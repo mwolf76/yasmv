@@ -54,9 +54,15 @@ typedef enum {
   /* leaves */
   ICONST, UWCONST, SWCONST, IDENT, LITERAL, NIL,
 
+  /* utils */
+  COMMA, SET,
+
 } ExprType;
 
+// using STL string as basic atom class
+typedef string Atom;
 
+// TODO: document this
 typedef struct Expr_TAG {
   ExprType f_symb;
 
@@ -68,27 +74,42 @@ typedef struct Expr_TAG {
 
     /* 64 bit */
     unsigned long long f_ull;
+
+    struct {
+      const Atom& f_atom;
+    };
   };
 
+  // ordinary expr
   Expr_TAG(ExprType symb, const Expr_TAG& lhs, const Expr_TAG& rhs)
-    : f_symb(symb),
-      f_lhs(lhs),
-      f_rhs(rhs)
+    : f_symb(symb)
+    , f_lhs(lhs)
+    , f_rhs(rhs)
   {}
 
+  // identifier
+  Expr_TAG(const Atom& atom)
+    : f_symb(IDENT)
+    , f_atom(atom)
+  {}
+
+  // nil
   Expr_TAG()
-    : f_symb(NIL),
-      f_lhs(*this),
-      f_rhs(*this)
+    : f_symb(NIL)
+    , f_lhs(*this)
+    , f_rhs(*this)
   {}
 
 } Expr;
+
+typedef Expr* Expr_ptr;
+typedef vector<Expr_ptr> Exprs;
 
 typedef struct {
   // ELF hash (cfr. General Hash Functions by
   long operator() (const Expr& k) const
   {
-    long res, x = (long)(k.f_symb);
+    long x, res = (long)(k.f_symb);
 
     res = (res << 4) + (long)(&(k.f_lhs));
     if ((x = res & 0xF0000000L) != 0)
@@ -116,19 +137,108 @@ typedef struct {
 ostream& operator<<(ostream& os, const Expr& t)
 { return os << ""; }
 
-// using STL string as basic atom class
-typedef string Atom;
-typedef Atom* Atom_ptr;
-typedef vector<Atom_ptr> Atoms;
-
 // typedef Literal* Literal_ptr;
 // typedef vector<Literal_ptr> Literals;
 
-typedef Expr* Expr_ptr;
-typedef vector<Expr_ptr> Exprs;
+typedef struct {
+  long operator() (const Atom& k) const
+  {
+    return 0;
+  }
+} AtomHash;
+
+typedef struct {
+ bool operator() (const Atom& x, const Atom& y) const
+  { return x == y; }
+} AtomEq;
 
 typedef unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef pair<ExprPool::iterator, bool> ExprPoolHit;
+
+typedef unordered_set<Atom, AtomHash, AtomEq> AtomPool;
+typedef pair<AtomPool::iterator, bool> AtomPoolHit;
+
+class IVarType {
+public:
+  virtual Expr get_name() const =0;
+  virtual bool is_boolean() const =0;
+  virtual bool is_intRange() const =0;
+  virtual bool is_intEnum() const =0;
+  virtual bool is_symb_enum() const =0;
+  virtual bool is_mixed_enum() const =0;
+  virtual bool is_instance() const =0;
+};
+typedef IVarType* IVarType_ptr;
+
+class IModule {
+public:
+  virtual bool is_main() const =0;
+  virtual const Expr& get_name() const =0;
+
+  virtual const Exprs& get_formalParams() =0;
+  virtual void add_formalParam(Expr& identifier) =0;
+
+  // virtual const ISADeclarations& get_isaDecls() =0;
+  // virtual IModule& operator+=(ISADeclaration& identifier) =0;
+
+  virtual const Variables& get_localVars() const =0;
+  virtual void add_localVar(IVariable& var) =0;
+};
+
+typedef IModule* IModule_ptr;
+typedef vector<IModule_ptr> Modules;
+
+class IVariable {
+public:
+  virtual const Expr& get_fqdn() const =0;
+
+  virtual const IModule& get_owner() const =0;
+  virtual const Expr& get_name() const =0;
+
+  virtual const IVarType& get_type() const =0;
+};
+typedef IVariable* IVariable_ptr;
+
+class IModel {
+public:
+  virtual const string& get_origin() const =0;
+  virtual const Modules& get_modules() const =0;
+  virtual IModel& operator+=(IModule& module) =0;
+};
+
+typedef set<Expr, ExprEq> EnumLiterals;
+class EnumType : public IVarType {
+  friend class TypeRegister;
+  EnumType() {}
+
+  EnumLiterals f_literals;
+
+public:
+  bool is_boolean() const
+  { return false; }
+
+  bool is_intRange() const
+  { return false; }
+
+  bool is_intEnum() const
+  { return false; }
+
+  bool is_symb_enum() const
+  { return false; }
+
+  bool is_mixed_enum() const
+  { return false; }
+
+  bool is_instance() const
+  { return false; }
+
+  // Expr get_name() const
+  // { return  ExprMgr::INSTANCE().make_enum(*this); }
+
+  const EnumLiterals& get_literals() const
+  { return f_literals; }
+
+};
 
 class ExprMgr;
 typedef ExprMgr* ExprMgr_ptr;
@@ -137,9 +247,9 @@ class ExprMgr  {
   typedef ExprMgr* ExprMgr_ptr;
 
 public:
-  static ExprMgr_ptr INSTANCE() {
+  static ExprMgr& INSTANCE() {
     if (! f_instance) f_instance = new ExprMgr();
-    return f_instance;
+    return (*f_instance);
   }
 
   static const Expr& nil;
@@ -265,12 +375,51 @@ public:
   // inline const Expr& make_uwconst(long long value)
   // { return make_expr(SWCONST, value); }
 
+  inline const Expr& make_enum(EnumType& enumeration)
+  {
+    Expr_ptr res = const_cast<Expr_ptr> (&nil);
+    const EnumLiterals& literals = enumeration.get_literals();
+
+    /* reverse iteration */
+    for (EnumLiterals::reverse_iterator eye = literals.rbegin();
+         eye != literals.rend(); eye ++) {
+      res = const_cast<Expr_ptr>(&make_expr(COMMA, *eye, *res));
+    }
+
+    // head node
+    res = const_cast<Expr_ptr>(&make_expr(SET, *res, nil));
+
+    return *res;
+  }
+
+  inline const Expr& make_boolean()
+  {
+    AtomPoolHit ah = (f_atom_pool.insert(Atom("boolean")));
+    if (ah.second) {
+      logger << "Added new atom to pool" << *ah.first;
+    }
+
+    return make_expr(*ah.first);
+  }
+
+  inline const Expr& make_identifier(const Atom atom)
+  {
+    AtomPoolHit ah = (f_atom_pool.insert(Atom(atom)));
+    if (ah.second) {
+      logger << "Added new atom to pool" << *ah.first;
+    }
+
+    return make_expr(*ah.first);
+  }
+
 protected:
   ExprMgr()
-    : f_nil(),
-      f_pool()
+    :  f_expr_pool()
+    ,  f_atom_pool()
   {
-    f_pool.insert(f_nil);
+    // setup pre-defined known identifiers
+    f_expr_pool.insert(make_identifier(Atom("boolean")));
+
   }
 
 private:
@@ -278,10 +427,28 @@ private:
 
   /* low-level services */
   inline const Expr& make_expr(ExprType et, const Expr& a, const Expr& b)
-  { f_pool.insert(Expr(et, a, b)); }
+  {
+    ExprPoolHit eh = (f_expr_pool.insert(Expr(et, a, b)));
+    if (eh.second) {
+      logger << "Added new expr to pool" << *eh.first;
+    }
 
-  ExprPool f_pool;
-  Expr f_nil;
+    return *eh.first;
+  }
+
+  inline const Expr& make_expr(const Atom& atom)
+  {
+    ExprPoolHit eh = (f_expr_pool.insert(Expr(atom)));
+    if (eh.second) {
+      logger << "Added new expr to pool" << *eh.first;
+    }
+
+    return *eh.first;
+  }
+
+  /* shared pools */
+  ExprPool f_expr_pool;
+  AtomPool f_atom_pool;
 };
 
 // static initialization

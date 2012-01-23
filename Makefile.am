@@ -7,6 +7,15 @@ VERSION = $(PACKAGE_VERSION)
 AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" @CPPFLAGS@
 READMES = LGPL-2.1 NEWS README
 
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/3rdparty/ezlogger
+
+# Programs to be built
+bin_PROGRAMS = smv
+
+smv_SOURCES = src/main.cc
+smv_LDDADD = libexpr.la libmodel.la libexpr.la
+
+
 # lib_LTLIBRARIES = libgnusmv.la
 
 # The GNUSMV test executable

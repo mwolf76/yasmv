@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include "ezlogger_misc.hpp"
+#include "ezlogger_output_policy.hpp"
 
 namespace axter
 {
@@ -57,8 +58,8 @@ namespace axter
                                     int LineNo, const char*FunctionName,
                                     ext_data levels_format_usage_data)
   {
-    return ezlogger_format_policy::get_log_prefix_format(FileName,
-                                                         LineNo, FunctionName,
+    return ezlogger_format_policy::get_log_prefix_format(FileName, LineNo,
+                                                         FunctionName,
                                                          levels_format_usage_data);
   }
 

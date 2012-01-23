@@ -310,11 +310,11 @@ scope {
 formal_params
 	:	'('
         id=identifier {
-            $module.add_param(id);
+            $module.add_formalParam(id);
         }
 
         ( ',' id=identifier {
-            $module.add_param(id);
+            $module.add_formalParam(id);
         })*
         ')'
     ;

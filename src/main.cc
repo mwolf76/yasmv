@@ -18,49 +18,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /**
- * @file common.hh
+ * @file main.cc
  *
- * @brief System wide definitions
+ * @brief Program main body
  *
  */
+#include <common.hh>
 
-#ifndef COMMON_H
-#define COMMON_H
-#include <config.h>
+int main()
+{
+  // std::tr1::unordered_set<Expr*, ExprHash, ExprEq > terms;
+  // // std::tr1::unordered_map<Expr, int, ExprHash, ExprEq> adds;
+  // std::tr1::unordered_map<Expr*, int> adds;
+  logger << "Logger test" << endl;
+  cout << "Hello world!" << endl;
 
-#include <utility>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <vector>
-#include <set>
-
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
-
-using std::pair;
-using std::make_pair;
-
-using std::string;
-using std::ostringstream;
-using std::ostream;
-using std::vector;
-using std::set;
-using std::tr1::unordered_map;
-using std::tr1::unordered_set;
-
-using std::cout;
-using std::cerr;
-using std::endl;
-
-class IVariable;
-typedef IVariable* IVariable_ptr;
-typedef vector<IVariable_ptr> Variables;
-
-class IModule;
-typedef IModule* IModule_ptr;
-
-// logging support using ezlogger (cfr. http://axter.com/ezlogger/)
-#include <logging.hh>
-
-#endif
+  return 0;
+}

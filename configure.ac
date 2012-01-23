@@ -25,12 +25,15 @@ AC_DEFINE_UNQUOTED(LIBRARY_BUGREPORT, "Please report bugs to <marco.pensallorto@
 
 # Checks for programs.
 oldcflags=$CFLAGS
+oldcxxflags=$CXXFLAGS
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_CXXCPP
+
 CFLAGS="-Wall -Wstrict-prototypes $excflags$oldcflags"
+CXXFLAGS="-Wall $excflags$oldcflags"
 
 if test "x$ac_cv_prog_CPP" != "x"; then
 AC_DEFINE(HAVE_CPP, 1, Have preprocessor)
