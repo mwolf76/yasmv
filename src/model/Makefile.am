@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-INCLUDES = -I$(top_srcdir)/src/model -I$(top_srcdir)/src/expr
+INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/model
 
 PKG_HH = model.hh
 PKG_CC = model.cc

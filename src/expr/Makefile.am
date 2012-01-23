@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-INCLUDES = -I$(top_srcdir)/src/expr
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr
 
 PKG_HH = expr.hh
 PKG_CC = expr.cc
