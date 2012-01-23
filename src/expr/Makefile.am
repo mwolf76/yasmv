@@ -1,0 +1,12 @@
+AUTOMAKE_OPTIONS = subdir-objects
+INCLUDES = -I$(top_srcdir)/src/expr
+
+PKG_HH = expr.hh
+PKG_CC = expr.cc
+
+PKG_SOURCES = $(PKG_H) $(PKG_CC)
+
+# -------------------------------------------------------
+
+noinst_LTLIBRARIES = libexpr.la
+libexpr_la_SOURCES = $(PKG_SOURCES)
