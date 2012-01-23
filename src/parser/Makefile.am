@@ -1,4 +1,14 @@
 SUBDIRS = grammars
+AUTOMAKE_OPTIONS = subdir-objects
 
-all:
-	cd smv && java -jar /opt/jars/antlr-3.4-complete-no-antlrv2.jar org.antlr.Tool smv.g
+INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/model -I$(top_srcdir)/src/parser/grammars
+
+PKG_HH = grammars/smvLexer.h
+PKG_CC = grammars/smvLexer.c
+
+PKG_SOURCES = $(PKG_H) $(PKG_CC)
+
+# -------------------------------------------------------
+
+noinst_LTLIBRARIES = libparser.la
+libparser_la_SOURCES = $(PKG_SOURCES)

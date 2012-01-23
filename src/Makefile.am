@@ -1,1 +1,1 @@
-SUBDIRS = expr model
+SUBDIRS = expr model parser
