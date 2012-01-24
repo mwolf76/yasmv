@@ -420,7 +420,7 @@ fsm_define_decl_clause
 
 /* INIT */
 fsm_init_decl
-    : 'INIT' fsm_var_decl_body
+    : 'INIT' fsm_init_decl_body
     ;
 
 fsm_init_decl_body
@@ -435,7 +435,7 @@ fsm_init_decl_clause
 
 /* INVAR */
 fsm_invar_decl
-    : 'INVAR' fsm_var_decl_body
+    : 'INVAR' fsm_invar_decl_body
     ;
 
 fsm_invar_decl_body
@@ -449,7 +449,7 @@ fsm_invar_decl_clause
 
 /* TRANS */
 fsm_trans_decl
-    : 'TRANS' fsm_var_decl_body
+    : 'TRANS' fsm_trans_decl_body
     ;
 
 fsm_trans_decl_body
@@ -463,7 +463,7 @@ fsm_trans_decl_clause
 
 /* FAIRN */
 fsm_fairn_decl
-    : 'FAIRNESS' fsm_var_decl_body
+    : 'FAIRNESS' fsm_fairn_decl_body
     ;
 
 fsm_fairn_decl_body
@@ -474,7 +474,6 @@ fsm_fairn_decl_clause
 	: expr=untimed_expression ';'
       { $modules::module->add_fairness(*expr); }
 	;
-
 
 /* functional FSM definition */
 assignment_formula
