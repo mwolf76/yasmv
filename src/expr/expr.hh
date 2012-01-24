@@ -80,12 +80,8 @@ typedef struct Expr_TAG {
     };
   };
 
-  // ordinary expr
-  Expr_TAG(ExprType symb, const Expr_TAG& lhs, const Expr_TAG& rhs)
-    : f_symb(symb)
-    , f_lhs(lhs)
-    , f_rhs(rhs)
-  {}
+  // NOTE: there is no chance of getting the wrong ctor called as
+  // any of them has a different number of paramters. (sweet)
 
   // identifier
   Expr_TAG(const Atom& atom)
@@ -98,6 +94,24 @@ typedef struct Expr_TAG {
     : f_symb(NIL)
     , f_lhs(*this)
     , f_rhs(*this)
+  {}
+
+  // values
+  Expr_TAG(ExprType symb, long long value)
+    : f_symb(symb)
+    , f_ull(value)
+  {
+    // safety check
+    assert ((symb == ICONST)  ||
+            (symb == UWCONST) ||
+            (symb == SWCONST));
+  }
+
+  // ordinary expr
+  Expr_TAG(ExprType symb, const Expr_TAG& lhs, const Expr_TAG& rhs)
+    : f_symb(symb)
+    , f_lhs(lhs)
+    , f_rhs(rhs)
   {}
 
 } Expr;
@@ -143,7 +157,20 @@ ostream& operator<<(ostream& os, const Expr& t)
 typedef struct {
   long operator() (const Atom& k) const
   {
-    return 0;
+    unsigned long hash = 0;
+    unsigned long x    = 0;
+
+    for(std::size_t i = 0; i < k.length(); i++)
+      {
+        hash = (hash << 4) + k[i];
+        if((x = hash & 0xF0000000L) != 0)
+          {
+            hash ^= (x >> 24);
+          }
+        hash &= ~x;
+      }
+
+    return hash;
   }
 } AtomHash;
 
@@ -201,9 +228,8 @@ typedef IVariable* IVariable_ptr;
 
 class IModel {
 public:
-  virtual const string& get_origin() const =0;
   virtual const Modules& get_modules() const =0;
-  virtual IModel& operator+=(IModule& module) =0;
+  virtual void add_module(IModule& module) =0;
 };
 
 typedef set<Expr, ExprEq> EnumLiterals;
@@ -253,6 +279,9 @@ public:
   }
 
   static const Expr& nil;
+
+  // Pointer to eXpression to simplify expr manipulation code
+# define  PX(expr) (const_cast<Expr_ptr>(&(expr)))
 
   /* LTL */
   inline const Expr& make_F(Expr& expr)
@@ -365,48 +394,38 @@ public:
   inline const Expr& make_ite(Expr& pred, Expr& t, Expr& e)
   { return make_expr(ITE, make_expr(COND, pred, t), e); }
 
-  // /* leaves */
-  // inline const Expr& make_iconst(long long value)
-  // { return make_expr(ICONST, value); }
+  /* leaves */
+  inline const Expr& make_iconst(long long value)
+  { return make_const(ICONST, value); }
 
-  // inline const Expr& make_uwconst(unsigned long long value)
-  // { return make_expr(UWCONST, value); }
+  inline const Expr& make_uwconst(unsigned long long value)
+  { return make_const(UWCONST, value); }
 
-  // inline const Expr& make_uwconst(long long value)
-  // { return make_expr(SWCONST, value); }
+  inline const Expr& make_uwconst(long long value)
+  { return make_const(SWCONST, value); }
 
   inline const Expr& make_enum(EnumType& enumeration)
   {
-    Expr_ptr res = const_cast<Expr_ptr> (&nil);
+    Expr_ptr res = PX(nil);
     const EnumLiterals& literals = enumeration.get_literals();
 
     /* reverse iteration */
     for (EnumLiterals::reverse_iterator eye = literals.rbegin();
          eye != literals.rend(); eye ++) {
-      res = const_cast<Expr_ptr>(&make_expr(COMMA, *eye, *res));
+      res = PX(make_expr(COMMA, *eye, *res));
     }
 
-    // head node
-    res = const_cast<Expr_ptr>(&make_expr(SET, *res, nil));
-
-    return *res;
+    return make_expr(SET, *res, nil);
   }
 
   inline const Expr& make_boolean()
-  {
-    AtomPoolHit ah = (f_atom_pool.insert(Atom("boolean")));
-    if (ah.second) {
-      logger << "Added new atom to pool" << *ah.first;
-    }
-
-    return make_expr(*ah.first);
-  }
+  { return make_identifier("boolean"); }
 
   inline const Expr& make_identifier(const Atom atom)
   {
     AtomPoolHit ah = (f_atom_pool.insert(Atom(atom)));
     if (ah.second) {
-      logger << "Added new atom to pool" << *ah.first;
+      logger << "Added new atom to pool: '" << *ah.first << "'" << endl;
     }
 
     return make_expr(*ah.first);
@@ -418,8 +437,7 @@ protected:
     ,  f_atom_pool()
   {
     // setup pre-defined known identifiers
-    f_expr_pool.insert(make_identifier(Atom("boolean")));
-
+    f_expr_pool.insert(make_boolean());
   }
 
 private:
@@ -430,20 +448,31 @@ private:
   {
     ExprPoolHit eh = (f_expr_pool.insert(Expr(et, a, b)));
     if (eh.second) {
-      logger << "Added new expr to pool" << *eh.first;
+      logger << "Added new expr to pool" << (*eh.first) << endl;
     }
 
-    return *eh.first;
+    return (*eh.first);
   }
 
   inline const Expr& make_expr(const Atom& atom)
   {
     ExprPoolHit eh = (f_expr_pool.insert(Expr(atom)));
     if (eh.second) {
-      logger << "Added new expr to pool" << *eh.first;
+      logger << "Added new expr to pool" << (*eh.first) << endl;
     }
 
-    return *eh.first;
+    return (*eh.first);
+  }
+
+  inline const Expr& make_const(ExprType et, long long value)
+  {
+    assert( et == ICONST || et == UWCONST || et == SWCONST );
+    ExprPoolHit eh = (f_expr_pool.insert(Expr(et, value)));
+    if (eh.second) {
+      logger << "Added new expr to pool" << (*eh.first) << endl;
+    }
+
+    return (*eh.first);
   }
 
   /* shared pools */

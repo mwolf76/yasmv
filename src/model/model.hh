@@ -64,11 +64,47 @@ public:
   { f_localVars.push_back(&var); }
 };
 
-class Instance {
-  Module& f_module;
+class Instance : public IVarType {
+  friend class TypeRegister;
+
+  const Expr* f_identifier;
+  Module* f_module;
   Variables f_actualParams;
 
-  Instance(Module& module, Variables actualParams);
+  // eager binding (not used by the parser)
+  Instance(Module& module, Variables actualParams)
+    : f_identifier(PX(ExprMgr::nil))
+    , f_module(&module)
+    , f_actualParams(actualParams)
+  {}
+
+  // lazy binding
+  Instance(const Expr& identifier)
+    : f_identifier(&identifier)
+    , f_module(NULL)
+    , f_actualParams()
+  {}
+
+  Expr get_name() const
+  { return *f_identifier; }
+
+  bool is_boolean() const
+  { return false; }
+
+  bool is_intRange() const
+  { return false; }
+
+  bool is_intEnum() const
+  { return false; }
+
+  bool is_symb_enum() const
+  { return false; }
+
+  bool is_mixed_enum() const
+  { return false; }
+
+  bool is_instance() const
+  { return true; }
 };
 
 class Variable : public IVariable {
@@ -201,6 +237,8 @@ typedef vector<Expr> Literals;
 // };
 
 typedef unordered_map<Expr, IVarType_ptr, ExprHash, ExprEq> Expr2IVarTypeMap;
+typedef pair<Expr2IVarTypeMap::iterator, bool> IVarTypeHit;
+
 class TypeRegister {
   Expr2IVarTypeMap f_register;
 
@@ -214,23 +252,31 @@ public:
                   new BooleanType());
   }
 
+  // REVIEW ME
+  const IVarType_ptr find_instance(const Expr& identifier)
+  {
+    Instance tmp(identifier);
+    IVarTypeHit hit = f_register.insert(make_pair(identifier, &tmp));
+    if (hit.second) {
+      logger << "Added instance of module '" << identifier << "' to type register" << endl;
+    }
+
+    return f_register[identifier];
+  }
+
+private:
   void register_type(const Expr type_name, IVarType_ptr vtype)
   { f_register.insert(make_pair(type_name, vtype)); }
 
 };
 
 class Model : public IModel {
-  string f_origin;
   Modules f_modules;
 
 public:
-  Model(const string origin)
-    : f_origin(origin),
-      f_modules()
+  Model()
+    : f_modules()
   {}
-
-  const string& get_origin() const
-  { return f_origin; }
 
   const Modules& get_modules() const
   { return f_modules; }
@@ -240,6 +286,35 @@ public:
 
 };
 
+class ModelMgr;
+typedef ModelMgr* ModelMgr_ptr;
 
+class ModelMgr  {
+  typedef ModelMgr* ModelMgr_ptr;
+
+public:
+  static ModelMgr& INSTANCE() {
+    if (! f_instance) f_instance = new ModelMgr();
+    return (*f_instance);
+  }
+
+protected:
+  ModelMgr()
+    : f_model()
+  {}
+
+private:
+  static ModelMgr_ptr f_instance;
+
+  /* low-level services */
+  inline Model& get_model()
+  { return f_model; }
+
+  /* local data */
+  Model f_model;
+};
+
+// static initialization
+ModelMgr_ptr ModelMgr::f_instance = NULL;
 
 #endif

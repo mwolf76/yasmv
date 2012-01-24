@@ -26,21 +26,16 @@ options {
 
 @members {
 #include <common.hh>
+#include <expr.hh>
 #include <model.hh>
 
-ExprMgr em;
-ModelMgr mm;
+// singleton managers
+ExprMgr& em = ExprMgr::INSTANCE();
+ModelMgr& mm = ModelMgr::INSTANCE();
 }
 
 /* Toplevel */
-smv
-scope {
-    IModel& model;
-}
-@init {
-    model = mm.get_model();
-}
-    : modules // properties
+smv : modules // properties
 ;
 
 /* properties */
@@ -747,7 +742,7 @@ lvalue returns [Expr& res]
 	;
 
 /* pvalue is used in param passing (actuals) */
-pvalue returns [Term_ptr res]
+pvalue returns [Expr& res]
 	:	'next' '(' expr=postfix_expression ')'
         { $res = em.make_next(expr) }
 
@@ -756,7 +751,7 @@ pvalue returns [Term_ptr res]
 	;
 
 /* ordinary values used elsewhere */
-value returns [Term_ptr res]
+value returns [Expr& res]
     :   expr=postfix_expression
         { $res = expr; }
     ;
@@ -780,18 +775,19 @@ type_name returns [IVarType_ptr res]
 
 actual_param_decls [IVarType_ptr type_]
 scope {
-    FormalParameters formalParams();
-    InstanceType_ptr module;
+    Exprs formalParams;
+    Instance module;
 }
+
 @init {
-    module = dynamic_cast<InstanceType_ptr> ($type_);
+    module = dynamic_cast<Instance*> ($type_);
 }
 	:
         '(' ap=pvalue {
-            module += ap;
+            module.addParam(ap);
         }
         (',' pvalue {
-                module += ap;
+                module.addParam(ap);
         })*
         ')'
     ;
@@ -802,12 +798,12 @@ scope {
 }
 	:	'{' lit=literal {
             Literal literal(const char *)($lit.text->chars);
-            literals += lit;
+            literals.addLiteral(lit);
         }
 
         (',' lit=literal {
             Literal literal(const char *)($lit.text->chars);
-            literals += lit;
+            literals.addLiteral(lit);
         })*
         '}'
 	;
