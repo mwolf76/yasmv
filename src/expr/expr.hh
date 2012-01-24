@@ -194,7 +194,7 @@ typedef Expr* Expr_ptr;
 typedef vector<Expr_ptr> Exprs;
 
 
-class IVarType {
+class IType {
 public:
   virtual Expr get_name() const =0;
   virtual bool is_boolean() const =0;
@@ -204,7 +204,7 @@ public:
   virtual bool is_mixed_enum() const =0;
   virtual bool is_instance() const =0;
 };
-typedef IVarType* IVarType_ptr;
+typedef IType* IType_ptr;
 
 class IModule {
 public:
@@ -246,7 +246,7 @@ typedef vector<IModule_ptr> Modules;
 class IVariable {
 public:
   virtual const Expr& get_name() const =0;
-  virtual const IVarType& get_type() const =0;
+  virtual const IType& get_type() const =0;
 };
 
 class IDefine {
@@ -268,7 +268,7 @@ public:
 };
 
 typedef set<Expr*> EnumLiterals;
-class EnumType : public IVarType {
+class EnumType : public IType {
   friend class TypeRegister;
   EnumType() {}
 

@@ -496,7 +496,7 @@ assignment_clause
 // 	:   untimed_expression (','! untimed_expression)*
 // 	;
 
-untimed_expression returns [Expr* res]
+untimed_expression returns [Expr_ptr res]
 	: expr=case_expression
         { $res = expr; }
 
@@ -505,7 +505,7 @@ untimed_expression returns [Expr* res]
 	;
 
 // predicates
-case_expression returns [Expr* res]
+case_expression returns [Expr_ptr res]
 scope {
     Exprs clauses;
 }
@@ -529,7 +529,7 @@ scope {
       }
 	;
 
-cond_expression returns [Expr* res]
+cond_expression returns [Expr_ptr res]
 	: expr=iff_expression (
         '?' lhs=iff_expression ':' rhs=iff_expression
         {
@@ -541,7 +541,7 @@ cond_expression returns [Expr* res]
 
 	;
 
-iff_expression returns [Expr* res]
+iff_expression returns [Expr_ptr res]
 	:  lhs=imply_expression (
             '<->' rhs=iff_expression
             { $res = PX(em.make_iff(*lhs, *rhs)); }
@@ -549,7 +549,7 @@ iff_expression returns [Expr* res]
     |       { $res = lhs; } )
 	;
 
-imply_expression returns [Expr* res]
+imply_expression returns [Expr_ptr res]
 	: lhs=inclusive_or_expression (
             '->' rhs=imply_expression
             { $res = PX(em.make_implies(*lhs, *rhs)); }
@@ -558,7 +558,7 @@ imply_expression returns [Expr* res]
 
 	;
 
-inclusive_or_expression returns [Expr* res]
+inclusive_or_expression returns [Expr_ptr res]
 	: lhs=exclusive_or_expression (
             '|' rhs=inclusive_or_expression
             { $res = PX(em.make_or(*lhs, *rhs)); }
@@ -567,7 +567,7 @@ inclusive_or_expression returns [Expr* res]
 
 	;
 
-exclusive_or_expression returns [Expr* res]
+exclusive_or_expression returns [Expr_ptr res]
 	: lhs=and_expression (
             'xor' rhs=exclusive_or_expression
             { $res = PX(em.make_xor(*lhs, *rhs)); }
@@ -578,7 +578,7 @@ exclusive_or_expression returns [Expr* res]
         |   { $res = lhs; } )
 	;
 
-and_expression returns [Expr* res]
+and_expression returns [Expr_ptr res]
 	: lhs=equality_expression (
             '&' rhs=equality_expression
             { $res = PX(em.make_and(*lhs, *rhs)); }
@@ -586,7 +586,7 @@ and_expression returns [Expr* res]
     |       { $res = lhs; } )
 	;
 
-equality_expression returns [Expr* res]
+equality_expression returns [Expr_ptr res]
 	: lhs=relational_expression (
             '=' rhs=equality_expression
             { $res = PX(em.make_eq(*lhs, *rhs)); }
@@ -598,7 +598,7 @@ equality_expression returns [Expr* res]
 
 	;
 
-relational_expression returns [Expr* res]
+relational_expression returns [Expr_ptr res]
 	: lhs=shift_expression (
             '<' rhs=relational_expression
             { $res = PX(em.make_lt(*lhs, *rhs)); }
@@ -616,7 +616,7 @@ relational_expression returns [Expr* res]
 
 	;
 
-shift_expression returns [Expr* res]
+shift_expression returns [Expr_ptr res]
 	: lhs=additive_expression (
             '<<' rhs=shift_expression
             { $res = PX(em.make_lshift(*lhs, *rhs)); }
@@ -627,7 +627,7 @@ shift_expression returns [Expr* res]
     |       { $res = lhs; } )
 	;
 
-additive_expression returns [Expr* res]
+additive_expression returns [Expr_ptr res]
 	: lhs=multiplicative_expression (
             '+' rhs=additive_expression
             { $res = PX(em.make_add(*lhs, *rhs)); }
@@ -638,7 +638,7 @@ additive_expression returns [Expr* res]
     |       { $res = lhs; } )
 	;
 
-multiplicative_expression returns [Expr* res]
+multiplicative_expression returns [Expr_ptr res]
 	: lhs=unary_expression (
             '*' rhs=multiplicative_expression
             { $res = PX(em.make_mul(*lhs, *rhs)); }
@@ -652,7 +652,7 @@ multiplicative_expression returns [Expr* res]
     |       { $res = lhs; } )
 	;
 
-unary_expression returns [Expr* res]
+unary_expression returns [Expr_ptr res]
 	: expr=postfix_expression
       { $res = expr; }
 
@@ -685,7 +685,7 @@ unary_expression returns [Expr* res]
 
 	;
 
-postfix_expression returns [Expr* res]
+postfix_expression returns [Expr_ptr res]
 	:   lhs=primary_expression (
 
             '[' rhs=primary_expression ']'
@@ -699,7 +699,7 @@ postfix_expression returns [Expr* res]
 
 	;
 
-primary_expression returns [Expr* res]
+primary_expression returns [Expr_ptr res]
 	: id=identifier
       { $res = id; }
 
@@ -711,17 +711,17 @@ primary_expression returns [Expr* res]
 
 	;
 
-identifier returns [Expr* res]
+identifier returns [Expr_ptr res]
 	: IDENTIFIER
     { $res = PX(em.make_identifier((const char*)($IDENTIFIER.text->chars))); }
 	;
 
-constant returns [Expr* res]
+constant returns [Expr_ptr res]
     :	enum_constant
     |   range_constant
     ;
 
-int_constant returns [Expr* res]
+int_constant returns [Expr_ptr res]
 	:   HEX_LITERAL
         {
          Atom tmp((const char*)($HEX_LITERAL.text->chars));
@@ -742,7 +742,7 @@ int_constant returns [Expr* res]
         }
 	;
 
-range_constant returns [Expr* res]
+range_constant returns [Expr_ptr res]
 	:	lhs=int_constant (
 			'..' rhs=int_constant
             { $res = PX(em.make_range(*lhs, *rhs)); }
@@ -751,11 +751,11 @@ range_constant returns [Expr* res]
 
 	;
 
-enum_constant returns [Expr* res]
+enum_constant returns [Expr_ptr res]
 	:	 enum_type;
 
 /* lvalue is used in assignments */
-lvalue returns [Expr* res]
+lvalue returns [Expr_ptr res]
 	:	'init' '(' expr=postfix_expression ')'
         { $res = PX(em.make_init(*expr)); }
 
@@ -767,7 +767,7 @@ lvalue returns [Expr* res]
 	;
 
 /* pvalue is used in param passing (actuals) */
-pvalue returns [Expr* res]
+pvalue returns [Expr_ptr res]
 	:	'next' '(' expr=postfix_expression ')'
         { $res = PX(em.make_next(*expr)); }
 
@@ -776,12 +776,12 @@ pvalue returns [Expr* res]
 	;
 
 /* ordinary values used elsewhere */
-value returns [Expr* res]
+value returns [Expr_ptr res]
     :   expr=postfix_expression
         { $res = expr; }
     ;
 
-type_name returns [IVarType_ptr res]
+type_name returns [IType_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
@@ -798,7 +798,7 @@ type_name returns [IVarType_ptr res]
       actual_param_decls[$res]
     ;
 
-actual_param_decls [IVarType_ptr type_]
+actual_param_decls [IType_ptr type_]
 scope {
     Instance* instance;
 }
@@ -831,7 +831,7 @@ scope {
         '}'
 	;
 
-word_type returns [IVarType_ptr res]
+word_type returns [IType_ptr res]
 	:	'unsigned'? 'word' '[' k=int_constant ']'
         { $res = tm.find_uword(*k); }
 
@@ -839,7 +839,7 @@ word_type returns [IVarType_ptr res]
         { $res = tm.find_sword(*k); }
 	;
 
-literal returns [Expr* res]
+literal returns [Expr_ptr res]
     :  expr=identifier { $res = expr; }
     |  expr=int_constant { $res = expr; }
     ;

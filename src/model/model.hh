@@ -119,7 +119,7 @@ public:
 
 };
 
-class Instance : public IVarType {
+class Instance : public IType {
 public:
   friend class TypeMgr;
 
@@ -168,10 +168,10 @@ public:
 
 class Variable : public IVariable {
   const Expr& f_name;
-  IVarType& f_type;
+  IType& f_type;
 
 public:
-  Variable(const Expr& name, IVarType& type)
+  Variable(const Expr& name, IType& type)
     : f_name(name)
     , f_type(type)
   {}
@@ -179,27 +179,27 @@ public:
   const Expr& get_name() const
   { return f_name; }
 
-  const IVarType& get_type() const
+  const IType& get_type() const
   { return f_type; }
 };
 
 class StateVar : public Variable {
 public:
-  StateVar (const Expr& name, IVarType& type_)
+  StateVar (const Expr& name, IType& type_)
     : Variable(name, type_)
   {}
 };
 
 class InputVar : public Variable {
 public:
-  InputVar (const Expr& name, IVarType& type_)
+  InputVar (const Expr& name, IType& type_)
     : Variable(name, type_)
   {}
 };
 
 class FrozenVar: public Variable {
 public:
-  FrozenVar (const Expr& name, IVarType& type_)
+  FrozenVar (const Expr& name, IType& type_)
     : Variable(name, type_)
   {}
 };
@@ -238,7 +238,7 @@ public:
   { return f_body; }
 };
 
-class BooleanType : public IVarType {
+class BooleanType : public IType {
   friend class TypeMgr;
   BooleanType() {}
 
@@ -265,16 +265,7 @@ public:
   { return ExprMgr::INSTANCE().make_boolean(); }
 };
 
-
-// class IntRangeIterator {
-// public:
-//   IntRangeIterator(IVarType& vtype);
-
-//   bool has_more() const;
-//   Expr& next();
-// };
-
-class IntRangeType : public IVarType {
+class IntRangeType : public IType {
   Expr f_min;
   Expr f_max;
 
@@ -300,31 +291,8 @@ public:
 
 typedef vector<Expr> Literals;
 
-// class EnumType : public IVarType {
-//   Literals f_literals;
-
-//   EnumType(Literals literals);
-// };
-
-// class InstanceType : public IVarType {
-//   Expr f_moduleName;
-//   Instance* f_binding; // reserved for type resolution
-
-//   InstanceType(Expr moduleName) :
-//     f_moduleName(moduleName),
-//     f_binding(NULL) {}
-
-// public:
-//   Instance& get_instance();
-
-//   bool is_unresolved() const;
-// };
-
-// class FiniteTypeIteratorException (Exception) {
-// };
-
-typedef unordered_map<Expr, IVarType_ptr, ExprHash, ExprEq> Expr2IVarTypeMap;
-typedef pair<Expr2IVarTypeMap::iterator, bool> IVarTypeHit;
+typedef unordered_map<Expr, IType_ptr, ExprHash, ExprEq> Expr2ITypeMap;
+typedef pair<Expr2ITypeMap::iterator, bool> ITypeHit;
 
 class TypeMgr;
 typedef TypeMgr* TypeMgr_ptr;
@@ -337,24 +305,24 @@ public:
   }
 
   // REVIEW ME
-  const IVarType_ptr find_boolean()
+  const IType_ptr find_boolean()
   { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
 
   // REVIEW ME
-  const IVarType_ptr find_uword(Expr& size)
+  const IType_ptr find_uword(Expr& size)
   { return NULL; }
 
   // REVIEW ME
-  const IVarType_ptr find_sword(Expr& size)
+  const IType_ptr find_sword(Expr& size)
   { return NULL; }
 
-  const IVarType_ptr find_range(const Expr& from, const Expr& to)
+  const IType_ptr find_range(const Expr& from, const Expr& to)
   { return NULL; }
 
-  const IVarType_ptr find_instance(const Expr& identifier)
+  const IType_ptr find_instance(const Expr& identifier)
   {
     Instance tmp(identifier);
-    IVarTypeHit hit = f_register.insert(make_pair(identifier, &tmp));
+    ITypeHit hit = f_register.insert(make_pair(identifier, &tmp));
     if (hit.second) {
       logger << "Added instance of module '" << identifier << "' to type register" << endl;
     }
@@ -376,11 +344,11 @@ private:
   static TypeMgr_ptr f_instance;
 
   /* low-level services */
-  void register_type(const Expr type_name, IVarType_ptr vtype)
+  void register_type(const Expr type_name, IType_ptr vtype)
   { f_register.insert(make_pair(type_name, vtype)); }
 
   /* local data */
-  Expr2IVarTypeMap f_register;
+  Expr2ITypeMap f_register;
 };
 
 
