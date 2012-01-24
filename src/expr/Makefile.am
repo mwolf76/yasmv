@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/3rdparty/ezlogger
 
-PKG_HH = expr.hh
-PKG_CC = expr.cc
+PKG_HH = expr.hh expr_mgr.hh expr_printer.hh
+PKG_CC = expr.cc expr_mgr.cc expr_printer.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

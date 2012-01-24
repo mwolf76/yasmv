@@ -127,6 +127,11 @@ typedef struct Expr_TAG {
 
 } Expr;
 
+class IExprVisitor {
+public:
+  virtual void visit(Expr& expr) =0;
+};
+
 static Expr nil;
 
 // Expression pool
