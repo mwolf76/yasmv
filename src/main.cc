@@ -97,11 +97,13 @@ parseFile(pANTLR3_UINT8 fName)
 extern void link_expr();
 extern void link_model();
 
-int main()
+int main(int argc, char *argv[])
 {
   link_expr();
   link_model();
 
-  parseFile((pANTLR3_UINT8)"test.smv");
+  const char* fname = argv[1];
+
+  parseFile((pANTLR3_UINT8) fname);
   return 0;
 }
