@@ -27,6 +27,8 @@ options {
 @header {
 #include <common.hh>
 #include <expr.hh>
+#include <types.hh>
+#include <expr_mgr.hh>
 #include <model.hh>
 }
 
@@ -432,7 +434,6 @@ fsm_init_decl_clause
       { $modules::module->add_init(*expr); }
 	;
 
-
 /* INVAR */
 fsm_invar_decl
     : 'INVAR' fsm_invar_decl_body
@@ -521,7 +522,7 @@ scope {
       'esac'
       {
         // build reversed ITE
-        res = PX(ExprMgr::nil);
+        res = PX(nil);
         for (Exprs::reverse_iterator eye = $case_expression::clauses.rend();
              eye != $case_expression::clauses.rbegin(); eye ++) {
             res = PX(em.make_ite((**eye), (*res)));
@@ -781,7 +782,7 @@ value returns [Expr_ptr res]
         { $res = expr; }
     ;
 
-type_name returns [IType_ptr res]
+type_name returns [Type_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
@@ -790,21 +791,33 @@ type_name returns [IType_ptr res]
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(*lhs, *rhs); }
 
-	| word_type
+    | 'unsigned'? 'word' '[' k=int_constant ']'
+       { $res = tm.find_uword(*k); }
+
+	|  'signed' 'word' '[' k=int_constant ']'
+       { $res = tm.find_sword(*k); }
 
     | id=identifier
       { $res = tm.find_instance(*id); }
-
       actual_param_decls[$res]
     ;
 
-actual_param_decls [IType_ptr type_]
+enum_type
+scope { EnumLiterals literals; }
+	:	'{' lit=literal
+            { $enum_type::literals.insert(lit); }
+
+            (',' lit=literal { $enum_type::literals.insert(lit); } )*
+        '}'
+	;
+
+actual_param_decls [Type_ptr m]
 scope {
     Instance* instance;
 }
 
 @init {
-    $actual_param_decls::instance = dynamic_cast<Instance*> ($type_);
+    $actual_param_decls::instance = dynamic_cast<Instance*> ($m);
     assert( $actual_param_decls::instance );
 }
 	:
@@ -816,28 +829,6 @@ scope {
         })*
         ')'
     ;
-
-enum_type
-scope {
-    EnumLiterals literals;
-}
-	:	'{' lit=literal {
-            $enum_type::literals.insert(lit);
-        }
-
-        (',' lit=literal {
-            $enum_type::literals.insert(lit);
-        })*
-        '}'
-	;
-
-word_type returns [IType_ptr res]
-	:	'unsigned'? 'word' '[' k=int_constant ']'
-        { $res = tm.find_uword(*k); }
-
-	|	'signed' 'word' '[' k=int_constant ']'
-        { $res = tm.find_sword(*k); }
-	;
 
 literal returns [Expr_ptr res]
     :  expr=identifier { $res = expr; }

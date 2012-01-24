@@ -33,8 +33,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define MODEL_H
 #include <common.hh>
 #include <expr.hh>
+#include <types.hh>
+#include <expr_mgr.hh>
 
 // -- interfaces --------------------------------------------------------------
+
+typedef IModule* IModule_ptr;
+typedef vector<IModule_ptr> Modules;
+
+class IVariable {
+public:
+  virtual const Expr& get_name() const =0;
+  virtual const Type& get_type() const =0;
+};
+
+class IDefine {
+public:
+  virtual const Expr& get_name() const =0;
+  virtual const Expr& get_body() const =0;
+};
+
+class IAssign {
+public:
+  virtual const Expr& get_name() const =0;
+  virtual const Expr& get_body() const =0;
+};
+
+class IModel {
+public:
+  virtual const Modules& get_modules() const =0;
+  virtual void add_module(IModule& module) =0;
+};
 
 class Module : public IModule {
   Expr f_name;
@@ -119,59 +148,12 @@ public:
 
 };
 
-class Instance : public IType {
-public:
-  friend class TypeMgr;
-
-  const Expr* f_identifier;
-  Module* f_module;
-  Exprs f_params;
-
-  // eager binding (not used by the parser)
-  Instance(Module& module, Exprs params)
-    : f_identifier(PX(ExprMgr::nil))
-    , f_module(&module)
-    , f_params(params)
-  {}
-
-  // lazy binding
-  Instance(const Expr& identifier)
-    : f_identifier(&identifier)
-    , f_module(NULL)
-    , f_params()
-  {}
-
-  Expr get_name() const
-  { return *f_identifier; }
-
-  bool is_boolean() const
-  { return false; }
-
-  bool is_intRange() const
-  { return false; }
-
-  bool is_intEnum() const
-  { return false; }
-
-  bool is_symb_enum() const
-  { return false; }
-
-  bool is_mixed_enum() const
-  { return false; }
-
-  bool is_instance() const
-  { return true; }
-
-  void add_param(Expr& expr)
-  { f_params.push_back(&expr); }
-};
-
 class Variable : public IVariable {
   const Expr& f_name;
-  IType& f_type;
+  Type& f_type;
 
 public:
-  Variable(const Expr& name, IType& type)
+  Variable(const Expr& name, Type& type)
     : f_name(name)
     , f_type(type)
   {}
@@ -179,27 +161,27 @@ public:
   const Expr& get_name() const
   { return f_name; }
 
-  const IType& get_type() const
+  const Type& get_type() const
   { return f_type; }
 };
 
 class StateVar : public Variable {
 public:
-  StateVar (const Expr& name, IType& type_)
+  StateVar (const Expr& name, Type& type_)
     : Variable(name, type_)
   {}
 };
 
 class InputVar : public Variable {
 public:
-  InputVar (const Expr& name, IType& type_)
+  InputVar (const Expr& name, Type& type_)
     : Variable(name, type_)
   {}
 };
 
 class FrozenVar: public Variable {
 public:
-  FrozenVar (const Expr& name, IType& type_)
+  FrozenVar (const Expr& name, Type& type_)
     : Variable(name, type_)
   {}
 };
@@ -237,120 +219,6 @@ public:
   const Expr& get_body() const
   { return f_body; }
 };
-
-class BooleanType : public IType {
-  friend class TypeMgr;
-  BooleanType() {}
-
-public:
-  bool is_boolean() const
-  { return true; }
-
-  bool is_intRange() const
-  { return false; }
-
-  bool is_intEnum() const
-  { return false; }
-
-  bool is_symb_enum() const
-  { return false; }
-
-  bool is_mixed_enum() const
-  { return false; }
-
-  bool is_instance() const
-  { return false; }
-
-  Expr get_name() const
-  { return ExprMgr::INSTANCE().make_boolean(); }
-};
-
-class IntRangeType : public IType {
-  Expr f_min;
-  Expr f_max;
-
-  IntRangeType(Expr min, Expr max) {
-    f_min = min;
-    f_max = max;
-  }
-
-public:
-  inline const Expr& get_min() const
-  { return f_min; }
-
-  inline const Expr& get_max() const
-  { return f_max; }
-
-  Expr get_name() const
-  {
-    ostringstream oss;
-    oss << "[" << get_min() << ".." << get_max() << "]";
-    return oss.str();
-  }
-};
-
-typedef vector<Expr> Literals;
-
-typedef unordered_map<Expr, IType_ptr, ExprHash, ExprEq> Expr2ITypeMap;
-typedef pair<Expr2ITypeMap::iterator, bool> ITypeHit;
-
-class TypeMgr;
-typedef TypeMgr* TypeMgr_ptr;
-
-class TypeMgr {
-public:
-  static TypeMgr& INSTANCE() {
-    if (! f_instance) f_instance = new TypeMgr();
-    return (*f_instance);
-  }
-
-  // REVIEW ME
-  const IType_ptr find_boolean()
-  { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
-
-  // REVIEW ME
-  const IType_ptr find_uword(Expr& size)
-  { return NULL; }
-
-  // REVIEW ME
-  const IType_ptr find_sword(Expr& size)
-  { return NULL; }
-
-  const IType_ptr find_range(const Expr& from, const Expr& to)
-  { return NULL; }
-
-  const IType_ptr find_instance(const Expr& identifier)
-  {
-    Instance tmp(identifier);
-    ITypeHit hit = f_register.insert(make_pair(identifier, &tmp));
-    if (hit.second) {
-      logger << "Added instance of module '" << identifier << "' to type register" << endl;
-    }
-
-    return f_register[identifier];
-  }
-
-protected:
-  TypeMgr():
-    f_register()
-  {
-    /* boolean is the only predefined type. Any other type will be
-     declared by the user. */
-    register_type(ExprMgr::INSTANCE().make_boolean(),
-                  new BooleanType());
-  }
-
-private:
-  static TypeMgr_ptr f_instance;
-
-  /* low-level services */
-  void register_type(const Expr type_name, IType_ptr vtype)
-  { f_register.insert(make_pair(type_name, vtype)); }
-
-  /* local data */
-  Expr2ITypeMap f_register;
-};
-
 
 class Model : public IModel {
   Modules f_modules;
