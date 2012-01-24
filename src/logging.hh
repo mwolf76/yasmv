@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define LOGGING_H
 
 #include "ezlogger_misc.hpp"
+
 namespace axter {
   // custom format
   class ezlogger_format_policy  {
@@ -56,19 +57,15 @@ namespace axter {
     }
   };
 
-  std::string get_log_prefix_format(const char*FileName,
-                                    int LineNo, const char*FunctionName,
-                                    ext_data levels_format_usage_data) {
-    return
-      ezlogger_format_policy::get_log_prefix_format(FileName, LineNo,
-                                                    FunctionName,
-                                                    levels_format_usage_data);
-  }
+  extern std::string get_log_prefix_format(const char*FileName,
+                                           int LineNo, const char*FunctionName,
+                                           ext_data levels_format_usage_data);
 };
+
+
 #include "ezlogger_output_policy.hpp"
 #include "ezlogger_verbosity_level_policy.hpp"
 #include "ezlogger.hpp"
 #include "ezlogger_macros.hpp"
 #define logger EZLOGGERSTREAM2(cerr)
-
 #endif

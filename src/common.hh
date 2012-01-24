@@ -55,11 +55,16 @@ using std::cerr;
 using std::endl;
 
 class IVariable;
-typedef IVariable* IVariable_ptr;
-typedef vector<IVariable_ptr> Variables;
+typedef vector<IVariable*> Variables;
+
+class IDefine;
+typedef vector<IDefine*> Defines;
+
+class IAssign;
+typedef vector<IAssign*> Assigns;
 
 class IModule;
-typedef IModule* IModule_ptr;
+typedef vector<IModule*> Modules;
 
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)
 #include <logging.hh>

@@ -39,11 +39,14 @@ typedef enum {
   /* CTL */
   AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
 
+  /* temporal ops */
+  INIT, NEXT,
+
   /* arithmetical operators */
   NEG, PLUS, SUB, DIV, MUL, MOD,
 
   /* logical/bitwise operators */
-  NOT, AND, OR, XOR, XNOR, IMPLIES, IFF,
+  NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
 
   /* relational operators */
   EQ, NE, GE, GT, LE, LT,
@@ -54,6 +57,9 @@ typedef enum {
   /* leaves */
   ICONST, UWCONST, SWCONST, IDENT, LITERAL, NIL,
 
+  /* postfix exprs */
+  DOT, SUBSCRIPT, RANGE,
+
   /* utils */
   COMMA, SET,
 
@@ -62,7 +68,6 @@ typedef enum {
 // using STL string as basic atom class
 typedef string Atom;
 
-// TODO: document this
 typedef struct Expr_TAG {
   ExprType f_symb;
 
@@ -82,22 +87,19 @@ typedef struct Expr_TAG {
 
   // NOTE: there is no chance of getting the wrong ctor called as
   // any of them has a different number of paramters. (sweet)
-
-  // identifier
-  Expr_TAG(const Atom& atom)
-    : f_symb(IDENT)
-    , f_atom(atom)
-  {}
-
-  // nil
-  Expr_TAG()
+  inline Expr_TAG()
     : f_symb(NIL)
     , f_lhs(*this)
     , f_rhs(*this)
   {}
 
-  // values
-  Expr_TAG(ExprType symb, long long value)
+  inline Expr_TAG(const Atom& atom)
+    : f_symb(IDENT)
+    , f_atom(atom)
+  {}
+
+  inline Expr_TAG(ExprType symb,
+                  long long value)
     : f_symb(symb)
     , f_ull(value)
   {
@@ -108,20 +110,26 @@ typedef struct Expr_TAG {
   }
 
   // ordinary expr
-  Expr_TAG(ExprType symb, const Expr_TAG& lhs, const Expr_TAG& rhs)
+  inline Expr_TAG(ExprType symb,
+                  const Expr_TAG& lhs,
+                  const Expr_TAG& rhs)
     : f_symb(symb)
     , f_lhs(lhs)
     , f_rhs(rhs)
   {}
 
+  inline bool operator==(const struct Expr_TAG& other) const
+  {
+    return this->f_symb == other.f_symb &&
+      this->f_lhs == other.f_lhs &&
+      this->f_rhs == other.f_rhs ;
+  }
 } Expr;
 
-typedef Expr* Expr_ptr;
-typedef vector<Expr_ptr> Exprs;
 
-typedef struct {
-  // ELF hash (cfr. General Hash Functions by
-  long operator() (const Expr& k) const
+// Expression pool
+struct ExprHash {
+  inline long operator() (const Expr& k) const
   {
     long x, res = (long)(k.f_symb);
 
@@ -137,25 +145,23 @@ typedef struct {
 
     return res;
   }
-} ExprHash;
+};
 
-typedef struct {
- bool operator() (const Expr& x, const Expr& y) const
+struct ExprEq {
+  inline bool operator() (const Expr& x, const Expr& y) const
   {
     return x.f_symb == y.f_symb &&
       &x.f_lhs == &y.f_lhs &&
       &y.f_rhs == &y.f_rhs ;
   }
-} ExprEq;
+};
 
-ostream& operator<<(ostream& os, const Expr& t)
-{ return os << ""; }
+typedef unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+typedef pair<ExprPool::iterator, bool> ExprPoolHit;
 
-// typedef Literal* Literal_ptr;
-// typedef vector<Literal_ptr> Literals;
-
-typedef struct {
-  long operator() (const Atom& k) const
+// Atom pool
+struct AtomHash {
+  inline long operator() (const Atom& k) const
   {
     unsigned long hash = 0;
     unsigned long x    = 0;
@@ -172,18 +178,21 @@ typedef struct {
 
     return hash;
   }
-} AtomHash;
+};
 
-typedef struct {
- bool operator() (const Atom& x, const Atom& y) const
+struct AtomEq {
+  inline bool operator() (const Atom& x, const Atom& y) const
   { return x == y; }
-} AtomEq;
-
-typedef unordered_set<Expr, ExprHash, ExprEq> ExprPool;
-typedef pair<ExprPool::iterator, bool> ExprPoolHit;
+};
 
 typedef unordered_set<Atom, AtomHash, AtomEq> AtomPool;
 typedef pair<AtomPool::iterator, bool> AtomPoolHit;
+
+ostream& operator<<(ostream& os, const Expr& t);
+
+typedef Expr* Expr_ptr;
+typedef vector<Expr_ptr> Exprs;
+
 
 class IVarType {
 public:
@@ -202,7 +211,7 @@ public:
   virtual bool is_main() const =0;
   virtual const Expr& get_name() const =0;
 
-  virtual const Exprs& get_formalParams() =0;
+  virtual const Exprs& get_formalParams() const =0;
   virtual void add_formalParam(Expr& identifier) =0;
 
   // virtual const ISADeclarations& get_isaDecls() =0;
@@ -210,6 +219,25 @@ public:
 
   virtual const Variables& get_localVars() const =0;
   virtual void add_localVar(IVariable& var) =0;
+
+  virtual const Defines& get_localDefs() const =0;
+  virtual void add_localDef(IDefine& def) =0;
+
+  virtual const Assigns& get_assign() const =0;
+  virtual void add_assign(IAssign& assgn) =0;
+
+  virtual const Exprs& get_init() const =0;
+  virtual void add_init(Expr& expr) =0;
+
+  virtual const Exprs& get_invar() const =0;
+  virtual void add_invar(Expr& expr) =0;
+
+  virtual const Exprs& get_trans() const =0;
+  virtual void add_trans(Expr& expr) =0;
+
+  virtual const Exprs& get_fairness() const =0;
+  virtual void add_fairness(Expr& expr) =0;
+
 };
 
 typedef IModule* IModule_ptr;
@@ -217,14 +245,21 @@ typedef vector<IModule_ptr> Modules;
 
 class IVariable {
 public:
-  virtual const Expr& get_fqdn() const =0;
-
-  virtual const IModule& get_owner() const =0;
   virtual const Expr& get_name() const =0;
-
   virtual const IVarType& get_type() const =0;
 };
-typedef IVariable* IVariable_ptr;
+
+class IDefine {
+public:
+  virtual const Expr& get_name() const =0;
+  virtual const Expr& get_body() const =0;
+};
+
+class IAssign {
+public:
+  virtual const Expr& get_name() const =0;
+  virtual const Expr& get_body() const =0;
+};
 
 class IModel {
 public:
@@ -232,7 +267,7 @@ public:
   virtual void add_module(IModule& module) =0;
 };
 
-typedef set<Expr, ExprEq> EnumLiterals;
+typedef set<Expr*> EnumLiterals;
 class EnumType : public IVarType {
   friend class TypeRegister;
   EnumType() {}
@@ -264,6 +299,8 @@ public:
   const EnumLiterals& get_literals() const
   { return f_literals; }
 
+  void add_literal(Expr& lit)
+  { f_literals.insert(&lit); }
 };
 
 class ExprMgr;
@@ -284,115 +321,131 @@ public:
 # define  PX(expr) (const_cast<Expr_ptr>(&(expr)))
 
   /* LTL */
-  inline const Expr& make_F(Expr& expr)
+  inline const Expr& make_F(const Expr& expr)
   { return make_expr(F, expr, nil); }
 
-  inline const Expr& make_G(Expr& expr)
+  inline const Expr& make_G(const Expr& expr)
   { return make_expr(G, expr, nil); }
 
-  inline const Expr& make_X(Expr& expr)
+  inline const Expr& make_X(const Expr& expr)
   { return make_expr(X, expr, nil); }
 
-  inline const Expr& make_U(Expr& expr)
+  inline const Expr& make_U(const Expr& expr)
   { return make_expr(U, expr, nil); }
 
-  inline const Expr& make_R(Expr& expr)
+  inline const Expr& make_R(const Expr& expr)
   { return make_expr(R, expr, nil); }
 
   /* CTL (A) */
-  inline const Expr& make_AF(Expr& expr)
+  inline const Expr& make_AF(const Expr& expr)
   { return make_expr(AF, expr, nil); }
 
-  inline const Expr& make_AG(Expr& expr)
+  inline const Expr& make_AG(const Expr& expr)
   { return make_expr(AG, expr, nil); }
 
-  inline const Expr& make_AX(Expr& expr)
+  inline const Expr& make_AX(const Expr& expr)
   { return make_expr(AX, expr, nil); }
 
-  inline const Expr& make_AU(Expr& expr)
+  inline const Expr& make_AU(const Expr& expr)
   { return make_expr(AU, expr, nil); }
 
-  inline const Expr& make_AR(Expr& expr)
+  inline const Expr& make_AR(const Expr& expr)
   { return make_expr(AR, expr, nil); }
 
   /* CTL (E) */
-  inline const Expr& make_EF(Expr& expr)
+  inline const Expr& make_EF(const Expr& expr)
   { return make_expr(EF, expr, nil); }
 
-  inline const Expr& make_EG(Expr& expr)
+  inline const Expr& make_EG(const Expr& expr)
   { return make_expr(EG, expr, nil); }
 
-  inline const Expr& make_EX(Expr& expr)
+  inline const Expr& make_EX(const Expr& expr)
   { return make_expr(EX, expr, nil); }
 
-  inline const Expr& make_EU(Expr& expr)
+  inline const Expr& make_EU(const Expr& expr)
   { return make_expr(EU, expr, nil); }
 
-  inline const Expr& make_ER(Expr& expr)
+  inline const Expr& make_ER(const Expr& expr)
   { return make_expr(ER, expr, nil); }
 
+  /* temporal ops */
+  inline const Expr& make_init(const Expr& expr)
+  { return make_expr(INIT, expr, nil); }
+
+  inline const Expr& make_next(const Expr& expr)
+  { return make_expr(NEXT, expr, nil); }
+
   /* arithmetical operators */
-  inline const Expr& make_neg(Expr& expr)
+  inline const Expr& make_neg(const Expr& expr)
   { return make_expr(NEG, expr, nil); }
 
-  inline const Expr& make_plus(Expr& a, Expr& b)
+  inline const Expr& make_add(const Expr& a, const Expr& b)
   { return make_expr(PLUS, a, b); }
 
-  inline const Expr& make_sub(Expr& a, Expr& b)
+  inline const Expr& make_sub(const Expr& a, const Expr& b)
   { return make_expr(SUB, a, b); }
 
-  inline const Expr& make_div(Expr& a, Expr& b)
+  inline const Expr& make_div(const Expr& a, const Expr& b)
   { return make_expr(DIV, a, b); }
 
-  inline const Expr& make_mul(Expr& a, Expr& b)
+  inline const Expr& make_mul(const Expr& a, const Expr& b)
   { return make_expr(MUL, a, b); }
 
-  inline const Expr& make_mod(Expr& a, Expr& b)
+  inline const Expr& make_mod(const Expr& a, const Expr& b)
   { return make_expr(MOD, a, b); }
 
   /* logical/bitwise operators */
-  inline const Expr& make_not(Expr& expr)
+  inline const Expr& make_not(const Expr& expr)
   { return make_expr(NOT, expr, nil); }
 
-  inline const Expr& make_and(Expr& a, Expr& b)
+  inline const Expr& make_and(const Expr& a, const Expr& b)
   { return make_expr(AND, a, b); }
 
-  inline const Expr& make_or(Expr& a, Expr& b)
+  inline const Expr& make_or(const Expr& a, const Expr& b)
   { return make_expr(OR, a, b); }
 
-  inline const Expr& make_xor(Expr& a, Expr& b)
+  inline const Expr& make_lshift(const Expr& a, const Expr& b)
+  { return make_expr(LSHIFT, a, b); }
+
+  inline const Expr& make_rshift(const Expr& a, const Expr& b)
+  { return make_expr(RSHIFT, a, b); }
+
+  inline const Expr& make_xor(const Expr& a, const Expr& b)
   { return make_expr(XOR, a, b); }
 
-  inline const Expr& make_xnor(Expr& a, Expr& b)
+  inline const Expr& make_xnor(const Expr& a, const Expr& b)
   { return make_expr(XNOR, a, b); }
 
-  inline const Expr& make_implies(Expr& a, Expr& b)
+  inline const Expr& make_implies(const Expr& a, const Expr& b)
   { return make_expr(IMPLIES, a, b); }
 
-  inline const Expr& make_iff(Expr& a, Expr& b)
+  inline const Expr& make_iff(const Expr& a, const Expr& b)
   { return make_expr(IFF, a, b); }
 
   /* relational operators */
-  inline const Expr& make_eq(Expr& a, Expr& b)
+  inline const Expr& make_eq(const Expr& a, const Expr& b)
   { return make_expr(EQ, a, b); }
 
-  inline const Expr& make_ne(Expr& a, Expr& b)
+  inline const Expr& make_ne(const Expr& a, const Expr& b)
   { return make_expr(NE, a, b); }
 
-  inline const Expr& make_ge(Expr& a, Expr& b)
+  inline const Expr& make_ge(const Expr& a, const Expr& b)
   { return make_expr(GE, a, b); }
 
-  inline const Expr& make_gt(Expr& a, Expr& b)
+  inline const Expr& make_gt(const Expr& a, const Expr& b)
   { return make_expr(GT, a, b); }
 
-  inline const Expr& make_le(Expr& a, Expr& b)
+  inline const Expr& make_le(const Expr& a, const Expr& b)
   { return make_expr(LE, a, b); }
 
-  inline const Expr& make_lt(Expr& a, Expr& b)
+  inline const Expr& make_lt(const Expr& a, const Expr& b)
   { return make_expr(LT, a, b); }
 
-  inline const Expr& make_ite(Expr& pred, Expr& t, Expr& e)
-  { return make_expr(ITE, make_expr(COND, pred, t), e); }
+  inline const Expr& make_cond(const Expr& a, const Expr& b)
+  { return make_expr(COND, a, b); }
+
+  inline const Expr& make_ite(const Expr& a, const Expr& b)
+  { return make_expr(ITE, a, b); }
 
   /* leaves */
   inline const Expr& make_iconst(long long value)
@@ -412,14 +465,39 @@ public:
     /* reverse iteration */
     for (EnumLiterals::reverse_iterator eye = literals.rbegin();
          eye != literals.rend(); eye ++) {
-      res = PX(make_expr(COMMA, *eye, *res));
+      res = PX(make_expr(COMMA, (**eye), *res));
     }
 
     return make_expr(SET, *res, nil);
   }
 
+  inline const Expr& make_dot(const Expr& a, const Expr& b)
+  { return make_expr(DOT, a, b); }
+
+  inline const Expr& make_subscript(const Expr& a, const Expr& b)
+  { return make_expr(SUBSCRIPT, a, b); }
+
+  inline const Expr& make_range(const Expr& a, const Expr& b)
+  { return make_expr(RANGE, a, b);  }
+
+  /* consts */
+
+  // TODO:
+  inline const Expr& make_hex_const(const Atom atom)
+  { return nil; }
+
+  inline const Expr& make_oct_const(const Atom atom)
+  { return nil; }
+
+  inline const Expr& make_dec_const(const Atom atom)
+  { return nil; }
+
+  /* predefined identifiers */
   inline const Expr& make_boolean()
   { return make_identifier("boolean"); }
+
+  inline const Expr& make_main()
+  { return make_identifier("main"); }
 
   inline const Expr& make_identifier(const Atom atom)
   {
@@ -479,8 +557,5 @@ private:
   ExprPool f_expr_pool;
   AtomPool f_atom_pool;
 };
-
-// static initialization
-ExprMgr_ptr ExprMgr::f_instance = NULL;
 
 #endif

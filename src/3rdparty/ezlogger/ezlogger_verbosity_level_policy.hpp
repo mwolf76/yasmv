@@ -50,14 +50,8 @@ namespace axter
     }
   };
 
-  verbosity get_verbosity_level_tolerance(){
-    return ezlogger_verbosity_level_policy::get_verbosity_level_tolerance();
-  }
-
-  void set_verbosity_level_tolerance(verbosity NewValue){
-    ezlogger_verbosity_level_policy::set_verbosity_level_tolerance(NewValue);
-  }
-
+  extern verbosity get_verbosity_level_tolerance();
+  extern void set_verbosity_level_tolerance(verbosity NewValue);
 }
 
 #endif //EZLOGGER_VERBOSITY_LEVEL_POLICY_HPP_HEADER_GRD_

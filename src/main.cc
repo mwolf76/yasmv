@@ -31,6 +31,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include    <smvLexer.h>
 #include    <smvParser.h>
 
+#include <logging.hh>
+namespace axter {
+  std::string get_log_prefix_format(const char*FileName,
+                                    int LineNo, const char*FunctionName,
+                                    ext_data levels_format_usage_data) {
+    return
+      ezlogger_format_policy::get_log_prefix_format(FileName, LineNo,
+                                                    FunctionName,
+                                                    levels_format_usage_data);
+  }
+
+  std::ostream& get_log_stream() {
+    return ezlogger_output_policy::get_log_stream();
+  }
+
+  verbosity get_verbosity_level_tolerance(){
+    return ezlogger_verbosity_level_policy::get_verbosity_level_tolerance();
+  }
+
+  void set_verbosity_level_tolerance(verbosity NewValue){
+    ezlogger_verbosity_level_policy::set_verbosity_level_tolerance(NewValue);
+  }
+
+
+
+
+
+};
+
+
 static void
 parseFile(pANTLR3_UINT8 fName)
 {
@@ -63,8 +93,15 @@ parseFile(pANTLR3_UINT8 fName)
   input->close(input);
 }
 
+// these are needed to force linking of modules
+extern void link_expr();
+extern void link_model();
+
 int main()
 {
+  link_expr();
+  link_model();
+
   parseFile((pANTLR3_UINT8)"test.smv");
   return 0;
 }

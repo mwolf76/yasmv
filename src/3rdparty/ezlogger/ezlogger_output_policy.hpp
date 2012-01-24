@@ -82,10 +82,7 @@ namespace axter
 		}
 	};
 
-  std::ostream& get_log_stream() {
-    return ezlogger_output_policy::get_log_stream();
-  }
-
+  extern std::ostream& get_log_stream();
 }
 
 

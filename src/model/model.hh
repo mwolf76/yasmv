@@ -39,17 +39,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class Module : public IModule {
   Expr f_name;
   Exprs f_formalParams;
+
   Variables f_localVars;
+  Defines f_localDefs;
+
+  Exprs f_init;
+  Exprs f_invar;
+  Exprs f_trans;
+  Exprs f_fair;
+  Assigns f_assgn;
 
 public:
 
-  Module(const Expr name) :
-    f_name(name),
-    f_formalParams(),
-    f_localVars() {}
+  Module(const Expr name)
+    : f_name(name)
+    , f_formalParams()
+    , f_localVars()
+    , f_localDefs()
+    , f_init()
+    , f_invar()
+    , f_trans()
+    , f_fair()
+    , f_assgn()
+  {}
 
   const Expr& get_name() const
   { return f_name; }
+
+  bool is_main() const
+  { return f_name == ExprMgr::INSTANCE().make_main(); }
 
   const Exprs& get_formalParams() const
   { return f_formalParams; }
@@ -62,27 +80,65 @@ public:
 
   void add_localVar(IVariable& var)
   { f_localVars.push_back(&var); }
+
+  const Defines& get_localDefs() const
+  { return f_localDefs; }
+
+  void add_localDef(IDefine& def)
+  { f_localDefs.push_back(&def); }
+
+  const Assigns& get_assign() const
+  { return f_assgn; }
+
+  void add_assign(IAssign& assign)
+  { f_assgn.push_back(&assign); }
+
+  const Exprs& get_init() const
+  { return f_init; }
+
+  void add_init(Expr& expr)
+  { f_init.push_back(&expr); }
+
+  const Exprs& get_invar() const
+  { return f_invar; }
+
+  void add_invar(Expr& expr)
+  { f_invar.push_back(&expr); }
+
+  const Exprs& get_trans() const
+  { return f_trans; }
+
+  void add_trans(Expr& expr)
+  { f_trans.push_back(&expr); }
+
+  const Exprs& get_fairness() const
+  { return f_fair; }
+
+  void add_fairness(Expr& expr)
+  { f_fair.push_back(&expr); }
+
 };
 
 class Instance : public IVarType {
-  friend class TypeRegister;
+public:
+  friend class TypeMgr;
 
   const Expr* f_identifier;
   Module* f_module;
-  Variables f_actualParams;
+  Exprs f_params;
 
   // eager binding (not used by the parser)
-  Instance(Module& module, Variables actualParams)
+  Instance(Module& module, Exprs params)
     : f_identifier(PX(ExprMgr::nil))
     , f_module(&module)
-    , f_actualParams(actualParams)
+    , f_params(params)
   {}
 
   // lazy binding
   Instance(const Expr& identifier)
     : f_identifier(&identifier)
     , f_module(NULL)
-    , f_actualParams()
+    , f_params()
   {}
 
   Expr get_name() const
@@ -105,54 +161,85 @@ class Instance : public IVarType {
 
   bool is_instance() const
   { return true; }
+
+  void add_param(Expr& expr)
+  { f_params.push_back(&expr); }
 };
 
 class Variable : public IVariable {
-  Expr f_name;
-  Expr f_fqdn;
-
-  IModule& f_owner;
+  const Expr& f_name;
   IVarType& f_type;
 
 public:
-  Variable(IModule& owner, const Expr name, IVarType& type)
-    : f_owner(owner),
-      f_type(type)
-  {
-    // f_fqdn = ExprMgr.INSTANCE().make_fqdn(owner.get_name(), name);
-    f_name = name;
-  }
-
-  const IModule& get_owner() const
-  { return f_owner; }
-
-  const Expr& get_fqdn() const
-  { return f_fqdn; }
+  Variable(const Expr& name, IVarType& type)
+    : f_name(name)
+    , f_type(type)
+  {}
 
   const Expr& get_name() const
   { return f_name; }
+
+  const IVarType& get_type() const
+  { return f_type; }
 };
 
 class StateVar : public Variable {
-  StateVar (IModule& owner, const Expr name, IVarType& type_)
-    : Variable(owner, name, type_)
+public:
+  StateVar (const Expr& name, IVarType& type_)
+    : Variable(name, type_)
   {}
 };
 
 class InputVar : public Variable {
-  InputVar (IModule& owner, const Expr name, IVarType& type_)
-    : Variable(owner, name, type_)
+public:
+  InputVar (const Expr& name, IVarType& type_)
+    : Variable(name, type_)
   {}
 };
 
 class FrozenVar: public Variable {
-  FrozenVar (IModule& owner, const Expr name, IVarType& type_)
-    : Variable(owner, name, type_)
+public:
+  FrozenVar (const Expr& name, IVarType& type_)
+    : Variable(name, type_)
   {}
 };
 
+class Define : public IDefine {
+  const Expr& f_name;
+  const Expr& f_body;
+
+public:
+  Define(const Expr& name, const Expr& body)
+    : f_name(f_name)
+    , f_body(body)
+  {}
+
+  const Expr& get_name() const
+  { return f_name; }
+
+  const Expr& get_body() const
+  { return f_body; }
+};
+
+class Assign : public IAssign {
+  const Expr& f_name;
+  const Expr& f_body;
+
+public:
+  Assign(const Expr& name, const Expr& body)
+    : f_name(name)
+    , f_body(body)
+  {}
+
+  const Expr& get_name() const
+  { return f_name; }
+
+  const Expr& get_body() const
+  { return f_body; }
+};
+
 class BooleanType : public IVarType {
-  friend class TypeRegister;
+  friend class TypeMgr;
   BooleanType() {}
 
 public:
@@ -239,20 +326,31 @@ typedef vector<Expr> Literals;
 typedef unordered_map<Expr, IVarType_ptr, ExprHash, ExprEq> Expr2IVarTypeMap;
 typedef pair<Expr2IVarTypeMap::iterator, bool> IVarTypeHit;
 
-class TypeRegister {
-  Expr2IVarTypeMap f_register;
+class TypeMgr;
+typedef TypeMgr* TypeMgr_ptr;
 
+class TypeMgr {
 public:
-  TypeRegister():
-    f_register()
-  {
-    /* boolean is the only predefined type. Any other type will be
-     declared by the user. */
-    register_type(ExprMgr::INSTANCE().make_boolean(),
-                  new BooleanType());
+  static TypeMgr& INSTANCE() {
+    if (! f_instance) f_instance = new TypeMgr();
+    return (*f_instance);
   }
 
   // REVIEW ME
+  const IVarType_ptr find_boolean()
+  { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
+
+  // REVIEW ME
+  const IVarType_ptr find_uword(Expr& size)
+  { return NULL; }
+
+  // REVIEW ME
+  const IVarType_ptr find_sword(Expr& size)
+  { return NULL; }
+
+  const IVarType_ptr find_range(const Expr& from, const Expr& to)
+  { return NULL; }
+
   const IVarType_ptr find_instance(const Expr& identifier)
   {
     Instance tmp(identifier);
@@ -264,11 +362,27 @@ public:
     return f_register[identifier];
   }
 
+protected:
+  TypeMgr():
+    f_register()
+  {
+    /* boolean is the only predefined type. Any other type will be
+     declared by the user. */
+    register_type(ExprMgr::INSTANCE().make_boolean(),
+                  new BooleanType());
+  }
+
 private:
+  static TypeMgr_ptr f_instance;
+
+  /* low-level services */
   void register_type(const Expr type_name, IVarType_ptr vtype)
   { f_register.insert(make_pair(type_name, vtype)); }
 
+  /* local data */
+  Expr2IVarTypeMap f_register;
 };
+
 
 class Model : public IModel {
   Modules f_modules;
@@ -284,6 +398,13 @@ public:
   void add_module(IModule& module)
   { f_modules.push_back(&module); }
 
+  Module& new_module(Expr& identifier)
+  {
+    Module* m = new Module(identifier);
+    add_module(*m);
+    return *m;
+  }
+
 };
 
 class ModelMgr;
@@ -298,6 +419,9 @@ public:
     return (*f_instance);
   }
 
+  inline Model& get_model()
+  { return f_model; }
+
 protected:
   ModelMgr()
     : f_model()
@@ -307,14 +431,8 @@ private:
   static ModelMgr_ptr f_instance;
 
   /* low-level services */
-  inline Model& get_model()
-  { return f_model; }
-
   /* local data */
   Model f_model;
 };
-
-// static initialization
-ModelMgr_ptr ModelMgr::f_instance = NULL;
 
 #endif
