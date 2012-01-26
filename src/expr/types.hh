@@ -35,8 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // Basic Type class. Is.. nothing.
 class Type {
 public:
-  // virtual const Expr& get_name() const
-  // { return nil; }
+  virtual const string get_repr() const
+  { return "<NullType>"; }
 
   virtual bool is_boolean() const
   { return false; }
@@ -85,8 +85,8 @@ public:
   bool is_instance() const
   { return false; }
 
-  // const Expr& get_name() const
-  // { return ExprMgr::INSTANCE().make_boolean(); }
+  const string get_repr() const
+  { return "boolean"; }
 };
 
 class IntRangeType : public Type {
@@ -105,12 +105,12 @@ public:
   inline const Expr& get_max() const
   { return f_max; }
 
-  // const Expr& get_name() const
-  // {
-  //   ostringstream oss;
-  //   oss << "[" << get_min() << ".." << get_max() << "]";
-  //   return oss.str();
-  // }
+  const string get_repr() const
+  {
+    ostringstream oss;
+    oss << "[" << get_min() << ".." << get_max() << "]";
+    return oss.str();
+  }
 };
 
 
@@ -140,8 +140,24 @@ public:
   bool is_instance() const
   { return false; }
 
-  // Expr get_name() const
-  // { return  ExprMgr::INSTANCE().make_enum(*this); }
+  const string get_repr() const
+  {
+    ostringstream oss;
+    EnumLiterals::iterator eye;
+
+    oss << "{ ";
+    eye = f_literals.begin();
+    while (eye != f_literals.end()) {
+      oss << (**eye);
+      eye ++;
+      if (eye != f_literals.begin()) {
+        oss << ", ";
+      }
+    }
+    oss << "}";
+
+    return oss.str();
+  }
 
   const EnumLiterals& get_literals() const
   { return f_literals; }
@@ -238,7 +254,8 @@ public:
       logger << "Added instance of module '" << identifier << "' to type register" << endl;
     }
 
-    return &f_register[identifier];
+    TypeRegister::pointer p = &(*hit.first);
+    return &(p->second);
   }
 
 protected:
