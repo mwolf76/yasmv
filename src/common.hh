@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <set>
 
 #include <tr1/unordered_set>
@@ -46,6 +47,7 @@ using std::string;
 using std::ostringstream;
 using std::ostream;
 using std::vector;
+using std::stack;
 using std::set;
 using std::tr1::unordered_map;
 using std::tr1::unordered_set;
@@ -53,6 +55,7 @@ using std::tr1::unordered_set;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::flush;
 
 class IVariable;
 typedef vector<IVariable*> Variables;
