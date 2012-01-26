@@ -744,12 +744,12 @@ int_constant returns [Expr_ptr res]
 	;
 
 range_constant returns [Expr_ptr res]
-	:	lhs=int_constant (
-			'..' rhs=int_constant
-            { $res = PX(em.make_range(*lhs, *rhs)); }
+	:	lhs=int_constant
 
-    |   { $res = lhs; } )
+        ('..' rhs=int_constant
+           { $res = PX(em.make_range(*lhs, *rhs)); }
 
+        |  { $res = lhs; } )
 	;
 
 enum_constant returns [Expr_ptr res]
@@ -812,20 +812,12 @@ scope { EnumLiterals literals; }
 	;
 
 actual_param_decls [Type_ptr m]
-scope {
-    Instance* instance;
-}
-
-@init {
-    $actual_param_decls::instance = dynamic_cast<Instance*> ($m);
-    assert( $actual_param_decls::instance );
-}
 	:
         '(' ap=pvalue {
-            $actual_param_decls::instance->add_param(*ap);
+            ((Instance*)(m)) -> add_param(*ap);
         }
         (',' pvalue {
-                $actual_param_decls::instance->add_param(*ap);
+                ((Instance*)(m)) -> add_param(*ap);
         })*
         ')'
     ;
