@@ -224,8 +224,6 @@ public:
   inline Expr_ptr make_main()
   { return main_expr; }
 
-  // inline Expr_ptr make_main()
-  // { return make_identifier("main"); }
   inline Expr_ptr make_identifier(Atom atom)
   {
     AtomPoolHit ah = (f_atom_pool.insert(atom));

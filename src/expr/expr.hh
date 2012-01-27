@@ -55,7 +55,7 @@ typedef enum {
   ITE, COND,
 
   /* leaves */
-  ICONST, UWCONST, SWCONST, IDENT, LITERAL, NIL,
+  ICONST, UWCONST, SWCONST, IDENT, NIL,
 
   /* postfix exprs */
   DOT, SUBSCRIPT, RANGE,
@@ -132,29 +132,55 @@ typedef struct Expr_TAG {
 struct ExprHash {
   inline long operator() (const Expr& k) const
   {
-    return 0;
-    // long x, res = (long)(k.f_symb);
+    if (k.f_symb == IDENT) {
+      return (long)(k.f_atom);
+    }
 
-    // res = (res << 4) + (long)(&(k.f_lhs));
-    // if ((x = res & 0xF0000000L) != 0)
-    //   res ^= (x >> 24);
-    // res &= ~x;
+    else {
+      long v0, v1, x, res = (long)(k.f_symb);
+      if (k.f_symb == ICONST
+          || k.f_symb == SWCONST
+          || k.f_symb == UWCONST) {
+        v0 = (long)(k.f_ull);
+        v1 = (long)(k.f_ull >> sizeof(long));
+      }
+      else {
+        v0 = (long)(k.f_lhs);
+        v1 = (long)(k.f_rhs);
+      }
 
-    // res = (res << 4) + (long)(&(k.f_rhs));
-    // if ((x = res & 0xF0000000L) != 0)
-    //   res ^= (x >> 24);
-    // res &= ~x;
+      res = (res << 4) + v0;
+      if ((x = res & 0xF0000000L) != 0)
+        res ^= (x >> 24);
+      res &= ~x;
 
-    // return res;
+      res = (res << 4) + v1;
+      if ((x = res & 0xF0000000L) != 0)
+        res ^= (x >> 24);
+      res &= ~x;
+
+      return res;
+    }
+
+    assert (0); // unreachable
   }
 };
 
 struct ExprEq {
-  bool operator() (const Expr& x, const Expr& y) const
+  inline bool operator() (const Expr& x, const Expr& y) const
   {
-    return x.f_symb == y.f_symb &&
-      &x.f_lhs == &y.f_lhs &&
-      &y.f_rhs == &y.f_rhs ;
+    return
+      // both exprs must be the same type...
+      x.f_symb == y.f_symb && (
+
+                               /* either the same identifier */
+                               (x.f_symb == IDENT  && x.f_atom == y.f_atom) ||
+
+                               /* or the same constant */
+                               (x.f_symb >= ICONST && x.f_ull == y.f_ull) ||
+
+                               /* or the same subtree */
+                               (x.f_lhs == y.f_lhs && y.f_rhs == y.f_rhs));
   }
 };
 

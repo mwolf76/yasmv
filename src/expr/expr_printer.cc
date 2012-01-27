@@ -314,8 +314,9 @@ void Printer::walk_leaf(const Expr_ptr expr)
   else if (symb == IDENT) {
     f_os << (*expr->f_atom);
   }
-  else if (symb == LITERAL) {
-    f_os << expr->f_atom;
-  }
+  // else if (symb == LITERAL) {
+  //   f_os << expr->f_atom;
+  // }
+
   else assert(0);
 }

@@ -811,7 +811,6 @@ void Walker::walk () {
     case UWCONST:
     case SWCONST:
     case IDENT:
-    case LITERAL:
       walk_leaf(curr.expr);
       break;
 
