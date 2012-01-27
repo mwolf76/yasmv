@@ -90,19 +90,19 @@ public:
 };
 
 class IntRangeType : public Type {
-  Expr f_min;
-  Expr f_max;
+  Expr_ptr f_min;
+  Expr_ptr f_max;
 
-  IntRangeType(Expr min, Expr max) {
-    f_min = min;
-    f_max = max;
-  }
+  IntRangeType(Expr_ptr min, Expr_ptr max)
+    : f_min(min)
+    , f_max(max)
+  {}
 
 public:
-  inline const Expr& get_min() const
+  inline Expr_ptr get_min() const
   { return f_min; }
 
-  inline const Expr& get_max() const
+  inline Expr_ptr get_max() const
   { return f_max; }
 
   const string get_repr() const
@@ -148,7 +148,7 @@ public:
     oss << "{ ";
     eye = f_literals.begin();
     while (eye != f_literals.end()) {
-      oss << (**eye);
+      oss << (*eye);
       eye ++;
       if (eye != f_literals.begin()) {
         oss << ", ";

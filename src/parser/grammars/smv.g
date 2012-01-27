@@ -556,7 +556,7 @@ imply_expression returns [Expr_ptr res]
             '->' rhs=imply_expression
             { $res = em.make_implies(lhs, rhs); }
 
-    |      { lhs = $res; } )
+    |      { $res = lhs; } )
 
 	;
 

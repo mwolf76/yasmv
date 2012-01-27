@@ -231,7 +231,8 @@ public:
   {
     AtomPoolHit ah = (f_atom_pool.insert(Atom(atom)));
     if (ah.second) {
-      logger << "Added new atom to pool: '" << *ah.first << "'" << endl;
+      AtomPool::const_pointer atom = & (*ah.first);
+      logger << "Added new atom to pool: '" << (*atom) << "'" << endl;
     }
 
     return make_expr(*ah.first);
@@ -250,35 +251,22 @@ private:
   static ExprMgr_ptr f_instance;
 
   /* low-level services */
-  inline Expr_ptr make_expr(ExprType et,  Expr_ptr  a,  Expr_ptr  b)
-  {
-    ExprPoolHit eh = (f_expr_pool.insert(Expr(et, a, b)));
-    if (eh.second) {
-      logger << "Added new expr to pool" << (*eh.first) << endl;
+  Expr_ptr make_expr(ExprType et,  Expr_ptr  a,  Expr_ptr  b)
+  { return __make_expr(f_expr_pool.insert(Expr(et, a, b))); }
+
+  Expr_ptr make_expr(const Atom& atom)
+  { return __make_expr(f_expr_pool.insert(Expr(atom))); }
+
+  Expr_ptr make_const(ExprType et, long long value)
+  { assert( et == ICONST || et == UWCONST || et == SWCONST );
+    return __make_expr(f_expr_pool.insert(Expr(et, value))); }
+
+  inline Expr_ptr __make_expr(ExprPoolHit hit) {
+    ExprPool::pointer expr = const_cast <Expr_ptr> ( & (*hit.first) );
+    if (hit.second) {
+      logger << "Added new expr to pool '" << expr << "'" << endl;
     }
-
-    return const_cast <Expr_ptr> (& (*eh.first));
-  }
-
-  inline Expr_ptr make_expr(const Atom& atom)
-  {
-    ExprPoolHit eh = (f_expr_pool.insert(Expr(atom)));
-    if (eh.second) {
-      logger << "Added new expr to pool" << (*eh.first) << endl;
-    }
-
-    return const_cast <Expr_ptr> (& (*eh.first));
-  }
-
-  inline Expr_ptr make_const(ExprType et, long long value)
-  {
-    assert( et == ICONST || et == UWCONST || et == SWCONST );
-    ExprPoolHit eh = (f_expr_pool.insert(Expr(et, value)));
-    if (eh.second) {
-      logger << "Added new expr to pool" << (*eh.first) << endl;
-    }
-
-    return const_cast <Expr_ptr> (& (*eh.first));
+    return expr;
   }
 
   /* shared pools */

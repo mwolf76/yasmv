@@ -189,9 +189,9 @@ struct AtomEq {
 typedef unordered_set<Atom, AtomHash, AtomEq> AtomPool;
 typedef pair<AtomPool::iterator, bool> AtomPoolHit;
 
-ostream& operator<<(ostream& os, const Expr& t);
-
 typedef Expr* Expr_ptr;
 typedef vector<Expr_ptr> Exprs;
+
+ostream& operator<<(ostream& os, const Expr_ptr t);
 
 #endif
