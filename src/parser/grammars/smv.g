@@ -496,6 +496,7 @@ assignment_clause
     ;
 
 untimed_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: expr=case_expression
         { $res = expr; }
 
@@ -508,6 +509,7 @@ case_expression returns [Expr_ptr res]
 scope {
     Exprs clauses;
 }
+@init { res = NULL; }
 	: 'case'
         lhs=untimed_expression ':' rhs=untimed_expression
         { $case_expression::clauses.push_back(
@@ -532,6 +534,7 @@ scope {
 	;
 
 cond_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: expr=iff_expression (
         '?' lhs=iff_expression ':' rhs=iff_expression
         {
@@ -544,6 +547,7 @@ cond_expression returns [Expr_ptr res]
 	;
 
 iff_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	:  lhs=imply_expression (
             '<->' rhs=iff_expression
             { $res = em.make_iff(lhs, rhs); }
@@ -552,6 +556,7 @@ iff_expression returns [Expr_ptr res]
 	;
 
 imply_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=inclusive_or_expression (
             '->' rhs=imply_expression
             { $res = em.make_implies(lhs, rhs); }
@@ -561,6 +566,7 @@ imply_expression returns [Expr_ptr res]
 	;
 
 inclusive_or_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=exclusive_or_expression (
             '|' rhs=inclusive_or_expression
             { $res = em.make_or(lhs, rhs); }
@@ -570,6 +576,7 @@ inclusive_or_expression returns [Expr_ptr res]
 	;
 
 exclusive_or_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=and_expression (
             'xor' rhs=exclusive_or_expression
             { $res = em.make_xor(lhs, rhs); }
@@ -581,6 +588,7 @@ exclusive_or_expression returns [Expr_ptr res]
 	;
 
 and_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=equality_expression (
             '&' rhs=equality_expression
             { $res = em.make_and(lhs, rhs); }
@@ -589,6 +597,7 @@ and_expression returns [Expr_ptr res]
 	;
 
 equality_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=relational_expression (
             '=' rhs=equality_expression
             { $res = em.make_eq(lhs, rhs); }
@@ -601,6 +610,7 @@ equality_expression returns [Expr_ptr res]
 	;
 
 relational_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=shift_expression (
             '<' rhs=relational_expression
             { $res = em.make_lt(lhs, rhs); }
@@ -619,6 +629,7 @@ relational_expression returns [Expr_ptr res]
 	;
 
 shift_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=additive_expression (
             '<<' rhs=shift_expression
             { $res = em.make_lshift(lhs, rhs); }
@@ -630,6 +641,7 @@ shift_expression returns [Expr_ptr res]
 	;
 
 additive_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=multiplicative_expression (
             '+' rhs=additive_expression
             { $res = em.make_add(lhs, rhs); }
@@ -641,6 +653,7 @@ additive_expression returns [Expr_ptr res]
 	;
 
 multiplicative_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: lhs=unary_expression (
             '*' rhs=multiplicative_expression
             { $res = em.make_mul(lhs, rhs); }
@@ -655,6 +668,7 @@ multiplicative_expression returns [Expr_ptr res]
 	;
 
 unary_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: expr=postfix_expression
       { $res = expr; }
 
@@ -688,6 +702,7 @@ unary_expression returns [Expr_ptr res]
 	;
 
 postfix_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	:   lhs=primary_expression (
 
             '[' rhs=primary_expression ']'
@@ -702,6 +717,7 @@ postfix_expression returns [Expr_ptr res]
 	;
 
 primary_expression returns [Expr_ptr res]
+@init { res = NULL; }
 	: id=identifier
       { $res = id; }
 
@@ -714,16 +730,19 @@ primary_expression returns [Expr_ptr res]
 	;
 
 identifier returns [Expr_ptr res]
+@init { res = NULL; }
 	: IDENTIFIER
     { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
 	;
 
 constant returns [Expr_ptr res]
+@init { res = NULL; }
     :	enum_constant
     |   range_constant
     ;
 
 int_constant returns [Expr_ptr res]
+@init { res = NULL; }
 	:   HEX_LITERAL
         {
          Atom tmp((const char*)($HEX_LITERAL.text->chars));
@@ -745,6 +764,7 @@ int_constant returns [Expr_ptr res]
 	;
 
 range_constant returns [Expr_ptr res]
+@init { res = NULL; }
 	:	lhs=int_constant
 
         ('..' rhs=int_constant
@@ -754,10 +774,12 @@ range_constant returns [Expr_ptr res]
 	;
 
 enum_constant returns [Expr_ptr res]
+@init { res = NULL; }
 	:	 enum_type;
 
 /* lvalue is used in assignments */
 lvalue returns [Expr_ptr res]
+@init { res = NULL; }
 	:	'init' '(' expr=postfix_expression ')'
         { $res = em.make_init(expr); }
 
@@ -770,6 +792,7 @@ lvalue returns [Expr_ptr res]
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
+@init { res = NULL; }
 	:	'next' '(' expr=postfix_expression ')'
         { $res = em.make_next(expr); }
 
@@ -779,11 +802,13 @@ pvalue returns [Expr_ptr res]
 
 /* ordinary values used elsewhere */
 value returns [Expr_ptr res]
+@init { res = NULL; }
     :   expr=postfix_expression
         { $res = expr; }
     ;
 
 type_name returns [Type_ptr res]
+@init { res = NULL; }
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
@@ -824,6 +849,7 @@ actual_param_decls [Type_ptr m]
     ;
 
 literal returns [Expr_ptr res]
+@init { res = NULL; }
     :  expr=identifier { $res = expr; }
     |  expr=int_constant { $res = expr; }
     ;

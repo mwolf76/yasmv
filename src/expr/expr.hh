@@ -67,6 +67,7 @@ typedef enum {
 
 // using STL string as basic atom class
 typedef string Atom;
+typedef Atom* Atom_ptr;
 
 typedef struct Expr_TAG {
   ExprType f_symb;
@@ -81,7 +82,7 @@ typedef struct Expr_TAG {
     unsigned long long f_ull;
 
     struct {
-      const Atom* f_atom;
+      const Atom_ptr f_atom;
     };
   };
 
@@ -95,7 +96,7 @@ typedef struct Expr_TAG {
 
   inline Expr_TAG(const Atom& atom)
     : f_symb(IDENT)
-    , f_atom(&atom)
+    , f_atom(const_cast<const Atom_ptr> (&atom))
   {}
 
   inline Expr_TAG(ExprType symb,
@@ -149,7 +150,7 @@ struct ExprHash {
 };
 
 struct ExprEq {
-  inline bool operator() (const Expr& x, const Expr& y) const
+  bool operator() (const Expr& x, const Expr& y) const
   {
     return x.f_symb == y.f_symb &&
       &x.f_lhs == &y.f_lhs &&

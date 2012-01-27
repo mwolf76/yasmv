@@ -177,13 +177,13 @@ public:
 
   /* leaves */
   inline Expr_ptr make_iconst(long long value)
-  { return make_const (ICONST, value); }
+  { return __make_expr(f_expr_pool.insert(Expr(ICONST, value))); }
 
   inline Expr_ptr make_uwconst(unsigned long long value)
-  { return make_const (UWCONST, value); }
+  { return __make_expr(f_expr_pool.insert(Expr(UWCONST, value))); }
 
-  inline Expr_ptr make_uwconst(long long value)
-  { return make_const(SWCONST, value); }
+  inline Expr_ptr make_swconst(long long value)
+  { return __make_expr(f_expr_pool.insert(Expr(SWCONST, value))); }
 
   // inline const Expr_ptr make_enum(EnumType& enumeration)
   // {
@@ -208,28 +208,27 @@ public:
   inline Expr_ptr make_range( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(RANGE, a, b);  }
 
-  /* s */
-
   // TODO:
-  inline Expr_ptr make_hex_const( Atom atom)
+  inline Expr_ptr make_hex_const(Atom atom)
   { return NULL; }
 
-  inline Expr_ptr make_oct_const( Atom atom)
+  inline Expr_ptr make_oct_const(Atom atom)
   { return NULL; }
 
-  inline Expr_ptr make_dec_const( Atom atom)
+  inline Expr_ptr make_dec_const(Atom atom)
   { return NULL; }
 
   /* predefined identifiers */
   inline Expr_ptr make_boolean()
-  { return make_identifier("boolean"); }
-
+  { return bool_expr; }
   inline Expr_ptr make_main()
-  { return make_identifier("main"); }
+  { return main_expr; }
 
-  inline Expr_ptr make_identifier( Atom atom)
+  // inline Expr_ptr make_main()
+  // { return make_identifier("main"); }
+  inline Expr_ptr make_identifier(Atom atom)
   {
-    AtomPoolHit ah = (f_atom_pool.insert(Atom(atom)));
+    AtomPoolHit ah = (f_atom_pool.insert(atom));
     if (ah.second) {
       AtomPool::const_pointer atom = & (*ah.first);
       logger << "Added new atom to pool: '" << (*atom) << "'" << endl;
@@ -243,31 +242,40 @@ protected:
     :  f_expr_pool()
     ,  f_atom_pool()
   {
-    // setup pre-defined known identifiers
-    f_expr_pool.insert(*make_boolean());
+    const Atom_ptr atom_boolean = new Atom("boolean");
+    const ExprPoolHit bool_hit = f_expr_pool.insert(*atom_boolean);
+    assert(bool_hit.second); // it has to be true
+    bool_expr = const_cast<Expr_ptr> (& (*bool_hit.first));
+
+    const Atom_ptr atom_main = new Atom("main");
+    const ExprPoolHit main_hit = f_expr_pool.insert(*atom_main);
+    assert(main_hit.second); // it has to be true
+    main_expr = const_cast<Expr_ptr> (& (*main_hit.first));
   }
 
 private:
   static ExprMgr_ptr f_instance;
 
-  /* low-level services */
+  /* mid level services */
   Expr_ptr make_expr(ExprType et,  Expr_ptr  a,  Expr_ptr  b)
   { return __make_expr(f_expr_pool.insert(Expr(et, a, b))); }
 
   Expr_ptr make_expr(const Atom& atom)
   { return __make_expr(f_expr_pool.insert(Expr(atom))); }
 
-  Expr_ptr make_const(ExprType et, long long value)
-  { assert( et == ICONST || et == UWCONST || et == SWCONST );
-    return __make_expr(f_expr_pool.insert(Expr(et, value))); }
-
+  // low-level
   inline Expr_ptr __make_expr(ExprPoolHit hit) {
     ExprPool::pointer expr = const_cast <Expr_ptr> ( & (*hit.first) );
+
     if (hit.second) {
-      logger << "Added new expr to pool '" << expr << "'" << endl;
+      logger << "Added new expr to pool: '" << expr << "'" << endl;
     }
     return expr;
   }
+
+  /* builtins */
+  Expr_ptr bool_expr;
+  Expr_ptr main_expr;
 
   /* shared pools */
   ExprPool f_expr_pool;
