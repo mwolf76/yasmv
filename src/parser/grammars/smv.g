@@ -295,12 +295,14 @@ smv
 // 	;
 
 modules
-scope { Module* module ; }
+scope {
+    IModule_ptr module ;
+}
 @init {
-$modules::module = NULL;
+    $modules::module = NULL;
 }
 	: ( 'MODULE' id=identifier
-      { $modules::module = & mm.get_model().new_module(*id); }
+      { $modules::module = mm.get_model().new_module(id); }
 
       formal_params? fsm
       )*
@@ -309,10 +311,10 @@ $modules::module = NULL;
 formal_params
 	:	'('
         id=identifier
-        { $modules::module->add_formalParam(*id); }
+        { $modules::module->add_formalParam(id); }
 
         ( ',' id=identifier {
-            $modules::module->add_formalParam(*id);
+            $modules::module->add_formalParam(id);
         })*
         ')'
     ;
@@ -361,9 +363,9 @@ fsm_var_decl_body
 	;
 
 fsm_var_decl_clause
-	: id=identifier ':' type=type_name ';'
+	: id=identifier ':' tp=type_name ';'
     {
-            StateVar var(*id, *type);
+            IVariable_ptr var = new StateVar(id, tp);
             $modules::module->add_localVar(var);
     }
 	;
@@ -378,9 +380,9 @@ fsm_ivar_decl_body
 	;
 
 fsm_ivar_decl_clause
-	: id=identifier ':' type=type_name ';'
+	: id=identifier ':' tp=type_name ';'
     {
-            InputVar var(*id, *type);
+            IVariable_ptr var = new InputVar(id, tp);
             $modules::module->add_localVar(var);
     }
 	;
@@ -395,9 +397,9 @@ fsm_frozenvar_decl_body
 	;
 
 fsm_frozenvar_decl_clause
-	: id=identifier ':' type=type_name ';'
+	: id=identifier ':' tp=type_name ';'
     {
-            FrozenVar var(*id, *type);
+            IVariable_ptr var = new FrozenVar(id, tp);
             $modules::module->add_localVar(var);
     }
 	;
@@ -415,7 +417,7 @@ fsm_define_decl_body
 fsm_define_decl_clause
 	: id=identifier ':=' body=untimed_expression ';'
     {
-            Define def(*id, *body);
+            IDefine_ptr def = new Define(id, body);
             $modules::module->add_localDef(def);
     }
 	;
@@ -431,7 +433,7 @@ fsm_init_decl_body
 
 fsm_init_decl_clause
 	: expr=untimed_expression ';'
-      { $modules::module->add_init(*expr); }
+      { $modules::module->add_init(expr); }
 	;
 
 /* INVAR */
@@ -445,7 +447,7 @@ fsm_invar_decl_body
 
 fsm_invar_decl_clause
 	: expr=untimed_expression ';'
-      { $modules::module->add_invar(*expr); }
+      { $modules::module->add_invar(expr); }
 	;
 
 /* TRANS */
@@ -459,7 +461,7 @@ fsm_trans_decl_body
 
 fsm_trans_decl_clause
 	: expr=untimed_expression ';'
-      { $modules::module->add_trans(*expr); }
+      { $modules::module->add_trans(expr); }
 	;
 
 /* FAIRN */
@@ -473,7 +475,7 @@ fsm_fairn_decl_body
 
 fsm_fairn_decl_clause
 	: expr=untimed_expression ';'
-      { $modules::module->add_fairness(*expr); }
+      { $modules::module->add_fairness(expr); }
 	;
 
 /* functional FSM definition */
@@ -488,14 +490,10 @@ assignment_body
 assignment_clause
 	: id=lvalue ':=' expr=untimed_expression ';'
     {
-            Assign assgn(*id, *expr);
+            IAssign_ptr assgn = new Assign(id, expr);
             $modules::module->add_assign(assgn);
     }
     ;
-
-// argument_expression_list
-// 	:   untimed_expression (','! untimed_expression)*
-// 	;
 
 untimed_expression returns [Expr_ptr res]
 	: expr=case_expression
@@ -512,20 +510,23 @@ scope {
 }
 	: 'case'
         lhs=untimed_expression ':' rhs=untimed_expression
-        { $case_expression::clauses.push_back(PX(em.make_cond(*lhs, *rhs))); }
+        { $case_expression::clauses.push_back(
+                const_cast<Expr_ptr>(em.make_cond(lhs, rhs)));
+        }
 
         (
             ';' lhs=untimed_expression ':' rhs=untimed_expression
-            { $case_expression::clauses.push_back(PX(em.make_cond(*lhs, *rhs))); }
+            { $case_expression::clauses.push_back(
+                 const_cast<Expr_ptr>(em.make_cond(lhs, rhs))); }
         )*
 
       'esac'
       {
         // build reversed ITE
-        res = PX(nil);
+        res = NULL;
         for (Exprs::reverse_iterator eye = $case_expression::clauses.rend();
              eye != $case_expression::clauses.rbegin(); eye ++) {
-            res = PX(em.make_ite((**eye), (*res)));
+            res = const_cast<Expr_ptr>(em.make_ite((*eye), res));
         }
       }
 	;
@@ -534,8 +535,8 @@ cond_expression returns [Expr_ptr res]
 	: expr=iff_expression (
         '?' lhs=iff_expression ':' rhs=iff_expression
         {
-            $res = PX(em.make_ite(
-                      em.make_cond(*expr, *lhs), *rhs));
+            $res = em.make_ite(
+                    em.make_cond(expr, lhs), rhs);
         }
 
     | { $res = expr; } )
@@ -545,7 +546,7 @@ cond_expression returns [Expr_ptr res]
 iff_expression returns [Expr_ptr res]
 	:  lhs=imply_expression (
             '<->' rhs=iff_expression
-            { $res = PX(em.make_iff(*lhs, *rhs)); }
+            { $res = em.make_iff(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -553,7 +554,7 @@ iff_expression returns [Expr_ptr res]
 imply_expression returns [Expr_ptr res]
 	: lhs=inclusive_or_expression (
             '->' rhs=imply_expression
-            { $res = PX(em.make_implies(*lhs, *rhs)); }
+            { $res = em.make_implies(lhs, rhs); }
 
     |      { lhs = $res; } )
 
@@ -562,7 +563,7 @@ imply_expression returns [Expr_ptr res]
 inclusive_or_expression returns [Expr_ptr res]
 	: lhs=exclusive_or_expression (
             '|' rhs=inclusive_or_expression
-            { $res = PX(em.make_or(*lhs, *rhs)); }
+            { $res = em.make_or(lhs, rhs); }
 
     |       { $res = lhs; } )
 
@@ -571,10 +572,10 @@ inclusive_or_expression returns [Expr_ptr res]
 exclusive_or_expression returns [Expr_ptr res]
 	: lhs=and_expression (
             'xor' rhs=exclusive_or_expression
-            { $res = PX(em.make_xor(*lhs, *rhs)); }
+            { $res = em.make_xor(lhs, rhs); }
 
         |  'xnor' rhs=exclusive_or_expression
-            { $res = PX(em.make_xnor(*lhs, *rhs)); }
+            { $res = em.make_xnor(lhs, rhs); }
 
         |   { $res = lhs; } )
 	;
@@ -582,7 +583,7 @@ exclusive_or_expression returns [Expr_ptr res]
 and_expression returns [Expr_ptr res]
 	: lhs=equality_expression (
             '&' rhs=equality_expression
-            { $res = PX(em.make_and(*lhs, *rhs)); }
+            { $res = em.make_and(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -590,10 +591,10 @@ and_expression returns [Expr_ptr res]
 equality_expression returns [Expr_ptr res]
 	: lhs=relational_expression (
             '=' rhs=equality_expression
-            { $res = PX(em.make_eq(*lhs, *rhs)); }
+            { $res = em.make_eq(lhs, rhs); }
 
     |       '!=' rhs=equality_expression
-            { $res = PX(em.make_ne(*lhs, *rhs)); }
+            { $res = em.make_ne(lhs, rhs); }
 
     |       { $res = lhs; } )
 
@@ -602,16 +603,16 @@ equality_expression returns [Expr_ptr res]
 relational_expression returns [Expr_ptr res]
 	: lhs=shift_expression (
             '<' rhs=relational_expression
-            { $res = PX(em.make_lt(*lhs, *rhs)); }
+            { $res = em.make_lt(lhs, rhs); }
 
     |       '<=' rhs=relational_expression
-            { $res = PX(em.make_le(*lhs, *rhs)); }
+            { $res = em.make_le(lhs, rhs); }
 
     |       '>=' rhs=relational_expression
-            { $res = PX(em.make_ge(*lhs, *rhs)); }
+            { $res = em.make_ge(lhs, rhs); }
 
     |       '>' rhs=relational_expression
-            { $res = PX(em.make_gt(*lhs, *rhs)); }
+            { $res = em.make_gt(lhs, rhs); }
 
     |       { $res = lhs; } )
 
@@ -620,10 +621,10 @@ relational_expression returns [Expr_ptr res]
 shift_expression returns [Expr_ptr res]
 	: lhs=additive_expression (
             '<<' rhs=shift_expression
-            { $res = PX(em.make_lshift(*lhs, *rhs)); }
+            { $res = em.make_lshift(lhs, rhs); }
 
     |       '>>' rhs=shift_expression
-            { $res = PX(em.make_rshift(*lhs, *rhs)); }
+            { $res = em.make_rshift(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -631,10 +632,10 @@ shift_expression returns [Expr_ptr res]
 additive_expression returns [Expr_ptr res]
 	: lhs=multiplicative_expression (
             '+' rhs=additive_expression
-            { $res = PX(em.make_add(*lhs, *rhs)); }
+            { $res = em.make_add(lhs, rhs); }
 
     |       '-' rhs=additive_expression
-            { $res = PX(em.make_sub(*lhs, *rhs)); }
+            { $res = em.make_sub(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -642,13 +643,13 @@ additive_expression returns [Expr_ptr res]
 multiplicative_expression returns [Expr_ptr res]
 	: lhs=unary_expression (
             '*' rhs=multiplicative_expression
-            { $res = PX(em.make_mul(*lhs, *rhs)); }
+            { $res = em.make_mul(lhs, rhs); }
 
     |       '/' rhs=multiplicative_expression
-            { $res = PX(em.make_div(*lhs, *rhs)); }
+            { $res = em.make_div(lhs, rhs); }
 
     |       'mod' rhs=multiplicative_expression
-            { $res = PX(em.make_mod(*lhs, *rhs)); }
+            { $res = em.make_mod(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -658,31 +659,31 @@ unary_expression returns [Expr_ptr res]
       { $res = expr; }
 
 	| 'next' '(' expr=postfix_expression ')'
-      { $res = PX(em.make_next(*expr)); }
+      { $res = em.make_next(expr); }
 
 	| '!' expr=postfix_expression
-      { $res = PX(em.make_not(*expr)); }
+      { $res = em.make_not(expr); }
 
     | '-' expr=postfix_expression
-      { $res = PX(em.make_neg(*expr)); }
+      { $res = em.make_neg(expr); }
 
     // | 'toint' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_toint(*expr)); }
+    //    { $res = PX(em.make_toint(expr)); }
 
     // | 'bool' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_bool(*expr)); }
+    //    { $res = PX(em.make_bool(expr)); }
 
     // | 'word1' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_word1(*expr)); }
+    //    { $res = PX(em.make_word1(expr)); }
 
     // | 'signed' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_signed(*expr)); }
+    //    { $res = PX(em.make_signed(expr)); }
 
     // | 'unsigned' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_unsigned(*expr)); }
+    //    { $res = PX(em.make_unsigned(expr)); }
 
     // | 'count' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_count(*expr)); }
+    //    { $res = PX(em.make_count(expr)); }
 
 	;
 
@@ -690,11 +691,11 @@ postfix_expression returns [Expr_ptr res]
 	:   lhs=primary_expression (
 
             '[' rhs=primary_expression ']'
-            { $res = PX(em.make_subscript(*lhs, *rhs)); }
+            { $res = em.make_subscript(lhs, rhs); }
         |
 
             '.' rhs=primary_expression
-            { $res = PX(em.make_dot(*lhs, *rhs)); }
+            { $res = em.make_dot(lhs, rhs); }
 
         |   { $res = lhs; } )
 
@@ -714,7 +715,7 @@ primary_expression returns [Expr_ptr res]
 
 identifier returns [Expr_ptr res]
 	: IDENTIFIER
-    { $res = PX(em.make_identifier((const char*)($IDENTIFIER.text->chars))); }
+    { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
 	;
 
 constant returns [Expr_ptr res]
@@ -726,20 +727,20 @@ int_constant returns [Expr_ptr res]
 	:   HEX_LITERAL
         {
          Atom tmp((const char*)($HEX_LITERAL.text->chars));
-         $res = PX(em.make_hex_const(tmp));
+         $res = em.make_hex_const(tmp);
         }
 
     | OCTAL_LITERAL
         {
          Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
-         $res = PX(em.make_oct_const(tmp));
+         $res = em.make_oct_const(tmp);
         }
 
 
    	| DECIMAL_LITERAL
         {
          Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
-         $res = PX(em.make_dec_const(tmp));
+         $res = em.make_dec_const(tmp);
         }
 	;
 
@@ -747,7 +748,7 @@ range_constant returns [Expr_ptr res]
 	:	lhs=int_constant
 
         ('..' rhs=int_constant
-           { $res = PX(em.make_range(*lhs, *rhs)); }
+           { $res = em.make_range(lhs, rhs); }
 
         |  { $res = lhs; } )
 	;
@@ -758,10 +759,10 @@ enum_constant returns [Expr_ptr res]
 /* lvalue is used in assignments */
 lvalue returns [Expr_ptr res]
 	:	'init' '(' expr=postfix_expression ')'
-        { $res = PX(em.make_init(*expr)); }
+        { $res = em.make_init(expr); }
 
 	|	'next' '(' expr=postfix_expression ')'
-        { $res = PX(em.make_next(*expr)); }
+        { $res = em.make_next(expr); }
 
 	|	expr=postfix_expression
         { $res = expr; }
@@ -770,7 +771,7 @@ lvalue returns [Expr_ptr res]
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
 	:	'next' '(' expr=postfix_expression ')'
-        { $res = PX(em.make_next(*expr)); }
+        { $res = em.make_next(expr); }
 
 	|	expr=postfix_expression
         { $res = expr; }
@@ -789,16 +790,16 @@ type_name returns [Type_ptr res]
 	| enum_type
 
     | lhs=int_constant '..' rhs=int_constant
-      { $res = tm.find_range(*lhs, *rhs); }
+      { $res = tm.find_range(lhs, rhs); }
 
     | 'unsigned'? 'word' '[' k=int_constant ']'
-       { $res = tm.find_uword(*k); }
+       { $res = tm.find_uword(k); }
 
 	|  'signed' 'word' '[' k=int_constant ']'
-       { $res = tm.find_sword(*k); }
+       { $res = tm.find_sword(k); }
 
     | id=identifier
-      { $res = tm.find_instance(*id); }
+      { $res = tm.find_instance(id); }
       actual_param_decls[$res]
     ;
 
@@ -814,10 +815,10 @@ scope { EnumLiterals literals; }
 actual_param_decls [Type_ptr m]
 	:
         '(' ap=pvalue {
-            ((Instance*)(m)) -> add_param(*ap);
+            ((Instance*)(m)) -> add_param(ap);
         }
         (',' pvalue {
-                ((Instance*)(m)) -> add_param(*ap);
+                ((Instance*)(m)) -> add_param(ap);
         })*
         ')'
     ;

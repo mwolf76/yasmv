@@ -53,6 +53,7 @@ typedef enum {
   IMPLIES_1, IMPLIES_2,
   IFF_1, IFF_2,
 
+  RSHIFT_1, RSHIFT_2,
   LSHIFT_1, LSHIFT_2,
 
   EQ_1, EQ_2,
@@ -72,10 +73,10 @@ typedef enum {
 
 struct activation_record {
   entry_point pc;
-  const Expr_ptr expr;
+  Expr_ptr expr;
 
-  activation_record()
-    : pc(DEFAULT) , expr(NULL)
+  activation_record(const Expr_ptr e)
+    : pc(DEFAULT) , expr(e)
   {}
 
   activation_record(entry_point ep, const Expr_ptr e)
@@ -90,14 +91,17 @@ class Walker {
 protected:
   walker_stack f_stack;
 
-  virtual void pre_hook() =0;
-  virtual void post_hook() =0;
+  // extra-hooks
+  virtual void pre_hook()
+  {}
+  virtual void post_hook()
+  {}
 
   void walk();
 
 public:
   Walker();
-  ~Walker();
+  virtual ~Walker();
 
   Walker& operator() (const Expr_ptr expr);
 
@@ -376,7 +380,8 @@ public:
   {}
 
   // leaves
-  virtual void walk_leaf(const Expr_ptr expr) =0;
+  virtual void walk_leaf(const Expr_ptr expr)
+  {}
 };
 
 #endif

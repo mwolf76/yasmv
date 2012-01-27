@@ -31,6 +31,8 @@
 Walker::Walker()
 {}
 
+Walker::~Walker()
+{}
 
 Walker& Walker::operator() (const Expr_ptr expr) {
 
@@ -40,8 +42,7 @@ Walker& Walker::operator() (const Expr_ptr expr) {
   // before walking hook
   this->pre_hook();
 
-  activation_record call;
-  call.expr = expr;
+  activation_record call(expr);
 
   // setup toplevel act. record and perform walk
   f_stack.push(call); walk();
@@ -170,7 +171,7 @@ void Walker::walk () {
     case F:
       if (walk_F_preorder(curr.expr)) {
         curr.pc = F_1;
-        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        f_stack.push(activation_record(curr.expr->f_lhs));
         goto loop;
 
       entry_F_1:
@@ -180,7 +181,7 @@ void Walker::walk () {
 
     case G:
       if (walk_G_preorder(curr.expr)) {
-        curr_curr.ep = G_1;
+        curr.pc = G_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -191,7 +192,7 @@ void Walker::walk () {
 
     case X:
       if (walk_X_preorder(curr.expr)) {
-        curr_curr.ep = X_1;
+        curr.pc = X_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -202,30 +203,44 @@ void Walker::walk () {
 
     case U:
       if (walk_U_preorder(curr.expr)) {
-        curr_curr.ep = U_1;
+        curr.pc = U_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_U_1:
-        walk_U_postorder(curr.expr);
+        if (walk_U_inorder(curr.expr)) {
+          curr.pc = U_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_U_2:
+          walk_U_postorder(curr.expr);
+        }
       }
       break;
 
     case R:
       if (walk_R_preorder(curr.expr)) {
-        curr_curr.ep = R_1;
+        curr.pc = R_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_R_1:
-        walk_R_postorder(curr.expr);
+        if (walk_R_inorder(curr.expr)) {
+          curr.pc = R_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_R_2:
+          walk_R_postorder(curr.expr);
+        }
       }
       break;
 
       // CTL A ops
     case AF:
       if (walk_AF_preorder(curr.expr)) {
-        curr_curr.ep = AF_1;
+        curr.pc = AF_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -236,7 +251,7 @@ void Walker::walk () {
 
     case AG:
       if (walk_AG_preorder(curr.expr)) {
-        curr_curr.ep = AG_1;
+        curr.pc = AG_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -247,7 +262,7 @@ void Walker::walk () {
 
     case AX:
       if (walk_AX_preorder(curr.expr)) {
-        curr_curr.ep = AX_1;
+        curr.pc = AX_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -256,15 +271,112 @@ void Walker::walk () {
       }
       break;
 
-    case AU: assert(0);
-    case AR: assert(0);
+    case AU:
+      if (walk_AU_preorder(curr.expr)) {
+        curr.pc = AU_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_AU_1:
+        if (walk_AU_inorder(curr.expr)) {
+          curr.pc = AU_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_AU_2:
+          walk_AU_postorder(curr.expr);
+        }
+      }
+
+    case AR:
+      if (walk_AR_preorder(curr.expr)) {
+        curr.pc = AR_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_AR_1:
+        if (walk_AR_inorder(curr.expr)) {
+          curr.pc = AR_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_AR_2:
+          walk_AR_postorder(curr.expr);
+        }
+      }
 
       // CTL E ops
+    case EF:
+      if (walk_EF_preorder(curr.expr)) {
+        curr.pc = EF_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_EF_1:
+        walk_EF_postorder(curr.expr);
+      }
+      break;
+
+    case EG:
+      if (walk_EG_preorder(curr.expr)) {
+        curr.pc = EG_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_EG_1:
+        walk_EG_postorder(curr.expr);
+      }
+      break;
+
+    case EX:
+      if (walk_EX_preorder(curr.expr)) {
+        curr.pc = EX_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_EX_1:
+        walk_EX_postorder(curr.expr);
+      }
+      break;
+
+    case EU:
+      if (walk_EU_preorder(curr.expr)) {
+        curr.pc = EU_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_EU_1:
+        if (walk_EU_inorder(curr.expr)) {
+          curr.pc = EU_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_EU_2:
+          walk_EU_postorder(curr.expr);
+        }
+      }
+
+    case ER:
+      if (walk_ER_preorder(curr.expr)) {
+        curr.pc = ER_1;
+        f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+        goto loop;
+
+      entry_ER_1:
+        if (walk_ER_inorder(curr.expr)) {
+          curr.pc = ER_2;
+          f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
+          goto loop;
+
+        entry_ER_2:
+          walk_ER_postorder(curr.expr);
+        }
+      }
 
       // unary temporal
     case INIT:
       if (walk_init_preorder(curr.expr)) {
-        curr_curr.ep = INIT_1;
+        curr.pc = INIT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -275,7 +387,7 @@ void Walker::walk () {
 
     case NEXT:
       if (walk_next_preorder(curr.expr)) {
-        curr_curr.ep = NEXT_1;
+        curr.pc = NEXT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -287,7 +399,7 @@ void Walker::walk () {
       // unary
     case NEG:
       if (walk_next_preorder(curr.expr)) {
-        curr_curr.ep = NEG_1;
+        curr.pc = NEG_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -298,7 +410,7 @@ void Walker::walk () {
 
     case NOT:
       if (walk_next_preorder(curr.expr)) {
-        curr_curr.ep = NOT_1;
+        curr.pc = NOT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
@@ -310,13 +422,13 @@ void Walker::walk () {
       // basic arithmetical
     case ADD:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = ADD_1;
+        curr.pc = ADD_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_ADD_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = ADD_2;
+          curr.pc = ADD_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -328,13 +440,13 @@ void Walker::walk () {
 
     case SUB:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = SUB_1;
+        curr.pc = SUB_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_SUB_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = SUB_2;
+          curr.pc = SUB_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -346,13 +458,13 @@ void Walker::walk () {
 
     case MUL:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = MUL_1;
+        curr.pc = MUL_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_MUL_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = MUL_2;
+          curr.pc = MUL_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -364,13 +476,13 @@ void Walker::walk () {
 
     case DIV:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = DIV_1;
+        curr.pc = DIV_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_DIV_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = DIV_2;
+          curr.pc = DIV_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -382,13 +494,13 @@ void Walker::walk () {
 
     case MOD:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = MOD_1;
+        curr.pc = MOD_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_MOD_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = MOD_2;
+          curr.pc = MOD_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -401,13 +513,13 @@ void Walker::walk () {
       // basic logical
     case AND:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = AND_1;
+        curr.pc = AND_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_AND_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = AND_2;
+          curr.pc = AND_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -419,13 +531,13 @@ void Walker::walk () {
 
     case OR:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = OR_1;
+        curr.pc = OR_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_OR_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = OR_2;
+          curr.pc = OR_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -437,13 +549,13 @@ void Walker::walk () {
 
     case XOR:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = XOR_1;
+        curr.pc = XOR_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_XOR_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = XOR_2;
+          curr.pc = XOR_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -455,13 +567,13 @@ void Walker::walk () {
 
     case XNOR:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = XNOR_1;
+        curr.pc = XNOR_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_XNOR_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = XNOR_2;
+          curr.pc = XNOR_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -473,13 +585,13 @@ void Walker::walk () {
 
     case IMPLIES:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = IMPLIES_1;
+        curr.pc = IMPLIES_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_IMPLIES_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = IMPLIES_2;
+          curr.pc = IMPLIES_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -491,13 +603,13 @@ void Walker::walk () {
 
     case IFF:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = IFF_1;
+        curr.pc = IFF_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_IFF_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = IFF_2;
+          curr.pc = IFF_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -509,13 +621,13 @@ void Walker::walk () {
 
     case LSHIFT:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = LSHIFT_1;
+        curr.pc = LSHIFT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_LSHIFT_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = LSHIFT_2;
+          curr.pc = LSHIFT_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -527,13 +639,13 @@ void Walker::walk () {
 
     case RSHIFT:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = RSHIFT_1;
+        curr.pc = RSHIFT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_RSHIFT_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = RSHIFT_2;
+          curr.pc = RSHIFT_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -546,13 +658,13 @@ void Walker::walk () {
       // relational
     case EQ:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = EQ_1;
+        curr.pc = EQ_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_EQ_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = EQ_2;
+          curr.pc = EQ_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -564,13 +676,13 @@ void Walker::walk () {
 
     case NE:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = NE_1;
+        curr.pc = NE_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_NE_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = NE_2;
+          curr.pc = NE_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -582,13 +694,13 @@ void Walker::walk () {
 
     case GT:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = GT_1;
+        curr.pc = GT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_GT_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = GT_2;
+          curr.pc = GT_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -601,13 +713,13 @@ void Walker::walk () {
 
     case GE:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = GE_1;
+        curr.pc = GE_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_GE_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = GE_2;
+          curr.pc = GE_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -620,13 +732,13 @@ void Walker::walk () {
 
     case LT:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = LT_1;
+        curr.pc = LT_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_LT_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = LT_2;
+          curr.pc = LT_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -639,13 +751,13 @@ void Walker::walk () {
 
     case LE:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = LE_1;
+        curr.pc = LE_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_LE_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = LE_2;
+          curr.pc = LE_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -659,13 +771,13 @@ void Walker::walk () {
 
     case ITE:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = ITE_1;
+        curr.pc = ITE_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_ITE_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = ITE_2;
+          curr.pc = ITE_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }
@@ -678,13 +790,13 @@ void Walker::walk () {
 
     case COND:
       if (walk_add_preorder(curr.expr)) {
-        curr_curr.ep = COND_1;
+        curr.pc = COND_1;
         f_stack.push(activation_record(DEFAULT, curr.expr->f_lhs));
         goto loop;
 
       entry_COND_1:
         if (walk_add_inorder(curr.expr)) {
-          curr_add.ep = COND_2;
+          curr.pc = COND_2;
           f_stack.push(activation_record(DEFAULT, curr.expr->f_rhs));
           goto loop;
         }

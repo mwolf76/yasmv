@@ -38,35 +38,69 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 // -- interfaces --------------------------------------------------------------
 
-typedef IModule* IModule_ptr;
-typedef vector<IModule_ptr> Modules;
-
 class IVariable {
 public:
-  virtual const Expr& get_name() const =0;
-  virtual const Type& get_type() const =0;
+  virtual const Expr_ptr get_name() const =0;
+  virtual const Type_ptr get_type() const =0;
 };
+typedef IVariable* IVariable_ptr;
 
 class IDefine {
 public:
-  virtual const Expr& get_name() const =0;
-  virtual const Expr& get_body() const =0;
+  virtual const Expr_ptr get_name() const =0;
+  virtual const Expr_ptr get_body() const =0;
 };
+typedef IDefine* IDefine_ptr;
 
 class IAssign {
 public:
-  virtual const Expr& get_name() const =0;
-  virtual const Expr& get_body() const =0;
+  virtual const Expr_ptr get_name() const =0;
+  virtual const Expr_ptr get_body() const =0;
+};
+typedef IAssign* IAssign_ptr;
+
+class IModule {
+public:
+  virtual bool is_main() const =0;
+  virtual const Expr_ptr get_name() const =0;
+
+  virtual const Exprs& get_formalParams() const =0;
+  virtual void add_formalParam(Expr_ptr identifier) =0;
+
+  // virtual const ISADeclarations& get_isaDecls() =0;
+  // virtual IModule& operator+=(ISADeclaration& identifier) =0;
+
+  virtual const Variables& get_localVars() const =0;
+  virtual void add_localVar(IVariable_ptr var) =0;
+
+  virtual const Defines& get_localDefs() const =0;
+  virtual void add_localDef(IDefine_ptr def) =0;
+
+  virtual const Assigns& get_assign() const =0;
+  virtual void add_assign(IAssign_ptr assgn) =0;
+
+  virtual const Exprs& get_init() const =0;
+  virtual void add_init(Expr_ptr expr) =0;
+
+  virtual const Exprs& get_invar() const =0;
+  virtual void add_invar(Expr_ptr expr) =0;
+
+  virtual const Exprs& get_trans() const =0;
+  virtual void add_trans(Expr_ptr expr) =0;
+
+  virtual const Exprs& get_fairness() const =0;
+  virtual void add_fairness(Expr_ptr expr) =0;
 };
 
 class IModel {
 public:
   virtual const Modules& get_modules() const =0;
-  virtual void add_module(IModule& module) =0;
+  virtual void add_module(IModule* module) =0;
 };
+typedef IModel* IModel_ptr;
 
 class Module : public IModule {
-  Expr f_name;
+  Expr_ptr f_name;
   Exprs f_formalParams;
 
   Variables f_localVars;
@@ -80,7 +114,7 @@ class Module : public IModule {
 
 public:
 
-  Module(const Expr name)
+  Module(const Expr_ptr name)
     : f_name(name)
     , f_formalParams()
     , f_localVars()
@@ -92,7 +126,7 @@ public:
     , f_assgn()
   {}
 
-  const Expr& get_name() const
+  const Expr_ptr get_name() const
   { return f_name; }
 
   bool is_main() const
@@ -101,122 +135,124 @@ public:
   const Exprs& get_formalParams() const
   { return f_formalParams; }
 
-  void add_formalParam(Expr& identifier)
-  { f_formalParams.push_back(&identifier); }
+  void add_formalParam(Expr_ptr identifier)
+  { f_formalParams.push_back(identifier); }
 
   const Variables& get_localVars() const
   { return f_localVars; }
 
-  void add_localVar(IVariable& var)
-  { f_localVars.push_back(&var); }
+  void add_localVar(IVariable_ptr var)
+  { f_localVars.push_back(var); }
 
   const Defines& get_localDefs() const
   { return f_localDefs; }
 
-  void add_localDef(IDefine& def)
-  { f_localDefs.push_back(&def); }
+  void add_localDef(IDefine_ptr def)
+  { f_localDefs.push_back(def); }
 
   const Assigns& get_assign() const
   { return f_assgn; }
 
-  void add_assign(IAssign& assign)
-  { f_assgn.push_back(&assign); }
+  void add_assign(IAssign_ptr assign)
+  { f_assgn.push_back(assign); }
 
   const Exprs& get_init() const
   { return f_init; }
 
-  void add_init(Expr& expr)
-  { f_init.push_back(&expr); }
+  void add_init(Expr_ptr expr)
+  { f_init.push_back(expr); }
 
   const Exprs& get_invar() const
   { return f_invar; }
 
-  void add_invar(Expr& expr)
-  { f_invar.push_back(&expr); }
+  void add_invar(Expr_ptr expr)
+  { f_invar.push_back(expr); }
 
   const Exprs& get_trans() const
   { return f_trans; }
 
-  void add_trans(Expr& expr)
-  { f_trans.push_back(&expr); }
+  void add_trans(Expr_ptr expr)
+  { f_trans.push_back(expr); }
 
   const Exprs& get_fairness() const
   { return f_fair; }
 
-  void add_fairness(Expr& expr)
-  { f_fair.push_back(&expr); }
-
+  void add_fairness(Expr_ptr expr)
+  { f_fair.push_back(expr); }
 };
 
+typedef IModule* IModule_ptr;
+typedef vector<IModule_ptr> Modules;
+
 class Variable : public IVariable {
-  const Expr& f_name;
-  Type& f_type;
+  Expr_ptr f_name;
+  Type_ptr f_type;
 
 public:
-  Variable(const Expr& name, Type& type)
+  Variable(Expr_ptr name, Type_ptr type)
     : f_name(name)
     , f_type(type)
   {}
 
-  const Expr& get_name() const
+  const Expr_ptr get_name() const
   { return f_name; }
 
-  const Type& get_type() const
+  const Type_ptr get_type() const
   { return f_type; }
 };
 
 class StateVar : public Variable {
 public:
-  StateVar (const Expr& name, Type& type_)
+  StateVar (const Expr_ptr name, Type_ptr type_)
     : Variable(name, type_)
   {}
 };
 
 class InputVar : public Variable {
 public:
-  InputVar (const Expr& name, Type& type_)
+  InputVar (const Expr_ptr name, Type_ptr type_)
     : Variable(name, type_)
   {}
 };
 
 class FrozenVar: public Variable {
 public:
-  FrozenVar (const Expr& name, Type& type_)
+  FrozenVar (const Expr_ptr name, Type_ptr type_)
     : Variable(name, type_)
   {}
 };
 
 class Define : public IDefine {
-  const Expr& f_name;
-  const Expr& f_body;
+  const Expr_ptr f_name;
+  const Expr_ptr f_body;
 
 public:
-  Define(const Expr& name, const Expr& body)
+  Define(const Expr_ptr name, const Expr_ptr body)
     : f_name(f_name)
     , f_body(body)
   {}
 
-  const Expr& get_name() const
+  const Expr_ptr get_name() const
   { return f_name; }
 
-  const Expr& get_body() const
+  const Expr_ptr get_body() const
   { return f_body; }
 };
 
 class Assign : public IAssign {
-  const Expr& f_name;
-  const Expr& f_body;
+  const Expr_ptr f_name;
+  const Expr_ptr f_body;
 
 public:
-  Assign(const Expr& name, const Expr& body)
+  Assign(const Expr_ptr name, const Expr_ptr body)
     : f_name(name)
     , f_body(body)
   {}
 
-  const Expr& get_name() const
+  const Expr_ptr get_name() const
   { return f_name; }
 
-  const Expr& get_body() const
+  const Expr_ptr get_body() const
   { return f_body; }
 };
 
@@ -231,14 +267,15 @@ public:
   const Modules& get_modules() const
   { return f_modules; }
 
-  void add_module(IModule& module)
-  { f_modules.push_back(&module); }
+  void add_module(IModule_ptr module)
+  { f_modules.push_back(module); }
 
-  Module& new_module(Expr& identifier)
+  IModule_ptr new_module(Expr_ptr identifier)
   {
-    Module* m = new Module(identifier);
-    add_module(*m);
-    return *m;
+    IModule_ptr m = new Module(identifier);
+    add_module(m);
+
+    return m;
   }
 
 };
@@ -247,8 +284,6 @@ class ModelMgr;
 typedef ModelMgr* ModelMgr_ptr;
 
 class ModelMgr  {
-  typedef ModelMgr* ModelMgr_ptr;
-
 public:
   static ModelMgr& INSTANCE() {
     if (! f_instance) f_instance = new ModelMgr();
@@ -267,6 +302,7 @@ private:
   static ModelMgr_ptr f_instance;
 
   /* low-level services */
+
   /* local data */
   Model f_model;
 };

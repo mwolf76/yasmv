@@ -1,5 +1,4 @@
 #include <expr.hh>
-#include <expr_visitor.hh>
 #include <expr_mgr.hh>
 
 // static initialization

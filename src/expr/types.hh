@@ -173,19 +173,19 @@ class Instance : public Type {
 public:
   friend class TypeMgr;
 
-  const Expr& f_identifier;
+  const Expr_ptr f_identifier;
   Module_ptr f_module;
   Exprs f_params;
 
-  // eager binding (not used by the parser)
-  Instance(Module& module, Exprs params)
-    : f_identifier(nil)
-    , f_module(&module)
-    , f_params(params)
-  {}
+  // // eager binding (not used by the parser)
+  // Instance(Module& module, Exprs& params)
+  //   : f_identifier(NULL)
+  //   , f_module(&module)
+  //   , f_params(params)
+  // {}
 
   // lazy binding
-  Instance(const Expr& identifier)
+  Instance(Expr* identifier)
     : f_identifier(identifier)
     , f_module(NULL)
     , f_params()
@@ -212,13 +212,13 @@ public:
   bool is_instance() const
   { return true; }
 
-  void add_param(Expr& expr)
-  { f_params.push_back(&expr); }
+  void add_param(const Expr_ptr expr)
+  { f_params.push_back(expr); }
 };
 
 typedef vector<Expr> Literals;
 
-typedef unordered_map<Expr, Type, ExprHash, ExprEq> TypeRegister;
+typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeRegister;
 typedef pair<TypeRegister::iterator, bool> TypeHit;
 
 class TypeMgr;
@@ -233,29 +233,30 @@ public:
 
   // REVIEW ME
   const Type_ptr find_boolean()
-  { return &f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
+  { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
 
   // REVIEW ME
-  const Type_ptr find_uword(Expr& size)
+  const Type_ptr find_uword(Expr_ptr size)
   { return const_cast <const Type_ptr> (&nilType); }
 
   // REVIEW ME
-  const Type_ptr find_sword(Expr& size)
+  const Type_ptr find_sword(Expr_ptr size)
   { return const_cast <const Type_ptr> (&nilType); }
 
-  const Type_ptr find_range(const Expr& from, const Expr& to)
+  const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
   { return const_cast <const Type_ptr> (&nilType); }
 
-  const Type_ptr find_instance(const Expr& identifier)
+  // FIXME! won't work
+  const Type_ptr find_instance(Expr_ptr identifier)
   {
-    Instance tmp(identifier);
-    TypeHit hit = f_register.insert(make_pair(identifier, tmp));
+    Type_ptr inst = new Instance(identifier);
+    TypeHit hit = f_register.insert(make_pair(identifier, inst));
     if (hit.second) {
       logger << "Added instance of module '" << identifier << "' to type register" << endl;
     }
 
     TypeRegister::pointer p = &(*hit.first);
-    return &(p->second);
+    return p->second;
   }
 
 protected:
@@ -264,15 +265,15 @@ protected:
   {
     /* boolean is the only predefined type. Any other type will be
        declared by the user. */
-    register_type(ExprMgr::INSTANCE().make_boolean(),
-                  BooleanType());
+    register_type(const_cast<Expr *>(ExprMgr::INSTANCE().make_boolean()),
+                  new BooleanType());
   }
 
 private:
   static TypeMgr_ptr f_instance;
 
   /* low-level services */
-  void register_type(const Expr type_name, Type vtype)
+  void register_type(Expr* type_name, Type* vtype)
   { f_register.insert(make_pair(type_name, vtype)); }
 
   /* local data */

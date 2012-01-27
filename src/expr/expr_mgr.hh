@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr.hh>
 
 // a Pointer to eXpression conversion macro to simplify expr manipulation code
-#define PX(expr) (const_cast<Expr_ptr>(&(expr)))
+// #define PX(expr) (const_cast<Expr_ptr>(&(expr)))
 
 class ExprMgr;
 typedef ExprMgr* ExprMgr_ptr;
@@ -49,145 +49,145 @@ public:
   }
 
   /* LTL */
-  inline const Expr& make_F(const Expr& expr)
-  { return make_expr(F, expr, nil); }
+  inline Expr_ptr make_F( Expr_ptr  expr)
+  { return make_expr(F, expr, NULL); }
 
-  inline const Expr& make_G(const Expr& expr)
-  { return make_expr(G, expr, nil); }
+  inline Expr_ptr make_G( Expr_ptr  expr)
+  { return make_expr(G, expr, NULL); }
 
-  inline const Expr& make_X(const Expr& expr)
-  { return make_expr(X, expr, nil); }
+  inline Expr_ptr make_X( Expr_ptr  expr)
+  { return make_expr(X, expr, NULL); }
 
-  inline const Expr& make_U(const Expr& expr)
-  { return make_expr(U, expr, nil); }
+  inline Expr_ptr make_U( Expr_ptr  expr)
+  { return make_expr(U, expr, NULL); }
 
-  inline const Expr& make_R(const Expr& expr)
-  { return make_expr(R, expr, nil); }
+  inline Expr_ptr make_R( Expr_ptr  expr)
+  { return make_expr(R, expr, NULL); }
 
   /* CTL (A) */
-  inline const Expr& make_AF(const Expr& expr)
-  { return make_expr(AF, expr, nil); }
+  inline Expr_ptr make_AF( Expr_ptr  expr)
+  { return make_expr(AF, expr, NULL); }
 
-  inline const Expr& make_AG(const Expr& expr)
-  { return make_expr(AG, expr, nil); }
+  inline Expr_ptr make_AG( Expr_ptr  expr)
+  { return make_expr(AG, expr, NULL); }
 
-  inline const Expr& make_AX(const Expr& expr)
-  { return make_expr(AX, expr, nil); }
+  inline Expr_ptr make_AX( Expr_ptr  expr)
+  { return make_expr(AX, expr, NULL); }
 
-  inline const Expr& make_AU(const Expr& expr)
-  { return make_expr(AU, expr, nil); }
+  inline Expr_ptr make_AU( Expr_ptr  expr)
+  { return make_expr(AU, expr, NULL); }
 
-  inline const Expr& make_AR(const Expr& expr)
-  { return make_expr(AR, expr, nil); }
+  inline Expr_ptr make_AR( Expr_ptr  expr)
+  { return make_expr(AR, expr, NULL); }
 
   /* CTL (E) */
-  inline const Expr& make_EF(const Expr& expr)
-  { return make_expr(EF, expr, nil); }
+  inline Expr_ptr make_EF( Expr_ptr  expr)
+  { return make_expr(EF, expr, NULL); }
 
-  inline const Expr& make_EG(const Expr& expr)
-  { return make_expr(EG, expr, nil); }
+  inline Expr_ptr make_EG( Expr_ptr  expr)
+  { return make_expr(EG, expr, NULL); }
 
-  inline const Expr& make_EX(const Expr& expr)
-  { return make_expr(EX, expr, nil); }
+  inline Expr_ptr make_EX( Expr_ptr  expr)
+  { return make_expr(EX, expr, NULL); }
 
-  inline const Expr& make_EU(const Expr& expr)
-  { return make_expr(EU, expr, nil); }
+  inline Expr_ptr make_EU( Expr_ptr  expr)
+  { return make_expr(EU, expr, NULL); }
 
-  inline const Expr& make_ER(const Expr& expr)
-  { return make_expr(ER, expr, nil); }
+  inline Expr_ptr make_ER( Expr_ptr  expr)
+  { return make_expr(ER, expr, NULL); }
 
   /* temporal ops */
-  inline const Expr& make_init(const Expr& expr)
-  { return make_expr(INIT, expr, nil); }
+  inline Expr_ptr make_init( Expr_ptr  expr)
+  { return make_expr(INIT, expr, NULL); }
 
-  inline const Expr& make_next(const Expr& expr)
-  { return make_expr(NEXT, expr, nil); }
+  inline Expr_ptr make_next( Expr_ptr  expr)
+  { return make_expr(NEXT, expr, NULL); }
 
   /* arithmetical operators */
-  inline const Expr& make_neg(const Expr& expr)
-  { return make_expr(NEG, expr, nil); }
+  inline Expr_ptr make_neg( Expr_ptr  expr)
+  { return make_expr(NEG, expr, NULL); }
 
-  inline const Expr& make_add(const Expr& a, const Expr& b)
-  { return make_expr(PLUS, a, b); }
+  inline Expr_ptr make_add( Expr_ptr  a,  Expr_ptr  b)
+  { return make_expr(ADD, a, b); }
 
-  inline const Expr& make_sub(const Expr& a, const Expr& b)
+  inline Expr_ptr make_sub( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(SUB, a, b); }
 
-  inline const Expr& make_div(const Expr& a, const Expr& b)
+  inline Expr_ptr make_div( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(DIV, a, b); }
 
-  inline const Expr& make_mul(const Expr& a, const Expr& b)
+  inline Expr_ptr make_mul( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(MUL, a, b); }
 
-  inline const Expr& make_mod(const Expr& a, const Expr& b)
+  inline Expr_ptr make_mod( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(MOD, a, b); }
 
   /* logical/bitwise operators */
-  inline const Expr& make_not(const Expr& expr)
-  { return make_expr(NOT, expr, nil); }
+  inline Expr_ptr make_not( Expr_ptr  expr)
+  { return make_expr(NOT, expr, NULL); }
 
-  inline const Expr& make_and(const Expr& a, const Expr& b)
+  inline Expr_ptr make_and( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(AND, a, b); }
 
-  inline const Expr& make_or(const Expr& a, const Expr& b)
+  inline Expr_ptr make_or( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(OR, a, b); }
 
-  inline const Expr& make_lshift(const Expr& a, const Expr& b)
+  inline Expr_ptr make_lshift( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(LSHIFT, a, b); }
 
-  inline const Expr& make_rshift(const Expr& a, const Expr& b)
+  inline Expr_ptr make_rshift( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(RSHIFT, a, b); }
 
-  inline const Expr& make_xor(const Expr& a, const Expr& b)
+  inline Expr_ptr make_xor( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(XOR, a, b); }
 
-  inline const Expr& make_xnor(const Expr& a, const Expr& b)
+  inline Expr_ptr make_xnor( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(XNOR, a, b); }
 
-  inline const Expr& make_implies(const Expr& a, const Expr& b)
+  inline Expr_ptr make_implies( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(IMPLIES, a, b); }
 
-  inline const Expr& make_iff(const Expr& a, const Expr& b)
+  inline Expr_ptr make_iff( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(IFF, a, b); }
 
   /* relational operators */
-  inline const Expr& make_eq(const Expr& a, const Expr& b)
+  inline Expr_ptr make_eq( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(EQ, a, b); }
 
-  inline const Expr& make_ne(const Expr& a, const Expr& b)
+  inline Expr_ptr make_ne( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(NE, a, b); }
 
-  inline const Expr& make_ge(const Expr& a, const Expr& b)
+  inline Expr_ptr make_ge( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(GE, a, b); }
 
-  inline const Expr& make_gt(const Expr& a, const Expr& b)
+  inline Expr_ptr make_gt( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(GT, a, b); }
 
-  inline const Expr& make_le(const Expr& a, const Expr& b)
+  inline Expr_ptr make_le( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(LE, a, b); }
 
-  inline const Expr& make_lt(const Expr& a, const Expr& b)
+  inline Expr_ptr make_lt( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(LT, a, b); }
 
-  inline const Expr& make_cond(const Expr& a, const Expr& b)
+  inline Expr_ptr make_cond( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(COND, a, b); }
 
-  inline const Expr& make_ite(const Expr& a, const Expr& b)
+  inline Expr_ptr make_ite( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(ITE, a, b); }
 
   /* leaves */
-  inline const Expr& make_iconst(long long value)
-  { return make_const(ICONST, value); }
+  inline Expr_ptr make_iconst(long long value)
+  { return make_const (ICONST, value); }
 
-  inline const Expr& make_uwconst(unsigned long long value)
-  { return make_const(UWCONST, value); }
+  inline Expr_ptr make_uwconst(unsigned long long value)
+  { return make_const (UWCONST, value); }
 
-  inline const Expr& make_uwconst(long long value)
+  inline Expr_ptr make_uwconst(long long value)
   { return make_const(SWCONST, value); }
 
-  // inline const Expr& make_enum(EnumType& enumeration)
+  // inline const Expr_ptr make_enum(EnumType& enumeration)
   // {
-  //   Expr_ptr res = PX(nil);
+  //   Expr_ptr res = PX(NULL);
   //   const EnumLiterals& literals = enumeration.get_literals();
 
   //   /* reverse iteration */
@@ -196,38 +196,38 @@ public:
   //     res = PX(make_expr(COMMA, (**eye), *res));
   //   }
 
-  //   return make_expr(SET, *res, nil);
+  //   return make_expr(SET, *res, NULL);
   // }
 
-  inline const Expr& make_dot(const Expr& a, const Expr& b)
+  inline Expr_ptr make_dot( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(DOT, a, b); }
 
-  inline const Expr& make_subscript(const Expr& a, const Expr& b)
+  inline Expr_ptr make_subscript( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(SUBSCRIPT, a, b); }
 
-  inline const Expr& make_range(const Expr& a, const Expr& b)
+  inline Expr_ptr make_range( Expr_ptr  a,  Expr_ptr  b)
   { return make_expr(RANGE, a, b);  }
 
-  /* consts */
+  /* s */
 
   // TODO:
-  inline const Expr& make_hex_const(const Atom atom)
-  { return nil; }
+  inline Expr_ptr make_hex_const( Atom atom)
+  { return NULL; }
 
-  inline const Expr& make_oct_const(const Atom atom)
-  { return nil; }
+  inline Expr_ptr make_oct_const( Atom atom)
+  { return NULL; }
 
-  inline const Expr& make_dec_const(const Atom atom)
-  { return nil; }
+  inline Expr_ptr make_dec_const( Atom atom)
+  { return NULL; }
 
   /* predefined identifiers */
-  inline const Expr& make_boolean()
+  inline Expr_ptr make_boolean()
   { return make_identifier("boolean"); }
 
-  inline const Expr& make_main()
+  inline Expr_ptr make_main()
   { return make_identifier("main"); }
 
-  inline const Expr& make_identifier(const Atom atom)
+  inline Expr_ptr make_identifier( Atom atom)
   {
     AtomPoolHit ah = (f_atom_pool.insert(Atom(atom)));
     if (ah.second) {
@@ -243,34 +243,34 @@ protected:
     ,  f_atom_pool()
   {
     // setup pre-defined known identifiers
-    f_expr_pool.insert(make_boolean());
+    f_expr_pool.insert(*make_boolean());
   }
 
 private:
   static ExprMgr_ptr f_instance;
 
   /* low-level services */
-  inline const Expr& make_expr(ExprType et, const Expr& a, const Expr& b)
+  inline Expr_ptr make_expr(ExprType et,  Expr_ptr  a,  Expr_ptr  b)
   {
     ExprPoolHit eh = (f_expr_pool.insert(Expr(et, a, b)));
     if (eh.second) {
       logger << "Added new expr to pool" << (*eh.first) << endl;
     }
 
-    return (*eh.first);
+    return const_cast <Expr_ptr> (& (*eh.first));
   }
 
-  inline const Expr& make_expr(const Atom& atom)
+  inline Expr_ptr make_expr(const Atom& atom)
   {
     ExprPoolHit eh = (f_expr_pool.insert(Expr(atom)));
     if (eh.second) {
       logger << "Added new expr to pool" << (*eh.first) << endl;
     }
 
-    return (*eh.first);
+    return const_cast <Expr_ptr> (& (*eh.first));
   }
 
-  inline const Expr& make_const(ExprType et, long long value)
+  inline Expr_ptr make_const(ExprType et, long long value)
   {
     assert( et == ICONST || et == UWCONST || et == SWCONST );
     ExprPoolHit eh = (f_expr_pool.insert(Expr(et, value)));
@@ -278,7 +278,7 @@ private:
       logger << "Added new expr to pool" << (*eh.first) << endl;
     }
 
-    return (*eh.first);
+    return const_cast <Expr_ptr> (& (*eh.first));
   }
 
   /* shared pools */

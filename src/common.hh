@@ -69,6 +69,17 @@ typedef vector<IAssign*> Assigns;
 class IModule;
 typedef vector<IModule*> Modules;
 
+struct PtrHash {
+  inline long operator() (void* ptr) const
+  { return (long)(ptr); }
+
+};
+
+struct PtrEq {
+  inline bool operator() (const void* x, const void* y) const
+  { return x == y;  }
+};
+
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)
 #include <logging.hh>
 

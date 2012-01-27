@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <common.hh>
 #include <expr.hh>
+#include <expr_printer.hh>
 #include <model.hh>
 
 #include    <smvLexer.h>
@@ -100,10 +101,38 @@ extern void link_model();
 int main(int argc, char *argv[])
 {
   link_expr();
-  link_model();
+  // \  link_model();
 
   const char* fname = argv[1];
 
   parseFile((pANTLR3_UINT8) fname);
+  Printer prn(cout);
+
+  Model& M = ModelMgr::INSTANCE().get_model();
+  Modules mods = M.get_modules();
+
+  for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+    Module* pm = dynamic_cast <Module*> (*eye);
+    {
+      Module& m = (*pm);
+      const Expr_ptr module_name = m.get_name();
+
+      prn << "Module name: "<< module_name << "\n";
+      const Variables& svars = m.get_localVars();
+
+      prn << "Variables: ";
+      for (Variables::const_iterator veye = svars.begin();
+           veye != svars.end(); veye ++ ) {
+
+        IVariable* tmp = *veye;
+
+        if (StateVar* vp = dynamic_cast<StateVar*>(tmp)) {
+          const StateVar& v = (*vp);
+          prn << v.get_name(); cout << endl;
+        }
+      }
+    }
+  }
+
   return 0;
 }

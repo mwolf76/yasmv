@@ -43,7 +43,7 @@ typedef enum {
   INIT, NEXT,
 
   /* arithmetical operators */
-  NEG, PLUS, SUB, DIV, MUL, MOD,
+  NEG, ADD, SUB, DIV, MUL, MOD,
 
   /* logical/bitwise operators */
   NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
@@ -73,15 +73,15 @@ typedef struct Expr_TAG {
 
   union {
     struct {
-      const struct Expr_TAG& f_lhs;
-      const struct Expr_TAG& f_rhs;
+      struct Expr_TAG* f_lhs;
+      struct Expr_TAG* f_rhs;
     };
 
     /* 64 bit */
     unsigned long long f_ull;
 
     struct {
-      const Atom& f_atom;
+      const Atom* f_atom;
     };
   };
 
@@ -89,13 +89,13 @@ typedef struct Expr_TAG {
   // any of them has a different number of paramters. (sweet)
   inline Expr_TAG()
     : f_symb(NIL)
-    , f_lhs(*this)
-    , f_rhs(*this)
+    , f_lhs(NULL)
+    , f_rhs(NULL)
   {}
 
   inline Expr_TAG(const Atom& atom)
     : f_symb(IDENT)
-    , f_atom(atom)
+    , f_atom(&atom)
   {}
 
   inline Expr_TAG(ExprType symb,
@@ -111,46 +111,40 @@ typedef struct Expr_TAG {
 
   // ordinary expr
   inline Expr_TAG(ExprType symb,
-                  const Expr_TAG& lhs,
-                  const Expr_TAG& rhs)
+                  Expr_TAG* lhs,
+                  Expr_TAG* rhs)
     : f_symb(symb)
     , f_lhs(lhs)
     , f_rhs(rhs)
   {}
 
-  inline bool operator==(const struct Expr_TAG& other) const
+  inline bool operator==(const struct Expr_TAG* other) const
   {
-    return this->f_symb == other.f_symb &&
-      this->f_lhs == other.f_lhs &&
-      this->f_rhs == other.f_rhs ;
+    return this->f_symb == other->f_symb &&
+      this->f_lhs == other->f_lhs &&
+      this->f_rhs == other->f_rhs ;
   }
 
 } Expr;
-
-class IExprVisitor {
-public:
-  virtual void visit(Expr& expr) =0;
-};
-
-static Expr nil;
 
 // Expression pool
 struct ExprHash {
   inline long operator() (const Expr& k) const
   {
-    long x, res = (long)(k.f_symb);
+    return 0;
+    // long x, res = (long)(k.f_symb);
 
-    res = (res << 4) + (long)(&(k.f_lhs));
-    if ((x = res & 0xF0000000L) != 0)
-      res ^= (x >> 24);
-    res &= ~x;
+    // res = (res << 4) + (long)(&(k.f_lhs));
+    // if ((x = res & 0xF0000000L) != 0)
+    //   res ^= (x >> 24);
+    // res &= ~x;
 
-    res = (res << 4) + (long)(&(k.f_rhs));
-    if ((x = res & 0xF0000000L) != 0)
-      res ^= (x >> 24);
-    res &= ~x;
+    // res = (res << 4) + (long)(&(k.f_rhs));
+    // if ((x = res & 0xF0000000L) != 0)
+    //   res ^= (x >> 24);
+    // res &= ~x;
 
-    return res;
+    // return res;
   }
 };
 
@@ -199,39 +193,5 @@ ostream& operator<<(ostream& os, const Expr& t);
 
 typedef Expr* Expr_ptr;
 typedef vector<Expr_ptr> Exprs;
-
-class IModule {
-public:
-  virtual bool is_main() const =0;
-  virtual const Expr& get_name() const =0;
-
-  virtual const Exprs& get_formalParams() const =0;
-  virtual void add_formalParam(Expr& identifier) =0;
-
-  // virtual const ISADeclarations& get_isaDecls() =0;
-  // virtual IModule& operator+=(ISADeclaration& identifier) =0;
-
-  virtual const Variables& get_localVars() const =0;
-  virtual void add_localVar(IVariable& var) =0;
-
-  virtual const Defines& get_localDefs() const =0;
-  virtual void add_localDef(IDefine& def) =0;
-
-  virtual const Assigns& get_assign() const =0;
-  virtual void add_assign(IAssign& assgn) =0;
-
-  virtual const Exprs& get_init() const =0;
-  virtual void add_init(Expr& expr) =0;
-
-  virtual const Exprs& get_invar() const =0;
-  virtual void add_invar(Expr& expr) =0;
-
-  virtual const Exprs& get_trans() const =0;
-  virtual void add_trans(Expr& expr) =0;
-
-  virtual const Exprs& get_fairness() const =0;
-  virtual void add_fairness(Expr& expr) =0;
-
-};
 
 #endif
