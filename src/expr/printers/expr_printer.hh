@@ -26,9 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef EXPR_PRINTER_H
 #define EXPR_PRINTER_H
-
-#include <common.hh>
-#include <expr.hh>
 #include <expr_walker.hh>
 
 class Printer : public Walker {

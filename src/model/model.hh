@@ -91,11 +91,16 @@ public:
   virtual const Exprs& get_fairness() const =0;
   virtual void add_fairness(Expr_ptr expr) =0;
 };
+typedef IModule* IModule_ptr;
+typedef vector<IModule_ptr> Modules;
 
 class IModel {
 public:
   virtual const Modules& get_modules() const =0;
-  virtual void add_module(IModule* module) =0;
+  virtual void add_module(IModule_ptr module) =0;
+
+  virtual const Exprs& get_ltlspecs() const =0;
+  virtual void add_ltlspec(Expr_ptr formula) =0;
 };
 typedef IModel* IModel_ptr;
 
@@ -188,9 +193,6 @@ public:
   { f_fair.push_back(expr); }
 };
 
-typedef IModule* IModule_ptr;
-typedef vector<IModule_ptr> Modules;
-
 class Variable : public IVariable {
   Expr_ptr f_name;
   Type_ptr f_type;
@@ -266,10 +268,15 @@ public:
 class Model : public IModel {
   Modules f_modules;
 
+  // properties
+  Exprs f_ltlspecs;
+
 public:
   Model()
     : f_modules()
-  {}
+  {
+    logger << "Initialized Model instance @" << this << endl;
+  }
 
   const Modules& get_modules() const
   { return f_modules; }
@@ -277,13 +284,11 @@ public:
   void add_module(IModule_ptr module)
   { f_modules.push_back(module); }
 
-  IModule_ptr new_module(Expr_ptr identifier)
-  {
-    IModule_ptr m = new Module(identifier);
-    add_module(m);
+  const Exprs& get_ltlspecs() const
+  { return f_ltlspecs; }
 
-    return m;
-  }
+  void add_ltlspec(Expr_ptr formula)
+  { f_ltlspecs.push_back(formula); }
 
 };
 
@@ -297,8 +302,9 @@ public:
     return (*f_instance);
   }
 
-  inline Model& get_model()
-  { return f_model; }
+  inline IModel_ptr get_model()
+  { return &f_model; }
+
 
 protected:
   ModelMgr()

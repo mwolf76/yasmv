@@ -28,9 +28,6 @@
 #include <expr.hh>
 #include <expr_printer.hh>
 
-#define LHS rec_print(expr.f_lhs)
-#define RHS rec_print(expr.f_rhs)
-
 Printer::Printer()
   : f_os(cout)
 {}

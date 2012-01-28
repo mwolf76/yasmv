@@ -110,6 +110,8 @@ AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
 		 src/expr/Makefile
+                 src/expr/printers/Makefile
+                 src/expr/validators/Makefile
                  src/model/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile

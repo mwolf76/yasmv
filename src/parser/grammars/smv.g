@@ -41,258 +41,73 @@ options {
 
 /* Toplevel */
 smv
-: modules // properties
-;
+scope {
+    IModel_ptr model;
+}
+@init {
+    $smv::model = mm.get_model();
+}
+    : modules ( property ';' )*
+    ;
 
-/* properties */
-// property_list
-// 	: 	property ( ';'! property )
-//     ;
+property
+    : ltl_spec
+    ;
 
-// TODO PSLSPEC
-// property
-//   : ltl_spec
-//   | ctl_spec
-//   ;
+// backjump entry point (see README below)
+temporal_formula returns [Expr_ptr res]
+@init {
+    res = NULL;
+}
+    : formula=ltl_formula
+        { $res = formula; }
+    ;
 
-/** CTL properties */
-// ctl_spec:	('CTLSPEC' | 'SPEC') formula=ctl_formula -> ^(CTLSPEC $formula)
-// 	;
+/** LTL properties */
+ltl_spec
+    : 'LTLSPEC' formula=ltl_formula
+        { $smv::model->add_ltlspec(formula); }
+	;
 
-// ctl_formula
-// 	:	binary_ctl_formula;
+ltl_formula returns [Expr_ptr res]
+@init {
+    res = NULL;
+}
+	:	formula=binary_ltl_formula
+        { $res = formula; }
+    ;
 
-// binary_ctl_formula
-// 	:	unary_ctl_formula (
-// 			binary_ctl_operator^ unary_ctl_formula
-// 		)*
-// 	;
+binary_ltl_formula returns [Expr_ptr res]
+@init {
+    res = NULL;
+}
+	:	lhs=unary_ltl_formula (
+            'U' rhs=binary_ltl_formula
+            { $res = em.make_U(lhs, rhs); }
 
-// binary_ctl_operator
-// 	:	'AU' -> AU
-// 	|	'EU' -> EU
-// 	|	'AR' -> AR
-// 	|	'ER' -> ER
-// 	;
+        |   'R' rhs=binary_ltl_formula
+            { $res = em.make_R(lhs, rhs); }
 
-// unary_ctl_formula
-// 	:	'AG' formula=unary_ctl_formula -> ^(AG $formula)
-// 	|	'EG' formula=unary_ctl_formula -> ^(AG $formula)
-// 	|	'AF' formula=unary_ctl_formula -> ^(AF $formula)
-// 	|	'EF' formula=unary_ctl_formula -> ^(EF $formula)
-// 	|	next_ctl_formula
-// 	;
+        |   { $res = lhs; } )
 
-// next_ctl_formula
-// 	:	'AX' formula=ctl_untimed_expression -> ^(AX $formula)
-// 	|	'EX' formula=ctl_untimed_expression -> ^(EX $formula)
-// 	|	ctl_untimed_expression
-// 	;
+	;
 
-// ctl_untimed_expression
-// 	: ctl_case_expression
-// 	| ctl_cond_expression
-// 	;
-// ctl_case_expression
-// 	: 'case'! ctl_case_clauses 'esac'!
-// 	;
+unary_ltl_formula returns [Expr_ptr res]
+@init {
+    res = NULL;
+}
+	:	'G' formula=unary_ltl_formula
+        { $res = em.make_G(formula); }
 
-// ctl_case_clauses
-// 	: ctl_case_clause (ite_operator^ ctl_case_clause)*
-// 	;
+	|	'F' formula=unary_ltl_formula
+        { $res = em.make_F(formula); }
 
-// ctl_case_clause
-// 	: (ctl_cond_expression column_operator ctl_cond_expression)
-// 		=> ctl_cond_expression column_operator^ ctl_cond_expression
-// 	| -> NIL
-// 	;
+	|	'X' formula=unary_ltl_formula
+        { $res = em.make_X(formula); }
 
-// ctl_cond_expression
-// 	: ctl_iff_expression ('?' ctl_iff_expression ':' ctl_iff_expression)?
-// 	;
-
-// ctl_iff_expression
-// 	:  ctl_imply_expression (iff_operator^ ctl_imply_expression)*
-// 	;
-
-// ctl_imply_expression
-// 	: ctl_inclusive_or_expression (imply_operator^ ctl_inclusive_or_expression)*
-// 	;
-
-// ctl_inclusive_or_expression
-// 	: ctl_exclusive_or_expression ( inclusive_or_operator^ ctl_exclusive_or_expression)*
-// 	;
-
-// ctl_exclusive_or_expression
-// 	: ctl_and_expression (exclusive_or_operator^ ctl_and_expression)*
-// 	;
-
-// ctl_and_expression
-// 	: ctl_equality_expression (and_operator^ ctl_equality_expression)*
-// 	;
-
-// ctl_equality_expression
-// 	: ctl_relational_expression (equality_operator^ ctl_relational_expression)*
-// 	;
-
-// ctl_relational_expression
-// 	: ctl_shift_expression (relational_operator^ ctl_shift_expression)*
-// 	;
-
-// ctl_shift_expression
-// 	: ctl_additive_expression (shift_operator^ ctl_additive_expression)*
-// 	;
-
-// // arithmetic
-// ctl_additive_expression
-// 	: ctl_multiplicative_expression (additive_operator^ ctl_multiplicative_expression)*
-// 	;
-
-// ctl_multiplicative_expression
-// 	: ctl_cast_expression (multiplicative_operator^ ctl_cast_expression)*
-// 	;
-
-// ctl_cast_expression
-// 	: boolean_type^ '('! ctl_cast_expression ')'!
-// 	| ctl_unary_expression
-// 	;
-
-// ctl_unary_expression
-// 	: ctl_postfix_expression
-// 	| 'next' '(' expr=ctl_postfix_expression ')' -> ^(NEXT $expr)
-// 	| '!' expr=ctl_postfix_expression	     -> ^(NOT $expr)
-// 	;
-
-// ctl_postfix_expression : ctl_subscript_expression;
-
-// ctl_subscript_expression
-// 	:   ctl_primary_expression (
-// 		subscript_operator^ ctl_primary_expression ']'! |
-// 		dot_operator^ ctl_primary_expression )*
-// 	;
-
-// ctl_primary_expression
-// 	: identifier
-// 	| constant
-// 	| '(' expr=ctl_formula ')' -> $expr
-// 	;
-
-// /** LTL properties */
-// ltl_spec:	'LTLSPEC' formula=ltl_formula -> ^(LTLSPEC $formula)
-// 	;
-
-// ltl_formula
-// 	:	binary_ltl_formula;
-
-// binary_ltl_formula
-// 	:	unary_ltl_formula (
-// 			binary_ltl_operator^ unary_ltl_formula
-// 		)*
-// 	;
-
-// binary_ltl_operator
-// 	:	'U' -> U
-// 	|	'R' -> R
-// 	;
-
-// unary_ltl_formula
-// 	:	'G' formula=unary_ltl_formula -> ^(G $formula)
-// 	|	'F' formula=unary_ltl_formula -> ^(F $formula)
-// 	|	next_ltl_formula
-// 	;
-
-// next_ltl_formula
-// 	:	'X' formula=ltl_untimed_expression -> ^(X $formula)
-// 	|	ltl_untimed_expression
-// 	;
-
-// ltl_untimed_expression
-// 	: ltl_case_expression
-// 	| ltl_cond_expression
-// 	;
-// ltl_case_expression
-// 	: 'case'! ltl_case_clauses 'esac'!
-// 	;
-
-// ltl_case_clauses
-// 	: ltl_case_clause (ite_operator^ ltl_case_clause)*
-// 	;
-
-// ltl_case_clause
-// 	: (ltl_cond_expression column_operator ltl_cond_expression)
-// 		=> ltl_cond_expression column_operator^ ltl_cond_expression
-// 	| -> NIL
-// 	;
-
-// ltl_cond_expression
-// 	: ltl_iff_expression ('?' ltl_iff_expression ':' ltl_iff_expression)?
-// 	;
-
-// ltl_iff_expression
-// 	:  ltl_imply_expression (iff_operator^ ltl_imply_expression)*
-// 	;
-
-// ltl_imply_expression
-// 	: ltl_inclusive_or_expression (imply_operator^ ltl_inclusive_or_expression)*
-// 	;
-
-// ltl_inclusive_or_expression
-// 	: ltl_exclusive_or_expression ( inclusive_or_operator^ ltl_exclusive_or_expression)*
-// 	;
-
-// ltl_exclusive_or_expression
-// 	: ltl_and_expression (exclusive_or_operator^ ltl_and_expression)*
-// 	;
-
-// ltl_and_expression
-// 	: ltl_equality_expression (and_operator^ ltl_equality_expression)*
-// 	;
-
-// ltl_equality_expression
-// 	: ltl_relational_expression (equality_operator^ ltl_relational_expression)*
-// 	;
-
-// ltl_relational_expression
-// 	: ltl_shift_expression (relational_operator^ ltl_shift_expression)*
-// 	;
-
-// ltl_shift_expression
-// 	: ltl_additive_expression (shift_operator^ ltl_additive_expression)*
-// 	;
-
-// // arithmetic
-// ltl_additive_expression
-// 	: ltl_multiplicative_expression (additive_operator^ ltl_multiplicative_expression)*
-// 	;
-
-// ltl_multiplicative_expression
-// 	: ltl_cast_expression (multiplicative_operator^ ltl_cast_expression)*
-// 	;
-
-// ltl_cast_expression
-// 	: boolean_type^ '('! ltl_cast_expression ')'!
-// 	| ltl_unary_expression
-// 	;
-
-// ltl_unary_expression
-// 	: ltl_postfix_expression
-// 	| 'next' '(' expr=ltl_postfix_expression ')' -> ^(NEXT $expr)
-// 	| '!' expr=ltl_postfix_expression	     -> ^(NOT $expr)
-// 	;
-
-// ltl_postfix_expression : ltl_subscript_expression;
-
-// ltl_subscript_expression
-// 	:   ltl_primary_expression (
-// 		subscript_operator^ ltl_primary_expression ']'! |
-// 		dot_operator^ ltl_primary_expression )*
-// 	;
-
-// ltl_primary_expression
-// 	: identifier
-// 	| constant
-// 	| '(' expr=ltl_formula ')' -> $expr
-// 	;
+        formula=untimed_expression
+        { $res = formula; }
+	;
 
 modules
 scope {
@@ -302,7 +117,10 @@ scope {
     $modules::module = NULL;
 }
 	: ( 'MODULE' id=identifier
-      { $modules::module = mm.get_model().new_module(id); }
+      {
+        $modules::module = new Module(id);
+        $smv::model->add_module($modules::module);
+      }
 
       formal_params? fsm
       )*
@@ -724,9 +542,15 @@ primary_expression returns [Expr_ptr res]
 	| k=constant
       { $res = k; }
 
-	| '(' expr=untimed_expression ')'
+    /*
+       README: follow recursive rule avoid a lot of code duplication
+       in the grammar, however this relaxes the grammar to the point
+       of allowing temporal operators in non-temporal expressions, and
+       mixing CTL and LTL operators (bad). A proper check needs to be
+       done at compilation time.
+    */
+	| '(' expr=temporal_formula ')'
       { $res = expr; }
-
 	;
 
 identifier returns [Expr_ptr res]

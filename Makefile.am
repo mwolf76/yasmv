@@ -10,6 +10,8 @@ READMES = LGPL-2.1 NEWS README
 INCLUDES = 					\
 	-I$(top_srcdir)/src 			\
 	-I$(top_srcdir)/src/expr 		\
+	-I$(top_srcdir)/src/expr/printers 	\
+	-I$(top_srcdir)/src/expr/validators 	\
 	-I$(top_srcdir)/src/model 		\
 	-I$(top_srcdir)/src/3rdparty/ezlogger 	\
 	-I$(top_srcdir)/src/parser/grammars
@@ -18,10 +20,12 @@ INCLUDES = 					\
 bin_PROGRAMS = smv
 
 smv_SOURCES = src/main.cc
-smv_LDADD = 						\
-	$(top_builddir)/src/expr/libexpr.la 		\
-	$(top_builddir)/src/model/libmodel.la 		\
-	$(top_builddir)/src/parser/libparser.la   	\
+smv_LDADD = 								\
+	$(top_builddir)/src/expr/printers/libexpr_printers.la		\
+	$(top_builddir)/src/expr/validators/libexpr_validators.la	\
+	$(top_builddir)/src/expr/libexpr.la 				\
+	$(top_builddir)/src/model/libmodel.la 				\
+	$(top_builddir)/src/parser/libparser.la   			\
 	-lantlr3c
 
 pkgconfdir = $(libdir)/pkgconfig

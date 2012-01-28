@@ -98,6 +98,9 @@ parseFile(pANTLR3_UINT8 fName)
 extern void link_expr();
 extern void link_model();
 
+ostream& operator<<(ostream& os, const Expr_ptr t)
+{ Printer (os) << t; return os; }
+
 int main(int argc, char *argv[])
 {
   link_expr();
@@ -106,8 +109,8 @@ int main(int argc, char *argv[])
   parseFile((pANTLR3_UINT8) fname);
   Printer prn(cout);
 
-  Model& M = ModelMgr::INSTANCE().get_model();
-  Modules mods = M.get_modules();
+  IModel_ptr M = ModelMgr::INSTANCE().get_model();
+  Modules mods = M->get_modules();
 
   for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
     Module* pm = dynamic_cast <Module*> (*eye);

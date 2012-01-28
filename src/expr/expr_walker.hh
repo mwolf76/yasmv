@@ -66,9 +66,6 @@ typedef enum {
   ITE_1, ITE_2,
   COND_1, COND_2,
 
-
-
-
 } entry_point;
 
 struct activation_record {
@@ -77,10 +74,6 @@ struct activation_record {
 
   activation_record(const Expr_ptr e)
     : pc(DEFAULT) , expr(e)
-  {}
-
-  activation_record(entry_point ep, const Expr_ptr e)
-    : pc(ep) , expr(e)
   {}
 
 };
@@ -105,16 +98,12 @@ public:
 
   Walker& operator() (const Expr_ptr expr);
 
-  // -- walker interface: for unary operator we define a pre and a
-  // -- postorder hook. The pre-hook returns a boolean that determines if
-  // -- the subtree is to be visited. For each binary operatoe we
-  // -- define a pre, an in and a postorder hook. Here, both pre and in
-  // -- hooks return a boolean with the same semantics as above. This
-  // -- can be used e.g. for lazy evaluation.
-
-  // pre  -> preorder
-  // in   -> in-order
-  // postorder -> postorderorder
+  // -- walker interface: for unary operator we define a pre- and a
+  // -- post-order hook. The pre-hook returns a boolean that
+  // -- determines if the subtree is to be visited. For each binary
+  // -- operator we define a pre-, an in- and a post-order hook. Here,
+  // -- both pre- and in- hooks return a boolean with the same
+  // -- semantics as above. This can be used e.g. for lazy evaluation.
 
   // LTL ops
   virtual bool walk_F_preorder(const Expr_ptr expr)
