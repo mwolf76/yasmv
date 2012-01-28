@@ -67,8 +67,8 @@ public:
   virtual const Exprs& get_formalParams() const =0;
   virtual void add_formalParam(Expr_ptr identifier) =0;
 
-  // virtual const ISADeclarations& get_isaDecls() =0;
-  // virtual IModule& operator+=(ISADeclaration& identifier) =0;
+  virtual const Exprs& get_isaDecls() const =0;
+  virtual void add_isaDecl(Expr_ptr identifier) =0;
 
   virtual const Variables& get_localVars() const =0;
   virtual void add_localVar(IVariable_ptr var) =0;
@@ -102,7 +102,7 @@ typedef IModel* IModel_ptr;
 class Module : public IModule {
   Expr_ptr f_name;
   Exprs f_formalParams;
-
+  Exprs f_isaDecls;
   Variables f_localVars;
   Defines f_localDefs;
 
@@ -117,6 +117,7 @@ public:
   Module(const Expr_ptr name)
     : f_name(name)
     , f_formalParams()
+    , f_isaDecls()
     , f_localVars()
     , f_localDefs()
     , f_init()
@@ -137,6 +138,12 @@ public:
 
   void add_formalParam(Expr_ptr identifier)
   { f_formalParams.push_back(identifier); }
+
+  const Exprs& get_isaDecls() const
+  { return f_isaDecls; }
+
+  void add_isaDecl(Expr_ptr identifier)
+  { f_isaDecls.push_back(identifier); }
 
   const Variables& get_localVars() const
   { return f_localVars; }

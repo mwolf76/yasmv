@@ -325,10 +325,10 @@ fsm :	(fsm_formula)*
 
 fsm_formula
     :	/* isa decls */
-//        fsm_isa_decl_body
+        fsm_isa_decl_body
 
         /* variables and defines */
-	   fsm_var_decl
+	|   fsm_var_decl
 	|	fsm_ivar_decl
 	|	fsm_frozenvar_decl
 	|	fsm_define_decl
@@ -344,14 +344,14 @@ fsm_formula
 	;
 
 /* ISA */
-// fsm_isa_decl_body
-// 	: fsm_isa_decl_clause +
-// 	;
+fsm_isa_decl_body
+	: fsm_isa_decl_clause +
+	;
 
-// fsm_isa_decl_clause
-// 	: 'ISA' id=identifier
-//        { $modules::module->add_isa_decl(id); }
-// 	;
+fsm_isa_decl_clause
+	: 'ISA' id=identifier
+       { $modules::module->add_isaDecl(id); }
+	;
 
 /* VAR */
 fsm_var_decl
