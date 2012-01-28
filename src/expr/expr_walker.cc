@@ -167,6 +167,7 @@ void Walker::walk () {
       }
     }
 
+    assert(curr.expr);
     switch (curr.expr->f_symb) {
 
       // LTL ops

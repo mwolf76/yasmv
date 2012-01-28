@@ -105,7 +105,7 @@ unary_ltl_formula returns [Expr_ptr res]
 	|	'X' formula=unary_ltl_formula
         { $res = em.make_X(formula); }
 
-        formula=untimed_expression
+    |   formula=untimed_expression
         { $res = formula; }
 	;
 
@@ -376,8 +376,8 @@ iff_expression returns [Expr_ptr res]
 imply_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=inclusive_or_expression (
-            '->' rhs=imply_expression
-            { $res = em.make_implies(lhs, rhs); }
+           '->' rhs=imply_expression
+           { $res = em.make_implies(lhs, rhs); }
 
     |      { $res = lhs; } )
 
