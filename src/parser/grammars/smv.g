@@ -50,7 +50,7 @@ scope { IModel_ptr model; }
 temporal_formula returns [Expr_ptr res]
 @init { res = NULL; }
     : formula=ltl_formula
-        { $res = formula; }
+      { $res = formula; }
     ;
 
 /** LTL properties */
@@ -68,15 +68,16 @@ ltl_formula returns [Expr_ptr res]
 
 binary_ltl_formula returns [Expr_ptr res]
 @init { res = NULL; }
-	:	lhs=unary_ltl_formula (
-            'U' rhs=binary_ltl_formula
-            { $res = em.make_U(lhs, rhs); }
+	:	lhs=unary_ltl_formula
+        { $res = lhs; }
+        (
+            'U' rhs=unary_ltl_formula
+            { $res = em.make_U($res, rhs); }
 
-        |   'R' rhs=binary_ltl_formula
-            { $res = em.make_R(lhs, rhs); }
+        |   'R' rhs=unary_ltl_formula
+            { $res = em.make_R($res, rhs); }
 
-        |   { $res = lhs; } )
-
+        )*
 	;
 
 unary_ltl_formula returns [Expr_ptr res]
@@ -106,7 +107,7 @@ scope {
         $smv::model->add_module($modules::module);
       }
 
-      formal_params? module_body
+      formal_params? fsm_isa_decl_clause* module_body
       )*
     ;
 
@@ -137,10 +138,7 @@ module_body
     ;
 
 module_decl
-    :	/* isa decls */
-        fsm_isa_decl_body
-
-        /* variables and defines */
+    :	/* variables and defines */
 	|   fsm_var_decl
 	|	fsm_ivar_decl
 	|	fsm_frozenvar_decl
@@ -157,11 +155,6 @@ module_decl
 
         /* properties */
     |   property
-	;
-
-/* ISA */
-fsm_isa_decl_body
-	: fsm_isa_decl_clause +
 	;
 
 fsm_isa_decl_clause
@@ -283,7 +276,7 @@ fsm_trans_decl_clause
       { $modules::module->add_trans(expr); }
 	;
 
-/* FAIRN */
+/* FAIRNESS */
 fsm_fairn_decl
     : 'FAIRNESS' fsm_fairn_decl_body
     ;
@@ -309,24 +302,26 @@ assignment_body
 
 assignment_clause
 	: id=lvalue ':=' expr=untimed_expression
-    {
-            IAssign_ptr assgn = new Assign(id, expr);
-            $modules::module->add_assign(assgn);
-    }
+      {
+       IAssign_ptr assgn = new Assign(id, expr);
+       $modules::module->add_assign(assgn);
+      }
     ;
 
 untimed_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: expr=case_expression
-        { $res = expr; }
+      { $res = expr; }
 
 	| expr=cond_expression
-        { $res = expr; }
+      { $res = expr; }
 	;
 
 case_expression returns [Expr_ptr res]
-scope { Exprs clauses; }
-@init { res = NULL; }
+@init {
+    Exprs clauses;
+    res = NULL;
+}
 	: 'case' cls=case_clauses 'esac'
       {
         for (Exprs::reverse_iterator eye = cls.rbegin();
@@ -350,165 +345,187 @@ case_clauses returns [Exprs res]
 
 cond_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: expr=iff_expression (
-        '?' lhs=iff_expression ':' rhs=iff_expression
-        {
-            $res = em.make_ite(
-                    em.make_cond(expr, lhs), rhs);
-        }
-
-    | { $res = expr; } )
-
+	: expr=iff_expression
+      { $res = expr; }
+    (
+      '?' lhs=untimed_expression ':' rhs=cond_expression
+      {
+       $res = em.make_ite(em.make_cond($res, lhs), rhs);
+      }
+    )?
 	;
 
 iff_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	:  lhs=imply_expression (
-            '<->' rhs=iff_expression
-            { $res = em.make_iff(lhs, rhs); }
-
-    |       { $res = lhs; } )
+	:  lhs=imply_expression
+       { $res = lhs; }
+    (
+       '<->' rhs=imply_expression
+       { $res = em.make_iff($res, rhs); }
+    )*
 	;
 
 imply_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=inclusive_or_expression (
-           '->' rhs=imply_expression
-           { $res = em.make_implies(lhs, rhs); }
-
-    |      { $res = lhs; } )
-
-	;
+	: lhs=inclusive_or_expression
+      { $res = lhs; }
+    (
+      '->' rhs=inclusive_or_expression
+      { $res = em.make_implies($res, rhs); }
+    )*
+    ;
 
 inclusive_or_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=exclusive_or_expression (
-            '|' rhs=inclusive_or_expression
-            { $res = em.make_or(lhs, rhs); }
+	: lhs=exclusive_or_expression
+      { $res = lhs; }
+    (
+      '|' rhs=exclusive_or_expression
+      { $res = em.make_or($res, rhs); }
 
-    |       { $res = lhs; } )
-
+    )*
 	;
 
 exclusive_or_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=and_expression (
-            'xor' rhs=exclusive_or_expression
-            { $res = em.make_xor(lhs, rhs); }
+	: lhs=and_expression
+      { $res = lhs; }
+    (
+      'xor' rhs=and_expression
+      { $res = em.make_xor($res, rhs); }
 
-        |  'xnor' rhs=exclusive_or_expression
-            { $res = em.make_xnor(lhs, rhs); }
+    |  'xnor' rhs=and_expression
+      { $res = em.make_xnor($res, rhs); }
 
-        |   { $res = lhs; } )
+    )*
 	;
 
 and_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=equality_expression (
-            '&' rhs=equality_expression
-            { $res = em.make_and(lhs, rhs); }
+	: lhs=equality_expression
+      { $res = lhs; }
 
-    |       { $res = lhs; } )
+    (
+      '&' rhs=equality_expression
+       { $res = em.make_and($res, rhs); }
+
+    )*
 	;
 
 equality_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=relational_expression (
-            '=' rhs=equality_expression
-            { $res = em.make_eq(lhs, rhs); }
+	: lhs=relational_expression
+      { $res = lhs; }
 
-    |       '!=' rhs=equality_expression
-            { $res = em.make_ne(lhs, rhs); }
+    ( '==' rhs=relational_expression
+      { $res = em.make_eq($res, rhs); }
 
-    |       { $res = lhs; } )
+    | '!=' rhs=relational_expression
+      { $res = em.make_ne($res, rhs); }
 
+    )*
 	;
 
 relational_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=union_expression (
-            '<' rhs=relational_expression
-            { $res = em.make_lt(lhs, rhs); }
+	: lhs=union_expression
+      { $res = lhs; }
 
-    |       '<=' rhs=relational_expression
-            { $res = em.make_le(lhs, rhs); }
+    (
+      '<' rhs=union_expression
+      { $res = em.make_lt($res, rhs); }
 
-    |       '>=' rhs=relational_expression
-            { $res = em.make_ge(lhs, rhs); }
+    | '<=' rhs=union_expression
+      { $res = em.make_le($res, rhs); }
 
-    |       '>' rhs=relational_expression
-            { $res = em.make_gt(lhs, rhs); }
+    | '>=' rhs=union_expression
+      { $res = em.make_ge($res, rhs); }
 
-    |       { $res = lhs; } )
+    | '>' rhs=union_expression
+      { $res = em.make_gt($res, rhs); }
 
+    )*
 	;
 
 union_expression returns [Expr_ptr res]
 @init { res = NULL; }
-    : lhs=member_expression (
-      'union' rhs = union_expression
-      { $res = em.make_union(lhs, rhs); }
+    : lhs=member_expression
+      { $res= lhs; }
 
-    | { $res = lhs; } )
-
+    (
+      'union' rhs=member_expression
+      { $res = em.make_union($res, rhs); }
+    )*
     ;
 
 member_expression returns [Expr_ptr res]
 @init { res = NULL; }
-    : lhs=shift_expression (
-      'in' rhs = member_expression
-      { $res = em.make_member(lhs, rhs); }
+    : lhs=shift_expression
+      { $res = lhs; }
 
-    | { $res = lhs; } )
-
+    (
+      'in' rhs=shift_expression
+      { $res = em.make_member($res, rhs); }
+    )*
     ;
 
 shift_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=additive_expression (
-            '<<' rhs=shift_expression
-            { $res = em.make_lshift(lhs, rhs); }
+	: lhs=additive_expression
+      { $res = lhs; }
 
-    |       '>>' rhs=shift_expression
-            { $res = em.make_rshift(lhs, rhs); }
+    (
+      '<<' rhs=additive_expression
+      { $res = em.make_lshift($res, rhs); }
 
-    |       { $res = lhs; } )
+    | '>>' rhs=additive_expression
+       { $res = em.make_rshift($res, rhs); }
+
+    )*
 	;
 
 additive_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=multiplicative_expression (
-            '+' rhs=additive_expression
-            { $res = em.make_add(lhs, rhs); }
+	: lhs=multiplicative_expression
+        { $res = lhs; }
 
-    |       '-' rhs=additive_expression
-            { $res = em.make_sub(lhs, rhs); }
+    (
+        '+' rhs=multiplicative_expression
+        { $res = em.make_add($res, rhs); }
 
-    |       { $res = lhs; } )
+    |   '-' rhs=multiplicative_expression
+        { $res = em.make_sub($res, rhs); }
+    )*
 	;
 
 multiplicative_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=concatenative_expression (
-            '*' rhs=multiplicative_expression
-            { $res = em.make_mul(lhs, rhs); }
+	: lhs=concatenative_expression
+        { $res = lhs; }
 
-    |       '/' rhs=multiplicative_expression
-            { $res = em.make_div(lhs, rhs); }
+    (
+      '*' rhs=concatenative_expression
+      { $res = em.make_mul($res, rhs); }
 
-    |       'mod' rhs=multiplicative_expression
-            { $res = em.make_mod(lhs, rhs); }
+    | '/' rhs=concatenative_expression
+      { $res = em.make_div($res, rhs); }
 
-    |       { $res = lhs; } )
+    | 'mod' rhs=concatenative_expression
+      { $res = em.make_mod($res, rhs); }
+
+    )*
 	;
 
 concatenative_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=unary_expression (
-            '::' rhs=concatenative_expression
-            { $res = em.make_concat(lhs, rhs); }
+	: lhs=unary_expression
+        { $res = lhs; }
 
-    |       { $res = lhs; } )
+    (
+       '::' rhs=unary_expression
+       { $res = em.make_concat($res, rhs); }
+
+    )*
 	;
 
 unary_expression returns [Expr_ptr res]
@@ -542,7 +559,6 @@ unary_expression returns [Expr_ptr res]
 
     | 'count' '(' expr=postfix_expression ')'
        { $res = em.make_count(expr); }
-
 	;
 
 postfix_expression returns [Expr_ptr res]
@@ -716,38 +732,58 @@ literal returns [Expr_ptr res]
 
 /** Lexer rules */
 IDENTIFIER
-	:	LETTER (LETTER|'0'..'9')*
+	:	ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
 	;
 
 WORD_CONSTANT
-    :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HexDigit+ ;
+    :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HEX_DIGIT +
+    ;
 
-fragment
-LETTER
-	:	'A'..'Z' | 'a'..'z' | '_'|'-'
+fragment ID_FIRST_CHAR
+	:	'A'..'Z' | 'a'..'z' | '_'
+	;
+
+fragment ID_FOLLOWING_CHARS
+	:	 ID_FIRST_CHAR
+    |    DECIMAL_DIGIT
+    |    '$'
+    |    '#'
+    |    '-'
 	;
 
 HEX_LITERAL
-    : '0' ('x'|'X') HexDigit+
-    ;
+   : '0' ('x'|'X') HEX_DIGIT
+   ;
 
 DECIMAL_LITERAL
-    : ('0' | '1'..'9' '0'..'9'*)
-    ;
+   : ZERO | DECIMAL_FIRST DECIMAL_DIGIT*
+   ;
 
 OCTAL_LITERAL
-    : '0' ('0'..'7')+
+   : ZERO OCTAL_DIGIT+
     ;
 
-fragment
-Exponent
-    : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+fragment OCTAL_DIGIT
+   : ZERO | '1' .. '7'
+   ;
 
-fragment
-HexDigit
-    : ('0'..'9'|'a'..'f'|'A'..'F') ;
+fragment DECIMAL_FIRST
+   : '1' .. '9'
+   ;
 
-WS  : (' '|'\r'|'\t'|'\u000C'|'\n') {
+fragment DECIMAL_DIGIT
+   :  OCTAL_DIGIT | '8' | '9'
+   ;
+
+fragment HEX_DIGIT
+   :  DECIMAL_DIGIT | 'a'..'f' | 'A'..'F'
+   ;
+
+fragment ZERO
+   : '0'
+   ;
+
+WS : (' '|'\r'|'\t'|'\u000C'|'\n') {
     $channel=HIDDEN;
 } ;
 
