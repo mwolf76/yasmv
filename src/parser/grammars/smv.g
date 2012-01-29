@@ -19,7 +19,7 @@
 grammar smv;
 
 options {
-	k = 1; /* LL(1) grammar with a few exceptions */
+	k = 2; /* LL(1) grammar with a few exceptions */
 	memoize = true;
     language = C;
 }
@@ -41,46 +41,32 @@ options {
 
 /* Toplevel */
 smv
-scope {
-    IModel_ptr model;
-}
-@init {
-    $smv::model = mm.get_model();
-}
-    : modules ( property ';' )*
-    ;
-
-property
-    : ltl_spec
+scope { IModel_ptr model; }
+@init { $smv::model = mm.get_model(); }
+    : modules
     ;
 
 // backjump entry point (see README below)
 temporal_formula returns [Expr_ptr res]
-@init {
-    res = NULL;
-}
+@init { res = NULL; }
     : formula=ltl_formula
         { $res = formula; }
     ;
 
 /** LTL properties */
-ltl_spec
+ltl_spec returns [Expr_ptr res]
     : 'LTLSPEC' formula=ltl_formula
-        { $smv::model->add_ltlspec(formula); }
+      { $res = formula; }
 	;
 
 ltl_formula returns [Expr_ptr res]
-@init {
-    res = NULL;
-}
+@init { res = NULL; }
 	:	formula=binary_ltl_formula
         { $res = formula; }
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
-@init {
-    res = NULL;
-}
+@init { res = NULL; }
 	:	lhs=unary_ltl_formula (
             'U' rhs=binary_ltl_formula
             { $res = em.make_U(lhs, rhs); }
@@ -93,9 +79,7 @@ binary_ltl_formula returns [Expr_ptr res]
 	;
 
 unary_ltl_formula returns [Expr_ptr res]
-@init {
-    res = NULL;
-}
+@init { res = NULL; }
 	:	'G' formula=unary_ltl_formula
         { $res = em.make_G(formula); }
 
@@ -113,17 +97,25 @@ modules
 scope {
     IModule_ptr module ;
 }
-@init {
-    $modules::module = NULL;
-}
-	: ( 'MODULE' id=identifier
+@init { $modules::module = NULL; }
+
+    : ( 'MODULE' id=identifier
       {
         $modules::module = new Module(id);
         $smv::model->add_module($modules::module);
       }
 
-      formal_params? fsm
+      formal_params? fsm properties?
       )*
+    ;
+
+properties
+    : property ( ';' property )*
+    ;
+
+property
+    : formula=ltl_spec
+      { $modules::module->add_ltlspec(formula); }
     ;
 
 formal_params
@@ -322,34 +314,28 @@ untimed_expression returns [Expr_ptr res]
         { $res = expr; }
 	;
 
-// predicates
 case_expression returns [Expr_ptr res]
-scope {
-    Exprs clauses;
-}
-@init { res = NULL; }
-	: 'case'
-        lhs=untimed_expression ':' rhs=untimed_expression
-        { $case_expression::clauses.push_back(
-                const_cast<Expr_ptr>(em.make_cond(lhs, rhs)));
-        }
-
-        (
-            ';' lhs=untimed_expression ':' rhs=untimed_expression
-            { $case_expression::clauses.push_back(
-                 const_cast<Expr_ptr>(em.make_cond(lhs, rhs))); }
-        )*
-
-      'esac'
+scope { Exprs clauses; }
+	: 'case' cls=case_clauses 'esac'
       {
-        // build reversed ITE
         res = NULL;
-        for (Exprs::reverse_iterator eye = $case_expression::clauses.rend();
-             eye != $case_expression::clauses.rbegin(); eye ++) {
-            res = const_cast<Expr_ptr>(em.make_ite((*eye), res));
+        for (Exprs::reverse_iterator eye = cls.rbegin();
+             eye != cls.rend();
+             eye ++) {
+            if (!res) { res = (*eye); }
+            else {
+                res = const_cast<Expr_ptr>(em.make_ite((*eye), res));
+            }
         }
       }
 	;
+
+case_clauses returns [Exprs res]
+    :
+       ( lhs=untimed_expression ':' rhs=untimed_expression ';'
+         { $res.push_back(em.make_cond(lhs, rhs)); } )+
+    ;
+
 
 cond_expression returns [Expr_ptr res]
 @init { res = NULL; }
@@ -429,7 +415,7 @@ equality_expression returns [Expr_ptr res]
 
 relational_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=shift_expression (
+	: lhs=union_expression (
             '<' rhs=relational_expression
             { $res = em.make_lt(lhs, rhs); }
 
@@ -445,6 +431,26 @@ relational_expression returns [Expr_ptr res]
     |       { $res = lhs; } )
 
 	;
+
+union_expression returns [Expr_ptr res]
+@init { res = NULL; }
+    : lhs=member_expression (
+      'union' rhs = union_expression
+      { $res = em.make_union(lhs, rhs); }
+
+    | { $res = lhs; } )
+
+    ;
+
+member_expression returns [Expr_ptr res]
+@init { res = NULL; }
+    : lhs=shift_expression (
+      'in' rhs = member_expression
+      { $res = em.make_member(lhs, rhs); }
+
+    | { $res = lhs; } )
+
+    ;
 
 shift_expression returns [Expr_ptr res]
 @init { res = NULL; }
@@ -472,7 +478,7 @@ additive_expression returns [Expr_ptr res]
 
 multiplicative_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	: lhs=unary_expression (
+	: lhs=concatenative_expression (
             '*' rhs=multiplicative_expression
             { $res = em.make_mul(lhs, rhs); }
 
@@ -481,6 +487,15 @@ multiplicative_expression returns [Expr_ptr res]
 
     |       'mod' rhs=multiplicative_expression
             { $res = em.make_mod(lhs, rhs); }
+
+    |       { $res = lhs; } )
+	;
+
+concatenative_expression returns [Expr_ptr res]
+@init { res = NULL; }
+	: lhs=unary_expression (
+            '::' rhs=concatenative_expression
+            { $res = em.make_concat(lhs, rhs); }
 
     |       { $res = lhs; } )
 	;
@@ -499,23 +514,23 @@ unary_expression returns [Expr_ptr res]
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
 
-    // | 'toint' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_toint(expr)); }
+    | 'toint' '(' expr=postfix_expression ')'
+       { $res = em.make_toint(expr); }
 
-    // | 'bool' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_bool(expr)); }
+    | 'bool' '(' expr=postfix_expression ')'
+       { $res = em.make_bool(expr); }
 
-    // | 'word1' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_word1(expr)); }
+    | 'word1' '(' expr=postfix_expression ')'
+       { $res = em.make_word1(expr); }
 
-    // | 'signed' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_signed(expr)); }
+    | 'signed' '(' expr=postfix_expression ')'
+       { $res = em.make_signed(expr); }
 
-    // | 'unsigned' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_unsigned(expr)); }
+    | 'unsigned' '(' expr=postfix_expression ')'
+       { $res = em.make_unsigned(expr); }
 
-    // | 'count' '(' expr=postfix_expression ')'
-    //    { $res = PX(em.make_count(expr)); }
+    | 'count' '(' expr=postfix_expression ')'
+       { $res = em.make_count(expr); }
 
 	;
 
@@ -563,6 +578,13 @@ constant returns [Expr_ptr res]
 @init { res = NULL; }
     :	enum_constant
     |   range_constant
+    |   word_constant
+    ;
+
+word_constant returns [Expr_ptr res]
+@init { res = NULL; }
+    : WORD_CONSTANT
+    { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
     ;
 
 int_constant returns [Expr_ptr res]
@@ -599,7 +621,10 @@ range_constant returns [Expr_ptr res]
 
 enum_constant returns [Expr_ptr res]
 @init { res = NULL; }
-	:	 enum_type;
+
+	: literals=enum_type
+    { $res = em.make_enum(literals); }
+    ;
 
 /* lvalue is used in assignments */
 lvalue returns [Expr_ptr res]
@@ -636,7 +661,8 @@ type_name returns [Type_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
-	| enum_type
+	| literals=enum_type
+     { $res = tm.find_enum(literals); }
 
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }
@@ -652,12 +678,11 @@ type_name returns [Type_ptr res]
       actual_param_decls[$res]
     ;
 
-enum_type
-scope { EnumLiterals literals; }
+enum_type returns [EnumLiterals lits]
 	:	'{' lit=literal
-            { $enum_type::literals.insert(lit); }
+            { $lits.insert(lit); }
 
-            (',' lit=literal { $enum_type::literals.insert(lit); } )*
+            (',' lit=literal { $lits.insert(lit); } )*
         '}'
 	;
 
@@ -682,6 +707,9 @@ literal returns [Expr_ptr res]
 IDENTIFIER
 	:	LETTER (LETTER|'0'..'9')*
 	;
+
+WORDCONST
+    :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HexDigit+ ;
 
 fragment
 LETTER

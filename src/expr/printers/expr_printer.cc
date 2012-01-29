@@ -296,6 +296,19 @@ bool Printer::walk_cond_inorder(const Expr_ptr expr)
 void Printer::walk_cond_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+
+bool Printer::walk_set_preorder(const Expr_ptr expr)
+{ f_os << "{"; return true; }
+void Printer::walk_set_postorder(const Expr_ptr expr)
+{ f_os << "}"; }
+
+bool Printer::walk_comma_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_comma_inorder(const Expr_ptr expr)
+{ f_os << ", "; return true; }
+void Printer::walk_comma_postorder(const Expr_ptr expr)
+{}
+
 void Printer::walk_leaf(const Expr_ptr expr)
 
 {

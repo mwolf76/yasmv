@@ -114,7 +114,6 @@ public:
 };
 
 
-typedef set<Expr*> EnumLiterals;
 class EnumType : public Type {
   friend class TypeMgr;
   EnumType() {}
@@ -168,6 +167,38 @@ public:
 
 class Module;
 typedef Module* Module_ptr;
+
+class Enumeration : public Type {
+public:
+  friend class TypeMgr;
+  EnumLiterals f_literals;
+
+  Enumeration(EnumLiterals& lits)
+    : f_literals(lits)
+  {};
+
+  bool is_boolean() const
+  { return false; }
+
+  bool is_intRange() const
+  { return false; }
+
+  bool is_intEnum() const
+  { return ! has_symbs(); }
+
+  bool is_symb_enum() const
+  { return ! has_numbers();  }
+
+  bool is_mixed_enum() const
+  { return (! has_symbs()) || (! has_numbers()); }
+
+  bool is_instance() const
+  { return true; }
+
+private:
+  bool has_symbs() const;
+  bool has_numbers() const;
+};
 
 class Instance : public Type {
 public:
@@ -231,9 +262,11 @@ public:
     return (*f_instance);
   }
 
-  // REVIEW ME
   const Type_ptr find_boolean()
   { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
+
+  const Type_ptr find_enum(EnumLiterals& lits)
+  { return f_register[ ExprMgr::INSTANCE().make_enum(lits) ]; }
 
   // REVIEW ME
   const Type_ptr find_uword(Expr_ptr size)

@@ -45,6 +45,12 @@ typedef enum {
   /* arithmetical operators */
   NEG, ADD, SUB, DIV, MUL, MOD,
 
+  /* word-related operators */
+  CONCAT, COUNT,
+
+  /* casts */
+  CAST_INT, CAST_BOOL, CAST_SIGNED, CAST_UNSIGNED,
+
   /* logical/bitwise operators */
   NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
 
@@ -60,10 +66,33 @@ typedef enum {
   /* postfix exprs */
   DOT, SUBSCRIPT, RANGE,
 
+  /* set exprs */
+  MEMBER, UNION,
+
   /* utils */
   COMMA, SET,
 
 } ExprType;
+
+class UnsupportedOperatorException : public exception {
+  virtual const char* what() const throw() {
+    return "Unsupported operator";
+  }
+};
+
+class BadWordConstException : public exception {
+public:
+  BadWordConstException(const char* msg)
+    : f_msg(msg)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+};
 
 // using STL string as basic atom class
 typedef string Atom;
@@ -78,8 +107,11 @@ typedef struct Expr_TAG {
       struct Expr_TAG* f_rhs;
     };
 
-    /* 64 bit */
-    unsigned long long f_ull;
+    struct {
+      /* 64 bit */
+      unsigned long long f_ull;
+      unsigned short f_wsize; // words only
+    };
 
     struct {
       const Atom_ptr f_atom;
@@ -94,21 +126,27 @@ typedef struct Expr_TAG {
     , f_rhs(NULL)
   {}
 
+  // identifiers
   inline Expr_TAG(const Atom& atom)
     : f_symb(IDENT)
     , f_atom(const_cast<const Atom_ptr> (&atom))
   {}
 
+  // word constants
+  inline Expr_TAG(ExprType symb,
+                  short wsize,
+                  long long value)
+    : f_symb(symb)
+    , f_ull(value)
+    , f_wsize(wsize)
+  { assert ((symb == UWCONST) || (symb == SWCONST)); }
+
+  // int constants
   inline Expr_TAG(ExprType symb,
                   long long value)
     : f_symb(symb)
     , f_ull(value)
-  {
-    // safety check
-    assert ((symb == ICONST)  ||
-            (symb == UWCONST) ||
-            (symb == SWCONST));
-  }
+  { assert (symb == ICONST); }
 
   // ordinary expr
   inline Expr_TAG(ExprType symb,
@@ -219,6 +257,7 @@ typedef pair<AtomPool::iterator, bool> AtomPoolHit;
 
 typedef Expr* Expr_ptr;
 typedef vector<Expr_ptr> Exprs;
+typedef set<Expr_ptr> EnumLiterals;
 
 // for logging purposes
 ostream& operator<<(ostream& os, const Expr_ptr t);
@@ -291,6 +330,28 @@ public:
   inline Expr_ptr make_next(Expr_ptr expr)
   { return make_expr(NEXT, expr, NULL); }
 
+  /* word-related and casts */
+  inline Expr_ptr make_concat(Expr_ptr a, Expr_ptr b)
+  { return make_expr(CONCAT, a, b); }
+
+  inline Expr_ptr make_toint(Expr_ptr expr)
+  { return make_expr(CAST_INT, expr, NULL); }
+
+  inline Expr_ptr make_bool(Expr_ptr expr)
+  { return make_expr(CAST_BOOL, expr, NULL); }
+
+  inline Expr_ptr make_word1(Expr_ptr expr)
+  { throw UnsupportedOperatorException(); }
+
+  inline Expr_ptr make_signed(Expr_ptr expr)
+  { return make_expr(CAST_SIGNED, expr, NULL); }
+
+  inline Expr_ptr make_unsigned(Expr_ptr expr)
+  { return make_expr(CAST_UNSIGNED, expr, NULL); }
+
+  inline Expr_ptr make_count(Expr_ptr expr)
+  { return make_expr(COUNT, expr, NULL); }
+
   /* arithmetical operators */
   inline Expr_ptr make_neg(Expr_ptr expr)
   { return make_expr(NEG, expr, NULL); }
@@ -357,6 +418,12 @@ public:
   inline Expr_ptr make_lt(Expr_ptr a, Expr_ptr b)
   { return make_expr(LT, a, b); }
 
+  inline Expr_ptr make_union(Expr_ptr a, Expr_ptr b)
+  { return make_expr(UNION, a, b); }
+
+  inline Expr_ptr make_member(Expr_ptr a, Expr_ptr b)
+  { return make_expr(MEMBER, a, b); }
+
   inline Expr_ptr make_cond(Expr_ptr a, Expr_ptr b)
   { return make_expr(COND, a, b); }
 
@@ -364,28 +431,28 @@ public:
   { return make_expr(ITE, a, b); }
 
   /* leaves */
-  inline Expr_ptr make_iconst(long long value)
+  inline Expr_ptr make_iconst(unsigned long long value)
   { return __make_expr(f_expr_pool.insert(Expr(ICONST, value))); }
 
-  inline Expr_ptr make_uwconst(unsigned long long value)
-  { return __make_expr(f_expr_pool.insert(Expr(UWCONST, value))); }
+  inline Expr_ptr make_uwconst(unsigned short wsize, unsigned long long value)
+  { return __make_expr(f_expr_pool.insert(Expr(UWCONST, wsize, value))); }
 
-  inline Expr_ptr make_swconst(long long value)
-  { return __make_expr(f_expr_pool.insert(Expr(SWCONST, value))); }
+  inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
+  { return __make_expr(f_expr_pool.insert(Expr(SWCONST, wsize, value))); }
 
-  // inline const Expr_ptr make_enum(EnumType& enumeration)
-  // {
-  //   Expr_ptr res = PX(NULL);
-  //   const EnumLiterals& literals = enumeration.get_literals();
+  inline Expr_ptr make_enum(EnumLiterals& literals)
+  {
+    Expr_ptr res = NULL;
 
-  //   /* reverse iteration */
-  //   for (EnumLiterals::reverse_iterator eye = literals.rbegin();
-  //        eye != literals.rend(); eye ++) {
-  //     res = PX(make_expr(COMMA, (**eye), *res));
-  //   }
+    /* reverse iteration */
+    for (EnumLiterals::reverse_iterator eye = literals.rbegin();
+         eye != literals.rend(); eye ++) {
+      if (!res) res = (*eye);
+      else res = make_expr(COMMA, (*eye), res);
+    }
 
-  //   return make_expr(SET, *res, NULL);
-  // }
+    return make_expr(SET, res, NULL);
+  }
 
   inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
   { return make_expr(DOT, a, b); }
@@ -412,6 +479,13 @@ public:
   inline Expr_ptr make_main()
   { return main_expr; }
 
+  // Here a bit of magic occurs, so it's better to keep a note: this
+  // method is used by the parser to build identifier nodes.  The
+  // function is fed with a const char* coming from the Lexer, an Atom
+  // object (which is in fact a std::string) is built on-the-fly and
+  // used to search the atom pool. The atom resulting from the search
+  // is always the one stored in the pool. The auto atom object,
+  // however gets destroyed as it gets out of scope, so no leak occurs.
   inline Expr_ptr make_identifier(Atom atom)
   {
     AtomPoolHit ah = (f_atom_pool.insert(atom));
@@ -421,6 +495,75 @@ public:
     }
 
     return make_expr(*ah.first);
+  }
+
+  inline Expr_ptr make_wconst(Atom atom)
+  {
+    regex wconst_rx("0(u|s)(b|d|o|h|)(/d+)_(.+)");
+    cmatch match;
+
+    regex_match(atom.c_str(), match, wconst_rx);
+    assert (match.size() == 4);
+
+    string sign_flag(match[0]);
+    string type_flag(match[1]);
+    string size_field(match[2]);
+    string wliteral(match[3]);
+
+
+    bool is_signed = (sign_flag == "s");
+    unsigned short wsize = atoi(size_field.c_str());
+
+    unsigned long long value = 0ULL;
+
+    if (match[1] == "b") {
+      if (wsize != wliteral.size())
+        throw BadWordConstException("Boolean word constants must match the word size.");
+
+      int i;
+      for (i = wliteral.size() -1;
+           i >= (is_signed) ? 1 : 0; -- i) {
+        value = 2 * value + wliteral[i];
+      }
+
+      // MSB is -2^(wsize)
+      if ((is_signed) && (wliteral[0] == '1')) {
+        value -= pow2(i);
+      }
+
+    }
+
+    // NEG not supported here
+    else if (match[1] == "d") {
+      value = strtoll(wliteral.c_str(), NULL, 10);
+    }
+    else if (match[1] == "o") {
+      value = strtoll(wliteral.c_str(), NULL, 8);
+    }
+    else if (match[1] == "h") {
+      value = strtoll(wliteral.c_str(), NULL, 16);
+    }
+    else assert(0);
+
+    // range check
+    if (value >= pow2(wsize - (is_signed ? 1 : 0))) {
+      throw BadWordConstException("Decimal value not representable with this word size.");
+    }
+
+    return is_signed ? make_swconst( wsize, value )
+      : make_uwconst(wsize, value );
+  }
+
+  inline bool is_identifier(const Expr_ptr expr) const {
+    assert(expr);
+    return expr->f_symb == IDENT;
+  }
+
+  inline bool is_numeric(const Expr_ptr expr) const {
+    assert(expr);
+    return (expr->f_symb == ICONST)
+      || (expr->f_symb == UWCONST)
+      || (expr->f_symb == SWCONST) ;
   }
 
 protected:
@@ -455,6 +598,15 @@ private:
       logger << "Added new expr to pool: '" << expr << "'" << endl;
     }
     return expr;
+  }
+
+  // utils
+  inline unsigned long long pow2(unsigned exp) {
+    unsigned long long res = 1;
+    for (unsigned i = exp; i; -- i) {
+      res *= 2;
+    }
+    return res;
   }
 
   /* builtins */

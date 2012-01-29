@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <config.h>
 
 #include <cassert>
+#include <cstdlib>
+#include <exception>
 #include <utility>
 #include <string>
 #include <sstream>
@@ -40,6 +42,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 
+#include <boost/regex.hpp>
+
+using std::exception;
+
 using std::pair;
 using std::make_pair;
 
@@ -49,8 +55,13 @@ using std::ostream;
 using std::vector;
 using std::stack;
 using std::set;
+
 using std::tr1::unordered_map;
 using std::tr1::unordered_set;
+
+using boost::regex;
+using boost::cmatch;
+using boost::regex_match;
 
 using std::cout;
 using std::cerr;

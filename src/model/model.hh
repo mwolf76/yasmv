@@ -90,6 +90,11 @@ public:
 
   virtual const Exprs& get_fairness() const =0;
   virtual void add_fairness(Expr_ptr expr) =0;
+
+  // properties management
+  virtual const Exprs& get_ltlspecs() const =0;
+  virtual void add_ltlspec(Expr_ptr formula) =0;
+
 };
 typedef IModule* IModule_ptr;
 typedef vector<IModule_ptr> Modules;
@@ -98,10 +103,8 @@ class IModel {
 public:
   virtual const Modules& get_modules() const =0;
   virtual void add_module(IModule_ptr module) =0;
-
-  virtual const Exprs& get_ltlspecs() const =0;
-  virtual void add_ltlspec(Expr_ptr formula) =0;
 };
+
 typedef IModel* IModel_ptr;
 
 class Module : public IModule {
@@ -117,6 +120,8 @@ class Module : public IModule {
   Exprs f_fair;
   Assigns f_assgn;
 
+  Exprs f_ltlspecs;
+
 public:
 
   Module(const Expr_ptr name)
@@ -130,6 +135,7 @@ public:
     , f_trans()
     , f_fair()
     , f_assgn()
+    , f_ltlspecs()
   {}
 
   const Expr_ptr get_name() const
@@ -191,6 +197,12 @@ public:
 
   void add_fairness(Expr_ptr expr)
   { f_fair.push_back(expr); }
+
+  const Exprs& get_ltlspecs() const
+  { return f_ltlspecs; }
+
+  void add_ltlspec(Expr_ptr formula)
+  { f_ltlspecs.push_back(formula); }
 };
 
 class Variable : public IVariable {
@@ -268,9 +280,6 @@ public:
 class Model : public IModel {
   Modules f_modules;
 
-  // properties
-  Exprs f_ltlspecs;
-
 public:
   Model()
     : f_modules()
@@ -283,13 +292,6 @@ public:
 
   void add_module(IModule_ptr module)
   { f_modules.push_back(module); }
-
-  const Exprs& get_ltlspecs() const
-  { return f_ltlspecs; }
-
-  void add_ltlspec(Expr_ptr formula)
-  { f_ltlspecs.push_back(formula); }
-
 };
 
 class ModelMgr;

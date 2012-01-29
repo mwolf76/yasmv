@@ -155,11 +155,24 @@ void Walker::walk () {
       case LE_1: goto entry_LE_1;
       case LE_2: goto entry_LE_2;
 
+      case MEMBER_1: goto entry_MEMBER_1;
+      case MEMBER_2: goto entry_MEMBER_2;
+
+      case UNION_1: goto entry_UNION_1;
+      case UNION_2: goto entry_UNION_2;
+
       case ITE_1: goto entry_ITE_1;
       case ITE_2: goto entry_ITE_2;
 
       case COND_1: goto entry_COND_1;
       case COND_2: goto entry_COND_2;
+
+      case SET_1: goto entry_SET_1;
+      case COMMA_1: goto entry_COMMA_1;
+      case COMMA_2: goto entry_COMMA_2;
+
+      case DOT_1: goto entry_DOT_1;
+      case DOT_2: goto entry_DOT_2;
 
         // .. missing anything ?
 
@@ -770,6 +783,43 @@ void Walker::walk () {
       }
       break;
 
+
+      case MEMBER:
+      if (walk_member_preorder(curr.expr)) {
+        f_stack.top().pc = MEMBER_1;
+        f_stack.push(activation_record(curr.expr->f_lhs));
+        goto loop;
+
+      entry_MEMBER_1:
+        if (walk_member_inorder(curr.expr)) {
+          f_stack.top().pc = MEMBER_2;
+          f_stack.push(activation_record(curr.expr->f_rhs));
+          goto loop;
+        }
+
+      entry_MEMBER_2:
+        walk_member_postorder(curr.expr);
+      }
+      break;
+
+    case UNION:
+      if (walk_union_preorder(curr.expr)) {
+        f_stack.top().pc = UNION_1;
+        f_stack.push(activation_record(curr.expr->f_lhs));
+        goto loop;
+
+      entry_UNION_1:
+        if (walk_union_inorder(curr.expr)) {
+          f_stack.top().pc = UNION_2;
+          f_stack.push(activation_record(curr.expr->f_rhs));
+          goto loop;
+        }
+
+      entry_UNION_2:
+        walk_union_postorder(curr.expr);
+      }
+      break;
+
       // ITE
 
     case ITE:
@@ -806,6 +856,53 @@ void Walker::walk () {
 
       entry_COND_2:
         walk_cond_postorder(curr.expr);
+      }
+      break;
+
+    case SET:
+      if (walk_set_preorder(curr.expr)) {
+        f_stack.top().pc = SET_1;
+        f_stack.push(activation_record(curr.expr->f_lhs));
+        goto loop;
+
+      entry_SET_1:
+        walk_set_postorder(curr.expr);
+      }
+      break;
+
+    case COMMA:
+      if (walk_comma_preorder(curr.expr)) {
+        f_stack.top().pc = COMMA_1;
+        f_stack.push(activation_record(curr.expr->f_lhs));
+        goto loop;
+
+      entry_COMMA_1:
+        if (walk_comma_inorder(curr.expr)) {
+          f_stack.top().pc = COMMA_2;
+          f_stack.push(activation_record(curr.expr->f_rhs));
+          goto loop;
+        }
+
+      entry_COMMA_2:
+        walk_comma_postorder(curr.expr);
+      }
+      break;
+
+    case DOT:
+      if (walk_dot_preorder(curr.expr)) {
+        f_stack.top().pc = DOT_1;
+        f_stack.push(activation_record(curr.expr->f_lhs));
+        goto loop;
+
+      entry_DOT_1:
+        if (walk_dot_inorder(curr.expr)) {
+          f_stack.top().pc = DOT_2;
+          f_stack.push(activation_record(curr.expr->f_rhs));
+          goto loop;
+        }
+
+      entry_DOT_2:
+        walk_dot_postorder(curr.expr);
       }
       break;
 

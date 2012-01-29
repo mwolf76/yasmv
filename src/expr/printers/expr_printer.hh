@@ -152,6 +152,11 @@ protected:
   bool walk_cond_preorder(const Expr_ptr expr);
   bool walk_cond_inorder(const Expr_ptr expr);
   void walk_cond_postorder(const Expr_ptr expr);
+  bool walk_set_preorder(const Expr_ptr expr);
+  void walk_set_postorder(const Expr_ptr expr);
+  bool walk_comma_preorder(const Expr_ptr expr);
+  bool walk_comma_inorder(const Expr_ptr expr);
+  void walk_comma_postorder(const Expr_ptr expr);
   void walk_leaf(const Expr_ptr expr);
 };
 
