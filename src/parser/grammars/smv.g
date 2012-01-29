@@ -55,6 +55,7 @@ temporal_formula returns [Expr_ptr res]
 
 /** LTL properties */
 ltl_spec returns [Expr_ptr res]
+@init { res = NULL; }
     : 'LTLSPEC' formula=ltl_formula
       { $res = formula; }
 	;
@@ -105,12 +106,12 @@ scope {
         $smv::model->add_module($modules::module);
       }
 
-      formal_params? fsm properties?
+      formal_params? module_body
       )*
     ;
 
 properties
-    : property ( ';' property )*
+    : (property ';'?)*
     ;
 
 property
@@ -130,10 +131,12 @@ formal_params
     ;
 
 // FSM definition entry point
-fsm :	(fsm_formula)*
+module_body
+    :	module_decl
+        ( ';' module_decl )*
     ;
 
-fsm_formula
+module_decl
     :	/* isa decls */
         fsm_isa_decl_body
 
@@ -151,6 +154,9 @@ fsm_formula
 
         /* functional FSM */
 	|	assignment_formula
+
+        /* properties */
+    |   property
 	;
 
 /* ISA */
@@ -169,11 +175,12 @@ fsm_var_decl
     ;
 
 fsm_var_decl_body
-	: fsm_var_decl_clause +
+	: fsm_var_decl_clause
+        ( ';' fsm_var_decl_clause)*
 	;
 
 fsm_var_decl_clause
-	: id=identifier ':' tp=type_name ';'
+	: id=identifier ':' tp=type_name
     {
             IVariable_ptr var = new StateVar(id, tp);
             $modules::module->add_localVar(var);
@@ -186,11 +193,12 @@ fsm_ivar_decl
     ;
 
 fsm_ivar_decl_body
-	: fsm_ivar_decl_clause+
+	: fsm_ivar_decl_clause
+        ( ';' fsm_ivar_decl_clause)*
 	;
 
 fsm_ivar_decl_clause
-	: id=identifier ':' tp=type_name ';'
+	: id=identifier ':' tp=type_name
     {
             IVariable_ptr var = new InputVar(id, tp);
             $modules::module->add_localVar(var);
@@ -203,17 +211,17 @@ fsm_frozenvar_decl
     ;
 
 fsm_frozenvar_decl_body
-	: fsm_frozenvar_decl_clause+
+	: fsm_frozenvar_decl_clause
+        ( ';' fsm_frozenvar_decl_clause)*
 	;
 
 fsm_frozenvar_decl_clause
-	: id=identifier ':' tp=type_name ';'
+	: id=identifier ':' tp=type_name
     {
             IVariable_ptr var = new FrozenVar(id, tp);
             $modules::module->add_localVar(var);
     }
 	;
-
 
 /* DEFINE */
 fsm_define_decl
@@ -221,11 +229,12 @@ fsm_define_decl
     ;
 
 fsm_define_decl_body
-	: fsm_define_decl_clause+
+	: fsm_define_decl_clause
+        ( ';' fsm_define_decl_clause)*
 	;
 
 fsm_define_decl_clause
-	: id=identifier ':=' body=untimed_expression ';'
+	: id=identifier ':=' body=untimed_expression
     {
             IDefine_ptr def = new Define(id, body);
             $modules::module->add_localDef(def);
@@ -294,11 +303,12 @@ assignment_formula
 	;
 
 assignment_body
-	: assignment_clause +
+	: assignment_clause (
+            ';' assignment_clause) *
 	;
 
 assignment_clause
-	: id=lvalue ':=' expr=untimed_expression ';'
+	: id=lvalue ':=' expr=untimed_expression
     {
             IAssign_ptr assgn = new Assign(id, expr);
             $modules::module->add_assign(assgn);
@@ -316,9 +326,9 @@ untimed_expression returns [Expr_ptr res]
 
 case_expression returns [Expr_ptr res]
 scope { Exprs clauses; }
+@init { res = NULL; }
 	: 'case' cls=case_clauses 'esac'
       {
-        res = NULL;
         for (Exprs::reverse_iterator eye = cls.rbegin();
              eye != cls.rend();
              eye ++) {
@@ -331,6 +341,7 @@ scope { Exprs clauses; }
 	;
 
 case_clauses returns [Exprs res]
+@init {}
     :
        ( lhs=untimed_expression ':' rhs=untimed_expression ';'
          { $res.push_back(em.make_cond(lhs, rhs)); } )+
@@ -708,7 +719,7 @@ IDENTIFIER
 	:	LETTER (LETTER|'0'..'9')*
 	;
 
-WORDCONST
+WORD_CONSTANT
     :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HexDigit+ ;
 
 fragment
