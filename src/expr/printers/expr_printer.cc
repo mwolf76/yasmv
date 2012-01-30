@@ -57,20 +57,24 @@ bool Printer::walk_F_preorder(const Expr_ptr expr)
 { f_os << "F ("; return true; }
 void Printer::walk_F_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_G_preorder(const Expr_ptr expr)
 { f_os << "G ("; return true; }
 void Printer::walk_G_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_X_preorder(const Expr_ptr expr)
 { f_os << "X ("; return true; }
 void Printer::walk_X_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_U_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_U_inorder(const Expr_ptr expr)
 { f_os << " U "; return true; }
 void Printer::walk_U_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_R_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_R_inorder(const Expr_ptr expr)
@@ -82,20 +86,24 @@ bool Printer::walk_AF_preorder(const Expr_ptr expr)
 { f_os << "AF ("; return true; }
 void Printer::walk_AF_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_AG_preorder(const Expr_ptr expr)
 { f_os << "AG ("; return true; }
 void Printer::walk_AG_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_AX_preorder(const Expr_ptr expr)
 { f_os << "AX ("; return true; }
 void Printer::walk_AX_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_AU_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_AU_inorder(const Expr_ptr expr)
 { f_os << " AU "; return true; }
 void Printer::walk_AU_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_AR_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_AR_inorder(const Expr_ptr expr)
@@ -111,16 +119,19 @@ bool Printer::walk_EG_preorder(const Expr_ptr expr)
 { f_os << "EG ("; return true; }
 void Printer::walk_EG_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_EX_preorder(const Expr_ptr expr)
 { f_os << "EX ("; return true; }
 void Printer::walk_EX_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_EU_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_EU_inorder(const Expr_ptr expr)
 { f_os << " EU "; return true; }
 void Printer::walk_EU_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
 bool Printer::walk_ER_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_ER_inorder(const Expr_ptr expr)
@@ -138,7 +149,6 @@ bool Printer::walk_next_preorder(const Expr_ptr expr)
 void Printer::walk_next_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-// highest binding level??
 bool Printer::walk_neg_preorder(const Expr_ptr expr)
 { f_os << "- "; return true; }
 void Printer::walk_neg_postorder(const Expr_ptr expr)
@@ -296,7 +306,6 @@ bool Printer::walk_cond_inorder(const Expr_ptr expr)
 void Printer::walk_cond_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-
 bool Printer::walk_set_preorder(const Expr_ptr expr)
 { f_os << "{"; return true; }
 void Printer::walk_set_postorder(const Expr_ptr expr)
@@ -331,7 +340,6 @@ void Printer::walk_union_postorder(const Expr_ptr expr)
 {}
 
 void Printer::walk_leaf(const Expr_ptr expr)
-
 {
   ExprType symb = expr->f_symb;
 
