@@ -30,6 +30,11 @@ options {
 #include <types.hh>
 #include <expr_mgr.hh>
 #include <model.hh>
+
+#define PROP_EXPR 0
+#define LTL_EXPR 1
+#define CTL_EXPR 2
+// ...
 }
 
 @members {
@@ -41,17 +46,81 @@ options {
 
 /* Toplevel */
 smv
-scope { IModel_ptr model; }
-@init { $smv::model = mm.get_model(); }
-    : modules
+scope {
+    IModel_ptr model;
+    int mode;
+}
+
+@init {
+    $smv::model = mm.get_model();
+    $smv::mode = PROP_EXPR;
+}
+    : modules ';'?
     ;
 
-// backjump entry point (see README below)
-temporal_formula returns [Expr_ptr res]
+/** CTL  properties */
+ctl_spec returns [Expr_ptr res]
 @init { res = NULL; }
-    : formula=ltl_formula
+    : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
      { $res = formula; }
+	;
+
+ctl_formula returns [Expr_ptr res]
+@init { res = NULL; int prev_mode; }
+	:
+        { prev_mode = $smv::mode; $smv::mode= CTL_EXPR; }
+        formula=binary_ctl_formula
+
+        { $smv::mode = prev_mode; $res = formula; }
     ;
+
+binary_ctl_formula returns [Expr_ptr res]
+@init { res = NULL; }
+	:	lhs=unary_ctl_formula
+        { $res = lhs; }
+        (
+           'AU' rhs=unary_ctl_formula
+           { $res = em.make_AU($res, rhs); }
+
+        |
+           'EU' rhs=unary_ctl_formula
+           { $res = em.make_EU($res, rhs); }
+
+        |
+           'AR' rhs=unary_ctl_formula
+           { $res = em.make_AR($res, rhs); }
+
+        |
+           'ER' rhs=unary_ctl_formula
+           { $res = em.make_ER($res, rhs); }
+
+        )*
+	;
+
+unary_ctl_formula returns [Expr_ptr res]
+@init { res = NULL; }
+	:
+       'AG' formula=unary_ctl_formula
+       { $res = em.make_AG(formula); }
+    |
+       'EG' formula=unary_ctl_formula
+       { $res = em.make_EG(formula); }
+    |
+       'AF' formula=unary_ctl_formula
+       { $res = em.make_AF(formula); }
+    |
+       'EF' formula=unary_ctl_formula
+       { $res = em.make_EF(formula); }
+    |
+       'AX' formula=unary_ctl_formula
+       { $res = em.make_AX(formula); }
+    |
+       'EX' formula=unary_ctl_formula
+       { $res = em.make_EX(formula); }
+
+    |   formula=untimed_expression
+       { $res = formula; }
+	;
 
 /** LTL properties */
 ltl_spec returns [Expr_ptr res]
@@ -61,9 +130,12 @@ ltl_spec returns [Expr_ptr res]
 	;
 
 ltl_formula returns [Expr_ptr res]
-@init { res = NULL; }
-	:	formula=binary_ltl_formula
-       { $res = formula; }
+@init { res = NULL; int prev_mode; }
+	:
+        { prev_mode = $smv::mode; $smv::mode= LTL_EXPR; }
+        formula=binary_ltl_formula
+
+        { $smv::mode = prev_mode; $res = formula; }
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
@@ -106,13 +178,13 @@ scope { IModule_ptr module ; }
       )*
     ;
 
-properties
-    : (property ';'?)*
-    ;
-
 property
     : formula=ltl_spec
       { $modules::module->add_ltlspec(formula); }
+
+    |
+      formula=ctl_spec
+      { $modules::module->add_ctlspec(formula); }
     ;
 
 formal_params
@@ -566,15 +638,13 @@ primary_expression returns [Expr_ptr res]
 	| k=constant
       { $res = k; }
 
-    /*
-       README: follow recursive rule avoids a lot of code duplication
-       in the grammar, however this relaxes the grammar to the point
-       of allowing temporal operators in non-temporal expressions, and
-       mixing CTL and LTL operators (bad). A proper check needs to be
-       done at compilation time.
-    */
-	| '(' expr=temporal_formula ')'
-      { $res = expr; }
+	| '(' (
+            { $smv::mode == LTL_EXPR }?=> expr=ltl_formula ')'
+            { $res = expr; }
+
+	      | { $smv::mode == PROP_EXPR }?=> expr=untimed_expression ')'
+            { $res = expr; }
+          )
 	;
 
 identifier returns [Expr_ptr res]
@@ -609,16 +679,16 @@ int_constant returns [Expr_ptr res]
         $res = em.make_hex_const(tmp);
       }
 
-    | OCTAL_LITERAL
-      {
-        Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
-        $res = em.make_oct_const(tmp);
-      }
-
    	| DECIMAL_LITERAL
       {
         Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_dec_const(tmp);
+      }
+
+    | OCTAL_LITERAL
+      {
+        Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
+        $res = em.make_oct_const(tmp);
       }
 	;
 
@@ -718,6 +788,7 @@ literal returns [Expr_ptr res]
 @init { res = NULL; }
     :  expr=identifier
        { $res = expr; }
+
     |  expr=int_constant
        { $res = expr; }
     ;

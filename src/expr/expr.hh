@@ -275,6 +275,8 @@ public:
     return (*f_instance);
   }
 
+  // -- makers ----------------------------------------------------------------
+
   /* LTL */
   inline Expr_ptr make_F(Expr_ptr expr)
   { return make_expr(F, expr, NULL); }
@@ -463,16 +465,6 @@ public:
   inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
   { return make_expr(RANGE, a, b);  }
 
-  // TODO:
-  inline Expr_ptr make_hex_const(Atom atom)
-  { return NULL; }
-
-  inline Expr_ptr make_oct_const(Atom atom)
-  { return NULL; }
-
-  inline Expr_ptr make_dec_const(Atom atom)
-  { return NULL; }
-
   /* predefined identifiers */
   inline Expr_ptr make_boolean()
   { return bool_expr; }
@@ -554,6 +546,16 @@ public:
       : make_uwconst(wsize, value );
   }
 
+  inline Expr_ptr make_hex_const(Atom atom)
+  { return make_iconst( strtoll(atom.c_str(), NULL, 16)); }
+
+  inline Expr_ptr make_dec_const(Atom atom)
+  { return make_iconst( strtoll(atom.c_str(), NULL, 10)); }
+
+  inline Expr_ptr make_oct_const(Atom atom)
+  { return make_iconst( strtoll(atom.c_str(), NULL, 8)); }
+
+  // -- is-a predicates -------------------------------------------------------
   inline bool is_identifier(const Expr_ptr expr) const {
     assert(expr);
     return expr->f_symb == IDENT;

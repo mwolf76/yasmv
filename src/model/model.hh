@@ -95,6 +95,10 @@ public:
   virtual const Exprs& get_ltlspecs() const =0;
   virtual void add_ltlspec(Expr_ptr formula) =0;
 
+  virtual const Exprs& get_ctlspecs() const =0;
+  virtual void add_ctlspec(Expr_ptr formula) =0;
+
+
 };
 typedef IModule* IModule_ptr;
 typedef vector<IModule_ptr> Modules;
@@ -121,6 +125,7 @@ class Module : public IModule {
   Assigns f_assgn;
 
   Exprs f_ltlspecs;
+  Exprs f_ctlspecs;
 
 public:
 
@@ -136,6 +141,7 @@ public:
     , f_fair()
     , f_assgn()
     , f_ltlspecs()
+    , f_ctlspecs()
   {}
 
   const Expr_ptr get_name() const
@@ -203,6 +209,12 @@ public:
 
   void add_ltlspec(Expr_ptr formula)
   { f_ltlspecs.push_back(formula); }
+
+  const Exprs& get_ctlspecs() const
+  { return f_ctlspecs; }
+
+  void add_ctlspec(Expr_ptr formula)
+  { f_ctlspecs.push_back(formula); }
 };
 
 class Variable : public IVariable {
