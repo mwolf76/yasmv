@@ -309,6 +309,27 @@ bool Printer::walk_comma_inorder(const Expr_ptr expr)
 void Printer::walk_comma_postorder(const Expr_ptr expr)
 {}
 
+bool Printer::walk_dot_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_dot_inorder(const Expr_ptr expr)
+{ f_os << "."; return true; }
+void Printer::walk_dot_postorder(const Expr_ptr expr)
+{}
+
+bool Printer::walk_member_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_member_inorder(const Expr_ptr expr)
+{ f_os << " in "; return true; }
+void Printer::walk_member_postorder(const Expr_ptr expr)
+{}
+
+bool Printer::walk_union_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_union_inorder(const Expr_ptr expr)
+{ f_os << " union "; return true; }
+void Printer::walk_union_postorder(const Expr_ptr expr)
+{}
+
 void Printer::walk_leaf(const Expr_ptr expr)
 
 {

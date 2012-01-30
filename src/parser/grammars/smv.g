@@ -20,7 +20,7 @@ grammar smv;
 
 options {
 	k = 2; /* LL(1) grammar with a few exceptions */
-	memoize = true;
+    memoize = true;
     language = C;
 }
 
@@ -50,55 +50,50 @@ scope { IModel_ptr model; }
 temporal_formula returns [Expr_ptr res]
 @init { res = NULL; }
     : formula=ltl_formula
-      { $res = formula; }
+     { $res = formula; }
     ;
 
 /** LTL properties */
 ltl_spec returns [Expr_ptr res]
 @init { res = NULL; }
     : 'LTLSPEC' formula=ltl_formula
-      { $res = formula; }
+     { $res = formula; }
 	;
 
 ltl_formula returns [Expr_ptr res]
 @init { res = NULL; }
 	:	formula=binary_ltl_formula
-        { $res = formula; }
+       { $res = formula; }
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
 @init { res = NULL; }
 	:	lhs=unary_ltl_formula
-        { $res = lhs; }
-        (
+        { $res = lhs; } (
             'U' rhs=unary_ltl_formula
-            { $res = em.make_U($res, rhs); }
+           { $res = em.make_U($res, rhs); }
 
         |   'R' rhs=unary_ltl_formula
-            { $res = em.make_R($res, rhs); }
-
-        )*
+           { $res = em.make_R($res, rhs); } )*
 	;
 
 unary_ltl_formula returns [Expr_ptr res]
 @init { res = NULL; }
 	:	'G' formula=unary_ltl_formula
-        { $res = em.make_G(formula); }
+       { $res = em.make_G(formula); }
 
 	|	'F' formula=unary_ltl_formula
-        { $res = em.make_F(formula); }
+       { $res = em.make_F(formula); }
 
 	|	'X' formula=unary_ltl_formula
-        { $res = em.make_X(formula); }
+       { $res = em.make_X(formula); }
 
     |   formula=untimed_expression
-        { $res = formula; }
+       { $res = formula; }
 	;
 
 modules
-scope {
-    IModule_ptr module ;
-}
+scope { IModule_ptr module ; }
 @init { $modules::module = NULL; }
 
     : ( 'MODULE' id=identifier
@@ -125,9 +120,9 @@ formal_params
         id=identifier
         { $modules::module->add_formalParam(id); }
 
-        ( ',' id=identifier {
-            $modules::module->add_formalParam(id);
-        })*
+        ( ',' id=identifier
+        { $modules::module->add_formalParam(id); }
+        )*
         ')'
     ;
 
@@ -139,7 +134,7 @@ module_body
 
 module_decl
     :	/* variables and defines */
-	|   fsm_var_decl
+        fsm_var_decl
 	|	fsm_ivar_decl
 	|	fsm_frozenvar_decl
 	|	fsm_define_decl
@@ -162,7 +157,6 @@ fsm_isa_decl_clause
        { $modules::module->add_isaDecl(id); }
 	;
 
-/* VAR */
 fsm_var_decl
     : 'VAR' fsm_var_decl_body
     ;
@@ -175,12 +169,11 @@ fsm_var_decl_body
 fsm_var_decl_clause
 	: id=identifier ':' tp=type_name
     {
-            IVariable_ptr var = new StateVar(id, tp);
-            $modules::module->add_localVar(var);
+      IVariable_ptr var = new StateVar(id, tp);
+      $modules::module->add_localVar(var);
     }
 	;
 
-/* IVAR */
 fsm_ivar_decl
     : 'IVAR' fsm_ivar_decl_body
     ;
@@ -193,12 +186,11 @@ fsm_ivar_decl_body
 fsm_ivar_decl_clause
 	: id=identifier ':' tp=type_name
     {
-            IVariable_ptr var = new InputVar(id, tp);
-            $modules::module->add_localVar(var);
+      IVariable_ptr var = new InputVar(id, tp);
+      $modules::module->add_localVar(var);
     }
 	;
 
-/* FROZENVAR */
 fsm_frozenvar_decl
     : 'FROZENVAR' fsm_frozenvar_decl_body
     ;
@@ -211,12 +203,11 @@ fsm_frozenvar_decl_body
 fsm_frozenvar_decl_clause
 	: id=identifier ':' tp=type_name
     {
-            IVariable_ptr var = new FrozenVar(id, tp);
-            $modules::module->add_localVar(var);
+      IVariable_ptr var = new FrozenVar(id, tp);
+      $modules::module->add_localVar(var);
     }
 	;
 
-/* DEFINE */
 fsm_define_decl
     : 'DEFINE' fsm_define_decl_body
     ;
@@ -229,12 +220,11 @@ fsm_define_decl_body
 fsm_define_decl_clause
 	: id=identifier ':=' body=untimed_expression
     {
-            IDefine_ptr def = new Define(id, body);
-            $modules::module->add_localDef(def);
+      IDefine_ptr def = new Define(id, body);
+      $modules::module->add_localDef(def);
     }
 	;
 
-/* INIT */
 fsm_init_decl
     : 'INIT' fsm_init_decl_body
     ;
@@ -248,7 +238,6 @@ fsm_init_decl_clause
       { $modules::module->add_init(expr); }
 	;
 
-/* INVAR */
 fsm_invar_decl
     : 'INVAR' fsm_invar_decl_body
     ;
@@ -262,7 +251,6 @@ fsm_invar_decl_clause
       { $modules::module->add_invar(expr); }
 	;
 
-/* TRANS */
 fsm_trans_decl
     : 'TRANS' fsm_trans_decl_body
     ;
@@ -276,7 +264,6 @@ fsm_trans_decl_clause
       { $modules::module->add_trans(expr); }
 	;
 
-/* FAIRNESS */
 fsm_fairn_decl
     : 'FAIRNESS' fsm_fairn_decl_body
     ;
@@ -290,9 +277,8 @@ fsm_fairn_decl_clause
       { $modules::module->add_fairness(expr); }
 	;
 
-/* functional FSM definition */
 assignment_formula
-	: 	'ASSIGN' assignment_body
+	: 'ASSIGN' assignment_body
 	;
 
 assignment_body
@@ -308,6 +294,7 @@ assignment_clause
       }
     ;
 
+// main expression entry point
 untimed_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: expr=case_expression
@@ -318,16 +305,12 @@ untimed_expression returns [Expr_ptr res]
 	;
 
 case_expression returns [Expr_ptr res]
-@init {
-    Exprs clauses;
-    res = NULL;
-}
+@init { Exprs clauses; res = NULL; }
 	: 'case' cls=case_clauses 'esac'
       {
-        for (Exprs::reverse_iterator eye = cls.rbegin();
-             eye != cls.rend();
+        for (Exprs::reverse_iterator eye = cls.rbegin(); eye != cls.rend();
              eye ++) {
-            if (!res) { res = (*eye); }
+            if (!res) res = (*eye);
             else {
                 res = const_cast<Expr_ptr>(em.make_ite((*eye), res));
             }
@@ -336,22 +319,24 @@ case_expression returns [Expr_ptr res]
 	;
 
 case_clauses returns [Exprs res]
-@init {}
     :
-       ( lhs=untimed_expression ':' rhs=untimed_expression ';'
-         { $res.push_back(em.make_cond(lhs, rhs)); } )+
+    (
+      lhs=untimed_expression ':' rhs=untimed_expression ';'
+      {
+assert(lhs);
+assert(rhs);
+$res.push_back(em.make_cond(lhs, rhs)); }
+    )+
     ;
-
 
 cond_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: expr=iff_expression
       { $res = expr; }
+
     (
       '?' lhs=untimed_expression ':' rhs=cond_expression
-      {
-       $res = em.make_ite(em.make_cond($res, lhs), rhs);
-      }
+      { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
     )?
 	;
 
@@ -359,6 +344,7 @@ iff_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	:  lhs=imply_expression
        { $res = lhs; }
+
     (
        '<->' rhs=imply_expression
        { $res = em.make_iff($res, rhs); }
@@ -369,6 +355,7 @@ imply_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=inclusive_or_expression
       { $res = lhs; }
+
     (
       '->' rhs=inclusive_or_expression
       { $res = em.make_implies($res, rhs); }
@@ -379,10 +366,10 @@ inclusive_or_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=exclusive_or_expression
       { $res = lhs; }
+
     (
       '|' rhs=exclusive_or_expression
       { $res = em.make_or($res, rhs); }
-
     )*
 	;
 
@@ -390,13 +377,13 @@ exclusive_or_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=and_expression
       { $res = lhs; }
+
     (
       'xor' rhs=and_expression
-      { $res = em.make_xor($res, rhs); }
+     { $res = em.make_xor($res, rhs); }
 
     |  'xnor' rhs=and_expression
-      { $res = em.make_xnor($res, rhs); }
-
+     { $res = em.make_xnor($res, rhs); }
     )*
 	;
 
@@ -407,8 +394,7 @@ and_expression returns [Expr_ptr res]
 
     (
       '&' rhs=equality_expression
-       { $res = em.make_and($res, rhs); }
-
+      { $res = em.make_and($res, rhs); }
     )*
 	;
 
@@ -417,12 +403,11 @@ equality_expression returns [Expr_ptr res]
 	: lhs=relational_expression
       { $res = lhs; }
 
-    ( '==' rhs=relational_expression
-      { $res = em.make_eq($res, rhs); }
+    ( '=' rhs=relational_expression
+     { $res = em.make_eq($res, rhs); }
 
     | '!=' rhs=relational_expression
-      { $res = em.make_ne($res, rhs); }
-
+     { $res = em.make_ne($res, rhs); }
     )*
 	;
 
@@ -433,28 +418,27 @@ relational_expression returns [Expr_ptr res]
 
     (
       '<' rhs=union_expression
-      { $res = em.make_lt($res, rhs); }
+     { $res = em.make_lt($res, rhs); }
 
     | '<=' rhs=union_expression
-      { $res = em.make_le($res, rhs); }
+     { $res = em.make_le($res, rhs); }
 
     | '>=' rhs=union_expression
-      { $res = em.make_ge($res, rhs); }
+     { $res = em.make_ge($res, rhs); }
 
     | '>' rhs=union_expression
-      { $res = em.make_gt($res, rhs); }
-
+     { $res = em.make_gt($res, rhs); }
     )*
 	;
 
 union_expression returns [Expr_ptr res]
 @init { res = NULL; }
     : lhs=member_expression
-      { $res= lhs; }
+     { $res= lhs; }
 
     (
       'union' rhs=member_expression
-      { $res = em.make_union($res, rhs); }
+     { $res = em.make_union($res, rhs); }
     )*
     ;
 
@@ -487,7 +471,7 @@ shift_expression returns [Expr_ptr res]
 additive_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=multiplicative_expression
-        { $res = lhs; }
+      { $res = lhs; }
 
     (
         '+' rhs=multiplicative_expression
@@ -501,7 +485,7 @@ additive_expression returns [Expr_ptr res]
 multiplicative_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=concatenative_expression
-        { $res = lhs; }
+      { $res = lhs; }
 
     (
       '*' rhs=concatenative_expression
@@ -512,19 +496,17 @@ multiplicative_expression returns [Expr_ptr res]
 
     | 'mod' rhs=concatenative_expression
       { $res = em.make_mod($res, rhs); }
-
     )*
 	;
 
 concatenative_expression returns [Expr_ptr res]
 @init { res = NULL; }
 	: lhs=unary_expression
-        { $res = lhs; }
+      { $res = lhs; }
 
     (
        '::' rhs=unary_expression
        { $res = em.make_concat($res, rhs); }
-
     )*
 	;
 
@@ -563,18 +545,18 @@ unary_expression returns [Expr_ptr res]
 
 postfix_expression returns [Expr_ptr res]
 @init { res = NULL; }
-	:   lhs=primary_expression (
+	:   lhs=primary_expression
+        { $res = lhs; }
 
-            '[' rhs=primary_expression ']'
-            { $res = em.make_subscript(lhs, rhs); }
-        |
+    (
+        '[' rhs=primary_expression ']'
+        { $res = em.make_subscript($res, rhs); }
 
-            '.' rhs=primary_expression
-            { $res = em.make_dot(lhs, rhs); }
+    |   '.' rhs=primary_expression
+        { $res = em.make_dot($res, rhs); }
 
-        |   { $res = lhs; } )
-
-	;
+    )*
+    ;
 
 primary_expression returns [Expr_ptr res]
 @init { res = NULL; }
@@ -585,7 +567,7 @@ primary_expression returns [Expr_ptr res]
       { $res = k; }
 
     /*
-       README: follow recursive rule avoid a lot of code duplication
+       README: follow recursive rule avoids a lot of code duplication
        in the grammar, however this relaxes the grammar to the point
        of allowing temporal operators in non-temporal expressions, and
        mixing CTL and LTL operators (bad). A proper check needs to be
@@ -598,52 +580,56 @@ primary_expression returns [Expr_ptr res]
 identifier returns [Expr_ptr res]
 @init { res = NULL; }
 	: IDENTIFIER
-    { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
+      { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
 	;
 
 constant returns [Expr_ptr res]
 @init { res = NULL; }
-    :	enum_constant
-    |   range_constant
-    |   word_constant
+    :	k=enum_constant
+        { $res = k; }
+
+    |   k=range_constant
+        { $res = k; }
+
+    |   k=word_constant
+        { $res = k; }
     ;
 
 word_constant returns [Expr_ptr res]
 @init { res = NULL; }
     : WORD_CONSTANT
-    { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
+      { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
     ;
 
 int_constant returns [Expr_ptr res]
 @init { res = NULL; }
-	:   HEX_LITERAL
-        {
-         Atom tmp((const char*)($HEX_LITERAL.text->chars));
-         $res = em.make_hex_const(tmp);
-        }
+	: HEX_LITERAL
+      {
+        Atom tmp((const char*)($HEX_LITERAL.text->chars));
+        $res = em.make_hex_const(tmp);
+      }
 
     | OCTAL_LITERAL
-        {
-         Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
-         $res = em.make_oct_const(tmp);
-        }
-
+      {
+        Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
+        $res = em.make_oct_const(tmp);
+      }
 
    	| DECIMAL_LITERAL
-        {
-         Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
-         $res = em.make_dec_const(tmp);
-        }
+      {
+        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+        $res = em.make_dec_const(tmp);
+      }
 	;
 
 range_constant returns [Expr_ptr res]
 @init { res = NULL; }
-	:	lhs=int_constant
+	: lhs=int_constant
+      { $res = lhs; }
 
-        ('..' rhs=int_constant
-           { $res = em.make_range(lhs, rhs); }
-
-        |  { $res = lhs; } )
+      ('..' rhs=int_constant
+      { $res = em.make_range(lhs, rhs); }
+      )?
 	;
 
 enum_constant returns [Expr_ptr res]
@@ -656,31 +642,31 @@ enum_constant returns [Expr_ptr res]
 /* lvalue is used in assignments */
 lvalue returns [Expr_ptr res]
 @init { res = NULL; }
-	:	'init' '(' expr=postfix_expression ')'
-        { $res = em.make_init(expr); }
+	: 'init' '(' expr=postfix_expression ')'
+      { $res = em.make_init(expr); }
 
-	|	'next' '(' expr=postfix_expression ')'
-        { $res = em.make_next(expr); }
+	| 'next' '(' expr=postfix_expression ')'
+      { $res = em.make_next(expr); }
 
-	|	expr=postfix_expression
-        { $res = expr; }
+	| expr=postfix_expression
+      { $res = expr; }
 	;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
 @init { res = NULL; }
-	:	'next' '(' expr=postfix_expression ')'
-        { $res = em.make_next(expr); }
+	: 'next' '(' expr=postfix_expression ')'
+      { $res = em.make_next(expr); }
 
-	|	expr=postfix_expression
-        { $res = expr; }
+	| expr=postfix_expression
+      { $res = expr; }
 	;
 
 /* ordinary values used elsewhere */
 value returns [Expr_ptr res]
 @init { res = NULL; }
-    :   expr=postfix_expression
-        { $res = expr; }
+    : expr=postfix_expression
+      { $res = expr; }
     ;
 
 type_name returns [Type_ptr res]
@@ -689,45 +675,51 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
 	| literals=enum_type
-     { $res = tm.find_enum(literals); }
+      { $res = tm.find_enum(literals); }
 
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }
 
     | 'unsigned'? 'word' '[' k=int_constant ']'
-       { $res = tm.find_uword(k); }
+      { $res = tm.find_uword(k); }
 
-	|  'signed' 'word' '[' k=int_constant ']'
-       { $res = tm.find_sword(k); }
+	| 'signed' 'word' '[' k=int_constant ']'
+      { $res = tm.find_sword(k); }
 
     | id=identifier
-      { $res = tm.find_instance(id); }
-      actual_param_decls[$res]
+      { $res = tm.find_instance(id); }  actual_param_decls[$res]
     ;
 
 enum_type returns [EnumLiterals lits]
-	:	'{' lit=literal
-            { $lits.insert(lit); }
+	:
+     '{'
+          lit=literal
+          { $lits.insert(lit); }
 
-            (',' lit=literal { $lits.insert(lit); } )*
-        '}'
+          (',' lit=literal
+          { $lits.insert(lit); }
+          )*
+     '}'
 	;
 
 actual_param_decls [Type_ptr m]
 	:
-        '(' ap=pvalue {
-            ((Instance*)(m)) -> add_param(ap);
-        }
-        (',' pvalue {
-                ((Instance*)(m)) -> add_param(ap);
-        })*
-        ')'
+     '('
+          ap=pvalue
+            { ((Instance*)(m)) -> add_param(ap); }
+
+          (',' pvalue
+          { ((Instance*)(m)) -> add_param(ap); }
+          )*
+     ')'
     ;
 
 literal returns [Expr_ptr res]
 @init { res = NULL; }
-    :  expr=identifier { $res = expr; }
-    |  expr=int_constant { $res = expr; }
+    :  expr=identifier
+       { $res = expr; }
+    |  expr=int_constant
+       { $res = expr; }
     ;
 
 /** Lexer rules */
@@ -783,10 +775,12 @@ fragment ZERO
    : '0'
    ;
 
-WS : (' '|'\r'|'\t'|'\u000C'|'\n') {
-    $channel=HIDDEN;
-} ;
+WS
+   : (' '|'\r'|'\t'|'\u000C'|'\n')
+     { $channel=HIDDEN; }
+   ;
 
-LINE_COMMENT : '--' ~('\n'|'\r')* '\r'? '\n' {
-    $channel=HIDDEN;
-} ;
+LINE_COMMENT
+   : '--' ~('\n'|'\r')* '\r'? '\n'
+     { $channel=HIDDEN; }
+   ;
