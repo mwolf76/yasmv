@@ -35,222 +35,150 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // Basic Type class. Is.. nothing.
 class Type {
 public:
-  virtual const string get_repr() const
-  { return "<NullType>"; }
+  virtual const Expr_ptr get_repr() const
+  { return NULL; }
 
-  virtual bool is_boolean() const
-  { return false; }
-
-  virtual bool is_intRange() const
-  { return false; }
-
-  virtual bool is_intEnum() const
-  { return false; }
-
-  virtual bool is_symb_enum() const
-  { return false; }
-
-  virtual bool is_mixed_enum() const
-  { return false; }
-
-  virtual bool is_instance() const
-  { return false; }
 };
 typedef Type* Type_ptr;
-const static Type nilType;
+const static Type nilType; // ??
 
 // -- Supported data types: boolean, ranged integers, pure-int enums,
 // .. symbolic enums, mixed enums, words and signed words up to 32 bits
 // .. wide, module instances.
 class BooleanType : public Type {
   friend class TypeMgr;
-  BooleanType() {}
+  ExprMgr& f_em;
+
+  Expr_ptr f_repr;
+
+protected:
+  BooleanType()
+    : f_em(ExprMgr::INSTANCE())
+    , f_repr(f_em.make_boolean())
+  {}
 
 public:
-  bool is_boolean() const
-  { return true; }
+  const Expr_ptr get_repr() const
+  { return f_repr; }
+};
 
-  bool is_intRange() const
-  { return false; }
+class TemporalType : public Type {
+  friend class TypeMgr;
+  ExprMgr& f_em;
 
-  bool is_intEnum() const
-  { return false; }
+  Expr_ptr f_repr;
 
-  bool is_symb_enum() const
-  { return false; }
+protected:
+  TemporalType()
+    : f_em(ExprMgr::INSTANCE())
+    , f_repr(f_em.make_temporal())
+  {}
 
-  bool is_mixed_enum() const
-  { return false; }
-
-  bool is_instance() const
-  { return false; }
-
-  const string get_repr() const
-  { return "boolean"; }
+public:
+  const Expr_ptr get_repr() const
+  { return f_repr; }
 };
 
 class IntRangeType : public Type {
-  Expr_ptr f_min;
-  Expr_ptr f_max;
+  friend class TypeMgr;
+  ExprMgr& f_em;
 
-  IntRangeType(Expr_ptr min, Expr_ptr max)
-    : f_min(min)
+  const Expr_ptr f_min;
+  const Expr_ptr f_max;
+
+  IntRangeType(const Expr_ptr min, const Expr_ptr max)
+    : f_em(ExprMgr::INSTANCE())
+    , f_min(min)
     , f_max(max)
   {}
 
 public:
-  inline Expr_ptr get_min() const
+  inline const Expr_ptr get_min() const
   { return f_min; }
 
-  inline Expr_ptr get_max() const
+  inline const Expr_ptr get_max() const
   { return f_max; }
 
-  const string get_repr() const
-  {
-    ostringstream oss;
-    oss << "[" << get_min() << ".." << get_max() << "]";
-    return oss.str();
-  }
+  const Expr_ptr get_repr() const
+  { return f_em.make_range(f_min, f_max); }
 };
 
 
 class EnumType : public Type {
   friend class TypeMgr;
-  EnumType() {}
+  ExprMgr& f_em;
+
+  EnumType()
+    : f_em(ExprMgr::INSTANCE())
+  {}
 
   EnumLiterals f_literals;
 
 public:
-  bool is_boolean() const
-  { return false; }
-
-  bool is_intRange() const
-  { return false; }
-
-  bool is_intEnum() const
-  { return false; }
-
-  bool is_symb_enum() const
-  { return false; }
-
-  bool is_mixed_enum() const
-  { return false; }
-
-  bool is_instance() const
-  { return false; }
-
-  const string get_repr() const
-  {
-    ostringstream oss;
-    EnumLiterals::iterator eye;
-
-    oss << "{ ";
-    eye = f_literals.begin();
-    while (eye != f_literals.end()) {
-      oss << (*eye);
-      eye ++;
-      if (eye != f_literals.begin()) {
-        oss << ", ";
-      }
-    }
-    oss << "}";
-
-    return oss.str();
-  }
+  const Expr_ptr get_repr() const
+  { return f_em.make_enum(f_literals); }
 
   const EnumLiterals& get_literals() const
   { return f_literals; }
 
   void add_literal(Expr& lit)
   { f_literals.insert(&lit); }
-};
 
-class Module;
-typedef Module* Module_ptr;
-
-class Enumeration : public Type {
-public:
-  friend class TypeMgr;
-  EnumLiterals f_literals;
-
-  Enumeration(EnumLiterals& lits)
-    : f_literals(lits)
-  {};
-
-  bool is_boolean() const
-  { return false; }
-
-  bool is_intRange() const
-  { return false; }
-
-  bool is_intEnum() const
-  { return ! has_symbs(); }
-
-  bool is_symb_enum() const
-  { return ! has_numbers();  }
-
-  bool is_mixed_enum() const
-  { return (! has_symbs()) || (! has_numbers()); }
-
-  bool is_instance() const
-  { return true; }
-
-private:
   bool has_symbs() const;
   bool has_numbers() const;
 };
+
+// class Enumeration : public Type {
+// public:
+//   friend class TypeMgr;
+
+//   ExprMgr& f_em;
+//   EnumLiterals f_literals;
+
+//   Enumeration(EnumLiterals& lits)
+//     : f_em(ExprMgr::INSTANCE())
+//     , f_literals(lits)
+//   {}
+
+// private:
+//
+//
+// };
 
 class Instance : public Type {
 public:
   friend class TypeMgr;
 
   const Expr_ptr f_identifier;
-  Module_ptr f_module;
+  IModule_ptr f_module;
   Exprs f_params;
 
-  // // eager binding (not used by the parser)
-  // Instance(Module& module, Exprs& params)
-  //   : f_identifier(NULL)
-  //   , f_module(&module)
-  //   , f_params(params)
-  // {}
-
-  // lazy binding
   Instance(Expr* identifier)
     : f_identifier(identifier)
     , f_module(NULL)
     , f_params()
   {}
 
-  // const Expr& get_name() const
-  // { return f_identifier; }
-
-  bool is_boolean() const
-  { return false; }
-
-  bool is_intRange() const
-  { return false; }
-
-  bool is_intEnum() const
-  { return false; }
-
-  bool is_symb_enum() const
-  { return false; }
-
-  bool is_mixed_enum() const
-  { return false; }
-
-  bool is_instance() const
-  { return true; }
-
   void add_param(const Expr_ptr expr)
   { f_params.push_back(expr); }
+
+  const Expr_ptr get_module_name() const
+  { return f_identifier; }
+
+  const IModule_ptr get_module() const
+  { assert(f_module); return f_module; }
+
+  void set_module(IModule_ptr module)
+  { assert(!f_module); assert(module); f_module = module; }
+
 };
+typedef Instance* Instance_ptr;
 
 typedef vector<Expr> Literals;
 
-typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeRegister;
-typedef pair<TypeRegister::iterator, bool> TypeHit;
+// the same here??
+typedef unordered_map<FQExpr, Type_ptr, fqexpr_hash, fqexpr_eq> TypeMap;
+typedef pair<TypeMap::iterator, bool> TypeHit;
 
 class TypeMgr;
 typedef TypeMgr* TypeMgr_ptr;
@@ -262,55 +190,133 @@ public:
     return (*f_instance);
   }
 
-  const Type_ptr find_boolean()
-  { return f_register[ ExprMgr::INSTANCE().make_boolean() ]; }
+  inline const Type_ptr get_type(const FQExpr& fqexpr) const
+  {
+    TypeMap::const_iterator eye = f_map.find(fqexpr);
+    Type_ptr res = NULL;
 
-  const Type_ptr find_enum(EnumLiterals& lits)
-  { return f_register[ ExprMgr::INSTANCE().make_enum(lits) ]; }
+    // cache miss
+    if (eye == f_map.end()) return NULL;
 
-  // REVIEW ME
+    return res;
+  }
+
+  inline void set_type(const FQExpr fqexpr, const Type_ptr tp)
+  { f_map[ fqexpr ] = tp; }
+
+  inline const Type_ptr find_boolean()
+  {
+    return f_register[ FQExpr(f_em.make_boolean()) ];
+  }
+
+  // this type is reserved to tell temporal boolean exprs properties
+  // from boolean propositions
+  inline const Type_ptr find_temporal()
+  {
+    return f_register[ FQExpr(f_em.make_temporal()) ];
+  }
+
+  inline const Type_ptr find_enum(Expr_ptr ctx, EnumLiterals& lits)
+  { return f_register[ FQExpr(ctx, f_em.make_enum(lits)) ]; }
+
+
   const Type_ptr find_uword(Expr_ptr size)
-  { return const_cast <const Type_ptr> (&nilType); }
+  {
+    return f_register[ FQExpr(f_em.make_uword(size)) ];
+  }
 
-  // REVIEW ME
   const Type_ptr find_sword(Expr_ptr size)
-  { return const_cast <const Type_ptr> (&nilType); }
+  {
+    return f_register[ FQExpr (f_em.make_sword(size)) ];
+  }
 
   const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
-  { return const_cast <const Type_ptr> (&nilType); }
+  {
+    return f_register[ FQExpr (f_em.make_range(from, to)) ];
+  }
 
-  // FIXME! won't work
   const Type_ptr find_instance(Expr_ptr identifier)
   {
     Type_ptr inst = new Instance(identifier);
-    TypeHit hit = f_register.insert(make_pair(identifier, inst));
+    TypeHit hit =
+      f_register.insert( make_pair( FQExpr(identifier),
+                                    inst));
     if (hit.second) {
-      logger << "Added instance of module '" << identifier << "' to type register" << endl;
+      logger << "Added instance of module '"
+             << identifier
+             << "' to type register"
+             << endl;
     }
 
-    TypeRegister::pointer p = &(*hit.first);
+    TypeMap::pointer p = &(*hit.first);
     return p->second;
   }
 
-protected:
-  TypeMgr():
-    f_register()
+
+  inline bool is_boolean(const Type_ptr tp) const
+  { return NULL != dynamic_cast <const BooleanType*> (tp); }
+
+  inline bool is_intRange(const Type_ptr tp) const
+  { return NULL != dynamic_cast <const IntRangeType*> (tp); }
+
+  inline bool is_intEnum(const Type_ptr tp) const
   {
-    /* boolean is the only predefined type. Any other type will be
-       declared by the user. */
-    register_type(const_cast<Expr *>(ExprMgr::INSTANCE().make_boolean()),
-                  new BooleanType());
+    EnumType* tmp;
+    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
+      return ! tmp->has_symbs();
+    }
+  }
+
+  inline bool is_symbEnum(const Type_ptr tp) const
+  {
+    EnumType* tmp;
+    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
+      return ! tmp->has_numbers();
+    }
+  }
+
+  inline bool is_mixed_enum(const Type_ptr tp) const
+  {
+    EnumType* tmp;
+    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
+      return ! tmp->has_numbers();
+    }
+
+    return (! tmp->has_symbs())
+      || (! tmp->has_numbers());
+  }
+
+  inline bool is_instance(const Type_ptr tp) const
+  { return (NULL != dynamic_cast <Instance*> (tp)); }
+
+
+protected:
+  TypeMgr()
+    : f_register()
+    , f_map()
+    , f_em(ExprMgr::INSTANCE())
+  {
+    // register predefined types
+    register_type( FQExpr( f_em.make_boolean() ),
+                   new BooleanType());
+
+    register_type( FQExpr( f_em.make_temporal() ),
+                   new TemporalType());
   }
 
 private:
   static TypeMgr_ptr f_instance;
 
   /* low-level services */
-  void register_type(Expr* type_name, Type* vtype)
-  { f_register.insert(make_pair(type_name, vtype)); }
+  void register_type(const FQExpr fqexpr, Type_ptr vtype)
+  { f_register [ fqexpr ] = vtype; }
 
   /* local data */
-  TypeRegister f_register;
+  TypeMap f_register;
+  TypeMap f_map;
+
+  // ref to expr manager
+  ExprMgr& f_em;
 };
 
 

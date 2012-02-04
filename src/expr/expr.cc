@@ -9,7 +9,7 @@ ExprMgr* ExprMgr::f_instance = NULL;
 void link_expr()
 {}
 
-bool Enumeration::has_symbs() const
+bool EnumType::has_symbs() const
 {
   bool res = false;
   ExprMgr& em = ExprMgr::INSTANCE();
@@ -23,7 +23,7 @@ bool Enumeration::has_symbs() const
   return res;
 }
 
-bool Enumeration::has_numbers() const
+bool EnumType::has_numbers() const
 {
   bool res = false;
   ExprMgr& em = ExprMgr::INSTANCE();

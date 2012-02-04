@@ -37,27 +37,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr_mgr.hh>
 
 // -- interfaces --------------------------------------------------------------
+// class ISymbol;
+// typedef ISymbol* ISymbol_ptr;
 
-class IVariable {
+// class IVariable;
+// typedef IVariable* IVariable_ptr;
+// // typedef vector<IVariable_ptr> Variables;
+
+// class IConstant;
+// typedef IConstant* IConstant_ptr;
+// typedef vector<IConstant_ptr> Constants;
+
+// class IDefine;
+// typedef IDefine* IDefine_ptr;
+// typedef vector<IDefine_ptr> Defines;
+
+class ISymbol {
 public:
   virtual const Expr_ptr get_name() const =0;
+
+  bool is_variable() const;
+  bool is_define() const;
+  bool is_const() const;
+};
+
+class IVariable : public ISymbol {
+public:
   virtual const Type_ptr get_type() const =0;
 };
-typedef IVariable* IVariable_ptr;
 
-class IDefine {
+class IConstant : public ISymbol {
+};
+
+class IDefine : public ISymbol {
 public:
-  virtual const Expr_ptr get_name() const =0;
   virtual const Expr_ptr get_body() const =0;
 };
-typedef IDefine* IDefine_ptr;
 
 class IAssign {
 public:
   virtual const Expr_ptr get_name() const =0;
   virtual const Expr_ptr get_body() const =0;
 };
-typedef IAssign* IAssign_ptr;
 
 class IModule {
 public:
@@ -72,6 +93,9 @@ public:
 
   virtual const Variables& get_localVars() const =0;
   virtual void add_localVar(IVariable_ptr var) =0;
+
+  virtual const Constants& get_localConsts() const =0;
+  virtual void add_localVar(IConstant_ptr k) =0;
 
   virtual const Defines& get_localDefs() const =0;
   virtual void add_localDef(IDefine_ptr def) =0;
@@ -98,10 +122,14 @@ public:
   virtual const Exprs& get_ctlspecs() const =0;
   virtual void add_ctlspec(Expr_ptr formula) =0;
 
+  // dictionary behavior
+  // virtual IVariable_ptr fetch_variable(Expr_ptr id) =0;
+  // virtual IDefine_ptr fetch_define(Expr_ptr id) =0;
+  // virtual ISymbol_ptr fetch_const(Expr_ptr id) =0;
 
 };
-typedef IModule* IModule_ptr;
-typedef vector<IModule_ptr> Modules;
+// typedef IModule* IModule_ptr;
+// typedef vector<IModule_ptr> Modules;
 
 class IModel {
 public:
@@ -115,8 +143,10 @@ class Module : public IModule {
   Expr_ptr f_name;
   Exprs f_formalParams;
   Exprs f_isaDecls;
+
   Variables f_localVars;
   Defines f_localDefs;
+  Constants f_localConsts;
 
   Exprs f_init;
   Exprs f_invar;
@@ -135,6 +165,7 @@ public:
     , f_isaDecls()
     , f_localVars()
     , f_localDefs()
+    , f_localConsts()
     , f_init()
     , f_invar()
     , f_trans()
@@ -166,19 +197,29 @@ public:
   { return f_localVars; }
 
   void add_localVar(IVariable_ptr var)
-  { f_localVars.push_back(var); }
+  { // f_localVars.push_back(var);
+  }
 
   const Defines& get_localDefs() const
   { return f_localDefs; }
 
   void add_localDef(IDefine_ptr def)
-  { f_localDefs.push_back(def); }
+  { // f_localDefs.push_back(def);
+  }
+
+  const Constants& get_localConsts() const
+  { return f_localConsts; }
+
+  void add_localVar(IConstant_ptr k)
+  { // f_localConsts.push_back(k);
+  }
 
   const Assigns& get_assign() const
   { return f_assgn; }
 
   void add_assign(IAssign_ptr assign)
-  { f_assgn.push_back(assign); }
+  { // f_assgn.push_back(assign);
+  }
 
   const Exprs& get_init() const
   { return f_init; }
@@ -295,15 +336,16 @@ class Model : public IModel {
 public:
   Model()
     : f_modules()
-  {
-    logger << "Initialized Model instance @" << this << endl;
-  }
+  { logger << "Initialized Model instance @" << this << endl; }
 
   const Modules& get_modules() const
   { return f_modules; }
 
   void add_module(IModule_ptr module)
-  { f_modules.push_back(module); }
+  { // f_modules.push_back(module);
+  }
+
+  ISymbol_ptr fetch_symbol(const FQExpr& fqexpr);
 };
 
 class ModelMgr;
@@ -318,7 +360,6 @@ public:
 
   inline IModel_ptr get_model()
   { return &f_model; }
-
 
 protected:
   ModelMgr()

@@ -745,7 +745,7 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
 	| literals=enum_type
-      { $res = tm.find_enum(literals); }
+      { $res = tm.find_enum($modules::module->get_name(), literals); }
 
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }

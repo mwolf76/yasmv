@@ -112,28 +112,28 @@ int main(int argc, char *argv[])
   IModel_ptr M = ModelMgr::INSTANCE().get_model();
   Modules mods = M->get_modules();
 
-  for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-    Module* pm = dynamic_cast <Module*> (*eye);
-    {
-      Module& m = (*pm);
-      const Expr_ptr module_name = m.get_name();
+  // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+  //   IModule_ptr pm = dynamic_cast <IModule_ptr> (*eye).second;
+  //   {
+  //     Module& m = (*pm);
+  //     const Expr_ptr module_name = m.get_name();
 
-      prn << "Module name: "<< module_name << "\n";
-      const Variables& svars = m.get_localVars();
+  //     prn << "Module name: "<< module_name << "\n";
+  //     const Variables& svars = m.get_localVars();
 
-      prn << "Variables: ";
-      for (Variables::const_iterator veye = svars.begin();
-           veye != svars.end(); veye ++ ) {
+  //     prn << "Variables: ";
+  //     for (Variables::const_iterator veye = svars.begin();
+  //          veye != svars.end(); veye ++ ) {
 
-        IVariable* tmp = *veye;
+  //       IVariable* tmp = *veye;
 
-        if (StateVar* vp = dynamic_cast<StateVar*>(tmp)) {
-          const StateVar& v = (*vp);
-          prn << v.get_name(); cout << endl;
-        }
-      }
-    }
-  }
+  //       if (StateVar* vp = dynamic_cast<StateVar*>(tmp)) {
+  //         const StateVar& v = (*vp);
+  //         prn << v.get_name(); cout << endl;
+  //       }
+  //     }
+  //   }
+  // }
 
   return 0;
 }

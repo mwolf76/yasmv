@@ -43,6 +43,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <tr1/unordered_map>
 
 #include <boost/regex.hpp>
+#include "boost/tuple/tuple.hpp"
+#include "boost/tuple/tuple_comparison.hpp"
 
 using std::exception;
 
@@ -63,22 +65,12 @@ using boost::regex;
 using boost::cmatch;
 using boost::regex_match;
 
+using boost::tuple;
+
 using std::cout;
 using std::cerr;
 using std::endl;
 using std::flush;
-
-class IVariable;
-typedef vector<IVariable*> Variables;
-
-class IDefine;
-typedef vector<IDefine*> Defines;
-
-class IAssign;
-typedef vector<IAssign*> Assigns;
-
-class IModule;
-typedef vector<IModule*> Modules;
 
 struct PtrHash {
   inline long operator() (void* ptr) const
@@ -87,8 +79,9 @@ struct PtrHash {
 };
 
 struct PtrEq {
-  inline bool operator() (const void* x, const void* y) const
-  { return x == y;  }
+  inline bool operator() (const void* x,
+                          const void* y) const
+  { return x == y; }
 };
 
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)

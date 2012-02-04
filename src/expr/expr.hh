@@ -74,32 +74,13 @@ typedef enum {
 
 } ExprType;
 
-class UnsupportedOperatorException : public exception {
-  virtual const char* what() const throw() {
-    return "Unsupported operator";
-  }
-};
-
-class BadWordConstException : public exception {
-public:
-  BadWordConstException(const char* msg)
-    : f_msg(msg)
-  {}
-
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
-
-protected:
-  const char* f_msg;
-};
-
 // using STL string as basic atom class
 typedef string Atom;
 typedef Atom* Atom_ptr;
 
 typedef struct Expr_TAG {
   ExprType f_symb;
+  Expr_TAG* f_ctx;
 
   union {
     struct {
@@ -122,6 +103,7 @@ typedef struct Expr_TAG {
   // any of them has a different number of paramters. (sweet)
   inline Expr_TAG()
     : f_symb(NIL)
+    , f_ctx(NULL)
     , f_lhs(NULL)
     , f_rhs(NULL)
   {}
@@ -255,9 +237,62 @@ struct AtomEq {
 typedef unordered_set<Atom, AtomHash, AtomEq> AtomPool;
 typedef pair<AtomPool::iterator, bool> AtomPoolHit;
 
+// system-wide expr
 typedef Expr* Expr_ptr;
+
 typedef vector<Expr_ptr> Exprs;
 typedef set<Expr_ptr> EnumLiterals;
+
+class UnsupportedOperatorException : public exception {
+  virtual const char* what() const throw() {
+    return "Unsupported operator";
+  }
+};
+
+class BadWordConstException : public exception {
+public:
+  BadWordConstException(const char* msg)
+    : f_msg(msg)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+};
+
+class BadContext : public exception {
+public:
+  BadContext(Expr_ptr ctx)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+
+class UnresolvedSymbol : public exception {
+public:
+  UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+
 
 // for logging purposes
 ostream& operator<<(ostream& os, const Expr_ptr t);
@@ -442,7 +477,7 @@ public:
   inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
   { return __make_expr(f_expr_pool.insert(Expr(SWCONST, wsize, value))); }
 
-  inline Expr_ptr make_enum(EnumLiterals& literals)
+  inline Expr_ptr make_enum(const EnumLiterals& literals)
   {
     Expr_ptr res = NULL;
 
@@ -466,10 +501,20 @@ public:
   { return make_expr(RANGE, a, b);  }
 
   /* predefined identifiers */
-  inline Expr_ptr make_boolean()
+  inline Expr_ptr make_temporal() const
+  { return temporal_expr; }
+
+  inline Expr_ptr make_boolean() const
   { return bool_expr; }
-  inline Expr_ptr make_main()
+
+  inline Expr_ptr make_main() const
   { return main_expr; }
+
+  inline Expr_ptr make_uword(Expr_ptr size)
+  { return make_expr(SUBSCRIPT, uword_expr, size); }
+
+  inline Expr_ptr make_sword(Expr_ptr size)
+  { return make_expr(SUBSCRIPT, sword_expr, size); }
 
   // Here a bit of magic occurs, so it's better to keep a note: this
   // method is used by the parser to build identifier nodes.  The
@@ -501,8 +546,6 @@ public:
     string type_flag(match[1]);
     string size_field(match[2]);
     string wliteral(match[3]);
-
-
     bool is_signed = (sign_flag == "s");
     unsigned short wsize = atoi(size_field.c_str());
 
@@ -568,9 +611,26 @@ public:
       || (expr->f_symb == SWCONST) ;
   }
 
+  inline Expr_ptr lvalue_varname(const Expr_ptr expr) const {
+    assert(expr);
+    if (expr->f_symb == IDENT)
+      return expr;
+
+    if ((expr->f_symb == INIT) ||
+        (expr->f_symb == NEXT))
+      return expr->f_lhs;
+
+    return NULL;
+  }
+
 protected:
   ExprMgr()
   {
+    const Atom_ptr atom_temporal = new Atom("temporal");
+    const ExprPoolHit temporal_hit = f_expr_pool.insert(*atom_temporal);
+    assert(temporal_hit.second); // it has to be true
+    temporal_expr = const_cast<Expr_ptr> (& (*temporal_hit.first));
+
     const Atom_ptr atom_boolean = new Atom("boolean");
     const ExprPoolHit bool_hit = f_expr_pool.insert(*atom_boolean);
     assert(bool_hit.second); // it has to be true
@@ -580,6 +640,16 @@ protected:
     const ExprPoolHit main_hit = f_expr_pool.insert(*atom_main);
     assert(main_hit.second); // it has to be true
     main_expr = const_cast<Expr_ptr> (& (*main_hit.first));
+
+    const Atom_ptr atom_uword = new Atom("unsigned word");
+    const ExprPoolHit uword_hit = f_expr_pool.insert(*atom_uword);
+    assert(uword_hit.second); // it has to be true
+    uword_expr = const_cast<Expr_ptr> (& (*uword_hit.first));
+
+    const Atom_ptr atom_sword = new Atom("signed word");
+    const ExprPoolHit sword_hit = f_expr_pool.insert(*atom_sword);
+    assert(sword_hit.second); // it has to be true
+    sword_expr = const_cast<Expr_ptr> (& (*sword_hit.first));
   }
 
 private:
@@ -612,12 +682,89 @@ private:
   }
 
   /* builtins */
+  Expr_ptr temporal_expr;
   Expr_ptr bool_expr;
   Expr_ptr main_expr;
+  Expr_ptr uword_expr;
+  Expr_ptr sword_expr;
 
   /* shared pools */
   ExprPool f_expr_pool;
   AtomPool f_atom_pool;
 };
+
+class FQExpr {
+  Expr_ptr f_ctx;
+  Expr_ptr f_expr;
+
+public:
+  FQExpr(Expr_ptr ctx, Expr_ptr expr)
+    : f_ctx(ctx)
+    , f_expr(expr)
+  {}
+
+  FQExpr(Expr_ptr expr)
+    : f_ctx(ExprMgr::INSTANCE().make_main()) // default ctx
+    , f_expr(expr)
+  {}
+
+  FQExpr(const FQExpr& fqexpr)
+    : f_ctx(fqexpr.ctx())
+    , f_expr(fqexpr.expr())
+  {}
+
+  inline const Expr_ptr& ctx() const
+  { return f_ctx; }
+
+  inline const Expr_ptr& expr() const
+  { return f_expr; }
+
+  inline bool operator==(const FQExpr& other) const
+  {
+    return this->f_ctx == other.ctx() &&
+      this->f_expr == other.expr();
+  }
+
+  // TODO: hash func
+  inline unsigned long hash() const
+  { return 0; }
+
+};
+typedef FQExpr* FQExpr_ptr;
+
+struct fqexpr_hash {
+  inline long operator() (const FQExpr& x) const
+  { return x.hash(); }
+};
+
+struct fqexpr_eq {
+  inline bool operator() (const FQExpr &x,
+                          const FQExpr &y) const
+  { return x == y; }
+};
+
+class ISymbol;
+typedef ISymbol* ISymbol_ptr;
+typedef unordered_map<Expr_ptr, ISymbol_ptr, PtrHash, PtrEq> Symbols;
+
+class IConstant;
+typedef IConstant* IConstant_ptr;
+typedef unordered_map<Expr_ptr, IConstant_ptr, PtrHash, PtrEq> Constants;
+
+class IVariable;
+typedef IVariable* IVariable_ptr;
+typedef unordered_map<Expr_ptr, IVariable_ptr, PtrHash, PtrEq> Variables;
+
+class IDefine;
+typedef IDefine* IDefine_ptr;
+typedef unordered_map<Expr_ptr, IDefine_ptr, PtrHash, PtrEq> Defines;
+
+class IAssign;
+typedef IAssign* IAssign_ptr;
+typedef unordered_set<IAssign_ptr, PtrHash, PtrEq> Assigns;
+
+class IModule;
+typedef IModule* IModule_ptr;
+typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
 
 #endif
