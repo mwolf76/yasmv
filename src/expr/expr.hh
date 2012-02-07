@@ -478,6 +478,9 @@ public:
   inline Expr_ptr make_boolean() const
   { return bool_expr; }
 
+  inline Expr_ptr make_const() const
+  { return const_expr; }
+
   inline Expr_ptr make_integer() const
   { return integer_expr; }
 
@@ -620,6 +623,11 @@ protected:
     assert(main_hit.second); // it has to be true
     main_expr = const_cast<Expr_ptr> (& (*main_hit.first));
 
+    const Atom_ptr atom_const = new Atom("const");
+    const ExprPoolHit const_hit = f_expr_pool.insert(*atom_const);
+    assert(const_hit.second); // it has to be true
+    const_expr = const_cast<Expr_ptr> (& (*const_hit.first));
+
     const Atom_ptr atom_uword = new Atom("unsigned word");
     const ExprPoolHit uword_hit = f_expr_pool.insert(*atom_uword);
     assert(uword_hit.second); // it has to be true
@@ -664,6 +672,7 @@ private:
   Expr_ptr temporal_expr;
   Expr_ptr integer_expr;
   Expr_ptr bool_expr;
+  Expr_ptr const_expr;
   Expr_ptr main_expr;
   Expr_ptr uword_expr;
   Expr_ptr sword_expr;

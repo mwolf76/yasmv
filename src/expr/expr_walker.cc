@@ -36,20 +36,13 @@ Walker::~Walker()
 
 Walker& Walker::operator() (const Expr_ptr expr) {
 
-  // TODO: review this
-  assert(f_stack.empty());
-
   // before walking hook
   this->pre_hook();
 
   activation_record call(expr);
 
   // setup toplevel act. record and perform walk
-  f_stack.push(call);
-  walk();
-
-  // TODO: review this
-  assert(f_stack.empty());
+  f_stack.push(call); walk();
 
   // after walking hook
   this->post_hook();

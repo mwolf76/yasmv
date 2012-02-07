@@ -37,24 +37,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr_mgr.hh>
 
 // -- interfaces --------------------------------------------------------------
-// class ISymbol;
-// typedef ISymbol* ISymbol_ptr;
-
-// class IVariable;
-// typedef IVariable* IVariable_ptr;
-// // typedef vector<IVariable_ptr> Variables;
-
-// class IConstant;
-// typedef IConstant* IConstant_ptr;
-// typedef vector<IConstant_ptr> Constants;
-
-// class IDefine;
-// typedef IDefine* IDefine_ptr;
-// typedef vector<IDefine_ptr> Defines;
-
 class ISymbol {
 public:
+  virtual const Expr_ptr get_ctx() const =0;
   virtual const Expr_ptr get_name() const =0;
+  virtual const Type_ptr get_type() const =0;
 
   bool is_variable() const;
   IVariable& as_variable() const;
@@ -64,11 +51,10 @@ public:
 
   bool is_const() const;
   IConstant& as_const() const;
+
 };
 
 class IVariable : public ISymbol {
-public:
-  virtual const Type_ptr get_type() const =0;
 };
 
 class IConstant : public ISymbol {
@@ -76,6 +62,7 @@ class IConstant : public ISymbol {
 
 class IDefine : public ISymbol {
 public:
+  // move this to symbol??
   virtual const Expr_ptr get_body() const =0;
 };
 
@@ -126,15 +113,7 @@ public:
 
   virtual const Exprs& get_ctlspecs() const =0;
   virtual void add_ctlspec(Expr_ptr formula) =0;
-
-  // dictionary behavior
-  // virtual IVariable_ptr fetch_variable(Expr_ptr id) =0;
-  // virtual IDefine_ptr fetch_define(Expr_ptr id) =0;
-  // virtual ISymbol_ptr fetch_const(Expr_ptr id) =0;
-
 };
-// typedef IModule* IModule_ptr;
-// typedef vector<IModule_ptr> Modules;
 
 class IModel {
 public:
@@ -266,14 +245,19 @@ public:
 };
 
 class Variable : public IVariable {
+  Expr_ptr f_ctx;
   Expr_ptr f_name;
   Type_ptr f_type;
 
 public:
-  Variable(Expr_ptr name, Type_ptr type)
-    : f_name(name)
+  Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type)
+    : f_ctx(ctx)
+    , f_name(name)
     , f_type(type)
   {}
+
+  const Expr_ptr get_ctx() const
+  { return f_ctx; }
 
   const Expr_ptr get_name() const
   { return f_name; }
@@ -284,40 +268,49 @@ public:
 
 class StateVar : public Variable {
 public:
-  StateVar (const Expr_ptr name, Type_ptr type_)
-    : Variable(name, type_)
+  StateVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
+    : Variable(ctx, name, type_)
   {}
 };
 
 class InputVar : public Variable {
 public:
-  InputVar (const Expr_ptr name, Type_ptr type_)
-    : Variable(name, type_)
+  InputVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
+    : Variable(ctx, name, type_)
   {}
 };
 
 class FrozenVar: public Variable {
 public:
-  FrozenVar (const Expr_ptr name, Type_ptr type_)
-    : Variable(name, type_)
+  FrozenVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
+    : Variable(ctx, name, type_)
   {}
 };
 
 class Define : public IDefine {
+  const Expr_ptr f_ctx;
   const Expr_ptr f_name;
   const Expr_ptr f_body;
 
 public:
-  Define(const Expr_ptr name, const Expr_ptr body)
-    : f_name(f_name)
+  Define(const Expr_ptr ctx, const Expr_ptr name, const Expr_ptr body)
+    : f_ctx(ctx)
+    , f_name(f_name)
     , f_body(body)
   {}
+
+  const Expr_ptr get_ctx() const
+  { return f_ctx; }
 
   const Expr_ptr get_name() const
   { return f_name; }
 
   const Expr_ptr get_body() const
   { return f_body; }
+
+  const Type_ptr get_type() const
+  { return TypeMgr::INSTANCE().get_type(FQExpr(f_ctx, f_name)); }
+
 };
 
 class Assign : public IAssign {

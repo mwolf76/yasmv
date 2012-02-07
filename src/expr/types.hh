@@ -219,6 +219,9 @@ public:
   inline void set_type(const FQExpr fqexpr, const Type_ptr tp)
   { f_map[ fqexpr ] = tp; }
 
+  inline const Type_ptr find_const()
+  { return f_register[ FQExpr(f_em.make_const()) ]; }
+
   inline const Type_ptr find_boolean()
   { return f_register[ FQExpr(f_em.make_boolean()) ]; }
 

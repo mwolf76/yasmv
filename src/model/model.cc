@@ -6,9 +6,6 @@ TypeMgr_ptr TypeMgr::f_instance = NULL;
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
-void link_model(void)
-{ return; }
-
 // symbol resolution
 ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
 {
@@ -38,7 +35,7 @@ ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
     return (*citer).second;
   }
 
-  // if all of the above fail
+  // if all of the above fail...
   throw UnresolvedSymbol(symb, ctx);
 }
 
