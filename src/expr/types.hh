@@ -128,22 +128,34 @@ public:
   bool has_numbers() const;
 };
 
-// class Enumeration : public Type {
-// public:
-//   friend class TypeMgr;
+class Word : public Type {
+  friend class TypeMgr;
+  ExprMgr& f_em;
 
-//   ExprMgr& f_em;
-//   EnumLiterals f_literals;
+  unsigned f_size;
+  bool f_is_signed;
 
-//   Enumeration(EnumLiterals& lits)
-//     : f_em(ExprMgr::INSTANCE())
-//     , f_literals(lits)
-//   {}
+  Word(unsigned size, bool is_signed=false)
+    : f_em(ExprMgr::INSTANCE())
+    , f_size(size)
+    , f_is_signed(is_signed)
+  {}
 
-// private:
-//
-//
-// };
+public:
+  const Expr_ptr get_repr() const
+  {
+    return (!f_is_signed)
+      ? f_em.make_uword(f_em.make_iconst(f_size))
+      : f_em.make_sword(f_em.make_iconst(f_size));
+  }
+
+  unsigned get_size() const
+  { return f_size; }
+
+  bool is_signed() const
+  { return f_is_signed; }
+
+};
 
 class Instance : public Type {
 public:
@@ -161,6 +173,9 @@ public:
 
   void add_param(const Expr_ptr expr)
   { f_params.push_back(expr); }
+
+  const Exprs& get_params() const
+  { return f_params; }
 
   const Expr_ptr get_module_name() const
   { return f_identifier; }
@@ -205,9 +220,10 @@ public:
   { f_map[ fqexpr ] = tp; }
 
   inline const Type_ptr find_boolean()
-  {
-    return f_register[ FQExpr(f_em.make_boolean()) ];
-  }
+  { return f_register[ FQExpr(f_em.make_boolean()) ]; }
+
+  inline const Type_ptr find_integer()
+  { return f_register[ FQExpr(f_em.make_integer()) ]; }
 
   // this type is reserved to tell temporal boolean exprs properties
   // from boolean propositions
@@ -221,19 +237,13 @@ public:
 
 
   const Type_ptr find_uword(Expr_ptr size)
-  {
-    return f_register[ FQExpr(f_em.make_uword(size)) ];
-  }
+  { return f_register[ FQExpr(f_em.make_uword(size)) ]; }
 
   const Type_ptr find_sword(Expr_ptr size)
-  {
-    return f_register[ FQExpr (f_em.make_sword(size)) ];
-  }
+  { return f_register[ FQExpr (f_em.make_sword(size)) ]; }
 
   const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
-  {
-    return f_register[ FQExpr (f_em.make_range(from, to)) ];
-  }
+  { return f_register[ FQExpr (f_em.make_range(from, to)) ]; }
 
   const Type_ptr find_instance(Expr_ptr identifier)
   {
@@ -252,6 +262,8 @@ public:
     return p->second;
   }
 
+  inline bool is_temporal(const Type_ptr tp) const
+  { return is_boolean(tp) || NULL != dynamic_cast <const TemporalType*> (tp); }
 
   inline bool is_boolean(const Type_ptr tp) const
   { return NULL != dynamic_cast <const BooleanType*> (tp); }
@@ -262,29 +274,41 @@ public:
   inline bool is_intEnum(const Type_ptr tp) const
   {
     EnumType* tmp;
-    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
-      return ! tmp->has_symbs();
+    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
+      return false;
     }
+
+    return ! tmp->has_symbs();
   }
 
   inline bool is_symbEnum(const Type_ptr tp) const
   {
     EnumType* tmp;
-    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
-      return ! tmp->has_numbers();
+    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
+      return false;
     }
+
+    return ! tmp->has_numbers();
   }
+
+  inline bool is_integer(const Type_ptr tp) const
+  { return is_intEnum(tp) || is_intRange(tp); }
 
   inline bool is_mixed_enum(const Type_ptr tp) const
   {
     EnumType* tmp;
-    if (NULL != (tmp = dynamic_cast <EnumType*> (tp))) {
-      return ! tmp->has_numbers();
+
+    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
+      return false;
     }
 
-    return (! tmp->has_symbs())
-      || (! tmp->has_numbers());
+    return
+      tmp->has_symbs() &&
+      tmp->has_numbers();
   }
+
+  inline bool is_word(const Type_ptr tp) const
+  { return (NULL != dynamic_cast <Word*> (tp)); }
 
   inline bool is_instance(const Type_ptr tp) const
   { return (NULL != dynamic_cast <Instance*> (tp)); }
@@ -319,5 +343,98 @@ private:
   ExprMgr& f_em;
 };
 
+
+// -- analyzer related exception hierarchy
+class AnalyzerException : public exception {
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+class BadContext : public AnalyzerException {
+public:
+  BadContext(Expr_ptr ctx)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+};
+
+class UnresolvedSymbol : public AnalyzerException {
+public:
+  UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+
+// when a numer of types were allowed and none of them was given
+class BadType: public AnalyzerException {
+public:
+
+  // exactly one type allowed
+  BadType(Expr_ptr got, Expr_ptr allowed, Expr_ptr body)
+  {}
+
+  // multiple types allowed
+  BadType(Expr_ptr got, Exprs allowed, Expr_ptr body)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+
+class NotAnLvalue
+ : public AnalyzerException {
+
+public:
+  NotAnLvalue(Expr_ptr got)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
+
+
+class ResolutionException
+ : public AnalyzerException {
+
+public:
+  ResolutionException(Expr_ptr expr)
+  {}
+
+  virtual const char* what() const throw() {
+    return f_msg;
+  }
+
+protected:
+  const char* f_msg;
+
+};
 
 #endif

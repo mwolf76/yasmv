@@ -171,7 +171,7 @@ scope { IModule_ptr module ; }
     : ( 'MODULE' id=identifier
       {
         $modules::module = new Module(id);
-        $smv::model->add_module($modules::module);
+        $smv::model->add_module(id, $modules::module);
       }
 
       formal_params? fsm_isa_decl_clause* module_body

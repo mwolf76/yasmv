@@ -57,8 +57,13 @@ public:
   virtual const Expr_ptr get_name() const =0;
 
   bool is_variable() const;
+  IVariable& as_variable() const;
+
   bool is_define() const;
+  IDefine& as_define() const;
+
   bool is_const() const;
+  IConstant& as_const() const;
 };
 
 class IVariable : public ISymbol {
@@ -133,8 +138,10 @@ public:
 
 class IModel {
 public:
+  virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
+  virtual IModule& get_module(Expr_ptr name) =0;
+
   virtual const Modules& get_modules() const =0;
-  virtual void add_module(IModule_ptr module) =0;
 };
 
 typedef IModel* IModel_ptr;
@@ -341,8 +348,18 @@ public:
   const Modules& get_modules() const
   { return f_modules; }
 
-  void add_module(IModule_ptr module)
-  { // f_modules.push_back(module);
+  void add_module(Expr_ptr name, IModule_ptr module)
+  { f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module)); }
+
+  IModule& get_module(Expr_ptr name)
+  {
+    const pair <Expr_ptr const, IModule_ptr> found = (*f_modules.find(name));
+
+    if (!found.second) {
+      // throw ModuleNotFoundException(name);
+    }
+
+    return *found.second;
   }
 
   ISymbol_ptr fetch_symbol(const FQExpr& fqexpr);

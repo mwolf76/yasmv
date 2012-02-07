@@ -243,13 +243,21 @@ typedef Expr* Expr_ptr;
 typedef vector<Expr_ptr> Exprs;
 typedef set<Expr_ptr> EnumLiterals;
 
+// TODO: move all these exception classes somewhere else!!
 class UnsupportedOperatorException : public exception {
   virtual const char* what() const throw() {
     return "Unsupported operator";
   }
 };
 
-class BadWordConstException : public exception {
+
+// for logging purposes
+ostream& operator<<(ostream& os, const Expr_ptr t);
+
+class ExprMgr;
+typedef ExprMgr* ExprMgr_ptr;
+
+class BadWordConstException {
 public:
   BadWordConstException(const char* msg)
     : f_msg(msg)
@@ -262,43 +270,6 @@ public:
 protected:
   const char* f_msg;
 };
-
-class BadContext : public exception {
-public:
-  BadContext(Expr_ptr ctx)
-  {}
-
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
-
-protected:
-  const char* f_msg;
-
-};
-
-
-class UnresolvedSymbol : public exception {
-public:
-  UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
-  {}
-
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
-
-protected:
-  const char* f_msg;
-
-};
-
-
-
-// for logging purposes
-ostream& operator<<(ostream& os, const Expr_ptr t);
-
-class ExprMgr;
-typedef ExprMgr* ExprMgr_ptr;
 
 class ExprMgr  {
 public:
@@ -507,6 +478,9 @@ public:
   inline Expr_ptr make_boolean() const
   { return bool_expr; }
 
+  inline Expr_ptr make_integer() const
+  { return integer_expr; }
+
   inline Expr_ptr make_main() const
   { return main_expr; }
 
@@ -631,6 +605,11 @@ protected:
     assert(temporal_hit.second); // it has to be true
     temporal_expr = const_cast<Expr_ptr> (& (*temporal_hit.first));
 
+    const Atom_ptr atom_integer = new Atom("integer");
+    const ExprPoolHit integer_hit = f_expr_pool.insert(*atom_integer);
+    assert(integer_hit.second); // it has to be true
+    integer_expr = const_cast<Expr_ptr> (& (*integer_hit.first));
+
     const Atom_ptr atom_boolean = new Atom("boolean");
     const ExprPoolHit bool_hit = f_expr_pool.insert(*atom_boolean);
     assert(bool_hit.second); // it has to be true
@@ -683,6 +662,7 @@ private:
 
   /* builtins */
   Expr_ptr temporal_expr;
+  Expr_ptr integer_expr;
   Expr_ptr bool_expr;
   Expr_ptr main_expr;
   Expr_ptr uword_expr;
@@ -742,6 +722,8 @@ struct fqexpr_eq {
                           const FQExpr &y) const
   { return x == y; }
 };
+
+typedef vector<FQExpr> FQExprs;
 
 class ISymbol;
 typedef ISymbol* ISymbol_ptr;

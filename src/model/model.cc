@@ -48,14 +48,38 @@ bool ISymbol::is_variable(void) const
     (const_cast <const ISymbol_ptr> (this));
 }
 
+IVariable& ISymbol::as_variable(void) const
+{
+  IVariable_ptr res = dynamic_cast <const IVariable_ptr>
+    (const_cast <const ISymbol_ptr> (this));
+  assert (res);
+  return (*res);
+}
+
 bool ISymbol::is_define(void) const
 {
   return NULL != dynamic_cast <const IDefine_ptr>
     (const_cast <const ISymbol_ptr> (this));
 }
 
+IDefine& ISymbol::as_define(void) const
+{
+  IDefine_ptr res = dynamic_cast <const IDefine_ptr>
+    (const_cast <const ISymbol_ptr> (this));
+  assert (res);
+  return (*res);
+}
+
 bool ISymbol::is_const() const
 {
   return NULL != dynamic_cast <const IConstant_ptr>
     (const_cast <const ISymbol_ptr> (this));
+}
+
+IConstant& ISymbol::as_const(void) const
+{
+  IConstant_ptr res = dynamic_cast <const IConstant_ptr>
+    (const_cast <const ISymbol_ptr> (this));
+  assert (res);
+  return (*res);
 }

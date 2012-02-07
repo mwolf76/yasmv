@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr.hh>
 #include <expr_printer.hh>
 #include <model.hh>
+#include <analyzer.hh>
 
 #include    <smvLexer.h>
 #include    <smvParser.h>
@@ -112,28 +113,32 @@ int main(int argc, char *argv[])
   IModel_ptr M = ModelMgr::INSTANCE().get_model();
   Modules mods = M->get_modules();
 
-  // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-  //   IModule_ptr pm = dynamic_cast <IModule_ptr> (*eye).second;
-  //   {
-  //     Module& m = (*pm);
-  //     const Expr_ptr module_name = m.get_name();
+  Analyzer analyzer(false);
 
-  //     prn << "Module name: "<< module_name << "\n";
-  //     const Variables& svars = m.get_localVars();
+  for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+    IModule_ptr pm = eye->second;
+    {
+      Module& m = dynamic_cast <Module&> (*pm);
+      const Expr_ptr module_name = m.get_name();
 
-  //     prn << "Variables: ";
-  //     for (Variables::const_iterator veye = svars.begin();
-  //          veye != svars.end(); veye ++ ) {
+      prn << "Module name: "<< module_name << "\n";
+      const Variables& svars = m.get_localVars();
 
-  //       IVariable* tmp = *veye;
+      prn << "Variables: " << "\n";
+      for (Variables::const_iterator veye = svars.begin();
+           veye != svars.end(); veye ++ ) {
 
-  //       if (StateVar* vp = dynamic_cast<StateVar*>(tmp)) {
-  //         const StateVar& v = (*vp);
-  //         prn << v.get_name(); cout << endl;
-  //       }
-  //     }
-  //   }
-  // }
+        IVariable* tmp = veye->second;
+
+        if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+          const StateVar& v = (*vp);
+          prn << v.get_name(); cout << endl;
+        }
+      }
+    }
+  }
+
+  analyzer.process();
 
   return 0;
 }

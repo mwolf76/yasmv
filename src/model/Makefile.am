@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger
 
-PKG_HH = model.hh
-PKG_CC = model.cc
+PKG_HH = model.hh analyzer.hh
+PKG_CC = model.cc analyzer.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
