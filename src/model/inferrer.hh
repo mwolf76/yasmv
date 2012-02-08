@@ -30,9 +30,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <types.hh>
 #include <model.hh>
 
-// ctx-expr-type entry
-// typedef stack<Type_ptr> TypeStack; does not have a clear() ?!?
+// NOTE: here we're using a vector in order to bypass STL stack
+// interface limitations. (i.e. absence of clear())
 typedef vector<Type_ptr> TypeStack;
+typedef vector<Expr_ptr> ExprStack;
 
 class Inferrer : public Walker {
 public:
@@ -172,9 +173,9 @@ protected:
 
 private:
   TypeMap f_map; // cache
-  TypeStack f_stack;   // basic ctx
 
-  Expr_ptr f_ctx;
+  TypeStack f_type_stack;
+  ExprStack f_ctx_stack;
 
   // managers
   ModelMgr& f_mm;
@@ -184,12 +185,12 @@ private:
   // services
   inline bool cache_miss(const Expr_ptr expr)
   {
-    FQExpr key(f_ctx, expr);
+    FQExpr key(f_ctx_stack.back(), expr);
     TypeMap::iterator eye = f_map.find(key);
 
     if (eye != f_map.end()) {
       Type_ptr res = (*eye).second;
-      f_stack.push_back(res);
+      f_type_stack.push_back(res);
       return false;
     }
 

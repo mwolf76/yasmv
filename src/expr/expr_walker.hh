@@ -89,7 +89,7 @@ typedef stack<struct activation_record> walker_stack;
 
 class Walker {
 protected:
-  walker_stack f_stack;
+  walker_stack f_recursion_stack;
 
   // extra-hooks
   virtual void pre_hook()

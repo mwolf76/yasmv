@@ -33,16 +33,14 @@ Analyzer::Analyzer(bool eager)
   , f_em(ExprMgr::INSTANCE())
   , f_tm(TypeMgr::INSTANCE())
 {
-  logger << "Created Analyzer instance at @" << this << endl;
+  logger << "Created Analyzer @" << this << endl;
 
   // let's get started
   if (eager) process();
 }
 
 Analyzer::~Analyzer()
-{
-  logger << "Destroying analyzer..." << endl;
-}
+{ logger << "Destroying Analyzer @" << this << endl; }
 
 void Analyzer::process()
 {
@@ -77,10 +75,7 @@ void Analyzer::process()
         const Expr_ptr varname = var->get_name();
         const Type_ptr vartype = var->get_type();
 
-        logger
-          << "processing var "
-          << varname << ": "
-          << vartype << endl;
+        logger << "processing var " << varname << ": " << vartype << endl;
 
         // eager binding for module instances
         if (f_tm.is_instance(vartype)) {
@@ -105,10 +100,12 @@ void Analyzer::process()
     // INVAR, TRANS, FAIRNESS have all to be boolean formulae; ASSIGNs
     // have to match lvalue type. The type for every expression is
     // inferred using the lazy walker strategy.
+    logger << "-- second pass (type checking)" << endl;
     for (Modules::const_iterator mod_eye = modules.begin();
          mod_eye != modules.end(); mod_eye ++ ) {
 
       Module& module = dynamic_cast <Module&> (*mod_eye->second);
+      logger << "processing module '" << module << "' " << endl;
 
       // Remark: ctx name is MODULE name, not instance's
       // rationale: you may have several instances but they
@@ -156,6 +153,8 @@ void Analyzer::process()
            init_eye != init.end(); init_eye ++) {
 
         Expr_ptr body = (*init_eye);
+        logger << "processing INIT " << ctx << "::" << body << endl;
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean())
           throw BadType(f_tm.find_boolean()->get_repr(),
@@ -167,6 +166,8 @@ void Analyzer::process()
            invar_eye != invar.end(); invar_eye ++) {
 
         Expr_ptr body = (*invar_eye);
+        logger << "processing INVAR " << ctx << "::" << body << endl;
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
@@ -179,6 +180,8 @@ void Analyzer::process()
            trans_eye != trans.end(); trans_eye ++) {
 
         Expr_ptr body = (*trans_eye);
+        logger << "processing TRANS " << ctx << "::" << body << endl;
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
@@ -191,6 +194,8 @@ void Analyzer::process()
            fair_eye != fair.end(); fair_eye ++) {
 
         Expr_ptr body = (*fair_eye);
+        logger << "processing FAIRNESS " << ctx << "::" << body << endl;
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
@@ -208,6 +213,8 @@ void Analyzer::process()
         Type_ptr lvalue_type = f_inferrer.process(ctx, lvalue);
 
         Expr_ptr body = (*assign_eye)->get_body();
+        logger << "processing ASSIGN " << ctx << "::" << body << endl;
+
         Type_ptr body_type = f_inferrer.process(ctx, body);
 
         if (lvalue_type != body_type) {
@@ -220,6 +227,8 @@ void Analyzer::process()
            ltl_eye != ltlspecs.end(); ltl_eye ++) {
 
         Expr_ptr body = (*ltl_eye);
+        logger << "processing LTLSPEC " << ctx << "::" << body << endl;
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_temporal()) {
           // throw BadType(LTL_TEMPORAL, tp, body);
@@ -231,6 +240,9 @@ void Analyzer::process()
            ctl_eye != ctlspecs.end(); ctl_eye ++) {
 
         Expr_ptr body = (*ctl_eye);
+        logger << "processing CTLSPEC " << ctx << "::" << body << endl;
+
+
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_temporal()) {
           // throw BadType(CTL_TEMPORAL, tp, body);
@@ -243,6 +255,6 @@ void Analyzer::process()
   }
 
   catch (AnalyzerException ae) {
-    // report error
+    cerr << ae << endl;
   }
 }

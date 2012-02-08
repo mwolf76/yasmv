@@ -349,6 +349,7 @@ ostream& operator<<(ostream& os, Type_ptr tp);
 
 // -- analyzer related exception hierarchy
 class AnalyzerException : public exception {
+  friend ostream& operator<<(ostream& os, AnalyzerException& ae);
 
   virtual const char* what() const throw() {
     return f_msg;
@@ -439,5 +440,8 @@ protected:
   const char* f_msg;
 
 };
+
+ostream& operator<<(ostream& os, AnalyzerException& ae);
+
 
 #endif

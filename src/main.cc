@@ -55,11 +55,6 @@ namespace axter {
   void set_verbosity_level_tolerance(verbosity NewValue){
     ezlogger_verbosity_level_policy::set_verbosity_level_tolerance(NewValue);
   }
-
-
-
-
-
 };
 
 
