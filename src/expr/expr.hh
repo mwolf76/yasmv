@@ -736,19 +736,19 @@ typedef vector<FQExpr> FQExprs;
 
 class ISymbol;
 typedef ISymbol* ISymbol_ptr;
-typedef unordered_map<Expr_ptr, ISymbol_ptr, PtrHash, PtrEq> Symbols;
+typedef unordered_map<FQExpr, ISymbol_ptr, fqexpr_hash, fqexpr_eq> Symbols;
 
 class IConstant;
 typedef IConstant* IConstant_ptr;
-typedef unordered_map<Expr_ptr, IConstant_ptr, PtrHash, PtrEq> Constants;
+typedef unordered_map<FQExpr, IConstant_ptr, fqexpr_hash, fqexpr_eq> Constants;
 
 class IVariable;
 typedef IVariable* IVariable_ptr;
-typedef unordered_map<Expr_ptr, IVariable_ptr, PtrHash, PtrEq> Variables;
+typedef unordered_map<FQExpr, IVariable_ptr, fqexpr_hash, fqexpr_eq> Variables;
 
 class IDefine;
 typedef IDefine* IDefine_ptr;
-typedef unordered_map<Expr_ptr, IDefine_ptr, PtrHash, PtrEq> Defines;
+typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Defines;
 
 class IAssign;
 typedef IAssign* IAssign_ptr;

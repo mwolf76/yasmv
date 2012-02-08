@@ -18,7 +18,7 @@ ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
 
   // suggested resolve order: constants, params, defs, vars
   Variables vars = module->get_localVars();
-  Variables::iterator viter = vars.find(symb);
+  Variables::iterator viter = vars.find(FQExpr(ctx, symb));
   if (viter != vars.end()) {
     return (*viter).second;
   }
@@ -80,3 +80,9 @@ IConstant& ISymbol::as_const(void) const
   assert (res);
   return (*res);
 }
+
+ostream& operator<<(ostream& os, Module& module)
+{ return os << module.get_name(); }
+
+ostream& operator<<(ostream& os, Type_ptr type_ptr )
+{ return os << type_ptr->get_repr(); }

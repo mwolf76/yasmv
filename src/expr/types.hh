@@ -345,7 +345,7 @@ private:
   // ref to expr manager
   ExprMgr& f_em;
 };
-
+ostream& operator<<(ostream& os, Type_ptr tp);
 
 // -- analyzer related exception hierarchy
 class AnalyzerException : public exception {

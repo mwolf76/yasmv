@@ -61,6 +61,7 @@ void Analyzer::process()
          mod_eye != modules.end(); mod_eye ++ ) {
 
       Module& module = dynamic_cast <Module&> (*mod_eye->second);
+      logger << "processing module '" << module << "' " << endl;
 
       // Remark: ctx name is MODULE name, not instance's
       // rationale: you may have several instances but they
@@ -75,6 +76,11 @@ void Analyzer::process()
 
         const Expr_ptr varname = var->get_name();
         const Type_ptr vartype = var->get_type();
+
+        logger
+          << "processing var "
+          << varname << ": "
+          << vartype << endl;
 
         // eager binding for module instances
         if (f_tm.is_instance(vartype)) {

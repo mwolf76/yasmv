@@ -242,7 +242,7 @@ fsm_var_decl_clause
 	: id=identifier ':' tp=type_name
     {
       IVariable_ptr var = new StateVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar(var);
+      $modules::module->add_localVar($modules::module->get_name(), id, var);
     }
 	;
 
@@ -259,7 +259,7 @@ fsm_ivar_decl_clause
 	: id=identifier ':' tp=type_name
     {
       IVariable_ptr var = new InputVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar(var);
+      $modules::module->add_localVar($modules::module->get_name(), id, var);
     }
 	;
 
@@ -276,7 +276,7 @@ fsm_frozenvar_decl_clause
 	: id=identifier ':' tp=type_name
     {
       IVariable_ptr var = new FrozenVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar(var);
+      $modules::module->add_localVar($modules::module->get_name(), id, var);
     }
 	;
 
@@ -293,7 +293,7 @@ fsm_define_decl_clause
 	: id=identifier ':=' body=untimed_expression
     {
       IDefine_ptr def = new Define($modules::module->get_name(), id, body);
-      $modules::module->add_localDef(def);
+      $modules::module->add_localDef($modules::module->get_name(), id, def);
     }
 	;
 
