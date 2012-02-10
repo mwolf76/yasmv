@@ -200,8 +200,7 @@ formal_params
 
 // FSM definition entry point
 module_body
-    :	module_decl
-        ( ';' module_decl )*
+    :	module_decl ( ';' module_decl )*
     ;
 
 module_decl
@@ -241,8 +240,8 @@ fsm_var_decl_body
 fsm_var_decl_clause
 	: id=identifier ':' tp=type_name
     {
-      IVariable_ptr var = new StateVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar($modules::module->get_name(), id, var);
+      IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
+      $modules::module->add_localVar(id, var);
     }
 	;
 
@@ -258,8 +257,8 @@ fsm_ivar_decl_body
 fsm_ivar_decl_clause
 	: id=identifier ':' tp=type_name
     {
-      IVariable_ptr var = new InputVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar($modules::module->get_name(), id, var);
+      IVariable_ptr var = new InputVar($modules::module->expr(), id, tp);
+      $modules::module->add_localVar(id, var);
     }
 	;
 
@@ -275,8 +274,8 @@ fsm_frozenvar_decl_body
 fsm_frozenvar_decl_clause
 	: id=identifier ':' tp=type_name
     {
-      IVariable_ptr var = new FrozenVar($modules::module->get_name(), id, tp);
-      $modules::module->add_localVar($modules::module->get_name(), id, var);
+      IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
+      $modules::module->add_localVar(id, var);
     }
 	;
 
@@ -292,8 +291,8 @@ fsm_define_decl_body
 fsm_define_decl_clause
 	: id=identifier ':=' body=untimed_expression
     {
-      IDefine_ptr def = new Define($modules::module->get_name(), id, body);
-      $modules::module->add_localDef($modules::module->get_name(), id, def);
+      IDefine_ptr def = new Define($modules::module->expr(), id, body);
+      $modules::module->add_localDef(id, def);
     }
 	;
 
@@ -302,11 +301,12 @@ fsm_init_decl
     ;
 
 fsm_init_decl_body
-	: fsm_init_decl_clause +
+	: fsm_init_decl_clause
+        (';' fsm_init_decl_clause)*
 	;
 
 fsm_init_decl_clause
-	: expr=untimed_expression ';'
+	: expr=untimed_expression
       { $modules::module->add_init(expr); }
 	;
 
@@ -315,11 +315,12 @@ fsm_invar_decl
     ;
 
 fsm_invar_decl_body
-	: fsm_invar_decl_clause +
+	: fsm_invar_decl_clause
+        (';' fsm_invar_decl_clause)*
 	;
 
 fsm_invar_decl_clause
-	: expr=untimed_expression ';'
+	: expr=untimed_expression
       { $modules::module->add_invar(expr); }
 	;
 
@@ -328,11 +329,12 @@ fsm_trans_decl
     ;
 
 fsm_trans_decl_body
-	: fsm_trans_decl_clause +
+	: fsm_trans_decl_clause
+        (';' fsm_trans_decl_clause)*
 	;
 
 fsm_trans_decl_clause
-	: expr=untimed_expression ';'
+	: expr=untimed_expression
       { $modules::module->add_trans(expr); }
 	;
 
@@ -341,11 +343,12 @@ fsm_fairn_decl
     ;
 
 fsm_fairn_decl_body
-	: fsm_fairn_decl_clause +
+	: fsm_fairn_decl_clause
+        (';' fsm_fairn_decl_clause)*
 	;
 
 fsm_fairn_decl_clause
-	: expr=untimed_expression ';'
+	: expr=untimed_expression
       { $modules::module->add_fairness(expr); }
 	;
 
@@ -395,9 +398,9 @@ case_clauses returns [Exprs res]
     (
       lhs=untimed_expression ':' rhs=untimed_expression ';'
       {
-assert(lhs);
-assert(rhs);
-$res.push_back(em.make_cond(lhs, rhs)); }
+       assert(lhs); assert(rhs);
+       $res.push_back(em.make_cond(lhs, rhs));
+      }
     )+
     ;
 
@@ -745,7 +748,7 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
 	| literals=enum_type
-      { $res = tm.find_enum($modules::module->get_name(), literals); }
+      { $res = tm.find_enum($modules::module->expr(), literals); }
 
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }
