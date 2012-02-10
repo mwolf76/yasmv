@@ -64,7 +64,7 @@ void Analyzer::process()
       // Remark: ctx name is MODULE name, not instance's
       // rationale: you may have several instances but they
       // all should refer to the same entry on the type map.
-      const Expr_ptr ctx = module.get_name();
+      const Expr_ptr ctx = module.expr();
 
       const Variables vars = module.get_localVars();
       for (Variables::const_iterator var_eye = vars.begin();
@@ -72,7 +72,7 @@ void Analyzer::process()
 
         IVariable_ptr const var = var_eye->second;
 
-        const Expr_ptr varname = var->get_name();
+        const Expr_ptr varname = var->expr();
         const Type_ptr vartype = var->get_type();
 
         logger << "processing var " << varname << ": " << vartype << endl;
@@ -110,7 +110,7 @@ void Analyzer::process()
       // Remark: ctx name is MODULE name, not instance's
       // rationale: you may have several instances but they
       // all should refer to the same entry on the type map.
-      Expr_ptr ctx = module.get_name();
+      Expr_ptr ctx = module.expr();
 
       // const Exprs params = module.get_formalParams();
       // for (Exprs::const_iterator param_eye = params.begin();
@@ -131,7 +131,7 @@ void Analyzer::process()
 
         Define& define = dynamic_cast <Define&> (*define_eye->second);
 
-        Expr_ptr dname = define.get_name();
+        Expr_ptr dname = define.expr();
         FQExpr fqdn(ctx, dname);
 
         Expr_ptr dbody = define.get_body();
@@ -207,7 +207,7 @@ void Analyzer::process()
       for (Assigns::const_iterator assign_eye = assign.begin();
            assign_eye != assign.end(); assign_eye ++) {
 
-        Expr_ptr lvalue = (*assign_eye)->get_name();
+        Expr_ptr lvalue = (*assign_eye)->get_lvalue();
         if (!lvalue)
           throw NotAnLvalue(lvalue);
         Type_ptr lvalue_type = f_inferrer.process(ctx, lvalue);

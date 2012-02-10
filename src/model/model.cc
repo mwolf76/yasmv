@@ -82,10 +82,114 @@ IConstant& ISymbol::as_const(void) const
 }
 
 ostream& operator<<(ostream& os, Module& module)
-{ return os << module.get_name(); }
+{ return os << module.expr(); }
 
 ostream& operator<<(ostream& os, Type_ptr type_ptr )
 { return os << type_ptr->get_repr(); }
 
 ostream& operator<<(ostream& os, AnalyzerException& ae)
 { return os << ae.what(); }
+
+
+//
+
+Module::Module(const Expr_ptr name)
+  : f_name(name)
+  , f_formalParams()
+  , f_isaDecls()
+  , f_localVars()
+  , f_localDefs()
+  , f_localConsts()
+  , f_init()
+  , f_invar()
+  , f_trans()
+  , f_fair()
+  , f_assgn()
+  , f_ltlspecs()
+  , f_ctlspecs()
+{}
+
+void Module::add_formalParam(Expr_ptr identifier)
+{
+  logger << "Module " << (*this)
+         << ", adding param " << identifier << endl;
+  f_formalParams.push_back(identifier);
+}
+
+void Module::add_isaDecl(Expr_ptr identifier)
+{
+  logger << "Module " << (*this)
+         << ", adding isadecl " << identifier << endl;
+  f_isaDecls.push_back(identifier);
+}
+
+
+void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
+{
+  logger << "Module " << (*this)
+         << ", adding local var " << var << endl;
+  f_localVars.insert(make_pair<FQExpr,
+                     IVariable_ptr>(FQExpr(expr(), name), var));
+}
+
+void Module::add_localDef(Expr_ptr name, IDefine_ptr def)
+{
+  logger << "Module " << (*this)
+         << ", adding local def " << name << endl;
+  f_localDefs.insert(make_pair<FQExpr,
+                     IDefine_ptr>(FQExpr(expr(), name), def));
+}
+
+void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
+{
+  logger << "Module " << (*this)
+         << ", adding local const " << name << endl;
+  f_localConsts.insert(make_pair<FQExpr,
+                       IConstant_ptr>(FQExpr(expr(), name), k));
+}
+
+void Module::add_assign(IAssign_ptr assign)
+{ assert (0); // f_assgn.push_back(assign);
+}
+
+void Module::add_init(Expr_ptr expr)
+{
+  logger << "Module " << (*this)
+         << ", adding INIT " << expr << endl;
+  f_init.push_back(expr);
+}
+
+void Module::add_invar(Expr_ptr expr)
+{
+  logger << "Module " << (*this)
+         << ", adding INVAR " << expr << endl;
+  f_invar.push_back(expr);
+}
+
+void Module::add_trans(Expr_ptr expr)
+{
+  logger << "Module " << (*this)
+         << ", adding TRANS " << expr << endl;
+  f_trans.push_back(expr);
+}
+
+void Module::add_fairness(Expr_ptr expr)
+{
+  logger << "Module " << (*this)
+         << ", adding FAIRNESS " << expr << endl;
+  f_fair.push_back(expr);
+}
+
+void Module::add_ltlspec(Expr_ptr formula)
+{
+  logger << "Module " << (*this)
+         << ", adding LTLSPEC " << formula << endl;
+  f_ltlspecs.push_back(formula);
+}
+
+void Module::add_ctlspec(Expr_ptr formula)
+{
+  logger << "Module " << (*this)
+         << ", adding CTLSPEC " << formula << endl;
+  f_ctlspecs.push_back(formula);
+}

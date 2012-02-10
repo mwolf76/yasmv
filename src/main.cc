@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
     IModule_ptr pm = eye->second;
     {
       Module& m = dynamic_cast <Module&> (*pm);
-      const Expr_ptr module_name = m.get_name();
+      //      const Expr_ptr module_name = m.expr();
 
-      prn << "Module name: "<< module_name << "\n";
+      prn << "Module name: "<< m.expr() << "\n";
       const Variables& svars = m.get_localVars();
 
       prn << "Variables: " << "\n";
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
         if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
           const StateVar& v = (*vp);
-          prn << v.get_name(); cout << endl;
+          prn << v.expr(); cout << endl;
         }
       }
     }

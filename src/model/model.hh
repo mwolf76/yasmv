@@ -39,8 +39,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // -- interfaces --------------------------------------------------------------
 class ISymbol {
 public:
-  virtual const Expr_ptr get_ctx() const =0;
-  virtual const Expr_ptr get_name() const =0;
+  virtual const Expr_ptr ctx() const =0;
+  virtual const Expr_ptr expr() const =0;
+
   virtual const Type_ptr get_type() const =0;
 
   bool is_variable() const;
@@ -68,14 +69,13 @@ public:
 
 class IAssign {
 public:
-  virtual const Expr_ptr get_name() const =0;
+  virtual const Expr_ptr get_lvalue() const =0;
   virtual const Expr_ptr get_body() const =0;
 };
 
 class IModule {
 public:
-  virtual bool is_main() const =0;
-  virtual const Expr_ptr get_name() const =0;
+  virtual const Expr_ptr expr() const =0;
 
   virtual const Exprs& get_formalParams() const =0;
   virtual void add_formalParam(Expr_ptr identifier) =0;
@@ -84,13 +84,13 @@ public:
   virtual void add_isaDecl(Expr_ptr identifier) =0;
 
   virtual const Variables& get_localVars() const =0;
-  virtual void add_localVar(Expr_ptr ctx, Expr_ptr expr, IVariable_ptr var) =0;
+  virtual void add_localVar(Expr_ptr expr, IVariable_ptr var) =0;
 
   virtual const Constants& get_localConsts() const =0;
-  virtual void add_localConst(Expr_ptr ctx, Expr_ptr expr, IConstant_ptr k) =0;
+  virtual void add_localConst(Expr_ptr expr, IConstant_ptr k) =0;
 
   virtual const Defines& get_localDefs() const =0;
-  virtual void add_localDef(Expr_ptr ctx, Expr_ptr expr, IDefine_ptr def) =0;
+  virtual void add_localDef(Expr_ptr expr, IDefine_ptr def) =0;
 
   virtual const Assigns& get_assign() const =0;
   virtual void add_assign(IAssign_ptr assgn) =0;
@@ -145,100 +145,62 @@ class Module : public IModule {
 
 public:
 
-  Module(const Expr_ptr name)
-    : f_name(name)
-    , f_formalParams()
-    , f_isaDecls()
-    , f_localVars()
-    , f_localDefs()
-    , f_localConsts()
-    , f_init()
-    , f_invar()
-    , f_trans()
-    , f_fair()
-    , f_assgn()
-    , f_ltlspecs()
-    , f_ctlspecs()
-  {}
+  Module(const Expr_ptr name);
 
-  const Expr_ptr get_name() const
+  inline const Expr_ptr expr() const
   { return f_name; }
 
   bool is_main() const
   { return f_name == ExprMgr::INSTANCE().make_main(); }
 
+
+  void add_formalParam(Expr_ptr identifier);
   const Exprs& get_formalParams() const
   { return f_formalParams; }
 
-  void add_formalParam(Expr_ptr identifier)
-  { f_formalParams.push_back(identifier); }
-
+  void add_isaDecl(Expr_ptr identifier);
   const Exprs& get_isaDecls() const
   { return f_isaDecls; }
 
-  void add_isaDecl(Expr_ptr identifier)
-  { f_isaDecls.push_back(identifier); }
-
+  void add_localVar(Expr_ptr name, IVariable_ptr var);
   const Variables& get_localVars() const
   { return f_localVars; }
 
-  void add_localVar(Expr_ptr ctx, Expr_ptr name, IVariable_ptr var)
-  { f_localVars.insert(make_pair<FQExpr, IVariable_ptr>(FQExpr(ctx, name), var)); }
-
+  void add_localDef(Expr_ptr name, IDefine_ptr def);
   const Defines& get_localDefs() const
   { return f_localDefs; }
 
-  void add_localDef(Expr_ptr ctx, Expr_ptr name, IDefine_ptr def)
-  { f_localDefs.insert(make_pair<FQExpr, IDefine_ptr>(FQExpr(ctx, name), def)); }
-
+  void add_localConst(Expr_ptr name, IConstant_ptr k);
   const Constants& get_localConsts() const
   { return f_localConsts; }
 
-  void add_localConst(Expr_ptr ctx, Expr_ptr name, IConstant_ptr k)
-  { f_localConsts.insert(make_pair<FQExpr, IConstant_ptr>(FQExpr(ctx, name), k)); }
-
+  void add_assign(IAssign_ptr assign);
   const Assigns& get_assign() const
   { return f_assgn; }
 
-  void add_assign(IAssign_ptr assign)
-  { // f_assgn.push_back(assign);
-  }
-
+  void add_init(Expr_ptr expr);
   const Exprs& get_init() const
   { return f_init; }
 
-  void add_init(Expr_ptr expr)
-  { f_init.push_back(expr); }
-
+  void add_invar(Expr_ptr expr);
   const Exprs& get_invar() const
   { return f_invar; }
 
-  void add_invar(Expr_ptr expr)
-  { f_invar.push_back(expr); }
-
+  void add_trans(Expr_ptr expr);
   const Exprs& get_trans() const
   { return f_trans; }
 
-  void add_trans(Expr_ptr expr)
-  { f_trans.push_back(expr); }
-
+  void add_fairness(Expr_ptr expr);
   const Exprs& get_fairness() const
   { return f_fair; }
 
-  void add_fairness(Expr_ptr expr)
-  { f_fair.push_back(expr); }
-
+  void add_ltlspec(Expr_ptr formula);
   const Exprs& get_ltlspecs() const
   { return f_ltlspecs; }
 
-  void add_ltlspec(Expr_ptr formula)
-  { f_ltlspecs.push_back(formula); }
-
+  void add_ctlspec(Expr_ptr formula);
   const Exprs& get_ctlspecs() const
   { return f_ctlspecs; }
-
-  void add_ctlspec(Expr_ptr formula)
-  { f_ctlspecs.push_back(formula); }
 };
 
 ostream& operator<<(ostream& os, Module& module);
@@ -255,10 +217,10 @@ public:
     , f_type(type)
   {}
 
-  const Expr_ptr get_ctx() const
+  const Expr_ptr ctx() const
   { return f_ctx; }
 
-  const Expr_ptr get_name() const
+  const Expr_ptr expr() const
   { return f_name; }
 
   const Type_ptr get_type() const
@@ -298,10 +260,10 @@ public:
     , f_body(body)
   {}
 
-  const Expr_ptr get_ctx() const
+  const Expr_ptr ctx() const
   { return f_ctx; }
 
-  const Expr_ptr get_name() const
+  const Expr_ptr expr() const
   { return f_name; }
 
   const Expr_ptr get_body() const
@@ -322,7 +284,7 @@ public:
     , f_body(body)
   {}
 
-  const Expr_ptr get_name() const
+  const Expr_ptr get_lvalue() const
   { return f_name; }
 
   const Expr_ptr get_body() const
