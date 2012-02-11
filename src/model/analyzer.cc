@@ -254,7 +254,7 @@ void Analyzer::process()
 
   }
 
-  catch (AnalyzerException ae) {
-    cerr << ae << endl;
+  catch (AnalyzerException& ae) {
+    cerr << ae.what() << endl;
   }
 }

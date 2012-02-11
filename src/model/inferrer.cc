@@ -411,6 +411,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
   }
   else assert(0);
 
+  assert(tp);
   f_type_stack.push_back(tp);
 }
 

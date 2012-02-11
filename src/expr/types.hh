@@ -79,6 +79,19 @@ public:
   { return f_repr; }
 };
 
+class IntegerType : public Type {
+  friend class TypeMgr;
+  ExprMgr& f_em;
+
+  IntegerType()
+    : f_em(ExprMgr::INSTANCE())
+  {}
+
+public:
+  const Expr_ptr get_repr() const
+  { return f_em.make_integer(); }
+};
+
 class IntRangeType : public Type {
   friend class TypeMgr;
   ExprMgr& f_em;
@@ -284,6 +297,14 @@ public:
     return ! tmp->has_symbs();
   }
 
+  inline bool is_integer(const Type_ptr tp) const
+  {
+    return
+      is_intRange(tp) ||
+      is_intEnum(tp)  ||
+      (NULL != dynamic_cast<const IntegerType*>(tp));
+  }
+
   inline bool is_symbEnum(const Type_ptr tp) const
   {
     EnumType* tmp;
@@ -293,9 +314,6 @@ public:
 
     return ! tmp->has_numbers();
   }
-
-  inline bool is_integer(const Type_ptr tp) const
-  { return is_intEnum(tp) || is_intRange(tp); }
 
   inline bool is_mixed_enum(const Type_ptr tp) const
   {
@@ -327,6 +345,9 @@ protected:
     register_type( FQExpr( f_em.make_boolean() ),
                    new BooleanType());
 
+    register_type( FQExpr( f_em.make_integer() ),
+                   new IntegerType());
+
     register_type( FQExpr( f_em.make_temporal() ),
                    new TemporalType());
   }
@@ -349,95 +370,122 @@ ostream& operator<<(ostream& os, Type_ptr tp);
 
 // -- analyzer related exception hierarchy
 class AnalyzerException : public exception {
-  friend ostream& operator<<(ostream& os, AnalyzerException& ae);
-
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
-
-protected:
-  const char* f_msg;
-
+public:
+  virtual const char* what() const throw() =0;
 };
 
 class BadContext : public AnalyzerException {
+  Expr_ptr f_ctx;
+
 public:
   BadContext(Expr_ptr ctx)
+    : f_ctx(ctx)
   {}
 
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
+  const char* what() const throw() {
+    ostringstream oss;
 
+    oss << "Bad Context: " << f_ctx;
+    return oss.str().c_str();
+  }
 };
 
 class UnresolvedSymbol : public AnalyzerException {
+  Expr_ptr f_ctx;
+  Expr_ptr f_expr;
+
 public:
   UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
+    : f_ctx(ctx)
+    , f_expr(expr)
   {}
 
-  virtual const char* what() const throw() {
-    return f_msg;
+  const char* what() const throw() {
+    ostringstream oss;
+
+    oss << "Unresolved symbol: " << f_ctx << "::" << f_expr;
+    return oss.str().c_str();
   }
-
-protected:
-  const char* f_msg;
-
 };
 
-
 // when a numer of types were allowed and none of them was given
-class BadType: public AnalyzerException {
+class BadType : public AnalyzerException {
+  Expr_ptr f_got;
+  Exprs f_allowed;
+  Expr_ptr f_body;
+
 public:
 
   // exactly one type allowed
   BadType(Expr_ptr got, Expr_ptr allowed, Expr_ptr body)
-  {}
-
-  // multiple types allowed
-  BadType(Expr_ptr got, Exprs allowed, Expr_ptr body)
-  {}
-
-  virtual const char* what() const throw() {
-    return f_msg;
+    : f_got(got)
+    , f_allowed()
+    , f_body(body)
+  {
+    f_allowed.push_back(allowed);
   }
 
-protected:
-  const char* f_msg;
+  // multiple types allowed shortcut
+  BadType(Expr_ptr got, Exprs allowed, Expr_ptr body)
+    : f_got(got)
+    , f_allowed(allowed)
+    , f_body(body)
+  {}
 
+  ~BadType() throw()
+  {}
+
+  const char* what() const throw() {
+    ostringstream oss;
+
+    oss << "BadType: got " << f_got
+        << " expected ";
+
+    Exprs::const_iterator eye = f_allowed.begin();
+    do
+      {
+        oss << (*eye); eye ++;
+        if (eye != f_allowed.end()) oss << ", ";
+      } while (eye != f_allowed.end());
+
+    return oss.str().c_str();
+  }
 };
 
 
-class NotAnLvalue
- : public AnalyzerException {
+class NotAnLvalue: public AnalyzerException {
+  Expr_ptr f_got;
 
 public:
   NotAnLvalue(Expr_ptr got)
+    : f_got(got)
   {}
 
-  virtual const char* what() const throw() {
-    return f_msg;
+  const char* what() const throw() {
+    ostringstream oss;
+
+    oss << "NotAnLValue: " << f_got;
+    return oss.str().c_str();
   }
-
-protected:
-  const char* f_msg;
-
 };
 
 
 class ResolutionException
  : public AnalyzerException {
 
+  Expr_ptr f_expr;
+
 public:
   ResolutionException(Expr_ptr expr)
+    : f_expr(expr)
   {}
 
-  virtual const char* what() const throw() {
-    return f_msg;
-  }
+  const char* what() const throw() {
+    ostringstream oss;
 
-protected:
-  const char* f_msg;
+    oss << "UnresolvedSymbol: " << f_expr;
+    return oss.str().c_str();
+  }
 
 };
 
