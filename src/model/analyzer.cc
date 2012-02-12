@@ -88,7 +88,9 @@ void Analyzer::process()
           int inst_params_num = instance.get_params().size();
           int modl_params_num = resolved.get_formalParams().size();
           if ( inst_params_num != modl_params_num ) {
-            // throw BadInstance(module_name);
+            throw BadParams(module_name,
+                            modl_params_num,
+                            inst_params_num);
           }
         }
 

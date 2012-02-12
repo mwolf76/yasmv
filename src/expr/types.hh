@@ -390,6 +390,28 @@ public:
   }
 };
 
+class BadParams : public AnalyzerException {
+  Expr_ptr f_moduleName;
+  int f_modl_params_num;
+  int f_inst_params_num;
+
+public:
+  BadParams(Expr_ptr module, int params_num, int actual_num)
+    : f_moduleName(module)
+    , f_modl_params_num(params_num)
+    , f_inst_params_num(actual_num)
+  {}
+
+  const char* what() const throw() {
+    ostringstream oss;
+
+    oss << "BadParams: " << f_moduleName
+        << " expected " << f_modl_params_num
+        << " got " << f_inst_params_num;
+    return oss.str().c_str();
+  }
+};
+
 class UnresolvedSymbol : public AnalyzerException {
   Expr_ptr f_ctx;
   Expr_ptr f_expr;
