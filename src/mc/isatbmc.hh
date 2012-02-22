@@ -28,10 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define IBMC_FALSIFICAIOTN_ALGORITHM_H
 #include <satbmc.hh>
 
-class IBMCFalsification : public BMCFalsification {
+class ISATBMCFalsification : public SATBMCFalsification {
 public:
-  IBMCFalsification(Model& model);
-  ~IBMCFalsification();
+  ISATBMCFalsification(IModel& model);
+  ~ISATBMCFalsification();
 
   // actual algorithm
   void run();

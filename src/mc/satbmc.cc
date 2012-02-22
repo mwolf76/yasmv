@@ -1,16 +1,21 @@
 #include <satbmc.hh>
 
-SATBMCAlgorithm::SATBMCAlgorithm(Model& model)
+SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
 {
-  logger << "Creating SATBMC algorithm instance "
+  logger << "Creating SATBMCFalsification algorithm instance "
          << get_param("alg_name") << " @" << this
          << endl;
 }
 
-SATBMCAlgorithm::~SATBMCAlgorithm()
+SATBMCFalsification::~SATBMCFalsification()
 {
-  logger << "Destroying SATBMC algorithm instance"
+  logger << "Destroying SATBMCFalsification algorithm instance"
          << get_param("alg_name") << " @" << this
          << endl;
+}
+
+void SATBMCFalsification::operator()()
+{
+  assert(0);
 }

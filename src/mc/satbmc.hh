@@ -25,22 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef BMC_FALSIFICATION_ALGORITHM_H
-#define BMC_FALSIFICAIOTN_ALGORITHM_H
+#define BMC_FALSIFICATION_ALGORITHM_H
 #include <mc.hh>
-
-// class Variant {};
-typedef vector <Trace_ptr> Traces;
-
-class BMCFalsification {
+class SATBMCFalsification : public MCAlgorithm {
 public:
-  BMCFalsification(Model& model);
-  ~BMCFalsification();
+  SATBMCFalsification(IModel& model);
+  ~SATBMCFalsification();
 
-  // actual algorithm
-  void run();
-
-protected:
-
+  void operator()();
 };
 
 #endif

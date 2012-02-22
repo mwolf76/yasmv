@@ -28,15 +28,13 @@
 #include <expr.hh>
 #include <analyzer.hh>
 
-Analyzer::Analyzer(bool eager)
+Analyzer::Analyzer()
   : f_mm(ModelMgr::INSTANCE())
   , f_em(ExprMgr::INSTANCE())
   , f_tm(TypeMgr::INSTANCE())
+  , f_inferrer()
 {
   logger << "Created Analyzer @" << this << endl;
-
-  // let's get started
-  if (eager) process();
 }
 
 Analyzer::~Analyzer()

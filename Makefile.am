@@ -14,7 +14,8 @@ INCLUDES = 					\
 	-I$(top_srcdir)/src/expr/validators 	\
 	-I$(top_srcdir)/src/model 		\
 	-I$(top_srcdir)/src/3rdparty/ezlogger 	\
-	-I$(top_srcdir)/src/parser/grammars
+	-I$(top_srcdir)/src/parser/grammars	\
+	-I$(top_srcdir)/src/mc
 
 # Programs to be built
 bin_PROGRAMS = smv
@@ -27,6 +28,7 @@ smv_LDADD = 								\
 	$(top_builddir)/src/expr/libexpr.la 				\
 	$(top_builddir)/src/model/libmodel.la 				\
 	$(top_builddir)/src/parser/libparser.la				\
+	$(top_builddir)/src/mc/libmc.la					\
 	-lantlr3c $(BOOST_REGEX_LIBS)
 
 smv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)

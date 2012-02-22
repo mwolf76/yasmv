@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <common.hh>
 
 typedef enum {
+  BOTTOM,
   BOOLEAN,
   INTEGER,
   STRING,
@@ -37,21 +38,29 @@ typedef enum {
 // Variant iface
 class IVariant {
 public:
-  virtual bool is_boolean() =0;
-  virtual bool as_boolean() =0;
+  virtual bool is_nil() const =0;
 
-  virtual bool is_integer() =0;
-  virtual int as_integer() =0;
+  virtual bool is_boolean() const =0;
+  virtual bool as_boolean() const =0;
 
-  virtual bool is_string() =0;
-  virtual string as_string() =0;
+  virtual bool is_integer() const =0;
+  virtual int as_integer() const =0;
+
+  virtual bool is_string() const =0;
+  virtual string as_string() const =0;
 };
 
 
 // Variant implementation
 class Variant : public IVariant {
+  friend ostream& operator<<(ostream& os, const Variant& variant);
+
 public:
   // variant constructors
+  Variant()
+    : f_type(BOTTOM)
+  {}
+
   Variant(bool value)
     : f_type(BOOLEAN)
     , f_bool(value)
@@ -67,19 +76,25 @@ public:
     , f_str(value)
   {}
 
-  bool is_boolean();
-  bool as_boolean();
+  bool is_nil() const;
 
-  bool is_integer();
-  int as_integer();
+  bool is_boolean() const;
+  bool as_boolean() const;
 
-  bool is_string();
-  string as_string();
+  bool is_integer() const;
+  int as_integer() const;
+
+  bool is_string() const;
+  string as_string() const;
 
 private:
+  VariantType f_type;
+
   bool f_bool;
   int f_int;
   string f_str;
 };
+
+extern Variant NilValue;
 
 #endif

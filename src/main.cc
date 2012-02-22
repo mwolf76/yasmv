@@ -25,10 +25,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <common.hh>
+
 #include <expr.hh>
 #include <expr_printer.hh>
+
 #include <model.hh>
 #include <analyzer.hh>
+
+#include <mc.hh>
+#include <satbmc.hh>
 
 #include    <smvLexer.h>
 #include    <smvParser.h>
@@ -108,32 +113,47 @@ int main(int argc, char *argv[])
   IModel_ptr M = ModelMgr::INSTANCE().get_model();
   Modules mods = M->get_modules();
 
-  Analyzer analyzer(false);
+  Analyzer analyzer;
+  analyzer.process();
 
-  for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-    IModule_ptr pm = eye->second;
-    {
-      Module& m = dynamic_cast <Module&> (*pm);
-      //      const Expr_ptr module_name = m.expr();
+  SATBMCFalsification alg(*M);
+  alg.set_param("k", 10);
+  alg.set_param("incremental", true);
+  assert(! alg.get_param("incremental").as_boolean());
+  // other params...
 
-      prn << "Module name: "<< m.expr() << "\n";
-      const Variables& svars = m.get_localVars();
+  alg(); // TODO support for multiprocessing sync, etc...
+  if (alg.has_witness()) {
+    const Traces& t = alg.get_traces();
 
-      prn << "Variables: " << "\n";
-      for (Variables::const_iterator veye = svars.begin();
-           veye != svars.end(); veye ++ ) {
-
-        IVariable* tmp = veye->second;
-
-        if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-          const StateVar& v = (*vp);
-          prn << v.expr(); cout << endl;
-        }
-      }
-    }
+    // maybe print them
   }
 
-  analyzer.process();
+
+
+
+  // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+  //   IModule_ptr pm = eye->second;
+  //   {
+  //     Module& m = dynamic_cast <Module&> (*pm);
+  //     //      const Expr_ptr module_name = m.expr();
+
+  //     prn << "Module name: "<< m.expr() << "\n";
+  //     const Variables& svars = m.get_localVars();
+
+  //     prn << "Variables: " << "\n";
+  //     for (Variables::const_iterator veye = svars.begin();
+  //          veye != svars.end(); veye ++ ) {
+
+  //       IVariable* tmp = veye->second;
+
+  //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+  //         const StateVar& v = (*vp);
+  //         prn << v.expr(); cout << endl;
+  //       }
+  //     }
+  //   }
+  // }
 
   return 0;
 }

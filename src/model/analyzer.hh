@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Analyzer {
 public:
-  Analyzer(bool eager=true);
+  Analyzer();
   ~Analyzer();
 
   // main method

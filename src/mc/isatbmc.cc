@@ -1,14 +1,14 @@
 #include <isatbmc.hh>
 
-ISATBMCAlgorithm::ISATBMCAlgorithm(Model& model)
-  : MCAlgorithm(model)
+ISATBMCFalsification::ISATBMCFalsification(IModel& model)
+  : SATBMCFalsification(model)
 {
   logger << "Creating ISATBMC algorithm instance "
          << get_param("alg_name") << " @" << this
          << endl;
 }
 
-ISATBMCAlgorithm::~ISATBMCAlgorithm()
+ISATBMCFalsification::~ISATBMCFalsification()
 {
   logger << "Destroying ISATBMC algorithm instance"
          << get_param("alg_name") << " @" << this

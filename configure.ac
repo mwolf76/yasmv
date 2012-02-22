@@ -120,6 +120,7 @@ AC_CONFIG_FILES([Makefile
                  src/model/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
+                 src/mc/Makefile
                  doc/Makefile
 		 gnusmv.pc])
 

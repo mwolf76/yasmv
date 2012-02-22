@@ -1,9 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = printers validators
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/mc -I$(top_srcdir)/src/3rdparty/ezlogger
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/mc -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger
 
-PKG_HH = mc.hh mc_walker.hh
-PKG_CC = mc.cc mc_walker.cc
+PKG_HH = mc.hh satbmc.hh isatbmc.hh
+PKG_CC = mc.cc satbmc.cc isatbmc.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

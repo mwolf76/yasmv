@@ -26,24 +26,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef MCALGORITHM_H
 #define MCALGORITHM_H
-#include <expr_walker.hh>
-#include <types.hh>
+
 #include <model.hh>
-#include <inferrer.hh>
+#include <trace.hh>
+#include <variant.hh>
 
-class Trace {};
-typedef Trace* Trace_ptr;
-
-// class Variant {};
-typedef vector <Trace_ptr> Traces;
+typedef unordered_map<string, Variant> ParametersMap;
 
 class MCAlgorithm {
 public:
-  MCAlgorithm(Model& model);
-  ~MCAlgorithm();
+  MCAlgorithm(IModel& model);
+  virtual ~MCAlgorithm();
 
   // actual algorithm
-  void run();
+  virtual void operator()() =0;
 
   // Trace iface
   inline bool has_witness() const
@@ -52,17 +48,19 @@ public:
   inline Traces get_traces() const
   { return f_traces; }
 
-  // alg abtract param iface (key -> value map)
-  void set_param(string& key, string& value);
-  string& get_param(string& key);
+  // alg abstract param iface (key -> value map)
+  void set_param(string key, Variant value);
+  Variant& get_param(const string key);
 
 protected:
+  ParametersMap f_params;
+
   // managers
   ModelMgr& f_mm;
   ExprMgr& f_em;
   TypeMgr& f_tm;
 
-  Model& f_model;
+  IModel& f_model;
   Traces  f_traces;
 };
 
