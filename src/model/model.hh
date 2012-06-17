@@ -77,10 +77,10 @@ class IModule {
 public:
   virtual const Expr_ptr expr() const =0;
 
-  virtual const Exprs& get_formalParams() const =0;
+  virtual const ExprVector& get_formalParams() const =0;
   virtual void add_formalParam(Expr_ptr identifier) =0;
 
-  virtual const Exprs& get_isaDecls() const =0;
+  virtual const ExprVector& get_isaDecls() const =0;
   virtual void add_isaDecl(Expr_ptr identifier) =0;
 
   virtual const Variables& get_localVars() const =0;
@@ -95,23 +95,23 @@ public:
   virtual const Assigns& get_assign() const =0;
   virtual void add_assign(IAssign_ptr assgn) =0;
 
-  virtual const Exprs& get_init() const =0;
+  virtual const ExprVector& get_init() const =0;
   virtual void add_init(Expr_ptr expr) =0;
 
-  virtual const Exprs& get_invar() const =0;
+  virtual const ExprVector& get_invar() const =0;
   virtual void add_invar(Expr_ptr expr) =0;
 
-  virtual const Exprs& get_trans() const =0;
+  virtual const ExprVector& get_trans() const =0;
   virtual void add_trans(Expr_ptr expr) =0;
 
-  virtual const Exprs& get_fairness() const =0;
+  virtual const ExprVector& get_fairness() const =0;
   virtual void add_fairness(Expr_ptr expr) =0;
 
   // properties management
-  virtual const Exprs& get_ltlspecs() const =0;
+  virtual const ExprVector& get_ltlspecs() const =0;
   virtual void add_ltlspec(Expr_ptr formula) =0;
 
-  virtual const Exprs& get_ctlspecs() const =0;
+  virtual const ExprVector& get_ctlspecs() const =0;
   virtual void add_ctlspec(Expr_ptr formula) =0;
 };
 
@@ -127,21 +127,21 @@ typedef IModel* IModel_ptr;
 
 class Module : public IModule {
   Expr_ptr f_name;
-  Exprs f_formalParams;
-  Exprs f_isaDecls;
+  ExprVector f_formalParams;
+  ExprVector f_isaDecls;
 
   Variables f_localVars;
   Defines f_localDefs;
   Constants f_localConsts;
 
-  Exprs f_init;
-  Exprs f_invar;
-  Exprs f_trans;
-  Exprs f_fair;
+  ExprVector f_init;
+  ExprVector f_invar;
+  ExprVector f_trans;
+  ExprVector f_fair;
   Assigns f_assgn;
 
-  Exprs f_ltlspecs;
-  Exprs f_ctlspecs;
+  ExprVector f_ltlspecs;
+  ExprVector f_ctlspecs;
 
 public:
 
@@ -155,11 +155,11 @@ public:
 
 
   void add_formalParam(Expr_ptr identifier);
-  const Exprs& get_formalParams() const
+  const ExprVector& get_formalParams() const
   { return f_formalParams; }
 
   void add_isaDecl(Expr_ptr identifier);
-  const Exprs& get_isaDecls() const
+  const ExprVector& get_isaDecls() const
   { return f_isaDecls; }
 
   void add_localVar(Expr_ptr name, IVariable_ptr var);
@@ -179,27 +179,27 @@ public:
   { return f_assgn; }
 
   void add_init(Expr_ptr expr);
-  const Exprs& get_init() const
+  const ExprVector& get_init() const
   { return f_init; }
 
   void add_invar(Expr_ptr expr);
-  const Exprs& get_invar() const
+  const ExprVector& get_invar() const
   { return f_invar; }
 
   void add_trans(Expr_ptr expr);
-  const Exprs& get_trans() const
+  const ExprVector& get_trans() const
   { return f_trans; }
 
   void add_fairness(Expr_ptr expr);
-  const Exprs& get_fairness() const
+  const ExprVector& get_fairness() const
   { return f_fair; }
 
   void add_ltlspec(Expr_ptr formula);
-  const Exprs& get_ltlspecs() const
+  const ExprVector& get_ltlspecs() const
   { return f_ltlspecs; }
 
   void add_ctlspec(Expr_ptr formula);
-  const Exprs& get_ctlspecs() const
+  const ExprVector& get_ctlspecs() const
   { return f_ctlspecs; }
 };
 

@@ -125,13 +125,13 @@ class EnumType : public Type {
     : f_em(ExprMgr::INSTANCE())
   {}
 
-  EnumLiterals f_literals;
+  ExprSet f_literals;
 
 public:
   Expr_ptr get_repr() const
-  { return f_em.make_enum(const_cast<EnumLiterals_ptr> (&f_literals)); }
+  { return f_em.make_enum(const_cast<ExprSet_ptr> (&f_literals)); }
 
-  const EnumLiterals& get_literals() const
+  const ExprSet& get_literals() const
   { return f_literals; }
 
   void add_literal(Expr& lit)
@@ -176,7 +176,7 @@ public:
 
   const Expr_ptr f_identifier;
   IModule_ptr f_module;
-  Exprs f_params;
+  ExprVector f_params;
 
   Instance(Expr* identifier)
     : f_identifier(identifier)
@@ -187,7 +187,7 @@ public:
   void add_param(const Expr_ptr expr)
   { f_params.push_back(expr); }
 
-  const Exprs& get_params() const
+  const ExprVector& get_params() const
   { return f_params; }
 
   const Expr_ptr get_module_name() const
@@ -246,7 +246,7 @@ public:
   inline const Type_ptr find_temporal()
   { return f_register[ FQExpr(f_em.make_temporal()) ]; }
 
-  inline const Type_ptr find_enum(Expr_ptr ctx, EnumLiterals_ptr lits)
+  inline const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits)
   { return f_register[ FQExpr(ctx, f_em.make_enum(lits)) ]; }
 
   const Type_ptr find_uword(Expr_ptr size)
@@ -430,7 +430,7 @@ public:
 // when a numer of types were allowed and none of them was given
 class BadType : public AnalyzerException {
   Expr_ptr f_got;
-  Exprs f_allowed;
+  ExprVector f_allowed;
   Expr_ptr f_body;
 
 public:
@@ -445,7 +445,7 @@ public:
   }
 
   // multiple types allowed shortcut
-  BadType(Expr_ptr got, Exprs allowed, Expr_ptr body)
+  BadType(Expr_ptr got, ExprVector allowed, Expr_ptr body)
     : f_got(got)
     , f_allowed(allowed)
     , f_body(body)
@@ -460,7 +460,7 @@ public:
     oss << "BadType: got " << f_got
         << " expected ";
 
-    Exprs::const_iterator eye = f_allowed.begin();
+    ExprVector::const_iterator eye = f_allowed.begin();
     do
       {
         oss << (*eye); eye ++;

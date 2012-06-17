@@ -112,8 +112,8 @@ void Analyzer::process()
       // all should refer to the same entry on the type map.
       Expr_ptr ctx = module.expr();
 
-      // const Exprs params = module.get_formalParams();
-      // for (Exprs::const_iterator param_eye = params.begin();
+      // const ExprVector params = module.get_formalParams();
+      // for (ExprVector::const_iterator param_eye = params.begin();
       //      param_eye != params.end(); param_eye ++) {
 
       //   Expr_ptr pname = *param_eye;
@@ -121,7 +121,7 @@ void Analyzer::process()
       // }
 
       // TODO: isa decls currently not supported
-      const Exprs isadecls = module.get_isaDecls();
+      const ExprVector isadecls = module.get_isaDecls();
       assert (isadecls.size() == 0);
 
       // type inference: defines
@@ -148,8 +148,8 @@ void Analyzer::process()
       } // for defines
 
       // type inference: FSM
-      const Exprs init = module.get_init();
-      for (Exprs::const_iterator init_eye = init.begin();
+      const ExprVector init = module.get_init();
+      for (ExprVector::const_iterator init_eye = init.begin();
            init_eye != init.end(); init_eye ++) {
 
         Expr_ptr body = (*init_eye);
@@ -161,8 +161,8 @@ void Analyzer::process()
                         tp->get_repr(), body);
       } // for init
 
-      const Exprs invar = module.get_invar();
-      for (Exprs::const_iterator invar_eye = invar.begin();
+      const ExprVector invar = module.get_invar();
+      for (ExprVector::const_iterator invar_eye = invar.begin();
            invar_eye != invar.end(); invar_eye ++) {
 
         Expr_ptr body = (*invar_eye);
@@ -175,8 +175,8 @@ void Analyzer::process()
         }
       } // for invar
 
-      const Exprs trans = module.get_trans();
-      for (Exprs::const_iterator trans_eye = trans.begin();
+      const ExprVector trans = module.get_trans();
+      for (ExprVector::const_iterator trans_eye = trans.begin();
            trans_eye != trans.end(); trans_eye ++) {
 
         Expr_ptr body = (*trans_eye);
@@ -189,8 +189,8 @@ void Analyzer::process()
         }
       } // for trans
 
-      const Exprs fair = module.get_fairness();
-      for (Exprs::const_iterator fair_eye = fair.begin();
+      const ExprVector fair = module.get_fairness();
+      for (ExprVector::const_iterator fair_eye = fair.begin();
            fair_eye != fair.end(); fair_eye ++) {
 
         Expr_ptr body = (*fair_eye);
@@ -222,8 +222,8 @@ void Analyzer::process()
         }
       } // for assign
 
-      const Exprs ltlspecs = module.get_ltlspecs();
-      for (Exprs::const_iterator ltl_eye = ltlspecs.begin();
+      const ExprVector ltlspecs = module.get_ltlspecs();
+      for (ExprVector::const_iterator ltl_eye = ltlspecs.begin();
            ltl_eye != ltlspecs.end(); ltl_eye ++) {
 
         Expr_ptr body = (*ltl_eye);
@@ -235,8 +235,8 @@ void Analyzer::process()
         }
       } // for ltlspecs
 
-      const Exprs ctlspecs = module.get_ctlspecs();
-      for (Exprs::const_iterator ctl_eye = ctlspecs.begin();
+      const ExprVector ctlspecs = module.get_ctlspecs();
+      for (ExprVector::const_iterator ctl_eye = ctlspecs.begin();
            ctl_eye != ctlspecs.end(); ctl_eye ++) {
 
         Expr_ptr body = (*ctl_eye);

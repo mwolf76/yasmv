@@ -14,7 +14,7 @@ bool EnumType::has_symbs() const
   bool res = false;
   ExprMgr& em = ExprMgr::INSTANCE();
 
-  for (EnumLiterals::iterator eye = f_literals.begin();
+  for (ExprSet::iterator eye = f_literals.begin();
        (!res) && (eye != f_literals.end()); eye ++) {
 
     res |= em.is_identifier(*eye);
@@ -28,7 +28,7 @@ bool EnumType::has_numbers() const
   bool res = false;
   ExprMgr& em = ExprMgr::INSTANCE();
 
-  for (EnumLiterals::iterator eye = f_literals.begin();
+  for (ExprSet::iterator eye = f_literals.begin();
        (!res) && (eye != f_literals.end()); eye ++) {
 
     res |= em.is_numeric(*eye);

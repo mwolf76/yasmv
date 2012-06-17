@@ -380,10 +380,10 @@ untimed_expression returns [Expr_ptr res]
 	;
 
 case_expression returns [Expr_ptr res]
-@init { Exprs_ptr clauses = new Exprs (); }
+@init { ExprVector_ptr clauses = new ExprVector (); }
 	: 'case' cls=case_clauses 'esac'
       {
-        for (Exprs::reverse_iterator eye = cls->rbegin(); eye != cls->rend();
+        for (ExprVector::reverse_iterator eye = cls->rbegin(); eye != cls->rend();
              eye ++) {
             if (!res) res = (*eye);
             else {
@@ -393,8 +393,8 @@ case_expression returns [Expr_ptr res]
       }
 	;
 
-case_clauses returns [Exprs_ptr res]
-@init { res = new Exprs (); }
+case_clauses returns [ExprVector_ptr res]
+@init { res = new ExprVector (); }
     :
     (
       lhs=untimed_expression ':' rhs=untimed_expression ';'
