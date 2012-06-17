@@ -240,8 +240,14 @@ typedef pair<AtomPool::iterator, bool> AtomPoolHit;
 // system-wide expr
 typedef Expr* Expr_ptr;
 
+
+// TODO: Rename this to ExprVector
 typedef vector<Expr_ptr> Exprs;
+typedef Exprs* Exprs_ptr;
+
+// TODO: Rename this to ExprSet
 typedef set<Expr_ptr> EnumLiterals;
+typedef EnumLiterals* EnumLiterals_ptr;
 
 // TODO: move all these exception classes somewhere else!!
 class UnsupportedOperatorException : public exception {
@@ -448,13 +454,13 @@ public:
   inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
   { return __make_expr(f_expr_pool.insert(Expr(SWCONST, wsize, value))); }
 
-  inline Expr_ptr make_enum(const EnumLiterals& literals)
+  inline Expr_ptr make_enum(EnumLiterals_ptr literals)
   {
     Expr_ptr res = NULL;
 
     /* reverse iteration */
-    for (EnumLiterals::reverse_iterator eye = literals.rbegin();
-         eye != literals.rend(); eye ++) {
+    for (EnumLiterals::reverse_iterator eye = literals->rbegin();
+         eye != literals->rend(); eye ++) {
       if (!res) res = (*eye);
       else res = make_expr(COMMA, (*eye), res);
     }

@@ -15,7 +15,7 @@ PKG_CC = grammars/smvLexer.cc grammars/smvParser.cc
 
 grammars/smvLexer.c grammars/smvParser.c: grammars/smv.g
 	@echo "compiling ANTLR grammar... (this may take a while)"
-	@java -cp /opt/jars/antlr-3.4-complete-no-antlrv2.jar org.antlr.Tool grammars/smv.g
+	@antlr3 grammars/smv.g
 
 grammars/smvLexer.cc: grammars/smvLexer.c
 	@cp grammars/smvLexer.c grammars/smvLexer.cc

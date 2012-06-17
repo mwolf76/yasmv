@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // Basic Type class. Is.. nothing.
 class Type {
 public:
-  virtual const Expr_ptr get_repr() const
+  virtual Expr_ptr get_repr() const
   { return NULL; }
 
 };
@@ -58,7 +58,7 @@ protected:
   {}
 
 public:
-  const Expr_ptr get_repr() const
+  Expr_ptr get_repr() const
   { return f_repr; }
 };
 
@@ -75,7 +75,7 @@ protected:
   {}
 
 public:
-  const Expr_ptr get_repr() const
+  Expr_ptr get_repr() const
   { return f_repr; }
 };
 
@@ -88,7 +88,7 @@ class IntegerType : public Type {
   {}
 
 public:
-  const Expr_ptr get_repr() const
+  Expr_ptr get_repr() const
   { return f_em.make_integer(); }
 };
 
@@ -112,7 +112,7 @@ public:
   inline const Expr_ptr get_max() const
   { return f_max; }
 
-  const Expr_ptr get_repr() const
+  Expr_ptr get_repr() const
   { return f_em.make_range(f_min, f_max); }
 };
 
@@ -128,8 +128,8 @@ class EnumType : public Type {
   EnumLiterals f_literals;
 
 public:
-  const Expr_ptr get_repr() const
-  { return f_em.make_enum(f_literals); }
+  Expr_ptr get_repr() const
+  { return f_em.make_enum(const_cast<EnumLiterals_ptr> (&f_literals)); }
 
   const EnumLiterals& get_literals() const
   { return f_literals; }
@@ -155,7 +155,7 @@ class Word : public Type {
   {}
 
 public:
-  const Expr_ptr get_repr() const
+  Expr_ptr get_repr() const
   {
     return (!f_is_signed)
       ? f_em.make_uword(f_em.make_iconst(f_size))
@@ -244,13 +244,10 @@ public:
   // this type is reserved to tell temporal boolean exprs properties
   // from boolean propositions
   inline const Type_ptr find_temporal()
-  {
-    return f_register[ FQExpr(f_em.make_temporal()) ];
-  }
+  { return f_register[ FQExpr(f_em.make_temporal()) ]; }
 
-  inline const Type_ptr find_enum(Expr_ptr ctx, EnumLiterals& lits)
+  inline const Type_ptr find_enum(Expr_ptr ctx, EnumLiterals_ptr lits)
   { return f_register[ FQExpr(ctx, f_em.make_enum(lits)) ]; }
-
 
   const Type_ptr find_uword(Expr_ptr size)
   { return f_register[ FQExpr(f_em.make_uword(size)) ]; }

@@ -60,13 +60,13 @@ scope {
 
 /** CTL  properties */
 ctl_spec returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
      { $res = formula; }
 	;
 
 ctl_formula returns [Expr_ptr res]
-@init { res = NULL; int prev_mode; }
+@init { int prev_mode; }
 	:
         { prev_mode = $smv::mode; $smv::mode= CTL_EXPR; }
         formula=binary_ctl_formula
@@ -75,7 +75,7 @@ ctl_formula returns [Expr_ptr res]
     ;
 
 binary_ctl_formula returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:	lhs=unary_ctl_formula
         { $res = lhs; }
         (
@@ -98,7 +98,7 @@ binary_ctl_formula returns [Expr_ptr res]
 	;
 
 unary_ctl_formula returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:
        'AG' formula=unary_ctl_formula
        { $res = em.make_AG(formula); }
@@ -124,13 +124,13 @@ unary_ctl_formula returns [Expr_ptr res]
 
 /** LTL properties */
 ltl_spec returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : 'LTLSPEC' formula=ltl_formula
      { $res = formula; }
 	;
 
 ltl_formula returns [Expr_ptr res]
-@init { res = NULL; int prev_mode; }
+@init { int prev_mode; }
 	:
         { prev_mode = $smv::mode; $smv::mode= LTL_EXPR; }
         formula=binary_ltl_formula
@@ -139,7 +139,7 @@ ltl_formula returns [Expr_ptr res]
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:	lhs=unary_ltl_formula
         { $res = lhs; } (
             'U' rhs=unary_ltl_formula
@@ -150,7 +150,7 @@ binary_ltl_formula returns [Expr_ptr res]
 	;
 
 unary_ltl_formula returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:	'G' formula=unary_ltl_formula
        { $res = em.make_G(formula); }
 
@@ -371,7 +371,7 @@ assignment_clause
 
 // main expression entry point
 untimed_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: expr=case_expression
       { $res = expr; }
 
@@ -380,10 +380,10 @@ untimed_expression returns [Expr_ptr res]
 	;
 
 case_expression returns [Expr_ptr res]
-@init { Exprs clauses; res = NULL; }
+@init { Exprs_ptr clauses = new Exprs (); }
 	: 'case' cls=case_clauses 'esac'
       {
-        for (Exprs::reverse_iterator eye = cls.rbegin(); eye != cls.rend();
+        for (Exprs::reverse_iterator eye = cls->rbegin(); eye != cls->rend();
              eye ++) {
             if (!res) res = (*eye);
             else {
@@ -393,19 +393,20 @@ case_expression returns [Expr_ptr res]
       }
 	;
 
-case_clauses returns [Exprs res]
+case_clauses returns [Exprs_ptr res]
+@init { res = new Exprs (); }
     :
     (
       lhs=untimed_expression ':' rhs=untimed_expression ';'
       {
        assert(lhs); assert(rhs);
-       $res.push_back(em.make_cond(lhs, rhs));
+       $res->push_back(em.make_cond(lhs, rhs));
       }
     )+
     ;
 
 cond_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: expr=iff_expression
       { $res = expr; }
 
@@ -416,7 +417,7 @@ cond_expression returns [Expr_ptr res]
 	;
 
 iff_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:  lhs=imply_expression
        { $res = lhs; }
 
@@ -427,7 +428,7 @@ iff_expression returns [Expr_ptr res]
 	;
 
 imply_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=inclusive_or_expression
       { $res = lhs; }
 
@@ -438,7 +439,7 @@ imply_expression returns [Expr_ptr res]
     ;
 
 inclusive_or_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=exclusive_or_expression
       { $res = lhs; }
 
@@ -449,7 +450,7 @@ inclusive_or_expression returns [Expr_ptr res]
 	;
 
 exclusive_or_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=and_expression
       { $res = lhs; }
 
@@ -463,7 +464,7 @@ exclusive_or_expression returns [Expr_ptr res]
 	;
 
 and_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=equality_expression
       { $res = lhs; }
 
@@ -474,7 +475,7 @@ and_expression returns [Expr_ptr res]
 	;
 
 equality_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=relational_expression
       { $res = lhs; }
 
@@ -487,7 +488,7 @@ equality_expression returns [Expr_ptr res]
 	;
 
 relational_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=union_expression
       { $res = lhs; }
 
@@ -507,7 +508,7 @@ relational_expression returns [Expr_ptr res]
 	;
 
 union_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : lhs=member_expression
      { $res= lhs; }
 
@@ -518,7 +519,7 @@ union_expression returns [Expr_ptr res]
     ;
 
 member_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : lhs=shift_expression
       { $res = lhs; }
 
@@ -529,7 +530,7 @@ member_expression returns [Expr_ptr res]
     ;
 
 shift_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=additive_expression
       { $res = lhs; }
 
@@ -544,7 +545,7 @@ shift_expression returns [Expr_ptr res]
 	;
 
 additive_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=multiplicative_expression
       { $res = lhs; }
 
@@ -558,7 +559,7 @@ additive_expression returns [Expr_ptr res]
 	;
 
 multiplicative_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=concatenative_expression
       { $res = lhs; }
 
@@ -575,7 +576,7 @@ multiplicative_expression returns [Expr_ptr res]
 	;
 
 concatenative_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=unary_expression
       { $res = lhs; }
 
@@ -586,7 +587,7 @@ concatenative_expression returns [Expr_ptr res]
 	;
 
 unary_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: expr=postfix_expression
       { $res = expr; }
 
@@ -619,7 +620,7 @@ unary_expression returns [Expr_ptr res]
 	;
 
 postfix_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	:   lhs=primary_expression
         { $res = lhs; }
 
@@ -634,7 +635,7 @@ postfix_expression returns [Expr_ptr res]
     ;
 
 primary_expression returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: id=identifier
       { $res = id; }
 
@@ -651,13 +652,13 @@ primary_expression returns [Expr_ptr res]
 	;
 
 identifier returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
 	;
 
 constant returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     :	k=enum_constant
         { $res = k; }
 
@@ -669,13 +670,13 @@ constant returns [Expr_ptr res]
     ;
 
 word_constant returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : WORD_CONSTANT
       { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
     ;
 
 int_constant returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: HEX_LITERAL
       {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
@@ -696,7 +697,7 @@ int_constant returns [Expr_ptr res]
 	;
 
 range_constant returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: lhs=int_constant
       { $res = lhs; }
 
@@ -706,15 +707,14 @@ range_constant returns [Expr_ptr res]
 	;
 
 enum_constant returns [Expr_ptr res]
-@init { res = NULL; }
-
+@init { }
 	: literals=enum_type
     { $res = em.make_enum(literals); }
     ;
 
 /* lvalue is used in assignments */
 lvalue returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: 'init' '(' expr=postfix_expression ')'
       { $res = em.make_init(expr); }
 
@@ -727,7 +727,7 @@ lvalue returns [Expr_ptr res]
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
 	: 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
@@ -737,13 +737,13 @@ pvalue returns [Expr_ptr res]
 
 /* ordinary values used elsewhere */
 value returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     : expr=postfix_expression
       { $res = expr; }
     ;
 
 type_name returns [Type_ptr res]
-@init { res = NULL; }
+@init { }
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
@@ -763,14 +763,15 @@ type_name returns [Type_ptr res]
       { $res = tm.find_instance(id); }  actual_param_decls[$res]
     ;
 
-enum_type returns [EnumLiterals lits]
+enum_type returns [EnumLiterals_ptr res]
+@init { res = new EnumLiterals (); }
 	:
      '{'
           lit=literal
-          { $lits.insert(lit); }
+          { $res->insert(lit); }
 
           (',' lit=literal
-          { $lits.insert(lit); }
+          { $res->insert(lit); }
           )*
      '}'
 	;
@@ -788,7 +789,7 @@ actual_param_decls [Type_ptr m]
     ;
 
 literal returns [Expr_ptr res]
-@init { res = NULL; }
+@init { }
     :  expr=identifier
        { $res = expr; }
 
