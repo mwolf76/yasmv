@@ -1,10 +1,26 @@
 README
 ======
 
-gnuSMV is tentative and partial C++ reimplementation of the NuSMV2 model checker. As a former member of the NuSMV2 development (in the years from 2008 to 2011) team I was never happy with a few architectural choices that were inherited from the long history of the NuSMV model checker and/or were due to the amount of legacy code and tools that relied on it. Don't get me wrong, I really think NuSMV is a great piece of software. And I owe to the developers in FBK most - if not all - of my Software Engineering education. Those people are really fantastic. It's just that I've been wondering for years what that code would've be like if one was completely free to redesign it all from-the-scratch. This is exactly what this project is all about. 
+gnuSMV is tentative and partial C++ reimplementation of the
+NuSMV2 model checker. As a former member of the NuSMV2
+development (in the years from 2008 to 2011) team I was never
+happy with a few architectural choices that were inherited from
+the long history of the NuSMV model checker and/or were due to
+the amount of legacy code and tools that relied on it. Don't get
+me wrong, I really think NuSMV is a great piece of software. And
+I owe to the developers in FBK most - if not all - of my Software
+Engineering education. Those people are really fantastic. It's
+just that I've been wondering for years what that code would've
+be like if one was completely free to redesign it all
+from-the-scratch. This is exactly what this project is all about.
 
 DISCLAIMER
 ==========
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
-gnuSMV is in no way related or endorsed by the NuSMV2 development board and/or FBK. 
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+gnuSMV is in no way related or endorsed by the NuSMV2 development
+board and/or FBK.
