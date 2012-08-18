@@ -403,7 +403,8 @@ dnl generated only once above (before we start the for loops).
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$Boost_lib" = xyes; then
-        Boost_lib_LDFLAGS="-L$boost_ldpath -Wl,-R$boost_ldpath"
+        dnl Boost_lib_LDFLAGS="-L$boost_ldpath -Wl,-R$boost_ldpath"
+        Boost_lib_LDFLAGS="-L$boost_ldpath"
         Boost_lib_LDPATH="$boost_ldpath"
         break 6
       else
