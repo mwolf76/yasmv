@@ -92,6 +92,8 @@ dnl 	 #endif
 dnl 	])
 
 
+AC_ANTLR
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_HEADER_STDBOOL
@@ -111,6 +113,9 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
 		strrchr strstr strtol, random srandom getpid \
 		mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
+
+# antlr runtime checks
+
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
