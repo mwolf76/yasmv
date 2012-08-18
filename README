@@ -1,7 +1,7 @@
 README
 ======
 
-gnuSMV is tentative and partial C++ reimplementation of the
+gnuSMV is a tentative and partial C++ reimplementation of the
 NuSMV2 model checker. As a former member of the NuSMV2
 development (in the years from 2008 to 2011) team I was never
 happy with a few architectural choices that were inherited from
