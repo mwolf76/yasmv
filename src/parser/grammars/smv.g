@@ -763,8 +763,8 @@ type_name returns [Type_ptr res]
       { $res = tm.find_instance(id); }  actual_param_decls[$res]
     ;
 
-enum_type returns [EnumLiterals_ptr res]
-@init { res = new EnumLiterals (); }
+enum_type returns [ExprSet_ptr res]
+@init { res = new ExprSet (); }
 	:
      '{'
           lit=literal

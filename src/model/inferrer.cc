@@ -398,11 +398,11 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
   }
 
   else if (symb_type == UWCONST) {
-    tp = f_tm.find_uword(f_em.make_iconst(expr->f_wsize));
+    tp = f_tm.find_uword(f_em.make_iconst(expr->u.f_size));
   }
 
   else if (symb_type == SWCONST) {
-    tp = f_tm.find_sword(f_em.make_iconst(expr->f_wsize));
+    tp = f_tm.find_sword(f_em.make_iconst(expr->u.f_size));
   }
 
   else if (symb_type == IDENT) {

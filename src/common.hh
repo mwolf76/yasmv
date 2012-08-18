@@ -84,7 +84,50 @@ struct PtrEq {
   { return x == y; }
 };
 
+class UnsupportedOperatorException : public exception {
+        virtual const char* what() const throw() {
+                return "Unsupported operator";
+        }
+};
+
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)
 #include <logging.hh>
+
+// reserved for numeric and word constant values
+typedef unsigned long long value_t;
+
+typedef enum {
+	BINARY = 2,
+	OCTAL = 8,
+	DECIMAL = 10,
+	HEXADECIMAL = 16
+} base_t;
+
+inline char base_char(base_t base)
+{
+	switch (base) {
+	case BINARY: return 'b';
+	case OCTAL: return 'o';
+	case DECIMAL: return 'd';
+	case HEXADECIMAL: return 'h';
+	default: assert (0); // unexpected;
+	}
+}
+
+inline string to_base(value_t value, base_t base)
+{
+    static const char alphabet[] = "0123456789abcdefgh";
+    std::string result;
+
+    while(value) {
+	    result += alphabet[value % base];
+	    value /= base;
+    }
+
+    return string(result.rbegin(), result.rend());
+}
+
+typedef std::string Atom;
+typedef Atom* Atom_ptr;
 
 #endif

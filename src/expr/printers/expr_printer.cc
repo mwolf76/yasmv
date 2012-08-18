@@ -339,19 +339,34 @@ bool Printer::walk_union_inorder(const Expr_ptr expr)
 void Printer::walk_union_postorder(const Expr_ptr expr)
 {}
 
+/* word print helpers */
+string word_repr(const Expr_ptr expr, base_t base)
+{
+	assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
+
+	ostringstream oss;
+	oss << "0"
+	    << ( expr->f_symb == SWCONST ? "s" : "u" )
+	    << base_char(base)
+	    << expr->u.f_size
+	    << to_base(expr->u.f_value, base) ;
+
+	return oss.str();
+}
+
 void Printer::walk_leaf(const Expr_ptr expr)
 {
   ExprType symb = expr->f_symb;
 
-  if (symb == ICONST) {
-    f_os << expr->f_ull;
+  if (ICONST == symb) {
+    f_os << expr->u.f_value;
   }
-  else if (symb == UWCONST) {
+  else if (UWCONST == symb ||
+           SWCONST == symb) {
+	  f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
   }
-  else if (symb == SWCONST) {
-  }
-  else if (symb == IDENT) {
-    f_os << (*expr->f_atom);
+  else if (IDENT == symb) {
+    f_os << (*expr->u.f_atom);
   }
   // else if (symb == LITERAL) {
   //   f_os << expr->f_atom;
