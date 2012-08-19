@@ -14,11 +14,20 @@ just that I've been wondering for years what that code would've
 be like if one was completely free to redesign it all
 from-the-scratch. This is exactly what this project is all about.
 
+TODO
+====
+
+. Improve ANTLR build scripting in a portable fashion (easy)
+. Add getopt support for arg parsing (easy)
+. Embed ADDs for booleanization (hard)
+. Port booleanization algorithms from NuSMV (easy)
+. ZMQ-based workload distribuition workbench and control shell (fun!)
+
 DISCLAIMER
 ==========
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+This code is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
