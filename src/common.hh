@@ -26,8 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef COMMON_H
 #define COMMON_H
-#include <config.h>
-
 #include <cassert>
 #include <cstdlib>
 #include <exception>
@@ -70,7 +68,7 @@ using std::cerr;
 using std::endl;
 using std::flush;
 
-/* custom base class definitions */
+/* custom base definitions */
 #include <base.hh>
 
 class UnsupportedOperatorException : public Exception {
