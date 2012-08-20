@@ -1,7 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = grammars
 
-AM_CXXFLAGS = -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function -DANTLR3_INLINE_INPUT_8BIT
+AM_CPPFLAGS = @AM_CPPFLAGS@
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function -DANTLR3_INLINE_INPUT_8BIT
 
 INCLUDES = \
 	-I$(top_srcdir)/src/ 				\

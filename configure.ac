@@ -34,22 +34,13 @@ BOOST_PROGRAM_OPTIONS
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
-# Library informations
-AC_DEFINE_UNQUOTED(LIBRARY_NAME, "gnusmv", Library Name)
-AC_DEFINE_UNQUOTED(LIBRARY_VERSION, "0.0.1", Library Version)
-AC_DEFINE_UNQUOTED(LIBRARY_BUILD_DATE, "`date -u`", Library build date)
-AC_DEFINE_UNQUOTED(LIBRARY_WEBSITE, "https://github.com/mwolf76", Library Website)
-AC_DEFINE_UNQUOTED(LIBRARY_EMAIL, "marco.pensallorto@gmail.com", Library Email)
-AC_DEFINE_UNQUOTED(LIBRARY_BUGREPORT, "Please report bugs to <marco.pensallorto@gmail.com>", Library bug message)
-
-tmp_cppflags="$CPPFLAGS"
-CPPFLAGS="$tmp_cppflags $BOOST_CPPFLAGS"
-
-tmp_cflags="$CFLAGS"
-CFLAGS="-Wall -Wstrict-prototypes $tmp_cflags"
-
-tmp_cxxflags="$CXXFLAGS"
-CXXFLAGS="-Wall $tmp_cflags $tmp_cxxflags"
+# Program informations
+AC_DEFINE_UNQUOTED(PROGRAM_NAME, "gnusmv", Program Name)
+AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.1", Program Version)
+AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
+AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
+AC_DEFINE_UNQUOTED(PROGRAM_EMAIL, "marco.pensallorto@gmail.com", Program Email)
+AC_DEFINE_UNQUOTED(PROGRAM_BUGREPORT, "Please report bugs to <marco.pensallorto@gmail.com>", Program bug message)
 
 if test "x$ac_cv_prog_CPP" != "x"; then
 AC_DEFINE(HAVE_CPP, 1, Have preprocessor)
@@ -105,7 +96,7 @@ AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
 
-# Checks for library functions.
+# Checks for program functions.
 AC_FUNC_CLOSEDIR_VOID
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MALLOC
@@ -118,6 +109,15 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
 		strrchr strstr strtol, random srandom getpid \
 		mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
+
+AM_CPPFLAGS="$BOOST_CPPFLAGS"
+AC_SUBST(AM_CPPFLAGS)
+
+AM_CFLAGS="-Wall -Wstrict-prototypes"
+AC_SUBST(AM_CFLAGS)
+
+AM_CXXFLAGS="-Wall"
+AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile

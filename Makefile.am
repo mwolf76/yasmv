@@ -4,7 +4,6 @@ SUBDIRS = src doc
 PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
-AM_CPPFLAGS = -DDATADIR=\"$(datadir)\" $(BOOST_CPPFLAGS) @CPPFLAGS@
 READMES = LGPL-2.1 NEWS README
 
 INCLUDES = 					\
@@ -21,7 +20,6 @@ INCLUDES = 					\
 bin_PROGRAMS = smv
 
 smv_SOURCES = src/main.cc
-smv_CPPFLAGS = $(BOOST_CPPFLAGS)
 smv_LDADD = 								\
 	$(top_builddir)/src/expr/printers/libexpr_printers.la		\
 	$(top_builddir)/src/expr/validators/libexpr_validators.la	\

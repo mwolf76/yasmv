@@ -1,5 +1,9 @@
 AUTOMAKE_OPTIONS = subdir-objects
+
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/mc -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger
+
+AM_CPPFLAGS=@AM_CPPFLAGS@
+AM_CXXFLAGS=@AM_CXXFLAGS@
 
 PKG_HH = mc.hh satbmc.hh isatbmc.hh
 PKG_CC = mc.cc satbmc.cc isatbmc.cc
