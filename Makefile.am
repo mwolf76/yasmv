@@ -29,7 +29,7 @@ smv_LDADD = 								\
 	$(top_builddir)/src/model/libmodel.la 				\
 	$(top_builddir)/src/parser/libparser.la				\
 	$(top_builddir)/src/mc/libmc.la					\
-	-lantlr3c $(BOOST_REGEX_LIBS)
+	-lantlr3c $(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
 
 smv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
 

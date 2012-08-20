@@ -30,6 +30,7 @@ BOOST_REQUIRE([1.34])
 
 dnl Then look for specific Boost libraries you need:
 BOOST_REGEX
+BOOST_PROGRAM_OPTIONS
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
@@ -91,7 +92,7 @@ dnl 	 # include <sys/types.h>
 dnl 	 #endif
 dnl 	])
 
-
+# antlr checks
 AC_ANTLR
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -113,9 +114,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
 		strrchr strstr strtol, random srandom getpid \
 		mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
-
-# antlr runtime checks
-
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile

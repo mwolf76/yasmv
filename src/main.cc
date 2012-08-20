@@ -63,6 +63,8 @@ namespace axter {
   }
 };
 
+#include <boost/program_options.hpp>
+namespace options = boost::program_options;
 
 static void
 parseFile(pANTLR3_UINT8 fName)
@@ -105,56 +107,89 @@ ostream& operator<<(ostream& os, const Expr_ptr t)
 
 int main(int argc, char *argv[])
 {
+  // hack
   link_expr();
-  const char* fname = argv[1];
 
-  parseFile((pANTLR3_UINT8) fname);
-  Printer prn(cout);
+  try {
+    options::options_description desc("Allowed options");
 
-  IModel_ptr M = ModelMgr::INSTANCE().get_model();
-  Modules mods = M->get_modules();
+    const char* fname = argv[1];
 
-  Analyzer analyzer;
-  analyzer.process();
+    parseFile((pANTLR3_UINT8) fname);
+    desc.add_options()
+      ("help", "produce help message")
+      ("compression", options::value<int>(), "set compression level")
+      ;
 
-  SATBMCFalsification alg(*M);
-  alg.set_param("k", 10);
-  alg.set_param("incremental", true);
-  assert(! alg.get_param("incremental").as_boolean());
-  // other params...
+    options::variables_map vm;
+    options::store(options::parse_command_line(argc, argv, desc), vm);
+    options::notify(vm);
 
-  alg(); // TODO support for multiprocessing sync, etc...
-  if (alg.has_witness()) {
-    const Traces& t = alg.get_traces();
+    if (vm.count("help")) {
+      cout << desc << "\n";
+      return 0;
+    }
 
-    // maybe print them
+    if (vm.count("compression")) {
+      cout << "Compression level was set to "
+           << vm["compression"].as<int>() << ".\n";
+    } else {
+      cout << "Compression level was not set.\n";
+    }
+
+    Printer prn(cout);
+
+    IModel_ptr M = ModelMgr::INSTANCE().get_model();
+    Modules mods = M->get_modules();
+
+    Analyzer analyzer;
+    analyzer.process();
+
+    SATBMCFalsification alg(*M);
+    alg.set_param("k", 10);
+    alg.set_param("incremental", true);
+    assert(! alg.get_param("incremental").as_boolean());
+    // other params...
+
+    alg(); // TODO support for multiprocessing sync, etc...
+    if (alg.has_witness()) {
+      const Traces& t = alg.get_traces();
+
+      // maybe print them
+    }
+
+    // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+    //   IModule_ptr pm = eye->second;
+    //   {
+    //     Module& m = dynamic_cast <Module&> (*pm);
+    //     //      const Expr_ptr module_name = m.expr();
+
+    //     prn << "Module name: "<< m.expr() << "\n";
+    //     const Variables& svars = m.get_localVars();
+
+    //     prn << "Variables: " << "\n";
+    //     for (Variables::const_iterator veye = svars.begin();
+    //          veye != svars.end(); veye ++ ) {
+
+    //       IVariable* tmp = veye->second;
+
+    //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+    //         const StateVar& v = (*vp);
+    //         prn << v.expr(); cout << endl;
+    //       }
+    //     }
+    //   }
+    // }
   }
 
+  catch(exception& e) {
+    cerr << "error: " << e.what() << "\n";
+    return 1;
+  }
 
-
-
-  // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-  //   IModule_ptr pm = eye->second;
-  //   {
-  //     Module& m = dynamic_cast <Module&> (*pm);
-  //     //      const Expr_ptr module_name = m.expr();
-
-  //     prn << "Module name: "<< m.expr() << "\n";
-  //     const Variables& svars = m.get_localVars();
-
-  //     prn << "Variables: " << "\n";
-  //     for (Variables::const_iterator veye = svars.begin();
-  //          veye != svars.end(); veye ++ ) {
-
-  //       IVariable* tmp = veye->second;
-
-  //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-  //         const StateVar& v = (*vp);
-  //         prn << v.expr(); cout << endl;
-  //       }
-  //     }
-  //   }
-  // }
+  catch(...) {
+    cerr << "Exception of unknown type!\n";
+  }
 
   return 0;
 }
