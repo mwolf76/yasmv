@@ -42,10 +42,14 @@ AC_DEFINE_UNQUOTED(LIBRARY_WEBSITE, "https://github.com/mwolf76", Library Websit
 AC_DEFINE_UNQUOTED(LIBRARY_EMAIL, "marco.pensallorto@gmail.com", Library Email)
 AC_DEFINE_UNQUOTED(LIBRARY_BUGREPORT, "Please report bugs to <marco.pensallorto@gmail.com>", Library bug message)
 
-oldcflags=$CFLAGS
-oldcxxflags=$CXXFLAGS
-CFLAGS="-Wall -Wstrict-prototypes $excflags$oldcflags"
-CXXFLAGS="-Wall $excflags$oldcflags"
+tmp_cppflags="$CPPFLAGS"
+CPPFLAGS="$tmp_cppflags $BOOST_CPPFLAGS"
+
+tmp_cflags="$CFLAGS"
+CFLAGS="-Wall -Wstrict-prototypes $tmp_cflags"
+
+tmp_cxxflags="$CXXFLAGS"
+CXXFLAGS="-Wall $tmp_cflags $tmp_cxxflags"
 
 if test "x$ac_cv_prog_CPP" != "x"; then
 AC_DEFINE(HAVE_CPP, 1, Have preprocessor)
@@ -67,30 +71,30 @@ AC_CHECK_LIB([m], [exp])
 # AC_SUBST(HAVE_LIBEXPAT)
 
 # Checks for header files.
-dnl AC_HEADER_DIRENT
-dnl AC_HEADER_STDC
-dnl AC_CHECK_HEADERS([float.h limits.h memory.h stddef.h stdlib.h string.h \
-dnl   sys/ioctl.h sys/param.h sys/time.h sys/resource.h unistd.h signal.h sys/signal.h \
-dnl   errno.h regex.h inttypes.h])
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS([float.h limits.h memory.h stddef.h stdlib.h string.h \
+  sys/ioctl.h sys/param.h sys/time.h sys/resource.h unistd.h signal.h sys/signal.h \
+  errno.h regex.h inttypes.h])
 
-dnl # This is for malloc:
-dnl AC_CHECK_HEADER(sys/types.h)
-dnl AC_CHECK_HEADER(malloc.h,
-dnl 	[ AC_DEFINE(HAVE_MALLOC_H, 1, Defined to 1 if the system provides malloc.h)],
-dnl 	[ AC_CHECK_HEADER(sys/malloc.h,
-dnl 	    [AC_DEFINE(HAVE_SYS_MALLOC_H, 1, Defined to 1 if the system provides sys/malloc.h)],
-dnl 	    [],
-dnl 	    [
-dnl 	      #if HAVE_SYS_TYPES_H
-dnl 	      # include <sys/types.h>
-dnl 	      #endif
-dnl 	    ]
-dnl 	    )],
-dnl 	[
-dnl 	 #if HAVE_SYS_TYPES_H
-dnl 	 # include <sys/types.h>
-dnl 	 #endif
-dnl 	])
+# This is for malloc:
+AC_CHECK_HEADER(sys/types.h)
+AC_CHECK_HEADER(malloc.h,
+	[ AC_DEFINE(HAVE_MALLOC_H, 1, Defined to 1 if the system provides malloc.h)],
+	[ AC_CHECK_HEADER(sys/malloc.h,
+	    [AC_DEFINE(HAVE_SYS_MALLOC_H, 1, Defined to 1 if the system provides sys/malloc.h)],
+	    [],
+	    [
+	      #if HAVE_SYS_TYPES_H
+	      # include <sys/types.h>
+	      #endif
+	    ]
+	    )],
+	[
+	 #if HAVE_SYS_TYPES_H
+	 # include <sys/types.h>
+	 #endif
+	])
 
 # antlr checks
 AC_ANTLR
