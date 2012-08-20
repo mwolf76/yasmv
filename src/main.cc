@@ -112,14 +112,10 @@ int main(int argc, char *argv[])
 
   try {
     options::options_description desc("Allowed options");
-
-    const char* fname = argv[1];
-
-    parseFile((pANTLR3_UINT8) fname);
     desc.add_options()
       ("help", "produce help message")
-      ("compression", options::value<int>(), "set compression level")
-      ;
+      ("verbosity", options::value<int>(), "set verbosity level")
+    ;
 
     options::variables_map vm;
     options::store(options::parse_command_line(argc, argv, desc), vm);
@@ -130,59 +126,64 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    if (vm.count("compression")) {
-      cout << "Compression level was set to "
-           << vm["compression"].as<int>() << ".\n";
+    if (vm.count("verbosity")) {
+      cout << "Verbosity level was set to "
+           << vm["verbosity"].as<int>() << ".\n";
     } else {
-      cout << "Compression level was not set.\n";
+      cout << "Verbosity level was not set.\n";
     }
 
-    Printer prn(cout);
+    return 0;
 
-    IModel_ptr M = ModelMgr::INSTANCE().get_model();
-    Modules mods = M->get_modules();
+  //   const char* fname = argv[1];
+  //   parseFile((pANTLR3_UINT8) fname);
 
-    Analyzer analyzer;
-    analyzer.process();
+  //   Printer prn(cout);
 
-    SATBMCFalsification alg(*M);
-    alg.set_param("k", 10);
-    alg.set_param("incremental", true);
-    assert(! alg.get_param("incremental").as_boolean());
-    // other params...
+  //   IModel_ptr M = ModelMgr::INSTANCE().get_model();
+  //   Modules mods = M->get_modules();
 
-    alg(); // TODO support for multiprocessing sync, etc...
-    if (alg.has_witness()) {
-      const Traces& t = alg.get_traces();
+  //   Analyzer analyzer;
+  //   analyzer.process();
 
-      // maybe print them
-    }
+  //   SATBMCFalsification alg(*M);
+  //   alg.set_param("k", 10);
+  //   alg.set_param("incremental", true);
+  //   assert(! alg.get_param("incremental").as_boolean());
+  //   // other params...
 
-    // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-    //   IModule_ptr pm = eye->second;
-    //   {
-    //     Module& m = dynamic_cast <Module&> (*pm);
-    //     //      const Expr_ptr module_name = m.expr();
+  //   alg(); // TODO support for multiprocessing sync, etc...
+  //   if (alg.has_witness()) {
+  //     const Traces& t = alg.get_traces();
 
-    //     prn << "Module name: "<< m.expr() << "\n";
-    //     const Variables& svars = m.get_localVars();
+  //     // maybe print them
+  //   }
 
-    //     prn << "Variables: " << "\n";
-    //     for (Variables::const_iterator veye = svars.begin();
-    //          veye != svars.end(); veye ++ ) {
+  //   // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+  //   //   IModule_ptr pm = eye->second;
+  //   //   {
+  //   //     Module& m = dynamic_cast <Module&> (*pm);
+  //   //     //      const Expr_ptr module_name = m.expr();
 
-    //       IVariable* tmp = veye->second;
+  //   //     prn << "Module name: "<< m.expr() << "\n";
+  //   //     const Variables& svars = m.get_localVars();
 
-    //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-    //         const StateVar& v = (*vp);
-    //         prn << v.expr(); cout << endl;
-    //       }
-    //     }
-    //   }
-    // }
+  //   //     prn << "Variables: " << "\n";
+  //   //     for (Variables::const_iterator veye = svars.begin();
+  //   //          veye != svars.end(); veye ++ ) {
+
+  //   //       IVariable* tmp = veye->second;
+
+  //   //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+  //   //         const StateVar& v = (*vp);
+  //   //         prn << v.expr(); cout << endl;
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
   }
 
-  catch(exception& e) {
+  catch(Exception& e) {
     cerr << "error: " << e.what() << "\n";
     return 1;
   }
