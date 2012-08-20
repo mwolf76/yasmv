@@ -557,12 +557,12 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
   Type_ptr exp_type;
 
   { // RHS
-      const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-      if (!f_tm.is_boolean(top) &&
-          !f_tm.is_word(top)) {
-        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-      }
-      exp_type = top;
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    if (!f_tm.is_boolean(top) &&
+	!f_tm.is_word(top)) {
+      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
+    exp_type = top;
   }
 
   { // LHS
@@ -588,12 +588,12 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
   Type_ptr exp_type;
 
   { // RHS
-      const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-      if (!f_tm.is_boolean(top) &&
-          !f_tm.is_word(top)) {
-        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-      }
-      exp_type = top;
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    if (!f_tm.is_boolean(top) &&
+	!f_tm.is_word(top)) {
+      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
+    exp_type = top;
   }
 
   { // LHS
@@ -619,12 +619,12 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
   Type_ptr exp_type;
 
   { // RHS
-      const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-      if (!f_tm.is_boolean(top) &&
-          !f_tm.is_word(top)) {
-        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-      }
-      exp_type = top;
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    if (!f_tm.is_boolean(top) &&
+	!f_tm.is_word(top)) {
+      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
+    exp_type = top;
   }
 
   { // LHS

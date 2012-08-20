@@ -1,21 +1,21 @@
 /*
-Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
- */
+*/
 
 /**
  * @file common.hh
@@ -72,9 +72,9 @@ using std::flush;
 #include <base.hh>
 
 class UnsupportedOperatorException : public Exception {
-        virtual const char* what() const throw() {
-                return "Unsupported operator";
-        }
+  virtual const char* what() const throw() {
+    return "Unsupported operator";
+  }
 };
 
 
@@ -97,34 +97,34 @@ struct PtrEq {
 typedef unsigned long long value_t;
 
 typedef enum {
-	BINARY = 2,
-	OCTAL = 8,
-	DECIMAL = 10,
-	HEXADECIMAL = 16
+  BINARY = 2,
+  OCTAL = 8,
+  DECIMAL = 10,
+  HEXADECIMAL = 16
 } base_t;
 
 inline char base_char(base_t base)
 {
-	switch (base) {
-	case BINARY: return 'b';
-	case OCTAL: return 'o';
-	case DECIMAL: return 'd';
-	case HEXADECIMAL: return 'h';
-	default: assert (0); // unexpected;
-	}
+  switch (base) {
+  case BINARY: return 'b';
+  case OCTAL: return 'o';
+  case DECIMAL: return 'd';
+  case HEXADECIMAL: return 'h';
+  default: assert (0); // unexpected;
+  }
 }
 
 inline string to_base(value_t value, base_t base)
 {
-    static const char alphabet[] = "0123456789abcdefgh";
-    std::string result;
+  static const char alphabet[] = "0123456789abcdefgh";
+  std::string result;
 
-    while(value) {
-	    result += alphabet[value % base];
-	    value /= base;
-    }
+  while(value) {
+    result += alphabet[value % base];
+    value /= base;
+  }
 
-    return string(result.rbegin(), result.rend());
+  return string(result.rbegin(), result.rend());
 }
 
 typedef std::string Atom;

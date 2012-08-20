@@ -1,28 +1,24 @@
-/*
-Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
- */
-
 /**
  * @file main.cc
  *
  * @brief Program main body
  *
- */
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ **/
 
 #include <common.hh>
 
@@ -115,7 +111,7 @@ int main(int argc, char *argv[])
     desc.add_options()
       ("help", "produce help message")
       ("verbosity", options::value<int>(), "set verbosity level")
-    ;
+      ;
 
     options::variables_map vm;
     options::store(options::parse_command_line(argc, argv, desc), vm);
@@ -135,52 +131,52 @@ int main(int argc, char *argv[])
 
     return 0;
 
-  //   const char* fname = argv[1];
-  //   parseFile((pANTLR3_UINT8) fname);
+    //   const char* fname = argv[1];
+    //   parseFile((pANTLR3_UINT8) fname);
 
-  //   Printer prn(cout);
+    //   Printer prn(cout);
 
-  //   IModel_ptr M = ModelMgr::INSTANCE().get_model();
-  //   Modules mods = M->get_modules();
+    //   IModel_ptr M = ModelMgr::INSTANCE().get_model();
+    //   Modules mods = M->get_modules();
 
-  //   Analyzer analyzer;
-  //   analyzer.process();
+    //   Analyzer analyzer;
+    //   analyzer.process();
 
-  //   SATBMCFalsification alg(*M);
-  //   alg.set_param("k", 10);
-  //   alg.set_param("incremental", true);
-  //   assert(! alg.get_param("incremental").as_boolean());
-  //   // other params...
+    //   SATBMCFalsification alg(*M);
+    //   alg.set_param("k", 10);
+    //   alg.set_param("incremental", true);
+    //   assert(! alg.get_param("incremental").as_boolean());
+    //   // other params...
 
-  //   alg(); // TODO support for multiprocessing sync, etc...
-  //   if (alg.has_witness()) {
-  //     const Traces& t = alg.get_traces();
+    //   alg(); // TODO support for multiprocessing sync, etc...
+    //   if (alg.has_witness()) {
+    //     const Traces& t = alg.get_traces();
 
-  //     // maybe print them
-  //   }
+    //     // maybe print them
+    //   }
 
-  //   // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-  //   //   IModule_ptr pm = eye->second;
-  //   //   {
-  //   //     Module& m = dynamic_cast <Module&> (*pm);
-  //   //     //      const Expr_ptr module_name = m.expr();
+    //   // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+    //   //   IModule_ptr pm = eye->second;
+    //   //   {
+    //   //     Module& m = dynamic_cast <Module&> (*pm);
+    //   //     //      const Expr_ptr module_name = m.expr();
 
-  //   //     prn << "Module name: "<< m.expr() << "\n";
-  //   //     const Variables& svars = m.get_localVars();
+    //   //     prn << "Module name: "<< m.expr() << "\n";
+    //   //     const Variables& svars = m.get_localVars();
 
-  //   //     prn << "Variables: " << "\n";
-  //   //     for (Variables::const_iterator veye = svars.begin();
-  //   //          veye != svars.end(); veye ++ ) {
+    //   //     prn << "Variables: " << "\n";
+    //   //     for (Variables::const_iterator veye = svars.begin();
+    //   //          veye != svars.end(); veye ++ ) {
 
-  //   //       IVariable* tmp = veye->second;
+    //   //       IVariable* tmp = veye->second;
 
-  //   //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-  //   //         const StateVar& v = (*vp);
-  //   //         prn << v.expr(); cout << endl;
-  //   //       }
-  //   //     }
-  //   //   }
-  //   // }
+    //   //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+    //   //         const StateVar& v = (*vp);
+    //   //         prn << v.expr(); cout << endl;
+    //   //       }
+    //   //     }
+    //   //   }
+    //   // }
   }
 
   catch(Exception& e) {

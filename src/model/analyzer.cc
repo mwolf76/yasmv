@@ -141,8 +141,8 @@ void Analyzer::process()
         if (_type) {
           if (_type != dtype) {
             throw BadType(_type->get_repr(),
-                                   dtype->get_repr(),
-                                   dbody);
+			  dtype->get_repr(),
+			  dbody);
           }
         } else f_tm.set_type(fqdn, dtype);
       } // for defines
@@ -171,7 +171,7 @@ void Analyzer::process()
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
-                                 tp->get_repr(), body);
+			tp->get_repr(), body);
         }
       } // for invar
 
@@ -185,7 +185,7 @@ void Analyzer::process()
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
-                                 tp->get_repr(), body);
+			tp->get_repr(), body);
         }
       } // for trans
 
@@ -199,7 +199,7 @@ void Analyzer::process()
         Type_ptr tp = f_inferrer.process(ctx, body);
         if (tp != f_tm.find_boolean()) {
           throw BadType(f_tm.find_boolean()->get_repr(),
-                                 tp->get_repr(), body);
+			tp->get_repr(), body);
         }
       } // for fair
 
