@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr_mgr.hh>
 
 // -- interfaces --------------------------------------------------------------
-class ISymbol {
+class ISymbol : IObject {
 public:
   virtual const Expr_ptr ctx() const =0;
   virtual const Expr_ptr expr() const =0;
@@ -52,7 +52,6 @@ public:
 
   bool is_const() const;
   IConstant& as_const() const;
-
 };
 
 class IVariable : public ISymbol {
@@ -67,13 +66,13 @@ public:
   virtual const Expr_ptr get_body() const =0;
 };
 
-class IAssign {
+class IAssign : public IObject {
 public:
   virtual const Expr_ptr get_lvalue() const =0;
   virtual const Expr_ptr get_body() const =0;
 };
 
-class IModule {
+class IModule : public IObject {
 public:
   virtual const Expr_ptr expr() const =0;
 
@@ -115,7 +114,7 @@ public:
   virtual void add_ctlspec(Expr_ptr formula) =0;
 };
 
-class IModel {
+class IModel : public IObject {
 public:
   virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
   virtual IModule& get_module(Expr_ptr name) =0;
@@ -152,7 +151,6 @@ public:
 
   bool is_main() const
   { return f_name == ExprMgr::INSTANCE().make_main(); }
-
 
   void add_formalParam(Expr_ptr identifier);
   const ExprVector& get_formalParams() const

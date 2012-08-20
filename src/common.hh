@@ -39,14 +39,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stack>
 #include <set>
 
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <boost/regex.hpp>
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
 
-using std::exception;
+using boost::unordered_map;
+using boost::unordered_set;
+
+using boost::regex;
+using boost::cmatch;
+using boost::regex_match;
+
+using boost::tuple;
 
 using std::pair;
 using std::make_pair;
@@ -58,19 +65,20 @@ using std::vector;
 using std::stack;
 using std::set;
 
-using std::tr1::unordered_map;
-using std::tr1::unordered_set;
-
-using boost::regex;
-using boost::cmatch;
-using boost::regex_match;
-
-using boost::tuple;
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using std::flush;
+
+/* custom base class definitions */
+#include <base.hh>
+
+class UnsupportedOperatorException : public Exception {
+        virtual const char* what() const throw() {
+                return "Unsupported operator";
+        }
+};
+
 
 struct PtrHash {
   inline long operator() (void* ptr) const
@@ -82,12 +90,6 @@ struct PtrEq {
   inline bool operator() (const void* x,
                           const void* y) const
   { return x == y; }
-};
-
-class UnsupportedOperatorException : public exception {
-        virtual const char* what() const throw() {
-                return "Unsupported operator";
-        }
 };
 
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)

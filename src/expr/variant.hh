@@ -36,7 +36,7 @@ typedef enum {
 } VariantType;
 
 // Variant iface
-class IVariant {
+class IVariant : public IObject {
 public:
   virtual bool is_nil() const =0;
 

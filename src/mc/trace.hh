@@ -33,7 +33,7 @@ typedef enum {
 } TraceType;
 
 // Trace iface
-class ITrace {
+class ITrace : public IObject {
 public:
   virtual string get_desc() =0;
   virtual void set_desc(const string& desc) =0;

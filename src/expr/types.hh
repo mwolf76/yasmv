@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <expr_mgr.hh>
 
 // Basic Type class. Is.. nothing.
-class Type {
+class Type : public Object {
 public:
   virtual Expr_ptr get_repr() const
   { return NULL; }
@@ -260,20 +260,23 @@ public:
 
   const Type_ptr find_instance(Expr_ptr identifier)
   {
-    Type_ptr inst = new Instance(identifier);
-    TypeHit hit =
-      f_register.insert( make_pair( FQExpr(identifier),
-                                    inst));
-    if (hit.second) {
-      logger << "Added instance of module '"
-             << identifier
-             << "' to type register"
-             << endl;
-    }
+    return NULL;
 
-    TypeMap::pointer p = &(*hit.first);
-    return p->second;
   }
+  // {
+  //   Type_ptr inst = new Instance(identifier);
+  //   TypeHit hit = f_register.insert( make_pair( FQExpr(identifier), inst));
+
+  //   if (hit.second) {
+  //     logger << "Added instance of module '"
+  //            << identifier
+  //            << "' to type register"
+  //            << endl;
+  //   }
+
+  //   TypeMap::p = &(*hit.first);
+  //   return p->second;
+  // }
 
   inline bool is_temporal(const Type_ptr tp) const
   { return is_boolean(tp) || NULL != dynamic_cast <const TemporalType*> (tp); }
@@ -366,7 +369,7 @@ private:
 ostream& operator<<(ostream& os, Type_ptr tp);
 
 // -- analyzer related exception hierarchy
-class AnalyzerException : public exception {
+class AnalyzerException : public Exception {
 public:
   virtual const char* what() const throw() =0;
 };
