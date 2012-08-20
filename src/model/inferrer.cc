@@ -1,40 +1,41 @@
-/*
-  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-*/
-
 /**
- * @file inferrer.cc
+ *  @file inferrer.cc
+ *  @brief Expr type inferrer
  *
- * @brief Model inferrer
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
  *
- */
+ *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **/
+
 #include <common.hh>
 
 #include <expr.hh>
 #include <inferrer.hh>
 
 Inferrer::Inferrer()
-  : f_map()
-  , f_type_stack()
-  , f_ctx_stack()
-  , f_mm(ModelMgr::INSTANCE())
-  , f_em(ExprMgr::INSTANCE())
-  , f_tm(TypeMgr::INSTANCE())
+    : f_map()
+    , f_type_stack()
+    , f_ctx_stack()
+    , f_mm(ModelMgr::INSTANCE())
+    , f_em(ExprMgr::INSTANCE())
+    , f_tm(TypeMgr::INSTANCE())
 { logger << "Created Inferrer @" << this << endl; }
 
 Inferrer::~Inferrer()
@@ -42,23 +43,23 @@ Inferrer::~Inferrer()
 
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
 {
-  Type_ptr res = NULL;
-  logger << "Determining type for expression " << ctx << "::" << body << endl;
+    Type_ptr res = NULL;
+    logger << "Determining type for expression " << ctx << "::" << body << endl;
 
-  // remove previous results
-  f_type_stack.clear();
-  f_ctx_stack.clear();
+    // remove previous results
+    f_type_stack.clear();
+    f_ctx_stack.clear();
 
-  // walk body in given ctx
-  f_ctx_stack.push_back(ctx);
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
 
-  // invoke walker on the body of the expr to be processed
-  (*this)(body);
+    // invoke walker on the body of the expr to be processed
+    (*this)(body);
 
-  assert(1 == f_type_stack.size()); res = f_type_stack.back();
+    assert(1 == f_type_stack.size()); res = f_type_stack.back();
 
-  logger << res << endl;
-  return res;
+    logger << res << endl;
+    return res;
 }
 
 void Inferrer::pre_hook()
@@ -343,7 +344,7 @@ bool Inferrer::walk_member_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_member_postorder(const Expr_ptr expr)
 {
-  // tODO: member
+    // tODO: member
 }
 
 bool Inferrer::walk_union_preorder(const Expr_ptr expr)
@@ -352,293 +353,293 @@ bool Inferrer::walk_union_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_union_postorder(const Expr_ptr expr)
 {
-  // todo: union
+    // todo: union
 }
 
 bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 {
-  Type_ptr tmp = f_type_stack.back();
-  Expr_ptr ctx = tmp->get_repr();
-  f_ctx_stack.push_back(ctx);
-  return true;
+    Type_ptr tmp = f_type_stack.back();
+    Expr_ptr ctx = tmp->get_repr();
+    f_ctx_stack.push_back(ctx);
+    return true;
 }
 void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 {
-  Type_ptr rhs_type;
+    Type_ptr rhs_type;
 
-  { // RHS, no checks necessary/possible
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    rhs_type = top;
-  }
+    { // RHS, no checks necessary/possible
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        rhs_type = top;
+    }
 
-  { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    assert(f_tm.is_instance(top));
-  }
+    { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        assert(f_tm.is_instance(top));
+    }
 
-  // propagate rhs type
-  f_type_stack.push_back(rhs_type);
+    // propagate rhs type
+    f_type_stack.push_back(rhs_type);
 
-  // restore previous ctx
-  f_ctx_stack.pop_back();
+    // restore previous ctx
+    f_ctx_stack.pop_back();
 }
 
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
-  ExprType symb_type = expr->f_symb;
-  Type_ptr tp;
+    ExprType symb_type = expr->f_symb;
+    Type_ptr tp;
 
-  // cache miss took care of the stack already
-  if (! cache_miss(expr)) return;
+    // cache miss took care of the stack already
+    if (! cache_miss(expr)) return;
 
-  if (symb_type == ICONST) {
-    tp = f_tm.find_integer();
-  }
+    if (symb_type == ICONST) {
+        tp = f_tm.find_integer();
+    }
 
-  else if (symb_type == UWCONST) {
-    tp = f_tm.find_uword(f_em.make_iconst(expr->u.f_size));
-  }
+    else if (symb_type == UWCONST) {
+        tp = f_tm.find_uword(f_em.make_iconst(expr->u.f_size));
+    }
 
-  else if (symb_type == SWCONST) {
-    tp = f_tm.find_sword(f_em.make_iconst(expr->u.f_size));
-  }
+    else if (symb_type == SWCONST) {
+        tp = f_tm.find_sword(f_em.make_iconst(expr->u.f_size));
+    }
 
-  else if (symb_type == IDENT) {
-    ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
-    tp = symb->get_type();
-  }
-  else assert(0);
+    else if (symb_type == IDENT) {
+        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
+        tp = symb->get_type();
+    }
+    else assert(0);
 
-  assert(tp);
-  f_type_stack.push_back(tp);
+    assert(tp);
+    f_type_stack.push_back(tp);
 }
 
 // one step of resolution returns a const or variable
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-  Model& model = static_cast <Model&> (*f_mm.get_model());
-  ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
+    Model& model = static_cast <Model&> (*f_mm.get_model());
+    ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
 
-  // is this a variable?
-  if (symb->is_variable()) {
-    return symb;
-  }
-
-  // ... or a define?
-  else if (symb->is_define()) {
-
-    while (symb->is_define()) {
-      Expr_ptr body = symb->as_define().get_body();
-      if (!f_em.is_identifier(body)) {
-        // throw BadDefine(); // TODO
-      }
-      symb = model.fetch_symbol(FQExpr(ctx, body));
+    // is this a variable?
+    if (symb->is_variable()) {
+        return symb;
     }
 
-    return symb;
-  }
+    // ... or a define?
+    else if (symb->is_define()) {
 
-  // .. or a constant?
-  else if (symb->is_const()) {
-    return symb;
-  }
+        while (symb->is_define()) {
+            Expr_ptr body = symb->as_define().get_body();
+            if (!f_em.is_identifier(body)) {
+                // throw BadDefine(); // TODO
+            }
+            symb = model.fetch_symbol(FQExpr(ctx, body));
+        }
 
-  // or what?!?
-  else assert(0);
+        return symb;
+    }
+
+    // .. or a constant?
+    else if (symb->is_const()) {
+        return symb;
+    }
+
+    // or what?!?
+    else assert(0);
 }
 
 // fun: temporal -> temporal
 void Inferrer::walk_unary_temporal_postorder(const Expr_ptr expr)
 {
-  const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
-  if (!f_tm.is_boolean(top) &&
-      !f_tm.is_temporal(top)) {
+    if (!f_tm.is_boolean(top) &&
+        !f_tm.is_temporal(top)) {
 
-    throw BadType(top->get_repr(),
-                  f_em.make_boolean(), expr);
-  }
+        throw BadType(top->get_repr(),
+                      f_em.make_boolean(), expr);
+    }
 
-  f_type_stack.push_back(f_tm.find_temporal());
+    f_type_stack.push_back(f_tm.find_temporal());
 }
 
 // fun: temporal x temporal -> temporal
 void Inferrer::walk_binary_temporal_postorder(const Expr_ptr expr)
 {
-  { // RHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top))
-      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-  }
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top))
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
 
-  { // LHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top))
-      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-  }
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top))
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
 
-  f_type_stack.push_back(f_tm.find_temporal());
+    f_type_stack.push_back(f_tm.find_temporal());
 }
 
 // fun: boolean -> boolean
 void Inferrer::walk_unary_fsm_postorder(const Expr_ptr expr)
 {
-  const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
-  if (!f_tm.is_boolean(top) &&
-      !f_tm.is_integer(top) &&
-      !f_tm.is_word(top)) {
+    if (!f_tm.is_boolean(top) &&
+        !f_tm.is_integer(top) &&
+        !f_tm.is_word(top)) {
 
-    throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-  }
+        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
 
-  f_type_stack.push_back(top); // propagate
+    f_type_stack.push_back(top); // propagate
 }
 
 // fun: arithm -> arithm
 void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 {
-  const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
-  if (!f_tm.is_integer(top) &&
-      !f_tm.is_word(top)) {
-    throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-  }
+    if (!f_tm.is_integer(top) &&
+        !f_tm.is_word(top)) {
+        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
 
-  f_type_stack.push_back(top); // propagate
+    f_type_stack.push_back(top); // propagate
 }
 
 // fun: logical -> logical
 void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
 {
-  const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
-  if (!f_tm.is_boolean(top)) {
-    throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-  }
+    if (!f_tm.is_boolean(top)) {
+        throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+    }
 
-  f_type_stack.push_back(top); // propagate
+    f_type_stack.push_back(top); // propagate
 }
 
 // fun: arithm x arithm -> arithm
 void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 {
-  Type_ptr exp_type;
+    Type_ptr exp_type;
 
-  { // RHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(top)) {
-      throw BadType(top->get_repr(), f_em.make_integer(), expr);
-    }
-    exp_type = top;
-  }
-
-  { // LHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(top)) {
-      throw BadType(top->get_repr(), f_em.make_integer(), expr);
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_integer(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
+        exp_type = top;
     }
 
-    // type matching is mandatory here
-    if (top != exp_type) {
-      throw BadType(exp_type->get_repr(), top->get_repr(), expr);
-    }
-  }
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_integer(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
 
-  f_type_stack.push_back(f_tm.find_integer());
+        // type matching is mandatory here
+        if (top != exp_type) {
+            throw BadType(exp_type->get_repr(), top->get_repr(), expr);
+        }
+    }
+
+    f_type_stack.push_back(f_tm.find_integer());
 }
 
 
 // fun: logical x logical -> logical
 void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
 {
-  Type_ptr exp_type;
+    Type_ptr exp_type;
 
-  { // RHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-	!f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-    }
-    exp_type = top;
-  }
-
-  { // LHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-        !f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_integer(), expr);
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+        }
+        exp_type = top;
     }
 
-    // type matching is mandatory here
-    if (top != exp_type) {
-      throw BadType(exp_type->get_repr(), top->get_repr(), expr);
-    }
-  }
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
 
-  // by design propagate lhs type it should really matter
-  f_type_stack.push_back(exp_type);
+        // type matching is mandatory here
+        if (top != exp_type) {
+            throw BadType(exp_type->get_repr(), top->get_repr(), expr);
+        }
+    }
+
+    // by design propagate lhs type it should really matter
+    f_type_stack.push_back(exp_type);
 }
 
 // fun: bitwise x bitwise -> bitwise
 void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 {
-  Type_ptr exp_type;
+    Type_ptr exp_type;
 
-  { // RHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-	!f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-    }
-    exp_type = top;
-  }
-
-  { // LHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-        !f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_integer(), expr);
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+        }
+        exp_type = top;
     }
 
-    // type matching is mandatory here
-    if (top != exp_type) {
-      throw BadType(exp_type->get_repr(), top->get_repr(), expr);
-    }
-  }
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
 
-  // by design propagate lhs type it should really matter
-  f_type_stack.push_back(exp_type);
+        // type matching is mandatory here
+        if (top != exp_type) {
+            throw BadType(exp_type->get_repr(), top->get_repr(), expr);
+        }
+    }
+
+    // by design propagate lhs type it should really matter
+    f_type_stack.push_back(exp_type);
 }
 
 // fun: arithmetical x arithmetical -> boolean
 void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 {
-  Type_ptr exp_type;
+    Type_ptr exp_type;
 
-  { // RHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-	!f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_boolean(), expr);
-    }
-    exp_type = top;
-  }
-
-  { // LHS
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top) &&
-        !f_tm.is_word(top)) {
-      throw BadType(top->get_repr(), f_em.make_integer(), expr);
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+        }
+        exp_type = top;
     }
 
-    // type matching is mandatory here
-    if (top != exp_type) {
-      throw BadType(exp_type->get_repr(), top->get_repr(), expr);
-    }
-  }
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top) &&
+            !f_tm.is_word(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
 
-  f_type_stack.push_back(f_tm.find_boolean());
+        // type matching is mandatory here
+        if (top != exp_type) {
+            throw BadType(exp_type->get_repr(), top->get_repr(), expr);
+        }
+    }
+
+    f_type_stack.push_back(f_tm.find_boolean());
 }

@@ -1,39 +1,40 @@
-/*
-  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-*/
-
 /**
- * @file printer.cc
+ *  @file expr_printer.cc
+ *  @brief Expr printers
  *
- * @brief Expression printer
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
  *
- */
+ *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **/
+
 #include <common.hh>
 
 #include <expr.hh>
 #include <expr_printer.hh>
 
 Printer::Printer()
-  : f_os(cout)
+    : f_os(cout)
 {}
 
 Printer::Printer(ostream& os)
-  : f_os(os)
+    : f_os(os)
 {}
 
 Printer::~Printer()
@@ -49,7 +50,7 @@ Printer& Printer::operator<<(Expr_ptr expr)
 { this->operator()(expr); return *this; }
 
 Printer& Printer::operator<< (const string& str) {
-  f_os << str << flush; return (*this);
+    f_os << str << flush; return (*this);
 }
 
 // walker interface
@@ -342,35 +343,35 @@ void Printer::walk_union_postorder(const Expr_ptr expr)
 /* word print helpers */
 string word_repr(const Expr_ptr expr, base_t base)
 {
-  assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
+    assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
 
-  ostringstream oss;
-  oss << "0"
-      << ( expr->f_symb == SWCONST ? "s" : "u" )
-      << base_char(base)
-      << expr->u.f_size
-      << to_base(expr->u.f_value, base) ;
+    ostringstream oss;
+    oss << "0"
+        << ( expr->f_symb == SWCONST ? "s" : "u" )
+        << base_char(base)
+        << expr->u.f_size
+        << to_base(expr->u.f_value, base) ;
 
-  return oss.str();
+    return oss.str();
 }
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-  ExprType symb = expr->f_symb;
+    ExprType symb = expr->f_symb;
 
-  if (ICONST == symb) {
-    f_os << expr->u.f_value;
-  }
-  else if (UWCONST == symb ||
-           SWCONST == symb) {
-    f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
-  }
-  else if (IDENT == symb) {
-    f_os << (*expr->u.f_atom);
-  }
-  // else if (symb == LITERAL) {
-  //   f_os << expr->f_atom;
-  // }
+    if (ICONST == symb) {
+        f_os << expr->u.f_value;
+    }
+    else if (UWCONST == symb ||
+             SWCONST == symb) {
+        f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
+    }
+    else if (IDENT == symb) {
+        f_os << (*expr->u.f_atom);
+    }
+    // else if (symb == LITERAL) {
+    //   f_os << expr->f_atom;
+    // }
 
-  else assert(0);
+    else assert(0);
 }
