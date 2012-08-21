@@ -18,7 +18,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **/
-
 #include <common.hh>
 
 #include <expr.hh>
@@ -37,8 +36,8 @@
 // logger configuration, has to be inlined in main
 #include "logging.cc"
 
-#include <boost/program_options.hpp>
-namespace options = boost::program_options;
+// options management
+#include "opts.hh"
 
 static void
 parseFile(pANTLR3_UINT8 fName)
@@ -79,82 +78,72 @@ extern void link_model();
 ostream& operator<<(ostream& os, const Expr_ptr t)
 { Printer (os) << t; return os; }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     // hack
     link_expr();
 
+    // parse command line options
+    OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+    opts_mgr.parse_command_line(argc, argv);
+    if (opts_mgr.help()) {
+        const string heading = "gnuSMV - yet another model checker.";
+
+        cout << heading
+             << endl
+             << opts_mgr.usage()
+             << endl
+             << endl ;
+        exit(1);
+    }
+
     try {
-        options::options_description desc("Allowed options");
-        desc.add_options()
-            ("help", "produce help message")
-            ("verbosity", options::value<int>(), "set verbosity level")
-            ;
+          const char* fname = argv[1];
+          parseFile((pANTLR3_UINT8) fname);
 
-        options::variables_map vm;
-        options::store(options::parse_command_line(argc, argv, desc), vm);
-        options::notify(vm);
+          Printer prn(cout);
 
-        if (vm.count("help")) {
-            cout << desc << "\n";
-            return 0;
-        }
+          IModel_ptr M = ModelMgr::INSTANCE().get_model();
+          Modules mods = M->get_modules();
 
-        if (vm.count("verbosity")) {
-            cout << "Verbosity level was set to "
-                 << vm["verbosity"].as<int>() << ".\n";
-        } else {
-            cout << "Verbosity level was not set.\n";
-        }
+          Analyzer analyzer;
+          analyzer.process();
 
-        return 0;
+          SATBMCFalsification alg(*M);
+          alg.set_param("k", 10);
+          alg.set_param("incremental", true);
+          assert(! alg.get_param("incremental").as_boolean());
+          // other params...
 
-        //   const char* fname = argv[1];
-        //   parseFile((pANTLR3_UINT8) fname);
+          alg(); // TODO support for multiprocessing sync, etc...
+          if (alg.has_witness()) {
+              // const Traces& t = alg.get_traces();
 
-        //   Printer prn(cout);
+            // maybe print them
+          }
 
-        //   IModel_ptr M = ModelMgr::INSTANCE().get_model();
-        //   Modules mods = M->get_modules();
+          for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+            IModule_ptr pm = eye->second;
+            {
+              Module& m = dynamic_cast <Module&> (*pm);
+              //      const Expr_ptr module_name = m.expr();
 
-        //   Analyzer analyzer;
-        //   analyzer.process();
+              prn << "Module name: "<< m.expr() << "\n";
+              const Variables& svars = m.get_localVars();
 
-        //   SATBMCFalsification alg(*M);
-        //   alg.set_param("k", 10);
-        //   alg.set_param("incremental", true);
-        //   assert(! alg.get_param("incremental").as_boolean());
-        //   // other params...
+              prn << "Variables: " << "\n";
+              for (Variables::const_iterator veye = svars.begin();
+                   veye != svars.end(); veye ++ ) {
 
-        //   alg(); // TODO support for multiprocessing sync, etc...
-        //   if (alg.has_witness()) {
-        //     const Traces& t = alg.get_traces();
+                IVariable* tmp = veye->second;
 
-        //     // maybe print them
-        //   }
-
-        //   // for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
-        //   //   IModule_ptr pm = eye->second;
-        //   //   {
-        //   //     Module& m = dynamic_cast <Module&> (*pm);
-        //   //     //      const Expr_ptr module_name = m.expr();
-
-        //   //     prn << "Module name: "<< m.expr() << "\n";
-        //   //     const Variables& svars = m.get_localVars();
-
-        //   //     prn << "Variables: " << "\n";
-        //   //     for (Variables::const_iterator veye = svars.begin();
-        //   //          veye != svars.end(); veye ++ ) {
-
-        //   //       IVariable* tmp = veye->second;
-
-        //   //       if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-        //   //         const StateVar& v = (*vp);
-        //   //         prn << v.expr(); cout << endl;
-        //   //       }
-        //   //     }
-        //   //   }
-        //   // }
+                if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+                  const StateVar& v = (*vp);
+                  prn << v.expr(); cout << endl;
+                }
+              }
+            }
+          }
     }
 
     catch(Exception& e) {
