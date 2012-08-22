@@ -584,41 +584,13 @@ public:
 protected:
     ExprMgr()
     {
-        // const Atom_ptr atom_temporal = new Atom("temporal");
-        // const ExprPoolHit temporal_hit = f_expr_pool.insert(*atom_temporal);
-        // assert(temporal_hit.second); // it has to be true
-        // temporal_expr = const_cast<Expr_ptr> (& (*temporal_hit.first));
         temporal_expr = make_identifier("temporal");
-
-        const Atom_ptr atom_integer = new Atom("integer");
-        const ExprPoolHit integer_hit = f_expr_pool.insert(*atom_integer);
-        assert(integer_hit.second); // it has to be true
-        integer_expr = const_cast<Expr_ptr> (& (*integer_hit.first));
-
-        const Atom_ptr atom_boolean = new Atom("boolean");
-        const ExprPoolHit bool_hit = f_expr_pool.insert(*atom_boolean);
-        assert(bool_hit.second); // it has to be true
-        bool_expr = const_cast<Expr_ptr> (& (*bool_hit.first));
-
-        const Atom_ptr atom_main = new Atom("main");
-        const ExprPoolHit main_hit = f_expr_pool.insert(*atom_main);
-        assert(main_hit.second); // it has to be true
-        main_expr = const_cast<Expr_ptr> (& (*main_hit.first));
-
-        const Atom_ptr atom_const = new Atom("const");
-        const ExprPoolHit const_hit = f_expr_pool.insert(*atom_const);
-        assert(const_hit.second); // it has to be true
-        const_expr = const_cast<Expr_ptr> (& (*const_hit.first));
-
-        const Atom_ptr atom_uword = new Atom("unsigned word");
-        const ExprPoolHit uword_hit = f_expr_pool.insert(*atom_uword);
-        assert(uword_hit.second); // it has to be true
-        uword_expr = const_cast<Expr_ptr> (& (*uword_hit.first));
-
-        const Atom_ptr atom_sword = new Atom("signed word");
-        const ExprPoolHit sword_hit = f_expr_pool.insert(*atom_sword);
-        assert(sword_hit.second); // it has to be true
-        sword_expr = const_cast<Expr_ptr> (& (*sword_hit.first));
+        integer_expr = make_identifier("integer");
+        bool_expr = make_identifier("boolean");
+        main_expr = make_identifier("main");
+        const_expr = make_identifier("const");
+        uword_expr = make_identifier("unsigned word");
+        sword_expr = make_identifier("signed word");
     }
 
 private:
