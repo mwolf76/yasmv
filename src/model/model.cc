@@ -180,17 +180,17 @@ void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
                          IConstant_ptr>(FQExpr(expr(), name), k));
 }
 
-void Module::add_assign(Expr_ptr lvalue, IDefine_ptr body)
+void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
 {
     logger << "Module " << (*this)
            << ", adding assign "
            << lvalue
            << " := "
-           << body
+           << def->body()
            << endl;
 
     f_assgn.insert(make_pair<FQExpr,
-                   IDefine_ptr>(FQExpr(expr(), lvalue), body));
+                   IDefine_ptr>(FQExpr(expr(), lvalue), def));
 }
 
 void Module::add_init(Expr_ptr expr)
