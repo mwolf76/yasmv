@@ -84,7 +84,7 @@ struct Expr_TAG {
     ExprType f_symb;
 
     union {
-        // indentifiers
+        // identifiers
         Atom_ptr f_atom;
 
         // operators
@@ -107,9 +107,9 @@ struct Expr_TAG {
     {}
 
     // identifiers
-    inline Expr_TAG(const Atom_ptr atom)
+    inline Expr_TAG(const Atom& atom)
     : f_symb(IDENT)
-    { u.f_atom = atom; }
+    { u.f_atom = const_cast<Atom *>(& atom); }
 
     // word constants
     inline Expr_TAG(ExprType symb, size_t size, value_t value)
@@ -407,19 +407,19 @@ public:
     /* leaves */
     inline Expr_ptr make_iconst(unsigned long long value)
     {
-        Expr tmp(ICONST, value);
+        Expr tmp(ICONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
     inline Expr_ptr make_uwconst(unsigned short wsize, unsigned long long value)
     {
-        Expr tmp(UWCONST, wsize, value);
+        Expr tmp(UWCONST, wsize, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
     inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
     {
-        Expr tmp(SWCONST, wsize, value);
+        Expr tmp(SWCONST, wsize, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -468,6 +468,7 @@ public:
     inline Expr_ptr make_sword(Expr_ptr size)
     { return make_expr(SUBSCRIPT, sword_expr, size); }
 
+    // TODO: review this comment
     // Here a bit of magic occurs, so it's better to keep a note:
     // this method is used by the parser to build identifier
     // nodes.  The function is fed with a const char* coming from
@@ -480,11 +481,15 @@ public:
     inline Expr_ptr make_identifier(Atom atom)
     {
         AtomPoolHit ah = f_atom_pool.insert(atom);
+        const Atom& pooled_atom =  (* ah.first);
+
         if (ah.second) {
             logger << "Added new atom to pool: '"
-                   << (*ah.first) << "'" << endl;
+                   << pooled_atom << "'" << endl;
         }
-        return make_expr(atom);
+
+        // no copy occurs here
+        return make_expr(pooled_atom);
     }
 
     inline Expr_ptr make_wconst(Atom atom)
@@ -579,38 +584,39 @@ public:
 protected:
     ExprMgr()
     {
-        const Atom_ptr atom_temporal = new Atom("temporal");
-        const ExprPoolHit temporal_hit = f_expr_pool.insert(atom_temporal);
-        assert(temporal_hit.second); // it has to be true
-        temporal_expr = const_cast<Expr_ptr> (& (*temporal_hit.first));
+        // const Atom_ptr atom_temporal = new Atom("temporal");
+        // const ExprPoolHit temporal_hit = f_expr_pool.insert(*atom_temporal);
+        // assert(temporal_hit.second); // it has to be true
+        // temporal_expr = const_cast<Expr_ptr> (& (*temporal_hit.first));
+        temporal_expr = make_identifier("temporal");
 
         const Atom_ptr atom_integer = new Atom("integer");
-        const ExprPoolHit integer_hit = f_expr_pool.insert(atom_integer);
+        const ExprPoolHit integer_hit = f_expr_pool.insert(*atom_integer);
         assert(integer_hit.second); // it has to be true
         integer_expr = const_cast<Expr_ptr> (& (*integer_hit.first));
 
         const Atom_ptr atom_boolean = new Atom("boolean");
-        const ExprPoolHit bool_hit = f_expr_pool.insert(atom_boolean);
+        const ExprPoolHit bool_hit = f_expr_pool.insert(*atom_boolean);
         assert(bool_hit.second); // it has to be true
         bool_expr = const_cast<Expr_ptr> (& (*bool_hit.first));
 
         const Atom_ptr atom_main = new Atom("main");
-        const ExprPoolHit main_hit = f_expr_pool.insert(atom_main);
+        const ExprPoolHit main_hit = f_expr_pool.insert(*atom_main);
         assert(main_hit.second); // it has to be true
         main_expr = const_cast<Expr_ptr> (& (*main_hit.first));
 
         const Atom_ptr atom_const = new Atom("const");
-        const ExprPoolHit const_hit = f_expr_pool.insert(atom_const);
+        const ExprPoolHit const_hit = f_expr_pool.insert(*atom_const);
         assert(const_hit.second); // it has to be true
         const_expr = const_cast<Expr_ptr> (& (*const_hit.first));
 
         const Atom_ptr atom_uword = new Atom("unsigned word");
-        const ExprPoolHit uword_hit = f_expr_pool.insert(atom_uword);
+        const ExprPoolHit uword_hit = f_expr_pool.insert(*atom_uword);
         assert(uword_hit.second); // it has to be true
         uword_expr = const_cast<Expr_ptr> (& (*uword_hit.first));
 
         const Atom_ptr atom_sword = new Atom("signed word");
-        const ExprPoolHit sword_hit = f_expr_pool.insert(atom_sword);
+        const ExprPoolHit sword_hit = f_expr_pool.insert(*atom_sword);
         assert(sword_hit.second); // it has to be true
         sword_expr = const_cast<Expr_ptr> (& (*sword_hit.first));
     }
@@ -621,27 +627,27 @@ private:
     /* mid level services */
     Expr_ptr make_expr(ExprType et, Expr_ptr a, Expr_ptr b)
     {
-        Expr tmp(et, a, b);
+        Expr tmp(et, a, b); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    Expr_ptr make_expr(Atom& atom)
+    Expr_ptr make_expr(const Atom& atom)
     {
-        Expr tmp(&atom);
+        Expr tmp(atom); // we need a temp store
         return __make_expr(&tmp);
     }
 
     // low-level
     inline Expr_ptr __make_expr(Expr_ptr expr) {
         ExprPoolHit eh = f_expr_pool.insert(*expr);
-        Expr_ptr res = const_cast<Expr_ptr> (& (*eh.first));
+        Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
 
         if (eh.second) {
             logger << "Added new expr to pool: '"
-                   << res << "'" << endl;
+                   << pooled_expr << "'" << endl;
         }
 
-        return res;
+        return pooled_expr;
     }
 
     // utils
