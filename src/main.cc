@@ -39,6 +39,7 @@
 // options management
 #include "opts.hh"
 
+// TODO: proper error handling
 static void
 parseFile(pANTLR3_UINT8 fName)
 {
@@ -48,7 +49,7 @@ parseFile(pANTLR3_UINT8 fName)
     psmvParser psr;
     psmvLexer  lxr;
 
-    logger << "Preparing for parsing..." << endl;
+    logger << "Preparing for parsing file '" << fName << "'" << endl;
 
     input = antlr3AsciiFileStreamNew(fName);
     assert(input);
@@ -78,6 +79,18 @@ extern void link_model();
 ostream& operator<<(ostream& os, const Expr_ptr t)
 { Printer (os) << t; return os; }
 
+static void usage()
+{
+    const string heading = "gnuSMV - A Symbolic model checker";
+
+    cout << heading
+         << endl
+         << endl
+         << OptsMgr::INSTANCE().usage()
+         << endl
+         << endl ;
+}
+
 int main(int argc, const char *argv[])
 {
     // hack
@@ -87,72 +100,66 @@ int main(int argc, const char *argv[])
     OptsMgr& opts_mgr = OptsMgr::INSTANCE();
     opts_mgr.parse_command_line(argc, argv);
     if (opts_mgr.help()) {
-        const string heading = "gnuSMV - yet another model checker.";
-
-        cout << heading
-             << endl
-             << opts_mgr.usage()
-             << endl
-             << endl ;
-        exit(1);
+        usage();
+        exit(0);
     }
 
     try {
-          const char* fname = argv[1];
-          parseFile((pANTLR3_UINT8) fname);
+        const char* fname = opts_mgr.model().c_str();
+        if (0 == strlen(fname)) {
+            usage();
+            exit(0);
+        }
+        parseFile((pANTLR3_UINT8) fname);
 
-          Printer prn(cout);
+        Printer prn(cout);
 
-          IModel_ptr M = ModelMgr::INSTANCE().get_model();
-          Modules mods = M->get_modules();
+        IModel_ptr M = ModelMgr::INSTANCE().get_model();
+        Modules mods = M->get_modules();
 
-          Analyzer analyzer;
-          analyzer.process();
+        Analyzer analyzer;
+        analyzer.process();
 
-          SATBMCFalsification alg(*M);
-          alg.set_param("k", 10);
-          alg.set_param("incremental", true);
-          assert(! alg.get_param("incremental").as_boolean());
-          // other params...
+        SATBMCFalsification alg(*M);
+        alg.set_param("k", 10);
+        alg.set_param("incremental", true);
+        assert(! alg.get_param("incremental").as_boolean());
+        // other params...
 
-          alg(); // TODO support for multiprocessing sync, etc...
-          if (alg.has_witness()) {
-              // const Traces& t = alg.get_traces();
+        alg(); // TODO support for multiprocessing sync, etc...
+        if (alg.has_witness()) {
+            // const Traces& t = alg.get_traces();
 
             // maybe print them
-          }
+        }
 
-          for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
+        for (Modules::iterator eye = mods.begin(); eye != mods.end(); eye ++ ) {
             IModule_ptr pm = eye->second;
             {
-              Module& m = dynamic_cast <Module&> (*pm);
-              //      const Expr_ptr module_name = m.expr();
+                Module& m = dynamic_cast <Module&> (*pm);
+                //      const Expr_ptr module_name = m.expr();
 
-              prn << "Module name: "<< m.expr() << "\n";
-              const Variables& svars = m.get_localVars();
+                prn << "Module name: "<< m.expr() << "\n";
+                const Variables& svars = m.get_localVars();
 
-              prn << "Variables: " << "\n";
-              for (Variables::const_iterator veye = svars.begin();
-                   veye != svars.end(); veye ++ ) {
+                prn << "Variables: " << "\n";
+                for (Variables::const_iterator veye = svars.begin();
+                     veye != svars.end(); veye ++ ) {
 
-                IVariable* tmp = veye->second;
+                    IVariable* tmp = veye->second;
 
-                if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-                  const StateVar& v = (*vp);
-                  prn << v.expr(); cout << endl;
+                    if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
+                        const StateVar& v = (*vp);
+                        prn << v.expr(); cout << endl;
+                    }
                 }
-              }
             }
-          }
+        }
     }
 
     catch(Exception& e) {
         cerr << "error: " << e.what() << "\n";
         return 1;
-    }
-
-    catch(...) {
-        cerr << "Exception of unknown type!\n";
     }
 
     return 0;
