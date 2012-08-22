@@ -34,7 +34,7 @@ ModelMgr_ptr ModelMgr::f_instance = NULL;
 
 void Model::add_module(Expr_ptr name, IModule_ptr module)
 {
-    logger << "Adding module: '" << name << "'" << endl;
+    logger << "Added module: '" << name << "'" << endl;
     f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
 }
 
@@ -144,14 +144,14 @@ Module::Module(const Expr_ptr name)
 void Module::add_formalParam(Expr_ptr identifier)
 {
     logger << "Module " << (*this)
-           << ", adding param " << identifier << endl;
+           << ", added param " << identifier << endl;
     f_formalParams.push_back(identifier);
 }
 
 void Module::add_isaDecl(Expr_ptr identifier)
 {
     logger << "Module " << (*this)
-           << ", adding isadecl " << identifier << endl;
+           << ", added isadecl " << identifier << endl;
     f_isaDecls.push_back(identifier);
 }
 
@@ -159,7 +159,7 @@ void Module::add_isaDecl(Expr_ptr identifier)
 void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
 {
     logger << "Module " << (*this)
-           << ", adding local var " << var << endl;
+           << ", added local var " << var << endl;
     f_localVars.insert(make_pair<FQExpr,
                        IVariable_ptr>(FQExpr(expr(), name), var));
 }
@@ -167,7 +167,7 @@ void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
 void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
 {
     logger << "Module " << (*this)
-           << ", adding local def " << name << endl;
+           << ", added local def " << name << endl;
     f_localDefs.insert(make_pair<FQExpr,
                        IDefine_ptr>(FQExpr(expr(), name), body));
 }
@@ -175,7 +175,7 @@ void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
 void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
 {
     logger << "Module " << (*this)
-           << ", adding local const " << name << endl;
+           << ", added local const " << name << endl;
     f_localConsts.insert(make_pair<FQExpr,
                          IConstant_ptr>(FQExpr(expr(), name), k));
 }
@@ -183,7 +183,7 @@ void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
 void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
 {
     logger << "Module " << (*this)
-           << ", adding assign "
+           << ", added assign "
            << lvalue
            << " := "
            << def->body()
@@ -196,41 +196,41 @@ void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
 void Module::add_init(Expr_ptr expr)
 {
     logger << "Module " << (*this)
-           << ", adding INIT " << expr << endl;
+           << ", added INIT " << expr << endl;
     f_init.push_back(expr);
 }
 
 void Module::add_invar(Expr_ptr expr)
 {
     logger << "Module " << (*this)
-           << ", adding INVAR " << expr << endl;
+           << ", added INVAR " << expr << endl;
     f_invar.push_back(expr);
 }
 
 void Module::add_trans(Expr_ptr expr)
 {
     logger << "Module " << (*this)
-           << ", adding TRANS " << expr << endl;
+           << ", added TRANS " << expr << endl;
     f_trans.push_back(expr);
 }
 
 void Module::add_fairness(Expr_ptr expr)
 {
     logger << "Module " << (*this)
-           << ", adding FAIRNESS " << expr << endl;
+           << ", added FAIRNESS " << expr << endl;
     f_fair.push_back(expr);
 }
 
 void Module::add_ltlspec(Expr_ptr formula)
 {
     logger << "Module " << (*this)
-           << ", adding LTLSPEC " << formula << endl;
+           << ", added LTLSPEC " << formula << endl;
     f_ltlspecs.push_back(formula);
 }
 
 void Module::add_ctlspec(Expr_ptr formula)
 {
     logger << "Module " << (*this)
-           << ", adding CTLSPEC " << formula << endl;
+           << ", added CTLSPEC " << formula << endl;
     f_ctlspecs.push_back(formula);
 }
