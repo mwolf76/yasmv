@@ -260,6 +260,7 @@ public:
 
     const Type_ptr find_instance(Expr_ptr identifier)
     {
+        assert(0);
         return NULL;
 
     }

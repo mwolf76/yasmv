@@ -431,7 +431,7 @@ ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     else if (symb->is_define()) {
 
         while (symb->is_define()) {
-            Expr_ptr body = symb->as_define().get_body();
+            Expr_ptr body = symb->as_define().body();
             if (!f_em.is_identifier(body)) {
                 // throw BadDefine(); // TODO
             }

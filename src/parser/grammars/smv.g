@@ -362,10 +362,10 @@ assignment_body
 	;
 
 assignment_clause
-	: id=lvalue ':=' expr=untimed_expression
+	: id=lvalue ':=' body=untimed_expression
       {
-       IAssign_ptr assgn = new Assign(id, expr);
-       $modules::module->add_assign(assgn);
+       IDefine_ptr def = new Define($modules::module->expr(), id, body);
+       $modules::module->add_assign(id, def);
       }
     ;
 

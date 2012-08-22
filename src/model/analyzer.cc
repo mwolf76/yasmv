@@ -135,7 +135,7 @@ void Analyzer::process()
                 Expr_ptr dname = define.expr();
                 FQExpr fqdn(ctx, dname);
 
-                Expr_ptr dbody = define.get_body();
+                Expr_ptr dbody = define.body();
                 Type_ptr dtype = f_inferrer.process(ctx, dbody);
 
                 Type_ptr _type = f_tm.get_type(fqdn); // previously determined type
@@ -208,19 +208,25 @@ void Analyzer::process()
             for (Assigns::const_iterator assign_eye = assign.begin();
                  assign_eye != assign.end(); assign_eye ++) {
 
-                Expr_ptr lvalue = (*assign_eye)->get_lvalue();
-                if (!lvalue)
-                    throw NotAnLvalue(lvalue);
-                Type_ptr lvalue_type = f_inferrer.process(ctx, lvalue);
+                Define& define = dynamic_cast <Define&> (*assign_eye->second);
+                Expr_ptr lvalue = define.expr();
+                FQExpr fqdn(ctx, lvalue);
 
-                Expr_ptr body = (*assign_eye)->get_body();
-                logger << "processing ASSIGN " << ctx << "::" << body << endl;
+                // TODO: check it's an lvalue
+                // if (!lvalue)
+                //     throw NotAnLvalue(lvalue);
 
-                Type_ptr body_type = f_inferrer.process(ctx, body);
+                Expr_ptr dbody = define.body();
+                Type_ptr dtype = f_inferrer.process(ctx, dbody);
 
-                if (lvalue_type != body_type) {
-                    // throw BadType(lvalue_type, body_type, body);
-                }
+                Type_ptr _type = f_tm.get_type(fqdn); // previously determined type
+                if (_type) {
+                    if (_type != dtype) {
+                        throw BadType(_type->get_repr(),
+                                      dtype->get_repr(),
+                                      dbody);
+                    }
+                } else f_tm.set_type(fqdn, dtype);
             } // for assign
 
             const ExprVector ltlspecs = module.get_ltlspecs();

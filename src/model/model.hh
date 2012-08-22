@@ -32,7 +32,7 @@
 #include <types.hh>
 #include <expr_mgr.hh>
 
-// -- interfaces --------------------------------------------------------------
+// -- primary decls  --------------------------------------------------------------
 class ISymbol : IObject {
 public:
     virtual const Expr_ptr ctx() const =0;
@@ -58,16 +58,10 @@ class IConstant : public ISymbol {
 
 class IDefine : public ISymbol {
 public:
-    // move this to symbol??
-    virtual const Expr_ptr get_body() const =0;
+    virtual const Expr_ptr body() const =0;
 };
 
-class IAssign : public IObject {
-public:
-    virtual const Expr_ptr get_lvalue() const =0;
-    virtual const Expr_ptr get_body() const =0;
-};
-
+// -- composite decls ----------------------------------------------------------
 class IModule : public IObject {
 public:
     virtual const Expr_ptr expr() const =0;
@@ -88,7 +82,7 @@ public:
     virtual void add_localDef(Expr_ptr expr, IDefine_ptr def) =0;
 
     virtual const Assigns& get_assign() const =0;
-    virtual void add_assign(IAssign_ptr assgn) =0;
+    virtual void add_assign(Expr_ptr expr, IDefine_ptr assgn) =0;
 
     virtual const ExprVector& get_init() const =0;
     virtual void add_init(Expr_ptr expr) =0;
@@ -168,7 +162,7 @@ public:
     const Constants& get_localConsts() const
     { return f_localConsts; }
 
-    void add_assign(IAssign_ptr assign);
+    void add_assign(Expr_ptr lvalue, IDefine_ptr body);
     const Assigns& get_assign() const
     { return f_assgn; }
 
@@ -260,29 +254,12 @@ public:
     const Expr_ptr expr() const
     { return f_name; }
 
-    const Expr_ptr get_body() const
+    const Expr_ptr body() const
     { return f_body; }
 
     const Type_ptr get_type() const
     { return TypeMgr::INSTANCE().get_type(FQExpr(f_ctx, f_name)); }
 
-};
-
-class Assign : public IAssign {
-    const Expr_ptr f_name;
-    const Expr_ptr f_body;
-
-public:
-    Assign(const Expr_ptr name, const Expr_ptr body)
-        : f_name(name)
-        , f_body(body)
-    {}
-
-    const Expr_ptr get_lvalue() const
-    { return f_name; }
-
-    const Expr_ptr get_body() const
-    { return f_body; }
 };
 
 class Model : public IModel {
@@ -296,8 +273,7 @@ public:
     const Modules& get_modules() const
     { return f_modules; }
 
-    void add_module(Expr_ptr name, IModule_ptr module)
-    { f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module)); }
+    void add_module(Expr_ptr name, IModule_ptr module);
 
     IModule& get_module(Expr_ptr name)
     {

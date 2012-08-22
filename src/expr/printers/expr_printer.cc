@@ -49,9 +49,8 @@ void Printer::post_hook()
 Printer& Printer::operator<<(Expr_ptr expr)
 { this->operator()(expr); return *this; }
 
-Printer& Printer::operator<< (const string& str) {
-    f_os << str << flush; return (*this);
-}
+Printer& Printer::operator<< (const string& str)
+{ f_os << str << flush; return *this; }
 
 // walker interface
 bool Printer::walk_F_preorder(const Expr_ptr expr)
@@ -367,7 +366,8 @@ void Printer::walk_leaf(const Expr_ptr expr)
         f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
     }
     else if (IDENT == symb) {
-        f_os << (*expr->u.f_atom);
+        Atom_ptr atom = expr->u.f_atom;
+        f_os << *atom;
     }
     // else if (symb == LITERAL) {
     //   f_os << expr->f_atom;

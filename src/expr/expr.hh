@@ -78,8 +78,6 @@ typedef Expr* Expr_ptr;
 // An Expression consists of an AST symbol, which is the expression
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
-
-
 struct Expr_TAG {
 
     // AST symb type
@@ -408,13 +406,22 @@ public:
 
     /* leaves */
     inline Expr_ptr make_iconst(unsigned long long value)
-    { return __make_expr(f_expr_pool.insert(Expr(ICONST, value))); }
+    {
+        Expr tmp(ICONST, value);
+        return __make_expr(&tmp);
+    }
 
     inline Expr_ptr make_uwconst(unsigned short wsize, unsigned long long value)
-    { return __make_expr(f_expr_pool.insert(Expr(UWCONST, wsize, value))); }
+    {
+        Expr tmp(UWCONST, wsize, value);
+        return __make_expr(&tmp);
+    }
 
     inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
-    { return __make_expr(f_expr_pool.insert(Expr(SWCONST, wsize, value))); }
+    {
+        Expr tmp(SWCONST, wsize, value);
+        return __make_expr(&tmp);
+    }
 
     inline Expr_ptr make_enum(ExprSet_ptr literals)
     {
@@ -472,12 +479,11 @@ public:
     // occurs.
     inline Expr_ptr make_identifier(Atom atom)
     {
-        AtomPoolHit ah = (f_atom_pool.insert(atom));
+        AtomPoolHit ah = f_atom_pool.insert(atom);
         if (ah.second) {
-            const Atom *atom = & (*ah.first);
-            logger << "Added new atom to pool: '" << (*atom) << "'" << endl;
+            logger << "Added new atom to pool: '"
+                   << (*ah.first) << "'" << endl;
         }
-
         return make_expr(atom);
     }
 
@@ -614,19 +620,28 @@ private:
 
     /* mid level services */
     Expr_ptr make_expr(ExprType et, Expr_ptr a, Expr_ptr b)
-    { return __make_expr(f_expr_pool.insert(Expr(et, a, b))); }
+    {
+        Expr tmp(et, a, b);
+        return __make_expr(&tmp);
+    }
 
     Expr_ptr make_expr(Atom& atom)
-    { return __make_expr(f_expr_pool.insert(Expr(&atom))); }
+    {
+        Expr tmp(&atom);
+        return __make_expr(&tmp);
+    }
 
     // low-level
-    inline Expr_ptr __make_expr(ExprPoolHit hit) {
-        Expr_ptr expr = const_cast <Expr_ptr> ( & (*hit.first) );
+    inline Expr_ptr __make_expr(Expr_ptr expr) {
+        ExprPoolHit eh = f_expr_pool.insert(*expr);
+        Expr_ptr res = const_cast<Expr_ptr> (& (*eh.first));
 
-        if (hit.second) {
-            logger << "Added new expr to pool: '" << expr << "'" << endl;
+        if (eh.second) {
+            logger << "Added new expr to pool: '"
+                   << res << "'" << endl;
         }
-        return expr;
+
+        return res;
     }
 
     // utils
@@ -721,8 +736,8 @@ typedef IDefine* IDefine_ptr;
 typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Defines;
 
 class IAssign;
-typedef IAssign* IAssign_ptr;
-typedef unordered_set<IAssign_ptr, PtrHash, PtrEq> Assigns;
+// typedef IAssign* IAssign_ptr; assign body can be seen as a define
+typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Assigns;
 
 class IModule;
 typedef IModule* IModule_ptr;

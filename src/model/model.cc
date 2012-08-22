@@ -32,6 +32,12 @@ TypeMgr_ptr TypeMgr::f_instance = NULL;
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
+void Model::add_module(Expr_ptr name, IModule_ptr module)
+{
+    logger << "Adding module: '" << name << "'" << endl;
+    f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
+}
+
 // symbol resolution
 ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
 {
@@ -158,12 +164,12 @@ void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
                        IVariable_ptr>(FQExpr(expr(), name), var));
 }
 
-void Module::add_localDef(Expr_ptr name, IDefine_ptr def)
+void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
 {
     logger << "Module " << (*this)
            << ", adding local def " << name << endl;
     f_localDefs.insert(make_pair<FQExpr,
-                       IDefine_ptr>(FQExpr(expr(), name), def));
+                       IDefine_ptr>(FQExpr(expr(), name), body));
 }
 
 void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
@@ -174,8 +180,17 @@ void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
                          IConstant_ptr>(FQExpr(expr(), name), k));
 }
 
-void Module::add_assign(IAssign_ptr assign)
-{ assert (0); // f_assgn.push_back(assign);
+void Module::add_assign(Expr_ptr lvalue, IDefine_ptr body)
+{
+    logger << "Module " << (*this)
+           << ", adding assign "
+           << lvalue
+           << " := "
+           << body
+           << endl;
+
+    f_assgn.insert(make_pair<FQExpr,
+                   IDefine_ptr>(FQExpr(expr(), lvalue), body));
 }
 
 void Module::add_init(Expr_ptr expr)
