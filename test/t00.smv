@@ -18,7 +18,7 @@ VAR x0 : boolean;
 ASSIGN
 init(x0) := FALSE;
 init(x1) := FALSE;
-init(x2): = FALSE;
+init(x2) := FALSE;
 
 next(x0) := ! x0;
 next(x1) := case
@@ -32,5 +32,4 @@ next(x2) := case
 esac;
 
 -- FALSE, ctx of length 6 exists.
-INVARSPEC
-         ! ( x2 && x1 && x0 );
+    LTLSPEC G (! ( x2 & x1 & x0 ));
