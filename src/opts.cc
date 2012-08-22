@@ -69,7 +69,12 @@ int OptsMgr::verbosity() const
 
 string OptsMgr::model() const
 {
-    string res = f_vm["model"].as<string>();
+    string res = "";
+
+    if (f_vm.count("model")) {
+        res = f_vm["model"].as<string>();
+    }
+
     return res;
 }
 
