@@ -121,6 +121,7 @@ AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+                 src/dd/Makefile
 		 src/expr/Makefile
                  src/expr/printers/Makefile
                  src/expr/validators/Makefile
