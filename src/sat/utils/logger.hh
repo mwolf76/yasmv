@@ -6,7 +6,7 @@
 #define LOGGER_H_INCLUDED
 
 #include <iostream>
-#include "utils/singleton.h"
+#include "utils/singleton.hh"
 
 namespace Minisat {
 
@@ -29,7 +29,7 @@ namespace Minisat {
   class Logger: public Singleton<Logger> {
   public:
     static const int DEFAULT_OUTPUT_LEVEL = 0;
-    
+
     Logger(std::ostream &o = std::cout)
     {
       output_level = DEFAULT_OUTPUT_LEVEL;

@@ -20,8 +20,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Minisat_Map_h
 #define Minisat_Map_h
 
-#include "mtl/IntTypes.h"
-#include "mtl/Vec.h"
+#include "mtl/IntTypes.hh"
+#include "mtl/Vec.hh"
 
 namespace Minisat {
 
@@ -72,7 +72,7 @@ class Map {
     bool    checkCap(int new_size) const { return new_size > cap; }
 
     int32_t index  (const K& k) const { return hash(k) % cap; }
-    void   _insert (const K& k, const D& d) { 
+    void   _insert (const K& k, const D& d) {
         vec<Pair>& ps = table[index(k)];
         ps.push(); ps.last().key = k; ps.last().data = d; }
 
@@ -96,7 +96,7 @@ class Map {
         // printf(" --- rehashing, old-cap=%d, new-cap=%d\n", cap, newsize);
     }
 
-    
+
  public:
 
     Map () : table(NULL), cap(0), size(0) {}
@@ -137,7 +137,7 @@ class Map {
         for (int i = 0; i < ps.size(); i++)
             if (equals(ps[i].key, k)){
                 d = ps[i].data;
-                return true; } 
+                return true; }
         return false;
     }
 

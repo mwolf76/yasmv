@@ -7,8 +7,8 @@
 #define SOLVERLOGGER_H_INCLUDED
 
 #include <ostream>
-#include "Vec.h"
-#include "SolverTypes.h"
+#include "Vec.hh"
+#include "SolverTypes.hh"
 
 namespace Minisat {
 

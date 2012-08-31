@@ -8,22 +8,22 @@
 
 #define INTERPOLATOR_DEBUG
 
-#include <Map.h>
-#include <Set.h>
-#include <Vec.h>
+#include <Map.hh>
+#include <Set.hh>
+#include <Vec.hh>
 
-#include "proof.h"
-#include "terms.h"
+#include "proof.hh"
+#include "terms.hh"
 
 namespace Minisat {
 
   class Interpolator {
 
-    template<class K> 
-    struct ptr_hasher  { 
-      uint32_t operator()(const K& k) const { 
+    template<class K>
+    struct ptr_hasher  {
+      uint32_t operator()(const K& k) const {
         return (uint32_t)(reinterpret_cast<size_t>(k));
-      } 
+      }
     };
 
     typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
@@ -31,7 +31,7 @@ namespace Minisat {
 
     // Minisat instance
     Solver& f_owner;
-    
+
     // The term factory used to build the interpolant formula
     TermFactory& f_factory;
 
@@ -60,32 +60,32 @@ namespace Minisat {
     // and global otherwise.
     inline bool atom_is_A_local(Var atom) const
     { return !atom_is_of_B(atom); }
-    
-    inline bool var_is_A_local(Var var) const 
+
+    inline bool var_is_A_local(Var var) const
     { return atom_is_A_local(var); }
 
     inline bool lit_is_A_local(Lit lit) const
     { return atom_is_A_local(var(lit)); }
 
-    inline bool var_is_of_B(Var var) const 
+    inline bool var_is_of_B(Var var) const
     { return atom_is_of_B(var); }
 
     inline bool lit_is_of_B(Lit lit) const
     { return atom_is_of_B(var(lit)); }
 
-    inline bool var_is_of_A(Var var) const 
+    inline bool var_is_of_A(Var var) const
     { return atom_is_of_A(var); }
-    
+
     inline bool lit_is_of_A(Lit lit) const
     { return atom_is_of_A(var(lit)); }
-    
+
     inline bool atom_is_of_A(Var atom) const
     { return a_variables.has(atom); }
 
     inline bool atom_is_of_B(Var atom) const
     { return b_variables.has(atom); }
 
-    inline bool clause_is_of_A(CRef cr) const 
+    inline bool clause_is_of_A(CRef cr) const
     { return a_clauses.has(cr); }
   };
 

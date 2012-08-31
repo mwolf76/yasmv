@@ -3,7 +3,7 @@
 // Author: Alberto Griggio
 // $Id: solverlog.cpp,v 1.2 2007-07-27 11:34:01 nusmv Exp $
 
-#include "utils/solverlogger.h"
+#include "utils/solverlogger.hh"
 
 namespace Minisat {
 

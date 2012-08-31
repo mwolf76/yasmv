@@ -4,23 +4,23 @@ proof.cc
 
 Proof-related interfaces and classes
 
-  This file is part of NuSMV version 2. 
-  Copyright (C) 2007 by FBK-irst. 
-  Author: Alberto Griggio <griggio@fbk.eu> 
+  This file is part of NuSMV version 2.
+  Copyright (C) 2007 by FBK-irst.
+  Author: Alberto Griggio <griggio@fbk.eu>
           Marco Pensallorto <pensallorto@fbk.eu>
 
-  NuSMV version 2 is free software; you can redistribute it and/or 
-  modify it under the terms of the GNU Lesser General Public 
-  License as published by the Free Software Foundation; either 
+  NuSMV version 2 is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
   version 2 of the License, or (at your option) any later version.
 
-  NuSMV version 2 is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+  NuSMV version 2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public 
-  License along with this library; if not, write to the Free Software 
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
 
   For more information on NuSMV see <http://nusmv.fbk.eu>
@@ -35,12 +35,12 @@ Proof-related interfaces and classes
 #include <map>
 #include <stack>
 
-#include "proof.h"
-#include <mtl/Sort.h>
+#include "proof.hh"
+#include <mtl/Sort.hh>
 
 namespace Minisat {
 
-  ProofManager::ProofManager(Solver* owner) 
+  ProofManager::ProofManager(Solver* owner)
     : f_owner(owner)
     , f_unsat_proof(NULL)
     , f_c2r(new C2R_Map())
@@ -57,7 +57,7 @@ namespace Minisat {
     C2R_Map& c2r = (*f_c2r);
     assert( NULL == f_reloc_c2r );
 
-    /* free CRef -> IR mapping */ 
+    /* free CRef -> IR mapping */
     for (int i = c2r.bucket_count() -1; 0 <= i; -- i) {
       const vec<C2R_Pair>& bucket = c2r.bucket(i);
 
@@ -82,8 +82,8 @@ namespace Minisat {
 
 #ifdef DEBUG_PROOF_LOGGING
     Logger& logger = Logger::get();
-    logger << loglevel(4) 
-           << "Building UNSAT proof, clause: " 
+    logger << loglevel(4)
+           << "Building UNSAT proof, clause: "
            << f_owner->ca[confl_ref] << endlog;
 #endif
 
@@ -94,10 +94,10 @@ namespace Minisat {
     vec<char> seen(f_owner->nVars(), 0);
     ResRule *res = NULL;
     int j, trail_last = f_owner->trail.size() -1;
-    
-    Lit p = lit_Undef; 
+
+    Lit p = lit_Undef;
     do {
-      assert(confl_ref != CRef_Undef); 
+      assert(confl_ref != CRef_Undef);
       Clause &confl = f_owner->ca[confl_ref];
       // Logger::get() << loglevel(8) << "Current clause: " << confl << endlog;
 
@@ -106,7 +106,7 @@ namespace Minisat {
 
       // update seen vars
       while (j < confl.size()) { seen[var(confl[j ++])] = 1; }
-      
+
       // Select next clause to look at:
       do {
         if (trail_last < 0) goto finished;
@@ -137,12 +137,12 @@ namespace Minisat {
     vec<Lit> empty; check_unsat_proof(*f_unsat_proof, empty);
 #endif
   }
-  
-  
+
+
   // Debug code, to be disabled upon release
   //
 #ifdef PROOF_CHECK
-  
+
   static void sort_for_check(vec<Lit> &out);
 
   // check unsat proof
@@ -153,7 +153,7 @@ namespace Minisat {
     vec<Lit> expected; expected_.copyTo(expected);
     sort_for_check(expected);
 
-    logger << loglevel(1) 
+    logger << loglevel(1)
            << "Checking UNSAT proof (" << expected_.size() << " literals expected) ... ";
 
     std::stack<InferenceRule *> to_process;
@@ -190,7 +190,7 @@ namespace Minisat {
           for (int i = 0; i < res->chain_size(); ++i) {
             Var v = res->chain_get_ith_var(i);
             InferenceRule* ir = res->chain_get_ith_rule(i);
-              
+
             vec<Lit> *c2 = cache[ir];
             if (!c2) abort();
             bool pos_found = false, neg_found = false;
@@ -219,7 +219,7 @@ namespace Minisat {
               std::cout << "WRONG RESOLUTION:, c1 = "
                         << *c1 << ", c2 = " << *c2 << ", pivot = "
                         << v << std::endl;
-              
+
               abort();
               return false;
             }
@@ -256,11 +256,11 @@ namespace Minisat {
     vec<Lit> *result = cache[&rule];
     if (0 < expected.size()) {
       bool ok = true;
-      
+
       // vec<Lit> tmp;  expected.copyTo(tmp);
-      // sort(tmp); 
+      // sort(tmp);
       sort(*result);
-      
+
       if (expected.size() != result->size()) {
         ok = false;
       } else {
@@ -290,7 +290,7 @@ namespace Minisat {
     }
 
     logger << loglevel(1) << "OK" << endlog;
-    return true;    
+    return true;
   }
 
   // [MP] check that for each assigned variable in the trail, a reason is available
@@ -315,7 +315,7 @@ namespace Minisat {
 
     return true;
   }
-  
+
   // internal services
   //
   static void sort_for_check(vec<Lit> &out)
@@ -324,9 +324,8 @@ namespace Minisat {
 
     sort(out);
     Lit *p = std::unique(&(out[0]), &(out[0])+out.size());
-    out.shrink(out.size() - (p-&(out[0])));    
+    out.shrink(out.size() - (p-&(out[0])));
   }
 
 #endif
 }
-

@@ -1,7 +1,7 @@
 // logger.cc: Logging facilities
 // Author: Alberto Griggio
 
-#include "utils/logger.h"
+#include "utils/logger.hh"
 
 namespace Minisat {
 

@@ -34,7 +34,7 @@ Generic term support (abstract interface)
 #ifndef TERMS_H_INCLUDED
 #define TERMS_H_INCLUDED
 
-#include <SolverTypes.h>
+#include <SolverTypes.hh>
 
 // Generic term (void* is standard to interact with underlying C code)
 typedef void* Term;
@@ -65,7 +65,7 @@ namespace Minisat {
     virtual ~TermReader() {}
     virtual TermReader& operator>> (Term& t) =0;
   };
-  
+
   class TermWriter {
 
   public:

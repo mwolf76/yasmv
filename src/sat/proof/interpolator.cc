@@ -2,8 +2,8 @@
 // Author: Alberto Griggio
 //         Marco Pensallorto
 
-#include "interpolator.h"
-#include "Solver.h"
+#include "interpolator.hh"
+#include "Solver.hh"
 
 #include <cassert>
 #include <sstream>
@@ -16,7 +16,7 @@ namespace Minisat {
   {
     Logger::get().set_output_level(0);
   }
-  
+
   Interpolator::~Interpolator()
   {
     // Cache elements needs no cleanup here because allocated memory
@@ -31,15 +31,15 @@ namespace Minisat {
     ClauseAllocator& ca = f_owner.ca;
 
     Logger& logger = Logger::get();
-    
-    logger << loglevel(2) 
+
+    logger << loglevel(2)
            << "Initializing interpolation" << endlog;
-    
+
     a_variables.clear();
     b_variables.clear();
 
     // The set of input groups for A
-    Set<int> ga; 
+    Set<int> ga;
     for (unsigned i = 0; i < n; ++ i) { int group = *(groups_of_a+i); ga.insert(group); }
 
     // load clauses from Solver, for each clause decide whether its A or B
@@ -51,8 +51,8 @@ namespace Minisat {
 
       if (ga.has(hyp.color())) {
         logger << loglevel(2) << "clause " << c << " to A" << endlog;
-        assert (! a_clauses.has(cr)); 
-        a_clauses.insert(cr); 
+        assert (! a_clauses.has(cr));
+        a_clauses.insert(cr);
 
         // register each var in the clause as belonging to A
         for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
@@ -88,7 +88,7 @@ namespace Minisat {
 
     // internal cache for memoizing
     R2T_Map r2t;
-    
+
     // [MP] setup internal structures
     init_interpolation(groups_of_a, n);
 
@@ -99,7 +99,7 @@ namespace Minisat {
       InferenceRule *r = to_process.last();
 
       if (r2t.has(r)) { to_process.pop(); continue; }
-      
+
       ClauseHypRule *hyp = NULL;
       ResRule *rr = NULL;
 
@@ -116,20 +116,20 @@ namespace Minisat {
           // [MP] inlined make_global
           Clause& c = ca[cr];
           Term trm = NULL;
-    
+
           for (int i = 0, sz = c.size(); i < sz; ++i) {
             Lit p = c[i];
 
             if (lit_is_of_B(p)) {
               Var v = var(p);
               assert(var_is_of_A(v) && var_is_of_B(v));
-              
+
               Term t = f_factory.make_var(v);
               if (NULL == t) continue; /* cnf var */
 
               if (sign(p)) { t = f_factory.make_not(t); }
 
-              if (NULL == trm) { trm = t;} 
+              if (NULL == trm) { trm = t;}
               else { trm = f_factory.make_or(trm, t); }
             }
           }
@@ -144,7 +144,7 @@ namespace Minisat {
           assert(!r2t.has(hyp));
           r2t.insert(hyp, f_factory.make_true());
         }
-      } 
+      }
 
       else if (NULL != (rr = dynamic_cast<ResRule *>(r))) {
         InferenceRule* start = &rr->get_start();
@@ -174,14 +174,14 @@ namespace Minisat {
             Term cur = NULL;
             if (var_is_A_local(pivot)) {
               cur = f_factory.make_or(s, p);
-            } 
+            }
             else {
               cur = f_factory.make_and(s, p);
             }
-            
+
             s = cur;
           }
-          
+
           assert( !r2t.has(rr) ); r2t.insert(rr, s);
         }
       } else assert(false);
@@ -192,4 +192,3 @@ namespace Minisat {
   }
 
 } // namespace Minisat
-

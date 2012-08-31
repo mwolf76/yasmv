@@ -6,23 +6,23 @@ proof.h
 
 Proof-related interfaces and classes
 
-  This file is part of NuSMV version 2. 
-  Copyright (C) 2007 by FBK-irst. 
-  Author: Alberto Griggio <griggio@fbk.eu> 
+  This file is part of NuSMV version 2.
+  Copyright (C) 2007 by FBK-irst.
+  Author: Alberto Griggio <griggio@fbk.eu>
           Marco Pensallorto <pensallorto@fbk.eu>
 
-  NuSMV version 2 is free software; you can redistribute it and/or 
-  modify it under the terms of the GNU Lesser General Public 
-  License as published by the Free Software Foundation; either 
+  NuSMV version 2 is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
   version 2 of the License, or (at your option) any later version.
 
-  NuSMV version 2 is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+  NuSMV version 2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public 
-  License along with this library; if not, write to the Free Software 
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
 
   For more information on NuSMV see <http://nusmv.fbk.eu>
@@ -35,13 +35,13 @@ Proof-related interfaces and classes
 #ifndef PROOF_H_DEFINED
 #define PROOF_H_DEFINED
 
-#include <Vec.h>
-#include <Map.h>
+#include <Vec.hh>
+#include <Map.hh>
 
-#include "core/Solver.h"
+#include "core/Solver.hh"
 
-#include "utils/logger.h"
-#include "utils/solverlogger.h"
+#include "utils/logger.hh"
+#include "utils/solverlogger.hh"
 
 // comment this out to disable debugging
 // #define DEBUG_PROOF_LOGGING
@@ -62,15 +62,15 @@ namespace Minisat {
 
     // reference counting
     inline int nrefs() const { return f_refcount; }
-    inline InferenceRule& ref() { 
-      ++ f_refcount; 
+    inline InferenceRule& ref() {
+      ++ f_refcount;
 
 #ifdef DEBUG_PROOF_LOGGING
-      Logger::get() << loglevel(20) 
-                    << "Inc ref count for InferenceRule @" << this 
+      Logger::get() << loglevel(20)
+                    << "Inc ref count for InferenceRule @" << this
                     << " (now is " << f_refcount << ")" << endlog;
 #endif
-      return *this; 
+      return *this;
     }
 
     inline void unref() {
@@ -78,17 +78,17 @@ namespace Minisat {
 
 #ifdef DEBUG_PROOF_LOGGING
       assert(0 <= f_refcount);
-      Logger::get() << loglevel(20) 
-                    << "Dec ref count for InferenceRule @" << this 
+      Logger::get() << loglevel(20)
+                    << "Dec ref count for InferenceRule @" << this
                     << " (now is " << f_refcount << ")" << endlog;
 #endif
-      
+
       if (0 == f_refcount) { delete this; }
     }
   };
 
-  struct VR_Pair_TAG { 
-    Var v; InferenceRule* ir; 
+  struct VR_Pair_TAG {
+    Var v; InferenceRule* ir;
     VR_Pair_TAG(Var v_, InferenceRule& ir_) : v(v_), ir(&ir_) {}
   };
   typedef vec<struct VR_Pair_TAG> Chain;
@@ -99,7 +99,7 @@ namespace Minisat {
     long f_color;
 
   public:
-    ClauseHypRule(CRef cr, long color) 
+    ClauseHypRule(CRef cr, long color)
       : f_cref(cr)
       , f_color(color)
     {}
@@ -122,7 +122,7 @@ namespace Minisat {
     ResRule(InferenceRule& s) { start = &s; }
     virtual ~ResRule() {};
 
-    inline void add_to_chain(Var pivot, InferenceRule& r) { 
+    inline void add_to_chain(Var pivot, InferenceRule& r) {
       chain.push(VR_Pair_TAG(pivot, r));
     }
 
@@ -137,7 +137,7 @@ namespace Minisat {
     // keep a ref to owner Solver to access its internal data (dirty
     // but necessary, minimize impact on Minisat code).
     Solver* f_owner;
-    
+
     InferenceRule* f_unsat_proof;
 
     /* Clause (cref actually) to Inference rule mapping */
@@ -162,7 +162,7 @@ namespace Minisat {
 #ifdef DEBUG_PROOF_LOGGING
       Clause& c = f_owner->ca[cr];
       Logger::get() << loglevel(10) << "Storing proof for Clause @" << cr << ", " << c << endlog;
-#endif      
+#endif
 
       assert( ! c2r.has(cr) );
       c2r.insert( cr, &ir);
@@ -176,7 +176,7 @@ namespace Minisat {
       C2R_Map& c2r = (*f_c2r);
       return (c2r.has(cr) && (1 < c2r[cr]->nrefs()));
     }
-    
+
     // remove proof associated to clause
     inline void remove_proof(CRef cr) {
 
@@ -185,12 +185,12 @@ namespace Minisat {
 #ifdef DEBUG_PROOF_LOGGING
       Clause& c = f_owner->ca[cr];
       Logger::get() << loglevel(8) << "Removing proof for Clause @" << cr << endlog;
-#endif      
+#endif
 
-      assert( c2r.has(cr) ); 
+      assert( c2r.has(cr) );
       InferenceRule* ir = c2r[cr];
-      
-      c2r.remove(cr); 
+
+      c2r.remove(cr);
       ir->unref();
     }
 
@@ -200,8 +200,8 @@ namespace Minisat {
 #ifdef DEBUG_PROOF_LOGGING
       C2R_Map& c2r = (*f_c2r);
 
-      Logger::get() 
-        << loglevel(4) 
+      Logger::get()
+        << loglevel(4)
         << "Update transaction started, "
         << c2r.elems() << " elements need remapping."
         << endlog;
@@ -248,9 +248,9 @@ namespace Minisat {
       C2R_Map& temp_c2r = (*f_reloc_c2r);
 
 #ifdef DEBUG_PROOF_LOGGING
-      Logger::get() << loglevel(8) << 
+      Logger::get() << loglevel(8) <<
         "updating @" << orig_cr << " --> @" << new_cr << endlog;
-#endif      
+#endif
       assert( orig_c2r.has(orig_cr) );
 
       InferenceRule* ir = orig_c2r[orig_cr];
@@ -264,26 +264,26 @@ namespace Minisat {
       assert( ! temp_c2r.has( new_cr) );
       temp_c2r.insert(new_cr, ir);
       orig_c2r.remove(orig_cr);
-    } 
+    }
 
-    inline InferenceRule& proof(CRef cr) const { 
+    inline InferenceRule& proof(CRef cr) const {
       C2R_Map& c2r = (*f_c2r);
 
       if (! c2r.has(cr) ) {
-        std::cerr << "Missing rule for Clause @" << cr << std::endl; 
+        std::cerr << "Missing rule for Clause @" << cr << std::endl;
         abort();
       }
-      return *c2r[cr]; 
+      return *c2r[cr];
     }
 
     // proof of unsatisfiability
-    inline InferenceRule& proof() { 
+    inline InferenceRule& proof() {
 
-      if (NULL == f_unsat_proof) { 
-        std::cerr << "proof of unsatisfiability not available!" << std::endl; 
+      if (NULL == f_unsat_proof) {
+        std::cerr << "proof of unsatisfiability not available!" << std::endl;
         abort();
       }
-      return *f_unsat_proof; 
+      return *f_unsat_proof;
     }
 
     // build UNSAT proof for conflicting clause

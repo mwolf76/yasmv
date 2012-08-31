@@ -26,17 +26,17 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include <assert.h>
 
-#include "mtl/IntTypes.h"
-#include "mtl/Alg.h"
-#include "mtl/Vec.h"
-#include "mtl/Map.h"
-#include "mtl/Alloc.h"
+#include "mtl/IntTypes.hh"
+#include "mtl/Alg.hh"
+#include "mtl/Vec.hh"
+#include "mtl/Map.hh"
+#include "mtl/Alloc.hh"
 
 namespace Minisat {
 
   enum proof_logging_mode {
     PROOF_LOGGING_OFF,
-    PROOF_LOGGING_CHAIN, 
+    PROOF_LOGGING_CHAIN,
     // PROOF_LOGGING_BIN // currently unused
   };
 
@@ -244,7 +244,7 @@ class ClauseAllocator : public RegionAllocator<uint32_t>
         Clause& c = operator[](cr);
 
         if (c.reloced()) { cr = c.relocation(); return cr; }
-        
+
         cr = to.alloc(c, c.learnt());
         c.relocate(cr);
 

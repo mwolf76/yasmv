@@ -18,7 +18,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **************************************************************************************************/
 
-#include "utils/System.h"
+#include "utils/System.hh"
 
 #if defined(__linux__)
 
@@ -68,7 +68,7 @@ static inline int memReadPeak(void)
 }
 
 double Minisat::memUsed() { return (double)memReadStat(0) * (double)getpagesize() / (1024*1024); }
-double Minisat::memUsedPeak() { 
+double Minisat::memUsedPeak() {
     double peak = memReadPeak() / 1024;
     return peak == 0 ? memUsed() : peak; }
 
@@ -90,6 +90,6 @@ double Minisat::memUsed(void) {
     return (double)t.max_size_in_use / (1024*1024); }
 
 #else
-double Minisat::memUsed() { 
+double Minisat::memUsed() {
     return 0; }
 #endif

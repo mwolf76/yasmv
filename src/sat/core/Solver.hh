@@ -23,11 +23,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Minisat_Solver_h
 #define Minisat_Solver_h
 
-#include "mtl/Vec.h"
-#include "mtl/Heap.h"
-#include "mtl/Alg.h"
-#include "utils/Options.h"
-#include "core/SolverTypes.h"
+#include "mtl/Vec.hh"
+#include "mtl/Heap.hh"
+#include "mtl/Alg.hh"
+#include "utils/Options.hh"
+#include "core/SolverTypes.hh"
 
 #ifdef NDEBUG
 #undef PROOF_CHECK  // disable proof self checking
@@ -88,33 +88,6 @@ public:
 
     // accessor for UNSAT proof
     InferenceRule& proof();
-
-    // NuSMV: PREF MOD
-    /*
-     * Add a variable at the end of the list of preferred variables
-     * Does not remove the variable from the standard ordering.
-     */
-    void addPreferred(Var v) { 
-      assert(0); // not yet implemented
-    }
-
-    /*
-     * Clear vector of preferred variables.
-     */
-    void clearPreferred() {
-      assert(0); // not yet implemented
-    }
-    // NuSMV: PREF MOD END
-
-    void    toDimacs     (FILE* f, const vec<Lit>& assumps);            // Write CNF to file in DIMACS-format.
-    void    toDimacs     (const char *file, const vec<Lit>& assumps);
-    void    toDimacs     (FILE* f, Clause& c, vec<Var>& map, Var& max);
-
-    // Convenience versions of 'toDimacs()':
-    void    toDimacs     (const char* file);
-    void    toDimacs     (const char* file, Lit p);
-    void    toDimacs     (const char* file, Lit p, Lit q);
-    void    toDimacs     (const char* file, Lit p, Lit q, Lit r);
 
     // Variable mode:
     //
@@ -415,12 +388,6 @@ inline bool     Solver::solve         (Lit p, Lit q, Lit r) { budgetOff(); assum
 inline bool     Solver::solve         (const vec<Lit>& assumps){ budgetOff(); assumps.copyTo(assumptions); return solve_() == l_True; }
 inline lbool    Solver::solveLimited  (const vec<Lit>& assumps){ assumps.copyTo(assumptions); return solve_(); }
 inline bool     Solver::okay          ()      const   { return ok; }
-
-inline void     Solver::toDimacs     (const char* file){ vec<Lit> as; toDimacs(file, as); }
-inline void     Solver::toDimacs     (const char* file, Lit p){ vec<Lit> as; as.push(p); toDimacs(file, as); }
-inline void     Solver::toDimacs     (const char* file, Lit p, Lit q){ vec<Lit> as; as.push(p); as.push(q); toDimacs(file, as); }
-inline void     Solver::toDimacs     (const char* file, Lit p, Lit q, Lit r){ vec<Lit> as; as.push(p); as.push(q); as.push(r); toDimacs(file, as); }
-
 
 //=================================================================================================
 // Debug etc:
