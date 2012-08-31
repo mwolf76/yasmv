@@ -1,1 +1,1 @@
-SUBDIRS = dd expr model parser mc
+SUBDIRS = compile dd expr mc model parser sat trace

@@ -128,14 +128,17 @@ AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+                 src/compile/Makefile
                  src/dd/Makefile
 		 src/expr/Makefile
                  src/expr/printers/Makefile
                  src/expr/validators/Makefile
+                 src/mc/Makefile
                  src/model/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
-                 src/mc/Makefile
+                 src/sat/Makefile
+                 src/trace/Makefile
                  doc/Makefile
 		 gnusmv.pc])
 
