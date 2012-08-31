@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @AM_CPPFLAGS@
+AM_CPPFLAGS = @AM_CPPFLAGS@ -DSIZEOF_VOID_P@SIZEOF_VOID_P@ -DSIZEOF_INT@SIZEOF_INT@ -DSIZEOF_LONG@SIZEOF_LONG@
 AM_CFLAGS = @AM_CFLAGS@
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
 
@@ -52,6 +52,11 @@ cuddDownloaded.cc:
 	@echo "unpacking cudd-2.5.0 ... (this may take a while)"
 	@tar xfz cudd-2.5.0.tar.gz
 	@touch cuddDownloaded.cc
+
+distclean-local:
+	@rm -rf cudd-2.5.0
+	@rm -f cudd-2.5.0.tar.gz
+	@rm -f cuddDownloaded.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

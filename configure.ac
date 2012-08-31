@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.60)
+AC_PREREQ(2.58)
 
 AC_INIT([gnusmv], [0.0.1], [marco.pensallorto@gmail.com])
 
@@ -25,8 +25,8 @@ AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_CXXCPP
 
-dnl First look for Boost, maybe for a specific minimum version:
-BOOST_REQUIRE([1.34])
+dnl First look for Boost
+BOOST_REQUIRE([])
 
 dnl Then look for specific Boost libraries you need:
 BOOST_REGEX
@@ -51,9 +51,16 @@ fi
 
 # Portability issues
 AC_CHECK_SIZEOF([void *])
+SIZEOF_VOID_P=$ac_cv_sizeof_void_p
+AC_SUBST(SIZEOF_VOID_P)
+
 AC_CHECK_SIZEOF([int])
+SIZEOF_INT=$ac_cv_sizeof_int
+AC_SUBST(SIZEOF_INT)
+
 AC_CHECK_SIZEOF([long])
-AC_CHECK_SIZEOF([long long])
+SIZEOF_LONG=$ac_cv_sizeof_long
+AC_SUBST(SIZEOF_LONG)
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [exp])
