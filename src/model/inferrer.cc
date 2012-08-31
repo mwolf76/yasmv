@@ -56,7 +56,8 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     // invoke walker on the body of the expr to be processed
     (*this)(body);
 
-    assert(1 == f_type_stack.size()); res = f_type_stack.back();
+    assert(1 == f_type_stack.size());
+    res = f_type_stack.back();
 
     logger << res << endl;
     return res;
