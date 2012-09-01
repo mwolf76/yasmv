@@ -35,11 +35,11 @@ Analyzer::Analyzer()
     , f_tm(TypeMgr::INSTANCE())
     , f_inferrer()
 {
-    logger << "Created Analyzer @" << this << endl;
+    trace << "Created Analyzer @" << this << endl;
 }
 
 Analyzer::~Analyzer()
-{ logger << "Destroying Analyzer @" << this << endl; }
+{ trace << "Destroying Analyzer @" << this << endl; }
 
 void Analyzer::process()
 {
@@ -48,7 +48,7 @@ void Analyzer::process()
     try {
         const Modules& modules = model.get_modules();
 
-        logger << "-- first pass (binding)" << endl;
+        trace << "-- first pass (binding)" << endl;
         // (binding) For each module m in M, A goes deep in the module
         // defs. Every variable decl is resolved either to a native type
         // (boolean, ranged int, ...) or to an instance. Due to (1) all
@@ -58,7 +58,7 @@ void Analyzer::process()
              mod_eye != modules.end(); mod_eye ++ ) {
 
             Module& module = dynamic_cast <Module&> (*mod_eye->second);
-            logger << "processing module '" << module << "' " << endl;
+            trace << "processing module '" << module << "' " << endl;
 
             // Remark: ctx name is MODULE name, not instance's
             // rationale: you may have several instances but they
@@ -74,7 +74,7 @@ void Analyzer::process()
                 const Expr_ptr varname = var->expr();
                 const Type_ptr vartype = var->get_type();
 
-                logger << "processing var " << varname << ": " << vartype << endl;
+                trace << "processing var " << varname << ": " << vartype << endl;
 
                 // eager binding for module instances
                 if (f_tm.is_instance(vartype)) {
@@ -101,12 +101,12 @@ void Analyzer::process()
         // INVAR, TRANS, FAIRNESS have all to be boolean formulae; ASSIGNs
         // have to match lvalue type. The type for every expression is
         // inferred using the lazy walker strategy.
-        logger << "-- second pass (type checking)" << endl;
+        trace << "-- second pass (type checking)" << endl;
         for (Modules::const_iterator mod_eye = modules.begin();
              mod_eye != modules.end(); mod_eye ++ ) {
 
             Module& module = dynamic_cast <Module&> (*mod_eye->second);
-            logger << "processing module '" << module << "' " << endl;
+            trace << "processing module '" << module << "' " << endl;
 
             // Remark: ctx name is MODULE name, not instance's
             // rationale: you may have several instances but they
@@ -154,7 +154,7 @@ void Analyzer::process()
                  init_eye != init.end(); init_eye ++) {
 
                 Expr_ptr body = (*init_eye);
-                logger << "processing INIT " << ctx << "::" << body << endl;
+                trace << "processing INIT " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean())
@@ -167,7 +167,7 @@ void Analyzer::process()
                  invar_eye != invar.end(); invar_eye ++) {
 
                 Expr_ptr body = (*invar_eye);
-                logger << "processing INVAR " << ctx << "::" << body << endl;
+                trace << "processing INVAR " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean()) {
@@ -181,7 +181,7 @@ void Analyzer::process()
                  trans_eye != trans.end(); trans_eye ++) {
 
                 Expr_ptr body = (*trans_eye);
-                logger << "processing TRANS " << ctx << "::" << body << endl;
+                trace << "processing TRANS " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean()) {
@@ -195,7 +195,7 @@ void Analyzer::process()
                  fair_eye != fair.end(); fair_eye ++) {
 
                 Expr_ptr body = (*fair_eye);
-                logger << "processing FAIRNESS " << ctx << "::" << body << endl;
+                trace << "processing FAIRNESS " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean()) {
@@ -234,7 +234,7 @@ void Analyzer::process()
                  ltl_eye != ltlspecs.end(); ltl_eye ++) {
 
                 Expr_ptr body = (*ltl_eye);
-                logger << "processing LTLSPEC " << ctx << "::" << body << endl;
+                trace << "processing LTLSPEC " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_temporal()) {
@@ -247,7 +247,7 @@ void Analyzer::process()
                  ctl_eye != ctlspecs.end(); ctl_eye ++) {
 
                 Expr_ptr body = (*ctl_eye);
-                logger << "processing CTLSPEC " << ctx << "::" << body << endl;
+                trace << "processing CTLSPEC " << ctx << "::" << body << endl;
 
 
                 Type_ptr tp = f_inferrer.process(ctx, body);

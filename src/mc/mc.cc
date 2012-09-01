@@ -32,18 +32,18 @@ MCAlgorithm::MCAlgorithm(IModel& model)
     , f_model(model)
     , f_traces()
 {
-    logger << "Creating MC algoritm instance "
-           << get_param("alg_name")
-           << " @" << this
-           << endl;
+    trace << "Creating MC algoritm instance "
+          << get_param("alg_name")
+          << " @" << this
+          << endl;
 }
 
 MCAlgorithm::~MCAlgorithm()
 {
-    logger << "Destroying MC algoritm instance"
-           << get_param("alg_name")
-           << " @" << this
-           << endl;
+    trace << "Destroying MC algoritm instance"
+          << get_param("alg_name")
+          << " @" << this
+          << endl;
 }
 
 void MCAlgorithm::set_param(string key, Variant value)

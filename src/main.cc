@@ -49,7 +49,7 @@ parseFile(pANTLR3_UINT8 fName)
     psmvParser psr;
     psmvLexer  lxr;
 
-    logger << "Preparing for parsing file '" << fName << "'" << endl;
+    debug << "Preparing for parsing file '" << fName << "'" << endl;
 
     input = antlr3AsciiFileStreamNew(fName);
     assert(input);
@@ -64,7 +64,7 @@ parseFile(pANTLR3_UINT8 fName)
     assert(psr);
 
     psr->smv(psr);
-    logger << "done." << endl;
+    info << "done." << endl;
 
     psr->free(psr);
     tstream->free(tstream);

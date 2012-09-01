@@ -28,16 +28,16 @@
 SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
 {
-  logger << "Creating SATBMCFalsification algorithm instance "
-         << get_param("alg_name") << " @" << this
-         << endl;
+  trace << "Creating SATBMCFalsification algorithm instance "
+        << get_param("alg_name") << " @" << this
+        << endl;
 }
 
 SATBMCFalsification::~SATBMCFalsification()
 {
-  logger << "Destroying SATBMCFalsification algorithm instance"
-         << get_param("alg_name") << " @" << this
-         << endl;
+  trace << "Destroying SATBMCFalsification algorithm instance"
+        << get_param("alg_name") << " @" << this
+        << endl;
 }
 
 void SATBMCFalsification::operator()()

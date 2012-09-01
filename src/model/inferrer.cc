@@ -36,15 +36,15 @@ Inferrer::Inferrer()
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
-{ logger << "Created Inferrer @" << this << endl; }
+{ trace << "Created Inferrer @" << this << endl; }
 
 Inferrer::~Inferrer()
-{ logger << "Destroying Inferrer @" << this << endl; }
+{ trace << "Destroying Inferrer @" << this << endl; }
 
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
 {
     Type_ptr res = NULL;
-    logger << "Determining type for expression " << ctx << "::" << body << endl;
+    debug << "Determining type for expression " << ctx << "::" << body << endl;
 
     // remove previous results
     f_type_stack.clear();
@@ -59,7 +59,7 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
 
-    logger << res << endl;
+    debug  << res << endl;
     return res;
 }
 

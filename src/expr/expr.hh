@@ -484,8 +484,8 @@ public:
         const Atom& pooled_atom =  (* ah.first);
 
         if (ah.second) {
-            logger << "Added new atom to pool: '"
-                   << pooled_atom << "'" << endl;
+            debug << "Added new atom to pool: '"
+                  << pooled_atom << "'" << endl;
         }
 
         // no copy occurs here
@@ -615,8 +615,8 @@ private:
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
 
         if (eh.second) {
-            logger << "Added new expr to pool: '"
-                   << pooled_expr << "'" << endl;
+            debug << "Added new expr to pool: '"
+                  << pooled_expr << "'" << endl;
         }
 
         return pooled_expr;

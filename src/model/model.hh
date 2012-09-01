@@ -268,7 +268,7 @@ class Model : public IModel {
 public:
     Model()
         : f_modules()
-    { logger << "Initialized Model instance @" << this << endl; }
+    { trace << "Initialized Model instance @" << this << endl; }
 
     const Modules& get_modules() const
     { return f_modules; }

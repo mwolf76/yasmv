@@ -17,13 +17,11 @@ namespace axter {
         return ezlogger_output_policy::get_log_stream();
     }
 
-    verbosity get_verbosity_level_tolerance(){
-        return ezlogger_verbosity_level_policy::get_verbosity_level_tolerance();
+    // TODO: make this configurable
+    verbosity get_verbosity_level_tolerance() {
+        return log_default_verbosity_level;
     }
 
-    void set_verbosity_level_tolerance(verbosity NewValue){
-        ezlogger_verbosity_level_policy::set_verbosity_level_tolerance(NewValue);
-    }
 };
 
 #else
