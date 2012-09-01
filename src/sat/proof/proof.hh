@@ -40,7 +40,7 @@ Proof-related interfaces and classes
 
 #include "core/Solver.hh"
 
-#include "utils/logger.hh"
+#include <common.hh>
 #include "utils/solverlogger.hh"
 
 // comment this out to disable debugging
@@ -219,14 +219,14 @@ namespace Minisat {
       assert (NULL != f_c2r);
 
       if (0 < c2r.elems()) {
-        std::cerr << "Incomplete update, following elements were missing" << std::endl;
+          err << "Incomplete update, following elements were missing" << endl;
 
         for (int i = c2r.bucket_count() -1; 0 <= i; -- i) {
           const vec<C2R_Pair>& bucket = c2r.bucket(i);
 
           for (int j = bucket.size() -1; 0 <= j; --j) {
             const C2R_Pair& c2r = bucket[j];
-            std::cout << c2r.key << std::endl;
+            err << c2r.key << endl;
           }
         }
 

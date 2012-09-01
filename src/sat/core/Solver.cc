@@ -23,8 +23,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "mtl/Sort.hh"
 #include "core/Solver.hh"
 #include "proof/proof.hh"
-#include "utils/logger.hh"
 
+#include <common.hh>
 using namespace Minisat;
 
 //=================================================================================================
@@ -105,12 +105,12 @@ Solver::Solver(proof_logging_mode mode) :
   , asynch_interrupt   (false)
 {
 #ifdef PROOF_CHECK
-  if (use_proof_logging) Logger::get() << "Proof logging enabled" << endlog;
-  Logger::get() << "Proof checking enabled" << endlog;
+  if (use_proof_logging) trace << "Proof logging enabled" << endlog;
+  trace << "Proof checking enabled" << endlog;
 #endif
 
 #ifdef MODEL_CHECK
-  Logger::get() << "Model checking enabled" << endlog;
+  trace << "Model checking enabled" << endlog;
 #endif
 }
 

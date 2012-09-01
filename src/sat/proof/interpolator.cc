@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <common.hh>
 
 namespace Minisat {
 
@@ -14,7 +15,7 @@ namespace Minisat {
     : f_owner(owner)
     , f_factory(factory)
   {
-    Logger::get().set_output_level(0);
+      // Logger::get().set_output_level(0);
   }
 
   Interpolator::~Interpolator()
@@ -30,10 +31,10 @@ namespace Minisat {
     ProofManager& pm = *(f_owner.pm);
     ClauseAllocator& ca = f_owner.ca;
 
-    Logger& logger = Logger::get();
+    // Logger& logger = Logger::get();
 
-    logger << loglevel(2)
-           << "Initializing interpolation" << endlog;
+    // logger << loglevel(2)
+    trace << "Initializing interpolation" << endl;
 
     a_variables.clear();
     b_variables.clear();
@@ -50,7 +51,7 @@ namespace Minisat {
       Clause& c = ca[cr];
 
       if (ga.has(hyp.color())) {
-        logger << loglevel(2) << "clause " << c << " to A" << endlog;
+        debug << "clause " << c << " to A" << endl;
         assert (! a_clauses.has(cr));
         a_clauses.insert(cr);
 
@@ -58,20 +59,20 @@ namespace Minisat {
         for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
           Var v = var(c[j]);
           if (! a_variables.has(v)) {
-            logger << loglevel(2) << "itp: adding var " << v << " to A" << endlog;
+            debug << "itp: adding var " << v << " to A" << endl;
             a_variables.insert(v);
           }
         }
       }
 
       else {
-        logger << loglevel(2) << "clause " << c << " to B" << endlog;
+        debug << "clause " << c << " to B" << endl;
 
         // register each var in the clause as belonging to B
         for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
           Var v = var(c[j]);
           if (! b_variables.has(v)) {
-            logger << loglevel(2) << "itp: adding var " << v << " to B" << endlog;
+            debug << "itp: adding var " << v << " to B" << endl;
             b_variables.insert(v);
           }
         }

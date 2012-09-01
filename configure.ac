@@ -138,7 +138,7 @@ AC_CONFIG_FILES([Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
-                 src/trace/Makefile
+                 src/witness/Makefile
                  doc/Makefile
 		 gnusmv.pc])
 
