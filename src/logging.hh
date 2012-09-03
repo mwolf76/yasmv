@@ -65,10 +65,10 @@ namespace axter {
 #include "ezlogger_macros.hpp"
 
 // custom loggers
-#define err  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, cerr)
-#define warn EZLOGGERVLSTREAM2(axter::log_always, cerr)
-#define trace EZLOGGERVLSTREAM2(axter::log_often, cerr)
-#define info EZLOGGERVLSTREAM2(axter::log_regularly, cerr)
-#define debug EZLOGGERVLSTREAM2(axter::log_rarely, cerr)
-#define drivel EZLOGGERVLSTREAM2(axter::log_very_rarely, cerr)
+#define ERR  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, cerr)
+#define WARN EZLOGGERVLSTREAM2(axter::log_always, cerr)
+#define TRACE EZLOGGERVLSTREAM2(axter::log_often, cerr)
+#define INFO EZLOGGERVLSTREAM2(axter::log_regularly, cerr)
+#define DEBUG EZLOGGERVLSTREAM2(axter::log_rarely, cerr)
+#define DRIVEL EZLOGGERVLSTREAM2(axter::log_very_rarely, cerr)
 #endif
