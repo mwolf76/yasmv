@@ -131,6 +131,7 @@ AC_CONFIG_FILES([Makefile
                  src/compile/Makefile
                  src/dd/Makefile
 		 src/expr/Makefile
+                 src/expr/compilers/Makefile
                  src/expr/printers/Makefile
                  src/expr/validators/Makefile
                  src/mc/Makefile
