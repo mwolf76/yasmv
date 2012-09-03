@@ -90,8 +90,9 @@ struct PtrEq {
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)
 #include <logging.hh>
 
-// reserved for numeric and word constant values
-typedef unsigned long long value_t;
+// reserved for numeric and word constant values (this has to match
+// cudd reprentation for ADD leaves).
+typedef long value_t;
 
 typedef enum {
   BINARY = 2,

@@ -23,6 +23,7 @@
 #define BASE_H
 
 #include <exception>
+#include <cdefs.h>
 
 /* the base class definition, including a virtual destructor */
 class IObject {
