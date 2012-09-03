@@ -1,14 +1,14 @@
 /**
- *  @file terms.hh
- *  @brief Generic terms support
+ *  @file addterms.hh
+ *  @brief Generic addterms support
  *
- *  This module contains the definitions for abstract terms
- *  manipulation.
+ *  This module contains the definitions for terms manipulation,
+ *  specialized for cudd ADDs.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
+ *  modify it under the addterms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
  *
@@ -22,31 +22,42 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef TERMS_H_INCLUDED
-#define TERMS_H_INCLUDED
-
-#include <SolverTypes.hh>
-
+#ifndef ADD_TERMS_H_INCLUDED
+#define ADD_TERMS_H_INCLUDED
 namespace Minisat {
 
-    template<class Term> class TermFactory {
-
+    class ADDTermFactory : public TermFactory<ADD> {
     public:
-        virtual ~TermFactory() {};
+        ADDTermFactory(Cudd& cudd)
+            : f_cudd(cudd)
+        {}
+
+        virtual ~ADDTermFactory() {};
 
         // constants
-        virtual Term make_true() =0;
-        virtual Term make_false() =0;
+        virtual ADD make_true()
+        { return f_cudd.addOne(); }
+
+        virtual ADD make_false()
+        { return f_cudd.addZero(); }
 
         // variables
-        virtual Term make_var(Var v) =0;
+        virtual ADD make_var(Var v)
+        { return f_cudd.addVar(v); }
 
         // operators
-        virtual Term make_and(Term t1, Term t2) =0;
-        virtual Term make_or(Term t1, Term t2) =0;
-        virtual Term make_not(Term t) =0;
+        virtual ADD make_and(ADD t1, ADD t2)
+        { return t1 & t2; }
+        virtual ADD make_or(ADD t1, ADD t2)
+        { return t1 | t2; }
+
+        virtual ADD make_not(ADD t)
+        { return ~ t; }
+
+        private:
+        Cudd& f_cudd;
     };
 
 } // namespace Minisat
 
-#endif // TERMS_H_INCLUDED
+#endif
