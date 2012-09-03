@@ -39,7 +39,7 @@ typedef enum {
     EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
 
     INIT_1, NEXT_1, NOT_1, NEG_1,
-    ADD_1, ADD_2,
+    PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
     SUB_1, SUB_2,
     MUL_1, MUL_2,
     DIV_1, DIV_2,

@@ -40,7 +40,7 @@ typedef enum {
     INIT, NEXT,
 
     /* arithmetical operators */
-    NEG, ADD, SUB, DIV, MUL, MOD,
+    NEG, PLUS, SUB, DIV, MUL, MOD,
 
     /* word-related operators */
     CONCAT, COUNT,
@@ -331,7 +331,7 @@ public:
     { return make_expr(NEG, expr, NULL); }
 
     inline Expr_ptr make_add(Expr_ptr a, Expr_ptr b)
-    { return make_expr(ADD, a, b); }
+    { return make_expr(PLUS, a, b); }
 
     inline Expr_ptr make_sub(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUB, a, b); }
@@ -484,7 +484,7 @@ public:
         const Atom& pooled_atom =  (* ah.first);
 
         if (ah.second) {
-            debug << "Added new atom to pool: '"
+            DEBUG << "Added new atom to pool: '"
                   << pooled_atom << "'" << endl;
         }
 
@@ -615,7 +615,7 @@ private:
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
 
         if (eh.second) {
-            debug << "Added new expr to pool: '"
+            DEBUG << "Added new expr to pool: '"
                   << pooled_expr << "'" << endl;
         }
 

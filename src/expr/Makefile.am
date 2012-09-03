@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = printers validators
+SUBDIRS = compilers printers validators
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/3rdparty/ezlogger
 
 AM_CPPFLAGS = @AM_CPPFLAGS@

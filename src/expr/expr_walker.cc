@@ -88,8 +88,8 @@ void Walker::walk ()
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
 
-            case ADD_1: goto entry_ADD_1;
-            case ADD_2: goto entry_ADD_2;
+            case PLUS_1: goto entry_PLUS_1;
+            case PLUS_2: goto entry_PLUS_2;
 
             case MUL_1: goto entry_MUL_1;
             case MUL_2: goto entry_MUL_2;
@@ -426,20 +426,20 @@ void Walker::walk ()
             break;
 
             // basic arithmetical
-        case ADD:
+        case PLUS:
             if (walk_add_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = ADD_1;
+                f_recursion_stack.top().pc = PLUS_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
-            entry_ADD_1:
+            entry_PLUS_1:
                 if (walk_add_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = ADD_2;
+                    f_recursion_stack.top().pc = PLUS_2;
                     f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
                 }
 
-            entry_ADD_2:
+            entry_PLUS_2:
                 walk_add_postorder(curr.expr);
             }
             break;
