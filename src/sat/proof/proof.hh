@@ -219,14 +219,14 @@ namespace Minisat {
       assert (NULL != f_c2r);
 
       if (0 < c2r.elems()) {
-          err << "Incomplete update, following elements were missing" << endl;
+          ERR << "Incomplete update, following elements were missing" << endl;
 
         for (int i = c2r.bucket_count() -1; 0 <= i; -- i) {
           const vec<C2R_Pair>& bucket = c2r.bucket(i);
 
           for (int j = bucket.size() -1; 0 <= j; --j) {
             const C2R_Pair& c2r = bucket[j];
-            err << c2r.key << endl;
+            ERR << c2r.key << endl;
           }
         }
 
@@ -270,7 +270,7 @@ namespace Minisat {
       C2R_Map& c2r = (*f_c2r);
 
       if (! c2r.has(cr) ) {
-        std::cerr << "Missing rule for Clause @" << cr << std::endl;
+        ERR << "Missing rule for Clause @" << cr << std::endl;
         abort();
       }
       return *c2r[cr];
@@ -280,7 +280,7 @@ namespace Minisat {
     inline InferenceRule& proof() {
 
       if (NULL == f_unsat_proof) {
-        std::cerr << "proof of unsatisfiability not available!" << std::endl;
+        ERR << "proof of unsatisfiability not available!" << std::endl;
         abort();
       }
       return *f_unsat_proof;

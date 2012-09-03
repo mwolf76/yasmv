@@ -32,7 +32,7 @@ MCAlgorithm::MCAlgorithm(IModel& model)
     , f_model(model)
     , f_traces()
 {
-    trace << "Creating MC algoritm instance "
+    TRACE << "Creating MC algoritm instance "
           << get_param("alg_name")
           << " @" << this
           << endl;
@@ -40,7 +40,7 @@ MCAlgorithm::MCAlgorithm(IModel& model)
 
 MCAlgorithm::~MCAlgorithm()
 {
-    trace << "Destroying MC algoritm instance"
+    TRACE << "Destroying MC algoritm instance"
           << get_param("alg_name")
           << " @" << this
           << endl;

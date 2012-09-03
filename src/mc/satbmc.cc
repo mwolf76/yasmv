@@ -28,14 +28,14 @@
 SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
 {
-  trace << "Creating SATBMCFalsification algorithm instance "
+  TRACE << "Creating SATBMCFalsification algorithm instance "
         << get_param("alg_name") << " @" << this
         << endl;
 }
 
 SATBMCFalsification::~SATBMCFalsification()
 {
-  trace << "Destroying SATBMCFalsification algorithm instance"
+  TRACE << "Destroying SATBMCFalsification algorithm instance"
         << get_param("alg_name") << " @" << this
         << endl;
 }

@@ -2,9 +2,11 @@
  *  @file inferrer.cc
  *  @brief Expr type inferrer
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  This module contains definitions and services that implement a
+ *  type inference engine. The type inference engine is implemented
+ *  using a simple walker pattern: (a) on preorder, return true if the
+ *  node has not yet been visited; (b) always do in-order (for binary
+ *  nodes); (c) perform proper type checking in post-order hooks.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -36,15 +38,15 @@ Inferrer::Inferrer()
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
-{ trace << "Created Inferrer @" << this << endl; }
+{ TRACE << "Created Inferrer @" << this << endl; }
 
 Inferrer::~Inferrer()
-{ trace << "Destroying Inferrer @" << this << endl; }
+{ TRACE << "Destroying Inferrer @" << this << endl; }
 
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
 {
     Type_ptr res = NULL;
-    debug << "Determining type for expression " << ctx << "::" << body << endl;
+    DEBUG << "Determining type for expression " << ctx << "::" << body << endl;
 
     // remove previous results
     f_type_stack.clear();
@@ -59,7 +61,7 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
 
-    debug  << res << endl;
+    DEBUG  << res << endl;
     return res;
 }
 
@@ -67,11 +69,6 @@ void Inferrer::pre_hook()
 {}
 void Inferrer::post_hook()
 {}
-
-// walker interface implementation: the type inference engine follows
-// a simple pattern: on preorder, return true if the node has not yet
-// been visited; always do in-order (for binary nodes); proper type
-// checking is performed by post-order hooks.
 
 bool Inferrer::walk_F_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

@@ -34,7 +34,7 @@ namespace Minisat {
     // Logger& logger = Logger::get();
 
     // logger << loglevel(2)
-    trace << "Initializing interpolation" << endl;
+    TRACE << "Initializing interpolation" << endl;
 
     a_variables.clear();
     b_variables.clear();
@@ -51,7 +51,7 @@ namespace Minisat {
       Clause& c = ca[cr];
 
       if (ga.has(hyp.color())) {
-        debug << "clause " << c << " to A" << endl;
+        DEBUG << "clause " << c << " to A" << endl;
         assert (! a_clauses.has(cr));
         a_clauses.insert(cr);
 
@@ -59,20 +59,20 @@ namespace Minisat {
         for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
           Var v = var(c[j]);
           if (! a_variables.has(v)) {
-            debug << "itp: adding var " << v << " to A" << endl;
+            DEBUG << "itp: adding var " << v << " to A" << endl;
             a_variables.insert(v);
           }
         }
       }
 
       else {
-        debug << "clause " << c << " to B" << endl;
+        DEBUG << "clause " << c << " to B" << endl;
 
         // register each var in the clause as belonging to B
         for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
           Var v = var(c[j]);
           if (! b_variables.has(v)) {
-            debug << "itp: adding var " << v << " to B" << endl;
+            DEBUG << "itp: adding var " << v << " to B" << endl;
             b_variables.insert(v);
           }
         }
