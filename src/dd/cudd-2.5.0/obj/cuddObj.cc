@@ -2550,6 +2550,29 @@ ADD::Agreement(
 
 
 ADD
+ADD::LShift(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addLShift, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::LShift
+
+ADD
+ADD::RShift(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addRShift, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::RShift
+
+
+ADD
 ADD::Or(
   const ADD& g) const
 {

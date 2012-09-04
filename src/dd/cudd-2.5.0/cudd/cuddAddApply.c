@@ -445,6 +445,84 @@ Cudd_addOneZeroMaximum(
 
 /**Function********************************************************************
 
+  Synopsis    [Integer LSHIFT]
+
+  Description [Integer LSHIFT . Returns NULL if not a terminal case;
+  f << g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addLShift(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (F == DD_ZERO(dd)) return(G);
+    if (G == DD_ZERO(dd)) return(F);
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) << cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addLShift */
+
+
+/**Function********************************************************************
+
+  Synopsis    [Integer RSHIFT]
+
+  Description [Integer RSHIFT . Returns NULL if not a terminal case;
+  f << g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addRshift(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (F == DD_ZERO(dd)) return(G);
+    if (G == DD_ZERO(dd)) return(F);
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) >> cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addRShift */
+
+
+/**Function********************************************************************
+
   Synopsis    [Disjunction of two 0-1 ADDs.]
 
   Description [Disjunction of two 0-1 ADDs. Returns NULL
