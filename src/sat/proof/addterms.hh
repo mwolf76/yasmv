@@ -54,7 +54,7 @@ namespace Minisat {
         virtual ADD make_not(ADD t)
         { return ~ t; }
 
-        private:
+    private:
         Cudd& f_cudd;
     };
 

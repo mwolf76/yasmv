@@ -209,7 +209,6 @@ protected:
     proof_logging_mode  use_proof_logging; // enable proof logging
 
     friend class ProofManager;
-    friend class Interpolator;
     ProofManager*       pm;               // Proof Manager helper object
     ClauseAllocator     ca;
 
