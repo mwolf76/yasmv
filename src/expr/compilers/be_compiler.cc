@@ -194,7 +194,6 @@ void BECompiler::walk_add_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs + rhs);
 }
 
@@ -206,7 +205,6 @@ void BECompiler::walk_sub_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs - rhs);
 }
 
@@ -218,7 +216,6 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs / rhs);
 }
 
@@ -230,7 +227,6 @@ void BECompiler::walk_mul_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs * rhs);
 }
 
@@ -240,7 +236,9 @@ bool BECompiler::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_mod_postorder(const Expr_ptr expr)
 {
-    assert(0); // integer division ?!?
+    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
+    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    f_add_stack.push_back(lhs / rhs);
 }
 
 bool BECompiler::walk_and_preorder(const Expr_ptr expr)
@@ -251,7 +249,6 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs & rhs);
 }
 
@@ -263,7 +260,6 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs | rhs);
 }
 
@@ -275,7 +271,6 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs.Xor(rhs));
 }
 
@@ -287,7 +282,6 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-
     f_add_stack.push_back(lhs.Xnor(rhs));
 }
 
@@ -514,46 +508,44 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         add = f_cudd.constant(expr->u.f_value);
     }
     else if (symb_type == IDENT) {
-        add = resolve(f_ctx_stack.back(), expr);
+        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
+        add = symb->as_variable().encoding();
     }
     else assert(0);
 
     f_add_stack.push_back(add);
 }
 
-// one step of resolution returns an encoding ADD
-ADD BECompiler::resolve(const Expr_ptr ctx, const Expr_ptr frag)
+// one step of resolution returns a const or variable
+ISymbol_ptr BECompiler::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    // Model& model = static_cast <Model&> (*f_mm.get_model());
-    // ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
+    Model& model = static_cast <Model&> (*f_mm.get_model());
+    ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
 
-    // // is this a variable?
-    // if (symb->is_variable()) {
-    //     return symb;
-    // }
+    // is this a variable?
+    if (symb->is_variable()) {
+        return symb;
+    }
 
-    // // ... or a define?
-    // else if (symb->is_define()) {
+    // ... or a define?
+    else if (symb->is_define()) {
 
-    //     while (symb->is_define()) {
-    //         Expr_ptr body = symb->as_define().body();
-    //         if (!f_em.is_identifier(body)) {
-    //             // throw BadDefine(); // TODO
-    //         }
-    //         symb = model.fetch_symbol(FQExpr(ctx, body));
-    //     }
+        while (symb->is_define()) {
+            Expr_ptr body = symb->as_define().body();
+            if (!f_em.is_identifier(body)) {
+                // throw BadDefine(); // TODO
+            }
+            symb = model.fetch_symbol(FQExpr(ctx, body));
+        }
 
-    //     return symb;
-    // }
+        return symb;
+    }
 
-    // // .. or a constant?
-    // else if (symb->is_const()) {
-    //     return symb;
-    // }
+    // .. or a constant?
+    else if (symb->is_const()) {
+        return symb;
+    }
 
-    // // or what?!?
-    // else assert(0);
-    assert(0);
-
-    return f_cudd.addZero();
+    // or what?!?
+    else assert(0);
 }

@@ -73,10 +73,3 @@ FILE *fp;
     return -1;
 }
 #endif
-
-/* put something here in case some compilers abort on empty files ... */
-int
-util_do_nothing()
-{
-    return 1;
-}

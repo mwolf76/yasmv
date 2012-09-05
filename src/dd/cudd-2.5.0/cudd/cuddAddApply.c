@@ -495,7 +495,7 @@ Cudd_addLShift(
 
 ******************************************************************************/
 DdNode *
-Cudd_addRshift(
+Cudd_addRShift(
   DdManager * dd,
   DdNode ** f,
   DdNode ** g)

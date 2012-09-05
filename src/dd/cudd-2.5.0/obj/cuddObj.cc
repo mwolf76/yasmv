@@ -1338,26 +1338,6 @@ Cudd::constant(
 } // Cudd::constant
 
 
-ADD
-Cudd::plusInfinity() const
-{
-    DdNode *result = Cudd_ReadPlusInfinity(p->manager);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // Cudd::plusInfinity
-
-
-ADD
-Cudd::minusInfinity() const
-{
-    DdNode *result = Cudd_ReadMinusInfinity(p->manager);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // Cudd::minusInfinity
-
-
 ZDD
 Cudd::zddVar(
   int index) const
@@ -1619,29 +1599,6 @@ Cudd::bddRealignDisable() const
     Cudd_bddRealignDisable(p->manager);
 
 } // Cudd::bddRealignDisable
-
-
-ADD
-Cudd::background() const
-{
-    DdNode *result = Cudd_ReadBackground(p->manager);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // Cudd::background
-
-
-void
-Cudd::SetBackground(
-  ADD bg) const
-{
-    DdManager *mgr = p->manager;
-    if (mgr != bg.manager()) {
-	p->errorHandler("Background comes from different manager.");
-    }
-    Cudd_SetBackground(mgr, bg.getNode());
-
-} // Cudd::SetBackground
 
 
 unsigned int
@@ -2442,18 +2399,6 @@ ADD::Times(
 
 
 ADD
-ADD::Threshold(
-  const ADD& g) const
-{
-    DdManager *mgr = checkSameManager(g);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addThreshold, node, g.node);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::Threshold
-
-
-ADD
 ADD::SetNZ(
   const ADD& g) const
 {
@@ -2525,28 +2470,28 @@ ADD::OneZeroMaximum(
 } // ADD::OneZeroMaximum
 
 
-ADD
-ADD::Diff(
-  const ADD& g) const
-{
-    DdManager *mgr = checkSameManager(g);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addDiff, node, g.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::Diff(
+//   const ADD& g) const
+// {
+//     DdManager *mgr = checkSameManager(g);
+//     DdNode *result = Cudd_addApply(mgr, Cudd_addDiff, node, g.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::Diff
+// } // ADD::Diff
 
 
-ADD
-ADD::Agreement(
-  const ADD& g) const
-{
-    DdManager *mgr = checkSameManager(g);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addAgreement, node, g.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::Agreement(
+//   const ADD& g) const
+// {
+//     DdManager *mgr = checkSameManager(g);
+//     DdNode *result = Cudd_addApply(mgr, Cudd_addAgreement, node, g.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::Agreement
+// } // ADD::Agreement
 
 
 ADD
@@ -2630,17 +2575,6 @@ ADD::Xnor(
     return ADD(p, result);
 
 } // ADD::Xnor
-
-
-ADD
-ADD::Log() const
-{
-    DdManager *mgr = p->manager;
-    DdNode *result = Cudd_addMonadicApply(mgr, Cudd_addLog, node);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::Log
 
 
 ADD
@@ -2826,156 +2760,6 @@ BDD::AndAbstract(
     return BDD(p, result);
 
 } // BDD::AndAbstract
-
-
-int
-Cudd::ApaNumberOfDigits(
-  int binaryDigits) const
-{
-    return Cudd_ApaNumberOfDigits(binaryDigits);
-
-} // Cudd::ApaNumberOfDigits
-
-
-DdApaNumber
-Cudd::NewApaNumber(
-  int digits) const
-{
-    return Cudd_NewApaNumber(digits);
-
-} // Cudd::NewApaNumber
-
-
-void
-Cudd::ApaCopy(
-  int digits,
-  DdApaNumber source,
-  DdApaNumber dest) const
-{
-    Cudd_ApaCopy(digits, source, dest);
-
-} // Cudd::ApaCopy
-
-
-DdApaDigit
-Cudd::ApaAdd(
-  int digits,
-  DdApaNumber a,
-  DdApaNumber b,
-  DdApaNumber sum) const
-{
-    return Cudd_ApaAdd(digits, a, b, sum);
-
-} // Cudd::ApaAdd
-
-
-DdApaDigit
-Cudd::ApaSubtract(
-  int digits,
-  DdApaNumber a,
-  DdApaNumber b,
-  DdApaNumber diff) const
-{
-    return Cudd_ApaSubtract(digits, a, b, diff);
-
-} // Cudd::ApaSubtract
-
-
-DdApaDigit
-Cudd::ApaShortDivision(
-  int digits,
-  DdApaNumber dividend,
-  DdApaDigit divisor,
-  DdApaNumber quotient) const
-{
-    return Cudd_ApaShortDivision(digits, dividend, divisor, quotient);
-
-} // Cudd::ApaShortDivision
-
-
-void
-Cudd::ApaShiftRight(
-  int digits,
-  DdApaDigit in,
-  DdApaNumber a,
-  DdApaNumber b) const
-{
-    Cudd_ApaShiftRight(digits, in, a, b);
-
-} // Cudd::ApaShiftRight
-
-
-void
-Cudd::ApaSetToLiteral(
-  int digits,
-  DdApaNumber number,
-  DdApaDigit literal) const
-{
-    Cudd_ApaSetToLiteral(digits, number, literal);
-
-} // Cudd::ApaSetToLiteral
-
-
-void
-Cudd::ApaPowerOfTwo(
-  int digits,
-  DdApaNumber number,
-  int power) const
-{
-    Cudd_ApaPowerOfTwo(digits, number, power);
-
-} // Cudd::ApaPowerOfTwo
-
-
-void
-Cudd::ApaPrintHex(
-  FILE * fp,
-  int digits,
-  DdApaNumber number) const
-{
-    cout.flush();
-    int result = Cudd_ApaPrintHex(fp, digits, number);
-    checkReturnValue(result);
-
-} // Cudd::ApaPrintHex
-
-
-void
-Cudd::ApaPrintDecimal(
-  FILE * fp,
-  int digits,
-  DdApaNumber number) const
-{
-    cout.flush();
-    int result = Cudd_ApaPrintDecimal(fp, digits, number);
-    checkReturnValue(result);
-
-} // Cudd::ApaPrintDecimal
-
-
-DdApaNumber
-ABDD::ApaCountMinterm(
-  int nvars,
-  int * digits) const
-{
-    DdManager *mgr = p->manager;
-    return Cudd_ApaCountMinterm(mgr, node, nvars, digits);
-
-} // ABDD::ApaCountMinterm
-
-
-void
-ABDD::ApaPrintMinterm(
-  int nvars,
-  FILE * fp) const
-{
-    cout.flush();
-    DdManager *mgr = p->manager;
-    int result = Cudd_ApaPrintMinterm(fp, mgr, node, nvars);
-    checkReturnValue(result);
-
-} // ABDD::ApaPrintMinterm
-
 
 void
 ABDD::EpdPrintMinterm(
@@ -4193,63 +3977,6 @@ BDD::LiteralSetIntersection(
     return BDD(p, result);
 
 } // BDD::LiteralSetIntersection
-
-
-ADD
-ADD::MatrixMultiply(
-  const ADD& B,
-  vector<ADD> z) const
-{
-    int nz = z.size();
-    DdManager *mgr = checkSameManager(B);
-    DdNode **Z = new DdNode *[nz];
-    for (int i = 0; i < nz; i++) {
-	Z[i] = z[i].node;
-    }
-    DdNode *result = Cudd_addMatrixMultiply(mgr, node, B.node, Z, nz);
-    delete [] Z;
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::MatrixMultiply
-
-
-ADD
-ADD::TimesPlus(
-  const ADD& B,
-  vector<ADD> z) const
-{
-    int nz = z.size();
-    DdManager *mgr = checkSameManager(B);
-    DdNode **Z = new DdNode *[nz];
-    for (int i = 0; i < nz; i++) {
-	Z[i] = z[i].node;
-    }
-    DdNode *result = Cudd_addTimesPlus(mgr, node, B.node, Z, nz);
-    delete [] Z;
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::TimesPlus
-
-
-ADD
-ADD::Triangle(
-  const ADD& g,
-  vector<ADD> z) const
-{
-    int nz = z.size();
-    DdManager *mgr = checkSameManager(g);
-    DdNode **Z = new DdNode *[nz];
-    for (int i = 0; i < nz; i++) {
-	Z[i] = z[i].node;
-    }
-    DdNode *result = Cudd_addTriangle(mgr, node, g.node, Z, nz);
-    delete [] Z;
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::Triangle
 
 
 BDD

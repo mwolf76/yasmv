@@ -237,93 +237,93 @@ Cudd_addIteConstant(
 } /* end of Cudd_addIteConstant */
 
 
-/* /\**Function******************************************************************** */
+/**Function********************************************************************
 
-/*   Synopsis    [Checks whether ADD g is constant whenever ADD f is 1.] */
+  Synopsis    [Checks whether ADD g is constant whenever ADD f is 1.]
 
-/*   Description [Checks whether ADD g is constant whenever ADD f is 1.  f */
-/*   must be a 0-1 ADD.  Returns a pointer to the resulting ADD (which may */
-/*   or may not be constant) or DD_NON_CONSTANT. If f is identically 0, */
-/*   the check is assumed to be successful, and the background value is */
-/*   returned. No new nodes are created.] */
+  Description [Checks whether ADD g is constant whenever ADD f is 1.  f
+  must be a 0-1 ADD.  Returns a pointer to the resulting ADD (which may
+  or may not be constant) or DD_NON_CONSTANT. If f is identically 0,
+  the check is assumed to be successful, and the background value is
+  returned. No new nodes are created.]
 
-/*   SideEffects [None] */
+  SideEffects [None]
 
-/*   SeeAlso     [Cudd_addIteConstant Cudd_addLeq] */
+  SeeAlso     [Cudd_addIteConstant Cudd_addLeq]
 
-/* ******************************************************************************\/ */
-/* DdNode * */
-/* Cudd_addEvalConst( */
-/*   DdManager * dd, */
-/*   DdNode * f, */
-/*   DdNode * g) */
-/* { */
-/*     DdNode *zero; */
-/*     DdNode *Fv,*Fnv,*Gv,*Gnv,*r,*t,*e; */
-/*     unsigned int topf,topg; */
+******************************************************************************/
+DdNode *
+Cudd_addEvalConst(
+  DdManager * dd,
+  DdNode * f,
+  DdNode * g)
+{
+    DdNode *zero;
+    DdNode *Fv,*Fnv,*Gv,*Gnv,*r,*t,*e;
+    unsigned int topf,topg;
 
-/* #ifdef DD_DEBUG */
-/*     assert(!Cudd_IsComplement(f)); */
-/* #endif */
+#ifdef DD_DEBUG
+    assert(!Cudd_IsComplement(f));
+#endif
 
-/*     statLine(dd); */
-/*     /\* Terminal cases. *\/ */
-/*     if (f == DD_ONE(dd) || cuddIsConstant(g)) { */
-/*         return(g); */
-/*     } */
-/*     if (f == (zero = DD_ZERO(dd))) { */
-/*         return(dd->background); */
-/*     } */
+    statLine(dd);
+    /* Terminal cases. */
+    if (f == DD_ONE(dd) || cuddIsConstant(g)) {
+        return(g);
+    }
+    if (f == (zero = DD_ZERO(dd))) {
+        return(f);
+    }
 
-/* #ifdef DD_DEBUG */
-/*     assert(!cuddIsConstant(f)); */
-/* #endif */
-/*     /\* From now on, f and g are known not to be constants. *\/ */
+#ifdef DD_DEBUG
+    assert(!cuddIsConstant(f));
+#endif
+    /* From now on, f and g are known not to be constants. */
 
-/*     topf = cuddI(dd,f->index); */
-/*     topg = cuddI(dd,g->index); */
+    topf = cuddI(dd,f->index);
+    topg = cuddI(dd,g->index);
 
-/*     /\* Check cache. *\/ */
-/*     r = cuddConstantLookup(dd,DD_ADD_EVAL_CONST_TAG,f,g,g); */
-/*     if (r != NULL) { */
-/*         return(r); */
-/*     } */
+    /* Check cache. */
+    r = cuddConstantLookup(dd,DD_ADD_EVAL_CONST_TAG,f,g,g);
+    if (r != NULL) {
+        return(r);
+    }
 
-/*     /\* Compute cofactors. *\/ */
-/*     if (topf <= topg) { */
-/*         Fv = cuddT(f); Fnv = cuddE(f); */
-/*     } else { */
-/*         Fv = Fnv = f; */
-/*     } */
-/*     if (topg <= topf) { */
-/*         Gv = cuddT(g); Gnv = cuddE(g); */
-/*     } else { */
-/*         Gv = Gnv = g; */
-/*     } */
+    /* Compute cofactors. */
+    if (topf <= topg) {
+        Fv = cuddT(f); Fnv = cuddE(f);
+    } else {
+        Fv = Fnv = f;
+    }
+    if (topg <= topf) {
+        Gv = cuddT(g); Gnv = cuddE(g);
+    } else {
+        Gv = Gnv = g;
+    }
 
-/*     /\* Recursive step. *\/ */
-/*     if (Fv != zero) { */
-/* 	t = Cudd_addEvalConst(dd,Fv,Gv); */
-/* 	if (t == DD_NON_CONSTANT || !cuddIsConstant(t)) { */
-/* 	    cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT); */
-/* 	    return(DD_NON_CONSTANT); */
-/* 	} */
-/* 	if (Fnv != zero) { */
-/* 	    e = Cudd_addEvalConst(dd,Fnv,Gnv); */
-/* 	    if (e == DD_NON_CONSTANT || !cuddIsConstant(e) || t != e) { */
-/* 		cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT); */
-/* 		return(DD_NON_CONSTANT); */
-/* 	    } */
-/* 	} */
-/* 	cuddCacheInsert2(dd,Cudd_addEvalConst,f,g,t); */
-/* 	return(t); */
-/*     } else { /\* Fnv must be != zero *\/ */
-/* 	e = Cudd_addEvalConst(dd,Fnv,Gnv); */
-/* 	cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, e); */
-/* 	return(e); */
-/*     } */
+    /* Recursive step. */
+    if (Fv != zero) {
+	t = Cudd_addEvalConst(dd,Fv,Gv);
+	if (t == DD_NON_CONSTANT || !cuddIsConstant(t)) {
+	    cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
+	    return(DD_NON_CONSTANT);
+	}
+	if (Fnv != zero) {
+	    e = Cudd_addEvalConst(dd,Fnv,Gnv);
+	    if (e == DD_NON_CONSTANT || !cuddIsConstant(e) || t != e) {
+		cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
+		return(DD_NON_CONSTANT);
+	    }
+	}
+	cuddCacheInsert2(dd,Cudd_addEvalConst,f,g,t);
+	return(t);
+    } else { /* Fnv must be != zero */
+	e = Cudd_addEvalConst(dd,Fnv,Gnv);
+	cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, e);
+	return(e);
+    }
 
-/* } /\* end of Cudd_addEvalConst *\/ */
+} /* end of Cudd_addEvalConst */
 
 
 /**Function********************************************************************

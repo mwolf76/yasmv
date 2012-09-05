@@ -24,7 +24,6 @@
 #define BE_COMPILER_H
 #include <expr_walker.hh>
 #include <model.hh>
-#include <cuddObj.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
@@ -197,7 +196,7 @@ private:
         return true;
     }
 
-    ADD resolve(const Expr_ptr ctx, const Expr_ptr frag);
+    ISymbol_ptr resolve(const Expr_ptr ctx, const Expr_ptr frag);
 };
 
 #endif

@@ -31,6 +31,7 @@
 #include <expr.hh>
 #include <types.hh>
 #include <expr_mgr.hh>
+#include <cuddObj.hh>
 
 // -- primary decls  --------------------------------------------------------------
 class ISymbol : IObject {
@@ -51,6 +52,8 @@ public:
 };
 
 class IVariable : public ISymbol {
+public:
+    virtual const ADD& encoding() const =0;
 };
 
 class IConstant : public ISymbol {
@@ -197,7 +200,7 @@ class Variable : public IVariable {
     Expr_ptr f_ctx;
     Expr_ptr f_name;
     Type_ptr f_type;
-
+    ADD f_encoding;
 public:
     Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type)
         : f_ctx(ctx)
@@ -210,6 +213,9 @@ public:
 
     const Expr_ptr expr() const
     { return f_name; }
+
+    const ADD& encoding() const
+    { return f_encoding; }
 
     const Type_ptr get_type() const
     { return f_type; }
