@@ -672,6 +672,18 @@ ADD::operator/(
 
 
 ADD
+ADD::operator%(
+  const ADD& other) const
+{
+    DdManager *mgr = checkSameManager(other);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addModulus, node, other.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::operator%
+
+
+ADD
 ADD::operator*=(
   const ADD& other)
 {
@@ -2399,18 +2411,6 @@ ADD::Times(
 
 
 ADD
-ADD::SetNZ(
-  const ADD& g) const
-{
-    DdManager *mgr = checkSameManager(g);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addSetNZ, node, g.node);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::SetNZ
-
-
-ADD
 ADD::Divide(
   const ADD& g) const
 {
@@ -2420,6 +2420,19 @@ ADD::Divide(
     return ADD(p, result);
 
 } // ADD::Divide
+
+
+ADD
+ADD::Modulus(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addModulus, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::Modulus
+
 
 
 ADD

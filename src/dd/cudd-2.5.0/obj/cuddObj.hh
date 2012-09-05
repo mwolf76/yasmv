@@ -170,8 +170,6 @@ public:
     bool operator==(const ABDD &other) const;
     bool operator!=(const ABDD &other) const;
     void print(int nvars, int verbosity = 1) const;
-    DdApaNumber ApaCountMinterm(int nvars, int * digits) const;
-    void ApaPrintMinterm(int nvars, FILE * fp = stdout) const;
     void EpdPrintMinterm(int nvars, FILE * fp = stdout) const;
     bool IsOne() const;
     bool IsCube() const;
@@ -350,29 +348,35 @@ public:
     ADD(Cudd const & manager, DdNode *ddNode);
     ADD(const ADD &from);
     ADD operator=(const ADD& right);
+
     // Relational operators
     bool operator<=(const ADD& other) const;
     bool operator>=(const ADD& other) const;
     bool operator<(const ADD& other) const;
     bool operator>(const ADD& other) const;
+
     // Arithmetic operators
     ADD operator-() const;
     ADD operator*(const ADD& other) const;
     ADD operator/(const ADD& other) const;
+    ADD operator%(const ADD& other) const;
     ADD operator*=(const ADD& other);
     ADD operator+(const ADD& other) const;
     ADD operator+=(const ADD& other);
     ADD operator-(const ADD& other) const;
     ADD operator-=(const ADD& other);
+
     // Shift operators
     ADD LShift(const ADD& other) const;
     ADD RShift(const ADD& other) const;
+
     // Logical operators
     ADD operator~() const;
     ADD operator&(const ADD& other) const;
     ADD operator&=(const ADD& other);
     ADD operator|(const ADD& other) const;
     ADD operator|=(const ADD& other);
+
     bool IsZero() const;
     ADD ExistAbstract(const ADD& cube) const;
     ADD UnivAbstract(const ADD& cube) const;
@@ -380,8 +384,8 @@ public:
     ADD Plus(const ADD& g) const;
     ADD Times(const ADD& g) const;
     ADD Threshold(const ADD& g) const;
-    ADD SetNZ(const ADD& g) const;
     ADD Divide(const ADD& g) const;
+    ADD Modulus(const ADD& g) const;
     ADD Minus(const ADD& g) const;
     ADD Minimum(const ADD& g) const;
     ADD Maximum(const ADD& g) const;
@@ -655,22 +659,6 @@ public:
     bool bddVarIsBound(int) const;
     ADD Walsh(std::vector<ADD> x, std::vector<ADD> y);
     ADD addResidue(int n, int m, int options, int top);
-    int ApaNumberOfDigits(int binaryDigits) const;
-    DdApaNumber NewApaNumber(int digits) const;
-    void ApaCopy(int digits, DdApaNumber source, DdApaNumber dest) const;
-    DdApaDigit ApaAdd(int digits, DdApaNumber a, DdApaNumber b, DdApaNumber
-		      sum) const;
-    DdApaDigit ApaSubtract(int digits, DdApaNumber a, DdApaNumber b,
-			   DdApaNumber diff) const;
-    DdApaDigit ApaShortDivision(int digits, DdApaNumber dividend, DdApaDigit
-				divisor, DdApaNumber quotient) const;
-    void ApaShiftRight(int digits, DdApaDigit in, DdApaNumber a, DdApaNumber
-		       b) const;
-    void ApaSetToLiteral(int digits, DdApaNumber number, DdApaDigit literal)
-      const;
-    void ApaPowerOfTwo(int digits, DdApaNumber number, int power) const;
-    void ApaPrintHex(FILE * fp, int digits, DdApaNumber number) const;
-    void ApaPrintDecimal(FILE * fp, int digits, DdApaNumber number) const;
     void DebugCheck();
     void CheckKeys();
     MtrNode * MakeTreeNode(unsigned int low, unsigned int size, unsigned int type) const;

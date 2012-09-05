@@ -124,10 +124,11 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddApply.c,v 1.19 2012/02/05 01:07:18 
 
   SideEffects [None]
 
-  SeeAlso     [Cudd_addMonadicApply Cudd_addPlus Cudd_addTimes
-  Cudd_addThreshold Cudd_addSetNZ Cudd_addDivide Cudd_addMinus Cudd_addMinimum
-  Cudd_addMaximum Cudd_addOneZeroMaximum Cudd_addDiff Cudd_addAgreement
-  Cudd_addOr Cudd_addNand Cudd_addNor Cudd_addXor Cudd_addXnor]
+  SeeAlso [Cudd_addMonadicApply Cudd_addPlus Cudd_addTimes
+  Cudd_addThreshold Cudd_addSetNZ Cudd_addDivide Cudd_addModulus
+  Cudd_addMinus Cudd_addMinimum Cudd_addMaximum Cudd_addOneZeroMaximum
+  Cudd_addDiff Cudd_addAgreement Cudd_addOr Cudd_addNand Cudd_addNor
+  Cudd_addXor Cudd_addXnor]
 
 ******************************************************************************/
 DdNode *
@@ -150,10 +151,10 @@ Cudd_addApply(
 
 /**Function********************************************************************
 
-  Synopsis    [Integer and floating point addition.]
+  Synopsis    [Integer point addition.]
 
-  Description [Integer and floating point addition. Returns NULL if not
-  a terminal case; f+g otherwise.]
+  Description [Integer addition. Returns NULL if not a terminal case;
+  f + g otherwise.]
 
   SideEffects [None]
 
@@ -174,7 +175,7 @@ Cudd_addPlus(
     if (F == DD_ZERO(dd)) return(G);
     if (G == DD_ZERO(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F)+cuddV(G);
+	value = cuddV(F) + cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
@@ -189,7 +190,7 @@ Cudd_addPlus(
 
 /**Function********************************************************************
 
-  Synopsis    [Integer and floating point multiplication.]
+  Synopsis    [Integer multiplication.]
 
   Description [Integer and floating point multiplication. Returns NULL
   if not a terminal case; f * g otherwise.  This function can be used also
@@ -215,7 +216,7 @@ Cudd_addTimes(
     if (F == DD_ONE(dd)) return(G);
     if (G == DD_ONE(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F)*cuddV(G);
+	value = cuddV(F) * cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
@@ -228,42 +229,42 @@ Cudd_addTimes(
 } /* end of Cudd_addTimes */
 
 
+/* /\**Function******************************************************************** */
+
+/*   Synopsis    [This operator sets f to the value of g wherever g != 0.] */
+
+/*   Description [This operator sets f to the value of g wherever g != 0. */
+/*   Returns NULL if not a terminal case; f op g otherwise.] */
+
+/*   SideEffects [None] */
+
+/*   SeeAlso     [Cudd_addApply] */
+
+/* ******************************************************************************\/ */
+/* DdNode * */
+/* Cudd_addSetNZ( */
+/*   DdManager * dd, */
+/*   DdNode ** f, */
+/*   DdNode ** g) */
+/* { */
+/*     DdNode *F, *G; */
+
+/*     F = *f; G = *g; */
+/*     if (F == G) return(F); */
+/*     if (F == DD_ZERO(dd)) return(G); */
+/*     if (G == DD_ZERO(dd)) return(F); */
+/*     if (cuddIsConstant(G)) return(G); */
+/*     return(NULL); */
+
+/* } /\* end of Cudd_addSetNZ *\/ */
+
+
 /**Function********************************************************************
 
-  Synopsis    [This operator sets f to the value of g wherever g != 0.]
+  Synopsis    [Integer division.]
 
-  Description [This operator sets f to the value of g wherever g != 0.
-  Returns NULL if not a terminal case; f op g otherwise.]
-
-  SideEffects [None]
-
-  SeeAlso     [Cudd_addApply]
-
-******************************************************************************/
-DdNode *
-Cudd_addSetNZ(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
-{
-    DdNode *F, *G;
-
-    F = *f; G = *g;
-    if (F == G) return(F);
-    if (F == DD_ZERO(dd)) return(G);
-    if (G == DD_ZERO(dd)) return(F);
-    if (cuddIsConstant(G)) return(G);
-    return(NULL);
-
-} /* end of Cudd_addSetNZ */
-
-
-/**Function********************************************************************
-
-  Synopsis    [Integer and floating point division.]
-
-  Description [Integer and floating point division. Returns NULL if not
-  a terminal case; f / g otherwise.]
+  Description [Integer division. Returns NULL if not a terminal case;
+  f / g otherwise.]
 
   SideEffects [None]
 
@@ -286,7 +287,7 @@ Cudd_addDivide(
     if (F == DD_ZERO(dd)) return(DD_ZERO(dd));
     if (G == DD_ONE(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F)/cuddV(G);
+	value = cuddV(F) / cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
@@ -297,7 +298,44 @@ Cudd_addDivide(
 
 /**Function********************************************************************
 
-  Synopsis    [Integer and floating point subtraction.]
+  Synopsis    [Integer modulus.]
+
+  Description [Integer modulus. Returns NULL if not a terminal case; f
+  % g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addModulus(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    /* We would like to use F == G -> F/G == 1, but F and G may
+    ** contain zeroes. */
+    if (F == DD_ZERO(dd)) return(DD_ZERO(dd));
+    if (G == DD_ONE(dd)) return(F);
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) % cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    return(NULL);
+
+} /* end of Cudd_addModulus */
+
+
+/**Function********************************************************************
+
+  Synopsis    [Integer subtraction.]
 
   Description [Integer and floating point subtraction. Returns NULL if
   not a terminal case; f - g otherwise.]
@@ -322,7 +360,7 @@ Cudd_addMinus(
     if (F == DD_ZERO(dd)) return(cuddAddNegateRecur(dd,G));
     if (G == DD_ZERO(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F)-cuddV(G);
+	value = cuddV(F) - cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
@@ -333,10 +371,10 @@ Cudd_addMinus(
 
 /**Function********************************************************************
 
-  Synopsis    [Integer and floating point min.]
+  Synopsis    [Integer min.]
 
-  Description [Integer and floating point min for Cudd_addApply.
-  Returns NULL if not a terminal case; min(f,g) otherwise.]
+  Description [Integer min for Cudd_addApply.  Returns NULL if not a
+  terminal case; min(f, g) otherwise.]
 
   SideEffects [None]
 
@@ -372,10 +410,10 @@ Cudd_addMinimum(
 
 /**Function********************************************************************
 
-  Synopsis    [Integer and floating point max.]
+  Synopsis    [Integer max.]
 
-  Description [Integer and floating point max for Cudd_addApply.
-  Returns NULL if not a terminal case; max(f,g) otherwise.]
+  Description [Integer max for Cudd_addApply.  Returns NULL if not a
+  terminal case; max(f, g) otherwise.]
 
   SideEffects [None]
 
@@ -447,8 +485,8 @@ Cudd_addOneZeroMaximum(
 
   Synopsis    [Integer LSHIFT]
 
-  Description [Integer LSHIFT . Returns NULL if not a terminal case;
-  f << g otherwise.]
+  Description [Integer LSHIFT. Returns NULL if not a terminal case; f
+  << g otherwise.]
 
   SideEffects [None]
 
@@ -486,8 +524,8 @@ Cudd_addLShift(
 
   Synopsis    [Integer RSHIFT]
 
-  Description [Integer RSHIFT . Returns NULL if not a terminal case;
-  f << g otherwise.]
+  Description [Integer RSHIFT. Returns NULL if not a terminal case; f
+  << g otherwise.]
 
   SideEffects [None]
 

@@ -107,22 +107,6 @@ extern "C" {
 ** is a synonim for CUDD_MAXINDEX. */
 #define CUDD_CONST_INDEX	CUDD_MAXINDEX
 
-/* These constants define the digits used in the representation of
-** arbitrary precision integers.  The configurations tested use 8, 16,
-** and 32 bits for each digit.  The typedefs should be in agreement
-** with these definitions.
-*/
-#if SIZEOF_LONG == 8
-#define DD_APA_BITS	32
-#define DD_APA_BASE	(1L << DD_APA_BITS)
-#define DD_APA_HEXPRINT	"%08x"
-#else
-#define DD_APA_BITS	16
-#define DD_APA_BASE	(1 << DD_APA_BITS)
-#define DD_APA_HEXPRINT	"%04x"
-#endif
-#define DD_APA_MASK	(DD_APA_BASE - 1)
-
 /*---------------------------------------------------------------------------*/
 /* Stucture declarations                                                     */
 /*---------------------------------------------------------------------------*/
@@ -275,17 +259,6 @@ struct DdNode {
 typedef struct DdManager DdManager;
 
 typedef struct DdGen DdGen;
-
-/* These typedefs for arbitrary precision arithmetic should agree with
-** the corresponding constant definitions above. */
-#if SIZEOF_LONG == 8
-typedef unsigned int DdApaDigit;
-typedef unsigned long int DdApaDoubleDigit;
-#else
-typedef unsigned short int DdApaDigit;
-typedef unsigned int DdApaDoubleDigit;
-#endif
-typedef DdApaDigit * DdApaNumber;
 
 /* Return type for function computing two-literal clauses. */
 typedef struct DdTlcInfo DdTlcInfo;
@@ -764,6 +737,8 @@ extern DdNode * Cudd_addUnivAbstract (DdManager *manager, DdNode *f, DdNode *cub
 extern DdNode * Cudd_addOrAbstract (DdManager *manager, DdNode *f, DdNode *cube);
 extern DdNode * Cudd_addApply (DdManager *dd, DdNode * (*)(DdManager *, DdNode **, DdNode **), DdNode *f, DdNode *g);
 extern DdNode * Cudd_addPlus (DdManager *dd, DdNode **f, DdNode **g);
+extern DdNode * Cudd_addDivide(DdManager *dd, DdNode **f, DdNode **g);
+extern DdNode * Cudd_addModulus(DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addTimes (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addThreshold (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addSetNZ (DdManager *dd, DdNode **f, DdNode **g);
@@ -798,25 +773,6 @@ extern DdNode * Cudd_addWalsh (DdManager *dd, DdNode **x, DdNode **y, int n);
 extern DdNode * Cudd_addResidue (DdManager *dd, int n, int m, int options, int top);
 extern DdNode * Cudd_bddAndAbstract (DdManager *manager, DdNode *f, DdNode *g, DdNode *cube);
 extern DdNode * Cudd_bddAndAbstractLimit (DdManager *manager, DdNode *f, DdNode *g, DdNode *cube, unsigned int limit);
-extern int Cudd_ApaNumberOfDigits (int binaryDigits);
-extern DdApaNumber Cudd_NewApaNumber (int digits);
-extern void Cudd_ApaCopy (int digits, DdApaNumber source, DdApaNumber dest);
-extern DdApaDigit Cudd_ApaAdd (int digits, DdApaNumber a, DdApaNumber b, DdApaNumber sum);
-extern DdApaDigit Cudd_ApaSubtract (int digits, DdApaNumber a, DdApaNumber b, DdApaNumber diff);
-extern DdApaDigit Cudd_ApaShortDivision (int digits, DdApaNumber dividend, DdApaDigit divisor, DdApaNumber quotient);
-extern unsigned int Cudd_ApaIntDivision (int  digits, DdApaNumber dividend, unsigned int  divisor, DdApaNumber  quotient);
-extern void Cudd_ApaShiftRight (int digits, DdApaDigit in, DdApaNumber a, DdApaNumber b);
-extern void Cudd_ApaSetToLiteral (int digits, DdApaNumber number, DdApaDigit literal);
-extern void Cudd_ApaPowerOfTwo (int digits, DdApaNumber number, int power);
-extern int Cudd_ApaCompare (int digitsFirst, DdApaNumber  first, int digitsSecond, DdApaNumber  second);
-extern int Cudd_ApaCompareRatios (int digitsFirst, DdApaNumber firstNum, unsigned int firstDen, int digitsSecond, DdApaNumber secondNum, unsigned int secondDen);
-extern int Cudd_ApaPrintHex (FILE *fp, int digits, DdApaNumber number);
-extern int Cudd_ApaPrintDecimal (FILE *fp, int digits, DdApaNumber number);
-extern int Cudd_ApaPrintExponential (FILE * fp, int  digits, DdApaNumber  number, int precision);
-extern DdApaNumber Cudd_ApaCountMinterm (DdManager *manager, DdNode *node, int nvars, int *digits);
-extern int Cudd_ApaPrintMinterm (FILE *fp, DdManager *dd, DdNode *node, int nvars);
-extern int Cudd_ApaPrintMintermExp (FILE * fp, DdManager * dd, DdNode * node, int  nvars, int precision);
-extern int Cudd_ApaPrintDensity (FILE * fp, DdManager * dd, DdNode * node, int  nvars);
 extern DdNode * Cudd_UnderApprox (DdManager *dd, DdNode *f, int numVars, int threshold, int safe, double quality);
 extern DdNode * Cudd_OverApprox (DdManager *dd, DdNode *f, int numVars, int threshold, int safe, double quality);
 extern DdNode * Cudd_RemapUnderApprox (DdManager *dd, DdNode *f, int numVars, int threshold, double quality);
