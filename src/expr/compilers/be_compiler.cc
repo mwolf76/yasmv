@@ -238,7 +238,7 @@ void BECompiler::walk_mod_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(lhs / rhs);
+    f_add_stack.push_back(lhs % rhs);
 }
 
 bool BECompiler::walk_and_preorder(const Expr_ptr expr)
