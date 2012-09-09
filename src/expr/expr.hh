@@ -58,10 +58,10 @@ typedef enum {
     ITE, COND,
 
     /* leaves */
-    ICONST, UWCONST, SWCONST, IDENT, NIL,
+    FALSE, TRUE, ICONST, UWCONST, SWCONST, IDENT, NIL,
 
     /* postfix exprs */
-    DOT, SUBSCRIPT, RANGE,
+    DOT, SUBSCRIPT, PARAMS, RANGE,
 
     /* set exprs */
     MEMBER, UNION,
@@ -100,11 +100,32 @@ struct Expr_TAG {
         };
     } u;
 
-    // NOTE: there is no chance of getting the wrong ctor called as
-    // any of them has a different number of parameters. (sweet)
+    // accessors
+    inline Atom_ptr atom()
+    { return u.f_atom; }
+
+    inline size_t size()
+    { return u.f_size; }
+    inline value_t value()
+    { return u.f_value; }
+
+    inline Expr_ptr lhs()
+    { return u.f_lhs; }
+    inline Expr_ptr rhs()
+    { return u.f_rhs; }
+
     inline Expr_TAG()
         : f_symb(NIL)
     {}
+
+    // bool consts
+    inline Expr_TAG(ExprType symb)
+        : f_symb(symb)
+    {
+        assert ((symb == FALSE) || (symb == TRUE));
+        u.f_lhs = NULL;
+        u.f_rhs = NULL;
+    }
 
     // identifiers
     inline Expr_TAG(const Atom& atom)
@@ -405,19 +426,31 @@ public:
     { return make_expr(ITE, a, b); }
 
     /* leaves */
-    inline Expr_ptr make_iconst(unsigned long long value)
+    inline Expr_ptr make_false()
+    {
+        Expr tmp(FALSE); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_true()
+    {
+        Expr tmp(TRUE); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_iconst(value_t value)
     {
         Expr tmp(ICONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_uwconst(unsigned short wsize, unsigned long long value)
+    inline Expr_ptr make_uwconst(unsigned short wsize, value_t value)
     {
         Expr tmp(UWCONST, wsize, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_swconst(unsigned short wsize, unsigned long long value)
+    inline Expr_ptr make_swconst(unsigned short wsize, value_t value)
     {
         Expr tmp(SWCONST, wsize, value); // we need a temp store
         return __make_expr(&tmp);
@@ -442,6 +475,9 @@ public:
 
     inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUBSCRIPT, a, b); }
+
+    inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
+    { return make_expr(PARAMS, a, b); }
 
     inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
     { return make_expr(RANGE, a, b);  }
@@ -507,7 +543,7 @@ public:
         bool is_signed = (sign_flag == "s");
         unsigned short wsize = atoi(size_field.c_str());
 
-        unsigned long long value = 0ULL;
+        value_t value = 0ULL;
 
         if (match[1] == "b") {
             if (wsize != wliteral.size())
@@ -587,6 +623,8 @@ protected:
         temporal_expr = make_identifier("temporal");
         integer_expr = make_identifier("integer");
         bool_expr = make_identifier("boolean");
+        false_expr = make_false();
+        true_expr = make_true();
         main_expr = make_identifier("main");
         const_expr = make_identifier("const");
         uword_expr = make_identifier("unsigned word");
@@ -623,8 +661,8 @@ private:
     }
 
     // utils
-    inline unsigned long long pow2(unsigned exp) {
-        unsigned long long res = 1;
+    inline value_t pow2(unsigned exp) {
+        value_t res = 1;
         for (unsigned i = exp; i; -- i) {
             res *= 2;
         }
@@ -635,6 +673,8 @@ private:
     Expr_ptr temporal_expr;
     Expr_ptr integer_expr;
     Expr_ptr bool_expr;
+    Expr_ptr false_expr;
+    Expr_ptr true_expr;
     Expr_ptr const_expr;
     Expr_ptr main_expr;
     Expr_ptr uword_expr;
@@ -712,9 +752,6 @@ typedef unordered_map<FQExpr, IVariable_ptr, fqexpr_hash, fqexpr_eq> Variables;
 class IDefine;
 typedef IDefine* IDefine_ptr;
 typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Defines;
-
-class IAssign;
-// typedef IAssign* IAssign_ptr; assign body can be seen as a define
 typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Assigns;
 
 class IModule;

@@ -72,7 +72,7 @@ void Analyzer::process()
                 IVariable_ptr const var = var_eye->second;
 
                 const Expr_ptr varname = var->expr();
-                const Type_ptr vartype = var->get_type();
+                const Type_ptr vartype = var->type();
 
                 TRACE << "processing var " << varname << ": " << vartype << endl;
 
@@ -138,10 +138,10 @@ void Analyzer::process()
                 Expr_ptr dbody = define.body();
                 Type_ptr dtype = f_inferrer.process(ctx, dbody);
 
-                Type_ptr _type = f_tm.get_type(fqdn); // previously determined type
-                if (_type) {
-                    if (_type != dtype) {
-                        throw BadType(_type->get_repr(),
+                Type_ptr type = f_tm.type(fqdn); // previously determined type
+                if (type) {
+                    if (type != dtype) {
+                        throw BadType(type->get_repr(),
                                       dtype->get_repr(),
                                       dbody);
                     }
@@ -219,10 +219,10 @@ void Analyzer::process()
                 Expr_ptr dbody = define.body();
                 Type_ptr dtype = f_inferrer.process(ctx, dbody);
 
-                Type_ptr _type = f_tm.get_type(fqdn); // previously determined type
-                if (_type) {
-                    if (_type != dtype) {
-                        throw BadType(_type->get_repr(),
+                Type_ptr type = f_tm.type(fqdn); // previously determined type
+                if (type) {
+                    if (type != dtype) {
+                        throw BadType(type->get_repr(),
                                       dtype->get_repr(),
                                       dbody);
                     }

@@ -358,7 +358,13 @@ void Printer::walk_leaf(const Expr_ptr expr)
 {
     ExprType symb = expr->f_symb;
 
-    if (ICONST == symb) {
+    if (FALSE == symb) {
+        f_os << "FALSE";
+    }
+    else if (TRUE == symb) {
+        f_os << "TRUE";
+    }
+    else if (ICONST == symb) {
         f_os << expr->u.f_value;
     }
     else if (UWCONST == symb ||

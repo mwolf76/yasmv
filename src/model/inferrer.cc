@@ -392,7 +392,12 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     // cache miss took care of the stack already
     if (! cache_miss(expr)) return;
 
-    if (symb_type == ICONST) {
+    if ((symb_type == FALSE) ||
+        (symb_type == TRUE)) {
+        tp = f_tm.find_boolean();
+    }
+
+    else if (symb_type == ICONST) {
         tp = f_tm.find_integer();
     }
 
@@ -406,8 +411,11 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 
     else if (symb_type == IDENT) {
         ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
-        tp = symb->get_type();
+
+        assert(symb);
+        tp = symb->type(); // define types are already inferred
     }
+
     else assert(0);
 
     assert(tp);
@@ -420,27 +428,18 @@ ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     Model& model = static_cast <Model&> (*f_mm.get_model());
     ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
 
-    // is this a variable?
-    if (symb->is_variable()) {
+    // is this a constant or variable?
+    if (symb->is_const() ||
+        symb->is_variable()) {
         return symb;
     }
 
     // ... or a define?
     else if (symb->is_define()) {
-
         while (symb->is_define()) {
             Expr_ptr body = symb->as_define().body();
-            if (!f_em.is_identifier(body)) {
-                // throw BadDefine(); // TODO
-            }
             symb = model.fetch_symbol(FQExpr(ctx, body));
         }
-
-        return symb;
-    }
-
-    // .. or a constant?
-    else if (symb->is_const()) {
         return symb;
     }
 

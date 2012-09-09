@@ -348,16 +348,17 @@ void Validator::walk_leaf(const Expr_ptr expr)
 {
     ExprType symb = expr->f_symb;
 
-    if (ICONST == symb) {
+    if (FALSE == symb) {
+    }
+    else if (TRUE == symb) {
+    }
+    else if (ICONST == symb) {
     }
     else if (UWCONST == symb ||
              SWCONST == symb) {
     }
     else if (IDENT == symb) {
     }
-    // else if (symb == LITERAL) {
-    //   f_os << expr->f_atom;
-    // }
 
     else assert(0);
 }
