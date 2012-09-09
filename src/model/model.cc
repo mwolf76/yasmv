@@ -48,12 +48,14 @@ ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
     if (eye == f_modules.end()) throw BadContext(ctx);
     IModule_ptr module = (*eye).second;
 
-    // suggested resolve order: constants, params, defs, vars
-    Variables vars = module->get_localVars();
-    Variables::iterator viter = vars.find(FQExpr(ctx, symb));
-    if (viter != vars.end()) {
-        return (*viter).second;
+    // suggested resolve order: constants, parameters, defines, variables
+    Constants cnts = module->get_localConsts();
+    Constants::iterator citer = cnts.find(symb);
+    if (citer != cnts.end()) {
+        return (*citer).second;
     }
+
+    // not yet implemented: params
 
     Defines defs = module->get_localDefs();
     Defines::iterator diter = defs.find(symb);
@@ -61,10 +63,10 @@ ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
         return (*diter).second;
     }
 
-    Constants cnts = module->get_localConsts();
-    Constants::iterator citer = cnts.find(symb);
-    if (citer != cnts.end()) {
-        return (*citer).second;
+    Variables vars = module->get_localVars();
+    Variables::iterator viter = vars.find(FQExpr(ctx, symb));
+    if (viter != vars.end()) {
+        return (*viter).second;
     }
 
     // if all of the above fail...

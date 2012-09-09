@@ -36,27 +36,28 @@
 // -- primary decls  --------------------------------------------------------------
 class ISymbol : IObject {
 public:
-    virtual const Expr_ptr ctx() const =0;
+    virtual const Expr_ptr ctx()  const =0;
     virtual const Expr_ptr expr() const =0;
+    virtual const Type_ptr type() const =0;
 
-    virtual const Type_ptr get_type() const =0;
+    bool is_const() const;
+    IConstant& as_const() const;
 
     bool is_variable() const;
     IVariable& as_variable() const;
 
     bool is_define() const;
     IDefine& as_define() const;
-
-    bool is_const() const;
-    IConstant& as_const() const;
-};
-
-class IVariable : public ISymbol {
-public:
-    virtual const ADD& encoding() const =0;
 };
 
 class IConstant : public ISymbol {
+public:
+    virtual bool is_false() const =0;
+    virtual bool is_true() const =0;
+    virtual value_t value() const =0;
+};
+
+class IVariable : public ISymbol {
 };
 
 class IDefine : public ISymbol {
@@ -200,7 +201,7 @@ class Variable : public IVariable {
     Expr_ptr f_ctx;
     Expr_ptr f_name;
     Type_ptr f_type;
-    ADD f_encoding;
+
 public:
     Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type)
         : f_ctx(ctx)
@@ -214,10 +215,7 @@ public:
     const Expr_ptr expr() const
     { return f_name; }
 
-    const ADD& encoding() const
-    { return f_encoding; }
-
-    const Type_ptr get_type() const
+    const Type_ptr type() const
     { return f_type; }
 };
 
@@ -263,9 +261,8 @@ public:
     const Expr_ptr body() const
     { return f_body; }
 
-    const Type_ptr get_type() const
-    { return TypeMgr::INSTANCE().get_type(FQExpr(f_ctx, f_name)); }
-
+    const Type_ptr type() const
+    { return TypeMgr::INSTANCE().type(FQExpr(f_ctx, f_name)); }
 };
 
 class Model : public IModel {

@@ -35,20 +35,19 @@
 // Basic Type class. Is.. nothing.
 class Type : public Object {
 public:
-    virtual Expr_ptr get_repr() const
-    { return NULL; }
-
+    virtual Expr_ptr get_repr() const =0;
+    // { return NULL; }
 };
 typedef Type* Type_ptr;
-const static Type nilType; // ??
+// const static Type nilType; // ??
 
 // -- Supported data types: boolean, ranged integers, pure-int enums,
 // .. symbolic enums, mixed enums, words and signed words up to 32 bits
 // .. wide, module instances.
+typedef class BooleanType* BooleanType_ptr;
 class BooleanType : public Type {
     friend class TypeMgr;
     ExprMgr& f_em;
-
     Expr_ptr f_repr;
 
 protected:
@@ -62,6 +61,7 @@ public:
     { return f_repr; }
 };
 
+typedef class Temporalype* TemporalType_ptr;
 class TemporalType : public Type {
     friend class TypeMgr;
     ExprMgr& f_em;
@@ -79,44 +79,69 @@ public:
     { return f_repr; }
 };
 
+typedef class IntegerType* IntegerType_ptr;
 class IntegerType : public Type {
     friend class TypeMgr;
     ExprMgr& f_em;
+    unsigned f_size;
+    bool f_signed;
 
-    IntegerType()
+    IntegerType(unsigned size, bool is_signed=false)
         : f_em(ExprMgr::INSTANCE())
+        , f_size(size)
+        , f_signed(is_signed)
     {}
 
 public:
     Expr_ptr get_repr() const
-    { return f_em.make_integer(); }
+    { return f_em.make_params(f_em.make_integer(), f_em.make_iconst(f_size)); }
+
+    unsigned size() const
+    { return f_size; }
+
+    bool is_signed() const
+    { return f_signed; }
 };
 
+typedef class IntRangeType* IntRangeType_ptr;
 class IntRangeType : public Type {
     friend class TypeMgr;
     ExprMgr& f_em;
 
-    const Expr_ptr f_min;
-    const Expr_ptr f_max;
+    value_t f_min;
+    value_t f_max;
 
     IntRangeType(const Expr_ptr min, const Expr_ptr max)
         : f_em(ExprMgr::INSTANCE())
-        , f_min(min)
-        , f_max(max)
-    {}
+    {
+        ExprType min_symbtype  = min->f_symb;
+        assert (ICONST == min_symbtype ||
+                SWCONST == min_symbtype ||
+                UWCONST == min_symbtype);
+        f_min = min->value();
+
+        ExprType max_symbtype  = max->f_symb;
+        assert (ICONST == max_symbtype ||
+                SWCONST == max_symbtype ||
+                UWCONST == max_symbtype);
+        f_max = max->value();
+    }
 
 public:
-    inline const Expr_ptr get_min() const
+    inline const value_t min() const
     { return f_min; }
 
-    inline const Expr_ptr get_max() const
+    inline const value_t max() const
     { return f_max; }
 
     Expr_ptr get_repr() const
-    { return f_em.make_range(f_min, f_max); }
+    { return f_em.make_range(f_em.make_iconst(f_min), f_em.make_iconst(f_max)); }
+
+    unsigned size() const
+    { assert(0); return -1; } // TODO...
 };
 
-
+typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
     friend class TypeMgr;
     ExprMgr& f_em;
@@ -170,6 +195,7 @@ public:
 
 };
 
+typedef class Instance* Instance_ptr;
 class Instance : public Type {
 public:
     friend class TypeMgr;
@@ -200,7 +226,6 @@ public:
     { assert(!f_module); assert(module); f_module = module; }
 
 };
-typedef Instance* Instance_ptr;
 
 typedef vector<Expr> Literals;
 
@@ -218,7 +243,7 @@ public:
         return (*f_instance);
     }
 
-    inline const Type_ptr get_type(const FQExpr& fqexpr) const
+    inline const Type_ptr type(const FQExpr& fqexpr) const
     {
         TypeMap::const_iterator eye = f_map.find(fqexpr);
         Type_ptr res = NULL;
@@ -345,9 +370,6 @@ protected:
         // register predefined types
         register_type( FQExpr( f_em.make_boolean() ),
                        new BooleanType());
-
-        register_type( FQExpr( f_em.make_integer() ),
-                       new IntegerType());
 
         register_type( FQExpr( f_em.make_temporal() ),
                        new TemporalType());
