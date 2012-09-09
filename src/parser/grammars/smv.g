@@ -662,7 +662,7 @@ constant returns [Expr_ptr res]
     :	k=enum_constant
         { $res = k; }
 
-    |   k=range_constant
+    |   k=range_constant // holds int_constants as well
         { $res = k; }
 
     |   k=word_constant
