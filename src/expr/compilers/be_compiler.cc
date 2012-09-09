@@ -50,7 +50,7 @@ BECompiler::BECompiler()
 BECompiler::~BECompiler()
 { TRACE << "Destroying BECompiler @" << this << endl; }
 
-ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body)
+ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
     DEBUG << "Compiling boolean expression " << ctx << "::" << body << endl;
 
@@ -60,6 +60,7 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body)
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
+    f_time_stack.push_back(time);
 
     // invoke walker on the body of the expr to be processed
     (*this)(body);
@@ -161,14 +162,42 @@ void BECompiler::walk_ER_postorder(const Expr_ptr expr)
 { assert(0); }
 
 bool BECompiler::walk_init_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    f_time_stack.push_back(0);
+    return true;
+}
 void BECompiler::walk_init_postorder(const Expr_ptr expr)
-{ assert(0); }
+{
+    f_time_stack.pop_back(); // reset time stack
+}
 
 bool BECompiler::walk_next_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    step_t curr_time = f_time_stack.back();
+    f_time_stack.push_back(1 + curr_time);
+    return true;
+}
 void BECompiler::walk_next_postorder(const Expr_ptr expr)
-{ assert(0); }
+{
+    f_time_stack.pop_back(); // reset time stack
+}
+
+bool BECompiler::walk_at_preorder(const Expr_ptr expr)
+{ return true; }
+bool BECompiler::walk_at_inorder(const Expr_ptr expr)
+{
+    ADD tmp = f_add_stack.back();
+    assert(Cudd_IsConstant(tmp));
+
+    step_t curr_time = Cudd_V(tmp);
+    f_time_stack.push_back(1 + curr_time);
+
+    return true;
+}
+void BECompiler::walk_at_postorder(const Expr_ptr expr)
+{
+    f_time_stack.pop_back(); // reset time stack
+}
 
 bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

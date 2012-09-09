@@ -24,5 +24,6 @@
 
 /* reserved for numeric and word constant values. */
 typedef long value_t;
+typedef unsigned step_t;
 
 #endif

@@ -167,6 +167,13 @@ bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 void Inferrer::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_fsm_postorder(expr); }
 
+bool Inferrer::walk_at_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_at_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_at_postorder(const Expr_ptr expr)
+{ walk_binary_fsm_postorder(expr); }
+
 bool Inferrer::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_neg_postorder(const Expr_ptr expr)
@@ -493,6 +500,27 @@ void Inferrer::walk_unary_fsm_postorder(const Expr_ptr expr)
     }
 
     f_type_stack.push_back(top); // propagate
+}
+
+// fun: int x boolean -> boolean
+void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
+{
+    { // RHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_boolean(top)) {
+            throw BadType(top->get_repr(), f_em.make_boolean(), expr);
+        }
+
+        f_type_stack.push_back(top); // propagate
+    }
+
+    // TODO: it has to be a const.
+    { // LHS
+        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
+        if (!f_tm.is_integer(top)) {
+            throw BadType(top->get_repr(), f_em.make_integer(), expr);
+        }
+    }
 }
 
 // fun: arithm -> arithm

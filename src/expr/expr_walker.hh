@@ -38,7 +38,7 @@ typedef enum {
     AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,
     EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
 
-    INIT_1, NEXT_1, NOT_1, NEG_1,
+    INIT_1, NEXT_1, AT_1, AT_2, NOT_1, NEG_1,
     PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
     SUB_1, SUB_2,
     MUL_1, MUL_2,
@@ -160,6 +160,11 @@ public:
     virtual bool walk_ER_preorder(const Expr_ptr expr) =0;
     virtual bool walk_ER_inorder(const Expr_ptr expr) =0;
     virtual void walk_ER_postorder(const Expr_ptr expr) =0;
+
+    // binary temporal ops
+    virtual bool walk_at_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_at_inorder(const Expr_ptr expr) =0;
+    virtual void walk_at_postorder(const Expr_ptr expr) =0;
 
     // unary temporal ops
     virtual bool walk_init_preorder(const Expr_ptr expr) =0;

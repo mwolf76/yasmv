@@ -30,6 +30,7 @@
 // interface limitations. (i.e. absence of clear())
 typedef vector<ADD> ADDStack;
 typedef vector<Expr_ptr> ExprStack;
+typedef vector<step_t> TimeStack;
 
 typedef unordered_map<FQExpr, ADD, fqexpr_hash, fqexpr_eq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
@@ -44,7 +45,7 @@ public:
     ~BECompiler();
 
     // toplevel
-    ADD process(Expr_ptr ctx, Expr_ptr body);
+    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
     void pre_hook();
@@ -91,6 +92,9 @@ protected:
     void walk_init_postorder(const Expr_ptr expr);
     bool walk_next_preorder(const Expr_ptr expr);
     void walk_next_postorder(const Expr_ptr expr);
+    bool walk_at_preorder(const Expr_ptr expr);
+    bool walk_at_inorder(const Expr_ptr expr);
+    void walk_at_postorder(const Expr_ptr expr);
     bool walk_neg_preorder(const Expr_ptr expr);
     void walk_neg_postorder(const Expr_ptr expr);
     bool walk_not_preorder(const Expr_ptr expr);
@@ -180,6 +184,7 @@ private:
 
     ADDStack f_add_stack;
     ExprStack f_ctx_stack;
+    TimeStack f_time_stack;
 
     // managers
     ModelMgr& f_mm;
@@ -189,7 +194,7 @@ private:
     // services
     inline bool cache_miss(const Expr_ptr expr)
     {
-        FQExpr key(f_ctx_stack.back(), expr);
+        FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
         ADDMap::iterator eye = f_map.find(key);
 
         if (eye != f_map.end()) {

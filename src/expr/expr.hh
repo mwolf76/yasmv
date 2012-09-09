@@ -37,7 +37,7 @@ typedef enum {
     AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
 
     /* temporal ops */
-    INIT, NEXT,
+    INIT, NEXT, AT,
 
     /* arithmetical operators */
     NEG, PLUS, SUB, DIV, MUL, MOD,
@@ -324,6 +324,9 @@ public:
 
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
+
+    inline Expr_ptr make_at(time_t time, Expr_ptr expr)
+    { return make_expr(AT, make_iconst(time), expr); }
 
     /* word-related and casts */
     inline Expr_ptr make_concat(Expr_ptr a, Expr_ptr b)
@@ -688,21 +691,25 @@ private:
 class FQExpr {
     Expr_ptr f_ctx;
     Expr_ptr f_expr;
+    unsigned f_time;
 
 public:
-    FQExpr(Expr_ptr ctx, Expr_ptr expr)
+    FQExpr(Expr_ptr ctx, Expr_ptr expr, unsigned time = 0)
         : f_ctx(ctx)
         , f_expr(expr)
+        , f_time(time)
     {}
 
-    FQExpr(Expr_ptr expr)
+    FQExpr(Expr_ptr expr, unsigned time = 0)
     : f_ctx(ExprMgr::INSTANCE().make_main()) // default ctx
     , f_expr(expr)
+    , f_time(time)
     {}
 
-    FQExpr(const FQExpr& fqexpr)
+    FQExpr(const FQExpr& fqexpr, unsigned time = 0)
     : f_ctx(fqexpr.ctx())
     , f_expr(fqexpr.expr())
+    , f_time(time)
     {}
 
     inline const Expr_ptr& ctx() const
@@ -711,10 +718,15 @@ public:
     inline const Expr_ptr& expr() const
     { return f_expr; }
 
+    inline unsigned time() const
+    { return f_time; }
+
     inline bool operator==(const FQExpr& other) const
     {
-        return this->f_ctx == other.ctx() &&
-            this->f_expr == other.expr();
+        return
+            this->f_ctx == other.ctx() &&
+            this->f_expr == other.expr() &&
+            this->f_time == other.time();
     }
 
     // TODO: hash func

@@ -85,6 +85,9 @@ protected:
     void walk_init_postorder(const Expr_ptr expr);
     bool walk_next_preorder(const Expr_ptr expr);
     void walk_next_postorder(const Expr_ptr expr);
+    bool walk_at_preorder(const Expr_ptr expr);
+    bool walk_at_inorder(const Expr_ptr expr);
+    void walk_at_postorder(const Expr_ptr expr);
     bool walk_neg_preorder(const Expr_ptr expr);
     void walk_neg_postorder(const Expr_ptr expr);
     bool walk_not_preorder(const Expr_ptr expr);
