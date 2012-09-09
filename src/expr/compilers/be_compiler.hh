@@ -24,6 +24,7 @@
 #define BE_COMPILER_H
 #include <expr_walker.hh>
 #include <model.hh>
+#include <encoder.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
@@ -32,6 +33,9 @@ typedef vector<Expr_ptr> ExprStack;
 
 typedef unordered_map<FQExpr, ADD, fqexpr_hash, fqexpr_eq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
+
+typedef unordered_map<ISymbol_ptr, IEncoding_ptr, PtrHash, PtrEq> ENCMap;
+typedef pair<ENCMap::iterator, bool> ENCHit;
 
 class BECompiler : public Walker {
 
@@ -171,7 +175,8 @@ protected:
     void walk_leaf(const Expr_ptr expr);
 
 private:
-    ADDMap f_map; // cache
+    ADDMap f_map; // expr -> add cache
+    ENCMap f_encodings; // symb -> add cache
 
     ADDStack f_add_stack;
     ExprStack f_ctx_stack;
@@ -179,7 +184,7 @@ private:
     // managers
     ModelMgr& f_mm;
     ExprMgr& f_em;
-    Cudd& f_cudd;
+    EncodingMgr& f_enc;
 
     // services
     inline bool cache_miss(const Expr_ptr expr)
@@ -196,7 +201,11 @@ private:
         return true;
     }
 
-    ISymbol_ptr resolve(const Expr_ptr ctx, const Expr_ptr frag);
+    inline void register_encoding(const ISymbol_ptr symb, IEncoding_ptr enc)
+    {
+        f_encodings [ symb ] = enc;
+    }
+
 };
 
 #endif
