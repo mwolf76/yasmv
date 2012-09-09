@@ -52,7 +52,9 @@ BECompiler::~BECompiler()
 
 ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
-    DEBUG << "Compiling boolean expression " << ctx << "::" << body << endl;
+    DEBUG << "Compiling boolean expression (time = " << time
+          << ") " << ctx << "::" << body
+          << endl;
 
     // remove previous results
     f_add_stack.clear();
@@ -189,6 +191,7 @@ bool BECompiler::walk_at_inorder(const Expr_ptr expr)
     ADD tmp = f_add_stack.back();
     assert(Cudd_IsConstant(tmp));
 
+    /* watch out, this can be dangerous */
     step_t curr_time = Cudd_V(tmp);
     f_time_stack.push_back(1 + curr_time);
 
