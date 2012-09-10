@@ -27,6 +27,7 @@
 
 SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
+  // , f_compiler()
 {
   TRACE << "Creating SATBMCFalsification algorithm instance "
         << get_param("alg_name") << " @" << this
@@ -40,7 +41,26 @@ SATBMCFalsification::~SATBMCFalsification()
         << endl;
 }
 
-void SATBMCFalsification::operator()()
+void SATBMCFalsification::process()
 {
-  assert(0);
 }
+
+//     // const Modules& modules = model.modules();
+//     // for (step_t i = 0; i < 10; ++ i) {
+//     //     for (Modules::iterator module = modules.begin();
+//     //          module != modules.end(); ++ module) {
+
+//     //         ExprVector& init = module->init();
+//     //         for (ExprVector::iterator expr = init.begin();
+//     //              expr != init.end(); ++ expr) {
+
+//     //             ADD add = f_compiler.process(*expr, 0);
+//     //             f_sat.inject(add);
+//     //         }
+//     //     }
+
+//     //     // invar, ... unrolling, blah blah blah
+//     //     f_sat.process();
+
+//     //    }
+// }

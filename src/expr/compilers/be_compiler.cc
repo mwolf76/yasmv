@@ -526,7 +526,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     if (! cache_miss(expr)) return;
 
     // symb resolution
-    Model& model = static_cast <Model&> (*f_mm.get_model());
+    Model& model = static_cast <Model&> (*f_mm.model());
     ISymbol_ptr symb = model.fetch_symbol(FQExpr(f_ctx_stack.back(), expr));
 
     // 0. bool/integer constant leaves

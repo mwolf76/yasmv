@@ -52,7 +52,7 @@ scope {
 }
 
 @init {
-    $smv::model = mm.get_model();
+    $smv::model = mm.model();
     $smv::mode = PROP_EXPR;
 }
     : modules ';'?

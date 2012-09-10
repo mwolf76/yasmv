@@ -432,7 +432,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 // one step of resolution returns a const or variable
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    Model& model = static_cast <Model&> (*f_mm.get_model());
+    Model& model = static_cast <Model&> (*f_mm.model());
     ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
 
     // is this a constant or variable?

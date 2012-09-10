@@ -114,8 +114,8 @@ int main(int argc, const char *argv[])
 
         Printer prn(cout);
 
-        IModel_ptr M = ModelMgr::INSTANCE().get_model();
-        Modules mods = M->get_modules();
+        IModel_ptr M = ModelMgr::INSTANCE().model();
+        Modules mods = M->modules();
 
         Analyzer analyzer;
         analyzer.process();
@@ -126,7 +126,7 @@ int main(int argc, const char *argv[])
         assert(! alg.get_param("incremental").as_boolean());
         // other params...
 
-        alg(); // TODO support for multiprocessing sync, etc...
+        // alg(); // TODO support for multiprocessing sync, etc...
         if (alg.has_witness()) {
             // const Traces& t = alg.get_traces();
 

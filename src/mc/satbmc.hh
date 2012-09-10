@@ -35,7 +35,16 @@ public:
     SATBMCFalsification(IModel& model);
     ~SATBMCFalsification();
 
-    void operator()();
+    void process();
+
+private:
+    // // be compiler
+    // BECompiler f_compiler;
+
+    // // inteface to SAT solver (= Minisat + extensions: add2cnf, model, proof, itp... )
+    // SATInterface f_sat;
 };
+
+
 
 #endif

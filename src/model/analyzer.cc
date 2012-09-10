@@ -43,10 +43,10 @@ Analyzer::~Analyzer()
 
 void Analyzer::process()
 {
-    Model& model = dynamic_cast <Model&> (*f_mm.get_model());
+    Model& model = dynamic_cast <Model&> (*f_mm.model());
 
     try {
-        const Modules& modules = model.get_modules();
+        const Modules& modules = model.modules();
 
         TRACE << "-- first pass (binding)" << endl;
         // (binding) For each module m in M, A goes deep in the module
@@ -149,7 +149,7 @@ void Analyzer::process()
             } // for defines
 
             // type inference: FSM
-            const ExprVector init = module.get_init();
+            const ExprVector init = module.init();
             for (ExprVector::const_iterator init_eye = init.begin();
                  init_eye != init.end(); init_eye ++) {
 
@@ -162,7 +162,7 @@ void Analyzer::process()
                                   tp->get_repr(), body);
             } // for init
 
-            const ExprVector invar = module.get_invar();
+            const ExprVector invar = module.invar();
             for (ExprVector::const_iterator invar_eye = invar.begin();
                  invar_eye != invar.end(); invar_eye ++) {
 
@@ -176,7 +176,7 @@ void Analyzer::process()
                 }
             } // for invar
 
-            const ExprVector trans = module.get_trans();
+            const ExprVector trans = module.trans();
             for (ExprVector::const_iterator trans_eye = trans.begin();
                  trans_eye != trans.end(); trans_eye ++) {
 
@@ -190,7 +190,7 @@ void Analyzer::process()
                 }
             } // for trans
 
-            const ExprVector fair = module.get_fairness();
+            const ExprVector fair = module.fairness();
             for (ExprVector::const_iterator fair_eye = fair.begin();
                  fair_eye != fair.end(); fair_eye ++) {
 
@@ -229,7 +229,7 @@ void Analyzer::process()
                 } else f_tm.set_type(fqdn, dtype);
             } // for assign
 
-            const ExprVector ltlspecs = module.get_ltlspecs();
+            const ExprVector ltlspecs = module.ltlspecs();
             for (ExprVector::const_iterator ltl_eye = ltlspecs.begin();
                  ltl_eye != ltlspecs.end(); ltl_eye ++) {
 
@@ -242,7 +242,7 @@ void Analyzer::process()
                 }
             } // for ltlspecs
 
-            const ExprVector ctlspecs = module.get_ctlspecs();
+            const ExprVector ctlspecs = module.ctlspecs();
             for (ExprVector::const_iterator ctl_eye = ctlspecs.begin();
                  ctl_eye != ctlspecs.end(); ctl_eye ++) {
 

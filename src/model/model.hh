@@ -88,23 +88,23 @@ public:
     virtual const Assigns& get_assign() const =0;
     virtual void add_assign(Expr_ptr expr, IDefine_ptr assgn) =0;
 
-    virtual const ExprVector& get_init() const =0;
+    virtual const ExprVector& init() const =0;
     virtual void add_init(Expr_ptr expr) =0;
 
-    virtual const ExprVector& get_invar() const =0;
+    virtual const ExprVector& invar() const =0;
     virtual void add_invar(Expr_ptr expr) =0;
 
-    virtual const ExprVector& get_trans() const =0;
+    virtual const ExprVector& trans() const =0;
     virtual void add_trans(Expr_ptr expr) =0;
 
-    virtual const ExprVector& get_fairness() const =0;
+    virtual const ExprVector& fairness() const =0;
     virtual void add_fairness(Expr_ptr expr) =0;
 
     // properties management
-    virtual const ExprVector& get_ltlspecs() const =0;
+    virtual const ExprVector& ltlspecs() const =0;
     virtual void add_ltlspec(Expr_ptr formula) =0;
 
-    virtual const ExprVector& get_ctlspecs() const =0;
+    virtual const ExprVector& ctlspecs() const =0;
     virtual void add_ctlspec(Expr_ptr formula) =0;
 };
 
@@ -113,7 +113,7 @@ public:
     virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
     virtual IModule& get_module(Expr_ptr name) =0;
 
-    virtual const Modules& get_modules() const =0;
+    virtual const Modules& modules() const =0;
 };
 
 typedef IModel* IModel_ptr;
@@ -137,7 +137,6 @@ class Module : public IModule {
     ExprVector f_ctlspecs;
 
 public:
-
     Module(const Expr_ptr name);
 
     inline const Expr_ptr expr() const
@@ -171,27 +170,27 @@ public:
     { return f_assgn; }
 
     void add_init(Expr_ptr expr);
-    const ExprVector& get_init() const
+    const ExprVector& init() const
     { return f_init; }
 
     void add_invar(Expr_ptr expr);
-    const ExprVector& get_invar() const
+    const ExprVector& invar() const
     { return f_invar; }
 
     void add_trans(Expr_ptr expr);
-    const ExprVector& get_trans() const
+    const ExprVector& trans() const
     { return f_trans; }
 
     void add_fairness(Expr_ptr expr);
-    const ExprVector& get_fairness() const
+    const ExprVector& fairness() const
     { return f_fair; }
 
     void add_ltlspec(Expr_ptr formula);
-    const ExprVector& get_ltlspecs() const
+    const ExprVector& ltlspecs() const
     { return f_ltlspecs; }
 
     void add_ctlspec(Expr_ptr formula);
-    const ExprVector& get_ctlspecs() const
+    const ExprVector& ctlspecs() const
     { return f_ctlspecs; }
 };
 
@@ -273,7 +272,7 @@ public:
         : f_modules()
     { TRACE << "Initialized Model instance @" << this << endl; }
 
-    const Modules& get_modules() const
+    const Modules& modules() const
     { return f_modules; }
 
     void add_module(Expr_ptr name, IModule_ptr module);
@@ -302,7 +301,7 @@ public:
         return (*f_instance);
     }
 
-    inline IModel_ptr get_model()
+    inline IModel_ptr model()
     { return &f_model; }
 
 protected:

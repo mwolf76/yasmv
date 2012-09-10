@@ -39,7 +39,7 @@ public:
   virtual ~MCAlgorithm();
 
   // actual algorithm
-  virtual void operator()() =0;
+  virtual void process() =0;
 
   // Trace iface
   inline bool has_witness() const
