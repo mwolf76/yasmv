@@ -34,10 +34,14 @@
 #include <Vec.hh>
 
 #include "proof.hh"
-#include "terms.hh"
+#include "terms/terms.hh"
 
 namespace Minisat {
 
+    template<class Term>
+    class SAT;
+
+    // move me!
     template<class K>
     struct ptr_hasher  {
         uint32_t operator()(const K& k) const {
@@ -48,14 +52,11 @@ namespace Minisat {
     template <class Term>
     class Interpolator {
 
-        // Minisat instance
-        Solver& f_owner;
-
-        // The term factory used to build the interpolant formula
-        TermFactory<Term> &f_factory;
+        // owner instance
+        SAT<Term>& f_owner;
 
     public:
-        Interpolator(Solver& owner, TermFactory<Term> &factory);
+        Interpolator(SAT<Term>& owner);
         ~Interpolator();
 
         // [MP] uses the Term Factory to build the interpolant. Input

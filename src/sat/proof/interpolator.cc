@@ -1,6 +1,6 @@
 /**
- *  @file addterms.hh
- *  @brief Generic addterms support
+ *  @file interpolator.hh
+ *  @brief Craig interpolation implementation
  *
  *  This module contains the definitions for Craig
  *  interpolation-related interfaces and classes.
@@ -33,11 +33,9 @@
 namespace Minisat {
 
     template <class Term>
-    Interpolator<Term>::Interpolator(Solver& owner, TermFactory <Term> &factory)
+    Interpolator<Term>::Interpolator(SAT<Term>& owner)
         : f_owner(owner)
-        , f_factory(factory)
     {
-        // Logger::get().set_output_level(0);
     }
 
     template <class Term>
@@ -111,6 +109,7 @@ namespace Minisat {
         ProofManager& pm = *(f_owner.pm);
         ClauseAllocator& ca = f_owner.ca;
         InferenceRule& unsat_proof = pm.proof();
+        TermFactory<Term> f_factory = f_owner.factory();
 
         // internal cache for memoizing
         R2T_Map r2t;
