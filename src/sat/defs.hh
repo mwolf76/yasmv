@@ -70,6 +70,9 @@ namespace Minisat {
 
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;
+
+    template <class Term>
+    class SAT;
 };
 
 #endif

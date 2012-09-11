@@ -1,15 +1,15 @@
 /**
- *  @file cnf.hh
- *  @brief CNF clauses generation and injection
+ *  @file bdd_model.hh
+ *  @brief SAT model extraction
  *
- *  This module contains the interface for services that implement an
- *  CNF clauses generation in a form that is suitable for direct
- *  injection into the SAT solver.
+ *  This module contains the definitions for SAT
+ *  model extraction.
  *
+ *  Authors: Marco Pensallorto
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
+ *  modify it under the addterms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
  *
@@ -23,18 +23,24 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CNFIZER_H
-#define CNFIZER_H
+#ifndef BDD_MODEL_H_INCLUDED
+#define BDD_MODEL_H_INCLUDED
+
+// TODO: move this to build system
+#define MODEL_DEBUG
 #include "defs.hh"
+#include <sat/model/model.hh>
+#include <cuddObj.hh>
 
 namespace Minisat {
 
-    template <class Term>
-    class CNFizer {
+    class BDDModelExtractor : public ModelExtractor<BDD> {
     public:
-        virtual void push(Term phi, const Group& group, const Color& color) =0;
+        BDDModelExtractor(SAT<BDD>& owner);
+        ~BDDModelExtractor();
+
     };
 
 }
 
-#endif
+#endif // MODEL_H_INCLUDED

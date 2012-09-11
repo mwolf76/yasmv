@@ -33,20 +33,6 @@
 namespace Minisat {
 
     template <class Term>
-    Interpolator<Term>::Interpolator(SAT<Term>& owner)
-        : f_owner(owner)
-    {
-    }
-
-    template <class Term>
-    Interpolator<Term>::~Interpolator()
-    {
-        // Cache elements needs no cleanup here because allocated memory
-        // belongs to the term factory, thus it is its own responsibility
-        // to free it.
-    }
-
-    template <class Term>
     void Interpolator<Term>::init_interpolation(int* groups_of_a, unsigned n)
     {
         // local accessors

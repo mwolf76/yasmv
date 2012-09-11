@@ -56,68 +56,6 @@ namespace Minisat {
         virtual Term interpolate(Colors& a); // only if status() == UNSAT
     };
 
-    class BDDSAT : public SAT<BDD> {
-    public:
-        virtual Group& new_group();
-        virtual Groups& groups();
-
-        virtual Color& new_color();
-        virtual Colors& colors();
-
-        virtual void push(BDD phi,
-                          Group& group = MAINGROUP,
-                          Color& color = BACKGROUND) =0;
-
-        virtual void solve();
-        virtual void solve(const Groups& groups);
-        virtual status_t status();
-
-        virtual BDD model(); // only if status() == SAT
-        virtual BDD interpolate(const Colors& a); // only if status() == UNSAT
-
-        BDDSAT(BDDTermFactory& factory);
-
-    protected:
-        inline BDDTermFactory& factory() const
-        { return f_factory; }
-
-        friend class CNFizer<BDD>;
-        inline const CNFizer<BDD>& cnf() const
-        { return f_cnfizer; }
-
-        friend class Interpolator<BDD>;
-        inline const Interpolator<BDD>& interpolator() const
-        { return f_interpolator; }
-
-        friend class ModelExtractor<BDD>;
-        inline const ModelExtractor<BDD>& model_extractor() const
-        { return f_model_extractor; }
-
-    private:
-        Groups f_groups;
-        id_t f_next_group;
-
-        Colors f_colors;
-        id_t f_next_color;
-
-        // -- sub-components -------------------------------------------------------
-
-        // the glorious Minisat SAT solver
-        Solver f_solver;
-
-        // The term factory used to build the interpolant formula
-        BDDTermFactory &f_factory;
-
-        // Conversion to CNF using BDD (cfr. Cabodi et al...) ADD ref
-        CNFizer<BDD> f_cnfizer;
-
-        // Interpolator component (cfr. McMillan et al... ) ADD ref
-        Interpolator<BDD> f_interpolator;
-
-        // Model extractor
-        ModelExtractor<BDD> f_model_extractor;
-    };
-
 };
 
 #endif

@@ -1,5 +1,5 @@
 /**
- *  @file cnf.hh
+ *  @file bdd_cnf.hh
  *  @brief CNF clauses generation and injection
  *
  *  This module contains the interface for services that implement an
@@ -23,18 +23,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CNFIZER_H
-#define CNFIZER_H
-#include "defs.hh"
+#ifndef BDD_CNFIZER_H
+#define BDD_CNFIZER_H
+#include "cnf.hh"
+#include "terms/bdd_terms.hh" // imports cuddObj.hh
 
 namespace Minisat {
 
-    template <class Term>
-    class CNFizer {
+    class BDDCNFizer : public CNFizer<BDD> {
     public:
-        virtual void push(Term phi, const Group& group, const Color& color) =0;
-    };
+        virtual void push(BDD phi, const Group& group, const Color& color);
 
+    // protected:
+        BDDCNFizer(SAT<BDD>& owner);
+        ~BDDCNFizer();
+
+    private:
+        // owner instance
+        SAT<BDD>& f_owner;
+    };
 }
 
 #endif

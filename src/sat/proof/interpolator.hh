@@ -35,6 +35,7 @@
 
 #include "proof.hh"
 #include "terms/terms.hh"
+#include "defs.hh"
 
 namespace Minisat {
 
@@ -52,19 +53,16 @@ namespace Minisat {
     template <class Term>
     class Interpolator {
 
-        // owner instance
-        SAT<Term>& f_owner;
-
     public:
-        Interpolator(SAT<Term>& owner);
-        ~Interpolator();
+        Interpolator(SAT<Term>& owner)
+            : f_owner(owner)
+        {}
 
         // [MP] uses the Term Factory to build the interpolant. Input
         // unsat proof comes from the associated solver's Proof Manager.
         Term interpolant(int *groups_of_a, unsigned na);
 
-    private:
-
+    protected:
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
         typedef Map< InferenceRule* , Term, InferenceRuleHasher> R2T_Map;
 
@@ -74,6 +72,9 @@ namespace Minisat {
         // The set of variables belonging to A
         Set<Var> a_variables;
         Set<Var> b_variables;
+
+        // owner instance
+        SAT<Term>& f_owner;
 
         void init_interpolation(int* groups_of_a, unsigned n);
 

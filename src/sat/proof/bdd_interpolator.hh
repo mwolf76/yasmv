@@ -1,15 +1,15 @@
 /**
- *  @file cnf.hh
- *  @brief CNF clauses generation and injection
+ *  @file interpolator.hh
+ *  @brief Craig interpolation
  *
- *  This module contains the interface for services that implement an
- *  CNF clauses generation in a form that is suitable for direct
- *  injection into the SAT solver.
+ *  This module contains the definitions for Craig
+ *  interpolation-related interfaces and classes.
  *
+ *  Authors: Alberto Griggio, Marco Pensallorto
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
+ *  modify it under the addterms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
  *
@@ -23,18 +23,21 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CNFIZER_H
-#define CNFIZER_H
-#include "defs.hh"
+#ifndef BDD_INTERPOLATOR_H_INCLUDED
+#define BDD_INTERPOLATOR_H_INCLUDED
+
+#include "proof/interpolator.hh"
+#include "terms/bdd_terms.hh" // imports cuddObj.hh
 
 namespace Minisat {
 
-    template <class Term>
-    class CNFizer {
+    class BDDInterpolator : public Interpolator<BDD>
+    {
     public:
-        virtual void push(Term phi, const Group& group, const Color& color) =0;
+        BDDInterpolator(SAT<BDD>& owner);
+        ~BDDInterpolator();
     };
 
 }
 
-#endif
+#endif // BDD_INTERPOLATOR_H_INCLUDED

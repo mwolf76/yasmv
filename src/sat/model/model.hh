@@ -33,9 +33,6 @@
 namespace Minisat {
 
     template <class Term>
-    class SAT;
-
-    template <class Term>
     class ModelExtractor {
 
         // owner instance
