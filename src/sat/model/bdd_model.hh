@@ -25,20 +25,17 @@
  **/
 #ifndef BDD_MODEL_H_INCLUDED
 #define BDD_MODEL_H_INCLUDED
-
-// TODO: move this to build system
-#define MODEL_DEBUG
-#include "defs.hh"
-#include <sat/model/model.hh>
-#include <cuddObj.hh>
+#include "sat.hh"
 
 namespace Minisat {
 
+    class BDDSAT;
     class BDDModelExtractor : public ModelExtractor<BDD> {
     public:
-        BDDModelExtractor(SAT<BDD>& owner);
-        ~BDDModelExtractor();
+        virtual BDD model();
 
+        BDDModelExtractor(BDDSAT& owner);
+        ~BDDModelExtractor();
     };
 
 }

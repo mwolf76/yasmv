@@ -24,15 +24,18 @@
  *
  **/
 #include "bdd_sat.hh"
+#include "cnf/bdd_cnf.hh"
+#include "proof/bdd_interpolator.hh"
+#include "model/bdd_model.hh"
 
 namespace Minisat {
 
     BDDSAT::BDDSAT(BDDTermFactory& factory)
         : f_solver()
-        , f_factory(factory)
-        , f_cnfizer(*this)
-        , f_interpolator(*this)
-        , f_model_extractor(*this)
+        , f_factory(&factory)
+        , f_cnfizer(new BDDCNFizer(*this))
+        , f_interpolator(new BDDInterpolator((*this)))
+        , f_model_extractor(new BDDModelExtractor(*this))
         , f_next_group(0)
         , f_next_color(0)
     {}
@@ -61,7 +64,7 @@ namespace Minisat {
 
     void BDDSAT::push(BDD phi, Group& group, Color& color)
     {
-        f_cnfizer.push(phi, group, color);
+        f_cnfizer->push(phi, group, color);
     }
 
     void BDDSAT::solve()

@@ -27,15 +27,6 @@
 #include "bdd_cnf.hh"
 namespace Minisat {
 
-    BDDCNFizer::BDDCNFizer(SAT<BDD>& owner)
-        : f_owner(owner)
-    {
-    }
-
-    BDDCNFizer::~BDDCNFizer()
-    {
-    }
-
     void BDDCNFizer::push(BDD phi, const Group& group, const Color& color)
     {
 

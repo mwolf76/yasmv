@@ -33,8 +33,18 @@ namespace Minisat {
     typedef unsigned id_t;
 
     typedef enum {
-        STATUS_SAT, STATUS_UNSAT, STATUS_UNKNOWN,
+        STATUS_SAT,
+        STATUS_UNSAT,
+        STATUS_UNKNOWN,
     } status_t;
+
+    // move me!
+    template<class K>
+    struct ptr_hasher  {
+        uint32_t operator()(const K& k) const {
+            return (uint32_t)(reinterpret_cast<size_t>(k));
+        }
+    };
 
     // formulae groups
     typedef class Group* Group_ptr;
@@ -70,9 +80,6 @@ namespace Minisat {
 
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;
-
-    template <class Term>
-    class SAT;
 };
 
 #endif

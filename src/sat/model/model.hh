@@ -25,24 +25,28 @@
  **/
 #ifndef MODEL_H_INCLUDED
 #define MODEL_H_INCLUDED
-
-// TODO: move this to build system
-#define MODEL_DEBUG
-#include "defs.hh"
+#include "sat.hh"
 
 namespace Minisat {
 
     template <class Term>
     class ModelExtractor {
-
-        // owner instance
-        SAT<Term>& f_owner;
+    protected:
+        SAT<Term>& f_owner; // the SAT instance
 
     public:
-        ModelExtractor(SAT<Term>& owner);
-        ~ModelExtractor();
+        ModelExtractor(SAT<Term>& owner)
+            : f_owner(owner)
+        { TRACE << "Initialized CNFizer instance @" << this << endl; }
 
-    private:
+        virtual ~ModelExtractor() =0;
+
+        /**
+         * @brief Retrieve a model from the SAT instance. Remark:
+         * current status must be STATUS_SAT. An exception will be
+         * raised otherwise.
+         */
+        virtual Term model() =0;
     };
 }
 

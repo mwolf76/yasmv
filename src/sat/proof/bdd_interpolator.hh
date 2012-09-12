@@ -25,16 +25,17 @@
  **/
 #ifndef BDD_INTERPOLATOR_H_INCLUDED
 #define BDD_INTERPOLATOR_H_INCLUDED
-
-#include "proof/interpolator.hh"
-#include "terms/bdd_terms.hh" // imports cuddObj.hh
+#include "sat.hh"
 
 namespace Minisat {
+
+    // the owner instance type (fwd decl)
+    class BDDSAT;
 
     class BDDInterpolator : public Interpolator<BDD>
     {
     public:
-        BDDInterpolator(SAT<BDD>& owner);
+        BDDInterpolator(BDDSAT& owner);
         ~BDDInterpolator();
     };
 

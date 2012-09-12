@@ -25,16 +25,32 @@
  **/
 #ifndef CNFIZER_H
 #define CNFIZER_H
-#include "defs.hh"
-
 namespace Minisat {
 
     template <class Term>
+    class SAT;
+
+    template <class Term>
     class CNFizer {
+    protected:
+        SAT<Term>& f_owner; // the SAT instance
+
     public:
-        virtual void push(Term phi, const Group& group, const Color& color) =0;
+        CNFizer(SAT<Term>& owner)
+            : f_owner(owner)
+        { TRACE << "Initialized CNFizer instance @" << this << endl; }
+
+        virtual ~CNFizer() =0;
+
+        /**
+         * @brief add a formula with a given group and color to the
+         * SAT instance.
+         */
+        virtual void push(Term phi,
+                          const Group& group,
+                          const Color& color) =0;
     };
 
-}
+};
 
 #endif

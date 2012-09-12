@@ -25,22 +25,17 @@
  **/
 #ifndef BDD_CNFIZER_H
 #define BDD_CNFIZER_H
-#include "cnf.hh"
-#include "terms/bdd_terms.hh" // imports cuddObj.hh
+#include "sat.hh"
 
 namespace Minisat {
 
+    class BDDSAT;
     class BDDCNFizer : public CNFizer<BDD> {
     public:
         virtual void push(BDD phi, const Group& group, const Color& color);
 
-    // protected:
-        BDDCNFizer(SAT<BDD>& owner);
+        BDDCNFizer(BDDSAT& owner);
         ~BDDCNFizer();
-
-    private:
-        // owner instance
-        SAT<BDD>& f_owner;
     };
 }
 

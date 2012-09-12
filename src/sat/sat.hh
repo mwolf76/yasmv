@@ -26,12 +26,18 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include "core/Solver.hh"
-#include "terms/bdd_terms.hh" // imports cuddObj.hh
-#include "proof/interpolator.hh"
+// general purpose decls
+#include "satdefs.hh"
+#include "terms/bdd_terms.hh"
+
+// sub-components decls
 #include "cnf/cnf.hh"
+#include "proof/proof.hh"
+#include "proof/interpolator.hh"
 #include "model/model.hh"
-#include "defs.hh"
+
+// the glorious Minisat SAT solver
+#include "core/Solver.hh"
 
 namespace Minisat {
 
@@ -54,6 +60,12 @@ namespace Minisat {
 
         virtual Term model(); // only if status() == SAT
         virtual Term interpolate(Colors& a); // only if status() == UNSAT
+
+        virtual TermFactory<Term>& factory() const =0;
+        virtual CNFizer<Term>& cnf() const =0;
+        virtual Interpolator<Term>& interpolator() const =0;
+        virtual ModelExtractor<Term>& model_extractor() const =0;
+        virtual Solver& solver() const =0;
     };
 
 };

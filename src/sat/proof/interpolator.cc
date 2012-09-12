@@ -30,6 +30,8 @@
 #include <sstream>
 #include <common.hh>
 
+#include <terms/terms.hh>
+
 namespace Minisat {
 
     template <class Term>

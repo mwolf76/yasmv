@@ -23,4 +23,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include "model.hh"
+#include "bdd_model.hh"
+#include "bdd_sat.hh"
+// #include "terms/bdd_terms.hh"
+
+namespace Minisat {
+
+    BDDModelExtractor::BDDModelExtractor(BDDSAT& owner)
+        : ModelExtractor<BDD>(dynamic_cast<SAT<BDD> &>(owner))
+    {}
+
+    BDD BDDModelExtractor::model()
+    {
+        BDDTermFactory& tf = dynamic_cast<BDDTermFactory &> (f_owner.factory());
+        return tf.make_false();
+    }
+
+}

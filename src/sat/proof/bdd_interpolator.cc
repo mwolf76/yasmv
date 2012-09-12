@@ -24,13 +24,17 @@
  *
  **/
 #include "bdd_interpolator.hh"
+#include "bdd_sat.hh"
 
 namespace Minisat {
 
-    BDDInterpolator::BDDInterpolator(SAT<BDD>& owner)
-        : Interpolator<BDD>(owner)
-    {
-    }
+    BDDInterpolator::BDDInterpolator(BDDSAT& owner)
+        : Interpolator<BDD>(dynamic_cast<SAT<BDD> &>(owner))
+    {}
+
+    // BDDInterpolator::BDDInterpolator(SAT<BDD>& owner)
+    //     : Interpolator<BDD>(owner)
+    // { TRACE << "Initialized BDD interpolator instance @" << this << endl; }
 
     BDDInterpolator::~BDDInterpolator()
     {

@@ -30,15 +30,10 @@
 #include "cnf/bdd_cnf.hh"
 #include "proof/bdd_interpolator.hh"
 #include "model/bdd_model.hh"
-#include <cuddObj.hh>
 
 namespace Minisat {
 
     class BDDSAT : public SAT<BDD> {
-        friend class BDDCNFizer;
-        friend class BDDInterpolator;
-        friend class BDDModelExtractor;
-
     public:
         virtual Group& new_group();
         virtual Groups& groups();
@@ -59,19 +54,17 @@ namespace Minisat {
 
         BDDSAT(BDDTermFactory& factory);
 
-    protected:
-        inline BDDTermFactory& factory() const
-        { return f_factory; }
+        BDDTermFactory& factory() const
+        { return *f_factory; }
 
-        inline const BDDCNFizer& cnf() const
-        { return f_cnfizer; }
+        BDDCNFizer& cnf() const
+        { return *f_cnfizer; }
 
-        inline const BDDInterpolator& interpolator() const
-        { return f_interpolator; }
+        BDDInterpolator& interpolator() const
+        { return *f_interpolator; }
 
-
-        inline const BDDModelExtractor model_extractor() const
-        { return f_model_extractor; }
+        BDDModelExtractor& model_extractor() const
+        { return *f_model_extractor; }
 
     private:
         Groups f_groups;
@@ -86,16 +79,16 @@ namespace Minisat {
         Solver f_solver;
 
         // The term factory used to build the interpolant formula
-        BDDTermFactory &f_factory;
+        BDDTermFactory *f_factory;
 
         // Conversion to CNF using BDD (cfr. Cabodi et al...) ADD ref
-        BDDCNFizer f_cnfizer;
+        BDDCNFizer *f_cnfizer;
 
         // Interpolator component (cfr. McMillan et al... ) ADD ref
-        BDDInterpolator f_interpolator;
+        BDDInterpolator *f_interpolator;
 
         // Model extractor
-        BDDModelExtractor f_model_extractor;
+        BDDModelExtractor *f_model_extractor;
     };
 
 };

@@ -32,23 +32,13 @@
 #include <Map.hh>
 #include <Set.hh>
 #include <Vec.hh>
-
-#include "proof.hh"
-#include "terms/terms.hh"
-#include "defs.hh"
+#include "satdefs.hh"
+#include "proof/proof.hh"
 
 namespace Minisat {
 
-    template<class Term>
+    template <class Term>
     class SAT;
-
-    // move me!
-    template<class K>
-    struct ptr_hasher  {
-        uint32_t operator()(const K& k) const {
-            return (uint32_t)(reinterpret_cast<size_t>(k));
-        }
-    };
 
     template <class Term>
     class Interpolator {
@@ -56,7 +46,9 @@ namespace Minisat {
     public:
         Interpolator(SAT<Term>& owner)
             : f_owner(owner)
-        {}
+        { TRACE << "Initialized CNFizer instance @" << this << endl; }
+
+        virtual ~Interpolator() =0;
 
         // [MP] uses the Term Factory to build the interpolant. Input
         // unsat proof comes from the associated solver's Proof Manager.
