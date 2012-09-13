@@ -24,6 +24,9 @@
  *
  **/
 #include <satbmc.hh>
+#include <sat.hh>
+
+using namespace Minisat;
 
 SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
@@ -43,6 +46,14 @@ SATBMCFalsification::~SATBMCFalsification()
 
 void SATBMCFalsification::process()
 {
+    BDDTermFactory tf(* new Cudd());
+    SAT<BDD> *engine = new SAT<BDD> (tf);
+
+    Colors colors;
+    BDD a = engine->interpolant(colors);
+    BDD b = engine->model();
+
+    delete engine;
 }
 
 //     // const Modules& modules = model.modules();

@@ -28,7 +28,6 @@
 #define BMC_FALSIFICATION_ALGORITHM_H
 
 #include <mc.hh>
-
 class SATBMCFalsification : public MCAlgorithm {
 
 public:
