@@ -31,7 +31,7 @@
 namespace Minisat {
 
     BDDSAT::BDDSAT(BDDTermFactory& factory)
-        : f_solver()
+        : f_solver(new Solver())
         , f_factory(&factory)
         , f_cnfizer(new BDDCNFizer(*this))
         , f_interpolator(new BDDInterpolator((*this)))
@@ -69,22 +69,31 @@ namespace Minisat {
 
     void BDDSAT::solve()
     {
+        f_solver->solve();
+        f_status = STATUS_SAT;
     }
 
     void BDDSAT::solve(const Groups& groups)
     {
+        f_solver->solve();
+        f_status = STATUS_SAT;
     }
 
     status_t BDDSAT::status()
     {
+        return f_status;
     }
 
     BDD BDDSAT::model()
     {
+        return f_model_extractor->model();
     }
 
     BDD BDDSAT::interpolate(const Colors& a)
     {
+        return f_interpolator->interpolant(NULL, 0);
     }
+
+
 
 };

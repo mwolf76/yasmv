@@ -39,7 +39,8 @@ namespace Minisat {
             : f_owner(owner)
         { TRACE << "Initialized CNFizer instance @" << this << endl; }
 
-        virtual ~ModelExtractor() =0;
+        virtual ~ModelExtractor()
+        {}
 
         /**
          * @brief Retrieve a model from the SAT instance. Remark:

@@ -43,7 +43,7 @@ namespace Minisat {
 
         virtual void push(BDD phi,
                           Group& group = MAINGROUP,
-                          Color& color = BACKGROUND) =0;
+                          Color& color = BACKGROUND);
 
         virtual void solve();
         virtual void solve(const Groups& groups);
@@ -66,6 +66,9 @@ namespace Minisat {
         BDDModelExtractor& model_extractor() const
         { return *f_model_extractor; }
 
+        Solver& solver() const
+        { return *f_solver; }
+
     private:
         Groups f_groups;
         id_t f_next_group;
@@ -73,10 +76,12 @@ namespace Minisat {
         Colors f_colors;
         id_t f_next_color;
 
+        status_t f_status;
+
         // -- sub-components -------------------------------------------------------
 
         // the glorious Minisat SAT solver
-        Solver f_solver;
+        Solver *f_solver;
 
         // The term factory used to build the interpolant formula
         BDDTermFactory *f_factory;

@@ -25,7 +25,16 @@
  *
  **/
 #include "bdd_cnf.hh"
+#include "bdd_sat.hh"
+
 namespace Minisat {
+
+    BDDCNFizer::BDDCNFizer(BDDSAT& owner)
+        : CNFizer<BDD>(dynamic_cast<SAT<BDD> &>(owner))
+    {}
+
+    BDDCNFizer::~BDDCNFizer()
+    {}
 
     void BDDCNFizer::push(BDD phi, const Group& group, const Color& color)
     {

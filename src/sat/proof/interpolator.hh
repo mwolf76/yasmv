@@ -48,11 +48,9 @@ namespace Minisat {
             : f_owner(owner)
         { TRACE << "Initialized CNFizer instance @" << this << endl; }
 
-        virtual ~Interpolator() =0;
-
         // [MP] uses the Term Factory to build the interpolant. Input
         // unsat proof comes from the associated solver's Proof Manager.
-        Term interpolant(int *groups_of_a, unsigned na);
+        virtual Term interpolant(int *groups_of_a, unsigned na);
 
     protected:
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;

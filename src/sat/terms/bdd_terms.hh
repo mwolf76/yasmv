@@ -40,9 +40,13 @@ namespace Minisat {
         // constants
         virtual BDD make_true()
         { return f_cudd.bddOne(); }
+        virtual bool is_true(BDD t)
+        { return f_cudd.bddIsOne(t); }
 
         virtual BDD make_false()
         { return f_cudd.bddZero(); }
+        virtual BDD is_false(BDD t)
+        { return f_cudd.bddIsZero(t); }
 
         // variables
         virtual BDD make_var(Var v)

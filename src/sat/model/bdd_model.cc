@@ -25,12 +25,14 @@
  **/
 #include "bdd_model.hh"
 #include "bdd_sat.hh"
-// #include "terms/bdd_terms.hh"
 
 namespace Minisat {
 
     BDDModelExtractor::BDDModelExtractor(BDDSAT& owner)
         : ModelExtractor<BDD>(dynamic_cast<SAT<BDD> &>(owner))
+    {}
+
+    BDDModelExtractor::~BDDModelExtractor()
     {}
 
     BDD BDDModelExtractor::model()

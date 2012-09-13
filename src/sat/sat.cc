@@ -1,6 +1,6 @@
 /**
- *  @file cnf.hh
- *  @brief CNF clauses generation and injection
+ *  @file sat.cc
+ *  @brief SAT interface implementation
  *
  *  This module contains the interface for services that implement an
  *  CNF clauses generation in a form that is suitable for direct
@@ -23,10 +23,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CNFIZER_H
-#define CNFIZER_H
+#include "sat.hh"
 namespace Minisat {
 
-};
+    template <class Term>
 
-#endif
+    template <class Term>
+
+    template <class Term>
+
+};

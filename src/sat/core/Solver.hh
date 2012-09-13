@@ -56,6 +56,13 @@ public:
     Solver(proof_logging_mode mode = PROOF_LOGGING_OFF); // by default uses no proof logging
     virtual ~Solver();
 
+    inline ProofManager& proof_manager() const {
+        return *pm;
+    }
+    inline const ClauseAllocator& clause_allocator() const {
+        return ca;
+    }
+
     // Problem specification:
     //
     Var     newVar    (bool polarity = true, bool dvar = true); // Add a new variable with parameters specifying variable mode.
@@ -184,7 +191,9 @@ protected:
     // Solver state:
     //
     bool                ok;               // If FALSE, the constraints are already unsatisfiable. No part of the solver state may be used!
+public:
     vec<CRef>           clauses;          // List of problem clauses.
+private:
     vec<CRef>           learnts;          // List of learnt clauses.
     double              cla_inc;          // Amount to bump next clause with.
     vec<double>         activity;         // A heuristic measurement of the activity of a variable.

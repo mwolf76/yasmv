@@ -1,7 +1,6 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CFLAGS = @AM_CFLAGS@
-AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function -DINT32_MIN=-1	\
--DINT32_MAX=200 -DINT64_MIN=-1 -DINT64_MAX=200
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
 
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 -I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger	\
@@ -15,17 +14,15 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 
-PKG_HH = satdefs.hh sat.hh bdd_sat.hh cnf/cnf.hh cnf/bdd_cnf.hh		\
-model/model.hh model/bdd_model.hh proof/simple.hh			\
-proof/interpolator.hh proof/proof.hh proof/terms.hh			\
+PKG_HH = satdefs.hh sat.hh proof/simple.hh proof/interpolator.hh	\
+proof/proof.hh proof/terms.hh proof/bdd_terms.hh			\
 proof/bdd_interpolator.hh core/SolverTypes.hh core/Solver.hh		\
 mtl/Alloc.hh mtl/Sort.hh mtl/Set.hh mtl/Heap.hh mtl/Map.hh mtl/Alg.hh	\
 mtl/Vec.hh mtl/IntTypes.hh mtl/Queue.hh mtl/XAlloc.hh utils/Options.hh	\
 utils/solverlogger.hh utils/System.hh utils/ParseUtils.hh
 
-PKG_CC = bdd_sat.cc cnf/bdd_cnf.cc model/bdd_model.cc		\
-proof/interpolator.cc proof/bdd_interpolator.cc proof/proof.cc	\
-core/Solver.cc utils/solverlogger.cc utils/Options.cc
+PKG_CC = proof/proof.cc core/Solver.cc utils/solverlogger.cc	\
+utils/Options.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

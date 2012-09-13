@@ -34,9 +34,12 @@ namespace Minisat {
     public:
         virtual ~TermFactory() {};
 
-        // constants
+        // constants (makers and predicates)
         virtual Term make_true() =0;
+        virtual bool is_true(Term t) =0;
+
         virtual Term make_false() =0;
+        virtual bool is_false(Term t) =0;
 
         // variables
         virtual Term make_var(Var v) =0;

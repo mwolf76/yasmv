@@ -27,6 +27,7 @@
 #define DEFS_H
 #include <common.hh>
 #include <SolverTypes.hh>
+#include <Set.hh>
 
 namespace Minisat {
 
@@ -46,37 +47,43 @@ namespace Minisat {
         }
     };
 
-    // formulae groups
-    typedef class Group* Group_ptr;
-    class Group {
-        id_t f_id;
+    // // formulae groups
+    // typedef class Group* Group_ptr;
+    // class Group {
+    //     id_t f_id;
 
-    public:
-        Group(id_t id)
-            : f_id(id)
-        {}
+    // public:
+    //     Group(id_t id)
+    //         : f_id(id)
+    //     {}
 
-        inline id_t id()
-        { return f_id; }
-    };
-    typedef vector<Group> Groups;
-    static Group MAINGROUP(0);
+    //     inline id_t id()
+    //     { return f_id; }
+    // };
+    // typedef Set<Group> Groups;
+    // static Group MAINGROUP(0);
+    typedef unsigned group_t;
+    static group_t MAINGROUP(0);
+    typedef Set<group_t> Groups;
 
     // interpolation colors
-    typedef class Color* Color_ptr;
-    class Color {
-        id_t f_id;
+    // typedef class Color* Color_ptr;
+    // class Color {
+    //     id_t f_id;
 
-    public:
-        Color(id_t id)
-            : f_id(id)
-        {}
+    // public:
+    //     Color(id_t id)
+    //         : f_id(id)
+    //     {}
 
-        inline id_t id()
-        { return f_id; }
-    };
-    typedef vector<struct Color> Colors;
-    static Color BACKGROUND(0);
+    //     inline id_t id()
+    //     { return f_id; }
+    // };
+    // typedef Set<struct Color> Colors;
+    // static Color BACKGROUND(0);
+    typedef unsigned color_t;
+    static color_t BACKGROUND(0);
+    typedef Set<color_t> Colors;
 
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;

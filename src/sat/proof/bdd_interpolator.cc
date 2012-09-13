@@ -32,10 +32,6 @@ namespace Minisat {
         : Interpolator<BDD>(dynamic_cast<SAT<BDD> &>(owner))
     {}
 
-    // BDDInterpolator::BDDInterpolator(SAT<BDD>& owner)
-    //     : Interpolator<BDD>(owner)
-    // { TRACE << "Initialized BDD interpolator instance @" << this << endl; }
-
     BDDInterpolator::~BDDInterpolator()
     {
         // Cache elements needs no cleanup here because allocated memory
