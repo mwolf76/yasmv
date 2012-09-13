@@ -24,6 +24,23 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <inttypes.h>
 #include <limits.h>
 
+#ifndef INT32_MIN
+#define INT32_MIN INT_MIN
+#endif
+
+#ifndef INT32_MAX
+#define INT32_MAX INT_MAX
+#endif
+
+#ifndef INT64_MIN
+#define INT64_MIN INT_MIN
+#endif
+
+#ifndef INT64_MAX
+#define INT64_MAX INT_MAX
+#endif
+
+
 //=================================================================================================
 
 #endif
