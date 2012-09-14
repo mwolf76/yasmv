@@ -90,15 +90,10 @@ namespace Minisat {
         ~CNFizer()
         { TRACE << "Destroyed CNFizer instance @" << this << endl; }
 
-        /**
-         * @brief add a formula with a given group and color to the
-         * SAT instance.
-         */
         void push(Term phi, const group_t group, const color_t color);
 
     private:
         SAT<Term>& f_owner; // the SAT instance
-        Solver f_solver;    // MiniSAT instance
     }; // CNFizer
 
     template <class Term>
@@ -108,18 +103,11 @@ namespace Minisat {
             : f_owner(*owner)
         { TRACE << "Initialized ModelExtractor instance @" << this << endl; }
 
-        virtual ~ModelExtractor()
+        ~ModelExtractor()
         { TRACE << "Destroyed ModelExtractor instance @" << this << endl; }
 
-        /**
-         * @brief Retrieve a model from the SAT instance. Remark:
-         * current status must be STATUS_SAT. An exception will be
-         * raised otherwise.
-         */
         Term model()
-        {
-            return f_owner.factory().make_false();
-        }
+        { return f_owner.factory().make_false(); }
 
     private:
         SAT<Term>& f_owner; // the SAT instance
@@ -363,7 +351,9 @@ namespace Minisat {
         friend class Interpolator<Term>;
 
     public:
-        // SAT groups mgmt
+        /**
+         * @brief Adds a new formula group to the SAT instance.
+         */
         group_t new_group()
         {
             group_t res = ++ f_next_group;
@@ -371,10 +361,16 @@ namespace Minisat {
 
             return res;
         }
+
+        /**
+         * @brief Returns the complete set of defined SAT groups.
+         */
         Groups& groups()
         { return f_groups; }
 
-        // ITP color groups mgmt
+        /**
+         * @brief Adds a new interpolation color to the SAT instance.
+         */
         color_t new_color()
         {
             color_t res = ++ f_next_color;
@@ -382,28 +378,57 @@ namespace Minisat {
 
             return res;
         }
+
+        /**
+         * @brief Returns the complete set of defined interpolation
+         * colors.
+         */
         Colors& colors()
         { return f_colors; }
 
+        /**
+         * @brief add a formula with a given group and color to the
+         * SAT instance.
+         */
         void push(Term t,
                   group_t group = MAINGROUP,
                   color_t color = BACKGROUND)
         { f_cnfizer.push(t, group, color); }
 
-        void solve()
-        { }
-        void solve(const Groups& groups)
-        { }
+        /**
+         * @brief Solve all groups.
+         */
+        status_t solve()
+        { return solve_groups(f_groups); }
 
+        /**
+         * @brief Solve only given groups.
+         */
+        status_t solve(const Groups& groups)
+        { return solve_groups(groups); }
+
+        /**
+         * @brief Last solving status
+         */
         status_t status()
         { return f_status; }
 
+        /**
+         * @brief Retrieve a model from the SAT instance. Remark:
+         * current status must be STATUS_SAT. An exception will be
+         * raised otherwise.
+         */
         Term model()
         {
             assert (f_status == STATUS_SAT);
             return f_model_extractor.model();
         }
 
+        /**
+         * @brief Retrieve an interpolant model from the SAT
+         * instance. Remark: current status must be STATUS_UNSAT. An
+         * exception will be raised otherwise.
+         */
         Term interpolant(const Colors& a)
         {
             assert (f_status == STATUS_UNSAT);
@@ -418,7 +443,10 @@ namespace Minisat {
             , f_interpolator(this)
             , f_next_group(0)
             , f_next_color(0)
-        {}
+        { TRACE << "Initialized SAT instance @" << this << endl; }
+
+        ~SAT()
+        { TRACE << "Destroyed SAT instance@" << this << endl; }
 
     protected:
         // these methods are reserved for internal usage by sub-components.
@@ -451,6 +479,28 @@ namespace Minisat {
         color_t f_next_color;
 
         status_t f_status;
+
+        // services
+        status_t solve_groups(const Groups& groups)
+        {
+            vec<Lit> assumptions;
+
+            // MTL Set interface is a bit awkard here :-/
+            int bckt, bckts = groups.bucket_count();
+            for (bckt = 0; bckt < bckts ; ++ bckt) {
+                const vec<group_t>& gs = groups.bucket(bckt);
+                for (int i = 0; i < gs.size(); ++ i) {
+                    assumptions.push(mkLit(gs[i], true)); // a -> phi, negate a
+                }
+            }
+
+            f_status = f_solver.solve()
+                ? STATUS_SAT
+                : STATUS_UNSAT
+                ;
+
+            return f_status;
+        }
 
     }; // SAT instance
 
