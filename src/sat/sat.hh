@@ -485,7 +485,7 @@ namespace Minisat {
         {
             vec<Lit> assumptions;
 
-            // MTL Set interface is a bit awkard here :-/
+            // MTL Set interface is a bit clumsy here :-/
             int bckt, bckts = groups.bucket_count();
             for (bckt = 0; bckt < bckts ; ++ bckt) {
                 const vec<group_t>& gs = groups.bucket(bckt);
