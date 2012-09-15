@@ -29,6 +29,7 @@ smv_LDADD = 								\
 	$(top_builddir)/src/parser/libparser.la				\
 	$(top_builddir)/src/mc/libmc.la					\
 	$(top_builddir)/src/dd/libcudd.la				\
+	$(top_builddir)/src/sat/libminisat.la				\
 	-lantlr3c							\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
 
