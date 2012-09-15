@@ -104,18 +104,25 @@ Solver::Solver(proof_logging_mode mode) :
   , propagation_budget (-1)
   , asynch_interrupt   (false)
 {
+    TRACE << "Initialized Solver instance @" << this;
+
 #ifdef PROOF_CHECK
-  if (use_proof_logging) trace << "Proof logging enabled" << endlog;
-  trace << "Proof checking enabled" << endlog;
+  if (use_proof_logging) TRACE << "[Proof logging enabled]" << endlog;
+  TRACE << "[Proof checking enabled]" << endlog;
 #endif
 
 #ifdef MODEL_CHECK
-  trace << "Model checking enabled" << endlog;
+  TRACE << "[Model checking enabled]" << endlog;
 #endif
+
+  TRACE << endl;
 }
 
 Solver::~Solver()
-{ if (NULL != pm) delete pm; }
+{
+    if (NULL != pm) delete pm;
+    TRACE << "Destroyed Solver instance @" << this << endl;
+}
 
 
 //=================================================================================================
