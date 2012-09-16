@@ -45,8 +45,8 @@ namespace axter {
             if (tmp.size()) tmp[tmp.size() -1] = ']';
 
             oss << "[" << tmp << "] "
-                << filename << ":" << LineNo << " "
-                << "(lvl = " << levels_format_usage_data.m_severity_level << ") :: "
+                << filename << ":" << LineNo << " :: "
+                // << "(lvl = " << levels_format_usage_data.m_severity_level << ") :: "
                 ;
 
             return oss.str().c_str();
