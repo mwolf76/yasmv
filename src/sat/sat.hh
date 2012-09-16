@@ -28,7 +28,7 @@
 
 // general purpose decls
 #include "satdefs.hh"
-#include "terms/terms.hh"
+#include "terms/bdd_terms.hh"
 #include "proof/proof.hh"
 #include "cuddObj.hh"
 
@@ -38,47 +38,77 @@
 
 // the glorious Minisat SAT solver
 #include "core/Solver.hh"
+#include "core/SolverTypes.hh"
 
 namespace Minisat {
 
     template <class Term>
     class SAT;
 
-    class BDDTermFactory : public TermFactory<BDD> {
-    public:
-        BDDTermFactory(Cudd& cudd)
-            : f_cudd(cudd)
-        { TRACE << "Initialized BDD Factory instance @" << this << endl; }
+    // REMARK: this CNFization algorithm requires Term to be BDDs (or 0-1 ADDs)
+    struct BDDHash {
+        inline long operator() (BDD term) const
+        {
+            DdNode *tmp = term.getRegularNode();
+            return (long) (tmp);
+        }
+    };
 
-        ~BDDTermFactory()
-        { TRACE << "Destroyed BDD Factory instance @" << this << endl; }
+    struct BDDEq {
+        inline bool operator() (const BDD x,
+                                const BDD y) const
+        { return x == y; }
+    };
 
-        // constants
-        virtual BDD make_true()
-        { return f_cudd.bddOne(); }
-        virtual bool is_true(BDD t)
-        { return t.IsOne(); }
+    typedef unordered_map<BDD, Var, BDDHash, BDDEq> BDD2VARMap;
 
-        virtual BDD make_false()
-        { return f_cudd.bddZero(); }
-        virtual bool is_false(BDD t)
-        { return t.IsZero(); }
+    struct GroupHash {
+        inline long operator() (group_t group) const
+        { return (long) (group); }
+    };
 
-        // variables
-        virtual BDD make_var(Var v)
-        { return f_cudd.bddVar(v); }
+    struct GroupEq {
+        inline bool operator() (const group_t x,
+                                const group_t y) const
+        { return x == y; }
+    };
 
-        // basic logical operators
-        virtual BDD make_and(BDD t1, BDD t2)
-        { return t1 & t2; }
-        virtual BDD make_or(BDD t1, BDD t2)
-        { return t1 | t2; }
-        virtual BDD make_not(BDD t)
-        { return !t; }
+    typedef unordered_map<group_t, Var, GroupHash, GroupEq> Group2VARMap;
+    // class BDDTermFactory : public TermFactory<BDD> {
+    // public:
+    //     BDDTermFactory(Cudd& cudd)
+    //         : f_cudd(cudd)
+    //     { TRACE << "Initialized BDD Factory instance @" << this << endl; }
 
-    private:
-        Cudd& f_cudd;
-    }; // Term Factory
+    //     ~BDDTermFactory()
+    //     { TRACE << "Destroyed BDD Factory instance @" << this << endl; }
+
+    //     // constants
+    //     virtual BDD make_true()
+    //     { return f_cudd.bddOne(); }
+    //     virtual bool is_true(BDD t)
+    //     { return t.IsOne(); }
+
+    //     virtual BDD make_false()
+    //     { return f_cudd.bddZero(); }
+    //     virtual bool is_false(BDD t)
+    //     { return t.IsZero(); }
+
+    //     // variables
+    //     virtual BDD make_var(Var v)
+    //     { return f_cudd.bddVar(v); }
+
+    //     // basic logical operators
+    //     virtual BDD make_and(BDD t1, BDD t2)
+    //     { return t1 & t2; }
+    //     virtual BDD make_or(BDD t1, BDD t2)
+    //     { return t1 | t2; }
+    //     virtual BDD make_not(BDD t)
+    //     { return !t; }
+
+    // private:
+    //     Cudd& f_cudd;
+    // }; // Term Factory
 
     template <class Term>
     class CNFizer {
@@ -90,10 +120,121 @@ namespace Minisat {
         ~CNFizer()
         { TRACE << "Destroyed CNFizer instance @" << this << endl; }
 
-        void push(Term phi, const group_t group, const color_t color);
+        void push(Term phi, const group_t group, const color_t color)
+        { push_single_node_cut(phi, group, color); }
+
+    protected:
+        // FIXME: recursive implementation, very inefficient
+        void push_single_node_cut(Term phi, const group_t group, const color_t color)
+        {
+            BDDTermFactory& factory = dynamic_cast<BDDTermFactory&> (f_owner.factory());
+
+            // if constant or already seen, return
+            if (factory.is_false(phi) ||
+                factory.is_true(phi) ||
+                f_map.find(phi).second) return;
+
+            push_single_node_cut(factory.make_then(phi), group, color);
+            push_single_node_cut(factory.make_else(phi), group, color);
+
+            write_cnf(phi, group, color);
+        }
+
+        inline Var find_group_var(group_t group)
+        {
+            const Group2VARMap::iterator eye = f_groups_map.find(group);
+            if (eye != f_groups_map.end()) {
+                return (*eye).second;
+            }
+
+            Solver& solver = f_owner.solver();
+            Var res = solver.newVar();
+            DEBUG << "Adding VAR " << res << " for group " << group << endl;
+            f_groups_map.insert( make_pair<group_t, Var>(group, res));
+
+            return res;
+        }
+
+        inline Var cnf_var()
+        {
+            Solver& solver = f_owner.solver();
+            Var res = solver.newVar();
+            return res;
+        }
+
+        inline Var find_bdd_var(BDD phi)
+        {
+            const BDD2VARMap::iterator eye = f_map.find(phi);
+            if (eye != f_map.end()) {
+                return (*eye).second;
+            }
+
+            Solver& solver = f_owner.solver();
+            Var res = solver.newVar();
+            DEBUG << "Adding VAR " << res << " for Term " << phi << endl;
+            f_map.insert( make_pair<BDD, Var>(phi, res));
+
+            return res;
+        }
+
+        void write_cnf(Term phi, const group_t group, const color_t color)
+        {
+            BDDTermFactory& factory = dynamic_cast<BDDTermFactory &> (f_owner.factory());
+            Solver& solver = f_owner.solver();
+
+            /* Minisat vars */
+            Var g, f, v, t, e;
+
+            // CNF var
+        g = find_group_var(group);
+        f = cnf_var();
+
+            // node variable, Then/Else branches vars
+            v = find_var(phi); // this will be a new one by construction
+            t = find_var(factory.make_then(phi));
+            e = find_var(factory.make_else(phi));
+
+            { // group -> !f, v, e
+                vec<Lit> ps(4);
+                ps.push(mkLit(g, true));
+                ps.push(mkLit(f, true));
+                ps.push(mkLit(v, false));
+                ps.push(mkLit(e, false));
+                solver.addClause_(ps, color);
+            }
+
+            { // group -> f, v, !e
+                vec<Lit> ps(4);
+                ps.push(mkLit(g, true));
+                ps.push(mkLit(f, false));
+                ps.push(mkLit(v, false));
+                ps.push(mkLit(e, false));
+                solver.addClause_(ps, color);
+            }
+
+            { // group -> !f, !v, t
+                vec<Lit> ps(4);
+                ps.push(mkLit(g, true));
+                ps.push(mkLit(f, true));
+                ps.push(mkLit(v, true));
+                ps.push(mkLit(t, false));
+                solver.addClause_(ps, color);
+            }
+
+            { // group -> f, !v, !t
+                vec<Lit> ps(4);
+                ps.push(mkLit(g, true));
+                ps.push(mkLit(f, false));
+                ps.push(mkLit(v, true));
+                ps.push(mkLit(t, false));
+                solver.addClause_(ps, color);
+            }
+        } // write_cnf()
 
     private:
         SAT<Term>& f_owner; // the SAT instance
+        BDD2VARMap f_map;
+        Group2VARMap f_groups_map;
     }; // CNFizer
 
     template <class Term>

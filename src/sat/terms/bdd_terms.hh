@@ -35,31 +35,37 @@ namespace Minisat {
             : f_cudd(cudd)
         {}
 
-        virtual ~BDDTermFactory() {};
+        virtual ~BDDTermFactory()
+        {};
 
         // constants
         virtual BDD make_true()
         { return f_cudd.bddOne(); }
-        virtual bool is_true(BDD t)
-        { return f_cudd.bddIsOne(t); }
+        virtual bool is_true(BDD bdd)
+        { return bdd.IsOne(); }
 
         virtual BDD make_false()
         { return f_cudd.bddZero(); }
-        virtual BDD is_false(BDD t)
-        { return f_cudd.bddIsZero(t); }
+        virtual bool is_false(BDD bdd)
+        { return bdd.IsZero(); }
 
         // variables
         virtual BDD make_var(Var v)
         { return f_cudd.bddVar(v); }
 
         // operators
-        virtual BDD make_and(BDD t1, BDD t2)
-        { return t1 & t2; }
-        virtual BDD make_or(BDD t1, BDD t2)
-        { return t1 | t2; }
+        virtual BDD make_and(BDD a, BDD b)
+        { return a & b; }
+        virtual BDD make_or(BDD a, BDD b)
+        { return a | b; }
 
-        virtual BDD make_not(BDD t)
-        { return ~ t; }
+        virtual BDD make_not(BDD a)
+        { return ~ a; }
+
+        virtual BDD make_then(BDD a)
+        { return BDD( f_cudd, a.getRegularNode()->type.kids.T ); }
+        virtual BDD make_else(BDD a)
+        { return BDD( f_cudd, a.getRegularNode()->type.kids.E ); }
 
     private:
         Cudd& f_cudd;
