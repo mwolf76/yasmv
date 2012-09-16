@@ -25,9 +25,10 @@ smv_LDADD = 								\
 	$(top_builddir)/src/expr/printers/libexpr_printers.la		\
 	$(top_builddir)/src/expr/validators/libexpr_validators.la	\
 	$(top_builddir)/src/expr/libexpr.la 				\
+	$(top_builddir)/src/mc/libmc.la					\
+	$(top_builddir)/src/expr/compilers/libexpr_compilers.la		\
 	$(top_builddir)/src/model/libmodel.la 				\
 	$(top_builddir)/src/parser/libparser.la				\
-	$(top_builddir)/src/mc/libmc.la					\
 	$(top_builddir)/src/dd/libcudd.la				\
 	$(top_builddir)/src/sat/libminisat.la				\
 	-lantlr3c							\
