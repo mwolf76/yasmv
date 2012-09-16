@@ -27,6 +27,9 @@
 #include <math.h>
 #include <encoder.hh>
 
+// static initialization
+EncodingMgr_ptr EncodingMgr::f_instance = NULL;
+
 IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
     assert(NULL != tp);
