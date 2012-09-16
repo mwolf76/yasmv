@@ -53,62 +53,23 @@ namespace Minisat {
             return (long) (tmp);
         }
     };
-
     struct BDDEq {
         inline bool operator() (const BDD x,
                                 const BDD y) const
         { return x == y; }
     };
-
     typedef unordered_map<BDD, Var, BDDHash, BDDEq> BDD2VARMap;
 
     struct GroupHash {
         inline long operator() (group_t group) const
         { return (long) (group); }
     };
-
     struct GroupEq {
         inline bool operator() (const group_t x,
                                 const group_t y) const
         { return x == y; }
     };
-
     typedef unordered_map<group_t, Var, GroupHash, GroupEq> Group2VARMap;
-    // class BDDTermFactory : public TermFactory<BDD> {
-    // public:
-    //     BDDTermFactory(Cudd& cudd)
-    //         : f_cudd(cudd)
-    //     { TRACE << "Initialized BDD Factory instance @" << this << endl; }
-
-    //     ~BDDTermFactory()
-    //     { TRACE << "Destroyed BDD Factory instance @" << this << endl; }
-
-    //     // constants
-    //     virtual BDD make_true()
-    //     { return f_cudd.bddOne(); }
-    //     virtual bool is_true(BDD t)
-    //     { return t.IsOne(); }
-
-    //     virtual BDD make_false()
-    //     { return f_cudd.bddZero(); }
-    //     virtual bool is_false(BDD t)
-    //     { return t.IsZero(); }
-
-    //     // variables
-    //     virtual BDD make_var(Var v)
-    //     { return f_cudd.bddVar(v); }
-
-    //     // basic logical operators
-    //     virtual BDD make_and(BDD t1, BDD t2)
-    //     { return t1 & t2; }
-    //     virtual BDD make_or(BDD t1, BDD t2)
-    //     { return t1 | t2; }
-    //     virtual BDD make_not(BDD t)
-    //     { return !t; }
-
-    // private:
-    //     Cudd& f_cudd;
-    // }; // Term Factory
 
     template <class Term>
     class CNFizer {
@@ -132,7 +93,7 @@ namespace Minisat {
             // if constant or already seen, return
             if (factory.is_false(phi) ||
                 factory.is_true(phi) ||
-                f_map.find(phi).second) return;
+                f_map.find(phi) != f_map.end()) return;
 
             push_single_node_cut(factory.make_then(phi), group, color);
             push_single_node_cut(factory.make_else(phi), group, color);
@@ -190,9 +151,9 @@ namespace Minisat {
         f = cnf_var();
 
             // node variable, Then/Else branches vars
-            v = find_var(phi); // this will be a new one by construction
-            t = find_var(factory.make_then(phi));
-            e = find_var(factory.make_else(phi));
+            v = find_bdd_var(phi); // this will be a new one by construction
+            t = find_bdd_var(factory.make_then(phi));
+            e = find_bdd_var(factory.make_else(phi));
 
             { // group -> !f, v, e
                 vec<Lit> ps(4);
@@ -488,6 +449,7 @@ namespace Minisat {
 
     template <class Term>
     class SAT : public IObject {
+        friend class CNFizer<Term>;
         friend class ModelExtractor<Term>;
         friend class Interpolator<Term>;
 
@@ -594,7 +556,7 @@ namespace Minisat {
         TermFactory<Term>& factory() const
         { return f_factory; }
 
-        const Solver& solver() const
+        Solver& solver()
         { return f_solver; }
 
     private:
