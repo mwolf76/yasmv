@@ -28,6 +28,8 @@
 #define BMC_FALSIFICATION_ALGORITHM_H
 
 #include <mc.hh>
+#include <expr/compilers/be_compiler.hh>
+
 class SATBMCFalsification : public MCAlgorithm {
 
 public:
@@ -37,11 +39,8 @@ public:
     void process();
 
 private:
-    // // be compiler
-    // BECompiler f_compiler;
-
-    // // inteface to SAT solver (= Minisat + extensions: add2cnf, model, proof, itp... )
-    // SATInterface f_sat;
+    // be compiler
+    BECompiler f_compiler;
 };
 
 

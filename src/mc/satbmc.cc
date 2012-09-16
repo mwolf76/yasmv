@@ -47,31 +47,39 @@ SATBMCFalsification::~SATBMCFalsification()
 void SATBMCFalsification::process()
 {
     BDDTermFactory tf(* new Cudd());
-    SAT<BDD> *engine = new SAT<BDD> (tf);
+    SAT<BDD> engine (tf);
 
-    Colors colors;
-    BDD a = engine->interpolant(colors);
-    BDD b = engine->model();
+    const Modules& modules = f_model.modules();
+    {
+        time_t step = 0;
+        for (Modules::const_iterator m = modules.begin();
+             m != modules.end(); ++ m) {
 
-    delete engine;
+            Module& module = dynamic_cast <Module&> (*m->second);
+            TRACE << "processing module '" << module << "' " << endl;
+
+            const ExprVector init = module.init();
+            for (ExprVector::const_iterator init_eye = init.begin();
+                 init_eye != init.end(); init_eye ++) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*init_eye);
+                TRACE << "compiling INIT " << ctx << "::" << body << endl;
+
+                BDD bdd = f_compiler.process(ctx, body, step);
+                engine.push(bdd);
+            } // for init
+        } // modules
+
+        engine.solve();
+    }
+
+    // Colors colors;
+    // BDD a = engine->interpolant(colors);
+    // BDD b = engine->model();
+
+
+    for (time_t t = 0; t < 10; ++ t) {
+
+    }
 }
-
-//     // const Modules& modules = model.modules();
-//     // for (step_t i = 0; i < 10; ++ i) {
-//     //     for (Modules::iterator module = modules.begin();
-//     //          module != modules.end(); ++ module) {
-
-//     //         ExprVector& init = module->init();
-//     //         for (ExprVector::iterator expr = init.begin();
-//     //              expr != init.end(); ++ expr) {
-
-//     //             ADD add = f_compiler.process(*expr, 0);
-//     //             f_sat.inject(add);
-//     //         }
-//     //     }
-
-//     //     // invar, ... unrolling, blah blah blah
-//     //     f_sat.process();
-
-//     //    }
-// }
