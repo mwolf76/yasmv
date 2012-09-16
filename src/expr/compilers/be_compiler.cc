@@ -50,7 +50,7 @@ BECompiler::BECompiler()
 BECompiler::~BECompiler()
 { TRACE << "Destroying BECompiler @" << this << endl; }
 
-ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
+BDD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
     DEBUG << "Compiling boolean expression (time = " << time
           << ") " << ctx << "::" << body
@@ -68,7 +68,10 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     (*this)(body);
 
     assert(1 == f_add_stack.size());
-    return f_add_stack.back();
+    ADD add = f_add_stack.back();
+
+    // convert to BDD and return
+    return add.BddStrictThreshold(0);
 }
 
 void BECompiler::pre_hook()

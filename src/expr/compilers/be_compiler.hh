@@ -45,7 +45,7 @@ public:
     ~BECompiler();
 
     // toplevel
-    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
+    BDD process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
     void pre_hook();
