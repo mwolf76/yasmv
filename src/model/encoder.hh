@@ -33,6 +33,7 @@
 #include <types.hh>
 #include <expr_mgr.hh>
 #include <model.hh>
+#include <cudd.hh> // Cudd Capsule
 #include <cuddObj.hh>
 
 // -- primary decls  --------------------------------------------------------------
@@ -77,8 +78,10 @@ public:
 
 protected:
     EncodingMgr()
-        : f_cudd(* new Cudd())
-    {}
+        : f_cudd(CuddMgr::INSTANCE().dd())
+    {
+        TRACE << "Initialized EncodingMgr @ " << this << endl;
+    }
 
 private:
     static EncodingMgr_ptr f_instance;

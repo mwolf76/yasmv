@@ -123,10 +123,10 @@ int main(int argc, const char *argv[])
         SATBMCFalsification alg(*M);
         alg.set_param("k", 10);
         alg.set_param("incremental", true);
-        assert(! alg.get_param("incremental").as_boolean());
+        // assert(! alg.get_param("incremental").as_boolean());
         // other params...
 
-        // alg(); // TODO support for multiprocessing sync, etc...
+        alg.process(); // TODO support for multiprocessing sync, etc...
         if (alg.has_witness()) {
             // const Traces& t = alg.get_traces();
 

@@ -143,12 +143,15 @@ namespace Minisat {
             BDDTermFactory& factory = dynamic_cast<BDDTermFactory &> (f_owner.factory());
             Solver& solver = f_owner.solver();
 
+            // DEBUG
+            phi.PrintMinterm();
+
             /* Minisat vars */
             Var g, f, v, t, e;
 
             // CNF var
-        g = find_group_var(group);
-        f = cnf_var();
+            g = find_group_var(group);
+            f = cnf_var();
 
             // node variable, Then/Else branches vars
             v = find_bdd_var(phi); // this will be a new one by construction

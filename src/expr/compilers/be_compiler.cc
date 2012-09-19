@@ -71,7 +71,8 @@ BDD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     ADD add = f_add_stack.back();
 
     // convert to BDD and return
-    return add.BddStrictThreshold(0);
+    return add.BddPattern();
+    //     cout << "##>" << endl; res.PrintMinterm(); cout << "<##" << endl;
 }
 
 void BECompiler::pre_hook()

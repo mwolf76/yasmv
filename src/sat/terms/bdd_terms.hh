@@ -25,7 +25,9 @@
 #ifndef BDD_TERMS_H_INCLUDED
 #define BDD_TERMS_H_INCLUDED
 #include "terms/terms.hh"
+#include <cudd.hh>     // Cudd capsule
 #include <cuddObj.hh>  // BDD Term implementantion
+#include <cuddInt.h>
 
 namespace Minisat {
 
@@ -33,10 +35,14 @@ namespace Minisat {
     public:
         BDDTermFactory(Cudd& cudd)
             : f_cudd(cudd)
-        {}
+        {
+            TRACE << "Initialized BDD Term Factory @ " << this << endl;
+        }
 
         virtual ~BDDTermFactory()
-        {};
+        {
+            TRACE << "Deinitialized BDD Term Factory @ " << this << endl;
+        };
 
         // constants
         virtual BDD make_true()
@@ -63,9 +69,17 @@ namespace Minisat {
         { return ~ a; }
 
         virtual BDD make_then(BDD a)
-        { return BDD( f_cudd, a.getRegularNode()->type.kids.T ); }
+        {
+            DdNode *node = a.getRegularNode();
+            assert (! cuddIsConstant(node));
+            return BDD( f_cudd, cuddT(node));
+        }
         virtual BDD make_else(BDD a)
-        { return BDD( f_cudd, a.getRegularNode()->type.kids.E ); }
+        {
+            DdNode *node = a.getRegularNode();
+            assert (! cuddIsConstant(node));
+            return BDD( f_cudd, cuddE(node));
+        }
 
     private:
         Cudd& f_cudd;

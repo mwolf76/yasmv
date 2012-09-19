@@ -32,6 +32,7 @@ MCAlgorithm::MCAlgorithm(IModel& model)
     , f_model(model)
     , f_traces()
 {
+    set_param("alg_name", "test");
     TRACE << "Creating MC algoritm instance "
           << get_param("alg_name")
           << " @" << this

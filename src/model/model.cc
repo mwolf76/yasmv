@@ -32,6 +32,10 @@ TypeMgr_ptr TypeMgr::f_instance = NULL;
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
+// TODO: this does not belong here
+#include <cudd.hh>
+CuddMgr_ptr CuddMgr::f_instance = NULL;
+
 void Model::add_module(Expr_ptr name, IModule_ptr module)
 {
     TRACE << "Added module: '" << name << "'" << endl;
