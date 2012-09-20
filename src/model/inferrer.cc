@@ -433,7 +433,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
     Model& model = static_cast <Model&> (*f_mm.model());
-    ISymbol_ptr symb = model.fetch_symbol(FQExpr(ctx, frag));
+    ISymbol_ptr symb = model.fetch_symbol(ctx, frag);
 
     // is this a constant or variable?
     if (symb->is_const() ||
@@ -445,7 +445,7 @@ ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     else if (symb->is_define()) {
         while (symb->is_define()) {
             Expr_ptr body = symb->as_define().body();
-            symb = model.fetch_symbol(FQExpr(ctx, body));
+            symb = model.fetch_symbol(ctx, body);
         }
         return symb;
     }

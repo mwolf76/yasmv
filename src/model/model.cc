@@ -43,11 +43,8 @@ void Model::add_module(Expr_ptr name, IModule_ptr module)
 }
 
 // symbol resolution
-ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
+ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
 {
-    const Expr_ptr ctx = fqexpr.ctx();
-    const Expr_ptr symb = fqexpr.expr();
-
     Modules::iterator eye = f_modules.find(ctx);
     if (eye == f_modules.end()) throw BadContext(ctx);
     IModule_ptr module = (*eye).second;
@@ -68,13 +65,13 @@ ISymbol_ptr Model::fetch_symbol(const FQExpr& fqexpr)
     }
 
     Variables vars = module->get_localVars();
-    Variables::iterator viter = vars.find(FQExpr(ctx, symb));
+    Variables::iterator viter = vars.find(symb);
     if (viter != vars.end()) {
         return (*viter).second;
     }
 
     // if all of the above fail...
-    throw UnresolvedSymbol(symb, ctx);
+    throw UnresolvedSymbol(ctx, symb);
 }
 
 bool ISymbol::is_variable(void) const

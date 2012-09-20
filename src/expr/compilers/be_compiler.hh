@@ -35,7 +35,7 @@ typedef vector<step_t> TimeStack;
 typedef unordered_map<FQExpr, ADD, fqexpr_hash, fqexpr_eq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
 
-typedef unordered_map<ISymbol_ptr, IEncoding_ptr, PtrHash, PtrEq> ENCMap;
+typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
 class BECompiler : public Walker {
@@ -45,7 +45,7 @@ public:
     ~BECompiler();
 
     // toplevel
-    BDD process(Expr_ptr ctx, Expr_ptr body, step_t time);
+    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
     void pre_hook();
@@ -179,8 +179,8 @@ protected:
     void walk_leaf(const Expr_ptr expr);
 
 private:
-    ADDMap f_map; // expr -> add cache
-    ENCMap f_encodings; // symb -> add cache
+    ADDMap f_map; // FQDN -> add cache
+    ENCMap f_encodings; // FQDN -> add encoding
 
     ADDStack f_add_stack;
     ExprStack f_ctx_stack;
@@ -206,10 +206,8 @@ private:
         return true;
     }
 
-    inline void register_encoding(const ISymbol_ptr symb, IEncoding_ptr enc)
-    {
-        f_encodings [ symb ] = enc;
-    }
+    inline void register_encoding(const FQExpr& symb, IEncoding_ptr enc)
+    { f_encodings [ symb ] = enc; }
 
 };
 

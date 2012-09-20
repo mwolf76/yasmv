@@ -288,7 +288,7 @@ public:
         return *found.second;
     }
 
-    ISymbol_ptr fetch_symbol(const FQExpr& fqexpr);
+    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
 };
 
 class ModelMgr;

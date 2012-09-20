@@ -50,12 +50,8 @@ BECompiler::BECompiler()
 BECompiler::~BECompiler()
 { TRACE << "Destroying BECompiler @" << this << endl; }
 
-BDD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
+ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
-    DEBUG << "Compiling boolean expression (time = " << time
-          << ") " << ctx << "::" << body
-          << endl;
-
     // remove previous results
     f_add_stack.clear();
     f_ctx_stack.clear();
@@ -64,21 +60,29 @@ BDD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     f_ctx_stack.push_back(ctx);
     f_time_stack.push_back(time);
 
+    TRACE << "Compiling boolean expression "
+          << "(time = " << time << ") "
+          << ctx << "::" << body
+          << endl;
+
     // invoke walker on the body of the expr to be processed
     (*this)(body);
 
     assert(1 == f_add_stack.size());
     ADD add = f_add_stack.back();
 
-    // convert to BDD and return
-    return add.BddPattern();
-    //     cout << "##>" << endl; res.PrintMinterm(); cout << "<##" << endl;
+    return add;
 }
 
 void BECompiler::pre_hook()
 {}
 void BECompiler::post_hook()
-{}
+{
+    ADD add = f_add_stack.back();
+    add.PrintMinterm();
+
+    // TODO: assert it's a 0-1 ADD
+}
 
 bool BECompiler::walk_F_preorder(const Expr_ptr expr)
 { assert(0); return false; }
@@ -531,7 +535,11 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
     // symb resolution
     Model& model = static_cast <Model&> (*f_mm.model());
-    ISymbol_ptr symb = model.fetch_symbol(FQExpr(f_ctx_stack.back(), expr));
+    Expr_ptr ctx = f_ctx_stack.back();
+    step_t time = f_time_stack.back();
+
+    ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
+    assert (NULL != symb);
 
     // 0. bool/integer constant leaves
     if (symb->is_const()) {
@@ -553,21 +561,22 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
     if (symb->is_variable()) {
 
-        // if encoding for variable is available reuse its ADD...
-        ENCMap::iterator eye = f_encodings.find(symb);
+        FQExpr key(ctx, expr, time);
+        IEncoding_ptr enc;
+
+        // if encoding for temporized variable is available reuse it
+        ENCMap::iterator eye = f_encodings.find(key);
         if (eye != f_encodings.end()) {
-            IEncoding_ptr enc = (*eye).second;
-            f_add_stack.push_back(enc->add());
+            enc = (*eye).second;
         }
 
-        // otherwise: (1) create it,
-        Type_ptr type = symb->as_variable().type();
-        IEncoding_ptr enc = f_enc.make_encoding(type);
+        else {
+            // ... otherwise create and cache it
+            enc = f_enc.make_encoding(symb->as_variable().type());
+            register_encoding(key, enc);
+        }
 
-        // (2) cache it,
-        register_encoding(symb, enc);
-
-        // (3) return it.
+        assert (NULL != enc);
         f_add_stack.push_back(enc->add());
     }
 
@@ -576,7 +585,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         Expr_ptr body = NULL;
         while (symb->is_define()) {
             body = symb->as_define().body();
-            symb = model.fetch_symbol(FQExpr(f_ctx_stack.back(), body));
+            symb = model.fetch_symbol(ctx, body);
         }
 
         // walk body in given ctx

@@ -3,7 +3,7 @@
  *  @brief Generic bddterms support
  *
  *  This module contains the definitions for terms manipulation,
- *  specialized for cudd BDDs.
+ *  specialized for cudd ADDs.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -22,63 +22,59 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef BDD_TERMS_H_INCLUDED
-#define BDD_TERMS_H_INCLUDED
+#ifndef ADD_TERMS_H_INCLUDED
+#define ADD_TERMS_H_INCLUDED
 #include "terms/terms.hh"
 #include <cudd.hh>     // Cudd capsule
-#include <cuddObj.hh>  // BDD Term implementantion
+#include <cuddObj.hh>  // ADD Term implementantion
 #include <cuddInt.h>
 
 namespace Minisat {
 
-    class BDDTermFactory : public TermFactory<BDD> {
+    class ADDTermFactory : public TermFactory<ADD> {
     public:
-        BDDTermFactory(Cudd& cudd)
+        ADDTermFactory(Cudd& cudd)
             : f_cudd(cudd)
-        {
-            TRACE << "Initialized BDD Term Factory @ " << this << endl;
-        }
+        { TRACE << "Initialized ADD Term Factory @ " << this << endl; }
 
-        virtual ~BDDTermFactory()
-        {
-            TRACE << "Deinitialized BDD Term Factory @ " << this << endl;
-        };
+        virtual ~ADDTermFactory()
+        { TRACE << "Deinitialized ADD Term Factory @ " << this << endl; }
 
         // constants
-        virtual BDD make_true()
-        { return f_cudd.bddOne(); }
-        virtual bool is_true(BDD bdd)
-        { return bdd.IsOne(); }
+        virtual ADD make_true()
+        { return f_cudd.addOne(); }
+        virtual bool is_true(ADD phi)
+        { return phi.IsOne(); }
 
-        virtual BDD make_false()
-        { return f_cudd.bddZero(); }
-        virtual bool is_false(BDD bdd)
-        { return bdd.IsZero(); }
+        virtual ADD make_false()
+        { return f_cudd.addZero(); }
+        virtual bool is_false(ADD phi)
+        { return phi.IsZero(); }
 
         // variables
-        virtual BDD make_var(Var v)
-        { return f_cudd.bddVar(v); }
+        virtual ADD make_var(Var v)
+        { return f_cudd.addVar(v); }
 
         // operators
-        virtual BDD make_and(BDD a, BDD b)
-        { return a & b; }
-        virtual BDD make_or(BDD a, BDD b)
-        { return a | b; }
+        virtual ADD make_and(ADD phi, ADD psi)
+        { return phi & psi; }
+        virtual ADD make_or(ADD phi, ADD psi)
+        { return phi | psi; }
 
-        virtual BDD make_not(BDD a)
-        { return ~ a; }
+        virtual ADD make_not(ADD phi)
+        { return ~ phi; }
 
-        virtual BDD make_then(BDD a)
+        virtual ADD make_then(ADD phi)
         {
-            DdNode *node = a.getRegularNode();
+            DdNode *node = phi.getRegularNode();
             assert (! cuddIsConstant(node));
-            return BDD( f_cudd, cuddT(node));
+            return ADD( f_cudd, cuddT(node));
         }
-        virtual BDD make_else(BDD a)
+        virtual ADD make_else(ADD phi)
         {
-            DdNode *node = a.getRegularNode();
+            DdNode *node = phi.getRegularNode();
             assert (! cuddIsConstant(node));
-            return BDD( f_cudd, cuddE(node));
+            return ADD( f_cudd, cuddE(node));
         }
 
     private:

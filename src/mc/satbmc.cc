@@ -46,8 +46,8 @@ SATBMCFalsification::~SATBMCFalsification()
 
 void SATBMCFalsification::process()
 {
-    BDDTermFactory tf(CuddMgr::INSTANCE().dd());
-    SAT<BDD> engine (tf);
+    ADDTermFactory tf(CuddMgr::INSTANCE().dd());
+    SAT<ADD> engine (tf);
 
     const Modules& modules = f_model.modules();
     {
@@ -66,8 +66,8 @@ void SATBMCFalsification::process()
                 Expr_ptr body = (*init_eye);
                 TRACE << "compiling INIT " << ctx << "::" << body << endl;
 
-                BDD bdd = f_compiler.process(ctx, body, step);
-                engine.push(bdd);
+                ADD add = f_compiler.process(ctx, body, step);
+                engine.push(add);
             } // for init
         } // modules
 

@@ -691,25 +691,25 @@ private:
 class FQExpr {
     Expr_ptr f_ctx;
     Expr_ptr f_expr;
-    unsigned f_time;
+    step_t f_time;
 
 public:
-    FQExpr(Expr_ptr ctx, Expr_ptr expr, unsigned time = 0)
+    FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0)
         : f_ctx(ctx)
         , f_expr(expr)
         , f_time(time)
     {}
 
-    FQExpr(Expr_ptr expr, unsigned time = 0)
+    FQExpr(Expr_ptr expr)
     : f_ctx(ExprMgr::INSTANCE().make_main()) // default ctx
     , f_expr(expr)
-    , f_time(time)
+    , f_time(0) // default time
     {}
 
-    FQExpr(const FQExpr& fqexpr, unsigned time = 0)
+    FQExpr(const FQExpr& fqexpr)
     : f_ctx(fqexpr.ctx())
     , f_expr(fqexpr.expr())
-    , f_time(time)
+    , f_time(fqexpr.time())
     {}
 
     inline const Expr_ptr& ctx() const
@@ -718,7 +718,7 @@ public:
     inline const Expr_ptr& expr() const
     { return f_expr; }
 
-    inline unsigned time() const
+    inline step_t time() const
     { return f_time; }
 
     inline bool operator==(const FQExpr& other) const

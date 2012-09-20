@@ -45,20 +45,20 @@ namespace Minisat {
     template <class Term>
     class SAT;
 
-    // REMARK: this CNFization algorithm requires Term to be BDDs (or 0-1 ADDs)
-    struct BDDHash {
-        inline long operator() (BDD term) const
+    // REMARK: this CNFization algorithm requires Term to be 0-1 ADDs
+    struct ADDHash {
+        inline long operator() (ADD term) const
         {
             DdNode *tmp = term.getRegularNode();
             return (long) (tmp);
         }
     };
-    struct BDDEq {
-        inline bool operator() (const BDD x,
-                                const BDD y) const
+    struct ADDEq {
+        inline bool operator() (const ADD x,
+                                const ADD y) const
         { return x == y; }
     };
-    typedef unordered_map<BDD, Var, BDDHash, BDDEq> BDD2VARMap;
+    typedef unordered_map<ADD, Var, ADDHash, ADDEq> ADD2VARMap;
 
     struct GroupHash {
         inline long operator() (group_t group) const
@@ -88,7 +88,7 @@ namespace Minisat {
         // FIXME: recursive implementation, very inefficient
         void push_single_node_cut(Term phi, const group_t group, const color_t color)
         {
-            BDDTermFactory& factory = dynamic_cast<BDDTermFactory&> (f_owner.factory());
+            ADDTermFactory& factory = dynamic_cast<ADDTermFactory&> (f_owner.factory());
 
             // if constant or already seen, return
             if (factory.is_false(phi) ||
@@ -123,9 +123,9 @@ namespace Minisat {
             return res;
         }
 
-        inline Var find_bdd_var(BDD phi)
+        inline Var find_bdd_var(ADD phi)
         {
-            const BDD2VARMap::iterator eye = f_map.find(phi);
+            const ADD2VARMap::iterator eye = f_map.find(phi);
             if (eye != f_map.end()) {
                 return (*eye).second;
             }
@@ -133,15 +133,22 @@ namespace Minisat {
             Solver& solver = f_owner.solver();
             Var res = solver.newVar();
             DEBUG << "Adding VAR " << res << " for Term " << phi << endl;
-            f_map.insert( make_pair<BDD, Var>(phi, res));
+            f_map.insert( make_pair<ADD, Var>(phi, res));
 
             return res;
         }
 
+        void add_clause(vec<Lit>& ps, const color_t color)
+        {
+            Solver& solver = f_owner.solver();
+
+            TRACE << ps << endl;
+            solver.addClause_(ps, color);
+        }
+
         void write_cnf(Term phi, const group_t group, const color_t color)
         {
-            BDDTermFactory& factory = dynamic_cast<BDDTermFactory &> (f_owner.factory());
-            Solver& solver = f_owner.solver();
+            ADDTermFactory& factory = dynamic_cast<ADDTermFactory &> (f_owner.factory());
 
             // DEBUG
             phi.PrintMinterm();
@@ -159,45 +166,45 @@ namespace Minisat {
             e = find_bdd_var(factory.make_else(phi));
 
             { // group -> !f, v, e
-                vec<Lit> ps(4);
+                vec<Lit> ps;
                 ps.push(mkLit(g, true));
                 ps.push(mkLit(f, true));
                 ps.push(mkLit(v, false));
                 ps.push(mkLit(e, false));
-                solver.addClause_(ps, color);
+                add_clause(ps, color);
             }
 
             { // group -> f, v, !e
-                vec<Lit> ps(4);
+                vec<Lit> ps;
                 ps.push(mkLit(g, true));
                 ps.push(mkLit(f, false));
                 ps.push(mkLit(v, false));
                 ps.push(mkLit(e, false));
-                solver.addClause_(ps, color);
+                add_clause(ps, color);
             }
 
             { // group -> !f, !v, t
-                vec<Lit> ps(4);
+                vec<Lit> ps;
                 ps.push(mkLit(g, true));
                 ps.push(mkLit(f, true));
                 ps.push(mkLit(v, true));
                 ps.push(mkLit(t, false));
-                solver.addClause_(ps, color);
+                add_clause(ps, color);
             }
 
             { // group -> f, !v, !t
-                vec<Lit> ps(4);
+                vec<Lit> ps;
                 ps.push(mkLit(g, true));
                 ps.push(mkLit(f, false));
                 ps.push(mkLit(v, true));
                 ps.push(mkLit(t, false));
-                solver.addClause_(ps, color);
+                add_clause(ps, color);
             }
         } // write_cnf()
 
     private:
         SAT<Term>& f_owner; // the SAT instance
-        BDD2VARMap f_map;
+        ADD2VARMap f_map;
         Group2VARMap f_groups_map;
     }; // CNFizer
 

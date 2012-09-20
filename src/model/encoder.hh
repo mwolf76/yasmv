@@ -79,9 +79,10 @@ public:
 protected:
     EncodingMgr()
         : f_cudd(CuddMgr::INSTANCE().dd())
-    {
-        TRACE << "Initialized EncodingMgr @ " << this << endl;
-    }
+    { TRACE << "Initialized EncodingMgr @ " << this << endl; }
+
+    ~EncodingMgr()
+    { TRACE << "Deinitialized EncodingMgr @ " << this << endl; }
 
 private:
     static EncodingMgr_ptr f_instance;
