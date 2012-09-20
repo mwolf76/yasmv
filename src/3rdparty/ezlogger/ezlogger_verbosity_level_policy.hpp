@@ -3,7 +3,7 @@
 
 namespace axter
 {
-  enum verbosity{log_default_verbosity_level = 3,
+  enum verbosity{log_default_verbosity_level = 5,
                  log_verbosity_not_set = 0,
                  log_always = 1,
                  log_often,
