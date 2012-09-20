@@ -39,6 +39,15 @@ namespace Minisat {
         STATUS_UNKNOWN,
     } status_t;
 
+    ostream& operator<<(ostream& os, status_t status)
+    {
+        if (STATUS_SAT == status) os << "SAT";
+        else if (STATUS_UNSAT == status) os << "UNSAT";
+        else os << "??";
+
+        return os;
+    }
+
     // move me!
     template<class K>
     struct ptr_hasher  {

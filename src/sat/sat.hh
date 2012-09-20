@@ -60,6 +60,17 @@ namespace Minisat {
     };
     typedef unordered_map<ADD, Var, ADDHash, ADDEq> ADD2VARMap;
 
+    struct VARHash {
+        inline long operator() (Var v) const
+        { return (long) (v); }
+    };
+    struct VAREq {
+        inline bool operator() (const Var x,
+                                const Var y) const
+        { return x == y; }
+    };
+    typedef unordered_map<Var, ADD, VARHash, VAREq> VAR2ADDMap;
+
     struct GroupHash {
         inline long operator() (group_t group) const
         { return (long) (group); }
@@ -93,7 +104,7 @@ namespace Minisat {
             // if constant or already seen, return
             if (factory.is_false(phi) ||
                 factory.is_true(phi) ||
-                f_map.find(phi) != f_map.end()) return;
+                f_dd2var_map.find(phi) != f_dd2var_map.end()) return;
 
             push_single_node_cut(factory.make_then(phi), group, color);
             push_single_node_cut(factory.make_else(phi), group, color);
@@ -120,22 +131,35 @@ namespace Minisat {
         {
             Solver& solver = f_owner.solver();
             Var res = solver.newVar();
+            DEBUG << "Adding VAR " << res << " for CNF" << endl;
             return res;
         }
 
         inline Var find_bdd_var(ADD phi)
         {
-            const ADD2VARMap::iterator eye = f_map.find(phi);
-            if (eye != f_map.end()) {
+            const ADD2VARMap::iterator eye = f_dd2var_map.find(phi);
+            if (eye != f_dd2var_map.end()) {
                 return (*eye).second;
             }
 
+            // generate new var and book it
             Solver& solver = f_owner.solver();
             Var res = solver.newVar();
             DEBUG << "Adding VAR " << res << " for Term " << phi << endl;
-            f_map.insert( make_pair<ADD, Var>(phi, res));
-
+            f_dd2var_map.insert( make_pair<ADD, Var>(phi, res));
+            f_var2dd_map.insert( make_pair<Var, ADD>(res, phi));
             return res;
+        }
+
+        // iface to v -> ADD internal map
+        inline ADD dd(Var v)
+        {
+            VAR2ADDMap::const_iterator eye = f_var2dd_map.find(v);
+            if (eye != f_var2dd_map.end()) {
+                return (*eye).second;
+            }
+
+            assert(0);
         }
 
         void add_clause(vec<Lit>& ps, const color_t color)
@@ -204,7 +228,8 @@ namespace Minisat {
 
     private:
         SAT<Term>& f_owner; // the SAT instance
-        ADD2VARMap f_map;
+        ADD2VARMap f_dd2var_map;
+        VAR2ADDMap f_var2dd_map;
         Group2VARMap f_groups_map;
     }; // CNFizer
 
@@ -612,6 +637,7 @@ namespace Minisat {
                 : STATUS_UNSAT
                 ;
 
+            DEBUG << "status is " << f_status << endl;
             return f_status;
         }
 
