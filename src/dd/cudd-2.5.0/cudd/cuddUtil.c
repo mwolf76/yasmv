@@ -223,7 +223,7 @@ Cudd_PrintMinterm(
 {
     int		i, *list;
 
-    /* background = manager->background; */
+    background = manager->zero;
     zero = Cudd_Not(manager->one);
     list = ALLOC(int,manager->size);
     if (list == NULL) {
@@ -589,7 +589,7 @@ Cudd_CountMinterm(
     double	res;
     CUDD_VALUE_TYPE epsilon;
 
-    /* background = manager->background; */
+    background = manager->zero;
     zero = Cudd_Not(manager->one);
 
     max = pow(2.0,(double)nvars);
@@ -668,7 +668,7 @@ Cudd_EpdCountMinterm(
     st_table	*table;
     int		status;
 
-    /* background = manager->background; */
+    background = manager->zero;
     zero = Cudd_Not(manager->one);
 
     EpdPow2(nvars, &max);
@@ -1867,7 +1867,8 @@ Cudd_FirstCube(
 	    next = cuddE(treg);
 	    if (top != treg) next = Cudd_Not(next);
 	    gen->stack.stack[gen->stack.sp] = next; gen->stack.sp++;
-	} else if (top == Cudd_Not(DD_ONE(dd)) /* || top == dd->background */) {
+	} else if (top == Cudd_Not(DD_ONE(dd)) ||
+                   top == dd->zero /* [MP: it was dd->background] */) {
 	    /* Backtrack */
 	    while (1) {
 		if (gen->stack.sp == 1) {
@@ -1963,7 +1964,8 @@ Cudd_NextCube(
 	    next = cuddE(treg);
 	    if (top != treg) next = Cudd_Not(next);
 	    gen->stack.stack[gen->stack.sp] = next; gen->stack.sp++;
-	} else if (top == Cudd_Not(DD_ONE(dd)) /* || top == dd->background */) {
+        } else if (top == Cudd_Not(DD_ONE(dd)) ||
+                   top == dd->zero /* [MP: it was dd->background] */) {
 	    /* Backtrack */
 	    while (1) {
 		if (gen->stack.sp == 1) {

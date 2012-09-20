@@ -620,10 +620,10 @@ extern DdNode * Cudd_ReadOne (DdManager *dd);
 extern DdNode * Cudd_ReadZddOne (DdManager *dd, int i);
 extern DdNode * Cudd_ReadZero (DdManager *dd);
 extern DdNode * Cudd_ReadLogicZero (DdManager *dd);
-extern DdNode * Cudd_ReadPlusInfinity (DdManager *dd);
-extern DdNode * Cudd_ReadMinusInfinity (DdManager *dd);
-extern DdNode * Cudd_ReadBackground (DdManager *dd);
-extern void Cudd_SetBackground (DdManager *dd, DdNode *bck);
+/* extern DdNode * Cudd_ReadPlusInfinity (DdManager *dd); */
+/* extern DdNode * Cudd_ReadMinusInfinity (DdManager *dd); */
+/* extern DdNode * Cudd_ReadBackground (DdManager *dd); */
+/* extern void Cudd_SetBackground (DdManager *dd, DdNode *bck); */
 extern unsigned int Cudd_ReadCacheSlots (DdManager *dd);
 extern double Cudd_ReadCacheUsedSlots (DdManager * dd);
 extern double Cudd_ReadCacheLookUps (DdManager *dd);

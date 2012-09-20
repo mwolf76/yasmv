@@ -687,7 +687,7 @@ Cudd_ApaCountMinterm(
     st_table	*table;
     DdApaNumber	i,count;
 
-    background = manager->background;
+    background = manager->zero; /* [MP: it was manager->background] */
     zero = Cudd_Not(manager->one);
 
     *digits = Cudd_ApaNumberOfDigits(nvars+1);

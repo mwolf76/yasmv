@@ -1869,7 +1869,8 @@ cuddMinHammingDistRecur(
 
     if (cuddIsConstant(F)) {
 	zero = Cudd_Not(DD_ONE(dd));
-	if (/* f == dd->background ||  */f == zero) {
+        /* dd->zero = 0, zero = ! 1 */
+	if (f == dd->zero ||  f == zero) {
 	    return(upperBound);
 	} else {
 	    return(0);

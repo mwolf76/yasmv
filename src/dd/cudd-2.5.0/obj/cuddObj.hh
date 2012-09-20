@@ -349,23 +349,21 @@ public:
     ADD(const ADD &from);
     ADD operator=(const ADD& right);
 
-    // Relational operators
-    bool operator<=(const ADD& other) const;
-    bool operator>=(const ADD& other) const;
-    bool operator<(const ADD& other) const;
-    bool operator>(const ADD& other) const;
-
-    // Arithmetic operators
+    // // Relational operators
+    // bool operator<=(const ADD& other) const;
+    // bool operator>=(const ADD& other) const;
+    // bool operator<(const ADD& other) const;
+    // bool operator>(const ADD& other) const;
+    // // Arithmetic operators
     ADD operator-() const;
-    ADD operator*(const ADD& other) const;
-    ADD operator/(const ADD& other) const;
-    ADD operator%(const ADD& other) const;
+    // ADD operator*(const ADD& other) const;
+    // ADD operator/(const ADD& other) const;
+    // ADD operator%(const ADD& other) const;
     ADD operator*=(const ADD& other);
-    ADD operator+(const ADD& other) const;
+    // ADD operator+(const ADD& other) const;
     ADD operator+=(const ADD& other);
-    ADD operator-(const ADD& other) const;
-    ADD operator-=(const ADD& other);
-
+    // ADD operator-(const ADD& other) const;
+    // ADD operator-=(const ADD& other);
     // Shift operators
     ADD LShift(const ADD& other) const;
     ADD RShift(const ADD& other) const;
@@ -373,9 +371,9 @@ public:
     // Logical operators
     ADD operator~() const;
     ADD operator&(const ADD& other) const;
-    ADD operator&=(const ADD& other);
+    // ADD operator&=(const ADD& other);
     ADD operator|(const ADD& other) const;
-    ADD operator|=(const ADD& other);
+    // ADD operator|=(const ADD& other);
 
     bool IsZero() const;
     ADD ExistAbstract(const ADD& cube) const;
@@ -406,6 +404,8 @@ public:
     ADD IteConstant(const ADD& g, const ADD& h) const;
     ADD EvalConst(const ADD& g) const;
     bool Leq(const ADD& g) const;
+    inline bool Lt(const ADD& g) const
+    { return *this != g && Leq(g); }
     ADD Cmpl() const;
     ADD Negate() const;
     ADD RoundOff(int N) const;
@@ -657,8 +657,8 @@ public:
     int bddBindVar(int) const;
     int bddUnbindVar(int) const;
     bool bddVarIsBound(int) const;
-    ADD Walsh(std::vector<ADD> x, std::vector<ADD> y);
-    ADD addResidue(int n, int m, int options, int top);
+    // ADD Walsh(std::vector<ADD> x, std::vector<ADD> y);
+    // ADD addResidue(int n, int m, int options, int top);
     void DebugCheck();
     void CheckKeys();
     MtrNode * MakeTreeNode(unsigned int low, unsigned int size, unsigned int type) const;

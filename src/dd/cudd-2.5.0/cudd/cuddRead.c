@@ -252,7 +252,7 @@ Cudd_addRead(
     *nx = lnx;
     *ny = lny;
 
-    *E = dd->background; /* this call will never cause reordering */
+    *E = dd->zero; /*[MP it was dd->background] this call will never cause reordering */
     cuddRef(*E);
 
     while (! feof(fp)) {
@@ -264,7 +264,7 @@ Cudd_addRead(
 	} else if (u >= *m || v >= *n || u < 0 || v < 0) {
 	    return(0);
 	}
- 
+
 	minterm1 = one; cuddRef(minterm1);
 
 	/* Build minterm1 corresponding to this arc */
@@ -456,7 +456,7 @@ Cudd_bddRead(
 	} else if (u >= *m || v >= *n || u < 0 || v < 0) {
 	    return(0);
 	}
- 
+
 	minterm1 = one; cuddRef(minterm1);
 
 	/* Build minterm1 corresponding to this arc. */
@@ -514,4 +514,3 @@ Cudd_bddRead(
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-

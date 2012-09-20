@@ -347,44 +347,44 @@ BDD::operator=(
 } // BDD::operator=
 
 
-bool
-BDD::operator<=(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return Cudd_bddLeq(mgr,node,other.node);
+// bool
+// BDD::operator<=(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return Cudd_bddLeq(mgr,node,other.node);
 
-} // BDD::operator<=
-
-
-bool
-BDD::operator>=(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return Cudd_bddLeq(mgr,other.node,node);
-
-} // BDD::operator>=
+// } // BDD::operator<=
 
 
-bool
-BDD::operator<(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return node != other.node && Cudd_bddLeq(mgr,node,other.node);
+// bool
+// BDD::operator>=(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return Cudd_bddLeq(mgr,other.node,node);
 
-} // BDD::operator<
+// } // BDD::operator>=
 
 
-bool
-BDD::operator>(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return node != other.node && Cudd_bddLeq(mgr,other.node,node);
+// bool
+// BDD::operator<(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return node != other.node && Cudd_bddLeq(mgr,node,other.node);
 
-} // BDD::operator>
+// } // BDD::operator<
+
+
+// bool
+// BDD::operator>(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return node != other.node && Cudd_bddLeq(mgr,other.node,node);
+
+// } // BDD::operator>
 
 
 BDD
@@ -403,31 +403,31 @@ BDD::operator~() const
 } // BDD::operator~
 
 
-BDD
-BDD::operator*(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddAnd(mgr,node,other.node);
-    checkReturnValue(result);
-    return BDD(p, result);
+// BDD
+// BDD::operator*(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddAnd(mgr,node,other.node);
+//     checkReturnValue(result);
+//     return BDD(p, result);
 
-} // BDD::operator*
+// } // BDD::operator*
 
 
-BDD
-BDD::operator*=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddAnd(mgr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator*=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddAnd(mgr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // BDD::operator*=
+// } // BDD::operator*=
 
 
 BDD
@@ -442,46 +442,46 @@ BDD::operator&(
 } // BDD::operator&
 
 
-BDD
-BDD::operator&=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddAnd(mgr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator&=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddAnd(mgr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // BDD::operator&=
-
-
-BDD
-BDD::operator+(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddOr(mgr,node,other.node);
-    checkReturnValue(result);
-    return BDD(p, result);
-
-} // BDD::operator+
+// } // BDD::operator&=
 
 
-BDD
-BDD::operator+=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddOr(mgr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator+(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddOr(mgr,node,other.node);
+//     checkReturnValue(result);
+//     return BDD(p, result);
 
-} // BDD::operator+=
+// } // BDD::operator+
+
+
+// BDD
+// BDD::operator+=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddOr(mgr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
+
+// } // BDD::operator+=
 
 
 BDD
@@ -496,73 +496,73 @@ BDD::operator|(
 } // BDD::operator|
 
 
-BDD
-BDD::operator|=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddOr(mgr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator|=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddOr(mgr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // BDD::operator|=
-
-
-BDD
-BDD::operator^(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddXor(mgr,node,other.node);
-    checkReturnValue(result);
-    return BDD(p, result);
-
-} // BDD::operator^
+// } // BDD::operator|=
 
 
-BDD
-BDD::operator^=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddXor(mgr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator^(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddXor(mgr,node,other.node);
+//     checkReturnValue(result);
+//     return BDD(p, result);
 
-} // BDD::operator^=
+// } // BDD::operator^
 
 
-BDD
-BDD::operator-(
-  const BDD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddAnd(mgr,node,Cudd_Not(other.node));
-    checkReturnValue(result);
-    return BDD(p, result);
+// BDD
+// BDD::operator^=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddXor(mgr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // BDD::operator-
+// } // BDD::operator^=
 
 
-BDD
-BDD::operator-=(
-  const BDD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_bddAnd(mgr,node,Cudd_Not(other.node));
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// BDD
+// BDD::operator-(
+//   const BDD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddAnd(mgr,node,Cudd_Not(other.node));
+//     checkReturnValue(result);
+//     return BDD(p, result);
 
-} // BDD::operator-=
+// } // BDD::operator-
+
+
+// BDD
+// BDD::operator-=(
+//   const BDD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_bddAnd(mgr,node,Cudd_Not(other.node));
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
+
+// } // BDD::operator-=
 
 
 bool
@@ -600,44 +600,44 @@ ADD::operator=(
 } // ADD::operator=
 
 
-bool
-ADD::operator<=(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return Cudd_addLeq(mgr,node,other.node);
+// bool
+// ADD::operator<=(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return Cudd_addLeq(mgr,node,other.node);
 
-} // ADD::operator<=
-
-
-bool
-ADD::operator>=(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return Cudd_addLeq(mgr,other.node,node);
-
-} // ADD::operator>=
+// } // ADD::operator<=
 
 
-bool
-ADD::operator<(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return node != other.node && Cudd_addLeq(mgr,node,other.node);
+// bool
+// ADD::operator>=(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return Cudd_addLeq(mgr,other.node,node);
 
-} // ADD::operator<
+// } // ADD::operator>=
 
 
-bool
-ADD::operator>(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    return node != other.node && Cudd_addLeq(mgr,other.node,node);
+// bool
+// ADD::operator<(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return node != other.node && Cudd_addLeq(mgr,node,other.node);
 
-} // ADD::operator>
+// } // ADD::operator<
+
+
+// bool
+// ADD::operator>(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     return node != other.node && Cudd_addLeq(mgr,other.node,node);
+
+// } // ADD::operator>
 
 
 ADD
@@ -648,39 +648,39 @@ ADD::operator-() const
 } // ADD::operator-
 
 
-ADD
-ADD::operator*(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addTimes,node,other.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::operator*(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addTimes,node,other.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::operator*
+// } // ADD::operator*
 
-ADD
-ADD::operator/(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addDivide, node, other.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::operator/(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr, Cudd_addDivide, node, other.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::operator/
+// } // ADD::operator/
 
 
-ADD
-ADD::operator%(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr, Cudd_addModulus, node, other.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::operator%(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr, Cudd_addModulus, node, other.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::operator%
+// } // ADD::operator%
 
 
 ADD
@@ -697,17 +697,16 @@ ADD::operator*=(
 
 } // ADD::operator*=
 
+// ADD
+// ADD::operator+(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addPlus,node,other.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-ADD
-ADD::operator+(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addPlus,node,other.node);
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::operator+
+// } // ADD::operator+
 
 
 ADD
@@ -725,31 +724,31 @@ ADD::operator+=(
 } // ADD::operator+=
 
 
-ADD
-ADD::operator-(
-  const ADD& other) const
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addMinus,node,other.node);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::operator-(
+//   const ADD& other) const
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addMinus,node,other.node);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::operator-
+// } // ADD::operator-
 
 
-ADD
-ADD::operator-=(
-  const ADD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addMinus,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// ADD
+// ADD::operator-=(
+//   const ADD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addMinus,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // ADD::operator-=
+// } // ADD::operator-=
 
 
 ADD
@@ -772,19 +771,19 @@ ADD::operator&(
 } // ADD::operator&
 
 
-ADD
-ADD::operator&=(
-  const ADD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addTimes,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// ADD
+// ADD::operator&=(
+//   const ADD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addTimes,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // ADD::operator&=
+// } // ADD::operator&=
 
 
 ADD
@@ -799,19 +798,19 @@ ADD::operator|(
 } // ADD::operator|
 
 
-ADD
-ADD::operator|=(
-  const ADD& other)
-{
-    DdManager *mgr = checkSameManager(other);
-    DdNode *result = Cudd_addApply(mgr,Cudd_addOr,node,other.node);
-    checkReturnValue(result);
-    Cudd_Ref(result);
-    Cudd_RecursiveDeref(mgr,node);
-    node = result;
-    return *this;
+// ADD
+// ADD::operator|=(
+//   const ADD& other)
+// {
+//     DdManager *mgr = checkSameManager(other);
+//     DdNode *result = Cudd_addApply(mgr,Cudd_addOr,node,other.node);
+//     checkReturnValue(result);
+//     Cudd_Ref(result);
+//     Cudd_RecursiveDeref(mgr,node);
+//     node = result;
+//     return *this;
 
-} // ADD::operator|=
+// } // ADD::operator|=
 
 
 bool
@@ -2483,30 +2482,6 @@ ADD::OneZeroMaximum(
 } // ADD::OneZeroMaximum
 
 
-// ADD
-// ADD::Diff(
-//   const ADD& g) const
-// {
-//     DdManager *mgr = checkSameManager(g);
-//     DdNode *result = Cudd_addApply(mgr, Cudd_addDiff, node, g.node);
-//     checkReturnValue(result);
-//     return ADD(p, result);
-
-// } // ADD::Diff
-
-
-// ADD
-// ADD::Agreement(
-//   const ADD& g) const
-// {
-//     DdManager *mgr = checkSameManager(g);
-//     DdNode *result = Cudd_addApply(mgr, Cudd_addAgreement, node, g.node);
-//     checkReturnValue(result);
-//     return ADD(p, result);
-
-// } // ADD::Agreement
-
-
 ADD
 ADD::LShift(
   const ADD& g) const
@@ -2708,51 +2683,51 @@ ADD::Negate() const
 } // ADD::Negate
 
 
-ADD
-ADD::RoundOff(
-  int N) const
-{
-    DdManager *mgr = p->manager;
-    DdNode *result = Cudd_addRoundOff(mgr, node, N);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// ADD::RoundOff(
+//   int N) const
+// {
+//     DdManager *mgr = p->manager;
+//     DdNode *result = Cudd_addRoundOff(mgr, node, N);
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // ADD::RoundOff
-
-
-ADD
-Cudd::Walsh(
-  vector<ADD> x,
-  vector<ADD> y)
-{
-    int n = x.size();
-    DdNode **X = new DdNode *[n];
-    DdNode **Y = new DdNode *[n];
-    for (int i = 0; i < n; i++) {
-	X[i] = x[i].getNode();
-	Y[i] = y[i].getNode();
-    }
-    DdNode *result = Cudd_addWalsh(p->manager, X, Y, n);
-    delete [] X;
-    delete [] Y;
-    checkReturnValue(result);
-    return ADD(p, result);
-
-} // ADD::Walsh
+// } // ADD::RoundOff
 
 
-ADD
-Cudd::addResidue(
-  int n,
-  int m,
-  int options,
-  int top)
-{
-    DdNode *result = Cudd_addResidue(p->manager, n, m, options, top);
-    checkReturnValue(result);
-    return ADD(p, result);
+// ADD
+// Cudd::Walsh(
+//   vector<ADD> x,
+//   vector<ADD> y)
+// {
+//     int n = x.size();
+//     DdNode **X = new DdNode *[n];
+//     DdNode **Y = new DdNode *[n];
+//     for (int i = 0; i < n; i++) {
+// 	X[i] = x[i].getNode();
+// 	Y[i] = y[i].getNode();
+//     }
+//     DdNode *result = Cudd_addWalsh(p->manager, X, Y, n);
+//     delete [] X;
+//     delete [] Y;
+//     checkReturnValue(result);
+//     return ADD(p, result);
 
-} // Cudd::addResidue
+// } // ADD::Walsh
+
+
+// ADD
+// Cudd::addResidue(
+//   int n,
+//   int m,
+//   int options,
+//   int top)
+// {
+//     DdNode *result = Cudd_addResidue(p->manager, n, m, options, top);
+//     checkReturnValue(result);
+//     return ADD(p, result);
+
+// } // Cudd::addResidue
 
 
 BDD
