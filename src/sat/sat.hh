@@ -28,7 +28,7 @@
 
 // general purpose decls
 #include "satdefs.hh"
-#include "terms/bdd_terms.hh"
+#include "terms/ddterms.hh"
 #include "proof/proof.hh"
 #include "cuddObj.hh"
 
@@ -42,339 +42,140 @@
 
 namespace Minisat {
 
-    template <class Term>
-    class SAT;
-
-    // REMARK: this CNFization algorithm requires Term to be 0-1 ADDs
-    struct ADDHash {
-        inline long operator() (ADD term) const
-        {
-            DdNode *tmp = term.getRegularNode();
-            return (long) (tmp);
-        }
-    };
-    struct ADDEq {
-        inline bool operator() (const ADD x,
-                                const ADD y) const
-        { return x == y; }
-    };
-    typedef unordered_map<ADD, Var, ADDHash, ADDEq> ADD2VARMap;
-
-    struct VARHash {
-        inline long operator() (Var v) const
-        { return (long) (v); }
-    };
-    struct VAREq {
-        inline bool operator() (const Var x,
-                                const Var y) const
-        { return x == y; }
-    };
-    typedef unordered_map<Var, ADD, VARHash, VAREq> VAR2ADDMap;
-
-    struct GroupHash {
-        inline long operator() (group_t group) const
-        { return (long) (group); }
-    };
-    struct GroupEq {
-        inline bool operator() (const group_t x,
-                                const group_t y) const
-        { return x == y; }
-    };
-    typedef unordered_map<group_t, Var, GroupHash, GroupEq> Group2VARMap;
-
-    template <class Term>
-    class CNFizer {
+    class SAT : public IObject {
     public:
-        CNFizer(SAT<Term>* owner)
-            : f_owner(*owner)
-        { TRACE << "Initialized CNFizer instance @" << this << endl; }
-
-        ~CNFizer()
-        { TRACE << "Destroyed CNFizer instance @" << this << endl; }
-
-        void push(Term phi, const group_t group, const color_t color)
-        { push_single_node_cut(phi, group, color); }
-
-    protected:
-        // FIXME: recursive implementation, very inefficient
-        void push_single_node_cut(Term phi, const group_t group, const color_t color)
+        /**
+         * @brief Adds a new formula group to the SAT instance.
+         */
+        inline group_t new_group()
         {
-            ADDTermFactory& factory = dynamic_cast<ADDTermFactory&> (f_owner.factory());
-
-            // if constant or already seen, return
-            if (factory.is_false(phi) ||
-                factory.is_true(phi) ||
-                f_dd2var_map.find(phi) != f_dd2var_map.end()) return;
-
-            push_single_node_cut(factory.make_then(phi), group, color);
-            push_single_node_cut(factory.make_else(phi), group, color);
-
-            write_cnf(phi, group, color);
-        }
-
-        inline Var find_group_var(group_t group)
-        {
-            const Group2VARMap::iterator eye = f_groups_map.find(group);
-            if (eye != f_groups_map.end()) {
-                return (*eye).second;
-            }
-
-            Solver& solver = f_owner.solver();
-            Var res = solver.newVar();
-            DEBUG << "Adding VAR " << res << " for group " << group << endl;
-            f_groups_map.insert( make_pair<group_t, Var>(group, res));
+            group_t res = ++ f_next_group;
+            f_groups.insert(res);
 
             return res;
         }
 
-        inline Var cnf_var()
+        /**
+         * @brief Returns the complete set of defined SAT groups.
+         */
+        inline const Groups& groups() const
+        { return f_groups; }
+
+        /**
+         * @brief Adds a new interpolation color to the SAT instance.
+         */
+        inline color_t new_color()
         {
-            Solver& solver = f_owner.solver();
-            Var res = solver.newVar();
-            DEBUG << "Adding VAR " << res << " for CNF" << endl;
+            color_t res = ++ f_next_color;
+            f_colors.insert(res);
+
             return res;
         }
 
-        inline Var find_bdd_var(ADD phi)
-        {
-            const ADD2VARMap::iterator eye = f_dd2var_map.find(phi);
-            if (eye != f_dd2var_map.end()) {
-                return (*eye).second;
-            }
+        /**
+         * @brief Returns the complete set of defined interpolation
+         * colors.
+         */
+        inline const Colors& colors() const
+        { return f_colors; }
 
-            // generate new var and book it
-            Solver& solver = f_owner.solver();
-            Var res = solver.newVar();
-            DEBUG << "Adding VAR " << res << " for Term " << phi << endl;
-            f_dd2var_map.insert( make_pair<ADD, Var>(phi, res));
-            f_var2dd_map.insert( make_pair<Var, ADD>(res, phi));
-            return res;
+        /**
+         * @brief add a formula with a given group and color to the
+         * SAT instance.
+         */
+        inline void push(Term term,
+                         group_t group = MAINGROUP,
+                         color_t color = BACKGROUND)
+        { cnf_push_single_node_cut(term, group, color); }
+
+        /**
+         * @brief Solve all groups.
+         */
+        inline status_t solve()
+        { return sat_solve_groups(f_groups); }
+
+        /**
+         * @brief Solve only given groups.
+         */
+        inline status_t solve(const Groups& groups)
+        { return sat_solve_groups(groups); }
+
+        /**
+         * @brief Last solving status
+         */
+        inline status_t status() const
+        { return f_status; }
+
+        /**
+         * @brief Retrieve an interpolant model from the SAT
+         * instance. Remark: current status must be STATUS_UNSAT. An
+         * exception will be raised otherwise.
+         */
+        inline Term interpolant(const Colors& a)
+        {
+            assert (f_status == STATUS_UNSAT);
+            return itp_build_interpolant(a);
         }
 
-        // iface to v -> ADD internal map
-        inline ADD dd(Var v)
+        /**
+         * @brief SAT instancte ctor
+         */
+        SAT(DDTermFactory& factory)
+            : f_factory(factory)
+            , f_solver()
+            , f_next_group(0)
+            , f_next_color(0)
+        { TRACE << "Initialized SAT instance @" << this << endl; }
+
+        /**
+         * @brief SAT instance dctor
+         */
+        ~SAT()
+        { TRACE << "Destroyed SAT instance@" << this << endl; }
+
+    private:
+        // Term factory
+        DDTermFactory& f_factory;
+
+        // SAT solver
+        Solver f_solver;
+
+        // SAT groups
+        Groups f_groups;
+        group_t f_next_group;
+
+        // ITP groups (colors)
+        Colors f_colors;
+        color_t f_next_color;
+
+        status_t f_status;
+
+        // -- CNF ------------------------------------------------------------
+        Term2VarMap f_term2var_map;
+        inline Var term2var(Term t)
         {
-            VAR2ADDMap::const_iterator eye = f_var2dd_map.find(v);
-            if (eye != f_var2dd_map.end()) {
+            Term2VarMap::const_iterator eye = f_term2var_map.find(t);
+            if (eye != f_term2var_map.end()) {
                 return (*eye).second;
             }
 
             assert(0);
         }
 
-        void add_clause(vec<Lit>& ps, const color_t color)
+        Var2TermMap f_var2term_map;
+        inline Term var2term(Var v)
         {
-            Solver& solver = f_owner.solver();
+            Var2TermMap::const_iterator eye = f_var2term_map.find(v);
+            if (eye != f_var2term_map.end()) {
+                return (*eye).second;
+            }
 
-            TRACE << ps << endl;
-            solver.addClause_(ps, color);
+            assert(0);
         }
 
-        void write_cnf(Term phi, const group_t group, const color_t color)
-        {
-            ADDTermFactory& factory = dynamic_cast<ADDTermFactory &> (f_owner.factory());
+        Group2VarMap f_groups_map;
 
-            // DEBUG
-            phi.PrintMinterm();
-
-            /* Minisat vars */
-            Var g, f, v, t, e;
-
-            // CNF var
-            g = find_group_var(group);
-            f = cnf_var();
-
-            // node variable, Then/Else branches vars
-            v = find_bdd_var(phi); // this will be a new one by construction
-            t = find_bdd_var(factory.make_then(phi));
-            e = find_bdd_var(factory.make_else(phi));
-
-            { // group -> !f, v, e
-                vec<Lit> ps;
-                ps.push(mkLit(g, true));
-                ps.push(mkLit(f, true));
-                ps.push(mkLit(v, false));
-                ps.push(mkLit(e, false));
-                add_clause(ps, color);
-            }
-
-            { // group -> f, v, !e
-                vec<Lit> ps;
-                ps.push(mkLit(g, true));
-                ps.push(mkLit(f, false));
-                ps.push(mkLit(v, false));
-                ps.push(mkLit(e, false));
-                add_clause(ps, color);
-            }
-
-            { // group -> !f, !v, t
-                vec<Lit> ps;
-                ps.push(mkLit(g, true));
-                ps.push(mkLit(f, true));
-                ps.push(mkLit(v, true));
-                ps.push(mkLit(t, false));
-                add_clause(ps, color);
-            }
-
-            { // group -> f, !v, !t
-                vec<Lit> ps;
-                ps.push(mkLit(g, true));
-                ps.push(mkLit(f, false));
-                ps.push(mkLit(v, true));
-                ps.push(mkLit(t, false));
-                add_clause(ps, color);
-            }
-        } // write_cnf()
-
-    private:
-        SAT<Term>& f_owner; // the SAT instance
-        ADD2VARMap f_dd2var_map;
-        VAR2ADDMap f_var2dd_map;
-        Group2VARMap f_groups_map;
-    }; // CNFizer
-
-    template <class Term>
-    class ModelExtractor {
-    public:
-        ModelExtractor(SAT<Term>* owner)
-            : f_owner(*owner)
-        { TRACE << "Initialized ModelExtractor instance @" << this << endl; }
-
-        ~ModelExtractor()
-        { TRACE << "Destroyed ModelExtractor instance @" << this << endl; }
-
-        Term model()
-        { return f_owner.factory().make_false(); }
-
-    private:
-        SAT<Term>& f_owner; // the SAT instance
-    }; // ModelExtractor
-
-    template <class Term>
-    class Interpolator {
-
-    public:
-        Interpolator(SAT<Term>* owner)
-            : f_owner(*owner)
-        { TRACE << "Initialized Interpolator instance @" << this << endl; }
-
-        ~Interpolator()
-        { TRACE << "Destroyed Interpolator instance @" << this << endl; }
-
-        Term interpolant(const Colors& a)
-        {
-            // local accessors
-            // ProofManager& pm = *(f_owner.pm);
-            ProofManager& pm = f_owner.solver().proof_manager();
-            const ClauseAllocator& ca = f_owner.solver().clause_allocator();
-            InferenceRule& unsat_proof = pm.proof();
-            TermFactory<Term>& f_factory = f_owner.factory();
-
-            // internal cache for memoizing
-            R2T_Map r2t;
-
-            // [MP] setup internal structures
-            init_interpolation(a);
-
-            typedef vec<InferenceRule *> RulesStack;
-            RulesStack to_process; to_process.push(&unsat_proof);
-
-            while (0 != to_process.size()) {
-                InferenceRule *r = to_process.last();
-
-                if (r2t.has(r)) { to_process.pop(); continue; }
-
-                ClauseHypRule *hyp = NULL;
-                ResRule *rr = NULL;
-
-                // if c is root (hypothesis)
-                if (NULL != (hyp = dynamic_cast<ClauseHypRule *>(r))) {
-                    CRef cr = hyp->cref();
-
-                    to_process.pop();
-
-                    // if c in A -> p(c) := global(c)
-                    if (clause_is_of_A(cr)) {
-                        assert(!r2t.has(hyp));
-
-                        // [MP] inlined make_global
-                        const Clause& c = ca[cr];
-                        Term trm = f_factory.make_false();
-
-                        for (int i = 0, sz = c.size(); i < sz; ++i) {
-                            Lit p = c[i];
-
-                            if (lit_is_of_B(p)) {
-                                Var v = var(p);
-                                assert(var_is_of_A(v) && var_is_of_B(v));
-
-                                Term t = f_factory.make_var(v);
-                                if (NULL == t) continue; /* cnf var */
-
-                                if (sign(p)) { t = f_factory.make_not(t); }
-
-                                trm = f_factory.make_or(trm, t);
-                            }
-                        }
-
-                        if (NULL == trm) trm = f_factory.make_false(); // empty clause
-                        // -- (end of inlined)
-
-                        r2t.insert(hyp, trm);
-                    } /* clause is of A */
-
-                    else { // p(c) := TRUE
-                        assert(!r2t.has(hyp));
-                        r2t.insert(hyp, f_factory.make_true());
-                    }
-                }
-
-                else if (NULL != (rr = dynamic_cast<ResRule *>(r))) {
-                    InferenceRule* start = &rr->get_start();
-
-                    Term s = r2t.has(start) ? r2t[start] : f_factory.make_false();
-                    if (f_factory.is_false(s)) to_process.push(start);
-
-                    bool children_done = (!f_factory.is_false(s));
-                    for (int i = 0; i < rr->chain_size(); ++ i) {
-                        InferenceRule* ir = rr->chain_get_ith_rule(i);
-
-                        if (!r2t.has(ir)) {
-                            to_process.push(ir);
-                            children_done = false;
-                        }
-                    }
-
-                    if (children_done) {
-                        to_process.pop();
-
-                        for (int i = 0; i < rr->chain_size(); ++i) {
-
-                            Var pivot = rr->chain_get_ith_var(i);
-                            InferenceRule* ir = rr->chain_get_ith_rule(i);
-
-                            Term p = r2t.has(ir) ? r2t[ir] : f_factory.make_false();
-                            Term cur = f_factory.make_false();
-                            if (var_is_A_local(pivot)) {
-                                cur = f_factory.make_or(s, p);
-                            }
-                            else {
-                                cur = f_factory.make_and(s, p);
-                            }
-
-                            s = cur;
-                        }
-
-                        assert( !r2t.has(rr) ); r2t.insert(rr, s);
-                    }
-                } else assert(false);
-            } /* while */
-
-            assert (r2t.has(&unsat_proof));
-            return r2t[&unsat_proof];
-        } // interpolant()
-
-    protected:
+        // -- Interpolator -----------------------------------------------------
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
         typedef Map< InferenceRule* , Term, InferenceRuleHasher> R2T_Map;
 
@@ -384,68 +185,6 @@ namespace Minisat {
         // The set of variables belonging to A
         Set<Var> a_variables;
         Set<Var> b_variables;
-
-        // owner instance
-        SAT<Term>& f_owner;
-
-        void init_interpolation(const Colors& ga)
-        {
-            // local accessors
-            const Solver& solver = f_owner.solver();
-            ProofManager& pm = solver.proof_manager();
-            const ClauseAllocator& ca = solver.clause_allocator();
-
-            // logger << loglevel(2)
-            TRACE << "Initializing interpolation" << endl;
-
-            a_variables.clear();
-            b_variables.clear();
-
-            // // The set of input groups for A
-            // Set<int> ga;
-            // for (unsigned i = 0; i < n; ++ i) { int group = *(groups_of_a+i); ga.insert(group); }
-
-            /* [MP]: WTF?!? this is plain wrong design. There is no need to
-            // interfer with the solver to fetch this kind of
-            // information. This belongs to CNFizer, not the solver. */
-
-            // load clauses from Solver, for each clause
-            // decide whether its A or B according to the color in the
-            // hypothesis for that (original) clause
-            for (int i = 0, nclauses = solver.nClauses(); i < nclauses; i ++ ) {
-                CRef cr = solver.clauses[i];
-                ClauseHypRule& hyp = dynamic_cast<ClauseHypRule&> (pm.proof(cr));
-                const Clause& c = ca[cr];
-
-                if (ga.has(hyp.color())) {
-                    DEBUG << "clause " << c << " to A" << endl;
-                    assert (! a_clauses.has(cr));
-                    a_clauses.insert(cr);
-
-                    // register each var in the clause as belonging to A
-                    for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
-                        Var v = var(c[j]);
-                        if (! a_variables.has(v)) {
-                            DEBUG << "itp: adding var " << v << " to A" << endl;
-                            a_variables.insert(v);
-                        }
-                    }
-                }
-
-                else {
-                    DEBUG << "clause " << c << " to B" << endl;
-
-                    // register each var in the clause as belonging to B
-                    for (int j = 0, cl_size = c.size(); j < cl_size; j ++ ) {
-                        Var v = var(c[j]);
-                        if (! b_variables.has(v)) {
-                            DEBUG << "itp: adding var " << v << " to B" << endl;
-                            b_variables.insert(v);
-                        }
-                    }
-                }
-            } // for each literal in the clause
-        } // init_interpolation
 
         // [AG] here the definition of "local" is that given by McMillan:
         // for a pair of formulas (A, B), an atom x is local if it
@@ -480,167 +219,19 @@ namespace Minisat {
 
         inline bool clause_is_of_A(CRef cr) const
         { return a_clauses.has(cr); }
-    }; // Interpolator
 
-    template <class Term>
-    class SAT : public IObject {
-        friend class CNFizer<Term>;
-        friend class ModelExtractor<Term>;
-        friend class Interpolator<Term>;
+        // -- Low level services -----------------------------------------------
+        Var cnf_new_solver_var();
+        Var cnf_find_group_var(group_t group);
+        Var cnf_find_term_var(Term phi);
+        void cnf_push_single_node_cut(Term phi, const group_t group,
+                                      const color_t color);
+        void cnf_write(Term phi, const group_t group, const color_t color);
 
-    public:
-        /**
-         * @brief Adds a new formula group to the SAT instance.
-         */
-        group_t new_group()
-        {
-            group_t res = ++ f_next_group;
-            f_groups.insert(res);
+        Term itp_build_interpolant(const Colors& a);
+        void itp_init_interpolation(const Colors& ga);
 
-            return res;
-        }
-
-        /**
-         * @brief Returns the complete set of defined SAT groups.
-         */
-        Groups& groups()
-        { return f_groups; }
-
-        /**
-         * @brief Adds a new interpolation color to the SAT instance.
-         */
-        color_t new_color()
-        {
-            color_t res = ++ f_next_color;
-            f_colors.insert(res);
-
-            return res;
-        }
-
-        /**
-         * @brief Returns the complete set of defined interpolation
-         * colors.
-         */
-        Colors& colors()
-        { return f_colors; }
-
-        /**
-         * @brief add a formula with a given group and color to the
-         * SAT instance.
-         */
-        void push(Term t,
-                  group_t group = MAINGROUP,
-                  color_t color = BACKGROUND)
-        { f_cnfizer.push(t, group, color); }
-
-        /**
-         * @brief Solve all groups.
-         */
-        status_t solve()
-        { return solve_groups(f_groups); }
-
-        /**
-         * @brief Solve only given groups.
-         */
-        status_t solve(const Groups& groups)
-        { return solve_groups(groups); }
-
-        /**
-         * @brief Last solving status
-         */
-        status_t status()
-        { return f_status; }
-
-        /**
-         * @brief Retrieve a model from the SAT instance. Remark:
-         * current status must be STATUS_SAT. An exception will be
-         * raised otherwise.
-         */
-        Term model()
-        {
-            assert (f_status == STATUS_SAT);
-            return f_model_extractor.model();
-        }
-
-        /**
-         * @brief Retrieve an interpolant model from the SAT
-         * instance. Remark: current status must be STATUS_UNSAT. An
-         * exception will be raised otherwise.
-         */
-        Term interpolant(const Colors& a)
-        {
-            assert (f_status == STATUS_UNSAT);
-            return f_interpolator.interpolant(a);
-        }
-
-        SAT(TermFactory<Term>& factory)
-            : f_factory(factory)
-            , f_solver()
-            , f_cnfizer(this)
-            , f_model_extractor(this)
-            , f_interpolator(this)
-            , f_next_group(0)
-            , f_next_color(0)
-        { TRACE << "Initialized SAT instance @" << this << endl; }
-
-        ~SAT()
-        { TRACE << "Destroyed SAT instance@" << this << endl; }
-
-    protected:
-        // these methods are reserved for internal usage by sub-components.
-        TermFactory<Term>& factory() const
-        { return f_factory; }
-
-        Solver& solver()
-        { return f_solver; }
-
-    private:
-        // Term factory
-        TermFactory<Term>& f_factory;
-
-        // SAT solver
-        Solver f_solver;
-
-        // CNFizer
-        CNFizer<Term> f_cnfizer;
-
-        // ModelExtractor
-        ModelExtractor<Term> f_model_extractor;
-
-        // Interpolator
-        Interpolator <Term> f_interpolator;
-
-        Groups f_groups;
-        group_t f_next_group;
-
-        Colors f_colors;
-        color_t f_next_color;
-
-        status_t f_status;
-
-        // services
-        status_t solve_groups(const Groups& groups)
-        {
-            vec<Lit> assumptions;
-
-            // MTL Set interface is a bit clumsy here :-/
-            int bckt, bckts = groups.bucket_count();
-            for (bckt = 0; bckt < bckts ; ++ bckt) {
-                const vec<group_t>& gs = groups.bucket(bckt);
-                for (int i = 0; i < gs.size(); ++ i) {
-                    assumptions.push(mkLit(gs[i], true)); // a -> phi, negate a
-                }
-            }
-
-            f_status = f_solver.solve()
-                ? STATUS_SAT
-                : STATUS_UNSAT
-                ;
-
-            DEBUG << "status is " << f_status << endl;
-            return f_status;
-        }
-
+        status_t sat_solve_groups(const Groups& groups);
     }; // SAT instance
 
 }; // minisat

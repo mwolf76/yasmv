@@ -28,6 +28,7 @@
 #include <common.hh>
 #include <SolverTypes.hh>
 #include <Set.hh>
+#include <cuddObj.hh>
 
 namespace Minisat {
 
@@ -39,14 +40,7 @@ namespace Minisat {
         STATUS_UNKNOWN,
     } status_t;
 
-    ostream& operator<<(ostream& os, status_t status)
-    {
-        if (STATUS_SAT == status) os << "SAT";
-        else if (STATUS_UNSAT == status) os << "UNSAT";
-        else os << "??";
-
-        return os;
-    }
+    ostream& operator<<(ostream& os, status_t status);
 
     // move me!
     template<class K>
@@ -96,6 +90,46 @@ namespace Minisat {
 
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;
+
+    typedef ADD Term;
+    typedef unordered_set<ADD> Terms;
+
+    // this CNFization algorithm requires Term to be 0-1 ADDs
+    struct TermHash {
+        inline long operator() (Term term) const
+        {
+            DdNode *tmp = term.getRegularNode();
+            return (long) (tmp);
+        }
+    };
+    struct TermEq {
+        inline bool operator() (const Term phi,
+                                const Term psi) const
+        { return phi == psi; }
+    };
+    typedef unordered_map<Term, Var, TermHash, TermEq> Term2VarMap;
+
+    struct VarHash {
+        inline long operator() (Var v) const
+        { return (long) (v); }
+    };
+    struct VarEq {
+        inline bool operator() (const Var x,
+                                const Var y) const
+        { return x == y; }
+    };
+    typedef unordered_map<Var, Term, VarHash, VarEq> Var2TermMap;
+
+    struct GroupHash {
+        inline long operator() (group_t group) const
+        { return (long) (group); }
+    };
+    struct GroupEq {
+        inline bool operator() (const group_t x,
+                                const group_t y) const
+        { return x == y; }
+    };
+    typedef unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
 };
 
 #endif

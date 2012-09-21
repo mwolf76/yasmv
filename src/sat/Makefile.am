@@ -15,14 +15,14 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 
 
 PKG_HH = satdefs.hh sat.hh proof/simple.hh proof/interpolator.hh	\
-proof/proof.hh proof/terms.hh proof/bdd_terms.hh			\
-proof/bdd_interpolator.hh core/SolverTypes.hh core/Solver.hh		\
-mtl/Alloc.hh mtl/Sort.hh mtl/Set.hh mtl/Heap.hh mtl/Map.hh mtl/Alg.hh	\
-mtl/Vec.hh mtl/IntTypes.hh mtl/Queue.hh mtl/XAlloc.hh utils/Options.hh	\
-utils/solverlogger.hh utils/System.hh utils/ParseUtils.hh
+proof/proof.hh terms/terms.hh terms/ddterms.hh core/SolverTypes.hh	\
+core/Solver.hh mtl/Alloc.hh mtl/Sort.hh mtl/Set.hh mtl/Heap.hh		\
+mtl/Map.hh mtl/Alg.hh mtl/Vec.hh mtl/IntTypes.hh mtl/Queue.hh		\
+mtl/XAlloc.hh utils/Options.hh utils/solverlogger.hh utils/System.hh	\
+utils/ParseUtils.hh
 
 PKG_CC = proof/proof.cc core/Solver.cc utils/solverlogger.cc	\
-utils/Options.cc
+utils/Options.cc cnf.cc interpolator.cc sat.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

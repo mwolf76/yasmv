@@ -46,8 +46,8 @@ SATBMCFalsification::~SATBMCFalsification()
 
 void SATBMCFalsification::process()
 {
-    ADDTermFactory tf(CuddMgr::INSTANCE().dd());
-    SAT<ADD> engine (tf);
+    DDTermFactory tf(CuddMgr::INSTANCE().dd());
+    SAT engine (tf);
 
     const Modules& modules = f_model.modules();
     {
