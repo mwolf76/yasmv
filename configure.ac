@@ -31,6 +31,7 @@ BOOST_REQUIRE([])
 dnl Then look for specific Boost libraries you need:
 BOOST_REGEX
 BOOST_PROGRAM_OPTIONS
+BOOST_TEST
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
