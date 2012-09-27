@@ -25,6 +25,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #define Minisat_SolverTypes_h
 
 #include <assert.h>
+#include <iostream>
+using std::ostream;
 
 #include "mtl/IntTypes.hh"
 #include "mtl/Alg.hh"
@@ -94,6 +96,7 @@ const Lit lit_Error = { -1 };  // }
 #define l_Undef (lbool((uint8_t)2))
 
 class lbool {
+    friend ostream &operator<<(ostream &os, const lbool &lb);
     uint8_t value;
 
 public:
