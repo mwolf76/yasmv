@@ -54,6 +54,17 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     return res;
 }
 
+IEncoding_ptr EncodingMgr::find_encoding(ADD add)
+{
+    // const ADD2Enc::iterator eye = f_add2enc_map.find(add);
+    // if (eye != f_groups_map.end()) {
+    //     return (*eye).second;
+    // }
+
+    // assert(0);
+}
+
+
 // boolean 1(1 bit) var
 BooleanEncoding::BooleanEncoding()
     : Encoding()

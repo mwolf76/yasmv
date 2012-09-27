@@ -41,8 +41,24 @@ class IEncoding : public IObject {
 public:
     virtual ADD add() const =0;
 };
+
+// duplicate code!
+struct ADDHash {
+    inline long operator() (ADD term) const
+    {
+        DdNode *tmp = term.getRegularNode();
+        return (long) (tmp);
+    }
+};
+struct ADDEq {
+    inline bool operator() (const ADD phi,
+                            const ADD psi) const
+    { return phi == psi; }
+};
+
 typedef IEncoding* IEncoding_ptr;
-typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> Encodings;
+typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> FQExpr2EncMap;
+typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
 
 typedef vector<ADD> EncodingBits;
 
@@ -76,6 +92,9 @@ public:
     // used by the compiler
     IEncoding_ptr make_encoding(Type_ptr type);
 
+    // user by the SAT model evaluator
+    IEncoding_ptr find_encoding(ADD add);
+
 protected:
     EncodingMgr()
         : f_cudd(CuddMgr::INSTANCE().dd())
@@ -93,9 +112,19 @@ private:
     Cudd& f_cudd;
 
     /* low-level services */
-    Encodings f_register;
+    FQExpr2EncMap f_fqexpr2enc_map;
+    ADD2EncMap f_add2enc_map;
+
     void register_encoding(const FQExpr fqexpr, IEncoding_ptr encoding)
-    { f_register [ fqexpr ] = encoding; }
+    {
+        f_fqexpr2enc_map [ fqexpr ] = encoding;
+        // for (EncodingBits::iterator i = encoding->bits().begin();
+        //      i != encoding->bits().end(); ++ i) {
+        //     const ADD& add = *i;
+        //     f_add2enc_map [ add ] = encoding;
+        // }
+    }
+
 };
 
 class Encoding : public IEncoding {

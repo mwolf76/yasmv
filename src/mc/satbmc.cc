@@ -48,6 +48,7 @@ void SATBMCFalsification::process()
 {
     DDTermFactory tf(CuddMgr::INSTANCE().dd());
     SAT engine (tf);
+    EncodingMgr& enc_mgr (EncodingMgr::INSTANCE());
 
     const Modules& modules = f_model.modules();
     {
@@ -72,6 +73,15 @@ void SATBMCFalsification::process()
         } // modules
 
         engine.solve();
+        // if (engine.status() == STATUS_SAT) {
+        //     for (Terms::iterator i = engine.terms().begin();
+        //          i != engine.terms().end(); ++ i) {
+        //         Term& term = *i;
+        //         // IEncoding_ptr enc = enc_mgr.find_encoding(term);
+        //         lbool vl = engine.value(term);
+        //         TRACE << vl << endl;
+        //     }
+        // }
     }
 
     // Colors colors;
