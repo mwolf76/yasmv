@@ -1,6 +1,6 @@
 /**
- *  @file bdd_terms.hh
- *  @brief Generic bddterms support
+ *  @file ddterms.hh
+ *  @brief DD (ADD) terms support
  *
  *  This module contains the definitions for terms manipulation,
  *  specialized for cudd ADDs.
@@ -31,14 +31,14 @@
 
 namespace Minisat {
 
-    class ADDTermFactory : public TermFactory<ADD> {
+    class DDTermFactory : public TermFactory<ADD> {
     public:
-        ADDTermFactory(Cudd& cudd)
+        DDTermFactory(Cudd& cudd)
             : f_cudd(cudd)
-        { TRACE << "Initialized ADD Term Factory @ " << this << endl; }
+        { TRACE << "Initialized DD Term Factory @ " << this << endl; }
 
-        virtual ~ADDTermFactory()
-        { TRACE << "Deinitialized ADD Term Factory @ " << this << endl; }
+        virtual ~DDTermFactory()
+        { TRACE << "Deinitialized DD Term Factory @ " << this << endl; }
 
         // constants
         virtual ADD make_true()
@@ -66,16 +66,22 @@ namespace Minisat {
 
         virtual ADD make_then(ADD phi)
         {
-            DdNode *node = phi.getRegularNode();
-            assert (! cuddIsConstant(node));
+            DdNode *node = phi.getNode();
             return ADD( f_cudd, cuddT(node));
         }
         virtual ADD make_else(ADD phi)
         {
-            DdNode *node = phi.getRegularNode();
-            assert (! cuddIsConstant(node));
+            DdNode *node = phi.getNode();
             return ADD( f_cudd, cuddE(node));
         }
+
+        virtual void walk_zeroes(ADD phi, void *obj,
+                                 void (*cb)(void *obj, int *list, int size))
+        { phi.Callback(cb, obj, 0); }
+
+        virtual void walk_ones(ADD phi, void *obj,
+                               void (*cb)(void *obj, int *list, int size))
+        { phi.Callback(cb, obj, 1); }
 
     private:
         Cudd& f_cudd;
