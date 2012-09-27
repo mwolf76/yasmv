@@ -918,6 +918,9 @@ extern void Cudd_SymmProfile (DdManager *table, int lower, int upper);
 extern unsigned int Cudd_Prime (unsigned int p);
 extern int Cudd_Reserve(DdManager *manager, int amount);
 extern int Cudd_PrintMinterm (DdManager *manager, DdNode *node);
+extern int Cudd_MintermCallback(DdManager *manager, DdNode *node,
+                                void (*callback)(void *obj, int *list, int size),
+                                void *obj, int polarity);
 extern int Cudd_bddPrintCover (DdManager *dd, DdNode *l, DdNode *u);
 extern int Cudd_PrintDebug (DdManager *dd, DdNode *f, int n, int pr);
 extern int Cudd_DagSize (DdNode *node);

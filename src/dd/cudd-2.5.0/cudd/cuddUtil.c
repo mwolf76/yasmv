@@ -147,7 +147,9 @@ static char rcsid[] DD_UNUSED = "$Id: cuddUtil.c,v 1.83 2012/02/05 01:07:19 fabi
 #endif
 
 static	DdNode	*background, *zero;
-
+static  void (*gl_callback)(void *obj, int* list, int size);
+static  int  gl_polarity = 0;
+static  void *gl_obj = 0;
 static	long cuddRand = 0;
 static	long cuddRand2;
 static	long shuffleSelect;
@@ -171,6 +173,10 @@ extern "C" {
 
 static int dp2 (DdManager *dd, DdNode *f, st_table *t);
 static void ddPrintMintermAux (DdManager *dd, DdNode *node, int *list);
+static void ddCallbackAux(
+  DdManager * dd /* manager */,
+  DdNode * node /* current node */,
+  int * list /* current recursion path */);
 static int ddDagInt (DdNode *n);
 static int cuddNodeArrayRecur (DdNode *f, DdNodePtr *table, int index);
 static int cuddEstimateCofactor (DdManager *dd, st_table *table, DdNode * node, int i, int phase, DdNode ** ptr);
@@ -232,6 +238,47 @@ Cudd_PrintMinterm(
     }
     for (i = 0; i < manager->size; i++) list[i] = 2;
     ddPrintMintermAux(manager,node,list);
+    FREE(list);
+    return(1);
+
+} /* end of Cudd_PrintMinterm */
+
+/**Function********************************************************************
+
+  Synopsis    [Executes a callback on a disjoint sum of products.]
+
+  Description [Prints a disjoint sum of product cover for the function
+  rooted at node. Each product corresponds to a path from node to a
+  leaf node different from the logical zero, and different from the
+  background value (if polarity is 0, exactly the opposite if polarity
+  is non-zero).  Returns 1 if successful; 0 otherwise.]
+
+  SideEffects []
+
+  SeeAlso     [Cudd_PrintMinterm]
+
+******************************************************************************/
+int
+Cudd_MintermCallback(
+  DdManager * manager,
+  DdNode * node,
+  void (*callback)(void *obj, int *list, int size),
+  void *obj,
+  int polarity)
+{
+    int		i, *list;
+
+    background = manager->zero;
+    zero = Cudd_Not(manager->one);
+    list = ALLOC(int,manager->size);
+    if (list == NULL) {
+	manager->errorCode = CUDD_MEMORY_OUT;
+	return(0);
+    }
+    for (i = 0; i < manager->size; i++) list[i] = 2;
+    gl_callback = callback; assert(callback);
+    gl_obj = obj; gl_polarity = polarity;
+    ddCallbackAux(manager,node,list);
     FREE(list);
     return(1);
 
@@ -3160,6 +3207,63 @@ ddPrintMintermAux(
 
 } /* end of ddPrintMintermAux */
 
+
+// TODO: this code is horrible...
+/**Function********************************************************************
+
+  Synopsis    [Performs the recursive step of Cudd_.]
+
+  Description []
+
+  SideEffects [None]
+
+******************************************************************************/
+static void
+ddCallbackAux(
+  DdManager * dd /* manager */,
+  DdNode * node /* current node */,
+  int * list /* current recursion path */)
+{
+    DdNode	*N,*Nv,*Nnv;
+    int		index;
+    N = Cudd_Regular(node);
+
+    if (cuddIsConstant(N)) {
+	/* Terminal case: Print one cube based on the current recursion
+	** path, unless we have reached the background value (ADDs) or
+	** the logical zero (BDDs).
+	*/
+        int cond = gl_polarity
+            ? (node != background && node != zero)
+            : (node == background || node == zero)
+            ;
+	if (cond) {
+	    /* for (i = 0; i < dd->size; i++) { */
+	    /*     v = list[i]; */
+	    /*     if (v == 0) (void) fprintf(dd->out,"0"); */
+	    /*     else if (v == 1) (void) fprintf(dd->out,"1"); */
+	    /*     else (void) fprintf(dd->out,"-"); */
+	    /* } */
+	    /* (void) fprintf(dd->out," %lx\n", cuddV(node)); */
+            gl_callback(gl_obj, list, dd->size);
+	}
+    } else {
+	Nv  = cuddT(N);
+	Nnv = cuddE(N);
+	if (Cudd_IsComplement(node)) {
+	    Nv  = Cudd_Not(Nv);
+	    Nnv = Cudd_Not(Nnv);
+	}
+	index = N->index;
+	list[index] = 0;
+	ddCallbackAux(dd,Nnv,list);
+	list[index] = 1;
+	ddCallbackAux(dd,Nv,list);
+	list[index] = 2;
+    }
+    return;
+
+} /* end of ddCallbackAux */
 
 /**Function********************************************************************
 

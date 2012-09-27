@@ -181,6 +181,7 @@ public:
     bool EquivDC(const ABDD& G, const ABDD& D) const;
     double * CofMinterm() const;
     void PrintMinterm() const;
+    void Callback(void (*cb)(void *obj, int *list, int size), void *obj, int polarity) const;
     double CountMinterm(int nvars) const;
     double CountPath() const;
     BDD Support() const;
