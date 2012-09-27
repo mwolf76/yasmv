@@ -1,5 +1,5 @@
 /**
- *  @file sat.cc
+ *  @file solver.cc
  *  @brief SAT interface implementation
  *
  *  This module contains the interface for services that implement an
@@ -36,11 +36,11 @@ namespace Minisat {
         for (bckt = 0; bckt < bckts ; ++ bckt) {
             const vec<group_t>& gs = groups.bucket(bckt);
             for (int i = 0; i < gs.size(); ++ i) {
-                assumptions.push(mkLit(gs[i], true)); // a -> phi, negate a
+                assumptions.push(mkLit(gs[i], false)); // a -> phi
             }
         }
 
-        f_status = f_solver.solve()
+        f_status = f_solver.solve(assumptions)
             ? STATUS_SAT
             : STATUS_UNSAT
             ;

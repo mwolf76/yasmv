@@ -86,7 +86,8 @@ namespace Minisat {
         inline void push(Term term,
                          group_t group = MAINGROUP,
                          color_t color = BACKGROUND)
-        { cnf_push_single_node_cut(term, group, color); }
+        //  { cnf_push_single_node_cut(term, group, color); }
+        { cnf_push_no_cut(term, group, color); }
 
         /**
          * @brief Solve all groups.
@@ -117,6 +118,12 @@ namespace Minisat {
             return itp_build_interpolant(a);
         }
 
+        inline Terms& terms()
+        { return f_terms; }
+
+        inline lbool value(Term term)
+        { return f_solver.modelValue(term2var(term)); }
+
         /**
          * @brief SAT instancte ctor
          */
@@ -125,7 +132,10 @@ namespace Minisat {
             , f_solver()
             , f_next_group(0)
             , f_next_color(0)
-        { TRACE << "Initialized SAT instance @" << this << endl; }
+        {
+            f_groups.insert(0); // default_group is always enabled
+            TRACE << "Initialized SAT instance @" << this << endl;
+        }
 
         /**
          * @brief SAT instance dctor
@@ -163,7 +173,7 @@ namespace Minisat {
         }
 
         Var2TermMap f_var2term_map;
-        inline Term var2term(Var v)
+        inline int var2index(Var v)
         {
             Var2TermMap::const_iterator eye = f_var2term_map.find(v);
             if (eye != f_var2term_map.end()) {
@@ -174,6 +184,9 @@ namespace Minisat {
         }
 
         Group2VarMap f_groups_map;
+
+        // -- Model ------------------------------------------------------------
+        Terms f_terms;
 
         // -- Interpolator -----------------------------------------------------
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
@@ -221,17 +234,23 @@ namespace Minisat {
         { return a_clauses.has(cr); }
 
         // -- Low level services -----------------------------------------------
-        Var cnf_new_solver_var();
-        Var cnf_find_group_var(group_t group);
-        Var cnf_find_term_var(Term phi);
+        Lit cnf_new_solver_lit(bool inv);
+        Lit cnf_find_group_lit(group_t group);
+        Lit cnf_find_term_lit(int index, bool is_cmpl);
         void cnf_push_single_node_cut(Term phi, const group_t group,
                                       const color_t color);
-        void cnf_write(Term phi, const group_t group, const color_t color);
+        Lit cnf_push_single_node_cut_aux(Term phi, const group_t group,
+                                         const color_t color);
+        Lit cnf_write(Term phi, const group_t group, const color_t color);
 
         Term itp_build_interpolant(const Colors& a);
         void itp_init_interpolation(const Colors& ga);
 
         status_t sat_solve_groups(const Groups& groups);
+
+        friend void bdd_0minterm_bridge(void *obj, int *list, int size);
+        void cnf_push_no_cut(Term phi, const group_t group, const color_t color);
+        void cnf_push_no_cut_callback(int *list, int size);
     }; // SAT instance
 
 }; // minisat

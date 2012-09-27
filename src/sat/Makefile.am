@@ -21,8 +21,8 @@ mtl/Map.hh mtl/Alg.hh mtl/Vec.hh mtl/IntTypes.hh mtl/Queue.hh		\
 mtl/XAlloc.hh utils/Options.hh utils/solverlogger.hh utils/System.hh	\
 utils/ParseUtils.hh
 
-PKG_CC = proof/proof.cc core/Solver.cc utils/solverlogger.cc	\
-utils/Options.cc cnf.cc interpolator.cc sat.cc
+PKG_CC = proof/proof.cc core/Solver.cc utils/Options.cc cnf.cc	\
+logger.cc interpolator.cc solver.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

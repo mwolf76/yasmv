@@ -40,7 +40,13 @@ namespace Minisat {
         STATUS_UNKNOWN,
     } status_t;
 
-    ostream& operator<<(ostream& os, status_t status);
+    // streaming for various SAT related types
+    ostream &operator<<(ostream &os, const Lit &lit);
+    ostream &operator<<(ostream &os, const Clause *clause);
+    ostream &operator<<(ostream &os, const Clause &clause);
+    ostream &operator<<(ostream &os, const vec<Lit> &lits);
+    ostream &operator<<(ostream &os, const status_t &status);
+    ostream &operator<<(ostream &os, const lbool &value);
 
     // move me!
     template<class K>
@@ -92,22 +98,19 @@ namespace Minisat {
     typedef vector<Lit> Literals;
 
     typedef ADD Term;
-    typedef unordered_set<ADD> Terms;
+    typedef vector<ADD> Terms;
 
     // this CNFization algorithm requires Term to be 0-1 ADDs
-    struct TermHash {
-        inline long operator() (Term term) const
-        {
-            DdNode *tmp = term.getRegularNode();
-            return (long) (tmp);
-        }
+    struct IntHash {
+        inline long operator() (int term) const
+        { return (long) (term); }
     };
-    struct TermEq {
-        inline bool operator() (const Term phi,
-                                const Term psi) const
+    struct IntEq {
+        inline bool operator() (const int phi,
+                                const int psi) const
         { return phi == psi; }
     };
-    typedef unordered_map<Term, Var, TermHash, TermEq> Term2VarMap;
+    typedef unordered_map<int, Var, IntHash, IntEq> Term2VarMap;
 
     struct VarHash {
         inline long operator() (Var v) const
@@ -118,7 +121,7 @@ namespace Minisat {
                                 const Var y) const
         { return x == y; }
     };
-    typedef unordered_map<Var, Term, VarHash, VarEq> Var2TermMap;
+    typedef unordered_map<Var, int, VarHash, VarEq> Var2TermMap;
 
     struct GroupHash {
         inline long operator() (group_t group) const

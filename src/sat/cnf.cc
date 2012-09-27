@@ -26,113 +26,184 @@
 #include <sat.hh>
 
 namespace Minisat {
+    void bdd_0minterm_bridge(void *obj, int *list, int size)
+    {
+        assert(obj);
+        SAT* inst = reinterpret_cast<SAT *>(obj); // the SAT instance
+        inst->cnf_push_no_cut_callback(list, size);
+    }
+
+    void SAT::cnf_push_no_cut(Term phi, const group_t group, const color_t color)
+    { f_factory.walk_zeroes(phi, this, bdd_0minterm_bridge); }
+
+    void SAT::cnf_push_no_cut_callback(int *list, int size)
+    {
+        // FIXME...
+        group_t group = MAINGROUP;
+        color_t color = BACKGROUND;
+        int i, v;
+        vec<Lit> ps; ps.push(cnf_find_group_lit(group));
+
+        for (i = 0; i < size; i++) {
+            v = list[i];
+
+            if (v == 0) {
+                ps.push(cnf_find_term_lit(i, false));
+            }
+            else if (v == 1) {
+                ps.push(cnf_find_term_lit(i, true));
+            }
+            else {
+                // it's a don't care, but we need the variable for
+                // mapback REVIEW: it could be an interesting tweak to
+                // do with options, to allow the user to prevent don't
+                // care vars to make their way to minisat.
+                cnf_find_term_lit(i, false);
+            }
+        }
+
+        TRACE << ps << endl;
+        f_solver.addClause_(ps, color);
+    }
 
     // FIXME: recursive implementation, very inefficient
-    void SAT::cnf_push_single_node_cut(Term phi, const group_t group, const color_t color)
+    // void SAT::cnf_push_single_node_cut(Term phi, const group_t group, const color_t color)
+    // {
+    //     Lit g = cnf_find_group_lit(group);
+    //     Lit a = cnf_push_single_node_cut_aux(phi, group, color);
+
+    //     { // activating clause: g -> f
+    //         vec<Lit> ps;
+    //         ps.push(g); ps.push(a);
+    //         TRACE << ps << endl;
+    //         f_solver.addClause_(ps, color);
+    //     }
+    // }
+
+    // Lit SAT::cnf_push_single_node_cut_aux(Term phi, const group_t group, const color_t color)
+    // {
+    //     // if constant or already seen, return
+    //     if (f_factory.is_false(phi)) {
+    //         return mkLit(0, true); // false
+    //     }
+
+    //     if (f_factory.is_true(phi)) {
+    //         return mkLit(0, false); // true
+    //     }
+
+    //     Term2VarMap::iterator eye = f_term2var_map.find(phi);
+    //     if (eye != f_term2var_map.end()) {
+    //         Var v = eye->second;
+    //         return mkLit(v, Cudd_IsComplement(phi.getNode()));
+    //     }
+
+    //     cnf_push_single_node_cut_aux(f_factory.make_then(phi), group, color);
+    //     cnf_push_single_node_cut_aux(f_factory.make_else(phi), group, color);
+
+    //     return cnf_write(phi, group, color);
+    // }
+
+    Lit SAT::cnf_find_group_lit(group_t group)
     {
-        // if constant or already seen, return
-        if (f_factory.is_false(phi) ||
-            f_factory.is_true(phi) ||
-            f_term2var_map.find(phi) != f_term2var_map.end()) return;
-
-        cnf_push_single_node_cut(f_factory.make_then(phi), group, color);
-        cnf_push_single_node_cut(f_factory.make_else(phi), group, color);
-
-        cnf_write(phi, group, color);
-    }
-
-    Var SAT::cnf_find_group_var(group_t group)
-    {
+        Var v;
         const Group2VarMap::iterator eye = f_groups_map.find(group);
+
         if (eye != f_groups_map.end()) {
-            return (*eye).second;
+            v = eye->second;
+        }
+        else {
+            v = f_solver.newVar();
+            DEBUG << "Adding VAR " << v << " for group " << group << endl;
+            f_groups_map.insert( make_pair<group_t, Var>(group, v));
         }
 
-        Var res = f_solver.newVar();
-        DEBUG << "Adding VAR " << res << " for group " << group << endl;
-        f_groups_map.insert( make_pair<group_t, Var>(group, res));
-
-        return res;
+        return mkLit(v, true); // g -> ...
     }
 
-    Var SAT::cnf_new_solver_var()
+    Lit SAT::cnf_new_solver_lit(bool inv)
     {
-        Var res = f_solver.newVar();
-        DEBUG << "Adding VAR " << res << " for CNF" << endl;
-        return res;
+        Var v = f_solver.newVar();
+        DEBUG << "Adding VAR " << v << " for CNF" << endl;
+        return mkLit(v, inv);
     }
 
-    Var SAT::cnf_find_term_var(Term phi)
+    // memoize only positive terms
+    Lit SAT::cnf_find_term_lit(int index, bool is_cmpl)
     {
-        const Term2VarMap::iterator eye = f_term2var_map.find(phi);
+        Var v;
+        const Term2VarMap::iterator eye = f_term2var_map.find(index);
+
         if (eye != f_term2var_map.end()) {
-            return (*eye).second;
+            v = eye->second;
+        }
+        else {
+            // generate new var and book it
+            v = f_solver.newVar();
+            DEBUG << "Adding VAR " << v << " for Term (index = " << index << ") " << endl;
+
+            f_term2var_map.insert( make_pair<int, Var>(index, v));
+            f_var2term_map.insert( make_pair<Var, int>(v, index));
+            // f_terms.push_back(phi);
         }
 
-        // generate new var and book it
-        Var res = f_solver.newVar();
-        DEBUG << "Adding VAR " << res << " for Term " << phi << endl;
-        f_term2var_map.insert( make_pair<ADD, Var>(phi, res));
-        f_var2term_map.insert( make_pair<Var, ADD>(res, phi));
-        return res;
+        return mkLit(v, is_cmpl);
     }
 
-    void SAT::cnf_write(Term phi, const group_t group, const color_t color)
-    {
-        // DEBUG
-        phi.PrintMinterm();
+    // Lit SAT::cnf_write(Term phi, const group_t group, const color_t color)
+    // {
+    //     /* Minisat lits */
+    //     Lit g, f, v, t, e;
 
-        /* Minisat vars */
-        Var g, f, v, t, e;
+    //     // CNF var
+    //     g = cnf_find_group_lit(group);
+    //     f = cnf_new_solver_lit(Cudd_IsComplement(phi.getNode()));
 
-        // CNF var
-        g = cnf_find_group_var(group);
-        f = cnf_new_solver_var();
+    //     // node variable, Then/Else branches vars
+    //     v = cnf_find_term_lit(phi); // this will be a new one by construction
+    //     t = cnf_find_term_lit(f_factory.make_then(phi));
+    //     e = cnf_find_term_lit(f_factory.make_else(phi));
 
-        // node variable, Then/Else branches vars
-        v = cnf_find_term_var(phi); // this will be a new one by construction
-        t = cnf_find_term_var(f_factory.make_then(phi));
-        e = cnf_find_term_var(f_factory.make_else(phi));
+    //     { // group -> !f, v, e
+    //         vec<Lit> ps;
+    //         ps.push(g);
+    //         ps.push(~ f);
+    //         ps.push(  v);
+    //         ps.push(  e);
+    //         TRACE << ps << endl;
+    //         f_solver.addClause_(ps, color);
+    //     }
 
-        { // group -> !f, v, e
-            vec<Lit> ps;
-            ps.push(mkLit(g, true));
-            ps.push(mkLit(f, true));
-            ps.push(mkLit(v, false));
-            ps.push(mkLit(e, false));
-            TRACE << ps << endl;
-            f_solver.addClause_(ps, color);
-        }
+    //     { // group -> f, v, !e
+    //         vec<Lit> ps;
+    //         ps.push(g);
+    //         ps.push(  f);
+    //         ps.push(  v);
+    //         ps.push(~ e);
+    //         TRACE << ps << endl;
+    //         f_solver.addClause_(ps, color);
+    //     }
 
-        { // group -> f, v, !e
-            vec<Lit> ps;
-            ps.push(mkLit(g, true));
-            ps.push(mkLit(f, false));
-            ps.push(mkLit(v, false));
-            ps.push(mkLit(e, false));
-            TRACE << ps << endl;
-            f_solver.addClause_(ps, color);
-        }
+    //     { // group -> !f, !v, t
+    //         vec<Lit> ps;
+    //         ps.push(g);
+    //         ps.push(~ f);
+    //         ps.push(~ v);
+    //         ps.push(  t);
+    //         TRACE << ps << endl;
+    //         f_solver.addClause_(ps, color);
+    //     }
 
-        { // group -> !f, !v, t
-            vec<Lit> ps;
-            ps.push(mkLit(g, true));
-            ps.push(mkLit(f, true));
-            ps.push(mkLit(v, true));
-            ps.push(mkLit(t, false));
-            TRACE << ps << endl;
-            f_solver.addClause_(ps, color);
-        }
+    //     { // group -> f, !v, !t
+    //         vec<Lit> ps;
+    //         ps.push(g);
+    //         ps.push(  f);
+    //         ps.push(~ v);
+    //         ps.push(~ t);
+    //         TRACE << ps << endl;
+    //         f_solver.addClause_(ps, color);
+    //     }
 
-        { // group -> f, !v, !t
-            vec<Lit> ps;
-            ps.push(mkLit(g, true));
-            ps.push(mkLit(f, false));
-            ps.push(mkLit(v, true));
-            ps.push(mkLit(t, false));
-            TRACE << ps << endl;
-            f_solver.addClause_(ps, color);
-        }
-    } // write_cnf()
+    //     return f;
+    // } // write_cnf()
 
 };
