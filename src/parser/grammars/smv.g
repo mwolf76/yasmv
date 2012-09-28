@@ -34,7 +34,8 @@ options {
 #define PROP_EXPR 0
 #define LTL_EXPR 1
 #define CTL_EXPR 2
-// ...
+#define INV_EXPR 3
+#define INTERACT 4
 }
 
 @members {
@@ -44,7 +45,7 @@ options {
     TypeMgr& tm = TypeMgr::INSTANCE();
 }
 
-/* Toplevel */
+/* SMV model Toplevel */
 smv
 scope {
     IModel_ptr model;
@@ -56,6 +57,25 @@ scope {
     $smv::mode = PROP_EXPR;
 }
     : modules ';'?
+    ;
+
+/* Scripting sub-system Toplevel */
+cmd
+scope {
+    IInterpreter_ptr interpreter;
+}
+
+@init {
+    $smv::interpreter = &Intepreter::INSTANCE();
+    $smv::mode = PROP_EXPR;
+}
+
+    : commands ';'?
+    ;
+
+commands returns [Expr_ptr res]
+    : 'QUIT'
+      { $res = make_cmd("/quit"); }
     ;
 
 /** CTL  properties */
@@ -122,11 +142,91 @@ unary_ctl_formula returns [Expr_ptr res]
        { $res = formula; }
 	;
 
+/* Commands to be implemented:
+
+ * Pure SAT
+ SAT <expr> - pure satisfiability problem on a pure-propositional. Requires variable definitions in separate model.
+ Returns UNSAT, or a witness #
+
+ NORMALIZE <expr> - prints the normal form on a pure-propositional. Requires variable definitions in separate model.
+ Returns normalized expr
+
+ * I/O
+ LOAD MODEL <filename> - load a new model from file
+ Returns OK, <0 errcode otherwise
+
+ DUMP MODEL <filename> - save a new model to file
+ Returns OK, <0 errcode otherwise
+
+ LOAD TRACE <filename> - load a trace from .json file
+ Returns trace#, <0 errcode otherwise
+
+ DUMP TRACE #trace [TO <filename>] - save a trace to .json file
+ Returns OK, <0 errcode otherwise
+
+ * Model
+ ANALYZE - analyzes the model and prints stats to stdout.
+ Returns nothing.
+
+ * MC
+ CHECK CTLSPEC <expr>, model checking of given properties.
+ Return witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
+
+ CHECK LTLSPEC <expr>, model checking of given properties.
+ Return witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
+
+ CHECK INVSPEC <expr>, model checking of given properties.
+ Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
+
+ SIMULATE [INIT | #steps] [DRY] [INTERACTIVE] [CONSTRAINED constraint1] ... [FOLLOWING #trace]
+ Returns witness index or UNSAT if simulation failed.
+
+ * TRACE
+
+ TRACES
+ PRINT TRACE
+
+ * OTHERS
+
+ NOW
+ Returns time in millisecs
+
+ FORMAT "FMT", ...
+ Returns a formatted message.
+
+ PRINT "FMT", ...
+ Same as above. Always prints to STDOUT.
+
+ SHELL "string"
+ Returns the output of an embedded shell command.
+
+ SET "name" TO "value" (eg. SET general.verbosity TO TRUE)
+ Returns current value
+
+ GET "name"
+ Returns current value
+
+ * CONTROL
+ LET <var> BE <expr> (e.g. LET t0 BE NOW -q)
+
+ IF (...) DO  ... END, if control block
+ WHILE (...) DO ... END, while control block
+
+ QUIT [-r retcode], terminates the program
+*/
+
+/** INVARIANT properties */
+inv_spec returns [Expr_ptr res]
+@init { }
+    : ( 'INVARSPEC' | 'INVSPEC' ) formula=untimed_expression
+      { $res = formula; }
+    ;
+
 /** LTL properties */
 ltl_spec returns [Expr_ptr res]
 @init { }
     : 'LTLSPEC' formula=ltl_formula
-     { $res = formula; }
+      { $res = formula; }
 	;
 
 ltl_formula returns [Expr_ptr res]
@@ -182,9 +282,11 @@ property
     : formula=ltl_spec
       { $modules::module->add_ltlspec(formula); }
 
-    |
-      formula=ctl_spec
+    | formula=ctl_spec
       { $modules::module->add_ctlspec(formula); }
+
+    | formula=inv_spec
+      { $modules::module->add_invspec(formula); }
     ;
 
 formal_params
