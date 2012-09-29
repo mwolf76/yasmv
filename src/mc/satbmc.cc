@@ -24,13 +24,13 @@
  *
  **/
 #include <satbmc.hh>
-#include <sat.hh>
-
 using namespace Minisat;
 
 SATBMCFalsification::SATBMCFalsification(IModel& model)
   : MCAlgorithm(model)
-  // , f_compiler()
+  , f_factory(CuddMgr::INSTANCE().dd())
+  , f_engine(f_factory)
+  , f_compiler()
 {
   TRACE << "Creating SATBMCFalsification algorithm instance "
         << get_param("alg_name") << " @" << this
@@ -44,52 +44,94 @@ SATBMCFalsification::~SATBMCFalsification()
         << endl;
 }
 
+void SATBMCFalsification::assert_fsm_init()
+{
+    const Modules& modules = f_model.modules();
+    for (Modules::const_iterator m = modules.begin();
+         m != modules.end(); ++ m) {
+
+        Module& module = dynamic_cast <Module&> (*m->second);
+        TRACE << "processing module '" << module << "' " << endl;
+
+        const ExprVector init = module.init();
+        for (ExprVector::const_iterator init_eye = init.begin();
+             init_eye != init.end(); init_eye ++) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*init_eye);
+            TRACE << "compiling INIT " << ctx << "::" << body << endl;
+
+            ADD add = f_compiler.process(ctx, body, 0);
+            f_engine.push(add);
+        } // for init
+
+        const ExprVector invar = module.invar();
+        for (ExprVector::const_iterator invar_eye = invar.begin();
+             invar_eye != invar.end(); invar_eye ++) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*invar_eye);
+            TRACE << "compiling INVAR " << ctx << "::" << body << endl;
+
+            ADD add = f_compiler.process(ctx, body, 0);
+            f_engine.push(add);
+        } // for invar
+    } // modules
+}
+
+void SATBMCFalsification::assert_fsm_trans(step_t time)
+{
+    const Modules& modules = f_model.modules();
+    for (Modules::const_iterator m = modules.begin();
+         m != modules.end(); ++ m) {
+
+        Module& module = dynamic_cast <Module&> (*m->second);
+        TRACE << "processing module '" << module << "' " << endl;
+
+        const ExprVector trans = module.trans();
+        for (ExprVector::const_iterator trans_eye = trans.begin();
+             trans_eye != trans.end(); trans_eye ++) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*trans_eye);
+            TRACE << "compiling TRANS " << ctx << "::" << body << endl;
+
+            ADD add = f_compiler.process(ctx, body, time);
+            f_engine.push(add);
+        } // for trans
+
+        // here it is necessary to add only next state invar, because
+        // curr state invar have already been taken care of.
+        const ExprVector invar = module.invar();
+        for (ExprVector::const_iterator invar_eye = invar.begin();
+             invar_eye != invar.end(); invar_eye ++) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*invar_eye);
+            TRACE << "compiling INVAR " << ctx << "::" << body << endl;
+
+            ADD add = f_compiler.process(ctx, body, 1 + time); // next
+            f_engine.push(add);
+        } // for invar
+
+    } // modules
+}
+
+void SATBMCFalsification::assert_violation(step_t time)
+{
+}
+
+
 void SATBMCFalsification::process()
 {
-    DDTermFactory tf(CuddMgr::INSTANCE().dd());
-    SAT engine (tf);
-    EncodingMgr& enc_mgr (EncodingMgr::INSTANCE());
+    step_t i, k = 10; // TODO
 
-    const Modules& modules = f_model.modules();
-    {
-        time_t step = 0;
-        for (Modules::const_iterator m = modules.begin();
-             m != modules.end(); ++ m) {
-
-            Module& module = dynamic_cast <Module&> (*m->second);
-            TRACE << "processing module '" << module << "' " << endl;
-
-            const ExprVector init = module.init();
-            for (ExprVector::const_iterator init_eye = init.begin();
-                 init_eye != init.end(); init_eye ++) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*init_eye);
-                TRACE << "compiling INIT " << ctx << "::" << body << endl;
-
-                ADD add = f_compiler.process(ctx, body, step);
-                engine.push(add);
-            } // for init
-        } // modules
-
-        engine.solve();
-        // if (engine.status() == STATUS_SAT) {
-        //     for (Terms::iterator i = engine.terms().begin();
-        //          i != engine.terms().end(); ++ i) {
-        //         Term& term = *i;
-        //         // IEncoding_ptr enc = enc_mgr.find_encoding(term);
-        //         lbool vl = engine.value(term);
-        //         TRACE << vl << endl;
-        //     }
-        // }
+    assert_fsm_init();
+    for (i = 0; i < k; ++ i) {
+        assert_fsm_trans(i);
     }
 
-    // Colors colors;
-    // BDD a = engine->interpolant(colors);
-    // BDD b = engine->model();
+    assert_violation(k);
 
-
-    for (time_t t = 0; t < 10; ++ t) {
-
-    }
+    f_engine.solve();
 }
