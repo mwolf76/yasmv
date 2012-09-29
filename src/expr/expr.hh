@@ -522,10 +522,10 @@ public:
         AtomPoolHit ah = f_atom_pool.insert(atom);
         const Atom& pooled_atom =  (* ah.first);
 
-        if (ah.second) {
-            DEBUG << "Added new atom to pool: '"
-                  << pooled_atom << "'" << endl;
-        }
+        // if (ah.second) {
+        //     DEBUG << "Added new atom to pool: '"
+        //           << pooled_atom << "'" << endl;
+        // }
 
         // no copy occurs here
         return make_expr(pooled_atom);
@@ -655,10 +655,10 @@ private:
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
 
-        if (eh.second) {
-            DEBUG << "Added new expr to pool: '"
-                  << pooled_expr << "'" << endl;
-        }
+        // if (eh.second) {
+        //     DEBUG << "Added new expr to pool: '"
+        //           << pooled_expr << "'" << endl;
+        // }
 
         return pooled_expr;
     }

@@ -146,8 +146,8 @@ Module::Module(const Expr_ptr name)
 
 void Module::add_formalParam(Expr_ptr identifier)
 {
-    TRACE << "Module " << (*this)
-          << ", added param " << identifier << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added param " << identifier << endl;
     f_formalParams.push_back(identifier);
 }
 
@@ -161,36 +161,36 @@ void Module::add_isaDecl(Expr_ptr identifier)
 
 void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
 {
-    TRACE << "Module " << (*this)
-          << ", added local var " << var << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added local var " << var << endl;
     f_localVars.insert(make_pair<FQExpr,
                        IVariable_ptr>(FQExpr(expr(), name), var));
 }
 
 void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
 {
-    TRACE << "Module " << (*this)
-          << ", added local def " << name << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added local def " << name << endl;
     f_localDefs.insert(make_pair<FQExpr,
                        IDefine_ptr>(FQExpr(expr(), name), body));
 }
 
 void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
 {
-    TRACE << "Module " << (*this)
-          << ", added local const " << name << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added local const " << name << endl;
     f_localConsts.insert(make_pair<FQExpr,
                          IConstant_ptr>(FQExpr(expr(), name), k));
 }
 
 void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
 {
-    TRACE << "Module " << (*this)
-          << ", added assign "
-          << lvalue
-          << " := "
-          << def->body()
-          << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added assign "
+    //       << lvalue
+    //       << " := "
+    //       << def->body()
+    //       << endl;
 
     f_assgn.insert(make_pair<FQExpr,
                    IDefine_ptr>(FQExpr(expr(), lvalue), def));
@@ -198,49 +198,49 @@ void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
 
 void Module::add_init(Expr_ptr expr)
 {
-    TRACE << "Module " << (*this)
-          << ", added INIT " << expr << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added INIT " << expr << endl;
     f_init.push_back(expr);
 }
 
 void Module::add_invar(Expr_ptr expr)
 {
-    TRACE << "Module " << (*this)
-          << ", added INVAR " << expr << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added INVAR " << expr << endl;
     f_invar.push_back(expr);
 }
 
 void Module::add_trans(Expr_ptr expr)
 {
-    TRACE << "Module " << (*this)
-          << ", added TRANS " << expr << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added TRANS " << expr << endl;
     f_trans.push_back(expr);
 }
 
 void Module::add_fairness(Expr_ptr expr)
 {
-    TRACE << "Module " << (*this)
-          << ", added FAIRNESS " << expr << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added FAIRNESS " << expr << endl;
     f_fair.push_back(expr);
 }
 
 void Module::add_invspec(Expr_ptr formula)
 {
-    TRACE << "Module " << (*this)
-          << ", added INVSPEC " << formula << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added INVSPEC " << formula << endl;
     f_invspecs.push_back(formula);
 }
 
 void Module::add_ltlspec(Expr_ptr formula)
 {
-    TRACE << "Module " << (*this)
-          << ", added LTLSPEC " << formula << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added LTLSPEC " << formula << endl;
     f_ltlspecs.push_back(formula);
 }
 
 void Module::add_ctlspec(Expr_ptr formula)
 {
-    TRACE << "Module " << (*this)
-          << ", added CTLSPEC " << formula << endl;
+    // TRACE << "Module " << (*this)
+    //       << ", added CTLSPEC " << formula << endl;
     f_ctlspecs.push_back(formula);
 }
