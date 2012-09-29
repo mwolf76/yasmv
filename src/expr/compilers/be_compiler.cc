@@ -55,6 +55,7 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     // remove previous results
     f_add_stack.clear();
     f_ctx_stack.clear();
+    f_time_stack.clear();
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
