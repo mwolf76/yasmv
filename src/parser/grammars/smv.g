@@ -26,6 +26,9 @@ options {
 
 @header {
 #include <common.hh>
+
+/* cmd subsystem */
+#include <cmd.hh>
 #include <expr.hh>
 #include <types.hh>
 #include <expr_mgr.hh>
@@ -43,6 +46,9 @@ options {
     ExprMgr& em = ExprMgr::INSTANCE();
     ModelMgr& mm = ModelMgr::INSTANCE();
     TypeMgr& tm = TypeMgr::INSTANCE();
+
+    // cmd subsystem
+    CommandMgr& cm = CommandMgr::INSTANCE();
 }
 
 /* SMV model Toplevel */
@@ -60,87 +66,17 @@ scope {
     ;
 
 /* Scripting sub-system Toplevel */
-cmd
+cmd returns [Command_ptr res]
 scope {
-    IInterpreter_ptr interpreter;
+    int mode;
 }
 
 @init {
-    $smv::interpreter = &Intepreter::INSTANCE();
-    $smv::mode = PROP_EXPR;
+    $cmd::mode = PROP_EXPR;
 }
 
-    : commands ';'?
+    : commands
     ;
-
-commands returns [Expr_ptr res]
-    : 'QUIT'
-      { $res = make_cmd("/quit"); }
-    ;
-
-/** CTL  properties */
-ctl_spec returns [Expr_ptr res]
-@init { }
-    : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
-     { $res = formula; }
-	;
-
-ctl_formula returns [Expr_ptr res]
-@init { int prev_mode; }
-	:
-        { prev_mode = $smv::mode; $smv::mode= CTL_EXPR; }
-        formula=binary_ctl_formula
-
-        { $smv::mode = prev_mode; $res = formula; }
-    ;
-
-binary_ctl_formula returns [Expr_ptr res]
-@init { }
-	:	lhs=unary_ctl_formula
-        { $res = lhs; }
-        (
-           'AU' rhs=unary_ctl_formula
-           { $res = em.make_AU($res, rhs); }
-
-        |
-           'EU' rhs=unary_ctl_formula
-           { $res = em.make_EU($res, rhs); }
-
-        |
-           'AR' rhs=unary_ctl_formula
-           { $res = em.make_AR($res, rhs); }
-
-        |
-           'ER' rhs=unary_ctl_formula
-           { $res = em.make_ER($res, rhs); }
-
-        )*
-	;
-
-unary_ctl_formula returns [Expr_ptr res]
-@init { }
-	:
-       'AG' formula=unary_ctl_formula
-       { $res = em.make_AG(formula); }
-    |
-       'EG' formula=unary_ctl_formula
-       { $res = em.make_EG(formula); }
-    |
-       'AF' formula=unary_ctl_formula
-       { $res = em.make_AF(formula); }
-    |
-       'EF' formula=unary_ctl_formula
-       { $res = em.make_EF(formula); }
-    |
-       'AX' formula=unary_ctl_formula
-       { $res = em.make_AX(formula); }
-    |
-       'EX' formula=unary_ctl_formula
-       { $res = em.make_EX(formula); }
-
-    |   formula=untimed_expression
-       { $res = formula; }
-	;
 
 /* Commands to be implemented:
 
@@ -214,6 +150,75 @@ unary_ctl_formula returns [Expr_ptr res]
 
  QUIT [-r retcode], terminates the program
 */
+commands returns [Command_ptr res]
+    :
+        'QUIT' { $res = cm.make_quit(); }
+
+    ;
+
+/** CTL  properties */
+ctl_spec returns [Expr_ptr res]
+@init { }
+    : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
+     { $res = formula; }
+	;
+
+ctl_formula returns [Expr_ptr res]
+@init { int prev_mode; }
+	:
+        { prev_mode = $smv::mode; $smv::mode= CTL_EXPR; }
+        formula=binary_ctl_formula
+
+        { $smv::mode = prev_mode; $res = formula; }
+    ;
+
+binary_ctl_formula returns [Expr_ptr res]
+@init { }
+	:	lhs=unary_ctl_formula
+        { $res = lhs; }
+        (
+           'AU' rhs=unary_ctl_formula
+           { $res = em.make_AU($res, rhs); }
+
+        |
+           'EU' rhs=unary_ctl_formula
+           { $res = em.make_EU($res, rhs); }
+
+        |
+           'AR' rhs=unary_ctl_formula
+           { $res = em.make_AR($res, rhs); }
+
+        |
+           'ER' rhs=unary_ctl_formula
+           { $res = em.make_ER($res, rhs); }
+
+        )*
+	;
+
+unary_ctl_formula returns [Expr_ptr res]
+@init { }
+	:
+       'AG' formula=unary_ctl_formula
+       { $res = em.make_AG(formula); }
+    |
+       'EG' formula=unary_ctl_formula
+       { $res = em.make_EG(formula); }
+    |
+       'AF' formula=unary_ctl_formula
+       { $res = em.make_AF(formula); }
+    |
+       'EF' formula=unary_ctl_formula
+       { $res = em.make_EF(formula); }
+    |
+       'AX' formula=unary_ctl_formula
+       { $res = em.make_AX(formula); }
+    |
+       'EX' formula=unary_ctl_formula
+       { $res = em.make_EX(formula); }
+
+    |   formula=untimed_expression
+       { $res = formula; }
+	;
 
 /** INVARIANT properties */
 inv_spec returns [Expr_ptr res]

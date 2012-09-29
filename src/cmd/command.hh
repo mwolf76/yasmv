@@ -23,43 +23,59 @@
 #define COMMAND_H
 
 #include <common.hh>
+#include <interpreter.hh>
 
-namespace Command {
+class ICommand : public IObject {
+public:
+    // functor-pattern
+    void virtual operator()() =0;
 
-    class ICommand : IObject {
-    public:
-        // abstract dctor
-        virtual ~ICommand() =0;
+    // representation
+    friend ostream& operator<<(ostream& os, ICommand& cmd);
+};
 
-        // functor-pattern
-        virtual operator()() =0;
-    };
+// -- command definitions --------------------------------------------------
+class Command : public ICommand {
+public:
+    Command(Interpreter& owner);
+    virtual ~Command();
 
-    // -- command definitions --------------------------------------------------
-    class Command : public class ICommand {
-    public:
-        Command();
-        virtual ~Command();
-    };
+protected:
+    Interpreter& f_owner;
+};
+typedef class ICommand* Command_ptr;
 
-    class FormatCommand : Command {
-    public:
-        FormatCommand(const char *fmt, ...);
-        virtual ~FormatCommand();
+class LoadModelCommand : public Command {
+public:
+    LoadModelCommand(Interpreter& owner, const string& filename);
+    virtual ~LoadModelCommand();
 
-    private:
-        const char *fmt;
-    };
+    void virtual operator()() =0;
 
-    class QuitCommand : Command {
-    public:
-        QuitCommand(int retcode);
-        virtual ~QuitCommand();
+private:
+    string f_filename;
+};
 
-    private:
-        int f_retcode;
-    };
+class FormatCommand : public Command {
+public:
+    FormatCommand(const char *fmt, ...);
+    virtual ~FormatCommand();
 
+    void virtual operator()() =0;
+
+private:
+    const char *fmt;
+};
+
+class QuitCommand : public Command {
+public:
+    QuitCommand(Interpreter& owner, int retcode);
+    virtual ~QuitCommand();
+
+    void virtual operator()();
+
+private:
+    int f_retcode;
 };
 
 #endif

@@ -129,6 +129,7 @@ AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+                 src/cmd/Makefile
                  src/compile/Makefile
                  src/dd/Makefile
 		 src/expr/Makefile

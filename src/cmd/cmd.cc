@@ -1,5 +1,5 @@
 /*
- * @file command.cc
+ * @file cmd.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,43 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <common.hh>
-#include <command.hh>
+#include <cmd.hh>
 
-Command::Command(Interpreter& owner)
-    : f_owner(owner)
-{ DEBUG << "Initialized command @" << this << endl;
-}
-
-Command::~Command()
-{ DEBUG << "Deinitialized command @" << this << endl; }
-
-// FormatCommand::FormatCommand()
-// {}
-
-// FormatCommand::~FormatCommand()
-// {}
-
-LoadModelCommand::LoadModelCommand(Interpreter& owner, const string &filename)
-    : Command(owner)
-    , f_filename(filename)
-{}
-
-LoadModelCommand::~LoadModelCommand()
-{}
-
-extern void parseFile(const char* fName); // in utils.cc
-void LoadModelCommand::operator()()
-{ parseFile(f_filename.c_str()); }
-
-QuitCommand::QuitCommand(Interpreter& owner, int retcode)
-    : Command(owner)
-    , f_retcode(retcode)
-{}
-
-QuitCommand::~QuitCommand()
-{}
-
-// sends a signal to the owner
-void QuitCommand::operator()()
-{ f_owner.quit(f_retcode); }
+// static initialization
+CommandMgr_ptr CommandMgr::f_instance = NULL;
