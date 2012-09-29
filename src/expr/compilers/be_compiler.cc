@@ -66,22 +66,31 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
           << ctx << "::" << body
           << endl;
 
-    // invoke walker on the body of the expr to be processed
-    (*this)(body);
+    process_aux(body);
 
+    // sanity conditions
     assert(1 == f_add_stack.size());
-    ADD add = f_add_stack.back();
+    assert(1 == f_ctx_stack.size());
+    assert(1 == f_time_stack.size());
 
+    ADD add = f_add_stack.back();
     return add;
 }
+
+// support for re-entrant compilation
+void BECompiler::process_aux(Expr_ptr body)
+{
+    // invoke walker on the body of the expr to be processed
+    (*this)(body);
+}
+
 
 void BECompiler::pre_hook()
 {}
 void BECompiler::post_hook()
 {
-    ADD add = f_add_stack.back();
-    add.PrintMinterm();
-
+    // ADD add = f_add_stack.back();
+    // add.PrintMinterm();
     // TODO: assert it's a 0-1 ADD
 }
 
@@ -575,19 +584,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         f_add_stack.push_back(enc->add());
     }
 
-    // ... or a define? (re-entrant invocation)
+    // ... or a define? needs to be compiled (re-entrant invocation)
     else if (symb->is_define()) {
-        Expr_ptr body = NULL;
-        while (symb->is_define()) {
-            body = symb->as_define().body();
-            symb = model.fetch_symbol(ctx, body);
-        }
-
-        // walk body in given ctx
-        // f_ctx_stack.push_back(ctx); FIXME
-
-        // invoke walker on the body of the expr to be processed
-        (*this)(body);
+        process_aux(symb->as_define().body());
     }
 
     // or what?!?
