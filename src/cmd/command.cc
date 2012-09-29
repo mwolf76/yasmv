@@ -45,8 +45,11 @@ LoadModelCommand::~LoadModelCommand()
 {}
 
 extern void parseFile(const char* fName); // in utils.cc
-void LoadModelCommand::operator()()
-{ parseFile(f_filename.c_str()); }
+Variant LoadModelCommand::operator()()
+{
+    parseFile(f_filename.c_str());
+    return Variant("OK");
+}
 
 QuitCommand::QuitCommand(Interpreter& owner, int retcode)
     : Command(owner)
@@ -57,5 +60,8 @@ QuitCommand::~QuitCommand()
 {}
 
 // sends a signal to the owner
-void QuitCommand::operator()()
-{ f_owner.quit(f_retcode); }
+Variant QuitCommand::operator()()
+{
+    f_owner.quit(f_retcode);
+    return Variant("BYE");
+}

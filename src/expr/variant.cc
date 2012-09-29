@@ -28,6 +28,56 @@
 
 Variant NilValue;
 
+// variant constructors
+Variant::Variant()
+    : f_type(BOTTOM)
+{
+    DEBUG << "Initialized BOTTOM Variant @" << this << endl;
+}
+
+Variant::Variant(bool value)
+    : f_type(BOOLEAN)
+    , f_bool(value)
+{
+    DEBUG << "Initialized BOOLEAN Variant @" << this << " (value = " << f_bool << ")" << endl;
+}
+
+Variant::Variant(int value)
+    : f_type(INTEGER)
+    , f_int(value)
+{
+    DEBUG << "Initialized INTEGER Variant @" << this << " (value = " << f_int << ")" << endl;
+}
+
+Variant::Variant(const string &value)
+    : f_type(STRING)
+    , f_str(value)
+{
+    DEBUG << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
+}
+
+Variant::Variant(const char *value)
+    : f_type(STRING)
+    , f_str(value)
+{
+    DEBUG << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
+}
+
+Variant::Variant(const Variant& v)
+    : f_type(v.f_type)
+{
+    switch (f_type) {
+    case BOTTOM: return;
+    case BOOLEAN: f_bool = v.f_bool; return;
+    case INTEGER: f_int = v.f_int; return;
+    case STRING: f_str = v.f_str; return;
+    default: assert(0);
+    }
+
+    void *tmp = (void *) &v;
+    DEBUG << "Initialized COPY Variant @" << this << " (from @" << tmp << ")" << endl;
+}
+
 bool Variant::is_nil() const
 { return f_type == BOTTOM; }
 
@@ -48,8 +98,17 @@ string Variant::as_string() const
 
 ostream& operator<<(ostream& os, const Variant& variant)
 {
-  if (variant.is_boolean()) {
-    return os << variant.as_boolean();
-  }
-  else assert(0);
+    if (variant.is_nil()) {
+        return os << "(null)";
+    }
+    else if (variant.is_boolean()) {
+        return os << variant.as_boolean();
+    }
+    else if (variant.is_integer()) {
+        return os << variant.as_integer();
+    }
+    else if (variant.is_string()) {
+        return os << variant.as_string();
+    }
+    else assert(0);
 }

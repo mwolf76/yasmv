@@ -23,12 +23,13 @@
 #define COMMAND_H
 
 #include <common.hh>
+#include <variant.hh>
 #include <interpreter.hh>
 
 class ICommand : public IObject {
 public:
     // functor-pattern
-    void virtual operator()() =0;
+    Variant virtual operator()() =0;
 
     // representation
     friend ostream& operator<<(ostream& os, ICommand& cmd);
@@ -50,7 +51,7 @@ public:
     LoadModelCommand(Interpreter& owner, const string& filename);
     virtual ~LoadModelCommand();
 
-    void virtual operator()() =0;
+    Variant virtual operator()() =0;
 
 private:
     string f_filename;
@@ -61,7 +62,7 @@ public:
     FormatCommand(const char *fmt, ...);
     virtual ~FormatCommand();
 
-    void virtual operator()() =0;
+    Variant virtual operator()() =0;
 
 private:
     const char *fmt;
@@ -72,7 +73,7 @@ public:
     QuitCommand(Interpreter& owner, int retcode);
     virtual ~QuitCommand();
 
-    void virtual operator()();
+    Variant virtual operator()();
 
 private:
     int f_retcode;

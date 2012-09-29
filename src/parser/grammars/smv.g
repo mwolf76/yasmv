@@ -74,8 +74,8 @@ scope {
 @init {
     $cmd::mode = PROP_EXPR;
 }
-
-    : commands
+    : command = commands
+    { $res = command; }
     ;
 
 /* Commands to be implemented:
@@ -153,7 +153,6 @@ scope {
 commands returns [Command_ptr res]
     :
         'QUIT' { $res = cm.make_quit(); }
-
     ;
 
 /** CTL  properties */

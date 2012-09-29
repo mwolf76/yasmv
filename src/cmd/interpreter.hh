@@ -27,14 +27,6 @@
 class ICommand; // fwd decls
 typedef class ICommand* ICommand_ptr;
 
-enum SystemStatus {
-    READY,
-    PARSING,
-    PARSED,
-    RUNNING,
-    LEAVING,
-} ;
-
 typedef class Interpreter* Interpreter_ptr;
 class Interpreter {
 public:
@@ -42,11 +34,14 @@ public:
     static Interpreter& INSTANCE();
 
     // cmd loop
-    void operator()();
+    Variant& operator()();
+
+    inline Variant& last_result()
+    { return f_last_result; }
 
     // true iff system is shutting down
     inline bool is_leaving() const
-    { return f_status == LEAVING; }
+    { return f_leaving; }
 
     // process retcode
     inline int retcode() const
@@ -71,11 +66,13 @@ protected:
     { return *f_err; }
 
     int f_retcode;
-    SystemStatus f_status;
+    bool f_leaving;
 
     istream *f_in;
     ostream *f_out;
     ostream *f_err;
+
+    Variant f_last_result;
 
     static Interpreter_ptr f_instance;
 };

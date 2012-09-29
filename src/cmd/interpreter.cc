@@ -31,7 +31,7 @@ Interpreter& Interpreter::INSTANCE()
 
 Interpreter::Interpreter()
     : f_retcode(0)
-    , f_status(READY)
+    , f_leaving(false)
 
       // default I/O streams
     , f_in(& std::cin)
@@ -49,31 +49,31 @@ Interpreter::~Interpreter()
 void Interpreter::quit(int retcode)
 {
     f_retcode = retcode;
-    f_status = LEAVING;
+    f_leaving = true;
 }
 
 extern  ICommand* parseCommand(const char *command); // in utils.cc
-void Interpreter::operator()()
+Variant& Interpreter::operator()()
 {
-    string cmdLine; (*f_in) >> cmdLine;
+    // cmd prompt
+    (*f_out) << ">> "; string cmdLine; (*f_in) >> cmdLine;
     Command_ptr cmd = parseCommand(cmdLine.c_str());
 
     if (NULL != cmd) {
-        f_status = RUNNING;
+
         try {
             (*f_out) << "Running..." << endl;
-            (*cmd)();
+            f_last_result = (*cmd)();
             (*f_out) << "Done." << endl;
         }
 
         catch (Exception& e) {
         }
-
-        f_status = READY;
     }
 
     else {
         (*f_out) << "Parsing error" << endl;
     }
 
+    return f_last_result;
 }

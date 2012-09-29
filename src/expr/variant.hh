@@ -29,70 +29,61 @@
 #include <common.hh>
 
 typedef enum {
-  BOTTOM,
-  BOOLEAN,
-  INTEGER,
-  STRING,
+    BOTTOM,
+    BOOLEAN,
+    INTEGER,
+    STRING,
 } VariantType;
 
 // Variant iface
 class IVariant : public IObject {
 public:
-  virtual bool is_nil() const =0;
+    virtual bool is_nil() const =0;
 
-  virtual bool is_boolean() const =0;
-  virtual bool as_boolean() const =0;
+    virtual bool is_boolean() const =0;
+    virtual bool as_boolean() const =0;
 
-  virtual bool is_integer() const =0;
-  virtual int as_integer() const =0;
+    virtual bool is_integer() const =0;
+    virtual int as_integer() const =0;
 
-  virtual bool is_string() const =0;
-  virtual string as_string() const =0;
+    virtual bool is_string() const =0;
+    virtual string as_string() const =0;
 };
 
 
 // Variant implementation
 class Variant : public IVariant {
-  friend ostream& operator<<(ostream& os, const Variant& variant);
+    friend ostream& operator<<(ostream& os, const Variant& variant);
 
 public:
-  // variant constructors
-  Variant()
-    : f_type(BOTTOM)
-  {}
+    // variant constructors
+    Variant();
 
-  Variant(bool value)
-    : f_type(BOOLEAN)
-    , f_bool(value)
-  {}
+    Variant(const string &value);
+    Variant(const char *value);
 
-  Variant(int value)
-    : f_type(INTEGER)
-    , f_int(value)
-  {}
+    Variant(bool value);
+    Variant(int value);
+    Variant(const Variant& v);
 
-  Variant(string value)
-    : f_type(STRING)
-    , f_str(value)
-  {}
+    // variant predicates & getters
+    bool is_nil() const;
 
-  bool is_nil() const;
+    bool is_boolean() const;
+    bool as_boolean() const;
 
-  bool is_boolean() const;
-  bool as_boolean() const;
+    bool is_integer() const;
+    int as_integer() const;
 
-  bool is_integer() const;
-  int as_integer() const;
-
-  bool is_string() const;
-  string as_string() const;
+    bool is_string() const;
+    string as_string() const;
 
 private:
-  VariantType f_type;
+    VariantType f_type;
 
-  bool f_bool;
-  int f_int;
-  string f_str;
+    bool f_bool;
+    int f_int;
+    string f_str;
 };
 
 extern Variant NilValue;
