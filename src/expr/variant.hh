@@ -27,11 +27,13 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 #include <common.hh>
+#include <ctime>
 
 typedef enum {
     BOTTOM,
     BOOLEAN,
     INTEGER,
+    CLOCK,
     STRING,
 } VariantType;
 
@@ -45,6 +47,9 @@ public:
 
     virtual bool is_integer() const =0;
     virtual int as_integer() const =0;
+
+    virtual bool is_clock() const =0;
+    virtual clock_t as_clock() const =0;
 
     virtual bool is_string() const =0;
     virtual string as_string() const =0;
@@ -64,6 +69,9 @@ public:
 
     Variant(bool value);
     Variant(int value);
+
+    Variant(clock_t value);
+
     Variant(const Variant& v);
 
     // variant predicates & getters
@@ -75,6 +83,9 @@ public:
     bool is_integer() const;
     int as_integer() const;
 
+    bool is_clock() const;
+    clock_t as_clock() const;
+
     bool is_string() const;
     string as_string() const;
 
@@ -84,6 +95,7 @@ private:
     bool f_bool;
     int f_int;
     string f_str;
+    clock_t f_clock;
 };
 
 extern Variant NilValue;
