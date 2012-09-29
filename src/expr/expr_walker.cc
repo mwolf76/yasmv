@@ -38,8 +38,7 @@ Walker& Walker::operator() (const Expr_ptr expr)
     activation_record call(expr);
 
     // setup toplevel act. record and perform walk
-    f_recursion_stack.push(call);
-    walk();
+    f_recursion_stack.push(call); walk();
 
     // after walking hook
     this->post_hook();
@@ -49,11 +48,14 @@ Walker& Walker::operator() (const Expr_ptr expr)
 
 void Walker::walk ()
 {
-    while(! f_recursion_stack.empty()) {
+    size_t rec_level = f_recursion_stack.size();
+    assert (0 != rec_level);
+
+    size_t rec_goal = rec_level -1; // support re-entrant invocation
+    while(f_recursion_stack.size() != rec_goal) {
 
     loop:
         activation_record curr = f_recursion_stack.top();
-
         if (curr.pc != DEFAULT) {
 
             // restore caller location (simulate call return behavior)
