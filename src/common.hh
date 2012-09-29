@@ -55,6 +55,7 @@ using std::make_pair;
 
 using std::string;
 using std::ostringstream;
+using std::istream;
 using std::ostream;
 using std::vector;
 using std::stack;
