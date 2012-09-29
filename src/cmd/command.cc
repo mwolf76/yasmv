@@ -22,10 +22,14 @@
 #include <common.hh>
 #include <command.hh>
 
+#include <expr.hh>
+#include <mc.hh>
+#include <sat.hh>
+#include <expr/compilers/be_compiler.hh>
+
 Command::Command(Interpreter& owner)
     : f_owner(owner)
-{ DEBUG << "Initialized command @" << this << endl;
-}
+{ DEBUG << "Initialized command @" << this << endl; }
 
 Command::~Command()
 { DEBUG << "Deinitialized command @" << this << endl; }
@@ -45,6 +49,50 @@ Variant LoadModelCommand::operator()()
 LoadModelCommand::~LoadModelCommand()
 {}
 
+// -- Normalize ---------------------------------------------------------------
+NormalizeCommand::NormalizeCommand(Interpreter& owner, Expr_ptr expr)
+    : Command(owner)
+    , f_expr(expr)
+{}
+
+// sends a signal to the owner
+Variant NormalizeCommand::operator()()
+{
+}
+
+NormalizeCommand::~NormalizeCommand()
+{}
+
+// -- SAT ----------------------------------------------------------------------
+SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
+    : Command(owner)
+    , f_factory(CuddMgr::INSTANCE().dd())
+    , f_engine(f_factory)
+    , f_compiler()
+    , f_expr(expr)
+{
+    DEBUG << "Expr @" << f_expr << endl;
+}
+
+// sends a signal to the owner
+Variant SATCommand::operator()()
+{
+    Expr_ptr ctx = ExprMgr::INSTANCE().make_main(); // default ctx
+    TRACE << "compiling EXPR " << ctx << "::" << f_expr << endl;
+
+    ADD add = f_compiler.process(ctx, f_expr, 0);
+    f_engine.push(add);
+
+    ostringstream tmp;
+    tmp << f_engine.solve();
+
+    return Variant(tmp.str());
+}
+
+SATCommand::~SATCommand()
+{}
+
+// -- QUIT ---------------------------------------------------------------------
 QuitCommand::QuitCommand(Interpreter& owner, int retcode)
     : Command(owner)
     , f_retcode(retcode)

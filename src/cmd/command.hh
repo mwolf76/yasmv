@@ -25,6 +25,9 @@
 #include <common.hh>
 #include <variant.hh>
 #include <interpreter.hh>
+#include <expr.hh>
+#include <expr/compilers/be_compiler.hh>
+#include <sat.hh>
 
 class ICommand : public IObject {
 public:
@@ -55,6 +58,34 @@ public:
 
 private:
     string f_filename;
+};
+
+class SATCommand : public Command {
+public:
+    SATCommand(Interpreter& owner, Expr_ptr expr);
+    virtual ~SATCommand();
+
+    Variant virtual operator()();
+
+private:
+    // SAT machinery
+    Minisat::DDTermFactory f_factory;
+    Minisat::SAT f_engine;
+    BECompiler f_compiler;
+
+    // the expr to solve
+    Expr_ptr f_expr;
+};
+
+class NormalizeCommand : public Command {
+public:
+    NormalizeCommand(Interpreter& owner, Expr_ptr expr);
+    virtual ~NormalizeCommand();
+
+    Variant virtual operator()();
+
+private:
+    Expr_ptr f_expr;
 };
 
 class FormatCommand : public Command {

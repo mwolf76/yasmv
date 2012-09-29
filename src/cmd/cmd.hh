@@ -46,6 +46,12 @@ public:
     inline Command_ptr make_load_model(const char *filepath)
     { return new LoadModelCommand(f_interpreter, filepath); }
 
+    inline Command_ptr make_sat(Expr_ptr expr)
+    { return new SATCommand(f_interpreter, expr); }
+
+    inline Command_ptr make_normalize(Expr_ptr expr)
+    { return new NormalizeCommand(f_interpreter, expr); }
+
 protected:
     CommandMgr()
         : f_interpreter(Interpreter::INSTANCE())

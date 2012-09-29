@@ -34,11 +34,9 @@ options {
 #include <expr_mgr.hh>
 #include <model.hh>
 
-#define PROP_EXPR 0
+#define PRP_EXPR 0
 #define LTL_EXPR 1
 #define CTL_EXPR 2
-#define INV_EXPR 3
-#define INTERACT 4
 }
 
 @members {
@@ -55,25 +53,16 @@ options {
 smv
 scope {
     IModel_ptr model;
-    int mode;
 }
 
 @init {
     $smv::model = mm.model();
-    $smv::mode = PROP_EXPR;
 }
     : modules ';'?
     ;
 
 /* Scripting sub-system Toplevel */
 cmd returns [Command_ptr res]
-scope {
-    int mode;
-}
-
-@init {
-    $cmd::mode = PROP_EXPR;
-}
     : command = commands
     { $res = command; }
     ;
@@ -152,10 +141,16 @@ scope {
 */
 commands returns [Command_ptr res]
     :
-        'LOAD' 'MODEL' fp=filepath
+        'SAT' expr=generic_formula[PRP_EXPR]
+        { $res = cm.make_sat(expr); }
+
+    |   'NORMALIZE' expr=generic_formula[PRP_EXPR]
+        { $res = cm.make_normalize(expr); }
+
+    |   'LOAD' 'MODEL' fp=filepath
         { $res = cm.make_load_model(fp); }
 
-        | 'QUIT'
+    |   'QUIT'
         { $res = cm.make_quit(); }
     ;
 
@@ -182,19 +177,15 @@ filepath_fragment returns [const char *res]
     ;
 
 /** CTL  properties */
-ctl_spec returns [Expr_ptr res]
-@init { }
-    : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
-     { $res = formula; }
-	;
+// ctl_spec returns [Expr_ptr res]
+// @init { }
+//     : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
+//      { $res = formula; }
+// 	;
 
 ctl_formula returns [Expr_ptr res]
-@init { int prev_mode; }
-	:
-        { prev_mode = $smv::mode; $smv::mode= CTL_EXPR; }
-        formula=binary_ctl_formula
-
-        { $smv::mode = prev_mode; $res = formula; }
+	: formula = binary_ctl_formula
+      { $res = formula; }
     ;
 
 binary_ctl_formula returns [Expr_ptr res]
@@ -245,27 +236,55 @@ unary_ctl_formula returns [Expr_ptr res]
        { $res = formula; }
 	;
 
-/** INVARIANT properties */
-inv_spec returns [Expr_ptr res]
-@init { }
-    : ( 'INVARSPEC' | 'INVSPEC' ) formula=untimed_expression
-      { $res = formula; }
+/** Common entry-point for propositional, ltl and ctl formulae */
+generic_formula [int m] returns [Expr_ptr res]
+scope {
+    int mode;
+}
+	:
+        {
+            // just to make sure we don't mess things up...
+            assert (
+                (m == PRP_EXPR) ||
+                (m == LTL_EXPR) ||
+                (m == CTL_EXPR) );
+
+            $generic_formula::mode = m;
+        }
+
+        { $generic_formula::mode == PRP_EXPR }?=> fmla = prp_formula
+        { $res = fmla; }
+
+    |   { $generic_formula::mode == LTL_EXPR }?=> fmla = ltl_formula
+        { $res = fmla; }
+
+    |   { $generic_formula::mode == CTL_EXPR }?=> fmla = ctl_formula
+        { $res = fmla; }
     ;
 
-/** LTL properties */
-ltl_spec returns [Expr_ptr res]
-@init { }
-    : 'LTLSPEC' formula=ltl_formula
-      { $res = formula; }
-	;
+/** INVARIANT properties */
+// inv_spec returns [Expr_ptr res]
+// @init { }
+//     : ( 'INVARSPEC' | 'INVSPEC' ) formula=untimed_expression
+//       { $res = formula; }
+//     ;
+
+/* LTL properties */
+// ltl_spec returns [Expr_ptr res]
+// @init { }
+//     : 'LTLSPEC' formula=ltl_formula
+//       { $res = formula; }
+// 	;
+
+prp_formula returns [Expr_ptr res]
+    :  formula=untimed_expression
+       { $res = formula; }
+    ;
 
 ltl_formula returns [Expr_ptr res]
-@init { int prev_mode; }
 	:
-        { prev_mode = $smv::mode; $smv::mode= LTL_EXPR; }
         formula=binary_ltl_formula
-
-        { $smv::mode = prev_mode; $res = formula; }
+        { $res = formula; }
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
@@ -308,16 +327,16 @@ scope { IModule_ptr module ; }
       )*
     ;
 
-property
-    : formula=ltl_spec
-      { $modules::module->add_ltlspec(formula); }
+// property
+//     : formula=ltl_spec
+//       { $modules::module->add_ltlspec(formula); }
 
-    | formula=ctl_spec
-      { $modules::module->add_ctlspec(formula); }
+//     | formula=ctl_spec
+//       { $modules::module->add_ctlspec(formula); }
 
-    | formula=inv_spec
-      { $modules::module->add_invspec(formula); }
-    ;
+//     | formula=inv_spec
+//       { $modules::module->add_invspec(formula); }
+//     ;
 
 formal_params
 	:	'('
@@ -351,8 +370,6 @@ module_decl
         /* functional FSM */
 	|	assignment_formula
 
-        /* properties */
-    |   property
 	;
 
 fsm_isa_decl_clause
@@ -775,11 +792,15 @@ primary_expression returns [Expr_ptr res]
       { $res = k; }
 
 	| '(' (
-            { $smv::mode == LTL_EXPR }?=> expr=ltl_formula ')'
+            { $generic_formula::mode == PRP_EXPR }?=> expr=untimed_expression ')'
             { $res = expr; }
 
-	      | { $smv::mode == PROP_EXPR }?=> expr=untimed_expression ')'
+          | { $generic_formula::mode == LTL_EXPR }?=> expr=ltl_formula ')'
             { $res = expr; }
+
+          | { $generic_formula::mode == CTL_EXPR }?=> expr=ctl_formula ')'
+            { $res = expr; }
+
           )
 	;
 
