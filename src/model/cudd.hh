@@ -48,6 +48,8 @@ protected:
 
         void *dd_ptr = f_cudd.getManager();
         TRACE << "Initialized CuddMgr @ " << this << " (dd@" << dd_ptr << ")" << endl;
+
+        f_cudd.AutodynEnable(CUDD_REORDER_SIFT);
     }
 
 private:
