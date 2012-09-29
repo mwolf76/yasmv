@@ -210,6 +210,7 @@ private:
     void walk_binary_logical_postorder(const Expr_ptr expr);
     void walk_binary_bitwise_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
+    void walk_ternary_ite_postorder(const Expr_ptr expr);
 };
 
 #endif
