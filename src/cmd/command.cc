@@ -30,33 +30,24 @@ Command::Command(Interpreter& owner)
 Command::~Command()
 { DEBUG << "Deinitialized command @" << this << endl; }
 
-// FormatCommand::FormatCommand()
-// {}
-
-// FormatCommand::~FormatCommand()
-// {}
-
 LoadModelCommand::LoadModelCommand(Interpreter& owner, const string &filename)
     : Command(owner)
     , f_filename(filename)
 {}
 
-LoadModelCommand::~LoadModelCommand()
-{}
-
-extern void parseFile(const char* fName); // in utils.cc
+extern void parseFile(const char *filepath); // in utils.cc
 Variant LoadModelCommand::operator()()
 {
     parseFile(f_filename.c_str());
     return Variant("OK");
 }
 
+LoadModelCommand::~LoadModelCommand()
+{}
+
 QuitCommand::QuitCommand(Interpreter& owner, int retcode)
     : Command(owner)
     , f_retcode(retcode)
-{}
-
-QuitCommand::~QuitCommand()
 {}
 
 // sends a signal to the owner
@@ -65,3 +56,6 @@ Variant QuitCommand::operator()()
     f_owner.quit(f_retcode);
     return Variant("BYE");
 }
+
+QuitCommand::~QuitCommand()
+{}

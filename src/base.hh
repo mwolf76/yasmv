@@ -38,8 +38,7 @@ class Object : public IObject {
 class Exception : public std::exception {
 public:
     virtual const char* what() const throw() =0;
-    virtual ~Exception() throw()
-    {}
+    virtual ~Exception() throw() {}
 };
 
 #endif

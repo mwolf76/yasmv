@@ -152,7 +152,33 @@ scope {
 */
 commands returns [Command_ptr res]
     :
-        'QUIT' { $res = cm.make_quit(); }
+        'LOAD' 'MODEL' fp=filepath
+        { $res = cm.make_load_model(fp); }
+
+        | 'QUIT'
+        { $res = cm.make_quit(); }
+    ;
+
+filepath returns [const char *res]
+@init { std::ostringstream oss; }
+    :
+        (
+            frag=filepath_fragment
+            { oss << frag; }
+        ) +
+        { $res = oss.str().c_str(); }
+    ;
+
+filepath_fragment returns [const char *res]
+    :
+        IDENTIFIER
+        { $res = (const char *) $IDENTIFIER.text->chars; }
+
+    |   '.'
+        { $res = "."; }
+
+    |   '/'
+        { $res = "/"; }
     ;
 
 /** CTL  properties */
@@ -908,12 +934,20 @@ IDENTIFIER
 	:	ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
 	;
 
+FILEPATH
+    :  (FP_CHARS)+
+    ;
+
 WORD_CONSTANT
     :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HEX_DIGIT +
     ;
 
 fragment ID_FIRST_CHAR
 	:	'A'..'Z' | 'a'..'z' | '_'
+	;
+
+fragment FP_CHARS
+	:	'/' | '.' | '..'
 	;
 
 fragment ID_FOLLOWING_CHARS

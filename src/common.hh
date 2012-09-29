@@ -75,6 +75,23 @@ class UnsupportedOperatorException : public Exception {
   }
 };
 
+class FileInputException : public Exception {
+    virtual const char* what() const throw() {
+        ostringstream oss;
+        oss << "Can not read file '" << f_filename << "'";
+        return oss.str().c_str();
+    }
+
+    string f_filename;
+
+public:
+    FileInputException(const string &filename)
+        : f_filename(filename)
+    {}
+
+    virtual ~FileInputException() throw()
+    {}
+};
 
 struct PtrHash {
   inline long operator() (void* ptr) const

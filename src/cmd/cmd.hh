@@ -43,6 +43,9 @@ public:
     inline Command_ptr make_quit(int retcode =0)
     { return new QuitCommand(f_interpreter, retcode); }
 
+    inline Command_ptr make_load_model(const char *filepath)
+    { return new LoadModelCommand(f_interpreter, filepath); }
+
 protected:
     CommandMgr()
         : f_interpreter(Interpreter::INSTANCE())

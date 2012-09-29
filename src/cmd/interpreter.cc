@@ -56,7 +56,7 @@ extern  ICommand* parseCommand(const char *command); // in utils.cc
 Variant& Interpreter::operator()()
 {
     // cmd prompt
-    (*f_out) << ">> "; string cmdLine; (*f_in) >> cmdLine;
+    (*f_out) << ">> "; string cmdLine; std::getline(*f_in, cmdLine);
     Command_ptr cmd = parseCommand(cmdLine.c_str());
 
     if (NULL != cmd) {
@@ -68,6 +68,8 @@ Variant& Interpreter::operator()()
         }
 
         catch (Exception& e) {
+            (*f_err) << e.what() << endl;
+            f_last_result = NilValue;
         }
     }
 

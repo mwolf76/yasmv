@@ -51,7 +51,7 @@ public:
     LoadModelCommand(Interpreter& owner, const string& filename);
     virtual ~LoadModelCommand();
 
-    Variant virtual operator()() =0;
+    Variant virtual operator()();
 
 private:
     string f_filename;
