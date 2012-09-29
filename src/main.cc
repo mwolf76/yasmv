@@ -60,6 +60,10 @@ static void usage()
          << endl ;
 }
 
+// just for debugging purposes withing gdb
+static void pe(Expr_ptr e)
+{ DEBUG << e << endl; }
+
 // TODO: proper error handling
 void parseFile(const char* fName)
 {
