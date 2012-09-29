@@ -224,6 +224,13 @@ void Module::add_fairness(Expr_ptr expr)
     f_fair.push_back(expr);
 }
 
+void Module::add_invspec(Expr_ptr formula)
+{
+    TRACE << "Module " << (*this)
+          << ", added INVSPEC " << formula << endl;
+    f_invspecs.push_back(formula);
+}
+
 void Module::add_ltlspec(Expr_ptr formula)
 {
     TRACE << "Module " << (*this)

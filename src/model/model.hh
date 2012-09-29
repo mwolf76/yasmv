@@ -101,6 +101,9 @@ public:
     virtual void add_fairness(Expr_ptr expr) =0;
 
     // properties management
+    virtual const ExprVector& invspecs() const =0;
+    virtual void add_invspec(Expr_ptr formula) =0;
+
     virtual const ExprVector& ltlspecs() const =0;
     virtual void add_ltlspec(Expr_ptr formula) =0;
 
@@ -133,6 +136,7 @@ class Module : public IModule {
     ExprVector f_fair;
     Assigns f_assgn;
 
+    ExprVector f_invspecs;
     ExprVector f_ltlspecs;
     ExprVector f_ctlspecs;
 
@@ -184,6 +188,10 @@ public:
     void add_fairness(Expr_ptr expr);
     const ExprVector& fairness() const
     { return f_fair; }
+
+    void add_invspec(Expr_ptr formula);
+    const ExprVector& invspecs() const
+    { return f_invspecs; }
 
     void add_ltlspec(Expr_ptr formula);
     const ExprVector& ltlspecs() const
