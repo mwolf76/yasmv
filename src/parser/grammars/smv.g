@@ -73,14 +73,11 @@ cmd returns [Command_ptr res]
  SAT <expr> - pure satisfiability problem on a pure-propositional. Requires variable definitions in separate model.
  Returns UNSAT, or a witness #
 
- NORMALIZE <expr> - prints the normal form on a pure-propositional. Requires variable definitions in separate model.
- Returns normalized expr
-
  * I/O
  LOAD MODEL <filename> - load a new model from file
  Returns OK, <0 errcode otherwise
 
- DUMP MODEL <filename> - save a new model to file
+ DUMP MODEL [TO <filename>] - save a new model to file
  Returns OK, <0 errcode otherwise
 
  LOAD TRACE <filename> - load a trace from .json file
@@ -144,8 +141,8 @@ commands returns [Command_ptr res]
         'SAT' expr=generic_formula[PRP_EXPR]
         { $res = cm.make_sat(expr); }
 
-    |   'NORMALIZE' expr=generic_formula[PRP_EXPR]
-        { $res = cm.make_normalize(expr); }
+    |   'CLK'
+        { $res = cm.make_now(); }
 
     |   'LOAD' 'MODEL' fp=filepath
         { $res = cm.make_load_model(fp); }

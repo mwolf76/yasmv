@@ -49,8 +49,8 @@ public:
     inline Command_ptr make_sat(Expr_ptr expr)
     { return new SATCommand(f_interpreter, expr); }
 
-    inline Command_ptr make_normalize(Expr_ptr expr)
-    { return new NormalizeCommand(f_interpreter, expr); }
+    inline Command_ptr make_now()
+    { return new NowCommand(f_interpreter); }
 
 protected:
     CommandMgr()

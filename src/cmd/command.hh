@@ -77,15 +77,12 @@ private:
     Expr_ptr f_expr;
 };
 
-class NormalizeCommand : public Command {
+class NowCommand : public Command {
 public:
-    NormalizeCommand(Interpreter& owner, Expr_ptr expr);
-    virtual ~NormalizeCommand();
+    NowCommand(Interpreter& owner);
+    virtual ~NowCommand();
 
     Variant virtual operator()();
-
-private:
-    Expr_ptr f_expr;
 };
 
 class FormatCommand : public Command {

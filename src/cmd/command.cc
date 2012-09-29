@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <ctime>
 #include <common.hh>
 #include <command.hh>
 
@@ -49,18 +50,17 @@ Variant LoadModelCommand::operator()()
 LoadModelCommand::~LoadModelCommand()
 {}
 
-// -- Normalize ---------------------------------------------------------------
-NormalizeCommand::NormalizeCommand(Interpreter& owner, Expr_ptr expr)
+// -- Now ---------------------------------------------------------------
+NowCommand::NowCommand(Interpreter& owner)
     : Command(owner)
-    , f_expr(expr)
 {}
 
-// sends a signal to the owner
-Variant NormalizeCommand::operator()()
+Variant NowCommand::operator()()
 {
+    return Variant(clock());
 }
 
-NormalizeCommand::~NormalizeCommand()
+NowCommand::~NowCommand()
 {}
 
 // -- SAT ----------------------------------------------------------------------
@@ -70,9 +70,7 @@ SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
     , f_engine(f_factory)
     , f_compiler()
     , f_expr(expr)
-{
-    DEBUG << "Expr @" << f_expr << endl;
-}
+{}
 
 // sends a signal to the owner
 Variant SATCommand::operator()()
