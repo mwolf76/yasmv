@@ -453,11 +453,10 @@ bool BECompiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_ite_postorder(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back((lhs <= rhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    const ADD e = f_add_stack.back(); f_add_stack.pop_back();
+    const ADD t = f_add_stack.back(); f_add_stack.pop_back();
+    const ADD c = f_add_stack.back(); f_add_stack.pop_back();
+    f_add_stack.push_back(c.Ite(t, e));
  }
 
 bool BECompiler::walk_cond_preorder(const Expr_ptr expr)
@@ -465,12 +464,7 @@ bool BECompiler::walk_cond_preorder(const Expr_ptr expr)
 bool BECompiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_cond_postorder(const Expr_ptr expr)
-{
-    const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD t = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD e = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(c.Ite(t, e));
-}
+{}
 
 bool BECompiler::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
