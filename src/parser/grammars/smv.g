@@ -363,10 +363,17 @@ fsm_var_decl_body
 	;
 
 fsm_var_decl_clause
-	: id=identifier ':' tp=type_name
+@init {
+    ExprVector ev;
+}
+	: ids=identifiers[&ev] ':' tp=type_name
     {
-      IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
-      $modules::module->add_localVar(id, var);
+      ExprVector::iterator expr_iter;
+      for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+          Expr_ptr id = (*expr_iter);
+          IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
+          $modules::module->add_localVar(id, var);
+      }
     }
 	;
 
@@ -781,6 +788,12 @@ primary_expression returns [Expr_ptr res]
 
           )
 	;
+
+identifiers [ExprVector* ids]
+    :
+      ident=identifier { ids->push_back(ident); }
+      ( ',' ident=identifier { ids->push_back(ident); }  )*
+    ;
 
 identifier returns [Expr_ptr res]
 @init { }
