@@ -100,18 +100,28 @@ cmd returns [Command_ptr res]
  CHECK INVSPEC <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
- SIMULATE [INIT | #steps] [DRY] [INTERACTIVE] [CONSTRAINED constraint1] ... [FOLLOWING #trace]
+ SIMULATE [ INIT | RESUME #trace ] [#steps] [CONSTRAINED constraint1] [GUIDED <#trace>]...
  Returns witness index or UNSAT if simulation failed.
+
+ >> SIMULATE
+ OK. Created Trace (#4)
+
+ >> SIMULATE INIT
+ OK. Created Trace (#4)
 
  * TRACE
 
- TRACES
+ SHOW TRACES
+ TRACE
+
+
+
  PRINT TRACE
 
  * OTHERS
 
- NOW
- Returns time in millisecs
+ CLK
+ Returns CPU time in millisecs
 
  FORMAT "FMT", ...
  Returns a formatted message.
@@ -119,7 +129,7 @@ cmd returns [Command_ptr res]
  PRINT "FMT", ...
  Same as above. Always prints to STDOUT.
 
- SHELL "string"
+ SH <shell command>
  Returns the output of an embedded shell command.
 
  SET "name" TO "value" (eg. SET general.verbosity TO TRUE)
@@ -387,12 +397,19 @@ fsm_ivar_decl_body
 	;
 
 fsm_ivar_decl_clause
-	: id=identifier ':' tp=type_name
+@init {
+    ExprVector ev;
+}
+    : ids=identifiers[&ev] ':' tp=type_name
     {
-      IVariable_ptr var = new InputVar($modules::module->expr(), id, tp);
-      $modules::module->add_localVar(id, var);
+            ExprVector::iterator expr_iter;
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr id = (*expr_iter);
+                IVariable_ptr var = new InputVar($modules::module->expr(), id, tp);
+                $modules::module->add_localVar(id, var);
+            }
     }
-	;
+    ;
 
 fsm_frozenvar_decl
     : 'FROZENVAR' fsm_frozenvar_decl_body
@@ -404,12 +421,19 @@ fsm_frozenvar_decl_body
 	;
 
 fsm_frozenvar_decl_clause
-	: id=identifier ':' tp=type_name
+@init {
+    ExprVector ev;
+}
+    : ids=identifiers[&ev] ':' tp=type_name
     {
-      IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
-      $modules::module->add_localVar(id, var);
+            ExprVector::iterator expr_iter;
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr id = (*expr_iter);
+                IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
+                $modules::module->add_localVar(id, var);
+            }
     }
-	;
+    ;
 
 fsm_define_decl
     : 'DEFINE' fsm_define_decl_body
