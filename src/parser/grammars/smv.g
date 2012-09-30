@@ -173,18 +173,6 @@ filepath_fragment returns [const char *res]
         { $res = "/"; }
     ;
 
-/** CTL  properties */
-// ctl_spec returns [Expr_ptr res]
-// @init { }
-//     : ( 'SPEC' | 'CTLSPEC') formula=ctl_formula
-//      { $res = formula; }
-// 	;
-
-ctl_formula returns [Expr_ptr res]
-	: formula = binary_ctl_formula
-      { $res = formula; }
-    ;
-
 binary_ctl_formula returns [Expr_ptr res]
 @init { }
 	:	lhs=unary_ctl_formula
@@ -233,6 +221,22 @@ unary_ctl_formula returns [Expr_ptr res]
        { $res = formula; }
 	;
 
+/* Top-level aliases */
+propositional_formula returns [Expr_ptr res]
+    : fmla = generic_formula[PRP_EXPR]
+      { $res = fmla; }
+    ;
+
+ltl_formula returns [Expr_ptr res]
+    : fmla = generic_formula[LTL_EXPR]
+      { $res = fmla; }
+    ;
+
+ctl_formula returns [Expr_ptr res]
+    : fmla = generic_formula[CTL_EXPR]
+      { $res = fmla; }
+    ;
+
 /** Common entry-point for propositional, ltl and ctl formulae */
 generic_formula [int m] returns [Expr_ptr res]
 scope {
@@ -249,39 +253,14 @@ scope {
             $generic_formula::mode = m;
         }
 
-        { $generic_formula::mode == PRP_EXPR }?=> fmla = prp_formula
+        { $generic_formula::mode == PRP_EXPR }?=> fmla = untimed_expression
         { $res = fmla; }
 
-    |   { $generic_formula::mode == LTL_EXPR }?=> fmla = ltl_formula
+    |   { $generic_formula::mode == LTL_EXPR }?=> fmla = binary_ltl_formula
         { $res = fmla; }
 
-    |   { $generic_formula::mode == CTL_EXPR }?=> fmla = ctl_formula
+    |   { $generic_formula::mode == CTL_EXPR }?=> fmla = binary_ctl_formula
         { $res = fmla; }
-    ;
-
-/** INVARIANT properties */
-// inv_spec returns [Expr_ptr res]
-// @init { }
-//     : ( 'INVARSPEC' | 'INVSPEC' ) formula=untimed_expression
-//       { $res = formula; }
-//     ;
-
-/* LTL properties */
-// ltl_spec returns [Expr_ptr res]
-// @init { }
-//     : 'LTLSPEC' formula=ltl_formula
-//       { $res = formula; }
-// 	;
-
-prp_formula returns [Expr_ptr res]
-    :  formula=untimed_expression
-       { $res = formula; }
-    ;
-
-ltl_formula returns [Expr_ptr res]
-	:
-        formula=binary_ltl_formula
-        { $res = formula; }
     ;
 
 binary_ltl_formula returns [Expr_ptr res]
@@ -435,7 +414,7 @@ fsm_define_decl_body
 	;
 
 fsm_define_decl_clause
-	: id=identifier ':=' body=untimed_expression
+	: id=identifier ':=' body=propositional_formula
     {
       IDefine_ptr def = new Define($modules::module->expr(), id, body);
       $modules::module->add_localDef(id, def);
@@ -452,7 +431,7 @@ fsm_init_decl_body
 	;
 
 fsm_init_decl_clause
-	: expr=untimed_expression
+	: expr=propositional_formula
       { $modules::module->add_init(expr); }
 	;
 
@@ -466,7 +445,7 @@ fsm_invar_decl_body
 	;
 
 fsm_invar_decl_clause
-	: expr=untimed_expression
+	: expr=propositional_formula
       { $modules::module->add_invar(expr); }
 	;
 
@@ -480,7 +459,7 @@ fsm_trans_decl_body
 	;
 
 fsm_trans_decl_clause
-	: expr=untimed_expression
+	: expr=propositional_formula
       { $modules::module->add_trans(expr); }
 	;
 
@@ -494,7 +473,7 @@ fsm_fairn_decl_body
 	;
 
 fsm_fairn_decl_clause
-	: expr=untimed_expression
+	: expr=propositional_formula
       { $modules::module->add_fairness(expr); }
 	;
 
@@ -508,14 +487,16 @@ assignment_body
 	;
 
 assignment_clause
-	: id=lvalue ':=' body=untimed_expression
+	: id=lvalue ':=' body=propositional_formula
       {
        IDefine_ptr def = new Define($modules::module->expr(), id, body);
        $modules::module->add_assign(id, def);
       }
     ;
 
-// main expression entry point
+// expression entry point. This is the loopback entry point used in
+// the expressions rules but it's important outer rules use the
+// generic_formula entry point defined above.
 untimed_expression returns [Expr_ptr res]
 @init { }
 	: expr=case_expression
@@ -792,10 +773,10 @@ primary_expression returns [Expr_ptr res]
             { $generic_formula::mode == PRP_EXPR }?=> expr=untimed_expression ')'
             { $res = expr; }
 
-          | { $generic_formula::mode == LTL_EXPR }?=> expr=ltl_formula ')'
+          | { $generic_formula::mode == LTL_EXPR }?=> expr=binary_ltl_formula ')'
             { $res = expr; }
 
-          | { $generic_formula::mode == CTL_EXPR }?=> expr=ctl_formula ')'
+          | { $generic_formula::mode == CTL_EXPR }?=> expr=binary_ctl_formula ')'
             { $res = expr; }
 
           )
