@@ -41,13 +41,8 @@ namespace axter {
             ostringstream oss;
 
             time_t t = time(0) ;
-            string tmp = ctime(&t);
-            if (tmp.size()) tmp[tmp.size() -1] = ']';
-
-            oss << "[" << tmp << "] "
-                << filename << ":" << LineNo << " :: "
-                // << "(lvl = " << levels_format_usage_data.m_severity_level << ") :: "
-                ;
+            string tmp = ctime(&t);  if (tmp.size()) tmp[tmp.size() -1] = ']';
+            oss << "[" << tmp << " " << filename << ":" << LineNo << " :: "  ;
 
             return oss.str().c_str();
         }
