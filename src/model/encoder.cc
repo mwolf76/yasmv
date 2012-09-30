@@ -141,3 +141,10 @@ Encoding::~Encoding()
 {
 
 }
+
+EncodingMgr::EncodingMgr()
+    : f_cudd(CuddMgr::INSTANCE().dd())
+{ DEBUG << "Initialized EncodingMgr @ " << this << endl; }
+
+EncodingMgr::~EncodingMgr()
+{ DEBUG << "Deinitialized EncodingMgr @ " << this << endl; }

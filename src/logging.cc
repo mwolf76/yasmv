@@ -19,7 +19,7 @@ namespace axter {
 
     // TODO: make this configurable
     verbosity get_verbosity_level_tolerance() {
-        return log_default_verbosity_level;
+        return log_regularly; // log_default_verbosity_level;
     }
 
 };

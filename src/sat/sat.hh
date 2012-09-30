@@ -134,14 +134,14 @@ namespace Minisat {
             , f_next_color(0)
         {
             f_groups.insert(0); // default_group is always enabled
-            TRACE << "Initialized SAT instance @" << this << endl;
+            DEBUG << "Initialized SAT instance @" << this << endl;
         }
 
         /**
          * @brief SAT instance dctor
          */
         ~SAT()
-        { TRACE << "Destroyed SAT instance@" << this << endl; }
+        { DEBUG << "Destroyed SAT instance@" << this << endl; }
 
     private:
         // Term factory

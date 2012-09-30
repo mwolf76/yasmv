@@ -96,12 +96,8 @@ public:
     IEncoding_ptr find_encoding(ADD add);
 
 protected:
-    EncodingMgr()
-        : f_cudd(CuddMgr::INSTANCE().dd())
-    { TRACE << "Initialized EncodingMgr @ " << this << endl; }
-
-    ~EncodingMgr()
-    { TRACE << "Deinitialized EncodingMgr @ " << this << endl; }
+    EncodingMgr();
+    ~EncodingMgr();
 
 private:
     static EncodingMgr_ptr f_instance;

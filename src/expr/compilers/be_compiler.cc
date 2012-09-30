@@ -45,10 +45,10 @@ BECompiler::BECompiler()
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
-{ TRACE << "Created BECompiler @" << this << endl; }
+{ DEBUG << "Created BECompiler @" << this << endl; }
 
 BECompiler::~BECompiler()
-{ TRACE << "Destroying BECompiler @" << this << endl; }
+{ DEBUG << "Destroying BECompiler @" << this << endl; }
 
 ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
@@ -61,7 +61,7 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     f_ctx_stack.push_back(ctx);
     f_time_stack.push_back(time);
 
-    TRACE << "Compiling boolean expression "
+    DEBUG << "Compiling boolean expression "
           << "(time = " << time << ") "
           << ctx << "::" << body
           << endl;

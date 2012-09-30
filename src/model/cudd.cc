@@ -1,5 +1,5 @@
 /**
- *  @file cudd.hh
+ *  @file cudd.cc
  *  @brief Cudd module
  *
  *  This module contains definitions and services that implement an
@@ -24,33 +24,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <common.hh>
+#include <cudd.hh>
 
-#ifndef CUDD_H
-#define CUDD_H
+CuddMgr::CuddMgr()
+    : f_cudd()
+{
+    void *dd_ptr = f_cudd.getManager();
+    DEBUG << "Initialized CuddMgr @" << this << " (dd@" << dd_ptr << ")" << endl;
 
-#include <cuddObj.hh>
-
-typedef class CuddMgr* CuddMgr_ptr;
-class CuddMgr  {
-
-public:
-    static CuddMgr& INSTANCE() {
-        if (! f_instance) f_instance = new CuddMgr();
-        return (*f_instance);
-    }
-
-    inline Cudd& dd()
-    { return f_cudd; }
-
-protected:
-    CuddMgr();
-
-private:
-    static CuddMgr_ptr f_instance;
-
-    /* local data */
-    Cudd f_cudd;
-};
-
-
-#endif
+    // Setting CUDD params: TODO: configurable by options
+    f_cudd.AutodynEnable(CUDD_REORDER_SIFT);
+    // f_cudd.makeVerbose();
+}

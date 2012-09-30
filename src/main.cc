@@ -90,7 +90,6 @@ void parseFile(const char* fName)
     assert(psr);
 
     psr->smv(psr);
-    INFO << "done." << endl;
 
     psr->free(psr);
     tstream->free(tstream);

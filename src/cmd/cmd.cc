@@ -23,3 +23,16 @@
 
 // static initialization
 CommandMgr_ptr CommandMgr::f_instance = NULL;
+
+CommandMgr::CommandMgr()
+    : f_interpreter(Interpreter::INSTANCE())
+{
+    // TODO: macros for init/deinit logging
+    DEBUG << "CommandMgr initialized @" << this << endl;
+}
+
+CommandMgr::~CommandMgr()
+{
+    // TODO: macros for init/deinit logging
+    DEBUG << "CommandMgr deinitialized" << endl;
+}

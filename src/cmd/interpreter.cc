@@ -38,12 +38,12 @@ Interpreter::Interpreter()
     , f_out(& std::cout)
     , f_err(& std::cerr)
 {
-    TRACE << "Initialized command interpreter @" << this << endl;
+    DEBUG << "Initialized command interpreter @" << this << endl;
 }
 
 Interpreter::~Interpreter()
 {
-    TRACE << "Deinitialized command interpreter @" << this << endl;
+    DEBUG << "Deinitialized command interpreter @" << this << endl;
 }
 
 void Interpreter::quit(int retcode)
@@ -56,25 +56,20 @@ extern  ICommand* parseCommand(const char *command); // in utils.cc
 Variant& Interpreter::operator()()
 {
     // cmd prompt
+    f_last_result = Variant("Parsing Error");
+
     (*f_out) << ">> "; string cmdLine; std::getline(*f_in, cmdLine);
     Command_ptr cmd = parseCommand(cmdLine.c_str());
 
     if (NULL != cmd) {
 
         try {
-            (*f_out) << "Running..." << endl;
             f_last_result = (*cmd)();
-            (*f_out) << "Done." << endl;
         }
 
         catch (Exception& e) {
-            (*f_err) << e.what() << endl;
-            f_last_result = NilValue;
+            f_last_result = Variant(e.what());
         }
-    }
-
-    else {
-        (*f_out) << "Parsing error" << endl;
     }
 
     return f_last_result;

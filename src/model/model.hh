@@ -276,9 +276,7 @@ class Model : public IModel {
     Modules f_modules;
 
 public:
-    Model()
-        : f_modules()
-    { TRACE << "Initialized Model instance @" << this << endl; }
+    Model();
 
     const Modules& modules() const
     { return f_modules; }

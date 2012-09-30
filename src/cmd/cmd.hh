@@ -53,18 +53,8 @@ public:
     { return new NowCommand(f_interpreter); }
 
 protected:
-    CommandMgr()
-        : f_interpreter(Interpreter::INSTANCE())
-    {
-        // TODO: macros for init/deinit logging
-        TRACE << "CommandMgr initialized @" << this << endl;
-    }
-
-    ~CommandMgr()
-    {
-        // TODO: macros for init/deinit logging
-        TRACE << "CommandMgr deinitialized" << endl;
-    }
+    CommandMgr();
+    ~CommandMgr();
 
 private:
     static CommandMgr_ptr f_instance;

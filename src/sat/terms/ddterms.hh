@@ -35,10 +35,10 @@ namespace Minisat {
     public:
         DDTermFactory(Cudd& cudd)
             : f_cudd(cudd)
-        { TRACE << "Initialized DD Term Factory @ " << this << endl; }
+        { DEBUG << "Initialized DD Term Factory @ " << this << endl; }
 
         virtual ~DDTermFactory()
-        { TRACE << "Deinitialized DD Term Factory @ " << this << endl; }
+        { DEBUG << "Deinitialized DD Term Factory @ " << this << endl; }
 
         // constants
         virtual ADD make_true()

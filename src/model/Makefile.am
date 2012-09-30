@@ -11,8 +11,8 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/mod
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = model.hh analyzer.hh inferrer.hh encoder.hh
-PKG_CC = model.cc analyzer.cc inferrer.cc encoder.cc
+PKG_HH = cudd.hh model.hh analyzer.hh inferrer.hh encoder.hh
+PKG_CC = cudd.cc model.cc analyzer.cc inferrer.cc encoder.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

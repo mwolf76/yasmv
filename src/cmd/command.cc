@@ -72,18 +72,14 @@ SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
     , f_expr(expr)
 {}
 
-// sends a signal to the owner
 Variant SATCommand::operator()()
 {
     Expr_ptr ctx = ExprMgr::INSTANCE().make_main(); // default ctx
-    TRACE << "compiling EXPR " << ctx << "::" << f_expr << endl;
-
     ADD add = f_compiler.process(ctx, f_expr, 0);
     f_engine.push(add);
 
     ostringstream tmp;
     tmp << f_engine.solve();
-
     return Variant(tmp.str());
 }
 

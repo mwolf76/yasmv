@@ -62,7 +62,7 @@ namespace Minisat {
             }
         }
 
-        TRACE << ps << endl;
+        DEBUG << ps << endl;
         f_solver.addClause_(ps, color);
     }
 

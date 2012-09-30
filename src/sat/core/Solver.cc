@@ -104,24 +104,26 @@ Solver::Solver(proof_logging_mode mode) :
   , propagation_budget (-1)
   , asynch_interrupt   (false)
 {
-    TRACE << "Initialized Solver instance @" << this;
+    DEBUG << "Initialized Solver instance @" << this << endl;
 
 #ifdef PROOF_CHECK
-  if (use_proof_logging) TRACE << "[Proof logging enabled]" << endlog;
-  TRACE << "[Proof checking enabled]" << endlog;
+    if (use_proof_logging) {
+        DEBUG << "[Proof logging enabled]" << endl;
+    }
+    DEBUG << "[Proof checking enabled]" << endlog;
 #endif
 
 #ifdef MODEL_CHECK
-  TRACE << "[Model checking enabled]" << endlog;
+  DEBUG << "[Model checking enabled]" << endlog;
 #endif
 
-  TRACE << endl;
+  DEBUG << endl;
 }
 
 Solver::~Solver()
 {
     if (NULL != pm) delete pm;
-    TRACE << "Destroyed Solver instance @" << this << endl;
+    DEBUG << "Destroyed Solver instance @" << this << endl;
 }
 
 
@@ -1027,6 +1029,7 @@ lbool Solver::solve_()
         model.growTo(nVars());
         for (int i = 0; i < nVars(); i++) model[i] = value(i);
 
+        // temp
         for (int i = 0; i < nVars(); i++) {
             TRACE << i << ": " << model[i] << endl;
         }
