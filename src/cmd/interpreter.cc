@@ -58,18 +58,25 @@ Variant& Interpreter::operator()()
     // cmd prompt
     f_last_result = Variant("Parsing Error");
 
-    (*f_out) << ">> "; string cmdLine; std::getline(*f_in, cmdLine);
-    Command_ptr cmd = parseCommand(cmdLine.c_str());
+    (*f_out) << ">> "; string cmdLine;
 
-    if (NULL != cmd) {
+    if (std::getline(*f_in, cmdLine)) {
+        Command_ptr cmd = parseCommand(cmdLine.c_str());
 
-        try {
-            f_last_result = (*cmd)();
+        if (NULL != cmd) {
+
+            try {
+                f_last_result = (*cmd)();
+            }
+
+            catch (Exception& e) {
+                f_last_result = Variant(e.what());
+            }
         }
-
-        catch (Exception& e) {
-            f_last_result = Variant(e.what());
-        }
+    }
+    else {
+        f_last_result = Variant("BYE");
+        f_leaving = true;
     }
 
     return f_last_result;
