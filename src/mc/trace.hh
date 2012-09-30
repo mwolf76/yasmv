@@ -54,7 +54,6 @@ public:
 private:
 };
 
-typedef ITrace* ITrace_ptr;
-typedef vector <ITrace_ptr> Traces;
+typedef Trace* Trace_ptr;
 
 #endif

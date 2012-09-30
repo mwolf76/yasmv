@@ -30,11 +30,11 @@
 
 class ISATBMCFalsification : public SATBMCFalsification {
 public:
-  ISATBMCFalsification(IModel& model);
-  ~ISATBMCFalsification();
+    ISATBMCFalsification(IModel& model, Expr_ptr property);
+    ~ISATBMCFalsification();
 
-  // actual algorithm
-  void run();
+    // actual algorithm
+    void run();
 
 protected:
 

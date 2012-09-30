@@ -34,7 +34,7 @@
 class SATBMCFalsification : public MCAlgorithm {
 
 public:
-    SATBMCFalsification(IModel& model);
+    SATBMCFalsification(IModel& model, Expr_ptr formula);
     ~SATBMCFalsification();
 
     void process();
@@ -49,7 +49,5 @@ private:
     void assert_fsm_trans(step_t time);
     void assert_violation(step_t time);
 };
-
-
 
 #endif

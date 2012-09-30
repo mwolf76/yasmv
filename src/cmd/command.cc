@@ -86,6 +86,24 @@ Variant SATCommand::operator()()
 SATCommand::~SATCommand()
 {}
 
+// -- CheckInvspec -------------------------------------------------------------
+CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr expr)
+    : Command(owner)
+    , f_engine(*ModelMgr::INSTANCE().model(), expr)
+{}
+
+Variant CheckInvspecCommand::operator()()
+{
+    f_engine.process();
+
+    ostringstream tmp;
+    tmp << f_engine.status();
+    return Variant(tmp.str());
+}
+
+CheckInvspecCommand::~CheckInvspecCommand()
+{}
+
 // -- QUIT ---------------------------------------------------------------------
 QuitCommand::QuitCommand(Interpreter& owner, int retcode)
     : Command(owner)

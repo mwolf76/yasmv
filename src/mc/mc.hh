@@ -33,35 +33,53 @@
 
 typedef unordered_map<string, Variant> ParametersMap;
 
+typedef enum {
+    MC_FALSE,
+    MC_TRUE,
+    MC_UNKNOWN,
+} mc_status_t;
+
 class MCAlgorithm {
 public:
-  MCAlgorithm(IModel& model);
-  virtual ~MCAlgorithm();
+    MCAlgorithm(IModel& model, Expr_ptr property);
+    virtual ~MCAlgorithm();
 
-  // actual algorithm
-  virtual void process() =0;
+    // actual algorithm
+    virtual void process() =0;
 
-  // Trace iface
-  inline bool has_witness() const
-  { return ! f_traces.empty(); }
+    // Witness iface
+    inline mc_status_t status() const
+    { return f_status; }
 
-  inline Traces get_traces() const
-  { return f_traces; }
+    inline bool has_witness() const
+    { return NULL != f_witness; }
 
-  // alg abstract param iface (key -> value map)
-  void set_param(string key, Variant value);
-  Variant& get_param(const string key);
+    inline Trace& get_witness() const
+    {
+        assert (has_witness());
+        return *f_witness;
+    }
+
+    // alg abstract param iface (key -> value map)
+    void set_param(string key, Variant value);
+    Variant& get_param(const string key);
 
 protected:
-  ParametersMap f_params;
+    // managers
+    ModelMgr& f_mm;
+    ExprMgr& f_em;
+    TypeMgr& f_tm;
 
-  // managers
-  ModelMgr& f_mm;
-  ExprMgr& f_em;
-  TypeMgr& f_tm;
+    // model and property
+    IModel& f_model;
+    Expr_ptr f_property;
 
-  IModel& f_model;
-  Traces  f_traces;
+    // ctx witness
+    Trace_ptr f_witness;
+    mc_status_t f_status;
+
+    // algorithm specific params
+    ParametersMap f_params;
 };
 
 #endif

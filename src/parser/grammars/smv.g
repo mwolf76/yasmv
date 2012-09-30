@@ -151,6 +151,10 @@ commands returns [Command_ptr res]
         'SAT' expr=generic_formula[PRP_EXPR]
         { $res = cm.make_sat(expr); }
 
+    /* Property checking commands */
+    |   'CHECK' 'INVSPEC' expr=generic_formula[PRP_EXPR]
+        { $res = cm.make_check_invspec(expr); }
+
     |   'CLK'
         { $res = cm.make_now(); }
 

@@ -26,23 +26,15 @@
 #include <satbmc.hh>
 using namespace Minisat;
 
-SATBMCFalsification::SATBMCFalsification(IModel& model)
-  : MCAlgorithm(model)
+SATBMCFalsification::SATBMCFalsification(IModel& model, Expr_ptr property)
+    : MCAlgorithm(model, property)
   , f_factory(CuddMgr::INSTANCE().dd())
   , f_engine(f_factory)
   , f_compiler()
-{
-  TRACE << "Creating SATBMCFalsification algorithm instance "
-        << get_param("alg_name") << " @" << this
-        << endl;
-}
+{}
 
 SATBMCFalsification::~SATBMCFalsification()
-{
-  TRACE << "Destroying SATBMCFalsification algorithm instance"
-        << get_param("alg_name") << " @" << this
-        << endl;
-}
+{}
 
 void SATBMCFalsification::assert_fsm_init()
 {
@@ -121,7 +113,6 @@ void SATBMCFalsification::assert_violation(step_t time)
 {
 }
 
-
 void SATBMCFalsification::process()
 {
     step_t i, k = 10; // TODO
@@ -132,6 +123,8 @@ void SATBMCFalsification::process()
     }
 
     assert_violation(k);
+    if (STATUS_SAT == f_engine.solve()) {
+        f_status = MC_FALSE;
+    }
 
-    f_engine.solve();
 }

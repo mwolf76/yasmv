@@ -25,12 +25,14 @@
  **/
 #include <mc.hh>
 
-MCAlgorithm::MCAlgorithm(IModel& model)
+MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
     : f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_model(model)
-    , f_traces()
+    , f_property(property)
+    , f_witness(NULL)
+    , f_status(MC_UNKNOWN)
 {
     set_param("alg_name", "test");
     TRACE << "Creating MC algoritm instance "

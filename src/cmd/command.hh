@@ -28,6 +28,7 @@
 #include <expr.hh>
 #include <expr/compilers/be_compiler.hh>
 #include <sat.hh>
+#include <satbmc.hh>
 
 class ICommand : public IObject {
 public:
@@ -76,6 +77,22 @@ private:
     // the expr to solve
     Expr_ptr f_expr;
 };
+
+class CheckInvspecCommand : public Command {
+public:
+    CheckInvspecCommand(Interpreter& owner, Expr_ptr expr);
+    virtual ~CheckInvspecCommand();
+
+    Variant virtual operator()();
+
+private:
+    // BMC machinery
+    SATBMCFalsification f_engine;
+
+    // the invariant expr
+    Expr_ptr f_expr;
+};
+
 
 class NowCommand : public Command {
 public:
