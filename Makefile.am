@@ -23,7 +23,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
 # Programs to be built
 bin_PROGRAMS = smv
 
-smv_SOURCES = src/opts.cc src/main.cc
+smv_SOURCES = src/opts.cc src/main.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/expr/printers/libexpr_printers.la	\
 	$(top_builddir)/src/expr/validators/libexpr_validators.la	\
 	$(top_builddir)/src/parser/libparser.la				\

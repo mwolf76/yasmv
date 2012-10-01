@@ -146,4 +146,15 @@ inline string to_base(value_t value, base_t base)
 typedef std::string Atom;
 typedef Atom* Atom_ptr;
 
+/* tokens */
+extern const char *FALSE_TOKEN;
+extern const char *TRUE_TOKEN;
+extern const char *BOOL_TOKEN;
+extern const char *UNSIGNED_TOKEN;
+extern const char *SIGNED_TOKEN;
+extern const char *INTEGER_TOKEN;
+extern const char *TEMPORAL_TOKEN;
+extern const char *MAIN_TOKEN;
+#define DEFAULT_BITS 8
+
 #endif
