@@ -31,14 +31,13 @@
 #include <mc.hh>
 #include <satbmc.hh>
 
-// logger configuration, has to be inlined in main
-#include "logging.cc"
-
 // options management
 #include "opts.hh"
 
 #include <smvLexer.h>
 #include <smvParser.h>
+
+#include <logging.hh>
 
 // these are needed to force linking of modules
 extern void link_expr();
@@ -137,6 +136,7 @@ int main(int argc, const char *argv[])
     // parse command line options
     OptsMgr& opts_mgr = OptsMgr::INSTANCE();
     opts_mgr.parse_command_line(argc, argv);
+
     if (opts_mgr.help()) {
         usage();
         exit(0);
@@ -162,70 +162,23 @@ int main(int argc, const char *argv[])
     return system.retcode();
 }
 
-// int main(int argc, const char *argv[])
-// {
-//     // hack
-//     link_expr();
+// logging subsystem settings
+namespace axter {
+    std::string get_log_prefix_format(const char*FileName,
+                                      int LineNo, const char*FunctionName,
+                                      ext_data levels_format_usage_data) {
 
+        return ezlogger_format_policy::
+            get_log_prefix_format(FileName, LineNo, FunctionName,
+                                  levels_format_usage_data);
+    }
 
-//     try {
-//         const char* fname = opts_mgr.model().c_str();
-//         if (0 == strlen(fname)) {
-//             usage();
-//             exit(0);
-//         }
-//         parseFile((pANTLR3_UINT8) fname);
+    std::ostream& get_log_stream() {
+        return ezlogger_output_policy::get_log_stream();
+    }
 
-//         Printer prn(cout);
-
-//         IModel& M(ModelMgr::INSTANCE().model());
-
-//         Analyzer analyzer;
-//         analyzer.process();
-
-//         // Expr_ptr invspec = M.invspecs[0];
-
-//         SATBMCFalsification alg(M, invspec);
-//         alg.set_param("k", 10);
-//         alg.set_param("incremental", true);
-//         // assert(! alg.get_param("incremental").as_boolean());
-//         // other params...
-
-//         alg.process(); // TODO support for multiprocessing sync, etc...
-//         if (alg.has_witness()) {
-//             // const Traces& t = alg.get_traces();
-
-//             // maybe print them
-//         }
-
-//         // for (Modules::iterator eye = M.modules.begin(); eye != M.modules.end(); eye ++ ) {
-//         //     IModule_ptr pm = eye->second;
-//         //     {
-//         //         Module& m = dynamic_cast <Module&> (*pm);
-//         //         //      const Expr_ptr module_name = m.expr();
-
-//         //         prn << "Module name: "<< m.expr() << "\n";
-//         //         const Variables& svars = m.get_localVars();
-
-//         //         prn << "Variables: " << "\n";
-//         //         for (Variables::const_iterator veye = svars.begin();
-//         //              veye != svars.end(); veye ++ ) {
-
-//         //             IVariable* tmp = veye->second;
-
-//         //             if (StateVar* vp = dynamic_cast<StateVar*> (tmp) ){
-//         //                 const StateVar& v = (*vp);
-//         //                 prn << v.expr(); cout << endl;
-//         //             }
-//         //         }
-//         //     }
-//         // }
-//     }
-
-//     catch(Exception& e) {
-//         cerr << "error: " << e.what() << "\n";
-//         return 1;
-//     }
-
-//     return 0;
-// }
+    // delegated to OptsMgr
+    verbosity get_verbosity_level_tolerance() {
+        return OptsMgr::INSTANCE().get_verbosity_level_tolerance();
+    }
+};

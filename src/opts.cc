@@ -62,6 +62,8 @@ void OptsMgr::parse_command_line(int argc, const char **argv)
     if (f_vm.count("help")) {
         f_help = true;
     }
+
+    f_started = true;
 }
 
 int OptsMgr::verbosity() const
@@ -91,4 +93,20 @@ string OptsMgr::usage() const
     ostringstream oss;
     oss << f_desc;
     return oss.str();
+}
+
+
+using namespace axter;
+verbosity OptsMgr::get_verbosity_level_tolerance() {
+
+    // FIX default
+    if (!f_started) return log_often;
+
+    switch (verbosity()) {
+    case 0 : return log_always;
+    case 1 : return log_often;
+    case 2 : return log_regularly;
+    case 3 : return log_rarely;
+    default: return log_very_rarely;
+    }
 }

@@ -22,7 +22,9 @@ class OptsMgr;
 typedef OptsMgr* OptsMgr_ptr;
 
 #include <common.hh>
+#include <logging.hh>
 #include <boost/program_options.hpp>
+
 namespace options = boost::program_options;
 
 class OptsMgr {
@@ -48,6 +50,9 @@ public:
     // to be invoked by main
     void parse_command_line(int argc, const char **argv);
 
+    // delegate
+    axter::verbosity get_verbosity_level_tolerance();
+
 protected:
     OptsMgr();
 
@@ -60,4 +65,5 @@ private:
     options::variables_map f_vm;
 
     bool f_help;
+    bool f_started;
 };
