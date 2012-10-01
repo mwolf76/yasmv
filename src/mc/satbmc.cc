@@ -57,17 +57,17 @@ void SATBMCFalsification::assert_fsm_init()
             f_engine.push(add);
         } // for init
 
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); invar_eye ++) {
+        // const ExprVector invar = module.invar();
+        // for (ExprVector::const_iterator invar_eye = invar.begin();
+        //      invar_eye != invar.end(); invar_eye ++) {
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*invar_eye);
-            TRACE << "compiling INVAR " << ctx << "::" << body << endl;
+        //     Expr_ptr ctx = module.expr();
+        //     Expr_ptr body = (*invar_eye);
+        //     TRACE << "compiling INVAR " << ctx << "::" << body << endl;
 
-            ADD add = f_compiler.process(ctx, body, 0);
-            f_engine.push(add);
-        } // for invar
+        //     ADD add = f_compiler.process(ctx, body, 0);
+        //     f_engine.push(add);
+        // } // for invar
     } // modules
 }
 
@@ -78,7 +78,7 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
          m != modules.end(); ++ m) {
 
         Module& module = dynamic_cast <Module&> (*m->second);
-        TRACE << "processing module '" << module << "' " << endl;
+        DEBUG << "processing module '" << module << "' " << endl;
 
         const ExprVector trans = module.trans();
         for (ExprVector::const_iterator trans_eye = trans.begin();
@@ -86,7 +86,7 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
 
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*trans_eye);
-            TRACE << "compiling TRANS " << ctx << "::" << body << endl;
+            TRACE << "compiling @" << time << " TRANS " << ctx << "::" << body << endl;
 
             ADD add = f_compiler.process(ctx, body, time);
             f_engine.push(add);
