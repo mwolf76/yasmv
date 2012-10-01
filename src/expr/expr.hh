@@ -30,10 +30,10 @@
 #include <atom.hh>
 
 typedef enum {
-    /* LTL */
+    /* LTL ops */
     F, G, X, U, R,
 
-    /* CTL */
+    /* CTL ops */
     AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
 
     /* temporal ops */
@@ -45,8 +45,8 @@ typedef enum {
     /* word-related operators */
     CONCAT, COUNT,
 
-    /* casts */
-    CAST_INT, CAST_BOOL, CAST_SIGNED, CAST_UNSIGNED,
+    /* types (also used for casts) */
+    BOOL, SIGNED, UNSIGNED,
 
     /* logical/bitwise operators */
     NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
@@ -61,10 +61,10 @@ typedef enum {
     ICONST, UWCONST, SWCONST, IDENT, NIL,
 
     /* postfix exprs */
-    DOT, SUBSCRIPT, PARAMS, RANGE,
+    DOT, SUBSCRIPT, RANGE,
 
-    /* set exprs */
-    MEMBER, UNION,
+    // /* set exprs */
+    // MEMBER, UNION,
 
     /* utils */
     COMMA, SET,
@@ -332,20 +332,20 @@ public:
     inline Expr_ptr make_concat(Expr_ptr a, Expr_ptr b)
     { return make_expr(CONCAT, a, b); }
 
-    inline Expr_ptr make_toint(Expr_ptr expr)
-    { return make_expr(CAST_INT, expr, NULL); }
+    // inline Expr_ptr make_toint(Expr_ptr expr)
+    // { return make_expr(CAST_INT, expr, NULL); }
 
-    inline Expr_ptr make_bool(Expr_ptr expr)
-    { return make_expr(CAST_BOOL, expr, NULL); }
+    // inline Expr_ptr make_bool(Expr_ptr expr)
+    // { return make_expr(BOOL, expr, NULL); }
 
     inline Expr_ptr make_word1(Expr_ptr expr)
     { throw UnsupportedOperatorException(); }
 
     inline Expr_ptr make_signed(Expr_ptr expr)
-    { return make_expr(CAST_SIGNED, expr, NULL); }
+    { return make_expr(SIGNED, expr, NULL); }
 
     inline Expr_ptr make_unsigned(Expr_ptr expr)
-    { return make_expr(CAST_UNSIGNED, expr, NULL); }
+    { return make_expr(UNSIGNED, expr, NULL); }
 
     inline Expr_ptr make_count(Expr_ptr expr)
     { return make_expr(COUNT, expr, NULL); }
@@ -416,24 +416,11 @@ public:
     inline Expr_ptr make_lt(Expr_ptr a, Expr_ptr b)
     { return make_expr(LT, a, b); }
 
-    inline Expr_ptr make_union(Expr_ptr a, Expr_ptr b)
-    { return make_expr(UNION, a, b); }
-
-    inline Expr_ptr make_member(Expr_ptr a, Expr_ptr b)
-    { return make_expr(MEMBER, a, b); }
-
     inline Expr_ptr make_cond(Expr_ptr a, Expr_ptr b)
     { return make_expr(COND, a, b); }
 
     inline Expr_ptr make_ite(Expr_ptr a, Expr_ptr b)
     { return make_expr(ITE, a, b); }
-
-    /* leaves */
-    inline Expr_ptr make_false()
-    { return make_identifier("FALSE"); }
-
-    inline Expr_ptr make_true()
-    { return make_identifier("TRUE"); }
 
     inline Expr_ptr make_iconst(value_t value)
     {
@@ -473,33 +460,41 @@ public:
     inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUBSCRIPT, a, b); }
 
-    inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
-    { return make_expr(PARAMS, a, b); }
-
     inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
     { return make_expr(RANGE, a, b);  }
 
-    /* predefined identifiers */
-    inline Expr_ptr make_temporal() const
+    /* -- types ------------------------------------------------------------- */
+    inline Expr_ptr make_temporal_type() const
     { return temporal_expr; }
 
-    inline Expr_ptr make_boolean() const
+    inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
-    inline Expr_ptr make_const() const
-    { return const_expr; }
+    inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
+    { return make_expr(SUBSCRIPT, unsigned_expr, make_iconst((value_t) bits)); }
 
-    inline Expr_ptr make_integer() const
+    inline Expr_ptr make_signed_type(unsigned bits = DEFAULT_BITS)
+    { return make_expr(SUBSCRIPT, signed_expr, make_iconst((value_t) bits)); }
+
+    // abstract integer type (reserved for inferrer)
+    inline Expr_ptr make_integer_type() const
     { return integer_expr; }
 
+    /* -- builtin identifiers ----------------------------------------------- */
     inline Expr_ptr make_main() const
     { return main_expr; }
 
-    inline Expr_ptr make_uword(Expr_ptr size)
-    { return make_expr(SUBSCRIPT, uword_expr, size); }
+    inline Expr_ptr make_false()
+    { return false_expr; }
 
-    inline Expr_ptr make_sword(Expr_ptr size)
-    { return make_expr(SUBSCRIPT, sword_expr, size); }
+    inline Expr_ptr make_true()
+    { return true_expr; }
+
+    // inline Expr_ptr make_uword(Expr_ptr size)
+    // { return make_expr(SUBSCRIPT, uword_expr, size); }
+
+    // inline Expr_ptr make_sword(Expr_ptr size)
+    // { return make_expr(SUBSCRIPT, sword_expr, size); }
 
     // TODO: review this comment
     // Here a bit of magic occurs, so it's better to keep a note:
@@ -516,10 +511,10 @@ public:
         AtomPoolHit ah = f_atom_pool.insert(atom);
         const Atom& pooled_atom =  (* ah.first);
 
-        // if (ah.second) {
-        //     DEBUG << "Added new atom to pool: '"
-        //           << pooled_atom << "'" << endl;
-        // }
+        if (ah.second) {
+            DEBUG << "Added new atom to pool: '"
+                  << pooled_atom << "'" << endl;
+        }
 
         // no copy occurs here
         return make_expr(pooled_atom);
@@ -576,8 +571,9 @@ public:
             throw BadWordConstException("Decimal value not representable with this word size.");
         }
 
-        return is_signed ? make_swconst( wsize, value )
-            : make_uwconst(wsize, value );
+        return is_signed
+            ? make_swconst(wsize, value)
+            : make_uwconst(wsize, value);
     }
 
     inline Expr_ptr make_hex_const(Atom atom)
@@ -615,19 +611,8 @@ public:
     }
 
 protected:
-    ExprMgr()
-    {
-        false_expr = make_false();
-        true_expr = make_true();
-
-        temporal_expr = make_identifier("temporal");
-        integer_expr = make_identifier("integer");
-        bool_expr = make_identifier("boolean");
-        main_expr = make_identifier("main");
-        const_expr = make_identifier("const");
-        uword_expr = make_identifier("unsigned word");
-        sword_expr = make_identifier("signed word");
-    }
+    ExprMgr();
+    ~ExprMgr();
 
 private:
     static ExprMgr_ptr f_instance;
@@ -650,10 +635,10 @@ private:
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
 
-        // if (eh.second) {
-        //     DEBUG << "Added new expr to pool: '"
-        //           << pooled_expr << "'" << endl;
-        // }
+        if (eh.second) {
+            DEBUG << "Added new expr to pool: '"
+                  << pooled_expr << "'" << endl;
+        }
 
         return pooled_expr;
     }
@@ -667,16 +652,23 @@ private:
         return res;
     }
 
-    /* builtins */
+    /* a few builtin identifiers */
+
+    // temporal exprs type
     Expr_ptr temporal_expr;
-    Expr_ptr integer_expr;
+
+    // boolean exprs type and constants
     Expr_ptr bool_expr;
     Expr_ptr false_expr;
     Expr_ptr true_expr;
-    Expr_ptr const_expr;
+
+    // main module
     Expr_ptr main_expr;
-    Expr_ptr uword_expr;
-    Expr_ptr sword_expr;
+
+    // base for (un-)signed integer
+    Expr_ptr unsigned_expr;
+    Expr_ptr signed_expr;
+    Expr_ptr integer_expr; // reserved for abstract integer-type
 
     /* shared pools */
     ExprPool f_expr_pool;

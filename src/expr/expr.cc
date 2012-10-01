@@ -62,3 +62,30 @@ bool EnumType::has_numbers() const
 
     return res;
 }
+
+ExprMgr::ExprMgr()
+{
+    // boolean type identifier, false and true identifiers
+    bool_expr = make_identifier(BOOL_TOKEN);
+    false_expr = make_identifier(FALSE_TOKEN);
+    true_expr = make_identifier(TRUE_TOKEN);
+
+    // unsigned and signed base integer types identifiers
+    unsigned_expr = make_identifier(UNSIGNED_TOKEN);
+    signed_expr = make_identifier(SIGNED_TOKEN);
+
+    integer_expr = make_identifier(INTEGER_TOKEN); // abstract
+
+    // temporal type identifier
+    temporal_expr = make_identifier(TEMPORAL_TOKEN);
+
+    // main module identifier
+    main_expr = make_identifier(MAIN_TOKEN);
+
+    DEBUG << "ExprMgr @" << this << " initialized" << endl;
+}
+
+ExprMgr::~ExprMgr()
+{
+    DEBUG << "ExprMgr @" << this << " deinitialized" << endl;
+}

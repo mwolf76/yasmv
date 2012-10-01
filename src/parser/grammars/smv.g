@@ -72,9 +72,9 @@ cmd returns [Command_ptr res]
 
 /* Commands to be implemented:
 
- * Pure SAT
- SAT <expr> - pure satisfiability problem on a pure-propositional. Requires variable definitions in separate model.
- Returns UNSAT, or a witness #
+ * SAT <expr> [ ; <expr]* -- pure satisfiability problem on a (set of)
+ propositional formulas. Requires variable definitions in separate
+ model. Returns UNSAT, or a witness #
 
  * I/O
  READ MODEL <filename> - load a new model from file (stdin not supported)
@@ -656,45 +656,23 @@ equality_expression returns [Expr_ptr res]
 
 relational_expression returns [Expr_ptr res]
 @init { }
-	: lhs=union_expression
+	: lhs=shift_expression
       { $res = lhs; }
 
     (
-      '<' rhs=union_expression
+      '<' rhs=shift_expression
      { $res = em.make_lt($res, rhs); }
 
-    | '<=' rhs=union_expression
+    | '<=' rhs=shift_expression
      { $res = em.make_le($res, rhs); }
 
-    | '>=' rhs=union_expression
+    | '>=' rhs=shift_expression
      { $res = em.make_ge($res, rhs); }
 
-    | '>' rhs=union_expression
+    | '>' rhs=shift_expression
      { $res = em.make_gt($res, rhs); }
     )*
 	;
-
-union_expression returns [Expr_ptr res]
-@init { }
-    : lhs=member_expression
-     { $res= lhs; }
-
-    (
-      'union' rhs=member_expression
-     { $res = em.make_union($res, rhs); }
-    )*
-    ;
-
-member_expression returns [Expr_ptr res]
-@init { }
-    : lhs=shift_expression
-      { $res = lhs; }
-
-    (
-      'in' rhs=shift_expression
-      { $res = em.make_member($res, rhs); }
-    )*
-    ;
 
 shift_expression returns [Expr_ptr res]
 @init { }
@@ -767,20 +745,20 @@ unary_expression returns [Expr_ptr res]
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
 
-    | 'toint' '(' expr=postfix_expression ')'
-       { $res = em.make_toint(expr); }
+    // | 'toint' '(' expr=postfix_expression ')'
+    //    { $res = em.make_toint(expr); }
 
-    | 'bool' '(' expr=postfix_expression ')'
-       { $res = em.make_bool(expr); }
+    // | 'bool' '(' expr=postfix_expression ')'
+    //    { $res = em.make_bool(expr); }
 
-    | 'word1' '(' expr=postfix_expression ')'
-       { $res = em.make_word1(expr); }
+    // | 'word1' '(' expr=postfix_expression ')'
+    //    { $res = em.make_word1(expr); }
 
-    | 'signed' '(' expr=postfix_expression ')'
-       { $res = em.make_signed(expr); }
+    // | 'signed' '(' expr=postfix_expression ')'
+    //    { $res = em.make_signed(expr); }
 
-    | 'unsigned' '(' expr=postfix_expression ')'
-       { $res = em.make_unsigned(expr); }
+    // | 'unsigned' '(' expr=postfix_expression ')'
+    //    { $res = em.make_unsigned(expr); }
 
     | 'count' '(' expr=postfix_expression ')'
        { $res = em.make_count(expr); }
@@ -921,21 +899,32 @@ value returns [Expr_ptr res]
 
 type_name returns [Type_ptr res]
 @init { }
+    // boolean
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
+    // integer types (unsigned and signed)
+    | 'unsigned' (
+            '(' k=int_constant ')'
+            { $res = tm.find_unsigned(k->value()); }
+            |
+            { $res = tm.find_unsigned(); }
+    )
+	| 'signed' ( '(' k=int_constant ')'
+            { $res = tm.find_signed(k->value()); }
+            |
+            { $res = tm.find_signed(); }
+    )
+
+    // enumeratives
 	| literals=enum_type
       { $res = tm.find_enum($modules::module->expr(), literals); }
 
+    // ranges
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }
 
-    | 'unsigned'? 'word' '[' k=int_constant ']'
-      { $res = tm.find_uword(k); }
-
-	| 'signed' 'word' '[' k=int_constant ']'
-      { $res = tm.find_sword(k); }
-
+    // instances
     | id=identifier
       { $res = tm.find_instance(id); }  actual_param_decls[$res]
     ;

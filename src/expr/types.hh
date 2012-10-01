@@ -53,7 +53,7 @@ class BooleanType : public Type {
 protected:
     BooleanType()
         : f_em(ExprMgr::INSTANCE())
-        , f_repr(f_em.make_boolean())
+        , f_repr(f_em.make_boolean_type())
     {}
 
 public:
@@ -71,7 +71,7 @@ class TemporalType : public Type {
 protected:
     TemporalType()
         : f_em(ExprMgr::INSTANCE())
-        , f_repr(f_em.make_temporal())
+        , f_repr(f_em.make_temporal_type())
     {}
 
 public:
@@ -85,6 +85,12 @@ class IntegerType : public Type {
     ExprMgr& f_em;
     unsigned f_size;
     bool f_signed;
+    bool f_abstract;
+
+    IntegerType() // abstract
+        : f_em(ExprMgr::INSTANCE())
+        , f_abstract(true)
+    {}
 
     IntegerType(unsigned size, bool is_signed=false)
         : f_em(ExprMgr::INSTANCE())
@@ -94,13 +100,21 @@ class IntegerType : public Type {
 
 public:
     Expr_ptr get_repr() const
-    { return f_em.make_params(f_em.make_integer(), f_em.make_iconst(f_size)); }
+    {
+        return f_signed
+            ? f_em.make_signed_type(f_size)
+            : f_em.make_unsigned_type(f_size)
+            ;
+    }
 
     unsigned size() const
     { return f_size; }
 
     bool is_signed() const
     { return f_signed; }
+
+    bool is_abstract() const
+    { return f_abstract; }
 };
 
 typedef class IntRangeType* IntRangeType_ptr;
@@ -182,9 +196,9 @@ class Word : public Type {
 public:
     Expr_ptr get_repr() const
     {
-        return (!f_is_signed)
-            ? f_em.make_uword(f_em.make_iconst(f_size))
-            : f_em.make_sword(f_em.make_iconst(f_size));
+        return (! f_is_signed)
+            ? f_em.make_unsigned(f_em.make_iconst(f_size))
+            : f_em.make_signed  (f_em.make_iconst(f_size));
     }
 
     unsigned get_size() const
@@ -258,28 +272,31 @@ public:
     inline void set_type(const FQExpr fqexpr, const Type_ptr tp)
     { f_map[ fqexpr ] = tp; }
 
-    inline const Type_ptr find_const()
-    { return f_register[ FQExpr(f_em.make_const()) ]; }
-
     inline const Type_ptr find_boolean()
-    { return f_register[ FQExpr(f_em.make_boolean()) ]; }
+    { return f_register[ FQExpr(f_em.make_boolean_type()) ]; }
 
-    inline const Type_ptr find_integer()
-    { return f_register[ FQExpr(f_em.make_integer()) ]; }
+    inline const Type_ptr find_integer() // abstract
+    { return f_register[ FQExpr(f_em.make_integer_type()) ]; }
+
+    inline const Type_ptr find_unsigned(unsigned bits = DEFAULT_BITS)
+    { return f_register[ FQExpr(f_em.make_unsigned_type(bits)) ]; }
+
+    inline const Type_ptr find_signed(unsigned bits = DEFAULT_BITS)
+    { return f_register[ FQExpr(f_em.make_signed_type(bits)) ]; }
 
     // this type is reserved to tell temporal boolean exprs properties
     // from boolean propositions
     inline const Type_ptr find_temporal()
-    { return f_register[ FQExpr(f_em.make_temporal()) ]; }
+    { return f_register[ FQExpr(f_em.make_temporal_type()) ]; }
 
     inline const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits)
     { return f_register[ FQExpr(ctx, f_em.make_enum(lits)) ]; }
 
-    const Type_ptr find_uword(Expr_ptr size)
-    { return f_register[ FQExpr(f_em.make_uword(size)) ]; }
+    // const Type_ptr find_uword(Expr_ptr size)
+    // { return f_register[ FQExpr(f_em.make_uword(size)) ]; }
 
-    const Type_ptr find_sword(Expr_ptr size)
-    { return f_register[ FQExpr (f_em.make_sword(size)) ]; }
+    // const Type_ptr find_sword(Expr_ptr size)
+    // { return f_register[ FQExpr (f_em.make_sword(size)) ]; }
 
     const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
     { return f_register[ FQExpr (f_em.make_range(from, to)) ]; }
@@ -369,11 +386,15 @@ protected:
         , f_em(ExprMgr::INSTANCE())
     {
         // register predefined types
-        register_type( FQExpr( f_em.make_boolean() ),
+        register_type( FQExpr( f_em.make_boolean_type() ),
                        new BooleanType());
 
-        register_type( FQExpr( f_em.make_temporal() ),
+        register_type( FQExpr( f_em.make_temporal_type() ),
                        new TemporalType());
+
+        // abstract integer type
+        register_type( FQExpr( f_em.make_temporal_type() ),
+                       new IntegerType());
     }
 
 private:
