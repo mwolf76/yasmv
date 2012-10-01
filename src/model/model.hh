@@ -113,6 +113,9 @@ public:
 
 class IModel : public IObject {
 public:
+    virtual Expr_ptr name() const =0;
+    virtual void set_name(Expr_ptr name) =0;
+
     virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
     virtual IModule& get_module(Expr_ptr name) =0;
 
@@ -273,10 +276,14 @@ public:
 };
 
 class Model : public IModel {
-    Modules f_modules;
-
 public:
     Model();
+
+    Expr_ptr name() const
+    { return f_name; }
+
+    void set_name(Expr_ptr name)
+    { f_name = name; }
 
     const Modules& modules() const
     { return f_modules; }
@@ -295,6 +302,10 @@ public:
     }
 
     ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
+
+private:
+    Modules f_modules;
+    Expr_ptr f_name;
 };
 
 class ModelMgr;
