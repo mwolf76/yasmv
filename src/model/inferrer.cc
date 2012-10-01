@@ -399,12 +399,12 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     // cache miss took care of the stack already
     if (! cache_miss(expr)) return;
 
-    if ((symb_type == FALSE) ||
-        (symb_type == TRUE)) {
-        tp = f_tm.find_boolean();
-    }
+    // if ((symb_type == FALSE) ||
+    //     (symb_type == TRUE)) {
+    //     tp = f_tm.find_boolean();
+    // }
 
-    else if (symb_type == ICONST) {
+    if (symb_type == ICONST) {
         tp = f_tm.find_integer();
     }
 

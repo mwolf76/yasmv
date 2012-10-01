@@ -49,28 +49,42 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     if (eye == f_modules.end()) throw BadContext(ctx);
     IModule_ptr module = (*eye).second;
 
-    // suggested resolve order: constants, parameters, defines, variables
-    Constants cnts = module->get_localConsts();
-    Constants::iterator citer = cnts.find(symb);
-    if (citer != cnts.end()) {
-        return (*citer).second;
+    // suggested resolve order: local constants, global constants, parameters, defines, variables
+    {
+        Constants cnts = module->get_localConsts();
+        Constants::iterator citer = cnts.find(symb);
+        if (citer != cnts.end()) {
+            return (*citer).second;
+        }
     }
 
-    // not yet implemented: params
-
-    Defines defs = module->get_localDefs();
-    Defines::iterator diter = defs.find(symb);
-    if (diter != defs.end()) {
-        return (*diter).second;
+    {
+        Constants::iterator citer = f_constants.find(symb);
+        if (citer != f_constants.end()) {
+            return (*citer).second;
+        }
     }
 
-    Variables vars = module->get_localVars();
-    Variables::iterator viter = vars.find(symb);
-    if (viter != vars.end()) {
-        return (*viter).second;
+    // TODO: not yet implemented: params
+
+    {
+        Defines defs = module->get_localDefs();
+        Defines::iterator diter = defs.find(symb);
+        if (diter != defs.end()) {
+            return (*diter).second;
+        }
+    }
+
+    {
+        Variables vars = module->get_localVars();
+        Variables::iterator viter = vars.find(symb);
+        if (viter != vars.end()) {
+            return (*viter).second;
+        }
     }
 
     // if all of the above fail...
+    WARN << "Could not resolve symbol " << ctx << "::" << symb << endl;
     throw UnresolvedSymbol(ctx, symb);
 }
 
@@ -246,4 +260,25 @@ void Module::add_ctlspec(Expr_ptr formula)
 
 Model::Model()
     : f_modules()
-{ DEBUG << "Initialized Model instance @" << this << endl; }
+    , f_constants()
+{
+    DEBUG << "Initialized Model instance @" << this << endl;
+
+    // initialize global constants
+    f_constants.insert(make_pair<FQExpr,
+                       IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
+                                      new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                   ExprMgr::INSTANCE().make_false(),
+                                                   TypeMgr::INSTANCE().find_boolean(), 0)));
+
+    f_constants.insert(make_pair<FQExpr,
+                       IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
+                                      new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                   ExprMgr::INSTANCE().make_true(),
+                                                   TypeMgr::INSTANCE().find_boolean(), 1)));
+}
+
+Model::~Model()
+{
+    // TODO: free memory for symbols... (they've been allocated using new)
+}

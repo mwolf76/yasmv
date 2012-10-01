@@ -918,8 +918,8 @@ void Walker::walk ()
                 walk_dot_postorder(curr.expr);
             }
             break;
-        case FALSE:
-        case TRUE:
+        // case FALSE:
+        // case TRUE:
         case ICONST:
         case UWCONST:
         case SWCONST:

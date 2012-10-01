@@ -52,8 +52,8 @@ public:
 
 class IConstant : public ISymbol {
 public:
-    virtual bool is_false() const =0;
-    virtual bool is_true() const =0;
+    // virtual bool is_false() const =0;
+    // virtual bool is_true() const =0;
     virtual value_t value() const =0;
 };
 
@@ -250,6 +250,33 @@ public:
     {}
 };
 
+class Constant : public IConstant {
+    const Expr_ptr f_ctx;
+    const Expr_ptr f_name;
+    const Type_ptr f_type;
+    value_t f_value;
+
+public:
+    Constant(const Expr_ptr ctx, const Expr_ptr name, Type_ptr type, value_t value)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_type(type)
+        , f_value(value)
+    {}
+
+    const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    const Expr_ptr expr() const
+    { return f_name; }
+
+    const Type_ptr type() const
+    { return f_type; }
+
+    value_t value() const
+    { return f_value; }
+};
+
 class Define : public IDefine {
     const Expr_ptr f_ctx;
     const Expr_ptr f_name;
@@ -258,7 +285,7 @@ class Define : public IDefine {
 public:
     Define(const Expr_ptr ctx, const Expr_ptr name, const Expr_ptr body)
         : f_ctx(ctx)
-        , f_name(f_name)
+        , f_name(name)
         , f_body(body)
     {}
 
@@ -278,6 +305,7 @@ public:
 class Model : public IModel {
 public:
     Model();
+    ~Model();
 
     Expr_ptr name() const
     { return f_name; }
@@ -305,6 +333,7 @@ public:
 
 private:
     Modules f_modules;
+    Constants f_constants; // global consts
     Expr_ptr f_name;
 };
 

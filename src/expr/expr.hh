@@ -58,7 +58,7 @@ typedef enum {
     ITE, COND,
 
     /* leaves */
-    FALSE, TRUE, ICONST, UWCONST, SWCONST, IDENT, NIL,
+    ICONST, UWCONST, SWCONST, IDENT, NIL,
 
     /* postfix exprs */
     DOT, SUBSCRIPT, PARAMS, RANGE,
@@ -118,14 +118,14 @@ struct Expr_TAG {
         : f_symb(NIL)
     {}
 
-    // bool consts
-    inline Expr_TAG(ExprType symb)
-        : f_symb(symb)
-    {
-        assert ((symb == FALSE) || (symb == TRUE));
-        u.f_lhs = NULL;
-        u.f_rhs = NULL;
-    }
+    // // bool consts
+    // inline Expr_TAG(ExprType symb)
+    //     : f_symb(symb)
+    // {
+    //     assert ((symb == FALSE) || (symb == TRUE));
+    //     u.f_lhs = NULL;
+    //     u.f_rhs = NULL;
+    // }
 
     // identifiers
     inline Expr_TAG(const Atom& atom)
@@ -430,16 +430,10 @@ public:
 
     /* leaves */
     inline Expr_ptr make_false()
-    {
-        Expr tmp(FALSE); // we need a temp store
-        return __make_expr(&tmp);
-    }
+    { return make_identifier("FALSE"); }
 
     inline Expr_ptr make_true()
-    {
-        Expr tmp(TRUE); // we need a temp store
-        return __make_expr(&tmp);
-    }
+    { return make_identifier("TRUE"); }
 
     inline Expr_ptr make_iconst(value_t value)
     {
@@ -623,11 +617,12 @@ public:
 protected:
     ExprMgr()
     {
+        false_expr = make_false();
+        true_expr = make_true();
+
         temporal_expr = make_identifier("temporal");
         integer_expr = make_identifier("integer");
         bool_expr = make_identifier("boolean");
-        false_expr = make_false();
-        true_expr = make_true();
         main_expr = make_identifier("main");
         const_expr = make_identifier("const");
         uword_expr = make_identifier("unsigned word");

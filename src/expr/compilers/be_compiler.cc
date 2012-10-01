@@ -549,10 +549,10 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     if (symb->is_const()) {
         IConstant& konst = symb->as_const();
 
-        if (konst.is_false()) {
+        if (0 == konst.value()) {
             f_add_stack.push_back(f_enc.zero());
         }
-        else if (konst.is_true()) {
+        else if (1 == konst.value()) {
             f_add_stack.push_back(f_enc.one());
         }
         else {
@@ -560,10 +560,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         }
     }
 
-    assert (symb->is_variable() ||
-            symb->is_define());
-
-    if (symb->is_variable()) {
+    else if (symb->is_variable()) {
 
         FQExpr key(ctx, expr, time);
         IEncoding_ptr enc;
