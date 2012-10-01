@@ -58,7 +58,10 @@ scope {
 @init {
     $smv::model = mm.model();
 }
-    : modules ';'?
+    : 'MODEL' id=identifier
+      { $smv::model->set_name(id); }
+
+      modules ';'? // exit point
     ;
 
 /* Scripting sub-system Toplevel */
@@ -74,16 +77,16 @@ cmd returns [Command_ptr res]
  Returns UNSAT, or a witness #
 
  * I/O
- LOAD MODEL <filename> - load a new model from file
+ READ MODEL <filename> - load a new model from file (stdin not supported)
  Returns OK, <0 errcode otherwise
 
- DUMP MODEL [TO <filename>] - save a new model to file
+ DUMP MODEL [ TO <filename> ] - save a new model to file
  Returns OK, <0 errcode otherwise
 
- LOAD TRACE <filename> - load a trace from .json file
+ READ TRACE <filename> - load a trace from .json file (stdin not supported)
  Returns trace#, <0 errcode otherwise
 
- DUMP TRACE #trace [TO <filename>] - save a trace to .json file
+ DUMP TRACE #trace [ TO <filename> ] - save a trace to .json file
  Returns OK, <0 errcode otherwise
 
  * Model
@@ -97,7 +100,7 @@ cmd returns [Command_ptr res]
  CHECK LTLSPEC <expr>, model checking of given properties.
  Return witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
- CHECK INVSPEC <expr>, model checking of given properties.
+ CHECK INVAR <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
  SIMULATE [ INIT | RESUME #trace ] [#steps] [CONSTRAINED constraint1] [GUIDED <#trace>]...
@@ -152,13 +155,13 @@ commands returns [Command_ptr res]
         { $res = cm.make_sat(expr); }
 
     /* Property checking commands */
-    |   'CHECK' 'INVSPEC' expr=generic_formula[PRP_EXPR]
+    |   'CHECK' 'INVAR' expr=generic_formula[PRP_EXPR]
         { $res = cm.make_check_invspec(expr); }
 
     |   'CLK'
         { $res = cm.make_now(); }
 
-    |   'LOAD' 'MODEL' fp=filepath
+    |   'READ' 'MODEL' fp=filepath
         { $res = cm.make_load_model(fp); }
 
     |   'QUIT'
@@ -348,17 +351,19 @@ module_decl
     :	/* variables and defines */
         fsm_var_decl
 	|	fsm_ivar_decl
-	|	fsm_frozenvar_decl
 	|	fsm_define_decl
 
-		/* relational FSM */
+		/* FSM definition */
 	|	fsm_init_decl
-	|	fsm_invar_decl
 	|	fsm_trans_decl
-    |   fsm_fairn_decl
 
-        /* functional FSM */
-	|	assignment_formula
+// scheduled for removal
+// 	|	fsm_invar_decl
+//  |   fsm_fairn_decl
+//     /* functional FSM */
+// |	assignment_formula
+
+//	|	fsm_frozenvar_decl
 
 	;
 
@@ -415,29 +420,29 @@ fsm_ivar_decl_clause
     }
     ;
 
-fsm_frozenvar_decl
-    : 'FROZENVAR' fsm_frozenvar_decl_body
-    ;
+// fsm_frozenvar_decl
+//     : 'FROZENVAR' fsm_frozenvar_decl_body
+//     ;
 
-fsm_frozenvar_decl_body
-	: fsm_frozenvar_decl_clause
-        ( ';' fsm_frozenvar_decl_clause)*
-	;
+// fsm_frozenvar_decl_body
+// 	: fsm_frozenvar_decl_clause
+//         ( ';' fsm_frozenvar_decl_clause)*
+// 	;
 
-fsm_frozenvar_decl_clause
-@init {
-    ExprVector ev;
-}
-    : ids=identifiers[&ev] ':' tp=type_name
-    {
-            ExprVector::iterator expr_iter;
-            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
-                $modules::module->add_localVar(id, var);
-            }
-    }
-    ;
+// fsm_frozenvar_decl_clause
+// @init {
+//     ExprVector ev;
+// }
+//     : ids=identifiers[&ev] ':' tp=type_name
+//     {
+//             ExprVector::iterator expr_iter;
+//             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+//                 Expr_ptr id = (*expr_iter);
+//                 IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
+//                 $modules::module->add_localVar(id, var);
+//             }
+//     }
+//     ;
 
 fsm_define_decl
     : 'DEFINE' fsm_define_decl_body
@@ -470,19 +475,19 @@ fsm_init_decl_clause
       { $modules::module->add_init(expr); }
 	;
 
-fsm_invar_decl
-    : 'INVAR' fsm_invar_decl_body
-    ;
+// fsm_invar_decl
+//     : 'INVAR' fsm_invar_decl_body
+//     ;
 
-fsm_invar_decl_body
-	: fsm_invar_decl_clause
-        (';' fsm_invar_decl_clause)*
-	;
+// fsm_invar_decl_body
+// 	: fsm_invar_decl_clause
+//         (';' fsm_invar_decl_clause)*
+// 	;
 
-fsm_invar_decl_clause
-	: expr=propositional_formula
-      { $modules::module->add_invar(expr); }
-	;
+// fsm_invar_decl_clause
+// 	: expr=propositional_formula
+//       { $modules::module->add_invar(expr); }
+// 	;
 
 fsm_trans_decl
     : 'TRANS' fsm_trans_decl_body
@@ -498,36 +503,36 @@ fsm_trans_decl_clause
       { $modules::module->add_trans(expr); }
 	;
 
-fsm_fairn_decl
-    : 'FAIRNESS' fsm_fairn_decl_body
-    ;
+// fsm_fairn_decl
+//     : 'FAIRNESS' fsm_fairn_decl_body
+//     ;
 
-fsm_fairn_decl_body
-	: fsm_fairn_decl_clause
-        (';' fsm_fairn_decl_clause)*
-	;
+// fsm_fairn_decl_body
+// 	: fsm_fairn_decl_clause
+//         (';' fsm_fairn_decl_clause)*
+// 	;
 
-fsm_fairn_decl_clause
-	: expr=propositional_formula
-      { $modules::module->add_fairness(expr); }
-	;
+// fsm_fairn_decl_clause
+// 	: expr=propositional_formula
+//       { $modules::module->add_fairness(expr); }
+// 	;
 
-assignment_formula
-	: 'ASSIGN' assignment_body
-	;
+// assignment_formula
+// 	: 'ASSIGN' assignment_body
+// 	;
 
-assignment_body
-	: assignment_clause (
-            ';' assignment_clause) *
-	;
+// assignment_body
+// 	: assignment_clause (
+//             ';' assignment_clause) *
+// 	;
 
-assignment_clause
-	: id=lvalue ':=' body=propositional_formula
-      {
-       IDefine_ptr def = new Define($modules::module->expr(), id, body);
-       $modules::module->add_assign(id, def);
-      }
-    ;
+// assignment_clause
+// 	: id=lvalue ':=' body=propositional_formula
+//       {
+//        IDefine_ptr def = new Define($modules::module->expr(), id, body);
+//        $modules::module->add_assign(id, def);
+//       }
+//     ;
 
 // expression entry point. This is the loopback entry point used in
 // the expressions rules but it's important outer rules use the
@@ -993,9 +998,9 @@ fragment FP_CHARS
 fragment ID_FOLLOWING_CHARS
 	:	 ID_FIRST_CHAR
     |    DECIMAL_DIGIT
-    |    '$'
-    |    '#'
-    |    '-'
+//    |    '$'
+//    |    '#'
+//    |    '-'
 	;
 
 HEX_LITERAL
