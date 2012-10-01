@@ -33,6 +33,9 @@ public:
     // singleton
     static Interpreter& INSTANCE();
 
+    // external commands (will be consumed and destroyed)
+    Variant& operator()(ICommand_ptr cmd);
+
     // cmd loop
     Variant& operator()();
 

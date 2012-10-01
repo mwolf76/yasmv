@@ -53,6 +53,22 @@ void Interpreter::quit(int retcode)
 }
 
 extern  ICommand* parseCommand(const char *command); // in utils.cc
+Variant& Interpreter::operator()(Command_ptr cmd)
+{
+    assert(NULL != cmd);
+
+    try {
+        f_last_result = (*cmd)();
+    }
+
+    catch (Exception& e) {
+        f_last_result = Variant(e.what());
+    }
+
+    delete cmd;
+    return f_last_result;
+}
+
 Variant& Interpreter::operator()()
 {
     // cmd prompt
@@ -64,14 +80,7 @@ Variant& Interpreter::operator()()
         Command_ptr cmd = parseCommand(cmdLine.c_str());
 
         if (NULL != cmd) {
-
-            try {
-                f_last_result = (*cmd)();
-            }
-
-            catch (Exception& e) {
-                f_last_result = Variant(e.what());
-            }
+            (*this)(cmd);
         }
     }
     else {

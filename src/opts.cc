@@ -29,7 +29,6 @@ OptsMgr::OptsMgr()
     , f_vm()
     , f_help(false)
 {
-    f_pos.add("model", -1);
     f_desc.add_options()
 
         (
@@ -49,12 +48,16 @@ OptsMgr::OptsMgr()
          "input model"
          )
         ;
+
+    // arguments are models
+    f_pos.add("model", -1);
 }
 
 void OptsMgr::parse_command_line(int argc, const char **argv)
 {
     options::store(options::command_line_parser(argc, const_cast<char **>(argv)).
-                 options(f_desc).positional(f_pos).run(), f_vm);
+                options(f_desc).positional(f_pos).run(), f_vm);
+
     options::notify(f_vm);
     if (f_vm.count("help")) {
         f_help = true;

@@ -144,6 +144,16 @@ int main(int argc, const char *argv[])
 
     // Run command interpreter subsystem
     Interpreter& system = Interpreter::INSTANCE();
+
+    // Run options-generated commands (if any)
+    const string model_filename = opts_mgr.model();
+    if (! model_filename.empty()) {
+        Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
+        Variant& res = system(cmd);
+        cerr << res << endl;
+    }
+
+    // interactive cmd loop
     do {
         Variant& res = system();
         cerr << res << endl;

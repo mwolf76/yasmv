@@ -52,7 +52,9 @@ typedef class ICommand* Command_ptr;
 
 class LoadModelCommand : public Command {
 public:
+    // from FILE
     LoadModelCommand(Interpreter& owner, const string& filename);
+
     virtual ~LoadModelCommand();
 
     Variant virtual operator()();
