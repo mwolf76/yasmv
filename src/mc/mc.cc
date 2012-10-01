@@ -35,15 +35,15 @@ MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
     , f_status(MC_UNKNOWN)
 {
     set_param("alg_name", "test");
-    TRACE << "Creating MC algoritm instance "
-          << get_param("alg_name")
-          << " @" << this
-          << endl;
+    DEBUG  << "Creating MC algoritm instance "
+           << get_param("alg_name")
+           << " @" << this
+           << endl;
 }
 
 MCAlgorithm::~MCAlgorithm()
 {
-    TRACE << "Destroying MC algoritm instance"
+    DEBUG << "Destroying MC algoritm instance"
           << get_param("alg_name")
           << " @" << this
           << endl;
