@@ -98,6 +98,8 @@ IntEncoding::IntEncoding(unsigned nbits, bool is_signed)
 
         // add it to the encoding
         add_res += add_var;
+
+        ++ i;
     }
 }
 

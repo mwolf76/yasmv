@@ -396,6 +396,9 @@ public:
     ADD Nor(const ADD& g) const;
     ADD Xor(const ADD& g) const;
     ADD Xnor(const ADD& g) const;
+    ADD Equals(const ADD& g) const;
+    ADD LT(const ADD& g) const;
+    ADD LEQ(const ADD& g) const;
     ADD Log() const;
     ADD FindMax() const;
     ADD FindMin() const;

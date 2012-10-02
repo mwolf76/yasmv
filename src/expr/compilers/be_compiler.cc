@@ -290,9 +290,7 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back((lhs == rhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    f_add_stack.push_back(lhs.Equals(rhs));
 }
 
 bool BECompiler::walk_ne_preorder(const Expr_ptr expr)
@@ -303,9 +301,7 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back((lhs == rhs)
-                          ? f_enc.zero()
-                          : f_enc.one());
+    f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
 }
 
 bool BECompiler::walk_gt_preorder(const Expr_ptr expr)
@@ -316,9 +312,7 @@ void BECompiler::walk_gt_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(rhs.Lt(lhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    f_add_stack.push_back(rhs.LT(lhs));
 }
 
 bool BECompiler::walk_ge_preorder(const Expr_ptr expr)
@@ -329,9 +323,7 @@ void BECompiler::walk_ge_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(rhs.Leq(lhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    f_add_stack.push_back(rhs.LEQ(lhs));
 }
 
 bool BECompiler::walk_lt_preorder(const Expr_ptr expr)
@@ -342,9 +334,7 @@ void BECompiler::walk_lt_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(lhs.Lt(rhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    f_add_stack.push_back(lhs.LT(rhs));
 }
 
 bool BECompiler::walk_le_preorder(const Expr_ptr expr)
@@ -355,9 +345,7 @@ void BECompiler::walk_le_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(lhs.Leq(rhs)
-                          ? f_enc.one()
-                          : f_enc.zero());
+    f_add_stack.push_back(lhs.LEQ(rhs));
 }
 
 bool BECompiler::walk_ite_preorder(const Expr_ptr expr)
@@ -409,6 +397,19 @@ void BECompiler::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
+inline void BECompiler::push_const_value(value_t value)
+{
+    if (0 == value) {
+        f_add_stack.push_back(f_enc.zero());
+    }
+    else if (1 == value) {
+        f_add_stack.push_back(f_enc.one());
+    }
+    else {
+        f_add_stack.push_back(f_enc.constant(value));
+    }
+}
+
 void BECompiler::walk_leaf(const Expr_ptr expr)
 {
     /* cached? */
@@ -419,22 +420,21 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
+    // 0. explicit constants (e.g. 42)
+    if (ExprMgr::INSTANCE().is_numeric(expr)) {
+        value_t value = expr->value();
+        push_const_value(value);
+
+        return;
+    }
+
     ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
     assert (NULL != symb);
 
-    // 0. bool/integer constant leaves
+    // 1. bool/integer constant leaves
     if (symb->is_const()) {
-        IConstant& konst = symb->as_const();
-
-        if (0 == konst.value()) {
-            f_add_stack.push_back(f_enc.zero());
-        }
-        else if (1 == konst.value()) {
-            f_add_stack.push_back(f_enc.one());
-        }
-        else {
-            f_add_stack.push_back(f_enc.constant(konst.value()));
-        }
+        value_t value = symb->as_const().value();
+        push_const_value(value);
     }
 
     else if (symb->is_variable()) {

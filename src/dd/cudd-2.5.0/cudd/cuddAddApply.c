@@ -727,6 +727,112 @@ Cudd_addXnor(
 
 /**Function********************************************************************
 
+  Synopsis    [Equality of two ADDs.]
+
+  Description [Equality of two ADDs. Returns NULL if not a terminal
+  case; f == g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addEquals(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *F, *G;
+
+    F = *f; G = *g;
+    if (F == G) return(DD_ONE(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+} /* end of Cudd_addEquals */
+
+
+/**Function********************************************************************
+
+  Synopsis    [Integer LT (<).]
+
+  Description [Integer < for Cudd_addApply.  Returns NULL if not a
+  terminal case; lt(f, g) otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addLT(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *F, *G;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	if (cuddV(F) < cuddV(G)) {
+	    return DD_ONE(dd);
+	} else {
+	    return DD_ZERO(dd);
+	}
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addLT */
+
+/**Function********************************************************************
+
+  Synopsis    [Integer LEQ (<=).]
+
+  Description [Integer <= for Cudd_addApply.  Returns NULL if not a
+  terminal case; leq(f, g) otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addLEQ(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *F, *G;
+
+    F = *f; G = *g;
+    if (F == G) return(F);
+
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	if (cuddV(F) < cuddV(G)) {
+	    return DD_ONE(dd);
+	} else {
+	    return DD_ZERO(dd);
+	}
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addLEq */
+
+
+/**Function********************************************************************
+
   Synopsis    [Applies op to the discriminants of f.]
 
   Description [Applies op to the discriminants of f.

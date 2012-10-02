@@ -2566,6 +2566,39 @@ ADD::Xnor(
 
 
 ADD
+ADD::Equals(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addEquals, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::Equals
+
+ADD
+ADD::LT(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addLT, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::LT
+
+ADD
+ADD::LEQ(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addLEQ, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::LEQ
+
+ADD
 ADD::FindMax() const
 {
     DdManager *mgr = p->manager;

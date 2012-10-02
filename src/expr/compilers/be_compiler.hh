@@ -161,6 +161,8 @@ private:
     inline void register_encoding(const FQExpr& symb, IEncoding_ptr enc)
     { f_encodings [ symb ] = enc; }
 
+    void push_const_value(value_t value);
+
 };
 
 #endif
