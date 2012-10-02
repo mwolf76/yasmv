@@ -36,14 +36,7 @@ typedef enum {
     DEFAULT,
     RETURN,
 
-    // LTL
-    F_1, G_1, X_1, U_1, U_2, R_1, R_2,
-
-    // CTL
-    AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,
-    EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
-
-    // Boolean, Algebraic, Relational, ... (primary)
+    // -- Simple walkers
     NEXT_1, NEG_1, NOT_1,
 
     PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
@@ -64,6 +57,9 @@ typedef enum {
     RSHIFT_1, RSHIFT_2,
     LSHIFT_1, LSHIFT_2,
 
+    RROTATE_1, RROTATE_2,
+    LROTATE_1, LROTATE_2,
+
     EQ_1, EQ_2,
     NE_1, NE_2,
     GT_1, GT_2,
@@ -71,10 +67,25 @@ typedef enum {
     LT_1, LT_2,
     LE_1, LE_2,
 
+    // ite
     ITE_1, ITE_2,
     COND_1, COND_2,
 
+    // dot notation for identifiers
     DOT_1, DOT_2,
+
+    // -- Temporal walkers
+    F_1, G_1, X_1, U_1, U_2, R_1, R_2,
+    AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,
+    EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
+
+    // -- Full walkers
+
+    // range decls
+    RANGE_1, RANGE_2,
+
+    // for enum decls, params
+    SET_1, PARAMS_1, COMMA_1, COMMA_2,
 } entry_point;
 
 // reserved for walkers

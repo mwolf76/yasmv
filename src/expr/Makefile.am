@@ -6,10 +6,12 @@ AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = expr.hh variant.hh expr_walker.hh simple_expr_walker.hh	\
-temporal_expr_walker.hh ltl_expr_walker.hh ctl_expr_walker.hh
+temporal_expr_walker.hh ltl_expr_walker.hh ctl_expr_walker.hh		\
+full_expr_walker.hh
 
 PKG_CC = expr.cc variant.cc expr_walker.cc simple_expr_walker.cc	\
-temporal_expr_walker.cc ltl_expr_walker.cc ctl_expr_walker.cc
+temporal_expr_walker.cc ltl_expr_walker.cc ctl_expr_walker.cc		\
+full_expr_walker.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

@@ -26,9 +26,9 @@
 
 #ifndef EXPR_PRINTER_H
 #define EXPR_PRINTER_H
-#include <temporal_expr_walker.hh>
+#include <full_expr_walker.hh>
 
-class Printer : public TemporalWalker {
+class Printer : public FullWalker {
     ostream& f_os;
 
 public:
@@ -160,12 +160,15 @@ protected:
     bool walk_comma_preorder(const Expr_ptr expr);
     bool walk_comma_inorder(const Expr_ptr expr);
     void walk_comma_postorder(const Expr_ptr expr);
-    bool walk_bits_preorder(const Expr_ptr expr);
-    bool walk_bits_inorder(const Expr_ptr expr);
-    void walk_bits_postorder(const Expr_ptr expr);
+    bool walk_params_preorder(const Expr_ptr expr);
+    bool walk_params_inorder(const Expr_ptr expr);
+    void walk_params_postorder(const Expr_ptr expr);
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
+    bool walk_range_preorder(const Expr_ptr expr);
+    bool walk_range_inorder(const Expr_ptr expr);
+    void walk_range_postorder(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 };
 

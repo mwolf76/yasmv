@@ -31,19 +31,6 @@
 
 typedef enum {
 
-    // -- declarations ---------------------------------------------------------
-
-    // types
-    BOOL, SIGNED, UNSIGNED,
-
-    BITS, // reserved for signed(bits) and unsigned(bits)
-
-    /* utils */
-    // SUBSCRIPT, (simiilar to bits but [] instead of ()) - future for arrays
-    RANGE,
-
-    COMMA, SET, // reserved for enums
-
     // -- primary expressions --------------------------------------------------
 
     /* propositional next (nesting supported) */
@@ -86,6 +73,19 @@ typedef enum {
 
     /* CTL ops */
     AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
+
+    // -- declarations ---------------------------------------------------------
+
+    // types
+    BOOL, SIGNED, UNSIGNED,
+
+    PARAMS, // int type decls, module and function params (e.g '()')
+
+    /* utils */
+    // SUBSCRIPT, (simiilar to bits but [] instead of ()) - future for arrays
+    RANGE,
+
+    COMMA, SET, // reserved for enums
 
 } ExprType;
 
@@ -478,14 +478,14 @@ public:
     inline Expr_ptr make_integer_type() const
     { return integer_expr; }
 
-    inline Expr_ptr make_bits(Expr_ptr a, Expr_ptr b)
-    { return make_expr(BITS, a, b); }
+    inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
+    { return make_expr(PARAMS, a, b); }
 
     inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
-    { return make_expr(BITS, unsigned_expr, make_iconst((value_t) bits)); }
+    { return make_params(unsigned_expr, make_iconst((value_t) bits)); }
 
     inline Expr_ptr make_signed_type(unsigned bits = DEFAULT_BITS)
-    { return make_expr(BITS, signed_expr, make_iconst((value_t) bits)); }
+    { return make_params(signed_expr, make_iconst((value_t) bits)); }
 
     inline Expr_ptr make_enum_type(ExprSet_ptr literals)
     {
