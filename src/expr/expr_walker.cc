@@ -25,10 +25,12 @@
 #include <expr_walker.hh>
 
 Walker::Walker()
-{ DEBUG << "Initialized walker @" << this << endl; }
+{ // DRIVEL << "Initialized walker @" << this << endl;
+}
 
 Walker::~Walker()
-{ DEBUG << "Deinitialized walker @" << this << endl; }
+{ // DRIVEL << "Deinitialized walker @" << this << endl;
+}
 
 Walker& Walker::operator() (const Expr_ptr expr)
 {

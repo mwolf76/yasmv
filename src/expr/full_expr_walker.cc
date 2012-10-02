@@ -26,10 +26,12 @@
 
 FullWalker::FullWalker()
     : TemporalWalker()
-{ DEBUG << "Initialized full walker @" << this << endl; }
+{ // DRIVEL << "Initialized full walker @" << this << endl;
+}
 
 FullWalker::~FullWalker()
-{ DEBUG << "Deinitialized full walker @" << this << endl; }
+{ // DRIVEL << "Deinitialized full walker @" << this << endl;
+}
 
 void FullWalker::walk()
 {

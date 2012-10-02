@@ -387,12 +387,13 @@ fsm_var_decl_clause
 }
 	: ids=identifiers[&ev] ':' tp=type_name
     {
-      ExprVector::iterator expr_iter;
-      for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-          Expr_ptr id = (*expr_iter);
-          IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
-          $modules::module->add_localVar(id, var);
-      }
+            ExprVector::iterator expr_iter;
+            assert(NULL != tp);
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr id = (*expr_iter);
+                IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
+                $modules::module->add_localVar(id, var);
+            }
     }
 	;
 
@@ -412,6 +413,7 @@ fsm_ivar_decl_clause
     : ids=identifiers[&ev] ':' tp=type_name
     {
             ExprVector::iterator expr_iter;
+            assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
                 IVariable_ptr var = new InputVar($modules::module->expr(), id, tp);
@@ -436,6 +438,7 @@ fsm_ivar_decl_clause
 //     : ids=identifiers[&ev] ':' tp=type_name
 //     {
 //             ExprVector::iterator expr_iter;
+//             assert(NULL != tp);
 //             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
 //                 Expr_ptr id = (*expr_iter);
 //                 IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
@@ -846,7 +849,7 @@ range_constant returns [Expr_ptr res]
       { $res = lhs; }
 
       ('..' rhs=int_constant
-      { $res = em.make_range(lhs, rhs); }
+      { $res = em.make_range_type(lhs, rhs); }
       )?
 	;
 

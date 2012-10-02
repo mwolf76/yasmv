@@ -26,10 +26,12 @@
 
 SimpleWalker::SimpleWalker()
     : Walker()
-{ DEBUG << "Initialized simple walker @" << this << endl; }
+{ // DRIVEL << "Initialized simple walker @" << this << endl;
+}
 
 SimpleWalker::~SimpleWalker()
-{ DEBUG << "Deinitialized simple walker @" << this << endl; }
+{ // DRIVEL << "Deinitialized simple walker @" << this << endl;
+}
 
 void SimpleWalker::walk ()
 {

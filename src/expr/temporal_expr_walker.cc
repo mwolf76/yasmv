@@ -26,10 +26,12 @@
 
 TemporalWalker::TemporalWalker()
     : SimpleWalker()
-{ DEBUG << "Initialized temporal walker @" << this << endl; }
+{ // DRIVEL << "Initialized temporal walker @" << this << endl;
+}
 
 TemporalWalker::~TemporalWalker()
-{ DEBUG << "Deinitialized temporal walker @" << this << endl; }
+{ // DRIVEL << "Deinitialized temporal walker @" << this << endl;
+}
 
 void TemporalWalker::walk()
 {

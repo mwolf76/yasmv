@@ -464,9 +464,6 @@ public:
     // inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     // { return make_expr(SUBSCRIPT, a, b); }
 
-    inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
-    { return make_expr(RANGE, a, b);  }
-
     /* -- types ------------------------------------------------------------- */
     inline Expr_ptr make_temporal_type() const
     { return temporal_expr; }
@@ -477,6 +474,9 @@ public:
     // abstract integer type (reserved for inferrer)
     inline Expr_ptr make_integer_type() const
     { return integer_expr; }
+
+    inline Expr_ptr make_range_type(Expr_ptr a, Expr_ptr b)
+    { return make_expr(RANGE, a, b);  }
 
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
