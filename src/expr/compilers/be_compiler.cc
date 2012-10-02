@@ -94,103 +94,6 @@ void BECompiler::post_hook()
     // TODO: assert it's a 0-1 ADD
 }
 
-bool BECompiler::walk_F_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_F_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_G_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_G_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_X_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_X_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_U_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_U_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_U_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_R_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_R_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_R_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_AF_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_AF_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_AG_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_AG_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_AX_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_AX_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_AU_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_AU_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_AU_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_AR_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_AR_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_AR_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_EF_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_EF_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_EG_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_EG_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_EX_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_EX_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_EU_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_EU_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_EU_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_ER_preorder(const Expr_ptr expr)
-{ assert(0); return false; }
-bool BECompiler::walk_ER_inorder(const Expr_ptr expr)
-{ assert(0); return false; }
-void BECompiler::walk_ER_postorder(const Expr_ptr expr)
-{ assert(0); }
-
-bool BECompiler::walk_init_preorder(const Expr_ptr expr)
-{
-    f_time_stack.push_back(0);
-    return true;
-}
-void BECompiler::walk_init_postorder(const Expr_ptr expr)
-{
-    f_time_stack.pop_back(); // reset time stack
-}
-
 bool BECompiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();
@@ -202,23 +105,23 @@ void BECompiler::walk_next_postorder(const Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
-bool BECompiler::walk_at_preorder(const Expr_ptr expr)
-{ return true; }
-bool BECompiler::walk_at_inorder(const Expr_ptr expr)
-{
-    ADD tmp = f_add_stack.back();
-    assert(Cudd_IsConstant(tmp));
+// bool BECompiler::walk_at_preorder(const Expr_ptr expr)
+// { return true; }
+// bool BECompiler::walk_at_inorder(const Expr_ptr expr)
+// {
+//     ADD tmp = f_add_stack.back();
+//     assert(Cudd_IsConstant(tmp));
 
-    /* watch out, this can be dangerous */
-    step_t curr_time = Cudd_V(tmp);
-    f_time_stack.push_back(1 + curr_time);
+//     /* watch out, this can be dangerous */
+//     step_t curr_time = Cudd_V(tmp);
+//     f_time_stack.push_back(1 + curr_time);
 
-    return true;
-}
-void BECompiler::walk_at_postorder(const Expr_ptr expr)
-{
-    f_time_stack.pop_back(); // reset time stack
-}
+//     return true;
+// }
+// void BECompiler::walk_at_postorder(const Expr_ptr expr)
+// {
+//     f_time_stack.pop_back(); // reset time stack
+// }
 
 bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -475,25 +378,6 @@ bool BECompiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_cond_postorder(const Expr_ptr expr)
 {}
-
-bool BECompiler::walk_set_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void BECompiler::walk_set_postorder(const Expr_ptr expr)
-{ assert(0); /* unsupported */ }
-
-bool BECompiler::walk_comma_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool BECompiler::walk_comma_inorder(const Expr_ptr expr)
-{ return true; }
-void BECompiler::walk_comma_postorder(const Expr_ptr expr)
-{ assert(0); /* unsupported */ }
-
-bool BECompiler::walk_bits_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool BECompiler::walk_bits_inorder(const Expr_ptr expr)
-{ return true; }
-void BECompiler::walk_bits_postorder(const Expr_ptr expr)
-{ assert(0); /* unsupported */ }
 
 bool BECompiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
