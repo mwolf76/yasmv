@@ -37,6 +37,8 @@ void TemporalWalker::walk()
     assert (0 != rec_level);
 
     size_t rec_goal = rec_level -1; // support re-entrant invocation
+
+ resume:
     while(f_recursion_stack.size() != rec_goal) {
 
     loop:
@@ -45,6 +47,7 @@ void TemporalWalker::walk()
 
             // restore caller location (simulate call return behavior)
             switch(curr.pc){
+            // LTL
             case F_1: goto entry_F_1;
             case G_1: goto entry_G_1;
             case X_1: goto entry_X_1;
@@ -53,15 +56,32 @@ void TemporalWalker::walk()
             case R_1: goto entry_R_1;
             case R_2: goto entry_R_2;
 
-            // .. fallback on ancestor's walker and resume
+            // CTL A
+            case AF_1: goto entry_AF_1;
+            case AG_1: goto entry_AG_1;
+            case AX_1: goto entry_AX_1;
+            case AU_1: goto entry_AU_1;
+            case AU_2: goto entry_AU_2;
+            case AR_1: goto entry_AR_1;
+            case AR_2: goto entry_AR_2;
+
+            // CTL E
+            case EF_1: goto entry_EF_1;
+            case EG_1: goto entry_EG_1;
+            case EX_1: goto entry_EX_1;
+            case EU_1: goto entry_EU_1;
+            case EU_2: goto entry_EU_2;
+            case ER_1: goto entry_ER_1;
+            case ER_2: goto entry_ER_2;
+
+            // fallback on ancestor's walker and resume
             default:
-                try {
-                    SimpleWalker::walk();
-                }
+                try { SimpleWalker::walk(); }
                 catch (WalkerException &we) {
-                    // DEBUG << "Caught " << we.what() << " continuing..." << endl;
-                    goto loop;
+                    const char *nls = we.what();
+                    DEBUG << "Caught " << nls << ", continuing..." << endl;
                 }
+                goto resume;
             }
         }
 
@@ -138,14 +158,154 @@ void TemporalWalker::walk()
             }
             break;
 
-        default:
-            try {
-                SimpleWalker::walk();
-            }
-            catch (WalkerException &we) {
-                // DEBUG << "Caught " << we.what() << " continuing..." << endl;
+        // CTL A ops
+        case AF:
+            if (walk_AF_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = AF_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
+
+            entry_AF_1:
+                walk_AF_postorder(curr.expr);
             }
+            break;
+
+        case AG:
+            if (walk_AG_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = AG_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_AG_1:
+                walk_AG_postorder(curr.expr);
+            }
+            break;
+
+        case AX:
+            if (walk_AX_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = AX_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_AX_1:
+                walk_AX_postorder(curr.expr);
+            }
+            break;
+
+        case AU:
+            if (walk_AU_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = AU_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_AU_1:
+                if (walk_AU_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = AU_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    goto loop;
+
+                entry_AU_2:
+                    walk_AU_postorder(curr.expr);
+                }
+            }
+            break;
+
+        case AR:
+            if (walk_AR_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = AR_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_AR_1:
+                if (walk_AR_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = AR_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    goto loop;
+
+                entry_AR_2:
+                    walk_AR_postorder(curr.expr);
+                }
+            }
+            break;
+
+        // CTL E ops
+        case EF:
+            if (walk_EF_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = EF_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_EF_1:
+                walk_EF_postorder(curr.expr);
+            }
+            break;
+
+        case EG:
+            if (walk_EG_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = EG_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_EG_1:
+                walk_EG_postorder(curr.expr);
+            }
+            break;
+
+        case EX:
+            if (walk_EX_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = EX_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_EX_1:
+                walk_EX_postorder(curr.expr);
+            }
+            break;
+
+        case EU:
+            if (walk_EU_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = EU_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_EU_1:
+                if (walk_EU_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = EU_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    goto loop;
+
+                entry_EU_2:
+                    walk_EU_postorder(curr.expr);
+                }
+            }
+            break;
+
+        case ER:
+            if (walk_ER_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = ER_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_ER_1:
+                if (walk_ER_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = ER_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    goto loop;
+
+                entry_ER_2:
+                    walk_ER_postorder(curr.expr);
+                }
+            }
+            break;
+
+        // fallback on ancestor's walker and resume
+        default:
+            try { SimpleWalker::walk(); }
+            catch (WalkerException &we) {
+                const char *nls = we.what();
+                DEBUG << "Caught " << nls << ", continuing..." << endl;
+            }
+            goto resume;
         } // switch
 
         f_recursion_stack.pop();
