@@ -146,16 +146,12 @@ Module::Module(const Expr_ptr name)
     : f_name(name)
     , f_formalParams()
     , f_isaDecls()
+    , f_localConsts()
     , f_localVars()
     , f_localDefs()
-    , f_localConsts()
     , f_init()
-    , f_invar()
     , f_trans()
-    , f_fair()
-    , f_assgn()
-    , f_ltlspecs()
-    , f_ctlspecs()
+      //, f_fair()
 {}
 
 void Module::add_formalParam(Expr_ptr identifier)
@@ -197,30 +193,11 @@ void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
                          IConstant_ptr>(FQExpr(expr(), name), k));
 }
 
-void Module::add_assign(Expr_ptr lvalue, IDefine_ptr def)
-{
-    DEBUG << "Module " << (*this)
-          << ", added assign "
-          << lvalue
-          << " := "
-          << def->body()
-          << endl;
-    f_assgn.insert(make_pair<FQExpr,
-                   IDefine_ptr>(FQExpr(expr(), lvalue), def));
-}
-
 void Module::add_init(Expr_ptr expr)
 {
     DEBUG << "Module " << (*this)
           << ", added INIT " << expr << endl;
     f_init.push_back(expr);
-}
-
-void Module::add_invar(Expr_ptr expr)
-{
-    DEBUG << "Module " << (*this)
-          << ", added INVAR " << expr << endl;
-    f_invar.push_back(expr);
 }
 
 void Module::add_trans(Expr_ptr expr)
@@ -230,33 +207,12 @@ void Module::add_trans(Expr_ptr expr)
     f_trans.push_back(expr);
 }
 
-void Module::add_fairness(Expr_ptr expr)
-{
-    DEBUG << "Module " << (*this)
-          << ", added FAIRNESS " << expr << endl;
-    f_fair.push_back(expr);
-}
-
-void Module::add_invspec(Expr_ptr formula)
-{
-    DEBUG << "Module " << (*this)
-          << ", added INVSPEC " << formula << endl;
-    f_invspecs.push_back(formula);
-}
-
-void Module::add_ltlspec(Expr_ptr formula)
-{
-    DEBUG << "Module " << (*this)
-          << ", added LTLSPEC " << formula << endl;
-    f_ltlspecs.push_back(formula);
-}
-
-void Module::add_ctlspec(Expr_ptr formula)
-{
-    DEBUG << "Module " << (*this)
-          << ", added CTLSPEC " << formula << endl;
-    f_ctlspecs.push_back(formula);
-}
+// void Module::add_fairness(Expr_ptr expr)
+// {
+//     DEBUG << "Module " << (*this)
+//           << ", added FAIRNESS " << expr << endl;
+//     f_fair.push_back(expr);
+// }
 
 Model::Model()
     : f_modules()

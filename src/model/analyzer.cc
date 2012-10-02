@@ -34,12 +34,10 @@ Analyzer::Analyzer()
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_inferrer()
-{
-    TRACE << "Created Analyzer @" << this << endl;
-}
+{ DEBUG << "Created Analyzer @" << this << endl; }
 
 Analyzer::~Analyzer()
-{ TRACE << "Destroying Analyzer @" << this << endl; }
+{ DEBUG << "Destroying Analyzer @" << this << endl; }
 
 void Analyzer::process()
 {
@@ -48,7 +46,7 @@ void Analyzer::process()
     try {
         const Modules& modules = model.modules();
 
-        TRACE << "-- first pass (binding)" << endl;
+        DEBUG << "-- first pass (binding)" << endl;
         // (binding) For each module m in M, A goes deep in the module
         // defs. Every variable decl is resolved either to a native type
         // (boolean, ranged int, ...) or to an instance. Due to (1) all
@@ -58,7 +56,7 @@ void Analyzer::process()
              mod_eye != modules.end(); mod_eye ++ ) {
 
             Module& module = dynamic_cast <Module&> (*mod_eye->second);
-            TRACE << "processing module '" << module << "' " << endl;
+            DEBUG << "processing module '" << module << "' " << endl;
 
             // Remark: ctx name is MODULE name, not instance's
             // rationale: you may have several instances but they
@@ -74,7 +72,7 @@ void Analyzer::process()
                 const Expr_ptr varname = var->expr();
                 const Type_ptr vartype = var->type();
 
-                TRACE << "processing var " << varname << ": " << vartype << endl;
+                DEBUG << "processing var " << varname << ": " << vartype << endl;
 
                 // eager binding for module instances
                 if (f_tm.is_instance(vartype)) {
@@ -101,12 +99,12 @@ void Analyzer::process()
         // INVAR, TRANS, FAIRNESS have all to be boolean formulae; ASSIGNs
         // have to match lvalue type. The type for every expression is
         // inferred using the lazy walker strategy.
-        TRACE << "-- second pass (type checking)" << endl;
+        DEBUG << "-- second pass (type checking)" << endl;
         for (Modules::const_iterator mod_eye = modules.begin();
              mod_eye != modules.end(); mod_eye ++ ) {
 
             Module& module = dynamic_cast <Module&> (*mod_eye->second);
-            TRACE << "processing module '" << module << "' " << endl;
+            DEBUG << "processing module '" << module << "' " << endl;
 
             // Remark: ctx name is MODULE name, not instance's
             // rationale: you may have several instances but they
@@ -154,7 +152,7 @@ void Analyzer::process()
                  init_eye != init.end(); init_eye ++) {
 
                 Expr_ptr body = (*init_eye);
-                TRACE << "processing INIT " << ctx << "::" << body << endl;
+                DEBUG << "processing INIT " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean())
@@ -162,26 +160,12 @@ void Analyzer::process()
                                   tp->get_repr(), body);
             } // for init
 
-            const ExprVector invar = module.invar();
-            for (ExprVector::const_iterator invar_eye = invar.begin();
-                 invar_eye != invar.end(); invar_eye ++) {
-
-                Expr_ptr body = (*invar_eye);
-                TRACE << "processing INVAR " << ctx << "::" << body << endl;
-
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_boolean()) {
-                    throw BadType(f_tm.find_boolean()->get_repr(),
-                                  tp->get_repr(), body);
-                }
-            } // for invar
-
             const ExprVector trans = module.trans();
             for (ExprVector::const_iterator trans_eye = trans.begin();
                  trans_eye != trans.end(); trans_eye ++) {
 
                 Expr_ptr body = (*trans_eye);
-                TRACE << "processing TRANS " << ctx << "::" << body << endl;
+                DEBUG << "processing TRANS " << ctx << "::" << body << endl;
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean()) {
@@ -190,72 +174,19 @@ void Analyzer::process()
                 }
             } // for trans
 
-            const ExprVector fair = module.fairness();
-            for (ExprVector::const_iterator fair_eye = fair.begin();
-                 fair_eye != fair.end(); fair_eye ++) {
+            // const ExprVector fair = module.fairness();
+            // for (ExprVector::const_iterator fair_eye = fair.begin();
+            //      fair_eye != fair.end(); fair_eye ++) {
 
-                Expr_ptr body = (*fair_eye);
-                TRACE << "processing FAIRNESS " << ctx << "::" << body << endl;
+            //     Expr_ptr body = (*fair_eye);
+            //     DEBUG << "processing FAIRNESS " << ctx << "::" << body << endl;
 
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_boolean()) {
-                    throw BadType(f_tm.find_boolean()->get_repr(),
-                                  tp->get_repr(), body);
-                }
-            } // for fair
-
-            const Assigns assign = module.get_assign();
-            for (Assigns::const_iterator assign_eye = assign.begin();
-                 assign_eye != assign.end(); assign_eye ++) {
-
-                Define& define = dynamic_cast <Define&> (*assign_eye->second);
-                Expr_ptr lvalue = define.expr();
-                FQExpr fqdn(ctx, lvalue);
-
-                // TODO: check it's an lvalue
-                // if (!lvalue)
-                //     throw NotAnLvalue(lvalue);
-
-                Expr_ptr dbody = define.body();
-                Type_ptr dtype = f_inferrer.process(ctx, dbody);
-
-                Type_ptr type = f_tm.type(fqdn); // previously determined type
-                if (type) {
-                    if (type != dtype) {
-                        throw BadType(type->get_repr(),
-                                      dtype->get_repr(),
-                                      dbody);
-                    }
-                } else f_tm.set_type(fqdn, dtype);
-            } // for assign
-
-            const ExprVector ltlspecs = module.ltlspecs();
-            for (ExprVector::const_iterator ltl_eye = ltlspecs.begin();
-                 ltl_eye != ltlspecs.end(); ltl_eye ++) {
-
-                Expr_ptr body = (*ltl_eye);
-                TRACE << "processing LTLSPEC " << ctx << "::" << body << endl;
-
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_temporal()) {
-                    // throw BadType(LTL_TEMPORAL, tp, body);
-                }
-            } // for ltlspecs
-
-            const ExprVector ctlspecs = module.ctlspecs();
-            for (ExprVector::const_iterator ctl_eye = ctlspecs.begin();
-                 ctl_eye != ctlspecs.end(); ctl_eye ++) {
-
-                Expr_ptr body = (*ctl_eye);
-                TRACE << "processing CTLSPEC " << ctx << "::" << body << endl;
-
-
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_temporal()) {
-                    // throw BadType(CTL_TEMPORAL, tp, body);
-                }
-
-            } // for ctlspecs
+            //     Type_ptr tp = f_inferrer.process(ctx, body);
+            //     if (tp != f_tm.find_boolean()) {
+            //         throw BadType(f_tm.find_boolean()->get_repr(),
+            //                       tp->get_repr(), body);
+            //     }
+            // } // for fair
 
         } // for modules
 

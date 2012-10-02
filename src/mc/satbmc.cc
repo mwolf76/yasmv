@@ -57,17 +57,6 @@ void SATBMCFalsification::assert_fsm_init()
             f_engine.push(add);
         } // for init
 
-        // const ExprVector invar = module.invar();
-        // for (ExprVector::const_iterator invar_eye = invar.begin();
-        //      invar_eye != invar.end(); invar_eye ++) {
-
-        //     Expr_ptr ctx = module.expr();
-        //     Expr_ptr body = (*invar_eye);
-        //     TRACE << "compiling INVAR " << ctx << "::" << body << endl;
-
-        //     ADD add = f_compiler.process(ctx, body, 0);
-        //     f_engine.push(add);
-        // } // for invar
     } // modules
 }
 
@@ -91,20 +80,6 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
             ADD add = f_compiler.process(ctx, body, time);
             f_engine.push(add);
         } // for trans
-
-        // here it is necessary to add only next state invar, because
-        // curr state invar have already been taken care of.
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); invar_eye ++) {
-
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*invar_eye);
-            TRACE << "compiling INVAR " << ctx << "::" << body << endl;
-
-            ADD add = f_compiler.process(ctx, body, 1 + time); // next
-            f_engine.push(add);
-        } // for invar
 
     } // modules
 }

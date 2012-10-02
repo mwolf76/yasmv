@@ -85,30 +85,14 @@ public:
     virtual const Defines& get_localDefs() const =0;
     virtual void add_localDef(Expr_ptr expr, IDefine_ptr def) =0;
 
-    virtual const Assigns& get_assign() const =0;
-    virtual void add_assign(Expr_ptr expr, IDefine_ptr assgn) =0;
-
     virtual const ExprVector& init() const =0;
     virtual void add_init(Expr_ptr expr) =0;
-
-    virtual const ExprVector& invar() const =0;
-    virtual void add_invar(Expr_ptr expr) =0;
 
     virtual const ExprVector& trans() const =0;
     virtual void add_trans(Expr_ptr expr) =0;
 
-    virtual const ExprVector& fairness() const =0;
-    virtual void add_fairness(Expr_ptr expr) =0;
-
-    // properties management
-    virtual const ExprVector& invspecs() const =0;
-    virtual void add_invspec(Expr_ptr formula) =0;
-
-    virtual const ExprVector& ltlspecs() const =0;
-    virtual void add_ltlspec(Expr_ptr formula) =0;
-
-    virtual const ExprVector& ctlspecs() const =0;
-    virtual void add_ctlspec(Expr_ptr formula) =0;
+    // virtual const ExprVector& fairness() const =0;
+    // virtual void add_fairness(Expr_ptr expr) =0;
 };
 
 class IModel : public IObject {
@@ -126,22 +110,17 @@ typedef IModel* IModel_ptr;
 
 class Module : public IModule {
     Expr_ptr f_name;
+
     ExprVector f_formalParams;
     ExprVector f_isaDecls;
 
-    Variables f_localVars;
-    Defines f_localDefs;
     Constants f_localConsts;
+    Variables f_localVars;
+    Defines   f_localDefs;
 
     ExprVector f_init;
-    ExprVector f_invar;
     ExprVector f_trans;
-    ExprVector f_fair;
-    Assigns f_assgn;
-
-    ExprVector f_invspecs;
-    ExprVector f_ltlspecs;
-    ExprVector f_ctlspecs;
+    //    ExprVector f_fair;
 
 public:
     Module(const Expr_ptr name);
@@ -172,37 +151,17 @@ public:
     const Constants& get_localConsts() const
     { return f_localConsts; }
 
-    void add_assign(Expr_ptr lvalue, IDefine_ptr body);
-    const Assigns& get_assign() const
-    { return f_assgn; }
-
     void add_init(Expr_ptr expr);
     const ExprVector& init() const
     { return f_init; }
-
-    void add_invar(Expr_ptr expr);
-    const ExprVector& invar() const
-    { return f_invar; }
 
     void add_trans(Expr_ptr expr);
     const ExprVector& trans() const
     { return f_trans; }
 
-    void add_fairness(Expr_ptr expr);
-    const ExprVector& fairness() const
-    { return f_fair; }
-
-    void add_invspec(Expr_ptr formula);
-    const ExprVector& invspecs() const
-    { return f_invspecs; }
-
-    void add_ltlspec(Expr_ptr formula);
-    const ExprVector& ltlspecs() const
-    { return f_ltlspecs; }
-
-    void add_ctlspec(Expr_ptr formula);
-    const ExprVector& ctlspecs() const
-    { return f_ctlspecs; }
+    // void add_fairness(Expr_ptr expr);
+    // const ExprVector& fairness() const
+    // { return f_fair; }
 };
 
 ostream& operator<<(ostream& os, Module& module);
