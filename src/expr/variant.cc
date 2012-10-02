@@ -32,42 +32,42 @@ Variant NilValue;
 Variant::Variant()
     : f_type(BOTTOM)
 {
-    DEBUG << "Initialized BOTTOM Variant @" << this << endl;
+    DRIVEL << "Initialized BOTTOM Variant @" << this << endl;
 }
 
 Variant::Variant(bool value)
     : f_type(BOOLEAN)
     , f_bool(value)
 {
-    DEBUG << "Initialized BOOLEAN Variant @" << this << " (value = " << f_bool << ")" << endl;
+    DRIVEL << "Initialized BOOLEAN Variant @" << this << " (value = " << f_bool << ")" << endl;
 }
 
 Variant::Variant(int value)
     : f_type(INTEGER)
     , f_int(value)
 {
-    DEBUG << "Initialized INTEGER Variant @" << this << " (value = " << f_int << ")" << endl;
+    DRIVEL << "Initialized INTEGER Variant @" << this << " (value = " << f_int << ")" << endl;
 }
 
 Variant::Variant(clock_t value)
     : f_type(CLOCK)
     , f_clock(value)
 {
-    DEBUG << "Initialized CLOCK Variant @" << this << " (value = " << f_clock << ")" << endl;
+    DRIVEL << "Initialized CLOCK Variant @" << this << " (value = " << f_clock << ")" << endl;
 }
 
 Variant::Variant(const string &value)
     : f_type(STRING)
     , f_str(value)
 {
-    DEBUG << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
+    DRIVEL << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
 }
 
 Variant::Variant(const char *value)
     : f_type(STRING)
     , f_str(value)
 {
-    DEBUG << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
+    DRIVEL << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
 }
 
 Variant::Variant(const Variant& v)
@@ -83,7 +83,7 @@ Variant::Variant(const Variant& v)
     }
 
     void *tmp = (void *) &v;
-    DEBUG << "Initialized COPY Variant @" << this << " (from @" << tmp << ")" << endl;
+    DRIVEL << "Initialized COPY Variant @" << this << " (from @" << tmp << ")" << endl;
 }
 
 bool Variant::is_nil() const
