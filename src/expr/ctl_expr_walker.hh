@@ -29,7 +29,7 @@
 
 #include <temporal_expr_walker.hh>
 
-// just a temporal walker with the CTL part
+// just a temporal walker with the LTL part
 // filtered out
 class CTLWalker : public TemporalWalker {
 protected:
