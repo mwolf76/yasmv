@@ -705,29 +705,17 @@ additive_expression returns [Expr_ptr res]
 
 multiplicative_expression returns [Expr_ptr res]
 @init { }
-	: lhs=concatenative_expression
-      { $res = lhs; }
-
-    (
-      '*' rhs=concatenative_expression
-      { $res = em.make_mul($res, rhs); }
-
-    | '/' rhs=concatenative_expression
-      { $res = em.make_div($res, rhs); }
-
-    | 'mod' rhs=concatenative_expression
-      { $res = em.make_mod($res, rhs); }
-    )*
-	;
-
-concatenative_expression returns [Expr_ptr res]
-@init { }
 	: lhs=unary_expression
       { $res = lhs; }
-
     (
-       '::' rhs=unary_expression
-       { $res = em.make_concat($res, rhs); }
+      '*' rhs=unary_expression
+      { $res = em.make_mul($res, rhs); }
+
+    | '/' rhs=unary_expression
+      { $res = em.make_div($res, rhs); }
+
+    | 'mod' rhs=unary_expression
+      { $res = em.make_mod($res, rhs); }
     )*
 	;
 
@@ -760,8 +748,8 @@ unary_expression returns [Expr_ptr res]
     // | 'unsigned' '(' expr=postfix_expression ')'
     //    { $res = em.make_unsigned(expr); }
 
-    | 'count' '(' expr=postfix_expression ')'
-       { $res = em.make_count(expr); }
+    // | 'count' '(' expr=postfix_expression ')'
+    //    { $res = em.make_count(expr); }
 	;
 
 postfix_expression returns [Expr_ptr res]
@@ -770,10 +758,11 @@ postfix_expression returns [Expr_ptr res]
         { $res = lhs; }
 
     (
-        '[' rhs=primary_expression ']'
-        { $res = em.make_subscript($res, rhs); }
+    //     '[' rhs=primary_expression ']'
+    //     { $res = em.make_subscript($res, rhs); }
 
-    |   '.' rhs=primary_expression
+    // |
+        '.' rhs=primary_expression
         { $res = em.make_dot($res, rhs); }
 
     )*
@@ -864,21 +853,21 @@ range_constant returns [Expr_ptr res]
 enum_constant returns [Expr_ptr res]
 @init { }
 	: literals=enum_type
-    { $res = em.make_enum(literals); }
+    { $res = em.make_enum_type(literals); }
     ;
 
-/* lvalue is used in assignments */
-lvalue returns [Expr_ptr res]
-@init { }
-	: 'init' '(' expr=postfix_expression ')'
-      { $res = em.make_init(expr); }
+// /* lvalue is used in assignments */
+// lvalue returns [Expr_ptr res]
+// @init { }
+// 	: 'init' '(' expr=postfix_expression ')'
+//       { $res = em.make_init(expr); }
 
-	| 'next' '(' expr=postfix_expression ')'
-      { $res = em.make_next(expr); }
+// 	| 'next' '(' expr=postfix_expression ')'
+//       { $res = em.make_next(expr); }
 
-	| expr=postfix_expression
-      { $res = expr; }
-	;
+// 	| expr=postfix_expression
+//       { $res = expr; }
+// 	;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
