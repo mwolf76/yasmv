@@ -49,7 +49,8 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     if (eye == f_modules.end()) throw BadContext(ctx);
     IModule_ptr module = (*eye).second;
 
-    // suggested resolve order: local constants, global constants, parameters, defines, variables
+    // suggested resolve order: local constants, global constants,
+    // parameters, defines, variables
     {
         Constants cnts = module->get_localConsts();
         Constants::iterator citer = cnts.find(symb);
