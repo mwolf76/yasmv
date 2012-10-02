@@ -38,15 +38,15 @@ Inferrer::Inferrer()
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
-{ TRACE << "Created Inferrer @" << this << endl; }
+{ DEBUG << "Created Inferrer @" << this << endl; }
 
 Inferrer::~Inferrer()
-{ TRACE << "Destroying Inferrer @" << this << endl; }
+{ DEBUG << "Destroying Inferrer @" << this << endl; }
 
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
 {
     Type_ptr res = NULL;
-    DEBUG << "Determining type for expression " << ctx << "::" << body << endl;
+    INFO << "Determining type for expression " << ctx << "::" << body << endl;
 
     // remove previous results
     f_type_stack.clear();
