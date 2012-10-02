@@ -149,7 +149,7 @@ public:
     { return f_max; }
 
     Expr_ptr get_repr() const
-    { return f_em.make_range(f_em.make_iconst(f_min), f_em.make_iconst(f_max)); }
+    { return f_em.make_range_type(f_em.make_iconst(f_min), f_em.make_iconst(f_max)); }
 
     unsigned size() const
     { assert(0); return -1; } // TODO...
@@ -279,27 +279,51 @@ public:
     { return f_register[ FQExpr(f_em.make_integer_type()) ]; }
 
     inline const Type_ptr find_unsigned(unsigned bits = DEFAULT_BITS)
-    { return f_register[ FQExpr(f_em.make_unsigned_type(bits)) ]; }
+    {
+        FQExpr descr(f_em.make_unsigned_type(bits));
+        Type_ptr res = lookup_type(descr);
+        if (NULL != res) return res;
+
+        // new type, needs to be registered before returning
+        res = new IntegerType(bits, false); // unsigned
+        register_type(descr, res);
+        return res;
+    }
 
     inline const Type_ptr find_signed(unsigned bits = DEFAULT_BITS)
-    { return f_register[ FQExpr(f_em.make_signed_type(bits)) ]; }
+    {
+        FQExpr descr(f_em.make_signed_type(bits));
+        Type_ptr res = lookup_type(descr);
+        if (NULL != res) return res;
 
-    // this type is reserved to tell temporal boolean exprs properties
-    // from boolean propositions
-    inline const Type_ptr find_temporal()
-    { return f_register[ FQExpr(f_em.make_temporal_type()) ]; }
+        // new type, needs to be registered before returning
+        res = new IntegerType(bits, true);  // signed
+        register_type(descr, res);
+        return res;
+    }
 
     inline const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits)
-    { return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ]; }
+    {
+        assert(0); // TODO
+        return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ];
+    }
 
-    // const Type_ptr find_uword(Expr_ptr size)
-    // { return f_register[ FQExpr(f_em.make_uword(size)) ]; }
+    inline const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
+    {
+        FQExpr descr(f_em.make_range_type(from, to));
+        Type_ptr res = lookup_type(descr);
+        if (NULL != res) return res;
 
-    // const Type_ptr find_sword(Expr_ptr size)
-    // { return f_register[ FQExpr (f_em.make_sword(size)) ]; }
+        // new type, needs to be registered before returning
+        res = new IntRangeType(from, to);
+        register_type(descr, res);
+        return res;
+    }
 
-    const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to)
-    { return f_register[ FQExpr (f_em.make_range(from, to)) ]; }
+    // this type is reserved to tell temporal boolean exprs properties
+    // from boolean propositions.
+    inline const Type_ptr find_temporal()
+    { return f_register[ FQExpr(f_em.make_temporal_type()) ]; }
 
     const Type_ptr find_instance(Expr_ptr identifier)
     {
@@ -393,7 +417,7 @@ protected:
                        new TemporalType());
 
         // abstract integer type
-        register_type( FQExpr( f_em.make_temporal_type() ),
+        register_type( FQExpr( f_em.make_integer_type() ),
                        new IntegerType());
     }
 
@@ -401,8 +425,14 @@ private:
     static TypeMgr_ptr f_instance;
 
     /* low-level services */
+
+    // register a type
     void register_type(const FQExpr fqexpr, Type_ptr vtype)
     { f_register [ fqexpr ] = vtype; }
+
+    // lookup up a type, returns NULL if not found
+    Type_ptr lookup_type(const FQExpr fqexpr)
+    { return f_register [ fqexpr ]; }
 
     /* local data */
     TypeMap f_register;
