@@ -26,9 +26,9 @@
 
 #ifndef EXPR_PRINTER_H
 #define EXPR_PRINTER_H
-#include <expr_walker.hh>
+#include <temporal_expr_walker.hh>
 
-class Printer : public Walker {
+class Printer : public TemporalWalker {
     ostream& f_os;
 
 public:

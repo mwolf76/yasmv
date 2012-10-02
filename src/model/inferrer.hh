@@ -23,16 +23,17 @@
 #ifndef INFERRER_H
 #define INFERRER_H
 
-#include <expr_walker.hh>
 #include <types.hh>
 #include <model.hh>
+
+#include <temporal_expr_walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
 typedef vector<Type_ptr> TypeStack;
 typedef vector<Expr_ptr> ExprStack;
 
-class Inferrer : public Walker {
+class Inferrer : public TemporalWalker {
 public:
     Inferrer();
     ~Inferrer();

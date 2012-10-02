@@ -1,6 +1,6 @@
 /**
  *  @file temporal_expr_walker.hh
- *  @brief Expression algorithm-unaware walk pattern implementation
+ *  @brief Expression algorithm-unaware walk pattern implementation (TEMPORAL variant)
  *
  *  This module contains definitions and services that implement an
  *  optimized storage for expressions. Expressions are stored in a
@@ -24,46 +24,27 @@
  *
  **/
 
-#ifndef TEMP_EXPR_WALKER_H
-#define TEMP_EXPR_WALKER_H
+#ifndef TEMPORAL_EXPR_WALKER_H
+#define TEMPORAL_EXPR_WALKER_H
 
 #include <common.hh>
 #include <expr.hh>
+#include <simple_expr_walker.hh>
 
-typedef enum {
-    F_1, G_1, X_1, U_1, U_2, R_1, R_2,
-    AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,
-    EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
-} expr_walker_entry_point;
+class TemporalWalker : public SimpleWalker {
+protected:
 
-struct activation_record {
-    expr_walker_entry_point pc;
-    Expr_ptr expr;
-
-    activation_record(const Expr_ptr e)
-    : pc(DEFAULT) , expr(e)
+    // extra-hooks
+    virtual void pre_hook()
+    {}
+    virtual void post_hook()
     {}
 
-};
-
-typedef stack<struct activation_record> walker_stack;
-
-class TemporalWalker : public class SimpleWalker {
-protected:
-    virtual void walk();
+    void walk();
 
 public:
     TemporalWalker();
     virtual ~TemporalWalker();
-
-    Walker& operator() (const Expr_ptr expr);
-
-    // -- walker interface: for unary operator we define a pre- and a
-    // -- post-order hook. The pre-hook returns a boolean that
-    // -- determines if the subtree is to be visited. For each binary
-    // -- operator we define a pre-, an in- and a post-order hook. Here,
-    // -- both pre- and in- hooks return a boolean with the same
-    // -- semantics as above. This can be used e.g. for lazy evaluation.
 
     // LTL ops
     virtual bool walk_F_preorder(const Expr_ptr expr) =0;
@@ -113,6 +94,7 @@ public:
     virtual bool walk_ER_preorder(const Expr_ptr expr) =0;
     virtual bool walk_ER_inorder(const Expr_ptr expr) =0;
     virtual void walk_ER_postorder(const Expr_ptr expr) =0;
+
 };
 
 #endif

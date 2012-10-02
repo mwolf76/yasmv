@@ -22,7 +22,8 @@
 
 #ifndef BE_COMPILER_H
 #define BE_COMPILER_H
-#include <expr_walker.hh>
+#include <simple_expr_walker.hh>
+
 #include <model.hh>
 #include <encoder.hh>
 
@@ -38,7 +39,7 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-class BECompiler : public Walker {
+class BECompiler : public SimpleWalker {
 
 public:
     BECompiler();

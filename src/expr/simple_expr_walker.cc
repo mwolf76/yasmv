@@ -1,5 +1,5 @@
 /**
- * @file expr_walker.cc
+ * @file simple_expr_walker.cc
  * @brief Expression walker
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -22,71 +22,30 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <expr_walker.hh>
+#include <simple_expr_walker.hh>
 
-Walker::Walker()
-{}
+SimpleWalker::SimpleWalker()
+    : Walker()
+{ DEBUG << "Initialized simple walker @" << this << endl; }
 
-Walker::~Walker()
-{}
+SimpleWalker::~SimpleWalker()
+{ DEBUG << "Deinitialized simple walker @" << this << endl; }
 
-Walker& Walker::operator() (const Expr_ptr expr)
+void SimpleWalker::walk ()
 {
-    // before walking hook
-    this->pre_hook();
+    size_t rec_level = f_recursion_stack.size();
+    assert (0 != rec_level);
 
-    activation_record call(expr);
-
-    // setup toplevel act. record and perform walk
-    f_recursion_stack.push(call);
-    walk();
-
-    // after walking hook
-    this->post_hook();
-
-    return *this;
-}
-
-void Walker::walk ()
-{
-    while(! f_recursion_stack.empty()) {
+    size_t rec_goal = rec_level -1; // support re-entrant invocation
+    while(f_recursion_stack.size() != rec_goal) {
 
     loop:
         activation_record curr = f_recursion_stack.top();
-
         if (curr.pc != DEFAULT) {
 
             // restore caller location (simulate call return behavior)
             switch(curr.pc){
-            case F_1: goto entry_F_1;
-            case G_1: goto entry_G_1;
-            case X_1: goto entry_X_1;
-            case U_1: goto entry_U_1;
-            case U_2: goto entry_U_2;
-            case R_1: goto entry_R_1;
-            case R_2: goto entry_R_2;
-
-            case AF_1: goto entry_AF_1;
-            case AG_1: goto entry_AG_1;
-            case AX_1: goto entry_AX_1;
-            case AU_1: goto entry_AU_1;
-            case AU_2: goto entry_AU_2;
-            case AR_1: goto entry_AR_1;
-            case AR_2: goto entry_AR_2;
-
-            case EF_1: goto entry_EF_1;
-            case EG_1: goto entry_EG_1;
-            case EX_1: goto entry_EX_1;
-            case EU_1: goto entry_EU_1;
-            case EU_2: goto entry_EU_2;
-            case ER_1: goto entry_ER_1;
-            case ER_2: goto entry_ER_2;
-
-            case INIT_1: goto entry_INIT_1;
             case NEXT_1: goto entry_NEXT_1;
-
-            case AT_1: goto entry_AT_1;
-            case AT_2: goto entry_AT_2;
 
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
@@ -148,274 +107,24 @@ void Walker::walk ()
             case LE_1: goto entry_LE_1;
             case LE_2: goto entry_LE_2;
 
-            case MEMBER_1: goto entry_MEMBER_1;
-            case MEMBER_2: goto entry_MEMBER_2;
-
-            case UNION_1: goto entry_UNION_1;
-            case UNION_2: goto entry_UNION_2;
-
             case ITE_1: goto entry_ITE_1;
             case ITE_2: goto entry_ITE_2;
 
             case COND_1: goto entry_COND_1;
             case COND_2: goto entry_COND_2;
 
-            case SET_1: goto entry_SET_1;
-            case COMMA_1: goto entry_COMMA_1;
-            case COMMA_2: goto entry_COMMA_2;
-
             case DOT_1: goto entry_DOT_1;
             case DOT_2: goto entry_DOT_2;
 
-            // .. missing anything ?
-            default: assert(0);
+            default: throw UnsupportedEntryPointException(curr.pc);
+
             }
         }
 
         assert(curr.expr);
         switch (curr.expr->f_symb) {
 
-        // LTL ops
-        case F:
-            if (walk_F_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = F_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_F_1:
-                walk_F_postorder(curr.expr);
-            }
-            break;
-
-        case G:
-            if (walk_G_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = G_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_G_1:
-                walk_G_postorder(curr.expr);
-            }
-            break;
-
-        case X:
-            if (walk_X_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = X_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_X_1:
-                walk_X_postorder(curr.expr);
-            }
-            break;
-
-        case U:
-            if (walk_U_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = U_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_U_1:
-                if (walk_U_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = U_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_U_2:
-                    walk_U_postorder(curr.expr);
-                }
-            }
-            break;
-
-        case R:
-            if (walk_R_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = R_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_R_1:
-                if (walk_R_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = R_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_R_2:
-                    walk_R_postorder(curr.expr);
-                }
-            }
-            break;
-
-        // CTL A ops
-        case AF:
-            if (walk_AF_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AF_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AF_1:
-                walk_AF_postorder(curr.expr);
-            }
-            break;
-
-        case AG:
-            if (walk_AG_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AG_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AG_1:
-                walk_AG_postorder(curr.expr);
-            }
-            break;
-
-        case AX:
-            if (walk_AX_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AX_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AX_1:
-                walk_AX_postorder(curr.expr);
-            }
-            break;
-
-        case AU:
-            if (walk_AU_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AU_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AU_1:
-                if (walk_AU_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = AU_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_AU_2:
-                    walk_AU_postorder(curr.expr);
-                }
-            }
-            break;
-
-        case AR:
-            if (walk_AR_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AR_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AR_1:
-                if (walk_AR_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = AR_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_AR_2:
-                    walk_AR_postorder(curr.expr);
-                }
-            }
-            break;
-
-        // CTL E ops
-        case EF:
-            if (walk_EF_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = EF_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_EF_1:
-                walk_EF_postorder(curr.expr);
-            }
-            break;
-
-        case EG:
-            if (walk_EG_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = EG_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_EG_1:
-                walk_EG_postorder(curr.expr);
-            }
-            break;
-
-        case EX:
-            if (walk_EX_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = EX_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_EX_1:
-                walk_EX_postorder(curr.expr);
-            }
-            break;
-
-        case EU:
-            if (walk_EU_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = EU_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_EU_1:
-                if (walk_EU_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = EU_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_EU_2:
-                    walk_EU_postorder(curr.expr);
-                }
-            }
-            break;
-
-        case ER:
-            if (walk_ER_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = ER_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_ER_1:
-                if (walk_ER_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = ER_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                    goto loop;
-
-                entry_ER_2:
-                    walk_ER_postorder(curr.expr);
-                }
-            }
-            break;
-
-        // binary temporal
-        case AT:
-            if (walk_at_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AT_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_AT_1:
-                if (walk_at_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = AT_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_AT_2:
-                walk_at_postorder(curr.expr);
-            }
-            break;
-
         // unary temporal
-        case INIT:
-            if (walk_init_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = INIT_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_INIT_1:
-                walk_init_postorder(curr.expr);
-            }
-            break;
-
         case NEXT:
             if (walk_next_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = NEXT_1;
@@ -797,42 +506,6 @@ void Walker::walk ()
             }
             break;
 
-        case MEMBER:
-            if (walk_member_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = MEMBER_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_MEMBER_1:
-                if (walk_member_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = MEMBER_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_MEMBER_2:
-                walk_member_postorder(curr.expr);
-            }
-            break;
-
-        case UNION:
-            if (walk_union_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = UNION_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_UNION_1:
-                if (walk_union_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = UNION_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_UNION_2:
-                walk_union_postorder(curr.expr);
-            }
-            break;
-
         // ITE
         case ITE:
             if (walk_ite_preorder(curr.expr)) {
@@ -870,35 +543,6 @@ void Walker::walk ()
             }
             break;
 
-        case SET:
-            if (walk_set_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = SET_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_SET_1:
-                walk_set_postorder(curr.expr);
-            }
-            break;
-
-        case COMMA:
-            if (walk_comma_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = COMMA_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_COMMA_1:
-                if (walk_comma_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = COMMA_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_COMMA_2:
-                walk_comma_postorder(curr.expr);
-            }
-            break;
-
         case DOT:
             if (walk_dot_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = DOT_1;
@@ -916,8 +560,8 @@ void Walker::walk ()
                 walk_dot_postorder(curr.expr);
             }
             break;
-        case FALSE:
-        case TRUE:
+
+        // leaves
         case ICONST:
         case UWCONST:
         case SWCONST:
@@ -925,7 +569,9 @@ void Walker::walk ()
             walk_leaf(curr.expr);
             break;
 
-        default: assert(0);
+        default:
+            throw UnsupportedOperatorException(curr.expr->f_symb);
+
         } // switch
 
         f_recursion_stack.pop();

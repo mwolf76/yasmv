@@ -30,20 +30,33 @@
 #include <atom.hh>
 
 typedef enum {
+
+    // -- declarations ---------------------------------------------------------
+
+    // types
+    BOOL, SIGNED, UNSIGNED,
+
+    BITS, // reserved for signed(bits) and unsigned(bits)
+
+    /* utils */
+    // SUBSCRIPT, (simiilar to bits but [] instead of ()) - future for arrays
+    RANGE,
+
+    COMMA, SET, // reserved for enums
+
     // -- primary expressions --------------------------------------------------
 
-    /* temporal ops */
-    // INIT,
-    NEXT, // AT,
+    /* propositional next (nesting supported) */
+    NEXT,
 
     /* arithmetical operators */
     NEG, PLUS, SUB, DIV, MUL, MOD,
 
-    /* word-related operators */
-    // CONCAT, COUNT,
-
     /* logical/bitwise operators */
     NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
+
+    // future
+    // LROTATE, RROTATE,
 
     /* relational operators */
     EQ, NE, GE, GT, LE, LT,
@@ -54,6 +67,18 @@ typedef enum {
     /* leaves */
     ICONST, UWCONST, SWCONST, IDENT, DOT, NIL,
 
+    /* future
+    COUNT, // count( <pred>, x0, ..., xk ) -> number of elems satisfying pred
+    ANY,   // any( <pred>, x0, ..., xk ) -> pick one elem among those satisfying pred
+
+    -- PRED is_even(x) := (x % 2 == 0); // unary predicate
+    -- PRED ALL(x) := TRUE              //
+
+    -- COUNT (is_even, a, b, c, d)
+    -- ANY( { TRUE }, a, b, c, d) // perl-like
+
+    */
+
     // -- temporal logic ops ---------------------------------------------------
 
     /* LTL ops */
@@ -61,19 +86,6 @@ typedef enum {
 
     /* CTL ops */
     AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
-
-    // -- declarations ---------------------------------------------------------
-
-    // types
-    BOOL, SIGNED, UNSIGNED,
-
-    BITS, // reserved for signed(bits) and unsigned(bits)
-
-    /* utils */
-    // SUBSCRIPT,
-    RANGE,
-
-    COMMA, SET, // reserved for enums
 
 } ExprType;
 

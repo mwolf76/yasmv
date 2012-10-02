@@ -69,12 +69,6 @@ using std::flush;
 /* custom base definitions */
 #include <base.hh>
 
-class UnsupportedOperatorException : public Exception {
-  virtual const char* what() const throw() {
-    return "Unsupported operator";
-  }
-};
-
 class FileInputException : public Exception {
     virtual const char* what() const throw() {
         ostringstream oss;

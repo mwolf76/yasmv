@@ -5,8 +5,8 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/3rdp
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = expr.hh expr_walker.hh variant.hh
-PKG_CC = expr.cc expr_walker.cc variant.cc
+PKG_HH = expr.hh variant.hh expr_walker.hh simple_expr_walker.hh temporal_expr_walker.hh
+PKG_CC = expr.cc variant.cc expr_walker.cc simple_expr_walker.cc temporal_expr_walker.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

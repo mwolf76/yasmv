@@ -1,5 +1,5 @@
 /**
- *  @file expr_walker.hh
+ *  @file simple_expr_walker.hh
  *  @brief Expression algorithm-unaware walk pattern implementation
  *
  *  This module contains definitions and services that implement an
@@ -24,102 +24,28 @@
  *
  **/
 
-#ifndef EXPR_WALKER_H
-#define EXPR_WALKER_H
+#ifndef SIMPLE_EXPR_WALKER_H
+#define SIMPLE_EXPR_WALKER_H
 
 #include <common.hh>
 #include <expr.hh>
+#include <expr_walker.hh>
 
-typedef enum {
-    DEFAULT,
-    RETURN,
-
-    INIT_1, NEXT_1,
-    AT_1, AT_2,
-    NEG_1,
-    NOT_1,
-    PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
-    SUB_1, SUB_2,
-    MUL_1, MUL_2,
-    DIV_1, DIV_2,
-    MOD_1, MOD_2,
-
-    AND_1, AND_2,
-    OR_1, OR_2,
-    XOR_1, XOR_2,
-
-    XNOR_1, XNOR_2,
-    IMPLIES_1, IMPLIES_2,
-    IFF_1, IFF_2,
-
-    RSHIFT_1, RSHIFT_2,
-    LSHIFT_1, LSHIFT_2,
-
-    EQ_1, EQ_2,
-    NE_1, NE_2,
-    GT_1, GT_2,
-    GE_1, GE_2,
-    LT_1, LT_2,
-    LE_1, LE_2,
-
-    MEMBER_1, MEMBER_2,
-    UNION_1, UNION_2,
-
-    ITE_1, ITE_2,
-    COND_1, COND_2,
-
-    SET_1, COMMA_1, COMMA_2,
-
-    DOT_1, DOT_2,
-
-} entry_point;
-
-struct activation_record {
-    entry_point pc;
-    Expr_ptr expr;
-
-    activation_record(const Expr_ptr e)
-    : pc(DEFAULT) , expr(e)
-    {}
-
-};
-
-typedef stack<struct activation_record> walker_stack;
-
-class Walker {
+class SimpleWalker : public Walker{
 protected:
-    walker_stack f_recursion_stack;
 
-    // extra-hooks
     virtual void pre_hook()
     {}
     virtual void post_hook()
     {}
 
-    void walk();
+    virtual void walk();
 
 public:
-    Walker();
-    virtual ~Walker();
-
-    Walker& operator() (const Expr_ptr expr);
-
-    // -- walker interface: for unary operator we define a pre- and a
-    // -- post-order hook. The pre-hook returns a boolean that
-    // -- determines if the subtree is to be visited. For each binary
-    // -- operator we define a pre-, an in- and a post-order hook. Here,
-    // -- both pre- and in- hooks return a boolean with the same
-    // -- semantics as above. This can be used e.g. for lazy evaluation.
-
-    // binary temporal ops
-    virtual bool walk_at_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_at_inorder(const Expr_ptr expr) =0;
-    virtual void walk_at_postorder(const Expr_ptr expr) =0;
+    SimpleWalker();
+    virtual ~SimpleWalker();
 
     // unary temporal ops
-    virtual bool walk_init_preorder(const Expr_ptr expr) =0;
-    virtual void walk_init_postorder(const Expr_ptr expr) =0;
-
     virtual bool walk_next_preorder(const Expr_ptr expr) =0;
     virtual void walk_next_postorder(const Expr_ptr expr) =0;
 
@@ -183,6 +109,14 @@ public:
     virtual bool walk_rshift_inorder(const Expr_ptr expr) =0;
     virtual void walk_rshift_postorder(const Expr_ptr expr) =0;
 
+    // virtual bool walk_lrotate_preorder(const Expr_ptr expr) =0;
+    // virtual bool walk_lrotate_inorder(const Expr_ptr expr) =0;
+    // virtual void walk_lrotate_postorder(const Expr_ptr expr) =0;
+
+    // virtual bool walk_rrotate_preorder(const Expr_ptr expr) =0;
+    // virtual bool walk_rrotate_inorder(const Expr_ptr expr) =0;
+    // virtual void walk_rrotate_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_eq_preorder(const Expr_ptr expr) =0;
     virtual bool walk_eq_inorder(const Expr_ptr expr) =0;
     virtual void walk_eq_postorder(const Expr_ptr expr) =0;
@@ -207,14 +141,6 @@ public:
     virtual bool walk_le_inorder(const Expr_ptr expr) =0;
     virtual void walk_le_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_member_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_member_inorder(const Expr_ptr expr) =0;
-    virtual void walk_member_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_union_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_union_inorder(const Expr_ptr expr) =0;
-    virtual void walk_union_postorder(const Expr_ptr expr) =0;
-
     // ITE chains
     virtual bool walk_ite_preorder(const Expr_ptr expr) =0;
     virtual bool walk_ite_inorder(const Expr_ptr expr) =0;
@@ -223,13 +149,6 @@ public:
     virtual bool walk_cond_preorder(const Expr_ptr expr) =0;
     virtual bool walk_cond_inorder(const Expr_ptr expr) =0;
     virtual void walk_cond_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_set_preorder(const Expr_ptr expr) =0;
-    virtual void walk_set_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_comma_inorder(const Expr_ptr expr) =0;
-    virtual void walk_comma_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_dot_preorder(const Expr_ptr expr) =0;
     virtual bool walk_dot_inorder(const Expr_ptr expr) =0;
