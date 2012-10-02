@@ -24,6 +24,7 @@
 #include <command.hh>
 
 #include <expr.hh>
+#include <analyzer.hh>
 #include <mc.hh>
 #include <sat.hh>
 #include <expr/compilers/be_compiler.hh>
@@ -43,7 +44,13 @@ LoadModelCommand::LoadModelCommand(Interpreter& owner, const string &filename)
 extern void parseFile(const char *filepath); // in utils.cc
 Variant LoadModelCommand::operator()()
 {
+    // parsing
     parseFile(f_filename.c_str());
+
+    // model analysis
+    Analyzer analyzer;
+    analyzer.process();
+
     return Variant("OK");
 }
 
