@@ -36,13 +36,15 @@ typedef enum {
     DEFAULT,
     RETURN,
 
+    // LTL
     F_1, G_1, X_1, U_1, U_2, R_1, R_2,
+
+    // CTL
     AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,
     EF_1, EG_1, EX_1, EU_1, EU_2, ER_1, ER_2,
 
-    NEXT_1,
-    NEG_1,
-    NOT_1,
+    // Boolean, Algebraic, Relational, ... (primary)
+    NEXT_1, NEG_1, NOT_1,
 
     PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
     SUB_1, SUB_2,
@@ -73,7 +75,6 @@ typedef enum {
     COND_1, COND_2,
 
     DOT_1, DOT_2,
-
 } entry_point;
 
 // reserved for walkers
@@ -89,7 +90,10 @@ struct activation_record {
 typedef stack<struct activation_record> walker_stack;
 
 class WalkerException : public Exception
-{};
+{
+public:
+    virtual const char* what() const throw() =0;
+};
 
 // raised when the walker has encountered an unsupported entry point
 class UnsupportedEntryPointException : public WalkerException {
