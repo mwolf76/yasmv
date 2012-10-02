@@ -63,14 +63,12 @@ typedef enum {
     LT_1, LT_2,
     LE_1, LE_2,
 
-    MEMBER_1, MEMBER_2,
-    UNION_1, UNION_2,
-
     ITE_1, ITE_2,
     COND_1, COND_2,
 
     SET_1, COMMA_1, COMMA_2,
 
+    BITS_1, BITS_2,
     DOT_1, DOT_2,
 
 } entry_point;
@@ -257,14 +255,6 @@ public:
     virtual bool walk_le_inorder(const Expr_ptr expr) =0;
     virtual void walk_le_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_member_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_member_inorder(const Expr_ptr expr) =0;
-    virtual void walk_member_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_union_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_union_inorder(const Expr_ptr expr) =0;
-    virtual void walk_union_postorder(const Expr_ptr expr) =0;
-
     // ITE chains
     virtual bool walk_ite_preorder(const Expr_ptr expr) =0;
     virtual bool walk_ite_inorder(const Expr_ptr expr) =0;
@@ -277,9 +267,14 @@ public:
     virtual bool walk_set_preorder(const Expr_ptr expr) =0;
     virtual void walk_set_postorder(const Expr_ptr expr) =0;
 
+    // utils
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
     virtual bool walk_comma_inorder(const Expr_ptr expr) =0;
     virtual void walk_comma_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_bits_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_bits_inorder(const Expr_ptr expr) =0;
+    virtual void walk_bits_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_dot_preorder(const Expr_ptr expr) =0;
     virtual bool walk_dot_inorder(const Expr_ptr expr) =0;

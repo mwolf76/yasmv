@@ -30,23 +30,17 @@
 #include <atom.hh>
 
 typedef enum {
-    /* LTL ops */
-    F, G, X, U, R,
-
-    /* CTL ops */
-    AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
+    // -- primary expressions --------------------------------------------------
 
     /* temporal ops */
-    INIT, NEXT, AT,
+    // INIT,
+    NEXT, // AT,
 
     /* arithmetical operators */
     NEG, PLUS, SUB, DIV, MUL, MOD,
 
     /* word-related operators */
-    CONCAT, COUNT,
-
-    /* types (also used for casts) */
-    BOOL, SIGNED, UNSIGNED,
+    // CONCAT, COUNT,
 
     /* logical/bitwise operators */
     NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
@@ -58,16 +52,28 @@ typedef enum {
     ITE, COND,
 
     /* leaves */
-    ICONST, UWCONST, SWCONST, IDENT, NIL,
+    ICONST, UWCONST, SWCONST, IDENT, DOT, NIL,
 
-    /* postfix exprs */
-    DOT, SUBSCRIPT, RANGE,
+    // -- temporal logic ops ---------------------------------------------------
 
-    // /* set exprs */
-    // MEMBER, UNION,
+    /* LTL ops */
+    F, G, X, U, R,
+
+    /* CTL ops */
+    AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
+
+    // -- declarations ---------------------------------------------------------
+
+    // types
+    BOOL, SIGNED, UNSIGNED,
+
+    BITS, // reserved for signed(bits) and unsigned(bits)
 
     /* utils */
-    COMMA, SET,
+    // SUBSCRIPT,
+    RANGE,
+
+    COMMA, SET, // reserved for enums
 
 } ExprType;
 
@@ -319,18 +325,18 @@ public:
     { return make_expr(ER, lhs, rhs); }
 
     /* temporal ops */
-    inline Expr_ptr make_init(Expr_ptr expr)
-    { return make_expr(INIT, expr, NULL); }
+    // inline Expr_ptr make_init(Expr_ptr expr)
+    // { return make_expr(INIT, expr, NULL); }
 
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
-    inline Expr_ptr make_at(time_t time, Expr_ptr expr)
-    { return make_expr(AT, make_iconst(time), expr); }
+    // inline Expr_ptr make_at(time_t time, Expr_ptr expr)
+    // { return make_expr(AT, make_iconst(time), expr); }
 
     /* word-related and casts */
-    inline Expr_ptr make_concat(Expr_ptr a, Expr_ptr b)
-    { return make_expr(CONCAT, a, b); }
+    // inline Expr_ptr make_concat(Expr_ptr a, Expr_ptr b)
+    // { return make_expr(CONCAT, a, b); }
 
     // inline Expr_ptr make_toint(Expr_ptr expr)
     // { return make_expr(CAST_INT, expr, NULL); }
@@ -338,8 +344,8 @@ public:
     // inline Expr_ptr make_bool(Expr_ptr expr)
     // { return make_expr(BOOL, expr, NULL); }
 
-    inline Expr_ptr make_word1(Expr_ptr expr)
-    { throw UnsupportedOperatorException(); }
+    // inline Expr_ptr make_word1(Expr_ptr expr)
+    // { throw UnsupportedOperatorException(); }
 
     inline Expr_ptr make_signed(Expr_ptr expr)
     { return make_expr(SIGNED, expr, NULL); }
@@ -347,8 +353,8 @@ public:
     inline Expr_ptr make_unsigned(Expr_ptr expr)
     { return make_expr(UNSIGNED, expr, NULL); }
 
-    inline Expr_ptr make_count(Expr_ptr expr)
-    { return make_expr(COUNT, expr, NULL); }
+    // inline Expr_ptr make_count(Expr_ptr expr)
+    // { return make_expr(COUNT, expr, NULL); }
 
     /* arithmetical operators */
     inline Expr_ptr make_neg(Expr_ptr expr)
@@ -440,7 +446,36 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_enum(ExprSet_ptr literals)
+    inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
+    { return make_expr(DOT, a, b); }
+
+    // inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
+    // { return make_expr(SUBSCRIPT, a, b); }
+
+    inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
+    { return make_expr(RANGE, a, b);  }
+
+    /* -- types ------------------------------------------------------------- */
+    inline Expr_ptr make_temporal_type() const
+    { return temporal_expr; }
+
+    inline Expr_ptr make_boolean_type() const
+    { return bool_expr; }
+
+    // abstract integer type (reserved for inferrer)
+    inline Expr_ptr make_integer_type() const
+    { return integer_expr; }
+
+    inline Expr_ptr make_bits(Expr_ptr a, Expr_ptr b)
+    { return make_expr(BITS, a, b); }
+
+    inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
+    { return make_expr(BITS, unsigned_expr, make_iconst((value_t) bits)); }
+
+    inline Expr_ptr make_signed_type(unsigned bits = DEFAULT_BITS)
+    { return make_expr(BITS, signed_expr, make_iconst((value_t) bits)); }
+
+    inline Expr_ptr make_enum_type(ExprSet_ptr literals)
     {
         Expr_ptr res = NULL;
 
@@ -454,32 +489,6 @@ public:
         return make_expr(SET, res, NULL);
     }
 
-    inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
-    { return make_expr(DOT, a, b); }
-
-    inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
-    { return make_expr(SUBSCRIPT, a, b); }
-
-    inline Expr_ptr make_range(Expr_ptr a, Expr_ptr b)
-    { return make_expr(RANGE, a, b);  }
-
-    /* -- types ------------------------------------------------------------- */
-    inline Expr_ptr make_temporal_type() const
-    { return temporal_expr; }
-
-    inline Expr_ptr make_boolean_type() const
-    { return bool_expr; }
-
-    inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
-    { return make_expr(SUBSCRIPT, unsigned_expr, make_iconst((value_t) bits)); }
-
-    inline Expr_ptr make_signed_type(unsigned bits = DEFAULT_BITS)
-    { return make_expr(SUBSCRIPT, signed_expr, make_iconst((value_t) bits)); }
-
-    // abstract integer type (reserved for inferrer)
-    inline Expr_ptr make_integer_type() const
-    { return integer_expr; }
-
     /* -- builtin identifiers ----------------------------------------------- */
     inline Expr_ptr make_main() const
     { return main_expr; }
@@ -489,12 +498,6 @@ public:
 
     inline Expr_ptr make_true()
     { return true_expr; }
-
-    // inline Expr_ptr make_uword(Expr_ptr size)
-    // { return make_expr(SUBSCRIPT, uword_expr, size); }
-
-    // inline Expr_ptr make_sword(Expr_ptr size)
-    // { return make_expr(SUBSCRIPT, sword_expr, size); }
 
     // TODO: review this comment
     // Here a bit of magic occurs, so it's better to keep a note:
@@ -598,17 +601,17 @@ public:
             || (expr->f_symb == SWCONST) ;
     }
 
-    inline Expr_ptr lvalue_varname(const Expr_ptr expr) const {
-        assert(expr);
-        if (expr->f_symb == IDENT)
-            return expr;
+    // inline Expr_ptr lvalue_varname(const Expr_ptr expr) const {
+    //     assert(expr);
+    //     if (expr->f_symb == IDENT)
+    //         return expr;
 
-        if ((expr->f_symb == INIT) ||
-            (expr->f_symb == NEXT))
-            return expr->u.f_lhs;
+    //     if ((expr->f_symb == INIT) ||
+    //         (expr->f_symb == NEXT))
+    //         return expr->u.f_lhs;
 
-        return NULL;
-    }
+    //     return NULL;
+    // }
 
 protected:
     ExprMgr();

@@ -308,25 +308,18 @@ bool Validator::walk_comma_inorder(const Expr_ptr expr)
 void Validator::walk_comma_postorder(const Expr_ptr expr)
 {}
 
+bool Validator::walk_bits_preorder(const Expr_ptr expr)
+{ return true; }
+bool Validator::walk_bits_inorder(const Expr_ptr expr)
+{ return true; }
+void Validator::walk_bits_postorder(const Expr_ptr expr)
+{}
+
 bool Validator::walk_dot_preorder(const Expr_ptr expr)
 { return true; }
 bool Validator::walk_dot_inorder(const Expr_ptr expr)
 { return true; }
 void Validator::walk_dot_postorder(const Expr_ptr expr)
-{}
-
-bool Validator::walk_member_preorder(const Expr_ptr expr)
-{ return true; }
-bool Validator::walk_member_inorder(const Expr_ptr expr)
-{ return true; }
-void Validator::walk_member_postorder(const Expr_ptr expr)
-{}
-
-bool Validator::walk_union_preorder(const Expr_ptr expr)
-{ return true; }
-bool Validator::walk_union_inorder(const Expr_ptr expr)
-{ return true; }
-void Validator::walk_union_postorder(const Expr_ptr expr)
 {}
 
 /* word print helpers */

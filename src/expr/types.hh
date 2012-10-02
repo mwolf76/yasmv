@@ -168,7 +168,7 @@ class EnumType : public Type {
 
 public:
     Expr_ptr get_repr() const
-    { return f_em.make_enum(const_cast<ExprSet_ptr> (&f_literals)); }
+    { return f_em.make_enum_type(const_cast<ExprSet_ptr> (&f_literals)); }
 
     const ExprSet& get_literals() const
     { return f_literals; }
@@ -290,7 +290,7 @@ public:
     { return f_register[ FQExpr(f_em.make_temporal_type()) ]; }
 
     inline const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits)
-    { return f_register[ FQExpr(ctx, f_em.make_enum(lits)) ]; }
+    { return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ]; }
 
     // const Type_ptr find_uword(Expr_ptr size)
     // { return f_register[ FQExpr(f_em.make_uword(size)) ]; }

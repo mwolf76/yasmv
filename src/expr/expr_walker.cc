@@ -84,11 +84,11 @@ void Walker::walk ()
             case ER_1: goto entry_ER_1;
             case ER_2: goto entry_ER_2;
 
-            case INIT_1: goto entry_INIT_1;
+            // case INIT_1: goto entry_INIT_1;
             case NEXT_1: goto entry_NEXT_1;
 
-            case AT_1: goto entry_AT_1;
-            case AT_2: goto entry_AT_2;
+            // case AT_1: goto entry_AT_1;
+            // case AT_2: goto entry_AT_2;
 
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
@@ -150,12 +150,6 @@ void Walker::walk ()
             case LE_1: goto entry_LE_1;
             case LE_2: goto entry_LE_2;
 
-            // case MEMBER_1: goto entry_MEMBER_1;
-            // case MEMBER_2: goto entry_MEMBER_2;
-
-            // case UNION_1: goto entry_UNION_1;
-            // case UNION_2: goto entry_UNION_2;
-
             case ITE_1: goto entry_ITE_1;
             case ITE_2: goto entry_ITE_2;
 
@@ -165,6 +159,9 @@ void Walker::walk ()
             case SET_1: goto entry_SET_1;
             case COMMA_1: goto entry_COMMA_1;
             case COMMA_2: goto entry_COMMA_2;
+
+            case BITS_1: goto entry_BITS_1;
+            case BITS_2: goto entry_BITS_2;
 
             case DOT_1: goto entry_DOT_1;
             case DOT_2: goto entry_DOT_2;
@@ -388,35 +385,35 @@ void Walker::walk ()
             break;
 
         // binary temporal
-        case AT:
-            if (walk_at_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = AT_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
+        // case AT:
+        //     if (walk_at_preorder(curr.expr)) {
+        //         f_recursion_stack.top().pc = AT_1;
+        //         f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+        //         goto loop;
 
-            entry_AT_1:
-                if (walk_at_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = AT_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
+        //     entry_AT_1:
+        //         if (walk_at_inorder(curr.expr)) {
+        //             f_recursion_stack.top().pc = AT_2;
+        //             f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+        //             goto loop;
+        //         }
 
-            entry_AT_2:
-                walk_at_postorder(curr.expr);
-            }
-            break;
+        //     entry_AT_2:
+        //         walk_at_postorder(curr.expr);
+        //     }
+        //     break;
 
         // unary temporal
-        case INIT:
-            if (walk_init_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = INIT_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
+        // case INIT:
+        //     if (walk_init_preorder(curr.expr)) {
+        //         f_recursion_stack.top().pc = INIT_1;
+        //         f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+        //         goto loop;
 
-            entry_INIT_1:
-                walk_init_postorder(curr.expr);
-            }
-            break;
+        //     entry_INIT_1:
+        //         walk_init_postorder(curr.expr);
+        //     }
+        //     break;
 
         case NEXT:
             if (walk_next_preorder(curr.expr)) {
@@ -799,42 +796,6 @@ void Walker::walk ()
             }
             break;
 
-        // case MEMBER:
-        //     if (walk_member_preorder(curr.expr)) {
-        //         f_recursion_stack.top().pc = MEMBER_1;
-        //         f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-        //         goto loop;
-
-        //     entry_MEMBER_1:
-        //         if (walk_member_inorder(curr.expr)) {
-        //             f_recursion_stack.top().pc = MEMBER_2;
-        //             f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-        //             goto loop;
-        //         }
-
-        //     entry_MEMBER_2:
-        //         walk_member_postorder(curr.expr);
-        //     }
-        //     break;
-
-        // case UNION:
-        //     if (walk_union_preorder(curr.expr)) {
-        //         f_recursion_stack.top().pc = UNION_1;
-        //         f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-        //         goto loop;
-
-        //     entry_UNION_1:
-        //         if (walk_union_inorder(curr.expr)) {
-        //             f_recursion_stack.top().pc = UNION_2;
-        //             f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-        //             goto loop;
-        //         }
-
-        //     entry_UNION_2:
-        //         walk_union_postorder(curr.expr);
-        //     }
-        //     break;
-
         // ITE
         case ITE:
             if (walk_ite_preorder(curr.expr)) {
@@ -900,6 +861,23 @@ void Walker::walk ()
                 walk_comma_postorder(curr.expr);
             }
             break;
+
+        case BITS:
+            if (walk_bits_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BITS_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_BITS_1:
+                if (walk_bits_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = BITS_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_BITS_2:
+                walk_bits_postorder(curr.expr);
+            }
 
         case DOT:
             if (walk_dot_preorder(curr.expr)) {

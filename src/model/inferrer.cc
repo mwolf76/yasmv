@@ -343,22 +343,18 @@ bool Inferrer::walk_comma_inorder(const Expr_ptr expr)
 void Inferrer::walk_comma_postorder(const Expr_ptr expr)
 {}
 
-bool Inferrer::walk_member_preorder(const Expr_ptr expr)
+bool Inferrer::walk_bits_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_member_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_member_postorder(const Expr_ptr expr)
+bool Inferrer::walk_bits_inorder(const Expr_ptr expr)
 {
-    // tODO: member
+    Type_ptr tmp = f_type_stack.back();
+    Expr_ptr ctx = tmp->get_repr();
+    f_ctx_stack.push_back(ctx);
+    return true;
 }
-
-bool Inferrer::walk_union_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_union_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_union_postorder(const Expr_ptr expr)
+void Inferrer::walk_bits_postorder(const Expr_ptr expr)
 {
-    // todo: union
+    assert(0);
 }
 
 bool Inferrer::walk_dot_preorder(const Expr_ptr expr)

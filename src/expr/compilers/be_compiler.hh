@@ -170,15 +170,12 @@ protected:
     bool walk_comma_preorder(const Expr_ptr expr);
     bool walk_comma_inorder(const Expr_ptr expr);
     void walk_comma_postorder(const Expr_ptr expr);
+    bool walk_bits_preorder(const Expr_ptr expr);
+    bool walk_bits_inorder(const Expr_ptr expr);
+    void walk_bits_postorder(const Expr_ptr expr);
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
-    bool walk_member_preorder(const Expr_ptr expr);
-    bool walk_member_inorder(const Expr_ptr expr);
-    void walk_member_postorder(const Expr_ptr expr);
-    bool walk_union_preorder(const Expr_ptr expr);
-    bool walk_union_inorder(const Expr_ptr expr);
-    void walk_union_postorder(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
 private:

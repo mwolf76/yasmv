@@ -488,18 +488,11 @@ bool BECompiler::walk_comma_inorder(const Expr_ptr expr)
 void BECompiler::walk_comma_postorder(const Expr_ptr expr)
 { assert(0); /* unsupported */ }
 
-bool BECompiler::walk_member_preorder(const Expr_ptr expr)
+bool BECompiler::walk_bits_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool BECompiler::walk_member_inorder(const Expr_ptr expr)
+bool BECompiler::walk_bits_inorder(const Expr_ptr expr)
 { return true; }
-void BECompiler::walk_member_postorder(const Expr_ptr expr)
-{ assert(0); /* unsupported */ }
-
-bool BECompiler::walk_union_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool BECompiler::walk_union_inorder(const Expr_ptr expr)
-{ return true; }
-void BECompiler::walk_union_postorder(const Expr_ptr expr)
+void BECompiler::walk_bits_postorder(const Expr_ptr expr)
 { assert(0); /* unsupported */ }
 
 bool BECompiler::walk_dot_preorder(const Expr_ptr expr)
