@@ -784,10 +784,6 @@ Cudd_addLT(
 	    return DD_ZERO(dd);
 	}
     }
-    if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
-    }
     return(NULL);
 
 } /* end of Cudd_addLT */
@@ -813,18 +809,13 @@ Cudd_addLEQ(
     DdNode *F, *G;
 
     F = *f; G = *g;
-    if (F == G) return(F);
-
+    if (F == G) return DD_ONE(dd);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
 	if (cuddV(F) < cuddV(G)) {
 	    return DD_ONE(dd);
 	} else {
 	    return DD_ZERO(dd);
 	}
-    }
-    if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
     }
     return(NULL);
 
