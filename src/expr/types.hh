@@ -373,6 +373,14 @@ public:
             (NULL != dynamic_cast<const IntegerType*>(tp));
     }
 
+    inline bool is_iconst(const Type_ptr tp) const
+    {
+        IntegerType_ptr tmp(const_cast<IntegerType*>
+                            (dynamic_cast<const IntegerType*>(tp)));
+
+        return (NULL != (tmp) && (0 == tmp->size()));
+    }
+
     inline bool is_symbEnum(const Type_ptr tp) const
     {
         EnumType* tmp;
@@ -535,15 +543,16 @@ public:
     const char* what() const throw() {
         ostringstream oss;
 
-        oss << "BadType: got " << f_got
-            << " expected ";
+        oss << "BadType: rhs has type " << f_got
+            << " in " << f_body;
 
+        oss << ", allowed: ";
         ExprVector::const_iterator eye = f_allowed.begin();
-        do
-            {
-                oss << (*eye); eye ++;
-                if (eye != f_allowed.end()) oss << ", ";
-            } while (eye != f_allowed.end());
+        do {
+            oss << (*eye); eye ++;
+            if (eye != f_allowed.end()) oss << ", ";
+        } while (eye != f_allowed.end());
+        oss << ".";
 
         return oss.str().c_str();
     }

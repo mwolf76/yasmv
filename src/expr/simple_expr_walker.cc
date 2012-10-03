@@ -528,7 +528,7 @@ void SimpleWalker::walk ()
             break;
 
         case COND:
-            if (walk_ite_preorder(curr.expr)) {
+            if (walk_cond_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = COND_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;

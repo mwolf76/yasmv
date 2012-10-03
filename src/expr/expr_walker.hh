@@ -85,7 +85,9 @@ typedef enum {
     RANGE_1, RANGE_2,
 
     // for enum decls, params
-    SET_1, PARAMS_1, COMMA_1, COMMA_2,
+    SET_1,
+    PARAMS_1, PARAMS_2,
+    COMMA_1, COMMA_2,
 } entry_point;
 
 // reserved for walkers

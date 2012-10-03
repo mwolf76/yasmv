@@ -176,7 +176,7 @@ void Printer::walk_add_postorder(const Expr_ptr expr)
 bool Printer::walk_sub_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_sub_inorder(const Expr_ptr expr)
-{ f_os << " + "; return true; }
+{ f_os << " - "; return true; }
 void Printer::walk_sub_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
@@ -260,7 +260,7 @@ void Printer::walk_rshift_postorder(const Expr_ptr expr)
 bool Printer::walk_eq_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_eq_inorder(const Expr_ptr expr)
-{ f_os << " == "; return true; }
+{ f_os << " = "; return true; }
 void Printer::walk_eq_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
@@ -365,27 +365,16 @@ void Printer::walk_leaf(const Expr_ptr expr)
 {
     ExprType symb = expr->f_symb;
 
-    // if (FALSE == symb) {
-    //     f_os << "FALSE";
-    // }
-    // else if (TRUE == symb) {
-    //     f_os << "TRUE";
-    // }
-    // else
     if (ICONST == symb) {
         f_os << expr->u.f_value;
     }
-    else if (UWCONST == symb ||
-             SWCONST == symb) {
-        f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
-    }
+    // else if (UWCONST == symb ||
+    //          SWCONST == symb) {
+    //     f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
+    // }
     else if (IDENT == symb) {
         Atom_ptr atom = expr->u.f_atom;
         f_os << *atom;
     }
-    // else if (symb == LITERAL) {
-    //   f_os << expr->f_atom;
-    // }
-
     else assert(0);
 }

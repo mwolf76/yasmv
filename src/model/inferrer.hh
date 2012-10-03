@@ -209,6 +209,11 @@ private:
     void walk_binary_bitwise_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_ternary_ite_postorder(const Expr_ptr expr);
+
+    // useful for errors
+    Expr_ptr f_boolean;
+    Expr_ptr f_integer;
+    ExprVector f_integer_or_boolean;
 };
 
 #endif

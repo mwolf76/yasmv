@@ -38,6 +38,9 @@
 #include <expr.hh>
 #include <be_compiler.hh>
 
+// comment this out
+// #define DEBUG_BE_COMPILER
+
 BECompiler::BECompiler()
     : f_map()
     , f_add_stack()
@@ -89,9 +92,10 @@ void BECompiler::pre_hook()
 {}
 void BECompiler::post_hook()
 {
-    // ADD add = f_add_stack.back();
-    // add.PrintMinterm();
-    // TODO: assert it's a 0-1 ADD
+    cout << "out -- " << endl;
+    ADD add = f_add_stack.back();
+    add.PrintMinterm();
+    cout << endl;
 }
 
 bool BECompiler::walk_next_preorder(const Expr_ptr expr)
@@ -128,6 +132,10 @@ bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 void BECompiler::walk_neg_postorder(const Expr_ptr expr)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    top.Negate().PrintMinterm();
+    #endif
     f_add_stack.push_back(top.Negate());
 }
 
@@ -136,6 +144,10 @@ bool BECompiler::walk_not_preorder(const Expr_ptr expr)
 void BECompiler::walk_not_postorder(const Expr_ptr expr)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    top.Cmpl().PrintMinterm();
+    #endif
     f_add_stack.push_back(top.Cmpl());
 }
 
@@ -147,6 +159,10 @@ void BECompiler::walk_add_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Plus(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Plus(rhs));
 }
 
@@ -158,6 +174,10 @@ void BECompiler::walk_sub_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Minus(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Minus(rhs));
 }
 
@@ -169,6 +189,10 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Divide(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Divide(rhs));
 }
 
@@ -180,6 +204,10 @@ void BECompiler::walk_mul_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Times(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Times(rhs));
 }
 
@@ -191,6 +219,10 @@ void BECompiler::walk_mod_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Modulus(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Modulus(rhs));
 }
 
@@ -202,6 +234,10 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Times(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
 }
 
@@ -213,6 +249,10 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Or(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Or(rhs));
 }
 
@@ -224,6 +264,10 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Xor(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Xor(rhs));
 }
 
@@ -235,6 +279,10 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Xnor(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Xnor(rhs));
 }
 
@@ -246,6 +294,10 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Cmpl().Or(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Cmpl().Or(rhs));
 }
 
@@ -257,6 +309,10 @@ void BECompiler::walk_iff_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Xnor(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Xnor(rhs));
 }
 
@@ -268,6 +324,10 @@ void BECompiler::walk_lshift_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.LShift(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.LShift(rhs));
 }
 
@@ -279,6 +339,10 @@ void BECompiler::walk_rshift_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.RShift(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.RShift(rhs));
 }
 
@@ -290,6 +354,10 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Equals(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Equals(rhs));
 }
 
@@ -301,6 +369,10 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.Equals(rhs).Cmpl().PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
 }
 
@@ -312,6 +384,10 @@ void BECompiler::walk_gt_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    rhs.LT(lhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(rhs.LT(lhs));
 }
 
@@ -323,6 +399,10 @@ void BECompiler::walk_ge_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    rhs.LEQ(lhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(rhs.LEQ(lhs));
 }
 
@@ -334,6 +414,10 @@ void BECompiler::walk_lt_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.LT(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.LT(rhs));
 }
 
@@ -345,6 +429,10 @@ void BECompiler::walk_le_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    lhs.LEQ(rhs).PrintMinterm();
+    #endif
     f_add_stack.push_back(lhs.LEQ(rhs));
 }
 
@@ -357,6 +445,11 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
     const ADD e = f_add_stack.back(); f_add_stack.pop_back();
     const ADD t = f_add_stack.back(); f_add_stack.pop_back();
     const ADD c = f_add_stack.back(); f_add_stack.pop_back();
+    #ifdef DEBUG_BE_COMPILER
+    cout << "-- " << expr << endl;
+    c.Ite(t, e).PrintMinterm();
+    #endif
+
     f_add_stack.push_back(c.Ite(t, e));
  }
 
@@ -424,45 +517,46 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     if (ExprMgr::INSTANCE().is_numeric(expr)) {
         value_t value = expr->value();
         push_const_value(value);
-
-        return;
     }
 
-    ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
-    assert (NULL != symb);
+    else {
+        ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
+        assert (NULL != symb);
 
-    // 1. bool/integer constant leaves
-    if (symb->is_const()) {
-        value_t value = symb->as_const().value();
-        push_const_value(value);
-    }
-
-    else if (symb->is_variable()) {
-
-        FQExpr key(ctx, expr, time);
-        IEncoding_ptr enc;
-
-        // if encoding for temporized variable is available reuse it
-        ENCMap::iterator eye = f_encodings.find(key);
-        if (eye != f_encodings.end()) {
-            enc = (*eye).second;
+        // 1. bool/integer constant leaves
+        if (symb->is_const()) {
+            value_t value = symb->as_const().value();
+            push_const_value(value);
         }
 
-        else {
-            // ... otherwise create and cache it
-            enc = f_enc.make_encoding(symb->as_variable().type());
-            register_encoding(key, enc);
+        // 2. variable
+        else if (symb->is_variable()) {
+
+            FQExpr key(ctx, expr, time);
+            IEncoding_ptr enc;
+
+            // if encoding for temporized variable is available reuse it
+            ENCMap::iterator eye = f_encodings.find(key);
+            if (eye != f_encodings.end()) {
+                enc = (*eye).second;
+            }
+
+            else {
+                // ... otherwise create and cache it
+                enc = f_enc.make_encoding(symb->as_variable().type());
+                register_encoding(key, enc);
+            }
+
+            assert (NULL != enc);
+            f_add_stack.push_back(enc->add());
         }
 
-        assert (NULL != enc);
-        f_add_stack.push_back(enc->add());
-    }
+        // 3. define? needs to be compiled (re-entrant invocation)
+        else if (symb->is_define()) {
+            process_aux(symb->as_define().body());
+        }
 
-    // ... or a define? needs to be compiled (re-entrant invocation)
-    else if (symb->is_define()) {
-        process_aux(symb->as_define().body());
+        // or what?!?
+        else assert(0);
     }
-
-    // or what?!?
-    else assert(0);
 }

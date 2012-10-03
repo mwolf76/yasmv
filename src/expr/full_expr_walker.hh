@@ -50,6 +50,7 @@ public:
     virtual void walk_set_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_params_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_params_inorder(const Expr_ptr expr) =0;
     virtual void walk_params_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
