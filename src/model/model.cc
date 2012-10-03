@@ -134,9 +134,6 @@ IConstant& ISymbol::as_const(void) const
 ostream& operator<<(ostream& os, Module& module)
 { return os << module.expr(); }
 
-ostream& operator<<(ostream& os, Type_ptr type_ptr )
-{ return os << type_ptr->get_repr(); }
-
 ostream& operator<<(ostream& os, AnalyzerException& ae)
 { return os << ae.what(); }
 
