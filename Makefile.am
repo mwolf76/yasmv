@@ -6,9 +6,11 @@ VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
 
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
--I$(top_srcdir)/src/expr/printers -I$(top_srcdir)/src/expr/validators	\
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
+-I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
+-I$(top_srcdir)/src/type -I$(top_srcdir)/src/expr/walkers		\
 -I$(top_srcdir)/src/model -I$(top_srcdir)/src/cmd			\
+-I$(top_srcdir)/src/utils -I$(top_srcdir)/src/utils/printers		\
 -I$(top_srcdir)/src/3rdparty/ezlogger					\
 -I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/mc		\
 -I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core	\
@@ -24,14 +26,16 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
 bin_PROGRAMS = smv
 
 smv_SOURCES = src/opts.cc src/main.cc src/common.cc
-smv_LDADD = $(top_builddir)/src/expr/printers/libexpr_printers.la	\
-	$(top_builddir)/src/expr/validators/libexpr_validators.la	\
+smv_LDADD = $(top_builddir)/src/utils/printers/libexpr_printers.la	\
 	$(top_builddir)/src/parser/libparser.la				\
 	$(top_builddir)/src/cmd/libcommand.la				\
-	$(top_builddir)/src/mc/libmc.la \
-	$(top_builddir)/src/expr/compilers/libexpr_compilers.la \
+	$(top_builddir)/src/mc/libmc.la					\
 	$(top_builddir)/src/model/libmodel.la				\
 	$(top_builddir)/src/expr/libexpr.la				\
+	$(top_builddir)/src/expr/walkers/libexpr_walkers.la		\
+	$(top_builddir)/src/type/libtype.la				\
+	$(top_builddir)/src/enc/libenc.la				\
+	$(top_builddir)/src/utils/libutils.la				\
 	$(top_builddir)/src/dd/libcudd.la				\
 	$(top_builddir)/src/sat/libminisat.la -lantlr3c			\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)

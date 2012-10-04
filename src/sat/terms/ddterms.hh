@@ -25,7 +25,7 @@
 #ifndef ADD_TERMS_H_INCLUDED
 #define ADD_TERMS_H_INCLUDED
 #include "terms/terms.hh"
-#include <cudd.hh>     // Cudd capsule
+#include <cudd_mgr.hh> // Cudd capsule
 #include <cuddObj.hh>  // ADD Term implementantion
 #include <cuddInt.h>
 
