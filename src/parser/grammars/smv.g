@@ -29,10 +29,15 @@ options {
 
 /* cmd subsystem */
 #include <cmd.hh>
+
 #include <expr.hh>
-#include <types.hh>
 #include <expr_mgr.hh>
+
+#include <type.hh>
+#include <type_mgr.hh>
+
 #include <model.hh>
+#include <model_mgr.hh>
 
 #define PRP_EXPR 0
 #define LTL_EXPR 1
@@ -936,14 +941,14 @@ enum_type returns [ExprSet_ptr res]
 
 actual_param_decls [Type_ptr m]
 	:
-     '('
-          ap=pvalue
-            { ((Instance*)(m)) -> add_param(ap); }
+     // '('
+     //      ap=pvalue
+     //        { ((Instance*)(m)) -> add_param(ap); }
 
-          (',' pvalue
-          { ((Instance*)(m)) -> add_param(ap); }
-          )*
-     ')'
+     //      (',' pvalue
+     //      { ((Instance*)(m)) -> add_param(ap); }
+     //      )*
+     // ')'
     ;
 
 literal returns [Expr_ptr res]
