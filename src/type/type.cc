@@ -1,5 +1,5 @@
 /**
- *  @file types.cc
+ *  @file type.cc
  *  @brief Type system classes
  *
  *  This module contains definitions and services that implement an
@@ -24,9 +24,37 @@
  *
  **/
 
-#include <types.hh>
+#include <type.hh>
 
-ostream& operator<<(ostream& os, Type_ptr type_ptr )
+ostream& operator<<(ostream& os, Type_ptr type_ptr)
 {
     return os << type_ptr->get_repr();
+}
+
+bool EnumType::has_symbs() const
+{
+    bool res = false;
+    ExprMgr& em = ExprMgr::INSTANCE();
+
+    for (ExprSet::iterator eye = f_literals.begin();
+         (!res) && (eye != f_literals.end()); eye ++) {
+
+        res |= em.is_identifier(*eye);
+    }
+
+    return res;
+}
+
+bool EnumType::has_numbers() const
+{
+    bool res = false;
+    ExprMgr& em = ExprMgr::INSTANCE();
+
+    for (ExprSet::iterator eye = f_literals.begin();
+         (!res) && (eye != f_literals.end()); eye ++) {
+
+        res |= em.is_numeric(*eye);
+    }
+
+    return res;
 }
