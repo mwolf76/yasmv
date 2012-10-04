@@ -1,6 +1,6 @@
 /**
- *  @file cudd.hh
- *  @brief Cudd module
+ *  @file cudd_mgr.hh
+ *  @brief Cudd module (CuddMgr class)
  *
  *  This module contains definitions and services that implement an
  *  cudd for symbols. For each symbol a boolean encoding is
@@ -25,8 +25,8 @@
  *
  **/
 
-#ifndef CUDD_H
-#define CUDD_H
+#ifndef CUDD_MGR_H
+#define CUDD_MGR_H
 
 #include <cuddObj.hh>
 
@@ -34,13 +34,15 @@ typedef class CuddMgr* CuddMgr_ptr;
 class CuddMgr  {
 
 public:
-    static CuddMgr& INSTANCE() {
-        if (! f_instance) f_instance = new CuddMgr();
-        return (*f_instance);
-    }
-
     inline Cudd& dd()
     { return f_cudd; }
+
+    static CuddMgr& INSTANCE() {
+        if (! f_instance) {
+            f_instance = new CuddMgr();
+        }
+        return (*f_instance);
+    }
 
 protected:
     CuddMgr();

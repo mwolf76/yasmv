@@ -1,6 +1,6 @@
 /**
- *  @file cudd.hh
- *  @brief Cudd module
+ *  @file cudd_mgr.cc
+ *  @brief Cudd module (CuddMgr class)
  *
  *  This module contains definitions and services that implement an
  *  cudd for symbols. For each symbol a boolean encoding is
@@ -25,32 +25,12 @@
  *
  **/
 
-#ifndef CUDD_H
-#define CUDD_H
+#include <cudd_mgr.hh>
 
-#include <cuddObj.hh>
+CuddMgr_ptr CuddMgr::f_instance = NULL;
 
-typedef class CuddMgr* CuddMgr_ptr;
-class CuddMgr  {
-
-public:
-    static CuddMgr& INSTANCE() {
-        if (! f_instance) f_instance = new CuddMgr();
-        return (*f_instance);
-    }
-
-    inline Cudd& dd()
-    { return f_cudd; }
-
-protected:
-    CuddMgr();
-
-private:
-    static CuddMgr_ptr f_instance;
-
-    /* local data */
-    Cudd f_cudd;
-};
-
-
-#endif
+CuddMgr::CuddMgr()
+    : f_cudd()
+{
+    // TODO: enable dynamic reordering
+}
