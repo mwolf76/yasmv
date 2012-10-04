@@ -24,17 +24,15 @@
 #include <command.hh>
 
 #include <expr.hh>
-#include <analyzer.hh>
 #include <mc.hh>
 #include <sat.hh>
-#include <expr/compilers/be_compiler.hh>
 
 Command::Command(Interpreter& owner)
     : f_owner(owner)
-{ DEBUG << "Initialized command @" << this << endl; }
+{ DRIVEL << "Initialized command @" << this << endl; }
 
 Command::~Command()
-{ DEBUG << "Deinitialized command @" << this << endl; }
+{ DRIVEL << "Deinitialized command @" << this << endl; }
 
 LoadModelCommand::LoadModelCommand(Interpreter& owner, const string &filename)
     : Command(owner)
@@ -48,8 +46,7 @@ Variant LoadModelCommand::operator()()
     parseFile(f_filename.c_str());
 
     // model analysis
-    Analyzer analyzer;
-    analyzer.process();
+    ModelMgr::INSTANCE().analyze();
 
     return Variant("OK");
 }
