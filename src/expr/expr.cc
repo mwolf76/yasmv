@@ -25,31 +25,3 @@
  **/
 
 #include <expr.hh>
-
-// bool EnumType::has_symbs() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
-
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
-
-//         res |= em.is_identifier(*eye);
-//     }
-
-//     return res;
-// }
-
-// bool EnumType::has_numbers() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
-
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
-
-//         res |= em.is_numeric(*eye);
-//     }
-
-//     return res;
-// }

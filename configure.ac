@@ -133,6 +133,7 @@ AC_CONFIG_FILES([Makefile
                  src/dd/Makefile
                  src/enc/Makefile
 		 src/expr/Makefile
+                 src/expr/tests/Makefile
                  src/expr/walkers/Makefile
                  src/mc/Makefile
                  src/model/Makefile

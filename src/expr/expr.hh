@@ -119,9 +119,17 @@ struct Expr_TAG {
     } u;
 
     // accessors
+    inline bool is_atom() const
+    { return IDENT == f_symb; }
     inline Atom_ptr atom()
     { return u.f_atom; }
 
+    inline bool is_const() const
+    {
+        return (UWCONST == f_symb ||
+                SWCONST == f_symb ||
+                ICONST  == f_symb );
+    }
     inline size_t size()
     { return u.f_size; }
     inline value_t value()
