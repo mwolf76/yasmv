@@ -29,7 +29,7 @@
 
 #include <mc.hh>
 #include <sat.hh>
-#include <expr/compilers/be_compiler.hh>
+#include <compiler.hh>
 
 class SATBMCFalsification : public MCAlgorithm {
 
