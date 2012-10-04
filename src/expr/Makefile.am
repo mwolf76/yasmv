@@ -1,17 +1,12 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = compilers printers validators
+SUBDIRS = walkers
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/3rdparty/ezlogger
 
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = expr.hh types.hh variant.hh expr_walker.hh			\
-simple_expr_walker.hh temporal_expr_walker.hh ltl_expr_walker.hh	\
-ctl_expr_walker.hh full_expr_walker.hh
-
-PKG_CC = expr.cc types.cc variant.cc expr_walker.cc			\
-simple_expr_walker.cc temporal_expr_walker.cc ltl_expr_walker.cc	\
-ctl_expr_walker.cc full_expr_walker.cc
+PKG_HH = expr.hh fqexpr.hh pool.hh expr_mgr.hh
+PKG_CC = expr.cc fqexpr.cc expr_mgr.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

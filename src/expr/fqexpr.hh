@@ -1,5 +1,5 @@
 /**
- *  @file expr.cc
+ *  @file expr.hh, Fully Qualified Expression (FQEXpr)
  *  @brief Expression management
  *
  *  This module contains definitions and services that implement an
@@ -23,33 +23,52 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#ifndef FQ_EXPR_H
+#define FQ_EXPR_H
 
 #include <expr.hh>
 
-// bool EnumType::has_symbs() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
+typedef class FQExpr* FQExpr_ptr;
 
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
+class FQExpr {
+public:
+    FQExpr(Expr_ptr expr); // default ctx, default time
+    FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
 
-//         res |= em.is_identifier(*eye);
-//     }
+    FQExpr(const FQExpr& fqexpr);
 
-//     return res;
-// }
+    inline const Expr_ptr& ctx() const
+    { return f_ctx; }
 
-// bool EnumType::has_numbers() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
+    inline const Expr_ptr& expr() const
+    { return f_expr; }
 
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
+    inline step_t time() const
+    { return f_time; }
 
-//         res |= em.is_numeric(*eye);
-//     }
+    bool operator==(const FQExpr& other) const;
+    unsigned long hash() const;
 
-//     return res;
-// }
+private:
+    // expression ctx (default is 'main')
+    Expr_ptr f_ctx;
+
+    // expression body
+    Expr_ptr f_expr;
+
+    // expression time (default is 0)
+    step_t f_time;
+};
+
+struct fqexpr_hash {
+    inline long operator() (const FQExpr& x) const
+    { return x.hash(); }
+};
+
+struct fqexpr_eq {
+    inline bool operator() (const FQExpr &x,
+                            const FQExpr &y) const
+    { return x == y; }
+};
+
+#endif

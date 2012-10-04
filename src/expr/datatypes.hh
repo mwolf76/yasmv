@@ -1,5 +1,5 @@
 /**
- *  @file expr.cc
+ *  @file expr.hh
  *  @brief Expression management
  *
  *  This module contains definitions and services that implement an
@@ -23,33 +23,32 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#ifndef EXPR_DATATYPES_H
+#define EXPR_DATATYPES_H
 
-#include <expr.hh>
+#include <fqexpr.hh>
 
-// bool EnumType::has_symbs() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
+typedef vector<FQExpr> FQExprVector;
 
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
+class ISymbol;
+typedef ISymbol* ISymbol_ptr;
+typedef unordered_map<FQExpr, ISymbol_ptr, fqexpr_hash, fqexpr_eq> Symbols;
 
-//         res |= em.is_identifier(*eye);
-//     }
+class IConstant;
+typedef IConstant* IConstant_ptr;
+typedef unordered_map<FQExpr, IConstant_ptr, fqexpr_hash, fqexpr_eq> Constants;
 
-//     return res;
-// }
+class IVariable;
+typedef IVariable* IVariable_ptr;
+typedef unordered_map<FQExpr, IVariable_ptr, fqexpr_hash, fqexpr_eq> Variables;
 
-// bool EnumType::has_numbers() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
+class IDefine;
+typedef IDefine* IDefine_ptr;
+typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Defines;
+typedef unordered_map<FQExpr, IDefine_ptr, fqexpr_hash, fqexpr_eq> Assigns;
 
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
+class IModule;
+typedef IModule* IModule_ptr;
+typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
 
-//         res |= em.is_numeric(*eye);
-//     }
-
-//     return res;
-// }
+#endif

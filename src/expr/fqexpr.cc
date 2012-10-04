@@ -1,5 +1,5 @@
 /**
- *  @file expr.cc
+ *  @file fqexpr.cc, Fully Qualified Expression (FQEXpr)
  *  @brief Expression management
  *
  *  This module contains definitions and services that implement an
@@ -24,32 +24,36 @@
  *
  **/
 
-#include <expr.hh>
+#include <fqexpr.hh>
+#include <expr_mgr.hh>
 
-// bool EnumType::has_symbs() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
+FQExpr::FQExpr(Expr_ptr expr)
+    : f_ctx(ExprMgr::INSTANCE().make_main())
+    , f_expr(expr)
+    , f_time(0)
+{}
 
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
+FQExpr::FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time)
+    : f_ctx(ctx)
+    , f_expr(expr)
+    , f_time(time)
+{}
 
-//         res |= em.is_identifier(*eye);
-//     }
+FQExpr::FQExpr(const FQExpr& fqexpr)
+    : f_ctx(fqexpr.ctx())
+    , f_expr(fqexpr.expr())
+    , f_time(fqexpr.time())
+{}
 
-//     return res;
-// }
+bool FQExpr::operator==(const FQExpr& other) const
+{
+    return
+        this->f_ctx == other.ctx() &&
+        this->f_expr == other.expr() &&
+        this->f_time == other.time();
+}
 
-// bool EnumType::has_numbers() const
-// {
-//     bool res = false;
-//     ExprMgr& em = ExprMgr::INSTANCE();
-
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
-
-//         res |= em.is_numeric(*eye);
-//     }
-
-//     return res;
-// }
+unsigned long FQExpr::hash() const
+{
+    return 0; // TODO
+}
