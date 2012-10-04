@@ -1,5 +1,5 @@
 /**
- *  @file encoder.hh
+ *  @file enc.hh
  *  @brief Encoder module
  *
  *  This module contains definitions and services that implement an
@@ -30,97 +30,18 @@
 
 #include <common.hh>
 #include <expr.hh>
-#include <types.hh>
 #include <expr_mgr.hh>
-#include <model.hh>
-#include <cudd.hh> // Cudd Capsule
-#include <cuddObj.hh>
+
+#include <type.hh>
+
+#include <cudd_mgr.hh>
+#include <enc_mgr.hh>
 
 // -- primary decls  --------------------------------------------------------------
+typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
 public:
     virtual ADD add() const =0;
-};
-
-// duplicate code!
-struct ADDHash {
-    inline long operator() (ADD term) const
-    {
-        DdNode *tmp = term.getRegularNode();
-        return (long) (tmp);
-    }
-};
-struct ADDEq {
-    inline bool operator() (const ADD phi,
-                            const ADD psi) const
-    { return phi == psi; }
-};
-
-typedef IEncoding* IEncoding_ptr;
-typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> FQExpr2EncMap;
-typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
-
-typedef vector<ADD> EncodingBits;
-
-// ADD-only implementation. Admittedly not very flexible but ADDs are
-// a consolidated architectural choice now.
-class Encoding;
-class EncodingMgr;
-typedef EncodingMgr* EncodingMgr_ptr;
-
-class EncodingMgr  {
-    friend class Encoding;
-
-public:
-    static EncodingMgr& INSTANCE() {
-        if (! f_instance) f_instance = new EncodingMgr();
-        return (*f_instance);
-    }
-
-    inline Cudd& dd() const
-    { return f_cudd; }
-
-    inline ADD one() const
-    { return f_cudd.addOne(); }
-
-    inline ADD zero() const
-    { return f_cudd.addZero(); }
-
-    inline ADD constant(value_t value) const
-    { return f_cudd.constant(value); }
-
-    // used by the compiler
-    IEncoding_ptr make_encoding(Type_ptr type);
-
-    // user by the SAT model evaluator
-    IEncoding_ptr find_encoding(ADD add);
-
-protected:
-    EncodingMgr();
-    ~EncodingMgr();
-
-private:
-    static EncodingMgr_ptr f_instance;
-
-    /* low-level services */
-
-    /* local data */
-    Cudd& f_cudd;
-
-    /* low-level services */
-    FQExpr2EncMap f_fqexpr2enc_map;
-    ADD2EncMap f_add2enc_map;
-
-    void register_encoding(const FQExpr fqexpr, IEncoding_ptr encoding)
-    {
-        f_fqexpr2enc_map [ fqexpr ] = encoding;
-        // for (EncodingBits::iterator i = encoding->bits().begin();
-        //      i != encoding->bits().end(); ++ i) {
-        //     const ADD& add = *i;
-        //     f_add2enc_map [ add ] = encoding;
-        // }
-    }
-
 };
 
 class Encoding : public IEncoding {
@@ -139,6 +60,12 @@ protected:
     EncodingMgr& f_mgr;
     EncodingBits f_bits;
     ADD f_add;
+
+    // shared services
+    unsigned range_repr_bits (value_t range)
+    { return ceil(log2(range)); }
+
+    ADD make_integer_encoding(unsigned nbits, bool is_signed =false);
 };
 
 
@@ -173,6 +100,9 @@ protected:
 
     // n bits bounded integer var (D = 0..2^n -1)
     RangeEncoding(value_t min_value, value_t max_value);
+
+    value_t f_min;
+    value_t f_max;
 };
 
 // finite enumerative
@@ -183,8 +113,9 @@ protected:
     { assert(0); }
 
     // n bits bounded integer var (D = 0..2^n -1)
-    EnumEncoding(ExprSet f_literals);
-    unsigned f_nbits;
+    EnumEncoding(ExprSet lits);
+
+    ExprSet f_lits;
 };
 
 #endif

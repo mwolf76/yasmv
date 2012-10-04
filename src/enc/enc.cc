@@ -1,5 +1,5 @@
 /**
- *  @file encoder.cc
+ *  @file enc.cc
  *  @brief Encoder module
  *
  *  This module contains definitions and services that implement an
@@ -25,45 +25,7 @@
  *
  **/
 #include <math.h>
-#include <encoder.hh>
-
-// static initialization
-EncodingMgr_ptr EncodingMgr::f_instance = NULL;
-
-IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
-{
-    assert(NULL != tp);
-    IEncoding_ptr res = NULL;
-    IntegerType_ptr itype;
-    IntRangeType_ptr rtype;
-
-    if (NULL != dynamic_cast<BooleanType_ptr>(tp)) {
-        res = new BooleanEncoding();
-    }
-    else if (NULL != (itype = dynamic_cast<IntegerType_ptr>(tp))) {
-        res = new IntEncoding(itype->size(), itype->is_signed());
-    }
-    else if (NULL != (rtype = dynamic_cast<IntRangeType_ptr>(tp))) {
-        res = new RangeEncoding(rtype->min(), rtype->max());
-    }
-    // tODO: more here...
-
-    else assert(0); /* unexpected or unsupported */
-
-    assert (NULL != res);
-    return res;
-}
-
-IEncoding_ptr EncodingMgr::find_encoding(ADD add)
-{
-    // const ADD2Enc::iterator eye = f_add2enc_map.find(add);
-    // if (eye != f_groups_map.end()) {
-    //     return (*eye).second;
-    // }
-
-    // assert(0);
-}
-
+#include <enc.hh>
 
 // boolean 1(1 bit) var
 BooleanEncoding::BooleanEncoding()
@@ -76,77 +38,32 @@ BooleanEncoding::BooleanEncoding()
 IntEncoding::IntEncoding(unsigned nbits, bool is_signed)
     : Encoding()
 {
-    bool msb = true;
-
-    // in place
-    ADD& add_res = f_add;
-
-    assert(0 < nbits);
-    unsigned i = 0;
-
-    while (i < nbits) {
-        ADD two = f_mgr.dd().constant(2);
-        if (msb && is_signed) {
-            msb = false;
-            two = two.Negate(); // MSB is -2^N in 2's complement
-        }
-        add_res *= two;
-
-        // create var and book it
-        ADD add_var = f_mgr.dd().addVar();
-        f_bits.push_back(add_var);
-
-        // add it to the encoding
-        add_res += add_var;
-
-        ++ i;
-    }
+    make_integer_encoding(nbits, is_signed);
 }
-
-/* private service */
-static inline unsigned range_repr_bits (value_t range)
-{ return ceil(log2(range)); }
 
 // bounded integer var
 RangeEncoding::RangeEncoding(value_t min, value_t max)
     : Encoding()
+    , f_min(min)
+    , f_max(max)
 {
-    // in place
-    ADD& add_res = f_add;
-    unsigned nbits = range_repr_bits(max - min);
+    unsigned nbits = range_repr_bits(f_max - f_min);
+    assert (0 < nbits);
 
-    assert(0 < nbits);
-    unsigned i = 0;
-
-    while (i < nbits) {
-        ADD two = f_mgr.dd().constant(2);
-        add_res *= two;
-
-        // create var and book it
-        ADD add_var = f_mgr.dd().addVar();
-        f_bits.push_back(add_var);
-
-        // add it to the encoding
-        add_res += add_var;
-    }
+    make_integer_encoding(nbits);
 }
 
-
 // enumerative
-EnumEncoding::EnumEncoding(ExprSet f_literals)
+EnumEncoding::EnumEncoding(ExprSet lits)
+    : Encoding()
+    , f_lits(lits)
 {
-    assert(0); // tODO
+    unsigned nbits = range_repr_bits(f_lits.size());
+    assert (0 < nbits);
+
+    make_integer_encoding(nbits);
 }
 
 // dctor
 Encoding::~Encoding()
-{
-
-}
-
-EncodingMgr::EncodingMgr()
-    : f_cudd(CuddMgr::INSTANCE().dd())
-{ DEBUG << "Initialized EncodingMgr @ " << this << endl; }
-
-EncodingMgr::~EncodingMgr()
-{ DEBUG << "Deinitialized EncodingMgr @ " << this << endl; }
+{ }
