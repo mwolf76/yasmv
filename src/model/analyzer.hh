@@ -24,8 +24,12 @@
 #define EXPR_ANALYZER_H
 
 #include <common.hh>
+
+#include <expr.hh>
+#include <type.hh>
+
 #include <model.hh>
-#include <types.hh>
+#include <model_mgr.hh>
 
 #include <temporal_expr_walker.hh>
 
@@ -82,10 +86,10 @@ private:
     Expr_ptr f_expr;
 };
 
-class ExprAnalyzer : public TemporalWalker {
+class Analyzer : public TemporalWalker {
 public:
-    ExprAnalyzer();
-    ~ExprAnalyzer();
+    Analyzer();
+    ~Analyzer();
 
     // toplevel
     ExprKind process(Expr_ptr ctx, Expr_ptr body);

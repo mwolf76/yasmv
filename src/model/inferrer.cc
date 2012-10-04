@@ -31,13 +31,17 @@
 #include <expr.hh>
 #include <inferrer.hh>
 
-Inferrer::Inferrer()
+#include <model_mgr.hh>
+
+#include <type_exceptions.hh>
+
+Inferrer::Inferrer(ModelMgr& owner)
     : f_map()
     , f_type_stack()
     , f_ctx_stack()
-    , f_mm(ModelMgr::INSTANCE())
-    , f_em(ExprMgr::INSTANCE())
-    , f_tm(TypeMgr::INSTANCE())
+    , f_mm(owner)
+    , f_em(owner.em())
+    , f_tm(owner.tm())
 {
     f_integer_or_boolean.push_back(f_em.make_integer_type());
     f_integer_or_boolean.push_back(f_em.make_boolean_type());

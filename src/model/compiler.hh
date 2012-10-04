@@ -1,6 +1,6 @@
 /**
- *  @file be_compiler.hh
- *  @brief Expr validators
+ *  @file compiler.hh
+ *  @brief Boolean compiler
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -25,7 +25,9 @@
 #include <simple_expr_walker.hh>
 
 #include <model.hh>
-#include <encoder.hh>
+#include <model_mgr.hh>
+
+#include <enc.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())

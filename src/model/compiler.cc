@@ -1,6 +1,6 @@
 /**
- *  @file be_compiler.cc
- *  @brief Expr compilers
+ *  @file compiler.cc
+ *  @brief Boolean compiler
  *
  *  This module contains definitions and services that implement the
  *  booolean expressions compilation into a form which is suitable for
@@ -36,7 +36,7 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <be_compiler.hh>
+#include <compiler.hh>
 
 // comment this out
 // #define DEBUG_BE_COMPILER

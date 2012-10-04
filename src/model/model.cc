@@ -25,16 +25,7 @@
  **/
 
 #include <model.hh>
-
-// static initialization
-TypeMgr_ptr TypeMgr::f_instance = NULL;
-
-// static initialization
-ModelMgr_ptr ModelMgr::f_instance = NULL;
-
-// TODO: this does not belong here
-#include <cudd.hh>
-CuddMgr_ptr CuddMgr::f_instance = NULL;
+#include <type_exceptions.hh>
 
 void Model::add_module(Expr_ptr name, IModule_ptr module)
 {

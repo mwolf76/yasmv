@@ -1,6 +1,6 @@
 /**
- *  @file expr_analyzer.cc
- *  @brief Expr type expr_analyzer
+ *  @file analyzer.cc
+ *  @brief Expr type analyzer
  *
  *  This module contains definitions and services that implement a
  *  type inference engine. The type inference engine is implemented
@@ -29,9 +29,9 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <expr_analyzer.hh>
+#include <analyzer.hh>
 
-ExprAnalyzer::ExprAnalyzer()
+Analyzer::Analyzer()
     : f_map()
     , f_kind_stack()
     , f_ctx_stack()
@@ -57,13 +57,13 @@ ExprAnalyzer::ExprAnalyzer()
     f_algebraic.push_back(EXPR_ALGEBRAIC);
     f_boolean.push_back(EXPR_BOOLEAN);
 
-    TRACE << "Created ExprAnalyzer @" << this << endl;
+    TRACE << "Created Analyzer @" << this << endl;
 }
 
-ExprAnalyzer::~ExprAnalyzer()
-{ TRACE << "Destroying ExprAnalyzer @" << this << endl; }
+Analyzer::~Analyzer()
+{ TRACE << "Destroying Analyzer @" << this << endl; }
 
-ExprKind ExprAnalyzer::process(Expr_ptr ctx, Expr_ptr body)
+ExprKind Analyzer::process(Expr_ptr ctx, Expr_ptr body)
 {
     ExprKind res = EXPR_UNKNOWN;
     DEBUG << "Determining kind for expression " << ctx << "::" << body << endl;
@@ -85,262 +85,262 @@ ExprKind ExprAnalyzer::process(Expr_ptr ctx, Expr_ptr body)
     return res;
 }
 
-void ExprAnalyzer::pre_hook()
+void Analyzer::pre_hook()
 {}
-void ExprAnalyzer::post_hook()
+void Analyzer::post_hook()
 {}
 
-bool ExprAnalyzer::walk_F_preorder(const Expr_ptr expr)
+bool Analyzer::walk_F_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_F_postorder(const Expr_ptr expr)
+void Analyzer::walk_F_postorder(const Expr_ptr expr)
 { walk_ltl_unary(expr); }
 
-bool ExprAnalyzer::walk_G_preorder(const Expr_ptr expr)
+bool Analyzer::walk_G_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_G_postorder(const Expr_ptr expr)
+void Analyzer::walk_G_postorder(const Expr_ptr expr)
 { walk_ltl_g(expr); }
 
-bool ExprAnalyzer::walk_X_preorder(const Expr_ptr expr)
+bool Analyzer::walk_X_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_X_postorder(const Expr_ptr expr)
+void Analyzer::walk_X_postorder(const Expr_ptr expr)
 { walk_ltl_unary(expr); }
 
-bool ExprAnalyzer::walk_U_preorder(const Expr_ptr expr)
+bool Analyzer::walk_U_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_U_inorder(const Expr_ptr expr)
+bool Analyzer::walk_U_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_U_postorder(const Expr_ptr expr)
+void Analyzer::walk_U_postorder(const Expr_ptr expr)
 { walk_ltl_binary(expr); }
 
-bool ExprAnalyzer::walk_R_preorder(const Expr_ptr expr)
+bool Analyzer::walk_R_preorder(const Expr_ptr expr)
 { return cache_miss(expr);  }
-bool ExprAnalyzer::walk_R_inorder(const Expr_ptr expr)
+bool Analyzer::walk_R_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_R_postorder(const Expr_ptr expr)
+void Analyzer::walk_R_postorder(const Expr_ptr expr)
 { walk_ltl_binary(expr); }
 
-bool ExprAnalyzer::walk_AF_preorder(const Expr_ptr expr)
+bool Analyzer::walk_AF_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_AF_postorder(const Expr_ptr expr)
+void Analyzer::walk_AF_postorder(const Expr_ptr expr)
 { walk_ctl_unary(expr); }
 
-bool ExprAnalyzer::walk_AG_preorder(const Expr_ptr expr)
+bool Analyzer::walk_AG_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_AG_postorder(const Expr_ptr expr)
+void Analyzer::walk_AG_postorder(const Expr_ptr expr)
 { walk_ctl_ag(expr); }
 
-bool ExprAnalyzer::walk_AX_preorder(const Expr_ptr expr)
+bool Analyzer::walk_AX_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_AX_postorder(const Expr_ptr expr)
+void Analyzer::walk_AX_postorder(const Expr_ptr expr)
 { walk_ctl_unary(expr); }
 
-bool ExprAnalyzer::walk_AU_preorder(const Expr_ptr expr)
+bool Analyzer::walk_AU_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_AU_inorder(const Expr_ptr expr)
+bool Analyzer::walk_AU_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_AU_postorder(const Expr_ptr expr)
+void Analyzer::walk_AU_postorder(const Expr_ptr expr)
 { walk_ctl_binary(expr); }
 
-bool ExprAnalyzer::walk_AR_preorder(const Expr_ptr expr)
+bool Analyzer::walk_AR_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_AR_inorder(const Expr_ptr expr)
+bool Analyzer::walk_AR_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_AR_postorder(const Expr_ptr expr)
+void Analyzer::walk_AR_postorder(const Expr_ptr expr)
 { walk_ctl_binary(expr); }
 
-bool ExprAnalyzer::walk_EF_preorder(const Expr_ptr expr)
+bool Analyzer::walk_EF_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_EF_postorder(const Expr_ptr expr)
+void Analyzer::walk_EF_postorder(const Expr_ptr expr)
 { walk_ctl_unary(expr); }
 
-bool ExprAnalyzer::walk_EG_preorder(const Expr_ptr expr)
+bool Analyzer::walk_EG_preorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_EG_postorder(const Expr_ptr expr)
+void Analyzer::walk_EG_postorder(const Expr_ptr expr)
 { walk_ctl_unary(expr); }
 
-bool ExprAnalyzer::walk_EX_preorder(const Expr_ptr expr)
+bool Analyzer::walk_EX_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_EX_postorder(const Expr_ptr expr)
+void Analyzer::walk_EX_postorder(const Expr_ptr expr)
 { walk_ctl_unary(expr); }
 
-bool ExprAnalyzer::walk_EU_preorder(const Expr_ptr expr)
+bool Analyzer::walk_EU_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_EU_inorder(const Expr_ptr expr)
+bool Analyzer::walk_EU_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_EU_postorder(const Expr_ptr expr)
+void Analyzer::walk_EU_postorder(const Expr_ptr expr)
 { walk_ctl_binary(expr); }
 
-bool ExprAnalyzer::walk_ER_preorder(const Expr_ptr expr)
+bool Analyzer::walk_ER_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_ER_inorder(const Expr_ptr expr)
+bool Analyzer::walk_ER_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_ER_postorder(const Expr_ptr expr)
+void Analyzer::walk_ER_postorder(const Expr_ptr expr)
 { walk_ctl_binary(expr); }
 
-bool ExprAnalyzer::walk_next_preorder(const Expr_ptr expr)
+bool Analyzer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_next_postorder(const Expr_ptr expr)
+void Analyzer::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_boolean(expr); }
 
-bool ExprAnalyzer::walk_neg_preorder(const Expr_ptr expr)
+bool Analyzer::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_neg_postorder(const Expr_ptr expr)
+void Analyzer::walk_neg_postorder(const Expr_ptr expr)
 { walk_unary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_not_preorder(const Expr_ptr expr)
+bool Analyzer::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void ExprAnalyzer::walk_not_postorder(const Expr_ptr expr)
+void Analyzer::walk_not_postorder(const Expr_ptr expr)
 { walk_unary_boolean(expr); }
 
-bool ExprAnalyzer::walk_add_preorder(const Expr_ptr expr)
+bool Analyzer::walk_add_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_add_inorder(const Expr_ptr expr)
+bool Analyzer::walk_add_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_add_postorder(const Expr_ptr expr)
+void Analyzer::walk_add_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_sub_preorder(const Expr_ptr expr)
+bool Analyzer::walk_sub_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_sub_inorder(const Expr_ptr expr)
+bool Analyzer::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_sub_postorder(const Expr_ptr expr)
+void Analyzer::walk_sub_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_div_preorder(const Expr_ptr expr)
+bool Analyzer::walk_div_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_div_inorder(const Expr_ptr expr)
+bool Analyzer::walk_div_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_div_postorder(const Expr_ptr expr)
+void Analyzer::walk_div_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_mul_preorder(const Expr_ptr expr)
+bool Analyzer::walk_mul_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_mul_inorder(const Expr_ptr expr)
+bool Analyzer::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_mul_postorder(const Expr_ptr expr)
+void Analyzer::walk_mul_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_mod_preorder(const Expr_ptr expr)
+bool Analyzer::walk_mod_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_mod_inorder(const Expr_ptr expr)
+bool Analyzer::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_mod_postorder(const Expr_ptr expr)
+void Analyzer::walk_mod_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_and_preorder(const Expr_ptr expr)
+bool Analyzer::walk_and_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_and_inorder(const Expr_ptr expr)
+bool Analyzer::walk_and_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_and_postorder(const Expr_ptr expr)
+void Analyzer::walk_and_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_or_preorder(const Expr_ptr expr)
+bool Analyzer::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_or_inorder(const Expr_ptr expr)
+bool Analyzer::walk_or_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_or_postorder(const Expr_ptr expr)
+void Analyzer::walk_or_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_xor_preorder(const Expr_ptr expr)
+bool Analyzer::walk_xor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_xor_inorder(const Expr_ptr expr)
+bool Analyzer::walk_xor_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_xor_postorder(const Expr_ptr expr)
+void Analyzer::walk_xor_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_xnor_preorder(const Expr_ptr expr)
+bool Analyzer::walk_xnor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_xnor_inorder(const Expr_ptr expr)
+bool Analyzer::walk_xnor_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_xnor_postorder(const Expr_ptr expr)
+void Analyzer::walk_xnor_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_implies_preorder(const Expr_ptr expr)
+bool Analyzer::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_implies_inorder(const Expr_ptr expr)
+bool Analyzer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_implies_postorder(const Expr_ptr expr)
+void Analyzer::walk_implies_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_iff_preorder(const Expr_ptr expr)
+bool Analyzer::walk_iff_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_iff_inorder(const Expr_ptr expr)
+bool Analyzer::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_iff_postorder(const Expr_ptr expr)
+void Analyzer::walk_iff_postorder(const Expr_ptr expr)
 { walk_binary_boolean(expr); }
 
-bool ExprAnalyzer::walk_lshift_preorder(const Expr_ptr expr)
+bool Analyzer::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_lshift_inorder(const Expr_ptr expr)
+bool Analyzer::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_lshift_postorder(const Expr_ptr expr)
+void Analyzer::walk_lshift_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_rshift_preorder(const Expr_ptr expr)
+bool Analyzer::walk_rshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_rshift_inorder(const Expr_ptr expr)
+bool Analyzer::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_rshift_postorder(const Expr_ptr expr)
+void Analyzer::walk_rshift_postorder(const Expr_ptr expr)
 { walk_binary_algebraic(expr); }
 
-bool ExprAnalyzer::walk_eq_preorder(const Expr_ptr expr)
+bool Analyzer::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_eq_inorder(const Expr_ptr expr)
+bool Analyzer::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_eq_postorder(const Expr_ptr expr)
+void Analyzer::walk_eq_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_ne_preorder(const Expr_ptr expr)
+bool Analyzer::walk_ne_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_ne_inorder(const Expr_ptr expr)
+bool Analyzer::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_ne_postorder(const Expr_ptr expr)
+void Analyzer::walk_ne_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_gt_preorder(const Expr_ptr expr)
+bool Analyzer::walk_gt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_gt_inorder(const Expr_ptr expr)
+bool Analyzer::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_gt_postorder(const Expr_ptr expr)
+void Analyzer::walk_gt_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_ge_preorder(const Expr_ptr expr)
+bool Analyzer::walk_ge_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_ge_inorder(const Expr_ptr expr)
+bool Analyzer::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_ge_postorder(const Expr_ptr expr)
+void Analyzer::walk_ge_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_lt_preorder(const Expr_ptr expr)
+bool Analyzer::walk_lt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_lt_inorder(const Expr_ptr expr)
+bool Analyzer::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_lt_postorder(const Expr_ptr expr)
+void Analyzer::walk_lt_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_le_preorder(const Expr_ptr expr)
+bool Analyzer::walk_le_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_le_inorder(const Expr_ptr expr)
+bool Analyzer::walk_le_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_le_postorder(const Expr_ptr expr)
+void Analyzer::walk_le_postorder(const Expr_ptr expr)
 { walk_binary_relational(expr); }
 
-bool ExprAnalyzer::walk_ite_preorder(const Expr_ptr expr)
+bool Analyzer::walk_ite_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_ite_inorder(const Expr_ptr expr)
+bool Analyzer::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_ite_postorder(const Expr_ptr expr)
+void Analyzer::walk_ite_postorder(const Expr_ptr expr)
 { walk_ternary_ite(expr); }
 
-bool ExprAnalyzer::walk_cond_preorder(const Expr_ptr expr)
+bool Analyzer::walk_cond_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool ExprAnalyzer::walk_cond_inorder(const Expr_ptr expr)
+bool Analyzer::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
-void ExprAnalyzer::walk_cond_postorder(const Expr_ptr expr)
+void Analyzer::walk_cond_postorder(const Expr_ptr expr)
 {}
 
 // TODO....
-void ExprAnalyzer::walk_dot_postorder(const Expr_ptr expr)
+void Analyzer::walk_dot_postorder(const Expr_ptr expr)
 {
     assert(0);
     // Type_ptr rhs_type;
@@ -362,7 +362,7 @@ void ExprAnalyzer::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
-void ExprAnalyzer::walk_leaf(const Expr_ptr expr)
+void Analyzer::walk_leaf(const Expr_ptr expr)
 {
     ExprType symb_type = expr->f_symb;
     ExprKind res = EXPR_ERROR;
@@ -399,7 +399,7 @@ void ExprAnalyzer::walk_leaf(const Expr_ptr expr)
 }
 
 // one step of resolution returns a const or variable
-ISymbol_ptr ExprAnalyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
+ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
     Model& model = static_cast <Model&> (*f_mm.model());
     ISymbol_ptr symb = model.fetch_symbol(ctx, frag);
@@ -423,7 +423,7 @@ ISymbol_ptr ExprAnalyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     else assert(0);
 }
 
-void ExprAnalyzer::walk_ltl_g(const Expr_ptr expr)
+void Analyzer::walk_ltl_g(const Expr_ptr expr)
 {
     const ExprKind top = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ltl(expr, top);
@@ -431,7 +431,7 @@ void ExprAnalyzer::walk_ltl_g(const Expr_ptr expr)
     f_kind_stack.push_back(top == EXPR_G_ONLY_LTL ? EXPR_G_ONLY_LTL : EXPR_GENERIC_LTL);
 }
 
-void ExprAnalyzer::walk_ltl_unary(const Expr_ptr expr)
+void Analyzer::walk_ltl_unary(const Expr_ptr expr)
 {
     const ExprKind top = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ltl(expr, top);
@@ -439,7 +439,7 @@ void ExprAnalyzer::walk_ltl_unary(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_GENERIC_LTL);
 }
 
-void ExprAnalyzer::walk_ltl_binary(const Expr_ptr expr)
+void Analyzer::walk_ltl_binary(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ltl(expr, rhs);
@@ -450,7 +450,7 @@ void ExprAnalyzer::walk_ltl_binary(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_GENERIC_LTL);
 }
 
-void ExprAnalyzer::walk_ctl_ag(const Expr_ptr expr)
+void Analyzer::walk_ctl_ag(const Expr_ptr expr)
 {
     const ExprKind top = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ctl(expr, top);
@@ -458,7 +458,7 @@ void ExprAnalyzer::walk_ctl_ag(const Expr_ptr expr)
     f_kind_stack.push_back(top == EXPR_AG_ONLY_CTL ? EXPR_AG_ONLY_CTL : EXPR_GENERIC_CTL);
 }
 
-void ExprAnalyzer::walk_ctl_unary(const Expr_ptr expr)
+void Analyzer::walk_ctl_unary(const Expr_ptr expr)
 {
     const ExprKind top = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ctl(expr, top);
@@ -466,7 +466,7 @@ void ExprAnalyzer::walk_ctl_unary(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_GENERIC_LTL);
 }
 
-void ExprAnalyzer::walk_ctl_binary(const Expr_ptr expr)
+void Analyzer::walk_ctl_binary(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     check_ltl(expr, rhs);
@@ -478,7 +478,7 @@ void ExprAnalyzer::walk_ctl_binary(const Expr_ptr expr)
 
 }
 
-void ExprAnalyzer::walk_unary_algebraic(const Expr_ptr expr)
+void Analyzer::walk_unary_algebraic(const Expr_ptr expr)
 {
     const ExprKind top = f_kind_stack.back(); f_kind_stack.pop_back();
     check_algebraic(expr, top);
@@ -487,7 +487,7 @@ void ExprAnalyzer::walk_unary_algebraic(const Expr_ptr expr)
 }
 
 
-void ExprAnalyzer::walk_binary_algebraic(const Expr_ptr expr)
+void Analyzer::walk_binary_algebraic(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     check_algebraic(expr, rhs);
@@ -498,7 +498,7 @@ void ExprAnalyzer::walk_binary_algebraic(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_ALGEBRAIC);
 }
 
-void ExprAnalyzer::walk_binary_relational(const Expr_ptr expr)
+void Analyzer::walk_binary_relational(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     check_algebraic(expr, rhs);
@@ -509,7 +509,7 @@ void ExprAnalyzer::walk_binary_relational(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_BOOLEAN);
 }
 
-void ExprAnalyzer::walk_binary_boolean(const Expr_ptr expr)
+void Analyzer::walk_binary_boolean(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     check_boolean(expr, rhs);
@@ -520,7 +520,7 @@ void ExprAnalyzer::walk_binary_boolean(const Expr_ptr expr)
     f_kind_stack.push_back(EXPR_BOOLEAN);
 }
 
-void ExprAnalyzer::walk_ternary_ite(const Expr_ptr expr)
+void Analyzer::walk_ternary_ite(const Expr_ptr expr)
 {
     const ExprKind rhs = f_kind_stack.back(); f_kind_stack.pop_back();
     const ExprKind lhs = f_kind_stack.back(); f_kind_stack.pop_back();
@@ -533,7 +533,7 @@ void ExprAnalyzer::walk_ternary_ite(const Expr_ptr expr)
 }
 
 // -- low level checkrs --------------------------------------------------------
-void ExprAnalyzer::check_temporal(const Expr_ptr expr, ExprKind ek)
+void Analyzer::check_temporal(const Expr_ptr expr, ExprKind ek)
 {
     if ((EXPR_BOOLEAN != ek) &&
         (EXPR_GENERIC_CTL != ek) &&
@@ -544,7 +544,7 @@ void ExprAnalyzer::check_temporal(const Expr_ptr expr, ExprKind ek)
     }
 }
 
-void ExprAnalyzer::check_ltl(const Expr_ptr expr, ExprKind ek)
+void Analyzer::check_ltl(const Expr_ptr expr, ExprKind ek)
 {
     if ((EXPR_BOOLEAN != ek) &&
         (EXPR_GENERIC_LTL != ek) &&
@@ -553,7 +553,7 @@ void ExprAnalyzer::check_ltl(const Expr_ptr expr, ExprKind ek)
     }
 }
 
-void ExprAnalyzer::check_ctl(const Expr_ptr expr, ExprKind ek)
+void Analyzer::check_ctl(const Expr_ptr expr, ExprKind ek)
 {
     if ((EXPR_BOOLEAN != ek) &&
         (EXPR_GENERIC_CTL != ek) &&
@@ -562,21 +562,21 @@ void ExprAnalyzer::check_ctl(const Expr_ptr expr, ExprKind ek)
     }
 }
 
-void ExprAnalyzer::check_algebraic(const Expr_ptr expr, ExprKind ek)
+void Analyzer::check_algebraic(const Expr_ptr expr, ExprKind ek)
 {
     if ((EXPR_ALGEBRAIC != ek)) {
         throw BadExpressionKindException(ek, expr, f_algebraic);
     }
 }
 
-void ExprAnalyzer::check_boolean(const Expr_ptr expr, ExprKind ek)
+void Analyzer::check_boolean(const Expr_ptr expr, ExprKind ek)
 {
     if ((EXPR_BOOLEAN != ek)) {
         throw BadExpressionKindException(ek, expr, f_boolean);
     }
 }
 
-void ExprAnalyzer::check_match(const Expr_ptr expr, ExprKind lhs, ExprKind rhs)
+void Analyzer::check_match(const Expr_ptr expr, ExprKind lhs, ExprKind rhs)
 {
     if ((lhs != rhs)) {
         ExprKinds tmp;

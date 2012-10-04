@@ -28,9 +28,13 @@
 #define MODEL_H
 
 #include <common.hh>
+#include <datatypes.hh>
+
 #include <expr.hh>
-#include <types.hh>
+#include <fqexpr.hh>
 #include <expr_mgr.hh>
+#include <type.hh>
+
 #include <cuddObj.hh>
 
 // -- primary decls  --------------------------------------------------------------
@@ -294,33 +298,6 @@ private:
     Modules f_modules;
     Constants f_constants; // global consts
     Expr_ptr f_name;
-};
-
-class ModelMgr;
-typedef ModelMgr* ModelMgr_ptr;
-
-class ModelMgr  {
-public:
-    static ModelMgr& INSTANCE() {
-        if (! f_instance) f_instance = new ModelMgr();
-        return (*f_instance);
-    }
-
-    inline IModel_ptr model()
-    { return &f_model; }
-
-protected:
-    ModelMgr()
-        : f_model()
-    {}
-
-private:
-    static ModelMgr_ptr f_instance;
-
-    /* low-level services */
-
-    /* local data */
-    Model f_model;
 };
 
 #endif
