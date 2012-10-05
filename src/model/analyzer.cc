@@ -372,8 +372,8 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
 
     // a constants is a 0-bits unsigned type
     if ((symb_type == ICONST) ||
-        (symb_type == UWCONST)||
-        (symb_type == SWCONST)) {
+        (symb_type == HCONST) ||
+        (symb_type == OCONST)) {
         res = EXPR_ALGEBRAIC;
     }
 
