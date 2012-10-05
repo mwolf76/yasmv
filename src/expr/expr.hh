@@ -27,7 +27,6 @@
 #define EXPR_H
 
 #include <common.hh>
-#include <atom.hh>
 
 typedef enum {
 
@@ -103,7 +102,10 @@ typedef Expr* Expr_ptr;
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
 
-/* system-wide expr definition */
+/* using STL string as basic atom class */
+typedef string Atom;
+typedef Atom* Atom_ptr;
+
 typedef struct Expr_TAG* Expr_ptr;
 struct Expr_TAG {
 
@@ -145,10 +147,6 @@ struct Expr_TAG {
     inline Expr_ptr rhs()
     { return u.f_rhs; }
 
-    inline Expr_TAG()
-        : f_symb(NIL)
-    {}
-
     // identifiers
     inline Expr_TAG(const Atom& atom)
     : f_symb(IDENT)
@@ -181,9 +179,41 @@ typedef ExprVector* ExprVector_ptr;
 typedef set<Expr_ptr> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
+typedef class FQExpr* FQExpr_ptr;
+class FQExpr {
+public:
+    FQExpr(Expr_ptr expr); // default ctx, default time
+    FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
+
+    FQExpr(const FQExpr& fqexpr);
+
+    inline const Expr_ptr& ctx() const
+    { return f_ctx; }
+
+    inline const Expr_ptr& expr() const
+    { return f_expr; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    bool operator==(const FQExpr& other) const;
+    unsigned long hash() const;
+
+private:
+    // expression ctx (default is 'main')
+    Expr_ptr f_ctx;
+
+    // expression body
+    Expr_ptr f_expr;
+
+    // expression time (default is 0)
+    step_t f_time;
+};
+
 // for logging purposes
 ostream& operator<<(ostream& os, const Expr_ptr t);
 
+// TODO: move this!
 class BadWordConstException : public Exception {
 public:
     BadWordConstException(const char* msg)

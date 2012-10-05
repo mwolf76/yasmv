@@ -28,17 +28,43 @@
 
 #include <expr.hh>
 
-/* Hash function for expressions */
+/* -- expr pool definitions -------------------------------------------------- */
+
 struct ExprHash {
     long operator() (const Expr& k) const;
 };
 
-/* Equality function for expressions */
 struct ExprEq {
     bool operator() (const Expr& x, const Expr& y) const;
 };
 
 typedef unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef pair<ExprPool::iterator, bool> ExprPoolHit;
+
+/* -- atom pool definitions -------------------------------------------------- */
+
+struct AtomHash {
+    long operator() (const Atom& k) const;
+};
+
+struct AtomEq {
+    bool operator() (const Atom& x, const Atom& y) const;
+};
+
+typedef unordered_set<Atom, AtomHash, AtomEq> AtomPool;
+typedef pair<AtomPool::iterator, bool> AtomPoolHit;
+
+/* -- fqexpr pool definitions ------------------------------------------------ */
+
+struct FQExprHash {
+    long operator() (const FQExpr& k) const;
+};
+
+struct FQExprEq {
+    bool operator() (const FQExpr& x, const FQExpr& y) const;
+};
+
+typedef unordered_set<FQExpr, FQExprHash, FQExprEq> FQExprPool;
+typedef pair<FQExprPool::iterator, bool> FQExprPoolHit;
 
 #endif

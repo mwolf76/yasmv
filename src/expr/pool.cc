@@ -77,3 +77,39 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
             /* ...or share the same subtrees */
             (x.u.f_lhs == y.u.f_lhs && y.u.f_rhs == y.u.f_rhs));
 }
+
+long AtomHash::operator() (const Atom& k) const
+{
+    unsigned long hash = 0;
+    unsigned long x    = 0;
+
+    for(std::size_t i = 0; i < k.length(); i++)
+        {
+            hash = (hash << 4) + k[i];
+            if((x = hash & 0xF0000000L) != 0)
+                {
+                    hash ^= (x >> 24);
+                }
+            hash &= ~x;
+        }
+
+    return hash;
+}
+
+bool AtomEq::operator() (const Atom& x, const Atom& y) const
+{
+    return x == y;
+}
+
+
+long FQExprHash::operator() (const FQExpr& k) const
+{
+    return 0; // TODO
+}
+
+bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const
+{
+    return (x.ctx() == y.ctx() &&
+            x.expr() == y.expr() &&
+            x.time() == y.time());
+}
