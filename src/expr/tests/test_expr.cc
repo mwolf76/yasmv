@@ -353,6 +353,58 @@ BOOST_AUTO_TEST_CASE(printer)
         Printer printer(oss);
         printer << oconst_42; BOOST_CHECK (oss.str() == string("052"));
     }
+
+    {
+        Expr_ptr x_dot_y = em.make_dot(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << x_dot_y; BOOST_CHECK (oss.str() == string("x.y"));
+    }
+
+    {
+        Expr_ptr x_params_y = em.make_params(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << x_params_y; BOOST_CHECK (oss.str() == string("x(y)"));
+    }
+
+    // LTL makers
+    {
+        Expr_ptr Fx = em.make_F(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << Fx; BOOST_CHECK (oss.str() == string("F (x)"));
+    }
+
+    {
+        Expr_ptr Gx = em.make_G(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << Gx; BOOST_CHECK (oss.str() == string("G (x)"));
+    }
+
+    {
+        Expr_ptr Xx = em.make_X(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << Xx; BOOST_CHECK (oss.str() == string("X (x)"));
+    }
+
+    {
+        Expr_ptr xUy = em.make_U(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xUy; BOOST_CHECK (oss.str() == string("(x U y)"));
+    }
+
+    {
+        Expr_ptr xRy = em.make_R(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xRy; BOOST_CHECK (oss.str() == string("(x R y)"));
+    }
+
+
 }
 
 BOOST_AUTO_TEST_CASE(consts_printer)

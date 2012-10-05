@@ -133,7 +133,7 @@ void TemporalWalker::walk()
             entry_U_1:
                 if (walk_U_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = U_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_U_2:
@@ -151,7 +151,7 @@ void TemporalWalker::walk()
             entry_R_1:
                 if (walk_R_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = R_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_R_2:
