@@ -41,10 +41,21 @@ smv_LDADD = $(top_builddir)/src/utils/printers/libexpr_printers.la	\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
 
 
-tests_SOURCES =
-tests_LDADD = $(top_builddir)/src/expr/libexpr.la	\
-$(top_builddir)/src/expr/tests/libexpr_tests.la		\
--lboost_unit_test_framework
+tests_SOURCES = $(top_builddir)/src/dummy_logging.cc src/common.cc
+tests_LDADD = $(top_builddir)/src/expr/tests/libexpr_tests.la		\
+$(top_builddir)/src/utils/printers/tests/libexpr_printer_tests.la 	\
+\
+$(top_builddir)/src/utils/printers/libexpr_printers.la			\
+$(top_builddir)/src/parser/libparser.la					\
+$(top_builddir)/src/cmd/libcommand.la $(top_builddir)/src/mc/libmc.la	\
+$(top_builddir)/src/model/libmodel.la					\
+$(top_builddir)/src/expr/libexpr.la					\
+$(top_builddir)/src/expr/walkers/libexpr_walkers.la			\
+$(top_builddir)/src/type/libtype.la $(top_builddir)/src/enc/libenc.la	\
+$(top_builddir)/src/utils/libutils.la					\
+$(top_builddir)/src/dd/libcudd.la					\
+$(top_builddir)/src/sat/libminisat.la -lantlr3c $(BOOST_REGEX_LIBS)	\
+$(BOOST_PROGRAM_OPTIONS_LIBS) -lboost_unit_test_framework
 
 smv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
 tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS)

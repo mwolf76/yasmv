@@ -142,7 +142,6 @@ AC_CONFIG_FILES([Makefile
                  src/sat/Makefile
                  src/type/Makefile
                  src/utils/Makefile
-                 src/utils/printers/Makefile
                  src/witness/Makefile
                  doc/Makefile
 		 gnusmv.pc])

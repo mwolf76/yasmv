@@ -1,4 +1,5 @@
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/3rdparty/ezlogger
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
+-I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/3rdparty/ezlogger
 
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@

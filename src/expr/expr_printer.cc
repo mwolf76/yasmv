@@ -49,6 +49,9 @@ void Printer::post_hook()
 Printer& Printer::operator<<(Expr_ptr expr)
 { this->operator()(expr); return *this; }
 
+Printer& Printer::operator<<(Expr& expr)
+{ this->operator()(&expr); return *this; }
+
 Printer& Printer::operator<< (const string& str)
 { f_os << str << flush; return *this; }
 
@@ -347,19 +350,19 @@ void Printer::walk_range_postorder(const Expr_ptr expr)
 {}
 
 /* word print helpers */
-string word_repr(const Expr_ptr expr, base_t base)
-{
-    assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
+// string word_repr(const Expr_ptr expr, base_t base)
+// {
+//     assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
 
-    ostringstream oss;
-    oss << "0"
-        << ( expr->f_symb == SWCONST ? "s" : "u" )
-        << base_char(base)
-        << expr->u.f_size
-        << to_base(expr->u.f_value, base) ;
+//     ostringstream oss;
+//     oss << "0"
+//         << ( expr->f_symb == SWCONST ? "s" : "u" )
+//         << base_char(base)
+//         << expr->u.f_size
+//         << to_base(expr->u.f_value, base) ;
 
-    return oss.str();
-}
+//     return oss.str();
+// }
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {

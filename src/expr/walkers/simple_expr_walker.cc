@@ -565,8 +565,9 @@ void SimpleWalker::walk ()
 
         // leaves
         case ICONST:
-        case UWCONST:
-        case SWCONST:
+        case HCONST:
+        case OCONST:
+
         case IDENT:
             walk_leaf(curr.expr);
             break;

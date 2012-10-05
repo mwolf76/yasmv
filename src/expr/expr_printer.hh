@@ -38,6 +38,8 @@ public:
     ~Printer();
 
     Printer& operator<<(const string& str);
+
+    Printer& operator<<(Expr& expr);
     Printer& operator<<(Expr_ptr expr);
 
 protected:

@@ -52,7 +52,13 @@ typedef enum {
     ITE, COND,
 
     /* leaves */
-    ICONST, UWCONST, SWCONST, IDENT, DOT, NIL,
+    ICONST, // decimal constants
+    HCONST, // hex constants
+    OCONST, // octal constants
+
+    IDENT, DOT,
+
+    NIL, // reserved
 
     /* future
     COUNT, // count( <pred>, x0, ..., xk ) -> number of elems satisfying pred
@@ -96,6 +102,9 @@ typedef Expr* Expr_ptr;
 // An Expression consists of an AST symbol, which is the expression
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
+
+/* system-wide expr definition */
+typedef struct Expr_TAG* Expr_ptr;
 struct Expr_TAG {
 
     // AST symb type
@@ -105,17 +114,15 @@ struct Expr_TAG {
         // identifiers
         Atom_ptr f_atom;
 
+        // numeric constants
+        value_t f_value;
+
         // operators
         struct  {
             Expr_ptr f_lhs;
             Expr_ptr f_rhs; // NULL for unary ops
         };
 
-        // word and numeric constants
-        struct {
-            size_t f_size;
-            value_t f_value;
-        };
     } u;
 
     // accessors
@@ -126,12 +133,10 @@ struct Expr_TAG {
 
     inline bool is_const() const
     {
-        return (UWCONST == f_symb ||
-                SWCONST == f_symb ||
-                ICONST  == f_symb );
+        return (ICONST == f_symb ||
+                HCONST == f_symb ||
+                OCONST == f_symb );
     }
-    inline size_t size()
-    { return u.f_size; }
     inline value_t value()
     { return u.f_value; }
 
@@ -149,27 +154,18 @@ struct Expr_TAG {
     : f_symb(IDENT)
     { u.f_atom = const_cast<Atom *>(& atom); }
 
-    // word constants
-    inline Expr_TAG(ExprType symb, size_t size, value_t value)
-        : f_symb(symb)
-    {
-        assert ((symb == UWCONST) || (symb == SWCONST));
-
-        u.f_size = size;
-        u.f_value = value;
-    }
-
-    // int constants, are treated as machine size word constants
+    // numeric constants, are treated as machine size consts.
     inline Expr_TAG(ExprType symb, value_t value)
         : f_symb(symb)
     {
-        assert (symb == ICONST);
+        assert (symb == ICONST ||
+                symb == HCONST ||
+                symb == OCONST );
 
-        u.f_size = sizeof(value_t);
         u.f_value = value;
     }
 
-    // ordinary expr
+    // binary expr (rhs is NULL for unary ops)
     inline Expr_TAG(ExprType symb, Expr_TAG* lhs, Expr_TAG* rhs)
         : f_symb(symb)
     {
@@ -177,10 +173,7 @@ struct Expr_TAG {
         u.f_rhs = rhs;
     }
 
-}; // Expr_TAG
-
-// system-wide expr
-typedef Expr* Expr_ptr;
+}; // struct Expr_TAG
 
 typedef vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;

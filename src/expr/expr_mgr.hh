@@ -32,7 +32,7 @@
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
-    // -- makers (mostly inlined) ----------------------------------------------
+    // -- expr makers (mostly inlined) -----------------------------------------
 
     /* LTL */
     inline Expr_ptr make_F(Expr_ptr expr)
@@ -170,15 +170,15 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_uwconst(unsigned short wsize, value_t value)
+    inline Expr_ptr make_hconst(unsigned short wsize, value_t value)
     {
-        Expr tmp(UWCONST, wsize, value); // we need a temp store
+        Expr tmp(HCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_swconst(unsigned short wsize, value_t value)
+    inline Expr_ptr make_oconst(unsigned short wsize, value_t value)
     {
-        Expr tmp(SWCONST, wsize, value); // we need a temp store
+        Expr tmp(OCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -243,7 +243,7 @@ public:
         return make_expr(pooled_atom);
     }
 
-    Expr_ptr make_wconst(Atom atom);
+    // Expr_ptr make_wconst(Atom atom);
 
     inline Expr_ptr make_hex_const(Atom atom)
     { return make_iconst( strtoll(atom.c_str(), NULL, 16)); }
@@ -263,8 +263,8 @@ public:
     inline bool is_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
-            || (expr->f_symb == UWCONST)
-            || (expr->f_symb == SWCONST) ;
+            || (expr->f_symb == HCONST)
+            || (expr->f_symb == OCONST) ;
     }
 
     // singleton instance accessor
