@@ -135,15 +135,15 @@ protected:
         ExprMgr& em = f_owner.em();
 
         ExprType min_symbtype  = min->f_symb;
-        assert (ICONST == min_symbtype  ||
-                SWCONST == min_symbtype ||
-                UWCONST == min_symbtype );
+        assert (ICONST == min_symbtype ||
+                HCONST == min_symbtype ||
+                OCONST == min_symbtype );
         f_min = min->value();
 
         ExprType max_symbtype  = max->f_symb;
-        assert (ICONST == max_symbtype  ||
-                SWCONST == max_symbtype ||
-                UWCONST == max_symbtype );
+        assert (ICONST == max_symbtype ||
+                HCONST == max_symbtype ||
+                OCONST == max_symbtype );
         f_max = max->value();
 
         f_repr = em.make_range_type(em.make_iconst(f_min),
