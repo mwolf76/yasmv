@@ -94,10 +94,6 @@ typedef enum {
 
 } ExprType;
 
-// system-wide expr
-typedef struct Expr_TAG Expr;
-typedef Expr* Expr_ptr;
-
 // An Expression consists of an AST symbol, which is the expression
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
@@ -106,8 +102,8 @@ typedef Expr* Expr_ptr;
 typedef string Atom;
 typedef Atom* Atom_ptr;
 
-typedef struct Expr_TAG* Expr_ptr;
-struct Expr_TAG {
+typedef struct Expr_TAG *Expr_ptr;
+typedef struct Expr_TAG {
 
     // AST symb type
     ExprType f_symb;
@@ -164,14 +160,14 @@ struct Expr_TAG {
     }
 
     // binary expr (rhs is NULL for unary ops)
-    inline Expr_TAG(ExprType symb, Expr_TAG* lhs, Expr_TAG* rhs)
+    inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
         : f_symb(symb)
     {
         u.f_lhs = lhs;
         u.f_rhs = rhs;
     }
 
-}; // struct Expr_TAG
+} Expr;
 
 typedef vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;
@@ -187,17 +183,14 @@ public:
 
     FQExpr(const FQExpr& fqexpr);
 
-    inline const Expr_ptr& ctx() const
+    inline Expr_ptr ctx() const
     { return f_ctx; }
 
-    inline const Expr_ptr& expr() const
+    inline Expr_ptr expr() const
     { return f_expr; }
 
     inline step_t time() const
     { return f_time; }
-
-    bool operator==(const FQExpr& other) const;
-    unsigned long hash() const;
 
 private:
     // expression ctx (default is 'main')

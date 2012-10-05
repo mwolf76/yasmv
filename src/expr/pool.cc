@@ -34,6 +34,7 @@ long ExprHash::operator() (const Expr& k) const
 
     else {
         long v0, v1, x, res = (long)(k.f_symb);
+
         if (k.f_symb == ICONST
             || k.f_symb == HCONST
             || k.f_symb == OCONST) {
@@ -46,13 +47,15 @@ long ExprHash::operator() (const Expr& k) const
         }
 
         res = (res << 4) + v0;
-        if ((x = res & 0xF0000000L) != 0)
+        if ((x = res & 0xF0000000L) != 0) {
             res ^= (x >> 24);
+        }
         res &= ~x;
 
         res = (res << 4) + v1;
-        if ((x = res & 0xF0000000L) != 0)
+        if ((x = res & 0xF0000000L) != 0) {
             res ^= (x >> 24);
+        }
         res &= ~x;
 
         return res;
@@ -86,10 +89,9 @@ long AtomHash::operator() (const Atom& k) const
     for(std::size_t i = 0; i < k.length(); i++)
         {
             hash = (hash << 4) + k[i];
-            if((x = hash & 0xF0000000L) != 0)
-                {
-                    hash ^= (x >> 24);
-                }
+            if((x = hash & 0xF0000000L) != 0) {
+                hash ^= (x >> 24);
+            }
             hash &= ~x;
         }
 
@@ -101,10 +103,34 @@ bool AtomEq::operator() (const Atom& x, const Atom& y) const
     return x == y;
 }
 
-
 long FQExprHash::operator() (const FQExpr& k) const
 {
-    return 0; // TODO
+    long x, res = 0;
+    ExprHash eh;
+
+    long v0 = eh(*k.ctx());
+    long v1 = eh(*k.expr());
+    long v2 = k.time();
+
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v2;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
 }
 
 bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const

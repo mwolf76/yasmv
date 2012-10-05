@@ -26,34 +26,3 @@
 
 #include <fqexpr.hh>
 #include <expr_mgr.hh>
-
-FQExpr::FQExpr(Expr_ptr expr)
-    : f_ctx(ExprMgr::INSTANCE().make_main())
-    , f_expr(expr)
-    , f_time(0)
-{}
-
-FQExpr::FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time)
-    : f_ctx(ctx)
-    , f_expr(expr)
-    , f_time(time)
-{}
-
-FQExpr::FQExpr(const FQExpr& fqexpr)
-    : f_ctx(fqexpr.ctx())
-    , f_expr(fqexpr.expr())
-    , f_time(fqexpr.time())
-{}
-
-bool FQExpr::operator==(const FQExpr& other) const
-{
-    return
-        this->f_ctx == other.ctx() &&
-        this->f_expr == other.expr() &&
-        this->f_time == other.time();
-}
-
-unsigned long FQExpr::hash() const
-{
-    return 0; // TODO
-}
