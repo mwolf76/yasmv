@@ -82,13 +82,8 @@ protected:
     bool walk_ER_preorder(const Expr_ptr expr);
     bool walk_ER_inorder(const Expr_ptr expr);
     void walk_ER_postorder(const Expr_ptr expr);
-    bool walk_init_preorder(const Expr_ptr expr);
-    void walk_init_postorder(const Expr_ptr expr);
     bool walk_next_preorder(const Expr_ptr expr);
     void walk_next_postorder(const Expr_ptr expr);
-    bool walk_at_preorder(const Expr_ptr expr);
-    bool walk_at_inorder(const Expr_ptr expr);
-    void walk_at_postorder(const Expr_ptr expr);
     bool walk_neg_preorder(const Expr_ptr expr);
     void walk_neg_postorder(const Expr_ptr expr);
     bool walk_not_preorder(const Expr_ptr expr);
@@ -156,14 +151,6 @@ protected:
     bool walk_cond_preorder(const Expr_ptr expr);
     bool walk_cond_inorder(const Expr_ptr expr);
     void walk_cond_postorder(const Expr_ptr expr);
-    bool walk_set_preorder(const Expr_ptr expr);
-    void walk_set_postorder(const Expr_ptr expr);
-    bool walk_comma_preorder(const Expr_ptr expr);
-    bool walk_comma_inorder(const Expr_ptr expr);
-    void walk_comma_postorder(const Expr_ptr expr);
-    bool walk_bits_preorder(const Expr_ptr expr);
-    bool walk_bits_inorder(const Expr_ptr expr);
-    void walk_bits_postorder(const Expr_ptr expr);
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
@@ -176,9 +163,7 @@ private:
     ExprStack f_ctx_stack;
 
     // managers
-    ModelMgr& f_mm;
-    ExprMgr& f_em;
-    TypeMgr& f_tm;
+    ModelMgr& f_owner;
 
     // services
     inline bool cache_miss(const Expr_ptr expr)
@@ -206,8 +191,10 @@ private:
     void walk_binary_arithmetical_postorder(const Expr_ptr expr);
     void walk_unary_logical_postorder(const Expr_ptr expr);
     void walk_binary_logical_postorder(const Expr_ptr expr);
+    void walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr);
     void walk_binary_bitwise_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
+    void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
     void walk_ternary_ite_postorder(const Expr_ptr expr);
 
     // useful for errors

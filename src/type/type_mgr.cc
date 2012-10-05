@@ -38,9 +38,6 @@ TypeMgr::TypeMgr()
     register_type( FQExpr( f_em.make_boolean_type() ),
                    new BooleanType(*this));
 
-    register_type( FQExpr( f_em.make_temporal_type() ),
-                   new TemporalType(*this));
-
     register_type( FQExpr( f_em.make_integer_type() ),
                    new IntegerType(*this));
 }
@@ -52,7 +49,7 @@ const Type_ptr TypeMgr::find_unsigned(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new IntegerType(*this, bits, false); // unsigned
+    res = new FiniteIntegerType(*this, bits, false);
     register_type(descr, res);
     return res;
 }
@@ -64,15 +61,9 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new IntegerType(*this, bits, true);  // signed
+    res = new FiniteIntegerType(*this, bits, true);  // signed
     register_type(descr, res);
     return res;
-}
-
-const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet_ptr lits)
-{
-    assert(0); // TODO
-    return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ];
 }
 
 const Type_ptr TypeMgr::find_range(const Expr_ptr from, const Expr_ptr to)
@@ -87,6 +78,11 @@ const Type_ptr TypeMgr::find_range(const Expr_ptr from, const Expr_ptr to)
     return res;
 }
 
+const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet_ptr lits)
+{
+    assert(0); // TODO
+    return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ];
+}
 
 const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
 {
@@ -108,11 +104,6 @@ const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
     //   return p->second;
     // }
 
-
-bool TypeMgr::is_temporal(const Type_ptr tp) const
-{
-    return is_boolean(tp) || NULL != dynamic_cast <const TemporalType*> (tp);
-}
 
 bool TypeMgr::is_boolean(const Type_ptr tp) const
 {
@@ -140,15 +131,6 @@ bool TypeMgr::is_integer(const Type_ptr tp) const
         is_intRange(tp) ||
         is_intEnum(tp)  ||
         (NULL != dynamic_cast<const IntegerType*>(tp));
-}
-
-/* by definition a constant is a 0-bit integer */
-bool TypeMgr::is_const(const Type_ptr tp) const
-{
-    IntegerType_ptr tmp(const_cast<IntegerType*>
-                        (dynamic_cast<const IntegerType*>(tp)));
-
-    return (NULL != (tmp) && (0 == tmp->size()));
 }
 
 bool TypeMgr::is_symbEnum(const Type_ptr tp) const

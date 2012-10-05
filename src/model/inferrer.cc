@@ -39,15 +39,16 @@ Inferrer::Inferrer(ModelMgr& owner)
     : f_map()
     , f_type_stack()
     , f_ctx_stack()
-    , f_mm(owner)
-    , f_em(owner.em())
-    , f_tm(owner.tm())
+    , f_owner(owner)
 {
-    f_integer_or_boolean.push_back(f_em.make_integer_type());
-    f_integer_or_boolean.push_back(f_em.make_boolean_type());
+    ExprMgr& em = f_owner.em();
 
-    f_boolean = f_em.make_boolean_type();
-    f_integer = f_em.make_integer_type();
+    /* build predefined type sets, used in error reporting */
+    f_integer_or_boolean.push_back(em.make_integer_type());
+    f_integer_or_boolean.push_back(em.make_boolean_type());
+
+    f_boolean = em.make_boolean_type();
+    f_integer = em.make_integer_type();
 
     DEBUG << "Created Inferrer @" << this << endl;
 }
@@ -169,11 +170,6 @@ bool Inferrer::walk_ER_inorder(const Expr_ptr expr)
 void Inferrer::walk_ER_postorder(const Expr_ptr expr)
 { walk_binary_temporal_postorder(expr); }
 
-bool Inferrer::walk_init_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_init_postorder(const Expr_ptr expr)
-{ walk_unary_fsm_postorder(expr); }
-
 bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_next_postorder(const Expr_ptr expr)
@@ -236,42 +232,42 @@ bool Inferrer::walk_and_preorder(const Expr_ptr expr)
 bool Inferrer::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_and_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_or_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_xor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_xor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_xnor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_xnor_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_xnor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_implies_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_iff_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_iff_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
+{ walk_binary_logical_or_bitwise_postorder(expr); }
 
 bool Inferrer::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -292,14 +288,14 @@ bool Inferrer::walk_eq_preorder(const Expr_ptr expr)
 bool Inferrer::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_eq_postorder(const Expr_ptr expr)
-{ walk_binary_relational_postorder(expr); }
+{ walk_binary_boolean_or_relational_postorder(expr); }
 
 bool Inferrer::walk_ne_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_ne_postorder(const Expr_ptr expr)
-{ walk_binary_relational_postorder(expr); }
+{ walk_binary_boolean_or_relational_postorder(expr); }
 
 bool Inferrer::walk_gt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -343,43 +339,19 @@ bool Inferrer::walk_cond_inorder(const Expr_ptr expr)
 void Inferrer::walk_cond_postorder(const Expr_ptr expr)
 {}
 
-bool Inferrer::walk_set_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_set_postorder(const Expr_ptr expr)
-{}
-
-bool Inferrer::walk_comma_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_comma_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_comma_postorder(const Expr_ptr expr)
-{}
-
-bool Inferrer::walk_bits_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_bits_inorder(const Expr_ptr expr)
-{
-    Type_ptr tmp = f_type_stack.back();
-    Expr_ptr ctx = tmp->get_repr();
-    f_ctx_stack.push_back(ctx);
-    return true;
-}
-void Inferrer::walk_bits_postorder(const Expr_ptr expr)
-{
-    assert(0);
-}
-
 bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 {
     Type_ptr tmp = f_type_stack.back();
     Expr_ptr ctx = tmp->get_repr();
+
     f_ctx_stack.push_back(ctx);
     return true;
 }
 void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
     Type_ptr rhs_type;
 
     { // RHS, no checks necessary/possible
@@ -389,7 +361,7 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 
     { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
         const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-        assert(f_tm.is_instance(top));
+        assert(tm.is_instance(top));
     }
 
     // propagate rhs type
@@ -405,31 +377,21 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
    the most general case.  */
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
-    ExprType symb_type = expr->f_symb;
+    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em = f_owner.em();
+
     Type_ptr tp;
 
     // cache miss took care of the stack already
     if (! cache_miss(expr)) return;
 
     // a constants is a 0-bits unsigned type
-    if (symb_type == ICONST) {
-        tp = f_tm.find_unsigned(0);
+    if (em.is_numeric(expr)) {
+        tp = tm.find_integer();
     }
 
-    // TODO: kill this?
-    // else if (symb_type == UWCONST) {
-    //     tp = f_tm.find_uword(f_em.make_iconst(expr->u.f_size));
-    // }
-
-    // TODO: kill this too?
-    // else if (symb_type == SWCONST) {
-    //     tp = f_tm.find_sword(f_em.make_iconst(expr->u.f_size));
-    // }
-
-    else if (symb_type == IDENT) {
-        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
-
-        assert(symb);
+    else if (em.is_identifier(expr)) {
+        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr); assert(symb);
         tp = symb->type(); // define types are already inferred
     }
 
@@ -442,7 +404,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 // one step of resolution returns a const or variable
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    Model& model = static_cast <Model&> (*f_mm.model());
+    Model& model = static_cast <Model&> (*f_owner.model());
     ISymbol_ptr symb = model.fetch_symbol(ctx, frag);
 
     // is this a constant or variable?
@@ -467,64 +429,48 @@ ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 // fun: temporal -> temporal
 void Inferrer::walk_unary_temporal_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
-    if (!f_tm.is_boolean(top) &&
-        !f_tm.is_temporal(top)) {
-
-        throw BadType(top->get_repr(),
-                      f_em.make_boolean_type(), expr);
+    if (!tm.is_boolean(top)) {
+        throw BadType(top->get_repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(f_tm.find_temporal());
+    f_type_stack.push_back(tm.find_boolean());
 }
 
 // fun: temporal x temporal -> temporal
 void Inferrer::walk_binary_temporal_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     { // RHS
         const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-        if (!f_tm.is_boolean(top))
+        if (!tm.is_boolean(top))
             throw BadType(top->get_repr(), f_boolean, expr);
     }
 
     { // LHS
         const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-        if (!f_tm.is_boolean(top))
+        if (!tm.is_boolean(top))
             throw BadType(top->get_repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(f_tm.find_temporal());
+    f_type_stack.push_back(tm.find_boolean());
 }
 
 // fun: T -> T
 void Inferrer::walk_unary_fsm_postorder(const Expr_ptr expr)
-{
-    const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    f_type_stack.push_back(top); // propagate
-}
-
-// fun: int x boolean -> boolean
-// void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
-// {
-//     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-//     if (!f_tm.is_boolean(rhs)) {
-//         throw BadType(rhs->get_repr(), f_em.make_boolean_type(), expr);
-//     }
-
-//     f_type_stack.push_back(rhs); // propagate
-
-//     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-//     if (!f_tm.is_integer(lhs)) {
-//         throw BadType(lhs->get_repr(), f_em.make_unsigned_type(0), expr); // must be a const
-//     }
-// }
+{ /* no checks */ }
 
 // fun: arithm -> arithm
 void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(top)) {
+    if (!tm.is_integer(top)) {
         throw BadType(top->get_repr(), f_integer, expr);
     }
 
@@ -534,8 +480,10 @@ void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 // fun: logical -> logical
 void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(top)) {
+    if (!tm.is_boolean(top)) {
         throw BadType(top->get_repr(), f_boolean, expr);
     }
 
@@ -545,62 +493,78 @@ void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
 // fun: arithm, arithm -> arithm
 void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(rhs)) {
+    if (!tm.is_integer(rhs)) {
         throw BadType(rhs->get_repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(lhs)) {
+    if (!tm.is_integer(lhs)) {
         throw BadType(lhs->get_repr(), f_integer, expr);
     }
 
-    // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
-        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
-    }
-
     // generic integer
-    f_type_stack.push_back(f_tm.find_integer());
+    f_type_stack.push_back(tm.find_integer());
 }
 
 // fun: logical x logical -> logical
 void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(rhs)) {
+    if (!tm.is_boolean(rhs)) {
         throw BadType(rhs->get_repr(), f_boolean, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(lhs)) {
+    if (!tm.is_boolean(lhs)) {
         throw BadType(lhs->get_repr(), f_boolean, expr);
-    }
-
-    // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
-        throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
     }
 
     f_type_stack.push_back(lhs);
 }
 
-// fun: bitwise x bitwise -> bitwise
+void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_boolean(rhs)) {
+        throw BadType(rhs->get_repr(), f_boolean, expr);
+    }
+
+    const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_boolean(lhs)) {
+        throw BadType(lhs->get_repr(), f_boolean, expr);
+    }
+
+    f_type_stack.push_back(lhs);
+}
+
+
+// fun: (A/L) x (A/L) -> A/L
 void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(rhs)) {
+    if (!tm.is_integer(rhs) &&
+        !tm.is_boolean(rhs)) {
         throw BadType(rhs->get_repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_integer(lhs)) {
+    if (!tm.is_integer(lhs) &&
+        !tm.is_boolean(lhs)) {
         throw BadType(lhs->get_repr(), f_integer, expr);
     }
 
-    // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
-        throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
+    // types have to match
+    if (lhs != rhs) {
+        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
     }
 
     f_type_stack.push_back(lhs);
@@ -609,50 +573,64 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 // fun: arithmetical x arithmetical -> boolean
 void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(rhs) &&
-        !f_tm.is_integer(rhs)) {
+    if (!tm.is_integer(rhs)) {
+        throw BadType(rhs->get_repr(), f_integer, expr);
+    }
+
+    const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_integer(lhs)) {
+        throw BadType(lhs->get_repr(), f_integer, expr);
+    }
+
+    f_type_stack.push_back(tm.find_boolean());
+}
+
+// fun: A/B x A/B -> B
+void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_boolean(rhs) &&
+        !tm.is_integer(rhs)) {
         throw BadType(rhs->get_repr(), f_integer_or_boolean, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(lhs) &&
-        !f_tm.is_integer(lhs)) {
+    if (!tm.is_boolean(lhs) &&
+        !tm.is_integer(lhs)) {
         throw BadType(lhs->get_repr(), f_integer_or_boolean, expr);
     }
 
-    // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
-        throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
+    // types have to match
+    if (lhs != rhs) {
+        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
     }
 
-    f_type_stack.push_back(f_tm.find_boolean());
+    f_type_stack.push_back(tm.find_boolean());
 }
+
 
 // fun: boolean x T x T -> T
 void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(rhs) &&
-        !f_tm.is_integer(rhs)) {
-        throw BadType(rhs->get_repr(), f_integer_or_boolean, expr);
-    }
-
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(lhs) &&
-        !f_tm.is_integer(lhs)) {
-        throw BadType(lhs->get_repr(), f_integer_or_boolean, expr);
-    }
-
-    // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
-        throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
-    }
 
     // condition is always boolean
     const Type_ptr cond = f_type_stack.back(); f_type_stack.pop_back();
-    if (!f_tm.is_boolean(cond)) {
+    if (!tm.is_boolean(cond)) {
         throw BadType(cond->get_repr(), f_boolean, expr);
+    }
+
+    // types have to match
+    if (lhs != rhs) {
+        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
     }
 
     f_type_stack.push_back(lhs);

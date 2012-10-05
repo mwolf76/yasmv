@@ -41,7 +41,22 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
     those determined by the inferrer);
 
     2. It instantiates (and owns) type descriptors (Type objects);
-*/
+
+    NOTE: there at distinct concepts of type that should not be mixed
+    together: Here we talk about the type of an expression from a
+    static analysis PoV. An expression can be boolean, integer, a
+    particular enum (TODO: prohibit intersection) or an instance of a
+    certain module. And that's final.
+
+    When it comes to encoding though, a variable can be either signed
+    or unsigned, with a given number of bits. But this, *by design* is
+    completely ignored by the type inferrer.
+
+    Moreover, a wff temporal formula is considered boolean w.r.t. type
+    inference, it will be responsibility of the formula-analyzer to
+    determine whether its a CTL/LTL/INVAR, and in different section of
+    the system different actions can be taken according to this.
+  */
 typedef class TypeMgr* TypeMgr_ptr;
 class TypeMgr {
 public:
@@ -63,25 +78,22 @@ public:
     inline void set_type(const FQExpr fqexpr, const Type_ptr tp)
     { f_map[ fqexpr ] = tp; }
 
-    /* -- builtins ---------------------------------------------------------- */
+    /* -- inference --------------------------------------------------------- */
     inline const Type_ptr find_boolean()
     { return f_register[ FQExpr(f_em.make_boolean_type()) ]; }
-
-    inline const Type_ptr find_temporal() // (e.g. LTL or CTL)
-    { return f_register[ FQExpr(f_em.make_temporal_type()) ]; }
 
     inline const Type_ptr find_integer() // abstract
     { return f_register[ FQExpr(f_em.make_integer_type()) ]; }
 
-    /* -- dynamic ------------------------------------------------------------ */
-    const Type_ptr find_unsigned(unsigned bits = DEFAULT_BITS);
-    const Type_ptr find_signed(unsigned bits = DEFAULT_BITS);
-    const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits);
+    /* -- decls ------------------------------------------------------------- */
+    const Type_ptr find_unsigned(unsigned bits);
+    const Type_ptr find_signed(unsigned bits);
     const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to);
+
+    const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits);
     const Type_ptr find_instance(Expr_ptr identifier);
 
     // -- is_xxx predicates ----------------------------------------------------
-    bool is_temporal(const Type_ptr tp) const;
     bool is_boolean(const Type_ptr tp) const;
 
     bool is_intRange(const Type_ptr tp) const;

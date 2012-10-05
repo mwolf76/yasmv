@@ -901,17 +901,10 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
     // integer types (unsigned and signed)
-    | 'unsigned' (
-            '(' k=int_constant ')'
-            { $res = tm.find_unsigned(k->value()); }
-            |
-            { $res = tm.find_unsigned(); }
-    )
-	| 'signed' ( '(' k=int_constant ')'
-            { $res = tm.find_signed(k->value()); }
-            |
-            { $res = tm.find_signed(); }
-    )
+    | 'unsigned' '(' k=int_constant ')'
+      { $res = tm.find_unsigned(k->value()); }
+	| 'signed' '(' k=int_constant ')'
+      { $res = tm.find_signed(k->value()); }
 
     // enumeratives
 	| literals=enum_type

@@ -66,34 +66,28 @@ protected:
     BooleanType(TypeMgr& owner);
 };
 
-typedef class Temporalype* TemporalType_ptr;
-class TemporalType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    TemporalType(TypeMgr& owner);
-};
-
 typedef class IntegerType* IntegerType_ptr;
 class IntegerType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    IntegerType(TypeMgr& owner); // abstract
-    IntegerType(TypeMgr& owner, unsigned size, bool is_signed=false);
+    IntegerType(TypeMgr& owner);
+};
+
+typedef class FiniteIntegerType* FiniteIntegerType_ptr;
+class FiniteIntegerType : public IntegerType {
+protected:
+    friend class TypeMgr; // ctors not public
+    FiniteIntegerType(TypeMgr& owner, unsigned width, bool is_signed);
+
+    unsigned f_width;
+    bool f_signed;
 
 public:
-    inline unsigned size() const
-    { return f_size; }
+    inline unsigned width() const
+    { return f_width; }
 
     inline bool is_signed() const
     { return f_signed; }
-
-    // inline bool is_abstract() const
-    // { return f_abstract; }
-
-private:
-    unsigned f_size;
-    bool f_signed;
-    // bool f_abstract;
 };
 
 typedef class IntRangeType* IntRangeType_ptr;

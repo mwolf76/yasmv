@@ -32,43 +32,26 @@ BooleanType::BooleanType(TypeMgr& owner)
     f_repr = f_owner.em().make_boolean_type();
 }
 
-TemporalType::TemporalType(TypeMgr& owner)
-    : Type(owner)
-{
-    f_repr = f_owner.em().make_temporal_type();
-}
-
 IntegerType::IntegerType(TypeMgr& owner) // abstract
     : Type(owner)
-    // , f_abstract(true)
+{
+    f_repr = f_owner.em().make_integer_type();
+}
+
+
+FiniteIntegerType::FiniteIntegerType(TypeMgr& owner, unsigned width, bool is_signed)
+    : IntegerType(owner)
+    , f_width(width)
+    , f_signed(is_signed)
 {
     f_repr = f_signed
-        ? f_owner.em().make_signed_type(f_size)
-        : f_owner.em().make_unsigned_type(f_size)
+        ? f_owner.em().make_signed_type(width)
+        : f_owner.em().make_unsigned_type(width)
         ;
 }
 
-IntegerType::IntegerType(TypeMgr& owner, unsigned size, bool is_signed)
-    : Type(owner)
-    , f_size(size)
-    , f_signed(is_signed)
-{
-    if (0 == f_size) {
-        // special case for consts
-        f_repr = f_owner.em().make_integer_type();
-    }
-    else {
-        assert(0 < f_size);
-        f_repr = f_signed
-            ? f_owner.em().make_signed_type(f_size)
-            : f_owner.em().make_unsigned_type(f_size)
-            ;
-    }
-}
-
-
 IntRangeType::IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr max)
-    : Type(owner)
+    : Type(owner) // IntegerType?
 {
     ExprMgr& em = f_owner.em();
 
