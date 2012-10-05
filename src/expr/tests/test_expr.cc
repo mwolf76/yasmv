@@ -1,5 +1,5 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test
+#define BOOST_TEST_MODULE test_expr
 #include <boost/test/unit_test.hpp>
 
 #include <expr.hh>
