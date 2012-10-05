@@ -241,8 +241,6 @@ public:
         return make_expr(pooled_atom);
     }
 
-    // Expr_ptr make_wconst(Atom atom);
-
     inline Expr_ptr make_dec_const(Atom atom)
     { return make_iconst( strtoll(atom.c_str(), NULL, 10)); }
 
