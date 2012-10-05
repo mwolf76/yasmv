@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE(printer)
         printer << x_params_y; BOOST_CHECK (oss.str() == string("x(y)"));
     }
 
-    // LTL makers
+    // LTL
     {
         Expr_ptr Fx = em.make_F(x);
         ostringstream oss;
@@ -402,6 +402,78 @@ BOOST_AUTO_TEST_CASE(printer)
         ostringstream oss;
         Printer printer(oss);
         printer << xRy; BOOST_CHECK (oss.str() == string("(x R y)"));
+    }
+
+    // CTL A
+    {
+        Expr_ptr AFx = em.make_AF(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << AFx; BOOST_CHECK (oss.str() == string("AF (x)"));
+    }
+
+    {
+        Expr_ptr AGx = em.make_AG(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << AGx; BOOST_CHECK (oss.str() == string("AG (x)"));
+    }
+
+    {
+        Expr_ptr AXx = em.make_AX(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << AXx; BOOST_CHECK (oss.str() == string("AX (x)"));
+    }
+
+    {
+        Expr_ptr xAUy = em.make_AU(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xAUy; BOOST_CHECK (oss.str() == string("(x AU y)"));
+    }
+
+    {
+        Expr_ptr xARy = em.make_AR(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xARy; BOOST_CHECK (oss.str() == string("(x AR y)"));
+    }
+
+    // CTL E
+    {
+        Expr_ptr EFx = em.make_EF(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << EFx; BOOST_CHECK (oss.str() == string("EF (x)"));
+    }
+
+    {
+        Expr_ptr EGx = em.make_EG(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << EGx; BOOST_CHECK (oss.str() == string("EG (x)"));
+    }
+
+    {
+        Expr_ptr EXx = em.make_EX(x);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << EXx; BOOST_CHECK (oss.str() == string("EX (x)"));
+    }
+
+    {
+        Expr_ptr xEUy = em.make_EU(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xEUy; BOOST_CHECK (oss.str() == string("(x EU y)"));
+    }
+
+    {
+        Expr_ptr xERy = em.make_ER(x, y);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << xERy; BOOST_CHECK (oss.str() == string("(x ER y)"));
     }
 
 

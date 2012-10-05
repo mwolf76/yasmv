@@ -203,7 +203,7 @@ void TemporalWalker::walk()
             entry_AU_1:
                 if (walk_AU_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = AU_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_AU_2:
@@ -221,7 +221,7 @@ void TemporalWalker::walk()
             entry_AR_1:
                 if (walk_AR_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = AR_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_AR_2:
@@ -273,7 +273,7 @@ void TemporalWalker::walk()
             entry_EU_1:
                 if (walk_EU_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = EU_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_EU_2:
@@ -291,7 +291,7 @@ void TemporalWalker::walk()
             entry_ER_1:
                 if (walk_ER_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = ER_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
 
                 entry_ER_2:
