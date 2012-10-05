@@ -544,7 +544,11 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
             else {
                 // ... otherwise create and cache it
                 enc = f_enc.make_encoding(symb->as_variable().type());
-                register_encoding(key, enc);
+                register_encoding(key, enc); // TODO: move the
+                                             // encoding register to a
+                                             // dedicated
+                                             // object. (maybe the
+                                             // enc_mgr itself?)
             }
 
             assert (NULL != enc);
