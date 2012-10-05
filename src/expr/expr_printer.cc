@@ -364,20 +364,18 @@ void Printer::walk_range_postorder(const Expr_ptr expr)
 //     return oss.str();
 // }
 
+#include <iomanip>
+using std::hex;
+using std::dec;
+using std::oct;
+
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-    ExprType symb = expr->f_symb;
-
-    if (ICONST == symb) {
-        f_os << expr->u.f_value;
+    switch (expr->f_symb) {
+    case ICONST: f_os << dec << expr->value(); break;
+    case HCONST: f_os << hex << "0x" << expr->value(); break;
+    case OCONST: f_os << oct << "0"  << expr->value(); break;
+    case IDENT:  f_os << expr->atom(); break;
+    default: assert(0);
     }
-    // else if (UWCONST == symb ||
-    //          SWCONST == symb) {
-    //     f_os << word_repr(expr, DECIMAL); // TODO: make this default configurable
-    // }
-    else if (IDENT == symb) {
-        Atom_ptr atom = expr->u.f_atom;
-        f_os << *atom;
-    }
-    else assert(0);
 }

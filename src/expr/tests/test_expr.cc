@@ -332,6 +332,27 @@ BOOST_AUTO_TEST_CASE(printer)
         Printer printer(oss);
         printer << x_ite_y; BOOST_CHECK (oss.str() == string("(x : y)"));
     }
+
+    {
+        Expr_ptr iconst_42 = em.make_iconst(42);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << iconst_42; BOOST_CHECK (oss.str() == string("42"));
+    }
+
+    {
+        Expr_ptr hconst_42 = em.make_hconst(0x2a);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << hconst_42; BOOST_CHECK (oss.str() == string("0x2a"));
+    }
+
+    {
+        Expr_ptr oconst_42 = em.make_oconst(052);
+        ostringstream oss;
+        Printer printer(oss);
+        printer << oconst_42; BOOST_CHECK (oss.str() == string("052"));
+    }
 }
 
 BOOST_AUTO_TEST_CASE(consts_printer)
