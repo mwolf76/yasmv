@@ -41,6 +41,30 @@ IEncoding_ptr EncodingMgr::find_encoding(ADD add)
     // assert(0);
 }
 
+IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
+{
+    assert(NULL != tp);
+    IEncoding_ptr res = NULL;
+    IntegerType_ptr itype;
+    IntRangeType_ptr rtype;
+
+    if (NULL != dynamic_cast<BooleanType_ptr>(tp)) {
+        res = new BooleanEncoding();
+    }
+    else if (NULL != (itype = dynamic_cast<IntegerType_ptr>(tp))) {
+        res = new IntEncoding(itype->size(), itype->is_signed());
+    }
+    else if (NULL != (rtype = dynamic_cast<IntRangeType_ptr>(tp))) {
+        res = new RangeEncoding(rtype->min(), rtype->max());
+    }
+    // tODO: more here...
+
+    else assert(0); /* unexpected or unsupported */
+
+    assert (NULL != res);
+    return res;
+}
+
 EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd())
 {

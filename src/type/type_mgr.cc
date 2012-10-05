@@ -41,7 +41,6 @@ TypeMgr::TypeMgr()
     register_type( FQExpr( f_em.make_temporal_type() ),
                    new TemporalType(*this));
 
-    // abstract integer type
     register_type( FQExpr( f_em.make_integer_type() ),
                    new IntegerType(*this));
 }
@@ -143,7 +142,8 @@ bool TypeMgr::is_integer(const Type_ptr tp) const
         (NULL != dynamic_cast<const IntegerType*>(tp));
 }
 
-bool TypeMgr::is_iconst(const Type_ptr tp) const
+/* by definition a constant is a 0-bit integer */
+bool TypeMgr::is_const(const Type_ptr tp) const
 {
     IntegerType_ptr tmp(const_cast<IntegerType*>
                         (dynamic_cast<const IntegerType*>(tp)));

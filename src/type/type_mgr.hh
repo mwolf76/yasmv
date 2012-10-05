@@ -27,13 +27,11 @@
 #ifndef TYPE_MGR_H
 #define TYPE_MGR_H
 
-#include <fqexpr.hh>
+#include <expr.hh>
 #include <expr_mgr.hh>
 
 typedef class Type* Type_ptr; // fwd
-typedef class TypeMgr* TypeMgr_ptr;
-
-typedef unordered_map<FQExpr, Type_ptr, fqexpr_hash, fqexpr_eq> TypeMap;
+typedef unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
 
 /**
@@ -44,6 +42,7 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
 
     2. It instantiates (and owns) type descriptors (Type objects);
 */
+typedef class TypeMgr* TypeMgr_ptr;
 class TypeMgr {
 public:
 
@@ -84,13 +83,16 @@ public:
     // -- is_xxx predicates ----------------------------------------------------
     bool is_temporal(const Type_ptr tp) const;
     bool is_boolean(const Type_ptr tp) const;
+
     bool is_intRange(const Type_ptr tp) const;
     bool is_intEnum(const Type_ptr tp) const;
     bool is_integer(const Type_ptr tp) const;
-    bool is_iconst(const Type_ptr tp) const;
+
+    bool is_const(const Type_ptr tp) const;
+
     bool is_symbEnum(const Type_ptr tp) const;
     bool is_mixed_enum(const Type_ptr tp) const;
-    bool is_word(const Type_ptr tp) const;
+
     bool is_instance(const Type_ptr tp) const;
 
     // singleton instance accessor

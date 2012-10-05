@@ -51,7 +51,7 @@ struct ADDEq {
     { return phi == psi; }
 };
 
-typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> FQExpr2EncMap;
+typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
 typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
 
 typedef vector<ADD> EncodingBits;

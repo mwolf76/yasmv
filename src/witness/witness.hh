@@ -38,7 +38,7 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
-// typedef unordered_map<FQExpr, , fqexpr_hash, fqexpr_eq> TypeMap;
+// typedef unordered_map<FQExpr, , FQExprHash, FQExprEq> TypeMap;
 
 // class Value : public IObject {
 // public:

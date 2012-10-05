@@ -274,22 +274,22 @@ void ModelMgr::analyze()
                 DEBUG << "processing var " << varname << ": " << vartype << endl;
 
                 // eager binding for module instances
-                // TODO: review this
-                // if (f_tm.is_instance(vartype)) {
-                //     Instance& instance = dynamic_cast <Instance&> (*vartype);
+                if (f_tm.is_instance(vartype)) {
+                    assert(0); // FIXME!
+                    // Instance& instance = dynamic_cast <Instance&> (*vartype);
 
-                //     const Expr_ptr module_name = instance.get_module_name();
-                //     IModule& resolved = model.get_module(module_name);
+                    // const Expr_ptr module_name = instance.get_module_name();
+                    // IModule& resolved = model.get_module(module_name);
 
-                //     // match number of params
-                //     int inst_params_num = instance.get_params().size();
-                //     int modl_params_num = resolved.get_formalParams().size();
-                //     if ( inst_params_num != modl_params_num ) {
-                //         throw BadParams(module_name,
-                //                         modl_params_num,
-                //                         inst_params_num);
-                //     }
-                // }
+                    // // match number of params
+                    // int inst_params_num = instance.get_params().size();
+                    // int modl_params_num = resolved.get_formalParams().size();
+                    // if ( inst_params_num != modl_params_num ) {
+                    //     throw BadParams(module_name,
+                    //                     modl_params_num,
+                    //                     inst_params_num);
+                    // }
+                }
                 f_tm.set_type( FQExpr(ctx, varname), vartype);
             }
         }

@@ -30,16 +30,14 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <fqexpr.hh>
 #include <expr_mgr.hh>
+
 #include <type_mgr.hh>
 
-/* -- Supported data types: boolean, ranged integers, finite-width
-   integers, pure-int enums, symbolic enums, mixed enums,
-   instances.
-*/
+/* Supported data types: boolean, ranged integers, finite-width
+   integers, pure-int enums, symbolic enums, mixed enums, instances. */
 
-// Reminder: types are *immutable* by design!
+// NOTE: types are *immutable* by design!
 
 /* Basic Type class. Is.. nothing. */
 typedef class Type* Type_ptr;
@@ -65,49 +63,22 @@ typedef class BooleanType* BooleanType_ptr;
 class BooleanType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    BooleanType(TypeMgr& owner)
-        : Type(owner)
-
-    {
-        f_repr = f_owner.em().make_boolean_type();
-    }
+    BooleanType(TypeMgr& owner);
 };
 
 typedef class Temporalype* TemporalType_ptr;
 class TemporalType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    TemporalType(TypeMgr& owner)
-        : Type(owner)
-    {
-        f_repr = f_owner.em().make_temporal_type();
-    }
+    TemporalType(TypeMgr& owner);
 };
 
 typedef class IntegerType* IntegerType_ptr;
 class IntegerType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    IntegerType(TypeMgr& owner) // abstract
-        : Type(owner)
-        , f_abstract(true)
-    {
-        f_repr = f_signed
-            ? f_owner.em().make_signed_type(f_size)
-            : f_owner.em().make_unsigned_type(f_size)
-            ;
-    }
-
-    IntegerType(TypeMgr& owner, unsigned size, bool is_signed=false)
-        : Type(owner)
-        , f_size(size)
-        , f_signed(is_signed)
-    {
-        f_repr = f_signed
-            ? f_owner.em().make_signed_type(f_size)
-            : f_owner.em().make_unsigned_type(f_size)
-            ;
-    }
+    IntegerType(TypeMgr& owner); // abstract
+    IntegerType(TypeMgr& owner, unsigned size, bool is_signed=false);
 
 public:
     inline unsigned size() const
@@ -116,39 +87,20 @@ public:
     inline bool is_signed() const
     { return f_signed; }
 
-    inline bool is_abstract() const
-    { return f_abstract; }
+    // inline bool is_abstract() const
+    // { return f_abstract; }
 
 private:
     unsigned f_size;
     bool f_signed;
-    bool f_abstract;
+    // bool f_abstract;
 };
 
 typedef class IntRangeType* IntRangeType_ptr;
 class IntRangeType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr max)
-        : Type(owner)
-    {
-        ExprMgr& em = f_owner.em();
-
-        ExprType min_symbtype  = min->f_symb;
-        assert (ICONST == min_symbtype ||
-                HCONST == min_symbtype ||
-                OCONST == min_symbtype );
-        f_min = min->value();
-
-        ExprType max_symbtype  = max->f_symb;
-        assert (ICONST == max_symbtype ||
-                HCONST == max_symbtype ||
-                OCONST == max_symbtype );
-        f_max = max->value();
-
-        f_repr = em.make_range_type(em.make_iconst(f_min),
-                                    em.make_iconst(f_max));
-    }
+    IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr max);
 
 public:
     inline const value_t min() const
@@ -169,13 +121,7 @@ typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    EnumType(TypeMgr& owner, ExprSet literals)
-        : Type(owner)
-        , f_literals(literals)
-    {
-        // TODO: kill cast
-        f_repr = f_owner.em().make_enum_type(const_cast<ExprSet_ptr> (&f_literals));
-    }
+    EnumType(TypeMgr& owner, ExprSet literals);
 
 public:
     const ExprSet& literals() const
@@ -192,33 +138,18 @@ typedef class Instance* Instance_ptr;
 class Instance : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    Instance(TypeMgr& owner, Expr* identifier)
-        : Type(owner)
-        , f_identifier(identifier)
-          // , f_module(NULL) // flawed design, types are immutable.
-          // , f_params()
-    {}
+    Instance(TypeMgr& owner, Expr* identifier, ExprVector& params);
 
 public:
-    // const ExprVector& params() const
-    // { return f_params; }
+    const ExprVector& params() const
+    { return f_params; }
 
     const Expr_ptr identifier() const
     { return f_identifier; }
 
-    // void add_param(const Expr_ptr expr)
-    // { f_params.push_back(expr); }
-
-    // const IModule_ptr get_module() const
-    // { assert(f_module); return f_module; }
-
-    // void set_module(IModule_ptr module)
-    // { assert(!f_module); assert(module); f_module = module; }
-
 private:
     const Expr_ptr f_identifier;
-    // IModule_ptr f_module;
-    // ExprVector f_params;
+    ExprVector f_params;
 };
 
 #endif

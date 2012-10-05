@@ -28,14 +28,34 @@
 #define MODEL_H
 
 #include <common.hh>
-#include <datatypes.hh>
 
 #include <expr.hh>
-#include <fqexpr.hh>
 #include <expr_mgr.hh>
+
 #include <type.hh>
 
-#include <cuddObj.hh>
+typedef vector<FQExpr> FQExprVector;
+
+class ISymbol;
+typedef ISymbol* ISymbol_ptr;
+typedef unordered_map<FQExpr, ISymbol_ptr, FQExprHash, FQExprEq> Symbols;
+
+class IConstant;
+typedef IConstant* IConstant_ptr;
+typedef unordered_map<FQExpr, IConstant_ptr, FQExprHash, FQExprEq> Constants;
+
+class IVariable;
+typedef IVariable* IVariable_ptr;
+typedef unordered_map<FQExpr, IVariable_ptr, FQExprHash, FQExprEq> Variables;
+
+class IDefine;
+typedef IDefine* IDefine_ptr;
+typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Defines;
+typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Assigns;
+
+class IModule;
+typedef IModule* IModule_ptr;
+typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
 
 // -- primary decls  --------------------------------------------------------------
 class ISymbol : IObject {

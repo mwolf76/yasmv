@@ -35,10 +35,10 @@ typedef vector<ADD> ADDStack;
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t> TimeStack;
 
-typedef unordered_map<FQExpr, ADD, fqexpr_hash, fqexpr_eq> ADDMap;
+typedef unordered_map<FQExpr, ADD, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
 
-typedef unordered_map<FQExpr, IEncoding_ptr, fqexpr_hash, fqexpr_eq> ENCMap;
+typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
 class BECompiler : public SimpleWalker {

@@ -556,7 +556,7 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
     }
 
     // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_iconst(lhs) && !f_tm.is_iconst(rhs)) {
+    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
         throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
     }
 
@@ -578,7 +578,7 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
     }
 
     // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_iconst(lhs) && !f_tm.is_iconst(rhs)) {
+    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
         throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
     }
 
@@ -599,7 +599,7 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
     }
 
     // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_iconst(lhs) && !f_tm.is_iconst(rhs)) {
+    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
         throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
     }
 
@@ -622,7 +622,7 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
     }
 
     // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_iconst(lhs) && !f_tm.is_iconst(rhs)) {
+    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
         throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
     }
 
@@ -645,7 +645,7 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     }
 
     // type matching is mandatory here
-    if ((lhs != rhs) && !f_tm.is_iconst(lhs) && !f_tm.is_iconst(rhs)) {
+    if ((lhs != rhs) && !f_tm.is_const(lhs) && !f_tm.is_const(rhs)) {
         throw BadType(rhs->get_repr(), rhs->get_repr(), expr);
     }
 

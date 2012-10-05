@@ -45,7 +45,7 @@ enum ExprKind {
     EXPR_ERROR,
 };
 
-typedef unordered_map<FQExpr, ExprKind, fqexpr_hash, fqexpr_eq> KindMap;
+typedef unordered_map<FQExpr, ExprKind, FQExprHash, FQExprEq> KindMap;
 typedef pair<KindMap::iterator, bool> KindHit;
 typedef vector<ExprKind> ExprKinds; // used only in exception
 
