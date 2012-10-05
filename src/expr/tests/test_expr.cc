@@ -476,6 +476,29 @@ BOOST_AUTO_TEST_CASE(printer)
         printer << xERy; BOOST_CHECK (oss.str() == string("(x ER y)"));
     }
 
+    {
+        Expr_ptr main_ = em.make_main();
+        ostringstream oss;
+        Printer printer(oss);
+        printer << main_; BOOST_CHECK (oss.str() == string("main"));
+    }
+
+
+    {
+        Expr_ptr false_ = em.make_false();
+        ostringstream oss;
+        Printer printer(oss);
+        printer << false_; BOOST_CHECK (oss.str() == string("FALSE"));
+    }
+
+
+    {
+        Expr_ptr true_ = em.make_true();
+        ostringstream oss;
+        Printer printer(oss);
+        printer << true_; BOOST_CHECK (oss.str() == string("TRUE"));
+    }
+
 
 }
 
