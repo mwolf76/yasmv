@@ -817,15 +817,15 @@ constant returns [Expr_ptr res]
     |   k=range_constant // holds int_constants as well
         { $res = k; }
 
-    |   k=word_constant
-        { $res = k; }
+    // |   k=word_constant
+    //     { $res = k; }
     ;
 
-word_constant returns [Expr_ptr res]
-@init { }
-    : WORD_CONSTANT
-      { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
-    ;
+// word_constant returns [Expr_ptr res]
+// @init { }
+//     : WORD_CONSTANT
+//       { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
+//     ;
 
 int_constant returns [Expr_ptr res]
 @init { }
