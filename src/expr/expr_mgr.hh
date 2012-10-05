@@ -86,12 +86,6 @@ public:
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
-    // inline Expr_ptr make_signed(Expr_ptr expr)
-    // { return make_expr(SIGNED, expr, NULL); }
-
-    // inline Expr_ptr make_unsigned(Expr_ptr expr)
-    // { return make_expr(UNSIGNED, expr, NULL); }
-
     /* arithmetical operators */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
