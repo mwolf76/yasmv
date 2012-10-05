@@ -140,7 +140,7 @@ void SimpleWalker::walk ()
 
         // unary arithmetic/logical
         case NEG:
-            if (walk_next_preorder(curr.expr)) {
+            if (walk_neg_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = NEG_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;

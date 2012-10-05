@@ -86,11 +86,11 @@ public:
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
-    inline Expr_ptr make_signed(Expr_ptr expr)
-    { return make_expr(SIGNED, expr, NULL); }
+    // inline Expr_ptr make_signed(Expr_ptr expr)
+    // { return make_expr(SIGNED, expr, NULL); }
 
-    inline Expr_ptr make_unsigned(Expr_ptr expr)
-    { return make_expr(UNSIGNED, expr, NULL); }
+    // inline Expr_ptr make_unsigned(Expr_ptr expr)
+    // { return make_expr(UNSIGNED, expr, NULL); }
 
     /* arithmetical operators */
     inline Expr_ptr make_neg(Expr_ptr expr)
@@ -170,13 +170,13 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_hconst(unsigned short wsize, value_t value)
+    inline Expr_ptr make_hconst(value_t value)
     {
         Expr tmp(HCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_oconst(unsigned short wsize, value_t value)
+    inline Expr_ptr make_oconst(value_t value)
     {
         Expr tmp(OCONST, value); // we need a temp store
         return __make_expr(&tmp);
@@ -184,6 +184,9 @@ public:
 
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return make_expr(DOT, a, b); }
+
+    inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
+    { return make_expr(PARAMS, a, b); }
 
     /* type makers */
     inline Expr_ptr make_temporal_type() const
@@ -197,10 +200,11 @@ public:
     { return integer_expr; }
 
     inline Expr_ptr make_range_type(Expr_ptr a, Expr_ptr b)
-    { return make_expr(RANGE, a, b);  }
-
-    inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
-    { return make_expr(PARAMS, a, b); }
+    {
+        assert(is_numeric(a));
+        assert(is_numeric(b));
+        return make_expr(RANGE, a, b);
+    }
 
     inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
     { return make_params(unsigned_expr, make_iconst((value_t) bits)); }
@@ -210,7 +214,7 @@ public:
 
     Expr_ptr make_enum_type(ExprSet_ptr literals);
 
-    /* builtins */
+    /* builtin identifiers */
     inline Expr_ptr make_main() const
     { return main_expr; }
 
@@ -245,14 +249,14 @@ public:
 
     // Expr_ptr make_wconst(Atom atom);
 
-    inline Expr_ptr make_hex_const(Atom atom)
-    { return make_iconst( strtoll(atom.c_str(), NULL, 16)); }
-
     inline Expr_ptr make_dec_const(Atom atom)
     { return make_iconst( strtoll(atom.c_str(), NULL, 10)); }
 
+    inline Expr_ptr make_hex_const(Atom atom)
+    { return make_hconst( strtoll(atom.c_str(), NULL, 16)); }
+
     inline Expr_ptr make_oct_const(Atom atom)
-    { return make_iconst( strtoll(atom.c_str(), NULL, 8)); }
+    { return make_oconst( strtoll(atom.c_str(), NULL, 8)); }
 
     // -- is-a predicates -------------------------------------------------------
     inline bool is_identifier(const Expr_ptr expr) const {
