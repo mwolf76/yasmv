@@ -42,9 +42,6 @@ ExprMgr::ExprMgr()
 
     integer_expr = make_identifier(INTEGER_TOKEN); // abstract
 
-    // temporal type identifier
-    temporal_expr = make_identifier(TEMPORAL_TOKEN);
-
     // main module identifier
     main_expr = make_identifier(MAIN_TOKEN);
 

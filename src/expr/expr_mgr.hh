@@ -183,13 +183,9 @@ public:
     { return make_expr(PARAMS, a, b); }
 
     /* type makers */
-    inline Expr_ptr make_temporal_type() const
-    { return temporal_expr; }
-
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
-    // abstract integer type (reserved for inferrer)
     inline Expr_ptr make_integer_type() const
     { return integer_expr; }
 
