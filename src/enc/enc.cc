@@ -64,6 +64,36 @@ EnumEncoding::EnumEncoding(ExprSet lits)
     make_integer_encoding(nbits);
 }
 
+// common code for integer encodings
+ADD Encoding::make_integer_encoding(unsigned nbits, bool is_signed)
+{
+    bool msb = true;
+
+    // in place
+    ADD& add_res = f_add;
+
+    assert(0 < nbits);
+    unsigned i = 0;
+
+    while (i < nbits) {
+        ADD two = f_mgr.dd().constant(2);
+        if (msb && is_signed) {
+            msb = false;
+            two = two.Negate(); // MSB is -2^N in 2's complement
+        }
+        add_res *= two;
+
+        // create var and book it
+        ADD add_var = f_mgr.dd().addVar();
+        f_bits.push_back(add_var);
+
+        // add it to the encoding
+        add_res += add_var;
+
+        ++ i;
+    }
+}
+
 // dctor
 Encoding::~Encoding()
 { }

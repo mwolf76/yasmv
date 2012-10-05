@@ -31,30 +31,6 @@
 // static initialization
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
-IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
-{
-    assert(NULL != tp);
-    IEncoding_ptr res = NULL;
-    IntegerType_ptr itype;
-    IntRangeType_ptr rtype;
-
-    if (NULL != dynamic_cast<BooleanType_ptr>(tp)) {
-        res = new BooleanEncoding();
-    }
-    else if (NULL != (itype = dynamic_cast<IntegerType_ptr>(tp))) {
-        res = new IntEncoding(itype->size(), itype->is_signed());
-    }
-    else if (NULL != (rtype = dynamic_cast<IntRangeType_ptr>(tp))) {
-        res = new RangeEncoding(rtype->min(), rtype->max());
-    }
-    // tODO: more here...
-
-    else assert(0); /* unexpected or unsupported */
-
-    assert (NULL != res);
-    return res;
-}
-
 IEncoding_ptr EncodingMgr::find_encoding(ADD add)
 {
     // const ADD2Enc::iterator eye = f_add2enc_map.find(add);
@@ -63,37 +39,6 @@ IEncoding_ptr EncodingMgr::find_encoding(ADD add)
     // }
 
     // assert(0);
-}
-
-// TODO: review...
-// this is a private member of Encoding to allow for inplace ADD building
-ADD Encoding::make_integer_encoding(unsigned nbits, bool is_signed)
-{
-    bool msb = true;
-
-    // in place
-    ADD& add_res = f_add;
-
-    assert(0 < nbits);
-    unsigned i = 0;
-
-    while (i < nbits) {
-        ADD two = f_mgr.dd().constant(2);
-        if (msb && is_signed) {
-            msb = false;
-            two = two.Negate(); // MSB is -2^N in 2's complement
-        }
-        add_res *= two;
-
-        // create var and book it
-        ADD add_var = f_mgr.dd().addVar();
-        f_bits.push_back(add_var);
-
-        // add it to the encoding
-        add_res += add_var;
-
-        ++ i;
-    }
 }
 
 EncodingMgr::EncodingMgr()
