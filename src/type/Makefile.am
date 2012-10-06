@@ -1,4 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
+SUBDIRS = tests
 
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr		\
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/3rdparty/ezlogger
