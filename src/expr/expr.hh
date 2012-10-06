@@ -203,8 +203,8 @@ private:
     step_t f_time;
 };
 
-// for logging purposes
 ostream& operator<<(ostream& os, const Expr_ptr t);
+ostream& operator<<(ostream& os, const FQExpr& fqexpr);
 
 // TODO: move this!
 class BadWordConstException : public Exception {

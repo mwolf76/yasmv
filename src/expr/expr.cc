@@ -26,6 +26,7 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
+#include <expr_printer.hh>
 
 FQExpr::FQExpr(Expr_ptr expr)
     : f_ctx(ExprMgr::INSTANCE().make_main())
@@ -44,3 +45,20 @@ FQExpr::FQExpr(const FQExpr& fqexpr)
     , f_expr(fqexpr.expr())
     , f_time(fqexpr.time())
 {}
+
+ostream& operator<<(ostream& os, const Expr_ptr t)
+{
+    Printer (os) << t; return os;
+}
+
+// @0{main::x}
+ostream& operator<<(ostream& os, const FQExpr& fqexpr)
+{
+    os << "@" << fqexpr.time() << "{";
+    Printer (os) << fqexpr.ctx()
+                 << "::"
+                 << fqexpr.expr();
+    os << "}";
+
+    return os;
+}

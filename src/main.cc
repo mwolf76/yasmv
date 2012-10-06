@@ -31,20 +31,12 @@
 #include <mc.hh>
 #include <satbmc.hh>
 
-// options management
-#include "opts.hh"
+#include <opts.hh>
 
 #include <smvLexer.h>
 #include <smvParser.h>
 
 #include <logging.hh>
-
-// these are needed to force linking of modules
-extern void link_expr();
-extern void link_model();
-
-ostream& operator<<(ostream& os, const Expr_ptr t)
-{ Printer (os) << t; return os; }
 
 static const string heading_msg = \
                   "gnuSMV - A Symbolic model checker\n"
