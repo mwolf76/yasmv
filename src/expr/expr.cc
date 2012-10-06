@@ -48,7 +48,9 @@ FQExpr::FQExpr(const FQExpr& fqexpr)
 
 ostream& operator<<(ostream& os, const Expr_ptr t)
 {
-    Printer (os) << t; return os;
+    Printer (os) << t;
+
+    return os;
 }
 
 // @0{main::x}

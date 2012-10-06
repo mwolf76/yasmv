@@ -5,7 +5,7 @@
 #include <expr_mgr.hh>
 #include <expr_printer.hh>
 
-BOOST_AUTO_TEST_SUITE(expr)
+BOOST_AUTO_TEST_SUITE(Main)
 BOOST_AUTO_TEST_CASE(makers)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
@@ -496,7 +496,13 @@ BOOST_AUTO_TEST_CASE(printer)
         printer << true_; BOOST_CHECK (oss.str() == string("TRUE"));
     }
 
+    {
+        Expr_ptr main_ = em.make_main();
+        const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
+        ostringstream oss;
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("@7{main::x}"));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
