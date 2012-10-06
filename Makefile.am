@@ -39,7 +39,7 @@ smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
 
 
-tests_SOURCES = $(top_builddir)/src/dummy_logging.cc src/common.cc
+tests_SOURCES = $(top_builddir)/src/tests.cc src/common.cc
 tests_LDADD = $(top_builddir)/src/expr/tests/libexpr_tests.la		\
 $(top_builddir)/src/type/tests/libtype_tests.la				\
 									\
