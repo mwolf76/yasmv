@@ -55,16 +55,10 @@ IntRangeType::IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr ma
 {
     ExprMgr& em = f_owner.em();
 
-    ExprType min_symbtype  = min->f_symb;
-    assert (ICONST == min_symbtype ||
-            HCONST == min_symbtype ||
-            OCONST == min_symbtype );
+    assert (em.is_numeric(min));
     f_min = min->value();
 
-    ExprType max_symbtype  = max->f_symb;
-    assert (ICONST == max_symbtype ||
-            HCONST == max_symbtype ||
-            OCONST == max_symbtype );
+    assert (em.is_numeric(max));
     f_max = max->value();
 
     f_repr = em.make_range_type(em.make_iconst(f_min),
@@ -91,7 +85,7 @@ Instance::Instance(TypeMgr& owner, Expr* identifier, ExprVector& params)
 bool EnumType::has_symbs() const
 {
     bool res = false;
-    ExprMgr& em = ExprMgr::INSTANCE();
+    ExprMgr& em = f_owner.em();
 
     for (ExprSet::iterator eye = f_literals.begin();
          (!res) && (eye != f_literals.end()); eye ++) {
@@ -105,7 +99,7 @@ bool EnumType::has_symbs() const
 bool EnumType::has_numbers() const
 {
     bool res = false;
-    ExprMgr& em = ExprMgr::INSTANCE();
+    ExprMgr& em = f_owner.em();
 
     for (ExprSet::iterator eye = f_literals.begin();
          (!res) && (eye != f_literals.end()); eye ++) {
