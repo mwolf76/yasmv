@@ -94,17 +94,14 @@ public:
     const Type_ptr find_instance(Expr_ptr identifier);
 
     // -- is_xxx predicates ----------------------------------------------------
+
+    /* int_enum is an important subcase of enumeratives. An
+       all-integer valued enumerative can safely be treated as an
+       integer w.r.t. type inferring. */
     bool is_boolean(const Type_ptr tp) const;
-
-    bool is_intRange(const Type_ptr tp) const;
-    bool is_intEnum(const Type_ptr tp) const;
     bool is_integer(const Type_ptr tp) const;
-
-    bool is_const(const Type_ptr tp) const;
-
-    bool is_symbEnum(const Type_ptr tp) const;
-    bool is_mixed_enum(const Type_ptr tp) const;
-
+    bool is_int_range(const Type_ptr tp) const;
+    bool is_int_enum(const Type_ptr tp) const;
     bool is_instance(const Type_ptr tp) const;
 
     // singleton instance accessor
@@ -129,11 +126,10 @@ private:
     /* --- low-level services ----------------------------------------------- */
 
     // register a type
-    void register_type(const FQExpr fqexpr, Type_ptr vtype)
-    { f_register [ fqexpr ] = vtype; }
+    void register_type(const FQExpr fqexpr, Type_ptr vtype);
 
     // lookup up a type, returns NULL if not found
-    Type_ptr lookup_type(const FQExpr fqexpr)
+    inline Type_ptr lookup_type(const FQExpr fqexpr)
     { return f_register [ fqexpr ]; }
 
     /* local data */

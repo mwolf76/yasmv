@@ -89,6 +89,7 @@ const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
     assert(0);
     return NULL;
 }
+
     // {
     //   Type_ptr inst = new Instance(identifier);
     //   TypeHit hit = f_register.insert( make_pair( FQExpr(identifier), inst));
@@ -104,57 +105,39 @@ const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
     //   return p->second;
     // }
 
-
 bool TypeMgr::is_boolean(const Type_ptr tp) const
 {
     return NULL != dynamic_cast <const BooleanType*> (tp);
 }
 
-bool TypeMgr::is_intRange(const Type_ptr tp) const
+bool TypeMgr::is_integer(const Type_ptr tp) const
+{
+    return is_int_range(tp) || is_int_enum(tp)  ||
+        (NULL != dynamic_cast<const IntegerType*>(tp));
+}
+
+bool TypeMgr::is_int_range(const Type_ptr tp) const
 {
     return NULL != dynamic_cast <const IntRangeType*> (tp);
 }
 
-bool TypeMgr::is_intEnum(const Type_ptr tp) const
+bool TypeMgr::is_int_enum(const Type_ptr tp) const
 {
     EnumType* tmp;
-    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
-        return false;
-    }
-
-    return ! tmp->has_symbs();
-}
-
-bool TypeMgr::is_integer(const Type_ptr tp) const
-{
-    return
-        is_intRange(tp) ||
-        is_intEnum(tp)  ||
-        (NULL != dynamic_cast<const IntegerType*>(tp));
-}
-
-bool TypeMgr::is_symbEnum(const Type_ptr tp) const
-{
-    EnumType* tmp;
-    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
-        return false;
-    }
-
-    return ! tmp->has_numbers();
-}
-
-bool TypeMgr::is_mixed_enum(const Type_ptr tp) const
-{
-    EnumType* tmp;
-
-    if (! (tmp = dynamic_cast <EnumType*> (tp))) {
-        return false;
-    }
-
-    return
-        tmp->has_symbs() &&
-        tmp->has_numbers();
+    return (! (tmp = dynamic_cast <EnumType*> (tp)))
+        ? false
+        : ! tmp->has_symbs();
 }
 
 bool TypeMgr::is_instance(const Type_ptr tp) const
-{ return (NULL != dynamic_cast <Instance*> (tp)); }
+{
+    return (NULL != dynamic_cast <Instance*> (tp));
+}
+
+void TypeMgr::register_type(const FQExpr fqexpr, Type_ptr vtype)
+{
+    assert ((NULL != vtype) && (! lookup_type(fqexpr)));
+    DEBUG << "Registering new type: " << fqexpr << endl;
+
+    f_register [ fqexpr ] = vtype;
+}

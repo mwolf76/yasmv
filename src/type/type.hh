@@ -122,7 +122,6 @@ public:
     { return f_literals; }
 
     bool has_symbs() const;
-    bool has_numbers() const;
 
 private:
     ExprSet f_literals;

@@ -80,8 +80,6 @@ Instance::Instance(TypeMgr& owner, Expr* identifier, ExprVector& params)
 {
 }
 
-
-
 bool EnumType::has_symbs() const
 {
     bool res = false;
@@ -91,20 +89,6 @@ bool EnumType::has_symbs() const
          (!res) && (eye != f_literals.end()); eye ++) {
 
         res |= em.is_identifier(*eye);
-    }
-
-    return res;
-}
-
-bool EnumType::has_numbers() const
-{
-    bool res = false;
-    ExprMgr& em = f_owner.em();
-
-    for (ExprSet::iterator eye = f_literals.begin();
-         (!res) && (eye != f_literals.end()); eye ++) {
-
-        res |= em.is_numeric(*eye);
     }
 
     return res;
