@@ -229,6 +229,42 @@ Cudd_addTimes(
 } /* end of Cudd_addTimes */
 
 
+/**Function********************************************************************
+
+  Synopsis    [Integer bitwise AND]
+
+  Description [Integer bitwise AND]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWTimes(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) & cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWTimes */
+
+
 /* /\**Function******************************************************************** */
 
 /*   Synopsis    [This operator sets f to the value of g wherever g != 0.] */
@@ -595,6 +631,43 @@ Cudd_addOr(
 
 /**Function********************************************************************
 
+  Synopsis    [Integer bitwise OR]
+
+  Description [Integer bitwise OR]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWOr(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) | cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWOr */
+
+
+/**Function********************************************************************
+
   Synopsis    [NAND of two 0-1 ADDs.]
 
   Description [NAND of two 0-1 ADDs. Returns NULL
@@ -693,6 +766,43 @@ Cudd_addXor(
 
 /**Function********************************************************************
 
+  Synopsis    [XOR of two 0-1 ADDs.]
+
+  Description [XOR of two 0-1 ADDs. Returns NULL
+  if not a terminal case; f XOR g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWXor(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = cuddV(F) ^ cuddV(G);
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWXor */
+
+
+/**Function********************************************************************
+
   Synopsis    [XNOR of two 0-1 ADDs.]
 
   Description [XNOR of two 0-1 ADDs. Returns NULL
@@ -716,6 +826,43 @@ Cudd_addXnor(
     if (F == DD_ONE(dd) && G == DD_ONE(dd)) return(DD_ONE(dd));
     if (G == DD_ZERO(dd) && F == DD_ZERO(dd)) return(DD_ONE(dd));
     if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    if (F > G) { /* swap f and g */
+	*f = G;
+	*g = F;
+    }
+    return(NULL);
+
+} /* end of Cudd_addXnor */
+
+
+/**Function********************************************************************
+
+  Synopsis    [Integer bitwise XNOR]
+
+  Description [Integer bitwise XNOR]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWXnor(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *res;
+    DdNode *F, *G;
+    CUDD_VALUE_TYPE value;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	value = ! (cuddV(F) ^ cuddV(G));
+	res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+
     if (F > G) { /* swap f and g */
 	*f = G;
 	*g = F;
@@ -878,6 +1025,30 @@ Cudd_addMonadicApply(
 
 /* } /\* end of Cudd_addLog *\/ */
 
+/**Function********************************************************************
+
+  Synopsis    [Bitwise 1-complement ADD.]
+
+  Description [Bitwise 1-complement ADD.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addMonadicApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWCmpl(
+  DdManager * dd,
+  DdNode * f)
+{
+    if (cuddIsConstant(f)) {
+	CUDD_VALUE_TYPE value = ! (cuddV(f));
+	DdNode *res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWCmpl */
 
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */

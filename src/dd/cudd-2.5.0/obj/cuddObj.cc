@@ -2408,6 +2408,16 @@ ADD::Times(
 
 } // ADD::Times
 
+ADD
+ADD::BWTimes(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addBWTimes, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWTimes
 
 ADD
 ADD::Divide(
@@ -2518,6 +2528,17 @@ ADD::Or(
 
 
 ADD
+ADD::BWOr(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addBWOr, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWOr
+
+ADD
 ADD::Nand(
   const ADD& g) const
 {
@@ -2554,6 +2575,17 @@ ADD::Xor(
 
 
 ADD
+ADD::BWXor(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addBWXor, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWXor
+
+ADD
 ADD::Xnor(
   const ADD& g) const
 {
@@ -2564,6 +2596,16 @@ ADD::Xnor(
 
 } // ADD::Xnor
 
+ADD
+ADD::BWXnor(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addBWXnor, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWXnor
 
 ADD
 ADD::Equals(
@@ -2704,6 +2746,15 @@ ADD::Cmpl() const
 
 } // ADD::Cmpl
 
+ADD
+ADD::BWCmpl() const
+{
+    DdManager *mgr = p->manager;
+    DdNode *result = Cudd_addMonadicApply(mgr, Cudd_addBWCmpl, node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWCmpl
 
 ADD
 ADD::Negate() const
