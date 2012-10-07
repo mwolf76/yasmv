@@ -35,7 +35,7 @@
 #include <type_mgr.hh>
 
 /* Supported data types: boolean, ranged integers, finite-width
-   integers, pure-int enums, symbolic enums, mixed enums, instances. */
+   integers, (pure-int) enums, module instances. */
 
 // NOTE: types are *immutable* by design!
 
@@ -102,9 +102,6 @@ public:
 
     inline const value_t max() const
     { return f_max; }
-
-    unsigned size() const
-    { assert(0); return -1; } // TODO...
 
 private:
     value_t f_min;

@@ -94,6 +94,8 @@ bool EnumType::has_symbs() const
     return res;
 }
 
-// ostream helper
+// ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type_ptr)
-{ return os << type_ptr->get_repr(); }
+{
+    return os << type_ptr->get_repr();
+}
