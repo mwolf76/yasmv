@@ -13,7 +13,6 @@ BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(boolean_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
 
     Type_ptr bt = tm.find_boolean();
     BOOST_CHECK(  tm.is_boolean(bt));
@@ -29,7 +28,6 @@ BOOST_AUTO_TEST_CASE(boolean_type)
 BOOST_AUTO_TEST_CASE(integer_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
 
     Type_ptr in = tm.find_integer();
     BOOST_CHECK(! tm.is_boolean(in));
@@ -83,7 +81,6 @@ BOOST_AUTO_TEST_CASE(range_type)
 BOOST_AUTO_TEST_CASE(unsigned_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
 
     Type_ptr in = tm.find_unsigned(8);
     BOOST_CHECK(! tm.is_boolean(in));
@@ -104,7 +101,6 @@ BOOST_AUTO_TEST_CASE(unsigned_type)
 BOOST_AUTO_TEST_CASE(signed_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
 
     Type_ptr in = tm.find_signed(16);
     BOOST_CHECK(! tm.is_boolean(in));
