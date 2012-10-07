@@ -50,6 +50,7 @@ smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 tests_SOURCES = $(top_srcdir)/src/tests.cc src/common.cc	\
 	$(top_srcdir)/src/expr/tests/test_expr.cc		\
 	$(top_srcdir)/src/type/tests/test_type.cc		\
+	$(top_srcdir)/src/dd/tests/test_dd.cc			\
 	$(top_srcdir)/src/enc/tests/test_enc.cc
 
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
