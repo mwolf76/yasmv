@@ -51,9 +51,6 @@ public:
     ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
-    // re-entrant invocation
-    void process_aux(Expr_ptr body);
-
     void pre_hook();
     void post_hook();
 

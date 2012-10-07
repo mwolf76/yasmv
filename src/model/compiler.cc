@@ -69,7 +69,8 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
           << ctx << "::" << body
           << endl;
 
-    process_aux(body);
+    // invoke walker on the body of the expr to be processed
+    (*this)(body);
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -79,14 +80,6 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     ADD add = f_add_stack.back();
     return add;
 }
-
-// support for re-entrant compilation
-void BECompiler::process_aux(Expr_ptr body)
-{
-    // invoke walker on the body of the expr to be processed
-    (*this)(body);
-}
-
 
 void BECompiler::pre_hook()
 {}
@@ -557,7 +550,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
         // 3. define? needs to be compiled (re-entrant invocation)
         else if (symb->is_define()) {
-            process_aux(symb->as_define().body());
+            (*this)(symb->as_define().body());
         }
 
         // or what?!?
