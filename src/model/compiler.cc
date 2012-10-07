@@ -45,8 +45,7 @@ BECompiler::BECompiler()
     : f_map()
     , f_add_stack()
     , f_ctx_stack()
-    , f_mm(ModelMgr::INSTANCE())
-    , f_em(ExprMgr::INSTANCE())
+    , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
 { DEBUG << "Created BECompiler @" << this << endl; }
 
@@ -101,24 +100,6 @@ void BECompiler::walk_next_postorder(const Expr_ptr expr)
 {
     f_time_stack.pop_back(); // reset time stack
 }
-
-// bool BECompiler::walk_at_preorder(const Expr_ptr expr)
-// { return true; }
-// bool BECompiler::walk_at_inorder(const Expr_ptr expr)
-// {
-//     ADD tmp = f_add_stack.back();
-//     assert(Cudd_IsConstant(tmp));
-
-//     /* watch out, this can be dangerous */
-//     step_t curr_time = Cudd_V(tmp);
-//     f_time_stack.push_back(1 + curr_time);
-
-//     return true;
-// }
-// void BECompiler::walk_at_postorder(const Expr_ptr expr)
-// {
-//     f_time_stack.pop_back(); // reset time stack
-// }
 
 bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -227,11 +208,24 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Times(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Times(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
+    }
+
+    else if (binary_algebraic(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.BWTimes(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise arithmetic */
+    }
+
+    else assert(0);
 }
 
 bool BECompiler::walk_or_preorder(const Expr_ptr expr)
@@ -242,11 +236,24 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Or(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Or(rhs));
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Or(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Or(rhs));
+    }
+
+    else if (binary_algebraic(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Or(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise arithmetic */
+    }
+
+    else assert(0);
 }
 
 bool BECompiler::walk_xor_preorder(const Expr_ptr expr)
@@ -257,11 +264,24 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Xor(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Xor(rhs));
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Xor(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Xor(rhs));
+    }
+
+    else if (binary_algebraic(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.BWXor(rhs).PrintMinterm(); /* bitwise arithmetic */
+#endif
+        f_add_stack.push_back(lhs.Xor(rhs));
+    }
+
+    else assert(0);
 }
 
 bool BECompiler::walk_xnor_preorder(const Expr_ptr expr)
@@ -272,11 +292,22 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Xnor(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Xnor(rhs));
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Xnor(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Xnor(rhs));
+    }
+
+    else {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Xnor(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise arithmetic */
+    }
 }
 
 bool BECompiler::walk_implies_preorder(const Expr_ptr expr)
@@ -287,11 +318,24 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Cmpl().Or(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Cmpl().Or(rhs));
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Cmpl().Or(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Cmpl().Or(rhs));
+    }
+
+    else if (binary_algebraic(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Cmpl().Or(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.BWCmpl().BWOr(rhs)); /* bw */
+    }
+
+    else assert(0);
 }
 
 bool BECompiler::walk_iff_preorder(const Expr_ptr expr)
@@ -302,11 +346,23 @@ void BECompiler::walk_iff_postorder(const Expr_ptr expr)
 {
     const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
     const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.Xnor(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.Xnor(rhs));
+
+    if (binary_boolean(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Xnor(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.Xnor(rhs));
+    }
+
+    else if (binary_algebraic(expr)) {
+#ifdef DEBUG_BE_COMPILER
+        cout << "-- " << expr << endl;
+        lhs.Xnor(rhs).PrintMinterm();
+#endif
+        f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise arithmetic */
+
+    }
 }
 
 bool BECompiler::walk_lshift_preorder(const Expr_ptr expr)
@@ -502,7 +558,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     if (! cache_miss(expr)) return;
 
     // symb resolution
-    Model& model = static_cast <Model&> (*f_mm.model());
+    Model& model = static_cast <Model&> (*f_owner.model());
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
@@ -555,5 +611,111 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
         // or what?!?
         else assert(0);
+    }
+}
+
+bool BECompiler::binary_boolean(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em = f_owner.em();
+
+    if (em.is_binary_logical_only(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        assert (tm.is_boolean( f_owner.type(lhs)));
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        assert(tm.is_boolean( f_owner.type(rhs)));
+
+        return true;
+    }
+
+    else if (em.is_binary_logical_bitwise(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        if (! tm.is_boolean( f_owner.type(lhs))) {
+            return false;
+        }
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        if (! tm.is_boolean( f_owner.type(rhs))) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+bool BECompiler::binary_algebraic(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em = f_owner.em();
+
+    if (em.is_binary_arithmetical_only(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        assert (tm.is_integer( f_owner.type(lhs)));
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        assert(tm.is_integer( f_owner.type(rhs)));
+
+        return true;
+    }
+
+    else if (em.is_binary_logical_bitwise(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        if (! tm.is_integer( f_owner.type(lhs))) {
+            return false;
+        }
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        if (! tm.is_integer( f_owner.type(rhs))) {
+            return false;
+        }
+
+        return true;
+    }
+
+}
+
+bool BECompiler::unary_boolean(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em = f_owner.em();
+
+    if (em.is_unary_logical_only(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        assert (tm.is_boolean( f_owner.type(lhs)));
+
+        return true;
+    }
+
+    else if (em.is_unary_logical_bitwise(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        if (! tm.is_integer( f_owner.type(lhs))) {
+            return false;
+        }
+
+        return true;
+    }
+
+}
+
+bool BECompiler::unary_algebraic(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em = f_owner.em();
+
+    if (em.is_unary_arithmetical_only(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        assert (tm.is_boolean( f_owner.type(lhs)));
+
+        return true;
+    }
+
+    else if (em.is_unary_logical_bitwise(expr)) {
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        if (! tm.is_integer( f_owner.type(lhs))) {
+            return false;
+        }
+
+        return true;
     }
 }

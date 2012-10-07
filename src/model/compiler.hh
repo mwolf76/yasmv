@@ -138,8 +138,7 @@ private:
     TimeStack f_time_stack;
 
     // managers
-    ModelMgr& f_mm;
-    ExprMgr& f_em;
+    ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
     // services
@@ -162,6 +161,12 @@ private:
 
     void push_const_value(value_t value);
 
+    // inspectors
+    bool binary_boolean(const Expr_ptr expr);
+    bool binary_algebraic(const Expr_ptr expr);
+
+    bool unary_boolean(const Expr_ptr expr);
+    bool unary_algebraic(const Expr_ptr expr);
 };
 
 #endif
