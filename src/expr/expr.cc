@@ -58,18 +58,13 @@ ostream& operator<<(ostream& os, const FQExpr& fqexpr)
 {
     step_t step = fqexpr.time();
 
-    if (step) {
-        os << "@" <<  step
-           << "{";
-    }
+    os << "@" <<  step << "{";
 
     Printer (os) << fqexpr.ctx()
                  << "::"
                  << fqexpr.expr();
 
-    if (step) {
-        os << "}";
-    }
+    os << "}";
 
     return os;
 }

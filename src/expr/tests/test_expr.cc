@@ -495,13 +495,34 @@ BOOST_AUTO_TEST_CASE(expr_printer)
         printer << true_; BOOST_CHECK (oss.str() == string("TRUE"));
     }
 
+}
+
+BOOST_AUTO_TEST_CASE(fqexprs)
+{
+    ExprMgr& em = ExprMgr::INSTANCE();
+    Atom a_x("x");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr main_ = em.make_main();
+
     {
-        Expr_ptr main_ = em.make_main();
+
         const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
         ostringstream oss;
         oss << fqexpr; BOOST_CHECK (oss.str() == string("@7{main::x}"));
     }
+
+    {
+
+        const FQExpr& fqexpr = FQExpr(main_, x, 0);
+
+        ostringstream oss;
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("@0{main::x}"));
+    }
+
+
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
