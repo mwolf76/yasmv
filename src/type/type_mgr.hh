@@ -90,7 +90,7 @@ public:
     const Type_ptr find_signed(unsigned bits);
     const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to);
 
-    const Type_ptr find_enum(Expr_ptr ctx, ExprSet& lits);
+    const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
 
     // -- is_xxx predicates ----------------------------------------------------

@@ -66,23 +66,39 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     return res;
 }
 
-const Type_ptr TypeMgr::find_range(const Expr_ptr from, const Expr_ptr to)
+const Type_ptr TypeMgr::find_range(const Expr_ptr min, const Expr_ptr max)
 {
-    FQExpr descr(f_em.make_range_type(from, to));
+    // normalize range
+    assert (f_em.is_numeric(min));
+    value_t min_ = min->value();
+
+    assert (f_em.is_numeric(max));
+    value_t max_ = max->value();
+
+    // inverted range? ok, not polite but supported :-)
+    if (max_ < min_) { value_t tmp = max_; max_ = min_; min_ = tmp; }
+
+    const Expr_ptr min_expr = f_em.make_iconst(min_);
+    const Expr_ptr max_expr = f_em.make_iconst(max_);
+
+    FQExpr descr(f_em.make_range_type(min_expr, max_expr));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new IntRangeType(*this, from, to);
+    res = new IntRangeType(*this, min_, max_);
     register_type(descr, res);
     return res;
 }
 
-const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet& lits)
+const Type_ptr TypeMgr::find_enum(ExprSet& lits)
 {
-    /* IMPORTANT: lits ordering has to be canonical for enum types to
+    /*
+       IMPORTANT: lits ordering has to be canonical for enum types to
        work as expected! Otherwise same set of lits with different
-       ordering could be mistakingly seen as a different type. */
+       ordering could be mistakingly seen as a different type.
+    */
+
     FQExpr descr(f_em.make_enum_type(lits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;

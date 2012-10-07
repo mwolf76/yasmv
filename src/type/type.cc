@@ -50,16 +50,13 @@ FiniteIntegerType::FiniteIntegerType(TypeMgr& owner, unsigned width, bool is_sig
         ;
 }
 
-IntRangeType::IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr max)
+IntRangeType::IntRangeType(TypeMgr& owner, value_t min, value_t max)
     : Type(owner) // IntegerType?
+    , f_min(min)
+    , f_max(max)
 {
     ExprMgr& em = f_owner.em();
-
-    assert (em.is_numeric(min));
-    f_min = min->value();
-
-    assert (em.is_numeric(max));
-    f_max = max->value();
+    assert (f_min <= f_max);
 
     f_repr = em.make_range_type(em.make_iconst(f_min),
                                 em.make_iconst(f_max));

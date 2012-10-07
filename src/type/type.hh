@@ -94,7 +94,7 @@ typedef class IntRangeType* IntRangeType_ptr;
 class IntRangeType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr max);
+    IntRangeType(TypeMgr& owner, value_t min, value_t max);
 
 public:
     inline const value_t min() const

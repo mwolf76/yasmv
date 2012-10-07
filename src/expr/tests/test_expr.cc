@@ -6,7 +6,7 @@
 #include <expr_printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(makers)
+BOOST_AUTO_TEST_CASE(expr_makers)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
 
@@ -139,8 +139,7 @@ BOOST_AUTO_TEST_CASE(makers)
     BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom("TRUE"));
 }
 
-/* printer */
-BOOST_AUTO_TEST_CASE(printer)
+BOOST_AUTO_TEST_CASE(expr_printer)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
 

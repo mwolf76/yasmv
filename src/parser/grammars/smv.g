@@ -904,19 +904,19 @@ type_name returns [Type_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
-    // integer types (unsigned and signed)
+    // finite integer types
     | 'unsigned' '(' k=int_constant ')'
       { $res = tm.find_unsigned(k->value()); }
 	| 'signed' '(' k=int_constant ')'
       { $res = tm.find_signed(k->value()); }
 
-    // enumeratives
-	| enum_type[lits]
-      { $res = tm.find_enum($modules::module->expr(), lits); }
-
     // ranges
     | lhs=int_constant '..' rhs=int_constant
       { $res = tm.find_range(lhs, rhs); }
+
+    // enumeratives
+	| enum_type[lits]
+      { $res = tm.find_enum(lits); }
 
     // instances
     | id=identifier
