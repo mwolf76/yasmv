@@ -53,7 +53,6 @@ ostream& operator<<(ostream& os, const Expr_ptr t)
     return os;
 }
 
-// @3{main::x}, but main::boolean
 ostream& operator<<(ostream& os, const FQExpr& fqexpr)
 {
     step_t step = fqexpr.time();
