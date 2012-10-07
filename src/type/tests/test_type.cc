@@ -8,7 +8,7 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
-BOOST_AUTO_TEST_SUITE(type)
+BOOST_AUTO_TEST_SUITE(tests)
 
 BOOST_AUTO_TEST_CASE(ctors)
 {
@@ -17,5 +17,14 @@ BOOST_AUTO_TEST_CASE(ctors)
     Type_ptr bt = tm.find_boolean();
 
 }
+
+BOOST_AUTO_TEST_CASE(ctorks)
+{
+    TypeMgr& tm = TypeMgr::INSTANCE();
+
+    Type_ptr bt = tm.find_boolean();
+
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,7 +1,11 @@
 // test_main.cpp
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Main
+#define BOOST_TEST_MODULE tests
 #include <boost/test/unit_test.hpp>
+
+/* tests placeholders */
+BOOST_AUTO_TEST_SUITE(tests)
+BOOST_AUTO_TEST_SUITE_END()
 
 #include <common.hh>
 #include <logging.hh>

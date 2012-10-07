@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = walkers tests
+SUBDIRS = walkers
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
 -I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/3rdparty/ezlogger
 

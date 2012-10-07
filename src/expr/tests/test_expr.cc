@@ -5,7 +5,7 @@
 #include <expr_mgr.hh>
 #include <expr_printer.hh>
 
-BOOST_AUTO_TEST_SUITE(Main)
+BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(makers)
 {
     ExprMgr& em(ExprMgr::INSTANCE());

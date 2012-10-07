@@ -133,7 +133,6 @@ AC_CONFIG_FILES([Makefile
                  src/dd/Makefile
                  src/enc/Makefile
 		 src/expr/Makefile
-                 src/expr/tests/Makefile
                  src/expr/walkers/Makefile
                  src/mc/Makefile
                  src/model/Makefile
@@ -141,7 +140,6 @@ AC_CONFIG_FILES([Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
                  src/type/Makefile
-                 src/type/tests/Makefile
                  src/utils/Makefile
                  src/witness/Makefile
                  doc/Makefile

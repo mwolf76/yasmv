@@ -24,6 +24,10 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 # Programs to be built
 bin_PROGRAMS = smv tests
 
+# test target helper
+test: tests
+	@./tests --log_level=test_suite
+
 smv_SOURCES = src/opts.cc src/main.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(top_builddir)/src/cmd/libcommand.la			\
@@ -39,11 +43,11 @@ smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
 
 
-tests_SOURCES = $(top_builddir)/src/tests.cc src/common.cc
-tests_LDADD = $(top_builddir)/src/expr/tests/libexpr_tests.la		\
-$(top_builddir)/src/type/tests/libtype_tests.la				\
-									\
-$(top_builddir)/src/parser/libparser.la					\
+tests_SOURCES = $(top_srcdir)/src/tests.cc src/common.cc	\
+	$(top_srcdir)/src/expr/tests/test_expr.cc		\
+	$(top_srcdir)/src/type/tests/test_type.cc
+
+tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 $(top_builddir)/src/cmd/libcommand.la $(top_builddir)/src/mc/libmc.la	\
 $(top_builddir)/src/model/libmodel.la					\
 $(top_builddir)/src/expr/libexpr.la					\
