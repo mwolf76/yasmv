@@ -28,6 +28,10 @@ bin_PROGRAMS = smv tests
 test: tests
 	@./tests --log_level=test_suite
 
+# tags target helper  (uses exuberant ctags)
+tags:
+	@ctags -Re $(top_srcdir)
+
 smv_SOURCES = src/opts.cc src/main.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(top_builddir)/src/cmd/libcommand.la			\
