@@ -32,13 +32,32 @@
 typedef vector<Type_ptr> TypeStack;
 typedef vector<Expr_ptr> ExprStack;
 
+typedef unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
+typedef pair<TypeReg::iterator, bool> TypeRegHit;
+
 class ModelMgr;
 class Inferrer : public TemporalWalker {
 public:
     Inferrer(ModelMgr& owner);
     ~Inferrer();
 
-    // toplevel
+    /** @brief Returns Type object for given FQExpr */
+    const Type_ptr type(FQExpr& fqexpr)
+    {
+        TypeReg::const_iterator eye = f_map.find(fqexpr);
+        Type_ptr res = NULL;
+
+        // cache miss, fallback to walker
+        if (eye == f_map.end()) {
+            /* hopefully type does not change overtime ;-) */
+            res = process(fqexpr.ctx(), fqexpr.expr());
+        }
+
+        assert(NULL != res);
+        return res;
+    }
+
+    // walker toplevel
     Type_ptr process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
@@ -157,7 +176,7 @@ protected:
     void walk_leaf(const Expr_ptr expr);
 
 private:
-    TypeMap f_map; // cache
+    TypeReg f_map; // cache
 
     TypeStack f_type_stack;
     ExprStack f_ctx_stack;
@@ -169,7 +188,7 @@ private:
     inline bool cache_miss(const Expr_ptr expr)
     {
         FQExpr key(f_ctx_stack.back(), expr);
-        TypeMap::iterator eye = f_map.find(key);
+        TypeReg::iterator eye = f_map.find(key);
 
         if (eye != f_map.end()) {
             Type_ptr res = (*eye).second;

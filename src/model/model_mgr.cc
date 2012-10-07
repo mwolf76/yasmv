@@ -290,7 +290,7 @@ void ModelMgr::analyze()
                     //                     inst_params_num);
                     // }
                 }
-                f_tm.set_type( FQExpr(ctx, varname), vartype);
+                // f_tm.set_type( FQExpr(ctx, varname), vartype);
             }
         }
 
@@ -333,16 +333,9 @@ void ModelMgr::analyze()
                 FQExpr fqdn(ctx, dname);
 
                 Expr_ptr dbody = define.body();
-                Type_ptr dtype = f_inferrer.process(ctx, dbody);
+                FQExpr fqdb(ctx, dbody);
 
-                Type_ptr type = f_tm.type(fqdn); // previously determined type
-                if (type) {
-                    if (type != dtype) {
-                        throw BadType(type->get_repr(),
-                                      dtype->get_repr(),
-                                      dbody);
-                    }
-                } else f_tm.set_type(fqdn, dtype);
+                Type_ptr tp = type(fqdb);
             } // for defines
 
             // type inference: FSM

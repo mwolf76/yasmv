@@ -62,7 +62,6 @@ class ISymbol : IObject {
 public:
     virtual const Expr_ptr ctx()  const =0;
     virtual const Expr_ptr expr() const =0;
-    virtual const Type_ptr type() const =0;
 
     bool is_const() const;
     IConstant& as_const() const;
@@ -76,16 +75,19 @@ public:
 
 class IConstant : public ISymbol {
 public:
-    // virtual bool is_false() const =0;
-    // virtual bool is_true() const =0;
     virtual value_t value() const =0;
+    virtual const Type_ptr type() const =0;
 };
 
 class IVariable : public ISymbol {
+public:
+    // var types are used for enc building
+    virtual const Type_ptr type() const =0;
 };
 
 class IDefine : public ISymbol {
 public:
+    // defines have no type, it is inferred.
     virtual const Expr_ptr body() const =0;
 };
 
@@ -281,8 +283,8 @@ public:
     const Expr_ptr body() const
     { return f_body; }
 
-    const Type_ptr type() const
-    { return TypeMgr::INSTANCE().type(FQExpr(f_ctx, f_name)); }
+    // const Type_ptr type() const
+    // { return TypeMgr::INSTANCE().type(FQExpr(f_ctx, f_name)); }
 };
 
 class Model : public IModel {

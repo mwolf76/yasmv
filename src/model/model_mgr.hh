@@ -53,6 +53,11 @@ public:
     inline TypeMgr& tm() const
     { return f_tm; }
 
+    // delegated type inferenc method
+    inline Type_ptr type(FQExpr& fqexpr) {
+        return f_inferrer.type(fqexpr);
+    }
+
 protected:
     ModelMgr();
     ~ModelMgr();

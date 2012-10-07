@@ -371,34 +371,45 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
     f_ctx_stack.pop_back();
 }
 
-/* Integer types: in general if one has a binary op between two
-   integer types phi(x) op psi(y) where x and y are the number of bits
-   of the encoding the result type is rho(x + y) which should cover
-   the most general case.  */
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     ExprMgr& em = f_owner.em();
 
-    Type_ptr tp;
-
     // cache miss took care of the stack already
     if (! cache_miss(expr)) return;
 
-    // a constants is a 0-bits unsigned type
+    // a numeric constant is an integer
     if (em.is_numeric(expr)) {
-        tp = tm.find_integer();
+        Type_ptr res = tm.find_integer();
+        f_type_stack.push_back(res);
     }
 
     else if (em.is_identifier(expr)) {
-        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr); assert(symb);
-        tp = symb->type(); // define types are already inferred
+        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
+        assert(symb);
+
+        // 1. bool/integer constant leaves
+        if (symb->is_const()) {
+            Type_ptr res = symb->as_const().type();
+            f_type_stack.push_back(res);
+        }
+
+        // 2. variable
+        else if (symb->is_variable()) {
+            Type_ptr res = symb->as_variable().type();
+            f_type_stack.push_back(res);
+        }
+
+        // 3. define? needs to be compiled (re-entrant invocation)
+        else if (symb->is_define()) {
+            (*this)(symb->as_define().body());
+        }
     }
 
-    else assert(0);
-
-    assert(tp);
-    f_type_stack.push_back(tp);
+    else {
+        assert(0);
+    }
 }
 
 // one step of resolution returns a const or variable
