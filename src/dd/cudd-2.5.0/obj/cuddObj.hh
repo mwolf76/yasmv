@@ -382,6 +382,7 @@ public:
     ADD OrAbstract(const ADD& cube) const;
     ADD Plus(const ADD& g) const;
     ADD Times(const ADD& g) const;
+    ADD BWTimes(const ADD& g) const;
     ADD Threshold(const ADD& g) const;
     ADD Divide(const ADD& g) const;
     ADD Modulus(const ADD& g) const;
@@ -392,10 +393,13 @@ public:
     ADD Diff(const ADD& g) const;
     ADD Agreement(const ADD& g) const;
     ADD Or(const ADD& g) const;
+    ADD BWOr(const ADD& g) const;
     ADD Nand(const ADD& g) const;
     ADD Nor(const ADD& g) const;
     ADD Xor(const ADD& g) const;
+    ADD BWXor(const ADD& g) const;
     ADD Xnor(const ADD& g) const;
+    ADD BWXnor(const ADD& g) const;
     ADD Equals(const ADD& g) const;
     ADD LT(const ADD& g) const;
     ADD LEQ(const ADD& g) const;
@@ -411,6 +415,7 @@ public:
     inline bool Lt(const ADD& g) const
     { return *this != g && Leq(g); }
     ADD Cmpl() const;
+    ADD BWCmpl() const;
     ADD Negate() const;
     ADD RoundOff(int N) const;
     BDD BddThreshold(CUDD_VALUE_TYPE value) const;

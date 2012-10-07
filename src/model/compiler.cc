@@ -276,9 +276,9 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
     else if (binary_algebraic(expr)) {
 #ifdef DEBUG_BE_COMPILER
         cout << "-- " << expr << endl;
-        lhs.BWXor(rhs).PrintMinterm(); /* bitwise arithmetic */
+        lhs.BWXor(rhs).PrintMinterm();
 #endif
-        f_add_stack.push_back(lhs.Xor(rhs));
+        f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise arithmetic */
     }
 
     else assert(0);
@@ -642,6 +642,10 @@ bool BECompiler::binary_boolean(const Expr_ptr expr)
 
         return true;
     }
+
+    /* unreachable */
+    assert(false);
+    return false;
 }
 
 bool BECompiler::binary_algebraic(const Expr_ptr expr)
@@ -673,6 +677,9 @@ bool BECompiler::binary_algebraic(const Expr_ptr expr)
         return true;
     }
 
+    /* unreachable */
+    assert(false);
+    return false;
 }
 
 bool BECompiler::unary_boolean(const Expr_ptr expr)
@@ -696,6 +703,9 @@ bool BECompiler::unary_boolean(const Expr_ptr expr)
         return true;
     }
 
+    /* unreachable */
+    assert(false);
+    return false;
 }
 
 bool BECompiler::unary_algebraic(const Expr_ptr expr)
@@ -718,4 +728,8 @@ bool BECompiler::unary_algebraic(const Expr_ptr expr)
 
         return true;
     }
+
+    /* unreachable */
+    assert(false);
+    return false;
 }
