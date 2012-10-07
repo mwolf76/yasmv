@@ -124,6 +124,9 @@ typedef struct Expr_TAG {
     } u;
 
     // accessors
+    inline ExprType symb()
+    { return f_symb; }
+
     inline Atom& atom()
     {
         assert (IDENT == f_symb);

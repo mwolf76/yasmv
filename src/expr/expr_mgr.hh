@@ -259,6 +259,55 @@ public:
             || (expr->f_symb == OCONST) ;
     }
 
+    inline bool is_unary_logical_bitwise(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (NOT == symb);
+    }
+
+    inline bool is_binary_logical_bitwise(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ( (AND == symb)
+                 || (OR  == symb)
+                 || (XOR == symb)
+                 || (XNOR == symb)
+                 || (IMPLIES == symb)
+                 || (IFF == symb));
+    }
+
+    inline bool is_unary_logical_only(const Expr_ptr expr) const {
+        assert(expr);
+        return false; /* there is no logical that is not also a bitwise */
+    }
+
+    inline bool is_binary_logical_only(const Expr_ptr expr) const {
+        assert(expr);
+        return false; /* there is no logical that is not also a bitwise */
+    }
+
+    inline bool is_unary_arithmetical_only(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ( (NEG == symb) );
+    }
+
+    inline bool is_binary_arithmetical_only(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ( (PLUS == symb)
+                 || (SUB == symb)
+                 || (DIV== symb)
+                 || (MUL== symb)
+                 || (MOD == symb)
+                 || (RSHIFT == symb)
+                 || (LSHIFT == symb));
+    }
+
     // singleton instance accessor
     static inline ExprMgr& INSTANCE() {
         if (! f_instance) {
