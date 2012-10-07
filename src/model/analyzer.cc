@@ -364,37 +364,23 @@ void Analyzer::walk_dot_postorder(const Expr_ptr expr)
 
 void Analyzer::walk_leaf(const Expr_ptr expr)
 {
-    ExprType symb_type = expr->f_symb;
     ExprKind res = EXPR_ERROR;
 
     // cache miss took care of the stack already
     if (! cache_miss(expr)) return;
 
-    // a constants is a 0-bits unsigned type
-    if ((symb_type == ICONST) ||
-        (symb_type == HCONST) ||
-        (symb_type == OCONST)) {
-        res = EXPR_ALGEBRAIC;
+    // use inferrer to determine type
+    FQExpr tmp(f_ctx_stack.back(), expr);
+    Type_ptr tp = f_mm.type(tmp);
+
+    if (f_tm.is_boolean(tp)) {
+        res = EXPR_BOOLEAN;
     }
-
-    else if (symb_type == IDENT) {
-        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
-
-        assert(symb);
-        const Type_ptr tp = symb->type(); // define types are already inferred (CHECKME?!?)
-        assert(tp);
-
-        if (f_tm.is_integer(tp)) {
-            res = EXPR_ALGEBRAIC;
-        }
-        else if (f_tm.is_boolean(tp)) {
-            res = EXPR_BOOLEAN;
-        }
-        else assert(0);
+    else if (f_tm.is_integer(tp)) {
+        res = EXPR_ALGEBRAIC;
     }
     else assert(0);
 
-    assert(res);
     f_kind_stack.push_back(res);
 }
 
