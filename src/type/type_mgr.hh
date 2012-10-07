@@ -90,7 +90,7 @@ public:
     const Type_ptr find_signed(unsigned bits);
     const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to);
 
-    const Type_ptr find_enum(Expr_ptr ctx, ExprSet_ptr lits);
+    const Type_ptr find_enum(Expr_ptr ctx, ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
 
     // -- is_xxx predicates ----------------------------------------------------
@@ -99,10 +99,33 @@ public:
        all-integer valued enumerative can safely be treated as an
        integer w.r.t. type inferring. */
     bool is_boolean(const Type_ptr tp) const;
+
     bool is_integer(const Type_ptr tp) const;
+    bool is_int_finite(const Type_ptr tp) const;
     bool is_int_range(const Type_ptr tp) const;
     bool is_int_enum(const Type_ptr tp) const;
+
+    bool is_enum(const Type_ptr tp) const;
     bool is_instance(const Type_ptr tp) const;
+
+    // -- as_xxx accessors ------------------------------------------------------
+    typedef class BooleanType* BooleanType_ptr;
+    BooleanType_ptr as_boolean(const Type_ptr tp) const;
+
+    typedef class IntegerType* IntegerType_ptr;
+    IntegerType_ptr as_integer(const Type_ptr tp) const;
+
+    typedef class FiniteIntegerType* FiniteIntegerType_ptr;
+    FiniteIntegerType_ptr as_int_finite(const Type_ptr tp) const;
+
+    typedef class IntRangeType* IntRangeType_ptr;
+    IntRangeType_ptr as_int_range(const Type_ptr tp) const;
+
+    typedef class EnumType* EnumType_ptr;
+    EnumType_ptr as_enum(const Type_ptr tp) const;
+
+    typedef class Instance* Instance_ptr;
+    Instance_ptr as_instance(const Type_ptr tp) const;
 
     // singleton instance accessor
     static inline TypeMgr& INSTANCE() {

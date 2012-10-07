@@ -78,9 +78,8 @@ const Type_ptr TypeMgr::find_range(const Expr_ptr from, const Expr_ptr to)
     return res;
 }
 
-const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet_ptr lits)
+const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet& lits)
 {
-    assert(0); // TODO
     return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ];
 }
 
@@ -107,31 +106,89 @@ const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
 
 bool TypeMgr::is_boolean(const Type_ptr tp) const
 {
-    return NULL != dynamic_cast <const BooleanType*> (tp);
+    return NULL != dynamic_cast <const BooleanType_ptr> (tp);
+}
+
+BooleanType_ptr TypeMgr::as_boolean(const Type_ptr tp) const
+{
+    BooleanType_ptr res = dynamic_cast <const BooleanType_ptr> (tp);
+    assert(res);
+
+    return res;
 }
 
 bool TypeMgr::is_integer(const Type_ptr tp) const
 {
     return is_int_range(tp) || is_int_enum(tp)  ||
-        (NULL != dynamic_cast<const IntegerType*>(tp));
+        (NULL != dynamic_cast<const IntegerType_ptr>(tp));
+}
+
+IntegerType_ptr TypeMgr::as_integer(const Type_ptr tp) const
+{
+    IntegerType_ptr res = dynamic_cast<const IntegerType_ptr>(tp);
+    assert(res);
+
+    return res;
 }
 
 bool TypeMgr::is_int_range(const Type_ptr tp) const
 {
-    return NULL != dynamic_cast <const IntRangeType*> (tp);
+    return NULL != dynamic_cast <const IntRangeType_ptr> (tp);
+}
+
+IntRangeType_ptr TypeMgr::as_int_range(const Type_ptr tp) const
+{
+    IntRangeType_ptr res = dynamic_cast <IntRangeType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+bool TypeMgr::is_enum(const Type_ptr tp) const
+{
+    return NULL != dynamic_cast <const EnumType_ptr> (tp);
 }
 
 bool TypeMgr::is_int_enum(const Type_ptr tp) const
 {
-    EnumType* tmp;
-    return (! (tmp = dynamic_cast <EnumType*> (tp)))
+    EnumType_ptr tmp;
+    return (! (tmp = dynamic_cast <const EnumType_ptr> (tp)))
         ? false
         : ! tmp->has_symbs();
 }
 
+EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
+{
+    EnumType_ptr res = dynamic_cast<EnumType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+bool TypeMgr::is_int_finite(const Type_ptr tp) const
+{
+    return (NULL != dynamic_cast <FiniteIntegerType*> (tp));
+}
+
+FiniteIntegerType_ptr TypeMgr::as_int_finite(const Type_ptr tp) const
+{
+    FiniteIntegerType_ptr res = dynamic_cast <const FiniteIntegerType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
 bool TypeMgr::is_instance(const Type_ptr tp) const
 {
-    return (NULL != dynamic_cast <Instance*> (tp));
+    return (NULL != dynamic_cast <Instance_ptr> (tp));
+}
+
+Instance_ptr TypeMgr::as_instance(const Type_ptr tp) const
+{
+    Instance_ptr res = dynamic_cast <Instance_ptr> (tp);
+    assert(res);
+
+    return res;
 }
 
 void TypeMgr::register_type(const FQExpr fqexpr, Type_ptr vtype)

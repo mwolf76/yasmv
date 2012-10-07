@@ -859,9 +859,11 @@ range_constant returns [Expr_ptr res]
 	;
 
 enum_constant returns [Expr_ptr res]
-@init { }
-	: literals=enum_type
-    { $res = em.make_enum_type(literals); }
+@init {
+    ExprSet lits;
+}
+	: enum_type[lits]
+    { $res = em.make_enum_type(lits); }
     ;
 
 // /* lvalue is used in assignments */
@@ -895,7 +897,9 @@ value returns [Expr_ptr res]
     ;
 
 type_name returns [Type_ptr res]
-@init { }
+@init {
+    ExprSet lits;
+}
     // boolean
 	: 'boolean'
     { $res = tm.find_boolean(); }
@@ -907,8 +911,8 @@ type_name returns [Type_ptr res]
       { $res = tm.find_signed(k->value()); }
 
     // enumeratives
-	| literals=enum_type
-      { $res = tm.find_enum($modules::module->expr(), literals); }
+	| enum_type[lits]
+      { $res = tm.find_enum($modules::module->expr(), lits); }
 
     // ranges
     | lhs=int_constant '..' rhs=int_constant
@@ -919,15 +923,14 @@ type_name returns [Type_ptr res]
       { $res = tm.find_instance(id); }  actual_param_decls[$res]
     ;
 
-enum_type returns [ExprSet_ptr res]
-@init { res = new ExprSet (); }
+enum_type [ExprSet& lits]
 	:
      '{'
           lit=literal
-          { $res->insert(lit); }
+          { $lits.insert(lit); }
 
           (',' lit=literal
-          { $res->insert(lit); }
+          { $lits.insert(lit); }
           )*
      '}'
 	;

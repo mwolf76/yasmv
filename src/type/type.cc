@@ -65,12 +65,11 @@ IntRangeType::IntRangeType(TypeMgr& owner, const Expr_ptr min, const Expr_ptr ma
                                 em.make_iconst(f_max));
 }
 
-EnumType::EnumType(TypeMgr& owner, ExprSet literals)
+EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : Type(owner)
     , f_literals(literals)
 {
-    // TODO: kill cast
-    f_repr = f_owner.em().make_enum_type(const_cast<ExprSet_ptr> (&f_literals));
+    f_repr = f_owner.em().make_enum_type(f_literals);
 }
 
 Instance::Instance(TypeMgr& owner, Expr* identifier, ExprVector& params)

@@ -202,7 +202,7 @@ public:
     inline Expr_ptr make_signed_type(unsigned bits)
     { return make_params(signed_expr, make_iconst((value_t) bits)); }
 
-    Expr_ptr make_enum_type(ExprSet_ptr literals);
+    Expr_ptr make_enum_type(ExprSet& literals);
 
     /* builtin identifiers */
     inline Expr_ptr make_main() const

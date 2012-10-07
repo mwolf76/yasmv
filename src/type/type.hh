@@ -112,7 +112,7 @@ typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    EnumType(TypeMgr& owner, ExprSet literals);
+    EnumType(TypeMgr& owner, ExprSet& literals);
 
 public:
     const ExprSet& literals() const

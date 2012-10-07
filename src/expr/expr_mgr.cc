@@ -53,13 +53,15 @@ ExprMgr::~ExprMgr()
     DEBUG << "ExprMgr @" << this << " deinitialized" << endl;
 }
 
-Expr_ptr ExprMgr::make_enum_type(ExprSet_ptr literals)
+/* REVIEW: lits ordering has to be canonical for enum types to work as
+   expected! */
+Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 {
     Expr_ptr res = NULL;
 
     /* reverse iteration */
-    for (ExprSet::reverse_iterator eye = literals->rbegin();
-         eye != literals->rend(); eye ++) {
+    for (ExprSet::reverse_iterator eye = literals.rbegin();
+         eye != literals.rend(); eye ++) {
         if (!res) res = (*eye);
         else res = make_expr(COMMA, (*eye), res);
     }
