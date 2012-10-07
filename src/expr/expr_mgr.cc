@@ -53,8 +53,6 @@ ExprMgr::~ExprMgr()
     DEBUG << "ExprMgr @" << this << " deinitialized" << endl;
 }
 
-/* REVIEW: lits ordering has to be canonical for enum types to work as
-   expected! */
 Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 {
     Expr_ptr res = NULL;

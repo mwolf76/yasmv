@@ -80,7 +80,17 @@ const Type_ptr TypeMgr::find_range(const Expr_ptr from, const Expr_ptr to)
 
 const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, ExprSet& lits)
 {
-    return f_register[ FQExpr(ctx, f_em.make_enum_type(lits)) ];
+    /* IMPORTANT: lits ordering has to be canonical for enum types to
+       work as expected! Otherwise same set of lits with different
+       ordering could be mistakingly seen as a different type. */
+    FQExpr descr(f_em.make_enum_type(lits));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new EnumType(*this, lits);
+    register_type(descr, res);
+    return res;
 }
 
 const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)

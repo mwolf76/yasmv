@@ -10,7 +10,7 @@
 
 BOOST_AUTO_TEST_SUITE(tests)
 
-BOOST_AUTO_TEST_CASE(type_ctors_and_predicates)
+BOOST_AUTO_TEST_CASE(types)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
     ExprMgr& em = ExprMgr::INSTANCE();
@@ -121,17 +121,44 @@ BOOST_AUTO_TEST_CASE(type_ctors_and_predicates)
         BOOST_REQUIRE( NULL != et );
 
         BOOST_CHECK( 3 == et->literals().size() );
+
+        // try all possible different orderings (3! = 6)
+        { // #1
+            ExprSet lhd;
+            lhd.insert(l); lhd.insert(h); lhd.insert(d);
+            BOOST_CHECK(in == tm.find_enum(ctx, lhd));
+        }
+
+        { // #2
+            ExprSet ldh;
+            ldh.insert(l); ldh.insert(d); ldh.insert(h);
+            BOOST_CHECK(in == tm.find_enum(ctx, ldh));
+        }
+
+        { // #3
+            ExprSet hld;
+            hld.insert(h); hld.insert(l); hld.insert(d);
+            BOOST_CHECK(in == tm.find_enum(ctx, hld));
+        }
+
+        { // #4
+            ExprSet hdl;
+            hdl.insert(h); hdl.insert(d); hdl.insert(l);
+            BOOST_CHECK(in == tm.find_enum(ctx, hdl));
+        }
+
+        { // #5
+            ExprSet dlh;
+            dlh.insert(d); dlh.insert(l); dlh.insert(h);
+            BOOST_CHECK(in == tm.find_enum(ctx, dlh));
+        }
+
+        { // #6
+            ExprSet dhl;
+            dhl.insert(d); dhl.insert(h); dhl.insert(l);
+            BOOST_CHECK(in == tm.find_enum(ctx, dhl));
+        }
     }
-
 }
-
-BOOST_AUTO_TEST_CASE(ctorks)
-{
-    TypeMgr& tm = TypeMgr::INSTANCE();
-
-    Type_ptr bt = tm.find_boolean();
-
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()
