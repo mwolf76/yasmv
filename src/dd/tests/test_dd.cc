@@ -116,12 +116,48 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
     }
 
     {
-        ADD x_times_y = lhs.Times(rhs);
-        ADD y_times_x = rhs.Times(lhs);
-        BOOST_CHECK(x_times_y == y_times_x);
+        ADD x_minus_y = lhs.Minus(rhs);
+        ADD y_minus_x = rhs.Minus(lhs);
+        BOOST_CHECK(x_minus_y != y_minus_x);
     }
 
+    {
+        ADD x_divide_y = lhs.Divide(rhs);
+        ADD y_divide_x = rhs.Divide(lhs);
+        BOOST_CHECK(x_divide_y != y_divide_x);
+    }
 
+    {
+        ADD x_mod_y = lhs.Modulus(rhs);
+        ADD y_mod_x = rhs.Modulus(lhs);
+        BOOST_CHECK(x_mod_y != y_mod_x);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(dd_relational)
+{
+    Cudd dd;
+
+    ADD lhs = make_integer_encoding(dd, 4, false);
+    ADD rhs = make_integer_encoding(dd, 4, false);
+
+    {
+        ADD x_equals_y = lhs.Equals(rhs);
+        ADD y_equals_x = rhs.Equals(lhs);
+        BOOST_CHECK(x_equals_y == y_equals_x);
+    }
+
+    {
+        ADD x_lt_y = lhs.LT(rhs);
+        ADD y_lt_x = rhs.LT(lhs);
+        BOOST_CHECK(x_lt_y != y_lt_x);
+    }
+
+    {
+        ADD x_leq_y = lhs.LEQ(rhs);
+        ADD y_leq_x = rhs.LEQ(lhs);
+        BOOST_CHECK(x_leq_y != y_leq_x);
+    }
 }
 
 
