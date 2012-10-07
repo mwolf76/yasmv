@@ -134,6 +134,54 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
     }
 }
 
+BOOST_AUTO_TEST_CASE(dd_bitwise)
+{
+    Cudd dd;
+    ADD lhs = dd.addVar();
+    ADD rhs = dd.addVar();
+
+    // {
+    //     ADD neg_neg = lhs.Cmpl().Cmpl();
+    //     BOOST_CHECK(lhs == neg_neg);
+    // }
+
+    {
+        ADD x_and_y = lhs.BWTimes(rhs);
+        ADD y_and_x = rhs.BWTimes(lhs);
+        BOOST_CHECK(x_and_y == y_and_x);
+    }
+
+    {
+        ADD x_or_y = lhs.BWOr(rhs);
+        ADD y_or_x = rhs.BWOr(lhs);
+        BOOST_CHECK(x_or_y == y_or_x);
+    }
+
+    {
+        ADD x_xor_y = lhs.BWXor(rhs);
+        ADD y_xor_x = rhs.BWXor(lhs);
+        BOOST_CHECK(x_xor_y == y_xor_x);
+    }
+
+    {
+        ADD x_xnor_y = lhs.BWXnor(rhs);
+        ADD y_xnor_x = rhs.BWXnor(lhs);
+        BOOST_CHECK(x_xnor_y == y_xnor_x);
+    }
+
+    {
+        ADD x_xnor_y = lhs.BWXnor(rhs);
+        ADD y_xnor_x = rhs.BWXnor(lhs);
+        BOOST_CHECK(x_xnor_y == y_xnor_x);
+    }
+
+    {
+        ADD x_xnor_y = lhs.BWXnor(rhs);
+        ADD y_xnor_x = rhs.BWXor(lhs).BWCmpl();
+        BOOST_CHECK(x_xnor_y == y_xnor_x);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(dd_relational)
 {
     Cudd dd;
