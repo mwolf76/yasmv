@@ -22,8 +22,8 @@
 #ifndef CDEFS_DEFINED
 #define CDEFS_DEFINED
 
-/* reserved for numeric and word constant values. */
+/* Reserved for native data type, should match machine word for
+   optimal performance. This type used for the ADD leaves. */
 typedef long value_t;
-typedef unsigned step_t;
 
 #endif

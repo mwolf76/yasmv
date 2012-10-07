@@ -66,8 +66,27 @@ using std::cerr;
 using std::endl;
 using std::flush;
 
-/* custom base definitions */
-#include <base.hh>
+#include <cdefs.h>
+
+/* time representation */
+typedef unsigned step_t;
+
+/* the base class definition, including a virtual destructor */
+class IObject {
+public:
+    virtual ~IObject()
+    {}
+};
+
+class Object : public IObject {
+};
+
+#include <exception>
+class Exception : public std::exception {
+public:
+    virtual const char* what() const throw() =0;
+    virtual ~Exception() throw() {}
+};
 
 class FileInputException : public Exception {
     virtual const char* what() const throw() {
@@ -87,55 +106,39 @@ public:
     {}
 };
 
-struct PtrHash {
-  inline long operator() (void* ptr) const
-  { return (long)(ptr); }
-
-};
-
-struct PtrEq {
-  inline bool operator() (const void* x,
-                          const void* y) const
-  { return x == y; }
-};
-
 // logging support using ezlogger (cfr. http://axter.com/ezlogger/)
 #include <logging.hh>
 
-// reserved for numeric and word constant values (this has to match
-// cudd reprentation for ADD leaves).
-typedef long value_t;
+// typedef enum {
+//   BINARY = 2,
+//   OCTAL = 8,
+//   DECIMAL = 10,
+//   HEXADECIMAL = 16
+// } base_t;
 
-typedef enum {
-  BINARY = 2,
-  OCTAL = 8,
-  DECIMAL = 10,
-  HEXADECIMAL = 16
-} base_t;
+// inline char base_char(base_t base)
+// {
+//   switch (base) {
+//   case BINARY: return 'b';
+//   case OCTAL: return 'o';
+//   case DECIMAL: return 'd';
+//   case HEXADECIMAL: return 'h';
+//   default: assert (0); // unexpected;
+//   }
+// }
 
-inline char base_char(base_t base)
-{
-  switch (base) {
-  case BINARY: return 'b';
-  case OCTAL: return 'o';
-  case DECIMAL: return 'd';
-  case HEXADECIMAL: return 'h';
-  default: assert (0); // unexpected;
-  }
-}
+// inline string to_base(value_t value, base_t base)
+// {
+//   static const char alphabet[] = "0123456789abcdefgh";
+//   std::string result;
 
-inline string to_base(value_t value, base_t base)
-{
-  static const char alphabet[] = "0123456789abcdefgh";
-  std::string result;
+//   while(value) {
+//     result += alphabet[value % base];
+//     value /= base;
+//   }
 
-  while(value) {
-    result += alphabet[value % base];
-    value /= base;
-  }
-
-  return string(result.rbegin(), result.rend());
-}
+//   return string(result.rbegin(), result.rend());
+// }
 
 typedef std::string Atom;
 typedef Atom* Atom_ptr;
