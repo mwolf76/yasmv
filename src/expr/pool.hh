@@ -67,4 +67,14 @@ struct FQExprEq {
 typedef unordered_set<FQExpr, FQExprHash, FQExprEq> FQExprPool;
 typedef pair<FQExprPool::iterator, bool> FQExprPoolHit;
 
+/* -- generic ptr based definitions ------------------------------------------ */
+struct PtrHash {
+    long operator() (void *ptr) const;
+};
+
+struct PtrEq {
+    bool operator() (const void* x,
+                     const void* y) const;
+};
+
 #endif

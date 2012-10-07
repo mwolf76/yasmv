@@ -196,10 +196,10 @@ public:
         return make_expr(RANGE, a, b);
     }
 
-    inline Expr_ptr make_unsigned_type(unsigned bits = DEFAULT_BITS)
+    inline Expr_ptr make_unsigned_type(unsigned bits)
     { return make_params(unsigned_expr, make_iconst((value_t) bits)); }
 
-    inline Expr_ptr make_signed_type(unsigned bits = DEFAULT_BITS)
+    inline Expr_ptr make_signed_type(unsigned bits)
     { return make_params(signed_expr, make_iconst((value_t) bits)); }
 
     Expr_ptr make_enum_type(ExprSet_ptr literals);

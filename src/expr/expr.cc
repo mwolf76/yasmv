@@ -53,14 +53,23 @@ ostream& operator<<(ostream& os, const Expr_ptr t)
     return os;
 }
 
-// @0{main::x}
+// @3{main::x}, but main::boolean
 ostream& operator<<(ostream& os, const FQExpr& fqexpr)
 {
-    os << "@" << fqexpr.time() << "{";
+    step_t step = fqexpr.time();
+
+    if (step) {
+        os << "@" <<  step
+           << "{";
+    }
+
     Printer (os) << fqexpr.ctx()
                  << "::"
                  << fqexpr.expr();
-    os << "}";
+
+    if (step) {
+        os << "}";
+    }
 
     return os;
 }

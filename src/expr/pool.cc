@@ -139,3 +139,14 @@ bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const
             x.expr() == y.expr() &&
             x.time() == y.time());
 }
+
+long PtrHash::operator() (void *ptr) const
+{
+    return (long)(ptr);
+}
+
+bool PtrEq::operator() (const void* x,
+                        const void* y) const
+{
+    return x == y;
+}
