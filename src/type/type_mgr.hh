@@ -31,14 +31,13 @@
 #include <expr_mgr.hh>
 
 typedef class Type* Type_ptr; // fwd
-typedef unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeMap;
+typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
 
 /**
     The TypeMgr has two well-defined responsibilites:
 
-    1. It keeps track of the type of FQExprs in the system (such as
-    those determined by the inferrer);
+    1. It keeps track of types that has been defined;
 
     2. It instantiates (and owns) type descriptors (Type objects);
 
@@ -61,29 +60,12 @@ typedef class TypeMgr* TypeMgr_ptr;
 class TypeMgr {
 public:
 
-    /** @brief Returns Type object for given expr, or NULL if none is
-        available. */
-    const Type_ptr type(const FQExpr& fqexpr) const
-    {
-        TypeMap::const_iterator eye = f_map.find(fqexpr);
-        Type_ptr res = NULL;
-
-        // cache miss
-        if (eye == f_map.end()) return NULL;
-
-        // TODO: something missing here!!!
-        return res;
-    }
-
-    inline void set_type(const FQExpr fqexpr, const Type_ptr tp)
-    { f_map[ fqexpr ] = tp; }
-
     /* -- inference --------------------------------------------------------- */
     inline const Type_ptr find_boolean()
-    { return f_register[ FQExpr(f_em.make_boolean_type()) ]; }
+    { return f_register[ f_em.make_boolean_type() ]; }
 
     inline const Type_ptr find_integer() // abstract
-    { return f_register[ FQExpr(f_em.make_integer_type()) ]; }
+    { return f_register[ f_em.make_integer_type() ]; }
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_unsigned(unsigned bits);
@@ -149,15 +131,14 @@ private:
     /* --- low-level services ----------------------------------------------- */
 
     // register a type
-    void register_type(const FQExpr fqexpr, Type_ptr vtype);
+    void register_type(const Expr_ptr expr, Type_ptr vtype);
 
     // lookup up a type, returns NULL if not found
-    inline Type_ptr lookup_type(const FQExpr fqexpr)
-    { return f_register [ fqexpr ]; }
+    inline Type_ptr lookup_type(const Expr_ptr expr)
+    { return f_register [ expr ]; }
 
     /* local data */
     TypeMap f_register;
-    TypeMap f_map;
 
     // ref to expr manager
     ExprMgr& f_em;

@@ -31,20 +31,19 @@ TypeMgr_ptr TypeMgr::f_instance = NULL;
 
 TypeMgr::TypeMgr()
     : f_register()
-    , f_map()
     , f_em(ExprMgr::INSTANCE())
 {
     // register predefined types
-    register_type( FQExpr( f_em.make_boolean_type() ),
+    register_type( f_em.make_boolean_type(),
                    new BooleanType(*this));
 
-    register_type( FQExpr( f_em.make_integer_type() ),
+    register_type( f_em.make_integer_type(),
                    new IntegerType(*this));
 }
 
 const Type_ptr TypeMgr::find_unsigned(unsigned bits)
 {
-    FQExpr descr(f_em.make_unsigned_type(bits));
+    Expr_ptr descr(f_em.make_unsigned_type(bits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
@@ -56,7 +55,7 @@ const Type_ptr TypeMgr::find_unsigned(unsigned bits)
 
 const Type_ptr TypeMgr::find_signed(unsigned bits)
 {
-    FQExpr descr(f_em.make_signed_type(bits));
+    Expr_ptr descr(f_em.make_signed_type(bits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
@@ -81,7 +80,7 @@ const Type_ptr TypeMgr::find_range(const Expr_ptr min, const Expr_ptr max)
     const Expr_ptr min_expr = f_em.make_iconst(min_);
     const Expr_ptr max_expr = f_em.make_iconst(max_);
 
-    FQExpr descr(f_em.make_range_type(min_expr, max_expr));
+    Expr_ptr descr(f_em.make_range_type(min_expr, max_expr));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
@@ -99,7 +98,7 @@ const Type_ptr TypeMgr::find_enum(ExprSet& lits)
        ordering could be mistakingly seen as a different type.
     */
 
-    FQExpr descr(f_em.make_enum_type(lits));
+    Expr_ptr descr(f_em.make_enum_type(lits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
@@ -111,24 +110,15 @@ const Type_ptr TypeMgr::find_enum(ExprSet& lits)
 
 const Type_ptr TypeMgr::find_instance(Expr_ptr identifier)
 {
-    assert(0);
-    return NULL;
+    Expr_ptr descr(f_em.make_params(identifier, NULL));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new Instance(*this, identifier);
+    register_type(descr, res);
+    return res;
 }
-
-    // {
-    //   Type_ptr inst = new Instance(identifier);
-    //   TypeHit hit = f_register.insert( make_pair( FQExpr(identifier), inst));
-
-    //   if (hit.second) {
-    //     logger << "Added instance of module '"
-    //            << identifier
-    //            << "' to type register"
-    //            << endl;
-    //   }
-
-    //   TypeMap::p = &(*hit.first);
-    //   return p->second;
-    // }
 
 bool TypeMgr::is_boolean(const Type_ptr tp) const
 {
@@ -217,10 +207,10 @@ Instance_ptr TypeMgr::as_instance(const Type_ptr tp) const
     return res;
 }
 
-void TypeMgr::register_type(const FQExpr fqexpr, Type_ptr vtype)
+void TypeMgr::register_type(const Expr_ptr expr, Type_ptr vtype)
 {
-    assert ((NULL != vtype) && (! lookup_type(fqexpr)));
-    DEBUG << "Registering new type: " << fqexpr << endl;
+    assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
+    DEBUG << "Registering new type: " << expr << endl;
 
-    f_register [ fqexpr ] = vtype;
+    f_register [ expr ] = vtype;
 }

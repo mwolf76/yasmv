@@ -128,18 +128,14 @@ typedef class Instance* Instance_ptr;
 class Instance : public Type {
 protected:
     friend class TypeMgr; // ctors not public
-    Instance(TypeMgr& owner, Expr* identifier, ExprVector& params);
+    Instance(TypeMgr& owner, Expr_ptr identifier);
 
 public:
-    const ExprVector& params() const
-    { return f_params; }
-
     const Expr_ptr identifier() const
     { return f_identifier; }
 
 private:
     const Expr_ptr f_identifier;
-    ExprVector f_params;
 };
 
 #endif

@@ -69,11 +69,13 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     f_repr = f_owner.em().make_enum_type(f_literals);
 }
 
-Instance::Instance(TypeMgr& owner, Expr* identifier, ExprVector& params)
+Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
     : Type(owner)
     , f_identifier(identifier)
-    , f_params(params)
 {
+    // use empty params node to distinguish type from identifier
+    // (i.e. it's foo() instead of foo).
+    f_repr = f_owner.em().make_params(identifier, NULL);
 }
 
 bool EnumType::has_symbs() const
