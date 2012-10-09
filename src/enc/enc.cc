@@ -26,23 +26,6 @@
  **/
 #include <enc.hh>
 
-#include <cuddInt.h>  /* for cudd_isconstant */
-
-// Constants
-ConstEncoding::ConstEncoding(value_t value)
-    : Encoding()
-{
-    unsigned i, base = f_mgr.base();
-
-    for (i = f_mgr.width(); (i); -- i) {
-        ADD digit = f_mgr.constant(value % base);
-        f_dv.push_back(digit);
-        value /= base;
-    }
-
-    assert (value == 0); // not overflowing
-}
-
 // boolean 1(1 bit) var
 BooleanEncoding::BooleanEncoding()
     : Encoding()

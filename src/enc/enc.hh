@@ -67,22 +67,6 @@ protected:
     ADD make_monolithic_encoding(unsigned nbits);
 };
 
-// for constants promotion as algebraic entities
-class ConstEncoding : public Encoding {
-friend class EncodingMgr; // expose ctors only to mgr
-public:
-    // Of course, this is meaningless. Here only to fullfill abstract decl.
-    Expr_ptr expr(DDVector& assignment)
-    { assert(0); /* ehm... what? */ }
-
-protected:
-    virtual ~ConstEncoding()
-    { assert(0); }
-
-    // Const value, width is provided by EncMgr
-    ConstEncoding(value_t value);
-};
-
 // 1-bit boolean var (identity encoding)
 class BooleanEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr

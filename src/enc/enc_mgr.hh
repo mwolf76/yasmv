@@ -35,6 +35,7 @@
 #include <type.hh>
 
 #include <cudd_mgr.hh>
+#include <cuddInt.h>  /* for cudd_isconstant */
 
 typedef class IEncoding *IEncoding_ptr; // fwd decl
 
@@ -73,6 +74,12 @@ public:
     inline ADD constant(value_t value)
     { return f_cudd.constant(value); }
 
+    inline bool is_constant(ADD x) const
+    { return cuddIsConstant(x.getNode()); }
+
+    inline value_t const_value(ADD x) const
+    { return Cudd_V(x.getNode()); }
+
     inline ADD bit()
     { return f_cudd.addVar(); }
 
@@ -92,11 +99,17 @@ public:
         return (*f_instance);
     }
 
-    unsigned width() const
-    { return f_width; }
+    // inline unsigned width() const
+    // { return f_width; }
 
-    unsigned base() const
+    inline ADD base() const
     { return f_base; }
+
+    inline ADD full() const
+    { return f_full; }
+
+    inline ADD msb()
+    { return f_msb; }
 
 protected:
     EncodingMgr();
@@ -125,9 +138,10 @@ private:
         // }
     }
 
-    /* used for FAR operations on integers */
-    unsigned f_base; // 0x10
-    unsigned f_width;// 8
+    ADD f_base;  // 0x10
+    ADD f_width; // 8
+    ADD f_full;  // 0xF
+    ADD f_msb;   // 0x8
 };
 
 #endif

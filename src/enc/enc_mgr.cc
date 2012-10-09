@@ -78,8 +78,11 @@ EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd())
     , f_em(ExprMgr::INSTANCE())
 {
-    f_width = 8; // experimental, 8 nibbles (=32 bits)
+    // f_width = 8; // experimental, 8 nibbles (=32 bits)
+
     f_base = f_cudd.constant(0x10); // 0x10 = nibble size
+    f_full = f_cudd.constant(0xF);
+    f_msb  = f_cudd.constant(0x8);
 
     DRIVEL << "Initialized EncodingMgr @ " << this << endl;
 }
