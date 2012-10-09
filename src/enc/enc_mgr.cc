@@ -45,19 +45,28 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
     assert(NULL != tp);
     IEncoding_ptr res = NULL;
-    FiniteIntegerType_ptr itype;
-    IntRangeType_ptr rtype;
 
-    if (NULL != dynamic_cast<BooleanType_ptr>(tp)) {
+    BooleanType_ptr btype;
+    AlgebraicType_ptr atype;
+    IntRangeType_ptr rtype;
+    EnumType_ptr etype;
+
+    if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
+        DEBUG << "Encoding Boolean " << btype << endl;
         res = new BooleanEncoding();
     }
-    else if (NULL != (itype = dynamic_cast<FiniteIntegerType_ptr>(tp))) {
-        res = new IntEncoding(itype->width(), itype->is_signed());
+    else if (NULL != (atype = dynamic_cast<AlgebraicType_ptr>(tp))) {
+        DEBUG << "Encoding Algebraic " << atype << endl;
+        res = new AlgebraicEncoding(atype->width(), atype->is_signed());
     }
     else if (NULL != (rtype = dynamic_cast<IntRangeType_ptr>(tp))) {
+        DEBUG << "Encoding Range " << rtype << endl;
         res = new RangeEncoding(rtype->min(), rtype->max());
     }
-    // tODO: more here...
+    else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
+        DEBUG << "Encoding Enum " << etype << endl;
+        res = new EnumEncoding(etype->literals());
+    }
 
     else assert(0); /* unexpected or unsupported */
 
@@ -67,7 +76,11 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
 EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd())
+    , f_em(ExprMgr::INSTANCE())
 {
+    f_width = 8; // experimental, 8 nibbles (=32 bits)
+    f_base = f_cudd.constant(0x10); // 0x10 = nibble size
+
     DRIVEL << "Initialized EncodingMgr @ " << this << endl;
 }
 

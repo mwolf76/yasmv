@@ -24,74 +24,110 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <math.h>
+#include <cmath>
 #include <enc.hh>
+
+// Constants
+ConstEncoding::ConstEncoding(value_t value)
+    : Encoding()
+{
+    unsigned i, base = f_mgr.base();
+
+    for (i = f_mgr.width(); (i); -- i) {
+        ADD digit = f_mgr.constant(value % base);
+        f_dv.push_back(digit);
+        value /= base;
+    }
+
+    assert (value == 0); // not overflowing
+}
 
 // boolean 1(1 bit) var
 BooleanEncoding::BooleanEncoding()
     : Encoding()
 {
-    f_add = f_mgr.dd().addVar();
-    f_bits.push_back(f_add);
-}
-
-IntEncoding::IntEncoding(unsigned nbits, bool is_signed)
-    : Encoding()
-{
-    make_integer_encoding(nbits, is_signed);
+    // single bit encoding
+    f_dv.push_back(f_mgr.dd().addVar());
 }
 
 // bounded integer var
 RangeEncoding::RangeEncoding(value_t min, value_t max)
-    : Encoding()
-    , f_min(min)
+    : f_min(min)
     , f_max(max)
 {
     unsigned nbits = range_repr_bits(f_max - f_min);
-    assert (0 < nbits);
 
-    make_integer_encoding(nbits);
+    make_monolithic_encoding(nbits);
 }
 
-// enumerative
-EnumEncoding::EnumEncoding(ExprSet lits)
-    : Encoding()
-    , f_lits(lits)
+Expr_ptr RangeEncoding::expr(ADD leaf)
 {
-    unsigned nbits = range_repr_bits(f_lits.size());
-    assert (0 < nbits);
+    ExprMgr& em = f_mgr.em();
 
-    make_integer_encoding(nbits);
+    value_t res = Cudd_V(leaf.getNode()) + f_min;
+    assert (f_min <= res && res <= f_max);
+
+    return em.make_iconst(res);
 }
 
-// common code for integer encodings
-ADD Encoding::make_integer_encoding(unsigned nbits, bool is_signed)
+ADD RangeEncoding::leaf(Expr_ptr expr)
 {
-    bool msb = true;
+    ExprMgr& em = f_mgr.em();
 
-    // in place
-    ADD& add_res = f_add;
+    assert(em.is_numeric(expr));
+    return f_mgr.constant(expr->value() - f_min);
+}
+
+EnumEncoding::EnumEncoding(const ExprSet& lits)
+{
+    unsigned nbits = range_repr_bits(lits.size());
+
+    make_monolithic_encoding(nbits);
+
+    value_t v;
+    ExprSet::iterator eye;
+    for (v = 0, eye= lits.begin(); eye != lits.end(); ++ eye, ++ v) {
+
+        f_v2e_map[v] = *eye;
+        f_e2v_map[*eye] = v;
+    }
+}
+
+Expr_ptr EnumEncoding::expr(ADD leaf)
+{
+    value_t lindex = Cudd_V(leaf.getNode());
+    return f_v2e_map [lindex];
+}
+
+ADD EnumEncoding::leaf(Expr_ptr expr)
+{
+    ExprMgr& em = f_mgr.em();
+    assert(em.is_identifier(expr));
+
+    return f_mgr.constant(f_e2v_map[expr]);
+}
+
+unsigned MonolithicEncoding::range_repr_bits (value_t range)
+{
+    return ceil(log2(range));
+}
+
+ADD MonolithicEncoding::make_monolithic_encoding(unsigned nbits)
+{
+    ADD res = f_mgr.bit();
+    ADD two = f_mgr.constant(2);
 
     assert(0 < nbits);
-    unsigned i = 0;
+    unsigned i = 1;
 
     while (i < nbits) {
-        ADD two = f_mgr.dd().constant(2);
-        if (msb && is_signed) {
-            msb = false;
-            two = two.Negate(); // MSB is -2^N in 2's complement
-        }
-        add_res *= two;
-
-        // create var and book it
-        ADD add_var = f_mgr.dd().addVar();
-        f_bits.push_back(add_var);
-
-        // add it to the encoding
-        add_res += add_var;
+        res *= two;
+        res += f_mgr.bit();
 
         ++ i;
     }
+
+    return res;
 }
 
 // dctor

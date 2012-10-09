@@ -64,14 +64,17 @@ public:
     inline Cudd& dd() const
     { return f_cudd; }
 
-    inline ADD one() const
+    inline ADD one()
     { return f_cudd.addOne(); }
 
-    inline ADD zero() const
+    inline ADD zero()
     { return f_cudd.addZero(); }
 
-    inline ADD constant(value_t value) const
+    inline ADD constant(value_t value)
     { return f_cudd.constant(value); }
+
+    inline ADD bit()
+    { return f_cudd.addVar(); }
 
     // used by the compiler
     IEncoding_ptr make_encoding(Type_ptr type);
@@ -79,12 +82,21 @@ public:
     // user by the SAT model evaluator
     IEncoding_ptr find_encoding(ADD add);
 
+    inline ExprMgr& em()
+    { return f_em; }
+
     static EncodingMgr& INSTANCE() {
         if (! f_instance) {
             f_instance = new EncodingMgr();
         }
         return (*f_instance);
     }
+
+    unsigned width() const
+    { return f_width; }
+
+    unsigned base() const
+    { return f_base; }
 
 protected:
     EncodingMgr();
@@ -97,6 +109,7 @@ private:
 
     /* local data */
     Cudd& f_cudd;
+    ExprMgr& f_em;
 
     /* low-level services */
     FQExpr2EncMap f_fqexpr2enc_map;
@@ -112,6 +125,9 @@ private:
         // }
     }
 
+    /* used for FAR operations on integers */
+    unsigned f_base; // 0x10
+    unsigned f_width;// 8
 };
 
 #endif

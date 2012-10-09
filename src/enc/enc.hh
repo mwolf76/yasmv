@@ -38,36 +38,42 @@
 #include <enc_mgr.hh>
 
 // -- primary decls  --------------------------------------------------------------
+typedef vector<ADD> DDVector;
+
 typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
 public:
-    virtual ADD add() const =0;
+    virtual DDVector& dv() =0;
 };
 
 class Encoding : public IEncoding {
 public:
-    ADD add() const
-    { return f_add; }
+    DDVector& dv()
+    { return f_dv; }
 
 protected:
     Encoding()
         : f_mgr(EncodingMgr::INSTANCE())
-        , f_add(f_mgr.dd().addZero())
     {}
 
     virtual ~Encoding() =0;
 
     EncodingMgr& f_mgr;
-    EncodingBits f_bits;
-    ADD f_add;
+    DDVector f_dv; // digit vector
 
-    // shared services
-    unsigned range_repr_bits (value_t range)
-    { return ceil(log2(range)); }
-
-    ADD make_integer_encoding(unsigned nbits, bool is_signed =false);
+    ADD make_integer_encoding(unsigned nbits);
 };
 
+// for constants promotion as algebraic entities
+class ConstEncoding : public Encoding {
+friend class EncodingMgr; // expose ctors only to mgr
+protected:
+    virtual ~ConstEncoding()
+    { assert(0); }
+
+    // Const value, width is provided by EncMgr
+    ConstEncoding(value_t value);
+};
 
 // 1-bit boolean var (identity encoding)
 class BooleanEncoding : public Encoding {
@@ -80,42 +86,67 @@ protected:
     BooleanEncoding();
 };
 
-
-// n-bits 2's complement signed integer
-class IntEncoding : public Encoding {
+class AlgebraicEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
+public:
+
 protected:
-    virtual ~IntEncoding()
+    virtual ~AlgebraicEncoding()
     { assert(0); }
 
-    IntEncoding(unsigned nbits, bool is_signed);
+    AlgebraicEncoding(unsigned width, bool is_signed);
+
+    ADD make_algebraic_encoding();
 };
 
-// 2's complement ranged integer
-class RangeEncoding : public Encoding {
+// base class for finite int based
+class MonolithicEncoding : public Encoding {
+public:
+    virtual Expr_ptr expr(ADD leaf) =0;
+    virtual ADD leaf(Expr_ptr expr) =0;
+
+protected:
+    ADD make_monolithic_encoding(unsigned nbits);
+    unsigned range_repr_bits (value_t range);
+};
+
+class RangeEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
+public:
+    virtual Expr_ptr expr(ADD leaf);
+    virtual ADD leaf(Expr_ptr expr);
+
 protected:
     virtual ~RangeEncoding()
     { assert(0); }
 
-    // n bits bounded integer var (D = 0..2^n -1)
     RangeEncoding(value_t min_value, value_t max_value);
 
     value_t f_min;
     value_t f_max;
 };
 
-// finite enumerative
-class EnumEncoding : public Encoding {
+typedef unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
+typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;
+
+typedef unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
+typedef pair<ExprValueMap::iterator, bool> ExprValueMapHit;
+
+
+class EnumEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
+public:
+    virtual Expr_ptr expr(ADD leaf);
+    virtual ADD leaf(Expr_ptr expr);
+
 protected:
     virtual ~EnumEncoding()
     { assert(0); }
 
-    // n bits bounded integer var (D = 0..2^n -1)
-    EnumEncoding(ExprSet lits);
+    EnumEncoding(const ExprSet& lits);
 
-    ExprSet f_lits;
+    ValueExprMap f_v2e_map;
+    ExprValueMap f_e2v_map;
 };
 
 #endif
