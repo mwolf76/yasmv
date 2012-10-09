@@ -133,9 +133,21 @@ private:
     ADDMap f_map; // FQDN -> add cache
     ENCMap f_encodings; // FQDN -> add encoding
 
+    // partial results
     ADDStack f_add_stack;
+
+    // type look-ahead for operands promotion
+    TypeStack f_type_stack;
+
+    // current ctx stack, for symbol resolution
     ExprStack f_ctx_stack;
+
+    // current time frame, for unrolling
     TimeStack f_time_stack;
+
+    // experimental, FAR for integers
+    // (fractioned algebraic representation)
+    unsigned f_wwidth; // word width, default is 8 nibbles (=32 bits)
 
     // managers
     ModelMgr& f_owner;
@@ -161,12 +173,18 @@ private:
 
     void push_const_value(value_t value);
 
-    // inspectors
-    bool binary_boolean(const Expr_ptr expr);
-    bool binary_algebraic(const Expr_ptr expr);
+    /* -- expr inspectors ---------------------------------------------------- */
+    bool is_binary_boolean(const Expr_ptr expr);
+    bool is_unary_boolean(const Expr_ptr expr);
 
-    bool unary_boolean(const Expr_ptr expr);
-    bool unary_algebraic(const Expr_ptr expr);
+    bool is_binary_monolithic(const Expr_ptr expr);
+    bool is_unary_monolithic(const Expr_ptr expr);
+
+    bool is_binary_enumerative(const Expr_ptr expr);
+    bool is_unary_enumerative(const Expr_ptr expr);
+
+    bool is_binary_algebraic(const Expr_ptr expr);
+    bool is_unary_algebraic(const Expr_ptr expr);
 };
 
 #endif
