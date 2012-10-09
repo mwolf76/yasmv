@@ -72,7 +72,7 @@ class BooleanEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~BooleanEncoding()
@@ -86,7 +86,7 @@ class AlgebraicEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~AlgebraicEncoding()
@@ -101,12 +101,12 @@ protected:
 
 // base class for finite int based
 class MonolithicEncoding : public Encoding {
-public:
-    // here assignment *must* have size 1
-    Expr_ptr expr(DDVector& assignment);
-
 protected:
-    ADD make_monolithic_encoding(unsigned nbits);
+    virtual ~MonolithicEncoding()
+    { assert(0); }
+
+    MonolithicEncoding();
+
     unsigned range_repr_bits (value_t range);
 };
 
@@ -114,7 +114,7 @@ class RangeEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~RangeEncoding()
@@ -136,7 +136,7 @@ class EnumEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~EnumEncoding()

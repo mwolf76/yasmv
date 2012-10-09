@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(boolean_type)
     BOOST_CHECK(  tm.is_boolean(bt));
 
     BOOST_CHECK(! tm.is_integer(bt));
-    BOOST_CHECK(! tm.is_int_finite(bt));
+    // BOOST_CHECK(! tm.is_int_finite(bt));o
     BOOST_CHECK(! tm.is_int_range(bt));
     BOOST_CHECK(! tm.is_int_enum(bt));
     BOOST_CHECK(! tm.is_enum(bt));
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(integer_type)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(  tm.is_integer(in));
-    BOOST_CHECK(! tm.is_int_finite(in));
+    // BOOST_CHECK(! tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
     BOOST_CHECK(! tm.is_enum(in));
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(range_type)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(  tm.is_integer(in));
-    BOOST_CHECK(! tm.is_int_finite(in));
+    // BOOST_CHECK(! tm.is_int_finite(in));
     BOOST_CHECK(  tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
     BOOST_CHECK(! tm.is_enum(in));
@@ -86,16 +86,16 @@ BOOST_AUTO_TEST_CASE(unsigned_type)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(  tm.is_integer(in));
-    BOOST_CHECK(  tm.is_int_finite(in));
+    // BOOST_CHECK(  tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
 
     BOOST_CHECK(! tm.is_instance(in));
 
-    // additional checks
-    FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
-    BOOST_REQUIRE( NULL != fit );
-    BOOST_CHECK( ! fit->is_signed() );
+    // // additional checks
+    // FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
+    // BOOST_REQUIRE( NULL != fit );
+    // BOOST_CHECK( ! fit->is_signed() );
 }
 
 BOOST_AUTO_TEST_CASE(signed_type)
@@ -106,16 +106,16 @@ BOOST_AUTO_TEST_CASE(signed_type)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(  tm.is_integer(in));
-    BOOST_CHECK(  tm.is_int_finite(in));
+    // BOOST_CHECK(  tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
 
     BOOST_CHECK(! tm.is_instance(in));
 
-    // additional checks
-    FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
-    BOOST_REQUIRE( NULL != fit );
-    BOOST_CHECK(   fit->is_signed() );
+    // // additional checks
+    // FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
+    // BOOST_REQUIRE( NULL != fit );
+    // BOOST_CHECK(   fit->is_signed() );
 }
 
 BOOST_AUTO_TEST_CASE(enum_type_symbolic)
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(! tm.is_integer(in));
-    BOOST_CHECK(! tm.is_int_finite(in));
+    // BOOST_CHECK(! tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
     BOOST_CHECK(  tm.is_enum(in));
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(enum_type_numeric)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(  tm.is_integer(in));
-    BOOST_CHECK(! tm.is_int_finite(in));
+    // BOOST_CHECK(! tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(  tm.is_int_enum(in));
     BOOST_CHECK(  tm.is_enum(in));
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(enum_type_mixed)
     BOOST_CHECK(! tm.is_boolean(in));
 
     BOOST_CHECK(! tm.is_integer(in));
-    BOOST_CHECK(! tm.is_int_finite(in));
+    // BOOST_CHECK(! tm.is_int_finite(in));
     BOOST_CHECK(! tm.is_int_range(in));
     BOOST_CHECK(! tm.is_int_enum(in));
     BOOST_CHECK(  tm.is_enum(in));

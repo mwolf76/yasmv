@@ -34,6 +34,15 @@ BooleanEncoding::BooleanEncoding()
     f_dv.push_back(f_mgr.dd().addVar());
 }
 
+Expr_ptr BooleanEncoding::expr(DDVector& assignment)
+{
+    assert(0);
+}
+
+MonolithicEncoding::MonolithicEncoding()
+    : Encoding()
+{}
+
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
