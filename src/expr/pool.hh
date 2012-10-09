@@ -77,4 +77,15 @@ struct PtrEq {
                      const void* y) const;
 };
 
+/* -- integer key definitions (here to collect them all together) ------------ */
+struct ValueHash {
+    long operator() (value_t) const;
+};
+
+struct ValueEq {
+    bool operator() (const value_t x,
+                     const value_t y) const;
+};
+
+
 #endif

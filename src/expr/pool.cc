@@ -150,3 +150,14 @@ bool PtrEq::operator() (const void* x,
 {
     return x == y;
 }
+
+long ValueHash::operator() (value_t k) const
+{
+    return (long)(k);
+}
+
+bool ValueEq::operator() (const value_t x,
+                          const value_t y) const
+{
+    return x == y;
+}
