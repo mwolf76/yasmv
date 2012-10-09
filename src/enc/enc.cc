@@ -24,8 +24,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmath>
 #include <enc.hh>
+
+#include <cuddInt.h>  /* for cudd_isconstant */
 
 // Constants
 ConstEncoding::ConstEncoding(value_t value)
@@ -50,69 +51,8 @@ BooleanEncoding::BooleanEncoding()
     f_dv.push_back(f_mgr.dd().addVar());
 }
 
-// bounded integer var
-RangeEncoding::RangeEncoding(value_t min, value_t max)
-    : f_min(min)
-    , f_max(max)
-{
-    unsigned nbits = range_repr_bits(f_max - f_min);
-
-    make_monolithic_encoding(nbits);
-}
-
-Expr_ptr RangeEncoding::expr(ADD leaf)
-{
-    ExprMgr& em = f_mgr.em();
-
-    value_t res = Cudd_V(leaf.getNode()) + f_min;
-    assert (f_min <= res && res <= f_max);
-
-    return em.make_iconst(res);
-}
-
-ADD RangeEncoding::leaf(Expr_ptr expr)
-{
-    ExprMgr& em = f_mgr.em();
-
-    assert(em.is_numeric(expr));
-    return f_mgr.constant(expr->value() - f_min);
-}
-
-EnumEncoding::EnumEncoding(const ExprSet& lits)
-{
-    unsigned nbits = range_repr_bits(lits.size());
-
-    make_monolithic_encoding(nbits);
-
-    value_t v;
-    ExprSet::iterator eye;
-    for (v = 0, eye= lits.begin(); eye != lits.end(); ++ eye, ++ v) {
-
-        f_v2e_map[v] = *eye;
-        f_e2v_map[*eye] = v;
-    }
-}
-
-Expr_ptr EnumEncoding::expr(ADD leaf)
-{
-    value_t lindex = Cudd_V(leaf.getNode());
-    return f_v2e_map [lindex];
-}
-
-ADD EnumEncoding::leaf(Expr_ptr expr)
-{
-    ExprMgr& em = f_mgr.em();
-    assert(em.is_identifier(expr));
-
-    return f_mgr.constant(f_e2v_map[expr]);
-}
-
-unsigned MonolithicEncoding::range_repr_bits (value_t range)
-{
-    return ceil(log2(range));
-}
-
-ADD MonolithicEncoding::make_monolithic_encoding(unsigned nbits)
+// base service, has to be in superclass for visibility
+ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
     ADD res = f_mgr.bit();
     ADD two = f_mgr.constant(2);
@@ -125,6 +65,104 @@ ADD MonolithicEncoding::make_monolithic_encoding(unsigned nbits)
         res += f_mgr.bit();
 
         ++ i;
+    }
+
+    return res;
+}
+
+// algebraic encoding uses monolithic as a builing block
+AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed)
+    : f_width(width)
+    , f_signed(is_signed)
+{
+    unsigned i;
+    const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
+
+    for (i = 0; i < f_width; ++ i) {
+        f_dv.push_back(make_monolithic_encoding(NIBBLE_SIZE));
+    }
+}
+
+Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
+{
+    ExprMgr& em = f_mgr.em();
+    unsigned i;
+
+    value_t res = 0;
+    assert (assignment.size() == f_width);
+
+    i = 0; do {
+        ADD digit = assignment[i];
+        ADD eval = f_dv[i].Times(assignment[i]);
+
+        assert (cuddIsConstant(eval.getNode()));
+        res += Cudd_V(eval.getNode());
+
+        if (++ i < f_width) {
+            res *= 0x10; // bleah!
+        } else break;
+    } while (true);
+
+    return em.make_iconst(res);
+}
+
+// bounded integer var
+RangeEncoding::RangeEncoding(value_t min, value_t max)
+    : f_min(min)
+    , f_max(max)
+{
+    unsigned nbits = range_repr_bits(f_max - f_min);
+    make_monolithic_encoding(nbits);
+}
+
+Expr_ptr RangeEncoding::expr(DDVector& assignment)
+{
+    ExprMgr& em = f_mgr.em();
+    assert (assignment.size() == 1);
+
+    ADD leaf = assignment[0];
+    ADD eval = f_dv[0].Times(leaf);
+    assert (cuddIsConstant(eval.getNode()));
+
+    value_t res = Cudd_V(eval.getNode()) + f_min;
+    assert (f_min <= res && res <= f_max);
+
+    return em.make_iconst(res);
+}
+
+EnumEncoding::EnumEncoding(const ExprSet& lits)
+{
+    unsigned nbits = range_repr_bits(lits.size());
+    make_monolithic_encoding(nbits);
+
+    value_t v;
+    ExprSet::iterator eye;
+    for (v = 0, eye= lits.begin(); eye != lits.end(); ++ eye, ++ v) {
+
+        f_v2e_map[v] = *eye;
+        f_e2v_map[*eye] = v;
+    }
+}
+
+Expr_ptr EnumEncoding::expr(DDVector& assignment)
+{
+    assert (assignment.size() == 1);
+
+    ADD leaf = assignment[0];
+    ADD eval = f_dv[0].Times(leaf);
+    assert (cuddIsConstant(eval.getNode()));
+
+    value_t lindex = Cudd_V(eval.getNode());
+    return f_v2e_map [lindex];
+}
+
+unsigned MonolithicEncoding::range_repr_bits (value_t range)
+{
+    unsigned res = 0;
+    assert(0 < range);
+    while (range) {
+        ++ res;
+        range /= 2;
     }
 
     return res;

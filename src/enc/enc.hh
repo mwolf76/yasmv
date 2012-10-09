@@ -51,6 +51,9 @@ public:
     DDVector& dv()
     { return f_dv; }
 
+    // vector of DD leaves (consts) -> expr
+    virtual Expr_ptr expr(DDVector& assignment) =0;
+
 protected:
     Encoding()
         : f_mgr(EncodingMgr::INSTANCE())
@@ -61,12 +64,17 @@ protected:
     EncodingMgr& f_mgr;
     DDVector f_dv; // digit vector
 
-    ADD make_integer_encoding(unsigned nbits);
+    ADD make_monolithic_encoding(unsigned nbits);
 };
 
 // for constants promotion as algebraic entities
 class ConstEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
+public:
+    // Of course, this is meaningless. Here only to fullfill abstract decl.
+    Expr_ptr expr(DDVector& assignment)
+    { assert(0); /* ehm... what? */ }
+
 protected:
     virtual ~ConstEncoding()
     { assert(0); }
@@ -78,6 +86,10 @@ protected:
 // 1-bit boolean var (identity encoding)
 class BooleanEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
+public:
+    // here assignment *must* have size 1
+    Expr_ptr expr(DDVector& assignment);
+
 protected:
     virtual ~BooleanEncoding()
     { assert(0); }
@@ -89,21 +101,25 @@ protected:
 class AlgebraicEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
+    // here assignment *must* have size 1
+    Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~AlgebraicEncoding()
     { assert(0); }
 
+    // width is number of *digits* here */
     AlgebraicEncoding(unsigned width, bool is_signed);
 
-    ADD make_algebraic_encoding();
+    unsigned f_width;
+    bool f_signed;
 };
 
 // base class for finite int based
 class MonolithicEncoding : public Encoding {
 public:
-    virtual Expr_ptr expr(ADD leaf) =0;
-    virtual ADD leaf(Expr_ptr expr) =0;
+    // here assignment *must* have size 1
+    Expr_ptr expr(DDVector& assignment);
 
 protected:
     ADD make_monolithic_encoding(unsigned nbits);
@@ -113,8 +129,8 @@ protected:
 class RangeEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
-    virtual Expr_ptr expr(ADD leaf);
-    virtual ADD leaf(Expr_ptr expr);
+    // here assignment *must* have size 1
+    Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~RangeEncoding()
@@ -132,12 +148,11 @@ typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;
 typedef unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
 typedef pair<ExprValueMap::iterator, bool> ExprValueMapHit;
 
-
 class EnumEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
-    virtual Expr_ptr expr(ADD leaf);
-    virtual ADD leaf(Expr_ptr expr);
+    // here assignment *must* have size 1
+    Expr_ptr expr(DDVector& assignment);
 
 protected:
     virtual ~EnumEncoding()
