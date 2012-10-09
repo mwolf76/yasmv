@@ -38,7 +38,6 @@ IntegerType::IntegerType(TypeMgr& owner) // abstract
     f_repr = f_owner.em().make_integer_type();
 }
 
-
 AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed)
     : IntegerType(owner)
     , f_width(width)

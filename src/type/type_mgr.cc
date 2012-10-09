@@ -135,8 +135,7 @@ BooleanType_ptr TypeMgr::as_boolean(const Type_ptr tp) const
 
 bool TypeMgr::is_integer(const Type_ptr tp) const
 {
-    return is_int_range(tp) || is_int_enum(tp)  ||
-        (NULL != dynamic_cast<const IntegerType_ptr>(tp));
+    return (NULL != dynamic_cast<const IntegerType_ptr>(tp));
 }
 
 IntegerType_ptr TypeMgr::as_integer(const Type_ptr tp) const

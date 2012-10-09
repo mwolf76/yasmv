@@ -64,7 +64,7 @@ public:
     inline const Type_ptr find_boolean()
     { return f_register[ f_em.make_boolean_type() ]; }
 
-    inline const Type_ptr find_integer() // abstract
+    inline const Type_ptr find_integer()
     { return f_register[ f_em.make_integer_type() ]; }
 
     /* -- decls ------------------------------------------------------------- */
@@ -82,12 +82,22 @@ public:
        integer w.r.t. type inferring. */
     bool is_boolean(const Type_ptr tp) const;
 
+    // 42 is an integer
     bool is_integer(const Type_ptr tp) const;
+
+    // an algebraic VAR
     bool is_int_algebraic(const Type_ptr tp) const;
+
+    // a RANGE
     bool is_int_range(const Type_ptr tp) const;
+
+    // an all-int ENUM
     bool is_int_enum(const Type_ptr tp) const;
 
+    // an ENUM
     bool is_enum(const Type_ptr tp) const;
+
+    // an INSTANCE
     bool is_instance(const Type_ptr tp) const;
 
     // -- as_xxx accessors ------------------------------------------------------
