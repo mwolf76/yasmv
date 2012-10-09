@@ -73,11 +73,11 @@ protected:
     IntegerType(TypeMgr& owner);
 };
 
-typedef class FiniteIntegerType* FiniteIntegerType_ptr;
-class FiniteIntegerType : public IntegerType {
+typedef class AlgebraicType* AlgebraicType_ptr;
+class AlgebraicType : public IntegerType {
 protected:
     friend class TypeMgr; // ctors not public
-    FiniteIntegerType(TypeMgr& owner, unsigned width, bool is_signed);
+    AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed);
 
     unsigned f_width;
     bool f_signed;

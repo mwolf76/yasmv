@@ -39,7 +39,7 @@ IntegerType::IntegerType(TypeMgr& owner) // abstract
 }
 
 
-FiniteIntegerType::FiniteIntegerType(TypeMgr& owner, unsigned width, bool is_signed)
+AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed)
     : IntegerType(owner)
     , f_width(width)
     , f_signed(is_signed)

@@ -83,7 +83,7 @@ public:
     bool is_boolean(const Type_ptr tp) const;
 
     bool is_integer(const Type_ptr tp) const;
-    bool is_int_finite(const Type_ptr tp) const;
+    bool is_int_algebraic(const Type_ptr tp) const;
     bool is_int_range(const Type_ptr tp) const;
     bool is_int_enum(const Type_ptr tp) const;
 
@@ -97,8 +97,8 @@ public:
     typedef class IntegerType* IntegerType_ptr;
     IntegerType_ptr as_integer(const Type_ptr tp) const;
 
-    typedef class FiniteIntegerType* FiniteIntegerType_ptr;
-    FiniteIntegerType_ptr as_int_finite(const Type_ptr tp) const;
+    typedef class AlgebraicType* AlgebraicType_ptr;
+    AlgebraicType_ptr as_int_algebraic(const Type_ptr tp) const;
 
     typedef class IntRangeType* IntRangeType_ptr;
     IntRangeType_ptr as_int_range(const Type_ptr tp) const;

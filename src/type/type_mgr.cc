@@ -48,7 +48,7 @@ const Type_ptr TypeMgr::find_unsigned(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new FiniteIntegerType(*this, bits, false);
+    res = new AlgebraicType(*this, bits, false);
     register_type(descr, res);
     return res;
 }
@@ -60,7 +60,7 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new FiniteIntegerType(*this, bits, true);  // signed
+    res = new AlgebraicType(*this, bits, true);  // signed
     register_type(descr, res);
     return res;
 }
@@ -181,14 +181,14 @@ EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
     return res;
 }
 
-bool TypeMgr::is_int_finite(const Type_ptr tp) const
+bool TypeMgr::is_int_algebraic(const Type_ptr tp) const
 {
-    return (NULL != dynamic_cast <FiniteIntegerType*> (tp));
+    return (NULL != dynamic_cast <AlgebraicType*> (tp));
 }
 
-FiniteIntegerType_ptr TypeMgr::as_int_finite(const Type_ptr tp) const
+AlgebraicType_ptr TypeMgr::as_int_algebraic(const Type_ptr tp) const
 {
-    FiniteIntegerType_ptr res = dynamic_cast <const FiniteIntegerType_ptr> (tp);
+    AlgebraicType_ptr res = dynamic_cast <const AlgebraicType_ptr> (tp);
     assert(res);
 
     return res;
