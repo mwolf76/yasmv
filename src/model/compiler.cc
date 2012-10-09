@@ -989,9 +989,8 @@ bool BECompiler::is_binary_boolean(const Expr_ptr expr)
 
     /* AND, OR, XOR, XNOR, IFF, IMPLIES */
     if (em.is_binary_logical(expr)) {
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         return (is_boolean(f_owner.type(lhs)) &&
                 is_boolean(f_owner.type(rhs)));
     }
@@ -1022,9 +1021,8 @@ bool BECompiler::is_binary_monolithic(const Expr_ptr expr)
         (em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         return (is_monolithic(f_owner.type(lhs)) &&
                 is_monolithic(f_owner.type(rhs)));
     }
@@ -1055,9 +1053,8 @@ bool BECompiler::is_binary_enumerative(const Expr_ptr expr)
     if ((em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         return (is_enumerative(f_owner.type(lhs)) &&
                 is_enumerative(f_owner.type(rhs)));
     }
@@ -1089,8 +1086,8 @@ bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
         (em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
         // see comment above
         return ( (is_algebraic(f_owner.type(lhs)) ||
@@ -1118,6 +1115,20 @@ bool BECompiler::is_unary_algebraic(const Expr_ptr expr)
 
     return false;
 }
+
+/* this is cool, due to stack organization is perfectly fine to use
+   binary variants :-) */
+bool BECompiler::is_ite_boolean(const Expr_ptr expr)
+{ return is_binary_boolean(expr); }
+
+bool BECompiler::is_ite_monolithic(const Expr_ptr expr)
+{ return is_binary_monolithic(expr); }
+
+bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
+{ return is_binary_enumerative(expr); }
+
+bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
+{ return is_binary_algebraic(expr); }
 
 // REMARK: algebrizations makes sense only for binary ops, there is no
 // need to algebrize a single operand! (unless casts are introduced,
