@@ -24,6 +24,8 @@
 #define BE_COMPILER_H
 #include <simple_expr_walker.hh>
 
+#include <type.hh>
+
 #include <model.hh>
 #include <model_mgr.hh>
 
@@ -152,6 +154,7 @@ private:
     // managers
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
+    TypeMgr& f_tm;
 
     // services
     inline bool cache_miss(const Expr_ptr expr)
@@ -171,20 +174,47 @@ private:
     inline void register_encoding(const FQExpr& symb, IEncoding_ptr enc)
     { f_encodings [ symb ] = enc; }
 
-    void push_const_value(value_t value);
+    /* -- type predicates ---------------------------------------------------- */
+
+    /* delegates to TypeMgr */
+    inline bool is_boolean(Type_ptr tp)
+    { return f_tm.is_boolean(tp); }
+
+    inline bool is_algebraic(Type_ptr tp)
+    { return f_tm.is_int_algebraic(tp); }
+
+    inline bool is_enumerative(Type_ptr tp)
+    { return f_tm.is_enum(tp); }
+
+    inline bool is_monolithic(Type_ptr tp)
+    {
+        return (f_tm.is_integer(tp)   || // constants
+                f_tm.is_int_range(tp) ||
+                f_tm.is_int_enum(tp));   // only ints
+    }
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
     bool is_unary_boolean(const Expr_ptr expr);
+    bool is_ite_boolean(const Expr_ptr expr);
 
     bool is_binary_monolithic(const Expr_ptr expr);
     bool is_unary_monolithic(const Expr_ptr expr);
+    bool is_ite_monolithic(const Expr_ptr expr);
 
     bool is_binary_enumerative(const Expr_ptr expr);
     bool is_unary_enumerative(const Expr_ptr expr);
+    bool is_ite_enumerative(const Expr_ptr expr);
 
     bool is_binary_algebraic(const Expr_ptr expr);
     bool is_unary_algebraic(const Expr_ptr expr);
+    bool is_ite_algebraic(const Expr_ptr expr);
+
+    /* -- type work ---------------------------------------------------------- */
+    unsigned algebrize_ops_binary();
+
+    void algebraic_from_monolithic(unsigned width);
+    void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
 };
 
 #endif
