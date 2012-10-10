@@ -995,6 +995,56 @@ void BECompiler::algebraic_plus()
     }
 }
 
+void BECompiler::algebraic_mul()
+{
+    unsigned pos, i, j, width = algebrize_ops_binary(); // largest, takes care of type stack
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* res[width];
+    for (i = width -1; 0 <= i; -- i) {
+        *res[i] = f_enc.zero();
+    }
+
+    ADD* tmp[width];
+    for (i = width -1; 0 <= i; -- i) {
+        *tmp[i] = f_enc.zero();
+    }
+
+    ADD carry = f_enc.zero();
+
+    for (i = width -1; 0 <= i; -- i) {
+        for (j = width -1; 0 <= j; -- j) {
+
+            // ignore what happend out of result boundaries
+            if (0 <= (pos = width - i - j)) {
+
+                /* build mul table for digit product */
+                ADD product = (*lhs[i]).Times(*rhs[j]).Plus(carry);
+
+                *tmp[pos] = product.Modulus(f_enc.base());
+                carry = product.Divide(f_enc.base());
+            }
+        }
+
+        // update result
+        for (j = width -1; i <= j; -- j) {
+            *res[j] += *tmp[j];
+        }
+
+        // return i-th digit of result
+        f_add_stack.push_back(*res[i]);
+    }
+}
+
 void BECompiler::algebraic_and()
 {
     unsigned i, width = algebrize_ops_binary(); // largest
@@ -1105,7 +1155,7 @@ void BECompiler::algebraic_implies()
     for (i = width; (i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
+        ADD tmp = (*lhs[i]).BWCmpl().BWOr(*rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
