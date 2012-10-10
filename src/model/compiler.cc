@@ -43,11 +43,11 @@
 
 BECompiler::BECompiler()
     : f_map()
+    , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
-    , f_tm(TypeMgr::INSTANCE())
 { DEBUG << "Created BECompiler @" << this << endl; }
 
 BECompiler::~BECompiler()
@@ -109,13 +109,15 @@ bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void BECompiler::walk_neg_postorder(const Expr_ptr expr)
 {
-    if (is_unary_monolithic(expr)) {
+    TypeMgr& tm = f_owner.tm();
+
+    if (is_unary_integer(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Negate());
     }
     else if (is_unary_algebraic(expr)) {
         const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-        unsigned i, width = f_tm.as_int_algebraic(rhs_type)->width();
+        unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
 
         ADD* lhs[width];
         for (i = width; (i) ; -- i) {
@@ -132,13 +134,15 @@ bool BECompiler::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void BECompiler::walk_not_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     if (is_unary_boolean(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Cmpl());
     }
     else if (is_unary_algebraic(expr)) {
         const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-        unsigned i, width = f_tm.as_int_algebraic(rhs_type)->width();
+        unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
 
         ADD* lhs[width];
         for (i = width; (i) ; -- i) {
@@ -156,7 +160,7 @@ bool BECompiler::walk_add_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_add_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Plus(rhs));
@@ -197,7 +201,7 @@ bool BECompiler::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_sub_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Minus(rhs));
@@ -216,7 +220,7 @@ bool BECompiler::walk_div_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_div_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Divide(rhs));
@@ -235,7 +239,7 @@ bool BECompiler::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_mul_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Times(rhs));
@@ -254,7 +258,7 @@ bool BECompiler::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_mod_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Modulus(rhs));
@@ -279,10 +283,10 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
     }
 
-    else if (is_binary_monolithic(expr)) {
+    else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -322,10 +326,10 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Or(rhs));
     }
 
-    else if (is_binary_monolithic(expr)) {
+    else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -363,10 +367,10 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Xor(rhs));
     }
 
-    else if (is_binary_monolithic(expr)) {
+    else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -404,10 +408,10 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Xnor(rhs));
     }
 
-    else if (is_binary_monolithic(expr)) {
+    else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -445,10 +449,10 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Cmpl().Or(rhs));
     }
 
-    else if (is_binary_monolithic(expr)) {
+    else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -491,10 +495,10 @@ bool BECompiler::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_lshift_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise monolithic arithmetic */
+        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
     }
 
     else if (is_binary_algebraic(expr)) {
@@ -556,7 +560,7 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Equals(rhs));
     }
 
-    else if (is_binary_monolithic(expr) ||
+    else if (is_binary_integer(expr) ||
              is_binary_enumerative(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
@@ -603,7 +607,7 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
         f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
     }
 
-    else if (is_binary_monolithic(expr) ||
+    else if (is_binary_integer(expr) ||
              is_binary_enumerative(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
@@ -644,7 +648,7 @@ bool BECompiler::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_gt_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LT(lhs)); // simulate GT op
@@ -684,7 +688,7 @@ bool BECompiler::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_ge_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LEQ(lhs)); // simulate GEQ op
@@ -724,7 +728,7 @@ bool BECompiler::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_lt_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LT(rhs));
@@ -764,7 +768,7 @@ bool BECompiler::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_le_postorder(const Expr_ptr expr)
 {
-    if (is_binary_monolithic(expr)) {
+    if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LEQ(rhs));
@@ -804,21 +808,23 @@ bool BECompiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_ite_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm = f_owner.tm();
+
     if (is_ite_boolean(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
-        f_type_stack.push_back(f_tm.find_boolean());
+        f_type_stack.push_back(tm.find_boolean());
         f_add_stack.push_back(c.Ite(lhs, rhs));
     }
 
-    else if (is_ite_monolithic(expr)) {
+    else if (is_ite_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
-        f_type_stack.push_back(f_tm.find_integer());
+        f_type_stack.push_back(tm.find_integer());
         f_add_stack.push_back(c.Ite(lhs, rhs));
     }
 
@@ -827,7 +833,7 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
-        f_type_stack.push_back(f_tm.find_integer());
+        f_type_stack.push_back(tm.find_integer());
         f_add_stack.push_back(c.Ite(lhs, rhs));
     }
 
@@ -882,7 +888,7 @@ void BECompiler::walk_dot_postorder(const Expr_ptr expr)
 
     // { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
     //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    //     assert(f_tm.is_instance(top));
+    //     assert(tm.is_instance(top));
     // }
 
     // // propagate rhs add
@@ -894,6 +900,9 @@ void BECompiler::walk_dot_postorder(const Expr_ptr expr)
 
 void BECompiler::walk_leaf(const Expr_ptr expr)
 {
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
     /* cached? */
     if (! cache_miss(expr)) return;
 
@@ -902,9 +911,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
-    // 0. explicit constants are monolithic ints (e.g. 42)
-    if (ExprMgr::INSTANCE().is_numeric(expr)) {
-        f_type_stack.push_back(f_tm.find_integer()); // reserved
+    // 0. explicit constants are integer ints (e.g. 42)
+    if (em.is_numeric(expr)) {
+        f_type_stack.push_back(tm.find_integer()); // reserved
         f_add_stack.push_back(f_enc.constant(expr->value()));
     }
 
@@ -946,13 +955,13 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
             assert (NULL != enc);
 
             // push either 1 or more ADDs depending on the encoding
-            if (is_boolean(vtype) ||
-                is_enumerative(vtype) ||
-                is_integer(vtype)) {
+            if (tm.is_boolean(vtype) ||
+                tm.is_enum(vtype) ||
+                tm.is_integer(vtype)) {
                 f_add_stack.push_back(enc->dv()[0]);
             }
-            else if (is_algebraic(vtype)) {
-                for (unsigned i = f_tm.as_int_algebraic(vtype)->width(); (i); -- i) {
+            else if (tm.is_int_algebraic(vtype)) {
+                for (unsigned i = tm.as_int_algebraic(vtype)->width(); (i); -- i) {
                     f_add_stack.push_back(enc->dv()[i]);
                 }
             }
@@ -995,13 +1004,14 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 bool BECompiler::is_binary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /* AND, OR, XOR, XNOR, IFF, IMPLIES */
     if (em.is_binary_logical(expr)) {
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (is_boolean(f_owner.type(lhs)) &&
-                is_boolean(f_owner.type(rhs)));
+        return (tm.is_boolean(f_owner.type(lhs)) &&
+                tm.is_boolean(f_owner.type(rhs)));
     }
 
     return false;
@@ -1010,19 +1020,21 @@ bool BECompiler::is_binary_boolean(const Expr_ptr expr)
 bool BECompiler::is_unary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /*  NOT, () ? */
     if (em.is_unary_logical(expr)) {
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (is_boolean(f_owner.type(lhs)));
+        return (tm.is_boolean(f_owner.type(lhs)));
     }
 
     return false;
 }
 
-bool BECompiler::is_binary_monolithic(const Expr_ptr expr)
+bool BECompiler::is_binary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
        IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
@@ -1032,22 +1044,22 @@ bool BECompiler::is_binary_monolithic(const Expr_ptr expr)
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (is_integer(f_owner.type(lhs)) &&
-                is_integer(f_owner.type(rhs)));
+        return (tm.is_integer(f_owner.type(lhs)) &&
+                tm.is_integer(f_owner.type(rhs)));
     }
 
     return false;
 }
 
-bool BECompiler::is_unary_monolithic(const Expr_ptr expr)
+bool BECompiler::is_unary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /* unary : ? (), : (), NEG, NOT(bw) */
     if (em.is_unary_arithmetical(expr)) {
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-
-        return (is_integer(f_owner.type(lhs)));
+        Type_ptr tp = f_type_stack.back();
+        return (tm.is_integer(tp));
     }
 
     return false;
@@ -1056,6 +1068,7 @@ bool BECompiler::is_unary_monolithic(const Expr_ptr expr)
 bool BECompiler::is_binary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
        IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
@@ -1064,8 +1077,8 @@ bool BECompiler::is_binary_enumerative(const Expr_ptr expr)
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (is_enumerative(f_owner.type(lhs)) &&
-                is_enumerative(f_owner.type(rhs)));
+        return (tm.is_enum(f_owner.type(lhs)) &&
+                tm.is_enum(f_owner.type(rhs)));
     }
 
     return false;
@@ -1074,12 +1087,13 @@ bool BECompiler::is_binary_enumerative(const Expr_ptr expr)
 bool BECompiler::is_unary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     /* unary : ? (), : (), NEG, NOT(bw) */
     if (em.is_unary_arithmetical(expr)) {
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        return (is_enumerative(f_owner.type(lhs)));
+        return (tm.is_enum(f_owner.type(lhs)));
     }
 
     return false;
@@ -1090,6 +1104,7 @@ bool BECompiler::is_unary_enumerative(const Expr_ptr expr)
 bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     if ((em.is_binary_logical(expr)) ||
         (em.is_binary_arithmetical(expr)) ||
@@ -1099,11 +1114,11 @@ bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
         // see comment above
-        return ( (is_algebraic(f_owner.type(lhs)) ||
-                  is_integer(f_owner.type(lhs))) &&
+        return ( (tm.is_int_algebraic(f_owner.type(lhs)) ||
+                  tm.is_integer(f_owner.type(lhs))) &&
 
-                 (is_algebraic(f_owner.type(rhs)) ||
-                  is_integer(f_owner.type(rhs))));
+                 (tm.is_int_algebraic(f_owner.type(rhs)) ||
+                  tm.is_integer(f_owner.type(rhs))));
     }
 
     return false;
@@ -1112,14 +1127,15 @@ bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
 bool BECompiler::is_unary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
 
     if ((em.is_unary_logical(expr)) ||
         (em.is_unary_arithmetical(expr))) {
 
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        return ( (is_algebraic(f_owner.type(lhs)) ||
-                  is_integer(f_owner.type(lhs))));
+        return ( (tm.is_int_algebraic(f_owner.type(lhs)) ||
+                  tm.is_integer(f_owner.type(lhs))));
     }
 
     return false;
@@ -1130,8 +1146,8 @@ bool BECompiler::is_unary_algebraic(const Expr_ptr expr)
 bool BECompiler::is_ite_boolean(const Expr_ptr expr)
 { return is_binary_boolean(expr); }
 
-bool BECompiler::is_ite_monolithic(const Expr_ptr expr)
-{ return is_binary_monolithic(expr); }
+bool BECompiler::is_ite_integer(const Expr_ptr expr)
+{ return is_binary_integer(expr); }
 
 bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
 { return is_binary_enumerative(expr); }
@@ -1145,21 +1161,23 @@ bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
 // but then again a CAST can be thought as a binary op...[ CAST 8 x ])
 
 /* This is slightly complex: it fetches 2 ops, one of them must be
-   algebraic, possibly both. Performs monolithic to algebraic
+   algebraic, possibly both. Performs integer to algebraic
    conversion if needed, aligns algebraic operands to the largest
    size, and return this size. */
 unsigned BECompiler::algebrize_ops_binary()
 {
+    TypeMgr& tm = f_owner.tm();
+
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
 
-    assert( is_algebraic(rhs_type) || is_algebraic(lhs_type) );
-    unsigned rhs_width = is_algebraic(rhs_type)
-        ? f_tm.as_int_algebraic(rhs_type)->width()
+    assert( tm.is_int_algebraic(rhs_type) || tm.is_int_algebraic(lhs_type) );
+    unsigned rhs_width = tm.is_int_algebraic(rhs_type)
+        ? tm.as_int_algebraic(rhs_type)->width()
         : 0;
 
-    unsigned lhs_width = is_algebraic(lhs_type)
-        ? f_tm.as_int_algebraic(lhs_type)->width()
+    unsigned lhs_width = tm.is_int_algebraic(lhs_type)
+        ? tm.as_int_algebraic(lhs_type)->width()
         : 0;
 
     /* max */
@@ -1170,21 +1188,21 @@ unsigned BECompiler::algebrize_ops_binary()
 
     /* perform conversion or padding, taking sign bit into account */
     if (rhs_width < res) {
-        if (! rhs_width) { // monolithic, conversion required
-            algebraic_from_monolithic(res);
+        if (! rhs_width) { // integer, conversion required
+            algebraic_from_integer(res);
         }
         else { // just padding required
-            bool is_signed = f_tm.as_int_algebraic(rhs_type)->is_signed();
+            bool is_signed = tm.as_int_algebraic(rhs_type)->is_signed();
             algebraic_padding(rhs_width, res, is_signed);
         }
     }
 
     if (lhs_width < res) {
-        if (! lhs_width) { // monolithic, conversion required
-            algebraic_from_monolithic(res);
+        if (! lhs_width) { // integer, conversion required
+            algebraic_from_integer(res);
         }
         else { // just padding required
-            bool is_signed = f_tm.as_int_algebraic(lhs_type)->is_signed();
+            bool is_signed = tm.as_int_algebraic(lhs_type)->is_signed();
             algebraic_padding(lhs_width, res, is_signed);
         }
     }
@@ -1192,8 +1210,8 @@ unsigned BECompiler::algebrize_ops_binary()
     return res;
 }
 
-// due to new type system, monolithic can be only constant (good)
-void BECompiler::algebraic_from_monolithic(unsigned width)
+// due to new type system, integer can be only constant (good)
+void BECompiler::algebraic_from_integer(unsigned width)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
     assert (f_enc.is_constant(top));
