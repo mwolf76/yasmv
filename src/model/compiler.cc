@@ -89,11 +89,9 @@ void BECompiler::pre_hook()
 {}
 void BECompiler::post_hook()
 {
-    // TODO: MANDATORY CHECK THE RETURNED ADD!!!!
-    // cout << "out -- " << endl;
-    // ADD add = f_add_stack.back();
-    // add.PrintMinterm();
-    // cout << endl;
+    ADD add = f_add_stack.back();
+    assert( add.FindMin() == f_enc.zero() );
+    assert( add.FindMax() == f_enc.one() );
 }
 
 bool BECompiler::walk_next_preorder(const Expr_ptr expr)
@@ -1194,8 +1192,7 @@ unsigned BECompiler::algebrize_ops_binary()
     return res;
 }
 
-// monolithic can be constant (good) or expr (reencoding needed ... :-/),
-// for now only constant is supported.
+// due to new type system, monolithic can be only constant (good)
 void BECompiler::algebraic_from_monolithic(unsigned width)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
