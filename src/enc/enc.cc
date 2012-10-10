@@ -98,29 +98,29 @@ Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
     return em.make_iconst(res);
 }
 
-// bounded integer var
-RangeEncoding::RangeEncoding(value_t min, value_t max)
-    : f_min(min)
-    , f_max(max)
-{
-    unsigned nbits = range_repr_bits(f_max - f_min);
-    make_monolithic_encoding(nbits);
-}
+// // bounded integer var
+// RangeEncoding::RangeEncoding(value_t min, value_t max)
+//     : f_min(min)
+//     , f_max(max)
+// {
+//     unsigned nbits = range_repr_bits(f_max - f_min);
+//     make_monolithic_encoding(nbits);
+// }
 
-Expr_ptr RangeEncoding::expr(DDVector& assignment)
-{
-    ExprMgr& em = f_mgr.em();
-    assert (assignment.size() == 1);
+// Expr_ptr RangeEncoding::expr(DDVector& assignment)
+// {
+//     ExprMgr& em = f_mgr.em();
+//     assert (assignment.size() == 1);
 
-    ADD leaf = assignment[0];
-    ADD eval = f_dv[0].Times(leaf);
-    assert (cuddIsConstant(eval.getNode()));
+//     ADD leaf = assignment[0];
+//     ADD eval = f_dv[0].Times(leaf);
+//     assert (cuddIsConstant(eval.getNode()));
 
-    value_t res = Cudd_V(eval.getNode()) + f_min;
-    assert (f_min <= res && res <= f_max);
+//     value_t res = Cudd_V(eval.getNode()) + f_min;
+//     assert (f_min <= res && res <= f_max);
 
-    return em.make_iconst(res);
-}
+//     return em.make_iconst(res);
+// }
 
 EnumEncoding::EnumEncoding(const ExprSet& lits)
 {

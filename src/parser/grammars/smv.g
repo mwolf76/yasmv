@@ -905,16 +905,16 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
     // finite integer types
-    | 'unsigned' '(' k=int_constant ')'
-      { $res = tm.find_unsigned(k->value()); }
+    | 'unsigned' '(' width=int_constant ')'
+      { $res = tm.find_unsigned(width->value()); }
 	| 'signed' '(' k=int_constant ')'
-      { $res = tm.find_signed(k->value()); }
+      { $res = tm.find_signed(width->value()); }
 
     // ranges
-    | lhs=int_constant '..' rhs=int_constant
-      { $res = tm.find_range(lhs, rhs); }
+    // | lhs=int_constant '..' rhs=int_constant
+    //   { $res = tm.find_range(lhs, rhs); }
 
-    // enumeratives
+    // enumeratives, pure symbolic
 	| enum_type[lits]
       { $res = tm.find_enum(lits); }
 

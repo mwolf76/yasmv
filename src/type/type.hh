@@ -34,8 +34,8 @@
 
 #include <type_mgr.hh>
 
-/* Supported data types: boolean, ranged integers, finite-width
-   integers, (pure-int) enums, module instances. */
+/* Supported data types: boolean, integers (signed and unsigned)
+   enums, module instances. */
 
 // NOTE: types are *immutable* by design!
 
@@ -90,23 +90,23 @@ public:
     { return f_signed; }
 };
 
-typedef class IntRangeType* IntRangeType_ptr;
-class IntRangeType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    IntRangeType(TypeMgr& owner, value_t min, value_t max);
+// typedef class IntRangeType* IntRangeType_ptr;
+// class IntRangeType : public Type {
+// protected:
+//     friend class TypeMgr; // ctors not public
+//     IntRangeType(TypeMgr& owner, value_t min, value_t max);
 
-public:
-    inline const value_t min() const
-    { return f_min; }
+// public:
+//     inline const value_t min() const
+//     { return f_min; }
 
-    inline const value_t max() const
-    { return f_max; }
+//     inline const value_t max() const
+//     { return f_max; }
 
-private:
-    value_t f_min;
-    value_t f_max;
-};
+// private:
+//     value_t f_min;
+//     value_t f_max;
+// };
 
 typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
@@ -118,7 +118,7 @@ public:
     const ExprSet& literals() const
     { return f_literals; }
 
-    bool has_symbs() const;
+    // bool has_symbs() const;
 
 private:
     ExprSet f_literals;

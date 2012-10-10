@@ -186,12 +186,8 @@ private:
     inline bool is_enumerative(Type_ptr tp)
     { return f_tm.is_enum(tp); }
 
-    inline bool is_monolithic(Type_ptr tp)
-    {
-        return (f_tm.is_integer(tp)   || // constants
-                f_tm.is_int_range(tp) ||
-                f_tm.is_int_enum(tp));   // only ints
-    }
+    inline bool is_integer(Type_ptr tp)
+    { return (f_tm.is_integer(tp)); }
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);

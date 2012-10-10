@@ -811,15 +811,25 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
+        f_type_stack.push_back(f_tm.find_boolean());
         f_add_stack.push_back(c.Ite(lhs, rhs));
     }
 
-    else if (is_ite_monolithic(expr) ||
-             is_ite_enumerative(expr)) {
+    else if (is_ite_monolithic(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
+        f_type_stack.push_back(f_tm.find_integer());
+        f_add_stack.push_back(c.Ite(lhs, rhs));
+    }
+
+    else if (is_ite_enumerative(expr)) {
+        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
+        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+        const ADD c = f_add_stack.back(); f_add_stack.pop_back();
+
+        f_type_stack.push_back(f_tm.find_integer());
         f_add_stack.push_back(c.Ite(lhs, rhs));
     }
 
@@ -939,7 +949,8 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
             // push either 1 or more ADDs depending on the encoding
             if (is_boolean(vtype) ||
-                is_monolithic(vtype)) { // enums have monolithic encodings too
+                is_enumerative(vtype) ||
+                is_integer(vtype)) {
                 f_add_stack.push_back(enc->dv()[0]);
             }
             else if (is_algebraic(vtype)) {
@@ -1023,8 +1034,8 @@ bool BECompiler::is_binary_monolithic(const Expr_ptr expr)
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (is_monolithic(f_owner.type(lhs)) &&
-                is_monolithic(f_owner.type(rhs)));
+        return (is_integer(f_owner.type(lhs)) &&
+                is_integer(f_owner.type(rhs)));
     }
 
     return false;
@@ -1038,7 +1049,7 @@ bool BECompiler::is_unary_monolithic(const Expr_ptr expr)
     if (em.is_unary_arithmetical(expr)) {
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        return (is_monolithic(f_owner.type(lhs)));
+        return (is_integer(f_owner.type(lhs)));
     }
 
     return false;
@@ -1091,10 +1102,10 @@ bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
 
         // see comment above
         return ( (is_algebraic(f_owner.type(lhs)) ||
-                  is_monolithic(f_owner.type(lhs))) &&
+                  is_integer(f_owner.type(lhs))) &&
 
                  (is_algebraic(f_owner.type(rhs)) ||
-                  is_monolithic(f_owner.type(rhs))));
+                  is_integer(f_owner.type(rhs))));
     }
 
     return false;
@@ -1110,7 +1121,7 @@ bool BECompiler::is_unary_algebraic(const Expr_ptr expr)
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
         return ( (is_algebraic(f_owner.type(lhs)) ||
-                  is_monolithic(f_owner.type(lhs))));
+                  is_integer(f_owner.type(lhs))));
     }
 
     return false;
@@ -1129,6 +1140,7 @@ bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
 
 bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
+
 
 // REMARK: algebrizations makes sense only for binary ops, there is no
 // need to algebrize a single operand! (unless casts are introduced,

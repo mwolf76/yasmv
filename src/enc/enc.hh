@@ -110,21 +110,21 @@ protected:
     unsigned range_repr_bits (value_t range);
 };
 
-class RangeEncoding : public MonolithicEncoding {
-friend class EncodingMgr; // expose ctors only to mgr
-public:
-    // here assignment *must* have size 1
-    virtual Expr_ptr expr(DDVector& assignment);
+// class RangeEncoding : public MonolithicEncoding {
+// friend class EncodingMgr; // expose ctors only to mgr
+// public:
+//     // here assignment *must* have size 1
+//     virtual Expr_ptr expr(DDVector& assignment);
 
-protected:
-    virtual ~RangeEncoding()
-    { assert(0); }
+// protected:
+//     virtual ~RangeEncoding()
+//     { assert(0); }
 
-    RangeEncoding(value_t min_value, value_t max_value);
+//     RangeEncoding(value_t min_value, value_t max_value);
 
-    value_t f_min;
-    value_t f_max;
-};
+//     value_t f_min;
+//     value_t f_max;
+// };
 
 typedef unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
 typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;

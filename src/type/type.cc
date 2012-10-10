@@ -49,23 +49,29 @@ AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed)
         ;
 }
 
-IntRangeType::IntRangeType(TypeMgr& owner, value_t min, value_t max)
-    : Type(owner) // IntegerType?
-    , f_min(min)
-    , f_max(max)
-{
-    ExprMgr& em = f_owner.em();
-    assert (f_min <= f_max);
+// IntRangeType::IntRangeType(TypeMgr& owner, value_t min, value_t max)
+//     : Type(owner) // IntegerType?
+//     , f_min(min)
+//     , f_max(max)
+// {
+//     ExprMgr& em = f_owner.em();
+//     assert (f_min <= f_max);
 
-    f_repr = em.make_range_type(em.make_iconst(f_min),
-                                em.make_iconst(f_max));
-}
+//     f_repr = em.make_range_type(em.make_iconst(f_min),
+//                                 em.make_iconst(f_max));
+// }
 
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : Type(owner)
     , f_literals(literals)
 {
     f_repr = f_owner.em().make_enum_type(f_literals);
+    ExprSet::iterator i;
+
+    for (i = literals.begin(); i != literals.end(); ++ i) {
+        Expr_ptr expr = *i;
+        assert(ExprMgr::INSTANCE().is_identifier(expr)); // debug only
+    }
 }
 
 Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
@@ -77,19 +83,19 @@ Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
     f_repr = f_owner.em().make_params(identifier, NULL);
 }
 
-bool EnumType::has_symbs() const
-{
-    bool res = false;
-    ExprMgr& em = f_owner.em();
+// bool EnumType::has_symbs() const
+// {
+//     bool res = false;
+//     ExprMgr& em = f_owner.em();
 
-    for (ExprSet::iterator eye = f_literals.begin();
-         (!res) && (eye != f_literals.end()); eye ++) {
+//     for (ExprSet::iterator eye = f_literals.begin();
+//          (!res) && (eye != f_literals.end()); eye ++) {
 
-        res |= em.is_identifier(*eye);
-    }
+//         res |= em.is_identifier(*eye);
+//     }
 
-    return res;
-}
+//     return res;
+// }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type_ptr)

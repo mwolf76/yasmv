@@ -70,7 +70,7 @@ public:
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_unsigned(unsigned bits);
     const Type_ptr find_signed(unsigned bits);
-    const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to);
+    // const Type_ptr find_range(const Expr_ptr from, const Expr_ptr to);
 
     const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
@@ -82,17 +82,17 @@ public:
        integer w.r.t. type inferring. */
     bool is_boolean(const Type_ptr tp) const;
 
-    // 42 is an integer
+    // 42 is an integer constant
     bool is_integer(const Type_ptr tp) const;
 
-    // an algebraic VAR
+    // an algebraic variable
     bool is_int_algebraic(const Type_ptr tp) const;
 
     // a RANGE
-    bool is_int_range(const Type_ptr tp) const;
+    // bool is_int_range(const Type_ptr tp) const;
 
     // an all-int ENUM
-    bool is_int_enum(const Type_ptr tp) const;
+    // bool is_int_enum(const Type_ptr tp) const;
 
     // an ENUM
     bool is_enum(const Type_ptr tp) const;
@@ -110,8 +110,8 @@ public:
     typedef class AlgebraicType* AlgebraicType_ptr;
     AlgebraicType_ptr as_int_algebraic(const Type_ptr tp) const;
 
-    typedef class IntRangeType* IntRangeType_ptr;
-    IntRangeType_ptr as_int_range(const Type_ptr tp) const;
+    // typedef class IntRangeType* IntRangeType_ptr;
+    // IntRangeType_ptr as_int_range(const Type_ptr tp) const;
 
     typedef class EnumType* EnumType_ptr;
     EnumType_ptr as_enum(const Type_ptr tp) const;
