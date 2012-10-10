@@ -190,7 +190,30 @@ private:
     bool is_unary_algebraic(const Expr_ptr expr);
     bool is_ite_algebraic(const Expr_ptr expr);
 
-    /* -- type work ---------------------------------------------------------- */
+    /* -- algebraic work ---------------------------------------------------- */
+    void algebraic_neg();
+    void algebraic_not();
+
+    void algebraic_plus();
+    void algebraic_sub();
+    void algebraic_div();
+    void algebraic_mul();
+    void algebraic_mod();
+    void algebraic_and();
+    void algebraic_or();
+    void algebraic_xor();
+    void algebraic_xnor();
+    void algebraic_implies();
+    void algebraic_lshift();
+    void algebraic_rshift();
+    void algebraic_equals();
+    void algebraic_not_equals();
+    void algebraic_gt();
+    void algebraic_ge();
+    void algebraic_lt();
+    void algebraic_le();
+    void algebraic_ite();
+
     unsigned algebrize_ops_binary();
 
     void algebraic_from_integer(unsigned width);

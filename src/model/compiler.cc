@@ -114,9 +114,10 @@ void BECompiler::walk_neg_postorder(const Expr_ptr expr)
     if (is_unary_integer(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Negate());
+        return;
     }
     else if (is_unary_algebraic(expr)) {
-        const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+        const Type_ptr rhs_type = f_type_stack.back(); // just inspect
         unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
 
         ADD* lhs[width];
@@ -124,10 +125,11 @@ void BECompiler::walk_neg_postorder(const Expr_ptr expr)
             *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
         }
 
-        /* perform algebraic NEG */
-        assert(0); // not implemented
+        algebraic_neg();
+        return;
     }
-    else assert(0); // unexpected
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_not_preorder(const Expr_ptr expr)
@@ -139,9 +141,10 @@ void BECompiler::walk_not_postorder(const Expr_ptr expr)
     if (is_unary_boolean(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Cmpl());
+        return;
     }
     else if (is_unary_algebraic(expr)) {
-        const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+        const Type_ptr rhs_type = f_type_stack.back(); // just inspect
         unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
 
         ADD* lhs[width];
@@ -149,9 +152,11 @@ void BECompiler::walk_not_postorder(const Expr_ptr expr)
             *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
         }
 
-        /* perform algebraic NOT */
-        assert(0); // not implemented
+        algebraic_not(); // bitwise
+        return;
     }
+
+    assert(false); // unreachable
 }
 
 bool BECompiler::walk_add_preorder(const Expr_ptr expr)
@@ -164,35 +169,16 @@ void BECompiler::walk_add_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Plus(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform arithmetic sum using positional algorithm */
-        ADD carry = f_enc.zero();
-        for (i = width; (i); -- i) {
-
-            /* x[i] + y[i] + c */
-            ADD tmp = (*lhs[i]).Plus(*rhs[i]).Plus(carry);
-            carry = f_enc.base().LT(tmp); /* c > 0x10 */
-
-            /* x[i] = (x[i] + y[i] + c) % base */ // TODO: detect overflow on MSB
-            f_add_stack.push_back(tmp.Modulus(f_enc.base()));
-        }
+        algebraic_plus();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_sub_preorder(const Expr_ptr expr)
@@ -205,13 +191,16 @@ void BECompiler::walk_sub_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Minus(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        assert(0); // not implemented
+        algebraic_sub();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unexpected
 }
 
 bool BECompiler::walk_div_preorder(const Expr_ptr expr)
@@ -224,13 +213,16 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Divide(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        assert(0); // not implemented
+        algebraic_div();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unexpected
 }
 
 bool BECompiler::walk_mul_preorder(const Expr_ptr expr)
@@ -243,13 +235,17 @@ void BECompiler::walk_mul_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Times(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
+
 
     else if (is_binary_algebraic(expr)) {
-        assert(0); // not implemented
+        algebraic_mul();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_mod_preorder(const Expr_ptr expr)
@@ -262,13 +258,16 @@ void BECompiler::walk_mod_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Modulus(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        assert(0); // not implemented
+        algebraic_mod();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_and_preorder(const Expr_ptr expr)
@@ -281,37 +280,24 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWTimes(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_and(); // bitwise
+        return;
     }
 
-    else assert(0);
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_or_preorder(const Expr_ptr expr)
@@ -324,34 +310,21 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Or(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWTimes(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_or();
+        return;
     }
 }
 
@@ -365,35 +338,24 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Xor(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWXor(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_xor();
+        return;
     }
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_xnor_preorder(const Expr_ptr expr)
@@ -406,35 +368,24 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Xnor(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWXnor(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_xnor();
+        return;
     }
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_implies_preorder(const Expr_ptr expr)
@@ -447,36 +398,24 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Cmpl().Or(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_implies();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_iff_preorder(const Expr_ptr expr)
@@ -484,10 +423,7 @@ bool BECompiler::walk_iff_preorder(const Expr_ptr expr)
 bool BECompiler::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_iff_postorder(const Expr_ptr expr)
-{
-    /* just a fancy name for xnor :-) */
-    walk_xnor_postorder(expr);
-}
+{ /* just a fancy name for xnor :-) */ walk_xnor_postorder(expr); }
 
 bool BECompiler::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -498,39 +434,16 @@ void BECompiler::walk_lshift_postorder(const Expr_ptr expr)
     if (is_binary_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
+        f_add_stack.push_back(lhs.LShift(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
-
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, nothing fancy  here :-) */
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
-            f_add_stack.push_back(tmp);
-        }
+        algebraic_lshift();
+        return;
     }
-    else assert(0);
 
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.LShift(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.LShift(rhs));
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_rshift_preorder(const Expr_ptr expr)
@@ -539,13 +452,19 @@ bool BECompiler::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void BECompiler::walk_rshift_postorder(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    #ifdef DEBUG_BE_COMPILER
-    cout << "-- " << expr << endl;
-    lhs.RShift(rhs).PrintMinterm();
-    #endif
-    f_add_stack.push_back(lhs.RShift(rhs));
+    if (is_binary_integer(expr)) {
+        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
+        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+        f_add_stack.push_back(lhs.RShift(rhs)); /* bitwise integer arithmetic */
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
+    }
+    else if (is_binary_algebraic(expr)) {
+        algebraic_rshift();
+        return;
+    }
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_eq_preorder(const Expr_ptr expr)
@@ -558,6 +477,8 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr) ||
@@ -565,34 +486,16 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, similar to xnor, only conjuct res */
-        ADD tmp = f_enc.one();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp *= (*lhs[i]).Equals(*rhs[i]);
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp);
-
+        algebraic_equals();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_ne_preorder(const Expr_ptr expr)
@@ -605,6 +508,8 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_integer(expr) ||
@@ -612,34 +517,16 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* perform bw arithmetic, similar to xnor, only conjuct res */
-        ADD tmp = f_enc.one();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp *= (*lhs[i]).Equals(*rhs[i]);
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp.Cmpl());
-
+        algebraic_not_equals();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_gt_preorder(const Expr_ptr expr)
@@ -652,32 +539,13 @@ void BECompiler::walk_gt_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LT(lhs)); // simulate GT op
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* relationals, msb predicate first, if false inspect next digit ... */
-        ADD tmp = f_enc.zero();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp += (*rhs[i]).LT(*lhs[i]); // CHECK MSB
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp);
-
+        algebraic_gt();
+        return;
     }
     else assert(0);
 }
@@ -692,34 +560,16 @@ void BECompiler::walk_ge_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LEQ(lhs)); // simulate GEQ op
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* relationals, msb predicate first, if false inspect next digit ... */
-        ADD tmp = f_enc.zero();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp += (*rhs[i]).LEQ(*lhs[i]); // CHECK MSB
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp);
-
+        algebraic_ge();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_lt_preorder(const Expr_ptr expr)
@@ -732,34 +582,16 @@ void BECompiler::walk_lt_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LT(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* relationals, msb predicate first, if false inspect next digit ... */
-        ADD tmp = f_enc.zero();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp += (*lhs[i]).LT(*rhs[i]); // CHECK MSB
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp);
-
+        algebraic_lt();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_le_preorder(const Expr_ptr expr)
@@ -772,34 +604,16 @@ void BECompiler::walk_le_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LEQ(rhs));
+        f_type_stack.pop_back(); // consume one, leave the other
+        return;
     }
 
     else if (is_binary_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        /* relationals, msb predicate first, if false inspect next digit ... */
-        ADD tmp = f_enc.zero();
-        for (i = width; (i); -- i) {
-
-            /* x[i] &  y[i] */
-            tmp += (*lhs[i]).LEQ(*rhs[i]); // CHECK MSB
-        }
-
-        /* just one result */
-        f_add_stack.push_back(tmp);
-
+        algebraic_le();
+        return;
     }
-    else assert(0);
+
+    assert(0); // unreachable
 }
 
 bool BECompiler::walk_ite_preorder(const Expr_ptr expr)
@@ -814,51 +628,45 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-
-        f_type_stack.push_back(tm.find_boolean());
         f_add_stack.push_back(c.Ite(lhs, rhs));
+
+        f_type_stack.pop_back();
+        f_type_stack.pop_back(); // consume two, leave the third
+        return;
     }
 
     else if (is_ite_integer(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-
-        f_type_stack.push_back(tm.find_integer());
         f_add_stack.push_back(c.Ite(lhs, rhs));
+
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.pop_back(); // consume all, push integer
+        f_type_stack.push_back(tm.find_integer());
+        return;
     }
 
     else if (is_ite_enumerative(expr)) {
         const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-
-        f_type_stack.push_back(tm.find_integer());
         f_add_stack.push_back(c.Ite(lhs, rhs));
+
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.pop_back(); // consume all, push integer
+        f_type_stack.push_back(tm.find_integer());
+        return;
     }
 
     else if (is_ite_algebraic(expr)) {
-        unsigned i, width = algebrize_ops_binary(); // largest
-
-        ADD* rhs[width];
-        for (i = width; (i) ; -- i) {
-            *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-
-        /* multiplex, easy as pie :-) */
-        for (i = width; (i); -- i) {
-            f_add_stack.push_back(c.Ite(*lhs[i], *rhs[i]));
-        }
+        algebraic_ite();
+        return;
     }
 
-    else assert(0); // unexpected
+    assert(0); // unreachable
  }
 
 bool BECompiler::walk_cond_preorder(const Expr_ptr expr)
@@ -913,8 +721,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
     // 0. explicit constants are integer ints (e.g. 42)
     if (em.is_numeric(expr)) {
-        f_type_stack.push_back(tm.find_integer()); // reserved
         f_add_stack.push_back(f_enc.constant(expr->value()));
+        f_type_stack.push_back(tm.find_integer()); // consts
+        return;
     }
 
     else {
@@ -924,8 +733,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         // 1. bool/integer constant leaves
         if (symb->is_const()) {
             IConstant& konst =  symb->as_const();
-            f_type_stack.push_back(konst.type());
             f_add_stack.push_back(f_enc.constant(konst.value()));
+            f_type_stack.push_back(konst.type());
+            return;
         }
 
         // 2. variable
@@ -933,7 +743,6 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
             // push into type stack
             Type_ptr vtype = symb->as_variable().type();
-            f_type_stack.push_back(vtype);
 
             // if encoding for variable is available reuse it,
             // otherwise create and cache it.
@@ -955,6 +764,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
             assert (NULL != enc);
 
             // push either 1 or more ADDs depending on the encoding
+            f_type_stack.push_back(vtype);
             if (tm.is_boolean(vtype) ||
                 tm.is_enum(vtype) ||
                 tm.is_integer(vtype)) {
@@ -966,15 +776,17 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                 }
             }
             else assert(0); // unexpected
+            return;
         }
 
         // 3. define? Simply compile it recursively.
         else if (symb->is_define()) {
             (*this)(symb->as_define().body());
+            return;
         }
-
-        else assert(0); // unexpected
     }
+
+    assert(0); // unreachable
 }
 
 /**
@@ -1155,6 +967,354 @@ bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
 bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
 
+
+void BECompiler::algebraic_plus()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest, takes care of type stack
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform arithmetic sum using positional algorithm */
+    ADD carry = f_enc.zero();
+    for (i = width; (i); -- i) {
+
+        /* x[i] + y[i] + c */
+        ADD tmp = (*lhs[i]).Plus(*rhs[i]).Plus(carry);
+        carry = f_enc.base().LT(tmp); /* c > 0x10 */
+
+        /* x[i] = (x[i] + y[i] + c) % base */ // TODO: detect overflow on MSB
+        f_add_stack.push_back(tmp.Modulus(f_enc.base()));
+    }
+}
+
+void BECompiler::algebraic_and()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWTimes(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_or()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWOr(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_xor()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWXor(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_xnor()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWXnor(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_implies()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_lshift()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
+        f_add_stack.push_back(tmp);
+    }
+}
+
+void BECompiler::algebraic_rshift()
+{
+}
+
+void BECompiler::algebraic_equals()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, similar to xnor, only conjuct res */
+    ADD tmp = f_enc.one();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp *= (*lhs[i]).Equals(*rhs[i]);
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp);
+}
+
+void BECompiler::algebraic_not_equals()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, similar to xnor, only conjuct res */
+    ADD tmp = f_enc.one();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp *= (*lhs[i]).Equals(*rhs[i]);
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp.Cmpl());
+}
+
+void BECompiler::algebraic_gt()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* relationals, msb predicate first, if false inspect next digit ... */
+    ADD tmp = f_enc.zero();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp += (*rhs[i]).LT(*lhs[i]); // CHECK MSB
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp);
+}
+
+void BECompiler::algebraic_ge()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* relationals, msb predicate first, if false inspect next digit ... */
+    ADD tmp = f_enc.zero();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp += (*rhs[i]).LEQ(*lhs[i]); // CHECK MSB
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp);
+}
+
+void BECompiler::algebraic_lt()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* relationals, msb predicate first, if false inspect next digit ... */
+    ADD tmp = f_enc.zero();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp += (*lhs[i]).LT(*rhs[i]); // CHECK MSB
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp);
+}
+
+void BECompiler::algebraic_le()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* relationals, msb predicate first, if false inspect next digit ... */
+    ADD tmp = f_enc.zero();
+    for (i = width; (i); -- i) {
+
+        /* x[i] &  y[i] */
+        tmp += (*lhs[i]).LEQ(*rhs[i]); // CHECK MSB
+    }
+
+    /* just one result */
+    f_add_stack.push_back(tmp);
+}
+
+// TODO fix type stack
+void BECompiler::algebraic_ite()
+{
+    unsigned i, width = algebrize_ops_binary(); // largest
+
+    ADD* rhs[width];
+    for (i = width; (i) ; -- i) {
+        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD* lhs[width];
+    for (i = width; (i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    const ADD c = f_add_stack.back(); f_add_stack.pop_back();
+
+    /* multiplex, easy as pie :-) */
+    for (i = width; (i); -- i) {
+        f_add_stack.push_back(c.Ite(*lhs[i], *rhs[i]));
+    }
+}
 
 // REMARK: algebrizations makes sense only for binary ops, there is no
 // need to algebrize a single operand! (unless casts are introduced,
