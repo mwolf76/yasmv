@@ -75,6 +75,16 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed)
     }
 }
 
+TempEncoding::TempEncoding(ADD *dds, unsigned width)
+    : f_width(width)
+    , f_signed(false)
+{
+  for (i = 0; i < f_width; ++ i) {
+      f_dv.push_back(dds[i]);
+  }
+}
+
+
 Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
 {
     ExprMgr& em = f_mgr.em();

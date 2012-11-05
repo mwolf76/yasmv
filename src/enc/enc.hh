@@ -99,6 +99,21 @@ protected:
     bool f_signed;
 };
 
+
+class TempEncoding : public AlgebraicEncoding {
+friend class EncodingMgr; // expose ctors only to mgr
+public:
+    // for temp values type is provided by the encoding itself
+    inline Type_ptr type() const;
+
+protected:
+    virtual ~TempEncoding()
+    { assert(0); }
+
+    // width is number of *digits* here */
+    TempEncoding(ADD *dds, unsigned width);
+};
+
 // base class for finite int based
 class MonolithicEncoding : public Encoding {
 protected:
@@ -109,22 +124,6 @@ protected:
 
     unsigned range_repr_bits (value_t range);
 };
-
-// class RangeEncoding : public MonolithicEncoding {
-// friend class EncodingMgr; // expose ctors only to mgr
-// public:
-//     // here assignment *must* have size 1
-//     virtual Expr_ptr expr(DDVector& assignment);
-
-// protected:
-//     virtual ~RangeEncoding()
-//     { assert(0); }
-
-//     RangeEncoding(value_t min_value, value_t max_value);
-
-//     value_t f_min;
-//     value_t f_max;
-// };
 
 typedef unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
 typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;

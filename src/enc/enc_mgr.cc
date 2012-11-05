@@ -59,10 +59,6 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         DEBUG << "Encoding Algebraic " << atype << endl;
         res = new AlgebraicEncoding(atype->width(), atype->is_signed());
     }
-    // else if (NULL != (rtype = dynamic_cast<IntRangeType_ptr>(tp))) {
-    //     DEBUG << "Encoding Range " << rtype << endl;
-    //     res = new RangeEncoding(rtype->min(), rtype->max());
-    // }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding Enum " << etype << endl;
         res = new EnumEncoding(etype->literals());
