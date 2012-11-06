@@ -88,31 +88,27 @@ public:
     // here assignment *must* have size 1
     virtual Expr_ptr expr(DDVector& assignment);
 
+    inline bool is_signed() const
+    { return f_signed; }
+
+    inline bool is_temporary() const
+    { return f_temporary; }
+
+    inline unsigned width() const
+    { return f_width; }
+
 protected:
     virtual ~AlgebraicEncoding()
     { assert(0); }
 
-    // width is number of *digits* here */
-    AlgebraicEncoding(unsigned width, bool is_signed);
+    // width is number of *digits* here, dds is reserved for temporary encodings
+    AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds = NULL);
 
-    unsigned f_width;
     bool f_signed;
+    bool f_temporary;
+    unsigned f_width;
 };
 
-
-class TempEncoding : public AlgebraicEncoding {
-friend class EncodingMgr; // expose ctors only to mgr
-public:
-    // for temp values type is provided by the encoding itself
-    inline Type_ptr type() const;
-
-protected:
-    virtual ~TempEncoding()
-    { assert(0); }
-
-    // width is number of *digits* here */
-    TempEncoding(ADD *dds, unsigned width);
-};
 
 // base class for finite int based
 class MonolithicEncoding : public Encoding {

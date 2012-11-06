@@ -128,14 +128,10 @@ private:
     FQExpr2EncMap f_fqexpr2enc_map;
     ADD2EncMap f_add2enc_map;
 
-    void register_encoding(const FQExpr fqexpr, IEncoding_ptr encoding)
+    inline void register_encoding(const FQExpr fqexpr, IEncoding_ptr encoding)
     {
+        assert(! f_fqexpr2enc_map [ fqexpr ] );
         f_fqexpr2enc_map [ fqexpr ] = encoding;
-        // for (EncodingBits::iterator i = encoding->bits().begin();
-        //      i != encoding->bits().end(); ++ i) {
-        //     const ADD& add = *i;
-        //     f_add2enc_map [ add ] = encoding;
-        // }
     }
 
     ADD f_base;  // 0x10

@@ -63,27 +63,26 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
 }
 
 // algebraic encoding uses monolithic as a builing block
-AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed)
+AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     : f_width(width)
     , f_signed(is_signed)
+    , f_temporary(NULL != dds)
 {
     unsigned i;
     const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
 
-    for (i = 0; i < f_width; ++ i) {
-        f_dv.push_back(make_monolithic_encoding(NIBBLE_SIZE));
+    if (f_temporary) {
+        for (i = 0; i < f_width; ++ i) {
+            f_dv.push_back(dds[i]);
+        }
+    }
+
+    else {
+        for (i = 0; i < f_width; ++ i) {
+            f_dv.push_back(make_monolithic_encoding(NIBBLE_SIZE));
+        }
     }
 }
-
-TempEncoding::TempEncoding(ADD *dds, unsigned width)
-    : f_width(width)
-    , f_signed(false)
-{
-  for (i = 0; i < f_width; ++ i) {
-      f_dv.push_back(dds[i]);
-  }
-}
-
 
 Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
 {
@@ -107,30 +106,6 @@ Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
 
     return em.make_iconst(res);
 }
-
-// // bounded integer var
-// RangeEncoding::RangeEncoding(value_t min, value_t max)
-//     : f_min(min)
-//     , f_max(max)
-// {
-//     unsigned nbits = range_repr_bits(f_max - f_min);
-//     make_monolithic_encoding(nbits);
-// }
-
-// Expr_ptr RangeEncoding::expr(DDVector& assignment)
-// {
-//     ExprMgr& em = f_mgr.em();
-//     assert (assignment.size() == 1);
-
-//     ADD leaf = assignment[0];
-//     ADD eval = f_dv[0].Times(leaf);
-//     assert (cuddIsConstant(eval.getNode()));
-
-//     value_t res = Cudd_V(eval.getNode()) + f_min;
-//     assert (f_min <= res && res <= f_max);
-
-//     return em.make_iconst(res);
-// }
 
 EnumEncoding::EnumEncoding(const ExprSet& lits)
 {

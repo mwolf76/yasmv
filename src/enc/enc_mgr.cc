@@ -48,7 +48,6 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
     BooleanType_ptr btype;
     AlgebraicType_ptr atype;
-    // IntRangeType_ptr rtype;
     EnumType_ptr etype;
 
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
@@ -57,7 +56,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     }
     else if (NULL != (atype = dynamic_cast<AlgebraicType_ptr>(tp))) {
         DEBUG << "Encoding Algebraic " << atype << endl;
-        res = new AlgebraicEncoding(atype->width(), atype->is_signed());
+        res = new AlgebraicEncoding(atype->width(), atype->is_signed(), atype->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding Enum " << etype << endl;
