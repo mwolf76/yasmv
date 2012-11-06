@@ -71,6 +71,7 @@
 
 #include "util.h"
 #include "cuddInt.h"
+#include <limits.h>
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -323,7 +324,10 @@ Cudd_addDivide(
     if (F == DD_ZERO(dd)) return(DD_ZERO(dd));
     if (G == DD_ONE(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) / cuddV(G);
+	value = (G == DD_ZERO(dd)
+                 ? INT_MAX /* division by zero! */
+                 : (cuddV(F) / cuddV(G)));
+
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
