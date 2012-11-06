@@ -73,16 +73,10 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     // invoke walker on the body of the expr to be processed
     (*this)(body);
 
-    // sanity conditions
-    assert(1 == f_add_stack.size());
-    assert(1 == f_type_stack.size());
-    assert(1 == f_ctx_stack.size());
-    assert(1 == f_time_stack.size());
-
-    // Just one add returned. This is ok, because the compiler is
-    // supposed to return a boolean formula.
-    ADD add = f_add_stack.back();
-    return add;
+    // Just one 0-1 ADD returned. This is ok, because the compiler is
+    // supposed to return a boolean formula, suitable for CNF
+    // conversion. This condition is checked by the post-hook method.
+    return f_add_stack.back();
 }
 
 void BECompiler::pre_hook()
@@ -92,6 +86,12 @@ void BECompiler::post_hook()
     ADD add = f_add_stack.back();
     assert( add.FindMin() == f_enc.zero() );
     assert( add.FindMax() == f_enc.one() );
+
+    // sanity conditions
+    assert(1 == f_add_stack.size());
+    assert(1 == f_type_stack.size());
+    assert(1 == f_ctx_stack.size());
+    assert(1 == f_time_stack.size());
 }
 
 bool BECompiler::walk_next_preorder(const Expr_ptr expr)
@@ -218,7 +218,7 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_div();
+        // algebraic_div(expr->rhs());
         return;
     }
 
@@ -719,7 +719,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
-    // 0. explicit constants are integer ints (e.g. 42)
+    ENCMap::iterator eye;
+
+    // 1. explicit constants are integer ints (e.g. 42)
     if (em.is_numeric(expr)) {
         f_add_stack.push_back(f_enc.constant(expr->value()));
         f_type_stack.push_back(tm.find_integer()); // consts
@@ -727,10 +729,11 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     }
 
     else {
+        // 2. Model symbol
         ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
         assert (NULL != symb);
 
-        // 1. bool/integer constant leaves
+        // 2.1. bool/integer constant leaves
         if (symb->is_const()) {
             IConstant& konst =  symb->as_const();
             f_add_stack.push_back(f_enc.constant(konst.value()));
@@ -738,11 +741,12 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
             return;
         }
 
-        // 2. variable
+        // 2.2 variable (includes support for temporaries)
         else if (symb->is_variable()) {
 
             // push into type stack
             Type_ptr vtype = symb->as_variable().type();
+            f_type_stack.push_back(vtype);
 
             // if encoding for variable is available reuse it,
             // otherwise create and cache it.
@@ -754,17 +758,13 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                 enc = (*eye).second;
             }
             else {
+                /* build a new encoding for this symbol */
                 enc = f_enc.make_encoding(vtype);
-                register_encoding(key, enc); // TODO: move the
-                                             // encoding register to a
-                                             // dedicated
-                                             // object. (maybe the
-                                             // enc_mgr itself?)
+                register_encoding(key, enc);
             }
             assert (NULL != enc);
 
             // push either 1 or more ADDs depending on the encoding
-            f_type_stack.push_back(vtype);
             if (tm.is_boolean(vtype) ||
                 tm.is_enum(vtype) ||
                 tm.is_integer(vtype)) {
@@ -776,6 +776,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                 }
             }
             else assert(0); // unexpected
+
             return;
         }
 
@@ -967,6 +968,15 @@ bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
 bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
 
+void BECompiler::algebraic_neg()
+{
+    assert(0); // TODO
+}
+
+void BECompiler::algebraic_not()
+{
+    assert(0); // TODO
+}
 
 void BECompiler::algebraic_plus()
 {
@@ -994,6 +1004,12 @@ void BECompiler::algebraic_plus()
         f_add_stack.push_back(tmp.Modulus(f_enc.base()));
     }
 }
+
+void BECompiler::algebraic_sub()
+{
+    assert(0); // TODO
+}
+
 
 void BECompiler::algebraic_mul()
 {
@@ -1043,6 +1059,16 @@ void BECompiler::algebraic_mul()
         // return i-th digit of result
         f_add_stack.push_back(*res[i]);
     }
+}
+
+void BECompiler::algebraic_div()
+{
+    assert(0); // TODO
+}
+
+void BECompiler::algebraic_mod()
+{
+    assert(0); // TODO
 }
 
 void BECompiler::algebraic_and()

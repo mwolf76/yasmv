@@ -132,8 +132,9 @@ protected:
     void walk_leaf(const Expr_ptr expr);
 
 private:
-    ADDMap f_map; // FQDN -> add cache
-    ENCMap f_encodings; // FQDN -> add encoding
+    ADDMap f_map; // FQDN -> DD cache
+    ENCMap f_encodings; // FQDN -> DD encoding
+    ENCMap f_temporary; // FQDN -> DD encoding (temp only)
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
