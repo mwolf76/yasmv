@@ -65,31 +65,6 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     return res;
 }
 
-// const Type_ptr TypeMgr::find_range(const Expr_ptr min, const Expr_ptr max)
-// {
-//     // normalize range
-//     assert (f_em.is_numeric(min));
-//     value_t min_ = min->value();
-
-//     assert (f_em.is_numeric(max));
-//     value_t max_ = max->value();
-
-//     // inverted range? ok, not polite but supported :-)
-//     if (max_ < min_) { value_t tmp = max_; max_ = min_; min_ = tmp; }
-
-//     const Expr_ptr min_expr = f_em.make_iconst(min_);
-//     const Expr_ptr max_expr = f_em.make_iconst(max_);
-
-//     Expr_ptr descr(f_em.make_range_type(min_expr, max_expr));
-//     Type_ptr res = lookup_type(descr);
-//     if (NULL != res) return res;
-
-//     // new type, needs to be registered before returning
-//     res = new IntRangeType(*this, min_, max_);
-//     register_type(descr, res);
-//     return res;
-// }
-
 const Type_ptr TypeMgr::find_enum(ExprSet& lits)
 {
     /*
@@ -146,31 +121,10 @@ IntegerType_ptr TypeMgr::as_integer(const Type_ptr tp) const
     return res;
 }
 
-// bool TypeMgr::is_int_range(const Type_ptr tp) const
-// {
-//     return NULL != dynamic_cast <const IntRangeType_ptr> (tp);
-// }
-
-// IntRangeType_ptr TypeMgr::as_int_range(const Type_ptr tp) const
-// {
-//     IntRangeType_ptr res = dynamic_cast <IntRangeType_ptr> (tp);
-//     assert(res);
-
-//     return res;
-// }
-
 bool TypeMgr::is_enum(const Type_ptr tp) const
 {
     return NULL != dynamic_cast <const EnumType_ptr> (tp);
 }
-
-// bool TypeMgr::is_int_enum(const Type_ptr tp) const
-// {
-//     EnumType_ptr tmp;
-//     return (! (tmp = dynamic_cast <const EnumType_ptr> (tp)))
-//         ? false
-//         : ! tmp->has_symbs();
-// }
 
 EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
 {

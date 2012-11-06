@@ -38,28 +38,17 @@ IntegerType::IntegerType(TypeMgr& owner) // abstract
     f_repr = f_owner.em().make_integer_type();
 }
 
-AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed)
+AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD *dds)
     : IntegerType(owner)
     , f_width(width)
     , f_signed(is_signed)
+    , f_dds(dds)
 {
     f_repr = f_signed
         ? f_owner.em().make_signed_type(width)
         : f_owner.em().make_unsigned_type(width)
         ;
 }
-
-// IntRangeType::IntRangeType(TypeMgr& owner, value_t min, value_t max)
-//     : Type(owner) // IntegerType?
-//     , f_min(min)
-//     , f_max(max)
-// {
-//     ExprMgr& em = f_owner.em();
-//     assert (f_min <= f_max);
-
-//     f_repr = em.make_range_type(em.make_iconst(f_min),
-//                                 em.make_iconst(f_max));
-// }
 
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : Type(owner)
@@ -82,20 +71,6 @@ Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
     // (i.e. it's foo() instead of foo).
     f_repr = f_owner.em().make_params(identifier, NULL);
 }
-
-// bool EnumType::has_symbs() const
-// {
-//     bool res = false;
-//     ExprMgr& em = f_owner.em();
-
-//     for (ExprSet::iterator eye = f_literals.begin();
-//          (!res) && (eye != f_literals.end()); eye ++) {
-
-//         res |= em.is_identifier(*eye);
-//     }
-
-//     return res;
-// }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type_ptr)

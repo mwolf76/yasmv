@@ -28,6 +28,7 @@
 #define TYPE_H
 
 #include <common.hh>
+#include <cudd_mgr.hh>
 
 #include <expr.hh>
 #include <expr_mgr.hh>
@@ -75,38 +76,26 @@ protected:
 
 typedef class AlgebraicType* AlgebraicType_ptr;
 class AlgebraicType : public IntegerType {
-protected:
-    friend class TypeMgr; // ctors not public
-    AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed);
-
-    unsigned f_width;
-    bool f_signed;
-
 public:
     inline unsigned width() const
     { return f_width; }
 
     inline bool is_signed() const
     { return f_signed; }
+
+    inline ADD *dds() const
+    { return f_dds; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD *dds = NULL);
+
+    unsigned f_width;
+    bool f_signed;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
 };
-
-// typedef class IntRangeType* IntRangeType_ptr;
-// class IntRangeType : public Type {
-// protected:
-//     friend class TypeMgr; // ctors not public
-//     IntRangeType(TypeMgr& owner, value_t min, value_t max);
-
-// public:
-//     inline const value_t min() const
-//     { return f_min; }
-
-//     inline const value_t max() const
-//     { return f_max; }
-
-// private:
-//     value_t f_min;
-//     value_t f_max;
-// };
 
 typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
@@ -117,8 +106,6 @@ protected:
 public:
     const ExprSet& literals() const
     { return f_literals; }
-
-    // bool has_symbs() const;
 
 private:
     ExprSet f_literals;
