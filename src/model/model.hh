@@ -48,6 +48,10 @@ class IVariable;
 typedef IVariable* IVariable_ptr;
 typedef unordered_map<FQExpr, IVariable_ptr, FQExprHash, FQExprEq> Variables;
 
+class ITemporary;
+typedef ITemporary* ITemporary_ptr;
+typedef unordered_map<FQExpr, ITemporary_ptr, FQExprHash, FQExprEq> Temporaries;
+
 class IDefine;
 typedef IDefine* IDefine_ptr;
 typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Defines;
@@ -69,6 +73,9 @@ public:
     bool is_variable() const;
     IVariable& as_variable() const;
 
+    bool is_temporary() const;
+    ITemporary& as_temporary() const;
+
     bool is_define() const;
     IDefine& as_define() const;
 };
@@ -82,6 +89,11 @@ public:
 class IVariable : public ISymbol {
 public:
     // var types are used for enc building
+    virtual const Type_ptr type() const =0;
+};
+
+class ITemporary : public IVariable {
+public:
     virtual const Type_ptr type() const =0;
 };
 
@@ -319,6 +331,7 @@ public:
 private:
     Modules f_modules;
     Constants f_constants; // global consts
+    Temporaries f_temporaries;
     Expr_ptr f_name;
 };
 

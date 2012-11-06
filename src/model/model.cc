@@ -40,9 +40,7 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     if (eye == f_modules.end()) throw BadContext(ctx);
     IModule_ptr module = (*eye).second;
 
-    // suggested resolve order: local constants, global constants,
-    // parameters, defines, variables
-    {
+    { /* local consts */
         Constants cnts = module->get_localConsts();
         Constants::iterator citer = cnts.find(symb);
         if (citer != cnts.end()) {
@@ -50,16 +48,26 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
         }
     }
 
-    {
+    { /* global consts */
         Constants::iterator citer = f_constants.find(symb);
         if (citer != f_constants.end()) {
             return (*citer).second;
         }
     }
 
-    // TODO: not yet implemented: params
+    { /* temporaries */
+        Temporaries::iterator titer = f_temporaries.find(symb);
+        if (titer != f_temporaries.end()) {
+            return (*titer).second;
+        }
+    }
 
-    {
+
+    { /* params */
+        // TODO: not yet implemented: params
+    }
+
+    { /* defines */
         Defines defs = module->get_localDefs();
         Defines::iterator diter = defs.find(symb);
         if (diter != defs.end()) {
@@ -67,7 +75,7 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
         }
     }
 
-    {
+    { /* variables */
         Variables vars = module->get_localVars();
         Variables::iterator viter = vars.find(symb);
         if (viter != vars.end()) {
@@ -89,6 +97,20 @@ bool ISymbol::is_variable(void) const
 IVariable& ISymbol::as_variable(void) const
 {
     IVariable_ptr res = dynamic_cast <const IVariable_ptr>
+        (const_cast <const ISymbol_ptr> (this));
+    assert (res);
+    return (*res);
+}
+
+bool ISymbol::is_temporary(void) const
+{
+    return NULL != dynamic_cast <const ITemporary_ptr>
+        (const_cast <const ISymbol_ptr> (this));
+}
+
+ITemporary& ISymbol::as_temporary(void) const
+{
+    ITemporary_ptr res = dynamic_cast <const ITemporary_ptr>
         (const_cast <const ISymbol_ptr> (this));
     assert (res);
     return (*res);
