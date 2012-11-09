@@ -18,7 +18,7 @@ PKG_HH = model.hh model_mgr.hh analyzer.hh inferrer.hh	\
 compiler.hh
 
 PKG_CC = model.cc model_mgr.cc analyzer.cc inferrer.cc	\
-compiler.cc
+compiler.cc algebra.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
