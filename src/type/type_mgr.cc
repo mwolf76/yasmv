@@ -134,12 +134,12 @@ EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
     return res;
 }
 
-bool TypeMgr::is_int_algebraic(const Type_ptr tp) const
+bool TypeMgr::is_algebraic(const Type_ptr tp) const
 {
     return (NULL != dynamic_cast <AlgebraicType*> (tp));
 }
 
-AlgebraicType_ptr TypeMgr::as_int_algebraic(const Type_ptr tp) const
+AlgebraicType_ptr TypeMgr::as_algebraic(const Type_ptr tp) const
 {
     AlgebraicType_ptr res = dynamic_cast <const AlgebraicType_ptr> (tp);
     assert(res);

@@ -109,23 +109,13 @@ bool BECompiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void BECompiler::walk_neg_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-
     if (is_unary_integer(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Negate());
         return;
     }
     else if (is_unary_algebraic(expr)) {
-        const Type_ptr rhs_type = f_type_stack.back(); // just inspect
-        unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        algebraic_neg();
+        algebraic_neg(expr);
         return;
     }
 
@@ -136,23 +126,13 @@ bool BECompiler::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void BECompiler::walk_not_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-
     if (is_unary_boolean(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Cmpl());
         return;
     }
     else if (is_unary_algebraic(expr)) {
-        const Type_ptr rhs_type = f_type_stack.back(); // just inspect
-        unsigned i, width = tm.as_int_algebraic(rhs_type)->width();
-
-        ADD* lhs[width];
-        for (i = width; (i) ; -- i) {
-            *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        algebraic_not(); // bitwise
+        algebraic_not(expr); // bitwise
         return;
     }
 
@@ -174,7 +154,7 @@ void BECompiler::walk_add_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_plus();
+        algebraic_plus(expr);
         return;
     }
 
@@ -196,7 +176,7 @@ void BECompiler::walk_sub_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_sub();
+        algebraic_sub(expr);
         return;
     }
 
@@ -241,7 +221,7 @@ void BECompiler::walk_mul_postorder(const Expr_ptr expr)
 
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_mul();
+        algebraic_mul(expr);
         return;
     }
 
@@ -263,7 +243,7 @@ void BECompiler::walk_mod_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_mod();
+        algebraic_mod(expr);
         return;
     }
 
@@ -293,7 +273,7 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_and(); // bitwise
+        algebraic_and(expr); // bitwise
         return;
     }
 
@@ -323,7 +303,7 @@ void BECompiler::walk_or_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_or();
+        algebraic_or(expr);
         return;
     }
 }
@@ -351,7 +331,7 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_xor();
+        algebraic_xor(expr);
         return;
     }
 
@@ -381,7 +361,7 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_xnor();
+        algebraic_xnor(expr);
         return;
     }
 
@@ -411,7 +391,7 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_implies();
+        algebraic_implies(expr);
         return;
     }
 
@@ -439,7 +419,7 @@ void BECompiler::walk_lshift_postorder(const Expr_ptr expr)
         return;
     }
     else if (is_binary_algebraic(expr)) {
-        algebraic_lshift();
+        algebraic_lshift(expr);
         return;
     }
 
@@ -460,7 +440,7 @@ void BECompiler::walk_rshift_postorder(const Expr_ptr expr)
         return;
     }
     else if (is_binary_algebraic(expr)) {
-        algebraic_rshift();
+        algebraic_rshift(expr);
         return;
     }
 
@@ -491,7 +471,7 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_equals();
+        algebraic_equals(expr);
         return;
     }
 
@@ -522,7 +502,7 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_not_equals();
+        algebraic_not_equals(expr);
         return;
     }
 
@@ -544,7 +524,7 @@ void BECompiler::walk_gt_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_gt();
+        algebraic_gt(expr);
         return;
     }
     else assert(0);
@@ -565,7 +545,7 @@ void BECompiler::walk_ge_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_ge();
+        algebraic_ge(expr);
         return;
     }
 
@@ -587,7 +567,7 @@ void BECompiler::walk_lt_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_lt();
+        algebraic_lt(expr);
         return;
     }
 
@@ -609,7 +589,7 @@ void BECompiler::walk_le_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        algebraic_le();
+        algebraic_le(expr);
         return;
     }
 
@@ -662,7 +642,7 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
     }
 
     else if (is_ite_algebraic(expr)) {
-        algebraic_ite();
+        algebraic_ite(expr);
         return;
     }
 
@@ -720,6 +700,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     step_t time = f_time_stack.back();
 
     ENCMap::iterator eye;
+    IEncoding_ptr enc = NULL;
 
     // 1. explicit constants are integer ints (e.g. 42)
     if (em.is_numeric(expr)) {
@@ -728,63 +709,87 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    else {
-        // 2. Model symbol
-        ISymbol_ptr symb = model.fetch_symbol(ctx, expr);
-        assert (NULL != symb);
+    else { // 2. Symbols (temp and model)
+        ISymbol_ptr symb = NULL;
+        Type_ptr type = NULL;
 
-        // 2.1. bool/integer constant leaves
-        if (symb->is_const()) {
-            IConstant& konst =  symb->as_const();
-            f_add_stack.push_back(f_enc.constant(konst.value()));
-            f_type_stack.push_back(konst.type());
-            return;
-        }
-
-        // 2.2 variable (includes support for temporaries)
-        else if (symb->is_variable()) {
+        // 2. 1. Temp symbol are maintained internally by the compiler
+        if (NULL != (symb = fetch_temporary(expr, time))) {
 
             // push into type stack
-            Type_ptr vtype = symb->as_variable().type();
-            f_type_stack.push_back(vtype);
+            type = symb->as_variable().type();
+            f_type_stack.push_back(type);
 
-            // if encoding for variable is available reuse it,
-            // otherwise create and cache it.
-            FQExpr key(ctx, expr, time);
-            IEncoding_ptr enc = NULL;
+            // if encoding for temp variable is available reuse it,
+            // otherwise fail miserably (temporary encodings must be
+            // already defined at this point)
+            FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
 
-            ENCMap::iterator eye = f_encodings.find(key);
-            if (eye != f_encodings.end()) {
+            ENCMap::iterator eye = f_temporary.find(key);
+            if (eye != f_temporary.end()) {
                 enc = (*eye).second;
             }
-            else {
-                /* build a new encoding for this symbol */
-                enc = f_enc.make_encoding(vtype);
-                register_encoding(key, enc);
-            }
+            else assert(false); // unexpected
+
             assert (NULL != enc);
+        }
 
-            // push either 1 or more ADDs depending on the encoding
-            if (tm.is_boolean(vtype) ||
-                tm.is_enum(vtype) ||
-                tm.is_integer(vtype)) {
-                f_add_stack.push_back(enc->dv()[0]);
-            }
-            else if (tm.is_int_algebraic(vtype)) {
-                for (unsigned i = tm.as_int_algebraic(vtype)->width(); (i); -- i) {
-                    f_add_stack.push_back(enc->dv()[i]);
+        // 2. Model symbol
+        else if (NULL != (symb = model.fetch_symbol(ctx, expr))) {
+
+                // 2.1. bool/integer constant leaves
+                if (symb->is_const()) {
+                    IConstant& konst =  symb->as_const();
+                    f_add_stack.push_back(f_enc.constant(konst.value()));
+                    f_type_stack.push_back(konst.type());
+                    return;
                 }
+
+                // 2.2 variable (includes support for temporaries)
+                else if (symb->is_variable()) {
+
+                    // push into type stack
+                    type = symb->as_variable().type();
+                    f_type_stack.push_back(type);
+
+                    // if encoding for variable is available reuse it,
+                    // otherwise create and cache it.
+                    FQExpr key(ctx, expr, time);
+
+                    ENCMap::iterator eye = f_encodings.find(key);
+                    if (eye != f_encodings.end()) {
+                        enc = (*eye).second;
+                    }
+                    else {
+                        /* build a new encoding for this symbol */
+                        enc = f_enc.make_encoding(type);
+                        register_encoding(key, enc);
+                    }
+
+                    assert (NULL != enc);
+                }
+
+                // 2.3 define? Simply compile it recursively.
+                else if (symb->is_define()) {
+                    (*this)(symb->as_define().body());
+                    return;
+                }
+        }
+
+        // push either 1 or more ADDs depending on the encoding
+        if (tm.is_boolean(type) ||
+            tm.is_enum(type) ||
+            tm.is_integer(type)) {
+            f_add_stack.push_back(enc->dv()[0]);
+        }
+        else if (tm.is_algebraic(type)) {
+            for (unsigned i = tm.as_algebraic(type)->width(); (0 <= i); -- i) {
+                f_add_stack.push_back(enc->dv()[i]);
             }
-            else assert(0); // unexpected
-
-            return;
         }
+        else assert(0); // unexpected
 
-        // 3. define? Simply compile it recursively.
-        else if (symb->is_define()) {
-            (*this)(symb->as_define().body());
-            return;
-        }
+        return;
     }
 
     assert(0); // unreachable
@@ -927,10 +932,10 @@ bool BECompiler::is_binary_algebraic(const Expr_ptr expr)
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
         // see comment above
-        return ( (tm.is_int_algebraic(f_owner.type(lhs)) ||
+        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
                   tm.is_integer(f_owner.type(lhs))) &&
 
-                 (tm.is_int_algebraic(f_owner.type(rhs)) ||
+                 (tm.is_algebraic(f_owner.type(rhs)) ||
                   tm.is_integer(f_owner.type(rhs))));
     }
 
@@ -947,7 +952,7 @@ bool BECompiler::is_unary_algebraic(const Expr_ptr expr)
 
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        return ( (tm.is_int_algebraic(f_owner.type(lhs)) ||
+        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
                   tm.is_integer(f_owner.type(lhs))));
     }
 
@@ -968,33 +973,66 @@ bool BECompiler::is_ite_enumerative(const Expr_ptr expr)
 bool BECompiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
 
-void BECompiler::algebraic_neg()
+void BECompiler::algebraic_neg(const Expr_ptr expr)
 {
-    assert(0); // TODO
+    assert( is_unary_algebraic(expr) );
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr type = f_type_stack.back(); // just inspect
+    unsigned i, width = tm.as_algebraic(type)->width();
+
+    /* create temp complemented ADDs */
+    ADD dds[width];
+    for (i = width; (0 <= i) ; -- i) {
+        dds[i] = f_add_stack.back().Cmpl(); f_add_stack.pop_back();
+    }
+    FQExpr temp = make_temporary_encoding(dds, width);
+
+    /* type stack is untouched because the argument is already algebraic */
+    (*this)(em.make_add(temp.expr(), em.make_one()));
 }
 
-void BECompiler::algebraic_not()
+void BECompiler::algebraic_not(const Expr_ptr expr)
 {
-    assert(0); // TODO
+    assert( is_unary_algebraic(expr) );
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr type = f_type_stack.back(); // just inspect
+    unsigned i, width = tm.as_algebraic(type)->width();
+
+    ADD* lhs[width];
+    for (i = width; (0 <= i) ; -- i) {
+        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    /* perform bw arithmetic, nothing fancy  here :-) */
+    for (i = width; (0 <= i); -- i) {
+
+        /* ! x[i] */
+        ADD tmp = (*lhs[i]).Cmpl();
+        f_add_stack.push_back(tmp);
+    }
 }
 
-void BECompiler::algebraic_plus()
+void BECompiler::algebraic_plus(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest, takes care of type stack
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform arithmetic sum using positional algorithm */
     ADD carry = f_enc.zero();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] + y[i] + c */
         ADD tmp = (*lhs[i]).Plus(*rhs[i]).Plus(carry);
@@ -1005,23 +1043,26 @@ void BECompiler::algebraic_plus()
     }
 }
 
-void BECompiler::algebraic_sub()
+void BECompiler::algebraic_sub(const Expr_ptr expr)
 {
-    assert(0); // TODO
+    assert( is_binary_algebraic(expr) );
+
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_add(expr->lhs(), em.make_neg(expr->rhs())));
 }
 
-
-void BECompiler::algebraic_mul()
+void BECompiler::algebraic_mul(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned pos, i, j, width = algebrize_ops_binary(); // largest, takes care of type stack
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
@@ -1061,32 +1102,35 @@ void BECompiler::algebraic_mul()
     }
 }
 
-void BECompiler::algebraic_div()
+void BECompiler::algebraic_div(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     assert(0); // TODO
 }
 
-void BECompiler::algebraic_mod()
+void BECompiler::algebraic_mod(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     assert(0); // TODO
 }
 
-void BECompiler::algebraic_and()
+void BECompiler::algebraic_and(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWTimes(*rhs[i]);
@@ -1094,22 +1138,23 @@ void BECompiler::algebraic_and()
     }
 }
 
-void BECompiler::algebraic_or()
+void BECompiler::algebraic_or(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWOr(*rhs[i]);
@@ -1117,22 +1162,23 @@ void BECompiler::algebraic_or()
     }
 }
 
-void BECompiler::algebraic_xor()
+void BECompiler::algebraic_xor(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWXor(*rhs[i]);
@@ -1140,22 +1186,23 @@ void BECompiler::algebraic_xor()
     }
 }
 
-void BECompiler::algebraic_xnor()
+void BECompiler::algebraic_xnor(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWXnor(*rhs[i]);
@@ -1163,22 +1210,23 @@ void BECompiler::algebraic_xnor()
     }
 }
 
-void BECompiler::algebraic_implies()
+void BECompiler::algebraic_implies(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWCmpl().BWOr(*rhs[i]);
@@ -1186,22 +1234,23 @@ void BECompiler::algebraic_implies()
     }
 }
 
-void BECompiler::algebraic_lshift()
+void BECompiler::algebraic_lshift(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
@@ -1209,27 +1258,29 @@ void BECompiler::algebraic_lshift()
     }
 }
 
-void BECompiler::algebraic_rshift()
+void BECompiler::algebraic_rshift(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
 }
 
-void BECompiler::algebraic_equals()
+void BECompiler::algebraic_equals(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, similar to xnor, only conjuct res */
     ADD tmp = f_enc.one();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp *= (*lhs[i]).Equals(*rhs[i]);
@@ -1239,23 +1290,24 @@ void BECompiler::algebraic_equals()
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_not_equals()
+void BECompiler::algebraic_not_equals(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, similar to xnor, only conjuct res */
     ADD tmp = f_enc.one();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp *= (*lhs[i]).Equals(*rhs[i]);
@@ -1265,23 +1317,24 @@ void BECompiler::algebraic_not_equals()
     f_add_stack.push_back(tmp.Cmpl());
 }
 
-void BECompiler::algebraic_gt()
+void BECompiler::algebraic_gt(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp += (*rhs[i]).LT(*lhs[i]); // CHECK MSB
@@ -1291,23 +1344,24 @@ void BECompiler::algebraic_gt()
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_ge()
+void BECompiler::algebraic_ge(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp += (*rhs[i]).LEQ(*lhs[i]); // CHECK MSB
@@ -1317,23 +1371,24 @@ void BECompiler::algebraic_ge()
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_lt()
+void BECompiler::algebraic_lt(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp += (*lhs[i]).LT(*rhs[i]); // CHECK MSB
@@ -1343,23 +1398,24 @@ void BECompiler::algebraic_lt()
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_le()
+void BECompiler::algebraic_le(const Expr_ptr expr)
 {
+    assert( is_binary_algebraic(expr) );
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
         tmp += (*lhs[i]).LEQ(*rhs[i]); // CHECK MSB
@@ -1370,24 +1426,25 @@ void BECompiler::algebraic_le()
 }
 
 // TODO fix type stack
-void BECompiler::algebraic_ite()
+void BECompiler::algebraic_ite(const Expr_ptr expr)
 {
+    assert(is_ite_algebraic(expr));
     unsigned i, width = algebrize_ops_binary(); // largest
 
     ADD* rhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD* lhs[width];
-    for (i = width; (i) ; -- i) {
+    for (i = width; (0 <= i) ; -- i) {
         *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
     /* multiplex, easy as pie :-) */
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
         f_add_stack.push_back(c.Ite(*lhs[i], *rhs[i]));
     }
 }
@@ -1407,13 +1464,13 @@ unsigned BECompiler::algebrize_ops_binary()
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
 
-    assert( tm.is_int_algebraic(rhs_type) || tm.is_int_algebraic(lhs_type) );
-    unsigned rhs_width = tm.is_int_algebraic(rhs_type)
-        ? tm.as_int_algebraic(rhs_type)->width()
+    assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
+    unsigned rhs_width = tm.is_algebraic(rhs_type)
+        ? tm.as_algebraic(rhs_type)->width()
         : 0;
 
-    unsigned lhs_width = tm.is_int_algebraic(lhs_type)
-        ? tm.as_int_algebraic(lhs_type)->width()
+    unsigned lhs_width = tm.is_algebraic(lhs_type)
+        ? tm.as_algebraic(lhs_type)->width()
         : 0;
 
     /* max */
@@ -1428,7 +1485,7 @@ unsigned BECompiler::algebrize_ops_binary()
             algebraic_from_integer(res);
         }
         else { // just padding required
-            bool is_signed = tm.as_int_algebraic(rhs_type)->is_signed();
+            bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
             algebraic_padding(rhs_width, res, is_signed);
         }
     }
@@ -1438,7 +1495,7 @@ unsigned BECompiler::algebrize_ops_binary()
             algebraic_from_integer(res);
         }
         else { // just padding required
-            bool is_signed = tm.as_int_algebraic(lhs_type)->is_signed();
+            bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
             algebraic_padding(lhs_width, res, is_signed);
         }
     }
@@ -1456,7 +1513,7 @@ void BECompiler::algebraic_from_integer(unsigned width)
 
     unsigned i, base = Cudd_V(f_enc.base().getNode());
 
-    for (i = width; (i); -- i) {
+    for (i = width; (0 <= i); -- i) {
         ADD digit = f_enc.constant(value % base);
         f_add_stack.push_back(digit);
         value /= base;
@@ -1474,7 +1531,7 @@ void BECompiler::algebraic_padding(unsigned old_width, unsigned new_width, bool 
     assert (old_width < new_width); // old is smaller than new
 
     ADD* tmp[old_width];
-    for (i = old_width; (i) ; -- i) {
+    for (i = old_width; (0 <= i) ; -- i) {
         *tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
@@ -1483,10 +1540,37 @@ void BECompiler::algebraic_padding(unsigned old_width, unsigned new_width, bool 
         padding += (*tmp[i]).BWTimes(f_enc.msb()).Equals(zero).Ite(zero, f_enc.full());
     }
 
-    for (i = new_width - old_width; (i); -- i) {
+    for (i = new_width - old_width; (0 <= i); -- i) {
         f_add_stack.push_back(padding);
     }
-    for (i = old_width; (i); -- i) {
+    for (i = old_width; (0 <= i); -- i) {
         f_add_stack.push_back(*tmp[i]);
     }
+}
+
+FQExpr BECompiler::make_temporary_encoding(ADD dds[], unsigned width)
+{
+    ExprMgr& em = f_owner.em();
+
+    ostringstream oss;
+    oss << "__tmp" << f_temp_auto_index ++ ;
+
+    Expr_ptr expr = em.make_identifier(oss.str());
+    IEncoding_ptr enc = new AlgebraicEncoding(width, false, dds);
+    FQExpr key(expr);
+
+    register_temporary( key, enc);
+    return key;
+}
+
+// Resolution for temp symbols
+ISymbol_ptr BECompiler::fetch_temporary(const Expr_ptr expr, step_t time)
+{
+    FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
+    Temporaries::iterator viter = f_temporaries.find(key);
+    if (viter != f_temporaries.end()) {
+        return (*viter).second;
+    }
+
+    return NULL; // not found
 }

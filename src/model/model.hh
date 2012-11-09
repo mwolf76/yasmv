@@ -33,6 +33,7 @@
 #include <expr_mgr.hh>
 
 #include <type.hh>
+#include <enc.hh>
 
 typedef vector<FQExpr> FQExprVector;
 
@@ -331,7 +332,7 @@ public:
 private:
     Modules f_modules;
     Constants f_constants; // global consts
-    Temporaries f_temporaries;
+
     Expr_ptr f_name;
 };
 

@@ -164,6 +164,18 @@ public:
         return __make_expr(&tmp);
     }
 
+    inline Expr_ptr make_zero()
+    {
+        Expr tmp(ICONST, 0); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_one()
+    {
+        Expr tmp(ICONST, 1); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
     inline Expr_ptr make_hconst(value_t value)
     {
         Expr tmp(HCONST, value); // we need a temp store

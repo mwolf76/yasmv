@@ -99,9 +99,6 @@ public:
         return (*f_instance);
     }
 
-    // inline unsigned width() const
-    // { return f_width; }
-
     inline ADD base() const
     { return f_base; }
 

@@ -68,8 +68,8 @@ public:
     { return f_register[ f_em.make_integer_type() ]; }
 
     /* -- decls ------------------------------------------------------------- */
-    const Type_ptr find_unsigned(unsigned bits);
-    const Type_ptr find_signed(unsigned bits);
+    const Type_ptr find_unsigned(unsigned digits);
+    const Type_ptr find_signed(unsigned digits);
 
     const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
@@ -85,7 +85,7 @@ public:
     bool is_integer(const Type_ptr tp) const;
 
     // an algebraic variable
-    bool is_int_algebraic(const Type_ptr tp) const;
+    bool is_algebraic(const Type_ptr tp) const;
 
     // an ENUM
     bool is_enum(const Type_ptr tp) const;
@@ -101,7 +101,7 @@ public:
     IntegerType_ptr as_integer(const Type_ptr tp) const;
 
     typedef class AlgebraicType* AlgebraicType_ptr;
-    AlgebraicType_ptr as_int_algebraic(const Type_ptr tp) const;
+    AlgebraicType_ptr as_algebraic(const Type_ptr tp) const;
 
     typedef class EnumType* EnumType_ptr;
     EnumType_ptr as_enum(const Type_ptr tp) const;

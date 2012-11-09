@@ -33,7 +33,7 @@ void Model::add_module(Expr_ptr name, IModule_ptr module)
     f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
 }
 
-// symbol resolution
+// Resolution for model symbols
 ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
 {
     Modules::iterator eye = f_modules.find(ctx);
@@ -54,14 +54,6 @@ ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
             return (*citer).second;
         }
     }
-
-    { /* temporaries */
-        Temporaries::iterator titer = f_temporaries.find(symb);
-        if (titer != f_temporaries.end()) {
-            return (*titer).second;
-        }
-    }
-
 
     { /* params */
         // TODO: not yet implemented: params

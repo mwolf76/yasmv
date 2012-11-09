@@ -134,7 +134,7 @@ protected:
 private:
     ADDMap f_map; // FQDN -> DD cache
     ENCMap f_encodings; // FQDN -> DD encoding
-    ENCMap f_temporary; // FQDN -> DD encoding (temp only)
+    ENCMap f_temporary; // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -171,8 +171,17 @@ private:
         return true;
     }
 
-    inline void register_encoding(const FQExpr& symb, IEncoding_ptr enc)
-    { f_encodings [ symb ] = enc; }
+    inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
+    { f_encodings [ fqexpr ] = enc; }
+
+    inline void register_temporary(const FQExpr& fqexpr, IEncoding_ptr enc)
+    { f_temporary [ fqexpr ] = enc; }
+
+    unsigned f_temp_auto_index; // autoincr temp index
+    Temporaries f_temporaries;
+
+    FQExpr make_temporary_encoding(ADD dds[], unsigned width);
+    ISymbol_ptr fetch_temporary(const Expr_ptr ctx, step_t time);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
@@ -192,28 +201,28 @@ private:
     bool is_ite_algebraic(const Expr_ptr expr);
 
     /* -- algebraic work ---------------------------------------------------- */
-    void algebraic_neg();
-    void algebraic_not();
+    void algebraic_neg(const Expr_ptr expr);
+    void algebraic_not(const Expr_ptr expr);
 
-    void algebraic_plus();
-    void algebraic_sub();
-    void algebraic_div();
-    void algebraic_mul();
-    void algebraic_mod();
-    void algebraic_and();
-    void algebraic_or();
-    void algebraic_xor();
-    void algebraic_xnor();
-    void algebraic_implies();
-    void algebraic_lshift();
-    void algebraic_rshift();
-    void algebraic_equals();
-    void algebraic_not_equals();
-    void algebraic_gt();
-    void algebraic_ge();
-    void algebraic_lt();
-    void algebraic_le();
-    void algebraic_ite();
+    void algebraic_plus(const Expr_ptr expr);
+    void algebraic_sub(const Expr_ptr expr);
+    void algebraic_div(const Expr_ptr expr);
+    void algebraic_mul(const Expr_ptr expr);
+    void algebraic_mod(const Expr_ptr expr);
+    void algebraic_and(const Expr_ptr expr);
+    void algebraic_or(const Expr_ptr expr);
+    void algebraic_xor(const Expr_ptr expr);
+    void algebraic_xnor(const Expr_ptr expr);
+    void algebraic_implies(const Expr_ptr expr);
+    void algebraic_lshift(const Expr_ptr expr);
+    void algebraic_rshift(const Expr_ptr expr);
+    void algebraic_equals(const Expr_ptr expr);
+    void algebraic_not_equals(const Expr_ptr expr);
+    void algebraic_gt(const Expr_ptr expr);
+    void algebraic_ge(const Expr_ptr expr);
+    void algebraic_lt(const Expr_ptr expr);
+    void algebraic_le(const Expr_ptr expr);
+    void algebraic_ite(const Expr_ptr expr);
 
     unsigned algebrize_ops_binary();
 
