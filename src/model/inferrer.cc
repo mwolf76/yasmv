@@ -485,7 +485,7 @@ void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
         throw BadType(top->get_repr(), f_integer, expr);
     }
 
-    f_type_stack.push_back(top); // propagate
+    f_type_stack.push_back(tm.find_integer()); // propagate
 }
 
 // fun: logical -> logical
@@ -498,7 +498,7 @@ void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
         throw BadType(top->get_repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(top); // propagate
+    f_type_stack.push_back(tm.find_boolean()); // propagate
 }
 
 // fun: arithm, arithm -> arithm
@@ -517,6 +517,8 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
     }
 
     // generic integer
+    assert(tm.is_integer(lhs) && tm.is_integer(rhs));
+
     f_type_stack.push_back(tm.find_integer());
 }
 
@@ -535,7 +537,10 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
         throw BadType(lhs->get_repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(lhs);
+    // generic integer
+    assert(tm.is_boolean(lhs) && tm.is_boolean(rhs));
+
+    f_type_stack.push_back(tm.find_boolean());
 }
 
 void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
@@ -552,7 +557,7 @@ void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
         throw BadType(lhs->get_repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(lhs);
+    f_type_stack.push_back(tm.find_boolean());
 }
 
 
@@ -574,11 +579,17 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
     }
 
     // types have to match
-    if (lhs != rhs) {
-        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    if (tm.is_integer(lhs) && tm.is_integer(rhs)) {
+        f_type_stack.push_back(tm.find_integer());
+        return;
     }
 
-    f_type_stack.push_back(lhs);
+    if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
+        f_type_stack.push_back(tm.find_boolean());
+        return;
+    }
+
+    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
 }
 
 // fun: arithmetical x arithmetical -> boolean
@@ -617,11 +628,13 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
     }
 
     // types have to match
-    if (lhs != rhs) {
-        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    if ( (tm.is_boolean(lhs) && tm.is_boolean(rhs)) ||
+         (tm.is_integer(lhs) && tm.is_integer(rhs)) ) {
+        f_type_stack.push_back(tm.find_boolean());
+        return;
     }
 
-    f_type_stack.push_back(tm.find_boolean());
+    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
 }
 
 
@@ -640,9 +653,15 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     }
 
     // types have to match
-    if (lhs != rhs) {
-        throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    if ((tm.is_integer(lhs) && tm.is_integer(rhs))) {
+        f_type_stack.push_back(tm.find_integer());
+        return;
     }
 
-    f_type_stack.push_back(lhs);
+    if ((tm.is_boolean(lhs) && tm.is_boolean(rhs))) {
+        f_type_stack.push_back(tm.find_boolean());
+        return;
+    }
+
+    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
 }
