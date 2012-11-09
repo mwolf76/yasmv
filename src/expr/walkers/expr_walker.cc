@@ -40,7 +40,8 @@ Walker& Walker::operator() (const Expr_ptr expr)
     activation_record call(expr);
 
     // setup toplevel act. record and perform walk
-    f_recursion_stack.push(call); walk();
+    f_recursion_stack.push(call);
+    walk();
 
     // after walking hook
     this->post_hook();
