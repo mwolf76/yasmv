@@ -182,6 +182,7 @@ private:
 
     FQExpr make_temporary_encoding(ADD dds[], unsigned width);
     ISymbol_ptr fetch_temporary(const Expr_ptr ctx, step_t time);
+    void push_dds(IEncoding_ptr enc, Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);

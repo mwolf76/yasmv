@@ -75,7 +75,7 @@ protected:
 };
 
 typedef class AlgebraicType* AlgebraicType_ptr;
-class AlgebraicType : public IntegerType {
+class AlgebraicType : public Type {
 public:
     inline unsigned width() const
     { return f_width; }

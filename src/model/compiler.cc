@@ -84,8 +84,8 @@ void BECompiler::pre_hook()
 void BECompiler::post_hook()
 {
     ADD add = f_add_stack.back();
-    assert( add.FindMin() == f_enc.zero() );
-    assert( add.FindMax() == f_enc.one() );
+    assert( add.FindMin().Equals(f_enc.zero()) );
+    assert( add.FindMax().Equals(f_enc.one()) );
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -686,6 +686,29 @@ void BECompiler::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
+
+void BECompiler::push_dds(IEncoding_ptr enc, Type_ptr type)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    assert (NULL != enc);
+    DDVector& dds = enc->dv();
+    unsigned width = dds.size();
+
+    // push either 1 or more ADDs depending on the encoding
+    if (tm.is_boolean(type) || tm.is_enum(type) || tm.is_integer(type)) {
+        assert(1 == width);
+        f_add_stack.push_back(dds[0]);
+    }
+    else if (tm.is_algebraic(type)) {
+        assert( tm.as_algebraic(type)->width() == width ); // type and enc width info has to match
+        for (int i = width -1; (0 <= i); -- i) {
+            f_add_stack.push_back(dds[i]);
+        }
+    }
+    else assert(0); // unexpected
+}
+
 void BECompiler::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -718,11 +741,10 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
             // push into type stack
             type = symb->as_variable().type();
+            assert(tm.is_algebraic(type));
             f_type_stack.push_back(type);
 
-            // if encoding for temp variable is available reuse it,
-            // otherwise fail miserably (temporary encodings must be
-            // already defined at this point)
+            // temporary encodings must be already defined.
             FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
 
             ENCMap::iterator eye = f_temporary.find(key);
@@ -731,8 +753,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
             }
             else assert(false); // unexpected
 
-            assert (NULL != enc);
-        }
+            push_dds(enc, type);
+            return;
+        } /* temp symbol */
 
         // 2. Model symbol
         else if (NULL != (symb = model.fetch_symbol(ctx, expr))) {
@@ -766,7 +789,8 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                         register_encoding(key, enc);
                     }
 
-                    assert (NULL != enc);
+                    push_dds(enc, type);
+                    return;
                 }
 
                 // 2.3 define? Simply compile it recursively.
@@ -774,22 +798,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                     (*this)(symb->as_define().body());
                     return;
                 }
-        }
-
-        // push either 1 or more ADDs depending on the encoding
-        if (tm.is_boolean(type) ||
-            tm.is_enum(type) ||
-            tm.is_integer(type)) {
-            f_add_stack.push_back(enc->dv()[0]);
-        }
-        else if (tm.is_algebraic(type)) {
-            for (unsigned i = tm.as_algebraic(type)->width(); (0 <= i); -- i) {
-                f_add_stack.push_back(enc->dv()[i]);
-            }
-        }
-        else assert(0); // unexpected
-
-        return;
+        } /* model symbol */
     }
 
     assert(0); // unreachable

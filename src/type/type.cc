@@ -39,7 +39,7 @@ IntegerType::IntegerType(TypeMgr& owner) // abstract
 }
 
 AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD *dds)
-    : IntegerType(owner)
+    : Type(owner)
     , f_width(width)
     , f_signed(is_signed)
     , f_dds(dds)

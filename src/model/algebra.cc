@@ -44,11 +44,11 @@ void BECompiler::algebraic_neg(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned i, width = tm.as_algebraic(type)->width();
+    unsigned width = tm.as_algebraic(type)->width();
 
     /* create temp complemented ADDs */
     ADD dds[width];
-    for (i = width; (0 <= i) ; -- i) {
+    for (int i = width -1; (0 <= i) ; -- i) {
         dds[i] = f_add_stack.back().Cmpl(); f_add_stack.pop_back();
     }
     FQExpr temp = make_temporary_encoding(dds, width);
@@ -63,18 +63,17 @@ void BECompiler::algebraic_not(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned i, width = tm.as_algebraic(type)->width();
+    unsigned width = tm.as_algebraic(type)->width();
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
-
+    for (int i = width -1; (0 <= i); -- i) {
         /* ! x[i] */
-        ADD tmp = (*lhs[i]).Cmpl();
+        ADD tmp = lhs[i].Cmpl();
         f_add_stack.push_back(tmp);
     }
 }
@@ -82,24 +81,24 @@ void BECompiler::algebraic_not(const Expr_ptr expr)
 void BECompiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform arithmetic sum using positional algorithm */
     ADD carry = f_enc.zero();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] + y[i] + c */
-        ADD tmp = (*lhs[i]).Plus(*rhs[i]).Plus(carry);
+        ADD tmp = lhs[i].Plus(rhs[i]).Plus(carry);
         carry = f_enc.base().LT(tmp); /* c > 0x10 */
 
         /* x[i] = (x[i] + y[i] + c) % base */ // TODO: detect overflow on MSB
@@ -118,51 +117,51 @@ void BECompiler::algebraic_sub(const Expr_ptr expr)
 void BECompiler::algebraic_mul(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned pos, i, j, width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned pos, width = algebrize_ops_binary(); // largest, takes care of type stack
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* res[width];
-    for (i = width -1; 0 <= i; -- i) {
-        *res[i] = f_enc.zero();
+    ADD res[width];
+    for (int i = width -1; 0 <= i; -- i) {
+        res[i] = f_enc.zero();
     }
 
-    ADD* tmp[width];
-    for (i = width -1; 0 <= i; -- i) {
-        *tmp[i] = f_enc.zero();
+    ADD tmp[width];
+    for (int i = width -1; 0 <= i; -- i) {
+        tmp[i] = f_enc.zero();
     }
 
     ADD carry = f_enc.zero();
 
-    for (i = width -1; 0 <= i; -- i) {
-        for (j = width -1; 0 <= j; -- j) {
+    for (int i = width -1; 0 <= i; -- i) {
+        for (int j = width -1; 0 <= j; -- j) {
 
             // ignore what happend out of result boundaries
             if (0 <= (pos = width - i - j)) {
 
                 /* build mul table for digit product */
-                ADD product = (*lhs[i]).Times(*rhs[j]).Plus(carry);
+                ADD product = lhs[i].Times(rhs[j]).Plus(carry);
 
-                *tmp[pos] = product.Modulus(f_enc.base());
+                tmp[pos] = product.Modulus(f_enc.base());
                 carry = product.Divide(f_enc.base());
             }
         }
 
         // update result
-        for (j = width -1; i <= j; -- j) {
-            *res[j] += *tmp[j];
+        for (int j = width -1; i <= j; -- j) {
+            res[j] += tmp[j];
         }
 
         // return i-th digit of result
-        f_add_stack.push_back(*res[i]);
+        f_add_stack.push_back(res[i]);
     }
 }
 
@@ -181,23 +180,24 @@ void BECompiler::algebraic_mod(const Expr_ptr expr)
 void BECompiler::algebraic_and(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWTimes(*rhs[i]);
+        ADD tmp = lhs[i].BWTimes(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -205,23 +205,23 @@ void BECompiler::algebraic_and(const Expr_ptr expr)
 void BECompiler::algebraic_or(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWOr(*rhs[i]);
+        ADD tmp = lhs[i].BWOr(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -229,23 +229,23 @@ void BECompiler::algebraic_or(const Expr_ptr expr)
 void BECompiler::algebraic_xor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWXor(*rhs[i]);
+        ADD tmp = lhs[i].BWXor(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -253,23 +253,23 @@ void BECompiler::algebraic_xor(const Expr_ptr expr)
 void BECompiler::algebraic_xnor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWXnor(*rhs[i]);
+        ADD tmp = lhs[i].BWXnor(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -277,23 +277,23 @@ void BECompiler::algebraic_xnor(const Expr_ptr expr)
 void BECompiler::algebraic_implies(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWCmpl().BWOr(*rhs[i]);
+        ADD tmp = lhs[i].BWCmpl().BWOr(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -301,23 +301,23 @@ void BECompiler::algebraic_implies(const Expr_ptr expr)
 void BECompiler::algebraic_lshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = (*lhs[i]).BWCmpl().BWXor(*rhs[i]);
+        ADD tmp = lhs[i].BWCmpl().BWXor(rhs[i]);
         f_add_stack.push_back(tmp);
     }
 }
@@ -325,29 +325,30 @@ void BECompiler::algebraic_lshift(const Expr_ptr expr)
 void BECompiler::algebraic_rshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
+    assert( 0 ); // TODO: yet to be implemented...
 }
 
 void BECompiler::algebraic_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, similar to xnor, only conjuct res */
     ADD tmp = f_enc.one();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp *= (*lhs[i]).Equals(*rhs[i]);
+        tmp *= lhs[i].Equals(rhs[i]);
     }
 
     /* just one result */
@@ -357,24 +358,24 @@ void BECompiler::algebraic_equals(const Expr_ptr expr)
 void BECompiler::algebraic_not_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, similar to xnor, only conjuct res */
     ADD tmp = f_enc.one();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp *= (*lhs[i]).Equals(*rhs[i]);
+        tmp *= lhs[i].Equals(rhs[i]);
     }
 
     /* just one result */
@@ -384,24 +385,24 @@ void BECompiler::algebraic_not_equals(const Expr_ptr expr)
 void BECompiler::algebraic_gt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp += (*rhs[i]).LT(*lhs[i]); // CHECK MSB
+        tmp += rhs[i].LT(lhs[i]); // CHECK MSB
     }
 
     /* just one result */
@@ -411,24 +412,24 @@ void BECompiler::algebraic_gt(const Expr_ptr expr)
 void BECompiler::algebraic_ge(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp += (*rhs[i]).LEQ(*lhs[i]); // CHECK MSB
+        tmp += rhs[i].LEQ(lhs[i]); // CHECK MSB
     }
 
     /* just one result */
@@ -438,24 +439,24 @@ void BECompiler::algebraic_ge(const Expr_ptr expr)
 void BECompiler::algebraic_lt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp += (*lhs[i]).LT(*rhs[i]); // CHECK MSB
+        tmp += lhs[i].LT(rhs[i]); // CHECK MSB
     }
 
     /* just one result */
@@ -465,24 +466,24 @@ void BECompiler::algebraic_lt(const Expr_ptr expr)
 void BECompiler::algebraic_le(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
 
         /* x[i] &  y[i] */
-        tmp += (*lhs[i]).LEQ(*rhs[i]); // CHECK MSB
+        tmp += lhs[i].LEQ(rhs[i]); // CHECK MSB
     }
 
     /* just one result */
@@ -493,23 +494,23 @@ void BECompiler::algebraic_le(const Expr_ptr expr)
 void BECompiler::algebraic_ite(const Expr_ptr expr)
 {
     assert(is_ite_algebraic(expr));
-    unsigned i, width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD* rhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD rhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    ADD* lhs[width];
-    for (i = width; (0 <= i) ; -- i) {
-        *lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (int i = width -1; (0 <= i) ; -- i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
     /* multiplex, easy as pie :-) */
-    for (i = width; (0 <= i); -- i) {
-        f_add_stack.push_back(c.Ite(*lhs[i], *rhs[i]));
+    for (int i = width -1; (0 <= i); -- i) {
+        f_add_stack.push_back(c.Ite(lhs[i], rhs[i]));
     }
 }
 
@@ -524,6 +525,9 @@ void BECompiler::algebraic_ite(const Expr_ptr expr)
 unsigned BECompiler::algebrize_ops_binary()
 {
     TypeMgr& tm = f_owner.tm();
+
+    unsigned stack_size = f_type_stack.size();
+    assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
@@ -552,6 +556,9 @@ unsigned BECompiler::algebrize_ops_binary()
             bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
             algebraic_padding(rhs_width, res, is_signed);
         }
+
+        // push other operand's type
+        f_type_stack.push_back(lhs_type);
     }
 
     if (lhs_width < res) {
@@ -562,8 +569,17 @@ unsigned BECompiler::algebrize_ops_binary()
             bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
             algebraic_padding(lhs_width, res, is_signed);
         }
+
+        // push other operand's type
+        f_type_stack.push_back(rhs_type);
     }
 
+    // fix the type stack
+    if ((rhs_width == res) && (lhs_width == res)) {
+        f_type_stack.push_back(rhs_type); // arbitrary
+    }
+
+    assert( stack_size - 1 == f_type_stack.size());
     return res;
 }
 
@@ -575,9 +591,9 @@ void BECompiler::algebraic_from_integer(unsigned width)
 
     value_t value = f_enc.const_value(top);
 
-    unsigned i, base = Cudd_V(f_enc.base().getNode());
+    unsigned base = Cudd_V(f_enc.base().getNode());
 
-    for (i = width; (0 <= i); -- i) {
+    for (int i = width -1; (0 <= i); -- i) {
         ADD digit = f_enc.constant(value % base);
         f_add_stack.push_back(digit);
         value /= base;
@@ -588,27 +604,26 @@ void BECompiler::algebraic_from_integer(unsigned width)
 
 void BECompiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed)
 {
-    unsigned i;
     ADD padding = f_enc.zero();
     ADD zero = f_enc.zero();
 
     assert (old_width < new_width); // old is smaller than new
 
-    ADD* tmp[old_width];
-    for (i = old_width; (0 <= i) ; -- i) {
-        *tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ADD tmp[old_width];
+    for (int i = old_width -1; (0 <= i) ; -- i) {
+        tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     // sign extension predicate (0x00 or 0xFF?) only if required.
     if (is_signed) {
-        padding += (*tmp[i]).BWTimes(f_enc.msb()).Equals(zero).Ite(zero, f_enc.full());
+        padding += tmp[0].BWTimes(f_enc.msb()).Equals(zero).Ite(zero, f_enc.full());
     }
 
-    for (i = new_width - old_width; (0 <= i); -- i) {
+    for (int i = new_width - old_width /* -1 + 1 */; (0 <= i); -- i) {
         f_add_stack.push_back(padding);
     }
-    for (i = old_width; (0 <= i); -- i) {
-        f_add_stack.push_back(*tmp[i]);
+    for (int i = old_width -1; (0 <= i); -- i) {
+        f_add_stack.push_back(tmp[i]);
     }
 }
 
