@@ -75,6 +75,7 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     res = f_type_stack.back();
 
     DEBUG  << res << endl;
+
     return res;
 }
 
@@ -344,7 +345,7 @@ bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 {
     Type_ptr tmp = f_type_stack.back();
-    Expr_ptr ctx = tmp->get_repr();
+    Expr_ptr ctx = tmp->repr();
 
     f_ctx_stack.push_back(ctx);
     return true;
@@ -445,7 +446,7 @@ void Inferrer::walk_unary_temporal_postorder(const Expr_ptr expr)
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
 
     if (!tm.is_boolean(top)) {
-        throw BadType(top->get_repr(), f_boolean, expr);
+        throw BadType(top->repr(), f_boolean, expr);
     }
 
     f_type_stack.push_back(tm.find_boolean());
@@ -459,13 +460,13 @@ void Inferrer::walk_binary_temporal_postorder(const Expr_ptr expr)
     { // RHS
         const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
         if (!tm.is_boolean(top))
-            throw BadType(top->get_repr(), f_boolean, expr);
+            throw BadType(top->repr(), f_boolean, expr);
     }
 
     { // LHS
         const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
         if (!tm.is_boolean(top))
-            throw BadType(top->get_repr(), f_boolean, expr);
+            throw BadType(top->repr(), f_boolean, expr);
     }
 
     f_type_stack.push_back(tm.find_boolean());
@@ -482,7 +483,7 @@ void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(top) && !tm.is_algebraic(top)) {
-        throw BadType(top->get_repr(), f_integer, expr);
+        throw BadType(top->repr(), f_integer, expr);
     }
 
     f_type_stack.push_back(tm.find_integer());
@@ -495,7 +496,7 @@ void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
 
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(top)) {
-        throw BadType(top->get_repr(), f_boolean, expr);
+        throw BadType(top->repr(), f_boolean, expr);
     }
 
     f_type_stack.push_back(tm.find_boolean());
@@ -508,12 +509,12 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(rhs) && !tm.is_algebraic(rhs)) {
-        throw BadType(rhs->get_repr(), f_integer, expr);
+        throw BadType(rhs->repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(lhs) && !tm.is_algebraic(lhs)) {
-        throw BadType(lhs->get_repr(), f_integer, expr);
+        throw BadType(lhs->repr(), f_integer, expr);
     }
 
     // integer or algebraic
@@ -530,12 +531,12 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(rhs)) {
-        throw BadType(rhs->get_repr(), f_boolean, expr);
+        throw BadType(rhs->repr(), f_boolean, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(lhs)) {
-        throw BadType(lhs->get_repr(), f_boolean, expr);
+        throw BadType(lhs->repr(), f_boolean, expr);
     }
 
     // boolean
@@ -550,12 +551,12 @@ void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(rhs)) {
-        throw BadType(rhs->get_repr(), f_boolean, expr);
+        throw BadType(rhs->repr(), f_boolean, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(lhs)) {
-        throw BadType(lhs->get_repr(), f_boolean, expr);
+        throw BadType(lhs->repr(), f_boolean, expr);
     }
 
     // boolean
@@ -573,13 +574,13 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(rhs) &&
         !tm.is_boolean(rhs)) {
-        throw BadType(rhs->get_repr(), f_integer, expr);
+        throw BadType(rhs->repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(lhs) &&
         !tm.is_boolean(lhs)) {
-        throw BadType(lhs->get_repr(), f_integer, expr);
+        throw BadType(lhs->repr(), f_integer, expr);
     }
 
     // algebraic or integer
@@ -595,7 +596,7 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
         return;
     }
 
-    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    throw BadType(rhs->repr(), lhs->repr(), expr);
 }
 
 // fun: arithmetical x arithmetical -> boolean
@@ -605,12 +606,12 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(rhs) && !tm.is_algebraic(rhs)) {
-        throw BadType(rhs->get_repr(), f_integer, expr);
+        throw BadType(rhs->repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(lhs) && !tm.is_algebraic(lhs)) {
-        throw BadType(lhs->get_repr(), f_integer, expr);
+        throw BadType(lhs->repr(), f_integer, expr);
     }
 
     f_type_stack.push_back(tm.find_boolean());
@@ -623,14 +624,16 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(rhs) &&
+        !tm.is_algebraic(rhs) &&
         !tm.is_integer(rhs)) {
-        throw BadType(rhs->get_repr(), f_integer_or_boolean, expr);
+        throw BadType(rhs->repr(), f_integer_or_boolean, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(lhs) &&
+        !tm.is_algebraic(lhs) &&
         !tm.is_integer(lhs)) {
-        throw BadType(lhs->get_repr(), f_integer_or_boolean, expr);
+        throw BadType(lhs->repr(), f_integer_or_boolean, expr);
     }
 
     // algebraic or integer
@@ -646,7 +649,7 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
         return;
     }
 
-    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    throw BadType(rhs->repr(), lhs->repr(), expr);
 }
 
 
@@ -661,7 +664,7 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     // condition is always boolean
     const Type_ptr cond = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_boolean(cond)) {
-        throw BadType(cond->get_repr(), f_boolean, expr);
+        throw BadType(cond->repr(), f_boolean, expr);
     }
 
     // algebraic or integer
@@ -677,5 +680,5 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
         return;
     }
 
-    throw BadType(rhs->get_repr(), lhs->get_repr(), expr);
+    throw BadType(rhs->repr(), lhs->repr(), expr);
 }

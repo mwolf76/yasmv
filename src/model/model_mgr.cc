@@ -348,8 +348,8 @@ void ModelMgr::analyze()
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean())
-                    throw BadType(f_tm.find_boolean()->get_repr(),
-                                  tp->get_repr(), body);
+                    throw BadType(f_tm.find_boolean()->repr(),
+                                  tp->repr(), body);
             } // for init
 
             const ExprVector trans = module.trans();
@@ -361,8 +361,8 @@ void ModelMgr::analyze()
 
                 Type_ptr tp = f_inferrer.process(ctx, body);
                 if (tp != f_tm.find_boolean()) {
-                    throw BadType(f_tm.find_boolean()->get_repr(),
-                                  tp->get_repr(), body);
+                    throw BadType(f_tm.find_boolean()->repr(),
+                                  tp->repr(), body);
                 }
             } // for trans
 

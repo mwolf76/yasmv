@@ -44,7 +44,7 @@
 typedef class Type* Type_ptr;
 class Type : public Object {
 public:
-    inline Expr_ptr get_repr() const
+    inline Expr_ptr repr() const
     { return f_repr; }
 
     virtual ~Type()

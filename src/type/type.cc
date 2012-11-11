@@ -73,7 +73,5 @@ Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
 }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, Type_ptr type_ptr)
-{
-    return os << type_ptr->get_repr();
-}
+ostream& operator<<(ostream& os, Type_ptr type)
+{ return os << type->repr(); }
