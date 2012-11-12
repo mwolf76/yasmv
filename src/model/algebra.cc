@@ -81,15 +81,15 @@ void BECompiler::algebraic_not(const Expr_ptr expr)
 void BECompiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
+    int width = algebrize_ops_binary(); // largest, takes care of type stack
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width ; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width ; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
@@ -99,7 +99,7 @@ void BECompiler::algebraic_plus(const Expr_ptr expr)
 
         /* x[i] + y[i] + c */
         ADD tmp = lhs[i].Plus(rhs[i]).Plus(carry);
-        carry = f_enc.base().LT(tmp); /* c > 0x10 */
+        carry = f_enc.base().LEQ(tmp); /* c >= 0x10 */
 
         /* x[i] = (x[i] + y[i] + c) % base */ // TODO: detect overflow on MSB
         f_add_stack.push_back(tmp.Modulus(f_enc.base()));
@@ -168,13 +168,13 @@ void BECompiler::algebraic_mul(const Expr_ptr expr)
 void BECompiler::algebraic_div(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    assert(0); // TODO
+    assert( false ); // TODO
 }
 
 void BECompiler::algebraic_mod(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    assert(0); // TODO
+    assert( false ); // TODO
 }
 
 void BECompiler::algebraic_and(const Expr_ptr expr)
