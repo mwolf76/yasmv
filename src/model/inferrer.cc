@@ -74,7 +74,8 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
 
-    DEBUG  << res << endl;
+    Expr_ptr expr = res->repr();
+    DEBUG  << expr << endl;
 
     return res;
 }
