@@ -1,6 +1,6 @@
 /**
  *  @file compiler.hh
- *  @brief Boolean compiler
+ *  @brief Generic compiler
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,8 +20,8 @@
  *
  **/
 
-#ifndef BE_COMPILER_H
-#define BE_COMPILER_H
+#ifndef COMPILER_H
+#define COMPILER_H
 #include <simple_expr_walker.hh>
 
 #include <type.hh>
@@ -43,14 +43,14 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-class BECompiler : public SimpleWalker {
+class Compiler : public SimpleWalker {
 
 public:
-    BECompiler();
-    ~BECompiler();
+    Compiler();
+    ~Compiler();
 
     // toplevel
-    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
+    DDVector process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
     void pre_hook();
@@ -131,7 +131,6 @@ protected:
     void walk_dot_postorder(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
-private:
     ADDMap f_map; // FQDN -> DD cache
     ENCMap f_encodings; // FQDN -> DD encoding
     ENCMap f_temporary; // FQDN -> DD encoding (for temporaries)

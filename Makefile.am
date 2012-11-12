@@ -37,6 +37,7 @@ smv_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(top_builddir)/src/cmd/libcommand.la			\
 	$(top_builddir)/src/mc/libmc.la				\
 	$(top_builddir)/src/model/libmodel.la			\
+	$(top_builddir)/src/model/compilers/libcompilers.la	\
 	$(top_builddir)/src/expr/libexpr.la			\
 	$(top_builddir)/src/expr/walkers/libexpr_walkers.la	\
 	$(top_builddir)/src/type/libtype.la			\
@@ -57,6 +58,7 @@ tests_SOURCES = $(top_srcdir)/src/tests.cc src/common.cc	\
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 $(top_builddir)/src/cmd/libcommand.la $(top_builddir)/src/mc/libmc.la	\
 $(top_builddir)/src/model/libmodel.la					\
+$(top_builddir)/src/model/compilers/libcompilers.la			\
 $(top_builddir)/src/expr/libexpr.la					\
 $(top_builddir)/src/expr/walkers/libexpr_walkers.la			\
 $(top_builddir)/src/type/libtype.la $(top_builddir)/src/enc/libenc.la	\
