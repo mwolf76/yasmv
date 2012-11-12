@@ -90,7 +90,7 @@ void SATBMCFalsification::assert_violation(step_t time)
 
 void SATBMCFalsification::process()
 {
-    step_t i, k = 10; // TODO
+    step_t i, k = 1; // TODO
 
     assert_fsm_init();
     for (i = 0; i < k; ++ i) {
