@@ -51,7 +51,8 @@ tests_SOURCES = $(top_srcdir)/src/tests.cc src/common.cc	\
 	$(top_srcdir)/src/expr/tests/test_expr.cc		\
 	$(top_srcdir)/src/type/tests/test_type.cc		\
 	$(top_srcdir)/src/dd/tests/test_dd.cc			\
-	$(top_srcdir)/src/enc/tests/test_enc.cc
+	$(top_srcdir)/src/enc/tests/test_enc.cc 		\
+	$(top_srcdir)/src/model/tests/test_compiler.cc
 
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 $(top_builddir)/src/cmd/libcommand.la $(top_builddir)/src/mc/libmc.la	\
