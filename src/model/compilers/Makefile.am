@@ -1,0 +1,23 @@
+INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
+-I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
+-I$(top_srcdir)/src/type -I$(top_srcdir)/src/expr/walkers		\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/model/compilers		\
+-I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core	\
+-I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof		\
+-I$(top_srcdir)/src/sat/utils -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/epd					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/obj
+
+PKG_HH = compiler.hh be_compiler.hh
+
+PKG_CC = compiler.hh be_compiler.cc
+
+PKG_SOURCES = $(PKG_H) $(PKG_CC)
+
+# -------------------------------------------------------
+
+noinst_LTLIBRARIES = libcompilers.la
+libcompilers_la_SOURCES = $(PKG_SOURCES)
