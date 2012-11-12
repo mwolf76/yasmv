@@ -8,7 +8,7 @@
 #include <model.hh>
 #include <model_mgr.hh>
 
-#include <compiler.hh>
+#include <compilers/compiler.hh>
 
 #include <sat/terms/ddterms.hh>
 using Minisat::DDTermFactory;
@@ -66,24 +66,24 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
 
     DDTermFactory f_factory(CuddMgr::INSTANCE().dd());
 
-    BECompiler f_compiler;
+    Compiler f_compiler;
 
     Expr_ptr main_expr(em.make_main());
     IModule_ptr main_module = new Module( main_expr );
-    Type_ptr u4 = tm.find_unsigned(4);
+    Type_ptr u2 = tm.find_unsigned(2);
 
     Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
-    main_module->add_localVar(x, new StateVar(main_expr, x, u4));
+    main_module->add_localVar(x, new StateVar(main_expr, x, u2));
 
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_localVar(y, new StateVar(main_expr, y, u4));
+    main_module->add_localVar(y, new StateVar(main_expr, y, u2));
 
     mm.model()->add_module(main_expr, main_module);
 
     {
-        Expr_ptr expr = em.make_ge( em.make_add( x, em.make_one()), em.make_zero());
-        ADD add = f_compiler.process( main_expr, expr, 0);
-        f_factory.walk_ones(add, this, test_plus_minterm_bridge);
+        Expr_ptr expr = em.make_add( x, em.make_one());
+        DDVector ddv  = f_compiler.process( main_expr, expr, 0);
+        // f_factory.walk_ones(ddv, this, test_plus_minterm_bridge);
     }
 
     // {

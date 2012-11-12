@@ -42,7 +42,7 @@
    is MSB first. On the other hand, to ensure proper behavior the
    *result* of the operation has to be pushed in reverse order. */
 
-void BECompiler::algebraic_neg(const Expr_ptr expr)
+void Compiler::algebraic_neg(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
     ExprMgr& em = f_owner.em();
@@ -62,7 +62,7 @@ void BECompiler::algebraic_neg(const Expr_ptr expr)
     (*this)(em.make_add(temp.expr(), em.make_one()));
 }
 
-void BECompiler::algebraic_not(const Expr_ptr expr)
+void Compiler::algebraic_not(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
     TypeMgr& tm = f_owner.tm();
@@ -83,7 +83,7 @@ void BECompiler::algebraic_not(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_plus(const Expr_ptr expr)
+void Compiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     int width = algebrize_ops_binary(); // largest, takes care of type stack
@@ -111,7 +111,7 @@ void BECompiler::algebraic_plus(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_sub(const Expr_ptr expr)
+void Compiler::algebraic_sub(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
 
@@ -119,7 +119,7 @@ void BECompiler::algebraic_sub(const Expr_ptr expr)
     (*this)(em.make_add(expr->lhs(), em.make_neg(expr->rhs())));
 }
 
-void BECompiler::algebraic_mul(const Expr_ptr expr)
+void Compiler::algebraic_mul(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned pos, width = algebrize_ops_binary(); // largest, takes care of type stack
@@ -170,19 +170,19 @@ void BECompiler::algebraic_mul(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_div(const Expr_ptr expr)
+void Compiler::algebraic_div(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     assert( false ); // TODO
 }
 
-void BECompiler::algebraic_mod(const Expr_ptr expr)
+void Compiler::algebraic_mod(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     assert( false ); // TODO
 }
 
-void BECompiler::algebraic_and(const Expr_ptr expr)
+void Compiler::algebraic_and(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -207,7 +207,7 @@ void BECompiler::algebraic_and(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_or(const Expr_ptr expr)
+void Compiler::algebraic_or(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -231,7 +231,7 @@ void BECompiler::algebraic_or(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_xor(const Expr_ptr expr)
+void Compiler::algebraic_xor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -255,7 +255,7 @@ void BECompiler::algebraic_xor(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_xnor(const Expr_ptr expr)
+void Compiler::algebraic_xnor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -279,7 +279,7 @@ void BECompiler::algebraic_xnor(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_implies(const Expr_ptr expr)
+void Compiler::algebraic_implies(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -303,7 +303,7 @@ void BECompiler::algebraic_implies(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_lshift(const Expr_ptr expr)
+void Compiler::algebraic_lshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -327,13 +327,13 @@ void BECompiler::algebraic_lshift(const Expr_ptr expr)
     }
 }
 
-void BECompiler::algebraic_rshift(const Expr_ptr expr)
+void Compiler::algebraic_rshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     assert( 0 ); // TODO: yet to be implemented...
 }
 
-void BECompiler::algebraic_equals(const Expr_ptr expr)
+void Compiler::algebraic_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -360,7 +360,7 @@ void BECompiler::algebraic_equals(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_not_equals(const Expr_ptr expr)
+void Compiler::algebraic_not_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -387,7 +387,7 @@ void BECompiler::algebraic_not_equals(const Expr_ptr expr)
     f_add_stack.push_back(tmp.Cmpl());
 }
 
-void BECompiler::algebraic_gt(const Expr_ptr expr)
+void Compiler::algebraic_gt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -414,7 +414,7 @@ void BECompiler::algebraic_gt(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_ge(const Expr_ptr expr)
+void Compiler::algebraic_ge(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -447,7 +447,7 @@ void BECompiler::algebraic_ge(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_lt(const Expr_ptr expr)
+void Compiler::algebraic_lt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -474,7 +474,7 @@ void BECompiler::algebraic_lt(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-void BECompiler::algebraic_le(const Expr_ptr expr)
+void Compiler::algebraic_le(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
@@ -502,7 +502,7 @@ void BECompiler::algebraic_le(const Expr_ptr expr)
 }
 
 // TODO fix type stack
-void BECompiler::algebraic_ite(const Expr_ptr expr)
+void Compiler::algebraic_ite(const Expr_ptr expr)
 {
     assert(is_ite_algebraic(expr));
     unsigned width = algebrize_ops_binary(); // largest
@@ -533,7 +533,7 @@ void BECompiler::algebraic_ite(const Expr_ptr expr)
    algebraic, possibly both. Performs integer to algebraic
    conversion if needed, aligns algebraic operands to the largest
    size, and return this size. */
-unsigned BECompiler::algebrize_ops_binary()
+unsigned Compiler::algebrize_ops_binary()
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -595,7 +595,7 @@ unsigned BECompiler::algebrize_ops_binary()
 }
 
 // due to new type system, integer can be only constant (good)
-void BECompiler::algebraic_from_integer(unsigned width)
+void Compiler::algebraic_from_integer(unsigned width)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
     assert (f_enc.is_constant(top));
@@ -613,7 +613,7 @@ void BECompiler::algebraic_from_integer(unsigned width)
     assert (value == 0); // not overflowing
 }
 
-void BECompiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed)
+void Compiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed)
 {
     ADD padding = f_enc.zero();
     ADD zero = f_enc.zero();
@@ -638,7 +638,7 @@ void BECompiler::algebraic_padding(unsigned old_width, unsigned new_width, bool 
     }
 }
 
-FQExpr BECompiler::make_temporary_encoding(ADD dds[], unsigned width)
+FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 {
     ExprMgr& em = f_owner.em();
 
@@ -654,7 +654,7 @@ FQExpr BECompiler::make_temporary_encoding(ADD dds[], unsigned width)
 }
 
 // Resolution for temp symbols
-ISymbol_ptr BECompiler::fetch_temporary(const Expr_ptr expr, step_t time)
+ISymbol_ptr Compiler::fetch_temporary(const Expr_ptr expr, step_t time)
 {
     FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
     Temporaries::iterator viter = f_temporaries.find(key);

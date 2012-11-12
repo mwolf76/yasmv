@@ -47,7 +47,7 @@ class Compiler : public SimpleWalker {
 
 public:
     Compiler();
-    ~Compiler();
+    virtual ~Compiler();
 
     // toplevel
     DDVector process(Expr_ptr ctx, Expr_ptr body, step_t time);

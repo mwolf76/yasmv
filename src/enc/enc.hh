@@ -84,7 +84,7 @@ protected:
 
 class AlgebraicEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
-friend class BECompiler;  // for temporaries
+friend class Compiler;  // for temporaries
 public:
     // here assignment *must* have size 1
     virtual Expr_ptr expr(DDVector& assignment);
