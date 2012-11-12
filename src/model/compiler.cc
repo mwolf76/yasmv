@@ -199,7 +199,7 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
     }
 
     else if (is_binary_algebraic(expr)) {
-        // algebraic_div(expr->rhs());
+        algebraic_div(expr);
         return;
     }
 
@@ -731,8 +731,8 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
 
     // 1. explicit constants are integer ints (e.g. 42)
     if (em.is_numeric(expr)) {
-        f_add_stack.push_back(f_enc.constant(expr->value()));
         f_type_stack.push_back(tm.find_integer()); // consts
+        f_add_stack.push_back(f_enc.constant(expr->value()));
         return;
     }
 
