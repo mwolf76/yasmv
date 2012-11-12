@@ -32,5 +32,5 @@ CuddMgr_ptr CuddMgr::f_instance = NULL;
 CuddMgr::CuddMgr()
     : f_cudd()
 {
-    // TODO: enable dynamic reordering
+    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
 }
