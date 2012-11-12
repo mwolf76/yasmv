@@ -180,9 +180,14 @@ private:
     unsigned f_temp_auto_index; // autoincr temp index
     Temporaries f_temporaries;
 
+    /* used by various algebraic operations */
     FQExpr make_temporary_encoding(ADD dds[], unsigned width);
+
+    /* fetch a temporary symbols (used by walk_leaf) */
     ISymbol_ptr fetch_temporary(const Expr_ptr ctx, step_t time);
-    void push_dds(IEncoding_ptr enc, Type_ptr type);
+
+    /* push dds and type information for variables (used by walk_leaf) */
+    void push_variable(IEncoding_ptr enc, Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);

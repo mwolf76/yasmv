@@ -688,7 +688,7 @@ void BECompiler::walk_dot_postorder(const Expr_ptr expr)
 }
 
 
-void BECompiler::push_dds(IEncoding_ptr enc, Type_ptr type)
+void BECompiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -743,7 +743,6 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
     // 2. 1. Temporary symbols are maintained internally by the compiler
     if (NULL != (symb = fetch_temporary(expr, time))) {
 
-        // push into type stack
         type = symb->as_variable().type();
         assert(tm.is_algebraic(type));
 
@@ -756,7 +755,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         }
         else assert(false); // unexpected
 
-        push_dds(enc, type);
+        push_variable(enc, type);
         return;
     } /* Temporary symbols */
 
@@ -766,8 +765,9 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         // 2. 2. 1. bool/integer constant leaves
         if (symb->is_const()) {
             IConstant& konst =  symb->as_const();
-            f_add_stack.push_back(f_enc.constant(konst.value()));
+
             f_type_stack.push_back(konst.type());
+            f_add_stack.push_back(f_enc.constant(konst.value()));
             return;
         }
 
@@ -791,7 +791,7 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
                 register_encoding(key, enc);
             }
 
-            push_dds(enc, type);
+            push_variable(enc, type);
             return;
         } /* variables */
 
