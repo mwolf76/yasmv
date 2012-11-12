@@ -483,11 +483,22 @@ void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-    if (!tm.is_integer(top) && !tm.is_algebraic(top)) {
+    if (!tm.is_integer(top) &&
+        !tm.is_algebraic(top)) {
         throw BadType(top->repr(), f_integer, expr);
     }
 
-    f_type_stack.push_back(tm.find_integer());
+    if (tm.is_integer(top)) {
+        f_type_stack.push_back(tm.find_integer());
+        return;
+    }
+
+    if (tm.is_algebraic(top)) {
+        f_type_stack.push_back(top);
+        return;
+    }
+
+    assert( false ); // unreachable
 }
 
 // fun: logical -> logical
@@ -518,11 +529,40 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
         throw BadType(lhs->repr(), f_integer, expr);
     }
 
-    // integer or algebraic
-    assert((tm.is_integer(lhs) || tm.is_algebraic(lhs)) &&
-           (tm.is_integer(rhs) || tm.is_algebraic(rhs))) ;
+    // both ops integers -> integer
+    if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
+        f_type_stack.push_back(tm.find_integer());
+        return;
+    }
 
-    f_type_stack.push_back(tm.find_integer());
+    // one op algebraic, possibly both.
+    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
+    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+
+    // if both are algebraic they have to agree on signedness too.
+    if ((NULL != arhs) && (NULL != alhs)) {
+        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    }
+
+    unsigned width = 0;
+
+    if (NULL != arhs) {
+        width = (width < arhs->width())
+            ? arhs->width()
+            : width
+            ;
+    }
+
+    if (NULL != alhs) {
+        width = (width < alhs->width())
+            ? alhs->width()
+            : width
+            ;
+    }
+
+    f_type_stack.push_back(alhs->is_signed()
+                           ? tm.find_signed(width)
+                           : tm.find_unsigned(width));
 }
 
 // fun: logical x logical -> logical
@@ -546,6 +586,7 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
     f_type_stack.push_back(tm.find_boolean());
 }
 
+// looks bad, review
 void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
@@ -574,30 +615,58 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(rhs) &&
+        !tm.is_algebraic(rhs) &&
         !tm.is_boolean(rhs)) {
         throw BadType(rhs->repr(), f_integer, expr);
     }
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(lhs) &&
+        !tm.is_algebraic(rhs) &&
         !tm.is_boolean(lhs)) {
         throw BadType(lhs->repr(), f_integer, expr);
     }
 
-    // algebraic or integer
-    if ((tm.is_integer(lhs) || tm.is_algebraic(lhs)) &&
-        (tm.is_integer(rhs) || tm.is_algebraic(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
-        return;
-    }
-
-    // boolean
+    // both ops boolean -> boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
         f_type_stack.push_back(tm.find_boolean());
         return;
     }
 
-    throw BadType(rhs->repr(), lhs->repr(), expr);
+    // both ops integers -> integer
+    if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
+        f_type_stack.push_back(tm.find_integer());
+        return;
+    }
+
+    // one op algebraic, possibly both.
+    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
+    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+
+    // if both are algebraic they have to agree on signedness too.
+    if ((NULL != arhs) && (NULL != alhs)) {
+        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    }
+
+    unsigned width = 0;
+
+    if (NULL != arhs) {
+        width = (width < arhs->width())
+            ? arhs->width()
+            : width
+            ;
+    }
+
+    if (NULL != alhs) {
+        width = (width < alhs->width())
+            ? alhs->width()
+            : width
+            ;
+    }
+
+    f_type_stack.push_back(alhs->is_signed()
+                           ? tm.find_signed(width)
+                           : tm.find_unsigned(width));
 }
 
 // fun: arithmetical x arithmetical -> boolean
@@ -668,18 +737,38 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
         throw BadType(cond->repr(), f_boolean, expr);
     }
 
-    // algebraic or integer
-    if ((tm.is_integer(lhs) || tm.is_algebraic(lhs)) &&
-        (tm.is_integer(rhs) || tm.is_algebraic(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
-        return;
-    }
-
     // boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
         f_type_stack.push_back(tm.find_boolean());
         return;
     }
 
-    throw BadType(rhs->repr(), lhs->repr(), expr);
+    // one op algebraic, possibly both.
+    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
+    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+
+    // if both are algebraic they have to agree on signedness too.
+    if ((NULL != arhs) && (NULL != alhs)) {
+        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    }
+
+    unsigned width = 0;
+
+    if (NULL != arhs) {
+        width = (width < arhs->width())
+            ? arhs->width()
+            : width
+            ;
+    }
+
+    if (NULL != alhs) {
+        width = (width < alhs->width())
+            ? alhs->width()
+            : width
+            ;
+    }
+
+    f_type_stack.push_back(alhs->is_signed()
+                           ? tm.find_signed(width)
+                           : tm.find_unsigned(width));
 }
