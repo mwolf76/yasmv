@@ -81,6 +81,7 @@ ADD BECompiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 
 void BECompiler::pre_hook()
 {}
+
 void BECompiler::post_hook()
 {
     ADD add = f_add_stack.back();
@@ -119,7 +120,7 @@ void BECompiler::walk_neg_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_not_preorder(const Expr_ptr expr)
@@ -158,7 +159,7 @@ void BECompiler::walk_add_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_sub_preorder(const Expr_ptr expr)
@@ -180,7 +181,7 @@ void BECompiler::walk_sub_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unexpected
+    assert( false ); // unexpected
 }
 
 bool BECompiler::walk_div_preorder(const Expr_ptr expr)
@@ -202,7 +203,7 @@ void BECompiler::walk_div_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unexpected
+    assert( false ); // unexpected
 }
 
 bool BECompiler::walk_mul_preorder(const Expr_ptr expr)
@@ -225,7 +226,7 @@ void BECompiler::walk_mul_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_mod_preorder(const Expr_ptr expr)
@@ -247,7 +248,7 @@ void BECompiler::walk_mod_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_and_preorder(const Expr_ptr expr)
@@ -277,7 +278,7 @@ void BECompiler::walk_and_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_or_preorder(const Expr_ptr expr)
@@ -335,7 +336,7 @@ void BECompiler::walk_xor_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_xnor_preorder(const Expr_ptr expr)
@@ -365,7 +366,7 @@ void BECompiler::walk_xnor_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_implies_preorder(const Expr_ptr expr)
@@ -395,7 +396,7 @@ void BECompiler::walk_implies_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_iff_preorder(const Expr_ptr expr)
@@ -423,7 +424,7 @@ void BECompiler::walk_lshift_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_rshift_preorder(const Expr_ptr expr)
@@ -444,7 +445,7 @@ void BECompiler::walk_rshift_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_eq_preorder(const Expr_ptr expr)
@@ -475,7 +476,7 @@ void BECompiler::walk_eq_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_ne_preorder(const Expr_ptr expr)
@@ -506,7 +507,7 @@ void BECompiler::walk_ne_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_gt_preorder(const Expr_ptr expr)
@@ -527,7 +528,7 @@ void BECompiler::walk_gt_postorder(const Expr_ptr expr)
         algebraic_gt(expr);
         return;
     }
-    else assert(0);
+    else assert( false );
 }
 
 bool BECompiler::walk_ge_preorder(const Expr_ptr expr)
@@ -549,7 +550,7 @@ void BECompiler::walk_ge_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_lt_preorder(const Expr_ptr expr)
@@ -571,7 +572,7 @@ void BECompiler::walk_lt_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_le_preorder(const Expr_ptr expr)
@@ -593,7 +594,7 @@ void BECompiler::walk_le_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 bool BECompiler::walk_ite_preorder(const Expr_ptr expr)
@@ -646,7 +647,7 @@ void BECompiler::walk_ite_postorder(const Expr_ptr expr)
         return;
     }
 
-    assert(0); // unreachable
+    assert( false ); // unreachable
  }
 
 bool BECompiler::walk_cond_preorder(const Expr_ptr expr)
@@ -695,6 +696,9 @@ void BECompiler::push_dds(IEncoding_ptr enc, Type_ptr type)
     DDVector& dds = enc->dv();
     unsigned width = dds.size();
 
+    // push into type stack
+    f_type_stack.push_back(type);
+
     // push either 1 or more ADDs depending on the encoding
     if (tm.is_boolean(type) || tm.is_enum(type) || tm.is_integer(type)) {
         assert(1 == width);
@@ -706,7 +710,7 @@ void BECompiler::push_dds(IEncoding_ptr enc, Type_ptr type)
             f_add_stack.push_back(dds[i]);
         }
     }
-    else assert(0); // unexpected
+    else assert( false ); // unexpected
 }
 
 void BECompiler::walk_leaf(const Expr_ptr expr)
@@ -732,76 +736,73 @@ void BECompiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    else { // 2. Symbols (temp and model)
-        ISymbol_ptr symb = NULL;
-        Type_ptr type = NULL;
+    // 2. Symbols
+    ISymbol_ptr symb = NULL;
+    Type_ptr type = NULL;
 
-        // 2. 1. Temp symbol are maintained internally by the compiler
-        if (NULL != (symb = fetch_temporary(expr, time))) {
+    // 2. 1. Temporary symbols are maintained internally by the compiler
+    if (NULL != (symb = fetch_temporary(expr, time))) {
+
+        // push into type stack
+        type = symb->as_variable().type();
+        assert(tm.is_algebraic(type));
+
+        // temporary encodings must be already defined.
+        FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
+
+        ENCMap::iterator eye = f_temporary.find(key);
+        if (eye != f_temporary.end()) {
+            enc = (*eye).second;
+        }
+        else assert(false); // unexpected
+
+        push_dds(enc, type);
+        return;
+    } /* Temporary symbols */
+
+    // 2. 2. Model symbol
+    if (NULL != (symb = model.fetch_symbol(ctx, expr))) {
+
+        // 2. 2. 1. bool/integer constant leaves
+        if (symb->is_const()) {
+            IConstant& konst =  symb->as_const();
+            f_add_stack.push_back(f_enc.constant(konst.value()));
+            f_type_stack.push_back(konst.type());
+            return;
+        }
+
+        // 2. 2. 2. variables
+        else if (symb->is_variable()) {
 
             // push into type stack
             type = symb->as_variable().type();
-            assert(tm.is_algebraic(type));
-            f_type_stack.push_back(type);
 
-            // temporary encodings must be already defined.
-            FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
+            // if encoding for variable is available reuse it,
+            // otherwise create and cache it.
+            FQExpr key(ctx, expr, time);
 
-            ENCMap::iterator eye = f_temporary.find(key);
-            if (eye != f_temporary.end()) {
+            ENCMap::iterator eye = f_encodings.find(key);
+            if (eye != f_encodings.end()) {
                 enc = (*eye).second;
             }
-            else assert(false); // unexpected
+            else {
+                /* build a new encoding for this symbol */
+                enc = f_enc.make_encoding(type);
+                register_encoding(key, enc);
+            }
 
             push_dds(enc, type);
             return;
-        } /* temp symbol */
+        } /* variables */
 
-        // 2. Model symbol
-        else if (NULL != (symb = model.fetch_symbol(ctx, expr))) {
+        // 2. 3. define? Simply compile it recursively.
+        else if (symb->is_define()) {
+            (*this)(symb->as_define().body());
+            return;
+        }
+    }  /* Model symbols */
 
-                // 2.1. bool/integer constant leaves
-                if (symb->is_const()) {
-                    IConstant& konst =  symb->as_const();
-                    f_add_stack.push_back(f_enc.constant(konst.value()));
-                    f_type_stack.push_back(konst.type());
-                    return;
-                }
-
-                // 2.2 variable (includes support for temporaries)
-                else if (symb->is_variable()) {
-
-                    // push into type stack
-                    type = symb->as_variable().type();
-                    f_type_stack.push_back(type);
-
-                    // if encoding for variable is available reuse it,
-                    // otherwise create and cache it.
-                    FQExpr key(ctx, expr, time);
-
-                    ENCMap::iterator eye = f_encodings.find(key);
-                    if (eye != f_encodings.end()) {
-                        enc = (*eye).second;
-                    }
-                    else {
-                        /* build a new encoding for this symbol */
-                        enc = f_enc.make_encoding(type);
-                        register_encoding(key, enc);
-                    }
-
-                    push_dds(enc, type);
-                    return;
-                }
-
-                // 2.3 define? Simply compile it recursively.
-                else if (symb->is_define()) {
-                    (*this)(symb->as_define().body());
-                    return;
-                }
-        } /* model symbol */
-    }
-
-    assert(0); // unreachable
+    assert( false ); // unreachable
 }
 
 /**
