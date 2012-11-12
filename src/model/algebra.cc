@@ -37,6 +37,11 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+/* Important Remark: operand arguments (which are DD vectors) are
+   fetched from the internal DD stack in a little-endian fashion, that
+   is MSB first. On the other hand, to ensure proper behavior the
+   *result* of the operation has to be pushed in reverse order. */
+
 void BECompiler::algebraic_neg(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
