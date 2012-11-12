@@ -415,21 +415,27 @@ void BECompiler::algebraic_ge(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* relationals, msb predicate first, if false inspect next digit ... */
+    /* relationals, msb predicate first, if false and prefix matches,
+       inspect next digit */
     ADD tmp = f_enc.zero();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (int i = 0; i < width; ++ i) {
 
-        /* x[i] &  y[i] */
-        tmp += rhs[i].LEQ(lhs[i]); // CHECK MSB
+        ADD pfx = f_enc.one();
+        for (int j = 0; j < i; j ++ ) {
+            pfx *= rhs[j].Equals(lhs[j]);
+        }
+
+        /* pfx & ( x[i] <  y[i] ) */
+        tmp += pfx.Times(rhs[i].LEQ(lhs[i]));
     }
 
     /* just one result */
@@ -442,21 +448,21 @@ void BECompiler::algebraic_lt(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (int i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (int i = 0; i < width; ++ i) {
 
         /* x[i] &  y[i] */
-        tmp += lhs[i].LT(rhs[i]); // CHECK MSB
+        tmp += lhs[i].LT(rhs[i]); // CHECK MSB?
     }
 
     /* just one result */
