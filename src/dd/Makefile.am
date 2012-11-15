@@ -9,10 +9,11 @@ INCLUDES = \
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/epd		\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/obj
+	-I$(top_srcdir)/src/dd/cudd-2.5.0/obj 		\
+	-I$(top_srcdir)/src/3rdparty/ezlogger
 
-PKG_HH = cudd_mgr.hh cudd-2.5.0/cudd/cudd.h cudd-2.5.0/cudd/cuddInt.h
-PKG_CC = cudd_mgr.cc cudd-2.5.0/cudd/cuddAPI.c				\
+PKG_HH = cudd_mgr.hh dd_walker.hh cudd-2.5.0/cudd/cudd.h cudd-2.5.0/cudd/cuddInt.h
+PKG_CC = cudd_mgr.cc dd_walker.cc cudd-2.5.0/cudd/cuddAPI.c				\
 cudd-2.5.0/cudd/cuddAddAbs.c cudd-2.5.0/cudd/cuddAddApply.c		\
 cudd-2.5.0/cudd/cuddAddFind.c cudd-2.5.0/cudd/cuddAddIte.c		\
 cudd-2.5.0/cudd/cuddAddInv.c cudd-2.5.0/cudd/cuddAddNeg.c		\
