@@ -31,11 +31,11 @@
 #include <expr.hh>
 #include <analyzer.hh>
 
-Analyzer::Analyzer()
+Analyzer::Analyzer(ModelMgr& owner)
     : f_map()
     , f_kind_stack()
     , f_ctx_stack()
-    , f_mm(ModelMgr::INSTANCE())
+    , f_mm(owner)
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
 {
@@ -387,8 +387,7 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
 // one step of resolution returns a const or variable
 ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    Model& model = static_cast <Model&> (*f_mm.model());
-    ISymbol_ptr symb = model.fetch_symbol(ctx, frag);
+    ISymbol_ptr symb = f_mm.resolver()->fetch_symbol(ctx, frag);
 
     // is this a constant or variable?
     if (symb->is_const() ||
@@ -400,7 +399,7 @@ ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     else if (symb->is_define()) {
         while (symb->is_define()) {
             Expr_ptr body = symb->as_define().body();
-            symb = model.fetch_symbol(ctx, body);
+            symb = f_mm.resolver()->fetch_symbol(ctx, body);
         }
         return symb;
     }

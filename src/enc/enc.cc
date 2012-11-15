@@ -68,18 +68,17 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     , f_signed(is_signed)
     , f_temporary(NULL != dds)
 {
-    int i;
+    unsigned i;
     const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
 
     if (f_temporary) {
-        // REVIEW me
-        for (i = f_width -1; 0 <= i ; -- i) {
+        for (i = 0; i < width; ++ i) {
             f_dv.push_back(dds[i]);
         }
     }
 
     else {
-        for (i = f_width -1; 0 <= i ; -- i) {
+        for (i = 0; i < width; ++ i) {
             f_dv.push_back(make_monolithic_encoding(NIBBLE_SIZE));
         }
     }

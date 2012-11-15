@@ -227,6 +227,30 @@ public:
     { return f_type; }
 };
 
+class Temporary : public ITemporary {
+private:
+    Expr_ptr f_ctx;
+    Expr_ptr f_name;
+    Type_ptr f_type;
+
+public:
+    Temporary(Expr_ptr name, Type_ptr type)
+        : f_ctx(ExprMgr::INSTANCE().make_main())
+        , f_name(name)
+        , f_type(type)
+    {}
+
+    const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    const Expr_ptr expr() const
+    { return f_name; }
+
+    const Type_ptr type() const
+    { return f_type; }
+
+};
+
 class StateVar : public Variable {
 public:
     StateVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
@@ -327,12 +351,8 @@ public:
         return *found.second;
     }
 
-    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
-
 private:
     Modules f_modules;
-    Constants f_constants; // global consts
-
     Expr_ptr f_name;
 };
 

@@ -417,11 +417,11 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 // one step of resolution returns a const or variable
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    Model& model = static_cast <Model&> (*f_owner.model());
-    ISymbol_ptr symb = model.fetch_symbol(ctx, frag);
+    ISymbol_ptr symb = f_owner.resolver()->fetch_symbol(ctx, frag);
 
     // is this a constant or variable?
     if (symb->is_const() ||
+        symb->is_temporary() ||
         symb->is_variable()) {
         return symb;
     }
@@ -430,7 +430,7 @@ ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
     else if (symb->is_define()) {
         while (symb->is_define()) {
             Expr_ptr body = symb->as_define().body();
-            symb = model.fetch_symbol(ctx, body);
+            symb = f_owner.resolver()->fetch_symbol(ctx, body);
         }
         return symb;
     }

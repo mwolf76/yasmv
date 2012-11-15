@@ -27,6 +27,7 @@
 #include <model_mgr.hh>
 #include <type_exceptions.hh>
 
+
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
@@ -34,7 +35,8 @@ ModelMgr::ModelMgr()
     : f_model()
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
-    , f_inferrer(* new Inferrer(*this))
+    , f_resolver(* new Resolver(* this))
+    , f_inferrer(* new Inferrer(* this))
 {}
 
 // void Model::add_module(Expr_ptr name, IModule_ptr module)

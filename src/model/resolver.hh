@@ -1,6 +1,6 @@
 /**
- *  @file model_mgr.hh
- *  @brief Model module (ModelMgr class)
+ *  @file resolver.hh
+ *  @brief Symbol resolution module
  *
  *  This module contains definitions and services that implement an
  *  optimized storage for expressions. Expressions are stored in a
@@ -24,66 +24,42 @@
  *
  **/
 
-#ifndef MODEL_MGR_H
-#define MODEL_MGR_H
+#ifndef RESOLVER_H
+#define RESOLVER_H
+
+#include <common.hh>
+
+#include <expr.hh>
+#include <expr_mgr.hh>
+
+#include <type.hh>
+#include <enc.hh>
 
 #include <model.hh>
-#include <resolver.hh>
 
-#include <inferrer.hh>
-
-#include <expr_mgr.hh>
-#include <type_mgr.hh>
-
-typedef class ModelMgr *ModelMgr_ptr;
-class ModelMgr  {
-
+class ModelMgr;
+class IResolver : public IObject {
 public:
-    inline IModel_ptr model()
-    { return &f_model; }
+    /* fetch a symbol (model or temporary) */
+    virtual ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb) =0;
+    virtual void register_temporary(const Expr_ptr expr, ITemporary_ptr temp) =0;
+};
 
-    inline IResolver_ptr resolver()
-    { return &f_resolver; }
+typedef IResolver* IResolver_ptr;
 
-    void analyze();
+class Resolver : public IResolver {
+public:
+    Resolver(ModelMgr& owner);
+    ~Resolver();
 
-    static ModelMgr& INSTANCE() {
-        if (! f_instance) f_instance = new ModelMgr();
-        return (*f_instance);
-    }
-
-    inline ExprMgr& em() const
-    { return f_em; }
-
-    inline TypeMgr& tm() const
-    { return f_tm; }
-
-    // delegated type inferenc method
-    inline Type_ptr type(FQExpr& fqexpr) {
-        return f_inferrer.type(fqexpr);
-    }
-
-protected:
-    ModelMgr();
-    ~ModelMgr();
+    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    void register_temporary(const Expr_ptr symb, ITemporary_ptr temp);
 
 private:
-    static ModelMgr_ptr f_instance;
+    ModelMgr& f_owner;
 
-    /* local data */
-    Model f_model;
-
-    // ref to expr manager
-    ExprMgr& f_em;
-
-    // ref to type manager
-    TypeMgr& f_tm;
-
-    // symb resolver
-    Resolver f_resolver;
-
-    // ref to inferrer (used for model analysis)
-    Inferrer& f_inferrer;
+    Temporaries f_temporaries;
+    Constants f_constants; // global consts
 };
 
 #endif

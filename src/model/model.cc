@@ -33,53 +33,6 @@ void Model::add_module(Expr_ptr name, IModule_ptr module)
     f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
 }
 
-// Resolution for model symbols
-ISymbol_ptr Model::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
-{
-    Modules::iterator eye = f_modules.find(ctx);
-    if (eye == f_modules.end()) throw BadContext(ctx);
-    IModule_ptr module = (*eye).second;
-
-    { /* local consts */
-        Constants cnts = module->get_localConsts();
-        Constants::iterator citer = cnts.find(symb);
-        if (citer != cnts.end()) {
-            return (*citer).second;
-        }
-    }
-
-    { /* global consts */
-        Constants::iterator citer = f_constants.find(symb);
-        if (citer != f_constants.end()) {
-            return (*citer).second;
-        }
-    }
-
-    { /* params */
-        // TODO: not yet implemented: params
-    }
-
-    { /* defines */
-        Defines defs = module->get_localDefs();
-        Defines::iterator diter = defs.find(symb);
-        if (diter != defs.end()) {
-            return (*diter).second;
-        }
-    }
-
-    { /* variables */
-        Variables vars = module->get_localVars();
-        Variables::iterator viter = vars.find(symb);
-        if (viter != vars.end()) {
-            return (*viter).second;
-        }
-    }
-
-    // if all of the above fail...
-    WARN << "Could not resolve symbol " << ctx << "::" << symb << endl;
-    throw UnresolvedSymbol(ctx, symb);
-}
-
 bool ISymbol::is_variable(void) const
 {
     return NULL != dynamic_cast <const IVariable_ptr>
@@ -219,22 +172,8 @@ void Module::add_trans(Expr_ptr expr)
 
 Model::Model()
     : f_modules()
-    , f_constants()
 {
     DEBUG << "Initialized Model instance @" << this << endl;
-
-    // initialize global constants
-    f_constants.insert(make_pair<FQExpr,
-                       IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
-                                      new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                   ExprMgr::INSTANCE().make_false(),
-                                                   TypeMgr::INSTANCE().find_boolean(), 0)));
-
-    f_constants.insert(make_pair<FQExpr,
-                       IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
-                                      new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                   ExprMgr::INSTANCE().make_true(),
-                                                   TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 Model::~Model()

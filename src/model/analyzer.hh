@@ -88,7 +88,7 @@ private:
 
 class Analyzer : public TemporalWalker {
 public:
-    Analyzer();
+    Analyzer(ModelMgr& owner);
     ~Analyzer();
 
     // toplevel
