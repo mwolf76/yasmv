@@ -84,18 +84,9 @@ BOOST_AUTO_TEST_CASE(unsigned_type)
 
     Type_ptr in = tm.find_unsigned(8);
     BOOST_CHECK(! tm.is_boolean(in));
-
-    BOOST_CHECK(  tm.is_integer(in));
-    // BOOST_CHECK(  tm.is_int_finite(in));
-    // BOOST_CHECK(! tm.is_int_range(in));
-    // BOOST_CHECK(! tm.is_int_enum(in));
-
+    BOOST_CHECK(! tm.is_integer(in));
+    BOOST_CHECK(  tm.is_algebraic(in));
     BOOST_CHECK(! tm.is_instance(in));
-
-    // // additional checks
-    // FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
-    // BOOST_REQUIRE( NULL != fit );
-    // BOOST_CHECK( ! fit->is_signed() );
 }
 
 BOOST_AUTO_TEST_CASE(signed_type)
@@ -104,18 +95,9 @@ BOOST_AUTO_TEST_CASE(signed_type)
 
     Type_ptr in = tm.find_signed(16);
     BOOST_CHECK(! tm.is_boolean(in));
-
-    BOOST_CHECK(  tm.is_integer(in));
-    // BOOST_CHECK(  tm.is_int_finite(in));
-    // BOOST_CHECK(! tm.is_int_range(in));
-    // BOOST_CHECK(! tm.is_int_enum(in));
-
+    BOOST_CHECK(! tm.is_integer(in));
+    BOOST_CHECK(  tm.is_algebraic(in));
     BOOST_CHECK(! tm.is_instance(in));
-
-    // // additional checks
-    // FiniteIntegerType_ptr fit = dynamic_cast<FiniteIntegerType_ptr>(in);
-    // BOOST_REQUIRE( NULL != fit );
-    // BOOST_CHECK(   fit->is_signed() );
 }
 
 BOOST_AUTO_TEST_CASE(enum_type_symbolic)

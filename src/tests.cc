@@ -26,6 +26,6 @@ namespace axter {
     }
 
     verbosity get_verbosity_level_tolerance() {
-        return log_always;
+        return log_always; // return log_rarely; //
     }
 };
