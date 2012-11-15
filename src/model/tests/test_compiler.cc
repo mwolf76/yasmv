@@ -8,54 +8,79 @@
 #include <model.hh>
 #include <model_mgr.hh>
 
-#include <compilers/compiler.hh>
+#include <compilers/be_compiler.hh>
 
-#include <sat/terms/ddterms.hh>
-using Minisat::DDTermFactory;
+#include <dd_walker.hh>
 
-class DDPlusInspector : public IObject {
+class TestWalker : public DDWalker {
 public:
+    TestWalker(CuddMgr& owner)
+        : DDWalker(owner)
+    {}
 
-    void callback(int *list, int size);
-};
+    bool condition(const DdNode *node)
+    {
+        DdNode *N = Cudd_Regular(node);
+        assert( cuddIsConstant(N) );
 
+        /* arithmetical zero */
+        if (node == f_owner.dd().getManager()->zero) {
+            return false;
+        }
 
-// 8 bits
-long byte2int(int *data)
-{
-    long i, res = 0;
+        /* logical zero */
+        if (node == Cudd_Not(f_owner.dd().getManager()->one)) {
+            return false;
+        }
 
-    for (i = 128; i; i /= 2) {
-        if ( *data == 1 ) res += i;
-        else if (*data == 0) ;
-        else assert(0); // ???
-
-        ++ data;
+        /* true otherwise */
+        return true;
     }
 
-    return res;
-}
+    virtual void action(value_t value) =0;
 
-void DDPlusInspector::callback(int *list, int size)
-{
-    assert(16 == size);
+protected:
+    value_t pow2(unsigned exp)
+    {
+        value_t res = 1;
+        for (unsigned i = exp; i; -- i) {
+            res *= 2;
+        }
 
-    /* LHS = bits 0..7 */
-    long lhs = byte2int(list);
+        return res;
+    }
 
-    /* RHS = bits 8..15 */
-    long rhs = byte2int(list + 8);
+    value_t bits2value()
+    {
+        long i, res = 0;
+        char *data = f_data;
 
-    BOOST_CHECK( lhs == rhs + 1 );
-}
+        for (i = pow2(f_owner.dd().getManager()->size -1); i; i /= 2) {
+            if ( *data == 1 ) res += i;
+            else if (*data == 0) ;
+            else assert(0); // unexpected
 
-void test_plus_minterm_bridge(void *obj, int *list, int size)
-{
-    assert(obj);
-    DDPlusInspector *inst = reinterpret_cast<DDPlusInspector *>(obj);
+        ++ data;
+        }
 
-    inst->callback(list, size);
-}
+        return res;
+    }
+
+};
+
+// a decent abstraction :-)
+class PlusTestWalker : public TestWalker {
+public:
+    PlusTestWalker(CuddMgr& owner)
+        : TestWalker(owner)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(value == 1 + bits2value());
+    }
+};
+
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(compiler_plus)
@@ -64,9 +89,7 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
     ExprMgr& em(ExprMgr::INSTANCE());
     TypeMgr& tm(TypeMgr::INSTANCE());
 
-    DDTermFactory f_factory(CuddMgr::INSTANCE().dd());
-
-    Compiler f_compiler;
+    BECompiler f_compiler;
 
     Expr_ptr main_expr(em.make_main());
     IModule_ptr main_module = new Module( main_expr );
@@ -78,26 +101,16 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
     main_module->add_localVar(y, new StateVar(main_expr, y, u2));
 
+    Atom a_d("d"); Expr_ptr define = em.make_identifier(a_d);
+
+    /* y := x + 1 */
+    Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
+
+    main_module->add_localDef(define, new Define(main_expr, define, test_expr));
     mm.model()->add_module(main_expr, main_module);
 
-    {
-        Expr_ptr expr = em.make_add( x, em.make_one());
-        DDVector ddv  = f_compiler.process( main_expr, expr, 0);
-        // f_factory.walk_ones(ddv, this, test_plus_minterm_bridge);
-    }
-
-    // {
-    //     Expr_ptr expr = em.make_add( em.make_one(), x);
-    //     ADD add = f_compiler.process( main_expr, expr, 0);
-    //     f_factory.walk_ones(add, this, test_plus_minterm_bridge);
-    // }
-
-    // {
-    //     Expr_ptr expr = em.make_add( x, y );
-    //     ADD add = f_compiler.process( main_expr, expr, 0);
-    //     f_factory.walk_ones(add, this, test_plus_minterm_bridge);
-    // }
-
+    PlusTestWalker ptw(CuddMgr::INSTANCE());
+    ptw(f_compiler.process( main_expr, define, 0));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
