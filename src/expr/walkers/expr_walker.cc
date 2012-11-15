@@ -34,7 +34,7 @@ Walker::~Walker()
 
 Walker& Walker::operator() (const Expr_ptr expr)
 {
-    // before walking hook
+    // pre-walking hook
     this->pre_hook();
 
     activation_record call(expr);
@@ -43,7 +43,7 @@ Walker& Walker::operator() (const Expr_ptr expr)
     f_recursion_stack.push(call);
     walk();
 
-    // after walking hook
+    // post-walking hook
     this->post_hook();
 
     return *this;
