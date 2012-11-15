@@ -131,9 +131,11 @@ protected:
     void walk_dot_postorder(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
+    unsigned f_temp_auto_index; // autoincr temp index
+
     ADDMap f_map; // FQDN -> DD cache
-    ENCMap f_encodings; // FQDN -> DD encoding
-    ENCMap f_temporary; // FQDN -> DD encoding (for temporaries)
+    ENCMap f_model_encodings; // FQDN -> DD encoding
+    ENCMap f_temp_encodings;  // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -171,19 +173,10 @@ protected:
     }
 
     inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
-    { f_encodings [ fqexpr ] = enc; }
-
-    inline void register_temporary(const FQExpr& fqexpr, IEncoding_ptr enc)
-    { f_temporary [ fqexpr ] = enc; }
-
-    unsigned f_temp_auto_index; // autoincr temp index
-    Temporaries f_temporaries;
+    { f_model_encodings [ fqexpr ] = enc; }
 
     /* used by various algebraic operations */
     FQExpr make_temporary_encoding(ADD dds[], unsigned width);
-
-    /* fetch a temporary symbols (used by walk_leaf) */
-    ISymbol_ptr fetch_temporary(const Expr_ptr ctx, step_t time);
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);

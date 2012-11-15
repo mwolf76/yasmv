@@ -48,13 +48,13 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     ExprMgr& em = f_owner.em();
     TypeMgr& tm = f_owner.tm();
 
-    const Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned width = tm.as_algebraic(type)->width();
+    const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
+    int width = tm.as_algebraic(type)->width();
 
     /* create temp complemented ADDs */
     ADD dds[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
-        dds[i] = f_add_stack.back().Cmpl(); f_add_stack.pop_back();
+    for (int i = 0; i < width; ++ i) {
+        dds[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
     }
     FQExpr temp = make_temporary_encoding(dds, width);
 
@@ -636,31 +636,4 @@ void Compiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is
     for (int i = old_width -1; (0 <= i); -- i) {
         f_add_stack.push_back(tmp[i]);
     }
-}
-
-FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
-{
-    ExprMgr& em = f_owner.em();
-
-    ostringstream oss;
-    oss << "__tmp" << f_temp_auto_index ++ ;
-
-    Expr_ptr expr = em.make_identifier(oss.str());
-    IEncoding_ptr enc = new AlgebraicEncoding(width, false, dds);
-    FQExpr key(expr);
-
-    register_temporary( key, enc);
-    return key;
-}
-
-// Resolution for temp symbols
-ISymbol_ptr Compiler::fetch_temporary(const Expr_ptr expr, step_t time)
-{
-    FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
-    Temporaries::iterator viter = f_temporaries.find(key);
-    if (viter != f_temporaries.end()) {
-        return (*viter).second;
-    }
-
-    return NULL; // not found
 }

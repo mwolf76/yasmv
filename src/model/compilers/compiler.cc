@@ -42,7 +42,8 @@
 // #define DEBUG_BE_COMPILER
 
 Compiler::Compiler()
-    : f_map()
+    : f_temp_auto_index(0)
+    , f_map()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()
@@ -78,7 +79,8 @@ DDVector Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 }
 
 void Compiler::pre_hook()
-{}
+{
+}
 
 void Compiler::post_hook()
 {}
@@ -710,7 +712,9 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     if (! cache_miss(expr)) return;
 
     // symb resolution
-    Model& model = static_cast <Model&> (*f_owner.model());
+    // Model& model = static_cast <Model&> (*f_owner.model());
+    IResolver& resolver = * f_owner.resolver();
+
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
@@ -725,11 +729,12 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }
 
     // 2. Symbols
-    ISymbol_ptr symb = NULL;
-    Type_ptr type = NULL;
+    ISymbol_ptr symb = resolver.fetch_symbol(ctx, expr);
 
     // 2. 1. Temporary symbols are maintained internally by the compiler
-    if (NULL != (symb = fetch_temporary(expr, time))) {
+    ITemporary_ptr temp;
+    if (NULL != (temp = dynamic_cast<ITemporary_ptr>(symb))) {
+        Type_ptr type = NULL;
 
         type = symb->as_variable().type();
         assert(tm.is_algebraic(type));
@@ -737,8 +742,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         // temporary encodings must be already defined.
         FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
 
-        ENCMap::iterator eye = f_temporary.find(key);
-        if (eye != f_temporary.end()) {
+        ENCMap::iterator eye = f_temp_encodings.find(key);
+        if (eye != f_temp_encodings.end()) {
             enc = (*eye).second;
         }
         else assert(false); // unexpected
@@ -748,7 +753,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     } /* Temporary symbols */
 
     // 2. 2. Model symbol
-    if (NULL != (symb = model.fetch_symbol(ctx, expr))) {
+    if (NULL != symb) {
+        Type_ptr type = NULL;
 
         // 2. 2. 1. bool/integer constant leaves
         if (symb->is_const()) {
@@ -769,8 +775,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             // otherwise create and cache it.
             FQExpr key(ctx, expr, time);
 
-            ENCMap::iterator eye = f_encodings.find(key);
-            if (eye != f_encodings.end()) {
+            ENCMap::iterator eye = f_model_encodings.find(key);
+            if (eye != f_model_encodings.end()) {
                 enc = (*eye).second;
             }
             else {
@@ -970,3 +976,25 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
+
+FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    ostringstream oss;
+    oss << "__tmp" << f_temp_auto_index ++ ;
+
+    Expr_ptr expr = em.make_identifier(oss.str());
+
+    /* Register temporary symbol into resolver (temporaries are global) */
+    f_owner.resolver()->register_temporary(expr,
+                                           new Temporary(expr,
+                                                         tm.find_unsigned( width )));
+
+    /* register encoding, using fqexpr */
+    const FQExpr& key = FQExpr(expr);
+    f_temp_encodings [ key ] = new AlgebraicEncoding(width, false, dds);
+
+    return key;
+}

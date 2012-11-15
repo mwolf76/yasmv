@@ -59,9 +59,9 @@ protected:
             : f_data + half;
 
         for (i = half -1; 0 <= i; -- i) {
-            if ( *data == 1 ) res += pow2(i);
-            else if (*data == 0) /* nop */ ;
-            else assert(0); // unexpected
+            if ( *data == 1 ) {
+                res += pow2(i);
+            }
 
             ++ data;
         }
@@ -96,6 +96,21 @@ public:
     }
 };
 
+class NegTestWalker : public TestWalker {
+public:
+    NegTestWalker(CuddMgr& owner)
+        : TestWalker(owner)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        value_t msb = msb_value();
+        value_t lsb = lsb_value();
+        BOOST_CHECK(0 == ((msb + lsb) % 0x100));
+    }
+};
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(compiler_plus)
@@ -116,16 +131,31 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
     main_module->add_localVar(y, new StateVar(main_expr, y, u2));
 
-    Atom a_d("d"); Expr_ptr define = em.make_identifier(a_d);
-
-    /* y := x + 1 */
-    Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
-
-    main_module->add_localDef(define, new Define(main_expr, define, test_expr));
     mm.model()->add_module(main_expr, main_module);
 
-    PlusTestWalker ptw(CuddMgr::INSTANCE());
-    ptw(f_compiler.process( main_expr, define, 0));
+    // {
+    //     Atom a_d("d_plus"); Expr_ptr define = em.make_identifier(a_d);
+
+    //     /* y := x + 1 */
+    //     Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
+
+    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+    //     PlusTestWalker ptw(CuddMgr::INSTANCE());
+
+    //     ptw(f_compiler.process( main_expr, define, 0));
+    // }
+
+    {
+        Atom a_d("d_neg"); Expr_ptr define = em.make_identifier(a_d);
+
+        /* y := - x */
+        Expr_ptr test_expr = em.make_eq( y, em.make_neg( x ));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        NegTestWalker ntw(CuddMgr::INSTANCE());
+        ntw(f_compiler.process( main_expr, define, 0));
+    }
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

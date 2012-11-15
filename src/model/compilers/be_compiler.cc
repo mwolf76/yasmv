@@ -69,6 +69,8 @@ void BECompiler::pre_hook()
 
 void BECompiler::post_hook()
 {
+    if (0 < f_recursion_stack.size()) return;
+
     ADD add = f_add_stack.back();
     assert( add.FindMin().Equals(f_enc.zero()) );
     assert( add.FindMax().Equals(f_enc.one()) );
@@ -78,4 +80,8 @@ void BECompiler::post_hook()
     assert(1 == f_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
+
+    // cout << "res: " << endl;
+    // add.PrintMinterm();
+    // cout << endl;
 }
