@@ -28,11 +28,6 @@ public:
             return false;
         }
 
-        /* logical zero */
-        if (node == Cudd_Not(f_owner.dd().getManager()->one)) {
-            return false;
-        }
-
         /* true otherwise */
         return true;
     }
@@ -40,6 +35,8 @@ public:
     virtual void action(value_t value) =0;
 
 protected:
+
+    /* services */
     value_t pow2(unsigned exp)
     {
         value_t res = 1;
@@ -50,21 +47,34 @@ protected:
         return res;
     }
 
-    value_t bits2value()
+    value_t value(bool msb)
     {
         long i, res = 0;
-        char *data = f_data;
+        int size = f_owner.dd().getManager()->size;
+        assert( 0 == size % 2); // size is even
 
-        for (i = pow2(f_owner.dd().getManager()->size -1); i; i /= 2) {
-            if ( *data == 1 ) res += i;
-            else if (*data == 0) ;
+        int half = size/2;
+        char *data = (msb)
+            ? f_data
+            : f_data + half;
+
+        for (i = half -1; 0 <= i; -- i) {
+            if ( *data == 1 ) res += pow2(i);
+            else if (*data == 0) /* nop */ ;
             else assert(0); // unexpected
 
-        ++ data;
+            ++ data;
         }
 
         return res;
+
     }
+
+    inline value_t msb_value()
+    { return value (true); }
+
+    inline value_t lsb_value()
+    { return value (false); }
 
 };
 
@@ -77,7 +87,12 @@ public:
 
     virtual void action(value_t value)
     {
-        BOOST_CHECK(value == 1 + bits2value());
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        value_t msb = msb_value();
+        value_t lsb = lsb_value();
+
+        BOOST_CHECK(msb == (1 + lsb) % 256);
     }
 };
 

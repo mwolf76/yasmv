@@ -69,12 +69,6 @@ public:
 protected:
     dd_walker_stack f_recursion_stack;
 
-    // extra-hooks
-    virtual void pre_hook()
-    {}
-    virtual void post_hook()
-    {}
-
     virtual void walk();
 
     virtual bool condition(const DdNode *node) =0;

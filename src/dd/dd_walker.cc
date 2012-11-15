@@ -35,9 +35,6 @@ DDWalker::~DDWalker()
 
 DDWalker& DDWalker::operator() (ADD dd)
 {
-    // before walking hook
-    this->pre_hook();
-
     dd_activation_record call(dd.getNode());
 
     assert (NULL == f_data);
@@ -52,9 +49,6 @@ DDWalker& DDWalker::operator() (ADD dd)
     // setup toplevel act. record and perform walk
     f_recursion_stack.push(call);
     walk();
-
-    // after walking hook
-    this->post_hook();
 
     /* release temp memory */
     free(f_data); f_data = NULL;
@@ -79,38 +73,38 @@ void DDWalker::walk ()
 
     call:
         dd_activation_record curr = f_recursion_stack.top();
-
         N = Cudd_Regular(curr.node);
+
+        /* if node is a constand and fulfills condition, perform action on it */
+        if ( cuddIsConstant(N) ) {
+            if (condition(curr.node)) {
+                action(cuddV(curr.node));
+            }
+
+            // continue
+            goto entry_RETURN;
+        }
+
+        /* init common to all paths below here */
         cell = f_data + N->index;
 
+        if (Cudd_IsComplement(curr.node)) {
+            Nv  = Cudd_Not(cuddT(N));
+            Nnv = Cudd_Not(cuddE(N));
+        }
+        else {
+            Nv  = cuddT(N);
+            Nnv = cuddE(N);
+        }
+
+        // restore caller location (simulate call return behavior)
         if (curr.pc != DD_DEFAULT) {
-
-            /* common to all paths */
-            if (Cudd_IsComplement(curr.node)) {
-                Nv  = Cudd_Not(cuddT(N));
-                Nnv = Cudd_Not(cuddE(N));
-            }
-            else {
-                Nv  = cuddT(N);
-                Nnv = cuddE(N);
-            }
-
-            // restore caller location (simulate call return behavior)
             switch(curr.pc) {
             case DD_ELSE: goto entry_ELSE;
             case DD_RETURN: goto entry_RETURN;
             default: assert( false ); // unexpected
             }
         } /* pc != DEFAULT */
-
-        // DEFAULT:
-        assert(curr.node);
-
-        /* if node is a constand and fulfills condition, perform action on it */
-        if ( cuddIsConstant(N) && condition(curr.node) ) {
-            action(cuddV(curr.node));
-            continue; /* done with this node */
-        }
 
         // entry_THEN: (fallthru)
         *cell = 0; /* false */
