@@ -535,32 +535,35 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
         return;
     }
 
-    // one op algebraic, possibly both.
-    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
-    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+        // one op algebraic, possibly both.
+    unsigned rhs_width = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->width()
+        : 0;
+    bool rhs_is_signed = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->is_signed()
+        : false;
+
+    unsigned lhs_width = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->width()
+        : 0;
+    bool lhs_is_signed = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->is_signed()
+        : false;
+
+    /* max */
+    unsigned width = rhs_width < lhs_width
+        ? lhs_width
+        : rhs_width
+        ;
+    bool is_signed = rhs_is_signed || lhs_is_signed;
 
     // if both are algebraic they have to agree on signedness too.
-    if ((NULL != arhs) && (NULL != alhs)) {
-        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    if ((0 < rhs_width) && (0 < lhs_width)) {
+        assert ( tm.as_algebraic(rhs)->is_signed() ==
+                 tm.as_algebraic(lhs)->is_signed() );
     }
 
-    unsigned width = 0;
-
-    if (NULL != arhs) {
-        width = (width < arhs->width())
-            ? arhs->width()
-            : width
-            ;
-    }
-
-    if (NULL != alhs) {
-        width = (width < alhs->width())
-            ? alhs->width()
-            : width
-            ;
-    }
-
-    f_type_stack.push_back(alhs->is_signed()
+    f_type_stack.push_back(is_signed
                            ? tm.find_signed(width)
                            : tm.find_unsigned(width));
 }
@@ -640,31 +643,34 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
     }
 
     // one op algebraic, possibly both.
-    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
-    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+    unsigned rhs_width = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->width()
+        : 0;
+    bool rhs_is_signed = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->is_signed()
+        : false;
+
+    unsigned lhs_width = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->width()
+        : 0;
+    bool lhs_is_signed = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->is_signed()
+        : false;
+
+    /* max */
+    unsigned width = rhs_width < lhs_width
+        ? lhs_width
+        : rhs_width
+        ;
+    bool is_signed = rhs_is_signed || lhs_is_signed;
 
     // if both are algebraic they have to agree on signedness too.
-    if ((NULL != arhs) && (NULL != alhs)) {
-        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    if ((0 < rhs_width) && (0 < lhs_width)) {
+        assert ( tm.as_algebraic(rhs)->is_signed() ==
+                 tm.as_algebraic(lhs)->is_signed() );
     }
 
-    unsigned width = 0;
-
-    if (NULL != arhs) {
-        width = (width < arhs->width())
-            ? arhs->width()
-            : width
-            ;
-    }
-
-    if (NULL != alhs) {
-        width = (width < alhs->width())
-            ? alhs->width()
-            : width
-            ;
-    }
-
-    f_type_stack.push_back(alhs->is_signed()
+    f_type_stack.push_back(is_signed
                            ? tm.find_signed(width)
                            : tm.find_unsigned(width));
 }
@@ -743,32 +749,35 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
         return;
     }
 
-    // one op algebraic, possibly both.
-    AlgebraicType_ptr arhs = tm.is_algebraic(rhs) ? tm.as_algebraic(rhs) : NULL;
-    AlgebraicType_ptr alhs = tm.is_algebraic(lhs) ? tm.as_algebraic(lhs) : NULL;
+        // one op algebraic, possibly both.
+    unsigned rhs_width = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->width()
+        : 0;
+    bool rhs_is_signed = tm.is_algebraic(rhs)
+        ? tm.as_algebraic(rhs)->is_signed()
+        : false;
+
+    unsigned lhs_width = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->width()
+        : 0;
+    bool lhs_is_signed = tm.is_algebraic(lhs)
+        ? tm.as_algebraic(lhs)->is_signed()
+        : false;
+
+    /* max */
+    unsigned width = rhs_width < lhs_width
+        ? lhs_width
+        : rhs_width
+        ;
+    bool is_signed = rhs_is_signed || lhs_is_signed;
 
     // if both are algebraic they have to agree on signedness too.
-    if ((NULL != arhs) && (NULL != alhs)) {
-        assert ( arhs->is_signed() == alhs->is_signed() ); // TODO better error handling
+    if ((0 < rhs_width) && (0 < lhs_width)) {
+        assert ( tm.as_algebraic(rhs)->is_signed() ==
+                 tm.as_algebraic(lhs)->is_signed() );
     }
 
-    unsigned width = 0;
-
-    if (NULL != arhs) {
-        width = (width < arhs->width())
-            ? arhs->width()
-            : width
-            ;
-    }
-
-    if (NULL != alhs) {
-        width = (width < alhs->width())
-            ? alhs->width()
-            : width
-            ;
-    }
-
-    f_type_stack.push_back(alhs->is_signed()
+    f_type_stack.push_back(is_signed
                            ? tm.find_signed(width)
                            : tm.find_unsigned(width));
 }
