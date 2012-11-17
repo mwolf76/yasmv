@@ -598,7 +598,6 @@ unsigned Compiler::algebrize_ops_binary()
         for (unsigned i = 0; i < res; ++ i){
             rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
         }
-        Type_ptr type_tmp = f_type_stack.back(); f_type_stack.pop_back();
 
         if (! lhs_width) { // integer, conversion required
             DEBUG << "INT -> ALGEBRAIC LHS" << endl;
@@ -613,9 +612,8 @@ unsigned Compiler::algebrize_ops_binary()
         f_type_stack.push_back(rhs_type);
 
         /* restore RHS and continue */
-        f_type_stack.push_back(type_tmp);
         for (unsigned i = 0; i < res; ++ i){
-            f_add_stack.push_back(rhs_tmp[res - i]);
+            f_add_stack.push_back(rhs_tmp[res - i - 1]);
         }
 
         assert( stack_size - 1 == f_type_stack.size());
@@ -647,7 +645,7 @@ void Compiler::algebraic_from_integer(unsigned width)
     if (value < 0) {
         value += pow(base, width); // 2's complement
     }
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         ADD digit = f_enc.constant(value % base);
         f_add_stack.push_back(digit);
         value /= base;
