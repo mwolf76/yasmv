@@ -40,6 +40,12 @@
 
 // NOTE: types are *immutable* by design!
 
+// ostream helper, uses FQExpr printer (see expr/expr.cc)
+ostream& operator<<(ostream& os, Type_ptr type);
+
+// ostream helper, uses FQExpr printer (see expr/expr.cc)
+ostream& operator<<(ostream& os, const Type_ptr type);
+
 /* Basic Type class. Is.. nothing. */
 typedef class Type* Type_ptr;
 class Type : public Object {
