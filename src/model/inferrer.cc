@@ -56,10 +56,10 @@ Inferrer::Inferrer(ModelMgr& owner)
 Inferrer::~Inferrer()
 { DEBUG << "Destroying Inferrer @" << this << endl; }
 
+/* this function is not memoized by design, for a memoized wrapper use type() */
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
 {
     Type_ptr res = NULL;
-    INFO << "Determining type for expression " << ctx << "::" << body << endl;
 
     // remove previous results
     f_type_stack.clear();
@@ -69,14 +69,14 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     f_ctx_stack.push_back(ctx);
 
     // invoke walker on the body of the expr to be processed
+    INFO << "Determining type for expression " << ctx << "::" << body << endl;
     (*this)(body);
 
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
 
-    Expr_ptr expr = res->repr();
-    DEBUG  << expr << endl;
-
+    /* memoize and return */
+    f_map[ FQExpr(ctx, body) ] = res;
     return res;
 }
 

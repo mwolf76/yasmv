@@ -41,7 +41,7 @@ public:
     Inferrer(ModelMgr& owner);
     ~Inferrer();
 
-    /** @brief Returns Type object for given FQExpr */
+    /** @brief Returns Type object for given FQExpr (memoized) */
     const Type_ptr type(FQExpr& fqexpr)
     {
         TypeReg::const_iterator eye = f_map.find(fqexpr);
@@ -49,8 +49,15 @@ public:
 
         // cache miss, fallback to walker
         if (eye == f_map.end()) {
-            /* hopefully type does not change overtime ;-) */
             res = process(fqexpr.ctx(), fqexpr.expr());
+            DEBUG  << "Type for " << fqexpr
+                   << " is " << res << endl;
+
+        }
+        else {
+            res = (*eye).second;
+            DEBUG  << "[CACHED] Type for " << fqexpr
+                   << " is " << res << endl;
         }
 
         assert(NULL != res);
