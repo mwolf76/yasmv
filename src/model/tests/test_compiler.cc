@@ -1,6 +1,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <stdint.h>
+
 #include <expr.hh>
 #include <expr_mgr.hh>
 #include <expr_printer.hh>
@@ -28,7 +30,6 @@ public:
             return false;
         }
 
-        /* true otherwise */
         return true;
     }
 
@@ -92,7 +93,7 @@ public:
         value_t msb = msb_value();
         value_t lsb = lsb_value();
 
-        BOOST_CHECK(msb == (1 + lsb) % 256);
+        BOOST_CHECK(msb == (1 + lsb) % 0x100);
     }
 };
 
@@ -112,8 +113,25 @@ public:
     }
 };
 
+class SubTestWalker : public TestWalker {
+public:
+    SubTestWalker(CuddMgr& owner)
+        : TestWalker(owner)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        uint8_t lhs = (uint8_t) msb_value();
+        uint8_t rhs = (uint8_t) lsb_value() -1;
+        BOOST_CHECK(lhs == rhs);
+    }
+};
+
+
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(compiler_plus)
+BOOST_AUTO_TEST_CASE(compiler)
 {
     ModelMgr& mm(ModelMgr::INSTANCE());
     ExprMgr& em(ExprMgr::INSTANCE());
@@ -133,17 +151,17 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
 
     mm.model()->add_module(main_expr, main_module);
 
-    // {
-    //     Atom a_d("d_plus"); Expr_ptr define = em.make_identifier(a_d);
+    {
+        Atom a_d("d_plus"); Expr_ptr define = em.make_identifier(a_d);
 
-    //     /* y := x + 1 */
-    //     Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
+        /* y := x + 1 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
 
-    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-    //     PlusTestWalker ptw(CuddMgr::INSTANCE());
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        PlusTestWalker ptw(CuddMgr::INSTANCE());
 
-    //     ptw(f_compiler.process( main_expr, define, 0));
-    // }
+        ptw(f_compiler.process( main_expr, define, 0));
+    }
 
     {
         Atom a_d("d_neg"); Expr_ptr define = em.make_identifier(a_d);
@@ -155,6 +173,18 @@ BOOST_AUTO_TEST_CASE(compiler_plus)
         NegTestWalker ntw(CuddMgr::INSTANCE());
         ntw(f_compiler.process( main_expr, define, 0));
     }
+
+    {
+        Atom a_d("d_sub"); Expr_ptr define = em.make_identifier(a_d);
+
+        /* y := x - 1 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_one()));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        SubTestWalker stw(CuddMgr::INSTANCE());
+        stw(f_compiler.process( main_expr, define, 0));
+    }
+
 
 }
 

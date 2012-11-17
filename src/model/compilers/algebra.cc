@@ -115,6 +115,10 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
 
+    /* rewrite requires discarding */
+    algebraic_discard_op();
+    algebraic_discard_op();
+
     ExprMgr& em = f_owner.em();
     (*this)(em.make_add(expr->lhs(), em.make_neg(expr->rhs())));
 }
@@ -541,7 +545,10 @@ unsigned Compiler::algebrize_ops_binary()
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    DEBUG << "RHS is " << rhs_type << endl;
+
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    DEBUG << "LHS is " << lhs_type << endl;
 
     assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
     unsigned rhs_width = tm.is_algebraic(rhs_type)
@@ -558,9 +565,19 @@ unsigned Compiler::algebrize_ops_binary()
         : rhs_width
         ;
 
+    // Nothing do be done, just ad result type to the type stack and leave
+    if ((rhs_width == res) && (lhs_width == res)) {
+        DEBUG << "Nothing do be done." << endl;
+        f_type_stack.push_back(rhs_type); // arbitrary
+
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
+    }
+
     /* perform conversion or padding, taking sign bit into account */
     if (rhs_width < res) {
         if (! rhs_width) { // integer, conversion required
+            DEBUG << "INT -> ALGEBRAIC RHS" << endl;
             algebraic_from_integer(res);
         }
         else { // just padding required
@@ -568,12 +585,23 @@ unsigned Compiler::algebrize_ops_binary()
             algebraic_padding(rhs_width, res, is_signed);
         }
 
-        // push other operand's type
+        // push other operand's type and return
         f_type_stack.push_back(lhs_type);
+
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
     }
 
     if (lhs_width < res) {
+        /* temporary storage to let adjustment for LHS to take place */
+        ADD rhs_tmp[res];
+        for (unsigned i = 0; i < res; ++ i){
+            rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
+        }
+        Type_ptr type_tmp = f_type_stack.back(); f_type_stack.pop_back();
+
         if (! lhs_width) { // integer, conversion required
+            DEBUG << "INT -> ALGEBRAIC LHS" << endl;
             algebraic_from_integer(res);
         }
         else { // just padding required
@@ -583,14 +611,28 @@ unsigned Compiler::algebrize_ops_binary()
 
         // push other operand's type
         f_type_stack.push_back(rhs_type);
+
+        /* restore RHS and continue */
+        f_type_stack.push_back(type_tmp);
+        for (unsigned i = 0; i < res; ++ i){
+            f_add_stack.push_back(rhs_tmp[res - i]);
+        }
+
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
     }
 
-    // fix the type stack
-    if ((rhs_width == res) && (lhs_width == res)) {
-        f_type_stack.push_back(rhs_type); // arbitrary
+    assert( false ); // unreachable
+}
+
+/// TODO: duplicate code
+static value_t pow(unsigned base, unsigned exp)
+{
+    value_t res = 1;
+    for (unsigned i = exp; i; -- i) {
+        res *= base;
     }
 
-    assert( stack_size - 1 == f_type_stack.size());
     return res;
 }
 
@@ -601,9 +643,10 @@ void Compiler::algebraic_from_integer(unsigned width)
     assert (f_enc.is_constant(top));
 
     value_t value = f_enc.const_value(top);
-
     unsigned base = Cudd_V(f_enc.base().getNode());
-
+    if (value < 0) {
+        value += pow(base, width); // 2's complement
+    }
     for (int i = width -1; (0 <= i); -- i) {
         ADD digit = f_enc.constant(value % base);
         f_add_stack.push_back(digit);
@@ -611,6 +654,7 @@ void Compiler::algebraic_from_integer(unsigned width)
     }
 
     assert (value == 0); // not overflowing
+    DEBUG << "ALGEBRAIC " << width << endl;
 }
 
 void Compiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed)
@@ -635,5 +679,22 @@ void Compiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is
     }
     for (int i = old_width -1; (0 <= i); -- i) {
         f_add_stack.push_back(tmp[i]);
+    }
+}
+
+void Compiler::algebraic_discard_op()
+{
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
+    DEBUG << "Discarding operand " << type << endl;
+
+    unsigned width = tm.is_algebraic(type)
+        ? tm.as_algebraic(type)->width()
+        : 1;
+
+    /* discard DDs */
+    for (unsigned i = 0; i < width; ++ i) {
+        f_add_stack.pop_back();
     }
 }

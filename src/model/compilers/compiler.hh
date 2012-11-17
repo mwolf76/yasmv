@@ -55,6 +55,7 @@ public:
 protected:
     void pre_hook();
     void post_hook();
+    void debug_hook();
 
     // walker interface
     bool walk_next_preorder(const Expr_ptr expr);
@@ -226,6 +227,8 @@ protected:
 
     void algebraic_from_integer(unsigned width);
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
+    void algebraic_discard_op();
+
 };
 
 #endif

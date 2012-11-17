@@ -998,3 +998,25 @@ FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 
     return key;
 }
+
+void Compiler::debug_hook()
+{
+    activation_record curr = f_recursion_stack.top();
+    DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
+
+    DEBUG << "DD Stack" << endl;
+    for (ADDStack::reverse_iterator i = f_add_stack.rbegin();
+         i != f_add_stack.rend(); ++ i) {
+        DdNode* node = (*i).getNode();
+        double paths = (*i).CountPath();
+        DEBUG << "DD: " << node
+              << " [" << paths << "]" << endl;
+    }
+
+    DEBUG << "Type Stack" << endl;
+    for (TypeStack::reverse_iterator i = f_type_stack.rbegin();
+         i != f_type_stack.rend(); ++ i) {
+        DEBUG << *i << endl;
+    }
+    DEBUG << "--------------------" << endl;
+}
