@@ -42,6 +42,8 @@ void SimpleWalker::walk ()
     while(f_recursion_stack.size() != rec_goal) {
 
     loop:
+        debug_hook();
+
         activation_record curr = f_recursion_stack.top();
         if (curr.pc != DEFAULT) {
 

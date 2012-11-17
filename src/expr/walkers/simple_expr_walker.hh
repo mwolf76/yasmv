@@ -38,6 +38,8 @@ protected:
     {}
     virtual void post_hook()
     {}
+    virtual void debug_hook()
+    {}
 
     virtual void walk();
 
