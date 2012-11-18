@@ -49,16 +49,16 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    int width = tm.as_algebraic(type)->width();
+    unsigned width = tm.as_algebraic(type)->width();
 
     /* create temp complemented ADDs */
-    ADD dds[width];
-    for (int i = 0; i < width; ++ i) {
-        dds[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
+    ADD lhs[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        lhs[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
     }
-    FQExpr temp = make_temporary_encoding(dds, width);
 
-    /* type stack is untouched because the argument is already algebraic */
+    /* rewrite ( -x ) as ( !x + 1 ) */
+    FQExpr temp = make_temporary_encoding(lhs, width);
     (*this)(em.make_add(temp.expr(), em.make_one()));
 }
 
@@ -71,15 +71,14 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     unsigned width = tm.as_algebraic(type)->width();
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         /* ! x[i] */
-        ADD tmp = lhs[i].Cmpl();
-        f_add_stack.push_back(tmp);
+        f_add_stack.push_back(lhs[width - i - 1].BWCmpl());
     }
 }
 
@@ -191,23 +190,22 @@ void Compiler::algebraic_and(const Expr_ptr expr)
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
 
-
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWTimes(rhs[i]);
-        f_add_stack.push_back(tmp);
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWTimes(rhs[ndx]));
     }
 }
 
@@ -217,21 +215,20 @@ void Compiler::algebraic_or(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
-
+    for (unsigned i = 0; i < width; ++ i) {
         /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWOr(rhs[i]);
-        f_add_stack.push_back(tmp);
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWOr(rhs[ndx]));
     }
 }
 
@@ -241,21 +238,20 @@ void Compiler::algebraic_xor(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
-
-        /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWXor(rhs[i]);
-        f_add_stack.push_back(tmp);
+    for (unsigned i = 0; i < width; ++ i) {
+        /* x[i] & y[i] */
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWXor(rhs[ndx]));
     }
 }
 
@@ -265,21 +261,20 @@ void Compiler::algebraic_xnor(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
-
-        /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWXnor(rhs[i]);
-        f_add_stack.push_back(tmp);
+    for (unsigned i = 0; i < width; ++ i) {
+        /* !(x[i] ^  y[i]) */
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWXnor(rhs[ndx]));
     }
 }
 
@@ -289,21 +284,20 @@ void Compiler::algebraic_implies(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
     for (int i = width -1; (0 <= i); -- i) {
-
-        /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWCmpl().BWOr(rhs[i]);
-        f_add_stack.push_back(tmp);
+        /* x[i] ->  y[i] */
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWCmpl().BWOr(rhs[ndx]));
     }
 }
 
@@ -343,21 +337,22 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform bw arithmetic, similar to xnor, only conjuct res */
     ADD tmp = f_enc.one();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
-        /* x[i] &  y[i] */
-        tmp *= lhs[i].Equals(rhs[i]);
+        /* x[i] == y[i] */
+        unsigned ndx = width - i - 1;
+        tmp *= lhs[ndx].Equals(rhs[ndx]);
     }
 
     /* just one result */
@@ -370,21 +365,21 @@ void Compiler::algebraic_not_equals(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* perform bw arithmetic, similar to xnor, only conjuct res */
+    /* perform bw arithmetic, similar to xnor, only conjuct res and negate */
     ADD tmp = f_enc.one();
-    for (int i = width; (0 <= i); -- i) {
-
-        /* x[i] &  y[i] */
-        tmp *= lhs[i].Equals(rhs[i]);
+    for (unsigned i = 0; i < width; ++ i) {
+        /* x[i] == y[i] */
+        unsigned ndx = width - i - 1;
+        tmp *= lhs[ndx].Equals(rhs[ndx]);
     }
 
     /* just one result */
@@ -397,49 +392,51 @@ void Compiler::algebraic_gt(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         /* x[i] &  y[i] */
-        tmp += rhs[i].LT(lhs[i]); // CHECK MSB
+        unsigned ndx = width - i - 1;
+        tmp += rhs[ndx].LT(lhs[ndx]); // CHECK MSB
     }
 
     /* just one result */
     f_add_stack.push_back(tmp);
 }
 
+// BLUEPRINT
 void Compiler::algebraic_ge(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false and prefix matches,
        inspect next digit */
     ADD tmp = f_enc.zero();
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         ADD pfx = f_enc.one();
-        for (int j = 0; j < i; j ++ ) {
+        for (unsigned j = 0; j < i; j ++ ) {
             pfx *= rhs[j].Equals(lhs[j]);
         }
 
@@ -457,18 +454,18 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (int i = 0; i < width; ++ i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         /* x[i] &  y[i] */
         tmp += lhs[i].LT(rhs[i]); // CHECK MSB?
@@ -484,21 +481,22 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* relationals, msb predicate first, if false inspect next digit ... */
     ADD tmp = f_enc.zero();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         /* x[i] &  y[i] */
-        tmp += lhs[i].LEQ(rhs[i]); // CHECK MSB
+        unsigned ndx = width - i - 1;
+        tmp += lhs[ndx].LEQ(rhs[ndx]); // CHECK MSB
     }
 
     /* just one result */
@@ -512,187 +510,20 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     unsigned width = algebrize_ops_binary(); // largest
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     const ADD c = f_add_stack.back(); f_add_stack.pop_back();
 
     /* multiplex, easy as pie :-) */
-    for (int i = width -1; (0 <= i); -- i) {
-        f_add_stack.push_back(c.Ite(lhs[i], rhs[i]));
-    }
-}
-
-// REMARK: algebrizations makes sense only for binary ops, there is no
-// need to algebrize a single operand! (unless casts are introduced,
-// but then again a CAST can be thought as a binary op...[ CAST 8 x ])
-
-/* This is slightly complex: it fetches 2 ops, one of them must be
-   algebraic, possibly both. Performs integer to algebraic
-   conversion if needed, aligns algebraic operands to the largest
-   size, and return this size. */
-unsigned Compiler::algebrize_ops_binary()
-{
-    TypeMgr& tm = f_owner.tm();
-
-    unsigned stack_size = f_type_stack.size();
-    assert (2 <= stack_size);
-
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "RHS is " << rhs_type << endl;
-
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "LHS is " << lhs_type << endl;
-
-    assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
-    unsigned rhs_width = tm.is_algebraic(rhs_type)
-        ? tm.as_algebraic(rhs_type)->width()
-        : 0;
-
-    unsigned lhs_width = tm.is_algebraic(lhs_type)
-        ? tm.as_algebraic(lhs_type)->width()
-        : 0;
-
-    /* max */
-    unsigned res = rhs_width < lhs_width
-        ? lhs_width
-        : rhs_width
-        ;
-
-    // Nothing do be done, just ad result type to the type stack and leave
-    if ((rhs_width == res) && (lhs_width == res)) {
-        DEBUG << "Nothing do be done." << endl;
-        f_type_stack.push_back(rhs_type); // arbitrary
-
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    /* perform conversion or padding, taking sign bit into account */
-    if (rhs_width < res) {
-        if (! rhs_width) { // integer, conversion required
-            DEBUG << "INT -> ALGEBRAIC RHS" << endl;
-            algebraic_from_integer(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
-            algebraic_padding(rhs_width, res, is_signed);
-        }
-
-        // push other operand's type and return
-        f_type_stack.push_back(lhs_type);
-
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    if (lhs_width < res) {
-        /* temporary storage to let adjustment for LHS to take place */
-        ADD rhs_tmp[res];
-        for (unsigned i = 0; i < res; ++ i){
-            rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        if (! lhs_width) { // integer, conversion required
-            DEBUG << "INT -> ALGEBRAIC LHS" << endl;
-            algebraic_from_integer(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
-            algebraic_padding(lhs_width, res, is_signed);
-        }
-
-        // push other operand's type
-        f_type_stack.push_back(rhs_type);
-
-        /* restore RHS and continue */
-        for (unsigned i = 0; i < res; ++ i){
-            f_add_stack.push_back(rhs_tmp[res - i - 1]);
-        }
-
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    assert( false ); // unreachable
-}
-
-/// TODO: duplicate code
-static value_t pow(unsigned base, unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; i; -- i) {
-        res *= base;
-    }
-
-    return res;
-}
-
-// due to new type system, integer can be only constant (good)
-void Compiler::algebraic_from_integer(unsigned width)
-{
-    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    assert (f_enc.is_constant(top));
-
-    value_t value = f_enc.const_value(top);
-    unsigned base = Cudd_V(f_enc.base().getNode());
-    if (value < 0) {
-        value += pow(base, width); // 2's complement
-    }
     for (unsigned i = 0; i < width; ++ i) {
-        ADD digit = f_enc.constant(value % base);
-        f_add_stack.push_back(digit);
-        value /= base;
-    }
-
-    assert (value == 0); // not overflowing
-    DEBUG << "ALGEBRAIC " << width << endl;
-}
-
-void Compiler::algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed)
-{
-    ADD padding = f_enc.zero();
-    ADD zero = f_enc.zero();
-
-    assert (old_width < new_width); // old is smaller than new
-
-    ADD tmp[old_width];
-    for (int i = old_width -1; (0 <= i) ; -- i) {
-        tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    // sign extension predicate (0x00 or 0xFF?) only if required.
-    if (is_signed) {
-        padding += tmp[0].BWTimes(f_enc.msb()).Equals(zero).Ite(zero, f_enc.full());
-    }
-
-    for (int i = new_width - old_width /* -1 + 1 */; (0 <= i); -- i) {
-        f_add_stack.push_back(padding);
-    }
-    for (int i = old_width -1; (0 <= i); -- i) {
-        f_add_stack.push_back(tmp[i]);
-    }
-}
-
-void Compiler::algebraic_discard_op()
-{
-    TypeMgr& tm = f_owner.tm();
-
-    const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "Discarding operand " << type << endl;
-
-    unsigned width = tm.is_algebraic(type)
-        ? tm.as_algebraic(type)->width()
-        : 1;
-
-    /* discard DDs */
-    for (unsigned i = 0; i < width; ++ i) {
-        f_add_stack.pop_back();
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(c.Ite(lhs[ndx], rhs[ndx]));
     }
 }
