@@ -78,31 +78,33 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     /* perform bw arithmetic, nothing fancy  here :-) */
     for (unsigned i = 0; i < width; ++ i) {
         /* ! x[i] */
-        f_add_stack.push_back(lhs[width - i - 1].BWCmpl());
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back(lhs[ndx].BWCmpl());
     }
 }
 
 void Compiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    int width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
 
     ADD rhs[width];
-    for (int i = 0; i < width ; ++ i) {
+    for (unsigned i = 0; i < width ; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = 0; i < width ; ++ i) {
+    for (unsigned i = 0; i < width ; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     /* perform arithmetic sum using positional algorithm */
     ADD carry = f_enc.zero();
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
 
         /* x[i] + y[i] + c */
-        ADD tmp = lhs[i].Plus(rhs[i]).Plus(carry);
+        unsigned ndx = width - i - 1;
+        ADD tmp = lhs[ndx].Plus(rhs[ndx]).Plus(carry);
         carry = f_enc.base().LEQ(tmp); /* c >= 0x10 */
 
         /* x[i] = (x[i] + y[i] + c) % base */ // TODO: detect overflow on MSB
@@ -114,7 +116,7 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
 
-    /* rewrite requires discarding */
+    /* rewrite requires discarding operands */
     algebraic_discard_op();
     algebraic_discard_op();
 
@@ -226,7 +228,8 @@ void Compiler::algebraic_or(const Expr_ptr expr)
 
     /* perform bw arithmetic, nothing fancy  here :-) */
     for (unsigned i = 0; i < width; ++ i) {
-        /* x[i] &  y[i] */
+
+        /* x[i] | y[i] */
         unsigned ndx = width - i - 1;
         f_add_stack.push_back(lhs[ndx].BWOr(rhs[ndx]));
     }
@@ -249,7 +252,8 @@ void Compiler::algebraic_xor(const Expr_ptr expr)
 
     /* perform bw arithmetic, nothing fancy  here :-) */
     for (unsigned i = 0; i < width; ++ i) {
-        /* x[i] & y[i] */
+
+        /* x[i] ^ y[i] */
         unsigned ndx = width - i - 1;
         f_add_stack.push_back(lhs[ndx].BWXor(rhs[ndx]));
     }
@@ -272,6 +276,7 @@ void Compiler::algebraic_xnor(const Expr_ptr expr)
 
     /* perform bw arithmetic, nothing fancy  here :-) */
     for (unsigned i = 0; i < width; ++ i) {
+
         /* !(x[i] ^  y[i]) */
         unsigned ndx = width - i - 1;
         f_add_stack.push_back(lhs[ndx].BWXnor(rhs[ndx]));
@@ -294,7 +299,8 @@ void Compiler::algebraic_implies(const Expr_ptr expr)
     }
 
     /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
+
         /* x[i] ->  y[i] */
         unsigned ndx = width - i - 1;
         f_add_stack.push_back(lhs[ndx].BWCmpl().BWOr(rhs[ndx]));
@@ -401,20 +407,24 @@ void Compiler::algebraic_gt(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* relationals, msb predicate first, if false inspect next digit ... */
+    /* MSB predicate first, if false and prefix matches, inspect next
+       digit. */
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        /* x[i] &  y[i] */
-        unsigned ndx = width - i - 1;
-        tmp += rhs[ndx].LT(lhs[ndx]); // CHECK MSB
+        ADD pfx = f_enc.one();
+        for (unsigned j = 0; j < i; j ++ ) {
+            pfx *= rhs[j].Equals(lhs[j]);
+        }
+
+        /* pfx & ( y[i] < x[i] ) */
+        tmp += pfx.Times(rhs[i].LT(lhs[i]));
     }
 
     /* just one result */
     f_add_stack.push_back(tmp);
 }
 
-// BLUEPRINT
 void Compiler::algebraic_ge(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
@@ -430,8 +440,8 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* relationals, msb predicate first, if false and prefix matches,
-       inspect next digit */
+    /* MSB predicate first, if false and prefix matches, inspect next
+       digit. */
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
@@ -440,7 +450,7 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
             pfx *= rhs[j].Equals(lhs[j]);
         }
 
-        /* pfx & ( x[i] <  y[i] ) */
+        /* pfx & ( y[i] <= x[i] ) */
         tmp += pfx.Times(rhs[i].LEQ(lhs[i]));
     }
 
@@ -463,12 +473,18 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* relationals, msb predicate first, if false inspect next digit ... */
+    /* MSB predicate first, if false and prefix matches, inspect next
+       digit. */
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        /* x[i] &  y[i] */
-        tmp += lhs[i].LT(rhs[i]); // CHECK MSB?
+        ADD pfx = f_enc.one();
+        for (unsigned j = 0; j < i; j ++ ) {
+            pfx *= rhs[j].Equals(lhs[j]);
+        }
+
+        /* pfx & ( x[i] < y[i] ) */
+        tmp += pfx.Times(lhs[i].LT(rhs[i]));
     }
 
     /* just one result */
@@ -490,13 +506,18 @@ void Compiler::algebraic_le(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* relationals, msb predicate first, if false inspect next digit ... */
+    /* MSB predicate first, if false and prefix matches, inspect next
+       digit. */
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        /* x[i] &  y[i] */
-        unsigned ndx = width - i - 1;
-        tmp += lhs[ndx].LEQ(rhs[ndx]); // CHECK MSB
+        ADD pfx = f_enc.one();
+        for (unsigned j = 0; j < i; j ++ ) {
+            pfx *= rhs[j].Equals(lhs[j]);
+        }
+
+        /* pfx & ( x[i] <= y[i] ) */
+        tmp += pfx.Times(lhs[i].LEQ(rhs[i]));
     }
 
     /* just one result */
