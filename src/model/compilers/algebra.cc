@@ -265,49 +265,25 @@ void Compiler::algebraic_xor(const Expr_ptr expr)
 void Compiler::algebraic_xnor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD rhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
+    /* rewrite requires discarding operands */
+    algebraic_discard_op();
+    algebraic_discard_op();
 
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* perform bw arithmetic, nothing fancy  here :-) */
-    for (unsigned i = 0; i < width; ++ i) {
-
-        /* !(x[i] ^  y[i]) */
-        unsigned ndx = width - i - 1;
-        f_add_stack.push_back(lhs[ndx].BWXnor(rhs[ndx]));
-    }
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_not(em.make_xor(expr->lhs(), expr->rhs())));
 }
 
 void Compiler::algebraic_implies(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD rhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
+    /* rewrite requires discarding operands */
+    algebraic_discard_op();
+    algebraic_discard_op();
 
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* perform bw arithmetic, nothing fancy  here :-) */
-    for (unsigned i = 0; i < width; ++ i) {
-
-        /* x[i] ->  y[i] */
-        unsigned ndx = width - i - 1;
-        f_add_stack.push_back(lhs[ndx].BWCmpl().BWOr(rhs[ndx]));
-    }
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_or(em.make_not(expr->lhs()), expr->rhs()));
 }
 
 void Compiler::algebraic_lshift(const Expr_ptr expr)
