@@ -347,94 +347,37 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD rhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
+    /* rewrite requires discarding operands */
+    algebraic_discard_op();
+    algebraic_discard_op();
 
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* perform bw arithmetic, similar to xnor, only conjuct res and negate */
-    ADD tmp = f_enc.one();
-    for (unsigned i = 0; i < width; ++ i) {
-        /* x[i] == y[i] */
-        unsigned ndx = width - i - 1;
-        tmp *= lhs[ndx].Equals(rhs[ndx]);
-    }
-
-    /* just one result */
-    f_add_stack.push_back(tmp.Cmpl());
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_not(em.make_eq(expr->lhs(), expr->rhs())));
 }
 
 void Compiler::algebraic_gt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD rhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
+    /* rewrite requires discarding operands */
+    algebraic_discard_op();
+    algebraic_discard_op();
 
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* MSB predicate first, if false and prefix matches, inspect next
-       digit. */
-    ADD tmp = f_enc.zero();
-    for (unsigned i = 0; i < width; ++ i) {
-
-        ADD pfx = f_enc.one();
-        for (unsigned j = 0; j < i; j ++ ) {
-            pfx *= rhs[j].Equals(lhs[j]);
-        }
-
-        /* pfx & ( y[i] < x[i] ) */
-        tmp += pfx.Times(rhs[i].LT(lhs[i]));
-    }
-
-    /* just one result */
-    f_add_stack.push_back(tmp);
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_not(em.make_le(expr->rhs(), expr->lhs())));
 }
 
 void Compiler::algebraic_ge(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
 
-    ADD rhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
+    /* rewrite requires discarding operands */
+    algebraic_discard_op();
+    algebraic_discard_op();
 
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* MSB predicate first, if false and prefix matches, inspect next
-       digit. */
-    ADD tmp = f_enc.zero();
-    for (unsigned i = 0; i < width; ++ i) {
-
-        ADD pfx = f_enc.one();
-        for (unsigned j = 0; j < i; j ++ ) {
-            pfx *= rhs[j].Equals(lhs[j]);
-        }
-
-        /* pfx & ( y[i] <= x[i] ) */
-        tmp += pfx.Times(rhs[i].LEQ(lhs[i]));
-    }
-
-    /* just one result */
-    f_add_stack.push_back(tmp);
+    ExprMgr& em = f_owner.em();
+    (*this)(em.make_not(em.make_lt(expr->rhs(), expr->lhs())));
 }
 
 void Compiler::algebraic_lt(const Expr_ptr expr)
