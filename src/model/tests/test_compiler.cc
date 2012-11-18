@@ -119,8 +119,9 @@ public:
 
 class SubTestWalker : public TestWalker {
 public:
-    SubTestWalker(CuddMgr& owner)
+    SubTestWalker(CuddMgr& owner, int ofs = 1)
         : TestWalker(owner)
+        , f_ofs(ofs)
     {}
 
     virtual void action(value_t value)
@@ -128,10 +129,34 @@ public:
         BOOST_CHECK(1 == value); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value() -1;
+        uint8_t rhs = (uint8_t) lsb_value() - f_ofs;
         BOOST_CHECK(lhs == rhs);
     }
+
+private:
+    int f_ofs;
 };
+
+class AndTestWalker : public TestWalker {
+public:
+    AndTestWalker(CuddMgr& owner, int ofs = 1)
+        : TestWalker(owner)
+        , f_ofs(ofs)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        uint8_t lhs = (uint8_t) msb_value();
+        uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(lhs == (rhs & f_ofs));
+    }
+
+private:
+    int f_ofs;
+};
+
 
 
 BOOST_AUTO_TEST_SUITE(tests)
@@ -214,16 +239,40 @@ BOOST_AUTO_TEST_CASE(compiler)
         ntw(f_compiler.process( main_expr, define, 0));
     }
 
-    // {
-    //     Atom a_d("d_sub"); Expr_ptr define = em.make_identifier(a_d);
+    {
+        Atom a_d("d_sub_1"); Expr_ptr define = em.make_identifier(a_d);
 
-    //     /* y := x - 1 */
-    //     Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_one()));
-    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        /* y := x - 1 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_one()));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
 
-    //     SubTestWalker stw(CuddMgr::INSTANCE());
-    //     stw(f_compiler.process( main_expr, define, 0));
-    // }
+        SubTestWalker stw(CuddMgr::INSTANCE());
+        stw(f_compiler.process( main_expr, define, 0));
+    }
+
+    {
+        Atom a_d("d_sub_2"); Expr_ptr define = em.make_identifier(a_d);
+
+        /* y := x - 42 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_iconst(42)));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        SubTestWalker stw(CuddMgr::INSTANCE(), 42);
+        stw(f_compiler.process( main_expr, define, 0));
+    }
+
+    {
+        Atom a_d("d_and_1"); Expr_ptr define = em.make_identifier(a_d);
+
+        /* y := x & 1 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_and( x, em.make_one()));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        AndTestWalker atw(CuddMgr::INSTANCE());
+        atw(f_compiler.process( main_expr, define, 0));
+    }
+
+
 
 }
 

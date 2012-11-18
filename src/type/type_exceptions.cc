@@ -89,7 +89,7 @@ const char* BadType::what() const throw()
 {
     ostringstream oss;
 
-    oss << "BadType: rhs has type " << f_got
+    oss << "BadType: operand has type " << f_got
         << " in " << f_body;
 
     oss << ", allowed: ";
