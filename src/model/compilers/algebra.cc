@@ -539,7 +539,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    const ADD cond = f_add_stack.back(); f_add_stack.pop_back();
+    ADD cond = f_add_stack.back(); f_add_stack.pop_back();
 
     for (unsigned i = 0; i < width; ++ i) {
 
