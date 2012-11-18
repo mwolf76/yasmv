@@ -127,51 +127,54 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 void Compiler::algebraic_mul(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned pos, width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
 
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD res[width];
-    for (int i = width -1; 0 <= i; -- i) {
-        res[i] = f_enc.zero();
-    }
-
     ADD tmp[width];
-    for (int i = width -1; 0 <= i; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
+        res[i] = f_enc.zero();
         tmp[i] = f_enc.zero();
     }
 
     ADD carry = f_enc.zero();
 
-    for (int i = width -1; 0 <= i; -- i) {
-        for (int j = width -1; 0 <= j; -- j) {
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx_i = width - i - 1;
 
-            // ignore what happend out of result boundaries
-            if (0 <= (pos = width - i - j)) {
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
 
-                /* build mul table for digit product */
-                ADD product = lhs[i].Times(rhs[j]).Plus(carry);
+            // ignore what happens out of result boundaries
+            if (i + j < width) {
+                unsigned ndx = width - i - j - 1;
 
-                tmp[pos] = product.Modulus(f_enc.base());
-                carry = product.Divide(f_enc.base());
+                /* MUL table for digit product */
+                ADD product = lhs[ndx_i].Times(rhs[ndx_j]).Plus(carry);
+
+                /* calculate digit and carry */
+                tmp[ndx] = product.Modulus(f_enc.base());
+                carry    = product.Divide (f_enc.base());
             }
         }
 
         // update result
-        for (int j = width -1; i <= j; -- j) {
-            res[j] += tmp[j];
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
+            res[ndx_j] += tmp[ndx_j];
         }
 
         // return i-th digit of result
-        f_add_stack.push_back(res[i]);
+        f_add_stack.push_back(res[ndx_i]);
     }
 }
 
