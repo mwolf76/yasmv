@@ -157,6 +157,25 @@ private:
     int f_ofs;
 };
 
+class OrTestWalker : public TestWalker {
+public:
+    OrTestWalker(CuddMgr& owner, int ofs = 1)
+        : TestWalker(owner)
+        , f_ofs(ofs)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        uint8_t lhs = (uint8_t) msb_value();
+        uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(lhs == (rhs | f_ofs));
+    }
+
+private:
+    int f_ofs;
+};
 
 
 BOOST_AUTO_TEST_SUITE(tests)
@@ -272,7 +291,16 @@ BOOST_AUTO_TEST_CASE(compiler)
         atw(f_compiler.process( main_expr, define, 0));
     }
 
+    {
+        Atom a_d("d_or_1"); Expr_ptr define = em.make_identifier(a_d);
 
+        /* y := x & 1 */
+        Expr_ptr test_expr = em.make_eq( y, em.make_or( x, em.make_one()));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        OrTestWalker atw(CuddMgr::INSTANCE());
+        atw(f_compiler.process( main_expr, define, 0));
+    }
 
 }
 
