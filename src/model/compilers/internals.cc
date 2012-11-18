@@ -44,8 +44,11 @@
 /* This is slightly complex: it fetches 2 ops, one of them must be
    algebraic, possibly both. Performs integer to algebraic
    conversion if needed, aligns algebraic operands to the largest
-   size, and return this size. */
-unsigned Compiler::algebrize_ops_binary()
+   size, and return this size.
+
+   UPDATE: if is_ite is true, the extra type object in the stack needs
+   to be removed from the type stack.  */
+unsigned Compiler::algebrize_ops_binary( bool is_ite )
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -57,6 +60,11 @@ unsigned Compiler::algebrize_ops_binary()
 
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
     DEBUG << "LHS is " << lhs_type << endl;
+
+    // HACK: only for ITEs
+    if (is_ite) {
+        f_type_stack.pop_back();
+    }
 
     assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
     unsigned rhs_width = tm.is_algebraic(rhs_type)
@@ -78,7 +86,7 @@ unsigned Compiler::algebrize_ops_binary()
         DEBUG << "Nothing do be done." << endl;
         f_type_stack.push_back(rhs_type); // arbitrary
 
-        assert( stack_size - 1 == f_type_stack.size());
+        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
         return res;
     }
 
@@ -96,7 +104,7 @@ unsigned Compiler::algebrize_ops_binary()
         // push other operand's type and return
         f_type_stack.push_back(lhs_type);
 
-        assert( stack_size - 1 == f_type_stack.size());
+        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
         return res;
     }
 
@@ -124,7 +132,7 @@ unsigned Compiler::algebrize_ops_binary()
             f_add_stack.push_back(rhs_tmp[res - i - 1]);
         }
 
-        assert( stack_size - 1 == f_type_stack.size());
+        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
         return res;
     }
 

@@ -223,7 +223,7 @@ protected:
     void algebraic_le(const Expr_ptr expr);
     void algebraic_ite(const Expr_ptr expr);
 
-    unsigned algebrize_ops_binary();
+    unsigned algebrize_ops_binary( bool is_ite = false );
 
     void algebraic_from_integer(unsigned width);
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);

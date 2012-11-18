@@ -524,11 +524,10 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-// TODO fix type stack
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
-    assert(is_ite_algebraic(expr));
-    unsigned width = algebrize_ops_binary(); // largest
+    assert( is_ite_algebraic(expr) );
+    unsigned width = algebrize_ops_binary( true ); // largest, kill extra type
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -540,11 +539,12 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    const ADD c = f_add_stack.back(); f_add_stack.pop_back();
+    const ADD cond = f_add_stack.back(); f_add_stack.pop_back();
 
-    /* multiplex, easy as pie :-) */
     for (unsigned i = 0; i < width; ++ i) {
+
+        /* (cond) ? x[i] : y[i] */
         unsigned ndx = width - i - 1;
-        f_add_stack.push_back(c.Ite(lhs[ndx], rhs[ndx]));
+        f_add_stack.push_back(cond.Ite(lhs[ndx], rhs[ndx]));
     }
 }
