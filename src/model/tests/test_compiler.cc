@@ -197,6 +197,27 @@ private:
     int f_ofs;
 };
 
+class XnorTestWalker : public TestWalker {
+public:
+    XnorTestWalker(CuddMgr& owner, int ofs = 1)
+        : TestWalker(owner)
+        , f_ofs(ofs)
+    {}
+
+    virtual void action(value_t value)
+    {
+        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+
+        uint8_t lhs = (uint8_t) msb_value();
+        uint8_t rhs = (uint8_t) ~ ((lsb_value() ^ f_ofs));
+        BOOST_CHECK(lhs == rhs);
+    }
+
+private:
+    int f_ofs;
+};
+
+
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(compiler)
 {
@@ -218,6 +239,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
     mm.model()->add_module(main_expr, main_module);
 
+    // WEIRD BUG!!!
     {
         Atom a_d("d_plus_1"); Expr_ptr define = em.make_identifier(a_d);
 
@@ -324,11 +346,22 @@ BOOST_AUTO_TEST_CASE(compiler)
     {
         Atom a_d("d_xor_1"); Expr_ptr define = em.make_identifier(a_d);
 
-        /* y := x & 1 */
+        /* y := x ^ 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_xor( x, em.make_one()));
         main_module->add_localDef(define, new Define(main_expr, define, test_expr));
 
         XorTestWalker atw(CuddMgr::INSTANCE());
+        atw(f_compiler.process( main_expr, define, 0));
+    }
+
+    {
+        Atom a_d("d_xnor_1"); Expr_ptr define = em.make_identifier(a_d);
+
+        /* y := ~ (x ^ 1) */
+        Expr_ptr test_expr = em.make_eq( y, em.make_xnor( x, em.make_one()));
+        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+        XnorTestWalker atw(CuddMgr::INSTANCE());
         atw(f_compiler.process( main_expr, define, 0));
     }
 
