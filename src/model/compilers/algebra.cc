@@ -86,7 +86,7 @@ void Compiler::algebraic_not(const Expr_ptr expr)
 void Compiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned width = algebrize_operands(); // largest, takes care of type stack
 
     ADD rhs[width];
     for (unsigned i = 0; i < width ; ++ i) {
@@ -127,7 +127,7 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 void Compiler::algebraic_mul(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest, takes care of type stack
+    unsigned width = algebrize_operands(); // largest, takes care of type stack
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -193,7 +193,7 @@ void Compiler::algebraic_mod(const Expr_ptr expr)
 void Compiler::algebraic_and(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -217,7 +217,7 @@ void Compiler::algebraic_and(const Expr_ptr expr)
 void Compiler::algebraic_or(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -241,7 +241,7 @@ void Compiler::algebraic_or(const Expr_ptr expr)
 void Compiler::algebraic_xor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -289,7 +289,7 @@ void Compiler::algebraic_implies(const Expr_ptr expr)
 void Compiler::algebraic_lshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (int i = width -1; (0 <= i) ; -- i) {
@@ -319,7 +319,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
 void Compiler::algebraic_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -383,7 +383,7 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
 void Compiler::algebraic_lt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -416,7 +416,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
 void Compiler::algebraic_le(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_ops_binary(); // largest
+    unsigned width = algebrize_operands(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -449,7 +449,7 @@ void Compiler::algebraic_le(const Expr_ptr expr)
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
     assert( is_ite_algebraic(expr) );
-    unsigned width = algebrize_ops_binary( true ); // largest, kill extra type
+    unsigned width = algebrize_operands( true ); // largest, kill extra type
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {

@@ -33,13 +33,16 @@
  *
  **/
 
+// comment this out to disable debug
+// #define DEBUG_COMPILER
+
+// comment this out to disable benchmarking
+// #define BENCHMARK_COMPILER
+
 #include <common.hh>
 
 #include <expr.hh>
 #include <compiler.hh>
-
-// comment this out
-// #define DEBUG_BE_COMPILER
 
 Compiler::Compiler()
     : f_temp_auto_index(0)
@@ -54,7 +57,7 @@ Compiler::Compiler()
 Compiler::~Compiler()
 { DEBUG << "Destroying Compiler @" << this << endl; }
 
-DDVector Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
+ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 {
     // remove previous results
     f_add_stack.clear();
@@ -74,16 +77,45 @@ DDVector Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     // invoke walker on the body of the expr to be processed
     (*this)(body);
 
-    // Return the whole ADD stack.
-    return f_add_stack;
+    // Just one 0-1 ADD returned. This is ok, because the compiler is
+    // supposed to return a boolean formula, suitable for CNF
+    // conversion. This condition is checked by the post-hook method.
+    return f_add_stack.back();
 }
 
 void Compiler::pre_hook()
 {
+#ifdef BENCHMARK_COMPILER
+    f_elapsed = clock();
+#endif
 }
 
 void Compiler::post_hook()
-{}
+{
+    if (0 < f_recursion_stack.size()) return;
+
+    ADD add = f_add_stack.back();
+    assert( add.FindMin().Equals(f_enc.zero()) );
+    assert( add.FindMax().Equals(f_enc.one()) );
+
+    // sanity conditions
+    assert(1 == f_add_stack.size());
+    assert(1 == f_type_stack.size());
+    assert(1 == f_ctx_stack.size());
+    assert(1 == f_time_stack.size());
+
+#ifdef BENCHMARK_COMPILER
+    f_elapsed = clock() - f_elapsed;
+    double secs = (double) f_elapsed / CLOCKS_PER_SEC;
+    cerr << "Elapsed: " << secs << endl;
+#endif
+
+#ifdef DEBUG_COMPILER
+    cout << "Result: " << endl;
+    add.PrintMinterm();
+    cout << endl;
+#endif
+}
 
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {

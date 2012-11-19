@@ -10,7 +10,7 @@
 #include <model.hh>
 #include <model_mgr.hh>
 
-#include <compilers/be_compiler.hh>
+#include <compilers/compiler.hh>
 
 #include <dd_walker.hh>
 
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(compiler)
     ExprMgr& em(ExprMgr::INSTANCE());
     TypeMgr& tm(TypeMgr::INSTANCE());
 
-    BECompiler f_compiler;
+    Compiler f_compiler;
 
     Expr_ptr main_expr(em.make_main());
     IModule_ptr main_module = new Module( main_expr );

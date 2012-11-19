@@ -11,9 +11,9 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-PKG_HH = compiler.hh be_compiler.hh
+PKG_HH = compiler.hh
 
-PKG_CC = compiler.cc be_compiler.cc algebra.cc internals.cc
+PKG_CC = compiler.cc algebra.cc internals.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

@@ -29,7 +29,7 @@
 
 #include <mc.hh>
 #include <sat.hh>
-#include <compilers/be_compiler.hh>
+#include <compilers/compiler.hh>
 
 class SATBMCFalsification : public MCAlgorithm {
 
@@ -42,7 +42,7 @@ public:
 private:
     Minisat::DDTermFactory f_factory;
     Minisat::SAT f_engine;
-    BECompiler f_compiler;
+    Compiler f_compiler;
 
     // services
     void assert_fsm_init();

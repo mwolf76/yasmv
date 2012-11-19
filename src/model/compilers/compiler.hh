@@ -50,11 +50,13 @@ public:
     virtual ~Compiler();
 
     // toplevel
-    DDVector process(Expr_ptr ctx, Expr_ptr body, step_t time);
+    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
+    clock_t f_elapsed; /* for benchmarking */
     void pre_hook();
     void post_hook();
+
     void debug_hook();
 
     // walker interface
@@ -202,7 +204,6 @@ protected:
     /* -- algebraic work ---------------------------------------------------- */
     void algebraic_neg(const Expr_ptr expr);
     void algebraic_not(const Expr_ptr expr);
-
     void algebraic_plus(const Expr_ptr expr);
     void algebraic_sub(const Expr_ptr expr);
     void algebraic_div(const Expr_ptr expr);
@@ -223,12 +224,11 @@ protected:
     void algebraic_le(const Expr_ptr expr);
     void algebraic_ite(const Expr_ptr expr);
 
-    unsigned algebrize_ops_binary( bool is_ite = false );
-
+    /* -- other services ---------------------------------------------------- */
     void algebraic_from_integer(unsigned width);
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
-
+    unsigned algebrize_operands(bool is_ite = false);
 };
 
 #endif

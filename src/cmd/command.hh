@@ -26,7 +26,7 @@
 #include <variant.hh>
 #include <interpreter.hh>
 #include <expr.hh>
-#include <compilers/be_compiler.hh>
+#include <compilers/compiler.hh>
 #include <sat.hh>
 #include <satbmc.hh>
 
@@ -74,7 +74,7 @@ private:
     // SAT machinery
     Minisat::DDTermFactory f_factory;
     Minisat::SAT f_engine;
-    BECompiler f_compiler;
+    Compiler f_compiler;
 
     // the expr to solve
     Expr_ptr f_expr;

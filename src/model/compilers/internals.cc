@@ -48,7 +48,7 @@
 
    UPDATE: if is_ite is true, the extra type object in the stack needs
    to be removed from the type stack.  */
-unsigned Compiler::algebrize_ops_binary( bool is_ite )
+unsigned Compiler::algebrize_operands(bool is_ite)
 {
     TypeMgr& tm = f_owner.tm();
 
