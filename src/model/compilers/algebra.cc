@@ -365,7 +365,7 @@ void Compiler::algebraic_gt(const Expr_ptr expr)
     algebraic_discard_op();
 
     ExprMgr& em = f_owner.em();
-    (*this)(em.make_not(em.make_le(expr->rhs(), expr->lhs())));
+    (*this)(em.make_not( em.make_le( expr->lhs(), expr->rhs())));
 }
 
 void Compiler::algebraic_ge(const Expr_ptr expr)
@@ -377,7 +377,7 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
     algebraic_discard_op();
 
     ExprMgr& em = f_owner.em();
-    (*this)(em.make_not(em.make_lt(expr->rhs(), expr->lhs())));
+    (*this)(em.make_not( em.make_lt( expr->lhs(), expr->rhs())));
 }
 
 void Compiler::algebraic_lt(const Expr_ptr expr)
@@ -406,7 +406,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
         }
 
         /* pfx & ( x[i] < y[i] ) */
-        tmp += pfx.Times(lhs[i].LT(rhs[i]));
+        tmp = tmp.Or(pfx.Times(lhs[i].LT(rhs[i])));
     }
 
     /* just one result */
@@ -439,7 +439,7 @@ void Compiler::algebraic_le(const Expr_ptr expr)
         }
 
         /* pfx & ( x[i] <= y[i] ) */
-        tmp += pfx.Times(lhs[i].LEQ(rhs[i]));
+        tmp = tmp.Or(pfx.Times(lhs[i].LEQ(rhs[i])));
     }
 
     /* just one result */
