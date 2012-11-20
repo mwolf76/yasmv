@@ -141,16 +141,17 @@ void Compiler::algebraic_mul(const Expr_ptr expr)
 
     ADD res[width];
     ADD tmp[width];
+
     for (unsigned i = 0; i < width; ++ i) {
         res[i] = f_enc.zero();
         tmp[i] = f_enc.zero();
     }
 
-    ADD carry = f_enc.zero();
-
+    ADD carry;
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx_i = width - i - 1;
 
+        carry = f_enc.zero();
         for (unsigned j = 0; j < width; ++ j) {
             unsigned ndx_j = width - j - 1;
 
