@@ -227,6 +227,7 @@ public:
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(1 == value);
         BOOST_CHECK(lhs < rhs);
     }
 };
@@ -239,9 +240,9 @@ public:
 
     virtual void action(value_t value)
     {
-        assert(1 == value);
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(1 == value);
         BOOST_CHECK(lhs <= rhs);
     }
 };
@@ -256,6 +257,7 @@ public:
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(1 == value);
         BOOST_CHECK(lhs > rhs);
     }
 };
@@ -270,6 +272,7 @@ public:
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
+        BOOST_CHECK(1 == value);
         BOOST_CHECK(lhs >= rhs);
     }
 };
