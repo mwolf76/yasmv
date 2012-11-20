@@ -178,9 +178,6 @@ protected:
     inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
     { f_model_encodings [ fqexpr ] = enc; }
 
-    /* used by various algebraic operations */
-    FQExpr make_temporary_encoding(ADD dds[], unsigned width);
-
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
@@ -229,6 +226,10 @@ protected:
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
     unsigned algebrize_operands(bool is_ite = false);
+
+    /* temporaries */
+    Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
+    Expr_ptr make_bounded_exp2(ADD *dds, unsigned width);
 };
 
 #endif

@@ -58,8 +58,8 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     }
 
     /* rewrite ( -x ) as ( !x + 1 ) */
-    FQExpr temp = make_temporary_encoding(lhs, width);
-    (*this)(em.make_add(temp.expr(), em.make_one()));
+    Expr_ptr temp = make_temporary_encoding(lhs, width);
+    (*this)(em.make_add(temp, em.make_one()));
 }
 
 void Compiler::algebraic_not(const Expr_ptr expr)
@@ -291,29 +291,56 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_operands(); // largest
 
+    ExprMgr& em = f_owner.em();
+
     ADD rhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
     ADD lhs[width];
-    for (int i = width -1; (0 <= i) ; -- i) {
+    for (unsigned i = 0; i < width; ++ i) {
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* perform bw arithmetic, nothing fancy  here :-) */
-    for (int i = width -1; (0 <= i); -- i) {
+    (*this)(em.make_ite(
+                        /* rhs anything beyond width? result is zero. */
+                        em.make_cond( em.make_ge( expr->rhs(),
+                                                  em.make_iconst(4 * width)),
+                                      em.make_zero()),
 
-        /* x[i] &  y[i] */
-        ADD tmp = lhs[i].BWCmpl().BWXor(rhs[i]);
-        f_add_stack.push_back(tmp);
-    }
+                        /* mul with a bounded power of 2 */
+                        em.make_mul ( expr->lhs(),
+                                      make_bounded_exp2(rhs, width))));
 }
 
+/* REVIEW: http://en.wikipedia.org/wiki/Arithmetic_shift#Non-equivalence_of_arithmetic_right_shift_and_division */
 void Compiler::algebraic_rshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    assert( 0 ); // TODO: yet to be implemented...
+    unsigned width = algebrize_operands(); // largest
+
+    ExprMgr& em = f_owner.em();
+
+    ADD rhs[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        rhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD lhs[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    (*this)(em.make_ite(
+                        /* rhs anything beyond width? result is zero. */
+                        em.make_cond( em.make_ge( expr->rhs(),
+                                                  em.make_iconst(4 * width)),
+                                      em.make_zero()),
+
+                        /* div with a bounded power of 2 */
+                        em.make_div ( expr->lhs(),
+                                      make_bounded_exp2(rhs, width))));
 }
 
 void Compiler::algebraic_equals(const Expr_ptr expr)

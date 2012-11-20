@@ -219,10 +219,9 @@ void Compiler::algebraic_discard_op()
     }
 }
 
-
 /* Builds a temporary encoding. This is used by some algebraic
    algorithms (e.g. division) */
-FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
+Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 {
     ExprMgr& em = f_owner.em();
     TypeMgr& tm = f_owner.tm();
@@ -241,7 +240,7 @@ FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
     const FQExpr& key = FQExpr(expr);
     f_temp_encodings [ key ] = new AlgebraicEncoding(width, false, dds);
 
-    return key;
+    return expr;
 }
 
 void Compiler::debug_hook()
@@ -443,3 +442,68 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 { return is_binary_algebraic(expr); }
+
+static inline value_t pow2(unsigned exp)
+{
+    value_t res = 1;
+    for (unsigned i = exp; i; -- i) {
+        res *= 2;
+    }
+
+        return res;
+}
+
+Expr_ptr Compiler::make_bounded_exp2(ADD *dds, unsigned width)
+{
+    value_t value;
+
+    unsigned base = Cudd_V(f_enc.base().getNode());
+    unsigned exp2 = 0;
+
+    ADD mpx[width]; /* multiplex */
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx = width - i - 1;
+        mpx[ndx] = (! ndx )
+            ? f_enc.one()
+            : f_enc.zero() ;
+    }
+
+    while (exp2 < width) {
+        ADD condition = f_enc.one();
+        { /* inlined condition */
+            value = exp2;
+
+            /* inlined condition */
+            for (unsigned i = 0; i < width; ++ i) {
+                unsigned ndx = width - i - 1;
+
+                condition *= dds[ndx].
+                    Equals(f_enc.constant(value % base));
+
+                value /= base;
+            }
+            assert (value == 0); // not overflowing
+        }
+
+        ADD constant[width];
+        {/* inlined power of 2 */
+            value = pow2(exp2);
+            for (unsigned i = 0; i < width; ++ i) {
+                unsigned ndx = width - i - 1;
+
+                constant[ndx] = f_enc.constant(value % base);
+
+                value /= base;
+            }
+            assert (value == 0); // not overflowing
+        }
+
+        for (unsigned i = 0; i < width; ++ i) {
+            mpx[i] = condition.Ite( constant[i], mpx[i] );
+        }
+
+        ++ exp2;
+    }
+
+    return make_temporary_encoding(mpx, width);
+}
