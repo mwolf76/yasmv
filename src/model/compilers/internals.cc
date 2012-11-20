@@ -41,13 +41,14 @@
 // need to algebrize a single operand! (unless casts are introduced,
 // but then again a CAST can be thought as a binary op...[ CAST 8 x ])
 
-/* This is slightly complex: it fetches 2 ops, one of them must be
-   algebraic, possibly both. Performs integer to algebraic
-   conversion if needed, aligns algebraic operands to the largest
-   size, and return this size.
+/* This is slightly complex: it fetches two operands (and
+   corresponding types), one of them must be algebraic, possibly
+   both. Performs integer to algebraic conversion if needed, aligns
+   algebraic operands to the largest size, and return this size,
+   leaving type stack in a consistent state.
 
-   UPDATE: if is_ite is true, the extra type object in the stack needs
-   to be removed from the type stack.  */
+   Remark: if is_ite is true, an extra type is removed from the type
+   stack.  */
 unsigned Compiler::algebrize_operands(bool is_ite)
 {
     TypeMgr& tm = f_owner.tm();
@@ -170,6 +171,8 @@ void Compiler::algebraic_from_integer(unsigned width)
     DEBUG << "ALGEBRAIC " << width << endl;
 }
 
+/* extends a DD vector on top of the stack from old_width to
+   new_width */
 void Compiler::algebraic_padding(unsigned old_width,
                                  unsigned new_width,
                                  bool is_signed)
@@ -197,6 +200,8 @@ void Compiler::algebraic_padding(unsigned old_width,
     }
 }
 
+/* Discards an operand (and corresponding type). This is needed for
+   rewrites. */
 void Compiler::algebraic_discard_op()
 {
     TypeMgr& tm = f_owner.tm();
@@ -214,6 +219,9 @@ void Compiler::algebraic_discard_op()
     }
 }
 
+
+/* Builds a temporary encoding. This is used by some algebraic
+   algorithms (e.g. division) */
 FQExpr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 {
     ExprMgr& em = f_owner.em();
