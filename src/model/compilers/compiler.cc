@@ -807,14 +807,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             // otherwise create and cache it.
             FQExpr key(ctx, expr, time);
 
-            ENCMap::iterator eye = f_model_encodings.find(key);
-            if (eye != f_model_encodings.end()) {
-                enc = (*eye).second;
-            }
-            else {
-                /* build a new encoding for this symbol */
+            /* build a new encoding for this symbol if none is available */
+            if (NULL == (enc = f_enc.find_encoding(key))) {
                 enc = f_enc.make_encoding(type);
-                register_encoding(key, enc);
+                f_enc.register_encoding(key, enc);
             }
 
             push_variable(enc, type);

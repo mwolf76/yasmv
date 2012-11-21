@@ -272,7 +272,7 @@ void Compiler::algebraic_xnor(const Expr_ptr expr)
     algebraic_discard_op();
 
     ExprMgr& em = f_owner.em();
-    (*this)(em.make_not(em.make_xor(expr->lhs(), expr->rhs())));
+    (*this)(em.make_not( em.make_xor( expr->lhs(), expr->rhs())));
 }
 
 void Compiler::algebraic_implies(const Expr_ptr expr)
@@ -284,7 +284,7 @@ void Compiler::algebraic_implies(const Expr_ptr expr)
     algebraic_discard_op();
 
     ExprMgr& em = f_owner.em();
-    (*this)(em.make_or(em.make_not(expr->lhs()), expr->rhs()));
+    (*this)(em.make_or( em.make_not( expr->lhs()), expr->rhs()));
 }
 
 void Compiler::algebraic_lshift(const Expr_ptr expr)
@@ -307,7 +307,7 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
     (*this)(em.make_ite(
                         /* rhs anything beyond width? result is zero. */
                         em.make_cond( em.make_ge( expr->rhs(),
-                                                  em.make_iconst(4 * width)),
+                                                  em.make_iconst(4 * width)), // HARDCODED
                                       em.make_zero()),
 
                         /* mul with a bounded power of 2 */
@@ -336,7 +336,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
     (*this)(em.make_ite(
                         /* rhs anything beyond width? result is zero. */
                         em.make_cond( em.make_ge( expr->rhs(),
-                                                  em.make_iconst(4 * width)),
+                                                  em.make_iconst(4 * width)), // HARDCODED
                                       em.make_zero()),
 
                         /* div with a bounded power of 2 */

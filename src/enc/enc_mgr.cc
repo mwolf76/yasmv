@@ -31,16 +31,6 @@
 // static initialization
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
-IEncoding_ptr EncodingMgr::find_encoding(ADD add)
-{
-    // const ADD2Enc::iterator eye = f_add2enc_map.find(add);
-    // if (eye != f_groups_map.end()) {
-    //     return (*eye).second;
-    // }
-
-    // assert(0);
-}
-
 IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
     assert(NULL != tp);

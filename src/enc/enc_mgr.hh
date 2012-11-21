@@ -83,11 +83,24 @@ public:
     inline ADD bit()
     { return f_cudd.addVar(); }
 
-    // used by the compiler
+    // Makes a new encoding. Used by the compiler
     IEncoding_ptr make_encoding(Type_ptr type);
 
-    // user by the SAT model evaluator
-    IEncoding_ptr find_encoding(ADD add);
+    // Registers an encoding. Used by the compiler
+    inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
+    { f_fqexpr2enc_map [ fqexpr ] = enc; }
+
+    // Retrieves an encoding previously created using
+    // make_encoding. User by the SAT model evaluator
+    inline IEncoding_ptr find_encoding(const FQExpr& fqexpr)
+    {
+        FQExpr2EncMap::iterator eye = f_fqexpr2enc_map.find(fqexpr);
+        if (eye != f_fqexpr2enc_map.end()) {
+            return (*eye).second;
+        }
+
+        return NULL;
+    }
 
     inline ExprMgr& em()
     { return f_em; }
@@ -122,14 +135,9 @@ private:
     ExprMgr& f_em;
 
     /* low-level services */
-    FQExpr2EncMap f_fqexpr2enc_map;
-    ADD2EncMap f_add2enc_map;
 
-    inline void register_encoding(const FQExpr fqexpr, IEncoding_ptr encoding)
-    {
-        assert(! f_fqexpr2enc_map [ fqexpr ] );
-        f_fqexpr2enc_map [ fqexpr ] = encoding;
-    }
+    /* encodings register */
+    FQExpr2EncMap f_fqexpr2enc_map;
 
     ADD f_base;  // 0x10
     ADD f_width; // 8
