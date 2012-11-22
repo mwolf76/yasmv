@@ -43,6 +43,9 @@
 namespace Minisat {
 
     class SAT : public IObject {
+        friend class CNFBuilder;
+        friend class WitnessBuilder;
+
     public:
         /**
          * @brief Adds a new formula group to the SAT instance.
@@ -118,11 +121,8 @@ namespace Minisat {
             return itp_build_interpolant(a);
         }
 
-        inline Terms& terms()
-        { return f_terms; }
-
-        inline lbool value(Term term)
-        { return f_solver.modelValue(term2var(term)); }
+        inline lbool value(int index)
+        { return f_solver.modelValue(index2var(index)); }
 
         /**
          * @brief SAT instancte ctor
@@ -161,22 +161,22 @@ namespace Minisat {
         status_t f_status;
 
         // -- CNF ------------------------------------------------------------
-        Term2VarMap f_term2var_map;
-        inline Var term2var(Term t)
+        Index2VarMap f_index2var_map;
+        inline Var index2var(int index)
         {
-            Term2VarMap::const_iterator eye = f_term2var_map.find(t);
-            if (eye != f_term2var_map.end()) {
+            Index2VarMap::const_iterator eye = f_index2var_map.find(index);
+            if (eye != f_index2var_map.end()) {
                 return (*eye).second;
             }
 
             assert(0);
         }
 
-        Var2TermMap f_var2term_map;
+        Var2IndexMap f_var2index_map;
         inline int var2index(Var v)
         {
-            Var2TermMap::const_iterator eye = f_var2term_map.find(v);
-            if (eye != f_var2term_map.end()) {
+            Var2IndexMap::const_iterator eye = f_var2index_map.find(v);
+            if (eye != f_var2index_map.end()) {
                 return (*eye).second;
             }
 
@@ -184,9 +184,6 @@ namespace Minisat {
         }
 
         Group2VarMap f_groups_map;
-
-        // -- Model ------------------------------------------------------------
-        Terms f_terms;
 
         // -- Interpolator -----------------------------------------------------
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
@@ -236,7 +233,7 @@ namespace Minisat {
         // -- Low level services -----------------------------------------------
         Lit cnf_new_solver_lit(bool inv);
         Lit cnf_find_group_lit(group_t group);
-        Lit cnf_find_term_lit(int index, bool is_cmpl);
+        Lit cnf_find_index_lit(int index, bool is_cmpl);
         void cnf_push_single_node_cut(Term phi, const group_t group,
                                       const color_t color);
         Lit cnf_push_single_node_cut_aux(Term phi, const group_t group,
@@ -248,9 +245,7 @@ namespace Minisat {
 
         status_t sat_solve_groups(const Groups& groups);
 
-        friend void bdd_0minterm_bridge(void *obj, int *list, int size);
         void cnf_push_no_cut(Term phi, const group_t group, const color_t color);
-        void cnf_push_no_cut_callback(int *list, int size);
     }; // SAT instance
 
 }; // minisat

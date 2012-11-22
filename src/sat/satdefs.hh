@@ -110,7 +110,7 @@ namespace Minisat {
                                 const int psi) const
         { return phi == psi; }
     };
-    typedef unordered_map<int, Var, IntHash, IntEq> Term2VarMap;
+    typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
     struct VarHash {
         inline long operator() (Var v) const
@@ -121,7 +121,7 @@ namespace Minisat {
                                 const Var y) const
         { return x == y; }
     };
-    typedef unordered_map<Var, int, VarHash, VarEq> Var2TermMap;
+    typedef unordered_map<Var, int, VarHash, VarEq> Var2IndexMap;
 
     struct GroupHash {
         inline long operator() (group_t group) const
