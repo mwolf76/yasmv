@@ -324,6 +324,28 @@ public:
     // { return TypeMgr::INSTANCE().type(FQExpr(f_ctx, f_name)); }
 };
 
+class SymbIter {
+public:
+    /* Calculates COI if formula is non-NULL */
+    SymbIter(IModel& model, Expr_ptr formula = NULL);
+
+    ~SymbIter();
+
+    /* true iff there are more symbols to be processed */
+    inline bool has_next() const
+    { return f_iter != f_symbols.end(); }
+
+    inline ISymbol_ptr next()
+    { return (* f_iter); ++ f_iter; }
+
+private:
+    IModel&  f_model;
+    Expr_ptr f_formula; /* for COI */
+
+    vector<ISymbol_ptr> f_symbols;
+    vector<ISymbol_ptr>::const_iterator f_iter;
+};
+
 class Model : public IModel {
 public:
     Model();
@@ -350,6 +372,10 @@ public:
 
         return *found.second;
     }
+
+
+    /* symbols iterator (takes COI into account) */
+    SymbIter& symbols();
 
 private:
     Modules f_modules;

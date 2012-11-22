@@ -180,3 +180,41 @@ Model::~Model()
 {
     // TODO: free memory for symbols... (they've been allocated using new)
 }
+
+SymbIter::SymbIter(IModel& model, Expr_ptr formula)
+    : f_model(model)
+    , f_formula(formula)
+{
+    assert( !f_formula ); // TODO implement COI
+
+    /* Fetch modules from model */
+    const Modules& modules = f_model.modules();
+
+    for (Modules::const_iterator mi = modules.begin();
+         mi != modules.end(); ++ mi) {
+
+        IModule& module = * (*mi).second;
+
+        { /* defines */
+            Defines defs = module.get_localDefs();
+            for (Defines::const_iterator di = defs.begin();
+                 di != defs.end(); ++ di) {
+
+                IDefine_ptr def = (*di).second;
+                f_symbols.push_back(def);
+            }
+        }
+
+        { /* variables */
+            Variables vars = module.get_localVars();
+            for (Variables::const_iterator vi = vars.begin();
+                 vi != vars.end(); ++ vi) {
+
+                IVariable_ptr var = (*vi).second;
+                f_symbols.push_back(var);
+            }
+        }
+    }
+
+    f_iter = f_symbols.begin();
+}
