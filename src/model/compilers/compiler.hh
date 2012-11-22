@@ -137,7 +137,6 @@ protected:
     unsigned f_temp_auto_index; // autoincr temp index
 
     ADDMap f_map; // FQDN -> DD cache
-    ENCMap f_model_encodings; // FQDN -> DD encoding
     ENCMap f_temp_encodings;  // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion
@@ -174,9 +173,6 @@ protected:
 
         return true;
     }
-
-    inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
-    { f_model_encodings [ fqexpr ] = enc; }
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
