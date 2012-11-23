@@ -218,3 +218,7 @@ SymbIter::SymbIter(IModel& model, Expr_ptr formula)
 
     f_iter = f_symbols.begin();
 }
+
+SymbIter::~SymbIter()
+{
+}

@@ -134,6 +134,8 @@ public:
     // virtual void add_fairness(Expr_ptr expr) =0;
 };
 
+class SymbIter;
+
 class IModel : public IObject {
 public:
     virtual Expr_ptr name() const =0;
@@ -372,10 +374,6 @@ public:
 
         return *found.second;
     }
-
-
-    /* symbols iterator (takes COI into account) */
-    SymbIter& symbols();
 
 private:
     Modules f_modules;
