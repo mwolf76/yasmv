@@ -30,6 +30,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <list>
 #include <vector>
 #include <stack>
 #include <set>
@@ -57,6 +58,7 @@ using std::string;
 using std::ostringstream;
 using std::istream;
 using std::ostream;
+using std::list;
 using std::vector;
 using std::stack;
 using std::set;
