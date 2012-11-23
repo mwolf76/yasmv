@@ -37,8 +37,11 @@
 #include <cudd_mgr.hh>
 #include <enc_mgr.hh>
 
+const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
+
 // -- primary decls  --------------------------------------------------------------
 typedef vector<ADD> DDVector;
+typedef vector<int> IndexVector;
 
 typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
@@ -54,6 +57,9 @@ public:
     DDVector& dv()
     { return f_dv; }
 
+    DDVector& bits()
+    { return f_bits; }
+
 protected:
     Encoding()
         : f_mgr(EncodingMgr::INSTANCE())
@@ -62,12 +68,17 @@ protected:
     virtual ~Encoding() =0;
 
     EncodingMgr& f_mgr;
-    DDVector f_dv; // digit vector
 
+    DDVector f_dv; // digit vector
+    DDVector f_bits; // all bits
+
+    // low level services
+    ADD bit();
     ADD make_monolithic_encoding(unsigned nbits);
 };
 
 // 1-bit boolean var (identity encoding)
+typedef class BooleanEncoding* BooleanEncoding_ptr;
 class BooleanEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
@@ -82,6 +93,7 @@ protected:
     BooleanEncoding();
 };
 
+typedef class AlgebraicEncoding* AlgebraicEncoding_ptr;
 class AlgebraicEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 friend class Compiler;  // for temporaries
@@ -98,6 +110,30 @@ public:
     inline unsigned width() const
     { return f_width; }
 
+    inline DDVector::const_iterator bits_begin(unsigned k)
+    {
+        assert(k < f_width);
+        DDVector::const_iterator res = f_bits.begin();
+
+        /* skip previous digits' bits */
+        for (unsigned i = 0; i < k * NIBBLE_SIZE; ++ i)
+            ++ res;
+
+        return res;
+    }
+
+    inline DDVector::const_iterator bits_end(unsigned k)
+    {
+        assert(k < f_width);
+        DDVector::const_iterator res = bits_begin(k);
+
+        /* skip digits' bits */
+        for (unsigned i = 0; i < NIBBLE_SIZE; ++ i)
+            ++ res;
+
+        return res;
+    }
+
 protected:
     virtual ~AlgebraicEncoding()
     { assert(0); }
@@ -112,6 +148,7 @@ protected:
 
 
 // base class for finite int based
+typedef class MonolithicEncoding* MonolithicEncoding_ptr;
 class MonolithicEncoding : public Encoding {
 protected:
     virtual ~MonolithicEncoding()
@@ -128,6 +165,7 @@ typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;
 typedef unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
 typedef pair<ExprValueMap::iterator, bool> ExprValueMapHit;
 
+typedef class EnumEncoding* EnumEncoding_ptr;
 class EnumEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:

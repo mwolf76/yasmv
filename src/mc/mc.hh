@@ -30,6 +30,9 @@
 #include <model.hh>
 #include <model_mgr.hh>
 
+#include <enc.hh>
+#include <enc_mgr.hh>
+
 #include <trace.hh>
 #include <variant.hh>
 

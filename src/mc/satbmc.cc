@@ -140,33 +140,47 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
             ISymbol_ptr symb = symbs.next();
 
             if (symb->is_variable()) {
-                /* time it */
+
+                /* time it, and fetch encoding for enc mgr */
                 FQExpr key(symb->ctx(), symb->expr(), i);
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
 
-                /* the ADDs */
-                DDVector& dds = enc->dv();
-                DDVector  assignment;
+                /* possible casts */
+                AlgebraicEncoding_ptr ae;
 
-                for (DDVector::const_iterator ddi = dds.begin();
-                     ddi != dds.end(); ++ ddi) {
+                /* conjunction of leaf DDs, one for each digit */
+                DDVector assignment;
 
-                    ADD add = (*ddi);
-                    int index = add.getNode()->index;
+                // ...
+                if (NULL != (ae = dynamic_cast<AlgebraicEncoding_ptr> (enc))) {
 
-                    ADD bitvalue = (Minisat::toInt(engine.value(index)) == 0)
-                        ? enc_mgr.one()
-                        : enc_mgr.zero()
-                        ;
+                    for (unsigned i = 0; i < NIBBLE_SIZE; ++ i) {
 
-                    assignment.push_back( bitvalue );
+                        ADD conj = enc_mgr.one(); // neuter elem
+
+                        /* filtered customs on vector iterator to
+                           fetch i-th digit bits of an algebraic */
+                        DDVector::const_iterator begin = ae->bits_begin(i);
+                        DDVector::const_iterator end = ae->bits_end(i);
+                        for (DDVector::const_iterator di = begin; di != end; ++ di) {
+
+                            ADD bit(*di);
+                            bool val = (Minisat::toInt(engine.value(bit.getNode()->index)) == 0);
+
+                            conj *= val ? bit : bit.Cmpl();
+                        }
+                        assignment.push_back( conj );
+                    }
+
+                    /* put final value into time frame container */
+                    Expr_ptr value = enc->expr(assignment);
+                    tf.set_value( key, value );
+                } // is algebraic
+
+                else {
+                    // ....
                 }
-                assert( assignment.size() == dds.size() );
-
-                /* put final value into time frame container */
-                Expr_ptr value = enc->expr(assignment);
-                tf.set_value( key, value );
-            }
-        }
-    }
+            } // if (is_variable)
+        } // while (symbs.has_next())
+    } // foreach time frame
 }

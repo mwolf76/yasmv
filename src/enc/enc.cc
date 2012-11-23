@@ -26,22 +26,17 @@
  **/
 #include <enc.hh>
 
-// boolean 1(1 bit) var
-BooleanEncoding::BooleanEncoding()
-    : Encoding()
+// low-level service for bits allocation
+ADD Encoding::bit()
 {
-    // single bit encoding
-    f_dv.push_back(f_mgr.dd().addVar());
-}
+    ADD res = f_mgr.bit();
 
-Expr_ptr BooleanEncoding::expr(DDVector& assignment)
-{
-    assert(0);
-}
+    /* keep track of every bit in the encoding, this is user later,
+       when evaluating the scalar value of a bit combination. */
+    f_bits.push_back(res);
 
-MonolithicEncoding::MonolithicEncoding()
-    : Encoding()
-{}
+    return res;
+}
 
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
@@ -62,24 +57,38 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
     return res;
 }
 
+// boolean 1(1 bit) var
+BooleanEncoding::BooleanEncoding()
+    : Encoding()
+{
+    // single bit encoding
+    f_dv.push_back(bit());
+}
+
+Expr_ptr BooleanEncoding::expr(DDVector& assignment)
+{
+    assert(0);
+}
+
+MonolithicEncoding::MonolithicEncoding()
+    : Encoding()
+{}
+
 // algebraic encoding uses monolithic as a builing block
 AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     : f_width(width)
     , f_signed(is_signed)
     , f_temporary(NULL != dds)
 {
-    unsigned i;
-    const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
-
     if (f_temporary) {
-        for (i = 0; i < width; ++ i) {
+        assert( NULL != dds ); // obvious
+        for (unsigned i = 0; i < width; ++ i) {
             f_dv.push_back(dds[i]);
         }
     }
-
     else {
-        for (i = 0; i < width; ++ i) {
-            f_dv.push_back(make_monolithic_encoding(NIBBLE_SIZE));
+        for (unsigned i = 0; i < width; ++ i) {
+            f_dv.push_back( make_monolithic_encoding(NIBBLE_SIZE));
         }
     }
 }
