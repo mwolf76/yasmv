@@ -23,5 +23,55 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #include <witness.hh>
+
+TimeFrame::TimeFrame()
+{}
+
+TimeFrame::~TimeFrame()
+{}
+
+/* Retrieves value for expr, throws an exception if no value exists. */
+Expr_ptr TimeFrame::value( FQExpr expr )
+{
+    FQExpr2ExprMap::iterator eye;
+
+    eye = f_map.find( expr );
+    assert (f_map.end() != eye); // TODO
+
+    return (*eye).second;
+}
+
+/* Returns true iff expr has an assigned value within this time frame. */
+bool TimeFrame::has_value( FQExpr expr )
+{
+    FQExpr2ExprMap::iterator eye;
+
+    eye = f_map.find( expr );
+    return (f_map.end() != eye);
+}
+
+/* Sets value for expr */
+void TimeFrame::set_value( FQExpr expr, Expr_ptr value )
+{
+    f_map[ expr ] = value;
+}
+
+Witness::Witness(string name)
+    : f_name(name)
+{
+    DEBUG << "Created new witness: " << f_name << endl;
+}
+
+TimeFrame& Witness::new_frame()
+{
+    TimeFrame_ptr res = new TimeFrame();
+    f_frames.push_back(*res);
+
+    unsigned k = length();
+    DEBUG << "Added TimeFrame " << k
+          << " to witness " << name()
+          << endl;
+
+    return * res;
+}

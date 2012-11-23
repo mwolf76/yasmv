@@ -54,7 +54,10 @@ void SATBMCFalsification::assert_fsm_init()
             TRACE << "compiling INIT " << ctx << "::" << body << endl;
 
             ADD add = f_compiler.process(ctx, body, 0);
+
+            TRACE << "CNFizing ..." << endl;
             f_engine.push(add);
+            TRACE << "Done." << endl;
         } // for init
 
     } // modules
@@ -78,7 +81,10 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
             TRACE << "compiling @" << time << " TRANS " << ctx << "::" << body << endl;
 
             ADD add = f_compiler.process(ctx, body, time);
+
+            TRACE << "CNFizing ..." << endl;
             f_engine.push(add);
+            TRACE << "Done." << endl;
         } // for trans
 
     } // modules
@@ -98,8 +104,69 @@ void SATBMCFalsification::process()
     }
 
     assert_violation(k);
+
+    TRACE << "Solving..." << endl;
     if (STATUS_SAT == f_engine.solve()) {
         f_status = MC_FALSE;
+
+        /* ctx extraction */
+        ostringstream oss; oss << "CTX for '" << f_property << "'";
+        Witness& ctx = * new BMCCounterExample(f_property, model(), f_engine, k, false);
+
+        // TODO: register
+        cerr << "CTX" << endl;
+        // cerr << ctx << endl;
     }
 
+    TRACE << "Done." << endl;
+
+}
+
+BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
+                                     Minisat::SAT& engine, unsigned k,
+                                     bool use_coi)
+    : Witness()
+{
+    ostringstream oss; oss << "BMC CTX witness for property " << property;
+    set_name(oss.str());
+
+    EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
+
+    for (unsigned i = 0; i < k; ++ i) {
+        TimeFrame& tf = new_frame();
+
+        SymbIter symbs( model, use_coi ? property : NULL );
+        while (symbs.has_next()) {
+            ISymbol_ptr symb = symbs.next();
+
+            if (symb->is_variable()) {
+                /* time it */
+                FQExpr key(symb->ctx(), symb->expr(), i);
+                IEncoding_ptr enc = enc_mgr.find_encoding(key);
+
+                /* the ADDs */
+                DDVector& dds = enc->dv();
+                DDVector  assignment;
+
+                for (DDVector::const_iterator ddi = dds.begin();
+                     ddi != dds.end(); ++ ddi) {
+
+                    ADD add = (*ddi);
+                    int index = add.getNode()->index;
+
+                    ADD bitvalue = (Minisat::toInt(engine.value(index)) == 0)
+                        ? enc_mgr.one()
+                        : enc_mgr.zero()
+                        ;
+
+                    assignment.push_back( bitvalue );
+                }
+                assert( assignment.size() == dds.size() );
+
+                /* put final value into time frame container */
+                Expr_ptr value = enc->expr(assignment);
+                tf.set_value( key, value );
+            }
+        }
+    }
 }

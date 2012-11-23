@@ -29,7 +29,10 @@
 
 #include <mc.hh>
 #include <sat.hh>
+
 #include <compilers/compiler.hh>
+
+#include <witness.hh>
 
 class SATBMCFalsification : public MCAlgorithm {
 
@@ -48,6 +51,13 @@ private:
     void assert_fsm_init();
     void assert_fsm_trans(step_t time);
     void assert_violation(step_t time);
+};
+
+/* Specialized for BMC ctx */
+class BMCCounterExample : public Witness {
+public:
+    BMCCounterExample(Expr_ptr property, IModel& model,
+                      Minisat::SAT& engine, unsigned k, bool use_coi);
 };
 
 #endif

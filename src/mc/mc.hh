@@ -49,6 +49,9 @@ public:
     // actual algorithm
     virtual void process() =0;
 
+    IModel& model() const
+    { return f_model; }
+
     // Witness iface
     inline mc_status_t status() const
     { return f_status; }
