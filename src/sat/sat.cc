@@ -27,6 +27,13 @@
 
 namespace Minisat {
 
+    void SAT::sat_build_model()
+    {
+        assert (STATUS_SAT == f_status);
+        f_sat_model = realloc( f_sat_model,
+
+    }
+
     status_t SAT::sat_solve_groups(const Groups& groups)
     {
         vec<Lit> assumptions;
@@ -44,6 +51,11 @@ namespace Minisat {
             ? STATUS_SAT
             : STATUS_UNSAT
             ;
+
+        /* if last status is SAT, build model */
+        if (STATUS_SAT == f_status) {
+            sat_build_model();
+        }
 
         DEBUG << "status is " << f_status << endl;
         return f_status;

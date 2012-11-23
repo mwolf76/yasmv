@@ -122,7 +122,10 @@ namespace Minisat {
         }
 
         inline lbool value(int index)
-        { return f_solver.modelValue(index2var(index)); }
+        {
+            assert (STATUS_SAT == f_status);
+            return f_solver.modelValue(index2var(index));
+        }
 
         /**
          * @brief SAT instancte ctor
@@ -244,6 +247,8 @@ namespace Minisat {
         void itp_init_interpolation(const Colors& ga);
 
         status_t sat_solve_groups(const Groups& groups);
+
+        void sat_build_model();
 
         void cnf_push_no_cut(Term phi, const group_t group, const color_t color);
     }; // SAT instance

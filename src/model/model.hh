@@ -338,7 +338,13 @@ public:
     { return f_iter != f_symbols.end(); }
 
     inline ISymbol_ptr next()
-    { return (* f_iter); ++ f_iter; }
+    {
+        ISymbol_ptr res = (* f_iter);
+
+        ++ f_iter;
+        return res;
+    }
+
 
 private:
     IModel&  f_model;

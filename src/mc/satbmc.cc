@@ -114,8 +114,6 @@ void SATBMCFalsification::process()
         Witness& ctx = * new BMCCounterExample(f_property, model(), f_engine, k, false);
 
         // TODO: register
-        cerr << "CTX" << endl;
-        // cerr << ctx << endl;
     }
 
     TRACE << "Done." << endl;
@@ -131,6 +129,11 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
     set_name(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
+
+    /* it's not necessary to fully populate the inputs array
+       before proceeding to evaluation (this is why we're usiong
+       calloc here), so everything can be done in just one pass. */
+    int *inputs = (int *) calloc( enc_mgr.nbits(), sizeof(int));
 
     for (unsigned i = 0; i < k; ++ i) {
         TimeFrame& tf = new_frame();
@@ -148,39 +151,42 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                 /* possible casts */
                 AlgebraicEncoding_ptr ae;
 
-                /* conjunction of leaf DDs, one for each digit */
-                DDVector assignment;
-
                 // ...
                 if (NULL != (ae = dynamic_cast<AlgebraicEncoding_ptr> (enc))) {
 
-                    for (unsigned i = 0; i < NIBBLE_SIZE; ++ i) {
-
-                        ADD conj = enc_mgr.one(); // neuter elem
+                    for (unsigned i = 0; i < ae->width(); ++ i) {
 
                         /* filtered customs on vector iterator to
-                           fetch i-th digit bits of an algebraic */
+                           fetch i-th digit bits of an algebraic,
+                           update relevant bits of the inputss
+                           array. */
                         DDVector::const_iterator begin = ae->bits_begin(i);
                         DDVector::const_iterator end = ae->bits_end(i);
                         for (DDVector::const_iterator di = begin; di != end; ++ di) {
 
                             ADD bit(*di);
-                            bool val = (Minisat::toInt(engine.value(bit.getNode()->index)) == 0);
-
-                            conj *= val ? bit : bit.Cmpl();
+                            int index = bit.getNode()->index;
+                            int value = (Minisat::toInt(engine.value(index)) == 0);
+                            inputs[index] = value;
                         }
-                        assignment.push_back( conj );
                     }
-
-                    /* put final value into time frame container */
-                    Expr_ptr value = enc->expr(assignment);
-                    tf.set_value( key, value );
                 } // is algebraic
 
                 else {
                     // ....
                 }
+
+
+                /* put final value into time frame container */
+                Expr_ptr value = enc->expr(inputs);
+                DEBUG << "value (" << key << ") = " << value << endl;
+                tf.set_value( key, value );
+
             } // if (is_variable)
+
         } // while (symbs.has_next())
     } // foreach time frame
+
+    free ( inputs );
+
 }

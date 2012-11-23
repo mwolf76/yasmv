@@ -83,6 +83,9 @@ public:
     inline ADD bit()
     { return f_cudd.addVar(); }
 
+    inline unsigned nbits()
+    { return f_cudd.ReadSize(); }
+
     // Makes a new encoding. Used by the compiler
     IEncoding_ptr make_encoding(Type_ptr type);
 

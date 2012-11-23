@@ -41,7 +41,7 @@ ADD Encoding::bit()
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
-    ADD res = f_mgr.bit();
+    ADD res = bit();
     ADD two = f_mgr.constant(2);
 
     assert(0 < nbits);
@@ -49,7 +49,7 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
 
     while (i < nbits) {
         res *= two;
-        res += f_mgr.bit();
+        res += bit();
 
         ++ i;
     }
@@ -65,7 +65,7 @@ BooleanEncoding::BooleanEncoding()
     f_dv.push_back(bit());
 }
 
-Expr_ptr BooleanEncoding::expr(DDVector& assignment)
+Expr_ptr BooleanEncoding::expr(int *assignment)
 {
     assert(0);
 }
@@ -93,19 +93,43 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     }
 }
 
-Expr_ptr AlgebraicEncoding::expr(DDVector& assignment)
+DDVector::const_iterator AlgebraicEncoding::bits_begin(unsigned k)
+{
+    assert(k < f_width);
+    DDVector::const_iterator res = f_bits.begin();
+
+    /* skip previous digits' bits */
+    for (unsigned i = 0; i < k * NIBBLE_SIZE; ++ i) {
+        ++ res;
+    }
+
+    return res;
+}
+
+DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
+{
+    assert(k < f_width);
+    DDVector::const_iterator res = bits_begin(k);
+
+    /* skip digits' bits */
+    for (unsigned i = 0; i < NIBBLE_SIZE; ++ i) {
+        ++ res;
+    }
+
+    return res;
+}
+
+Expr_ptr AlgebraicEncoding::expr(int *assignment)
 {
     ExprMgr& em = f_mgr.em();
     unsigned i;
 
     value_t res = 0;
-    assert (assignment.size() == f_width);
 
     i = 0; do {
-        ADD digit = assignment[i];
-        ADD eval = f_dv[i].Times(assignment[i]);
+        ADD eval = f_dv[i].Eval( assignment );
+        assert (cuddIsConstant(eval.getRegularNode()));
 
-        assert (cuddIsConstant(eval.getNode()));
         res += Cudd_V(eval.getNode());
 
         if (++ i < f_width) {
@@ -130,12 +154,9 @@ EnumEncoding::EnumEncoding(const ExprSet& lits)
     }
 }
 
-Expr_ptr EnumEncoding::expr(DDVector& assignment)
+Expr_ptr EnumEncoding::expr(int *assignment)
 {
-    assert (assignment.size() == 1);
-
-    ADD leaf = assignment[0];
-    ADD eval = f_dv[0].Times(leaf);
+    ADD eval = f_dv[0].Eval(assignment);
     assert (cuddIsConstant(eval.getNode()));
 
     value_t lindex = Cudd_V(eval.getNode());

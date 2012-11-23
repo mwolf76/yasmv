@@ -49,7 +49,7 @@ public:
     virtual DDVector& dv() =0;
 
     // vector of DD leaves (consts) -> expr
-    virtual Expr_ptr expr(DDVector& assignment) =0;
+    virtual Expr_ptr expr(int* assignment) =0;
 };
 
 class Encoding : public IEncoding {
@@ -83,7 +83,7 @@ class BooleanEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    virtual Expr_ptr expr(DDVector& assignment);
+    Expr_ptr expr(int* assignment);
 
 protected:
     virtual ~BooleanEncoding()
@@ -99,7 +99,7 @@ friend class EncodingMgr; // expose ctors only to mgr
 friend class Compiler;  // for temporaries
 public:
     // here assignment *must* have size 1
-    virtual Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(int* assignment);
 
     inline bool is_signed() const
     { return f_signed; }
@@ -110,29 +110,9 @@ public:
     inline unsigned width() const
     { return f_width; }
 
-    inline DDVector::const_iterator bits_begin(unsigned k)
-    {
-        assert(k < f_width);
-        DDVector::const_iterator res = f_bits.begin();
-
-        /* skip previous digits' bits */
-        for (unsigned i = 0; i < k * NIBBLE_SIZE; ++ i)
-            ++ res;
-
-        return res;
-    }
-
-    inline DDVector::const_iterator bits_end(unsigned k)
-    {
-        assert(k < f_width);
-        DDVector::const_iterator res = bits_begin(k);
-
-        /* skip digits' bits */
-        for (unsigned i = 0; i < NIBBLE_SIZE; ++ i)
-            ++ res;
-
-        return res;
-    }
+    // custom iterator
+    DDVector::const_iterator bits_begin(unsigned k);
+    DDVector::const_iterator bits_end(unsigned k);
 
 protected:
     virtual ~AlgebraicEncoding()
@@ -170,7 +150,7 @@ class EnumEncoding : public MonolithicEncoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
-    virtual Expr_ptr expr(DDVector& assignment);
+    virtual Expr_ptr expr(int* assignment);
 
 protected:
     virtual ~EnumEncoding()

@@ -68,7 +68,7 @@ TimeFrame& Witness::new_frame()
     TimeFrame_ptr res = new TimeFrame();
     f_frames.push_back(*res);
 
-    unsigned k = length();
+    unsigned k = length() -1;
     DEBUG << "Added TimeFrame " << k
           << " to witness " << name()
           << endl;
