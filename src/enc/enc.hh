@@ -44,15 +44,15 @@ typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
 public:
     virtual DDVector& dv() =0;
+
+    // vector of DD leaves (consts) -> expr
+    virtual Expr_ptr expr(DDVector& assignment) =0;
 };
 
 class Encoding : public IEncoding {
 public:
     DDVector& dv()
     { return f_dv; }
-
-    // vector of DD leaves (consts) -> expr
-    virtual Expr_ptr expr(DDVector& assignment) =0;
 
 protected:
     Encoding()
