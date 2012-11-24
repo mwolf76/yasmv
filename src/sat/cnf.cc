@@ -75,7 +75,9 @@ namespace Minisat {
                     // mapback REVIEW: it could be an interesting tweak to
                     // do with options, to allow the user to prevent don't
                     // care vars to make their way to minisat.
-                    f_sat.cnf_find_index_lit(i, false);
+
+                    // REVIEW
+                    // f_sat.cnf_find_index_lit(i, false);
                 }
             }
 
@@ -133,7 +135,7 @@ namespace Minisat {
                    << " for Term (index = " << index << ") " << endl;
 
             f_index2var_map.insert( make_pair<int, Var>(index, v));
-            f_var2index_map.insert( make_pair<Var, int>(v, index));
+            // f_var2index_map.insert( make_pair<Var, int>(v, index));
         }
 
         return mkLit(v, is_cmpl);

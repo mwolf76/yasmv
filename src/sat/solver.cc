@@ -29,6 +29,9 @@ namespace Minisat {
 
     status_t SAT::sat_solve_groups(const Groups& groups)
     {
+        clock_t t0 = clock();
+        TRACE << "Solving ... " << endl;
+
         vec<Lit> assumptions;
 
         // MTL Set interface is a bit clumsy here :-/
@@ -45,7 +48,10 @@ namespace Minisat {
             : STATUS_UNSAT
             ;
 
-        DEBUG << "status is " << f_status << endl;
+        clock_t elapsed = clock() - t0;
+        double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+        TRACE << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
+
         return f_status;
     }
 

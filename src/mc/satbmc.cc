@@ -104,7 +104,6 @@ void SATBMCFalsification::process()
 
     assert_violation(k);
 
-    TRACE << "Solving..." << endl;
     if (STATUS_SAT == f_engine.solve()) {
         f_status = MC_FALSE;
 
