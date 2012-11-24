@@ -37,7 +37,7 @@
 // #define DEBUG_COMPILER
 
 // comment this out to disable benchmarking
-// #define BENCHMARK_COMPILER
+#define BENCHMARK_COMPILER
 
 #include <common.hh>
 
@@ -69,10 +69,8 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     f_ctx_stack.push_back(ctx);
     f_time_stack.push_back(time);
 
-    DEBUG << "Compiling boolean expression "
-          << "(time = " << time << ") "
-          << ctx << "::" << body
-          << endl;
+    FQExpr key(ctx, body, time);
+    DEBUG << "Compiling " << key << endl;
 
     // invoke walker on the body of the expr to be processed
     (*this)(body);
@@ -106,8 +104,8 @@ void Compiler::post_hook()
 
 #ifdef BENCHMARK_COMPILER
     f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / CLOCKS_PER_SEC;
-    cerr << "Elapsed: " << secs << endl;
+    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Took " << secs << " seconds" << endl;
 #endif
 
 #ifdef DEBUG_COMPILER

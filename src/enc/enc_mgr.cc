@@ -34,7 +34,7 @@ EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
     assert(NULL != tp);
-    Expr_ptr repr = tp->repr();
+    // Expr_ptr repr = tp->repr();
 
     IEncoding_ptr res = NULL;
 
@@ -43,15 +43,15 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     EnumType_ptr etype;
 
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
-        DEBUG << "Encoding Boolean " << repr << endl;
+        // DEBUG << "Encoding Boolean " << repr << endl;
         res = new BooleanEncoding();
     }
     else if (NULL != (atype = dynamic_cast<AlgebraicType_ptr>(tp))) {
-        DEBUG << "Encoding Algebraic " << repr << endl;
+        // DEBUG << "Encoding Algebraic " << repr << endl;
         res = new AlgebraicEncoding(atype->width(), atype->is_signed(), atype->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
-        DEBUG << "Encoding Enum " << repr << endl;
+        // DEBUG << "Encoding Enum " << repr << endl;
         res = new EnumEncoding(etype->literals());
     }
 

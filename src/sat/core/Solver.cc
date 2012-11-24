@@ -117,7 +117,7 @@ Solver::Solver(proof_logging_mode mode) :
   DEBUG << "[Model checking enabled]" << endlog;
 #endif
 
-  DEBUG << endl;
+  DEBUG << "Initialization completed." << endl;
 }
 
 Solver::~Solver()
@@ -1030,9 +1030,9 @@ lbool Solver::solve_()
         for (int i = 0; i < nVars(); i++) model[i] = value(i);
 
         // temp
-        for (int i = 0; i < nVars(); i++) {
-            TRACE << i << ": " << model[i] << endl;
-        }
+        // for (int i = 0; i < nVars(); i++) {
+        //     TRACE << i << ": " << model[i] << endl;
+        // }
 
 #ifdef MODEL_CHECK
         verifyModel();

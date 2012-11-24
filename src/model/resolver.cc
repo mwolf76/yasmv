@@ -66,8 +66,6 @@ void Resolver::register_temporary(const Expr_ptr symb, ITemporary_ptr temp)
 
 ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
 {
-    DEBUG << "Resolving symbol " << ctx << "::" << symb << endl;
-
     /* Fetch modules from model */
     const Modules& f_modules = f_owner.model()->modules();
 

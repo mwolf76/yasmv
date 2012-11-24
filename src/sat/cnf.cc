@@ -79,7 +79,7 @@ namespace Minisat {
                 }
             }
 
-            // DEBUG << ps << endl;
+            DRIVEL << ps << endl;
             f_sat.f_solver.addClause_(ps, color);
         }
 
@@ -88,11 +88,7 @@ namespace Minisat {
     };
 
     void SAT::cnf_push_no_cut(Term phi, const group_t group, const color_t color)
-    {
-        // f_factory.walk_zeroes(phi, this, bdd_0minterm_bridge);
-        CNFBuilder builder(CuddMgr::INSTANCE(), *this);
-        builder(phi);
-    }
+    { CNFBuilder builder(CuddMgr::INSTANCE(), *this); builder(phi); }
 
     Lit SAT::cnf_find_group_lit(group_t group)
     {
@@ -104,7 +100,9 @@ namespace Minisat {
         }
         else {
             v = f_solver.newVar();
-            DEBUG << "Adding VAR " << v << " for group " << group << endl;
+            DRIVEL << "Adding VAR " << v
+                   << " for group " << group << endl;
+
             f_groups_map.insert( make_pair<group_t, Var>(group, v));
         }
 
@@ -114,7 +112,8 @@ namespace Minisat {
     Lit SAT::cnf_new_solver_lit(bool inv)
     {
         Var v = f_solver.newVar();
-        DEBUG << "Adding VAR " << v << " for CNF" << endl;
+        DRIVEL << "Adding VAR " << v << " for CNF" << endl;
+
         return mkLit(v, inv);
     }
 
@@ -130,7 +129,8 @@ namespace Minisat {
         else {
             // generate new var and book it
             v = f_solver.newVar();
-            DEBUG << "Adding VAR " << v << " for Term (index = " << index << ") " << endl;
+            DRIVEL << "Adding VAR " << v
+                   << " for Term (index = " << index << ") " << endl;
 
             f_index2var_map.insert( make_pair<int, Var>(index, v));
             f_var2index_map.insert( make_pair<Var, int>(v, index));

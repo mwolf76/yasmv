@@ -50,14 +50,9 @@ public:
         // cache miss, fallback to walker
         if (eye == f_map.end()) {
             res = process(fqexpr.ctx(), fqexpr.expr());
-            DEBUG  << "Type for " << fqexpr
-                   << " is " << res << endl;
-
         }
         else {
             res = (*eye).second;
-            DEBUG  << "[CACHED] Type for " << fqexpr
-                   << " is " << res << endl;
         }
 
         assert(NULL != res);

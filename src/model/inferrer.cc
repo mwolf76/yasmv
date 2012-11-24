@@ -69,11 +69,14 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     f_ctx_stack.push_back(ctx);
 
     // invoke walker on the body of the expr to be processed
-    INFO << "Determining type for expression " << ctx << "::" << body << endl;
+    TRACE << "Determining type for expression " << ctx << "::" << body << endl;
     (*this)(body);
 
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
+
+    DRIVEL << "Type for " << ctx << "::" << body
+           << " is " << res << endl;
 
     /* memoize and return */
     f_map[ FQExpr(ctx, body) ] = res;

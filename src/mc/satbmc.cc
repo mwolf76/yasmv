@@ -36,6 +36,18 @@ SATBMCFalsification::SATBMCFalsification(IModel& model, Expr_ptr property)
 SATBMCFalsification::~SATBMCFalsification()
 {}
 
+void SATBMCFalsification::push_formula(ADD phi)
+{
+    clock_t t0 = clock();
+    TRACE << "CNFizing ..." << endl;
+
+    f_engine.push(phi);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
 void SATBMCFalsification::assert_fsm_init()
 {
     const Modules& modules = f_model.modules();
@@ -54,10 +66,7 @@ void SATBMCFalsification::assert_fsm_init()
             TRACE << "compiling INIT " << ctx << "::" << body << endl;
 
             ADD add = f_compiler.process(ctx, body, 0);
-
-            TRACE << "CNFizing ..." << endl;
-            f_engine.push(add);
-            TRACE << "Done." << endl;
+            push_formula(add);
         } // for init
 
     } // modules
@@ -81,10 +90,7 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
             TRACE << "compiling @" << time << " TRANS " << ctx << "::" << body << endl;
 
             ADD add = f_compiler.process(ctx, body, time);
-
-            TRACE << "CNFizing ..." << endl;
-            f_engine.push(add);
-            TRACE << "Done." << endl;
+            push_formula(add);
         } // for trans
 
     } // modules

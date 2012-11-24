@@ -57,10 +57,10 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "RHS is " << rhs_type << endl;
+    DRIVEL << "RHS is " << rhs_type << endl;
 
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "LHS is " << lhs_type << endl;
+    DRIVEL << "LHS is " << lhs_type << endl;
 
     // HACK: only for ITEs
     if (is_ite) {
@@ -84,7 +84,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
 
     // Nothing do be done, just ad result type to the type stack and leave
     if ((rhs_width == res) && (lhs_width == res)) {
-        DEBUG << "Nothing do be done." << endl;
+        DRIVEL << "Nothing do be done." << endl;
         f_type_stack.push_back(rhs_type); // arbitrary
 
         assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
@@ -94,7 +94,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     /* perform conversion or padding, taking sign bit into account */
     if (rhs_width < res) {
         if (! rhs_width) { // integer, conversion required
-            DEBUG << "INT -> ALGEBRAIC RHS" << endl;
+            DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
             algebraic_from_integer(res);
         }
         else { // just padding required
@@ -117,7 +117,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
         }
 
         if (! lhs_width) { // integer, conversion required
-            DEBUG << "INT -> ALGEBRAIC LHS" << endl;
+            DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
             algebraic_from_integer(res);
         }
         else { // just padding required
@@ -168,7 +168,7 @@ void Compiler::algebraic_from_integer(unsigned width)
     }
 
     assert (value == 0); // not overflowing
-    DEBUG << "ALGEBRAIC " << width << endl;
+    DRIVEL << "ALGEBRAIC " << width << endl;
 }
 
 /* extends a DD vector on top of the stack from old_width to
@@ -207,8 +207,6 @@ void Compiler::algebraic_discard_op()
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    DEBUG << "Discarding operand " << type << endl;
-
     unsigned width = tm.is_algebraic(type)
         ? tm.as_algebraic(type)->width()
         : 1;
@@ -245,6 +243,7 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 
 void Compiler::debug_hook()
 {
+#if 0
     activation_record curr = f_recursion_stack.top();
     DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
 
@@ -263,6 +262,7 @@ void Compiler::debug_hook()
         DEBUG << *i << endl;
     }
     DEBUG << "--------------------" << endl;
+#endif
 }
 
 /**
