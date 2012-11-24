@@ -20,10 +20,14 @@ public:
         : DDWalker(owner)
     {}
 
+    /* tests do not use recursion */
+    bool recursion(const DdNode *node)
+    { return false; }
+
     bool condition(const DdNode *node)
     {
         DdNode *N = Cudd_Regular(node);
-        assert( cuddIsConstant(N) );
+        if (! cuddIsConstant(N)) return false;
 
         /* arithmetical zero */
         if (node == f_owner.dd().getManager()->zero) {
@@ -33,7 +37,7 @@ public:
         return true;
     }
 
-    virtual void action(value_t value) =0;
+    virtual void action(const DdNode *node) =0;
 
 protected:
 
@@ -86,9 +90,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         value_t msb = msb_value();
         value_t lsb = lsb_value();
@@ -107,9 +111,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value() * f_ofs;
         BOOST_CHECK(lhs == rhs);
@@ -126,9 +130,9 @@ public:
         : TestWalker(owner)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         value_t msb = msb_value();
         value_t lsb = lsb_value();
@@ -143,9 +147,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value() - f_ofs;
@@ -163,9 +167,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
@@ -183,9 +187,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
@@ -203,9 +207,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
@@ -223,9 +227,9 @@ public:
         , f_ofs(ofs)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
-        BOOST_CHECK(1 == value); /* 0-1 ADDs */
+        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
 
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) ~ ((lsb_value() ^ f_ofs));
@@ -242,11 +246,11 @@ public:
         : TestWalker(owner)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == value);
+        BOOST_CHECK(1 == Cudd_V(node));
         BOOST_CHECK(lhs < rhs);
     }
 };
@@ -257,11 +261,11 @@ public:
         : TestWalker(owner)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == value);
+        BOOST_CHECK(1 == Cudd_V(node));
         BOOST_CHECK(lhs <= rhs);
     }
 };
@@ -272,11 +276,11 @@ public:
         : TestWalker(owner)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == value);
+        BOOST_CHECK(1 == Cudd_V(node));
         BOOST_CHECK(lhs > rhs);
     }
 };
@@ -287,11 +291,11 @@ public:
         : TestWalker(owner)
     {}
 
-    virtual void action(value_t value)
+    virtual void action(const DdNode *node)
     {
         uint8_t lhs = (uint8_t) msb_value();
         uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == value);
+        BOOST_CHECK(1 == Cudd_V(node));
         BOOST_CHECK(lhs >= rhs);
     }
 };
@@ -498,6 +502,15 @@ BOOST_AUTO_TEST_CASE(compiler)
         GeTestWalker gew(CuddMgr::INSTANCE());
         gew(f_compiler.process( main_expr, define, 0));
     }
+
+    // {
+    //     Atom a_d("d_lsh_1"); Expr_ptr define = em.make_identifier(a_d);
+
+    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+
+    //     GeTestWalker gew(CuddMgr::INSTANCE());
+    //     gew(f_compiler.process( main_expr, define, 0));
+    // }
 
 }
 

@@ -28,6 +28,130 @@
 
 namespace Minisat {
 
+    class CNFBuilderSingleCut : public DDWalker {
+    public:
+        CNFBuilderSingleCut(CuddMgr& mgr, SAT& sat)
+            : DDWalker(mgr)
+            , f_sat(sat)
+        {}
+
+        ~CNFBuilderSingleCut()
+        {}
+
+        bool condition(const DdNode *node)
+        {
+            /* if it's not a constant node... */
+            if (! cuddIsConstant(Cudd_Regular(node)) &&
+
+                /* and not visited. */
+                f_seen.find(node) == f_seen.end()) {
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool recursion(DdNode *node)
+        {
+            DdNode *N, *Nv, *Nnv;
+            N = Cudd_Regular(node);
+
+            if (Cudd_IsComplement(node)) {
+                Nv  = Cudd_Not(cuddT(N));
+                Nnv = Cudd_Not(cuddE(N));
+            }
+            else {
+                Nv  = cuddT(N);
+                Nnv = cuddE(N);
+            }
+
+            /* recur into T and E subtrees (reversed order) */
+            f_recursion_stack.push( dd_activation_record(Nnv));
+            f_recursion_stack.push( dd_activation_record(Nv));
+
+            return true;
+        }
+
+        void action(DdNode *node)
+        {
+            /* mark as visited */
+            f_seen.insert(node);
+
+            // FIXME...
+            group_t group = MAINGROUP;
+            color_t color = BACKGROUND;
+
+            DdNode *N, *Nv, *Nnv;
+            N = Cudd_Regular(node);
+
+            if (Cudd_IsComplement(node)) {
+                Nv  = Cudd_Not(cuddT(N));
+                Nnv = Cudd_Not(cuddE(N));
+            }
+            else {
+                Nv  = cuddT(N);
+                Nnv = cuddE(N);
+            }
+
+            Var v = f_sat.cnf_new_cnf_var();
+            int f = node->index;
+            int t = Nv->index;
+            int e = Nnv->index;
+
+            { // group -> !f, v, e
+                vec<Lit> ps;
+
+                ps.push(f_sat.cnf_find_group_lit(group));
+                ps.push(f_sat.cnf_find_index_lit(f, true));
+                ps.push(mkLit(v, false));
+                ps.push(f_sat.cnf_find_index_lit(e, false));
+
+                DRIVEL << ps << endl;
+                f_sat.f_solver.addClause_(ps, color);
+             }
+
+            { // group -> f, v, !e
+                vec<Lit> ps;
+
+                ps.push(f_sat.cnf_find_group_lit(group));
+                ps.push(f_sat.cnf_find_index_lit(f, false));
+                ps.push(mkLit(v, false));
+                ps.push(f_sat.cnf_find_index_lit(e, true));
+
+                DRIVEL << ps << endl;
+                f_sat.f_solver.addClause_(ps, color);
+            }
+
+            { // group -> !f, !v, t
+                vec<Lit> ps;
+
+                ps.push(f_sat.cnf_find_group_lit(group));
+                ps.push(f_sat.cnf_find_index_lit(f, true));
+                ps.push(mkLit(v, true));
+                ps.push(f_sat.cnf_find_index_lit(t, false));
+
+                DRIVEL << ps << endl;
+                f_sat.f_solver.addClause_(ps, color);
+            }
+
+            { // group -> f, !v, !t
+                vec<Lit> ps;
+
+                ps.push(f_sat.cnf_find_group_lit(group));
+                ps.push(f_sat.cnf_find_index_lit(f, false));
+                ps.push(mkLit(v, true));
+                ps.push(f_sat.cnf_find_index_lit(t, true));
+
+                DRIVEL << ps << endl;
+                f_sat.f_solver.addClause_(ps, color);
+            }
+        }
+
+    private:
+        SAT& f_sat;
+        unordered_set<const DdNode *> f_seen;
+    };
+
     class CNFBuilder : public DDWalker {
     public:
         CNFBuilder(CuddMgr& mgr, SAT& sat)
@@ -40,19 +164,25 @@ namespace Minisat {
 
         bool condition(const DdNode *node)
         {
-            DdNode *N = Cudd_Regular(node);
-            assert( cuddIsConstant(N) );
+            /* if it's a constant node... */
+            if (cuddIsConstant(Cudd_Regular(node)) &&
 
-            /* take into account arithmetical zeroes */
-            if (node == f_owner.dd().getManager()->zero) {
+                /* and it's zero */
+                (node == f_owner.dd().getManager()->zero)) {
                 return true;
             }
 
             return false;
         }
 
-        virtual void action(value_t value)
+        /* no recursion */
+        bool recursion(const DdNode *node)
+        { return false; }
+
+        void action(const DdNode *node)
         {
+            value_t value = Cudd_V(node);
+
             // FIXME...
             group_t group = MAINGROUP;
             color_t color = BACKGROUND;
@@ -111,12 +241,12 @@ namespace Minisat {
         return mkLit(v, true); // g -> ...
     }
 
-    Lit SAT::cnf_new_solver_lit(bool inv)
+    Var SAT::cnf_new_cnf_var()
     {
         Var v = f_solver.newVar();
         DRIVEL << "Adding VAR " << v << " for CNF" << endl;
 
-        return mkLit(v, inv);
+        return v;
     }
 
     // memoize only positive terms

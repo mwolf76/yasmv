@@ -75,17 +75,22 @@ void DDWalker::walk ()
         dd_activation_record curr = f_recursion_stack.top();
         N = Cudd_Regular(curr.node);
 
-        /* if node is a constand and fulfills condition, perform action on it */
-        if ( cuddIsConstant(N) ) {
-            if (condition(curr.node)) {
-                action(cuddV(curr.node));
+        /* if node fulfills condition, perform action on it */
+        if (condition(curr.node)) {
+
+            /* recursion hook */
+            if (recursion(curr.node)) {
+                goto call;
             }
 
-            // continue
-            goto entry_RETURN;
+            /* post-hook */
+            action(curr.node);
         }
 
-        /* init common to all paths below here */
+        /* no further processing for constants */
+        if (cuddIsConstant(N)) goto entry_RETURN;
+
+        /* internal node, init common to all paths below here */
         cell = f_data + N->index;
 
         if (Cudd_IsComplement(curr.node)) {

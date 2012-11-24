@@ -72,7 +72,8 @@ protected:
     virtual void walk();
 
     virtual bool condition(const DdNode *node) =0;
-    virtual void action(value_t value) =0;
+    virtual bool recursion(const DdNode *node) =0;
+    virtual void action   (const DdNode *node) =0;
 
     CuddMgr& f_owner;
     char *f_data; /* try to limit memory waste for caching */

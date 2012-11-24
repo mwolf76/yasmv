@@ -44,6 +44,7 @@ namespace Minisat {
 
     class SAT : public IObject {
         friend class CNFBuilder;
+        friend class CNFBuilderSingleCut;
         friend class WitnessBuilder;
 
     public:
@@ -234,7 +235,8 @@ namespace Minisat {
         { return a_clauses.has(cr); }
 
         // -- Low level services -----------------------------------------------
-        Lit cnf_new_solver_lit(bool inv);
+        Var cnf_new_cnf_var();
+
         Lit cnf_find_group_lit(group_t group);
         Lit cnf_find_index_lit(int index, bool is_cmpl);
         void cnf_push_single_node_cut(Term phi, const group_t group,
