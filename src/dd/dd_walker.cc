@@ -25,18 +25,28 @@
 
 DDWalker::DDWalker(CuddMgr& owner)
     : f_owner(owner)
-    , f_data(NULL)
-{ // DRIVEL << "Initialized walker @" << this << endl;
-}
+{}
 
 DDWalker::~DDWalker()
-{ // DRIVEL << "Deinitialized walker @" << this << endl;
-}
+{}
 
-DDWalker& DDWalker::operator() (ADD dd)
+DDLeafWalker::~DDLeafWalker()
+{}
+
+DDNodeWalker::~DDNodeWalker()
+{}
+
+DDLeafWalker::DDLeafWalker(CuddMgr& owner)
+    : DDWalker(owner)
+    , f_data(NULL)
+{}
+
+DDNodeWalker::DDNodeWalker(CuddMgr& owner)
+    : DDWalker(owner)
+{}
+
+void DDLeafWalker::pre_hook()
 {
-    dd_activation_record call(dd.getNode());
-
     assert (NULL == f_data);
     size_t nelems = f_owner.dd().getManager()->size;
     f_data = (char *) malloc( nelems * sizeof(char));
@@ -45,52 +55,65 @@ DDWalker& DDWalker::operator() (ADD dd)
     for (unsigned i = 0; i < nelems; ++ i) {
         *( f_data + i ) = 2;
     }
+}
+
+void DDNodeWalker::pre_hook()
+{}
+
+void DDLeafWalker::post_hook()
+{
+    /* release temp memory */
+    free(f_data);
+    f_data = NULL;
+}
+
+void DDNodeWalker::post_hook()
+{}
+
+DDWalker& DDWalker::operator() (ADD dd)
+{
+    dd_activation_record call(dd.getNode());
+
+    pre_hook();
 
     // setup toplevel act. record and perform walk
     f_recursion_stack.push(call);
     walk();
 
-    /* release temp memory */
-    free(f_data); f_data = NULL;
+    post_hook();
 
     return *this;
 }
 
-void DDWalker::walk ()
+/* pre-order visit strategy */
+void DDLeafWalker::walk ()
 {
     size_t rec_level = f_recursion_stack.size();
     assert (0 != rec_level);
-
-    size_t rec_goal = rec_level -1; // support re-entrant invocation
-    assert (0 == rec_goal);
 
     DdNode *N, *Nv, *Nnv;
 
     /* for fast access to the DD variables array */
     char *cell;
 
-    while(f_recursion_stack.size() != rec_goal) {
-
+    while(0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
         N = Cudd_Regular(curr.node);
 
-        /* if node fulfills condition, perform action on it */
-        if (condition(curr.node)) {
-
-            /* recursion hook */
-            if (recursion(curr.node)) {
-                goto call;
+        /* if node is a constand and fulfills condition, perform
+           action on it. Recur into its children
+           afterwards. (pre-order). */
+        if ( cuddIsConstant(N) ) {
+            if (condition(curr.node)) {
+                action(curr.node);
             }
 
-            /* post-hook */
-            action(curr.node);
+            // continue
+            goto entry_RETURN;
         }
 
-        /* no further processing for constants */
-        if (cuddIsConstant(N)) goto entry_RETURN;
-
-        /* internal node, init common to all paths below here */
+        /* init common to all paths below here */
         cell = f_data + N->index;
 
         if (Cudd_IsComplement(curr.node)) {
@@ -125,6 +148,63 @@ void DDWalker::walk ()
 
     entry_RETURN:
         *cell = 2; /* don't care */
+
+        f_recursion_stack.pop();
+    } // while
+}
+
+/* post-order visit strategy */
+void DDNodeWalker::walk ()
+{
+    size_t rec_level = f_recursion_stack.size();
+    assert (0 != rec_level);
+
+    DdNode *N, *Nv, *Nnv;
+
+    while(0 != f_recursion_stack.size()) {
+    call:
+        dd_activation_record curr = f_recursion_stack.top();
+
+        // restore caller location (simulate call return behavior)
+        if (curr.pc != DD_DEFAULT) {
+            switch(curr.pc) {
+            case DD_ELSE: goto entry_node_ELSE;
+            case DD_RETURN: goto entry_node_ACTION;
+            default: assert( false ); // unexpected
+            }
+        } /* pc != DEFAULT */
+
+        N = Cudd_Regular(curr.node);
+
+        /* if node is a not constand and fulfills condition, perform
+           action on it. Recur into its children
+           afterwards. (pre-order). */
+        if ( ! cuddIsConstant(N) ) {
+            if (condition(curr.node)) {
+
+                /* recur in THEN */
+                Nv = Cudd_IsComplement(curr.node)
+                    ? Cudd_Not(cuddT(N))
+                    : cuddT(N) ;
+                f_recursion_stack.top().pc = DD_ELSE;
+                f_recursion_stack.push(dd_activation_record(Nv));
+                goto call;
+
+            entry_node_ELSE:
+                /* recur in ELSE */
+                Nnv = Cudd_IsComplement(curr.node)
+                    ? Cudd_Not(cuddE(N))
+                    : cuddE(N) ;
+
+                f_recursion_stack.top().pc = DD_RETURN;
+                f_recursion_stack.push(dd_activation_record(Nnv));
+                goto call;
+
+            entry_node_ACTION:
+                /* process node */
+                action(curr.node);
+            }
+        }
 
         f_recursion_stack.pop();
     } // while

@@ -43,7 +43,7 @@
 namespace Minisat {
 
     class SAT : public IObject {
-        friend class CNFBuilder;
+        friend class CNFBuilderNoCut;
         friend class CNFBuilderSingleCut;
         friend class WitnessBuilder;
 
@@ -90,8 +90,8 @@ namespace Minisat {
         inline void push(Term term,
                          group_t group = MAINGROUP,
                          color_t color = BACKGROUND)
-        //  { cnf_push_single_node_cut(term, group, color); }
-        { cnf_push_no_cut(term, group, color); }
+        { cnf_push_single_cut(term, group, color); }
+        // { cnf_push_no_cut(term, group, color); }
 
         /**
          * @brief Solve all groups.
@@ -239,20 +239,17 @@ namespace Minisat {
 
         Lit cnf_find_group_lit(group_t group);
         Lit cnf_find_index_lit(int index, bool is_cmpl);
-        void cnf_push_single_node_cut(Term phi, const group_t group,
-                                      const color_t color);
-        Lit cnf_push_single_node_cut_aux(Term phi, const group_t group,
-                                         const color_t color);
-        Lit cnf_write(Term phi, const group_t group, const color_t color);
+
+        // Lit cnf_write(Term phi, const group_t group, const color_t color);
 
         Term itp_build_interpolant(const Colors& a);
         void itp_init_interpolation(const Colors& ga);
 
         status_t sat_solve_groups(const Groups& groups);
 
-        void sat_build_model();
-
+        // CNFization algorithms
         void cnf_push_no_cut(Term phi, const group_t group, const color_t color);
+        void cnf_push_single_cut(Term phi, const group_t group, const color_t color);
     }; // SAT instance
 
 }; // minisat

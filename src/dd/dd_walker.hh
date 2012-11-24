@@ -36,7 +36,7 @@
 typedef enum {
     DD_DEFAULT,
     DD_RETURN,
-    DD_ELSE
+    DD_ELSE,
 } dd_entry_point;
 
 // reserved for walkers
@@ -58,7 +58,11 @@ public:
     virtual const char* what() const throw() =0;
 };
 
-// walker base class
+/* Two kinds of DD walkers are defined: leaf and node walkers,
+   designed to process leaf nodes and internal nodes of given DD
+   respectively. */
+
+// base class (generic walker)
 class DDWalker {
 public:
     DDWalker(CuddMgr& owner);
@@ -67,16 +71,44 @@ public:
     virtual DDWalker& operator() (ADD dd);
 
 protected:
-    dd_walker_stack f_recursion_stack;
-
-    virtual void walk();
+    virtual void walk() =0;
+    virtual void pre_hook() =0;
+    virtual void post_hook() =0;
 
     virtual bool condition(const DdNode *node) =0;
-    virtual bool recursion(const DdNode *node) =0;
     virtual void action   (const DdNode *node) =0;
 
+    /* explicit recursion stack */
+    dd_walker_stack f_recursion_stack;
+
+    /* the CUDD instance */
     CuddMgr& f_owner;
+};
+
+class DDLeafWalker : public DDWalker {
+public:
+    DDLeafWalker(CuddMgr& owner);
+    virtual ~DDLeafWalker();
+
+protected:
+    virtual void walk();
+    virtual void pre_hook();
+    virtual void post_hook();
+
+    /* Holds the value for relevant literals when action is called */
     char *f_data; /* try to limit memory waste for caching */
 };
+
+class DDNodeWalker : public DDWalker {
+public:
+    DDNodeWalker(CuddMgr& owner);
+    virtual ~DDNodeWalker();
+
+protected:
+    virtual void walk();
+    virtual void pre_hook();
+    virtual void post_hook();
+};
+
 
 #endif
