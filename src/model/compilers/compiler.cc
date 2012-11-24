@@ -70,7 +70,7 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
     f_time_stack.push_back(time);
 
     FQExpr key(ctx, body, time);
-    DEBUG << "Compiling " << key << endl;
+    TRACE << "Compiling " << key << endl;
 
     // invoke walker on the body of the expr to be processed
     (*this)(body);
