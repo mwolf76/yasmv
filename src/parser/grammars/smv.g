@@ -986,7 +986,7 @@ fragment ID_FOLLOWING_CHARS
 	;
 
 HEX_LITERAL
-   : '0' ('x'|'X') HEX_DIGIT
+   : '0' ('x'|'X') HEX_DIGIT+
    ;
 
 DECIMAL_LITERAL
