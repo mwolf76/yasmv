@@ -87,7 +87,7 @@ typedef enum {
     PARAMS, // int type decls, module and function params (e.g '()')
 
     /* utils */
-    // SUBSCRIPT, (simiilar to bits but [] instead of ()) - future for arrays
+    SUBSCRIPT,
     RANGE,
 
     COMMA, SET, // reserved for enums

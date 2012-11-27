@@ -191,6 +191,9 @@ public:
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return make_expr(DOT, a, b); }
 
+    inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
+    { return make_expr(SUBSCRIPT, a, b); }
+
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
 
@@ -356,7 +359,7 @@ private:
     inline Expr_ptr __make_expr(Expr_ptr expr) {
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
-#if 0
+#if 1
         if (eh.second) {
             DRIVEL << "Added new expr to pool: '"
                    << pooled_expr << "'" << endl;

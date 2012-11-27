@@ -19,7 +19,7 @@
 grammar smv;
 
 options {
-	k = 2; /* LL(1) grammar with a few exceptions */
+	k = 3;
     memoize = true;
     language = C;
 }
@@ -39,9 +39,6 @@ options {
 #include <model.hh>
 #include <model_mgr.hh>
 
-#define PRP_EXPR 0
-#define LTL_EXPR 1
-#define CTL_EXPR 2
 }
 
 @members {
@@ -99,13 +96,8 @@ cmd returns [Command_ptr res]
  Returns nothing.
 
  * MC
- CHECK CTLSPEC <expr>, model checking of given properties.
- Return witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
- CHECK LTLSPEC <expr>, model checking of given properties.
- Return witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
-
- CHECK INVAR <expr>, model checking of given properties.
+ INVAR <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
  SIMULATE [ INIT | RESUME #trace ] [#steps] [CONSTRAINED constraint1] [GUIDED <#trace>]...
@@ -121,8 +113,6 @@ cmd returns [Command_ptr res]
 
  SHOW TRACES
  TRACE
-
-
 
  PRINT TRACE
 
@@ -156,17 +146,16 @@ cmd returns [Command_ptr res]
 */
 commands returns [Command_ptr res]
     :
-        'SAT' expr=generic_formula[PRP_EXPR]
+        'SAT' expr=toplevel_expression
         { $res = cm.make_sat(expr); }
 
-    /* Property checking commands */
-    |   'CHECK' 'INVAR' expr=generic_formula[PRP_EXPR]
+    |   'ASSERT' expr=toplevel_expression
         { $res = cm.make_check_invspec(expr); }
 
     |   'CLK'
         { $res = cm.make_now(); }
 
-    |   'READ' 'MODEL' fp=filepath
+    |   'MODEL' fp=filepath
         { $res = cm.make_load_model(fp); }
 
     |   'QUIT'
@@ -195,122 +184,6 @@ filepath_fragment returns [const char *res]
         { $res = "/"; }
     ;
 
-binary_ctl_formula returns [Expr_ptr res]
-@init { }
-	:	lhs=unary_ctl_formula
-        { $res = lhs; }
-        (
-           'AU' rhs=unary_ctl_formula
-           { $res = em.make_AU($res, rhs); }
-
-        |
-           'EU' rhs=unary_ctl_formula
-           { $res = em.make_EU($res, rhs); }
-
-        |
-           'AR' rhs=unary_ctl_formula
-           { $res = em.make_AR($res, rhs); }
-
-        |
-           'ER' rhs=unary_ctl_formula
-           { $res = em.make_ER($res, rhs); }
-
-        )*
-	;
-
-unary_ctl_formula returns [Expr_ptr res]
-@init { }
-	:
-       'AG' formula=unary_ctl_formula
-       { $res = em.make_AG(formula); }
-    |
-       'EG' formula=unary_ctl_formula
-       { $res = em.make_EG(formula); }
-    |
-       'AF' formula=unary_ctl_formula
-       { $res = em.make_AF(formula); }
-    |
-       'EF' formula=unary_ctl_formula
-       { $res = em.make_EF(formula); }
-    |
-       'AX' formula=unary_ctl_formula
-       { $res = em.make_AX(formula); }
-    |
-       'EX' formula=unary_ctl_formula
-       { $res = em.make_EX(formula); }
-
-    |   formula=untimed_expression
-       { $res = formula; }
-	;
-
-/* Top-level aliases */
-propositional_formula returns [Expr_ptr res]
-    : fmla = generic_formula[PRP_EXPR]
-      { $res = fmla; }
-    ;
-
-ltl_formula returns [Expr_ptr res]
-    : fmla = generic_formula[LTL_EXPR]
-      { $res = fmla; }
-    ;
-
-ctl_formula returns [Expr_ptr res]
-    : fmla = generic_formula[CTL_EXPR]
-      { $res = fmla; }
-    ;
-
-/** Common entry-point for propositional, ltl and ctl formulae */
-generic_formula [int m] returns [Expr_ptr res]
-scope {
-    int mode;
-}
-	:
-        {
-            // just to make sure we don't mess things up...
-            assert (
-                (m == PRP_EXPR) ||
-                (m == LTL_EXPR) ||
-                (m == CTL_EXPR) );
-
-            $generic_formula::mode = m;
-        }
-
-        { $generic_formula::mode == PRP_EXPR }?=> fmla = untimed_expression
-        { $res = fmla; }
-
-    |   { $generic_formula::mode == LTL_EXPR }?=> fmla = binary_ltl_formula
-        { $res = fmla; }
-
-    |   { $generic_formula::mode == CTL_EXPR }?=> fmla = binary_ctl_formula
-        { $res = fmla; }
-    ;
-
-binary_ltl_formula returns [Expr_ptr res]
-@init { }
-	:	lhs=unary_ltl_formula
-        { $res = lhs; } (
-            'U' rhs=unary_ltl_formula
-           { $res = em.make_U($res, rhs); }
-
-        |   'R' rhs=unary_ltl_formula
-           { $res = em.make_R($res, rhs); } )*
-	;
-
-unary_ltl_formula returns [Expr_ptr res]
-@init { }
-	:	'G' formula=unary_ltl_formula
-       { $res = em.make_G(formula); }
-
-	|	'F' formula=unary_ltl_formula
-       { $res = em.make_F(formula); }
-
-	|	'X' formula=unary_ltl_formula
-       { $res = em.make_X(formula); }
-
-    |   formula=untimed_expression
-       { $res = formula; }
-	;
-
 modules
 scope { IModule_ptr module ; }
 @init { $modules::module = NULL; }
@@ -324,17 +197,6 @@ scope { IModule_ptr module ; }
       formal_params? fsm_isa_decl_clause* module_body
       )*
     ;
-
-// property
-//     : formula=ltl_spec
-//       { $modules::module->add_ltlspec(formula); }
-
-//     | formula=ctl_spec
-//       { $modules::module->add_ctlspec(formula); }
-
-//     | formula=inv_spec
-//       { $modules::module->add_invspec(formula); }
-//     ;
 
 formal_params
 	:	'('
@@ -355,22 +217,12 @@ module_body
 module_decl
     :	/* variables and defines */
         fsm_var_decl
-	|	fsm_ivar_decl
 	|	fsm_define_decl
 
 		/* FSM definition */
 	|	fsm_init_decl
 	|	fsm_trans_decl
-
-// scheduled for removal
-// 	|	fsm_invar_decl
-//  |   fsm_fairn_decl
-//     /* functional FSM */
-// |	assignment_formula
-
-//	|	fsm_frozenvar_decl
-
-	;
+    ;
 
 fsm_isa_decl_clause
 	: 'ISA' id=identifier
@@ -402,56 +254,6 @@ fsm_var_decl_clause
     }
 	;
 
-fsm_ivar_decl
-    : 'IVAR' fsm_ivar_decl_body
-    ;
-
-fsm_ivar_decl_body
-	: fsm_ivar_decl_clause
-        ( ';' fsm_ivar_decl_clause)*
-	;
-
-fsm_ivar_decl_clause
-@init {
-    ExprVector ev;
-}
-    : ids=identifiers[&ev] ':' tp=type_name
-    {
-            ExprVector::iterator expr_iter;
-            assert(NULL != tp);
-            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new InputVar($modules::module->expr(), id, tp);
-                $modules::module->add_localVar(id, var);
-            }
-    }
-    ;
-
-// fsm_frozenvar_decl
-//     : 'FROZENVAR' fsm_frozenvar_decl_body
-//     ;
-
-// fsm_frozenvar_decl_body
-// 	: fsm_frozenvar_decl_clause
-//         ( ';' fsm_frozenvar_decl_clause)*
-// 	;
-
-// fsm_frozenvar_decl_clause
-// @init {
-//     ExprVector ev;
-// }
-//     : ids=identifiers[&ev] ':' tp=type_name
-//     {
-//             ExprVector::iterator expr_iter;
-//             assert(NULL != tp);
-//             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-//                 Expr_ptr id = (*expr_iter);
-//                 IVariable_ptr var = new FrozenVar($modules::module->expr(), id, tp);
-//                 $modules::module->add_localVar(id, var);
-//             }
-//     }
-//     ;
-
 fsm_define_decl
     : 'DEFINE' fsm_define_decl_body
     ;
@@ -462,7 +264,7 @@ fsm_define_decl_body
 	;
 
 fsm_define_decl_clause
-	: id=identifier ':=' body=propositional_formula
+	: id=identifier ':=' body=toplevel_expression
     {
       IDefine_ptr def = new Define($modules::module->expr(), id, body);
       $modules::module->add_localDef(id, def);
@@ -479,23 +281,9 @@ fsm_init_decl_body
 	;
 
 fsm_init_decl_clause
-	: expr=propositional_formula
+	: expr=toplevel_expression
       { $modules::module->add_init(expr); }
 	;
-
-// fsm_invar_decl
-//     : 'INVAR' fsm_invar_decl_body
-//     ;
-
-// fsm_invar_decl_body
-// 	: fsm_invar_decl_clause
-//         (';' fsm_invar_decl_clause)*
-// 	;
-
-// fsm_invar_decl_clause
-// 	: expr=propositional_formula
-//       { $modules::module->add_invar(expr); }
-// 	;
 
 fsm_trans_decl
     : 'TRANS' fsm_trans_decl_body
@@ -507,88 +295,18 @@ fsm_trans_decl_body
 	;
 
 fsm_trans_decl_clause
-	: expr=propositional_formula
+	: expr=toplevel_expression
       { $modules::module->add_trans(expr); }
 	;
 
-// fsm_fairn_decl
-//     : 'FAIRNESS' fsm_fairn_decl_body
-//     ;
-
-// fsm_fairn_decl_body
-// 	: fsm_fairn_decl_clause
-//         (';' fsm_fairn_decl_clause)*
-// 	;
-
-// fsm_fairn_decl_clause
-// 	: expr=propositional_formula
-//       { $modules::module->add_fairness(expr); }
-// 	;
-
-// assignment_formula
-// 	: 'ASSIGN' assignment_body
-// 	;
-
-// assignment_body
-// 	: assignment_clause (
-//             ';' assignment_clause) *
-// 	;
-
-// assignment_clause
-// 	: id=lvalue ':=' body=propositional_formula
-//       {
-//        IDefine_ptr def = new Define($modules::module->expr(), id, body);
-//        $modules::module->add_assign(id, def);
-//       }
-//     ;
-
-// expression entry point. This is the loopback entry point used in
-// the expressions rules but it's important outer rules use the
-// generic_formula entry point defined above.
-untimed_expression returns [Expr_ptr res]
+toplevel_expression returns [Expr_ptr res]
 @init { }
-	: expr=case_expression
-      { $res = expr; }
-
-	| expr=cond_expression
-      { $res = expr; }
-	;
-
-case_expression returns [Expr_ptr res]
-@init { ExprVector_ptr clauses = new ExprVector (); }
-	: 'case' cls=case_clauses 'esac'
-      {
-        for (ExprVector::reverse_iterator eye = cls->rbegin(); eye != cls->rend();
-             eye ++) {
-            if (!res) res = (*eye);
-            else {
-                res = const_cast<Expr_ptr>(em.make_ite((*eye), res));
-            }
-        }
-      }
-	;
-
-case_clauses returns [ExprVector_ptr res]
-@init { res = new ExprVector (); }
-    :
-    (
-      lhs=untimed_expression ':' rhs=untimed_expression ';'
-      {
-       assert(lhs); assert(rhs);
-       $res->push_back(em.make_cond(lhs, rhs));
-      }
-    )+
-    ;
-
-cond_expression returns [Expr_ptr res]
-@init { }
-	: expr=iff_expression
-      { $res = expr; }
-
-    (
-      '?' lhs=untimed_expression ':' rhs=cond_expression
-      { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
-    )?
+	: expr=iff_expression {
+         $res = expr;
+      } (
+            '?' lhs=toplevel_expression ':' rhs=toplevel_expression
+            { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
+      )?
 	;
 
 iff_expression returns [Expr_ptr res]
@@ -741,42 +459,24 @@ unary_expression returns [Expr_ptr res]
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
 
-    // | 'toint' '(' expr=postfix_expression ')'
-    //    { $res = em.make_toint(expr); }
-
-    // | 'bool' '(' expr=postfix_expression ')'
-    //    { $res = em.make_bool(expr); }
-
-    // | 'word1' '(' expr=postfix_expression ')'
-    //    { $res = em.make_word1(expr); }
-
-    // | 'signed' '(' expr=postfix_expression ')'
-    //    { $res = em.make_signed(expr); }
-
-    // | 'unsigned' '(' expr=postfix_expression ')'
-    //    { $res = em.make_unsigned(expr); }
-
-    // | 'count' '(' expr=postfix_expression ')'
-    //    { $res = em.make_count(expr); }
 	;
 
 postfix_expression returns [Expr_ptr res]
 @init { }
-	:   lhs=primary_expression
+	:   lhs=basic_expression
         { $res = lhs; }
 
     (
-    //     '[' rhs=primary_expression ']'
-    //     { $res = em.make_subscript($res, rhs); }
+        '[' rhs=basic_expression ']'
+        { $res = em.make_subscript($res, rhs); }
 
-    // |
-        '.' rhs=primary_expression
+    |   '.' rhs=basic_expression
         { $res = em.make_dot($res, rhs); }
 
     )*
     ;
 
-primary_expression returns [Expr_ptr res]
+basic_expression returns [Expr_ptr res]
 @init { }
 	: id=identifier
       { $res = id; }
@@ -784,18 +484,38 @@ primary_expression returns [Expr_ptr res]
 	| k=constant
       { $res = k; }
 
-	| '(' (
-            { $generic_formula::mode == PRP_EXPR }?=> expr=untimed_expression ')'
-            { $res = expr; }
+	| '(' expr=toplevel_expression ')'
+      { $res = expr; }
 
-          | { $generic_formula::mode == LTL_EXPR }?=> expr=binary_ltl_formula ')'
-            { $res = expr; }
+    | 'case'
+           cls=case_clauses
 
-          | { $generic_formula::mode == CTL_EXPR }?=> expr=binary_ctl_formula ')'
-            { $res = expr; }
+      'esac' {
+           for (ExprVector::reverse_iterator eye = cls->rbegin();
+                eye != cls->rend(); ++ eye) {
+                if (!res) {
+                    res = (*eye)->rhs(); /* default value */
+                }
+                else {
+                    res = const_cast<Expr_ptr>( em.make_ite( (*eye), res));
+                }
+           }
+           delete cls;  // avoid memleaks
+      }
 
-          )
 	;
+
+case_clauses returns [ExprVector_ptr res]
+@init { res = new ExprVector (); }
+    :
+    (
+      lhs=toplevel_expression ':' rhs=toplevel_expression ';'
+      {
+       assert(lhs); assert(rhs);
+       $res->push_back(em.make_cond(lhs, rhs));
+      }
+    )+
+    ;
 
 identifiers [ExprVector* ids]
     :
@@ -817,15 +537,7 @@ constant returns [Expr_ptr res]
     |   k=range_constant // holds int_constants as well
         { $res = k; }
 
-    // |   k=word_constant
-    //     { $res = k; }
     ;
-
-// word_constant returns [Expr_ptr res]
-// @init { }
-//     : WORD_CONSTANT
-//       { $res = em.make_wconst((const char*)($WORD_CONSTANT.text->chars)); }
-//     ;
 
 int_constant returns [Expr_ptr res]
 @init { }
