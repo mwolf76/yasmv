@@ -144,10 +144,18 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
 
                 /* time it, and fetch encoding for enc mgr */
                 FQExpr key(symb->ctx(), symb->expr(), i);
+                DEBUG << key << endl;
+
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
+                if ( NULL == enc ) {
+                    TRACE << symb->ctx()  << "::"
+                          << symb->expr() << " not in COI, skipping..." << endl;
+                    continue;
+                }
 
                 /* possible casts */
                 AlgebraicEncoding_ptr ae;
+                BooleanEncoding_ptr be;
 
                 // ...
                 if (NULL != (ae = dynamic_cast<AlgebraicEncoding_ptr> (enc))) {
@@ -163,17 +171,18 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                         for (DDVector::const_iterator di = begin; di != end; ++ di) {
 
                             ADD bit(*di);
-                            int index = bit.getNode()->index;
+                            int index = Cudd_NodeReadIndex(bit.getNode());
                             int value = (Minisat::toInt(engine.value(index)) == 0);
                             inputs[index] = value;
                         }
                     }
                 } // is algebraic
 
-                else {
-                    // ....
-                }
-
+                else if (NULL != (be = (dynamic_cast<BooleanEncoding_ptr> (enc)))) {
+                    int index = Cudd_NodeReadIndex(be->bit().getNode());
+                    int value = (Minisat::toInt(engine.value(index)) == 0);
+                    inputs[index] = value;
+                } // is_boolean
 
                 /* put final value into time frame container */
                 Expr_ptr value = enc->expr(inputs);
