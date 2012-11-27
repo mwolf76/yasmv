@@ -27,7 +27,7 @@
 #include <enc.hh>
 
 // low-level service for bits allocation
-ADD Encoding::bit()
+ADD Encoding::make_bit()
 {
     ADD res = f_mgr.bit();
 
@@ -41,7 +41,7 @@ ADD Encoding::bit()
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
-    ADD res = bit();
+    ADD res = make_bit();
     ADD two = f_mgr.constant(2);
 
     assert(0 < nbits);
@@ -49,7 +49,7 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
 
     while (i < nbits) {
         res *= two;
-        res += bit();
+        res += make_bit();
 
         ++ i;
     }
@@ -62,12 +62,23 @@ BooleanEncoding::BooleanEncoding()
     : Encoding()
 {
     // single bit encoding
-    f_dv.push_back(bit());
+    f_dv.push_back(make_bit());
 }
 
 Expr_ptr BooleanEncoding::expr(int *assignment)
 {
-    assert(0);
+    ExprMgr& em = f_mgr.em();
+    ADD eval = f_dv[0].Eval( assignment );
+    assert (cuddIsConstant(eval.getRegularNode()));
+
+    value_t res = Cudd_V(eval.getNode());
+    return res == 0 ? em.make_false() : em.make_true();
+}
+
+ADD BooleanEncoding::bit()
+{
+    assert( 1 == f_dv.size() );
+    return f_dv[0];
 }
 
 MonolithicEncoding::MonolithicEncoding()

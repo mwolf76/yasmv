@@ -73,7 +73,7 @@ protected:
     DDVector f_bits; // all bits
 
     // low level services
-    ADD bit();
+    ADD make_bit();
     ADD make_monolithic_encoding(unsigned nbits);
 };
 
@@ -84,6 +84,8 @@ friend class EncodingMgr; // expose ctors only to mgr
 public:
     // here assignment *must* have size 1
     Expr_ptr expr(int* assignment);
+
+    ADD bit();
 
 protected:
     virtual ~BooleanEncoding()
