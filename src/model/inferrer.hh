@@ -50,9 +50,13 @@ public:
         // cache miss, fallback to walker
         if (eye == f_map.end()) {
             res = process(fqexpr.ctx(), fqexpr.expr());
+            DRIVEL << "Type [" << fqexpr << "] is "
+                   << res << endl;
         }
         else {
             res = (*eye).second;
+            DRIVEL << "[CACHED] Type [" << fqexpr << "] is "
+                   << res << endl;
         }
 
         assert(NULL != res);
@@ -65,6 +69,8 @@ public:
 protected:
     void pre_hook();
     void post_hook();
+
+    void debug_hook();
 
     // walker interface
     bool walk_F_preorder(const Expr_ptr expr);
@@ -216,7 +222,9 @@ private:
     void walk_binary_bitwise_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
+
     void walk_ternary_ite_postorder(const Expr_ptr expr);
+    void walk_ternary_cond_postorder(const Expr_ptr expr);
 
     // useful for errors
     Expr_ptr f_boolean;

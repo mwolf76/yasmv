@@ -88,6 +88,21 @@ void Inferrer::pre_hook()
 void Inferrer::post_hook()
 {}
 
+void Inferrer::debug_hook()
+{
+#if 1
+    activation_record curr = f_recursion_stack.top();
+    DEBUG << "inferrer debug hook, expr = " << curr.expr << endl;
+
+    DEBUG << "Type Stack" << endl;
+    for (TypeStack::reverse_iterator i = f_type_stack.rbegin();
+         i != f_type_stack.rend(); ++ i) {
+        DEBUG << *i << endl;
+    }
+    DEBUG << "--------------------" << endl;
+#endif
+}
+
 bool Inferrer::walk_F_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_F_postorder(const Expr_ptr expr)
@@ -342,7 +357,7 @@ bool Inferrer::walk_cond_preorder(const Expr_ptr expr)
 bool Inferrer::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_cond_postorder(const Expr_ptr expr)
-{}
+{ walk_ternary_cond_postorder(expr); }
 
 bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -774,8 +789,8 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
 }
 
 
-// fun: boolean x T x T -> T
-void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
+// fun:  boolean x T -> T
+void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -783,14 +798,30 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
 
     // condition is always boolean
-    const Type_ptr cond = f_type_stack.back(); f_type_stack.pop_back();
-    if (!tm.is_boolean(cond)) {
-        throw BadType(cond->repr(), f_boolean, expr);
+    if (!tm.is_boolean(lhs)) {
+        throw BadType(lhs->repr(), f_boolean, expr);
     }
+
+    f_type_stack.push_back(rhs);
+}
+
+// fun: (boolean ? T) x T -> T
+void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
 
     // boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
         f_type_stack.push_back(tm.find_boolean());
+        return;
+    }
+
+    // both ops integers -> integer
+    if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
+        f_type_stack.push_back(tm.find_integer());
         return;
     }
 
