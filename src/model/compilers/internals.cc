@@ -243,7 +243,7 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 
 void Compiler::debug_hook()
 {
-#if 0
+#if 1
     activation_record curr = f_recursion_stack.top();
     DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
 
@@ -429,19 +429,76 @@ bool Compiler::is_unary_algebraic(const Expr_ptr expr)
     return false;
 }
 
-/* this is cool, due to stack organization is perfectly fine to use
-   binary variants :-) */
 bool Compiler::is_ite_boolean(const Expr_ptr expr)
-{ return is_binary_boolean(expr); }
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* ITE */
+    if (em.is_ite(expr)) {
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        return (tm.is_boolean(f_owner.type(lhs)) &&
+                tm.is_boolean(f_owner.type(rhs)));
+    }
+
+    return false;
+}
 
 bool Compiler::is_ite_integer(const Expr_ptr expr)
-{ return is_binary_integer(expr); }
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* ITE (bw) */
+    if (em.is_ite(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        return (tm.is_integer(f_owner.type(lhs)) &&
+                tm.is_integer(f_owner.type(rhs)));
+    }
+
+    return false;
+}
 
 bool Compiler::is_ite_enumerative(const Expr_ptr expr)
-{ return is_binary_enumerative(expr); }
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* ITE (bw) */
+    if (em.is_ite(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        return (tm.is_enum(f_owner.type(lhs)) &&
+                tm.is_enum(f_owner.type(rhs)));
+    }
+
+    return false;
+
+}
 
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
-{ return is_binary_algebraic(expr); }
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    if (em.is_ite(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+
+        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
+                  tm.is_integer(f_owner.type(lhs))) &&
+
+                 (tm.is_algebraic(f_owner.type(rhs)) ||
+                  tm.is_integer(f_owner.type(rhs))));
+    }
+
+    return false;
+}
 
 static inline value_t pow2(unsigned exp)
 {
