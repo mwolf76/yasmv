@@ -98,6 +98,9 @@ AC_CHECK_HEADER(malloc.h,
 # antlr checks
 AC_ANTLR
 
+# zlib check
+AX_CHECK_ZLIB
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_HEADER_STDBOOL
@@ -117,7 +120,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
 		strrchr strstr strtol, random srandom getpid \
 		mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
-
 AM_CPPFLAGS="$BOOST_CPPFLAGS"
 AC_SUBST(AM_CPPFLAGS)
 
