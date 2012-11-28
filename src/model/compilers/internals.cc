@@ -95,7 +95,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     if (rhs_width < res) {
         if (! rhs_width) { // integer, conversion required
             DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
-            algebraic_from_integer(res);
+            algebraic_from_integer_const(res);
         }
         else { // just padding required
             bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
@@ -118,7 +118,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
 
         if (! lhs_width) { // integer, conversion required
             DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
-            algebraic_from_integer(res);
+            algebraic_from_integer_const(res);
         }
         else { // just padding required
             bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
@@ -150,8 +150,8 @@ static inline value_t pow(unsigned base, unsigned exp)
     return res;
 }
 
-// due to new type system, integer can be only constant (good)
-void Compiler::algebraic_from_integer(unsigned width)
+/* basic case: integer constant */
+void Compiler::algebraic_from_integer_const(unsigned width)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
     assert (f_enc.is_constant(top));
@@ -243,7 +243,7 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 
 void Compiler::debug_hook()
 {
-#if 1
+#if 0
     activation_record curr = f_recursion_stack.top();
     DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
 

@@ -78,8 +78,6 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     DRIVEL << "Type for " << ctx << "::" << body
            << " is " << res << endl;
 
-    /* memoize and return */
-    f_map[ FQExpr(ctx, body) ] = res;
     return res;
 }
 
@@ -90,7 +88,7 @@ void Inferrer::post_hook()
 
 void Inferrer::debug_hook()
 {
-#if 1
+#if 0
     activation_record curr = f_recursion_stack.top();
     DEBUG << "inferrer debug hook, expr = " << curr.expr << endl;
 
@@ -194,13 +192,6 @@ bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_fsm_postorder(expr); }
-
-// bool Inferrer::walk_at_preorder(const Expr_ptr expr)
-// { return cache_miss(expr); }
-// bool Inferrer::walk_at_inorder(const Expr_ptr expr)
-// { return true; }
-// void Inferrer::walk_at_postorder(const Expr_ptr expr)
-// { walk_binary_fsm_postorder(expr); }
 
 bool Inferrer::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -468,7 +459,8 @@ void Inferrer::walk_unary_temporal_postorder(const Expr_ptr expr)
         throw BadType(top->repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(tm.find_boolean());
+    // f_type_stack.push_back(tm.find_boolean());
+    memoize_canonical_result( expr, tm.find_boolean());
 }
 
 // fun: temporal x temporal -> temporal
@@ -488,7 +480,8 @@ void Inferrer::walk_binary_temporal_postorder(const Expr_ptr expr)
             throw BadType(top->repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(tm.find_boolean());
+    // f_type_stack.push_back(tm.find_boolean());
+    memoize_canonical_result( expr, tm.find_boolean());
 }
 
 // fun: T -> T
@@ -507,12 +500,13 @@ void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
     }
 
     if (tm.is_integer(top)) {
-        f_type_stack.push_back(tm.find_integer());
+        // f_type_stack.push_back(tm.find_integer());
+        memoize_canonical_result( expr, tm.find_integer());
         return;
     }
 
     if (tm.is_algebraic(top)) {
-        f_type_stack.push_back(top);
+        memoize_canonical_result( expr, top);
         return;
     }
 
@@ -529,7 +523,7 @@ void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
         throw BadType(top->repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(tm.find_boolean());
+    memoize_canonical_result( expr, tm.find_boolean());
 }
 
 // fun: arithm, arithm -> arithm
@@ -549,7 +543,7 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 
     // both ops integers -> integer
     if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
+        memoize_canonical_result(expr, tm.find_integer());
         return;
     }
 
@@ -581,9 +575,9 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
                  tm.as_algebraic(lhs)->is_signed() );
     }
 
-    f_type_stack.push_back(is_signed
-                           ? tm.find_signed(width)
-                           : tm.find_unsigned(width));
+    memoize_canonical_result( expr, (is_signed
+                                     ? tm.find_signed(width)
+                                     : tm.find_unsigned(width)));
 }
 
 // fun: logical x logical -> logical
@@ -604,7 +598,7 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
     // boolean
     assert(tm.is_boolean(lhs) && tm.is_boolean(rhs));
 
-    f_type_stack.push_back(tm.find_boolean());
+    memoize_canonical_result(expr, tm.find_boolean());
 }
 
 void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
@@ -627,13 +621,13 @@ void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
 
     // both ops boolean -> boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
-        f_type_stack.push_back(tm.find_boolean());
+        memoize_canonical_result( expr, tm.find_boolean());
         return;
     }
 
     // both ops integers -> integer
     if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
+        memoize_canonical_result( expr, tm.find_integer());
         return;
     }
 
@@ -665,9 +659,9 @@ void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
                  tm.as_algebraic(lhs)->is_signed() );
     }
 
-    f_type_stack.push_back(is_signed
-                           ? tm.find_signed(width)
-                           : tm.find_unsigned(width));
+    memoize_canonical_result(expr, (is_signed
+                                    ? tm.find_signed(width)
+                                    : tm.find_unsigned(width)));
 }
 
 
@@ -692,13 +686,13 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 
     // both ops boolean -> boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
-        f_type_stack.push_back(tm.find_boolean());
+        memoize_canonical_result( expr, tm.find_boolean());
         return;
     }
 
     // both ops integers -> integer
     if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
+        memoize_canonical_result( expr, tm.find_integer());
         return;
     }
 
@@ -730,9 +724,9 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
                  tm.as_algebraic(lhs)->is_signed() );
     }
 
-    f_type_stack.push_back(is_signed
-                           ? tm.find_signed(width)
-                           : tm.find_unsigned(width));
+    memoize_canonical_result( expr, (is_signed
+                                     ? tm.find_signed(width)
+                                     : tm.find_unsigned(width)));
 }
 
 // fun: arithmetical x arithmetical -> boolean
@@ -750,7 +744,7 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
         throw BadType(lhs->repr(), f_integer, expr);
     }
 
-    f_type_stack.push_back(tm.find_boolean());
+    memoize_canonical_result( expr, tm.find_boolean());
 }
 
 // fun: A/B x A/B -> B
@@ -775,13 +769,13 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
     // algebraic or integer
     if ((tm.is_integer(lhs) || tm.is_algebraic(lhs)) &&
         (tm.is_integer(rhs) || tm.is_algebraic(rhs))) {
-        f_type_stack.push_back(tm.find_boolean());
+        memoize_canonical_result( expr, tm.find_boolean());
         return;
     }
 
     // boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
-        f_type_stack.push_back(tm.find_boolean());
+        memoize_canonical_result( expr, tm.find_boolean());
         return;
     }
 
@@ -802,7 +796,7 @@ void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
         throw BadType(lhs->repr(), f_boolean, expr);
     }
 
-    f_type_stack.push_back(rhs);
+    memoize_canonical_result(expr, rhs);
 }
 
 // fun: (boolean ? T) x T -> T
@@ -813,19 +807,19 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     const Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
 
+    unsigned width =0;
+    bool is_signed;
+
     // boolean
     if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
-        f_type_stack.push_back(tm.find_boolean());
+        memoize_canonical_result( expr, tm.find_boolean());
         return;
     }
 
-    // both ops integers -> integer
-    if (tm.is_integer(lhs) && (tm.is_integer(rhs))) {
-        f_type_stack.push_back(tm.find_integer());
-        return;
-    }
-
-    // one op algebraic, possibly both.
+    // ITEs are forced to be algebraic, even when both children are
+    // integers. Actual type is first customarily inferred from
+    // children. If no algebraic is found among children, searches
+    // backwards in the type stack.
     unsigned rhs_width = tm.is_algebraic(rhs)
         ? tm.as_algebraic(rhs)->width()
         : 0;
@@ -841,19 +835,106 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
         : false;
 
     /* max */
-    unsigned width = rhs_width < lhs_width
+    width = rhs_width < lhs_width
         ? lhs_width
         : rhs_width
         ;
-    bool is_signed = rhs_is_signed || lhs_is_signed;
 
-    // if both are algebraic they have to agree on signedness too.
-    if ((0 < rhs_width) && (0 < lhs_width)) {
-        assert ( tm.as_algebraic(rhs)->is_signed() ==
-                 tm.as_algebraic(lhs)->is_signed() );
+    if (0 != width) {
+        is_signed = rhs_is_signed || lhs_is_signed;
+
+        // if both are algebraic they have to agree on signedness too.
+        if ((0 < rhs_width) && (0 < lhs_width)) {
+            assert ( tm.as_algebraic(rhs)->is_signed() ==
+                     tm.as_algebraic(lhs)->is_signed() );
+        }
     }
 
-    f_type_stack.push_back(is_signed
-                           ? tm.find_signed(width)
-                           : tm.find_unsigned(width));
+    /* fallback case: inspect type stack backwards */
+    else {
+        /* map canonicity w.r.t. compiler rewrites should help here */
+        assert (0 < f_type_stack.size());
+
+        TypeStack::reverse_iterator ri = f_type_stack.rbegin();
+        do {
+            Type_ptr type = (*ri);
+            if (tm.is_algebraic(type)) {
+
+                width = tm.as_algebraic(type)->width();
+                is_signed = tm.as_algebraic(type)->is_signed();
+
+                break;
+            }
+
+            ++ ri;
+        } while ( ri != f_type_stack.rend() );
+    }
+
+    assert (0 < width);
+    memoize_canonical_result(expr, is_signed
+                             ? tm.find_signed(width)
+                             : tm.find_unsigned(width));
+}
+
+/* memoize (canonical) and return */
+void Inferrer::memoize_canonical_result (Expr_ptr expr, Type_ptr type)
+{
+    f_type_stack.push_back(type);
+    f_map[ FQExpr(f_ctx_stack.back(), find_canonical_expr(expr)) ] = type;
+}
+
+Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+
+    /* time is not relevant here */
+    while (em.is_next(expr)) {
+        expr = expr->lhs();
+    }
+
+    if (em.is_binary_relational(expr)) {
+        return em.make_lt(expr->lhs(), expr->rhs());
+    }
+    else if (em.is_binary_arithmetical(expr)) {
+        return em.make_add(expr->lhs(), expr->rhs());
+    }
+    else if (em.is_binary_logical(expr)) {
+        return em.make_and(expr->lhs(), expr->rhs());
+    }
+
+    /* no rewrites */
+    else if (em.is_unary_arithmetical(expr) ||
+             em.is_unary_logical(expr) ||
+             em.is_ite(expr) ||
+             em.is_cond(expr) ||
+             em.is_identifier(expr) ||
+             em.is_numeric(expr)) {
+        return expr;
+    }
+
+    DEBUG << expr << endl;
+    assert ( false ); // unreachable
+}
+
+Type_ptr Inferrer::type(FQExpr& fqexpr)
+{
+    /* to avoid a number of cache misses due to compiler rewrites,
+       we squeeze types in equivalence classes: Relationals -> lhs
+       '<' rhs, Algebraic -> lhs '+' rhs */
+    FQExpr key( fqexpr.ctx(),
+                find_canonical_expr( fqexpr.expr()));
+
+    TypeReg::const_iterator eye = f_map.find(key);
+    Type_ptr res = NULL;
+
+    // cache miss, fallback to walker
+    if (eye == f_map.end()) {
+        res = process(fqexpr.ctx(), fqexpr.expr());
+    }
+    else {
+        res = (*eye).second;
+    }
+
+    assert(NULL != res);
+    return res;
 }

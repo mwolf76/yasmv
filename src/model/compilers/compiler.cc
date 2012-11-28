@@ -637,15 +637,7 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     }
 
     else if (is_ite_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(c.Ite(lhs, rhs));
-
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.pop_back(); // consume all, push integer
-        f_type_stack.push_back(tm.find_integer());
+        integer_ite(expr);
         return;
     }
 
@@ -675,7 +667,7 @@ bool Compiler::walk_cond_preorder(const Expr_ptr expr)
 bool Compiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cond_postorder(const Expr_ptr expr)
-{ /* nop, ite will do all the work */ }
+{ /* nop */ }
 
 bool Compiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

@@ -474,6 +474,31 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
+/* pre-processing for algebraic_ite */
+void Compiler::integer_ite(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    FQExpr key(expr);
+    const Type_ptr type = f_owner.type(key); /* it's a kind of magic */
+    unsigned width = tm.as_algebraic(type)->width();
+
+    const ADD tmp = f_add_stack.back(); f_add_stack.pop_back();
+    algebraic_from_integer_const(width); // lhs
+
+    f_add_stack.push_back(tmp);
+    algebraic_from_integer_const(width);  // rhs
+
+    /* fix type stack */
+    f_type_stack.pop_back();
+    f_type_stack.pop_back();
+
+    f_type_stack.push_back( tm.find_unsigned( width ));
+    f_type_stack.push_back( tm.find_unsigned( width ));
+
+    algebraic_ite(expr);
+}
+
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
     assert( is_ite_algebraic(expr) );

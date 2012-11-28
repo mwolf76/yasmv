@@ -215,10 +215,13 @@ protected:
     void algebraic_ge(const Expr_ptr expr);
     void algebraic_lt(const Expr_ptr expr);
     void algebraic_le(const Expr_ptr expr);
+
+    void integer_ite(const Expr_ptr expr); /* preprocessing */
     void algebraic_ite(const Expr_ptr expr);
 
     /* -- other services ---------------------------------------------------- */
-    void algebraic_from_integer(unsigned width);
+    void algebraic_from_integer_const(unsigned width);
+
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
     unsigned algebrize_operands(bool is_ite = false);

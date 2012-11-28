@@ -41,27 +41,8 @@ public:
     Inferrer(ModelMgr& owner);
     ~Inferrer();
 
-    /** @brief Returns Type object for given FQExpr (memoized) */
-    const Type_ptr type(FQExpr& fqexpr)
-    {
-        TypeReg::const_iterator eye = f_map.find(fqexpr);
-        Type_ptr res = NULL;
-
-        // cache miss, fallback to walker
-        if (eye == f_map.end()) {
-            res = process(fqexpr.ctx(), fqexpr.expr());
-            DRIVEL << "Type [" << fqexpr << "] is "
-                   << res << endl;
-        }
-        else {
-            res = (*eye).second;
-            DRIVEL << "[CACHED] Type [" << fqexpr << "] is "
-                   << res << endl;
-        }
-
-        assert(NULL != res);
-        return res;
-    }
+    /** @brief Returns Type object for given FQExpr (memoized). */
+    Type_ptr type(FQExpr& fqexpr);
 
     // walker toplevel
     Type_ptr process(Expr_ptr ctx, Expr_ptr body);
@@ -225,6 +206,10 @@ private:
 
     void walk_ternary_ite_postorder(const Expr_ptr expr);
     void walk_ternary_cond_postorder(const Expr_ptr expr);
+
+    // useful for better caching
+    Expr_ptr find_canonical_expr(Expr_ptr expr);
+    void memoize_canonical_result(Expr_ptr expr, Type_ptr type);
 
     // useful for errors
     Expr_ptr f_boolean;
