@@ -267,6 +267,11 @@ public:
         return expr->f_symb == IDENT;
     }
 
+    inline bool is_next(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == NEXT;
+    }
+
     inline bool is_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
@@ -280,6 +285,20 @@ public:
         ExprType symb = expr->f_symb;
 
         return (NOT == symb);
+    }
+
+    inline bool is_ite(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (ITE == symb);
+    }
+
+    inline bool is_cond(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (COND == symb);
     }
 
     inline bool is_binary_logical(const Expr_ptr expr) const {
