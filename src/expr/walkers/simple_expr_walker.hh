@@ -111,14 +111,6 @@ public:
     virtual bool walk_rshift_inorder(const Expr_ptr expr) =0;
     virtual void walk_rshift_postorder(const Expr_ptr expr) =0;
 
-    // virtual bool walk_lrotate_preorder(const Expr_ptr expr) =0;
-    // virtual bool walk_lrotate_inorder(const Expr_ptr expr) =0;
-    // virtual void walk_lrotate_postorder(const Expr_ptr expr) =0;
-
-    // virtual bool walk_rrotate_preorder(const Expr_ptr expr) =0;
-    // virtual bool walk_rrotate_inorder(const Expr_ptr expr) =0;
-    // virtual void walk_rrotate_postorder(const Expr_ptr expr) =0;
-
     virtual bool walk_eq_preorder(const Expr_ptr expr) =0;
     virtual bool walk_eq_inorder(const Expr_ptr expr) =0;
     virtual void walk_eq_postorder(const Expr_ptr expr) =0;
