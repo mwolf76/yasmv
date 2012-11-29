@@ -18,8 +18,26 @@ BOOST_AUTO_TEST_CASE(grammar)
 
     Expr_ptr x = em.make_identifier(a_x);
     Expr_ptr y = em.make_identifier(a_y);
+    BOOST_CHECK ( x != y );
 
-    // primary makers
+    // test identifiers canonicity
+    BOOST_CHECK( x == em.make_identifier(a_x));
+    BOOST_CHECK( y == em.make_identifier(a_y));
+
+    // test basic exprs
+
+    {
+        Expr_ptr phi = em.make_neg(x);
+        Expr_ptr psi = parseString("- x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_not(x);
+        Expr_ptr psi = parseString("! x");
+        BOOST_CHECK (phi == psi);
+    }
+
     {
         Expr_ptr phi = em.make_add(x, y);
         Expr_ptr psi = parseString("x + y");
@@ -57,6 +75,30 @@ BOOST_AUTO_TEST_CASE(grammar)
     }
 
     {
+        Expr_ptr phi = em.make_xor(x, y);
+        Expr_ptr psi = parseString("x xor y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_xnor(x, y);
+        Expr_ptr psi = parseString("x xnor y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_implies(x, y);
+        Expr_ptr psi = parseString("x -> y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_iff(x, y);
+        Expr_ptr psi = parseString("x <-> y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
         Expr_ptr phi = em.make_lshift(x, y);
         Expr_ptr psi = parseString("x << y");
         BOOST_CHECK (phi == psi);
@@ -89,6 +131,18 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_gt(x, y);
         Expr_ptr psi = parseString("x > y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_iconst(42));
+        Expr_ptr psi = parseString("x ? y : 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_iconst(42));
+        Expr_ptr psi = parseString("x ? y : 42");
         BOOST_CHECK (phi == psi);
     }
 
