@@ -23,9 +23,75 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_add(x, y);
         Expr_ptr psi = parseString("x + y");
-
         BOOST_CHECK (phi == psi);
     }
+
+    {
+        Expr_ptr phi = em.make_mul(x, y);
+        Expr_ptr psi = parseString("x * y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_sub(x, y);
+        Expr_ptr psi = parseString("x - y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_div(x, y);
+        Expr_ptr psi = parseString("x / y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_and(x, y);
+        Expr_ptr psi = parseString("x & y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_or(x, y);
+        Expr_ptr psi = parseString("x | y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_lshift(x, y);
+        Expr_ptr psi = parseString("x << y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_rshift(x, y);
+        Expr_ptr psi = parseString("x >> y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_le(x, y);
+        Expr_ptr psi = parseString("x <= y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_lt(x, y);
+        Expr_ptr psi = parseString("x < y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_ge(x, y);
+        Expr_ptr psi = parseString("x >= y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_gt(x, y);
+        Expr_ptr psi = parseString("x > y");
+        BOOST_CHECK (phi == psi);
+    }
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
