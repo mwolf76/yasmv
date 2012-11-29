@@ -199,7 +199,6 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_and(em.make_eq( x, em.make_iconst(0)),
                                    em.make_eq( y, em.make_iconst(1)));
-
         Expr_ptr psi = parseString("x = 0 & y = 1");
         BOOST_CHECK (phi == psi);
     }
@@ -207,7 +206,6 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_or(em.make_eq( x, em.make_iconst(0)),
                                   em.make_eq( y, em.make_iconst(1)));
-
         Expr_ptr psi = parseString("x = 0 | y = 1");
         BOOST_CHECK (phi == psi);
     }
@@ -216,7 +214,6 @@ BOOST_AUTO_TEST_CASE(grammar)
         Expr_ptr phi = em.make_implies(em.make_eq( x, em.make_iconst(0)),
                                        em.make_eq( em.make_next(x),
                                                    em.make_iconst(1)));
-
         Expr_ptr psi = parseString("x = 0 -> next(x) = 1");
         BOOST_CHECK (phi == psi);
     }
@@ -224,11 +221,9 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_iff(em.make_eq( x, em.make_iconst(0)),
                                    em.make_eq( y, em.make_iconst(1)));
-
         Expr_ptr psi = parseString("x = 0 <-> y = 1");
         BOOST_CHECK (phi == psi);
     }
-
 
     {
         Expr_ptr phi = em.make_gt(x, em.make_lshift(y,
@@ -256,6 +251,19 @@ BOOST_AUTO_TEST_CASE(grammar)
         Expr_ptr psi = parseString("next(x + y)");
         BOOST_CHECK (phi == psi);
     }
+
+    {
+        Expr_ptr phi = em.make_implies( em.make_and( em.make_eq(x, em.make_iconst(0)),
+                                                     em.make_eq(y, em.make_iconst(0))),
+                                        em.make_or( em.make_ne(em.make_next(x),
+                                                               em.make_iconst(0)),
+                                                    em.make_ne(em.make_next(y),
+                                                               em.make_iconst(0))));
+
+        Expr_ptr psi = parseString("x = 0 & y = 0 -> next(x) != 0 | next(y) != 0");
+        BOOST_CHECK (phi == psi);
+    }
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
