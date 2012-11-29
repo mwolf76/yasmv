@@ -27,6 +27,12 @@ BOOST_AUTO_TEST_CASE(grammar)
     // test basic exprs
 
     {
+        Expr_ptr phi = em.make_next(x);
+        Expr_ptr psi = parseString("next(x)");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
         Expr_ptr phi = em.make_neg(x);
         Expr_ptr psi = parseString("- x");
         BOOST_CHECK (phi == psi);
@@ -113,6 +119,18 @@ BOOST_AUTO_TEST_CASE(grammar)
     {
         Expr_ptr phi = em.make_le(x, y);
         Expr_ptr psi = parseString("x <= y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_eq(x, y);
+        Expr_ptr psi = parseString("x = y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_ne(x, y);
+        Expr_ptr psi = parseString("x != y");
         BOOST_CHECK (phi == psi);
     }
 
