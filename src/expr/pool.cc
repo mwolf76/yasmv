@@ -78,7 +78,8 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
              && x.u.f_value == y.u.f_value) ||
 
             /* ...or share the same subtrees */
-            (x.u.f_lhs == y.u.f_lhs && y.u.f_rhs == y.u.f_rhs));
+            (x.u.f_lhs == y.u.f_lhs &&
+             x.u.f_rhs == y.u.f_rhs));
 }
 
 long AtomHash::operator() (const Atom& k) const
