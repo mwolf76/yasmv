@@ -480,14 +480,14 @@ void Compiler::integer_ite(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     FQExpr key(expr);
-    const Type_ptr type = f_owner.type(key); /* it's a kind of magic */
+    const Type_ptr type = f_owner.type(key);
     unsigned width = tm.as_algebraic(type)->width();
 
     const ADD tmp = f_add_stack.back(); f_add_stack.pop_back();
-    algebraic_from_integer_const(width); // lhs
+    algebraic_from_integer_const(width); // rhs
 
     f_add_stack.push_back(tmp);
-    algebraic_from_integer_const(width);  // rhs
+    algebraic_from_integer_const(width);  // lhs
 
     /* fix type stack */
     f_type_stack.pop_back();
