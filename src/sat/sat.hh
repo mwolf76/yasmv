@@ -87,11 +87,9 @@ namespace Minisat {
          * @brief add a formula with a given group and color to the
          * SAT instance.
          */
-        inline void push(Term term,
-                         group_t group = MAINGROUP,
-                         color_t color = BACKGROUND)
-        { cnf_push_single_cut(term, group, color); }
-        // { cnf_push_no_cut(term, group, color); }
+        void push(Term term,
+                  group_t group = MAINGROUP,
+                  color_t color = BACKGROUND);
 
         /**
          * @brief Solve all groups.

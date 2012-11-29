@@ -33,15 +33,78 @@ namespace Minisat {
         CNFBuilderSingleCut(CuddMgr& mgr, SAT& sat)
             : DDNodeWalker(mgr)
             , f_sat(sat)
+            , f_topset(false)
         {}
 
         ~CNFBuilderSingleCut()
         {}
 
+
         bool condition(const DdNode *node)
         {
             /* not visited */
             return (f_seen.find(node) == f_seen.end());
+        }
+
+        void post_hook()
+        {
+            // FIXME...
+            group_t group = MAINGROUP;
+            color_t color = BACKGROUND;
+
+            Lit gl = f_sat.cnf_find_group_lit(group);
+
+            /* build and push clause toplevel */
+            vec<Lit> ps;
+
+            ps.push(gl);
+
+            assert ( f_topset );
+            ps.push( f_toplevel );
+
+            DRIVEL << ps << endl;
+            f_sat.f_solver.addClause_(ps, color);
+        }
+
+        /* internal service for action */
+        void push_clause(color_t color, Lit vl,
+                         const DdNode* F, bool fpol,
+                         const DdNode* K, bool kpol)
+        {
+            assert(! Cudd_IsConstant(Cudd_Regular(F)));
+            bool false_konst = false; /* include k in the clause? */
+
+            if (Cudd_IsConstant(Cudd_Regular(K))) {
+                value_t value = Cudd_V(K);
+                assert(0 == value || 1 == value);
+
+                /* True const? clause is trivially satisfied, skip it. */
+                if ((0 == value) && kpol ||
+                    (0 != value) && (! kpol))
+                    return;
+
+                false_konst = true;
+            }
+
+            /* build and push clause */
+            vec<Lit> ps;
+            ps.push(vl);
+
+            // memoize toplevel literal
+            if (! f_topset) {
+                f_topset = true;
+                f_toplevel = f_sat.cnf_find_index_lit(Cudd_NodeReadIndex(const_cast <DdNode*>(F)),
+                                                      false);
+            }
+
+            ps.push(f_sat.cnf_find_index_lit(Cudd_NodeReadIndex(const_cast <DdNode*>(F)),
+                                             fpol));
+            if (! false_konst) {
+                ps.push(f_sat.cnf_find_index_lit(Cudd_NodeReadIndex(const_cast <DdNode*>(K)), kpol));
+            }
+
+            DRIVEL << ps << endl;
+            f_sat.f_solver.addClause_(ps, color);
         }
 
         void action(const DdNode *node)
@@ -52,6 +115,8 @@ namespace Minisat {
             // FIXME...
             group_t group = MAINGROUP;
             color_t color = BACKGROUND;
+
+            Lit gl = f_sat.cnf_find_group_lit(group);
 
             DdNode *N, *Nv, *Nnv;
             N = Cudd_Regular(node);
@@ -65,63 +130,31 @@ namespace Minisat {
                 Nnv = cuddE(N);
             }
 
-            Var v = f_sat.cnf_new_cnf_var();
-            int f = node->index;
-            int t = Nv->index;
-            int e = Nnv->index;
+            // if (! Cudd_IsConstant(Cudd_Regular(Nv)) ||
+            //     ! Cudd_IsConstant(Cudd_Regular(Nnv))) {
+            {
+                Var v = f_sat.cnf_new_cnf_var();
 
-            { // group -> !f, v, e
-                vec<Lit> ps;
+                // group -> v, !f, e
+                push_clause(color, mkLit( v, false), node, true, Nnv, false);
 
-                ps.push(f_sat.cnf_find_group_lit(group));
-                ps.push(f_sat.cnf_find_index_lit(f, true));
-                ps.push(mkLit(v, false));
-                ps.push(f_sat.cnf_find_index_lit(e, false));
+                // group -> v, f, !e
+                push_clause(color, mkLit( v, false), node, false, Nnv, true);
 
-                DRIVEL << ps << endl;
-                f_sat.f_solver.addClause_(ps, color);
-             }
+                // group -> !v, !f, t
+                push_clause(color, mkLit( v, true), node, true, Nv, false);
 
-            { // group -> f, v, !e
-                vec<Lit> ps;
-
-                ps.push(f_sat.cnf_find_group_lit(group));
-                ps.push(f_sat.cnf_find_index_lit(f, false));
-                ps.push(mkLit(v, false));
-                ps.push(f_sat.cnf_find_index_lit(e, true));
-
-                DRIVEL << ps << endl;
-                f_sat.f_solver.addClause_(ps, color);
-            }
-
-            { // group -> !f, !v, t
-                vec<Lit> ps;
-
-                ps.push(f_sat.cnf_find_group_lit(group));
-                ps.push(f_sat.cnf_find_index_lit(f, true));
-                ps.push(mkLit(v, true));
-                ps.push(f_sat.cnf_find_index_lit(t, false));
-
-                DRIVEL << ps << endl;
-                f_sat.f_solver.addClause_(ps, color);
-            }
-
-            { // group -> f, !v, !t
-                vec<Lit> ps;
-
-                ps.push(f_sat.cnf_find_group_lit(group));
-                ps.push(f_sat.cnf_find_index_lit(f, false));
-                ps.push(mkLit(v, true));
-                ps.push(f_sat.cnf_find_index_lit(t, true));
-
-                DRIVEL << ps << endl;
-                f_sat.f_solver.addClause_(ps, color);
+                // group -> !v, f, !t
+                push_clause(color, mkLit( v, true), node, false, Nv, true);
             }
         }
 
     private:
         SAT& f_sat;
         unordered_set<const DdNode *> f_seen;
+
+        bool f_topset;
+        Lit f_toplevel;
     };
 
     class CNFBuilderNoCut : public DDLeafWalker {
@@ -171,8 +204,9 @@ namespace Minisat {
                     // f_sat.cnf_find_index_lit(i, false);
                 }
             }
-
+#if 0
             DRIVEL << ps << endl;
+#endif
             f_sat.f_solver.addClause_(ps, color);
         }
 
@@ -214,6 +248,7 @@ namespace Minisat {
     }
 
     // memoize only positive terms
+
     Lit SAT::cnf_find_index_lit(int index, bool is_cmpl)
     {
         Var v;
@@ -233,5 +268,14 @@ namespace Minisat {
         }
 
         return mkLit(v, is_cmpl);
+    }
+
+    void SAT::push(Term term, group_t group, color_t color)
+    {
+#if 0
+        cnf_push_single_cut(term, group, color);
+#else
+        cnf_push_no_cut(term, group, color);
+#endif
     }
 };
