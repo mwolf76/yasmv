@@ -450,7 +450,7 @@ unary_expression returns [Expr_ptr res]
 	: expr=postfix_expression
       { $res = expr; }
 
-	| 'next' '(' expr=postfix_expression ')'
+	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
 	| '!' expr=postfix_expression

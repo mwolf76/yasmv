@@ -164,6 +164,57 @@ BOOST_AUTO_TEST_CASE(grammar)
         BOOST_CHECK (phi == psi);
     }
 
+    /* operators precedence */
+    {
+        Expr_ptr phi = em.make_add(x, em.make_mul(y, em.make_iconst(42)));
+        Expr_ptr psi = parseString("x + y * 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_add(x, em.make_neg(y));
+        Expr_ptr psi = parseString("x + - y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_or(x, em.make_and(y, em.make_iconst(42)));
+        Expr_ptr psi = parseString("x | y & 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+
+    {
+        Expr_ptr phi = em.make_add(x, em.make_div(y, em.make_iconst(42)));
+        Expr_ptr psi = parseString("x + y / 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_add(x, em.make_mod(y, em.make_iconst(42)));
+        Expr_ptr psi = parseString("x + y mod 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    /* left associativity */
+    {
+        Expr_ptr phi = em.make_add(em.make_add(x, y), em.make_iconst(42));
+        Expr_ptr psi = parseString("x + y + 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_mul(em.make_mul(x, y), em.make_iconst(42));
+        Expr_ptr psi = parseString("x * y * 42");
+        BOOST_CHECK (phi == psi);
+    }
+
+    /* misc */
+    {
+        Expr_ptr phi = em.make_next(em.make_add(x, y));
+        Expr_ptr psi = parseString("next(x + y)");
+        BOOST_CHECK (phi == psi);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
