@@ -311,16 +311,16 @@ toplevel_expression returns [Expr_ptr res]
 
 iff_expression returns [Expr_ptr res]
 @init { }
-	:  lhs=imply_expression
+	:  lhs=implies_expression
        { $res = lhs; }
 
     (
-       '<->' rhs=imply_expression
+       '<->' rhs=implies_expression
        { $res = em.make_iff($res, rhs); }
     )*
 	;
 
-imply_expression returns [Expr_ptr res]
+implies_expression returns [Expr_ptr res]
 @init { }
 	: lhs=inclusive_or_expression
       { $res = lhs; }
