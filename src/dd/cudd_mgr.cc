@@ -32,5 +32,5 @@ CuddMgr_ptr CuddMgr::f_instance = NULL;
 CuddMgr::CuddMgr()
     : f_cudd()
 {
-    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
+    f_cudd.AutodynEnable(CUDD_REORDER_SIFT);
 }
