@@ -317,7 +317,6 @@ BOOST_AUTO_TEST_CASE(compiler)
 
     mm.model()->add_module(main_expr, main_module);
 
-    // WEIRD BUG!!!
     {
         Atom a_d("d_plus_1"); Expr_ptr define = em.make_identifier(a_d);
 
