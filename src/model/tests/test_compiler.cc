@@ -14,15 +14,11 @@
 
 #include <dd_walker.hh>
 
-class TestWalker : public DDWalker {
+class TestWalker : public DDLeafWalker {
 public:
     TestWalker(CuddMgr& owner)
-        : DDWalker(owner)
+        : DDLeafWalker(owner)
     {}
-
-    /* tests do not use recursion */
-    bool recursion(const DdNode *node)
-    { return false; }
 
     bool condition(const DdNode *node)
     {
