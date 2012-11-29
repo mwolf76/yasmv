@@ -33,6 +33,6 @@ namespace axter {
     }
 
     verbosity get_verbosity_level_tolerance() {
-        return log_very_rarely; // log_always; //;
+        return log_always; // log_very_rarely; //
     }
 };
