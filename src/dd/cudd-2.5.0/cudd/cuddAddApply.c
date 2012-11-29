@@ -1046,7 +1046,7 @@ Cudd_addBWCmpl(
   DdNode * f)
 {
     if (cuddIsConstant(f)) {
-	CUDD_VALUE_TYPE value = ! (cuddV(f));
+	CUDD_VALUE_TYPE value = 0xF - cuddV(f);
 	DdNode *res = cuddUniqueConst(dd,value);
 	return(res);
     }
