@@ -22,8 +22,13 @@
 #ifndef CDEFS_DEFINED
 #define CDEFS_DEFINED
 
+#define DEFAULT_BITS 8
+
 /* Reserved for native data type, should match machine word for
    optimal performance. This type used for the ADD leaves. */
 typedef long value_t;
+
+/* time representation */
+typedef unsigned step_t;
 
 #endif

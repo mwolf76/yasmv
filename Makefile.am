@@ -33,7 +33,7 @@ test: tests
 tags:
 	@ctags -Re $(top_srcdir)
 
-smv_SOURCES = src/opts.cc src/main.cc src/common.cc
+smv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
 	$(top_builddir)/src/mc/libmc.la					\
@@ -50,11 +50,12 @@ smv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/dd/libcudd.la -lantlr3c			\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) -lprofiler
 
-tests_SOURCES = $(top_srcdir)/src/tests.cc src/common.cc	\
-	$(top_srcdir)/src/expr/tests/test_expr.cc		\
-	$(top_srcdir)/src/type/tests/test_type.cc		\
-	$(top_srcdir)/src/dd/tests/test_dd.cc			\
-	$(top_srcdir)/src/enc/tests/test_enc.cc 		\
+tests_SOURCES = $(top_srcdir)/src/tests.cc src/parse.cc src/common.cc	\
+	$(top_srcdir)/src/expr/tests/test_expr.cc			\
+	$(top_srcdir)/src/parser/tests/test_parser.cc			\
+	$(top_srcdir)/src/type/tests/test_type.cc			\
+	$(top_srcdir)/src/dd/tests/test_dd.cc				\
+	$(top_srcdir)/src/enc/tests/test_enc.cc				\
 	$(top_srcdir)/src/model/tests/test_compiler.cc
 
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
@@ -65,6 +66,7 @@ $(top_builddir)/src/expr/libexpr.la					\
 $(top_builddir)/src/expr/walkers/libexpr_walkers.la			\
 $(top_builddir)/src/type/libtype.la $(top_builddir)/src/enc/libenc.la	\
 $(top_builddir)/src/utils/libutils.la					\
+$(top_builddir)/src/witness/libwitness.la				\
 $(top_builddir)/src/sat/libminisat.la					\
 $(top_builddir)/src/dd/libcudd.la -lantlr3c $(BOOST_REGEX_LIBS)		\
 $(BOOST_PROGRAM_OPTIONS_LIBS) -lboost_unit_test_framework

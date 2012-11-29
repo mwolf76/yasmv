@@ -8,7 +8,14 @@ BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_SUITE_END()
 
 #include <common.hh>
-#include <logging.hh>
+#include <expr.hh>
+
+// just for debugging purposes within gdb
+static void pe(Expr_ptr e)
+{ DEBUG << e << endl; }
+
+static void pf(FQExpr& e)
+{ DEBUG << e << endl; }
 
 // logging subsystem settings
 namespace axter {
@@ -26,6 +33,6 @@ namespace axter {
     }
 
     verbosity get_verbosity_level_tolerance() {
-        return log_always; // return log_rarely; //
+        return log_very_rarely; // log_always; //;
     }
 };

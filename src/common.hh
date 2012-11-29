@@ -25,66 +25,64 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <exception>
+
+/* custom C definitions */
+#include <cdefs.h>
+
 #include <utility>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <list>
-#include <vector>
-#include <stack>
-#include <set>
-
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
-
-#include <boost/regex.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-
-using boost::unordered_map;
-using boost::unordered_set;
-
-using boost::regex;
-using boost::cmatch;
-using boost::regex_match;
-
-using boost::tuple;
-
 using std::pair;
 using std::make_pair;
 
+#include <string>
 using std::string;
+typedef string Atom;
+typedef Atom* Atom_ptr;
+
+#include <sstream>
 using std::ostringstream;
+
+#include <iostream>
 using std::istream;
 using std::ostream;
-using std::list;
-using std::vector;
-using std::stack;
-using std::set;
-
 using std::cout;
 using std::cerr;
 using std::endl;
 using std::flush;
 
-#include <cdefs.h>
+#include <list>
+using std::list;
 
-/* time representation */
-typedef unsigned step_t;
+#include <vector>
+using std::vector;
 
-/* the base class definition, including a virtual destructor */
-class IObject {
-public:
-    virtual ~IObject()
-    {}
-};
+#include <stack>
+using std::stack;
 
-class Object : public IObject {
-};
+#include <set>
+using std::set;
+
+#include <boost/unordered_set.hpp>
+using boost::unordered_set;
+
+#include <boost/unordered_map.hpp>
+using boost::unordered_map;
+
+#include <boost/regex.hpp>
+using boost::regex;
+using boost::cmatch;
+using boost::regex_match;
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+using boost::tuple;
+
+/* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
+#include <logging.hh>
 
 #include <exception>
-class Exception : public std::exception {
+using std::exception;
+
+class Exception : public exception {
 public:
     virtual const char* what() const throw() =0;
     virtual ~Exception() throw() {}
@@ -108,44 +106,17 @@ public:
     {}
 };
 
-// logging support using ezlogger (cfr. http://axter.com/ezlogger/)
-#include <logging.hh>
+/* the base class definition, including a virtual destructor */
+class IObject {
+public:
+    virtual ~IObject()
+    {}
+};
 
-// typedef enum {
-//   BINARY = 2,
-//   OCTAL = 8,
-//   DECIMAL = 10,
-//   HEXADECIMAL = 16
-// } base_t;
+class Object : public IObject {
+};
 
-// inline char base_char(base_t base)
-// {
-//   switch (base) {
-//   case BINARY: return 'b';
-//   case OCTAL: return 'o';
-//   case DECIMAL: return 'd';
-//   case HEXADECIMAL: return 'h';
-//   default: assert (0); // unexpected;
-//   }
-// }
-
-// inline string to_base(value_t value, base_t base)
-// {
-//   static const char alphabet[] = "0123456789abcdefgh";
-//   std::string result;
-
-//   while(value) {
-//     result += alphabet[value % base];
-//     value /= base;
-//   }
-
-//   return string(result.rbegin(), result.rend());
-// }
-
-typedef std::string Atom;
-typedef Atom* Atom_ptr;
-
-/* tokens */
+/* tokens, defined in common.cc */
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
 extern const char *BOOL_TOKEN;
@@ -154,6 +125,5 @@ extern const char *SIGNED_TOKEN;
 extern const char *INTEGER_TOKEN;
 extern const char *TEMPORAL_TOKEN;
 extern const char *MAIN_TOKEN;
-#define DEFAULT_BITS 8
 
 #endif
