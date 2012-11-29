@@ -88,15 +88,12 @@ DDWalker& DDWalker::operator() (ADD dd)
 /* pre-order visit strategy */
 void DDLeafWalker::walk ()
 {
-    size_t rec_level = f_recursion_stack.size();
-    assert (0 != rec_level);
-
     DdNode *N, *Nv, *Nnv;
 
     /* for fast access to the DD variables array */
     char *cell;
 
-    while(0 != f_recursion_stack.size()) {
+    while (0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
         N = Cudd_Regular(curr.node);
@@ -156,14 +153,21 @@ void DDLeafWalker::walk ()
 /* post-order visit strategy */
 void DDNodeWalker::walk ()
 {
-    size_t rec_level = f_recursion_stack.size();
-    assert (0 != rec_level);
-
     DdNode *N, *Nv, *Nnv;
+
+    dd_activation_record curr = f_recursion_stack.top();
+    // ADD dd(CuddMgr::INSTANCE().dd(), const_cast<DdNode *>(curr.node));
+    // dd.PrintMinterm();
+    // cerr << endl;
 
     while(0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
+        // ADD dd(CuddMgr::INSTANCE().dd(), const_cast<DdNode *>(curr.node));
+        // dd.PrintMinterm();
+        // cerr << endl;
+
+        N = Cudd_Regular(curr.node);
 
         // restore caller location (simulate call return behavior)
         if (curr.pc != DD_DEFAULT) {
@@ -174,11 +178,8 @@ void DDNodeWalker::walk ()
             }
         } /* pc != DEFAULT */
 
-        N = Cudd_Regular(curr.node);
-
-        /* if node is a not constand and fulfills condition, perform
-           action on it. Recur into its children
-           afterwards. (pre-order). */
+        /* if node is not a constant and fulfills condition, perform
+           action on it. Recur into its children afterwards (pre-order). */
         if ( ! cuddIsConstant(N) ) {
             if (condition(curr.node)) {
 
@@ -186,6 +187,7 @@ void DDNodeWalker::walk ()
                 Nv = Cudd_IsComplement(curr.node)
                     ? Cudd_Not(cuddT(N))
                     : cuddT(N) ;
+
                 f_recursion_stack.top().pc = DD_ELSE;
                 f_recursion_stack.push(dd_activation_record(Nv));
                 goto call;
