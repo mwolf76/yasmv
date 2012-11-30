@@ -494,10 +494,12 @@ basic_expression returns [Expr_ptr res]
            for (ExprVector::reverse_iterator eye = cls->rbegin();
                 eye != cls->rend(); ++ eye) {
                 if (!res) {
+                    // TODO: convert this into an exception
+                    assert((*eye)->lhs() == em.make_true());
                     res = (*eye)->rhs(); /* default value */
                 }
                 else {
-                    res = const_cast<Expr_ptr>( em.make_ite( (*eye), res));
+                    res = em.make_ite( (*eye), res);
                 }
            }
            delete cls;  // avoid memleaks
@@ -578,19 +580,6 @@ enum_constant returns [Expr_ptr res]
     { $res = em.make_enum_type(lits); }
     ;
 
-// /* lvalue is used in assignments */
-// lvalue returns [Expr_ptr res]
-// @init { }
-// 	: 'init' '(' expr=postfix_expression ')'
-//       { $res = em.make_init(expr); }
-
-// 	| 'next' '(' expr=postfix_expression ')'
-//       { $res = em.make_next(expr); }
-
-// 	| expr=postfix_expression
-//       { $res = expr; }
-// 	;
-
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
 @init { }
@@ -617,10 +606,17 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
     // finite integer types
-    | 'unsigned' '(' width=int_constant ')'
-      { $res = tm.find_unsigned(width->value()); }
-	| 'signed' '(' k=int_constant ')'
-      { $res = tm.find_signed(width->value()); }
+    | 'unsigned' '(' width=int_constant ')' (
+            '[' size=int_constant ']'
+              { $res = tm.find_unsigned_array(width->value(), size->value()); }
+
+            | { $res = tm.find_unsigned(width->value()); } )
+
+	| 'signed' '(' width=int_constant ')' (
+            '[' size=int_constant ']'
+                { $res = tm.find_signed_array(width->value(), size->value()); }
+
+            | { $res = tm.find_signed(width->value()); } )
 
     // ranges
     // | lhs=int_constant '..' rhs=int_constant
@@ -692,9 +688,8 @@ fragment FP_CHARS
 fragment ID_FOLLOWING_CHARS
 	:	 ID_FIRST_CHAR
     |    DECIMAL_DIGIT
-//    |    '$'
-//    |    '#'
-//    |    '-'
+    |    '$'
+    |    '#'
 	;
 
 HEX_LITERAL
