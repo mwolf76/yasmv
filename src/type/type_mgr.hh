@@ -69,7 +69,10 @@ public:
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_unsigned(unsigned digits);
+    const Type_ptr find_unsigned_array(unsigned digits, unsigned size);
+
     const Type_ptr find_signed(unsigned digits);
+    const Type_ptr find_signed_array(unsigned digits, unsigned size);
 
     const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);

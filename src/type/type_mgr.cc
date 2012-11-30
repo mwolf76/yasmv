@@ -48,7 +48,20 @@ const Type_ptr TypeMgr::find_unsigned(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new AlgebraicType(*this, bits, false);
+    res = new AlgebraicType( *this, bits, false);
+    register_type(descr, res);
+    return res;
+}
+
+const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
+{
+    Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_type(digits),
+                                        f_em.make_iconst(size)));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this, find_unsigned(digits), size);
     register_type(descr, res);
     return res;
 }
@@ -60,7 +73,20 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new AlgebraicType(*this, bits, true);  // signed
+    res = new AlgebraicType( *this, bits, true);  // signed
+    register_type(descr, res);
+    return res;
+}
+
+const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
+{
+    Expr_ptr descr(f_em.make_subscript( f_em.make_signed_type(digits),
+                                        f_em.make_iconst(size)));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this , find_signed(digits), size);
     register_type(descr, res);
     return res;
 }

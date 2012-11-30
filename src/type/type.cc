@@ -50,6 +50,15 @@ AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD
         ;
 }
 
+ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)
+    : Type(owner)
+    , f_of(of)
+    , f_size(size)
+{
+    f_repr = f_owner.em().make_subscript( of->repr(),
+                                          f_owner.em().make_iconst( size));
+}
+
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : Type(owner)
     , f_literals(literals)

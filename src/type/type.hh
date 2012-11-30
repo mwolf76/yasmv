@@ -103,6 +103,23 @@ protected:
     ADD *f_dds;
 };
 
+typedef class ArrayType* ArrayType_ptr;
+class ArrayType : public Type {
+public:
+    inline unsigned size() const
+    { return f_size; }
+
+    inline Type_ptr of() const
+    { return f_of; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    ArrayType(TypeMgr& owner, Type_ptr of, unsigned size);
+
+    Type_ptr f_of;
+    unsigned f_size;
+};
+
 typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
 protected:
