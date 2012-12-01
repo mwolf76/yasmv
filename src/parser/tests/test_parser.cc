@@ -15,9 +15,11 @@ BOOST_AUTO_TEST_CASE(grammar)
 
     Atom a_x("x");
     Atom a_y("y");
+    Atom a_w("w");
 
     Expr_ptr x = em.make_identifier(a_x);
     Expr_ptr y = em.make_identifier(a_y);
+    Expr_ptr w = em.make_identifier(a_w);
     BOOST_CHECK ( x != y );
 
     // test identifiers canonicity
@@ -164,6 +166,12 @@ BOOST_AUTO_TEST_CASE(grammar)
         BOOST_CHECK (phi == psi);
     }
 
+    {
+        Expr_ptr phi = em.make_subscript(x, em.make_iconst(42));
+        Expr_ptr psi = parseString("x[42]");
+        BOOST_CHECK (phi == psi);
+    }
+
     /* operators precedence */
     {
         Expr_ptr phi = em.make_add(x, em.make_mul(y, em.make_iconst(42)));
@@ -229,6 +237,33 @@ BOOST_AUTO_TEST_CASE(grammar)
         Expr_ptr phi = em.make_gt(x, em.make_lshift(y,
                                                     em.make_iconst(2)));
         Expr_ptr psi = parseString("x > y << 2");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_add( em.make_subscript(x, em.make_iconst(42)),
+                                    em.make_subscript(y, em.make_iconst(0)));
+        Expr_ptr psi = parseString("x[42] + y[0]");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(x, em.make_sub (y,
+                                                         em.make_iconst(1)));
+
+        Expr_ptr psi = parseString("x[y - 1]");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_dot(x, y);
+        Expr_ptr psi = parseString("x.y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_dot(em.make_dot(x, y), w);
+        Expr_ptr psi = parseString("x.y.w");
         BOOST_CHECK (phi == psi);
     }
 

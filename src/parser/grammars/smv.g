@@ -467,10 +467,11 @@ postfix_expression returns [Expr_ptr res]
         { $res = lhs; }
 
     (
-        '[' rhs=basic_expression ']'
+        '[' rhs=toplevel_expression ']'
         { $res = em.make_subscript($res, rhs); }
 
-    |   '.' rhs=basic_expression
+        // TODO: nested dot not supported
+    |   '.' rhs=identifier
         { $res = em.make_dot($res, rhs); }
 
     )*
