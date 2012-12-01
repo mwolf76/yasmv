@@ -382,6 +382,27 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
     f_ctx_stack.pop_back();
 }
 
+bool Inferrer::walk_subscript_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_integer(rhs) &&
+        !tm.is_algebraic(rhs))
+            throw BadType(rhs->repr(), f_integer, expr);
+
+    Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
+    if (!tm.is_array(lhs))
+            throw BadType(lhs->repr(), "array", expr);
+
+    /* return wrapped type */
+    f_type_stack.push_back(tm.as_array(lhs)->of());
+}
+
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();

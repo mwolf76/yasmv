@@ -699,6 +699,81 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
+bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
+{ return true; }
+
+/* Array selector builder: for arrays subscription, a chain of ITE is
+   built out of the encodings for each element which are assumed to be
+   present in dd stack in reversed order (walk_leaf took care of
+   this). */
+void Compiler::walk_subscript_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    unsigned base = Cudd_V(f_enc.base().getNode());
+
+    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+
+    /* algebrize selection expr (rhs), using machine width */
+    assert (tm.is_integer(rhs_type) || tm.is_algebraic(rhs_type));
+    algebrize_unary();
+
+    ADD selector[2]; // TODO
+    for (unsigned i = 0; i < 2; ++ i) {
+        selector[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+
+    unsigned size = tm.as_array(lhs_type)->size();
+
+    const Type_ptr scalar_type = tm.as_array(lhs_type)->of();
+    unsigned width = tm.is_algebraic(scalar_type)
+        ? tm.as_algebraic(rhs_type)->width()
+        : 1; /* monolithics, consts, enum, etc... use just 1 DD */
+    ;
+
+    /* fetch DDs from the stack */
+    ADD dds[width * size];
+    for (unsigned i = 0; i < width * size; ++ i) {
+        dds[i] = f_add_stack.back(); f_add_stack.pop_back();
+    }
+
+    ADD res; /* one digit at a time */
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx = width - i - 1;
+        res = f_enc.zero(); // TODO: FAILURE here
+
+        for (unsigned j = 0; j < size; ++ j) {
+
+            /* selected index */
+            unsigned selection = size - j -1;
+
+            ADD cond = f_enc.one();
+            value_t value = ndx;
+
+            /* encode the case selection as a conjunction of
+               Equals ADD digit-by-digit (inlined) */
+            for (unsigned k = 0; k < width; ++ k) {
+
+                ADD digit = f_enc.constant(value % base);
+                f_add_stack.push_back(digit);
+                value /= base;
+
+                /* case selection */
+                cond *= selector[ndx].Equals(digit);
+            }
+            assert (value == 0); // not overflowing
+
+            /* chaining */
+            res = cond.Ite( dds[width * selection + i], res);
+        }
+
+        f_add_stack.push_back(res);
+    }
+}
+
 /* private service of walk_leaf */
 void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 {
@@ -711,17 +786,24 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
     // push into type stack
     f_type_stack.push_back(type);
 
-    // push either 1 or more ADDs depending on the encoding
-    if (tm.is_boolean(type) || tm.is_enum(type) || tm.is_integer(type)) {
+    /* booleans, constants, monoliths are just one DD */
+    if (tm.is_boolean(type)
+        || tm.is_integer(type)
+        || tm.is_enum(type)) {
         assert(1 == width);
         f_add_stack.push_back(dds[0]);
     }
-    else if (tm.is_algebraic(type)) {
-        assert( tm.as_algebraic(type)->width() == width ); // type and enc width info has to match
-        for (int i = width -1; (0 <= i); -- i) {
-            f_add_stack.push_back(dds[i]);
+
+    /* arrays and algebraics, reversed list of encoding DDs */
+    else if (tm.is_algebraic(type)
+             || (tm.is_array(type))) {
+        // assert( tm.as_algebraic(type)->width() == width ); // type and enc width info has to match
+        for (DDVector::reverse_iterator ri = dds.rbegin();
+             ri != dds.rend(); ++ ri) {
+            f_add_stack.push_back(*ri);
         }
     }
+
     else assert( false ); // unexpected
 }
 

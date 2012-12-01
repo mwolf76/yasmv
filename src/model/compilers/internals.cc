@@ -140,6 +140,60 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     assert( false ); // unreachable
 }
 
+/* UPDATE: currently this is used only in array selectors */
+unsigned Compiler::algebrize_unary()
+{
+    TypeMgr& tm = f_owner.tm();
+
+    unsigned stack_size = f_type_stack.size();
+    assert (1 <= stack_size);
+
+    unsigned machine_width = 2; // TODO!
+
+    const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
+    DRIVEL << "TOP is " << top_type << endl;
+
+    unsigned top_width = tm.is_algebraic(top_type)
+        ? tm.as_algebraic(top_type)->width()
+        : 0;
+
+    /* max */
+    unsigned res = top_width < machine_width
+        ? machine_width
+        : top_width
+        ;
+
+    // Nothing do be done, just ad result type to the type stack and leave
+    if ((top_width == res)) {
+        DRIVEL << "Nothing do be done." << endl;
+        f_type_stack.push_back(top_type); // arbitrary
+
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
+    }
+
+    /* perform conversion or padding, taking sign bit into account */
+    if (top_width < res) {
+        if (! top_width) { // integer, conversion required
+            DRIVEL << "INT -> ALGEBRAIC TOP" << endl;
+            algebraic_from_integer_const(res);
+        }
+        else { // just padding required
+            bool is_signed = tm.as_algebraic(top_type)->is_signed();
+            algebraic_padding(top_width, res, is_signed);
+        }
+
+        // push other operand's type and return
+        f_type_stack.push_back(tm.find_unsigned(2)); // TODO machine_size
+
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
+    }
+
+    assert( false ); // unreachable
+}
+
+
 static inline value_t pow(unsigned base, unsigned exp)
 {
     value_t res = 1;

@@ -132,6 +132,9 @@ protected:
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
+    bool walk_subscript_preorder(const Expr_ptr expr);
+    bool walk_subscript_inorder(const Expr_ptr expr);
+    void walk_subscript_postorder(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
     unsigned f_temp_auto_index; // autoincr temp index
@@ -224,11 +227,15 @@ protected:
 
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
+
+    /* TODO: refactor these */
     unsigned algebrize_operands(bool is_ite = false);
+    unsigned algebrize_unary();
 
     /* temporaries */
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
     Expr_ptr make_bounded_exp2(ADD *dds, unsigned width);
+
 };
 
 #endif

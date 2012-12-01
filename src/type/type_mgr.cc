@@ -186,6 +186,20 @@ Instance_ptr TypeMgr::as_instance(const Type_ptr tp) const
     return res;
 }
 
+bool TypeMgr::is_array(const Type_ptr tp) const
+{
+    return NULL != dynamic_cast <const ArrayType_ptr> (tp);
+}
+
+ArrayType_ptr TypeMgr::as_array(const Type_ptr tp) const
+{
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+/* low level service */
 void TypeMgr::register_type(const Expr_ptr expr, Type_ptr vtype)
 {
     assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));

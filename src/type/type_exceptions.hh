@@ -67,8 +67,11 @@ public:
 // when a numer of types were allowed and none of them was given
 class BadType : public AnalyzerException {
     Expr_ptr f_got;
-    ExprVector f_allowed;
     Expr_ptr f_body;
+
+    bool f_use_repr;
+    ExprVector f_allowed;
+    string f_allowed_repr;
 
 public:
     /* exactly one type allowed */
@@ -77,8 +80,10 @@ public:
     /* multiple types allowed (shortcut) */
     BadType(Expr_ptr got, ExprVector allowed, Expr_ptr body);
 
-    const char* what() const throw();
+    /* Allowed type described using a generic string (i.e. arrays) */
+    BadType(Expr_ptr got, const char *allowed, Expr_ptr body);
 
+    const char* what() const throw();
     ~BadType() throw();
 };
 

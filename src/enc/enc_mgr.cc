@@ -41,6 +41,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     BooleanType_ptr btype;
     AlgebraicType_ptr atype;
     EnumType_ptr etype;
+    ArrayType_ptr vtype;
 
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
         // DEBUG << "Encoding Boolean " << repr << endl;
@@ -53,6 +54,14 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         // DEBUG << "Encoding Enum " << repr << endl;
         res = new EnumEncoding(etype->literals());
+    }
+    else if (NULL != (vtype = dynamic_cast<ArrayType_ptr>(tp))) {
+        // DEBUG << "Encoding Array " << repr << endl;
+        Encodings encs;
+        for (unsigned i =0; i < vtype->size(); ++ i) {
+            encs.push_back(make_encoding(vtype->of()));
+        }
+        res = new ArrayEncoding(encs);
     }
 
     else assert(0); /* unexpected or unsupported */

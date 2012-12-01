@@ -168,6 +168,9 @@ protected:
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
+    bool walk_subscript_preorder(const Expr_ptr expr);
+    bool walk_subscript_inorder(const Expr_ptr expr);
+    void walk_subscript_postorder(const Expr_ptr expr);
     bool walk_range_preorder(const Expr_ptr expr);
     bool walk_range_inorder(const Expr_ptr expr);
     void walk_range_postorder(const Expr_ptr expr);

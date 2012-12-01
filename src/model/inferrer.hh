@@ -162,6 +162,10 @@ protected:
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
+    bool walk_subscript_preorder(const Expr_ptr expr);
+    bool walk_subscript_inorder(const Expr_ptr expr);
+    void walk_subscript_postorder(const Expr_ptr expr);
+
     void walk_leaf(const Expr_ptr expr);
 
 private:
@@ -214,6 +218,7 @@ private:
     // useful for errors
     Expr_ptr f_boolean;
     Expr_ptr f_integer;
+
     ExprVector f_integer_or_boolean;
 };
 

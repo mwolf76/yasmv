@@ -342,6 +342,13 @@ bool Printer::walk_dot_inorder(const Expr_ptr expr)
 void Printer::walk_dot_postorder(const Expr_ptr expr)
 {}
 
+bool Printer::walk_subscript_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_subscript_inorder(const Expr_ptr expr)
+{ f_os << "["; return true; }
+void Printer::walk_subscript_postorder(const Expr_ptr expr)
+{ f_os << "]"; }
+
 bool Printer::walk_range_preorder(const Expr_ptr expr)
 { return true; }
 bool Printer::walk_range_inorder(const Expr_ptr expr)

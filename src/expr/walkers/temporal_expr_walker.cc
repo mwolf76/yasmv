@@ -302,10 +302,14 @@ void TemporalWalker::walk()
 
         // fallback on ancestor's walker and resume
         default:
-            try { SimpleWalker::walk(); }
+            try {
+                SimpleWalker::walk();
+            }
             catch (WalkerException &we) {
-                const char *nls = we.what();
-                DEBUG << "Caught " << nls << ", continuing..." << endl;
+                string msg (we.what());
+                DEBUG << "Caught " << msg
+                      << ", continuing..."
+                      << endl;
             }
             goto resume;
         } // switch

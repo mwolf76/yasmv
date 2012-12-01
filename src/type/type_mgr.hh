@@ -96,6 +96,9 @@ public:
     // an INSTANCE
     bool is_instance(const Type_ptr tp) const;
 
+    // an ARRAY
+    bool is_array(const Type_ptr tp) const;
+
     // -- as_xxx accessors ------------------------------------------------------
     typedef class BooleanType* BooleanType_ptr;
     BooleanType_ptr as_boolean(const Type_ptr tp) const;
@@ -111,6 +114,9 @@ public:
 
     typedef class Instance* Instance_ptr;
     Instance_ptr as_instance(const Type_ptr tp) const;
+
+    typedef class ArrayType* ArrayType_ptr;
+    ArrayType_ptr as_array(const Type_ptr tp) const;
 
     // singleton instance accessor
     static inline TypeMgr& INSTANCE() {

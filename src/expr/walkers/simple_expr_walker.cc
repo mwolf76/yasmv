@@ -120,6 +120,9 @@ void SimpleWalker::walk ()
             case DOT_1: goto entry_DOT_1;
             case DOT_2: goto entry_DOT_2;
 
+            case SUBSCRIPT_1: goto entry_SUBSCRIPT_1;
+            case SUBSCRIPT_2: goto entry_SUBSCRIPT_2;
+
             default: throw UnsupportedEntryPointException(curr.pc);
 
             }
@@ -562,6 +565,24 @@ void SimpleWalker::walk ()
 
             entry_DOT_2:
                 walk_dot_postorder(curr.expr);
+            }
+            break;
+
+        case SUBSCRIPT:
+            if (walk_subscript_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = SUBSCRIPT_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_SUBSCRIPT_1:
+                if (walk_subscript_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = SUBSCRIPT_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_SUBSCRIPT_2:
+                walk_subscript_postorder(curr.expr);
             }
             break;
 

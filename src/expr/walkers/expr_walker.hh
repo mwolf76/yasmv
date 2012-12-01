@@ -74,6 +74,9 @@ typedef enum {
     // dot notation for identifiers
     DOT_1, DOT_2,
 
+    // subscripts (arrays)
+    SUBSCRIPT_1, SUBSCRIPT_2,
+
     // -- Temporal walkers
     F_1, G_1, X_1, U_1, U_2, R_1, R_2,
     AF_1, AG_1, AX_1, AU_1, AU_2, AR_1, AR_2,

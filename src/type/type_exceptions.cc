@@ -71,6 +71,7 @@ BadType::BadType(Expr_ptr got, Expr_ptr allowed, Expr_ptr body)
     : f_got(got)
     , f_allowed()
     , f_body(body)
+    , f_use_repr(false)
 {
     f_allowed.push_back(allowed);
 }
@@ -80,6 +81,15 @@ BadType::BadType(Expr_ptr got, ExprVector allowed, Expr_ptr body)
     : f_got(got)
     , f_allowed(allowed)
     , f_body(body)
+    , f_use_repr(false)
+{}
+
+/* Allowed type described using a generic string (i.e. arrays) */
+BadType::BadType(Expr_ptr got, const char *allowed, Expr_ptr body)
+    : f_got(got)
+    , f_allowed_repr(allowed)
+    , f_body(body)
+    , f_use_repr(true)
 {}
 
 BadType::~BadType() throw()
@@ -93,12 +103,18 @@ const char* BadType::what() const throw()
         << " in " << f_body;
 
     oss << ", allowed: ";
-    ExprVector::const_iterator eye = f_allowed.begin();
-    do {
-        oss << (*eye); eye ++;
-        if (eye != f_allowed.end()) oss << ", ";
-    } while (eye != f_allowed.end());
-    oss << ".";
+    if (! f_use_repr) {
+        ExprVector::const_iterator eye = f_allowed.begin();
+        do {
+            oss << (*eye); eye ++;
+            if (eye != f_allowed.end()) oss << ", ";
+        } while (eye != f_allowed.end());
+        oss << ".";
+    }
+
+    else {
+        oss << f_allowed_repr;
+    }
 
     return oss.str().c_str();
 }

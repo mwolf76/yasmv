@@ -26,6 +26,10 @@
  **/
 #include <enc.hh>
 
+// shared dctor
+Encoding::~Encoding()
+{}
+
 // low-level service for bits allocation
 ADD Encoding::make_bit()
 {
@@ -186,6 +190,20 @@ unsigned MonolithicEncoding::range_repr_bits (value_t range)
     return res;
 }
 
-// dctor
-Encoding::~Encoding()
-{ }
+ArrayEncoding::ArrayEncoding(Encodings elements)
+    : f_elements(elements)
+{
+    assert(0 < elements.size());
+    f_dv.reserve( elements.size() *
+                  elements[0]->dv().size() ); // preallocate memory
+
+    for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
+        DDVector& dds = (*i)->dv();
+        f_dv.insert( f_dv.end(), dds.begin(), dds.end() );
+    }
+}
+
+Expr_ptr ArrayEncoding::expr(int* assignment)
+{
+    assert( false ); // an array cannot be evaluated
+}
