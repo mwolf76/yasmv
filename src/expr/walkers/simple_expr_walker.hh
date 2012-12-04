@@ -148,6 +148,10 @@ public:
     virtual bool walk_dot_inorder(const Expr_ptr expr) =0;
     virtual void walk_dot_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_params_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_params_inorder(const Expr_ptr expr) =0;
+    virtual void walk_params_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_subscript_preorder(const Expr_ptr expr) =0;
     virtual bool walk_subscript_inorder(const Expr_ptr expr) =0;
     virtual void walk_subscript_postorder(const Expr_ptr expr) =0;

@@ -382,6 +382,13 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
     f_ctx_stack.pop_back();
 }
 
+bool Inferrer::walk_params_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_params_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_params_postorder(const Expr_ptr expr)
+{ assert( false ); /* not yet implemented */ }
+
 bool Inferrer::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)

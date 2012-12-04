@@ -328,19 +328,19 @@ bool Printer::walk_comma_inorder(const Expr_ptr expr)
 void Printer::walk_comma_postorder(const Expr_ptr expr)
 {}
 
-bool Printer::walk_params_preorder(const Expr_ptr expr)
-{ return true; }
-bool Printer::walk_params_inorder(const Expr_ptr expr)
-{ f_os << "("; return true; }
-void Printer::walk_params_postorder(const Expr_ptr expr)
-{ f_os << ")"; }
-
 bool Printer::walk_dot_preorder(const Expr_ptr expr)
 { return true; }
 bool Printer::walk_dot_inorder(const Expr_ptr expr)
 { f_os << "."; return true; }
 void Printer::walk_dot_postorder(const Expr_ptr expr)
 {}
+
+bool Printer::walk_params_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_params_inorder(const Expr_ptr expr)
+{ f_os << "("; return true; }
+void Printer::walk_params_postorder(const Expr_ptr expr)
+{ f_os << ")";}
 
 bool Printer::walk_subscript_preorder(const Expr_ptr expr)
 { return true; }

@@ -132,6 +132,9 @@ protected:
     bool walk_dot_preorder(const Expr_ptr expr);
     bool walk_dot_inorder(const Expr_ptr expr);
     void walk_dot_postorder(const Expr_ptr expr);
+    bool walk_params_preorder(const Expr_ptr expr);
+    bool walk_params_inorder(const Expr_ptr expr);
+    void walk_params_postorder(const Expr_ptr expr);
     bool walk_subscript_preorder(const Expr_ptr expr);
     bool walk_subscript_inorder(const Expr_ptr expr);
     void walk_subscript_postorder(const Expr_ptr expr);
