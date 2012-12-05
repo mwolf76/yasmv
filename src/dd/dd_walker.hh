@@ -44,7 +44,7 @@ struct dd_activation_record {
     dd_entry_point pc;
     const DdNode *node;
 
-    dd_activation_record(const DdNode *n)
+    dd_activation_record(const DdNode *n, bool inv = false)
         : pc(DD_DEFAULT)
         , node(n)
     {}
@@ -75,9 +75,6 @@ protected:
     virtual void pre_hook() =0;
     virtual void post_hook() =0;
 
-    virtual bool condition(const DdNode *node) =0;
-    virtual void action   (const DdNode *node) =0;
-
     /* explicit recursion stack */
     dd_walker_stack f_recursion_stack;
 
@@ -89,6 +86,9 @@ class DDLeafWalker : public DDWalker {
 public:
     DDLeafWalker(CuddMgr& owner);
     virtual ~DDLeafWalker();
+
+    virtual bool condition(const DdNode *node) =0;
+    virtual void action   (const DdNode *node) =0;
 
 protected:
     virtual void walk();
@@ -103,6 +103,9 @@ class DDNodeWalker : public DDWalker {
 public:
     DDNodeWalker(CuddMgr& owner);
     virtual ~DDNodeWalker();
+
+    virtual bool condition(const DdNode *node) =0;
+    virtual void action   (const DdNode *node) =0;
 
 protected:
     virtual void walk();

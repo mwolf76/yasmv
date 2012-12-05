@@ -60,10 +60,10 @@ namespace Minisat {
                 v = f_data[i];
 
                 if (v == 0) {
-                    ps.push(f_sat.cnf_find_index_lit(i, false));
+                    ps.push( mkLit( f_sat.cnf_find_index_var(i), false));
                 }
                 else if (v == 1) {
-                    ps.push(f_sat.cnf_find_index_lit(i, true));
+                    ps.push( mkLit( f_sat.cnf_find_index_var(i), true));
                 }
                 else {
                     // it's a don't care, but we need the variable for

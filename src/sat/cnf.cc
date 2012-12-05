@@ -47,40 +47,31 @@ namespace Minisat {
         return mkLit(v, true); // g -> ...
     }
 
-    Var SAT::cnf_new_cnf_var()
-    {
-        Var v = f_solver.newVar();
-        DRIVEL << "Adding VAR " << v << " for CNF" << endl;
-
-        return v;
-    }
-
     // memoize only positive terms
 
-    Lit SAT::cnf_find_index_lit(int index, bool is_cmpl)
+    Var SAT::cnf_find_index_var(int index)
     {
-        Var v;
+        Var res;
         const Index2VarMap::iterator eye = f_index2var_map.find(index);
 
         if (eye != f_index2var_map.end()) {
-            v = eye->second;
+            res = eye->second;
         }
         else {
-            // generate new var and book it
-            v = f_solver.newVar();
-            DRIVEL << "Adding VAR " << v
-                   << " for Term (index = " << index << ") " << endl;
+            /* generate new var and book it. */
+            res = f_solver.newVar();
+            DRIVEL << "Adding VAR " << res
+                   << " for DD (index = " << index << ") " << endl;
 
-            f_index2var_map.insert( make_pair<int, Var>(index, v));
-            // f_var2index_map.insert( make_pair<Var, int>(v, index));
+            f_index2var_map.insert( make_pair<int, Var>(index, res));
         }
 
-        return mkLit(v, is_cmpl);
+        return res;
     }
 
     void SAT::push(Term term, group_t group, color_t color)
     {
-#if 0
+#if 1
         cnf_push_single_cut(term, group, color);
 #else
         cnf_push_no_cut(term, group, color);

@@ -74,10 +74,11 @@ DDWalker& DDWalker::operator() (ADD dd)
 {
     dd_activation_record call(dd.getNode());
 
-    pre_hook();
-
     // setup toplevel act. record and perform walk
     f_recursion_stack.push(call);
+
+    pre_hook();
+
     walk();
 
     post_hook();
@@ -153,21 +154,28 @@ void DDLeafWalker::walk ()
 /* post-order visit strategy */
 void DDNodeWalker::walk ()
 {
-    DdNode *N, *Nv, *Nnv;
-
     dd_activation_record curr = f_recursion_stack.top();
-    // ADD dd(CuddMgr::INSTANCE().dd(), const_cast<DdNode *>(curr.node));
-    // dd.PrintMinterm();
-    // cerr << endl;
 
     while(0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
-        // ADD dd(CuddMgr::INSTANCE().dd(), const_cast<DdNode *>(curr.node));
-        // dd.PrintMinterm();
-        // cerr << endl;
+        DdNode *N, *T, *E;
 
         N = Cudd_Regular(curr.node);
+        if (cuddIsConstant(N) ) {
+            f_recursion_stack.pop();
+            continue;
+        }
+
+        T = Cudd_IsComplement(curr.node)
+            ? Cudd_Complement( cuddT(N))
+            : cuddT(N)
+            ;
+
+        E = Cudd_IsComplement(curr.node)
+            ? Cudd_Complement( cuddE(N))
+            : cuddE(N)
+            ;
 
         // restore caller location (simulate call return behavior)
         if (curr.pc != DD_DEFAULT) {
@@ -180,32 +188,21 @@ void DDNodeWalker::walk ()
 
         /* if node is not a constant and fulfills condition, perform
            action on it. Recur into its children afterwards (pre-order). */
-        if ( ! cuddIsConstant(N) ) {
-            if (condition(curr.node)) {
+        if (condition(N)) {
+            /* recur in THEN */
+            f_recursion_stack.top().pc = DD_ELSE;
+            f_recursion_stack.push(dd_activation_record(T));
+            goto call;
 
-                /* recur in THEN */
-                Nv = Cudd_IsComplement(curr.node)
-                    ? Cudd_Not(cuddT(N))
-                    : cuddT(N) ;
+        entry_node_ELSE:
+            /* recur in ELSE */
+            f_recursion_stack.top().pc = DD_RETURN;
+            f_recursion_stack.push(dd_activation_record(E));
+            goto call;
 
-                f_recursion_stack.top().pc = DD_ELSE;
-                f_recursion_stack.push(dd_activation_record(Nv));
-                goto call;
-
-            entry_node_ELSE:
-                /* recur in ELSE */
-                Nnv = Cudd_IsComplement(curr.node)
-                    ? Cudd_Not(cuddE(N))
-                    : cuddE(N) ;
-
-                f_recursion_stack.top().pc = DD_RETURN;
-                f_recursion_stack.push(dd_activation_record(Nnv));
-                goto call;
-
-            entry_node_ACTION:
-                /* process node */
-                action(curr.node);
-            }
+        entry_node_ACTION:
+            /* process node in post-order. */
+            action(curr.node);
         }
 
         f_recursion_stack.pop();
