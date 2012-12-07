@@ -378,7 +378,7 @@ private:
     inline Expr_ptr __make_expr(Expr_ptr expr) {
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
-#if 1
+#if 0
         if (eh.second) {
             DRIVEL << "Added new expr to pool: '"
                    << pooled_expr << "'" << endl;
