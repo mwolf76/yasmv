@@ -140,6 +140,87 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     assert( false ); // unreachable
 }
 
+unsigned Compiler::algebrize_binary_predicate()
+{
+    TypeMgr& tm = f_owner.tm();
+
+    unsigned stack_size = f_type_stack.size();
+    assert (2 <= stack_size);
+
+    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    DRIVEL << "RHS is " << rhs_type << endl;
+
+    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    DRIVEL << "LHS is " << lhs_type << endl;
+
+    assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
+    unsigned rhs_width = tm.is_algebraic(rhs_type)
+        ? tm.as_algebraic(rhs_type)->width()
+        : 0;
+
+    unsigned lhs_width = tm.is_algebraic(lhs_type)
+        ? tm.as_algebraic(lhs_type)->width()
+        : 0;
+
+    /* max */
+    unsigned res = rhs_width < lhs_width
+        ? lhs_width
+        : rhs_width
+        ;
+
+    // Nothing do be done, just add result type to the type stack and leave
+    if ((rhs_width == res) && (lhs_width == res)) {
+        DRIVEL << "Nothing do be done." << endl;
+        f_type_stack.push_back(tm.find_boolean()); // predicate
+        return res;
+    }
+
+    /* perform conversion or padding, taking sign bit into account */
+    if (rhs_width < res) {
+        if (! rhs_width) { // integer, conversion required
+            DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
+            algebraic_from_integer_const(res);
+        }
+        else { // just padding required
+            bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
+            algebraic_padding(rhs_width, res, is_signed);
+        }
+
+        // push boolean type and return
+        f_type_stack.push_back(tm.find_boolean());
+        return res;
+    }
+
+    if (lhs_width < res) {
+        /* temporary storage to let adjustment for LHS to take place */
+        ADD rhs_tmp[res];
+        for (unsigned i = 0; i < res; ++ i){
+            rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
+        }
+
+        if (! lhs_width) { // integer, conversion required
+            DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
+            algebraic_from_integer_const(res);
+        }
+        else { // just padding required
+            bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
+            algebraic_padding(lhs_width, res, is_signed);
+        }
+
+        // push boolean type
+        f_type_stack.push_back(tm.find_boolean());
+
+        /* restore RHS and continue */
+        for (unsigned i = 0; i < res; ++ i){
+            f_add_stack.push_back(rhs_tmp[res - i - 1]);
+        }
+
+        return res;
+    }
+
+    assert( false ); // unreachable
+}
+
 /* UPDATE: currently this is used only in array selectors */
 unsigned Compiler::algebrize_unary()
 {
@@ -617,4 +698,79 @@ Expr_ptr Compiler::make_bounded_exp2(ADD *dds, unsigned width)
     }
 
     return make_temporary_encoding(mpx, width);
+}
+
+bool Compiler::cache_miss(const Expr_ptr expr)
+{
+    FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
+    ADDMap::iterator eye = f_map.find(key);
+
+    if (eye != f_map.end()) {
+
+        DDVector::reverse_iterator ri;
+        for (ri = (*eye).second.rbegin();
+             ri != (*eye).second.rend(); ++ ri ) {
+            f_add_stack.push_back(*ri);
+        }
+        return false;
+    }
+
+#if USE_SHIFTER
+    FQExpr key0(f_ctx_stack.back(), expr, 0);
+    ADDMap::iterator eye = f_map.find(key);
+
+    if (eye != f_map.end()) {
+        DDVector dv = (*eye).second;
+        step_t time = f_time_stack.back();
+        TRACE << "Shifting " << key0
+              << " to time " << time
+              << endl;
+
+        for (DDVector::reverse_iterator ri = dv.rbegin();
+             ri != dv.rend(); ++ ri) {
+
+            ADD shifted = f_shifter.process(*eye, time);
+            f_add_stack.push_back(shifted);
+        }
+
+        memoize_result(expr); /* memoize this result as well */
+        return false;
+    }
+#endif
+
+    /* cache miss */
+    return true;
+}
+
+void Compiler::memoize_result(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    assert( 0 < f_type_stack.size() );
+    Type_ptr type = f_type_stack.back();
+
+    /* We choose to memoize algebraics only */
+    if (!tm.is_algebraic(type)) return;
+
+    /* assemble memoization key */
+    assert( 0 < f_ctx_stack.size() );
+    Expr_ptr ctx = f_ctx_stack.back();
+    assert( 0 < f_time_stack.size() );
+    step_t time = f_time_stack.back();
+    FQExpr key(ctx, expr, time);
+
+    /* collect dds and memoize */
+    DDVector dv;
+    unsigned i;
+    ADDStack::reverse_iterator ri;
+    AlgebraicType_ptr at = tm.as_algebraic(type);
+
+    assert(at->width() <= f_add_stack.size());
+    for (i = 0, ri = f_add_stack.rbegin();
+         i < at->width(); ++ i, ++ ri) {
+        dv.push_back(*ri);
+    }
+    assert (dv.size() == at->width());
+
+    f_map [key] = dv;
 }

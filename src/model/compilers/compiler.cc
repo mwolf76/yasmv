@@ -52,6 +52,7 @@ Compiler::Compiler()
     , f_ctx_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
+    , f_shifter(*this)
 { DEBUG << "Created Compiler @" << this << endl; }
 
 Compiler::~Compiler()
@@ -133,10 +134,12 @@ void Compiler::walk_neg_postorder(const Expr_ptr expr)
     if (is_unary_integer(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Negate());
+        memoize_result(expr);
         return;
     }
     else if (is_unary_algebraic(expr)) {
         algebraic_neg(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -150,10 +153,12 @@ void Compiler::walk_not_postorder(const Expr_ptr expr)
     if (is_unary_boolean(expr)) {
         const ADD top = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(top.Cmpl());
+        memoize_result(expr);
         return;
     }
     else if (is_unary_algebraic(expr)) {
         algebraic_not(expr); // bitwise
+        memoize_result(expr);
         return;
     }
 
@@ -171,11 +176,13 @@ void Compiler::walk_add_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Plus(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_plus(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -193,11 +200,13 @@ void Compiler::walk_sub_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Minus(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_sub(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -215,11 +224,13 @@ void Compiler::walk_div_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Divide(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_div(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -237,12 +248,14 @@ void Compiler::walk_mul_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Times(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
 
     else if (is_binary_algebraic(expr)) {
         algebraic_mul(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -260,11 +273,13 @@ void Compiler::walk_mod_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Modulus(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_mod(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -282,6 +297,7 @@ void Compiler::walk_and_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -290,11 +306,13 @@ void Compiler::walk_and_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_and(expr); // bitwise
+        memoize_result(expr);
         return;
     }
 
@@ -312,6 +330,7 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Or(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -320,11 +339,13 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_or(expr);
+        memoize_result(expr);
         return;
     }
 }
@@ -340,6 +361,7 @@ void Compiler::walk_xor_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Xor(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -348,11 +370,13 @@ void Compiler::walk_xor_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_xor(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -370,6 +394,7 @@ void Compiler::walk_xnor_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Xnor(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -378,11 +403,13 @@ void Compiler::walk_xnor_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_xnor(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -400,6 +427,7 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Cmpl().Or(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -408,11 +436,13 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_implies(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -437,10 +467,12 @@ void Compiler::walk_lshift_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LShift(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_lshift(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -458,10 +490,12 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.RShift(rhs)); /* bitwise integer arithmetic */
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_rshift(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -479,6 +513,7 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -488,11 +523,13 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_equals(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -510,6 +547,7 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
@@ -519,11 +557,13 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_not_equals(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -541,11 +581,13 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LT(lhs)); // simulate GT op
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_gt(expr);
+        memoize_result(expr);
         return;
     }
     else assert( false );
@@ -562,11 +604,13 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(rhs.LEQ(lhs)); // simulate GEQ op
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_ge(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -584,11 +628,13 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LT(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_lt(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -606,11 +652,13 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
         const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
         f_add_stack.push_back(lhs.LEQ(rhs));
         f_type_stack.pop_back(); // consume one, leave the other
+        memoize_result(expr);
         return;
     }
 
     else if (is_binary_algebraic(expr)) {
         algebraic_le(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -633,11 +681,13 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
 
         f_type_stack.pop_back();
         f_type_stack.pop_back(); // consume two, leave the third
+        memoize_result(expr);
         return;
     }
 
     else if (is_ite_integer(expr)) {
         integer_ite(expr);
+        memoize_result(expr);
         return;
     }
 
@@ -651,11 +701,13 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
         f_type_stack.pop_back();
         f_type_stack.pop_back(); // consume all, push integer
         f_type_stack.push_back(tm.find_integer());
+        memoize_result(expr);
         return;
     }
 
     else if (is_ite_algebraic(expr)) {
         algebraic_ite(expr);
+        memoize_result(expr);
         return;
     }
 

@@ -37,11 +37,32 @@ typedef vector<ADD> ADDStack;
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t> TimeStack;
 
-typedef unordered_map<FQExpr, ADD, FQExprHash, FQExprEq> ADDMap;
+typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
 
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
+
+/* This class is used to perform time shifting of a previously
+   compiled expression. */
+
+class Compiler; /* fwd decl */
+
+#include <dd_walker.hh>
+class TimeShifter : public DDNodeWalker {
+public:
+    TimeShifter(Compiler& owner);
+    ~TimeShifter();
+
+    bool condition(const DdNode *node);
+    void action(const DdNode *node);
+
+    void pre_hook();
+    void post_hook();
+
+private:
+    Compiler& f_owner;
+};
 
 class Compiler : public SimpleWalker {
 
@@ -165,20 +186,12 @@ protected:
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
-    // services
-    inline bool cache_miss(const Expr_ptr expr)
-    {
-        FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
-        ADDMap::iterator eye = f_map.find(key);
+    // time shifter (avoid recompilation)
+    TimeShifter f_shifter;
 
-        if (eye != f_map.end()) {
-            ADD& res = (*eye).second;
-            f_add_stack.push_back(res);
-            return false;
-        }
-
-        return true;
-    }
+    /* services */
+    bool cache_miss(const Expr_ptr expr);
+    void memoize_result(const Expr_ptr expr);
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
@@ -233,6 +246,7 @@ protected:
 
     /* TODO: refactor these */
     unsigned algebrize_operands(bool is_ite = false);
+    unsigned algebrize_binary_predicate(); /* 1 */
     unsigned algebrize_unary();
 
     /* temporaries */

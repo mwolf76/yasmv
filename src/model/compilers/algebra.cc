@@ -347,7 +347,8 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
 void Compiler::algebraic_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+
+    unsigned width = algebrize_binary_predicate(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -411,7 +412,7 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
 void Compiler::algebraic_lt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_predicate(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -444,7 +445,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
 void Compiler::algebraic_le(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_predicate(); // largest
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {

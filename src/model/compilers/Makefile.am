@@ -13,7 +13,7 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 
 PKG_HH = compiler.hh
 
-PKG_CC = compiler.cc algebra.cc internals.cc
+PKG_CC = compiler.cc algebra.cc internals.cc shifter.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
