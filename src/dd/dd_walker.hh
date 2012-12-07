@@ -43,8 +43,7 @@ typedef enum {
 struct dd_activation_record {
     dd_entry_point pc;
     const DdNode *node;
-
-    dd_activation_record(const DdNode *n, bool inv = false)
+    dd_activation_record(const DdNode *n)
         : pc(DD_DEFAULT)
         , node(n)
     {}

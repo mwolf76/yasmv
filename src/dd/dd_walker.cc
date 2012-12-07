@@ -159,23 +159,12 @@ void DDNodeWalker::walk ()
     while(0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
-        DdNode *N, *T, *E;
 
-        N = Cudd_Regular(curr.node);
-        if (cuddIsConstant(N) ) {
+        /* skip constants */
+        if (cuddIsConstant(curr.node)) {
             f_recursion_stack.pop();
             continue;
         }
-
-        T = Cudd_IsComplement(curr.node)
-            ? Cudd_Complement( cuddT(N))
-            : cuddT(N)
-            ;
-
-        E = Cudd_IsComplement(curr.node)
-            ? Cudd_Complement( cuddE(N))
-            : cuddE(N)
-            ;
 
         // restore caller location (simulate call return behavior)
         if (curr.pc != DD_DEFAULT) {
@@ -188,16 +177,16 @@ void DDNodeWalker::walk ()
 
         /* if node is not a constant and fulfills condition, perform
            action on it. Recur into its children afterwards (pre-order). */
-        if (condition(N)) {
+        if (condition(curr.node)) {
             /* recur in THEN */
             f_recursion_stack.top().pc = DD_ELSE;
-            f_recursion_stack.push(dd_activation_record(T));
+            f_recursion_stack.push(dd_activation_record(cuddT(curr.node)));
             goto call;
 
         entry_node_ELSE:
             /* recur in ELSE */
             f_recursion_stack.top().pc = DD_RETURN;
-            f_recursion_stack.push(dd_activation_record(E));
+            f_recursion_stack.push(dd_activation_record(cuddE(curr.node)));
             goto call;
 
         entry_node_ACTION:

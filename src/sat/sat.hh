@@ -123,7 +123,10 @@ namespace Minisat {
         inline lbool value(int index)
         {
             assert (STATUS_SAT == f_status);
-            return f_solver.modelValue(index2var(index));
+            Var v = index2var(index);
+            if (v < 0) return l_Undef;
+
+            return f_solver.modelValue(v);
         }
 
         /**
@@ -171,7 +174,7 @@ namespace Minisat {
                 return (*eye).second;
             }
 
-            assert(0);
+            return -1; /* cnf var */
         }
 
         Var2IndexMap f_var2index_map;
@@ -182,7 +185,7 @@ namespace Minisat {
                 return (*eye).second;
             }
 
-            assert(0);
+            return -1; /* cnf var */
         }
 
         Group2VarMap f_groups_map;
@@ -233,10 +236,11 @@ namespace Minisat {
         { return a_clauses.has(cr); }
 
         // -- Low level services -----------------------------------------------
-        Var cnf_new_cnf_var();
+        // Var cnf_new_cnf_var();
 
+        Var cnf_find_index_var(int index);
         Lit cnf_find_group_lit(group_t group);
-        Lit cnf_find_index_lit(int index, bool is_cmpl);
+        // Lit cnf_find_index_lit(int index, bool is_cmpl);
 
         // Lit cnf_write(Term phi, const group_t group, const color_t color);
 
