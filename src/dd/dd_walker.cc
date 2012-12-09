@@ -159,11 +159,16 @@ void DDNodeWalker::walk ()
     while(0 != f_recursion_stack.size()) {
     call:
         dd_activation_record curr = f_recursion_stack.top();
+        assert ( !Cudd_IsComplement(curr.node));
 
-        /* skip constants */
+        /* process constant immediately, no recursion */
         if (cuddIsConstant(curr.node)) {
-            f_recursion_stack.pop();
-            continue;
+            if (condition(curr.node)) goto entry_node_ACTION;
+            else {
+                /* just skip it */
+                f_recursion_stack.pop();
+                continue;
+            }
         }
 
         // restore caller location (simulate call return behavior)

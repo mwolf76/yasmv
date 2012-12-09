@@ -43,8 +43,9 @@ namespace Minisat {
 
         bool condition(const DdNode *node)
         {
-            /* not visited (regular) */
-            return (f_seen.find(Cudd_Regular(node))== f_seen.end());
+            /* is a non constant, not visited node. */
+            return ( !cuddIsConstant(node) &&
+                     f_seen.find(node) == f_seen.end());
         }
 
         void pre_hook()
@@ -84,7 +85,7 @@ namespace Minisat {
 
             ps.push( mkLit( x, px ));
 
-            DRIVEL << ps << endl;
+            // DRIVEL << ps << endl;
             f_sat.f_solver.addClause_(ps, color);
         }
 
@@ -98,7 +99,7 @@ namespace Minisat {
             ps.push( mkLit( x, px ));
             ps.push( mkLit( y, py ));
 
-            DRIVEL << ps << endl;
+            // DRIVEL << ps << endl;
             f_sat.f_solver.addClause_(ps, color);
         }
 
@@ -114,17 +115,14 @@ namespace Minisat {
             ps.push( mkLit( y, py ));
             ps.push( mkLit( w, pw ));
 
-            DRIVEL << ps << endl;
+            // DRIVEL << ps << endl;
             f_sat.f_solver.addClause_(ps, color);
         }
 
         void action(const DdNode *node)
         {
-#if 0
-            ADD dbg (f_owner.dd(), const_cast<DdNode *>(node));
-            dbg.PrintMinterm();
-#endif
-
+            /* don't process leaves */
+            assert (!Cudd_IsConstant(node));
             f_seen.insert(node); /* mark as visited */
 
             // FIXME...
@@ -267,9 +265,9 @@ namespace Minisat {
 
             if (f_activation_map.end() == eye) {
                 res = f_sat.f_solver.newVar();
-                DRIVEL << "Adding VAR " << res
-                       << " for CNF of DD (index = " << node->index << ")"
-                       << endl;
+                // DRIVEL << "Adding VAR " << res
+                //        << " for CNF of DD (index = " << node->index << ")"
+                //        << endl;
 
                 /* insert into activation map */
                 f_activation_map [ node_ ] = res;

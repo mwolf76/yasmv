@@ -26,6 +26,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 #include <common.hh>
+#include <pool.hh>
 #include <SolverTypes.hh>
 #include <Set.hh>
 #include <cuddObj.hh>
@@ -101,15 +102,15 @@ namespace Minisat {
     typedef vector<ADD> Terms;
 
     // this CNFization algorithm requires Term to be 0-1 ADDs
-    struct IntHash {
-        inline long operator() (int term) const
-        { return (long) (term); }
-    };
-    struct IntEq {
-        inline bool operator() (const int phi,
-                                const int psi) const
-        { return phi == psi; }
-    };
+    // struct IntHash {
+    //     inline long operator() (int term) const
+    //     { return (long) (term); }
+    // };
+    // struct IntEq {
+    //     inline bool operator() (const int phi,
+    //                             const int psi) const
+    //     { return phi == psi; }
+    // };
     typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
     struct VarHash {

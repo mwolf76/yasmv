@@ -38,8 +38,8 @@ namespace Minisat {
         }
         else {
             v = f_solver.newVar();
-            DRIVEL << "Adding VAR " << v
-                   << " for group " << group << endl;
+            // DRIVEL << "Adding VAR " << v
+            //        << " for group " << group << endl;
 
             f_groups_map.insert( make_pair<group_t, Var>(group, v));
         }
@@ -60,8 +60,8 @@ namespace Minisat {
         else {
             /* generate new var and book it. */
             res = f_solver.newVar();
-            DRIVEL << "Adding VAR " << res
-                   << " for DD (index = " << index << ") " << endl;
+            // DRIVEL << "Adding VAR " << res
+            //        << " for DD (index = " << index << ") " << endl;
 
             f_index2var_map.insert( make_pair<int, Var>(index, res));
         }

@@ -71,6 +71,10 @@ public:
 
 protected:
     virtual void walk() =0;
+
+    virtual bool condition(const DdNode *node) =0;
+    virtual void action   (const DdNode *node) =0;
+
     virtual void pre_hook() =0;
     virtual void post_hook() =0;
 
@@ -86,9 +90,6 @@ public:
     DDLeafWalker(CuddMgr& owner);
     virtual ~DDLeafWalker();
 
-    virtual bool condition(const DdNode *node) =0;
-    virtual void action   (const DdNode *node) =0;
-
 protected:
     virtual void walk();
     virtual void pre_hook();
@@ -102,9 +103,6 @@ class DDNodeWalker : public DDWalker {
 public:
     DDNodeWalker(CuddMgr& owner);
     virtual ~DDNodeWalker();
-
-    virtual bool condition(const DdNode *node) =0;
-    virtual void action   (const DdNode *node) =0;
 
 protected:
     virtual void walk();

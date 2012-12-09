@@ -87,5 +87,15 @@ struct ValueEq {
                      const value_t y) const;
 };
 
+struct IntHash {
+    inline long operator() (int term) const
+    { return (long) (term); }
+};
+struct IntEq {
+    inline bool operator() (const int phi,
+                            const int psi) const
+    { return phi == psi; }
+};
+
 
 #endif
