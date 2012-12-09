@@ -52,7 +52,6 @@ Compiler::Compiler()
     , f_ctx_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
-    , f_shifter(*this)
 { DEBUG << "Created Compiler @" << this << endl; }
 
 Compiler::~Compiler()
@@ -114,6 +113,12 @@ void Compiler::post_hook()
     add.PrintMinterm();
     cout << endl;
 #endif
+
+    /* issue a warning for UNSAT */
+    if (add.IsZero()) {
+        WARN << "Formula is UNSAT" << endl;
+    }
+
 }
 
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
@@ -124,6 +129,7 @@ bool Compiler::walk_next_preorder(const Expr_ptr expr)
 }
 void Compiler::walk_next_postorder(const Expr_ptr expr)
 {
+    assert (0 < f_time_stack.size());
     f_time_stack.pop_back(); // reset time stack
 }
 
@@ -938,11 +944,9 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             // otherwise create and cache it.
             FQExpr key(ctx, expr, time);
 
-            /* build a new encoding for this symbol if none is available */
-            if (NULL == (enc = f_enc.find_encoding(key))) {
-                enc = f_enc.make_encoding(type);
-                f_enc.register_encoding(key, enc);
-            }
+            /* build a new encoding for this symbol if none is available. */
+            enc = find_encoding(key, type);
+            assert (NULL != enc);
 
             push_variable(enc, type);
             return;
@@ -956,4 +960,17 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }  /* Model symbols */
 
     assert( false ); // unreachable
+}
+
+IEncoding_ptr Compiler::find_encoding(FQExpr& key, Type_ptr type)
+{
+    IEncoding_ptr res;
+
+    if (NULL == (res = f_enc.find_encoding(key))) {
+        assert (NULL != type);
+        res = f_enc.make_encoding(type);
+        f_enc.register_encoding(key, res);
+    }
+
+    return res;
 }

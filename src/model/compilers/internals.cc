@@ -57,10 +57,10 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DRIVEL << "RHS is " << rhs_type << endl;
+    // DRIVEL << "RHS is " << rhs_type << endl;
 
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DRIVEL << "LHS is " << lhs_type << endl;
+    // DRIVEL << "LHS is " << lhs_type << endl;
 
     // HACK: only for ITEs
     if (is_ite) {
@@ -84,7 +84,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
 
     // Nothing do be done, just ad result type to the type stack and leave
     if ((rhs_width == res) && (lhs_width == res)) {
-        DRIVEL << "Nothing do be done." << endl;
+        // DRIVEL << "Nothing do be done." << endl;
         f_type_stack.push_back(rhs_type); // arbitrary
 
         assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
@@ -94,7 +94,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     /* perform conversion or padding, taking sign bit into account */
     if (rhs_width < res) {
         if (! rhs_width) { // integer, conversion required
-            DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
+            // DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
             algebraic_from_integer_const(res);
         }
         else { // just padding required
@@ -117,7 +117,7 @@ unsigned Compiler::algebrize_operands(bool is_ite)
         }
 
         if (! lhs_width) { // integer, conversion required
-            DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
+            // DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
             algebraic_from_integer_const(res);
         }
         else { // just padding required
@@ -148,10 +148,10 @@ unsigned Compiler::algebrize_binary_predicate()
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DRIVEL << "RHS is " << rhs_type << endl;
+    // DRIVEL << "RHS is " << rhs_type << endl;
 
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    DRIVEL << "LHS is " << lhs_type << endl;
+    // DRIVEL << "LHS is " << lhs_type << endl;
 
     assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
     unsigned rhs_width = tm.is_algebraic(rhs_type)
@@ -170,7 +170,7 @@ unsigned Compiler::algebrize_binary_predicate()
 
     // Nothing do be done, just add result type to the type stack and leave
     if ((rhs_width == res) && (lhs_width == res)) {
-        DRIVEL << "Nothing do be done." << endl;
+        // DRIVEL << "Nothing do be done." << endl;
         f_type_stack.push_back(tm.find_boolean()); // predicate
         return res;
     }
@@ -178,7 +178,7 @@ unsigned Compiler::algebrize_binary_predicate()
     /* perform conversion or padding, taking sign bit into account */
     if (rhs_width < res) {
         if (! rhs_width) { // integer, conversion required
-            DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
+            // DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
             algebraic_from_integer_const(res);
         }
         else { // just padding required
@@ -199,7 +199,7 @@ unsigned Compiler::algebrize_binary_predicate()
         }
 
         if (! lhs_width) { // integer, conversion required
-            DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
+            // DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
             algebraic_from_integer_const(res);
         }
         else { // just padding required
@@ -232,7 +232,7 @@ unsigned Compiler::algebrize_unary()
     unsigned machine_width = 2; // TODO!
 
     const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
-    DRIVEL << "TOP is " << top_type << endl;
+    // DRIVEL << "TOP is " << top_type << endl;
 
     unsigned top_width = tm.is_algebraic(top_type)
         ? tm.as_algebraic(top_type)->width()
@@ -246,7 +246,7 @@ unsigned Compiler::algebrize_unary()
 
     // Nothing do be done, just ad result type to the type stack and leave
     if ((top_width == res)) {
-        DRIVEL << "Nothing do be done." << endl;
+        // DRIVEL << "Nothing do be done." << endl;
         f_type_stack.push_back(top_type); // arbitrary
 
         assert( stack_size - 1 == f_type_stack.size());
@@ -256,7 +256,7 @@ unsigned Compiler::algebrize_unary()
     /* perform conversion or padding, taking sign bit into account */
     if (top_width < res) {
         if (! top_width) { // integer, conversion required
-            DRIVEL << "INT -> ALGEBRAIC TOP" << endl;
+            // DRIVEL << "INT -> ALGEBRAIC TOP" << endl;
             algebraic_from_integer_const(res);
         }
         else { // just padding required
@@ -303,7 +303,7 @@ void Compiler::algebraic_from_integer_const(unsigned width)
     }
 
     assert (value == 0); // not overflowing
-    DRIVEL << "ALGEBRAIC " << width << endl;
+    // DRIVEL << "ALGEBRAIC " << width << endl;
 }
 
 /* extends a DD vector on top of the stack from old_width to
@@ -706,37 +706,22 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     ADDMap::iterator eye = f_map.find(key);
 
     if (eye != f_map.end()) {
+        const Type_ptr type = f_owner.type(key);
+        TRACE << "Cache hit for " << expr
+              << " type is " << type
+              << endl;
 
+        /* push cached DDs and type */
         DDVector::reverse_iterator ri;
         for (ri = (*eye).second.rbegin();
              ri != (*eye).second.rend(); ++ ri ) {
             f_add_stack.push_back(*ri);
         }
+        f_type_stack.push_back(type);
+
+        /* cache hit */
         return false;
     }
-
-#if USE_SHIFTER
-    FQExpr key0(f_ctx_stack.back(), expr, 0);
-    ADDMap::iterator eye = f_map.find(key);
-
-    if (eye != f_map.end()) {
-        DDVector dv = (*eye).second;
-        step_t time = f_time_stack.back();
-        TRACE << "Shifting " << key0
-              << " to time " << time
-              << endl;
-
-        for (DDVector::reverse_iterator ri = dv.rbegin();
-             ri != dv.rend(); ++ ri) {
-
-            ADD shifted = f_shifter.process(*eye, time);
-            f_add_stack.push_back(shifted);
-        }
-
-        memoize_result(expr); /* memoize this result as well */
-        return false;
-    }
-#endif
 
     /* cache miss */
     return true;
@@ -749,28 +734,80 @@ void Compiler::memoize_result(const Expr_ptr expr)
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
 
-    /* We choose to memoize algebraics only */
-    if (!tm.is_algebraic(type)) return;
-
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
     Expr_ptr ctx = f_ctx_stack.back();
+
     assert( 0 < f_time_stack.size() );
     step_t time = f_time_stack.back();
+
     FQExpr key(ctx, expr, time);
+    TRACE << "Memoizing result for " << key
+          << " type is " << type << endl;
 
     /* collect dds and memoize */
     DDVector dv;
-    unsigned i;
-    ADDStack::reverse_iterator ri;
-    AlgebraicType_ptr at = tm.as_algebraic(type);
+    unsigned i, width;
+    if (tm.is_algebraic(type)) {
+        width = tm.as_algebraic(type)->width();
+    }
 
-    assert(at->width() <= f_add_stack.size());
+    else if (tm.is_boolean(type)) {
+        width = 1;
+    }
+
+    else assert (false); /* unreachable */
+
+    assert(width <= f_add_stack.size());
+    ADDStack::reverse_iterator ri;
     for (i = 0, ri = f_add_stack.rbegin();
-         i < at->width(); ++ i, ++ ri) {
+         i < width; ++ i, ++ ri) {
         dv.push_back(*ri);
     }
-    assert (dv.size() == at->width());
+    assert (dv.size() == width);
 
-    f_map [key] = dv;
+    f_map.insert( make_pair <FQExpr,
+                  DDVector> ( key, dv ));
+}
+
+int double_cmp(double x, double y)
+{
+    return (x == y)
+        ? 0
+        : ((x < y)
+           ? 1
+           : -1);
+}
+
+struct DDInfo {
+    ADD dd;
+    double npaths;
+
+    DDInfo(ADD add)
+        : dd(add)
+    {
+        npaths = dd.CountPath();
+    }
+};
+
+bool compare_ddinfo( const DDInfo & e1, const DDInfo & e2)
+{ return e1.npaths < e2.npaths; }
+
+typedef vector<DDInfo> DDInfoVector;
+
+ADD Compiler::optimize_and_chain(ADD* dds, unsigned len)
+{
+    DDInfoVector iv;
+    for (unsigned i = 0; i < len; ++ i) {
+        iv.push_back( DDInfo(dds[i]));
+    }
+
+    std::sort( iv.begin(), iv.end(), compare_ddinfo );
+
+    ADD res = f_enc.one();
+    for (DDInfoVector::iterator i = iv.begin(); i != iv.end(); ++ i) {
+        res *= (*i).dd;
+    }
+
+    return res;
 }

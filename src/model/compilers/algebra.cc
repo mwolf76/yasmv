@@ -32,6 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#define PROFILE_COMPILER
+
 #include <common.hh>
 
 #include <expr.hh>
@@ -360,17 +362,14 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    /* perform bw arithmetic, similar to xnor, only conjuct res */
-    ADD tmp = f_enc.one();
+    ADD tmp[width];
     for (unsigned i = 0; i < width; ++ i) {
-
-        /* x[i] == y[i] */
-        unsigned ndx = width - i - 1;
-        tmp *= lhs[ndx].Equals(rhs[ndx]);
+        unsigned ndx = width - 1 -i;
+        tmp[ndx] = lhs[ndx].Equals(rhs[ndx]);
     }
 
     /* just one result */
-    f_add_stack.push_back(tmp);
+    f_add_stack.push_back(optimize_and_chain(tmp, width));
 }
 
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
@@ -428,14 +427,18 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
        digit. */
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
+        ADD phi[1 + i];
 
-        ADD pfx = f_enc.one();
+        /* prefix */
         for (unsigned j = 0; j < i; j ++ ) {
-            pfx *= rhs[j].Equals(lhs[j]);
+            phi[j] = rhs[j].Equals(lhs[j]);
         }
 
-        /* pfx & ( x[i] < y[i] ) */
-        tmp = tmp.Or(pfx.Times(lhs[i].LT(rhs[i])));
+        /* add final condition */
+        phi[i] = lhs[i].LT(rhs[i]);
+
+        /* add optimized chain to disjunction */
+        tmp = tmp.Or( optimize_and_chain(phi, 1 + i));
     }
 
     /* just one result */
@@ -462,13 +465,18 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     ADD tmp = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        ADD pfx = f_enc.one();
+        ADD phi[1 + i];
+
+        /* prefix */
         for (unsigned j = 0; j < i; j ++ ) {
-            pfx *= rhs[j].Equals(lhs[j]);
+            phi[j] = rhs[j].Equals(lhs[j]);
         }
 
-        /* pfx & ( x[i] <= y[i] ) */
-        tmp = tmp.Or(pfx.Times(lhs[i].LEQ(rhs[i])));
+        /* add final condition */
+        phi[i] = lhs[i].LEQ(rhs[i]);
+
+        /* add optimized chain to disjunction */
+        tmp = tmp.Or( optimize_and_chain(phi, 1 + i));
     }
 
     /* just one result */

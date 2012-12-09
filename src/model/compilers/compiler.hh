@@ -43,29 +43,7 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-/* This class is used to perform time shifting of a previously
-   compiled expression. */
-
-class Compiler; /* fwd decl */
-
-#include <dd_walker.hh>
-class TimeShifter : public DDNodeWalker {
-public:
-    TimeShifter(Compiler& owner);
-    ~TimeShifter();
-
-    bool condition(const DdNode *node);
-    void action(const DdNode *node);
-
-    void pre_hook();
-    void post_hook();
-
-private:
-    Compiler& f_owner;
-};
-
 class Compiler : public SimpleWalker {
-
 public:
     Compiler();
     virtual ~Compiler();
@@ -163,8 +141,8 @@ protected:
 
     unsigned f_temp_auto_index; // autoincr temp index
 
-    ADDMap f_map; // FQDN -> DD cache
-    ENCMap f_temp_encodings;  // FQDN -> DD encoding (for temporaries)
+    ADDMap f_map;                 // FQDN -> DD cache
+    ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -186,12 +164,12 @@ protected:
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
-    // time shifter (avoid recompilation)
-    TimeShifter f_shifter;
-
     /* services */
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
+
+    /* proxy for the omonymous method in enc mgr */
+    IEncoding_ptr find_encoding(FQExpr& key, Type_ptr type= NULL);
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
@@ -239,6 +217,8 @@ protected:
     void algebraic_ite(const Expr_ptr expr);
 
     /* -- other services ---------------------------------------------------- */
+    ADD optimize_and_chain(ADD* dds, unsigned len);
+
     void algebraic_from_integer_const(unsigned width);
 
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
@@ -246,7 +226,7 @@ protected:
 
     /* TODO: refactor these */
     unsigned algebrize_operands(bool is_ite = false);
-    unsigned algebrize_binary_predicate(); /* 1 */
+    unsigned algebrize_binary_predicate();
     unsigned algebrize_unary();
 
     /* temporaries */
