@@ -69,14 +69,14 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     f_ctx_stack.push_back(ctx);
 
     // invoke walker on the body of the expr to be processed
-    DRIVEL << "Determining type for expression " << ctx << "::" << body << endl;
+    // DRIVEL << "Determining type for expression " << ctx << "::" << body << endl;
     (*this)(body);
 
     assert(1 == f_type_stack.size());
     res = f_type_stack.back();
 
-    DRIVEL << "Type for " << ctx << "::" << body
-           << " is " << res << endl;
+    // DRIVEL << "Type for " << ctx << "::" << body
+    //        << " is " << res << endl;
 
     return res;
 }
