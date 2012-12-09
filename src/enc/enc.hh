@@ -40,13 +40,14 @@
 const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
 
 // -- primary decls  --------------------------------------------------------------
-typedef vector<ADD> DDVector;
-typedef vector<int> IndexVector;
-
 typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
 public:
+    /* Full-Digit DDs */
     virtual DDVector& dv() =0;
+
+    /* Bit-level DDs */
+    virtual DDVector& bits() =0;
 
     // vector of DD leaves (consts) -> expr
     virtual Expr_ptr expr(int* assignment) =0;

@@ -39,6 +39,9 @@
 
 typedef class IEncoding *IEncoding_ptr; // fwd decl
 
+typedef vector<ADD> DDVector;
+typedef vector<int> IndexVector;
+
 struct ADDHash {
     inline long operator() (ADD term) const
     {
@@ -53,7 +56,7 @@ struct ADDEq {
 };
 
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
-typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
+// typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
 
 typedef vector<ADD> EncodingBits;
 
@@ -91,7 +94,9 @@ public:
 
     // Registers an encoding. Used by the compiler
     inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
-    { f_fqexpr2enc_map [ fqexpr ] = enc; }
+    {
+        f_fqexpr2enc_map [ fqexpr ] = enc;
+    }
 
     // Retrieves an encoding previously created using
     // make_encoding. User by the SAT model evaluator

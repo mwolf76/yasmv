@@ -33,9 +33,6 @@ EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
 IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
-    assert(NULL != tp);
-    // Expr_ptr repr = tp->repr();
-
     IEncoding_ptr res = NULL;
 
     BooleanType_ptr btype;
@@ -43,20 +40,22 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     EnumType_ptr etype;
     ArrayType_ptr vtype;
 
+    assert(NULL != tp);
+
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
-        // DEBUG << "Encoding Boolean " << repr << endl;
+        DEBUG << "Encoding Boolean " << btype << endl;
         res = new BooleanEncoding();
     }
     else if (NULL != (atype = dynamic_cast<AlgebraicType_ptr>(tp))) {
-        // DEBUG << "Encoding Algebraic " << repr << endl;
+        DEBUG << "Encoding Algebraic " << atype << endl;
         res = new AlgebraicEncoding(atype->width(), atype->is_signed(), atype->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
-        // DEBUG << "Encoding Enum " << repr << endl;
+        DEBUG << "Encoding Enum " << etype << endl;
         res = new EnumEncoding(etype->literals());
     }
     else if (NULL != (vtype = dynamic_cast<ArrayType_ptr>(tp))) {
-        // DEBUG << "Encoding Array " << repr << endl;
+        DEBUG << "Encoding Array " << vtype << endl;
         Encodings encs;
         for (unsigned i =0; i < vtype->size(); ++ i) {
             encs.push_back(make_encoding(vtype->of()));
