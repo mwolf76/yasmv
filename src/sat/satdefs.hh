@@ -25,11 +25,17 @@
  **/
 #ifndef DEFS_H
 #define DEFS_H
+
 #include <common.hh>
 #include <pool.hh>
+
 #include <SolverTypes.hh>
+
+/* from MTL */
 #include <Set.hh>
-#include <cuddObj.hh>
+
+// for the definition of Term
+#include <dd.hh>
 
 namespace Minisat {
 
@@ -98,8 +104,8 @@ namespace Minisat {
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;
 
-    typedef ADD Term;
-    typedef vector<ADD> Terms;
+    typedef YDD_ptr Term;
+    typedef vector<Term> Terms;
 
     // this CNFization algorithm requires Term to be 0-1 ADDs
     // struct IntHash {

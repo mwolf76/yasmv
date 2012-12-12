@@ -29,31 +29,65 @@
 
 namespace Minisat {
 
-    class CNFBuilderSingleCut : public DDNodeWalker {
+    /* used only for CNF-ization */
+    class TimedDD {
     public:
-        CNFBuilderSingleCut(CuddMgr& mgr, SAT& sat)
-            : DDNodeWalker(mgr)
-            , f_sat(sat)
+        TimedDD(YDD_ptr node, step_t time)
+            : f_node(node)
+            , f_time(time)
+        {}
+
+        TimedDD(const TimedDD& other)
+            : f_node(other.node())
+            , f_time(other.time())
+        {}
+
+        inline YDD_ptr node() const
+        { return f_node; }
+
+        inline step_t time() const
+        { return f_time; }
+
+    private:
+        // The YDD node
+        YDD_ptr f_node;
+
+        // expression time (default is 0)
+        step_t f_time;
+    };
+
+    struct TimedDDHash {
+        inline long operator() (const TimedDD& k) const
+        { return 0; } // TODO: hash function
+    };
+
+    struct TimedDDEq {
+        inline bool operator() (const TimedDD& x, const TimedDD& y) const
+        {
+            return (x.node() == y.node() &&
+                    x.time() == y.time());
+        }
+    };
+
+
+
+    class CNFBuilderSingleCut : public YDDWalker {
+    public:
+        CNFBuilderSingleCut(SAT& sat, step_t time)
+            : f_sat(sat)
+            , f_time(time)
             , f_toplevel(NULL)
         {}
 
         ~CNFBuilderSingleCut()
         {}
 
-
-        bool condition(const DdNode *node)
-        {
-            /* is a non constant, not visited node. */
-            return ( !cuddIsConstant(node) &&
-                     f_seen.find(node) == f_seen.end());
-        }
-
         void pre_hook()
         {
             assert( 1 == f_recursion_stack.size());
 
-            dd_activation_record curr = f_recursion_stack.top();
-            f_toplevel = const_cast<DdNode *>(curr.node);
+            ydd_activation_record curr = f_recursion_stack.top();
+            f_toplevel = const_cast<YDD_ptr>(curr.node);
 
             /* this has to be preallocated */
             group_t group = MAINGROUP;
@@ -73,6 +107,15 @@ namespace Minisat {
 
             /* assert toplevel fun */
             push1( color, find_cnf_var(f_toplevel), false);
+        }
+
+        bool condition(const YDD_ptr node)
+        {
+            assert(NULL != node);
+
+            /* is a non constant, not visited node. */
+            return ( !node->is_const() &&
+                     f_seen.find(node) == f_seen.end());
         }
 
         /* push 1 var clause */
@@ -119,10 +162,10 @@ namespace Minisat {
             f_sat.f_solver.addClause_(ps, color);
         }
 
-        void action(const DdNode *node)
+        void action(YDD_ptr node)
         {
             /* don't process leaves */
-            assert (!Cudd_IsConstant(node));
+            assert (NULL != node && ! node->is_const());
             f_seen.insert(node); /* mark as visited */
 
             // FIXME...
@@ -135,19 +178,19 @@ namespace Minisat {
             Var v = find_dd_var(node);
 
             /* both T, E are consts */
-            if (cuddIsConstant( cuddT(node)) &&
-                cuddIsConstant( cuddE(node))) {
+            if (node->Then()->is_const() &&
+                node->Else()->is_const()) {
 
-                if (0 != cuddV(cuddT(node)) &&
-                    0 == cuddV(cuddE(node))) {
+                if (node->Then()->is_true() &&
+                    node->Else()->is_false()) {
 
                     /* v <-> f */
                     push2( color, f, false, v, true );
                     push2( color, f, true, v, false );
                 }
 
-                else if (0 == cuddV(cuddT(node)) &&
-                         0 != cuddV(cuddE(node))) {
+                else if (node->Then()->is_false() &&
+                         node->Else()->is_true()) {
                     /* !( v <-> f ) */
                     push2( color, f, false, v, false );
                     push2( color, f, true, v, true );
@@ -157,12 +200,11 @@ namespace Minisat {
             }
 
             /* T is const, E is not */
-            else if (cuddIsConstant( cuddT(node)) &&
-                     !cuddIsConstant( cuddE(node))) {
+            else if (node->Then()->is_const() &&
+                     ! node->Else()->is_const()) {
 
-                Var e = find_cnf_var(cuddE(node));
-
-                if (0 != cuddV(cuddT(node))) {
+                Var e = find_cnf_var(node->Else());
+                if (node->Then()->is_true()) {
 
                     /* ( f | !v ) ; */
                     push2( color, f, false, v, true);
@@ -187,12 +229,12 @@ namespace Minisat {
             }
 
             /* E is const, T is not */
-            else if (cuddIsConstant( cuddE(node)) &&
-                     !cuddIsConstant( cuddT(node))) {
+            else if (node->Else()->is_const() &&
+                     ! node->Then()->is_const()) {
 
-                Var t = find_cnf_var(cuddT(node));
+                Var t = find_cnf_var(node->Then());
 
-                if (0 != cuddV(cuddE(node))) {
+                if (node->Else()->is_true()) {
 
                     /* ( f | v ) ; */
                     push2( color, f, false, v, false);
@@ -218,11 +260,11 @@ namespace Minisat {
 
             /* both T, E non consts */
             else {
-                assert (! Cudd_IsConstant(cuddT(node)));
-                Var t = find_cnf_var(cuddT(node));
+                assert (! node->Then()->is_const());
+                Var t = find_cnf_var(node->Then());
 
-                assert (! Cudd_IsConstant(cuddE(node)));
-                Var e = find_cnf_var(cuddE(node));
+                assert (! node->Else()->is_const());
+                Var e = find_cnf_var(node->Else());
 
                 /* !f, v, e */
                 push3( color, f, true, v, false, e, false);
@@ -240,37 +282,36 @@ namespace Minisat {
 
     private:
         SAT& f_sat;
-        unordered_set<const DdNode *> f_seen;
+        unordered_set<YDD_ptr> f_seen;
 
         Lit f_gl;
-
-        typedef unordered_map<DdNode *, Var, PtrHash, PtrEq> ActivationMap;
+        typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> ActivationMap;
         ActivationMap f_activation_map;
 
-        Var find_dd_var(const DdNode *node)
+        Var find_dd_var(const YDD_ptr node)
         {
-            assert (! Cudd_IsComplement(node));
-            return f_sat.cnf_find_index_var(node->index);
+            assert (NULL != node);
+
+            UCBI ucbi = f_sat.find_ucbi(node->index());
+            TCBI tcbi (ucbi.ctx(), ucbi.expr(), ucbi.time(), ucbi.bitno(), f_time);
+            return f_sat.f_mapper.var(tcbi);
         }
 
-        Var find_cnf_var(const DdNode *node)
+        Var find_cnf_var(const YDD_ptr node)
         {
             Var res;
 
-            assert (! Cudd_IsComplement(node));
-            DdNode *node_ = const_cast<DdNode *>(node);
+            assert (NULL != node);
+            TimedDD timed_node (const_cast<YDD_ptr> (node), f_time);
 
             const ActivationMap::iterator eye = \
-                f_activation_map.find( node_ );
+                f_activation_map.find( timed_node );
 
             if (f_activation_map.end() == eye) {
-                res = f_sat.f_solver.newVar();
-                // DRIVEL << "Adding VAR " << res
-                //        << " for CNF of DD (index = " << node->index << ")"
-                //        << endl;
+                res = f_sat.new_sat_var();
 
-                /* insert into activation map */
-                f_activation_map [ node_ ] = res;
+                /* Insert into activation map */
+                f_activation_map [ timed_node ] = res;
             }
 
             else {
@@ -280,10 +321,14 @@ namespace Minisat {
             return res;
         }
 
-        DdNode* f_toplevel;
+        YDD_ptr f_toplevel;
+        step_t f_time;
     };
 
-    void SAT::cnf_push_single_cut(Term phi, const group_t group, const color_t color)
-    { CNFBuilderSingleCut builder(CuddMgr::INSTANCE(), *this); builder(phi); }
+    void SAT::cnf_push_single_cut(Term phi, step_t time, const group_t group, const color_t color)
+    {
+        CNFBuilderSingleCut builder(*this, time);
+        builder(phi);
+    }
 
 };

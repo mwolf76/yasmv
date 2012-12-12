@@ -49,32 +49,27 @@ namespace Minisat {
 
     // memoize only positive terms
 
-    Var SAT::cnf_find_index_var(int index)
-    {
-        Var res;
-        const Index2VarMap::iterator eye = f_index2var_map.find(index);
+    // Var SAT::cnf_find_index_var(int index)
+    // {
+    //     Var res;
+    //     const Index2VarMap::iterator eye = f_index2var_map.find(index);
 
-        if (eye != f_index2var_map.end()) {
-            res = eye->second;
-        }
-        else {
-            /* generate new var and book it. */
-            res = f_solver.newVar();
-            // DRIVEL << "Adding VAR " << res
-            //        << " for DD (index = " << index << ") " << endl;
+    //     if (eye != f_index2var_map.end()) {
+    //         res = eye->second;
+    //     }
+    //     else {
+    //         /* generate new var and book it. */
+    //         res = f_solver.newVar();
+    //         // DRIVEL << "Adding VAR " << res
+    //         //        << " for DD (index = " << index << ") " << endl;
 
-            f_index2var_map.insert( make_pair<int, Var>(index, res));
-        }
+    //         f_index2var_map.insert( make_pair<int, Var>(index, res));
+    //     }
 
-        return res;
-    }
+    //     return res;
+    // }
 
-    void SAT::push(Term term, group_t group, color_t color)
-    {
-#if 1
-        cnf_push_single_cut(term, group, color);
-#else
-        cnf_push_no_cut(term, group, color);
-#endif
-    }
+    /* TODO: inline */
+    void SAT::push(Term term, step_t time, group_t group, color_t color)
+    { cnf_push_single_cut(term, time, group, color); }
 };

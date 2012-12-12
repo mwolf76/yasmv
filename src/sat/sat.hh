@@ -27,11 +27,13 @@
 #define SAT_H
 
 // general purpose decls
+#include <enc_mgr.hh>
 #include "satdefs.hh"
 #include "terms/ddterms.hh"
 #include "proof/proof.hh"
 #include "cuddObj.hh"
 
+/* MTL */
 #include <Map.hh>
 #include <Set.hh>
 #include <Vec.hh>
@@ -42,10 +44,32 @@
 
 namespace Minisat {
 
+    class SAT; // fwd decl
+
+    typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+    typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+
+    class TimeMapper : public IObject {
+        friend class SAT;
+
+    public:
+        Var var( TCBI& tcbi );
+        TCBI& tcbi( Var var );
+
+    private:
+        TimeMapper(SAT& owner);
+        ~TimeMapper();
+
+        SAT& f_owner;
+
+        /* Bidirectional mapping */
+        TCBI2VarMap f_tcbi2var_map;
+        Var2TCBIMap f_var2tcbi_map;
+    };
+
+
     class SAT : public IObject {
-        friend class CNFBuilderNoCut;
         friend class CNFBuilderSingleCut;
-        friend class WitnessBuilder;
 
     public:
         /**
@@ -87,9 +111,7 @@ namespace Minisat {
          * @brief add a formula with a given group and color to the
          * SAT instance.
          */
-        void push(Term term,
-                  group_t group = MAINGROUP,
-                  color_t color = BACKGROUND);
+        void push(Term term, step_t time, group_t group, color_t color);
 
         /**
          * @brief Solve all groups.
@@ -134,6 +156,8 @@ namespace Minisat {
          */
         SAT(DDTermFactory& factory)
             : f_factory(factory)
+            , f_enc_mgr(EncodingMgr::INSTANCE())
+            , f_mapper(* new TimeMapper(*this))
             , f_solver()
             , f_next_group(0)
             , f_next_color(0)
@@ -148,9 +172,22 @@ namespace Minisat {
         ~SAT()
         { DEBUG << "Destroyed SAT instance@" << this << endl; }
 
+        /* Internal services */
+        inline Var new_sat_var() // proxy
+        { return f_solver.newVar(); }
+
+        inline UCBI find_ucbi(int index) // proxy
+        { return f_enc_mgr.find_ucbi(index); }
+
     private:
         // Term factory
         DDTermFactory& f_factory;
+
+        // Enc Mgr
+        EncodingMgr& f_enc_mgr;
+
+        // TimeMapper
+        TimeMapper& f_mapper;
 
         // SAT solver
         Solver f_solver;
@@ -236,13 +273,8 @@ namespace Minisat {
         { return a_clauses.has(cr); }
 
         // -- Low level services -----------------------------------------------
-        // Var cnf_new_cnf_var();
-
-        Var cnf_find_index_var(int index);
+        // Var cnf_find_index_var(int index);
         Lit cnf_find_group_lit(group_t group);
-        // Lit cnf_find_index_lit(int index, bool is_cmpl);
-
-        // Lit cnf_write(Term phi, const group_t group, const color_t color);
 
         Term itp_build_interpolant(const Colors& a);
         void itp_init_interpolation(const Colors& ga);
@@ -250,8 +282,8 @@ namespace Minisat {
         status_t sat_solve_groups(const Groups& groups);
 
         // CNFization algorithms
-        void cnf_push_no_cut(Term phi, const group_t group, const color_t color);
-        void cnf_push_single_cut(Term phi, const group_t group, const color_t color);
+        void cnf_push_no_cut(Term phi, step_t time, const group_t group, const color_t color);
+        void cnf_push_single_cut(Term phi, step_t time, const group_t group, const color_t color);
     }; // SAT instance
 
 }; // minisat
