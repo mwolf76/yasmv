@@ -2,10 +2,10 @@
  *  @file cudd_mgr.hh
  *  @brief Cudd module (CuddMgr class)
  *
- *  This module contains definitions and services that implement an
- *  cudd for symbols. For each symbol a boolean encoding is
- *  maintained, the cudd takes care of ADD variables definitions
- *  and is provides mapback services as well.
+ *  This module contains definitions and services that implement a
+ *  Cudd instance factory. This is used to maintain several separate
+ *  Cudd instances, one for each time frame - thus allowing for good
+ *  scalability during the compiling phase.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -28,14 +28,19 @@
 #ifndef CUDD_MGR_H
 #define CUDD_MGR_H
 
+#include <common.hh>
 #include <cuddObj.hh>
 
 typedef class CuddMgr* CuddMgr_ptr;
+typedef Cudd* Cudd_ptr;
+
+typedef vector<Cudd_ptr> CuddVector;
+
 class CuddMgr  {
 
 public:
-    inline Cudd& dd()
-    { return f_cudd; }
+    /* Generate a *new* Cudd instance */
+    Cudd& dd();
 
     static CuddMgr& INSTANCE() {
         if (! f_instance) {
@@ -46,12 +51,11 @@ public:
 
 protected:
     CuddMgr();
+    ~CuddMgr();
 
 private:
     static CuddMgr_ptr f_instance;
-
-    /* local data */
-    Cudd f_cudd;
+    CuddVector f_cudd_instances;
 };
 
 

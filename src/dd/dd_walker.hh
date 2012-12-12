@@ -28,28 +28,39 @@
 #define DD_WALKER_H
 
 #include <common.hh>
-#include <cudd_mgr.hh>
+
+#include <dd.hh>
 #include <cuddInt.h>
 
-// enums in C++ are non-extensible, thus we have to keep all possible
-// values together in one place. (for DDs things are simpler)
 typedef enum {
-    DD_DEFAULT,
-    DD_RETURN,
-    DD_ELSE,
+    DD_PREORDER,
+    DD_INORDER,
+    DD_POSTORDER,
 } dd_entry_point;
 
-// reserved for walkers
-struct dd_activation_record {
+// reserved for ADD walkers
+struct add_activation_record {
     dd_entry_point pc;
     const DdNode *node;
-    dd_activation_record(const DdNode *n)
-        : pc(DD_DEFAULT)
-        , node(n)
+
+    add_activation_record(const DdNode *dd)
+        : pc(DD_PREORDER)
+        , node(dd)
     {}
 };
+typedef stack<struct add_activation_record> add_walker_stack;
 
-typedef stack<struct dd_activation_record> dd_walker_stack;
+// reserved for YDD walkers
+struct ydd_activation_record {
+    dd_entry_point pc;
+    const YDD_ptr node;
+
+    ydd_activation_record(const YDD_ptr dd)
+        : pc(DD_PREORDER)
+        , node(dd)
+    {}
+};
+typedef stack<struct ydd_activation_record> ydd_walker_stack;
 
 class DDWalkerException : public Exception
 {
@@ -57,20 +68,15 @@ public:
     virtual const char* what() const throw() =0;
 };
 
-/* Two kinds of DD walkers are defined: leaf and node walkers,
-   designed to process leaf nodes and internal nodes of given DD
-   respectively. */
-
-// base class (generic walker)
-class DDWalker {
+class ADDWalker {
 public:
-    DDWalker(CuddMgr& owner);
-    virtual ~DDWalker();
+    ADDWalker();
+    virtual ~ADDWalker();
 
-    virtual DDWalker& operator() (ADD dd);
+    virtual ADDWalker& operator() (ADD dd);
 
 protected:
-    virtual void walk() =0;
+    virtual void walk();
 
     virtual bool condition(const DdNode *node) =0;
     virtual void action   (const DdNode *node) =0;
@@ -79,36 +85,27 @@ protected:
     virtual void post_hook() =0;
 
     /* explicit recursion stack */
-    dd_walker_stack f_recursion_stack;
-
-    /* the CUDD instance */
-    CuddMgr& f_owner;
+    add_walker_stack f_recursion_stack;
 };
 
-class DDLeafWalker : public DDWalker {
+class YDDWalker {
 public:
-    DDLeafWalker(CuddMgr& owner);
-    virtual ~DDLeafWalker();
+    YDDWalker();
+    virtual ~YDDWalker();
+
+    virtual YDDWalker& operator() (const YDD_ptr dd);
 
 protected:
     virtual void walk();
-    virtual void pre_hook();
-    virtual void post_hook();
 
-    /* Holds the value for relevant literals when action is called */
-    char *f_data; /* try to limit memory waste for caching */
+    virtual bool condition(const YDD_ptr node) =0;
+    virtual void action   (const YDD_ptr node) =0;
+
+    virtual void pre_hook() =0;
+    virtual void post_hook() =0;
+
+    /* explicit recursion stack */
+    ydd_walker_stack f_recursion_stack;
 };
-
-class DDNodeWalker : public DDWalker {
-public:
-    DDNodeWalker(CuddMgr& owner);
-    virtual ~DDNodeWalker();
-
-protected:
-    virtual void walk();
-    virtual void pre_hook();
-    virtual void post_hook();
-};
-
 
 #endif

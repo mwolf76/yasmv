@@ -24,13 +24,33 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #include <cudd_mgr.hh>
 
 CuddMgr_ptr CuddMgr::f_instance = NULL;
 
 CuddMgr::CuddMgr()
-    : f_cudd()
 {
-    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
+    DRIVEL << "Initialized CuddMgr @ " << this << endl;
+}
+
+CuddMgr::~CuddMgr()
+{
+    CuddVector::iterator i;
+    for (i = f_cudd_instances.begin(); i != f_cudd_instances.end(); ++ i)
+        delete *i;
+
+    DRIVEL << "Deinitialized EncodingMgr @ " << this << endl;
+}
+
+Cudd& CuddMgr::dd()
+{
+    Cudd* res = new Cudd();
+    assert (NULL != res);
+
+    /* Common setup for all dd instances */
+    res -> AutodynEnable(CUDD_REORDER_SAME);
+
+    f_cudd_instances.push_back(res);
+
+    return *res;
 }
