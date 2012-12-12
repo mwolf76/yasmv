@@ -48,11 +48,16 @@ private:
     Compiler f_compiler;
 
     // services
+    void prepare();
+
     void assert_fsm_init();
     void assert_fsm_trans(step_t time);
     void assert_violation(step_t time);
 
-    void push_formula(ADD phi);
+    void push_timed_formulas(YDDVector& formulas, step_t time);
+
+    YDDVector f_init_ydds;
+    YDDVector f_trans_ydds;
 };
 
 /* Specialized for BMC ctx */

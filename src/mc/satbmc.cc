@@ -36,58 +36,80 @@ SATBMCFalsification::SATBMCFalsification(IModel& model, Expr_ptr property)
 SATBMCFalsification::~SATBMCFalsification()
 {}
 
-void SATBMCFalsification::push_formula(ADD phi)
+void SATBMCFalsification::push_timed_formulas(YDDVector& formulas, step_t time)
 {
-    clock_t t0 = clock();
-    TRACE << "CNFizing ..." << endl;
-
-    f_engine.push(phi);
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
+    for (YDDVector::iterator i = formulas.begin(); formulas.end() != i; ++ i) {
+        YDD_ptr phi = *i;
+        f_engine.push(phi, time,
+                      MAINGROUP,
+                      BACKGROUND); // TODO group and color
+    }
 }
 
-void SATBMCFalsification::assert_fsm_init()
+void SATBMCFalsification::prepare()
 {
+    f_init_ydds.clear();
     const Modules& modules = f_model.modules();
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
 
         Module& module = dynamic_cast <Module&> (*m->second);
-        const ExprVector init = module.init();
 
+        /* INIT */
+        const ExprVector init = module.init();
         for (ExprVector::const_iterator init_eye = init.begin();
              init_eye != init.end(); ++ init_eye) {
 
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*init_eye);
 
-            ADD add = f_compiler.process(ctx, body, 0);
-            push_formula(add);
+            /* Compiler produces an YDD */
+            f_init_ydds.push_back(f_compiler.process(ctx, body));
         }
-    }
-}
 
-void SATBMCFalsification::assert_fsm_trans(step_t time)
-{
-    const Modules& modules = f_model.modules();
-    for (Modules::const_iterator m = modules.begin();
-         m != modules.end(); ++ m) {
-
-        Module& module = dynamic_cast <Module&> (*m->second);
+        /* TRANS */
         const ExprVector trans = module.trans();
-
         for (ExprVector::const_iterator trans_eye = trans.begin();
              trans_eye != trans.end(); ++ trans_eye) {
 
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*trans_eye);
 
-            ADD add = f_compiler.process(ctx, body, time);
-            push_formula(add);
+            /* Compiler produces an YDD */
+            f_trans_ydds.push_back(f_compiler.process(ctx, body));
         }
     }
+}
+
+void SATBMCFalsification::assert_fsm_init()
+{
+    clock_t t0 = clock();
+    unsigned n = f_init_ydds.size();
+    TRACE << "CNFizing INITs ... ("
+          << n << " formulas)"
+          << endl;
+
+    push_timed_formulas(f_init_ydds, 0);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
+void SATBMCFalsification::assert_fsm_trans(step_t time)
+{
+    clock_t t0 = clock();
+    unsigned n = f_trans_ydds.size();
+
+    TRACE << "CNFizing TRANSes ... ("
+          << n << " formulas)"
+          << endl;
+
+    push_timed_formulas(f_trans_ydds, time);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
 }
 
 void SATBMCFalsification::assert_violation(step_t time)
@@ -95,7 +117,10 @@ void SATBMCFalsification::assert_violation(step_t time)
 
 void SATBMCFalsification::process()
 {
-    step_t i, k = 1; // TODO
+    step_t i, k = 10; // TODO
+
+    /* Prepare formulas for time injection */
+    prepare();
 
     assert_fsm_init();
     for (i = 0; i < k; ++ i) {
@@ -133,7 +158,8 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
        calloc here), so everything can be done in just one pass. */
     int *inputs = (int *) calloc( enc_mgr.nbits(), sizeof(int));
 
-    for (unsigned i = 0; i < k; ++ i) {
+    /* up to k (included) */
+    for (unsigned i = 0; i <= k; ++ i) {
         TimeFrame& tf = new_frame();
 
         SymbIter symbs( model, use_coi ? property : NULL );
@@ -172,6 +198,8 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
 
                             ADD bit(*di);
                             int index = Cudd_NodeReadIndex(bit.getNode());
+                            assert (0 <= index);
+
                             int value = (Minisat::toInt(engine.value(index)) == 0);
                             inputs[index] = value;
                         }
@@ -180,6 +208,8 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
 
                 else if (NULL != (be = (dynamic_cast<BooleanEncoding_ptr> (enc)))) {
                     int index = Cudd_NodeReadIndex(be->bit().getNode());
+                    assert (0 <= index);
+
                     int value = (Minisat::toInt(engine.value(index)) == 0);
                     inputs[index] = value;
                 } // is_boolean
