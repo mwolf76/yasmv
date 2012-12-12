@@ -206,8 +206,78 @@ private:
     step_t f_time;
 };
 
-ostream& operator<<(ostream& os, const Expr_ptr t);
+class UCBI {
+public:
+    UCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno);
+    UCBI(const UCBI& ucbi);
+
+    inline Expr_ptr ctx() const
+    { return f_ctx; }
+
+    inline Expr_ptr expr() const
+    { return f_expr; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    inline unsigned bitno() const
+    { return f_bitno; }
+
+private:
+    // expression ctx (default is 'main')
+    Expr_ptr f_ctx;
+
+    // expression body
+    Expr_ptr f_expr;
+
+    // expression time (default is 0)
+    step_t f_time;
+
+    // bit number
+    unsigned f_bitno;
+};
+
+class TCBI {
+public:
+    TCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);
+    TCBI(const TCBI& tcbi);
+
+    inline Expr_ptr ctx() const
+    { return f_ctx; }
+
+    inline Expr_ptr expr() const
+    { return f_expr; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    inline unsigned bitno() const
+    { return f_bitno; }
+
+    inline step_t base() const
+    { return f_time; }
+
+private:
+    // expression ctx (default is 'main')
+    Expr_ptr f_ctx;
+
+    // expression body
+    Expr_ptr f_expr;
+
+    // expression time (default is 0)
+    step_t f_time;
+
+    // bit number
+    unsigned f_bitno;
+
+    // time base (default is 0)
+    step_t f_base;
+};
+
+ostream& operator<<(ostream& os, const Expr_ptr expr);
 ostream& operator<<(ostream& os, const FQExpr& fqexpr);
+ostream& operator<<(ostream& os, const UCBI& ucbi);
+ostream& operator<<(ostream& os, const TCBI& tcbi);
 
 // TODO: move this!
 class BadWordConstException : public Exception {

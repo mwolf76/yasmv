@@ -162,3 +162,28 @@ bool ValueEq::operator() (const value_t x,
 {
     return x == y;
 }
+
+/* REVIEW: hash function */
+long UCBIHash::operator() (const UCBI& k) const
+{ return 0; }
+
+bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
+{
+    return (x.ctx() == y.ctx() &&
+            x.expr() == y.expr() &&
+            x.time() == y.time() &&
+            x.bitno() == y.bitno());
+}
+
+/* REVIEW: hash function */
+long TCBIHash::operator() (const TCBI& k) const
+{ return 0; }
+
+bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
+{
+    return (x.ctx() == y.ctx() &&
+            x.expr() == y.expr() &&
+            x.time() == y.time() &&
+            x.bitno() == y.bitno() &&
+            x.base() == y.base());
+}

@@ -91,11 +91,27 @@ struct IntHash {
     inline long operator() (int term) const
     { return (long) (term); }
 };
+
 struct IntEq {
     inline bool operator() (const int phi,
                             const int psi) const
     { return phi == psi; }
 };
 
+struct UCBIHash {
+    long operator() (const UCBI& k) const;
+};
+
+struct UCBIEq {
+    bool operator() (const UCBI& x, const UCBI& y) const;
+};
+
+struct TCBIHash {
+    long operator() (const TCBI& k) const;
+};
+
+struct TCBIEq {
+    bool operator() (const TCBI& x, const TCBI& y) const;
+};
 
 #endif
