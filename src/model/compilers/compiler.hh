@@ -1,6 +1,6 @@
 /**
  *  @file compiler.hh
- *  @brief Generic compiler
+ *  @brief Boolean expressions compiler
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -31,25 +31,62 @@
 
 #include <enc.hh>
 
+#include <dd_walker.hh>
+#include <ydd.hh>
+
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector<ADD> ADDStack;
+typedef vector<ADD> ADDStack; // ouput of Stage 1
+typedef vector<YDD_ptr> YDDStack;  // output of Stage 2
+
 typedef vector<Expr_ptr> ExprStack;
-typedef vector<step_t> TimeStack;
+typedef vector<step_t>   TimeStack;
 
 typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
 
+typedef unordered_map<DdNode *, YDD_ptr, PtrHash, PtrEq> YDDMap;
+typedef pair<YDDMap::iterator, bool> YDDHit;
+
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
+
+class Compiler; // fwd decl
+
+class Converter : public ADDWalker {
+public:
+    Converter(Compiler& owner);
+    ~Converter();
+
+    bool condition(const DdNode *node);
+    void action(const DdNode *node);
+
+    // NOPs
+    void pre_hook() {}
+    void post_hook() {}
+
+    YDD_ptr process(ADD input);
+
+    // TODO: use pool allocator
+    inline YDD_ptr make_ldd(bool v)
+    { return new YDD(v); }
+
+    inline YDD_ptr make_ldd(int index, YDD_ptr lhs, YDD_ptr rhs)
+    { return new YDD(index, lhs, rhs); }
+
+private:
+    Compiler& f_owner;
+
+    YDDMap f_cache;
+    YDDStack f_out_stack;
+};
 
 class Compiler : public SimpleWalker {
 public:
     Compiler();
     virtual ~Compiler();
 
-    // toplevel
-    ADD process(Expr_ptr ctx, Expr_ptr body, step_t time);
+    YDD_ptr process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -58,7 +95,7 @@ protected:
 
     void debug_hook();
 
-    // walker interface
+    // expr walker interface
     bool walk_next_preorder(const Expr_ptr expr);
     void walk_next_postorder(const Expr_ptr expr);
     bool walk_neg_preorder(const Expr_ptr expr);
@@ -164,12 +201,9 @@ protected:
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
-    /* services */
+    /* Stage 1 services */
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
-
-    /* proxy for the omonymous method in enc mgr */
-    IEncoding_ptr find_encoding(FQExpr& key, Type_ptr type= NULL);
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
@@ -233,6 +267,8 @@ protected:
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
     Expr_ptr make_bounded_exp2(ADD *dds, unsigned width);
 
+    /* Stage 2 services */
+    Converter f_converter;
 };
 
 #endif

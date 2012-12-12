@@ -14,6 +14,8 @@
 
 #include <dd_walker.hh>
 
+# if 0
+
 class TestWalker : public DDLeafWalker {
 public:
     TestWalker(CuddMgr& owner)
@@ -510,3 +512,5 @@ BOOST_AUTO_TEST_CASE(compiler)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif

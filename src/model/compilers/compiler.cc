@@ -1,19 +1,20 @@
 /**
  *  @file compiler.cc
- *  @brief Boolean compiler
+ *  @brief Boolean expressions compiler
  *
  *  This module contains definitions and services that implement the
  *  booolean expressions compilation into a form which is suitable for
- *  the SAT analysis. Current implementation uses ADDs to perform
- *  expression manipulation and booleanization. Expressions are
- *  assumed to be type-safe, only boolean expressions on arithmetic
- *  predicates are supported. The final result of expression
- *  compilation must be a 0-1 ADD which is suitable for CNF clauses
- *  injection directly into the SAT solver. The compilation engine is
- *  implemented using a simple walker pattern: (a) on preorder, return
- *  true if the node has not yet been visited; (b) always do in-order
- *  (for binary nodes); (c) perform proper compilation in post-order
- *  hooks.
+ *  subsequent phases of the model checking process. Current
+ *  implementation splits the compilation process in two stages: In
+ *  Stage 1, the compiler uses CUDD ADDs to perform expression
+ *  manipulation and booleanization. Expressions are assumed to be
+ *  type-safe, only boolean expressions on arithmetic predicates are
+ *  supported. The result Stage 1 must be a 0-1 ADD. In Stage 2, the
+ *  previous result is converted to a custom DD, which is homomorphic
+ *  with its input but has CBI (Canonical Bit Identifier) information
+ *  for those nodes which refer to variables. This format is then
+ *  suitable for Time instantiation and then CNFization of the clauses
+ *  injection directly into the SAT solver.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -50,14 +51,26 @@ Compiler::Compiler()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()
+    , f_time_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
-{ DEBUG << "Created Compiler @" << this << endl; }
+    , f_converter(*this)
+{
+    DEBUG << "Created Compiler @" << this << endl;
+}
 
 Compiler::~Compiler()
-{ DEBUG << "Destroying Compiler @" << this << endl; }
+{
+    DEBUG << "Destroying Compiler @" << this << endl;
+}
 
-ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
+/* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
+void Compiler::pre_hook()
+{}
+void Compiler::post_hook()
+{}
+
+YDD_ptr Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
     // remove previous results
     f_add_stack.clear();
@@ -67,34 +80,17 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, step_t time = 0)
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
-    f_time_stack.push_back(time);
 
-    FQExpr key(ctx, body, time);
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    FQExpr key(ctx, body);
     TRACE << "Compiling " << key << endl;
 
-    // invoke walker on the body of the expr to be processed
-    (*this)(body);
-
-    // Just one 0-1 ADD returned. This is ok, because the compiler is
-    // supposed to return a boolean formula, suitable for CNF
-    // conversion. This condition is checked by the post-hook method.
-    return f_add_stack.back();
-}
-
-void Compiler::pre_hook()
-{
-#ifdef BENCHMARK_COMPILER
     f_elapsed = clock();
-#endif
-}
 
-void Compiler::post_hook()
-{
-    if (0 < f_recursion_stack.size()) return;
-
-    ADD add = f_add_stack.back();
-    assert( add.FindMin().Equals(f_enc.zero()) );
-    assert( add.FindMax().Equals(f_enc.one()) );
+    /* Stage 1. Invoke walker on the body of the expr to be processed */
+    (*this)(body);
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -102,24 +98,39 @@ void Compiler::post_hook()
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
-#ifdef BENCHMARK_COMPILER
+    // Exactly one 0-1 ADD.
+    ADD add = f_add_stack.back();
+    assert( add.FindMin().Equals(f_enc.zero()) );
+    assert( add.FindMax().Equals(f_enc.one()) );
+
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Took " << secs << " seconds" << endl;
-#endif
+    TRACE << "Phase 1 done. Took " << secs << " seconds" << endl;
 
-#ifdef DEBUG_COMPILER
-    cout << "Result: " << endl;
-    add.PrintMinterm();
-    cout << endl;
-#endif
+    YDD_ptr res = NULL;
+    if (! add.IsZero())  {
+        /* Stage 2. Conversion to YDD */
+        res = f_converter.process(add);
 
-    /* issue a warning for UNSAT */
-    if (add.IsZero()) {
-        WARN << "Formula is UNSAT" << endl;
+        f_elapsed = clock() - f_elapsed;
+        double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
+        TRACE << "Phase 2 done. Took " << secs << " seconds" << endl;
     }
 
+    else {
+        /* issue a warning for UNSAT formulas */
+        WARN << "Formula is UNSAT" << endl;
+        res = new YDD(false); /* REVIEW: would just NULL be ok here? */
+    }
+
+    assert (NULL != res);
+    return res;
 }
+
+/*  Stage 1 engine is implemented using a simple expression walker
+ *  pattern: (a) on preorder, return true if the node has not yet been
+ *  visited; (b) always do in-order (for binary nodes); (c) perform
+ *  proper compilation in post-order hooks. */
 
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
@@ -945,8 +956,11 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             FQExpr key(ctx, expr, time);
 
             /* build a new encoding for this symbol if none is available. */
-            enc = find_encoding(key, type);
-            assert (NULL != enc);
+            if (NULL == (enc = f_enc.find_encoding(key))) {
+                assert (NULL != type);
+                enc = f_enc.make_encoding(type);
+                f_enc.register_encoding(key, enc);
+            }
 
             push_variable(enc, type);
             return;
@@ -960,17 +974,4 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }  /* Model symbols */
 
     assert( false ); // unreachable
-}
-
-IEncoding_ptr Compiler::find_encoding(FQExpr& key, Type_ptr type)
-{
-    IEncoding_ptr res;
-
-    if (NULL == (res = f_enc.find_encoding(key))) {
-        assert (NULL != type);
-        res = f_enc.make_encoding(type);
-        f_enc.register_encoding(key, res);
-    }
-
-    return res;
 }
