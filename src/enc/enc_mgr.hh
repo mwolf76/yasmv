@@ -56,9 +56,7 @@ struct ADDEq {
 };
 
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
-// typedef unordered_map<ADD, IEncoding_ptr, ADDHash, ADDEq> ADD2EncMap;
-
-typedef vector<ADD> EncodingBits;
+typedef unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
 class EncodingMgr  {
@@ -93,10 +91,11 @@ public:
     IEncoding_ptr make_encoding(Type_ptr type);
 
     // Registers an encoding. Used by the compiler
-    inline void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
-    {
-        f_fqexpr2enc_map [ fqexpr ] = enc;
-    }
+    void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc);
+
+    // Retrieves Untimed Canonical Bit Id for index
+    inline UCBI find_ucbi(int index)
+    { return f_index2ucbi_map.at(index); }
 
     // Retrieves an encoding previously created using
     // make_encoding. User by the SAT model evaluator
@@ -142,10 +141,11 @@ private:
     Cudd& f_cudd;
     ExprMgr& f_em;
 
-    /* low-level services */
-
     /* encodings register */
     FQExpr2EncMap f_fqexpr2enc_map;
+
+    /* Untimed Canonical Bit Identifiers register */
+    Index2UCBIMap f_index2ucbi_map;
 
     ADD f_base;  // 0x10
     ADD f_width; // 8

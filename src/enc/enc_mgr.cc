@@ -69,8 +69,27 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     return res;
 }
 
+void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
+{
+    f_fqexpr2enc_map [ fqexpr ] = enc;
+
+    /* keep CBI as well */
+    DDVector& bits = enc->dv();
+
+    unsigned i;
+    DDVector::iterator di;
+
+    for (i = 0, di = bits.begin(); i < bits.size(); ++ i, ++ di) {
+        f_index2ucbi_map.
+            insert(pair<int, UCBI> ((*di).getNode()->index,
+                                    UCBI(fqexpr.ctx(), fqexpr.expr(),
+                                         fqexpr.time(), i)));
+    }
+    assert (di == bits.end());
+}
+
 EncodingMgr::EncodingMgr()
-    : f_cudd(CuddMgr::INSTANCE().dd())
+    : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
 {
     // f_width = 8; // experimental, 8 nibbles (=32 bits)
