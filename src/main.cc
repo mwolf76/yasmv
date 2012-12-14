@@ -58,6 +58,12 @@ static void pe(Expr_ptr e)
 static void pf(FQExpr& e)
 { DEBUG << e << endl; }
 
+static void pu(UCBI& ucbi)
+{ DEBUG << ucbi << endl; }
+
+static void pt(TCBI& tcbi)
+{ DEBUG << tcbi << endl; }
+
 int main(int argc, const char *argv[])
 {
     heading();
