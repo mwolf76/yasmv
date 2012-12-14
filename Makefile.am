@@ -36,6 +36,7 @@ tags:
 smv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
+	$(top_builddir)/src/mc/bmc/libbmc.la				\
 	$(top_builddir)/src/mc/libmc.la					\
 	$(top_builddir)/src/model/libmodel.la				\
 	$(top_builddir)/src/model/compilers/libcompilers.la		\
@@ -59,7 +60,8 @@ tests_SOURCES = $(top_srcdir)/src/tests.cc src/parse.cc src/common.cc	\
 	$(top_srcdir)/src/model/tests/test_compiler.cc
 
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
-$(top_builddir)/src/cmd/libcommand.la $(top_builddir)/src/mc/libmc.la	\
+$(top_builddir)/src/cmd/libcommand.la					\
+$(top_builddir)/src/mc/bmc/libbmc.la $(top_builddir)/src/mc/libmc.la	\
 $(top_builddir)/src/model/libmodel.la					\
 $(top_builddir)/src/model/compilers/libcompilers.la			\
 $(top_builddir)/src/expr/libexpr.la					\

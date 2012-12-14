@@ -1,4 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
+SUBDIRS = bmc
 
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
