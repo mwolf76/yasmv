@@ -1,6 +1,6 @@
 /**
- *  @file time_mapper.cc
- *  @brief SAT interface implementation (Time Mapper sub-component)
+ *  @file time_mapper.hh
+ *  @brief SAT interface (Time Mapper sub-component)
  *
  *  This module contains the interface for services that implement the
  *  Time Mapper. This service is used to keep a bidirectional mapping
@@ -24,46 +24,43 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#ifndef SAT_TIME_MAPPER_H
+#define SAT_TIME_MAPPER_H
 
-#include <sat.hh>
+#include <expr.hh>
+#include <pool.hh>
+
+#include <common.hh>
+
+#include "core/SolverTypes.hh"
+
 namespace Minisat {
 
-    TimeMapper::TimeMapper(SAT& owner)
-        : f_owner(owner)
-    {}
+    class SAT; // fwd decl
 
-    TimeMapper::~TimeMapper()
-    {}
+    typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+    typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
-    Var TimeMapper::var(const TCBI& tcbi)
-    {
-        Var var;
-        const TCBI2VarMap::iterator eye = f_tcbi2var_map.find(tcbi);
+    class TimeMapper : public IObject {
 
-        if (f_tcbi2var_map.end() != eye) {
-            var = eye->second;
-        }
-        else {
-            /* generate a new var and book it. */
-            var = f_owner.new_sat_var();
+        /* ctor and dctor are available only to SAT owner */
+        friend class SAT;
 
-            // DRIVEL << "Adding VAR " << var << " for " << tcbi << endl;
-            f_tcbi2var_map.insert( make_pair<TCBI, Var>(tcbi, var));
-            f_var2tcbi_map.insert( make_pair<Var, TCBI>(var, tcbi));
-        }
+    public:
+        Var var(const TCBI& tcbi );
+        const TCBI& tcbi( Var var );
 
-        return var;
-    }
+    private:
+        TimeMapper(SAT& owner);
+        ~TimeMapper();
 
-    const TCBI& TimeMapper::tcbi(Var var)
-    {
-        const Var2TCBIMap::iterator eye = f_var2tcbi_map.find(var);
+        SAT& f_owner;
 
-        /* TCBI *has* to be there already. */
-        if (f_var2tcbi_map.end() == eye) {
-            assert (false); /* unexpected */
-        }
+        /* Bidirectional mapping */
+        TCBI2VarMap f_tcbi2var_map;
+        Var2TCBIMap f_var2tcbi_map;
+    };
 
-        return eye->second;
-    }
-};
+}; /* namespace */
+
+#endif

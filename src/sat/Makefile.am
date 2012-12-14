@@ -16,12 +16,12 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 
-PKG_HH = satdefs.hh sat.hh proof/simple.hh proof/interpolator.hh	\
-proof/proof.hh terms/terms.hh terms/ddterms.hh core/SolverTypes.hh	\
-core/Solver.hh mtl/Alloc.hh mtl/Sort.hh mtl/Set.hh mtl/Heap.hh		\
-mtl/Map.hh mtl/Alg.hh mtl/Vec.hh mtl/IntTypes.hh mtl/Queue.hh		\
-mtl/XAlloc.hh utils/Options.hh utils/solverlogger.hh utils/System.hh	\
-utils/ParseUtils.hh
+PKG_HH = satdefs.hh sat.hh time_mapper.hh proof/simple.hh		\
+proof/interpolator.hh proof/proof.hh terms/terms.hh terms/ddterms.hh	\
+core/SolverTypes.hh core/Solver.hh mtl/Alloc.hh mtl/Sort.hh mtl/Set.hh	\
+mtl/Heap.hh mtl/Map.hh mtl/Alg.hh mtl/Vec.hh mtl/IntTypes.hh		\
+mtl/Queue.hh mtl/XAlloc.hh utils/Options.hh utils/solverlogger.hh	\
+utils/System.hh utils/ParseUtils.hh
 
 PKG_CC = proof/proof.cc core/Solver.cc utils/Options.cc cnf.cc		\
 time_mapper.cc cnf_singlecut.cc logger.cc interpolator.cc solver.cc
