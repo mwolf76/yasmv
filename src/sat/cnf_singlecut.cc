@@ -53,15 +53,12 @@ namespace Minisat {
 
     struct TimedDDHash {
         inline long operator() (const TimedDD& k) const
-        { return 0; } // TODO: hash function
+        { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
     };
 
     struct TimedDDEq {
         inline bool operator() (const TimedDD& x, const TimedDD& y) const
-        {
-            return (x.node() == y.node() &&
-                    x.time() == y.time());
-        }
+        { return (x.node() == y.node() && x.time() == y.time()); }
     };
 
     class CNFBuilderSingleCut : public ADDWalker {
@@ -315,7 +312,8 @@ namespace Minisat {
                 res = f_sat.new_sat_var();
 
                 /* Insert into activation map */
-                f_activation_map [ timed_node ] = res;
+                f_activation_map.insert( make_pair<TimedDD, Var>
+                                         (timed_node, res));
             }
 
             else {
