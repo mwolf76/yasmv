@@ -117,7 +117,7 @@ void SATBMCFalsification::assert_violation(step_t time)
 
 void SATBMCFalsification::process()
 {
-    step_t i, k = 50; // TODO
+    step_t i, k = 10; // TODO
 
     /* Prepare formulas for time injection */
     prepare();

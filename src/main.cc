@@ -29,7 +29,6 @@
 #include <analyzer.hh>
 
 #include <mc.hh>
-#include <satbmc.hh>
 
 #include <opts.hh>
 

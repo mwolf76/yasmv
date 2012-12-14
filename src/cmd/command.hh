@@ -28,7 +28,8 @@
 #include <expr.hh>
 #include <compilers/compiler.hh>
 #include <sat.hh>
-#include <satbmc.hh>
+
+#include <bmc/bmc.hh>
 
 class ICommand : public IObject {
 public:

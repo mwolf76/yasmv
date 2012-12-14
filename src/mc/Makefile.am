@@ -17,8 +17,8 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 AM_CPPFLAGS=@AM_CPPFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_HH = mc.hh satbmc.hh isatbmc.hh
-PKG_CC = mc.cc satbmc.cc isatbmc.cc
+PKG_HH = mc.hh
+PKG_CC = mc.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
