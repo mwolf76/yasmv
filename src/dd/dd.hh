@@ -91,6 +91,7 @@ private:
     YDD *f_else; /* right */
 } *YDD_ptr;
 
+typedef vector<ADD> ADDVector;
 typedef vector <YDD_ptr> YDDVector;
 
 #endif
