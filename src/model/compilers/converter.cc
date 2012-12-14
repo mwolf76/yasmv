@@ -27,6 +27,8 @@
  **/
 #include <compiler.hh>
 
+#if 0 // TODO: This can turn out to be useful at some point...
+
 Converter::Converter(Compiler& owner)
     : f_owner(owner)
 {}
@@ -88,3 +90,5 @@ YDD_ptr Converter::process(ADD input)
     assert( 1 == f_out_stack.size());
     return f_out_stack.back();
 }
+
+#endif

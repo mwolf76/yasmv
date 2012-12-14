@@ -5,16 +5,12 @@
  *  This module contains definitions and services that implement the
  *  booolean expressions compilation into a form which is suitable for
  *  subsequent phases of the model checking process. Current
- *  implementation splits the compilation process in two stages: In
- *  Stage 1, the compiler uses CUDD ADDs to perform expression
- *  manipulation and booleanization. Expressions are assumed to be
- *  type-safe, only boolean expressions on arithmetic predicates are
- *  supported. The result Stage 1 must be a 0-1 ADD. In Stage 2, the
- *  previous result is converted to a custom DD, which is homomorphic
- *  with its input but has CBI (Canonical Bit Identifier) information
- *  for those nodes which refer to variables. This format is then
- *  suitable for Time instantiation and then CNFization of the clauses
- *  injection directly into the SAT solver.
+ *  implementation uses CUDD ADDs to perform expression manipulation
+ *  and booleanization. Expressions are assumed to be type-safe, only
+ *  boolean expressions on arithmetic predicates are supported. The
+ *  result of the compilation process must be a 0-1 ADD. This format
+ *  is then suitable for Time-instantiation and then CNFization of the
+ *  clauses injection directly into the SAT solver.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -54,7 +50,6 @@ Compiler::Compiler()
     , f_time_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
-    , f_converter(*this)
 {
     DEBUG << "Created Compiler @" << this << endl;
 }
@@ -70,7 +65,7 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-YDD_ptr Compiler::process(Expr_ptr ctx, Expr_ptr body)
+ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
     // remove previous results
     f_add_stack.clear();
@@ -89,7 +84,7 @@ YDD_ptr Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     f_elapsed = clock();
 
-    /* Stage 1. Invoke walker on the body of the expr to be processed */
+    /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 
     // sanity conditions
@@ -99,35 +94,23 @@ YDD_ptr Compiler::process(Expr_ptr ctx, Expr_ptr body)
     assert(1 == f_time_stack.size());
 
     // Exactly one 0-1 ADD.
-    ADD add = f_add_stack.back();
-    assert( add.FindMin().Equals(f_enc.zero()) );
-    assert( add.FindMax().Equals(f_enc.one()) );
+    ADD res = f_add_stack.back();
+    assert( res.FindMin().Equals(f_enc.zero()) );
+    assert( res.FindMax().Equals(f_enc.one()) );
 
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Phase 1 done. Took " << secs << " seconds" << endl;
+    TRACE << "Done. Took " << secs << " seconds" << endl;
 
-    YDD_ptr res = NULL;
-    if (! add.IsZero())  {
-        /* Stage 2. Conversion to YDD */
-        res = f_converter.process(add);
-
-        f_elapsed = clock() - f_elapsed;
-        double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-        TRACE << "Phase 2 done. Took " << secs << " seconds" << endl;
-    }
-
-    else {
+    if (res.IsZero())  {
         /* issue a warning for UNSAT formulas */
         WARN << "Formula is UNSAT" << endl;
-        res = new YDD(false); /* REVIEW: would just NULL be ok here? */
     }
 
-    assert (NULL != res);
     return res;
 }
 
-/*  Stage 1 engine is implemented using a simple expression walker
+/*  Compilation engine is implemented using a simple expression walker
  *  pattern: (a) on preorder, return true if the node has not yet been
  *  visited; (b) always do in-order (for binary nodes); (c) perform
  *  proper compilation in post-order hooks. */

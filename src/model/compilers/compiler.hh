@@ -37,7 +37,7 @@
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
 typedef vector<ADD> ADDStack; // ouput of Stage 1
-typedef vector<YDD_ptr> YDDStack;  // output of Stage 2
+// typedef vector<YDD_ptr> YDDStack;  // output of Stage 2
 
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
@@ -51,42 +51,42 @@ typedef pair<YDDMap::iterator, bool> YDDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-class Compiler; // fwd decl
+// class Compiler; // fwd decl
 
-class Converter : public ADDWalker {
-public:
-    Converter(Compiler& owner);
-    ~Converter();
+// class Converter : public ADDWalker {
+// public:
+//     Converter(Compiler& owner);
+//     ~Converter();
 
-    bool condition(const DdNode *node);
-    void action(const DdNode *node);
+//     bool condition(const DdNode *node);
+//     void action(const DdNode *node);
 
-    // NOPs
-    void pre_hook() {}
-    void post_hook() {}
+//     // NOPs
+//     void pre_hook() {}
+//     void post_hook() {}
 
-    YDD_ptr process(ADD input);
+//     YDD_ptr process(ADD input);
 
-    // TODO: use pool allocator
-    inline YDD_ptr make_ldd(bool v)
-    { return new YDD(v); }
+//     // TODO: use pool allocator
+//     inline YDD_ptr make_ldd(bool v)
+//     { return new YDD(v); }
 
-    inline YDD_ptr make_ldd(int index, YDD_ptr lhs, YDD_ptr rhs)
-    { return new YDD(index, lhs, rhs); }
+//     inline YDD_ptr make_ldd(int index, YDD_ptr lhs, YDD_ptr rhs)
+//     { return new YDD(index, lhs, rhs); }
 
-private:
-    Compiler& f_owner;
+// private:
+//     Compiler& f_owner;
 
-    YDDMap f_cache;
-    YDDStack f_out_stack;
-};
+//     YDDMap f_cache;
+//     YDDStack f_out_stack;
+// };
 
 class Compiler : public SimpleWalker {
 public:
     Compiler();
     virtual ~Compiler();
 
-    YDD_ptr process(Expr_ptr ctx, Expr_ptr body);
+    ADD process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -201,13 +201,6 @@ protected:
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
-    /* Stage 1 services */
-    bool cache_miss(const Expr_ptr expr);
-    void memoize_result(const Expr_ptr expr);
-
-    /* push dds and type information for variables (used by walk_leaf) */
-    void push_variable(IEncoding_ptr enc, Type_ptr type);
-
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
     bool is_unary_boolean(const Expr_ptr expr);
@@ -250,7 +243,13 @@ protected:
     void integer_ite(const Expr_ptr expr); /* preprocessing */
     void algebraic_ite(const Expr_ptr expr);
 
-    /* -- other services ---------------------------------------------------- */
+    /* -- internals --------------------------------------------------------- */
+    bool cache_miss(const Expr_ptr expr);
+    void memoize_result(const Expr_ptr expr);
+
+    /* push dds and type information for variables (used by walk_leaf) */
+    void push_variable(IEncoding_ptr enc, Type_ptr type);
+
     ADD optimize_and_chain(ADD* dds, unsigned len);
 
     void algebraic_from_integer_const(unsigned width);
@@ -267,8 +266,8 @@ protected:
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
     Expr_ptr make_bounded_exp2(ADD *dds, unsigned width);
 
-    /* Stage 2 services */
-    Converter f_converter;
+    // /* Stage 2 services */
+    // Converter f_converter;
 };
 
 #endif
