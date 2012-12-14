@@ -178,6 +178,8 @@ typedef ExprVector* ExprVector_ptr;
 typedef set<Expr_ptr> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
+// TODO: split this into multiple headers
+
 typedef class FQExpr* FQExpr_ptr;
 class FQExpr {
 public:
@@ -255,7 +257,7 @@ public:
     { return f_bitno; }
 
     inline step_t base() const
-    { return f_time; }
+    { return f_base; }
 
 private:
     // expression ctx (default is 'main')

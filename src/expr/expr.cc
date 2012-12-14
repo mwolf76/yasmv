@@ -103,13 +103,15 @@ ostream& operator<<(ostream& os, const UCBI& ucbi)
     step_t step = ucbi.time();
     unsigned bitno = ucbi.bitno();
 
-    os << "+" <<  step << "{";
+    os << "+" << step
+       << "{" ;
 
     Printer (os) << ctx
                  << "::"
-                 << expr;
+                 << expr ;
 
-    os << "}."   << bitno;
+    os << "}."
+       << bitno ;
 
     return os;
 }
@@ -123,12 +125,19 @@ ostream& operator<<(ostream& os, const TCBI& tcbi)
     step_t timebase = tcbi.base();
 
     os << "@" << timebase
-       << " +" <<  step << "{";
+       << "{"
+
+       << "+" <<  step
+       << "{" ;
 
     Printer (os) << ctx
                  << "::"
-                 << expr;
+                 << expr ;
 
-    os << "}."   << bitno;
+    os << "}."
+       << bitno ;
+
+    os << "}" ;
+
     return os;
 }

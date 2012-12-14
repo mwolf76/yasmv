@@ -181,9 +181,11 @@ long TCBIHash::operator() (const TCBI& k) const
 
 bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
 {
+    step_t abs_time_x = x.base() + x.time();
+    step_t abs_time_y = y.base() + y.time();
+
     return (x.ctx() == y.ctx() &&
             x.expr() == y.expr() &&
-            x.time() == y.time() &&
             x.bitno() == y.bitno() &&
-            x.base() == y.base());
+            abs_time_x == abs_time_y);
 }
