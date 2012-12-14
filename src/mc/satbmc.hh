@@ -54,10 +54,10 @@ private:
     void assert_fsm_trans(step_t time);
     void assert_violation(step_t time);
 
-    void push_timed_formulas(YDDVector& formulas, step_t time);
+    void push_timed_formulas(ADDVector& formulas, step_t time);
 
-    YDDVector f_init_ydds;
-    YDDVector f_trans_ydds;
+    ADDVector f_init_adds;
+    ADDVector f_trans_adds;
 };
 
 /* Specialized for BMC ctx */

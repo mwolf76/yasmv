@@ -36,10 +36,10 @@ SATBMCFalsification::SATBMCFalsification(IModel& model, Expr_ptr property)
 SATBMCFalsification::~SATBMCFalsification()
 {}
 
-void SATBMCFalsification::push_timed_formulas(YDDVector& formulas, step_t time)
+void SATBMCFalsification::push_timed_formulas(ADDVector& formulas, step_t time)
 {
-    for (YDDVector::iterator i = formulas.begin(); formulas.end() != i; ++ i) {
-        YDD_ptr phi = *i;
+    for (ADDVector::iterator i = formulas.begin(); formulas.end() != i; ++ i) {
+        ADD phi = *i;
         f_engine.push(phi, time,
                       MAINGROUP,
                       BACKGROUND); // TODO group and color
@@ -48,7 +48,7 @@ void SATBMCFalsification::push_timed_formulas(YDDVector& formulas, step_t time)
 
 void SATBMCFalsification::prepare()
 {
-    f_init_ydds.clear();
+    f_init_adds.clear();
     const Modules& modules = f_model.modules();
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
@@ -63,8 +63,8 @@ void SATBMCFalsification::prepare()
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*init_eye);
 
-            /* Compiler produces an YDD */
-            f_init_ydds.push_back(f_compiler.process(ctx, body));
+            /* Compiler produces an ADD */
+            f_init_adds.push_back(f_compiler.process(ctx, body));
         }
 
         /* TRANS */
@@ -75,8 +75,8 @@ void SATBMCFalsification::prepare()
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*trans_eye);
 
-            /* Compiler produces an YDD */
-            f_trans_ydds.push_back(f_compiler.process(ctx, body));
+            /* Compiler produces an ADD */
+            f_trans_adds.push_back(f_compiler.process(ctx, body));
         }
     }
 }
@@ -84,12 +84,12 @@ void SATBMCFalsification::prepare()
 void SATBMCFalsification::assert_fsm_init()
 {
     clock_t t0 = clock();
-    unsigned n = f_init_ydds.size();
+    unsigned n = f_init_adds.size();
     TRACE << "CNFizing INITs ... ("
           << n << " formulas)"
           << endl;
 
-    push_timed_formulas(f_init_ydds, 0);
+    push_timed_formulas(f_init_adds, 0);
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
@@ -99,13 +99,13 @@ void SATBMCFalsification::assert_fsm_init()
 void SATBMCFalsification::assert_fsm_trans(step_t time)
 {
     clock_t t0 = clock();
-    unsigned n = f_trans_ydds.size();
+    unsigned n = f_trans_adds.size();
 
-    TRACE << "CNFizing TRANSes ... ("
-          << n << " formulas)"
+    TRACE << "CNFizing TRANSes @" << time
+          << "... (" << n << " formulas)"
           << endl;
 
-    push_timed_formulas(f_trans_ydds, time);
+    push_timed_formulas(f_trans_adds, time);
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
@@ -117,7 +117,7 @@ void SATBMCFalsification::assert_violation(step_t time)
 
 void SATBMCFalsification::process()
 {
-    step_t i, k = 10; // TODO
+    step_t i, k = 50; // TODO
 
     /* Prepare formulas for time injection */
     prepare();
@@ -132,9 +132,9 @@ void SATBMCFalsification::process()
     if (STATUS_SAT == f_engine.solve()) {
         f_status = MC_FALSE;
 
-        /* ctx extraction */
-        ostringstream oss; oss << "CTX for '" << f_property << "'";
-        Witness& ctx = * new BMCCounterExample(f_property, model(), f_engine, k, false);
+        /* cex extraction */
+        ostringstream oss; oss << "CEX for '" << f_property << "'";
+        Witness& cex = * new BMCCounterExample(f_property, model(), f_engine, k, false);
 
         // TODO: register
     }
@@ -152,14 +152,10 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
     set_name(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
-
-    /* it's not necessary to fully populate the inputs array
-       before proceeding to evaluation (this is why we're usiong
-       calloc here), so everything can be done in just one pass. */
-    int *inputs = (int *) calloc( enc_mgr.nbits(), sizeof(int));
+    int inputs[enc_mgr.nbits()];
 
     /* up to k (included) */
-    for (unsigned i = 0; i <= k; ++ i) {
+    for (step_t step = 0; step <= k; ++ step) {
         TimeFrame& tf = new_frame();
 
         SymbIter symbs( model, use_coi ? property : NULL );
@@ -169,9 +165,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
             if (symb->is_variable()) {
 
                 /* time it, and fetch encoding for enc mgr */
-                FQExpr key(symb->ctx(), symb->expr(), i);
-                DEBUG << key << endl;
-
+                FQExpr key(symb->ctx(), symb->expr(), 0);
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
                 if ( NULL == enc ) {
                     TRACE << symb->ctx()  << "::"
@@ -179,51 +173,36 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                     continue;
                 }
 
-                /* possible casts */
-                AlgebraicEncoding_ptr ae;
-                BooleanEncoding_ptr be;
+                /* 1. for each bit int the encoding, fetch UCBI, time it
+                   into TCBI, fetch its value in MiniSAT model and set
+                   the corresponding entry in input. */
+                DDVector::const_iterator di;
+                unsigned ndx;
 
-                // ...
-                if (NULL != (ae = dynamic_cast<AlgebraicEncoding_ptr> (enc))) {
+                for (ndx = 0, di = enc->bits().begin();
+                     enc->bits().end() != di; ++ ndx, ++ di) {
 
-                    for (unsigned i = 0; i < ae->width(); ++ i) {
+                    unsigned bit = (*di).getNode()->index;
 
-                        /* filtered customs on vector iterator to
-                           fetch i-th digit bits of an algebraic,
-                           update relevant bits of the inputss
-                           array. */
-                        DDVector::const_iterator begin = ae->bits_begin(i);
-                        DDVector::const_iterator end = ae->bits_end(i);
-                        for (DDVector::const_iterator di = begin; di != end; ++ di) {
+                    const UCBI& ucbi = enc_mgr.find_ucbi(bit);
+                    const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(),
+                                            ucbi.time(), ucbi.bitno(),
+                                            step);
 
-                            ADD bit(*di);
-                            int index = Cudd_NodeReadIndex(bit.getNode());
-                            assert (0 <= index);
+                    Var var = engine.tcbi_to_var(tcbi);
+                    int value = engine.value(var); /* Don't care is assigned to 0 */
 
-                            int value = (Minisat::toInt(engine.value(index)) == 0);
-                            inputs[index] = value;
-                        }
-                    }
-                } // is algebraic
+                    inputs[bit] = value;
+                }
 
-                else if (NULL != (be = (dynamic_cast<BooleanEncoding_ptr> (enc)))) {
-                    int index = Cudd_NodeReadIndex(be->bit().getNode());
-                    assert (0 <= index);
-
-                    int value = (Minisat::toInt(engine.value(index)) == 0);
-                    inputs[index] = value;
-                } // is_boolean
-
-                /* put final value into time frame container */
+                /* 2. eval the encoding ADD with inputs and put
+                   resulting value into time frame container. */
                 Expr_ptr value = enc->expr(inputs);
+
                 DEBUG << "value (" << key << ") = " << value << endl;
                 tf.set_value( key, value );
 
             } // if (is_variable)
-
         } // while (symbs.has_next())
     } // foreach time frame
-
-    free ( inputs );
-
 }
