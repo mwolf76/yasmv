@@ -63,10 +63,14 @@ namespace Minisat {
 
     class CNFBuilderSingleCut : public ADDWalker {
     public:
-        CNFBuilderSingleCut(SAT& sat, step_t time)
+        CNFBuilderSingleCut(SAT& sat, step_t time,
+                            group_t group = MAINGROUP,
+                            color_t color = BACKGROUND)
             : f_sat(sat)
             , f_time(time)
             , f_toplevel(NULL)
+            , f_group(group)
+            , f_color(color)
         {}
 
         ~CNFBuilderSingleCut()
@@ -78,25 +82,18 @@ namespace Minisat {
 
             add_activation_record curr = f_recursion_stack.top();
             f_toplevel = const_cast<DdNode *>(curr.node);
-
-            /* this has to be preallocated */
-            group_t group = MAINGROUP;
-            f_gl = f_sat.cnf_find_group_lit(group);
         }
 
         void post_hook()
         {
-            // FIXME...
-            group_t group = MAINGROUP;
-            color_t color = BACKGROUND;
-
             /* build and push clause toplevel */
-            vec<Lit> ps; ps.push(f_gl);
+            vec<Lit> ps;
+            ps.push( mkLit( f_group, true));
 
             assert (NULL != f_toplevel);
 
             /* assert toplevel fun */
-            push1( color, find_cnf_var(f_toplevel), false);
+            push1( find_cnf_var(f_toplevel), false);
         }
 
         bool condition(const DdNode* node)
@@ -109,47 +106,42 @@ namespace Minisat {
         }
 
         /* push 1 var clause */
-        inline void push1( color_t color, Var x, bool px )
+        inline void push1( Var x, bool px )
         {
             vec<Lit> ps;
-
-            group_t group = MAINGROUP;
-            ps.push(f_sat.cnf_find_group_lit(group));
+            ps.push( mkLit( f_group, true));
 
             ps.push( mkLit( x, px ));
 
-            // DRIVEL << ps << endl;
-            f_sat.f_solver.addClause_(ps, color);
+            //DRIVEL << ps << endl;
+            f_sat.f_solver.addClause_(ps, f_color);
         }
 
         /* push 2 vars clause */
-        inline void push2( color_t color, Var x, bool px, Var y, bool py )
+        inline void push2( Var x, bool px, Var y, bool py )
         {
             vec<Lit> ps;
-            group_t group = MAINGROUP;
-            ps.push(f_sat.cnf_find_group_lit(group));
+            ps.push( mkLit( f_group, true));
 
             ps.push( mkLit( x, px ));
             ps.push( mkLit( y, py ));
 
-            // DRIVEL << ps << endl;
-            f_sat.f_solver.addClause_(ps, color);
+            //DRIVEL << ps << endl;
+            f_sat.f_solver.addClause_(ps, f_color);
         }
 
         /* push 3 vars clause */
-        inline void push3( color_t color, Var x, bool px, Var y, bool py, Var w, bool pw )
+        inline void push3( Var x, bool px, Var y, bool py, Var w, bool pw )
         {
             vec<Lit> ps;
-
-            group_t group = MAINGROUP;
-            ps.push(f_sat.cnf_find_group_lit(group));
+            ps.push( mkLit( f_group, true));
 
             ps.push( mkLit( x, px ));
             ps.push( mkLit( y, py ));
             ps.push( mkLit( w, pw ));
 
-            // DRIVEL << ps << endl;
-            f_sat.f_solver.addClause_(ps, color);
+            //DRIVEL << ps << endl;
+            f_sat.f_solver.addClause_(ps, f_color);
         }
 
         void action(const DdNode* node)
@@ -157,12 +149,6 @@ namespace Minisat {
             /* don't process leaves */
             assert (! cuddIsConstant(node));
             f_seen.insert(const_cast<DdNode *>(node)); /* mark as visited */
-
-            // FIXME...
-            group_t group = MAINGROUP;
-            color_t color = BACKGROUND;
-
-            // Lit gl = f_sat.cnf_find_group_lit(group);
 
             Var f = find_cnf_var(node);
             Var v = find_dd_var(node);
@@ -176,8 +162,8 @@ namespace Minisat {
                     0 == cuddV(cuddE(node))) {
 
                     /* v <-> f */
-                    push2( color, f, false, v, true );
-                    push2( color, f, true, v, false );
+                    push2( f, false, v, true );
+                    push2( f, true, v, false );
                 }
 
                 /* negative polarity (!T ^ E) */
@@ -185,8 +171,8 @@ namespace Minisat {
                          0 != cuddV(cuddE(node))) {
 
                     /* !( v <-> f ) */
-                    push2( color, f, false, v, false );
-                    push2( color, f, true, v, true );
+                    push2( f, false, v, false );
+                    push2( f, true, v, true );
                 }
 
                 else assert (false); /* unreachable */
@@ -202,25 +188,25 @@ namespace Minisat {
                 if (0 != cuddV(cuddT(node))) {
 
                     /* ( f | !v ) */
-                    push2( color, f, false, v, true);
+                    push2( f, false, v, true);
 
                     /* ( f | !e ) */
-                    push2( color, f, false, e, true);
+                    push2( f, false, e, true);
 
                     /* (!f |  v |  e) */
-                    push3( color, f, true , v, false, e, false);
+                    push3( f, true , v, false, e, false);
                 }
 
                 /* Negative polarity (!T) */
                 else {
                     /* ( !f | !v ) ; */
-                    push2( color, f, true, v, true);
+                    push2( f, true, v, true);
 
                     /* ( !f | e ) */
-                    push2( color, f, true, e, false);
+                    push2( f, true, e, false);
 
                     /* (f |  v |  !e) */
-                    push3( color, f, false , v, false, e, true);
+                    push3( f, false , v, false, e, true);
                 }
             }
 
@@ -234,25 +220,25 @@ namespace Minisat {
                 if (0 != cuddV(cuddE(node))) {
 
                     /* ( f | v ) */
-                    push2( color, f, false, v, false);
+                    push2( f, false, v, false);
 
                     /* ( f | !t ) */
-                    push2( color, f, false, t, true);
+                    push2( f, false, t, true);
 
                     /* (!f |  !v |  t) */
-                    push3( color, f, true , v, true, t, false);
+                    push3( f, true , v, true, t, false);
                 }
 
                 /* Negative polarity */
                 else {
                     /* ( !f | v ) */
-                    push2( color, f, true, v, false);
+                    push2( f, true, v, false);
 
                     /* ( !f | t ) */
-                    push2( color, f, true, t, false);
+                    push2( f, true, t, false);
 
                     /* (f |  !v |  !t) */
-                    push3( color, f, false , v, true, t, true);
+                    push3( f, false , v, true, t, true);
                 }
             }
 
@@ -265,16 +251,16 @@ namespace Minisat {
                 Var e = find_cnf_var(cuddE(node));
 
                 /* !f, v, e */
-                push3( color, f, true, v, false, e, false);
+                push3( f, true, v, false, e, false);
 
                 /* !f, !v, t  */
-                push3( color, f, true, v, true, t, false );
+                push3( f, true, v, true, t, false );
 
                 /* f, v, !e */
-                push3( color, f, false, v, false, e, true );
+                push3( f, false, v, false, e, true );
 
                 /* f, !v, !t */
-                push3( color, f, false, v, true, t, true );
+                push3( f, false, v, true, t, true );
             }
         }
 
@@ -282,9 +268,11 @@ namespace Minisat {
         SAT& f_sat;
         unordered_set<DdNode*> f_seen;
 
-        Lit f_gl;
         typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> ActivationMap;
         ActivationMap f_activation_map;
+
+        group_t f_group;
+        color_t f_color;
 
         Var find_dd_var(const DdNode* node)
         {
@@ -327,9 +315,11 @@ namespace Minisat {
         step_t f_time;
     };
 
-    void SAT::cnf_push_single_cut(Term phi, step_t time, const group_t group, const color_t color)
+    void SAT::cnf_push_single_cut(Term phi, step_t time,
+                                  const group_t group,
+                                  const color_t color)
     {
-        CNFBuilderSingleCut builder(*this, time);
+        CNFBuilderSingleCut builder(*this, time, group, color);
         builder(phi);
     }
 

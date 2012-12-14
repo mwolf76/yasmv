@@ -24,23 +24,25 @@
  *
  **/
 #include <sat.hh>
+#include <cstdlib>
 
 namespace Minisat {
 
     status_t SAT::sat_solve_groups(const Groups& groups)
     {
+        vec<Lit> assumptions;
+
         clock_t t0 = clock();
         TRACE << "Solving ... " << endl;
 
-        vec<Lit> assumptions;
+        Groups::const_iterator i;
+        for (i = groups.begin(); groups.end() != i; ++ i) {
+            int grp = *i;
 
-        // MTL Set interface is a bit clumsy here :-/
-        int bckt, bckts = groups.bucket_count();
-        for (bckt = 0; bckt < bckts ; ++ bckt) {
-            const vec<group_t>& gs = groups.bucket(bckt);
-            for (int i = 0; i < gs.size(); ++ i) {
-                assumptions.push(mkLit(gs[i], false)); // a -> phi
-            }
+            /* Assumptions work like "a -> phi", thus a non-negative
+               value enables group, whereas a negative value disables
+               it. */
+            assumptions.push( mkLit( abs(grp), grp < 0));
         }
 
         f_status = f_solver.solve(assumptions)

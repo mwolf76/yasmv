@@ -63,40 +63,10 @@ namespace Minisat {
         }
     };
 
-    // // formulae groups
-    // typedef class Group* Group_ptr;
-    // class Group {
-    //     id_t f_id;
-
-    // public:
-    //     Group(id_t id)
-    //         : f_id(id)
-    //     {}
-
-    //     inline id_t id()
-    //     { return f_id; }
-    // };
-    // typedef Set<Group> Groups;
-    // static Group MAINGROUP(0);
-    typedef unsigned group_t;
+    typedef Var group_t;
     static group_t MAINGROUP(0);
-    typedef Set<group_t> Groups;
+    typedef vector<group_t> Groups;
 
-    // interpolation colors
-    // typedef class Color* Color_ptr;
-    // class Color {
-    //     id_t f_id;
-
-    // public:
-    //     Color(id_t id)
-    //         : f_id(id)
-    //     {}
-
-    //     inline id_t id()
-    //     { return f_id; }
-    // };
-    // typedef Set<struct Color> Colors;
-    // static Color BACKGROUND(0);
     typedef unsigned color_t;
     static color_t BACKGROUND(0);
     typedef Set<color_t> Colors;

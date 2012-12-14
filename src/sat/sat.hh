@@ -55,8 +55,8 @@ namespace Minisat {
          */
         inline group_t new_group()
         {
-            group_t res = ++ f_next_group;
-            f_groups.insert(res);
+            group_t res = new_sat_var();
+            f_groups.push_back(res);
 
             return res;
         }
@@ -64,7 +64,7 @@ namespace Minisat {
         /**
          * @brief Returns the complete set of defined SAT groups.
          */
-        inline const Groups& groups() const
+        inline Groups& groups()
         { return f_groups; }
 
         /**
@@ -89,7 +89,8 @@ namespace Minisat {
          * @brief add a formula with a given group and color to the
          * SAT instance.
          */
-        void push(Term term, step_t time, group_t group, color_t color);
+        inline void push(Term term, step_t time, group_t group, color_t color)
+        { cnf_push_single_cut(term, time, group, color); }
 
         /**
          * @brief Solve all groups.
@@ -140,10 +141,9 @@ namespace Minisat {
             , f_enc_mgr(EncodingMgr::INSTANCE())
             , f_mapper(* new TimeMapper(*this))
             , f_solver()
-            , f_next_group(0)
             , f_next_color(0)
         {
-            f_groups.insert(0); // default_group is always enabled
+            f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
             DEBUG << "Initialized SAT instance @" << this << endl;
         }
 
@@ -173,9 +173,8 @@ namespace Minisat {
         // SAT solver
         Solver f_solver;
 
-        // SAT groups
+        // SAT groups (just ordinary Minisat Vars)
         Groups f_groups;
-        group_t f_next_group;
 
         // ITP groups (colors)
         Colors f_colors;
@@ -254,8 +253,7 @@ namespace Minisat {
         { return a_clauses.has(cr); }
 
         // -- Low level services -----------------------------------------------
-        // Var cnf_find_index_var(int index);
-        Lit cnf_find_group_lit(group_t group);
+        // Lit cnf_find_group_lit(group_t group, bool enabled = true);
 
         Term itp_build_interpolant(const Colors& a);
         void itp_init_interpolation(const Colors& ga);

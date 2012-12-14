@@ -26,25 +26,16 @@
 #include <bmc.hh>
 using namespace Minisat;
 
-SATBMCFalsification::SATBMCFalsification(IModel& model, Expr_ptr property)
+SATBMCFalsification::SATBMCFalsification(IModel& model,
+                                         Expr_ptr property)
     : MCAlgorithm(model, property)
-  , f_factory(CuddMgr::INSTANCE().dd())
-  , f_engine(f_factory)
-  , f_compiler()
+    , f_factory(CuddMgr::INSTANCE().dd())
+    , f_engine(f_factory)
+    , f_compiler()
 {}
 
 SATBMCFalsification::~SATBMCFalsification()
 {}
-
-void SATBMCFalsification::push_timed_formulas(ADDVector& formulas, step_t time)
-{
-    for (ADDVector::iterator i = formulas.begin(); formulas.end() != i; ++ i) {
-        ADD phi = *i;
-        f_engine.push(phi, time,
-                      MAINGROUP,
-                      BACKGROUND); // TODO group and color
-    }
-}
 
 void SATBMCFalsification::prepare()
 {
@@ -78,6 +69,10 @@ void SATBMCFalsification::prepare()
             /* Compiler produces an ADD */
             f_trans_adds.push_back(f_compiler.process(ctx, body));
         }
+
+        /* Violation (negation of ASSERT) */
+        f_violation_add = f_compiler.process( f_em.make_main(),
+                                              f_em.make_not(f_property));
     }
 }
 
@@ -89,7 +84,10 @@ void SATBMCFalsification::assert_fsm_init()
           << n << " formulas)"
           << endl;
 
-    push_timed_formulas(f_init_adds, 0);
+    ADDVector::iterator i;
+    for (i = f_init_adds.begin(); f_init_adds.end() != i; ++ i) {
+        f_engine.push( *i, 0, MAINGROUP, BACKGROUND);
+    }
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
@@ -105,7 +103,10 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
           << "... (" << n << " formulas)"
           << endl;
 
-    push_timed_formulas(f_trans_adds, time);
+    ADDVector::iterator i;
+    for (i = f_trans_adds.begin(); f_trans_adds.end() != i; ++ i) {
+        f_engine.push( *i, time, MAINGROUP, BACKGROUND);
+    }
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
@@ -113,32 +114,53 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
 }
 
 void SATBMCFalsification::assert_violation(step_t time)
-{ /* TODO!!! */ }
+{
+    clock_t t0 = clock();
+    TRACE << "CNFizing Violation @"
+          << time << endl;
+
+    f_engine.push( f_violation_add, time,
+                   f_engine.new_group(), BACKGROUND);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
 
 void SATBMCFalsification::process()
 {
-    step_t i, k = 10; // TODO
+    step_t i, k = 20; // TODO
 
-    /* Prepare formulas for time injection */
     prepare();
-
     assert_fsm_init();
-    for (i = 0; i < k; ++ i) {
-        assert_fsm_trans(i);
+    assert_violation(0);
+
+    TRACE << "Looking for a BMC CEX of length 0" << endl;
+
+    if (STATUS_UNSAT == f_engine.solve()) {
+
+        i = 0; do {
+            /* disable last violation */
+            (*f_engine.groups().rbegin()) *= -1;
+
+            assert_fsm_trans(i ++);
+            assert_violation(i);
+
+            TRACE << "Looking for a BMC CEX of length "
+                  << i << endl;
+
+        } while ((STATUS_UNSAT == f_engine.solve()) && (i < k));
     }
 
-    assert_violation(k);
-
-    if (STATUS_SAT == f_engine.solve()) {
+    if (STATUS_SAT == f_engine.status()) {
         f_status = MC_FALSE;
 
         /* cex extraction */
         ostringstream oss; oss << "CEX for '" << f_property << "'";
-        Witness& cex = * new BMCCounterExample(f_property, model(), f_engine, k, false);
+        Witness& cex = * new BMCCounterExample(f_property, model(), f_engine, i, false);
 
         // TODO: register
     }
 
     TRACE << "Done." << endl;
-
 }

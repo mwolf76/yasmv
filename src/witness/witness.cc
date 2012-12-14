@@ -52,9 +52,14 @@ bool TimeFrame::has_value( FQExpr expr )
 }
 
 /* Sets value for expr */
-void TimeFrame::set_value( FQExpr expr, Expr_ptr value )
+void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
 {
-    f_map[ expr ] = value;
+    DRIVEL << fqexpr
+           << " := "
+           << value << endl;
+
+    f_map.insert( make_pair< FQExpr, Expr_ptr >
+                  (fqexpr, value));
 }
 
 Witness::Witness(string name)

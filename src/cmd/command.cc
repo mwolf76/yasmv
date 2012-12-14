@@ -93,9 +93,9 @@ SATCommand::~SATCommand()
 {}
 
 // -- CheckInvspec -------------------------------------------------------------
-CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr expr)
+CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr invariant)
     : Command(owner)
-    , f_engine(*ModelMgr::INSTANCE().model(), expr)
+    , f_engine(*ModelMgr::INSTANCE().model(), invariant)
 {}
 
 Variant CheckInvspecCommand::operator()()
