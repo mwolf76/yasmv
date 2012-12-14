@@ -104,19 +104,9 @@ namespace Minisat {
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;
 
-    typedef YDD_ptr Term;
+    typedef ADD Term;
     typedef vector<Term> Terms;
 
-    // this CNFization algorithm requires Term to be 0-1 ADDs
-    // struct IntHash {
-    //     inline long operator() (int term) const
-    //     { return (long) (term); }
-    // };
-    // struct IntEq {
-    //     inline bool operator() (const int phi,
-    //                             const int psi) const
-    //     { return phi == psi; }
-    // };
     typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
     struct VarHash {

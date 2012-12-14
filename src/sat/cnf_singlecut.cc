@@ -25,32 +25,27 @@
  **/
 #include <pool.hh>
 #include <sat.hh>
+
 #include <dd_walker.hh>
 
 namespace Minisat {
 
-    /* used only for CNF-ization */
-    class TimedDD {
+    /* internal, used only for CNF-ization */
+    struct TimedDD {
     public:
-        TimedDD(YDD_ptr node, step_t time)
+        TimedDD(DdNode *node, step_t time)
             : f_node(node)
             , f_time(time)
         {}
 
-        TimedDD(const TimedDD& other)
-            : f_node(other.node())
-            , f_time(other.time())
-        {}
-
-        inline YDD_ptr node() const
+        inline DdNode* node() const
         { return f_node; }
 
         inline step_t time() const
         { return f_time; }
 
-    private:
-        // The YDD node
-        YDD_ptr f_node;
+        // The DdNode node
+        DdNode* f_node;
 
         // expression time (default is 0)
         step_t f_time;
@@ -69,9 +64,7 @@ namespace Minisat {
         }
     };
 
-
-
-    class CNFBuilderSingleCut : public YDDWalker {
+    class CNFBuilderSingleCut : public ADDWalker {
     public:
         CNFBuilderSingleCut(SAT& sat, step_t time)
             : f_sat(sat)
@@ -86,8 +79,8 @@ namespace Minisat {
         {
             assert( 1 == f_recursion_stack.size());
 
-            ydd_activation_record curr = f_recursion_stack.top();
-            f_toplevel = const_cast<YDD_ptr>(curr.node);
+            add_activation_record curr = f_recursion_stack.top();
+            f_toplevel = const_cast<DdNode *>(curr.node);
 
             /* this has to be preallocated */
             group_t group = MAINGROUP;
@@ -109,13 +102,13 @@ namespace Minisat {
             push1( color, find_cnf_var(f_toplevel), false);
         }
 
-        bool condition(const YDD_ptr node)
+        bool condition(const DdNode* node)
         {
             assert(NULL != node);
 
             /* is a non constant, not visited node. */
-            return ( !node->is_const() &&
-                     f_seen.find(node) == f_seen.end());
+            return ( !cuddIsConstant(node) &&
+                     f_seen.find(const_cast<DdNode *>(node)) == f_seen.end());
         }
 
         /* push 1 var clause */
@@ -162,11 +155,11 @@ namespace Minisat {
             f_sat.f_solver.addClause_(ps, color);
         }
 
-        void action(YDD_ptr node)
+        void action(const DdNode* node)
         {
             /* don't process leaves */
-            assert (NULL != node && ! node->is_const());
-            f_seen.insert(node); /* mark as visited */
+            assert (! cuddIsConstant(node));
+            f_seen.insert(const_cast<DdNode *>(node)); /* mark as visited */
 
             // FIXME...
             group_t group = MAINGROUP;
@@ -178,19 +171,22 @@ namespace Minisat {
             Var v = find_dd_var(node);
 
             /* both T, E are consts */
-            if (node->Then()->is_const() &&
-                node->Else()->is_const()) {
+            if (cuddIsConstant(cuddT(node)) &&
+                cuddIsConstant(cuddE(node))) {
 
-                if (node->Then()->is_true() &&
-                    node->Else()->is_false()) {
+                /* positive polarity (T ^ !E) */
+                if (0 != cuddV(cuddT(node)) &&
+                    0 == cuddV(cuddE(node))) {
 
                     /* v <-> f */
                     push2( color, f, false, v, true );
                     push2( color, f, true, v, false );
                 }
 
-                else if (node->Then()->is_false() &&
-                         node->Else()->is_true()) {
+                /* negative polarity (!T ^ E) */
+                else if (0 == cuddV(cuddT(node)) &&
+                         0 != cuddV(cuddE(node))) {
+
                     /* !( v <-> f ) */
                     push2( color, f, false, v, false );
                     push2( color, f, true, v, true );
@@ -200,13 +196,15 @@ namespace Minisat {
             }
 
             /* T is const, E is not */
-            else if (node->Then()->is_const() &&
-                     ! node->Else()->is_const()) {
+            else if (cuddIsConstant(cuddT(node)) &&
+                     ! cuddIsConstant(cuddE(node))) {
 
-                Var e = find_cnf_var(node->Else());
-                if (node->Then()->is_true()) {
+                Var e = find_cnf_var(cuddE(node));
 
-                    /* ( f | !v ) ; */
+                /* Positive polarity (T) */
+                if (0 != cuddV(cuddT(node))) {
+
+                    /* ( f | !v ) */
                     push2( color, f, false, v, true);
 
                     /* ( f | !e ) */
@@ -216,6 +214,7 @@ namespace Minisat {
                     push3( color, f, true , v, false, e, false);
                 }
 
+                /* Negative polarity (!T) */
                 else {
                     /* ( !f | !v ) ; */
                     push2( color, f, true, v, true);
@@ -229,14 +228,15 @@ namespace Minisat {
             }
 
             /* E is const, T is not */
-            else if (node->Else()->is_const() &&
-                     ! node->Then()->is_const()) {
+            else if (cuddIsConstant(cuddE(node)) &&
+                     ! cuddIsConstant(cuddT(node))) {
 
-                Var t = find_cnf_var(node->Then());
+                Var t = find_cnf_var(cuddT(node));
 
-                if (node->Else()->is_true()) {
+                /* Positive polarity (E) */
+                if (0 != cuddV(cuddE(node))) {
 
-                    /* ( f | v ) ; */
+                    /* ( f | v ) */
                     push2( color, f, false, v, false);
 
                     /* ( f | !t ) */
@@ -246,8 +246,9 @@ namespace Minisat {
                     push3( color, f, true , v, true, t, false);
                 }
 
+                /* Negative polarity */
                 else {
-                    /* ( !f | v ) ; */
+                    /* ( !f | v ) */
                     push2( color, f, true, v, false);
 
                     /* ( !f | t ) */
@@ -258,13 +259,13 @@ namespace Minisat {
                 }
             }
 
-            /* both T, E non consts */
+            /* General case: both T, E non const */
             else {
-                assert (! node->Then()->is_const());
-                Var t = find_cnf_var(node->Then());
+                assert (! cuddIsConstant(cuddT(node)));
+                Var t = find_cnf_var(cuddT(node));
 
-                assert (! node->Else()->is_const());
-                Var e = find_cnf_var(node->Else());
+                assert (! cuddIsConstant(cuddE(node)));
+                Var e = find_cnf_var(cuddE(node));
 
                 /* !f, v, e */
                 push3( color, f, true, v, false, e, false);
@@ -282,27 +283,30 @@ namespace Minisat {
 
     private:
         SAT& f_sat;
-        unordered_set<YDD_ptr> f_seen;
+        unordered_set<DdNode*> f_seen;
 
         Lit f_gl;
         typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> ActivationMap;
         ActivationMap f_activation_map;
 
-        Var find_dd_var(const YDD_ptr node)
+        Var find_dd_var(const DdNode* node)
         {
             assert (NULL != node);
 
-            UCBI ucbi = f_sat.find_ucbi(node->index());
-            TCBI tcbi (ucbi.ctx(), ucbi.expr(), ucbi.time(), ucbi.bitno(), f_time);
+            const UCBI& ucbi = f_sat.find_ucbi(node->index);
+            const TCBI& tcbi = TCBI (ucbi.ctx(), ucbi.expr(),
+                                     ucbi.time(), ucbi.bitno(),
+                                     f_time);
+
             return f_sat.f_mapper.var(tcbi);
         }
 
-        Var find_cnf_var(const YDD_ptr node)
+        Var find_cnf_var(const DdNode* node)
         {
             Var res;
 
             assert (NULL != node);
-            TimedDD timed_node (const_cast<YDD_ptr> (node), f_time);
+            TimedDD timed_node (const_cast<DdNode*> (node), f_time);
 
             const ActivationMap::iterator eye = \
                 f_activation_map.find( timed_node );
@@ -321,7 +325,7 @@ namespace Minisat {
             return res;
         }
 
-        YDD_ptr f_toplevel;
+        DdNode* f_toplevel;
         step_t f_time;
     };
 

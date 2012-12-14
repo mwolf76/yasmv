@@ -33,6 +33,8 @@
 #include "proof/proof.hh"
 #include "cuddObj.hh"
 
+#include <time_mapper.hh>
+
 /* MTL */
 #include <Map.hh>
 #include <Set.hh>
@@ -43,30 +45,6 @@
 #include "core/SolverTypes.hh"
 
 namespace Minisat {
-
-    class SAT; // fwd decl
-
-    typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-    typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
-
-    class TimeMapper : public IObject {
-        friend class SAT;
-
-    public:
-        Var var( TCBI& tcbi );
-        TCBI& tcbi( Var var );
-
-    private:
-        TimeMapper(SAT& owner);
-        ~TimeMapper();
-
-        SAT& f_owner;
-
-        /* Bidirectional mapping */
-        TCBI2VarMap f_tcbi2var_map;
-        Var2TCBIMap f_var2tcbi_map;
-    };
-
 
     class SAT : public IObject {
         friend class CNFBuilderSingleCut;
@@ -142,14 +120,17 @@ namespace Minisat {
             return itp_build_interpolant(a);
         }
 
-        inline lbool value(int index)
+        inline int value(Var var)
         {
             assert (STATUS_SAT == f_status);
-            Var v = index2var(index);
-            if (v < 0) return l_Undef;
-
-            return f_solver.modelValue(v);
+            return 0 == Minisat::toInt(f_solver.modelValue(var));
         }
+
+        inline Var tcbi_to_var(const TCBI& tcbi)
+        { return f_mapper.var(tcbi); }
+
+        inline const TCBI& var_to_tcbi(Var var)
+        { return f_mapper.tcbi(var); }
 
         /**
          * @brief SAT instancte ctor
@@ -176,7 +157,7 @@ namespace Minisat {
         inline Var new_sat_var() // proxy
         { return f_solver.newVar(); }
 
-        inline UCBI find_ucbi(int index) // proxy
+        inline const UCBI& find_ucbi(int index) // proxy
         { return f_enc_mgr.find_ucbi(index); }
 
     private:

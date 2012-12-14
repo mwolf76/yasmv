@@ -1029,10 +1029,11 @@ lbool Solver::solve_()
         model.growTo(nVars());
         for (int i = 0; i < nVars(); i++) model[i] = value(i);
 
-        // temp
-        // for (int i = 0; i < nVars(); i++) {
-        //     TRACE << i << ": " << model[i] << endl;
-        // }
+#if 0
+        for (int i = 0; i < nVars(); i++) {
+            TRACE << i << ": " << model[i] << endl;
+        }
+#endif
 
 #ifdef MODEL_CHECK
         verifyModel();
