@@ -39,7 +39,7 @@
 
 typedef class IEncoding *IEncoding_ptr; // fwd decl
 
-typedef vector<ADD> DDVector;
+typedef vector<ADD> DDVector; // Deprecated: TODO Rename to ADDVector
 typedef vector<int> IndexVector;
 
 struct ADDHash {
@@ -94,7 +94,7 @@ public:
     void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc);
 
     // Retrieves Untimed Canonical Bit Id for index
-    inline UCBI find_ucbi(int index)
+    inline const UCBI& find_ucbi(int index)
     { return f_index2ucbi_map.at(index); }
 
     // Retrieves an encoding previously created using

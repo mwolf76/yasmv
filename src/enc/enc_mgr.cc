@@ -74,7 +74,7 @@ void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
     f_fqexpr2enc_map [ fqexpr ] = enc;
 
     /* keep CBI as well */
-    DDVector& bits = enc->dv();
+    DDVector& bits = enc->bits();
 
     unsigned i;
     DDVector::iterator di;
