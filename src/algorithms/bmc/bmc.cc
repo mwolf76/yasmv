@@ -156,7 +156,7 @@ void SATBMCFalsification::process()
     if (STATUS_SAT == f_engine.status()) {
         f_status = MC_FALSE;
 
-        /* cex extraction */
+        /* CEX extraction */
         ostringstream oss; oss << "CEX for '" << f_property << "'";
         Witness& cex = * new BMCCounterExample(f_property, model(), f_engine, i, false);
 

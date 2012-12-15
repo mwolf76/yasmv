@@ -33,7 +33,7 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
-#include <trace.hh>
+#include <witness.hh>
 #include <variant.hh>
 
 typedef unordered_map<string, Variant> ParametersMap;
@@ -62,7 +62,7 @@ public:
     inline bool has_witness() const
     { return NULL != f_witness; }
 
-    inline Trace& get_witness() const
+    inline Witness& get_witness() const
     {
         assert (has_witness());
         return *f_witness;
@@ -83,7 +83,7 @@ protected:
     Expr_ptr f_property;
 
     // ctx witness
-    Trace_ptr f_witness;
+    Witness_ptr f_witness;
     mc_status_t f_status;
 
     // algorithm specific params
