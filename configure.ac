@@ -25,6 +25,12 @@ AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_CXXCPP
 
+# (optional) Doxygen
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+if test -z "$DOXYGEN";
+   then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
+fi
+
 dnl First look for Boost
 BOOST_REQUIRE([])
 
@@ -66,8 +72,8 @@ AC_SUBST(SIZEOF_LONG)
 # Checks for libraries.
 AC_CHECK_LIB([m], [exp])
 
-# AM_CONDITIONAL(HAVE_LIBEXPAT, test "x$ac_have_expat" = "xyes")
-# AC_SUBST(HAVE_LIBEXPAT)
+AM_CONDITIONAL([HAVE_DOXYGEN],
+[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/Doxyfile])])
 
 # Checks for header files.
 AC_HEADER_DIRENT
