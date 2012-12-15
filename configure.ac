@@ -42,7 +42,7 @@ BOOST_TEST
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
-AC_DEFINE_UNQUOTED(PROGRAM_NAME, "gnusmv", Program Name)
+AC_DEFINE_UNQUOTED(PROGRAM_NAME, "Yasmine", Program Name)
 AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.1", Program Version)
 AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
 AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
