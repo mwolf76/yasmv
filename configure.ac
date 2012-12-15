@@ -136,8 +136,8 @@ AC_CONFIG_FILES([Makefile
                  src/enc/Makefile
 		 src/expr/Makefile
                  src/expr/walkers/Makefile
-                 src/mc/Makefile
-                 src/mc/bmc/Makefile
+                 src/algorithms/Makefile
+                 src/algorithms/bmc/Makefile
                  src/model/Makefile
                  src/model/compilers/Makefile
                  src/parser/Makefile

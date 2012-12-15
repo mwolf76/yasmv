@@ -24,8 +24,8 @@
  *
  **/
 
-#ifndef MCALGORITHM_H
-#define MCALGORITHM_H
+#ifndef MC_ALGORITHM_H
+#define MC_ALGORITHM_H
 
 #include <model.hh>
 #include <model_mgr.hh>

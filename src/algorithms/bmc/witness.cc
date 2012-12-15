@@ -33,7 +33,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                                      bool use_coi)
     : Witness()
 {
-    ostringstream oss; oss << "BMC CTX witness for property " << property;
+    ostringstream oss; oss << "BMC CEX witness for property " << property;
     set_name(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());

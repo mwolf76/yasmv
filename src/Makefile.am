@@ -1,1 +1,1 @@
-SUBDIRS = cmd dd enc expr mc model parser sat type utils witness
+SUBDIRS = dd sat expr type enc model algorithms witness parser cmd utils

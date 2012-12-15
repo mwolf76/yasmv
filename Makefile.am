@@ -12,7 +12,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/model -I$(top_srcdir)/src/cmd			\
 -I$(top_srcdir)/src/utils -I$(top_srcdir)/src/witness			\
 -I$(top_srcdir)/src/3rdparty/ezlogger					\
--I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/mc		\
+-I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/algorithms	\
 -I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core	\
 -I$(top_srcdir)/src/sat -I$(top_srcdir)/src/sat/mtl			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd					\
@@ -36,8 +36,8 @@ tags:
 smv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
 smv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
-	$(top_builddir)/src/mc/bmc/libbmc.la				\
-	$(top_builddir)/src/mc/libmc.la					\
+	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\
 	$(top_builddir)/src/model/compilers/libcompilers.la		\
 	$(top_builddir)/src/expr/libexpr.la				\
@@ -59,19 +59,22 @@ tests_SOURCES = $(top_srcdir)/src/tests.cc src/parse.cc src/common.cc	\
 	$(top_srcdir)/src/enc/tests/test_enc.cc				\
 	$(top_srcdir)/src/model/tests/test_compiler.cc
 
-tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
-$(top_builddir)/src/cmd/libcommand.la					\
-$(top_builddir)/src/mc/bmc/libbmc.la $(top_builddir)/src/mc/libmc.la	\
-$(top_builddir)/src/model/libmodel.la					\
-$(top_builddir)/src/model/compilers/libcompilers.la			\
-$(top_builddir)/src/expr/libexpr.la					\
-$(top_builddir)/src/expr/walkers/libexpr_walkers.la			\
-$(top_builddir)/src/type/libtype.la $(top_builddir)/src/enc/libenc.la	\
-$(top_builddir)/src/utils/libutils.la					\
-$(top_builddir)/src/witness/libwitness.la				\
-$(top_builddir)/src/sat/libminisat.la					\
-$(top_builddir)/src/dd/libcudd.la -lantlr3c $(BOOST_REGEX_LIBS)		\
-$(BOOST_PROGRAM_OPTIONS_LIBS) -lboost_unit_test_framework
+tests_LDADD = $(top_builddir)/src/parser/libparser.la		\
+	$(top_builddir)/src/cmd/libcommand.la			\
+	$(top_builddir)/src/algorithms/bmc/libbmc.la		\
+	$(top_builddir)/src/algorithms/libalgorithms.la		\
+	$(top_builddir)/src/model/libmodel.la			\
+	$(top_builddir)/src/model/compilers/libcompilers.la	\
+	$(top_builddir)/src/expr/libexpr.la			\
+	$(top_builddir)/src/expr/walkers/libexpr_walkers.la	\
+	$(top_builddir)/src/type/libtype.la			\
+	$(top_builddir)/src/enc/libenc.la			\
+	$(top_builddir)/src/utils/libutils.la			\
+	$(top_builddir)/src/witness/libwitness.la		\
+	$(top_builddir)/src/sat/libminisat.la			\
+	$(top_builddir)/src/dd/libcudd.la -lantlr3c		\
+	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)	\
+	-lboost_unit_test_framework
 
 smv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
 tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS)

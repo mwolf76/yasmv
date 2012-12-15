@@ -23,7 +23,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <bmc.hh>
+#include <bmc/bmc.hh>
 using namespace Minisat;
 
 SATBMCFalsification::SATBMCFalsification(IModel& model,
@@ -115,6 +115,7 @@ void SATBMCFalsification::assert_fsm_trans(step_t time)
 
 void SATBMCFalsification::assert_violation(step_t time)
 {
+    // TODO: macro to wrap code to be benchmarked (cool!)
     clock_t t0 = clock();
     TRACE << "CNFizing Violation @"
           << time << endl;
