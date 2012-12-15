@@ -366,7 +366,10 @@ cuddLinearInPlace(
     int    xindex, yindex;
     int    xslots, yslots;
     int    xshift, yshift;
-    int    oldxkeys, oldykeys;
+#ifdef DD_COUNT
+    int    oldxkeys;
+#endif
+    int oldykeys;
     int    newxkeys, newykeys;
     int    comple, newcomplement;
     int    i;
@@ -399,7 +402,9 @@ cuddLinearInPlace(
 #endif
 	/* Get parameters of x subtable. */
 	xlist = table->subtables[x].nodelist;
+#ifdef DD_COUNT
 	oldxkeys = table->subtables[x].keys;
+#endif
 	xslots = table->subtables[x].slots;
 	xshift = table->subtables[x].shift;
 

@@ -53,10 +53,10 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                 FQExpr key(symb->ctx(), symb->expr(), 0);
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
                 if ( NULL == enc ) {
-                    TRACE << symb->ctx()
-                          << "::" << symb->expr()
-                          << " not in COI, skipping..."
-                          << endl;
+                    // TRACE << symb->ctx()
+                    //       << "::" << symb->expr()
+                    //       << " not in COI, skipping..."
+                    //       << endl;
 
                     continue;
                 }
