@@ -144,6 +144,8 @@ AC_CONFIG_FILES([Makefile
                  src/expr/walkers/Makefile
                  src/algorithms/Makefile
                  src/algorithms/bmc/Makefile
+                 src/algorithms/kind/Makefile
+                 src/algorithms/sim/Makefile
                  src/model/Makefile
                  src/model/compilers/Makefile
                  src/parser/Makefile

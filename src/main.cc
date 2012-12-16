@@ -17,6 +17,31 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * @mainpage YASMINE - Yet Another Symolic Modelling INteractive Environment
+ * @author Marco Pensallorto < marco DOT pensallorto AT gmail DOT com>\n
+ * Copyright (C) 2011-2012\n
+ * @section DownloadSourceCode Download
+ * Source code is available on Github:\n
+ * https://github.com/mwolf76/gnuSMV
+ * \n\n
+ *
+ * <H1><CENTER>Overview</CENTER></H1>YASMINE (Yet Another Symbolic
+ * Modelling INteractive Environment) started off in fall 2011 as a
+ * tentative and partial C++ reimplementation of the NuSMV2 model
+ * checker. As a former member of the NuSMV2 development team (in the
+ * years from 2008 to 2011), I was never happy with a few
+ * architectural choices that were inherited from the long history of
+ * the NuSMV model checker and/or were due to the amount of legacy
+ * code and tools that relied on its "peculiar" behavior. Don't get me
+ * wrong, I really think NuSMV is a great piece of software. And I owe
+ * to the developers and researchers in FBK most - if not all - of my
+ * scientific and software engineering training. Those people are
+ * really fantastic. It's just that I have been wondering for years
+ * what that project would have been like, if one was completely free
+ * to redesign it all from-the-scratch. This is exactly why this
+ * project exists in the first place.
+ *
  **/
 #include <common.hh>
 

@@ -23,7 +23,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 # Programs to be built
-bin_PROGRAMS = smv tests
+bin_PROGRAMS = yasmv tests
 
 # test target helper
 test: tests
@@ -33,10 +33,12 @@ test: tests
 tags:
 	@ctags -Re $(top_srcdir)
 
-smv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
-smv_LDADD = $(top_builddir)/src/parser/libparser.la			\
+yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
+yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
 	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+	$(top_builddir)/src/algorithms/kind/libkind.la			\
+	$(top_builddir)/src/algorithms/sim/libsim.la			\
 	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\
 	$(top_builddir)/src/model/compilers/libcompilers.la		\
@@ -62,6 +64,8 @@ tests_SOURCES = $(top_srcdir)/src/tests.cc src/parse.cc src/common.cc	\
 tests_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(top_builddir)/src/cmd/libcommand.la			\
 	$(top_builddir)/src/algorithms/bmc/libbmc.la		\
+	$(top_builddir)/src/algorithms/kind/libkind.la		\
+	$(top_builddir)/src/algorithms/sim/libsim.la		\
 	$(top_builddir)/src/algorithms/libalgorithms.la		\
 	$(top_builddir)/src/model/libmodel.la			\
 	$(top_builddir)/src/model/compilers/libcompilers.la	\
@@ -76,7 +80,7 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)	\
 	-lboost_unit_test_framework
 
-smv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
+yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
 tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS)
 
 pkgconfdir = $(libdir)/pkgconfig
