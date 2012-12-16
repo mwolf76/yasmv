@@ -90,7 +90,7 @@ public:
 
 private:
     // BMC machinery
-    SATBMCFalsification f_engine;
+    BMC f_bmc;
 
     // the invariant expr
     Expr_ptr f_expr;

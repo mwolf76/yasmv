@@ -1,5 +1,4 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = bmc kind
 
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
@@ -18,12 +17,12 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 AM_CPPFLAGS=@AM_CPPFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_HH = mc.hh
-PKG_CC = mc.cc
+PKG_HH = kind.hh
+PKG_CC = kind.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
 # -------------------------------------------------------
 
-noinst_LTLIBRARIES = libalgorithms.la
-libalgorithms_la_SOURCES = $(PKG_SOURCES)
+noinst_LTLIBRARIES = libkind.la
+libkind_la_SOURCES = $(PKG_SOURCES)

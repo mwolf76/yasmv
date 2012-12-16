@@ -36,6 +36,12 @@
 #include <witness.hh>
 #include <variant.hh>
 
+/* SAT interface */
+#include <sat.hh>
+
+/* Model compiler */
+#include <compilers/compiler.hh>
+
 typedef unordered_map<string, Variant> ParametersMap;
 
 typedef enum {
@@ -43,6 +49,16 @@ typedef enum {
     MC_TRUE,
     MC_UNKNOWN,
 } mc_status_t;
+
+using Minisat::group_t;
+using Minisat::MAINGROUP;
+
+using Minisat::color_t;
+using Minisat::BACKGROUND;
+
+using Minisat::SAT;
+using Minisat::STATUS_SAT;
+using Minisat::STATUS_UNSAT;
 
 class MCAlgorithm {
 public:
@@ -88,6 +104,48 @@ protected:
 
     // algorithm specific params
     ParametersMap f_params;
+
+    void assert_fsm_init (step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_fsm_trans(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_invariant(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_violation(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    inline SAT& engine()
+    { return f_engine; }
+
+    inline Compiler& compiler()
+    { return f_compiler; }
+
+    /* shortcut */
+    inline void toggle_last_group()
+    { (*f_engine.groups().rbegin()) *= -1; }
+
+    ADDVector f_init_adds;
+    ADDVector f_trans_adds;
+
+    ADD       f_invariant_add;
+    ADD       f_violation_add;
+
+private:
+    // services
+    void prepare();
+
+    /* Model Compiler */
+    Compiler f_compiler;
+
+    /* The Engine */
+    SAT& f_engine;
 };
 
 #endif

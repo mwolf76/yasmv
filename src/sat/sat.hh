@@ -136,9 +136,9 @@ namespace Minisat {
         /**
          * @brief SAT instancte ctor
          */
-        SAT(DDTermFactory& factory)
-            : f_factory(factory)
-            , f_enc_mgr(EncodingMgr::INSTANCE())
+        SAT(/* DDTermFactory& factory */)
+        // : f_factory(factory)
+            : f_enc_mgr(EncodingMgr::INSTANCE())
             , f_mapper(* new TimeMapper(*this))
             , f_solver()
             , f_next_color(0)
@@ -161,8 +161,8 @@ namespace Minisat {
         { return f_enc_mgr.find_ucbi(index); }
 
     private:
-        // Term factory
-        DDTermFactory& f_factory;
+        // // Term factory
+        // DDTermFactory& f_factory;
 
         // Enc Mgr
         EncodingMgr& f_enc_mgr;

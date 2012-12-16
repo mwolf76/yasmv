@@ -71,7 +71,7 @@ NowCommand::~NowCommand()
 SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
     : Command(owner)
     , f_factory(CuddMgr::INSTANCE().dd())
-    , f_engine(f_factory)
+    , f_engine(/* f_factory */)
     , f_compiler()
     , f_expr(expr)
 {}
@@ -95,15 +95,14 @@ SATCommand::~SATCommand()
 // -- CheckInvspec -------------------------------------------------------------
 CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr invariant)
     : Command(owner)
-    , f_engine(*ModelMgr::INSTANCE().model(), invariant)
+    , f_bmc(*ModelMgr::INSTANCE().model(), invariant)
 {}
 
 Variant CheckInvspecCommand::operator()()
 {
-    f_engine.process();
+    f_bmc.process();
 
-    ostringstream tmp;
-    tmp << f_engine.status();
+    ostringstream tmp; tmp << f_bmc.status();
     return Variant(tmp.str());
 }
 
