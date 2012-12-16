@@ -89,20 +89,20 @@ namespace Minisat {
          * @brief add a formula with a given group and color to the
          * SAT instance.
          */
-        inline void push(Term term, step_t time, group_t group, color_t color)
+        inline void push(Term term, step_t time,
+                         group_t group = MAINGROUP,
+                         color_t color = BACKGROUND)
         { cnf_push_single_cut(term, time, group, color); }
 
+        /* shortcut */
+        inline void toggle_last_group()
+        { (*f_groups.rbegin()) *= -1; }
+
         /**
-         * @brief Solve all groups.
+         * @brief Invoke Minisat
          */
         inline status_t solve()
         { return sat_solve_groups(f_groups); }
-
-        /**
-         * @brief Solve only given groups.
-         */
-        inline status_t solve(const Groups& groups)
-        { return sat_solve_groups(groups); }
 
         /**
          * @brief Last solving status
