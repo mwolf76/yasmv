@@ -50,29 +50,41 @@ void Simulation::process()
     assert_fsm_init(0);
     TRACE << "Starting simulation..." << endl;
 
-    if (STATUS_UNSAT == engine().solve()) {
+    if (STATUS_SAT == engine().solve()) {
 
         do {
             assert_fsm_trans(k); ++ k;
             TRACE << "Simulating step " << k << endl;
         } while (STATUS_SAT == engine().solve() && ! leave);
+
+        if (STATUS_SAT == engine().status()) {
+
+            TRACE << "Extracting simulation witness (k = " << k << ")."
+                  << endl;
+
+            set_status( SIMULATION_SAT );
+
+            // /* CEX extraction */
+            // ostringstream oss; oss << "CEX for '" << f_property << "'";
+            // Witness& witness = * new SimulationWitness(f_property, model(),
+            //                                            engine(), k, false);
+
+            // TODO: register
+        }
+
+        else {
+            TRACE << "Inconsistency detected in TRANS, step " << k
+                  << ". Simulation aborted."
+                  << endl;
+
+            set_status( SIMULATION_UNSAT );
+        }
     }
 
-    if (STATUS_SAT == engine().status()) {
-
-        TRACE << "Found Simulation witness (k = " << k
-              << ")." << endl;
-
-        set_status( SIMULATION_SAT );
-
-        // /* CEX extraction */
-        // ostringstream oss; oss << "CEX for '" << f_property << "'";
-        // Witness& witness = * new SimulationWitness(f_property, model(),
-        //                                            engine(), k, false);
-
-        // TODO: register
-    }
     else {
+        TRACE << "Inconsistency detected in INIT. Simulation aborted."
+              << endl;
+
         set_status( SIMULATION_UNSAT );
     }
 
