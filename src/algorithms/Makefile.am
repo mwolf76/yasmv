@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = bmc kind
+SUBDIRS = bmc kind sim
 
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
@@ -18,8 +18,8 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 AM_CPPFLAGS=@AM_CPPFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_HH = mc.hh
-PKG_CC = mc.cc
+PKG_HH = base.hh mc.hh
+PKG_CC = base.cc mc.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

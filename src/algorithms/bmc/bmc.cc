@@ -47,7 +47,7 @@ void BMC::process()
             /* TODO: tell the children last valid k */
 
             /* disable last violation */
-            toggle_last_group();
+            engine().toggle_last_group();
 
             assert_fsm_trans(k ++);
             assert_violation(k, engine().new_group());
@@ -59,15 +59,17 @@ void BMC::process()
     }
 
     if (STATUS_SAT == engine().status()) {
-        f_status = MC_FALSE;
+        set_status(MC_FALSE);
 
         TRACE << "Found BMC CEX witness (k = " << k
               << "), invariant is FALSE." << endl;
 
         /* CEX extraction */
-        ostringstream oss; oss << "CEX for '" << f_property << "'";
-        Witness& cex = * new BMCCounterExample(f_property, model(),
-                                               engine(), k, false);
+        ostringstream oss; oss << "CEX for '"
+                               << property() << "'";
+
+        Witness& trace = * new BMCCounterExample(property(), model(),
+                                                 engine(), k, false);
 
         // TODO: register
     }

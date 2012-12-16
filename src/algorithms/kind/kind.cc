@@ -37,7 +37,7 @@ KInduction::~KInduction()
 
 void KInduction::prepare()
 {
-    const Modules& modules = f_model.modules();
+    const Modules& modules = model().modules();
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
 
@@ -52,7 +52,7 @@ void KInduction::prepare()
             Expr_ptr body = (*init_eye);
 
             f_not_init_adds.push_back(compiler().process(ctx,
-                                                         f_em.make_not(body)));
+                                                         em().make_not(body)));
         }
     }
 }
@@ -93,7 +93,7 @@ void KInduction::process()
         k = 1; do {
 
             /* disable last violation */
-            toggle_last_group();
+            engine().toggle_last_group();
 
             assert_fsm_trans(k);
             assert_invariant(k);
@@ -112,7 +112,7 @@ void KInduction::process()
     if (STATUS_UNSAT == engine().status()) {
         TRACE << "Found K-induction proof (k = " << k
               << "), invariant is TRUE." << endl;
-        f_status = MC_TRUE;
+        set_status(MC_TRUE);
     }
 
     TRACE << "Done." << endl;
