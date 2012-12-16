@@ -78,15 +78,13 @@ SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
 
 Variant SATCommand::operator()()
 {
-# if 0 // TODO: later
     Expr_ptr ctx = ExprMgr::INSTANCE().make_main(); // default ctx
     ADD add = f_compiler.process(ctx, f_expr);
-    f_engine.push(add);
+    f_engine.push(add, 0);
 
     ostringstream tmp;
     tmp << f_engine.solve();
     return Variant(tmp.str());
-#endif
 }
 
 SATCommand::~SATCommand()
@@ -95,7 +93,8 @@ SATCommand::~SATCommand()
 // -- CheckInvspec -------------------------------------------------------------
 CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr invariant)
     : Command(owner)
-    , f_bmc(*ModelMgr::INSTANCE().model(), invariant)
+    , f_bmc(* ModelMgr::INSTANCE().model(),
+            invariant)
 {}
 
 Variant CheckInvspecCommand::operator()()
@@ -107,6 +106,29 @@ Variant CheckInvspecCommand::operator()()
 }
 
 CheckInvspecCommand::~CheckInvspecCommand()
+{}
+
+// -- SIMULATE  ----------------------------------------------------------------
+SimulateCommand::SimulateCommand(Interpreter& owner, int resume,
+                                 int nsteps, ExprVector& constraints)
+    : Command(owner)
+    , f_sim(* ModelMgr::INSTANCE().model(),
+            resume, nsteps, constraints)
+{
+    assert(-1 == resume);
+    assert(-1 == nsteps);
+    assert( 0 == constraints.size());
+}
+
+Variant SimulateCommand::operator()()
+{
+    f_sim.process();
+
+    ostringstream tmp; tmp << f_sim.status();
+    return Variant(tmp.str());
+}
+
+SimulateCommand::~SimulateCommand()
 {}
 
 // -- QUIT ---------------------------------------------------------------------

@@ -30,6 +30,7 @@
 #include <sat.hh>
 
 #include <bmc/bmc.hh>
+#include <sim/simulation.hh>
 
 class ICommand : public IObject {
 public:
@@ -81,6 +82,23 @@ private:
     Expr_ptr f_expr;
 };
 
+class SimulateCommand : public Command {
+public:
+    SimulateCommand(Interpreter& owner, int resume,
+                    int nsteps, ExprVector& constraints);
+
+    virtual ~SimulateCommand();
+
+    Variant virtual operator()();
+
+private:
+    // Simulation machinery
+    Simulation f_sim;
+
+    // Simulation constraints
+    Expr_ptr f_expr;
+};
+
 class CheckInvspecCommand : public Command {
 public:
     CheckInvspecCommand(Interpreter& owner, Expr_ptr expr);
@@ -95,7 +113,6 @@ private:
     // the invariant expr
     Expr_ptr f_expr;
 };
-
 
 class NowCommand : public Command {
 public:

@@ -97,16 +97,13 @@ cmd returns [Command_ptr res]
 
  * MC
 
- INVAR <expr>, model checking of given properties.
+ ASSERT <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
- SIMULATE [ INIT | RESUME #trace ] [#steps] [CONSTRAINED constraint1] [GUIDED <#trace>]...
+ SIMULATE [ RESUME #trace ] [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )?
  Returns witness index or UNSAT if simulation failed.
 
  >> SIMULATE
- OK. Created Trace (#4)
-
- >> SIMULATE INIT
  OK. Created Trace (#4)
 
  * TRACE
@@ -145,22 +142,77 @@ cmd returns [Command_ptr res]
  QUIT [-r retcode], terminates the program
 */
 commands returns [Command_ptr res]
-    :
-        'SAT' expr=toplevel_expression
-        { $res = cm.make_sat(expr); }
+    :  c=assert_command
+       { $res = c; }
 
-    |   'ASSERT' expr=toplevel_expression
-        { $res = cm.make_check_invspec(expr); }
+    |  c=clk_command
+       { $res = c; }
 
-    |   'CLK'
-        { $res = cm.make_now(); }
+    |  c=sat_command
+       { $res = c; }
 
-    |   'MODEL' fp=filepath
-        { $res = cm.make_load_model(fp); }
+    |  c=model_command
+       { $res = c; }
 
-    |   'QUIT'
-        { $res = cm.make_quit(); }
+    |  c=simulate_command
+       { $res = c; }
+
+    |  c=quit_command
+        { $res = c; }
     ;
+
+assert_command returns [Command_ptr res]
+    :   'ASSERT' expr=toplevel_expression
+        { $res = cm.make_check_invspec(expr); }
+    ;
+
+clk_command returns [Command_ptr res]
+    : 'CLK' { $res = cm.make_now(); }
+    ;
+
+model_command returns [Command_ptr res]
+    : 'MODEL' fp=filepath
+      { $res = cm.make_load_model(fp); }
+    ;
+
+sat_command returns [Command_ptr res]
+    : 'SAT' expr=toplevel_expression
+       { $res = cm.make_sat(expr); }
+    ;
+
+simulate_command returns [Command_ptr res]
+@init {
+    int nsteps = -1; /* unlimited */
+    int resume = -1; /* new trace */
+    ExprVector constraints;
+}
+    : 'SIMULATE'
+
+        ( 'RESUME' tid=int_constant
+        { resume = (int) tid->value(); } )?
+
+        ( 'CONSTRAINED' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
+        ) ?
+
+        ( steps=int_constant
+          { nsteps = (int) steps->value(); }
+        ) ?
+
+        {$res = cm.make_simulate( resume, nsteps, constraints ); }
+
+    ;
+
+quit_command returns [Command_ptr res]
+    :  'QUIT'
+       { $res = cm.make_quit(); }
+    ;
+
+// -------------------------------------------------------------------------------
 
 filepath returns [const char *res]
 @init { std::ostringstream oss; }

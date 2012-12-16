@@ -49,6 +49,9 @@ public:
     inline Command_ptr make_sat(Expr_ptr expr)
     { return new SATCommand(f_interpreter, expr); }
 
+    inline Command_ptr make_simulate(int resume, int nsteps, ExprVector& constraints)
+    { return new SimulateCommand(f_interpreter, resume, nsteps, constraints); }
+
     inline Command_ptr make_check_invspec(Expr_ptr expr)
     { return new CheckInvspecCommand(f_interpreter, expr); }
 
