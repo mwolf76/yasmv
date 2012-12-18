@@ -47,10 +47,6 @@ protected:
     void assert_fsm_not_init (step_t time,
                               group_t group = MAINGROUP,
                               color_t color = BACKGROUND);
-
-private:
-    void prepare();
-
 };
 
 #endif

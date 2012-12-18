@@ -55,27 +55,20 @@ using Minisat::STATUS_UNSAT;
 
 class Algorithm {
 public:
-    Algorithm(IModel& model);
+    Algorithm();
     virtual ~Algorithm();
 
     // actual algorithm
     virtual void process() =0;
 
-    IModel& model() const
-    { return f_model; }
-
-    // alg abstract param iface (key -> value map)
+    // algorithm abstract param interface (key -> value map)
     void set_param(string key, Variant value);
     Variant& get_param(const string key);
 
-protected:
-    void assert_fsm_init (step_t time,
-                          group_t group = MAINGROUP,
-                          color_t color = BACKGROUND);
+    inline Compiler& compiler()
+    { return f_compiler; }
 
-    void assert_fsm_trans(step_t time,
-                          group_t group = MAINGROUP,
-                          color_t color = BACKGROUND);
+protected:
 
     inline ModelMgr& mm()
     { return f_mm; }
@@ -86,27 +79,14 @@ protected:
     inline TypeMgr& tm()
     { return f_tm; }
 
-    inline IModel& model()
-    { return f_model; }
-
     inline SAT& engine()
     { return f_engine; }
-
-    inline Compiler& compiler()
-    { return f_compiler; }
 
 private:
     // managers
     ModelMgr& f_mm;
     ExprMgr& f_em;
     TypeMgr& f_tm;
-
-    IModel& f_model;
-    ADDVector f_init_adds;
-    ADDVector f_trans_adds;
-
-    // services
-    void prepare();
 
     /* Model Compiler */
     Compiler f_compiler;

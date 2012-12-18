@@ -29,15 +29,7 @@ using namespace Minisat;
 KInduction::KInduction(IModel& model, Expr_ptr property)
     : MCAlgorithm(model, property)
 {
-    prepare();
-}
-
-KInduction::~KInduction()
-{}
-
-void KInduction::prepare()
-{
-    const Modules& modules = model().modules();
+    const Modules& modules = f_model.modules();
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
 
@@ -74,6 +66,9 @@ void KInduction::assert_fsm_not_init(step_t time, group_t group, color_t color)
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     TRACE << "Done. (took " << secs << " seconds)" << endl;
 }
+
+KInduction::~KInduction()
+{}
 
 void KInduction::process()
 {

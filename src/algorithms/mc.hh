@@ -43,19 +43,60 @@ public:
     mc_status_t status() const;
 
     bool has_witness() const;
-
     Witness& get_witness() const;
-
-protected:
-    inline ADD& invariant()
-    { return f_invariant_add; }
-
-    inline ADD& violation()
-    { return f_violation_add; }
 
     inline Expr_ptr property()
     { return f_property; }
 
+    inline IModel& model()
+    { return f_model; }
+
+protected:
+    IModel& f_model;
+    Expr_ptr f_property;
+
+    void assert_fsm_init (step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_fsm_trans(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_violation(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    inline ADD& invariant()
+    { return f_invariant_add; }
+
+    void assert_invariant(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    inline ADD& violation()
+    { return f_violation_add; }
+
+    void set_status(mc_status_t status);
+
+private:
+    ADD       f_invariant_add;
+    ADD       f_violation_add;
+
+    ADDVector f_init_adds;
+    ADDVector f_trans_adds;
+
+    // ctx witness
+    Witness_ptr f_witness;
+    mc_status_t f_status;
+};
+
+class SlaveAlgorithm : public Algorithm {
+public:
+    SlaveAlgorithm(MCAlgorithm& master);
+    virtual ~SlaveAlgorithm();
+
+protected:
     void assert_violation(step_t time,
                           group_t group = MAINGROUP,
                           color_t color = BACKGROUND);
@@ -64,20 +105,9 @@ protected:
                           group_t group = MAINGROUP,
                           color_t color = BACKGROUND);
 
-    void set_status(mc_status_t status);
-
 private:
-    // services
-    void prepare();
-
-    ADD       f_invariant_add;
-    ADD       f_violation_add;
-
-    Expr_ptr f_property;
-
-    // ctx witness
-    Witness_ptr f_witness;
-    mc_status_t f_status;
+    MCAlgorithm& f_master;
 };
+
 
 #endif

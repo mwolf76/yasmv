@@ -27,7 +27,8 @@
 using namespace Minisat;
 
 MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
-    : Algorithm(model)
+    : Algorithm()
+    , f_model(model)
     , f_property(property)
     , f_witness(NULL)
 {
@@ -37,8 +38,45 @@ MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
            << " @" << this
            << endl;
 
-    /* pre-compilation */
-    prepare();
+        /* internal structures are empty */
+    assert( 0 == f_init_adds.size() );
+    assert( 0 == f_trans_adds.size() );
+
+    const Modules& modules = f_model.modules();
+    for (Modules::const_iterator m = modules.begin();
+         m != modules.end(); ++ m) {
+
+        Module& module = dynamic_cast <Module&> (*m->second);
+
+        /* INIT */
+        const ExprVector init = module.init();
+        for (ExprVector::const_iterator init_eye = init.begin();
+             init_eye != init.end(); ++ init_eye) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*init_eye);
+
+            f_init_adds.push_back(compiler().process(ctx, body));
+        }
+
+        /* TRANS */
+        const ExprVector trans = module.trans();
+        for (ExprVector::const_iterator trans_eye = trans.begin();
+             trans_eye != trans.end(); ++ trans_eye) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*trans_eye);
+
+            f_trans_adds.push_back(compiler().process(ctx, body));
+        }
+    }
+
+    /* Invariant */
+    f_invariant_add = compiler().process( em().make_main(), f_property);
+
+    /* Violation (negation of Invarion) */
+    f_violation_add = compiler().process( em().make_main(),
+                                          em().make_not( f_property));
 }
 
 MCAlgorithm::~MCAlgorithm()
@@ -64,16 +102,6 @@ Witness& MCAlgorithm::get_witness() const
 void MCAlgorithm::set_status(mc_status_t status)
 { f_status = status; }
 
-void MCAlgorithm::prepare()
-{
-    /* Invariant */
-    f_invariant_add = compiler().process( em().make_main(), f_property);
-
-    /* Violation (negation of Invarion) */
-    f_violation_add = compiler().process( em().make_main(),
-                                          em().make_not( f_property));
-}
-
 void MCAlgorithm::assert_violation(step_t time, group_t group, color_t color)
 {
     // TODO: macro to wrap code to be benchmarked (cool!)
@@ -86,4 +114,55 @@ void MCAlgorithm::assert_violation(step_t time, group_t group, color_t color)
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
+void MCAlgorithm::assert_fsm_init(step_t time, group_t group, color_t color)
+{
+    clock_t t0 = clock();
+    unsigned n = f_init_adds.size();
+    TRACE << "CNFizing INITs @" << time
+          << "... (" << n << " formulas)"
+          << endl;
+
+    ADDVector::iterator i;
+    for (i = f_init_adds.begin(); f_init_adds.end() != i; ++ i) {
+        engine().push( *i, time, group, color);
+    }
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
+void MCAlgorithm::assert_fsm_trans(step_t time, group_t group, color_t color)
+{
+    clock_t t0 = clock();
+    unsigned n = f_trans_adds.size();
+
+    TRACE << "CNFizing TRANSes @" << time
+          << "... (" << n << " formulas)"
+          << endl;
+
+    ADDVector::iterator i;
+    for (i = f_trans_adds.begin(); f_trans_adds.end() != i; ++ i) {
+        engine().push( *i, time, group, color);
+    }
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
+SlaveAlgorithm::SlaveAlgorithm(MCAlgorithm& master)
+    : Algorithm()
+    , f_master(master)
+{
+}
+
+SlaveAlgorithm::~SlaveAlgorithm()
+{
+    DEBUG << "Destroying MC algoritm instance"
+          << get_param("alg_name")
+          << " @" << this
+          << endl;
 }

@@ -49,12 +49,26 @@ public:
     simulation_status_t status() const;
 
 private:
+    IModel& f_model;
+
     int f_resume;
     int f_nsteps;
     ExprVector f_constraints;
 
     simulation_status_t f_status;
     void set_status(simulation_status_t status);
+
+    ADDVector f_init_adds;
+    ADDVector f_trans_adds;
+
+    void assert_fsm_init (step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_fsm_trans(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
 };
 
 class SimulationWitness : public Witness {

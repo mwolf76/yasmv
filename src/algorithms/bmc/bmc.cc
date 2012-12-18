@@ -27,7 +27,8 @@
 
 BMC::BMC(IModel& model, Expr_ptr property)
     : MCAlgorithm(model, property)
-{}
+{
+}
 
 BMC::~BMC()
 {}
