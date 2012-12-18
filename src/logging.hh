@@ -44,7 +44,8 @@ namespace axter {
             ostringstream oss;
 
             ftime(&now);
-            string timestr = ctime(&now.time);  // if (tmp.size()) tmp[tmp.size() -1] = ']';
+            string timestr = ctime(&now.time);
+            if (timestr.size()) timestr[timestr.size() -1] = ']';
 
             oss << "[" << timestr << "." << now.millitm << " "
                 << filename << ":" << LineNo << " :: "  ;
