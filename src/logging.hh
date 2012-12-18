@@ -24,6 +24,7 @@
 #define LOGGING_H
 
 #include "ezlogger_misc.hpp"
+#include <sys/timeb.h>
 
 namespace axter {
     // custom format
@@ -35,14 +36,18 @@ namespace axter {
                                           int LineNo, const char*FunctionName,
                                           ext_data levels_format_usage_data)
         {
+            struct timeb now;
+
             const string filename(FileName);
             const string funcname(FunctionName);
 
             ostringstream oss;
 
-            time_t t = time(0) ;
-            string tmp = ctime(&t);  if (tmp.size()) tmp[tmp.size() -1] = ']';
-            oss << "[" << tmp << " " << filename << ":" << LineNo << " :: "  ;
+            ftime(&now);
+            string timestr = ctime(&now.time);  // if (tmp.size()) tmp[tmp.size() -1] = ']';
+
+            oss << "[" << timestr << "." << now.millitm << " "
+                << filename << ":" << LineNo << " :: "  ;
 
             return oss.str().c_str();
         }
