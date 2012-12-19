@@ -654,11 +654,58 @@ type_name returns [Type_ptr res]
 @init {
     ExprSet lits;
 }
-    // boolean
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
-    // finite integer types
+    | 'uint8_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_unsigned_array(2, size->value()); }
+
+        | { $res = tm.find_unsigned(2); } )
+
+    | 'int8_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_signed_array(2, size->value()); }
+
+        | { $res = tm.find_signed(2); } )
+
+    | 'uint16_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_unsigned_array(4, size->value()); }
+
+        | { $res = tm.find_unsigned(4); } )
+
+    | 'int16_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_signed_array(4, size->value()); }
+
+        | { $res = tm.find_signed(4); } )
+
+    | 'uint32_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_unsigned_array(8, size->value()); }
+
+        | { $res = tm.find_unsigned(8); } )
+
+    | 'int32_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_signed_array(8, size->value()); }
+
+        | { $res = tm.find_signed(8); } )
+
+    | 'uint64_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_unsigned_array(16, size->value()); }
+
+        | { $res = tm.find_unsigned(16); } )
+
+    | 'int64_t' (
+        '[' size=int_constant ']'
+          { $res = tm.find_signed_array(16, size->value()); }
+
+        | { $res = tm.find_signed(16); } )
+
+    // generic finite integer types
     | 'unsigned' '(' width=int_constant ')' (
             '[' size=int_constant ']'
               { $res = tm.find_unsigned_array(width->value(), size->value()); }
