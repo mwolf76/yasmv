@@ -72,11 +72,17 @@ public:
     inline ADD zero()
     { return f_cudd.addZero(); }
 
+    inline ADD error()
+    { return f_cudd.constant(error_value); }
+
     inline ADD constant(value_t value)
-    { return f_cudd.constant(value); }
+    { assert (error_value != value); return f_cudd.constant(value); }
 
     inline bool is_constant(ADD x) const
     { return cuddIsConstant(x.getNode()); }
+
+    inline bool is_error(ADD x) const
+    { return cuddIsConstant(x.getNode()) && (error_value == Cudd_V(x.getNode())); }
 
     inline value_t const_value(ADD x) const
     { return Cudd_V(x.getNode()); }

@@ -645,6 +645,18 @@ static inline value_t pow2(unsigned exp)
         return res;
 }
 
+/**
+   This function builds a selector of powers of 2, i.e.
+
+   f(A) := (A == 0) ? 1
+                    : (A == 1) ? 2
+		               : (A == 2) ? 4
+			                  .
+					  .
+					  .
+					  : (A == k - 1) ? 2 ^ (k-1)
+					                 : ERROR
+*/
 Expr_ptr Compiler::make_bounded_exp2(ADD *dds, unsigned width)
 {
     value_t value;
@@ -652,49 +664,44 @@ Expr_ptr Compiler::make_bounded_exp2(ADD *dds, unsigned width)
     unsigned base = Cudd_V(f_enc.base().getNode());
     unsigned exp2 = 0;
 
-    ADD mpx[width]; /* multiplex */
+    ADD mpx[width]; /* multiplexer, building terminal error nodes */
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - i - 1;
-        mpx[ndx] = (! ndx )
-            ? f_enc.one()
-            : f_enc.zero() ;
+        mpx[ndx] = f_enc.error();
     }
 
     while (exp2 < width) {
-        ADD condition = f_enc.one();
-        { /* inlined condition */
-            value = exp2;
+      /* build cond 0-1 ADD, 'A == k' */
+      ADD condition = f_enc.one();
 
-            /* inlined condition */
-            for (unsigned i = 0; i < width; ++ i) {
-                unsigned ndx = width - i - 1;
+      value = exp2;
+      for (unsigned i = 0; i < width; ++ i) {
+	unsigned ndx = width - i - 1;
+	condition *= dds[ndx]. // TODO: this conjuction should be optimized
+	  Equals(f_enc.constant(value % base));
+	
+	value /= base;
+      }
+      assert (value == 0); // not overflowing
 
-                condition *= dds[ndx].
-                    Equals(f_enc.constant(value % base));
+      /* build corresponding Then ADD vec, '2^value' */
+      ADD constant[width];
 
-                value /= base;
-            }
-            assert (value == 0); // not overflowing
-        }
+      value = pow2(exp2);
+      for (unsigned i = 0; i < width; ++ i) {
+	unsigned ndx = width - i - 1;
+	constant[ndx] = f_enc.constant(value % base);
+	
+	value /= base;
+      }
+      assert (value == 0); // not overflowing
+     
+      /* ITE chaining (endianess irrelevant here)*/
+      for (unsigned i = 0; i < width; ++ i) {
+	mpx[i] = condition.Ite( constant[i], mpx[i] );
+      }
 
-        ADD constant[width];
-        {/* inlined power of 2 */
-            value = pow2(exp2);
-            for (unsigned i = 0; i < width; ++ i) {
-                unsigned ndx = width - i - 1;
-
-                constant[ndx] = f_enc.constant(value % base);
-
-                value /= base;
-            }
-            assert (value == 0); // not overflowing
-        }
-
-        for (unsigned i = 0; i < width; ++ i) {
-            mpx[i] = condition.Ite( constant[i], mpx[i] );
-        }
-
-        ++ exp2;
+      ++ exp2;
     }
 
     return make_temporary_encoding(mpx, width);

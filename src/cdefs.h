@@ -22,13 +22,19 @@
 #ifndef CDEFS_DEFINED
 #define CDEFS_DEFINED
 
-#define DEFAULT_BITS 8
+#include <limits.h>
 
 /* Reserved for native data type, should match machine word for
-   optimal performance. This type used for the ADD leaves. */
+   optimal performance. This type will be used for the ADD leaves. */
 typedef long value_t;
 
-/* time representation */
+/* Reserved for ADD ops error checking. */
+static const value_t error_value = LONG_MIN;
+
+/* Number of bits per digit. */
+static const value_t bits_per_digit = 4;
+
+/* Reserved for time frames representation. */
 typedef unsigned step_t;
 
 #endif
