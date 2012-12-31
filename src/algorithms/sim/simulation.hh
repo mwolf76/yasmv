@@ -46,7 +46,11 @@ public:
 
     void process();
 
-    simulation_status_t status() const;
+    inline simulation_status_t status() const
+    { return f_status; }
+
+    inline IModel& model()
+    { return f_model; }
 
 private:
     IModel& f_model;

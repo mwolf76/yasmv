@@ -33,7 +33,7 @@ Simulation::Simulation(IModel& model, int resume,
     , f_nsteps(nsteps)
     , f_constraints(constraints)
 {
-        /* internal structures are empty */
+    /* internal structures are empty */
     assert( 0 == f_init_adds.size() );
     assert( 0 == f_trans_adds.size() );
 
@@ -70,9 +70,6 @@ Simulation::Simulation(IModel& model, int resume,
 Simulation::~Simulation()
 {}
 
-simulation_status_t Simulation::status() const
-{ return f_status; }
-
 void Simulation::set_status(simulation_status_t status)
 { f_status = status; }
 
@@ -89,7 +86,12 @@ void Simulation::process()
         do {
             assert_fsm_trans(k); ++ k;
             TRACE << "Simulating step " << k << endl;
-        } while (STATUS_SAT == engine().solve() && ! leave);
+
+            if (STATUS_SAT == engine().solve()) {
+                ostringstream oss; oss << "Simulation";
+                SimulationWitness witness(model(), engine(), k);
+            }
+        } while (STATUS_SAT == engine().status() && ! leave);
 
         if (STATUS_SAT == engine().status()) {
 
@@ -97,11 +99,6 @@ void Simulation::process()
                   << endl;
 
             set_status( SIMULATION_SAT );
-
-            // /* CEX extraction */
-            // ostringstream oss; oss << "CEX for '" << f_property << "'";
-            // Witness& witness = * new SimulationWitness(f_property, model(),
-            //                                            engine(), k, false);
 
             // TODO: register
         }

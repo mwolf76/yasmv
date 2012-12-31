@@ -18,7 +18,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
 PKG_HH = simulation.hh
-PKG_CC = simulation.cc
+PKG_CC = simulation.cc witness.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
