@@ -306,15 +306,50 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
         lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
     }
 
-    (*this)(em.make_ite(
-                        /* rhs anything beyond width? result is zero. */
-                        em.make_cond( em.make_ge( expr->rhs(),
-                                                  em.make_iconst(bits_per_digit * width)),
-                                      em.make_zero()),
+    ADD tmp[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        tmp[i] = lhs[i];
+    }
 
-                        /* othwerwise, mul with a bounded power of 2. */
-                        em.make_mul ( expr->lhs(),
-                                      make_bounded_exp2(rhs, width))));
+    /* base return value, when rhs >= width * nbits */
+    ADD res[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        res[i] = f_enc.zero();
+    }
+
+    ADD msb_mask = f_enc.constant(1 << (bits_per_digit - 1));
+    ADD c0;
+    ADD c1;
+
+    for (unsigned k = 0; k < bits_per_digit * width; ++ k) {
+
+        /* compile selection condition */
+        (*this)(em.make_eq( expr->rhs(), em.make_iconst(k)));
+        ADD cond = f_add_stack.back(); f_add_stack.pop_back();
+        f_type_stack.pop_back(); /* adjust type stack */
+
+        c0 = f_enc.zero(); /* lsh always introduces 0 as LSB */
+        for (unsigned i = 0; i < width; ++ i) {
+            unsigned ndx = width - i - 1;
+
+            /* c' = (0 < D & MSB_MASK); */
+            c1 = f_enc.zero().LT( tmp[ndx].BWTimes( msb_mask ));
+
+            /* accumulate */
+            res[ndx] = cond.Ite( tmp[ndx], res[ndx] );
+
+             /* x[i] = x[i] << 1 | c0 */
+            tmp[ndx] = tmp[ndx].BWLShift().BWOr(c0);
+
+            c0 = c1;
+        }
+    }
+
+    /* push result (reversed) */
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx = width - i - 1;
+        f_add_stack.push_back( res[ndx]);
+    }
 }
 
 /* REVIEW: http://en.wikipedia.org/wiki/Arithmetic_shift#Non-equivalence_of_arithmetic_right_shift_and_division */

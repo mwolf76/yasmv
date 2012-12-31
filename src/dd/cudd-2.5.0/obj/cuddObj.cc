@@ -2747,6 +2747,26 @@ ADD::Cmpl() const
 } // ADD::Cmpl
 
 ADD
+ADD::BWLShift() const
+{
+    DdManager *mgr = p->manager;
+    DdNode *result = Cudd_addMonadicApply(mgr, Cudd_addBWLShift, node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWLShift
+
+ADD
+ADD::BWRShift() const
+{
+    DdManager *mgr = p->manager;
+    DdNode *result = Cudd_addMonadicApply(mgr, Cudd_addBWRShift, node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::BWRShift
+
+ADD
 ADD::BWCmpl() const
 {
     DdManager *mgr = p->manager;

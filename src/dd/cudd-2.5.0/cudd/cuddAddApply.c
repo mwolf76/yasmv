@@ -1054,6 +1054,58 @@ Cudd_addBWCmpl(
 
 } /* end of Cudd_addBWCmpl */
 
+
+/**Function********************************************************************
+
+  Synopsis    [1 bit left shift ADD.]
+
+  Description [1 bit left shift ADD.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addMonadicApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWLShift(
+  DdManager * dd,
+  DdNode * f)
+{
+    if (cuddIsConstant(f)) {
+	CUDD_VALUE_TYPE value = (cuddV(f) << 1) & 0xf;
+	DdNode *res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWLShift */
+
+
+/**Function********************************************************************
+
+  Synopsis    [1 bit right shift ADD.]
+
+  Description [1 bit right shift ADD.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addMonadicApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addBWRShift(
+  DdManager * dd,
+  DdNode * f)
+{
+    if (cuddIsConstant(f)) {
+	CUDD_VALUE_TYPE value = (cuddV(f) >> 1) & 0xf;
+	DdNode *res = cuddUniqueConst(dd,value);
+	return(res);
+    }
+    return(NULL);
+
+} /* end of Cudd_addBWRShift */
+
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */
 /*---------------------------------------------------------------------------*/

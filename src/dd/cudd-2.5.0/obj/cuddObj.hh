@@ -365,9 +365,14 @@ public:
     ADD operator+=(const ADD& other);
     // ADD operator-(const ADD& other) const;
     // ADD operator-=(const ADD& other);
+
     // Shift operators
     ADD LShift(const ADD& other) const;
     ADD RShift(const ADD& other) const;
+
+    // 1 bit shift operators
+    ADD BWLShift() const;
+    ADD BWRShift() const;
 
     // Logical operators
     ADD operator~() const;

@@ -775,6 +775,8 @@ extern DdNode * Cudd_addEvalConst (DdManager *dd, DdNode *f, DdNode *g);
 extern int Cudd_addLeq (DdManager * dd, DdNode * f, DdNode * g);
 extern DdNode * Cudd_addCmpl (DdManager *dd, DdNode *f);
 extern DdNode * Cudd_addBWCmpl (DdManager *dd, DdNode *f);
+extern DdNode * Cudd_addBWLShift (DdManager *dd, DdNode *f);
+extern DdNode * Cudd_addBWRShift (DdManager *dd, DdNode *f);
 extern DdNode * Cudd_addNegate (DdManager *dd, DdNode *f);
 extern DdNode * Cudd_addRoundOff (DdManager *dd, DdNode *f, int N);
 extern DdNode * Cudd_addWalsh (DdManager *dd, DdNode **x, DdNode **y, int n);
