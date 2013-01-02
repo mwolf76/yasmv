@@ -1,46 +1,47 @@
 README
 ======
 
-YASMINE (Yet Another Symbolic Modelling INteractive Environment)
-started off in fall 2011 as a tentative and partial C++
+The YASMINE (Yet Another Symbolic Modelling INteractive Environment)
+project started off in fall 2011 as a tentative and partial C++
 reimplementation of the NuSMV2 model checker. As a former member of
-the NuSMV2 development (in the years from 2008 to 2011) team I was
-never happy with a few architectural choices that were inherited from
-the long history of the NuSMV model checker and/or were due to the
-amount of legacy code and tools that relied on it. Don't get me wrong,
-I really think NuSMV is a great piece of software. And I owe to the
-developers and researchers in FBK most - if not all - of my scientific
-and software engineering training. Those people are really
-fantastic. It's just that I have been wondering for years what that
-project would have been like, if one was completely free to redesign
-it all from-the-scratch. This is exactly why this project exists in
-the first place.
+the NuSMV2 development team (in the years from 2008 to 2011) I was
+never happy with a few architectural choices, inherited from the long
+history of the NuSMV model checker and/or due to the amount of legacy
+code and tools that relied on it. Don't get me wrong, I really think
+NuSMV is a great piece of software. And I owe to the developers and
+researchers in FBK most - if not all - of my scientific and software
+engineering training. Those people are really fantastic. It's just
+that I have been wondering for years what that project would have been
+like, if one was completely free to redesign it all from the
+scratch. This is exactly why this project exists in the first place.
 
 Overtime, YASMINE has significantly diverged from the original goal of
-making a NuSMV re-implementation. I think of it as a full-fledged
-interactive environment for symbolic model verification among other
-things. The tool is designed and crafted with high flexibility
-requirements and coding standards, as a test bed for new ideas. Of
-course, feedback (and criticism too) is very welcome, expecially if
-constructive.
-
-The input language for YASMINE is a dialect of SMV which retains only
-partial compatibility with NuSMV's SMV. However, I think automatic
-tools could easily be designed to translate NuSMV's SMV models into
-YASMINE's. Hovewer, this is currently out of scope.
+making a NuSMV re-implementation. The input language for YASMINE is a
+dialect of SMV which retains only partial compatibility with NuSMV's
+original SMV language. Current goal is to match as closely as possible
+the data model of the C language, in order to have a working
+verification engine to be used in formal verification of C code.  But
+this is antipaticing the future. There still is *a lot* of work that
+needs to be done, before it's even conceivable to start trying. I
+think of this project as a full-fledged interactive environment for
+symbolic model verification among other things. The tool is designed
+and crafted with high flexibility requirements as a test bed for new
+ideas. Of course, feedback (and criticism too) is very welcome,
+expecially if constructive.
 
 According to my best knowledge, the main differences between the two
 systems are:
 
 0. Technology
 
-   YASMINE is 100% gnu++98 C++ code, using the CUDD library by
-   C. Somenzi (add ref) and a custom Minisat solver. Checking
-   technology is SAT-based, whereas NuSMV evolved overtime from a pure
-   BDD system (also based on CUDD) to a hybrid BDD/SAT model
-   checker. The CUDD library in YASMINE is used extensively in order
-   to build the appropriate boolean encoding of formulae, in a format
-   that is suitable for SAT processing.
+   YASMINE is 100% gnu++98 C++ code, using Algebraic Decision Diagrams
+   (ADDs) to perform manipulation of formulas. Reasoning technology is
+   SAT-based. On the other hand, NuSMV evolved overtime from a pure
+   BDD-based system to a hybrid BDD/SAT model checker.
+
+   YASMINE natively uses a portfolio-like approach, spawning multiple
+   processes for each model checking problem, in order to exploit
+   modern multi-core CPUs parallel processing capabilities.
 
    The parser for both the input model language and the interpreter
    shell is a LL(1) (with a few exceptions) top-down parser built with
@@ -55,48 +56,40 @@ systems are:
 1. Input language
 
 1.1. The type system and operator semantics has been carefully
-     redesigned, to closely match standard C-like semanthics. In fact,
-     main driving scenario of application for this design is software
-     model checking.
+     redesigned, to closely match standard C-like semanthics. As
+     stated above, main driving application scenario for this design
+     is software model checking. *All* integer arithmetic is 2's
+     complement as it would be performed by any regular commercial
+     processor;
 
-     1.1.1. No finite range integer types or int enumeratives
-            allowed. Models should ordinary integer (either signed or
-            unsigned) variables.
+     1.1.1. NuSMV's finite range integer types and int enumeratives
+            are not supported. Models should use ordinary integer
+            types (either signed or unsigned). Users are encouraged to
+            adopt c99 integer types: (u)int8_t, (u)int16_t,
+            (u)int32_t, (u)int64_t;
 
      1.1.2. Enumeratives must be pure symbolic (all literals as
             identifiers) AND disjunct;
 
-     1.1.3. Integers can only be represented using signed(n) and
-            unsigned(n) types; where n is the type width, expressed as
-            the number of hexadecimal digits in its 2's complement
-            representation;
+     1.1.3. All C standard notations for integers (octal, decimal,
+            hexadecimal) are supported (e.g. 052, 42, 0x2a). NuSMV's
+            special-purpose format for bitvectors is *not* supported;
 
-     1.1.4. All C standard notations for integers (octal, decimal,
-            hexadecimal) are supported (e.g. 052, 42, 0x2a).
-
-     1.1.5. Non-determinism is supported using the ANY construct;
+     1.1.4. Non-determinism is supported using the ANY construct; (FUTURE)
             (e.g. x = ANY(2, 3, 5, 7, 11, 13, 17, 19, 23))
 
-     (REVIEW, NOT SURE ABOUT THIS)
-     1.1.6. & --> &&, | --> ||, introduced standard C notation for ^ (xor)
-
-1.2. NuSMV's INVAR, ASSIGN, and init keywords are not supported. There
-     is only one way to express an FSM, that is using INIT (for
-     initial states) and TRANS(for transition relation);
-
-1.3. No INVARSPEC, LTLSPEC, CTLSPEC, (...) in input models. YASMINE
-     models are just that, models (namely, FSM descriptions). Support
-     is given at the command level in the interactive specify
-     properties to be checked.
+1.2. No INVARSPEC, LTLSPEC, CTLSPEC, (...) in input models. YASMINE
+     models are just that: models (namely, FSM descriptions). Support
+     is given at the command level in the interactive shell, in order
+     to allow specifing properties to be checked. Currently only
+     invariant checking is in scope;
 
 2. Interactive environment
 
 2.1. YASMINE provides a fully Turing-complete interpreted language for
      process control: constructs are provided for result inspection
      (IF), looping (WHILE), and formatted output (PRINT) among other
-     things. The tool is designed to be fully scriptable;
-
-2.2. (...)
+     things. The tool is designed to be fully scriptable; (FUTURE)
 
 DISCLAIMER
 ==========
@@ -107,4 +100,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 YASMINE is in no way related to, or endorsed by, the NuSMV2
-development board and/or FBK.
+development board and/or FBK. YASMINE does not contain *a single* line
+of code coming from NuSMV's codebase, with the possible exception of
+the custom MiniSAT solver that was part of *my* B. Sc. dissertation.
