@@ -2,19 +2,22 @@ MODEL lsh
 MODULE main
 
 VAR
-    x : uint32_t;
-    y : uint32_t;
-    c : uint32_t;
+    x : uint16_t;
+    y : uint16_t;
+    d : boolean;
 
 INIT
-     (c = 1) & (x = 1) & (y = 1);
+     (d) & (x = 1) & (y = 1);
 
 TRANS
-     next(x) = ((c = 1) ? ( x << y )
-                        : ( x >> y ));
+     next(d) <-> (
+             (x = 16384 & d
+             |x =     2 & !d)
+             ? !d
+             :  d
+     );
 
      next(y) = y;
 
-     next(c) = ((x = 0x100000000) ? 2
-                           : (x = 1) ? 1
-                                     : c);
+     next(x) = (d ? ( x << y )
+                  : ( x >> y ));
