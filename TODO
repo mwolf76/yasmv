@@ -1,0 +1,15 @@
+TODO
+====
+
+TESTING
+        . Arrays
+        . Suite of models for integration testing
+
+IMPLEMENTATION
+        . Single-cut and Multi-cut CNF algorithms (urgent)
+        . Implement and test dot-notation resolution
+        . Witness mgr
+
+REFACTORING
+        . Remove support for LTL and CTL
+        . Proper error management (i.e. exceptions instead of assertions)
