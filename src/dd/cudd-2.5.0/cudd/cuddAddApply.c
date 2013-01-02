@@ -544,19 +544,15 @@ Cudd_addLShift(
     CUDD_VALUE_TYPE value;
 
     F = *f; G = *g;
-    if (F == DD_ZERO(dd)) return(G);
+    if (F == DD_ZERO(dd)) return DD_ZERO(dd);
     if (G == DD_ZERO(dd)) return(F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
 	value = cuddV(F) << cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
-    if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
-    }
-    return(NULL);
 
+    return(NULL);
 } /* end of Cudd_addLShift */
 
 
@@ -583,19 +579,14 @@ Cudd_addRShift(
     CUDD_VALUE_TYPE value;
 
     F = *f; G = *g;
-    if (F == DD_ZERO(dd)) return(G);
-    if (G == DD_ZERO(dd)) return(F);
+    if (F == DD_ZERO(dd)) return DD_ZERO(dd); /* unsigned arithmetic */
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
 	value = cuddV(F) >> cuddV(G);
 	res = cuddUniqueConst(dd,value);
 	return(res);
     }
-    if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
-    }
-    return(NULL);
 
+    return(NULL);
 } /* end of Cudd_addRShift */
 
 
