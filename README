@@ -20,14 +20,15 @@ making a NuSMV re-implementation. The input language for YASMINE is a
 dialect of SMV which retains only partial compatibility with NuSMV's
 original SMV language. Current goal is to match as closely as possible
 the data model of the C language, in order to have a working
-verification engine to be used in formal verification of C code.  But
-this is antipaticing the future. There still is *a lot* of work that
-needs to be done, before it's even conceivable to start trying. I
-think of this project as a full-fledged interactive environment for
-symbolic model verification among other things. The tool is designed
-and crafted with high flexibility requirements as a test bed for new
-ideas. Of course, feedback (and criticism too) is very welcome,
-expecially if constructive.
+verification engine to be used in formal verification of C code. But
+this is antipaticing the future. There still is an insane amount of
+work that needs to be done, before it's even conceivable to start
+trying. I think of this project as a full-fledged interactive
+environment for symbolic model verification among other things. The
+tool is designed and crafted with high flexibility requirements as a
+test bed for new ideas - knowing for sure some of them will prove
+quite unsatisfactory. Of course, feedback (and criticism too) is very
+welcome, expecially if constructive.
 
 According to my best knowledge, the main differences between the two
 systems are:
@@ -41,7 +42,10 @@ systems are:
 
    YASMINE natively uses a portfolio-like approach, spawning multiple
    processes for each model checking problem, in order to exploit
-   modern multi-core CPUs parallel processing capabilities.
+   modern multi-core CPUs parallel processing capabilities. AFAICT,
+   NuSMV is not (yet) natively capable of performing multiple checking
+   algorithms on the same property in parallel, I'm not aware though,
+   whether or not this is already in the works.
 
    The parser for both the input model language and the interpreter
    shell is a LL(1) (with a few exceptions) top-down parser built with
@@ -56,11 +60,10 @@ systems are:
 1. Input language
 
 1.1. The type system and operator semantics has been carefully
-     redesigned, to closely match standard C-like semanthics. As
-     stated above, main driving application scenario for this design
-     is software model checking. *All* integer arithmetic is 2's
-     complement as it would be performed by any regular commercial
-     processor;
+     redesigned, to match standard C semanthics as closely as
+     possible. As stated above, main driving application scenario for
+     this design is software model checking. *All* integer arithmetic
+     is 2's complement as it would be performed by any C compiler.
 
      1.1.1. NuSMV's finite range integer types and int enumeratives
             are not supported. Models should use ordinary integer
@@ -86,10 +89,11 @@ systems are:
 
 2. Interactive environment
 
-2.1. YASMINE provides a fully Turing-complete interpreted language for
-     process control: constructs are provided for result inspection
-     (IF), looping (WHILE), and formatted output (PRINT) among other
-     things. The tool is designed to be fully scriptable; (FUTURE)
+2.1. The YASMINE shell provides a fully Turing-complete interpreted
+     language for process control: constructs are provided for result
+     inspection (IF), looping (WHILE), and formatted output (PRINT)
+     among other things. The tool is designed to be fully scriptable;
+     (FUTURE)
 
 DISCLAIMER
 ==========
