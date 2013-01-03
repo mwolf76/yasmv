@@ -326,20 +326,21 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
         ADD cond = f_add_stack.back(); f_add_stack.pop_back();
         f_type_stack.pop_back(); /* adjust type stack */
 
-        carry = f_enc.zero(); /* lsh always introduces 0 as LSB */
-        for (unsigned i = 0; i < width; ++ i) {
-            unsigned ndx = width - i - 1;
+        if (! cond.IsZero()) {
+            carry = f_enc.zero(); /* lsh always introduces 0 as LSB */
+            for (unsigned i = 0; i < width; ++ i) {
+                unsigned ndx = width - i - 1;
 
-            /* c' = (0 < D & MSB_MASK); */
-            ADD next_carry = f_enc.zero().
-                LT( tmp[ndx].BWTimes( mask ));
+                /* c' = (0 < D & MSB_MASK); */
+                ADD next_carry = f_enc.zero().
+                    LT( tmp[ndx].BWTimes( mask ));
 
-            res[ndx] = cond.Ite( tmp[ndx], res[ndx] );
+                /* x[i] = ( x[i] << 1 ) | carry */
+                tmp[ndx] = tmp[ndx].BWLShift().BWOr(carry);
 
-            /* x[i] = ( x[i] << 1 ) | carry */
-            tmp[ndx] = tmp[ndx].BWLShift().BWOr(carry);
-
-            carry = next_carry;
+                res[ndx] = cond.Ite( tmp[ndx], res[ndx] );
+                carry = next_carry;
+            }
         }
     }
 
@@ -387,22 +388,23 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
         ADD cond = f_add_stack.back(); f_add_stack.pop_back();
         f_type_stack.pop_back(); /* adjust type stack */
 
-        /* FIXME: rsh should *not* always introduce 0 as LSB */
-        carry = f_enc.zero();
+        if (! cond.IsZero()) {
+            /* FIXME: rsh should *not* always introduce 0 as LSB */
+            carry = f_enc.zero();
 
-        for (unsigned i = 0; i < width; ++ i) {
-            unsigned ndx = i; /* left-to-right */
+            for (unsigned i = 0; i < width; ++ i) {
+                unsigned ndx = i; /* left-to-right */
 
-            /* c' = ( 0 < ( D[i] & 0x1 ) << 3 */
-            ADD next_carry = f_enc.zero().
-                LT(tmp[ndx].BWTimes(f_enc.one())).LShift(weight);
+                /* c' = ( 0 < ( D[i] & 0x1 ) << 3 */
+                ADD next_carry = f_enc.zero().
+                    LT(tmp[ndx].BWTimes(f_enc.one())).LShift(weight);
 
-            res[ndx] = cond.Ite( tmp[ndx], res[ndx] );
+                /* x[i] = ( x[i] >> 1 ) | c */
+                tmp[ndx] = tmp[ndx].BWRShift().BWOr(carry);
 
-            /* x[i] = ( x[i] >> 1 ) | c */
-            tmp[ndx] = tmp[ndx].BWRShift().BWOr(carry);
-
-            carry = next_carry;
+                res[ndx] = cond.Ite( tmp[ndx], res[ndx] );
+                carry = next_carry;
+            }
         }
     }
 

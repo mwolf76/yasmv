@@ -635,78 +635,6 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
     return false;
 }
 
-static inline value_t pow2(unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; i; -- i) {
-        res *= 2;
-    }
-
-        return res;
-}
-
-/**
-   This function builds a selector of powers of 2, i.e.
-
-   f(A) := (A == 0) ? 1
-                    : (A == 1) ? 2
-		               : (A == 2) ? 4
-			                  .
-					  .
-					  .
-					  : (A == k - 1) ? 2 ^ (k-1)
-					                 : ERROR
-*/
-Expr_ptr Compiler::make_bounded_exp2(ADD *dds, unsigned width)
-{
-    value_t value;
-
-    unsigned base = Cudd_V(f_enc.base().getNode());
-    unsigned exp2 = 0;
-
-    ADD mpx[width]; /* multiplexer, building terminal error nodes */
-    for (unsigned i = 0; i < width; ++ i) {
-        unsigned ndx = width - i - 1;
-        mpx[ndx] = f_enc.error();
-    }
-
-    while (exp2 < width) {
-      /* build cond 0-1 ADD, 'A == k' */
-      ADD condition = f_enc.one();
-
-      value = exp2;
-      for (unsigned i = 0; i < width; ++ i) {
-	unsigned ndx = width - i - 1;
-	condition *= dds[ndx]. // TODO: this conjuction should be optimized
-	  Equals(f_enc.constant(value % base));
-	
-	value /= base;
-      }
-      assert (value == 0); // not overflowing
-
-      /* build corresponding Then ADD vec, '2^value' */
-      ADD constant[width];
-
-      value = pow2(exp2);
-      for (unsigned i = 0; i < width; ++ i) {
-	unsigned ndx = width - i - 1;
-	constant[ndx] = f_enc.constant(value % base);
-	
-	value /= base;
-      }
-      assert (value == 0); // not overflowing
-     
-      /* ITE chaining (endianess irrelevant here)*/
-      for (unsigned i = 0; i < width; ++ i) {
-	mpx[i] = condition.Ite( constant[i], mpx[i] );
-      }
-
-      ++ exp2;
-    }
-
-    return make_temporary_encoding(mpx, width);
-}
-
 bool Compiler::cache_miss(const Expr_ptr expr)
 {
     FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
@@ -759,7 +687,8 @@ void Compiler::memoize_result(const Expr_ptr expr)
         width = tm.as_algebraic(type)->width();
     }
 
-    else if (tm.is_boolean(type)) {
+    else if (tm.is_integer(type) ||
+             tm.is_boolean(type)) {
         width = 1;
     }
 

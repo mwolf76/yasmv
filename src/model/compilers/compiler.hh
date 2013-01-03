@@ -50,36 +50,6 @@ typedef pair<YDDMap::iterator, bool> YDDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-// class Compiler; // fwd decl
-
-// class Converter : public ADDWalker {
-// public:
-//     Converter(Compiler& owner);
-//     ~Converter();
-
-//     bool condition(const DdNode *node);
-//     void action(const DdNode *node);
-
-//     // NOPs
-//     void pre_hook() {}
-//     void post_hook() {}
-
-//     YDD_ptr process(ADD input);
-
-//     // TODO: use pool allocator
-//     inline YDD_ptr make_ldd(bool v)
-//     { return new YDD(v); }
-
-//     inline YDD_ptr make_ldd(int index, YDD_ptr lhs, YDD_ptr rhs)
-//     { return new YDD(index, lhs, rhs); }
-
-// private:
-//     Compiler& f_owner;
-
-//     YDDMap f_cache;
-//     YDDStack f_out_stack;
-// };
-
 class Compiler : public SimpleWalker {
 public:
     Compiler();
@@ -263,10 +233,6 @@ protected:
 
     /* temporaries */
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
-    Expr_ptr make_bounded_exp2(ADD *dds, unsigned width);
-
-    // /* Stage 2 services */
-    // Converter f_converter;
 };
 
 #endif

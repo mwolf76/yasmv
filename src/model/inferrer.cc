@@ -707,7 +707,7 @@ void Inferrer::walk_binary_bitwise_postorder(const Expr_ptr expr)
 
     const Type_ptr lhs = f_type_stack.back(); f_type_stack.pop_back();
     if (!tm.is_integer(lhs) &&
-        !tm.is_algebraic(rhs) &&
+        !tm.is_algebraic(lhs) &&
         !tm.is_boolean(lhs)) {
         throw BadType(lhs->repr(), f_integer, expr);
     }
