@@ -90,8 +90,9 @@ MonolithicEncoding::MonolithicEncoding()
 {}
 
 // algebraic encoding uses monolithic as a builing block
-AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
+AlgebraicEncoding::AlgebraicEncoding(unsigned width, unsigned fract, bool is_signed, ADD *dds)
     : f_width(width)
+    , f_fract(fract)
     , f_signed(is_signed)
     , f_temporary(NULL != dds)
 {

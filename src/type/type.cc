@@ -38,16 +38,32 @@ IntegerType::IntegerType(TypeMgr& owner) // abstract
     f_repr = f_owner.em().make_integer_type();
 }
 
-AlgebraicType::AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD *dds)
+AlgebraicType::AlgebraicType(TypeMgr& owner, ADD *dds)
     : Type(owner)
-    , f_width(width)
-    , f_signed(is_signed)
     , f_dds(dds)
 {
-    f_repr = f_signed
-        ? f_owner.em().make_signed_type(width)
-        : f_owner.em().make_unsigned_type(width)
-        ;
+}
+
+SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds)
+    : AlgebraicType(owner, dds)
+    , f_width(width)
+{
+    f_repr = f_owner.em().make_signed_type(width);
+}
+
+UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds)
+    : AlgebraicType(owner, dds)
+    , f_width(width)
+{
+    f_repr = f_owner.em().make_unsigned_type(width);
+}
+
+FixedAlgebraicType::FixedAlgebraicType(TypeMgr& owner, unsigned width, unsigned fract, ADD *dds)
+    : AlgebraicType(owner, dds)
+    , f_width(width)
+    , f_fract(fract)
+{
+    f_repr = f_owner.em().make_fixed_type(width, fract);
 }
 
 ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)

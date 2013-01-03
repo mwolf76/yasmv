@@ -39,7 +39,7 @@ ExprMgr::ExprMgr()
     // unsigned and signed base integer types identifiers
     unsigned_expr = make_identifier(UNSIGNED_TOKEN);
     signed_expr = make_identifier(SIGNED_TOKEN);
-
+    fixed_expr = make_identifier(FIXED_TOKEN);
     integer_expr = make_identifier(INTEGER_TOKEN); // abstract
 
     // main module identifier

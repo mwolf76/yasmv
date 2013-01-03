@@ -122,9 +122,10 @@ protected:
     { assert(0); }
 
     // width is number of *digits* here, dds is reserved for temporary encodings
-    AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds = NULL);
+    AlgebraicEncoding(unsigned width, unsigned fract, bool is_signed, ADD *dds = NULL);
 
     unsigned f_width;
+    unsigned f_fract; // non-zero for fixed encodings
     bool f_signed;
     bool f_temporary;
 };

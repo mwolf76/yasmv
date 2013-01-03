@@ -28,6 +28,7 @@ const char *TRUE_TOKEN = "TRUE";
 const char *BOOL_TOKEN = "boolean";
 const char *UNSIGNED_TOKEN = "unsigned";
 const char *SIGNED_TOKEN = "signed";
+const char *FIXED_TOKEN = "fixed";
 const char *INTEGER_TOKEN = "integer";
 const char *TEMPORAL_TOKEN = "temporal";
 const char *MAIN_TOKEN = "main";

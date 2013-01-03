@@ -718,9 +718,12 @@ type_name returns [Type_ptr res]
 
             | { $res = tm.find_signed(width->value()); } )
 
-    // ranges
-    // | lhs=int_constant '..' rhs=int_constant
-    //   { $res = tm.find_range(lhs, rhs); }
+    // fixed point rational numbers
+    | 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
+            '[' size=int_constant ']'
+                { $res = tm.find_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
+
+            | { $res = tm.find_fixed(iwidth->value(), fract_width->value()); } )
 
     // enumeratives, pure symbolic
 	| enum_type[lits]

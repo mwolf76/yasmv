@@ -74,6 +74,9 @@ public:
     const Type_ptr find_signed(unsigned digits);
     const Type_ptr find_signed_array(unsigned digits, unsigned size);
 
+    const Type_ptr find_fixed(unsigned int_digits, unsigned fract_digits);
+    const Type_ptr find_fixed_array(unsigned int_digits, unsigned fract_digits, unsigned size);
+
     const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
 
@@ -89,6 +92,9 @@ public:
 
     // an algebraic variable
     bool is_algebraic(const Type_ptr tp) const;
+    bool is_signed_algebraic(const Type_ptr tp) const;
+    bool is_unsigned_algebraic(const Type_ptr tp) const;
+    bool is_fixed_algebraic(const Type_ptr tp) const;
 
     // an ENUM
     bool is_enum(const Type_ptr tp) const;
@@ -108,6 +114,15 @@ public:
 
     typedef class AlgebraicType* AlgebraicType_ptr;
     AlgebraicType_ptr as_algebraic(const Type_ptr tp) const;
+
+    typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+    SignedAlgebraicType_ptr as_signed_algebraic(const Type_ptr tp) const;
+
+    typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
+    UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
+
+    typedef class FixedAlgebraicType* FixedAlgebraicType_ptr;
+    FixedAlgebraicType_ptr as_fixed_algebraic(const Type_ptr tp) const;
 
     typedef class EnumType* EnumType_ptr;
     EnumType_ptr as_enum(const Type_ptr tp) const;

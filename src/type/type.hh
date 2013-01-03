@@ -23,7 +23,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef TYPE_H
 #define TYPE_H
 
@@ -35,10 +34,10 @@
 
 #include <type_mgr.hh>
 
-/* Supported data types: boolean, integers (signed and unsigned)
-   enums, module instances. */
+/* Supported data types: boolean, integers (signed and unsigned),
+   fixed-point, enums, module instances, arrays of all-of-the-above. */
 
-// NOTE: types are *immutable* by design!
+/* REMARK types are *immutable* by design! */
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type);
@@ -50,7 +49,7 @@ ostream& operator<<(ostream& os, const Type_ptr type);
 typedef class Type* Type_ptr;
 class Type : public Object {
 public:
-    inline Expr_ptr repr() const
+    Expr_ptr repr() const
     { return f_repr; }
 
     virtual ~Type()
@@ -83,33 +82,83 @@ protected:
 typedef class AlgebraicType* AlgebraicType_ptr;
 class AlgebraicType : public Type {
 public:
-    inline unsigned width() const
-    { return f_width; }
+    virtual unsigned width() const =0;
+    virtual bool is_signed() const =0;
 
-    inline bool is_signed() const
-    { return f_signed; }
-
-    inline ADD *dds() const
+    ADD *dds() const
     { return f_dds; }
 
 protected:
     friend class TypeMgr; // ctors not public
-    AlgebraicType(TypeMgr& owner, unsigned width, bool is_signed, ADD *dds = NULL);
-
-    unsigned f_width;
-    bool f_signed;
+    AlgebraicType(TypeMgr& owner, ADD *dds = NULL);
 
     // this is reserved for temp encodings, it's NULL for ordinary algebraics
     ADD *f_dds;
 };
 
+
+typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+class SignedAlgebraicType : public AlgebraicType {
+public:
+    unsigned width() const
+    { return f_width; }
+
+    bool is_signed() const
+    { return true; }
+
+ protected:
+    friend class TypeMgr; // ctors not public
+    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+
+    unsigned f_width;
+};
+
+typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
+class UnsignedAlgebraicType : public AlgebraicType {
+public:
+    unsigned width() const
+    { return f_width; }
+
+    bool is_signed() const
+    { return false; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+
+    unsigned f_width;
+};
+
+
+typedef class FixedAlgebraicType* FixedAlgebraicType_ptr;
+class FixedAlgebraicType : public AlgebraicType {
+public:
+    unsigned width() const
+    { return f_width; }
+
+    unsigned fract() const
+    { return f_fract; }
+
+    /* in current implementation fixed is signed only */
+    bool is_signed() const
+    { return true; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    FixedAlgebraicType(TypeMgr& owner, unsigned width, unsigned fract, ADD *dds = NULL);
+
+    unsigned f_width;
+    unsigned f_fract;
+};
+
+
 typedef class ArrayType* ArrayType_ptr;
 class ArrayType : public Type {
 public:
-    inline unsigned size() const
+    unsigned size() const
     { return f_size; }
 
-    inline Type_ptr of() const
+    Type_ptr of() const
     { return f_of; }
 
 protected:

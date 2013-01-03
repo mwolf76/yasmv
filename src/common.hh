@@ -116,12 +116,13 @@ public:
 class Object : public IObject {
 };
 
-/* tokens, defined in common.cc */
+/* internal tokens, defined in common.cc */
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
 extern const char *BOOL_TOKEN;
 extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;
+extern const char *FIXED_TOKEN;
 extern const char *INTEGER_TOKEN;
 extern const char *TEMPORAL_TOKEN;
 extern const char *MAIN_TOKEN;

@@ -48,7 +48,7 @@ const Type_ptr TypeMgr::find_unsigned(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new AlgebraicType( *this, bits, false);
+    res = new UnsignedAlgebraicType( *this, bits);
     register_type(descr, res);
     return res;
 }
@@ -61,7 +61,8 @@ const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this, find_unsigned(digits), size);
+    res = new ArrayType( *this,
+                         find_unsigned(digits), size);
     register_type(descr, res);
     return res;
 }
@@ -73,7 +74,7 @@ const Type_ptr TypeMgr::find_signed(unsigned bits)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new AlgebraicType( *this, bits, true);  // signed
+    res = new SignedAlgebraicType( *this, bits);
     register_type(descr, res);
     return res;
 }
@@ -86,10 +87,40 @@ const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this , find_signed(digits), size);
+    res = new ArrayType( *this,
+                         find_signed(digits), size);
     register_type(descr, res);
     return res;
 }
+
+const Type_ptr TypeMgr::find_fixed(unsigned int_digits, unsigned fract_digits)
+{
+    Expr_ptr descr(f_em.make_fixed_type(int_digits, fract_digits));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new FixedAlgebraicType( *this, int_digits, fract_digits);
+    register_type(descr, res);
+    return res;
+}
+
+const Type_ptr TypeMgr::find_fixed_array(unsigned int_digits,
+                                         unsigned fract_digits,
+                                         unsigned size)
+{
+    Expr_ptr descr(f_em.make_subscript( f_em.make_fixed_type(int_digits, fract_digits),
+                                        f_em.make_iconst(size)));
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this,
+                         find_fixed(int_digits, fract_digits), size);
+    register_type(descr, res);
+    return res;
+}
+
 
 const Type_ptr TypeMgr::find_enum(ExprSet& lits)
 {
@@ -161,13 +192,48 @@ EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
 }
 
 bool TypeMgr::is_algebraic(const Type_ptr tp) const
-{
-    return (NULL != dynamic_cast <AlgebraicType*> (tp));
-}
+{ return (NULL != dynamic_cast <AlgebraicType*> (tp)); }
+
+bool TypeMgr::is_signed_algebraic(const Type_ptr tp) const
+{ return (NULL != dynamic_cast <SignedAlgebraicType*> (tp)); }
+
+bool TypeMgr::is_unsigned_algebraic(const Type_ptr tp) const
+{ return (NULL != dynamic_cast <UnsignedAlgebraicType*> (tp)); }
+
+bool TypeMgr::is_fixed_algebraic(const Type_ptr tp) const
+{ return (NULL != dynamic_cast <FixedAlgebraicType*> (tp)); }
 
 AlgebraicType_ptr TypeMgr::as_algebraic(const Type_ptr tp) const
 {
-    AlgebraicType_ptr res = dynamic_cast <const AlgebraicType_ptr> (tp);
+    AlgebraicType_ptr res = dynamic_cast
+        <const AlgebraicType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+SignedAlgebraicType_ptr TypeMgr::as_signed_algebraic(const Type_ptr tp) const
+{
+    SignedAlgebraicType_ptr res = dynamic_cast
+        <const SignedAlgebraicType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+UnsignedAlgebraicType_ptr TypeMgr::as_unsigned_algebraic(const Type_ptr tp) const
+{
+    UnsignedAlgebraicType_ptr res = dynamic_cast
+        <const UnsignedAlgebraicType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+FixedAlgebraicType_ptr TypeMgr::as_fixed_algebraic(const Type_ptr tp) const
+{
+    FixedAlgebraicType_ptr res = dynamic_cast
+        <const FixedAlgebraicType_ptr> (tp);
     assert(res);
 
     return res;

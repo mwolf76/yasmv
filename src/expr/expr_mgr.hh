@@ -191,6 +191,9 @@ public:
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return make_expr(DOT, a, b); }
 
+    inline Expr_ptr make_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(COMMA, a, b); }
+
     inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUBSCRIPT, a, b); }
 
@@ -216,6 +219,13 @@ public:
 
     inline Expr_ptr make_signed_type(unsigned bits)
     { return make_params(signed_expr, make_iconst((value_t) bits)); }
+
+    inline Expr_ptr make_fixed_type(unsigned int_digits, unsigned fract_digits)
+    {
+        return make_params(fixed_expr,
+                           make_comma(make_iconst((value_t) int_digits),
+                                      make_iconst((value_t) fract_digits)));
+    }
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
@@ -406,6 +416,7 @@ private:
     // base for (un-)signed integer
     Expr_ptr unsigned_expr;
     Expr_ptr signed_expr;
+    Expr_ptr fixed_expr;
     Expr_ptr integer_expr; // reserved for abstract integer-type
 
     /* shared pools */
