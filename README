@@ -71,14 +71,16 @@ systems are:
             adopt c99 integer types: (u)int8_t, (u)int16_t,
             (u)int32_t, (u)int64_t;
 
-     1.1.2. Enumeratives must be pure symbolic (all literals as
+     1.1.2. Support for Fixed-point rational arithmetic;
+
+     1.1.3. Enumeratives must be pure symbolic (all literals as
             identifiers) AND disjunct;
 
-     1.1.3. All C standard notations for integers (octal, decimal,
+     1.1.4. All C standard notations for integers (octal, decimal,
             hexadecimal) are supported (e.g. 052, 42, 0x2a). NuSMV's
             special-purpose format for bitvectors is *not* supported;
 
-     1.1.4. Non-determinism is supported using the ANY construct; (FUTURE)
+     1.1.5. Non-determinism is supported using the ANY construct; (FUTURE)
             (e.g. x = ANY(2, 3, 5, 7, 11, 13, 17, 19, 23))
 
 1.2. No INVARSPEC, LTLSPEC, CTLSPEC, (...) in input models. YASMINE
