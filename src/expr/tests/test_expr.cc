@@ -73,11 +73,11 @@ BOOST_AUTO_TEST_CASE(expr_makers)
     BOOST_CHECK (x_ite_y->f_symb == ITE && x_ite_y->u.f_lhs == x && x_ite_y->u.f_rhs == y);
 
     Expr_ptr iconst_42 = em.make_iconst(42);
-    BOOST_CHECK (em.is_numeric(iconst_42) && iconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(iconst_42) && iconst_42->value() == 42);
     Expr_ptr hconst_42 = em.make_hconst(0x2a);
-    BOOST_CHECK (em.is_numeric(hconst_42) && hconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(hconst_42) && hconst_42->value() == 42);
     Expr_ptr oconst_42 = em.make_oconst(052);
-    BOOST_CHECK (em.is_numeric(oconst_42) && oconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(oconst_42) && oconst_42->value() == 42);
 
     Expr_ptr x_dot_y = em.make_dot(x, y);
     BOOST_CHECK (x_dot_y->f_symb == DOT && x_dot_y->u.f_lhs == x && x_dot_y->u.f_rhs == y);

@@ -204,30 +204,83 @@ public:
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
-    inline Expr_ptr make_integer_type() const
-    { return integer_expr; }
+    inline Expr_ptr make_int_const_type() const
+    { return int_expr; }
+
+    inline Expr_ptr make_fxd_const_type() const
+    { return fxd_expr; }
 
     inline Expr_ptr make_range_type(Expr_ptr a, Expr_ptr b)
     {
-        assert(is_numeric(a));
-        assert(is_numeric(b));
+        assert(is_int_numeric(a));
+        assert(is_int_numeric(b));
         return make_expr(RANGE, a, b);
     }
 
-    inline Expr_ptr make_unsigned_type(unsigned bits)
-    { return make_params(unsigned_expr, make_iconst((value_t) bits)); }
-
-    inline Expr_ptr make_signed_type(unsigned bits)
-    { return make_params(signed_expr, make_iconst((value_t) bits)); }
-
-    inline Expr_ptr make_fixed_type(unsigned int_digits, unsigned fract_digits)
+    inline Expr_ptr make_abstract_unsigned_int_type()
     {
-        return make_params(fixed_expr,
+        return unsigned_int_expr;
+    }
+
+    inline Expr_ptr make_unsigned_int_type(unsigned digits)
+    {
+        return make_params(unsigned_int_expr,
+                           make_iconst((value_t) digits));
+    }
+
+    inline Expr_ptr make_abstract_signed_int_type()
+    {
+        return signed_int_expr;
+    }
+
+    inline Expr_ptr make_signed_int_type(unsigned digits)
+    {
+        return make_params(signed_int_expr,
+                           make_iconst((value_t) digits));
+    }
+
+    inline Expr_ptr make_abstract_unsigned_fxd_type()
+    {
+        return unsigned_fxd_expr;
+    }
+
+    inline Expr_ptr make_unsigned_fxd_type(unsigned int_digits,
+                                           unsigned fract_digits)
+    {
+        return make_params(unsigned_fxd_expr,
                            make_comma(make_iconst((value_t) int_digits),
                                       make_iconst((value_t) fract_digits)));
     }
 
+    inline Expr_ptr make_abstract_signed_fxd_type()
+    {
+        return signed_fxd_expr;
+    }
+
+    inline Expr_ptr make_signed_fxd_type(unsigned int_digits,
+                                         unsigned fract_digits)
+    {
+        return make_params(signed_fxd_expr,
+                           make_comma(make_iconst((value_t) int_digits),
+                                      make_iconst((value_t) fract_digits)));
+    }
+
+    inline Expr_ptr make_abstract_enum_type()
+    {
+        return enum_expr;
+    }
+
     Expr_ptr make_enum_type(ExprSet& literals);
+
+    inline Expr_ptr make_abstract_inst_type()
+    {
+        return inst_expr;
+    }
+
+    inline Expr_ptr make_abstract_array_type()
+    {
+        return array_expr;
+    }
 
     /* builtin identifiers */
     inline Expr_ptr make_main() const
@@ -282,11 +335,16 @@ public:
         return expr->f_symb == NEXT;
     }
 
-    inline bool is_numeric(const Expr_ptr expr) const {
+    inline bool is_int_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
             || (expr->f_symb == OCONST) ;
+    }
+
+    inline bool is_fxd_numeric(const Expr_ptr expr) const {
+        assert(expr);
+        return (expr->f_symb == FCONST);
     }
 
     // expr inspectors, used by compiler as helpers to determine operands type
@@ -402,22 +460,35 @@ private:
 
     /* -- data ------------------------------------------------------------- */
 
-    // temporal exprs type
-    Expr_ptr temporal_expr;
+    // // temporal exprs type
+    // Expr_ptr temporal_expr;
 
-    // boolean exprs type and constants
+    /* boolean exprs type and constants */
     Expr_ptr bool_expr;
     Expr_ptr false_expr;
     Expr_ptr true_expr;
 
-    // main module
+    /* main module */
     Expr_ptr main_expr;
 
-    // base for (un-)signed integer
-    Expr_ptr unsigned_expr;
-    Expr_ptr signed_expr;
-    Expr_ptr fixed_expr;
-    Expr_ptr integer_expr; // reserved for abstract integer-type
+    /* reserved for abstract enum types */
+    Expr_ptr enum_expr;
+
+    /* reserved for abstract instance types */
+    Expr_ptr inst_expr;
+
+    /* reserved for abstract array types */
+    Expr_ptr array_expr;
+
+    /* integers */
+    Expr_ptr unsigned_int_expr;
+    Expr_ptr signed_int_expr;
+    Expr_ptr int_expr;
+
+    /* fixed-point reals */
+    Expr_ptr unsigned_fxd_expr;
+    Expr_ptr signed_fxd_expr;
+    Expr_ptr fxd_expr;
 
     /* shared pools */
     ExprPool f_expr_pool;

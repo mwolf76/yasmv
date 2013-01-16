@@ -55,6 +55,8 @@ typedef enum {
     HCONST, // hex constants
     OCONST, // octal constants
 
+    FCONST, // fract constant
+
     IDENT, DOT,
 
     NIL, // reserved
