@@ -66,58 +66,87 @@ const char* UnresolvedSymbol::what() const throw()
     return oss.str().c_str();
 }
 
-// exactly one type allowed
-BadType::BadType(Expr_ptr got, Expr_ptr allowed, Expr_ptr body)
-    : f_got(got)
-    , f_allowed()
-    , f_body(body)
-    , f_use_repr(false)
-{
-    f_allowed.push_back(allowed);
-}
-
-// multiple types allowed shortcut
-BadType::BadType(Expr_ptr got, ExprVector allowed, Expr_ptr body)
-    : f_got(got)
-    , f_allowed(allowed)
-    , f_body(body)
-    , f_use_repr(false)
-{}
-
-/* Allowed type described using a generic string (i.e. arrays) */
-BadType::BadType(Expr_ptr got, const char *allowed, Expr_ptr body)
-    : f_got(got)
-    , f_allowed_repr(allowed)
-    , f_body(body)
-    , f_use_repr(true)
+BadType::BadType(Expr_ptr repr, expected_t expected)
+    : f_repr(repr)
+    , f_expected(expected)
 {}
 
 BadType::~BadType() throw()
 {}
 
+TypeMismatch::TypeMismatch(Expr_ptr repr_a, Expr_ptr repr_b)
+    : f_repr_a(repr_a)
+    , f_repr_b(repr_b)
+{}
+
+TypeMismatch::~TypeMismatch() throw()
+{}
+
+static inline Expr_ptr make_abstract_type(expected_t item)
+{
+    ExprMgr& em = ExprMgr::INSTANCE();
+
+    switch (item) {
+    case TP_BOOLEAN: return em.make_boolean_type();
+    case TP_INT_CONST: return em.make_int_const_type();
+    case TP_FXD_CONST: return em.make_fxd_const_type();
+    case TP_SIGNED_INT: return em.make_abstract_signed_int_type();
+    case TP_UNSIGNED_INT: return em.make_abstract_unsigned_int_type();
+    case TP_SIGNED_FXD: return em.make_abstract_signed_fxd_type();
+    case TP_UNSIGNED_FXD: return em.make_abstract_unsigned_fxd_type();
+    case TP_ENUM: return em.make_abstract_enum_type();
+    case TP_INSTANCE: return em.make_abstract_inst_type();
+    case TP_ARRAY: return em.make_abstract_array_type();
+    default: assert (false); /* unexpected */
+    }
+
+    return NULL;
+}
+
 const char* BadType::what() const throw()
 {
     ostringstream oss;
 
-    oss << "BadType: operand has type " << f_got
-        << " in " << f_body;
+    oss << "BadType: operand has type " << f_repr
+        << ", expected: ";
 
-    oss << ", allowed: ";
-    if (! f_use_repr) {
-        ExprVector::const_iterator eye = f_allowed.begin();
-        do {
-            oss << (*eye); eye ++;
-            if (eye != f_allowed.end()) oss << ", ";
-        } while (eye != f_allowed.end());
-        oss << ".";
+    ExprVector tmp;
+
+    /* collect expected types representations */
+    for (unsigned i = 1; i <= TP_LAST_TYPE; i <<= 1) {
+        if (i & f_expected) {
+            tmp.push_back( make_abstract_type(i));
+        }
     }
 
-    else {
-        oss << f_allowed_repr;
+    /* at least one type is expected, right? */
+    assert (0 < tmp.size());
+
+    ExprVector::iterator eye = tmp.begin();
+    oss << (*eye); eye ++;
+
+    ExprVector::iterator last = ( ++ tmp.rbegin()).base();
+    while (eye != last) {
+        oss << ", " << (*eye);
+        ++ eye;
     }
+
+    oss << " or " << (*last)
+        << ".";
 
     return oss.str().c_str();
 }
+
+const char* TypeMismatch::what() const throw()
+{
+    ostringstream oss;
+    oss << "Type mismatch: "
+        << f_repr_a << " and "
+        << f_repr_b;
+
+    return oss.str().c_str();
+}
+
 
 ResolutionException::ResolutionException(Expr_ptr expr)
     : f_expr(expr)

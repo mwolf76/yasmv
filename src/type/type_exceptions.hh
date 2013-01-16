@@ -64,27 +64,28 @@ public:
     const char* what() const throw();
 };
 
-// when a numer of types were allowed and none of them was given
+/** Raised when a the inferrer detects a wrong type */
 class BadType : public AnalyzerException {
-    Expr_ptr f_got;
-    Expr_ptr f_body;
-
-    bool f_use_repr;
-    ExprVector f_allowed;
-    string f_allowed_repr;
+    Expr_ptr f_repr;
+    expected_t f_expected;
 
 public:
-    /* exactly one type allowed */
-    BadType(Expr_ptr got, Expr_ptr allowed, Expr_ptr body);
-
-    /* multiple types allowed (shortcut) */
-    BadType(Expr_ptr got, ExprVector allowed, Expr_ptr body);
-
-    /* Allowed type described using a generic string (i.e. arrays) */
-    BadType(Expr_ptr got, const char *allowed, Expr_ptr body);
+    BadType(Expr_ptr type, expected_t expected);
 
     const char* what() const throw();
     ~BadType() throw();
+};
+
+/** Raised when the inferrer detects two types which do not properly match as expected */
+class TypeMismatch : public AnalyzerException {
+    Expr_ptr f_repr_a;
+    Expr_ptr f_repr_b;
+
+public:
+    TypeMismatch(Expr_ptr repr_a, Expr_ptr repr_b);
+
+    const char* what() const throw();
+    ~TypeMismatch() throw();
 };
 
 class ResolutionException

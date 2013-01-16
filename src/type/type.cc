@@ -25,6 +25,7 @@
  **/
 
 #include <type.hh>
+#include <type_mgr.hh>
 
 BooleanType::BooleanType(TypeMgr& owner)
     : Type(owner)
@@ -32,38 +33,61 @@ BooleanType::BooleanType(TypeMgr& owner)
     f_repr = f_owner.em().make_boolean_type();
 }
 
-IntegerType::IntegerType(TypeMgr& owner) // abstract
+IntConstType::IntConstType(TypeMgr& owner)
     : Type(owner)
 {
-    f_repr = f_owner.em().make_integer_type();
+    f_repr = f_owner.em().make_int_const_type();
+}
+
+FxdConstType::FxdConstType(TypeMgr& owner)
+    : Type(owner)
+{
+    f_repr = f_owner.em().make_fxd_const_type();
 }
 
 AlgebraicType::AlgebraicType(TypeMgr& owner, ADD *dds)
     : Type(owner)
     , f_dds(dds)
-{
-}
+{}
 
-SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds)
+SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
+                                         unsigned width,
+                                         ADD *dds)
     : AlgebraicType(owner, dds)
     , f_width(width)
 {
-    f_repr = f_owner.em().make_signed_type(width);
+    f_repr = f_owner.em().make_signed_int_type(width);
 }
 
-UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds)
+UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
+                                             unsigned width,
+                                             ADD *dds)
     : AlgebraicType(owner, dds)
     , f_width(width)
 {
-    f_repr = f_owner.em().make_unsigned_type(width);
+    f_repr = f_owner.em().make_unsigned_int_type(width);
 }
 
-FixedAlgebraicType::FixedAlgebraicType(TypeMgr& owner, unsigned width, unsigned fract, ADD *dds)
+SignedFixedAlgebraicType::SignedFixedAlgebraicType(TypeMgr& owner,
+                                                   unsigned width,
+                                                   unsigned fract,
+                                                   ADD *dds)
     : AlgebraicType(owner, dds)
     , f_width(width)
     , f_fract(fract)
 {
-    f_repr = f_owner.em().make_fixed_type(width, fract);
+    f_repr = f_owner.em().make_signed_fxd_type(width, fract);
+}
+
+UnsignedFixedAlgebraicType::UnsignedFixedAlgebraicType(TypeMgr& owner,
+                                                       unsigned width,
+                                                       unsigned fract,
+                                                       ADD *dds)
+    : AlgebraicType(owner, dds)
+    , f_width(width)
+    , f_fract(fract)
+{
+    f_repr = f_owner.em().make_unsigned_fxd_type(width, fract);
 }
 
 ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)

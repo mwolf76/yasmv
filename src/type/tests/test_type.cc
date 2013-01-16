@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(boolean_type)
     Type_ptr bt = tm.find_boolean();
     BOOST_CHECK(  tm.is_boolean(bt));
 
-    BOOST_CHECK(! tm.is_integer(bt));
+    BOOST_CHECK(! tm.is_int_const(bt));
     // BOOST_CHECK(! tm.is_int_finite(bt));o
     // BOOST_CHECK(! tm.is_int_range(bt));
     // BOOST_CHECK(! tm.is_int_enum(bt));
@@ -29,10 +29,10 @@ BOOST_AUTO_TEST_CASE(integer_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
 
-    Type_ptr in = tm.find_integer();
+    Type_ptr in = tm.find_int_const();
     BOOST_CHECK(! tm.is_boolean(in));
 
-    BOOST_CHECK(  tm.is_integer(in));
+    BOOST_CHECK(  tm.is_int_const(in));
     // BOOST_CHECK(! tm.is_int_finite(in));
     // BOOST_CHECK(! tm.is_int_range(in));
     // BOOST_CHECK(! tm.is_int_enum(in));
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(integer_type)
 //     Type_ptr in = tm.find_range(a, b);
 //     BOOST_CHECK(! tm.is_boolean(in));
 
-//     BOOST_CHECK(  tm.is_integer(in));
+//     BOOST_CHECK(  tm.is_int_const(in));
 //     // BOOST_CHECK(! tm.is_int_finite(in));
 //     BOOST_CHECK(  tm.is_int_range(in));
 //     BOOST_CHECK(! tm.is_int_enum(in));
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(unsigned_type)
 
     Type_ptr in = tm.find_unsigned(8);
     BOOST_CHECK(! tm.is_boolean(in));
-    BOOST_CHECK(! tm.is_integer(in));
+    BOOST_CHECK(! tm.is_int_const(in));
     BOOST_CHECK(  tm.is_algebraic(in));
     BOOST_CHECK(! tm.is_instance(in));
 }
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(signed_type)
 
     Type_ptr in = tm.find_signed(16);
     BOOST_CHECK(! tm.is_boolean(in));
-    BOOST_CHECK(! tm.is_integer(in));
+    BOOST_CHECK(! tm.is_int_const(in));
     BOOST_CHECK(  tm.is_algebraic(in));
     BOOST_CHECK(! tm.is_instance(in));
 }
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     Type_ptr in = tm.find_enum(ev);
     BOOST_CHECK(! tm.is_boolean(in));
 
-    BOOST_CHECK(! tm.is_integer(in));
+    BOOST_CHECK(! tm.is_int_const(in));
     // BOOST_CHECK(! tm.is_int_finite(in));
     // BOOST_CHECK(! tm.is_int_range(in));
     // BOOST_CHECK(! tm.is_int_enum(in));
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
 //     Type_ptr in = tm.find_enum(ev);
 //     BOOST_CHECK(! tm.is_boolean(in));
 
-//     BOOST_CHECK(  tm.is_integer(in));
+//     BOOST_CHECK(  tm.is_int_const(in));
 //     // BOOST_CHECK(! tm.is_int_finite(in));
 //     BOOST_CHECK(! tm.is_int_range(in));
 //     BOOST_CHECK(  tm.is_int_enum(in));
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
 //     Type_ptr in = tm.find_enum(ev);
 //     BOOST_CHECK(! tm.is_boolean(in));
 
-//     BOOST_CHECK(! tm.is_integer(in));
+//     BOOST_CHECK(! tm.is_int_const(in));
 //     // BOOST_CHECK(! tm.is_int_finite(in));
 //     BOOST_CHECK(! tm.is_int_range(in));
 //     BOOST_CHECK(! tm.is_int_enum(in));
