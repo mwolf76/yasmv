@@ -76,6 +76,9 @@ using boost::regex_match;
 #include <boost/tuple/tuple_comparison.hpp>
 using boost::tuple;
 
+#include <algorithm>
+using std::max;
+
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <logging.hh>
 
@@ -120,11 +123,15 @@ class Object : public IObject {
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
 extern const char *BOOL_TOKEN;
+
 extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;
-extern const char *FIXED_TOKEN;
-extern const char *INTEGER_TOKEN;
-extern const char *TEMPORAL_TOKEN;
-extern const char *MAIN_TOKEN;
 
+extern const char *FXD_TOKEN;
+extern const char *INT_TOKEN;
+
+extern const char *MAIN_TOKEN;
+extern const char *ENUM_TOKEN;
+extern const char *INST_TOKEN;
+extern const char *ARRAY_TOKEN;
 #endif
