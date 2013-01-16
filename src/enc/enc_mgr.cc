@@ -38,7 +38,8 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     BooleanType_ptr btype;
     SignedAlgebraicType_ptr sa_type;
     UnsignedAlgebraicType_ptr ua_type;
-    FixedAlgebraicType_ptr fa_type;
+    SignedFixedAlgebraicType_ptr sfa_type;
+    UnsignedFixedAlgebraicType_ptr ufa_type;
     EnumType_ptr etype;
     ArrayType_ptr vtype;
 
@@ -56,10 +57,15 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         DEBUG << "Encoding unsigned algebraic " << ua_type << endl;
         res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
     }
-    else if (NULL != (fa_type = dynamic_cast<FixedAlgebraicType_ptr>(tp))) {
-        DEBUG << "Encoding fixed-point algebraic " << fa_type << endl;
-        res = new AlgebraicEncoding(fa_type->width(), fa_type->fract(),
-                                    true, fa_type->dds());
+    else if (NULL != (sfa_type = dynamic_cast<SignedFixedAlgebraicType_ptr>(tp))) {
+        DEBUG << "Encoding signed fixed-point algebraic " << sfa_type << endl;
+        res = new AlgebraicEncoding(sfa_type->width(), sfa_type->fract(),
+                                    true, sfa_type->dds());
+    }
+    else if (NULL != (ufa_type = dynamic_cast<UnsignedFixedAlgebraicType_ptr>(tp))) {
+        DEBUG << "Encoding unsigned fixed-point algebraic " << ufa_type << endl;
+        res = new AlgebraicEncoding(ufa_type->width(), ufa_type->fract(),
+                                    false, sfa_type->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding enum " << etype << endl;
