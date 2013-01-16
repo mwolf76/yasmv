@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(fqexprs)
         const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
         ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("@7{main::x}"));
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("+7{main::x}"));
     }
 
     {
@@ -518,11 +518,8 @@ BOOST_AUTO_TEST_CASE(fqexprs)
         const FQExpr& fqexpr = FQExpr(main_, x, 0);
 
         ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("@0{main::x}"));
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("+0{main::x}"));
     }
-
-
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

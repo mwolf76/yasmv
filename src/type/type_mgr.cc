@@ -44,14 +44,14 @@ TypeMgr::TypeMgr()
                    new FxdConstType(*this));
 }
 
-const Type_ptr TypeMgr::find_unsigned(unsigned bits)
+const Type_ptr TypeMgr::find_unsigned(unsigned digits)
 {
-    Expr_ptr descr(f_em.make_unsigned_int_type(bits));
+    Expr_ptr descr(f_em.make_unsigned_int_type(digits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new UnsignedAlgebraicType( *this, bits);
+    res = new UnsignedAlgebraicType( *this, digits);
     register_type(descr, res);
     return res;
 }
@@ -70,14 +70,14 @@ const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
     return res;
 }
 
-const Type_ptr TypeMgr::find_signed(unsigned bits)
+const Type_ptr TypeMgr::find_signed(unsigned digits)
 {
-    Expr_ptr descr(f_em.make_signed_int_type(bits));
+    Expr_ptr descr(f_em.make_signed_int_type(digits));
     Type_ptr res = lookup_type(descr);
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new SignedAlgebraicType( *this, bits);
+    res = new SignedAlgebraicType( *this, digits);
     register_type(descr, res);
     return res;
 }
