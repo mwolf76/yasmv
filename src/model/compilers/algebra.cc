@@ -32,16 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#define PROFILE_COMPILER
-
 #include <common.hh>
 
 #include <expr.hh>
 #include <compiler.hh>
 
 /* Important Remark: operand arguments (which are DD vectors) are
-   fetched from the internal DD stack in a little-endian fashion, that
-   is MSB first. On the other hand, to ensure proper behavior the
+   fetched from the internal DD stack in a big-endian fashion, that is
+   MSB first. On the other hand, to ensure proper behavior the
    *result* of the operation has to be pushed in reverse order. */
 
 void Compiler::algebraic_neg(const Expr_ptr expr)
@@ -50,8 +48,25 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     ExprMgr& em = f_owner.em();
     TypeMgr& tm = f_owner.tm();
 
-    const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = tm.as_algebraic(type)->width();
+    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
+    unsigned width;
+
+    {
+        /* fxd -> int type conversion */
+        if (tm.is_signed_fixed_algebraic(type) ||
+            tm.is_unsigned_fixed_algebraic(type)) {
+            type = algebraic_make_int_of_fxd_type(type);
+        }
+        if (tm.is_signed_algebraic(type)) {
+            width = tm.as_signed_algebraic(type)->width();
+        }
+        else if (tm.is_unsigned_fixed_algebraic(type)) {
+            width = tm.as_unsigned_algebraic(type)->width();
+        }
+        else {
+            assert( false ); /* unexpected */
+        }
+    }
 
     /* create temp complemented ADDs */
     ADD lhs[width];
@@ -69,8 +84,25 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     assert( is_unary_algebraic(expr) );
     TypeMgr& tm = f_owner.tm();
 
-    const Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned width = tm.as_algebraic(type)->width();
+    Type_ptr type = f_type_stack.back(); // just inspect
+    unsigned width;
+
+    {
+        /* fxd -> int type conversion */
+        if (tm.is_signed_fixed_algebraic(type) ||
+            tm.is_unsigned_fixed_algebraic(type)) {
+            type = algebraic_make_int_of_fxd_type(type);
+        }
+        if (tm.is_signed_algebraic(type)) {
+            width = tm.as_signed_algebraic(type)->width();
+        }
+        else if (tm.is_unsigned_fixed_algebraic(type)) {
+            width = tm.as_unsigned_algebraic(type)->width();
+        }
+        else {
+            assert( false ); /* unexpected */
+        }
+    }
 
     ADD lhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -88,7 +120,7 @@ void Compiler::algebraic_not(const Expr_ptr expr)
 void Compiler::algebraic_plus(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest, takes care of type stack
+    unsigned width = algebrize_binary_arithmetical();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width ; ++ i) {
@@ -129,7 +161,7 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 void Compiler::algebraic_mul(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest, takes care of type stack
+    unsigned width = algebrize_binary_arithmetical();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -196,7 +228,7 @@ void Compiler::algebraic_mod(const Expr_ptr expr)
 void Compiler::algebraic_and(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_arithmetical();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -220,7 +252,7 @@ void Compiler::algebraic_and(const Expr_ptr expr)
 void Compiler::algebraic_or(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_arithmetical();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -244,7 +276,7 @@ void Compiler::algebraic_or(const Expr_ptr expr)
 void Compiler::algebraic_xor(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_arithmetical();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -292,7 +324,7 @@ void Compiler::algebraic_implies(const Expr_ptr expr)
 void Compiler::algebraic_lshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_arithmetical();
 
     ExprMgr& em = f_owner.em();
 
@@ -354,7 +386,7 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
 void Compiler::algebraic_rshift(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_operands(); // largest
+    unsigned width = algebrize_binary_arithmetical();
 
     ExprMgr& em = f_owner.em();
 
@@ -419,7 +451,7 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
 
-    unsigned width = algebrize_binary_predicate(); // largest
+    unsigned width = algebrize_binary_relational();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -480,7 +512,7 @@ void Compiler::algebraic_ge(const Expr_ptr expr)
 void Compiler::algebraic_lt(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_binary_predicate(); // largest
+    unsigned width = algebrize_binary_relational();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -517,7 +549,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
 void Compiler::algebraic_le(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
-    unsigned width = algebrize_binary_predicate(); // largest
+    unsigned width = algebrize_binary_relational();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -552,35 +584,10 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     f_add_stack.push_back(tmp);
 }
 
-/* pre-processing for algebraic_ite */
-void Compiler::integer_ite(const Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
-
-    FQExpr key(expr);
-    const Type_ptr type = f_owner.type(key);
-    unsigned width = tm.as_algebraic(type)->width();
-
-    const ADD tmp = f_add_stack.back(); f_add_stack.pop_back();
-    algebraic_from_integer_const(width); // rhs
-
-    f_add_stack.push_back(tmp);
-    algebraic_from_integer_const(width);  // lhs
-
-    /* fix type stack */
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-
-    f_type_stack.push_back( tm.find_unsigned( width ));
-    f_type_stack.push_back( tm.find_unsigned( width ));
-
-    algebraic_ite(expr);
-}
-
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
     assert( is_ite_algebraic(expr) );
-    unsigned width = algebrize_operands( true ); // largest, kill extra type
+    unsigned width = algebrize_ternary_ite();
 
     ADD rhs[width];
     for (unsigned i = 0; i < width; ++ i) {

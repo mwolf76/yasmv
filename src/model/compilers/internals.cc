@@ -37,19 +37,64 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-// REMARK: algebrizations makes sense only for binary ops, there is no
-// need to algebrize a single operand! (unless casts are introduced,
-// but then again a CAST can be thought as a binary op...[ CAST 8 x ])
+/* Helper macros */
+#define FETCH_DDS(store, count)                                   \
+    for (unsigned i = 0; i < (count); ++ i) {                     \
+        (store)[i] = f_add_stack.back();                          \
+        f_add_stack.pop_back();                                   \
+    }
 
-/* This is slightly complex: it fetches two operands (and
-   corresponding types), one of them must be algebraic, possibly
-   both. Performs integer to algebraic conversion if needed, aligns
-   algebraic operands to the largest size, and return this size,
-   leaving type stack in a consistent state.
+#define PUSH_DDS(store, count)                                    \
+    for (unsigned i = 0; i < (count); ++ i) {                     \
+        unsigned ndx = (count) - i - 1;                           \
+        f_add_stack.push_back((store) [ndx]);                     \
+    }
 
-   Remark: if is_ite is true, an extra type is removed from the type
-   stack.  */
-unsigned Compiler::algebrize_operands(bool is_ite)
+#define ALGEBRIZE_ONE(top, width)               \
+    {                                           \
+        algebrize_operand((top), (width));      \
+    }
+
+#define ALGEBRIZE_TWO(rhs, lhs, width)          \
+    {                                           \
+        ADD tmp[(width)];                       \
+        algebrize_operand((rhs), (width));      \
+        FETCH_DDS(tmp, (width));                \
+        algebrize_operand((lhs), (width));      \
+        PUSH_DDS(tmp, (width));                 \
+    }
+
+
+void Compiler::algebrize_operand(Type_ptr type, unsigned final_width)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    if (tm.is_int_const(type)) {
+        algebraic_from_int_const(final_width);
+    }
+    else if (tm.is_fxd_const(type)) {
+        algebraic_from_fxd_const(final_width);
+    }
+
+    else {
+        unsigned width = tm.calculate_width(type);
+        if (width == final_width) return;
+
+        if (width < final_width) {
+            // padding required, take sign bit into account.
+            bool is_signed = tm.is_signed_algebraic(type) ||
+                tm.is_signed_fixed_algebraic(type);
+
+            algebraic_padding(width, final_width, is_signed);
+        }
+        else {
+            assert (width > final_width);
+            assert (false); /* unexpected */
+        }
+    }
+}
+
+unsigned Compiler::algebrize_binary_arithmetical()
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -57,26 +102,13 @@ unsigned Compiler::algebrize_operands(bool is_ite)
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    // DRIVEL << "RHS is " << rhs_type << endl;
-
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    // DRIVEL << "LHS is " << lhs_type << endl;
+    assert( tm.is_algebraic(rhs_type) ||
+            tm.is_algebraic(lhs_type) );
 
-    // HACK: only for ITEs
-    if (is_ite) {
-        f_type_stack.pop_back();
-    }
+    unsigned rhs_width = tm.calculate_width(rhs_type);
+    unsigned lhs_width = tm.calculate_width(lhs_type);
 
-    assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
-    unsigned rhs_width = tm.is_algebraic(rhs_type)
-        ? tm.as_algebraic(rhs_type)->width()
-        : 0;
-
-    unsigned lhs_width = tm.is_algebraic(lhs_type)
-        ? tm.as_algebraic(lhs_type)->width()
-        : 0;
-
-    /* max */
     unsigned res = rhs_width < lhs_width
         ? lhs_width
         : rhs_width
@@ -84,63 +116,22 @@ unsigned Compiler::algebrize_operands(bool is_ite)
 
     // Nothing do be done, just ad result type to the type stack and leave
     if ((rhs_width == res) && (lhs_width == res)) {
-        // DRIVEL << "Nothing do be done." << endl;
         f_type_stack.push_back(rhs_type); // arbitrary
 
-        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
+        assert( stack_size - 1 == f_type_stack.size());
         return res;
     }
 
-    /* perform conversion or padding, taking sign bit into account */
-    if (rhs_width < res) {
-        if (! rhs_width) { // integer, conversion required
-            // DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
-            algebraic_from_integer_const(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
-            algebraic_padding(rhs_width, res, is_signed);
-        }
+    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
+    f_type_stack.push_back(rhs_type);
 
-        // push other operand's type and return
-        f_type_stack.push_back(lhs_type);
-
-        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
-        return res;
-    }
-
-    if (lhs_width < res) {
-        /* temporary storage to let adjustment for LHS to take place */
-        ADD rhs_tmp[res];
-        for (unsigned i = 0; i < res; ++ i){
-            rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        if (! lhs_width) { // integer, conversion required
-            // DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
-            algebraic_from_integer_const(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
-            algebraic_padding(lhs_width, res, is_signed);
-        }
-
-        // push other operand's type
-        f_type_stack.push_back(rhs_type);
-
-        /* restore RHS and continue */
-        for (unsigned i = 0; i < res; ++ i){
-            f_add_stack.push_back(rhs_tmp[res - i - 1]);
-        }
-
-        assert( stack_size - ( is_ite ? 2 : 1 ) == f_type_stack.size());
-        return res;
-    }
+    assert( stack_size - 1 == f_type_stack.size());
+    return res;
 
     assert( false ); // unreachable
 }
 
-unsigned Compiler::algebrize_binary_predicate()
+unsigned Compiler::algebrize_ternary_ite()
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -148,81 +139,78 @@ unsigned Compiler::algebrize_binary_predicate()
     assert (2 <= stack_size);
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    // DRIVEL << "RHS is " << rhs_type << endl;
-
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    // DRIVEL << "LHS is " << lhs_type << endl;
+    f_type_stack.pop_back(); /* ITEs require an extra pop() */
 
-    assert( tm.is_algebraic(rhs_type) || tm.is_algebraic(lhs_type) );
-    unsigned rhs_width = tm.is_algebraic(rhs_type)
-        ? tm.as_algebraic(rhs_type)->width()
-        : 0;
+    assert( tm.is_algebraic(rhs_type) ||
+            tm.is_algebraic(lhs_type) );
 
-    unsigned lhs_width = tm.is_algebraic(lhs_type)
-        ? tm.as_algebraic(lhs_type)->width()
-        : 0;
+    unsigned rhs_width = tm.calculate_width(rhs_type);
+    unsigned lhs_width = tm.calculate_width(lhs_type);
 
-    /* max */
     unsigned res = rhs_width < lhs_width
         ? lhs_width
         : rhs_width
         ;
 
-    // Nothing do be done, just add result type to the type stack and leave
-    if ((rhs_width == res) && (lhs_width == res)) {
-        // DRIVEL << "Nothing do be done." << endl;
-        f_type_stack.push_back(tm.find_boolean()); // predicate
+    // Nothing do be done, just add result type to the type stack and
+    // leave.
+    if ((rhs_width == res) &&
+        (lhs_width == res)) {
+        f_type_stack.push_back(rhs_type); // arbitrary
+
+        /* sanity check */
+        assert( stack_size - 2 == f_type_stack.size());
         return res;
     }
 
-    /* perform conversion or padding, taking sign bit into account */
-    if (rhs_width < res) {
-        if (! rhs_width) { // integer, conversion required
-            // DRIVEL << "INT -> ALGEBRAIC RHS" << endl;
-            algebraic_from_integer_const(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(rhs_type)->is_signed();
-            algebraic_padding(rhs_width, res, is_signed);
-        }
+    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
 
-        // push boolean type and return
-        f_type_stack.push_back(tm.find_boolean());
-        return res;
-    }
-
-    if (lhs_width < res) {
-        /* temporary storage to let adjustment for LHS to take place */
-        ADD rhs_tmp[res];
-        for (unsigned i = 0; i < res; ++ i){
-            rhs_tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
-        }
-
-        if (! lhs_width) { // integer, conversion required
-            // DRIVEL << "INT -> ALGEBRAIC LHS" << endl;
-            algebraic_from_integer_const(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(lhs_type)->is_signed();
-            algebraic_padding(lhs_width, res, is_signed);
-        }
-
-        // push boolean type
-        f_type_stack.push_back(tm.find_boolean());
-
-        /* restore RHS and continue */
-        for (unsigned i = 0; i < res; ++ i){
-            f_add_stack.push_back(rhs_tmp[res - i - 1]);
-        }
-
-        return res;
-    }
-
-    assert( false ); // unreachable
+    // sanity check
+    assert( stack_size - 2 == f_type_stack.size());
+    return res;
 }
 
-/* UPDATE: currently this is used only in array selectors */
-unsigned Compiler::algebrize_unary()
+unsigned Compiler::algebrize_binary_relational()
+{
+    TypeMgr& tm = f_owner.tm();
+
+    unsigned stack_size = f_type_stack.size();
+    assert (2 <= stack_size);
+
+    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    assert( tm.is_algebraic(rhs_type) ||
+            tm.is_algebraic(lhs_type) );
+
+    unsigned rhs_width = tm.calculate_width(rhs_type);
+    unsigned lhs_width = tm.calculate_width(lhs_type);
+
+    unsigned res = rhs_width < lhs_width
+        ? lhs_width
+        : rhs_width
+        ;
+
+    // Nothing do be done, just add result type to the type stack and
+    // leave.
+    if ((rhs_width == res) &&
+        (lhs_width == res)) {
+        f_type_stack.push_back(tm.find_boolean()); // predicate
+
+        /* sanity check */
+        assert( stack_size - 1 == f_type_stack.size());
+        return res;
+    }
+
+    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
+    f_type_stack.push_back(tm.find_boolean()); // predicate
+
+    /* sanity check */
+    assert( stack_size - 1 == f_type_stack.size());
+    return res;
+}
+
+unsigned Compiler::algebrize_unary_subscript()
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -232,61 +220,31 @@ unsigned Compiler::algebrize_unary()
     unsigned machine_width = 2; // TODO!
 
     const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
-    // DRIVEL << "TOP is " << top_type << endl;
+    unsigned top_width = tm.calculate_width(top_type);
 
-    unsigned top_width = tm.is_algebraic(top_type)
-        ? tm.as_algebraic(top_type)->width()
-        : 0;
-
-    /* max */
     unsigned res = top_width < machine_width
         ? machine_width
         : top_width
         ;
 
-    // Nothing do be done, just ad result type to the type stack and leave
+    // Nothing do be done, just add result type to the type stack and
+    // leave.
     if ((top_width == res)) {
-        // DRIVEL << "Nothing do be done." << endl;
-        f_type_stack.push_back(top_type); // arbitrary
-
+        f_type_stack.push_back(top_type);
         assert( stack_size - 1 == f_type_stack.size());
         return res;
     }
 
-    /* perform conversion or padding, taking sign bit into account */
-    if (top_width < res) {
-        if (! top_width) { // integer, conversion required
-            // DRIVEL << "INT -> ALGEBRAIC TOP" << endl;
-            algebraic_from_integer_const(res);
-        }
-        else { // just padding required
-            bool is_signed = tm.as_algebraic(top_type)->is_signed();
-            algebraic_padding(top_width, res, is_signed);
-        }
+    ALGEBRIZE_ONE(top_type, res);
+    f_type_stack.push_back(top_type);
 
-        // push other operand's type and return
-        f_type_stack.push_back(tm.find_unsigned(2)); // TODO machine_size
-
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
+    assert( stack_size - 1 == f_type_stack.size());
+    return res;
 
     assert( false ); // unreachable
 }
 
-
-static inline value_t pow(unsigned base, unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; (i); -- i) {
-        res *= base;
-    }
-
-    return res;
-}
-
-/* basic case: integer constant */
-void Compiler::algebraic_from_integer_const(unsigned width)
+void Compiler::algebraic_from_int_const(unsigned width)
 {
     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
     assert (f_enc.is_constant(top));
@@ -303,8 +261,53 @@ void Compiler::algebraic_from_integer_const(unsigned width)
     }
 
     assert (value == 0); // not overflowing
-    // DRIVEL << "ALGEBRAIC " << width << endl;
 }
+
+
+void Compiler::algebraic_from_fxd_const(unsigned width)
+{
+#if 0 // LATER...
+
+    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
+    assert (f_enc.is_constant(top));
+
+    value_t value = f_enc.const_value(top);
+    unsigned base = Cudd_V(f_enc.base().getNode());
+    if (value < 0) {
+        value += pow(base, width); // 2's complement
+    }
+    for (unsigned i = 0; i < width; ++ i) {
+        ADD digit = f_enc.constant(value % base);
+        f_add_stack.push_back(digit);
+        value /= base;
+    }
+
+    assert (value == 0); // not overflowing
+#endif
+
+    assert (0);
+}
+
+// void Compiler::algebraic_from_int_const(unsigned width)
+// {
+//     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
+//     assert (f_enc.is_constant(top));
+
+//     value_t value = f_enc.const_value(top);
+//     unsigned base = Cudd_V(f_enc.base().getNode());
+//     if (value < 0) {
+//         value += pow(base, width); // 2's complement
+//     }
+//     for (unsigned i = 0; i < width; ++ i) {
+//         ADD digit = f_enc.constant(value % base);
+//         f_add_stack.push_back(digit);
+//         value /= base;
+//     }
+
+//     assert (value == 0); // not overflowing
+//     // DRIVEL << "ALGEBRAIC " << width << endl;
+// }
+
 
 /* extends a DD vector on top of the stack from old_width to
    new_width */
@@ -342,9 +345,7 @@ void Compiler::algebraic_discard_op()
     TypeMgr& tm = f_owner.tm();
 
     const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = tm.is_algebraic(type)
-        ? tm.as_algebraic(type)->width()
-        : 1;
+    unsigned width = tm.calculate_width(type);
 
     /* discard DDs */
     for (unsigned i = 0; i < width; ++ i) {
@@ -400,30 +401,7 @@ void Compiler::debug_hook()
 #endif
 }
 
-/**
-   Booleans:
-   . binary: AND, OR, XOR, XNOR, IFF, IMPLIES, EQ, NE
-   . unary : NOT, () ?
-
-   Finite Range Integers (aka Monolithes)
-
-   . binary: AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
-   IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD
-
-   . unary : ? (), : (), NEG, NOT(bw)
-
-   Enums (strict subset of the above)
-   . binary : LT, LE, GT, GE, EQ, NE
-   . unary  : ? (), : (),
-
-   Algebraic:
-
-   . binary : AND(bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
-   IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD
-
-   . unary  : NOT(bw), ? (), : (), NEG,
-*/
-
+/* two operands, both booleans */
 bool Compiler::is_binary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -440,6 +418,7 @@ bool Compiler::is_binary_boolean(const Expr_ptr expr)
     return false;
 }
 
+/* one operand, boolean */
 bool Compiler::is_unary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -454,6 +433,7 @@ bool Compiler::is_unary_boolean(const Expr_ptr expr)
     return false;
 }
 
+/* two operands both int consts */
 bool Compiler::is_binary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -467,13 +447,41 @@ bool Compiler::is_binary_integer(const Expr_ptr expr)
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (tm.is_integer(f_owner.type(lhs)) &&
-                tm.is_integer(f_owner.type(rhs)));
+        return (tm.is_int_const(f_owner.type(lhs)) &&
+                tm.is_int_const(f_owner.type(rhs)));
     }
 
     return false;
 }
 
+/* two operands, both int or fxd consts, *at least one* fxd const */
+bool Compiler::is_binary_fixed(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
+       IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
+    if ((em.is_binary_logical(expr)) ||
+        (em.is_binary_arithmetical(expr)) ||
+        (em.is_binary_relational(expr))) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+
+        if (((! tm.is_fxd_const(f_owner.type(lhs))) &&
+             (! tm.is_int_const(f_owner.type(rhs)))) ||
+            ((! tm.is_fxd_const(f_owner.type(lhs))) &&
+             (! tm.is_int_const(f_owner.type(rhs))))) return false;
+
+        return ( (tm.is_fxd_const(f_owner.type(lhs))) ||
+                 (tm.is_fxd_const(f_owner.type(rhs)))) ;
+    }
+
+    return false;
+}
+
+/* one operand, int const */
 bool Compiler::is_unary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -482,12 +490,28 @@ bool Compiler::is_unary_integer(const Expr_ptr expr)
     /* unary : ? (), : (), NEG, NOT(bw) */
     if (em.is_unary_arithmetical(expr)) {
         Type_ptr tp = f_type_stack.back();
-        return (tm.is_integer(tp));
+        return (tm.is_int_const(tp));
     }
 
     return false;
 }
 
+/* one operand, fxd const */
+bool Compiler::is_unary_fixed(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* unary : ? (), : (), NEG, NOT(bw) */
+    if (em.is_unary_arithmetical(expr)) {
+        Type_ptr tp = f_type_stack.back();
+        return (tm.is_fxd_const(tp));
+    }
+
+    return false;
+}
+
+/* two operands, both enumeratives */
 bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -507,6 +531,7 @@ bool Compiler::is_binary_enumerative(const Expr_ptr expr)
     return false;
 }
 
+/* one operand, enumerative */
 bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -522,8 +547,7 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
     return false;
 }
 
-/* following predicates take into account that conversion may be
-   needed to "algebrize" an operand, *but not BOTH of them* */
+/* two operands, both int, fxd or algebraic. At least one algebraic */
 bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -536,17 +560,22 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        // see comment above
-        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
-                  tm.is_integer(f_owner.type(lhs))) &&
+        if ( (!tm.is_algebraic(f_owner.type(lhs)) &&
+              !tm.is_int_const(f_owner.type(lhs)) &&
+              !tm.is_fxd_const(f_owner.type(lhs))) ||
 
-                 (tm.is_algebraic(f_owner.type(rhs)) ||
-                  tm.is_integer(f_owner.type(rhs))));
+             (!tm.is_algebraic(f_owner.type(rhs)) &&
+              !tm.is_int_const(f_owner.type(rhs)) &&
+              !tm.is_fxd_const(f_owner.type(rhs))) ) return false;
+
+        return (tm.is_algebraic(f_owner.type(lhs)) ||
+                tm.is_algebraic(f_owner.type(rhs)));
     }
 
     return false;
 }
 
+/* one operand, algebraic */
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -556,14 +585,13 @@ bool Compiler::is_unary_algebraic(const Expr_ptr expr)
         (em.is_unary_arithmetical(expr))) {
 
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-
-        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
-                  tm.is_integer(f_owner.type(lhs))));
+        return (tm.is_algebraic(f_owner.type(lhs)));
     }
 
     return false;
 }
 
+/* same as is_binary_boolean, checks only lhs and rhs */
 bool Compiler::is_ite_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -580,6 +608,7 @@ bool Compiler::is_ite_boolean(const Expr_ptr expr)
     return false;
 }
 
+/* same as is_binary_integer, checks only lhs and rhs */
 bool Compiler::is_ite_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -590,13 +619,38 @@ bool Compiler::is_ite_integer(const Expr_ptr expr)
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (tm.is_integer(f_owner.type(lhs)) &&
-                tm.is_integer(f_owner.type(rhs)));
+        return (tm.is_int_const(f_owner.type(lhs)) &&
+                tm.is_int_const(f_owner.type(rhs)));
     }
 
     return false;
 }
 
+/* same as is_binary_fixed, checks only lhs and rhs */
+bool Compiler::is_ite_fixed(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    /* ITE (bw) */
+    if (em.is_ite(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+
+        if (((! tm.is_fxd_const(f_owner.type(lhs))) &&
+             (! tm.is_int_const(f_owner.type(rhs)))) ||
+            ((! tm.is_fxd_const(f_owner.type(lhs))) &&
+             (! tm.is_int_const(f_owner.type(rhs))))) return false;
+
+        return ( (tm.is_fxd_const(f_owner.type(lhs))) ||
+                 (tm.is_fxd_const(f_owner.type(rhs)))) ;
+    }
+
+    return false;
+}
+
+/* same as  is_binary_enumerative, checks only lhs and rhs */
 bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -615,6 +669,7 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 
 }
 
+/* same as is_binary_algebraic, checks only lhs and rhs */
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -625,11 +680,16 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
 
-        return ( (tm.is_algebraic(f_owner.type(lhs)) ||
-                  tm.is_integer(f_owner.type(lhs))) &&
+        if ( (!tm.is_algebraic(f_owner.type(lhs)) &&
+              !tm.is_int_const(f_owner.type(lhs)) &&
+              !tm.is_fxd_const(f_owner.type(lhs))) ||
 
-                 (tm.is_algebraic(f_owner.type(rhs)) ||
-                  tm.is_integer(f_owner.type(rhs))));
+             (!tm.is_algebraic(f_owner.type(rhs)) &&
+              !tm.is_int_const(f_owner.type(rhs)) &&
+              !tm.is_fxd_const(f_owner.type(rhs))) ) return false;
+
+        return (tm.is_algebraic(f_owner.type(lhs)) ||
+                tm.is_algebraic(f_owner.type(rhs)));
     }
 
     return false;
@@ -682,19 +742,9 @@ void Compiler::memoize_result(const Expr_ptr expr)
 
     /* collect dds and memoize */
     DDVector dv;
-    unsigned i, width;
-    if (tm.is_algebraic(type)) {
-        width = tm.as_algebraic(type)->width();
-    }
-
-    else if (tm.is_integer(type) ||
-             tm.is_boolean(type)) {
-        width = 1;
-    }
-
-    else assert (false); /* unreachable */
-
+    unsigned i, width = tm.calculate_width(type);
     assert(width <= f_add_stack.size());
+
     ADDStack::reverse_iterator ri;
     for (i = 0, ri = f_add_stack.rbegin();
          i < width; ++ i, ++ ri) {
@@ -744,6 +794,24 @@ ADD Compiler::optimize_and_chain(ADD* dds, unsigned len)
     for (DDInfoVector::iterator i = iv.begin(); i != iv.end(); ++ i) {
         res *= (*i).dd;
     }
+
+    return res;
+}
+
+Type_ptr Compiler::algebraic_make_int_of_fxd_type(Type_ptr type)
+{
+    TypeMgr& tm = f_owner.tm();
+    Type_ptr res = NULL;
+
+    if (tm.is_signed_fixed_algebraic(type)) {
+        SignedFixedAlgebraicType_ptr in = tm.as_signed_fixed_algebraic(type);
+        res = tm.find_signed(in->width() + in->fract());
+    }
+    else if (tm.is_unsigned_algebraic(type)) {
+        UnsignedFixedAlgebraicType_ptr in = tm.as_unsigned_fixed_algebraic(type);
+        res = tm.find_unsigned(in->width() + in->fract());
+    }
+    else assert( false ); /* unexpected */
 
     return res;
 }

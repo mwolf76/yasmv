@@ -103,7 +103,6 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     TRACE << "Done. Took " << secs << " seconds" << endl;
 
     if (res.IsZero())  {
-        /* issue a warning for UNSAT formulas */
         WARN << "Formula is UNSAT" << endl;
     }
 
@@ -132,8 +131,7 @@ bool Compiler::walk_neg_preorder(const Expr_ptr expr)
 void Compiler::walk_neg_postorder(const Expr_ptr expr)
 {
     if (is_unary_integer(expr)) {
-        const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(top.Negate());
+        integer_neg(expr);
         memoize_result(expr);
         return;
     }
@@ -151,8 +149,7 @@ bool Compiler::walk_not_preorder(const Expr_ptr expr)
 void Compiler::walk_not_postorder(const Expr_ptr expr)
 {
     if (is_unary_boolean(expr)) {
-        const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(top.Cmpl());
+        boolean_not(expr);
         memoize_result(expr);
         return;
     }
@@ -172,10 +169,7 @@ bool Compiler::walk_add_inorder(const Expr_ptr expr)
 void Compiler::walk_add_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Plus(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_plus(expr);
         memoize_result(expr);
         return;
     }
@@ -196,10 +190,6 @@ bool Compiler::walk_sub_inorder(const Expr_ptr expr)
 void Compiler::walk_sub_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Minus(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
         memoize_result(expr);
         return;
     }
@@ -220,10 +210,7 @@ bool Compiler::walk_div_inorder(const Expr_ptr expr)
 void Compiler::walk_div_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Divide(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_div(expr);
         memoize_result(expr);
         return;
     }
@@ -244,14 +231,10 @@ bool Compiler::walk_mul_inorder(const Expr_ptr expr)
 void Compiler::walk_mul_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Times(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_mul(expr);
         memoize_result(expr);
         return;
     }
-
 
     else if (is_binary_algebraic(expr)) {
         algebraic_mul(expr);
@@ -269,10 +252,7 @@ bool Compiler::walk_mod_inorder(const Expr_ptr expr)
 void Compiler::walk_mod_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Modulus(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_mod(expr);
         memoize_result(expr);
         return;
     }
@@ -293,19 +273,13 @@ bool Compiler::walk_and_inorder(const Expr_ptr expr)
 void Compiler::walk_and_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_and(expr);
         memoize_result(expr);
         return;
     }
 
     else if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_and(expr);
         memoize_result(expr);
         return;
     }
@@ -326,19 +300,13 @@ bool Compiler::walk_or_inorder(const Expr_ptr expr)
 void Compiler::walk_or_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Or(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_or(expr);
         memoize_result(expr);
         return;
     }
 
     else if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_or(expr);
         memoize_result(expr);
         return;
     }
@@ -357,19 +325,13 @@ bool Compiler::walk_xor_inorder(const Expr_ptr expr)
 void Compiler::walk_xor_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Xor(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_xor(expr);
         memoize_result(expr);
         return;
     }
 
     else if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_xor(expr);
         memoize_result(expr);
         return;
     }
@@ -390,19 +352,13 @@ bool Compiler::walk_xnor_inorder(const Expr_ptr expr)
 void Compiler::walk_xnor_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Xnor(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_xnor(expr);
         memoize_result(expr);
         return;
     }
 
     else if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_xnor(expr);
         memoize_result(expr);
         return;
     }
@@ -423,19 +379,13 @@ bool Compiler::walk_implies_inorder(const Expr_ptr expr)
 void Compiler::walk_implies_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Cmpl().Or(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_implies(expr);
         memoize_result(expr);
         return;
     }
 
     else if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_implies(expr);
         memoize_result(expr);
         return;
     }
@@ -463,10 +413,7 @@ bool Compiler::walk_lshift_inorder(const Expr_ptr expr)
 void Compiler::walk_lshift_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.LShift(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_lshift(expr);
         memoize_result(expr);
         return;
     }
@@ -486,10 +433,7 @@ bool Compiler::walk_rshift_inorder(const Expr_ptr expr)
 void Compiler::walk_rshift_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.RShift(rhs)); /* bitwise integer arithmetic */
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_rshift(expr);
         memoize_result(expr);
         return;
     }
@@ -509,20 +453,13 @@ bool Compiler::walk_eq_inorder(const Expr_ptr expr)
 void Compiler::walk_eq_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Equals(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_equals(expr);
         memoize_result(expr);
         return;
     }
 
-    else if (is_binary_integer(expr) ||
-             is_binary_enumerative(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Equals(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+    else if (is_binary_integer(expr)) {
+        integer_equals(expr);
         memoize_result(expr);
         return;
     }
@@ -543,20 +480,13 @@ bool Compiler::walk_ne_inorder(const Expr_ptr expr)
 void Compiler::walk_ne_postorder(const Expr_ptr expr)
 {
     if (is_binary_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
-        f_type_stack.pop_back(); // consume one, leave the other
+        boolean_not_equals(expr);
         memoize_result(expr);
         return;
     }
 
-    else if (is_binary_integer(expr) ||
-             is_binary_enumerative(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
-        f_type_stack.pop_back(); // consume one, leave the other
+    else if (is_binary_integer(expr)) {
+        integer_not_equals(expr);
         memoize_result(expr);
         return;
     }
@@ -577,10 +507,7 @@ bool Compiler::walk_gt_inorder(const Expr_ptr expr)
 void Compiler::walk_gt_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(rhs.LT(lhs)); // simulate GT op
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_gt(expr);
         memoize_result(expr);
         return;
     }
@@ -600,10 +527,7 @@ bool Compiler::walk_ge_inorder(const Expr_ptr expr)
 void Compiler::walk_ge_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(rhs.LEQ(lhs)); // simulate GEQ op
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_ge(expr);
         memoize_result(expr);
         return;
     }
@@ -624,10 +548,7 @@ bool Compiler::walk_lt_inorder(const Expr_ptr expr)
 void Compiler::walk_lt_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.LT(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_lt(expr);
         memoize_result(expr);
         return;
     }
@@ -648,10 +569,7 @@ bool Compiler::walk_le_inorder(const Expr_ptr expr)
 void Compiler::walk_le_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(lhs.LEQ(rhs));
-        f_type_stack.pop_back(); // consume one, leave the other
+        integer_le(expr);
         memoize_result(expr);
         return;
     }
@@ -671,16 +589,8 @@ bool Compiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ite_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-
     if (is_ite_boolean(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(c.Ite(lhs, rhs));
-
-        f_type_stack.pop_back();
-        f_type_stack.pop_back(); // consume two, leave the third
+        boolean_ite(expr);
         memoize_result(expr);
         return;
     }
@@ -692,15 +602,7 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     }
 
     else if (is_ite_enumerative(expr)) {
-        const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-        const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-        f_add_stack.push_back(c.Ite(lhs, rhs));
-
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.pop_back(); // consume all, push integer
-        f_type_stack.push_back(tm.find_integer());
+        enumerative_ite(expr);
         memoize_result(expr);
         return;
     }
@@ -775,8 +677,8 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
 
     /* algebrize selection expr (rhs), using machine width */
-    assert (tm.is_integer(rhs_type) || tm.is_algebraic(rhs_type));
-    algebrize_unary();
+    assert (tm.is_int_const(rhs_type) || tm.is_algebraic(rhs_type));
+    algebrize_unary_subscript();
 
     ADD selector[2]; // TODO
     for (unsigned i = 0; i < 2; ++ i) {
@@ -788,10 +690,21 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     unsigned size = tm.as_array(lhs_type)->size();
 
     const Type_ptr scalar_type = tm.as_array(lhs_type)->of();
-    unsigned width = tm.is_algebraic(scalar_type)
-        ? tm.as_algebraic(rhs_type)->width()
-        : 1; /* monolithics, consts, enum, etc... use just 1 DD */
-    ;
+    unsigned width;
+
+    if (tm.is_int_const(rhs_type) ||
+        tm.is_fxd_const(rhs_type)) {
+        width = 1;
+    }
+    else if (tm.is_signed_algebraic(rhs_type)) {
+        width = tm.as_signed_algebraic(rhs_type)->width();
+    }
+    else if (tm.is_unsigned_algebraic(rhs_type)) {
+        width = tm.as_unsigned_algebraic(rhs_type)->width();
+    }
+    else {
+        assert(false); /* TODO: support others.. */
+    }
 
     /* fetch DDs from the stack */
     ADD dds[width * size];
@@ -847,7 +760,7 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 
     /* booleans, constants, monoliths are just one DD */
     if (tm.is_boolean(type)
-        || tm.is_integer(type)
+        || tm.is_int_const(type)
         || tm.is_enum(type)) {
         assert(1 == width);
         f_add_stack.push_back(dds[0]);
@@ -884,9 +797,17 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     ENCMap::iterator eye;
     IEncoding_ptr enc = NULL;
 
-    // 1. explicit constants are integer ints (e.g. 42)
-    if (em.is_numeric(expr)) {
-        f_type_stack.push_back(tm.find_integer()); // consts
+    // 1.1. explicit constants are integer consts (e.g. 42) ..
+    if (em.is_int_numeric(expr)) {
+        f_type_stack.push_back(tm.find_int_const());
+        f_add_stack.push_back(f_enc.constant(expr->value()));
+        return;
+    }
+
+    // 1.2. or fixed consts (e.g. 42.42) TODO: currently the number of
+    // decimal digits in fract consts is a global setting.
+    if (em.is_fxd_numeric(expr)) {
+        f_type_stack.push_back(tm.find_fxd_const());
         f_add_stack.push_back(f_enc.constant(expr->value()));
         return;
     }

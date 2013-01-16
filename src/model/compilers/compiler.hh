@@ -179,6 +179,10 @@ protected:
     bool is_unary_integer(const Expr_ptr expr);
     bool is_ite_integer(const Expr_ptr expr);
 
+    bool is_binary_fixed(const Expr_ptr expr);
+    bool is_unary_fixed(const Expr_ptr expr);
+    bool is_ite_fixed(const Expr_ptr expr);
+
     bool is_binary_enumerative(const Expr_ptr expr);
     bool is_unary_enumerative(const Expr_ptr expr);
     bool is_ite_enumerative(const Expr_ptr expr);
@@ -187,7 +191,68 @@ protected:
     bool is_unary_algebraic(const Expr_ptr expr);
     bool is_ite_algebraic(const Expr_ptr expr);
 
-    /* -- algebraic work ---------------------------------------------------- */
+    /* -- boolean exprs ----------------------------------------------------- */
+    void boolean_not(const Expr_ptr expr);
+    void boolean_and(const Expr_ptr expr);
+    void boolean_or(const Expr_ptr expr);
+    void boolean_xor(const Expr_ptr expr);
+    void boolean_xnor(const Expr_ptr expr);
+    void boolean_implies(const Expr_ptr expr);
+    void boolean_equals(const Expr_ptr expr);
+    void boolean_not_equals(const Expr_ptr expr);
+    void boolean_ite(const Expr_ptr expr);
+
+    /* -- const exprs ------------------------------------------------------- */
+    void integer_neg(const Expr_ptr expr);
+    void integer_not(const Expr_ptr expr);
+    void integer_plus(const Expr_ptr expr);
+    void integer_sub(const Expr_ptr expr);
+    void integer_div(const Expr_ptr expr);
+    void integer_mul(const Expr_ptr expr);
+    void integer_mod(const Expr_ptr expr);
+    void integer_and(const Expr_ptr expr);
+    void integer_or(const Expr_ptr expr);
+    void integer_xor(const Expr_ptr expr);
+    void integer_xnor(const Expr_ptr expr);
+    void integer_implies(const Expr_ptr expr);
+    void integer_lshift(const Expr_ptr expr);
+    void integer_rshift(const Expr_ptr expr);
+    void integer_equals(const Expr_ptr expr);
+    void integer_not_equals(const Expr_ptr expr);
+    void integer_gt(const Expr_ptr expr);
+    void integer_ge(const Expr_ptr expr);
+    void integer_lt(const Expr_ptr expr);
+    void integer_le(const Expr_ptr expr);
+    void integer_ite(const Expr_ptr expr);
+
+    void fixed_neg(const Expr_ptr expr);
+    void fixed_not(const Expr_ptr expr);
+    void fixed_plus(const Expr_ptr expr);
+    void fixed_sub(const Expr_ptr expr);
+    void fixed_div(const Expr_ptr expr);
+    void fixed_mul(const Expr_ptr expr);
+    void fixed_mod(const Expr_ptr expr);
+    void fixed_and(const Expr_ptr expr);
+    void fixed_or(const Expr_ptr expr);
+    void fixed_xor(const Expr_ptr expr);
+    void fixed_xnor(const Expr_ptr expr);
+    void fixed_implies(const Expr_ptr expr);
+    void fixed_lshift(const Expr_ptr expr);
+    void fixed_rshift(const Expr_ptr expr);
+    void fixed_equals(const Expr_ptr expr);
+    void fixed_not_equals(const Expr_ptr expr);
+    void fixed_gt(const Expr_ptr expr);
+    void fixed_ge(const Expr_ptr expr);
+    void fixed_lt(const Expr_ptr expr);
+    void fixed_le(const Expr_ptr expr);
+    void fixed_ite(const Expr_ptr expr);
+
+    /* -- enumeratives ------------------------------------------------------ */
+    void enumerative_equals(const Expr_ptr expr);
+    void enumerative_not_equals(const Expr_ptr expr);
+    void enumerative_ite(const Expr_ptr expr);
+
+    /* -- algebraic exprs --------------------------------------------------- */
     void algebraic_neg(const Expr_ptr expr);
     void algebraic_not(const Expr_ptr expr);
     void algebraic_plus(const Expr_ptr expr);
@@ -208,8 +273,6 @@ protected:
     void algebraic_ge(const Expr_ptr expr);
     void algebraic_lt(const Expr_ptr expr);
     void algebraic_le(const Expr_ptr expr);
-
-    void integer_ite(const Expr_ptr expr); /* preprocessing */
     void algebraic_ite(const Expr_ptr expr);
 
     /* -- internals --------------------------------------------------------- */
@@ -221,15 +284,36 @@ protected:
 
     ADD optimize_and_chain(ADD* dds, unsigned len);
 
-    void algebraic_from_integer_const(unsigned width);
+    void algebraic_from_fxd_const(unsigned width);
+    void algebraic_from_int_const(unsigned width);
 
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
 
-    /* TODO: refactor these */
-    unsigned algebrize_operands(bool is_ite = false);
-    unsigned algebrize_binary_predicate();
-    unsigned algebrize_unary();
+    /** @brief Determines type width */
+    unsigned type_width(Type_ptr type);
+
+    /** @brief Adjusts operand */
+    void algebrize_operand(Type_ptr type, unsigned final_width);
+
+    /** @brief Converts a fxd type into the corresponding int type,
+        the new type width is equals to int_digits + fract_digits */
+    Type_ptr algebraic_make_int_of_fxd_type(Type_ptr type);
+
+    /** @brief Determines the width of an algebraic type */
+    unsigned algebraic_type_width(Type_ptr type);
+
+    /** @brief ITEs */
+    unsigned algebrize_ternary_ite();
+
+    /** @brief Binary arithmetical ops */
+    unsigned algebrize_binary_arithmetical();
+
+    /** @brief Binary relational ops */
+    unsigned algebrize_binary_relational();
+
+    /** @brief Subscripts */
+    unsigned algebrize_unary_subscript();
 
     /* temporaries */
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
