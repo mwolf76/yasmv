@@ -348,10 +348,7 @@ void ModelMgr::analyze()
                 Expr_ptr body = (*init_eye);
                 DEBUG << "processing INIT " << ctx << "::" << body << endl;
 
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_boolean())
-                    throw BadType(f_tm.find_boolean()->repr(),
-                                  tp->repr(), body);
+                f_inferrer.process(ctx, body, TP_BOOLEAN);
             } // for init
 
             const ExprVector trans = module.trans();
@@ -361,30 +358,11 @@ void ModelMgr::analyze()
                 Expr_ptr body = (*trans_eye);
                 DEBUG << "processing TRANS " << ctx << "::" << body << endl;
 
-                Type_ptr tp = f_inferrer.process(ctx, body);
-                if (tp != f_tm.find_boolean()) {
-                    throw BadType(f_tm.find_boolean()->repr(),
-                                  tp->repr(), body);
-                }
-            } // for trans
+                f_inferrer.process(ctx, body, TP_BOOLEAN);
+            }
+        } // for trans
 
-            // const ExprVector fair = module.fairness();
-            // for (ExprVector::const_iterator fair_eye = fair.begin();
-            //      fair_eye != fair.end(); fair_eye ++) {
-
-            //     Expr_ptr body = (*fair_eye);
-            //     DEBUG << "processing FAIRNESS " << ctx << "::" << body << endl;
-
-            //     Type_ptr tp = f_inferrer.process(ctx, body);
-            //     if (tp != f_tm.find_boolean()) {
-            //         throw BadType(f_tm.find_boolean()->get_repr(),
-            //                       tp->get_repr(), body);
-            //     }
-            // } // for fair
-
-        } // for modules
-
-    }
+    } // for modules
 
     catch (AnalyzerException& ae) {
         cerr << ae.what() << endl;

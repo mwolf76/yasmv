@@ -45,7 +45,7 @@ public:
     Type_ptr type(FQExpr& fqexpr);
 
     // walker toplevel
-    Type_ptr process(Expr_ptr ctx, Expr_ptr body);
+    Type_ptr process(Expr_ptr ctx, Expr_ptr body, expected_t expected = TP_BOOLEAN);
 
 protected:
     void pre_hook();
@@ -197,6 +197,44 @@ private:
 
     ISymbol_ptr resolve(const Expr_ptr ctx, const Expr_ptr id);
 
+    /* throws a BadType exception if toplevel type does not match any
+       of the expected. Returns type if succesful. */
+    Type_ptr check_expected_type(expected_t expected);
+
+    /* common special cases */
+    inline Type_ptr check_boolean()
+    { return check_expected_type(TP_BOOLEAN); }
+
+    inline Type_ptr check_arithmetical()
+    {
+        return check_expected_type(TP_INT_CONST    |
+                                   TP_FXD_CONST    |
+                                   TP_UNSIGNED_INT |
+                                   TP_SIGNED_INT   |
+                                   TP_UNSIGNED_FXD |
+                                   TP_SIGNED_FXD ) ;
+    }
+
+    inline Type_ptr check_arithmetical_integer()
+    {
+        return check_expected_type(TP_INT_CONST    |
+                                   TP_UNSIGNED_INT |
+                                   TP_SIGNED_INT ) ;
+    }
+
+    inline Type_ptr check_boolean_or_integer()
+    {
+        return check_expected_type(TP_BOOLEAN      |
+                                   TP_INT_CONST    |
+                                   TP_UNSIGNED_INT |
+                                   TP_SIGNED_INT ) ;
+    }
+
+    inline Type_ptr check_array()
+    {
+        return check_expected_type(TP_ARRAY);
+    }
+
     // post-orders only
     void walk_unary_temporal_postorder(const Expr_ptr expr);
     void walk_unary_fsm_postorder(const Expr_ptr expr);
@@ -207,7 +245,7 @@ private:
     void walk_unary_logical_postorder(const Expr_ptr expr);
     void walk_binary_logical_postorder(const Expr_ptr expr);
     void walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr);
-    void walk_binary_bitwise_postorder(const Expr_ptr expr);
+    void walk_binary_shift_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
 
@@ -217,12 +255,6 @@ private:
     // useful for better caching
     Expr_ptr find_canonical_expr(Expr_ptr expr);
     void memoize_canonical_result(Expr_ptr expr, Type_ptr type);
-
-    // useful for errors
-    Expr_ptr f_boolean;
-    Expr_ptr f_integer;
-
-    ExprVector f_integer_or_boolean;
 };
 
 #endif

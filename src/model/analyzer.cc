@@ -376,7 +376,9 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
     if (f_tm.is_boolean(tp)) {
         res = EXPR_BOOLEAN;
     }
-    else if (f_tm.is_integer(tp)) {
+    else if (f_tm.is_int_const(tp) ||
+             f_tm.is_fxd_const(tp) ||
+             f_tm.is_algebraic(tp)) {
         res = EXPR_ALGEBRAIC;
     }
     else assert(0);
