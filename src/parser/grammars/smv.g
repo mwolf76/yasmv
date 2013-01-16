@@ -661,69 +661,75 @@ type_name returns [Type_ptr res]
         '[' size=int_constant ']'
           { $res = tm.find_unsigned_array(2, size->value()); }
 
-        | { $res = tm.find_unsigned(2); } )
+         | { $res = tm.find_unsigned(2); } )
 
     | 'int8_t' (
         '[' size=int_constant ']'
           { $res = tm.find_signed_array(2, size->value()); }
 
-        | { $res = tm.find_signed(2); } )
+         | { $res = tm.find_signed(2); } )
 
     | 'uint16_t' (
         '[' size=int_constant ']'
           { $res = tm.find_unsigned_array(4, size->value()); }
 
-        | { $res = tm.find_unsigned(4); } )
+         | { $res = tm.find_unsigned(4); } )
 
     | 'int16_t' (
         '[' size=int_constant ']'
           { $res = tm.find_signed_array(4, size->value()); }
 
-        | { $res = tm.find_signed(4); } )
+         | { $res = tm.find_signed(4); } )
 
     | 'uint32_t' (
         '[' size=int_constant ']'
           { $res = tm.find_unsigned_array(8, size->value()); }
 
-        | { $res = tm.find_unsigned(8); } )
+         | { $res = tm.find_unsigned(8); } )
 
     | 'int32_t' (
         '[' size=int_constant ']'
           { $res = tm.find_signed_array(8, size->value()); }
 
-        | { $res = tm.find_signed(8); } )
+         | { $res = tm.find_signed(8); } )
 
     | 'uint64_t' (
         '[' size=int_constant ']'
           { $res = tm.find_unsigned_array(16, size->value()); }
 
-        | { $res = tm.find_unsigned(16); } )
+         | { $res = tm.find_unsigned(16); } )
 
     | 'int64_t' (
         '[' size=int_constant ']'
           { $res = tm.find_signed_array(16, size->value()); }
 
-        | { $res = tm.find_signed(16); } )
+         | { $res = tm.find_signed(16); } )
 
     // generic finite integer types
-    | 'unsigned' '(' width=int_constant ')' (
+    | 'unsigned' 'int'? '(' width=int_constant ')' (
             '[' size=int_constant ']'
               { $res = tm.find_unsigned_array(width->value(), size->value()); }
 
-            | { $res = tm.find_unsigned(width->value()); } )
+             | { $res = tm.find_unsigned(width->value()); } )
 
-	| 'signed' '(' width=int_constant ')' (
+	| 'signed' 'int'? '(' width=int_constant ')' (
             '[' size=int_constant ']'
                 { $res = tm.find_signed_array(width->value(), size->value()); }
 
-            | { $res = tm.find_signed(width->value()); } )
+             | { $res = tm.find_signed(width->value()); } )
 
     // fixed point rational numbers
-    | 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
+    | 'signed' 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
             '[' size=int_constant ']'
-                { $res = tm.find_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
+                { $res = tm.find_signed_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
 
-            | { $res = tm.find_fixed(iwidth->value(), fract_width->value()); } )
+             | { $res = tm.find_signed_fixed(iwidth->value(), fract_width->value()); } )
+
+    | 'unsigned' 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
+            '[' size=int_constant ']'
+                { $res = tm.find_unsigned_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
+
+             | { $res = tm.find_unsigned_fixed(iwidth->value(), fract_width->value()); } )
 
     // enumeratives, pure symbolic
 	| enum_type[lits]
