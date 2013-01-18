@@ -50,6 +50,24 @@ typedef pair<YDDMap::iterator, bool> YDDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
+/* shortcuts to to simplify manipulation of the internal ADD stack */
+#define POP_ADD(op)                             \
+    const ADD op = f_add_stack.back();          \
+    f_add_stack.pop_back()
+
+#define POP_TWO(rhs,lhs)                        \
+    POP_ADD(rhs); POP_ADD(lhs)
+
+#define POP_ALGEBRAIC(vec, width)               \
+    ADD vec[width];                             \
+    for (unsigned i = 0; i < width ; ++ i) {    \
+        vec[i] = f_add_stack.back();            \
+        f_add_stack.pop_back();                 \
+    }
+
+/* shortcut for pushing */
+#define PUSH(add) f_add_stack.push_back(add)
+
 class Compiler : public SimpleWalker {
 public:
     Compiler();
@@ -155,6 +173,7 @@ protected:
 
     // partial results
     ADDStack f_add_stack;
+    ADDStack f_tmp_stack;         // used for binary algebrizations
 
     // current ctx stack, for symbol resolution
     ExprStack f_ctx_stack;
@@ -226,19 +245,11 @@ protected:
     void integer_ite(const Expr_ptr expr);
 
     void fixed_neg(const Expr_ptr expr);
-    void fixed_not(const Expr_ptr expr);
     void fixed_plus(const Expr_ptr expr);
     void fixed_sub(const Expr_ptr expr);
     void fixed_div(const Expr_ptr expr);
     void fixed_mul(const Expr_ptr expr);
     void fixed_mod(const Expr_ptr expr);
-    void fixed_and(const Expr_ptr expr);
-    void fixed_or(const Expr_ptr expr);
-    void fixed_xor(const Expr_ptr expr);
-    void fixed_xnor(const Expr_ptr expr);
-    void fixed_implies(const Expr_ptr expr);
-    void fixed_lshift(const Expr_ptr expr);
-    void fixed_rshift(const Expr_ptr expr);
     void fixed_equals(const Expr_ptr expr);
     void fixed_not_equals(const Expr_ptr expr);
     void fixed_gt(const Expr_ptr expr);
@@ -278,6 +289,7 @@ protected:
     /* -- internals --------------------------------------------------------- */
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
+    void flush_operands();
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);

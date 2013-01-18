@@ -39,52 +39,47 @@
 
 void Compiler::boolean_not(const Expr_ptr expr)
 {
-    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(top.Cmpl());
+    POP_ADD(lhs);
+    f_add_stack.push_back(lhs.Cmpl());
 }
 
 void Compiler::boolean_and(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
 
-    f_add_stack.push_back(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_or(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Or(rhs));
 
-    f_add_stack.push_back(lhs.Or(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_xor(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Xor(rhs));
 
-    f_add_stack.push_back(lhs.Xor(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_xnor(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Xnor(rhs));
 
-    f_add_stack.push_back(lhs.Xnor(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_implies(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Cmpl().Or(rhs));
 
-    f_add_stack.push_back(lhs.Cmpl().Or(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
@@ -96,11 +91,9 @@ void Compiler::boolean_not_equals(const Expr_ptr expr)
 
 void Compiler::boolean_ite(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD cnd = f_add_stack.back(); f_add_stack.pop_back();
-
-    f_add_stack.push_back(cnd.Ite(lhs, rhs));
+    POP_TWO(rhs, lhs);
+    POP_ADD(cnd);
+    PUSH(cnd.Ite(lhs, rhs));
 
     // consume two operand types, leave the third
     f_type_stack.pop_back();

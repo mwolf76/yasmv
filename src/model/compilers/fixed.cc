@@ -40,103 +40,65 @@
 #include <compiler.hh>
 
 void Compiler::fixed_neg(const Expr_ptr expr)
-{
-}
+{ integer_neg(expr); }
 
 void Compiler::fixed_plus(const Expr_ptr expr)
-{
-}
+{ integer_plus(expr); }
 
 void Compiler::fixed_sub(const Expr_ptr expr)
-{
-}
+{ integer_sub(expr); }
 
 void Compiler::fixed_mul(const Expr_ptr expr)
 {
+    assert( false ); // TODO
 }
 
 void Compiler::fixed_div(const Expr_ptr expr)
 {
+        assert( false ); // TODO
 }
 
 void Compiler::fixed_mod(const Expr_ptr expr)
 {
-}
-
-void Compiler::fixed_and(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_or(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_xor(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_xnor(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_implies(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_lshift(const Expr_ptr expr)
-{
-}
-
-void Compiler::fixed_rshift(const Expr_ptr expr)
-{
+        assert( false ); // TODO
 }
 
 void Compiler::fixed_equals(const Expr_ptr expr)
-{
-}
+{ integer_equals(expr); }
 
 void Compiler::fixed_not_equals(const Expr_ptr expr)
-{
-}
+{ integer_not_equals(expr); }
 
 void Compiler::fixed_gt(const Expr_ptr expr)
-{
-}
+{ integer_gt(expr); }
 
 void Compiler::fixed_ge(const Expr_ptr expr)
-{
-}
+{ integer_ge(expr); }
 
 void Compiler::fixed_lt(const Expr_ptr expr)
-{
-}
+{ integer_lt(expr); }
 
 void Compiler::fixed_le(const Expr_ptr expr)
-{
-}
+{ integer_le(expr); }
 
 void Compiler::fixed_ite(const Expr_ptr expr)
 {
-    #if 0 // LATER
     TypeMgr& tm = f_owner.tm();
 
     FQExpr key(expr); const Type_ptr type = f_owner.type(key);
-    unsigned width = tm.as_algebraic(type)->width();
+    unsigned width = tm.calculate_width(type);
 
-    const ADD tmp = f_add_stack.back(); f_add_stack.pop_back();
-    algebraic_from_integer_const(width); // rhs
-
-    f_add_stack.push_back(tmp);
-    algebraic_from_integer_const(width);  // lhs
+    assert( 0 == f_tmp_stack.size() );
+    algebraic_from_fxd_const(width); // rhs
+    algebraic_from_fxd_const(width); // lhs
+    flush_operands();
 
     /* fix type stack, constants are always unsigned */
     f_type_stack.pop_back();
     f_type_stack.pop_back();
-    f_type_stack.push_back( tm.find_unsigned( width ));
-    f_type_stack.push_back( tm.find_unsigned( width ));
+    f_type_stack.push_back( type );
+    f_type_stack.push_back( type );
 
     /* re-uses general algorithm */
     algebraic_ite(expr);
-#endif
-
 }

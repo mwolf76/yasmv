@@ -246,17 +246,17 @@ unsigned Compiler::algebrize_unary_subscript()
 
 void Compiler::algebraic_from_int_const(unsigned width)
 {
-    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    assert (f_enc.is_constant(top));
+    POP_ADD(add);
+    assert (f_enc.is_constant(add));
 
-    value_t value = f_enc.const_value(top);
+    value_t value = f_enc.const_value(add);
     unsigned base = Cudd_V(f_enc.base().getNode());
     if (value < 0) {
         value += pow(base, width); // 2's complement
     }
     for (unsigned i = 0; i < width; ++ i) {
         ADD digit = f_enc.constant(value % base);
-        f_add_stack.push_back(digit);
+        f_tmp_stack.push_back(digit);
         value /= base;
     }
 
@@ -266,12 +266,10 @@ void Compiler::algebraic_from_int_const(unsigned width)
 
 void Compiler::algebraic_from_fxd_const(unsigned width)
 {
-#if 0 // LATER...
+    POP_ADD(add);
+    assert (f_enc.is_constant(add));
 
-    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    assert (f_enc.is_constant(top));
-
-    value_t value = f_enc.const_value(top);
+    value_t value = f_enc.const_value(add);
     unsigned base = Cudd_V(f_enc.base().getNode());
     if (value < 0) {
         value += pow(base, width); // 2's complement
@@ -283,31 +281,7 @@ void Compiler::algebraic_from_fxd_const(unsigned width)
     }
 
     assert (value == 0); // not overflowing
-#endif
-
-    assert (0);
 }
-
-// void Compiler::algebraic_from_int_const(unsigned width)
-// {
-//     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-//     assert (f_enc.is_constant(top));
-
-//     value_t value = f_enc.const_value(top);
-//     unsigned base = Cudd_V(f_enc.base().getNode());
-//     if (value < 0) {
-//         value += pow(base, width); // 2's complement
-//     }
-//     for (unsigned i = 0; i < width; ++ i) {
-//         ADD digit = f_enc.constant(value % base);
-//         f_add_stack.push_back(digit);
-//         value /= base;
-//     }
-
-//     assert (value == 0); // not overflowing
-//     // DRIVEL << "ALGEBRAIC " << width << endl;
-// }
-
 
 /* extends a DD vector on top of the stack from old_width to
    new_width */
@@ -814,4 +788,13 @@ Type_ptr Compiler::algebraic_make_int_of_fxd_type(Type_ptr type)
     else assert( false ); /* unexpected */
 
     return res;
+}
+
+void Compiler::flush_operands()
+{
+    for (ADDStack::reverse_iterator ri = f_tmp_stack.rbegin();
+         f_tmp_stack.rend() != ri; ++ ri) {
+        PUSH(*ri);
+    }
+    f_tmp_stack.clear();
 }

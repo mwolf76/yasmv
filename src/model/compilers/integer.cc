@@ -39,194 +39,174 @@
 
 void Compiler::integer_neg(const Expr_ptr expr)
 {
-    const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-
-    f_add_stack.push_back(top.Negate());
+    POP_ADD(lhs);
+    PUSH(lhs.Negate());
 }
 
 void Compiler::integer_plus(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Plus(rhs));
 
-    f_add_stack.push_back(lhs.Plus(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_sub(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Minus(rhs));
 
-    f_add_stack.push_back(lhs.Minus(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_mul(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Times(rhs));
 
-    f_add_stack.push_back(lhs.Times(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_div(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Divide(rhs));
 
-    f_add_stack.push_back(lhs.Divide(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_mod(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Modulus(rhs));
 
-    f_add_stack.push_back(lhs.Modulus(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_and(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.BWTimes(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_or(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.BWOr(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_xor(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.BWXor(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_xnor(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_implies(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_lshift(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.LShift(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.LShift(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_rshift(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.RShift(rhs)); /* bitwise integer arithmetic */
 
-    f_add_stack.push_back(lhs.RShift(rhs)); /* bitwise integer arithmetic */
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_equals(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Equals(rhs));
 
-    f_add_stack.push_back(lhs.Equals(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_not_equals(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Equals(rhs).Cmpl());
 
-    f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_gt(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(rhs.LT(lhs)); // simulate GT op
 
-    f_add_stack.push_back(rhs.LT(lhs)); // simulate GT op
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_ge(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(rhs.LEQ(lhs)); // simulate GEQ op
 
-    f_add_stack.push_back(rhs.LEQ(lhs)); // simulate GEQ op
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_lt(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.LT(rhs));
 
-    f_add_stack.push_back(lhs.LT(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::integer_le(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.LEQ(rhs));
 
-    f_add_stack.push_back(lhs.LEQ(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
+/* ITE is not a proper const manipulation as it *always* is a function
+   of the condition. The result of an ITE is an algebraic */
 void Compiler::integer_ite(const Expr_ptr expr)
 {
-#if 0 // LATER
     TypeMgr& tm = f_owner.tm();
 
     FQExpr key(expr); const Type_ptr type = f_owner.type(key);
-    unsigned width = tm.as_algebraic(type)->width();
+    unsigned width = tm.calculate_width(type);
 
-    const ADD tmp = f_add_stack.back(); f_add_stack.pop_back();
-    algebraic_from_integer_const(width); // rhs
-
-    f_add_stack.push_back(tmp);
-    algebraic_from_integer_const(width);  // lhs
+    assert( 0 == f_tmp_stack.size() );
+    algebraic_from_int_const(width); // rhs
+    algebraic_from_int_const(width); // lhs
+    flush_operands();
 
     /* fix type stack, constants are always unsigned */
     f_type_stack.pop_back();
     f_type_stack.pop_back();
-    f_type_stack.push_back( tm.find_unsigned( width ));
-    f_type_stack.push_back( tm.find_unsigned( width ));
+    f_type_stack.push_back( type );
+    f_type_stack.push_back( type );
 
     /* re-uses general algorithm */
     algebraic_ite(expr);
-#endif
 }

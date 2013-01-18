@@ -39,33 +39,30 @@
 
 void Compiler::enumerative_equals(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Equals(rhs));
 
-    f_add_stack.push_back(lhs.Equals(rhs));
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::enumerative_not_equals(const Expr_ptr expr)
 {
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
+    POP_TWO(rhs, lhs);
+    PUSH(lhs.Equals(rhs).Cmpl());
 
-    f_add_stack.push_back(lhs.Equals(rhs).Cmpl());
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::enumerative_ite(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
+    POP_TWO(rhs, lhs);
+    POP_ADD(cnd);
+    PUSH(cnd.Ite(lhs, rhs));
 
-    const ADD rhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD lhs = f_add_stack.back(); f_add_stack.pop_back();
-    const ADD c = f_add_stack.back(); f_add_stack.pop_back();
-    f_add_stack.push_back(c.Ite(lhs, rhs));
-
+    // consume all, push rhs type
+    Type_ptr type = f_type_stack.back();
     f_type_stack.pop_back();
     f_type_stack.pop_back();
-    f_type_stack.pop_back(); // consume all, push integer
-    f_type_stack.push_back(tm.find_int_const());
+    f_type_stack.pop_back();
+    f_type_stack.push_back(type);
 }
