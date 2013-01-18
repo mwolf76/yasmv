@@ -587,25 +587,6 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
                                check_arithmetical()));
 }
 
-#if 0
-    const Type_ptr rhs = check_boolean_or_integer();
-    const Type_ptr lhs = check_boolean_or_integer();
-
-    // both ops boolean -> boolean
-    if (tm.is_boolean(lhs) && tm.is_boolean(rhs)) {
-        memoize_canonical_result( expr, tm.find_boolean());
-        return;
-    }
-
-    // both arithmetical -> boolean
-    else if (!tm.is_boolean(lhs) && !tm.is_boolean(rhs)) {
-        memoize_canonical_result( expr, tm.find_boolean());
-        return;
-    }
-
-    else throw TypeMismatch( lhs->repr(), rhs->repr() );
-}
-#endif
 
 // fun:  boolean x T -> T
 void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
@@ -625,13 +606,6 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     PUSH_TYPE( tm.result_type( expr, rhs, lhs,
                                check_boolean()));
 }
-# if 0
-
-               // if (lhs != rhs) throw TypeMismatch( lhs->repr(), rhs->repr() );
-    memoize_canonical_result(expr,
-}
-
-#endif
 
 void Inferrer::memoize_result (Expr_ptr expr)
 {
