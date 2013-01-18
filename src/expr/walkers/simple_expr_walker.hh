@@ -34,11 +34,17 @@
 class SimpleWalker : public Walker{
 protected:
 
+    /* global hooks */
     virtual void pre_hook()
     {}
     virtual void post_hook()
     {}
-    virtual void debug_hook()
+
+
+    /* step-by-step hooks */
+    virtual void pre_node_hook(Expr_ptr expr)
+    {}
+    virtual void post_node_hook(Expr_ptr expr)
     {}
 
     virtual void walk();

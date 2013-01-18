@@ -351,9 +351,20 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
     return expr;
 }
 
+void Compiler::pre_node_hook(Expr_ptr expr)
+{
+
+}
+
+void Compiler::post_node_hook(Expr_ptr expr)
+{
+    memoize_result(expr);
+}
+
+#if 0
+
 void Compiler::debug_hook()
 {
-#if 0
     activation_record curr = f_recursion_stack.top();
     DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
 
@@ -372,8 +383,8 @@ void Compiler::debug_hook()
         DEBUG << *i << endl;
     }
     DEBUG << "--------------------" << endl;
-#endif
 }
+#endif
 
 /* two operands, both booleans */
 bool Compiler::is_binary_boolean(const Expr_ptr expr)

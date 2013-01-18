@@ -73,9 +73,14 @@ void Inferrer::pre_hook()
 void Inferrer::post_hook()
 {}
 
+void Inferrer::pre_node_hook(Expr_ptr expr)
+{}
+void Inferrer::post_node_hook(Expr_ptr expr)
+{}
+
+#if 0
 void Inferrer::debug_hook()
 {
-#if 0
     activation_record curr = f_recursion_stack.top();
     DEBUG << "inferrer debug hook, expr = " << curr.expr << endl;
 
@@ -85,8 +90,8 @@ void Inferrer::debug_hook()
         DEBUG << *i << endl;
     }
     DEBUG << "--------------------" << endl;
-#endif
 }
+#endif
 
 Type_ptr Inferrer::check_expected_type(expected_t expected)
 {

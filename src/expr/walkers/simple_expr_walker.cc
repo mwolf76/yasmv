@@ -42,8 +42,6 @@ void SimpleWalker::walk ()
     while(f_recursion_stack.size() != rec_goal) {
 
     loop:
-        debug_hook();
-
         activation_record curr = f_recursion_stack.top();
         if (curr.pc != DEFAULT) {
 
@@ -131,7 +129,9 @@ void SimpleWalker::walk ()
             }
         }
 
-        assert(curr.expr);
+        assert(NULL != curr.expr);
+        pre_node_hook(curr.expr);
+
         switch (curr.expr->f_symb) {
 
         // unary temporal
@@ -620,6 +620,9 @@ void SimpleWalker::walk ()
             throw UnsupportedOperatorException(curr.expr->f_symb);
 
         } // switch
+
+        assert(NULL != curr.expr);
+        post_node_hook(curr.expr);
 
         f_recursion_stack.pop();
     } // while (!empty)

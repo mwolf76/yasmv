@@ -80,7 +80,8 @@ protected:
     void pre_hook();
     void post_hook();
 
-    void debug_hook();
+    void pre_node_hook(Expr_ptr expr);
+    void post_node_hook(Expr_ptr expr);
 
     // expr walker interface
     bool walk_next_preorder(const Expr_ptr expr);

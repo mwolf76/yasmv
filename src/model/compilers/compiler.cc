@@ -140,8 +140,6 @@ void Compiler::walk_neg_postorder(const Expr_ptr expr)
         algebraic_neg(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_not_preorder(const Expr_ptr expr)
@@ -158,8 +156,6 @@ void Compiler::walk_not_postorder(const Expr_ptr expr)
         algebraic_not(expr); // bitwise
     }
     else assert(false); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_add_preorder(const Expr_ptr expr)
@@ -178,8 +174,6 @@ void Compiler::walk_add_postorder(const Expr_ptr expr)
         algebraic_plus(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_sub_preorder(const Expr_ptr expr)
@@ -198,8 +192,6 @@ void Compiler::walk_sub_postorder(const Expr_ptr expr)
         algebraic_sub(expr);
     }
     else assert( false ); // unexpected
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_div_preorder(const Expr_ptr expr)
@@ -218,8 +210,6 @@ void Compiler::walk_div_postorder(const Expr_ptr expr)
         algebraic_div(expr);
     }
     else assert( false ); // unexpected
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_mul_preorder(const Expr_ptr expr)
@@ -238,8 +228,6 @@ void Compiler::walk_mul_postorder(const Expr_ptr expr)
         algebraic_mul(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_mod_preorder(const Expr_ptr expr)
@@ -255,8 +243,6 @@ void Compiler::walk_mod_postorder(const Expr_ptr expr)
         algebraic_mod(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_and_preorder(const Expr_ptr expr)
@@ -275,8 +261,6 @@ void Compiler::walk_and_postorder(const Expr_ptr expr)
         algebraic_and(expr); // bitwise
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_or_preorder(const Expr_ptr expr)
@@ -295,8 +279,6 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
         algebraic_or(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_xor_preorder(const Expr_ptr expr)
@@ -315,8 +297,6 @@ void Compiler::walk_xor_postorder(const Expr_ptr expr)
         algebraic_xor(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_xnor_preorder(const Expr_ptr expr)
@@ -335,8 +315,6 @@ void Compiler::walk_xnor_postorder(const Expr_ptr expr)
         algebraic_xnor(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_implies_preorder(const Expr_ptr expr)
@@ -355,8 +333,6 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
         algebraic_implies(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_iff_preorder(const Expr_ptr expr)
@@ -379,8 +355,6 @@ void Compiler::walk_lshift_postorder(const Expr_ptr expr)
         algebraic_lshift(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_rshift_preorder(const Expr_ptr expr)
@@ -396,8 +370,6 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
         algebraic_rshift(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
@@ -419,8 +391,6 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
         algebraic_equals(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_ne_preorder(const Expr_ptr expr)
@@ -442,8 +412,6 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
         algebraic_not_equals(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_gt_preorder(const Expr_ptr expr)
@@ -462,8 +430,6 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
         algebraic_gt(expr);
     }
     else assert( false );
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_ge_preorder(const Expr_ptr expr)
@@ -482,8 +448,6 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
         algebraic_ge(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_lt_preorder(const Expr_ptr expr)
@@ -500,12 +464,8 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_lt(expr);
-        memoize_result(expr);
-        return;
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_le_preorder(const Expr_ptr expr)
@@ -524,8 +484,6 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
         algebraic_le(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_ite_preorder(const Expr_ptr expr)
@@ -550,8 +508,6 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
         algebraic_ite(expr);
     }
     else assert( false ); // unreachable
-
-    memoize_result(expr);
 }
 
 bool Compiler::walk_cond_preorder(const Expr_ptr expr)

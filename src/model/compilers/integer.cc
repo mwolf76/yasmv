@@ -43,6 +43,12 @@ void Compiler::integer_neg(const Expr_ptr expr)
     PUSH(lhs.Negate());
 }
 
+void Compiler::integer_not(const Expr_ptr expr)
+{
+    POP_ADD(lhs);
+    PUSH(lhs.BWCmpl());
+}
+
 void Compiler::integer_plus(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
@@ -118,7 +124,7 @@ void Compiler::integer_xnor(const Expr_ptr expr)
 void Compiler::integer_implies(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.BWCmpl().BWXor(rhs)); /* bitwise integer arithmetic */
+    PUSH(lhs.BWCmpl().BWOr(rhs)); /* bitwise integer arithmetic */
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
