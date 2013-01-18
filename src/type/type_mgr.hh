@@ -36,7 +36,7 @@ typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
 
 /**
-    The TypeMgr has two well-defined responsibilites:
+    The TypeMgr has three well-defined responsibilites:
 
     1. It keeps track of types that has been defined;
 
@@ -56,6 +56,9 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
     inference, it will be responsibility of the formula-analyzer to
     determine whether its a CTL/LTL/INVAR, and in different section of
     the system different actions can be taken according to this.
+
+    3. It is the single authoritative source for determining the resulting
+    type of an operand, via the result_type methods.
   */
 typedef class TypeMgr* TypeMgr_ptr;
 
@@ -85,14 +88,20 @@ public:
                                            unsigned fract_digits,
                                            unsigned size);
 
+
     const Type_ptr find_unsigned_fixed(unsigned int_digits,
                                      unsigned fract_digits);
     const Type_ptr find_unsigned_fixed_array(unsigned int_digits,
                                            unsigned fract_digits,
                                            unsigned size);
 
+    /* default types */
+    const Type_ptr find_default_unsigned();
+    const Type_ptr find_default_unsigned_fixed();
+
     const Type_ptr find_enum(ExprSet& lits);
     const Type_ptr find_instance(Expr_ptr identifier);
+
 
     /* -- is_xxx predicates ------------------------------------------------- */
 
@@ -198,11 +207,11 @@ public:
         int types, monoliths and consts */
     unsigned calculate_fract(Type_ptr type) const;
 
-    /** Determine the resulting type of a binary arithmetical op. */
-    Type_ptr arithmetical_result_type(Type_ptr a, Type_ptr b);
-
-    /** Determine the resulting type of a binary bitwise op. */
-    Type_ptr bitwise_result_type(Type_ptr a, Type_ptr b);
+    /** Determine the resulting type of an operation given the type of its
+        operands. */
+    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
+    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
+    Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
 
     /** Singleton instance accessor */
     static inline TypeMgr& INSTANCE() {
@@ -225,6 +234,11 @@ private:
     static TypeMgr_ptr f_instance;
 
     /* --- low-level services ----------------------------------------------- */
+
+    /** service of result_type */
+    Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr bitwise_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type
     void register_type(const Expr_ptr expr, Type_ptr vtype);

@@ -35,6 +35,14 @@ typedef vector<Expr_ptr> ExprStack;
 typedef unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
 typedef pair<TypeReg::iterator, bool> TypeRegHit;
 
+/* shortcuts to to simplify manipulation of the internal type stack */
+#define POP_TYPE(op)                              \
+    const Type_ptr op = f_type_stack.back();      \
+    f_type_stack.pop_back()
+
+#define PUSH_TYPE(tp)                             \
+    f_type_stack.push_back(tp)
+
 class ModelMgr;
 class Inferrer : public TemporalWalker {
 public:
@@ -189,7 +197,7 @@ private:
 
         if (eye != f_map.end()) {
             Type_ptr res = (*eye).second;
-            f_type_stack.push_back(res);
+            PUSH_TYPE(res);
             return false;
         }
 
@@ -255,7 +263,7 @@ private:
 
     // useful for better caching
     Expr_ptr find_canonical_expr(Expr_ptr expr);
-    void memoize_canonical_result(Expr_ptr expr, Type_ptr type);
+    void memoize_result(Expr_ptr expr);
 };
 
 #endif

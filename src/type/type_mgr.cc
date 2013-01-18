@@ -26,6 +26,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+#include <type_exceptions.hh>
+
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 
@@ -55,6 +57,19 @@ const Type_ptr TypeMgr::find_unsigned(unsigned digits)
     register_type(descr, res);
     return res;
 }
+
+const Type_ptr TypeMgr::find_default_unsigned()
+{
+    /* TODO: move this somewhere */
+    return find_unsigned(8);
+}
+
+const Type_ptr TypeMgr::find_default_unsigned_fixed()
+{
+    /* TODO: move this somewhere */
+    return find_unsigned_fixed(6, 2);
+}
+
 
 const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
@@ -264,7 +279,40 @@ ArrayType_ptr TypeMgr::as_array(const Type_ptr tp) const
     return res;
 }
 
-/* used by the inferrer */
+/* unary variant */
+Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs)
+{ return lhs; /* nop */ }
+
+/* binary variant */
+Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+{
+    ExprMgr& em = f_em;
+
+    if (em.is_binary_arithmetical(expr)) {
+        return arithmetical_result_type(lhs, rhs);
+    }
+    else if (em.is_binary_logical(expr)) {
+        return bitwise_result_type(lhs, rhs);
+    }
+    else if (em.is_binary_relational(expr)) {
+        return find_boolean();
+    }
+    else assert (false); // unexpected
+}
+
+
+/* ternary variant */
+Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,
+                              Type_ptr lhs, Type_ptr rhs)
+{
+    ExprMgr& em = f_em;
+
+    if (em.is_ite(expr)) {
+        return ite_result_type(lhs, rhs);
+    }
+    else assert (false); // unexpected
+}
+
 Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
     // both ops integers -> integer
@@ -281,6 +329,13 @@ Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 
     // at least one algebraic
     if (is_algebraic(lhs) || is_algebraic(rhs)) {
+
+        if ( is_boolean(lhs) || is_enum(lhs) || is_array(lhs) ||
+             is_boolean(rhs) || is_enum(rhs) || is_array(rhs)) {
+
+            throw TypeMismatch(lhs->repr(),
+                               rhs->repr());
+        }
 
         bool is_fixed = \
             is_fxd_algebraic(lhs) ||
@@ -311,6 +366,9 @@ Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
         if ( is_fixed &&  is_signed) return find_signed_fixed(width - fract, fract);
 
     } /* is_algebraic */
+
+    throw TypeMismatch(lhs->repr(),
+                       rhs->repr());
 
     assert( false ); /* unexpected */
     return NULL;
@@ -333,6 +391,13 @@ Type_ptr TypeMgr::bitwise_result_type(Type_ptr lhs, Type_ptr rhs)
     // at least one algebraic
     if (is_algebraic(lhs) || is_algebraic(rhs)) {
 
+        if ( is_boolean(lhs) || is_enum(lhs) || is_array(lhs) ||
+             is_boolean(rhs) || is_enum(rhs) || is_array(rhs)) {
+
+            throw TypeMismatch(lhs->repr(),
+                               rhs->repr());
+        }
+
         bool is_fixed = \
             is_fxd_algebraic(lhs) ||
             is_fxd_algebraic(rhs) ;
@@ -363,7 +428,75 @@ Type_ptr TypeMgr::bitwise_result_type(Type_ptr lhs, Type_ptr rhs)
 
     } /* is_algebraic */
 
+    throw TypeMismatch(lhs->repr(),
+                       rhs->repr());
+
     assert( false ); /* unexpected */
+    return NULL;
+}
+
+Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
+{
+    /* monoliths */
+    if (is_boolean(lhs) && is_boolean(rhs))
+        return rhs;
+
+    if (is_enum(lhs) && is_enum(rhs) && (lhs == rhs))
+        return rhs;
+
+    /* algebraics */
+    if (is_int_const(lhs) && is_int_const(rhs))
+        return find_default_unsigned();
+
+    if ((is_int_const(lhs) && is_fxd_const(rhs)) ||
+        (is_fxd_const(lhs) && is_int_const(rhs)) ||
+        (is_fxd_const(lhs) && is_fxd_const(rhs)))
+        return find_default_unsigned_fixed();
+
+    // at least one algebraic
+    if (is_algebraic(lhs) || is_algebraic(rhs)) {
+
+        if ( is_boolean(lhs) || is_enum(lhs) || is_array(lhs) ||
+             is_boolean(rhs) || is_enum(rhs) || is_array(rhs)) {
+
+            throw TypeMismatch(lhs->repr(),
+                               rhs->repr());
+        }
+
+        bool is_fixed = \
+            is_fxd_algebraic(lhs) ||
+            is_fxd_algebraic(rhs) ;
+
+        bool is_signed = \
+            is_signed_algebraic(lhs) ||
+            is_signed_algebraic(rhs) ;
+
+        unsigned width = max( calculate_width(lhs),
+                              calculate_width(rhs));
+
+        unsigned fract = max( calculate_fract(lhs),
+                              calculate_fract(rhs));
+
+        assert (fract <= width); /* sanity */
+
+        /* ! fixed && ! signed --> unsigned int */
+        if (!is_fixed && !is_signed) return find_unsigned(width);
+
+        /* ! fixed &&   signed --> signed int */
+        if (!is_fixed &&  is_signed) return find_signed(width);
+
+        /*   fixed && ! signed --> unsigned fixed */
+        if ( is_fixed && !is_signed) return find_unsigned_fixed(width - fract, fract);
+
+        /*   fixed &&   signed --> signed fixed */
+        if ( is_fixed &&  is_signed) return find_signed_fixed(width - fract, fract);
+
+    } /* is_algebraic */
+
+    throw TypeMismatch(lhs->repr(),
+                       rhs->repr());
+
+    assert (false); // unexpected
     return NULL;
 }
 
