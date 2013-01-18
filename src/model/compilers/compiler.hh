@@ -66,7 +66,7 @@ typedef pair<ENCMap::iterator, bool> ENCHit;
     }
 
 /* shortcut for pushing */
-#define PUSH(add) f_add_stack.push_back(add)
+#define PUSH_ADD(add) f_add_stack.push_back(add)
 
 class Compiler : public SimpleWalker {
 public:

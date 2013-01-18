@@ -46,7 +46,7 @@ void Compiler::boolean_not(const Expr_ptr expr)
 void Compiler::boolean_and(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
+    PUSH_ADD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -54,7 +54,7 @@ void Compiler::boolean_and(const Expr_ptr expr)
 void Compiler::boolean_or(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.Or(rhs));
+    PUSH_ADD(lhs.Or(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -62,7 +62,7 @@ void Compiler::boolean_or(const Expr_ptr expr)
 void Compiler::boolean_xor(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.Xor(rhs));
+    PUSH_ADD(lhs.Xor(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -70,7 +70,7 @@ void Compiler::boolean_xor(const Expr_ptr expr)
 void Compiler::boolean_xnor(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.Xnor(rhs));
+    PUSH_ADD(lhs.Xnor(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -78,7 +78,7 @@ void Compiler::boolean_xnor(const Expr_ptr expr)
 void Compiler::boolean_implies(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
-    PUSH(lhs.Cmpl().Or(rhs));
+    PUSH_ADD(lhs.Cmpl().Or(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -93,7 +93,7 @@ void Compiler::boolean_ite(const Expr_ptr expr)
 {
     POP_TWO(rhs, lhs);
     POP_ADD(cnd);
-    PUSH(cnd.Ite(lhs, rhs));
+    PUSH_ADD(cnd.Ite(lhs, rhs));
 
     // consume two operand types, leave the third
     f_type_stack.pop_back();

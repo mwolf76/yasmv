@@ -44,7 +44,7 @@
         f_add_stack.pop_back();                                   \
     }
 
-#define PUSH_DDS(store, count)                                    \
+#define PUSH_ADD_DDS(store, count)                                    \
     for (unsigned i = 0; i < (count); ++ i) {                     \
         unsigned ndx = (count) - i - 1;                           \
         f_add_stack.push_back((store) [ndx]);                     \
@@ -61,7 +61,7 @@
         algebrize_operand((rhs), (width));      \
         FETCH_DDS(tmp, (width));                \
         algebrize_operand((lhs), (width));      \
-        PUSH_DDS(tmp, (width));                 \
+        PUSH_ADD_DDS(tmp, (width));                 \
     }
 
 
@@ -805,7 +805,7 @@ void Compiler::flush_operands()
 {
     for (ADDStack::reverse_iterator ri = f_tmp_stack.rbegin();
          f_tmp_stack.rend() != ri; ++ ri) {
-        PUSH(*ri);
+        PUSH_ADD(*ri);
     }
     f_tmp_stack.clear();
 }

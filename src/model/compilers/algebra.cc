@@ -135,7 +135,7 @@ void Compiler::algebraic_plus(const Expr_ptr expr)
         carry = f_enc.base().LEQ(tmp); /* c >= 0x10 */
 
         /* x[i] = (x[i] + y[i] + c) % base */
-        PUSH(tmp.Modulus(f_enc.base()));
+        PUSH_ADD(tmp.Modulus(f_enc.base()));
     }
 }
 
@@ -196,7 +196,7 @@ void Compiler::algebraic_mul(const Expr_ptr expr)
         }
 
         // return i-th digit of result
-        PUSH(res[ndx_i]);
+        PUSH_ADD(res[ndx_i]);
     }
 }
 
@@ -225,7 +225,7 @@ void Compiler::algebraic_and(const Expr_ptr expr)
 
         /* x[i] &  y[i] */
         unsigned ndx = width - i - 1;
-        PUSH(lhs[ndx].BWTimes(rhs[ndx]));
+        PUSH_ADD(lhs[ndx].BWTimes(rhs[ndx]));
     }
 }
 
@@ -242,7 +242,7 @@ void Compiler::algebraic_or(const Expr_ptr expr)
 
         /* x[i] | y[i] */
         unsigned ndx = width - i - 1;
-        PUSH(lhs[ndx].BWOr(rhs[ndx]));
+        PUSH_ADD(lhs[ndx].BWOr(rhs[ndx]));
     }
 }
 
@@ -259,7 +259,7 @@ void Compiler::algebraic_xor(const Expr_ptr expr)
 
         /* x[i] ^ y[i] */
         unsigned ndx = width - i - 1;
-        PUSH(lhs[ndx].BWXor(rhs[ndx]));
+        PUSH_ADD(lhs[ndx].BWXor(rhs[ndx]));
     }
 }
 
@@ -339,7 +339,7 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
     /* push result (reversed) */
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - i - 1;
-        PUSH( res[ndx]);
+        PUSH_ADD( res[ndx]);
     }
 }
 
@@ -396,7 +396,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
     /* push result (reversed) */
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - i - 1;
-        PUSH(res[ndx]);
+        PUSH_ADD(res[ndx]);
     }
 }
 
@@ -415,7 +415,7 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
     }
 
     /* just one result */
-    PUSH(optimize_and_chain(tmp, width));
+    PUSH_ADD(optimize_and_chain(tmp, width));
 }
 
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
@@ -483,7 +483,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
     }
 
     /* just one predult */
-    PUSH(pred);
+    PUSH_ADD(pred);
 }
 
 void Compiler::algebraic_le(const Expr_ptr expr)
@@ -514,7 +514,7 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     }
 
     /* just one result */
-    PUSH(pred);
+    PUSH_ADD(pred);
 }
 
 void Compiler::algebraic_ite(const Expr_ptr expr)
@@ -529,6 +529,6 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     /* (cond) ? x[i] : y[i] */
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - i - 1;
-        PUSH(cnd.Ite(lhs[ndx], rhs[ndx]));
+        PUSH_ADD(cnd.Ite(lhs[ndx], rhs[ndx]));
     }
 }
