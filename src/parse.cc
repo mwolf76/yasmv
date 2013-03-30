@@ -35,7 +35,7 @@
 #include <smvLexer.h>
 #include <smvParser.h>
 
-#define HAVE_ANTLR_34 1
+#define HAVE_ANTLR_34 0
 
 // TODO: proper error handling
 void parseFile(const char* fName)
