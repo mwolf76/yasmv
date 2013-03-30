@@ -292,7 +292,7 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
         return arithmetical_result_type(lhs, rhs);
     }
     else if (em.is_binary_logical(expr)) {
-        return bitwise_result_type(lhs, rhs);
+        return logical_result_type(lhs, rhs);
     }
     else if (em.is_binary_relational(expr)) {
         return find_boolean();
@@ -307,6 +307,7 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,
 {
     ExprMgr& em = f_em;
 
+    assert(is_boolean(cnd));
     if (em.is_ite(expr)) {
         return ite_result_type(lhs, rhs);
     }
@@ -374,8 +375,13 @@ Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
     return NULL;
 }
 
-Type_ptr TypeMgr::bitwise_result_type(Type_ptr lhs, Type_ptr rhs)
+Type_ptr TypeMgr::logical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
+    // both ops booleans -> boolean
+    if (is_boolean(lhs) && (is_boolean(rhs))) {
+        return find_boolean();
+    }
+
     // both ops integers -> integer
     if (is_int_const(lhs) && (is_int_const(rhs))) {
         return find_int_const();
@@ -511,7 +517,8 @@ void TypeMgr::register_type(const Expr_ptr expr, Type_ptr vtype)
 
 unsigned TypeMgr::calculate_width(Type_ptr type) const
 {
-    if (is_int_const(type) ||
+    if (is_boolean(type)   ||
+        is_int_const(type) ||
         is_fxd_const(type) ||
         is_enum(type)) {
         return 1; /* monolithic */
@@ -523,12 +530,12 @@ unsigned TypeMgr::calculate_width(Type_ptr type) const
         return as_unsigned_algebraic(type)->width();
     }
     else if (is_signed_fixed_algebraic(type)) {
-        return \
+        return
             as_signed_fixed_algebraic(type)->width() +
             as_signed_fixed_algebraic(type)->fract() ;
     }
     else if (is_unsigned_fixed_algebraic(type)) {
-        return \
+        return
             as_unsigned_fixed_algebraic(type)->width() +
             as_unsigned_fixed_algebraic(type)->fract() ;
     }
@@ -539,7 +546,8 @@ unsigned TypeMgr::calculate_width(Type_ptr type) const
 
 unsigned TypeMgr::calculate_fract(Type_ptr type) const
 {
-    if (is_int_const(type) ||
+    if (is_boolean(type)   ||
+        is_int_const(type) ||
         is_fxd_const(type) ||
         is_enum(type)) {
         return 0; /* monolithic */

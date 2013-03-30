@@ -237,7 +237,7 @@ private:
 
     /** service of result_type */
     Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr bitwise_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type
