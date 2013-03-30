@@ -1,35 +1,82 @@
--- Simple ring counter
--- x2 x1 x0
---  0  0  0
---  0  0  1
---  0  1  0
---  0  1  1
---  1  0  0
---  1  0  1
---  1  1  0
---  1  1  1
+MODEL ring_counter
 
 MODULE main
 
-VAR x0 : boolean;
+VAR
+    x0 : boolean;
     x1 : boolean;
     x2 : boolean;
+    x3 : boolean;
+    x4 : boolean;
+    x5 : boolean;
+    x6 : boolean;
+    x7 : boolean;
 
-ASSIGN
-init(x0) := FALSE;
-init(x1) := FALSE;
-init(x2) := FALSE;
+INIT
+        ! x0;
 
-next(x0) := ! x0;
-next(x1) := case
-    x0 : ! x1;
-    TRUE: x1;
-esac;
+INIT
+        ! x1;
 
-next(x2) := case
-    x1 : ! x2;
-    TRUE: x2;
-esac;
+INIT
+        ! x2;
 
--- FALSE, ctx of length 6 exists.
-    LTLSPEC G (! ( x2 & x1 & x0 ));
+INIT
+        ! x3;
+
+INIT
+        ! x4;
+
+INIT
+        ! x5;
+
+INIT
+        ! x6;
+
+INIT
+        ! x7;
+
+TRANS
+        next(x0) <-> ! x0;
+
+TRANS
+        next(x1) <-> case
+                        x0 : ! x1;
+                        TRUE: x1;
+                     esac;
+
+TRANS
+        next(x2) <-> case
+                        x1 : ! x2;
+                        TRUE: x2;
+                     esac;
+
+TRANS
+        next(x3) <-> case
+                        x2 : ! x3;
+                        TRUE: x3;
+                     esac;
+
+TRANS
+        next(x4) <-> case
+                        x3 : ! x4;
+                        TRUE: x4;
+                     esac;
+
+TRANS
+        next(x5) <-> case
+                        x4 : ! x5;
+                        TRUE: x5;
+                     esac;
+
+TRANS
+        next(x6) <-> case
+                        x5 : ! x6;
+                        TRUE: x6;
+                     esac;
+
+TRANS
+        next(x7) <-> case
+                        x6 : ! x6;
+                        TRUE: x6;
+                     esac;
