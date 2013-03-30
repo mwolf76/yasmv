@@ -39,7 +39,7 @@
 #include <type_exceptions.hh>
 
 // uncommment following line to enable post_node_hook debug (verbose!)
-// #define DEBUG_INFERRER
+#define DEBUG_INFERRER
 
 Inferrer::Inferrer(ModelMgr& owner)
     : f_map()
@@ -87,7 +87,7 @@ void Inferrer::post_node_hook(Expr_ptr expr)
 
 #ifdef DEBUG_INFERRER
     activation_record curr = f_recursion_stack.top();
-    DEBUG << "inferrer debug hook, expr = " << curr.expr << endl;
+    DEBUG << "inferrer post-node hook, expr = " << curr.expr << endl;
 
     DEBUG << "Type Stack" << endl;
     for (TypeStack::reverse_iterator i = f_type_stack.rbegin();
@@ -603,8 +603,7 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
     POP_TYPE(rhs);
     POP_TYPE(lhs);
-    PUSH_TYPE( tm.result_type( expr, rhs, lhs,
-                               check_boolean()));
+    PUSH_TYPE( tm.result_type( expr, tm.find_boolean(), lhs, rhs));
 }
 
 void Inferrer::memoize_result (Expr_ptr expr)
