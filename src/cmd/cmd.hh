@@ -67,5 +67,4 @@ private:
     Interpreter& f_interpreter;
 };
 
-
 #endif
