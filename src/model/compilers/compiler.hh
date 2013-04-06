@@ -174,7 +174,6 @@ protected:
 
     // partial results
     ADDStack f_add_stack;
-    ADDStack f_tmp_stack;         // used for binary algebrizations
 
     // current ctx stack, for symbol resolution
     ExprStack f_ctx_stack;

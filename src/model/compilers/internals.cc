@@ -44,26 +44,25 @@
         f_add_stack.pop_back();                                   \
     }
 
-#define PUSH_ADD_DDS(store, count)                                    \
+#define PUSH_DDS(store, count)                                    \
     for (unsigned i = 0; i < (count); ++ i) {                     \
         unsigned ndx = (count) - i - 1;                           \
         f_add_stack.push_back((store) [ndx]);                     \
     }
 
 #define ALGEBRIZE_ONE(top, width)               \
-    {                                           \
+    do {                                        \
         algebrize_operand((top), (width));      \
-    }
+    } while (0)
 
 #define ALGEBRIZE_TWO(rhs, lhs, width)          \
-    {                                           \
+    do {                                        \
         ADD tmp[(width)];                       \
         algebrize_operand((rhs), (width));      \
         FETCH_DDS(tmp, (width));                \
         algebrize_operand((lhs), (width));      \
-        PUSH_ADD_DDS(tmp, (width));                 \
-    }
-
+        PUSH_DDS(tmp, (width));                 \
+    } while (0)
 
 void Compiler::algebrize_operand(Type_ptr type, unsigned final_width)
 {
@@ -256,7 +255,7 @@ void Compiler::algebraic_from_int_const(unsigned width)
     }
     for (unsigned i = 0; i < width; ++ i) {
         ADD digit = f_enc.constant(value % base);
-        f_tmp_stack.push_back(digit);
+        f_add_stack.push_back(digit);
         value /= base;
     }
 
@@ -803,9 +802,4 @@ Type_ptr Compiler::algebraic_make_int_of_fxd_type(Type_ptr type)
 
 void Compiler::flush_operands()
 {
-    for (ADDStack::reverse_iterator ri = f_tmp_stack.rbegin();
-         f_tmp_stack.rend() != ri; ++ ri) {
-        PUSH_ADD(*ri);
-    }
-    f_tmp_stack.clear();
 }

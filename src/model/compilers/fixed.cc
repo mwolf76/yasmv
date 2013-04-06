@@ -88,10 +88,8 @@ void Compiler::fixed_ite(const Expr_ptr expr)
     FQExpr key(expr); const Type_ptr type = f_owner.type(key);
     unsigned width = tm.calculate_width(type);
 
-    assert( 0 == f_tmp_stack.size() );
     algebraic_from_fxd_const(width); // rhs
     algebraic_from_fxd_const(width); // lhs
-    flush_operands();
 
     /* fix type stack, constants are always unsigned */
     f_type_stack.pop_back();
