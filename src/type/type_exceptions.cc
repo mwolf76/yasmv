@@ -85,22 +85,52 @@ TypeMismatch::~TypeMismatch() throw()
 static inline Expr_ptr make_abstract_type(expected_t item)
 {
     ExprMgr& em = ExprMgr::INSTANCE();
+    Expr_ptr res = NULL;
 
     switch (item) {
-    case TP_BOOLEAN: return em.make_boolean_type();
-    case TP_INT_CONST: return em.make_int_const_type();
-    case TP_FXD_CONST: return em.make_fxd_const_type();
-    case TP_SIGNED_INT: return em.make_abstract_signed_int_type();
-    case TP_UNSIGNED_INT: return em.make_abstract_unsigned_int_type();
-    case TP_SIGNED_FXD: return em.make_abstract_signed_fxd_type();
-    case TP_UNSIGNED_FXD: return em.make_abstract_unsigned_fxd_type();
-    case TP_ENUM: return em.make_abstract_enum_type();
-    case TP_INSTANCE: return em.make_abstract_inst_type();
-    case TP_ARRAY: return em.make_abstract_array_type();
-    default: assert (false); /* unexpected */
+    case TP_BOOLEAN:
+        res = em.make_boolean_type();
+        break;
+
+    case TP_INT_CONST:
+        res = em.make_int_const_type();
+        break;
+
+    case TP_FXD_CONST:
+        res = em.make_fxd_const_type();
+        break;
+
+    case TP_SIGNED_INT:
+        res = em.make_abstract_signed_int_type();
+        break;
+
+    case TP_UNSIGNED_INT:
+        res = em.make_abstract_unsigned_int_type();
+        break;
+
+    case TP_SIGNED_FXD:
+        res = em.make_abstract_signed_fxd_type();
+        break;
+
+    case TP_UNSIGNED_FXD:
+        res = em.make_abstract_unsigned_fxd_type();
+        break;
+
+    case TP_ENUM:
+        res = em.make_abstract_enum_type();
+        break;
+
+    case TP_INSTANCE:
+        res = em.make_abstract_inst_type();
+        break;
+
+    case TP_ARRAY:
+        res = em.make_abstract_array_type();
+        break;
     }
 
-    return NULL;
+    assert (NULL != res); /* unexpected */
+    return res;
 }
 
 const char* BadType::what() const throw()
@@ -123,16 +153,17 @@ const char* BadType::what() const throw()
     assert (0 < tmp.size());
 
     ExprVector::iterator eye = tmp.begin();
-    oss << (*eye); eye ++;
+    oss << (*eye);
 
-    ExprVector::iterator last = ( ++ tmp.rbegin()).base();
-    while (eye != last) {
-        oss << ", " << (*eye);
-        ++ eye;
+    if (1 < tmp.size()) {
+        ExprVector::iterator last = ( ++ tmp.rbegin()).base();
+        while (++ eye != last) {
+            oss << ", " << (*eye);
+        }
+
+        oss << " or " << (*last);
     }
-
-    oss << " or " << (*last)
-        << ".";
+    oss << ".";
 
     return oss.str().c_str();
 }
