@@ -55,15 +55,21 @@ options {
 smv
 scope {
     IModel_ptr model;
+    IModule_ptr module;
 }
 
 @init {
     $smv::model = mm.model();
 }
-    : 'MODEL' id=identifier
-      { $smv::model->set_name(id); }
+    : 'FSM' id=identifier
+      {
+            $smv::model->set_name(id);
 
-      modules ';'? // exit point
+            $smv::module = new Module(em.make_main());
+            $smv::model->add_module(em.make_main(), $smv::module);
+      }
+
+      module_body ';'? // exit point
     ;
 
 /* Scripting sub-system Toplevel */
@@ -236,27 +242,13 @@ filepath_fragment returns [const char *res]
         { $res = "/"; }
     ;
 
-modules
-scope { IModule_ptr module ; }
-@init { $modules::module = NULL; }
-
-    : ( 'MODULE' id=identifier
-      {
-        $modules::module = new Module(id);
-        $smv::model->add_module(id, $modules::module);
-      }
-
-      formal_params? fsm_isa_decl_clause* module_body
-      )*
-    ;
-
 formal_params
 	:	'('
         id=identifier
-        { $modules::module->add_formalParam(id); }
+        { $smv::module->add_formalParam(id); }
 
         ( ',' id=identifier
-        { $modules::module->add_formalParam(id); }
+        { $smv::module->add_formalParam(id); }
         )*
         ')'
     ;
@@ -278,7 +270,7 @@ module_decl
 
 fsm_isa_decl_clause
 	: 'ISA' id=identifier
-       { $modules::module->add_isaDecl(id); }
+       { $smv::module->add_isaDecl(id); }
 	;
 
 fsm_var_decl
@@ -300,8 +292,8 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new StateVar($modules::module->expr(), id, tp);
-                $modules::module->add_localVar(id, var);
+                IVariable_ptr var = new StateVar($smv::module->expr(), id, tp);
+                $smv::module->add_localVar(id, var);
             }
     }
 	;
@@ -318,8 +310,8 @@ fsm_define_decl_body
 fsm_define_decl_clause
 	: id=identifier ':=' body=toplevel_expression
     {
-      IDefine_ptr def = new Define($modules::module->expr(), id, body);
-      $modules::module->add_localDef(id, def);
+      IDefine_ptr def = new Define($smv::module->expr(), id, body);
+      $smv::module->add_localDef(id, def);
     }
 	;
 
@@ -334,7 +326,7 @@ fsm_init_decl_body
 
 fsm_init_decl_clause
 	: expr=toplevel_expression
-      { $modules::module->add_init(expr); }
+      { $smv::module->add_init(expr); }
 	;
 
 fsm_trans_decl
@@ -348,7 +340,7 @@ fsm_trans_decl_body
 
 fsm_trans_decl_clause
 	: expr=toplevel_expression
-      { $modules::module->add_trans(expr); }
+      { $smv::module->add_trans(expr); }
 	;
 
 toplevel_expression returns [Expr_ptr res]
