@@ -84,6 +84,10 @@ private:
 
     // ref to inferrer (used for model analysis)
     Inferrer& f_inferrer;
+
+    // analyzer passes
+    void first_pass();
+    void second_pass();
 };
 
 #endif
