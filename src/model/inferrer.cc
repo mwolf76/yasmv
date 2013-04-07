@@ -112,20 +112,11 @@ Type_ptr Inferrer::check_expected_type(expected_t expected)
         (tm.is_int_const(type) &&
          (0 == (expected & TP_INT_CONST))) ||
 
-        (tm.is_fxd_const(type) &&
-         (0 == (expected & TP_FXD_CONST))) ||
-
         (tm.is_signed_algebraic(type) &&
          (0 == (expected & TP_SIGNED_INT))) ||
 
         (tm.is_unsigned_algebraic(type) &&
          (0 == (expected & TP_UNSIGNED_INT))) ||
-
-        (tm.is_signed_fixed_algebraic(type)
-         && (0 == (expected & TP_SIGNED_FXD))) ||
-
-        (tm.is_unsigned_fixed_algebraic(type)
-         && (0 == (expected & TP_UNSIGNED_FXD))) ||
 
         (tm.is_enum(type) &&
          (0 == (expected & TP_ENUM))) ||
@@ -400,6 +391,8 @@ bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 }
 void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 {
+    assert(false); // no longer supported
+#if 0
     TypeMgr& tm = f_owner.tm();
     Type_ptr rhs_type;
 
@@ -418,6 +411,7 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 
     // restore previous ctx
     f_ctx_stack.pop_back();
+#endif
 }
 
 bool Inferrer::walk_params_preorder(const Expr_ptr expr)
@@ -450,11 +444,6 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     // is an integer const ..
     if (em.is_int_numeric(expr)) {
         PUSH_TYPE(tm.find_int_const());
-    }
-
-    // .. or a fixed const
-    else if (em.is_fxd_numeric(expr)) {
-        PUSH_TYPE(tm.find_fxd_const());
     }
 
     // .. or a symbol

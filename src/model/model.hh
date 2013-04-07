@@ -35,86 +35,21 @@
 #include <type.hh>
 #include <enc.hh>
 
-typedef vector<FQExpr> FQExprVector;
-
-class ISymbol;
-typedef ISymbol* ISymbol_ptr;
-typedef unordered_map<FQExpr, ISymbol_ptr, FQExprHash, FQExprEq> Symbols;
-
-class IConstant;
-typedef IConstant* IConstant_ptr;
-typedef unordered_map<FQExpr, IConstant_ptr, FQExprHash, FQExprEq> Constants;
-
-class IVariable;
-typedef IVariable* IVariable_ptr;
-typedef unordered_map<FQExpr, IVariable_ptr, FQExprHash, FQExprEq> Variables;
-
-class ITemporary;
-typedef ITemporary* ITemporary_ptr;
-typedef unordered_map<FQExpr, ITemporary_ptr, FQExprHash, FQExprEq> Temporaries;
-
-class IDefine;
-typedef IDefine* IDefine_ptr;
-typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Defines;
-typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Assigns;
+#include <symbol.hh>
 
 class IModule;
 typedef IModule* IModule_ptr;
 typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
 
-// -- primary decls  --------------------------------------------------------------
-class ISymbol : IObject {
-public:
-    virtual const Expr_ptr ctx()  const =0;
-    virtual const Expr_ptr expr() const =0;
-
-    bool is_const() const;
-    IConstant& as_const() const;
-
-    bool is_variable() const;
-    IVariable& as_variable() const;
-
-    bool is_temporary() const;
-    ITemporary& as_temporary() const;
-
-    bool is_define() const;
-    IDefine& as_define() const;
-};
-
-class IConstant : public ISymbol {
-public:
-    virtual value_t value() const =0;
-    virtual const Type_ptr type() const =0;
-};
-
-class IVariable : public ISymbol {
-public:
-    // var types are used for enc building
-    virtual const Type_ptr type() const =0;
-};
-
-class ITemporary : public IVariable {
-public:
-    virtual const Type_ptr type() const =0;
-};
-
-class IDefine : public ISymbol {
-public:
-    // defines have no type, it is inferred.
-    virtual const Expr_ptr body() const =0;
-};
+class IModel;
+typedef IModel* IModel_ptr;
 
 // -- composite decls ----------------------------------------------------------
 class IModule : public IObject {
 public:
     virtual const Expr_ptr expr() const =0;
 
-    virtual const ExprVector& get_formalParams() const =0;
-    virtual void add_formalParam(Expr_ptr identifier) =0;
-
-    virtual const ExprVector& get_isaDecls() const =0;
-    virtual void add_isaDecl(Expr_ptr identifier) =0;
-
+    // Symbols management
     virtual const Variables& get_localVars() const =0;
     virtual void add_localVar(Expr_ptr expr, IVariable_ptr var) =0;
 
@@ -124,17 +59,13 @@ public:
     virtual const Defines& get_localDefs() const =0;
     virtual void add_localDef(Expr_ptr expr, IDefine_ptr def) =0;
 
+    // Finite State Machine definition
     virtual const ExprVector& init() const =0;
     virtual void add_init(Expr_ptr expr) =0;
 
     virtual const ExprVector& trans() const =0;
     virtual void add_trans(Expr_ptr expr) =0;
-
-    // virtual const ExprVector& fairness() const =0;
-    // virtual void add_fairness(Expr_ptr expr) =0;
 };
-
-class SymbIter;
 
 class IModel : public IObject {
 public:
@@ -147,13 +78,8 @@ public:
     virtual const Modules& modules() const =0;
 };
 
-typedef IModel* IModel_ptr;
-
 class Module : public IModule {
     Expr_ptr f_name;
-
-    ExprVector f_formalParams;
-    ExprVector f_isaDecls;
 
     Constants f_localConsts;
     Variables f_localVars;
@@ -161,7 +87,6 @@ class Module : public IModule {
 
     ExprVector f_init;
     ExprVector f_trans;
-    //    ExprVector f_fair;
 
 public:
     Module(const Expr_ptr name);
@@ -171,14 +96,6 @@ public:
 
     bool is_main() const
     { return f_name == ExprMgr::INSTANCE().make_main(); }
-
-    void add_formalParam(Expr_ptr identifier);
-    const ExprVector& get_formalParams() const
-    { return f_formalParams; }
-
-    void add_isaDecl(Expr_ptr identifier);
-    const ExprVector& get_isaDecls() const
-    { return f_isaDecls; }
 
     void add_localVar(Expr_ptr name, IVariable_ptr var);
     const Variables& get_localVars() const
@@ -199,10 +116,6 @@ public:
     void add_trans(Expr_ptr expr);
     const ExprVector& trans() const
     { return f_trans; }
-
-    // void add_fairness(Expr_ptr expr);
-    // const ExprVector& fairness() const
-    // { return f_fair; }
 };
 
 ostream& operator<<(ostream& os, Module& module);
@@ -321,9 +234,6 @@ public:
 
     const Expr_ptr body() const
     { return f_body; }
-
-    // const Type_ptr type() const
-    // { return TypeMgr::INSTANCE().type(FQExpr(f_ctx, f_name)); }
 };
 
 class SymbIter {
@@ -344,7 +254,6 @@ public:
         ++ f_iter;
         return res;
     }
-
 
 private:
     IModel&  f_model;

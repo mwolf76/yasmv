@@ -32,6 +32,8 @@
 
 #include <type.hh>
 
+#include <symbol.hh>
+
 typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
 
@@ -62,7 +64,38 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
   */
 typedef class TypeMgr* TypeMgr_ptr;
 
+class Literal : public ILiteral {
+    const Expr_ptr f_ctx;
+    const Expr_ptr f_name;
+    const EnumType_ptr f_type;
+
+public:
+    Literal(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_type(type)
+    {}
+
+    virtual const Type_ptr type() const
+    { return f_type; }
+
+    virtual const Expr_ptr name() const
+    { return  f_name; }
+
+    virtual const Expr_ptr expr() const
+    { return ExprMgr::INSTANCE().make_dot( f_ctx, f_name ); }
+
+    virtual const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    // delegate to owner (which is an Enum)
+    virtual value_t value() const
+    { return f_type->value( expr() ); }
+};
+
 class TypeMgr {
+    Literals f_lits;
+
 public:
 
     /* -- inference --------------------------------------------------------- */
@@ -71,9 +104,6 @@ public:
 
     inline const Type_ptr find_int_const()
     { return f_register[ f_em.make_int_const_type() ]; }
-
-    inline const Type_ptr find_fxd_const()
-    { return f_register[ f_em.make_fxd_const_type() ]; }
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_signed(unsigned digits);
@@ -99,28 +129,26 @@ public:
     const Type_ptr find_default_unsigned();
     const Type_ptr find_default_unsigned_fixed();
 
-    const Type_ptr find_enum(ExprSet& lits);
-    const Type_ptr find_instance(Expr_ptr identifier);
+    /* Remark: unambiguous enums resolution requires DOT fullnames */
+    void define_enum(Expr_ptr fullname, ExprSet& lits);
+    const Type_ptr find_enum(Expr_ptr fullname);
 
+    /* Literals are const-like objects managed by the TypeMgr */
+    const Literals& literals() const
+    { return f_lits; }
 
     /* -- is_xxx predicates ------------------------------------------------- */
 
     /** true iff tp is boolean type */
     inline bool is_boolean(const Type_ptr tp) const
     {
-        return NULL != dynamic_cast <const BooleanType_ptr> (tp);
+        return (NULL != dynamic_cast <const BooleanType_ptr> (tp));
     }
 
     /** true iff tp is int const type */
     inline bool is_int_const(const Type_ptr tp) const
     {
-        return (NULL != dynamic_cast<const IntConstType_ptr>(tp));
-    }
-
-    /** true iff tp is fxd const type */
-    inline bool is_fxd_const(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast<const FxdConstType_ptr>(tp));
+        return (NULL != dynamic_cast<const IntConstType_ptr> (tp));
     }
 
     /** true iff tp is algebraic type (abstract) */
@@ -129,56 +157,22 @@ public:
         return (NULL != dynamic_cast <AlgebraicType_ptr> (tp));
     }
 
-    /** true iff tp is either signed or unsigned fixed type (abstract) */
-    inline bool is_fxd_algebraic(const Type_ptr tp) const
-    {
-        return
-            ((NULL != dynamic_cast <SignedFixedAlgebraicType_ptr> (tp)) ||
-             (NULL != dynamic_cast <UnsignedFixedAlgebraicType_ptr> (tp)));
-    }
-
-    /** true iff tp is either int or fxd signed type (abstract) */
-    inline bool is_sgn_algebraic(const Type_ptr tp) const
-    {
-        return
-            ((NULL != dynamic_cast <SignedAlgebraicType_ptr> (tp)) ||
-             (NULL != dynamic_cast <SignedFixedAlgebraicType_ptr> (tp)));
-    }
-
-    /** true iff tp is signed int algebraic type (ground) */
+    /** true iff tp is a signed algebraic type (ground) */
     inline bool is_signed_algebraic(const Type_ptr tp) const
     {
         return (NULL != dynamic_cast <SignedAlgebraicType_ptr> (tp));
     }
 
-    /** true iff tp is unsigned int algebraic type (ground) */
+    /** true iff tp is an unsigned algebraic type (ground) */
     inline bool is_unsigned_algebraic(const Type_ptr tp) const
     {
         return (NULL != dynamic_cast <UnsignedAlgebraicType_ptr> (tp));
-    }
-
-    /** true iff tp is signed fxd algebraic type (ground) */
-    inline bool is_signed_fixed_algebraic(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <SignedFixedAlgebraicType_ptr> (tp));
-    }
-
-    /** true iff tp is unsigned fxd algebraic type (ground) */
-    inline bool is_unsigned_fixed_algebraic(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <UnsignedFixedAlgebraicType_ptr> (tp));
     }
 
     /** true iff tp is enum type */
     inline bool is_enum(const Type_ptr tp) const
     {
         return NULL != dynamic_cast <const EnumType_ptr> (tp);
-    }
-
-    /** true iff tp is instance type */
-    inline bool is_instance(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <Instance_ptr> (tp));
     }
 
     /** true iff tp is array tyype */
@@ -192,20 +186,13 @@ public:
     AlgebraicType_ptr as_algebraic(const Type_ptr tp) const;
     SignedAlgebraicType_ptr as_signed_algebraic(const Type_ptr tp) const;
     UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
-    SignedFixedAlgebraicType_ptr as_signed_fixed_algebraic(const Type_ptr tp) const;
-    UnsignedFixedAlgebraicType_ptr as_unsigned_fixed_algebraic(const Type_ptr tp) const;
     EnumType_ptr as_enum(const Type_ptr tp) const;
-    Instance_ptr as_instance(const Type_ptr tp) const;
     ArrayType_ptr as_array(const Type_ptr tp) const;
 
     /* -- services used by compiler and inferrer ---------------------------- */
 
     /** returns the *total* width of an algebraic type, 1 for monoliths and consts */
     unsigned calculate_width(Type_ptr type) const;
-
-    /** returns the fractional width of a fxd algebraic type, 0 for
-        int types, monoliths and consts */
-    unsigned calculate_fract(Type_ptr type) const;
 
     /** Determine the resulting type of an operation given the type of its
         operands. */

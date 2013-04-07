@@ -77,42 +77,47 @@ ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     FQExpr key(ctx, symb, 0); // time arbitrarily set to 0.
 
     { /* Temp symbols are maintained here internally */
-        Temporaries::iterator viter = f_temporaries.find(key);
+        const Temporaries::iterator viter = f_temporaries.find(key);
         if (viter != f_temporaries.end()) {
             return (*viter).second;
         }
     }
 
+    { /* enum literals */
+        const Literals& lits = TypeMgr::INSTANCE().literals();
+        Literals::const_iterator liter = lits.find(key);
+        if (liter != lits.end()) {
+            return (*liter).second;
+        }
+    }
+
     { /* local consts */
-        Constants cnts = module->get_localConsts();
-        Constants::iterator citer = cnts.find(key);
+        const Constants& cnts = module->get_localConsts();
+        Constants::const_iterator citer = cnts.find(key);
         if (citer != cnts.end()) {
             return (*citer).second;
         }
     }
 
     { /* global consts */
-        Constants::iterator citer = f_constants.find(key);
+        const Constants& cnts = f_constants;
+        Constants::const_iterator citer = cnts.find(key);
         if (citer != f_constants.end()) {
             return (*citer).second;
         }
     }
 
-    { /* params */
-        // TODO: not yet implemented: params
-    }
-
     { /* defines */
-        Defines defs = module->get_localDefs();
-        Defines::iterator diter = defs.find(key);
+        const Defines& defs = module->get_localDefs();
+        Defines::const_iterator diter = defs.find(key);
         if (diter != defs.end()) {
             return (*diter).second;
         }
     }
 
     { /* variables */
-        Variables vars = module->get_localVars();
-        Variables::iterator viter = vars.find(key);
+        const Variables& vars = module->get_localVars();
+        Variables::const_iterator viter = vars.find(key);
         if (viter != vars.end()) {
             return (*viter).second;
         }

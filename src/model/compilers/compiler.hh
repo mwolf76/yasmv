@@ -296,7 +296,6 @@ protected:
 
     ADD optimize_and_chain(ADD* dds, unsigned len);
 
-    void algebraic_from_fxd_const(unsigned width);
     void algebraic_from_int_const(unsigned width);
 
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
@@ -307,10 +306,6 @@ protected:
 
     /** @brief Adjusts operand */
     void algebrize_operand(Type_ptr type, unsigned final_width);
-
-    /** @brief Converts a fxd type into the corresponding int type,
-        the new type width is equals to int_digits + fract_digits */
-    Type_ptr algebraic_make_int_of_fxd_type(Type_ptr type);
 
     /** @brief Determines the width of an algebraic type */
     unsigned algebraic_type_width(Type_ptr type);

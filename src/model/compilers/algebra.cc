@@ -52,15 +52,10 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     unsigned width;
 
     {
-        /* fxd -> int type conversion */
-        if (tm.is_signed_fixed_algebraic(type) ||
-            tm.is_unsigned_fixed_algebraic(type)) {
-            type = algebraic_make_int_of_fxd_type(type);
-        }
         if (tm.is_signed_algebraic(type)) {
             width = tm.as_signed_algebraic(type)->width();
         }
-        else if (tm.is_unsigned_fixed_algebraic(type)) {
+        else if (tm.is_unsigned_algebraic(type)) {
             width = tm.as_unsigned_algebraic(type)->width();
         }
         else {
@@ -88,15 +83,10 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     unsigned width;
 
     {
-        /* fxd -> int type conversion */
-        if (tm.is_signed_fixed_algebraic(type) ||
-            tm.is_unsigned_fixed_algebraic(type)) {
-            type = algebraic_make_int_of_fxd_type(type);
-        }
         if (tm.is_signed_algebraic(type)) {
             width = tm.as_signed_algebraic(type)->width();
         }
-        else if (tm.is_unsigned_fixed_algebraic(type)) {
+        else if (tm.is_unsigned_algebraic(type)) {
             width = tm.as_unsigned_algebraic(type)->width();
         }
         else {

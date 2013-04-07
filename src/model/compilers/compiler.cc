@@ -133,9 +133,6 @@ void Compiler::walk_neg_postorder(const Expr_ptr expr)
     if (is_unary_integer(expr)) {
         integer_neg(expr);
     }
-    else if (is_unary_fixed(expr)) {
-        fixed_neg(expr);
-    }
     else if (is_unary_algebraic(expr)) {
         algebraic_neg(expr);
     }
@@ -167,9 +164,6 @@ void Compiler::walk_add_postorder(const Expr_ptr expr)
     if (is_binary_integer(expr)) {
         integer_plus(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_plus(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_plus(expr);
     }
@@ -184,9 +178,6 @@ void Compiler::walk_sub_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
         integer_sub(expr);
-    }
-    else if (is_binary_fixed(expr)) {
-        fixed_sub(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_sub(expr);
@@ -203,9 +194,6 @@ void Compiler::walk_div_postorder(const Expr_ptr expr)
     if (is_binary_integer(expr)) {
         integer_div(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_div(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_div(expr);
     }
@@ -220,9 +208,6 @@ void Compiler::walk_mul_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
         integer_mul(expr);
-    }
-    else if (is_binary_fixed(expr)) {
-        fixed_mul(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_mul(expr);
@@ -384,9 +369,6 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     else if (is_binary_integer(expr)) {
         integer_equals(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_equals(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_equals(expr);
     }
@@ -405,9 +387,6 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
     else if (is_binary_integer(expr)) {
         integer_not_equals(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_not_equals(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_not_equals(expr);
     }
@@ -422,9 +401,6 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
         integer_gt(expr);
-    }
-    else if (is_binary_fixed(expr)) {
-        fixed_gt(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_gt(expr);
@@ -441,9 +417,6 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
     if (is_binary_integer(expr)) {
         integer_ge(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_ge(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_ge(expr);
     }
@@ -459,9 +432,6 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
     if (is_binary_integer(expr)) {
         integer_lt(expr);
     }
-    else if (is_binary_fixed(expr)) {
-        fixed_lt(expr);
-    }
     else if (is_binary_algebraic(expr)) {
         algebraic_lt(expr);
     }
@@ -476,9 +446,6 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
 {
     if (is_binary_integer(expr)) {
         integer_le(expr);
-    }
-    else if (is_binary_fixed(expr)) {
-        fixed_le(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_le(expr);
@@ -497,9 +464,6 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     }
     else if (is_ite_integer(expr)) {
         integer_ite(expr);
-    }
-    else if (is_ite_fixed(expr)) {
-        fixed_ite(expr);
     }
     else if (is_ite_enumerative(expr)) {
         enumerative_ite(expr);
@@ -586,8 +550,7 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     const Type_ptr scalar_type = tm.as_array(lhs_type)->of();
     unsigned width;
 
-    if (tm.is_int_const(rhs_type) ||
-        tm.is_fxd_const(rhs_type)) {
+    if (tm.is_int_const(rhs_type)) {
         width = 1;
     }
     else if (tm.is_signed_algebraic(rhs_type)) {
@@ -694,14 +657,6 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     // 1.1. explicit constants are integer consts (e.g. 42) ..
     if (em.is_int_numeric(expr)) {
         f_type_stack.push_back(tm.find_int_const());
-        f_add_stack.push_back(f_enc.constant(expr->value()));
-        return;
-    }
-
-    // 1.2. or fixed consts (e.g. 42.42) TODO: currently the number of
-    // decimal digits in fract consts is a global setting.
-    if (em.is_fxd_numeric(expr)) {
-        f_type_stack.push_back(tm.find_fxd_const());
         f_add_stack.push_back(f_enc.constant(expr->value()));
         return;
     }

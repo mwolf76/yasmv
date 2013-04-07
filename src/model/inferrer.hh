@@ -217,11 +217,8 @@ private:
     inline Type_ptr check_arithmetical()
     {
         return check_expected_type(TP_INT_CONST    |
-                                   TP_FXD_CONST    |
                                    TP_UNSIGNED_INT |
-                                   TP_SIGNED_INT   |
-                                   TP_UNSIGNED_FXD |
-                                   TP_SIGNED_FXD ) ;
+                                   TP_SIGNED_INT ) ;
     }
 
     inline Type_ptr check_arithmetical_integer()

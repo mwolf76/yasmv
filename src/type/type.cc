@@ -39,12 +39,6 @@ IntConstType::IntConstType(TypeMgr& owner)
     f_repr = f_owner.em().make_int_const_type();
 }
 
-FxdConstType::FxdConstType(TypeMgr& owner)
-    : Type(owner)
-{
-    f_repr = f_owner.em().make_fxd_const_type();
-}
-
 AlgebraicType::AlgebraicType(TypeMgr& owner, ADD *dds)
     : Type(owner)
     , f_dds(dds)
@@ -68,28 +62,6 @@ UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
     f_repr = f_owner.em().make_unsigned_int_type(width);
 }
 
-SignedFixedAlgebraicType::SignedFixedAlgebraicType(TypeMgr& owner,
-                                                   unsigned width,
-                                                   unsigned fract,
-                                                   ADD *dds)
-    : AlgebraicType(owner, dds)
-    , f_width(width)
-    , f_fract(fract)
-{
-    f_repr = f_owner.em().make_signed_fxd_type(width, fract);
-}
-
-UnsignedFixedAlgebraicType::UnsignedFixedAlgebraicType(TypeMgr& owner,
-                                                       unsigned width,
-                                                       unsigned fract,
-                                                       ADD *dds)
-    : AlgebraicType(owner, dds)
-    , f_width(width)
-    , f_fract(fract)
-{
-    f_repr = f_owner.em().make_unsigned_fxd_type(width, fract);
-}
-
 ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)
     : Type(owner)
     , f_of(of)
@@ -110,15 +82,6 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
         Expr_ptr expr = *i;
         assert(ExprMgr::INSTANCE().is_identifier(expr)); // debug only
     }
-}
-
-Instance::Instance(TypeMgr& owner, Expr_ptr identifier)
-    : Type(owner)
-    , f_identifier(identifier)
-{
-    // use empty params node to distinguish type from identifier
-    // (i.e. it's foo() instead of foo).
-    f_repr = f_owner.em().make_params(identifier, NULL);
 }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)

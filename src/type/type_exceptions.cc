@@ -96,10 +96,6 @@ static inline Expr_ptr make_abstract_type(expected_t item)
         res = em.make_int_const_type();
         break;
 
-    case TP_FXD_CONST:
-        res = em.make_fxd_const_type();
-        break;
-
     case TP_SIGNED_INT:
         res = em.make_abstract_signed_int_type();
         break;
@@ -108,20 +104,8 @@ static inline Expr_ptr make_abstract_type(expected_t item)
         res = em.make_abstract_unsigned_int_type();
         break;
 
-    case TP_SIGNED_FXD:
-        res = em.make_abstract_signed_fxd_type();
-        break;
-
-    case TP_UNSIGNED_FXD:
-        res = em.make_abstract_unsigned_fxd_type();
-        break;
-
     case TP_ENUM:
         res = em.make_abstract_enum_type();
-        break;
-
-    case TP_INSTANCE:
-        res = em.make_abstract_inst_type();
         break;
 
     case TP_ARRAY:

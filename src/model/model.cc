@@ -100,30 +100,14 @@ ostream& operator<<(ostream& os, AnalyzerException& ae)
 
 Module::Module(const Expr_ptr name)
     : f_name(name)
-    , f_formalParams()
-    , f_isaDecls()
+
     , f_localConsts()
     , f_localVars()
     , f_localDefs()
+
     , f_init()
     , f_trans()
-      //, f_fair()
 {}
-
-void Module::add_formalParam(Expr_ptr identifier)
-{
-    DEBUG << "Module " << (*this)
-          << ", added param " << identifier << endl;
-    f_formalParams.push_back(identifier);
-}
-
-void Module::add_isaDecl(Expr_ptr identifier)
-{
-    DEBUG << "Module " << (*this)
-          << ", added isadecl " << identifier << endl;
-    f_isaDecls.push_back(identifier);
-}
-
 
 void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
 {
@@ -162,13 +146,6 @@ void Module::add_trans(Expr_ptr expr)
           << ", added TRANS " << expr << endl;
     f_trans.push_back(expr);
 }
-
-// void Module::add_fairness(Expr_ptr expr)
-// {
-//     DEBUG << "Module " << (*this)
-//           << ", added FAIRNESS " << expr << endl;
-//     f_fair.push_back(expr);
-// }
 
 Model::Model()
     : f_modules()

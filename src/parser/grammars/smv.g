@@ -19,7 +19,7 @@
 grammar smv;
 
 options {
-	k = 3;
+	k = 3; // TODO = 3??
     memoize = true;
     language = C;
 }
@@ -38,7 +38,6 @@ options {
 
 #include <model.hh>
 #include <model_mgr.hh>
-
 }
 
 @members {
@@ -58,6 +57,8 @@ scope {
     IModule_ptr module;
 }
 
+
+// TODO: support for multiple machines
 @init {
     $smv::model = mm.model();
 }
@@ -242,17 +243,6 @@ filepath_fragment returns [const char *res]
         { $res = "/"; }
     ;
 
-formal_params
-	:	'('
-        id=identifier
-        { $smv::module->add_formalParam(id); }
-
-        ( ',' id=identifier
-        { $smv::module->add_formalParam(id); }
-        )*
-        ')'
-    ;
-
 // FSM definition entry point
 module_body
     :	module_decl ( ';' module_decl )*
@@ -261,6 +251,7 @@ module_body
 module_decl
     :	/* variables and defines */
         fsm_var_decl
+    |   fsm_enum_decl
 	|	fsm_define_decl
 
 		/* FSM definition */
@@ -268,14 +259,41 @@ module_decl
 	|	fsm_trans_decl
     ;
 
-fsm_isa_decl_clause
-	: 'ISA' id=identifier
-       { $smv::module->add_isaDecl(id); }
-	;
-
 fsm_var_decl
     : 'VAR' fsm_var_decl_body
     ;
+
+fsm_enum_decl
+    : 'ENUM' fsm_enum_decl_body
+    ;
+
+fsm_enum_decl_body
+    : fsm_enum_decl_clause
+        ( ';' fsm_enum_decl_clause)*
+    ;
+
+fsm_enum_decl_clause
+@init {
+    ExprSet lits;
+}
+    : local=identifier ':' fsm_enum_type_lits[lits]
+      {
+            tm.define_enum( em.make_dot($smv::module->expr(),
+                                        local), lits);
+      }
+    ;
+
+fsm_enum_type_lits [ExprSet& lits]
+	:
+     '{'
+          lit=literal
+          { $lits.insert(lit); }
+
+          (',' lit=literal
+          { $lits.insert(lit); }
+          )*
+     '}'
+	;
 
 fsm_var_decl_body
 	: fsm_var_decl_clause
@@ -578,12 +596,8 @@ identifier returns [Expr_ptr res]
 
 constant returns [Expr_ptr res]
 @init { }
-    :	k=enum_constant
+    : k=range_constant // holds int_constants as well
         { $res = k; }
-
-    |   k=range_constant // holds int_constants as well
-        { $res = k; }
-
     ;
 
 int_constant returns [Expr_ptr res]
@@ -616,14 +630,6 @@ range_constant returns [Expr_ptr res]
       { $res = em.make_range_type(lhs, rhs); }
       )?
 	;
-
-enum_constant returns [Expr_ptr res]
-@init {
-    ExprSet lits;
-}
-	: enum_type[lits]
-    { $res = em.make_enum_type(lits); }
-    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
@@ -710,58 +716,14 @@ type_name returns [Type_ptr res]
 
              | { $res = tm.find_signed(width->value()); } )
 
-    // fixed point rational numbers
-    | 'signed' 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
-            '[' size=int_constant ']'
-                { $res = tm.find_signed_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
-
-             | { $res = tm.find_signed_fixed(iwidth->value(), fract_width->value()); } )
-
-    | 'unsigned' 'fixed' '(' iwidth = int_constant ',' fract_width = int_constant ')' (
-            '[' size=int_constant ']'
-                { $res = tm.find_unsigned_fixed_array(iwidth->value(), fract_width->value(), size->value()); }
-
-             | { $res = tm.find_unsigned_fixed(iwidth->value(), fract_width->value()); } )
-
-    // enumeratives, pure symbolic
-	| enum_type[lits]
-      { $res = tm.find_enum(lits); }
-
-    // instances
-    | id=identifier
-      { $res = tm.find_instance(id); }  actual_param_decls[$res]
-    ;
-
-enum_type [ExprSet& lits]
-	:
-     '{'
-          lit=literal
-          { $lits.insert(lit); }
-
-          (',' lit=literal
-          { $lits.insert(lit); }
-          )*
-     '}'
-	;
-
-actual_param_decls [Type_ptr m]
-	:
-     // '('
-     //      ap=pvalue
-     //        { ((Instance*)(m)) -> add_param(ap); }
-
-     //      (',' pvalue
-     //      { ((Instance*)(m)) -> add_param(ap); }
-     //      )*
-     // ')'
+    // reserved for ENUMs
+    |  expr=identifier
+       { $res = tm.find_enum( em.make_dot( $smv::module->expr(), expr)); }
     ;
 
 literal returns [Expr_ptr res]
 @init { }
     :  expr=identifier
-       { $res = expr; }
-
-    |  expr=int_constant
        { $res = expr; }
     ;
 

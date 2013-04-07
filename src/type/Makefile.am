@@ -1,8 +1,11 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS =
 
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr	\
--I$(top_srcdir)/src/type -I$(top_srcdir)/src/dd		\
+INCLUDES = -I$(top_srcdir)/src 				\
+-I$(top_srcdir)/src/expr				\
+-I$(top_srcdir)/src/type 				\
+-I$(top_srcdir)/src/model 				\
+-I$(top_srcdir)/src/dd					\
 -I$(top_srcdir)/src/3rdparty/ezlogger			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr			\

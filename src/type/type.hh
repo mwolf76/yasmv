@@ -3,16 +3,15 @@
  *  @brief Type system classes
  *
  *  This module contains definitions and services that implement type
- *  classes. YASMINE's types can be classified as Monolithic types
- *  (i.e. that can be represented using a single DD) or Algebraic types
- *  (i.e. that are represented using a vector of DDs). The type system
- *  is organized as follows:
+ *  classes. YASMINE's types can be classified as (a) Monolithic types
+ *  (i.e. that can be represented using a single DD), (b) Algebraic
+ *  types (i.e. that are represented using a vector of DDs) or (c)
+ *  Array types. The type system is organized as follows:
  *
  *  MONOLITHIC types
  *  ================
  *  + Booleans (type keyword is 'boolean')
  *  + Enumeratives (e.g. { LOUIE, HUEWEY, DEWEY })
- *  TODO: add more
 
  *  ALGEBRAIC types
  *  ===============
@@ -22,17 +21,8 @@
  *  + Unsigned integers(N) (type keyword is 'unsigned int'), where N
  *  has the same meaning as above.
  *
- *  + Signed fixed-point reals(N, F) (type keyword is 'signed fxd'),
- *  where N is the number of hexadecimal digits used in the
- *  representation of the integer part, F is the number of hexadecimal
- *  digits used in the representation of the fractional part.
- *
- * + Unsigned fixed-point reals(N, F) (type keyword is 'unsigned
- * fxd'), where N, F have the same meaning as above.
- *
- * Remark: constants (either integer or real) are *always* unsigned
- * and have the special reserved abstract types 'unsigned int(0)' (for
- * integer consts) and 'unsigned fxd(0,0)' (for reals consts).
+ * Remark: numeric constants are *always* unsigned and have the
+ * special reserved abstract types 'unsigned int(0)'.
  *
  * Type Aliases
  * ============
@@ -47,12 +37,6 @@
  * uint16_t, int16_t
  * uint32_t, int32_t
  * uint64_t, int64_t
- *
- * REAL type aliases:
- * ufxd0_8t, fxd0_8t,
- * ufxd12_4t, int12_4t,
- * ufxd24_8t, int24_8t,
- * ufxd48_16t, ufxd48_16t
  *
  * Explicit type conversions(casts)
  * ================================
@@ -69,9 +53,8 @@
  * operator, type conversions take place as a pre-processing. The
  * following rules apply:
  *
- * 1. When one of the two operands is fxd the other one is also converted to fxd.
- * 2. When one of the two operands is signed the other one is also converted to signed.
- * 3. The size of the result fits the largest size of the involved operands.
+ * 1. When one of the two operands is signed the other one is also converted to signed.
+ * 2. The size of the result fits the largest size of the involved operands.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -107,14 +90,13 @@
 typedef unsigned expected_t;
 #define TP_BOOLEAN   0x1
 #define TP_INT_CONST 0x2
-#define TP_FXD_CONST 0x4
+// #define TP_FXD_CONST 0x4
 #define TP_UNSIGNED_INT  0x8
 #define TP_SIGNED_INT    0x10
-#define TP_UNSIGNED_FXD  0x20
-#define TP_SIGNED_FXD 0x40
+// #define TP_UNSIGNED_FXD  0x20
+// #define TP_SIGNED_FXD 0x40
 #define TP_ENUM 0x80
-#define TP_INSTANCE  0x100
-#define TP_LAST_TYPE 0x100
+#define TP_LAST_TYPE 0x80
 
 /* arrays use former bits to determine the type of elements */
 #define TP_ARRAY 0x200
@@ -125,10 +107,7 @@ typedef class BooleanType* BooleanType_ptr;
 typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-typedef class SignedFixedAlgebraicType* SignedFixedAlgebraicType_ptr;
-typedef class UnsignedFixedAlgebraicType* UnsignedFixedAlgebraicType_ptr;
 typedef class EnumType* EnumType_ptr;
-typedef class Instance* Instance_ptr;
 typedef class ArrayType* ArrayType_ptr;
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
@@ -295,22 +274,21 @@ public:
     const ExprSet& literals() const
     { return f_literals; }
 
+    value_t value(Expr_ptr lit) const
+    {
+        value_t res = 0;
+        for (ExprSet::iterator eye = f_literals.begin();
+             eye != f_literals.end(); ++ eye, ++ res) {
+
+            if (*eye == lit)
+                return res;
+        }
+
+        assert(false); // not found
+    }
+
 private:
     ExprSet f_literals;
-};
-
-typedef class Instance* Instance_ptr;
-class Instance : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    Instance(TypeMgr& owner, Expr_ptr identifier);
-
-public:
-    const Expr_ptr identifier() const
-    { return f_identifier; }
-
-private:
-    const Expr_ptr f_identifier;
 };
 
 #endif

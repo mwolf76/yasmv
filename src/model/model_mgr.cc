@@ -242,57 +242,7 @@ ModelMgr::ModelMgr()
 
 void ModelMgr::first_pass()
 {
-    Model& model(f_model);
-    const Modules& modules = model.modules();
-
-    try {
-        for (Modules::const_iterator mod_eye = modules.begin();
-             mod_eye != modules.end(); mod_eye ++ ) {
-
-            Module& module = dynamic_cast <Module&> (*mod_eye->second);
-            DEBUG << "processing module '" << module << "' " << endl;
-
-            // Remark: ctx name is MODULE name, not instance's
-            // rationale: you may have several instances but they
-            // all should refer to the same entry on the type map.
-            const Expr_ptr ctx = module.expr();
-
-            const Variables vars = module.get_localVars();
-            for (Variables::const_iterator var_eye = vars.begin();
-                 var_eye != vars.end(); var_eye ++) {
-
-                IVariable_ptr const var = var_eye->second;
-
-                const Expr_ptr varname = var->expr();
-                const Type_ptr vartype = var->type();
-
-                DEBUG << "processing var " << varname << ": " << vartype << endl;
-
-                // eager binding for module instances
-                if (f_tm.is_instance(vartype)) {
-                    assert(0); // FIXME!
-                    // Instance& instance = dynamic_cast <Instance&> (*vartype);
-
-                    // const Expr_ptr module_name = instance.get_module_name();
-                    // IModule& resolved = model.get_module(module_name);
-
-                    // // match number of params
-                    // int inst_params_num = instance.get_params().size();
-                    // int modl_params_num = resolved.get_formalParams().size();
-                    // if ( inst_params_num != modl_params_num ) {
-                    //     throw BadParams(module_name,
-                    //                     modl_params_num,
-                    //                     inst_params_num);
-                    // }
-                }
-                // f_tm.set_type( FQExpr(ctx, varname), vartype);
-            }
-        }
-    } // for modules
-
-    catch (AnalyzerException& ae) {
-        cerr << ae.what() << endl;
-    }
+    /* nop */
 }
 
 void ModelMgr::second_pass()
