@@ -62,6 +62,9 @@ public:
     bool is_const() const;
     IConstant& as_const() const;
 
+    bool is_literal() const;
+    ILiteral& as_literal() const;
+
     bool is_variable() const;
     IVariable& as_variable() const;
 

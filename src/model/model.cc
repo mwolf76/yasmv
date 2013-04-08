@@ -27,76 +27,17 @@
 #include <model.hh>
 #include <type_exceptions.hh>
 
-void Model::add_module(Expr_ptr name, IModule_ptr module)
-{
-    DEBUG << "Added module: '" << name << "'" << endl;
-    f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
-}
-
-bool ISymbol::is_variable(void) const
-{
-    return NULL != dynamic_cast <const IVariable_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
-
-IVariable& ISymbol::as_variable(void) const
-{
-    IVariable_ptr res = dynamic_cast <const IVariable_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-
-bool ISymbol::is_temporary(void) const
-{
-    return NULL != dynamic_cast <const ITemporary_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
-
-ITemporary& ISymbol::as_temporary(void) const
-{
-    ITemporary_ptr res = dynamic_cast <const ITemporary_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-
-bool ISymbol::is_define(void) const
-{
-    return NULL != dynamic_cast <const IDefine_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
-
-IDefine& ISymbol::as_define(void) const
-{
-    IDefine_ptr res = dynamic_cast <const IDefine_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-
-bool ISymbol::is_const() const
-{
-    return NULL != dynamic_cast <const IConstant_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
-
-IConstant& ISymbol::as_const(void) const
-{
-    IConstant_ptr res = dynamic_cast <const IConstant_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-
 ostream& operator<<(ostream& os, Module& module)
 { return os << module.expr(); }
 
 ostream& operator<<(ostream& os, AnalyzerException& ae)
 { return os << ae.what(); }
 
-
-//
+void Model::add_module(Expr_ptr name, IModule_ptr module)
+{
+    DEBUG << "Added module: '" << name << "'" << endl;
+    f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
+}
 
 Module::Module(const Expr_ptr name)
     : f_name(name)
