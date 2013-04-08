@@ -260,7 +260,7 @@ module_decl
     ;
 
 fsm_var_decl
-    : 'VAR' fsm_var_decl_body
+    : 'VAR'  fsm_var_decl_body
     ;
 
 fsm_enum_decl
@@ -310,8 +310,8 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new StateVar($smv::module->expr(), id, tp);
-                $smv::module->add_localVar(id, var);
+                IVariable_ptr var = new Variable($smv::module->expr(), id, tp);
+                $smv::module->add_var(id, var);
             }
     }
 	;
@@ -329,7 +329,7 @@ fsm_define_decl_clause
 	: id=identifier ':=' body=toplevel_expression
     {
       IDefine_ptr def = new Define($smv::module->expr(), id, body);
-      $smv::module->add_localDef(id, def);
+      $smv::module->add_def(id, def);
     }
 	;
 

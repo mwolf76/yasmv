@@ -50,7 +50,7 @@ Module::Module(const Expr_ptr name)
     , f_trans()
 {}
 
-void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
+void Module::add_var(Expr_ptr name, IVariable_ptr var)
 {
     DEBUG << "Module " << (*this)
           << ", added local var " << var << endl;
@@ -58,7 +58,7 @@ void Module::add_localVar(Expr_ptr name, IVariable_ptr var)
                        IVariable_ptr>(FQExpr(expr(), name), var));
 }
 
-void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
+void Module::add_def(Expr_ptr name, IDefine_ptr body)
 {
     DEBUG << "Module " << (*this)
           << ", added local def " << name << endl;
@@ -66,7 +66,7 @@ void Module::add_localDef(Expr_ptr name, IDefine_ptr body)
                        IDefine_ptr>(FQExpr(expr(), name), body));
 }
 
-void Module::add_localConst(Expr_ptr name, IConstant_ptr k)
+void Module::add_const(Expr_ptr name, IConstant_ptr k)
 {
     DEBUG << "Module " << (*this)
           << ", added local const " << name << endl;
@@ -114,7 +114,7 @@ SymbIter::SymbIter(IModel& model, Expr_ptr formula)
         IModule& module = * (*mi).second;
 
         { /* defines */
-            Defines defs = module.get_localDefs();
+            Defines defs = module.defs();
             for (Defines::const_iterator di = defs.begin();
                  di != defs.end(); ++ di) {
 
@@ -124,7 +124,7 @@ SymbIter::SymbIter(IModel& model, Expr_ptr formula)
         }
 
         { /* variables */
-            Variables vars = module.get_localVars();
+            Variables vars = module.vars();
             for (Variables::const_iterator vi = vars.begin();
                  vi != vars.end(); ++ vi) {
 

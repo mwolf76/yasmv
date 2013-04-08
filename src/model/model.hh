@@ -50,14 +50,14 @@ public:
     virtual const Expr_ptr expr() const =0;
 
     // Symbols management
-    virtual const Variables& get_localVars() const =0;
-    virtual void add_localVar(Expr_ptr expr, IVariable_ptr var) =0;
+    virtual const Variables& vars() const =0;
+    virtual void add_var(Expr_ptr expr, IVariable_ptr var) =0;
 
-    virtual const Constants& get_localConsts() const =0;
-    virtual void add_localConst(Expr_ptr expr, IConstant_ptr k) =0;
+    virtual const Constants& consts() const =0;
+    virtual void add_const(Expr_ptr expr, IConstant_ptr k) =0;
 
-    virtual const Defines& get_localDefs() const =0;
-    virtual void add_localDef(Expr_ptr expr, IDefine_ptr def) =0;
+    virtual const Defines& defs() const =0;
+    virtual void add_def(Expr_ptr expr, IDefine_ptr def) =0;
 
     // Finite State Machine definition
     virtual const ExprVector& init() const =0;
@@ -97,16 +97,16 @@ public:
     bool is_main() const
     { return f_name == ExprMgr::INSTANCE().make_main(); }
 
-    void add_localVar(Expr_ptr name, IVariable_ptr var);
-    const Variables& get_localVars() const
+    void add_var(Expr_ptr name, IVariable_ptr var);
+    const Variables& vars() const
     { return f_localVars; }
 
-    void add_localDef(Expr_ptr name, IDefine_ptr def);
-    const Defines& get_localDefs() const
+    void add_def(Expr_ptr name, IDefine_ptr def);
+    const Defines& defs() const
     { return f_localDefs; }
 
-    void add_localConst(Expr_ptr name, IConstant_ptr k);
-    const Constants& get_localConsts() const
+    void add_const(Expr_ptr name, IConstant_ptr k);
+    const Constants& consts() const
     { return f_localConsts; }
 
     void add_init(Expr_ptr expr);
@@ -164,27 +164,6 @@ public:
     const Type_ptr type() const
     { return f_type; }
 
-};
-
-class StateVar : public Variable {
-public:
-    StateVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
-        : Variable(ctx, name, type_)
-    {}
-};
-
-class InputVar : public Variable {
-public:
-    InputVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
-        : Variable(ctx, name, type_)
-    {}
-};
-
-class FrozenVar: public Variable {
-public:
-    FrozenVar (const Expr_ptr ctx, const Expr_ptr name, Type_ptr type_)
-        : Variable(ctx, name, type_)
-    {}
 };
 
 class Constant : public IConstant {

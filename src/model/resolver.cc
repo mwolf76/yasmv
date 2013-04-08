@@ -92,7 +92,7 @@ ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     }
 
     { /* local consts */
-        const Constants& cnts = module->get_localConsts();
+        const Constants& cnts = module->consts();
         Constants::const_iterator citer = cnts.find(key);
         if (citer != cnts.end()) {
             return (*citer).second;
@@ -108,7 +108,7 @@ ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     }
 
     { /* defines */
-        const Defines& defs = module->get_localDefs();
+        const Defines& defs = module->defs();
         Defines::const_iterator diter = defs.find(key);
         if (diter != defs.end()) {
             return (*diter).second;
@@ -116,7 +116,7 @@ ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
     }
 
     { /* variables */
-        const Variables& vars = module->get_localVars();
+        const Variables& vars = module->vars();
         Variables::const_iterator viter = vars.find(key);
         if (viter != vars.end()) {
             return (*viter).second;

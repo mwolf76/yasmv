@@ -262,7 +262,7 @@ void ModelMgr::second_pass()
         Expr_ptr ctx = module.expr();
 
         // type inference: defines
-        const Defines defines = module.get_localDefs();
+        const Defines defines = module.defs();
         for (Defines::const_iterator define_eye = defines.begin();
              define_eye != defines.end(); define_eye ++) {
 
