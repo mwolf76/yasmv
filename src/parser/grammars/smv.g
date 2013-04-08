@@ -276,11 +276,8 @@ fsm_enum_decl_clause
 @init {
     ExprSet lits;
 }
-    : local=identifier ':' fsm_enum_type_lits[lits]
-      {
-            tm.define_enum( em.make_dot($smv::module->expr(),
-                                        local), lits);
-      }
+    : expr=identifier ':' fsm_enum_type_lits[lits]
+      { tm.add_enum( $smv::module->expr(), expr, lits ); }
     ;
 
 fsm_enum_type_lits [ExprSet& lits]
@@ -718,7 +715,7 @@ type_name returns [Type_ptr res]
 
     // reserved for ENUMs
     |  expr=identifier
-       { $res = tm.find_enum( em.make_dot( $smv::module->expr(), expr)); }
+       { $res = tm.find_enum( $smv::module->expr(), expr ); }
     ;
 
 literal returns [Expr_ptr res]

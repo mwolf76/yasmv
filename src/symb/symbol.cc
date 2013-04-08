@@ -96,3 +96,4 @@ ILiteral& ISymbol::as_literal(void) const
     assert (res);
     return (*res);
 }
+

@@ -101,13 +101,14 @@ const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     return res;
 }
 
-void TypeMgr::define_enum(Expr_ptr fullname, ExprSet& lits)
+void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 {
     /*
        IMPORTANT: lits ordering has to be canonical for enum types to
        work as expected! Otherwise same set of lits with different
        ordering could be mistakingly seen as a different type.
     */
+    Expr_ptr fullname = ExprMgr::INSTANCE().make_dot( ctx, name );
 
     if (NULL != lookup_type(fullname)) {
         assert(0); // tODO: better error handling
@@ -115,21 +116,26 @@ void TypeMgr::define_enum(Expr_ptr fullname, ExprSet& lits)
 
     EnumType_ptr tp = new EnumType( *this, lits );
 
+    // Define the ENUM
+    IEnum_ptr enm = new Enum(ctx, name, tp);
+    f_enums.insert( make_pair<FQExpr,
+                    IEnum_ptr>( FQExpr( ctx, name), enm));
+
     // Literals are all maintained together by the type mgr. This
     // greatly simplifies the resolver.
     for (ExprSet::iterator eye = lits.begin(); eye != lits.end(); ++ eye) {
         f_lits.insert( make_pair<FQExpr,
                                  ILiteral_ptr>(FQExpr( fullname, *eye),
-                                               new Literal(fullname, *eye, tp)));
+                                               new Literal(enm, *eye)));
     }
 
     // new type, needs to be registered before returning
     register_type(fullname, tp);
 }
 
-const Type_ptr TypeMgr::find_enum(Expr_ptr fullname)
+const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
 {
-    Type_ptr res = lookup_type(fullname);
+    Type_ptr res = lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name));
     assert( NULL != res ); // TODO error handling
 
     return res;

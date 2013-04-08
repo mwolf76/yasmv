@@ -163,7 +163,6 @@ public:
 
     const Type_ptr type() const
     { return f_type; }
-
 };
 
 class Constant : public IConstant {

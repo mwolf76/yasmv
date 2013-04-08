@@ -64,36 +64,63 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
   */
 typedef class TypeMgr* TypeMgr_ptr;
 
-class Literal : public ILiteral {
+class Enum : public IEnum {
     const Expr_ptr f_ctx;
     const Expr_ptr f_name;
     const EnumType_ptr f_type;
 
 public:
-    Literal(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
+    Enum(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
         : f_ctx(ctx)
         , f_name(name)
         , f_type(type)
     {}
 
+    virtual const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    virtual const Expr_ptr name() const
+    { return f_name; }
+
+    virtual const Expr_ptr expr() const
+    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
+
     virtual const Type_ptr type() const
     { return f_type; }
+};
+
+class Literal : public ILiteral {
+    const IEnum_ptr f_owner;
+    const Expr_ptr f_name;
+
+public:
+    Literal(IEnum_ptr owner, const Expr_ptr name)
+        : f_owner(owner)
+        , f_name(name)
+    {}
+
+    virtual const Expr_ptr ctx() const
+    { return f_owner->ctx(); }
 
     virtual const Expr_ptr name() const
     { return  f_name; }
 
+    virtual const Type_ptr type() const
+    { return f_owner->type(); }
+
     virtual const Expr_ptr expr() const
-    { return ExprMgr::INSTANCE().make_dot( f_ctx, f_name ); }
+    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
 
-    virtual const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    // delegate to owner (which is an Enum)
     virtual value_t value() const
-    { return f_type->value( expr() ); }
+    {
+        return dynamic_cast<EnumType_ptr> (type())
+            ->value(expr());
+    }
 };
 
 class TypeMgr {
+    /* Shared enums and literals */
+    Enums f_enums;
     Literals f_lits;
 
 public:
@@ -130,10 +157,11 @@ public:
     const Type_ptr find_default_unsigned_fixed();
 
     /* Remark: unambiguous enums resolution requires DOT fullnames */
-    void define_enum(Expr_ptr fullname, ExprSet& lits);
-    const Type_ptr find_enum(Expr_ptr fullname);
+    void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
+    const Type_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
 
-    /* Literals are const-like objects managed by the TypeMgr */
+    const Enums& enums() const
+    { return f_enums; }
     const Literals& literals() const
     { return f_lits; }
 

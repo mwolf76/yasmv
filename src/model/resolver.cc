@@ -83,6 +83,14 @@ ISymbol_ptr Resolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
         }
     }
 
+    { /* enum types */
+        const Enums& enums = TypeMgr::INSTANCE().enums();
+        Enums::const_iterator eiter = enums.find(key);
+        if (eiter != enums.end()) {
+            return (*eiter).second;
+        }
+    }
+
     { /* enum literals */
         const Literals& lits = TypeMgr::INSTANCE().literals();
         Literals::const_iterator liter = lits.find(key);

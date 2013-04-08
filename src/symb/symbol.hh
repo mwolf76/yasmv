@@ -37,6 +37,10 @@ class ILiteral;
 typedef ILiteral* ILiteral_ptr;
 typedef unordered_map<FQExpr, ILiteral_ptr, FQExprHash, FQExprEq> Literals;
 
+class IEnum;
+typedef IEnum* IEnum_ptr;
+typedef unordered_map<FQExpr, IEnum_ptr, FQExprHash, FQExprEq> Enums;
+
 class IConstant;
 typedef IConstant* IConstant_ptr;
 typedef unordered_map<FQExpr, IConstant_ptr, FQExprHash, FQExprEq> Constants;
@@ -53,7 +57,16 @@ class IDefine;
 typedef IDefine* IDefine_ptr;
 typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Defines;
 
-// -- primary decls  --------------------------------------------------------------
+class ITyped : IObject {
+public:
+    virtual const Type_ptr type() const =0;
+};
+
+class IValue : IObject {
+public:
+    virtual value_t value() const =0;
+};
+
 class ISymbol : IObject {
 public:
     virtual const Expr_ptr ctx()  const =0;
@@ -75,17 +88,21 @@ public:
     IDefine& as_define() const;
 };
 
-class ILiteral : public ISymbol {
-public:
-    virtual value_t value() const =0;
-    virtual const Type_ptr type() const =0;
-};
+class IEnum
+    : public ITyped
+    , public ISymbol
+{};
 
-class IConstant : public ISymbol {
-public:
-    virtual value_t value() const =0;
-    virtual const Type_ptr type() const =0;
-};
+class ILiteral
+    : public ISymbol
+    , public ITyped
+{};
+
+class IConstant
+    : public ISymbol
+    , public ITyped
+    , public IValue
+{};
 
 class IVariable : public ISymbol {
 public:
