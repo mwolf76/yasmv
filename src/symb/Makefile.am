@@ -1,9 +1,9 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = compilers
+SUBDIRS =
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 -I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc			\
 -I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/type	\
--I$(top_srcdir)/src/symb -I$(top_srcdir)/src/mc			\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/mc		\
 -I$(top_srcdir)/src/3rdparty/ezlogger				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr				\
@@ -15,13 +15,13 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = model.hh model_mgr.hh resolver.hh analyzer.hh inferrer.hh
+PKG_HH = symbol.hh
 
-PKG_CC = model.cc model_mgr.cc resolver.cc analyzer.cc inferrer.cc
+PKG_CC = symbol.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
 # -------------------------------------------------------
 
-noinst_LTLIBRARIES = libmodel.la
-libmodel_la_SOURCES = $(PKG_SOURCES)
+noinst_LTLIBRARIES = libsymb.la
+libsymb_la_SOURCES = $(PKG_SOURCES)

@@ -95,9 +95,6 @@ ostream& operator<<(ostream& os, Module& module)
 ostream& operator<<(ostream& os, AnalyzerException& ae)
 { return os << ae.what(); }
 
-
-//
-
 Module::Module(const Expr_ptr name)
     : f_name(name)
 
