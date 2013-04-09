@@ -201,14 +201,14 @@ public:
     { return make_expr(PARAMS, a, b); }
 
     /* type makers */
+    inline Expr_ptr make_meta_type(Expr_ptr a)
+    { return make_expr(PARAMS, meta_expr, a); }
+
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
     inline Expr_ptr make_int_const_type() const
     { return int_expr; }
-
-    inline Expr_ptr make_fxd_const_type() const
-    { return fxd_expr; }
 
     inline Expr_ptr make_range_type(Expr_ptr a, Expr_ptr b)
     {
@@ -239,57 +239,22 @@ public:
                            make_iconst((value_t) digits));
     }
 
-    inline Expr_ptr make_abstract_unsigned_fxd_type()
-    {
-        return unsigned_fxd_expr;
-    }
-
-    inline Expr_ptr make_unsigned_fxd_type(unsigned int_digits,
-                                           unsigned fract_digits)
-    {
-        return make_params(unsigned_fxd_expr,
-                           make_comma(make_iconst((value_t) int_digits),
-                                      make_iconst((value_t) fract_digits)));
-    }
-
-    inline Expr_ptr make_abstract_signed_fxd_type()
-    {
-        return signed_fxd_expr;
-    }
-
-    inline Expr_ptr make_signed_fxd_type(unsigned int_digits,
-                                         unsigned fract_digits)
-    {
-        return make_params(signed_fxd_expr,
-                           make_comma(make_iconst((value_t) int_digits),
-                                      make_iconst((value_t) fract_digits)));
-    }
-
-    inline Expr_ptr make_abstract_enum_type()
-    {
-        return enum_expr;
-    }
+    inline Expr_ptr make_abstract_enum_type() const
+    { return enum_expr; }
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
-    inline Expr_ptr make_abstract_inst_type()
-    {
-        return inst_expr;
-    }
-
-    inline Expr_ptr make_abstract_array_type()
-    {
-        return array_expr;
-    }
+    inline Expr_ptr make_abstract_array_type() const
+    { return array_expr; }
 
     /* builtin identifiers */
     inline Expr_ptr make_main() const
     { return main_expr; }
 
-    inline Expr_ptr make_false()
+    inline Expr_ptr make_false() const
     { return false_expr; }
 
-    inline Expr_ptr make_true()
+    inline Expr_ptr make_true() const
     { return true_expr; }
 
     // Here a bit of magic occurs, so it's better to keep a note:
@@ -460,9 +425,6 @@ private:
 
     /* -- data ------------------------------------------------------------- */
 
-    // // temporal exprs type
-    // Expr_ptr temporal_expr;
-
     /* boolean exprs type and constants */
     Expr_ptr bool_expr;
     Expr_ptr false_expr;
@@ -474,21 +436,16 @@ private:
     /* reserved for abstract enum types */
     Expr_ptr enum_expr;
 
-    /* reserved for abstract instance types */
-    Expr_ptr inst_expr;
-
     /* reserved for abstract array types */
     Expr_ptr array_expr;
+
+    /* reserved */
+    Expr_ptr meta_expr;
 
     /* integers */
     Expr_ptr unsigned_int_expr;
     Expr_ptr signed_int_expr;
     Expr_ptr int_expr;
-
-    /* fixed-point reals */
-    Expr_ptr unsigned_fxd_expr;
-    Expr_ptr signed_fxd_expr;
-    Expr_ptr fxd_expr;
 
     /* shared pools */
     ExprPool f_expr_pool;

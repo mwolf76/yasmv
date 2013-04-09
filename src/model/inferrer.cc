@@ -451,34 +451,46 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
         ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
         assert(symb);
 
-        // 1. bool/integer constant leaves
         if (symb->is_const()) {
             Type_ptr res = symb->as_const().type();
             PUSH_TYPE(res);
         }
 
-        // 2. variable
+        else if (symb->is_literal()) {
+            Type_ptr res = symb->as_literal().type();
+            PUSH_TYPE(res);
+        }
+
         else if (symb->is_variable()) {
             Type_ptr res = symb->as_variable().type();
             PUSH_TYPE(res);
         }
 
-        // 3. define? needs to be compiled (re-entrant invocation)
         else if (symb->is_define()) {
             (*this)(symb->as_define().body());
         }
+
+        else if (symb->is_enum()) {
+            IEnum& enm = symb->as_enum();
+            Expr_ptr fullname = em.make_dot(enm.ctx(), enm.expr());
+            Type_ptr res = tm.find_meta(fullname);
+            PUSH_TYPE(res);
+        }
+
+        else assert(false);
     }
 
     else assert(false); // unexpected
 }
 
-// one step of resolution returns a const or variable
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
     ISymbol_ptr symb = f_owner.resolver()->fetch_symbol(ctx, frag);
+    assert( NULL != symb );
 
-    // is this a constant or variable?
     if (symb->is_const() ||
+        symb->is_literal() ||
+        symb->is_enum() ||
         symb->is_temporary() ||
         symb->is_variable()) {
         return symb;

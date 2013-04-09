@@ -35,12 +35,24 @@ TypeMgr::TypeMgr()
     : f_register()
     , f_em(ExprMgr::INSTANCE())
 {
-    // register predefined types
     register_type( f_em.make_boolean_type(),
                    new BooleanType(*this));
 
     register_type( f_em.make_int_const_type(),
                    new IntConstType(*this));
+}
+
+const Type_ptr TypeMgr::find_meta(Expr_ptr subtype)
+{
+    Expr_ptr descr = f_em.make_meta_type(subtype);
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new MetaType( *this, subtype);
+    register_type(descr, res);
+
+    return res;
 }
 
 const Type_ptr TypeMgr::find_unsigned(unsigned digits)
@@ -212,7 +224,6 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
     }
     else assert (false); // unexpected
 }
-
 
 /* ternary variant */
 Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,

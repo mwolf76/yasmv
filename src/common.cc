@@ -28,11 +28,10 @@ const char *TRUE_TOKEN = "TRUE";
 const char *BOOL_TOKEN = "boolean";
 const char *UNSIGNED_TOKEN = "unsigned";
 const char *SIGNED_TOKEN = "signed";
-
-const char *FXD_TOKEN = "fixed";
 const char *INT_TOKEN = "int";
 
 const char *MAIN_TOKEN = "main";
+const char *META_TOKEN = "meta";
 const char *ENUM_TOKEN = "enum";
-const char *INST_TOKEN = "instance";
 const char *ARRAY_TOKEN = "array";
+

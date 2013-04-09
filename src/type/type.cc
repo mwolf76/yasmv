@@ -27,6 +27,12 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+MetaType::MetaType(TypeMgr& owner, Expr_ptr subtype)
+    : Type(owner)
+{
+    f_repr = f_owner.em().make_meta_type(subtype);
+}
+
 BooleanType::BooleanType(TypeMgr& owner)
     : Type(owner)
 {

@@ -97,3 +97,16 @@ ILiteral& ISymbol::as_literal(void) const
     return (*res);
 }
 
+bool ISymbol::is_enum() const
+{
+    return NULL != dynamic_cast <const IEnum_ptr>
+        (const_cast <const ISymbol_ptr> (this));
+}
+
+IEnum& ISymbol::as_enum() const
+{
+    IEnum_ptr res = dynamic_cast <const IEnum_ptr>
+        (const_cast <const ISymbol_ptr> (this));
+    assert (res);
+    return (*res);
+}

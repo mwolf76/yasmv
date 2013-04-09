@@ -112,13 +112,14 @@ public:
     { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
 
     virtual value_t value() const
-    {
-        return dynamic_cast<EnumType_ptr> (type())
-            ->value(expr());
-    }
+    { return dynamic_cast<EnumType_ptr> (type())->value(expr()); }
 };
 
 class TypeMgr {
+
+    // reserved
+    Type_ptr f_ctx_type;
+
     /* Shared enums and literals */
     Enums f_enums;
     Literals f_lits;
@@ -126,6 +127,8 @@ class TypeMgr {
 public:
 
     /* -- inference --------------------------------------------------------- */
+    const Type_ptr find_meta(Expr_ptr repr);
+
     inline const Type_ptr find_boolean()
     { return f_register[ f_em.make_boolean_type() ]; }
 
@@ -134,24 +137,21 @@ public:
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_signed(unsigned digits);
-    const Type_ptr find_signed_array(unsigned digits, unsigned size);
-
+    const Type_ptr find_signed_array(unsigned digits,
+                                     unsigned size);
     const Type_ptr find_unsigned(unsigned digits);
-    const Type_ptr find_unsigned_array(unsigned digits, unsigned size);
-
+    const Type_ptr find_unsigned_array(unsigned digits,
+                                       unsigned size);
     const Type_ptr find_signed_fixed(unsigned int_digits,
                                      unsigned fract_digits);
     const Type_ptr find_signed_fixed_array(unsigned int_digits,
                                            unsigned fract_digits,
                                            unsigned size);
-
-
     const Type_ptr find_unsigned_fixed(unsigned int_digits,
-                                     unsigned fract_digits);
+                                       unsigned fract_digits);
     const Type_ptr find_unsigned_fixed_array(unsigned int_digits,
-                                           unsigned fract_digits,
-                                           unsigned size);
-
+                                             unsigned fract_digits,
+                                             unsigned size);
     /* default types */
     const Type_ptr find_default_unsigned();
     const Type_ptr find_default_unsigned_fixed();

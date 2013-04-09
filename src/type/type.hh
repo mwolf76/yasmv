@@ -110,6 +110,9 @@ typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 typedef class EnumType* EnumType_ptr;
 typedef class ArrayType* ArrayType_ptr;
 
+// reserved for resolution
+typedef class CtxType* CtxType_ptr;
+
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type);
 
@@ -137,6 +140,12 @@ protected:
     Expr_ptr f_repr;
 };
 
+/** Meta type */
+class MetaType : public Type {
+protected:
+    friend class TypeMgr; // ctors not public
+    MetaType(TypeMgr& owner, Expr_ptr subtype);
+};
 
 /** Boolean type */
 class BooleanType : public Type {
@@ -151,14 +160,6 @@ class IntConstType : public Type {
 protected:
     friend class TypeMgr; // ctors not public
     IntConstType(TypeMgr& owner);
-};
-
-/** Fixed-point real constants type (always unsigned) */
-typedef class FxdConstType* FxdConstType_ptr;
-class FxdConstType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    FxdConstType(TypeMgr& owner);
 };
 
 /** Base class for all algebraic types */
@@ -202,47 +203,6 @@ protected:
     UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
 
     unsigned f_width;
-};
-
-
-/* Signed Fixed-point reals */
-typedef class SignedFixedAlgebraicType* SignedFixedAlgebraicType_ptr;
-class SignedFixedAlgebraicType : public AlgebraicType {
-public:
-    unsigned width() const
-    { return f_width; }
-
-    unsigned fract() const
-    { return f_fract; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    SignedFixedAlgebraicType(TypeMgr& owner, unsigned width, unsigned fract, ADD *dds = NULL);
-
-    unsigned f_width;
-    unsigned f_fract;
-};
-
-/* Unsigned Fixed-point reals */
-typedef class UnsignedFixedAlgebraicType* UnsignedFixedAlgebraicType_ptr;
-class UnsignedFixedAlgebraicType : public AlgebraicType {
-public:
-    unsigned width() const
-    { return f_width; }
-
-    unsigned fract() const
-    { return f_fract; }
-
-    /* in current implementation fixed is signed only */
-    bool is_signed() const
-    { return true; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    UnsignedFixedAlgebraicType(TypeMgr& owner, unsigned width, unsigned fract, ADD *dds = NULL);
-
-    unsigned f_width;
-    unsigned f_fract;
 };
 
 /** Arrays */
@@ -290,5 +250,13 @@ public:
 private:
     ExprSet f_literals;
 };
+
+typedef class ResolutionCtxType* ResolutionCtxType_ptr;
+class ResolutionCtxType : public Type {
+protected:
+    friend class TypeMgr; // ctors not public
+    ResolutionCtxType(TypeMgr& owner);
+};
+
 
 #endif

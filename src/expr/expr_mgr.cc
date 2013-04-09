@@ -47,20 +47,9 @@ ExprMgr::ExprMgr()
     }
     int_expr = make_identifier(INT_TOKEN);
 
-    // fixed-point real types identifiers
-    {
-        ostringstream oss; oss << UNSIGNED_TOKEN << " " << FXD_TOKEN;
-        unsigned_fxd_expr = make_identifier(oss.str());
-    }
-    {
-        ostringstream oss; oss << SIGNED_TOKEN  << " "  << FXD_TOKEN;
-        signed_fxd_expr = make_identifier(oss.str());
-    }
-    fxd_expr = make_identifier(FXD_TOKEN);
-
     main_expr = make_identifier(MAIN_TOKEN);
+    meta_expr = make_identifier(META_TOKEN);
     enum_expr = make_identifier(ENUM_TOKEN);
-    inst_expr = make_identifier(INST_TOKEN);
     array_expr = make_identifier (ARRAY_TOKEN);
 
     DEBUG << "ExprMgr @" << this << " initialized" << endl;

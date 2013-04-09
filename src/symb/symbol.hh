@@ -86,17 +86,10 @@ public:
 
     bool is_define() const;
     IDefine& as_define() const;
+
+    bool is_enum() const;
+    IEnum& as_enum() const;
 };
-
-class IEnum
-    : public ITyped
-    , public ISymbol
-{};
-
-class ILiteral
-    : public ISymbol
-    , public ITyped
-{};
 
 class IConstant
     : public ISymbol
@@ -104,16 +97,26 @@ class IConstant
     , public IValue
 {};
 
-class IVariable : public ISymbol {
-public:
-    // var types are used for enc building
-    virtual const Type_ptr type() const =0;
-};
+class ITemporary
+    : public ISymbol
+    , public ITyped
+{};
 
-class ITemporary : public IVariable {
-public:
-    virtual const Type_ptr type() const =0;
-};
+class IVariable
+    : public ISymbol
+    , public ITyped
+{};
+
+class IEnum
+    : public ISymbol
+    , public ITyped
+{};
+
+class ILiteral
+    : public ISymbol
+    , public ITyped
+    , public IValue
+{};
 
 class IDefine : public ISymbol {
 public:

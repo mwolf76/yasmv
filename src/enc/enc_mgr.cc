@@ -36,10 +36,8 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     IEncoding_ptr res = NULL;
 
     BooleanType_ptr btype;
-    SignedAlgebraicType_ptr sa_type;
     UnsignedAlgebraicType_ptr ua_type;
-    SignedFixedAlgebraicType_ptr sfa_type;
-    UnsignedFixedAlgebraicType_ptr ufa_type;
+    SignedAlgebraicType_ptr sa_type;
     EnumType_ptr etype;
     ArrayType_ptr vtype;
 
@@ -57,16 +55,6 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         DEBUG << "Encoding " << ua_type << endl;
         res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
     }
-    else if (NULL != (sfa_type = dynamic_cast<SignedFixedAlgebraicType_ptr>(tp))) {
-        DEBUG << "Encoding " << sfa_type << endl;
-        res = new AlgebraicEncoding(sfa_type->width(), sfa_type->fract(),
-                                    true, sfa_type->dds());
-    }
-    else if (NULL != (ufa_type = dynamic_cast<UnsignedFixedAlgebraicType_ptr>(tp))) {
-        DEBUG << "Encoding " << ufa_type << endl;
-        res = new AlgebraicEncoding(ufa_type->width(), ufa_type->fract(),
-                                    false, sfa_type->dds());
-    }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding " << etype << endl;
         res = new EnumEncoding(etype->literals());
@@ -79,8 +67,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         }
         res = new ArrayEncoding(encs);
     }
-
-    else assert(0); /* unexpected or unsupported */
+    else assert(false); /* unexpected or unsupported */
 
     assert (NULL != res);
     return res;
