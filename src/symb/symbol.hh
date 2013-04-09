@@ -50,6 +50,9 @@ class IConstant;
 typedef IConstant* IConstant_ptr;
 typedef unordered_map<FQExpr, IConstant_ptr, FQExprHash, FQExprEq> Constants;
 
+class IArray;
+typedef IArray* IArray_ptr;
+
 class IVariable;
 typedef IVariable* IVariable_ptr;
 typedef unordered_map<FQExpr, IVariable_ptr, FQExprHash, FQExprEq> Variables;
@@ -94,6 +97,9 @@ public:
 
     bool is_enum() const;
     IEnum& as_enum() const;
+
+    bool is_array() const;
+    IArray& as_array() const;
 };
 
 class IConstant
@@ -103,6 +109,11 @@ class IConstant
 {};
 
 class ITemporary
+    : public ISymbol
+    , public ITyped
+{};
+
+class IArray
     : public ISymbol
     , public ITyped
 {};

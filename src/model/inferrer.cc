@@ -472,12 +472,11 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
-        // TODO: uncomment
-        // else if (symb->is_array()) {
-        //     Type_ptr res = symb->as_array().type(); // meta type
-        //     PUSH_TYPE(res);
-        //     return;
-        // }
+        else if (symb->is_array()) {
+            Type_ptr res = symb->as_array().type(); // meta type
+            PUSH_TYPE(res);
+            return;
+        }
         else if (symb->is_variable()) {
             Type_ptr res = symb->as_variable().type();
             PUSH_TYPE(res);

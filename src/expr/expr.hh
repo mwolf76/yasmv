@@ -61,6 +61,8 @@ typedef enum {
 
     NIL, // reserved
 
+    META,
+
     /* future
     COUNT, // count( <pred>, x0, ..., xk ) -> number of elems satisfying pred
     ANY,   // any( <pred>, x0, ..., xk ) -> pick one elem among those satisfying pred
