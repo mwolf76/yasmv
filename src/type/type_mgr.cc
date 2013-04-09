@@ -28,12 +28,15 @@
 
 #include <type_exceptions.hh>
 
+#include <meta_resolver.hh>
+
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 
 TypeMgr::TypeMgr()
     : f_register()
     , f_em(ExprMgr::INSTANCE())
+    , f_resolver(* new MetaResolver(* this))
 {
     register_type( f_em.make_boolean_type(),
                    new BooleanType(*this));

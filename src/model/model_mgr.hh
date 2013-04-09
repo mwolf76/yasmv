@@ -28,7 +28,7 @@
 #define MODEL_MGR_H
 
 #include <model.hh>
-#include <resolver.hh>
+#include <model_resolver.hh>
 
 #include <inferrer.hh>
 
@@ -67,6 +67,12 @@ protected:
     ModelMgr();
     ~ModelMgr();
 
+    friend class ModelResolver;
+
+    Symbols f_symbols;
+    inline Symbols& symbols()
+    { return f_symbols; }
+
 private:
     static ModelMgr_ptr f_instance;
 
@@ -80,7 +86,7 @@ private:
     TypeMgr& f_tm;
 
     // symb resolver
-    Resolver f_resolver;
+    ModelResolver f_resolver;
 
     // ref to inferrer (used for model analysis)
     Inferrer& f_inferrer;

@@ -15,7 +15,7 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = symbol.hh
+PKG_HH = symbol.hh resolver.hh
 
 PKG_CC = symbol.cc
 

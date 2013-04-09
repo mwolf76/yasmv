@@ -436,6 +436,7 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
+    ModelMgr& mm = f_owner;
     ExprMgr& em = f_owner.em();
 
     // cache miss took care of the stack already
@@ -444,43 +445,51 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     // is an integer const ..
     if (em.is_int_numeric(expr)) {
         PUSH_TYPE(tm.find_int_const());
+        return;
     }
 
     // .. or a symbol
-    else if (em.is_identifier(expr)) {
-        ISymbol_ptr symb = resolve(f_ctx_stack.back(), expr);
-        assert(symb);
+    if (em.is_identifier(expr)) {
+        Expr_ptr ctx = f_ctx_stack.back();
+        ISymbol_ptr symb = (em.is_meta(ctx))
+            ? tm.resolver()->fetch_symbol(ctx, expr)
+            : mm.resolver()->fetch_symbol(ctx, expr)
+            ;
+        assert(NULL != symb);
 
         if (symb->is_const()) {
             Type_ptr res = symb->as_const().type();
             PUSH_TYPE(res);
+            return;
         }
-
         else if (symb->is_literal()) {
             Type_ptr res = symb->as_literal().type();
             PUSH_TYPE(res);
+            return;
         }
-
+        else if (symb->is_enum()) {
+            Type_ptr res = symb->as_enum().type(); // meta type
+            PUSH_TYPE(res);
+            return;
+        }
+        // TODO: uncomment
+        // else if (symb->is_array()) {
+        //     Type_ptr res = symb->as_array().type(); // meta type
+        //     PUSH_TYPE(res);
+        //     return;
+        // }
         else if (symb->is_variable()) {
             Type_ptr res = symb->as_variable().type();
             PUSH_TYPE(res);
+            return;
         }
-
         else if (symb->is_define()) {
             (*this)(symb->as_define().body());
+            return;
         }
-
-        else if (symb->is_enum()) {
-            IEnum& enm = symb->as_enum();
-            Expr_ptr fullname = em.make_dot(enm.ctx(), enm.expr());
-            Type_ptr res = tm.find_meta(fullname);
-            PUSH_TYPE(res);
-        }
-
-        else assert(false);
     }
 
-    else assert(false); // unexpected
+    assert(false); // unexpected
 }
 
 ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)

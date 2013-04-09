@@ -31,6 +31,7 @@ const char *SIGNED_TOKEN = "signed";
 const char *INT_TOKEN = "int";
 
 const char *MAIN_TOKEN = "main";
+const char *TEMP_TOKEN = "temp";
 const char *META_TOKEN = "meta";
 const char *ENUM_TOKEN = "enum";
 const char *ARRAY_TOKEN = "array";

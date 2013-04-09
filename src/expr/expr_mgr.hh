@@ -202,7 +202,7 @@ public:
 
     /* type makers */
     inline Expr_ptr make_meta_type(Expr_ptr a)
-    { return make_expr(PARAMS, meta_expr, a); }
+    { return make_expr(META, a, NULL); }
 
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
@@ -248,6 +248,9 @@ public:
     { return array_expr; }
 
     /* builtin identifiers */
+    inline Expr_ptr make_temp() const
+    { return temp_expr; }
+
     inline Expr_ptr make_main() const
     { return main_expr; }
 
@@ -290,6 +293,11 @@ public:
     { return make_oconst( strtoll(atom.c_str(), NULL, 8)); }
 
     // -- is-a predicates -------------------------------------------------------
+    inline bool is_meta(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == META;
+    }
+
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
@@ -439,8 +447,11 @@ private:
     /* reserved for abstract array types */
     Expr_ptr array_expr;
 
-    /* reserved */
+    /* reserved for type resolution */
     Expr_ptr meta_expr;
+
+    /* reserved for temp symbols ctx */
+    Expr_ptr temp_expr;
 
     /* integers */
     Expr_ptr unsigned_int_expr;

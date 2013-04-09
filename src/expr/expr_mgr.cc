@@ -49,6 +49,7 @@ ExprMgr::ExprMgr()
 
     main_expr = make_identifier(MAIN_TOKEN);
     meta_expr = make_identifier(META_TOKEN);
+    temp_expr = make_identifier(TEMP_TOKEN);
     enum_expr = make_identifier(ENUM_TOKEN);
     array_expr = make_identifier (ARRAY_TOKEN);
 

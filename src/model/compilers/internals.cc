@@ -314,9 +314,9 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
     Expr_ptr expr = em.make_identifier(oss.str());
 
     /* Register temporary symbol into resolver (temporaries are global) */
-    f_owner.resolver()->register_temporary(expr,
-                                           new Temporary(expr,
-                                                         tm.find_unsigned( width )));
+    f_owner.resolver()->add_symbol(em.make_temp(), expr,
+                                   new Temporary(expr,
+                                                 tm.find_unsigned( width )));
 
     /* register encoding, using fqexpr */
     const FQExpr& key = FQExpr(expr);

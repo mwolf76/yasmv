@@ -27,39 +27,19 @@
 #ifndef RESOLVER_H
 #define RESOLVER_H
 
-#include <common.hh>
+#include <symbol.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-
-#include <type.hh>
-#include <enc.hh>
-
-#include <model.hh>
-
-class ModelMgr;
 class IResolver : public IObject {
 public:
-    /* fetch a symbol (model or temporary) */
-    virtual ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb) =0;
-    virtual void register_temporary(const Expr_ptr expr, ITemporary_ptr temp) =0;
+    /** @brief register a symbol in the underlying storage */
+    virtual void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb) =0;
+
+    // TODO: rename to 'symbol()'
+
+    /** @brief fetch a symbol */
+    virtual ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr expr) =0;
 };
 
 typedef IResolver* IResolver_ptr;
-
-class Resolver : public IResolver {
-public:
-    Resolver(ModelMgr& owner);
-    ~Resolver();
-
-    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
-    void register_temporary(const Expr_ptr symb, ITemporary_ptr temp);
-
-private:
-    ModelMgr& f_owner;
-
-    Temporaries f_temporaries;
-    Constants f_constants; // global consts
-};
 
 #endif

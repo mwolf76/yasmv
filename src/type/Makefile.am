@@ -17,9 +17,9 @@ INCLUDES = -I$(top_srcdir)/src 				\
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = type.hh type_mgr.hh type_exceptions.hh
+PKG_HH = type.hh type_mgr.hh type_exceptions.hh meta_resolver.hh
 
-PKG_CC = type.cc type_mgr.cc type_exceptions.cc
+PKG_CC = type.cc type_mgr.cc type_exceptions.cc meta_resolver.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

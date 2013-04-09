@@ -15,9 +15,9 @@ INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 AM_CPPFLAGS = @AM_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = model.hh model_mgr.hh resolver.hh analyzer.hh inferrer.hh
+PKG_HH = model.hh model_mgr.hh analyzer.hh inferrer.hh model_resolver.hh
 
-PKG_CC = model.cc model_mgr.cc resolver.cc analyzer.cc inferrer.cc
+PKG_CC = model.cc model_mgr.cc analyzer.cc inferrer.cc model_resolver.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

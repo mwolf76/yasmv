@@ -388,7 +388,14 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
 // one step of resolution returns a const or variable
 ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
 {
-    ISymbol_ptr symb = f_mm.resolver()->fetch_symbol(ctx, frag);
+    ISymbol_ptr symb = NULL;
+
+    if (f_em.is_meta(ctx)) {
+        symb = f_tm.resolver()->fetch_symbol(ctx, frag);
+    }
+    else {
+        symb = f_mm.resolver()->fetch_symbol(ctx, frag);
+    }
 
     // is this a constant or variable?
     if (symb->is_const() ||

@@ -27,6 +27,11 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include <common.hh>
+#include <expr.hh>
+#include <pool.hh>
+#include <type.hh>
+
 typedef vector<FQExpr> FQExprVector;
 
 class ISymbol;
