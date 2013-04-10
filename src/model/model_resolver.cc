@@ -61,7 +61,7 @@ void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_
     f_owner.symbols()[ key ] = symb;
 }
 
-ISymbol_ptr ModelResolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr expr)
+ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
     /* Fetch modules from model */
     const Modules& f_modules = f_owner.model()->modules();

@@ -75,6 +75,11 @@ public:
     virtual value_t value() const =0;
 };
 
+class IBody : IObject {
+public:
+    virtual const Expr_ptr body() const =0;
+};
+
 class ISymbol : IObject {
 public:
     virtual const Expr_ptr ctx()  const =0;
@@ -134,10 +139,9 @@ class ILiteral
     , public IValue
 {};
 
-class IDefine : public ISymbol {
-public:
-    // defines have no type, it has to be inferred.
-    virtual const Expr_ptr body() const =0;
-};
+class IDefine
+    : public ISymbol
+    , public IBody
+{};
 
 #endif

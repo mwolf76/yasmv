@@ -204,8 +204,6 @@ private:
         return true;
     }
 
-    ISymbol_ptr resolve(const Expr_ptr ctx, const Expr_ptr id);
-
     /* throws a BadType exception if toplevel type does not match any
        of the expected. Returns type if succesful. */
     Type_ptr check_expected_type(expected_t expected);

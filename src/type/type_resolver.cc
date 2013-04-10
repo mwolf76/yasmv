@@ -24,25 +24,25 @@
  *
  **/
 
-#include <meta_resolver.hh>
+#include <type_resolver.hh>
 #include <type_mgr.hh>
 #include <type_exceptions.hh>
 
-MetaResolver::MetaResolver(TypeMgr& owner)
+TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)
 {
-    DEBUG << "Initialized Meta Resolver instance @" << this << endl;
+    DEBUG << "Initialized Type Resolver instance @" << this << endl;
 }
 
-MetaResolver::~MetaResolver()
+TypeResolver::~TypeResolver()
 {}
 
-void MetaResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
 {
     assert (false); // TODO
 }
 
-ISymbol_ptr MetaResolver::fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb)
+ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr symb)
 {
     FQExpr key(ctx, symb, 0); // time arbitrarily set to 0.
 

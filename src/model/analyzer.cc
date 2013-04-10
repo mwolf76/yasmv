@@ -386,30 +386,36 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
 }
 
 // one step of resolution returns a const or variable
-ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
+ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr expr)
 {
-    ISymbol_ptr symb = NULL;
+    ISymbol_ptr symb;
 
-    if (f_em.is_meta(ctx)) {
-        symb = f_tm.resolver()->fetch_symbol(ctx, frag);
-    }
-    else {
-        symb = f_mm.resolver()->fetch_symbol(ctx, frag);
-    }
+    // module symbols
+    if (NULL != (symb = f_mm.resolver()->symbol(ctx, expr))) {
 
-    // is this a constant or variable?
-    if (symb->is_const() ||
-        symb->is_variable()) {
-        return symb;
-    }
-
-    // ... or a define?
-    else if (symb->is_define()) {
-        while (symb->is_define()) {
-            Expr_ptr body = symb->as_define().body();
-            symb = f_mm.resolver()->fetch_symbol(ctx, body);
+        // is this a constant or variable?
+        if (symb->is_const() ||
+            symb->is_variable()) {
+            return symb;
         }
-        return symb;
+
+        // ... or a define?
+        else if (symb->is_define()) {
+            while (symb->is_define()) {
+                Expr_ptr body = symb->as_define().body();
+                symb = f_mm.resolver()->symbol(ctx, body);
+            }
+            return symb;
+        }
+    }
+
+    // type symbols
+    else if (NULL != (symb = f_tm.resolver()->symbol(ctx, expr))) {
+
+        if (symb->is_enum() ||
+            symb->is_array()) {
+            return symb;
+        }
     }
 
     // or what?!?

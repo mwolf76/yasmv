@@ -38,6 +38,8 @@
 #include <model_mgr.hh>
 #include <type_exceptions.hh>
 
+#include <proxy.hh>
+
 // uncommment following line to enable post_node_hook debug (verbose!)
 #define DEBUG_INFERRER
 
@@ -436,7 +438,6 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
-    ModelMgr& mm = f_owner;
     ExprMgr& em = f_owner.em();
 
     // cache miss took care of the stack already
@@ -450,12 +451,9 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 
     // .. or a symbol
     if (em.is_identifier(expr)) {
+        ResolverProxy proxy;
         Expr_ptr ctx = f_ctx_stack.back();
-        ISymbol_ptr symb = (em.is_meta(ctx))
-            ? tm.resolver()->fetch_symbol(ctx, expr)
-            : mm.resolver()->fetch_symbol(ctx, expr)
-            ;
-        assert(NULL != symb);
+        ISymbol_ptr symb = proxy.symbol(ctx, expr);
 
         if (symb->is_const()) {
             Type_ptr res = symb->as_const().type();
@@ -468,12 +466,12 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
             return;
         }
         else if (symb->is_enum()) {
-            Type_ptr res = symb->as_enum().type(); // meta type
+            Type_ptr res = symb->as_enum().type();
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_array()) {
-            Type_ptr res = symb->as_array().type(); // meta type
+            Type_ptr res = symb->as_array().type();
             PUSH_TYPE(res);
             return;
         }
@@ -489,31 +487,6 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     }
 
     assert(false); // unexpected
-}
-
-ISymbol_ptr Inferrer::resolve(const Expr_ptr ctx, const Expr_ptr frag)
-{
-    ISymbol_ptr symb = f_owner.resolver()->fetch_symbol(ctx, frag);
-    assert( NULL != symb );
-
-    if (symb->is_const() ||
-        symb->is_literal() ||
-        symb->is_enum() ||
-        symb->is_temporary() ||
-        symb->is_variable()) {
-        return symb;
-    }
-
-    // ... or a define?
-    else if (symb->is_define()) {
-        while (symb->is_define()) {
-            Expr_ptr body = symb->as_define().body();
-            symb = f_owner.resolver()->fetch_symbol(ctx, body);
-        }
-        return symb;
-    }
-
-    else assert( false ); // unexpected
 }
 
 // fun: temporal -> temporal

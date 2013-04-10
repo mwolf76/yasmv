@@ -34,7 +34,7 @@
 
 #include <symbol.hh>
 
-#include <meta_resolver.hh>
+#include <type_resolver.hh>
 
 typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
@@ -126,7 +126,7 @@ class TypeMgr {
     Enums f_enums;
     Literals f_lits;
 
-    MetaResolver f_resolver;
+    TypeResolver f_resolver;
 
 public:
 
@@ -134,7 +134,7 @@ public:
     { return &f_resolver; }
 
     /* -- inference --------------------------------------------------------- */
-    const Type_ptr find_meta(Expr_ptr repr);
+    const Type_ptr find_type(Expr_ptr repr);
 
     inline const Type_ptr find_boolean()
     { return f_register[ f_em.make_boolean_type() ]; }

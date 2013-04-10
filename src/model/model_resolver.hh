@@ -37,7 +37,7 @@ public:
 
     void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb);
 
-    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
 
 private:
     ModelMgr& f_owner;

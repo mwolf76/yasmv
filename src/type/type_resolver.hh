@@ -1,5 +1,5 @@
 /**
- *  @file resolver.hh
+ *  @file type_resolver.hh
  *  @brief Symbol resolution module
  *
  *  This module contains definitions and services that implement an
@@ -24,20 +24,22 @@
  *
  **/
 
-#ifndef RESOLVER_H
-#define RESOLVER_H
+#ifndef TYPE_RESOLVER_H
+#define TYPE_RESOLVER_H
 
-#include <symbol.hh>
+#include <resolver.hh>
 
-class IResolver : public IObject {
+class TypeResolver : public IResolver {
 public:
-    /** @brief register a symbol in the underlying storage */
-    virtual void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb) =0;
+    TypeResolver(TypeMgr& owner);
+    ~TypeResolver();
 
-    /** @brief fetch a symbol */
-    virtual ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr) =0;
+    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb);
+
+    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
+
+private:
+    TypeMgr& f_owner;
 };
-
-typedef IResolver* IResolver_ptr;
 
 #endif

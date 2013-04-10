@@ -28,7 +28,7 @@
 
 #include <type_exceptions.hh>
 
-#include <meta_resolver.hh>
+#include <type_resolver.hh>
 
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
@@ -36,7 +36,7 @@ TypeMgr_ptr TypeMgr::f_instance = NULL;
 TypeMgr::TypeMgr()
     : f_register()
     , f_em(ExprMgr::INSTANCE())
-    , f_resolver(* new MetaResolver(* this))
+    , f_resolver(* new TypeResolver(* this))
 {
     register_type( f_em.make_boolean_type(),
                    new BooleanType(*this));
@@ -45,7 +45,7 @@ TypeMgr::TypeMgr()
                    new IntConstType(*this));
 }
 
-const Type_ptr TypeMgr::find_meta(Expr_ptr subtype)
+const Type_ptr TypeMgr::find_type(Expr_ptr subtype)
 {
     Expr_ptr descr = f_em.make_meta_type(subtype);
     Type_ptr res = lookup_type(descr);

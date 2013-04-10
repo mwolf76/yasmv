@@ -41,6 +41,8 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+#include <proxy.hh>
+
 Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
@@ -644,10 +646,6 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     /* cached? */
     if (! cache_miss(expr)) return;
 
-    // symb resolution
-    // Model& model = static_cast <Model&> (*f_owner.model());
-    IResolver& resolver = * f_owner.resolver();
-
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
@@ -661,8 +659,9 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    // 2. Symbols
-    ISymbol_ptr symb = resolver.fetch_symbol(ctx, expr);
+    // 2. Module-managed symbols
+    ResolverProxy resolver;
+    ISymbol_ptr symb = resolver.symbol(ctx, expr);
 
     // 2. 1. Temporary symbols are maintained internally by the compiler
     ITemporary_ptr temp;
@@ -685,46 +684,58 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* Temporary symbols */
 
-    // 2. 2. Model symbol
-    if (NULL != symb) {
-        Type_ptr type = NULL;
+    // 2. 2. 1. bool/integer constant leaves
+    if (symb->is_const()) {
+        IConstant& konst =  symb->as_const();
 
-        // 2. 2. 1. bool/integer constant leaves
-        if (symb->is_const()) {
-            IConstant& konst =  symb->as_const();
+        f_type_stack.push_back(konst.type());
+        f_add_stack.push_back(f_enc.constant(konst.value()));
+        return;
+    }
 
-            f_type_stack.push_back(konst.type());
-            f_add_stack.push_back(f_enc.constant(konst.value()));
-            return;
+    // 2. 2. 2. variables
+    else if (symb->is_variable()) {
+
+        // push into type stack
+        Type_ptr type = symb->as_variable().type();
+
+        // if encoding for variable is available reuse it,
+        // otherwise create and cache it.
+        FQExpr key(ctx, expr, time);
+
+        /* build a new encoding for this symbol if none is available. */
+        if (NULL == (enc = f_enc.find_encoding(key))) {
+            assert (NULL != type);
+            enc = f_enc.make_encoding(type);
+            f_enc.register_encoding(key, enc);
         }
 
-        // 2. 2. 2. variables
-        else if (symb->is_variable()) {
+        push_variable(enc, type);
+        return;
+    } /* variables */
 
-            // push into type stack
-            type = symb->as_variable().type();
+    // 2. 3. define? Simply compile it recursively.
+    else if (symb->is_define()) {
+        (*this)(symb->as_define().body());
+        return;
+    }
 
-            // if encoding for variable is available reuse it,
-            // otherwise create and cache it.
-            FQExpr key(ctx, expr, time);
-
-            /* build a new encoding for this symbol if none is available. */
-            if (NULL == (enc = f_enc.find_encoding(key))) {
-                assert (NULL != type);
-                enc = f_enc.make_encoding(type);
-                f_enc.register_encoding(key, enc);
-            }
-
-            push_variable(enc, type);
-            return;
-        } /* variables */
-
-        // 2. 3. define? Simply compile it recursively.
-        else if (symb->is_define()) {
-            (*this)(symb->as_define().body());
+    // 3. TypeMgr symbols
+    { /* try enums */
+        IEnum_ptr enm;
+        if (NULL != (enm = dynamic_cast<IEnum_ptr>(symb))) {
+            assert(false); // TODO
             return;
         }
-    }  /* Model symbols */
+    }
 
-    assert( false ); // unreachable
+    { /* try arrays */
+        IArray_ptr arr;
+        if (NULL != (arr = dynamic_cast<IArray_ptr>(symb))) {
+            assert(false); // TODO
+            return;
+        }
+    }
+
+    assert( false ); /* give up, TODO: exception */
 }

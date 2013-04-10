@@ -1,6 +1,6 @@
 /**
- *  @file meta_resolver.hh
- *  @brief Symbol resolution module
+ *  @file proxy.hh
+ *  @brief Resolver proxy
  *
  *  This module contains definitions and services that implement an
  *  optimized storage for expressions. Expressions are stored in a
@@ -24,22 +24,41 @@
  *
  **/
 
-#ifndef META_RESOLVER_H
-#define META_RESOLVER_H
+#ifndef RESOLVER_PROXY_H
+#define RESOLVER_PROXY_H
 
 #include <resolver.hh>
+#include <model_mgr.hh>
+#include <type_mgr.hh>
 
-class MetaResolver : public IResolver {
+class ResolverProxy : public IResolver {
+    TypeMgr& f_tm;
+    ModelMgr& f_mm;
+
 public:
-    MetaResolver(TypeMgr& owner);
-    ~MetaResolver();
+    ResolverProxy()
+        : f_tm(TypeMgr::INSTANCE())
+        , f_mm(ModelMgr::INSTANCE())
+    {}
 
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb);
+    /** @brief register a symbol in the underlying storage */
+    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+    { assert(false); } // proxy is used read-only
 
-    ISymbol_ptr fetch_symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    /** @brief fetch a symbol */
+    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr)
+    {
+        ISymbol_ptr res = NULL;
 
-private:
-    TypeMgr& f_owner;
+        res = f_tm.resolver()->symbol(ctx, expr);
+        if (NULL != res) return res;
+
+        res = f_mm.resolver()->symbol(ctx, expr);
+        if (NULL != res) return res;
+
+        assert(false); // tODO exception
+        return NULL;
+    }
 };
 
 #endif
