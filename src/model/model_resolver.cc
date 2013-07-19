@@ -67,7 +67,7 @@ ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
     const Modules& f_modules = f_owner.model()->modules();
 
     Modules::const_iterator eye = f_modules.find(ctx);
-    if (eye == f_modules.end()) throw BadContext(ctx);
+    if (eye == f_modules.end()) return NULL;
 
     // init lookup data
     IModule_ptr module = (*eye).second;
@@ -105,7 +105,5 @@ ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
         }
     }
 
-    /* if all of the above fail... */
-    WARN << "Could not resolve symbol " << ctx << "::" << expr << endl;
-    throw UnresolvedSymbol(ctx, expr);
+    return NULL; // unresolved;
 }
