@@ -26,9 +26,9 @@
 
 #ifndef EXPR_PRINTER_H
 #define EXPR_PRINTER_H
-#include <full_expr_walker.hh>
+#include <expr_walker.hh>
 
-class Printer : public FullWalker {
+class Printer : public ExprWalker {
     ostream& f_os;
 
 public:

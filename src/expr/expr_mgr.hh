@@ -32,55 +32,7 @@
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
-    // -- expr makers (mostly inlined) -----------------------------------------
-
-    /* LTL */
-    inline Expr_ptr make_F(Expr_ptr expr)
-    { return make_expr(F, expr, NULL); }
-
-    inline Expr_ptr make_G(Expr_ptr expr)
-    { return make_expr(G, expr, NULL); }
-
-    inline Expr_ptr make_X(Expr_ptr expr)
-    { return make_expr(X, expr, NULL); }
-
-    inline Expr_ptr make_U(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(U, lhs, rhs); }
-
-    inline Expr_ptr make_R(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(R, lhs, rhs); }
-
-    /* CTL (A ops) */
-    inline Expr_ptr make_AF(Expr_ptr expr)
-    { return make_expr(AF, expr, NULL); }
-
-    inline Expr_ptr make_AG(Expr_ptr expr)
-    { return make_expr(AG, expr, NULL); }
-
-    inline Expr_ptr make_AX(Expr_ptr expr)
-    { return make_expr(AX, expr, NULL); }
-
-    inline Expr_ptr make_AU(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(AU, lhs, rhs); }
-
-    inline Expr_ptr make_AR(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(AR, lhs, rhs); }
-
-    /* CTL (E ops) */
-    inline Expr_ptr make_EF(Expr_ptr expr)
-    { return make_expr(EF, expr, NULL); }
-
-    inline Expr_ptr make_EG(Expr_ptr expr)
-    { return make_expr(EG, expr, NULL); }
-
-    inline Expr_ptr make_EX(Expr_ptr expr)
-    { return make_expr(EX, expr, NULL); }
-
-    inline Expr_ptr make_EU(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(EU, lhs, rhs); }
-
-    inline Expr_ptr make_ER(Expr_ptr lhs, Expr_ptr rhs)
-    { return make_expr(ER, lhs, rhs); }
+    // -- expr makers ----------------------------------------------------------
 
     /* primary expressions */
     inline Expr_ptr make_next(Expr_ptr expr)
@@ -201,9 +153,6 @@ public:
     { return make_expr(PARAMS, a, b); }
 
     /* type makers */
-    inline Expr_ptr make_meta_type(Expr_ptr a)
-    { return make_expr(META, a, NULL); }
-
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
@@ -218,9 +167,7 @@ public:
     }
 
     inline Expr_ptr make_abstract_unsigned_int_type()
-    {
-        return unsigned_int_expr;
-    }
+    { return unsigned_int_expr; }
 
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
@@ -229,9 +176,7 @@ public:
     }
 
     inline Expr_ptr make_abstract_signed_int_type()
-    {
-        return signed_int_expr;
-    }
+    { return signed_int_expr; }
 
     inline Expr_ptr make_signed_int_type(unsigned digits)
     {
@@ -239,13 +184,16 @@ public:
                            make_iconst((value_t) digits));
     }
 
-    inline Expr_ptr make_abstract_enum_type() const
-    { return enum_expr; }
+    inline Expr_ptr make_abstract_array_type(Expr_ptr of)
+    { return make_params( array_expr, of); }
 
-    Expr_ptr make_enum_type(ExprSet& literals);
+    inline Expr_ptr make_abstract_range_type(Expr_ptr of)
+    { return make_params( range_expr, of); }
 
-    inline Expr_ptr make_abstract_array_type() const
-    { return array_expr; }
+    Expr_ptr make_set_type(ExprSet& literals);
+
+    inline Expr_ptr make_abstract_set_type(Expr_ptr of)
+    { return make_params( set_expr, of); }
 
     /* builtin identifiers */
     inline Expr_ptr make_temp() const
@@ -293,14 +241,14 @@ public:
     { return make_oconst( strtoll(atom.c_str(), NULL, 8)); }
 
     // -- is-a predicates -------------------------------------------------------
-    inline bool is_meta(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == META;
-    }
-
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
+    }
+
+    inline bool is_dot(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == DOT;
     }
 
     inline bool is_next(const Expr_ptr expr) const {
@@ -374,6 +322,14 @@ public:
                 (LSHIFT == symb));
     }
 
+    inline bool is_binary_enumerative(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ((EQ == symb) ||
+                (NE == symb));
+    }
+
     inline bool is_binary_relational(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
@@ -441,14 +397,14 @@ private:
     /* main module */
     Expr_ptr main_expr;
 
-    /* reserved for abstract enum types */
-    Expr_ptr enum_expr;
+    /* reserved for abstract set types */
+    Expr_ptr set_expr;
 
     /* reserved for abstract array types */
     Expr_ptr array_expr;
 
-    /* reserved for type resolution */
-    Expr_ptr meta_expr;
+    /* reserved for abstract array types */
+    Expr_ptr range_expr;
 
     /* reserved for temp symbols ctx */
     Expr_ptr temp_expr;

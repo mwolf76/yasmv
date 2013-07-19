@@ -75,14 +75,6 @@ typedef enum {
 
     */
 
-    // -- temporal logic ops ---------------------------------------------------
-
-    /* LTL ops */
-    F, G, X, U, R,
-
-    /* CTL ops */
-    AF, EF, AG, EG, AX, EX, AU, EU, AR, ER,
-
     // -- declarations ---------------------------------------------------------
 
     // types
