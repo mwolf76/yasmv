@@ -131,8 +131,8 @@ extern const char *FXD_TOKEN;
 extern const char *INT_TOKEN;
 
 extern const char *MAIN_TOKEN;
-extern const char *TEMP_TOKEN;
-extern const char *META_TOKEN;
-extern const char *ENUM_TOKEN;
+
+extern const char *SET_TOKEN;
+extern const char *RANGE_TOKEN;
 extern const char *ARRAY_TOKEN;
 #endif

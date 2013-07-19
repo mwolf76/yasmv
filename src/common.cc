@@ -23,16 +23,18 @@
 #include <common.hh>
 
 /* tokens */
+const char *MAIN_TOKEN = "main";
+
+/* bool consts */
 const char *FALSE_TOKEN = "FALSE";
 const char *TRUE_TOKEN = "TRUE";
-const char *BOOL_TOKEN = "boolean";
-const char *UNSIGNED_TOKEN = "unsigned";
-const char *SIGNED_TOKEN = "signed";
-const char *INT_TOKEN = "int";
 
-const char *MAIN_TOKEN = "main";
-const char *TEMP_TOKEN = "temp";
-const char *META_TOKEN = "meta";
-const char *ENUM_TOKEN = "enum";
-const char *ARRAY_TOKEN = "array";
+/* types */
+const char *BOOL_TOKEN     = "boolean";
+const char *UNSIGNED_TOKEN = "unsigned";
+const char *SIGNED_TOKEN   = "signed";
+const char *INT_TOKEN      = "int";
+const char *SET_TOKEN      = "set";
+const char *ARRAY_TOKEN    = "array";
+const char *RANGE_TOKEN    = "range";
 
