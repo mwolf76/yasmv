@@ -45,19 +45,6 @@ TypeMgr::TypeMgr()
                    new IntConstType(*this));
 }
 
-const Type_ptr TypeMgr::find_type(Expr_ptr subtype)
-{
-    Expr_ptr descr = f_em.make_meta_type(subtype);
-    Type_ptr res = lookup_type(descr);
-    if (NULL != res) return res;
-
-    // new type, needs to be registered before returning
-    res = new MetaType( *this, subtype);
-    register_type(descr, res);
-
-    return res;
-}
-
 const Type_ptr TypeMgr::find_unsigned(unsigned digits)
 {
     Expr_ptr descr(f_em.make_unsigned_int_type(digits));
@@ -222,7 +209,8 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
     else if (em.is_binary_logical(expr)) {
         return logical_result_type(lhs, rhs);
     }
-    else if (em.is_binary_relational(expr)) {
+    else if (em.is_binary_relational(expr) ||
+             em.is_binary_enumerative(expr)){
         return find_boolean();
     }
     else assert (false); // unexpected

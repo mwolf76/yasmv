@@ -27,7 +27,9 @@
 #include <type_exceptions.hh>
 BadContext::BadContext(Expr_ptr ctx)
     : f_ctx(ctx)
-{}
+{
+    ;
+}
 
 const char* BadContext::what() const throw()
 {
@@ -69,7 +71,9 @@ const char* UnresolvedSymbol::what() const throw()
 BadType::BadType(Expr_ptr repr, expected_t expected)
     : f_repr(repr)
     , f_expected(expected)
-{}
+{
+    ;
+}
 
 BadType::~BadType() throw()
 {}
@@ -82,40 +86,40 @@ TypeMismatch::TypeMismatch(Expr_ptr repr_a, Expr_ptr repr_b)
 TypeMismatch::~TypeMismatch() throw()
 {}
 
-static inline Expr_ptr make_abstract_type(expected_t item)
-{
-    ExprMgr& em = ExprMgr::INSTANCE();
-    Expr_ptr res = NULL;
+// static inline Expr_ptr make_abstract_type(expected_t item)
+// {
+//     ExprMgr& em = ExprMgr::INSTANCE();
+//     Expr_ptr res = NULL;
 
-    switch (item) {
-    case TP_BOOLEAN:
-        res = em.make_boolean_type();
-        break;
+//     switch (item) {
+//     case TP_BOOLEAN:
+//         res = em.make_boolean_type();
+//         break;
 
-    case TP_INT_CONST:
-        res = em.make_int_const_type();
-        break;
+//     case TP_INT_CONST:
+//         res = em.make_int_const_type();
+//         break;
 
-    case TP_SIGNED_INT:
-        res = em.make_abstract_signed_int_type();
-        break;
+//     case TP_SIGNED_INT:
+//         res = em.make_abstract_signed_int_type();
+//         break;
 
-    case TP_UNSIGNED_INT:
-        res = em.make_abstract_unsigned_int_type();
-        break;
+//     case TP_UNSIGNED_INT:
+//         res = em.make_abstract_unsigned_int_type();
+//         break;
 
-    case TP_ENUM:
-        res = em.make_abstract_enum_type();
-        break;
+//     case TP_ENUM:
+//         res = em.make_abstract_set_type();
+//         break;
 
-    case TP_ARRAY:
-        res = em.make_abstract_array_type();
-        break;
-    }
+//     case TP_ARRAY:
+//         res = em.make_abstract_array_type();
+//         break;
+//     }
 
-    assert (NULL != res); /* unexpected */
-    return res;
-}
+//     assert (NULL != res); /* unexpected */
+//     return res;
+// }
 
 const char* BadType::what() const throw()
 {
@@ -129,7 +133,8 @@ const char* BadType::what() const throw()
     /* collect expected types representations */
     for (unsigned i = 1; i <= TP_LAST_TYPE; i <<= 1) {
         if (i & f_expected) {
-            tmp.push_back( make_abstract_type(i));
+            abort();
+            // tmp.push_back( make_abstract_type(i));
         }
     }
 

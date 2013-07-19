@@ -83,11 +83,12 @@
 #include <expr_mgr.hh>
 
 /* Supported data types: boolean, integers (signed and unsigned),
-   fixed-point, enums, module instances, arrays of all-of-the-above. */
+   enums, module instances, arrays of all-of-the-above. */
 
 /* REMARK types are *immutable* by design! */
-
 typedef unsigned expected_t;
+
+// TODO: support fixed-point arithmetic
 #define TP_BOOLEAN   0x1
 #define TP_INT_CONST 0x2
 // #define TP_FXD_CONST 0x4
@@ -98,8 +99,10 @@ typedef unsigned expected_t;
 #define TP_ENUM 0x80
 #define TP_LAST_TYPE 0x80
 
-/* arrays use former bits to determine the type of elements */
+/* array types use less significant bits to determine the type of elements */
 #define TP_ARRAY 0x200
+#define TP_RANGE 0x400
+#define TP_SET   0x800
 
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
@@ -138,13 +141,6 @@ protected:
 
     TypeMgr& f_owner;
     Expr_ptr f_repr;
-};
-
-/** Meta type */
-class MetaType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    MetaType(TypeMgr& owner, Expr_ptr subtype);
 };
 
 /** Boolean type */
@@ -223,6 +219,34 @@ protected:
     unsigned f_size;
 };
 
+/** Ranges */
+typedef class RangeType* RangeType_ptr;
+class RangeType : public Type {
+public:
+    Type_ptr of() const
+    { return f_of; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    RangeType(TypeMgr& owner, Type_ptr of);
+
+    Type_ptr f_of;
+};
+
+/** Sets */
+typedef class SetType* SetType_ptr;
+class SetType : public Type {
+public:
+    Type_ptr of() const
+    { return f_of; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    SetType(TypeMgr& owner, Type_ptr of);
+
+    Type_ptr f_of;
+};
+
 /** Enumeratives */
 typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
@@ -257,6 +281,5 @@ protected:
     friend class TypeMgr; // ctors not public
     ResolutionCtxType(TypeMgr& owner);
 };
-
 
 #endif

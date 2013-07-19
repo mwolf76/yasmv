@@ -27,12 +27,6 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
-MetaType::MetaType(TypeMgr& owner, Expr_ptr subtype)
-    : Type(owner)
-{
-    f_repr = f_owner.em().make_meta_type(subtype);
-}
-
 BooleanType::BooleanType(TypeMgr& owner)
     : Type(owner)
 {
@@ -77,11 +71,25 @@ ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)
                                           f_owner.em().make_iconst( size));
 }
 
+RangeType::RangeType(TypeMgr& owner, Type_ptr of)
+    : Type(owner)
+    , f_of(of)
+{
+    f_repr = f_owner.em().make_abstract_range_type ( of->repr() );
+}
+
+SetType::SetType(TypeMgr& owner, Type_ptr of)
+    : Type(owner)
+    , f_of(of)
+{
+    f_repr = f_owner.em().make_abstract_set_type( of->repr() );
+}
+
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : Type(owner)
     , f_literals(literals)
 {
-    f_repr = f_owner.em().make_enum_type(f_literals);
+    f_repr = f_owner.em().make_set_type(f_literals);
     ExprSet::iterator i;
 
     for (i = literals.begin(); i != literals.end(); ++ i) {

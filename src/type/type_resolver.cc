@@ -42,9 +42,9 @@ void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_p
     assert (false); // TODO
 }
 
-ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr symb)
+ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
-    FQExpr key(ctx, symb, 0); // time arbitrarily set to 0.
+    FQExpr key(ctx, expr, 0); // time arbitrarily set to 0.
 
     { /* enum types */
         const Enums& enums = TypeMgr::INSTANCE().enums();
@@ -62,7 +62,5 @@ ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr symb)
         }
     }
 
-    /* if all of the above fail... */
-    WARN << "Could not resolve symbol " << ctx << "::" << symb << endl;
-    throw UnresolvedSymbol(ctx, symb);
+    return NULL; /* unresolved */
 }

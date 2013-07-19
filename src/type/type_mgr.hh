@@ -134,13 +134,16 @@ public:
     { return &f_resolver; }
 
     /* -- inference --------------------------------------------------------- */
-    const Type_ptr find_type(Expr_ptr repr);
-
     inline const Type_ptr find_boolean()
     { return f_register[ f_em.make_boolean_type() ]; }
 
     inline const Type_ptr find_int_const()
     { return f_register[ f_em.make_int_const_type() ]; }
+
+    /* -- abstract types ---------------------------------------------------- */
+    const Type_ptr find_array_type( Type_ptr of );
+    const Type_ptr find_range_type( Type_ptr of );
+    const Type_ptr find_set_type( Type_ptr of );
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_signed(unsigned digits);
