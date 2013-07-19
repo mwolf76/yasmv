@@ -30,6 +30,8 @@
 
 #include <type_resolver.hh>
 
+const int DEFAULT_INTTYPE_SIZE = 8;
+
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 
@@ -43,6 +45,7 @@ TypeMgr::TypeMgr()
 
     register_type( f_em.make_int_const_type(),
                    new IntConstType(*this));
+
 }
 
 const Type_ptr TypeMgr::find_unsigned(unsigned digits)
@@ -58,10 +61,7 @@ const Type_ptr TypeMgr::find_unsigned(unsigned digits)
 }
 
 const Type_ptr TypeMgr::find_default_unsigned()
-{
-    /* TODO: move this somewhere */
-    return find_unsigned(8);
-}
+{ return find_unsigned(DEFAULT_INTTYPE_SIZE); }
 
 const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
@@ -88,6 +88,9 @@ const Type_ptr TypeMgr::find_signed(unsigned digits)
     register_type(descr, res);
     return res;
 }
+
+const Type_ptr TypeMgr::find_default_signed()
+{ return find_signed(DEFAULT_INTTYPE_SIZE); }
 
 const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
 {
@@ -189,6 +192,22 @@ UnsignedAlgebraicType_ptr TypeMgr::as_unsigned_algebraic(const Type_ptr tp) cons
 ArrayType_ptr TypeMgr::as_array(const Type_ptr tp) const
 {
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+RangeType_ptr TypeMgr::as_range(const Type_ptr tp) const
+{
+    RangeType_ptr res = dynamic_cast<RangeType_ptr> (tp);
+    assert(res);
+
+    return res;
+}
+
+SetType_ptr TypeMgr::as_set(const Type_ptr tp) const
+{
+    SetType_ptr res = dynamic_cast<SetType_ptr> (tp);
     assert(res);
 
     return res;

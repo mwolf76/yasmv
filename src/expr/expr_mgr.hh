@@ -263,11 +263,6 @@ public:
             || (expr->f_symb == OCONST) ;
     }
 
-    inline bool is_fxd_numeric(const Expr_ptr expr) const {
-        assert(expr);
-        return (expr->f_symb == FCONST);
-    }
-
     // expr inspectors, used by compiler as helpers to determine operands type
     inline bool is_unary_logical(const Expr_ptr expr) const {
         assert(expr);

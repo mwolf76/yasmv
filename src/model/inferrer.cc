@@ -568,8 +568,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
              em.is_ite(expr) ||
              em.is_cond(expr) ||
              em.is_identifier(expr) ||
-             em.is_int_numeric(expr) ||
-             em.is_fxd_numeric(expr)) {
+             em.is_int_numeric(expr)) {
         return expr;
     }
 

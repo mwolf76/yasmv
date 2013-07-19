@@ -48,18 +48,13 @@ typedef pair<TypeMap::iterator, bool> TypeHit;
 
     NOTE: there at distinct concepts of type that should not be mixed
     together: Here we talk about the type of an expression from a
-    static analysis PoV. An expression can be boolean, integer, a
-    particular enum (TODO: prohibit intersection) or an instance of a
-    certain module. And that's final.
+    static analysis PoV. An expression can be a boolean, integer,
+    non-deterministic choice in a set or range (TODO). And that's
+    final (i.e. types are immutable).
 
     When it comes to encoding though, a variable can be either signed
     or unsigned, with a given number of bits. But this, *by design* is
     completely ignored by the type inferrer.
-
-    Moreover, a wff temporal formula is considered boolean w.r.t. type
-    inference, it will be responsibility of the formula-analyzer to
-    determine whether its a CTL/LTL/INVAR, and in different section of
-    the system different actions can be taken according to this.
 
     3. It is the single authoritative source for determining the resulting
     type of an operand, via the result_type methods.
@@ -143,28 +138,18 @@ public:
     /* -- abstract types ---------------------------------------------------- */
     const Type_ptr find_array_type( Type_ptr of );
     const Type_ptr find_range_type( Type_ptr of );
-    const Type_ptr find_set_type( Type_ptr of );
+    const Type_ptr find_set_type  ( Type_ptr of );
 
     /* -- decls ------------------------------------------------------------- */
     const Type_ptr find_signed(unsigned digits);
+    const Type_ptr find_default_signed();
     const Type_ptr find_signed_array(unsigned digits,
                                      unsigned size);
+
     const Type_ptr find_unsigned(unsigned digits);
+    const Type_ptr find_default_unsigned();
     const Type_ptr find_unsigned_array(unsigned digits,
                                        unsigned size);
-    const Type_ptr find_signed_fixed(unsigned int_digits,
-                                     unsigned fract_digits);
-    const Type_ptr find_signed_fixed_array(unsigned int_digits,
-                                           unsigned fract_digits,
-                                           unsigned size);
-    const Type_ptr find_unsigned_fixed(unsigned int_digits,
-                                       unsigned fract_digits);
-    const Type_ptr find_unsigned_fixed_array(unsigned int_digits,
-                                             unsigned fract_digits,
-                                             unsigned size);
-    /* default types */
-    const Type_ptr find_default_unsigned();
-    const Type_ptr find_default_unsigned_fixed();
 
     /* Remark: unambiguous enums resolution requires DOT fullnames */
     void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
@@ -219,6 +204,18 @@ public:
         return NULL != dynamic_cast <const ArrayType_ptr> (tp);
     }
 
+    /** true iff tp is range tyype */
+    inline bool is_range(const Type_ptr tp) const
+    {
+        return NULL != dynamic_cast <const RangeType_ptr> (tp);
+    }
+
+    /** true iff tp is range tyype */
+    inline bool is_set(const Type_ptr tp) const
+    {
+        return NULL != dynamic_cast <const SetType_ptr> (tp);
+    }
+
     // -- as_xxx accessors -------------------------------------------------- */
     BooleanType_ptr as_boolean(const Type_ptr tp) const;
     AlgebraicType_ptr as_algebraic(const Type_ptr tp) const;
@@ -226,6 +223,8 @@ public:
     UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
     EnumType_ptr as_enum(const Type_ptr tp) const;
     ArrayType_ptr as_array(const Type_ptr tp) const;
+    RangeType_ptr as_range(const Type_ptr tp) const;
+    SetType_ptr as_set(const Type_ptr tp) const;
 
     /* -- services used by compiler and inferrer ---------------------------- */
 
