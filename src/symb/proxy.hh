@@ -30,6 +30,7 @@
 #include <resolver.hh>
 #include <model_mgr.hh>
 #include <type_mgr.hh>
+#include <type_exceptions.hh>
 
 class ResolverProxy : public IResolver {
     TypeMgr& f_tm;
@@ -56,8 +57,9 @@ public:
         res = f_mm.resolver()->symbol(ctx, expr);
         if (NULL != res) return res;
 
-        assert(false); // tODO exception
-        return NULL;
+        /* if all of the above fail... */
+        WARN << "Could not resolve symbol " << ctx << "::" << expr << endl;
+        throw UnresolvedSymbol(ctx, expr);
     }
 };
 
