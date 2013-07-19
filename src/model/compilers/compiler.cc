@@ -525,6 +525,29 @@ bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
 bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 
+bool Compiler::walk_set_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Compiler::walk_set_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
+bool Compiler::walk_comma_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+
+bool Compiler::walk_comma_inorder(const Expr_ptr expr)
+{ return true; }
+
+void Compiler::walk_comma_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
+bool Compiler::walk_range_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+
+bool Compiler::walk_range_inorder(const Expr_ptr expr)
+{ return true; }
+
+void Compiler::walk_range_postorder(const Expr_ptr expr)
+{ assert(false); /* TODO support inlined non-determinism */ }
+
 /* Array selector builder: for arrays subscription, a chain of ITE is
    built out of the encodings for each element which are assumed to be
    present in dd stack in reversed order (walk_leaf took care of
@@ -661,7 +684,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     // 2. Module-managed symbols
     ResolverProxy resolver;
-    ISymbol_ptr symb = resolver.symbol(ctx, expr);
+    ISymbol_ptr symb = resolver.symbol(ctx, expr);;
 
     // 2. 1. Temporary symbols are maintained internally by the compiler
     ITemporary_ptr temp;
@@ -724,7 +747,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     { /* try enums */
         IEnum_ptr enm;
         if (NULL != (enm = dynamic_cast<IEnum_ptr>(symb))) {
-            assert(false); // TODO
+            f_ctx_stack.push_back(enm->expr());
             return;
         }
     }
@@ -732,7 +755,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     { /* try arrays */
         IArray_ptr arr;
         if (NULL != (arr = dynamic_cast<IArray_ptr>(symb))) {
-            assert(false); // TODO
+            f_ctx_stack.push_back(arr->expr());
             return;
         }
     }

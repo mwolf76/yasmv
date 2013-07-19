@@ -41,7 +41,7 @@
 #include <proxy.hh>
 
 // uncommment following line to enable post_node_hook debug (verbose!)
-#define DEBUG_INFERRER
+// #define DEBUG_INFERRER
 
 Inferrer::Inferrer(ModelMgr& owner)
     : f_map()
@@ -131,93 +131,6 @@ Type_ptr Inferrer::check_expected_type(expected_t expected)
 
     return type;
 }
-
-bool Inferrer::walk_F_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_F_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_G_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_G_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_X_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_X_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_U_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_U_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_U_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
-
-bool Inferrer::walk_R_preorder(const Expr_ptr expr)
-{ return cache_miss(expr);  }
-bool Inferrer::walk_R_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_R_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
-
-bool Inferrer::walk_AF_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_AF_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_AG_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_AG_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_AX_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_AX_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_AU_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_AU_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_AU_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
-
-bool Inferrer::walk_AR_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_AR_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_AR_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
-
-bool Inferrer::walk_EF_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_EF_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_EG_preorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_EG_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_EX_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Inferrer::walk_EX_postorder(const Expr_ptr expr)
-{ walk_unary_temporal_postorder(expr); }
-
-bool Inferrer::walk_EU_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_EU_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_EU_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
-
-bool Inferrer::walk_ER_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Inferrer::walk_ER_inorder(const Expr_ptr expr)
-{ return true; }
-void Inferrer::walk_ER_postorder(const Expr_ptr expr)
-{ walk_binary_temporal_postorder(expr); }
 
 bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -386,34 +299,34 @@ bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 {
     Type_ptr tmp = f_type_stack.back();
-    Expr_ptr ctx = tmp->repr();
-
+    Expr_ptr ctx = f_owner.em().make_dot( f_ctx_stack.back(), expr->lhs());
     f_ctx_stack.push_back(ctx);
+
     return true;
 }
 void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 {
-    assert(false); // no longer supported
-#if 0
     TypeMgr& tm = f_owner.tm();
-    Type_ptr rhs_type;
+    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
+    EnumType_ptr enm;
 
-    { // RHS, no checks necessary/possible
-        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-        rhs_type = top;
+    if (NULL != (enm = dynamic_cast<EnumType_ptr> (type))) {
+        const ExprSet& lits = enm->literals();
+        Expr_ptr rhs = expr->rhs();
+
+        if (lits.find(rhs) != lits.end()) {
+            ResolverProxy proxy;
+            ISymbol_ptr symb = proxy.symbol(f_ctx_stack.back(), rhs);
+
+            PUSH_TYPE(symb->as_literal().type());
+        }
     }
 
-    { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
-        const Type_ptr top = f_type_stack.back(); f_type_stack.pop_back();
-        assert(tm.is_instance(top));
-    }
+    else assert(false);
 
-    // propagate rhs type
-    PUSH_TYPE(rhs_type);
 
     // restore previous ctx
     f_ctx_stack.pop_back();
-#endif
 }
 
 bool Inferrer::walk_params_preorder(const Expr_ptr expr)
@@ -435,6 +348,52 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_TYPE(tm.as_array(check_array())->of());
 }
 
+bool Inferrer::walk_set_preorder(Expr_ptr expr)
+{ return cache_miss(expr); }
+
+void Inferrer::walk_set_postorder(Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    POP_TYPE(of);
+    PUSH_TYPE(tm.find_set_type(of));
+}
+
+bool Inferrer::walk_comma_preorder(Expr_ptr expr)
+{ return cache_miss(expr); }
+
+bool Inferrer::walk_comma_inorder(Expr_ptr expr)
+{ return true; }
+
+void Inferrer::walk_comma_postorder(Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    POP_TYPE(rhs);
+    POP_TYPE(lhs);
+
+    if (lhs != rhs) {
+        throw TypeMismatch(lhs->repr(),
+                           rhs->repr());
+    }
+
+    PUSH_TYPE(lhs);
+}
+
+bool Inferrer::walk_range_preorder(Expr_ptr expr)
+{ return cache_miss(expr); }
+
+bool Inferrer::walk_range_inorder(Expr_ptr expr)
+{ return true; }
+
+void Inferrer::walk_range_postorder(Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    PUSH_TYPE( tm.find_range_type( tm.result_type( expr,
+                                                   check_arithmetical(),
+                                                   check_arithmetical())));
+}
+
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
@@ -451,8 +410,9 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 
     // .. or a symbol
     if (em.is_identifier(expr)) {
-        ResolverProxy proxy;
         Expr_ptr ctx = f_ctx_stack.back();
+
+        ResolverProxy proxy;
         ISymbol_ptr symb = proxy.symbol(ctx, expr);
 
         if (symb->is_const()) {
@@ -465,12 +425,12 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
-        else if (symb->is_enum()) {
+        else if (symb->is_enum()) { // meta type
             Type_ptr res = symb->as_enum().type();
             PUSH_TYPE(res);
             return;
         }
-        else if (symb->is_array()) {
+        else if (symb->is_array()) { // meta type
             Type_ptr res = symb->as_array().type();
             PUSH_TYPE(res);
             return;
@@ -487,19 +447,6 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     }
 
     assert(false); // unexpected
-}
-
-// fun: temporal -> temporal
-void Inferrer::walk_unary_temporal_postorder(const Expr_ptr expr)
-{
-    PUSH_TYPE(check_boolean());
-}
-
-// fun: temporal x temporal -> temporal
-void Inferrer::walk_binary_temporal_postorder(const Expr_ptr expr)
-{
-    check_boolean();
-    PUSH_TYPE(check_boolean());
 }
 
 // fun: T -> T
@@ -560,13 +507,13 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
                                check_arithmetical()));
 }
 
-// fun: A/B x A/B -> B
+// fun: A/B/E x A/B/E -> B
 void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     PUSH_TYPE( tm.result_type( expr,
-                               check_arithmetical(),
-                               check_arithmetical()));
+                               check_arithmetical_enumerative(),
+                               check_arithmetical_enumerative()));
 }
 
 
@@ -615,7 +562,8 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     }
 
     /* no rewrites */
-    else if (em.is_unary_arithmetical(expr) ||
+    else if (em.is_dot(expr) ||
+             em.is_unary_arithmetical(expr) ||
              em.is_unary_logical(expr) ||
              em.is_ite(expr) ||
              em.is_cond(expr) ||

@@ -25,13 +25,11 @@
 
 #include <common.hh>
 
-#include <expr.hh>
 #include <type.hh>
+#include <expr_walker.hh>
 
 #include <model.hh>
 #include <model_mgr.hh>
-
-#include <temporal_expr_walker.hh>
 
 enum ExprKind {
     EXPR_UNKNOWN,
@@ -86,7 +84,7 @@ private:
     Expr_ptr f_expr;
 };
 
-class Analyzer : public TemporalWalker {
+class Analyzer : public ExprWalker {
 public:
     Analyzer(ModelMgr& owner);
     ~Analyzer();

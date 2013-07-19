@@ -25,7 +25,7 @@
 
 #include <type.hh>
 #include <model.hh>
-#include <temporal_expr_walker.hh>
+#include <expr_walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
@@ -44,7 +44,7 @@ typedef pair<TypeReg::iterator, bool> TypeRegHit;
     f_type_stack.push_back(tp)
 
 class ModelMgr;
-class Inferrer : public TemporalWalker {
+class Inferrer : public ExprWalker {
 public:
     Inferrer(ModelMgr& owner);
     ~Inferrer();
@@ -63,42 +63,6 @@ protected:
     void post_node_hook(Expr_ptr expr);
 
     // walker interface
-    bool walk_F_preorder(const Expr_ptr expr);
-    void walk_F_postorder(const Expr_ptr expr);
-    bool walk_G_preorder(const Expr_ptr expr);
-    void walk_G_postorder(const Expr_ptr expr);
-    bool walk_X_preorder(const Expr_ptr expr);
-    void walk_X_postorder(const Expr_ptr expr);
-    bool walk_U_preorder(const Expr_ptr expr);
-    bool walk_U_inorder(const Expr_ptr expr);
-    void walk_U_postorder(const Expr_ptr expr);
-    bool walk_R_preorder(const Expr_ptr expr);
-    bool walk_R_inorder(const Expr_ptr expr);
-    void walk_R_postorder(const Expr_ptr expr);
-    bool walk_AF_preorder(const Expr_ptr expr);
-    void walk_AF_postorder(const Expr_ptr expr);
-    bool walk_AG_preorder(const Expr_ptr expr);
-    void walk_AG_postorder(const Expr_ptr expr);
-    bool walk_AX_preorder(const Expr_ptr expr);
-    void walk_AX_postorder(const Expr_ptr expr);
-    bool walk_AU_preorder(const Expr_ptr expr);
-    bool walk_AU_inorder(const Expr_ptr expr);
-    void walk_AU_postorder(const Expr_ptr expr);
-    bool walk_AR_preorder(const Expr_ptr expr);
-    bool walk_AR_inorder(const Expr_ptr expr);
-    void walk_AR_postorder(const Expr_ptr expr);
-    bool walk_EF_preorder(const Expr_ptr expr);
-    void walk_EF_postorder(const Expr_ptr expr);
-    bool walk_EG_preorder(const Expr_ptr expr);
-    void walk_EG_postorder(const Expr_ptr expr);
-    bool walk_EX_preorder(const Expr_ptr expr);
-    void walk_EX_postorder(const Expr_ptr expr);
-    bool walk_EU_preorder(const Expr_ptr expr);
-    bool walk_EU_inorder(const Expr_ptr expr);
-    void walk_EU_postorder(const Expr_ptr expr);
-    bool walk_ER_preorder(const Expr_ptr expr);
-    bool walk_ER_inorder(const Expr_ptr expr);
-    void walk_ER_postorder(const Expr_ptr expr);
     bool walk_next_preorder(const Expr_ptr expr);
     void walk_next_postorder(const Expr_ptr expr);
     bool walk_neg_preorder(const Expr_ptr expr);
@@ -178,6 +142,17 @@ protected:
     bool walk_subscript_inorder(const Expr_ptr expr);
     void walk_subscript_postorder(const Expr_ptr expr);
 
+    bool walk_set_preorder(const Expr_ptr expr);
+    void walk_set_postorder(const Expr_ptr expr);
+
+    bool walk_comma_preorder(const Expr_ptr expr);
+    bool walk_comma_inorder(const Expr_ptr expr);
+    void walk_comma_postorder(const Expr_ptr expr);
+
+    bool walk_range_preorder(const Expr_ptr expr);
+    bool walk_range_inorder(const Expr_ptr expr);
+    void walk_range_postorder(const Expr_ptr expr);
+
     void walk_leaf(const Expr_ptr expr);
 
 private:
@@ -219,6 +194,14 @@ private:
                                    TP_SIGNED_INT ) ;
     }
 
+    inline Type_ptr check_arithmetical_enumerative()
+    {
+        return check_expected_type(TP_INT_CONST    |
+                                   TP_UNSIGNED_INT |
+                                   TP_SIGNED_INT   |
+                                   TP_ENUM );
+    }
+
     inline Type_ptr check_arithmetical_integer()
     {
         return check_expected_type(TP_INT_CONST    |
@@ -240,10 +223,8 @@ private:
     }
 
     // post-orders only
-    void walk_unary_temporal_postorder(const Expr_ptr expr);
     void walk_unary_fsm_postorder(const Expr_ptr expr);
     void walk_binary_fsm_postorder(const Expr_ptr expr);
-    void walk_binary_temporal_postorder(const Expr_ptr expr);
     void walk_unary_arithmetical_postorder(const Expr_ptr expr);
     void walk_binary_arithmetical_postorder(const Expr_ptr expr);
     void walk_unary_logical_postorder(const Expr_ptr expr);

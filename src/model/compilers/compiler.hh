@@ -22,7 +22,7 @@
 
 #ifndef COMPILER_H
 #define COMPILER_H
-#include <simple_expr_walker.hh>
+#include <expr_walker.hh>
 
 #include <type.hh>
 
@@ -68,7 +68,7 @@ typedef pair<ENCMap::iterator, bool> ENCHit;
 /* shortcut for pushing */
 #define PUSH_ADD(add) f_add_stack.push_back(add)
 
-class Compiler : public SimpleWalker {
+class Compiler : public ExprWalker {
 public:
     Compiler();
     virtual ~Compiler();
@@ -162,6 +162,15 @@ protected:
     bool walk_subscript_preorder(const Expr_ptr expr);
     bool walk_subscript_inorder(const Expr_ptr expr);
     void walk_subscript_postorder(const Expr_ptr expr);
+    bool walk_set_preorder(const Expr_ptr);
+    void walk_set_postorder(const Expr_ptr);
+    bool walk_comma_preorder(const Expr_ptr);
+    bool walk_comma_inorder(const Expr_ptr);
+    void walk_comma_postorder(const Expr_ptr);
+    bool walk_range_preorder(const Expr_ptr);
+    bool walk_range_inorder(const Expr_ptr);
+    void walk_range_postorder(const Expr_ptr);
+
     void walk_leaf(const Expr_ptr expr);
 
     unsigned f_temp_auto_index; // autoincr temp index
