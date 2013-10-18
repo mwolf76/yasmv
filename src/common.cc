@@ -31,6 +31,7 @@ const char *TRUE_TOKEN = "TRUE";
 
 /* types */
 const char *BOOL_TOKEN     = "boolean";
+const char *ANY_TOKEN      = "(any)";
 const char *UNSIGNED_TOKEN = "unsigned";
 const char *SIGNED_TOKEN   = "signed";
 const char *INT_TOKEN      = "int";

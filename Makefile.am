@@ -23,7 +23,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 # Programs to be built
-bin_PROGRAMS = yasmv tests
+bin_PROGRAMS = yasmv # tests
 
 # test target helper
 test: tests

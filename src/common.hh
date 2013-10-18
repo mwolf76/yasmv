@@ -123,6 +123,7 @@ class Object : public IObject {
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
 extern const char *BOOL_TOKEN;
+extern const char *ANY_TOKEN;
 
 extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;

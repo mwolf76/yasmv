@@ -11,15 +11,23 @@
  *  MONOLITHIC types
  *  ================
  *  + Booleans (type keyword is 'boolean')
- *  + Enumeratives (e.g. { LOUIE, HUEWEY, DEWEY })
+ *  + Enumeratives (aka sets) (e.g. { LOUIE, HUEWEY, DEWEY })
 
  *  ALGEBRAIC types
  *  ===============
- *  + Signed integers(N) (type keyword is 'signed int'), where N is the number
- *  of hexadecimal digits used in the representation.
+ *  + Signed integers(N) (type keyword is 'signed int' or just 'int'),
+ *  where N is the number of hexadecimal digits used in the
+ *  representation.
  *
  *  + Unsigned integers(N) (type keyword is 'unsigned int'), where N
  *  has the same meaning as above.
+ *
+ *  COMPOSITE types
+ *  ===============
+ *
+ *  + ARRAYS
+ *  + RANGES
+ *  + SETS
  *
  * Remark: numeric constants are *always* unsigned and have the
  * special reserved abstract types 'unsigned int(0)'.
@@ -33,7 +41,7 @@
  * is in no way mandatory.
  *
  * INTEGER type aliases:
- * uint8_t, int8_t
+ * uint8_t,  int8_t
  * uint16_t, int16_t
  * uint32_t, int32_t
  * uint64_t, int64_t
@@ -82,36 +90,18 @@
 #include <expr.hh>
 #include <expr_mgr.hh>
 
-/* Supported data types: boolean, integers (signed and unsigned),
-   enums, module instances, arrays of all-of-the-above. */
-
-/* REMARK types are *immutable* by design! */
-typedef unsigned expected_t;
-
-// TODO: support fixed-point arithmetic
-#define TP_BOOLEAN   0x1
-#define TP_INT_CONST 0x2
-// #define TP_FXD_CONST 0x4
-#define TP_UNSIGNED_INT  0x8
-#define TP_SIGNED_INT    0x10
-// #define TP_UNSIGNED_FXD  0x20
-// #define TP_SIGNED_FXD 0x40
-#define TP_ENUM 0x80
-#define TP_LAST_TYPE 0x80
-
-/* array types use less significant bits to determine the type of elements */
-#define TP_ARRAY 0x200
-#define TP_RANGE 0x400
-#define TP_SET   0x800
-
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
 typedef class BooleanType* BooleanType_ptr;
-typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 typedef class EnumType* EnumType_ptr;
+typedef class SetType* SetType_ptr;
 typedef class ArrayType* ArrayType_ptr;
+typedef class RangeType* RangeType_ptr;
+
+typedef list<Type_ptr> TypeList;
+typedef set<Type_ptr> TypeSet;
 
 // reserved for resolution
 typedef class CtxType* CtxType_ptr;
@@ -124,23 +114,35 @@ ostream& operator<<(ostream& os, const Type_ptr type);
 
 class TypeMgr; // fwd
 
-/** Basic Type class. Is.. nothing. */
+/** Basic Type class. */
 class Type : public Object {
 public:
     Expr_ptr repr() const
     { return f_repr; }
 
+    bool is_abstract() const
+    { return f_abstract; }
+
     virtual ~Type()
     {}
 
 protected:
-    Type(TypeMgr &owner)
+    Type(TypeMgr &owner, bool abstract = false)
         : f_owner(owner)
         , f_repr(NULL)
+        , f_abstract(abstract)
     {}
 
     TypeMgr& f_owner;
     Expr_ptr f_repr;
+    bool f_abstract;
+};
+
+/** Any (scalar) type */
+class AnyType : public Type {
+protected:
+    friend class TypeMgr; // ctors not public
+    AnyType(TypeMgr& owner);
 };
 
 /** Boolean type */
@@ -158,47 +160,46 @@ protected:
     IntConstType(TypeMgr& owner);
 };
 
-/** Base class for all algebraic types */
-typedef class AlgebraicType* AlgebraicType_ptr;
-class AlgebraicType : public Type {
+/** Signed integers */
+typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+class SignedAlgebraicType : public Type {
 public:
+    unsigned width() const
+    { return f_width; }
+
     ADD *dds() const
     { return f_dds; }
 
-protected:
+ protected:
     friend class TypeMgr; // ctors not public
-    AlgebraicType(TypeMgr& owner, ADD *dds = NULL);
+    SignedAlgebraicType(TypeMgr& owner); // abstract
+    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+
+    unsigned f_width;
 
     // this is reserved for temp encodings, it's NULL for ordinary algebraics
     ADD *f_dds;
 };
 
-/** Signed integers */
-typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
-class SignedAlgebraicType : public AlgebraicType {
-public:
-    unsigned width() const
-    { return f_width; }
-
- protected:
-    friend class TypeMgr; // ctors not public
-    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
-
-    unsigned f_width;
-};
-
 /** Unsigned integers */
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-class UnsignedAlgebraicType : public AlgebraicType {
+class UnsignedAlgebraicType : public Type {
 public:
     unsigned width() const
     { return f_width; }
+
+    ADD *dds() const
+    { return f_dds; }
 
 protected:
     friend class TypeMgr; // ctors not public
+    UnsignedAlgebraicType(TypeMgr& owner); // abstract
     UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
 
     unsigned f_width;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
 };
 
 /** Arrays */
@@ -213,7 +214,12 @@ public:
 
 protected:
     friend class TypeMgr; // ctors not public
+
+    // concrete array type
     ArrayType(TypeMgr& owner, Type_ptr of, unsigned size);
+
+    // abstract array type
+    ArrayType(TypeMgr& owner, Type_ptr of);
 
     Type_ptr f_of;
     unsigned f_size;
@@ -248,6 +254,7 @@ protected:
 };
 
 /** Enumeratives */
+// TODO: this should be renamed to SetType (merging Sets and Enums)
 typedef class EnumType* EnumType_ptr;
 class EnumType : public Type {
 protected:

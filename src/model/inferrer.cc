@@ -56,7 +56,7 @@ Inferrer::~Inferrer()
 { DEBUG << "Destroying Inferrer @" << this << endl; }
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
-Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body, expected_t expected)
+Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body, TypeSet& expected)
 {
     // remove previous results
     f_type_stack.clear();
@@ -100,37 +100,82 @@ void Inferrer::post_node_hook(Expr_ptr expr)
 #endif
 }
 
-Type_ptr Inferrer::check_expected_type(expected_t expected)
+Type_ptr Inferrer::check_boolean_or_integer()
 {
     TypeMgr& tm = f_owner.tm();
 
     POP_TYPE(type);
     assert (NULL != type);
 
-    /* what could go wrong? */
-    if ((tm.is_boolean(type) &&
-         (0 == (expected & TP_BOOLEAN))) ||
+    if (! tm.check_type(type, tm.propositionals()) &&
+        ! tm.check_type(type, tm.arithmeticals())) {
+        // throw BadType(type->repr(), expected);
+        abort();
+    }
 
-        (tm.is_int_const(type) &&
-         (0 == (expected & TP_INT_CONST))) ||
+    return type;
+}
 
-        (tm.is_signed_algebraic(type) &&
-         (0 == (expected & TP_SIGNED_INT))) ||
 
-        (tm.is_unsigned_algebraic(type) &&
-         (0 == (expected & TP_UNSIGNED_INT))) ||
+Type_ptr Inferrer::check_arithmetical_enumerative()
+{
+    TypeMgr& tm = f_owner.tm();
 
-        (tm.is_enum(type) &&
-         (0 == (expected & TP_ENUM))) ||
+    POP_TYPE(type);
+    assert (NULL != type);
 
-        (tm.is_array(type) &&
-         (0 == (expected & TP_ARRAY)))) {
+    if (! tm.check_type(type, tm.propositionals()) &&
+        ! tm.check_type(type, tm.arithmeticals())) {
+        // throw BadType(type->repr(), expected);
+        abort();
+    }
 
+    return type;
+
+}
+
+
+Type_ptr Inferrer::check_expected_type(TypeSet &expected)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    POP_TYPE(type);
+    assert (NULL != type);
+
+    if (! tm.check_type(type, expected)) {
         throw BadType(type->repr(), expected);
     }
 
     return type;
 }
+
+Type_ptr Inferrer::check_array()
+{
+    TypeMgr& tm = f_owner.tm();
+
+    POP_TYPE(type);
+    assert (NULL != type);
+
+    if (! tm.is_array(type)) {
+        throw BadType(type->repr(), tm.arrays());
+    }
+
+    return type;
+}
+
+// Type_ptr Inferrer::check_set()
+// {
+//     TypeMgr& tm = f_owner.tm();
+
+//     POP_TYPE(type);
+//     assert (NULL != type);
+
+//     if (! tm.is_set(type)) {
+//         throw BadType(type->repr(), tm.sets());
+//     }
+
+//     return type;
+// }
 
 bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

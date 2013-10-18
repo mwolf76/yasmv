@@ -68,12 +68,10 @@ const char* UnresolvedSymbol::what() const throw()
     return oss.str().c_str();
 }
 
-BadType::BadType(Expr_ptr repr, expected_t expected)
+BadType::BadType(Expr_ptr repr, TypeSet &allowed)
     : f_repr(repr)
-    , f_expected(expected)
-{
-    ;
-}
+    , f_allowed(allowed)
+{}
 
 BadType::~BadType() throw()
 {}
@@ -128,29 +126,19 @@ const char* BadType::what() const throw()
     oss << "BadType: operand has type " << f_repr
         << ", expected: ";
 
-    ExprVector tmp;
-
-    /* collect expected types representations */
-    for (unsigned i = 1; i <= TP_LAST_TYPE; i <<= 1) {
-        if (i & f_expected) {
-            abort();
-            // tmp.push_back( make_abstract_type(i));
-        }
-    }
-
     /* at least one type is expected, right? */
-    assert (0 < tmp.size());
+    assert (0 < f_allowed.size());
 
-    ExprVector::iterator eye = tmp.begin();
-    oss << (*eye);
+    TypeSet::const_iterator eye = f_allowed.begin();
+    oss << (*eye)->repr();
 
-    if (1 < tmp.size()) {
-        ExprVector::iterator last = ( ++ tmp.rbegin()).base();
+    if (1 < f_allowed.size()) {
+        TypeSet::const_iterator last = ( ++ f_allowed.rbegin()).base();
         while (++ eye != last) {
-            oss << ", " << (*eye);
+            oss << ", " << (*eye)->repr();
         }
 
-        oss << " or " << (*last);
+        oss << " or " << (*last)->repr();
     }
     oss << ".";
 

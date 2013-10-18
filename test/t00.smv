@@ -1,6 +1,5 @@
-MODEL ring_counter
-
-MODULE main
+FSM
+    ring_counter
 
 VAR
     x0 : boolean;

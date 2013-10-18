@@ -31,6 +31,9 @@ ExprMgr_ptr ExprMgr::f_instance = NULL;
 
 ExprMgr::ExprMgr()
 {
+    // useful for arrays type checking
+    any_expr = make_identifier(ANY_TOKEN);
+
     // boolean type identifier, false and true identifiers
     bool_expr = make_identifier(BOOL_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);

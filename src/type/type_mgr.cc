@@ -40,12 +40,53 @@ TypeMgr::TypeMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_resolver(* new TypeResolver(* this))
 {
-    register_type( f_em.make_boolean_type(),
-                   new BooleanType(*this));
+    f_at = new AnyType(*this);
+    register_type( f_em.make_any_type(), f_at);
 
-    register_type( f_em.make_int_const_type(),
-                   new IntConstType(*this));
+    f_bt = new BooleanType(*this);
+    register_type( f_em.make_boolean_type(), f_bt);
+    f_propositionals.insert(f_bt);
 
+    f_ict = new IntConstType(*this);
+    register_type( f_em.make_int_const_type(), f_ict);
+    f_arithmeticals.insert(f_ict);
+
+    f_uat = new UnsignedAlgebraicType(*this);
+    register_type (f_em.make_abstract_unsigned_int_type(), f_uat);
+    f_arithmeticals.insert(f_uat);
+
+    f_uaat = new ArrayType(*this, f_uat);
+    register_type(f_em.make_abstract_array_type( f_uat->repr()), f_uaat );
+    f_arrays.insert(f_uaat);
+
+    f_sat = new SignedAlgebraicType(*this);
+    register_type (f_em.make_abstract_signed_int_type(), f_sat);
+    f_arithmeticals.insert(f_sat);
+
+    f_saat = new ArrayType(*this, f_sat);
+    register_type(f_em.make_abstract_array_type( f_sat->repr()), f_saat );
+    f_arrays.insert(f_saat);
+}
+
+bool TypeMgr::check_type(Type_ptr tp, TypeSet &allowed)
+{
+    assert(NULL != tp);
+
+    // perfect matching, no further fuss
+    if (allowed.end() != allowed.find(tp))
+        return true;
+
+    // it was not found, all compatible abstract are already there -> fail
+    if (tp->is_abstract())
+        return false;
+
+    if (is_unsigned_algebraic(tp))
+        return allowed.end() != allowed.find( f_uat );
+
+    if (is_signed_algebraic(tp))
+        return allowed.end() != allowed.find( f_sat );
+
+    return false;
 }
 
 const Type_ptr TypeMgr::find_unsigned(unsigned digits)
@@ -106,6 +147,48 @@ const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     return res;
 }
 
+const Type_ptr TypeMgr::find_array_type( Type_ptr of )
+{
+    Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
+
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this, of );
+
+    register_type(descr, res);
+    return res;
+}
+
+const Type_ptr TypeMgr::find_range_type( Type_ptr of )
+{
+    Expr_ptr descr(f_em.make_abstract_range_type( of->repr() ));
+
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new RangeType( *this, of );
+
+    register_type(descr, res);
+    return res;
+}
+
+const Type_ptr TypeMgr::find_set_type  ( Type_ptr of )
+{
+    Expr_ptr descr(f_em.make_abstract_set_type( of->repr() ));
+
+    Type_ptr res = lookup_type(descr);
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new SetType( *this, of );
+
+    register_type(descr, res);
+    return res;
+}
+
 void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 {
     /*
@@ -157,15 +240,6 @@ BooleanType_ptr TypeMgr::as_boolean(const Type_ptr tp) const
 EnumType_ptr TypeMgr::as_enum(const Type_ptr tp) const
 {
     EnumType_ptr res = dynamic_cast<EnumType_ptr> (tp);
-    assert(res);
-
-    return res;
-}
-
-AlgebraicType_ptr TypeMgr::as_algebraic(const Type_ptr tp) const
-{
-    AlgebraicType_ptr res = dynamic_cast
-        <const AlgebraicType_ptr> (tp);
     assert(res);
 
     return res;

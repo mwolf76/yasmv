@@ -24,6 +24,8 @@
 #define INFERRER_H
 
 #include <type.hh>
+#include <type_mgr.hh>
+
 #include <model.hh>
 #include <expr_walker.hh>
 
@@ -53,7 +55,8 @@ public:
     Type_ptr type(FQExpr& fqexpr);
 
     // walker toplevel
-    Type_ptr process(Expr_ptr ctx, Expr_ptr body, expected_t expected = TP_BOOLEAN);
+    Type_ptr process(Expr_ptr ctx, Expr_ptr body,
+                     TypeSet& expected = TypeMgr::INSTANCE().propositionals());
 
 protected:
     void pre_hook();
@@ -181,46 +184,39 @@ private:
 
     /* throws a BadType exception if toplevel type does not match any
        of the expected. Returns type if succesful. */
-    Type_ptr check_expected_type(expected_t expected);
+    Type_ptr check_expected_type(TypeSet& expected);
 
     /* common special cases */
     inline Type_ptr check_boolean()
-    { return check_expected_type(TP_BOOLEAN); }
+    { return check_expected_type(TypeMgr::INSTANCE().propositionals()); }
 
     inline Type_ptr check_arithmetical()
-    {
-        return check_expected_type(TP_INT_CONST    |
-                                   TP_UNSIGNED_INT |
-                                   TP_SIGNED_INT ) ;
-    }
+    { return check_expected_type(TypeMgr::INSTANCE().arithmeticals()); }
 
-    inline Type_ptr check_arithmetical_enumerative()
-    {
-        return check_expected_type(TP_INT_CONST    |
-                                   TP_UNSIGNED_INT |
-                                   TP_SIGNED_INT   |
-                                   TP_ENUM );
-    }
+    /* other cases */
+    Type_ptr check_boolean_or_integer();
+    Type_ptr check_arithmetical_enumerative();
 
-    inline Type_ptr check_arithmetical_integer()
-    {
-        return check_expected_type(TP_INT_CONST    |
-                                   TP_UNSIGNED_INT |
-                                   TP_SIGNED_INT ) ;
-    }
+    Type_ptr check_array();
 
-    inline Type_ptr check_boolean_or_integer()
-    {
-        return check_expected_type(TP_BOOLEAN      |
-                                   TP_INT_CONST    |
-                                   TP_UNSIGNED_INT |
-                                   TP_SIGNED_INT ) ;
-    }
+    // inline Type_ptr check_array()
+    // { return check_expected_type(TypeMgr::INSTANCE().arrays()); }
 
-    inline Type_ptr check_array()
-    {
-        return check_expected_type(TP_ARRAY);
-    }
+    // inline
+    // {
+    //     return check_expected_type(TP_INT_CONST    |
+    //                                TP_UNSIGNED_INT |
+    //                                TP_SIGNED_INT   |
+    //                                TP_ENUM );
+    // }
+
+    // inline Type_ptr check_arithmetical_integer()
+    // {
+    //     return check_expected_type(TP_INT_CONST    |
+    //                                TP_UNSIGNED_INT |
+    //                                TP_SIGNED_INT ) ;
+    // }
+
 
     // post-orders only
     void walk_unary_fsm_postorder(const Expr_ptr expr);

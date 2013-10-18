@@ -153,6 +153,9 @@ public:
     { return make_expr(PARAMS, a, b); }
 
     /* type makers */
+    inline Expr_ptr make_any_type() const
+    { return any_expr; }
+
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
@@ -383,6 +386,8 @@ private:
     value_t pow2(unsigned exp);
 
     /* -- data ------------------------------------------------------------- */
+
+    Expr_ptr any_expr;
 
     /* boolean exprs type and constants */
     Expr_ptr bool_expr;

@@ -94,7 +94,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing INIT " << fqdn << endl;
 
             try {
-                f_inferrer.process(ctx, body, TP_BOOLEAN);
+                f_inferrer.process(ctx, body);
             }
             catch (AnalyzerException& ae) {
                 cerr << "INIT " << fqdn << endl
@@ -112,7 +112,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing TRANS " << fqdn << endl;
 
             try {
-                f_inferrer.process(ctx, body, TP_BOOLEAN);
+                f_inferrer.process(ctx, body);
             }
             catch (AnalyzerException& ae) {
                 cerr << "TRANS " << fqdn << endl

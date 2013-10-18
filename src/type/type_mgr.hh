@@ -117,16 +117,30 @@ class TypeMgr {
     // reserved
     Type_ptr f_ctx_type;
 
+    TypeSet f_propositionals;
+    TypeSet f_arithmeticals;
+    TypeSet f_arrays;
+
     /* Shared enums and literals */
     Enums f_enums;
     Literals f_lits;
-
-    TypeResolver f_resolver;
 
 public:
 
     inline IResolver_ptr resolver()
     { return &f_resolver; }
+
+    // predefined type sets
+    inline TypeSet& propositionals()
+    { return f_propositionals; }
+
+    inline TypeSet& arithmeticals()
+    { return f_arithmeticals; }
+
+    inline TypeSet& arrays()
+    { return f_arrays; }
+
+    bool check_type(Type_ptr tp, TypeSet &allowed);
 
     /* -- inference --------------------------------------------------------- */
     inline const Type_ptr find_boolean()
@@ -136,6 +150,9 @@ public:
     { return f_register[ f_em.make_int_const_type() ]; }
 
     /* -- abstract types ---------------------------------------------------- */
+    const Type_ptr find_signed_type();
+    const Type_ptr find_unsigned_type();
+
     const Type_ptr find_array_type( Type_ptr of );
     const Type_ptr find_range_type( Type_ptr of );
     const Type_ptr find_set_type  ( Type_ptr of );
@@ -174,10 +191,11 @@ public:
         return (NULL != dynamic_cast<const IntConstType_ptr> (tp));
     }
 
-    /** true iff tp is algebraic type (abstract) */
     inline bool is_algebraic(const Type_ptr tp) const
     {
-        return (NULL != dynamic_cast <AlgebraicType_ptr> (tp));
+        return
+            is_signed_algebraic(tp) ||
+            is_unsigned_algebraic(tp);
     }
 
     /** true iff tp is a signed algebraic type (ground) */
@@ -218,7 +236,6 @@ public:
 
     // -- as_xxx accessors -------------------------------------------------- */
     BooleanType_ptr as_boolean(const Type_ptr tp) const;
-    AlgebraicType_ptr as_algebraic(const Type_ptr tp) const;
     SignedAlgebraicType_ptr as_signed_algebraic(const Type_ptr tp) const;
     UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
     EnumType_ptr as_enum(const Type_ptr tp) const;
@@ -228,7 +245,7 @@ public:
 
     /* -- services used by compiler and inferrer ---------------------------- */
 
-    /** returns the *total* width of an algebraic type, 1 for monoliths and consts */
+    /** returns the width of an algebraic type, 1 for monoliths and consts */
     unsigned calculate_width(Type_ptr type) const;
 
     /** Determine the resulting type of an operation given the type of its
@@ -276,6 +293,19 @@ private:
 
     // ref to expr manager
     ExprMgr& f_em;
+
+    // ref to internal resolver
+    TypeResolver f_resolver;
+
+    Type_ptr f_at;
+    Type_ptr f_bt;
+
+    Type_ptr f_ict;
+    Type_ptr f_uat;
+    Type_ptr f_sat;
+
+    Type_ptr f_uaat;
+    Type_ptr f_saat;
 };
 
 #endif

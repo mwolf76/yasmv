@@ -27,6 +27,12 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+AnyType::AnyType(TypeMgr& owner)
+    : Type(owner)
+{
+    f_repr = f_owner.em().make_any_type();
+}
+
 BooleanType::BooleanType(TypeMgr& owner)
     : Type(owner)
 {
@@ -39,25 +45,34 @@ IntConstType::IntConstType(TypeMgr& owner)
     f_repr = f_owner.em().make_int_const_type();
 }
 
-AlgebraicType::AlgebraicType(TypeMgr& owner, ADD *dds)
-    : Type(owner)
-    , f_dds(dds)
-{}
+SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner)
+    : Type(owner, true) // abstract
+{
+    f_repr = f_owner.em().make_abstract_signed_int_type();
+}
 
 SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
                                          unsigned width,
                                          ADD *dds)
-    : AlgebraicType(owner, dds)
+    : Type(owner, dds)
     , f_width(width)
+    , f_dds(dds)
 {
     f_repr = f_owner.em().make_signed_int_type(width);
+}
+
+UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner)
+    : Type(owner, true) // abstract
+{
+    f_repr = f_owner.em().make_abstract_unsigned_int_type();
 }
 
 UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
                                              unsigned width,
                                              ADD *dds)
-    : AlgebraicType(owner, dds)
+    : Type(owner)
     , f_width(width)
+    , f_dds(dds)
 {
     f_repr = f_owner.em().make_unsigned_int_type(width);
 }
@@ -67,22 +82,24 @@ ArrayType::ArrayType(TypeMgr& owner, Type_ptr of, unsigned size)
     , f_of(of)
     , f_size(size)
 {
+    assert (0 < size); // 0 is reserved
     f_repr = f_owner.em().make_subscript( of->repr(),
                                           f_owner.em().make_iconst( size));
 }
 
+ArrayType::ArrayType(TypeMgr& owner, Type_ptr of)
+    : Type(owner, true) // abstract
+    , f_of(of)
+    , f_size(0)
+{
+    f_repr = f_owner.em().make_abstract_array_type( of->repr() );
+}
+
 RangeType::RangeType(TypeMgr& owner, Type_ptr of)
-    : Type(owner)
+    : Type(owner, true) // abstract
     , f_of(of)
 {
     f_repr = f_owner.em().make_abstract_range_type ( of->repr() );
-}
-
-SetType::SetType(TypeMgr& owner, Type_ptr of)
-    : Type(owner)
-    , f_of(of)
-{
-    f_repr = f_owner.em().make_abstract_set_type( of->repr() );
 }
 
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
@@ -96,6 +113,13 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
         Expr_ptr expr = *i;
         assert(ExprMgr::INSTANCE().is_identifier(expr)); // debug only
     }
+}
+
+SetType::SetType(TypeMgr& owner, Type_ptr of)
+    : Type(owner, true) // abstract
+    , f_of(of)
+{
+    f_repr = f_owner.em().make_abstract_set_type( of->repr() );
 }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
