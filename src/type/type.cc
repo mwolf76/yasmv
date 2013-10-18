@@ -70,7 +70,7 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : MonolithicalType(owner)
     , f_literals(literals)
 {
-    f_repr = f_owner.em().make_set_type(f_literals);
+    f_repr = f_owner.em().make_enum_type(f_literals);
     ExprSet::iterator i;
 
     for (i = literals.begin(); i != literals.end(); ++ i) {

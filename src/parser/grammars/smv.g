@@ -593,7 +593,7 @@ identifier returns [Expr_ptr res]
 
 constant returns [Expr_ptr res]
 @init { }
-    : k=range_constant // holds int_constants as well
+    : k=int_constant
         { $res = k; }
     ;
 
@@ -616,16 +616,6 @@ int_constant returns [Expr_ptr res]
         Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
         $res = em.make_oct_const(tmp);
       }
-	;
-
-range_constant returns [Expr_ptr res]
-@init { }
-	: lhs=int_constant
-      { $res = lhs; }
-
-      ('..' rhs=int_constant
-      { $res = em.make_range_type(lhs, rhs); }
-      )?
 	;
 
 /* pvalue is used in param passing (actuals) */

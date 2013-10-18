@@ -162,13 +162,6 @@ public:
     inline Expr_ptr make_int_const_type() const
     { return int_expr; }
 
-    inline Expr_ptr make_range_type(Expr_ptr a, Expr_ptr b)
-    {
-        assert(is_int_numeric(a));
-        assert(is_int_numeric(b));
-        return make_expr(RANGE, a, b);
-    }
-
     inline Expr_ptr make_abstract_unsigned_int_type()
     { return unsigned_int_expr; }
 
@@ -190,13 +183,7 @@ public:
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
     { return make_params( array_expr, of); }
 
-    inline Expr_ptr make_abstract_range_type(Expr_ptr of)
-    { return make_params( range_expr, of); }
-
-    Expr_ptr make_set_type(ExprSet& literals);
-
-    inline Expr_ptr make_abstract_set_type(Expr_ptr of)
-    { return make_params( set_expr, of); }
+    Expr_ptr make_enum_type(ExprSet& literals);
 
     /* builtin identifiers */
     inline Expr_ptr make_temp() const
@@ -397,14 +384,8 @@ private:
     /* main module */
     Expr_ptr main_expr;
 
-    /* reserved for abstract set types */
-    Expr_ptr set_expr;
-
     /* reserved for abstract array types */
     Expr_ptr array_expr;
-
-    /* reserved for abstract array types */
-    Expr_ptr range_expr;
 
     /* reserved for temp symbols ctx */
     Expr_ptr temp_expr;

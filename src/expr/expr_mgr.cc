@@ -51,9 +51,7 @@ ExprMgr::ExprMgr()
     int_expr = make_identifier(INT_TOKEN);
 
     main_expr = make_identifier(MAIN_TOKEN);
-    set_expr = make_identifier(SET_TOKEN);
-    range_expr = make_identifier(RANGE_TOKEN);
-    array_expr = make_identifier (ARRAY_TOKEN);
+    array_expr = make_identifier(ARRAY_TOKEN);
 
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }
@@ -63,7 +61,7 @@ ExprMgr::~ExprMgr()
     DEBUG << "ExprMgr @" << this << " deinitialized" << endl;
 }
 
-Expr_ptr ExprMgr::make_set_type(ExprSet& literals)
+Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 {
     Expr_ptr res = NULL;
 
