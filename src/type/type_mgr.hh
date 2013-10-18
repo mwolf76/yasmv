@@ -2,10 +2,6 @@
  *  @file type_mgr.hh
  *  @brief Type system classes (TypeMgr)
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,6 +17,10 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
  *
  **/
 
@@ -39,26 +39,15 @@
 typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 typedef pair<TypeMap::iterator, bool> TypeHit;
 
-/**
-    The TypeMgr has three well-defined responsibilites:
+/* The TypeMgr has three well-defined responsibilites:
 
-    1. It keeps track of types that has been defined;
+   1. It keeps track of types that has been defined;
 
-    2. It instantiates (and owns) type descriptors (Type objects);
+   2. It instantiates (and owns) type descriptors (Type objects);
 
-    NOTE: there at distinct concepts of type that should not be mixed
-    together: Here we talk about the type of an expression from a
-    static analysis PoV. An expression can be a boolean, integer,
-    non-deterministic choice in a set or range (TODO). And that's
-    final (i.e. types are immutable).
+   3. It is the single authoritative source for determining the
+   resulting type of an operand, via the result_type methods. */
 
-    When it comes to encoding though, a variable can be either signed
-    or unsigned, with a given number of bits. But this, *by design* is
-    completely ignored by the type inferrer.
-
-    3. It is the single authoritative source for determining the resulting
-    type of an operand, via the result_type methods.
-  */
 typedef class TypeMgr* TypeMgr_ptr;
 
 class Enum : public IEnum {
@@ -143,34 +132,31 @@ public:
     bool check_type(Type_ptr tp, TypeSet &allowed);
 
     /* -- inference --------------------------------------------------------- */
-    inline const Type_ptr find_boolean()
-    { return f_register[ f_em.make_boolean_type() ]; }
+    inline const ScalarType_ptr find_boolean()
+    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]); }
 
-    inline const Type_ptr find_int_const()
-    { return f_register[ f_em.make_int_const_type() ]; }
+    inline const ScalarType_ptr find_int_const()
+    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_int_const_type() ]); }
 
     /* -- abstract types ---------------------------------------------------- */
-    const Type_ptr find_signed_type();
-    const Type_ptr find_unsigned_type();
-
-    const Type_ptr find_array_type( Type_ptr of );
-    const Type_ptr find_range_type( Type_ptr of );
-    const Type_ptr find_set_type  ( Type_ptr of );
+    const ScalarType_ptr find_signed_type();
+    const ScalarType_ptr find_unsigned_type();
+    const ArrayType_ptr find_array_type( ScalarType_ptr of );
 
     /* -- decls ------------------------------------------------------------- */
-    const Type_ptr find_signed(unsigned digits);
-    const Type_ptr find_default_signed();
-    const Type_ptr find_signed_array(unsigned digits,
-                                     unsigned size);
+    const ScalarType_ptr find_signed(unsigned digits);
+    const ScalarType_ptr find_default_signed();
+    const ArrayType_ptr find_signed_array(unsigned digits,
+                                          unsigned size);
 
-    const Type_ptr find_unsigned(unsigned digits);
-    const Type_ptr find_default_unsigned();
-    const Type_ptr find_unsigned_array(unsigned digits,
-                                       unsigned size);
+    const ScalarType_ptr find_unsigned(unsigned digits);
+    const ScalarType_ptr find_default_unsigned();
+    const ArrayType_ptr find_unsigned_array(unsigned digits,
+                                            unsigned size);
 
     /* Remark: unambiguous enums resolution requires DOT fullnames */
     void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
-    const Type_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
+    const ScalarType_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
 
     const Enums& enums() const
     { return f_enums; }
@@ -222,26 +208,12 @@ public:
         return NULL != dynamic_cast <const ArrayType_ptr> (tp);
     }
 
-    /** true iff tp is range tyype */
-    inline bool is_range(const Type_ptr tp) const
-    {
-        return NULL != dynamic_cast <const RangeType_ptr> (tp);
-    }
-
-    /** true iff tp is range tyype */
-    inline bool is_set(const Type_ptr tp) const
-    {
-        return NULL != dynamic_cast <const SetType_ptr> (tp);
-    }
-
     // -- as_xxx accessors -------------------------------------------------- */
     BooleanType_ptr as_boolean(const Type_ptr tp) const;
     SignedAlgebraicType_ptr as_signed_algebraic(const Type_ptr tp) const;
     UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
     EnumType_ptr as_enum(const Type_ptr tp) const;
     ArrayType_ptr as_array(const Type_ptr tp) const;
-    RangeType_ptr as_range(const Type_ptr tp) const;
-    SetType_ptr as_set(const Type_ptr tp) const;
 
     /* -- services used by compiler and inferrer ---------------------------- */
 
@@ -297,15 +269,12 @@ private:
     // ref to internal resolver
     TypeResolver f_resolver;
 
-    Type_ptr f_at;
-    Type_ptr f_bt;
-
-    Type_ptr f_ict;
-    Type_ptr f_uat;
-    Type_ptr f_sat;
-
-    Type_ptr f_uaat;
-    Type_ptr f_saat;
+    ScalarType_ptr f_bt;  // booleans
+    ScalarType_ptr f_ict; // int consts
+    ScalarType_ptr f_uat; // (abstract) unsigned
+    ScalarType_ptr f_sat; // (abstract) signed
+    ArrayType_ptr f_uaat; // (abstract) unsigned array
+    ArrayType_ptr f_saat; // (abstract) signed array
 };
 
 #endif

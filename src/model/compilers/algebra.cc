@@ -53,10 +53,10 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
 
     {
         if (tm.is_signed_algebraic(type)) {
-            width = tm.as_signed_algebraic(type)->width();
+            width = tm.as_signed_algebraic(type)->size();
         }
         else if (tm.is_unsigned_algebraic(type)) {
-            width = tm.as_unsigned_algebraic(type)->width();
+            width = tm.as_unsigned_algebraic(type)->size();
         }
         else {
             assert( false ); /* unexpected */
@@ -84,10 +84,10 @@ void Compiler::algebraic_not(const Expr_ptr expr)
 
     {
         if (tm.is_signed_algebraic(type)) {
-            width = tm.as_signed_algebraic(type)->width();
+            width = tm.as_signed_algebraic(type)->size();
         }
         else if (tm.is_unsigned_algebraic(type)) {
-            width = tm.as_unsigned_algebraic(type)->width();
+            width = tm.as_unsigned_algebraic(type)->size();
         }
         else {
             assert( false ); /* unexpected */

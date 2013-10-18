@@ -2,6 +2,25 @@
  *  @file type.hh
  *  @brief Type system classes
  *
+ *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT
+ *  gmail DOT com >
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1
+ *  of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free
+ *  Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ *  Boston, MA 02110-1301 USA
+ *
+ *
  *  This module contains definitions and services that implement type
  *  classes. YASMINE's types can be classified as (a) Monolithic types
  *  (i.e. that can be represented using a single DD), (b) Algebraic
@@ -10,37 +29,41 @@
  *
  *  MONOLITHIC types
  *  ================
- *  + Booleans (type keyword is 'boolean')
- *  + Enumeratives (aka sets) (e.g. { LOUIE, HUEWEY, DEWEY })
+ *  + Booleans
+ *  + Enumeratives (e.g. { LOUIE, HUEWEY, DEWEY })
 
  *  ALGEBRAIC types
  *  ===============
  *  + Signed integers(N) (type keyword is 'signed int' or just 'int'),
  *  where N is the number of hexadecimal digits used in the
- *  representation.
+ *  representation. MSB is the sign bit. (e.g. an int(4) ranges from
+ *  -8 to 7)
  *
  *  + Unsigned integers(N) (type keyword is 'unsigned int'), where N
- *  has the same meaning as above.
- *
- *  COMPOSITE types
- *  ===============
- *
- *  + ARRAYS
- *  + RANGES
- *  + SETS
+ *  has the same meaning as above. (e.g. an unsigned int(4) ranges
+ *  from 0 to 15.
  *
  * Remark: numeric constants are *always* unsigned and have the
  * special reserved abstract types 'unsigned int(0)'.
  *
- * Type Aliases
+ *  ARRAY types
+ *  ===============
+ *
+ *  + ARRAY of booleans
+ *  + ARRAY of enumeratives
+ *  + ARRAY of signed integers
+ *  + ARRAY of unsigned integers
+ *
+* Type Aliases
  * ============
  *
- * A few type aliases are provided, to make YASMINE's type system look
+ * A few type aliases are provided, to bring YASMINE's type system
  * closer to C99's. These type aliases are just synctactig sugar for
  * the type classes defined above, and their usage though recommended
  * is in no way mandatory.
  *
  * INTEGER type aliases:
+ * uint4_t,  int4_t
  * uint8_t,  int8_t
  * uint16_t, int16_t
  * uint32_t, int32_t
@@ -64,22 +87,6 @@
  * 1. When one of the two operands is signed the other one is also converted to signed.
  * 2. The size of the result fits the largest size of the involved operands.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
  **/
 #ifndef TYPE_H
 #define TYPE_H
@@ -96,9 +103,7 @@ typedef class BooleanType* BooleanType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 typedef class EnumType* EnumType_ptr;
-typedef class SetType* SetType_ptr;
 typedef class ArrayType* ArrayType_ptr;
-typedef class RangeType* RangeType_ptr;
 
 typedef list<Type_ptr> TypeList;
 typedef set<Type_ptr> TypeSet;
@@ -114,47 +119,100 @@ ostream& operator<<(ostream& os, const Type_ptr type);
 
 class TypeMgr; // fwd
 
+typedef class ScalarType* ScalarType_ptr;
+
+typedef class MonolithicalType* MonolithicalType_ptr;
+typedef class BooleanType* BooleanType_ptr;
+typedef class EnumType* EnumType_ptr;
+
+typedef class AlgebraicType* AlgebraicType_ptr;
+typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
+
+typedef class ArrayType* ArrayType_ptr;
+
 /** Basic Type class. */
 class Type : public Object {
 public:
     Expr_ptr repr() const
     { return f_repr; }
 
-    bool is_abstract() const
-    { return f_abstract; }
+    // (i.e. there is no way to calculate the size, size() should *not* be invoked)
+    virtual bool is_abstract() const =0;
 
-    virtual ~Type()
-    {}
+    // This depends on Monolithical vs. Algebraic nature of type.
+    // (i.e. for Monoliths, size is the number of bits; for algebraics
+    // size is the number of ADDs.
+    virtual unsigned size() const =0;
+
+    // shortcurts
+    bool is_scalar();
+    bool is_monolithical();
+    bool is_algebraic();
+    bool is_boolean();
+    bool is_intconst();
+    bool is_signed_algebraic();
+    bool is_unsigned_algebraic();
+    bool is_enum();
+    bool is_array();
+
+    virtual ~Type();
 
 protected:
-    Type(TypeMgr &owner, bool abstract = false)
+    Type(TypeMgr &owner)
         : f_owner(owner)
         , f_repr(NULL)
-        , f_abstract(abstract)
     {}
 
     TypeMgr& f_owner;
     Expr_ptr f_repr;
-    bool f_abstract;
 };
 
-/** Any (scalar) type */
-class AnyType : public Type {
+/** -- Scalars ------------------------------------------------------------ */
+
+/** Scalar type class. */
+class ScalarType : public Type {
 protected:
-    friend class TypeMgr; // ctors not public
-    AnyType(TypeMgr& owner);
+    ScalarType(TypeMgr &owner)
+        : Type(owner)
+    {}
+};
+
+/** Monolithical type class. */
+class MonolithicalType : public ScalarType {
+protected:
+    MonolithicalType(TypeMgr &owner)
+        : ScalarType(owner)
+    {}
+};
+
+/** Algebraic type class. */
+class AlgebraicType : public ScalarType {
+protected:
+    AlgebraicType(TypeMgr &owner)
+        : ScalarType(owner)
+    {}
 };
 
 /** Boolean type */
-class BooleanType : public Type {
+typedef class BooleanType* BooleanType_ptr;
+class BooleanType : public MonolithicalType {
+public:
+    bool is_abstract() const;
+    unsigned size() const;
+
 protected:
     friend class TypeMgr; // ctors not public
     BooleanType(TypeMgr& owner);
 };
 
-/** Integer constants type (always unsigned) */
+/** reserved for numeric constants */
 typedef class IntConstType* IntConstType_ptr;
-class IntConstType : public Type {
+class IntConstType : public AlgebraicType {
+public:
+    bool is_abstract() const;
+    unsigned size() const;
+
 protected:
     friend class TypeMgr; // ctors not public
     IntConstType(TypeMgr& owner);
@@ -162,10 +220,10 @@ protected:
 
 /** Signed integers */
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
-class SignedAlgebraicType : public Type {
+class SignedAlgebraicType : public AlgebraicType {
 public:
-    unsigned width() const
-    { return f_width; }
+    bool is_abstract() const;
+    unsigned size() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -183,10 +241,10 @@ public:
 
 /** Unsigned integers */
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-class UnsignedAlgebraicType : public Type {
+class UnsignedAlgebraicType : public AlgebraicType {
 public:
-    unsigned width() const
-    { return f_width; }
+    bool is_abstract() const;
+    unsigned size() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -202,66 +260,17 @@ protected:
     ADD *f_dds;
 };
 
-/** Arrays */
-typedef class ArrayType* ArrayType_ptr;
-class ArrayType : public Type {
-public:
-    unsigned size() const
-    { return f_size; }
-
-    Type_ptr of() const
-    { return f_of; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-
-    // concrete array type
-    ArrayType(TypeMgr& owner, Type_ptr of, unsigned size);
-
-    // abstract array type
-    ArrayType(TypeMgr& owner, Type_ptr of);
-
-    Type_ptr f_of;
-    unsigned f_size;
-};
-
-/** Ranges */
-typedef class RangeType* RangeType_ptr;
-class RangeType : public Type {
-public:
-    Type_ptr of() const
-    { return f_of; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    RangeType(TypeMgr& owner, Type_ptr of);
-
-    Type_ptr f_of;
-};
-
-/** Sets */
-typedef class SetType* SetType_ptr;
-class SetType : public Type {
-public:
-    Type_ptr of() const
-    { return f_of; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    SetType(TypeMgr& owner, Type_ptr of);
-
-    Type_ptr f_of;
-};
-
 /** Enumeratives */
-// TODO: this should be renamed to SetType (merging Sets and Enums)
 typedef class EnumType* EnumType_ptr;
-class EnumType : public Type {
+class EnumType : public MonolithicalType {
 protected:
     friend class TypeMgr; // ctors not public
     EnumType(TypeMgr& owner, ExprSet& literals);
 
 public:
+    bool is_abstract() const;
+    unsigned size() const;
+
     const ExprSet& literals() const
     { return f_literals; }
 
@@ -282,6 +291,35 @@ private:
     ExprSet f_literals;
 };
 
+/** -- Arrays ------------------------------------------------------------ */
+
+/** Array type class. */
+typedef class ArrayType* ArrayType_ptr;
+class ArrayType : public Type {
+public:
+    bool is_abstract() const;
+    unsigned size() const;
+
+    unsigned nelems() const
+    { return f_nelems; }
+
+    ScalarType_ptr of() const
+    { return f_of; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+
+    // concrete array type
+    ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems);
+
+    // abstract array type
+    ArrayType(TypeMgr& owner, ScalarType_ptr of);
+
+    ScalarType_ptr f_of;
+    unsigned f_nelems;
+};
+
+// ????
 typedef class ResolutionCtxType* ResolutionCtxType_ptr;
 class ResolutionCtxType : public Type {
 protected:

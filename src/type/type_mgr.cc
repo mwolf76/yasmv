@@ -2,10 +2,6 @@
  *  @file type_mgr.cc
  *  @brief Type system classes (TypeMgr)
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,6 +17,11 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
+ *
  *
  **/
 #include <type.hh>
@@ -40,9 +41,6 @@ TypeMgr::TypeMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_resolver(* new TypeResolver(* this))
 {
-    f_at = new AnyType(*this);
-    register_type( f_em.make_any_type(), f_at);
-
     f_bt = new BooleanType(*this);
     register_type( f_em.make_boolean_type(), f_bt);
     f_propositionals.insert(f_bt);
@@ -89,10 +87,10 @@ bool TypeMgr::check_type(Type_ptr tp, TypeSet &allowed)
     return false;
 }
 
-const Type_ptr TypeMgr::find_unsigned(unsigned digits)
+const ScalarType_ptr TypeMgr::find_unsigned(unsigned digits)
 {
     Expr_ptr descr(f_em.make_unsigned_int_type(digits));
-    Type_ptr res = lookup_type(descr);
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
@@ -101,14 +99,14 @@ const Type_ptr TypeMgr::find_unsigned(unsigned digits)
     return res;
 }
 
-const Type_ptr TypeMgr::find_default_unsigned()
+const ScalarType_ptr TypeMgr::find_default_unsigned()
 { return find_unsigned(DEFAULT_INTTYPE_SIZE); }
 
-const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
+const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_int_type(digits),
                                         f_em.make_iconst(size)));
-    Type_ptr res = lookup_type(descr);
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
@@ -118,10 +116,10 @@ const Type_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
     return res;
 }
 
-const Type_ptr TypeMgr::find_signed(unsigned digits)
+const ScalarType_ptr TypeMgr::find_signed(unsigned digits)
 {
     Expr_ptr descr(f_em.make_signed_int_type(digits));
-    Type_ptr res = lookup_type(descr);
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
@@ -130,14 +128,14 @@ const Type_ptr TypeMgr::find_signed(unsigned digits)
     return res;
 }
 
-const Type_ptr TypeMgr::find_default_signed()
+const ScalarType_ptr TypeMgr::find_default_signed()
 { return find_signed(DEFAULT_INTTYPE_SIZE); }
 
-const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
+const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
 {
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
                                         f_em.make_iconst(size)));
-    Type_ptr res = lookup_type(descr);
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
@@ -147,43 +145,15 @@ const Type_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     return res;
 }
 
-const Type_ptr TypeMgr::find_array_type( Type_ptr of )
+const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
 {
     Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
 
-    Type_ptr res = lookup_type(descr);
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
     res = new ArrayType( *this, of );
-
-    register_type(descr, res);
-    return res;
-}
-
-const Type_ptr TypeMgr::find_range_type( Type_ptr of )
-{
-    Expr_ptr descr(f_em.make_abstract_range_type( of->repr() ));
-
-    Type_ptr res = lookup_type(descr);
-    if (NULL != res) return res;
-
-    // new type, needs to be registered before returning
-    res = new RangeType( *this, of );
-
-    register_type(descr, res);
-    return res;
-}
-
-const Type_ptr TypeMgr::find_set_type  ( Type_ptr of )
-{
-    Expr_ptr descr(f_em.make_abstract_set_type( of->repr() ));
-
-    Type_ptr res = lookup_type(descr);
-    if (NULL != res) return res;
-
-    // new type, needs to be registered before returning
-    res = new SetType( *this, of );
 
     register_type(descr, res);
     return res;
@@ -221,9 +191,11 @@ void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
     register_type(fullname, tp);
 }
 
-const Type_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
+const ScalarType_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
 {
-    Type_ptr res = lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name));
+    ScalarType_ptr res =
+        dynamic_cast<ScalarType_ptr> (lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name)));
+
     assert( NULL != res ); // TODO error handling
 
     return res;
@@ -266,22 +238,6 @@ UnsignedAlgebraicType_ptr TypeMgr::as_unsigned_algebraic(const Type_ptr tp) cons
 ArrayType_ptr TypeMgr::as_array(const Type_ptr tp) const
 {
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (tp);
-    assert(res);
-
-    return res;
-}
-
-RangeType_ptr TypeMgr::as_range(const Type_ptr tp) const
-{
-    RangeType_ptr res = dynamic_cast<RangeType_ptr> (tp);
-    assert(res);
-
-    return res;
-}
-
-SetType_ptr TypeMgr::as_set(const Type_ptr tp) const
-{
-    SetType_ptr res = dynamic_cast<SetType_ptr> (tp);
     assert(res);
 
     return res;
@@ -461,10 +417,10 @@ unsigned TypeMgr::calculate_width(Type_ptr type) const
         return 1; /* monolithic */
     }
     else if (is_signed_algebraic(type)) {
-        return as_signed_algebraic(type)->width();
+        return as_signed_algebraic(type)->size();
     }
     else if (is_unsigned_algebraic(type)) {
-        return as_unsigned_algebraic(type)->width();
+        return as_unsigned_algebraic(type)->size();
     }
     else if (is_array(type)) {
         assert(false); // FIXME yet to be supported

@@ -393,16 +393,16 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_TYPE(tm.as_array(check_array())->of());
 }
 
-bool Inferrer::walk_set_preorder(Expr_ptr expr)
-{ return cache_miss(expr); }
+// bool Inferrer::walk_set_preorder(Expr_ptr expr)
+// { return cache_miss(expr); }
 
-void Inferrer::walk_set_postorder(Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
+// void Inferrer::walk_set_postorder(Expr_ptr expr)
+// {
+//     TypeMgr& tm = f_owner.tm();
 
-    POP_TYPE(of);
-    PUSH_TYPE(tm.find_set_type(of));
-}
+//     POP_TYPE(of);
+//     PUSH_TYPE(tm.find_set_type(of));
+// }
 
 bool Inferrer::walk_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }
@@ -425,19 +425,19 @@ void Inferrer::walk_comma_postorder(Expr_ptr expr)
     PUSH_TYPE(lhs);
 }
 
-bool Inferrer::walk_range_preorder(Expr_ptr expr)
-{ return cache_miss(expr); }
+// bool Inferrer::walk_range_preorder(Expr_ptr expr)
+// { return cache_miss(expr); }
 
-bool Inferrer::walk_range_inorder(Expr_ptr expr)
-{ return true; }
+// bool Inferrer::walk_range_inorder(Expr_ptr expr)
+// { return true; }
 
-void Inferrer::walk_range_postorder(Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.find_range_type( tm.result_type( expr,
-                                                   check_arithmetical(),
-                                                   check_arithmetical())));
-}
+// void Inferrer::walk_range_postorder(Expr_ptr expr)
+// {
+//     TypeMgr& tm = f_owner.tm();
+//     PUSH_TYPE( tm.find_range_type( tm.result_type( expr,
+//                                                    check_arithmetical(),
+//                                                    check_arithmetical())));
+// }
 
 void Inferrer::walk_leaf(const Expr_ptr expr)
 {

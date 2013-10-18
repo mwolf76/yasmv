@@ -77,11 +77,7 @@ typedef enum {
     // subscripts (arrays)
     SUBSCRIPT_1, SUBSCRIPT_2,
 
-    // range decls
-    RANGE_1, RANGE_2,
-
     // for enum decls, params
-    SET_1,
     PARAMS_1, PARAMS_2,
     COMMA_1, COMMA_2,
 } entry_point;
@@ -271,9 +267,6 @@ protected:
     virtual bool walk_subscript_inorder(const Expr_ptr expr) =0;
     virtual void walk_subscript_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_set_preorder(const Expr_ptr expr) =0;
-    virtual void walk_set_postorder(const Expr_ptr expr) =0;
-
     virtual bool walk_params_preorder(const Expr_ptr expr) =0;
     virtual bool walk_params_inorder(const Expr_ptr expr) =0;
     virtual void walk_params_postorder(const Expr_ptr expr) =0;
@@ -281,10 +274,6 @@ protected:
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
     virtual bool walk_comma_inorder(const Expr_ptr expr) =0;
     virtual void walk_comma_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_range_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_range_inorder(const Expr_ptr expr) =0;
-    virtual void walk_range_postorder(const Expr_ptr expr) =0;
 
     // leaves
     virtual void walk_leaf(const Expr_ptr expr) =0;

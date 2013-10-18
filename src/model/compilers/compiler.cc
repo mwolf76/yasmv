@@ -579,10 +579,10 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
         width = 1;
     }
     else if (tm.is_signed_algebraic(rhs_type)) {
-        width = tm.as_signed_algebraic(rhs_type)->width();
+        width = tm.as_signed_algebraic(rhs_type)->size();
     }
     else if (tm.is_unsigned_algebraic(rhs_type)) {
-        width = tm.as_unsigned_algebraic(rhs_type)->width();
+        width = tm.as_unsigned_algebraic(rhs_type)->size();
     }
     else {
         assert(false); /* TODO: support others.. */

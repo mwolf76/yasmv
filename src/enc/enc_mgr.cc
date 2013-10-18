@@ -49,11 +49,11 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     }
     else if (NULL != (sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp))) {
         DEBUG << "Encoding " << sa_type << endl;
-        res = new AlgebraicEncoding(sa_type->width(), 0, true, sa_type->dds());
+        res = new AlgebraicEncoding(sa_type->size(), 0, true, sa_type->dds());
     }
     else if (NULL != (ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp))) {
         DEBUG << "Encoding " << ua_type << endl;
-        res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
+        res = new AlgebraicEncoding(ua_type->size(), 0, false, ua_type->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding " << etype << endl;
