@@ -200,7 +200,7 @@ void Compiler::integer_ite(const Expr_ptr expr)
     TypeMgr& tm = f_owner.tm();
 
     FQExpr key(expr); const Type_ptr type = f_owner.type(key);
-    unsigned width = tm.calculate_width(type);
+    unsigned width = type -> size();
 
     algebraic_from_int_const(width); // rhs
     algebraic_from_int_const(width); // lhs

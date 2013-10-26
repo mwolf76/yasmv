@@ -32,13 +32,11 @@
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
-    // -- expr makers ----------------------------------------------------------
-
-    /* primary expressions */
+    /* ++ primary expressions */
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
-    /* arithmetical operators */
+    /* ++ arithmetical operators */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
 
@@ -57,7 +55,7 @@ public:
     inline Expr_ptr make_mod(Expr_ptr a, Expr_ptr b)
     { return make_expr(MOD, a, b); }
 
-    /* logical/bitwise operators */
+    /* ++ logical/bitwise operators */
     inline Expr_ptr make_not(Expr_ptr expr)
     { return make_expr(NOT, expr, NULL); }
 
@@ -85,7 +83,7 @@ public:
     inline Expr_ptr make_iff(Expr_ptr a, Expr_ptr b)
     { return make_expr(IFF, a, b); }
 
-    /* relational operators */
+    /* ++ relational operators */
     inline Expr_ptr make_eq(Expr_ptr a, Expr_ptr b)
     { return make_expr(EQ, a, b); }
 
@@ -110,9 +108,21 @@ public:
     inline Expr_ptr make_ite(Expr_ptr a, Expr_ptr b)
     { return make_expr(ITE, a, b); }
 
-    inline Expr_ptr make_iconst(value_t value)
+    inline Expr_ptr make_const(value_t value) // decimal
     {
         Expr tmp(ICONST, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_hconst(value_t value) // hexadecimal
+    {
+        Expr tmp(HCONST, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_oconst(value_t value) // octal
+    {
+        Expr tmp(OCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -128,18 +138,6 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_hconst(value_t value)
-    {
-        Expr tmp(HCONST, value); // we need a temp store
-        return __make_expr(&tmp);
-    }
-
-    inline Expr_ptr make_oconst(value_t value)
-    {
-        Expr tmp(OCONST, value); // we need a temp store
-        return __make_expr(&tmp);
-    }
-
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return make_expr(DOT, a, b); }
 
@@ -152,32 +150,23 @@ public:
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
 
-    /* type makers */
-    inline Expr_ptr make_any_type() const
-    { return any_expr; }
-
+    /* ++ type makers */
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
-    inline Expr_ptr make_int_const_type() const
-    { return int_expr; }
-
-    inline Expr_ptr make_abstract_unsigned_int_type()
-    { return unsigned_int_expr; }
+    inline Expr_ptr make_constant_type() const
+    { return const_int_expr; }
 
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
         return make_params(unsigned_int_expr,
-                           make_iconst((value_t) digits));
+                           make_const((value_t) digits));
     }
-
-    inline Expr_ptr make_abstract_signed_int_type()
-    { return signed_int_expr; }
 
     inline Expr_ptr make_signed_int_type(unsigned digits)
     {
         return make_params(signed_int_expr,
-                           make_iconst((value_t) digits));
+                           make_const((value_t) digits));
     }
 
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
@@ -185,7 +174,7 @@ public:
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
-    /* builtin identifiers */
+    /* ++ builtin identifiers */
     inline Expr_ptr make_temp() const
     { return temp_expr; }
 
@@ -222,13 +211,13 @@ public:
     }
 
     inline Expr_ptr make_dec_const(Atom atom)
-    { return make_iconst( strtoll(atom.c_str(), NULL, 10)); }
+    { return make_const( strtoll(atom.c_str(), NULL, 10)); }
 
     inline Expr_ptr make_hex_const(Atom atom)
-    { return make_hconst( strtoll(atom.c_str(), NULL, 16)); }
+    { return make_hconst( strtoll(atom.c_str(), NULL, 0x10)); }
 
     inline Expr_ptr make_oct_const(Atom atom)
-    { return make_oconst( strtoll(atom.c_str(), NULL, 8)); }
+    { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
     // -- is-a predicates -------------------------------------------------------
     inline bool is_identifier(const Expr_ptr expr) const {
@@ -246,7 +235,7 @@ public:
         return expr->f_symb == NEXT;
     }
 
-    inline bool is_int_numeric(const Expr_ptr expr) const {
+    inline bool is_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
@@ -374,15 +363,15 @@ private:
 
     /* -- data ------------------------------------------------------------- */
 
-    Expr_ptr any_expr;
-
     /* boolean exprs type and constants */
     Expr_ptr bool_expr;
     Expr_ptr false_expr;
     Expr_ptr true_expr;
 
-    /* main module */
-    Expr_ptr main_expr;
+    /* integers */
+    Expr_ptr const_int_expr;
+    Expr_ptr unsigned_int_expr;
+    Expr_ptr signed_int_expr;
 
     /* reserved for abstract array types */
     Expr_ptr array_expr;
@@ -390,10 +379,8 @@ private:
     /* reserved for temp symbols ctx */
     Expr_ptr temp_expr;
 
-    /* integers */
-    Expr_ptr unsigned_int_expr;
-    Expr_ptr signed_int_expr;
-    Expr_ptr int_expr;
+    /* main module */
+    Expr_ptr main_expr;
 
     /* shared pools */
     ExprPool f_expr_pool;

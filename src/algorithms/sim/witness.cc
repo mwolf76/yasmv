@@ -31,8 +31,7 @@ SimulationWitness::SimulationWitness(IModel& model,
                                      Minisat::SAT& engine, unsigned k)
     : Witness()
 {
-#if 0
-    ostringstream oss; oss << "BMC CEX witness for property " << property;
+    ostringstream oss; oss << "BMC SIM witness";
     set_name(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
@@ -42,7 +41,7 @@ SimulationWitness::SimulationWitness(IModel& model,
     for (step_t step = 0; step <= k; ++ step) {
         TimeFrame& tf = new_frame();
 
-        SymbIter symbs( model, use_coi ? property : NULL );
+        SymbIter symbs( model, NULL );
         while (symbs.has_next()) {
             ISymbol_ptr symb = symbs.next();
 
@@ -89,5 +88,4 @@ SimulationWitness::SimulationWitness(IModel& model,
             }
         }
     }
-#endif
 }

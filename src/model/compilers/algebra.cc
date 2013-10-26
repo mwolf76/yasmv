@@ -46,22 +46,9 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
     ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
 
     Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width;
-
-    {
-        if (tm.is_signed_algebraic(type)) {
-            width = tm.as_signed_algebraic(type)->size();
-        }
-        else if (tm.is_unsigned_algebraic(type)) {
-            width = tm.as_unsigned_algebraic(type)->size();
-        }
-        else {
-            assert( false ); /* unexpected */
-        }
-    }
+    unsigned width = type->size();
 
     /* create temp complemented ADDs */
     ADD lhs[width];
@@ -77,22 +64,9 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
 void Compiler::algebraic_not(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
-    TypeMgr& tm = f_owner.tm();
 
     Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned width;
-
-    {
-        if (tm.is_signed_algebraic(type)) {
-            width = tm.as_signed_algebraic(type)->size();
-        }
-        else if (tm.is_unsigned_algebraic(type)) {
-            width = tm.as_unsigned_algebraic(type)->size();
-        }
-        else {
-            assert( false ); /* unexpected */
-        }
-    }
+    unsigned width = type->size();
 
     ADD lhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -304,7 +278,7 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
     for (unsigned k = 0; k < bits_per_digit * width; ++ k) {
 
         /* compile selection condition (re-entrant invocation) */
-        (*this)(em.make_eq( expr->rhs(), em.make_iconst(k)));
+        (*this)(em.make_eq( expr->rhs(), em.make_const(k)));
         ADD cond = f_add_stack.back(); f_add_stack.pop_back();
         f_type_stack.pop_back(); /* adjust type stack */
 
@@ -359,7 +333,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
     for (unsigned k = 0; k < bits_per_digit * width; ++ k) {
 
         /* compile selection condition (re-entrant invocation) */
-        (*this)(em.make_eq( expr->rhs(), em.make_iconst(k)));
+        (*this)(em.make_eq( expr->rhs(), em.make_const(k)));
         ADD cond = f_add_stack.back(); f_add_stack.pop_back();
         f_type_stack.pop_back(); /* adjust type stack */
 

@@ -373,14 +373,16 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
     FQExpr tmp(f_ctx_stack.back(), expr);
     Type_ptr tp = f_mm.type(tmp);
 
-    if (f_tm.is_boolean(tp)) {
+    if (tp -> is_boolean()) {
         res = EXPR_BOOLEAN;
     }
-    else if (f_tm.is_int_const(tp) ||
-             f_tm.is_algebraic(tp)) {
+    else if (tp -> is_algebraic()) {
         res = EXPR_ALGEBRAIC;
     }
-    else assert(0);
+    else {
+        // unsupported type
+        assert(0);
+    }
 
     f_kind_stack.push_back(res);
 }
@@ -419,7 +421,8 @@ ISymbol_ptr Analyzer::resolve(const Expr_ptr ctx, const Expr_ptr expr)
     }
 
     // or what?!?
-    else assert(0);
+    assert(0);
+    return NULL;
 }
 
 void Analyzer::walk_ltl_g(const Expr_ptr expr)

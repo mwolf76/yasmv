@@ -525,11 +525,6 @@ bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
 bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 
-bool Compiler::walk_set_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Compiler::walk_set_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
-
 bool Compiler::walk_comma_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 
@@ -539,28 +534,18 @@ bool Compiler::walk_comma_inorder(const Expr_ptr expr)
 void Compiler::walk_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
-bool Compiler::walk_range_preorder(const Expr_ptr expr)
-{  return cache_miss(expr); }
-
-bool Compiler::walk_range_inorder(const Expr_ptr expr)
-{ return true; }
-
-void Compiler::walk_range_postorder(const Expr_ptr expr)
-{ assert(false); /* TODO support inlined non-determinism */ }
-
 /* Array selector builder: for arrays subscription, a chain of ITE is
    built out of the encodings for each element which are assumed to be
    present in dd stack in reversed order (walk_leaf took care of
    this). */
 void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
     unsigned base = Cudd_V(f_enc.base().getNode());
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
 
     /* algebrize selection expr (rhs), using machine width */
-    assert (tm.is_int_const(rhs_type) || tm.is_algebraic(rhs_type));
+    assert (rhs_type->is_algebraic());
     algebrize_unary_subscript();
 
     ADD selector[2]; // TODO
@@ -569,24 +554,10 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     }
 
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    unsigned size = lhs_type -> size();
 
-    unsigned size = tm.as_array(lhs_type)->size();
-
-    const Type_ptr scalar_type = tm.as_array(lhs_type)->of();
-    unsigned width;
-
-    if (tm.is_int_const(rhs_type)) {
-        width = 1;
-    }
-    else if (tm.is_signed_algebraic(rhs_type)) {
-        width = tm.as_signed_algebraic(rhs_type)->size();
-    }
-    else if (tm.is_unsigned_algebraic(rhs_type)) {
-        width = tm.as_unsigned_algebraic(rhs_type)->size();
-    }
-    else {
-        assert(false); /* TODO: support others.. */
-    }
+    const Type_ptr scalar_type = lhs_type -> as_array() ->of();
+    unsigned width = scalar_type->size();
 
     /* fetch DDs from the stack */
     ADD dds[width * size];
@@ -640,22 +611,22 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
     // push into type stack
     f_type_stack.push_back(type);
 
-    /* booleans, constants, monoliths are just one DD */
-    if (tm.is_boolean(type)
-        || tm.is_int_const(type)
-        || tm.is_enum(type)) {
-        assert(1 == width);
+    /* booleans, monoliths are just one DD */
+    if (type->is_monolithical()) {
         f_add_stack.push_back(dds[0]);
     }
 
-    /* arrays and algebraics, reversed list of encoding DDs */
-    else if (tm.is_algebraic(type)
-             || (tm.is_array(type))) {
+    /* algebraics, reversed list of encoding DDs */
+    else if (type->is_algebraic()) {
         // assert( tm.as_algebraic(type)->width() == width ); // type and enc width info has to match
         for (DDVector::reverse_iterator ri = dds.rbegin();
              ri != dds.rend(); ++ ri) {
             f_add_stack.push_back(*ri);
         }
+    }
+
+    else if (type->is_array()) {
+        abort(); // TODO
     }
 
     else assert( false ); // unexpected
@@ -676,8 +647,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     IEncoding_ptr enc = NULL;
 
     // 1.1. explicit constants are integer consts (e.g. 42) ..
-    if (em.is_int_numeric(expr)) {
-        f_type_stack.push_back(tm.find_int_const());
+    if (em.is_numeric(expr)) {
+        f_type_stack.push_back(tm.find_constant());
         f_add_stack.push_back(f_enc.constant(expr->value()));
         return;
     }
@@ -692,7 +663,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Type_ptr type = NULL;
 
         type = symb->as_variable().type();
-        assert(tm.is_algebraic(type));
+        assert(type->is_algebraic());
 
         // temporary encodings must be already defined.
         FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);

@@ -2,10 +2,6 @@
  *  @file witness.cc
  *  @brief Witness module
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,6 +17,10 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
  *
  **/
 #include <witness.hh>

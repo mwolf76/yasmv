@@ -68,7 +68,7 @@ const char* UnresolvedSymbol::what() const throw()
     return oss.str().c_str();
 }
 
-BadType::BadType(Expr_ptr repr, TypeSet &allowed)
+BadType::BadType(Expr_ptr repr, TypeList &allowed)
     : f_repr(repr)
     , f_allowed(allowed)
 {}
@@ -129,11 +129,11 @@ const char* BadType::what() const throw()
     /* at least one type is expected, right? */
     assert (0 < f_allowed.size());
 
-    TypeSet::const_iterator eye = f_allowed.begin();
+    TypeList::const_iterator eye = f_allowed.begin();
     oss << (*eye)->repr();
 
     if (1 < f_allowed.size()) {
-        TypeSet::const_iterator last = ( ++ f_allowed.rbegin()).base();
+        TypeList::const_iterator last = ( ++ f_allowed.rbegin()).base();
         while (++ eye != last) {
             oss << ", " << (*eye)->repr();
         }

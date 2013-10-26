@@ -106,10 +106,6 @@ class TypeMgr {
     // reserved
     Type_ptr f_ctx_type;
 
-    TypeSet f_propositionals;
-    TypeSet f_arithmeticals;
-    TypeSet f_arrays;
-
     /* Shared enums and literals */
     Enums f_enums;
     Literals f_lits;
@@ -119,24 +115,12 @@ public:
     inline IResolver_ptr resolver()
     { return &f_resolver; }
 
-    // predefined type sets
-    inline TypeSet& propositionals()
-    { return f_propositionals; }
-
-    inline TypeSet& arithmeticals()
-    { return f_arithmeticals; }
-
-    inline TypeSet& arrays()
-    { return f_arrays; }
-
-    bool check_type(Type_ptr tp, TypeSet &allowed);
-
     /* -- inference --------------------------------------------------------- */
     inline const ScalarType_ptr find_boolean()
     { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]); }
 
-    inline const ScalarType_ptr find_int_const()
-    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_int_const_type() ]); }
+    inline const ScalarType_ptr find_constant()
+    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_constant_type() ]); }
 
     /* -- abstract types ---------------------------------------------------- */
     const ScalarType_ptr find_signed_type();
@@ -162,63 +146,6 @@ public:
     { return f_enums; }
     const Literals& literals() const
     { return f_lits; }
-
-    /* -- is_xxx predicates ------------------------------------------------- */
-
-    /** true iff tp is boolean type */
-    inline bool is_boolean(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <const BooleanType_ptr> (tp));
-    }
-
-    /** true iff tp is int const type */
-    inline bool is_int_const(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast<const IntConstType_ptr> (tp));
-    }
-
-    inline bool is_algebraic(const Type_ptr tp) const
-    {
-        return
-            is_signed_algebraic(tp) ||
-            is_unsigned_algebraic(tp);
-    }
-
-    /** true iff tp is a signed algebraic type (ground) */
-    inline bool is_signed_algebraic(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <SignedAlgebraicType_ptr> (tp));
-    }
-
-    /** true iff tp is an unsigned algebraic type (ground) */
-    inline bool is_unsigned_algebraic(const Type_ptr tp) const
-    {
-        return (NULL != dynamic_cast <UnsignedAlgebraicType_ptr> (tp));
-    }
-
-    /** true iff tp is enum type */
-    inline bool is_enum(const Type_ptr tp) const
-    {
-        return NULL != dynamic_cast <const EnumType_ptr> (tp);
-    }
-
-    /** true iff tp is array tyype */
-    inline bool is_array(const Type_ptr tp) const
-    {
-        return NULL != dynamic_cast <const ArrayType_ptr> (tp);
-    }
-
-    // -- as_xxx accessors -------------------------------------------------- */
-    BooleanType_ptr as_boolean(const Type_ptr tp) const;
-    SignedAlgebraicType_ptr as_signed_algebraic(const Type_ptr tp) const;
-    UnsignedAlgebraicType_ptr as_unsigned_algebraic(const Type_ptr tp) const;
-    EnumType_ptr as_enum(const Type_ptr tp) const;
-    ArrayType_ptr as_array(const Type_ptr tp) const;
-
-    /* -- services used by compiler and inferrer ---------------------------- */
-
-    /** returns the width of an algebraic type, 1 for monoliths and consts */
-    unsigned calculate_width(Type_ptr type) const;
 
     /** Determine the resulting type of an operation given the type of its
         operands. */
@@ -268,13 +195,6 @@ private:
 
     // ref to internal resolver
     TypeResolver f_resolver;
-
-    ScalarType_ptr f_bt;  // booleans
-    ScalarType_ptr f_ict; // int consts
-    ScalarType_ptr f_uat; // (abstract) unsigned
-    ScalarType_ptr f_sat; // (abstract) signed
-    ArrayType_ptr f_uaat; // (abstract) unsigned array
-    ArrayType_ptr f_saat; // (abstract) signed array
 };
 
 #endif

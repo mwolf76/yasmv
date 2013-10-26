@@ -30,12 +30,10 @@ const char *FALSE_TOKEN = "FALSE";
 const char *TRUE_TOKEN = "TRUE";
 
 /* types */
-const char *BOOL_TOKEN     = "boolean";
-const char *ANY_TOKEN      = "(any)";
-const char *UNSIGNED_TOKEN = "unsigned";
-const char *SIGNED_TOKEN   = "signed";
-const char *INT_TOKEN      = "int";
-const char *SET_TOKEN      = "set";
-const char *ARRAY_TOKEN    = "array";
-const char *RANGE_TOKEN    = "range";
+const char *BOOL_TOKEN      = "boolean";
+const char *UNSIGNED_TOKEN  = "unsigned";
+const char *SIGNED_TOKEN    = "signed";
+const char *CONST_TOKEN     = "const";
+const char *INT_TOKEN       = "int";
+const char *ARRAY_TOKEN     = "array";
 

@@ -31,15 +31,16 @@ ExprMgr_ptr ExprMgr::f_instance = NULL;
 
 ExprMgr::ExprMgr()
 {
-    // useful for arrays type checking
-    any_expr = make_identifier(ANY_TOKEN);
-
     // boolean type identifier, false and true identifiers
     bool_expr = make_identifier(BOOL_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);
     true_expr = make_identifier(TRUE_TOKEN);
 
-    // integer types identifiers
+    // {constant, signed, unsigned} integer types identifiers
+    {
+        ostringstream oss; oss << CONST_TOKEN << " " << INT_TOKEN;
+        const_int_expr = make_identifier(oss.str());
+    }
     {
         ostringstream oss; oss << UNSIGNED_TOKEN << " " << INT_TOKEN;
         unsigned_int_expr = make_identifier(oss.str());
@@ -48,10 +49,8 @@ ExprMgr::ExprMgr()
         ostringstream oss; oss << SIGNED_TOKEN << " " << INT_TOKEN;
         signed_int_expr = make_identifier(oss.str());
     }
-    int_expr = make_identifier(INT_TOKEN);
-
-    main_expr = make_identifier(MAIN_TOKEN);
     array_expr = make_identifier(ARRAY_TOKEN);
+    main_expr = make_identifier(MAIN_TOKEN);
 
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }

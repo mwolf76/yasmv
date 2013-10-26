@@ -99,17 +99,23 @@
 
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
+
+typedef class ScalarType* ScalarType_ptr;
+
+typedef class MonolithicalType* MonolithicalType_ptr;
 typedef class BooleanType* BooleanType_ptr;
+typedef class EnumType* EnumType_ptr;
+typedef class AlgebraicType* AlgebraicType_ptr;
+typedef class ConstantType* ConstantType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-typedef class EnumType* EnumType_ptr;
-typedef class ArrayType* ArrayType_ptr;
 
-typedef list<Type_ptr> TypeList;
-typedef set<Type_ptr> TypeSet;
+typedef class ArrayType* ArrayType_ptr;
 
 // reserved for resolution
 typedef class CtxType* CtxType_ptr;
+
+typedef list<Type_ptr> TypeList;
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, Type_ptr type);
@@ -119,42 +125,46 @@ ostream& operator<<(ostream& os, const Type_ptr type);
 
 class TypeMgr; // fwd
 
-typedef class ScalarType* ScalarType_ptr;
-
-typedef class MonolithicalType* MonolithicalType_ptr;
-typedef class BooleanType* BooleanType_ptr;
-typedef class EnumType* EnumType_ptr;
-
-typedef class AlgebraicType* AlgebraicType_ptr;
-typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
-typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-
-typedef class ArrayType* ArrayType_ptr;
-
 /** Basic Type class. */
 class Type : public Object {
 public:
     Expr_ptr repr() const
     { return f_repr; }
 
-    // (i.e. there is no way to calculate the size, size() should *not* be invoked)
-    virtual bool is_abstract() const =0;
-
     // This depends on Monolithical vs. Algebraic nature of type.
     // (i.e. for Monoliths, size is the number of bits; for algebraics
     // size is the number of ADDs.
+
+    // Number of elementary units (cfr sizeof op)
     virtual unsigned size() const =0;
 
-    // shortcurts
+    // Bits width
+    virtual unsigned width() const =0;
+
+    // shortcuts
     bool is_scalar();
     bool is_monolithical();
-    bool is_algebraic();
+
     bool is_boolean();
-    bool is_intconst();
+    BooleanType_ptr as_boolean();
+
+    bool is_algebraic();
+    AlgebraicType_ptr as_algebraic();
+
+    bool is_constant();
+    ConstantType_ptr as_constant();
+
     bool is_signed_algebraic();
+    SignedAlgebraicType_ptr as_signed_algebraic();
+
     bool is_unsigned_algebraic();
+    UnsignedAlgebraicType_ptr as_unsigned_algebraic();
+
     bool is_enum();
+    EnumType_ptr as_enum();
+
     bool is_array();
+    ArrayType_ptr as_array();
 
     virtual ~Type();
 
@@ -169,6 +179,12 @@ protected:
 };
 
 /** -- Scalars ------------------------------------------------------------ */
+
+/** Abstract type interface. */
+class AbstractType {
+public:
+    virtual bool is_abstract() const =0;
+};
 
 /** Scalar type class. */
 class ScalarType : public Type {
@@ -186,83 +202,30 @@ protected:
     {}
 };
 
-/** Algebraic type class. */
-class AlgebraicType : public ScalarType {
-protected:
-    AlgebraicType(TypeMgr &owner)
-        : ScalarType(owner)
-    {}
-};
-
 /** Boolean type */
 typedef class BooleanType* BooleanType_ptr;
 class BooleanType : public MonolithicalType {
 public:
-    bool is_abstract() const;
     unsigned size() const;
+    unsigned width() const;
 
 protected:
     friend class TypeMgr; // ctors not public
     BooleanType(TypeMgr& owner);
 };
 
-/** reserved for numeric constants */
-typedef class IntConstType* IntConstType_ptr;
-class IntConstType : public AlgebraicType {
-public:
-    bool is_abstract() const;
-    unsigned size() const;
-
+/** Algebraic type class. */
+class AlgebraicType : public ScalarType,
+                      public AbstractType {
 protected:
-    friend class TypeMgr; // ctors not public
-    IntConstType(TypeMgr& owner);
-};
-
-/** Signed integers */
-typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
-class SignedAlgebraicType : public AlgebraicType {
-public:
-    bool is_abstract() const;
-    unsigned size() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
- protected:
-    friend class TypeMgr; // ctors not public
-    SignedAlgebraicType(TypeMgr& owner); // abstract
-    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
-
-    unsigned f_width;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
-};
-
-/** Unsigned integers */
-typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
-class UnsignedAlgebraicType : public AlgebraicType {
-public:
-    bool is_abstract() const;
-    unsigned size() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    UnsignedAlgebraicType(TypeMgr& owner); // abstract
-    UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
-
-    unsigned f_width;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
+    AlgebraicType(TypeMgr &owner)
+        : ScalarType(owner)
+    {}
 };
 
 /** Enumeratives */
 typedef class EnumType* EnumType_ptr;
-class EnumType : public MonolithicalType {
+class EnumType : public MonolithicalType, public AbstractType {
 protected:
     friend class TypeMgr; // ctors not public
     EnumType(TypeMgr& owner, ExprSet& literals);
@@ -270,6 +233,7 @@ protected:
 public:
     bool is_abstract() const;
     unsigned size() const;
+    unsigned width() const;
 
     const ExprSet& literals() const
     { return f_literals; }
@@ -291,15 +255,75 @@ private:
     ExprSet f_literals;
 };
 
+/** Integer constants */
+typedef class ConstantType* ConstantType_ptr;
+class ConstantType : public AlgebraicType {
+public:
+    unsigned size() const;
+    unsigned width() const;
+    bool is_abstract() const;
+
+    ADD *dds() const
+    { return NULL; }
+
+ protected:
+    friend class TypeMgr; // ctors not public
+    ConstantType(TypeMgr& owner);
+};
+
+/** Signed integers */
+typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+class SignedAlgebraicType : public AlgebraicType {
+public:
+    unsigned size() const;
+    unsigned width() const;
+    bool is_abstract() const;
+
+    ADD *dds() const
+    { return f_dds; }
+
+ protected:
+    friend class TypeMgr; // ctors not public
+    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+
+    unsigned f_width;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
+};
+
+/** Unsigned integers */
+typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
+class UnsignedAlgebraicType : public AlgebraicType {
+public:
+    unsigned size() const;
+    unsigned width() const;
+    bool is_abstract() const;
+
+    ADD *dds() const
+    { return f_dds; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    UnsignedAlgebraicType(TypeMgr& owner); // abstract
+    UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+
+    unsigned f_width;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
+};
+
 /** -- Arrays ------------------------------------------------------------ */
 
 /** Array type class. */
 typedef class ArrayType* ArrayType_ptr;
-class ArrayType : public Type {
+class ArrayType : public Type,
+                  public AbstractType {
 public:
     bool is_abstract() const;
     unsigned size() const;
-
+    unsigned width() const;
     unsigned nelems() const
     { return f_nelems; }
 
@@ -319,7 +343,7 @@ protected:
     unsigned f_nelems;
 };
 
-// ????
+// what whas this again?
 typedef class ResolutionCtxType* ResolutionCtxType_ptr;
 class ResolutionCtxType : public Type {
 protected:

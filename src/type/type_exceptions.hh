@@ -67,10 +67,10 @@ public:
 /** Raised when a the inferrer detects a wrong type */
 class BadType : public AnalyzerException {
     Expr_ptr f_repr;
-    TypeSet f_allowed;
+    TypeList f_allowed;
 
 public:
-    BadType(Expr_ptr type, TypeSet &allowed);
+    BadType(Expr_ptr type, TypeList &allowed);
 
     const char* what() const throw();
     ~BadType() throw();

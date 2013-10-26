@@ -153,7 +153,7 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
         } else break;
     } while (true);
 
-    return em.make_iconst(res);
+    return em.make_const(res);
 }
 
 EnumEncoding::EnumEncoding(const ExprSet& lits)

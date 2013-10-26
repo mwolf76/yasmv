@@ -55,8 +55,7 @@ public:
     Type_ptr type(FQExpr& fqexpr);
 
     // walker toplevel
-    Type_ptr process(Expr_ptr ctx, Expr_ptr body,
-                     TypeSet& expected = TypeMgr::INSTANCE().propositionals());
+    Type_ptr process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
     void pre_hook();
@@ -144,17 +143,9 @@ protected:
     bool walk_subscript_preorder(const Expr_ptr expr);
     bool walk_subscript_inorder(const Expr_ptr expr);
     void walk_subscript_postorder(const Expr_ptr expr);
-
-    bool walk_set_preorder(const Expr_ptr expr);
-    void walk_set_postorder(const Expr_ptr expr);
-
     bool walk_comma_preorder(const Expr_ptr expr);
     bool walk_comma_inorder(const Expr_ptr expr);
     void walk_comma_postorder(const Expr_ptr expr);
-
-    bool walk_range_preorder(const Expr_ptr expr);
-    bool walk_range_inorder(const Expr_ptr expr);
-    void walk_range_postorder(const Expr_ptr expr);
 
     void walk_leaf(const Expr_ptr expr);
 
@@ -182,41 +173,14 @@ private:
         return true;
     }
 
-    /* throws a BadType exception if toplevel type does not match any
-       of the expected. Returns type if succesful. */
-    Type_ptr check_expected_type(TypeSet& expected);
 
-    /* common special cases */
-    inline Type_ptr check_boolean()
-    { return check_expected_type(TypeMgr::INSTANCE().propositionals()); }
-
-    inline Type_ptr check_arithmetical()
-    { return check_expected_type(TypeMgr::INSTANCE().arithmeticals()); }
-
-    /* other cases */
-    Type_ptr check_boolean_or_integer();
-    Type_ptr check_arithmetical_enumerative();
+    Type_ptr check_logical();
+    Type_ptr check_arithmetical();
+    Type_ptr check_logical_or_arithmetical();
+    Type_ptr check_enum();
+    Type_ptr check_scalar();
 
     Type_ptr check_array();
-
-    // inline Type_ptr check_array()
-    // { return check_expected_type(TypeMgr::INSTANCE().arrays()); }
-
-    // inline
-    // {
-    //     return check_expected_type(TP_INT_CONST    |
-    //                                TP_UNSIGNED_INT |
-    //                                TP_SIGNED_INT   |
-    //                                TP_ENUM );
-    // }
-
-    // inline Type_ptr check_arithmetical_integer()
-    // {
-    //     return check_expected_type(TP_INT_CONST    |
-    //                                TP_UNSIGNED_INT |
-    //                                TP_SIGNED_INT ) ;
-    // }
-
 
     // post-orders only
     void walk_unary_fsm_postorder(const Expr_ptr expr);
