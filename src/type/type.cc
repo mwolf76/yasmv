@@ -49,7 +49,7 @@ bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
 
 bool Type::is_constant()
-{ return is_algebraic() && as_algebraic() -> is_abstract(); }
+{ return NULL != dynamic_cast<ConstantType_ptr> ( this ); }
 
 AlgebraicType_ptr Type::as_algebraic()
 { return dynamic_cast <const AlgebraicType_ptr> (this); }
@@ -123,7 +123,7 @@ bool ConstantType::is_abstract() const
 { return true; }
 
 unsigned ConstantType::size() const
-{ return 0; }
+{ return 1; }
 
 unsigned ConstantType::width() const
 { return 0; }
