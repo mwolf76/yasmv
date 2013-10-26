@@ -176,6 +176,9 @@ protected:
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
 
+    // type look-ahead for relationals (used by ITEs)
+    TypeStack f_rel_type_stack;
+
     // partial results
     ADDStack f_add_stack;
 
@@ -187,7 +190,7 @@ protected:
 
     // experimental, FAR for integers
     // (fractioned algebraic representation)
-    unsigned f_wwidth; // word width, default is 8 nibbles (=32 bits)
+    // unsigned f_wwidth; // word width, default is 8 nibbles (=32 bits)
 
     // managers
     ModelMgr& f_owner;
@@ -202,10 +205,6 @@ protected:
     bool is_unary_integer(const Expr_ptr expr);
     bool is_ite_integer(const Expr_ptr expr);
 
-    bool is_binary_fixed(const Expr_ptr expr);
-    bool is_unary_fixed(const Expr_ptr expr);
-    bool is_ite_fixed(const Expr_ptr expr);
-
     bool is_binary_enumerative(const Expr_ptr expr);
     bool is_unary_enumerative(const Expr_ptr expr);
     bool is_ite_enumerative(const Expr_ptr expr);
@@ -213,6 +212,10 @@ protected:
     bool is_binary_algebraic(const Expr_ptr expr);
     bool is_unary_algebraic(const Expr_ptr expr);
     bool is_ite_algebraic(const Expr_ptr expr);
+
+    bool is_binary_constant(const Expr_ptr expr);
+    bool is_unary_constant(const Expr_ptr expr);
+    bool is_ite_constant(const Expr_ptr expr);
 
     /* -- boolean exprs ----------------------------------------------------- */
     void boolean_not(const Expr_ptr expr);
@@ -293,6 +296,8 @@ protected:
     /* -- internals --------------------------------------------------------- */
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
+    void relational_type_lookahead(const Expr_ptr expr);
+    void relational_type_cleanup();
     void flush_operands();
 
     /* push dds and type information for variables (used by walk_leaf) */
@@ -300,7 +305,7 @@ protected:
 
     ADD optimize_and_chain(ADD* dds, unsigned len);
 
-    void algebraic_from_int_const(unsigned width);
+    void algebraic_from_constant(unsigned width);
 
     void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
     void algebraic_discard_op();
@@ -311,20 +316,17 @@ protected:
     /** @brief Adjusts operand */
     void algebrize_operand(Type_ptr type, unsigned final_width);
 
-    /** @brief Determines the width of an algebraic type */
-    unsigned algebraic_type_width(Type_ptr type);
+    inline unsigned algebrize_binary_arithmetical()
+    { return algebrize_operation(); }
 
-    /** @brief ITEs */
-    unsigned algebrize_ternary_ite();
+    inline unsigned algebrize_binary_relational()
+    { return algebrize_operation(false, true); }
 
-    /** @brief Binary arithmetical ops */
-    unsigned algebrize_binary_arithmetical();
+    inline unsigned algebrize_ternary_ite()
+    { return algebrize_operation(true, false); }
 
-    /** @brief Binary relational ops */
-    unsigned algebrize_binary_relational();
-
-    /** @brief Subscripts */
-    unsigned algebrize_unary_subscript();
+    /* core function */
+    unsigned algebrize_operation(bool ternary = false, bool relational = false);
 
     /* temporaries */
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);

@@ -193,24 +193,3 @@ void Compiler::integer_le(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-/* ITE is not a proper const manipulation as it *always* is a function
-   of the condition. The result of an ITE is an algebraic */
-void Compiler::integer_ite(const Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
-
-    FQExpr key(expr); const Type_ptr type = f_owner.type(key);
-    unsigned width = type -> size();
-
-    algebraic_from_int_const(width); // rhs
-    algebraic_from_int_const(width); // lhs
-
-    /* fix type stack, constants are always unsigned */
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-    f_type_stack.push_back( type );
-    f_type_stack.push_back( type );
-
-    /* re-uses general algorithm */
-    algebraic_ite(expr);
-}

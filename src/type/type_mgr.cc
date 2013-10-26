@@ -34,14 +34,26 @@
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 
-static inline bool _iff(bool a, bool b)
-{ return (!(a) || (b)) && (!(b) || (a)); }
-
 TypeMgr::TypeMgr()
     : f_register()
     , f_em(ExprMgr::INSTANCE())
     , f_resolver(* new TypeResolver(* this))
 {
+    /* register predefined types */
+    register_type( f_em.make_boolean_type(),
+                   new BooleanType(*this));
+
+    register_type( f_em.make_constant_type(),
+                   new ConstantType(*this));
+
+    // (un)signed integers { 4, 8, 16, 32, 64 } bits wide
+    for (int i = 2; i <= 16; i *= 2) {
+        register_type( f_em.make_unsigned_int_type(i),
+                       new UnsignedAlgebraicType(*this, i, NULL));
+
+        register_type( f_em.make_signed_int_type(i),
+                       new UnsignedAlgebraicType(*this, i, NULL));
+    }
 }
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned digits)

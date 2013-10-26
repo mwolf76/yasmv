@@ -83,7 +83,6 @@ void Compiler::algebraic_not(const Expr_ptr expr)
 
 void Compiler::algebraic_plus(const Expr_ptr expr)
 {
-    assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_binary_arithmetical();
 
     POP_ALGEBRAIC(rhs, width);

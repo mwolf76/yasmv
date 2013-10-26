@@ -47,6 +47,7 @@ Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
     , f_type_stack()
+    , f_rel_type_stack()
     , f_add_stack()
     , f_ctx_stack()
     , f_time_stack()
@@ -72,6 +73,7 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     // remove previous results
     f_add_stack.clear();
     f_type_stack.clear();
+    f_rel_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
 
@@ -92,6 +94,7 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     // sanity conditions
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());
+    assert(0 == f_rel_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
@@ -359,8 +362,55 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+/* For relationals we need to do some work. Namely, we look-ahead lhs
+   and rhs types using the inferrer, to determine the expected
+   type. This is used to settle the ITE(const, const) algebrization
+   uncertainty. This comment applies to all relational operators. */
+void Compiler::relational_type_lookahead(const Expr_ptr expr)
+{
+    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+    Type_ptr rhs_type = f_owner.type(rhs);
+
+    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+    Type_ptr lhs_type = f_owner.type(lhs);
+
+    if (! lhs_type -> is_constant() &&
+        ! rhs_type -> is_constant()) {
+        assert( lhs_type == rhs_type );
+        f_rel_type_stack.push_back( rhs_type );
+    }
+
+    else if ( lhs_type -> is_constant() &&
+              ! rhs_type -> is_constant()) {
+        f_rel_type_stack.push_back( rhs_type );
+    }
+
+    else if ( rhs_type -> is_constant() &&
+              ! lhs_type -> is_constant()) {
+        f_rel_type_stack.push_back( lhs_type );
+    }
+
+    /* Uh Oh, both are constants. There is no easy way of this for now. */
+    else {
+        assert( false ); // unsupported;
+    }
+}
+
+void Compiler::relational_type_cleanup()
+{
+    assert(0 < f_rel_type_stack.size());
+    f_rel_type_stack.pop_back();
+}
+
+
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_eq_postorder(const Expr_ptr expr)
@@ -375,10 +425,17 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
         algebraic_equals(expr);
     }
     else assert( false ); // unreachable
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_ne_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ne_postorder(const Expr_ptr expr)
@@ -393,10 +450,17 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
         algebraic_not_equals(expr);
     }
     else assert( false ); // unreachable
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_gt_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_gt_postorder(const Expr_ptr expr)
@@ -408,10 +472,17 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
         algebraic_gt(expr);
     }
     else assert( false );
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_ge_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ge_postorder(const Expr_ptr expr)
@@ -423,10 +494,17 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
         algebraic_ge(expr);
     }
     else assert( false ); // unreachable
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_lt_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lt_postorder(const Expr_ptr expr)
@@ -438,10 +516,17 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
         algebraic_lt(expr);
     }
     else assert( false ); // unreachable
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_le_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    bool res = cache_miss(expr);
+    if (res) {
+        relational_type_lookahead(expr);
+    }
+    return res;
+}
 bool Compiler::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_le_postorder(const Expr_ptr expr)
@@ -453,6 +538,7 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
         algebraic_le(expr);
     }
     else assert( false ); // unreachable
+    relational_type_cleanup();
 }
 
 bool Compiler::walk_ite_preorder(const Expr_ptr expr)
@@ -464,11 +550,11 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     if (is_ite_boolean(expr)) {
         boolean_ite(expr);
     }
-    else if (is_ite_integer(expr)) {
-        integer_ite(expr);
-    }
     else if (is_ite_enumerative(expr)) {
         enumerative_ite(expr);
+    }
+    else if (is_ite_integer(expr)) {
+        integer_ite(expr);
     }
     else if (is_ite_algebraic(expr)) {
         algebraic_ite(expr);
@@ -546,7 +632,8 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 
     /* algebrize selection expr (rhs), using machine width */
     assert (rhs_type->is_algebraic());
-    algebrize_unary_subscript();
+    // algebrize_unary_subscript();
+    assert(false); // tODO
 
     ADD selector[2]; // TODO
     for (unsigned i = 0; i < 2; ++ i) {

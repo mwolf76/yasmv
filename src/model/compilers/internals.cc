@@ -37,7 +37,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-/* Helper macros */
+/* Helpers */
 #define FETCH_DDS(store, count)                                   \
     for (unsigned i = 0; i < (count); ++ i) {                     \
         (store)[i] = f_add_stack.back();                          \
@@ -50,187 +50,24 @@
         f_add_stack.push_back((store) [ndx]);                     \
     }
 
-#define ALGEBRIZE_ONE(top, width)               \
+#define ALGEBRIZE_RHS(sz)                       \
     do {                                        \
-        algebrize_operand((top), (width));      \
+        algebraic_from_constant((sz));          \
     } while (0)
 
-#define ALGEBRIZE_TWO(rhs, lhs, width)          \
+#define ALGEBRIZE_LHS(sz)                       \
     do {                                        \
-        ADD tmp[(width)];                       \
-        algebrize_operand((rhs), (width));      \
-        FETCH_DDS(tmp, (width));                \
-        algebrize_operand((lhs), (width));      \
-        PUSH_DDS(tmp, (width));                 \
+        ADD tmp[(sz)];                          \
+        FETCH_DDS(tmp, (sz));                   \
+        algebraic_from_constant((sz));          \
+        PUSH_DDS(tmp, (sz));                    \
     } while (0)
 
-void Compiler::algebrize_operand(Type_ptr type, unsigned final_width)
-{
-    if (type->is_constant()) {
-        algebraic_from_int_const(final_width);
-    }
-    else {
-        unsigned width = type -> size();
-        if (width == final_width) return;
+static inline bool _iff(bool a, bool b)
+{ return (!(a) || (b)) && (!(b) || (a)); }
 
-        if (width < final_width) {
-            // padding required, take sign bit into account.
-            bool is_signed = type->is_signed_algebraic();
-            algebraic_padding(width, final_width, is_signed);
-        }
-        else {
-            assert (width > final_width);
-            assert (false); /* unexpected */
-        }
-    }
-}
-
-unsigned Compiler::algebrize_binary_arithmetical()
-{
-    unsigned stack_size = f_type_stack.size();
-    assert (2 <= stack_size);
-
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    assert( rhs_type -> is_algebraic() && lhs_type -> is_algebraic() );
-    // assert( !rhs_type -> is_abstract() || !lhs_type -> is_abstract() );
-
-    unsigned rhs_width = rhs_type -> size();
-    unsigned lhs_width = lhs_type -> size();
-
-    unsigned res = rhs_width < lhs_width
-        ? lhs_width
-        : rhs_width
-        ;
-
-    // Nothing do be done, just ad result type to the type stack and leave
-    if ((rhs_width == res) && (lhs_width == res)) {
-        f_type_stack.push_back(rhs_type); // arbitrary
-
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
-    f_type_stack.push_back(rhs_type);
-
-    assert( stack_size - 1 == f_type_stack.size());
-    return res;
-
-    assert( false ); // unreachable
-}
-
-unsigned Compiler::algebrize_ternary_ite()
-{
-    unsigned stack_size = f_type_stack.size();
-    assert (2 <= stack_size);
-
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    f_type_stack.pop_back(); /* ITEs require an extra pop() */
-
-    assert( rhs_type -> is_algebraic() && lhs_type -> is_algebraic() );
-    // assert( !rhs_type -> is_abstract() || !lhs_type -> is_abstract() );
-
-    unsigned rhs_width = rhs_type -> size();
-    unsigned lhs_width = lhs_type -> size();
-
-    unsigned res = rhs_width < lhs_width
-        ? lhs_width
-        : rhs_width
-        ;
-
-    // Nothing do be done, just add result type to the type stack and
-    // leave.
-    if ((rhs_width == res) &&
-        (lhs_width == res)) {
-        f_type_stack.push_back(rhs_type); // arbitrary
-
-        /* sanity check */
-        assert( stack_size - 2 == f_type_stack.size());
-        return res;
-    }
-
-    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
-
-    // sanity check
-    assert( stack_size - 2 == f_type_stack.size());
-    return res;
-}
-
-unsigned Compiler::algebrize_binary_relational()
-{
-    TypeMgr& tm = f_owner.tm();
-
-    unsigned stack_size = f_type_stack.size();
-    assert (2 <= stack_size);
-
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-
-    assert( rhs_type -> is_algebraic() && lhs_type -> is_algebraic() );
-    // assert( !rhs_type -> is_abstract() || !lhs_type -> is_abstract() );
-
-    unsigned rhs_width = rhs_type -> size();
-    unsigned lhs_width = lhs_type -> size();
-
-    unsigned res = rhs_width < lhs_width
-        ? lhs_width
-        : rhs_width
-        ;
-
-    // Nothing do be done, just add result type to the type stack and
-    // leave.
-    if ((rhs_width == res) &&
-        (lhs_width == res)) {
-        f_type_stack.push_back(tm.find_boolean()); // predicate
-
-        /* sanity check */
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    ALGEBRIZE_TWO(rhs_type, lhs_type, res);
-    f_type_stack.push_back(tm.find_boolean()); // predicate
-
-    /* sanity check */
-    assert( stack_size - 1 == f_type_stack.size());
-    return res;
-}
-
-unsigned Compiler::algebrize_unary_subscript()
-{
-    unsigned stack_size = f_type_stack.size();
-    assert (1 <= stack_size);
-
-    unsigned machine_width = 2; // TODO!
-
-    const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned top_width = top_type -> size();
-
-    unsigned res = top_width < machine_width
-        ? machine_width
-        : top_width
-        ;
-
-    // Nothing do be done, just add result type to the type stack and
-    // leave.
-    if ((top_width == res)) {
-        f_type_stack.push_back(top_type);
-        assert( stack_size - 1 == f_type_stack.size());
-        return res;
-    }
-
-    ALGEBRIZE_ONE(top_type, res);
-    f_type_stack.push_back(top_type);
-
-    assert( stack_size - 1 == f_type_stack.size());
-    return res;
-
-    assert( false ); // unreachable
-}
-
-void Compiler::algebraic_from_int_const(unsigned width)
+// algebrization primitive
+void Compiler::algebraic_from_constant(unsigned width)
 {
     POP_ADD(add);
     assert (f_enc.is_constant(add));
@@ -249,6 +86,119 @@ void Compiler::algebraic_from_int_const(unsigned width)
     assert (value == 0); // not overflowing
 }
 
+/* ITE is not a proper const manipulation as it *always* is a function
+   of the condition. The result of an ITE is an algebraic. The size of
+   the expression poses a bit of a problem. After some thought I
+   realized a way to determine the necessary number of bits relying on
+   an extra stack and some recursion magic on the innermost relational
+   operator. This leaves the case when both operands of the relational
+   are abstract. This can be sorted out by means of rewriting, but as it
+   is not probably worth the effort, as of now it is unsupported. */
+void Compiler::integer_ite(const Expr_ptr expr)
+{
+    assert(0 < f_rel_type_stack.size());
+    Type_ptr type = f_rel_type_stack.back();
+    unsigned size = type -> size();
+
+    // reverse order
+    ALGEBRIZE_LHS(size);
+    ALGEBRIZE_RHS(size);
+
+    /* fix type stack, constants are always unsigned */
+    f_type_stack.pop_back();
+    f_type_stack.pop_back();
+    f_type_stack.push_back( type );
+    f_type_stack.push_back( type );
+
+    /* we can now re-use general case algorithm for algebraic ITEs */
+    algebraic_ite(expr);
+}
+
+unsigned Compiler::algebrize_operation(bool ternary, bool relational)
+{
+    unsigned res = 0;
+    unsigned stack_size = f_type_stack.size();
+    assert ((ternary ? 3 : 2) <= stack_size);
+    TypeMgr& tm = f_owner.tm();
+
+    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    if (ternary)
+        f_type_stack.pop_back(); /* ITEs require an extra pop() */
+
+    // both algebraic, not both consts
+    assert( rhs_type -> is_algebraic() &&
+            lhs_type -> is_algebraic() &&
+            !( rhs_type -> is_constant() &&
+               lhs_type -> is_constant()));
+
+    if (rhs_type -> is_constant()  ||
+        lhs_type -> is_constant()) {
+
+        if (lhs_type -> is_constant()) {
+            res = rhs_type -> size();
+            ALGEBRIZE_LHS(res);
+            f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean());
+        }
+        else if (rhs_type -> is_constant()) {
+            res = lhs_type -> size();
+            ALGEBRIZE_RHS(res);
+            f_type_stack.push_back( (!relational) ? lhs_type : tm.find_boolean());
+        }
+        else assert(0);
+    }
+    else {
+        // neither const -> size and signedness must match
+        assert( lhs_type -> size() ==
+                rhs_type -> size() &&
+
+                _iff( lhs_type -> is_signed_algebraic(),
+                      rhs_type -> is_signed_algebraic()));
+
+
+        // Nothing do be done, just add result type to the type stack
+        res = rhs_type -> size();
+        f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean()); // arbitrary
+    }
+
+    // sanity check
+    assert( stack_size - (ternary ? 2 : 1) == f_type_stack.size());
+    return res;
+}
+
+// unsigned Compiler::algebrize_unary_subscript()
+// {
+//     unsigned stack_size = f_type_stack.size();
+//     assert (1 <= stack_size);
+
+//     unsigned machine_width = 2; // TODO!
+
+//     const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
+//     unsigned top_width = top_type -> size();
+
+//     unsigned res = top_width < machine_width
+//         ? machine_width
+//         : top_width
+//         ;
+
+//     // Nothing do be done, just add result type to the type stack and
+//     // leave.
+//     if ((top_width == res)) {
+//         f_type_stack.push_back(top_type);
+//         assert( stack_size - 1 == f_type_stack.size());
+//         return res;
+//     }
+
+//     ALGEBRIZE_TOP(top_type);
+//     f_type_stack.push_back(top_type);
+
+//     assert( stack_size - 1 == f_type_stack.size());
+//     return res;
+
+//     assert( false ); // unreachable
+// }
+
+#if 0 // currently not supported, could be reused for casts later on
 
 /* extends a DD vector on top of the stack from old_width to
    new_width */
@@ -278,6 +228,8 @@ void Compiler::algebraic_padding(unsigned old_width,
         f_add_stack.push_back(tmp[i]);
     }
 }
+
+#endif
 
 /* Discards an operand (and corresponding type). This is needed for
    rewrites. */
@@ -463,9 +415,7 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 
         return
             f_owner.type(rhs) -> is_algebraic() &&
-            f_owner.type(lhs) -> is_algebraic();// &&
-            // (! f_owner.type(rhs) -> is_abstract() ||
-            //  ! f_owner.type(lhs) -> is_abstract()) ;
+            f_owner.type(lhs) -> is_algebraic();
     }
 
     return false;
@@ -549,9 +499,7 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 
         return
             f_owner.type(rhs) -> is_algebraic() &&
-            f_owner.type(lhs) -> is_algebraic(); // &&
-            // (! f_owner.type(rhs) -> is_abstract() ||
-             // ! f_owner.type(lhs) -> is_abstract()) ;
+            f_owner.type(lhs) -> is_algebraic();
     }
 
     return false;
