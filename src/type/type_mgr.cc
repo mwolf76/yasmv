@@ -26,6 +26,7 @@
  **/
 #include <type.hh>
 #include <type_mgr.hh>
+#include <opts.hh>
 
 #include <type_exceptions.hh>
 
@@ -56,8 +57,16 @@ TypeMgr::TypeMgr()
     }
 }
 
-const ScalarType_ptr TypeMgr::find_unsigned(unsigned digits)
+const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
+    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
+    unsigned digits = bits / bits_per_digit;
+    if (0 != bits % bits_per_digit) {
+        TRACE << "Requested type is not available with current bits_per_digit setting"
+              << endl;
+        ++ digits;
+    }
+
     Expr_ptr descr(f_em.make_unsigned_int_type(digits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -82,8 +91,16 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
     return res;
 }
 
-const ScalarType_ptr TypeMgr::find_signed(unsigned digits)
+const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
+    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
+    unsigned digits = bits / bits_per_digit;
+    if (0 != bits % bits_per_digit) {
+        TRACE << "Requested type is not available with current bits_per_digit setting"
+              << endl;
+        ++ digits;
+    }
+
     Expr_ptr descr(f_em.make_signed_int_type(digits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
