@@ -52,6 +52,9 @@ public:
     // level of verbosity
     unsigned verbosity() const;
 
+    // colorized
+    bool color() const;
+
     // number of bits per digit to be used in algebraic representation
     unsigned bits_per_digit() const;
 
@@ -76,6 +79,7 @@ private:
     options::variables_map f_vm;
 
     bool f_help;
+    bool f_color;
     bool f_started;
 };
 

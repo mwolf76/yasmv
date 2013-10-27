@@ -37,6 +37,11 @@ OptsMgr::OptsMgr()
         )
 
         (
+         "color",
+         "enables colorized output in interactive shell"
+        )
+
+        (
          "bits-per-digit",
          options::value<unsigned>()->default_value(DEFAULT_BITS_PER_DIGIT),
          "bits per digit to be used in algebraic representation"
@@ -69,6 +74,10 @@ void OptsMgr::parse_command_line(int argc, const char **argv)
         f_help = true;
     }
 
+    if (f_vm.count("color")) {
+        f_color = true;
+    }
+
     f_started = true;
 }
 
@@ -76,6 +85,11 @@ unsigned OptsMgr::verbosity() const
 {
     unsigned res = f_vm["verbosity"].as<unsigned>();
     return res;
+}
+
+bool OptsMgr::color() const
+{
+    return f_color;
 }
 
 unsigned OptsMgr::bits_per_digit() const

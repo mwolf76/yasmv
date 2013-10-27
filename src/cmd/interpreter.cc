@@ -71,11 +71,18 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 Variant& Interpreter::operator()()
 {
+    bool color (OptsMgr::INSTANCE().color());
     // cmd prompt
     f_last_result = Variant("Parsing Error");
 
-    (*f_out) << ">> "; string cmdLine;
+    if (color) {
+        (*f_out) <<  cyan << ">> " << normal;
+    }
+    else {
+        (*f_out) <<  ">> ";
+    }
 
+    string cmdLine;
     if (std::getline(*f_in, cmdLine)) {
         (*f_out) << "<< " << cmdLine << endl;
         Command_ptr cmd = parseCommand(cmdLine.c_str());

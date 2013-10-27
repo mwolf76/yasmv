@@ -1,6 +1,29 @@
 TODO
 ====
 
+CORE
+====
+
+0. Colorized output (2h)
+1. Defines evaluator (2h)
+
+2. Full arrays support (8h)
+3. Enumeratives support (4h)
+4. Check signed int support (4h)
+5. efficient CNFization (16h)
+6. COI (2h)
+7. BMC INVAR ALGOs (KIND + ITPs) (8h)
+
+GUI (reachabilty)
+===
+
+1. FSM Editor + Code generator (:
+
+*  States (actions)
+*  Transitions (guards and actions)
+
+2. FLOWCHART Editor
+
 TESTING
         . Arrays
         . Suite of models for integration testing

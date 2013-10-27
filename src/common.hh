@@ -133,6 +133,28 @@ extern const char *ARRAY_TOKEN;
 
 extern const char *MAIN_TOKEN;
 
+/* ANSI colors TODO move into a separate namespace */
+extern const char normal[];
+
+extern const char black[];
+extern const char red[];
+extern const char green[];
+extern const char yellow[];
+extern const char blue[];
+extern const char purple[];
+extern const char cyan[];
+
+extern const char light_gray[];
+extern const char dark_gray[];
+extern const char bold_red[];
+extern const char bold_green[];
+extern const char bold_yellow[];
+extern const char bold_blue[];
+extern const char bold_purple[];
+extern const char bold_cyan[];
+extern const char bold_light_gray[];
+extern const char bold_dark_gray[];
+
 /* internal utils */
 static inline unsigned pow2(unsigned exp)
 {
