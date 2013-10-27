@@ -30,7 +30,7 @@
 #include <mc.hh>
 #include <sat.hh>
 
-#include <compilers/compiler.hh>
+#include <compiler/compiler.hh>
 
 #include <witness.hh>
 

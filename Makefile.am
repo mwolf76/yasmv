@@ -41,7 +41,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/algorithms/sim/libsim.la			\
 	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\
-	$(top_builddir)/src/model/compilers/libcompilers.la		\
+	$(top_builddir)/src/model/compiler/libcompiler.la		\
 	$(top_builddir)/src/expr/libexpr.la				\
 	$(top_builddir)/src/expr/walkers/libexpr_walkers.la		\
 	$(top_builddir)/src/type/libtype.la				\
@@ -69,7 +69,7 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la		\
 	$(top_builddir)/src/algorithms/sim/libsim.la		\
 	$(top_builddir)/src/algorithms/libalgorithms.la		\
 	$(top_builddir)/src/model/libmodel.la			\
-	$(top_builddir)/src/model/compilers/libcompilers.la	\
+	$(top_builddir)/src/model/compiler/libcompiler.la	\
 	$(top_builddir)/src/expr/libexpr.la			\
 	$(top_builddir)/src/expr/walkers/libexpr_walkers.la	\
 	$(top_builddir)/src/type/libtype.la			\

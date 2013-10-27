@@ -39,7 +39,7 @@
 #include <sat.hh>
 
 /* Model compiler */
-#include <compilers/compiler.hh>
+#include <compiler/compiler.hh>
 
 typedef unordered_map<string, Variant> ParametersMap;
 

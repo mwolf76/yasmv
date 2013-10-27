@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = compilers
+SUBDIRS = compiler
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr	\
 -I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc			\
 -I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/type	\

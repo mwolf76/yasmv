@@ -26,7 +26,7 @@
 #include <variant.hh>
 #include <interpreter.hh>
 #include <expr.hh>
-#include <compilers/compiler.hh>
+#include <compiler/compiler.hh>
 #include <sat.hh>
 
 #include <bmc/bmc.hh>
