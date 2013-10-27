@@ -271,6 +271,7 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
+    unsigned bits_per_digit (OptsMgr::INSTANCE().bits_per_digit());
     ADD mask(f_enc.constant(1 << (bits_per_digit - 1)));
     ADD carry;
 
@@ -326,6 +327,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
+    unsigned bits_per_digit (OptsMgr::INSTANCE().bits_per_digit());
     ADD weight(f_enc.constant(bits_per_digit - 1));
 
     ADD carry;

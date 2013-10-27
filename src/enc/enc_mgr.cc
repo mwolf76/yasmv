@@ -96,7 +96,9 @@ EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
 {
-    unsigned base = pow2(bits_per_digit);
+    unsigned bits_per_digit (OptsMgr::INSTANCE().bits_per_digit());
+    unsigned base (pow2(bits_per_digit));
+
     f_base = f_cudd.constant( base );
     f_msb  = f_cudd.constant( ::msb (base - 1));
 

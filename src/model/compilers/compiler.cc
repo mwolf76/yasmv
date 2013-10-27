@@ -689,8 +689,6 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 /* private service of walk_leaf */
 void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 {
-    TypeMgr& tm = f_owner.tm();
-
     assert (NULL != enc);
     DDVector& dds = enc->dv();
     unsigned width = dds.size();
@@ -705,7 +703,7 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 
     /* algebraics, reversed list of encoding DDs */
     else if (type->is_algebraic()) {
-        // assert( tm.as_algebraic(type)->width() == width ); // type and enc width info has to match
+        assert( type -> as_algebraic()-> size() == width ); // type and enc width info has to match
         for (DDVector::reverse_iterator ri = dds.rbegin();
              ri != dds.rend(); ++ ri) {
             f_add_stack.push_back(*ri);

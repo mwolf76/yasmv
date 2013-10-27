@@ -188,13 +188,12 @@ protected:
     // current time frame, for unrolling
     TimeStack f_time_stack;
 
-    // experimental, FAR for integers
-    // (fractioned algebraic representation)
-    // unsigned f_wwidth; // word width, default is 8 nibbles (=32 bits)
-
     // managers
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
+
+    // for profiling
+    clock_t f_ticks;
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);

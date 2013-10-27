@@ -103,8 +103,9 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, unsigned fract, bool is_sig
         }
     }
     else {
+        unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
         for (unsigned i = 0; i < width; ++ i) {
-            f_dv.push_back( make_monolithic_encoding( bits_per_digit));
+            f_dv.push_back( make_monolithic_encoding(bits_per_digit));
         }
     }
 }
@@ -113,6 +114,8 @@ DDVector::const_iterator AlgebraicEncoding::bits_begin(unsigned k)
 {
     assert(k < f_width);
     DDVector::const_iterator res = f_bits.begin();
+
+    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
 
     /* skip previous digits' bits */
     for (unsigned i = 0; i < k * bits_per_digit; ++ i) {
@@ -127,6 +130,8 @@ DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
     assert(k < f_width);
     DDVector::const_iterator res = bits_begin(k);
 
+    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
+
     /* skip digits' bits */
     for (unsigned i = 0; i < bits_per_digit; ++ i) {
         ++ res;
@@ -138,7 +143,7 @@ DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
 Expr_ptr AlgebraicEncoding::expr(int *assignment)
 {
     ExprMgr& em = f_mgr.em();
-    unsigned i, base = pow2( bits_per_digit);
+    unsigned i, base = pow2(OptsMgr::INSTANCE().bits_per_digit());
 
     value_t res = 0;
 

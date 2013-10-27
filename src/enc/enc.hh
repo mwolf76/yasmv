@@ -29,6 +29,8 @@
 #define ENCODER_H
 
 #include <common.hh>
+#include <opts.hh>
+
 #include <expr.hh>
 #include <expr_mgr.hh>
 

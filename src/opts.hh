@@ -18,6 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **/
+
+#ifndef OPTS_H
+#define OPTS_H
+
 class OptsMgr;
 typedef OptsMgr* OptsMgr_ptr;
 
@@ -26,6 +30,10 @@ typedef OptsMgr* OptsMgr_ptr;
 #include <boost/program_options.hpp>
 
 namespace options = boost::program_options;
+
+// -- system defaults
+const unsigned DEFAULT_BITS_PER_DIGIT = 2;
+const unsigned DEFAULT_VERBOSITY      = 0;
 
 class OptsMgr {
 
@@ -41,8 +49,11 @@ public:
     // true iff help has been required
     bool help() const;
 
-    // required level of verbosity (defaults to 0)
-    int verbosity() const;
+    // level of verbosity
+    unsigned verbosity() const;
+
+    // number of bits per digit to be used in algebraic representation
+    unsigned bits_per_digit() const;
 
     // model filename
     string model() const;
@@ -67,3 +78,5 @@ private:
     bool f_help;
     bool f_started;
 };
+
+#endif

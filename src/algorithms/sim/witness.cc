@@ -37,16 +37,15 @@ SimulationWitness::SimulationWitness(IModel& model,
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
-    /* up to k (included) */
+    /* First pass, vars only, up to k (included) */
     for (step_t step = 0; step <= k; ++ step) {
         TimeFrame& tf = new_frame();
 
-        SymbIter symbs( model, NULL );
-        while (symbs.has_next()) {
-            ISymbol_ptr symb = symbs.next();
+        SymbIter vars( model, NULL );
+        while (vars.has_next()) {
+            ISymbol_ptr symb = vars.next();
 
             if (symb->is_variable()) {
-
                 /* time it, and fetch encoding for enc mgr */
                 FQExpr key(symb->ctx(), symb->expr(), 0);
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
@@ -88,4 +87,22 @@ SimulationWitness::SimulationWitness(IModel& model,
             }
         }
     }
+
+#if 0
+    /* Second pass, defs only, up to k (included) */
+    for (step_t step = 0; step <= k; ++ step) {
+        TimeFrame& tf = ith_frame( step );
+
+        SymbIter defs( model, NULL );
+        while (defs.has_next()) {
+            ISymbol_ptr symb = defs.next();
+
+            if (symb->is_define()) {
+                Expr_ptr value = f_evaluator.process( symb->ctx(), symb-> expr(), step);
+                FQExpr key(symb->ctx(), symb->expr(), 0);
+                tf.set_value( key, value );
+            }
+        }
+    }
+#endif
 }

@@ -34,19 +34,25 @@ OptsMgr::OptsMgr()
         (
          "help",
          "produce help message"
-         )
+        )
+
+        (
+         "bits-per-digit",
+         options::value<unsigned>()->default_value(DEFAULT_BITS_PER_DIGIT),
+         "bits per digit to be used in algebraic representation"
+        )
 
         (
          "verbosity",
-         options::value<int>()->default_value(0),
+         options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
          "verbosity level"
-         )
+        )
 
         (
          "model",
          options::value<string>(),
          "input model"
-         )
+        )
         ;
 
     // arguments are models
@@ -66,9 +72,15 @@ void OptsMgr::parse_command_line(int argc, const char **argv)
     f_started = true;
 }
 
-int OptsMgr::verbosity() const
+unsigned OptsMgr::verbosity() const
 {
-    int res = f_vm["verbosity"].as<int>();
+    unsigned res = f_vm["verbosity"].as<unsigned>();
+    return res;
+}
+
+unsigned OptsMgr::bits_per_digit() const
+{
+    unsigned res = f_vm["bits-per-digit"].as<unsigned>();
     return res;
 }
 

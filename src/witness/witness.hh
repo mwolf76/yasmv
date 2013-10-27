@@ -74,6 +74,15 @@ public:
     inline TimeFrames& frames()
     { return f_frames; }
 
+    inline TimeFrame& ith_frame(step_t step)
+    {
+        TimeFrames::iterator iter = f_frames.begin();
+        while (-- step)
+            ++ iter;
+
+        return * iter;
+    }
+
     inline const string& name() const
     { return f_name; }
 

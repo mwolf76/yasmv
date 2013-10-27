@@ -270,12 +270,50 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 
 void Compiler::pre_node_hook(Expr_ptr expr)
 {
+    /* assemble memoization key */
+    assert( 0 < f_ctx_stack.size() );
+    Expr_ptr ctx = f_ctx_stack.back();
 
+    assert( 0 < f_time_stack.size() );
+    step_t time = f_time_stack.back();
+
+    FQExpr key(ctx, expr, time);
+
+    TRACE << "Processing " << key << "..." << endl;
+    f_ticks = clock();
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
-    memoize_result(expr);
+    /* assemble memoization key */
+    assert( 0 < f_ctx_stack.size() );
+    Expr_ptr ctx = f_ctx_stack.back();
+
+    assert( 0 < f_time_stack.size() );
+    step_t time = f_time_stack.back();
+
+    FQExpr key(ctx, expr, time);
+
+    double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
+    TRACE << key << " took " << elapsed << "s" << endl;
+
+    assert( 0 < f_type_stack.size() );
+    Type_ptr type = f_type_stack.back();
+
+    /* collect dds and memoize */
+    DDVector dv;
+    unsigned i, width = type -> size();
+    assert(width <= f_add_stack.size());
+
+    ADDStack::reverse_iterator ri;
+    for (i = 0, ri = f_add_stack.rbegin();
+         i < width; ++ i, ++ ri) {
+        dv.push_back(*ri);
+    }
+    assert (dv.size() == width);
+
+    f_map.insert( make_pair <FQExpr,
+                  DDVector> ( key, dv ));
 }
 
 #if 0
@@ -530,38 +568,6 @@ bool Compiler::cache_miss(const Expr_ptr expr)
 
     /* cache miss */
     return true;
-}
-
-void Compiler::memoize_result(const Expr_ptr expr)
-{
-    assert( 0 < f_type_stack.size() );
-    Type_ptr type = f_type_stack.back();
-
-    /* assemble memoization key */
-    assert( 0 < f_ctx_stack.size() );
-    Expr_ptr ctx = f_ctx_stack.back();
-
-    assert( 0 < f_time_stack.size() );
-    step_t time = f_time_stack.back();
-
-    FQExpr key(ctx, expr, time);
-    TRACE << "Memoizing result for " << key
-          << " type is " << type << endl;
-
-    /* collect dds and memoize */
-    DDVector dv;
-    unsigned i, width = type -> size();
-    assert(width <= f_add_stack.size());
-
-    ADDStack::reverse_iterator ri;
-    for (i = 0, ri = f_add_stack.rbegin();
-         i < width; ++ i, ++ ri) {
-        dv.push_back(*ri);
-    }
-    assert (dv.size() == width);
-
-    f_map.insert( make_pair <FQExpr,
-                  DDVector> ( key, dv ));
 }
 
 int double_cmp(double x, double y)
