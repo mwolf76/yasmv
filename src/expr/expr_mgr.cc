@@ -74,11 +74,3 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
     return make_expr(SET, res, NULL);
 }
 
-value_t ExprMgr::pow2(unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; i; -- i) {
-        res *= 2;
-    }
-    return res;
-}

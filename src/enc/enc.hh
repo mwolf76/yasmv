@@ -37,8 +37,6 @@
 #include <cudd_mgr.hh>
 #include <enc_mgr.hh>
 
-const unsigned NIBBLE_SIZE = 4; // hexadecimal digit (hard-coded)
-
 // -- primary decls  --------------------------------------------------------------
 typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {

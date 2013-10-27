@@ -133,4 +133,25 @@ extern const char *ARRAY_TOKEN;
 
 extern const char *MAIN_TOKEN;
 
+/* internal utils */
+static inline unsigned pow2(unsigned exp)
+{
+    value_t res = 1;
+    for (unsigned i = exp; i; -- i) {
+        res *= 2;
+    }
+    return res;
+}
+
+static inline unsigned msb(unsigned value)
+{
+    unsigned int v;
+    unsigned res = 0;
+
+    while (v >>= 1) {
+        ++ res;
+    }
+
+    return res;
+}
 #endif

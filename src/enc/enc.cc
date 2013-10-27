@@ -104,7 +104,7 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, unsigned fract, bool is_sig
     }
     else {
         for (unsigned i = 0; i < width; ++ i) {
-            f_dv.push_back( make_monolithic_encoding(NIBBLE_SIZE));
+            f_dv.push_back( make_monolithic_encoding( bits_per_digit));
         }
     }
 }
@@ -115,7 +115,7 @@ DDVector::const_iterator AlgebraicEncoding::bits_begin(unsigned k)
     DDVector::const_iterator res = f_bits.begin();
 
     /* skip previous digits' bits */
-    for (unsigned i = 0; i < k * NIBBLE_SIZE; ++ i) {
+    for (unsigned i = 0; i < k * bits_per_digit; ++ i) {
         ++ res;
     }
 
@@ -128,7 +128,7 @@ DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
     DDVector::const_iterator res = bits_begin(k);
 
     /* skip digits' bits */
-    for (unsigned i = 0; i < NIBBLE_SIZE; ++ i) {
+    for (unsigned i = 0; i < bits_per_digit; ++ i) {
         ++ res;
     }
 
@@ -138,7 +138,7 @@ DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
 Expr_ptr AlgebraicEncoding::expr(int *assignment)
 {
     ExprMgr& em = f_mgr.em();
-    unsigned i;
+    unsigned i, base = pow2( bits_per_digit);
 
     value_t res = 0;
 
@@ -149,7 +149,7 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
         res += Cudd_V(eval.getNode());
 
         if (++ i < f_width) {
-            res *= 0x10; // bleah!
+            res *= base;
         } else break;
     } while (true);
 

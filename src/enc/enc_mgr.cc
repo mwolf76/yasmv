@@ -96,13 +96,13 @@ EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
 {
-    // f_width = 8; // experimental, 8 nibbles (=32 bits)
+    unsigned base = pow2(bits_per_digit);
+    f_base = f_cudd.constant( base );
+    f_msb  = f_cudd.constant( ::msb (base - 1));
 
-    f_base = f_cudd.constant(0x10); // 0x10 = nibble size
-    f_full = f_cudd.constant(0xF);
-    f_msb  = f_cudd.constant(0x8);
-
-    DRIVEL << "Initialized EncodingMgr @ " << this << endl;
+    DRIVEL << "Initialized EncodingMgr @ " << this
+           << ", using " << bits_per_digit << " bits per digit"
+           << endl;
 }
 
 EncodingMgr::~EncodingMgr()

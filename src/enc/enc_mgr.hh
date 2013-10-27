@@ -128,9 +128,6 @@ public:
     inline ADD base() const
     { return f_base; }
 
-    inline ADD full() const
-    { return f_full; }
-
     inline ADD msb()
     { return f_msb; }
 
@@ -153,10 +150,8 @@ private:
     /* Untimed Canonical Bit Identifiers register */
     Index2UCBIMap f_index2ucbi_map;
 
-    ADD f_base;  // 0x10
-    ADD f_width; // 8
-    ADD f_full;  // 0xF
-    ADD f_msb;   // 0x8
+    ADD f_base;  // (eg. 0x10)
+    ADD f_msb;   // (eg. 0x8)
 };
 
 #endif
