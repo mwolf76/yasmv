@@ -195,7 +195,7 @@ simulate_command returns [Command_ptr res]
 }
     : 'SIMULATE'
 
-        ( 'RESUME' tid=int_constant
+        ( 'RESUME' tid=constant
         { resume = (int) tid->value(); } )?
 
         ( 'CONSTRAINED' expr=toplevel_expression
@@ -206,7 +206,7 @@ simulate_command returns [Command_ptr res]
           ) *
         ) ?
 
-        ( steps=int_constant
+        ( steps=constant
           { nsteps = (int) steps->value(); }
         ) ?
 
@@ -592,13 +592,6 @@ identifier returns [Expr_ptr res]
 	;
 
 constant returns [Expr_ptr res]
-@init { }
-    : k=int_constant
-        { $res = k; }
-    ;
-
-int_constant returns [Expr_ptr res]
-@init { }
 	: HEX_LITERAL
       {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
@@ -643,98 +636,98 @@ type_name returns [Type_ptr res]
     { $res = tm.find_boolean(); }
 
     | 'uint4_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(4, size->value()); }
 
          | { $res = tm.find_unsigned(4); } )
 
     | 'int4_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(4, size->value()); }
 
          | { $res = tm.find_signed(4); } )
 
     | 'uint8_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(8, size->value()); }
 
          | { $res = tm.find_unsigned(8); } )
 
     | 'int8_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(8, size->value()); }
 
          | { $res = tm.find_signed(8); } )
 
     | 'uint12_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(12, size->value()); }
 
          | { $res = tm.find_unsigned(12); } )
 
     | 'int12_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(12, size->value()); }
 
          | { $res = tm.find_signed(12); } )
 
     | 'uint16_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(16, size->value()); }
 
          | { $res = tm.find_unsigned(16); } )
 
     | 'int16_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(16, size->value()); }
 
          | { $res = tm.find_signed(16); } )
 
     | 'uint24_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(24, size->value()); }
 
          | { $res = tm.find_unsigned(24); } )
 
     | 'int24_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(24, size->value()); }
 
          | { $res = tm.find_signed(24); } )
 
     | 'uint32_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(32, size->value()); }
 
          | { $res = tm.find_unsigned(32); } )
 
     | 'int32_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(32, size->value()); }
 
          | { $res = tm.find_signed(32); } )
 
     | 'uint64_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_unsigned_array(64, size->value()); }
 
          | { $res = tm.find_unsigned(64); } )
 
     | 'int64_t' (
-        '[' size=int_constant ']'
+        '[' size=constant ']'
           { $res = tm.find_signed_array(64, size->value()); }
 
          | { $res = tm.find_signed(64); } )
 
     // generic finite integer types
-    | 'unsigned' 'int'? '(' width=int_constant ')' (
-            '[' size=int_constant ']'
+    | 'unsigned' 'int'? '(' width=constant ')' (
+            '[' size=constant ']'
               { $res = tm.find_unsigned_array(width->value(), size->value()); }
 
              | { $res = tm.find_unsigned(width->value()); } )
 
-	| 'signed' 'int'? '(' width=int_constant ')' (
-            '[' size=int_constant ']'
+	| 'signed' 'int'? '(' width=constant ')' (
+            '[' size=constant ']'
                 { $res = tm.find_signed_array(width->value(), size->value()); }
 
              | { $res = tm.find_signed(width->value()); } )
