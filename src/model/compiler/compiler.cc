@@ -799,9 +799,11 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* variables */
 
-    // 2. 3. define? No way! They were supposed to be removed by the preprocessor
+    // 2. 3. define? Simply compile it recursively.
+    // we keep this to retain the old lazy behavior with nullary defines
+    // since it comes at no extra cost at all.
     else if (symb->is_define()) {
-        assert(false);
+        (*this)(symb->as_define().body());
         return;
     }
 

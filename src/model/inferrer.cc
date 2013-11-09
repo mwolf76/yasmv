@@ -434,8 +434,12 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
+        // we keep this to retain the old lazy behavior with nullary defines
+        // since it comes at no extra cost at all.
         else if (symb->is_define()) {
-            (*this)(symb->as_define().body());
+            IDefine& define = symb->as_define();
+            assert( 0 == define.formals().size());
+            (*this)(define.body());
             return;
         }
     }
