@@ -80,14 +80,11 @@ typedef enum {
     // types
     BOOL, SIGNED, UNSIGNED,
 
-    PARAMS, // int type decls, module and function params (e.g '()')
+    PARAMS, // (), binary
+    SUBSCRIPT, // [], binary
+    SET, // {}, unary
 
-    /* utils */
-    SUBSCRIPT,
-    RANGE,
-
-    COMMA, SET, // reserved for enums
-
+    COMMA,
 } ExprType;
 
 // An Expression consists of an AST symbol, which is the expression

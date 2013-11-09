@@ -61,29 +61,6 @@ void ModelMgr::second_pass()
         // all should refer to the same entry on the type map.
         Expr_ptr ctx = module.expr();
 
-        // type inference: defines
-        const Defines defines = module.defs();
-        for (Defines::const_iterator define_eye = defines.begin();
-             define_eye != defines.end(); define_eye ++) {
-
-            Define& define = dynamic_cast <Define&> (*define_eye->second);
-
-            Expr_ptr dname = define.expr();
-            FQExpr fqdn(ctx, dname);
-
-            Expr_ptr dbody = define.body();
-            FQExpr fqdb(ctx, dbody);
-
-            // try to infer type
-            try {
-                Type_ptr tmp = type(fqdb);
-            }
-            catch (AnalyzerException& ae) {
-                cerr << "DEFINE " << fqdn << endl
-                     << ae.what() << endl;
-            }
-        } // for defines
-
         // type inference: FSM
         const ExprVector init = module.init();
         for (ExprVector::const_iterator init_eye = init.begin();

@@ -225,6 +225,11 @@ public:
         return expr->f_symb == IDENT;
     }
 
+    inline bool is_params(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PARAMS;
+    }
+
     inline bool is_dot(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == DOT;

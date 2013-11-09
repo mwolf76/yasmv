@@ -449,7 +449,9 @@ void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
         traverse_param_list( params, expr->lhs());
         traverse_param_list( params, expr->rhs());
     }
-    params.push_back( expr);
+    else {
+        params.push_back( expr);
+    }
 }
 
 void Preprocessor::substitute_expression(const Expr_ptr expr)

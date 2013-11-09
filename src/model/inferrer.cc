@@ -566,6 +566,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
              em.is_ite(expr) ||
              em.is_cond(expr) ||
              em.is_identifier(expr) ||
+             em.is_params(expr) ||
              em.is_numeric(expr)) {
         return expr;
     }

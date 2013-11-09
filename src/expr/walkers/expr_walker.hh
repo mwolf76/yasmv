@@ -74,11 +74,15 @@ typedef enum {
     // dot notation for identifiers
     DOT_1, DOT_2,
 
-    // subscripts (arrays)
+    // subscripts ([])
     SUBSCRIPT_1, SUBSCRIPT_2,
 
-    // for enum decls, params
+    // sets ({})
+    // SET_1, SET_2,
+
+    // params (())
     PARAMS_1, PARAMS_2,
+
     COMMA_1, COMMA_2,
 } entry_point;
 
@@ -263,13 +267,17 @@ protected:
     virtual bool walk_dot_inorder(const Expr_ptr expr) =0;
     virtual void walk_dot_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_params_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_params_inorder(const Expr_ptr expr) =0;
+    virtual void walk_params_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_subscript_preorder(const Expr_ptr expr) =0;
     virtual bool walk_subscript_inorder(const Expr_ptr expr) =0;
     virtual void walk_subscript_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_params_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_params_inorder(const Expr_ptr expr) =0;
-    virtual void walk_params_postorder(const Expr_ptr expr) =0;
+    // virtual bool walk_set_preorder(const Expr_ptr expr) =0;
+    // virtual bool walk_set_inorder(const Expr_ptr expr) =0;
+    // virtual void walk_set_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
     virtual bool walk_comma_inorder(const Expr_ptr expr) =0;

@@ -316,18 +316,6 @@ bool Printer::walk_cond_inorder(const Expr_ptr expr)
 void Printer::walk_cond_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-bool Printer::walk_set_preorder(const Expr_ptr expr)
-{ f_os << "{"; return true; }
-void Printer::walk_set_postorder(const Expr_ptr expr)
-{ f_os << "}"; }
-
-bool Printer::walk_comma_preorder(const Expr_ptr expr)
-{ return true; }
-bool Printer::walk_comma_inorder(const Expr_ptr expr)
-{ f_os << ", "; return true; }
-void Printer::walk_comma_postorder(const Expr_ptr expr)
-{}
-
 bool Printer::walk_dot_preorder(const Expr_ptr expr)
 { return true; }
 bool Printer::walk_dot_inorder(const Expr_ptr expr)
@@ -349,27 +337,17 @@ bool Printer::walk_subscript_inorder(const Expr_ptr expr)
 void Printer::walk_subscript_postorder(const Expr_ptr expr)
 { f_os << "]"; }
 
-bool Printer::walk_range_preorder(const Expr_ptr expr)
+// bool Printer::walk_set_preorder(const Expr_ptr expr)
+// { f_os << "{"; return true; }
+// void Printer::walk_set_postorder(const Expr_ptr expr)
+// { f_os << "}"; }
+
+bool Printer::walk_comma_preorder(const Expr_ptr expr)
 { return true; }
-bool Printer::walk_range_inorder(const Expr_ptr expr)
-{ f_os << ".."; return true; }
-void Printer::walk_range_postorder(const Expr_ptr expr)
+bool Printer::walk_comma_inorder(const Expr_ptr expr)
+{ f_os << ", "; return true; }
+void Printer::walk_comma_postorder(const Expr_ptr expr)
 {}
-
-/* word print helpers */
-// string word_repr(const Expr_ptr expr, base_t base)
-// {
-//     assert (SWCONST == expr->f_symb || UWCONST == expr->f_symb);
-
-//     ostringstream oss;
-//     oss << "0"
-//         << ( expr->f_symb == SWCONST ? "s" : "u" )
-//         << base_char(base)
-//         << expr->u.f_size
-//         << to_base(expr->u.f_value, base) ;
-
-//     return oss.str();
-// }
 
 #include <iomanip>
 using std::hex;
