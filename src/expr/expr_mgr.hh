@@ -235,6 +235,11 @@ public:
         return expr->f_symb == NEXT;
     }
 
+    inline bool is_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == COMMA;
+    }
+
     inline bool is_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)

@@ -43,11 +43,11 @@
 // #define DEBUG_PREPROCESSOR
 
 Preprocessor::Preprocessor(ModelMgr& owner)
-    : f_map()
-    , f_ctx_stack()
+    : f_ctx_stack()
     , f_expr_stack()
     , f_env()
     , f_owner(owner)
+    , f_em(ExprMgr::INSTANCE())
 {
     DEBUG << "Created Preprocessor @" << this << endl;
 }
@@ -55,7 +55,7 @@ Preprocessor::Preprocessor(ModelMgr& owner)
 Preprocessor::~Preprocessor()
 { DEBUG << "Destroying Preprocessor @" << this << endl; }
 
-Type_ptr Preprocessor::process(Expr_ptr ctx, Expr_ptr expr)
+Expr_ptr Preprocessor::process(Expr_ptr ctx, Expr_ptr expr)
 {
     // remove previous results
     f_ctx_stack.clear();
@@ -331,7 +331,9 @@ void Preprocessor::walk_ite_postorder(const Expr_ptr expr)
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     POP_EXPR(cond);
-    PUSH_EXPR(f_em.make_ite( cond, lhs, rhs ));
+    PUSH_EXPR(f_em.make_ite( f_em.make_cond( cond,
+                                             lhs),
+                             rhs ));
 }
 
 bool Preprocessor::walk_cond_preorder(const Expr_ptr expr)
@@ -339,7 +341,7 @@ bool Preprocessor::walk_cond_preorder(const Expr_ptr expr)
 bool Preprocessor::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Preprocessor::walk_cond_postorder(const Expr_ptr expr)
-{ walk_ternary_cond_postorder(expr); }
+{}
 
 bool Preprocessor::walk_dot_preorder(const Expr_ptr expr)
 { return true; }
@@ -382,30 +384,31 @@ void Preprocessor::walk_comma_postorder(Expr_ptr expr)
 void Preprocessor::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr expr_ = expr;
 
     // is an integer const ..
-    if (em.is_numeric(expr)) {
-        PUSH_EXPR(expr);
+    if (em.is_numeric(expr_)) {
+        PUSH_EXPR(expr_);
         return;
     }
 
     // .. or a symbol
-    if (em.is_identifier(expr)) {
+    if (em.is_identifier(expr_)) {
 
         /* traverse the env stack, subst with the first occurence, if any */
         ExprPairStack::reverse_iterator env_iter;
         for (env_iter = f_env.rbegin(); env_iter != f_env.rend(); ++ env_iter) {
-            ExprPairStack entry = (*env_iter);
+            pair<Expr_ptr, Expr_ptr> entry = (*env_iter);
 
-            if (entry.first() == expr) {
-                expr = entry.second();
+            if (entry.first == expr_) {
+                expr_ = entry.second;
                 break;
             }
         }
 
         /* Symb resolution */
         ResolverProxy proxy;
-        ISymbol_ptr symb = proxy.symbol(f_ctx_stack.back(), expr);
+        ISymbol_ptr symb = proxy.symbol(f_ctx_stack.back(), expr_);
 
         if (symb->is_const()) {
             Expr_ptr res = symb->as_const().expr();
@@ -417,18 +420,18 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
             PUSH_EXPR(res);
             return;
         }
-        else if (symb->is_enum()) { // meta type
-            Expr_ptr res = symb->as_enum().type();
+        else if (symb->is_enum()) {
+            Expr_ptr res = symb->as_enum().expr();
             PUSH_EXPR(res);
             return;
         }
-        else if (symb->is_array()) { // meta type
-            Type_ptr res = symb->as_array().type();
-            PUSH_TYPE(res);
+        else if (symb->is_array()) {
+            Expr_ptr res = symb->as_array().expr();
+            PUSH_EXPR(res);
             return;
         }
         else if (symb->is_variable()) {
-            Expr_ptr res = symb->as_variable().type();
+            Expr_ptr res = symb->as_variable().expr();
             PUSH_EXPR(res);
             return;
         }
@@ -440,7 +443,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
     assert(false); // unexpected
 }
 
-ExprVector Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
+void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 {
     if (f_em.is_comma( expr)) {
         traverse_param_list( params, expr->lhs());
@@ -455,16 +458,18 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
 
     /* LHS -> define name, extract formals for definition */
     assert ( f_em.is_identifier( expr->lhs()));
-    IDefine_ptr define = proxy.symbol(f_ctx_stack.back(), name) -> as_define();
-    ExprVector& formals = define -> formals();
+    IDefine& define = proxy.symbol(f_ctx_stack.back(), expr -> lhs()) -> as_define();
+    const ExprVector& formals = define.formals();
 
     /* RHS -> comma separated lists of actual parameters */
     ExprVector actuals; traverse_param_list( actuals, expr -> rhs());
 
     /* Populate the subst environment */
     assert( formals.size() == actuals.size());
-    for (ExprVector::iterator ai = actuals.begin(),
-             ExprVector::iterator fi = formals.begin();
+
+    ExprVector::const_iterator ai;
+    ExprVector::const_iterator fi;
+    for (ai = actuals.begin(), fi = formals.begin();
          ai != actuals.end(); ++ ai, ++ fi) {
 
         Expr_ptr actual = (*ai);
@@ -475,11 +480,10 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
 
     /* Here comes a bit of magic: we just relaunch the preprocessor on the
        define body, to perform the substitution :-D */
-    (*this)(symb->define.body());
+    (*this)(define.body());
 
     /* Restore previous environment */
-    for (ExprVector::iterator ai = actuals.begin();
-         ai != actuals.end(); ++ ai ) {
-        env.pop_back();
+    for (ai = actuals.begin(); ai != actuals.end(); ++ ai ) {
+        f_env.pop_back();
     }
 }

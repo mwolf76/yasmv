@@ -346,12 +346,18 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
     f_ctx_stack.pop_back();
 }
 
+/* on-demand preprocessing to expand defines */
 bool Inferrer::walk_params_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    Expr_ptr ctx = f_ctx_stack.back();
+    (*this)( f_owner.preprocess( ctx, expr ));
+
+    return false;
+}
 bool Inferrer::walk_params_inorder(const Expr_ptr expr)
-{ return true; }
+{ assert( false ); return false; /* unreachable */ }
 void Inferrer::walk_params_postorder(const Expr_ptr expr)
-{ assert( false ); /* not yet implemented */ }
+{ assert( false ); return ; /* unreachable */ }
 
 bool Inferrer::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

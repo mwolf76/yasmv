@@ -80,6 +80,11 @@ public:
     virtual const Expr_ptr body() const =0;
 };
 
+class IParams: IObject {
+public:
+    virtual const ExprVector& formals() const =0;
+};
+
 class ISymbol : IObject {
 public:
     virtual const Expr_ptr ctx()  const =0;
@@ -141,6 +146,7 @@ class ILiteral
 
 class IDefine
     : public ISymbol
+    , public IParams
     , public IBody
 {};
 

@@ -376,7 +376,7 @@ void Compiler::relational_type_lookahead(const Expr_ptr expr)
 
     if (! lhs_type -> is_constant() &&
         ! rhs_type -> is_constant()) {
-        assert( lhs_type == rhs_type );
+        assert( lhs_type == rhs_type ); // FIXME: throw
         f_rel_type_stack.push_back( rhs_type );
     }
 
@@ -390,7 +390,7 @@ void Compiler::relational_type_lookahead(const Expr_ptr expr)
         f_rel_type_stack.push_back( lhs_type );
     }
 
-    /* Uh Oh, both are constants. There is no easy way of this for now. */
+    /* Uh Oh, both are constants. There is no easy way out of this for now. */
     else {
         assert( false ); // unsupported;
     }
@@ -599,12 +599,18 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
+/* on-demand preprocessing to expand defines */
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    Expr_ptr ctx = f_ctx_stack.back();
+    (*this)( f_owner.preprocess( ctx, expr ));
+
+    return false;
+}
 bool Compiler::walk_params_inorder(const Expr_ptr expr)
-{ return true; }
+{ assert( false ); return false; /* unreachable */ }
 void Compiler::walk_params_postorder(const Expr_ptr expr)
-{ assert (false); /* not yet implemented */ }
+{ assert( false ); return ; /* unreachable */ }
 
 bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -793,9 +799,9 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* variables */
 
-    // 2. 3. define? Simply compile it recursively.
+    // 2. 3. define? No way! They were supposed to be removed by the preprocessor
     else if (symb->is_define()) {
-        (*this)(symb->as_define().body());
+        assert(false);
         return;
     }
 

@@ -323,10 +323,13 @@ fsm_define_decl_body
 	;
 
 fsm_define_decl_clause
-	: id=identifier ':=' body=toplevel_expression
+@init {
+    ExprVector formals;
+}
+	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
-      IDefine_ptr def = new Define($smv::module->expr(), id, body);
-      $smv::module->add_def(id, def);
+     IDefine_ptr def = new Define($smv::module->expr(), id, formals, body);
+     $smv::module->add_def(id, def);
     }
 	;
 
@@ -520,6 +523,22 @@ unary_expression returns [Expr_ptr res]
 
 	;
 
+actual_params returns [Expr_ptr res]
+@init {
+    ExprVector actuals;
+}
+	: identifiers[&actuals]
+    {
+            ExprVector::reverse_iterator expr_iter;
+            res = NULL;
+
+            for (expr_iter = actuals.rbegin(); expr_iter != actuals.rend(); ++ expr_iter) {
+                Expr_ptr expr = (*expr_iter);
+                res = (!res) ? expr : em.make_comma( expr, res );
+            }
+    }
+	;
+
 postfix_expression returns [Expr_ptr res]
 @init { }
 	:   lhs=basic_expression
@@ -528,6 +547,9 @@ postfix_expression returns [Expr_ptr res]
     (
         '[' rhs=toplevel_expression ']'
         { $res = em.make_subscript($res, rhs); }
+    |
+        '(' rhs=actual_params ')'
+        { $res = em.make_params($res, rhs); }
 
         // TODO: nested dot not supported
     |   '.' rhs=identifier

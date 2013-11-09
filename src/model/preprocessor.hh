@@ -28,7 +28,7 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector< pair< Expr_ptr, Expr_ptr>> ExprPairStack;
+typedef vector< pair< Expr_ptr, Expr_ptr> > ExprPairStack;
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<IDefine_ptr> DefinesStack;
 
@@ -162,8 +162,12 @@ private:
     // managers
     ModelMgr& f_owner;
 
+    // Expr Mgr
+    ExprMgr& f_em;
+
+    /* internals */
     void substitute_expression(const Expr_ptr expr);
-    ExprVector traverse_param_list(const Expr_ptr expr);
+    void traverse_param_list(ExprVector& params, const Expr_ptr expr);
 };
 
 #endif

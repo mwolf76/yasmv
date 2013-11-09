@@ -194,13 +194,16 @@ public:
 
 class Define : public IDefine {
     const Expr_ptr f_ctx;
+
     const Expr_ptr f_name;
+    const ExprVector f_formals;
     const Expr_ptr f_body;
 
 public:
-    Define(const Expr_ptr ctx, const Expr_ptr name, const Expr_ptr body)
+    Define(const Expr_ptr ctx, const Expr_ptr name, const ExprVector& formals, const Expr_ptr body)
         : f_ctx(ctx)
         , f_name(name)
+        , f_formals(formals)
         , f_body(body)
     {}
 
@@ -212,6 +215,9 @@ public:
 
     const Expr_ptr body() const
     { return f_body; }
+
+    const ExprVector& formals() const
+    { return f_formals; }
 };
 
 class SymbIter {

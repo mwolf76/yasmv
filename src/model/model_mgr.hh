@@ -30,6 +30,7 @@
 #include <model.hh>
 #include <model_resolver.hh>
 
+#include <preprocessor.hh>
 #include <inferrer.hh>
 
 #include <expr_mgr.hh>
@@ -58,9 +59,16 @@ public:
     inline TypeMgr& tm() const
     { return f_tm; }
 
-    // delegated type inferenc method
+    /* FIXME: FQEXPR or ctx + body?!? */
+
+    // delegated type inference method
     inline Type_ptr type(FQExpr& fqexpr) {
         return f_inferrer.type(fqexpr);
+    }
+
+    // delegated param binding method
+    inline Expr_ptr preprocess(Expr_ptr ctx, Expr_ptr expr) {
+        return f_preprocessor.process(ctx, expr);
     }
 
 protected:
@@ -87,6 +95,9 @@ private:
 
     // symb resolver
     ModelResolver f_resolver;
+
+    // ref to preprocessor (used for defines expr substitution)
+    Preprocessor& f_preprocessor;
 
     // ref to inferrer (used for model analysis)
     Inferrer& f_inferrer;

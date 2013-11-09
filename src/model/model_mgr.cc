@@ -36,6 +36,7 @@ ModelMgr::ModelMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_resolver(* new ModelResolver(* this))
+    , f_preprocessor(* new Preprocessor(* this))
     , f_inferrer(* new Inferrer(* this))
 {}
 
