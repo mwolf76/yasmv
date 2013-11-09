@@ -527,7 +527,7 @@ actual_params returns [Expr_ptr res]
 @init {
     ExprVector actuals;
 }
-	: identifiers[&actuals]
+	: expressions[&actuals]
     {
             ExprVector::reverse_iterator expr_iter;
             res = NULL;
@@ -605,6 +605,12 @@ identifiers [ExprVector* ids]
     :
       ident=identifier { ids->push_back(ident); }
       ( ',' ident=identifier { ids->push_back(ident); }  )*
+    ;
+
+expressions [ExprVector* exprs]
+    :
+      expr=toplevel_expression { exprs->push_back(expr); }
+      ( ',' expr=toplevel_expression { exprs->push_back(expr); }  )*
     ;
 
 identifier returns [Expr_ptr res]
