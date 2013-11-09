@@ -116,8 +116,8 @@ SimulateCommand::SimulateCommand(Interpreter& owner, int resume,
             resume, nsteps, constraints)
 {
     assert(-1 == resume);
-    assert(-1 == nsteps);
-    assert( 0 == constraints.size());
+    // assert(-1 == nsteps);
+    // assert( 0 == constraints.size());
 }
 
 Variant SimulateCommand::operator()()

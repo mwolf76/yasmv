@@ -39,7 +39,7 @@ Algorithm::Algorithm()
 
 Algorithm::~Algorithm()
 {
-    DEBUG << "Destroying Base algoritm instance"
+    DEBUG << "Destroying Base algoritm instance "
           << get_param("alg_name")
           << " @" << this
           << endl;

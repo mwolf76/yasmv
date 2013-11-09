@@ -75,43 +75,52 @@ void Simulation::set_status(simulation_status_t status)
 
 void Simulation::process()
 {
-    step_t k = 0; // to infinity...
-    bool leave = false; // TODO: somebody telling us to stop
+    step_t k = 0;
+    bool leave = false;
 
     assert_fsm_init(0);
     TRACE << "Starting simulation..." << endl;
 
     if (STATUS_SAT == engine().solve()) {
 
-        do {
-            assert_fsm_trans(k); ++ k;
-            TRACE << "Simulating step " << k << endl;
-
-            if (STATUS_SAT == engine().solve()) {
-                ostringstream oss; oss << "Simulation";
-                SimulationWitness witness(model(), engine(), k);
-            }
-        } while (STATUS_SAT == engine().status() && ! leave);
-
-        if (STATUS_SAT == engine().status()) {
-
-            TRACE << "Extracting simulation witness (k = " << k << ")."
-                  << endl;
-
+        if (f_nsteps == k) {
             set_status( SIMULATION_SAT );
-
-            // TODO: register
+            leave = true;
         }
-
         else {
-            TRACE << "Inconsistency detected in TRANS, step " << k
-                  << ". Simulation aborted."
-                  << endl;
+            do {
+                assert_fsm_trans(k); ++ k;
+                TRACE << "Simulating step " << k << endl;
 
-            set_status( SIMULATION_UNSAT );
+                if (STATUS_SAT == engine().solve()) {
+                    ostringstream oss; oss << "Simulation";
+                    SimulationWitness witness(model(), engine(), k);
+
+                    if (f_nsteps == k) {
+                        set_status( SIMULATION_SAT );
+                        leave = true;
+                    }
+                }
+            } while (STATUS_SAT == engine().status() && ! leave);
+
+            if (STATUS_SAT == engine().status()) {
+
+                TRACE << "Extracting simulation witness (k = " << k << ")."
+                      << endl;
+
+                // set_status( SIMULATION_SAT );
+                // TODO: register
+            }
+
+            else {
+                TRACE << "Inconsistency detected in TRANS, step " << k
+                      << ". Simulation aborted."
+                      << endl;
+
+                set_status( SIMULATION_UNSAT );
+            }
         }
     }
-
     else {
         TRACE << "Inconsistency detected in INIT. Simulation aborted."
               << endl;

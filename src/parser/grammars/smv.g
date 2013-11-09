@@ -161,6 +161,9 @@ commands returns [Command_ptr res]
     |  c=model_command
        { $res = c; }
 
+    | c=init_command
+      { $res = c; }
+
     |  c=simulate_command
        { $res = c; }
 
@@ -185,6 +188,14 @@ model_command returns [Command_ptr res]
 sat_command returns [Command_ptr res]
     : 'SAT' expr=toplevel_expression
        { $res = cm.make_sat(expr); }
+    ;
+
+init_command returns [Command_ptr res]
+@init {
+        ExprVector dummy;
+}
+    : 'INIT'
+        {$res = cm.make_simulate( -1, 0, dummy); }
     ;
 
 simulate_command returns [Command_ptr res]
