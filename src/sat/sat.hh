@@ -144,14 +144,13 @@ namespace Minisat {
             , f_next_color(0)
         {
             f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
-            DEBUG << "Initialized SAT instance @" << this << endl;
+            // DEBUG << "Initialized SAT instance @" << this << endl;
         }
 
         /**
          * @brief SAT instance dctor
          */
-        ~SAT()
-        { DEBUG << "Destroyed SAT instance@" << this << endl; }
+        ~SAT() {}
 
         /* Internal services */
         inline Var new_sat_var() // proxy

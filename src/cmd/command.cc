@@ -124,7 +124,10 @@ Variant SimulateCommand::operator()()
 {
     f_sim.process();
 
-    ostringstream tmp; tmp << f_sim.status();
+    ostringstream tmp;
+    tmp << "Simulation is ";
+    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
+
     return Variant(tmp.str());
 }
 

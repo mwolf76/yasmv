@@ -63,8 +63,8 @@
 #include <logging.hh>
 
 static const string heading_msg = \
-                  "gnuSMV - A Symbolic model checker\n"
-                  "(c) 2012, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n";
+                  "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
+                  "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n";
 
 static void heading()
 { cout << heading_msg << endl; }
@@ -109,13 +109,13 @@ int main(int argc, const char *argv[])
     if (! model_filename.empty()) {
         Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
         Variant& res = system(cmd);
-        cerr << res << endl;
+        cout << res << endl;
     }
 
     // interactive cmd loop
     do {
         Variant& res = system();
-        cerr << res << endl;
+        cout << res << endl;
     } while (! system.is_leaving());
 
     return system.retcode();

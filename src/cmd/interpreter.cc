@@ -84,7 +84,7 @@ Variant& Interpreter::operator()()
 
     string cmdLine;
     if (std::getline(*f_in, cmdLine)) {
-        (*f_out) << "<< " << cmdLine << endl;
+        (*f_out) << cmdLine << endl;
         Command_ptr cmd = parseCommand(cmdLine.c_str());
 
         if (NULL != cmd) {

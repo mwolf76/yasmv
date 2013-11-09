@@ -86,6 +86,8 @@ void Simulation::process()
         if (f_nsteps == k) {
             set_status( SIMULATION_SAT );
             leave = true;
+
+            SimulationWitness witness(model(), engine(), k);
         }
         else {
             do {
