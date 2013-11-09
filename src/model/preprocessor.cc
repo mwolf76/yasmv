@@ -474,7 +474,18 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
     for (ai = actuals.begin(), fi = formals.begin();
          ai != actuals.end(); ++ ai, ++ fi) {
 
+        /* actual may have been introduced by a nested define, so we
+           chain-resolve it to the outermost, real model variable,
+           actual using the nested environment stack. */
         Expr_ptr actual = (*ai);
+        ExprPairStack::reverse_iterator eps_riter;
+        for ( eps_riter = f_env.rbegin(); eps_riter != f_env.rend(); ++ eps_riter ) {
+            pair<Expr_ptr, Expr_ptr> tmp (*eps_riter);
+            if (tmp.first == actual) {
+                actual = tmp.second;
+            }
+        }
+
         Expr_ptr formal = (*fi);
         f_env.push_back( make_pair <Expr_ptr, Expr_ptr>
                          ( formal, actual ));
