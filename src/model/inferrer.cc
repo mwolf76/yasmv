@@ -48,12 +48,10 @@ Inferrer::Inferrer(ModelMgr& owner)
     , f_type_stack()
     , f_ctx_stack()
     , f_owner(owner)
-{
-    DEBUG << "Created Inferrer @" << this << endl;
-}
+{ /* DEBUG << "Created Inferrer @" << this << endl; */ }
 
 Inferrer::~Inferrer()
-{ DEBUG << "Destroying Inferrer @" << this << endl; }
+{ /* DEBUG << "Destroying Inferrer @" << this << endl; */ }
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
 Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
@@ -82,8 +80,7 @@ void Inferrer::post_hook()
 {}
 
 void Inferrer::pre_node_hook(Expr_ptr expr)
-{
-}
+{}
 
 void Inferrer::post_node_hook(Expr_ptr expr)
 {
@@ -316,9 +313,10 @@ bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 {
-    Type_ptr tmp = f_type_stack.back(); // TODO: review this
-    Expr_ptr ctx = f_owner.em().make_dot( f_ctx_stack.back(), expr->lhs());
-    f_ctx_stack.push_back(ctx);
+    assert( false ); // TODO
+    // Type_ptr tmp = f_type_stack.back(); // TODO: review this
+    // Expr_ptr ctx = f_owner.em().make_dot( f_ctx_stack.back(), expr->lhs());
+    // f_ctx_stack.push_back(ctx);
 
     return true;
 }
@@ -346,7 +344,7 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
     f_ctx_stack.pop_back();
 }
 
-/* on-demand preprocessing to expand defines */
+/* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool Inferrer::walk_params_preorder(const Expr_ptr expr)
 {
     Expr_ptr ctx = f_ctx_stack.back();
@@ -365,6 +363,8 @@ bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 {
+    POP_TYPE(index); // TODO check index type (native word size)
+
     /* return wrapped type */
     PUSH_TYPE(check_array() -> as_array() -> of());
 }
@@ -424,11 +424,11 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
-        else if (symb->is_array()) { // meta type
-            Type_ptr res = symb->as_array().type();
-            PUSH_TYPE(res);
-            return;
-        }
+        // else if (symb->is_array()) { // meta type
+        //     Type_ptr res = symb->as_array().type();
+        //     PUSH_TYPE(res);
+        //     return;
+        // }
         else if (symb->is_variable()) {
             Type_ptr res = symb->as_variable().type();
             PUSH_TYPE(res);
@@ -540,6 +540,8 @@ void Inferrer::memoize_result (Expr_ptr expr)
                   find_canonical_expr(expr)) ] = type;
 }
 
+/* This is used to attempt for a better memoization, but it's not
+   really critical */
 Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -557,6 +559,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     }
     else if (em.is_binary_logical(expr)) {
         return em.make_and(expr->lhs(), expr->rhs());
+    }
+    else if (em.is_subscript(expr)) {
+        return em.make_subscript(expr->lhs(),
+                                 find_canonical_expr( expr->rhs()));
     }
 
     /* no rewrites */

@@ -43,6 +43,9 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
     assert(NULL != tp);
 
+    // disable reordering
+    f_cudd.AutodynDisable();
+
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
         DEBUG << "Encoding boolean " << btype << endl;
         res = new BooleanEncoding();
@@ -62,12 +65,17 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     else if (NULL != (vtype = dynamic_cast<ArrayType_ptr>(tp))) {
         DEBUG << "Encoding " << vtype << endl;
         Encodings encs;
-        for (unsigned i =0; i < vtype->size(); ++ i) {
+
+        assert( 0 == ( vtype->size() % vtype->of()->size()));
+        for (unsigned i =0; i < vtype->size() / vtype->of()->size(); ++ i) {
             encs.push_back(make_encoding(vtype->of()));
         }
         res = new ArrayEncoding(encs);
     }
     else assert(false); /* unexpected or unsupported */
+
+    // reenable reordering
+    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
 
     assert (NULL != res);
     return res;

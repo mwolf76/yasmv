@@ -1337,6 +1337,14 @@ Cudd::addZero() const
 
 } // Cudd::addZero
 
+ADD
+Cudd::addError() const
+{
+    DdNode *result = Cudd_addConst(p->manager, error_value); // reserved
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // Cudd::addError
 
 ADD
 Cudd::constant(

@@ -33,6 +33,7 @@ namespace options = boost::program_options;
 
 // -- system defaults
 const unsigned DEFAULT_BITS_PER_DIGIT = 2;
+const unsigned DEFAULT_WORD_WIDTH     = 16;
 const unsigned DEFAULT_VERBOSITY      = 0;
 
 class OptsMgr {
@@ -57,6 +58,9 @@ public:
 
     // number of bits per digit to be used in algebraic representation
     unsigned bits_per_digit() const;
+
+    // native word size in bits, used for algebrization of constant ITEs and arrays
+    unsigned word_width() const;
 
     // model filename
     string model() const;

@@ -114,6 +114,46 @@ void Compiler::integer_ite(const Expr_ptr expr)
     algebraic_ite(expr);
 }
 
+/* For relationals we need to do some work. Namely, we look-ahead lhs
+   and rhs types using the inferrer, to determine the expected
+   type. This is used to settle the ITE(const, const) algebrization
+   uncertainty. This comment applies to all relational operators. */
+void Compiler::relational_type_lookahead(const Expr_ptr expr)
+{
+    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+    Type_ptr rhs_type = f_owner.type(rhs);
+
+    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+    Type_ptr lhs_type = f_owner.type(lhs);
+
+    if (! lhs_type -> is_constant() &&
+        ! rhs_type -> is_constant()) {
+        assert( lhs_type == rhs_type ); // FIXME: throw
+        f_rel_type_stack.push_back( rhs_type );
+    }
+
+    else if ( lhs_type -> is_constant() &&
+              ! rhs_type -> is_constant()) {
+        f_rel_type_stack.push_back( rhs_type );
+    }
+
+    else if ( rhs_type -> is_constant() &&
+              ! lhs_type -> is_constant()) {
+        f_rel_type_stack.push_back( lhs_type );
+    }
+
+    /* Uh Oh, both are constants. There is no easy way out of this for now. */
+    else {
+        assert( false ); // unsupported;
+    }
+}
+
+void Compiler::relational_type_cleanup()
+{
+    assert(0 < f_rel_type_stack.size());
+    f_rel_type_stack.pop_back();
+}
+
 unsigned Compiler::algebrize_operation(bool ternary, bool relational)
 {
     unsigned res = 0;
@@ -165,71 +205,6 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
     assert( stack_size - (ternary ? 2 : 1) == f_type_stack.size());
     return res;
 }
-
-// unsigned Compiler::algebrize_unary_subscript()
-// {
-//     unsigned stack_size = f_type_stack.size();
-//     assert (1 <= stack_size);
-
-//     unsigned machine_width = 2; // TODO!
-
-//     const Type_ptr top_type = f_type_stack.back(); f_type_stack.pop_back();
-//     unsigned top_width = top_type -> size();
-
-//     unsigned res = top_width < machine_width
-//         ? machine_width
-//         : top_width
-//         ;
-
-//     // Nothing do be done, just add result type to the type stack and
-//     // leave.
-//     if ((top_width == res)) {
-//         f_type_stack.push_back(top_type);
-//         assert( stack_size - 1 == f_type_stack.size());
-//         return res;
-//     }
-
-//     ALGEBRIZE_TOP(top_type);
-//     f_type_stack.push_back(top_type);
-
-//     assert( stack_size - 1 == f_type_stack.size());
-//     return res;
-
-//     assert( false ); // unreachable
-// }
-
-#if 0 // currently not supported, could be reused for casts later on
-
-/* extends a DD vector on top of the stack from old_width to
-   new_width */
-void Compiler::algebraic_padding(unsigned old_width,
-                                 unsigned new_width,
-                                 bool is_signed)
-{
-    ADD padding = f_enc.zero();
-    ADD zero = f_enc.zero();
-
-    assert (old_width < new_width); // old is smaller than new
-
-    ADD tmp[old_width];
-    for (int i = old_width -1; (0 <= i) ; -- i) {
-        tmp[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    // sign extension predicate (0x00 or 0xFF?) only if required.
-    if (is_signed) {
-        padding += tmp[0].BWTimes(f_enc.msb()).Equals(zero).Ite(zero, f_enc.full());
-    }
-
-    for (int i = new_width - old_width /* -1 + 1 */; (0 <= i); -- i) {
-        f_add_stack.push_back(padding);
-    }
-    for (int i = old_width -1; (0 <= i); -- i) {
-        f_add_stack.push_back(tmp[i]);
-    }
-}
-
-#endif
 
 /* Discards an operand (and corresponding type). This is needed for
    rewrites. */
@@ -459,6 +434,23 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
     return false;
 }
 
+/* checks lhs is array, and rhs is algebraic */
+bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+
+    /* SUBSCRIPT */
+    if (em.is_subscript(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        return (f_owner.type(lhs) -> is_array() &&
+                f_owner.type(rhs) -> is_algebraic()) ;
+    }
+
+    return false;
+}
+
 /* one operand, algebraic */
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 {
@@ -506,6 +498,24 @@ bool Compiler::is_ite_integer(const Expr_ptr expr)
 
     return false;
 }
+
+/* checks lhs is array, and rhs is integer */
+bool Compiler::is_subscript_integer(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+
+    /* SUBSCRIPT */
+    if (em.is_subscript(expr)) {
+
+        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+        return (f_owner.type(lhs) -> is_array() &&
+                f_owner.type(rhs) -> is_constant()) ;
+    }
+
+    return false;
+}
+
 
 /* same as  is_binary_enumerative, checks only lhs and rhs */
 bool Compiler::is_ite_enumerative(const Expr_ptr expr)

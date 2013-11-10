@@ -571,7 +571,10 @@ postfix_expression returns [Expr_ptr res]
 
 basic_expression returns [Expr_ptr res]
 @init { }
-	: id=identifier
+	: err=error
+      { $res = err; }
+
+    | id=identifier
       { $res = id; }
 
 	| k=constant
@@ -649,6 +652,11 @@ constant returns [Expr_ptr res]
         $res = em.make_oct_const(tmp);
       }
 	;
+
+error returns [Expr_ptr res]
+    : 'ERR'
+    { $res = em.make_error(); }
+    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]

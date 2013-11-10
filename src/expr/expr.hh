@@ -55,36 +55,25 @@ typedef enum {
     HCONST, // hex constants
     OCONST, // octal constants
 
-    FCONST, // fract constant
-
+    /* identifiers */
     IDENT, DOT,
 
-    NIL, // reserved
-
-    META,
-
-    /* future
-    COUNT, // count( <pred>, x0, ..., xk ) -> number of elems satisfying pred
-    ANY,   // any( <pred>, x0, ..., xk ) -> pick one elem among those satisfying pred
-
-    -- PRED is_even(x) := (x % 2 == 0); // unary predicate
-    -- PRED ALL(x) := TRUE              //
-
-    -- COUNT (is_even, a, b, c, d)
-    -- ANY( { TRUE }, a, b, c, d) // perl-like
-
-    */
-
-    // -- declarations ---------------------------------------------------------
-
-    // types
+    /* declarations */
     BOOL, SIGNED, UNSIGNED,
 
+    /* defines */
     PARAMS, // (), binary
+
+    /* arrays */
     SUBSCRIPT, // [], binary
+
+    // TODO
     SET, // {}, unary
 
     COMMA,
+
+    // error handling
+    ERROR,
 } ExprType;
 
 // An Expression consists of an AST symbol, which is the expression

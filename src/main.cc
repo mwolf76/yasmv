@@ -63,8 +63,9 @@
 #include <logging.hh>
 
 static const string heading_msg = \
-                  "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
-                  "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n";
+    "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
+    "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
+    "https://github.com/mwolf76/gnuSMV\n";
 
 static void heading()
 { cout << heading_msg << endl; }

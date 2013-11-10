@@ -550,6 +550,7 @@ public:
     ADD addVar(int index) const;
     ADD addOne() const;
     ADD addZero() const;
+    ADD addError() const;
     ADD constant(CUDD_VALUE_TYPE c) const;
     ADD plusInfinity() const;
     ADD minusInfinity() const;

@@ -5,9 +5,9 @@ CORE
 ====
 
 0. Colorized output (2h) - ETA postponed
-1. Defines evaluator (2h) + parameters ETA 2013-11-11
+1. Parametrized defines (done)
+2. Full arrays support (8h) 2013-11-18 (current)
 
-2. Full arrays support (8h) 2013-11-18
 3. Enumeratives support (4h) 2013-11-25
 4. Check signed int support (4h) 2013-11-25
 5. efficient CNFization (16h) 2013-12-15

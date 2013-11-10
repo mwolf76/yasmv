@@ -497,3 +497,49 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         PUSH_ADD(cnd.Ite(lhs[ndx], rhs[ndx]));
     }
 }
+
+void Compiler::algebraic_subscript(const Expr_ptr expr)
+{
+    assert( is_subscript_algebraic(expr));
+
+    // index
+    Type_ptr t0 = f_type_stack.back(); f_type_stack.pop_back(); // consume index
+    assert( t0 -> is_algebraic() && ! t0 -> is_constant());
+    Type_ptr itype = t0 -> as_algebraic();
+    assert( itype -> size () == OptsMgr::INSTANCE().word_width());
+    POP_ALGEBRAIC(index, itype -> size());
+
+    // array
+    Type_ptr t1 = f_type_stack.back(); f_type_stack.pop_back(); // consume array
+    assert( t1 -> is_array());
+    ArrayType_ptr atype = t1 -> as_array();
+    unsigned elem_size  = atype -> of() -> size();
+    unsigned elem_count = atype -> nelems();
+    POP_ALGEBRAIC(vec, elem_size * elem_count);
+
+    // build the multiplexer
+    ADD mpx[ elem_size ];
+    for (unsigned i = 0; i < elem_size; ++ i) {
+        mpx[i] = f_enc.error(); // default to failure
+    }
+
+    ExprMgr& em = f_owner.em();
+    for (unsigned j = elem_count -1; (j) ; -- j) {
+        for (unsigned i = 0; i < elem_size; ++ i ) {
+
+            /* A bit of magic: reusing eq code :-) */
+            algebraic_equals( em.make_eq( expr->rhs(),
+                                          em.make_const(i)));
+
+            POP_ADD(cnd);
+            mpx[i] = cnd.Ite( vec[ j * elem_size + i ], mpx[i]);
+        }
+    }
+
+    // push mpx backwards
+    for (unsigned i = 0; i < elem_size; ++ i) {
+        PUSH_ADD( mpx[ elem_size - i - 1]);
+    }
+
+    f_type_stack.push_back( atype -> of());
+}

@@ -108,6 +108,12 @@ public:
     inline Expr_ptr make_ite(Expr_ptr a, Expr_ptr b)
     { return make_expr(ITE, a, b); }
 
+    inline Expr_ptr make_error()
+    {
+        Expr tmp(ERROR, 0); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
     inline Expr_ptr make_const(value_t value) // decimal
     {
         Expr tmp(ICONST, value); // we need a temp store
@@ -228,6 +234,11 @@ public:
     inline bool is_params(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == PARAMS;
+    }
+
+    inline bool is_subscript(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SUBSCRIPT;
     }
 
     inline bool is_dot(const Expr_ptr expr) const {

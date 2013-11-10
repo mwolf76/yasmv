@@ -203,6 +203,7 @@ protected:
     bool is_binary_integer(const Expr_ptr expr);
     bool is_unary_integer(const Expr_ptr expr);
     bool is_ite_integer(const Expr_ptr expr);
+    bool is_subscript_integer(const Expr_ptr expr);
 
     bool is_binary_enumerative(const Expr_ptr expr);
     bool is_unary_enumerative(const Expr_ptr expr);
@@ -215,6 +216,7 @@ protected:
     bool is_binary_constant(const Expr_ptr expr);
     bool is_unary_constant(const Expr_ptr expr);
     bool is_ite_constant(const Expr_ptr expr);
+    bool is_subscript_algebraic(const Expr_ptr expr);
 
     /* -- boolean exprs ----------------------------------------------------- */
     void boolean_not(const Expr_ptr expr);
@@ -250,19 +252,9 @@ protected:
     void integer_le(const Expr_ptr expr);
     void integer_ite(const Expr_ptr expr);
 
-    void fixed_neg(const Expr_ptr expr);
-    void fixed_plus(const Expr_ptr expr);
-    void fixed_sub(const Expr_ptr expr);
-    void fixed_div(const Expr_ptr expr);
-    void fixed_mul(const Expr_ptr expr);
-    void fixed_mod(const Expr_ptr expr);
-    void fixed_equals(const Expr_ptr expr);
-    void fixed_not_equals(const Expr_ptr expr);
-    void fixed_gt(const Expr_ptr expr);
-    void fixed_ge(const Expr_ptr expr);
-    void fixed_lt(const Expr_ptr expr);
-    void fixed_le(const Expr_ptr expr);
-    void fixed_ite(const Expr_ptr expr);
+    /* -- subscripts -------------------------------------------------------- */
+    void integer_subscript(const Expr_ptr expr);
+    void algebraic_subscript(const Expr_ptr expr);
 
     /* -- enumeratives ------------------------------------------------------ */
     void enumerative_equals(const Expr_ptr expr);
@@ -297,6 +289,7 @@ protected:
     void memoize_result(const Expr_ptr expr);
     void relational_type_lookahead(const Expr_ptr expr);
     void relational_type_cleanup();
+    void build_subscript_selector();
     void flush_operands();
 
     /* push dds and type information for variables (used by walk_leaf) */
@@ -324,7 +317,7 @@ protected:
     inline unsigned algebrize_ternary_ite()
     { return algebrize_operation(true, false); }
 
-    /* core function */
+    /* core algebrization functions */
     unsigned algebrize_operation(bool ternary = false, bool relational = false);
 
     /* temporaries */

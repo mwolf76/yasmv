@@ -251,3 +251,33 @@ void Compiler::integer_le(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
+void Compiler::integer_subscript(const Expr_ptr expr)
+{
+    f_type_stack.pop_back(); // consume index
+    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back(); // consume array
+
+    assert( type -> is_array());
+    ArrayType_ptr atype = type -> as_array();
+    unsigned elem_size  = atype -> of() -> size();
+    unsigned elem_count = atype -> nelems();
+
+    POP_ADD(index);
+    assert(f_enc.is_constant(index));
+    unsigned ndx = f_enc.const_value(index);
+
+    POP_ALGEBRAIC(vec, elem_size * elem_count);
+
+    if (ndx < elem_count) {
+        for (unsigned i = 0; i < elem_size; ++ i) {
+            PUSH_ADD( vec[ ndx * elem_size + i ]);
+        }
+    }
+    else {
+        /* out of boundaries */
+        for (unsigned i = 0; i < elem_size; ++ i) {
+            PUSH_ADD( f_enc.error());
+        }
+    }
+
+    f_type_stack.push_back( atype -> of());
+}

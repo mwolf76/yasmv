@@ -362,47 +362,6 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-/* For relationals we need to do some work. Namely, we look-ahead lhs
-   and rhs types using the inferrer, to determine the expected
-   type. This is used to settle the ITE(const, const) algebrization
-   uncertainty. This comment applies to all relational operators. */
-void Compiler::relational_type_lookahead(const Expr_ptr expr)
-{
-    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-    Type_ptr rhs_type = f_owner.type(rhs);
-
-    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-    Type_ptr lhs_type = f_owner.type(lhs);
-
-    if (! lhs_type -> is_constant() &&
-        ! rhs_type -> is_constant()) {
-        assert( lhs_type == rhs_type ); // FIXME: throw
-        f_rel_type_stack.push_back( rhs_type );
-    }
-
-    else if ( lhs_type -> is_constant() &&
-              ! rhs_type -> is_constant()) {
-        f_rel_type_stack.push_back( rhs_type );
-    }
-
-    else if ( rhs_type -> is_constant() &&
-              ! lhs_type -> is_constant()) {
-        f_rel_type_stack.push_back( lhs_type );
-    }
-
-    /* Uh Oh, both are constants. There is no easy way out of this for now. */
-    else {
-        assert( false ); // unsupported;
-    }
-}
-
-void Compiler::relational_type_cleanup()
-{
-    assert(0 < f_rel_type_stack.size());
-    f_rel_type_stack.pop_back();
-}
-
-
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
 {
     bool res = cache_miss(expr);
@@ -599,7 +558,7 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
     // f_ctx_stack.pop_back();
 }
 
-/* on-demand preprocessing to expand defines */
+/* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
 {
     Expr_ptr ctx = f_ctx_stack.back();
@@ -616,6 +575,16 @@ bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
+void Compiler::walk_subscript_postorder(const Expr_ptr expr)
+{
+    if (is_subscript_integer(expr)) {
+        integer_subscript(expr);
+    }
+    else if (is_subscript_algebraic(expr)) {
+        algebraic_subscript(expr);
+    }
+    else assert( false ); // unreachable
+}
 
 bool Compiler::walk_comma_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
@@ -625,72 +594,6 @@ bool Compiler::walk_comma_inorder(const Expr_ptr expr)
 
 void Compiler::walk_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
-
-/* Array selector builder: for arrays subscription, a chain of ITE is
-   built out of the encodings for each element which are assumed to be
-   present in dd stack in reversed order (walk_leaf took care of
-   this). */
-void Compiler::walk_subscript_postorder(const Expr_ptr expr)
-{
-    unsigned base = Cudd_V(f_enc.base().getNode());
-
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-
-    /* algebrize selection expr (rhs), using machine width */
-    assert (rhs_type->is_algebraic());
-    // algebrize_unary_subscript();
-    assert(false); // tODO
-
-    ADD selector[2]; // TODO
-    for (unsigned i = 0; i < 2; ++ i) {
-        selector[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned size = lhs_type -> size();
-
-    const Type_ptr scalar_type = lhs_type -> as_array() ->of();
-    unsigned width = scalar_type->size();
-
-    /* fetch DDs from the stack */
-    ADD dds[width * size];
-    for (unsigned i = 0; i < width * size; ++ i) {
-        dds[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    ADD res; /* one digit at a time */
-    for (unsigned i = 0; i < width; ++ i) {
-        unsigned ndx = width - i - 1;
-        res = f_enc.zero(); // TODO: FAILURE here
-
-        for (unsigned j = 0; j < size; ++ j) {
-
-            /* selected index */
-            unsigned selection = size - j -1;
-
-            ADD cond = f_enc.one();
-            value_t value = ndx;
-
-            /* encode the case selection as a conjunction of
-               Equals ADD digit-by-digit (inlined) */
-            for (unsigned k = 0; k < width; ++ k) {
-
-                ADD digit = f_enc.constant(value % base);
-                f_add_stack.push_back(digit);
-                value /= base;
-
-                /* case selection */
-                cond *= selector[ndx].Equals(digit);
-            }
-            assert (value == 0); // not overflowing
-
-            /* chaining */
-            res = cond.Ite( dds[width * selection + i], res);
-        }
-
-        f_add_stack.push_back(res);
-    }
-}
 
 /* private service of walk_leaf */
 void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
@@ -716,8 +619,17 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
         }
     }
 
+    /* array of algebraics, same as above, times nelems (!) */
     else if (type->is_array()) {
-        abort(); // TODO
+
+        // type and enc width info has to match
+        assert( type -> as_array() -> of() -> as_algebraic()-> size() ==
+                width / type -> as_array() -> nelems());
+
+        for (DDVector::reverse_iterator ri = dds.rbegin();
+             ri != dds.rend(); ++ ri) {
+            f_add_stack.push_back(*ri);
+        }
     }
 
     else assert( false ); // unexpected

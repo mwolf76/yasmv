@@ -48,6 +48,12 @@ OptsMgr::OptsMgr()
         )
 
         (
+         "word-width",
+         options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
+         "native word size in bits, used for algebrization of constant ITEs and arrays"
+        )
+
+        (
          "verbosity",
          options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
          "verbosity level"
@@ -95,6 +101,12 @@ bool OptsMgr::color() const
 unsigned OptsMgr::bits_per_digit() const
 {
     unsigned res = f_vm["bits-per-digit"].as<unsigned>();
+    return res;
+}
+
+unsigned OptsMgr::word_width() const
+{
+    unsigned res = f_vm["word-width"].as<unsigned>();
     return res;
 }
 

@@ -73,7 +73,7 @@ public:
     { return f_cudd.addZero(); }
 
     inline ADD error()
-    { return f_cudd.constant(error_value); }
+    { return f_cudd.addError(); }
 
     inline ADD constant(value_t value)
     { assert (error_value != value); return f_cudd.constant(value); }
