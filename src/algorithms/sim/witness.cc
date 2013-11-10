@@ -83,7 +83,9 @@ SimulationWitness::SimulationWitness(IModel& model,
                 /* 2. eval the encoding ADD with inputs and put
                    resulting value into time frame container. */
                 Expr_ptr value = enc->expr(inputs);
-                tf.set_value( key, value );
+                if (value) {
+                    tf.set_value( key, value );
+                }
             }
         }
     }

@@ -47,7 +47,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     f_cudd.AutodynDisable();
 
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
-        DEBUG << "Encoding boolean " << btype << endl;
+        DEBUG << "Encoding " << btype << endl;
         res = new BooleanEncoding();
     }
     else if (NULL != (sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp))) {

@@ -206,16 +206,17 @@ ArrayEncoding::ArrayEncoding(Encodings elements)
     : f_elements(elements)
 {
     assert(0 < elements.size());
-    f_dv.reserve( elements.size() *
-                  elements[0]->dv().size() ); // preallocate memory
-
     for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
-        DDVector& dds = (*i)->dv();
-        f_dv.insert( f_dv.end(), dds.begin(), dds.end() );
+
+        /* digits */
+        DDVector& dv = (*i)->dv();
+        f_dv.insert( f_dv.end(), dv.begin(), dv.end() );
+
+        /* bits */
+        DDVector& bits = (*i)->bits();
+        f_bits.insert( f_bits.end(), bits.begin(), bits.end() );
     }
 }
 
 Expr_ptr ArrayEncoding::expr(int* assignment)
-{
-    assert( false ); // an array cannot be evaluated
-}
+{ return NULL; } // an array cannot be evaluated

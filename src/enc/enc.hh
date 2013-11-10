@@ -43,10 +43,10 @@
 typedef class IEncoding *IEncoding_ptr;
 class IEncoding : public IObject {
 public:
-    /* Full-Digit DDs */
+    /* Full-Digit DDs (roots), used in manipulation of algebraics (e.g.. compiler) */
     virtual DDVector& dv() =0;
 
-    /* Bit-level DDs */
+    /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT solver) */
     virtual DDVector& bits() =0;
 
     // vector of DD leaves (consts) -> expr
