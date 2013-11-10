@@ -528,8 +528,8 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
         for (unsigned i = 0; i < elem_size; ++ i ) {
 
             /* A bit of magic: reusing eq code :-) */
-            algebraic_equals( em.make_eq( expr->rhs(),
-                                          em.make_const(j)));
+            (*this)( em.make_eq( expr->rhs(),
+                                 em.make_const(j)));
 
             POP_ADD(cnd);
             mpx[i] = cnd.Ite( vec[ j * elem_size + i ], mpx[i]);
