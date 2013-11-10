@@ -10,7 +10,9 @@ CORE
 
 3. Enumeratives support (4h) 2013-11-25
 4. Check signed int support (4h) 2013-11-25
+
 5. efficient CNFization (16h) 2013-12-15
+
 6. COI (2h) 2013-12-31
 7. BMC INVAR ALGOs (KIND + ITPs) (8h) 2014-01-31
 

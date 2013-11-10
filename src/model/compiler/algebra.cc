@@ -506,8 +506,10 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
     Type_ptr t0 = f_type_stack.back(); f_type_stack.pop_back(); // consume index
     assert( t0 -> is_algebraic() && ! t0 -> is_constant());
     Type_ptr itype = t0 -> as_algebraic();
-    assert( itype -> size () == OptsMgr::INSTANCE().word_width());
     POP_ALGEBRAIC(index, itype -> size());
+
+    // argh! this breaks octals.. :-/
+    assert( itype -> size() * f_enc.bits_per_digit() == f_enc.word_width());
 
     // array
     Type_ptr t1 = f_type_stack.back(); f_type_stack.pop_back(); // consume array
@@ -524,7 +526,9 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
     }
 
     ExprMgr& em = f_owner.em();
-    for (unsigned j = elem_count -1; (j) ; -- j) {
+    unsigned j = elem_count; do {
+
+        -- j;
 
         /* A bit of magic: reusing eq code :-) */
         (*this)( em.make_eq( expr->rhs(),
@@ -534,9 +538,11 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
         f_type_stack.pop_back(); /* adjust type stack */
 
         for (unsigned i = 0; i < elem_size; ++ i ) {
-            mpx[i] = cnd.Ite( vec[ j * elem_size + i ], mpx[i]);
+            unsigned ndx = elem_size - i - 1;
+            mpx[ ndx ] = cnd.Ite( vec[ j * elem_size + i ], mpx[ ndx ]);
         }
-    }
+
+    } while (j);
 
     // push mpx backwards
     for (unsigned i = 0; i < elem_size; ++ i) {
