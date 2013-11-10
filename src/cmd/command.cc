@@ -46,9 +46,9 @@ Variant LoadModelCommand::operator()()
     parseFile(f_filename.c_str());
 
     // model analysis
-    ModelMgr::INSTANCE().analyze();
+    bool status = ModelMgr::INSTANCE().analyze();
 
-    return Variant("OK");
+    return Variant( status ? "OK" : "ERROR" );
 }
 
 LoadModelCommand::~LoadModelCommand()

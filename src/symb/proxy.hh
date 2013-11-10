@@ -58,7 +58,7 @@ public:
         if (NULL != res) return res;
 
         /* if all of the above fail... */
-        WARN << "Could not resolve symbol " << ctx << "::" << expr << endl;
+        // WARN << "Could not resolve symbol " << ctx << "::" << expr << endl;
         throw UnresolvedSymbol(ctx, expr);
     }
 };

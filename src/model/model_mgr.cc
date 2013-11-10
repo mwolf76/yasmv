@@ -75,8 +75,10 @@ void ModelMgr::second_pass()
                 f_inferrer.process(ctx, body);
             }
             catch (AnalyzerException& ae) {
-                cerr << "INIT " << fqdn << endl
-                     << ae.what() << endl;
+                cerr << ae.what()
+                     << " in INIT "
+                     << fqdn << endl;
+                f_status = false;
             }
 
         } // for init
@@ -93,15 +95,19 @@ void ModelMgr::second_pass()
                 f_inferrer.process(ctx, body);
             }
             catch (AnalyzerException& ae) {
-                cerr << "TRANS " << fqdn << endl
-                     << ae.what() << endl;
+                cerr << ae.what()
+                     << " in TRANS "
+                     << fqdn << endl;
+                f_status = false;
             }
-        }
-    }
+        } // for trans
+    } // for module
 }
 
-void ModelMgr::analyze()
+bool ModelMgr::analyze()
 {
+    f_status = true;
+
     DEBUG << "-- first pass (binding)" << endl;
     // (binding) For each module m in M, A goes deep in the module
     // defs. Every variable decl is resolved either to a native type
@@ -109,6 +115,7 @@ void ModelMgr::analyze()
     // modules are defined so any unresolved symbol at this point is a
     // fatal. Native types are taken care of as well.
     first_pass();
+    if (! f_status) return false;
 
     DEBUG << "-- second pass (type checking)" << endl;
     // (typechecking) For each module m in M, A inspects FSM exprs:
@@ -116,5 +123,8 @@ void ModelMgr::analyze()
     // have to match lvalue type. The type for every expression is
     // inferred using the lazy walker strategy.
     second_pass();
+    if (! f_status) return false;
+
+    return true;
 }
 

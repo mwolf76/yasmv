@@ -46,7 +46,7 @@ public:
     inline IResolver_ptr resolver()
     { return &f_resolver; }
 
-    void analyze();
+    bool analyze();
 
     static ModelMgr& INSTANCE() {
         if (! f_instance) f_instance = new ModelMgr();
@@ -103,6 +103,7 @@ private:
     Inferrer& f_inferrer;
 
     // analyzer passes
+    bool f_status;
     void first_pass();
     void second_pass();
 };
