@@ -525,13 +525,15 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 
     ExprMgr& em = f_owner.em();
     for (unsigned j = elem_count -1; (j) ; -- j) {
+
+        /* A bit of magic: reusing eq code :-) */
+        (*this)( em.make_eq( expr->rhs(),
+                             em.make_const(j)));
+
+        ADD cnd = f_add_stack.back(); f_add_stack.pop_back();
+        f_type_stack.pop_back(); /* adjust type stack */
+
         for (unsigned i = 0; i < elem_size; ++ i ) {
-
-            /* A bit of magic: reusing eq code :-) */
-            (*this)( em.make_eq( expr->rhs(),
-                                 em.make_const(j)));
-
-            POP_ADD(cnd);
             mpx[i] = cnd.Ite( vec[ j * elem_size + i ], mpx[i]);
         }
     }
