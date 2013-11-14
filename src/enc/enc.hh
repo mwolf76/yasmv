@@ -156,6 +156,8 @@ public:
     // here assignment *must* have size 1
     virtual Expr_ptr expr(int* assignment);
 
+    virtual value_t value(Expr_ptr literal);
+
 protected:
     virtual ~EnumEncoding()
     { assert(0); }

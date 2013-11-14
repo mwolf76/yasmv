@@ -621,13 +621,13 @@ void ExprWalker::walk ()
             break;
 
         case SET:
-            if (walk_neg_preorder(curr.expr)) {
+            if (walk_set_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = SET_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
             entry_SET_1:
-                walk_neg_postorder(curr.expr);
+                walk_set_postorder(curr.expr);
             }
             break;
 

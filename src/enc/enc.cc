@@ -170,7 +170,7 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
 EnumEncoding::EnumEncoding(const ExprSet& lits)
 {
     unsigned nbits = range_repr_bits(lits.size());
-    make_monolithic_encoding(nbits);
+    f_dv.push_back( make_monolithic_encoding(nbits));
 
     value_t v;
     ExprSet::iterator eye;
@@ -179,6 +179,14 @@ EnumEncoding::EnumEncoding(const ExprSet& lits)
         f_v2e_map[v] = *eye;
         f_e2v_map[*eye] = v;
     }
+}
+
+value_t EnumEncoding::value(Expr_ptr lit)
+{
+    ExprValueMap::iterator eye = f_e2v_map.find( lit );
+    assert( eye != f_e2v_map.end());
+
+    return (*eye).second;
 }
 
 Expr_ptr EnumEncoding::expr(int *assignment)

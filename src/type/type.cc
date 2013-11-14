@@ -104,6 +104,9 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
 }
 
 unsigned EnumType::size() const
+{ return 1; }
+
+unsigned EnumType::width() const
 {
     unsigned res = 0, pow = 1;
 
@@ -114,9 +117,6 @@ unsigned EnumType::size() const
 
     return res;
 }
-
-unsigned EnumType::width() const
-{ return size(); }
 
 // -- Algebraics ------------------------------------------------------------
 bool ConstantType::is_abstract() const
@@ -156,7 +156,7 @@ unsigned SignedAlgebraicType::size() const
 unsigned SignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
-    return 4 * f_width;
+    return 4 * f_width; // FIXME !!! (why 4?)
 }
 
 bool UnsignedAlgebraicType::is_abstract() const
@@ -181,7 +181,7 @@ unsigned UnsignedAlgebraicType::size() const
 unsigned UnsignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
-    return 4 * f_width;
+    return 4 * f_width; // FIXME !!! (why 4?)
 }
 
 ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)

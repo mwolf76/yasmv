@@ -46,10 +46,15 @@ protected:
     void pre_hook();
     void post_hook();
 
+    // support for CTL ops
     CTL_HOOKS;
+
+    // support for LTL ops
     LTL_HOOKS;
 
+    // support for basic ops
     OP_HOOKS;
+
     void walk_leaf(const Expr_ptr expr);
 };
 

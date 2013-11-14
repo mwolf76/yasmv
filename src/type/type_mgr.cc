@@ -162,9 +162,11 @@ void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
     // Literals are all maintained together by the type mgr. This
     // greatly simplifies the resolver.
     for (ExprSet::iterator eye = lits.begin(); eye != lits.end(); ++ eye) {
+        Expr_ptr lit = *eye;
+
         f_lits.insert( make_pair<FQExpr,
-                                 ILiteral_ptr>(FQExpr( fullname, *eye),
-                                               new Literal(enm, *eye)));
+                                 ILiteral_ptr>(FQExpr( ctx, lit),
+                                               new Literal(enm, lit)));
     }
 
     // new type, needs to be registered before returning

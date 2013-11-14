@@ -71,6 +71,6 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
         else res = make_expr(COMMA, (*eye), res);
     }
 
-    return make_expr(SET, res, NULL);
+    return make_set(res);
 }
 

@@ -380,6 +380,9 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     else if (is_binary_integer(expr)) {
         integer_equals(expr);
     }
+    else if (is_binary_enumerative(expr)) {
+        enumerative_equals(expr);
+    }
     else if (is_binary_algebraic(expr)) {
         algebraic_equals(expr);
     }
@@ -404,6 +407,9 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
     }
     else if (is_binary_integer(expr)) {
         integer_not_equals(expr);
+    }
+    else if (is_binary_enumerative(expr)) {
+        enumerative_not_equals(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_not_equals(expr);
@@ -606,6 +612,7 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
     assert (NULL != enc);
     DDVector& dds = enc->dv();
     unsigned width = dds.size();
+    assert( 0 < width );
 
     // push into type stack
     f_type_stack.push_back(type);
@@ -654,18 +661,17 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     ENCMap::iterator eye;
     IEncoding_ptr enc = NULL;
 
-    // 1.1. explicit constants are integer consts (e.g. 42) ..
+    // 1. Explicit integer consts (e.g. 42) ..
     if (em.is_numeric(expr)) {
         f_type_stack.push_back(tm.find_constant());
         f_add_stack.push_back(f_enc.constant(expr->value()));
         return;
     }
 
-    // 2. Module-managed symbols
     ResolverProxy resolver;
     ISymbol_ptr symb = resolver.symbol(ctx, expr);;
 
-    // 2. 1. Temporary symbols are maintained internally by the compiler
+    // 2. Temporary symbols are maintained internally by the compiler
     ITemporary_ptr temp;
     if (NULL != (temp = dynamic_cast<ITemporary_ptr>(symb))) {
         Type_ptr type = NULL;
@@ -686,7 +692,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* Temporary symbols */
 
-    // 2. 2. 1. bool/integer constant leaves
+    // 3. bool/integer constant leaves
     if (symb->is_const()) {
         IConstant& konst =  symb->as_const();
 
@@ -695,7 +701,33 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    // 2. 2. 2. variables
+    // 4. Enum literals
+    if (symb->is_literal()) {
+        ILiteral& konst =  symb->as_literal();
+
+        // push into type stack
+        Type_ptr type = konst.type();
+
+        // if encoding for variable is available reuse it,
+        // otherwise create and cache it.
+        FQExpr key(ctx, expr, time);
+
+        /* build a new encoding for this symbol if none is available. */
+        if (NULL == (enc = f_enc.find_encoding(key))) {
+            assert (NULL != type);
+            enc = f_enc.make_encoding(type);
+            f_enc.register_encoding(key, enc);
+        }
+
+        EnumEncoding_ptr eenc = dynamic_cast<EnumEncoding_ptr>( enc );
+        assert( NULL != eenc );
+
+        f_type_stack.push_back(konst.type());
+        f_add_stack.push_back(f_enc.constant(eenc -> value( expr )));
+        return;
+    }
+
+    // 5.  variables
     else if (symb->is_variable()) {
 
         // push into type stack
@@ -716,29 +748,12 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* variables */
 
-    // 2. 3. define? Simply compile it recursively.
-    // we keep this to retain the old lazy behavior with nullary defines
-    // since it comes at no extra cost at all.
+    // 6 Defines. Simply compile it recursively.  we keep this to
+    // retain the old lazy behavior with nullary defines since it
+    // comes at no extra cost at all.
     else if (symb->is_define()) {
         (*this)(symb->as_define().body());
         return;
-    }
-
-    // 3. TypeMgr symbols
-    { /* try enums */
-        IEnum_ptr enm;
-        if (NULL != (enm = dynamic_cast<IEnum_ptr>(symb))) {
-            f_ctx_stack.push_back(enm->expr());
-            return;
-        }
-    }
-
-    { /* try arrays */
-        IArray_ptr arr;
-        if (NULL != (arr = dynamic_cast<IArray_ptr>(symb))) {
-            f_ctx_stack.push_back(arr->expr());
-            return;
-        }
     }
 
     assert( false ); /* give up, TODO: exception */
