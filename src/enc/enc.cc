@@ -164,6 +164,15 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
         } else break;
     } while (true);
 
+    if (is_signed()) {
+        // REVIEW this for non-exact types
+        value_t msb = pow2(OptsMgr::INSTANCE().bits_per_digit() * i - 1);
+        if (res & msb) {
+            value_t cmpl = 1 + (~res & (pow2(OptsMgr::INSTANCE().bits_per_digit() * i) - 1));
+            return em.make_neg( em.make_const(cmpl));
+        }
+    }
+
     return em.make_const(res);
 }
 

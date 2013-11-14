@@ -8,7 +8,7 @@ CORE
 * Full arrays support [X]
 * Enumeratives support [X]
 * Check signed int support
-
+* Consolidate Unit-testing
 * Efficient CNFization
 
 * COI (2h)

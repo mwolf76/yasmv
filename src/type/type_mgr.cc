@@ -53,7 +53,7 @@ TypeMgr::TypeMgr()
                        new UnsignedAlgebraicType(*this, i, NULL));
 
         register_type( f_em.make_signed_int_type(i),
-                       new UnsignedAlgebraicType(*this, i, NULL));
+                       new SignedAlgebraicType(*this, i, NULL));
     }
 }
 
