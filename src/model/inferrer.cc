@@ -369,6 +369,14 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_TYPE(check_array() -> as_array() -> of());
 }
 
+bool Inferrer::walk_set_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_set_postorder(const Expr_ptr expr)
+{
+    assert(false); // TODO
+}
+
+
 bool Inferrer::walk_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }
 

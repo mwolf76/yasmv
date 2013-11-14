@@ -586,6 +586,11 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+bool Compiler::walk_set_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Compiler::walk_set_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
 bool Compiler::walk_comma_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 

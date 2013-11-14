@@ -30,6 +30,45 @@
 #include <common.hh>
 #include <expr.hh>
 
+/* helper macros to declare walker hooks */
+#define UNARY(op)                                            \
+    bool walk_## op ## _preorder(const Expr_ptr expr);       \
+    void walk_## op ## _postorder(const Expr_ptr expr)
+
+#define BINARY(op)                                           \
+    bool walk_## op ## _preorder(const Expr_ptr expr);       \
+    bool walk_## op ## _inorder(const Expr_ptr expr);        \
+    void walk_## op ## _postorder(const Expr_ptr expr)
+
+#define OP_HOOKS \
+    UNARY(next); UNARY(neg); UNARY(not); \
+    BINARY(add); BINARY(sub);            \
+    BINARY(div); BINARY(mod);            \
+    BINARY(mul);                         \
+    BINARY(and); BINARY(or);             \
+    BINARY(xor); BINARY(implies);        \
+    BINARY(xnor); BINARY(iff);           \
+    BINARY(lshift); BINARY(rshift);      \
+    BINARY(eq); BINARY(ne);              \
+    BINARY(le); BINARY(lt);              \
+    BINARY(ge); BINARY(gt);              \
+    BINARY(ite); BINARY(cond);           \
+    BINARY(dot);                         \
+    BINARY(params);                      \
+    BINARY(subscript);                   \
+    UNARY(set);                          \
+    BINARY(comma)
+
+#define CTL_HOOKS \
+    UNARY(AF); UNARY(AG); UNARY(AX);     \
+    BINARY(AR); BINARY(AU);              \
+    UNARY(EF); UNARY(EG); UNARY(EX);     \
+    BINARY(ER); BINARY(EU)
+
+#define LTL_HOOKS \
+    UNARY(F); UNARY(G); UNARY(X);        \
+    BINARY(R); BINARY(U)
+
 // enums in C++ are non-extensible, thus we have to keep all possible
 // values together in one place.
 typedef enum {
@@ -78,7 +117,7 @@ typedef enum {
     SUBSCRIPT_1, SUBSCRIPT_2,
 
     // sets ({})
-    // SET_1, SET_2,
+    SET_1,
 
     // params (())
     PARAMS_1, PARAMS_2,
@@ -275,9 +314,8 @@ protected:
     virtual bool walk_subscript_inorder(const Expr_ptr expr) =0;
     virtual void walk_subscript_postorder(const Expr_ptr expr) =0;
 
-    // virtual bool walk_set_preorder(const Expr_ptr expr) =0;
-    // virtual bool walk_set_inorder(const Expr_ptr expr) =0;
-    // virtual void walk_set_postorder(const Expr_ptr expr) =0;
+    virtual bool walk_set_preorder(const Expr_ptr expr) =0;
+    virtual void walk_set_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
     virtual bool walk_comma_inorder(const Expr_ptr expr) =0;

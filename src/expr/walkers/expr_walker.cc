@@ -132,11 +132,10 @@ void ExprWalker::walk ()
             case SUBSCRIPT_1: goto entry_SUBSCRIPT_1;
             case SUBSCRIPT_2: goto entry_SUBSCRIPT_2;
 
+            case SET_1: goto entry_SET_1;
+
             case COMMA_1: goto entry_COMMA_1;
             case COMMA_2: goto entry_COMMA_2;
-
-            // case SET_1: goto entry_SET_1;
-            // case SET_2: goto entry_SET_2;
 
             default: throw UnsupportedEntryPointException(curr.pc);
 
@@ -621,6 +620,17 @@ void ExprWalker::walk ()
             }
             break;
 
+        case SET:
+            if (walk_neg_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = SET_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_SET_1:
+                walk_neg_postorder(curr.expr);
+            }
+            break;
+
         case COMMA:
             if (walk_comma_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = COMMA_1;
@@ -639,24 +649,6 @@ void ExprWalker::walk ()
             }
             break;
 
-
-        // case SET:
-        //     if (walk_set_preorder(curr.expr)) {
-        //         f_recursion_stack.top().pc = SET_1;
-        //         f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-        //         goto loop;
-
-        //     entry_SET_1:
-        //         if (walk_set_inorder(curr.expr)) {
-        //             f_recursion_stack.top().pc = SET_2;
-        //             f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-        //             goto loop;
-        //         }
-
-        //     entry_SET_2:
-        //         walk_set_postorder(curr.expr);
-        //     }
-        //     break;
 
         // leaves
         case ICONST:

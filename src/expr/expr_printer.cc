@@ -142,22 +142,10 @@ bool Printer::walk_ER_inorder(const Expr_ptr expr)
 void Printer::walk_ER_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-bool Printer::walk_init_preorder(const Expr_ptr expr)
-{ f_os << "init("; return true; }
-void Printer::walk_init_postorder(const Expr_ptr expr)
-{ f_os << ")"; }
-
 bool Printer::walk_next_preorder(const Expr_ptr expr)
 { f_os << "next("; return true; }
 void Printer::walk_next_postorder(const Expr_ptr expr)
 { f_os << ")"; }
-
-bool Printer::walk_at_preorder(const Expr_ptr expr)
-{ f_os << "@"; return true; }
-bool Printer::walk_at_inorder(const Expr_ptr expr)
-{ f_os << " {"; return true; }
-void Printer::walk_at_postorder(const Expr_ptr expr)
-{ f_os << "}"; }
 
 bool Printer::walk_neg_preorder(const Expr_ptr expr)
 { f_os << "- "; return true; }
@@ -337,10 +325,10 @@ bool Printer::walk_subscript_inorder(const Expr_ptr expr)
 void Printer::walk_subscript_postorder(const Expr_ptr expr)
 { f_os << "]"; }
 
-// bool Printer::walk_set_preorder(const Expr_ptr expr)
-// { f_os << "{"; return true; }
-// void Printer::walk_set_postorder(const Expr_ptr expr)
-// { f_os << "}"; }
+bool Printer::walk_set_preorder(const Expr_ptr expr)
+{ f_os << "{"; return true; }
+void Printer::walk_set_postorder(const Expr_ptr expr)
+{ f_os << "}"; }
 
 bool Printer::walk_comma_preorder(const Expr_ptr expr)
 { return true; }

@@ -4,37 +4,41 @@ TODO
 CORE
 ====
 
-0. Colorized output (2h) - ETA postponed
-1. Parametrized defines (done)
-2. Full arrays support (8h) 2013-11-18 (current)
+* Parametrized defines [X]
+* Full arrays support (8h) 2013-11-18 [X]
+* Enumeratives support (4h) 2013-11-25
+* Inlined non-determinsm via the {} operator
+* Check signed int support (4h) 2013-11-25
 
-3. Enumeratives support (4h) 2013-11-25
-4. Check signed int support (4h) 2013-11-25
+* Efficient CNFization (16h) 2013-12-15
 
-5. efficient CNFization (16h) 2013-12-15
+* COI (2h) 2013-12-31
+* BMC INVAR ALGOs (KIND + ITPs) (8h) 2014-01-31
 
-6. COI (2h) 2013-12-31
-7. BMC INVAR ALGOs (KIND + ITPs) (8h) 2014-01-31
+EXTRA
+=====
+
+* Colorized output (2h)
+* Emacs mode for editing
 
 GUI (reachabilty)
 ===
 
-1. FSM Editor + Code generator (:
+* FSM Editor + Code generator (:
+. States (actions)
+. Transitions (guards and actions)
 
-*  States (actions)
-*  Transitions (guards and actions)
+* FLOWCHART Editor
 
-2. FLOWCHART Editor
-
-TESTING
+* TESTING
         . Arrays
         . Suite of models for integration testing
 
-IMPLEMENTATION
+* IMPLEMENTATION
         . Single-cut and Multi-cut CNF algorithms (urgent)
         . Implement and test dot-notation resolution
         . Witness mgr
 
-REFACTORING
+* REFACTORING
         . Remove support for LTL and CTL
         . Proper error management (i.e. exceptions instead of assertions)

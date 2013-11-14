@@ -374,6 +374,14 @@ void Preprocessor::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_subscript( lhs, rhs ));
 }
 
+bool Preprocessor::walk_set_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_set_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_set( lhs));
+}
+
 bool Preprocessor::walk_comma_preorder(Expr_ptr expr)
 { assert(false); return false; }
 bool Preprocessor::walk_comma_inorder(Expr_ptr expr)

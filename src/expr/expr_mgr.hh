@@ -156,6 +156,9 @@ public:
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
 
+    inline Expr_ptr make_set(Expr_ptr a)
+    { return make_expr(SET, a, NULL); }
+
     /* ++ type makers */
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }

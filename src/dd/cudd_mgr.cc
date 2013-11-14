@@ -48,7 +48,8 @@ Cudd& CuddMgr::dd()
     assert (NULL != res);
 
     /* Common setup for all dd instances */
-    res -> AutodynEnable(CUDD_REORDER_GROUP_SIFT_CONV);
+    // res -> AutodynEnable(CUDD_REORDER_GROUP_SIFT_CONV);
+    res -> AutodynDisable();
 
     f_cudd_instances.push_back(res);
 
