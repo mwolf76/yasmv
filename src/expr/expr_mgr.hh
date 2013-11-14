@@ -36,6 +36,9 @@ public:
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
+    inline Expr_ptr make_prev(Expr_ptr expr)
+    { return make_expr(PREV, expr, NULL); }
+
     /* ++ arithmetical operators */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
@@ -252,6 +255,11 @@ public:
     inline bool is_next(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == NEXT;
+    }
+
+    inline bool is_prev(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PREV;
     }
 
     inline bool is_comma(const Expr_ptr expr) const {

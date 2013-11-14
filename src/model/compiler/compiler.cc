@@ -122,10 +122,22 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();
-    f_time_stack.push_back(1 + curr_time);
+    f_time_stack.push_back(curr_time - 1);
     return true;
 }
 void Compiler::walk_next_postorder(const Expr_ptr expr)
+{
+    assert (0 < f_time_stack.size());
+    f_time_stack.pop_back(); // reset time stack
+}
+
+bool Compiler::walk_prev_preorder(const Expr_ptr expr)
+{
+    step_t curr_time = f_time_stack.back();
+    f_time_stack.push_back(curr_time - 1);
+    return true;
+}
+void Compiler::walk_prev_postorder(const Expr_ptr expr)
 {
     assert (0 < f_time_stack.size());
     f_time_stack.pop_back(); // reset time stack

@@ -5,15 +5,15 @@ CORE
 ====
 
 * Parametrized defines [X]
-* Full arrays support (8h) 2013-11-18 [X]
-* Enumeratives support (4h) 2013-11-25
-* Inlined non-determinsm via the {} operator
-* Check signed int support (4h) 2013-11-25
+* Full arrays support [X]
+* Enumeratives support [X]
+* Check signed int support
 
-* Efficient CNFization (16h) 2013-12-15
+* Efficient CNFization
 
-* COI (2h) 2013-12-31
-* BMC INVAR ALGOs (KIND + ITPs) (8h) 2014-01-31
+* COI (2h)
+* BMC INVAR ALGOs (KIND + ITPs)
+
 
 EXTRA
 =====

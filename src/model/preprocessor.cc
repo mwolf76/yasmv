@@ -97,6 +97,14 @@ void Preprocessor::walk_next_postorder(const Expr_ptr expr)
     PUSH_EXPR( f_em.make_next( lhs));
 }
 
+bool Preprocessor::walk_prev_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_prev_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR( f_em.make_prev( lhs));
+}
+
 bool Preprocessor::walk_neg_preorder(const Expr_ptr expr)
 { return true; }
 void Preprocessor::walk_neg_postorder(const Expr_ptr expr)

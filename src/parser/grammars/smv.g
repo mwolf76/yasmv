@@ -541,6 +541,9 @@ unary_expression returns [Expr_ptr res]
 	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
+	| 'prev' '(' expr=toplevel_expression ')'
+      { $res = em.make_prev(expr); }
+
 	| '!' expr=postfix_expression
       { $res = em.make_not(expr); }
 
@@ -678,6 +681,9 @@ pvalue returns [Expr_ptr res]
 @init { }
 	: 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
+
+    | 'prev' '(' expr=postfix_expression ')'
+      { $res = em.make_prev(expr); }
 
 	| expr=postfix_expression
       { $res = expr; }

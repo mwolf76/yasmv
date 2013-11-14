@@ -147,6 +147,11 @@ bool Printer::walk_next_preorder(const Expr_ptr expr)
 void Printer::walk_next_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+bool Printer::walk_prev_preorder(const Expr_ptr expr)
+{ f_os << "prev("; return true; }
+void Printer::walk_prev_postorder(const Expr_ptr expr)
+{ f_os << ")"; }
+
 bool Printer::walk_neg_preorder(const Expr_ptr expr)
 { f_os << "- "; return true; }
 void Printer::walk_neg_postorder(const Expr_ptr expr)

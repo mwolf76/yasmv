@@ -41,7 +41,8 @@
     void walk_## op ## _postorder(const Expr_ptr expr)
 
 #define OP_HOOKS \
-    UNARY(next); UNARY(neg); UNARY(not); \
+    UNARY(next); UNARY(prev);            \
+    UNARY(neg); UNARY(not);              \
     BINARY(add); BINARY(sub);            \
     BINARY(div); BINARY(mod);            \
     BINARY(mul);                         \
@@ -76,7 +77,7 @@ typedef enum {
     RETURN,
 
     // -- Simple walkers
-    NEXT_1, NEG_1, NOT_1,
+    NEXT_1, PREV_1, NEG_1, NOT_1,
 
     PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
     SUB_1, SUB_2,
@@ -208,6 +209,9 @@ protected:
     // unary temporal ops
     virtual bool walk_next_preorder(const Expr_ptr expr) =0;
     virtual void walk_next_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_prev_preorder(const Expr_ptr expr) =0;
+    virtual void walk_prev_postorder(const Expr_ptr expr) =0;
 
     // unary ops
     virtual bool walk_neg_preorder(const Expr_ptr expr) =0;

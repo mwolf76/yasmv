@@ -152,6 +152,11 @@ bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 void Inferrer::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_fsm_postorder(expr); }
 
+bool Inferrer::walk_prev_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_prev_postorder(const Expr_ptr expr)
+{ walk_unary_fsm_postorder(expr); }
+
 bool Inferrer::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_neg_postorder(const Expr_ptr expr)
@@ -555,7 +560,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     ExprMgr& em = f_owner.em();
 
     /* time is not relevant here */
-    while (em.is_next(expr)) {
+    while (em.is_next(expr) || em.is_prev(expr)) {
         expr = expr->lhs();
     }
 
@@ -572,6 +577,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
         return em.make_subscript(expr->lhs(),
                                  find_canonical_expr( expr->rhs()));
     }
+    else if (em.is_params(expr)) {
+        return em.make_subscript(expr->lhs(),
+                                 find_canonical_expr( expr->rhs()));
+    }
 
     /* no rewrites */
     else if (em.is_dot(expr) ||
@@ -580,7 +589,6 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
              em.is_ite(expr) ||
              em.is_cond(expr) ||
              em.is_identifier(expr) ||
-             em.is_params(expr) ||
              em.is_numeric(expr)) {
         return expr;
     }
