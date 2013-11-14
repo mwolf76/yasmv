@@ -63,6 +63,9 @@ public:
     virtual const ExprVector& init() const =0;
     virtual void add_init(Expr_ptr expr) =0;
 
+    virtual const ExprVector& invar() const =0;
+    virtual void add_invar(Expr_ptr expr) =0;
+
     virtual const ExprVector& trans() const =0;
     virtual void add_trans(Expr_ptr expr) =0;
 };
@@ -86,6 +89,7 @@ class Module : public IModule {
     Defines   f_localDefs;
 
     ExprVector f_init;
+    ExprVector f_invar;
     ExprVector f_trans;
 
 public:
@@ -112,6 +116,10 @@ public:
     void add_init(Expr_ptr expr);
     const ExprVector& init() const
     { return f_init; }
+
+    void add_invar(Expr_ptr expr);
+    const ExprVector& invar() const
+    { return f_invar; }
 
     void add_trans(Expr_ptr expr);
     const ExprVector& trans() const

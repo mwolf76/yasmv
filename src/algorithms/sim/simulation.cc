@@ -54,6 +54,17 @@ Simulation::Simulation(IModel& model, int resume,
             f_init_adds.push_back(compiler().process(ctx, body));
         }
 
+        /* INVAR */
+        const ExprVector invar = module.invar();
+        for (ExprVector::const_iterator invar_eye = invar.begin();
+             invar_eye != invar.end(); ++ invar_eye) {
+
+            Expr_ptr ctx = module.expr();
+            Expr_ptr body = (*invar_eye);
+
+            f_invar_adds.push_back(compiler().process(ctx, body));
+        }
+
         /* TRANS */
         const ExprVector trans = module.trans();
         for (ExprVector::const_iterator trans_eye = trans.begin();
@@ -79,6 +90,7 @@ void Simulation::process()
     bool leave = false;
 
     assert_fsm_init(0);
+    assert_fsm_invar(0);
     TRACE << "Starting simulation..." << endl;
 
     if (STATUS_SAT == engine().solve()) {
@@ -91,7 +103,8 @@ void Simulation::process()
         }
         else {
             do {
-                assert_fsm_trans(k); ++ k;
+                assert_fsm_trans(k ++);
+                assert_fsm_invar(k);
                 TRACE << "Simulating step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
@@ -143,6 +156,24 @@ void Simulation::assert_fsm_init(step_t time, group_t group, color_t color)
 
     ADDVector::iterator i;
     for (i = f_init_adds.begin(); f_init_adds.end() != i; ++ i) {
+        engine().push( *i, time, group, color);
+    }
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Done. (took " << secs << " seconds)" << endl;
+}
+
+void Simulation::assert_fsm_invar(step_t time, group_t group, color_t color)
+{
+    clock_t t0 = clock();
+    unsigned n = f_invar_adds.size();
+    TRACE << "CNFizing INVARs @" << time
+          << "... (" << n << " formulas)"
+          << endl;
+
+    ADDVector::iterator i;
+    for (i = f_invar_adds.begin(); f_invar_adds.end() != i; ++ i) {
         engine().push( *i, time, group, color);
     }
 

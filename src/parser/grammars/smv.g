@@ -267,6 +267,7 @@ module_decl
 
 		/* FSM definition */
 	|	fsm_init_decl
+    |   fsm_invar_decl
 	|	fsm_trans_decl
     ;
 
@@ -356,6 +357,20 @@ fsm_init_decl_body
 fsm_init_decl_clause
 	: expr=toplevel_expression
       { $smv::module->add_init(expr); }
+	;
+
+fsm_invar_decl
+    : 'INVAR' fsm_invar_decl_body
+    ;
+
+fsm_invar_decl_body
+	: fsm_invar_decl_clause
+        (';' fsm_invar_decl_clause)*
+	;
+
+fsm_invar_decl_clause
+	: expr=toplevel_expression
+      { $smv::module->add_invar(expr); }
 	;
 
 fsm_trans_decl

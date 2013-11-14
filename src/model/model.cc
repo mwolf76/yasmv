@@ -81,6 +81,13 @@ void Module::add_init(Expr_ptr expr)
     f_init.push_back(expr);
 }
 
+void Module::add_invar(Expr_ptr expr)
+{
+    DEBUG << "Module " << (*this)
+          << ", added INVAR " << expr << endl;
+    f_invar.push_back(expr);
+}
+
 void Module::add_trans(Expr_ptr expr)
 {
     DEBUG << "Module " << (*this)
