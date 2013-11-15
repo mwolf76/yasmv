@@ -601,34 +601,29 @@ basic_expression returns [Expr_ptr res]
 	| '(' expr=toplevel_expression ')'
       { $res = expr; }
 
-    | 'case'
-           cls=case_clauses
+    | 'switch' '(' expr=toplevel_expression ')'
+         clauses = case_clauses[expr]
+        'default' ':' dflt=toplevel_expression ';'
+      'end' {
+            $res = dflt;
+            for (ExprVector::reverse_iterator eye = clauses->rbegin();
+                 eye != clauses->rend(); ++ eye) {
 
-      'esac' {
-           for (ExprVector::reverse_iterator eye = cls->rbegin();
-                eye != cls->rend(); ++ eye) {
-                if (!res) {
-                    // TODO: convert this into an exception
-                    assert((*eye)->lhs() == em.make_true());
-                    res = (*eye)->rhs(); /* default value */
-                }
-                else {
-                    res = em.make_ite( (*eye), res);
-                }
-           }
-           delete cls;  // avoid memleaks
-      }
-
+                    $res = em.make_ite((*eye), $res);
+            }
+            delete clauses;
+        }
 	;
 
-case_clauses returns [ExprVector_ptr res]
+case_clauses [Expr_ptr expr] returns [ExprVector_ptr res]
 @init { res = new ExprVector (); }
     :
     (
-      lhs=toplevel_expression ':' rhs=toplevel_expression ';'
+      'case' lhs=toplevel_expression ':' rhs=toplevel_expression ';'
       {
-       assert(lhs); assert(rhs);
-       $res->push_back(em.make_cond(lhs, rhs));
+       assert(lhs);
+       assert(rhs);
+       $res->push_back(em.make_cond( em.make_eq(lhs, expr), rhs));
       }
     )+
     ;
@@ -877,6 +872,6 @@ WS
    ;
 
 LINE_COMMENT
-   : '--' ~('\n'|'\r')* '\r'? '\n'
+   : ( '//' | '--' ) ~('\n'|'\r')* '\r'? '\n'
      { $channel=HIDDEN; }
    ;
