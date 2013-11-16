@@ -7,12 +7,23 @@ CORE
 * Parametrized defines [X]
 * Full arrays support [X]
 * Enumeratives support [X]
-* Check signed int support
+* Check signed int support [X]
+* Fancy switch-like construct
 * Consolidate Unit-testing
+* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4)
+* Casts
+* Module params + cmd line support (e.g. CALL fib(10))
+* FSM -> MODULE
+* HALT ( __halt__ ) boolean
+
+INIT (! HALT)
+
 * Efficient CNFization
 
 * COI (2h)
 * BMC INVAR ALGOs (KIND + ITPs)
+
+next (x) := fib(2) ???? mmmhhh...
 
 
 EXTRA

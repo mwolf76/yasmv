@@ -29,6 +29,7 @@
 
 #include <base.hh>
 #include <witness.hh>
+#include <witness_mgr.hh>
 
 typedef enum {
     SIMULATION_UNSAT,
@@ -39,8 +40,10 @@ typedef enum {
 class Simulation : public Algorithm {
 
 public:
-    Simulation(IModel& model, int resume,
-               int nsteps, ExprVector& constraints);
+    Simulation(IModel& model,
+               Expr_ptr halt_cond,
+               ExprVector& constraints,
+               Expr_ptr witness_id = NULL);
 
     ~Simulation();
 
@@ -52,12 +55,23 @@ public:
     inline IModel& model()
     { return f_model; }
 
+    inline Witness& witness()
+    {
+        assert( f_witness );
+        return * f_witness;
+    }
+
+    const inline Expr_ptr halt_cond() const
+    { return f_halt_cond; }
+
+    void set_witness(Witness& witness);
+
 private:
     IModel& f_model;
 
-    int f_resume;
-    int f_nsteps;
+    Expr_ptr f_halt_cond;
     ExprVector f_constraints;
+    Witness* f_witness;
 
     simulation_status_t f_status;
     void set_status(simulation_status_t status);
@@ -81,8 +95,10 @@ private:
 };
 
 class SimulationWitness : public Witness {
+
 public:
     SimulationWitness(IModel& model, SAT& engine, unsigned k);
+
 };
 
 #endif

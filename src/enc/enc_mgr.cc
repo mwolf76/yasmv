@@ -75,7 +75,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     else assert(false); /* unexpected or unsupported */
 
     // reenable reordering
-    // f_cudd.AutodynEnable(CUDD_REORDER_SAME);
+    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
 
     assert (NULL != res);
     return res;

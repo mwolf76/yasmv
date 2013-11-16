@@ -82,10 +82,37 @@ private:
     Expr_ptr f_expr;
 };
 
+/* Performs a new simulation with given constraints and halting
+   conditions. Simulation can be resumed unless it's last status is
+   UNSAT. */
+class InitCommand : public Command {
+public:
+    InitCommand(Interpreter& owner,
+                ExprVector& constraints);
+
+    virtual ~InitCommand();
+
+    Variant virtual operator()();
+
+private:
+    // Simulation machinery
+    Simulation f_sim;
+
+    // Simulation constraints
+    Expr_ptr f_expr;
+
+    // HALT condition
+    Expr_ptr f_halt;
+};
+
+/* Performs a new simulation with given constraints and halting
+   conditions. Simulation can be resumed unless it's last status is
+   UNSAT. */
 class SimulateCommand : public Command {
 public:
-    SimulateCommand(Interpreter& owner, int resume,
-                    int nsteps, ExprVector& constraints);
+    SimulateCommand(Interpreter& owner,
+                    Expr_ptr halt_condition,
+                    ExprVector& constraints);
 
     virtual ~SimulateCommand();
 
@@ -97,6 +124,36 @@ private:
 
     // Simulation constraints
     Expr_ptr f_expr;
+
+    // HALT condition
+    Expr_ptr f_halt;
+};
+
+
+/* Resume an existing simulation (simulation has to be SAT) */
+class ResumeCommand : public Command {
+public:
+    ResumeCommand(Interpreter& owner,
+                  Expr_ptr halt_condition,
+                  ExprVector& constraints,
+                  Expr_ptr witness_id);
+
+    virtual ~ResumeCommand();
+
+    Variant virtual operator()();
+
+private:
+    // Simulation machinery
+    Simulation f_sim;
+
+    // Simulation constraints
+    Expr_ptr f_expr;
+
+    // HALT condition
+    Expr_ptr f_halt;
+
+    // PAUSE condition
+    Expr_ptr f_pause;
 };
 
 class CheckInvspecCommand : public Command {

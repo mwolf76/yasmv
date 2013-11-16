@@ -33,15 +33,17 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                                      bool use_coi)
     : Witness()
 {
-    ostringstream oss; oss << "BMC CEX witness for property " << property;
-    set_name(oss.str());
+    ostringstream oss;
+    oss << "BMC CEX witness for property "
+        << property;
+    set_id(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
     /* up to k (included) */
     for (step_t step = 0; step <= k; ++ step) {
-        TimeFrame& tf = new_frame();
+        TimeFrame& tf = extend();
 
         SymbIter symbs( model, use_coi ? property : NULL );
         while (symbs.has_next()) {

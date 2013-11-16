@@ -108,17 +108,36 @@ Variant CheckInvspecCommand::operator()()
 CheckInvspecCommand::~CheckInvspecCommand()
 {}
 
-// -- SIMULATE  ----------------------------------------------------------------
-SimulateCommand::SimulateCommand(Interpreter& owner, int resume,
-                                 int nsteps, ExprVector& constraints)
+// -- INIT  ----------------------------------------------------------------
+InitCommand::InitCommand(Interpreter& owner,
+                         ExprVector& constraints)
     : Command(owner)
     , f_sim(* ModelMgr::INSTANCE().model(),
-            resume, nsteps, constraints)
+            ExprMgr::INSTANCE().make_true(), constraints)
+{}
+
+Variant InitCommand::operator()()
 {
-    assert(-1 == resume);
-    // assert(-1 == nsteps);
-    // assert( 0 == constraints.size());
+    f_sim.process();
+
+    ostringstream tmp;
+    tmp << "Simulation is ";
+    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
+
+    return Variant(tmp.str());
 }
+
+InitCommand::~InitCommand()
+{}
+
+// -- SIMULATE  ----------------------------------------------------------------
+SimulateCommand::SimulateCommand(Interpreter& owner,
+                                 Expr_ptr halt_cond,
+                                 ExprVector& constraints)
+    : Command(owner)
+    , f_sim(* ModelMgr::INSTANCE().model(),
+            halt_cond, constraints)
+{}
 
 Variant SimulateCommand::operator()()
 {
@@ -132,6 +151,30 @@ Variant SimulateCommand::operator()()
 }
 
 SimulateCommand::~SimulateCommand()
+{}
+
+// -- RESUME  ----------------------------------------------------------------
+ResumeCommand::ResumeCommand(Interpreter& owner,
+                             Expr_ptr halt_cond,
+                             ExprVector& constraints,
+                             Expr_ptr witness_id)
+    : Command(owner)
+    , f_sim(* ModelMgr::INSTANCE().model(),
+            halt_cond, constraints, witness_id)
+{}
+
+Variant ResumeCommand::operator()()
+{
+    f_sim.process();
+
+    ostringstream tmp;
+    tmp << "Simulation is ";
+    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
+
+    return Variant(tmp.str());
+}
+
+ResumeCommand::~ResumeCommand()
 {}
 
 // -- QUIT ---------------------------------------------------------------------

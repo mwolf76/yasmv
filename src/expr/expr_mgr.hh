@@ -117,6 +117,9 @@ public:
         return __make_expr(&tmp);
     }
 
+    inline value_t const_value(Expr_ptr expr)
+    { return expr -> value(); }
+
     inline Expr_ptr make_const(value_t value) // decimal
     {
         Expr tmp(ICONST, value); // we need a temp store
@@ -235,6 +238,14 @@ public:
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
+    }
+
+    inline bool is_constant(const Expr_ptr expr) const {
+        assert(expr);
+        return
+            expr -> f_symb == ICONST ||
+            expr -> f_symb == OCONST ||
+            expr -> f_symb == HCONST  ;
     }
 
     inline bool is_params(const Expr_ptr expr) const {

@@ -68,7 +68,7 @@ typedef list<TimeFrame> TimeFrames;
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(string name = "<Noname>");
+    Witness(string id = "<Noname>", step_t k = 0);
 
     /* data storage */
     inline TimeFrames& frames()
@@ -83,20 +83,21 @@ public:
         return * iter;
     }
 
-    inline const string& name() const
-    { return f_name; }
+    inline const string& id() const
+    { return f_id; }
 
-    inline void set_name(string name)
-    { f_name = name; }
+    inline void set_id(string id)
+    { f_id = id; }
 
     inline unsigned length()
     { return f_frames.size(); }
 
-    TimeFrame& new_frame();
+    // extend trace by k steps (default = 1 step)
+    TimeFrame& extend(step_t k = 1);
 
 protected:
-    /* this witness' name */
-    string f_name;
+    /* this witness' id */
+    string f_id;
 
     /* Timeframes (list) */
     TimeFrames f_frames;

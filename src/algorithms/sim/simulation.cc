@@ -25,17 +25,26 @@
  **/
 #include <sim/simulation.hh>
 
-Simulation::Simulation(IModel& model, int resume,
-                       int nsteps, ExprVector& constraints)
+Simulation::Simulation(IModel& model,
+                       Expr_ptr halt_cond,
+                       ExprVector& constraints,
+                       Expr_ptr witness_id)
     : Algorithm()
     , f_model(model)
-    , f_resume(resume)
-    , f_nsteps(nsteps)
+    , f_halt_cond(halt_cond)
     , f_constraints(constraints)
+    , f_witness(NULL)
 {
-    /* internal structures are empty */
-    assert( 0 == f_init_adds.size() );
-    assert( 0 == f_trans_adds.size() );
+    /* Resuming a simulation requires given witness to be SAT */
+    if (witness_id) {
+        Witness& w = WitnessMgr::INSTANCE().witness( witness_id );
+        set_witness(w);
+    }
+
+    /* ensure internal structures are empty */
+    assert( 0 == f_init_adds.size());
+    assert( 0 == f_invar_adds.size());
+    assert( 0 == f_trans_adds.size());
 
     const Modules& modules = f_model.modules();
     for (Modules::const_iterator m = modules.begin();
@@ -84,63 +93,73 @@ Simulation::~Simulation()
 void Simulation::set_status(simulation_status_t status)
 { f_status = status; }
 
+void Simulation::set_witness(Witness& witness)
+{
+    if (f_witness)
+        delete f_witness;
+
+    f_witness = & witness;
+}
+
 void Simulation::process()
 {
-    step_t k = 0;
-    bool leave = false;
+    WitnessMgr& wm = WitnessMgr::INSTANCE();
 
-    assert_fsm_init(0);
-    assert_fsm_invar(0);
-    TRACE << "Starting simulation..." << endl;
+    bool halt = false;
+    step_t k = f_witness ? f_witness -> length() : 0;
+
+    set_status( SIMULATION_SAT ); // resuming witness has already been checked
+
+    // if a witness is already there, we're resuming a previous
+    // simulation. Hence, no need for initial states.
+    if (!k) {
+        assert_fsm_init(0);
+        assert_fsm_invar(0);
+        TRACE << "Starting simulation..." << endl;
+    }
+    else {
+        // here we need to push all the values for variables in the
+        // last state of resuming witness. A complete assignment to
+        // all state variables ensures full deterministic behavior.
+        assert( false) ; // TODO
+        TRACE << "Resuming simulation..." << endl;
+    }
 
     if (STATUS_SAT == engine().solve()) {
+        SimulationWitness wtns( model(), engine(), k);
+        set_witness(wtns);
 
-        if (f_nsteps == k) {
-            set_status( SIMULATION_SAT );
-            leave = true;
-
-            SimulationWitness witness(model(), engine(), k);
-        }
-        else {
+        halt = wm.eval ( witness(), NULL, f_halt_cond, k);
+        if (!halt) {
             do {
                 assert_fsm_trans(k ++);
                 assert_fsm_invar(k);
                 TRACE << "Simulating step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
-                    ostringstream oss; oss << "Simulation";
-                    SimulationWitness witness(model(), engine(), k);
-
-                    if (f_nsteps == k) {
-                        set_status( SIMULATION_SAT );
-                        leave = true;
-                    }
+                    witness().extend();
+                    halt = wm.eval ( witness(), NULL, f_halt_cond, k);
                 }
-            } while (STATUS_SAT == engine().status() && ! leave);
+            } while (STATUS_SAT == engine().status() && ! halt);
+        }
+        else {
+            TRACE << "Inconsistency detected in transition relation at step " << k
+                  << ". Simulation aborted."
+                  << endl;
 
-            if (STATUS_SAT == engine().status()) {
-
-                TRACE << "Extracting simulation witness (k = " << k << ")."
-                      << endl;
-
-                // set_status( SIMULATION_SAT );
-                // TODO: register
-            }
-
-            else {
-                TRACE << "Inconsistency detected in TRANS, step " << k
-                      << ". Simulation aborted."
-                      << endl;
-
-                set_status( SIMULATION_UNSAT );
-            }
+            set_status( SIMULATION_UNSAT );
         }
     }
     else {
-        TRACE << "Inconsistency detected in INIT. Simulation aborted."
+        TRACE << "Inconsistency detected in initial states. Simulation aborted."
               << endl;
 
         set_status( SIMULATION_UNSAT );
+    }
+
+    if (halt) {
+        TRACE << "Simulation reached HALT condition"
+              << endl;
     }
 
     TRACE << "Done." << endl;

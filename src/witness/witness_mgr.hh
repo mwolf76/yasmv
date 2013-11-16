@@ -27,6 +27,8 @@
 #ifndef WITNESS_MGR_H
 #define WITNESS_MGR_H
 
+#include <evaluator.hh>
+
 #include <model.hh>
 #include <model_mgr.hh>
 
@@ -47,6 +49,16 @@ public:
     inline TypeMgr& tm() const
     { return f_tm; }
 
+    // delegated method to the Evaluator functor
+    inline const value_t eval( Witness&w, Expr_ptr ctx, Expr_ptr formula, step_t k)
+    { return f_evaluator.process( w, ctx, formula, k); }
+
+    // get a registered witness
+    Witness& witness( Expr_ptr id );
+
+    // register a new witness
+    void register_witness( Expr_ptr id, Witness& w );
+
 protected:
     WitnessMgr();
     ~WitnessMgr();
@@ -62,6 +74,8 @@ private:
 
     // ref to type manager
     TypeMgr& f_tm;
+
+    Evaluator f_evaluator;
 };
 
 #endif

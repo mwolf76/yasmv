@@ -38,15 +38,13 @@
 typedef vector<ADD> ADDStack; // ouput of Stage 1
 // typedef vector<YDD_ptr> YDDStack;  // output of Stage 2
 
+/* local typedefs */
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
-
 typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
-
-typedef unordered_map<DdNode *, YDD_ptr, PtrHash, PtrEq> YDDMap;
-typedef pair<YDDMap::iterator, bool> YDDHit;
-
+// typedef unordered_map<DdNode *, YDD_ptr, PtrHash, PtrEq> YDDMap;
+// typedef pair<YDDMap::iterator, bool> YDDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 

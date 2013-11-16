@@ -107,7 +107,7 @@ cmd returns [Command_ptr res]
  ASSERT <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
- SIMULATE [ RESUME #trace ] [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )?
+ SIMULATE ( RUN | RESUME ) [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )? [ HALT | PAUSE ON <halt_condition> ]
  Returns witness index or UNSAT if simulation failed.
 
  >> SIMULATE
@@ -192,24 +192,12 @@ sat_command returns [Command_ptr res]
 
 init_command returns [Command_ptr res]
 @init {
-        ExprVector dummy;
-}
-    : 'INIT'
-        {$res = cm.make_simulate( -1, 0, dummy); }
-    ;
-
-simulate_command returns [Command_ptr res]
-@init {
-    int nsteps = -1; /* unlimited */
-    int resume = -1; /* new trace */
+    Expr_ptr halt_cond = NULL;
     ExprVector constraints;
 }
-    : 'SIMULATE'
+    : 'INIT'
 
-        ( 'RESUME' tid=constant
-        { resume = (int) tid->value(); } )?
-
-        ( 'CONSTRAINED' expr=toplevel_expression
+        ( 'WITH' expr=toplevel_expression
           { constraints.push_back( expr ); }
 
           ( ',' expr=toplevel_expression
@@ -217,12 +205,51 @@ simulate_command returns [Command_ptr res]
           ) *
         ) ?
 
-        ( steps=constant
-          { nsteps = (int) steps->value(); }
+        {$res = cm.make_init( constraints ); }
+    ;
+
+simulate_command returns [Command_ptr res]
+@init {
+    Expr_ptr halt_cond = NULL;
+    ExprVector constraints;
+}
+    : 'SIMULATE'
+
+        ( 'WITH' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
         ) ?
 
-        {$res = cm.make_simulate( resume, nsteps, constraints ); }
+        ( 'HALT' 'ON' expr=toplevel_expression
+          { halt_cond = expr; }
+        ) ?
 
+        {$res = cm.make_simulate( halt_cond, constraints ); }
+    ;
+
+resume_command returns [Command_ptr res]
+@init {
+    Expr_ptr halt_cond = NULL;
+    ExprVector constraints;
+}
+    : 'RESUME' wid=identifier
+
+        ( 'WITH' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
+        ) ?
+
+        ( 'HALT' 'ON' expr=toplevel_expression
+          { halt_cond = expr; }
+        ) ?
+
+        {$res = cm.make_resume( halt_cond, constraints, wid); }
     ;
 
 quit_command returns [Command_ptr res]

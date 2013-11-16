@@ -381,7 +381,6 @@ void Inferrer::walk_set_postorder(const Expr_ptr expr)
     assert(false); // TODO
 }
 
-
 bool Inferrer::walk_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }
 

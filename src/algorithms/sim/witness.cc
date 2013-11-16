@@ -32,14 +32,14 @@ SimulationWitness::SimulationWitness(IModel& model,
     : Witness()
 {
     ostringstream oss; oss << "BMC SIM witness";
-    set_name(oss.str());
+    set_id(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
     /* First pass, vars only, up to k (included) */
     for (step_t step = 0; step <= k; ++ step) {
-        TimeFrame& tf = new_frame();
+        TimeFrame& tf = extend();
 
         SymbIter vars( model, NULL );
         while (vars.has_next()) {

@@ -33,3 +33,13 @@ WitnessMgr::WitnessMgr()
     : f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
 {}
+
+Witness& WitnessMgr::witness( Expr_ptr id )
+{
+    assert( false ); // TODO
+}
+
+void WitnessMgr::register_witness( Expr_ptr id, Witness& w )
+{
+    assert( false ); // TODO
+}

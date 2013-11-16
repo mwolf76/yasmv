@@ -1,5 +1,5 @@
 /**
- *  @file expr_eval.cc
+ *  @file evaluator.cc
  *  @brief Expr evaluator
  *
  *  This module contains definitions and services that implement an
@@ -27,22 +27,25 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <expr_eval.hh>
+#include <evaluator.hh>
+
+#include <witness_mgr.hh>
 
 Evaluator::Evaluator()
+    : f_owner(WitnessMgr::INSTANCE())
 { DEBUG << "Created Evaluator @" << this << endl; }
 
 Evaluator::~Evaluator()
 { DEBUG << "Destroying Evaluator @" << this << endl; }
 
-Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
-                            Expr_ptr body, step_t time)
+value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
+                           Expr_ptr body, step_t time)
 {
     // remove previous results
-    f_expr_stack.clear();
+    f_values_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_cache.clear();
+    f_map.clear();
 
     // setting the environment
     f_witness = &witness;
@@ -56,23 +59,16 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
     FQExpr key(ctx, body, time);
     TRACE << "Evaluating " << key << endl;
 
-    f_elapsed = clock();
-
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 
     // sanity conditions
-    assert(1 == f_expr_stack.size());
+    assert(1 == f_values_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
     // Exactly one expression
-    ADD res = f_expr_stack.back();
-
-    f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. Took " << secs << " seconds" << endl;
-
+    value_t res = f_values_stack.back();
     return res;
 }
 
@@ -109,13 +105,8 @@ bool Evaluator::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Evaluator::walk_neg_postorder(const Expr_ptr expr)
 {
-    if (is_unary_integer(expr)) {
-        integer_neg(expr);
-    }
-    else if (is_unary_algebraic(expr)) {
-        algebraic_neg(expr);
-    }
-    else assert( false ); // unreachable
+    POP_VALUE(lhs);
+    PUSH_VALUE(- lhs);
 }
 
 bool Evaluator::walk_not_preorder(const Expr_ptr expr)
@@ -123,9 +114,7 @@ bool Evaluator::walk_not_preorder(const Expr_ptr expr)
 void Evaluator::walk_not_postorder(const Expr_ptr expr)
 {
     POP_VALUE(lhs);
-
-    value_t res = ! lhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(! lhs);
 }
 
 bool Evaluator::walk_add_preorder(const Expr_ptr expr)
@@ -136,9 +125,7 @@ void Evaluator::walk_add_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs + rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs + rhs);
 }
 
 bool Evaluator::walk_sub_preorder(const Expr_ptr expr)
@@ -149,9 +136,7 @@ void Evaluator::walk_sub_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs - rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs - rhs);
 }
 
 bool Evaluator::walk_div_preorder(const Expr_ptr expr)
@@ -162,9 +147,7 @@ void Evaluator::walk_div_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs / rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs / rhs);
 }
 
 bool Evaluator::walk_mul_preorder(const Expr_ptr expr)
@@ -175,9 +158,7 @@ void Evaluator::walk_mul_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs / rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs * rhs);
 }
 
 bool Evaluator::walk_mod_preorder(const Expr_ptr expr)
@@ -188,9 +169,7 @@ void Evaluator::walk_mod_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs % rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs % rhs);
 }
 
 bool Evaluator::walk_and_preorder(const Expr_ptr expr)
@@ -201,9 +180,7 @@ void Evaluator::walk_and_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs & rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs & rhs);
 }
 
 bool Evaluator::walk_or_preorder(const Expr_ptr expr)
@@ -214,9 +191,7 @@ void Evaluator::walk_or_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs | rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs | rhs);
 }
 
 bool Evaluator::walk_xor_preorder(const Expr_ptr expr)
@@ -227,9 +202,7 @@ void Evaluator::walk_xor_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = lhs ^ rhs;
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs ^ rhs);
 }
 
 bool Evaluator::walk_xnor_preorder(const Expr_ptr expr)
@@ -240,9 +213,7 @@ void Evaluator::walk_xnor_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( ! lhs | rhs ) & ( ! rhs | lhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( ! lhs | rhs ) & ( ! rhs | lhs ));
 }
 
 bool Evaluator::walk_implies_preorder(const Expr_ptr expr)
@@ -253,9 +224,7 @@ void Evaluator::walk_implies_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( ! lhs | rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( ! lhs | rhs ));
 }
 
 bool Evaluator::walk_iff_preorder(const Expr_ptr expr)
@@ -273,9 +242,7 @@ void Evaluator::walk_lshift_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs << rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs << rhs ));
 }
 
 bool Evaluator::walk_rshift_preorder(const Expr_ptr expr)
@@ -286,9 +253,7 @@ void Evaluator::walk_rshift_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs << rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs >> rhs ));
 }
 
 bool Evaluator::walk_eq_preorder(const Expr_ptr expr)
@@ -299,9 +264,7 @@ void Evaluator::walk_eq_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs == rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs == rhs ));
 }
 
 bool Evaluator::walk_ne_preorder(const Expr_ptr expr)
@@ -312,9 +275,7 @@ void Evaluator::walk_ne_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs != rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(lhs != rhs);
 }
 
 bool Evaluator::walk_gt_preorder(const Expr_ptr expr)
@@ -325,9 +286,7 @@ void Evaluator::walk_gt_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs > rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs > rhs ));
 }
 
 bool Evaluator::walk_ge_preorder(const Expr_ptr expr)
@@ -338,9 +297,7 @@ void Evaluator::walk_ge_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs >= rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs >= rhs ));
 }
 
 bool Evaluator::walk_lt_preorder(const Expr_ptr expr)
@@ -351,9 +308,7 @@ void Evaluator::walk_lt_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs < rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs < rhs ));
 }
 
 bool Evaluator::walk_le_preorder(const Expr_ptr expr)
@@ -364,9 +319,7 @@ void Evaluator::walk_le_postorder(const Expr_ptr expr)
 {
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-
-    value_t res = ( lhs <= rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( lhs <= rhs ));
 }
 
 bool Evaluator::walk_ite_preorder(const Expr_ptr expr)
@@ -378,9 +331,7 @@ void Evaluator::walk_ite_postorder(const Expr_ptr expr)
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     POP_VALUE(cnd);
-
-    value_t res = ( cnd ? lhs : rhs );
-    PUSH_VALUE(res);
+    PUSH_VALUE(( cnd ? lhs : rhs ));
 }
 
 bool Evaluator::walk_cond_preorder(const Expr_ptr expr)
@@ -393,31 +344,10 @@ void Evaluator::walk_cond_postorder(const Expr_ptr expr)
 bool Evaluator::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_dot_inorder(const Expr_ptr expr)
-{
-    // ADD tmp = f_add_stack.back();
-    // Expr_ptr ctx = tmp->get_repr();
-    // f_ctx_stack.push_back(ctx);
-    return true;
-}
+{ return true; }
 void Evaluator::walk_dot_postorder(const Expr_ptr expr)
 {
-    ADD rhs_add;
-
-    // { // RHS, no checks necessary/possible
-    //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    //     rhs_add = top;
-    // }
-
-    // { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
-    //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    //     assert(tm.is_instance(top));
-    // }
-
-    // // propagate rhs add
-    // f_add_stack.push_back(rhs_add);
-
-    // // restore previous ctx
-    // f_ctx_stack.pop_back();
+    assert( false ); // yet to be implemented
 }
 
 bool Evaluator::walk_params_preorder(const Expr_ptr expr)
@@ -432,21 +362,9 @@ bool Evaluator::walk_subscript_preorder(const Expr_ptr expr)
 bool Evaluator::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 
-bool Evaluator::walk_comma_preorder(const Expr_ptr expr)
-{  return cache_miss(expr); }
-
-bool Evaluator::walk_comma_inorder(const Expr_ptr expr)
-{ return true; }
-
-void Evaluator::walk_comma_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
-
-/* Array selector builder: for arrays subscription, a chain of ITE is
-   built out of the encodings for each element which are assumed to be
-   present in dd stack in reversed order (walk_leaf took care of
-   this). */
 void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
 {
+#if 0
     unsigned base = Cudd_V(f_enc.base().getNode());
 
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
@@ -505,7 +423,22 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
 
         f_add_stack.push_back(res);
     }
+#endif
 }
+
+bool Evaluator::walk_set_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Evaluator::walk_set_postorder(const Expr_ptr expr)
+{
+    assert(false); // TODO
+}
+
+bool Evaluator::walk_comma_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+bool Evaluator::walk_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_comma_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
 
 void Evaluator::walk_leaf(const Expr_ptr expr)
 {
@@ -518,12 +451,14 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
+#if 0
+
     ENCMap::iterator eye;
     IEncoding_ptr enc = NULL;
 
     // 1. explicit constants are integer consts (e.g. 42) ..
     if (em.is_numeric(expr)) {
-        f_expr_stack.push_back(expr);
+        f_values_stack.push_back(expr -> lhs() -> const_value());
         return;
     }
 
@@ -532,8 +467,8 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
         FQExpr key( ctx, expr, time);
         if (f_witness -> has_value( key)) {
-            Expr_ptr res = f_witness -> value( key );
-            f_expr_stack.push_back(res);
+            value_t res = f_witness -> value( key );
+            f_values_stack.push_back(res);
             return;
         }
 
@@ -541,10 +476,11 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     else if (symb->is_define()) {
-        // re-entrant invocation
+        // A little bit of magic, re-entrant invocation ;-)
         (*this)(symb->as_define().body());
         return;
     }
 
     assert( false ); /* give up, TODO: exception */
+#endif
 }

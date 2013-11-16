@@ -54,29 +54,36 @@ bool TimeFrame::has_value( FQExpr expr )
 /* Sets value for expr */
 void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
 {
-    DRIVEL << fqexpr
-           << " := "
-           << value << endl;
-
+    DRIVEL << fqexpr << " := " << value << endl;
     f_map.insert( make_pair< FQExpr, Expr_ptr >
                   (fqexpr, value));
 }
 
-Witness::Witness(string name)
-    : f_name(name)
+Witness::Witness(string name, step_t k)
+    : f_id(name)
 {
-    DEBUG << "Created new witness: " << f_name << endl;
-}
-
-TimeFrame& Witness::new_frame()
-{
-    TimeFrame_ptr res = new TimeFrame();
-    f_frames.push_back(*res);
-
-    unsigned k = length() -1;
-    DEBUG << "Added TimeFrame " << k
-          << " to witness " << name()
+    DEBUG << "Created new witness: "
+          << f_id
           << endl;
 
-    return * res;
+    if (k) {
+        extend(k);
+    }
 }
+
+TimeFrame& Witness::extend(step_t k)
+{
+    TimeFrame_ptr tf;
+    while (k --) {
+        tf = new TimeFrame();
+        f_frames.push_back(*tf);
+
+        step_t curr = length() -1 ;
+        DEBUG << "Added TimeFrame " << curr
+              << " to witness " << id()
+              << endl;
+    }
+
+    return *tf;
+}
+
