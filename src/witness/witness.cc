@@ -62,9 +62,11 @@ void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
 Witness::Witness(string name, step_t k)
     : f_id(name)
 {
-    DEBUG << "Created new witness: "
-          << f_id
-          << endl;
+    DEBUG
+        << "Created new witness: "
+        << f_id
+        << " (" << k << " steps)"
+        << endl;
 
     if (k) {
         extend(k);
@@ -81,6 +83,7 @@ TimeFrame& Witness::extend(step_t k)
         step_t curr = length() -1 ;
         DEBUG << "Added TimeFrame " << curr
               << " to witness " << id()
+              << " @" << tf
               << endl;
     }
 
@@ -104,8 +107,7 @@ bool Witness::has_value( FQExpr fq )
     TimeFrame& tf = ith_frame(k);
 
     // time is always equal to zero here?
-    FQExpr tmp( fq.ctx(), fq.expr(), 0);
-    return tf.has_value( tmp);
+    return tf.has_value( FQExpr(fq.ctx(), fq.expr()));
 }
 
 

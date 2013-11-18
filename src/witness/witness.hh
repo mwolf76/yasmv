@@ -77,9 +77,11 @@ public:
     inline TimeFrame& ith_frame(step_t step)
     {
         TimeFrames::iterator iter = f_frames.begin();
+        assert( iter != f_frames.end());
         if (step) {
             while (-- step) {
                 ++ iter;
+                assert( iter != f_frames.end());
             }
         }
 
@@ -95,7 +97,7 @@ public:
     inline unsigned length()
     { return f_frames.size(); }
 
-    // extend trace by k steps (default = 1 step)
+    // extend trace by k steps, yields last one (default is 1 step)
     TimeFrame& extend(step_t k = 1);
 
     /* Retrieves value for expr, throws an exception if no value exists. */
