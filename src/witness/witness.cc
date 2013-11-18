@@ -87,3 +87,25 @@ TimeFrame& Witness::extend(step_t k)
     return *tf;
 }
 
+/* Retrieves value for expr, throws an exception if no value exists. */
+Expr_ptr Witness::value( FQExpr fq )
+{
+    step_t k = fq.time();
+    TimeFrame& tf = ith_frame(k);
+
+    FQExpr tmp( fq.ctx(), fq.expr(), 0);
+    return tf.value( tmp);
+}
+
+/* Returns true iff expr has an assigned value within this time frame. */
+bool Witness::has_value( FQExpr fq )
+{
+    step_t k = fq.time();
+    TimeFrame& tf = ith_frame(k);
+
+    // time is always equal to zero here?
+    FQExpr tmp( fq.ctx(), fq.expr(), 0);
+    return tf.has_value( tmp);
+}
+
+

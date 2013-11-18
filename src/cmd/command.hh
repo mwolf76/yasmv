@@ -82,9 +82,8 @@ private:
     Expr_ptr f_expr;
 };
 
-/* Performs a new simulation with given constraints and halting
-   conditions. Simulation can be resumed unless it's last status is
-   UNSAT. */
+/* Initiates a new simulation with given constraint. Simulation will
+   autmatically halt on the initial state. */
 class InitCommand : public Command {
 public:
     InitCommand(Interpreter& owner,
@@ -130,7 +129,9 @@ private:
 };
 
 
-/* Resume an existing simulation (simulation has to be SAT) */
+/* Simulates running pf model FSM, w/ given constraints. A non-null
+   witness ID (i.e. a valid identifer) shall be given to indicate the
+   point from which the resumed simulation will begin. */
 class ResumeCommand : public Command {
 public:
     ResumeCommand(Interpreter& owner,

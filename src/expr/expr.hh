@@ -180,7 +180,7 @@ public:
     { return f_time; }
 
 private:
-    // expression ctx (default is 'main')
+    // expression ctx (default for the FSM is 'main')
     Expr_ptr f_ctx;
 
     // expression body

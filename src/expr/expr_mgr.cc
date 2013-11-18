@@ -52,6 +52,8 @@ ExprMgr::ExprMgr()
     array_expr = make_identifier(ARRAY_TOKEN);
     main_expr = make_identifier(MAIN_TOKEN);
 
+    default_ctx_expr = make_identifier(DEFAULT_CTX_TOKEN);
+
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }
 

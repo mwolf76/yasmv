@@ -25,6 +25,8 @@
 /* tokens */
 const char *MAIN_TOKEN = "main";
 
+const char *DEFAULT_CTX_TOKEN = "default";
+
 /* bool consts */
 const char *FALSE_TOKEN = "FALSE";
 const char *TRUE_TOKEN = "TRUE";

@@ -103,6 +103,7 @@ void Simulation::set_witness(Witness& witness)
 
 void Simulation::process()
 {
+    ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
     bool halt = false;
@@ -129,7 +130,7 @@ void Simulation::process()
         SimulationWitness wtns( model(), engine(), k);
         set_witness(wtns);
 
-        halt = wm.eval ( witness(), NULL, f_halt_cond, k);
+        halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
         if (!halt) {
             do {
                 assert_fsm_trans(k ++);
@@ -138,7 +139,7 @@ void Simulation::process()
 
                 if (STATUS_SAT == engine().solve()) {
                     witness().extend();
-                    halt = wm.eval ( witness(), NULL, f_halt_cond, k);
+                    halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
                 }
             } while (STATUS_SAT == engine().status() && ! halt);
         }

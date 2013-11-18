@@ -77,8 +77,11 @@ public:
     inline TimeFrame& ith_frame(step_t step)
     {
         TimeFrames::iterator iter = f_frames.begin();
-        while (-- step)
-            ++ iter;
+        if (step) {
+            while (-- step) {
+                ++ iter;
+            }
+        }
 
         return * iter;
     }
@@ -94,6 +97,12 @@ public:
 
     // extend trace by k steps (default = 1 step)
     TimeFrame& extend(step_t k = 1);
+
+    /* Retrieves value for expr, throws an exception if no value exists. */
+    Expr_ptr value( FQExpr expr );
+
+    /* Returns true iff expr has an assigned value within this time frame. */
+    bool has_value( FQExpr expr );
 
 protected:
     /* this witness' id */

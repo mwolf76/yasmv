@@ -31,8 +31,8 @@
 
 #include <witness_mgr.hh>
 
-Evaluator::Evaluator()
-    : f_owner(WitnessMgr::INSTANCE())
+Evaluator::Evaluator(WitnessMgr& owner)
+    : f_owner(owner)
 { DEBUG << "Created Evaluator @" << this << endl; }
 
 Evaluator::~Evaluator()
@@ -443,7 +443,6 @@ void Evaluator::walk_comma_postorder(const Expr_ptr expr)
 void Evaluator::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
 
     /* cached? */
     if (! cache_miss(expr)) return;
@@ -451,36 +450,47 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
-#if 0
+    // 0. explicit boolean consts
+    if (em.is_bool_const(expr)) {
 
-    ENCMap::iterator eye;
-    IEncoding_ptr enc = NULL;
+        if (em.is_false(expr)) {
+            f_values_stack.push_back(0);
+        }
+        else if (em.is_true(expr)) {
+            f_values_stack.push_back(1);
+        }
+        else assert(false) ; // unexpected
+    }
 
     // 1. explicit constants are integer consts (e.g. 42) ..
-    if (em.is_numeric(expr)) {
-        f_values_stack.push_back(expr -> lhs() -> const_value());
+    else  if (em.is_numeric(expr)) {
+        f_values_stack.push_back(expr -> lhs() -> value());
         return;
     }
 
-    ISymbol_ptr symb = ModelMgr::INSTANCE().resolver().symbol(ctx, expr);
-    if (symb->is_variable()) {
+    else {
+        /* Look for symbols in the witness */
+        ISymbol_ptr symb = ModelMgr::INSTANCE().resolver() -> symbol(ctx, expr);
+        if (symb->is_variable()) { // vars
 
-        FQExpr key( ctx, expr, time);
-        if (f_witness -> has_value( key)) {
-            value_t res = f_witness -> value( key );
-            f_values_stack.push_back(res);
+            FQExpr key( ctx, expr, time);
+            if (f_witness -> has_value( key)) {
+                Expr_ptr expr = f_witness -> value(key);
+                value_t res = expr -> value();
+                f_values_stack.push_back(res);
+                return;
+            }
+
+            assert( false ); /* unexpected */
+        }
+
+        else if (symb->is_define()) { // defines
+
+            // A little bit of magic, re-entrant invocation ;-)
+            (*this)(symb->as_define().body());
             return;
         }
 
-        assert( false ); // TODO error
+        assert( false ); /* unexpected */
     }
-
-    else if (symb->is_define()) {
-        // A little bit of magic, re-entrant invocation ;-)
-        (*this)(symb->as_define().body());
-        return;
-    }
-
-    assert( false ); /* give up, TODO: exception */
-#endif
 }

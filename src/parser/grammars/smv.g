@@ -192,7 +192,6 @@ sat_command returns [Command_ptr res]
 
 init_command returns [Command_ptr res]
 @init {
-    Expr_ptr halt_cond = NULL;
     ExprVector constraints;
 }
     : 'INIT'
@@ -210,7 +209,7 @@ init_command returns [Command_ptr res]
 
 simulate_command returns [Command_ptr res]
 @init {
-    Expr_ptr halt_cond = NULL;
+    Expr_ptr halt_cond = em.make_false();
     ExprVector constraints;
 }
     : 'SIMULATE'
@@ -232,7 +231,7 @@ simulate_command returns [Command_ptr res]
 
 resume_command returns [Command_ptr res]
 @init {
-    Expr_ptr halt_cond = NULL;
+    Expr_ptr halt_cond = em.make_false();
     ExprVector constraints;
 }
     : 'RESUME' wid=identifier

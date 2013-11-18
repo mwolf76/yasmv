@@ -32,6 +32,7 @@ WitnessMgr_ptr WitnessMgr::f_instance = NULL;
 WitnessMgr::WitnessMgr()
     : f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
+    , f_evaluator(*this)
 {}
 
 Witness& WitnessMgr::witness( Expr_ptr id )

@@ -27,21 +27,22 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
-#include <witness.hh>
-
 #include <expr_walker.hh>
 #include <expr/pool.hh>
+
+#include <witness.hh>
 
 /* local typedefs */
 typedef unordered_map<FQExpr, value_t, FQExprHash, FQExprEq> FQExprValueMap;
 typedef pair<FQExprValueMap::iterator, bool> FQExprValueMapHit;
 
-// typedef vector<Expr_ptr> ExprStack;
+typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
 typedef vector<value_t>  ValuesStack;
 
 /* shortcuts to to simplify manipulation of the internal values stack */
 #define POP_VALUE(op)                              \
+    assert(0 < f_values_stack.size());             \
     const value_t op = f_values_stack.back();      \
     f_values_stack.pop_back()
 
@@ -63,7 +64,7 @@ class Evaluator : public ExprWalker {
     FQExprValueMap f_map;
 
 public:
-    Evaluator(); // defaults to std::cout
+    Evaluator(WitnessMgr& owner); // defaults to std::cout
     virtual ~Evaluator();
 
     value_t process(Witness& witness, Expr_ptr ctx, Expr_ptr body, step_t time);

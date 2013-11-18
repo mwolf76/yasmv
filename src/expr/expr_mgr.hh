@@ -193,6 +193,9 @@ public:
     inline Expr_ptr make_temp() const
     { return temp_expr; }
 
+    inline Expr_ptr make_default_ctx() const
+    { return default_ctx_expr; }
+
     inline Expr_ptr make_main() const
     { return main_expr; }
 
@@ -238,6 +241,21 @@ public:
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
+    }
+
+    inline bool is_bool_const(const Expr_ptr expr) const {
+        assert(expr);
+        return is_false(expr) || is_true(expr) ;
+    }
+
+    inline bool is_false(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == false_expr;
+    }
+
+    inline bool is_true(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == true_expr;
     }
 
     inline bool is_constant(const Expr_ptr expr) const {
@@ -424,6 +442,9 @@ private:
 
     /* main module */
     Expr_ptr main_expr;
+
+    /* toplevel default ctx (for command line exprs) */
+    Expr_ptr default_ctx_expr;
 
     /* shared pools */
     ExprPool f_expr_pool;
