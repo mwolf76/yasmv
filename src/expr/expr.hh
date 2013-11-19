@@ -179,6 +179,14 @@ public:
     inline step_t time() const
     { return f_time; }
 
+    inline bool operator==(const FQExpr& other)
+    {
+        return
+            f_ctx  == other.f_ctx  &&
+            f_expr == other.f_expr &&
+            f_time == other.f_time  ;
+    }
+
 private:
     // expression ctx (default for the FSM is 'main')
     Expr_ptr f_ctx;
