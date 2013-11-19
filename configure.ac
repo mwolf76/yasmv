@@ -155,6 +155,7 @@ AC_CONFIG_FILES([Makefile
                  src/type/Makefile
                  src/utils/Makefile
                  src/witness/Makefile
+                 src/witness/out/Makefile
                  doc/Makefile
 		 gnusmv.pc])
 
