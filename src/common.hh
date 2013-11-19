@@ -61,6 +61,9 @@ using std::stack;
 #include <set>
 using std::set;
 
+#include <algorithm>
+using std::find;
+
 #include <boost/unordered_set.hpp>
 using boost::unordered_set;
 
