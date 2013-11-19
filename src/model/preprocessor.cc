@@ -441,11 +441,6 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
             PUSH_EXPR(res);
             return;
         }
-        else if (symb->is_array()) {
-            Expr_ptr res = symb->as_array().expr();
-            PUSH_EXPR(res);
-            return;
-        }
         else if (symb->is_variable()) {
             Expr_ptr res = symb->as_variable().expr();
             PUSH_EXPR(res);

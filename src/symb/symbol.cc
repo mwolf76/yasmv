@@ -111,16 +111,3 @@ IEnum& ISymbol::as_enum() const
     return (*res);
 }
 
-bool ISymbol::is_array() const
-{
-    return NULL != dynamic_cast <const IArray_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
-
-IArray& ISymbol::as_array() const
-{
-    IArray_ptr res = dynamic_cast <const IArray_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
