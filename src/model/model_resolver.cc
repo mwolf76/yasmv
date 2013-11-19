@@ -81,14 +81,6 @@ ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
         }
     }
 
-    { /* local consts */
-        const Constants& cnts = module->consts();
-        Constants::const_iterator iter = cnts.find(key);
-        if (iter != cnts.end()) {
-            return (*iter).second;
-        }
-    }
-
     { /* variables */
         const Variables& vars = module->vars();
         Variables::const_iterator iter = vars.find(key);

@@ -53,9 +53,6 @@ public:
     virtual const Variables& vars() const =0;
     virtual void add_var(Expr_ptr expr, IVariable_ptr var) =0;
 
-    virtual const Constants& consts() const =0;
-    virtual void add_const(Expr_ptr expr, IConstant_ptr k) =0;
-
     virtual const Defines& defs() const =0;
     virtual void add_def(Expr_ptr expr, IDefine_ptr def) =0;
 
@@ -84,7 +81,6 @@ public:
 class Module : public IModule {
     Expr_ptr f_name;
 
-    Constants f_localConsts;
     Variables f_localVars;
     Defines   f_localDefs;
 
@@ -98,20 +94,16 @@ public:
     inline const Expr_ptr expr() const
     { return f_name; }
 
-    bool is_main() const
+    inline bool is_main() const
     { return f_name == ExprMgr::INSTANCE().make_main(); }
 
     void add_var(Expr_ptr name, IVariable_ptr var);
-    const Variables& vars() const
+    inline const Variables& vars() const
     { return f_localVars; }
 
     void add_def(Expr_ptr name, IDefine_ptr def);
-    const Defines& defs() const
+    inline const Defines& defs() const
     { return f_localDefs; }
-
-    void add_const(Expr_ptr name, IConstant_ptr k);
-    const Constants& consts() const
-    { return f_localConsts; }
 
     void add_init(Expr_ptr expr);
     const ExprVector& init() const

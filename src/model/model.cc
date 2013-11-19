@@ -42,7 +42,6 @@ void Model::add_module(Expr_ptr name, IModule_ptr module)
 Module::Module(const Expr_ptr name)
     : f_name(name)
 
-    , f_localConsts()
     , f_localVars()
     , f_localDefs()
 
@@ -64,14 +63,6 @@ void Module::add_def(Expr_ptr name, IDefine_ptr body)
           << ", added local def " << name << endl;
     f_localDefs.insert(make_pair<FQExpr,
                        IDefine_ptr>(FQExpr(expr(), name), body));
-}
-
-void Module::add_const(Expr_ptr name, IConstant_ptr k)
-{
-    DEBUG << "Module " << (*this)
-          << ", added local const " << name << endl;
-    f_localConsts.insert(make_pair<FQExpr,
-                         IConstant_ptr>(FQExpr(expr(), name), k));
 }
 
 void Module::add_init(Expr_ptr expr)
