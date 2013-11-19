@@ -43,11 +43,13 @@
 
 typedef unordered_map<FQExpr, Expr_ptr, FQExprHash, FQExprEq> FQExpr2ExprMap;
 
+class Witness; // fwd decl
+
 typedef class TimeFrame* TimeFrame_ptr;
 class TimeFrame : public IObject {
 
 public:
-    TimeFrame();
+    TimeFrame(Witness& owner);
     ~TimeFrame();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
@@ -61,32 +63,29 @@ public:
 
 private:
     FQExpr2ExprMap f_map;
+
+    // forbid copy
+    TimeFrame(const TimeFrame &other)
+        : f_owner( other.f_owner)
+    { assert (false); }
+
+    Witness& f_owner;
 };
 
-typedef list<TimeFrame> TimeFrames;
+typedef vector<TimeFrame_ptr> TimeFrames;
+typedef vector<FQExpr> FQExprs;
 
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(string id = "<Noname>", step_t k = 0);
+    Witness(string id = "<Noname>", step_t j = 0, step_t k = 0);
 
     /* data storage */
     inline TimeFrames& frames()
     { return f_frames; }
 
-    inline TimeFrame& ith_frame(step_t step)
-    {
-        TimeFrames::iterator iter = f_frames.begin();
-        assert( iter != f_frames.end());
-        if (step) {
-            while (-- step) {
-                ++ iter;
-                assert( iter != f_frames.end());
-            }
-        }
-
-        return * iter;
-    }
+    inline TimeFrame& operator[](step_t i)
+    { return * f_frames [i]; }
 
     inline const string& id() const
     { return f_id; }
@@ -96,6 +95,18 @@ public:
 
     inline unsigned length()
     { return f_frames.size(); }
+
+    inline FQExprs& lang()
+    { return f_lang; }
+
+    inline step_t j() const
+    { return f_j; }
+
+    inline step_t k() const
+    { return f_k; }
+
+    // extend trace by k appending the given one, yields last timeframe
+    TimeFrame& extend(Witness& w);
 
     // extend trace by k steps, yields last one (default is 1 step)
     TimeFrame& extend(step_t k = 1);
@@ -110,8 +121,22 @@ protected:
     /* this witness' id */
     string f_id;
 
+    /* distance (i.e. number of transitions) from time 0 of the first frame */
+    step_t f_j;
+
+    /* distance (i.e. number of transitions) from time 0 of the last frame */
+    step_t f_k;
+
     /* Timeframes (list) */
     TimeFrames f_frames;
+
+    /* Language (i.e. full list of symbols) */
+    FQExprs f_lang;
+};
+
+class WitnessPrinter : public IObject {
+public:
+    virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
 };
 
 #endif

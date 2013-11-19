@@ -55,6 +55,9 @@ public:
     inline IModel& model()
     { return f_model; }
 
+    inline bool has_witness() const
+    { return NULL != f_witness; }
+
     inline Witness& witness()
     {
         assert( f_witness );
@@ -68,10 +71,10 @@ public:
 
 private:
     IModel& f_model;
+    Witness* f_witness;
 
     Expr_ptr f_halt_cond;
     ExprVector f_constraints;
-    Witness* f_witness;
 
     simulation_status_t f_status;
     void set_status(simulation_status_t status);
@@ -97,7 +100,7 @@ private:
 class SimulationWitness : public Witness {
 
 public:
-    SimulationWitness(IModel& model, SAT& engine, unsigned k);
+    SimulationWitness(IModel& model, SAT& engine, step_t j, step_t k);
 
 };
 

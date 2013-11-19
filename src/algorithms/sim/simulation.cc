@@ -31,9 +31,9 @@ Simulation::Simulation(IModel& model,
                        Expr_ptr witness_id)
     : Algorithm()
     , f_model(model)
+    , f_witness(NULL)
     , f_halt_cond(halt_cond)
     , f_constraints(constraints)
-    , f_witness(NULL)
 {
     /* Resuming a simulation requires given witness to be SAT */
     if (witness_id) {
@@ -95,8 +95,9 @@ void Simulation::set_status(simulation_status_t status)
 
 void Simulation::set_witness(Witness& witness)
 {
-    if (f_witness)
+    if (f_witness) {
         delete f_witness;
+    }
 
     f_witness = & witness;
 }
@@ -107,9 +108,11 @@ void Simulation::process()
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
     bool halt = false;
+
+    step_t j = 0;
     step_t k = f_witness ? f_witness -> length() : 0;
 
-    set_status( SIMULATION_SAT ); // resuming witness has already been checked
+    set_status( SIMULATION_SAT ); // optimic assumption
 
     // if a witness is already there, we're resuming a previous
     // simulation. Hence, no need for initial states.
@@ -127,8 +130,10 @@ void Simulation::process()
     }
 
     if (STATUS_SAT == engine().solve()) {
-        SimulationWitness wtns( model(), engine(), k);
-        set_witness(wtns);
+        Witness_ptr w = new SimulationWitness( model(), engine(), j, k);
+
+        if (! has_witness()) set_witness(*w);
+        else witness().extend(*w);
 
         halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
         if (!halt) {
@@ -138,7 +143,9 @@ void Simulation::process()
                 TRACE << "Simulating step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
-                    witness().extend();
+                    Witness_ptr w = new SimulationWitness( model(), engine(), k, k);
+
+                    witness().extend(*w);
                     halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
                 }
             } while (STATUS_SAT == engine().status() && ! halt);

@@ -27,8 +27,8 @@
 
 using Minisat::Var;
 
-SimulationWitness::SimulationWitness(IModel& model,
-                                     Minisat::SAT& engine, unsigned k)
+SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
+                                     step_t j, step_t k)
     : Witness()
 {
     ostringstream oss; oss << "BMC SIM witness";
@@ -37,8 +37,19 @@ SimulationWitness::SimulationWitness(IModel& model,
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
+    f_j = j;
+    f_k = k;
+
+    /* Language */
+    SymbIter si (model);
+    while (si.has_next()) {
+        ISymbol_ptr symb = si.next();
+        FQExpr key( symb->ctx(), symb->expr());
+        f_lang.push_back( key );
+    }
+
     /* First pass, vars only, up to k (included) */
-    for (step_t step = 0; step <= k; ++ step) {
+    for (step_t step = j; step <= k; ++ step) {
         TimeFrame& tf = extend();
 
         SymbIter vars( model, NULL );

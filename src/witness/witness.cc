@@ -18,14 +18,11 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  **/
 #include <witness.hh>
 
-TimeFrame::TimeFrame()
+TimeFrame::TimeFrame(Witness& owner)
+    : f_owner(owner)
 {}
 
 TimeFrame::~TimeFrame()
@@ -34,6 +31,10 @@ TimeFrame::~TimeFrame()
 /* Retrieves value for expr, throws an exception if no value exists. */
 Expr_ptr TimeFrame::value( FQExpr expr )
 {
+    // symbol is defined in witness' language
+    FQExprs& lang = f_owner.lang();
+    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+
     FQExpr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
@@ -45,6 +46,10 @@ Expr_ptr TimeFrame::value( FQExpr expr )
 /* Returns true iff expr has an assigned value within this time frame. */
 bool TimeFrame::has_value( FQExpr expr )
 {
+    // symbol is defined in witness' language
+    FQExprs& lang = f_owner.lang();
+    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+
     FQExpr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
@@ -54,18 +59,21 @@ bool TimeFrame::has_value( FQExpr expr )
 /* Sets value for expr */
 void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
 {
+    // symbol is defined in witness' language
+    FQExprs& lang = f_owner.lang();
+    assert( find( lang.begin(), lang.end(), fqexpr) != lang.end());
+
     DRIVEL << fqexpr << " := " << value << endl;
-    f_map.insert( make_pair< FQExpr, Expr_ptr >
-                  (fqexpr, value));
+    f_map.insert( make_pair< FQExpr, Expr_ptr > (fqexpr, value));
 }
 
-Witness::Witness(string name, step_t k)
+Witness::Witness(string name, step_t j, step_t k)
     : f_id(name)
+    , f_j(j)
 {
     DEBUG
         << "Created new witness: "
-        << f_id
-        << " (" << k << " steps)"
+        << f_id << " (" << k << " steps)"
         << endl;
 
     if (k) {
@@ -73,41 +81,61 @@ Witness::Witness(string name, step_t k)
     }
 }
 
-TimeFrame& Witness::extend(step_t k)
+TimeFrame& Witness::extend(Witness& w)
 {
-    TimeFrame_ptr tf;
-    while (k --) {
-        tf = new TimeFrame();
-        f_frames.push_back(*tf);
+    assert(k() <= w.j()); // overlap not yet supported
+
+   // there may be a gap, fill it with empty timeframes
+    for (step_t i = k(); i < w.j(); ++ i) {
+        TimeFrame_ptr tf = new TimeFrame(*this);
+        f_frames.push_back(tf);
 
         step_t curr = length() -1 ;
-        DEBUG << "Added TimeFrame " << curr
+        DEBUG << "Added empty TimeFrame " << curr
               << " to witness " << id()
               << " @" << tf
               << endl;
     }
 
+    TimeFrame_ptr last = NULL;
+    for (TimeFrames::iterator i = w.frames().begin(); i != w.frames().end(); ++ i) {
+        f_frames.push_back(*i); // copy
+        last = (*i);
+    }
+
+    assert( last);
+    return * last;
+}
+
+TimeFrame& Witness::extend(step_t k)
+{
+    TimeFrame_ptr tf = NULL;
+    while (f_j != k --) {
+        tf = new TimeFrame(*this);
+        f_frames.push_back(tf);
+
+        step_t curr = length() -1 ;
+        DEBUG << "Added empty TimeFrame " << curr
+              << " to witness " << id()
+              << " @" << tf
+              << endl;
+    }
+
+    assert(tf);
     return *tf;
 }
 
 /* Retrieves value for expr, throws an exception if no value exists. */
 Expr_ptr Witness::value( FQExpr fq )
 {
-    step_t k = fq.time();
-    TimeFrame& tf = ith_frame(k);
-
-    FQExpr tmp( fq.ctx(), fq.expr(), 0);
-    return tf.value( tmp);
+    return f_frames[fq.time()]
+        -> value( FQExpr(fq.ctx(), fq.expr()));
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
 bool Witness::has_value( FQExpr fq )
 {
-    step_t k = fq.time();
-    TimeFrame& tf = ith_frame(k);
-
-    // time is always equal to zero here?
-    return tf.has_value( FQExpr(fq.ctx(), fq.expr()));
+    return f_frames[fq.time()]
+        -> has_value( FQExpr(fq.ctx(), fq.expr()));
 }
-
 
