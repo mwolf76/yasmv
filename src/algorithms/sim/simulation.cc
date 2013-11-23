@@ -108,15 +108,13 @@ void Simulation::process()
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
     bool halt = false;
-
-    step_t j = 0;
-    step_t k = f_witness ? f_witness -> length() : 0;
+    step_t k  = 0;
 
     set_status( SIMULATION_SAT ); // optimic assumption
 
     // if a witness is already there, we're resuming a previous
     // simulation. Hence, no need for initial states.
-    if (!k) {
+    if (! has_witness()) {
         assert_fsm_init(0);
         assert_fsm_invar(0);
         TRACE << "Starting simulation..." << endl;
@@ -125,15 +123,21 @@ void Simulation::process()
         // here we need to push all the values for variables in the
         // last state of resuming witness. A complete assignment to
         // all state variables ensures full deterministic behavior.
+
+        k = witness().size() -1;
         assert( false) ; // TODO
         TRACE << "Resuming simulation..." << endl;
     }
 
     if (STATUS_SAT == engine().solve()) {
-        Witness_ptr w = new SimulationWitness( model(), engine(), j, k);
+        Witness_ptr w = new SimulationWitness( model(), engine(), k);
 
-        if (! has_witness()) set_witness(*w);
-        else witness().extend(*w);
+        if (! has_witness()) {
+            set_witness(*w);
+        }
+        else {
+            witness().extend(*w);
+        }
 
         halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
         if (!halt) {
@@ -143,7 +147,7 @@ void Simulation::process()
                 TRACE << "Simulating step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
-                    Witness_ptr w = new SimulationWitness( model(), engine(), k, k);
+                    Witness_ptr w = new SimulationWitness( model(), engine(), k);
 
                     witness().extend(*w);
                     halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);

@@ -78,14 +78,17 @@ typedef vector<FQExpr> FQExprs;
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(string id = "<Noname>", step_t j = 0, step_t k = 0);
+    Witness(string id = "<Noname>");
 
     /* data storage */
     inline TimeFrames& frames()
     { return f_frames; }
 
     inline TimeFrame& operator[](step_t i)
-    { return * f_frames [i]; }
+    {
+        assert (i < size());
+        return * f_frames [i];
+    }
 
     inline const string& id() const
     { return f_id; }
@@ -93,23 +96,17 @@ public:
     inline void set_id(string id)
     { f_id = id; }
 
-    inline unsigned length()
+    inline unsigned size()
     { return f_frames.size(); }
 
     inline FQExprs& lang()
     { return f_lang; }
 
-    inline step_t j() const
-    { return f_j; }
-
-    inline step_t k() const
-    { return f_k; }
-
-    // extend trace by k appending the given one, yields last timeframe
+    /* Extends trace by k appending the given one, yields last timeframe */
     TimeFrame& extend(Witness& w);
 
-    // extend trace by k steps, yields last one (default is 1 step)
-    TimeFrame& extend(step_t k = 1);
+    /* Extends trace by 1 steps, yields new step */
+    TimeFrame& extend();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
     Expr_ptr value( FQExpr expr );

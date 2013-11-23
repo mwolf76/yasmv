@@ -580,6 +580,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
         return em.make_subscript(expr->lhs(),
                                  find_canonical_expr( expr->rhs()));
     }
+    else if (em.is_comma(expr)) {
+        return em.make_comma(find_canonical_expr( expr->lhs()),
+                             find_canonical_expr( expr->rhs()));
+    }
 
     /* no rewrites */
     else if (em.is_dot(expr) ||

@@ -67,36 +67,17 @@ void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
     f_map.insert( make_pair< FQExpr, Expr_ptr > (fqexpr, value));
 }
 
-Witness::Witness(string name, step_t j, step_t k)
+Witness::Witness(string name)
     : f_id(name)
-    , f_j(j)
 {
     DEBUG
         << "Created new witness: "
-        << f_id << " (" << k << " steps)"
+        << f_id
         << endl;
-
-    if (k) {
-        extend(k);
-    }
 }
 
 TimeFrame& Witness::extend(Witness& w)
 {
-    assert(k() <= w.j()); // overlap not yet supported
-
-   // there may be a gap, fill it with empty timeframes
-    for (step_t i = k(); i < w.j(); ++ i) {
-        TimeFrame_ptr tf = new TimeFrame(*this);
-        f_frames.push_back(tf);
-
-        step_t curr = length() -1 ;
-        DEBUG << "Added empty TimeFrame " << curr
-              << " to witness " << id()
-              << " @" << tf
-              << endl;
-    }
-
     TimeFrame_ptr last = NULL;
     for (TimeFrames::iterator i = w.frames().begin(); i != w.frames().end(); ++ i) {
         f_frames.push_back(*i); // copy
@@ -107,19 +88,16 @@ TimeFrame& Witness::extend(Witness& w)
     return * last;
 }
 
-TimeFrame& Witness::extend(step_t k)
+TimeFrame& Witness::extend()
 {
-    TimeFrame_ptr tf = NULL;
-    while (f_j != k --) {
-        tf = new TimeFrame(*this);
-        f_frames.push_back(tf);
+    TimeFrame_ptr tf = new TimeFrame(*this);
+    f_frames.push_back(tf);
 
-        step_t curr = length() -1 ;
-        DEBUG << "Added empty TimeFrame " << curr
-              << " to witness " << id()
-              << " @" << tf
-              << endl;
-    }
+    step_t curr = size() -1 ;
+    DEBUG << "Added empty TimeFrame " << curr
+          << " to witness " << id()
+          << " @" << tf
+          << endl;
 
     assert(tf);
     return *tf;

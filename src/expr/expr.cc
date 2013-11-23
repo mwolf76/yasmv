@@ -88,7 +88,7 @@ ostream& operator<<(ostream& os, const FQExpr& fqexpr)
     Expr_ptr expr = fqexpr.expr();
     step_t step = fqexpr.time();
 
-    os << "+" <<  step << "{";
+    os << "@" <<  step << "{";
     Printer (os) << fqexpr.ctx()
                  << "::"
                  << fqexpr.expr();

@@ -27,8 +27,7 @@
 
 using Minisat::Var;
 
-SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
-                                     step_t j, step_t k)
+SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t k)
     : Witness()
 {
     ostringstream oss; oss << "BMC SIM witness";
@@ -36,9 +35,6 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
-
-    f_j = j;
-    f_k = k;
 
     /* Language */
     SymbIter si (model);
@@ -48,61 +44,57 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
         f_lang.push_back( key );
     }
 
-    /* First pass, vars only, up to k (included) */
-    for (step_t step = j; step <= k; ++ step) {
-        TimeFrame& tf = extend();
+    /* Just k-th timeframe */
+    TimeFrame& tf = extend();
+    SymbIter vars( model, NULL );
+    while (vars.has_next()) {
+        ISymbol_ptr symb = vars.next();
 
-        SymbIter vars( model, NULL );
-        while (vars.has_next()) {
-            ISymbol_ptr symb = vars.next();
+        if (symb->is_variable()) {
+            /* time it, and fetch encoding for enc mgr */
+            FQExpr key(symb->ctx(), symb->expr());
+            IEncoding_ptr enc = enc_mgr.find_encoding(key);
+            if ( NULL == enc ) {
+                // TRACE << symb->ctx()
+                //       << "::" << symb->expr()
+                //       << " not in COI, skipping..."
+                //       << endl;
 
-            if (symb->is_variable()) {
-                /* time it, and fetch encoding for enc mgr */
-                FQExpr key(symb->ctx(), symb->expr(), 0);
-                IEncoding_ptr enc = enc_mgr.find_encoding(key);
-                if ( NULL == enc ) {
-                    // TRACE << symb->ctx()
-                    //       << "::" << symb->expr()
-                    //       << " not in COI, skipping..."
-                    //       << endl;
+                continue;
+            }
 
-                    continue;
-                }
+            /* 1. for each bit int the encoding, fetch UCBI, time it
+               into TCBI, fetch its value in MiniSAT model and set
+               the corresponding entry in input. */
+            DDVector::const_iterator di;
+            unsigned ndx;
 
-                /* 1. for each bit int the encoding, fetch UCBI, time it
-                   into TCBI, fetch its value in MiniSAT model and set
-                   the corresponding entry in input. */
-                DDVector::const_iterator di;
-                unsigned ndx;
+            for (ndx = 0, di = enc->bits().begin();
+                 enc->bits().end() != di; ++ ndx, ++ di) {
 
-                for (ndx = 0, di = enc->bits().begin();
-                     enc->bits().end() != di; ++ ndx, ++ di) {
+                unsigned bit = (*di).getNode()->index;
 
-                    unsigned bit = (*di).getNode()->index;
+                const UCBI& ucbi = enc_mgr.find_ucbi(bit);
+                const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(), 0,
+                                        ucbi.bitno(), k);
 
-                    const UCBI& ucbi = enc_mgr.find_ucbi(bit);
-                    const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                            ucbi.time(), ucbi.bitno(),
-                                            step);
+                Var var = engine.tcbi_to_var(tcbi);
+                int value = engine.value(var); /* Don't care is assigned to 0 */
 
-                    Var var = engine.tcbi_to_var(tcbi);
-                    int value = engine.value(var); /* Don't care is assigned to 0 */
+                inputs[bit] = value;
+            }
 
-                    inputs[bit] = value;
-                }
-
-                /* 2. eval the encoding ADD with inputs and put
-                   resulting value into time frame container. */
-                Expr_ptr value = enc->expr(inputs);
-                if (value) {
-                    tf.set_value( key, value );
-                }
+            /* 2. eval the encoding ADD with inputs and put
+               resulting value into time frame container. */
+            Expr_ptr value = enc->expr(inputs);
+            if (value) {
+                tf.set_value( key, value );
             }
         }
     }
 
-#if 0
-    /* Second pass, defs only, up to k (included) */
+#if 0 // maybe later
+    /* Second pass, defs only */
     for (step_t step = 0; step <= k; ++ step) {
         TimeFrame& tf = ith_frame( step );
 
