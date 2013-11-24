@@ -181,9 +181,9 @@ protected:
     void algebraic_neg(const Expr_ptr expr);
     void algebraic_not(const Expr_ptr expr);
     void algebraic_plus(const Expr_ptr expr);
+    void algebraic_mul(const Expr_ptr expr);
     void algebraic_sub(const Expr_ptr expr);
     void algebraic_div(const Expr_ptr expr);
-    void algebraic_mul(const Expr_ptr expr);
     void algebraic_mod(const Expr_ptr expr);
     void algebraic_and(const Expr_ptr expr);
     void algebraic_or(const Expr_ptr expr);
@@ -199,6 +199,18 @@ protected:
     void algebraic_lt(const Expr_ptr expr);
     void algebraic_le(const Expr_ptr expr);
     void algebraic_ite(const Expr_ptr expr);
+
+private:
+    // karatsuba multiplication algorithm (EXPERIMENTAL)
+    void karatsuba_mul(unsigned width);
+    void karatsuba_mul_aux(unsigned width);
+    void karatsuba_add_high_and_low(unsigned width);
+
+    // recursive multiplication algorithm
+    void recursive_mul(unsigned width, bool extra = false);
+
+    // traditional multiplication algorithm
+    void longhand_mul(unsigned width, bool extra = false);
 
     /* -- internals --------------------------------------------------------- */
     bool cache_miss(const Expr_ptr expr);
