@@ -43,6 +43,7 @@ typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
 typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
+typedef unordered_map<FQExpr, int, FQExprHash, FQExprEq> IntMap;
 // typedef unordered_map<DdNode *, YDD_ptr, PtrHash, PtrEq> YDDMap;
 // typedef pair<YDDMap::iterator, bool> YDDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
@@ -71,7 +72,7 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    ADD process(Expr_ptr ctx, Expr_ptr body);
+    ADD process(Expr_ptr ctx, Expr_ptr body, bool first_pass);
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -87,6 +88,7 @@ protected:
     unsigned f_temp_auto_index; // autoincr temp index
 
     ADDMap f_map;                 // FQDN -> DD cache
+    IntMap f_sizes;               // FQDN -> # sharing nodes
     ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion
@@ -201,6 +203,9 @@ protected:
     void algebraic_ite(const Expr_ptr expr);
 
 private:
+    // Two pass compiler
+    bool f_first;
+
     // karatsuba multiplication algorithm (EXPERIMENTAL)
     void karatsuba_mul(unsigned width);
     void karatsuba_mul_aux(unsigned width);

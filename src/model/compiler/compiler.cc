@@ -68,7 +68,7 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
+ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
 {
     // remove previous results
     f_add_stack.clear();
@@ -76,6 +76,7 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     f_rel_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
+    f_first = first_pass;
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
@@ -83,13 +84,27 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     // toplevel (time is assumed at 0, arbitraryly nested next allowed)
     f_time_stack.push_back(0);
 
-    FQExpr key(ctx, body);
-    TRACE << "Compiling " << key << endl;
-
     f_elapsed = clock();
 
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
+
+    f_elapsed = clock() - f_elapsed;
+    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
+
+    if (f_first) {
+        FQExpr key(ctx, body);
+        TRACE << "Encoding of " << key << " took "
+              << secs << " seconds" << endl;
+    }
+    else {
+        FQExpr key(ctx, body);
+        TRACE << "Compilation of " << key << " took "
+              << secs << " seconds" << endl;
+    }
+
+    /* Need this to fit the prototype */
+    if (f_first) return f_enc.zero();
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -102,10 +117,6 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body)
     ADD res = f_add_stack.back();
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
-
-    f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. Took " << secs << " seconds" << endl;
 
     if (res.IsZero())  {
         WARN << "Formula is UNSAT" << endl;
@@ -147,6 +158,7 @@ bool Compiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_neg_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_unary_integer(expr)) {
         integer_neg(expr);
     }
@@ -160,6 +172,7 @@ bool Compiler::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_not_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_unary_boolean(expr)) {
         boolean_not(expr);
     }
@@ -178,6 +191,7 @@ bool Compiler::walk_add_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_add_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_plus(expr);
     }
@@ -193,6 +207,7 @@ bool Compiler::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_sub_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_sub(expr);
     }
@@ -208,6 +223,7 @@ bool Compiler::walk_div_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_div_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_div(expr);
     }
@@ -223,6 +239,7 @@ bool Compiler::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mul_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_mul(expr);
     }
@@ -238,6 +255,7 @@ bool Compiler::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mod_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_mod(expr);
     }
@@ -253,6 +271,7 @@ bool Compiler::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_and_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_and(expr);
     }
@@ -271,6 +290,7 @@ bool Compiler::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_or_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_or(expr);
     }
@@ -289,6 +309,7 @@ bool Compiler::walk_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_xor_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_xor(expr);
     }
@@ -307,6 +328,7 @@ bool Compiler::walk_xnor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_xnor_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_xnor(expr);
     }
@@ -325,6 +347,7 @@ bool Compiler::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_implies_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_implies(expr);
     }
@@ -350,6 +373,7 @@ bool Compiler::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lshift_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_lshift(expr);
     }
@@ -365,6 +389,7 @@ bool Compiler::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_rshift_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_rshift(expr);
     }
@@ -386,6 +411,7 @@ bool Compiler::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_eq_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_equals(expr);
     }
@@ -414,6 +440,7 @@ bool Compiler::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ne_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_boolean(expr)) {
         boolean_not_equals(expr);
     }
@@ -442,6 +469,7 @@ bool Compiler::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_gt_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_gt(expr);
     }
@@ -464,6 +492,7 @@ bool Compiler::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ge_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_ge(expr);
     }
@@ -486,6 +515,7 @@ bool Compiler::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lt_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_lt(expr);
     }
@@ -508,6 +538,7 @@ bool Compiler::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_le_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_binary_integer(expr)) {
         integer_le(expr);
     }
@@ -524,6 +555,7 @@ bool Compiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ite_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_ite_boolean(expr)) {
         boolean_ite(expr);
     }
@@ -557,7 +589,8 @@ bool Compiler::walk_dot_inorder(const Expr_ptr expr)
 }
 void Compiler::walk_dot_postorder(const Expr_ptr expr)
 {
-    ADD rhs_add;
+    if (f_first) return;
+    // ADD rhs_add;
 
     // { // RHS, no checks necessary/possible
     //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
@@ -595,6 +628,7 @@ bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 {
+    if (f_first) return;
     if (is_subscript_integer(expr)) {
         integer_subscript(expr);
     }
@@ -751,9 +785,14 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         /* build a new encoding for this symbol if none is available. */
         if (NULL == (enc = f_enc.find_encoding(key))) {
-            assert (NULL != type);
-            enc = f_enc.make_encoding(type);
-            f_enc.register_encoding(key, enc);
+            if (f_first) {
+                assert (NULL != type);
+                enc = f_enc.make_encoding(type);
+                f_enc.register_encoding(key, enc);
+            }
+            else {
+                assert( false ); // unexpected
+            }
         }
 
         push_variable(enc, type);

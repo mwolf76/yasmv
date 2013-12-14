@@ -260,6 +260,8 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
+    if (f_first) return;
+
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
     Expr_ptr ctx = f_ctx_stack.back();
@@ -287,8 +289,14 @@ void Compiler::post_node_hook(Expr_ptr expr)
     }
     assert (dv.size() == width);
 
+    int size = CuddMgr::INSTANCE().dd().SharingSize(dv);
+    TRACE << size << endl;
+
     f_map.insert( make_pair <FQExpr,
                   DDVector> ( key, dv ));
+
+    f_sizes.insert( make_pair <FQExpr,
+                    int> ( key, size ));
 }
 
 #if 0
@@ -561,7 +569,7 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     if (eye != f_map.end()) {
         const Type_ptr type = f_owner.type(key);
         TRACE << "Cache hit for " << expr
-              << " type is " << type
+              << ", type is " << type
               << endl;
 
         /* push cached DDs and type */

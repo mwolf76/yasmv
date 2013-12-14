@@ -4825,6 +4825,23 @@ Cudd::SharingSize(
 
 } // Cudd::SharingSize
 
+int
+Cudd::SharingSize(
+  const vector<ADD>& v) const
+{
+    vector<ADD>::size_type n = v.size();
+    DdNode **nodeArray = new DdNode *[n];
+    for (vector<ADD>::size_type i = 0; i != n; ++i) {
+	nodeArray[i] = v[i].getNode();
+    }
+    int result = Cudd_SharingSize(nodeArray, n);
+    delete [] nodeArray;
+    checkReturnValue(n == 0 || result > 0);
+    return result;
+
+} // Cudd::SharingSize
+
+
 
 double
 ABDD::CountMinterm(

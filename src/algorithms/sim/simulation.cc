@@ -46,43 +46,48 @@ Simulation::Simulation(IModel& model,
     assert( 0 == f_invar_adds.size());
     assert( 0 == f_trans_adds.size());
 
-    const Modules& modules = f_model.modules();
-    for (Modules::const_iterator m = modules.begin();
-         m != modules.end(); ++ m) {
+    for (int pass = 0; pass < 2; ++ pass) {
+        bool first_pass = (0 == pass);
+        TRACE << "Pass " << (first_pass ? "1" : "2") << endl;
 
-        Module& module = dynamic_cast <Module&> (*m->second);
+        const Modules& modules = f_model.modules();
+        for (Modules::const_iterator m = modules.begin();
+             m != modules.end(); ++ m) {
 
-        /* INIT */
-        const ExprVector init = module.init();
-        for (ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); ++ init_eye) {
+            Module& module = dynamic_cast <Module&> (*m->second);
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*init_eye);
+            /* INIT */
+            const ExprVector init = module.init();
+            for (ExprVector::const_iterator init_eye = init.begin();
+                 init_eye != init.end(); ++ init_eye) {
 
-            f_init_adds.push_back(compiler().process(ctx, body));
-        }
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*init_eye);
 
-        /* INVAR */
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); ++ invar_eye) {
+                f_init_adds.push_back(compiler().process(ctx, body, first_pass));
+            }
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*invar_eye);
+            /* INVAR */
+            const ExprVector invar = module.invar();
+            for (ExprVector::const_iterator invar_eye = invar.begin();
+                 invar_eye != invar.end(); ++ invar_eye) {
 
-            f_invar_adds.push_back(compiler().process(ctx, body));
-        }
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*invar_eye);
 
-        /* TRANS */
-        const ExprVector trans = module.trans();
-        for (ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); ++ trans_eye) {
+                f_invar_adds.push_back(compiler().process(ctx, body, first_pass));
+            }
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*trans_eye);
+            /* TRANS */
+            const ExprVector trans = module.trans();
+            for (ExprVector::const_iterator trans_eye = trans.begin();
+                 trans_eye != trans.end(); ++ trans_eye) {
 
-            f_trans_adds.push_back(compiler().process(ctx, body));
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*trans_eye);
+
+                f_trans_adds.push_back(compiler().process(ctx, body, first_pass));
+            }
         }
     }
 }

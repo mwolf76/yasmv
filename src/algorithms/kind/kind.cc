@@ -29,6 +29,7 @@ using namespace Minisat;
 KInduction::KInduction(IModel& model, Expr_ptr property)
     : MCAlgorithm(model, property)
 {
+#if 0
     const Modules& modules = f_model.modules();
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
@@ -47,10 +48,12 @@ KInduction::KInduction(IModel& model, Expr_ptr property)
                                                          em().make_not(body)));
         }
     }
+#endif
 }
 
 void KInduction::assert_fsm_not_init(step_t time, group_t group, color_t color)
 {
+#if 0
     clock_t t0 = clock();
     unsigned n = f_not_init_adds.size();
     TRACE << "CNFizing NOT INITs @" << time
@@ -65,6 +68,7 @@ void KInduction::assert_fsm_not_init(step_t time, group_t group, color_t color)
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     TRACE << "Done. (took " << secs << " seconds)" << endl;
+#endif
 }
 
 KInduction::~KInduction()
@@ -72,6 +76,7 @@ KInduction::~KInduction()
 
 void KInduction::process()
 {
+#if 0
     step_t k; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
 
@@ -111,4 +116,5 @@ void KInduction::process()
     }
 
     TRACE << "Done." << endl;
+#endif
 }

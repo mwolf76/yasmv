@@ -78,6 +78,7 @@ SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
 
 Variant SATCommand::operator()()
 {
+#if 0
     Expr_ptr ctx = ExprMgr::INSTANCE().make_main(); // default ctx
     ADD add = f_compiler.process(ctx, f_expr);
     f_engine.push(add, 0);
@@ -85,6 +86,7 @@ Variant SATCommand::operator()()
     ostringstream tmp;
     tmp << f_engine.solve();
     return Variant(tmp.str());
+#endif
 }
 
 SATCommand::~SATCommand()

@@ -698,6 +698,7 @@ public:
     void Reserve(int amount) const;
     int SharingSize(DD* nodes, int n) const;
     int SharingSize(const std::vector<BDD>& v) const;
+    int SharingSize(const std::vector<ADD>& v) const;
     BDD bddComputeCube(BDD * vars, int * phase, int n) const;
     ADD addComputeCube(ADD * vars, int * phase, int n);
     int NextNode(DdGen * gen, BDD * nnode);

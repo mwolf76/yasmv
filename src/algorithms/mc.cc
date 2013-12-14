@@ -32,6 +32,7 @@ MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
     , f_property(property)
     , f_witness(NULL)
 {
+#if 0
     set_param("alg_name", "test");
     DEBUG  << "Creating MC algoritm instance "
            << get_param("alg_name")
@@ -77,6 +78,7 @@ MCAlgorithm::MCAlgorithm(IModel& model, Expr_ptr property)
     /* Violation (negation of Invarion) */
     f_violation_add = compiler().process( em().make_main(),
                                           em().make_not( f_property));
+#endif
 }
 
 MCAlgorithm::~MCAlgorithm()
