@@ -207,10 +207,11 @@ private:
     void karatsuba_add_high_and_low(unsigned width);
 
     // recursive multiplication algorithm
-    void recursive_mul(unsigned width, bool extra = false);
+    void recursive_mul_prepare_shift_and_pad(unsigned width, unsigned shift);
+    void recursive_mul(unsigned width, bool extra);
 
-    // traditional multiplication algorithm
-    void longhand_mul(unsigned width, bool extra = false);
+    // traditional multiplication algorithm (fallback case)
+    void longhand_mul(unsigned width, bool extra);
 
     /* -- internals --------------------------------------------------------- */
     bool cache_miss(const Expr_ptr expr);

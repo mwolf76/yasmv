@@ -117,43 +117,127 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 
 void Compiler::algebraic_mul(const Expr_ptr expr)
 {
+#if 0
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_binary_arithmetical();
 
-    recursive_mul(width);
+    recursive_mul(width, false);
+#else
+    /* longhand mul */
+    assert( is_binary_algebraic(expr) );
+    unsigned width = algebrize_binary_arithmetical();
+
+    POP_ALGEBRAIC(rhs, width);
+    POP_ALGEBRAIC(lhs, width);
+
+    ADD res[width];
+    ADD tmp[width];
+
+    for (unsigned i = 0; i < width; ++ i) {
+        res[i] = f_enc.zero();
+        tmp[i] = f_enc.zero();
+    }
+
+    ADD carry;
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx_i = width - i - 1;
+
+        carry = f_enc.zero();
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
+
+            // ignore what happens out of result boundaries
+            if (i + j < width) {
+                unsigned ndx = width - i - j - 1;
+
+                /* MUL table for digit product */
+                ADD product = lhs[ndx_i].Times(rhs[ndx_j]).Plus(carry);
+
+                /* calculate digit and carry */
+                tmp[ndx] = product.Modulus(f_enc.base());
+                carry    = product.Divide (f_enc.base());
+            }
+        }
+
+        // update result
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
+            res[ndx_j] += tmp[ndx_j];
+        }
+
+        // return i-th digit of result
+        PUSH_ADD(res[ndx_i]);
+    }
+#endif
 }
 
-/*
-Let x and y be represented as n-digit strings in some base B. For any
-positive integer m less than n, one can write the two given numbers as
+/* fetched width digits from the ADD stack, shifts to the left of the
+   given amount, pads with non-significant left-hand zeros up to 2 *
+   width digits, and pushes back into the ADD stack in reverse
+   order. This is a private service of Compiler::recursive_mul */
+void Compiler::recursive_mul_prepare_shift_and_pad(unsigned width, unsigned shift)
+{
+    unsigned i, ndx = 0, dbl = 2 * width;
+    unsigned pad = dbl - width - shift;
+    ADD tmp[dbl];
 
-x = x1 B^m + x0
-y = y1 B^m + y0,
-where x0 and y0 are less than B^mm. The product is then
+    /* padding */
+    for (i = 0; i < pad; ++ i) {
+        tmp[ ndx ++ ] = f_enc.zero();
+    }
 
-xy = x1y1 B2^m + x1y0 B^m + x0y1 B^m + x0y0
+    /* fetching */
+    for (i = 0; i < width; ++ i) {
+        tmp[ ndx ++ ] = f_add_stack.back();
+        f_add_stack.pop_back();
+    }
 
-*/
+    /* shifting */
+    for (i = 0; i < shift; ++ i) {
+        tmp[ ndx ++ ] = f_enc.zero();
+    }
+
+    assert( ndx == dbl );
+
+    /* push result */
+    for (i = 0; i < dbl; ++ i) {
+        ndx = dbl - i - 1;
+        f_add_stack.push_back( tmp[ndx] );
+    }
+}
+
+/**
+    Let x and y be represented as n-digit strings in some base B. For
+    any positive integer m less than n, one can write the two given
+    numbers as
+
+    x = x1 B^m + x0
+    y = y1 B^m + y0,
+    where x0 and y0 are less than B^m. The product is then
+
+    xy = x1y1 B2^m + x1y0 B^m + x0y1 B^m + x0y0
+**/
 void Compiler::recursive_mul(unsigned width, bool extra)
 {
     /* Induction base */
     assert((width == 1) || ((width & 1) == 0)); // is 1 or even
-    if (width <= 2) {
-        longhand_mul(width, extra);
+    if (width == 1) {
+        longhand_mul(1, extra);
         return;
     }
+
+    unsigned stack_size = f_add_stack.size();
 
     POP_ALGEBRAIC( rhs, width);
     POP_ALGEBRAIC( lhs, width);
 
+    // width is a multiple of 2
     unsigned hlf = width / 2;
     unsigned dbl = width * 2;
 
     /* -- DIVIDE ------------------------------------------------------------ */
     {
-        ADD tmp[dbl];
-
-        /* -- 2.1. Mul( Al, Bl, width) ------------------------------------------ */
+        /* -- 2.1. Al * Bl */
         for (unsigned i = 0; i < hlf; ++ i) {
             unsigned ndx = width - i - 1;
             PUSH_ADD( rhs[ndx]);
@@ -163,24 +247,9 @@ void Compiler::recursive_mul(unsigned width, bool extra)
             PUSH_ADD( lhs[ndx]);
         }
         recursive_mul(hlf, true);
-        {
-            unsigned i = 0;
-            while (i < width) {
-                tmp[i] = f_enc.zero();
-                ++ i;
-            }
-            while (i < dbl) {
-                tmp[i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
-        }
-        for (unsigned i = 0; i < dbl; ++ i) {
-            unsigned ndx = dbl - i - 1;
-            f_add_stack.push_back( tmp[ndx] );
-        }
+        recursive_mul_prepare_shift_and_pad( width, 0);
 
-        /* -- 2.2.  Mul( Ah, Bl) ------------------------------------------------ */
+        /* -- 2.2.  Ah * Bl */
         for (unsigned i = 0; i < hlf; ++ i) {
             unsigned ndx = width - i - 1;
             PUSH_ADD( rhs[ndx]);
@@ -189,62 +258,22 @@ void Compiler::recursive_mul(unsigned width, bool extra)
             unsigned ndx = width - i - 1;
             PUSH_ADD( lhs[ndx]);
         }
-        recursive_mul(hlf, true); // yields m digits
-        {
-            unsigned i = 0;
-            while (i < hlf) {
-                tmp[width + i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
-            while (i < width) {
-                tmp[width + i] = f_enc.zero();
-                ++ i;
-            }
-            while (i < hlf) {
-                tmp[width + i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
-        }
-        for (unsigned i = 0; i < dbl; ++ i) {
-            unsigned ndx = dbl - i - 1;
-            f_add_stack.push_back( tmp[ndx] );
-        }
+        recursive_mul(hlf, true);
+        recursive_mul_prepare_shift_and_pad( width, hlf);
 
-        /* -- 2.3.  Mul( Al, Bh) ------------------------------------------------ */
-        for (unsigned i = 0; i < hlf; ++ i) {
-            unsigned ndx = width - i - 1;
-            PUSH_ADD( lhs[ndx]);
-        }
+        /* -- 2.3.  Al * Bh */
         for (unsigned i = hlf; i < width; ++ i) {
             unsigned ndx = width - i - 1;
             PUSH_ADD( rhs[ndx]);
         }
-        recursive_mul(hlf, true); // yields m digits
-        {
-            unsigned i = 0;
-            while (i < hlf) {
-                tmp[width + i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
-            while (i < width) {
-                tmp[width + i] = f_enc.zero();
-                ++ i;
-            }
-            while (i < hlf) {
-                tmp[width + i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
+        for (unsigned i = 0; i < hlf; ++ i) {
+            unsigned ndx = width - i - 1;
+            PUSH_ADD( lhs[ndx]);
         }
-        for (unsigned i = 0; i < dbl; ++ i) {
-            unsigned ndx = dbl - i - 1;
-            f_add_stack.push_back( tmp[ndx] );
-        }
+        recursive_mul(hlf, true);
+        recursive_mul_prepare_shift_and_pad( width, hlf);
 
-        /* -- 2.4. z3 = Mul( Ah, Bh) ----------------------------------------------- */
+        /* -- 2.4. Ah * Bh */
         for (unsigned i = hlf; i < width; ++ i) {
             unsigned ndx = width - i - 1;
             PUSH_ADD( rhs[ndx]);
@@ -254,69 +283,70 @@ void Compiler::recursive_mul(unsigned width, bool extra)
             PUSH_ADD( lhs[ndx]);
         }
         recursive_mul(hlf, true);
-        {
-            unsigned i = 0;
-            while (i < width) {
-                tmp[i] = f_add_stack.back();
-                f_add_stack.pop_back();
-                ++ i;
-            }
-            while (i < width) {
-                tmp[width + i] = f_enc.zero();
-                ++ i;
-            }
-        }
-        for (unsigned i = 0; i < dbl; ++ i) {
-            unsigned ndx = dbl - i - 1;
-            f_add_stack.push_back( tmp[ndx] );
-        }
+        recursive_mul_prepare_shift_and_pad( width, width);
     }
 
+    /* -- COMBINE ----------------------------------------------------------- */
     {
-        /* COMBINE: now we have 4 2m digits numbers in the stack: A,
-           B, C and D, in reversed order.  Result is (((A + B) + C) +
-           D). If not in extra mode (this occurs at toplevel), prevent
-           useless calculations to be performed. */
+        /* Now we have 4 2m digits numbers in the stack: A, B, C and
+           D, in reversed order. Result is (((A + B) + C) + D). */
         ADD lhs[dbl];
         ADD rhs[dbl];
+        unsigned j;
 
-        for (unsigned j = 0; j < 3; ++ j) {
-            ADD carry = f_enc.zero();
+        j = 0; do {
 
+            // Fetch operands
             for (unsigned i = 0; i < dbl; ++ i) {
                 rhs[i] = f_add_stack.back();
                 f_add_stack.pop_back();
             }
-
             for (unsigned i = 0; i < dbl; ++ i) {
                 lhs[i] = f_add_stack.back();
                 f_add_stack.pop_back();
             }
 
-            for (unsigned i = 0; i < extra ? dbl : width; ++ i) {
+            ADD carry = f_enc.zero();
+
+            /* If not in extra mode (this occurs at toplevel), prevent
+               useless calculations to be performed. */
+            for (unsigned i = 0; i < (extra ? dbl : width); ++ i) {
                 unsigned ndx = dbl - i - 1;
                 ADD tmp = lhs[ndx].Plus( rhs[ndx]).Plus(carry);
 
                 carry = f_enc.base().LEQ(tmp); /* c >= 0x10 */
                 PUSH_ADD(tmp.Modulus(f_enc.base()));
             }
-            // padding required to keep alignment
+
+            if (j == 2) // we're done
+                break;
+
+            // if not in extra mode, zero padding is required to keep going
             if (!extra) {
-                for (unsigned i = 0; i < width; ++ i) {
+                PUSH_ADD(carry);
+                for (unsigned i = 1; i < width; ++ i) {
                     f_add_stack.push_back(f_enc.zero());
                 }
             }
-        }
+
+            ++ j;
+        } while (1);
+    }
+
+    // recursion check
+    if (extra) {
+        assert( f_add_stack.size() == stack_size );
     }
 }
 
 
 /* Multiplying 2 m-digits numbers yields a 2m digits number. As in
-   normal ALU operations result digits "falling off" the MSB boundary
-   just get discarded (overflow). However, keeping those extra digits
-   in calculations is required when using this algorithm as a building
-   block (i.e. Recursive and Karatsuba algorithms). This method yields
-   a single m-digits number if extra is false (default), a 2m-digits
+   ordinary ALU operations result digits "falling off" the word
+   representation boundary just get discarded (overflow). However,
+   keeping those extra digits in calculations is required when using
+   this algorithm as a building block for recursive algorithms
+   (i.e. Recursive and Karatsuba algorithms). This method yields a
+   single m-digits number if extra is false (default), a 2m-digits
    number otherwise. */
 void Compiler::longhand_mul(unsigned width, bool extra)
 {
@@ -368,6 +398,7 @@ void Compiler::longhand_mul(unsigned width, bool extra)
             unsigned ndx_j = actual - j - 1;
             res[ndx_j] += tmp[ndx_j];
         }
+
         PUSH_ADD(res[ndx_i]);
     }
 }
