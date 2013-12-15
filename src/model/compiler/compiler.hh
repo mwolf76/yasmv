@@ -48,6 +48,9 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
+typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ACMap; // and-chain
+typedef pair<ACMap::iterator, bool> ACHit;
+
 /* shortcuts to to simplify manipulation of the internal ADD stack */
 #define POP_ADD(op)                             \
     const ADD op = f_add_stack.back();          \
@@ -68,7 +71,11 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    ADD process(Expr_ptr ctx, Expr_ptr body, bool first_pass);
+    void process(Expr_ptr ctx, Expr_ptr body, bool first_pass);
+
+    /* implicit conjunctive chain returning protocol */
+    bool has_next();
+    ADD  next();
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -85,6 +92,9 @@ protected:
 
     ADDMap f_map;                 // FQDN -> DD cache
     ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
+
+    DDVector f_roots;             // ADD chain roots
+    ACMap  f_chains;              // chain root -> DD vector
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -224,7 +234,8 @@ private:
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
-    ADD optimize_and_chain(ADD* dds, unsigned len);
+    ADD book_and_chain(ADD* dds, unsigned len);
+    void finalize_and_chains();
 
     void algebraic_from_constant(unsigned width);
 
@@ -251,6 +262,7 @@ private:
 
     /* temporaries */
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
+    BooleanEncoding_ptr make_chain_encoding();
 };
 
 #endif

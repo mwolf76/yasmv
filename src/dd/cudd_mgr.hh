@@ -58,5 +58,4 @@ private:
     CuddVector f_cudd_instances;
 };
 
-
 #endif

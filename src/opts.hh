@@ -32,7 +32,7 @@ typedef OptsMgr* OptsMgr_ptr;
 namespace options = boost::program_options;
 
 // -- system defaults
-const unsigned DEFAULT_BITS_PER_DIGIT = 2;
+const unsigned DEFAULT_BITS_PER_DIGIT = 1;
 const unsigned DEFAULT_WORD_WIDTH     = 16;
 const unsigned DEFAULT_VERBOSITY      = 0;
 

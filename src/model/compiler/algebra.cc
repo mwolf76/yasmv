@@ -619,8 +619,7 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
         tmp[ndx] = lhs[ndx].Equals(rhs[ndx]);
     }
 
-    /* just one result */
-    PUSH_ADD(optimize_and_chain(tmp, width));
+    PUSH_ADD( book_and_chain(tmp, width));
 }
 
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
@@ -684,7 +683,7 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
         phi[i] = lhs[i].LT(rhs[i]);
 
         /* add optimized chain to disjunction */
-        pred = pred.Or( optimize_and_chain(phi, 1 + i));
+        pred = pred.Or( book_and_chain(phi, 1 + i));
     }
 
     /* just one predult */
@@ -715,7 +714,7 @@ void Compiler::algebraic_le(const Expr_ptr expr)
         phi[i] = lhs[i].LEQ(rhs[i]);
 
         /* add optimized chain to disjunction */
-        pred = pred.Or( optimize_and_chain(phi, 1 + i));
+        pred = pred.Or( book_and_chain(phi, 1 + i));
     }
 
     /* just one result */

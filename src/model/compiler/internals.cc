@@ -243,6 +243,28 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
     return expr;
 }
 
+/* Builds a temporary boolean encoding. This is used by Pass 3 */
+BooleanEncoding_ptr Compiler::make_chain_encoding()
+{
+    ExprMgr& em = f_owner.em();
+    TypeMgr& tm = f_owner.tm();
+
+    ostringstream oss;
+    oss << "__ac" << f_temp_auto_index ++ ;
+
+    Expr_ptr expr = em.make_identifier(oss.str());
+
+    /* register encoding, using fqexpr */
+    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
+        (f_enc.make_encoding( tm.find_boolean()));
+
+    const FQExpr& key = FQExpr(expr);
+    f_enc.register_encoding(key, be);
+
+    return be;
+}
+
+
 void Compiler::pre_node_hook(Expr_ptr expr)
 {
     /* assemble memoization key */
@@ -271,9 +293,6 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     FQExpr key(ctx, expr, time);
 
-    double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
-    TRACE << key << " took " << elapsed << "s" << endl;
-
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
 
@@ -290,6 +309,13 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert (dv.size() == width);
     f_map.insert( make_pair <FQExpr,
                   DDVector> ( key, dv ));
+
+    double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
+    unsigned nodes = f_enc.dd().SharingSize(dv);
+    TRACE
+        << key << " took " << elapsed << "s, "
+        << nodes << " ADD nodes"
+        << endl;
 }
 
 #if 0
@@ -581,50 +607,40 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     return true;
 }
 
-#if 1
-int double_cmp(double x, double y)
+ADD Compiler::book_and_chain(ADD* dds, unsigned len)
 {
-    return (x == y)
-        ? 0
-        : ((x < y)
-           ? 1
-           : -1);
-}
+    BooleanEncoding_ptr be
+        = make_chain_encoding();
 
-struct DDInfo {
-    ADD dd;
-    double npaths;
+    /* add alpha variable */
+    ADD ret = be -> bits() [0];
 
-    DDInfo(ADD add)
-        : dd(add)
-    {
-        npaths = dd.CountPath();
-    }
-};
-
-bool compare_ddinfo( const DDInfo & e1, const DDInfo & e2)
-{ return e1.npaths < e2.npaths; }
-
-typedef vector<DDInfo> DDInfoVector;
-
-ADD Compiler::optimize_and_chain(ADD* dds, unsigned len)
-{
-    TRACE << " -- started optimize AND" << endl;
-    DDInfoVector iv;
+    /* collect dds */
+    DDVector dv;
     for (unsigned i = 0; i < len; ++ i) {
-        TRACE << " -- eval size of DD " << i << endl;
-        iv.push_back( DDInfo(dds[i]));
+        dv.push_back( dds[i]);
     }
 
-    std::sort( iv.begin(), iv.end(), compare_ddinfo );
+    /* saving (1) alias: alpha -> dds and (2) chain root */
+    f_chains.insert( make_pair <ADD, DDVector> ( ret, dv ));
+    f_roots.push_back( ret );
 
-    ADD res = f_enc.one();
-    for (DDInfoVector::iterator i = iv.begin(); i != iv.end(); ++ i) {
-        TRACE << " -- mul DD " << endl;
-        res *= (*i).dd;
-    }
-
-    TRACE << " -- done optimize AND" << endl;
-    return res;
+    return ret;
 }
-#endif
+
+void Compiler::finalize_and_chains()
+{
+    // Conjunct booked AND chains into result stack
+    for (DDVector::iterator i = f_roots.begin(); f_roots.end() != i; ++ i) {
+        ADD a (*i);
+
+        ACMap::iterator eye = f_chains.find(a);
+        assert( f_chains.end() != eye);
+
+        // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
+        DDVector& Y ((*eye).second);
+        for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
+            PUSH_ADD( a.Cmpl().Or( *j));
+        }
+    }
+}

@@ -68,7 +68,7 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
+void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
 {
     // remove previous results
     f_add_stack.clear();
@@ -76,6 +76,8 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     f_rel_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
+    f_roots.clear();
+    f_chains.clear();
     f_first = first_pass;
 
     // walk body in given ctx
@@ -96,15 +98,9 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
         FQExpr key(ctx, body);
         TRACE << "Encoding of " << key << " took "
               << secs << " seconds" << endl;
-    }
-    else {
-        FQExpr key(ctx, body);
-        TRACE << "Compilation of " << key << " took "
-              << secs << " seconds" << endl;
-    }
 
-    /* Need this to fit the prototype */
-    if (f_first) return f_enc.zero();
+        return;
+    }
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -118,11 +114,30 @@ ADD Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
 
-    if (res.IsZero())  {
-        WARN << "Formula is UNSAT" << endl;
-    }
+    finalize_and_chains();
 
-    return res;
+    unsigned sz (f_add_stack.size());
+    FQExpr key(ctx, body);
+    TRACE
+        << "Compilation of " << key << " took "
+        << secs << " seconds, "
+        << sz << " DDs"
+        << endl;
+}
+
+bool Compiler::has_next()
+{
+    assert( ! f_first );
+    return 0 < f_add_stack.size();
+}
+
+ADD Compiler::next()
+{
+    assert( ! f_first);
+    assert( has_next());
+
+    POP_ADD(ret);
+    return ret;
 }
 
 /*  Compilation engine is implemented using a simple expression walker

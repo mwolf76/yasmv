@@ -46,9 +46,9 @@ Simulation::Simulation(IModel& model,
     assert( 0 == f_invar_adds.size());
     assert( 0 == f_trans_adds.size());
 
+    Compiler& cmpl(compiler());
     for (int pass = 0; pass < 2; ++ pass) {
         bool first_pass = (0 == pass);
-        TRACE << "Pass " << (first_pass ? "1" : "2") << endl;
 
         const Modules& modules = f_model.modules();
         for (Modules::const_iterator m = modules.begin();
@@ -64,7 +64,12 @@ Simulation::Simulation(IModel& model,
                 Expr_ptr ctx = module.expr();
                 Expr_ptr body = (*init_eye);
 
-                f_init_adds.push_back(compiler().process(ctx, body, first_pass));
+                cmpl.process(ctx, body, first_pass);
+                if (! first_pass) {
+                    while (cmpl.has_next()) {
+                        f_init_adds.push_back(cmpl.next());
+                    }
+                }
             }
 
             /* INVAR */
@@ -75,7 +80,12 @@ Simulation::Simulation(IModel& model,
                 Expr_ptr ctx = module.expr();
                 Expr_ptr body = (*invar_eye);
 
-                f_invar_adds.push_back(compiler().process(ctx, body, first_pass));
+                cmpl.process(ctx, body, first_pass);
+                if (! first_pass) {
+                    while (cmpl.has_next()) {
+                        f_invar_adds.push_back(cmpl.next());
+                    }
+                }
             }
 
             /* TRANS */
@@ -86,7 +96,12 @@ Simulation::Simulation(IModel& model,
                 Expr_ptr ctx = module.expr();
                 Expr_ptr body = (*trans_eye);
 
-                f_trans_adds.push_back(compiler().process(ctx, body, first_pass));
+                cmpl.process(ctx, body, first_pass);
+                if (! first_pass) {
+                    while (cmpl.has_next()) {
+                        f_trans_adds.push_back(cmpl.next());
+                    }
+                }
             }
         }
     }
