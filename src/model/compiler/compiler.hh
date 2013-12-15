@@ -41,11 +41,10 @@ typedef vector<ADD> ADDStack; // ouput of Stage 1
 /* local typedefs */
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
+
 typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
 typedef pair<ADDMap::iterator, bool> ADDHit;
-typedef unordered_map<FQExpr, int, FQExprHash, FQExprEq> IntMap;
-// typedef unordered_map<DdNode *, YDD_ptr, PtrHash, PtrEq> YDDMap;
-// typedef pair<YDDMap::iterator, bool> YDDHit;
+
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
@@ -53,9 +52,6 @@ typedef pair<ENCMap::iterator, bool> ENCHit;
 #define POP_ADD(op)                             \
     const ADD op = f_add_stack.back();          \
     f_add_stack.pop_back()
-
-#define POP_TWO(rhs,lhs)                        \
-    POP_ADD(rhs); POP_ADD(lhs)
 
 #define POP_ALGEBRAIC(vec, width)               \
     ADD vec[width];                             \
@@ -88,7 +84,6 @@ protected:
     unsigned f_temp_auto_index; // autoincr temp index
 
     ADDMap f_map;                 // FQDN -> DD cache
-    IntMap f_sizes;               // FQDN -> # sharing nodes
     ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
 
     // type look-ahead for operands promotion

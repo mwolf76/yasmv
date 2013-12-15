@@ -39,7 +39,8 @@
 
 void Compiler::enumerative_equals(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     PUSH_ADD(lhs.Equals(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
@@ -47,7 +48,8 @@ void Compiler::enumerative_equals(const Expr_ptr expr)
 
 void Compiler::enumerative_not_equals(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     PUSH_ADD(lhs.Equals(rhs).Cmpl());
 
     f_type_stack.pop_back(); // consume one, leave the other
@@ -55,7 +57,8 @@ void Compiler::enumerative_not_equals(const Expr_ptr expr)
 
 void Compiler::enumerative_ite(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     POP_ADD(cnd);
     PUSH_ADD(cnd.Ite(lhs, rhs));
 

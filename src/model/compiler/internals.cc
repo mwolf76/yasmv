@@ -288,15 +288,8 @@ void Compiler::post_node_hook(Expr_ptr expr)
         dv.push_back(*ri);
     }
     assert (dv.size() == width);
-
-    int size = CuddMgr::INSTANCE().dd().SharingSize(dv);
-    TRACE << size << endl;
-
     f_map.insert( make_pair <FQExpr,
                   DDVector> ( key, dv ));
-
-    f_sizes.insert( make_pair <FQExpr,
-                    int> ( key, size ));
 }
 
 #if 0
@@ -588,6 +581,7 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     return true;
 }
 
+#if 1
 int double_cmp(double x, double y)
 {
     return (x == y)
@@ -615,8 +609,10 @@ typedef vector<DDInfo> DDInfoVector;
 
 ADD Compiler::optimize_and_chain(ADD* dds, unsigned len)
 {
+    TRACE << " -- started optimize AND" << endl;
     DDInfoVector iv;
     for (unsigned i = 0; i < len; ++ i) {
+        TRACE << " -- eval size of DD " << i << endl;
         iv.push_back( DDInfo(dds[i]));
     }
 
@@ -624,8 +620,11 @@ ADD Compiler::optimize_and_chain(ADD* dds, unsigned len)
 
     ADD res = f_enc.one();
     for (DDInfoVector::iterator i = iv.begin(); i != iv.end(); ++ i) {
+        TRACE << " -- mul DD " << endl;
         res *= (*i).dd;
     }
 
+    TRACE << " -- done optimize AND" << endl;
     return res;
 }
+#endif

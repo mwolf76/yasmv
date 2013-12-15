@@ -55,7 +55,8 @@ void Compiler::integer_not(const Expr_ptr expr)
 
 void Compiler::integer_plus(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -66,7 +67,8 @@ void Compiler::integer_plus(const Expr_ptr expr)
 
 void Compiler::integer_sub(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -77,7 +79,8 @@ void Compiler::integer_sub(const Expr_ptr expr)
 
 void Compiler::integer_mul(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -88,7 +91,8 @@ void Compiler::integer_mul(const Expr_ptr expr)
 
 void Compiler::integer_div(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -99,7 +103,8 @@ void Compiler::integer_div(const Expr_ptr expr)
 
 void Compiler::integer_mod(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -110,7 +115,8 @@ void Compiler::integer_mod(const Expr_ptr expr)
 
 void Compiler::integer_and(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -121,7 +127,8 @@ void Compiler::integer_and(const Expr_ptr expr)
 
 void Compiler::integer_or(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -132,7 +139,8 @@ void Compiler::integer_or(const Expr_ptr expr)
 
 void Compiler::integer_xor(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -143,7 +151,8 @@ void Compiler::integer_xor(const Expr_ptr expr)
 
 void Compiler::integer_xnor(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -154,7 +163,8 @@ void Compiler::integer_xnor(const Expr_ptr expr)
 
 void Compiler::integer_implies(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -165,7 +175,8 @@ void Compiler::integer_implies(const Expr_ptr expr)
 
 void Compiler::integer_lshift(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -176,7 +187,8 @@ void Compiler::integer_lshift(const Expr_ptr expr)
 
 void Compiler::integer_rshift(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -187,7 +199,8 @@ void Compiler::integer_rshift(const Expr_ptr expr)
 
 void Compiler::integer_equals(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -198,7 +211,8 @@ void Compiler::integer_equals(const Expr_ptr expr)
 
 void Compiler::integer_not_equals(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -209,7 +223,8 @@ void Compiler::integer_not_equals(const Expr_ptr expr)
 
 void Compiler::integer_gt(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -220,7 +235,8 @@ void Compiler::integer_gt(const Expr_ptr expr)
 
 void Compiler::integer_ge(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -231,7 +247,8 @@ void Compiler::integer_ge(const Expr_ptr expr)
 
 void Compiler::integer_lt(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
@@ -242,7 +259,8 @@ void Compiler::integer_lt(const Expr_ptr expr)
 
 void Compiler::integer_le(const Expr_ptr expr)
 {
-    POP_TWO(rhs, lhs);
+    POP_ADD(rhs);
+    POP_ADD(lhs);
     assert (f_enc.is_constant(rhs));
     assert (f_enc.is_constant(lhs));
 
