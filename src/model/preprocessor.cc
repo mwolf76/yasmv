@@ -397,6 +397,14 @@ bool Preprocessor::walk_comma_inorder(Expr_ptr expr)
 void Preprocessor::walk_comma_postorder(Expr_ptr expr)
 { assert(false); }
 
+bool Preprocessor::walk_cast_preorder(Expr_ptr expr)
+{ assert(false); return false; }
+bool Preprocessor::walk_cast_inorder(Expr_ptr expr)
+{ assert(false); return false; }
+void Preprocessor::walk_cast_postorder(Expr_ptr expr)
+{ assert(false); }
+
+
 void Preprocessor::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();

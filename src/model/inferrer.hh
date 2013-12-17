@@ -111,7 +111,7 @@ private:
     void walk_binary_shift_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
-
+    void walk_binary_cast_postorder(const Expr_ptr expr);
     void walk_ternary_ite_postorder(const Expr_ptr expr);
     void walk_ternary_cond_postorder(const Expr_ptr expr);
 

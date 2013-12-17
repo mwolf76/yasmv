@@ -339,7 +339,7 @@ fsm_var_decl_clause
 @init {
     ExprVector ev;
 }
-	: ids=identifiers[&ev] ':' tp=type_name
+	: ids=identifiers[&ev] ':' tp=type
     {
             ExprVector::iterator expr_iter;
             assert(NULL != tp);
@@ -412,7 +412,6 @@ fsm_trans_decl_clause
 	: expr=toplevel_expression
       { $smv::module->add_trans(expr); }
 	;
-
 toplevel_expression returns [Expr_ptr res]
 @init { }
 	: expr=iff_expression {
@@ -545,18 +544,30 @@ additive_expression returns [Expr_ptr res]
 
 multiplicative_expression returns [Expr_ptr res]
 @init { }
-	: lhs=unary_expression
+	: lhs=cast_expression
       { $res = lhs; }
     (
-      '*' rhs=unary_expression
+      '*' rhs=cast_expression
       { $res = em.make_mul($res, rhs); }
 
-    | '/' rhs=unary_expression
+    | '/' rhs=cast_expression
       { $res = em.make_div($res, rhs); }
 
-    | 'mod' rhs=unary_expression
+    | 'mod' rhs=cast_expression
       { $res = em.make_mod($res, rhs); }
     )*
+	;
+
+
+cast_expression returns [Expr_ptr res]
+@init {
+    Expr_ptr cast = NULL;
+}
+    : '(' tp = builtin_type ')' expr = cast_expression
+        { $res = em.make_cast( tp -> repr(), expr ); }
+	|
+        expr = unary_expression
+        { $res = expr; }
 	;
 
 unary_expression returns [Expr_ptr res]
@@ -717,10 +728,15 @@ value returns [Expr_ptr res]
       { $res = expr; }
     ;
 
-type_name returns [Type_ptr res]
-@init {
-    ExprSet lits;
-}
+type returns [Type_ptr res]
+    : tp = builtin_type
+      { $res = tp; }
+
+    | tp = user_type
+      { $res = tp; }
+    ;
+
+builtin_type returns [Type_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
@@ -819,10 +835,13 @@ type_name returns [Type_ptr res]
             '[' size=constant ']'
                 { $res = tm.find_signed_array(width->value(), size->value()); }
 
-             | { $res = tm.find_signed(width->value()); } )
+            | { $res = tm.find_signed(width->value()); } )
+    ;
 
-    // reserved for ENUMs
-    |  expr=identifier
+user_type returns [Type_ptr res]
+@init {
+}
+    : expr=identifier
        { $res = tm.find_enum( $smv::module->expr(), expr ); }
     ;
 

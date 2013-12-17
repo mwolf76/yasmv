@@ -43,23 +43,27 @@
 #define OP_HOOKS \
     UNARY(next); UNARY(prev);            \
     UNARY(neg); UNARY(not);              \
+                                         \
     BINARY(add); BINARY(sub);            \
     BINARY(div); BINARY(mod);            \
     BINARY(mul);                         \
+                                         \
     BINARY(and); BINARY(or);             \
     BINARY(xor); BINARY(implies);        \
     BINARY(xnor); BINARY(iff);           \
     BINARY(lshift); BINARY(rshift);      \
+    BINARY(cast);                        \
+                                         \
     BINARY(eq); BINARY(ne);              \
     BINARY(le); BINARY(lt);              \
     BINARY(ge); BINARY(gt);              \
     BINARY(ite); BINARY(cond);           \
+                                         \
     BINARY(dot);                         \
     BINARY(params);                      \
     BINARY(subscript);                   \
     UNARY(set);                          \
     BINARY(comma)
-
 
 #define CTL_HOOKS \
     UNARY(AF); UNARY(AG); UNARY(AX);     \
@@ -125,6 +129,8 @@ typedef enum {
     PARAMS_1, PARAMS_2,
 
     COMMA_1, COMMA_2,
+
+    CAST_1, CAST_2,
 } entry_point;
 
 // reserved for walkers
@@ -325,6 +331,10 @@ protected:
     virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
     virtual bool walk_comma_inorder(const Expr_ptr expr) =0;
     virtual void walk_comma_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_cast_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_cast_inorder(const Expr_ptr expr) =0;
+    virtual void walk_cast_postorder(const Expr_ptr expr) =0;
 
     // leaves
     virtual void walk_leaf(const Expr_ptr expr) =0;

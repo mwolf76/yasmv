@@ -244,6 +244,13 @@ bool Inferrer::walk_iff_inorder(const Expr_ptr expr)
 void Inferrer::walk_iff_postorder(const Expr_ptr expr)
 { walk_binary_logical_or_bitwise_postorder(expr); }
 
+bool Inferrer::walk_cast_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_cast_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_cast_postorder(const Expr_ptr expr)
+{ assert( false ); /* TODO */ }
+
 bool Inferrer::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_lshift_inorder(const Expr_ptr expr)
@@ -498,6 +505,15 @@ void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
                                check_logical_or_arithmetical(),
                                check_logical_or_arithmetical()));
 }
+
+void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    PUSH_TYPE( tm.result_type( expr,
+                               check_logical_or_arithmetical(),
+                               check_logical_or_arithmetical()));
+}
+
 
 
 /* specialized for shift ops (use rhs) */

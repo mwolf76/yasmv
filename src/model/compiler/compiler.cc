@@ -382,6 +382,13 @@ bool Compiler::walk_iff_inorder(const Expr_ptr expr)
 void Compiler::walk_iff_postorder(const Expr_ptr expr)
 { /* just a fancy name for xnor :-) */ walk_xnor_postorder(expr); }
 
+bool Compiler::walk_cast_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Compiler::walk_cast_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_cast_postorder(const Expr_ptr expr)
+{ assert(false); /* TODO */ }
+
 bool Compiler::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_lshift_inorder(const Expr_ptr expr)

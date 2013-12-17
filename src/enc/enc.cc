@@ -45,7 +45,9 @@ ADD Encoding::make_bit()
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
+#if 0
     unsigned next_bit = f_mgr.nbits();
+#endif
 
     ADD res = make_bit();
     ADD two = f_mgr.constant(2);

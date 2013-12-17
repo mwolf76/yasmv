@@ -202,7 +202,12 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
              em.is_binary_enumerative(expr)){
         return find_boolean();
     }
-    else assert (false); // unexpected
+    else if (em.is_cast(expr)) {
+        return lhs;
+    }
+    else {
+        assert (false); /* unexpected */
+    }
 }
 
 /* ternary variant */

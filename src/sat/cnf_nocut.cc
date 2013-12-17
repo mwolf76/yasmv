@@ -23,17 +23,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#if 0
-
 #include <sat.hh>
 #include <dd_walker.hh>
 
+#if 0
 namespace Minisat {
 
-    class CNFBuilderNoCut : public DDLeafWalker {
+    class CNFBuilderNoCut : public ADDWalker {
     public:
         CNFBuilderNoCut(CuddMgr& mgr, SAT& sat)
-            : DDLeafWalker()
+            : ADDWalker()
             , f_sat(sat)
             , f_owner(mgr)
         {}
@@ -78,9 +77,6 @@ namespace Minisat {
                     // f_sat.cnf_find_index_lit(i, false);
                 }
             }
-// #if 0
-//             DRIVEL << ps << endl;
-// #endif
             f_sat.f_solver.addClause_(ps, color);
         }
 
@@ -90,8 +86,10 @@ namespace Minisat {
     };
 
     void SAT::cnf_push_no_cut(Term phi, const group_t group, const color_t color)
-    { CNFBuilderNoCut builder(CuddMgr::INSTANCE(), *this); builder(phi); }
+    {
+        CNFBuilderNoCut builder(CuddMgr::INSTANCE(), *this);
+        builder(phi);
+    }
 
 };
-
 #endif

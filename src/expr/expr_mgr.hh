@@ -83,6 +83,9 @@ public:
     inline Expr_ptr make_implies(Expr_ptr a, Expr_ptr b)
     { return make_expr(IMPLIES, a, b); }
 
+    inline Expr_ptr make_cast(Expr_ptr a, Expr_ptr b)
+    { return make_expr(CAST, a, b); }
+
     inline Expr_ptr make_iff(Expr_ptr a, Expr_ptr b)
     { return make_expr(IFF, a, b); }
 
@@ -294,6 +297,11 @@ public:
     inline bool is_comma(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == COMMA;
+    }
+
+    inline bool is_cast(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == CAST;
     }
 
     inline bool is_numeric(const Expr_ptr expr) const {
