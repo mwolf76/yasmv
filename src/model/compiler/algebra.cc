@@ -790,3 +790,67 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 
     f_type_stack.push_back( atype -> of());
 }
+
+/* add n-1 non significant zero, LSB is original bit */
+void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
+{
+    FQExpr key( f_ctx_stack.back(), expr->lhs());
+    Type_ptr tp = f_owner.type( key);
+
+    for (unsigned i = 0; i < tp->width() -1; ++ i) {
+        PUSH_ADD(f_enc.zero());
+    }
+}
+
+/* squeeze all bits in a big Or */
+void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
+{
+    FQExpr key (f_ctx_stack.back(), expr->rhs());
+    Type_ptr tp = f_owner.type( key);
+
+    POP_ALGEBRAIC(rhs, tp -> width());
+    ADD res = f_enc.zero();
+    for (unsigned i = 0; i < tp->width(); ++ i) {
+        res = res.Or( rhs[i]); // order is not relevant here
+    }
+
+    Expr_ptr temp = make_temporary_encoding( &res, 1);
+    (*this)(temp);
+}
+
+void Compiler::algebraic_cast_from_algebraic(const Expr_ptr expr)
+{
+    FQExpr src (f_ctx_stack.back(), expr->rhs());
+    Type_ptr src_type = f_owner.type( src);
+
+    FQExpr tgt (f_ctx_stack.back(), expr->lhs());
+    Type_ptr tgt_type = f_owner.type( tgt);
+
+    if (src_type -> width() == tgt_type -> width()) {
+        return; /* nop */
+    }
+    else if (src_type -> width() < tgt_type -> width()) {
+        /* grow */
+        if (tgt_type -> is_signed_algebraic()) {
+            /* signed, needs sign bit extension (src MSB) */
+            ADD msb = f_add_stack.back(); /* just inspect */
+            for (unsigned i = src_type -> width(); i < tgt_type -> width(); ++ i) {
+                PUSH_ADD( msb);
+            }
+        }
+        else {
+            assert( tgt_type -> is_unsigned_algebraic());
+            /* unsigned, pad with zeroes */
+            for (unsigned i = src_type -> width(); i < tgt_type -> width(); ++ i) {
+                PUSH_ADD( f_enc.zero());
+            }
+        }
+    }
+    else {
+        /* shrink */
+        assert (tgt_type -> width() < src_type -> width());
+        for (unsigned i = src_type -> width(); i > tgt_type -> width(); -- i) {
+            f_add_stack.pop_back(); /* discard ADDs */
+        }
+    }
+}

@@ -387,7 +387,33 @@ bool Compiler::walk_cast_preorder(const Expr_ptr expr)
 bool Compiler::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cast_postorder(const Expr_ptr expr)
-{ assert(false); /* TODO */ }
+{
+    if (f_first) return;
+
+    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+
+    Type_ptr src_type = f_owner.type(lhs);
+    Type_ptr tgt_type = f_owner.type(rhs);
+
+    if (src_type -> is_boolean() &&
+        tgt_type -> is_boolean()) {
+        return; /* nop */
+    }
+    else if (src_type -> is_boolean() &&
+        tgt_type -> is_algebraic()) {
+        algebraic_cast_from_boolean(expr);
+    }
+    else if (src_type -> is_algebraic() &&
+             tgt_type -> is_boolean()) {
+        boolean_cast_from_algebraic(expr);
+    }
+    else if (src_type -> is_algebraic() &&
+             tgt_type -> is_algebraic()) {
+        algebraic_cast_from_algebraic(expr);
+    }
+    else assert (false); // unreachable
+}
 
 bool Compiler::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

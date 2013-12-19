@@ -223,6 +223,11 @@ private:
     // traditional multiplication algorithm (fallback case)
     void longhand_mul(unsigned width, bool extra);
 
+    /* casts */
+    void algebraic_cast_from_boolean(const Expr_ptr expr);
+    void boolean_cast_from_algebraic(const Expr_ptr expr);
+    void algebraic_cast_from_algebraic(const Expr_ptr expr);
+
     /* -- internals --------------------------------------------------------- */
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);

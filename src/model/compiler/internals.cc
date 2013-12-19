@@ -220,7 +220,7 @@ void Compiler::algebraic_discard_op()
 }
 
 /* Builds a temporary encoding. This is used by some algebraic
-   algorithms (e.g. division) */
+   algorithms (e.g. neg, algebraic-to-bool cast, ...) */
 Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
 {
     ExprMgr& em = f_owner.em();
