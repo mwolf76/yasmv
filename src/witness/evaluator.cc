@@ -440,6 +440,13 @@ bool Evaluator::walk_comma_inorder(const Expr_ptr expr)
 void Evaluator::walk_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
+bool Evaluator::walk_type_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+bool Evaluator::walk_type_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_type_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
 bool Evaluator::walk_cast_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 bool Evaluator::walk_cast_inorder(const Expr_ptr expr)

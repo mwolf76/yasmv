@@ -141,6 +141,9 @@ void ExprWalker::walk ()
             case CAST_1: goto entry_CAST_1;
             case CAST_2: goto entry_CAST_2;
 
+            case TYPE_1: goto entry_TYPE_1;
+            case TYPE_2: goto entry_TYPE_2;
+
             default: throw UnsupportedEntryPointException(curr.pc);
 
             }
@@ -679,6 +682,24 @@ void ExprWalker::walk ()
 
             entry_CAST_2:
                 walk_cast_postorder(curr.expr);
+            }
+            break;
+
+        case TYPE:
+            if (walk_type_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = TYPE_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_TYPE_1:
+                if (walk_type_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = TYPE_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_TYPE_2:
+                walk_type_postorder(curr.expr);
             }
             break;
 

@@ -52,7 +52,8 @@
     BINARY(xor); BINARY(implies);        \
     BINARY(xnor); BINARY(iff);           \
     BINARY(lshift); BINARY(rshift);      \
-    BINARY(cast);                        \
+                                         \
+    BINARY(type); BINARY(cast);          \
                                          \
     BINARY(eq); BINARY(ne);              \
     BINARY(le); BINARY(lt);              \
@@ -131,6 +132,7 @@ typedef enum {
     COMMA_1, COMMA_2,
 
     CAST_1, CAST_2,
+    TYPE_1, TYPE_2,
 } entry_point;
 
 // reserved for walkers
@@ -335,6 +337,10 @@ protected:
     virtual bool walk_cast_preorder(const Expr_ptr expr) =0;
     virtual bool walk_cast_inorder(const Expr_ptr expr) =0;
     virtual void walk_cast_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_type_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_type_inorder(const Expr_ptr expr) =0;
+    virtual void walk_type_postorder(const Expr_ptr expr) =0;
 
     // leaves
     virtual void walk_leaf(const Expr_ptr expr) =0;

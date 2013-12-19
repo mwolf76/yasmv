@@ -91,7 +91,6 @@ private:
         return true;
     }
 
-
     Type_ptr check_logical();
     Type_ptr check_arithmetical();
     Type_ptr check_logical_or_arithmetical();

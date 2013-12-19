@@ -251,6 +251,13 @@ bool Inferrer::walk_cast_inorder(const Expr_ptr expr)
 void Inferrer::walk_cast_postorder(const Expr_ptr expr)
 { assert( false ); /* TODO */ }
 
+bool Inferrer::walk_type_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_type_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_type_postorder(const Expr_ptr expr)
+{ assert( false ); /* TODO */ }
+
 bool Inferrer::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_lshift_inorder(const Expr_ptr expr)
@@ -598,6 +605,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     }
     else if (em.is_comma(expr)) {
         return em.make_comma(find_canonical_expr( expr->lhs()),
+                             find_canonical_expr( expr->rhs()));
+    }
+    else if (em.is_cast(expr)) {
+        return em.make_cast( find_canonical_expr( expr->lhs()),
                              find_canonical_expr( expr->rhs()));
     }
 

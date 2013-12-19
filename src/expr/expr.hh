@@ -41,8 +41,8 @@ typedef enum {
     /* logical/bitwise operators */
     NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
 
-    /* cast operator */
-    CAST,
+    /* type operators */
+    TYPE, CAST,
 
     // future
     // LROTATE, RROTATE,
