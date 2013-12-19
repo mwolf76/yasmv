@@ -156,7 +156,7 @@ unsigned SignedAlgebraicType::size() const
 unsigned SignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
-    return 4 * f_width; // FIXME !!! (why 4?)
+    return f_width;
 }
 
 bool UnsignedAlgebraicType::is_abstract() const
@@ -181,7 +181,7 @@ unsigned UnsignedAlgebraicType::size() const
 unsigned UnsignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
-    return 4 * f_width; // FIXME !!! (why 4?)
+    return f_width;
 }
 
 ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)

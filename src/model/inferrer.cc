@@ -249,14 +249,23 @@ bool Inferrer::walk_cast_preorder(const Expr_ptr expr)
 bool Inferrer::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_cast_postorder(const Expr_ptr expr)
-{ assert( false ); /* TODO */ }
+{ walk_binary_cast_postorder(expr); }
 
 bool Inferrer::walk_type_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    Type_ptr tp = f_owner.tm().find_type_by_def(expr);
+    f_type_stack.push_back( tp);
+    return false;
+}
 bool Inferrer::walk_type_inorder(const Expr_ptr expr)
-{ return true; }
+{
+    assert( false ); /* unreachable */
+    return false;
+}
 void Inferrer::walk_type_postorder(const Expr_ptr expr)
-{ assert( false ); /* TODO */ }
+{
+    assert( false ); /* unreachable */
+}
 
 bool Inferrer::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -521,8 +530,6 @@ void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
                                check_logical_or_arithmetical()));
 }
 
-
-
 /* specialized for shift ops (use rhs) */
 void Inferrer::walk_binary_shift_postorder(const Expr_ptr expr)
 {
@@ -609,6 +616,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     }
     else if (em.is_cast(expr)) {
         return em.make_cast( find_canonical_expr( expr->lhs()),
+                             find_canonical_expr( expr->rhs()));
+    }
+    else if (em.is_type(expr)) {
+        return em.make_type( find_canonical_expr( expr->lhs()),
                              find_canonical_expr( expr->rhs()));
     }
 

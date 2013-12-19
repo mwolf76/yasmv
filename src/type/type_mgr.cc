@@ -57,6 +57,19 @@ TypeMgr::TypeMgr()
     }
 }
 
+const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
+{
+    assert( f_em.is_type(expr));
+    if (f_em.is_unsigned_int( expr->lhs())) {
+        return find_unsigned( expr->rhs()->value());
+    }
+    else if (f_em.is_signed_int( expr->lhs())) {
+        return find_signed( expr->rhs()->value());
+    }
+    else assert (false); /* unexpected */
+    return NULL;
+}
+
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
     unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
@@ -203,7 +216,7 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
         return find_boolean();
     }
     else if (em.is_cast(expr)) {
-        return lhs;
+        return cast_result_type(lhs, rhs);
     }
     else {
         assert (false); /* unexpected */
@@ -260,6 +273,33 @@ Type_ptr TypeMgr::logical_result_type(Type_ptr lhs, Type_ptr rhs)
 
     return arithmetical_result_type(lhs, rhs);
 }
+
+Type_ptr TypeMgr::cast_result_type(Type_ptr lhs, Type_ptr rhs)
+{
+    // same type, it's ok although useless
+    if (lhs == rhs) return lhs;
+
+    /* algebraic -> boolean? */
+    if (lhs -> is_boolean() &&
+        rhs -> is_algebraic()) {
+        return lhs;
+    }
+
+    /* boolean -> algebraic? */
+    if (lhs -> is_algebraic() &&
+        rhs -> is_boolean()) {
+        return lhs;
+    }
+
+    /* algebraic -> algebraic (of different signedness/width)? */
+    if (lhs -> is_algebraic() &&
+        rhs -> is_algebraic()) {
+        return lhs;
+    }
+
+    return NULL;
+}
+
 
 Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
 {

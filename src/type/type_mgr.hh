@@ -138,6 +138,8 @@ public:
     const ArrayType_ptr find_unsigned_array(unsigned digits,
                                             unsigned size);
 
+    const Type_ptr find_type_by_def(const Expr_ptr expr);
+
     /* Remark: unambiguous enums resolution requires DOT fullnames */
     void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
     const ScalarType_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
@@ -178,6 +180,7 @@ private:
     /** service of result_type */
     Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type

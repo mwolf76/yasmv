@@ -249,6 +249,16 @@ public:
         return expr->f_symb == IDENT;
     }
 
+    inline bool is_unsigned_int(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == unsigned_int_expr;
+    }
+
+    inline bool is_signed_int(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == signed_int_expr;
+    }
+
     inline bool is_bool_const(const Expr_ptr expr) const {
         assert(expr);
         return is_false(expr) || is_true(expr) ;
@@ -305,6 +315,11 @@ public:
     inline bool is_cast(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == CAST;
+    }
+
+    inline bool is_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == TYPE;
     }
 
     inline bool is_numeric(const Expr_ptr expr) const {

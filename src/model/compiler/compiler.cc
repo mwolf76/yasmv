@@ -383,11 +383,20 @@ void Compiler::walk_iff_postorder(const Expr_ptr expr)
 { /* just a fancy name for xnor :-) */ walk_xnor_postorder(expr); }
 
 bool Compiler::walk_type_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    Type_ptr tp = f_owner.tm().find_type_by_def(expr);
+    f_type_stack.push_back( tp);
+    return false;
+}
 bool Compiler::walk_type_inorder(const Expr_ptr expr)
-{ return true; }
+{
+    assert( false ); /* unreachable */
+    return false;
+}
 void Compiler::walk_type_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO */ }
+{
+    assert( false ); /* unreachable */
+}
 
 bool Compiler::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -398,10 +407,15 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
     if (f_first) return;
 
     FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+    Type_ptr tgt_type = f_owner.type(lhs);
 
-    Type_ptr src_type = f_owner.type(lhs);
-    Type_ptr tgt_type = f_owner.type(rhs);
+    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
+    Type_ptr src_type = f_owner.type(rhs);
+
+    assert (f_type_stack.back() == src_type);
+    f_type_stack.pop_back();
+    f_type_stack.pop_back();
+    f_type_stack.push_back( tgt_type);
 
     if (src_type -> is_boolean() &&
         tgt_type -> is_boolean()) {
