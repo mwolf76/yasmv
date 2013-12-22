@@ -98,11 +98,11 @@ void Compiler::integer_ite(const Expr_ptr expr)
 {
     assert(0 < f_rel_type_stack.size());
     Type_ptr type = f_rel_type_stack.back();
-    unsigned size = type -> size();
+    unsigned width = type -> width();
 
     // reverse order
-    ALGEBRIZE_LHS(size);
-    ALGEBRIZE_RHS(size);
+    ALGEBRIZE_LHS(width);
+    ALGEBRIZE_RHS(width);
 
     /* fix type stack, constants are always unsigned */
     f_type_stack.pop_back();
@@ -176,12 +176,12 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
         lhs_type -> is_constant()) {
 
         if (lhs_type -> is_constant()) {
-            res = rhs_type -> size();
+            res = rhs_type -> width();
             ALGEBRIZE_LHS(res);
             f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean());
         }
         else if (rhs_type -> is_constant()) {
-            res = lhs_type -> size();
+            res = lhs_type -> width();
             ALGEBRIZE_RHS(res);
             f_type_stack.push_back( (!relational) ? lhs_type : tm.find_boolean());
         }
@@ -189,15 +189,15 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
     }
     else {
         // neither const -> size and signedness must match
-        assert( lhs_type -> size() ==
-                rhs_type -> size() &&
+        assert( lhs_type -> width() ==
+                rhs_type -> width() &&
 
                 _iff( lhs_type -> is_signed_algebraic(),
                       rhs_type -> is_signed_algebraic()));
 
 
         // Nothing do be done, just add result type to the type stack
-        res = rhs_type -> size();
+        res = rhs_type -> width();
         f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean()); // arbitrary
     }
 
@@ -211,7 +211,7 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
 void Compiler::algebraic_discard_op()
 {
     const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = type -> size();
+    unsigned width = type -> width();
 
     /* discard DDs */
     for (unsigned i = 0; i < width; ++ i) {
@@ -300,7 +300,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     /* collect dds and memoize */
     DDVector dv;
-    unsigned i, width = type -> size();
+    unsigned i, width = type -> width();
     assert(width <= f_add_stack.size());
 
     ADDStack::reverse_iterator ri;

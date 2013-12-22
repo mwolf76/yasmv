@@ -739,7 +739,7 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 
     /* algebraics, reversed list of encoding DDs */
     else if (type->is_algebraic()) {
-        assert( type -> as_algebraic()-> size() == width ); // type and enc width info has to match
+        assert( type -> as_algebraic()-> width() == width ); // type and enc width info has to match
         for (DDVector::reverse_iterator ri = dds.rbegin();
              ri != dds.rend(); ++ ri) {
             f_add_stack.push_back(*ri);
@@ -750,7 +750,7 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
     else if (type->is_array()) {
 
         // type and enc width info has to match
-        assert( type -> as_array() -> of() -> as_algebraic()-> size() ==
+        assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
                 width / type -> as_array() -> nelems());
 
         for (DDVector::reverse_iterator ri = dds.rbegin();

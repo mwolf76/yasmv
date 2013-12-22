@@ -52,11 +52,11 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     }
     else if (NULL != (sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp))) {
         DEBUG << "Encoding " << sa_type << endl;
-        res = new AlgebraicEncoding(sa_type->size(), 0, true, sa_type->dds());
+        res = new AlgebraicEncoding(sa_type->width(), 0, true, sa_type->dds());
     }
     else if (NULL != (ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp))) {
         DEBUG << "Encoding " << ua_type << endl;
-        res = new AlgebraicEncoding(ua_type->size(), 0, false, ua_type->dds());
+        res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
         DEBUG << "Encoding " << etype << endl;
@@ -66,9 +66,9 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         DEBUG << "Encoding " << vtype << endl;
         Encodings encs;
 
-        assert( 0 == ( vtype->size() % vtype->of()->size()));
-        for (unsigned i =0; i < vtype->size() / vtype->of()->size(); ++ i) {
-            encs.push_back(make_encoding(vtype->of()));
+        assert( 0 == ( vtype->width() % vtype->of()->width()));
+        for (unsigned i = 0; i < vtype->width() / vtype->of()->width(); ++ i) {
+            encs.push_back( make_encoding(vtype->of()));
         }
         res = new ArrayEncoding(encs);
     }
@@ -103,16 +103,14 @@ void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
 EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
-    , f_bits_per_digit (OptsMgr::INSTANCE().bits_per_digit())
     , f_word_width ((OptsMgr::INSTANCE().word_width()))
 {
-    unsigned base (pow2(f_bits_per_digit));
+    unsigned base = 2;
 
     f_base = f_cudd.constant( base );
     f_msb  = f_cudd.constant( ::msb (base - 1));
 
     DRIVEL << "Initialized EncodingMgr @ " << this
-           << ", using " << f_bits_per_digit << " bits per digit"
            << ", array " << f_word_width << " bits indexes"
            << endl;
 }

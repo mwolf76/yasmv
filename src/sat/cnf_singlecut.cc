@@ -67,8 +67,8 @@ namespace Minisat {
                             group_t group = MAINGROUP,
                             color_t color = BACKGROUND)
             : f_sat(sat)
-            , f_time(time)
             , f_toplevel(NULL)
+            , f_time(time)
             , f_group(group)
             , f_color(color)
         {}
@@ -271,6 +271,9 @@ namespace Minisat {
         typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> ActivationMap;
         ActivationMap f_activation_map;
 
+        DdNode* f_toplevel;
+        step_t f_time;
+
         group_t f_group;
         color_t f_color;
 
@@ -310,9 +313,6 @@ namespace Minisat {
 
             return res;
         }
-
-        DdNode* f_toplevel;
-        step_t f_time;
     };
 
     void SAT::cnf_push_single_cut(Term phi, step_t time,

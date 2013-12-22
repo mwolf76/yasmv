@@ -131,9 +131,6 @@ public:
     inline ADD msb()
     { return f_msb; }
 
-    inline unsigned bits_per_digit() const
-    { return f_bits_per_digit; }
-
     inline unsigned word_width() const
     { return f_word_width; }
 
@@ -159,7 +156,6 @@ private:
     ADD f_base;  // (eg. 0x10)
     ADD f_msb;   // (eg. 0x8)
 
-    unsigned f_bits_per_digit;
     unsigned f_word_width;
 };
 

@@ -28,25 +28,30 @@ void Minisat::parseOptions(int& argc, char** argv, bool strict)
     int i, j;
     for (i = j = 1; i < argc; i++){
         const char* str = argv[i];
-        if (match(str, "--") && match(str, Option::getHelpPrefixString()) && match(str, "help")){
+
+        if (match(str, "--") && match(str, Option::getHelpPrefixString()) && match(str, "help")) {
             if (*str == '\0')
                 printUsageAndExit(argc, argv);
             else if (match(str, "-verb"))
                 printUsageAndExit(argc, argv, true);
-        } else {
+        }
+        else {
             bool parsed_ok = false;
 
             for (int k = 0; !parsed_ok && k < Option::getOptionList().size(); k++){
                 parsed_ok = Option::getOptionList()[k]->parse(argv[i]);
-
-                // fprintf(stderr, "checking %d: %s against flag <%s> (%s)\n", i, argv[i], Option::getOptionList()[k]->name, parsed_ok ? "ok" : "skip");
             }
 
-            if (!parsed_ok)
-                if (strict && match(argv[i], "-"))
-                    fprintf(stderr, "ERROR! Unknown flag \"%s\". Use '--%shelp' for help.\n", argv[i], Option::getHelpPrefixString()), exit(1);
-                else
+            if (!parsed_ok) {
+                if (strict && match(argv[i], "-")) {
+                    fprintf(stderr,
+                            "ERROR! Unknown flag \"%s\". Use '--%shelp' for help.\n",
+                            argv[i], Option::getHelpPrefixString()), exit(1);
+                }
+                else {
                     argv[j++] = argv[i];
+                }
+            }
         }
     }
 

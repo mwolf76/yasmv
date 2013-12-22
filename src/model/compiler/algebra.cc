@@ -48,7 +48,7 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     ExprMgr& em = f_owner.em();
 
     Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = type->size();
+    unsigned width = type->width();
 
     /* create temp complemented ADDs */
     ADD lhs[width];
@@ -66,7 +66,7 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     assert( is_unary_algebraic(expr) );
 
     Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned width = type->size();
+    unsigned width = type->width();
 
     ADD lhs[width];
     for (unsigned i = 0; i < width; ++ i) {
@@ -511,11 +511,10 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
-    unsigned bits_per_digit (OptsMgr::INSTANCE().bits_per_digit());
-    ADD mask(f_enc.constant(1 << (bits_per_digit - 1)));
+    ADD mask(f_enc.constant(1));
     ADD carry;
 
-    for (unsigned k = 0; k < bits_per_digit * width; ++ k) {
+    for (unsigned k = 0; k < width; ++ k) {
 
         /* compile selection condition (re-entrant invocation) */
         (*this)(em.make_eq( expr->rhs(), em.make_const(k)));
@@ -567,11 +566,10 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
-    unsigned bits_per_digit (OptsMgr::INSTANCE().bits_per_digit());
-    ADD weight(f_enc.constant(bits_per_digit - 1));
+    ADD weight(f_enc.constant(0));
 
     ADD carry;
-    for (unsigned k = 0; k < bits_per_digit * width; ++ k) {
+    for (unsigned k = 0; k < width; ++ k) {
 
         /* compile selection condition (re-entrant invocation) */
         (*this)(em.make_eq( expr->rhs(), em.make_const(k)));
@@ -744,17 +742,18 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
     // index
     Type_ptr t0 = f_type_stack.back(); f_type_stack.pop_back(); // consume index
     assert( t0 -> is_algebraic() && ! t0 -> is_constant());
-    Type_ptr itype = t0 -> as_algebraic();
-    POP_ALGEBRAIC(index, itype -> size());
 
-    // argh! this breaks octals.. :-/
-    assert( itype -> size() * f_enc.bits_per_digit() == f_enc.word_width());
+    Type_ptr itype = t0 -> as_algebraic();
+    POP_ALGEBRAIC(index, itype -> width());
+
+    assert( itype -> width() == f_enc.word_width());
 
     // array
     Type_ptr t1 = f_type_stack.back(); f_type_stack.pop_back(); // consume array
     assert( t1 -> is_array());
     ArrayType_ptr atype = t1 -> as_array();
-    unsigned elem_size  = atype -> of() -> size();
+
+    unsigned elem_size  = atype -> of() -> width();
     unsigned elem_count = atype -> nelems();
     POP_ALGEBRAIC(vec, elem_size * elem_count);
 

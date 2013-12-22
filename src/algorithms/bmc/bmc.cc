@@ -69,8 +69,8 @@ void BMC::process()
         ostringstream oss; oss << "CEX for '"
                                << property() << "'";
 
-        Witness& trace = * new BMCCounterExample(property(), model(),
-                                                 engine(), k, false);
+        // Witness& trace = * new BMCCounterExample(property(), model(),
+        //                                          engine(), k, false);
 
         // TODO: register
     }

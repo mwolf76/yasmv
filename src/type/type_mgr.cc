@@ -72,20 +72,12 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
-    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
-    unsigned digits = bits / bits_per_digit;
-    if (0 != bits % bits_per_digit) {
-        TRACE << "Requested type is not available with current bits_per_digit setting"
-              << endl;
-        ++ digits;
-    }
-
-    Expr_ptr descr(f_em.make_unsigned_int_type(digits));
+    Expr_ptr descr(f_em.make_unsigned_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new UnsignedAlgebraicType( *this, digits);
+    res = new UnsignedAlgebraicType( *this, bits);
     register_type(descr, res);
     return res;
 }
@@ -106,20 +98,12 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 
 const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
-    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
-    unsigned digits = bits / bits_per_digit;
-    if (0 != bits % bits_per_digit) {
-        TRACE << "Requested type is not available with current bits_per_digit setting"
-              << endl;
-        ++ digits;
-    }
-
-    Expr_ptr descr(f_em.make_signed_int_type(digits));
+    Expr_ptr descr(f_em.make_signed_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
     // new type, needs to be registered before returning
-    res = new SignedAlgebraicType( *this, digits);
+    res = new SignedAlgebraicType(*this, bits);
     register_type(descr, res);
     return res;
 }

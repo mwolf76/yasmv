@@ -42,12 +42,6 @@ OptsMgr::OptsMgr()
         )
 
         (
-         "bits-per-digit",
-         options::value<unsigned>()->default_value(DEFAULT_BITS_PER_DIGIT),
-         "bits per digit to be used in algebraic representation"
-        )
-
-        (
          "word-width",
          options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
          "native word size in bits, used for algebrization of constant ITEs and arrays"
@@ -96,12 +90,6 @@ unsigned OptsMgr::verbosity() const
 bool OptsMgr::color() const
 {
     return f_color;
-}
-
-unsigned OptsMgr::bits_per_digit() const
-{
-    unsigned res = f_vm["bits-per-digit"].as<unsigned>();
-    return res;
 }
 
 unsigned OptsMgr::word_width() const

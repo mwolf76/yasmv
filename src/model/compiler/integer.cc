@@ -276,7 +276,7 @@ void Compiler::integer_subscript(const Expr_ptr expr)
 
     assert( type -> is_array());
     ArrayType_ptr atype = type -> as_array();
-    unsigned elem_size  = atype -> of() -> size();
+    unsigned elem_size  = atype -> of() -> width();
     unsigned elem_count = atype -> nelems();
 
     POP_ADD(index);

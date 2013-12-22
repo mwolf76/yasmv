@@ -70,7 +70,7 @@ protected:
 
     EncodingMgr& f_mgr;
 
-    DDVector f_dv; // digit vector
+    DDVector f_dv;   // digit vector
     DDVector f_bits; // all bits
 
     // low level services
@@ -113,10 +113,6 @@ public:
     inline unsigned width() const
     { return f_width; }
 
-    // custom iterator
-    DDVector::const_iterator bits_begin(unsigned k);
-    DDVector::const_iterator bits_end(unsigned k);
-
 protected:
     virtual ~AlgebraicEncoding()
     { assert(0); }
@@ -125,7 +121,8 @@ protected:
     AlgebraicEncoding(unsigned width, unsigned fract, bool is_signed, ADD *dds = NULL);
 
     unsigned f_width;
-    unsigned f_fract; // non-zero for fixed encodings
+    unsigned f_fract; // non-zero for fixed encodings (FUTURE)
+
     bool f_signed;
     bool f_temporary;
 };

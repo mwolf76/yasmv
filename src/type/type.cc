@@ -81,9 +81,6 @@ BooleanType::BooleanType(TypeMgr& owner)
     f_repr = f_owner.em().make_boolean_type();
 }
 
-unsigned BooleanType::size() const
-{ return 1; }
-
 unsigned BooleanType::width() const
 { return 1; }
 
@@ -103,9 +100,6 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     }
 }
 
-unsigned EnumType::size() const
-{ return 1; }
-
 unsigned EnumType::width() const
 {
     unsigned res = 0, pow = 1;
@@ -122,11 +116,8 @@ unsigned EnumType::width() const
 bool ConstantType::is_abstract() const
 { return true; }
 
-unsigned ConstantType::size() const
-{ return 1; }
-
 unsigned ConstantType::width() const
-{ return 0; }
+{ return 1; }
 
 ConstantType::ConstantType(TypeMgr& owner)
     : AlgebraicType(owner)
@@ -147,12 +138,6 @@ SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
     f_repr = f_owner.em().make_signed_int_type(width);
 }
 
-unsigned SignedAlgebraicType::size() const
-{
-    assert( 0 != f_width );
-    return f_width;
-}
-
 unsigned SignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
@@ -170,12 +155,6 @@ UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
     , f_dds(dds)
 {
     f_repr = f_owner.em().make_unsigned_int_type(width);
-}
-
-unsigned UnsignedAlgebraicType::size() const
-{
-    assert( 0 != f_width );
-    return f_width;
 }
 
 unsigned UnsignedAlgebraicType::width() const
@@ -219,16 +198,10 @@ ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
     f_repr = f_owner.em().make_abstract_array_type( of->repr());
 }
 
-unsigned ArrayType::size() const
-{
-    assert( 0 != f_nelems );
-    return f_nelems * f_of -> size();
-}
-
 unsigned ArrayType::width() const
 {
     assert( 0 != f_nelems );
-    return 4 * f_nelems * f_of -> size();
+    return f_nelems * f_of -> width();
 }
 
 bool ArrayType::is_abstract() const

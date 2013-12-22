@@ -54,8 +54,6 @@ ADDWalker& ADDWalker::operator() (ADD dd)
 /* post-order visit strategy */
 void ADDWalker::walk ()
 {
-    add_activation_record curr = f_recursion_stack.top();
-
     while(0 != f_recursion_stack.size()) {
     call:
         add_activation_record curr = f_recursion_stack.top();
@@ -136,8 +134,6 @@ YDDWalker& YDDWalker::operator() (const YDD_ptr dd)
 /* post-order visit strategy */
 void YDDWalker::walk ()
 {
-    ydd_activation_record curr = f_recursion_stack.top();
-
     while(0 != f_recursion_stack.size()) {
     call:
         ydd_activation_record curr = f_recursion_stack.top();

@@ -45,10 +45,6 @@ ADD Encoding::make_bit()
 // base service, has to be in superclass for visibility
 ADD Encoding::make_monolithic_encoding(unsigned nbits)
 {
-#if 0
-    unsigned next_bit = f_mgr.nbits();
-#endif
-
     ADD res = make_bit();
     ADD two = f_mgr.constant(2);
 
@@ -61,10 +57,6 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
 
         ++ i;
     }
-
-#if 0
-    f_mgr.dd().MakeTreeNode(next_bit, nbits, MTR_DEFAULT);
-#endif
 
     return res;
 }
@@ -111,47 +103,16 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, unsigned fract, bool is_sig
         }
     }
     else {
-        unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
         for (unsigned i = 0; i < width; ++ i) {
-            f_dv.push_back( make_monolithic_encoding(bits_per_digit));
+            f_dv.push_back( make_monolithic_encoding(1));
         }
     }
-}
-
-DDVector::const_iterator AlgebraicEncoding::bits_begin(unsigned k)
-{
-    assert(k < f_width);
-    DDVector::const_iterator res = f_bits.begin();
-
-    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
-
-    /* skip previous digits' bits */
-    for (unsigned i = 0; i < k * bits_per_digit; ++ i) {
-        ++ res;
-    }
-
-    return res;
-}
-
-DDVector::const_iterator AlgebraicEncoding::bits_end(unsigned k)
-{
-    assert(k < f_width);
-    DDVector::const_iterator res = bits_begin(k);
-
-    unsigned bits_per_digit = OptsMgr::INSTANCE().bits_per_digit();
-
-    /* skip digits' bits */
-    for (unsigned i = 0; i < bits_per_digit; ++ i) {
-        ++ res;
-    }
-
-    return res;
 }
 
 Expr_ptr AlgebraicEncoding::expr(int *assignment)
 {
     ExprMgr& em = f_mgr.em();
-    unsigned i, base = pow2(OptsMgr::INSTANCE().bits_per_digit());
+    unsigned i, base = 2;
 
     value_t res = 0;
 
@@ -168,9 +129,9 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
 
     if (is_signed()) {
         // REVIEW this for non-exact types
-        value_t msb = pow2(OptsMgr::INSTANCE().bits_per_digit() * i - 1);
+        value_t msb = pow2(i - 1);
         if (res & msb) {
-            value_t cmpl = 1 + (~res & (pow2(OptsMgr::INSTANCE().bits_per_digit() * i) - 1));
+            value_t cmpl = 1 + (~res & (pow2(i) - 1));
             return em.make_neg( em.make_const(cmpl));
         }
     }

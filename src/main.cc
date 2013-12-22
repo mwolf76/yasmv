@@ -76,17 +76,17 @@ static void usage()
          << endl ;
 }
 
-// just for debugging purposes withing gdb
-static void pe(Expr_ptr e)
+/* these are unused, just for debugging purposes withing gdb */
+void pe(Expr_ptr e)
 { DEBUG << e << endl; }
 
-static void pf(FQExpr& e)
+void pf(FQExpr& e)
 { DEBUG << e << endl; }
 
-static void pu(UCBI& ucbi)
+void pu(UCBI& ucbi)
 { DEBUG << ucbi << endl; }
 
-static void pt(TCBI& tcbi)
+void pt(TCBI& tcbi)
 { DEBUG << tcbi << endl; }
 
 int main(int argc, const char *argv[])

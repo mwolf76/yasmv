@@ -32,7 +32,6 @@ typedef OptsMgr* OptsMgr_ptr;
 namespace options = boost::program_options;
 
 // -- system defaults
-const unsigned DEFAULT_BITS_PER_DIGIT = 1;
 const unsigned DEFAULT_WORD_WIDTH     = 16;
 const unsigned DEFAULT_VERBOSITY      = 0;
 
@@ -56,8 +55,8 @@ public:
     // colorized
     bool color() const;
 
-    // number of bits per digit to be used in algebraic representation
-    unsigned bits_per_digit() const;
+    // // number of bits per digit to be used in algebraic representation
+    // unsigned bits_per_digit() const;
 
     // native word size in bits, used for algebrization of constant ITEs and arrays
     unsigned word_width() const;

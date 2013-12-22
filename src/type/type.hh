@@ -135,9 +135,6 @@ public:
     // (i.e. for Monoliths, size is the number of bits; for algebraics
     // size is the number of ADDs.
 
-    // Number of elementary units (cfr sizeof op)
-    virtual unsigned size() const =0;
-
     // Bits width
     virtual unsigned width() const =0;
 
@@ -206,7 +203,6 @@ protected:
 typedef class BooleanType* BooleanType_ptr;
 class BooleanType : public MonolithicalType {
 public:
-    unsigned size() const;
     unsigned width() const;
 
 protected:
@@ -232,7 +228,6 @@ protected:
 
 public:
     bool is_abstract() const;
-    unsigned size() const;
     unsigned width() const;
 
     const ExprSet& literals() const
@@ -259,7 +254,6 @@ private:
 typedef class ConstantType* ConstantType_ptr;
 class ConstantType : public AlgebraicType {
 public:
-    unsigned size() const;
     unsigned width() const;
     bool is_abstract() const;
 
@@ -275,7 +269,6 @@ public:
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 class SignedAlgebraicType : public AlgebraicType {
 public:
-    unsigned size() const;
     unsigned width() const;
     bool is_abstract() const;
 
@@ -296,7 +289,6 @@ public:
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 class UnsignedAlgebraicType : public AlgebraicType {
 public:
-    unsigned size() const;
     unsigned width() const;
     bool is_abstract() const;
 
@@ -322,7 +314,6 @@ class ArrayType : public Type,
                   public AbstractType {
 public:
     bool is_abstract() const;
-    unsigned size() const;
     unsigned width() const;
     unsigned nelems() const
     { return f_nelems; }

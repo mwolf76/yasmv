@@ -87,6 +87,8 @@ Variant SATCommand::operator()()
     tmp << f_engine.solve();
     return Variant(tmp.str());
 #endif
+
+    return Variant ("Unsupported");
 }
 
 SATCommand::~SATCommand()
