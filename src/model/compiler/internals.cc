@@ -282,7 +282,9 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_first || f_owner.em().is_type(expr)) {
+        return;
+    }
 
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );

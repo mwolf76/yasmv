@@ -43,7 +43,7 @@ typedef pair<TypeReg::iterator, bool> TypeRegHit;
     f_type_stack.pop_back()
 
 #define PUSH_TYPE(tp)                             \
-    f_type_stack.push_back(tp)
+        f_type_stack.push_back(tp)
 
 class ModelMgr;
 class Inferrer : public ExprWalker {
