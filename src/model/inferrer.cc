@@ -104,7 +104,12 @@ Type_ptr Inferrer::check_logical()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_boolean()) ? res : NULL;
+    if (res -> is_boolean()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 Type_ptr Inferrer::check_arithmetical()
@@ -112,7 +117,12 @@ Type_ptr Inferrer::check_arithmetical()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_algebraic()) ? res : NULL;
+    if (res -> is_algebraic()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 Type_ptr Inferrer::check_logical_or_arithmetical()
@@ -120,7 +130,13 @@ Type_ptr Inferrer::check_logical_or_arithmetical()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_algebraic() || res -> is_boolean()) ? res : NULL;
+    if (res -> is_algebraic() ||
+        res -> is_boolean()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 Type_ptr Inferrer::check_enum()
@@ -128,7 +144,12 @@ Type_ptr Inferrer::check_enum()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_enum()) ? res : NULL;
+    if (res -> is_enum()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 Type_ptr Inferrer::check_scalar()
@@ -136,7 +157,12 @@ Type_ptr Inferrer::check_scalar()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_scalar()) ? res : NULL;
+    if (res -> is_scalar()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 Type_ptr Inferrer::check_array()
@@ -144,7 +170,12 @@ Type_ptr Inferrer::check_array()
     POP_TYPE(res);
     assert (NULL != res);
 
-    return (res -> is_array()) ? res : NULL;
+    if (res -> is_array()) {
+        return res;
+    }
+
+    throw BadType(res);
+    return NULL; /* unreachable */
 }
 
 bool Inferrer::walk_next_preorder(const Expr_ptr expr)
@@ -391,7 +422,11 @@ bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 {
-    POP_TYPE(index); // TODO check index type (native word size)
+    POP_TYPE(index);
+    if (! index -> is_algebraic() &&
+        ! index -> is_constant()) {
+        throw BadType(index);
+    }
 
     /* return wrapped type */
     PUSH_TYPE(check_array() -> as_array() -> of());
@@ -414,10 +449,8 @@ void Inferrer::walk_comma_postorder(Expr_ptr expr)
 {
     POP_TYPE(rhs);
     POP_TYPE(lhs);
-
     if (lhs != rhs) {
-        throw TypeMismatch(lhs->repr(),
-                           rhs->repr());
+        throw TypeMismatch(lhs, rhs);
     }
 
     PUSH_TYPE(lhs);
@@ -551,9 +584,15 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.result_type( expr,
-                               check_scalar(),
-                               check_scalar()));
+    Type_ptr rhs = check_scalar();
+    Type_ptr lhs = check_scalar();
+
+    /* constants can be promoted */
+    if (lhs != rhs  && ! lhs -> is_constant() && ! rhs -> is_constant()) {
+        throw TypeMismatch( lhs, rhs);
+    }
+
+    PUSH_TYPE( tm.result_type( expr, lhs, rhs));
 }
 
 

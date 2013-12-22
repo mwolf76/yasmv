@@ -64,25 +64,24 @@ public:
     const char* what() const throw();
 };
 
-/** Raised when a the inferrer detects a wrong type */
+/** Raised when the inferrer detects a wrong type */
 class BadType : public AnalyzerException {
     Expr_ptr f_repr;
-    TypeList f_allowed;
 
 public:
-    BadType(Expr_ptr type, TypeList &allowed);
+    BadType(Type_ptr tp);
 
     const char* what() const throw();
     ~BadType() throw();
 };
 
-/** Raised when the inferrer detects two types which do not properly match as expected */
+/** Raised when the inferrer detects two mismatching types */
 class TypeMismatch : public AnalyzerException {
     Expr_ptr f_repr_a;
     Expr_ptr f_repr_b;
 
 public:
-    TypeMismatch(Expr_ptr repr_a, Expr_ptr repr_b);
+    TypeMismatch(Type_ptr a, Type_ptr b);
 
     const char* what() const throw();
     ~TypeMismatch() throw();

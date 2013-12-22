@@ -68,17 +68,16 @@ const char* UnresolvedSymbol::what() const throw()
     return oss.str().c_str();
 }
 
-BadType::BadType(Expr_ptr repr, TypeList &allowed)
-    : f_repr(repr)
-    , f_allowed(allowed)
+BadType::BadType(Type_ptr tp)
+    : f_repr(tp -> repr())
 {}
 
 BadType::~BadType() throw()
 {}
 
-TypeMismatch::TypeMismatch(Expr_ptr repr_a, Expr_ptr repr_b)
-    : f_repr_a(repr_a)
-    , f_repr_b(repr_b)
+TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
+    : f_repr_a(lhs -> repr())
+    , f_repr_b(rhs -> repr())
 {}
 
 TypeMismatch::~TypeMismatch() throw()
@@ -122,25 +121,7 @@ TypeMismatch::~TypeMismatch() throw()
 const char* BadType::what() const throw()
 {
     ostringstream oss;
-
-    oss << "BadType: operand has type " << f_repr
-        << ", expected: ";
-
-    /* at least one type is expected, right? */
-    assert (0 < f_allowed.size());
-
-    TypeList::const_iterator eye = f_allowed.begin();
-    oss << (*eye)->repr();
-
-    if (1 < f_allowed.size()) {
-        TypeList::const_iterator last = ( ++ f_allowed.rbegin()).base();
-        while (++ eye != last) {
-            oss << ", " << (*eye)->repr();
-        }
-
-        oss << " or " << (*last)->repr();
-    }
-    oss << ".";
+    oss << "TypeError: operand has invalid type " << f_repr;
 
     return oss.str().c_str();
 }
@@ -148,9 +129,9 @@ const char* BadType::what() const throw()
 const char* TypeMismatch::what() const throw()
 {
     ostringstream oss;
-    oss << "Type mismatch: "
+    oss << "TypeError: "
         << f_repr_a << " and "
-        << f_repr_b;
+        << f_repr_b << " do not match";
 
     return oss.str().c_str();
 }

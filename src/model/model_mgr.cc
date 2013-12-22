@@ -42,7 +42,7 @@ ModelMgr::ModelMgr()
 
 void ModelMgr::first_pass()
 {
-    /* nop */
+    DEBUG << "Not yet implemented" << endl;
 }
 
 void ModelMgr::second_pass()
@@ -76,12 +76,33 @@ void ModelMgr::second_pass()
             }
             catch (AnalyzerException& ae) {
                 cerr << ae.what()
-                     << " in INIT "
+                     << endl
+                     << "  in INIT "
                      << fqdn << endl;
                 f_status = false;
             }
-
         } // for init
+
+        const ExprVector invar = module.invar();
+        for (ExprVector::const_iterator invar_eye = invar.begin();
+             invar_eye != invar.end(); invar_eye ++) {
+
+            Expr_ptr body = (*invar_eye);
+            FQExpr fqdn(ctx, body);
+
+            DEBUG << "processing INVAR " << fqdn << endl;
+
+            try {
+                f_inferrer.process(ctx, body);
+            }
+            catch (AnalyzerException& ae) {
+                cerr << ae.what()
+                     << endl
+                     << "  in INVAR "
+                     << fqdn << endl;
+                f_status = false;
+            }
+        } // for invar
 
         const ExprVector trans = module.trans();
         for (ExprVector::const_iterator trans_eye = trans.begin();
@@ -96,7 +117,8 @@ void ModelMgr::second_pass()
             }
             catch (AnalyzerException& ae) {
                 cerr << ae.what()
-                     << " in TRANS "
+                     << endl
+                     << "  in TRANS "
                      << fqdn << endl;
                 f_status = false;
             }
