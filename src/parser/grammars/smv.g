@@ -740,85 +740,85 @@ builtin_type returns [Type_ptr res]
 	: 'boolean'
     { $res = tm.find_boolean(); }
 
-    | 'uint4_t' (
+    | 'uint4' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(4, size->value()); }
 
          | { $res = tm.find_unsigned(4); } )
 
-    | 'int4_t' (
+    | 'int4' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(4, size->value()); }
 
          | { $res = tm.find_signed(4); } )
 
-    | 'uint8_t' (
+    | 'uint8' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(8, size->value()); }
 
          | { $res = tm.find_unsigned(8); } )
 
-    | 'int8_t' (
+    | 'int8' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(8, size->value()); }
 
          | { $res = tm.find_signed(8); } )
 
-    | 'uint12_t' (
+    | 'uint12' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(12, size->value()); }
 
          | { $res = tm.find_unsigned(12); } )
 
-    | 'int12_t' (
+    | 'int12' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(12, size->value()); }
 
          | { $res = tm.find_signed(12); } )
 
-    | 'uint16_t' (
+    | 'uint16' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(16, size->value()); }
 
          | { $res = tm.find_unsigned(16); } )
 
-    | 'int16_t' (
+    | 'int16' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(16, size->value()); }
 
          | { $res = tm.find_signed(16); } )
 
-    | 'uint24_t' (
+    | 'uint24' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(24, size->value()); }
 
          | { $res = tm.find_unsigned(24); } )
 
-    | 'int24_t' (
+    | 'int24' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(24, size->value()); }
 
          | { $res = tm.find_signed(24); } )
 
-    | 'uint32_t' (
+    | 'uint32' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(32, size->value()); }
 
          | { $res = tm.find_unsigned(32); } )
 
-    | 'int32_t' (
+    | 'int32' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(32, size->value()); }
 
          | { $res = tm.find_signed(32); } )
 
-    | 'uint64_t' (
+    | 'uint64' (
         '[' size=constant ']'
           { $res = tm.find_unsigned_array(64, size->value()); }
 
          | { $res = tm.find_unsigned(64); } )
 
-    | 'int64_t' (
+    | 'int64' (
         '[' size=constant ']'
           { $res = tm.find_signed_array(64, size->value()); }
 
