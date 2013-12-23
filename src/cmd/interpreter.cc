@@ -22,6 +22,8 @@
 #include <command.hh>
 #include <interpreter.hh>
 
+#include <opts.hh>
+
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
 {

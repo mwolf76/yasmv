@@ -4,52 +4,28 @@ TODO
 CORE
 ====
 
-* Parametrized defines [X]
-* Full arrays support [X]
-* Enumeratives support [X]
-* Check signed int support [X]
-* Fancy switch-like construct
-* Consolidate Unit-testing
-* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4)
-* Casts
-* Module params + cmd line support (e.g. CALL fib(10))
-* FSM -> MODULE
-* HALT ( __halt__ ) boolean
+* Efficient CNFization algorithm *NEXT*
 
-INIT (! HALT)
+* COI (2h) *FUTURE*
+* LTL model checking support *FUTURE*
+* BMC INVAR ALGOs (KIND + ITPs) *FUTURE*
+* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4) *FUTURE*
 
-* Efficient CNFization
+MAINTENANCE
+===========
 
-* COI (2h)
-* BMC INVAR ALGOs (KIND + ITPs)
-
-next (x) := fib(2) ???? mmmhhh...
-
+* Consolidate Unit-testing *NOW*
+* Strip away unused parts from Cudd *NEXT*
+* Explore load distribution over multiple cores *FUTURE*
 
 EXTRA
 =====
 
-* Colorized output (2h)
-* Emacs mode for editing
+* Verbosity levels and Colorized output (4h) *NOW*
+* Emacs mode for editing *FUTURE*
 
 GUI (reachabilty)
 ===
 
-* FSM Editor + Code generator (:
-. States (actions)
-. Transitions (guards and actions)
+* FSM Editor + Code generator :-) *FUTURE*
 
-* FLOWCHART Editor
-
-* TESTING
-        . Arrays
-        . Suite of models for integration testing
-
-* IMPLEMENTATION
-        . Single-cut and Multi-cut CNF algorithms (urgent)
-        . Implement and test dot-notation resolution
-        . Witness mgr
-
-* REFACTORING
-        . Remove support for LTL and CTL
-        . Proper error management (i.e. exceptions instead of assertions)

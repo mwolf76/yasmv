@@ -10,8 +10,6 @@
 #include <model.hh>
 #include <model_mgr.hh>
 
-#include <compilers/compiler.hh>
-
 #include <dd_walker.hh>
 
 # if 0

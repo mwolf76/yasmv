@@ -23,7 +23,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 # Programs to be built
-bin_PROGRAMS = yasmv # tests
+bin_PROGRAMS = yasmv tests
 
 # test target helper
 test: tests
@@ -54,8 +54,8 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/dd/libcudd.la -lantlr3c			\
 	$(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) -lprofiler
 
-tests_SOURCES = $(top_srcdir)/src/tests.cc src/parse.cc src/common.cc	\
-	$(top_srcdir)/src/expr/tests/test_expr.cc			\
+tests_SOURCES = src/opts.cc s $(top_srcdir)/src/tests.cc src/parse.cc	\
+	src/common.cc $(top_srcdir)/src/expr/tests/test_expr.cc		\
 	$(top_srcdir)/src/parser/tests/test_parser.cc			\
 	$(top_srcdir)/src/type/tests/test_type.cc			\
 	$(top_srcdir)/src/dd/tests/test_dd.cc				\

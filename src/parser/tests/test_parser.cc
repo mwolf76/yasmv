@@ -155,26 +155,26 @@ BOOST_AUTO_TEST_CASE(grammar)
     }
 
     {
-        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_iconst(42));
+        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_const(42));
         Expr_ptr psi = parseString("x ? y : 42");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_iconst(42));
+        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_const(42));
         Expr_ptr psi = parseString("x ? y : 42");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_subscript(x, em.make_iconst(42));
+        Expr_ptr phi = em.make_subscript(x, em.make_const(42));
         Expr_ptr psi = parseString("x[42]");
         BOOST_CHECK (phi == psi);
     }
 
     /* operators precedence */
     {
-        Expr_ptr phi = em.make_add(x, em.make_mul(y, em.make_iconst(42)));
+        Expr_ptr phi = em.make_add(x, em.make_mul(y, em.make_const(42)));
         Expr_ptr psi = parseString("x + y * 42");
         BOOST_CHECK (phi == psi);
     }
@@ -186,70 +186,70 @@ BOOST_AUTO_TEST_CASE(grammar)
     }
 
     {
-        Expr_ptr phi = em.make_or(x, em.make_and(y, em.make_iconst(42)));
+        Expr_ptr phi = em.make_or(x, em.make_and(y, em.make_const(42)));
         Expr_ptr psi = parseString("x | y & 42");
         BOOST_CHECK (phi == psi);
     }
 
 
     {
-        Expr_ptr phi = em.make_add(x, em.make_div(y, em.make_iconst(42)));
+        Expr_ptr phi = em.make_add(x, em.make_div(y, em.make_const(42)));
         Expr_ptr psi = parseString("x + y / 42");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_add(x, em.make_mod(y, em.make_iconst(42)));
+        Expr_ptr phi = em.make_add(x, em.make_mod(y, em.make_const(42)));
         Expr_ptr psi = parseString("x + y mod 42");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_and(em.make_eq( x, em.make_iconst(0)),
-                                   em.make_eq( y, em.make_iconst(1)));
+        Expr_ptr phi = em.make_and(em.make_eq( x, em.make_const(0)),
+                                   em.make_eq( y, em.make_const(1)));
         Expr_ptr psi = parseString("x = 0 & y = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_or(em.make_eq( x, em.make_iconst(0)),
-                                  em.make_eq( y, em.make_iconst(1)));
+        Expr_ptr phi = em.make_or(em.make_eq( x, em.make_const(0)),
+                                  em.make_eq( y, em.make_const(1)));
         Expr_ptr psi = parseString("x = 0 | y = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_implies(em.make_eq( x, em.make_iconst(0)),
+        Expr_ptr phi = em.make_implies(em.make_eq( x, em.make_const(0)),
                                        em.make_eq( em.make_next(x),
-                                                   em.make_iconst(1)));
+                                                   em.make_const(1)));
         Expr_ptr psi = parseString("x = 0 -> next(x) = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_iff(em.make_eq( x, em.make_iconst(0)),
-                                   em.make_eq( y, em.make_iconst(1)));
+        Expr_ptr phi = em.make_iff(em.make_eq( x, em.make_const(0)),
+                                   em.make_eq( y, em.make_const(1)));
         Expr_ptr psi = parseString("x = 0 <-> y = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_gt(x, em.make_lshift(y,
-                                                    em.make_iconst(2)));
+                                                    em.make_const(2)));
         Expr_ptr psi = parseString("x > y << 2");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_add( em.make_subscript(x, em.make_iconst(42)),
-                                    em.make_subscript(y, em.make_iconst(0)));
+        Expr_ptr phi = em.make_add( em.make_subscript(x, em.make_const(42)),
+                                    em.make_subscript(y, em.make_const(0)));
         Expr_ptr psi = parseString("x[42] + y[0]");
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_subscript(x, em.make_sub (y,
-                                                         em.make_iconst(1)));
+                                                         em.make_const(1)));
 
         Expr_ptr psi = parseString("x[y - 1]");
         BOOST_CHECK (phi == psi);
@@ -269,13 +269,13 @@ BOOST_AUTO_TEST_CASE(grammar)
 
     /* left associativity */
     {
-        Expr_ptr phi = em.make_add(em.make_add(x, y), em.make_iconst(42));
+        Expr_ptr phi = em.make_add(em.make_add(x, y), em.make_const(42));
         Expr_ptr psi = parseString("x + y + 42");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_mul(em.make_mul(x, y), em.make_iconst(42));
+        Expr_ptr phi = em.make_mul(em.make_mul(x, y), em.make_const(42));
         Expr_ptr psi = parseString("x * y * 42");
         BOOST_CHECK (phi == psi);
     }
@@ -288,12 +288,12 @@ BOOST_AUTO_TEST_CASE(grammar)
     }
 
     {
-        Expr_ptr phi = em.make_implies( em.make_and( em.make_eq(x, em.make_iconst(0)),
-                                                     em.make_eq(y, em.make_iconst(0))),
+        Expr_ptr phi = em.make_implies( em.make_and( em.make_eq(x, em.make_const(0)),
+                                                     em.make_eq(y, em.make_const(0))),
                                         em.make_or( em.make_ne(em.make_next(x),
-                                                               em.make_iconst(0)),
+                                                               em.make_const(0)),
                                                     em.make_ne(em.make_next(y),
-                                                               em.make_iconst(0))));
+                                                               em.make_const(0))));
 
         Expr_ptr psi = parseString("x = 0 & y = 0 -> next(x) != 0 | next(y) != 0");
         BOOST_CHECK (phi == psi);

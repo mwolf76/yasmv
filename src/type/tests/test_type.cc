@@ -15,25 +15,25 @@ BOOST_AUTO_TEST_CASE(boolean_type)
     TypeMgr& tm = TypeMgr::INSTANCE();
     Type_ptr type = tm.find_boolean();
 
-    BOOST_CHECK(  tm.is_boolean(type));
-    BOOST_CHECK(! tm.is_int_const(type));
-    BOOST_CHECK(! tm.is_algebraic(type));
-    BOOST_CHECK(! tm.is_signed_algebraic(type));
-    BOOST_CHECK(! tm.is_unsigned_algebraic(type));
-    BOOST_CHECK(! tm.is_enum(type));
+    BOOST_CHECK(  type->is_boolean());
+    BOOST_CHECK(! type->is_constant());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
 }
 
-BOOST_AUTO_TEST_CASE(int_const_type)
+BOOST_AUTO_TEST_CASE(constant_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_int_const();
+    Type_ptr type = tm.find_constant();
 
-    BOOST_CHECK(! tm.is_boolean(type));
-    BOOST_CHECK(  tm.is_int_const(type));
-    BOOST_CHECK(! tm.is_algebraic(type));
-    BOOST_CHECK(! tm.is_signed_algebraic(type));
-    BOOST_CHECK(! tm.is_unsigned_algebraic(type));
-    BOOST_CHECK(! tm.is_enum(type));
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(  type->is_constant());
+    BOOST_CHECK(  type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
 }
 
 BOOST_AUTO_TEST_CASE(unsigned_int_type)
@@ -41,12 +41,12 @@ BOOST_AUTO_TEST_CASE(unsigned_int_type)
     TypeMgr& tm = TypeMgr::INSTANCE();
     Type_ptr type = tm.find_unsigned(8);
 
-    BOOST_CHECK(! tm.is_boolean(type));
-    BOOST_CHECK(! tm.is_int_const(type));
-    BOOST_CHECK(  tm.is_algebraic(type));
-    BOOST_CHECK(! tm.is_signed_algebraic(type));
-    BOOST_CHECK(  tm.is_unsigned_algebraic(type));
-    BOOST_CHECK(! tm.is_enum(type));
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_constant());
+    BOOST_CHECK(  type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(  type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
 }
 
 BOOST_AUTO_TEST_CASE(signed_int_type)
@@ -54,12 +54,12 @@ BOOST_AUTO_TEST_CASE(signed_int_type)
     TypeMgr& tm = TypeMgr::INSTANCE();
     Type_ptr type = tm.find_signed(8);
 
-    BOOST_CHECK(! tm.is_boolean(type));
-    BOOST_CHECK(! tm.is_int_const(type));
-    BOOST_CHECK(  tm.is_algebraic(type));
-    BOOST_CHECK(  tm.is_signed_algebraic(type));
-    BOOST_CHECK(! tm.is_unsigned_algebraic(type));
-    BOOST_CHECK(! tm.is_enum(type));
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_constant());
+    BOOST_CHECK(  type->is_algebraic());
+    BOOST_CHECK(  type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
 }
 
 BOOST_AUTO_TEST_CASE(enum_type_symbolic)
@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     ev.insert(d);
 
     Type_ptr type = tm.find_enum(ev);
-    BOOST_CHECK(! tm.is_boolean(type));
-    BOOST_CHECK(! tm.is_int_const(type));
-    BOOST_CHECK(! tm.is_algebraic(type));
-    BOOST_CHECK(! tm.is_signed_algebraic(type));
-    BOOST_CHECK(! tm.is_unsigned_algebraic(type));
-    BOOST_CHECK(  tm.is_enum(type));
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_constant());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(  type->is_enum());
 
     // additional checks
     EnumType_ptr et = dynamic_cast<EnumType_ptr>(type);

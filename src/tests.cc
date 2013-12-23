@@ -11,10 +11,10 @@ BOOST_AUTO_TEST_SUITE_END()
 #include <expr.hh>
 
 // just for debugging purposes within gdb
-static void pe(Expr_ptr e)
+void pe(Expr_ptr e)
 { DEBUG << e << endl; }
 
-static void pf(FQExpr& e)
+void pf(FQExpr& e)
 { DEBUG << e << endl; }
 
 // logging subsystem settings

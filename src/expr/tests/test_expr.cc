@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(expr_makers)
     Expr_ptr x_ite_y = em.make_ite(x, y);
     BOOST_CHECK (x_ite_y->f_symb == ITE && x_ite_y->u.f_lhs == x && x_ite_y->u.f_rhs == y);
 
-    Expr_ptr iconst_42 = em.make_iconst(42);
+    Expr_ptr iconst_42 = em.make_const(42);
     BOOST_CHECK (em.is_numeric(iconst_42) && iconst_42->value() == 42);
     Expr_ptr hconst_42 = em.make_hconst(0x2a);
     BOOST_CHECK (em.is_numeric(hconst_42) && hconst_42->value() == 42);
@@ -84,6 +84,7 @@ BOOST_AUTO_TEST_CASE(expr_makers)
     Expr_ptr x_params_y = em.make_params(x, y);
     BOOST_CHECK (x_params_y->f_symb == PARAMS && x_params_y->u.f_lhs == x && x_params_y->u.f_rhs == y);
 
+#if 0
     // LTL makers
     Expr_ptr Fx = em.make_F(x);
     BOOST_CHECK (Fx->f_symb == F && Fx->u.f_lhs == x && Fx->u.f_rhs == NULL);
@@ -95,30 +96,7 @@ BOOST_AUTO_TEST_CASE(expr_makers)
     BOOST_CHECK (xUy->f_symb == U && xUy->u.f_lhs == x && xUy->u.f_rhs == y);
     Expr_ptr xRy = em.make_R(x, y);
     BOOST_CHECK (xRy->f_symb == R && xRy->u.f_lhs == x && xRy->u.f_rhs == y);
-
-    // CTL A makers
-    Expr_ptr AFx = em.make_AF(x);
-    BOOST_CHECK (AFx->f_symb == AF && AFx->u.f_lhs == x && AFx->u.f_rhs == NULL);
-    Expr_ptr AGx = em.make_AG(x);
-    BOOST_CHECK (AGx->f_symb == AG && AGx->u.f_lhs == x && AGx->u.f_rhs == NULL);
-    Expr_ptr AXx = em.make_AX(x);
-    BOOST_CHECK (AXx->f_symb == AX && AXx->u.f_lhs == x && AXx->u.f_rhs == NULL);
-    Expr_ptr xAUy = em.make_AU(x, y);
-    BOOST_CHECK (xAUy->f_symb == AU && xAUy->u.f_lhs == x && xAUy->u.f_rhs == y);
-    Expr_ptr xARy = em.make_AR(x, y);
-    BOOST_CHECK (xARy->f_symb == AR && xARy->u.f_lhs == x && xARy->u.f_rhs == y);
-
-    // CTL E makers
-    Expr_ptr EFx = em.make_EF(x);
-    BOOST_CHECK (EFx->f_symb == EF && EFx->u.f_lhs == x && EFx->u.f_rhs == NULL);
-    Expr_ptr EGx = em.make_EG(x);
-    BOOST_CHECK (EGx->f_symb == EG && EGx->u.f_lhs == x && EGx->u.f_rhs == NULL);
-    Expr_ptr EXx = em.make_EX(x);
-    BOOST_CHECK (EXx->f_symb == EX && EXx->u.f_lhs == x && EXx->u.f_rhs == NULL);
-    Expr_ptr xEUy = em.make_EU(x, y);
-    BOOST_CHECK (xEUy->f_symb == EU && xEUy->u.f_lhs == x && xEUy->u.f_rhs == y);
-    Expr_ptr xERy = em.make_ER(x, y);
-    BOOST_CHECK (xERy->f_symb == ER && xERy->u.f_lhs == x && xERy->u.f_rhs == y);
+#endif
 
     // type makers
     // Expr_ptr range_xy = em.make_range_type(x, y);
@@ -330,7 +308,7 @@ BOOST_AUTO_TEST_CASE(expr_printer)
     }
 
     {
-        Expr_ptr iconst_42 = em.make_iconst(42);
+        Expr_ptr iconst_42 = em.make_const(42);
         ostringstream oss;
         Printer printer(oss);
         printer << iconst_42; BOOST_CHECK (oss.str() == string("42"));
@@ -364,6 +342,7 @@ BOOST_AUTO_TEST_CASE(expr_printer)
         printer << x_params_y; BOOST_CHECK (oss.str() == string("x(y)"));
     }
 
+#if 0
     // LTL
     {
         Expr_ptr Fx = em.make_F(x);
@@ -399,86 +378,13 @@ BOOST_AUTO_TEST_CASE(expr_printer)
         Printer printer(oss);
         printer << xRy; BOOST_CHECK (oss.str() == string("(x R y)"));
     }
-
-    // CTL A
-    {
-        Expr_ptr AFx = em.make_AF(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << AFx; BOOST_CHECK (oss.str() == string("AF (x)"));
-    }
-
-    {
-        Expr_ptr AGx = em.make_AG(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << AGx; BOOST_CHECK (oss.str() == string("AG (x)"));
-    }
-
-    {
-        Expr_ptr AXx = em.make_AX(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << AXx; BOOST_CHECK (oss.str() == string("AX (x)"));
-    }
-
-    {
-        Expr_ptr xAUy = em.make_AU(x, y);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << xAUy; BOOST_CHECK (oss.str() == string("(x AU y)"));
-    }
-
-    {
-        Expr_ptr xARy = em.make_AR(x, y);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << xARy; BOOST_CHECK (oss.str() == string("(x AR y)"));
-    }
-
-    // CTL E
-    {
-        Expr_ptr EFx = em.make_EF(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << EFx; BOOST_CHECK (oss.str() == string("EF (x)"));
-    }
-
-    {
-        Expr_ptr EGx = em.make_EG(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << EGx; BOOST_CHECK (oss.str() == string("EG (x)"));
-    }
-
-    {
-        Expr_ptr EXx = em.make_EX(x);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << EXx; BOOST_CHECK (oss.str() == string("EX (x)"));
-    }
-
-    {
-        Expr_ptr xEUy = em.make_EU(x, y);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << xEUy; BOOST_CHECK (oss.str() == string("(x EU y)"));
-    }
-
-    {
-        Expr_ptr xERy = em.make_ER(x, y);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << xERy; BOOST_CHECK (oss.str() == string("(x ER y)"));
-    }
-
+#endif
     {
         Expr_ptr main_ = em.make_main();
         ostringstream oss;
         Printer printer(oss);
         printer << main_; BOOST_CHECK (oss.str() == string("main"));
     }
-
 
     {
         Expr_ptr false_ = em.make_false();
@@ -510,7 +416,7 @@ BOOST_AUTO_TEST_CASE(fqexprs)
         const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
         ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("+7{main::x}"));
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("@7{main::x}"));
     }
 
     {
@@ -518,7 +424,7 @@ BOOST_AUTO_TEST_CASE(fqexprs)
         const FQExpr& fqexpr = FQExpr(main_, x, 0);
 
         ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("+0{main::x}"));
+        oss << fqexpr; BOOST_CHECK (oss.str() == string("@0{main::x}"));
     }
 }
 
