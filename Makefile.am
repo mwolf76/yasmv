@@ -22,11 +22,10 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-# Programs to be built
-bin_PROGRAMS = yasmv tests
+bin_PROGRAMS = yasmv run_tests
 
 # test target helper
-test: tests
+run_tests: tests
 	@./tests --log_level=test_suite
 
 # tags target helper  (uses exuberant ctags)
