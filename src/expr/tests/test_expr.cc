@@ -184,14 +184,6 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_constant(oconst_42));
     BOOST_CHECK (42 == em.const_value(oconst_42));
 
-    Expr_ptr zero = em.make_zero();
-    BOOST_CHECK( em.is_constant(zero));
-    BOOST_CHECK( em.is_zero( zero));
-
-    Expr_ptr one = em.make_one();
-    BOOST_CHECK( em.is_constant(one));
-    BOOST_CHECK( em.is_one( one));
-
     Expr_ptr x_dot_y = em.make_dot(x, y);
     BOOST_CHECK (x_dot_y->f_symb == DOT && x_dot_y->lhs() == x && x_dot_y->rhs() == y);
     BOOST_CHECK (em.is_dot(x_dot_y));
@@ -200,19 +192,37 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (x_params_y->f_symb == PARAMS &&
                  x_params_y->lhs() == x && x_params_y->rhs() == y);
     BOOST_CHECK (em.is_params(x_params_y));
+}
 
-    // type makers
-    // TODO
+BOOST_AUTO_TEST_CASE(builtin)
+{
+    ExprMgr& em(ExprMgr::INSTANCE());
 
-    // builtin identifiers
     Expr_ptr main_ = em.make_main();
     BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom("main"));
+    BOOST_CHECK (em.is_main(main_));
 
     Expr_ptr false_ = em.make_false();
     BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom("FALSE"));
+    BOOST_CHECK (em.is_false(false_));
 
     Expr_ptr true_ = em.make_true();
     BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom("TRUE"));
+    BOOST_CHECK (em.is_true(true_));
+
+    Expr_ptr zero = em.make_zero();
+    BOOST_CHECK( em.is_constant(zero));
+    BOOST_CHECK( em.is_zero( zero));
+
+    Expr_ptr one = em.make_one();
+    BOOST_CHECK( em.is_constant(one));
+    BOOST_CHECK( em.is_one( one));
+}
+
+BOOST_AUTO_TEST_CASE(typedefs)
+{
+    //    ExprMgr& em(ExprMgr::INSTANCE());
+
 }
 
 BOOST_AUTO_TEST_CASE(printer)
@@ -440,7 +450,6 @@ BOOST_AUTO_TEST_CASE(printer)
         printer << x_params_y; BOOST_CHECK (oss.str() == string("x(y)"));
     }
 
-#if 0
     // LTL
     {
         Expr_ptr Fx = em.make_F(x);
@@ -476,7 +485,7 @@ BOOST_AUTO_TEST_CASE(printer)
         Printer printer(oss);
         printer << xRy; BOOST_CHECK (oss.str() == string("(x R y)"));
     }
-#endif
+
     {
         Expr_ptr main_ = em.make_main();
         ostringstream oss;

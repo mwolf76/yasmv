@@ -46,8 +46,8 @@ protected:
     void pre_hook();
     void post_hook();
 
-    // // support for LTL ops
-    // LTL_HOOKS;
+    // support for LTL ops
+    LTL_HOOKS;
 
     // support for basic ops
     OP_HOOKS;

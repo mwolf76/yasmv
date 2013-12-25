@@ -178,6 +178,35 @@ Type_ptr Inferrer::check_array()
     return NULL; /* unreachable */
 }
 
+bool Inferrer::walk_F_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_F_postorder(const Expr_ptr expr)
+{ walk_unary_ltl_postorder(expr); }
+
+bool Inferrer::walk_G_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_G_postorder(const Expr_ptr expr)
+{ walk_unary_ltl_postorder(expr); }
+
+bool Inferrer::walk_X_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_X_postorder(const Expr_ptr expr)
+{ walk_unary_ltl_postorder(expr); }
+
+bool Inferrer::walk_U_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_U_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_U_postorder(const Expr_ptr expr)
+{ walk_binary_ltl_postorder(expr); }
+
+bool Inferrer::walk_R_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_R_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_R_postorder(const Expr_ptr expr)
+{ walk_binary_ltl_postorder(expr); }
+
 bool Inferrer::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Inferrer::walk_next_postorder(const Expr_ptr expr)
@@ -519,6 +548,9 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 void Inferrer::walk_unary_fsm_postorder(const Expr_ptr expr)
 { /* no checks */ }
 
+void Inferrer::walk_unary_ltl_postorder(const Expr_ptr expr)
+{ /* no checks */ }
+
 // fun: arithm -> arithm
 void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 {
@@ -538,6 +570,19 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
     PUSH_TYPE( tm.result_type( expr,
                                check_arithmetical(),
                                check_arithmetical()));
+}
+
+// fun: logical x logical -> logical
+void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
+{
+    check_logical();
+    PUSH_TYPE( check_logical() );
+}
+
+void Inferrer::walk_binary_ltl_postorder(const Expr_ptr expr)
+{
+    check_logical();
+    PUSH_TYPE( check_logical() );
 }
 
 // fun: logical x logical -> logical

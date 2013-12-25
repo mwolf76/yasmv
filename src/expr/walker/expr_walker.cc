@@ -55,6 +55,14 @@ void ExprWalker::walk ()
 
             // restore caller location (simulate call return behavior)
             switch(curr.pc){
+            case F_1: goto entry_F_1;
+            case G_1: goto entry_G_1;
+            case X_1: goto entry_X_1;
+            case U_1: goto entry_U_1;
+            case U_2: goto entry_U_2;
+            case R_1: goto entry_R_1;
+            case R_2: goto entry_R_2;
+
             case NEXT_1: goto entry_NEXT_1;
             case PREV_1: goto entry_PREV_1;
 
@@ -153,6 +161,76 @@ void ExprWalker::walk ()
         pre_node_hook(curr.expr);
 
         switch (curr.expr->f_symb) {
+
+        // unary arithmetic/logical
+        case F:
+            if (walk_F_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = F_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_F_1:
+                walk_F_postorder(curr.expr);
+            }
+            break;
+
+        case G:
+            if (walk_G_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = G_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_G_1:
+                walk_G_postorder(curr.expr);
+            }
+            break;
+
+        case X:
+            if (walk_X_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = X_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_X_1:
+                walk_X_postorder(curr.expr);
+            }
+            break;
+
+        case U:
+            if (walk_U_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = U_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_U_1:
+                if (walk_U_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = U_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_U_2:
+                walk_U_postorder(curr.expr);
+            }
+            break;
+
+        case R:
+            if (walk_R_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = R_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_R_1:
+                if (walk_R_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = R_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_R_2:
+                walk_R_postorder(curr.expr);
+            }
+            break;
 
         // unary temporal
         case NEXT:

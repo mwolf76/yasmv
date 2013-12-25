@@ -31,50 +31,73 @@
 #include <expr.hh>
 
 /* helper macros to declare walker hooks */
-#define UNARY(op)                                            \
+#define UNARY_HOOK(op)                                       \
     bool walk_## op ## _preorder(const Expr_ptr expr);       \
     void walk_## op ## _postorder(const Expr_ptr expr)
 
-#define BINARY(op)                                           \
+#define BINARY_HOOK(op)                                      \
     bool walk_## op ## _preorder(const Expr_ptr expr);       \
     bool walk_## op ## _inorder(const Expr_ptr expr);        \
     void walk_## op ## _postorder(const Expr_ptr expr)
 
-#define OP_HOOKS \
-    UNARY(next); UNARY(prev);            \
-    UNARY(neg); UNARY(not);              \
-                                         \
-    BINARY(add); BINARY(sub);            \
-    BINARY(div); BINARY(mod);            \
-    BINARY(mul);                         \
-                                         \
-    BINARY(and); BINARY(or);             \
-    BINARY(xor); BINARY(implies);        \
-    BINARY(xnor); BINARY(iff);           \
-    BINARY(lshift); BINARY(rshift);      \
-                                         \
-    BINARY(type); BINARY(cast);          \
-                                         \
-    BINARY(eq); BINARY(ne);              \
-    BINARY(le); BINARY(lt);              \
-    BINARY(ge); BINARY(gt);              \
-    BINARY(ite); BINARY(cond);           \
-                                         \
-    BINARY(dot);                         \
-    BINARY(params);                      \
-    BINARY(subscript);                   \
-    UNARY(set);                          \
-    BINARY(comma)
+#define OP_HOOKS                                   \
+    UNARY_HOOK(next); UNARY_HOOK(prev);            \
+    UNARY_HOOK(neg); UNARY_HOOK(not);              \
+                                                   \
+    BINARY_HOOK(add); BINARY_HOOK(sub);            \
+    BINARY_HOOK(div); BINARY_HOOK(mod);            \
+    BINARY_HOOK(mul);                              \
+                                                   \
+    BINARY_HOOK(and); BINARY_HOOK(or);             \
+    BINARY_HOOK(xor); BINARY_HOOK(implies);        \
+    BINARY_HOOK(xnor); BINARY_HOOK(iff);           \
+    BINARY_HOOK(lshift); BINARY_HOOK(rshift);      \
+                                                   \
+    BINARY_HOOK(type); BINARY_HOOK(cast);          \
+                                                   \
+    BINARY_HOOK(eq); BINARY_HOOK(ne);              \
+    BINARY_HOOK(le); BINARY_HOOK(lt);              \
+    BINARY_HOOK(ge); BINARY_HOOK(gt);              \
+    BINARY_HOOK(ite); BINARY_HOOK(cond);           \
+                                                   \
+    BINARY_HOOK(dot);                              \
+    BINARY_HOOK(params);                           \
+    BINARY_HOOK(subscript);                        \
+    UNARY_HOOK(set);                               \
+    BINARY_HOOK(comma)
 
-#define LTL_HOOKS                        \
-    UNARY(F); UNARY(G); UNARY(X);        \
-    BINARY(R); BINARY(U)
+#define LTL_HOOKS                                       \
+    UNARY_HOOK(F); UNARY_HOOK(G); UNARY_HOOK(X);        \
+    BINARY_HOOK(R); BINARY_HOOK(U)
+
+#define UNARY_STUB(op)                                       \
+    bool walk_## op ## _preorder(const Expr_ptr expr)        \
+    { assert(false); return false; }                         \
+    void walk_## op ## _postorder(const Expr_ptr expr) {}
+
+#define BINARY_STUB(op)                                      \
+    bool walk_## op ## _preorder(const Expr_ptr expr)        \
+    { assert(false); return false; }                         \
+    bool walk_## op ## _inorder(const Expr_ptr expr)         \
+    { assert(false); return false; }                         \
+    void walk_## op ## _postorder(const Expr_ptr expr) {}
+
+#define LTL_STUBS                                       \
+    UNARY_STUB(F); UNARY_STUB(G); UNARY_STUB(X);        \
+    BINARY_STUB(R); BINARY_STUB(U)
 
 // enums in C++ are non-extensible, thus we have to keep all possible
 // values together in one place.
 typedef enum {
     DEFAULT,
     RETURN,
+
+    // -- LTL ops
+    F_1,
+    G_1,
+    X_1,
+    U_1, U_2,
+    R_1, R_2,
 
     // -- Simple walkers
     NEXT_1, PREV_1, NEG_1, NOT_1,
@@ -208,6 +231,24 @@ protected:
     walker_stack f_recursion_stack;
 
     // -- hooks ----------------------------------------------------------------
+
+    // ltl temporal op
+    virtual bool walk_F_preorder(const Expr_ptr expr) =0;
+    virtual void walk_F_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_G_preorder(const Expr_ptr expr) =0;
+    virtual void walk_G_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_X_preorder(const Expr_ptr expr) =0;
+    virtual void walk_X_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_U_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_U_inorder(const Expr_ptr expr) =0;
+    virtual void walk_U_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_R_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_R_inorder(const Expr_ptr expr) =0;
+    virtual void walk_R_postorder(const Expr_ptr expr) =0;
 
     // unary temporal ops
     virtual bool walk_next_preorder(const Expr_ptr expr) =0;

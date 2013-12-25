@@ -85,6 +85,7 @@ protected:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
+    LTL_STUBS;
     OP_HOOKS;
     void walk_leaf(const Expr_ptr expr);
 

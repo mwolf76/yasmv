@@ -64,7 +64,7 @@ protected:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    OP_HOOKS;
+    LTL_HOOKS; OP_HOOKS;
     void walk_leaf(const Expr_ptr expr);
 
 private:
@@ -101,7 +101,9 @@ private:
 
     // post-orders only
     void walk_unary_fsm_postorder(const Expr_ptr expr);
+    void walk_unary_ltl_postorder(const Expr_ptr expr);
     void walk_binary_fsm_postorder(const Expr_ptr expr);
+    void walk_binary_ltl_postorder(const Expr_ptr expr);
     void walk_unary_arithmetical_postorder(const Expr_ptr expr);
     void walk_binary_arithmetical_postorder(const Expr_ptr expr);
     void walk_unary_logical_postorder(const Expr_ptr expr);

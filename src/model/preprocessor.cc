@@ -89,6 +89,52 @@ void Preprocessor::pre_node_hook(Expr_ptr expr)
 void Preprocessor::post_node_hook(Expr_ptr expr)
 {}
 
+bool Preprocessor::walk_F_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_F_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR( f_em.make_F( lhs));
+}
+
+bool Preprocessor::walk_G_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_G_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR( f_em.make_G( lhs));
+}
+
+bool Preprocessor::walk_X_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_X_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR( f_em.make_X( lhs));
+}
+
+bool Preprocessor::walk_U_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_U_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_U_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_U( lhs, rhs ));
+}
+
+bool Preprocessor::walk_R_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_R_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_R_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_R( lhs, rhs ));
+}
+
 bool Preprocessor::walk_next_preorder(const Expr_ptr expr)
 { return true; }
 void Preprocessor::walk_next_postorder(const Expr_ptr expr)

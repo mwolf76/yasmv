@@ -412,6 +412,8 @@ fsm_trans_decl_clause
 	: expr=toplevel_expression
       { $smv::module->add_trans(expr); }
 	;
+
+
 toplevel_expression returns [Expr_ptr res]
 @init { }
 	: expr=iff_expression {
@@ -479,6 +481,39 @@ and_expression returns [Expr_ptr res]
       { $res = em.make_and($res, rhs); }
     )*
 	;
+
+ltl_formula returns [Expr_ptr res]
+@init { }
+    :
+        formula=binary_ltl_formula
+        { $res = formula; }
+    ;
+
+binary_ltl_formula returns [Expr_ptr res]
+@init { }
+        : lhs=unary_ltl_formula
+        { $res = lhs; } (
+            'U' rhs=unary_ltl_formula
+           { $res = em.make_U($res, rhs); }
+
+        |   'R' rhs=unary_ltl_formula
+           { $res = em.make_R($res, rhs); } )*
+        ;
+
+unary_ltl_formula returns [Expr_ptr res]
+@init { }
+    : 'G' formula=unary_ltl_formula
+      { $res = em.make_G(formula); }
+
+    | 'F' formula=unary_ltl_formula
+      { $res = em.make_F(formula); }
+
+    | 'X' formula=unary_ltl_formula
+      { $res = em.make_X(formula); }
+
+    | formula=equality_expression
+      { $res = formula; }
+    ;
 
 equality_expression returns [Expr_ptr res]
 @init { }
@@ -557,7 +592,6 @@ multiplicative_expression returns [Expr_ptr res]
       { $res = em.make_mod($res, rhs); }
     )*
 	;
-
 
 cast_expression returns [Expr_ptr res]
 @init {
