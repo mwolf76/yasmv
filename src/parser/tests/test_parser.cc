@@ -65,8 +65,32 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
     }
 
     {
+        Expr_ptr phi = em.make_G( em.make_F(x));
+        Expr_ptr psi = parseString("G (F x)");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_G( em.make_F(x));
+        Expr_ptr psi = parseString("G (F (x))");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
         Expr_ptr phi = em.make_F( em.make_G(x));
         Expr_ptr psi = parseString("F G x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_F( em.make_G(x));
+        Expr_ptr psi = parseString("F (G x)");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_F( em.make_G(x));
+        Expr_ptr psi = parseString("F G (x)");
         BOOST_CHECK (phi == psi);
     }
 
