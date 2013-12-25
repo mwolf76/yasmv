@@ -67,12 +67,12 @@ void ModelMgr::second_pass()
              init_eye != init.end(); init_eye ++) {
 
             Expr_ptr body = (*init_eye);
-            FQExpr fqdn(ctx, body);
 
+            FQExpr fqdn(ctx, body);
             DEBUG << "processing INIT " << fqdn << endl;
 
             try {
-                f_inferrer.process(ctx, body);
+                f_inferrer.process(body, ctx);
             }
             catch (AnalyzerException& ae) {
                 cerr << ae.what()
@@ -88,12 +88,12 @@ void ModelMgr::second_pass()
              invar_eye != invar.end(); invar_eye ++) {
 
             Expr_ptr body = (*invar_eye);
-            FQExpr fqdn(ctx, body);
 
+            FQExpr fqdn(ctx, body);
             DEBUG << "processing INVAR " << fqdn << endl;
 
             try {
-                f_inferrer.process(ctx, body);
+                f_inferrer.process(body, ctx);
             }
             catch (AnalyzerException& ae) {
                 cerr << ae.what()
@@ -109,11 +109,12 @@ void ModelMgr::second_pass()
              trans_eye != trans.end(); trans_eye ++) {
 
             Expr_ptr body = (*trans_eye);
+
             FQExpr fqdn(ctx, body);
             DEBUG << "processing TRANS " << fqdn << endl;
 
             try {
-                f_inferrer.process(ctx, body);
+                f_inferrer.process(body, ctx);
             }
             catch (AnalyzerException& ae) {
                 cerr << ae.what()

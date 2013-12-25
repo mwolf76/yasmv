@@ -52,10 +52,10 @@ public:
     ~Inferrer();
 
     /** @brief Returns Type object for given FQExpr (memoized). */
-    Type_ptr type(FQExpr& fqexpr);
+    Type_ptr type(Expr_ptr expr, Expr_ptr ctx);
 
     // walker toplevel
-    Type_ptr process(Expr_ptr ctx, Expr_ptr body);
+    Type_ptr process(Expr_ptr expr, Expr_ptr ctx);
 
 protected:
     void pre_hook();

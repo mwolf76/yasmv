@@ -793,8 +793,8 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 /* add n-1 non significant zero, LSB is original bit */
 void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
 {
-    FQExpr key( f_ctx_stack.back(), expr->lhs());
-    Type_ptr tp = f_owner.type( key);
+    Type_ptr tp = f_owner.type( expr->lhs(),
+                                f_ctx_stack.back());
 
     for (unsigned i = 0; i < tp->width() -1; ++ i) {
         PUSH_ADD(f_enc.zero());
@@ -804,8 +804,8 @@ void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
 /* squeeze all bits in a big Or */
 void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
 {
-    FQExpr key (f_ctx_stack.back(), expr->rhs());
-    Type_ptr tp = f_owner.type( key);
+    Type_ptr tp = f_owner.type( expr->rhs(),
+                                f_ctx_stack.back());
 
     POP_ALGEBRAIC(rhs, tp -> width());
     ADD res = f_enc.zero();
@@ -819,11 +819,9 @@ void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
 
 void Compiler::algebraic_cast_from_algebraic(const Expr_ptr expr)
 {
-    FQExpr src (f_ctx_stack.back(), expr->rhs());
-    Type_ptr src_type = f_owner.type( src);
-
-    FQExpr tgt (f_ctx_stack.back(), expr->lhs());
-    Type_ptr tgt_type = f_owner.type( tgt);
+    Expr_ptr ctx (f_ctx_stack.back());
+    Type_ptr src_type = f_owner.type( expr->rhs(), ctx);
+    Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
 
     if (src_type -> width() == tgt_type -> width()) {
         return; /* nop */

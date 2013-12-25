@@ -54,7 +54,7 @@ Inferrer::~Inferrer()
 { /* DEBUG << "Destroying Inferrer @" << this << endl; */ }
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
-Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
+Type_ptr Inferrer::process(Expr_ptr expr, Expr_ptr ctx)
 {
     // remove previous results
     f_type_stack.clear();
@@ -64,7 +64,7 @@ Type_ptr Inferrer::process(Expr_ptr ctx, Expr_ptr body)
     f_ctx_stack.push_back(ctx);
 
     // invoke walker on the body of the expr to be processed
-    (*this)(body);
+    (*this)(expr);
 
     assert(1 == f_type_stack.size());
 
@@ -677,7 +677,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
         expr = expr->lhs();
     }
 
-    if (em.is_binary_relational(expr)) {
+    if (em.is_unary_ltl(expr)) {
+        return em.make_F(expr->lhs());
+    }
+    else if (em.is_binary_relational(expr)) {
         return em.make_lt(expr->lhs(), expr->rhs());
     }
     else if (em.is_binary_arithmetical(expr)) {
@@ -693,6 +696,10 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     else if (em.is_params(expr)) {
         return em.make_subscript(expr->lhs(),
                                  find_canonical_expr( expr->rhs()));
+    }
+    else if (em.is_binary_ltl(expr)) {
+        return em.make_U(find_canonical_expr( expr->lhs()),
+                         find_canonical_expr( expr->rhs()));
     }
     else if (em.is_comma(expr)) {
         return em.make_comma(find_canonical_expr( expr->lhs()),
@@ -722,20 +729,19 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     assert ( false ); // unreachable
 }
 
-Type_ptr Inferrer::type(FQExpr& fqexpr)
+Type_ptr Inferrer::type(Expr_ptr expr, Expr_ptr ctx)
 {
     /* to avoid a number of cache misses due to compiler rewrites,
        we squeeze types in equivalence classes: Relationals -> lhs
        '<' rhs, Arithmetical -> lhs '+' rhs */
-    FQExpr key( fqexpr.ctx(),
-                find_canonical_expr( fqexpr.expr()));
+    FQExpr key( ctx, find_canonical_expr( expr));
 
     TypeReg::const_iterator eye = f_map.find(key);
     Type_ptr res = NULL;
 
     // cache miss, fallback to walker
     if (eye == f_map.end()) {
-        res = process(fqexpr.ctx(), fqexpr.expr());
+        res = process( expr, ctx);
     }
     else {
         res = (*eye).second;

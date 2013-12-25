@@ -1,6 +1,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <model.hh>
+#include <model_mgr.hh>
+
 #include <expr.hh>
 #include <expr_mgr.hh>
 #include <printer.hh>
@@ -128,6 +131,215 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
         BOOST_CHECK(type == tm.find_enum(dhl));
     }
     #endif
+}
+
+BOOST_AUTO_TEST_CASE(type_inference)
+{
+    /* a rather rough setup ... */
+    ModelMgr& mm (ModelMgr::INSTANCE());
+    ExprMgr& em (ExprMgr::INSTANCE());
+    TypeMgr& tm (TypeMgr::INSTANCE());
+    Model& model (reinterpret_cast<Model&> (*mm.model()));
+    Module& main (* new Module(em.make_main()));
+
+    /* done with setup, now on with the actual tests :-) */
+
+    { /* booleans */
+        Type_ptr boolean = tm.find_boolean();
+
+        Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
+        main.add_var(x, new Variable(main.expr(), x, boolean));
+        Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
+        main.add_var(y, new Variable(main.expr(), y, boolean));
+        model.add_module( em.make_main(), &main);
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_F( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_G( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_X( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_U( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_R( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_next( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_prev( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_not( x ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_and( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_or( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_xor( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_xnor( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_implies( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( boolean ==
+                     mm.type( em.make_iff( x, y ),
+                              em.make_main()));
+    }
+
+    { /* uint16_t */
+        Type_ptr uint16 = tm.find_unsigned(16);
+
+        Atom a_x("x2"); Expr_ptr x = em.make_identifier(a_x);
+        main.add_var(x, new Variable(main.expr(), x, uint16));
+        Atom a_y("y2"); Expr_ptr y = em.make_identifier(a_y);
+        main.add_var(y, new Variable(main.expr(), y, uint16));
+        model.add_module( em.make_main(), &main);
+
+        // relationals
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_ne( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_ge( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_gt( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_le( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_lt( x, y),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_ne( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_ge( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_gt( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_le( x, y ),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_lt( x, y),
+                              em.make_main()));
+
+        // y == x op k
+        Expr_ptr k = em.make_const(42);
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq( x, k),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_add( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_sub( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_div( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_mul( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_mod( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_and( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_or( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_xor( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_xnor( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_implies( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_iff( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_lshift( x, k)),
+                              em.make_main()));
+
+        BOOST_CHECK( tm.find_boolean() ==
+                     mm.type( em.make_eq(y,
+                                         em.make_rshift( x, k)),
+                              em.make_main()));
+    }
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

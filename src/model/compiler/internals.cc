@@ -120,11 +120,9 @@ void Compiler::integer_ite(const Expr_ptr expr)
    uncertainty. This comment applies to all relational operators. */
 void Compiler::relational_type_lookahead(const Expr_ptr expr)
 {
-    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-    Type_ptr rhs_type = f_owner.type(rhs);
-
-    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-    Type_ptr lhs_type = f_owner.type(lhs);
+    Expr_ptr ctx (f_ctx_stack.back());
+    Type_ptr rhs_type = f_owner.type( expr->rhs(), ctx);
+    Type_ptr lhs_type = f_owner.type( expr->lhs(), ctx);
 
     if (! lhs_type -> is_constant() &&
         ! rhs_type -> is_constant()) {
@@ -349,13 +347,12 @@ void Compiler::debug_hook()
 bool Compiler::is_binary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* AND, OR, XOR, XNOR, IFF, IMPLIES */
     if (em.is_binary_logical(expr)) {
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_boolean() &&
-                f_owner.type(rhs) -> is_boolean());
+        return (f_owner.type(expr->lhs(), ctx) -> is_boolean() &&
+                f_owner.type(expr->rhs(), ctx) -> is_boolean());
     }
 
     return false;
@@ -365,11 +362,11 @@ bool Compiler::is_binary_boolean(const Expr_ptr expr)
 bool Compiler::is_unary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /*  NOT, () ? */
     if (em.is_unary_logical(expr)) {
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return f_owner.type(lhs) -> is_boolean();
+        return f_owner.type(expr->lhs(), ctx) -> is_boolean();
     }
 
     return false;
@@ -379,6 +376,7 @@ bool Compiler::is_unary_boolean(const Expr_ptr expr)
 bool Compiler::is_binary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
        IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
@@ -386,10 +384,8 @@ bool Compiler::is_binary_integer(const Expr_ptr expr)
         (em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_constant() &&
-                f_owner.type(rhs) -> is_constant());
+        return (f_owner.type(expr->lhs(), ctx) -> is_constant() &&
+                f_owner.type(expr->rhs(), ctx) -> is_constant());
     }
 
     return false;
@@ -413,16 +409,15 @@ bool Compiler::is_unary_integer(const Expr_ptr expr)
 bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
        IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
     if ((em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_enum() &&
-                f_owner.type(rhs) -> is_enum() );
+        return (f_owner.type(expr->lhs(), ctx) -> is_enum() &&
+                f_owner.type(expr->rhs(), ctx) -> is_enum() );
     }
 
     return false;
@@ -432,12 +427,11 @@ bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* unary : ? (), : (), NEG, NOT(bw) */
     if (em.is_unary_arithmetical(expr)) {
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-
-        return (f_owner.type(lhs) -> is_enum());
+        return (f_owner.type(expr->lhs(), ctx) -> is_enum());
     }
 
     return false;
@@ -447,17 +441,15 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     if ((em.is_binary_logical(expr)) ||
         (em.is_binary_arithmetical(expr)) ||
         (em.is_binary_relational(expr))) {
 
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-
         return
-            f_owner.type(rhs) -> is_algebraic() &&
-            f_owner.type(lhs) -> is_algebraic();
+            f_owner.type(expr->rhs(), ctx) -> is_algebraic() &&
+            f_owner.type(expr->lhs(), ctx) -> is_algebraic();
     }
 
     return false;
@@ -467,14 +459,15 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* SUBSCRIPT */
     if (em.is_subscript(expr)) {
 
         FQExpr rhs(f_ctx_stack.back(), expr->rhs());
         FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_array() &&
-                f_owner.type(rhs) -> is_algebraic()) ;
+        return (f_owner.type(expr->lhs(), ctx) -> is_array() &&
+                f_owner.type(expr->rhs(), ctx) -> is_algebraic()) ;
     }
 
     return false;
@@ -484,12 +477,12 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     if ((em.is_unary_logical(expr)) ||
         (em.is_unary_arithmetical(expr))) {
 
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return f_owner.type(lhs) -> is_algebraic();
+        return f_owner.type(expr->lhs(), ctx) -> is_algebraic();
     }
 
     return false;
@@ -499,13 +492,12 @@ bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 bool Compiler::is_ite_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* ITE */
     if (em.is_ite(expr)) {
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_boolean() &&
-                f_owner.type(rhs) -> is_boolean()) ;
+        return (f_owner.type(expr->lhs(), ctx) -> is_boolean() &&
+                f_owner.type(expr->rhs(), ctx) -> is_boolean()) ;
     }
 
     return false;
@@ -515,14 +507,12 @@ bool Compiler::is_ite_boolean(const Expr_ptr expr)
 bool Compiler::is_ite_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* ITE (bw) */
     if (em.is_ite(expr)) {
-
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_constant() &&
-                f_owner.type(rhs) -> is_constant()) ;
+        return (f_owner.type(expr->lhs(), ctx) -> is_constant() &&
+                f_owner.type(expr->rhs(), ctx) -> is_constant()) ;
     }
 
     return false;
@@ -532,14 +522,12 @@ bool Compiler::is_ite_integer(const Expr_ptr expr)
 bool Compiler::is_subscript_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* SUBSCRIPT */
     if (em.is_subscript(expr)) {
-
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_array() &&
-                f_owner.type(rhs) -> is_constant()) ;
+        return (f_owner.type(expr->lhs(), ctx) -> is_array() &&
+                f_owner.type(expr->rhs(), ctx) -> is_constant()) ;
     }
 
     return false;
@@ -550,14 +538,13 @@ bool Compiler::is_subscript_integer(const Expr_ptr expr)
 bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     /* ITE (bw) */
     if (em.is_ite(expr)) {
 
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-        return (f_owner.type(lhs) -> is_enum() &&
-                f_owner.type(rhs) -> is_enum()) ;
+        return (f_owner.type(expr->lhs(), ctx) -> is_enum() &&
+                f_owner.type(expr->rhs(), ctx) -> is_enum()) ;
     }
 
     return false;
@@ -568,15 +555,13 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
 
     if (em.is_ite(expr)) {
 
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-
         return
-            f_owner.type(rhs) -> is_algebraic() &&
-            f_owner.type(lhs) -> is_algebraic();
+            f_owner.type(expr-> rhs(), ctx) -> is_algebraic() &&
+            f_owner.type(expr-> lhs(), ctx) -> is_algebraic();
     }
 
     return false;
@@ -584,11 +569,13 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 
 bool Compiler::cache_miss(const Expr_ptr expr)
 {
+    Expr_ptr ctx (f_ctx_stack.back());
+
     FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
     ADDMap::iterator eye = f_map.find(key);
 
     if (eye != f_map.end()) {
-        const Type_ptr type = f_owner.type(key);
+        const Type_ptr type = f_owner.type(expr, ctx);
         TRACE << "Cache hit for " << expr
               << ", type is " << type
               << endl;

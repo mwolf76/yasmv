@@ -406,11 +406,9 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
 {
     if (f_first) return;
 
-    FQExpr lhs(f_ctx_stack.back(), expr->lhs());
-    Type_ptr tgt_type = f_owner.type(lhs);
-
-    FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-    Type_ptr src_type = f_owner.type(rhs);
+    Expr_ptr ctx (f_ctx_stack.back());
+    Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
+    Type_ptr src_type = f_owner.type( expr->rhs(), ctx);
 
     assert (f_type_stack.back() == src_type);
     f_type_stack.pop_back();

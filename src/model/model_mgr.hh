@@ -59,16 +59,16 @@ public:
     inline TypeMgr& tm() const
     { return f_tm; }
 
-    /* FIXME: FQEXPR or ctx + body?!? */
-
     // delegated type inference method
-    inline Type_ptr type(FQExpr& fqexpr) {
-        return f_inferrer.type(fqexpr);
+    inline Type_ptr type(Expr_ptr body,
+                         Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
+        return f_inferrer.type(body, ctx);
     }
 
     // delegated param binding method
-    inline Expr_ptr preprocess(Expr_ptr ctx, Expr_ptr expr) {
-        return f_preprocessor.process(ctx, expr);
+    inline Expr_ptr preprocess(Expr_ptr body,
+                               Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
+        return f_preprocessor.process(body, ctx);
     }
 
 protected:

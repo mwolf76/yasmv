@@ -55,7 +55,7 @@ Preprocessor::Preprocessor(ModelMgr& owner)
 Preprocessor::~Preprocessor()
 { DEBUG << "Destroying Preprocessor @" << this << endl; }
 
-Expr_ptr Preprocessor::process(Expr_ptr ctx, Expr_ptr expr)
+Expr_ptr Preprocessor::process(Expr_ptr expr, Expr_ptr ctx)
 {
     // remove previous results
     f_ctx_stack.clear();
