@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = walkers printer
+SUBDIRS = walker printer
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr			\
--I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/expr/printer	\
+-I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/expr/printer	\
 -I$(top_srcdir)/src/3rdparty/ezlogger
 
 AM_CPPFLAGS = @AM_CPPFLAGS@

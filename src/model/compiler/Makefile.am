@@ -1,7 +1,7 @@
 INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb			\
--I$(top_srcdir)/src/expr/walkers -I$(top_srcdir)/src/model		\
+-I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/model		\
 -I$(top_srcdir)/src/model/compiler					\
 -I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core	\
 -I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof		\

@@ -14,5 +14,5 @@ PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
 # -------------------------------------------------------
 
-noinst_LTLIBRARIES = libexpr_walkers.la
-libexpr_walkers_la_SOURCES = $(PKG_SOURCES)
+noinst_LTLIBRARIES = libexpr_walker.la
+libexpr_walker_la_SOURCES = $(PKG_SOURCES)
