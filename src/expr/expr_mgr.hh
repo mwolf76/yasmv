@@ -32,99 +32,275 @@
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
-    /* ++ primary expressions */
+
+    /* -- LTL expressions --------------------------------------------------- */
+    inline Expr_ptr make_F(Expr_ptr expr)
+    { return make_expr(F, expr, NULL); }
+
+    inline bool is_F(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == F;
+    }
+
+    inline Expr_ptr make_G(Expr_ptr expr)
+    { return make_expr(G, expr, NULL); }
+
+    inline bool is_G(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == G;
+    }
+
+    inline Expr_ptr make_X(Expr_ptr expr)
+    { return make_expr(X, expr, NULL); }
+
+    inline bool is_X(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == X;
+    }
+
+    inline Expr_ptr make_U(Expr_ptr lhs, Expr_ptr rhs)
+    { return make_expr(U, lhs, rhs); }
+
+    inline bool is_U(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == U;
+    }
+
+    inline Expr_ptr make_R(Expr_ptr lhs, Expr_ptr rhs)
+    { return make_expr(R, lhs, rhs); }
+
+    inline bool is_R(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == R;
+    }
+
+    inline bool is_LTL(const Expr_ptr expr) const {
+        assert(expr);
+        return
+            expr->f_symb == F ||
+            expr->f_symb == G ||
+            expr->f_symb == X ||
+            expr->f_symb == U ||
+            expr->f_symb == R ;
+    }
+
+    /* -- Temporal operators ------------------------------------------------ */
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
+
+    inline bool is_next(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == NEXT;
+    }
 
     inline Expr_ptr make_prev(Expr_ptr expr)
     { return make_expr(PREV, expr, NULL); }
 
-    /* ++ arithmetical operators */
+    inline bool is_prev(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PREV;
+    }
+
+    /* -- Arithmetical operators -------------------------------------------- */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
+
+    inline bool is_neg(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == NEG;
+    }
 
     inline Expr_ptr make_add(Expr_ptr a, Expr_ptr b)
     { return make_expr(PLUS, a, b); }
 
+    inline bool is_add(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PLUS;
+    }
+
     inline Expr_ptr make_sub(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUB, a, b); }
+
+    inline bool is_sub(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SUB;
+    }
 
     inline Expr_ptr make_div(Expr_ptr a, Expr_ptr b)
     { return make_expr(DIV, a, b); }
 
+    inline bool is_div(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == DIV;
+    }
+
     inline Expr_ptr make_mul(Expr_ptr a, Expr_ptr b)
     { return make_expr(MUL, a, b); }
+
+    inline bool is_mul(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == MUL;
+    }
 
     inline Expr_ptr make_mod(Expr_ptr a, Expr_ptr b)
     { return make_expr(MOD, a, b); }
 
-    /* ++ logical/bitwise operators */
+    inline bool is_mod(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == MOD;
+    }
+
+    /* -- Logical/Bitwise operators ----------------------------------------- */
     inline Expr_ptr make_not(Expr_ptr expr)
     { return make_expr(NOT, expr, NULL); }
+
+    inline bool is_not(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == NOT;
+    }
 
     inline Expr_ptr make_and(Expr_ptr a, Expr_ptr b)
     { return make_expr(AND, a, b); }
 
+    inline bool is_and(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == AND;
+    }
+
     inline Expr_ptr make_or(Expr_ptr a, Expr_ptr b)
     { return make_expr(OR, a, b); }
+
+    inline bool is_or(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == OR;
+    }
 
     inline Expr_ptr make_lshift(Expr_ptr a, Expr_ptr b)
     { return make_expr(LSHIFT, a, b); }
 
+    inline bool is_lshift(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == LSHIFT;
+    }
+
     inline Expr_ptr make_rshift(Expr_ptr a, Expr_ptr b)
     { return make_expr(RSHIFT, a, b); }
+
+    inline bool is_rshift(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == RSHIFT;
+    }
 
     inline Expr_ptr make_xor(Expr_ptr a, Expr_ptr b)
     { return make_expr(XOR, a, b); }
 
+    inline bool is_xor(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == XOR;
+    }
+
     inline Expr_ptr make_xnor(Expr_ptr a, Expr_ptr b)
     { return make_expr(XNOR, a, b); }
+
+    inline bool is_xnor(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == XNOR;
+    }
 
     inline Expr_ptr make_implies(Expr_ptr a, Expr_ptr b)
     { return make_expr(IMPLIES, a, b); }
 
-    inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
-    { return make_expr(TYPE, a, b); }
-
-    inline Expr_ptr make_cast(Expr_ptr a, Expr_ptr b)
-    { return make_expr(CAST, a, b); }
+    inline bool is_implies(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == IMPLIES;
+    }
 
     inline Expr_ptr make_iff(Expr_ptr a, Expr_ptr b)
     { return make_expr(IFF, a, b); }
 
-    /* ++ relational operators */
+    inline bool is_iff(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == IFF;
+    }
+
+    /* -- Relational operators ---------------------------------------------- */
     inline Expr_ptr make_eq(Expr_ptr a, Expr_ptr b)
     { return make_expr(EQ, a, b); }
+
+    inline bool is_eq(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == EQ;
+    }
 
     inline Expr_ptr make_ne(Expr_ptr a, Expr_ptr b)
     { return make_expr(NE, a, b); }
 
+    inline bool is_ne(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == NE;
+    }
+
     inline Expr_ptr make_ge(Expr_ptr a, Expr_ptr b)
     { return make_expr(GE, a, b); }
+
+    inline bool is_ge(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == GE;
+    }
 
     inline Expr_ptr make_gt(Expr_ptr a, Expr_ptr b)
     { return make_expr(GT, a, b); }
 
+    inline bool is_gt(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == GT;
+    }
+
     inline Expr_ptr make_le(Expr_ptr a, Expr_ptr b)
     { return make_expr(LE, a, b); }
+
+    inline bool is_le(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == LE;
+    }
 
     inline Expr_ptr make_lt(Expr_ptr a, Expr_ptr b)
     { return make_expr(LT, a, b); }
 
+    inline bool is_lt(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == LT;
+    }
+
+    /* -- ITEs -------------------------------------------------------------- */
     inline Expr_ptr make_cond(Expr_ptr a, Expr_ptr b)
     { return make_expr(COND, a, b); }
+
+    inline bool is_cond(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (COND == symb);
+    }
 
     inline Expr_ptr make_ite(Expr_ptr a, Expr_ptr b)
     { return make_expr(ITE, a, b); }
 
-    inline Expr_ptr make_error()
-    {
-        Expr tmp(ERROR, 0); // we need a temp store
-        return __make_expr(&tmp);
+    inline bool is_ite(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (ITE == symb);
     }
 
+    /* -- constants --------------------------------------------------------- */
     inline value_t const_value(Expr_ptr expr)
-    { return expr -> value(); }
+    {
+        assert( expr->f_symb == ICONST ||
+                expr->f_symb == HCONST ||
+                expr->f_symb == OCONST );
+        return expr -> value();
+    }
 
     inline Expr_ptr make_const(value_t value) // decimal
     {
@@ -144,18 +320,6 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_zero()
-    {
-        Expr tmp(ICONST, 0); // we need a temp store
-        return __make_expr(&tmp);
-    }
-
-    inline Expr_ptr make_one()
-    {
-        Expr tmp(ICONST, 1); // we need a temp store
-        return __make_expr(&tmp);
-    }
-
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return make_expr(DOT, a, b); }
 
@@ -171,12 +335,22 @@ public:
     inline Expr_ptr make_set(Expr_ptr a)
     { return make_expr(SET, a, NULL); }
 
-    /* ++ type makers */
-    inline Expr_ptr make_boolean_type() const
-    { return bool_expr; }
+    /* -- Types & Casts ----------------------------------------------------- */
+    inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
+    { return make_expr(TYPE, a, b); }
 
-    inline Expr_ptr make_constant_type() const
-    { return const_int_expr; }
+    inline bool is_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == TYPE;
+    }
+
+    inline Expr_ptr make_cast(Expr_ptr a, Expr_ptr b)
+    { return make_expr(CAST, a, b); }
+
+    inline bool is_cast(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == CAST;
+    }
 
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
@@ -195,21 +369,85 @@ public:
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
-    /* ++ builtin identifiers */
+    /* -- Builtin types ----------------------------------------------------- */
+    inline Expr_ptr make_boolean_type() const
+    { return bool_expr; }
+
+    inline bool is_boolean_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == bool_expr;
+    }
+
+    inline Expr_ptr make_constant_type() const
+    { return const_int_expr; }
+
+    inline bool is_constant_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == const_int_expr;
+    }
+
+    /* -- Builtin identifiers and constants --------------------------------- */
     inline Expr_ptr make_temp() const
     { return temp_expr; }
+
+    inline bool is_temp(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == temp_expr;
+    }
 
     inline Expr_ptr make_default_ctx() const
     { return default_ctx_expr; }
 
+    inline bool is_default_ctx(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == default_ctx_expr;
+    }
+
     inline Expr_ptr make_main() const
     { return main_expr; }
+
+    inline bool is_main(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == main_expr;
+    }
 
     inline Expr_ptr make_false() const
     { return false_expr; }
 
+    inline bool is_false(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == false_expr;
+    }
+
     inline Expr_ptr make_true() const
     { return true_expr; }
+
+    inline bool is_true(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == true_expr;
+    }
+
+    inline Expr_ptr make_zero()
+    {
+        Expr tmp(ICONST, 0); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline bool is_zero(const Expr_ptr expr) const {
+        assert(expr);
+        return is_constant(expr) && (0 == expr->u.f_value);
+    }
+
+    inline Expr_ptr make_one()
+    {
+        Expr tmp(ICONST, 1); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline bool is_one(const Expr_ptr expr) const {
+        assert(expr);
+        return is_constant(expr) && (1 == expr->u.f_value);
+    }
 
     // Here a bit of magic occurs, so it's better to keep a note:
     // this method is used by the parser to build identifier
@@ -243,7 +481,27 @@ public:
     inline Expr_ptr make_oct_const(Atom atom)
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
-    // -- is-a predicates -------------------------------------------------------
+    inline Expr_ptr make_error()
+    {
+        Expr tmp(ERROR, 0); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline bool is_error(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return (ERROR == symb);
+    }
+
+    // -- broad is-a predicates ------------------------------------------------
+    inline bool is_temporal(const Expr_ptr expr) const {
+        assert(expr);
+        return
+            expr->f_symb == PREV ||
+            expr->f_symb == NEXT;
+    }
+
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
@@ -262,16 +520,6 @@ public:
     inline bool is_bool_const(const Expr_ptr expr) const {
         assert(expr);
         return is_false(expr) || is_true(expr) ;
-    }
-
-    inline bool is_false(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == false_expr;
-    }
-
-    inline bool is_true(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == true_expr;
     }
 
     inline bool is_constant(const Expr_ptr expr) const {
@@ -297,29 +545,9 @@ public:
         return expr->f_symb == DOT;
     }
 
-    inline bool is_next(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == NEXT;
-    }
-
-    inline bool is_prev(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == PREV;
-    }
-
     inline bool is_comma(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == COMMA;
-    }
-
-    inline bool is_cast(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == CAST;
-    }
-
-    inline bool is_type(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == TYPE;
     }
 
     inline bool is_numeric(const Expr_ptr expr) const {
@@ -335,20 +563,6 @@ public:
         ExprType symb = expr->f_symb;
 
         return (NOT == symb);
-    }
-
-    inline bool is_ite(const Expr_ptr expr) const {
-        assert(expr);
-        ExprType symb = expr->f_symb;
-
-        return (ITE == symb);
-    }
-
-    inline bool is_cond(const Expr_ptr expr) const {
-        assert(expr);
-        ExprType symb = expr->f_symb;
-
-        return (COND == symb);
     }
 
     inline bool is_binary_logical(const Expr_ptr expr) const {
@@ -444,9 +658,6 @@ private:
 #endif
         return pooled_expr;
     }
-
-    // utils
-    value_t pow2(unsigned exp);
 
     /* -- data ------------------------------------------------------------- */
 

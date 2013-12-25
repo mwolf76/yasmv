@@ -23,13 +23,13 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-# raises a few warnings for run_tests target not being an
-# executable. Peace.
-bin_PROGRAMS = yasmv run_tests
-
-# test target helper
-run_tests: tests
+# Overriding 'all' target raises make warnings. Peace.
+all: config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 	@./tests --log_level=test_suite
+	@echo "Done."
+
+bin_PROGRAMS = yasmv tests
 
 # tags target helper  (uses exuberant ctags)
 tags:
