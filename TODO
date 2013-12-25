@@ -4,21 +4,23 @@ TODO
 High priority tasks:
 --------------------
 
-* LTL model checking support [core]
 * Consolidate Unit-testing [maintenance]
-* Verbosity levels and Colorized output *NOW* [usability]
+* LTL model checking support w/ SBMC [core]
+* Verbosity levels and Colorized output [usability]
 * Packages refactoring [walkers, exceptions] [maintenance]
-* Efficient CNFization algorithm [core]
-* CEGAR, COI [core]
-* Fixed-point types support [e.g. ufxd6.2_t, fxd10.4_t] [core]
-* BMC INVAR ALGOs [KIND + ITPs] [core]
 
+Medium priority tasks:
+----------------------
+
+* Efficient CNFization algorithm [core]
+* Invariant checking algorithms (k-induction, interpolants, ...) [core]
+* CEGAR, COI [core]
+* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
 
 Low priority tasks:
 -------------------
 
 * Strip away unused parts from Cudd [maintenance]
 * Explore load distribution over multiple cores [experimental]
-* Emacs mode for editing *FUTURE* [usability]
-* FSM Editor + Code generator :-] *FUTURE* [extension]
-
+* FSM Editor + Code generator :-] [extension]
+* Emacs mode for editing [usability]
