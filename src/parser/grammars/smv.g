@@ -473,11 +473,11 @@ exclusive_or_expression returns [Expr_ptr res]
 
 and_expression returns [Expr_ptr res]
 @init { }
-	: lhs=equality_expression
+	: lhs=ltl_formula
       { $res = lhs; }
 
     (
-      '&' rhs=equality_expression
+      '&' rhs=ltl_formula
       { $res = em.make_and($res, rhs); }
     )*
 	;
@@ -491,14 +491,15 @@ ltl_formula returns [Expr_ptr res]
 
 binary_ltl_formula returns [Expr_ptr res]
 @init { }
-        : lhs=unary_ltl_formula
-        { $res = lhs; } (
+    : lhs=unary_ltl_formula
+      { $res = lhs; } (
             'U' rhs=unary_ltl_formula
-           { $res = em.make_U($res, rhs); }
+            { $res = em.make_U($res, rhs); }
 
         |   'R' rhs=unary_ltl_formula
-           { $res = em.make_R($res, rhs); } )*
-        ;
+            { $res = em.make_R($res, rhs); }
+    )*
+    ;
 
 unary_ltl_formula returns [Expr_ptr res]
 @init { }
