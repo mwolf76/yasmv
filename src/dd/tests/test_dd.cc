@@ -3,7 +3,7 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
-#include <expr_printer.hh>
+#include <printer.hh>
 
 #include <type.hh>
 #include <type_mgr.hh>

@@ -66,13 +66,7 @@
     UNARY(set);                          \
     BINARY(comma)
 
-#define CTL_HOOKS \
-    UNARY(AF); UNARY(AG); UNARY(AX);     \
-    BINARY(AR); BINARY(AU);              \
-    UNARY(EF); UNARY(EG); UNARY(EX);     \
-    BINARY(ER); BINARY(EU)
-
-#define LTL_HOOKS \
+#define LTL_HOOKS                        \
     UNARY(F); UNARY(G); UNARY(X);        \
     BINARY(R); BINARY(U)
 

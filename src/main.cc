@@ -48,7 +48,7 @@
 #include <cmd.hh>
 
 #include <expr.hh>
-#include <expr_printer.hh>
+#include <printer.hh>
 
 #include <model.hh>
 #include <analyzer.hh>

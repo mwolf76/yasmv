@@ -3,7 +3,7 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
-#include <expr_printer.hh>
+#include <printer.hh>
 
 /* from src/parse.cc */
 extern Expr_ptr parseString(const char *string);

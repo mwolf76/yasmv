@@ -5,7 +5,7 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
-#include <expr_printer.hh>
+#include <printer.hh>
 
 #include <model.hh>
 #include <model_mgr.hh>

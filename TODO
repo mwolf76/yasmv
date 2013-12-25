@@ -1,15 +1,24 @@
-TODO LIST
+TODO
+====
 
-* COI [core, 2h]
-* Efficient CNFization algorithm [core, 8h]
-* LTL model checking support [grammar, commands, smbc] [core]
-* BMC INVAR ALGOs [KIND + ITPs] [core]
-* Fixed-point types support [e.g. ufxd6.2_t, fxd10.4_t] [core]
+High priority tasks:
+--------------------
+
+* LTL model checking support [core]
 * Consolidate Unit-testing [maintenance]
+* Verbosity levels and Colorized output *NOW* [usability]
 * Packages refactoring [walkers, exceptions] [maintenance]
+* Efficient CNFization algorithm [core]
+* CEGAR, COI [core]
+* Fixed-point types support [e.g. ufxd6.2_t, fxd10.4_t] [core]
+* BMC INVAR ALGOs [KIND + ITPs] [core]
+
+
+Low priority tasks:
+-------------------
+
 * Strip away unused parts from Cudd [maintenance]
 * Explore load distribution over multiple cores [experimental]
-* Verbosity levels and Colorized output *NOW* [usability, 4h]
 * Emacs mode for editing *FUTURE* [usability]
 * FSM Editor + Code generator :-] *FUTURE* [extension]
 

@@ -3,7 +3,7 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
-#include <expr_printer.hh>
+#include <printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(expr_makers)
