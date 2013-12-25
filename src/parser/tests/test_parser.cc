@@ -9,7 +9,7 @@
 extern Expr_ptr parseString(const char *string);
 
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(grammar)
+BOOST_AUTO_TEST_CASE(basic_parsing)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
 
@@ -26,8 +26,51 @@ BOOST_AUTO_TEST_CASE(grammar)
     BOOST_CHECK( x == em.make_identifier(a_x));
     BOOST_CHECK( y == em.make_identifier(a_y));
 
-    // test basic exprs
+    // test LTL basic exprs
+    {
+        Expr_ptr phi = em.make_F(x);
+        Expr_ptr psi = parseString("F x");
+        BOOST_CHECK (phi == psi);
+    }
 
+    {
+        Expr_ptr phi = em.make_G(x);
+        Expr_ptr psi = parseString("G x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_X(x);
+        Expr_ptr psi = parseString("X x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_U(x, y);
+        Expr_ptr psi = parseString("x U y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_R(x, y);
+        Expr_ptr psi = parseString("x R y");
+        BOOST_CHECK (phi == psi);
+    }
+
+    // a few more LTL tests
+    {
+        Expr_ptr phi = em.make_G( em.make_F(x));
+        Expr_ptr psi = parseString("G F x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_F( em.make_G(x));
+        Expr_ptr psi = parseString("F G x");
+        BOOST_CHECK (phi == psi);
+    }
+
+    // test basic exprs
     {
         Expr_ptr phi = em.make_next(x);
         Expr_ptr psi = parseString("next(x)");
@@ -269,7 +312,8 @@ BOOST_AUTO_TEST_CASE(grammar)
 
     /* left associativity */
     {
-        Expr_ptr phi = em.make_add(em.make_add(x, y), em.make_const(42));
+        Expr_ptr phi = em.make_add(em.make_add(x, y),
+                                   em.make_const(42));
         Expr_ptr psi = parseString("x + y + 42");
         BOOST_CHECK (phi == psi);
     }
