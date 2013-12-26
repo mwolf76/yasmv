@@ -129,13 +129,23 @@ public:
 
     /* -- decls ------------------------------------------------------------- */
     const ScalarType_ptr find_signed(unsigned digits);
+    const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
+
     const ScalarType_ptr find_default_signed();
     const ArrayType_ptr find_signed_array(unsigned digits,
                                           unsigned size);
+    const ArrayType_ptr find_signed_array(unsigned magnitude,
+                                          unsigned fractional,
+                                          unsigned size);
 
     const ScalarType_ptr find_unsigned(unsigned digits);
+    const ScalarType_ptr find_unsigned(unsigned magnitude, unsigned fractional);
+
     const ScalarType_ptr find_default_unsigned();
     const ArrayType_ptr find_unsigned_array(unsigned digits,
+                                            unsigned size);
+    const ArrayType_ptr find_unsigned_array(unsigned magnitude,
+                                            unsigned fractional,
                                             unsigned size);
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);

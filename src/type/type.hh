@@ -335,6 +335,64 @@ protected:
     ADD *f_dds;
 };
 
+/** Signed fixed */
+typedef class SignedFxdAlgebraicType* SignedFxdAlgebraicType_ptr;
+class SignedFxdAlgebraicType : public AlgebraicType {
+public:
+    inline unsigned magnitude() const
+    { return f_magnitude; }
+
+    inline unsigned fractional() const
+    { return f_fractional; }
+
+    unsigned width() const;
+    bool is_abstract() const;
+
+    ADD *dds() const
+    { return f_dds; }
+
+ protected:
+    friend class TypeMgr; // ctors not public
+    SignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
+                           unsigned fractional, ADD *dds = NULL);
+
+    unsigned f_magnitude;
+    unsigned f_fractional;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
+};
+
+/** Unsigned integers */
+typedef class UnsignedFxdAlgebraicType* UnsignedFxdAlgebraicType_ptr;
+class UnsignedFxdAlgebraicType : public AlgebraicType {
+public:
+    inline unsigned magnitude() const
+    { return f_magnitude; }
+
+    inline unsigned fractional() const
+    { return f_fractional; }
+
+    unsigned width() const;
+    bool is_abstract() const;
+
+    ADD *dds() const
+    { return f_dds; }
+
+protected:
+    friend class TypeMgr; // ctors not public
+    UnsignedFxdAlgebraicType(TypeMgr& owner); // abstract
+    UnsignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
+                             unsigned fractional, ADD *dds = NULL);
+
+    unsigned f_magnitude;
+    unsigned f_fractional;
+
+    // this is reserved for temp encodings, it's NULL for ordinary algebraics
+    ADD *f_dds;
+};
+
+
 /** -- Arrays ------------------------------------------------------------ */
 
 /** Array type class. */

@@ -37,6 +37,7 @@ const char *UNSIGNED_TOKEN  = "unsigned";
 const char *SIGNED_TOKEN    = "signed";
 const char *CONST_TOKEN     = "const";
 const char *INT_TOKEN       = "int";
+const char *FXD_TOKEN       = "fxd";
 const char *ARRAY_TOKEN     = "array";
 
 /* color support for *nix systems */

@@ -131,6 +131,7 @@ extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;
 extern const char *CONST_TOKEN;
 extern const char *INT_TOKEN;
+extern const char *FXD_TOKEN;
 
 extern const char *ARRAY_TOKEN;
 

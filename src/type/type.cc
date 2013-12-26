@@ -177,6 +177,29 @@ unsigned SignedAlgebraicType::width() const
     return f_width;
 }
 
+bool SignedFxdAlgebraicType::is_abstract() const
+{ return false; }
+
+SignedFxdAlgebraicType::SignedFxdAlgebraicType(TypeMgr& owner,
+                                               unsigned magnitude,
+                                               unsigned fractional,
+                                               ADD *dds)
+    : AlgebraicType(owner)
+    , f_magnitude(magnitude)
+    , f_fractional(fractional)
+    , f_dds(dds)
+{
+    f_repr = f_owner.em().make_signed_fxd_type(magnitude,
+                                               fractional);
+}
+
+unsigned SignedFxdAlgebraicType::width() const
+{
+    assert( 0 != f_magnitude );
+    assert( 0 != f_fractional);
+    return f_magnitude + f_fractional;
+}
+
 bool UnsignedAlgebraicType::is_abstract() const
 { return false; }
 
@@ -196,6 +219,30 @@ unsigned UnsignedAlgebraicType::width() const
     return f_width;
 }
 
+bool UnsignedFxdAlgebraicType::is_abstract() const
+{ return false; }
+
+UnsignedFxdAlgebraicType::UnsignedFxdAlgebraicType(TypeMgr& owner,
+                                                   unsigned magnitude,
+                                                   unsigned fractional,
+                                                   ADD *dds)
+    : AlgebraicType(owner)
+    , f_magnitude(magnitude)
+    , f_fractional(fractional)
+    , f_dds(dds)
+{
+    f_repr = f_owner.em().make_unsigned_fxd_type(magnitude,
+                                                 fractional);
+}
+
+unsigned UnsignedFxdAlgebraicType::width() const
+{
+    assert( 0 != f_magnitude );
+    assert( 0 != f_fractional);
+    return f_magnitude + f_fractional;
+}
+
+// -- Arrays ------------------------------------------------------------
 ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
     : Type(owner)
     , f_of(of)
@@ -215,7 +262,6 @@ ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
                                           f_owner.em().make_const(nelems));
 }
 
-// -- Arrays ------------------------------------------------------------
 ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
     : Type(owner)
     , f_of(of)

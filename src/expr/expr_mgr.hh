@@ -353,6 +353,8 @@ public:
     /* -- Types & Casts ----------------------------------------------------- */
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
     { return make_expr(TYPE, a, b); }
+    inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b, Expr_ptr c)
+    { return make_expr(TYPE, a, make_expr(COMMA, b, c)); }
 
     inline bool is_type(const Expr_ptr expr) const {
         assert(expr);
@@ -373,10 +375,24 @@ public:
                          make_const((value_t) digits));
     }
 
+    inline Expr_ptr make_unsigned_fxd_type(unsigned magnitude, unsigned fractional)
+    {
+        return make_type(unsigned_fxd_expr,
+                         make_const((value_t) magnitude),
+                         make_const((value_t) fractional));
+    }
+
     inline Expr_ptr make_signed_int_type(unsigned digits)
     {
         return make_type(signed_int_expr,
                          make_const((value_t) digits));
+    }
+
+    inline Expr_ptr make_signed_fxd_type(unsigned magnitude, unsigned fractional)
+    {
+        return make_type(signed_fxd_expr,
+                         make_const((value_t) magnitude),
+                         make_const((value_t) fractional));
     }
 
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
@@ -685,6 +701,10 @@ private:
     Expr_ptr const_int_expr;
     Expr_ptr unsigned_int_expr;
     Expr_ptr signed_int_expr;
+
+    /* fixed */
+    Expr_ptr unsigned_fxd_expr;
+    Expr_ptr signed_fxd_expr;
 
     /* reserved for abstract array types */
     Expr_ptr array_expr;

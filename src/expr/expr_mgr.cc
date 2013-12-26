@@ -49,6 +49,15 @@ ExprMgr::ExprMgr()
         ostringstream oss; oss << SIGNED_TOKEN << " " << INT_TOKEN;
         signed_int_expr = make_identifier(oss.str());
     }
+    {
+        ostringstream oss; oss << UNSIGNED_TOKEN << " " << FXD_TOKEN;
+        unsigned_fxd_expr = make_identifier(oss.str());
+    }
+    {
+        ostringstream oss; oss << SIGNED_TOKEN << " " << FXD_TOKEN;
+        signed_fxd_expr = make_identifier(oss.str());
+    }
+
     array_expr = make_identifier(ARRAY_TOKEN);
     main_expr = make_identifier(MAIN_TOKEN);
 

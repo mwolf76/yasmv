@@ -778,11 +778,18 @@ castable_type returns [Type_ptr res]
     : tp = boolean_type
       { $res = tp; }
 
-    | tp = unsigned_type
+    | tp = unsigned_int_type
       { $res = tp; }
 
-    | tp = signed_type
+    | tp = signed_int_type
       { $res = tp; }
+
+    | tp = unsigned_fxd_type
+      { $res = tp; }
+
+    | tp = signed_fxd_type
+      { $res = tp; }
+
     ;
 
 boolean_type returns [Type_ptr res]
@@ -791,14 +798,14 @@ boolean_type returns [Type_ptr res]
     { $res = tm.find_boolean(); }
     ;
 
-unsigned_type returns [Type_ptr res]
+unsigned_int_type returns [Type_ptr res]
 @init {
     char *p;
 }
 	:
-        UNSIGNED_TYPE
+        UNSIGNED_INT_TYPE
         {
-            p = (char *) $UNSIGNED_TYPE.text->chars;
+            p = (char *) $UNSIGNED_INT_TYPE.text->chars;
             while (!isdigit(*p)) ++ p; // skip to width
         }
         (
@@ -811,14 +818,14 @@ unsigned_type returns [Type_ptr res]
     )
     ;
 
-signed_type returns [Type_ptr res]
+signed_int_type returns [Type_ptr res]
 @init {
     char *p;
 }
 	:
-        SIGNED_TYPE
+        SIGNED_INT_TYPE
         {
-            p = (char *) $SIGNED_TYPE.text->chars;
+            p = (char *) $SIGNED_INT_TYPE.text->chars;
             while (!isdigit(*p)) ++ p; // skip to width
         }
         (
@@ -827,6 +834,52 @@ signed_type returns [Type_ptr res]
     |
         {
             $res = tm.find_signed( atoi(p));
+        }
+    )
+    ;
+
+unsigned_fxd_type returns [Type_ptr res]
+@init {
+    char *p, *q;
+}
+	:
+        UNSIGNED_FXD_TYPE
+        {
+            p = (char *) $UNSIGNED_FXD_TYPE.text->chars;
+            while (!isdigit(*p)) ++ p; // skip to magnitude
+
+            q = p;
+            while (*q != '.') ++ q; // skip to fractional
+        }
+        (
+            '[' size=constant ']'
+            { $res = tm.find_unsigned_array( atoi(p), atoi(q), size->value()); }
+    |
+        {
+            $res = tm.find_unsigned( atoi(p), atoi(q));
+        }
+    )
+    ;
+
+signed_fxd_type returns [Type_ptr res]
+@init {
+    char *p, *q;
+}
+	:
+        SIGNED_FXD_TYPE
+        {
+            p = (char *) $SIGNED_FXD_TYPE.text->chars;
+            while (!isdigit(*p)) ++ p; // skip to magnitude
+
+            q = p;
+            while (*q != '.') ++ q; // skip to fractional
+        }
+        (
+            '[' size=constant ']'
+            { $res = tm.find_signed_array( atoi(p), atoi(q), size->value()); }
+    |
+        {
+            $res = tm.find_signed( atoi(p), atoi(q));
         }
     )
     ;
@@ -844,12 +897,20 @@ literal returns [Expr_ptr res]
     ;
 
 /** Lexer rules */
-UNSIGNED_TYPE
+UNSIGNED_INT_TYPE
     :  'uint' TYPE_WIDTH
     ;
 
-SIGNED_TYPE
+SIGNED_INT_TYPE
     :  'int' TYPE_WIDTH
+    ;
+
+UNSIGNED_FXD_TYPE
+    :  'ufxd' TYPE_MAG_FRAC
+    ;
+
+SIGNED_FXD_TYPE
+    :  'fxd' TYPE_MAG_FRAC
     ;
 
 IDENTIFIER
@@ -862,6 +923,10 @@ FILEPATH
 
 fragment TYPE_WIDTH
     : DECIMAL_LITERAL
+    ;
+
+fragment TYPE_MAG_FRAC
+    : DECIMAL_LITERAL '.' DECIMAL_LITERAL
     ;
 
 fragment ID_FIRST_CHAR

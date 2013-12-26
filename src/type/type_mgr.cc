@@ -80,6 +80,19 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
     return res;
 }
 
+const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractional)
+{
+    Expr_ptr descr(f_em.make_unsigned_fxd_type(magnitude, fractional));
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new UnsignedFxdAlgebraicType( *this, magnitude, fractional);
+    register_type(descr, res);
+    return res;
+}
+
+
 const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_int_type(digits),
@@ -94,6 +107,23 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
     return res;
 }
 
+const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
+                                                 unsigned fractional,
+                                                 unsigned size)
+{
+    Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_fxd_type(magnitude, fractional),
+                                        f_em.make_const(size)));
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this,
+                         find_unsigned(magnitude, fractional), size);
+    register_type(descr, res);
+    return res;
+}
+
+
 const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
     Expr_ptr descr(f_em.make_signed_int_type(bits));
@@ -106,6 +136,19 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
     return res;
 }
 
+const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractional)
+{
+    Expr_ptr descr(f_em.make_signed_fxd_type(magnitude, fractional));
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new SignedFxdAlgebraicType(*this, magnitude, fractional);
+    register_type(descr, res);
+    return res;
+}
+
+
 const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
 {
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
@@ -116,6 +159,22 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     // new type, needs to be registered before returning
     res = new ArrayType( *this,
                          find_signed(digits), size);
+    register_type(descr, res);
+    return res;
+}
+
+const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
+                                               unsigned fractional,
+                                               unsigned size)
+{
+    Expr_ptr descr(f_em.make_subscript( f_em.make_signed_fxd_type(magnitude, fractional),
+                                        f_em.make_const(size)));
+    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
+    if (NULL != res) return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this,
+                         find_signed(magnitude, fractional), size);
     register_type(descr, res);
     return res;
 }
