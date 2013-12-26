@@ -850,6 +850,8 @@ unsigned_fxd_type returns [Type_ptr res]
 
             q = p;
             while (*q != '.') ++ q; // skip to fractional
+
+            *(q ++) = 0;
         }
         (
             '[' size=constant ']'
@@ -873,6 +875,8 @@ signed_fxd_type returns [Type_ptr res]
 
             q = p;
             while (*q != '.') ++ q; // skip to fractional
+
+            *(q ++) = 0;
         }
         (
             '[' size=constant ']'
