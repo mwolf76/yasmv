@@ -2,10 +2,6 @@
  *  @file symbol.hh
  *  @brief Symbol interface
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -31,6 +27,15 @@
 #include <expr.hh>
 #include <pool.hh>
 #include <type.hh>
+
+class UnresolvedSymbol : public Exception {
+    Expr_ptr f_ctx;
+    Expr_ptr f_expr;
+
+public:
+    UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr);
+    const char* what() const throw();
+};
 
 typedef vector<FQExpr> FQExprVector;
 

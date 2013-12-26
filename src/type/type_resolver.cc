@@ -24,9 +24,9 @@
  *
  **/
 
-#include <type_resolver.hh>
+#include <type.hh>
 #include <type_mgr.hh>
-#include <type_exceptions.hh>
+#include <type_resolver.hh>
 
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)

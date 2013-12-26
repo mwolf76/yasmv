@@ -24,8 +24,22 @@
  *
  **/
 
+#include <symbol.hh>
 #include <model.hh>
-#include <type_exceptions.hh>
+
+UnresolvedSymbol::UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
+    : f_ctx(ctx)
+    , f_expr(expr)
+{}
+
+const char* UnresolvedSymbol::what() const throw()
+{
+    ostringstream oss;
+
+    oss << "Unresolved symbol: " << f_ctx << "::" << f_expr;
+    return oss.str().c_str();
+}
+
 
 bool ISymbol::is_variable(void) const
 {

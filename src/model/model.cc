@@ -23,15 +23,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
+#include <type.hh>
 #include <model.hh>
-#include <type_exceptions.hh>
 
 ostream& operator<<(ostream& os, Module& module)
 { return os << module.expr(); }
 
-ostream& operator<<(ostream& os, AnalyzerException& ae)
-{ return os << ae.what(); }
+ostream& operator<<(ostream& os, Exception& e)
+{ return os << e.what(); }
 
 void Model::add_module(Expr_ptr name, IModule_ptr module)
 {

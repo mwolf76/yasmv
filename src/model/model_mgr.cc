@@ -24,9 +24,8 @@
  *
  **/
 
+#include <symbol.hh>
 #include <model_mgr.hh>
-#include <type_exceptions.hh>
-
 
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
@@ -39,6 +38,19 @@ ModelMgr::ModelMgr()
     , f_preprocessor(* new Preprocessor(* this))
     , f_inferrer(* new Inferrer(* this))
 {}
+
+// ResolutionException::ResolutionException(Expr_ptr expr)
+//     : f_expr(expr)
+// {}
+
+// const char* ResolutionException::what() const throw()
+// {
+//     ostringstream oss;
+
+//     oss << "UnresolvedSymbol: " << f_expr;
+//     return oss.str().c_str();
+// }
+
 
 void ModelMgr::first_pass()
 {
@@ -74,7 +86,7 @@ void ModelMgr::second_pass()
             try {
                 f_inferrer.process(body, ctx);
             }
-            catch (AnalyzerException& ae) {
+            catch (Exception& ae) {
                 cerr << ae.what()
                      << endl
                      << "  in INIT "
@@ -95,7 +107,7 @@ void ModelMgr::second_pass()
             try {
                 f_inferrer.process(body, ctx);
             }
-            catch (AnalyzerException& ae) {
+            catch (Exception& ae) {
                 cerr << ae.what()
                      << endl
                      << "  in INVAR "
@@ -116,7 +128,7 @@ void ModelMgr::second_pass()
             try {
                 f_inferrer.process(body, ctx);
             }
-            catch (AnalyzerException& ae) {
+            catch (Exception& ae) {
                 cerr << ae.what()
                      << endl
                      << "  in TRANS "

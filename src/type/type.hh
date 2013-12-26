@@ -123,6 +123,35 @@ ostream& operator<<(ostream& os, Type_ptr type);
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 ostream& operator<<(ostream& os, const Type_ptr type);
 
+/** Exception classes */
+class TypeException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
+/** Raised when the inferrer detects a wrong type */
+class BadType : public TypeException {
+    Expr_ptr f_repr;
+
+public:
+    BadType(Type_ptr tp);
+
+    const char* what() const throw();
+    ~BadType() throw();
+};
+
+/** Raised when the inferrer detects two mismatching types */
+class TypeMismatch : public TypeException {
+    Expr_ptr f_repr_a;
+    Expr_ptr f_repr_b;
+
+public:
+    TypeMismatch(Type_ptr a, Type_ptr b);
+
+    const char* what() const throw();
+    ~TypeMismatch() throw();
+};
+
 class TypeMgr; // fwd
 
 /** Basic Type class. */

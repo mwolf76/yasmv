@@ -24,12 +24,10 @@
  *
  *
  **/
-#include <type.hh>
-#include <type_mgr.hh>
 #include <opts.hh>
 
-#include <type_exceptions.hh>
-
+#include <type.hh>
+#include <type_mgr.hh>
 #include <type_resolver.hh>
 
 // static initialization

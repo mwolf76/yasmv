@@ -30,7 +30,6 @@
 #include <resolver.hh>
 #include <model_mgr.hh>
 #include <type_mgr.hh>
-#include <type_exceptions.hh>
 
 class ResolverProxy : public IResolver {
     TypeMgr& f_tm;

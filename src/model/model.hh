@@ -44,6 +44,23 @@ typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
 class IModel;
 typedef IModel* IModel_ptr;
 
+/** Exception classes */
+class ModelException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
+class ResolutionException
+    : public ModelException {
+
+public:
+    ResolutionException(Expr_ptr expr);
+    const char* what() const throw();
+
+private:
+    Expr_ptr f_expr;
+};
+
 // -- composite decls ----------------------------------------------------------
 class IModule : public IObject {
 public:

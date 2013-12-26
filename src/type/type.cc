@@ -27,6 +27,39 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+BadType::BadType(Type_ptr tp)
+    : f_repr(tp -> repr())
+{}
+
+BadType::~BadType() throw()
+{}
+
+const char* BadType::what() const throw()
+{
+    ostringstream oss;
+    oss << "TypeError: operand has invalid type " << f_repr;
+
+    return oss.str().c_str();
+}
+
+TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
+    : f_repr_a(lhs -> repr())
+    , f_repr_b(rhs -> repr())
+{}
+
+TypeMismatch::~TypeMismatch() throw()
+{}
+
+const char* TypeMismatch::what() const throw()
+{
+    ostringstream oss;
+    oss << "TypeError: "
+        << f_repr_a << " and "
+        << f_repr_b << " do not match";
+
+    return oss.str().c_str();
+}
+
 bool Type::is_scalar()
 { return NULL != dynamic_cast<ScalarType_ptr>( this ); }
 
