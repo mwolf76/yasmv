@@ -472,8 +472,5 @@ BOOST_AUTO_TEST_CASE(typedefs)
         BOOST_CHECK (phi == psi);
     }
 
-
-
-
 }
 BOOST_AUTO_TEST_SUITE_END()
