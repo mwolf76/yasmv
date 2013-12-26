@@ -22,12 +22,12 @@
 #include <command.hh>
 #include <interpreter.hh>
 
-#include <opts.hh>
-
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
 {
-    if (! f_instance) f_instance = new Interpreter();
+    if (! f_instance) {
+        f_instance = new Interpreter();
+    }
     return (*f_instance);
 }
 
@@ -73,24 +73,30 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 Variant& Interpreter::operator()()
 {
-    bool color (OptsMgr::INSTANCE().color());
-    // cmd prompt
-    f_last_result = Variant("Parsing Error");
-
-    if (color) {
-        (*f_out) <<  cyan << ">> " << normal;
-    }
-    else {
-        (*f_out) <<  ">> ";
-    }
-
+    prompt();
     string cmdLine;
     if (std::getline(*f_in, cmdLine)) {
-        (*f_out) << cmdLine << endl;
         Command_ptr cmd = parseCommand(cmdLine.c_str());
-
         if (NULL != cmd) {
+
+            bool color (OptsMgr::INSTANCE().color());
+            if (color) {
+                cout << green
+                     << "<< "
+                     << cmdLine
+                     << normal
+                     << endl;
+            }
+            else {
+                cout << "<< "
+                     << cmdLine
+                     << endl;
+            }
+
             (*this)(cmd);
+        }
+        else {
+            f_last_result = Variant("Parsing Error");
         }
     }
     else {

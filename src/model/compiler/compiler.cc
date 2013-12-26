@@ -680,7 +680,7 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
 {
     Expr_ptr ctx = f_ctx_stack.back();
-    (*this)( f_owner.preprocess( ctx, expr ));
+    (*this)( f_owner.preprocess( expr, ctx));
 
     return false;
 }

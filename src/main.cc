@@ -88,35 +88,62 @@ void pu(UCBI& ucbi)
 void pt(TCBI& tcbi)
 { DEBUG << tcbi << endl; }
 
+void batch(Command_ptr cmd)
+{
+    Interpreter& system = Interpreter::INSTANCE();
+    bool color (OptsMgr::INSTANCE().color());
+    Variant& res = system(cmd);
+    if (color) {
+        cout << endl << yellow << "<< "
+             << res << normal << endl;
+    }
+    else {
+        cout << endl << "<< " << res
+             << endl;
+    }
+}
+
 int main(int argc, const char *argv[])
 {
-    heading();
-
-    // parse command line options
-    OptsMgr& opts_mgr = OptsMgr::INSTANCE();
-    opts_mgr.parse_command_line(argc, argv);
-
-    if (opts_mgr.help()) {
-        usage();
-        exit(0);
-    }
-
-    // Run command interpreter subsystem
     Interpreter& system = Interpreter::INSTANCE();
 
-    // Run options-generated commands (if any)
-    const string model_filename = opts_mgr.model();
-    if (! model_filename.empty()) {
-        Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
-        Variant& res = system(cmd);
-        cout << res << endl;
+    heading();
+    try {
+
+        // parse command line options
+        OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+        opts_mgr.parse_command_line(argc, argv);
+
+        if (opts_mgr.help()) {
+            usage();
+            exit(0);
+        }
+
+        // Run options-generated commands (if any)
+        const string model_filename = opts_mgr.model();
+        if (! model_filename.empty()) {
+            Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
+            batch(cmd);
+        }
+
+        // interactive cmd loop
+        do {
+            Variant& res = system();
+            bool color (OptsMgr::INSTANCE().color());
+            if (color) {
+                cout << endl << yellow << "<< "
+                     << res << normal << endl;
+            }
+            else {
+                cout << endl << "<< " << res
+                     << endl;
+            }
+        } while (! system.is_leaving());
     }
 
-    // interactive cmd loop
-    do {
-        Variant& res = system();
-        cout << res << endl;
-    } while (! system.is_leaving());
+    catch (Exception &e) {
+        cerr << red << e.what() << endl;
+    }
 
     return system.retcode();
 }

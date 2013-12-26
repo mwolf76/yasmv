@@ -40,7 +40,25 @@ Simulation::Simulation(IModel& model,
         Witness& w = WitnessMgr::INSTANCE().witness( witness_id );
         set_witness(w);
     }
+}
 
+Simulation::~Simulation()
+{}
+
+void Simulation::set_status(simulation_status_t status)
+{ f_status = status; }
+
+void Simulation::set_witness(Witness& witness)
+{
+    if (f_witness) {
+        delete f_witness;
+    }
+
+    f_witness = & witness;
+}
+
+void Simulation::process()
+{
     /* ensure internal structures are empty */
     assert( 0 == f_init_adds.size());
     assert( 0 == f_invar_adds.size());
@@ -105,25 +123,7 @@ Simulation::Simulation(IModel& model,
             }
         }
     }
-}
 
-Simulation::~Simulation()
-{}
-
-void Simulation::set_status(simulation_status_t status)
-{ f_status = status; }
-
-void Simulation::set_witness(Witness& witness)
-{
-    if (f_witness) {
-        delete f_witness;
-    }
-
-    f_witness = & witness;
-}
-
-void Simulation::process()
-{
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 

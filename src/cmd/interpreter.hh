@@ -23,6 +23,7 @@
 #define INTERPRETER_H
 
 #include <common.hh>
+#include <opts.hh>
 
 class ICommand; // fwd decls
 typedef class ICommand* ICommand_ptr;
@@ -67,6 +68,17 @@ protected:
 
     inline ostream& err() const
     { return *f_err; }
+
+    inline void prompt() const
+    {
+        bool color (OptsMgr::INSTANCE().color());
+        if (color) {
+            (*f_out) << normal << ">> ";
+        }
+        else {
+            (*f_out) <<  ">> ";
+        }
+    }
 
     int f_retcode;
     bool f_leaving;
