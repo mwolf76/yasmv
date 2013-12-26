@@ -17,6 +17,7 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
     Cudd dd;
     ADD lhs = dd.addVar();
     ADD rhs = dd.addVar();
+    ADD zero (dd.addZero());
 
     {
         ADD neg_neg = lhs.Cmpl().Cmpl();
@@ -38,7 +39,11 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
     {
         ADD x_xor_y = lhs.Xor(rhs);
         ADD y_xor_x = rhs.Xor(lhs);
+        ADD x_xor_x = lhs.Xor(lhs);
+        ADD y_xor_y = rhs.Xor(rhs);
         BOOST_CHECK(x_xor_y == y_xor_x);
+        BOOST_CHECK(x_xor_x == zero);
+        BOOST_CHECK(y_xor_y == zero);
     }
 
     {

@@ -598,7 +598,7 @@ cast_expression returns [Expr_ptr res]
 @init {
     Expr_ptr cast = NULL;
 }
-    : '(' tp = builtin_type ')' expr = cast_expression
+    : '(' tp = castable_type ')' expr = cast_expression
         { $res = em.make_cast( tp -> repr(), expr ); }
 	|
         expr = unary_expression
@@ -739,13 +739,14 @@ constant returns [Expr_ptr res]
 	;
 
 error returns [Expr_ptr res]
+@init {}
     : 'ERR'
     { $res = em.make_error(); }
     ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
-@init { }
+@init {}
 	: 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
@@ -764,120 +765,76 @@ value returns [Expr_ptr res]
     ;
 
 type returns [Type_ptr res]
-    : tp = builtin_type
+@init {}
+    : tp = castable_type
       { $res = tp; }
 
-    | tp = user_type
+    | tp = enum_type
       { $res = tp; }
     ;
 
-builtin_type returns [Type_ptr res]
-	: 'boolean'
+castable_type returns [Type_ptr res]
+@init {}
+    : tp = boolean_type
+      { $res = tp; }
+
+    | tp = unsigned_type
+      { $res = tp; }
+
+    | tp = signed_type
+      { $res = tp; }
+    ;
+
+boolean_type returns [Type_ptr res]
+@init {}
+    : 'boolean'
     { $res = tm.find_boolean(); }
-
-    | 'uint4' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(4, size->value()); }
-
-         | { $res = tm.find_unsigned(4); } )
-
-    | 'int4' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(4, size->value()); }
-
-         | { $res = tm.find_signed(4); } )
-
-    | 'uint8' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(8, size->value()); }
-
-         | { $res = tm.find_unsigned(8); } )
-
-    | 'int8' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(8, size->value()); }
-
-         | { $res = tm.find_signed(8); } )
-
-    | 'uint12' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(12, size->value()); }
-
-         | { $res = tm.find_unsigned(12); } )
-
-    | 'int12' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(12, size->value()); }
-
-         | { $res = tm.find_signed(12); } )
-
-    | 'uint16' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(16, size->value()); }
-
-         | { $res = tm.find_unsigned(16); } )
-
-    | 'int16' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(16, size->value()); }
-
-         | { $res = tm.find_signed(16); } )
-
-    | 'uint24' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(24, size->value()); }
-
-         | { $res = tm.find_unsigned(24); } )
-
-    | 'int24' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(24, size->value()); }
-
-         | { $res = tm.find_signed(24); } )
-
-    | 'uint32' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(32, size->value()); }
-
-         | { $res = tm.find_unsigned(32); } )
-
-    | 'int32' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(32, size->value()); }
-
-         | { $res = tm.find_signed(32); } )
-
-    | 'uint64' (
-        '[' size=constant ']'
-          { $res = tm.find_unsigned_array(64, size->value()); }
-
-         | { $res = tm.find_unsigned(64); } )
-
-    | 'int64' (
-        '[' size=constant ']'
-          { $res = tm.find_signed_array(64, size->value()); }
-
-         | { $res = tm.find_signed(64); } )
-
-    // generic finite integer types
-    | 'unsigned' 'int'? '(' width=constant ')' (
-            '[' size=constant ']'
-              { $res = tm.find_unsigned_array(width->value(), size->value()); }
-
-             | { $res = tm.find_unsigned(width->value()); } )
-
-	| 'signed' 'int'? '(' width=constant ')' (
-            '[' size=constant ']'
-                { $res = tm.find_signed_array(width->value(), size->value()); }
-
-            | { $res = tm.find_signed(width->value()); } )
     ;
 
-user_type returns [Type_ptr res]
+unsigned_type returns [Type_ptr res]
 @init {
+    char *p;
 }
+	:
+        UNSIGNED_TYPE
+        {
+            p = (char *) $UNSIGNED_TYPE.text->chars;
+            while (!isdigit(*p)) ++ p; // skip to width
+        }
+        (
+            '[' size=constant ']'
+            { $res = tm.find_unsigned_array( atoi(p), size->value()); }
+    |
+        {
+            $res = tm.find_unsigned( atoi(p));
+        }
+    )
+    ;
+
+signed_type returns [Type_ptr res]
+@init {
+    char *p;
+}
+	:
+        SIGNED_TYPE
+        {
+            p = (char *) $SIGNED_TYPE.text->chars;
+            while (!isdigit(*p)) ++ p; // skip to width
+        }
+        (
+            '[' size=constant ']'
+            { $res = tm.find_signed_array( atoi(p), size->value()); }
+    |
+        {
+            $res = tm.find_signed( atoi(p));
+        }
+    )
+    ;
+
+enum_type returns [Type_ptr res]
+@init {}
     : expr=identifier
-       { $res = tm.find_enum( $smv::module->expr(), expr ); }
+      { $res = tm.find_enum( $smv::module->expr(), expr ); }
     ;
 
 literal returns [Expr_ptr res]
@@ -887,6 +844,14 @@ literal returns [Expr_ptr res]
     ;
 
 /** Lexer rules */
+UNSIGNED_TYPE
+    :  'uint' TYPE_WIDTH
+    ;
+
+SIGNED_TYPE
+    :  'int' TYPE_WIDTH
+    ;
+
 IDENTIFIER
 	:	ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
 	;
@@ -895,8 +860,8 @@ FILEPATH
     :  (FP_CHARS)+
     ;
 
-WORD_CONSTANT
-    :   '0' ('s' | 'u') DECIMAL_LITERAL '_' HEX_DIGIT +
+fragment TYPE_WIDTH
+    : DECIMAL_LITERAL
     ;
 
 fragment ID_FIRST_CHAR

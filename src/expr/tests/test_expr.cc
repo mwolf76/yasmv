@@ -219,12 +219,6 @@ BOOST_AUTO_TEST_CASE(builtin)
     BOOST_CHECK( em.is_one( one));
 }
 
-BOOST_AUTO_TEST_CASE(typedefs)
-{
-    //    ExprMgr& em(ExprMgr::INSTANCE());
-
-}
-
 BOOST_AUTO_TEST_CASE(printer)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
