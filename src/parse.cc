@@ -26,7 +26,6 @@
 #include <printer.hh>
 
 #include <model.hh>
-#include <analyzer.hh>
 
 #include <mc.hh>
 
