@@ -18,7 +18,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
 PKG_HH = bmc.hh
-PKG_CC = bmc.cc witness.cc
+PKG_CC = bmc.cc witness.cc analyzer.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
