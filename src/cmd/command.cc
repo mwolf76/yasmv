@@ -75,7 +75,7 @@ TimeCommand::TimeCommand(Interpreter& owner)
 
 Variant TimeCommand::operator()()
 {
-    return Variant(clock());
+    return Variant( clock());
 }
 
 TimeCommand::~TimeCommand()

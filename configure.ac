@@ -32,12 +32,12 @@ if test -z "$DOXYGEN";
 fi
 
 dnl First look for Boost
-BOOST_REQUIRE([])
+BOOST_REQUIRE([1.48])
 
 dnl Then look for specific Boost libraries you need:
-BOOST_REGEX
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
+BOOST_THREADS
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
