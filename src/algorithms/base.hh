@@ -55,7 +55,7 @@ using Minisat::STATUS_UNSAT;
 
 class Algorithm {
 public:
-    Algorithm();
+    Algorithm(ostream& os = std::cout);
     virtual ~Algorithm();
 
     // actual algorithm
@@ -82,7 +82,13 @@ protected:
     inline SAT& engine()
     { return f_engine; }
 
+    inline ostream& os()
+    { return f_os; }
+
 private:
+    // output
+    ostream& f_os;
+
     // managers
     ModelMgr& f_mm;
     ExprMgr& f_em;

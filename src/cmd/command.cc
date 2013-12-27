@@ -54,54 +54,40 @@ Variant LoadModelCommand::operator()()
 LoadModelCommand::~LoadModelCommand()
 {}
 
-// -- Now ---------------------------------------------------------------
-NowCommand::NowCommand(Interpreter& owner)
+// -- Help ---------------------------------------------------------------
+HelpCommand::HelpCommand(Interpreter& owner, Atom topic)
     : Command(owner)
+    , f_topic(topic)
 {}
 
-Variant NowCommand::operator()()
+Variant HelpCommand::operator()()
 {
     return Variant(clock());
 }
 
-NowCommand::~NowCommand()
+HelpCommand::~HelpCommand()
 {}
 
-// -- SAT ----------------------------------------------------------------------
-SATCommand::SATCommand(Interpreter& owner, Expr_ptr expr)
+// -- Time ---------------------------------------------------------------
+TimeCommand::TimeCommand(Interpreter& owner)
     : Command(owner)
-    , f_factory(CuddMgr::INSTANCE().dd())
-    , f_engine(/* f_factory */)
-    , f_compiler()
-    , f_expr(expr)
 {}
 
-Variant SATCommand::operator()()
+Variant TimeCommand::operator()()
 {
-#if 0
-    Expr_ptr ctx = ExprMgr::INSTANCE().make_main(); // default ctx
-    ADD add = f_compiler.process(ctx, f_expr);
-    f_engine.push(add, 0);
-
-    ostringstream tmp;
-    tmp << f_engine.solve();
-    return Variant(tmp.str());
-#endif
-
-    return Variant ("Unsupported");
+    return Variant(clock());
 }
 
-SATCommand::~SATCommand()
+TimeCommand::~TimeCommand()
 {}
 
-// -- CheckInvspec -------------------------------------------------------------
-CheckInvspecCommand::CheckInvspecCommand(Interpreter& owner, Expr_ptr invariant)
+// -- Check -------------------------------------------------------------
+CheckCommand::CheckCommand(Interpreter& owner, Expr_ptr formula)
     : Command(owner)
-    , f_bmc(* ModelMgr::INSTANCE().model(),
-            invariant)
+    , f_bmc(* ModelMgr::INSTANCE().model(), formula)
 {}
 
-Variant CheckInvspecCommand::operator()()
+Variant CheckCommand::operator()()
 {
     f_bmc.process();
 
@@ -109,38 +95,17 @@ Variant CheckInvspecCommand::operator()()
     return Variant(tmp.str());
 }
 
-CheckInvspecCommand::~CheckInvspecCommand()
-{}
-
-// -- INIT  ----------------------------------------------------------------
-InitCommand::InitCommand(Interpreter& owner,
-                         ExprVector& constraints)
-    : Command(owner)
-    , f_sim(* ModelMgr::INSTANCE().model(),
-            ExprMgr::INSTANCE().make_true(), constraints)
-{}
-
-Variant InitCommand::operator()()
-{
-    f_sim.process();
-
-    ostringstream tmp;
-    tmp << "Simulation is ";
-    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
-
-    return Variant(tmp.str());
-}
-
-InitCommand::~InitCommand()
+CheckCommand::~CheckCommand()
 {}
 
 // -- SIMULATE  ----------------------------------------------------------------
 SimulateCommand::SimulateCommand(Interpreter& owner,
                                  Expr_ptr halt_cond,
+                                 Expr_ptr resume_id,
                                  ExprVector& constraints)
     : Command(owner)
     , f_sim(* ModelMgr::INSTANCE().model(),
-            halt_cond, constraints)
+            halt_cond, resume_id, constraints)
 {}
 
 Variant SimulateCommand::operator()()
@@ -164,7 +129,7 @@ ResumeCommand::ResumeCommand(Interpreter& owner,
                              Expr_ptr witness_id)
     : Command(owner)
     , f_sim(* ModelMgr::INSTANCE().model(),
-            halt_cond, constraints, witness_id)
+            halt_cond, witness_id, constraints)
 {}
 
 Variant ResumeCommand::operator()()

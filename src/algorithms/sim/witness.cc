@@ -1,10 +1,6 @@
 /**
- *  @file BMC CEX
- *  @brief BMC CounterEXample extraction class
- *
- *  This module contains definitions and services that implements
- *  extraction of a CEX (CounterEXample) witness for SAT BMC
- *  algorithms.
+ *  @file BMC Simulation witnesses
+ *  @brief BMC Simulation witnesses
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -54,12 +50,9 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t
             /* time it, and fetch encoding for enc mgr */
             FQExpr key(symb->ctx(), symb->expr());
             IEncoding_ptr enc = enc_mgr.find_encoding(key);
-            if ( NULL == enc ) {
-                // TRACE << symb->ctx()
-                //       << "::" << symb->expr()
-                //       << " not in COI, skipping..."
-                //       << endl;
 
+            /* not in COI, skipping... */
+            if ( NULL == enc ) {
                 continue;
             }
 

@@ -62,3 +62,5 @@ const char bold_purple[] = { ESC, '[', '1', ';', '3', '5', 'm', 0 };
 const char bold_cyan[] = { ESC, '[', '1', ';', '3', '6', 'm', 0 };
 const char bold_light_gray[] = { ESC, '[', '1', ';', '3', '7', 'm', 0 };
 const char bold_dark_gray[] = { ESC, '[', '1', ';', '3', '8', 'm', 0 };
+
+volatile sig_atomic_t sigint_caught = 0;

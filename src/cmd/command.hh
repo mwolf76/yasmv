@@ -56,7 +56,6 @@ class LoadModelCommand : public Command {
 public:
     // from FILE
     LoadModelCommand(Interpreter& owner, const string& filename);
-
     virtual ~LoadModelCommand();
 
     Variant virtual operator()();
@@ -65,43 +64,23 @@ private:
     string f_filename;
 };
 
-class SATCommand : public Command {
+class HelpCommand : public Command {
 public:
-    SATCommand(Interpreter& owner, Expr_ptr expr);
-    virtual ~SATCommand();
+    HelpCommand(Interpreter& owner, Atom topic);
+    virtual ~HelpCommand();
 
     Variant virtual operator()();
 
 private:
-    // SAT machinery
-    Minisat::DDTermFactory f_factory;
-    Minisat::SAT f_engine;
-    Compiler f_compiler;
-
-    // the expr to solve
-    Expr_ptr f_expr;
+    Atom f_topic;
 };
 
-/* Initiates a new simulation with given constraint. Simulation will
-   autmatically halt on the initial state. */
-class InitCommand : public Command {
+class TimeCommand : public Command {
 public:
-    InitCommand(Interpreter& owner,
-                ExprVector& constraints);
-
-    virtual ~InitCommand();
+    TimeCommand(Interpreter& owner);
+    virtual ~TimeCommand();
 
     Variant virtual operator()();
-
-private:
-    // Simulation machinery
-    Simulation f_sim;
-
-    // Simulation constraints
-    Expr_ptr f_expr;
-
-    // HALT condition
-    Expr_ptr f_halt;
 };
 
 /* Performs a new simulation with given constraints and halting
@@ -110,7 +89,8 @@ private:
 class SimulateCommand : public Command {
 public:
     SimulateCommand(Interpreter& owner,
-                    Expr_ptr halt_condition,
+                    Expr_ptr halt_cond,
+                    Expr_ptr resume_id,
                     ExprVector& constraints);
 
     virtual ~SimulateCommand();
@@ -126,6 +106,9 @@ private:
 
     // HALT condition
     Expr_ptr f_halt;
+
+    // Witness id
+    Expr_ptr f_witness;
 };
 
 
@@ -157,10 +140,10 @@ private:
     Expr_ptr f_pause;
 };
 
-class CheckInvspecCommand : public Command {
+class CheckCommand : public Command {
 public:
-    CheckInvspecCommand(Interpreter& owner, Expr_ptr expr);
-    virtual ~CheckInvspecCommand();
+    CheckCommand(Interpreter& owner, Expr_ptr expr);
+    virtual ~CheckCommand();
 
     Variant virtual operator()();
 
@@ -168,16 +151,8 @@ private:
     // BMC machinery
     BMC f_bmc;
 
-    // the invariant expr
-    Expr_ptr f_expr;
-};
-
-class NowCommand : public Command {
-public:
-    NowCommand(Interpreter& owner);
-    virtual ~NowCommand();
-
-    Variant virtual operator()();
+    // the formula to be checked
+    Expr_ptr f_formula;
 };
 
 class FormatCommand : public Command {

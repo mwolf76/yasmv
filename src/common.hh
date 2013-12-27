@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <csignal>
 
 /* custom C definitions */
 #include <cdefs.h>
@@ -160,6 +161,8 @@ extern const char bold_purple[];
 extern const char bold_cyan[];
 extern const char bold_light_gray[];
 extern const char bold_dark_gray[];
+
+extern volatile sig_atomic_t sigint_caught;
 
 /* internal utils */
 static inline unsigned pow2(unsigned exp)

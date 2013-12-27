@@ -24,8 +24,9 @@
  **/
 #include <base.hh>
 
-Algorithm::Algorithm()
-    : f_mm(ModelMgr::INSTANCE())
+Algorithm::Algorithm(ostream &os)
+    : f_os(os)
+    , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_engine(* new SAT())

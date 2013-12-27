@@ -103,8 +103,19 @@ void batch(Command_ptr cmd)
     }
 }
 
+void sighandler(int signum)
+{
+    if (signum == SIGINT) {
+        cout << endl << "Caught SIGINT signal" << endl;
+        sigint_caught = 1;
+    }
+}
+
 int main(int argc, const char *argv[])
 {
+    /* you may also prefer sigaction() instead of signal() */
+    signal(SIGINT, sighandler);
+
     Interpreter& system = Interpreter::INSTANCE();
 
     heading();

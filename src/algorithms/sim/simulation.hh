@@ -42,8 +42,8 @@ class Simulation : public Algorithm {
 public:
     Simulation(IModel& model,
                Expr_ptr halt_cond,
-               ExprVector& constraints,
-               Expr_ptr witness_id = NULL);
+               Expr_ptr witness_id,
+               ExprVector& constraints);
 
     ~Simulation();
 

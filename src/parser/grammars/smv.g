@@ -149,20 +149,17 @@ cmd returns [Command_ptr res]
  QUIT [-r retcode], terminates the program
 */
 commands returns [Command_ptr res]
-    :  c=assert_command
+    :  c=help_command
        { $res = c; }
 
-    |  c=clk_command
+    |  c=check_command
        { $res = c; }
 
-    |  c=sat_command
+    |  c=time_command
        { $res = c; }
 
     |  c=model_command
        { $res = c; }
-
-    | c=init_command
-      { $res = c; }
 
     |  c=simulate_command
        { $res = c; }
@@ -171,13 +168,22 @@ commands returns [Command_ptr res]
         { $res = c; }
     ;
 
-assert_command returns [Command_ptr res]
-    :   'ASSERT' expr=toplevel_expression
-        { $res = cm.make_check_invspec(expr); }
+help_command returns [Command_ptr res]
+@init {
+    Atom topic;
+}
+    : 'help'
+      ( IDENTIFIER { topic = (const char *) $IDENTIFIER.text->chars; } )?
+      { $res = cm.make_help(topic); }
     ;
 
-clk_command returns [Command_ptr res]
-    : 'CLK' { $res = cm.make_now(); }
+check_command returns [Command_ptr res]
+    :   'check' expr=toplevel_expression
+        { $res = cm.make_check(expr); }
+    ;
+
+time_command returns [Command_ptr res]
+    : 'time' { $res = cm.make_time(); }
     ;
 
 model_command returns [Command_ptr res]
@@ -185,36 +191,15 @@ model_command returns [Command_ptr res]
       { $res = cm.make_load_model(fp); }
     ;
 
-sat_command returns [Command_ptr res]
-    : 'SAT' expr=toplevel_expression
-       { $res = cm.make_sat(expr); }
-    ;
-
-init_command returns [Command_ptr res]
-@init {
-    ExprVector constraints;
-}
-    : 'INIT'
-
-        ( 'WITH' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        {$res = cm.make_init( constraints ); }
-    ;
-
 simulate_command returns [Command_ptr res]
 @init {
-    Expr_ptr halt_cond = em.make_false();
+    Expr_ptr halt_cond = NULL;
+    Expr_ptr resume_id = NULL;
     ExprVector constraints;
 }
-    : 'SIMULATE'
+    : 'simulate'
 
-        ( 'WITH' expr=toplevel_expression
+        ( 'with' expr=toplevel_expression
           { constraints.push_back( expr ); }
 
           ( ',' expr=toplevel_expression
@@ -222,37 +207,21 @@ simulate_command returns [Command_ptr res]
           ) *
         ) ?
 
-        ( 'HALT' 'ON' expr=toplevel_expression
-          { halt_cond = expr; }
+        ( 'halt'
+            ( 'on'     expr=toplevel_expression { halt_cond = expr; } )
+        |   ( 'after'  expr=constant            { halt_cond = expr; } )
+
         ) ?
 
-        {$res = cm.make_simulate( halt_cond, constraints ); }
-    ;
+        (  'resume' wid=identifier
+           { resume_id = wid; }
+        )?
 
-resume_command returns [Command_ptr res]
-@init {
-    Expr_ptr halt_cond = em.make_false();
-    ExprVector constraints;
-}
-    : 'RESUME' wid=identifier
-
-        ( 'WITH' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        ( 'HALT' 'ON' expr=toplevel_expression
-          { halt_cond = expr; }
-        ) ?
-
-        {$res = cm.make_resume( halt_cond, constraints, wid); }
+        { $res = cm.make_simulate( halt_cond, resume_id, constraints ); }
     ;
 
 quit_command returns [Command_ptr res]
-    :  'QUIT'
+    :  'quit'
        { $res = cm.make_quit(); }
     ;
 
@@ -536,16 +505,16 @@ relational_expression returns [Expr_ptr res]
 
     (
       '<' rhs=shift_expression
-     { $res = em.make_lt($res, rhs); }
+      { $res = em.make_lt($res, rhs); }
 
     | '<=' rhs=shift_expression
-     { $res = em.make_le($res, rhs); }
+      { $res = em.make_le($res, rhs); }
 
     | '>=' rhs=shift_expression
-     { $res = em.make_ge($res, rhs); }
+      { $res = em.make_ge($res, rhs); }
 
     | '>' rhs=shift_expression
-     { $res = em.make_gt($res, rhs); }
+      { $res = em.make_gt($res, rhs); }
     )*
 	;
 
@@ -560,7 +529,6 @@ shift_expression returns [Expr_ptr res]
 
     | '>>' rhs=additive_expression
        { $res = em.make_rshift($res, rhs); }
-
     )*
 	;
 
@@ -621,7 +589,6 @@ unary_expression returns [Expr_ptr res]
 
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
-
 	;
 
 actual_params returns [Expr_ptr res]
@@ -652,10 +619,9 @@ postfix_expression returns [Expr_ptr res]
         '(' rhs=actual_params ')'
         { $res = em.make_params($res, rhs); }
 
-        // TODO: nested dot not supported
+        // TODO: nested dot not yet supported
     |   '.' rhs=identifier
         { $res = em.make_dot($res, rhs); }
-
     )*
     ;
 
@@ -958,7 +924,7 @@ DECIMAL_LITERAL
 
 OCTAL_LITERAL
    : ZERO OCTAL_DIGIT+
-    ;
+   ;
 
 fragment OCTAL_DIGIT
    : ZERO | '1' .. '7'

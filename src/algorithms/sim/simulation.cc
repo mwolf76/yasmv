@@ -27,17 +27,16 @@
 
 Simulation::Simulation(IModel& model,
                        Expr_ptr halt_cond,
-                       ExprVector& constraints,
-                       Expr_ptr witness_id)
+                       Expr_ptr resume_id,
+                       ExprVector& constraints)
     : Algorithm()
     , f_model(model)
     , f_witness(NULL)
     , f_halt_cond(halt_cond)
     , f_constraints(constraints)
 {
-    /* Resuming a simulation requires given witness to be SAT */
-    if (witness_id) {
-        Witness& w = WitnessMgr::INSTANCE().witness( witness_id );
+    if (resume_id) {
+        Witness& w = WitnessMgr::INSTANCE().witness( resume_id );
         set_witness(w);
     }
 }
@@ -127,7 +126,7 @@ void Simulation::process()
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
-    bool halt = false;
+    bool halt = false; sigint_caught = 0;
     step_t k  = 0;
 
     set_status( SIMULATION_SAT ); // optimic assumption
@@ -164,13 +163,29 @@ void Simulation::process()
             do {
                 assert_fsm_trans(k ++);
                 assert_fsm_invar(k);
-                TRACE << "Simulating step " << k << endl;
+                os () << "-- completed step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
                     Witness_ptr w = new SimulationWitness( model(), engine(), k);
 
+                    // SymbIter vars( model(), NULL );
+                    // bool first = true;
+                    // while (vars.has_next()) {
+                    //     ISymbol_ptr symb = vars.next();
+                    //     FQExpr key(symb->ctx(), symb->expr(), k-1);
+
+                    //     if (first) {
+                    //         os() << "-- " << k << " --" << endl;
+                    //         first = false;
+                    //     }
+                    //     os() << symb->expr() << "=" << w->value(key)
+                    //          << endl;
+                    // }
+
                     witness().extend(*w);
-                    halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
+
+                    /* eval halt condition */
+                    halt = sigint_caught || wm.eval ( witness(), em.make_main(), f_halt_cond, k);
                 }
             } while (STATUS_SAT == engine().status() && ! halt);
         }
