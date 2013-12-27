@@ -4,18 +4,21 @@ TODO
 High priority tasks:
 --------------------
 
-* Consolidate Unit-testing [maintenance]
-* LTL model checking support w/ SBMC [core]
+* Threading model (boost)
+* Unified checking algorithm (i.e.)
+- propositional formulas (SAT on initial states only)
+- invariant properties (G <formula>)
+- full LTL properties
 * Verbosity levels and Colorized output [usability]
-* Packages refactoring [walkers, exceptions] [maintenance]
+* Consolidate Unit-testing [maintenance]
 
 Medium priority tasks:
 ----------------------
 
 * Efficient CNFization algorithm [core]
-* Invariant checking algorithms (k-induction, interpolants, ...) [core]
 * CEGAR, COI [core]
 * Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
+* Readline support
 
 Low priority tasks:
 -------------------

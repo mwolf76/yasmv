@@ -71,10 +71,9 @@ using boost::unordered_set;
 #include <boost/unordered_map.hpp>
 using boost::unordered_map;
 
-#include <boost/regex.hpp>
-using boost::regex;
-using boost::cmatch;
-using boost::regex_match;
+#include <boost/thread.hpp>
+using boost::thread;
+using boost::thread_interrupted;
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>

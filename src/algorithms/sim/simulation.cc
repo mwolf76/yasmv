@@ -58,6 +58,9 @@ void Simulation::set_witness(Witness& witness)
 
 void Simulation::process()
 {
+    clock_t t0 = clock(), t1;
+    double secs;
+
     /* ensure internal structures are empty */
     assert( 0 == f_init_adds.size());
     assert( 0 == f_invar_adds.size());
@@ -149,8 +152,12 @@ void Simulation::process()
     }
 
     if (STATUS_SAT == engine().solve()) {
-        Witness_ptr w = new SimulationWitness( model(), engine(), k);
+        t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+        os () << "-- simulation initialized, took " << secs
+              << " seconds" << endl;
+        t0 = t1; // resetting clock
 
+        Witness_ptr w = new SimulationWitness( model(), engine(), k);
         if (! has_witness()) {
             set_witness(*w);
         }
@@ -158,34 +165,51 @@ void Simulation::process()
             witness().extend(*w);
         }
 
-        halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
+        /* HALT condition can either be:
+           1. a boolean formula; (halts when true)
+           2. a non-negative integer constant; (number of steps to be executed)
+           3. NULL (no halt condition)
+        */
+        if (sigint_caught) {
+            halt = true;
+        }
+        else if (NULL != f_halt_cond) {
+            if ( em.is_constant( f_halt_cond)) {
+                halt = (0 == f_halt_cond->value());
+                f_halt_cond = em.make_const( f_halt_cond->value() -1);
+            }
+            else {
+                halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
+            }
+        }
         if (!halt) {
+
             do {
+                t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+                os () << "-- completed step " << 1 + k
+                      << ", took " << secs << " seconds"
+                      << endl;
+                t0 = t1; // resetting clock
+
                 assert_fsm_trans(k ++);
                 assert_fsm_invar(k);
-                os () << "-- completed step " << k << endl;
 
                 if (STATUS_SAT == engine().solve()) {
                     Witness_ptr w = new SimulationWitness( model(), engine(), k);
-
-                    // SymbIter vars( model(), NULL );
-                    // bool first = true;
-                    // while (vars.has_next()) {
-                    //     ISymbol_ptr symb = vars.next();
-                    //     FQExpr key(symb->ctx(), symb->expr(), k-1);
-
-                    //     if (first) {
-                    //         os() << "-- " << k << " --" << endl;
-                    //         first = false;
-                    //     }
-                    //     os() << symb->expr() << "=" << w->value(key)
-                    //          << endl;
-                    // }
-
                     witness().extend(*w);
 
-                    /* eval halt condition */
-                    halt = sigint_caught || wm.eval ( witness(), em.make_main(), f_halt_cond, k);
+                    if (sigint_caught) {
+                        halt = true;
+                    }
+                    if (NULL != f_halt_cond) {
+                        if ( em.is_constant( f_halt_cond)) {
+                            halt = (0 == f_halt_cond->value());
+                            f_halt_cond = em.make_const( f_halt_cond->value() -1);
+                        }
+                        else {
+                            halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
+                        }
+                    }
                 }
             } while (STATUS_SAT == engine().status() && ! halt);
         }

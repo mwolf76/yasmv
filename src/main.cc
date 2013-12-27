@@ -111,16 +111,32 @@ void sighandler(int signum)
     }
 }
 
+// run each command in a separate thread
+void process()
+{
+    Interpreter& system = Interpreter::INSTANCE();
+
+    Variant& res = system();
+    bool color (OptsMgr::INSTANCE().color());
+    if (color) {
+        cout << endl << yellow << "<< "
+             << res << normal << endl;
+    }
+    else {
+        cout << endl << "<< " << res
+             << endl;
+    }
+}
+
 int main(int argc, const char *argv[])
 {
+    heading();
+
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGINT, sighandler);
 
     Interpreter& system = Interpreter::INSTANCE();
-
-    heading();
     try {
-
         // parse command line options
         OptsMgr& opts_mgr = OptsMgr::INSTANCE();
         opts_mgr.parse_command_line(argc, argv);
@@ -139,16 +155,9 @@ int main(int argc, const char *argv[])
 
         // interactive cmd loop
         do {
-            Variant& res = system();
-            bool color (OptsMgr::INSTANCE().color());
-            if (color) {
-                cout << endl << yellow << "<< "
-                     << res << normal << endl;
-            }
-            else {
-                cout << endl << "<< " << res
-                     << endl;
-            }
+            thread t(&process);
+
+            t.join();
         } while (! system.is_leaving());
     }
 

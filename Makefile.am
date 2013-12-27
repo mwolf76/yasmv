@@ -55,7 +55,8 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/dd/libcudd.la				\
 	$(top_builddir)/src/sat/libminisat.la				\
 	$(top_builddir)/src/dd/libcudd.la -lantlr3c			\
-	$(BOOST_PROGRAM_OPTIONS_LIBS)
+	$(BOOST_PROGRAM_OPTIONS_LIBS) 					\
+	$(BOOST_THREAD_LIBS)
 
 tests_SOURCES = src/opts.cc s $(top_srcdir)/src/tests.cc src/parse.cc	\
 	src/common.cc $(top_srcdir)/src/expr/tests/test_expr.cc		\
