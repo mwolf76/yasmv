@@ -29,9 +29,7 @@ Simulation::Simulation(IModel& model,
                        Expr_ptr halt_cond,
                        Expr_ptr resume_id,
                        ExprVector& constraints)
-    : Algorithm()
-    , f_model(model)
-    , f_witness(NULL)
+    : Algorithm(model)
     , f_halt_cond(halt_cond)
     , f_constraints(constraints)
 {
@@ -47,15 +45,6 @@ Simulation::~Simulation()
 void Simulation::set_status(simulation_status_t status)
 { f_status = status; }
 
-void Simulation::set_witness(Witness& witness)
-{
-    if (f_witness) {
-        delete f_witness;
-    }
-
-    f_witness = & witness;
-}
-
 void Simulation::process()
 {
     clock_t t0 = clock(), t1;
@@ -66,66 +55,13 @@ void Simulation::process()
     assert( 0 == f_invar_adds.size());
     assert( 0 == f_trans_adds.size());
 
-    Compiler& cmpl(compiler());
-    for (int pass = 0; pass < 2; ++ pass) {
-        bool first_pass = (0 == pass);
+    TRACE << "Phase 1" << endl;
+    prepare();
 
-        const Modules& modules = f_model.modules();
-        for (Modules::const_iterator m = modules.begin();
-             m != modules.end(); ++ m) {
+    TRACE << "Phase 2" << endl;
+    compile();
 
-            Module& module = dynamic_cast <Module&> (*m->second);
-
-            /* INIT */
-            const ExprVector init = module.init();
-            for (ExprVector::const_iterator init_eye = init.begin();
-                 init_eye != init.end(); ++ init_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*init_eye);
-
-                cmpl.process(ctx, body, first_pass);
-                if (! first_pass) {
-                    while (cmpl.has_next()) {
-                        f_init_adds.push_back(cmpl.next());
-                    }
-                }
-            }
-
-            /* INVAR */
-            const ExprVector invar = module.invar();
-            for (ExprVector::const_iterator invar_eye = invar.begin();
-                 invar_eye != invar.end(); ++ invar_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*invar_eye);
-
-                cmpl.process(ctx, body, first_pass);
-                if (! first_pass) {
-                    while (cmpl.has_next()) {
-                        f_invar_adds.push_back(cmpl.next());
-                    }
-                }
-            }
-
-            /* TRANS */
-            const ExprVector trans = module.trans();
-            for (ExprVector::const_iterator trans_eye = trans.begin();
-                 trans_eye != trans.end(); ++ trans_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*trans_eye);
-
-                cmpl.process(ctx, body, first_pass);
-                if (! first_pass) {
-                    while (cmpl.has_next()) {
-                        f_trans_adds.push_back(cmpl.next());
-                    }
-                }
-            }
-        }
-    }
-
+    TRACE << "Phase 3" << endl;
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 

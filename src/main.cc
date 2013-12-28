@@ -52,8 +52,6 @@
 
 #include <model.hh>
 
-#include <mc.hh>
-
 #include <opts.hh>
 
 #include <smvLexer.h>

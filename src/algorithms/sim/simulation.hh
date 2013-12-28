@@ -52,27 +52,10 @@ public:
     inline simulation_status_t status() const
     { return f_status; }
 
-    inline IModel& model()
-    { return f_model; }
-
-    inline bool has_witness() const
-    { return NULL != f_witness; }
-
-    inline Witness& witness()
-    {
-        assert( f_witness );
-        return * f_witness;
-    }
-
     const inline Expr_ptr halt_cond() const
     { return f_halt_cond; }
 
-    void set_witness(Witness& witness);
-
 private:
-    IModel& f_model;
-    Witness* f_witness;
-
     Expr_ptr f_halt_cond;
     ExprVector f_constraints;
 

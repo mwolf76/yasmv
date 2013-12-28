@@ -24,8 +24,10 @@
 #include <command.hh>
 
 #include <expr.hh>
-#include <mc.hh>
-#include <sat.hh>
+
+/* algorithms */
+#include <bmc/bmc.hh>
+#include <sim/simulation.hh>
 
 Command::Command(Interpreter& owner)
     : f_owner(owner)

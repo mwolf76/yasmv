@@ -1,10 +1,6 @@
 /**
- *  @file BMC Algorithm.hh
- *  @brief SAT BMC Algorithm
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  @file bmc.hh
+ *  @brief SAT-based BMC Algorithms for property checking
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -27,16 +23,45 @@
 #ifndef BMC_ALGORITHM_H
 #define BMC_ALGORITHM_H
 
-#include <mc.hh>
+#include <base.hh>
 #include <witness.hh>
 
-class BMC : public MCAlgorithm {
+#include <bmc/analyzer.hh>
+
+class BMC : public Algorithm {
 
 public:
     BMC(IModel& model, Expr_ptr formula);
     ~BMC();
 
     void process();
+
+    mc_status_t status() const
+    { return f_status; }
+
+    Expr_ptr property() const
+    { return f_property; }
+
+private:
+    Expr_ptr  f_property;
+    formula_t f_strategy;
+    mc_status_t f_status;
+
+    ADDVector f_violation_adds;
+    ADDVector f_invariant_adds;
+
+    /* pure booleans, just initial states */
+    void bmc_propositional_check();
+
+    /* invariant checking */
+    void bmc_invarspec_check();
+
+    /* full LTL checking */
+    void bmc_ltlspec_check();
+
+    // overrides
+    void prepare();
+    void compile();
 };
 
 /* Specialized for BMC ctx */

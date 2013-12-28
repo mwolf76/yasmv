@@ -23,10 +23,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <mc.hh>
+#include <base.hh>
 #include <bmc.hh>
-
-using Minisat::Var;
 
 BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                                      Minisat::SAT& engine, unsigned k,

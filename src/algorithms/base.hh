@@ -49,16 +49,30 @@ using Minisat::MAINGROUP;
 using Minisat::color_t;
 using Minisat::BACKGROUND;
 
+using Minisat::Var;
 using Minisat::SAT;
 using Minisat::STATUS_SAT;
 using Minisat::STATUS_UNSAT;
 
+typedef enum {
+    MC_FALSE,
+    MC_TRUE,
+    MC_UNKNOWN,
+} mc_status_t;
+
 class Algorithm {
+
 public:
-    Algorithm(ostream& os = std::cout);
+    Algorithm(IModel& model, ostream& os = std::cout);
     virtual ~Algorithm();
 
-    // actual algorithm
+    /* Build encodings */
+    virtual void prepare();
+
+    /* Perform compilation */
+    virtual void compile();
+
+    /* Actual MC algorithm (abstract) */
     virtual void process() =0;
 
     // algorithm abstract param interface (key -> value map)
@@ -68,8 +82,21 @@ public:
     inline Compiler& compiler()
     { return f_compiler; }
 
-protected:
+    mc_status_t status() const;
 
+    inline bool has_witness() const
+    { return NULL != f_witness; }
+
+    inline void set_witness(Witness &witness)
+    { f_witness = &witness; }
+
+    inline Witness& witness() const
+    { assert (NULL != f_witness); return *f_witness; }
+
+    inline IModel& model()
+    { return f_model; }
+
+protected:
     inline ModelMgr& mm()
     { return f_mm; }
 
@@ -85,7 +112,28 @@ protected:
     inline ostream& os()
     { return f_os; }
 
+    /* FSM */
+    void assert_fsm_init(step_t time,
+                         group_t group = MAINGROUP,
+                         color_t color = BACKGROUND);
+
+    void assert_fsm_invar(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    void assert_fsm_trans(step_t time,
+                          group_t group = MAINGROUP,
+                          color_t color = BACKGROUND);
+
+    /* Generic formulas */
+    void assert_formula(step_t time, ADDVector& adds,
+                        group_t group = MAINGROUP,
+                        color_t color = BACKGROUND);
+
 private:
+    /* Model */
+    IModel& f_model;
+
     // output
     ostream& f_os;
 
@@ -102,6 +150,12 @@ private:
 
     /* Parameters */
     ParametersMap f_params;
+
+    ADDVector f_init_adds;
+    ADDVector f_invar_adds;
+    ADDVector f_trans_adds;
+
+    Witness_ptr f_witness;
 };
 
 #endif

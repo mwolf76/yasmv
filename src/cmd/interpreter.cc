@@ -74,34 +74,40 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 Variant& Interpreter::operator()()
 {
     prompt();
-    string cmdLine;
-    if (std::getline(*f_in, cmdLine)) {
-        Command_ptr cmd = parseCommand(cmdLine.c_str());
-        if (NULL != cmd) {
 
-            bool color (OptsMgr::INSTANCE().color());
-            if (color) {
-                cout << green
-                     << "<< "
-                     << cmdLine
-                     << normal
-                     << endl;
+    try {
+        string cmdLine;
+        if (std::getline(*f_in, cmdLine)) {
+            Command_ptr cmd = parseCommand(cmdLine.c_str());
+            if (NULL != cmd) {
+
+                bool color (OptsMgr::INSTANCE().color());
+                if (color) {
+                    cout << green
+                         << "<< "
+                         << cmdLine
+                         << normal
+                         << endl;
+                }
+                else {
+                    cout << "<< "
+                         << cmdLine
+                         << endl;
+                }
+
+                (*this)(cmd);
             }
             else {
-                cout << "<< "
-                     << cmdLine
-                     << endl;
+                f_last_result = Variant("Parsing Error");
             }
-
-            (*this)(cmd);
         }
         else {
-            f_last_result = Variant("Parsing Error");
+            f_last_result = Variant("BYE");
+            f_leaving = true;
         }
     }
-    else {
-        f_last_result = Variant("BYE");
-        f_leaving = true;
+    catch (Exception &e) {
+        f_last_result = Variant("Caught exception");
     }
 
     return f_last_result;
