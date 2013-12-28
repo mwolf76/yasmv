@@ -50,7 +50,7 @@ Variant LoadModelCommand::operator()()
     // model analysis
     bool status = ModelMgr::INSTANCE().analyze();
 
-    return Variant( status ? "OK" : "ERROR" );
+    return Variant( status ? "Ok" : "ERROR" );
 }
 
 LoadModelCommand::~LoadModelCommand()
@@ -81,6 +81,21 @@ Variant TimeCommand::operator()()
 }
 
 TimeCommand::~TimeCommand()
+{}
+
+// -- Prepare -------------------------------------------------------------
+PrepareCommand::PrepareCommand(Interpreter& owner)
+    : Command(owner)
+    , f_prepare(* ModelMgr::INSTANCE().model())
+{}
+
+Variant PrepareCommand::operator()()
+{
+    f_prepare.process();
+    return Variant("Ok");
+}
+
+PrepareCommand::~PrepareCommand()
 {}
 
 // -- Check -------------------------------------------------------------
@@ -115,8 +130,7 @@ Variant SimulateCommand::operator()()
     f_sim.process();
 
     ostringstream tmp;
-    tmp << "Simulation is ";
-    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
+    tmp << "Simulation halted, check witness " << f_sim.witness().id();
 
     return Variant(tmp.str());
 }

@@ -1,6 +1,10 @@
 /**
- *  @file simulation.hh
- *  @brief SAT-based BMC simulation algorithm
+ *  @file Prepare Algorithm.hh
+ *  @brief SAT Prepare Algorithm
+ *
+ *  This module contains definitions and services that implement an
+ *  optimized storage for expressions. Expressions are stored in a
+ *  Directed Acyclic Graph (DAG) for data sharing.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,47 +24,17 @@
  *
  **/
 
-#ifndef SIMULATION_ALGORITHM_H
-#define SIMULATION_ALGORITHM_H
+#ifndef PREPARE_ALGORITHM_H
+#define PREPARE_ALGORITHM_H
 
 #include <base.hh>
-#include <witness.hh>
-#include <witness_mgr.hh>
 
-typedef enum {
-    SIMULATION_UNSAT,
-    SIMULATION_SAT,
-    SIMULATION_UNKNOWN,
-} simulation_status_t;
-
-class Simulation : public Algorithm {
+class Prepare : public Algorithm {
 
 public:
-    Simulation(IModel& model, Expr_ptr halt_cond,
-               Expr_ptr witness_id, ExprVector& constraints);
-
-    ~Simulation();
+    Prepare(IModel& model);
+    ~Prepare();
 
     void process();
-
-    inline simulation_status_t status() const
-    { return f_status; }
-
-    const inline Expr_ptr halt_cond() const
-    { return f_halt_cond; }
-
-private:
-    Expr_ptr f_halt_cond;
-    ExprVector f_constraints;
-
-    simulation_status_t f_status;
-    void set_status(simulation_status_t status);
 };
-
-class SimulationWitness : public Witness {
-
-public:
-    SimulationWitness(IModel& model, SAT& engine, step_t k);
-};
-
 #endif

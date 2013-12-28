@@ -2,9 +2,6 @@
  *  @file Base Algorithm.hh
  *  @brief Base Algorithm
  *
- *  This module contains definitions and services that implement an
- *  abstract algorithm.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or

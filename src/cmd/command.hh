@@ -29,6 +29,8 @@
 #include <compiler/compiler.hh>
 #include <sat.hh>
 
+/* algorithms */
+#include <prepare.hh>
 #include <bmc/bmc.hh>
 #include <sim/simulation.hh>
 
@@ -81,6 +83,17 @@ public:
     virtual ~TimeCommand();
 
     Variant virtual operator()();
+};
+
+class PrepareCommand : public Command {
+public:
+    PrepareCommand(Interpreter& owner);
+    virtual ~PrepareCommand();
+
+    Variant virtual operator()();
+
+private:
+    Prepare f_prepare;
 };
 
 /* Performs a new simulation with given constraints and halting

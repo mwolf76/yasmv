@@ -1,6 +1,6 @@
 /**
  *  @file MC Algorithm.hh
- *  @brief SAT Simulation Algorithm
+ *  @brief SAT-based BMC simulation algorithm
  *
  *  This module contains definitions and services that implement an
  *  optimized storage for expressions. Expressions are stored in a
@@ -113,8 +113,8 @@ void Simulation::process()
                 halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
             }
         }
-        if (!halt) {
 
+        if (!halt) {
             do {
                 t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
                 os () << "-- completed step " << 1 + k

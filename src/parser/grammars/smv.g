@@ -158,6 +158,9 @@ commands returns [Command_ptr res]
     |  c=time_command
        { $res = c; }
 
+    |  c=prepare_command
+       { $res = c; }
+
     |  c=model_command
        { $res = c; }
 
@@ -165,7 +168,7 @@ commands returns [Command_ptr res]
        { $res = c; }
 
     |  c=quit_command
-        { $res = c; }
+       { $res = c; }
     ;
 
 help_command returns [Command_ptr res]
@@ -177,18 +180,23 @@ help_command returns [Command_ptr res]
       { $res = cm.make_help(topic); }
     ;
 
-check_command returns [Command_ptr res]
-    :   'check' expr=toplevel_expression
-        { $res = cm.make_check(expr); }
-    ;
-
 time_command returns [Command_ptr res]
     : 'time' { $res = cm.make_time(); }
+    ;
+
+prepare_command returns [Command_ptr res]
+    : 'prepare' { $res = cm.make_prepare(); }
     ;
 
 model_command returns [Command_ptr res]
     : 'MODEL' fp=filepath
       { $res = cm.make_load_model(fp); }
+    ;
+
+
+check_command returns [Command_ptr res]
+    :   'check' expr=toplevel_expression
+        { $res = cm.make_check(expr); }
     ;
 
 simulate_command returns [Command_ptr res]
