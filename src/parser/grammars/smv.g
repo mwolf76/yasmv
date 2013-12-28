@@ -167,6 +167,9 @@ commands returns [Command_ptr res]
     |  c=simulate_command
        { $res = c; }
 
+    |  c=witness_command
+       { $res = c; }
+
     |  c=quit_command
        { $res = c; }
     ;
@@ -189,14 +192,25 @@ prepare_command returns [Command_ptr res]
     ;
 
 model_command returns [Command_ptr res]
-    : 'MODEL' fp=filepath
+    : 'model' fp=filepath
       { $res = cm.make_load_model(fp); }
     ;
-
 
 check_command returns [Command_ptr res]
     :   'check' expr=toplevel_expression
         { $res = cm.make_check(expr); }
+    ;
+
+witness_command returns [Command_ptr res]
+    :   'witness' (
+
+            'list'
+            { $res = cm.make_witness_list(); }
+
+        |   'show' wid=identifier
+            { $res = cm.make_witness_show(wid); }
+
+        )
     ;
 
 simulate_command returns [Command_ptr res]

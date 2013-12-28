@@ -21,12 +21,14 @@
  **/
 #include <simulation.hh>
 
-using Minisat::Var;
+static unsigned progressive = 0;
+const char *prfx = "sim_";
 
+using Minisat::Var;
 SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t k)
     : Witness()
 {
-    ostringstream oss; oss << "BMC SIM witness";
+    ostringstream oss; oss << prfx << (++ progressive);
     set_id(oss.str());
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());

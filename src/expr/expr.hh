@@ -111,10 +111,10 @@ typedef struct Expr_TAG {
     } u;
 
     // accessors
-    inline ExprType symb()
+    inline ExprType symb() const
     { return f_symb; }
 
-    inline Atom& atom()
+    inline Atom& atom() const
     {
         assert (IDENT == f_symb);
         return *u.f_atom;

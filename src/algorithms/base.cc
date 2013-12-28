@@ -28,6 +28,7 @@ Algorithm::Algorithm(IModel& model, ostream &os)
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_engine(* new SAT())
+    , f_witness(NULL)
 {
     set_param("alg_name", "test");
     DEBUG  << "Creating algorithm instance "

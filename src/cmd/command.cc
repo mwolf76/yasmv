@@ -130,36 +130,13 @@ Variant SimulateCommand::operator()()
     f_sim.process();
 
     ostringstream tmp;
-    tmp << "Simulation halted, check witness " << f_sim.witness().id();
+    tmp << "Simulation halted, see witness '"
+        << f_sim.witness().id() << "'";
 
     return Variant(tmp.str());
 }
 
 SimulateCommand::~SimulateCommand()
-{}
-
-// -- RESUME  ----------------------------------------------------------------
-ResumeCommand::ResumeCommand(Interpreter& owner,
-                             Expr_ptr halt_cond,
-                             ExprVector& constraints,
-                             Expr_ptr witness_id)
-    : Command(owner)
-    , f_sim(* ModelMgr::INSTANCE().model(),
-            halt_cond, witness_id, constraints)
-{}
-
-Variant ResumeCommand::operator()()
-{
-    f_sim.process();
-
-    ostringstream tmp;
-    tmp << "Simulation is ";
-    tmp << ((f_sim.status() == SIMULATION_SAT) ? "SAT" : "UNSAT");
-
-    return Variant(tmp.str());
-}
-
-ResumeCommand::~ResumeCommand()
 {}
 
 // -- QUIT ---------------------------------------------------------------------
@@ -177,3 +154,52 @@ Variant QuitCommand::operator()()
 
 QuitCommand::~QuitCommand()
 {}
+
+// -- WITNESS  ----------------------------------------------------------------
+WitnessListCommand::WitnessListCommand(Interpreter& owner)
+    : Command(owner)
+{}
+
+Variant WitnessListCommand::operator()()
+{
+    ostream &os(cout);
+
+    const WitnessMap& map(WitnessMgr::INSTANCE().witnesses());
+    for (WitnessMap::const_iterator eye = map.begin(); eye != map.end(); ++ eye) {
+        os << (*eye).first << endl;
+    }
+    os << endl;
+
+    return Variant("Ok");
+}
+
+WitnessListCommand::~WitnessListCommand()
+{}
+
+WitnessShowCommand::WitnessShowCommand(Interpreter& owner, Expr_ptr wid)
+    : Command(owner)
+    , f_wid(wid)
+{}
+
+Variant WitnessShowCommand::operator()()
+{
+    ostream &os(cout);
+
+    Witness& w = WitnessMgr::INSTANCE().witness( f_wid );
+    for (step_t k = 0; k < w.size(); ++ k) {
+        os << " -- @ " << 1 + k << " -- " << endl;
+        TimeFrame& tf = w[ k ];
+        SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+        while (symbs.has_next()) {
+            ISymbol_ptr symb = symbs.next();
+            FQExpr key(symb->ctx(), symb->expr(), k);
+            os << symb->expr() << " = " << tf.value(key);
+        }
+    }
+
+    return Variant("Ok");
+}
+
+WitnessShowCommand::~WitnessShowCommand()
+{}
+

@@ -24,6 +24,8 @@
  *
  **/
 #include <expr.hh>
+#include <expr_mgr.hh>
+
 #include <pool.hh>
 
 long ExprHash::operator() (const Expr& k) const

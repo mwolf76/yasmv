@@ -61,6 +61,12 @@ public:
     inline Command_ptr make_check(Expr_ptr formula)
     { return new CheckCommand(f_interpreter, formula); }
 
+    inline Command_ptr make_witness_list()
+    { return new WitnessListCommand(f_interpreter); }
+
+    inline Command_ptr make_witness_show(Expr_ptr wid)
+    { return new WitnessShowCommand(f_interpreter, wid); }
+
 protected:
     CommandMgr();
     ~CommandMgr();

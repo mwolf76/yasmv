@@ -125,34 +125,6 @@ private:
 };
 
 
-/* Simulates running pf model FSM, w/ given constraints. A non-null
-   witness ID (i.e. a valid identifer) shall be given to indicate the
-   point from which the resumed simulation will begin. */
-class ResumeCommand : public Command {
-public:
-    ResumeCommand(Interpreter& owner,
-                  Expr_ptr halt_condition,
-                  ExprVector& constraints,
-                  Expr_ptr witness_id);
-
-    virtual ~ResumeCommand();
-
-    Variant virtual operator()();
-
-private:
-    // Simulation machinery
-    Simulation f_sim;
-
-    // Simulation constraints
-    Expr_ptr f_expr;
-
-    // HALT condition
-    Expr_ptr f_halt;
-
-    // PAUSE condition
-    Expr_ptr f_pause;
-};
-
 class CheckCommand : public Command {
 public:
     CheckCommand(Interpreter& owner, Expr_ptr expr);
@@ -188,6 +160,23 @@ public:
 
 private:
     int f_retcode;
+};
+
+class WitnessListCommand : public Command {
+public:
+WitnessListCommand(Interpreter& owner);
+virtual ~WitnessListCommand();
+    Variant virtual operator()();
+};
+
+class WitnessShowCommand : public Command {
+public:
+WitnessShowCommand(Interpreter& owner, Expr_ptr wid);
+virtual ~WitnessShowCommand();
+    Variant virtual operator()();
+
+private:
+    Expr_ptr f_wid;
 };
 
 #endif

@@ -71,6 +71,9 @@ using boost::unordered_set;
 #include <boost/unordered_map.hpp>
 using boost::unordered_map;
 
+#include <map>
+using std::map;
+
 #include <boost/thread.hpp>
 using boost::thread;
 using boost::thread_interrupted;

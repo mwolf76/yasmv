@@ -32,7 +32,7 @@ Simulation::Simulation(IModel& model,
     : Algorithm(model)
     , f_halt_cond(halt_cond)
     , f_constraints(constraints)
-{
+ {
     if (resume_id) {
         Witness& w = WitnessMgr::INSTANCE().witness( resume_id );
         set_witness(w);

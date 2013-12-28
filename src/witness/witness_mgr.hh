@@ -2,10 +2,6 @@
  *  @file witness_mgr.hh
  *  @brief Witness module (WitnessMgr class)
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -27,16 +23,58 @@
 #ifndef WITNESS_MGR_H
 #define WITNESS_MGR_H
 
-#include <evaluator.hh>
+#include <expr.hh>
 
 #include <model.hh>
 #include <model_mgr.hh>
 
+#include <evaluator.hh>
 #include <witness.hh>
 
-typedef class WitnessMgr *WitnessMgr_ptr;
-class WitnessMgr  {
+struct IdentifierLess {
+    bool operator() (const Expr_ptr x, const Expr_ptr y) const;
+};
 
+typedef class WitnessMgr *WitnessMgr_ptr;
+typedef map<Expr_ptr, Witness_ptr, IdentifierLess> WitnessMap;
+
+/** Exception classes */
+class WitnessException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
+/** Raised when a given ID is registered more than once */
+class DuplicateWitnessId : public WitnessException {
+    Expr_ptr f_id;
+
+public:
+    DuplicateWitnessId(Expr_ptr id)
+        : f_id(id)
+    {}
+
+    ~DuplicateWitnessId() throw()
+    {}
+
+    const char* what() const throw();
+};
+
+/** Raised when a given ID is searched for and was not registered */
+class UnknownWitnessId : public WitnessException {
+    Expr_ptr f_id;
+
+public:
+    UnknownWitnessId(Expr_ptr id)
+        : f_id(id)
+    {}
+
+    ~UnknownWitnessId() throw()
+    {}
+
+    const char* what() const throw();
+};
+
+class WitnessMgr  {
 public:
     static WitnessMgr& INSTANCE() {
         if (! f_instance) f_instance = new WitnessMgr();
@@ -53,6 +91,9 @@ public:
     inline const value_t eval( Witness&w, Expr_ptr ctx, Expr_ptr formula, step_t k)
     { return f_evaluator.process( w, ctx, formula, k); }
 
+    inline const WitnessMap& witnesses() const
+    { return f_map; }
+
     // get a registered witness
     Witness& witness( Expr_ptr id );
 
@@ -66,8 +107,8 @@ protected:
 private:
     static WitnessMgr_ptr f_instance;
 
-    // auto witness counter
-    unsigned f_auto_index;
+    // Witness register internal map: id -> witness
+    WitnessMap f_map;
 
     // ref to expr manager
     ExprMgr& f_em;
