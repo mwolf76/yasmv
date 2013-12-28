@@ -39,7 +39,6 @@ yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
 	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
-	$(top_builddir)/src/algorithms/kind/libkind.la			\
 	$(top_builddir)/src/algorithms/sim/libsim.la			\
 	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\
@@ -69,7 +68,6 @@ tests_SOURCES = src/opts.cc s $(top_srcdir)/src/tests.cc src/parse.cc	\
 tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/cmd/libcommand.la				\
 	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
-	$(top_builddir)/src/algorithms/kind/libkind.la			\
 	$(top_builddir)/src/algorithms/sim/libsim.la			\
 	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\

@@ -50,11 +50,6 @@ void Simulation::process()
     clock_t t0 = clock(), t1;
     double secs;
 
-    /* ensure internal structures are empty */
-    assert( 0 == f_init_adds.size());
-    assert( 0 == f_invar_adds.size());
-    assert( 0 == f_trans_adds.size());
-
     TRACE << "Phase 1" << endl;
     prepare();
 
@@ -170,59 +165,4 @@ void Simulation::process()
     }
 
     TRACE << "Done." << endl;
-}
-
-void Simulation::assert_fsm_init(step_t time, group_t group, color_t color)
-{
-    clock_t t0 = clock();
-    unsigned n = f_init_adds.size();
-    TRACE << "CNFizing INITs @" << time
-          << "... (" << n << " formulas)"
-          << endl;
-
-    ADDVector::iterator i;
-    for (i = f_init_adds.begin(); f_init_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
-}
-
-void Simulation::assert_fsm_invar(step_t time, group_t group, color_t color)
-{
-    clock_t t0 = clock();
-    unsigned n = f_invar_adds.size();
-    TRACE << "CNFizing INVARs @" << time
-          << "... (" << n << " formulas)"
-          << endl;
-
-    ADDVector::iterator i;
-    for (i = f_invar_adds.begin(); f_invar_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
-}
-
-void Simulation::assert_fsm_trans(step_t time, group_t group, color_t color)
-{
-    clock_t t0 = clock();
-    unsigned n = f_trans_adds.size();
-
-    TRACE << "CNFizing TRANSes @" << time
-          << "... (" << n << " formulas)"
-          << endl;
-
-    ADDVector::iterator i;
-    for (i = f_trans_adds.begin(); f_trans_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
 }
