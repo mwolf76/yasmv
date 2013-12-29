@@ -28,15 +28,16 @@
 #include <witness_mgr.hh>
 
 typedef enum {
-    SIMULATION_UNSAT,
-    SIMULATION_SAT,
-    SIMULATION_UNKNOWN,
+    SIMULATION_DONE,
+    SIMULATION_HALTED,
+    SIMULATION_DEADLOCKED,
+    SIMULATION_INTERRUPTED,
 } simulation_status_t;
 
 class Simulation : public Algorithm {
 
 public:
-    Simulation(IModel& model, Expr_ptr halt_cond,
+    Simulation(IModel& model, Expr_ptr condition,
                Expr_ptr witness_id, ExprVector& constraints);
 
     ~Simulation();
@@ -46,15 +47,14 @@ public:
     inline simulation_status_t status() const
     { return f_status; }
 
-    const inline Expr_ptr halt_cond() const
-    { return f_halt_cond; }
-
 private:
+    /* None of 'em, one of 'em, not both. */
     Expr_ptr f_halt_cond;
+    Expr_ptr f_nsteps;
+
     ExprVector f_constraints;
 
     simulation_status_t f_status;
-    void set_status(simulation_status_t status);
 };
 
 class SimulationWitness : public Witness {

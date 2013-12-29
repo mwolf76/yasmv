@@ -52,8 +52,8 @@ public:
     inline Command_ptr make_load_model(const char *filepath)
     { return new LoadModelCommand(f_interpreter, filepath); }
 
-    inline Command_ptr make_prepare()
-    { return new PrepareCommand(f_interpreter); }
+    inline Command_ptr make_init()
+    { return new InitCommand(f_interpreter); }
 
     inline Command_ptr make_simulate(Expr_ptr halt_cond, Expr_ptr resume_id, ExprVector& constraints)
     { return new SimulateCommand(f_interpreter, halt_cond, resume_id, constraints); }

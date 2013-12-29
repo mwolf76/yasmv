@@ -26,13 +26,23 @@
 #include <sim/simulation.hh>
 
 Simulation::Simulation(IModel& model,
-                       Expr_ptr halt_cond,
+                       Expr_ptr condition,
                        Expr_ptr resume_id,
                        ExprVector& constraints)
     : Algorithm(model)
-    , f_halt_cond(halt_cond)
+    , f_halt_cond( NULL )
+    , f_nsteps( NULL )
     , f_constraints(constraints)
- {
+{
+    ExprMgr& em (ExprMgr::INSTANCE());
+    if (NULL != condition) {
+        if (em.is_constant( condition)) {
+            f_nsteps = condition;
+        }
+        else {
+            f_halt_cond = condition;
+        }
+    }
     if (resume_id) {
         Witness& w = WitnessMgr::INSTANCE().witness( resume_id );
         set_witness(w);
@@ -41,9 +51,6 @@ Simulation::Simulation(IModel& model,
 
 Simulation::~Simulation()
 {}
-
-void Simulation::set_status(simulation_status_t status)
-{ f_status = status; }
 
 void Simulation::process()
 {
@@ -60,10 +67,8 @@ void Simulation::process()
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
-    bool halt = false; sigint_caught = 0;
+    sigint_caught = 0;
     step_t k  = 0;
-
-    set_status( SIMULATION_SAT ); // optimic assumption
 
     // if a witness is already there, we're resuming a previous
     // simulation. Hence, no need for initial states.
@@ -96,73 +101,71 @@ void Simulation::process()
             witness().extend(*w);
         }
 
-        /* HALT condition can either be:
-           1. a boolean formula; (halts when true)
-           2. a non-negative integer constant; (number of steps to be executed)
-           3. NULL (no halt condition)
-        */
+        /* halt simulation? */
         if (sigint_caught) {
-            halt = true;
+            f_status = SIMULATION_INTERRUPTED;
+            return;
         }
-        else if (NULL != f_halt_cond) {
-            if ( em.is_constant( f_halt_cond)) {
-                halt = (0 == f_halt_cond->value());
-                f_halt_cond = em.make_const( f_halt_cond->value() -1);
+        else if (NULL != f_halt_cond && wm.eval ( witness(),
+                                                  em.make_main(),
+                                                  f_halt_cond, k)) {
+            f_status = SIMULATION_HALTED;
+            return;
+        }
+        else if (NULL != f_nsteps) {
+            if (0 == f_nsteps->value()) {
+                f_status = SIMULATION_DONE;
+                return;
+            }
+            f_nsteps = em.make_const( f_nsteps->value() -1);
+        }
+
+        while (1) {
+            t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+            os () << "-- completed step " << 1 + k
+                  << ", took " << secs << " seconds"
+                  << endl;
+            t0 = t1; // resetting clock
+
+            // one more cup of coffe for the road
+            // TODO: SAT restart after a number of steps
+            assert_fsm_trans(k ++);
+            assert_fsm_invar(k);
+
+            if (STATUS_SAT == engine().solve()) {
+                Witness_ptr w = new SimulationWitness( model(), engine(), k);
+                witness().extend(*w);
+
+                if (sigint_caught) {
+                    f_status = SIMULATION_INTERRUPTED;
+                    return;
+                }
+                else if (NULL != f_halt_cond && wm.eval ( witness(),
+                                                          em.make_main(),
+                                                          f_halt_cond, k)) {
+                    f_status = SIMULATION_HALTED;
+                    return;
+                }
+                else if (NULL != f_nsteps) {
+                    if (0 == f_nsteps->value()) {
+                        f_status = SIMULATION_DONE;
+                        return;
+                    }
+                    f_nsteps = em.make_const( f_nsteps->value() -1);
+                }
             }
             else {
-                halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
-            }
-        }
-
-        if (!halt) {
-            do {
-                t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-                os () << "-- completed step " << 1 + k
-                      << ", took " << secs << " seconds"
+                TRACE << "Inconsistency detected in transition relation at step " << k
+                      << ". Simulation is deadlocked."
                       << endl;
-                t0 = t1; // resetting clock
-
-                assert_fsm_trans(k ++);
-                assert_fsm_invar(k);
-
-                if (STATUS_SAT == engine().solve()) {
-                    Witness_ptr w = new SimulationWitness( model(), engine(), k);
-                    witness().extend(*w);
-
-                    if (sigint_caught) {
-                        halt = true;
-                    }
-                    if (NULL != f_halt_cond) {
-                        if ( em.is_constant( f_halt_cond)) {
-                            halt = (0 == f_halt_cond->value());
-                            f_halt_cond = em.make_const( f_halt_cond->value() -1);
-                        }
-                        else {
-                            halt = wm.eval ( witness(), em.make_main(), f_halt_cond, k);
-                        }
-                    }
-                }
-            } while (STATUS_SAT == engine().status() && ! halt);
-        }
-        else {
-            TRACE << "Inconsistency detected in transition relation at step " << k
-                  << ". Simulation aborted."
-                  << endl;
-
-            set_status( SIMULATION_UNSAT );
+                f_status = SIMULATION_DEADLOCKED;
+                return;
+            }
         }
     }
     else {
-        TRACE << "Inconsistency detected in initial states. Simulation aborted."
+        TRACE << "Inconsistency detected in initial states. Simulation is deadlocked."
               << endl;
-
-        set_status( SIMULATION_UNSAT );
+        f_status = SIMULATION_DEADLOCKED;
     }
-
-    if (halt) {
-        TRACE << "Simulation reached HALT condition"
-              << endl;
-    }
-
-    TRACE << "Done." << endl;
 }

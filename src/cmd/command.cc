@@ -83,19 +83,19 @@ Variant TimeCommand::operator()()
 TimeCommand::~TimeCommand()
 {}
 
-// -- Prepare -------------------------------------------------------------
-PrepareCommand::PrepareCommand(Interpreter& owner)
+// -- Init -------------------------------------------------------------
+InitCommand::InitCommand(Interpreter& owner)
     : Command(owner)
-    , f_prepare(* ModelMgr::INSTANCE().model())
+    , f_init(* ModelMgr::INSTANCE().model())
 {}
 
-Variant PrepareCommand::operator()()
+Variant InitCommand::operator()()
 {
-    f_prepare.process();
+    f_init.process();
     return Variant("Ok");
 }
 
-PrepareCommand::~PrepareCommand()
+InitCommand::~InitCommand()
 {}
 
 // -- Check -------------------------------------------------------------
@@ -127,11 +127,28 @@ SimulateCommand::SimulateCommand(Interpreter& owner,
 
 Variant SimulateCommand::operator()()
 {
+    ostringstream tmp;
     f_sim.process();
 
-    ostringstream tmp;
-    tmp << "Simulation halted, see witness '"
-        << f_sim.witness().id() << "'";
+    switch (f_sim.status()) {
+    case SIMULATION_DONE:
+        tmp << "Simulation done, see witness '" << f_sim.witness().id() << "'"
+            << endl;
+        break;
+    case SIMULATION_HALTED:
+        tmp << "Simulation halted, see witness '" << f_sim.witness().id() << "'"
+            << endl;
+        break;
+    case SIMULATION_DEADLOCKED:
+        tmp << "Simulation deadlocked, see witness '" << f_sim.witness().id() << "'"
+            << endl;
+        break;
+    case SIMULATION_INTERRUPTED:
+        tmp << "Simulation interrupted, see witness '" << f_sim.witness().id() << "'"
+            << endl;
+        break;
+    default: assert( false ); /* unreachable */
+    } /* switch */
 
     return Variant(tmp.str());
 }

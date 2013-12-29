@@ -30,7 +30,7 @@
 #include <sat.hh>
 
 /* algorithms */
-#include <prepare.hh>
+#include <init.hh>
 #include <bmc/bmc.hh>
 #include <sim/simulation.hh>
 
@@ -85,15 +85,15 @@ public:
     Variant virtual operator()();
 };
 
-class PrepareCommand : public Command {
+class InitCommand : public Command {
 public:
-    PrepareCommand(Interpreter& owner);
-    virtual ~PrepareCommand();
+    InitCommand(Interpreter& owner);
+    virtual ~InitCommand();
 
     Variant virtual operator()();
 
 private:
-    Prepare f_prepare;
+    Init f_init;
 };
 
 /* Performs a new simulation with given constraints and halting

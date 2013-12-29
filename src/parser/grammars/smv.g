@@ -158,7 +158,7 @@ commands returns [Command_ptr res]
     |  c=time_command
        { $res = c; }
 
-    |  c=prepare_command
+    |  c=init_command
        { $res = c; }
 
     |  c=model_command
@@ -187,8 +187,8 @@ time_command returns [Command_ptr res]
     : 'time' { $res = cm.make_time(); }
     ;
 
-prepare_command returns [Command_ptr res]
-    : 'prepare' { $res = cm.make_prepare(); }
+init_command returns [Command_ptr res]
+    : 'init' { $res = cm.make_init(); }
     ;
 
 model_command returns [Command_ptr res]
@@ -229,10 +229,10 @@ simulate_command returns [Command_ptr res]
           ) *
         ) ?
 
-        ( 'halt'
-            ( 'on'     expr=toplevel_expression { halt_cond = expr; } )
-        |   ( 'after'  expr=constant            { halt_cond = expr; } )
-
+        ( 'halt' expr=toplevel_expression
+          { halt_cond = expr; }
+        |  expr=constant
+          { halt_cond = expr; }
         ) ?
 
         (  'resume' wid=identifier

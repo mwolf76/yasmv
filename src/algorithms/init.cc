@@ -1,10 +1,6 @@
 /**
- *  @file Prepare Algorithm.hh
- *  @brief SAT Prepare Algorithm
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  @file init.cc
+ *  @brief Init algorithm
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,18 +19,28 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <init.hh>
 
-#ifndef PREPARE_ALGORITHM_H
-#define PREPARE_ALGORITHM_H
+Init::Init(IModel& model)
+    : Algorithm(model)
+{}
 
-#include <base.hh>
+Init::~Init()
+{}
 
-class Prepare : public Algorithm {
+void Init::process()
+{
+    clock_t t0 = clock(), t1;
+    double secs;
 
-public:
-    Prepare(IModel& model);
-    ~Prepare();
+    TRACE << "Phase 1" << endl;
+    prepare();
 
-    void process();
-};
-#endif
+    TRACE << "Phase 2" << endl;
+    compile();
+
+    t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+    os () << "-- initialization completed, took " << secs
+          << " seconds" << endl;
+
+}
