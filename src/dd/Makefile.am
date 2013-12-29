@@ -9,7 +9,6 @@ INCLUDES = \
 	-I$(top_srcdir)/src/expr			\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd          \
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr 	 	\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/epd		\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
 	-I$(top_srcdir)/src/dd/cudd-2.5.0/obj 		\
@@ -47,15 +46,15 @@ cudd-2.5.0/cudd/cuddZddGroup.c cudd-2.5.0/cudd/cuddZddIsop.c		\
 cudd-2.5.0/cudd/cuddZddLin.c cudd-2.5.0/cudd/cuddZddMisc.c		\
 cudd-2.5.0/cudd/cuddZddPort.c cudd-2.5.0/cudd/cuddZddReord.c		\
 cudd-2.5.0/cudd/cuddZddSetop.c cudd-2.5.0/cudd/cuddZddSymm.c		\
-cudd-2.5.0/cudd/cuddZddUtil.c cudd-2.5.0/epd/epd.c			\
-cudd-2.5.0/mtr/mtrGroup.c cudd-2.5.0/mtr/mtrBasic.c			\
-cudd-2.5.0/util/cpu_stats.c cudd-2.5.0/util/datalimit.c			\
-cudd-2.5.0/util/pathsearch.c cudd-2.5.0/util/prtime.c			\
-cudd-2.5.0/util/restart.c cudd-2.5.0/util/saveimage.c			\
-cudd-2.5.0/util/strsav.c cudd-2.5.0/util/texpand.c			\
-cudd-2.5.0/util/cpu_time.c cudd-2.5.0/util/pipefork.c			\
-cudd-2.5.0/util/safe_mem.c cudd-2.5.0/util/state.c			\
-cudd-2.5.0/util/stub.c cudd-2.5.0/st/st.c cudd-2.5.0/obj/cuddObj.cc
+cudd-2.5.0/cudd/cuddZddUtil.c cudd-2.5.0/mtr/mtrGroup.c			\
+cudd-2.5.0/mtr/mtrBasic.c cudd-2.5.0/util/cpu_stats.c			\
+cudd-2.5.0/util/datalimit.c cudd-2.5.0/util/pathsearch.c		\
+cudd-2.5.0/util/prtime.c cudd-2.5.0/util/restart.c			\
+cudd-2.5.0/util/saveimage.c cudd-2.5.0/util/strsav.c			\
+cudd-2.5.0/util/texpand.c cudd-2.5.0/util/cpu_time.c			\
+cudd-2.5.0/util/pipefork.c cudd-2.5.0/util/safe_mem.c			\
+cudd-2.5.0/util/state.c cudd-2.5.0/util/stub.c cudd-2.5.0/st/st.c	\
+cudd-2.5.0/obj/cuddObj.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

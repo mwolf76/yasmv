@@ -2861,6 +2861,7 @@ BDD::AndAbstract(
 
 } // BDD::AndAbstract
 
+#if 0
 void
 ABDD::EpdPrintMinterm(
   int nvars,
@@ -2876,7 +2877,7 @@ ABDD::EpdPrintMinterm(
     fprintf(fp, "%s\n", str);
 
 } // ABDD::ApaPrintMinterm
-
+#endif
 
 BDD
 BDD::UnderApprox(

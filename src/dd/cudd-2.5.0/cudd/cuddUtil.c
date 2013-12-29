@@ -183,7 +183,7 @@ static int cuddEstimateCofactor (DdManager *dd, st_table *table, DdNode * node, 
 static DdNode * cuddUniqueLookup (DdManager * unique, int  index, DdNode * T, DdNode * E);
 static int cuddEstimateCofactorSimple (DdNode * node, int i);
 static double ddCountMintermAux (DdNode *node, double max, DdHashTable *table);
-static int ddEpdCountMintermAux (DdNode *node, EpDouble *max, EpDouble *epd, st_table *table);
+/* /\* static int ddEpdCountMintermAux (DdNode *node, EpDouble *max, EpDouble *epd, st_table *table); *\/ */
 static double ddCountPathAux (DdNode *node, st_table *table);
 static double ddCountPathsToNonZero (DdNode * N, st_table * table);
 static void ddSupportStep (DdNode *f, int *support);
@@ -690,6 +690,7 @@ Cudd_CountPath(
 } /* end of Cudd_CountPath */
 
 
+#if 0
 /**Function********************************************************************
 
   Synopsis    [Counts the number of minterms of a DD with extended precision.]
@@ -738,7 +739,7 @@ Cudd_EpdCountMinterm(
     return(0);
 
 } /* end of Cudd_EpdCountMinterm */
-
+#endif
 
 /**Function********************************************************************
 
@@ -3665,6 +3666,7 @@ ddCountPathAux(
 } /* end of ddCountPathAux */
 
 
+#if 0
 /**Function********************************************************************
 
   Synopsis    [Performs the recursive step of Cudd_EpdCountMinterm.]
@@ -3737,7 +3739,7 @@ ddEpdCountMintermAux(
     return(0);
 
 } /* end of ddEpdCountMintermAux */
-
+#endif
 
 /**Function********************************************************************
 
@@ -4019,6 +4021,7 @@ ddPickRepresentativeCube(
 } /* end of ddPickRepresentativeCube */
 
 
+#if 0
 /**Function********************************************************************
 
   Synopsis [Frees the memory used to store the minterm counts recorded
@@ -4044,7 +4047,7 @@ ddEpdFree(
 
 } /* end of ddEpdFree */
 
-
+#endif
 /**Function********************************************************************
 
   Synopsis [Recursively find the support of f.]
