@@ -22,15 +22,6 @@
 
 #include <witness_mgr.hh>
 
-bool IdentifierLess::operator() (const Expr_ptr x, const Expr_ptr y) const
-{
-    ExprMgr& em (ExprMgr::INSTANCE());
-    assert(em.is_identifier(const_cast<Expr_ptr>(x)));
-    assert(em.is_identifier(const_cast<Expr_ptr>(y)));
-
-    return x->atom() <= y->atom();
-}
-
 // static initialization
 WitnessMgr_ptr WitnessMgr::f_instance = NULL;
 
@@ -40,7 +31,7 @@ WitnessMgr::WitnessMgr()
     , f_evaluator(*this)
 {}
 
-Witness& WitnessMgr::witness( Expr_ptr id )
+Witness& WitnessMgr::witness( Atom id )
 {
     WitnessMap::iterator eye = f_map.find( id );
     if (f_map.end() == eye) {
@@ -51,14 +42,15 @@ Witness& WitnessMgr::witness( Expr_ptr id )
     return *wp;
 }
 
-void WitnessMgr::register_witness( Expr_ptr id, Witness& w )
+void WitnessMgr::register_witness( Witness& w )
 {
+    Atom id (w.id());
     WitnessMap::iterator eye = f_map.find( id );
     if (f_map.end() != eye) {
         throw DuplicateWitnessId( id );
     }
 
-    f_map.insert( make_pair <Expr_ptr, Witness_ptr> (id, &w));
+    f_map.insert( make_pair <Atom, Witness_ptr> (id, &w));
 }
 
 const char* DuplicateWitnessId::what() const throw()

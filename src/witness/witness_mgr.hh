@@ -31,12 +31,8 @@
 #include <evaluator.hh>
 #include <witness.hh>
 
-struct IdentifierLess {
-    bool operator() (const Expr_ptr x, const Expr_ptr y) const;
-};
-
 typedef class WitnessMgr *WitnessMgr_ptr;
-typedef map<Expr_ptr, Witness_ptr, IdentifierLess> WitnessMap;
+typedef map<Atom, Witness_ptr> WitnessMap;
 
 /** Exception classes */
 class WitnessException : public Exception {
@@ -46,10 +42,10 @@ public:
 
 /** Raised when a given ID is registered more than once */
 class DuplicateWitnessId : public WitnessException {
-    Expr_ptr f_id;
+    Atom f_id;
 
 public:
-    DuplicateWitnessId(Expr_ptr id)
+    DuplicateWitnessId(Atom id)
         : f_id(id)
     {}
 
@@ -61,10 +57,10 @@ public:
 
 /** Raised when a given ID is searched for and was not registered */
 class UnknownWitnessId : public WitnessException {
-    Expr_ptr f_id;
+    Atom f_id;
 
 public:
-    UnknownWitnessId(Expr_ptr id)
+    UnknownWitnessId(Atom id)
         : f_id(id)
     {}
 
@@ -95,10 +91,10 @@ public:
     { return f_map; }
 
     // get a registered witness
-    Witness& witness( Expr_ptr id );
+    Witness& witness( Atom id );
 
     // register a new witness
-    void register_witness( Expr_ptr id, Witness& w );
+    void register_witness( Witness& w );
 
 protected:
     WitnessMgr();

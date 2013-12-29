@@ -44,7 +44,8 @@ Simulation::Simulation(IModel& model,
         }
     }
     if (resume_id) {
-        Witness& w = WitnessMgr::INSTANCE().witness( resume_id );
+        Atom wid (resume_id->atom());
+        Witness& w = WitnessMgr::INSTANCE().witness(wid);
         set_witness(w);
     }
 }
@@ -80,7 +81,8 @@ void Simulation::process()
     else {
         // here we need to push all the values for variables in the
         // last state of resuming witness. A complete assignment to
-        // all state variables ensures full deterministic behavior.
+        // *all* state variables ensures full deterministic behavior
+        // (cfr. simulation restart).
 
         k = witness().size() -1;
         assert( false) ; // TODO
@@ -96,6 +98,7 @@ void Simulation::process()
         Witness_ptr w = new SimulationWitness( model(), engine(), k);
         if (! has_witness()) {
             set_witness(*w);
+            wm.register_witness(*w);
         }
         else {
             witness().extend(*w);
@@ -120,7 +123,7 @@ void Simulation::process()
             f_nsteps = em.make_const( f_nsteps->value() -1);
         }
 
-        while (1) {
+        while (true) {
             t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
             os () << "-- completed step " << 1 + k
                   << ", took " << secs << " seconds"
@@ -128,7 +131,8 @@ void Simulation::process()
             t0 = t1; // resetting clock
 
             // one more cup of coffe for the road
-            // TODO: SAT restart after a number of steps
+            // TODO: SAT restart after a given number of steps (e.g. 10) would help
+            // preventing performance degradation as k grows larger.
             assert_fsm_trans(k ++);
             assert_fsm_invar(k);
 
@@ -156,7 +160,6 @@ void Simulation::process()
             }
             else {
                 TRACE << "Inconsistency detected in transition relation at step " << k
-                      << ". Simulation is deadlocked."
                       << endl;
                 f_status = SIMULATION_DEADLOCKED;
                 return;
@@ -164,7 +167,7 @@ void Simulation::process()
         }
     }
     else {
-        TRACE << "Inconsistency detected in initial states. Simulation is deadlocked."
+        TRACE << "Inconsistency detected in initial states"
               << endl;
         f_status = SIMULATION_DEADLOCKED;
     }

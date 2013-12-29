@@ -132,20 +132,16 @@ Variant SimulateCommand::operator()()
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:
-        tmp << "Simulation done, see witness '" << f_sim.witness().id() << "'"
-            << endl;
+        tmp << "Simulation done, see witness '" << f_sim.witness().id() << "'";
         break;
     case SIMULATION_HALTED:
-        tmp << "Simulation halted, see witness '" << f_sim.witness().id() << "'"
-            << endl;
+        tmp << "Simulation halted, see witness '" << f_sim.witness().id() << "'";
         break;
     case SIMULATION_DEADLOCKED:
-        tmp << "Simulation deadlocked, see witness '" << f_sim.witness().id() << "'"
-            << endl;
+        tmp << "Simulation deadlocked, see witness '" << f_sim.witness().id() << "'";
         break;
     case SIMULATION_INTERRUPTED:
-        tmp << "Simulation interrupted, see witness '" << f_sim.witness().id() << "'"
-            << endl;
+        tmp << "Simulation interrupted, see witness '" << f_sim.witness().id() << "'";
         break;
     default: assert( false ); /* unreachable */
     } /* switch */
@@ -202,7 +198,7 @@ Variant WitnessShowCommand::operator()()
 {
     ostream &os(cout);
 
-    Witness& w = WitnessMgr::INSTANCE().witness( f_wid );
+    Witness& w = WitnessMgr::INSTANCE().witness( f_wid->atom() );
     for (step_t k = 0; k < w.size(); ++ k) {
         os << " -- @ " << 1 + k << " -- " << endl;
         TimeFrame& tf = w[ k ];
@@ -210,7 +206,7 @@ Variant WitnessShowCommand::operator()()
         while (symbs.has_next()) {
             ISymbol_ptr symb = symbs.next();
             FQExpr key(symb->ctx(), symb->expr(), k);
-            os << symb->expr() << " = " << tf.value(key);
+            os << symb->expr() << " = " << tf.value(key) << endl;
         }
     }
 

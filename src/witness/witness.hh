@@ -78,7 +78,7 @@ typedef vector<FQExpr> FQExprs;
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(string id = "<Noname>");
+    Witness(Atom id = "<Noname>");
 
     /* data storage */
     inline TimeFrames& frames()
@@ -90,7 +90,7 @@ public:
         return * f_frames [i];
     }
 
-    inline const string& id() const
+    inline const Atom& id() const
     { return f_id; }
 
     inline void set_id(string id)
@@ -116,7 +116,7 @@ public:
 
 protected:
     /* this witness' id */
-    string f_id;
+    Atom f_id;
 
     /* distance (i.e. number of transitions) from time 0 of the first frame */
     step_t f_j;

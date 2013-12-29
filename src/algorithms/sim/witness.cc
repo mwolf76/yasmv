@@ -22,7 +22,7 @@
 #include <simulation.hh>
 
 static unsigned progressive = 0;
-const char *prfx = "sim_";
+static const char *prfx = "sim_";
 
 using Minisat::Var;
 SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t k)
