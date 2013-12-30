@@ -132,20 +132,25 @@ Variant SimulateCommand::operator()()
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:
-        tmp << "Simulation done, see witness '" << f_sim.witness().id() << "'";
+        tmp << "Simulation done";
         break;
     case SIMULATION_HALTED:
-        tmp << "Simulation halted, see witness '" << f_sim.witness().id() << "'";
+        tmp << "Simulation halted";
         break;
     case SIMULATION_DEADLOCKED:
-        tmp << "Simulation deadlocked, see witness '" << f_sim.witness().id() << "'";
+        tmp << "Simulation deadlocked";
         break;
     case SIMULATION_INTERRUPTED:
-        tmp << "Simulation interrupted, see witness '" << f_sim.witness().id() << "'";
+        tmp << "Simulation interrupted";
         break;
     default: assert( false ); /* unreachable */
     } /* switch */
-
+    if (f_sim.has_witness()) {
+        tmp << ", see witness '" << f_sim.witness().id() << "'";
+    }
+    else {
+        tmp << "(no witness available)";
+    }
     return Variant(tmp.str());
 }
 
