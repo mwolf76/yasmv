@@ -199,15 +199,19 @@ Variant WitnessShowCommand::operator()()
     ostream &os(cout);
 
     Witness& w = WitnessMgr::INSTANCE().witness( f_wid->atom() );
-    for (step_t k = 0; k < w.size(); ++ k) {
-        os << " -- @ " << 1 + k << " -- " << endl;
-        TimeFrame& tf = w[ k ];
+    for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+        os << "-- @ " << 1 + time << endl;
+        TimeFrame& tf = w[ time ];
+
         SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
         while (symbs.has_next()) {
             ISymbol_ptr symb = symbs.next();
-            FQExpr key(symb->ctx(), symb->expr(), k);
-            os << symb->expr() << " = " << tf.value(key) << endl;
+            Expr_ptr expr (symb->expr());
+            Expr_ptr value(tf.value(expr));
+
+            os << symb->expr() << " = " << value << endl;
         }
+        os << endl;
     }
 
     return Variant("Ok");

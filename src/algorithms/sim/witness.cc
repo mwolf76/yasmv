@@ -25,11 +25,14 @@ static unsigned progressive = 0;
 static const char *prfx = "sim_";
 
 using Minisat::Var;
-SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t k)
+SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
+                                     step_t k, bool unique_id)
     : Witness()
 {
-    ostringstream oss; oss << prfx << (++ progressive);
-    set_id(oss.str());
+    if (unique_id) {
+        ostringstream oss; oss << prfx << (++ progressive);
+        set_id(oss.str());
+    }
 
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
@@ -38,8 +41,7 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t
     SymbIter si (model);
     while (si.has_next()) {
         ISymbol_ptr symb = si.next();
-        FQExpr key( symb->ctx(), symb->expr());
-        f_lang.push_back( key );
+        f_lang.push_back( symb -> expr());
     }
 
     /* Just k-th timeframe */
@@ -49,8 +51,12 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t
         ISymbol_ptr symb = vars.next();
 
         if (symb->is_variable()) {
+
+            Expr_ptr ctx (symb->ctx());
+            Expr_ptr expr(symb->expr());
+
             /* time it, and fetch encoding for enc mgr */
-            FQExpr key(symb->ctx(), symb->expr());
+            FQExpr key(ctx, expr);
             IEncoding_ptr enc = enc_mgr.find_encoding(key);
 
             /* not in COI, skipping... */
@@ -83,7 +89,7 @@ SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine, step_t
                resulting value into time frame container. */
             Expr_ptr value = enc->expr(inputs);
             if (value) {
-                tf.set_value( key, value );
+                tf.set_value( expr, value );
             }
         }
     }

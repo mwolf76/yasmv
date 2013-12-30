@@ -2,10 +2,6 @@
  *  @file witness.hh
  *  @brief Witness module
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -23,7 +19,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef WITNESS_H
 #define WITNESS_H
 
@@ -41,7 +36,61 @@
 #include <variant.hh>
 #include <sat.hh>
 
-typedef unordered_map<FQExpr, Expr_ptr, FQExprHash, FQExprEq> FQExpr2ExprMap;
+/** Exception classes */
+class WitnessException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
+/** Raised when a given ID is registered more than once */
+class DuplicateWitnessId : public WitnessException {
+public:
+    DuplicateWitnessId(Atom id)
+        : f_id(id)
+    {}
+
+    ~DuplicateWitnessId() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
+    Atom f_id;
+};
+
+/** Raised when a given ID is searched for and was not registered */
+class UnknownWitnessId : public WitnessException {
+public:
+    UnknownWitnessId(Atom id)
+        : f_id(id)
+    {}
+
+    ~UnknownWitnessId() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
+    Atom f_id;
+};
+
+/** Raised when TimeFrame for requested time does not exist. */
+class IllegalTime : public WitnessException {
+public:
+    IllegalTime(step_t time)
+        : f_time(time)
+    {}
+
+    ~IllegalTime() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
+    step_t f_time;
+};
+
+typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
 class Witness; // fwd decl
 
@@ -53,16 +102,16 @@ public:
     ~TimeFrame();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
-    Expr_ptr value( FQExpr expr );
+    Expr_ptr value( Expr_ptr expr );
 
     /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( FQExpr expr );
+    bool has_value( Expr_ptr expr );
 
     /* Sets value for expr */
-    void set_value( FQExpr expr, Expr_ptr value );
+    void set_value( Expr_ptr expr, Expr_ptr value );
 
 private:
-    FQExpr2ExprMap f_map;
+    Expr2ExprMap f_map;
 
     // forbid copy
     TimeFrame(const TimeFrame &other)
@@ -73,12 +122,12 @@ private:
 };
 
 typedef vector<TimeFrame_ptr> TimeFrames;
-typedef vector<FQExpr> FQExprs;
+typedef vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(Atom id = "<Noname>");
+    Witness(Atom id = "<Noname>", step_t j = 0);
 
     /* data storage */
     inline TimeFrames& frames()
@@ -86,7 +135,15 @@ public:
 
     inline TimeFrame& operator[](step_t i)
     {
-        assert (i < size());
+        if (i < f_j) {
+            throw IllegalTime(i);
+        }
+        i -= f_j;
+        assert(0 <= i);
+
+        if (f_frames.size() -1 < i) {
+            throw IllegalTime(f_j + i);
+        }
         return * f_frames [i];
     }
 
@@ -96,10 +153,13 @@ public:
     inline void set_id(string id)
     { f_id = id; }
 
-    inline unsigned size()
-    { return f_frames.size(); }
+    inline step_t first_time()
+    { return f_j; }
 
-    inline FQExprs& lang()
+    inline step_t last_time()
+    { return f_j + f_frames.size() -1; }
+
+    inline Exprs& lang()
     { return f_lang; }
 
     /* Extends trace by k appending the given one, yields last timeframe */
@@ -109,10 +169,10 @@ public:
     TimeFrame& extend();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
-    Expr_ptr value( FQExpr expr );
+    Expr_ptr value( Expr_ptr expr, step_t time);
 
     /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( FQExpr expr );
+    bool has_value( Expr_ptr expr, step_t time);
 
 protected:
     /* this witness' id */
@@ -121,14 +181,11 @@ protected:
     /* distance (i.e. number of transitions) from time 0 of the first frame */
     step_t f_j;
 
-    /* distance (i.e. number of transitions) from time 0 of the last frame */
-    step_t f_k;
-
     /* Timeframes (list) */
     TimeFrames f_frames;
 
     /* Language (i.e. full list of symbols) */
-    FQExprs f_lang;
+    Exprs f_lang;
 };
 
 class WitnessPrinter : public IObject {

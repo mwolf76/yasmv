@@ -4,26 +4,26 @@ TODO
 High priority tasks:
 --------------------
 
-* Threading model (boost)
 * Unified checking algorithm (i.e.)
 - propositional formulas (SAT on initial states only)
 - invariant properties (G <formula>)
 - full LTL properties
 * Verbosity levels and Colorized output [usability]
-* Consolidate Unit-testing [maintenance]
 
 Medium priority tasks:
 ----------------------
 
+* Commands hierarchy and help system
 * Efficient CNFization algorithm [core]
-* CEGAR, COI [core]
-* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
 * Readline support
+* Strip away unused parts from Cudd [maintenance]
+* Consolidate Unit-testing [maintenance]
 
 Low priority tasks:
 -------------------
 
-* Strip away unused parts from Cudd [maintenance]
+* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
+* CEGAR, COI [core]
 * Explore load distribution over multiple cores [experimental]
 * FSM Editor + Code generator :-] [extension]
 * Emacs mode for editing [usability]

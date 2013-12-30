@@ -48,9 +48,11 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
             ISymbol_ptr symb = symbs.next();
 
             if (symb->is_variable()) {
+                Expr_ptr ctx  (symb->ctx());
+                Expr_ptr expr (symb->expr());
 
                 /* time it, and fetch encoding for enc mgr */
-                FQExpr key(symb->ctx(), symb->expr(), 0);
+                FQExpr key(ctx, expr);
                 IEncoding_ptr enc = enc_mgr.find_encoding(key);
                 if ( NULL == enc ) {
                     // TRACE << symb->ctx()
@@ -86,7 +88,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                 /* 2. eval the encoding ADD with inputs and put
                    resulting value into time frame container. */
                 Expr_ptr value = enc->expr(inputs);
-                tf.set_value( key, value );
+                tf.set_value( expr, value );
             }
         }
     }

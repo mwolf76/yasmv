@@ -488,11 +488,8 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         ISymbol_ptr symb = ModelMgr::INSTANCE().resolver() -> symbol(ctx, expr);
         if (symb->is_variable()) { // vars
 
-            FQExpr key( ctx, expr, time);
-            if (f_witness -> has_value( key)) {
-                Expr_ptr expr = f_witness -> value(key);
-                value_t res = expr -> value();
-                f_values_stack.push_back(res);
+            if (f_witness -> has_value( expr, time)) {
+                f_values_stack.push_back(f_witness -> value(expr, time) -> value());
                 return;
             }
 

@@ -21,6 +21,39 @@
  **/
 #include <witness.hh>
 
+const char* DuplicateWitnessId::what() const throw()
+{
+    ostringstream oss;
+    oss << "Duplicate witness ID:  "
+        << f_id << " is already registered."
+        << endl
+        ;
+
+    return oss.str().c_str();
+}
+
+const char* UnknownWitnessId::what() const throw()
+{
+    ostringstream oss;
+    oss << "Unknown witness ID:  "
+        << f_id << " is not registered."
+        << endl
+        ;
+
+    return oss.str().c_str();
+}
+
+const char* IllegalTime::what() const throw()
+{
+    ostringstream oss;
+    oss << "Illegal time: "
+        << f_time
+        << endl
+        ;
+
+    return oss.str().c_str();
+}
+
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
 {}
@@ -29,13 +62,13 @@ TimeFrame::~TimeFrame()
 {}
 
 /* Retrieves value for expr, throws an exception if no value exists. */
-Expr_ptr TimeFrame::value( FQExpr expr )
+Expr_ptr TimeFrame::value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    FQExprs& lang = f_owner.lang();
+    Exprs& lang = f_owner.lang();
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    FQExpr2ExprMap::iterator eye;
+    Expr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
     assert (f_map.end() != eye); // TODO
@@ -44,45 +77,50 @@ Expr_ptr TimeFrame::value( FQExpr expr )
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
-bool TimeFrame::has_value( FQExpr expr )
+bool TimeFrame::has_value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    FQExprs& lang = f_owner.lang();
+    Exprs& lang = f_owner.lang();
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    FQExpr2ExprMap::iterator eye;
+    Expr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
     return (f_map.end() != eye);
 }
 
 /* Sets value for expr */
-void TimeFrame::set_value( FQExpr fqexpr, Expr_ptr value )
+void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
 {
     // symbol is defined in witness' language
-    FQExprs& lang = f_owner.lang();
-    assert( find( lang.begin(), lang.end(), fqexpr) != lang.end());
+    Exprs& lang = f_owner.lang();
+    assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    DRIVEL << fqexpr << " := " << value << endl;
-    f_map.insert( make_pair< FQExpr, Expr_ptr > (fqexpr, value));
+    DRIVEL << expr << " := " << value << endl;
+    f_map.insert( make_pair< Expr_ptr, Expr_ptr > (expr, value));
 }
 
-Witness::Witness(string name)
+Witness::Witness(string name, step_t j)
     : f_id(name)
+    , f_j(j)
 {
     DEBUG
         << "Created new witness: "
         << f_id
+        << ", starting at time"
+        << f_j
         << endl;
 }
 
 TimeFrame& Witness::extend(Witness& w)
 {
+    // seizing ownership of the TimeFrames from w
     TimeFrame_ptr last = NULL;
     for (TimeFrames::iterator i = w.frames().begin(); i != w.frames().end(); ++ i) {
-        f_frames.push_back(*i); // copy
+        f_frames.push_back(*i);
         last = (*i);
     }
+    w.f_frames.clear();
 
     assert( last);
     return * last;
@@ -93,8 +131,8 @@ TimeFrame& Witness::extend()
     TimeFrame_ptr tf = new TimeFrame(*this);
     f_frames.push_back(tf);
 
-    step_t curr = size() -1 ;
-    DEBUG << "Added empty TimeFrame " << curr
+    step_t last = 1 + last_time();
+    DEBUG << "Added empty TimeFrame " << last
           << " to witness " << id()
           << " @" << tf
           << endl;
@@ -104,16 +142,22 @@ TimeFrame& Witness::extend()
 }
 
 /* Retrieves value for expr, throws an exception if no value exists. */
-Expr_ptr Witness::value( FQExpr fq )
+Expr_ptr Witness::value( Expr_ptr expr, step_t time)
 {
-    return f_frames[fq.time()]
-        -> value( FQExpr(fq.ctx(), fq.expr()));
+    if (time < first_time() || time > last_time()) {
+        throw IllegalTime(time);
+    }
+    return f_frames[ time ]
+        -> value( expr );
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
-bool Witness::has_value( FQExpr fq )
+bool Witness::has_value( Expr_ptr expr, step_t time)
 {
-    return f_frames[fq.time()]
-        -> has_value( FQExpr(fq.ctx(), fq.expr()));
+    if (time < first_time() || time > last_time()) {
+        return false;
+    }
+    return f_frames[ time ]
+        -> has_value( expr );
 }
 

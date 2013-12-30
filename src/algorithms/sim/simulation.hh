@@ -60,7 +60,8 @@ private:
 class SimulationWitness : public Witness {
 
 public:
-    SimulationWitness(IModel& model, SAT& engine, step_t k);
+    SimulationWitness(IModel& model, SAT& engine, step_t k,
+                      bool unique_id = false);
 };
 
 #endif

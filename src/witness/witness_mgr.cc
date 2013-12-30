@@ -53,24 +53,3 @@ void WitnessMgr::register_witness( Witness& w )
     f_map.insert( make_pair <Atom, Witness_ptr> (id, &w));
 }
 
-const char* DuplicateWitnessId::what() const throw()
-{
-    ostringstream oss;
-    oss << "Duplicate witness ID:  "
-        << f_id << " is already registered."
-        << endl
-        ;
-
-    return oss.str().c_str();
-}
-
-const char* UnknownWitnessId::what() const throw()
-{
-    ostringstream oss;
-    oss << "Unknown witness ID:  "
-        << f_id << " is not registered."
-        << endl
-        ;
-
-    return oss.str().c_str();
-}

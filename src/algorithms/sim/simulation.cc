@@ -1,10 +1,6 @@
 /**
- *  @file MC Algorithm.hh
+ *  @file simulation.cc
  *  @brief SAT-based BMC simulation algorithm
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -83,10 +79,13 @@ void Simulation::process()
         // last state of resuming witness. A complete assignment to
         // *all* state variables ensures full deterministic behavior
         // (cfr. simulation restart).
-
+#if 0
         k = witness().size() -1;
         assert( false) ; // TODO
         TRACE << "Resuming simulation..." << endl;
+#else
+        assert(0); // not now
+#endif
     }
 
     if (STATUS_SAT == engine().solve()) {
@@ -95,12 +94,13 @@ void Simulation::process()
               << " seconds" << endl;
         t0 = t1; // resetting clock
 
-        Witness_ptr w = new SimulationWitness( model(), engine(), k);
         if (! has_witness()) {
-            set_witness(*w);
+            Witness_ptr w = new SimulationWitness( model(), engine(), k, true);
             wm.register_witness(*w);
+            set_witness(*w);
         }
         else {
+            Witness_ptr w = new SimulationWitness( model(), engine(), k);
             witness().extend(*w);
         }
 

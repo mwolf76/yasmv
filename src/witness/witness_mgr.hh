@@ -34,42 +34,6 @@
 typedef class WitnessMgr *WitnessMgr_ptr;
 typedef map<Atom, Witness_ptr> WitnessMap;
 
-/** Exception classes */
-class WitnessException : public Exception {
-public:
-    virtual const char* what() const throw() =0;
-};
-
-/** Raised when a given ID is registered more than once */
-class DuplicateWitnessId : public WitnessException {
-    Atom f_id;
-
-public:
-    DuplicateWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~DuplicateWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-};
-
-/** Raised when a given ID is searched for and was not registered */
-class UnknownWitnessId : public WitnessException {
-    Atom f_id;
-
-public:
-    UnknownWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~UnknownWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-};
-
 class WitnessMgr  {
 public:
     static WitnessMgr& INSTANCE() {
