@@ -760,6 +760,7 @@ extern DdNode * Cudd_addBWXor (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addXnor (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addBWXnor (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addEquals (DdManager *dd, DdNode **f, DdNode **g);
+extern DdNode * Cudd_addNotEquals (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addLT (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addLEQ (DdManager *dd, DdNode **f, DdNode **g);
 extern DdNode * Cudd_addMonadicApply (DdManager * dd, DdNode * (*op)(DdManager *, DdNode *), DdNode * f);

@@ -621,15 +621,23 @@ void Compiler::finalize_and_chains()
 {
     // Conjunct booked AND chains into result stack
     for (DDVector::iterator i = f_roots.begin(); f_roots.end() != i; ++ i) {
-        ADD a (*i);
+        ADD alpha (*i); ADD not_alpha = alpha.Cmpl();
 
-        ACMap::iterator eye = f_chains.find(a);
+        ACMap::iterator eye = f_chains.find(alpha);
         assert( f_chains.end() != eye);
 
-        // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
+
         DDVector& Y ((*eye).second);
         for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-            PUSH_ADD( a.Cmpl().Or( *j));
+            // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
+            PUSH_ADD (not_alpha.Or(*j));
         }
+
+        // !a -> !Y, that is: (a v !Y1 v !Y2 v !Y3 v ....)
+        ADD tmp (alpha);
+        for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
+            tmp = tmp.Or((*j).Cmpl());
+        }
+        PUSH_ADD (tmp);
     }
 }

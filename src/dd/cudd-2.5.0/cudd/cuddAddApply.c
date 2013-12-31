@@ -900,6 +900,38 @@ Cudd_addEquals(
 
 /**Function********************************************************************
 
+  Synopsis    [Inequality of two ADDs.]
+
+  Description [Equality of two ADDs. Returns NULL if not a terminal
+  case; f != g otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addApply]
+
+******************************************************************************/
+DdNode *
+Cudd_addNotEquals(
+  DdManager * dd,
+  DdNode ** f,
+  DdNode ** g)
+{
+    DdNode *F, *G;
+
+    F = *f; G = *g;
+    if (cuddIsConstant(F) && cuddIsConstant(G)) {
+	if (cuddV(F) != cuddV(G)) {
+	    return DD_ONE(dd);
+	} else {
+	    return DD_ZERO(dd);
+	}
+    }
+    return(NULL);
+
+} /* end of Cudd_addLT */
+
+/**Function********************************************************************
+
   Synopsis    [Integer LT (<).]
 
   Description [Integer < for Cudd_addApply.  Returns NULL if not a

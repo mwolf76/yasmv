@@ -2627,6 +2627,17 @@ ADD::Equals(
 } // ADD::Equals
 
 ADD
+ADD::NotEquals(
+  const ADD& g) const
+{
+    DdManager *mgr = checkSameManager(g);
+    DdNode *result = Cudd_addApply(mgr, Cudd_addNotEquals, node, g.node);
+    checkReturnValue(result);
+    return ADD(p, result);
+
+} // ADD::Equals
+
+ADD
 ADD::LT(
   const ADD& g) const
 {

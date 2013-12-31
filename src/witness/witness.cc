@@ -107,7 +107,7 @@ Witness::Witness(string name, step_t j)
     DEBUG
         << "Created new witness: "
         << f_id
-        << ", starting at time"
+        << ", starting at time "
         << f_j
         << endl;
 }

@@ -406,6 +406,7 @@ public:
     ADD Xnor(const ADD& g) const;
     ADD BWXnor(const ADD& g) const;
     ADD Equals(const ADD& g) const;
+    ADD NotEquals(const ADD& g) const;
     ADD LT(const ADD& g) const;
     ADD LEQ(const ADD& g) const;
     ADD Log() const;

@@ -622,6 +622,23 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
 
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
 {
+#if 1
+    /* new implementation, does not perform rewriting on Equals */
+    assert( is_binary_algebraic(expr) );
+    unsigned width = algebrize_binary_relational();
+
+    POP_ALGEBRAIC(rhs, width);
+    POP_ALGEBRAIC(lhs, width);
+
+    ADD tmp = f_enc.zero();
+    for (unsigned i = 0; i < width; ++ i) {
+        unsigned ndx = width - 1 -i;
+        tmp = tmp.Or( lhs[ndx].NotEquals(rhs[ndx]));
+    }
+
+    PUSH_ADD( tmp);
+#else
+    /* old implementation, performs rewriting on Equals */
     ExprMgr& em = f_owner.em();
     assert( is_binary_algebraic(expr) );
 
@@ -631,6 +648,7 @@ void Compiler::algebraic_not_equals(const Expr_ptr expr)
 
     (*this)(em.make_not(em.make_eq(expr->lhs(),
                                    expr->rhs())));
+#endif
 }
 
 void Compiler::algebraic_gt(const Expr_ptr expr)

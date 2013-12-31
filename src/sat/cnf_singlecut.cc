@@ -28,6 +28,7 @@
 
 #include <dd_walker.hh>
 
+#define DEBUG_CNF
 namespace Minisat {
 
     /* internal, used only for CNF-ization */
@@ -113,7 +114,9 @@ namespace Minisat {
 
             ps.push( mkLit( x, px ));
 
-            //DRIVEL << ps << endl;
+            #ifdef DEBUG_CNF
+            DRIVEL << ps << endl;
+            #endif
             f_sat.f_solver.addClause_(ps, f_color);
         }
 
@@ -126,7 +129,9 @@ namespace Minisat {
             ps.push( mkLit( x, px ));
             ps.push( mkLit( y, py ));
 
-            //DRIVEL << ps << endl;
+            #ifdef DEBUG_CNF
+            DRIVEL << ps << endl;
+            #endif
             f_sat.f_solver.addClause_(ps, f_color);
         }
 
@@ -140,7 +145,9 @@ namespace Minisat {
             ps.push( mkLit( y, py ));
             ps.push( mkLit( w, pw ));
 
-            //DRIVEL << ps << endl;
+            #ifdef DEBUG_CNF
+            DRIVEL << ps << endl;
+            #endif
             f_sat.f_solver.addClause_(ps, f_color);
         }
 
