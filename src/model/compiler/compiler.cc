@@ -121,7 +121,7 @@ void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     TRACE
         << "Compilation of " << key << " took "
         << secs << " seconds, "
-        << sz << " DDs"
+        << sz << " ADD nodes"
         << endl;
 }
 

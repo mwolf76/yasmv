@@ -177,8 +177,8 @@ void Algorithm::assert_fsm_init(step_t time, group_t group, color_t color)
 {
     clock_t t0 = clock();
     unsigned n = f_init_adds.size();
-    TRACE << "CNFizing INITs @" << time
-          << "... (" << n << " formulas)"
+    TRACE << "CNFizing INIT @" << time
+          << "... (" << n << " fragments)"
           << endl;
 
     ADDVector::iterator i;
@@ -195,8 +195,8 @@ void Algorithm::assert_fsm_invar(step_t time, group_t group, color_t color)
 {
     clock_t t0 = clock();
     unsigned n = f_invar_adds.size();
-    TRACE << "CNFizing INVARs @" << time
-          << "... (" << n << " formulas)"
+    TRACE << "CNFizing INVAR @" << time
+          << "... (" << n << " fragments)"
           << endl;
 
     ADDVector::iterator i;
@@ -214,8 +214,8 @@ void Algorithm::assert_fsm_trans(step_t time, group_t group, color_t color)
     clock_t t0 = clock();
     unsigned n = f_trans_adds.size();
 
-    TRACE << "CNFizing TRANSes @" << time
-          << "... (" << n << " formulas)"
+    TRACE << "CNFizing TRANS @" << time
+          << "... (" << n << " fragments)"
           << endl;
 
     ADDVector::iterator i;
@@ -234,8 +234,8 @@ void Algorithm::assert_formula(step_t time, ADDVector& adds,
     clock_t t0 = clock();
     unsigned n = f_trans_adds.size();
 
-    TRACE << "CNFizing formula @" << time
-          << "... (" << n << " formulas)"
+    TRACE << "CNFizing FORMULA @" << time
+          << "... (" << n << " fragments)"
           << endl;
 
     ADDVector::iterator i;
