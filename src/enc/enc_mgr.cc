@@ -28,6 +28,8 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
+// #define DEBUG_ENC
+
 // static initialization
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
@@ -47,23 +49,33 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     f_cudd.AutodynDisable();
 
     if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
+        #ifdef DEBUG_ENC
         DEBUG << "Encoding " << btype << endl;
+        #endif
         res = new BooleanEncoding();
     }
     else if (NULL != (sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp))) {
+        #ifdef DEBUG_ENC
         DEBUG << "Encoding " << sa_type << endl;
+        #endif
         res = new AlgebraicEncoding(sa_type->width(), 0, true, sa_type->dds());
     }
     else if (NULL != (ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp))) {
+        #ifdef DEBUG_ENC
         DEBUG << "Encoding " << ua_type << endl;
+        #endif
         res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
     }
     else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
+        #ifdef DEBUG_ENC
         DEBUG << "Encoding " << etype << endl;
+        #endif
         res = new EnumEncoding(etype->literals());
     }
     else if (NULL != (vtype = dynamic_cast<ArrayType_ptr>(tp))) {
+        #ifdef DEBUG_ENC
         DEBUG << "Encoding " << vtype << endl;
+        #endif
         Encodings encs;
 
         assert( 0 == ( vtype->width() % vtype->of()->width()));

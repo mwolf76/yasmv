@@ -626,7 +626,6 @@ void Compiler::finalize_and_chains()
         ACMap::iterator eye = f_chains.find(alpha);
         assert( f_chains.end() != eye);
 
-
         DDVector& Y ((*eye).second);
         for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
             // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
@@ -634,10 +633,16 @@ void Compiler::finalize_and_chains()
         }
 
         // !a -> !Y, that is: (a v !Y1 v !Y2 v !Y3 v ....)
-        ADD tmp (alpha);
+        ADD bigOr = f_enc.zero();
         for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-            tmp = tmp.Or((*j).Cmpl());
+            BooleanEncoding_ptr be
+                = make_chain_encoding();
+
+            ADD  av = be -> bits() [0];
+            bigOr = bigOr.Or( av);
+
+            PUSH_ADD( av.Cmpl(). Or( (*j). Cmpl()). Or( alpha));
         }
-        PUSH_ADD (tmp);
+        PUSH_ADD(bigOr);
     }
 }

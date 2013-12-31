@@ -28,7 +28,7 @@
 
 #include <dd_walker.hh>
 
-#define DEBUG_CNF
+// #define DEBUG_CNF
 namespace Minisat {
 
     /* internal, used only for CNF-ization */
