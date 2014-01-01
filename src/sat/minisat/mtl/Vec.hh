@@ -24,8 +24,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <assert.h>
 #include <new>
 
-#include "mtl/IntTypes.hh"
-#include "mtl/XAlloc.hh"
+#include "minisat/mtl/IntTypes.hh"
+#include "minisat/mtl/XAlloc.hh"
 
 namespace Minisat {
 

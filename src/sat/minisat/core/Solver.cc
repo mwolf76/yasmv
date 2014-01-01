@@ -22,7 +22,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include "mtl/Sort.hh"
 #include "core/Solver.hh"
-#include "proof/proof.hh"
+#include "proof.hh"
 
 #include <common.hh>
 using namespace Minisat;

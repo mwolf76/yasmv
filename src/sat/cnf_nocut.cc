@@ -2,10 +2,6 @@
  *  @file sat.cc
  *  @brief SAT interface implementation
  *
- *  This module contains the interface for services that implement an
- *  CNF clauses generation in a form that is suitable for direct
- *  injection into the SAT solver.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -26,15 +22,17 @@
 #include <sat.hh>
 #include <dd_walker.hh>
 
-#if 0
 namespace Minisat {
+#if 0
 
     class CNFBuilderNoCut : public ADDWalker {
     public:
-        CNFBuilderNoCut(CuddMgr& mgr, SAT& sat)
-            : ADDWalker()
-            , f_sat(sat)
-            , f_owner(mgr)
+        CNFBuilderNoCut(SAT& sat, step_t time, group_t group, color_t color)
+            : f_sat(sat)
+            // , f_time(time),
+            // , f_group(group)
+            // , f_color(color)
+            , f_owner(CuddMgr::INSTANCE())
         {}
 
         ~CNFBuilderNoCut()
@@ -54,17 +52,14 @@ namespace Minisat {
             group_t group = MAINGROUP;
             color_t color = BACKGROUND;
 
-            vec<Lit> ps; ps.push(f_sat.cnf_find_group_lit(group));
-
+            vec<Lit> ps; ps.push( f_sat.cnf_find_group_lit( group));
             unsigned i, size = f_owner.dd().getManager()->size;
-            int v;
             for (i = 0; i < size; ++ i) {
-                v = f_data[i];
 
-                if (v == 0) {
+                if (value == 0) {
                     ps.push( mkLit( f_sat.cnf_find_index_var(i), false));
                 }
-                else if (v == 1) {
+                else if (value == 1) {
                     ps.push( mkLit( f_sat.cnf_find_index_var(i), true));
                 }
                 else {
@@ -85,11 +80,11 @@ namespace Minisat {
         CuddMgr& f_owner;
     };
 
-    void SAT::cnf_push_no_cut(Term phi, const group_t group, const color_t color)
+    void SAT::cnf_push_no_cut(Term phi, step_t time, const group_t group, const color_t color)
     {
-        CNFBuilderNoCut builder(CuddMgr::INSTANCE(), *this);
+        CNFBuilderNoCut builder(*this, time, group, color);
         builder(phi);
     }
-
-};
 #endif
+};
+

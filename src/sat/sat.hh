@@ -26,28 +26,30 @@
 #ifndef SAT_H
 #define SAT_H
 
-// general purpose decls
+#include <satdefs.hh>
+#include <cuddObj.hh>
+
 #include <enc_mgr.hh>
-#include "satdefs.hh"
 #include "terms/ddterms.hh"
-#include "proof/proof.hh"
-#include "cuddObj.hh"
 
 #include <time_mapper.hh>
 
-/* MTL */
-#include <Map.hh>
-#include <Set.hh>
-#include <Vec.hh>
-
-// the glorious Minisat SAT solver
-#include "core/Solver.hh"
-#include "core/SolverTypes.hh"
+// the Minisat SAT solver
+#include <minisat/core/Solver.hh>
+#include <minisat/core/SolverTypes.hh>
 
 namespace Minisat {
 
+    using std::ostream;
+
+    ostream &operator<<(ostream &out, const Lit &lit);
+    ostream &operator<<(ostream &out, const Clause *clause);
+    ostream &operator<<(ostream &out, const Clause &clause);
+    ostream &operator<<(ostream &out, const vec<Lit> &lits);
+
     class SAT : public IObject {
         friend class CNFBuilderSingleCut;
+        friend class CNFBuilderNoCut;
 
     public:
         /**
@@ -206,6 +208,7 @@ namespace Minisat {
 
         Group2VarMap f_groups_map;
 
+#if 0
         // -- Interpolator -----------------------------------------------------
         typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
         typedef Map< InferenceRule* , Term, InferenceRuleHasher> R2T_Map;
@@ -250,9 +253,10 @@ namespace Minisat {
 
         inline bool clause_is_of_A(CRef cr) const
         { return a_clauses.has(cr); }
+#endif
 
         // -- Low level services -----------------------------------------------
-        // Lit cnf_find_group_lit(group_t group, bool enabled = true);
+        Lit cnf_find_group_lit(group_t group, bool enabled = true);
 
         Term itp_build_interpolant(const Colors& a);
         void itp_init_interpolation(const Colors& ga);

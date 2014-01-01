@@ -1,10 +1,6 @@
 /**
- *  @file defs.hh
- *  @brief DEFS interface
- *
- *  This module contains the interface for services that implement an
- *  CNF clauses generation in a form that is suitable for direct
- *  injection into the SAT solver.
+ *  @file satdefs.hh
+ *  @brief SAT interface
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -29,13 +25,10 @@
 #include <common.hh>
 #include <pool.hh>
 
-#include <SolverTypes.hh>
-
-/* from MTL */
-#include <Set.hh>
-
 // for the definition of Term
 #include <dd.hh>
+
+#include <minisat/core/SolverTypes.hh>
 
 namespace Minisat {
 
@@ -69,7 +62,7 @@ namespace Minisat {
 
     typedef unsigned color_t;
     static color_t BACKGROUND(0);
-    typedef Set<color_t> Colors;
+    typedef set<color_t> Colors;
 
     typedef vector<Var> Variables;
     typedef vector<Lit> Literals;

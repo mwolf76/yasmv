@@ -25,8 +25,6 @@
 #ifndef TERMS_H_INCLUDED
 #define TERMS_H_INCLUDED
 
-#include <SolverTypes.hh>
-
 namespace Minisat {
 
     template<class Term> class TermFactory {

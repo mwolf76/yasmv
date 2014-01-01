@@ -28,11 +28,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <iostream>
 using std::ostream;
 
-#include "mtl/IntTypes.hh"
-#include "mtl/Alg.hh"
-#include "mtl/Vec.hh"
-#include "mtl/Map.hh"
-#include "mtl/Alloc.hh"
+#include "minisat/mtl/IntTypes.hh"
+#include "minisat/mtl/Alg.hh"
+#include "minisat/mtl/Vec.hh"
+#include "minisat/mtl/Map.hh"
+#include "minisat/mtl/Alloc.hh"
 
 namespace Minisat {
 
