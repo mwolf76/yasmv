@@ -619,6 +619,10 @@ ADD Compiler::book_and_chain(ADD* dds, unsigned len)
 
 void Compiler::finalize_and_chains()
 {
+    // TODO: using formula polarity to determine which direction of
+    // the chaining inference needs to be included, in order to ensure
+    // sound results, can *greatly* enhance performance.
+
     // Conjunct booked AND chains into result stack
     for (DDVector::iterator i = f_roots.begin(); f_roots.end() != i; ++ i) {
         ADD alpha (*i); ADD not_alpha = alpha.Cmpl();
@@ -626,13 +630,17 @@ void Compiler::finalize_and_chains()
         ACMap::iterator eye = f_chains.find(alpha);
         assert( f_chains.end() != eye);
 
+        // positive polarity (fwd): a -> Y, that is: (!a v Y1) ^ (!a v
+        // Y2) ^ (!a v Y3) ^ ...
         DDVector& Y ((*eye).second);
         for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-            // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
+
             PUSH_ADD (not_alpha.Or(*j));
         }
 
-        // !a -> !Y, that is: (a v !Y1 v !Y2 v !Y3 v ....)
+        // negative polarity (bwd): Y -> a, that is: (a v !Y1 v !Y2 v
+        // !Y3 v ....), which in turn is rewritten as follows: Ex. (
+        // xi -> (yi -> a))
         ADD bigOr = f_enc.zero();
         for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
             BooleanEncoding_ptr be
