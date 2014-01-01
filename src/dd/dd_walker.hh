@@ -2,10 +2,6 @@
  *  @file dd_walker.hh
  *  @brief DD algorithm-unaware walk pattern implementation
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -50,18 +46,6 @@ struct add_activation_record {
 };
 typedef stack<struct add_activation_record> add_walker_stack;
 
-// reserved for YDD walkers
-struct ydd_activation_record {
-    dd_entry_point pc;
-    const YDD_ptr node;
-
-    ydd_activation_record(const YDD_ptr dd)
-        : pc(DD_PREORDER)
-        , node(dd)
-    {}
-};
-typedef stack<struct ydd_activation_record> ydd_walker_stack;
-
 class DDWalkerException : public Exception
 {
 public:
@@ -86,26 +70,6 @@ protected:
 
     /* explicit recursion stack */
     add_walker_stack f_recursion_stack;
-};
-
-class YDDWalker {
-public:
-    YDDWalker();
-    virtual ~YDDWalker();
-
-    virtual YDDWalker& operator() (const YDD_ptr dd);
-
-protected:
-    virtual void walk();
-
-    virtual bool condition(const YDD_ptr node) =0;
-    virtual void action   (const YDD_ptr node) =0;
-
-    virtual void pre_hook() =0;
-    virtual void post_hook() =0;
-
-    /* explicit recursion stack */
-    ydd_walker_stack f_recursion_stack;
 };
 
 #endif
