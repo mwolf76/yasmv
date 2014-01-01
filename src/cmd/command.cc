@@ -146,7 +146,27 @@ Variant SimulateCommand::operator()()
     default: assert( false ); /* unreachable */
     } /* switch */
     if (f_sim.has_witness()) {
-        tmp << ", see witness '" << f_sim.witness().id() << "'";
+        tmp << ", registered witness '" << f_sim.witness().id() << "'";
+
+        if (1) {
+            ostream &os(cout);
+
+            Witness& w (f_sim.witness());
+            for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+                os << "-- @ " << 1 + time << endl;
+                TimeFrame& tf = w[ time ];
+
+                SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+                while (symbs.has_next()) {
+                    ISymbol_ptr symb = symbs.next();
+                    Expr_ptr expr (symb->expr());
+                    Expr_ptr value(tf.value(expr));
+
+                    os << symb->expr() << " = " << value << endl;
+                }
+                os << endl;
+            }
+        }
     }
     else {
         tmp << "(no witness available)";
