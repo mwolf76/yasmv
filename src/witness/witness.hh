@@ -34,7 +34,6 @@
 #include <model_mgr.hh>
 
 #include <variant.hh>
-#include <sat.hh>
 
 /** Exception classes */
 class WitnessException : public Exception {
