@@ -152,6 +152,7 @@ AC_CONFIG_FILES([Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
+                 src/sat/minisat/Makefile
                  src/type/Makefile
                  src/utils/Makefile
                  src/witness/Makefile
