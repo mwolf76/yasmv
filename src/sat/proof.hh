@@ -2,9 +2,6 @@
  *  @file proof.hh
  *  @brief UNSAT proof logging
  *
- *  This module contains the definitions for Unsatisfiability proof
- *  logging.
- *
  *  Authors: Alberto Griggio, Marco Pensallorto
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -26,13 +23,13 @@
 #ifndef PROOF_H_DEFINED
 #define PROOF_H_DEFINED
 
-#include <Vec.hh>
-#include <Map.hh>
-
-#include "core/Solver.hh"
-
 #include <common.hh>
-#include "utils/solverlogger.hh"
+
+#include <minisat/mtl/Vec.hh>
+#include <minisat/mtl/Map.hh>
+#include <minisat/mtl/Sort.hh>
+
+#include "minisat/core/Solver.hh"
 
 // comment this out to disable debugging
 // #define DEBUG_PROOF_LOGGING

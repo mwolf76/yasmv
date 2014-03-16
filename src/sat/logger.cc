@@ -29,8 +29,8 @@ namespace Minisat {
 
     ostream &operator<<(ostream &out, const Lit &lit)
     {
-        out << (sign(lit) ? "~" : "") << var(lit);
-
+        if (!var(lit)) return out;
+        out << (sign(lit) ? "-" : "") << var(lit);
         return out;
     }
 
@@ -54,16 +54,13 @@ namespace Minisat {
 
     ostream &operator<<(ostream &out, const vec<Lit> &lits)
     {
-        out << "{";
-
         for (int i = 0; i < lits.size()-1; ++i) {
-            out << lits[i] << " ; ";
+            out << lits[i] << " ";
         }
 
         if (0 != lits.size()) {
             out << lits[lits.size()-1];
         }
-        out << "}";
 
         return out;
     }

@@ -32,8 +32,6 @@
 
 #include <common.hh>
 
-#include "core/SolverTypes.hh"
-
 namespace Minisat {
 
     class SAT; // fwd decl

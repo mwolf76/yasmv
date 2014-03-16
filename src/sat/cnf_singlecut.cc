@@ -2,10 +2,6 @@
  *  @file sat.cc
  *  @brief SAT interface implementation
  *
- *  This module contains the interface for services that implement an
- *  CNF clauses generation in a form that is suitable for direct
- *  injection into the SAT solver.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -28,7 +24,7 @@
 
 #include <dd_walker.hh>
 
-// #define DEBUG_CNF
+#define DEBUG_CNF
 namespace Minisat {
 
     /* internal, used only for CNF-ization */

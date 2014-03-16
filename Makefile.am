@@ -35,26 +35,26 @@ tags:
 	@ctags -Re $(top_srcdir)
 
 yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
-yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
-	$(top_builddir)/src/cmd/libcommand.la				\
-	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
-	$(top_builddir)/src/algorithms/sim/libsim.la			\
-	$(top_builddir)/src/algorithms/libalgorithms.la			\
-	$(top_builddir)/src/model/libmodel.la				\
-	$(top_builddir)/src/model/compiler/libcompiler.la		\
-	$(top_builddir)/src/expr/libexpr.la				\
-	$(top_builddir)/src/expr/walker/libexpr_walker.la		\
-	$(top_builddir)/src/expr/printer/libprinter.la			\
-	$(top_builddir)/src/type/libtype.la				\
-	$(top_builddir)/src/symb/libsymb.la				\
-	$(top_builddir)/src/enc/libenc.la				\
-	$(top_builddir)/src/utils/libutils.la				\
-	$(top_builddir)/src/witness/libwitness.la			\
-	$(top_builddir)/src/dd/libcudd.la				\
-	$(top_builddir)/src/sat/libminisat.la				\
-	$(top_builddir)/src/dd/libcudd.la -lantlr3c			\
-	$(BOOST_PROGRAM_OPTIONS_LIBS) 					\
-	$(BOOST_THREAD_LIBS)
+yasmv_LDADD = $(top_builddir)/src/parser/libparser.la		\
+	$(top_builddir)/src/cmd/libcommand.la			\
+	$(top_builddir)/src/algorithms/bmc/libbmc.la		\
+	$(top_builddir)/src/algorithms/sim/libsim.la		\
+	$(top_builddir)/src/algorithms/libalgorithms.la		\
+	$(top_builddir)/src/model/libmodel.la			\
+	$(top_builddir)/src/model/compiler/libcompiler.la	\
+	$(top_builddir)/src/expr/libexpr.la			\
+	$(top_builddir)/src/expr/walker/libexpr_walker.la	\
+	$(top_builddir)/src/expr/printer/libprinter.la		\
+	$(top_builddir)/src/type/libtype.la			\
+	$(top_builddir)/src/symb/libsymb.la			\
+	$(top_builddir)/src/enc/libenc.la			\
+	$(top_builddir)/src/utils/libutils.la			\
+	$(top_builddir)/src/witness/libwitness.la		\
+	$(top_builddir)/src/dd/libcudd.la			\
+	$(top_builddir)/src/sat/minisat/libminisat.la		\
+	$(top_builddir)/src/sat/libsat.la			\
+	$(top_builddir)/src/dd/libcudd.la -lantlr3c		\
+	$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS)
 
 tests_SOURCES = src/opts.cc s $(top_srcdir)/src/tests.cc src/parse.cc	\
 	src/common.cc $(top_srcdir)/src/expr/tests/test_expr.cc		\
@@ -79,7 +79,8 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/enc/libenc.la				\
 	$(top_builddir)/src/utils/libutils.la				\
 	$(top_builddir)/src/witness/libwitness.la			\
-	$(top_builddir)/src/sat/libminisat.la				\
+	$(top_builddir)/src/sat/minisat/libminisat.la			\
+	$(top_builddir)/src/sat/libsat.la				\
 	$(top_builddir)/src/dd/libcudd.la -lantlr3c			\
 	$(BOOST_PROGRAM_OPTIONS_LIBS) -lboost_unit_test_framework
 

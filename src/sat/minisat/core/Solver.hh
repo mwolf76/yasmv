@@ -23,11 +23,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Minisat_Solver_h
 #define Minisat_Solver_h
 
-#include "mtl/Vec.hh"
-#include "mtl/Heap.hh"
-#include "mtl/Alg.hh"
-#include "utils/Options.hh"
-#include "core/SolverTypes.hh"
+#include "minisat/mtl/Vec.hh"
+#include "minisat/mtl/Heap.hh"
+#include "minisat/mtl/Alg.hh"
+#include "minisat/utils/Options.hh"
+#include "minisat/core/SolverTypes.hh"
 
 #ifdef NDEBUG
 #undef PROOF_CHECK  // disable proof self checking

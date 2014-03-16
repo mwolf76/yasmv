@@ -24,11 +24,11 @@
  *
  **/
 #include <sat.hh>
+#include <proof.hh>
 
 namespace Minisat {
 
-#if 0 // TODO LATER
-
+#if 0
     Term SAT::itp_build_interpolant(const Colors& a)
     {
         // local accessors
@@ -197,6 +197,5 @@ namespace Minisat {
             }
         } // for each literal in the clause
     } // SAT::init_interpolation
-
 #endif
 };

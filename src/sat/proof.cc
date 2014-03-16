@@ -2,9 +2,6 @@
  *  @file proof.cc
  *  @brief UNSAT proof logging
  *
- *  This module contains the definitions for Unsatisfiability proof
- *  logging.
- *
  *  Authors: Alberto Griggio, Marco Pensallorto
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -29,7 +26,6 @@
 #include <stack>
 
 #include "proof.hh"
-#include <mtl/Sort.hh>
 
 namespace Minisat {
 

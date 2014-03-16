@@ -23,6 +23,8 @@
 #ifndef BASE_ALGORITHM_H
 #define BASE_ALGORITHM_H
 
+#include <sat.hh>
+
 #include <model.hh>
 #include <model_mgr.hh>
 
@@ -31,9 +33,6 @@
 
 #include <witness.hh>
 #include <variant.hh>
-
-/* SAT interface */
-#include <sat.hh>
 
 /* Model compiler */
 #include <compiler/compiler.hh>
