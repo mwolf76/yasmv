@@ -98,6 +98,15 @@ struct IntEq {
     { return phi == psi; }
 };
 
+struct PolarizedLiteralHash {
+    long operator() (const PolarizedLiteral& k) const;
+};
+
+struct PolarizedLiteralEq {
+    bool operator() (const PolarizedLiteral& x,
+                     const PolarizedLiteral& y) const;
+};
+
 struct UCBIHash {
     long operator() (const UCBI& k) const;
 };

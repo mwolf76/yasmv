@@ -203,6 +203,26 @@ private:
     step_t f_time;
 };
 
+/* Normal forms literals */
+class PolarizedLiteral {
+public:
+    PolarizedLiteral(Expr_ptr literal, bool polarity = true);
+
+    inline Expr_ptr literal() const
+    { return f_literal; }
+
+    inline bool polarity() const
+    { return f_polarity; }
+
+private:
+    // literal
+    Expr_ptr f_literal;
+
+    // polarity
+    bool f_polarity;
+};
+
+/* Untimed Canonical Bit Identifiers */
 class UCBI {
 public:
     UCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno);
@@ -234,6 +254,7 @@ private:
     unsigned f_bitno;
 };
 
+/* Timed Canonical Bit Identifiers */
 class TCBI {
 public:
     TCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);

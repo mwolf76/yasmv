@@ -89,14 +89,14 @@ long AtomHash::operator() (const Atom& k) const
     unsigned long hash = 0;
     unsigned long x    = 0;
 
-    for(std::size_t i = 0; i < k.length(); i++)
-        {
-            hash = (hash << 4) + k[i];
-            if((x = hash & 0xF0000000L) != 0) {
-                hash ^= (x >> 24);
-            }
-            hash &= ~x;
+    for (std::size_t i = 0; i < k.length(); i++) {
+
+        hash = (hash << 4) + k[i];
+        if((x = hash & 0xF0000000L) != 0) {
+            hash ^= (x >> 24);
         }
+        hash &= ~x;
+    }
 
     return hash;
 }
@@ -163,6 +163,20 @@ bool ValueEq::operator() (const value_t x,
                           const value_t y) const
 {
     return x == y;
+}
+
+long PolarizedLiteralHash::operator() (const PolarizedLiteral& k) const
+{
+    Expr_ptr lit = k.literal();
+    return ExprHash() (*lit);
+}
+
+bool PolarizedLiteralEq::operator() (const PolarizedLiteral& x,
+                                     const PolarizedLiteral& y) const
+{
+    return (x.literal() == y.literal() &&
+            (( x.polarity() &&  y.polarity()) ||
+             (!x.polarity() && !y.polarity())));
 }
 
 /* REVIEW: hash function */
