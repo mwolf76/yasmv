@@ -262,7 +262,6 @@ BooleanEncoding_ptr Compiler::make_chain_encoding()
     return be;
 }
 
-
 void Compiler::pre_node_hook(Expr_ptr expr)
 {
     /* assemble memoization key */
@@ -604,7 +603,7 @@ ADD Compiler::book_and_chain(ADD* dds, unsigned len)
     /* add alpha variable */
     ADD ret = be -> bits() [0];
 
-    /* collect dds */
+    /* collect DDs */
     DDVector dv;
     for (unsigned i = 0; i < len; ++ i) {
         dv.push_back( dds[i]);
@@ -631,18 +630,5 @@ void Compiler::finalize_and_chains()
             // a -> Y, that is: (!a v Y1) ^ (!a v Y2) ^ (!a v Y3) ^ ...
             PUSH_ADD (not_alpha.Or(*j));
         }
-
-        // !a -> !Y, that is: (a v !Y1 v !Y2 v !Y3 v ....)
-        ADD bigOr = f_enc.zero();
-        for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-            BooleanEncoding_ptr be
-                = make_chain_encoding();
-
-            ADD  av = be -> bits() [0];
-            bigOr = bigOr.Or( av);
-
-            PUSH_ADD( av.Cmpl(). Or( (*j). Cmpl()). Or( alpha));
-        }
-        PUSH_ADD(bigOr);
     }
 }

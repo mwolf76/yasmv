@@ -48,6 +48,9 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
+typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> MULMap; // multiplications
+typedef pair<MULMap::iterator, bool> MULHit;
+
 typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ACMap; // and-chain
 typedef pair<ACMap::iterator, bool> ACHit;
 
@@ -96,6 +99,8 @@ protected:
 
     DDVector f_roots;             // ADD chain roots
     ACMap  f_chains;              // chain root -> DD vector
+
+    MULMap f_muls;                // ( x * y ) -> DDs
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -241,7 +246,9 @@ private:
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
     ADD book_and_chain(ADD* dds, unsigned len);
+
     void finalize_and_chains();
+    void finalize_multiplications();
 
     void algebraic_from_constant(unsigned width);
 
