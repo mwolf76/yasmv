@@ -27,7 +27,7 @@
 #include <bmc.hh>
 
 BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
-                                     Minisat::SAT& engine, unsigned k,
+                                     SAT& engine, unsigned k,
                                      bool use_coi)
     : Witness()
 {

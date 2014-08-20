@@ -26,35 +26,32 @@
 #include <sat.hh>
 #include <cstdlib>
 
-namespace Minisat {
+status_t SAT::sat_solve_groups(const Groups& groups)
+{
+    vec<Lit> assumptions;
 
-    status_t SAT::sat_solve_groups(const Groups& groups)
-    {
-        vec<Lit> assumptions;
+    clock_t t0 = clock();
+    TRACE << "Solving ... " << endl;
 
-        clock_t t0 = clock();
-        TRACE << "Solving ... " << endl;
+    Groups::const_iterator i;
+    for (i = groups.begin(); groups.end() != i; ++ i) {
+        int grp = *i;
 
-        Groups::const_iterator i;
-        for (i = groups.begin(); groups.end() != i; ++ i) {
-            int grp = *i;
-
-            /* Assumptions work like "a -> phi", thus a non-negative
-               value enables group, whereas a negative value disables
-               it. */
-            assumptions.push( mkLit( abs(grp), grp < 0));
-        }
-
-        f_status = f_solver.solve(assumptions)
-            ? STATUS_SAT
-            : STATUS_UNSAT
-            ;
-
-        clock_t elapsed = clock() - t0;
-        double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-        TRACE << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
-
-        return f_status;
+        /* Assumptions work like "a -> phi", thus a non-negative
+           value enables group, whereas a negative value disables
+           it. */
+        assumptions.push( mkLit( abs(grp), grp < 0));
     }
 
-};
+    f_status = f_solver.solve(assumptions)
+        ? STATUS_SAT
+        : STATUS_UNSAT
+        ;
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    TRACE << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
+
+    return f_status;
+}
+

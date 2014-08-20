@@ -39,17 +39,6 @@
 
 typedef unordered_map<string, Variant> ParametersMap;
 
-using Minisat::group_t;
-using Minisat::MAINGROUP;
-
-using Minisat::color_t;
-using Minisat::BACKGROUND;
-
-using Minisat::Var;
-using Minisat::SAT;
-using Minisat::STATUS_SAT;
-using Minisat::STATUS_UNSAT;
-
 typedef enum {
     MC_FALSE,
     MC_TRUE,

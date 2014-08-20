@@ -84,16 +84,16 @@ void BMC::bmc_propositional_check()
     assert_formula(0, f_violation_adds, engine().new_group());
 
     TRACE << "Looking for a BMC CEX of length 0" << endl;
-    Minisat::status_t response = engine().solve();
+    status_t response = engine().solve();
 
-    if ( Minisat::STATUS_UNSAT == response) {
+    if ( STATUS_UNSAT == response) {
         f_status = MC_TRUE;
     }
-    else if ( Minisat::STATUS_SAT == response) {
+    else if ( STATUS_SAT == response) {
         f_status = MC_FALSE;
     }
     else {
-        assert( Minisat::STATUS_UNKNOWN == response);
+        assert( STATUS_UNKNOWN == response);
     }
 }
 
@@ -107,7 +107,7 @@ void BMC::bmc_invarspec_check()
     assert_formula(0, f_violation_adds, engine().new_group());
 
     TRACE << "Looking for a BMC CEX of length 0" << endl;
-    if (Minisat::STATUS_UNSAT == engine().solve()) {
+    if (STATUS_UNSAT == engine().solve()) {
 
         do {
             /* disable last violation */
@@ -123,10 +123,10 @@ void BMC::bmc_invarspec_check()
             TRACE << "Looking for a BMC CEX of length "
                   << k << endl;
 
-        } while ( Minisat::STATUS_UNSAT == engine().solve() && ! leave);
+        } while ( STATUS_UNSAT == engine().solve() && ! leave);
     }
 
-    if (Minisat::STATUS_SAT == engine().status()) {
+    if (STATUS_SAT == engine().status()) {
         f_status = MC_FALSE;
 
         TRACE << "Found BMC CEX witness (k = " << k

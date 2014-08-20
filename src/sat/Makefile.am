@@ -1,23 +1,19 @@
-AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = minisat
-
-AM_CPPFLAGS = @AM_CPPFLAGS@
-AM_CFLAGS = @AM_CFLAGS@
-AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
-
-INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd			\
--I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
--I$(top_srcdir)/src/type -I$(top_srcdir)/src/model			\
--I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger	\
--I$(top_srcdir)/src/sat -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I/usr/local/include -I$(top_srcdir)/src/	\
+-I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc				\
+-I$(top_srcdir)/src/expr -I$(top_srcdir)/src/type			\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/witness			\
+-I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/st					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
+AM_CFLAGS = @AM_CFLAGS@
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
+
 PKG_HH = satdefs.hh sat.hh
-PKG_CC = time_mapper.cc cnf_nocut.cc cnf_singlecut.cc solver.cc	\
-proof.cc interpolator.cc logger.cc
+PKG_CC = time_mapper.cc cnf_nocut.cc cnf_singlecut.cc solver.cc logger.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

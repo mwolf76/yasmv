@@ -25,82 +25,80 @@
  **/
 #include <sat.hh>
 
-namespace Minisat {
+ostream &operator<<(ostream &out, const Lit &lit)
+{
+    if (!var(lit)) return out;
+    out << (sign(lit) ? "-" : "") << var(lit);
+    return out;
+}
 
-    ostream &operator<<(ostream &out, const Lit &lit)
-    {
-        if (!var(lit)) return out;
-        out << (sign(lit) ? "-" : "") << var(lit);
-        return out;
+ostream &operator<<(ostream &out, const Clause *clause)
+{
+    out << (clause->learnt() ? "L" : "") << "(";
+    for (int i = 0; i < clause->size()-1; ++i) {
+        out << (*clause)[i] << " | ";
+    }
+    out << (*clause)[clause->size()-1] << ")";
+
+    return out;
+}
+
+ostream &operator<<(ostream &out, const Clause &clause)
+{
+    out << (&clause);
+
+    return out;
+}
+
+ostream &operator<<(ostream &out, const vec<Lit> &lits)
+{
+    for (int i = 0; i < lits.size()-1; ++i) {
+        out << lits[i] << " ";
     }
 
-    ostream &operator<<(ostream &out, const Clause *clause)
-    {
-        out << (clause->learnt() ? "L" : "") << "(";
-        for (int i = 0; i < clause->size()-1; ++i) {
-            out << (*clause)[i] << " | ";
-        }
-        out << (*clause)[clause->size()-1] << ")";
-
-        return out;
+    if (0 != lits.size()) {
+        out << lits[lits.size()-1];
     }
 
-    ostream &operator<<(ostream &out, const Clause &clause)
-    {
-        out << (&clause);
+    return out;
+}
 
-        return out;
+ostream &operator<<(ostream &os, const lbool &lb)
+{
+    switch(toInt(lb)) {
+    case 0:
+        os << "T";
+        break;
+    case 1:
+        os << "F";
+        break;
+    case 2:
+        os << "X";
+        break;
+    default:
+        assert(0);
     }
 
-    ostream &operator<<(ostream &out, const vec<Lit> &lits)
-    {
-        for (int i = 0; i < lits.size()-1; ++i) {
-            out << lits[i] << " ";
-        }
+    return os;
+}
 
-        if (0 != lits.size()) {
-            out << lits[lits.size()-1];
-        }
-
-        return out;
+ostream &operator<<(ostream &os, const status_t &status)
+{
+    switch (status) {
+    case STATUS_SAT:
+        os << "SAT";
+        break;
+    case STATUS_UNSAT:
+        os << "UNSAT";
+        break;
+    case STATUS_UNKNOWN:
+        os << "??";
+        break;
+    default:
+        assert(0);
     }
 
-    ostream &operator<<(ostream &os, const lbool &lb)
-    {
-        switch(lb.value) {
-        case 0:
-            os << "T";
-            break;
-        case 1:
-            os << "F";
-            break;
-        case 2:
-            os << "X";
-            break;
-        default:
-            assert(0);
-        }
+    return os;
+}
 
-        return os;
-    }
 
-    ostream &operator<<(ostream &os, const status_t &status)
-    {
-        switch (status) {
-        case STATUS_SAT:
-            os << "SAT";
-            break;
-        case STATUS_UNSAT:
-            os << "UNSAT";
-            break;
-        case STATUS_UNKNOWN:
-            os << "??";
-            break;
-        default:
-            assert(0);
-        }
-
-        return os;
-    }
-
-};

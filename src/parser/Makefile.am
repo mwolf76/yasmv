@@ -1,36 +1,36 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = grammars
 
-AM_CPPFLAGS = @AM_CPPFLAGS@
-AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -DANTLR3_INLINE_INPUT_8BIT
-
-INCLUDES = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd		\
--I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr		\
--I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/type	\
--I$(top_srcdir)/src/symb -I$(top_srcdir)/src/cmd		\
--I$(top_srcdir)/src/model -I$(top_srcdir)/src/sat		\
--I$(top_srcdir)/src/algorithms -I$(top_srcdir)/src/utils	\
--I$(top_srcdir)/src/witness -I$(top_srcdir)/src/sat/core	\
--I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof	\
--I$(top_srcdir)/src/sat/utils -I$(top_srcdir)/src/grammars	\
--I$(top_srcdir)/src/3rdparty/ezlogger				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/cudd				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/mtr				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/st				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/			\
+-I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc				\
+-I$(top_srcdir)/src/expr -I$(top_srcdir)/src/expr/walker		\
+-I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb			\
+-I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/model			\
+-I$(top_srcdir)/src/sat -I$(top_srcdir)/src/algorithms			\
+-I$(top_srcdir)/src/utils -I$(top_srcdir)/src/witness			\
+-I$(top_srcdir)/src/sat/core -I$(top_srcdir)/src/sat/mtl		\
+-I$(top_srcdir)/src/sat/proof -I$(top_srcdir)/src/sat/utils		\
+-I$(top_srcdir)/src/grammars -I$(top_srcdir)/src/3rdparty/ezlogger	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
+
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -DANTLR3_INLINE_INPUT_8BIT
 
 PKG_HH = grammars/smvLexer.h grammars/smvParser.h
 PKG_CC = grammars/smvLexer.cc grammars/smvParser.cc
 
-grammars/smvLexer.c grammars/smvParser.c: grammars/smv.g
+grammars/.timestamp: grammars/smv.g
 	@echo "compiling ANTLR grammar... (this may take a while)"
 	@antlr3 grammars/smv.g
+	@touch grammars/.timestamp
 
-grammars/smvLexer.cc: grammars/smvLexer.c
+grammars/smvLexer.cc: grammars/.timestamp
 	@cp grammars/smvLexer.c grammars/smvLexer.cc
 
-grammars/smvParser.cc: grammars/smvParser.c
+grammars/smvParser.cc: grammars/.timestamp
 	@cp grammars/smvParser.c grammars/smvParser.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)

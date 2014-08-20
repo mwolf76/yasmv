@@ -85,21 +85,21 @@ AC_CHECK_HEADERS([float.h limits.h memory.h stddef.h stdlib.h string.h \
 # This is for malloc:
 AC_CHECK_HEADER(sys/types.h)
 AC_CHECK_HEADER(malloc.h,
-	[ AC_DEFINE(HAVE_MALLOC_H, 1, Defined to 1 if the system provides malloc.h)],
-	[ AC_CHECK_HEADER(sys/malloc.h,
-	    [AC_DEFINE(HAVE_SYS_MALLOC_H, 1, Defined to 1 if the system provides sys/malloc.h)],
-	    [],
-	    [
-	      #if HAVE_SYS_TYPES_H
-	      # include <sys/types.h>
-	      #endif
-	    ]
-	    )],
-	[
-	 #if HAVE_SYS_TYPES_H
-	 # include <sys/types.h>
-	 #endif
-	])
+        [ AC_DEFINE(HAVE_MALLOC_H, 1, Defined to 1 if the system provides malloc.h)],
+        [ AC_CHECK_HEADER(sys/malloc.h,
+            [AC_DEFINE(HAVE_SYS_MALLOC_H, 1, Defined to 1 if the system provides sys/malloc.h)],
+            [],
+            [
+              #if HAVE_SYS_TYPES_H
+              # include <sys/types.h>
+              #endif
+            ]
+            )],
+        [
+         #if HAVE_SYS_TYPES_H
+         # include <sys/types.h>
+         #endif
+        ])
 
 # antlr checks
 AC_ANTLR
@@ -124,8 +124,8 @@ AC_FUNC_STAT
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
-		strrchr strstr strtol, random srandom getpid \
-		mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
+                strrchr strstr strtol, random srandom getpid \
+                mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
 AM_CPPFLAGS="$BOOST_CPPFLAGS"
 AC_SUBST(AM_CPPFLAGS)
 
@@ -136,11 +136,11 @@ AM_CXXFLAGS="-Wall"
 AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
-		 src/Makefile
+                 src/Makefile
                  src/cmd/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
-		 src/expr/Makefile
+                 src/expr/Makefile
                  src/expr/printer/Makefile
                  src/expr/walker/Makefile
                  src/algorithms/Makefile
@@ -152,12 +152,11 @@ AC_CONFIG_FILES([Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
-                 src/sat/minisat/Makefile
                  src/type/Makefile
                  src/utils/Makefile
                  src/witness/Makefile
                  src/witness/out/Makefile
                  doc/Makefile
-		 gnusmv.pc])
+                 gnusmv.pc])
 
 AC_OUTPUT

@@ -32,33 +32,30 @@
 
 #include <common.hh>
 
-namespace Minisat {
+class SAT; // fwd decl
 
-    class SAT; // fwd decl
+typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
-    typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-    typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+class TimeMapper : public IObject {
 
-    class TimeMapper : public IObject {
+    /* ctor and dctor are available only to SAT owner */
+    friend class SAT;
 
-        /* ctor and dctor are available only to SAT owner */
-        friend class SAT;
+public:
+    Var var(const TCBI& tcbi );
+    const TCBI& tcbi( Var var );
 
-    public:
-        Var var(const TCBI& tcbi );
-        const TCBI& tcbi( Var var );
+private:
+    TimeMapper(SAT& owner);
+    ~TimeMapper();
 
-    private:
-        TimeMapper(SAT& owner);
-        ~TimeMapper();
+    SAT& f_owner;
 
-        SAT& f_owner;
+    /* Bidirectional mapping */
+    TCBI2VarMap f_tcbi2var_map;
+    Var2TCBIMap f_var2tcbi_map;
+};
 
-        /* Bidirectional mapping */
-        TCBI2VarMap f_tcbi2var_map;
-        Var2TCBIMap f_var2tcbi_map;
-    };
-
-}; /* namespace */
 
 #endif

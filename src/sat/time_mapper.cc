@@ -26,44 +26,43 @@
  **/
 
 #include <sat.hh>
-namespace Minisat {
 
-    TimeMapper::TimeMapper(SAT& owner)
-        : f_owner(owner)
-    {}
+TimeMapper::TimeMapper(SAT& owner)
+    : f_owner(owner)
+{}
 
-    TimeMapper::~TimeMapper()
-    {}
+TimeMapper::~TimeMapper()
+{}
 
-    Var TimeMapper::var(const TCBI& tcbi)
-    {
-        Var var;
-        const TCBI2VarMap::iterator eye = f_tcbi2var_map.find(tcbi);
+Var TimeMapper::var(const TCBI& tcbi)
+{
+    Var var;
+    const TCBI2VarMap::iterator eye = f_tcbi2var_map.find(tcbi);
 
-        if (f_tcbi2var_map.end() != eye) {
-            var = eye->second;
-        }
-        else {
-            /* generate a new var and book it. */
-            var = f_owner.new_sat_var();
+    if (f_tcbi2var_map.end() != eye) {
+        var = eye->second;
+    }
+    else {
+        /* generate a new var and book it. */
+        var = f_owner.new_sat_var();
 
-            // DRIVEL << "Adding VAR " << var << " for " << tcbi << endl;
-            f_tcbi2var_map.insert( make_pair<TCBI, Var>(tcbi, var));
-            f_var2tcbi_map.insert( make_pair<Var, TCBI>(var, tcbi));
-        }
-
-        return var;
+        // DRIVEL << "Adding VAR " << var << " for " << tcbi << endl;
+        f_tcbi2var_map.insert( make_pair<TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( make_pair<Var, TCBI>(var, tcbi));
     }
 
-    const TCBI& TimeMapper::tcbi(Var var)
-    {
-        const Var2TCBIMap::iterator eye = f_var2tcbi_map.find(var);
+    return var;
+}
 
-        /* TCBI *has* to be there already. */
-        if (f_var2tcbi_map.end() == eye) {
-            assert (false); /* unexpected */
-        }
+const TCBI& TimeMapper::tcbi(Var var)
+{
+    const Var2TCBIMap::iterator eye = f_var2tcbi_map.find(var);
 
-        return eye->second;
+    /* TCBI *has* to be there already. */
+    if (f_var2tcbi_map.end() == eye) {
+        assert (false); /* unexpected */
     }
-};
+
+    return eye->second;
+}
+

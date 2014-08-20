@@ -1,18 +1,17 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = @AM_CPPFLAGS@ -DSIZEOF_VOID_P=@SIZEOF_VOID_P@	\
- -DSIZEOF_INT=@SIZEOF_INT@ -DSIZEOF_LONG=@SIZEOF_LONG@
+-DSIZEOF_INT=@SIZEOF_INT@ -DSIZEOF_LONG=@SIZEOF_LONG@		\
+-I$(top_srcdir)/src/ -I$(top_srcdir)/src/expr			\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd				\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr				\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st				\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/obj				\
+-I$(top_srcdir)/src/3rdparty/ezlogger
 
 AM_CFLAGS = @AM_CFLAGS@
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
-
-INCLUDES = \
-	-I$(top_srcdir)/src/				\
-	-I$(top_srcdir)/src/expr			\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd          \
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr 	 	\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
-	-I$(top_srcdir)/src/dd/cudd-2.5.0/obj 		\
-	-I$(top_srcdir)/src/3rdparty/ezlogger
 
 PKG_HH = cudd_mgr.hh dd.hh dd_walker.hh cudd-2.5.0/cudd/cudd.h	\
 cudd-2.5.0/cudd/cuddInt.h

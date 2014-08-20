@@ -25,7 +25,7 @@ static unsigned progressive = 0;
 static const char *prfx = "sim_";
 
 using Minisat::Var;
-SimulationWitness::SimulationWitness(IModel& model, Minisat::SAT& engine,
+SimulationWitness::SimulationWitness(IModel& model, SAT& engine,
                                      step_t k, bool unique_id)
     : Witness()
 {
