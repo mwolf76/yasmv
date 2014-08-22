@@ -66,7 +66,9 @@ class IModule : public IObject {
 public:
     virtual const Expr_ptr expr() const =0;
 
-    // Symbols management
+    // Symbols management, preserve decl ordering
+    virtual const ExprVector& locals() const =0;
+
     virtual const Variables& vars() const =0;
     virtual void add_var(Expr_ptr expr, IVariable_ptr var) =0;
 
@@ -98,6 +100,9 @@ public:
 class Module : public IModule {
     Expr_ptr f_name;
 
+    // preserves symbols ordering
+    ExprVector f_locals;
+
     Variables f_localVars;
     Defines   f_localDefs;
 
@@ -114,25 +119,22 @@ public:
     inline bool is_main() const
     { return f_name == ExprMgr::INSTANCE().make_main(); }
 
+    const ExprVector& locals() const;
+
     void add_var(Expr_ptr name, IVariable_ptr var);
-    inline const Variables& vars() const
-    { return f_localVars; }
+    const Variables& vars() const;
 
     void add_def(Expr_ptr name, IDefine_ptr def);
-    inline const Defines& defs() const
-    { return f_localDefs; }
+    const Defines& defs() const;
 
     void add_init(Expr_ptr expr);
-    const ExprVector& init() const
-    { return f_init; }
+    const ExprVector& init() const;
 
     void add_invar(Expr_ptr expr);
-    const ExprVector& invar() const
-    { return f_invar; }
+    const ExprVector& invar() const;
 
     void add_trans(Expr_ptr expr);
-    const ExprVector& trans() const
-    { return f_trans; }
+    const ExprVector& trans() const;
 };
 
 ostream& operator<<(ostream& os, Module& module);
@@ -217,7 +219,8 @@ class Define : public IDefine {
     const Expr_ptr f_body;
 
 public:
-    Define(const Expr_ptr ctx, const Expr_ptr name, const ExprVector& formals, const Expr_ptr body)
+    Define(const Expr_ptr ctx, const Expr_ptr name,
+           const ExprVector& formals, const Expr_ptr body)
         : f_ctx(ctx)
         , f_name(name)
         , f_formals(formals)
@@ -237,6 +240,13 @@ public:
     { return f_formals; }
 };
 
+/**
+ * Symbol iterator
+ *
+ * COI aware
+ * Preserves ordering
+ *
+ */
 class SymbIter {
 public:
     /* Calculates COI if formula is non-NULL */
