@@ -1,5 +1,4 @@
-FSM
-    ring_counter
+FSM t00
 
 VAR
     x0 : boolean;
@@ -39,43 +38,22 @@ TRANS
         next(x0) <-> ! x0;
 
 TRANS
-        next(x1) <-> case
-                        x0 : ! x1;
-                        TRUE: x1;
-                     esac;
+        next(x1) <-> x0 ? ! x1 : x1;
 
 TRANS
-        next(x2) <-> case
-                        x1 : ! x2;
-                        TRUE: x2;
-                     esac;
+        next(x2) <-> x0 & x1 ? ! x2 : x2;
 
 TRANS
-        next(x3) <-> case
-                        x2 : ! x3;
-                        TRUE: x3;
-                     esac;
+        next(x3) <-> x0 & x1 & x2 ? ! x3 : x3;
 
 TRANS
-        next(x4) <-> case
-                        x3 : ! x4;
-                        TRUE: x4;
-                     esac;
+        next(x4) <-> x0 & x1 & x2 & x3 ? ! x4 : x4;
 
 TRANS
-        next(x5) <-> case
-                        x4 : ! x5;
-                        TRUE: x5;
-                     esac;
+        next(x5) <-> x0 & x1 & x2 & x3 & x4 ? ! x5 : x5;
 
 TRANS
-        next(x6) <-> case
-                        x5 : ! x6;
-                        TRUE: x6;
-                     esac;
+        next(x6) <-> x0 & x1 & x2 & x3 & x4 & x5 ? ! x6 : x6;
 
 TRANS
-        next(x7) <-> case
-                        x6 : ! x6;
-                        TRUE: x6;
-                     esac;
+        next(x7) <-> x0 & x1 & x2 & x3 & x4 & x5 & x6 ? ! x7 : x7;
