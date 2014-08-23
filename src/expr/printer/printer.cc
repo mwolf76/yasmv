@@ -310,6 +310,7 @@ void Printer::walk_leaf(const Expr_ptr expr)
     case HCONST: f_os << hex << "0x" << expr->value(); break;
     case OCONST: f_os << oct << "0"  << expr->value(); break;
     case IDENT:  f_os << expr->atom(); break;
+    case UNDEF:  f_os << "UNDEF"; break;
     default: assert(0);
     }
 }

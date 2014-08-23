@@ -168,7 +168,6 @@ SymbIter::SymbIter(IModel& model, Expr_ptr formula)
                     symbol = (*vi).second;
                     break;
                 }
-
             } while(0);
 
             if (symbol)  {

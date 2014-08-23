@@ -56,11 +56,6 @@ typedef enum {
     /* conditionals */
     ITE, COND,
 
-    /* leaves */
-    ICONST, // decimal constants
-    HCONST, // hex constants
-    OCONST, // octal constants
-
     /* identifiers */
     IDENT, DOT,
 
@@ -78,8 +73,14 @@ typedef enum {
 
     COMMA,
 
-    // error handling
-    ERROR,
+    // -- Nullary
+    ICONST, // decimal constants
+    HCONST, // hex constants
+    OCONST, // octal constants
+
+    // undefined
+    UNDEF,
+
 } ExprType;
 
 // An Expression consists of an AST symbol, which is the expression
@@ -138,6 +139,14 @@ typedef struct Expr_TAG {
     : f_symb(IDENT)
     { u.f_atom = const_cast<Atom *>(& atom); }
 
+    // binary expr (rhs is NULL for unary ops)
+    inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
+        : f_symb(symb)
+    {
+        u.f_lhs = lhs;
+        u.f_rhs = rhs;
+    }
+
     // numeric constants, are treated as machine size consts.
     inline Expr_TAG(ExprType symb, value_t value)
         : f_symb(symb)
@@ -149,12 +158,11 @@ typedef struct Expr_TAG {
         u.f_value = value;
     }
 
-    // binary expr (rhs is NULL for unary ops)
-    inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
+    // nullary nodes (errors, undefined)
+    inline Expr_TAG(ExprType symb)
         : f_symb(symb)
     {
-        u.f_lhs = lhs;
-        u.f_rhs = rhs;
+        assert( symb == UNDEF );
     }
 
 } Expr;

@@ -102,7 +102,7 @@ typedef enum {
     // -- Simple walkers
     NEXT_1, PREV_1, NEG_1, NOT_1,
 
-    PLUS_1, PLUS_2, // FIXME: when proper cudd namespace is established, I *want* ADD back here!
+    PLUS_1, PLUS_2,
     SUB_1, SUB_2,
     MUL_1, MUL_2,
     DIV_1, DIV_2,
@@ -150,6 +150,7 @@ typedef enum {
 
     CAST_1, CAST_2,
     TYPE_1, TYPE_2,
+
 } entry_point;
 
 // reserved for walkers
@@ -379,6 +380,7 @@ protected:
 
     // leaves
     virtual void walk_leaf(const Expr_ptr expr) =0;
+
 };
 
 #endif

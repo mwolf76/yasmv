@@ -130,7 +130,6 @@ void Simulation::process()
                   << endl;
             t0 = t1; // resetting clock
 
-            // one more cup of coffe for the road
             // TODO: SAT restart after a given number of steps (e.g. 10) would help
             // preventing performance degradation as k grows larger.
             assert_fsm_trans(k ++);

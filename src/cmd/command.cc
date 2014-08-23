@@ -158,11 +158,27 @@ Variant SimulateCommand::operator()()
 
                 SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
                 while (symbs.has_next()) {
-                    ISymbol_ptr symb = symbs.next();
-                    Expr_ptr expr (symb->expr());
-                    Expr_ptr value(tf.value(expr));
 
-                    os << symb->expr() << " = " << value << endl;
+                    ISymbol_ptr symb = symbs.next();
+                    Expr_ptr value = NULL;
+
+                    if (symb->is_variable())  {
+                        Expr_ptr expr (symb->expr());
+
+                        value = tf.value(expr);
+                        os << expr << " = " << value << endl;
+                    }
+                    else if (symb->is_define()) {
+                        Expr_ptr ctx (symb->ctx());
+                        Expr_ptr expr (symb->expr());
+
+                        value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
+                        os << expr << " = " << value << endl;
+                    }
+                    else {
+                        continue;
+                    }
+
                 }
                 os << endl;
             }

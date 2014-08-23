@@ -48,8 +48,11 @@ public:
     { return f_tm; }
 
     // delegated method to the Evaluator functor
-    inline const value_t eval( Witness&w, Expr_ptr ctx, Expr_ptr formula, step_t k)
-    { return f_evaluator.process( w, ctx, formula, k); }
+    inline const Expr_ptr eval( Witness&w, Expr_ptr ctx, Expr_ptr formula, step_t k)
+    {
+        value_t value = f_evaluator.process( w, ctx, formula, k);
+        return ExprMgr::INSTANCE().make_const( value );
+    }
 
     inline const WitnessMap& witnesses() const
     { return f_map; }

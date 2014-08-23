@@ -96,7 +96,7 @@ void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
 
     if (f_first) {
         FQExpr key(ctx, body);
-        TRACE << "Encoding of " << key << " took "
+        TRACE << "Compilation of " << key << " took "
               << secs << " seconds" << endl;
 
         return;

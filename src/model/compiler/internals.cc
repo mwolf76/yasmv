@@ -273,7 +273,7 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
     FQExpr key(ctx, expr, time);
 
-    TRACE << "Processing " << key << "..." << endl;
+    DRIVEL << "Processing " << key << "..." << endl;
     f_ticks = clock();
 }
 

@@ -512,17 +512,17 @@ public:
     inline Expr_ptr make_oct_const(Atom atom)
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
-    inline Expr_ptr make_error()
+    inline Expr_ptr make_undef()
     {
-        Expr tmp(ERROR, 0); // we need a temp store
+        Expr tmp(UNDEF); // we need a temp store
         return __make_expr(&tmp);
     }
 
-    inline bool is_error(const Expr_ptr expr) const {
+    inline bool is_undef(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
 
-        return (ERROR == symb);
+        return (UNDEF == symb);
     }
 
     // -- broad is-a predicates ------------------------------------------------

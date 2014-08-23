@@ -261,8 +261,8 @@ public:
     inline ISymbol_ptr next()
     {
         ISymbol_ptr res = (* f_iter);
-
         ++ f_iter;
+
         return res;
     }
 

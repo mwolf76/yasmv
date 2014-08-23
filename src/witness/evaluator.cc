@@ -489,7 +489,18 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         if (symb->is_variable()) { // vars
 
             if (f_witness -> has_value( expr, time)) {
-                f_values_stack.push_back(f_witness -> value(expr, time) -> value());
+                Expr_ptr value = f_witness -> value(expr, time);
+
+                // promote FALSE -> 0, TRUE -> 1
+                if (em.is_false(value)) {
+                    f_values_stack.push_back(0);
+                }
+                else if (em.is_true(value)) {
+                    f_values_stack.push_back(1);
+                }
+                else {
+                    f_values_stack.push_back(value -> value());
+                }
                 return;
             }
 

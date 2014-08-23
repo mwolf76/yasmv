@@ -781,12 +781,13 @@ void ExprWalker::walk ()
             }
             break;
 
+
         // leaves
         case ICONST:
         case HCONST:
         case OCONST:
-
         case IDENT:
+        case UNDEF:
             walk_leaf(curr.expr);
             break;
 
@@ -800,5 +801,4 @@ void ExprWalker::walk ()
 
         f_recursion_stack.pop();
     } // while (!empty)
-
 }

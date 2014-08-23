@@ -62,10 +62,9 @@ void ModelMgr::second_pass()
     Model& model(f_model);
     const Modules& modules = model.modules();
 
-    for (Modules::const_iterator mod_eye = modules.begin();
-         mod_eye != modules.end(); mod_eye ++ ) {
+    for (Modules::const_iterator mi = modules.begin(); mi != modules.end(); ++ mi ) {
 
-        Module& module = dynamic_cast <Module&> (*mod_eye->second);
+        Module& module = dynamic_cast <Module&> (*mi->second);
         DEBUG << "processing module '" << module << "' " << endl;
 
         // Remark: ctx name is MODULE name, not instance's
@@ -74,11 +73,10 @@ void ModelMgr::second_pass()
         Expr_ptr ctx = module.expr();
 
         // type inference: FSM
-        const ExprVector init = module.init();
-        for (ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); init_eye ++) {
+        const ExprVector& init = module.init();
+        for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
 
-            Expr_ptr body = (*init_eye);
+            Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
             DEBUG << "processing INIT " << fqdn << endl;
@@ -95,11 +93,10 @@ void ModelMgr::second_pass()
             }
         } // for init
 
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); invar_eye ++) {
+        const ExprVector& invar = module.invar();
+        for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
 
-            Expr_ptr body = (*invar_eye);
+            Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
             DEBUG << "processing INVAR " << fqdn << endl;
@@ -116,11 +113,10 @@ void ModelMgr::second_pass()
             }
         } // for invar
 
-        const ExprVector trans = module.trans();
-        for (ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); trans_eye ++) {
+        const ExprVector& trans = module.trans();
+        for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
 
-            Expr_ptr body = (*trans_eye);
+            Expr_ptr body = (*ti);
 
             FQExpr fqdn(ctx, body);
             DEBUG << "processing TRANS " << fqdn << endl;
@@ -136,6 +132,26 @@ void ModelMgr::second_pass()
                 f_status = false;
             }
         } // for trans
+
+        const Defines& defs = module.defs();
+        for (Defines::const_iterator di = defs.begin(); di != defs.end(); ++ di ) {
+            FQExpr fqdn = (*di).first;
+            Expr_ptr body = (*di).second -> body();
+
+            DEBUG << "processing DEFINE " << fqdn << endl;
+
+            try {
+                f_inferrer.process(body, ctx);
+            }
+            catch (Exception& ae) {
+                cerr << ae.what()
+                     << endl
+                     << "  in DEFINE "
+                     << fqdn << endl;
+                f_status = false;
+            }
+        } // for defines
+
     } // for module
 }
 
