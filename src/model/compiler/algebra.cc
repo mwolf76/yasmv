@@ -157,12 +157,13 @@ void Compiler::algebraic_mul(const Expr_ptr expr)
         const FQExpr& key = FQExpr(expr);
         f_enc.register_encoding(key, be);
 
-        ADD bit = be -> bits() [0];
-        dv.push_back( bit );
+        dv.push_back(be -> bits() [0]);
     }
 
-    /* register multiplication */
-    f_muls.insert( make_pair< FQExpr, DDVector>( FQExpr( ctx, expr), dv));
+    /* register microcode */
+    MicroDescriptor md( MUL, dv, lhs, rhs );
+    f_micro_map.insert( make_pair < FQExpr, MicroDescriptor >
+                        ( FQExpr( ctx, expr), md));
 
     /* push ADDs in reverse order */
     for (unsigned i = 0; i < width; ++ i) {

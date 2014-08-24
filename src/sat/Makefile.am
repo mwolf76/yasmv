@@ -1,9 +1,9 @@
 AM_CPPFLAGS = @AM_CPPFLAGS@ -I/usr/local/include -I$(top_srcdir)/src/	\
 -I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc				\
 -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/type			\
--I$(top_srcdir)/src/model -I$(top_srcdir)/src/witness			\
--I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat		\
--I$(top_srcdir)/src/dd/cudd-2.5.0/cudd					\
+-I$(top_srcdir)/src/micro -I$(top_srcdir)/src/model			\
+-I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger	\
+-I$(top_srcdir)/src/sat -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/st					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\

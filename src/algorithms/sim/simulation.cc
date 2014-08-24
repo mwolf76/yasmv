@@ -132,7 +132,9 @@ void Simulation::process()
 
             // TODO: SAT restart after a given number of steps (e.g. 10) would help
             // preventing performance degradation as k grows larger.
-            assert_fsm_trans(k ++);
+            assert_fsm_trans(k);
+
+            ++ k;
             assert_fsm_invar(k);
 
             if (STATUS_SAT == engine().solve()) {

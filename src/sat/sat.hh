@@ -30,6 +30,8 @@
 #include <cuddObj.hh>
 
 #include <enc_mgr.hh>
+#include <micro.hh>
+
 #include "terms/ddterms.hh"
 
 #include <time_mapper.hh>
@@ -64,31 +66,20 @@ public:
     { return f_groups; }
 
     /**
-     * @brief Adds a new interpolation color to the SAT instance.
-     */
-    inline color_t new_color()
-    {
-        color_t res = ++ f_next_color;
-        f_colors.insert(res);
-
-        return res;
-    }
-
-    /**
-     * @brief Returns the complete set of defined interpolation
-     * colors.
-     */
-    inline const Colors& colors() const
-    { return f_colors; }
-
-    /**
-     * @brief add a formula with a given group and color to the
-     * SAT instance.
+     * @brief add a formula to the SAT problem instance.
      */
     inline void push(Term term, step_t time,
-                     group_t group = MAINGROUP,
-                     color_t color = BACKGROUND)
-    { cnf_push_single_cut(term, time, group, color); }
+                     group_t group = MAINGROUP)
+    { cnf_push_single_cut(term, time, group); }
+
+    /**
+     * @brief injects operator microcode
+     */
+    inline void inject(MicroDescriptor& descriptor,
+                       step_t time, group_t group = MAINGROUP)
+    {
+        assert(false); // not there yet
+    }
 
     /* shortcut */
     inline void toggle_last_group()
@@ -105,17 +96,6 @@ public:
      */
     inline status_t status() const
     { return f_status; }
-
-    /**
-     * @brief Retrieve an interpolant model from the SAT
-     * instance. Remark: current status must be STATUS_UNSAT. An
-     * exception will be raised otherwise.
-     */
-    inline Term interpolant(const Colors& a)
-    {
-        assert (f_status == STATUS_UNSAT);
-        return itp_build_interpolant(a);
-    }
 
     inline int value(Var var)
     {
@@ -137,7 +117,6 @@ public:
         : f_enc_mgr(EncodingMgr::INSTANCE())
         , f_mapper(* new TimeMapper(*this))
         , f_solver()
-        , f_next_color(0)
     {
         f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
         // DEBUG << "Initialized SAT instance @" << this << endl;
@@ -171,10 +150,6 @@ private:
     // SAT groups (just ordinary Minisat Vars)
     Groups f_groups;
 
-    // ITP groups (colors)
-    Colors f_colors;
-    color_t f_next_color;
-
     status_t f_status;
 
     // -- CNF ------------------------------------------------------------
@@ -202,64 +177,14 @@ private:
 
     Group2VarMap f_groups_map;
 
-#if 0
-    // -- Interpolator -----------------------------------------------------
-    typedef struct ptr_hasher<InferenceRule*> InferenceRuleHasher;
-    typedef Map< InferenceRule* , Term, InferenceRuleHasher> R2T_Map;
-
-    // The set of clauses belonging to A (B is the complement)
-    Set<CRef> a_clauses;
-
-    // The set of variables belonging to A
-    Set<Var> a_variables;
-    Set<Var> b_variables;
-
-    // [AG] here the definition of "local" is that given by McMillan:
-    // for a pair of formulas (A, B), an atom x is local if it
-    // contains a variable or uninterpreted function symbol not in B
-    // and global otherwise.
-    inline bool atom_is_A_local(Var atom) const
-    { return !atom_is_of_B(atom); }
-
-    inline bool var_is_A_local(Var var) const
-    { return atom_is_A_local(var); }
-
-    inline bool lit_is_A_local(Lit lit) const
-    { return atom_is_A_local(var(lit)); }
-
-    inline bool var_is_of_B(Var var) const
-    { return atom_is_of_B(var); }
-
-    inline bool lit_is_of_B(Lit lit) const
-    { return atom_is_of_B(var(lit)); }
-
-    inline bool var_is_of_A(Var var) const
-    { return atom_is_of_A(var); }
-
-    inline bool lit_is_of_A(Lit lit) const
-    { return atom_is_of_A(var(lit)); }
-
-    inline bool atom_is_of_A(Var atom) const
-    { return a_variables.has(atom); }
-
-    inline bool atom_is_of_B(Var atom) const
-    { return b_variables.has(atom); }
-
-    inline bool clause_is_of_A(CRef cr) const
-    { return a_clauses.has(cr); }
-#endif
-
     // -- Low level services -----------------------------------------------
     Lit cnf_find_group_lit(group_t group, bool enabled = true);
-
-    Term itp_build_interpolant(const Colors& a);
-    void itp_init_interpolation(const Colors& ga);
 
     status_t sat_solve_groups(const Groups& groups);
 
     // CNFization algorithms
-    void cnf_push_no_cut(Term phi, step_t time, const group_t group, const color_t color);
-    void cnf_push_single_cut(Term phi, step_t time, const group_t group, const color_t color);
+    void cnf_push_no_cut(Term phi, step_t time, const group_t group);
+    void cnf_push_single_cut(Term phi, step_t time, const group_t group);
 }; // SAT instance
 
 #endif

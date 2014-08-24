@@ -46,6 +46,8 @@
 Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
+    , f_temp_encodings()
+    , f_micro_map()
     , f_type_stack()
     , f_rel_type_stack()
     , f_add_stack()
@@ -78,6 +80,7 @@ void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     f_time_stack.clear();
     f_roots.clear();
     f_chains.clear();
+
     f_first = first_pass;
 
     // walk body in given ctx

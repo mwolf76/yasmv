@@ -60,13 +60,11 @@ struct TimedDDEq {
 class CNFBuilderSingleCut : public ADDWalker {
 public:
     CNFBuilderSingleCut(SAT& sat, step_t time,
-                        group_t group = MAINGROUP,
-                        color_t color = BACKGROUND)
+                        group_t group = MAINGROUP)
         : f_sat(sat)
         , f_toplevel(NULL)
         , f_time(time)
         , f_group(group)
-        , f_color(color)
     {}
 
     ~CNFBuilderSingleCut()
@@ -232,7 +230,6 @@ private:
     step_t f_time;
 
     group_t f_group;
-    color_t f_color;
 
     /* push 1 var clause */
     inline void push1( Var x, bool px )
@@ -245,7 +242,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps); // , f_color
+        f_sat.f_solver.addClause_(ps);
     }
 
     /* push 2 vars clause */
@@ -260,7 +257,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps); // , f_color
+        f_sat.f_solver.addClause_(ps);
     }
 
     /* push 3 vars clause */
@@ -276,7 +273,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps); // , f_color
+        f_sat.f_solver.addClause_(ps);
     }
 
     Var find_dd_var(const DdNode* node)
@@ -318,9 +315,8 @@ private:
 };
 
 void SAT::cnf_push_single_cut(Term phi, step_t time,
-                              const group_t group,
-                              const color_t color)
+                              const group_t group)
 {
-    CNFBuilderSingleCut builder(*this, time, group, color);
+    CNFBuilderSingleCut builder(*this, time, group);
     builder(phi);
 }

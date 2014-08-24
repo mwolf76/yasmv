@@ -102,21 +102,18 @@ protected:
 
     /* FSM */
     void assert_fsm_init(step_t time,
-                         group_t group = MAINGROUP,
-                         color_t color = BACKGROUND);
+                         group_t group = MAINGROUP);
 
     void assert_fsm_invar(step_t time,
-                          group_t group = MAINGROUP,
-                          color_t color = BACKGROUND);
+                          group_t group = MAINGROUP);
 
     void assert_fsm_trans(step_t time,
-                          group_t group = MAINGROUP,
-                          color_t color = BACKGROUND);
+                          group_t group = MAINGROUP);
 
     /* Generic formulas */
     void assert_formula(step_t time, ADDVector& adds,
-                        group_t group = MAINGROUP,
-                        color_t color = BACKGROUND);
+                        MicroDescriptors& micros,
+                        group_t group = MAINGROUP);
 
 private:
     /* Model */
@@ -140,8 +137,16 @@ private:
     ParametersMap f_params;
 
     ADDVector f_init_adds;
+    MicroDescriptors f_init_micro_descriptors;
+
     ADDVector f_invar_adds;
+    MicroDescriptors f_invar_micro_descriptors;
+
     ADDVector f_trans_adds;
+    MicroDescriptors f_trans_micro_descriptors;
+
+    ADDVector f_formula_adds;
+    MicroDescriptors f_formula_micro_descriptors;
 
     Witness_ptr f_witness;
 };

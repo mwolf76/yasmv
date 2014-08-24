@@ -48,6 +48,9 @@ TRANS
         next(x0) <-> ! x0;
 
 TRANS
+        (counter = 7) -> (next(x0) <-> x0);
+
+TRANS
         next(x1) <-> x0 ? ! x1 : x1;
 
 TRANS

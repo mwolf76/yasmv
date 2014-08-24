@@ -68,12 +68,6 @@ typedef Var group_t;
 static group_t MAINGROUP(0);
 typedef vector<group_t> Groups;
 
-typedef unsigned color_t;
-static color_t BACKGROUND(0);
-typedef set<color_t> Colors;
-
-// typedef vector<Var> Variables;
-
 typedef ADD Term;
 typedef vector<Term> Terms;
 

@@ -79,11 +79,6 @@ void Algorithm::prepare()
             Expr_ptr body = (*init_eye);
 
             cmpl.process(ctx, body, true);
-            if (! true) {
-                while (cmpl.has_next()) {
-                    f_init_adds.push_back(cmpl.next());
-                }
-            }
         }
 
         /* INVAR */
@@ -95,11 +90,6 @@ void Algorithm::prepare()
             Expr_ptr body = (*invar_eye);
 
             cmpl.process(ctx, body, true);
-            if (! true) {
-                while (cmpl.has_next()) {
-                    f_invar_adds.push_back(cmpl.next());
-                }
-            }
         }
 
         /* TRANS */
@@ -111,11 +101,6 @@ void Algorithm::prepare()
             Expr_ptr body = (*trans_eye);
 
             cmpl.process(ctx, body, true);
-            if (! true) {
-                while (cmpl.has_next()) {
-                    f_trans_adds.push_back(cmpl.next());
-                }
-            }
         }
     }
 } /* prepare() */
@@ -137,10 +122,16 @@ void Algorithm::compile()
             Expr_ptr ctx = module.expr();
             Expr_ptr body = (*init_eye);
 
-            cmpl.process(ctx, body, false);
+            cmpl.process(ctx, body, false); // 2nd pass
             while (cmpl.has_next()) {
                 f_init_adds.push_back(cmpl.next());
             }
+
+            MicroMap mmap = cmpl.micro_descriptors();
+            for (MicroMap::const_iterator mdi = mmap.begin(); mdi != mmap.end(); ++ mdi) {
+                f_init_micro_descriptors.push_back((*mdi).second);
+            }
+            cmpl.clear_micro_descriptors();
         }
 
         /* INVAR */
@@ -155,6 +146,12 @@ void Algorithm::compile()
             while (cmpl.has_next()) {
                 f_invar_adds.push_back(cmpl.next());
             }
+
+            MicroMap mmap = cmpl.micro_descriptors();
+            for (MicroMap::const_iterator mdi = mmap.begin(); mdi != mmap.end(); ++ mdi) {
+                f_invar_micro_descriptors.push_back((*mdi).second);
+            }
+            cmpl.clear_micro_descriptors();
         }
 
         /* TRANS */
@@ -169,13 +166,20 @@ void Algorithm::compile()
             while (cmpl.has_next()) {
                 f_trans_adds.push_back(cmpl.next());
             }
+
+            MicroMap mmap = cmpl.micro_descriptors();
+            for (MicroMap::const_iterator mdi = mmap.begin(); mdi != mmap.end(); ++ mdi) {
+                f_trans_micro_descriptors.push_back((*mdi).second);
+            }
+            cmpl.clear_micro_descriptors();
         }
     }
 } /* compile() */
 
-void Algorithm::assert_fsm_init(step_t time, group_t group, color_t color)
+void Algorithm::assert_fsm_init(step_t time, group_t group)
 {
     clock_t t0 = clock();
+
     unsigned n = f_init_adds.size();
     TRACE << "CNFizing INIT @" << time
           << "... (" << n << " fragments)"
@@ -183,7 +187,17 @@ void Algorithm::assert_fsm_init(step_t time, group_t group, color_t color)
 
     ADDVector::iterator i;
     for (i = f_init_adds.begin(); f_init_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
+        engine().push( *i, time, group);
+    }
+
+    unsigned m = f_init_micro_descriptors.size();
+    TRACE << "Injecting microcode for INIT @" << time
+          << "... (" << m << " descriptors)"
+          << endl;
+
+    MicroDescriptors::iterator j;
+    for (j = f_init_micro_descriptors.begin(); f_init_micro_descriptors.end() != j; ++ j)  {
+        engine().inject( *j, time, group);
     }
 
     clock_t elapsed = clock() - t0;
@@ -191,9 +205,10 @@ void Algorithm::assert_fsm_init(step_t time, group_t group, color_t color)
     TRACE << "Done. (took " << secs << " seconds)" << endl;
 }
 
-void Algorithm::assert_fsm_invar(step_t time, group_t group, color_t color)
+void Algorithm::assert_fsm_invar(step_t time, group_t group)
 {
     clock_t t0 = clock();
+
     unsigned n = f_invar_adds.size();
     TRACE << "CNFizing INVAR @" << time
           << "... (" << n << " fragments)"
@@ -201,7 +216,17 @@ void Algorithm::assert_fsm_invar(step_t time, group_t group, color_t color)
 
     ADDVector::iterator i;
     for (i = f_invar_adds.begin(); f_invar_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
+        engine().push( *i, time, group);
+    }
+
+    unsigned m = f_invar_micro_descriptors.size();
+    TRACE << "Injecting microcode for INVAR @" << time
+          << "... (" << m << " descriptors)"
+          << endl;
+
+    MicroDescriptors::iterator j;
+    for (j = f_invar_micro_descriptors.begin(); f_invar_micro_descriptors.end() != j; ++ j)  {
+        engine().inject( *j, time, group);
     }
 
     clock_t elapsed = clock() - t0;
@@ -209,9 +234,10 @@ void Algorithm::assert_fsm_invar(step_t time, group_t group, color_t color)
     TRACE << "Done. (took " << secs << " seconds)" << endl;
 }
 
-void Algorithm::assert_fsm_trans(step_t time, group_t group, color_t color)
+void Algorithm::assert_fsm_trans(step_t time, group_t group)
 {
     clock_t t0 = clock();
+
     unsigned n = f_trans_adds.size();
 
     TRACE << "CNFizing TRANS @" << time
@@ -220,7 +246,17 @@ void Algorithm::assert_fsm_trans(step_t time, group_t group, color_t color)
 
     ADDVector::iterator i;
     for (i = f_trans_adds.begin(); f_trans_adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
+        engine().push( *i, time, group);
+    }
+
+    unsigned m = f_trans_micro_descriptors.size();
+    TRACE << "Injecting microcode for TRANS @" << time
+          << "... (" << m << " descriptors)"
+          << endl;
+
+    MicroDescriptors::iterator j;
+    for (j = f_trans_micro_descriptors.begin(); f_trans_micro_descriptors.end() != j; ++ j)  {
+        engine().inject( *j, time, group);
     }
 
     clock_t elapsed = clock() - t0;
@@ -229,18 +265,23 @@ void Algorithm::assert_fsm_trans(step_t time, group_t group, color_t color)
 }
 
 void Algorithm::assert_formula(step_t time, ADDVector& adds,
-                               group_t group, color_t color)
+                               MicroDescriptors& micros, group_t group)
 {
     clock_t t0 = clock();
-    unsigned n = f_trans_adds.size();
 
+    unsigned n = adds.size();
     TRACE << "CNFizing FORMULA @" << time
           << "... (" << n << " fragments)"
           << endl;
 
     ADDVector::iterator i;
     for (i = adds.begin(); adds.end() != i; ++ i) {
-        engine().push( *i, time, group, color);
+        engine().push( *i, time, group);
+    }
+
+    MicroDescriptors::iterator j;
+    for (j = micros.begin(); micros.end() != j; ++ j)  {
+        engine().inject( *j, time, group);
     }
 
     clock_t elapsed = clock() - t0;

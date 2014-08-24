@@ -30,13 +30,13 @@
 #include <model_mgr.hh>
 
 #include <enc.hh>
+#include <micro.hh>
 
 #include <dd_walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
 typedef vector<ADD> ADDStack; // ouput of Stage 1
-// typedef vector<YDD_ptr> YDDStack;  // output of Stage 2
 
 /* local typedefs */
 typedef vector<Expr_ptr> ExprStack;
@@ -48,8 +48,8 @@ typedef pair<ADDMap::iterator, bool> ADDHit;
 typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
 typedef pair<ENCMap::iterator, bool> ENCHit;
 
-typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> MULMap; // multiplications
-typedef pair<MULMap::iterator, bool> MULHit;
+typedef unordered_map<FQExpr, MicroDescriptor, FQExprHash, FQExprEq> MicroMap;
+typedef pair<MicroMap::iterator, bool> MicroHit;
 
 typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ACMap; // and-chain
 typedef pair<ACMap::iterator, bool> ACHit;
@@ -60,9 +60,9 @@ typedef pair<ACMap::iterator, bool> ACHit;
     f_add_stack.pop_back()
 
 #define POP_ALGEBRAIC(vec, width)               \
-    ADD vec[width];                             \
+    DDVector vec;                               \
     for (unsigned i = 0; i < width ; ++ i) {    \
-        vec[i] = f_add_stack.back();            \
+        vec.push_back(f_add_stack.back());      \
         f_add_stack.pop_back();                 \
     }
 
@@ -80,6 +80,12 @@ public:
     bool has_next();
     ADD  next();
 
+    inline const MicroMap& micro_descriptors() const
+    { return f_micro_map; }
+
+    inline void clear_micro_descriptors()
+    { f_micro_map.clear(); }
+
 protected:
     clock_t f_elapsed; /* for benchmarking */
     void pre_hook();
@@ -96,11 +102,10 @@ protected:
 
     ADDMap f_map;                 // FQDN -> DD cache
     ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
+    MicroMap f_micro_map;         // FQDN -> MicroDescriptor
 
     DDVector f_roots;             // ADD chain roots
     ACMap  f_chains;              // chain root -> DD vector
-
-    MULMap f_muls;                // ( x * y ) -> DDs
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -217,18 +222,6 @@ private:
     // Two pass compiler
     bool f_first;
 
-    // karatsuba multiplication algorithm (EXPERIMENTAL)
-    void karatsuba_mul(unsigned width);
-    void karatsuba_mul_aux(unsigned width);
-    void karatsuba_add_high_and_low(unsigned width);
-
-    // recursive multiplication algorithm
-    void recursive_mul_prepare_shift_and_pad(unsigned width, unsigned shift);
-    void recursive_mul(unsigned width, bool extra);
-
-    // traditional multiplication algorithm (fallback case)
-    void longhand_mul(unsigned width, bool extra);
-
     /* casts */
     void algebraic_cast_from_boolean(const Expr_ptr expr);
     void boolean_cast_from_algebraic(const Expr_ptr expr);
@@ -248,7 +241,6 @@ private:
     ADD book_and_chain(ADD* dds, unsigned len);
 
     void finalize_and_chains();
-    void finalize_multiplications();
 
     void algebraic_from_constant(unsigned width);
 

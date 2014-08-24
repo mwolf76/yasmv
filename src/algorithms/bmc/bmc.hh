@@ -48,7 +48,10 @@ private:
     mc_status_t f_status;
 
     ADDVector f_violation_adds;
+    MicroDescriptors f_violation_micros;
+
     ADDVector f_invariant_adds;
+    MicroDescriptors f_invariant_micros;
 
     /* pure booleans, just initial states */
     void bmc_propositional_check();
