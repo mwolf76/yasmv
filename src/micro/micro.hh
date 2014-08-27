@@ -52,5 +52,4 @@ private:
 };
 
 typedef vector<MicroDescriptor> MicroDescriptors;
-
 #endif

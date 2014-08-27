@@ -29,6 +29,9 @@
 #include <expr.hh>
 #include <pool.hh>
 
+typedef unordered_map<ExprType, string> exprTypeToStringMap;
+typedef unordered_map<string, ExprType> exprTypeFromStringMap;
+
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
@@ -657,12 +660,15 @@ public:
         return (*f_instance);
     }
 
+    ExprType exprTypeFromString (string exprTypeString );
+
 protected:
     ExprMgr();
     ~ExprMgr();
 
 private:
     static ExprMgr_ptr f_instance;
+
 
     /* mid level services, inlined for performance */
     inline Expr_ptr make_expr(ExprType et, Expr_ptr a, Expr_ptr b)
@@ -721,6 +727,8 @@ private:
     /* shared pools */
     ExprPool f_expr_pool;
     AtomPool f_atom_pool;
+
+    exprTypeFromStringMap f_s2e;
 };
 
 #endif

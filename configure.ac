@@ -35,6 +35,7 @@ dnl First look for Boost
 BOOST_REQUIRE([1.48])
 
 dnl Then look for specific Boost libraries you need:
+BOOST_FILESYSTEM
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
 BOOST_THREADS
@@ -137,6 +138,8 @@ AC_SUBST(AM_CXXFLAGS)
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/3rdparty/Makefile
+                 src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
                  src/dd/Makefile
                  src/enc/Makefile

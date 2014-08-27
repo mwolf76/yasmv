@@ -44,7 +44,11 @@ using std::ostringstream;
 
 #include <iostream>
 using std::istream;
+using std::ifstream;
+
 using std::ostream;
+using std::ofstream;
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -65,6 +69,8 @@ using std::set;
 #include <algorithm>
 using std::find;
 
+#include <boost/algorithm/string.hpp>
+
 #include <boost/unordered_set.hpp>
 using boost::unordered_set;
 
@@ -81,6 +87,12 @@ using boost::thread_interrupted;
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 using boost::tuple;
+using boost::make_tuple;
+
+#include <boost/filesystem.hpp>
+using boost::filesystem::path;
+using boost::filesystem::directory_iterator;
+using boost::filesystem::filesystem_error;
 
 #include <algorithm>
 using std::max;
@@ -124,6 +136,10 @@ public:
 
 class Object : public IObject {
 };
+
+/* environment variables and paths */
+extern const char *YASMV_HOME;
+extern const char *MICROCODE_PATH;
 
 /* internal tokens, defined in common.cc */
 extern const char *FALSE_TOKEN;

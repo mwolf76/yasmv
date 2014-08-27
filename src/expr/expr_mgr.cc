@@ -63,12 +63,27 @@ ExprMgr::ExprMgr()
 
     default_ctx_expr = main_expr; // make_identifier(DEFAULT_CTX_TOKEN);
 
+    // for microcode operators loaders
+    f_s2e.insert( make_pair < string, ExprType > ( "add", PLUS ));
+    f_s2e.insert( make_pair < string, ExprType > ( "sub", SUB ));
+    f_s2e.insert( make_pair < string, ExprType > ( "div", DIV ));
+    f_s2e.insert( make_pair < string, ExprType > ( "mod", MOD ));
+    f_s2e.insert( make_pair < string, ExprType > ( "mul", MUL ));
+
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }
 
 ExprMgr::~ExprMgr()
 {
     DEBUG << "ExprMgr @" << this << " deinitialized" << endl;
+}
+
+ExprType ExprMgr::exprTypeFromString (string exprTypeString )
+{
+    exprTypeFromStringMap::iterator i = f_s2e.find( exprTypeString );
+    assert ( i != f_s2e.end());
+
+    return (*i).second;
 }
 
 Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)

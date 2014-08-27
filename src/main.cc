@@ -59,6 +59,8 @@
 
 #include <logging.hh>
 
+#include <micro_mgr.hh>
+
 static const string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
     "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
@@ -132,6 +134,10 @@ int main(int argc, const char *argv[])
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGINT, sighandler);
+
+    /* load microcode */
+    MicroMgr& mm = MicroMgr::INSTANCE();
+    mm.show_info(cout);
 
     Interpreter& system = Interpreter::INSTANCE();
     try {
