@@ -12,6 +12,8 @@ import datetime
 import os.path
 import subprocess
 
+MAXBITS = 8
+
 workdir = "/home/markus/Code/github/gnuSMV/tools/ucodegen/workdir"
 
 # parser states
@@ -22,6 +24,9 @@ workdir = "/home/markus/Code/github/gnuSMV/tools/ucodegen/workdir"
     ST_READ_PROBLEM,
     ST_WRITE_OUT,
 ) = range(5)
+
+def timestamp():
+    return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S')
 
 def gen_binary_ops_microcode():
 
@@ -38,12 +43,12 @@ def gen_binary_ops_microcode():
 
         for signedness in ('unsigned', 'signed'):
 
-            for width in range(1, 65):
+            for width in range(1, 1 + MAXBITS):
 
-                sourceName = os.path.join( workdir, signedness[0] + opName ) + "%d.json" % width
+                sourceName = os.path.join( workdir, signedness[0] + '-' + opName ) + "-%d.json" % width
                 source = file (sourceName, "wt" )
 
-                print "Generating microcode for %s (%s), width = %d" % (opName, opSymb, width)
+                print "Generating microcode for %s (%s), width = %d" % (signedness[0] + opName, opSymb, width)
 
                 # 1. create SMV model with given op
                 modelName = os.path.join( workdir, signedness[0] + opName ) + "%d.smv" % (width, )
@@ -72,7 +77,7 @@ def gen_binary_ops_microcode():
                 subprocess.call( [ 'NuSMV', '-quiet', '-source', scriptName, modelName ] )
 
                 # 4. process generated .dimacs file
-                dimacsName = os.path.join( workdir, opName ) + "%d.dimacs" % (width, )
+                dimacsName = os.path.join( workdir, signedness[0] + opName ) + "%d.dimacs" % (width, )
 
                 ac, x, y, z, seen, ucode = None, [], [], [], [], []
                 parserState = ST_WAIT_TIME0
@@ -152,17 +157,12 @@ def gen_binary_ops_microcode():
                 assert parserState == ST_WRITE_OUT
                 assert( len(x) == len(y) and len(x) == len(z))
 
-                source.write( "{ \"operator\": \"%(op)s\",\n   \"width\": \"%(width)d\",\n  \"cnf\": [ %(data)s ]}" % {
-                    'op': signedness[0] + opName,
-                    'width': width,
+                source.write( "{ \"generated\": \"%(generated)s\", \"cnf\": [%(cnf)s]}" % {
+                    'generated': timestamp(),
                     'cnf': ", ".join( map( str, ucode[1:] ))
                 })
 
-def clean():
-    subprocess.call( [ 'rm', '-f', 'workdir/*' ] )
-
 def main():
-    clean()
     gen_binary_ops_microcode()
 
 if __name__ == "__main__":
