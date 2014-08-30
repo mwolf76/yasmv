@@ -97,7 +97,6 @@ void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
 {
     f_fqexpr2enc_map [ fqexpr ] = enc;
 
-    /* keep CBI as well */
     DDVector& bits = enc->bits();
 
     unsigned i;
@@ -106,8 +105,7 @@ void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
     for (i = 0, di = bits.begin(); i < bits.size(); ++ i, ++ di) {
         f_index2ucbi_map.
             insert(pair<int, UCBI> ((*di).getNode()->index,
-                                    UCBI(fqexpr.ctx(), fqexpr.expr(),
-                                         fqexpr.time(), i)));
+                                    UCBI(fqexpr.ctx(), fqexpr.expr(), fqexpr.time(), i)));
     }
     assert (di == bits.end());
 }

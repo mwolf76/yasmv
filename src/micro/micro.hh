@@ -55,6 +55,7 @@ struct OpTripleEq {
             x.get<2>() == y.get<2>()  ;
     }
 };
+ostream& operator<<(ostream& os, OpTriple triple);
 
 class MicroDescriptor {
 
@@ -68,6 +69,16 @@ public:
         assert (f_z.size() == f_x.size() && f_z.size() == f_y.size());
     }
 
+    inline const OpTriple& triple() const
+    { return f_triple; }
+
+    inline const DDVector& z() const
+    { return f_z; }
+    inline const DDVector& x() const
+    { return f_x; }
+    inline const DDVector& y() const
+    { return f_y; }
+
 private:
     OpTriple f_triple;
 
@@ -75,6 +86,8 @@ private:
     DDVector f_x;
     DDVector f_y;
 };
+
+ostream& operator<<(ostream& os, MicroDescriptor& md);
 
 typedef vector<MicroDescriptor> MicroDescriptors;
 

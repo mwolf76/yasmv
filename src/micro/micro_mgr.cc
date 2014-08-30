@@ -135,17 +135,33 @@ MicroMgr::~MicroMgr()
 
 void MicroMgr::show_info(ostream &os)
 {
-    os << f_loaders.size() << " microcode loaders registered." << endl
+    os << f_loaders.size()
+       << " microcode loaders registered." << endl
        << "known operators: "
-        ;
-    for (MicroLoaderMap::const_iterator mli = f_loaders.begin(); mli != f_loaders.end(); ++ mli) {
-        os << mli->first << " " ;
+    ;
+
+    for (MicroLoaderMap::const_iterator i = f_loaders.begin();
+         i != f_loaders.end(); ++ i) {
+        os << i->first << " " ;
     }
     os << endl << endl;
 }
 
+MicroLoader& MicroMgr::require(const OpTriple& triple)
+{
+    MicroLoaderMap::const_iterator i = f_loaders.find( triple );
+    if (i == f_loaders.end()) {
+        throw MicroLoaderException(triple);
+    }
+
+    return * i->second;
+}
+
+
 MicroLoader::MicroLoader(const path& filepath)
     : f_fullpath(filepath)
+    , f_ready(false)
+    , f_microcode()
 {
     const string native (filepath.filename().replace_extension().native());
 
@@ -165,9 +181,16 @@ MicroLoader::MicroLoader(const path& filepath)
 MicroLoader::~MicroLoader()
 {}
 
-void MicroLoader::load()
+void MicroLoader::fetch_microcode()
 {
+    // this shall be executed only once
+    assert( ! f_ready );
+
     ifstream json_file(f_fullpath.c_str());
     Json::Value parsedFromString;
     json_file >> parsedFromString;
+
+    // TODO: fetch data...
+
+    f_ready = true;
 }

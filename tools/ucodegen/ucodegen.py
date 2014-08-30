@@ -12,7 +12,7 @@ import datetime
 import os.path
 import subprocess
 
-MAXBITS = 8
+MAXBITS = 32
 
 workdir = "/home/markus/Code/github/gnuSMV/tools/ucodegen/workdir"
 
@@ -133,11 +133,12 @@ def gen_binary_ops_microcode():
                             ac = numbers[0]
 
                         rewrite = []
+                        trivial = False
                         for n in numbers:
 
                             if n == ac:
-                                rewrite.append(0)
-                                continue
+                                trivial = True
+                                break
                             elif n in z:
                                 rewrite.append( 0 * width + z.index(n))
                                 continue
@@ -152,14 +153,15 @@ def gen_binary_ops_microcode():
 
                             rewrite.append( 3 * width + seen.index(n))
 
-                        ucode.append(rewrite)
+                        if (not trivial):
+                            ucode.append(rewrite)
 
                 assert parserState == ST_WRITE_OUT
                 assert( len(x) == len(y) and len(x) == len(z))
 
                 source.write( "{ \"generated\": \"%(generated)s\", \"cnf\": [%(cnf)s]}" % {
                     'generated': timestamp(),
-                    'cnf': ", ".join( map( str, ucode[1:] ))
+                    'cnf': ", ".join( map( str, ucode ))
                 })
 
 def main():

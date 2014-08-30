@@ -34,7 +34,6 @@
 using Minisat::Lit;
 using Minisat::mkLit;
 using Minisat::Var;
-using Minisat::Clause;
 using Minisat::lbool;
 using Minisat::vec;
 using Minisat::Solver;
@@ -49,8 +48,6 @@ typedef enum {
 
 // streaming for various SAT related types
 ostream &operator<<(ostream &os, const Minisat::Lit &lit);
-ostream &operator<<(ostream &os, const Minisat::Clause *clause);
-ostream &operator<<(ostream &os, const Minisat::Clause &clause);
 ostream &operator<<(ostream &os, const vec<Lit> &lits);
 ostream &operator<<(ostream &os, const status_t &status);
 ostream &operator<<(ostream &os, const lbool &value);

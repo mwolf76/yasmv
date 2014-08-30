@@ -25,3 +25,15 @@
  **/
 #include <type.hh>
 #include <micro.hh>
+
+ostream& operator<<(ostream& os, MicroDescriptor& md)
+{
+    os << md.triple();
+
+    const DDVector& z(md.z());
+    for (DDVector::const_iterator zi = z.begin(); zi != z.end(); ++ zi) {
+        os << *zi;
+    }
+
+    return os;
+}

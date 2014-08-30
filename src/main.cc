@@ -88,6 +88,9 @@ void pu(UCBI& ucbi)
 void pt(TCBI& tcbi)
 { DEBUG << tcbi << endl; }
 
+void pd(MicroDescriptor& md)
+{ DEBUG << md << endl; }
+
 void batch(Command_ptr cmd)
 {
     Interpreter& system = Interpreter::INSTANCE();

@@ -22,6 +22,14 @@
 #ifndef MICRO_MGR_H
 #define MICRO_MGR_H
 
+// the Minisat SAT solver
+#include <minisat/core/Solver.h>
+#include <minisat/core/SolverTypes.h>
+
+using Minisat::Lit;
+typedef vector<Lit> Lits;
+typedef vector<Lits> LitsVector;
+
 #include <micro.hh>
 
 typedef class MicroMgr *MicroMgr_ptr;
@@ -48,11 +56,25 @@ public:
     inline const OpTriple& triple() const
     { return f_triple; }
 
-    void load();
+    inline bool ready() const
+    { return f_ready; }
+
+    inline const LitsVector& microcode()
+    {
+        if (! f_ready) {
+            fetch_microcode();
+        }
+        return f_microcode;
+    }
 
 private:
     const path& f_fullpath;
     OpTriple f_triple;
+
+    bool f_ready;
+    LitsVector f_microcode;
+
+    void fetch_microcode();
 };
 
 typedef unordered_map<OpTriple, MicroLoader_ptr, OpTripleHash, OpTripleEq> MicroLoaderMap;
@@ -68,6 +90,8 @@ public:
     }
 
     void show_info(ostream& os);
+
+    MicroLoader& require(const OpTriple& triple);
 
 protected:
     MicroMgr();

@@ -12,15 +12,15 @@
  *  perform booleanization of algebraic expressions. Experimental
  *  results proved this approach unfeasible for realistic (i.e. >= 32)
  *  word sizes, at least for certain operators. To circumvent this
- *  limitation a different approach is needed. Therefore, for
- *  algebraic operators all we do here is (1) pushing bit results ADDs
- *  representing boolean formulas for the results and (2) register in
- *  a supporting complementary structure the information necessary to
- *  fully express those results at a later stage. The compilation
- *  engine is implemented using a simple walker pattern: (a) on
- *  preorder, return true if the node has not yet been visited; (b)
- *  always do in-order (for binary nodes); (c) perform proper
- *  compilation in post-order hooks.
+ *  limitation a different approach is needed. Therefore, for binary
+ *  algebraic operators (i.e. SUB, PLUS, MUL, MOD, DIV) all we do here
+ *  is (1) pushing bit results ADDs representing boolean formulas for
+ *  the results and (2) register in a supporting complementary
+ *  structure the information necessary to fully express those results
+ *  at a later stage. The compilation engine is implemented using a
+ *  simple walker pattern: (a) on preorder, return true if the node
+ *  has not yet been visited; (b) always do in-order (for binary
+ *  nodes); (c) perform proper compilation in post-order hooks.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -65,16 +65,7 @@ typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
 
 typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
-typedef pair<ADDMap::iterator, bool> ADDHit;
-
-typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> ENCMap;
-typedef pair<ENCMap::iterator, bool> ENCHit;
-
-typedef unordered_map<FQExpr, MicroDescriptor, FQExprHash, FQExprEq> MicroMap;
-typedef pair<MicroMap::iterator, bool> MicroHit;
-
-typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ACMap; // and-chain
-typedef pair<ACMap::iterator, bool> ACHit;
+typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
 
 /* shortcuts to to simplify manipulation of the internal ADD stack */
 #define POP_ADD(op)                             \
@@ -88,6 +79,13 @@ typedef pair<ACMap::iterator, bool> ACHit;
         f_add_stack.pop_back();                 \
     }
 
+#define FRESH_DV(vec, width)                    \
+    DDVector vec;                               \
+    make_auto_ddvect(vec, width)
+
+#define FRESH_DD(var)                           \
+    ADD var = make_auto_dd()
+
 /* shortcut for pushing */
 #define PUSH_ADD(add) f_add_stack.push_back(add)
 
@@ -96,8 +94,8 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    /* two-pass compiler, needed to build all var encoding before
-       proper compilation. */
+    /* two-pass compiler interface. This is needed to build all var
+       encoding before proper compilation. */
     void preprocess(Expr_ptr ctx, Expr_ptr body);
     Term process(Expr_ptr ctx, Expr_ptr body);
 
@@ -109,19 +107,27 @@ protected:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
+    /* model compiler does not support LTL ops */
     LTL_STUBS;
+
+    /* basic expr operators support */
     OP_HOOKS;
+
     void walk_leaf(const Expr_ptr expr);
 
     unsigned f_temp_auto_index; // autoincr temp index
 
-    ADDMap f_map;                 // FQDN -> DD cache
-    ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
+    // FQDN -> DD cache
+    ADDMap f_map;
 
+    // FQDN -> temporarry DD encodings
+    FQExpr2EncMap f_temp_encodings;
+
+    // chain root -> DD vector
+    ANDChainMap f_chains;
+
+    // microcode descriptors
     MicroDescriptors f_microdescriptors;
-
-    DDVector f_roots;             // ADD chain roots
-    ACMap  f_chains;              // chain root -> DD vector
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -257,8 +263,8 @@ private:
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
-    ADD book_and_chain(ADD* dds, unsigned len);
-
+    /* AND-chain optimization services */
+    ADD book_and_chain(DDVector& dv);
     void finalize_and_chains();
 
     void algebraic_from_constant(unsigned width);
@@ -272,22 +278,20 @@ private:
     /** @brief Adjusts operand */
     void algebrize_operand(Type_ptr type, unsigned final_width);
 
+    /* core algebrization functions */
+    unsigned algebrize_operation(bool ternary = false, bool relational = false);
     inline unsigned algebrize_binary_arithmetical()
     { return algebrize_operation(); }
-
     inline unsigned algebrize_binary_relational()
     { return algebrize_operation(false, true); }
-
     inline unsigned algebrize_ternary_ite()
     { return algebrize_operation(true, false); }
 
-    /* core algebrization functions */
-    unsigned algebrize_operation(bool ternary = false, bool relational = false);
-
-    /* temporaries */
-    Expr_ptr make_temp_id();
-    Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
-    BooleanEncoding_ptr make_chain_encoding();
+    /* Auto expressions and DDs */
+    Expr_ptr make_auto_id();
+    Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
+    void make_auto_ddvect(DDVector& dv, unsigned width);
+    ADD  make_auto_dd();
 };
 
 #endif

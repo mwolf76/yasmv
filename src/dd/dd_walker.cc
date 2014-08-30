@@ -37,7 +37,6 @@ void ADDWalker::post_hook()
 
 ADDWalker& ADDWalker::operator() (ADD dd)
 {
-
     /* setup toplevel act. record and perform walk. */
     add_activation_record call(dd.getNode());
     f_recursion_stack.push(call);

@@ -1,3 +1,7 @@
+-- TODO: add options in model, equivalent to long opts
+-- OPT inlined_add, microcode_add
+-- OPT inlined_mul, microcode_mul
+
 FSM t00
 
 DEFINE
@@ -46,9 +50,6 @@ INIT
 
 TRANS
         next(x0) <-> ! x0;
-
-TRANS
-        (counter = 7) -> (next(x0) <-> x0);
 
 TRANS
         next(x1) <-> x0 ? ! x1 : x1;

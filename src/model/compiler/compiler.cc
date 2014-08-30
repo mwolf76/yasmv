@@ -147,7 +147,6 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
  *  pattern: (a) on preorder, return true if the node has not yet been
  *  visited; (b) always do in-order (for binary nodes); (c) perform
  *  proper compilation in post-order hooks. */
-
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();
@@ -740,7 +739,8 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
 
     /* algebraics, reversed list of encoding DDs */
     else if (type->is_algebraic()) {
-        assert( type -> as_algebraic()-> width() == width ); // type and enc width info has to match
+        // type and enc width info has to match
+        assert( type -> as_algebraic()-> width() == width );
         for (DDVector::reverse_iterator ri = dds.rbegin();
              ri != dds.rend(); ++ ri) {
             f_add_stack.push_back(*ri);
@@ -774,7 +774,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx = f_ctx_stack.back();
     step_t time = f_time_stack.back();
 
-    ENCMap::iterator eye;
+    FQExpr2EncMap::const_iterator eye;
     IEncoding_ptr enc = NULL;
 
     // 1. Explicit integer consts (e.g. 42) ..
@@ -798,9 +798,9 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         // temporary encodings must be already defined.
         FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
 
-        ENCMap::iterator eye = f_temp_encodings.find(key);
+        eye = f_temp_encodings.find(key);
         if (eye != f_temp_encodings.end()) {
-            enc = (*eye).second;
+            enc = eye -> second;
         }
         else assert(false); // unexpected
 

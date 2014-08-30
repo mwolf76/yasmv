@@ -219,8 +219,6 @@ void Compiler::algebraic_discard_op()
 
 void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-
     assert( is_binary_algebraic(expr) );
     bool signedness = false; // TODO
     unsigned width = algebrize_binary_arithmetical();
@@ -228,14 +226,7 @@ void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-    /* register anonymous encoding */
-    DDVector dv;
-    for (unsigned i = 0; i < width; ++ i) {
-        BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
-            (f_enc.make_encoding( tm.find_boolean()));
-
-        dv.push_back(be -> bits() [0]);
-    }
+    FRESH_DV(dv, width);
 
     /* push DD vector in reversed order */
     for (unsigned i = 0; i < width; ++ i) {
@@ -250,17 +241,24 @@ void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
     f_microdescriptors.push_back(md);
 }
 
-/* Builds a temporary encoding. This is used by some algebraic
-   algorithms (e.g. neg, algebraic-to-bool cast, ...) */
-Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
+/* auto id generator */
+Expr_ptr Compiler::make_auto_id()
+{
+    ExprMgr& em = f_owner.em();
+    ostringstream oss;
+    oss << "__tmp" << f_temp_auto_index ++ ;
+    return em.make_identifier(oss.str());
+}
+
+/* Builds a temporary expression out of a DD array. This is used by
+   some algebraic algorithms. Uses arrays instead of DDVectors due to
+   historic reasons. */
+Expr_ptr Compiler::make_temporary_expr(ADD dds[], unsigned width)
 {
     ExprMgr& em = f_owner.em();
     TypeMgr& tm = f_owner.tm();
 
-    ostringstream oss;
-    oss << "__tmp" << f_temp_auto_index ++ ;
-
-    Expr_ptr expr = em.make_identifier(oss.str());
+    Expr_ptr expr(make_auto_id());
 
     /* Register temporary symbol into resolver (temporaries are global) */
     f_owner.resolver()->add_symbol(em.make_temp(), expr,
@@ -272,27 +270,6 @@ Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
     f_temp_encodings [ key ] = new AlgebraicEncoding(width, false, dds);
 
     return expr;
-}
-
-/* Builds a temporary boolean encoding. This is used by Pass 3 */
-BooleanEncoding_ptr Compiler::make_chain_encoding()
-{
-    ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
-
-    ostringstream oss;
-    oss << "__ac" << f_temp_auto_index ++ ;
-
-    Expr_ptr expr = em.make_identifier(oss.str());
-
-    /* register encoding, using fqexpr */
-    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
-        (f_enc.make_encoding( tm.find_boolean()));
-
-    const FQExpr& key = FQExpr(expr);
-    f_enc.register_encoding(key, be);
-
-    return be;
 }
 
 void Compiler::pre_node_hook(Expr_ptr expr)
@@ -628,45 +605,35 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     return true;
 }
 
-ADD Compiler::book_and_chain(ADD* dds, unsigned len)
+ADD Compiler::book_and_chain(DDVector& dv)
 {
-    BooleanEncoding_ptr be
-        = make_chain_encoding();
-
     /* add alpha variable */
-    ADD ret = be -> bits() [0];
+    FRESH_DD(ret);
 
-    /* collect DDs */
-    DDVector dv;
-    for (unsigned i = 0; i < len; ++ i) {
-        dv.push_back( dds[i]);
-    }
-
-    /* saving (1) alias: alpha -> dds and (2) chain root */
+    /* saving (1) alias: ret -> dds and (2) chain root */
     f_chains.insert( make_pair <ADD, DDVector> ( ret, dv ));
-    f_roots.push_back( ret );
 
     return ret;
 }
 
+// Conjunct booked AND chains into result stack
 void Compiler::finalize_and_chains()
 {
     // TODO: using formula polarity to determine which direction of
     // the chaining inference needs to be included, in order to ensure
     // sound results, can *greatly* enhance performance.
 
-    // Conjunct booked AND chains into result stack
-    for (DDVector::iterator i = f_roots.begin(); f_roots.end() != i; ++ i) {
-        ADD alpha (*i); ADD not_alpha = alpha.Cmpl();
+    ANDChainMap::const_iterator i;
+    DDVector::const_iterator j;
 
-        ACMap::iterator eye = f_chains.find(alpha);
-        assert( f_chains.end() != eye);
+
+    for (i = f_chains.begin(); f_chains.end() != i; ++ i) {
+        ADD alpha (i->first); ADD not_alpha = alpha.Cmpl();
 
         // positive polarity (fwd): a -> Y, that is: (!a v Y1) ^ (!a v
         // Y2) ^ (!a v Y3) ^ ...
-        DDVector& Y ((*eye).second);
-        for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-
+        const DDVector& Y (i->second);
+        for (j = Y.begin(); Y.end() != j; ++ j) {
             PUSH_ADD (not_alpha.Or(*j));
         }
 
@@ -674,11 +641,8 @@ void Compiler::finalize_and_chains()
         // !Y3 v ....), which in turn is rewritten as follows: Ex. (
         // xi -> (yi -> a))
         ADD bigOr = f_enc.zero();
-        for (DDVector::iterator j = Y.begin(); Y.end() != j; ++ j) {
-            BooleanEncoding_ptr be
-                = make_chain_encoding();
-
-            ADD  av = be -> bits() [0];
+        for (j = Y.begin(); Y.end() != j; ++ j) {
+            FRESH_DD(av);
             bigOr = bigOr.Or( av);
 
             PUSH_ADD( av.Cmpl(). Or( (*j). Cmpl()). Or( alpha));
@@ -694,6 +658,34 @@ void Compiler::clear_internals()
     f_rel_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_roots.clear();
     f_chains.clear();
 }
+
+/* build an auto fresh ADD variable and register its encoding */
+ADD Compiler::make_auto_dd()
+{
+    TypeMgr& tm = f_owner.tm();
+    Type_ptr boolean(tm.find_boolean());
+
+    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
+        (f_enc.make_encoding( boolean ));
+
+    // register encoding, a FQExpr is needed for UCBI booking
+    Expr_ptr aid = make_auto_id();
+    Expr_ptr ctx = f_ctx_stack.back();
+    step_t time = f_time_stack.back();
+    FQExpr key (ctx, aid, time);
+    f_enc.register_encoding( key, be);
+
+    return be -> bits() [0];
+}
+
+/* build an auto DD vector of fresh ADD variables. */
+void Compiler::make_auto_ddvect(DDVector& dv, unsigned width)
+{
+    assert(0 == dv.size());
+    for (unsigned i = 0; i < width; ++ i ) {
+        dv.push_back(make_auto_dd());
+    }
+}
+

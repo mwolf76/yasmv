@@ -39,8 +39,6 @@
 using std::ostream;
 
 ostream &operator<<(ostream &out, const Lit &lit);
-ostream &operator<<(ostream &out, const Clause *clause);
-ostream &operator<<(ostream &out, const Clause &clause);
 ostream &operator<<(ostream &out, const vec<Lit> &lits);
 
 class SAT : public IObject {

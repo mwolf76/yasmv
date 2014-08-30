@@ -91,7 +91,7 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
         lhs[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
     }
 
-    Expr_ptr temp = make_temporary_encoding(lhs, width);
+    Expr_ptr temp = make_temporary_expr(lhs, width);
     (*this)(em.make_add(temp, em.make_one()));
 }
 
@@ -456,22 +456,25 @@ void Compiler::algebraic_lt(const Expr_ptr expr)
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-    /* MSB predicate first, if false and prefix matches, inspect next
-       digit. */
+    // MSB predicate first, if false and prefix matches, inspect next
+    // digit. Uses AND-chain optimization to build clauses.
     ADD pred = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
-        ADD phi[1 + i];
 
-        /* prefix */
+        DDVector chain;
+
+        /* build chain prefix */
         for (unsigned j = 0; j < i; j ++ ) {
-            phi[j] = rhs[j].Equals(lhs[j]);
+            chain.push_back(rhs[j].Equals(lhs[j]));
         }
 
         /* add final condition */
-        phi[i] = lhs[i].LT(rhs[i]);
+        chain.push_back(lhs[i].LT(rhs[i]));
+
+        assert(1 + i == chain.size());
 
         /* add optimized chain to disjunction */
-        pred = pred.Or( book_and_chain(phi, 1 + i));
+        pred = pred.Or( book_and_chain(chain));
     }
 
     /* just one predult */
@@ -486,23 +489,25 @@ void Compiler::algebraic_le(const Expr_ptr expr)
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-    /* MSB predicate first, if false and prefix matches, inspect next
-       digit. */
+    // MSB predicate first, if false and prefix matches, inspect next
+    // digit. Uses AND-chain optimization to build clauses.
     ADD pred = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        ADD phi[1 + i];
+        DDVector chain;
 
-        /* prefix */
+        /* build chain prefix */
         for (unsigned j = 0; j < i; j ++ ) {
-            phi[j] = rhs[j].Equals(lhs[j]);
+            chain.push_back(rhs[j].Equals(lhs[j]));
         }
 
         /* add final condition */
-        phi[i] = lhs[i].LEQ(rhs[i]);
+        chain.push_back(lhs[i].LEQ(rhs[i]));
+
+        assert(1 + i == chain.size());
 
         /* add optimized chain to disjunction */
-        pred = pred.Or( book_and_chain(phi, 1 + i));
+        pred = pred.Or( book_and_chain(chain));
     }
 
     /* just one result */
@@ -603,7 +608,7 @@ void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
         res = res.Or( rhs[i]); // order is not relevant here
     }
 
-    Expr_ptr temp = make_temporary_encoding( &res, 1);
+    Expr_ptr temp = make_temporary_expr( &res, 1);
     (*this)(temp);
 }
 

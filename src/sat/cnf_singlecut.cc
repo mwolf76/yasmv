@@ -24,7 +24,8 @@
 
 #include <dd_walker.hh>
 
-#define DEBUG_CNF
+// comment following to disable insanely verbose CNF debug logging
+// #define DEBUG_CNF
 
 /* internal, used only for CNF-ization */
 struct TimedDD {
