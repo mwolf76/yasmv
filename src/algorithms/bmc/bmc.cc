@@ -55,25 +55,26 @@ void BMC::prepare()
     Algorithm::prepare();
 
     Compiler& cmpl(compiler()); // just a local ref
-    cmpl.process( em().make_main(), f_property, true);
-    cmpl.process( em().make_main(), em().make_not( f_property), true);
+    cmpl.preprocess( em().make_main(), f_property);
+    cmpl.preprocess( em().make_main(), em().make_not( f_property));
 }
 
 void BMC::compile()
 {
     Algorithm::compile();
 
-    Compiler& cmpl(compiler()); // just a local ref
-    cmpl.process( em().make_main(), f_property, false);
-    while (cmpl.has_next()) {
-        f_invariant_adds.push_back(cmpl.next());
-    }
+    // Compiler& cmpl(compiler()); // just a local ref
+    // cmpl.process(em().make_main(), f_property, false);
+    // while (cmpl.has_next()) {
+    //     f_invariant_adds.push_back(cmpl.next());
+    // }
 
-    cmpl.process( em().make_main(),
-                  em().make_not( f_property), false);
-    while (cmpl.has_next()) {
-        f_violation_adds.push_back(cmpl.next());
-    }
+    // cmpl.process( em().make_main(),
+    //               em().make_not( f_property), false);
+    // while (cmpl.has_next()) {
+    //     f_violation_adds.push_back(cmpl.next());
+    // }
+    assert (0); // XXX
 }
 
 void BMC::bmc_propositional_check()
@@ -81,7 +82,7 @@ void BMC::bmc_propositional_check()
     f_status = MC_UNKNOWN;
     assert_fsm_init(0);
     assert_fsm_invar(0);
-    assert_formula(0, f_violation_adds, f_violation_micros, engine().new_group());
+    assert_formula(0, f_violation, engine().new_group());
 
     TRACE << "Looking for a BMC CEX of length 0" << endl;
     status_t response = engine().solve();
@@ -104,8 +105,7 @@ void BMC::bmc_invarspec_check()
 
     assert_fsm_init(0);
     assert_fsm_invar(0);
-    assert_formula(0, f_violation_adds, f_violation_micros,
-                   engine().new_group());
+    assert_formula(0, f_violation, engine().new_group());
 
     TRACE << "Looking for a BMC CEX of length 0" << endl;
     if (STATUS_UNSAT == engine().solve()) {
@@ -115,12 +115,11 @@ void BMC::bmc_invarspec_check()
             engine().toggle_last_group();
 
             /* permanently push invariant on last known state */
-            assert_formula(k, f_invariant_adds, f_invariant_micros);
+            assert_formula(k, f_invariant);
 
             assert_fsm_trans(k ++);
             assert_fsm_invar(k);
-            assert_formula(k, f_violation_adds, f_violation_micros,
-                           engine().new_group());
+            assert_formula(k, f_violation, engine().new_group());
 
             TRACE << "Looking for a BMC CEX of length "
                   << k << endl;

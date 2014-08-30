@@ -26,35 +26,6 @@
 
 typedef class MicroMgr *MicroMgr_ptr;
 
-// <symb, is_signed?, width>
-typedef tuple<bool, ExprType, int> OpTriple;
-inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int width) {
-    return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
-}
-
-struct OpTripleHash {
-    long operator() (const OpTriple& k) const
-    {
-        const long prime = 31;
-
-        long res = 1;
-        res = prime * res + (k.get<0>() ? 1231 : 1237);
-        res = prime * res + k.get<1>();
-        res = prime * res + k.get<2>();
-        return res;
-    }
-};
-
-struct OpTripleEq {
-    bool operator() (const OpTriple& x, const OpTriple& y) const
-    {
-        return
-            x.get<0>() == y.get<0>() &&
-            x.get<1>() == y.get<1>() &&
-            x.get<2>() == y.get<2>()  ;
-    }
-};
-
 ostream& operator<<(ostream& os, OpTriple triple);
 
 class MicroLoaderException : public Exception {
@@ -82,7 +53,6 @@ public:
 private:
     const path& f_fullpath;
     OpTriple f_triple;
-
 };
 
 typedef unordered_map<OpTriple, MicroLoader_ptr, OpTripleHash, OpTripleEq> MicroLoaderMap;
@@ -105,9 +75,6 @@ protected:
 
 private:
     static MicroMgr_ptr f_instance;
-
-    // load microcode from data files
-    void initialize();
 
     MicroLoaderMap f_loaders;
 };

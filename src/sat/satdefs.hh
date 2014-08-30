@@ -25,7 +25,6 @@
 #include <common.hh>
 #include <pool.hh>
 
-// for the definition of Term
 #include <dd.hh>
 
 // the Minisat SAT solver
@@ -67,9 +66,6 @@ struct ptr_hasher  {
 typedef Var group_t;
 static group_t MAINGROUP(0);
 typedef vector<group_t> Groups;
-
-typedef ADD Term;
-typedef vector<Term> Terms;
 
 typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 

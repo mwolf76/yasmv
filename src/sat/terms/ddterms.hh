@@ -31,62 +31,6 @@
 
 namespace Minisat {
 
-    class DDTermFactory : public TermFactory<ADD> {
-    public:
-        DDTermFactory(Cudd& cudd)
-            : f_cudd(cudd)
-        { DEBUG << "Initialized DD Term Factory @ " << this << endl; }
-
-        virtual ~DDTermFactory()
-        { DEBUG << "Deinitialized DD Term Factory @ " << this << endl; }
-
-        // constants
-        virtual ADD make_true()
-        { return f_cudd.addOne(); }
-        virtual bool is_true(ADD phi)
-        { return phi.IsOne(); }
-
-        virtual ADD make_false()
-        { return f_cudd.addZero(); }
-        virtual bool is_false(ADD phi)
-        { return phi.IsZero(); }
-
-        // variables
-        virtual ADD make_var(Var v)
-        { return f_cudd.addVar(v); }
-
-        // operators
-        virtual ADD make_and(ADD phi, ADD psi)
-        { return phi & psi; }
-        virtual ADD make_or(ADD phi, ADD psi)
-        { return phi | psi; }
-
-        virtual ADD make_not(ADD phi)
-        { return ~ phi; }
-
-        virtual ADD make_then(ADD phi)
-        {
-            DdNode *node = phi.getNode();
-            return ADD( f_cudd, cuddT(node));
-        }
-        virtual ADD make_else(ADD phi)
-        {
-            DdNode *node = phi.getNode();
-            return ADD( f_cudd, cuddE(node));
-        }
-
-        virtual void walk_zeroes(ADD phi, void *obj,
-                                 void (*cb)(void *obj, int *list, int size))
-        { phi.Callback(cb, obj, 0); }
-
-        virtual void walk_ones(ADD phi, void *obj,
-                               void (*cb)(void *obj, int *list, int size))
-        { phi.Callback(cb, obj, 1); }
-
-    private:
-        Cudd& f_cudd;
-    };
-
 } // namespace Minisat
 
 #endif

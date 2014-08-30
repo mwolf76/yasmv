@@ -31,6 +31,8 @@
 #include <common.hh>
 #include <cuddObj.hh>
 
+typedef vector<ADD> DDVector;
+
 typedef class CuddMgr* CuddMgr_ptr;
 typedef Cudd* Cudd_ptr;
 

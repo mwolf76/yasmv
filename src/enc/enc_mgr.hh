@@ -39,7 +39,6 @@
 
 typedef class IEncoding *IEncoding_ptr; // fwd decl
 
-typedef vector<ADD> DDVector; // Deprecated: TODO Rename to ADDVector
 typedef vector<int> IndexVector;
 
 struct ADDHash {

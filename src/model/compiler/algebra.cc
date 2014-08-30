@@ -1,19 +1,6 @@
 /**
  *  @file algebra.cc
- *  @brief Boolean compiler - algebraic manipulations
- *
- *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  the SAT analysis. Current implementation uses ADDs to perform
- *  expression manipulation and booleanization. Expressions are
- *  assumed to be type-safe, only boolean expressions on arithmetic
- *  predicates are supported. The final result of expression
- *  compilation must be a 0-1 ADD_ which is suitable for CNF clauses
- *  injection directly into the SAT solver. The compilation engine is
- *  implemented using a simple walker pattern: (a) on preorder, return
- *  true if the node has not yet been visited; (b) always do in-order
- *  (for binary nodes); (c) perform proper compilation in post-order
- *  hooks.
+ *  @brief Boolean compiler - algebraic manipulations module.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -42,25 +29,6 @@
    MSB first. On the other hand, to ensure proper behavior the
    *result* of the operation has to be pushed in reverse order. */
 
-void Compiler::algebraic_neg(const Expr_ptr expr)
-{
-    assert( is_unary_algebraic(expr) );
-    ExprMgr& em = f_owner.em();
-
-    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = type->width();
-
-    /* create temp complemented ADDs */
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
-    }
-
-    /* rewrite ( -x ) as ( !x + 1 ) */
-    Expr_ptr temp = make_temporary_encoding(lhs, width);
-    (*this)(em.make_add(temp, em.make_one()));
-}
-
 void Compiler::algebraic_not(const Expr_ptr expr)
 {
     assert( is_unary_algebraic(expr) );
@@ -81,29 +49,56 @@ void Compiler::algebraic_not(const Expr_ptr expr)
     }
 }
 
+// TODO: add options to enable ADD-based or microcode-based
+// TODO: evaluate which approach is more efficient
 void Compiler::algebraic_plus(const Expr_ptr expr)
 {
+#if 0
     unsigned width = algebrize_binary_arithmetical();
 
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-    /* perform arithmetic sum using positional algorithm */
+    /* x[i] + y[i] + c */
     ADD carry = f_enc.zero();
     for (unsigned i = 0; i < width; ++ i) {
 
-        /* x[i] + y[i] + c */
         unsigned ndx = width - i - 1;
+
         ADD tmp = lhs[ndx].Plus(rhs[ndx]).Plus(carry);
         carry = f_enc.base().LEQ(tmp); /* c >= 0x10 */
 
         /* x[i] = (x[i] + y[i] + c) % base */
         PUSH_ADD(tmp.Modulus(f_enc.base()));
     }
+#else
+    algebraic_binary_microcode_operation(expr);
+#endif
 }
 
+/* rewrite ( -x ) as ( !x + 1 ) */
+void Compiler::algebraic_neg(const Expr_ptr expr)
+{
+    assert( is_unary_algebraic(expr) );
+    ExprMgr& em = f_owner.em();
+
+    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
+    unsigned width = type->width();
+
+    /* create temp complemented ADDs */
+    ADD lhs[width];
+    for (unsigned i = 0; i < width; ++ i) {
+        lhs[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
+    }
+
+    Expr_ptr temp = make_temporary_encoding(lhs, width);
+    (*this)(em.make_add(temp, em.make_one()));
+}
+
+// TODO: add options to enable ADD-based or microcode-based
 void Compiler::algebraic_sub(const Expr_ptr expr)
 {
+#if 1
     ExprMgr& em = f_owner.em();
     assert( is_binary_algebraic(expr) );
 
@@ -113,78 +108,75 @@ void Compiler::algebraic_sub(const Expr_ptr expr)
 
     (*this)( em.make_add( expr->lhs(),
                           em.make_neg(expr->rhs())));
+#else
+    algebrize_binary_microcode_operation(expr);
+#endif
 }
 
-/* For multiplication a different approach is needed. The ADDs for
-   higher bits in the multiplication results tend to grow
-   exponentially. Therefore, performing multiplication using ordinary
-   ADD algebra rapidly becomes unfeasible as the size of the operands
-   grow.  To circumvent this limitation a different approach is
-   needed. Therefore, all we do here is (1) pushing bit results ADDs
-   representing boolean formulas for the results and (2) store in a
-   supporting internal structure the information necessary to fully
-   express those results at a later stage. */
+// TODO: add options to enable ADD-based or microcode-based
+// TODO: evaluate which approach is more efficient
 void Compiler::algebraic_mul(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
-
+#if 0
+    /* longhand mul */
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_binary_arithmetical();
-
-    Expr_ptr ctx = f_ctx_stack.back();
 
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-    /* collect DDs */
-    DDVector dv;
+    ADD res[width];
+    ADD tmp[width];
+
     for (unsigned i = 0; i < width; ++ i) {
-
-        ostringstream oss;
-
-        oss << "__mul__"
-            << expr->lhs() << "__"
-            << expr->rhs() << "__"
-            << i;
-
-        Expr_ptr expr = em.make_identifier(oss.str());
-
-        /* register encoding, using fqexpr */
-        BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
-            (f_enc.make_encoding( tm.find_boolean()));
-
-        const FQExpr& key = FQExpr(expr);
-        f_enc.register_encoding(key, be);
-
-        dv.push_back(be -> bits() [0]);
+        res[i] = f_enc.zero();
+        tmp[i] = f_enc.zero();
     }
 
-    /* register microcode */
-    MicroDescriptor md( MUL, dv, lhs, rhs );
-    f_micro_map.insert( make_pair < FQExpr, MicroDescriptor >
-                        ( FQExpr( ctx, expr), md));
-
-    /* push ADDs in reverse order */
+    ADD carry;
     for (unsigned i = 0; i < width; ++ i) {
-        unsigned ndx = width - i - 1;
+        unsigned ndx_i = width - i - 1;
 
-        PUSH_ADD( dv[ ndx ]);
+        carry = f_enc.zero();
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
+
+            // ignore what happens out of result boundaries
+            if (i + j < width) {
+                unsigned ndx = width - i - j - 1;
+
+                /* MUL table for digit product */
+                ADD product = lhs[ndx_i].Times(rhs[ndx_j]).Plus(carry);
+
+                /* calculate digit and carry */
+                tmp[ndx] = product.Modulus(f_enc.base());
+                carry    = product.Divide (f_enc.base());
+            }
+        }
+
+        // update result
+        for (unsigned j = 0; j < width; ++ j) {
+            unsigned ndx_j = width - j - 1;
+            res[ndx_j] += tmp[ndx_j];
+        }
+
+        // return i-th digit of result
+        PUSH_ADD(res[ndx_i]);
     }
+#else
+    algebraic_binary_microcode_operation(expr);
+#endif
 }
 
+// microcode-only
 void Compiler::algebraic_div(const Expr_ptr expr)
-{
-    assert( is_binary_algebraic(expr) );
-    assert( false ); // TODO: currently unsupported
-}
+{ algebraic_binary_microcode_operation(expr); }
 
+// microcode-only
 void Compiler::algebraic_mod(const Expr_ptr expr)
-{
-    assert( is_binary_algebraic(expr) );
-    assert( false ); // TODO: currently unsupported
-}
+{ algebraic_binary_microcode_operation(expr); }
 
+// bitwise operators
 void Compiler::algebraic_and(const Expr_ptr expr)
 {
     assert( is_binary_algebraic(expr) );
@@ -399,10 +391,11 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
 #endif
 }
 
+// TODO: evaluate which approach is more efficient
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
 {
 #if 1
-    /* new implementation, does not perform rewriting on Equals */
+    /* new implementation, does not perform rewriting on equals */
     assert( is_binary_algebraic(expr) );
     unsigned width = algebrize_binary_relational();
 

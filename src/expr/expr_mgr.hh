@@ -36,6 +36,10 @@ typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
 
+    inline ExprType symb(Expr_ptr expr) const {
+        return expr->f_symb;
+    }
+
     /* -- LTL expressions --------------------------------------------------- */
     inline Expr_ptr make_F(Expr_ptr expr)
     { return make_expr(F, expr, NULL); }
@@ -661,6 +665,7 @@ public:
     }
 
     ExprType exprTypeFromString (string exprTypeString );
+    string exprTypeToString(ExprType exprType);
 
 protected:
     ExprMgr();

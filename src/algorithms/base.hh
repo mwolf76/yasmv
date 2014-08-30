@@ -111,8 +111,7 @@ protected:
                           group_t group = MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(step_t time, ADDVector& adds,
-                        MicroDescriptors& micros,
+    void assert_formula(step_t time, Term& term,
                         group_t group = MAINGROUP);
 
 private:
@@ -136,18 +135,13 @@ private:
     /* Parameters */
     ParametersMap f_params;
 
-    ADDVector f_init_adds;
-    MicroDescriptors f_init_micro_descriptors;
+    /* Formulas */
+    Terms f_init;
+    Terms f_invar;
+    Terms f_trans;
+    Terms f_formula;
 
-    ADDVector f_invar_adds;
-    MicroDescriptors f_invar_micro_descriptors;
-
-    ADDVector f_trans_adds;
-    MicroDescriptors f_trans_micro_descriptors;
-
-    ADDVector f_formula_adds;
-    MicroDescriptors f_formula_micro_descriptors;
-
+    /* Witness */
     Witness_ptr f_witness;
 };
 

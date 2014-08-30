@@ -217,6 +217,39 @@ void Compiler::algebraic_discard_op()
     }
 }
 
+void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+
+    assert( is_binary_algebraic(expr) );
+    bool signedness = false; // TODO
+    unsigned width = algebrize_binary_arithmetical();
+
+    POP_ALGEBRAIC(rhs, width);
+    POP_ALGEBRAIC(lhs, width);
+
+    /* register anonymous encoding */
+    DDVector dv;
+    for (unsigned i = 0; i < width; ++ i) {
+        BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
+            (f_enc.make_encoding( tm.find_boolean()));
+
+        dv.push_back(be -> bits() [0]);
+    }
+
+    /* push DD vector in reversed order */
+    for (unsigned i = 0; i < width; ++ i) {
+
+        unsigned ndx = width - i - 1;
+        PUSH_ADD(dv[ndx]);
+    }
+
+    /* register microcode */
+    OpTriple triple = make_op_triple( signedness, expr->symb(), width );
+    MicroDescriptor md( triple, dv, lhs, rhs );
+    f_microdescriptors.push_back(md);
+}
+
 /* Builds a temporary encoding. This is used by some algebraic
    algorithms (e.g. neg, algebraic-to-bool cast, ...) */
 Expr_ptr Compiler::make_temporary_encoding(ADD dds[], unsigned width)
@@ -652,4 +685,15 @@ void Compiler::finalize_and_chains()
         }
         PUSH_ADD(bigOr);
     }
+}
+
+void Compiler::clear_internals()
+{
+    f_add_stack.clear();
+    f_type_stack.clear();
+    f_rel_type_stack.clear();
+    f_ctx_stack.clear();
+    f_time_stack.clear();
+    f_roots.clear();
+    f_chains.clear();
 }

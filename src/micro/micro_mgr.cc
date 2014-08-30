@@ -49,7 +49,7 @@ MicroMgr_ptr MicroMgr::f_instance = NULL;
 ostream& operator<<(ostream& os, OpTriple triple)
 {
     bool is_signed (triple.get<0>());
-    os << "<< " << (is_signed ? "s" : "u");
+    os << (is_signed ? "s" : "u");
     switch (triple.get<1>())   {
     case PLUS: os << "add"; break;
     case SUB:  os << "sub"; break;
@@ -58,7 +58,7 @@ ostream& operator<<(ostream& os, OpTriple triple)
     case MOD:  os << "mod"; break;
     default: assert(false);
     }
-    os << triple.get<2>() << " >>";
+    os << triple.get<2>();
     return os;
 }
 
@@ -78,15 +78,6 @@ MicroLoaderException::~MicroLoaderException() throw()
 {}
 
 MicroMgr::MicroMgr()
-{
-    initialize();
-}
-
-MicroMgr::~MicroMgr()
-{
-}
-
-void MicroMgr::initialize()
 {
     char *basepath = getenv( YASMV_HOME );
     if (NULL == basepath) {
@@ -138,9 +129,19 @@ void MicroMgr::initialize()
     }
 }
 
+MicroMgr::~MicroMgr()
+{
+}
+
 void MicroMgr::show_info(ostream &os)
 {
-    os << f_loaders.size() << " microcode loaders registered." << endl;
+    os << f_loaders.size() << " microcode loaders registered." << endl
+       << "known operators: "
+        ;
+    for (MicroLoaderMap::const_iterator mli = f_loaders.begin(); mli != f_loaders.end(); ++ mli) {
+        os << mli->first << " " ;
+    }
+    os << endl << endl;
 }
 
 MicroLoader::MicroLoader(const path& filepath)
@@ -149,7 +150,7 @@ MicroLoader::MicroLoader(const path& filepath)
     const string native (filepath.filename().replace_extension().native());
 
     std::vector<std::string> fragments;
-    split(fragments, native, boost::is_any_of("-."));
+    split(fragments, native, boost::is_any_of("-"));
 
     // FIXME: better validation for microcode fragment filenames
     assert(fragments.size() == 3 && (fragments[0] == "s" || fragments[0] == "u"));

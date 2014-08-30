@@ -47,11 +47,8 @@ private:
     formula_t f_strategy;
     mc_status_t f_status;
 
-    ADDVector f_violation_adds;
-    MicroDescriptors f_violation_micros;
-
-    ADDVector f_invariant_adds;
-    MicroDescriptors f_invariant_micros;
+    Term f_violation;
+    Term f_invariant;
 
     /* pure booleans, just initial states */
     void bmc_propositional_check();

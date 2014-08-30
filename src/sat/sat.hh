@@ -29,10 +29,10 @@
 #include <satdefs.hh>
 #include <cuddObj.hh>
 
+#include <cudd_mgr.hh>
 #include <enc_mgr.hh>
-#include <micro.hh>
 
-#include "terms/ddterms.hh"
+#include <micro.hh>
 
 #include <time_mapper.hh>
 
@@ -68,17 +68,27 @@ public:
     /**
      * @brief add a formula to the SAT problem instance.
      */
-    inline void push(Term term, step_t time,
-                     group_t group = MAINGROUP)
-    { cnf_push_single_cut(term, time, group); }
-
-    /**
-     * @brief injects operator microcode
-     */
-    inline void inject(MicroDescriptor& descriptor,
-                       step_t time, group_t group = MAINGROUP)
+    inline void push(Term term, step_t time, group_t group = MAINGROUP)
     {
-        assert(false); // not there yet
+        unsigned n, m;
+
+        // push DDs
+        const DDVector& dv( term.formula()); n = dv.size();
+        TRACE << "CNFizing "<< n << " fragments" << endl;
+
+        DDVector::const_iterator i;
+        for (i = dv.begin(); dv.end() != i; ++ i) {
+            // TODO: additional CNF algorithms
+            cnf_push_single_cut( *i, time, group );
+        }
+
+        const MicroDescriptors& descriptors (term.descriptors()); m = descriptors.size();
+        TRACE << "Injecting " << m << " microcode descriptors" << endl;
+
+        MicroDescriptors::const_iterator j;
+        for (j = descriptors.begin(); descriptors.end() != j; ++ j)  {
+            cnf_inject_microcode( *j, time, group );
+        }
     }
 
     /* shortcut */
@@ -183,8 +193,9 @@ private:
     status_t sat_solve_groups(const Groups& groups);
 
     // CNFization algorithms
-    void cnf_push_no_cut(Term phi, step_t time, const group_t group);
-    void cnf_push_single_cut(Term phi, step_t time, const group_t group);
+    void cnf_push_no_cut(ADD add, step_t time, const group_t group);
+    void cnf_push_single_cut(ADD add, step_t time, const group_t group);
+    void cnf_inject_microcode(MicroDescriptor md, step_t time, const group_t group);
 }; // SAT instance
 
 #endif

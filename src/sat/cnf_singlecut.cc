@@ -1,6 +1,6 @@
 /**
- *  @file sat.cc
- *  @brief SAT interface implementation
+ *  @file cnf_singlecut.cc
+ *  @brief SAT implementation - CNF single cut builder
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -314,9 +314,8 @@ private:
     }
 };
 
-void SAT::cnf_push_single_cut(Term phi, step_t time,
-                              const group_t group)
+void SAT::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
-    CNFBuilderSingleCut builder(*this, time, group);
-    builder(phi);
+    CNFBuilderSingleCut worker(*this, time, group);
+    worker(add);
 }

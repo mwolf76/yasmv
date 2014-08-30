@@ -47,7 +47,7 @@ Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
     , f_temp_encodings()
-    , f_micro_map()
+    , f_microdescriptors()
     , f_type_stack()
     , f_rel_type_stack()
     , f_add_stack()
@@ -70,18 +70,10 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
+void Compiler::preprocess(Expr_ptr ctx, Expr_ptr body)
 {
-    // remove previous results
-    f_add_stack.clear();
-    f_type_stack.clear();
-    f_rel_type_stack.clear();
-    f_ctx_stack.clear();
-    f_time_stack.clear();
-    f_roots.clear();
-    f_chains.clear();
-
-    f_first = first_pass;
+    clear_internals();
+    f_first = true;
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
@@ -97,13 +89,31 @@ void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
-    if (f_first) {
-        FQExpr key(ctx, body);
-        TRACE << "Compilation of " << key << " took "
-              << secs << " seconds" << endl;
+    FQExpr key(ctx, body);
+    TRACE << "Preprocessing of " << key << " took "
+          << secs << " seconds" << endl;
 
-        return;
-    }
+    return;
+}
+
+Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
+{
+    clear_internals();
+    f_first = false;
+
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
+
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    f_elapsed = clock();
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
+
+    f_elapsed = clock() - f_elapsed;
+    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -117,30 +127,20 @@ void Compiler::process(Expr_ptr ctx, Expr_ptr body, bool first_pass)
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
 
+    // TODO: interesting, review this
     finalize_and_chains();
 
-    unsigned sz (f_add_stack.size());
+    unsigned res_sz (f_add_stack.size());
+    unsigned mcr_sz (f_microdescriptors.size());
     FQExpr key(ctx, body);
     TRACE
         << "Compilation of " << key << " took "
         << secs << " seconds, "
-        << sz << " ADD nodes"
+        << res_sz << " ADD results, "
+        << mcr_sz << " Microcode descriptors."
         << endl;
-}
 
-bool Compiler::has_next()
-{
-    assert( ! f_first );
-    return 0 < f_add_stack.size();
-}
-
-ADD Compiler::next()
-{
-    assert( ! f_first);
-    assert( has_next());
-
-    POP_ADD(ret);
-    return ret;
+    return Term( f_add_stack, f_microdescriptors );
 }
 
 /*  Compilation engine is implemented using a simple expression walker

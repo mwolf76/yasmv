@@ -1,6 +1,26 @@
 /**
  *  @file compiler.hh
- *  @brief Boolean expressions compiler
+ *  @brief Basic expressions compiler
+ *
+ *  This module contains definitions and services that implement the
+ *  booolean expressions compilation into a form which is suitable for
+ *  the SAT analysis. Current implementation uses ADDs to perform
+ *  expression manipulation. Expressions are assumed to be type-safe,
+ *  The final result of expression compilation shall be a 0-1 ADD_
+ *  suitable for CNF clauses injection directly into the SAT
+ *  solver. In previous versione, the compiler used ADDs also to
+ *  perform booleanization of algebraic expressions. Experimental
+ *  results proved this approach unfeasible for realistic (i.e. >= 32)
+ *  word sizes, at least for certain operators. To circumvent this
+ *  limitation a different approach is needed. Therefore, for
+ *  algebraic operators all we do here is (1) pushing bit results ADDs
+ *  representing boolean formulas for the results and (2) register in
+ *  a supporting complementary structure the information necessary to
+ *  fully express those results at a later stage. The compilation
+ *  engine is implemented using a simple walker pattern: (a) on
+ *  preorder, return true if the node has not yet been visited; (b)
+ *  always do in-order (for binary nodes); (c) perform proper
+ *  compilation in post-order hooks.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -30,6 +50,8 @@
 #include <model_mgr.hh>
 
 #include <enc.hh>
+#include <enc_mgr.hh>
+
 #include <micro.hh>
 
 #include <dd_walker.hh>
@@ -74,17 +96,10 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    void process(Expr_ptr ctx, Expr_ptr body, bool first_pass);
-
-    /* implicit conjunctive chain returning protocol */
-    bool has_next();
-    ADD  next();
-
-    inline const MicroMap& micro_descriptors() const
-    { return f_micro_map; }
-
-    inline void clear_micro_descriptors()
-    { f_micro_map.clear(); }
+    /* two-pass compiler, needed to build all var encoding before
+       proper compilation. */
+    void preprocess(Expr_ptr ctx, Expr_ptr body);
+    Term process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -102,7 +117,8 @@ protected:
 
     ADDMap f_map;                 // FQDN -> DD cache
     ENCMap f_temp_encodings;      // FQDN -> DD encoding (for temporaries)
-    MicroMap f_micro_map;         // FQDN -> MicroDescriptor
+
+    MicroDescriptors f_microdescriptors;
 
     DDVector f_roots;             // ADD chain roots
     ACMap  f_chains;              // chain root -> DD vector
@@ -219,7 +235,6 @@ protected:
     void algebraic_ite(const Expr_ptr expr);
 
 private:
-    // Two pass compiler
     bool f_first;
 
     /* casts */
@@ -228,12 +243,16 @@ private:
     void algebraic_cast_from_algebraic(const Expr_ptr expr);
 
     /* -- internals --------------------------------------------------------- */
+    void clear_internals();
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
     void relational_type_lookahead(const Expr_ptr expr);
     void relational_type_cleanup();
     void build_subscript_selector();
     void flush_operands();
+
+    /* microcode-based algebraic binary ops: supports PLUS, SUB, MUL, DIV, MOD */
+    void algebraic_binary_microcode_operation(const Expr_ptr expr);
 
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
@@ -266,6 +285,7 @@ private:
     unsigned algebrize_operation(bool ternary = false, bool relational = false);
 
     /* temporaries */
+    Expr_ptr make_temp_id();
     Expr_ptr make_temporary_encoding(ADD dds[], unsigned width);
     BooleanEncoding_ptr make_chain_encoding();
 };

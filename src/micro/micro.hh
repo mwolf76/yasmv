@@ -25,31 +25,83 @@
 #include <common.hh>
 #include <pool.hh>
 
-// for the definition of Term
 #include <dd.hh>
 
-typedef ADD Term;
-typedef vector<Term> Terms;
+// <symb, is_signed?, width>
+typedef tuple<bool, ExprType, int> OpTriple;
+inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int width) {
+    return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
+}
+
+struct OpTripleHash {
+    long operator() (const OpTriple& k) const
+    {
+        const long prime = 31;
+
+        long res = 1;
+        res = prime * res + (k.get<0>() ? 1231 : 1237);
+        res = prime * res + k.get<1>();
+        res = prime * res + k.get<2>();
+        return res;
+    }
+};
+
+struct OpTripleEq {
+    bool operator() (const OpTriple& x, const OpTriple& y) const
+    {
+        return
+            x.get<0>() == y.get<0>() &&
+            x.get<1>() == y.get<1>() &&
+            x.get<2>() == y.get<2>()  ;
+    }
+};
 
 class MicroDescriptor {
 
 public:
-    MicroDescriptor( ExprType op, Terms& z, Terms &x, Terms &y)
-        : f_op(op)
+    MicroDescriptor( OpTriple triple, DDVector& z, DDVector &x, DDVector &y)
+        : f_triple(triple)
         , f_z(z)
         , f_x(x)
         , f_y(y)
     {
-        assert (f_z.size() == f_x.size() &&
-                f_z.size() == f_y.size());
+        assert (f_z.size() == f_x.size() && f_z.size() == f_y.size());
     }
 
 private:
-    ExprType f_op;
-    Terms f_z;
-    Terms f_x;
-    Terms f_y;
+    OpTriple f_triple;
+
+    DDVector f_z;
+    DDVector f_x;
+    DDVector f_y;
 };
 
 typedef vector<MicroDescriptor> MicroDescriptors;
+
+// compiler output
+class Term {
+public:
+    Term()
+        : f_formula()
+        , f_descriptors()
+    {}
+
+    Term(DDVector& formula, MicroDescriptors& descriptors)
+        : f_formula(formula)
+        , f_descriptors(descriptors)
+    {}
+
+    inline const DDVector& formula() const
+    { return f_formula; }
+
+    inline const MicroDescriptors& descriptors() const
+    { return f_descriptors; }
+
+private:
+    DDVector f_formula;
+    MicroDescriptors f_descriptors;
+};
+
+typedef vector<Term> Terms;
+
 #endif
