@@ -34,10 +34,10 @@
 
 #include <micro.hh>
 
+#include <cnf_registry.hh>
 #include <time_mapper.hh>
 
 using std::ostream;
-
 ostream &operator<<(ostream &out, const Lit &lit);
 ostream &operator<<(ostream &out, const vec<Lit> &lits);
 
@@ -105,29 +105,62 @@ public:
     inline status_t status() const
     { return f_status; }
 
+    /**
+     * @brief Fetch variable value from Minisat model
+     */
     inline int value(Var var)
     {
         assert (STATUS_SAT == f_status);
         return 0 == Minisat::toInt(f_solver.modelValue(var));
     }
 
+    /**
+     * @brief TCBI -> Minisat variable mapping
+     */
     inline Var tcbi_to_var(const TCBI& tcbi)
     { return f_mapper.var(tcbi); }
 
+    /**
+     * @brief Minisat variable -> TCBI mapping
+     */
     inline const TCBI& var_to_tcbi(Var var)
     { return f_mapper.tcbi(var); }
 
     /**
+     * @brief DD index -> UCBI mapping
+     */
+    inline const UCBI& find_ucbi(int index)
+    { return f_enc_mgr.find_ucbi(index); }
+
+    /**
+     * @brief Timed model DD nodes to Minisat variable mapping
+     */
+    inline Var find_dd_var(const DdNode* node, step_t time)
+    { return f_registry.find_dd_var(node, time); }
+
+    /**
+     * @brief Artifactory DD nodes to Minisat variable mapping
+     */
+    inline Var find_cnf_var(const DdNode* node, step_t time)
+    { return f_registry.find_cnf_var(node, time);  }
+
+    /**
+     * @brief a new Minisat variable
+     */
+    inline Var new_sat_var() // proxy
+    { return f_solver.newVar(); }
+
+    /**
      * @brief SAT instancte ctor
      */
-    SAT(/* DDTermFactory& factory */)
-        // : f_factory(factory)
+    SAT()
         : f_enc_mgr(EncodingMgr::INSTANCE())
         , f_mapper(* new TimeMapper(*this))
+        , f_registry(* new CNFRegistry(*this))
         , f_solver()
     {
         f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
-        // DEBUG << "Initialized SAT instance @" << this << endl;
+        DEBUG << "Initialized SAT instance @" << this << endl;
     }
 
     /**
@@ -135,29 +168,22 @@ public:
      */
     ~SAT() {}
 
-    /* Internal services */
-    inline Var new_sat_var() // proxy
-    { return f_solver.newVar(); }
-
-    inline const UCBI& find_ucbi(int index) // proxy
-    { return f_enc_mgr.find_ucbi(index); }
-
 private:
-    // // Term factory
-    // DDTermFactory& f_factory;
-
-    // Enc Mgr
     EncodingMgr& f_enc_mgr;
 
-    // TimeMapper
+    // TCBI <-> var mapping
     TimeMapper& f_mapper;
 
-    // SAT solver
+    // CNF registry,
+    CNFRegistry f_registry;
+
+    // SAT solver, currently Minisat
     Solver f_solver;
 
-    // SAT groups (just ordinary Minisat Vars)
+    // used to partition the formula to be solved
     Groups f_groups;
 
+    // last solve() status
     status_t f_status;
 
     // -- CNF ------------------------------------------------------------

@@ -1,5 +1,5 @@
 /**
- *  @file time_mapper.hh
+ *  @file cnf_registry.hh
  *  @brief SAT interface (Time Mapper sub-component)
  *
  *  This module contains the interface for services that implement the
@@ -24,8 +24,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef SAT_TIME_MAPPER_H
-#define SAT_TIME_MAPPER_H
+#ifndef SAT_CNF_REGISTRY_H
+#define SAT_CNF_REGISTRY_H
 
 #include <expr.hh>
 #include <pool.hh>
@@ -37,24 +37,55 @@ class SAT; // fwd decl
 typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
 typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
-class TimeMapper : public IObject {
+struct TimedDD {
+public:
+    TimedDD(DdNode *node, step_t time)
+        : f_node(node)
+        , f_time(time)
+    {}
+
+    inline DdNode* node() const
+    { return f_node; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    // The DdNode node
+    DdNode* f_node;
+
+    // expression time (default is 0)
+    step_t f_time;
+};
+
+struct TimedDDHash {
+    inline long operator() (const TimedDD& k) const
+    { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
+};
+
+struct TimedDDEq {
+    inline bool operator() (const TimedDD& x, const TimedDD& y) const
+    { return (x.node() == y.node() && x.time() == y.time()); }
+};
+
+typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
+
+class CNFRegistry : public IObject {
 
     /* ctor and dctor are available only to SAT owner */
     friend class SAT;
 
 public:
-    Var var(const TCBI& tcbi );
-    const TCBI& tcbi( Var var );
+
+Var find_dd_var(const DdNode* node, step_t time);
+Var find_cnf_var(const DdNode* node, step_t time);
 
 private:
-    TimeMapper(SAT& owner);
-    ~TimeMapper();
+    CNFRegistry(SAT& sat);
+    ~CNFRegistry();
 
-    SAT& f_owner;
+    SAT& f_sat;
 
-    /* Bidirectional mapping */
-    TCBI2VarMap f_tcbi2var_map;
-    Var2TCBIMap f_var2tcbi_map;
+    TDD2VarMap f_tdd2var_map;
 };
 
 #endif

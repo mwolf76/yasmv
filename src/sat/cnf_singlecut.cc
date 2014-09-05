@@ -23,40 +23,10 @@
 #include <sat.hh>
 
 #include <dd_walker.hh>
+#include <cnf_registry.hh>
 
 // comment following to disable insanely verbose CNF debug logging
 // #define DEBUG_CNF
-
-/* internal, used only for CNF-ization */
-struct TimedDD {
-public:
-    TimedDD(DdNode *node, step_t time)
-        : f_node(node)
-        , f_time(time)
-    {}
-
-    inline DdNode* node() const
-    { return f_node; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    // The DdNode node
-    DdNode* f_node;
-
-    // expression time (default is 0)
-    step_t f_time;
-};
-
-struct TimedDDHash {
-    inline long operator() (const TimedDD& k) const
-    { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
-};
-
-struct TimedDDEq {
-    inline bool operator() (const TimedDD& x, const TimedDD& y) const
-    { return (x.node() == y.node() && x.time() == y.time()); }
-};
 
 class CNFBuilderSingleCut : public ADDWalker {
 public:
@@ -88,7 +58,7 @@ public:
         assert (NULL != f_toplevel);
 
         /* assert toplevel fun */
-        push1( find_cnf_var(f_toplevel), false);
+        push1( f_sat.find_cnf_var(f_toplevel, f_time), false);
     }
 
     bool condition(const DdNode* node)
@@ -106,8 +76,8 @@ public:
         assert (! cuddIsConstant(node));
         f_seen.insert(const_cast<DdNode *>(node)); /* mark as visited */
 
-        Var f = find_cnf_var(node);
-        Var v = find_dd_var(node);
+        Var f = f_sat.find_cnf_var(node, f_time);
+        Var v = f_sat.find_dd_var(node, f_time);
 
         /* both T, E are consts */
         if (cuddIsConstant(cuddT(node)) &&
@@ -138,7 +108,7 @@ public:
         else if (cuddIsConstant(cuddT(node)) &&
                  ! cuddIsConstant(cuddE(node))) {
 
-            Var e = find_cnf_var(cuddE(node));
+            Var e = f_sat.find_cnf_var(cuddE(node), f_time);
 
             /* Positive polarity (T) */
             if (0 != cuddV(cuddT(node))) {
@@ -170,7 +140,7 @@ public:
         else if (cuddIsConstant(cuddE(node)) &&
                  ! cuddIsConstant(cuddT(node))) {
 
-            Var t = find_cnf_var(cuddT(node));
+            Var t = f_sat.find_cnf_var(cuddT(node), f_time);
 
             /* Positive polarity (E) */
             if (0 != cuddV(cuddE(node))) {
@@ -201,10 +171,10 @@ public:
         /* General case: both T, E non const */
         else {
             assert (! cuddIsConstant(cuddT(node)));
-            Var t = find_cnf_var(cuddT(node));
+            Var t = f_sat.find_cnf_var(cuddT(node), f_time);
 
             assert (! cuddIsConstant(cuddE(node)));
-            Var e = find_cnf_var(cuddE(node));
+            Var e = f_sat.find_cnf_var(cuddE(node), f_time);
 
             /* !f, v, e */
             push3( f, true, v, false, e, false);
@@ -223,9 +193,6 @@ public:
 private:
     SAT& f_sat;
     unordered_set<DdNode*> f_seen;
-
-    typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> ActivationMap;
-    ActivationMap f_activation_map;
 
     DdNode* f_toplevel;
     step_t f_time;
@@ -275,43 +242,6 @@ private:
         DRIVEL << ps << endl;
 #endif
         f_sat.f_solver.addClause_(ps);
-    }
-
-    Var find_dd_var(const DdNode* node)
-    {
-        assert (NULL != node);
-
-        const UCBI& ucbi = f_sat.find_ucbi(node->index);
-        const TCBI& tcbi = TCBI (ucbi.ctx(), ucbi.expr(),
-                                 ucbi.time(), ucbi.bitno(),
-                                 f_time);
-
-        return f_sat.f_mapper.var(tcbi);
-    }
-
-    Var find_cnf_var(const DdNode* node)
-    {
-        Var res;
-
-        assert (NULL != node);
-        TimedDD timed_node (const_cast<DdNode*> (node), f_time);
-
-        const ActivationMap::iterator eye = \
-            f_activation_map.find( timed_node );
-
-        if (f_activation_map.end() == eye) {
-            res = f_sat.new_sat_var();
-
-            /* Insert into activation map */
-            f_activation_map.insert( make_pair<TimedDD, Var>
-                                     (timed_node, res));
-        }
-
-        else {
-            res = (*eye).second;
-        }
-
-        return res;
     }
 };
 

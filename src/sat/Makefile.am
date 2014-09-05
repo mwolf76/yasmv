@@ -13,7 +13,8 @@ AM_CFLAGS = @AM_CFLAGS@
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
 
 PKG_HH = satdefs.hh sat.hh
-PKG_CC = time_mapper.cc cnf_nocut.cc cnf_singlecut.cc cnf_inject.cc solver.cc logger.cc
+PKG_CC = cnf_registry.cc time_mapper.cc cnf_nocut.cc cnf_singlecut.cc	\
+cnf_inject.cc solver.cc logger.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
