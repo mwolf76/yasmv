@@ -22,10 +22,7 @@
 #ifndef MICRO_H
 #define MICRO_H
 
-#include <common.hh>
-#include <pool.hh>
-
-#include <dd.hh>
+#include <satdefs.hh>
 
 // <symb, is_signed?, width>
 typedef tuple<bool, ExprType, int> OpTriple;

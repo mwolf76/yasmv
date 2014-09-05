@@ -26,10 +26,6 @@
 #include <minisat/core/Solver.h>
 #include <minisat/core/SolverTypes.h>
 
-using Minisat::Lit;
-typedef vector<Lit> Lits;
-typedef vector<Lits> LitsVector;
-
 #include <micro.hh>
 
 typedef class MicroMgr *MicroMgr_ptr;

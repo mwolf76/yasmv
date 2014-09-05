@@ -38,6 +38,11 @@ using Minisat::lbool;
 using Minisat::vec;
 using Minisat::Solver;
 
+// for microcode
+typedef vector<Lit> Lits;
+typedef vector<Lits> LitsVector;
+
+
 typedef unsigned id_t;
 
 typedef enum {
@@ -61,7 +66,8 @@ struct ptr_hasher  {
 };
 
 typedef Var group_t;
-static group_t MAINGROUP(0);
+const group_t MAINGROUP(0);
+
 typedef vector<group_t> Groups;
 
 typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;

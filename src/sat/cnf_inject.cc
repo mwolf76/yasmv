@@ -39,27 +39,21 @@ public:
     ~CNFMicrocodeInjector()
     {}
 
-    void operator() (MicroDescriptor& md);
-
+    inline void operator() (MicroDescriptor& md)
+    { inject( MicroMgr::INSTANCE().require(md.triple()).microcode()); }
 
 private:
+    void inject(const LitsVector& microcode);
+
     SAT& f_sat;
     step_t f_time;
     group_t f_group;
 };
 
-void CNFMicrocodeInjector::operator() (MicroDescriptor& md)
+
+void CNFMicrocodeInjector::inject(const LitsVector& microcode)
 {
-    MicroMgr& mm (MicroMgr::INSTANCE());
-
-    OpTriple triple (md.triple());
-    MicroLoader& loader = mm.require(triple);
-
-    // loader.( f_sat, md.z(), md.x(), md.y());
-
-
-
-
+    assert(false); // to be implemented
 }
 
 void SAT::cnf_inject_microcode(MicroDescriptor md, step_t time, const group_t group)
