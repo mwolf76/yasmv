@@ -1,2 +1,2 @@
 #!/bin/sh
-./configure CFLAGS="-O0 -g -DPIC -fPIC" CXXFLAGS="-O0 -g -DPIC -fPIC -Wall -Werror"
+./configure CFLAGS="-O0 -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC" CXXFLAGS="-O0 -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC -Wall -Werror"
