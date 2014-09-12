@@ -39,11 +39,18 @@ public:
     ~CNFMicrocodeInjector()
     {}
 
-    inline void operator() (MicroDescriptor& md)
-    { inject( MicroMgr::INSTANCE().require(md.triple()).microcode()); }
+    inline void operator() (const MicroDescriptor& md)
+    {
+        MicroMgr& mm(MicroMgr::INSTANCE());
+
+        OpTriple triple (md.triple());
+        MicroLoader& loader = mm.require(triple);
+        inject(md, loader.microcode());
+    }
 
 private:
-    void inject(const LitsVector& microcode);
+    void inject(const MicroDescriptor& md,
+                const LitsVector& microcode);
 
     SAT& f_sat;
     step_t f_time;
@@ -51,12 +58,59 @@ private:
 };
 
 
-void CNFMicrocodeInjector::inject(const LitsVector& microcode)
+void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
+                                  const LitsVector& microcode)
 {
-    assert(false); // to be implemented
+    // local refs
+    const DDVector& z(md.z());
+    const DDVector& x(md.x());
+    const DDVector& y(md.y());
+    int width(md.width());
+
+    // foreach clause in microcode...
+    LitsVector::const_iterator i;
+    for (i = microcode.begin(); microcode.end() != i; ++ i) {
+        const Lits& clause (*i);
+        Lits ps;
+
+        // for each literal in clause, determine whether associated
+        // var belongs to z, x, y or is a cnf var. For each group in
+        // (z, x, y) fetch appropriate dd var from the registry. CNF
+        // vars are kept distinct among distinc injections.
+        Lits::const_iterator j;
+        for (j = clause.begin(); clause.end() != j; ++ j)  {
+            Lit lit (*j);
+
+            Var lit_var (Minisat::var(lit));
+            int lit_sign(Minisat::sign(lit));
+            Var tgt_var;
+
+            /* z? */
+            if (lit_var < (Var) width) {
+                const DdNode* node(z[ lit_var ].getNode());
+                tgt_var = f_sat.find_dd_var(node, f_time);
+            }
+            /* x? */
+            else if (width <= lit_var && lit_var < 2 * width) {
+                const DdNode* node(x[ lit_var - md.width() ].getNode());
+                tgt_var = f_sat.find_dd_var(node, f_time);
+            }
+            /* y? */
+            else if (2 * width <= lit_var && lit_var < 3 * width) {
+                const DdNode* node(y[ lit_var - 2 * md.width() ].getNode());
+                tgt_var = f_sat.find_dd_var(node, f_time);
+            }
+            /* cnf var */
+            else {
+                tgt_var = f_sat.find_cnf_var( lit_var - 3 * md.width(), f_time);
+            }
+            ps.push_back( mkLit( tgt_var, lit_sign));
+        }
+    }
 }
 
-void SAT::cnf_inject_microcode(MicroDescriptor md, step_t time, const group_t group)
+// proxy
+void SAT::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
 {
     CNFMicrocodeInjector worker(*this, time, group);
     worker(md);

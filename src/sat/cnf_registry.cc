@@ -70,3 +70,11 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
     return res;
 }
 
+Var CNFRegistry::find_cnf_var(Var v, step_t time)
+{
+    assert( false );
+    return 0;
+}
+
+
+

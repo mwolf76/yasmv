@@ -77,7 +77,12 @@ class CNFRegistry : public IObject {
 public:
 
 Var find_dd_var(const DdNode* node, step_t time);
+
+// DDNode* variant
 Var find_cnf_var(const DdNode* node, step_t time);
+
+// Integer variant
+Var find_cnf_var(int index, step_t time);
 
 private:
     CNFRegistry(SAT& sat);

@@ -42,7 +42,6 @@ using Minisat::Solver;
 typedef vector<Lit> Lits;
 typedef vector<Lits> LitsVector;
 
-
 typedef unsigned id_t;
 
 typedef enum {

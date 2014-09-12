@@ -145,6 +145,12 @@ public:
     { return f_registry.find_cnf_var(node, time);  }
 
     /**
+     * @brief CNF registry for injection CNF var
+     */
+    inline Var find_cnf_var(Var var, step_t time)
+    { return f_registry.find_cnf_var(var, time); }
+
+    /**
      * @brief a new Minisat variable
      */
     inline Var new_sat_var() // proxy
@@ -219,7 +225,9 @@ private:
     // CNFization algorithms
     void cnf_push_no_cut(ADD add, step_t time, const group_t group);
     void cnf_push_single_cut(ADD add, step_t time, const group_t group);
-    void cnf_inject_microcode(MicroDescriptor md, step_t time, const group_t group);
+
+    // CNF injection algorithm
+    void cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group);
 }; // SAT instance
 
 #endif

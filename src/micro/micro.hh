@@ -30,6 +30,14 @@ inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int wid
     return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
 }
 
+// triple helper getters
+inline bool triple_issigned( const OpTriple& triple )
+{ return triple.get<0>(); }
+inline ExprType triple_optype( const OpTriple& triple )
+{ return triple.get<1>(); }
+inline int triple_width( const OpTriple& triple )
+{ return triple.get<2>(); }
+
 struct OpTripleHash {
     long operator() (const OpTriple& k) const
     {
@@ -76,6 +84,9 @@ public:
     inline const DDVector& y() const
     { return f_y; }
 
+    inline unsigned width() const
+    { return f_z.size(); }
+
 private:
     OpTriple f_triple;
 
@@ -88,7 +99,7 @@ ostream& operator<<(ostream& os, MicroDescriptor& md);
 
 typedef vector<MicroDescriptor> MicroDescriptors;
 
-// compiler output
+// compiler output, TODO: move this
 class Term {
 public:
     Term()
