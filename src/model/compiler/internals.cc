@@ -239,6 +239,8 @@ void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
     OpTriple triple = make_op_triple( signedness, expr->symb(), width );
     MicroDescriptor md( triple, dv, lhs, rhs );
     f_microdescriptors.push_back(md);
+
+    DEBUG << "Registered " << md << endl;
 }
 
 /* auto id generator */
