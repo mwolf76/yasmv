@@ -210,7 +210,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps);
+        f_sat.add_clause(ps);
     }
 
     /* push 2 vars clause */
@@ -225,7 +225,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps);
+        f_sat.add_clause(ps);
     }
 
     /* push 3 vars clause */
@@ -241,7 +241,7 @@ private:
 #ifdef DEBUG_CNF
         DRIVEL << ps << endl;
 #endif
-        f_sat.f_solver.addClause_(ps);
+        f_sat.add_clause(ps);
     }
 };
 

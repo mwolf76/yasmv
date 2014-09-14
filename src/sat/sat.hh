@@ -42,8 +42,8 @@ ostream &operator<<(ostream &out, const Lit &lit);
 ostream &operator<<(ostream &out, const vec<Lit> &lits);
 
 class SAT : public IObject {
-    friend class CNFBuilderSingleCut;
-    friend class CNFBuilderNoCut;
+    //    friend class CNFBuilderSingleCut;
+    // friend class CNFBuilderNoCut;
 
 public:
     /**
@@ -147,14 +147,20 @@ public:
     /**
      * @brief CNF registry for injection CNF var
      */
-    inline Var find_cnf_var(Var var, step_t time)
-    { return f_registry.find_cnf_var(var, time); }
+    inline Var rewrite_cnf_var(Var var, step_t time)
+    { return f_registry.rewrite_cnf_var(var, time); }
 
     /**
      * @brief a new Minisat variable
      */
     inline Var new_sat_var() // proxy
     { return f_solver.newVar(); }
+
+    /**
+     * @brief add a CNF clause
+     */
+    inline void add_clause(vec<Lit>& ps) // proxy
+    { f_solver.addClause_(ps); }
 
     /**
      * @brief SAT instancte ctor

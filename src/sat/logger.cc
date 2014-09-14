@@ -27,7 +27,6 @@
 
 ostream &operator<<(ostream &out, const Lit &lit)
 {
-    if (!var(lit)) return out;
     out << (sign(lit) ? "-" : "") << var(lit);
     return out;
 }
