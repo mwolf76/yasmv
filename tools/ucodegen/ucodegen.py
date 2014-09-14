@@ -12,9 +12,9 @@ import datetime
 import os.path
 import subprocess
 
-MAXBITS = 32
+MAXBITS = 64
 
-workdir = "/home/markus/Code/github/gnuSMV/tools/ucodegen/workdir"
+workdir = "/home/markus/Code/markus/github/gnuSMV/tools/ucodegen/workdir"
 
 # parser states
 (
@@ -32,16 +32,19 @@ def gen_binary_ops_microcode():
 
     # list of operators to be processed
     ops = [
-        ( 'add', '+' ),
-        ( 'sub', '-' ),
-        ( 'mul', '*' ),
-        ( 'div', '/' ),
-        ( 'mod', 'mod' ),
+        ( 'add', '+'  ),
+        ( 'sub', '-'  ),
+        ( 'mul', '*'  ),
+        ( 'div', '/'  ),
+        ( 'mod', 'mod'),
     ]
 
     for (opName, opSymb) in ops:
 
-        for signedness in ('unsigned', 'signed'):
+        for signedness in (
+            'unsigned',
+            'signed'
+            ):
 
             for width in range(1, 1 + MAXBITS):
 
@@ -74,7 +77,7 @@ def gen_binary_ops_microcode():
                 script.close ()
 
                 # 3. invoke custom NuSMV2 to generate CNF
-                subprocess.call( [ 'NuSMV', '-quiet', '-source', scriptName, modelName ] )
+                subprocess.call( [ 'NuSMV', '-quiet', '-source', scriptName, modelName ], stderr=file ('/dev/null'))
 
                 # 4. process generated .dimacs file
                 dimacsName = os.path.join( workdir, signedness[0] + opName ) + "%d.dimacs" % (width, )
@@ -133,28 +136,26 @@ def gen_binary_ops_microcode():
                             ac = numbers[0]
 
                         rewrite = []
-                        trivial = False
-                        for n in numbers:
 
-                            if n == ac:
-                                trivial = True
-                                break
-                            elif n in z:
-                                rewrite.append( 0 * width + z.index(n))
+                        for n_ in numbers:
+                            n, pol = abs(n_), (n_ < 0) and 1 or 0
+                            assert 0 <= n, "WTF?!?"
+
+                            if n in z:
+                                rewrite.append( pol + 2 * (0 * width + z.index(n)))
                                 continue
                             elif n in x:
-                                rewrite.append( 1 * width + x.index(n))
+                                rewrite.append( pol + 2 * (1 * width + x.index(n)))
                                 continue
                             elif n in y:
-                                rewrite.append( 2 * width + y.index(n))
+                                rewrite.append( pol + 2 * (2 * width + y.index(n)))
                                 continue
                             elif n not in seen:
                                 seen.append(n)
 
-                            rewrite.append( 3 * width + seen.index(n))
+                            rewrite.append( pol + 2 * (3 * width + seen.index(n)))
 
-                        if (not trivial):
-                            ucode.append(rewrite)
+                        ucode.append(rewrite)
 
                 assert parserState == ST_WRITE_OUT
                 assert( len(x) == len(y) and len(x) == len(z))
