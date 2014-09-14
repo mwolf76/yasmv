@@ -1,11 +1,6 @@
 /**
  *  @file cnf_registry.hh
- *  @brief SAT interface (Time Mapper sub-component)
- *
- *  This module contains the interface for services that implement the
- *  Time Mapper. This service is used to keep a bidirectional mapping
- *  between Timed Canonical Bit Identifiers (or TCBIs) and actual
- *  Minisat Variables.
+ *  @brief SAT interface (CNF registry sub-component)
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -56,18 +51,44 @@ public:
     // expression time (default is 0)
     step_t f_time;
 };
-
 struct TimedDDHash {
     inline long operator() (const TimedDD& k) const
     { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
 };
-
 struct TimedDDEq {
     inline bool operator() (const TimedDD& x, const TimedDD& y) const
     { return (x.node() == y.node() && x.time() == y.time()); }
 };
-
 typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
+
+struct TimedVar {
+public:
+    TimedVar(Var var, step_t time)
+        : f_var(var)
+        , f_time(time)
+    {}
+
+    inline Var var() const
+    { return f_var; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    // The CNF var
+    Var f_var;
+
+    // expression time (default is 0)
+    step_t f_time;
+};
+struct TimedVarHash {
+    inline long operator() (const TimedVar& k) const
+    { return 0L; }
+};
+struct TimedVarEq {
+    inline bool operator() (const TimedVar& x, const TimedVar& y) const
+    { return (x.var() == y.var() && x.time() == y.time()); }
+};
+typedef unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
 
 class CNFRegistry : public IObject {
 
@@ -76,13 +97,12 @@ class CNFRegistry : public IObject {
 
 public:
 
+// services for CNF builder
 Var find_dd_var(const DdNode* node, step_t time);
-
-// DDNode* variant
 Var find_cnf_var(const DdNode* node, step_t time);
 
-// Integer variant
-Var find_cnf_var(int index, step_t time);
+// services for CNF injector
+Var rewrite_cnf_var(Var index, step_t time);
 
 private:
     CNFRegistry(SAT& sat);
@@ -91,6 +111,7 @@ private:
     SAT& f_sat;
 
     TDD2VarMap f_tdd2var_map;
+    RewriteMap f_rewrite_map;
 };
 
 #endif

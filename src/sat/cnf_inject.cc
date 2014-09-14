@@ -26,7 +26,7 @@
 
 #include <micro_mgr.hh>
 
-#define DEBUG_CNF
+// #define DEBUG_CNF
 
 class CNFMicrocodeInjector {
 public:
@@ -65,18 +65,21 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
     const DDVector& z(md.z());
     const DDVector& x(md.x());
     const DDVector& y(md.y());
+
     int width(md.width());
 
     // foreach clause in microcode...
     LitsVector::const_iterator i;
     for (i = microcode.begin(); microcode.end() != i; ++ i) {
         const Lits& clause (*i);
-        Lits ps;
+
+        Minisat::vec<Lit> ps; // MTL
 
         // for each literal in clause, determine whether associated
         // var belongs to z, x, y or is a cnf var. For each group in
         // (z, x, y) fetch appropriate dd var from the registry. CNF
         // vars are kept distinct among distinc injections.
+
         Lits::const_iterator j;
         for (j = clause.begin(); clause.end() != j; ++ j)  {
             Lit lit (*j);
@@ -86,26 +89,43 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
             Var tgt_var;
 
             /* z? */
-            if (lit_var < (Var) width) {
-                const DdNode* node(z[ lit_var ].getNode());
+            if (lit_var < width) {
+                int ndx = lit_var;
+                assert(0 <= ndx && ndx < width);
+
+                const DdNode* node(z[ width - ndx - 1].getNode());
                 tgt_var = f_sat.find_dd_var(node, f_time);
             }
             /* x? */
             else if (width <= lit_var && lit_var < 2 * width) {
-                const DdNode* node(x[ lit_var - md.width() ].getNode());
+                int ndx = lit_var - width;
+                assert(0 <= ndx && ndx < width);
+
+                const DdNode* node(x[ width - ndx - 1].getNode());
                 tgt_var = f_sat.find_dd_var(node, f_time);
             }
             /* y? */
             else if (2 * width <= lit_var && lit_var < 3 * width) {
-                const DdNode* node(y[ lit_var - 2 * md.width() ].getNode());
+                int ndx = lit_var - 2 * width;
+                assert(0 <= ndx && ndx < width);
+
+                const DdNode* node(y[ width - ndx - 1].getNode());
                 tgt_var = f_sat.find_dd_var(node, f_time);
             }
             /* cnf var */
             else {
-                tgt_var = f_sat.find_cnf_var( lit_var - 3 * md.width(), f_time);
+                int ndx = lit_var - 3 * width;
+                assert(0 <= ndx /* && ndx < width */);
+
+                tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
             }
-            ps.push_back( mkLit( tgt_var, lit_sign));
-        }
+            ps.push( mkLit( tgt_var, lit_sign));
+        } /* for (j = clause...) */
+
+#ifdef DEBUG_CNF
+            DRIVEL << ps << endl;
+#endif
+            f_sat.add_clause(ps);
     }
 }
 

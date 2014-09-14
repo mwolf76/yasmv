@@ -36,13 +36,13 @@ CNFRegistry::~CNFRegistry()
 
 Var CNFRegistry:: find_dd_var(const DdNode* node, step_t time)
 {
-    assert (NULL != node);
+    assert (NULL != node && ! Cudd_IsConstant(node));
 
     const UCBI& ucbi = f_sat.find_ucbi(node->index);
     const TCBI& tcbi = TCBI (ucbi.ctx(), ucbi.expr(),
                              ucbi.time(), ucbi.bitno(), time);
-
-    return f_sat.tcbi_to_var(tcbi);
+    Var res(f_sat.tcbi_to_var(tcbi));
+    return res;
 }
 
 Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
@@ -62,19 +62,30 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
         f_tdd2var_map.insert( make_pair<TimedDD, Var>
                               (timed_node, res));
     }
-
     else {
         res = (*eye).second;
     }
-
     return res;
 }
 
-Var CNFRegistry::find_cnf_var(Var v, step_t time)
+Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
 {
-    assert( false );
-    return 0;
+    Var res;
+
+    TimedVar timed_var (v, time);
+    RewriteMap::const_iterator eye = \
+        f_rewrite_map.find( timed_var );
+
+    if (f_rewrite_map.end() == eye) {
+        res = f_sat.new_sat_var();
+
+        /* Insert into tvv2var map */
+        f_rewrite_map.insert( make_pair<TimedVar, Var>
+                              (timed_var, res));
+    }
+    else {
+        res = (*eye).second;
+    }
+    return res;
 }
-
-
 
