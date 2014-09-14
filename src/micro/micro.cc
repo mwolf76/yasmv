@@ -29,11 +29,31 @@
 ostream& operator<<(ostream& os, MicroDescriptor& md)
 {
     os << md.triple();
-
+    os << "([";
     const DDVector& z(md.z());
-    for (DDVector::const_iterator zi = z.begin(); zi != z.end(); ++ zi) {
-        os << *zi;
+    for (DDVector::const_iterator zi = z.begin();;) {
+        os << (*zi).getNode()->index;
+        if (++ zi != z.end()) {
+            os << ", ";
+        } else break;
     }
+    os << "], [";
+    const DDVector& x(md.x());
+    for (DDVector::const_iterator xi = x.begin();;) {
+        os << (*xi).getNode()->index;
+        if (++ xi != x.end()) {
+            os << ", ";
+        } else break;
+    }
+    os << "], [";
+    const DDVector& y(md.y());
+    for (DDVector::const_iterator yi = y.begin();;) {
+        os << (*yi).getNode()->index;
+        if (++ yi != y.end()) {
+            os << ", ";
+        } else break;
+    }
+    os << "])";
 
     return os;
 }

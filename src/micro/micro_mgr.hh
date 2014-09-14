@@ -64,7 +64,7 @@ public:
     }
 
 private:
-    const path& f_fullpath;
+    path f_fullpath;
     OpTriple f_triple;
 
     bool f_ready;

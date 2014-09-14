@@ -46,6 +46,9 @@
 // static initialization
 MicroMgr_ptr MicroMgr::f_instance = NULL;
 
+static const char* JSON_GENERATED = "generated";
+static const char* JSON_CNF       = "cnf";
+
 ostream& operator<<(ostream& os, OpTriple triple)
 {
     bool is_signed (triple.get<0>());
@@ -183,14 +186,47 @@ MicroLoader::~MicroLoader()
 
 void MicroLoader::fetch_microcode()
 {
+    unsigned count(0);
+    clock_t t0 = clock(), t1;
+    double secs;
+
     // this shall be executed only once
     assert( ! f_ready );
 
+    Lits newClause;
     ifstream json_file(f_fullpath.c_str());
-    Json::Value parsedFromString;
-    json_file >> parsedFromString;
 
-    // TODO: fetch data...
+    Json::Value obj;
+    json_file >> obj;
+    assert(obj.type() == Json::objectValue);
+
+    const Json::Value generated (obj[ JSON_GENERATED ]);
+    DEBUG
+        << "Loading microcode for "
+        << f_triple
+        << ", generated " << generated
+        << endl;
+
+    const Json::Value cnf (obj[ JSON_CNF ]);
+    assert( cnf.type() == Json::arrayValue);
+
+    for (Json::Value::const_iterator i = cnf.begin(); cnf.end() != i; ++ i) {
+        const Json::Value clause (*i);
+
+        assert( clause.type() == Json::arrayValue);
+        newClause.clear();
+        for (Json::Value::const_iterator j = clause.begin(); clause.end() != j; ++ j) {
+            const Json::Value literal (*j);
+            assert( literal.type() == Json::intValue );
+            newClause.push_back( Minisat::toLit(literal.asInt()));
+        }
+        f_microcode.push_back( newClause ); ++ count;
+    }
+    t1 = clock(); secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+    DEBUG << count
+          << " clauses fetched, took " << secs
+          << " ms"
+          << endl;
 
     f_ready = true;
 }

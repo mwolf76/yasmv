@@ -71,7 +71,8 @@ public:
         , f_x(x)
         , f_y(y)
     {
-        assert (f_z.size() == f_x.size() && f_z.size() == f_y.size());
+        assert (f_z.size() == f_x.size() &&
+                f_z.size() == f_y.size());
     }
 
     inline const OpTriple& triple() const
