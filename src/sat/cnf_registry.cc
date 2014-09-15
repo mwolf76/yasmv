@@ -37,12 +37,10 @@ CNFRegistry::~CNFRegistry()
 Var CNFRegistry:: find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
-
     const UCBI& ucbi = f_sat.find_ucbi(node->index);
     const TCBI& tcbi = TCBI (ucbi.ctx(), ucbi.expr(),
                              ucbi.time(), ucbi.bitno(), time);
-    Var res(f_sat.tcbi_to_var(tcbi));
-    return res;
+    return f_sat.tcbi_to_var(tcbi);
 }
 
 Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
