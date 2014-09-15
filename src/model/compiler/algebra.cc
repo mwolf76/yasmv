@@ -373,7 +373,7 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
 
-#if 1
+#if 0
     ADD tmp = f_enc.one();
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - 1 -i;
@@ -381,13 +381,13 @@ void Compiler::algebraic_equals(const Expr_ptr expr)
     }
     PUSH_ADD( tmp );
 #else
-    ADD tmp[width];
+    // looks much better
+    DDVector dv;
     for (unsigned i = 0; i < width; ++ i) {
         unsigned ndx = width - 1 -i;
-        tmp[ndx] = lhs[ndx].Equals(rhs[ndx]);
+        dv.push_back( lhs[ndx].Equals(rhs[ndx]));
     }
-
-    PUSH_ADD( book_and_chain(tmp, width));
+    PUSH_ADD( book_and_chain(dv));
 #endif
 }
 
