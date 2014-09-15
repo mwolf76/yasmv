@@ -2,10 +2,6 @@
  *  @file micro.cc
  *  @brief Micro module
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -26,13 +22,30 @@
 #include <type.hh>
 #include <micro.hh>
 
+MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVector &y)
+    : f_triple(triple)
+    , f_z(z)
+    , f_x(x)
+    , f_y(y)
+{
+    // integrity checks
+    assert (f_z.size() == f_x.size() &&
+            f_z.size() == f_y.size());
+}
+
 ostream& operator<<(ostream& os, MicroDescriptor& md)
 {
     os << md.triple();
     os << "([";
     const DDVector& z(md.z());
     for (DDVector::const_iterator zi = z.begin();;) {
-        os << (*zi).getNode()->index;
+        const DdNode* node (zi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
         if (++ zi != z.end()) {
             os << ", ";
         } else break;
@@ -40,7 +53,13 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
     os << "], [";
     const DDVector& x(md.x());
     for (DDVector::const_iterator xi = x.begin();;) {
-        os << (*xi).getNode()->index;
+        const DdNode* node (xi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
         if (++ xi != x.end()) {
             os << ", ";
         } else break;
@@ -48,7 +67,13 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
     os << "], [";
     const DDVector& y(md.y());
     for (DDVector::const_iterator yi = y.begin();;) {
-        os << (*yi).getNode()->index;
+        const DdNode* node (yi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
         if (++ yi != y.end()) {
             os << ", ";
         } else break;

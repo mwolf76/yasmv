@@ -65,15 +65,7 @@ ostream& operator<<(ostream& os, OpTriple triple);
 class MicroDescriptor {
 
 public:
-    MicroDescriptor( OpTriple triple, DDVector& z, DDVector &x, DDVector &y)
-        : f_triple(triple)
-        , f_z(z)
-        , f_x(x)
-        , f_y(y)
-    {
-        assert (f_z.size() == f_x.size() &&
-                f_z.size() == f_y.size());
-    }
+    MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVector &y);
 
     inline const OpTriple& triple() const
     { return f_triple; }
