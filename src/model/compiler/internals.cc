@@ -82,7 +82,6 @@ void Compiler::algebraic_from_constant(unsigned width)
         f_add_stack.push_back(digit);
         value /= base;
     }
-
     assert (value == 0); // not overflowing
 }
 
@@ -354,7 +353,8 @@ void Compiler::debug_hook()
 }
 #endif
 
-/* two operands, both booleans */
+// -- semantic analysis predicates ---------------------------------------------
+
 bool Compiler::is_binary_boolean(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -369,21 +369,6 @@ bool Compiler::is_binary_boolean(const Expr_ptr expr)
     return false;
 }
 
-/* one operand, boolean */
-bool Compiler::is_unary_boolean(const Expr_ptr expr)
-{
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
-
-    /*  NOT, () ? */
-    if (em.is_unary_logical(expr)) {
-        return f_owner.type(expr->lhs(), ctx) -> is_boolean();
-    }
-
-    return false;
-}
-
-/* two operands both int consts */
 bool Compiler::is_binary_integer(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -402,21 +387,6 @@ bool Compiler::is_binary_integer(const Expr_ptr expr)
     return false;
 }
 
-/* one operand, int const */
-bool Compiler::is_unary_integer(const Expr_ptr expr)
-{
-    ExprMgr& em = f_owner.em();
-
-    /* unary : ? (), : (), NEG, NOT(bw) */
-    if (em.is_unary_arithmetical(expr)) {
-        Type_ptr tp = f_type_stack.back();
-        return tp->is_constant();
-    }
-
-    return false;
-}
-
-/* two operands, both enumeratives */
 bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -434,21 +404,6 @@ bool Compiler::is_binary_enumerative(const Expr_ptr expr)
     return false;
 }
 
-/* one operand, enumerative */
-bool Compiler::is_unary_enumerative(const Expr_ptr expr)
-{
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
-
-    /* unary : ? (), : (), NEG, NOT(bw) */
-    if (em.is_unary_arithmetical(expr)) {
-        return (f_owner.type(expr->lhs(), ctx) -> is_enum());
-    }
-
-    return false;
-}
-
-/* two operands, both algebraics, at least one non-abstract */
 bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
@@ -461,6 +416,45 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
         return
             f_owner.type(expr->rhs(), ctx) -> is_algebraic() &&
             f_owner.type(expr->lhs(), ctx) -> is_algebraic();
+    }
+
+    return false;
+}
+
+bool Compiler::is_unary_boolean(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
+
+    /*  NOT, () ? */
+    if (em.is_unary_logical(expr)) {
+        return f_owner.type(expr->lhs(), ctx) -> is_boolean();
+    }
+
+    return false;
+}
+
+bool Compiler::is_unary_integer(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+
+    /* unary : ? (), : (), NEG, NOT(bw) */
+    if (em.is_unary_arithmetical(expr)) {
+        Type_ptr tp = f_type_stack.back();
+        return tp->is_constant();
+    }
+
+    return false;
+}
+
+bool Compiler::is_unary_enumerative(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
+
+    /* unary : ? (), : (), NEG, NOT(bw) */
+    if (em.is_unary_arithmetical(expr)) {
+        return (f_owner.type(expr->lhs(), ctx) -> is_enum());
     }
 
     return false;
@@ -484,7 +478,6 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
     return false;
 }
 
-/* one operand, algebraic */
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();

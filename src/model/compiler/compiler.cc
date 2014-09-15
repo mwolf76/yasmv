@@ -132,10 +132,9 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     unsigned res_sz (f_add_stack.size());
     unsigned mcr_sz (f_microdescriptors.size());
-    FQExpr key(ctx, body);
     TRACE
-        << "Compilation of " << key << " took "
-        << secs << " seconds, "
+        << "Compilation of " << ctx << "::" << body
+        << " took " << secs << " seconds, "
         << res_sz << " ADD results, "
         << mcr_sz << " Microcode descriptors."
         << endl;

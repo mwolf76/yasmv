@@ -169,9 +169,6 @@ protected:
     bool is_unary_algebraic(const Expr_ptr expr);
     bool is_ite_algebraic(const Expr_ptr expr);
 
-    bool is_binary_constant(const Expr_ptr expr);
-    bool is_unary_constant(const Expr_ptr expr);
-    bool is_ite_constant(const Expr_ptr expr);
     bool is_subscript_algebraic(const Expr_ptr expr);
 
     /* -- boolean exprs ----------------------------------------------------- */
@@ -208,15 +205,6 @@ protected:
     void integer_le(const Expr_ptr expr);
     void integer_ite(const Expr_ptr expr);
 
-    /* -- subscripts -------------------------------------------------------- */
-    void integer_subscript(const Expr_ptr expr);
-    void algebraic_subscript(const Expr_ptr expr);
-
-    /* -- enumeratives ------------------------------------------------------ */
-    void enumerative_equals(const Expr_ptr expr);
-    void enumerative_not_equals(const Expr_ptr expr);
-    void enumerative_ite(const Expr_ptr expr);
-
     /* -- algebraic exprs --------------------------------------------------- */
     void algebraic_neg(const Expr_ptr expr);
     void algebraic_not(const Expr_ptr expr);
@@ -239,6 +227,15 @@ protected:
     void algebraic_lt(const Expr_ptr expr);
     void algebraic_le(const Expr_ptr expr);
     void algebraic_ite(const Expr_ptr expr);
+
+    /* -- subscripts -------------------------------------------------------- */
+    void integer_subscript(const Expr_ptr expr);
+    void algebraic_subscript(const Expr_ptr expr);
+
+    /* -- enumeratives ------------------------------------------------------ */
+    void enumerative_equals(const Expr_ptr expr);
+    void enumerative_not_equals(const Expr_ptr expr);
+    void enumerative_ite(const Expr_ptr expr);
 
 private:
     bool f_first;
