@@ -23,10 +23,10 @@
 #include <sat.hh>
 
 #include <dd_walker.hh>
-
 #include <micro_mgr.hh>
 
-// #define DEBUG_CNF
+// comment following to disable insanely verbose CNF debug logging
+#define DEBUG_CNF
 
 class CNFMicrocodeInjector {
 public:
@@ -57,24 +57,29 @@ private:
     group_t f_group;
 };
 
-
 void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                                   const LitsVector& microcode)
 {
+    DEBUG << const_cast<MicroDescriptor&> (md) << endl;
+
     // local refs
     const DDVector& z(md.z());
     const DDVector& x(md.x());
     const DDVector& y(md.y());
 
-    int width(md.width());
+    int width( triple_width(md.triple()));
     const Var alpha(0); // true
+
+    // keep each injection in a separate cnf space
+    f_sat.clear_cnf_map();
 
     // foreach clause in microcode...
     LitsVector::const_iterator i;
     for (i = microcode.begin(); microcode.end() != i; ++ i) {
         const Lits& clause (*i);
 
-        Minisat::vec<Lit> ps; // MTL
+        Minisat::vec<Lit> ps;
+        ps.push( mkLit( f_group, true));
 
         // for each literal in clause, determine whether associated
         // var belongs to z, x, y or is a cnf var. For each group in
@@ -93,7 +98,18 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                 int ndx = lit_var;
                 assert(0 <= ndx && ndx < width);
 
-                const DdNode* node(z[ width - ndx - 1].getNode());
+                const DdNode* node(NULL);
+                if (md.is_relational()) {
+                    assert(!ndx);
+                    node = z[0].getNode();
+                }
+                else if (md.is_binary()) {
+                    node = z[ width - ndx - 1].getNode();
+                }
+                else if (md.is_unary()) {
+                    assert(false); // not supported
+                }
+
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
@@ -102,9 +118,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                 else {
                     value_t value = cuddV(node);
                     assert( value < 2); // 0 or 1
-                    ps.push( mkLit( alpha, value
-                                    ? lit_sign
-                                    : ! lit_sign));
+                    ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
             /* x? */
@@ -121,9 +135,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                 else {
                     value_t value = cuddV(node);
                     assert( value < 2); // 0 or 1
-                    ps.push( mkLit( alpha, value
-                                    ? lit_sign
-                                    : ! lit_sign));
+                    ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
             /* y? */
@@ -140,9 +152,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                 else {
                     value_t value = cuddV(node);
                     assert( value < 2); // 0 or 1
-                    ps.push( mkLit( alpha, value
-                                    ? lit_sign
-                                    : ! lit_sign));
+                    ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
             /* cnf var */
@@ -157,9 +167,9 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
         } /* for (j = clause...) */
 
 #ifdef DEBUG_CNF
-            DRIVEL << ps << endl;
+        DRIVEL << ps << endl;
 #endif
-            f_sat.add_clause(ps);
+        f_sat.add_clause(ps);
     }
 }
 

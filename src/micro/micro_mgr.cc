@@ -54,11 +54,28 @@ ostream& operator<<(ostream& os, OpTriple triple)
     bool is_signed (triple.get<0>());
     os << (is_signed ? "s" : "u");
     switch (triple.get<1>())   {
+    case NEG: os << "neg"; break;
+    case NOT: os << "not"; break;
+
     case PLUS: os << "add"; break;
     case SUB:  os << "sub"; break;
     case MUL:  os << "mul"; break;
     case DIV:  os << "div"; break;
     case MOD:  os << "mod"; break;
+
+    case AND: os << "and"; break;
+    case OR:  os << "or";  break;
+    case XOR: os << "xor"; break;
+    case XNOR:os << "xnor";break;
+    case IMPLIES: os << "implies"; break;
+
+    case EQ: os << "eq"; break;
+    case NE: os << "ne"; break;
+    case LT: os << "lt"; break;
+    case LE: os << "le"; break;
+    case GT: os << "gt"; break;
+    case GE: os << "ge"; break;
+
     default: assert(false);
     }
     os << triple.get<2>();
@@ -130,25 +147,12 @@ MicroMgr::MicroMgr()
         ERR << tmp;
         exit(1);
     }
-}
+ }
 
-MicroMgr::~MicroMgr()
-{
-}
+ MicroMgr::~MicroMgr()
+ {
+ }
 
-void MicroMgr::show_info(ostream &os)
-{
-    os << f_loaders.size()
-       << " microcode loaders registered." << endl
-       << "known operators: "
-    ;
-
-    for (MicroLoaderMap::const_iterator i = f_loaders.begin();
-         i != f_loaders.end(); ++ i) {
-        os << i->first << " " ;
-    }
-    os << endl << endl;
-}
 
 MicroLoader& MicroMgr::require(const OpTriple& triple)
 {
@@ -202,8 +206,7 @@ void MicroLoader::fetch_microcode()
 
     const Json::Value generated (obj[ JSON_GENERATED ]);
     DEBUG
-        << "Loading microcode for "
-        << f_triple
+        << "Loading microcode for " << f_triple
         << ", generated " << generated
         << endl;
 

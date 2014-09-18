@@ -63,9 +63,6 @@
         PUSH_DDS(tmp, (sz));                    \
     } while (0)
 
-static inline bool _iff(bool a, bool b)
-{ return (!(a) || (b)) && (!(b) || (a)); }
-
 // algebrization primitive
 void Compiler::algebraic_from_constant(unsigned width)
 {
@@ -151,9 +148,9 @@ void Compiler::relational_type_cleanup()
     f_rel_type_stack.pop_back();
 }
 
-unsigned Compiler::algebrize_operation(bool ternary, bool relational)
+void Compiler::algebrize_operation(bool ternary, bool relational, unsigned& width, bool& signedness)
 {
-    unsigned res = 0;
+    width = 0;
     unsigned stack_size = f_type_stack.size();
     assert ((ternary ? 3 : 2) <= stack_size);
     TypeMgr& tm = f_owner.tm();
@@ -173,13 +170,13 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
         lhs_type -> is_constant()) {
 
         if (lhs_type -> is_constant()) {
-            res = rhs_type -> width();
-            ALGEBRIZE_LHS(res);
+            width = rhs_type -> width();
+            ALGEBRIZE_LHS(width);
             f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean());
         }
         else if (rhs_type -> is_constant()) {
-            res = lhs_type -> width();
-            ALGEBRIZE_RHS(res);
+            width = lhs_type -> width();
+            ALGEBRIZE_RHS(width);
             f_type_stack.push_back( (!relational) ? lhs_type : tm.find_boolean());
         }
         else assert(0);
@@ -194,51 +191,21 @@ unsigned Compiler::algebrize_operation(bool ternary, bool relational)
 
 
         // Nothing do be done, just add result type to the type stack
-        res = rhs_type -> width();
+        width = rhs_type -> width();
         f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean()); // arbitrary
     }
 
+    signedness = rhs_type -> is_signed_algebraic();
+
     // sanity check
-    assert( stack_size - (ternary ? 2 : 1) == f_type_stack.size());
-    return res;
+    assert(0 < width && (stack_size - (ternary ? 2 : 1) == f_type_stack.size()));
 }
 
-/* Discards an operand (and corresponding type). This is needed for
-   rewrites. */
-void Compiler::algebraic_discard_op()
+void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
+                                         DDVector& z, DDVector& x, DDVector &y )
 {
-    const Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = type -> width();
-
-    /* discard DDs */
-    for (unsigned i = 0; i < width; ++ i) {
-        f_add_stack.pop_back();
-    }
-}
-
-void Compiler::algebraic_binary_microcode_operation(const Expr_ptr expr)
-{
-    assert( is_binary_algebraic(expr) );
-    bool signedness = false; // TODO
-    unsigned width = algebrize_binary_arithmetical();
-
-    POP_ALGEBRAIC(rhs, width);
-    POP_ALGEBRAIC(lhs, width);
-
-    FRESH_DV(dv, width);
-
-    /* push DD vector in reversed order */
-    for (unsigned i = 0; i < width; ++ i) {
-
-        unsigned ndx = width - i - 1;
-        PUSH_ADD(dv[ndx]);
-    }
-
-    /* register microcode */
-    OpTriple triple = make_op_triple( signedness, expr->symb(), width );
-    MicroDescriptor md( triple, dv, lhs, rhs );
-    f_microdescriptors.push_back(md);
-
+    MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x, y);
+    f_descriptors.push_back(md);
     DEBUG << "Registered " << md << endl;
 }
 
@@ -273,6 +240,34 @@ Expr_ptr Compiler::make_temporary_expr(ADD dds[], unsigned width)
     return expr;
 }
 
+/* build an auto fresh ADD variable and register its encoding */
+ADD Compiler::make_auto_dd()
+{
+    TypeMgr& tm = f_owner.tm();
+    Type_ptr boolean(tm.find_boolean());
+
+    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
+        (f_enc.make_encoding( boolean ));
+
+    // register encoding, a FQExpr is needed for UCBI booking
+    Expr_ptr aid = make_auto_id();
+    Expr_ptr ctx = f_ctx_stack.back();
+    step_t time = f_time_stack.back();
+    FQExpr key (ctx, aid, time);
+    f_enc.register_encoding( key, be);
+
+    return be -> bits() [0];
+}
+
+/* build an auto DD vector of fresh ADD variables. */
+void Compiler::make_auto_ddvect(DDVector& dv, unsigned width)
+{
+    assert(0 == dv.size());
+    for (unsigned i = 0; i < width; ++ i ) {
+        dv.push_back(make_auto_dd());
+    }
+}
+
 void Compiler::pre_node_hook(Expr_ptr expr)
 {
     /* assemble memoization key */
@@ -302,6 +297,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
     step_t time = f_time_stack.back();
 
     FQExpr key(ctx, expr, time);
+    TRACE << key << endl;
 
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
@@ -552,7 +548,6 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
     }
 
     return false;
-
 }
 
 /* similar to is_binary_algebraic, checks only lhs and rhs */
@@ -600,52 +595,6 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     return true;
 }
 
-ADD Compiler::book_and_chain(DDVector& dv)
-{
-    /* add alpha variable */
-    FRESH_DD(ret);
-
-    /* saving (1) alias: ret -> dds and (2) chain root */
-    f_chains.insert( make_pair <ADD, DDVector> ( ret, dv ));
-
-    return ret;
-}
-
-// Conjunct booked AND chains into result stack
-void Compiler::finalize_and_chains()
-{
-    // TODO: using formula polarity to determine which direction of
-    // the chaining inference needs to be included, in order to ensure
-    // sound results, can *greatly* enhance performance.
-
-    ANDChainMap::const_iterator i;
-    DDVector::const_iterator j;
-
-
-    for (i = f_chains.begin(); f_chains.end() != i; ++ i) {
-        ADD alpha (i->first); ADD not_alpha = alpha.Cmpl();
-
-        // positive polarity (fwd): a -> Y, that is: (!a v Y1) ^ (!a v
-        // Y2) ^ (!a v Y3) ^ ...
-        const DDVector& Y (i->second);
-        for (j = Y.begin(); Y.end() != j; ++ j) {
-            PUSH_ADD (not_alpha.Or(*j));
-        }
-
-        // negative polarity (bwd): Y -> a, that is: (a v !Y1 v !Y2 v
-        // !Y3 v ....), which in turn is rewritten as follows: Ex. (
-        // xi -> (yi -> a))
-        ADD bigOr = f_enc.zero();
-        for (j = Y.begin(); Y.end() != j; ++ j) {
-            FRESH_DD(av);
-            bigOr = bigOr.Or( av);
-
-            PUSH_ADD( av.Cmpl(). Or( (*j). Cmpl()). Or( alpha));
-        }
-        PUSH_ADD(bigOr);
-    }
-}
-
 void Compiler::clear_internals()
 {
     f_add_stack.clear();
@@ -653,34 +602,5 @@ void Compiler::clear_internals()
     f_rel_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_chains.clear();
+    f_descriptors.clear();
 }
-
-/* build an auto fresh ADD variable and register its encoding */
-ADD Compiler::make_auto_dd()
-{
-    TypeMgr& tm = f_owner.tm();
-    Type_ptr boolean(tm.find_boolean());
-
-    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
-        (f_enc.make_encoding( boolean ));
-
-    // register encoding, a FQExpr is needed for UCBI booking
-    Expr_ptr aid = make_auto_id();
-    Expr_ptr ctx = f_ctx_stack.back();
-    step_t time = f_time_stack.back();
-    FQExpr key (ctx, aid, time);
-    f_enc.register_encoding( key, be);
-
-    return be -> bits() [0];
-}
-
-/* build an auto DD vector of fresh ADD variables. */
-void Compiler::make_auto_ddvect(DDVector& dv, unsigned width)
-{
-    assert(0 == dv.size());
-    for (unsigned i = 0; i < width; ++ i ) {
-        dv.push_back(make_auto_dd());
-    }
-}
-

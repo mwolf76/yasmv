@@ -140,7 +140,10 @@ int main(int argc, const char *argv[])
 
     /* load microcode */
     MicroMgr& mm = MicroMgr::INSTANCE();
-    mm.show_info(cout);
+    cout << mm.loaders().size()
+         << " microcode loaders registered."
+         << endl
+    ;
 
     Interpreter& system = Interpreter::INSTANCE();
     try {
@@ -163,7 +166,6 @@ int main(int argc, const char *argv[])
         // interactive cmd loop
         do {
             thread t(&process);
-
             t.join();
         } while (! system.is_leaving());
     }

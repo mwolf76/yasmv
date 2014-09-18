@@ -26,7 +26,7 @@
 #include <cnf_registry.hh>
 
 // comment following to disable insanely verbose CNF debug logging
-// #define DEBUG_CNF
+#define DEBUG_CNF
 
 class CNFBuilderSingleCut : public ADDWalker {
 public:

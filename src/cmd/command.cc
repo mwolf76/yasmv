@@ -165,14 +165,24 @@ Variant SimulateCommand::operator()()
                     if (symb->is_variable())  {
                         Expr_ptr expr (symb->expr());
 
-                        value = tf.value(expr);
+                        try {
+                            value = tf.value(expr);
+                        }
+                        catch (NoValue nv) {
+                            value = ExprMgr::INSTANCE().make_undef();
+                        }
                         os << expr << " = " << value << endl;
                     }
                     else if (symb->is_define()) {
                         Expr_ptr ctx (symb->ctx());
                         Expr_ptr expr (symb->expr());
 
-                        value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
+                        try {
+                            value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
+                        }
+                        catch (NoValue nv) {
+                            value = ExprMgr::INSTANCE().make_undef();
+                        }
                         os << expr << " = " << value << endl;
                     }
                     else {

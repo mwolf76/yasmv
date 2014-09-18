@@ -27,11 +27,7 @@ MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVe
     , f_z(z)
     , f_x(x)
     , f_y(y)
-{
-    // integrity checks
-    assert (f_z.size() == f_x.size() &&
-            f_z.size() == f_y.size());
-}
+{}
 
 ostream& operator<<(ostream& os, MicroDescriptor& md)
 {

@@ -85,9 +85,10 @@ public:
         return (*f_instance);
     }
 
-    void show_info(ostream& os);
-
     MicroLoader& require(const OpTriple& triple);
+
+    inline const MicroLoaderMap& loaders() const
+    { return f_loaders; }
 
 protected:
     MicroMgr();

@@ -63,13 +63,30 @@ ExprMgr::ExprMgr()
 
     default_ctx_expr = main_expr; // make_identifier(DEFAULT_CTX_TOKEN);
 
-    // currenlty microcode is only used for arithmetical ops
+    // arithmetical ops
     f_s2e.insert( make_pair < string, ExprType > ( "neg", NEG ));
     f_s2e.insert( make_pair < string, ExprType > ( "add", PLUS ));
     f_s2e.insert( make_pair < string, ExprType > ( "sub", SUB ));
     f_s2e.insert( make_pair < string, ExprType > ( "div", DIV ));
     f_s2e.insert( make_pair < string, ExprType > ( "mod", MOD ));
     f_s2e.insert( make_pair < string, ExprType > ( "mul", MUL ));
+
+    // bitwise ops
+    f_s2e.insert( make_pair < string, ExprType > ( "not", NOT ));
+    f_s2e.insert( make_pair < string, ExprType > ( "or", OR ));
+    f_s2e.insert( make_pair < string, ExprType > ( "and", AND ));
+    f_s2e.insert( make_pair < string, ExprType > ( "xor", XOR ));
+    f_s2e.insert( make_pair < string, ExprType > ( "xnor", XNOR ));
+    f_s2e.insert( make_pair < string, ExprType > ( "implies", IMPLIES ));
+
+    // relational ops
+    f_s2e.insert( make_pair < string, ExprType > ( "eq", EQ ));
+    f_s2e.insert( make_pair < string, ExprType > ( "ne", NE ));
+    f_s2e.insert( make_pair < string, ExprType > ( "gt", GT ));
+    f_s2e.insert( make_pair < string, ExprType > ( "ge", GE ));
+    f_s2e.insert( make_pair < string, ExprType > ( "lt", LT ));
+    f_s2e.insert( make_pair < string, ExprType > ( "le", LE ));
+
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }
 

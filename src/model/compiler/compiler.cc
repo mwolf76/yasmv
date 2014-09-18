@@ -47,7 +47,7 @@ Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
     , f_temp_encodings()
-    , f_microdescriptors()
+    , f_descriptors()
     , f_type_stack()
     , f_rel_type_stack()
     , f_add_stack()
@@ -127,11 +127,8 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
 
-    // TODO: interesting, review this
-    finalize_and_chains();
-
     unsigned res_sz (f_add_stack.size());
-    unsigned mcr_sz (f_microdescriptors.size());
+    unsigned mcr_sz (f_descriptors.size());
     TRACE
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
@@ -139,7 +136,7 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
         << mcr_sz << " Microcode descriptors."
         << endl;
 
-    return Term( f_add_stack, f_microdescriptors );
+    return Term( f_add_stack, f_descriptors );
 }
 
 /*  Compilation engine is implemented using a simple expression walker

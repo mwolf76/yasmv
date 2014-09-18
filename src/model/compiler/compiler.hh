@@ -81,13 +81,19 @@ typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
 
 #define FRESH_DV(vec, width)                    \
     DDVector vec;                               \
-    make_auto_ddvect(vec, width)
+    make_auto_ddvect(vec, width);               \
+    /* push DD vector in reversed order */      \
+    for (unsigned i = 0; i < width; ++ i) {     \
+        unsigned ndx = width - i - 1;           \
+        PUSH_ADD(dv[ndx]);                      \
+    }
 
 #define FRESH_DD(var)                           \
     ADD var = make_auto_dd()
 
 /* shortcut for pushing */
-#define PUSH_ADD(add) f_add_stack.push_back(add)
+#define PUSH_ADD(add)                           \
+    f_add_stack.push_back(add)
 
 class Compiler : public ExprWalker {
 public:
@@ -123,11 +129,8 @@ protected:
     // FQDN -> temporarry DD encodings
     FQExpr2EncMap f_temp_encodings;
 
-    // chain root -> DD vector
-    ANDChainMap f_chains;
-
     // microcode descriptors
-    MicroDescriptors f_microdescriptors;
+    MicroDescriptors f_descriptors;
 
     // type look-ahead for operands promotion
     TypeStack f_type_stack;
@@ -257,38 +260,41 @@ private:
     /* microcode-based algebraic binary ops: supports PLUS, SUB, MUL, DIV, MOD */
     void algebraic_binary_microcode_operation(const Expr_ptr expr);
 
+    /* microcode-based relationals: supports EQ, NE, GE, GT, LE, LT */
+    void algebraic_binary_microcode_relational(const Expr_ptr expr);
+
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
-    /* AND-chain optimization services */
-    ADD book_and_chain(DDVector& dv);
-    void finalize_and_chains();
-
     void algebraic_from_constant(unsigned width);
-
-    void algebraic_padding(unsigned old_width, unsigned new_width, bool is_signed);
-    void algebraic_discard_op();
 
     /** @brief Determines type width */
     unsigned type_width(Type_ptr type);
 
-    /** @brief Adjusts operand */
-    void algebrize_operand(Type_ptr type, unsigned final_width);
+    // aliases for algebrize_operation
+    inline void algebrize_binary_arithmetical(unsigned& width, bool& signedness)
+    { algebrize_operation(false, false, width, signedness); }
 
-    /* core algebrization functions */
-    unsigned algebrize_operation(bool ternary = false, bool relational = false);
-    inline unsigned algebrize_binary_arithmetical()
-    { return algebrize_operation(); }
-    inline unsigned algebrize_binary_relational()
-    { return algebrize_operation(false, true); }
-    inline unsigned algebrize_ternary_ite()
-    { return algebrize_operation(true, false); }
+    inline void algebrize_binary_relational(unsigned& width, bool& signedness)
+    { algebrize_operation(false, true, width, signedness); }
+
+    inline void algebrize_ternary_ite(unsigned& width, bool& signedness)
+    { algebrize_operation(true, false, width, signedness); }
+
+    /** critical low-level service */
+    void algebrize_operation(bool ternary, bool relational,
+                             unsigned& width, bool& signedness);
 
     /* Auto expressions and DDs */
     Expr_ptr make_auto_id();
     Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
     void make_auto_ddvect(DDVector& dv, unsigned width);
     ADD  make_auto_dd();
+
+    void algebraic_binary(const Expr_ptr expr);
+    void algebraic_relational(const Expr_ptr expr);
+    void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
+                                   DDVector& z, DDVector& x, DDVector &y );
 };
 
 #endif

@@ -97,6 +97,12 @@ using boost::filesystem::filesystem_error;
 #include <algorithm>
 using std::max;
 
+static inline bool _iff(bool a, bool b)
+{ return (!(a) || (b)) && ((!b) || (a)); }
+
+static inline bool _xor(bool a, bool b)
+{ return (!(a) && (b)) || ((!b) && (a)); }
+
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <logging.hh>
 

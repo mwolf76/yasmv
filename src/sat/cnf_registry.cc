@@ -66,6 +66,11 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
     return res;
 }
 
+void CNFRegistry::clear_cnf_map()
+{
+    f_rewrite_map.clear();
+}
+
 Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
 {
     Var res;

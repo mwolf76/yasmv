@@ -89,6 +89,21 @@ private:
     step_t f_time;
 };
 
+class NoValue : public WitnessException {
+public:
+    NoValue(Expr_ptr id)
+        : f_id(id)
+    {}
+
+    ~NoValue() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
+    Expr_ptr f_id;
+};
+
 typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
 class Witness; // fwd decl

@@ -144,9 +144,13 @@ public:
     inline Var find_cnf_var(const DdNode* node, step_t time)
     { return f_registry.find_cnf_var(node, time);  }
 
+
     /**
      * @brief CNF registry for injection CNF var
      */
+    inline void clear_cnf_map()
+    { f_registry.clear_cnf_map(); }
+
     inline Var rewrite_cnf_var(Var var, step_t time)
     { return f_registry.rewrite_cnf_var(var, time); }
 

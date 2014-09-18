@@ -54,6 +54,14 @@ const char* IllegalTime::what() const throw()
     return oss.str().c_str();
 }
 
+const char* NoValue::what() const throw()
+{
+    ostringstream oss;
+    oss << "No value for `" << f_id << "`";
+
+    return oss.str().c_str();
+}
+
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
 {}
@@ -71,7 +79,9 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     Expr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
-    assert (f_map.end() != eye); // TODO
+    if (f_map.end() == eye) {
+        throw NoValue(expr);
+    }
 
     return (*eye).second;
 }

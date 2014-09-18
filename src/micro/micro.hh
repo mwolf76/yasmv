@@ -77,8 +77,15 @@ public:
     inline const DDVector& y() const
     { return f_y; }
 
-    inline unsigned width() const
-    { return f_z.size(); }
+    inline bool is_relational() const
+    { return f_z.size() == 1; }
+
+    inline bool is_binary() const
+    { return f_z.size() == f_x.size() &&
+             f_z.size() == f_y.size(); }
+
+    inline bool is_unary() const
+    { return f_y.size() == 0; }
 
 private:
     OpTriple f_triple;
