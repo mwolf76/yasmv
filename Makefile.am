@@ -24,41 +24,75 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-# Overriding 'all' target raises make warnings. Peace.
-# all: config.h
-#	$(MAKE) $(AM_MAKEFLAGS) all-recursive
-#	@./tests --log_level=test_suite
-#	@echo "Done."
+# this raises a warning, it's all good :-)
+all: all-recursive
+	@YASMV_HOME=`pwd` ./tests --log_level=test_suite
+	@echo "Done."
 
-bin_PROGRAMS = yasmv
+bin_PROGRAMS = yasmv tests
 
 # tags target helper  (uses exuberant ctags)
 tags:
 	@ctags -Re $(top_srcdir)
 
 yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
-yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
-$(top_builddir)/src/cmd/libcommand.la					\
-$(top_builddir)/src/algorithms/bmc/libbmc.la				\
-$(top_builddir)/src/algorithms/sim/libsim.la				\
-$(top_builddir)/src/algorithms/libalgorithms.la				\
-$(top_builddir)/src/micro/libmicro.la					\
-$(top_builddir)/src/model/libmodel.la					\
-$(top_builddir)/src/model/compiler/libcompiler.la			\
-$(top_builddir)/src/expr/libexpr.la					\
-$(top_builddir)/src/expr/walker/libexpr_walker.la			\
-$(top_builddir)/src/expr/printer/libprinter.la				\
-$(top_builddir)/src/type/libtype.la					\
-$(top_builddir)/src/symb/libsymb.la $(top_builddir)/src/enc/libenc.la	\
-$(top_builddir)/src/utils/libutils.la					\
-$(top_builddir)/src/witness/libwitness.la				\
-$(top_builddir)/src/dd/libcudd.la -lminisat				\
-$(top_builddir)/src/sat/libsat.la $(top_builddir)/src/dd/libcudd.la	\
--lantlr3c $(top_builddir)/src/3rdparty/jsoncpp/libjson.la		\
-$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)			\
-$(BOOST_THREAD_LIBS)
+yasmv_LDADD = $(top_builddir)/src/parser/libparser.la		\
+        $(top_builddir)/src/cmd/libcommand.la			\
+        $(top_builddir)/src/algorithms/bmc/libbmc.la		\
+        $(top_builddir)/src/algorithms/sim/libsim.la		\
+        $(top_builddir)/src/algorithms/libalgorithms.la		\
+        $(top_builddir)/src/model/libmodel.la			\
+        $(top_builddir)/src/model/compiler/libcompiler.la	\
+        $(top_builddir)/src/micro/libmicro.la			\
+        $(top_builddir)/src/expr/libexpr.la			\
+        $(top_builddir)/src/expr/walker/libexpr_walker.la	\
+        $(top_builddir)/src/expr/printer/libprinter.la		\
+        $(top_builddir)/src/type/libtype.la			\
+        $(top_builddir)/src/symb/libsymb.la			\
+        $(top_builddir)/src/enc/libenc.la			\
+        $(top_builddir)/src/utils/libutils.la			\
+        $(top_builddir)/src/witness/libwitness.la		\
+        $(top_builddir)/src/sat/libsat.la			\
+								\
+        $(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c	\
+        $(top_builddir)/src/3rdparty/jsoncpp/libjson.la		\
+        $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)	\
+        $(BOOST_THREAD_LIBS)
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
+
+tests_SOURCES = src/opts.cc src/parse.cc src/common.cc src/tests.cc	\
+	$(top_srcdir)/src/expr/test_expr.cc				\
+	$(top_srcdir)/src/parser/test_parser.cc				\
+	$(top_srcdir)/src/type/test_type.cc				\
+	$(top_srcdir)/src/dd/test_dd.cc					\
+	$(top_srcdir)/src/enc/test_enc.cc				\
+	$(top_srcdir)/src/model/test_compiler.cc
+
+tests_LDADD = $(top_builddir)/src/parser/libparser.la		\
+	$(top_builddir)/src/cmd/libcommand.la			\
+	$(top_builddir)/src/algorithms/bmc/libbmc.la		\
+	$(top_builddir)/src/algorithms/sim/libsim.la		\
+	$(top_builddir)/src/algorithms/libalgorithms.la		\
+	$(top_builddir)/src/model/libmodel.la			\
+	$(top_builddir)/src/model/compiler/libcompiler.la	\
+	$(top_builddir)/src/micro/libmicro.la			\
+	$(top_builddir)/src/expr/libexpr.la			\
+	$(top_builddir)/src/expr/walker/libexpr_walker.la	\
+	$(top_builddir)/src/expr/printer/libprinter.la		\
+	$(top_builddir)/src/type/libtype.la			\
+	$(top_builddir)/src/symb/libsymb.la			\
+	$(top_builddir)/src/enc/libenc.la			\
+	$(top_builddir)/src/utils/libutils.la			\
+	$(top_builddir)/src/witness/libwitness.la		\
+	$(top_builddir)/src/sat/libsat.la			\
+								\
+	$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c	\
+	$(top_builddir)/src/3rdparty/jsoncpp/libjson.la		\
+	$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)	\
+	$(BOOST_THREAD_LIBS) -lboost_unit_test_framework
+
+tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
 pkgconf_DATA = gnusmv.pc

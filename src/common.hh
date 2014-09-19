@@ -200,10 +200,8 @@ static inline unsigned pow2(unsigned exp)
 
 static inline unsigned msb(unsigned value)
 {
-    unsigned int v;
     unsigned res = 0;
-
-    while (v >>= 1) {
+    while (value >>= 1) {
         ++ res;
     }
 
