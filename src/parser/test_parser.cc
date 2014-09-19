@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
 
     {
         Expr_ptr phi = em.make_add(x, em.make_mod(y, em.make_const(42)));
-        Expr_ptr psi = parseExpression("x + y mod 42");
+        Expr_ptr psi = parseExpression("x + y % 42");
         BOOST_CHECK (phi == psi);
     }
 

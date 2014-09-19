@@ -19,7 +19,6 @@
 grammar smv;
 
 options {
-	k = 3; // TODO = 3??
     memoize = true;
     language = C;
 }
@@ -579,7 +578,7 @@ multiplicative_expression returns [Expr_ptr res]
     | '/' rhs=cast_expression
       { $res = em.make_div($res, rhs); }
 
-    | 'mod' rhs=cast_expression
+    | '%' rhs=cast_expression
       { $res = em.make_mod($res, rhs); }
     )*
 	;
