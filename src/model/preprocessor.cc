@@ -167,6 +167,14 @@ void Preprocessor::walk_not_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_not( lhs));
 }
 
+bool Preprocessor::walk_bw_not_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_bw_not_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_bw_not( lhs));
+}
+
 bool Preprocessor::walk_add_preorder(const Expr_ptr expr)
 { return true; }
 bool Preprocessor::walk_add_inorder(const Expr_ptr expr)
@@ -233,6 +241,17 @@ void Preprocessor::walk_and_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_and( lhs, rhs ));
 }
 
+bool Preprocessor::walk_bw_and_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_bw_and_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_bw_and_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_bw_and( lhs, rhs ));
+}
+
 bool Preprocessor::walk_or_preorder(const Expr_ptr expr)
 { return true; }
 bool Preprocessor::walk_or_inorder(const Expr_ptr expr)
@@ -244,26 +263,37 @@ void Preprocessor::walk_or_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_or( lhs, rhs ));
 }
 
-bool Preprocessor::walk_xor_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_or_preorder(const Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_xor_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_xor_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_or_postorder(const Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
-    PUSH_EXPR(f_em.make_xor( lhs, rhs ));
+    PUSH_EXPR(f_em.make_bw_or( lhs, rhs ));
 }
 
-bool Preprocessor::walk_xnor_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xor_preorder(const Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_xnor_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_xnor_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_xor_postorder(const Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
-    PUSH_EXPR(f_em.make_xnor( lhs, rhs ));
+    PUSH_EXPR(f_em.make_bw_xor( lhs, rhs ));
+}
+
+bool Preprocessor::walk_bw_xnor_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_bw_xnor_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_bw_xnor_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_bw_xnor( lhs, rhs ));
 }
 
 bool Preprocessor::walk_implies_preorder(const Expr_ptr expr)

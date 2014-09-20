@@ -61,24 +61,6 @@ void Compiler::boolean_or(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_xor(const Expr_ptr expr)
-{
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Xor(rhs));
-
-    f_type_stack.pop_back(); // consume one, leave the other
-}
-
-void Compiler::boolean_xnor(const Expr_ptr expr)
-{
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Xnor(rhs));
-
-    f_type_stack.pop_back(); // consume one, leave the other
-}
-
 void Compiler::boolean_implies(const Expr_ptr expr)
 {
     POP_ADD(rhs);
@@ -88,11 +70,34 @@ void Compiler::boolean_implies(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-// just aliases..
+void Compiler::boolean_iff(const Expr_ptr expr)
+{
+    POP_ADD(rhs);
+    POP_ADD(lhs);
+    PUSH_ADD(lhs.Xnor(rhs));
+
+    f_type_stack.pop_back(); // consume one, leave the other
+}
+
+// implemented as xnor (logical equivalence)
 void Compiler::boolean_equals(const Expr_ptr expr)
-{ boolean_xnor(expr); }
+{
+    POP_ADD(rhs);
+    POP_ADD(lhs);
+    PUSH_ADD(lhs.Xnor(rhs));
+
+    f_type_stack.pop_back(); // consume one, leave the other
+}
+
+// implemented as negation of the former (i.e xor)
 void Compiler::boolean_not_equals(const Expr_ptr expr)
-{ boolean_xor(expr); }
+{
+    POP_ADD(rhs);
+    POP_ADD(lhs);
+    PUSH_ADD(lhs.Xor(rhs));
+
+    f_type_stack.pop_back(); // consume one, leave the other
+}
 
 void Compiler::boolean_ite(const Expr_ptr expr)
 {

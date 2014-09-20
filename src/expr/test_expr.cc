@@ -110,15 +110,15 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_rshift(x_rshift_y));
     BOOST_CHECK (em.is_binary_arithmetical(x_rshift_y));
 
-    Expr_ptr x_xor_y = em.make_xor(x, y);
-    BOOST_CHECK (x_xor_y->f_symb == XOR && x_xor_y->lhs() == x && x_xor_y->rhs() == y);
-    BOOST_CHECK (em.is_xor(x_xor_y));
-    BOOST_CHECK (em.is_binary_logical(x_xor_y));
+    Expr_ptr x_xor_y = em.make_bw_xor(x, y);
+    BOOST_CHECK (x_xor_y->f_symb == BW_XOR && x_xor_y->lhs() == x && x_xor_y->rhs() == y);
+    BOOST_CHECK (em.is_bw_xor(x_xor_y));
+    BOOST_CHECK (em.is_binary_arithmetical(x_xor_y));
 
-    Expr_ptr x_xnor_y = em.make_xnor(x, y);
-    BOOST_CHECK (x_xnor_y->f_symb == XNOR && x_xnor_y->lhs() == x && x_xnor_y->rhs() == y);
-    BOOST_CHECK (em.is_xnor(x_xnor_y));
-    BOOST_CHECK (em.is_binary_logical(x_xnor_y));
+    Expr_ptr x_xnor_y = em.make_bw_xnor(x, y);
+    BOOST_CHECK (x_xnor_y->f_symb == BW_XNOR && x_xnor_y->lhs() == x && x_xnor_y->rhs() == y);
+    BOOST_CHECK (em.is_bw_xnor(x_xnor_y));
+    BOOST_CHECK (em.is_binary_arithmetical(x_xnor_y));
 
     Expr_ptr x_implies_y = em.make_implies(x, y);
     BOOST_CHECK (x_implies_y->f_symb == IMPLIES &&
@@ -259,6 +259,13 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr not_x = em.make_not(x);
         ostringstream oss;
         Printer printer(oss);
+        printer << not_x; BOOST_CHECK (oss.str() == string("not x"));
+    }
+
+    {
+        Expr_ptr not_x = em.make_bw_not(x);
+        ostringstream oss;
+        Printer printer(oss);
         printer << not_x; BOOST_CHECK (oss.str() == string("! x"));
     }
 
@@ -301,14 +308,14 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr x_and_y = em.make_and(x, y);
         ostringstream oss;
         Printer printer(oss);
-        printer << x_and_y; BOOST_CHECK (oss.str() == string("(x & y)"));
+        printer << x_and_y; BOOST_CHECK (oss.str() == string("(x and y)"));
     }
 
     {
         Expr_ptr x_or_y = em.make_or(x, y);
         ostringstream oss;
         Printer printer(oss);
-        printer << x_or_y; BOOST_CHECK (oss.str() == string("(x | y)"));
+        printer << x_or_y; BOOST_CHECK (oss.str() == string("(x or y)"));
     }
 
     {
@@ -326,17 +333,17 @@ BOOST_AUTO_TEST_CASE(printer)
     }
 
     {
-        Expr_ptr x_xor_y = em.make_xor(x, y);
+        Expr_ptr x_xor_y = em.make_bw_xor(x, y);
         ostringstream oss;
         Printer printer(oss);
-        printer << x_xor_y; BOOST_CHECK (oss.str() == string("(x xor y)"));
+        printer << x_xor_y; BOOST_CHECK (oss.str() == string("(x ^ y)"));
     }
 
     {
-        Expr_ptr x_xnor_y = em.make_xnor(x, y);
+        Expr_ptr x_xnor_y = em.make_bw_xnor(x, y);
         ostringstream oss;
         Printer printer(oss);
-        printer << x_xnor_y; BOOST_CHECK (oss.str() == string("(x xnor y)"));
+        printer << x_xnor_y; BOOST_CHECK (oss.str() == string("(x ~ y)"));
     }
 
     {

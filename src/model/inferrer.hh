@@ -93,7 +93,6 @@ private:
 
     Type_ptr check_logical();
     Type_ptr check_arithmetical();
-    Type_ptr check_logical_or_arithmetical();
     Type_ptr check_enum();
     Type_ptr check_scalar();
 
@@ -102,13 +101,19 @@ private:
     // post-orders only
     void walk_unary_fsm_postorder(const Expr_ptr expr);
     void walk_unary_ltl_postorder(const Expr_ptr expr);
+
     void walk_binary_fsm_postorder(const Expr_ptr expr);
     void walk_binary_ltl_postorder(const Expr_ptr expr);
+
     void walk_unary_arithmetical_postorder(const Expr_ptr expr);
     void walk_binary_arithmetical_postorder(const Expr_ptr expr);
+
     void walk_unary_logical_postorder(const Expr_ptr expr);
+    void walk_unary_bitwise_postorder(const Expr_ptr expr);
+
     void walk_binary_logical_postorder(const Expr_ptr expr);
-    void walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr);
+    void walk_binary_bitwise_postorder(const Expr_ptr expr);
+
     void walk_binary_shift_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);

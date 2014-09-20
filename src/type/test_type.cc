@@ -194,11 +194,11 @@ BOOST_AUTO_TEST_CASE(type_inference)
                               em.make_main()));
 
         BOOST_CHECK( boolean ==
-                     mm.type( em.make_xor( x, y ),
+                     mm.type( em.make_bw_xor( x, y ),
                               em.make_main()));
 
         BOOST_CHECK( boolean ==
-                     mm.type( em.make_xnor( x, y ),
+                     mm.type( em.make_bw_xnor( x, y ),
                               em.make_main()));
 
         BOOST_CHECK( boolean ==
@@ -311,12 +311,12 @@ BOOST_AUTO_TEST_CASE(type_inference)
 
         BOOST_CHECK( tm.find_boolean() ==
                      mm.type( em.make_eq(y,
-                                         em.make_xor( x, k)),
+                                         em.make_bw_xor( x, k)),
                               em.make_main()));
 
         BOOST_CHECK( tm.find_boolean() ==
                      mm.type( em.make_eq(y,
-                                         em.make_xnor( x, k)),
+                                         em.make_bw_xnor( x, k)),
                               em.make_main()));
 
         BOOST_CHECK( tm.find_boolean() ==

@@ -181,6 +181,14 @@ public:
         return expr->f_symb == NOT;
     }
 
+    inline Expr_ptr make_bw_not(Expr_ptr expr)
+    { return make_expr(BW_NOT, expr, NULL); }
+
+    inline bool is_bw_not(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == BW_NOT;
+    }
+
     inline Expr_ptr make_and(Expr_ptr a, Expr_ptr b)
     { return make_expr(AND, a, b); }
 
@@ -189,12 +197,28 @@ public:
         return expr->f_symb == AND;
     }
 
+    inline Expr_ptr make_bw_and(Expr_ptr a, Expr_ptr b)
+    { return make_expr(BW_AND, a, b); }
+
+    inline bool is_bw_and(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == BW_AND;
+    }
+
     inline Expr_ptr make_or(Expr_ptr a, Expr_ptr b)
     { return make_expr(OR, a, b); }
 
     inline bool is_or(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == OR;
+    }
+
+    inline Expr_ptr make_bw_or(Expr_ptr a, Expr_ptr b)
+    { return make_expr(BW_OR, a, b); }
+
+    inline bool is_bw_or(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == BW_OR;
     }
 
     inline Expr_ptr make_lshift(Expr_ptr a, Expr_ptr b)
@@ -213,20 +237,20 @@ public:
         return expr->f_symb == RSHIFT;
     }
 
-    inline Expr_ptr make_xor(Expr_ptr a, Expr_ptr b)
-    { return make_expr(XOR, a, b); }
+    inline Expr_ptr make_bw_xor(Expr_ptr a, Expr_ptr b)
+    { return make_expr(BW_XOR, a, b); }
 
-    inline bool is_xor(const Expr_ptr expr) const {
+    inline bool is_bw_xor(const Expr_ptr expr) const {
         assert(expr);
-        return expr->f_symb == XOR;
+        return expr->f_symb == BW_XOR;
     }
 
-    inline Expr_ptr make_xnor(Expr_ptr a, Expr_ptr b)
-    { return make_expr(XNOR, a, b); }
+    inline Expr_ptr make_bw_xnor(Expr_ptr a, Expr_ptr b)
+    { return make_expr(BW_XNOR, a, b); }
 
-    inline bool is_xnor(const Expr_ptr expr) const {
+    inline bool is_bw_xnor(const Expr_ptr expr) const {
         assert(expr);
-        return expr->f_symb == XNOR;
+        return expr->f_symb == BW_XNOR;
     }
 
     inline Expr_ptr make_implies(Expr_ptr a, Expr_ptr b)
@@ -599,18 +623,14 @@ public:
     inline bool is_unary_logical(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
-
         return (NOT == symb);
     }
-
     inline bool is_binary_logical(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
 
         return ((AND == symb)  ||
                 (OR  == symb)  ||
-                (XOR == symb)  ||
-                (XNOR == symb) ||
                 (IFF == symb)  ||
                 (IMPLIES == symb));
     }
@@ -619,7 +639,8 @@ public:
         assert(expr);
         ExprType symb = expr->f_symb;
 
-        return ( (NEG == symb) );
+        return ((NEG == symb) ||
+                 (BW_NOT == symb));
     }
 
     inline bool is_binary_arithmetical(const Expr_ptr expr) const {
@@ -631,6 +652,12 @@ public:
                 (DIV == symb)    ||
                 (MUL == symb)    ||
                 (MOD == symb)    ||
+
+                (BW_AND == symb) ||
+                (BW_OR  == symb) ||
+                (BW_XOR == symb) ||
+                (BW_XNOR == symb)||
+
                 (RSHIFT == symb) ||
                 (LSHIFT == symb));
     }

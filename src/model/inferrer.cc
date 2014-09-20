@@ -124,20 +124,6 @@ Type_ptr Inferrer::check_arithmetical()
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_logical_or_arithmetical()
-{
-    POP_TYPE(res);
-    assert (NULL != res);
-
-    if (res -> is_algebraic() ||
-        res -> is_boolean()) {
-        return res;
-    }
-
-    throw BadType(res);
-    return NULL; /* unreachable */
-}
-
 Type_ptr Inferrer::check_enum()
 {
     POP_TYPE(res);
@@ -226,6 +212,11 @@ bool Inferrer::walk_not_preorder(const Expr_ptr expr)
 void Inferrer::walk_not_postorder(const Expr_ptr expr)
 { walk_unary_logical_postorder(expr); }
 
+bool Inferrer::walk_bw_not_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Inferrer::walk_bw_not_postorder(const Expr_ptr expr)
+{ walk_unary_logical_postorder(expr); }
+
 bool Inferrer::walk_add_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_add_inorder(const Expr_ptr expr)
@@ -266,42 +257,57 @@ bool Inferrer::walk_and_preorder(const Expr_ptr expr)
 bool Inferrer::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_and_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
+
+bool Inferrer::walk_bw_and_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_bw_and_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_bw_and_postorder(const Expr_ptr expr)
+{ walk_binary_logical_postorder(expr); }
+
 
 bool Inferrer::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_or_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_xor_preorder(const Expr_ptr expr)
+bool Inferrer::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_xor_inorder(const Expr_ptr expr)
+bool Inferrer::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_xor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+void Inferrer::walk_bw_or_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_xnor_preorder(const Expr_ptr expr)
+bool Inferrer::walk_bw_xor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_xnor_inorder(const Expr_ptr expr)
+bool Inferrer::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_xnor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+void Inferrer::walk_bw_xor_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
+
+bool Inferrer::walk_bw_xnor_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Inferrer::walk_bw_xnor_inorder(const Expr_ptr expr)
+{ return true; }
+void Inferrer::walk_bw_xnor_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
 
 bool Inferrer::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_implies_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
 bool Inferrer::walk_iff_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_iff_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
 bool Inferrer::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -591,20 +597,12 @@ void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
     PUSH_TYPE( check_logical() );
 }
 
-void Inferrer::walk_binary_logical_or_bitwise_postorder(const Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.result_type( expr,
-                               check_logical_or_arithmetical(),
-                               check_logical_or_arithmetical()));
-}
-
 void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     PUSH_TYPE( tm.result_type( expr,
-                               check_logical_or_arithmetical(),
-                               check_logical_or_arithmetical()));
+                               check_arithmetical(),
+                               check_arithmetical()));
 }
 
 /* specialized for shift ops (use rhs) */

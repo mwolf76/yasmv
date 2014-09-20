@@ -19,6 +19,7 @@
 grammar smv;
 
 options {
+    k = 2;
     memoize = true;
     language = C;
 }
@@ -61,7 +62,7 @@ scope {
 @init {
     $smv::model = mm.model();
 }
-    : 'FSM' id=identifier
+    : 'FSM' id=identifier ';'
       {
             $smv::model->set_name(id);
 
@@ -403,16 +404,87 @@ fsm_trans_decl_clause
       { $smv::module->add_trans(expr); }
 	;
 
-
+// entry point
 toplevel_expression returns [Expr_ptr res]
+    : expr=conditional_expression
+      { $res = expr; }
+    ;
+
+conditional_expression returns [Expr_ptr res]
 @init { }
-	: expr=iff_expression {
+	: expr=logical_or_expression {
          $res = expr;
       } (
             '?' lhs=toplevel_expression ':' rhs=toplevel_expression
             { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
       )?
 	;
+
+logical_or_expression returns[Expr_ptr res]
+@init { }
+    : lhs=logical_and_expression
+      { $res = lhs; }
+
+    (
+      'or' rhs=logical_and_expression
+      { $res = em.make_or($res, rhs); }
+    )*
+    ;
+
+logical_and_expression returns[Expr_ptr res]
+@init { }
+    : lhs=inclusive_or_expression
+      { $res = lhs; }
+
+    (
+      'and' rhs=inclusive_or_expression
+      { $res = em.make_and($res, rhs); }
+    )*
+    ;
+
+inclusive_or_expression returns[Expr_ptr res]
+@init { }
+    : lhs=exclusive_or_expression
+      { $res = lhs; }
+
+    (
+      '|' rhs=exclusive_or_expression
+      { $res = em.make_bw_or($res, rhs); }
+    )*
+    ;
+
+exclusive_or_expression returns[Expr_ptr res]
+@init { }
+    : lhs=equivalence_expression
+      { $res = lhs; }
+
+    (
+      '^' rhs=equivalence_expression
+      { $res = em.make_bw_xor($res, rhs); }
+    )*
+    ;
+
+equivalence_expression returns[Expr_ptr res]
+@init { }
+    : lhs=and_expression
+      { $res = lhs; }
+
+    (
+      '~' rhs=and_expression
+      { $res = em.make_bw_xnor($res, rhs); }
+    )*
+    ;
+
+and_expression returns[Expr_ptr res]
+@init { }
+    : lhs=iff_expression
+      { $res = lhs; }
+
+    (
+      '&' rhs=iff_expression
+      { $res = em.make_bw_and($res, rhs); }
+    )*
+    ;
 
 iff_expression returns [Expr_ptr res]
 @init { }
@@ -427,52 +499,16 @@ iff_expression returns [Expr_ptr res]
 
 implies_expression returns [Expr_ptr res]
 @init { }
-	: lhs=inclusive_or_expression
+	: lhs=temporal_formula
       { $res = lhs; }
 
     (
-      '->' rhs=inclusive_or_expression
+      '->' rhs=temporal_formula
       { $res = em.make_implies($res, rhs); }
     )*
     ;
 
-inclusive_or_expression returns [Expr_ptr res]
-@init { }
-	: lhs=exclusive_or_expression
-      { $res = lhs; }
-
-    (
-      '|' rhs=exclusive_or_expression
-      { $res = em.make_or($res, rhs); }
-    )*
-	;
-
-exclusive_or_expression returns [Expr_ptr res]
-@init { }
-	: lhs=and_expression
-      { $res = lhs; }
-
-    (
-      'xor' rhs=and_expression
-     { $res = em.make_xor($res, rhs); }
-
-    |  'xnor' rhs=and_expression
-     { $res = em.make_xnor($res, rhs); }
-    )*
-	;
-
-and_expression returns [Expr_ptr res]
-@init { }
-	: lhs=ltl_formula
-      { $res = lhs; }
-
-    (
-      '&' rhs=ltl_formula
-      { $res = em.make_and($res, rhs); }
-    )*
-	;
-
-ltl_formula returns [Expr_ptr res]
+temporal_formula returns [Expr_ptr res]
 @init { }
     :
         formula=binary_ltl_formula
@@ -605,8 +641,11 @@ unary_expression returns [Expr_ptr res]
 	| 'prev' '(' expr=toplevel_expression ')'
       { $res = em.make_prev(expr); }
 
-	| '!' expr=postfix_expression
+	| 'not' expr=postfix_expression
       { $res = em.make_not(expr); }
+
+    | '!' expr=postfix_expression
+      { $res = em.make_bw_not(expr); }
 
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }

@@ -63,10 +63,10 @@ ostream& operator<<(ostream& os, OpTriple triple)
     case DIV:  os << "div"; break;
     case MOD:  os << "mod"; break;
 
-    case AND: os << "and"; break;
-    case OR:  os << "or";  break;
-    case XOR: os << "xor"; break;
-    case XNOR:os << "xnor";break;
+    case BW_AND: os << "and"; break;
+    case BW_OR:  os << "or";  break;
+    case BW_XOR: os << "xor"; break;
+    case BW_XNOR:os << "xnor";break;
     case IMPLIES: os << "implies"; break;
 
     case EQ: os << "eq"; break;

@@ -43,14 +43,16 @@
 #define OP_HOOKS                                   \
     UNARY_HOOK(next); UNARY_HOOK(prev);            \
     UNARY_HOOK(neg); UNARY_HOOK(not);              \
+    UNARY_HOOK(bw_not);                            \
                                                    \
     BINARY_HOOK(add); BINARY_HOOK(sub);            \
     BINARY_HOOK(div); BINARY_HOOK(mod);            \
     BINARY_HOOK(mul);                              \
                                                    \
     BINARY_HOOK(and); BINARY_HOOK(or);             \
-    BINARY_HOOK(xor); BINARY_HOOK(implies);        \
-    BINARY_HOOK(xnor); BINARY_HOOK(iff);           \
+    BINARY_HOOK(bw_and); BINARY_HOOK(bw_or);       \
+    BINARY_HOOK(bw_xor); BINARY_HOOK(implies);     \
+    BINARY_HOOK(bw_xnor); BINARY_HOOK(iff);        \
     BINARY_HOOK(lshift); BINARY_HOOK(rshift);      \
                                                    \
     BINARY_HOOK(type); BINARY_HOOK(cast);          \
@@ -100,7 +102,7 @@ typedef enum {
     R_1, R_2,
 
     // -- Simple walkers
-    NEXT_1, PREV_1, NEG_1, NOT_1,
+    NEXT_1, PREV_1, NEG_1, NOT_1, BW_NOT_1,
 
     PLUS_1, PLUS_2,
     SUB_1, SUB_2,
@@ -109,19 +111,19 @@ typedef enum {
     MOD_1, MOD_2,
 
     AND_1, AND_2,
-    OR_1, OR_2,
+    BW_AND_1, BW_AND_2,
 
-    XOR_1, XOR_2,
-    XNOR_1, XNOR_2,
+    OR_1, OR_2,
+    BW_OR_1, BW_OR_2,
+
+    BW_XOR_1, BW_XOR_2,
+    BW_XNOR_1, BW_XNOR_2,
 
     IMPLIES_1, IMPLIES_2,
     IFF_1, IFF_2,
 
     RSHIFT_1, RSHIFT_2,
     LSHIFT_1, LSHIFT_2,
-
-    RROTATE_1, RROTATE_2,
-    LROTATE_1, LROTATE_2,
 
     EQ_1, EQ_2,
     NE_1, NE_2,
@@ -265,6 +267,9 @@ protected:
     virtual bool walk_not_preorder(const Expr_ptr expr) =0;
     virtual void walk_not_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_bw_not_preorder(const Expr_ptr expr) =0;
+    virtual void walk_bw_not_postorder(const Expr_ptr expr) =0;
+
     // arithmetical binary ops
     virtual bool walk_add_preorder(const Expr_ptr expr) =0;
     virtual bool walk_add_inorder(const Expr_ptr expr) =0;
@@ -290,17 +295,25 @@ protected:
     virtual bool walk_and_inorder(const Expr_ptr expr) =0;
     virtual void walk_and_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_bw_and_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_and_inorder(const Expr_ptr expr) =0;
+    virtual void walk_bw_and_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_or_preorder(const Expr_ptr expr) =0;
     virtual bool walk_or_inorder(const Expr_ptr expr) =0;
     virtual void walk_or_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_xor_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_xor_inorder(const Expr_ptr expr) =0;
-    virtual void walk_xor_postorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_or_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_or_inorder(const Expr_ptr expr) =0;
+    virtual void walk_bw_or_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_xnor_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_xnor_inorder(const Expr_ptr expr) =0;
-    virtual void walk_xnor_postorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_xor_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_xor_inorder(const Expr_ptr expr) =0;
+    virtual void walk_bw_xor_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_bw_xnor_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_bw_xnor_inorder(const Expr_ptr expr) =0;
+    virtual void walk_bw_xnor_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_implies_preorder(const Expr_ptr expr) =0;
     virtual bool walk_implies_inorder(const Expr_ptr expr) =0;

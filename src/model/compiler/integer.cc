@@ -32,7 +32,7 @@ void Compiler::integer_neg(const Expr_ptr expr)
     PUSH_ADD(lhs.Negate());
 }
 
-void Compiler::integer_not(const Expr_ptr expr)
+void Compiler::integer_bw_not(const Expr_ptr expr)
 {
     POP_ADD(lhs);
     assert (f_enc.is_constant(lhs));
@@ -100,7 +100,7 @@ void Compiler::integer_mod(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::integer_and(const Expr_ptr expr)
+void Compiler::integer_bw_and(const Expr_ptr expr)
 {
     POP_ADD(rhs);
     POP_ADD(lhs);
@@ -112,7 +112,7 @@ void Compiler::integer_and(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::integer_or(const Expr_ptr expr)
+void Compiler::integer_bw_or(const Expr_ptr expr)
 {
     POP_ADD(rhs);
     POP_ADD(lhs);
@@ -124,7 +124,7 @@ void Compiler::integer_or(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::integer_xor(const Expr_ptr expr)
+void Compiler::integer_bw_xor(const Expr_ptr expr)
 {
     POP_ADD(rhs);
     POP_ADD(lhs);
@@ -136,7 +136,7 @@ void Compiler::integer_xor(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::integer_xnor(const Expr_ptr expr)
+void Compiler::integer_bw_xnor(const Expr_ptr expr)
 {
     POP_ADD(rhs);
     POP_ADD(lhs);
@@ -144,18 +144,6 @@ void Compiler::integer_xnor(const Expr_ptr expr)
     assert (f_enc.is_constant(lhs));
 
     PUSH_ADD(lhs.BWXnor(rhs)); /* bitwise integer arithmetic */
-
-    f_type_stack.pop_back(); // consume one, leave the other
-}
-
-void Compiler::integer_implies(const Expr_ptr expr)
-{
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    assert (f_enc.is_constant(rhs));
-    assert (f_enc.is_constant(lhs));
-
-    PUSH_ADD(lhs.BWCmpl().BWOr(rhs)); /* bitwise integer arithmetic */
 
     f_type_stack.pop_back(); // consume one, leave the other
 }

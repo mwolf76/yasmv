@@ -50,7 +50,7 @@ void Compiler::algebraic_neg(const Expr_ptr expr)
     (*this)(em.make_add(temp, em.make_one()));
 }
 
-void Compiler::algebraic_not(const Expr_ptr expr)
+void Compiler::algebraic_bw_not(const Expr_ptr expr)
 {
     assert(is_unary_algebraic(expr));
 
@@ -102,19 +102,16 @@ void Compiler::algebraic_div(const Expr_ptr expr)
 void Compiler::algebraic_mod(const Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_and(const Expr_ptr expr)
+void Compiler::algebraic_bw_and(const Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_or(const Expr_ptr expr)
+void Compiler::algebraic_bw_or(const Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_xor(const Expr_ptr expr)
+void Compiler::algebraic_bw_xor(const Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_xnor(const Expr_ptr expr)
-{ algebraic_binary(expr); }
-
-void Compiler::algebraic_implies(const Expr_ptr expr)
+void Compiler::algebraic_bw_xnor(const Expr_ptr expr)
 { algebraic_binary(expr); }
 
 void Compiler::algebraic_lshift(const Expr_ptr expr)

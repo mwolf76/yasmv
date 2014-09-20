@@ -100,8 +100,13 @@ void Printer::walk_neg_postorder(const Expr_ptr expr)
 {}
 
 bool Printer::walk_not_preorder(const Expr_ptr expr)
-{ f_os << "! "; return true; }
+{ f_os << "not "; return true; }
 void Printer::walk_not_postorder(const Expr_ptr expr)
+{}
+
+bool Printer::walk_bw_not_preorder(const Expr_ptr expr)
+{ f_os << "! "; return true; }
+void Printer::walk_bw_not_postorder(const Expr_ptr expr)
 {}
 
 bool Printer::walk_add_preorder(const Expr_ptr expr)
@@ -142,29 +147,43 @@ void Printer::walk_mod_postorder(const Expr_ptr expr)
 bool Printer::walk_and_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_and_inorder(const Expr_ptr expr)
-{ f_os << " & "; return true; }
+{ f_os << " and "; return true; }
 void Printer::walk_and_postorder(const Expr_ptr expr)
+{ f_os << ")"; }
+
+bool Printer::walk_bw_and_preorder(const Expr_ptr expr)
+{ f_os << "("; return true; }
+bool Printer::walk_bw_and_inorder(const Expr_ptr expr)
+{ f_os << " & "; return true; }
+void Printer::walk_bw_and_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_or_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_or_inorder(const Expr_ptr expr)
-{ f_os << " | "; return true; }
+{ f_os << " or "; return true; }
 void Printer::walk_or_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-bool Printer::walk_xor_preorder(const Expr_ptr expr)
+bool Printer::walk_bw_or_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
-bool Printer::walk_xor_inorder(const Expr_ptr expr)
-{ f_os << " xor "; return true; }
-void Printer::walk_xor_postorder(const Expr_ptr expr)
+bool Printer::walk_bw_or_inorder(const Expr_ptr expr)
+{ f_os << " | "; return true; }
+void Printer::walk_bw_or_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-bool Printer::walk_xnor_preorder(const Expr_ptr expr)
+bool Printer::walk_bw_xor_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
-bool Printer::walk_xnor_inorder(const Expr_ptr expr)
-{ f_os << " xnor "; return true; }
-void Printer::walk_xnor_postorder(const Expr_ptr expr)
+bool Printer::walk_bw_xor_inorder(const Expr_ptr expr)
+{ f_os << " ^ "; return true; }
+void Printer::walk_bw_xor_postorder(const Expr_ptr expr)
+{ f_os << ")"; }
+
+bool Printer::walk_bw_xnor_preorder(const Expr_ptr expr)
+{ f_os << "("; return true; }
+bool Printer::walk_bw_xnor_inorder(const Expr_ptr expr)
+{ f_os << " ~ "; return true; }
+void Printer::walk_bw_xnor_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_implies_preorder(const Expr_ptr expr)

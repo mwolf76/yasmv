@@ -240,6 +240,12 @@ bool Analyzer::walk_neg_preorder(const Expr_ptr expr)
 void Analyzer::walk_neg_postorder(const Expr_ptr expr)
 { walk_unary_arithmetical_postorder(expr); }
 
+bool Analyzer::walk_bw_not_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Analyzer::walk_bw_not_postorder(const Expr_ptr expr)
+{ walk_unary_arithmetical_postorder(expr); }
+
+
 bool Analyzer::walk_not_preorder(const Expr_ptr expr)
 {
     bool res = cache_miss(expr);
@@ -297,42 +303,56 @@ bool Analyzer::walk_and_preorder(const Expr_ptr expr)
 bool Analyzer::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_and_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
+
+bool Analyzer::walk_bw_and_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Analyzer::walk_bw_and_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_bw_and_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
 
 bool Analyzer::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Analyzer::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_or_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
-bool Analyzer::walk_xor_preorder(const Expr_ptr expr)
+bool Analyzer::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Analyzer::walk_xor_inorder(const Expr_ptr expr)
+bool Analyzer::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
-void Analyzer::walk_xor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+void Analyzer::walk_bw_or_postorder(const Expr_ptr expr)
+{ walk_binary_logical_postorder(expr); }
 
-bool Analyzer::walk_xnor_preorder(const Expr_ptr expr)
+bool Analyzer::walk_bw_xor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Analyzer::walk_xnor_inorder(const Expr_ptr expr)
+bool Analyzer::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
-void Analyzer::walk_xnor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+void Analyzer::walk_bw_xor_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
+
+bool Analyzer::walk_bw_xnor_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Analyzer::walk_bw_xnor_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_bw_xnor_postorder(const Expr_ptr expr)
+{ walk_binary_arithmetical_postorder(expr); }
 
 bool Analyzer::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Analyzer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_implies_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
 bool Analyzer::walk_iff_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Analyzer::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_iff_postorder(const Expr_ptr expr)
-{ walk_binary_logical_or_bitwise_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
 bool Analyzer::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

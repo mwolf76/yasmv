@@ -71,13 +71,11 @@ ExprMgr::ExprMgr()
     f_s2e.insert( make_pair < string, ExprType > ( "mod", MOD ));
     f_s2e.insert( make_pair < string, ExprType > ( "mul", MUL ));
 
-    // bitwise ops
-    f_s2e.insert( make_pair < string, ExprType > ( "not", NOT ));
-    f_s2e.insert( make_pair < string, ExprType > ( "or", OR ));
-    f_s2e.insert( make_pair < string, ExprType > ( "and", AND ));
-    f_s2e.insert( make_pair < string, ExprType > ( "xor", XOR ));
-    f_s2e.insert( make_pair < string, ExprType > ( "xnor", XNOR ));
-    f_s2e.insert( make_pair < string, ExprType > ( "implies", IMPLIES ));
+    f_s2e.insert( make_pair < string, ExprType > ( "not", BW_NOT ));
+    f_s2e.insert( make_pair < string, ExprType > ( "or", BW_OR ));
+    f_s2e.insert( make_pair < string, ExprType > ( "and", BW_AND ));
+    f_s2e.insert( make_pair < string, ExprType > ( "xor", BW_XOR ));
+    f_s2e.insert( make_pair < string, ExprType > ( "xnor", BW_XNOR ));
 
     // relational ops
     f_s2e.insert( make_pair < string, ExprType > ( "eq", EQ ));
@@ -112,7 +110,12 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 ExprType ExprMgr::exprTypeFromString (string exprTypeString )
 {
     exprTypeFromStringMap::const_iterator i = f_s2e.find( exprTypeString );
-    assert (i != f_s2e.end());
+    if (i == f_s2e.end()) {
+        cerr << "Unsupported microcode file found: "
+             << exprTypeString
+             << endl;
+        exit(1);
+    }
 
     return (*i).second;
 }

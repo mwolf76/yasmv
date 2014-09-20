@@ -68,6 +68,7 @@ void ExprWalker::walk ()
 
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
+            case BW_NOT_1: goto entry_BW_NOT_1;
 
             case PLUS_1: goto entry_PLUS_1;
             case PLUS_2: goto entry_PLUS_2;
@@ -87,14 +88,20 @@ void ExprWalker::walk ()
             case AND_1: goto entry_AND_1;
             case AND_2: goto entry_AND_2;
 
+            case BW_AND_1: goto entry_BW_AND_1;
+            case BW_AND_2: goto entry_BW_AND_2;
+
             case OR_1: goto entry_OR_1;
             case OR_2: goto entry_OR_2;
 
-            case XOR_1: goto entry_XOR_1;
-            case XOR_2: goto entry_XOR_2;
+            case BW_OR_1: goto entry_BW_OR_1;
+            case BW_OR_2: goto entry_BW_OR_2;
 
-            case XNOR_1: goto entry_XNOR_1;
-            case XNOR_2: goto entry_XNOR_2;
+            case BW_XOR_1: goto entry_BW_XOR_1;
+            case BW_XOR_2: goto entry_BW_XOR_2;
+
+            case BW_XNOR_1: goto entry_BW_XNOR_1;
+            case BW_XNOR_2: goto entry_BW_XNOR_2;
 
             case IMPLIES_1: goto entry_IMPLIES_1;
             case IMPLIES_2: goto entry_IMPLIES_2;
@@ -255,7 +262,7 @@ void ExprWalker::walk ()
             }
             break;
 
-        // unary arithmetic/logical
+        // unary
         case NEG:
             if (walk_neg_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = NEG_1;
@@ -278,7 +285,18 @@ void ExprWalker::walk ()
             }
             break;
 
-        // basic arithmetical
+        case BW_NOT:
+            if (walk_bw_not_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BW_NOT_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_BW_NOT_1:
+                walk_bw_not_postorder(curr.expr);
+            }
+            break;
+
+        // binary
         case PLUS:
             if (walk_add_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = PLUS_1;
@@ -369,7 +387,7 @@ void ExprWalker::walk ()
             }
             break;
 
-        // basic logical
+        // logical/bitwise
         case AND:
             if (walk_and_preorder(curr.expr)) {
                 f_recursion_stack.top().pc = AND_1;
@@ -385,6 +403,24 @@ void ExprWalker::walk ()
 
             entry_AND_2:
                 walk_and_postorder(curr.expr);
+            }
+            break;
+
+        case BW_AND:
+            if (walk_bw_and_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BW_AND_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_BW_AND_1:
+                if (walk_bw_and_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = BW_AND_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_BW_AND_2:
+                walk_bw_and_postorder(curr.expr);
             }
             break;
 
@@ -406,39 +442,57 @@ void ExprWalker::walk ()
             }
             break;
 
-        case XOR:
-            if (walk_xor_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = XOR_1;
+        case BW_OR:
+            if (walk_bw_or_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BW_OR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
-            entry_XOR_1:
-                if (walk_xor_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = XOR_2;
+            entry_BW_OR_1:
+                if (walk_bw_or_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = BW_OR_2;
                     f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
                 }
 
-            entry_XOR_2:
-                walk_xor_postorder(curr.expr);
+            entry_BW_OR_2:
+                walk_bw_or_postorder(curr.expr);
             }
             break;
 
-        case XNOR:
-            if (walk_xnor_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = XNOR_1;
+        case BW_XOR:
+            if (walk_bw_xor_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BW_XOR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
-            entry_XNOR_1:
-                if (walk_xnor_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = XNOR_2;
+            entry_BW_XOR_1:
+                if (walk_bw_xor_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = BW_XOR_2;
                     f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
                 }
 
-            entry_XNOR_2:
-                walk_xnor_postorder(curr.expr);
+            entry_BW_XOR_2:
+                walk_bw_xor_postorder(curr.expr);
+            }
+            break;
+
+        case BW_XNOR:
+            if (walk_bw_xnor_preorder(curr.expr)) {
+                f_recursion_stack.top().pc = BW_XNOR_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_BW_XNOR_1:
+                if (walk_bw_xnor_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = BW_XNOR_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_BW_XNOR_2:
+                walk_bw_xnor_postorder(curr.expr);
             }
             break;
 

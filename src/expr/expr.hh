@@ -41,14 +41,17 @@ typedef enum {
     /* arithmetical operators */
     NEG, PLUS, SUB, DIV, MUL, MOD,
 
-    /* logical/bitwise operators */
-    NOT, AND, OR, XOR, XNOR, IMPLIES, IFF, LSHIFT, RSHIFT,
+    /* bitwise operators */
+    BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
+
+    /* logical operators */
+    NOT, AND, OR, IMPLIES, IFF,
+
+    /* shift operators */
+    LSHIFT, RSHIFT,
 
     /* type operators */
     TYPE, CAST,
-
-    // future
-    // LROTATE, RROTATE,
 
     /* relational operators */
     EQ, NE, GE, GT, LE, LT,
