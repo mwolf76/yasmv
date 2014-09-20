@@ -170,7 +170,6 @@ typedef class ArrayEncoding* ArrayEncoding_ptr;
 class ArrayEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr
 public:
-    // here assignment *must* have size 1
     virtual Expr_ptr expr(int* assignment);
 
 protected:

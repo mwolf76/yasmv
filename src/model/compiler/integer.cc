@@ -256,20 +256,18 @@ void Compiler::integer_subscript(const Expr_ptr expr)
 
     POP_ADD(index);
     assert(f_enc.is_constant(index));
-    unsigned ndx = f_enc.const_value(index);
+    unsigned sub = f_enc.const_value(index);
 
     POP_ALGEBRAIC(vec, elem_size * elem_count);
 
-    if (ndx < elem_count) {
+    if (sub < elem_count) {
         for (unsigned i = 0; i < elem_size; ++ i) {
-            PUSH_ADD( vec[ ndx * elem_size + i ]);
+            unsigned ndx = sub * elem_size + elem_size - i - 1;
+            PUSH_ADD( vec[ ndx ]);
         }
     }
     else {
-        /* out of boundaries */
-        for (unsigned i = 0; i < elem_size; ++ i) {
-            PUSH_ADD( f_enc.error());
-        }
+        assert(false); // TODO: out of boundaries
     }
 
     f_type_stack.push_back( atype -> of());

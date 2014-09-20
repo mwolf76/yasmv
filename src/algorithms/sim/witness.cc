@@ -65,8 +65,8 @@ SimulationWitness::SimulationWitness(IModel& model, SAT& engine,
             }
 
             /* 1. for each bit int the encoding, fetch UCBI, time it
-               into TCBI, fetch its value in MiniSAT model and set
-               the corresponding entry in input. */
+               into TCBI, fetch its value in solver model and set the
+               corresponding entry in inputs array. */
             DDVector::const_iterator di;
             unsigned ndx;
 
@@ -76,8 +76,7 @@ SimulationWitness::SimulationWitness(IModel& model, SAT& engine,
                 unsigned bit = (*di).getNode()->index;
 
                 const UCBI& ucbi = enc_mgr.find_ucbi(bit);
-                const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(), 0,
-                                        ucbi.bitno(), k);
+                const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(), 0, ucbi.bitno(), k);
 
                 Var var = engine.tcbi_to_var(tcbi);
                 int value = engine.value(var); /* Don't care is assigned to 0 */

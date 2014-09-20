@@ -77,19 +77,19 @@ static void usage()
 
 /* these are unused, just for debugging purposes withing gdb */
 void pe(Expr_ptr e)
-{ DEBUG << e << endl; }
+{ cerr << e << endl; }
 
 void pf(FQExpr& e)
-{ DEBUG << e << endl; }
+{ cerr << e << endl; }
 
 void pu(UCBI& ucbi)
-{ DEBUG << ucbi << endl; }
+{ cerr << ucbi << endl; }
 
 void pt(TCBI& tcbi)
-{ DEBUG << tcbi << endl; }
+{ cerr << tcbi << endl; }
 
 void pd(MicroDescriptor& md)
-{ DEBUG << md << endl; }
+{ cerr << md << endl; }
 
 void batch(Command_ptr cmd)
 {

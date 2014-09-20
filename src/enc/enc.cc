@@ -199,4 +199,20 @@ ArrayEncoding::ArrayEncoding(Encodings elements)
 }
 
 Expr_ptr ArrayEncoding::expr(int* assignment)
-{ return NULL; } // an array cannot be evaluated
+{
+    ExprMgr& em(ExprMgr::INSTANCE());
+    Expr_ptr acc(NULL);
+
+    for (Encodings::const_iterator i = f_elements.begin();
+         f_elements.end() != i; ++ i) {
+
+        IEncoding_ptr enc(*i);
+        Expr_ptr value (enc->expr(assignment));
+        acc = (NULL == acc)
+            ? value
+            : em.make_comma(acc, value)
+        ;
+    }
+    assert(NULL != acc);
+    return em.make_set( acc );
+}
