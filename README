@@ -1,7 +1,7 @@
 README
 ======
 
-The YASMINE (Yet Another Symbolic Modelling INteractive Environment)
+The YASMINE (Yet Another Symbolic Modelling INteractive Engine)
 project started off in fall 2011 as a tentative and partial C++
 reimplementation of the NuSMV2 model checker. As a former member of
 the NuSMV2 development team (in the years from 2008 to 2011) I was
