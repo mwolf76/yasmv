@@ -63,7 +63,10 @@ protected:
     virtual void walk();
 
     virtual bool condition(const DdNode *node) =0;
+
     virtual void action   (const DdNode *node) =0;
+    virtual void zero     (void) =0;
+    virtual void one      (void) =0;
 
     virtual void pre_hook() =0;
     virtual void post_hook() =0;

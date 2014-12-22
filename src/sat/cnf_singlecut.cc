@@ -70,6 +70,12 @@ public:
                  f_seen.find(const_cast<DdNode *>(node)) == f_seen.end());
     }
 
+    void zero()
+    { push1(0, true); /* makes formula UNSAT */ }
+
+    void one()
+    { /* nop */ }
+
     void action(const DdNode* node)
     {
         /* don't process leaves */

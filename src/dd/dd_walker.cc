@@ -58,14 +58,11 @@ void ADDWalker::walk ()
         add_activation_record curr = f_recursion_stack.top();
         assert ( !Cudd_IsComplement(curr.node));
 
-        /* process constant immediately, no recursion */
         if (cuddIsConstant(curr.node)) {
-            if (condition(curr.node)) goto entry_node_POSTORDER;
-            else {
-                /* just skip it */
-                f_recursion_stack.pop();
-                continue;
-            }
+            // invoke appropriate action for the leaf, then continue
+            (! Cudd_V(curr.node)) ? zero() : one();
+            f_recursion_stack.pop();
+            continue;
         }
 
         // restore caller location (simulate call return behavior)
