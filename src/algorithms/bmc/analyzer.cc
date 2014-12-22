@@ -230,11 +230,6 @@ bool Analyzer::walk_next_preorder(const Expr_ptr expr)
 void Analyzer::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_fsm_postorder(expr); }
 
-bool Analyzer::walk_prev_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-void Analyzer::walk_prev_postorder(const Expr_ptr expr)
-{ walk_unary_fsm_postorder(expr); }
-
 bool Analyzer::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Analyzer::walk_neg_postorder(const Expr_ptr expr)
@@ -737,7 +732,7 @@ Expr_ptr Analyzer::find_canonical_expr(Expr_ptr expr)
     ExprMgr& em = f_owner.em();
 
     /* time is not relevant here */
-    while (em.is_next(expr) || em.is_prev(expr)) {
+    while (em.is_next(expr)) {
         expr = expr->lhs();
     }
 

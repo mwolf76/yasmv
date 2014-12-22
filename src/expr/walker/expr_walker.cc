@@ -64,7 +64,6 @@ void ExprWalker::walk ()
             case R_2: goto entry_R_2;
 
             case NEXT_1: goto entry_NEXT_1;
-            case PREV_1: goto entry_PREV_1;
 
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
@@ -248,17 +247,6 @@ void ExprWalker::walk ()
 
             entry_NEXT_1:
                 walk_next_postorder(curr.expr);
-            }
-            break;
-
-        case PREV:
-            if (walk_prev_preorder(curr.expr)) {
-                f_recursion_stack.top().pc = PREV_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_PREV_1:
-                walk_prev_postorder(curr.expr);
             }
             break;
 

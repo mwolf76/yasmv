@@ -178,10 +178,6 @@ BOOST_AUTO_TEST_CASE(type_inference)
                               em.make_main()));
 
         BOOST_CHECK( boolean ==
-                     mm.type( em.make_prev( x ),
-                              em.make_main()));
-
-        BOOST_CHECK( boolean ==
                      mm.type( em.make_not( x ),
                               em.make_main()));
 

@@ -48,11 +48,6 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_next(next_x));
     BOOST_CHECK (em.is_temporal(next_x));
 
-    Expr_ptr prev_x = em.make_prev(x);
-    BOOST_CHECK (prev_x->f_symb == PREV && prev_x->lhs() == x && prev_x->rhs() == NULL);
-    BOOST_CHECK (em.is_prev(prev_x));
-    BOOST_CHECK (em.is_temporal(prev_x));
-
     Expr_ptr neg_x = em.make_neg(x);
     BOOST_CHECK (neg_x->f_symb == NEG && neg_x->lhs() == x && neg_x->rhs() == NULL);
     BOOST_CHECK (em.is_neg(neg_x));

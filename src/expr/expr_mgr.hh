@@ -115,14 +115,6 @@ public:
         return expr->f_symb == NEXT;
     }
 
-    inline Expr_ptr make_prev(Expr_ptr expr)
-    { return make_expr(PREV, expr, NULL); }
-
-    inline bool is_prev(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == PREV;
-    }
-
     /* -- Arithmetical operators -------------------------------------------- */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
@@ -559,9 +551,7 @@ public:
     // -- broad is-a predicates ------------------------------------------------
     inline bool is_temporal(const Expr_ptr expr) const {
         assert(expr);
-        return
-            expr->f_symb == PREV ||
-            expr->f_symb == NEXT;
+        return expr->f_symb == NEXT;
     }
 
     inline bool is_identifier(const Expr_ptr expr) const {

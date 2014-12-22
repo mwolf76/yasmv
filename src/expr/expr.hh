@@ -35,8 +35,8 @@ typedef enum {
 
     // -- primary expressions --------------------------------------------------
 
-    /* time shift operators (nesting supported) */
-    NEXT, PREV,
+    /* time shift operator (nesting supported) */
+    NEXT,
 
     /* arithmetical operators */
     NEG, PLUS, SUB, DIV, MUL, MOD,

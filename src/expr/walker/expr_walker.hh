@@ -41,7 +41,7 @@
     void walk_## op ## _postorder(const Expr_ptr expr)
 
 #define OP_HOOKS                                   \
-    UNARY_HOOK(next); UNARY_HOOK(prev);            \
+    UNARY_HOOK(next);                              \
     UNARY_HOOK(neg); UNARY_HOOK(not);              \
     UNARY_HOOK(bw_not);                            \
                                                    \
@@ -235,7 +235,7 @@ protected:
 
     // -- hooks ----------------------------------------------------------------
 
-    // ltl temporal op
+    // LTL temporal ops
     virtual bool walk_F_preorder(const Expr_ptr expr) =0;
     virtual void walk_F_postorder(const Expr_ptr expr) =0;
 
@@ -256,9 +256,6 @@ protected:
     // unary temporal ops
     virtual bool walk_next_preorder(const Expr_ptr expr) =0;
     virtual void walk_next_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_prev_preorder(const Expr_ptr expr) =0;
-    virtual void walk_prev_postorder(const Expr_ptr expr) =0;
 
     // unary ops
     virtual bool walk_neg_preorder(const Expr_ptr expr) =0;
