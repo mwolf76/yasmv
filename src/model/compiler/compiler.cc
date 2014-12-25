@@ -90,7 +90,7 @@ void Compiler::preprocess(Expr_ptr ctx, Expr_ptr body)
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
     FQExpr key(ctx, body);
-    TRACE << "Preprocessing of " << key << " took "
+    DEBUG << "Preprocessing of " << key << " took "
           << secs << " seconds" << endl;
 
     return;
@@ -129,7 +129,8 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     unsigned res_sz (f_add_stack.size());
     unsigned mcr_sz (f_descriptors.size());
-    TRACE
+
+    DEBUG
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
         << res_sz << " ADD results, "

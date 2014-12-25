@@ -72,7 +72,7 @@ public:
 
         // push DDs
         const DDVector& dv( term.formula()); n = dv.size();
-        TRACE << "CNFizing "<< n << " fragments" << endl;
+        DEBUG << "CNFizing "<< n << " fragments" << endl;
 
         DDVector::const_iterator i;
         for (i = dv.begin(); dv.end() != i; ++ i) {
@@ -81,7 +81,7 @@ public:
         }
 
         const MicroDescriptors& descriptors (term.descriptors()); m = descriptors.size();
-        TRACE << "Injecting " << m << " microcode descriptors" << endl;
+        DEBUG << "Injecting " << m << " microcode descriptors" << endl;
 
         MicroDescriptors::const_iterator j;
         for (j = descriptors.begin(); descriptors.end() != j; ++ j)  {

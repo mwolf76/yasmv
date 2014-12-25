@@ -48,7 +48,7 @@ typedef enum {
 class Algorithm {
 
 public:
-    Algorithm(IModel& model, ostream& os = std::cout);
+    Algorithm(IModel& model);
     virtual ~Algorithm();
 
     /* Build encodings */
@@ -97,9 +97,6 @@ protected:
     inline SAT& engine()
     { return f_engine; }
 
-    inline ostream& os()
-    { return f_os; }
-
     /* FSM */
     void assert_fsm_init(step_t time,
                          group_t group = MAINGROUP);
@@ -117,9 +114,6 @@ protected:
 private:
     /* Model */
     IModel& f_model;
-
-    // output
-    ostream& f_os;
 
     // managers
     ModelMgr& f_mm;

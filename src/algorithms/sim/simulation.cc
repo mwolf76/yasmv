@@ -54,13 +54,10 @@ void Simulation::process()
     clock_t t0 = clock(), t1;
     double secs;
 
-    TRACE << "Phase 1" << endl;
     prepare();
 
-    TRACE << "Phase 2" << endl;
     compile();
 
-    TRACE << "Phase 3" << endl;
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
@@ -72,7 +69,7 @@ void Simulation::process()
     if (! has_witness()) {
         assert_fsm_init(0);
         assert_fsm_invar(0);
-        TRACE << "Starting simulation..." << endl;
+        DEBUG << "Starting simulation..." << endl;
     }
     else {
         // here we need to push all the values for variables in the
@@ -82,7 +79,7 @@ void Simulation::process()
 #if 0
         k = witness().size() -1;
         assert( false) ; // TODO
-        TRACE << "Resuming simulation..." << endl;
+        DEBUG << "Resuming simulation..." << endl;
 #else
         assert(0); // not now
 #endif
@@ -90,7 +87,7 @@ void Simulation::process()
 
     if (STATUS_SAT == engine().solve()) {
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-        os () << "-- simulation initialized, took " << secs
+        TRACE << "simulation initialized, took " << secs
               << " seconds" << endl;
         t0 = t1; // resetting clock
 
@@ -125,7 +122,8 @@ void Simulation::process()
 
         while (true) {
             t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-            os () << "-- completed step " << 1 + k
+            step_t k_ = 1 + k;
+            TRACE << "completed step " << k_
                   << ", took " << secs << " seconds"
                   << endl;
             t0 = t1; // resetting clock
@@ -160,16 +158,16 @@ void Simulation::process()
                 }
             }
             else {
-                TRACE << "Inconsistency detected in transition relation at step " << k
-                      << endl;
+                WARN << "Inconsistency detected in transition relation at step " << k
+                     << endl;
                 f_status = SIMULATION_DEADLOCKED;
                 return;
             }
         }
     }
     else {
-        TRACE << "Inconsistency detected in initial states"
-              << endl;
+        WARN << "Inconsistency detected in initial states"
+             << endl;
         f_status = SIMULATION_DEADLOCKED;
     }
 }

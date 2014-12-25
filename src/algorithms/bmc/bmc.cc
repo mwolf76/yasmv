@@ -77,8 +77,8 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
     if (STATUS_SAT == engine().status()) {
         f_status = MC_FALSE;
 
-        INFO << "Found BMC CEX witness (k = " << k
-             << "), invariant is FALSE." << endl;
+        TRACE << "Found BMC CEX witness (k = " << k
+              << "), invariant is FALSE." << endl;
 
         /* CEX extraction */
         ostringstream oss;
@@ -142,13 +142,10 @@ void BMC::bmc_ltlspec_check( Expr_ptr property )
 
 void BMC::process()
 {
-    TRACE << "Phase 1" << endl;
     prepare();
 
-    TRACE << "Phase 2" << endl;
     compile();
 
-    TRACE << "Phase 3" << endl;
     Normalizer normalizer( ModelMgr::INSTANCE());
     normalizer.process( f_property );
     if (normalizer.is_invariant()) {

@@ -31,7 +31,7 @@ status_t SAT::sat_solve_groups(const Groups& groups)
     vec<Lit> assumptions;
 
     clock_t t0 = clock();
-    TRACE << "Solving ... " << endl;
+    DEBUG << "Solving ... " << endl;
 
     Groups::const_iterator i;
     for (i = groups.begin(); groups.end() != i; ++ i) {
@@ -50,7 +50,7 @@ status_t SAT::sat_solve_groups(const Groups& groups)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
+    DEBUG << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
 
     return f_status;
 }

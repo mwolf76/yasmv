@@ -21,9 +21,8 @@
  **/
 #include <base.hh>
 
-Algorithm::Algorithm(IModel& model, ostream &os)
+Algorithm::Algorithm(IModel& model)
     : f_model(model)
-    , f_os(os)
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
@@ -152,7 +151,7 @@ void Algorithm::compile()
 void Algorithm::assert_fsm_init(step_t time, group_t group)
 {
     unsigned n = f_init.size();
-    TRACE << "CNFizing INIT @" << time
+    DEBUG << "CNFizing INIT @" << time
           << "... (" << n << " fragments)"
           << endl;
 
@@ -165,13 +164,13 @@ void Algorithm::assert_fsm_init(step_t time, group_t group)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG << "Done. (took " << secs << " seconds)" << endl;
 }
 
 void Algorithm::assert_fsm_invar(step_t time, group_t group)
 {
     unsigned n = f_invar.size();
-    TRACE << "CNFizing INVAR @" << time
+    DEBUG << "CNFizing INVAR @" << time
           << "... (" << n << " fragments)"
           << endl;
 
@@ -184,13 +183,13 @@ void Algorithm::assert_fsm_invar(step_t time, group_t group)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG << "Done. (took " << secs << " seconds)" << endl;
 }
 
 void Algorithm::assert_fsm_trans(step_t time, group_t group)
 {
     unsigned n = f_trans.size();
-    TRACE << "CNFizing TRANS @" << time
+    DEBUG << "CNFizing TRANS @" << time
           << "... (" << n << " fragments)"
           << endl;
 
@@ -203,7 +202,7 @@ void Algorithm::assert_fsm_trans(step_t time, group_t group)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    TRACE << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG << "Done. (took " << secs << " seconds)" << endl;
 }
 
 void Algorithm::assert_formula(step_t time, Term& term, group_t group)

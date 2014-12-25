@@ -297,7 +297,6 @@ void Compiler::post_node_hook(Expr_ptr expr)
     step_t time = f_time_stack.back();
 
     FQExpr key(ctx, expr, time);
-    TRACE << key << endl;
 
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
@@ -320,7 +319,8 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
     unsigned nodes = f_enc.dd().SharingSize(dv);
-    TRACE
+
+    DEBUG
         << key << " took " << elapsed << "s, "
         << nodes << " ADD nodes"
         << endl;
@@ -577,7 +577,7 @@ bool Compiler::cache_miss(const Expr_ptr expr)
 
     if (eye != f_map.end()) {
         const Type_ptr type = f_owner.type(expr, ctx);
-        TRACE << "Cache hit for " << expr
+        DEBUG << "Cache hit for " << expr
               << ", type is " << type
               << endl;
 
