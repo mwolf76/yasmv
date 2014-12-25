@@ -104,7 +104,7 @@ cmd returns [Command_ptr res]
 
  * MC
 
- ASSERT <expr>, model checking of given properties.
+ VERIFY <expr>, model checking of given properties.
  Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
 
  SIMULATE ( RUN | RESUME ) [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )? [ HALT | PAUSE ON <halt_condition> ]
@@ -152,9 +152,6 @@ commands returns [Command_ptr res]
     :  c=help_command
        { $res = c; }
 
-    |  c=check_command
-       { $res = c; }
-
     |  c=time_command
        { $res = c; }
 
@@ -165,6 +162,9 @@ commands returns [Command_ptr res]
        { $res = c; }
 
     |  c=simulate_command
+       { $res = c; }
+
+    |  c=verify_command
        { $res = c; }
 
     |  c=witness_command
@@ -196,9 +196,21 @@ model_command returns [Command_ptr res]
       { $res = cm.make_load_model(fp); }
     ;
 
-check_command returns [Command_ptr res]
-    :   'check' expr=toplevel_expression
-        { $res = cm.make_check(expr); }
+verify_command returns[Command_ptr res]
+@init {
+    ExprVector constraints;
+}
+    : 'verify' property=toplevel_expression
+
+        ( 'with' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
+        ) ?
+
+        { $res = cm.make_verify( property, constraints ); }
     ;
 
 witness_command returns [Command_ptr res]

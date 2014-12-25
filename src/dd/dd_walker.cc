@@ -59,8 +59,13 @@ void ADDWalker::walk ()
         assert ( !Cudd_IsComplement(curr.node));
 
         if (cuddIsConstant(curr.node)) {
-            // invoke appropriate action for the leaf, then continue
-            (! Cudd_V(curr.node)) ? zero() : one();
+            // leaves ignored unless at the toplevel
+            if (1 == f_recursion_stack.size()) {
+                if (! Cudd_V(curr.node))
+                    zero();
+                else
+                    one();
+            }
             f_recursion_stack.pop();
             continue;
         }

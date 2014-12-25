@@ -41,8 +41,23 @@ ExprWalker& ExprWalker::operator() (const Expr_ptr expr)
     return *this;
 }
 
+void ExprWalker::rewrite(const Expr_ptr expr)
+{
+    activation_record curr = f_recursion_stack.top();
+
+    // rewrites can only be performed in pre-order
+    assert(curr.pc == DEFAULT);
+
+    f_recursion_stack.pop();
+    f_recursion_stack.push( activation_record( expr));
+
+    f_rewritten = true;
+}
+
 void ExprWalker::walk ()
 {
+    f_rewritten = false;
+
     size_t rec_level = f_recursion_stack.size();
     assert (0 != rec_level);
 
@@ -170,7 +185,7 @@ void ExprWalker::walk ()
 
         // unary arithmetic/logical
         case F:
-            if (walk_F_preorder(curr.expr)) {
+            if (walk_F_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = F_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -181,7 +196,7 @@ void ExprWalker::walk ()
             break;
 
         case G:
-            if (walk_G_preorder(curr.expr)) {
+            if (walk_G_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = G_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -192,7 +207,7 @@ void ExprWalker::walk ()
             break;
 
         case X:
-            if (walk_X_preorder(curr.expr)) {
+            if (walk_X_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = X_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -203,7 +218,7 @@ void ExprWalker::walk ()
             break;
 
         case U:
-            if (walk_U_preorder(curr.expr)) {
+            if (walk_U_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = U_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -221,7 +236,7 @@ void ExprWalker::walk ()
             break;
 
         case R:
-            if (walk_R_preorder(curr.expr)) {
+            if (walk_R_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = R_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -240,7 +255,7 @@ void ExprWalker::walk ()
 
         // unary temporal
         case NEXT:
-            if (walk_next_preorder(curr.expr)) {
+            if (walk_next_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = NEXT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -252,7 +267,7 @@ void ExprWalker::walk ()
 
         // unary
         case NEG:
-            if (walk_neg_preorder(curr.expr)) {
+            if (walk_neg_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = NEG_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -263,7 +278,7 @@ void ExprWalker::walk ()
             break;
 
         case NOT:
-            if (walk_not_preorder(curr.expr)) {
+            if (walk_not_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = NOT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -274,7 +289,7 @@ void ExprWalker::walk ()
             break;
 
         case BW_NOT:
-            if (walk_bw_not_preorder(curr.expr)) {
+            if (walk_bw_not_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_NOT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -286,7 +301,7 @@ void ExprWalker::walk ()
 
         // binary
         case PLUS:
-            if (walk_add_preorder(curr.expr)) {
+            if (walk_add_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = PLUS_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -304,7 +319,7 @@ void ExprWalker::walk ()
             break;
 
         case SUB:
-            if (walk_sub_preorder(curr.expr)) {
+            if (walk_sub_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = SUB_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -322,7 +337,7 @@ void ExprWalker::walk ()
             break;
 
         case MUL:
-            if (walk_mul_preorder(curr.expr)) {
+            if (walk_mul_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = MUL_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -340,7 +355,7 @@ void ExprWalker::walk ()
             break;
 
         case DIV:
-            if (walk_div_preorder(curr.expr)) {
+            if (walk_div_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = DIV_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -358,7 +373,7 @@ void ExprWalker::walk ()
             break;
 
         case MOD:
-            if (walk_mod_preorder(curr.expr)) {
+            if (walk_mod_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = MOD_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -377,7 +392,7 @@ void ExprWalker::walk ()
 
         // logical/bitwise
         case AND:
-            if (walk_and_preorder(curr.expr)) {
+            if (walk_and_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = AND_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -395,7 +410,7 @@ void ExprWalker::walk ()
             break;
 
         case BW_AND:
-            if (walk_bw_and_preorder(curr.expr)) {
+            if (walk_bw_and_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_AND_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -413,7 +428,7 @@ void ExprWalker::walk ()
             break;
 
         case OR:
-            if (walk_or_preorder(curr.expr)) {
+            if (walk_or_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = OR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -431,7 +446,7 @@ void ExprWalker::walk ()
             break;
 
         case BW_OR:
-            if (walk_bw_or_preorder(curr.expr)) {
+            if (walk_bw_or_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_OR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -449,7 +464,7 @@ void ExprWalker::walk ()
             break;
 
         case BW_XOR:
-            if (walk_bw_xor_preorder(curr.expr)) {
+            if (walk_bw_xor_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_XOR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -467,7 +482,7 @@ void ExprWalker::walk ()
             break;
 
         case BW_XNOR:
-            if (walk_bw_xnor_preorder(curr.expr)) {
+            if (walk_bw_xnor_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_XNOR_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -485,7 +500,7 @@ void ExprWalker::walk ()
             break;
 
         case IMPLIES:
-            if (walk_implies_preorder(curr.expr)) {
+            if (walk_implies_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = IMPLIES_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -503,7 +518,7 @@ void ExprWalker::walk ()
             break;
 
         case IFF:
-            if (walk_iff_preorder(curr.expr)) {
+            if (walk_iff_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = IFF_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -521,7 +536,7 @@ void ExprWalker::walk ()
             break;
 
         case LSHIFT:
-            if (walk_lshift_preorder(curr.expr)) {
+            if (walk_lshift_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = LSHIFT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -539,7 +554,7 @@ void ExprWalker::walk ()
             break;
 
         case RSHIFT:
-            if (walk_rshift_preorder(curr.expr)) {
+            if (walk_rshift_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = RSHIFT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -558,7 +573,7 @@ void ExprWalker::walk ()
 
         // relational
         case EQ:
-            if (walk_eq_preorder(curr.expr)) {
+            if (walk_eq_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = EQ_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -576,7 +591,7 @@ void ExprWalker::walk ()
             break;
 
         case NE:
-            if (walk_ne_preorder(curr.expr)) {
+            if (walk_ne_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = NE_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -594,7 +609,7 @@ void ExprWalker::walk ()
             break;
 
         case GT:
-            if (walk_gt_preorder(curr.expr)) {
+            if (walk_gt_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = GT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -613,7 +628,7 @@ void ExprWalker::walk ()
 
 
         case GE:
-            if (walk_ge_preorder(curr.expr)) {
+            if (walk_ge_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = GE_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -632,7 +647,7 @@ void ExprWalker::walk ()
 
 
         case LT:
-            if (walk_lt_preorder(curr.expr)) {
+            if (walk_lt_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = LT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -650,7 +665,7 @@ void ExprWalker::walk ()
             break;
 
         case LE:
-            if (walk_le_preorder(curr.expr)) {
+            if (walk_le_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = LE_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -669,7 +684,7 @@ void ExprWalker::walk ()
 
         // ITE
         case ITE:
-            if (walk_ite_preorder(curr.expr)) {
+            if (walk_ite_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = ITE_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -687,7 +702,7 @@ void ExprWalker::walk ()
             break;
 
         case COND:
-            if (walk_cond_preorder(curr.expr)) {
+            if (walk_cond_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = COND_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -705,7 +720,7 @@ void ExprWalker::walk ()
             break;
 
         case DOT:
-            if (walk_dot_preorder(curr.expr)) {
+            if (walk_dot_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = DOT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -723,7 +738,7 @@ void ExprWalker::walk ()
             break;
 
         case PARAMS:
-            if (walk_params_preorder(curr.expr)) {
+            if (walk_params_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = PARAMS_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -741,7 +756,7 @@ void ExprWalker::walk ()
             break;
 
         case SUBSCRIPT:
-            if (walk_subscript_preorder(curr.expr)) {
+            if (walk_subscript_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = SUBSCRIPT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -759,7 +774,7 @@ void ExprWalker::walk ()
             break;
 
         case SET:
-            if (walk_set_preorder(curr.expr)) {
+            if (walk_set_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = SET_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -770,7 +785,7 @@ void ExprWalker::walk ()
             break;
 
         case COMMA:
-            if (walk_comma_preorder(curr.expr)) {
+            if (walk_comma_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = COMMA_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -788,7 +803,7 @@ void ExprWalker::walk ()
             break;
 
         case CAST:
-            if (walk_cast_preorder(curr.expr)) {
+            if (walk_cast_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = CAST_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -806,7 +821,7 @@ void ExprWalker::walk ()
             break;
 
         case TYPE:
-            if (walk_type_preorder(curr.expr)) {
+            if (walk_type_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = TYPE_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
@@ -839,8 +854,10 @@ void ExprWalker::walk ()
         } // switch
 
         assert(NULL != curr.expr);
-        post_node_hook(curr.expr);
+        if (! f_rewritten) {
+            post_node_hook(curr.expr);
+            f_recursion_stack.pop();
+        } else f_rewritten = false;
 
-        f_recursion_stack.pop();
     } // while (!empty)
 }

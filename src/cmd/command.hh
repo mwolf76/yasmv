@@ -114,10 +114,10 @@ private:
     // Simulation machinery
     Simulation f_sim;
 
-    // Simulation constraints
+    // simulation constraints (optional)
     Expr_ptr f_expr;
 
-    // HALT condition
+    // HALT condition (optional)
     Expr_ptr f_halt;
 
     // Witness id
@@ -125,10 +125,10 @@ private:
 };
 
 
-class CheckCommand : public Command {
+class VerifyCommand : public Command {
 public:
-    CheckCommand(Interpreter& owner, Expr_ptr expr);
-    virtual ~CheckCommand();
+    VerifyCommand(Interpreter& owner, Expr_ptr expr, ExprVector& constraints);
+    virtual ~VerifyCommand();
 
     Variant virtual operator()();
 
@@ -136,8 +136,11 @@ private:
     // BMC machinery
     BMC f_bmc;
 
-    // the formula to be checked
-    Expr_ptr f_formula;
+    // the formula to be verifyed
+    Expr_ptr f_property;
+
+    // additional constraints (optional)
+    Expr_ptr f_constraints;
 };
 
 class FormatCommand : public Command {

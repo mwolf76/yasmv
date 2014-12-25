@@ -314,7 +314,9 @@ void Compiler::post_node_hook(Expr_ptr expr)
     }
     assert (dv.size() == width);
     f_map.insert( make_pair <FQExpr,
-                  DDVector> ( key, dv ));
+                  pair<DDVector, MicroDescriptors> > ( key,
+                                                       make_pair<DDVector, MicroDescriptors> (dv,
+                                                                                              f_descriptors) ));
 
     double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
     unsigned nodes = f_enc.dd().SharingSize(dv);
@@ -579,13 +581,22 @@ bool Compiler::cache_miss(const Expr_ptr expr)
               << ", type is " << type
               << endl;
 
-        /* push cached DDs and type */
+        /* push cached DDs */
         DDVector::reverse_iterator ri;
-        for (ri = (*eye).second.rbegin();
-             ri != (*eye).second.rend(); ++ ri ) {
+        for (ri = (*eye).second.first.rbegin();
+             ri != (*eye).second.first.rend(); ++ ri ) {
             f_add_stack.push_back(*ri);
         }
+
+        /* push cached type */
         f_type_stack.push_back(type);
+
+        /* push cached microcode */
+        MicroDescriptors::iterator mdi;
+        for (mdi = (*eye).second.second.begin();
+             mdi != (*eye).second.second.end(); ++ mdi) {
+            f_descriptors.push_back(*mdi);
+        }
 
         /* cache hit */
         return false;

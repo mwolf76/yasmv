@@ -98,13 +98,13 @@ Variant InitCommand::operator()()
 InitCommand::~InitCommand()
 {}
 
-// -- Check -------------------------------------------------------------
-CheckCommand::CheckCommand(Interpreter& owner, Expr_ptr formula)
+// -- Verify -------------------------------------------------------------
+VerifyCommand::VerifyCommand(Interpreter& owner, Expr_ptr formula, ExprVector& constraints)
     : Command(owner)
-    , f_bmc(* ModelMgr::INSTANCE().model(), formula)
+    , f_bmc(* ModelMgr::INSTANCE().model(), formula, constraints)
 {}
 
-Variant CheckCommand::operator()()
+Variant VerifyCommand::operator()()
 {
     f_bmc.process();
 
@@ -112,7 +112,7 @@ Variant CheckCommand::operator()()
     return Variant(tmp.str());
 }
 
-CheckCommand::~CheckCommand()
+VerifyCommand::~VerifyCommand()
 {}
 
 // -- SIMULATE  ----------------------------------------------------------------

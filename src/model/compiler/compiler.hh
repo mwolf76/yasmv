@@ -64,7 +64,7 @@ typedef vector<ADD> ADDStack; // ouput of Stage 1
 typedef vector<Expr_ptr> ExprStack;
 typedef vector<step_t>   TimeStack;
 
-typedef unordered_map<FQExpr, DDVector, FQExprHash, FQExprEq> ADDMap;
+typedef unordered_map<FQExpr, pair<DDVector, MicroDescriptors>, FQExprHash, FQExprEq> ADDMap;
 typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
 
 /* shortcuts to to simplify manipulation of the internal ADD stack */
@@ -113,7 +113,10 @@ protected:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    /* model compiler does not support LTL ops */
+    /* Model compiler does NOT support LTL ops. To enable verification
+     of temporal properties, the LTL operators needs to be rewritten
+     by the bmc algorithms before feeding the formula into the
+     compiler. */
     LTL_STUBS;
 
     /* basic expr operators support */

@@ -231,7 +231,10 @@ protected:
     {}
 
     virtual void walk();
+    void rewrite(const Expr_ptr expr);
+
     walker_stack f_recursion_stack;
+    bool f_rewritten;
 
     // -- hooks ----------------------------------------------------------------
 

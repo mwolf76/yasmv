@@ -20,92 +20,39 @@
  *
  **/
 #include <bmc/bmc.hh>
+#include <witness_mgr.hh>
 
-BMC::BMC(IModel& model, Expr_ptr property)
+BMC::BMC(IModel& model, Expr_ptr property, ExprVector& constraints)
     : Algorithm(model)
     , f_property(property)
+    , f_constraints(constraints)
 {
-    Analyzer analyzer( ModelMgr::INSTANCE());
-    f_strategy = analyzer.process( property);
-    if (f_strategy == PURE_PROPOSITIONAL) {
-        DEBUG << property
-              << " is a pure propositional property"
-              << endl;
-    }
-    else if (f_strategy == INVARIANT_PROPERTY) {
-        DEBUG << property
-              << " is an invariant (i.e. G-only) LTL property"
-              << endl;
-    }
-    else {
-        assert (f_strategy == FULL_LTL_PROPERTY);
-        DEBUG << property
-              << " is a full LTL property"
-              << endl;
-    }
-
-    TRACE << "done." << endl;
 }
 
 BMC::~BMC()
 {}
 
-void BMC::prepare()
+void BMC::bmc_invarspec_check(Expr_ptr property)
 {
-    Algorithm::prepare();
+    assert( em().is_G( property));
+    Expr_ptr ctx = em().make_main();
+    Expr_ptr invariant = property->lhs();
+    Expr_ptr violation = em().make_not( invariant );
 
     Compiler& cmpl(compiler()); // just a local ref
-    cmpl.preprocess( em().make_main(), f_property);
-    cmpl.preprocess( em().make_main(), em().make_not( f_property));
-}
 
-void BMC::compile()
-{
-    Algorithm::compile();
+    cmpl.preprocess( ctx, invariant );
+    Term ii (cmpl.process( ctx, invariant ));
 
-    // Compiler& cmpl(compiler()); // just a local ref
-    // cmpl.process(em().make_main(), f_property, false);
-    // while (cmpl.has_next()) {
-    //     f_invariant_adds.push_back(cmpl.next());
-    // }
+    cmpl.preprocess( ctx, violation);
+    Term vv (cmpl.process( ctx, violation ));
 
-    // cmpl.process( em().make_main(),
-    //               em().make_not( f_property), false);
-    // while (cmpl.has_next()) {
-    //     f_violation_adds.push_back(cmpl.next());
-    // }
-    assert (0); // XXX
-}
-
-void BMC::bmc_propositional_check()
-{
-    f_status = MC_UNKNOWN;
-    assert_fsm_init(0);
-    assert_fsm_invar(0);
-    assert_formula(0, f_violation, engine().new_group());
-
-    TRACE << "Looking for a BMC CEX of length 0" << endl;
-    status_t response = engine().solve();
-
-    if ( STATUS_UNSAT == response) {
-        f_status = MC_TRUE;
-    }
-    else if ( STATUS_SAT == response) {
-        f_status = MC_FALSE;
-    }
-    else {
-        assert( STATUS_UNKNOWN == response);
-    }
-}
-
-void BMC::bmc_invarspec_check()
-{
     step_t k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
 
     assert_fsm_init(0);
     assert_fsm_invar(0);
-    assert_formula(0, f_violation, engine().new_group());
+    assert_formula(0, vv, engine().new_group());
 
     TRACE << "Looking for a BMC CEX of length 0" << endl;
     if (STATUS_UNSAT == engine().solve()) {
@@ -115,11 +62,11 @@ void BMC::bmc_invarspec_check()
             engine().toggle_last_group();
 
             /* permanently push invariant on last known state */
-            assert_formula(k, f_invariant);
+            assert_formula(k, ii);
 
             assert_fsm_trans(k ++);
             assert_fsm_invar(k);
-            assert_formula(k, f_violation, engine().new_group());
+            assert_formula(k, vv, engine().new_group());
 
             TRACE << "Looking for a BMC CEX of length "
                   << k << endl;
@@ -130,21 +77,65 @@ void BMC::bmc_invarspec_check()
     if (STATUS_SAT == engine().status()) {
         f_status = MC_FALSE;
 
-        TRACE << "Found BMC CEX witness (k = " << k
-              << "), invariant is FALSE." << endl;
+        INFO << "Found BMC CEX witness (k = " << k
+             << "), invariant is FALSE." << endl;
 
         /* CEX extraction */
-        ostringstream oss; oss << "CEX for '"
-                               << property() << "'";
+        ostringstream oss;
+        oss << "CEX for '" << property << "'";
 
-        // Witness& trace = * new BMCCounterExample(property(), model(),
-        //                                          engine(), k, false);
+        Witness& w(* new BMCCounterExample(property, model(),
+                                           engine(), k, false));
+        if (1) {
+            ostream &os(cout);
+            for (step_t time = 0; time <= w.last_time(); ++ time) {
+                os << "-- @ " << 1 + time << endl;
+                TimeFrame& tf = w[ time ];
 
-        // TODO: register
+                SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+                while (symbs.has_next()) {
+
+                    ISymbol_ptr symb = symbs.next();
+                    Expr_ptr value = NULL;
+
+                    if (symb->is_variable())  {
+                        Expr_ptr expr (symb->expr());
+
+                        try {
+                            value = tf.value(expr);
+                        }
+                        catch (NoValue nv) {
+                            value = ExprMgr::INSTANCE().make_undef();
+                        }
+                        os << expr << " = " << value << endl;
+                    }
+                    else if (symb->is_define()) {
+                        Expr_ptr ctx (symb->ctx());
+                        Expr_ptr expr (symb->expr());
+
+                        try {
+                            value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
+                        }
+                        catch (NoValue nv) {
+                            value = ExprMgr::INSTANCE().make_undef();
+                        }
+                        os << expr << " = " << value << endl;
+                    }
+                    else {
+                        continue;
+                    }
+
+                }
+                os << endl;
+            }
+        }
     }
+
+    else assert(false);
+
 }
 
-void BMC::bmc_ltlspec_check()
+void BMC::bmc_ltlspec_check( Expr_ptr property )
 {
     assert(false); // TODO: not yet implemented
 }
@@ -158,22 +149,22 @@ void BMC::process()
     compile();
 
     TRACE << "Phase 3" << endl;
-    if (PURE_PROPOSITIONAL == f_strategy) {
-        bmc_propositional_check();
-    }
+    Normalizer normalizer( ModelMgr::INSTANCE());
+    normalizer.process( f_property );
+    if (normalizer.is_invariant()) {
+        TRACE << f_property
+              << " is an invariant (i.e. G-only) LTL property"
+              << endl;
 
-    else if (INVARIANT_PROPERTY == f_strategy) {
-        bmc_invarspec_check();
+        bmc_invarspec_check( normalizer.property() );
     }
-
-    else if (FULL_LTL_PROPERTY == f_strategy) {
-        bmc_ltlspec_check();
-    }
-
     else {
-        assert (false); /* unreachable */
-    }
+        TRACE << f_property
+              << " is a full LTL property"
+              << endl;
 
+        bmc_ltlspec_check( normalizer.property() );
+    }
     TRACE << "Done." << endl;
 }
 

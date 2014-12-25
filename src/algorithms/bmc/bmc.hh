@@ -26,12 +26,12 @@
 #include <base.hh>
 #include <witness.hh>
 
-#include <bmc/analyzer.hh>
+#include <bmc/normalizer.hh>
 
 class BMC : public Algorithm {
 
 public:
-    BMC(IModel& model, Expr_ptr formula);
+    BMC(IModel& model, Expr_ptr formula, ExprVector& constraints);
     ~BMC();
 
     void process();
@@ -42,26 +42,20 @@ public:
     Expr_ptr property() const
     { return f_property; }
 
+    const ExprVector& constraints() const
+    { return f_constraints; }
+
 private:
-    Expr_ptr  f_property;
-    formula_t f_strategy;
+    Expr_ptr f_property;
+
+    ExprVector f_constraints;
     mc_status_t f_status;
 
-    Term f_violation;
-    Term f_invariant;
-
-    /* pure booleans, just initial states */
-    void bmc_propositional_check();
-
     /* invariant checking */
-    void bmc_invarspec_check();
+    void bmc_invarspec_check( Expr_ptr property );
 
     /* full LTL checking */
-    void bmc_ltlspec_check();
-
-    // overrides
-    void prepare();
-    void compile();
+    void bmc_ltlspec_check( Expr_ptr property );
 };
 
 /* Specialized for BMC ctx */

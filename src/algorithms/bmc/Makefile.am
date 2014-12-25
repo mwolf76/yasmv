@@ -17,7 +17,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
 PKG_HH = bmc.hh
-PKG_CC = bmc.cc witness.cc analyzer.cc
+PKG_CC = bmc.cc witness.cc normalizer.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

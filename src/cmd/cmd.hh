@@ -58,8 +58,8 @@ public:
     inline Command_ptr make_simulate(Expr_ptr halt_cond, Expr_ptr resume_id, ExprVector& constraints)
     { return new SimulateCommand(f_interpreter, halt_cond, resume_id, constraints); }
 
-    inline Command_ptr make_check(Expr_ptr formula)
-    { return new CheckCommand(f_interpreter, formula); }
+    inline Command_ptr make_verify(Expr_ptr formula, ExprVector& constraints)
+    { return new VerifyCommand(f_interpreter, formula, constraints); }
 
     inline Command_ptr make_witness_list()
     { return new WitnessListCommand(f_interpreter); }

@@ -816,14 +816,14 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     // 3. bool/integer constant leaves
     if (symb->is_const()) {
-        IConstant& konst =  symb->as_const();
+        IConstant& konst = symb->as_const();
 
         f_type_stack.push_back(konst.type());
         f_add_stack.push_back(f_enc.constant(konst.value()));
         return;
     }
 
-    // 4. Enum literals
+    // 4. enum literals
     if (symb->is_literal()) {
         ILiteral& konst =  symb->as_literal();
 

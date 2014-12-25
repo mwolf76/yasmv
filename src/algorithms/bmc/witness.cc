@@ -39,6 +39,13 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
+    /* Language */
+    SymbIter si (model);
+    while (si.has_next()) {
+        ISymbol_ptr symb = si.next();
+        f_lang.push_back( symb -> expr());
+    }
+
     /* up to k (included) */
     for (step_t step = 0; step <= k; ++ step) {
         TimeFrame& tf = extend();
