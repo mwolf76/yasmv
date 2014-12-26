@@ -78,7 +78,8 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
         f_status = MC_FALSE;
 
         TRACE << "Found BMC CEX witness (k = " << k
-              << "), invariant is FALSE." << endl;
+              << "), invariant " << invariant <<
+            " is FALSE." << endl;
 
         /* CEX extraction */
         ostringstream oss;
@@ -87,9 +88,11 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
         Witness& w(* new BMCCounterExample(property, model(),
                                            engine(), k, false));
         if (1) {
-            ostream &os(cout);
             for (step_t time = 0; time <= w.last_time(); ++ time) {
-                os << "-- @ " << 1 + time << endl;
+                step_t time_ = 1 + time;
+                TRACE
+                    << "-- @ " << time_ << endl;
+
                 TimeFrame& tf = w[ time ];
 
                 SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
@@ -107,7 +110,9 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
                         catch (NoValue nv) {
                             value = ExprMgr::INSTANCE().make_undef();
                         }
-                        os << expr << " = " << value << endl;
+
+                        TRACE
+                            << expr << " = " << value << endl;
                     }
                     else if (symb->is_define()) {
                         Expr_ptr ctx (symb->ctx());
@@ -119,14 +124,14 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
                         catch (NoValue nv) {
                             value = ExprMgr::INSTANCE().make_undef();
                         }
-                        os << expr << " = " << value << endl;
+
+                        TRACE
+                            << expr << " = " << value << endl;
                     }
                     else {
                         continue;
                     }
-
                 }
-                os << endl;
             }
         }
     }
