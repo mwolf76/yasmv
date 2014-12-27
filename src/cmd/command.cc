@@ -106,9 +106,28 @@ VerifyCommand::VerifyCommand(Interpreter& owner, Expr_ptr formula, ExprVector& c
 
 Variant VerifyCommand::operator()()
 {
+    ostringstream tmp;
     f_bmc.process();
 
-    ostringstream tmp; tmp << f_bmc.status();
+    switch (f_bmc.status()) {
+    case MC_FALSE:
+        tmp << "Property is FALSE";
+        break;
+    case MC_TRUE:
+        tmp << "Property is TRUE";
+        break;
+    case MC_UNKNOWN:
+        tmp << "Property could not be decided";
+        break;
+    default: assert( false ); /* unreachable */
+    } /* switch */
+    if (f_bmc.has_witness()) {
+        tmp
+            << ", registered CEX witness `"
+            << f_bmc.witness().id()
+            << "`";
+    }
+
     return Variant(tmp.str());
 }
 
@@ -146,56 +165,13 @@ Variant SimulateCommand::operator()()
     default: assert( false ); /* unreachable */
     } /* switch */
     if (f_sim.has_witness()) {
-        tmp << ", registered witness '" << f_sim.witness().id() << "'";
-
-        if (1) {
-            ostream &os(cout);
-
-            Witness& w (f_sim.witness());
-            for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-                os << "-- @ " << 1 + time << endl;
-                TimeFrame& tf = w[ time ];
-
-                SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
-                while (symbs.has_next()) {
-
-                    ISymbol_ptr symb = symbs.next();
-                    Expr_ptr value = NULL;
-
-                    if (symb->is_variable())  {
-                        Expr_ptr expr (symb->expr());
-
-                        try {
-                            value = tf.value(expr);
-                        }
-                        catch (NoValue nv) {
-                            value = ExprMgr::INSTANCE().make_undef();
-                        }
-                        os << expr << " = " << value << endl;
-                    }
-                    else if (symb->is_define()) {
-                        Expr_ptr ctx (symb->ctx());
-                        Expr_ptr expr (symb->expr());
-
-                        try {
-                            value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-                        }
-                        catch (NoValue nv) {
-                            value = ExprMgr::INSTANCE().make_undef();
-                        }
-                        os << expr << " = " << value << endl;
-                    }
-                    else {
-                        continue;
-                    }
-
-                }
-                os << endl;
-            }
-        }
+        tmp
+            << ", registered witness `"
+            << f_sim.witness().id() << "`";
     }
     else {
-        tmp << "(no witness available)";
+        tmp
+            << "(no witness available)";
     }
     return Variant(tmp.str());
 }
@@ -226,11 +202,16 @@ WitnessListCommand::WitnessListCommand(Interpreter& owner)
 
 Variant WitnessListCommand::operator()()
 {
+    WitnessList::const_iterator eye;
     ostream &os(cout);
 
-    const WitnessMap& map(WitnessMgr::INSTANCE().witnesses());
-    for (WitnessMap::const_iterator eye = map.begin(); eye != map.end(); ++ eye) {
-        os << (*eye).first << endl;
+    const WitnessList& witnesses(WitnessMgr::INSTANCE().witnesses());
+    for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
+        os
+            << (*eye) -> id()
+            << "\t\t"
+            << (*eye) -> desc()
+            << endl;
     }
     os << endl;
 
@@ -240,12 +221,12 @@ Variant WitnessListCommand::operator()()
 WitnessListCommand::~WitnessListCommand()
 {}
 
-WitnessShowCommand::WitnessShowCommand(Interpreter& owner, Expr_ptr wid)
+WitnessDumpCommand::WitnessDumpCommand(Interpreter& owner, Expr_ptr wid)
     : Command(owner)
     , f_wid(wid)
 {}
 
-Variant WitnessShowCommand::operator()()
+Variant WitnessDumpCommand::operator()()
 {
     ostream &os(cout);
 
@@ -268,6 +249,6 @@ Variant WitnessShowCommand::operator()()
     return Variant("Ok");
 }
 
-WitnessShowCommand::~WitnessShowCommand()
+WitnessDumpCommand::~WitnessDumpCommand()
 {}
 

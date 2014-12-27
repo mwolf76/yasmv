@@ -22,6 +22,10 @@
 #include <bmc/bmc.hh>
 #include <witness_mgr.hh>
 
+// reserved for witnesses
+static unsigned progressive = 0;
+static const char *cex_trace_prfx = "cex_";
+
 BMC::BMC(IModel& model, Expr_ptr property, ExprVector& constraints)
     : Algorithm(model)
     , f_property(property)
@@ -82,13 +86,29 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
         f_status = MC_FALSE;
 
         TRACE
-            << "Found CEX witness (k =" << k << "), invariant " << invariant
-            << " is FALSE."
+            << "Found CEX witness (k =" << k << "), invariant `" << invariant
+            << "` is FALSE."
             << endl;
 
         Witness& w(* new BMCCounterExample(property, model(),
                                            engine(), k, false));
+        {
+            ostringstream oss;
+            oss
+                << cex_trace_prfx
+                << (++ progressive);
+            w.set_id(oss.str());
+        }
+        {
+            ostringstream oss;
+            oss
+                << "CEX witness for property `"
+                << property << "`";
+            w.set_desc(oss.str());
+        }
+
         wm.register_witness(w);
+        set_witness(w);
     }
 
     else assert(false);

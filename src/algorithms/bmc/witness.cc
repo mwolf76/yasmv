@@ -31,12 +31,6 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
                                      bool use_coi)
     : Witness()
 {
-    ostringstream oss;
-    oss
-        << "CEX witness for property "
-        << property;
-    set_id(oss.str());
-
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 

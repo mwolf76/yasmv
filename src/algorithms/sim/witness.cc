@@ -21,19 +21,10 @@
  **/
 #include <simulation.hh>
 
-static unsigned progressive = 0;
-static const char *prfx = "sim_";
-
 using Minisat::Var;
-SimulationWitness::SimulationWitness(IModel& model, SAT& engine,
-                                     step_t k, bool unique_id)
+SimulationWitness::SimulationWitness(IModel& model, SAT& engine, step_t k)
     : Witness()
 {
-    if (unique_id) {
-        ostringstream oss; oss << prfx << (++ progressive);
-        set_id(oss.str());
-    }
-
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 

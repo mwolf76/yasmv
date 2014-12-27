@@ -39,6 +39,8 @@ public:
     // functor-pattern
     Variant virtual operator()() =0;
 
+    virtual bool blocking() const =0;
+
     // representation
     friend ostream& operator<<(ostream& os, ICommand& cmd);
 };
@@ -52,6 +54,7 @@ public:
 protected:
     Interpreter& f_owner;
 };
+
 typedef class ICommand* Command_ptr;
 
 class LoadModelCommand : public Command {
@@ -59,6 +62,9 @@ public:
     // from FILE
     LoadModelCommand(Interpreter& owner, const string& filename);
     virtual ~LoadModelCommand();
+
+    virtual bool blocking() const
+    { return true; }
 
     Variant virtual operator()();
 
@@ -71,6 +77,9 @@ public:
     HelpCommand(Interpreter& owner, Atom topic);
     virtual ~HelpCommand();
 
+    virtual bool blocking() const
+    { return true; }
+
     Variant virtual operator()();
 
 private:
@@ -82,6 +91,9 @@ public:
     TimeCommand(Interpreter& owner);
     virtual ~TimeCommand();
 
+    virtual bool blocking() const
+    { return true; }
+
     Variant virtual operator()();
 };
 
@@ -89,6 +101,9 @@ class InitCommand : public Command {
 public:
     InitCommand(Interpreter& owner);
     virtual ~InitCommand();
+
+    virtual bool blocking() const
+    { return true; }
 
     Variant virtual operator()();
 
@@ -107,6 +122,9 @@ public:
                     ExprVector& constraints);
 
     virtual ~SimulateCommand();
+
+    virtual bool blocking() const
+    { return true; } // TODO: change to false
 
     Variant virtual operator()();
 
@@ -130,6 +148,9 @@ public:
     VerifyCommand(Interpreter& owner, Expr_ptr expr, ExprVector& constraints);
     virtual ~VerifyCommand();
 
+    virtual bool blocking() const
+    { return true; } // TODO: change to false
+
     Variant virtual operator()();
 
 private:
@@ -148,6 +169,9 @@ public:
     FormatCommand(const char *fmt, ...);
     virtual ~FormatCommand();
 
+    virtual bool blocking() const
+    { return true; }
+
     Variant virtual operator()() =0;
 
 private:
@@ -159,6 +183,9 @@ public:
     QuitCommand(Interpreter& owner, int retcode);
     virtual ~QuitCommand();
 
+    virtual bool blocking() const
+    { return true; }
+
     Variant virtual operator()();
 
 private:
@@ -167,16 +194,23 @@ private:
 
 class WitnessListCommand : public Command {
 public:
-WitnessListCommand(Interpreter& owner);
-virtual ~WitnessListCommand();
+    WitnessListCommand(Interpreter& owner);
+    virtual ~WitnessListCommand();
     Variant virtual operator()();
+
+    virtual bool blocking() const
+    { return true; }
 };
 
-class WitnessShowCommand : public Command {
+
+class WitnessDumpCommand : public Command {
 public:
-WitnessShowCommand(Interpreter& owner, Expr_ptr wid);
-virtual ~WitnessShowCommand();
+    WitnessDumpCommand(Interpreter& owner, Expr_ptr wid);
+    virtual ~WitnessDumpCommand();
     Variant virtual operator()();
+
+    virtual bool blocking() const
+    { return true; }
 
 private:
     Expr_ptr f_wid;

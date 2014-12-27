@@ -141,7 +141,7 @@ typedef vector<Expr_ptr> Exprs;
 typedef class Witness* Witness_ptr;
 class Witness : public IObject {
 public:
-    Witness(Atom id = "<Noname>", step_t j = 0);
+    Witness(Atom id = "<Noname>", Atom desc = "<No description>", step_t j = 0);
 
     /* data storage */
     inline TimeFrames& frames()
@@ -164,8 +164,14 @@ public:
     inline const Atom& id() const
     { return f_id; }
 
-    inline void set_id(string id)
+    inline void set_id(Atom id)
     { f_id = id; }
+
+    inline const Atom& desc() const
+    { return f_desc; }
+
+    inline void set_desc(Atom desc)
+    { f_desc = desc; }
 
     inline step_t first_time()
     { return f_j; }
@@ -191,6 +197,9 @@ public:
 protected:
     /* this witness' id */
     Atom f_id;
+
+    /* this witness' description */
+    Atom f_desc;
 
     /* distance (i.e. number of transitions) from time 0 of the first frame */
     step_t f_j;

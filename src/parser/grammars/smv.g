@@ -219,8 +219,8 @@ witness_command returns [Command_ptr res]
             'list'
             { $res = cm.make_witness_list(); }
 
-        |   'show' wid=identifier
-            { $res = cm.make_witness_show(wid); }
+        |   'dump' wid=identifier
+            { $res = cm.make_witness_dump(wid); }
 
         )
     ;

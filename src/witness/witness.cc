@@ -110,8 +110,9 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
     f_map.insert( make_pair< Expr_ptr, Expr_ptr > (expr, value));
 }
 
-Witness::Witness(string name, step_t j)
-    : f_id(name)
+Witness::Witness(Atom id, Atom desc, step_t j)
+    : f_id(id)
+    , f_desc(desc)
     , f_j(j)
 {
     DEBUG

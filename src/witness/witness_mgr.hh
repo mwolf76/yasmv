@@ -33,6 +33,7 @@
 
 typedef class WitnessMgr *WitnessMgr_ptr;
 typedef map<Atom, Witness_ptr> WitnessMap;
+typedef vector<Witness_ptr> WitnessList;
 
 class WitnessMgr  {
 public:
@@ -54,14 +55,17 @@ public:
         return ExprMgr::INSTANCE().make_const( value );
     }
 
-    inline const WitnessMap& witnesses() const
-    { return f_map; }
+    inline const WitnessList& witnesses() const
+    { return f_list; }
 
-    // get a registered witness
+    // get a registered witness by id
     Witness& witness( Atom id );
 
-    // register a new witness
-    void register_witness( Witness& w );
+    // get a registered witness by idx
+    Witness& witness( uint32_t index );
+
+    // register a new witness, yield back its index
+    uint32_t register_witness( Witness& w );
 
 protected:
     WitnessMgr();
@@ -72,6 +76,7 @@ private:
 
     // Witness register internal map: id -> witness
     WitnessMap f_map;
+    WitnessList f_list;
 
     // ref to expr manager
     ExprMgr& f_em;

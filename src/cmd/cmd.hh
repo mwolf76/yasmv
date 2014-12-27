@@ -64,8 +64,8 @@ public:
     inline Command_ptr make_witness_list()
     { return new WitnessListCommand(f_interpreter); }
 
-    inline Command_ptr make_witness_show(Expr_ptr wid)
-    { return new WitnessShowCommand(f_interpreter, wid); }
+    inline Command_ptr make_witness_dump(Expr_ptr wid)
+    { return new WitnessDumpCommand(f_interpreter, wid); }
 
 protected:
     CommandMgr();

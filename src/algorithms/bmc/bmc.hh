@@ -58,7 +58,7 @@ private:
     void bmc_ltlspec_check( Expr_ptr property );
 };
 
-/* Specialized for BMC ctx */
+/* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
     BMCCounterExample(Expr_ptr property, IModel& model,

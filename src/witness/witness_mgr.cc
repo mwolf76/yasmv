@@ -42,7 +42,7 @@ Witness& WitnessMgr::witness( Atom id )
     return *wp;
 }
 
-void WitnessMgr::register_witness( Witness& w )
+uint32_t WitnessMgr::register_witness( Witness& w )
 {
     Atom id (w.id());
     WitnessMap::iterator eye = f_map.find( id );
@@ -51,5 +51,7 @@ void WitnessMgr::register_witness( Witness& w )
     }
 
     f_map.insert( make_pair <Atom, Witness_ptr> (id, &w));
+    f_list.push_back( &w );
+    return f_list.size() -1;
 }
 

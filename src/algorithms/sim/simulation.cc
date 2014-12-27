@@ -21,6 +21,10 @@
  **/
 #include <sim/simulation.hh>
 
+// reserved for witnesses
+static unsigned progressive = 0;
+static const char *simulation_trace_prfx = "sim_";
+
 Simulation::Simulation(IModel& model,
                        Expr_ptr condition,
                        Expr_ptr resume_id,
@@ -69,7 +73,10 @@ void Simulation::process()
     if (! has_witness()) {
         assert_fsm_init(0);
         assert_fsm_invar(0);
-        DEBUG << "Starting simulation..." << endl;
+
+        DEBUG
+            << "Starting simulation..."
+            << endl;
     }
     else {
         // here we need to push all the values for variables in the
@@ -79,7 +86,10 @@ void Simulation::process()
 #if 0
         k = witness().size() -1;
         assert( false) ; // TODO
-        DEBUG << "Resuming simulation..." << endl;
+
+        DEBUG
+            << "Resuming simulation..."
+            << endl;
 #else
         assert(0); // not now
 #endif
@@ -87,18 +97,35 @@ void Simulation::process()
 
     if (STATUS_SAT == engine().solve()) {
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-        TRACE << "simulation initialized, took " << secs
-              << " seconds" << endl;
+
+        TRACE
+            << "simulation initialized, took " << secs
+            << " seconds" << endl;
+
         t0 = t1; // resetting clock
 
         if (! has_witness()) {
-            Witness_ptr w = new SimulationWitness( model(), engine(), k, true);
-            wm.register_witness(*w);
-            set_witness(*w);
+            Witness& w(* new SimulationWitness( model(), engine(), k));
+            {
+                ostringstream oss;
+                oss
+                    << simulation_trace_prfx
+                    << (++ progressive);
+                w.set_id(oss.str());
+            }
+            {
+                ostringstream oss;
+                oss
+                    << "Simulation trace";
+                w.set_desc(oss.str());
+            }
+
+            wm.register_witness(w);
+            set_witness(w);
         }
         else {
-            Witness_ptr w = new SimulationWitness( model(), engine(), k);
-            witness().extend(*w);
+            Witness& w( *new SimulationWitness( model(), engine(), k));
+            witness().extend(w);
         }
 
         /* halt simulation? */
@@ -123,9 +150,12 @@ void Simulation::process()
         while (true) {
             t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
             step_t k_ = 1 + k;
-            TRACE << "completed step " << k_
-                  << ", took " << secs << " seconds"
-                  << endl;
+
+            TRACE
+                << "completed step " << k_
+                << ", took " << secs << " seconds"
+                << endl;
+
             t0 = t1; // resetting clock
 
             // TODO: SAT restart after a given number of steps (e.g. 10) would help
@@ -136,8 +166,8 @@ void Simulation::process()
             assert_fsm_invar(k);
 
             if (STATUS_SAT == engine().solve()) {
-                Witness_ptr w = new SimulationWitness( model(), engine(), k);
-                witness().extend(*w);
+                Witness& w(* new SimulationWitness( model(), engine(), k));
+                witness().extend(w);
 
                 if (sigint_caught) {
                     f_status = SIMULATION_INTERRUPTED;
