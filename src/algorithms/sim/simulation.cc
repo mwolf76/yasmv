@@ -25,11 +25,12 @@
 static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
 
-Simulation::Simulation(IModel& model,
+Simulation::Simulation(ICommand& command,
+                       IModel& model,
                        Expr_ptr condition,
                        Expr_ptr resume_id,
                        ExprVector& constraints)
-    : Algorithm(model)
+    : Algorithm(command, model)
     , f_halt_cond( NULL )
     , f_nsteps( NULL )
     , f_constraints(constraints)
@@ -65,7 +66,6 @@ void Simulation::process()
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
 
-    sigint_caught = 0;
     step_t k  = 0;
 
     // if a witness is already there, we're resuming a previous
@@ -129,7 +129,7 @@ void Simulation::process()
         }
 
         /* halt simulation? */
-        if (sigint_caught) {
+        if (0) {
             f_status = SIMULATION_INTERRUPTED;
             return;
         }

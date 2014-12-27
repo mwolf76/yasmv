@@ -141,6 +141,7 @@ AC_CONFIG_FILES([Makefile
                  src/3rdparty/Makefile
                  src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
+                 src/cmd/commands/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
                  src/expr/Makefile

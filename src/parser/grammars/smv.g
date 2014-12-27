@@ -155,6 +155,9 @@ commands returns [Command_ptr res]
     |  c=time_command
        { $res = c; }
 
+    | c=job_command
+      { $res = c; }
+
     |  c=init_command
        { $res = c; }
 
@@ -191,10 +194,29 @@ init_command returns [Command_ptr res]
     : 'init' { $res = cm.make_init(); }
     ;
 
-model_command returns [Command_ptr res]
-    : 'model' fp=filepath
-      { $res = cm.make_load_model(fp); }
+job_command returns [Command_ptr res]
+    :   'job' (
+
+            'list'
+            { $res = cm.make_job_list(); }
+
+        |   'status' wid=identifier
+            { $res = cm.make_job_status(wid); }
+
+        |   'kill' wid=identifier
+            { $res = cm.make_job_kill(wid); }
+        )
     ;
+model_command returns [Command_ptr res]
+    : 'model' (
+            'load' fp=filepath
+            { $res = cm.make_model_load(fp); }
+
+        |   'dump'
+            { $res = cm.make_model_dump(); }
+        )
+    ;
+
 
 verify_command returns[Command_ptr res]
 @init {

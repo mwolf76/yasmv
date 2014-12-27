@@ -22,7 +22,7 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <command.hh>
+#include <commands/commands.hh>
 #include <interpreter.hh>
 
 class CommandMgr;
@@ -49,11 +49,23 @@ public:
     inline Command_ptr make_quit(int retcode =0)
     { return new QuitCommand(f_interpreter, retcode); }
 
-    inline Command_ptr make_load_model(const char *filepath)
-    { return new LoadModelCommand(f_interpreter, filepath); }
+    inline Command_ptr make_model_load(const char *filepath)
+    { return new ModelLoadCommand(f_interpreter, filepath); }
+
+    inline Command_ptr make_model_dump()
+    { return new ModelDumpCommand(f_interpreter); }
 
     inline Command_ptr make_init()
     { return new InitCommand(f_interpreter); }
+
+    inline Command_ptr make_job_list()
+    { return new JobListCommand(f_interpreter); }
+
+    inline Command_ptr make_job_status(Expr_ptr wid)
+    { return new JobStatusCommand(f_interpreter, wid); }
+
+    inline Command_ptr make_job_kill(Expr_ptr wid)
+    { return new JobKillCommand(f_interpreter, wid); }
 
     inline Command_ptr make_simulate(Expr_ptr halt_cond, Expr_ptr resume_id, ExprVector& constraints)
     { return new SimulateCommand(f_interpreter, halt_cond, resume_id, constraints); }

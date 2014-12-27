@@ -34,6 +34,8 @@
 #include <witness.hh>
 #include <variant.hh>
 
+#include <cmd/icommand.hh>
+
 /* Model compiler */
 #include <compiler/compiler.hh>
 
@@ -48,7 +50,7 @@ typedef enum {
 class Algorithm {
 
 public:
-    Algorithm(IModel& model);
+    Algorithm(ICommand& command, IModel& model);
     virtual ~Algorithm();
 
     /* Build encodings */
@@ -112,6 +114,9 @@ protected:
                         group_t group = MAINGROUP);
 
 private:
+    /* Command */
+    ICommand& f_command;
+
     /* Model */
     IModel& f_model;
 
@@ -133,7 +138,6 @@ private:
     Terms f_init;
     Terms f_invar;
     Terms f_trans;
-    Terms f_formula;
 
     /* Witness */
     Witness_ptr f_witness;

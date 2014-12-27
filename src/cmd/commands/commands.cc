@@ -1,5 +1,5 @@
 /*
- * @file command.cc
+ * @file commands.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,7 +21,7 @@
  **/
 #include <ctime>
 #include <common.hh>
-#include <command.hh>
+#include <commands.hh>
 
 #include <expr.hh>
 
@@ -31,18 +31,25 @@
 
 Command::Command(Interpreter& owner)
     : f_owner(owner)
-{ DRIVEL << "Initialized command @" << this << endl; }
+{
+    DRIVEL
+        << "Initialized command @" << this
+        << endl;
+}
 
 Command::~Command()
-{ DRIVEL << "Deinitialized command @" << this << endl; }
+{
+    DRIVEL << "Deinitialized command @" << this
+           << endl;
+}
 
-LoadModelCommand::LoadModelCommand(Interpreter& owner, const string &filename)
+ModelLoadCommand::ModelLoadCommand(Interpreter& owner, const string &filename)
     : Command(owner)
     , f_filename(filename)
 {}
 
 extern void parseFile(const char *filepath); // in utils.cc
-Variant LoadModelCommand::operator()()
+Variant ModelLoadCommand::operator()()
 {
     // parsing
     parseFile(f_filename.c_str());
@@ -53,8 +60,23 @@ Variant LoadModelCommand::operator()()
     return Variant( status ? "Ok" : "ERROR" );
 }
 
-LoadModelCommand::~LoadModelCommand()
+ModelLoadCommand::~ModelLoadCommand()
 {}
+
+ModelDumpCommand::ModelDumpCommand(Interpreter& owner)
+    : Command(owner)
+{}
+
+Variant ModelDumpCommand::operator()()
+{
+
+
+    return Variant ("Ok");
+}
+
+ModelDumpCommand::~ModelDumpCommand()
+{}
+
 
 // -- Help ---------------------------------------------------------------
 HelpCommand::HelpCommand(Interpreter& owner, Atom topic)
@@ -86,7 +108,7 @@ TimeCommand::~TimeCommand()
 // -- Init -------------------------------------------------------------
 InitCommand::InitCommand(Interpreter& owner)
     : Command(owner)
-    , f_init(* ModelMgr::INSTANCE().model())
+    , f_init(*this, * ModelMgr::INSTANCE().model())
 {}
 
 Variant InitCommand::operator()()
@@ -98,10 +120,100 @@ Variant InitCommand::operator()()
 InitCommand::~InitCommand()
 {}
 
+// -- JOB  ----------------------------------------------------------------
+JobListCommand::JobListCommand(Interpreter& owner)
+    : Command(owner)
+{}
+
+Variant JobListCommand::operator()()
+{
+    Jobs::const_iterator eye;
+    ostream &os(cout);
+
+    const Jobs& jobs(Interpreter::INSTANCE().jobs());
+    for (eye = jobs.begin(); eye != jobs.end(); ++ eye) {
+        os
+            << (*eye) -> id()
+            << "\t\t"
+            << (*eye) -> elapsed()
+            << endl;
+
+    }
+    os << endl;
+
+    return Variant("Ok");
+}
+
+JobListCommand::~JobListCommand()
+{}
+
+JobStatusCommand::JobStatusCommand(Interpreter& owner, Expr_ptr wid)
+    : Command(owner)
+    , f_wid(wid)
+{}
+
+Variant JobStatusCommand::operator()()
+{
+    // ostream &os(cout);
+
+    // Job& w = Interpreter::INSTANCE().job( f_wid->atom() );
+    // for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+    //     os << "-- @ " << 1 + time << endl;
+    //     TimeFrame& tf = w[ time ];
+
+    //     SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+    //     while (symbs.has_next()) {
+    //         ISymbol_ptr symb = symbs.next();
+    //         Expr_ptr expr (symb->expr());
+    //         Expr_ptr value(tf.value(expr));
+
+    //         os << symb->expr() << " = " << value << endl;
+    //     }
+    //     os << endl;
+    // }
+
+    return Variant("Ok");
+}
+
+JobStatusCommand::~JobStatusCommand()
+{}
+
+JobKillCommand::JobKillCommand(Interpreter& owner, Expr_ptr wid)
+    : Command(owner)
+    , f_wid(wid)
+{}
+
+Variant JobKillCommand::operator()()
+{
+    // ostream &os(cout);
+
+    // Job& w = JobMgr::INSTANCE().job( f_wid->atom() );
+    // for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+    //     os << "-- @ " << 1 + time << endl;
+    //     TimeFrame& tf = w[ time ];
+
+    //     SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+    //     while (symbs.has_next()) {
+    //         ISymbol_ptr symb = symbs.next();
+    //         Expr_ptr expr (symb->expr());
+    //         Expr_ptr value(tf.value(expr));
+
+    //         os << symb->expr() << " = " << value << endl;
+    //     }
+    //     os << endl;
+    // }
+
+    return Variant("Ok");
+}
+
+JobKillCommand::~JobKillCommand()
+{}
+
 // -- Verify -------------------------------------------------------------
 VerifyCommand::VerifyCommand(Interpreter& owner, Expr_ptr formula, ExprVector& constraints)
     : Command(owner)
-    , f_bmc(* ModelMgr::INSTANCE().model(), formula, constraints)
+    , f_bmc(*this, * ModelMgr::INSTANCE().model(),
+            formula, constraints)
 {}
 
 Variant VerifyCommand::operator()()
@@ -140,7 +252,7 @@ SimulateCommand::SimulateCommand(Interpreter& owner,
                                  Expr_ptr resume_id,
                                  ExprVector& constraints)
     : Command(owner)
-    , f_sim(* ModelMgr::INSTANCE().model(),
+    , f_sim(*this, * ModelMgr::INSTANCE().model(),
             halt_cond, resume_id, constraints)
 {}
 
@@ -211,6 +323,8 @@ Variant WitnessListCommand::operator()()
             << (*eye) -> id()
             << "\t\t"
             << (*eye) -> desc()
+            << "\t\t"
+            << (*eye) -> length()
             << endl;
     }
     os << endl;

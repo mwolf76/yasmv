@@ -25,8 +25,8 @@
 #include <common.hh>
 #include <opts.hh>
 
-class ICommand; // fwd decls
-typedef class ICommand* ICommand_ptr;
+#include <cmd/icommand.hh>
+#include <cmd/job.hh>
 
 typedef class Interpreter* Interpreter_ptr;
 class Interpreter {
@@ -50,6 +50,10 @@ public:
     // process retcode
     inline int retcode() const
     { return f_retcode; }
+
+    // background jobs
+    inline const Jobs& jobs() const
+    { return f_jobs; }
 
     void quit(int retcode);
 
@@ -79,6 +83,11 @@ protected:
             (*f_out) <<  ">> ";
         }
     }
+
+    // jobs mgmt
+    Jobs f_jobs;
+
+    void register_job( Job& job );
 
     int f_retcode;
     bool f_leaving;

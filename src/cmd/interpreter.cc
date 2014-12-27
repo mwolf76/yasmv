@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <command.hh>
+#include <commands/commands.hh>
 #include <interpreter.hh>
 
 Interpreter_ptr Interpreter::f_instance = NULL;
@@ -95,7 +95,23 @@ Variant& Interpreter::operator()()
                          << endl;
                 }
 
-                (*this)(cmd);
+                if (cmd -> blocking())
+                    (*this)(cmd);
+                else {
+                    Job& j (* new Job(*cmd));
+                    register_job(j);
+
+                    ostringstream oss;
+
+                    oss
+                        << "Job "
+                        << j.id()
+                        << " started"
+                    ;
+
+
+                    f_last_result = oss.str();
+                }
             }
             else {
                 f_last_result = Variant("Parsing Error");
@@ -112,3 +128,9 @@ Variant& Interpreter::operator()()
 
     return f_last_result;
 }
+
+void Interpreter::register_job( Job& job )
+{
+    f_jobs.push_back( &job );
+}
+

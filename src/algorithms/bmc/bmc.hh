@@ -31,7 +31,7 @@
 class BMC : public Algorithm {
 
 public:
-    BMC(IModel& model, Expr_ptr formula, ExprVector& constraints);
+    BMC(ICommand& command, IModel& model, Expr_ptr formula, ExprVector& constraints);
     ~BMC();
 
     void process();

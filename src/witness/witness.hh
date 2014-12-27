@@ -179,6 +179,9 @@ public:
     inline step_t last_time()
     { return f_j + f_frames.size() -1; }
 
+    inline step_t length()
+    { return f_frames.size(); }
+
     inline Exprs& lang()
     { return f_lang; }
 

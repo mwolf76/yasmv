@@ -21,8 +21,8 @@
  **/
 #include <init.hh>
 
-Init::Init(IModel& model)
-    : Algorithm(model)
+Init::Init(ICommand& command, IModel& model)
+    : Algorithm(command, model)
 {}
 
 Init::~Init()

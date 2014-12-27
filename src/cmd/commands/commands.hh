@@ -34,16 +34,7 @@
 #include <bmc/bmc.hh>
 #include <sim/simulation.hh>
 
-class ICommand : public IObject {
-public:
-    // functor-pattern
-    Variant virtual operator()() =0;
-
-    virtual bool blocking() const =0;
-
-    // representation
-    friend ostream& operator<<(ostream& os, ICommand& cmd);
-};
+#include <icommand.hh>
 
 // -- command definitions --------------------------------------------------
 class Command : public ICommand {
@@ -57,19 +48,39 @@ protected:
 
 typedef class ICommand* Command_ptr;
 
-class LoadModelCommand : public Command {
+class ModelLoadCommand : public Command {
 public:
     // from FILE
-    LoadModelCommand(Interpreter& owner, const string& filename);
-    virtual ~LoadModelCommand();
+    ModelLoadCommand(Interpreter& owner, const string& filename);
+    virtual ~ModelLoadCommand();
 
     virtual bool blocking() const
     { return true; }
+
+    virtual void kill()
+    { assert(false); }
 
     Variant virtual operator()();
 
 private:
     string f_filename;
+};
+
+class ModelDumpCommand : public Command {
+public:
+    ModelDumpCommand(Interpreter& owner);
+    virtual ~ModelDumpCommand();
+
+    virtual bool blocking() const
+    { return true; }
+
+    virtual void kill()
+    { assert(false); }
+
+    Variant virtual operator()();
+
+private:
+    Atom f_topic;
 };
 
 class HelpCommand : public Command {
@@ -79,6 +90,9 @@ public:
 
     virtual bool blocking() const
     { return true; }
+
+    virtual void kill()
+    { assert(false); }
 
     Variant virtual operator()();
 
@@ -94,6 +108,9 @@ public:
     virtual bool blocking() const
     { return true; }
 
+    virtual void kill()
+    { assert(false); }
+
     Variant virtual operator()();
 };
 
@@ -105,11 +122,61 @@ public:
     virtual bool blocking() const
     { return true; }
 
+    virtual void kill()
+    { assert(false); }
+
     Variant virtual operator()();
 
 private:
     Init f_init;
 };
+
+class JobListCommand : public Command {
+public:
+    JobListCommand(Interpreter& owner);
+    virtual ~JobListCommand();
+    Variant virtual operator()();
+
+    virtual bool blocking() const
+    { return true; }
+
+    virtual void kill()
+    { assert(false); }
+};
+
+
+class JobStatusCommand : public Command {
+public:
+    JobStatusCommand(Interpreter& owner, Expr_ptr wid);
+    virtual ~JobStatusCommand();
+    Variant virtual operator()();
+
+    virtual bool blocking() const
+    { return true; }
+
+    virtual void kill()
+    { assert(false); }
+
+private:
+    Expr_ptr f_wid;
+};
+
+class JobKillCommand : public Command {
+public:
+    JobKillCommand(Interpreter& owner, Expr_ptr wid);
+    virtual ~JobKillCommand();
+    Variant virtual operator()();
+
+    virtual bool blocking() const
+    { return true; }
+
+    virtual void kill()
+    { assert(false); }
+
+private:
+    Expr_ptr f_wid;
+};
+
 
 /* Performs a new simulation with given constraints and halting
    conditions. Simulation can be resumed unless it's last status is
@@ -124,7 +191,10 @@ public:
     virtual ~SimulateCommand();
 
     virtual bool blocking() const
-    { return true; } // TODO: change to false
+    { return false; }
+
+    virtual void kill()
+    { f_kill = true; }
 
     Variant virtual operator()();
 
@@ -140,6 +210,8 @@ private:
 
     // Witness id
     Expr_ptr f_witness;
+
+    bool f_kill;
 };
 
 
@@ -149,7 +221,10 @@ public:
     virtual ~VerifyCommand();
 
     virtual bool blocking() const
-    { return true; } // TODO: change to false
+    { return false; }
+
+    virtual void kill()
+    { assert(false); }
 
     Variant virtual operator()();
 
@@ -172,6 +247,9 @@ public:
     virtual bool blocking() const
     { return true; }
 
+    virtual void kill()
+    { assert(false); }
+
     Variant virtual operator()() =0;
 
 private:
@@ -185,6 +263,9 @@ public:
 
     virtual bool blocking() const
     { return true; }
+
+    virtual void kill()
+    { assert(false); }
 
     Variant virtual operator()();
 
@@ -200,8 +281,10 @@ public:
 
     virtual bool blocking() const
     { return true; }
-};
 
+    virtual void kill()
+    { assert(false); }
+};
 
 class WitnessDumpCommand : public Command {
 public:
@@ -211,6 +294,9 @@ public:
 
     virtual bool blocking() const
     { return true; }
+
+    virtual void kill()
+    { assert(false); }
 
 private:
     Expr_ptr f_wid;

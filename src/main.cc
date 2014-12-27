@@ -159,7 +159,8 @@ int main(int argc, const char *argv[])
         // Run options-generated commands (if any)
         const string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
-            Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
+            Command_ptr cmd = CommandMgr::INSTANCE()
+                .make_model_load(model_filename.c_str());
             batch(cmd);
         }
 

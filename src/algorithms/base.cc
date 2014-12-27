@@ -21,8 +21,9 @@
  **/
 #include <base.hh>
 
-Algorithm::Algorithm(IModel& model)
-    : f_model(model)
+Algorithm::Algorithm(ICommand& command, IModel& model)
+    : f_command(command)
+    , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
