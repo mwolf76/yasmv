@@ -54,9 +54,11 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
     assert_fsm_invar(0);
     assert_formula(0, vv, engine().new_group());
 
-    TRACE << "Looking for a BMC CEX of length 0" << endl;
-    if (STATUS_UNSAT == engine().solve()) {
+    TRACE
+        << "Looking for a BMC CEX of length 0"
+        << endl;
 
+    if (STATUS_UNSAT == engine().solve()) {
         do {
             /* disable last violation */
             engine().toggle_last_group();
@@ -75,65 +77,18 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
     }
 
     if (STATUS_SAT == engine().status()) {
+        WitnessMgr& wm = WitnessMgr::INSTANCE();
+
         f_status = MC_FALSE;
 
-        TRACE << "Found BMC CEX witness (k = " << k
-              << "), invariant " << invariant <<
-            " is FALSE." << endl;
-
-        /* CEX extraction */
-        ostringstream oss;
-        oss << "CEX for '" << property << "'";
+        TRACE
+            << "Found CEX witness (k =" << k << "), invariant " << invariant
+            << " is FALSE."
+            << endl;
 
         Witness& w(* new BMCCounterExample(property, model(),
                                            engine(), k, false));
-        if (1) {
-            for (step_t time = 0; time <= w.last_time(); ++ time) {
-                step_t time_ = 1 + time;
-                TRACE
-                    << "-- @ " << time_ << endl;
-
-                TimeFrame& tf = w[ time ];
-
-                SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
-                while (symbs.has_next()) {
-
-                    ISymbol_ptr symb = symbs.next();
-                    Expr_ptr value = NULL;
-
-                    if (symb->is_variable())  {
-                        Expr_ptr expr (symb->expr());
-
-                        try {
-                            value = tf.value(expr);
-                        }
-                        catch (NoValue nv) {
-                            value = ExprMgr::INSTANCE().make_undef();
-                        }
-
-                        TRACE
-                            << expr << " = " << value << endl;
-                    }
-                    else if (symb->is_define()) {
-                        Expr_ptr ctx (symb->ctx());
-                        Expr_ptr expr (symb->expr());
-
-                        try {
-                            value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-                        }
-                        catch (NoValue nv) {
-                            value = ExprMgr::INSTANCE().make_undef();
-                        }
-
-                        TRACE
-                            << expr << " = " << value << endl;
-                    }
-                    else {
-                        continue;
-                    }
-                }
-            }
-        }
+        wm.register_witness(w);
     }
 
     else assert(false);

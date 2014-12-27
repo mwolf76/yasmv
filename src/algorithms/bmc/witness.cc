@@ -32,7 +32,8 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
     : Witness()
 {
     ostringstream oss;
-    oss << "BMC CEX witness for property "
+    oss
+        << "CEX witness for property "
         << property;
     set_id(oss.str());
 

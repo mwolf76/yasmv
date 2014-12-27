@@ -57,7 +57,7 @@ value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
     f_time_stack.push_back(time);
 
     FQExpr key(ctx, body, time);
-    TRACE << "Evaluating " << key << endl;
+    DEBUG << "Evaluating " << key << endl;
 
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
