@@ -1,0 +1,14 @@
+gnuSMV - The YASMINE project
+
+README
+======
+
+This directory contains the microcode files YASMINE. Due to size, the
+microcode is currently distributed as a bz2 tarball called
+`microcode.tar.bz2`. Unpack the contents of this tarball and set the
+environment variable `YASMV_HOME` to its parent directory.
+
+The microcode covers the full set of supported operators on n-bit
+integers (n varying from 1 to 64). It is required to enable support
+for integer and (FUTURE) fixed-point arithmetic.
+
