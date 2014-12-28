@@ -25,6 +25,7 @@ Algorithm::Algorithm(ICommand& command, IModel& model)
     : f_command(command)
     , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
+    , f_bm(EncodingMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_engine(* new SAT())
@@ -206,5 +207,78 @@ void Algorithm::assert_fsm_trans(step_t time, group_t group)
     DEBUG << "Done. (took " << secs << " seconds)" << endl;
 }
 
+void Algorithm::assert_fsm_uniqueness( step_t j, step_t k, group_t group)
+{
+    SAT& eng(engine());
+    SymbIter symbs( model(), NULL ); // no COI support yet
+
+    typedef vector<Var> Vars;
+    Vars uniqueness_vars;
+
+    /* define uniqueness_vars into the solver ... */
+    while (symbs.has_next()) {
+        ISymbol_ptr symb = symbs.next();
+
+        /* currently all variables are state vars, no need
+           to worry further about this _for now_ */
+        if (symb->is_variable()) {
+
+            Expr_ptr ctx  (symb->ctx());
+            Expr_ptr expr (symb->expr());
+
+            FQExpr key(ctx, expr);
+            IEncoding_ptr enc = f_bm.find_encoding(key);
+
+            DDVector::const_iterator di;
+            unsigned ndx;
+            for (ndx = 0, di = enc->bits().begin();
+                 enc->bits().end() != di; ++ ndx, ++ di) {
+
+                unsigned bit = (*di).getNode()->index;
+
+                const UCBI& ucbi = f_bm.find_ucbi(bit);
+                const TCBI& jtcbi = TCBI(ucbi.ctx(), ucbi.expr(),
+                                         ucbi.time(), ucbi.bitno(), j);
+                const TCBI& ktcbi = TCBI(ucbi.ctx(), ucbi.expr(),
+                                         ucbi.time(), ucbi.bitno(), k);
+
+                Var jkne = eng.new_sat_var();
+                uniqueness_vars.push_back(jkne);
+
+                Var jvar = eng.tcbi_to_var(jtcbi);
+                Var kvar = eng.tcbi_to_var(ktcbi);
+
+                {
+                    vec<Lit> ps;
+                    ps.push( mkLit( jkne, true));
+                    ps.push( mkLit( jvar, true));
+                    ps.push( mkLit( kvar, true));
+                    eng.add_clause(ps);
+                }
+
+                {
+                    vec<Lit> ps;
+                    ps.push( mkLit( jkne, true));
+                    ps.push( mkLit( jvar, true));
+                    ps.push( mkLit( kvar, true));
+                    eng.add_clause(ps);
+                }
+            }
+        }
+    }
+
+    // ... and then assert at least one of them is true
+    vec<Lit> ps;
+    ps.push( mkLit( group, true));
+
+    for (Vars::iterator eye = uniqueness_vars.begin();
+         eye != uniqueness_vars.end(); ++ eye) {
+        ps.push( mkLit( *eye, false));
+    }
+
+    eng.add_clause(ps);
+}
+
 void Algorithm::assert_formula(step_t time, Term& term, group_t group)
 { engine().push( term, time, group); }
+

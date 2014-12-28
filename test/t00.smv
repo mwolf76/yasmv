@@ -1,18 +1,14 @@
--- TODO: add options in model, equivalent to long opts
--- OPT inlined_add, microcode_add
--- OPT inlined_mul, microcode_mul
+FSM t00;
 
-FSM t00
-
-DEFINE
-    counter := (x7 ? 128 : 0) +
-               (x6 ?  64 : 0) +
-               (x5 ?  32 : 0) +
-               (x4 ?  16 : 0) +
-               (x3 ?   8 : 0) +
-               (x2 ?   4 : 0) +
-               (x1 ?   2 : 0) +
-               (x0 ?   1 : 0) ;
+-- DEFINE
+--     counter := (x7 ? 128 : 0) +
+--                (x6 ?  64 : 0) +
+--                (x5 ?  32 : 0) +
+--                (x4 ?  16 : 0) +
+--                (x3 ?   8 : 0) +
+--                (x2 ?   4 : 0) +
+--                (x1 ?   2 : 0) +
+--                (x0 ?   1 : 0) ;
 
 VAR
     x0 : boolean;
@@ -25,50 +21,51 @@ VAR
     x7 : boolean;
 
 INIT
-        ! x0;
+        not x0;
 
 INIT
-        ! x1;
+        not x1;
 
 INIT
-        ! x2;
+        not x2;
 
 INIT
-        ! x3;
+        not x3;
 
 INIT
-        ! x4;
+        not x4;
 
 INIT
-        ! x5;
+        not x5;
 
 INIT
-        ! x6;
+        not x6;
 
 INIT
-        ! x7;
+        not x7;
 
 TRANS
-        next(x0) <-> ! x0;
+        next(x0) <-> not x0;
 
 TRANS
-        next(x1) <-> x0 ? ! x1 : x1;
+        next(x1) <-> ( x0 ? not x1 : x1 );
 
 TRANS
-        next(x2) <-> x0 & x1 ? ! x2 : x2;
+        next(x2) <-> ( x0 and x1 ? not x2 : x2 );
 
 TRANS
-        next(x3) <-> x0 & x1 & x2 ? ! x3 : x3;
+        next(x3) <-> ( x0 and x1 and x2 ? not x3 : x3 );
 
 TRANS
-        next(x4) <-> x0 & x1 & x2 & x3 ? ! x4 : x4;
+        next(x4) <-> ( x0 and x1 and x2 and x3 ? not x4 : x4 );
 
 TRANS
-        next(x5) <-> x0 & x1 & x2 & x3 & x4 ? ! x5 : x5;
+        next(x5) <-> ( x0 and x1 and x2 and x3 and x4 ? not x5 : x5 );
 
 TRANS
-        next(x6) <-> x0 & x1 & x2 & x3 & x4 & x5 ? ! x6 : x6;
+        next(x6) <-> ( x0 and x1 and x2 and x3 and x4 and x5 ? not x6 : x6 );
 
 TRANS
-        next(x7) <-> x0 & x1 & x2 & x3 & x4 & x5 & x6 ? ! x7 : x7;
+        next(x7) <-> ( x0 and x1 and x2 and x3 and x4 and x5 and x6 ? x7 : x7 );
+
 

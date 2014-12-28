@@ -52,13 +52,16 @@ public:
     inline group_t new_group()
     {
         group_t res = new_sat_var();
-        f_groups.push_back(res);
+        f_groups.push(res);
 
         return res;
     }
 
     /**
      * @brief Returns the complete set of defined SAT groups.
+     *
+     * A positive value of the i-th element of this array enables the
+     * i-th group, whereas a negative value disables it.
      */
     inline Groups& groups()
     { return f_groups; }
@@ -88,10 +91,6 @@ public:
             cnf_inject_microcode( *j, time, group );
         }
     }
-
-    /* shortcut */
-    inline void toggle_last_group()
-    { (*f_groups.rbegin()) *= -1; }
 
     /**
      * @brief Invoke Minisat
@@ -175,8 +174,11 @@ public:
         , f_registry(* new CNFRegistry(*this))
         , f_solver()
     {
-        f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
-        DEBUG << "Initialized SAT instance @" << this << endl;
+        /* MAINGROUP (=0) is already there. */
+        f_groups.push(new_sat_var());
+
+        DEBUG
+            << "Initialized SAT instance @" << this << endl;
     }
 
     /**

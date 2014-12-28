@@ -109,6 +109,10 @@ protected:
     void assert_fsm_trans(step_t time,
                           group_t group = MAINGROUP);
 
+    /* Generate uniqueness constraints between j-th and k-th state */
+    void assert_fsm_uniqueness(step_t j, step_t k,
+                               group_t group = MAINGROUP);
+
     /* Generic formulas */
     void assert_formula(step_t time, Term& term,
                         group_t group = MAINGROUP);
@@ -122,6 +126,7 @@ private:
 
     // managers
     ModelMgr& f_mm;
+    EncodingMgr& f_bm;
     ExprMgr& f_em;
     TypeMgr& f_tm;
 

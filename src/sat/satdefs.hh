@@ -71,7 +71,7 @@ struct ptr_hasher  {
 typedef Var group_t;
 const group_t MAINGROUP(0);
 
-typedef vector<group_t> Groups;
+typedef vec<group_t> Groups;
 
 typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 

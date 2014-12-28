@@ -164,11 +164,10 @@ int main(int argc, const char *argv[])
             batch(cmd);
         }
 
-        // interactive cmd loop
-        do {
-            thread t(&process);
-            t.join();
-        } while (! system.is_leaving());
+        do
+            process();
+
+        while (! system.is_leaving());
     }
 
     catch (Exception &e) {

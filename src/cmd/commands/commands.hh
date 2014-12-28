@@ -221,7 +221,7 @@ public:
     virtual ~VerifyCommand();
 
     virtual bool blocking() const
-    { return false; }
+    { return true; }
 
     virtual void kill()
     { assert(false); }

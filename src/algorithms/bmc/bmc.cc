@@ -38,80 +38,100 @@ BMC::~BMC()
 void BMC::bmc_invarspec_check(Expr_ptr property)
 {
     assert( em().is_G( property));
+
+    // local refs
+    SAT& eng(engine());
+    Compiler& cmpl(compiler());
+
     Expr_ptr ctx = em().make_main();
     Expr_ptr invariant = property->lhs();
-    Expr_ptr violation = em().make_not( invariant );
+    Expr_ptr violation = em().make_not(invariant);
 
-    Compiler& cmpl(compiler()); // just a local ref
-
-    cmpl.preprocess( ctx, invariant );
-    Term ii (cmpl.process( ctx, invariant ));
-
-    cmpl.preprocess( ctx, violation);
+    cmpl.preprocess( ctx, violation );
     Term vv (cmpl.process( ctx, violation ));
 
-    step_t k = 0; // to infinity...
+    step_t j, k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
 
-    assert_fsm_init(0);
-    assert_fsm_invar(0);
-    assert_formula(0, vv, engine().new_group());
+    group_t init_fsm_group (eng.new_group());
+    assert (1 == init_fsm_group && 1 == eng.groups()[1]);
 
-    TRACE
-        << "Looking for a BMC CEX of length 0"
-        << endl;
+    assert_fsm_init(0, init_fsm_group);
+    assert_fsm_invar(0, init_fsm_group);
 
-    if (STATUS_UNSAT == engine().solve()) {
-        do {
-            /* disable last violation */
-            engine().toggle_last_group();
+    do {
+        /* disable initial states group */
+        eng.groups()[1] *= -1;
 
-            /* permanently push invariant on last known state */
-            assert_formula(k, ii);
-
-            assert_fsm_trans(k ++);
-            assert_fsm_invar(k);
-            assert_formula(k, vv, engine().new_group());
-
-            TRACE << "Looking for a BMC CEX of length "
-                  << k << endl;
-
-        } while ( STATUS_UNSAT == engine().solve() && ! leave);
-    }
-
-    if (STATUS_SAT == engine().status()) {
-        WitnessMgr& wm = WitnessMgr::INSTANCE();
-
-        f_status = MC_FALSE;
+        /* assert violation in a separate group */
+        assert_formula(k, vv, eng.new_group());
 
         TRACE
-            << "Found CEX witness (k =" << k << "), invariant `" << invariant
-            << "` is FALSE."
+            << "Looking for proof or counterexample (k = " << k  << ")"
             << endl;
 
-        Witness& w(* new BMCCounterExample(property, model(),
-                                           engine(), k, false));
-        {
-            ostringstream oss;
-            oss
-                << cex_trace_prfx
-                << (++ progressive);
-            w.set_id(oss.str());
-        }
-        {
-            ostringstream oss;
-            oss
-                << "CEX witness for property `"
-                << property << "`";
-            w.set_desc(oss.str());
+        if (STATUS_UNSAT == eng.solve()) {
+            TRACE
+                << "Found k-induction proof (k = " << k << "), invariant `" << invariant
+                << "` is TRUE."
+                << endl;
+
+            f_status = MC_TRUE;
+            break;
         }
 
-        wm.register_witness(w);
-        set_witness(w);
-    }
+        /*enable initial states group */
+        eng.groups()[1] *= -1;
 
-    else assert(false);
+        DEBUG
+            << "Checking for violation @"
+            << k
+            << endl;
 
+        if (STATUS_SAT == eng.solve()) {
+            WitnessMgr& wm = WitnessMgr::INSTANCE();
+
+            TRACE
+                << "Found CEX witness (k = " << k << "), invariant `" << invariant
+                << "` is FALSE."
+                << endl;
+
+            Witness& w(* new BMCCounterExample(property, model(),
+                                               eng, k, false));
+            {
+                ostringstream oss;
+                oss
+                    << cex_trace_prfx
+                    << (++ progressive);
+                w.set_id(oss.str());
+            }
+            {
+                ostringstream oss;
+                oss
+                    << "CEX witness for property `"
+                    << property << "`";
+                w.set_desc(oss.str());
+            }
+
+            wm.register_witness(w);
+            set_witness(w);
+
+            f_status = MC_FALSE;
+            break;
+        }
+
+        /* disable violation */
+        eng.groups().last() *= -1;
+
+        /* unrolling */
+        assert_fsm_trans(k ++);
+        assert_fsm_invar(k);
+
+        /* build state uniqueness constraint for each pair of states (j, k), where j < k */
+        for (j = 0; j < k; ++ j)
+            assert_fsm_uniqueness(j, k);
+
+    } while (! leave);
 }
 
 void BMC::bmc_ltlspec_check( Expr_ptr property )

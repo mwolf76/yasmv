@@ -31,17 +31,18 @@ status_t SAT::sat_solve_groups(const Groups& groups)
     vec<Lit> assumptions;
 
     clock_t t0 = clock();
-    DEBUG << "Solving ... " << endl;
-
-    Groups::const_iterator i;
-    for (i = groups.begin(); groups.end() != i; ++ i) {
-        int grp = *i;
+    for (int i = 0; i < groups.size(); ++ i) {
+        Var grp = groups[i];
 
         /* Assumptions work like "a -> phi", thus a non-negative
-           value enables group, whereas a negative value disables
-           it. */
+           value enables group, whereas a negative value disables it. */
         assumptions.push( mkLit( abs(grp), grp < 0));
     }
+
+    DEBUG
+        << "Solving with following assumptions..."
+        << assumptions
+        << endl;
 
     f_status = f_solver.solve(assumptions)
         ? STATUS_SAT
@@ -50,7 +51,13 @@ status_t SAT::sat_solve_groups(const Groups& groups)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
+
+    DEBUG
+        << "Took "
+        << secs
+        << " seconds. Status is "
+        << f_status << "."
+        << endl;
 
     return f_status;
 }
