@@ -29,6 +29,8 @@
 
 // the Minisat SAT solver
 #include <minisat/core/Solver.h>
+#include <minisat/simp/SimpSolver.h>
+
 #include <minisat/core/SolverTypes.h>
 
 using Minisat::Lit;
@@ -36,7 +38,9 @@ using Minisat::mkLit;
 using Minisat::Var;
 using Minisat::lbool;
 using Minisat::vec;
+
 using Minisat::Solver;
+using Minisat::SimpSolver;
 
 // for microcode
 typedef vector<Lit> Lits;
