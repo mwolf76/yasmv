@@ -69,9 +69,74 @@ ModelDumpCommand::ModelDumpCommand(Interpreter& owner)
 
 Variant ModelDumpCommand::operator()()
 {
+    ostringstream oss;
 
+    IModel& model (* ModelMgr::INSTANCE().model());
 
-    return Variant ("Ok");
+    oss
+        << endl
+        << "FSM "
+        << model.name()
+        << ";"
+        << endl;
+
+    const Modules& modules (model.modules());
+    for (Modules::const_iterator m = modules.begin();
+         m != modules.end(); ++ m) {
+
+        Module& module = dynamic_cast <Module&> (*m->second);
+
+        /* INIT */
+        const ExprVector init = module.init();
+        if (init.begin() != init.end())
+            oss << endl;
+        for (ExprVector::const_iterator init_eye = init.begin();
+             init_eye != init.end(); ++ init_eye) {
+
+            Expr_ptr body (*init_eye);
+
+            oss
+                << "INIT "
+                << body
+                << ";"
+                << endl;
+
+        }
+
+        /* INVAR */
+        const ExprVector invar = module.invar();
+        if (invar.begin() != invar.end())
+            oss << endl;
+        for (ExprVector::const_iterator invar_eye = invar.begin();
+             invar_eye != invar.end(); ++ invar_eye) {
+
+            Expr_ptr body (*invar_eye);
+
+            oss
+                << "INVAR "
+                << body
+                << ";"
+                << endl;
+        }
+
+        /* TRANS */
+        const ExprVector trans = module.trans();
+        if (trans.begin() != trans.end())
+            oss << endl;
+        for (ExprVector::const_iterator trans_eye = trans.begin();
+             trans_eye != trans.end(); ++ trans_eye) {
+
+            Expr_ptr body (*trans_eye);
+
+            oss
+                << "TRANS "
+                << body
+                << ";"
+                << endl;
+        }
+    }
+
+    return Variant (oss.str());
 }
 
 ModelDumpCommand::~ModelDumpCommand()
