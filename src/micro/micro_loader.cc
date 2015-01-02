@@ -95,7 +95,7 @@ MicroLoader::MicroLoader(const path& filepath)
     else assert (false);
 
     const char* width(fragments[2].c_str());
-    for (char *p = 0; *p; ++ p)
+    for (const char *p = width; *p; ++ p)
         assert( isdigit(*p));
 
     f_triple = make_op_triple( 's' == *signedness, op_type, atoi(width));
