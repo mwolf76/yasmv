@@ -30,6 +30,8 @@ inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int wid
     return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
 }
 
+
+
 // triple helper getters
 inline bool triple_issigned( const OpTriple& triple )
 { return triple.get<0>(); }
@@ -60,7 +62,6 @@ struct OpTripleEq {
             x.get<2>() == y.get<2>()  ;
     }
 };
-ostream& operator<<(ostream& os, OpTriple triple);
 
 class MicroDescriptor {
 
@@ -95,34 +96,11 @@ private:
     DDVector f_y;
 };
 
+// helpers
+ostream& operator<<(ostream& os, OpTriple triple);
 ostream& operator<<(ostream& os, MicroDescriptor& md);
 
 typedef vector<MicroDescriptor> MicroDescriptors;
 
-// compiler output, TODO: move this
-class Term {
-public:
-    Term()
-        : f_formula()
-        , f_descriptors()
-    {}
-
-    Term(DDVector& formula, MicroDescriptors& descriptors)
-        : f_formula(formula)
-        , f_descriptors(descriptors)
-    {}
-
-    inline const DDVector& formula() const
-    { return f_formula; }
-
-    inline const MicroDescriptors& descriptors() const
-    { return f_descriptors; }
-
-private:
-    DDVector f_formula;
-    MicroDescriptors f_descriptors;
-};
-
-typedef vector<Term> Terms;
 
 #endif

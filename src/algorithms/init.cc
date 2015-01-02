@@ -23,7 +23,9 @@
 
 Init::Init(ICommand& command, IModel& model)
     : Algorithm(command, model)
-{}
+{
+    setup();
+}
 
 Init::~Init()
 {}
@@ -32,10 +34,6 @@ void Init::process()
 {
     clock_t t0 = clock(), t1;
     double secs;
-
-    prepare();
-
-    compile();
 
     t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 

@@ -232,7 +232,7 @@ private:
     // BMC machinery
     BMC f_bmc;
 
-    // the formula to be verifyed
+    // the formula to be verified
     Expr_ptr f_property;
 
     // additional constraints (optional)

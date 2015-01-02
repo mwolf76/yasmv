@@ -235,6 +235,7 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
 void Compiler::algebraic_relational(const Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
+
     unsigned width;
     bool signedness;
     algebrize_binary_relational(width, signedness);

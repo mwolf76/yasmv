@@ -47,17 +47,15 @@ typedef enum {
     MC_UNKNOWN,
 } mc_status_t;
 
+// Engine-less algorithm base class. Engine instances are provided by strategies.
 class Algorithm {
 
 public:
     Algorithm(ICommand& command, IModel& model);
     virtual ~Algorithm();
 
-    /* Build encodings */
-    virtual void prepare();
-
-    /* Perform compilation */
-    virtual void compile();
+    /* Build encodings are perform model compilation */
+    virtual void setup();
 
     /* Actual MC algorithm (abstract) */
     virtual void process() =0;
@@ -69,7 +67,7 @@ public:
     inline Compiler& compiler()
     { return f_compiler; }
 
-    mc_status_t status() const;
+    inline mc_status_t status() const;
 
     inline bool has_witness() const
     { return NULL != f_witness; }
@@ -86,7 +84,6 @@ public:
     inline IModel& model()
     { return f_model; }
 
-protected:
     inline ModelMgr& mm()
     { return f_mm; }
 
@@ -96,25 +93,22 @@ protected:
     inline TypeMgr& tm()
     { return f_tm; }
 
-    inline SAT& engine()
-    { return f_engine; }
-
     /* FSM */
-    void assert_fsm_init(step_t time,
+    void assert_fsm_init(Engine& engine, step_t time,
                          group_t group = MAINGROUP);
 
-    void assert_fsm_invar(step_t time,
+    void assert_fsm_invar(Engine& engine, step_t time,
                           group_t group = MAINGROUP);
 
-    void assert_fsm_trans(step_t time,
+    void assert_fsm_trans(Engine& engine, step_t time,
                           group_t group = MAINGROUP);
 
     /* Generate uniqueness constraints between j-th and k-th state */
-    void assert_fsm_uniqueness(step_t j, step_t k,
+    void assert_fsm_uniqueness(Engine& engine, step_t j, step_t k,
                                group_t group = MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(step_t time, Term& term,
+    void assert_formula(Engine& engine, step_t time, Term& term,
                         group_t group = MAINGROUP);
 
 private:
@@ -133,9 +127,6 @@ private:
     /* Model Compiler */
     Compiler f_compiler;
 
-    /* The Engine */
-    SAT& f_engine;
-
     /* Parameters */
     ParametersMap f_params;
 
@@ -146,6 +137,10 @@ private:
 
     /* Witness */
     Witness_ptr f_witness;
+
+protected:
+    /* Synchronization */
+    mutex f_mutex;
 };
 
 #endif

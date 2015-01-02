@@ -28,24 +28,23 @@ Algorithm::Algorithm(ICommand& command, IModel& model)
     , f_bm(EncodingMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
-    , f_engine(* new SAT())
     , f_witness(NULL)
 {
     set_param("alg_name", "test");
-    DEBUG  << "Creating algorithm instance "
-           << get_param("alg_name")
-           << " @" << this
-           << endl;
+    DEBUG
+        << "Creating algorithm instance "
+        << get_param("alg_name")
+        << " @" << this
+        << endl;
 }
 
 Algorithm::~Algorithm()
 {
-    DEBUG << "Destroying algorithm instance "
-          << get_param("alg_name")
-          << " @" << this
-          << endl;
-
-    delete & f_engine;
+    DEBUG
+        << "Destroying algorithm instance "
+        << get_param("alg_name")
+        << " @" << this
+        << endl;
 }
 
 void Algorithm::set_param(string key, Variant value)
@@ -62,155 +61,176 @@ Variant& Algorithm::get_param(const string key)
     else return NilValue;
 }
 
-void Algorithm::prepare()
+void Algorithm::setup()
 {
     Compiler& cmpl(compiler()); // just a local ref
     const Modules& modules = f_model.modules();
-    for (Modules::const_iterator m = modules.begin();
-         m != modules.end(); ++ m) {
 
-        Module& module = dynamic_cast <Module&> (*m->second);
+    DEBUG
+        << "Building encodings..."
+        << endl;
 
-        /* INIT */
-        const ExprVector init = module.init();
-        for (ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); ++ init_eye) {
+    {
+        for (Modules::const_iterator m = modules.begin();
+             m != modules.end(); ++ m) {
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*init_eye);
+            Module& module = dynamic_cast <Module&> (*m->second);
 
-            cmpl.preprocess(ctx, body);
+            /* INIT */
+            const ExprVector init = module.init();
+            for (ExprVector::const_iterator init_eye = init.begin();
+                 init_eye != init.end(); ++ init_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*init_eye);
+
+                cmpl.preprocess(ctx, body);
+            }
+
+            /* INVAR */
+            const ExprVector invar = module.invar();
+            for (ExprVector::const_iterator invar_eye = invar.begin();
+                 invar_eye != invar.end(); ++ invar_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*invar_eye);
+
+                cmpl.preprocess(ctx, body);
+            }
+
+            /* TRANS */
+            const ExprVector trans = module.trans();
+            for (ExprVector::const_iterator trans_eye = trans.begin();
+                 trans_eye != trans.end(); ++ trans_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*trans_eye);
+
+                cmpl.preprocess(ctx, body);
+            }
         }
+    } /* prepare() */
 
-        /* INVAR */
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); ++ invar_eye) {
+    DEBUG
+        << "Compiling FSM..."
+        << endl;
 
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*invar_eye);
+    {
+        for (Modules::const_iterator m = modules.begin();
+             m != modules.end(); ++ m) {
 
-            cmpl.preprocess(ctx, body);
+            Module& module = dynamic_cast <Module&> (*m->second);
+
+            /* INIT */
+            const ExprVector init = module.init();
+            for (ExprVector::const_iterator init_eye = init.begin();
+                 init_eye != init.end(); ++ init_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*init_eye);
+
+                f_init.push_back( cmpl.process(ctx, body));
+            }
+
+            /* INVAR */
+            const ExprVector invar = module.invar();
+            for (ExprVector::const_iterator invar_eye = invar.begin();
+                 invar_eye != invar.end(); ++ invar_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*invar_eye);
+
+                f_invar.push_back( cmpl.process(ctx, body));
+            }
+
+            /* TRANS */
+            const ExprVector trans = module.trans();
+            for (ExprVector::const_iterator trans_eye = trans.begin();
+                 trans_eye != trans.end(); ++ trans_eye) {
+
+                Expr_ptr ctx = module.expr();
+                Expr_ptr body = (*trans_eye);
+
+                f_trans.push_back( cmpl.process(ctx, body));
+            }
         }
+    } /* compile() */
+}
 
-        /* TRANS */
-        const ExprVector trans = module.trans();
-        for (ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); ++ trans_eye) {
-
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*trans_eye);
-
-            cmpl.preprocess(ctx, body);
-        }
-    }
-} /* prepare() */
-
-void Algorithm::compile()
-{
-    Compiler& cmpl(compiler()); // just a local ref
-    const Modules& modules = f_model.modules();
-    for (Modules::const_iterator m = modules.begin();
-         m != modules.end(); ++ m) {
-
-        Module& module = dynamic_cast <Module&> (*m->second);
-
-        /* INIT */
-        const ExprVector init = module.init();
-        for (ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); ++ init_eye) {
-
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*init_eye);
-
-            f_init.push_back( cmpl.process(ctx, body));
-        }
-
-        /* INVAR */
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); ++ invar_eye) {
-
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*invar_eye);
-
-            f_invar.push_back( cmpl.process(ctx, body));
-        }
-
-        /* TRANS */
-        const ExprVector trans = module.trans();
-        for (ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); ++ trans_eye) {
-
-            Expr_ptr ctx = module.expr();
-            Expr_ptr body = (*trans_eye);
-
-            f_trans.push_back( cmpl.process(ctx, body));
-        }
-    }
-} /* compile() */
-
-void Algorithm::assert_fsm_init(step_t time, group_t group)
+void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
 {
     unsigned n = f_init.size();
-    DEBUG << "CNFizing INIT @" << time
-          << "... (" << n << " fragments)"
-          << endl;
+    DEBUG
+        << "CNFizing INIT @" << time
+        << "... (" << n << " fragments)"
+        << endl;
 
     clock_t t0 = clock();
 
     Terms::const_iterator i;
     for (i = f_init.begin(); f_init.end() != i; ++ i) {
-        engine().push( *i, time, group);
+        engine.push( *i, time, group);
     }
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG
+        << "Done. (took " << secs << " seconds)"
+        << endl;
 }
 
-void Algorithm::assert_fsm_invar(step_t time, group_t group)
+void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
 {
     unsigned n = f_invar.size();
-    DEBUG << "CNFizing INVAR @" << time
-          << "... (" << n << " fragments)"
-          << endl;
+    DEBUG
+        << "CNFizing INVAR @" << time
+        << "... (" << n << " fragments)"
+        << endl;
 
     clock_t t0 = clock();
 
     Terms::const_iterator i;
     for (i = f_invar.begin(); f_invar.end() != i; ++ i) {
-        engine().push( *i, time, group);
+        engine.push( *i, time, group);
     }
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG
+        << "Done. (took " << secs << " seconds)"
+        << endl;
 }
 
-void Algorithm::assert_fsm_trans(step_t time, group_t group)
+void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 {
     unsigned n = f_trans.size();
-    DEBUG << "CNFizing TRANS @" << time
-          << "... (" << n << " fragments)"
-          << endl;
+    DEBUG
+        << "CNFizing TRANS @" << time
+        << "... (" << n << " fragments)"
+        << endl;
 
     clock_t t0 = clock();
 
     Terms::const_iterator i;
     for (i = f_trans.begin(); f_trans.end() != i; ++ i) {
-        engine().push( *i, time, group);
+        engine.push( *i, time, group);
     }
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG << "Done. (took " << secs << " seconds)" << endl;
+    DEBUG
+        << "Done. (took " << secs << " seconds)"
+        << endl;
 }
 
-void Algorithm::assert_fsm_uniqueness( step_t j, step_t k, group_t group)
+void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
 {
-    SAT& eng(engine());
     SymbIter symbs( model(), NULL ); // no COI support yet
+
+    clock_t t0 = clock();
+    DEBUG
+        << "CNFizing uniqueness(" << j << ", " << k << ")"
+        << endl;
 
     typedef vector<Var> Vars;
     Vars uniqueness_vars;
@@ -242,18 +262,18 @@ void Algorithm::assert_fsm_uniqueness( step_t j, step_t k, group_t group)
                 const TCBI& ktcbi = TCBI(ucbi.ctx(), ucbi.expr(),
                                          ucbi.time(), ucbi.bitno(), k);
 
-                Var jkne = eng.new_sat_var();
+                Var jkne = engine.new_sat_var();
                 uniqueness_vars.push_back(jkne);
 
-                Var jvar = eng.tcbi_to_var(jtcbi);
-                Var kvar = eng.tcbi_to_var(ktcbi);
+                Var jvar = engine.tcbi_to_var(jtcbi);
+                Var kvar = engine.tcbi_to_var(ktcbi);
 
                 {
                     vec<Lit> ps;
                     ps.push( mkLit( jkne, true));
                     ps.push( mkLit( jvar, true));
                     ps.push( mkLit( kvar, true));
-                    eng.add_clause(ps);
+                    engine.add_clause(ps);
                 }
 
                 {
@@ -261,7 +281,7 @@ void Algorithm::assert_fsm_uniqueness( step_t j, step_t k, group_t group)
                     ps.push( mkLit( jkne, true));
                     ps.push( mkLit( jvar, true));
                     ps.push( mkLit( kvar, true));
-                    eng.add_clause(ps);
+                    engine.add_clause(ps);
                 }
             }
         }
@@ -276,9 +296,29 @@ void Algorithm::assert_fsm_uniqueness( step_t j, step_t k, group_t group)
         ps.push( mkLit( *eye, false));
     }
 
-    eng.add_clause(ps);
+    engine.add_clause(ps);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    DEBUG
+        << "Done. (took " << secs << " seconds)"
+        << endl;
 }
 
-void Algorithm::assert_formula(step_t time, Term& term, group_t group)
-{ engine().push( term, time, group); }
+void Algorithm::assert_formula(Engine& engine, step_t time, Term& term, group_t group)
+{
+    clock_t t0 = clock();
+    DEBUG
+        << "CNFizing formula @" << time << " ..."
+        << endl;
+
+    engine.push( term, time, group);
+
+    clock_t elapsed = clock() - t0;
+    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
+    DEBUG
+        << "Done. (took " << secs << " seconds)"
+        << endl;
+}
+
 

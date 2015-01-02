@@ -417,8 +417,8 @@ Variant WitnessDumpCommand::operator()()
         SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
         while (symbs.has_next()) {
 
-            ISymbol_ptr symb = symbs.next();
-            Expr_ptr value = NULL;
+            ISymbol_ptr symb (symbs.next());
+            Expr_ptr value (NULL);
 
             if (symb->is_variable())  {
                 Expr_ptr expr (symb->expr());
@@ -443,10 +443,8 @@ Variant WitnessDumpCommand::operator()()
                 }
                 os << expr << " = " << value << endl;
             }
-            else {
+            else
                 continue;
-            }
-
         }
 
         os << endl;

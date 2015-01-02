@@ -32,7 +32,7 @@
 #include <cudd_mgr.hh>
 #include <enc_mgr.hh>
 
-#include <micro.hh>
+#include <compiler/term.hh>
 
 #include <cnf_registry.hh>
 #include <time_mapper.hh>
@@ -41,6 +41,8 @@ using std::ostream;
 ostream &operator<<(ostream &out, const Lit &lit);
 ostream &operator<<(ostream &out, const vec<Lit> &lits);
 
+
+typedef class SAT Engine;
 class SAT : public IObject {
     //    friend class CNFBuilderSingleCut;
     // friend class CNFBuilderNoCut;

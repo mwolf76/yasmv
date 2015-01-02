@@ -49,6 +49,8 @@ Simulation::Simulation(ICommand& command,
         Witness& w = WitnessMgr::INSTANCE().witness(wid);
         set_witness(w);
     }
+
+    setup();
 }
 
 Simulation::~Simulation()
@@ -59,9 +61,7 @@ void Simulation::process()
     clock_t t0 = clock(), t1;
     double secs;
 
-    prepare();
-
-    compile();
+    Engine engine;
 
     ExprMgr& em = ExprMgr::INSTANCE();
     WitnessMgr& wm = WitnessMgr::INSTANCE();
@@ -71,8 +71,8 @@ void Simulation::process()
     // if a witness is already there, we're resuming a previous
     // simulation. Hence, no need for initial states.
     if (! has_witness()) {
-        assert_fsm_init(0);
-        assert_fsm_invar(0);
+        assert_fsm_init(engine, 0);
+        assert_fsm_invar(engine, 0);
 
         DEBUG
             << "Starting simulation..."
@@ -95,7 +95,7 @@ void Simulation::process()
 #endif
     }
 
-    if (STATUS_SAT == engine().solve()) {
+    if (STATUS_SAT == engine.solve()) {
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
         TRACE
@@ -105,7 +105,7 @@ void Simulation::process()
         t0 = t1; // resetting clock
 
         if (! has_witness()) {
-            Witness& w(* new SimulationWitness( model(), engine(), k));
+            Witness& w(* new SimulationWitness( model(), engine, k));
             {
                 ostringstream oss;
                 oss
@@ -124,7 +124,7 @@ void Simulation::process()
             set_witness(w);
         }
         else {
-            Witness& w( *new SimulationWitness( model(), engine(), k));
+            Witness& w( *new SimulationWitness( model(), engine, k));
             witness().extend(w);
         }
 
@@ -160,13 +160,11 @@ void Simulation::process()
 
             // TODO: SAT restart after a given number of steps (e.g. 10) would help
             // preventing performance degradation as k grows larger.
-            assert_fsm_trans(k);
+            assert_fsm_trans(engine, k ++ );
+            assert_fsm_invar(engine, k);
 
-            ++ k;
-            assert_fsm_invar(k);
-
-            if (STATUS_SAT == engine().solve()) {
-                Witness& w(* new SimulationWitness( model(), engine(), k));
+            if (STATUS_SAT == engine.solve()) {
+                Witness& w(* new SimulationWitness( model(), engine, k));
                 witness().extend(w);
 
                 if (sigint_caught) {

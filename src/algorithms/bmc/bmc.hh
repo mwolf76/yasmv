@@ -24,6 +24,7 @@
 #define BMC_ALGORITHM_H
 
 #include <base.hh>
+#include <expr.hh>
 #include <witness.hh>
 
 #include <bmc/normalizer.hh>
@@ -36,8 +37,14 @@ public:
 
     void process();
 
-    mc_status_t status() const
+    inline mc_status_t status() const
     { return f_status; }
+
+    inline void set_status(mc_status_t status)
+    {
+        mutex::scoped_lock acquire(f_mutex);
+        f_status = status;
+    }
 
     Expr_ptr property() const
     { return f_property; }
@@ -51,11 +58,12 @@ private:
     ExprVector f_constraints;
     mc_status_t f_status;
 
-    /* invariant checking */
-    void bmc_invarspec_check( Expr_ptr property );
+    /* strategies */
+    void falsification( Expr_ptr phi );
+    void kinduction( Expr_ptr phi );
 
-    /* full LTL checking */
-    void bmc_ltlspec_check( Expr_ptr property );
+    /* synchronization */
+
 };
 
 /* Specialized for BMC CEX */

@@ -206,7 +206,11 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
 {
     MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x, y);
     f_descriptors.push_back(md);
-    DEBUG << "Registered " << md << endl;
+
+    DEBUG
+        << "Registered "
+        << md
+        << endl;
 }
 
 /* auto id generator */
@@ -331,9 +335,14 @@ void Compiler::post_node_hook(Expr_ptr expr)
 void Compiler::debug_hook()
 {
     activation_record curr = f_recursion_stack.top();
-    DEBUG << "compiler debug hook, expr = " << curr.expr << endl;
+    DEBUG
+        << "compiler debug hook, expr = "
+        << curr.expr << endl;
 
-    DEBUG << "DD Stack" << endl;
+    DEBUG
+        << "DD Stack"
+        << endl;
+
     for (ADDStack::reverse_iterator i = f_add_stack.rbegin();
          i != f_add_stack.rend(); ++ i) {
         DdNode* node = (*i).getNode();
@@ -342,12 +351,17 @@ void Compiler::debug_hook()
               << " [" << paths << "]" << endl;
     }
 
-    DEBUG << "Type Stack" << endl;
+    DEBUG
+        << "Type Stack"
+        << endl;
+
     for (TypeStack::reverse_iterator i = f_type_stack.rbegin();
          i != f_type_stack.rend(); ++ i) {
         DEBUG << *i << endl;
     }
-    DEBUG << "--------------------" << endl;
+    DEBUG
+        << "--------------------"
+        << endl;
 }
 #endif
 

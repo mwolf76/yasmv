@@ -30,65 +30,45 @@ BMC::BMC(ICommand& command, IModel& model, Expr_ptr property, ExprVector& constr
     : Algorithm(command, model)
     , f_property(property)
     , f_constraints(constraints)
-{}
+{
+    setup();
+
+    DEBUG
+        << "Created BMC @"
+        << this
+        << endl;
+}
 
 BMC::~BMC()
 {}
 
-void BMC::bmc_invarspec_check(Expr_ptr property)
+void BMC::falsification( Expr_ptr phi )
 {
-    assert( em().is_G( property));
+    assert( em().is_G( phi ));
 
-    // local refs
-    SAT& eng(engine());
-    Compiler& cmpl(compiler());
+    Engine engine;
 
     Expr_ptr ctx = em().make_main();
-    Expr_ptr invariant = property->lhs();
+
+    Expr_ptr invariant = phi->lhs();
+    compiler().preprocess( ctx, invariant);
+    Term ii (compiler().process( ctx, invariant));
+
     Expr_ptr violation = em().make_not(invariant);
+    compiler().preprocess( ctx, violation );
+    Term vv (compiler().process( ctx, violation));
 
-    cmpl.preprocess( ctx, violation );
-    Term vv (cmpl.process( ctx, violation ));
-
-    step_t j, k = 0; // to infinity...
+    step_t k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
 
-    group_t init_fsm_group (eng.new_group());
-    assert (1 == init_fsm_group && 1 == eng.groups()[1]);
-
-    assert_fsm_init(0, init_fsm_group);
-    assert_fsm_invar(0, init_fsm_group);
+    assert_fsm_init(engine, 0);
+    assert_fsm_invar(engine, 0);
 
     do {
-        /* disable initial states group */
-        eng.groups()[1] *= -1;
-
         /* assert violation in a separate group */
-        assert_formula(k, vv, eng.new_group());
+        assert_formula(engine, k, vv, engine.new_group());
 
-        TRACE
-            << "Looking for proof or counterexample (k = " << k  << ")"
-            << endl;
-
-        if (STATUS_UNSAT == eng.solve()) {
-            TRACE
-                << "Found k-induction proof (k = " << k << "), invariant `" << invariant
-                << "` is TRUE."
-                << endl;
-
-            f_status = MC_TRUE;
-            break;
-        }
-
-        /*enable initial states group */
-        eng.groups()[1] *= -1;
-
-        DEBUG
-            << "Checking for violation @"
-            << k
-            << endl;
-
-        if (STATUS_SAT == eng.solve()) {
+        if (STATUS_SAT == engine.solve()) {
             WitnessMgr& wm = WitnessMgr::INSTANCE();
 
             TRACE
@@ -96,8 +76,7 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
                 << "` is FALSE."
                 << endl;
 
-            Witness& w(* new BMCCounterExample(property, model(),
-                                               eng, k, false));
+            Witness& w(* new BMCCounterExample(phi, model(), engine, k, false));
             {
                 ostringstream oss;
                 oss
@@ -109,42 +88,88 @@ void BMC::bmc_invarspec_check(Expr_ptr property)
                 ostringstream oss;
                 oss
                     << "CEX witness for property `"
-                    << property << "`";
+                    << phi
+                    << "`"
+                ;
                 w.set_desc(oss.str());
             }
 
             wm.register_witness(w);
-            set_witness(w);
 
-            f_status = MC_FALSE;
+            set_witness(w);
+            set_status( MC_FALSE );
+
             break;
         }
 
-        /* disable violation */
-        eng.groups().last() *= -1;
+        /* disable violation and add invariant */
+        engine.groups().last() *= -1;
+        assert_formula(engine, k, ii, engine.new_group());
 
         /* unrolling */
-        assert_fsm_trans(k ++);
-        assert_fsm_invar(k);
+        assert_fsm_trans(engine, k ++);
+        assert_fsm_invar(engine, k);
+
+    } while (f_status == MC_UNKNOWN && !leave);
+}
+
+void BMC::kinduction( Expr_ptr phi )
+{
+    assert( em().is_G( phi ));
+
+    Engine engine;
+
+    Expr_ptr ctx = em().make_main();
+
+    Expr_ptr invariant = phi->lhs();
+    compiler().preprocess( ctx, invariant);
+    Term ii (compiler().process( ctx, invariant));
+
+    Expr_ptr violation = em().make_not(invariant);
+    compiler().preprocess( ctx, violation );
+    Term vv (compiler().process( ctx, violation));
+
+    step_t j, k = 0; // to infinity...
+    bool leave = false; // TODO: somebody telling us to stop
+
+    do {
+        /* assert violation in a separate group */
+        assert_formula(engine, k, vv, engine.new_group());
+
+        if (STATUS_UNSAT == engine.solve()) {
+            TRACE
+                << "Found k-induction proof (k = " << k << "), invariant `" << invariant
+                << "` is TRUE."
+                << endl;
+
+            set_status( MC_TRUE );
+            break;
+        }
+
+        /* disable violation and add invariant */
+        engine.groups().last() *= -1;
+
+        assert_formula(engine, k, ii, engine.new_group());
+
+        /* unrolling */
+        assert_fsm_trans(engine, k ++);
+        assert_fsm_invar(engine, k);
 
         /* build state uniqueness constraint for each pair of states (j, k), where j < k */
         for (j = 0; j < k; ++ j)
-            assert_fsm_uniqueness(j, k);
+            assert_fsm_uniqueness(engine, j, k);
 
-    } while (! leave);
+    } while (f_status == MC_UNKNOWN && !leave);
+
 }
 
-void BMC::bmc_ltlspec_check( Expr_ptr property )
-{
-    assert(false); // TODO: not yet implemented
-}
+// void BMC::bmc_ltlspec_check( Expr_ptr property )
+// {
+//     assert(false); // TODO: not yet implemented
+// }
 
 void BMC::process()
 {
-    prepare();
-
-    compile();
-
     Normalizer normalizer( ModelMgr::INSTANCE());
     normalizer.process( f_property );
     if (normalizer.is_invariant()) {
@@ -152,15 +177,24 @@ void BMC::process()
               << " is an invariant (i.e. G-only) LTL property"
               << endl;
 
-        bmc_invarspec_check( normalizer.property() );
+        Expr_ptr phi = normalizer.property();
+
+        set_status( MC_UNKNOWN );
+
+        // launch parallel threads
+        thread base(&BMC::falsification, this, phi);
+        thread step(&BMC::kinduction, this, phi);
+
+        base.join();
+        step.join();
     }
     else {
         TRACE << f_property
               << " is a full LTL property"
               << endl;
 
-        bmc_ltlspec_check( normalizer.property() );
+        assert( false );
+        // bmc_ltlspec_check( normalizer.property() );
     }
     TRACE << "Done." << endl;
 }
-

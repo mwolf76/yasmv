@@ -56,12 +56,18 @@ Compiler::Compiler()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
 {
-    DEBUG << "Created Compiler @" << this << endl;
+    DEBUG
+        << "Created Compiler @"
+        << this
+        << endl;
 }
 
 Compiler::~Compiler()
 {
-    DEBUG << "Destroying Compiler @" << this << endl;
+    DEBUG
+        << "Destroying Compiler @"
+        << this
+        << endl;
 }
 
 /* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
