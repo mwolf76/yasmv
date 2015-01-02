@@ -9,7 +9,6 @@ AC_CONFIG_AUX_DIR([helpers])
 AC_CONFIG_MACRO_DIR([m4])
 AM_CONFIG_HEADER([config.h])
 
-# AM_INIT_AUTOMAKE([1.9 tar-ustar no-define])
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST

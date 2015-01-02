@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = subdir-objects
+# AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = src doc
 
 ACLOCAL_AMFLAGS = -I m4
@@ -24,16 +24,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-# this raises a warning, it's all good :-)
-all: all-recursive
-	@YASMV_HOME=`pwd` ./tests --log_level=test_suite
-	@echo "Done."
-
 bin_PROGRAMS = yasmv tests
 
 # tags target helper  (uses exuberant ctags)
 tags:
-	@ctags -Re $(top_srcdir)
+	@ctags -Ref TAGS $(top_srcdir)
 
 yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la		\
