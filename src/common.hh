@@ -26,6 +26,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <csignal>
+#include <cctype>
 
 /* custom C definitions */
 #include <cdefs.h>
@@ -83,6 +84,9 @@ using std::map;
 #include <boost/thread.hpp>
 using boost::thread;
 using boost::thread_interrupted;
+
+#include <boost/thread/mutex.hpp>
+using boost::mutex;
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>

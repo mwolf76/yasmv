@@ -29,9 +29,6 @@
 #include <expr.hh>
 #include <pool.hh>
 
-typedef unordered_map<ExprType, string> exprTypeToStringMap;
-typedef unordered_map<string, ExprType> exprTypeFromStringMap;
-
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
@@ -441,6 +438,17 @@ public:
     }
 
     /* -- Builtin identifiers and constants --------------------------------- */
+    inline Expr_ptr make_identifier(Atom atom)
+    {
+        mutex::scoped_lock lock(f_atom_mutex);
+
+        AtomPoolHit ah = f_atom_pool.insert(atom);
+        const Atom& pooled_atom =  (* ah.first);
+
+        // no copy occurs here
+        return make_expr(pooled_atom);
+    }
+
     inline Expr_ptr make_temp() const
     { return temp_expr; }
 
@@ -501,29 +509,6 @@ public:
     inline bool is_one(const Expr_ptr expr) const {
         assert(expr);
         return is_constant(expr) && (1 == expr->u.f_value);
-    }
-
-    // Here a bit of magic occurs, so it's better to keep a note:
-    // this method is used by the parser to build identifier
-    // nodes.  The function is fed with a const char* coming from
-    // the Lexer, an Atom object (which in current implementation
-    // is in fact a std::string) is built on-the-fly and used to
-    // search the atom pool. The atom resulting from the search is
-    // always the one stored in the pool. The auto atom object,
-    // however gets destroyed as it gets out of scope, so no leak
-    // occurs.
-    inline Expr_ptr make_identifier(Atom atom)
-    {
-        AtomPoolHit ah = f_atom_pool.insert(atom);
-        const Atom& pooled_atom =  (* ah.first);
-#if 0
-        if (ah.second) {
-            DRIVEL << "Added new atom to pool: '"
-                   << pooled_atom << "'" << endl;
-        }
-#endif
-        // no copy occurs here
-        return make_expr(pooled_atom);
     }
 
     inline Expr_ptr make_dec_const(Atom atom)
@@ -681,9 +666,6 @@ public:
         return (*f_instance);
     }
 
-    ExprType exprTypeFromString (string exprTypeString );
-    string exprTypeToString(ExprType exprType);
-
 protected:
     ExprMgr();
     ~ExprMgr();
@@ -691,8 +673,7 @@ protected:
 private:
     static ExprMgr_ptr f_instance;
 
-
-    /* mid level services, inlined for performance */
+    /* mid level services */
     inline Expr_ptr make_expr(ExprType et, Expr_ptr a, Expr_ptr b)
     {
         Expr tmp(et, a, b); // we need a temp store
@@ -705,16 +686,13 @@ private:
         return __make_expr(&tmp);
     }
 
-    // low-level, inlined for performance
+    // synchronized low-level services
     inline Expr_ptr __make_expr(Expr_ptr expr) {
+        mutex::scoped_lock lock(f_expr_mutex);
+
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
-#if 0
-        if (eh.second) {
-            DRIVEL << "Added new expr to pool: '"
-                   << pooled_expr << "'" << endl;
-        }
-#endif
+
         return pooled_expr;
     }
 
@@ -746,11 +724,12 @@ private:
     /* toplevel default ctx (for command line exprs) */
     Expr_ptr default_ctx_expr;
 
-    /* shared pools */
+    /* synchronized shared pools */
+    mutex f_expr_mutex;
     ExprPool f_expr_pool;
-    AtomPool f_atom_pool;
 
-    exprTypeFromStringMap f_s2e;
+    mutex f_atom_mutex;
+    AtomPool f_atom_pool;
 };
 
 #endif

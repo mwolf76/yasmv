@@ -63,28 +63,6 @@ ExprMgr::ExprMgr()
 
     default_ctx_expr = main_expr; // make_identifier(DEFAULT_CTX_TOKEN);
 
-    // arithmetical ops
-    f_s2e.insert( make_pair < string, ExprType > ( "neg", NEG ));
-    f_s2e.insert( make_pair < string, ExprType > ( "add", PLUS ));
-    f_s2e.insert( make_pair < string, ExprType > ( "sub", SUB ));
-    f_s2e.insert( make_pair < string, ExprType > ( "div", DIV ));
-    f_s2e.insert( make_pair < string, ExprType > ( "mod", MOD ));
-    f_s2e.insert( make_pair < string, ExprType > ( "mul", MUL ));
-
-    f_s2e.insert( make_pair < string, ExprType > ( "not", BW_NOT ));
-    f_s2e.insert( make_pair < string, ExprType > ( "or", BW_OR ));
-    f_s2e.insert( make_pair < string, ExprType > ( "and", BW_AND ));
-    f_s2e.insert( make_pair < string, ExprType > ( "xor", BW_XOR ));
-    f_s2e.insert( make_pair < string, ExprType > ( "xnor", BW_XNOR ));
-
-    // relational ops
-    f_s2e.insert( make_pair < string, ExprType > ( "eq", EQ ));
-    f_s2e.insert( make_pair < string, ExprType > ( "ne", NE ));
-    f_s2e.insert( make_pair < string, ExprType > ( "gt", GT ));
-    f_s2e.insert( make_pair < string, ExprType > ( "ge", GE ));
-    f_s2e.insert( make_pair < string, ExprType > ( "lt", LT ));
-    f_s2e.insert( make_pair < string, ExprType > ( "le", LE ));
-
     DEBUG << "ExprMgr @" << this << " initialized" << endl;
 }
 
@@ -105,18 +83,5 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
     }
 
     return make_set(res);
-}
-
-ExprType ExprMgr::exprTypeFromString (string exprTypeString )
-{
-    exprTypeFromStringMap::const_iterator i = f_s2e.find( exprTypeString );
-    if (i == f_s2e.end()) {
-        cerr << "Unsupported microcode file found: "
-             << exprTypeString
-             << endl;
-        exit(1);
-    }
-
-    return (*i).second;
 }
 

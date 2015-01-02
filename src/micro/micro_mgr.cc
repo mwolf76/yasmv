@@ -46,57 +46,6 @@
 // static initialization
 MicroMgr_ptr MicroMgr::f_instance = NULL;
 
-static const char* JSON_GENERATED = "generated";
-static const char* JSON_CNF       = "cnf";
-
-ostream& operator<<(ostream& os, OpTriple triple)
-{
-    bool is_signed (triple.get<0>());
-    os << (is_signed ? "s" : "u");
-    switch (triple.get<1>())   {
-    case NEG: os << "neg"; break;
-    case NOT: os << "not"; break;
-
-    case PLUS: os << "add"; break;
-    case SUB:  os << "sub"; break;
-    case MUL:  os << "mul"; break;
-    case DIV:  os << "div"; break;
-    case MOD:  os << "mod"; break;
-
-    case BW_AND: os << "and"; break;
-    case BW_OR:  os << "or";  break;
-    case BW_XOR: os << "xor"; break;
-    case BW_XNOR:os << "xnor";break;
-    case IMPLIES: os << "implies"; break;
-
-    case EQ: os << "eq"; break;
-    case NE: os << "ne"; break;
-    case LT: os << "lt"; break;
-    case LE: os << "le"; break;
-    case GT: os << "gt"; break;
-    case GE: os << "ge"; break;
-
-    default: assert(false);
-    }
-    os << triple.get<2>();
-    return os;
-}
-
-MicroLoaderException::MicroLoaderException(const OpTriple& triple)
-    : f_triple(triple)
-{}
-
-const char* MicroLoaderException::what() const throw()
-{
-    ostringstream oss;
-    oss << "MicroLoaderException: can not instantiate loader for" << f_triple;
-
-    return oss.str().c_str();
-}
-
-MicroLoaderException::~MicroLoaderException() throw()
-{}
-
 MicroMgr::MicroMgr()
 {
     char *basepath = getenv( YASMV_HOME );
@@ -153,7 +102,6 @@ MicroMgr::MicroMgr()
  {
  }
 
-
 MicroLoader& MicroMgr::require(const OpTriple& triple)
 {
     MicroLoaderMap::const_iterator i = f_loaders.find( triple );
@@ -164,72 +112,36 @@ MicroLoader& MicroMgr::require(const OpTriple& triple)
     return * i->second;
 }
 
-
-MicroLoader::MicroLoader(const path& filepath)
-    : f_fullpath(filepath)
-    , f_ready(false)
-    , f_microcode()
+ostream& operator<<(ostream& os, OpTriple triple)
 {
-    const string native (filepath.filename().replace_extension().native());
+    bool is_signed (triple.get<0>());
+    os << (is_signed ? "s" : "u");
+    switch (triple.get<1>()) {
+    case NEG: os << "neg"; break;
+    case NOT: os << "not"; break;
 
-    std::vector<std::string> fragments;
-    split(fragments, native, boost::is_any_of("-"));
+    case PLUS: os << "add"; break;
+    case SUB:  os << "sub"; break;
+    case MUL:  os << "mul"; break;
+    case DIV:  os << "div"; break;
+    case MOD:  os << "mod"; break;
 
-    // FIXME: better validation for microcode fragment filenames
-    assert(fragments.size() == 3 && (fragments[0] == "s" || fragments[0] == "u"));
+    case BW_AND: os << "and"; break;
+    case BW_OR:  os << "or";  break;
+    case BW_XOR: os << "xor"; break;
+    case BW_XNOR:os << "xnor";break;
+    case IMPLIES: os << "implies"; break;
 
-    bool op_signed (fragments[0] == "s");
-    ExprType op_type (ExprMgr::INSTANCE().exprTypeFromString(fragments[1]));
-    int op_width (strtol(fragments[2].c_str(), NULL, 10));
+    case EQ: os << "eq"; break;
+    case NE: os << "ne"; break;
+    case LT: os << "lt"; break;
+    case LE: os << "le"; break;
+    case GT: os << "gt"; break;
+    case GE: os << "ge"; break;
 
-    f_triple = make_op_triple( op_signed, op_type, op_width );
-}
-
-MicroLoader::~MicroLoader()
-{}
-
-void MicroLoader::fetch_microcode()
-{
-    unsigned count(0);
-    clock_t t0 = clock(), t1;
-    double secs;
-
-    // this shall be executed only once
-    assert( ! f_ready );
-
-    Lits newClause;
-    ifstream json_file(f_fullpath.c_str());
-
-    Json::Value obj;
-    json_file >> obj;
-    assert(obj.type() == Json::objectValue);
-
-    const Json::Value generated (obj[ JSON_GENERATED ]);
-    DEBUG
-        << "Loading microcode for " << f_triple
-        << ", generated " << generated
-        << endl;
-
-    const Json::Value cnf (obj[ JSON_CNF ]);
-    assert( cnf.type() == Json::arrayValue);
-
-    for (Json::Value::const_iterator i = cnf.begin(); cnf.end() != i; ++ i) {
-        const Json::Value clause (*i);
-
-        assert( clause.type() == Json::arrayValue);
-        newClause.clear();
-        for (Json::Value::const_iterator j = clause.begin(); clause.end() != j; ++ j) {
-            const Json::Value literal (*j);
-            assert( literal.type() == Json::intValue );
-            newClause.push_back( Minisat::toLit(literal.asInt()));
-        }
-        f_microcode.push_back( newClause ); ++ count;
+    default: assert(false);
     }
-    t1 = clock(); secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-    DEBUG << count
-          << " clauses fetched, took " << secs
-          << " ms"
-          << endl;
-
-    f_ready = true;
+    os << triple.get<2>();
+    return os;
 }
+

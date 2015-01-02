@@ -57,7 +57,9 @@ TypeMgr::TypeMgr()
 
 const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 {
+    mutex::scoped_lock lock(f_register_mutex);
     assert( f_em.is_type(expr));
+
     if (f_em.is_unsigned_int( expr->lhs())) {
         return find_unsigned( expr->rhs()->value());
     }
@@ -70,6 +72,8 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_unsigned_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -82,6 +86,8 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractional)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_unsigned_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -95,8 +101,11 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractio
 
 const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_int_type(digits),
                                         f_em.make_const(size)));
+
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
 
@@ -111,6 +120,8 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
                                                  unsigned fractional,
                                                  unsigned size)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -126,6 +137,8 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
 
 const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_signed_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -138,6 +151,8 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 
 const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractional)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_signed_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -151,6 +166,8 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractiona
 
 const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -167,6 +184,8 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
                                                unsigned fractional,
                                                unsigned size)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -181,6 +200,8 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
 
 const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
 
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -193,8 +214,10 @@ const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
     return res;
 }
 
-void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
+void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     /*
        IMPORTANT: lits ordering has to be canonical for enum types to
        work as expected! Otherwise same set of lits with different
@@ -229,6 +252,8 @@ void TypeMgr::add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 
 const ScalarType_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
 {
+    mutex::scoped_lock lock(f_register_mutex);
+
     ScalarType_ptr res =
         dynamic_cast<ScalarType_ptr> (lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name)));
 
@@ -358,11 +383,3 @@ Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
     return arithmetical_result_type(lhs, rhs);
 }
 
-/* low level service */
-void TypeMgr::register_type(const Expr_ptr expr, Type_ptr vtype)
-{
-    assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
-    DEBUG << "Registering new type: " << expr << endl;
-
-    f_register [ expr ] = vtype;
-}

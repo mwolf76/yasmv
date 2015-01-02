@@ -1,6 +1,6 @@
 /**
- *  @file micro_mgr.hh
- *  @brief Microcode library - microcode manager module
+ *  @file micro_loader.hh
+ *  @brief Microcode library - microcode loader module
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,39 +19,43 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef MICRO_MGR_H
-#define MICRO_MGR_H
-
-// the Minisat SAT solver
-#include <minisat/core/Solver.h>
-#include <minisat/core/SolverTypes.h>
+#ifndef MICRO_LOADER_H
+#define MICRO_LOADER_H
 
 #include <micro.hh>
-#include <micro_loader.hh>
 
-typedef class MicroMgr *MicroMgr_ptr;
-class MicroMgr  {
-
+class MicroLoaderException : public Exception {
 public:
-    static MicroMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new MicroMgr();
-        }
-        return (*f_instance);
-    }
+    MicroLoaderException(const OpTriple& f_triple);
+    ~MicroLoaderException() throw();
 
-    MicroLoader& require(const OpTriple& triple);
-
-    inline const MicroLoaderMap& loaders() const
-    { return f_loaders; }
-
-protected:
-    MicroMgr();
-    ~MicroMgr();
+    const char* what() const throw();
 
 private:
-    static MicroMgr_ptr f_instance;
-    MicroLoaderMap f_loaders;
+    OpTriple f_triple;
+};
+
+typedef class MicroLoader* MicroLoader_ptr;
+typedef unordered_map<OpTriple, MicroLoader_ptr,
+                      OpTripleHash, OpTripleEq> MicroLoaderMap;
+
+class MicroLoader {
+public:
+    MicroLoader(const path& filepath);
+    ~MicroLoader();
+
+    inline const OpTriple& triple() const
+    { return f_triple; }
+
+    // synchronized
+    const LitsVector& microcode();
+
+private:
+    mutex f_mutex;
+    LitsVector f_microcode;
+
+    path f_fullpath;
+    OpTriple f_triple;
 };
 
 #endif

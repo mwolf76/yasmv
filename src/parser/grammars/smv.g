@@ -340,7 +340,7 @@ fsm_enum_decl_clause
     ExprSet lits;
 }
     : expr=identifier ':' fsm_enum_type_lits[lits]
-      { tm.add_enum( $smv::module->expr(), expr, lits ); }
+      { tm.register_enum( $smv::module->expr(), expr, lits ); }
     ;
 
 fsm_enum_type_lits [ExprSet& lits]

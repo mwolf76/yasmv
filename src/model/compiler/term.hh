@@ -1,6 +1,6 @@
 /**
- *  @file micro_mgr.hh
- *  @brief Microcode library - microcode manager module
+ *  @file term.hh
+ *  @brief Engine-compatible propositional expression
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,39 +19,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef MICRO_MGR_H
-#define MICRO_MGR_H
 
-// the Minisat SAT solver
-#include <minisat/core/Solver.h>
-#include <minisat/core/SolverTypes.h>
+#ifndef TERM_H
+#define TERM_H
 
+#include <dd_walker.hh>
 #include <micro.hh>
-#include <micro_loader.hh>
 
-typedef class MicroMgr *MicroMgr_ptr;
-class MicroMgr  {
-
+class Term {
 public:
-    static MicroMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new MicroMgr();
-        }
-        return (*f_instance);
-    }
+    Term()
+        : f_formula()
+        , f_descriptors()
+    {}
 
-    MicroLoader& require(const OpTriple& triple);
+    Term(DDVector& formula, MicroDescriptors& descriptors)
+        : f_formula(formula)
+        , f_descriptors(descriptors)
+    {}
 
-    inline const MicroLoaderMap& loaders() const
-    { return f_loaders; }
+    inline const DDVector& formula() const
+    { return f_formula; }
 
-protected:
-    MicroMgr();
-    ~MicroMgr();
+    inline const MicroDescriptors& descriptors() const
+    { return f_descriptors; }
 
 private:
-    static MicroMgr_ptr f_instance;
-    MicroLoaderMap f_loaders;
+    DDVector f_formula;
+    MicroDescriptors f_descriptors;
 };
+typedef vector<Term> Terms;
 
 #endif

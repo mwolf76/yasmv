@@ -117,10 +117,16 @@ public:
 
     /* -- inference --------------------------------------------------------- */
     inline const ScalarType_ptr find_boolean()
-    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]); }
+    {
+        mutex::scoped_lock lock(f_register_mutex);
+        return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]);
+    }
 
     inline const ScalarType_ptr find_constant()
-    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_constant_type() ]); }
+    {
+        mutex::scoped_lock lock(f_register_mutex);
+        return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_constant_type() ]);
+    }
 
     /* -- abstract types ---------------------------------------------------- */
     const ScalarType_ptr find_signed_type();
@@ -151,7 +157,7 @@ public:
     const Type_ptr find_type_by_def(const Expr_ptr expr);
 
     /* Remark: unambiguous enums resolution requires DOT fullnames */
-    void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
+    void register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
     const ScalarType_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
 
     const Enums& enums() const
@@ -194,7 +200,10 @@ private:
     Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type
-    void register_type(const Expr_ptr expr, Type_ptr vtype);
+    inline void register_type(const Expr_ptr expr, Type_ptr vtype) {
+        assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
+        f_register [ expr ] = vtype;
+    }
 
     // lookup up a type, returns NULL if not found
     inline Type_ptr lookup_type(const Expr_ptr expr)
@@ -202,6 +211,7 @@ private:
 
     /* local data */
     TypeMap f_register;
+    mutex f_register_mutex;
 
     // ref to expr manager
     ExprMgr& f_em;

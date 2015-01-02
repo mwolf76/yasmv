@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/		\
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/	\
 -I$(top_srcdir)/src/expr -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr/walker	\
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb	\
@@ -11,8 +11,8 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = micro.hh micro_mgr.hh
-PKG_CC = micro.cc micro_mgr.cc
+PKG_HH = micro.hh micro_loader.hh micro_mgr.hh
+PKG_CC = micro.cc micro_loader.cc micro_mgr.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 
