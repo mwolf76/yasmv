@@ -73,17 +73,6 @@ protected:
     inline ostream& err() const
     { return *f_err; }
 
-    inline void prompt() const
-    {
-        bool color (OptsMgr::INSTANCE().color());
-        if (color) {
-            (*f_out) << normal << ">> ";
-        }
-        else {
-            (*f_out) <<  ">> ";
-        }
-    }
-
     // jobs mgmt
     Jobs f_jobs;
 

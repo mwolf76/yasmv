@@ -1,3 +1,4 @@
+
 /*
  * @file interpreter.cc
  * @brief Command interpreter subsystem related classes and definitions.
@@ -21,6 +22,33 @@
  **/
 #include <commands/commands.hh>
 #include <interpreter.hh>
+
+#include <config.h>
+
+#ifdef HAVE_LIBREADLINE
+#  if defined(HAVE_READLINE_READLINE_H)
+#    include <readline/readline.h>
+#  elif defined(HAVE_READLINE_H)
+#    include <readline.h>
+#  else /* !defined(HAVE_READLINE_H) */
+extern char *readline ();
+#  endif /* !defined(HAVE_READLINE_H) */
+char *cmdline = NULL;
+#else /* !defined(HAVE_READLINE_READLINE_H) */
+/* no readline */
+#endif /* HAVE_LIBREADLINE */
+#ifdef HAVE_READLINE_HISTORY
+#  if defined(HAVE_READLINE_HISTORY_H)
+#    include <readline/history.h>
+#  elif defined(HAVE_HISTORY_H)
+  #    include <history.h>
+#  else /* !defined(HAVE_HISTORY_H) */
+extern void add_history ();
+extern int write_history ();
+extern int read_history ();
+#  endif /* defined(HAVE_READLINE_HISTORY_H) */
+/* no history */
+#endif /* HAVE_READLINE_HISTORY */
 
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
@@ -71,27 +99,53 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     return f_last_result;
 }
 
+
+/* A static variable for holding the line. */
+static char *line_read = (char *)NULL;
+
+/* Read a string, and return a pointer to it.
+   Returns NULL on EOF. */
+char *
+rl_gets ()
+{
+  /* If the buffer has already been allocated,
+     return the memory to the free pool. */
+  if (line_read)
+    {
+      free (line_read);
+      line_read = (char *)NULL;
+    }
+
+  /* Get a line from the user. */
+  line_read = readline (">> ");
+
+  /* If the line has any text in it,
+     save it on the history. */
+  if (line_read && *line_read)
+    add_history (line_read);
+
+  return (line_read);
+}
+
 Variant& Interpreter::operator()()
 {
-    prompt();
-
     try {
-        string cmdLine;
-        if (std::getline(*f_in, cmdLine)) {
-            Command_ptr cmd = parseCommand(cmdLine.c_str());
+        char *cmdline;
+        if ((cmdline = rl_gets())) {
+            Command_ptr cmd = parseCommand(cmdline);
             if (NULL != cmd) {
 
                 bool color (OptsMgr::INSTANCE().color());
                 if (color) {
                     cout << green
                          << "<< "
-                         << cmdLine
+                         << cmdline
                          << normal
                          << endl;
                 }
                 else {
                     cout << "<< "
-                         << cmdLine
+                         << cmdline
                          << endl;
                 }
 

@@ -71,13 +71,6 @@ extern "C" {
 /* Constant declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
-#ifndef SIZEOF_VOID_P
-#define SIZEOF_VOID_P 4
-#endif
-#ifndef SIZEOF_INT
-#define SIZEOF_INT 4
-#endif
-
 #if defined(__GNUC__)
 #define MTR_INLINE __inline__
 # if (__GNUC__ >2 || __GNUC_MINOR__ >=7)
@@ -173,7 +166,7 @@ extern MtrNode * Mtr_DissolveGroup (MtrNode *group);
 extern MtrNode * Mtr_FindGroup (MtrNode *root, unsigned int low, unsigned int high);
 extern int Mtr_SwapGroups (MtrNode *first, MtrNode *second);
 extern void Mtr_ReorderGroups(MtrNode *treenode, int *permutation);
-  
+
 extern void Mtr_PrintGroups (MtrNode *root, int silent);
   extern int Mtr_PrintGroupedOrder(MtrNode * root, int *invperm, FILE *fp);
 extern MtrNode * Mtr_ReadGroups (FILE *fp, int nleaves);
