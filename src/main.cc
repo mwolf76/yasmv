@@ -61,6 +61,31 @@
 
 #include <micro_mgr.hh>
 
+#ifdef HAVE_LIBREADLINE
+#  if defined(HAVE_READLINE_READLINE_H)
+#    include <readline/readline.h>
+#  elif defined(HAVE_READLINE_H)
+#    include <readline.h>
+#  else /* !defined(HAVE_READLINE_H) */
+extern char *readline ();
+#  endif /* !defined(HAVE_READLINE_H) */
+char *cmdline = NULL;
+#else /* !defined(HAVE_READLINE_READLINE_H) */
+/* no readline */
+#endif /* HAVE_LIBREADLINE */
+#ifdef HAVE_READLINE_HISTORY
+#  if defined(HAVE_READLINE_HISTORY_H)
+#    include <readline/history.h>
+#  elif defined(HAVE_HISTORY_H)
+  #    include <history.h>
+#  else /* !defined(HAVE_HISTORY_H) */
+extern void add_history ();
+extern int write_history ();
+extern int read_history ();
+#  endif /* defined(HAVE_READLINE_HISTORY_H) */
+/* no history */
+#endif /* HAVE_READLINE_HISTORY */
+
 static const string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
     "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
