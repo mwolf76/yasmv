@@ -47,15 +47,12 @@ void BMC::falsification( Expr_ptr phi )
     assert( em().is_G( phi ));
 
     Engine engine;
-
     Expr_ptr ctx = em().make_main();
 
     Expr_ptr invariant = phi->lhs();
-    compiler().preprocess( ctx, invariant);
     Term ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
-    compiler().preprocess( ctx, violation );
     Term vv (compiler().process( ctx, violation));
 
     step_t k = 0; // to infinity...
@@ -117,16 +114,14 @@ void BMC::kinduction( Expr_ptr phi )
 {
     assert( em().is_G( phi ));
 
+    /* thread locals */
     Engine engine;
-
     Expr_ptr ctx = em().make_main();
 
     Expr_ptr invariant = phi->lhs();
-    compiler().preprocess( ctx, invariant);
     Term ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
-    compiler().preprocess( ctx, violation );
     Term vv (compiler().process( ctx, violation));
 
     step_t j, k = 0; // to infinity...

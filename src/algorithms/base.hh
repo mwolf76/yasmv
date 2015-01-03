@@ -137,10 +137,6 @@ private:
 
     /* Witness */
     Witness_ptr f_witness;
-
-protected:
-    /* Synchronization */
-    mutex f_mutex;
 };
 
 #endif

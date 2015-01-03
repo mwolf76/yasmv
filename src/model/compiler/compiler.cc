@@ -76,8 +76,13 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-void Compiler::preprocess(Expr_ptr ctx, Expr_ptr body)
+Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
+    mutex::scoped_lock lock(f_process_mutex);
+
+    f_elapsed = clock();
+
+    /* pass 1: preprocessing */
     clear_internals();
     f_first = true;
 
@@ -87,23 +92,10 @@ void Compiler::preprocess(Expr_ptr ctx, Expr_ptr body)
     // toplevel (time is assumed at 0, arbitraryly nested next allowed)
     f_time_stack.push_back(0);
 
-    f_elapsed = clock();
-
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 
-    f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-
-    FQExpr key(ctx, body);
-    DEBUG << "Preprocessing of " << key << " took "
-          << secs << " seconds" << endl;
-
-    return;
-}
-
-Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
-{
+    /* pass 2: compilation */
     clear_internals();
     f_first = false;
 
@@ -113,13 +105,8 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
     // toplevel (time is assumed at 0, arbitraryly nested next allowed)
     f_time_stack.push_back(0);
 
-    f_elapsed = clock();
-
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
-
-    f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
     // sanity conditions
     assert(1 == f_add_stack.size());
@@ -135,6 +122,9 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     unsigned res_sz (f_add_stack.size());
     unsigned mcr_sz (f_descriptors.size());
+
+    f_elapsed = clock() - f_elapsed;
+    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
     DEBUG
         << "Compilation of " << ctx << "::" << body

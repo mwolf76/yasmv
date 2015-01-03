@@ -67,51 +67,6 @@ void Algorithm::setup()
     const Modules& modules = f_model.modules();
 
     DEBUG
-        << "Building encodings..."
-        << endl;
-
-    {
-        for (Modules::const_iterator m = modules.begin();
-             m != modules.end(); ++ m) {
-
-            Module& module = dynamic_cast <Module&> (*m->second);
-
-            /* INIT */
-            const ExprVector init = module.init();
-            for (ExprVector::const_iterator init_eye = init.begin();
-                 init_eye != init.end(); ++ init_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*init_eye);
-
-                cmpl.preprocess(ctx, body);
-            }
-
-            /* INVAR */
-            const ExprVector invar = module.invar();
-            for (ExprVector::const_iterator invar_eye = invar.begin();
-                 invar_eye != invar.end(); ++ invar_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*invar_eye);
-
-                cmpl.preprocess(ctx, body);
-            }
-
-            /* TRANS */
-            const ExprVector trans = module.trans();
-            for (ExprVector::const_iterator trans_eye = trans.begin();
-                 trans_eye != trans.end(); ++ trans_eye) {
-
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*trans_eye);
-
-                cmpl.preprocess(ctx, body);
-            }
-        }
-    } /* prepare() */
-
-    DEBUG
         << "Compiling FSM..."
         << endl;
 

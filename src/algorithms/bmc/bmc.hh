@@ -41,10 +41,7 @@ public:
     { return f_status; }
 
     inline void set_status(mc_status_t status)
-    {
-        mutex::scoped_lock acquire(f_mutex);
-        f_status = status;
-    }
+    { f_status = status; }
 
     Expr_ptr property() const
     { return f_property; }

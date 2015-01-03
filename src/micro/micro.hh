@@ -24,15 +24,13 @@
 
 #include <satdefs.hh>
 
-// <symb, is_signed?, width>
+/* <symb, is_signed?, width> */
 typedef tuple<bool, ExprType, int> OpTriple;
 inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int width) {
     return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
 }
 
-
-
-// triple helper getters
+/* triple helper getters */
 inline bool triple_issigned( const OpTriple& triple )
 { return triple.get<0>(); }
 inline ExprType triple_optype( const OpTriple& triple )

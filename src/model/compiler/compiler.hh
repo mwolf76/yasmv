@@ -102,9 +102,6 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    /* two-pass compiler interface. This is needed to build all var
-       encoding before proper compilation. */
-    void preprocess(Expr_ptr ctx, Expr_ptr body);
     Term process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
@@ -243,6 +240,7 @@ protected:
     void enumerative_ite(const Expr_ptr expr);
 
 private:
+    mutex f_process_mutex;
     bool f_first;
 
     /* casts */
