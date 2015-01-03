@@ -106,7 +106,7 @@ MicroLoader::~MicroLoader()
 
 const LitsVector& MicroLoader::microcode()
 {
-    mutex::scoped_lock lock(mutex);
+    mutex::scoped_lock lock(f_loading_mutex);
 
     if (0 == f_microcode.size()) {
 

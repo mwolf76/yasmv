@@ -51,7 +51,7 @@ public:
     const LitsVector& microcode();
 
 private:
-    mutex f_mutex;
+    mutex f_loading_mutex;
     LitsVector f_microcode;
 
     path f_fullpath;
