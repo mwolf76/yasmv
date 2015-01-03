@@ -31,24 +31,60 @@
 #  elif defined(HAVE_READLINE_H)
 #    include <readline.h>
 #  else /* !defined(HAVE_READLINE_H) */
-extern char *readline ();
+#    error Unsupported libreadline
 #  endif /* !defined(HAVE_READLINE_H) */
-char *cmdline = NULL;
 #else /* !defined(HAVE_READLINE_READLINE_H) */
-/* no readline */
+/* no readline,  provide fallback */
+char* readline(const char *prompt)
+{
+    static char *buf= NULL;
+    const int LINE_BUFSIZE (0x200);
+
+    if (prompt)
+        fputs( prompt, stdout);
+
+    buf = (char *) malloc(LINE_BUFSIZE);
+    return fgets( buf, LINE_BUFSIZE, stdin);
+}
 #endif /* HAVE_LIBREADLINE */
+
 #ifdef HAVE_READLINE_HISTORY
 #  if defined(HAVE_READLINE_HISTORY_H)
 #    include <readline/history.h>
 #  elif defined(HAVE_HISTORY_H)
-  #    include <history.h>
+#    include <history.h>
 #  else /* !defined(HAVE_HISTORY_H) */
-extern void add_history ();
-extern int write_history ();
-extern int read_history ();
+#    error Unsupported readline history
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
-/* no history */
-#endif /* HAVE_READLINE_HISTORY */
+#else /* HAVE_READLINE_HISTORY */
+/* no history, provide fallback */
+void add_history (const char*)
+{}
+#endif
+
+/* A static variable for holding the line. */
+static char *line_read = (char *)NULL;
+
+/* Read a string, and return a pointer to it.
+   Returns NULL on EOF. */
+char * rl_gets ()
+{
+    /* If the buffer has already been allocated, return the memory to
+       the free pool. */
+    if (line_read) {
+      free (line_read);
+      line_read = (char *)NULL;
+    }
+
+  /* Get a line from the user. */
+  line_read = readline (">> ");
+
+  /* If the line has any text in it, save it on the history. */
+  if (line_read && *line_read)
+      add_history (line_read);
+
+  return (line_read);
+}
 
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
@@ -68,12 +104,16 @@ Interpreter::Interpreter()
     , f_out(& std::cout)
     , f_err(& std::cerr)
 {
-    DEBUG << "Initialized command interpreter @" << this << endl;
+    DEBUG
+        << "Initialized command interpreter @" << this
+        << endl;
 }
 
 Interpreter::~Interpreter()
 {
-    DEBUG << "Deinitialized command interpreter @" << this << endl;
+    DEBUG
+        << "Deinitialized command interpreter @" << this
+        << endl;
 }
 
 void Interpreter::quit(int retcode)
@@ -97,34 +137,6 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
     delete cmd;
     return f_last_result;
-}
-
-
-/* A static variable for holding the line. */
-static char *line_read = (char *)NULL;
-
-/* Read a string, and return a pointer to it.
-   Returns NULL on EOF. */
-char *
-rl_gets ()
-{
-  /* If the buffer has already been allocated,
-     return the memory to the free pool. */
-  if (line_read)
-    {
-      free (line_read);
-      line_read = (char *)NULL;
-    }
-
-  /* Get a line from the user. */
-  line_read = readline (">> ");
-
-  /* If the line has any text in it,
-     save it on the history. */
-  if (line_read && *line_read)
-    add_history (line_read);
-
-  return (line_read);
 }
 
 Variant& Interpreter::operator()()
