@@ -137,7 +137,9 @@ public:
     const ScalarType_ptr find_signed(unsigned digits);
     const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
 
-    const ScalarType_ptr find_default_signed();
+    inline const ScalarType_ptr find_default_signed()
+    { return find_signed( 32 ); }
+
     const ArrayType_ptr find_signed_array(unsigned digits,
                                           unsigned size);
     const ArrayType_ptr find_signed_array(unsigned magnitude,
@@ -147,7 +149,9 @@ public:
     const ScalarType_ptr find_unsigned(unsigned digits);
     const ScalarType_ptr find_unsigned(unsigned magnitude, unsigned fractional);
 
-    const ScalarType_ptr find_default_unsigned();
+    inline const ScalarType_ptr find_default_unsigned()
+    { return find_unsigned( 32 ); }
+
     const ArrayType_ptr find_unsigned_array(unsigned digits,
                                             unsigned size);
     const ArrayType_ptr find_unsigned_array(unsigned magnitude,

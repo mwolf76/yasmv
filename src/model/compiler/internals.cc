@@ -97,8 +97,8 @@ void Compiler::integer_ite(const Expr_ptr expr)
     unsigned width = type -> width();
 
     // reverse order
-    ALGEBRIZE_LHS(width);
     ALGEBRIZE_RHS(width);
+    ALGEBRIZE_LHS(width);
 
     /* fix type stack, constants are always unsigned */
     f_type_stack.pop_back();
@@ -136,10 +136,9 @@ void Compiler::relational_type_lookahead(const Expr_ptr expr)
         f_rel_type_stack.push_back( lhs_type );
     }
 
-    /* Uh Oh, both are constants. There is no easy way out of this for now. */
-    else {
-        assert( false ); // unsupported;
-    }
+    /* Both are constants, default to native word type. TODO: add option for this */
+    else
+        f_rel_type_stack.push_back( TypeMgr::INSTANCE().find_default_unsigned());
 }
 
 void Compiler::relational_type_cleanup()
@@ -283,7 +282,15 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
     FQExpr key(ctx, expr, time);
 
-    DRIVEL << "Processing " << key << "..." << endl;
+    if (f_first)
+        DEBUG
+            << "Preprocessing " << key << "..."
+            << endl;
+    else
+        DEBUG
+            << "Processing " << key << "..."
+            << endl;
+
     f_ticks = clock();
 }
 

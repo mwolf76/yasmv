@@ -72,7 +72,8 @@ Compiler::~Compiler()
 
 /* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
 void Compiler::pre_hook()
-{}
+{
+}
 void Compiler::post_hook()
 {}
 

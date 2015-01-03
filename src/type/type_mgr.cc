@@ -380,6 +380,28 @@ Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
         (lhs == rhs))
         return rhs;
 
-    return arithmetical_result_type(lhs, rhs);
+    if (lhs -> is_algebraic() &&
+        rhs -> is_algebraic()) {
+
+        // both ops int const -> native word type
+        if (lhs->is_constant() &&
+            rhs->is_constant()) {
+            return find_default_unsigned();
+        }
+        assert( !lhs -> is_constant() ||
+                !rhs -> is_constant() );
+
+        if (lhs -> is_constant()) {
+            return rhs;
+        }
+        else if (rhs -> is_constant()) {
+            return lhs;
+        }
+        else if (lhs == rhs) {
+            return lhs;
+        }
+    }
+
+    return NULL;
 }
 
