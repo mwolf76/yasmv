@@ -107,6 +107,9 @@ AC_ANTLR
 # zlib check
 AX_CHECK_ZLIB
 
+# readline check
+AX_LIB_READLINE
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_HEADER_STDBOOL
