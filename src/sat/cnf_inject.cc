@@ -60,7 +60,9 @@ private:
 void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                                   const LitsVector& microcode)
 {
-    DEBUG << const_cast<MicroDescriptor&> (md) << endl;
+    DEBUG
+        << const_cast<MicroDescriptor&> (md)
+        << endl;
 
     // local refs
     const DDVector& z(md.z());
