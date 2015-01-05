@@ -87,7 +87,7 @@ typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
     /* push DD vector in reversed order */      \
     for (unsigned i = 0; i < width; ++ i) {     \
         unsigned ndx = width - i - 1;           \
-        PUSH_ADD(dv[ndx]);                      \
+        PUSH_ADD(vec[ndx]);                     \
     }
 
 #define FRESH_DD(var)                           \
@@ -96,6 +96,23 @@ typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
 /* shortcut for pushing */
 #define PUSH_ADD(add)                           \
     f_add_stack.push_back(add)
+
+/** Exception classes */
+class CompilerException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
+/** Raised when a constant could not fit into a native word */
+class ConstantTooLarge : public CompilerException {
+    Expr_ptr f_repr;
+
+public:
+    ConstantTooLarge(Expr_ptr expr);
+
+    const char* what() const throw();
+    ~ConstantTooLarge() throw();
+};
 
 class Compiler : public ExprWalker {
 public:
@@ -134,11 +151,8 @@ protected:
     // microcode descriptors
     MicroDescriptors f_descriptors;
 
-    // type look-ahead for operands promotion
+    // look-ahead for type checking
     TypeStack f_type_stack;
-
-    // type look-ahead for relationals (used by ITEs)
-    TypeStack f_rel_type_stack;
 
     // partial results
     ADDStack f_add_stack;
@@ -241,7 +255,7 @@ protected:
 
 private:
     mutex f_process_mutex;
-    bool f_first;
+    bool f_preprocess;
 
     /* casts */
     void algebraic_cast_from_boolean(const Expr_ptr expr);
@@ -252,8 +266,6 @@ private:
     void clear_internals();
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
-    void relational_type_lookahead(const Expr_ptr expr);
-    void relational_type_cleanup();
     void build_subscript_selector();
     void flush_operands();
 
@@ -266,24 +278,24 @@ private:
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
-    void algebraic_from_constant(unsigned width);
+    void algebraic_from_constant(Expr_ptr expr, unsigned width);
 
     /** @brief Determines type width */
     unsigned type_width(Type_ptr type);
 
     // aliases for algebrize_operation
-    inline void algebrize_binary_arithmetical(unsigned& width, bool& signedness)
-    { algebrize_operation(false, false, width, signedness); }
+    // inline void algebrize_binary_arithmetical(unsigned& width, bool& signedness)
+    // { algebrize_operation(false, false, width, signedness); }
 
-    inline void algebrize_binary_relational(unsigned& width, bool& signedness)
-    { algebrize_operation(false, true, width, signedness); }
+    // inline void algebrize_binary_relational(unsigned& width, bool& signedness)
+    // { algebrize_operation(false, true, width, signedness); }
 
-    inline void algebrize_ternary_ite(unsigned& width, bool& signedness)
-    { algebrize_operation(true, false, width, signedness); }
+    // inline void algebrize_ternary_ite(unsigned& width, bool& signedness)
+    // { algebrize_operation(true, false, width, signedness); }
 
-    /** critical low-level service */
-    void algebrize_operation(bool ternary, bool relational,
-                             unsigned& width, bool& signedness);
+    // /** critical low-level service */
+    // void algebrize_operation(bool ternary, bool relational,
+    //                          unsigned& width, bool& signedness);
 
     /* Auto expressions and DDs */
     Expr_ptr make_auto_id();

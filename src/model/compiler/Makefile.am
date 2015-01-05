@@ -14,8 +14,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 
 PKG_HH = compiler.hh
 
-PKG_CC = compiler.cc algebra.cc boolean.cc integer.cc	\
-enumerative.cc internals.cc
+PKG_CC = compiler.cc algebra.cc boolean.cc \
+enumerative.cc internals.cc exceptions.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

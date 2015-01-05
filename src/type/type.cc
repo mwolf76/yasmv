@@ -41,7 +41,9 @@ const char* BadType::what() const throw()
 TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
     : f_repr_a(lhs -> repr())
     , f_repr_b(rhs -> repr())
-{}
+{
+    cout << "thomas";
+}
 
 TypeMismatch::~TypeMismatch() throw()
 {}
@@ -76,9 +78,6 @@ EnumType_ptr Type::as_enum()
 
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
-
-bool Type::is_constant()
-{ return NULL != dynamic_cast<ConstantType_ptr> ( this ); }
 
 AlgebraicType_ptr Type::as_algebraic()
 { return dynamic_cast <const AlgebraicType_ptr> (this); }

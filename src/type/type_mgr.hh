@@ -118,14 +118,7 @@ public:
     /* -- inference --------------------------------------------------------- */
     inline const ScalarType_ptr find_boolean()
     {
-        mutex::scoped_lock lock(f_register_mutex);
         return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]);
-    }
-
-    inline const ScalarType_ptr find_constant()
-    {
-        mutex::scoped_lock lock(f_register_mutex);
-        return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_constant_type() ]);
     }
 
     /* -- abstract types ---------------------------------------------------- */
@@ -137,9 +130,6 @@ public:
     const ScalarType_ptr find_signed(unsigned digits);
     const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
 
-    inline const ScalarType_ptr find_default_signed()
-    { return find_signed( 32 ); }
-
     const ArrayType_ptr find_signed_array(unsigned digits,
                                           unsigned size);
     const ArrayType_ptr find_signed_array(unsigned magnitude,
@@ -148,9 +138,6 @@ public:
 
     const ScalarType_ptr find_unsigned(unsigned digits);
     const ScalarType_ptr find_unsigned(unsigned magnitude, unsigned fractional);
-
-    inline const ScalarType_ptr find_default_unsigned()
-    { return find_unsigned( 32 ); }
 
     const ArrayType_ptr find_unsigned_array(unsigned digits,
                                             unsigned size);
@@ -201,7 +188,6 @@ private:
     Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type
     inline void register_type(const Expr_ptr expr, Type_ptr vtype) {
@@ -215,7 +201,6 @@ private:
 
     /* local data */
     TypeMap f_register;
-    mutex f_register_mutex;
 
     // ref to expr manager
     ExprMgr& f_em;

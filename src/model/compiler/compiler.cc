@@ -49,7 +49,6 @@ Compiler::Compiler()
     , f_temp_encodings()
     , f_descriptors()
     , f_type_stack()
-    , f_rel_type_stack()
     , f_add_stack()
     , f_ctx_stack()
     , f_time_stack()
@@ -85,7 +84,7 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     /* pass 1: preprocessing */
     clear_internals();
-    f_first = true;
+    f_preprocess = true;
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
@@ -98,7 +97,7 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     /* pass 2: compilation */
     clear_internals();
-    f_first = false;
+    f_preprocess = false;
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
@@ -112,7 +111,6 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
     // sanity conditions
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());
-    assert(0 == f_rel_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
@@ -157,11 +155,10 @@ bool Compiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_neg_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_unary_integer(expr)) {
-        integer_neg(expr);
-    }
-    else if (is_unary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_unary_algebraic(expr)) {
         algebraic_neg(expr);
     }
     else assert( false ); // unreachable
@@ -171,7 +168,9 @@ bool Compiler::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_not_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_unary_boolean(expr)) {
         boolean_not(expr);
     }
@@ -182,11 +181,10 @@ bool Compiler::walk_bw_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_bw_not_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_unary_integer(expr)) {
-        integer_bw_not(expr);
-    }
-    else if (is_unary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_unary_algebraic(expr)) {
         algebraic_bw_not(expr); // bitwise
     }
     else assert(false); // unreachable
@@ -198,11 +196,10 @@ bool Compiler::walk_add_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_add_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_plus(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_plus(expr);
     }
     else assert( false ); // unreachable
@@ -214,11 +211,10 @@ bool Compiler::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_sub_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_sub(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_sub(expr);
     }
     else assert( false ); // unexpected
@@ -230,11 +226,10 @@ bool Compiler::walk_div_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_div_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_div(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_div(expr);
     }
     else assert( false ); // unexpected
@@ -246,11 +241,10 @@ bool Compiler::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mul_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_mul(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_mul(expr);
     }
     else assert( false ); // unreachable
@@ -262,11 +256,10 @@ bool Compiler::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mod_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_mod(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_mod(expr);
     }
     else assert( false ); // unreachable
@@ -278,7 +271,9 @@ bool Compiler::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_and_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_and(expr);
     }
@@ -291,11 +286,10 @@ bool Compiler::walk_bw_and_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_and_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_bw_and(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_bw_and(expr); // bitwise
     }
     else assert( false ); // unreachable
@@ -307,7 +301,9 @@ bool Compiler::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_or_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_or(expr);
     }
@@ -320,11 +316,10 @@ bool Compiler::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_or_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_bw_or(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_bw_or(expr);
     }
     else assert( false ); // unreachable
@@ -336,11 +331,10 @@ bool Compiler::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_xor_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_bw_xor(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_bw_xor(expr);
     }
     else assert( false ); // unreachable
@@ -352,11 +346,10 @@ bool Compiler::walk_bw_xnor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_bw_xnor(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_bw_xnor(expr);
     }
     else assert( false ); // unreachable
@@ -368,7 +361,9 @@ bool Compiler::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_implies_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_implies(expr);
     }
@@ -381,7 +376,9 @@ bool Compiler::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_iff_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_iff(expr);
     }
@@ -410,7 +407,8 @@ bool Compiler::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cast_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
 
     Expr_ptr ctx (f_ctx_stack.back());
     Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
@@ -446,11 +444,10 @@ bool Compiler::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lshift_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_lshift(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_lshift(expr);
     }
     else assert( false ); // unreachable
@@ -462,164 +459,115 @@ bool Compiler::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_rshift_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_rshift(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_rshift(expr);
     }
     else assert( false ); // unreachable
 }
 
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_eq_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_equals(expr);
     }
-    else if (is_binary_integer(expr)) {
-        integer_equals(expr);
-    }
-    else if (is_binary_enumerative(expr)) {
+    if (is_binary_enumerative(expr)) {
         enumerative_equals(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_equals(expr);
     }
     else assert( false ); // unreachable
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_ne_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ne_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_binary_boolean(expr)) {
         boolean_not_equals(expr);
     }
-    else if (is_binary_integer(expr)) {
-        integer_not_equals(expr);
-    }
-    else if (is_binary_enumerative(expr)) {
+    if (is_binary_enumerative(expr)) {
         enumerative_not_equals(expr);
     }
     else if (is_binary_algebraic(expr)) {
         algebraic_not_equals(expr);
     }
     else assert( false ); // unreachable
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_gt_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_gt_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_gt(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_gt(expr);
     }
     else assert( false );
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_ge_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ge_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_ge(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_ge(expr);
     }
     else assert( false ); // unreachable
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_lt_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lt_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_lt(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_lt(expr);
     }
     else assert( false ); // unreachable
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_le_preorder(const Expr_ptr expr)
-{
-    bool res = cache_miss(expr);
-    if (res) {
-        relational_type_lookahead(expr);
-    }
-    return res;
-}
+{ return cache_miss(expr); }
 bool Compiler::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_le_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_binary_integer(expr)) {
-        integer_le(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+
+    if (is_binary_algebraic(expr)) {
         algebraic_le(expr);
     }
     else assert( false ); // unreachable
-    relational_type_cleanup();
 }
 
 bool Compiler::walk_ite_preorder(const Expr_ptr expr)
@@ -628,15 +576,14 @@ bool Compiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ite_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     if (is_ite_boolean(expr)) {
         boolean_ite(expr);
     }
     else if (is_ite_enumerative(expr)) {
         enumerative_ite(expr);
-    }
-    else if (is_ite_integer(expr)) {
-        integer_ite(expr);
     }
     else if (is_ite_algebraic(expr)) {
         algebraic_ite(expr);
@@ -662,7 +609,9 @@ bool Compiler::walk_dot_inorder(const Expr_ptr expr)
 }
 void Compiler::walk_dot_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
+    if (f_preprocess)
+        return;
+
     // ADD rhs_add;
 
     // { // RHS, no checks necessary/possible
@@ -701,11 +650,9 @@ bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 {
-    if (f_first) return;
-    if (is_subscript_integer(expr)) {
-        integer_subscript(expr);
-    }
-    else if (is_subscript_algebraic(expr)) {
+    if (f_preprocess)
+        return;
+    if (is_subscript_algebraic(expr)) {
         algebraic_subscript(expr);
     }
     else assert( false ); // unreachable
@@ -781,10 +728,12 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     FQExpr2EncMap::const_iterator eye;
     IEncoding_ptr enc = NULL;
 
-    // 1. Explicit integer consts (e.g. 42) ..
+    // 1. Explicit integer consts, perform booleanization immediately using
+    // word-width property to determine the number of bits to be used.
     if (em.is_numeric(expr)) {
-        f_type_stack.push_back(tm.find_constant());
-        f_add_stack.push_back(f_enc.constant(expr->value()));
+        unsigned ww (OptsMgr::INSTANCE().word_width());
+        f_type_stack.push_back(tm.find_unsigned(ww));
+        algebraic_from_constant( expr, ww);
         return;
     }
 
@@ -859,14 +808,12 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         /* build a new encoding for this symbol if none is available. */
         if (NULL == (enc = f_enc.find_encoding(key))) {
-            if (f_first) {
+            if (f_preprocess) {
                 assert (NULL != type);
                 enc = f_enc.make_encoding(type);
                 f_enc.register_encoding(key, enc);
             }
-            else {
-                assert( false ); // unexpected
-            }
+            else assert( false ); // unexpected
         }
 
         push_variable(enc, type);

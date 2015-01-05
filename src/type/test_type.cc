@@ -19,25 +19,25 @@ BOOST_AUTO_TEST_CASE(boolean_type)
     Type_ptr type = tm.find_boolean();
 
     BOOST_CHECK(  type->is_boolean());
-    BOOST_CHECK(! type->is_constant());
+    // BOOST_CHECK(! type->is_constant());
     BOOST_CHECK(! type->is_algebraic());
     BOOST_CHECK(! type->is_signed_algebraic());
     BOOST_CHECK(! type->is_unsigned_algebraic());
     BOOST_CHECK(! type->is_enum());
 }
 
-BOOST_AUTO_TEST_CASE(constant_type)
-{
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_constant();
+// BOOST_AUTO_TEST_CASE(constant_type)
+// {
+//     TypeMgr& tm = TypeMgr::INSTANCE();
+//     Type_ptr type = tm.find_constant();
 
-    BOOST_CHECK(! type->is_boolean());
-    BOOST_CHECK(  type->is_constant());
-    BOOST_CHECK(  type->is_algebraic());
-    BOOST_CHECK(! type->is_signed_algebraic());
-    BOOST_CHECK(! type->is_unsigned_algebraic());
-    BOOST_CHECK(! type->is_enum());
-}
+//     BOOST_CHECK(! type->is_boolean());
+//     BOOST_CHECK(  type->is_constant());
+//     BOOST_CHECK(  type->is_algebraic());
+//     BOOST_CHECK(! type->is_signed_algebraic());
+//     BOOST_CHECK(! type->is_unsigned_algebraic());
+//     BOOST_CHECK(! type->is_enum());
+// }
 
 BOOST_AUTO_TEST_CASE(unsigned_int_type)
 {
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(unsigned_int_type)
     Type_ptr type = tm.find_unsigned(8);
 
     BOOST_CHECK(! type->is_boolean());
-    BOOST_CHECK(! type->is_constant());
+    // BOOST_CHECK(! type->is_constant());
     BOOST_CHECK(  type->is_algebraic());
     BOOST_CHECK(! type->is_signed_algebraic());
     BOOST_CHECK(  type->is_unsigned_algebraic());
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(signed_int_type)
     Type_ptr type = tm.find_signed(8);
 
     BOOST_CHECK(! type->is_boolean());
-    BOOST_CHECK(! type->is_constant());
+    // BOOST_CHECK(! type->is_constant());
     BOOST_CHECK(  type->is_algebraic());
     BOOST_CHECK(  type->is_signed_algebraic());
     BOOST_CHECK(! type->is_unsigned_algebraic());

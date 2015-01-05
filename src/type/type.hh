@@ -106,7 +106,6 @@ typedef class MonolithicalType* MonolithicalType_ptr;
 typedef class BooleanType* BooleanType_ptr;
 typedef class EnumType* EnumType_ptr;
 typedef class AlgebraicType* AlgebraicType_ptr;
-typedef class ConstantType* ConstantType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 
@@ -176,9 +175,6 @@ public:
 
     bool is_algebraic();
     AlgebraicType_ptr as_algebraic();
-
-    bool is_constant();
-    ConstantType_ptr as_constant();
 
     bool is_signed_algebraic();
     SignedAlgebraicType_ptr as_signed_algebraic();

@@ -57,7 +57,6 @@ TypeMgr::TypeMgr()
 
 const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 {
-    mutex::scoped_lock lock(f_register_mutex);
     assert( f_em.is_type(expr));
 
     if (f_em.is_unsigned_int( expr->lhs())) {
@@ -72,8 +71,6 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_unsigned_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -86,8 +83,6 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractional)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_unsigned_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -101,8 +96,6 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractio
 
 const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_int_type(digits),
                                         f_em.make_const(size)));
 
@@ -120,8 +113,6 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
                                                  unsigned fractional,
                                                  unsigned size)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -137,8 +128,6 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
 
 const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_signed_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -151,8 +140,6 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 
 const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractional)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_signed_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
     if (NULL != res) return res;
@@ -166,8 +153,6 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractiona
 
 const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -184,8 +169,6 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
                                                unsigned fractional,
                                                unsigned size)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -200,8 +183,6 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
 
 const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
 
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
@@ -216,8 +197,6 @@ const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
 
 void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     /*
        IMPORTANT: lits ordering has to be canonical for enum types to
        work as expected! Otherwise same set of lits with different
@@ -252,8 +231,6 @@ void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 
 const ScalarType_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
 {
-    mutex::scoped_lock lock(f_register_mutex);
-
     ScalarType_ptr res =
         dynamic_cast<ScalarType_ptr> (lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name)));
 
@@ -293,37 +270,17 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
 Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,
                               Type_ptr lhs, Type_ptr rhs)
 {
-    ExprMgr& em = f_em;
+    if (f_em.is_ite(expr) && cnd->is_boolean())
+        return arithmetical_result_type(lhs, rhs);
 
-    assert(cnd->is_boolean());
-    if (em.is_ite(expr)) {
-        return ite_result_type(lhs, rhs);
-    }
-    else assert (false); // unexpected
+    return NULL;
 }
 
 Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
     if (lhs -> is_algebraic() &&
         rhs -> is_algebraic()) {
-
-        // both ops int const -> int const
-        if (lhs->is_constant() &&
-            rhs->is_constant()) {
-            return lhs;
-        }
-        assert( !lhs -> is_constant() ||
-                !rhs -> is_constant() );
-
-        if (lhs -> is_constant()) {
-            return rhs;
-        }
-        else if (rhs -> is_constant()) {
-            return lhs;
-        }
-        else if (lhs == rhs) {
-            return lhs;
-        }
+        return rhs;
     }
 
     return NULL;
@@ -366,42 +323,4 @@ Type_ptr TypeMgr::cast_result_type(Type_ptr lhs, Type_ptr rhs)
     return NULL;
 }
 
-
-Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
-{
-    // both booleans -> boolean
-    if (lhs -> is_boolean() &&
-        rhs -> is_boolean())
-        return rhs;
-
-    // both (same) enums -> enum
-    if (lhs -> is_enum() &&
-        rhs -> is_enum() &&
-        (lhs == rhs))
-        return rhs;
-
-    if (lhs -> is_algebraic() &&
-        rhs -> is_algebraic()) {
-
-        // both ops int const -> native word type
-        if (lhs->is_constant() &&
-            rhs->is_constant()) {
-            return find_default_unsigned();
-        }
-        assert( !lhs -> is_constant() ||
-                !rhs -> is_constant() );
-
-        if (lhs -> is_constant()) {
-            return rhs;
-        }
-        else if (rhs -> is_constant()) {
-            return lhs;
-        }
-        else if (lhs == rhs) {
-            return lhs;
-        }
-    }
-
-    return NULL;
-}
 

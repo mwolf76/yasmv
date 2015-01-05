@@ -452,10 +452,8 @@ bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)
 void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 {
     POP_TYPE(index);
-    if (! index -> is_algebraic() &&
-        ! index -> is_constant()) {
+    if (! index -> is_algebraic())
         throw BadType(index);
-    }
 
     /* return wrapped type */
     PUSH_TYPE(check_array() -> as_array() -> of());
@@ -491,11 +489,13 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
     ExprMgr& em = f_owner.em();
 
     // cache miss took care of the stack already
-    if (! cache_miss(expr)) return;
+    if (! cache_miss(expr))
+        return;
 
     // is an integer const ..
     if (em.is_numeric(expr)) {
-        PUSH_TYPE(tm.find_constant());
+        unsigned ww (OptsMgr::INSTANCE().word_width());
+        PUSH_TYPE(tm.find_unsigned(ww));
         return;
     }
 
@@ -624,10 +624,8 @@ void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
     Type_ptr rhs = check_scalar();
     Type_ptr lhs = check_scalar();
 
-    /* constants can be promoted */
-    if (lhs != rhs  && ! lhs -> is_constant() && ! rhs -> is_constant()) {
+    if (lhs != rhs)
         throw TypeMismatch( lhs, rhs);
-    }
 
     PUSH_TYPE( tm.result_type( expr, lhs, rhs));
 }
@@ -646,9 +644,12 @@ void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
 void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
+
     POP_TYPE(rhs);
     POP_TYPE(lhs);
-    PUSH_TYPE( tm.result_type( expr, tm.find_boolean(), lhs, rhs));
+
+    Type_ptr res = tm.result_type( expr, tm.find_boolean(), lhs, rhs);
+    PUSH_TYPE(res);
 }
 
 void Inferrer::memoize_result (Expr_ptr expr)
