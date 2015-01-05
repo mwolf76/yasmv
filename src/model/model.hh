@@ -143,12 +143,14 @@ class Variable : public IVariable {
     Expr_ptr f_ctx;
     Expr_ptr f_name;
     Type_ptr f_type;
+    bool     f_input;
 
 public:
-    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type)
+    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type, bool input = false)
         : f_ctx(ctx)
         , f_name(name)
         , f_type(type)
+        , f_input(input)
     {}
 
     const Expr_ptr ctx() const
@@ -159,6 +161,9 @@ public:
 
     const Type_ptr type() const
     { return f_type; }
+
+    bool input() const
+    { return f_input; }
 };
 
 class Temporary : public ITemporary {

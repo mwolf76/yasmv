@@ -50,8 +50,14 @@ Module::Module(const Expr_ptr name)
 
 void Module::add_var(Expr_ptr name, IVariable_ptr var)
 {
+    Expr_ptr type_repr( var -> type() -> repr());
     DEBUG << "Module " << (*this)
-          << ", added local var " << var << endl;
+          << ", added var "
+          << name
+          << ", of type "
+          << type_repr
+          << endl;
+
     f_locals.push_back(name);
     f_localVars.insert(make_pair<FQExpr,
                        IVariable_ptr>(FQExpr(expr(), name), var));
@@ -70,7 +76,10 @@ const Variables& Module::vars() const
 void Module::add_def(Expr_ptr name, IDefine_ptr body)
 {
     DEBUG << "Module " << (*this)
-          << ", added local def " << name << endl;
+          << ", added local def "
+          << name
+          << endl;
+
     f_locals.push_back(name);
     f_localDefs.insert(make_pair<FQExpr,
                        IDefine_ptr>(FQExpr(expr(), name), body));

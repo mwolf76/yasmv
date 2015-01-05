@@ -45,8 +45,7 @@ options {
     ExprMgr& em = ExprMgr::INSTANCE();
     ModelMgr& mm = ModelMgr::INSTANCE();
     TypeMgr& tm = TypeMgr::INSTANCE();
-
-    // cmd subsystem
+    OptsMgr& om  = OptsMgr::INSTANCE();
     CommandMgr& cm = CommandMgr::INSTANCE();
 }
 
@@ -57,20 +56,35 @@ scope {
     IModule_ptr module;
 }
 
-
 // TODO: support for multiple machines
 @init {
     $smv::model = mm.model();
 }
-    : 'FSM' id=identifier ';'
-      {
-            $smv::model->set_name(id);
 
-            $smv::module = new Module(em.make_main());
-            $smv::model->add_module(em.make_main(), $smv::module);
-      }
+    : model_directives
 
-      module_body ';'? // exit point
+    'FSM' id=identifier ';'
+    {
+        $smv::model->set_name(id);
+
+        $smv::module = new Module(em.make_main());
+        $smv::model->add_module(em.make_main(), $smv::module);
+    }
+
+    module_body ';'? // exit point
+    ;
+
+model_directives
+    : model_directive*
+    ;
+
+model_directive
+    : model_word_width_directive
+    ;
+
+model_word_width_directive
+    : '#word-width' width=constant
+    { om.set_word_width( width -> value()); }
     ;
 
 /* Scripting sub-system Toplevel */
@@ -79,75 +93,6 @@ cmd returns [Command_ptr res]
     { $res = command; }
     ;
 
-/* Commands to be implemented:
-
- * SAT <expr> [ ; <expr]* -- pure satisfiability problem on a (set of)
- propositional formulas. Requires variable definitions in separate
- model. Returns UNSAT, or a witness #
-
- * I/O
- READ MODEL <filename> - load a new model from file (stdin not supported)
- Returns OK, <0 errcode otherwise
-
- DUMP MODEL [ TO <filename> ] - save a new model to file
- Returns OK, <0 errcode otherwise
-
- READ TRACE <filename> - load a trace from .json file (stdin not supported)
- Returns trace#, <0 errcode otherwise
-
- DUMP TRACE #trace [ TO <filename> ] - save a trace to .json file
- Returns OK, <0 errcode otherwise
-
- * Model
- ANALYZE - analyzes the model and prints stats to stdout.
- Returns nothing.
-
- * MC
-
- VERIFY <expr>, model checking of given properties.
- Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
-
- SIMULATE ( RUN | RESUME ) [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )? [ HALT | PAUSE ON <halt_condition> ]
- Returns witness index or UNSAT if simulation failed.
-
- >> SIMULATE
- OK. Created Trace (#4)
-
- * TRACE
-
- SHOW TRACES
- TRACE
-
- PRINT TRACE
-
- * OTHERS
-
- CLK
- Returns CPU time in millisecs
-
- FORMAT "FMT", ...
- Returns a formatted message.
-
- PRINT "FMT", ...
- Same as above. Always prints to STDOUT.
-
- SH <shell command>
- Returns the output of an embedded shell command.
-
- SET "name" TO "value" (eg. SET general.verbosity TO TRUE)
- Returns current value
-
- GET "name"
- Returns current value
-
- * CONTROL
- LET <var> BE <expr> (e.g. LET t0 BE NOW -q)
-
- IF (...) DO  ... END, if control block
- WHILE (...) DO ... END, while control block
-
- QUIT [-r retcode], terminates the program
-*/
 commands returns [Command_ptr res]
     :  c=help_command
        { $res = c; }
@@ -313,6 +258,7 @@ module_body
 module_decl
     :	/* variables and defines */
         fsm_var_decl
+    |   fsm_ivar_decl
     |   fsm_enum_decl
 	|	fsm_define_decl
 
@@ -320,6 +266,10 @@ module_decl
 	|	fsm_init_decl
     |   fsm_invar_decl
 	|	fsm_trans_decl
+    ;
+
+fsm_ivar_decl
+    : 'IVAR'  fsm_ivar_decl_body
     ;
 
 fsm_var_decl
@@ -355,6 +305,11 @@ fsm_enum_type_lits [ExprSet& lits]
      '}'
 	;
 
+fsm_ivar_decl_body
+	: fsm_ivar_decl_clause
+        ( ';' fsm_ivar_decl_clause)*
+	;
+
 fsm_var_decl_body
 	: fsm_var_decl_clause
         ( ';' fsm_var_decl_clause)*
@@ -372,6 +327,22 @@ fsm_var_decl_clause
                 Expr_ptr id = (*expr_iter);
                 IVariable_ptr var = new Variable($smv::module->expr(), id, tp);
                 $smv::module->add_var(id, var);
+            }
+    }
+	;
+
+fsm_ivar_decl_clause
+@init {
+    ExprVector ev;
+}
+	: ids=identifiers[&ev] ':' tp=type
+    {
+            ExprVector::iterator expr_iter;
+            assert(NULL != tp);
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr id = (*expr_iter);
+                IVariable_ptr ivar = new Variable($smv::module->expr(), id, tp, true);
+                $smv::module->add_var(id, ivar);
             }
     }
 	;
@@ -657,7 +628,7 @@ cast_expression returns [Expr_ptr res]
 @init {
     Expr_ptr cast = NULL;
 }
-    : '(' tp = castable_type ')' expr = cast_expression
+    : '(' tp = native_type ')' expr = cast_expression
         { $res = em.make_cast( tp -> repr(), expr ); }
 	|
         expr = unary_expression
@@ -811,14 +782,14 @@ value returns [Expr_ptr res]
 
 type returns [Type_ptr res]
 @init {}
-    : tp = castable_type
+    : tp = native_type
       { $res = tp; }
 
     | tp = enum_type
       { $res = tp; }
     ;
 
-castable_type returns [Type_ptr res]
+native_type returns [Type_ptr res]
 @init {}
     : tp = boolean_type
       { $res = tp; }
@@ -851,14 +822,16 @@ unsigned_int_type returns [Type_ptr res]
         UNSIGNED_INT_TYPE
         {
             p = (char *) $UNSIGNED_INT_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p)) ++ p; // skip to width
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_unsigned_array( atoi(p), size->value()); }
+            { $res = tm.find_unsigned_array( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), size->value()); }
     |
         {
-            $res = tm.find_unsigned( atoi(p));
+            $res = tm.find_unsigned( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width());
         }
     )
     ;
@@ -871,14 +844,16 @@ signed_int_type returns [Type_ptr res]
         SIGNED_INT_TYPE
         {
             p = (char *) $SIGNED_INT_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p)) ++ p; // skip to width
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_signed_array( atoi(p), size->value()); }
+            { $res = tm.find_signed_array( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), size->value()); }
     |
         {
-            $res = tm.find_signed( atoi(p));
+            $res = tm.find_signed( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), size->value());
         }
     )
     ;
@@ -947,11 +922,11 @@ literal returns [Expr_ptr res]
 
 /** Lexer rules */
 UNSIGNED_INT_TYPE
-    :  'uint' TYPE_WIDTH
+    :  'uint' TYPE_WIDTH?
     ;
 
 SIGNED_INT_TYPE
-    :  'int' TYPE_WIDTH
+    :  'int' TYPE_WIDTH?
     ;
 
 UNSIGNED_FXD_TYPE

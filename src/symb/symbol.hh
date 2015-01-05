@@ -125,7 +125,10 @@ class ITemporary
 class IVariable
     : public ISymbol
     , public ITyped
-{};
+{
+public:
+    virtual bool input() const =0;
+};
 
 class IEnum
     : public ISymbol
