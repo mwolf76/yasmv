@@ -194,9 +194,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     while (symbs.has_next()) {
         ISymbol_ptr symb = symbs.next();
 
-        /* currently all variables are state vars, no need
-           to worry further about this _for now_ */
-        if (symb->is_variable()) {
+        if (symb->is_variable() && ! symb->as_variable().input()) {
 
             Expr_ptr ctx  (symb->ctx());
             Expr_ptr expr (symb->expr());
