@@ -39,7 +39,9 @@ class OptsMgr {
 
 public:
     static OptsMgr& INSTANCE() {
-        if (! f_instance) f_instance = new OptsMgr();
+        if (! f_instance)
+            f_instance = new OptsMgr();
+
         return (*f_instance);
     }
 
@@ -55,11 +57,9 @@ public:
     // colorized
     bool color() const;
 
-    // // number of bits per digit to be used in algebraic representation
-    // unsigned bits_per_digit() const;
-
     // native word size in bits, used for algebrization of constant ITEs and arrays
     unsigned word_width() const;
+    void set_word_width(unsigned);
 
     // model filename
     string model() const;
@@ -84,6 +84,7 @@ private:
     bool f_help;
     bool f_color;
     bool f_started;
+    unsigned f_word_width;
 };
 
 #endif

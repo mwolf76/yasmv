@@ -28,6 +28,7 @@ OptsMgr::OptsMgr()
     , f_pos()
     , f_vm()
     , f_help(false)
+    , f_word_width(UINT_MAX)
 {
     f_desc.add_options()
 
@@ -44,7 +45,7 @@ OptsMgr::OptsMgr()
         (
          "word-width",
          options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
-         "native word size in bits, used for algebrization of constant ITEs and arrays"
+         "native word size in bits"
         )
 
         (
@@ -92,10 +93,20 @@ bool OptsMgr::color() const
     return f_color;
 }
 
+void OptsMgr::set_word_width(unsigned value)
+{
+    TRACE
+        << "Setting word width to "
+        << value
+        << endl;
+
+    f_word_width = value;
+}
+
 unsigned OptsMgr::word_width() const
 {
-    unsigned res = f_vm["word-width"].as<unsigned>();
-    return res;
+    return (UINT_MAX != f_word_width) ? f_word_width
+        : f_vm["word-width"].as<unsigned>();
 }
 
 string OptsMgr::model() const
