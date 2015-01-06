@@ -26,6 +26,23 @@
 #include <sat.hh>
 #include <cstdlib>
 
+/**
+ * @brief SAT instancte ctor
+ */
+SAT::SAT()
+    : f_enc_mgr(EncodingMgr::INSTANCE())
+    , f_mapper(* new TimeMapper(*this))
+    , f_registry(* new CNFRegistry(*this))
+    , f_solver()
+{
+    /* MAINGROUP (=0) is already there. */
+    f_groups.push(new_sat_var());
+
+    DEBUG
+        << "Initialized SAT instance @" << this
+        << endl;
+}
+
 status_t SAT::sat_solve_groups(const Groups& groups)
 {
     vec<Lit> assumptions;
@@ -62,3 +79,51 @@ status_t SAT::sat_solve_groups(const Groups& groups)
     return f_status;
 }
 
+void SAT::push(CompilationUnit cu, step_t time, group_t group)
+{
+    /* push DDs */
+    {
+        const DDVector& dv( cu.dds());
+        unsigned n = dv.size();
+        DEBUG
+            << "CNFizing " << n
+            << " fragments"
+            << endl;
+
+        DDVector::const_iterator i;
+        for (i = dv.begin(); dv.end() != i; ++ i) {
+            // TODO: additional CNF algorithms
+            cnf_push_single_cut( *i, time, group );
+        }
+    }
+
+    /* push microcode */
+    {
+        const MicroDescriptors& micro_descriptors (cu.micro_descriptors());
+        unsigned n = micro_descriptors.size();
+        DEBUG
+            << "Injecting " << n
+            << " microcode instances"
+            << endl;
+
+        MicroDescriptors::const_iterator i;
+        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)  {
+            cnf_inject_microcode( *i, time, group );
+        }
+    }
+
+    /* push muxes */
+    {
+        const MuxDescriptors& mux_descriptors (cu.mux_descriptors());
+        unsigned n = mux_descriptors.size();
+        DEBUG
+            << "Injecting " << n
+            << " MUX instances"
+            << endl;
+
+        MuxDescriptors::const_iterator i;
+        for (i = mux_descriptors.begin(); mux_descriptors.end() != i; ++ i)  {
+            cnf_inject_muxcode( *i, time, group );
+        }
+    }
+}

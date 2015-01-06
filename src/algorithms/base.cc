@@ -226,6 +226,11 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                     ps.push( mkLit( jkne, true));
                     ps.push( mkLit( jvar, true));
                     ps.push( mkLit( kvar, true));
+
+                    DRIVEL
+                        << ps
+                        << endl;
+
                     engine.add_clause(ps);
                 }
 
@@ -234,6 +239,11 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                     ps.push( mkLit( jkne, true));
                     ps.push( mkLit( jvar, true));
                     ps.push( mkLit( kvar, true));
+
+                    DRIVEL
+                        << ps
+                        << endl;
+
                     engine.add_clause(ps);
                 }
             }
@@ -248,6 +258,10 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
          eye != uniqueness_vars.end(); ++ eye) {
         ps.push( mkLit( *eye, false));
     }
+
+    DRIVEL
+        << ps
+        << endl;
 
     engine.add_clause(ps);
 

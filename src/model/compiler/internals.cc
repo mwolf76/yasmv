@@ -96,6 +96,7 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
 void Compiler::register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, DDVector& x, DDVector &y )
 {
     MuxDescriptor md( width, z, cnd, x, y);
+    f_mux_descriptors.push_back(md);
 
     DEBUG
         << "Registered "

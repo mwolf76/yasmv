@@ -40,48 +40,50 @@ MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, DDVector &x, 
 
 ostream& operator<<(ostream& os, MicroDescriptor& md)
 {
-    os << md.triple();
-    os << "([";
+    os
+        << md.triple()
+        << "(z = [";
+
     const DDVector& z(md.z());
     for (DDVector::const_iterator zi = z.begin();;) {
         const DdNode* node (zi->getNode());
-        if (! Cudd_IsConstant(node)) {
+
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ zi != z.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ zi != z.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
-    os << "], [";
+    os << "], x = [";
     const DDVector& x(md.x());
     for (DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node (xi->getNode());
-        if (! Cudd_IsConstant(node)) {
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ xi != x.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ xi != x.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
-    os << "], [";
+    os << "], y = [";
     const DDVector& y(md.y());
     for (DDVector::const_iterator yi = y.begin();;) {
         const DdNode* node (yi->getNode());
-        if (! Cudd_IsConstant(node)) {
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ yi != y.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        if (++ yi != y.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
     os << "])";
 
@@ -90,58 +92,60 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
 
 ostream& operator<<(ostream& os, MuxDescriptor& md)
 {
-    os << "MUX ";
-    os << "([";
+    os << "mux"
+       << md.width()
+       << "(z = [";
+
     const DDVector& z(md.z());
     for (DDVector::const_iterator zi = z.begin();;) {
         const DdNode* node (zi->getNode());
-        if (! Cudd_IsConstant(node)) {
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ zi != z.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ zi != z.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
 
-    os << "], [";
+    os << "], (cnd = ";
     const ADD cnd(md.cnd());
     const DdNode* node (cnd.getNode());
-    if (! Cudd_IsConstant(node)) {
-        os << node->index;
-    }
-    else {
-        os << "-";
-    }
 
+    if (! Cudd_IsConstant(node))
+        os << node->index;
+    else
+        os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+    os << "), x = [";
     const DDVector& x(md.x());
     for (DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node (xi->getNode());
-        if (! Cudd_IsConstant(node)) {
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ xi != x.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ xi != x.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
-    os << "], [";
+    os << "], y = [";
     const DDVector& y(md.y());
     for (DDVector::const_iterator yi = y.begin();;) {
         const DdNode* node (yi->getNode());
-        if (! Cudd_IsConstant(node)) {
+        if (! Cudd_IsConstant(node))
             os << node->index;
-        }
-        else {
-            os << "-";
-        }
-        if (++ yi != y.end()) {
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ yi != y.end())
             os << ", ";
-        } else break;
+        else
+            break;
     }
     os << "])";
 
