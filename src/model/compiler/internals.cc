@@ -81,89 +81,21 @@ void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
         throw ConstantTooLarge(konst);
 }
 
-/* ITE is not a proper const manipulation as it *always* is a function
-   of the condition. The result of an ITE is an algebraic. The size of
-   the expression poses a bit of a problem. After some thought I
-   realized a way to determine the necessary number of bits relying on
-   an extra stack and some recursion magic on the innermost relational
-   operator. This leaves the case when both operands of the relational
-   are abstract. This can be sorted out by means of rewriting, but as it
-   is not probably worth the effort, as of now it is unsupported. */
-void Compiler::integer_ite(const Expr_ptr expr)
-{
-    // assert(0 < f_rel_type_stack.size());
-    // Type_ptr type = f_rel_type_stack.back();
-    // unsigned width = type -> width();
-
-    // // reverse order
-    // ALGEBRIZE_RHS(width);
-    // ALGEBRIZE_LHS(width);
-
-    // /* fix type stack, constants are always unsigned */
-    // f_type_stack.pop_back();
-    // f_type_stack.pop_back();
-    // f_type_stack.push_back( type );
-    // f_type_stack.push_back( type );
-
-    // /* we can now re-use general case algorithm for algebraic ITEs */
-    // algebraic_ite(expr);
-
-}
-
-// void Compiler::algebrize_operation(bool ternary, bool relational, unsigned& width, bool& signedness)
-// {
-//     width = 0;
-//     unsigned stack_size = f_type_stack.size();
-//     assert ((ternary ? 3 : 2) <= stack_size);
-//     TypeMgr& tm = f_owner.tm();
-
-//     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-//     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-//     if (ternary)
-//         f_type_stack.pop_back(); /* ITEs require an extra pop() */
-
-//     // both algebraic, not both consts
-//     assert( rhs_type -> is_algebraic() &&
-//             lhs_type -> is_algebraic() &&
-//             !( rhs_type -> is_constant() &&
-//                lhs_type -> is_constant()));
-
-//     if (rhs_type -> is_constant()  ||
-//         lhs_type -> is_constant()) {
-
-//         if (lhs_type -> is_constant()) {
-//             width = rhs_type -> width();
-//             ALGEBRIZE_LHS(width);
-//             f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean());
-//         }
-//         else if (rhs_type -> is_constant()) {
-//             width = lhs_type -> width();
-//             ALGEBRIZE_RHS(width);
-//             f_type_stack.push_back( (!relational) ? lhs_type : tm.find_boolean());
-//         }
-//         else assert(0);
-//     }
-//     else {
-//         // neither const -> size and signedness must match
-//         assert( );
-
-
-//         // Nothing do be done, just add result type to the type stack
-//         width = rhs_type -> width();
-//         f_type_stack.push_back( (!relational) ? rhs_type : tm.find_boolean()); // arbitrary
-//     }
-
-//     signedness = rhs_type -> is_signed_algebraic();
-
-//     // sanity check
-//     assert(0 < width && (stack_size - (ternary ? 2 : 1) == f_type_stack.size()));
-// }
-
 void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                          DDVector& z, DDVector& x, DDVector &y )
 {
     MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x, y);
-    f_descriptors.push_back(md);
+    f_micro_descriptors.push_back(md);
+
+    DEBUG
+        << "Registered "
+        << md
+        << endl;
+}
+
+void Compiler::register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, DDVector& x, DDVector &y )
+{
+    MuxDescriptor md( width, z, cnd, x, y);
 
     DEBUG
         << "Registered "
@@ -255,9 +187,13 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
-    if (f_preprocess || f_owner.em().is_type(expr)) {
+    /* no caching during preprocessing */
+    if (f_preprocess)
         return;
-    }
+
+    /* no cache when compiling types */
+    if (f_owner.em().is_type(expr))
+        return;
 
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
@@ -271,7 +207,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
 
-    /* collect dds and memoize */
+    /* collect dds */
     DDVector dv;
     unsigned i, width = type -> width();
     assert(width <= f_add_stack.size());
@@ -282,17 +218,17 @@ void Compiler::post_node_hook(Expr_ptr expr)
         dv.push_back(*ri);
     }
     assert (dv.size() == width);
-    f_map.insert( make_pair <FQExpr,
-                  pair<DDVector, MicroDescriptors> > ( key,
-                                                       make_pair<DDVector, MicroDescriptors> (dv,
-                                                                                              f_descriptors) ));
+
+    /* memoize result */
+    f_map.insert( make_pair<FQExpr, CompilationUnit>
+                  ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_descriptors)));
 
     double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
     unsigned nodes = f_enc.dd().SharingSize(dv);
 
     DEBUG
-        << key << " took " << elapsed << "s, "
-        << nodes << " ADD nodes"
+        << key << " took " << elapsed << ", "
+        << nodes << " DD nodes"
         << endl;
 }
 
@@ -491,7 +427,7 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     Expr_ptr ctx (f_ctx_stack.back());
 
     FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
-    ADDMap::iterator eye = f_map.find(key);
+    CompilationMap::iterator eye = f_map.find(key);
 
     if (eye != f_map.end()) {
         const Type_ptr type = f_owner.type(expr, ctx);
@@ -499,22 +435,29 @@ bool Compiler::cache_miss(const Expr_ptr expr)
               << ", type is " << type
               << endl;
 
-        /* push cached DDs */
-        DDVector::reverse_iterator ri;
-        for (ri = (*eye).second.first.rbegin();
-             ri != (*eye).second.first.rend(); ++ ri ) {
-            f_add_stack.push_back(*ri);
+        CompilationUnit& unit = (*eye).second;
+
+        /* push cached DDs (reversed) */
+        {
+            const DDVector& dds (unit.dds());
+            DDVector::const_reverse_iterator i;
+            for (i = dds.rbegin(); i != dds.rend(); ++ i )
+                f_add_stack.push_back(*i);
         }
+
+        /* push cached microcode descriptors */
+        {
+            const MicroDescriptors& micros (unit.micro_descriptors());
+            MicroDescriptors::const_iterator i;
+            for (i = micros.begin(); micros.end() != i; ++ i)
+                f_micro_descriptors.push_back(*i);
+        }
+
+        /* no cache for mux descriptors, as algebraic ITEs are not
+           cached */
 
         /* push cached type */
         f_type_stack.push_back(type);
-
-        /* push cached microcode */
-        MicroDescriptors::iterator mdi;
-        for (mdi = (*eye).second.second.begin();
-             mdi != (*eye).second.second.end(); ++ mdi) {
-            f_descriptors.push_back(*mdi);
-        }
 
         /* cache hit */
         return false;
@@ -530,5 +473,6 @@ void Compiler::clear_internals()
     f_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_descriptors.clear();
+    f_micro_descriptors.clear();
+    f_mux_descriptors.clear();
 }

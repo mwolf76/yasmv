@@ -50,10 +50,10 @@ void BMC::falsification( Expr_ptr phi )
     Expr_ptr ctx = em().make_main();
 
     Expr_ptr invariant = phi->lhs();
-    Term ii (compiler().process( ctx, invariant));
+    CompilationUnit ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
-    Term vv (compiler().process( ctx, violation));
+    CompilationUnit vv (compiler().process( ctx, violation));
 
     step_t k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
@@ -119,10 +119,10 @@ void BMC::kinduction( Expr_ptr phi )
     Expr_ptr ctx = em().make_main();
 
     Expr_ptr invariant = phi->lhs();
-    Term ii (compiler().process( ctx, invariant));
+    CompilationUnit ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
-    Term vv (compiler().process( ctx, violation));
+    CompilationUnit vv (compiler().process( ctx, violation));
 
     step_t j, k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop

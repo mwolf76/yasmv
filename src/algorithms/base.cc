@@ -122,7 +122,7 @@ void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
 
     clock_t t0 = clock();
 
-    Terms::const_iterator i;
+    CompilationUnits::const_iterator i;
     for (i = f_init.begin(); f_init.end() != i; ++ i) {
         engine.push( *i, time, group);
     }
@@ -144,7 +144,7 @@ void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
 
     clock_t t0 = clock();
 
-    Terms::const_iterator i;
+    CompilationUnits::const_iterator i;
     for (i = f_invar.begin(); f_invar.end() != i; ++ i) {
         engine.push( *i, time, group);
     }
@@ -166,7 +166,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 
     clock_t t0 = clock();
 
-    Terms::const_iterator i;
+    CompilationUnits::const_iterator i;
     for (i = f_trans.begin(); f_trans.end() != i; ++ i) {
         engine.push( *i, time, group);
     }
@@ -258,7 +258,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
         << endl;
 }
 
-void Algorithm::assert_formula(Engine& engine, step_t time, Term& term, group_t group)
+void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& term, group_t group)
 {
     clock_t t0 = clock();
     DEBUG

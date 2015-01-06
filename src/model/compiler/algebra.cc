@@ -332,18 +332,14 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
                   rhs_type -> is_signed_algebraic()));
 
     unsigned width = rhs_type -> width();
-    // bool signedness= rhs_type -> is_signed_algebraic();
 
     POP_ALGEBRAIC(rhs, width);
     POP_ALGEBRAIC(lhs, width);
     POP_ADD(cnd);
 
-    /* (cond) ? x[i] : y[i] */
-    for (unsigned i = 0; i < width; ++ i) {
-        unsigned ndx = width - i - 1;
-        ADD bit (cnd.Ite(lhs[ndx], rhs[ndx]));
-        PUSH_ADD(bit);
-    }
+    FRESH_DV(dv, width);
+
+    register_muxdescriptor( width, dv, cnd, lhs, rhs );
 }
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)

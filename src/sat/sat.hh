@@ -32,7 +32,7 @@
 #include <cudd_mgr.hh>
 #include <enc_mgr.hh>
 
-#include <compiler/term.hh>
+#include <compiler/unit.hh>
 
 #include <cnf_registry.hh>
 #include <time_mapper.hh>
@@ -71,26 +71,52 @@ public:
     /**
      * @brief add a formula to the SAT problem instance.
      */
-    inline void push(Term term, step_t time, group_t group = MAINGROUP)
+    inline void push(CompilationUnit cu, step_t time, group_t group = MAINGROUP)
     {
-        unsigned n, m;
+        /* push DDs */
+        {
+            const DDVector& dv( cu.dds());
+            unsigned n = dv.size();
+            DEBUG
+                << "CNFizing " << n
+                << " fragments"
+                << endl;
 
-        // push DDs
-        const DDVector& dv( term.formula()); n = dv.size();
-        DEBUG << "CNFizing "<< n << " fragments" << endl;
-
-        DDVector::const_iterator i;
-        for (i = dv.begin(); dv.end() != i; ++ i) {
-            // TODO: additional CNF algorithms
-            cnf_push_single_cut( *i, time, group );
+            DDVector::const_iterator i;
+            for (i = dv.begin(); dv.end() != i; ++ i) {
+                // TODO: additional CNF algorithms
+                cnf_push_single_cut( *i, time, group );
+            }
         }
 
-        const MicroDescriptors& descriptors (term.descriptors()); m = descriptors.size();
-        DEBUG << "Injecting " << m << " microcode descriptors" << endl;
+        /* push microcode */
+        {
+            const MicroDescriptors& micro_descriptors (cu.micro_descriptors());
+            unsigned n = micro_descriptors.size();
+            DEBUG
+                << "Injecting " << n
+                << " microcode instances"
+                << endl;
 
-        MicroDescriptors::const_iterator j;
-        for (j = descriptors.begin(); descriptors.end() != j; ++ j)  {
-            cnf_inject_microcode( *j, time, group );
+            MicroDescriptors::const_iterator i;
+            for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)  {
+                cnf_inject_microcode( *i, time, group );
+            }
+        }
+
+        /* push muxes */
+        {
+            const MuxDescriptors& mux_descriptors (cu.mux_descriptors());
+            unsigned n = mux_descriptors.size();
+            DEBUG
+                << "Injecting " << n
+                << " MUX instances"
+                << endl;
+
+            MuxDescriptors::const_iterator i;
+            for (i = mux_descriptors.begin(); mux_descriptors.end() != i; ++ i)  {
+                cnf_inject_muxcode( *i, time, group );
+            }
         }
     }
 
@@ -240,8 +266,9 @@ private:
     void cnf_push_no_cut(ADD add, step_t time, const group_t group);
     void cnf_push_single_cut(ADD add, step_t time, const group_t group);
 
-    // CNF injection algorithm
+    // CNF injection services
     void cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group);
+    void cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group);
 }; // SAT instance
 
 #endif

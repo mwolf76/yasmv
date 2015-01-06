@@ -108,7 +108,7 @@ public:
                                group_t group = MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(Engine& engine, step_t time, Term& term,
+    void assert_formula(Engine& engine, step_t time, CompilationUnit& term,
                         group_t group = MAINGROUP);
 
 private:
@@ -131,9 +131,9 @@ private:
     ParametersMap f_params;
 
     /* Formulas */
-    Terms f_init;
-    Terms f_invar;
-    Terms f_trans;
+    CompilationUnits f_init;
+    CompilationUnits f_invar;
+    CompilationUnits f_trans;
 
     /* Witness */
     Witness_ptr f_witness;

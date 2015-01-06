@@ -61,6 +61,29 @@ struct OpTripleEq {
     }
 };
 
+class MuxDescriptor {
+public:
+    MuxDescriptor(unsigned width, DDVector& z, ADD cnd, DDVector& x, DDVector& y);
+
+    inline unsigned width() const
+    { return f_width; }
+    inline const DDVector& z() const
+    { return f_z; }
+    inline ADD cnd() const
+    { return f_cnd; }
+    inline const DDVector& x() const
+    { return f_x; }
+    inline const DDVector& y() const
+    { return f_y; }
+
+private:
+    unsigned f_width;
+    DDVector f_z;
+    ADD f_cnd;
+    DDVector f_x;
+    DDVector f_y;
+};
+
 class MicroDescriptor {
 
 public:
@@ -97,8 +120,10 @@ private:
 // helpers
 ostream& operator<<(ostream& os, OpTriple triple);
 ostream& operator<<(ostream& os, MicroDescriptor& md);
+ostream& operator<<(ostream& os, MuxDescriptor& md);
 
 typedef vector<MicroDescriptor> MicroDescriptors;
+typedef vector<MuxDescriptor> MuxDescriptors;
 
 
 #endif

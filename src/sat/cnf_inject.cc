@@ -175,9 +175,91 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
     }
 }
 
+class CNFMuxcodeInjector {
+public:
+    CNFMuxcodeInjector(SAT& sat, step_t time, group_t group = MAINGROUP)
+        : f_sat(sat)
+        , f_time(time)
+        , f_group(group)
+    {}
+
+    ~CNFMuxcodeInjector()
+    {}
+
+    inline void operator() (const MuxDescriptor& md)
+    { inject(md); }
+
+private:
+    void inject(const MuxDescriptor& md);
+
+    SAT& f_sat;
+    step_t f_time;
+    group_t f_group;
+};
+
+void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
+{
+    DEBUG
+        << const_cast<MuxDescriptor&> (md)
+        << endl;
+
+    // local refs
+    const DDVector& z(md.z());
+    const ADD& cnd(md.cnd());
+    const DDVector& x(md.x());
+    const DDVector& y(md.y());
+
+    { /* !a ( Zi <-> Xi for all i ) */
+
+        for (unsigned pol = 0; pol < 2; ++ pol) {
+
+            for (unsigned i = 0; i < md.width(); ++ i) {
+                Minisat::vec<Lit> ps;
+                ps.push( mkLit( f_group, true));
+
+                const DdNode* node(cnd.getNode());
+                if (! Cudd_IsConstant(node)) {
+                    Var tgt_var = f_sat.find_dd_var(node, f_time);
+                    ps.push( mkLit( tgt_var, true));
+                }
+                else assert(false);
+                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), ! pol ? true : false )));
+                ps.push( mkLit( f_sat.find_dd_var( x[i].getNode(),   pol ? true : false)));
+            }
+        }
+    }
+
+    { /* a ( Zi <-> Yi for all i */
+        for (unsigned pol = 0; pol < 2; ++ pol) {
+
+            for (unsigned i = 0; i < md.width(); ++ i) {
+                Minisat::vec<Lit> ps;
+                ps.push( mkLit( f_group, true));
+
+                const DdNode* node(cnd.getNode());
+                if (! Cudd_IsConstant(node)) {
+                    Var tgt_var = f_sat.find_dd_var(node, f_time);
+                    ps.push( mkLit( tgt_var, false));
+                }
+                else assert(false);
+                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), ! pol ? true : false )));
+                ps.push( mkLit( f_sat.find_dd_var( y[i].getNode(),   pol ? true : false)));
+            }
+        }
+    }
+}
+
 // proxy
 void SAT::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
 {
     CNFMicrocodeInjector worker(*this, time, group);
     worker(md);
 }
+
+// proxy
+void SAT::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
+{
+    CNFMuxcodeInjector worker(*this, time, group);
+    worker(md);
+}
+

@@ -47,7 +47,7 @@ Compiler::Compiler()
     : f_temp_auto_index(0)
     , f_map()
     , f_temp_encodings()
-    , f_descriptors()
+    , f_micro_descriptors()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()
@@ -76,7 +76,7 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
-Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
+CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
     mutex::scoped_lock lock(f_process_mutex);
 
@@ -120,7 +120,8 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
     assert( res.FindMax().Equals(f_enc.one()) );
 
     unsigned res_sz (f_add_stack.size());
-    unsigned mcr_sz (f_descriptors.size());
+    unsigned mcr_sz (f_micro_descriptors.size());
+    unsigned mux_sz (f_mux_descriptors.size());
 
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
@@ -128,11 +129,12 @@ Term Compiler::process(Expr_ptr ctx, Expr_ptr body)
     DEBUG
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
-        << res_sz << " ADD results, "
-        << mcr_sz << " Microcode descriptors."
+        << res_sz << " DDs, "
+        << mcr_sz << " Microcode descriptors, "
+        << mux_sz << " Multiplexer descriptors."
         << endl;
 
-    return Term( f_add_stack, f_descriptors );
+    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_descriptors);
 }
 
 /*  Compilation engine is implemented using a simple expression walker

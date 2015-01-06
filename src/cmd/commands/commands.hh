@@ -191,7 +191,7 @@ public:
     virtual ~SimulateCommand();
 
     virtual bool blocking() const
-    { return false; }
+    { return true; }
 
     virtual void kill()
     { f_kill = true; }

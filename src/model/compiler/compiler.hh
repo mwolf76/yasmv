@@ -56,18 +56,17 @@
 
 #include <dd_walker.hh>
 
-#include <compiler/term.hh>
+#include <compiler/unit.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
 typedef vector<ADD> ADDStack; // ouput of Stage 1
 
 /* local typedefs */
-typedef vector<Expr_ptr> ExprStack;
+typedef vector<Expr_ptr> ExprList;
 typedef vector<step_t>   TimeStack;
 
-typedef unordered_map<FQExpr, pair<DDVector, MicroDescriptors>, FQExprHash, FQExprEq> ADDMap;
-typedef unordered_map<ADD, DDVector, ADDHash, ADDEq> ANDChainMap;
+typedef unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
 
 /* shortcuts to to simplify manipulation of the internal ADD stack */
 #define POP_ADD(op)                             \
@@ -119,7 +118,7 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    Term process(Expr_ptr ctx, Expr_ptr body);
+    CompilationUnit process(Expr_ptr ctx, Expr_ptr body);
 
 protected:
     clock_t f_elapsed; /* for benchmarking */
@@ -142,14 +141,17 @@ protected:
 
     unsigned f_temp_auto_index; // autoincr temp index
 
-    // FQDN -> DD cache
-    ADDMap f_map;
+    // FQDN -> ( DD, micros, mux) cache
+    CompilationMap f_map;
 
-    // FQDN -> temporarry DD encodings
+    // FQDN -> temporary DD encodings
     FQExpr2EncMap f_temp_encodings;
 
     // microcode descriptors
-    MicroDescriptors f_descriptors;
+    MicroDescriptors f_micro_descriptors;
+
+    // mux descriptors
+    MuxDescriptors f_mux_descriptors;
 
     // look-ahead for type checking
     TypeStack f_type_stack;
@@ -158,7 +160,7 @@ protected:
     ADDStack f_add_stack;
 
     // current ctx stack, for symbol resolution
-    ExprStack f_ctx_stack;
+    ExprList f_ctx_stack;
 
     // current time frame, for unrolling
     TimeStack f_time_stack;
@@ -174,11 +176,6 @@ protected:
     bool is_binary_boolean(const Expr_ptr expr);
     bool is_unary_boolean(const Expr_ptr expr);
     bool is_ite_boolean(const Expr_ptr expr);
-
-    bool is_binary_integer(const Expr_ptr expr);
-    bool is_unary_integer(const Expr_ptr expr);
-    bool is_ite_integer(const Expr_ptr expr);
-    bool is_subscript_integer(const Expr_ptr expr);
 
     bool is_binary_enumerative(const Expr_ptr expr);
     bool is_unary_enumerative(const Expr_ptr expr);
@@ -199,28 +196,6 @@ protected:
     void boolean_equals(const Expr_ptr expr);
     void boolean_not_equals(const Expr_ptr expr);
     void boolean_ite(const Expr_ptr expr);
-
-    /* -- int const exprs ---------------------------------------------------- */
-    void integer_neg(const Expr_ptr expr);
-    void integer_bw_not(const Expr_ptr expr);
-    void integer_plus(const Expr_ptr expr);
-    void integer_sub(const Expr_ptr expr);
-    void integer_div(const Expr_ptr expr);
-    void integer_mul(const Expr_ptr expr);
-    void integer_mod(const Expr_ptr expr);
-    void integer_bw_and(const Expr_ptr expr);
-    void integer_bw_or(const Expr_ptr expr);
-    void integer_bw_xor(const Expr_ptr expr);
-    void integer_bw_xnor(const Expr_ptr expr);
-    void integer_lshift(const Expr_ptr expr);
-    void integer_rshift(const Expr_ptr expr);
-    void integer_equals(const Expr_ptr expr);
-    void integer_not_equals(const Expr_ptr expr);
-    void integer_gt(const Expr_ptr expr);
-    void integer_ge(const Expr_ptr expr);
-    void integer_lt(const Expr_ptr expr);
-    void integer_le(const Expr_ptr expr);
-    void integer_ite(const Expr_ptr expr);
 
     /* -- algebraic exprs --------------------------------------------------- */
     void algebraic_neg(const Expr_ptr expr);
@@ -266,7 +241,6 @@ private:
     void clear_internals();
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
-    void build_subscript_selector();
     void flush_operands();
 
     /* microcode-based algebraic binary ops: supports PLUS, SUB, MUL, DIV, MOD */
@@ -283,20 +257,6 @@ private:
     /** @brief Determines type width */
     unsigned type_width(Type_ptr type);
 
-    // aliases for algebrize_operation
-    // inline void algebrize_binary_arithmetical(unsigned& width, bool& signedness)
-    // { algebrize_operation(false, false, width, signedness); }
-
-    // inline void algebrize_binary_relational(unsigned& width, bool& signedness)
-    // { algebrize_operation(false, true, width, signedness); }
-
-    // inline void algebrize_ternary_ite(unsigned& width, bool& signedness)
-    // { algebrize_operation(true, false, width, signedness); }
-
-    // /** critical low-level service */
-    // void algebrize_operation(bool ternary, bool relational,
-    //                          unsigned& width, bool& signedness);
-
     /* Auto expressions and DDs */
     Expr_ptr make_auto_id();
     Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
@@ -305,8 +265,13 @@ private:
 
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
+
+    // microcode support
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x, DDVector &y );
+
+    // MUX support
+    void register_muxdescriptor( unsigned width, DDVector& z, ADD a, DDVector& x, DDVector &y );
 };
 
 #endif

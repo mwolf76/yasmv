@@ -29,6 +29,15 @@ MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVe
     , f_y(y)
 {}
 
+MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, DDVector &x, DDVector &y)
+    : f_width(width)
+    , f_z(z)
+    , f_cnd(cnd)
+    , f_x(x)
+    , f_y(y)
+{
+}
+
 ostream& operator<<(ostream& os, MicroDescriptor& md)
 {
     os << md.triple();
@@ -78,3 +87,64 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
 
     return os;
 }
+
+ostream& operator<<(ostream& os, MuxDescriptor& md)
+{
+    os << "MUX ";
+    os << "([";
+    const DDVector& z(md.z());
+    for (DDVector::const_iterator zi = z.begin();;) {
+        const DdNode* node (zi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
+        if (++ zi != z.end()) {
+            os << ", ";
+        } else break;
+    }
+
+    os << "], [";
+    const ADD cnd(md.cnd());
+    const DdNode* node (cnd.getNode());
+    if (! Cudd_IsConstant(node)) {
+        os << node->index;
+    }
+    else {
+        os << "-";
+    }
+
+    const DDVector& x(md.x());
+    for (DDVector::const_iterator xi = x.begin();;) {
+        const DdNode* node (xi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
+        if (++ xi != x.end()) {
+            os << ", ";
+        } else break;
+    }
+    os << "], [";
+    const DDVector& y(md.y());
+    for (DDVector::const_iterator yi = y.begin();;) {
+        const DdNode* node (yi->getNode());
+        if (! Cudd_IsConstant(node)) {
+            os << node->index;
+        }
+        else {
+            os << "-";
+        }
+        if (++ yi != y.end()) {
+            os << ", ";
+        } else break;
+    }
+    os << "])";
+
+    return os;
+}
+

@@ -26,28 +26,37 @@
 #include <dd_walker.hh>
 #include <micro.hh>
 
-class Term {
-public:
-    Term()
-        : f_formula()
-        , f_descriptors()
-    {}
+// typedef unordered_map<Expr_ptr, MuxDescriptor, PtrHash, PtrEq> MuxMap;
 
-    Term(DDVector& formula, MicroDescriptors& descriptors)
-        : f_formula(formula)
-        , f_descriptors(descriptors)
-    {}
+// class Term {
+// public:
+//     Term()
+//         : f_formula()
+//         , f_micro_descriptors()
+//         , f_mux_descriptors()
+//     {}
 
-    inline const DDVector& formula() const
-    { return f_formula; }
+//     Term(DDVector& formula, MicroDescriptors& micro_descriptors, MuxDescriptors& mux_descriptors)
+//         : f_formula(formula)
+//         , f_micro_descriptors(micro_descriptors)
+//         , f_mux_descriptors(mux_descriptors)
+//     {
+//     }
 
-    inline const MicroDescriptors& descriptors() const
-    { return f_descriptors; }
+//     inline const DDVector& formula() const
+//     { return f_formula; }
 
-private:
-    DDVector f_formula;
-    MicroDescriptors f_descriptors;
-};
-typedef vector<Term> Terms;
+//     inline const MicroDescriptors& micro_descriptors() const
+//     { return f_micro_descriptors; }
+
+//     inline const MuxDescriptors& mux_descriptors() const
+//     { return f_mux_descriptors; }
+
+// private:
+//     DDVector f_formula;
+//     MicroDescriptors f_micro_descriptors;
+//     MuxDescriptors f_mux_descriptors;
+// };
+// typedef vector<Term> Terms;
 
 #endif
