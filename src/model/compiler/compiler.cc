@@ -1,18 +1,7 @@
 /**
  *  @file compiler.cc
- *  @brief Boolean expressions compiler
  *
- *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  subsequent phases of the model checking process. Current
- *  implementation uses CUDD ADDs to perform expression manipulation
- *  and booleanization. Expressions are assumed to be type-safe, only
- *  boolean expressions on arithmetic predicates are supported. The
- *  result of the compilation process must be a 0-1 ADD. This format
- *  is then suitable for Time-instantiation and then CNFization of the
- *  clauses injection directly into the SAT solver.
- *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -29,113 +18,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
-// comment this out to disable debug
-// #define DEBUG_COMPILER
-
-// comment this out to disable benchmarking
-#define BENCHMARK_COMPILER
-
 #include <common.hh>
 
 #include <expr.hh>
 #include <compiler.hh>
 
 #include <proxy.hh>
-
-Compiler::Compiler()
-    : f_cache()
-    , f_temp_encodings()
-    , f_micro_descriptors()
-    , f_mux_descriptors()
-    , f_type_stack()
-    , f_add_stack()
-    , f_ctx_stack()
-    , f_time_stack()
-    , f_owner(ModelMgr::INSTANCE())
-    , f_enc(EncodingMgr::INSTANCE())
-    , f_temp_auto_index(0)
-{
-    DEBUG
-        << "Created Compiler @"
-        << this
-        << endl;
-}
-
-Compiler::~Compiler()
-{
-    DEBUG
-        << "Destroying Compiler @"
-        << this
-        << endl;
-}
-
-/* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
-void Compiler::pre_hook()
-{}
-void Compiler::post_hook()
-{}
-
-CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
-{
-    mutex::scoped_lock lock(f_process_mutex);
-
-    f_elapsed = clock();
-
-    /* pass 1: preprocessing */
-    clear_internals();
-    f_preprocess = true;
-
-    // walk body in given ctx
-    f_ctx_stack.push_back(ctx);
-
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-    f_time_stack.push_back(0);
-
-    /* Invoke walker on the body of the expr to be processed */
-    (*this)(body);
-
-    /* pass 2: compilation */
-    clear_internals();
-    f_preprocess = false;
-
-    // walk body in given ctx
-    f_ctx_stack.push_back(ctx);
-
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-    f_time_stack.push_back(0);
-
-    /* Invoke walker on the body of the expr to be processed */
-    (*this)(body);
-
-    // sanity conditions
-    assert(1 == f_add_stack.size());
-    assert(1 == f_type_stack.size());
-    assert(1 == f_ctx_stack.size());
-    assert(1 == f_time_stack.size());
-
-    // Exactly one 0-1 ADD.
-    ADD res = f_add_stack.back();
-    assert( res.FindMin().Equals(f_enc.zero()) );
-    assert( res.FindMax().Equals(f_enc.one()) );
-
-    unsigned res_sz (f_add_stack.size());
-    unsigned mcr_sz (f_micro_descriptors.size());
-    unsigned mux_sz (f_mux_descriptors.size());
-
-    f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
-
-     DEBUG
-        << "Compilation of " << ctx << "::" << body
-        << " took " << secs << " seconds, "
-        << res_sz << " DDs, "
-        << mcr_sz << " Microcode descriptors, "
-        << mux_sz << " Multiplexer descriptors."
-        << endl;
-
-    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_descriptors);
-}
 
 /*  Compilation engine is implemented using a simple expression walker
  *  pattern: (a) on preorder, return true if the node has not yet been
@@ -160,9 +48,9 @@ void Compiler::walk_neg_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_unary_algebraic(expr)) {
+    if (is_unary_algebraic(expr))
         algebraic_neg(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -173,9 +61,9 @@ void Compiler::walk_not_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_unary_boolean(expr)) {
+    if (is_unary_boolean(expr))
         boolean_not(expr);
-    }
+
     else assert(false); // unreachable
 }
 
@@ -186,9 +74,9 @@ void Compiler::walk_bw_not_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_unary_algebraic(expr)) {
-        algebraic_bw_not(expr); // bitwise
-    }
+    if (is_unary_algebraic(expr))
+        algebraic_bw_not(expr);
+
     else assert(false); // unreachable
 }
 
@@ -201,9 +89,9 @@ void Compiler::walk_add_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_plus(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -231,9 +119,9 @@ void Compiler::walk_div_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_div(expr);
-    }
+
     else assert( false ); // unexpected
 }
 
@@ -246,9 +134,9 @@ void Compiler::walk_mul_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_mul(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -261,9 +149,9 @@ void Compiler::walk_mod_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_mod(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -276,9 +164,9 @@ void Compiler::walk_and_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_and(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -291,9 +179,9 @@ void Compiler::walk_bw_and_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
-        algebraic_bw_and(expr); // bitwise
-    }
+    if (is_binary_algebraic(expr))
+        algebraic_bw_and(expr);
+
     else assert( false ); // unreachable
 }
 
@@ -306,9 +194,9 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_or(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -321,9 +209,9 @@ void Compiler::walk_bw_or_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_bw_or(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -336,9 +224,9 @@ void Compiler::walk_bw_xor_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_bw_xor(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -351,9 +239,9 @@ void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_bw_xnor(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -366,9 +254,9 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_implies(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -381,9 +269,9 @@ void Compiler::walk_iff_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_iff(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -391,6 +279,7 @@ bool Compiler::walk_type_preorder(const Expr_ptr expr)
 {
     Type_ptr tp = f_owner.tm().find_type_by_def(expr);
     f_type_stack.push_back( tp);
+
     return false;
 }
 bool Compiler::walk_type_inorder(const Expr_ptr expr)
@@ -399,9 +288,7 @@ bool Compiler::walk_type_inorder(const Expr_ptr expr)
     return false;
 }
 void Compiler::walk_type_postorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-}
+{ assert( false ); }
 
 bool Compiler::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -449,9 +336,9 @@ void Compiler::walk_lshift_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_lshift(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -464,9 +351,9 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_rshift(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -479,15 +366,15 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_equals(expr);
-    }
-    if (is_binary_enumerative(expr)) {
+
+    if (is_binary_enumerative(expr))
         enumerative_equals(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+
+    else if (is_binary_algebraic(expr))
         algebraic_equals(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -500,15 +387,15 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_boolean(expr)) {
+    if (is_binary_boolean(expr))
         boolean_not_equals(expr);
-    }
-    if (is_binary_enumerative(expr)) {
+
+    if (is_binary_enumerative(expr))
         enumerative_not_equals(expr);
-    }
-    else if (is_binary_algebraic(expr)) {
+
+    else if (is_binary_algebraic(expr))
         algebraic_not_equals(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -521,9 +408,9 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_gt(expr);
-    }
+
     else assert( false );
 }
 
@@ -536,9 +423,9 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_ge(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -551,9 +438,9 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_lt(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -566,9 +453,9 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_binary_algebraic(expr)) {
+    if (is_binary_algebraic(expr))
         algebraic_le(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -581,15 +468,15 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    if (is_ite_boolean(expr)) {
+    if (is_ite_boolean(expr))
         boolean_ite(expr);
-    }
-    else if (is_ite_enumerative(expr)) {
+
+    else if (is_ite_enumerative(expr))
         enumerative_ite(expr);
-    }
-    else if (is_ite_algebraic(expr)) {
+
+    else if (is_ite_algebraic(expr))
         algebraic_ite(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -603,8 +490,6 @@ void Compiler::walk_cond_postorder(const Expr_ptr expr)
     DEBUG
         << cnd
         << endl;
-
-
 }
 
 bool Compiler::walk_dot_preorder(const Expr_ptr expr)
@@ -661,9 +546,10 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 {
     if (f_preprocess)
         return;
-    if (is_subscript_algebraic(expr)) {
+
+    if (is_subscript_algebraic(expr))
         algebraic_subscript(expr);
-    }
+
     else assert( false ); // unreachable
 }
 
@@ -680,47 +566,6 @@ bool Compiler::walk_comma_inorder(const Expr_ptr expr)
 
 void Compiler::walk_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
-
-/* private service of walk_leaf */
-void Compiler::push_dds(IEncoding_ptr enc, Type_ptr type)
-{
-    assert (NULL != enc);
-    DDVector& dds = enc->dv();
-    unsigned width = dds.size();
-    assert( 0 < width );
-
-    // push into type stack
-    f_type_stack.push_back(type);
-
-    /* booleans, monoliths are just one DD */
-    if (type->is_monolithical())
-        f_add_stack.push_back(dds[0]);
-
-    /* algebraics, reversed list of encoding DDs */
-    else if (type->is_algebraic()) {
-        // type and enc width info has to match
-        assert( type -> as_algebraic()-> width() == width );
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
-            f_add_stack.push_back(*ri);
-        }
-    }
-
-    /* array of algebraics, same as above, times nelems (!) */
-    else if (type->is_array()) {
-
-        // type and enc width info has to match
-        assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
-                width / type -> as_array() -> nelems());
-
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
-            f_add_stack.push_back(*ri);
-        }
-    }
-
-    else assert( false ); // unexpected
-}
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {
@@ -844,3 +689,92 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     assert( false ); /* give up, TODO: exception */
 }
+
+CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
+{
+    mutex::scoped_lock lock(f_process_mutex);
+
+    f_elapsed = clock();
+
+    /* pass 1: preprocessing */
+    clear_internals();
+    f_preprocess = true;
+
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
+
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
+
+    /* pass 2: compilation */
+    clear_internals();
+    f_preprocess = false;
+
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
+
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
+
+    // sanity conditions
+    assert(1 == f_add_stack.size());
+    assert(1 == f_type_stack.size());
+    assert(1 == f_ctx_stack.size());
+    assert(1 == f_time_stack.size());
+
+    // Exactly one 0-1 ADD.
+    ADD res = f_add_stack.back();
+    assert( res.FindMin().Equals(f_enc.zero()) );
+    assert( res.FindMax().Equals(f_enc.one()) );
+
+    unsigned res_sz (f_add_stack.size());
+    unsigned mcr_sz (f_micro_descriptors.size());
+    unsigned mux_sz (f_mux_descriptors.size());
+
+    f_elapsed = clock() - f_elapsed;
+    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
+
+     DEBUG
+        << "Compilation of " << ctx << "::" << body
+        << " took " << secs << " seconds, "
+        << res_sz << " DDs, "
+        << mcr_sz << " Microcode descriptors, "
+        << mux_sz << " Multiplexer descriptors."
+        << endl;
+
+    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_descriptors);
+}
+
+Compiler::Compiler()
+    : f_cache()
+    , f_temp_encodings()
+    , f_micro_descriptors()
+    , f_mux_descriptors()
+    , f_type_stack()
+    , f_add_stack()
+    , f_ctx_stack()
+    , f_time_stack()
+    , f_owner(ModelMgr::INSTANCE())
+    , f_enc(EncodingMgr::INSTANCE())
+    , f_temp_auto_index(0)
+{
+    DEBUG
+        << "Created Compiler @"
+        << this
+        << endl;
+}
+
+Compiler::~Compiler()
+{
+    DEBUG
+        << "Destroying Compiler @"
+        << this
+        << endl;
+}
+

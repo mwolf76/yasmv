@@ -1,21 +1,7 @@
 /**
  *  @file internals.cc
- *  @brief Boolean compiler - internal services
  *
- *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  the SAT analysis. Current implementation uses ADDs to perform
- *  expression manipulation and booleanization. Expressions are
- *  assumed to be type-safe, only boolean expressions on arithmetic
- *  predicates are supported. The final result of expression
- *  compilation must be a 0-1 ADD which is suitable for CNF clauses
- *  injection directly into the SAT solver. The compilation engine is
- *  implemented using a simple walker pattern: (a) on preorder, return
- *  true if the node has not yet been visited; (b) always do in-order
- *  (for binary nodes); (c) perform proper compilation in post-order
- *  hooks.
- *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -37,19 +23,6 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-/* Helpers */
-#define FETCH_DDS(store, count)                                   \
-    for (unsigned i = 0; i < (count); ++ i) {                     \
-        (store)[i] = f_add_stack.back();                          \
-        f_add_stack.pop_back();                                   \
-    }
-
-#define PUSH_DDS(store, count)                                    \
-    for (unsigned i = 0; i < (count); ++ i) {                     \
-        unsigned ndx = (count) - i - 1;                           \
-        f_add_stack.push_back((store) [ndx]);                     \
-    }
-
 /* encodes constant value into a DD vector */
 void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
 {
@@ -66,6 +39,47 @@ void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
 
     if (value)
         throw ConstantTooLarge(konst);
+}
+
+/* private service of walk_leaf */
+void Compiler::push_dds(IEncoding_ptr enc, Type_ptr type)
+{
+    assert (NULL != enc);
+    DDVector& dds = enc->dv();
+    unsigned width = dds.size();
+    assert( 0 < width );
+
+    // push into type stack
+    f_type_stack.push_back(type);
+
+    /* booleans, monoliths are just one DD */
+    if (type->is_monolithical())
+        f_add_stack.push_back(dds[0]);
+
+    /* algebraics, reversed list of encoding DDs */
+    else if (type->is_algebraic()) {
+        // type and enc width info has to match
+        assert( type -> as_algebraic()-> width() == width );
+        for (DDVector::reverse_iterator ri = dds.rbegin();
+             ri != dds.rend(); ++ ri) {
+            f_add_stack.push_back(*ri);
+        }
+    }
+
+    /* array of algebraics, same as above, times nelems (!) */
+    else if (type->is_array()) {
+
+        // type and enc width info has to match
+        assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
+                width / type -> as_array() -> nelems());
+
+        for (DDVector::reverse_iterator ri = dds.rbegin();
+             ri != dds.rend(); ++ ri) {
+            f_add_stack.push_back(*ri);
+        }
+    }
+
+    else assert( false ); // unexpected
 }
 
 /* unary ops */
@@ -433,3 +447,10 @@ void Compiler::clear_internals()
     f_micro_descriptors.clear();
     f_mux_descriptors.clear();
 }
+
+/* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
+void Compiler::pre_hook()
+{}
+void Compiler::post_hook()
+{}
+

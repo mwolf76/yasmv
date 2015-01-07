@@ -1,33 +1,34 @@
 /**
  *  @file compiler.hh
- *  @brief Basic expressions compiler
+ *  @brief Propositional logic compiler
  *
  *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  the SAT analysis. Current implementation uses ADDs to perform
- *  expression manipulation. Expressions are assumed to be type-safe,
- *  The final result of expression compilation shall be a 0-1 ADD_
- *  suitable for CNF clauses injection directly into the SAT
- *  solver. In previous versione, the compiler used ADDs also to
- *  perform booleanization of algebraic expressions. Experimental
- *  results proved this approach unfeasible for realistic (i.e. >= 32)
- *  word sizes, at least for certain operators. To circumvent this
- *  limitation a different approach is needed. Therefore, for binary
- *  algebraic operators (i.e. SUB, PLUS, MUL, MOD, DIV) all we do here
- *  is (1) pushing bit results ADDs representing boolean formulas for
- *  the results and (2) register in a supporting complementary
- *  structure the information necessary to fully express those results
- *  at a later stage. The compilation engine is implemented using a
- *  simple walker pattern: (a) on preorder, return true if the node
- *  has not yet been visited; (b) always do in-order (for binary
- *  nodes); (c) perform proper compilation in post-order hooks.
+ *  compilation of propositional logic expressions into a form which
+ *  is suitable for subsequent phases of the model checking
+ *  process. Current implementation uses DDs to perform expression
+ *  manipulation. The compilation engine is implemented using a simple
+ *  walker pattern: (a) on preorder, return true if the node has not
+ *  yet been visited; (b) always do in-order (for binary nodes); (c)
+ *  perform proper compilation in post-order hooks. Expressions are
+ *  checked to be type safe, The final result of expression
+ *  compilation shall be the conjunction of DDs suitable for CNF
+ *  injection directly into the SAT solver. In previous versions, the
+ *  compiler used DDs also to perform booleanization of algebraic
+ *  expressions. Experimental results proved this approach unfeasible
+ *  for realistic (i.e. >= 32) word sizes, at least for certain
+ *  operators. To circumvent this limitation a different approach is
+ *  needed. Therefore, for unary and binary algebraic operators as
+ *  well as relational operators all we do here is (1) pushing bit
+ *  results DDs representing boolean formulas for the results and (2)
+ *  register in a supporting complementary structure the information
+ *  necessary to fully express those results at a later stage.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  modify it under the terms of the GNU General Public License as
+ *  published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
  *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
