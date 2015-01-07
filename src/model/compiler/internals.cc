@@ -187,15 +187,13 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     FQExpr key(ctx, expr, time);
 
     if (f_preprocess)
-        DEBUG
+        DRIVEL
             << "Preprocessing " << key << "..."
             << endl;
     else
-        DEBUG
+        DRIVEL
             << "Processing " << key << "..."
             << endl;
-
-    f_ticks = clock();
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
@@ -233,15 +231,19 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert (dv.size() == width);
 
     /* memoize result */
-    f_map.insert( make_pair<FQExpr, CompilationUnit>
-                  ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_descriptors)));
+    f_map.insert( make_pair<FQExpr, CompilationUnit> ( key,
+            CompilationUnit( dv, f_micro_descriptors, f_mux_descriptors)));
 
-    double elapsed = (double) (clock() - f_ticks) / CLOCKS_PER_SEC;
-    unsigned nodes = f_enc.dd().SharingSize(dv);
+    unsigned res_sz (f_add_stack.size());
+    unsigned mcr_sz (f_micro_descriptors.size());
+    unsigned mux_sz (f_mux_descriptors.size());
 
-    DEBUG
-        << key << " took " << elapsed << ", "
-        << nodes << " DD nodes"
+    DRIVEL
+        << "Cached " << key
+        << ": "
+        << res_sz << " DDs, "
+        << mcr_sz << " Microcode descriptors, "
+        << mux_sz << " Multiplexer descriptors."
         << endl;
 }
 

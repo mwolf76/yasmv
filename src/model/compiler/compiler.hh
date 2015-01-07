@@ -169,9 +169,6 @@ protected:
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
-    // for profiling
-    clock_t f_ticks;
-
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
     bool is_unary_boolean(const Expr_ptr expr);

@@ -126,7 +126,7 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
-    DEBUG
+     DEBUG
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
         << res_sz << " DDs, "
