@@ -63,7 +63,7 @@ struct OpTripleEq {
 
 class MuxDescriptor {
 public:
-    MuxDescriptor(unsigned width, DDVector& z, ADD cnd, DDVector& x, DDVector& y);
+    MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVector& x, DDVector& y);
 
     inline unsigned width() const
     { return f_width; }
@@ -71,6 +71,8 @@ public:
     { return f_z; }
     inline ADD cnd() const
     { return f_cnd; }
+    inline ADD aux() const
+    { return f_aux; }
     inline const DDVector& x() const
     { return f_x; }
     inline const DDVector& y() const
@@ -80,6 +82,7 @@ private:
     unsigned f_width;
     DDVector f_z;
     ADD f_cnd;
+    ADD f_aux;
     DDVector f_x;
     DDVector f_y;
 };

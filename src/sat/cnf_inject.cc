@@ -104,12 +104,8 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                     assert(!ndx);
                     node = z[0].getNode();
                 }
-                else if (md.is_binary()) {
+                else
                     node = z[ width - ndx - 1].getNode();
-                }
-                else if (md.is_unary()) {
-                    assert(false); // not supported
-                }
 
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
@@ -208,39 +204,32 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
 
     /* local refs */
     const DDVector& z(md.z());
-    const ADD& cnd(md.cnd());
+    const ADD& aux (md.aux());
     const DDVector& x(md.x());
     const DDVector& y(md.y());
 
-    { /* !a ( Zi <-> Xi for all i ) */
+    /* allocate a fresh variable for ITE condition */
+    Var act = f_sat.find_dd_var( aux.getNode(), f_time);
+
+    { /* !a, ( Zi <-> Xi for all i ) */
 
         for (unsigned pol = 0; pol < 2; ++ pol) {
 
             for (unsigned i = 0; i < md.width(); ++ i) {
                 Minisat::vec<Lit> ps;
                 ps.push( mkLit( f_group, true));
+                ps.push( mkLit( act, true));
 
-                const DdNode* node(cnd.getNode());
-                if (! Cudd_IsConstant(node)) {
-                    Var tgt_var = f_sat.find_dd_var(node, f_time);
-                    ps.push( mkLit( tgt_var, true));
-                }
-                else assert(false);
-
-                DdNode* znode (z[i].getNode()); assert( znode );
-                Lit zlit;
-                if (Cudd_IsConstant( znode ))
-                    zlit = mkLit( alpha, (! pol ^ (0 != Cudd_V(znode))) ? true : false );
-                else
-                    zlit = mkLit( f_sat.find_dd_var( z[i].getNode(), ! pol ? true : false ));
-                ps.push( zlit );
+                DdNode* znode (z[i].getNode());
+                assert( znode && ! Cudd_IsConstant( znode));
+                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
 
                 DdNode* xnode (x[i].getNode()); assert( xnode );
                 Lit xlit;
                 if (Cudd_IsConstant( xnode ))
-                    xlit = mkLit( alpha, (! pol ^ (0 != Cudd_V(xnode))) ? true : false );
+                    xlit = mkLit( alpha, Cudd_V(xnode) ? pol : ! pol);
                 else
-                    xlit = mkLit( f_sat.find_dd_var( x[i].getNode(), ! pol ? true : false ));
+                    xlit = mkLit( f_sat.find_dd_var( x[i].getNode(), f_time), pol );
                 ps.push( xlit );
 
                 DRIVEL
@@ -252,34 +241,24 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
         }
     }
 
-    { /* a ( Zi <-> Yi for all i */
+    { /* a, ( Zi <-> Yi for all i */
         for (unsigned pol = 0; pol < 2; ++ pol) {
 
             for (unsigned i = 0; i < md.width(); ++ i) {
                 Minisat::vec<Lit> ps;
                 ps.push( mkLit( f_group, true));
+                ps.push( mkLit( act, false));
 
-                const DdNode* node(cnd.getNode());
-                if (! Cudd_IsConstant(node)) {
-                    Var tgt_var = f_sat.find_dd_var(node, f_time);
-                    ps.push( mkLit( tgt_var, false));
-                }
-                else assert(false);
-
-                DdNode* znode (z[i].getNode()); assert( znode );
-                Lit zlit;
-                if (Cudd_IsConstant( znode ))
-                    zlit = mkLit( alpha, (! pol ^ (0 != Cudd_V(znode))) ? true : false );
-                else
-                    zlit = mkLit( f_sat.find_dd_var( z[i].getNode(), ! pol ? true : false ));
-                ps.push( zlit );
+                DdNode* znode (z[i].getNode());
+                assert( znode && ! Cudd_IsConstant( znode));
+                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
 
                 DdNode* ynode (y[i].getNode()); assert( ynode );
                 Lit ylit;
                 if (Cudd_IsConstant( ynode ))
-                    ylit = mkLit( alpha, (! pol ^ (0 != Cudd_V(ynode))) ? true : false );
+                    ylit = mkLit( alpha, Cudd_V(ynode) ? pol : ! pol );
                 else
-                    ylit = mkLit( f_sat.find_dd_var( y[i].getNode(), ! pol ? true : false ));
+                    ylit = mkLit( f_sat.find_dd_var( y[i].getNode(), f_time), pol);
                 ps.push( ylit );
 
                 DRIVEL

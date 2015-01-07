@@ -35,10 +35,11 @@ MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVe
     , f_y(y)
 {}
 
-MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, DDVector &x, DDVector &y)
+MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVector &x, DDVector &y)
     : f_width(width)
     , f_z(z)
     , f_cnd(cnd)
+    , f_aux(aux)
     , f_x(x)
     , f_y(y)
 {
@@ -122,16 +123,15 @@ ostream& operator<<(ostream& os, MuxDescriptor& md)
             break;
     }
 
-    os << "], (cnd = ";
-    const ADD cnd(md.cnd());
-    const DdNode* node (cnd.getNode());
+    os << "], (aux = "; {
+        const ADD aux(md.aux());
+        const DdNode* node (aux.getNode());
+        assert(! Cudd_IsConstant(node));
+        os
+            << node->index
+            << "), x = [";
+    }
 
-    if (! Cudd_IsConstant(node))
-        os << node->index;
-    else
-        os << ((Cudd_V(node) == 0) ? 'F' : 'T');
-
-    os << "), x = [";
     const DDVector& x(md.x());
     for (DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node (xi->getNode());

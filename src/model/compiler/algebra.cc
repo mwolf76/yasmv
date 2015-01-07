@@ -323,8 +323,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     POP_DD(cnd);
 
     FRESH_DV(dv, width);
-
-    register_muxdescriptor( width, dv, cnd, lhs, rhs );
+    register_muxdescriptor( width, dv, cnd, make_auto_dd(), lhs, rhs );
 }
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)

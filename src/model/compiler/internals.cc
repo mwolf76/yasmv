@@ -105,9 +105,10 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
         << endl;
 }
 
-void Compiler::register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, DDVector& x, DDVector &y )
+void Compiler::register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, ADD aux,
+                                       DDVector& x, DDVector &y )
 {
-    MuxDescriptor md( width, z, cnd, x, y);
+    MuxDescriptor md( width, z, cnd, aux, x, y);
     f_mux_descriptors.push_back(md);
 
     DEBUG
@@ -232,7 +233,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
     f_cache.insert( make_pair<FQExpr, CompilationUnit> ( key,
             CompilationUnit( dv, f_micro_descriptors, f_mux_descriptors)));
 
-    unsigned res_sz (f_add_stack.size());
+    unsigned res_sz (width);
     unsigned mcr_sz (f_micro_descriptors.size());
     unsigned mux_sz (f_mux_descriptors.size());
 

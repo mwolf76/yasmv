@@ -92,7 +92,6 @@ void SAT::push(CompilationUnit cu, step_t time, group_t group)
 
         DDVector::const_iterator i;
         for (i = dv.begin(); dv.end() != i; ++ i) {
-            // TODO: additional CNF algorithms
             cnf_push_single_cut( *i, time, group );
         }
     }

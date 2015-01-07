@@ -208,11 +208,9 @@ private:
 
     void algebraic_from_constant(Expr_ptr expr, unsigned width);
 
-    /** @brief Determines type width */
-    // unsigned type_width(Type_ptr type);
-
     Expr_ptr make_auto_id();
     Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
+
     void make_auto_ddvect(DDVector& dv, unsigned width);
     ADD  make_auto_dd();
 
@@ -227,7 +225,7 @@ private:
                                    DDVector& z, DDVector& x, DDVector &y );
 
     /* MUX support */
-    void register_muxdescriptor( unsigned width, DDVector& z, ADD a,
+    void register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, ADD aux,
                                  DDVector& x, DDVector &y );
 
     // FQDN -> ( DD, micros, mux ) cache

@@ -25,9 +25,6 @@
 #include <dd_walker.hh>
 #include <cnf_registry.hh>
 
-// comment following to disable insanely verbose CNF debug logging
-#define DEBUG_CNF
-
 class CNFBuilderSingleCut : public ADDWalker {
 public:
     CNFBuilderSingleCut(SAT& sat, step_t time,
@@ -213,9 +210,10 @@ private:
 
         ps.push( mkLit( x, px ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
-#endif
+        DRIVEL
+            << ps
+            << endl;
+
         f_sat.add_clause(ps);
     }
 
@@ -228,9 +226,10 @@ private:
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
-#endif
+        DRIVEL
+            << ps
+            << endl;
+
         f_sat.add_clause(ps);
     }
 
@@ -244,9 +243,9 @@ private:
         ps.push( mkLit( y, py ));
         ps.push( mkLit( w, pw ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
-#endif
+        DRIVEL
+            << ps
+            << endl;
         f_sat.add_clause(ps);
     }
 };
@@ -255,4 +254,8 @@ void SAT::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
     CNFBuilderSingleCut worker(*this, time, group);
     worker(add);
+
+    DRIVEL
+        << "------------------------------------------------------------"
+        << endl;
 }

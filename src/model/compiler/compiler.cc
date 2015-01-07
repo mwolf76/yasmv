@@ -482,12 +482,7 @@ bool Compiler::walk_cond_preorder(const Expr_ptr expr)
 bool Compiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cond_postorder(const Expr_ptr expr)
-{
-    Expr_ptr cnd (expr->lhs());
-    DEBUG
-        << cnd
-        << endl;
-}
+{}
 
 bool Compiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -734,10 +729,16 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     unsigned mcr_sz (f_micro_descriptors.size());
     unsigned mux_sz (f_mux_descriptors.size());
 
+    /* postprocessing for MUXes: for each descriptor, we need to
+       conjunct `aux <-> cnd` to the original formula */
+    MuxDescriptors::const_iterator mi;
+    for (mi = f_mux_descriptors.begin(); f_mux_descriptors.end() != mi; ++ mi)
+        PUSH_DD(mi -> cnd().Xnor(mi -> aux()));
+
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
 
-     DEBUG
+    DEBUG
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
         << res_sz << " DDs, "
