@@ -143,10 +143,12 @@ const LitsVector& MicroLoader::microcode()
             f_microcode.push_back( newClause ); ++ count;
         }
         t1 = clock(); secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-        DEBUG << count
-              << " clauses fetched, took " << secs
-              << " ms"
-              << endl;
+
+        DRIVEL
+            << count
+            << " clauses fetched, took " << secs
+            << " ms"
+            << endl;
     }
 
     return f_microcode;

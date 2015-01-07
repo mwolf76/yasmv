@@ -120,9 +120,10 @@ EncodingMgr::EncodingMgr()
     f_base = f_cudd.constant( base );
     f_msb  = f_cudd.constant( ::msb (base - 1));
 
-    DRIVEL << "Initialized EncodingMgr @ " << this
-           << ", array " << f_word_width << " bits indexes"
-           << endl;
+    DRIVEL
+        << "Initialized EncodingMgr @ " << this
+        << ", native word size is " << f_word_width
+        << endl;
 }
 
 EncodingMgr::~EncodingMgr()
