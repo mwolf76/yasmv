@@ -259,15 +259,14 @@ bool Inferrer::walk_bw_and_preorder(const Expr_ptr expr)
 bool Inferrer::walk_bw_and_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_bw_and_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
-
+{ walk_binary_arithmetical_postorder(expr); }
 
 bool Inferrer::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_or_postorder(const Expr_ptr expr)
-{ walk_binary_arithmetical_postorder(expr); }
+{ walk_binary_logical_postorder(expr); }
 
 bool Inferrer::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

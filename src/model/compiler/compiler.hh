@@ -243,12 +243,6 @@ private:
     void memoize_result(const Expr_ptr expr);
     void flush_operands();
 
-    /* microcode-based algebraic binary ops: supports PLUS, SUB, MUL, DIV, MOD */
-    void algebraic_binary_microcode_operation(const Expr_ptr expr);
-
-    /* microcode-based relationals: supports EQ, NE, GE, GT, LE, LT */
-    void algebraic_binary_microcode_relational(const Expr_ptr expr);
-
     /* push dds and type information for variables (used by walk_leaf) */
     void push_variable(IEncoding_ptr enc, Type_ptr type);
 
@@ -263,10 +257,13 @@ private:
     void make_auto_ddvect(DDVector& dv, unsigned width);
     ADD  make_auto_dd();
 
+    void algebraic_unary(const Expr_ptr expr);
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
 
     // microcode support
+    void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
+                                   DDVector& z, DDVector& x );
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x, DDVector &y );
 

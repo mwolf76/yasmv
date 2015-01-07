@@ -82,6 +82,18 @@ void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
 }
 
 void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
+                                         DDVector& z, DDVector& x )
+{
+    MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x);
+    f_micro_descriptors.push_back(md);
+
+    DEBUG
+        << "Registered "
+        << md
+        << endl;
+}
+
+void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                          DDVector& z, DDVector& x, DDVector &y )
 {
     MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x, y);

@@ -31,44 +31,29 @@
 
 // unary ops -------------------------------------------------------------------
 
-/* rewrite ( -x ) as ( !x + 1 ) */
-void Compiler::algebraic_neg(const Expr_ptr expr)
+void Compiler::algebraic_unary(const Expr_ptr expr)
 {
     assert(is_unary_algebraic(expr));
-    ExprMgr& em = f_owner.em();
 
-    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned width = type->width();
+    const Type_ptr lhs_type = f_type_stack.back(); // f_type_stack.pop_back();
 
-    /* create temp complemented ADDs */
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back().BWCmpl(); f_add_stack.pop_back();
-    }
+    // operands is algebraic
+    assert(lhs_type -> is_algebraic());
 
-    Expr_ptr temp = make_temporary_expr(lhs, width);
-    (*this)(em.make_add(temp, em.make_one()));
+    unsigned width  = lhs_type -> width();
+    bool signedness = lhs_type -> is_signed_algebraic();
+
+    POP_ALGEBRAIC(lhs, width);
+    FRESH_DV(res, width);
+
+    register_microdescriptor( signedness, expr->symb(), width, res, lhs);
 }
+
+void Compiler::algebraic_neg(const Expr_ptr expr)
+{ algebraic_unary(expr); }
 
 void Compiler::algebraic_bw_not(const Expr_ptr expr)
-{
-    assert(is_unary_algebraic(expr));
-
-    Type_ptr type = f_type_stack.back(); // just inspect
-    unsigned width = type->width();
-
-    ADD lhs[width];
-    for (unsigned i = 0; i < width; ++ i) {
-        lhs[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    /* perform bw arithmetic, nothing fancy  here :-) */
-    for (unsigned i = 0; i < width; ++ i) {
-        /* ! x[i] */
-        unsigned ndx = width - i - 1;
-        f_add_stack.push_back(lhs[ndx].BWCmpl());
-    }
-}
+{ algebraic_unary(expr); }
 
 // -- binary ops ---------------------------------------------------------------
 void Compiler::algebraic_binary(const Expr_ptr expr)

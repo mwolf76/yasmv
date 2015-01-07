@@ -598,7 +598,14 @@ bool Compiler::walk_cond_preorder(const Expr_ptr expr)
 bool Compiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cond_postorder(const Expr_ptr expr)
-{ /* nop */ }
+{
+    Expr_ptr cnd (expr->lhs());
+    DEBUG
+        << cnd
+        << endl;
+
+
+}
 
 bool Compiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -686,9 +693,8 @@ void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
     f_type_stack.push_back(type);
 
     /* booleans, monoliths are just one DD */
-    if (type->is_monolithical()) {
+    if (type->is_monolithical())
         f_add_stack.push_back(dds[0]);
-    }
 
     /* algebraics, reversed list of encoding DDs */
     else if (type->is_algebraic()) {
@@ -822,7 +828,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* variables */
 
-    // 6 Defines. Simply compile it recursively.  we keep this to
+    // 6 Defines. Simply compile it recursively.  We keep this to
     // retain the old lazy behavior with nullary defines since it
     // comes at no extra cost at all.
     else if (symb->is_define()) {
