@@ -39,28 +39,28 @@
 
 void Compiler::enumerative_equals(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Equals(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Equals(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::enumerative_not_equals(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Equals(rhs).Cmpl());
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Equals(rhs).Cmpl());
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::enumerative_ite(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    POP_ADD(cnd);
-    PUSH_ADD(cnd.Ite(lhs, rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    POP_DD(cnd);
+    PUSH_DD(cnd.Ite(lhs, rhs));
 
     // consume all, push rhs type
     Type_ptr type = f_type_stack.back();

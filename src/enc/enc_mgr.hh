@@ -96,7 +96,7 @@ public:
     IEncoding_ptr make_encoding(Type_ptr type);
 
     // Registers an encoding. Used by the compiler
-    void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc);
+    void register_encoding(const FQExpr& key, IEncoding_ptr enc);
 
     // Retrieves Untimed Canonical Bit Id for index
     inline const UCBI& find_ucbi(int index)

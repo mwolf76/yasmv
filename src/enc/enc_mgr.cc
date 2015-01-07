@@ -28,13 +28,12 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
-// #define DEBUG_ENC
-
-// static initialization
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
 IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
+    assert(NULL != tp);
+
     IEncoding_ptr res = NULL;
 
     BooleanType_ptr btype;
@@ -43,71 +42,70 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     EnumType_ptr etype;
     ArrayType_ptr vtype;
 
-    assert(NULL != tp);
-
-    // disable reordering
+    /* disable DD reordering */
     f_cudd.AutodynDisable();
 
-    if (NULL != (btype = dynamic_cast<BooleanType_ptr>(tp))) {
-        #ifdef DEBUG_ENC
-        DEBUG << "Encoding " << btype << endl;
-        #endif
+    if ((btype = dynamic_cast<BooleanType_ptr>(tp)))
         res = new BooleanEncoding();
-    }
-    else if (NULL != (sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp))) {
-        #ifdef DEBUG_ENC
-        DEBUG << "Encoding " << sa_type << endl;
-        #endif
+    else if ((sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(sa_type->width(), 0, true, sa_type->dds());
-    }
-    else if (NULL != (ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp))) {
-        #ifdef DEBUG_ENC
-        DEBUG << "Encoding " << ua_type << endl;
-        #endif
+    else if ((ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(ua_type->width(), 0, false, ua_type->dds());
-    }
-    else if (NULL != (etype = dynamic_cast<EnumType_ptr>(tp))) {
-        #ifdef DEBUG_ENC
-        DEBUG << "Encoding " << etype << endl;
-        #endif
+    else if ((etype = dynamic_cast<EnumType_ptr>(tp)))
         res = new EnumEncoding(etype->literals());
-    }
-    else if (NULL != (vtype = dynamic_cast<ArrayType_ptr>(tp))) {
-        #ifdef DEBUG_ENC
-        DEBUG << "Encoding " << vtype << endl;
-        #endif
-        Encodings encs;
+    else if ((vtype = dynamic_cast<ArrayType_ptr>(tp))) {
+        Encodings encodings;
 
         assert( 0 == ( vtype->width() % vtype->of()->width()));
         for (unsigned i = 0; i < vtype->width() / vtype->of()->width(); ++ i) {
-            encs.push_back( make_encoding(vtype->of()));
+            encodings.push_back( make_encoding(vtype->of()));
         }
-        res = new ArrayEncoding(encs);
+        res = new ArrayEncoding(encodings);
     }
     else assert(false); /* unexpected or unsupported */
 
-    // reenable reordering
+    /* enable DD reordering */
     f_cudd.AutodynEnable(CUDD_REORDER_SAME);
 
     assert (NULL != res);
     return res;
 }
 
-void EncodingMgr::register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc)
+void EncodingMgr::register_encoding(const FQExpr& key, IEncoding_ptr enc)
 {
-    f_fqexpr2enc_map [ fqexpr ] = enc;
+    ostringstream oss;
+    f_fqexpr2enc_map [ key ] = enc;
 
     DDVector& bits = enc->bits();
 
     unsigned i;
     DDVector::iterator di;
 
-    for (i = 0, di = bits.begin(); i < bits.size(); ++ i, ++ di) {
+    oss << key << " := [" ;
+    for (i = 0, di = bits.begin(); i < bits.size(); ) {
+        int index ((*di).getNode()->index);
+        oss << index;
+
         f_index2ucbi_map.
-            insert(pair<int, UCBI> ((*di).getNode()->index,
-                                    UCBI(fqexpr.ctx(), fqexpr.expr(), fqexpr.time(), i)));
+            insert(pair<int, UCBI> (index, UCBI(key.ctx(),
+                                                key.expr(),
+                                                key.time(), i)));
+
+        if ( ++ i < bits.size())
+            oss << ", ";
+
+        ++ di;
     }
     assert (di == bits.end());
+    oss << "]";
+
+    const char *tmp = (strdup(oss.str().c_str()));
+    DEBUG
+        << "Registered encoding: "
+        << tmp
+        << endl;
+
+    free((void *) tmp);
 }
 
 EncodingMgr::EncodingMgr()

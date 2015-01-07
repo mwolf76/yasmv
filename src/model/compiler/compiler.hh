@@ -60,7 +60,7 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector<ADD> ADDStack; // ouput of Stage 1
+typedef vector<ADD> ADDStack;
 
 /* local typedefs */
 typedef vector<Expr_ptr> ExprList;
@@ -68,33 +68,38 @@ typedef vector<step_t>   TimeStack;
 
 typedef unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
 
-/* shortcuts to to simplify manipulation of the internal ADD stack */
-#define POP_ADD(op)                             \
+/* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
+
+/** Fetch a single DD */
+#define POP_DD(op)                              \
     const ADD op = f_add_stack.back();          \
     f_add_stack.pop_back()
 
-#define POP_ALGEBRAIC(vec, width)               \
+/** Declare a fresh DD */
+#define FRESH_DD(var)                           \
+    ADD var = make_auto_dd()
+
+/** Push a single DD */
+#define PUSH_DD(add)                            \
+    f_add_stack.push_back(add)
+
+/** Fetch a DD vector of given width */
+#define POP_DV(vec, width)                      \
     DDVector vec;                               \
     for (unsigned i = 0; i < width ; ++ i) {    \
         vec.push_back(f_add_stack.back());      \
         f_add_stack.pop_back();                 \
     }
 
+/** Declare a DD vector of given width */
 #define FRESH_DV(vec, width)                    \
     DDVector vec;                               \
     make_auto_ddvect(vec, width);               \
     /* push DD vector in reversed order */      \
     for (unsigned i = 0; i < width; ++ i) {     \
         unsigned ndx = width - i - 1;           \
-        PUSH_ADD(vec[ndx]);                     \
+        PUSH_DD(vec[ndx]);                      \
     }
-
-#define FRESH_DD(var)                           \
-    ADD var = make_auto_dd()
-
-/* shortcut for pushing */
-#define PUSH_ADD(add)                           \
-    f_add_stack.push_back(add)
 
 /** Exception classes */
 class CompilerException : public Exception {
@@ -120,18 +125,11 @@ public:
 
     CompilationUnit process(Expr_ptr ctx, Expr_ptr body);
 
-protected:
-    clock_t f_elapsed; /* for benchmarking */
-    void pre_hook();
-    void post_hook();
-
-    void pre_node_hook(Expr_ptr expr);
-    void post_node_hook(Expr_ptr expr);
-
-    /* Model compiler does NOT support LTL ops. To enable verification
-     of temporal properties, the LTL operators needs to be rewritten
-     by the bmc algorithms before feeding the formula into the
-     compiler. */
+private:
+    /* Remark: the compiler does NOT support LTL ops. To enable
+       verification of temporal properties, the LTL operators needs to
+       be rewritten by the bmc algorithms before feeding the formula
+       into the compiler. */
     LTL_STUBS;
 
     /* basic expr operators support */
@@ -139,35 +137,8 @@ protected:
 
     void walk_leaf(const Expr_ptr expr);
 
-    unsigned f_temp_auto_index; // autoincr temp index
-
-    // FQDN -> ( DD, micros, mux) cache
-    CompilationMap f_map;
-
-    // FQDN -> temporary DD encodings
-    FQExpr2EncMap f_temp_encodings;
-
-    // microcode descriptors
-    MicroDescriptors f_micro_descriptors;
-
-    // mux descriptors
-    MuxDescriptors f_mux_descriptors;
-
-    // look-ahead for type checking
-    TypeStack f_type_stack;
-
-    // partial results
-    ADDStack f_add_stack;
-
-    // current ctx stack, for symbol resolution
-    ExprList f_ctx_stack;
-
-    // current time frame, for unrolling
-    TimeStack f_time_stack;
-
-    // managers
-    ModelMgr& f_owner;
-    EncodingMgr& f_enc;
+    /* push DDs and type information for variables (used by walk_leaf) */
+    void push_dds(IEncoding_ptr enc, Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
@@ -217,17 +188,12 @@ protected:
     void algebraic_ite(const Expr_ptr expr);
 
     /* -- subscripts -------------------------------------------------------- */
-    void integer_subscript(const Expr_ptr expr);
     void algebraic_subscript(const Expr_ptr expr);
 
     /* -- enumeratives ------------------------------------------------------ */
     void enumerative_equals(const Expr_ptr expr);
     void enumerative_not_equals(const Expr_ptr expr);
     void enumerative_ite(const Expr_ptr expr);
-
-private:
-    mutex f_process_mutex;
-    bool f_preprocess;
 
     /* casts */
     void algebraic_cast_from_boolean(const Expr_ptr expr);
@@ -238,17 +204,12 @@ private:
     void clear_internals();
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
-    void flush_operands();
-
-    /* push dds and type information for variables (used by walk_leaf) */
-    void push_variable(IEncoding_ptr enc, Type_ptr type);
 
     void algebraic_from_constant(Expr_ptr expr, unsigned width);
 
     /** @brief Determines type width */
-    unsigned type_width(Type_ptr type);
+    // unsigned type_width(Type_ptr type);
 
-    /* Auto expressions and DDs */
     Expr_ptr make_auto_id();
     Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
     void make_auto_ddvect(DDVector& dv, unsigned width);
@@ -258,14 +219,61 @@ private:
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
 
-    // microcode support
+    /* microcode support */
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x );
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x, DDVector &y );
 
-    // MUX support
-    void register_muxdescriptor( unsigned width, DDVector& z, ADD a, DDVector& x, DDVector &y );
+    /* MUX support */
+    void register_muxdescriptor( unsigned width, DDVector& z, ADD a,
+                                 DDVector& x, DDVector &y );
+
+    // FQDN -> ( DD, micros, mux ) cache
+    CompilationMap f_cache;
+
+    // FQDN -> temporary DD encodings
+    FQExpr2EncMap f_temp_encodings;
+
+    // microcode descriptors
+    MicroDescriptors f_micro_descriptors;
+
+    // mux descriptors
+    MuxDescriptors f_mux_descriptors;
+
+    // look-ahead for type checking
+    TypeStack f_type_stack;
+
+    // partial results
+    ADDStack f_add_stack;
+
+    // current ctx stack, for symbol resolution
+    ExprList f_ctx_stack;
+
+    // current time frame, for unrolling
+    TimeStack f_time_stack;
+
+    // managers
+    ModelMgr& f_owner;
+    EncodingMgr& f_enc;
+
+    /* Auto expressions and DDs */
+    unsigned f_temp_auto_index;
+
+    // TODO: can we get rid of this?
+    bool f_preprocess;
+
+    /* synchronization */
+    mutex f_process_mutex;
+
+    clock_t f_elapsed; /* for benchmarking */
+
+    void pre_hook();
+    void post_hook();
+
+    void pre_node_hook(Expr_ptr expr);
+    void post_node_hook(Expr_ptr expr);
+
 };
 
 #endif

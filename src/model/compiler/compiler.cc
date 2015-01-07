@@ -44,16 +44,17 @@
 #include <proxy.hh>
 
 Compiler::Compiler()
-    : f_temp_auto_index(0)
-    , f_map()
+    : f_cache()
     , f_temp_encodings()
     , f_micro_descriptors()
+    , f_mux_descriptors()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()
     , f_time_stack()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
+    , f_temp_auto_index(0)
 {
     DEBUG
         << "Created Compiler @"
@@ -71,8 +72,7 @@ Compiler::~Compiler()
 
 /* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
 void Compiler::pre_hook()
-{
-}
+{}
 void Compiler::post_hook()
 {}
 
@@ -682,7 +682,7 @@ void Compiler::walk_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
 /* private service of walk_leaf */
-void Compiler::push_variable(IEncoding_ptr enc, Type_ptr type)
+void Compiler::push_dds(IEncoding_ptr enc, Type_ptr type)
 {
     assert (NULL != enc);
     DDVector& dds = enc->dv();
@@ -765,7 +765,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         }
         else assert(false); // unexpected
 
-        push_variable(enc, type);
+        push_dds(enc, type);
         return;
     } /* Temporary symbols */
 
@@ -818,13 +818,19 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         if (NULL == (enc = f_enc.find_encoding(key))) {
             if (f_preprocess) {
                 assert (NULL != type);
+
+                DRIVEL
+                    << "Registering new encoding of type "
+                    << type << " for " << key
+                    << endl;
+
                 enc = f_enc.make_encoding(type);
                 f_enc.register_encoding(key, enc);
             }
             else assert( false ); // unexpected
         }
 
-        push_variable(enc, type);
+        push_dds(enc, type);
         return;
     } /* variables */
 

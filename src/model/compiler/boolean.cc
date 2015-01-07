@@ -39,42 +39,42 @@
 
 void Compiler::boolean_not(const Expr_ptr expr)
 {
-    POP_ADD(lhs);
+    POP_DD(lhs);
     f_add_stack.push_back(lhs.Cmpl());
 }
 
 void Compiler::boolean_and(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_or(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Or(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Or(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_implies(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Cmpl().Or(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Cmpl().Or(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_iff(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Xnor(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Xnor(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -82,9 +82,9 @@ void Compiler::boolean_iff(const Expr_ptr expr)
 // implemented as xnor (logical equivalence)
 void Compiler::boolean_equals(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Xnor(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Xnor(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
@@ -92,19 +92,19 @@ void Compiler::boolean_equals(const Expr_ptr expr)
 // implemented as negation of the former (i.e xor)
 void Compiler::boolean_not_equals(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    PUSH_ADD(lhs.Xor(rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Xor(rhs));
 
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
 void Compiler::boolean_ite(const Expr_ptr expr)
 {
-    POP_ADD(rhs);
-    POP_ADD(lhs);
-    POP_ADD(cnd);
-    PUSH_ADD(cnd.Ite(lhs, rhs));
+    POP_DD(rhs);
+    POP_DD(lhs);
+    POP_DD(cnd);
+    PUSH_DD(cnd.Ite(lhs, rhs));
 
     // consume two operand types, leave the third
     f_type_stack.pop_back();
