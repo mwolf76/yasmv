@@ -22,6 +22,12 @@
 #include <type.hh>
 #include <micro.hh>
 
+MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x)
+    : f_triple(triple)
+    , f_z(z)
+    , f_x(x)
+{}
+
 MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVector &y)
     : f_triple(triple)
     , f_z(z)
@@ -72,20 +78,26 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
         else
             break;
     }
-    os << "], y = [";
+    os << "]";
+
     const DDVector& y(md.y());
-    for (DDVector::const_iterator yi = y.begin();;) {
-        const DdNode* node (yi->getNode());
-        if (! Cudd_IsConstant(node))
-            os << node->index;
-        else
-            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
-        if (++ yi != y.end())
-            os << ", ";
-        else
-            break;
+    if (y.size()) {
+        os << ", y = [";
+        for (DDVector::const_iterator yi = y.begin();;) {
+            const DdNode* node (yi->getNode());
+            if (! Cudd_IsConstant(node))
+                os << node->index;
+            else
+                os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+            if (++ yi != y.end())
+                os << ", ";
+            else
+                break;
+        }
+        os << "]";
     }
-    os << "])";
+    os << ")";
+
 
     return os;
 }

@@ -87,6 +87,7 @@ private:
 class MicroDescriptor {
 
 public:
+    MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x);
     MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVector &y);
 
     inline const OpTriple& triple() const
