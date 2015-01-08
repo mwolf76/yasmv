@@ -271,17 +271,23 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,
                               Type_ptr lhs, Type_ptr rhs)
 {
     if (f_em.is_ite(expr) && cnd->is_boolean())
-        return arithmetical_result_type(lhs, rhs);
+        return ite_result_type(lhs, rhs);
+
+    return NULL;
+}
+
+Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
+{
+    if (lhs == rhs)
+        return lhs;
 
     return NULL;
 }
 
 Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
-    if (lhs -> is_algebraic() &&
-        rhs -> is_algebraic()) {
+    if (lhs -> is_algebraic() && rhs -> is_algebraic())
         return rhs;
-    }
 
     return NULL;
 }
@@ -289,18 +295,17 @@ Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 Type_ptr TypeMgr::logical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
     // both ops booleans -> boolean
-    if (lhs -> is_boolean() &&
-        rhs -> is_boolean()) {
+    if (lhs -> is_boolean() && rhs -> is_boolean())
         return find_boolean();
-    }
 
-    return arithmetical_result_type(lhs, rhs);
+    return NULL;
 }
 
 Type_ptr TypeMgr::cast_result_type(Type_ptr lhs, Type_ptr rhs)
 {
     // same type, it's ok although useless
-    if (lhs == rhs) return lhs;
+    if (lhs == rhs)
+        return lhs;
 
     /* algebraic -> boolean? */
     if (lhs -> is_boolean() &&
