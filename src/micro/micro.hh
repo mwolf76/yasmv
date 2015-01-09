@@ -128,6 +128,6 @@ ostream& operator<<(ostream& os, MuxDescriptor& md);
 
 typedef vector<MicroDescriptor> MicroDescriptors;
 typedef vector<MuxDescriptor> MuxDescriptors;
-
+typedef unordered_map<Expr_ptr, MuxDescriptors> MuxMap;
 
 #endif

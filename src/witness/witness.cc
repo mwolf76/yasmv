@@ -106,7 +106,12 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
     Exprs& lang = f_owner.lang();
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    DRIVEL << expr << " := " << value << endl;
+    DEBUG
+        << expr
+        << " := "
+        << value
+        << endl;
+
     f_map.insert( make_pair< Expr_ptr, Expr_ptr > (expr, value));
 }
 

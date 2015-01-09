@@ -457,7 +457,25 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
 }
 
 bool Compiler::walk_ite_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    if (!cache_miss(expr))
+        return false;
+
+    if (! f_preprocess && is_ite_algebraic( expr -> rhs())) {
+
+        /* perform a lookhead on RHS to collect nested ITEs */
+        ITEUnionFindMap::const_iterator eye = f_toplevel_map.find( expr );
+
+        Expr_ptr parent = expr;
+        if (f_toplevel_map.end() != eye)
+            parent = eye -> second;
+
+        f_toplevel_map.insert( make_pair< Expr_ptr, Expr_ptr >
+                               ( expr->rhs(), parent ));
+    }
+
+    return true;
+}
 bool Compiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ite_postorder(const Expr_ptr expr)
@@ -727,13 +745,10 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
     unsigned res_sz (f_add_stack.size());
     unsigned mcr_sz (f_micro_descriptors.size());
-    unsigned mux_sz (f_mux_descriptors.size());
+    unsigned mux_sz (f_mux_map.size());
 
-    /* postprocessing for MUXes: for each descriptor, we need to
-       conjunct `aux <-> cnd` to the original formula */
-    MuxDescriptors::const_iterator mi;
-    for (mi = f_mux_descriptors.begin(); f_mux_descriptors.end() != mi; ++ mi)
-        PUSH_DD(mi -> cnd().Xnor(mi -> aux()));
+    /* generates additional fragments for MUXes activation */
+    post_process_muxes();
 
     f_elapsed = clock() - f_elapsed;
     double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
@@ -742,18 +757,19 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
         << res_sz << " DDs, "
-        << mcr_sz << " Microcode descriptors, "
-        << mux_sz << " Multiplexer descriptors."
+        << mcr_sz << " Microdescriptors, "
+        << mux_sz << " Multiplexers."
         << endl;
 
-    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_descriptors);
+    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_map);
 }
 
 Compiler::Compiler()
     : f_cache()
     , f_temp_encodings()
     , f_micro_descriptors()
-    , f_mux_descriptors()
+    , f_mux_map()
+    , f_toplevel_map()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()

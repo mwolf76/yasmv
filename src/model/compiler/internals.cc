@@ -105,16 +105,57 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
         << endl;
 }
 
-void Compiler::register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, ADD aux,
+void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
+                                       DDVector& z, ADD cnd, ADD aux,
                                        DDVector& x, DDVector &y )
 {
+    /* verify if entry for toplevel already exists. If not, create it */
+    {
+        MuxMap::const_iterator mi = f_mux_map.find( toplevel );
+        if (f_mux_map.end() == mi)
+            f_mux_map.insert( make_pair< Expr_ptr, MuxDescriptors >
+                              (toplevel, MuxDescriptors()));
+    }
+
     MuxDescriptor md( width, z, cnd, aux, x, y);
-    f_mux_descriptors.push_back(md);
+
+    /* Entry for toplevel does exist for sure */
+    {
+        MuxMap::iterator mi = f_mux_map.find( toplevel );
+        assert( f_mux_map.end() != mi );
+
+        mi -> second.push_back( md );
+    }
 
     DEBUG
         << "Registered "
         << md
         << endl;
+}
+
+/* post-processing for MUXes: for each descriptor, we need to conjunct
+   `! AND ( prev_conditions ) AND cnd <-> aux` to the original
+   formula */
+void Compiler::post_process_muxes()
+{
+    for (MuxMap::const_iterator i = f_mux_map.begin(); f_mux_map.end() != i; ++ i) {
+
+        Expr_ptr toplevel (i -> first);
+        const MuxDescriptors& descriptors (i -> second);
+
+        DRIVEL
+            << "Processing MUX activation clauses for `"
+            << toplevel << "`"
+            << endl;
+
+        ADD prev = f_enc.zero();
+        for (MuxDescriptors::const_reverse_iterator j = descriptors.rbegin();
+             descriptors.rend() != j; ++ j) {
+            ADD act (prev.Cmpl().Times(j -> cnd()));
+            PUSH_DD( act.Xnor(j -> aux()));
+            prev = act;
+        }
+    }
 }
 
 /* auto id generator */
@@ -231,11 +272,11 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     /* memoize result */
     f_cache.insert( make_pair<FQExpr, CompilationUnit> ( key,
-            CompilationUnit( dv, f_micro_descriptors, f_mux_descriptors)));
+            CompilationUnit( dv, f_micro_descriptors, f_mux_map)));
 
     unsigned res_sz (width);
     unsigned mcr_sz (f_micro_descriptors.size());
-    unsigned mux_sz (f_mux_descriptors.size());
+    unsigned mux_sz (f_mux_map.size());
 
     DRIVEL
         << "Cached " << key
@@ -277,8 +318,13 @@ bool Compiler::cache_miss(const Expr_ptr expr)
                 f_micro_descriptors.push_back(*i);
         }
 
-        /* no cache for mux descriptors, as algebraic ITEs are not
-           cached */
+        /* push cached multiplexer chains */
+        {
+            const MuxMap& muxes (unit.mux_map());
+            MuxMap::const_iterator i;
+            for (i = muxes.begin(); muxes.end() != i; ++ i)
+                f_mux_map.insert(*i);
+        }
 
         /* push cached type */
         f_type_stack.push_back(type);
@@ -298,7 +344,8 @@ void Compiler::clear_internals()
     f_ctx_stack.clear();
     f_time_stack.clear();
     f_micro_descriptors.clear();
-    f_mux_descriptors.clear();
+    f_mux_map.clear();
+    f_toplevel_map.clear();
 }
 
 /* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */

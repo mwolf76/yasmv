@@ -323,7 +323,14 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     POP_DD(cnd);
 
     FRESH_DV(dv, width);
-    register_muxdescriptor( width, dv, cnd, make_auto_dd(), lhs, rhs );
+
+    Expr_ptr parent = expr;
+    ITEUnionFindMap::const_iterator eye = f_toplevel_map.find( expr );
+    if (f_toplevel_map.end() != eye)
+        parent = eye -> second;
+
+    register_muxdescriptor( parent, width, dv, cnd,
+                            make_auto_dd(), lhs, rhs );
 }
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)

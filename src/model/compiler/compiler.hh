@@ -68,6 +68,7 @@ typedef vector<Expr_ptr> ExprList;
 typedef vector<step_t>   TimeStack;
 
 typedef unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
+typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
 
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
 
@@ -224,9 +225,11 @@ private:
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x, DDVector &y );
 
-    /* MUX support */
-    void register_muxdescriptor( unsigned width, DDVector& z, ADD cnd, ADD aux,
+    /* MUXes support */
+    void register_muxdescriptor( Expr_ptr toplevel, unsigned width,
+                                 DDVector& z, ADD cnd, ADD aux,
                                  DDVector& x, DDVector &y );
+    void post_process_muxes();
 
     // FQDN -> ( DD, micros, mux ) cache
     CompilationMap f_cache;
@@ -238,7 +241,10 @@ private:
     MicroDescriptors f_micro_descriptors;
 
     // mux descriptors
-    MuxDescriptors f_mux_descriptors;
+    MuxMap f_mux_map;
+
+    // ITEs
+    ITEUnionFindMap f_toplevel_map;
 
     // look-ahead for type checking
     TypeStack f_type_stack;

@@ -113,16 +113,27 @@ void SAT::push(CompilationUnit cu, step_t time, group_t group)
 
     /* push muxes */
     {
-        const MuxDescriptors& mux_descriptors (cu.mux_descriptors());
-        unsigned n = mux_descriptors.size();
-        DEBUG
-            << "Injecting " << n
-            << " MUX instances"
-            << endl;
+        const MuxMap& mux_map (cu.mux_map());
+        MuxMap::const_iterator mmi (mux_map.begin());
 
-        MuxDescriptors::const_iterator i;
-        for (i = mux_descriptors.begin(); mux_descriptors.end() != i; ++ i)  {
-            cnf_inject_muxcode( *i, time, group );
+        while (mux_map.end() != mmi) {
+            Expr_ptr toplevel (mmi -> first);
+            MuxDescriptors descriptors (mmi -> second);
+
+            unsigned n = descriptors.size();
+            DEBUG
+                << "Injecting " << n
+                << " MUX instances"
+                << " for toplevel "
+                << toplevel
+                << endl;
+
+            MuxDescriptors::const_iterator i;
+            for (i = descriptors.begin(); descriptors.end() != i; ++ i)  {
+                cnf_inject_muxcode( *i, time, group );
+            }
+
+            ++ mmi ;
         }
     }
 }

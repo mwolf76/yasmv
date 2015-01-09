@@ -29,10 +29,10 @@ class CompilationUnit {
 public:
     CompilationUnit( DDVector& dds,
                      MicroDescriptors& micro_descriptors,
-                     MuxDescriptors& mux_descriptors)
+                     MuxMap& mux_map)
         : f_dds( dds )
         , f_micro_descriptors( micro_descriptors )
-        , f_mux_descriptors( mux_descriptors )
+        , f_mux_map( mux_map )
     {}
 
     const DDVector& dds() const
@@ -41,13 +41,13 @@ public:
     const MicroDescriptors& micro_descriptors() const
     { return f_micro_descriptors; }
 
-    const MuxDescriptors& mux_descriptors() const
-    { return f_mux_descriptors; }
+    const MuxMap& mux_map() const
+    { return f_mux_map; }
 
 private:
     DDVector f_dds;
     MicroDescriptors f_micro_descriptors;
-    MuxDescriptors f_mux_descriptors;
+    MuxMap f_mux_map;
 };
 typedef vector<CompilationUnit> CompilationUnits;
 #endif
