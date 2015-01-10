@@ -1,29 +1,28 @@
-TODO
-====
+* Refactoring
 
-High priority tasks:
---------------------
+* Use BDDs instead of ADDs in the compiler
 
-* Unified checking algorithm (i.e.)
-- propositional formulas (SAT on initial states only)
-- invariant properties (G <formula>)
-- full LTL properties
-* Verbosity levels and Colorized output [usability]
+* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t)
 
-Medium priority tasks:
-----------------------
+* CNFization algorithm
+- Support for multiple CNF algorithms (no-cut, single-cut, mix-cut)
 
-* Commands hierarchy and help system
-* Efficient CNFization algorithm [core]
-* Readline support
-* Strip away unused parts from Cudd [maintenance]
-* Consolidate Unit-testing [maintenance]
+* Unified checking algorithm
+- full LTL properties (not yet suported)
 
-Low priority tasks:
--------------------
+* SAT optimizations
 
-* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
-* CEGAR, COI [core]
-* Explore load distribution over multiple cores [experimental]
-* FSM Editor + Code generator :-] [extension]
+* Interpolation based-algorithms
+- requires interpolant-capable SAT solver
+
+* Commands
+- integration of libreadline
+- autocomplete support
+- help system
+
+* Experiment with CEGAR, COI, Data abstraction
+- functional model (i.e. introduce the := operator)
+
+* FSM Editor + Code generator
+
 * Emacs mode for editing [usability]
