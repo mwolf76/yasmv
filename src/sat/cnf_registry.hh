@@ -1,6 +1,6 @@
 /**
  *  @file cnf_registry.hh
- *  @brief SAT interface (CNF registry sub-component)
+ *  @brief Engine interface (CNF registry sub-component)
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -27,7 +27,7 @@
 
 #include <common.hh>
 
-class SAT; // fwd decl
+class Engine; // fwd decl
 
 typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
 typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
@@ -90,10 +90,10 @@ struct TimedVarEq {
 };
 typedef unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
 
-class CNFRegistry : public IObject {
+class CNFRegistry {
 
     /* ctor and dctor are available only to SAT owner */
-    friend class SAT;
+    friend class Engine;
 
 public:
 
@@ -106,10 +106,10 @@ void clear_cnf_map();
 Var rewrite_cnf_var(Var index, step_t time);
 
 private:
-    CNFRegistry(SAT& sat);
+    CNFRegistry(Engine& sat);
     ~CNFRegistry();
 
-    SAT& f_sat;
+    Engine& f_sat;
 
     TDD2VarMap f_tdd2var_map;
     RewriteMap f_rewrite_map;

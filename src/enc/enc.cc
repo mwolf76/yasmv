@@ -206,7 +206,7 @@ Expr_ptr ArrayEncoding::expr(int* assignment)
     for (Encodings::const_iterator i = f_elements.begin();
          f_elements.end() != i; ++ i) {
 
-        IEncoding_ptr enc(*i);
+        Encoding_ptr enc(*i);
         Expr_ptr value (enc->expr(assignment));
         acc = (NULL == acc)
             ? value

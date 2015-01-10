@@ -27,7 +27,7 @@
 
 class CNFBuilderSingleCut : public ADDWalker {
 public:
-    CNFBuilderSingleCut(SAT& sat, step_t time,
+    CNFBuilderSingleCut(Engine& sat, step_t time,
                         group_t group = MAINGROUP)
         : f_sat(sat)
         , f_toplevel(NULL)
@@ -68,7 +68,7 @@ public:
     }
 
     void zero()
-    { push1(0, true); /* makes formula UNSAT */ }
+    { push1(0, true); /* makes formula unsatisfiable */ }
 
     void one()
     { /* nop */ }
@@ -194,7 +194,7 @@ public:
     }
 
 private:
-    SAT& f_sat;
+    Engine& f_sat;
     unordered_set<DdNode*> f_seen;
 
     DdNode* f_toplevel;
@@ -250,7 +250,7 @@ private:
     }
 };
 
-void SAT::cnf_push_single_cut(ADD add, step_t time, const group_t group)
+void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
     CNFBuilderSingleCut worker(*this, time, group);
     worker(add);

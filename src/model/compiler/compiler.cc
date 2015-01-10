@@ -589,7 +589,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     step_t time = f_time_stack.back();
 
     FQExpr2EncMap::const_iterator eye;
-    IEncoding_ptr enc = NULL;
+    Encoding_ptr enc = NULL;
 
     // 1. Explicit integer consts, perform booleanization immediately using
     // word-width property to determine the number of bits to be used.

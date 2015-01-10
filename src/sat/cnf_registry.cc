@@ -27,7 +27,7 @@
 
 #include <sat.hh>
 
-CNFRegistry::CNFRegistry(SAT& owner)
+CNFRegistry::CNFRegistry(Engine& owner)
     : f_sat(owner)
 {}
 

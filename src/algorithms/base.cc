@@ -203,7 +203,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                 Expr_ptr expr (var.expr());
 
                 FQExpr key(ctx, expr);
-                IEncoding_ptr enc = f_bm.find_encoding(key);
+                Encoding_ptr enc = f_bm.find_encoding(key);
 
                 DDVector::const_iterator di;
                 unsigned ndx;

@@ -119,34 +119,6 @@ public:
     virtual ~Exception() throw() {}
 };
 
-class FileInputException : public Exception {
-    virtual const char* what() const throw() {
-        ostringstream oss;
-        oss << "Can not read file '" << f_filename << "'";
-        return oss.str().c_str();
-    }
-
-    string f_filename;
-
-public:
-    FileInputException(const string &filename)
-        : f_filename(filename)
-    {}
-
-    virtual ~FileInputException() throw()
-    {}
-};
-
-/* the base class definition, including a virtual destructor */
-class IObject {
-public:
-    virtual ~IObject()
-    {}
-};
-
-class Object : public IObject {
-};
-
 /* environment variables and paths */
 extern const char *YASMV_HOME;
 extern const char *MICROCODE_PATH;

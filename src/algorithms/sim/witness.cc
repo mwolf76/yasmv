@@ -22,7 +22,7 @@
 #include <simulation.hh>
 
 using Minisat::Var;
-SimulationWitness::SimulationWitness(Model& model, SAT& engine, step_t k)
+SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness()
 {
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
@@ -48,7 +48,7 @@ SimulationWitness::SimulationWitness(Model& model, SAT& engine, step_t k)
 
             /* time it, and fetch encoding for enc mgr */
             FQExpr key(ctx, expr);
-            IEncoding_ptr enc = enc_mgr.find_encoding(key);
+            Encoding_ptr enc = enc_mgr.find_encoding(key);
 
             /* not in COI, skipping... */
             if ( NULL == enc ) {

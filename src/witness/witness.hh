@@ -109,7 +109,7 @@ typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 class Witness; // fwd decl
 
 typedef class TimeFrame* TimeFrame_ptr;
-class TimeFrame : public IObject {
+class TimeFrame {
 
 public:
     TimeFrame(Witness& owner);
@@ -139,7 +139,7 @@ typedef vector<TimeFrame_ptr> TimeFrames;
 typedef vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
-class Witness : public IObject {
+class Witness {
 public:
     Witness(Atom id = "<Noname>", Atom desc = "<No description>", step_t j = 0);
 
@@ -214,7 +214,7 @@ protected:
     Exprs f_lang;
 };
 
-class WitnessPrinter : public IObject {
+class WitnessPrinter {
 public:
     virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
 };

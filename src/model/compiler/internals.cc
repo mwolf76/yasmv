@@ -39,7 +39,7 @@ void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
 }
 
 /* private service of walk_leaf */
-void Compiler::push_dds(IEncoding_ptr enc, Type_ptr type)
+void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
 {
     assert (NULL != enc);
     DDVector& dds = enc->dv();

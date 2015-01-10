@@ -29,7 +29,7 @@
 /**
  * @brief SAT instancte ctor
  */
-SAT::SAT()
+Engine::Engine()
     : f_enc_mgr(EncodingMgr::INSTANCE())
     , f_mapper(* new TimeMapper(*this))
     , f_registry(* new CNFRegistry(*this))
@@ -39,11 +39,11 @@ SAT::SAT()
     f_groups.push(new_sat_var());
 
     DEBUG
-        << "Initialized SAT instance @" << this
+        << "Initialized Engine instance @" << this
         << endl;
 }
 
-status_t SAT::sat_solve_groups(const Groups& groups)
+status_t Engine::sat_solve_groups(const Groups& groups)
 {
     vec<Lit> assumptions;
 
@@ -79,7 +79,7 @@ status_t SAT::sat_solve_groups(const Groups& groups)
     return f_status;
 }
 
-void SAT::push(CompilationUnit cu, step_t time, group_t group)
+void Engine::push(CompilationUnit cu, step_t time, group_t group)
 {
     /* push DDs */
     {

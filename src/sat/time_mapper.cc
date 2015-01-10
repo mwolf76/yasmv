@@ -27,7 +27,7 @@
 
 #include <sat.hh>
 
-TimeMapper::TimeMapper(SAT& owner)
+TimeMapper::TimeMapper(Engine& owner)
     : f_owner(owner)
 {}
 

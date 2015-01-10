@@ -32,25 +32,25 @@
 
 #include <common.hh>
 
-class SAT; // fwd decl
+class Engine; // fwd decl
 
 typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
 typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
-class TimeMapper : public IObject {
+class TimeMapper {
 
     /* ctor and dctor are available only to SAT owner */
-    friend class SAT;
+    friend class Engine;
 
 public:
     Var var(const TCBI& tcbi );
     const TCBI& tcbi( Var var );
 
 private:
-    TimeMapper(SAT& owner);
+    TimeMapper(Engine& owner);
     ~TimeMapper();
 
-    SAT& f_owner;
+    Engine& f_owner;
 
     /* Bidirectional mapping */
     TCBI2VarMap f_tcbi2var_map;

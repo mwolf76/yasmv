@@ -27,7 +27,7 @@
 
 class CNFMicrocodeInjector {
 public:
-    CNFMicrocodeInjector(SAT& sat, step_t time, group_t group = MAINGROUP)
+    CNFMicrocodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
         : f_sat(sat)
         , f_time(time)
         , f_group(group)
@@ -49,7 +49,7 @@ private:
     void inject(const MicroDescriptor& md,
                 const LitsVector& microcode);
 
-    SAT& f_sat;
+    Engine& f_sat;
     step_t f_time;
     group_t f_group;
 };
@@ -173,7 +173,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
 
 class CNFMuxcodeInjector {
 public:
-    CNFMuxcodeInjector(SAT& sat, step_t time, group_t group = MAINGROUP)
+    CNFMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
         : f_sat(sat)
         , f_time(time)
         , f_group(group)
@@ -188,7 +188,7 @@ public:
 private:
     void inject(const MuxDescriptor& md);
 
-    SAT& f_sat;
+    Engine& f_sat;
     step_t f_time;
     group_t f_group;
 };
@@ -274,14 +274,14 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
 }
 
 // proxy
-void SAT::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
+void Engine::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
 {
     CNFMicrocodeInjector worker(*this, time, group);
     worker(md);
 }
 
 // proxy
-void SAT::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
+void Engine::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
 {
     CNFMuxcodeInjector worker(*this, time, group);
     worker(md);

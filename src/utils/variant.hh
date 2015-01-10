@@ -37,27 +37,7 @@ typedef enum {
     STRING,
 } VariantType;
 
-// Variant iface
-class IVariant : public IObject {
-public:
-    virtual bool is_nil() const =0;
-
-    virtual bool is_boolean() const =0;
-    virtual bool as_boolean() const =0;
-
-    virtual bool is_integer() const =0;
-    virtual int as_integer() const =0;
-
-    virtual bool is_clock() const =0;
-    virtual clock_t as_clock() const =0;
-
-    virtual bool is_string() const =0;
-    virtual string as_string() const =0;
-};
-
-
-// Variant implementation
-class Variant : public IVariant {
+class Variant {
     friend ostream& operator<<(ostream& os, const Variant& variant);
 
 public:

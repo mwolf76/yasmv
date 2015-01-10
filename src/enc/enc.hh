@@ -40,26 +40,20 @@
 #include <enc_mgr.hh>
 
 // -- primary decls  --------------------------------------------------------------
-typedef class IEncoding *IEncoding_ptr;
-class IEncoding : public IObject {
+class Encoding {
 public:
-    /* Full-Digit DDs (roots), used in manipulation of algebraics (e.g.. compiler) */
-    virtual DDVector& dv() =0;
-
-    /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT solver) */
-    virtual DDVector& bits() =0;
-
-    // vector of DD leaves (consts) -> expr
-    virtual Expr_ptr expr(int* assignment) =0;
-};
-
-class Encoding : public IEncoding {
-public:
+    /* Full-Digit DDs (roots), used in manipulation of algebraics
+       (e.g.. compiler) */
     DDVector& dv()
     { return f_dv; }
 
+    /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT
+       solver) */
     DDVector& bits()
     { return f_bits; }
+
+    /* vector of DD leaves (consts) -> expr */
+    virtual Expr_ptr expr(int* assignment) =0;
 
 protected:
     Encoding()
@@ -77,6 +71,8 @@ protected:
     ADD make_bit();
     ADD make_monolithic_encoding(unsigned nbits);
 };
+
+typedef Encoding* Encoding_ptr;
 
 // 1-bit boolean var (identity encoding)
 typedef class BooleanEncoding* BooleanEncoding_ptr;
@@ -165,7 +161,7 @@ protected:
     ExprValueMap f_e2v_map;
 };
 
-typedef vector<IEncoding_ptr> Encodings;
+typedef vector<Encoding_ptr> Encodings;
 typedef class ArrayEncoding* ArrayEncoding_ptr;
 class ArrayEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr

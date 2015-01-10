@@ -41,11 +41,7 @@ using std::ostream;
 ostream &operator<<(ostream &out, const Lit &lit);
 ostream &operator<<(ostream &out, const vec<Lit> &lits);
 
-
-typedef class SAT Engine;
-class SAT : public IObject {
-    //    friend class CNFBuilderSingleCut;
-    // friend class CNFBuilderNoCut;
+class Engine {
 
 public:
     /**
@@ -147,14 +143,14 @@ public:
     { f_solver.addClause_(ps); }
 
     /**
-     * @brief SAT instancte ctor
+     * @brief SAT instance ctor
      */
-    SAT();
+    Engine();
 
     /**
      * @brief SAT instance dctor
      */
-    ~SAT() {}
+    ~Engine() {}
 
 private:
     EncodingMgr& f_enc_mgr;

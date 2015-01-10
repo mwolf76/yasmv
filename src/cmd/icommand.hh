@@ -27,7 +27,7 @@
 
 typedef class ICommand* ICommand_ptr;
 
-class ICommand : public IObject {
+class ICommand {
 public:
     // functor-pattern
     Variant virtual operator()() =0;

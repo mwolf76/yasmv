@@ -140,7 +140,7 @@ private:
     void walk_leaf(const Expr_ptr expr);
 
     /* push DDs and type information for variables (used by walk_leaf) */
-    void push_dds(IEncoding_ptr enc, Type_ptr type);
+    void push_dds(Encoding_ptr enc, Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);

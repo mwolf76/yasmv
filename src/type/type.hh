@@ -154,7 +154,7 @@ public:
 class TypeMgr; // fwd
 
 /** Basic Type class. */
-class Type : public Object {
+class Type {
 public:
     Expr_ptr repr() const
     { return f_repr; }

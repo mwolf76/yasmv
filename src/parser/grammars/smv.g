@@ -42,11 +42,11 @@ options {
 
 @members {
     /* singleton managers */
-    ExprMgr& em = ExprMgr::INSTANCE();
-    ModelMgr& mm = ModelMgr::INSTANCE();
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    OptsMgr& om  = OptsMgr::INSTANCE();
-    CommandMgr& cm = CommandMgr::INSTANCE();
+    ExprMgr& em (ExprMgr::INSTANCE());
+    ModelMgr& mm (ModelMgr::INSTANCE());
+    TypeMgr& tm (TypeMgr::INSTANCE());
+    OptsMgr& om  (OptsMgr::INSTANCE());
+    CommandMgr& cm (CommandMgr::INSTANCE());
 
     /* the model instance */
     Model& model (mm.model());

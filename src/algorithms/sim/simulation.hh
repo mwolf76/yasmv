@@ -65,7 +65,7 @@ private:
 class SimulationWitness : public Witness {
 
 public:
-    SimulationWitness(Model& model, SAT& engine, step_t k);
+    SimulationWitness(Model& model, Engine& engine, step_t k);
 };
 
 #endif

@@ -67,7 +67,7 @@ private:
 class BMCCounterExample : public Witness {
 public:
     BMCCounterExample(Expr_ptr property, Model& model,
-                      SAT& engine, unsigned k, bool use_coi);
+                      Engine& engine, unsigned k, bool use_coi);
 };
 
 #endif

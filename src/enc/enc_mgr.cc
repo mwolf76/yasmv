@@ -30,11 +30,11 @@
 
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
-IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
+Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 {
     assert(NULL != tp);
 
-    IEncoding_ptr res = NULL;
+    Encoding_ptr res = NULL;
 
     BooleanType_ptr btype;
     UnsignedAlgebraicType_ptr ua_type;
@@ -71,7 +71,7 @@ IEncoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     return res;
 }
 
-void EncodingMgr::register_encoding(const FQExpr& key, IEncoding_ptr enc)
+void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
 {
     ostringstream oss;
     f_fqexpr2enc_map [ key ] = enc;

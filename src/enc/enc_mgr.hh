@@ -37,7 +37,7 @@
 #include <cudd_mgr.hh>
 #include <cuddInt.h>  /* for cudd_isconstant */
 
-typedef class IEncoding *IEncoding_ptr; // fwd decl
+typedef class Encoding *Encoding_ptr; // fwd decl
 
 typedef vector<int> IndexVector;
 
@@ -54,7 +54,7 @@ struct ADDEq {
     { return phi == psi; }
 };
 
-typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
+typedef unordered_map<FQExpr, Encoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
 typedef unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
@@ -93,10 +93,10 @@ public:
     { return f_cudd.ReadSize(); }
 
     // Makes a new encoding. Used by the compiler
-    IEncoding_ptr make_encoding(Type_ptr type);
+    Encoding_ptr make_encoding(Type_ptr type);
 
     // Registers an encoding. Used by the compiler
-    void register_encoding(const FQExpr& key, IEncoding_ptr enc);
+    void register_encoding(const FQExpr& key, Encoding_ptr enc);
 
     // Retrieves Untimed Canonical Bit Id for index
     inline const UCBI& find_ucbi(int index)
@@ -104,7 +104,7 @@ public:
 
     // Retrieves an encoding previously created using
     // make_encoding. User by the SAT model evaluator
-    inline IEncoding_ptr find_encoding(const FQExpr& fqexpr)
+    inline Encoding_ptr find_encoding(const FQExpr& fqexpr)
     {
         FQExpr2EncMap::iterator eye = f_fqexpr2enc_map.find(fqexpr);
         if (eye != f_fqexpr2enc_map.end()) {

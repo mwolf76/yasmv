@@ -27,7 +27,7 @@
 #include <bmc.hh>
 
 BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
-                                     SAT& engine, unsigned k,
+                                     Engine& engine, unsigned k,
                                      bool use_coi)
     : Witness()
 {
@@ -55,7 +55,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
 
                 /* time it, and fetch encoding for enc mgr */
                 FQExpr key(ctx, expr);
-                IEncoding_ptr enc = enc_mgr.find_encoding(key);
+                Encoding_ptr enc = enc_mgr.find_encoding(key);
                 if ( NULL == enc ) {
                     // TRACE << symb->ctx()
                     //       << "::" << symb->expr()
