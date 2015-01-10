@@ -54,7 +54,7 @@ ModelMgr::ModelMgr()
 
 void ModelMgr::first_pass()
 {
-    DEBUG << "Not yet implemented" << endl;
+    DEBUG << "Not yet implemented" << std::endl;
 }
 
 void ModelMgr::second_pass()
@@ -65,7 +65,7 @@ void ModelMgr::second_pass()
     for (Modules::const_iterator mi = modules.begin(); mi != modules.end(); ++ mi ) {
 
         Module& module = dynamic_cast <Module&> (*mi->second);
-        DEBUG << "processing module '" << module << "' " << endl;
+        DEBUG << "processing module '" << module << "' " << std::endl;
 
         // Remark: ctx name is MODULE name, not instance's
         // rationale: you may have several instances but they
@@ -79,16 +79,20 @@ void ModelMgr::second_pass()
             Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing INIT " << fqdn << endl;
+            DEBUG << "processing INIT " << fqdn << std::endl;
 
             try {
                 f_inferrer.process(body, ctx);
             }
             catch (Exception& ae) {
-                cerr << ae.what()
-                     << endl
-                     << "  in INIT "
-                     << fqdn << endl;
+                std::string tmp(ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in INIT "
+                    << fqdn
+                    << std::endl;
+
                 f_status = false;
             }
         } // for init
@@ -99,16 +103,20 @@ void ModelMgr::second_pass()
             Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing INVAR " << fqdn << endl;
+            DEBUG << "processing INVAR " << fqdn << std::endl;
 
             try {
                 f_inferrer.process(body, ctx);
             }
             catch (Exception& ae) {
-                cerr << ae.what()
-                     << endl
-                     << "  in INVAR "
-                     << fqdn << endl;
+                std::string tmp (ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in INVAR "
+                    << fqdn
+                    << std::endl;
+
                 f_status = false;
             }
         } // for invar
@@ -119,16 +127,20 @@ void ModelMgr::second_pass()
             Expr_ptr body = (*ti);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing TRANS " << fqdn << endl;
+            DEBUG << "processing TRANS " << fqdn << std::endl;
 
             try {
                 f_inferrer.process(body, ctx);
             }
             catch (Exception& ae) {
-                cerr << ae.what()
-                     << endl
-                     << "  in TRANS "
-                     << fqdn << endl;
+                std::string tmp(ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in TRANS "
+                    << fqdn
+                    << std::endl;
+
                 f_status = false;
             }
         } // for trans
@@ -138,16 +150,20 @@ void ModelMgr::second_pass()
             FQExpr fqdn = (*di).first;
             Expr_ptr body = (*di).second -> body();
 
-            DEBUG << "processing DEFINE " << fqdn << endl;
+            DEBUG << "processing DEFINE " << fqdn << std::endl;
 
             try {
                 f_inferrer.process(body, ctx);
             }
             catch (Exception& ae) {
-                cerr << ae.what()
-                     << endl
-                     << "  in DEFINE "
-                     << fqdn << endl;
+                std::string tmp (ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in DEFINE "
+                    << fqdn
+                    << std::endl;
+
                 f_status = false;
             }
         } // for defines
@@ -159,7 +175,7 @@ bool ModelMgr::analyze()
 {
     f_status = true;
 
-    DEBUG << "-- first pass (binding)" << endl;
+    DEBUG << "-- first pass (binding)" << std::endl;
     // (binding) For each module m in M, A goes deep in the module
     // defs. Every variable decl is resolved either to a native type
     // (boolean, ranged int, ...) or to an instance. Due to (1) all
@@ -168,7 +184,7 @@ bool ModelMgr::analyze()
     first_pass();
     if (! f_status) return false;
 
-    DEBUG << "-- second pass (type checking)" << endl;
+    DEBUG << "-- second pass (type checking)" << std::endl;
     // (typechecking) For each module m in M, A inspects FSM exprs:
     // INVAR, TRANS, FAIRNESS have all to be boolean formulae; ASSIGNs
     // have to match lvalue type. The type for every expression is

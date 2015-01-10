@@ -23,6 +23,8 @@
 #ifndef BASE_ALGORITHM_H
 #define BASE_ALGORITHM_H
 
+#include <boost/unordered_map.hpp>
+
 #include <sat.hh>
 
 #include <model.hh>
@@ -34,12 +36,12 @@
 #include <witness.hh>
 #include <variant.hh>
 
-#include <cmd/icommand.hh>
+#include <cmd/command.hh>
 
 /* Model compiler */
 #include <compiler/compiler.hh>
 
-typedef unordered_map<string, Variant> ParametersMap;
+typedef boost::unordered_map<std::string, Variant> ParametersMap;
 
 typedef enum {
     MC_FALSE,
@@ -51,7 +53,7 @@ typedef enum {
 class Algorithm {
 
 public:
-    Algorithm(ICommand& command, Model& model);
+    Algorithm(Command& command, Model& model);
     virtual ~Algorithm();
 
     /* Build encodings are perform model compilation */
@@ -61,8 +63,8 @@ public:
     virtual void process() =0;
 
     // algorithm abstract param interface (key -> value map)
-    void set_param(string key, Variant value);
-    Variant& get_param(const string key);
+    void set_param(std::string key, Variant value);
+    Variant& get_param(const std::string key);
 
     inline Compiler& compiler()
     { return f_compiler; }
@@ -113,7 +115,7 @@ public:
 
 private:
     /* Command */
-    ICommand& f_command;
+    Command& f_command;
 
     /* Model */
     Model& f_model;

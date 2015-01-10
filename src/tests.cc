@@ -13,10 +13,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // just for debugging purposes within gdb
 void pe(Expr_ptr e)
-{ DEBUG << e << endl; }
+{ DEBUG << e << std::endl; }
 
 void pf(FQExpr& e)
-{ DEBUG << e << endl; }
+{ DEBUG << e << std::endl; }
 
 // logging subsystem settings
 namespace axter {

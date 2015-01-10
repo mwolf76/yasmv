@@ -40,7 +40,7 @@ Engine::Engine()
 
     DEBUG
         << "Initialized Engine instance @" << this
-        << endl;
+        << std::endl;
 }
 
 status_t Engine::sat_solve_groups(const Groups& groups)
@@ -59,7 +59,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     DEBUG
         << "Solving with following assumptions..."
         << assumptions
-        << endl;
+        << std::endl;
 
     f_status = f_solver.solve(assumptions)
         ? STATUS_SAT
@@ -74,7 +74,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
         << secs
         << " seconds. Status is "
         << f_status << "."
-        << endl;
+        << std::endl;
 
     return f_status;
 }
@@ -88,7 +88,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         DEBUG
             << "CNFizing " << n
             << " fragments"
-            << endl;
+            << std::endl;
 
         DDVector::const_iterator i;
         for (i = dv.begin(); dv.end() != i; ++ i) {
@@ -103,7 +103,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         DEBUG
             << "Injecting " << n
             << " microcode instances"
-            << endl;
+            << std::endl;
 
         MicroDescriptors::const_iterator i;
         for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)  {
@@ -126,7 +126,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
                 << " MUX instances"
                 << " for toplevel "
                 << toplevel
-                << endl;
+                << std::endl;
 
             MuxDescriptors::const_iterator i;
             for (i = descriptors.begin(); descriptors.end() != i; ++ i)  {

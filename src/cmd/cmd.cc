@@ -27,12 +27,14 @@ CommandMgr_ptr CommandMgr::f_instance = NULL;
 CommandMgr::CommandMgr()
     : f_interpreter(Interpreter::INSTANCE())
 {
-    // TODO: macros for init/deinit logging
-    DEBUG << "CommandMgr initialized @" << this << endl;
+    DRIVEL
+        << "CommandMgr initialized @" << this
+        << std::endl;
 }
 
 CommandMgr::~CommandMgr()
 {
-    // TODO: macros for init/deinit logging
-    DEBUG << "CommandMgr deinitialized" << endl;
+    DRIVEL
+        << "CommandMgr deinitialized"
+        << std::endl;
 }

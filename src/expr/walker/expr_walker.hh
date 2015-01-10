@@ -27,6 +27,9 @@
 #ifndef EXPR_WALKER_H
 #define EXPR_WALKER_H
 
+#include <sstream>
+#include <stack>
+
 #include <common.hh>
 #include <expr.hh>
 
@@ -165,7 +168,7 @@ struct activation_record {
     {}
 };
 
-typedef stack<struct activation_record> walker_stack;
+typedef std::stack<struct activation_record> walker_stack;
 
 class WalkerException : public Exception
 {
@@ -181,8 +184,10 @@ public:
     {}
 
     virtual const char* what() const throw() {
-        ostringstream oss;
-        oss << "Unsupported entry point (" << f_ep << ")";
+        std::ostringstream oss;
+        oss
+            << "Unsupported entry point (" << f_ep << ")";
+
         return oss.str().c_str();
     }
 
@@ -198,8 +203,10 @@ public:
     {}
 
     virtual const char* what() const throw() {
-        ostringstream oss;
-        oss << "Unsupported operator (" << f_et << ")";
+        std::ostringstream oss;
+        oss
+            << "Unsupported operator (" << f_et << ")";
+
         return oss.str().c_str();
     }
 

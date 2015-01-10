@@ -22,6 +22,9 @@
 #ifndef MICRO_LOADER_H
 #define MICRO_LOADER_H
 
+#include <boost/thread/mutex.hpp>
+#include <boost/filesystem.hpp>
+
 #include <micro.hh>
 
 class MicroLoaderException : public Exception {
@@ -36,12 +39,12 @@ private:
 };
 
 typedef class MicroLoader* MicroLoader_ptr;
-typedef unordered_map<OpTriple, MicroLoader_ptr,
-                      OpTripleHash, OpTripleEq> MicroLoaderMap;
+typedef boost::unordered_map<OpTriple, MicroLoader_ptr,
+                             OpTripleHash, OpTripleEq> MicroLoaderMap;
 
 class MicroLoader {
 public:
-    MicroLoader(const path& filepath);
+MicroLoader(const boost::filesystem::path& filepath);
     ~MicroLoader();
 
     inline const OpTriple& triple() const
@@ -51,10 +54,10 @@ public:
     const LitsVector& microcode();
 
 private:
-    mutex f_loading_mutex;
+    boost::mutex f_loading_mutex;
     LitsVector f_microcode;
 
-    path f_fullpath;
+    boost::filesystem::path f_fullpath;
     OpTriple f_triple;
 };
 

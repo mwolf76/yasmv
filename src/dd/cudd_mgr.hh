@@ -28,15 +28,17 @@
 #ifndef CUDD_MGR_H
 #define CUDD_MGR_H
 
+#include <vector>
+
 #include <common.hh>
 #include <cuddObj.hh>
 
-typedef vector<ADD> DDVector;
+typedef std::vector<ADD> DDVector;
 
 typedef class CuddMgr* CuddMgr_ptr;
 typedef Cudd* Cudd_ptr;
 
-typedef vector<Cudd_ptr> CuddVector;
+typedef std::vector<Cudd_ptr> CuddVector;
 
 class CuddMgr  {
 

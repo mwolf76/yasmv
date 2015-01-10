@@ -19,9 +19,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <vector>
+
 #include <base.hh>
 
-Algorithm::Algorithm(ICommand& command, Model& model)
+Algorithm::Algorithm(Command& command, Model& model)
     : f_command(command)
     , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
@@ -35,7 +37,7 @@ Algorithm::Algorithm(ICommand& command, Model& model)
         << "Creating algorithm instance "
         << get_param("alg_name")
         << " @" << this
-        << endl;
+        << std::endl;
 }
 
 Algorithm::~Algorithm()
@@ -44,13 +46,13 @@ Algorithm::~Algorithm()
         << "Destroying algorithm instance "
         << get_param("alg_name")
         << " @" << this
-        << endl;
+        << std::endl;
 }
 
-void Algorithm::set_param(string key, Variant value)
+void Algorithm::set_param(std::string key, Variant value)
 { f_params [ key ] = value; }
 
-Variant& Algorithm::get_param(const string key)
+Variant& Algorithm::get_param(const std::string key)
 {
     const ParametersMap::iterator eye = f_params.find(key);
 
@@ -68,7 +70,7 @@ void Algorithm::setup()
 
     DEBUG
         << "Compiling FSM..."
-        << endl;
+        << std::endl;
 
     {
         for (Modules::const_iterator m = modules.begin();
@@ -118,7 +120,7 @@ void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
     DEBUG
         << "CNFizing INIT @" << time
         << "... (" << n << " fragments)"
-        << endl;
+        << std::endl;
 
     clock_t t0 = clock();
 
@@ -131,7 +133,7 @@ void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     DEBUG
         << "Done. (took " << secs << " seconds)"
-        << endl;
+        << std::endl;
 }
 
 void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
@@ -140,7 +142,7 @@ void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
     DEBUG
         << "CNFizing INVAR @" << time
         << "... (" << n << " fragments)"
-        << endl;
+        << std::endl;
 
     clock_t t0 = clock();
 
@@ -153,7 +155,7 @@ void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     DEBUG
         << "Done. (took " << secs << " seconds)"
-        << endl;
+        << std::endl;
 }
 
 void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
@@ -162,7 +164,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
     DEBUG
         << "CNFizing TRANS @" << time
         << "... (" << n << " fragments)"
-        << endl;
+        << std::endl;
 
     clock_t t0 = clock();
 
@@ -175,7 +177,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     DEBUG
         << "Done. (took " << secs << " seconds)"
-        << endl;
+        << std::endl;
 }
 
 void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
@@ -185,9 +187,9 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     clock_t t0 = clock();
     DEBUG
         << "CNFizing uniqueness(" << j << ", " << k << ")"
-        << endl;
+        << std::endl;
 
-    typedef vector<Var> Vars;
+    typedef std::vector<Var> Vars;
     Vars uniqueness_vars;
 
     /* define uniqueness_vars into the solver ... */
@@ -232,7 +234,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
                         DRIVEL
                             << ps
-                            << endl;
+                            << std::endl;
 
                         engine.add_clause(ps);
                     }
@@ -245,7 +247,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
                         DRIVEL
                             << ps
-                            << endl;
+                            << std::endl;
 
                         engine.add_clause(ps);
                     }
@@ -265,7 +267,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
     DRIVEL
         << ps
-        << endl;
+        << std::endl;
 
     engine.add_clause(ps);
 
@@ -273,7 +275,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     DEBUG
         << "Done. (took " << secs << " seconds)"
-        << endl;
+        << std::endl;
 }
 
 void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& term, group_t group)
@@ -281,7 +283,7 @@ void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& ter
     clock_t t0 = clock();
     DEBUG
         << "CNFizing formula @" << time << " ..."
-        << endl;
+        << std::endl;
 
     engine.push( term, time, group);
 
@@ -289,7 +291,7 @@ void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& ter
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
     DEBUG
         << "Done. (took " << secs << " seconds)"
-        << endl;
+        << std::endl;
 }
 
 

@@ -22,7 +22,7 @@
 #include <model.hh>
 
 // WHY HERE?!?
-ostream& operator<<(ostream& os, Exception& e)
+std::ostream& operator<<(std::ostream& os, Exception& e)
 { return os << e.what(); }
 
 Module& Model::add_module(Module& module)
@@ -32,9 +32,9 @@ Module& Model::add_module(Module& module)
     DEBUG
         << "Added module: `"
         << name << "`"
-        << endl;
+        << std::endl;
 
-    f_modules.insert( make_pair<Expr_ptr, Module_ptr>
+    f_modules.insert( std::make_pair<Expr_ptr, Module_ptr>
                       (name, &module));
 
     return module;
@@ -55,7 +55,7 @@ Model::Model()
     DEBUG
         << "Initialized Model instance @"
         << this
-        << endl;
+        << std::endl;
 }
 
 Model::~Model()

@@ -32,6 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <boost/filesystem.hpp>
 
 #include <common.hh>
 
@@ -48,23 +49,29 @@ MicroMgr_ptr MicroMgr::f_instance = NULL;
 
 MicroMgr::MicroMgr()
 {
+    using boost::filesystem::path;
+    using boost::filesystem::directory_iterator;
+    using boost::filesystem::filesystem_error;
+
     char *basepath = getenv( YASMV_HOME );
     if (NULL == basepath) {
-        ERR << YASMV_HOME << " is not set. Exiting..." << endl;
+        ERR
+            << YASMV_HOME
+            << " is not set. Exiting..."
+            << std::endl;
+
         exit(1);
     }
-    path micropath = basepath / path ( MICROCODE_PATH );
-    DEBUG << micropath;
 
+    path micropath = basepath / path ( MICROCODE_PATH );
     try {
         if (exists(micropath) && is_directory(micropath)) {
             for (directory_iterator di = directory_iterator(micropath);
                  di != directory_iterator(); ++ di) {
 
                 path entry (di->path());
-                if (strcmp(entry.extension().c_str(), ".json")) {
+                if (strcmp(entry.extension().c_str(), ".json"))
                     continue;
-                }
 
                 // lazy microcode-loaders registration
                 try {
@@ -74,14 +81,16 @@ MicroMgr::MicroMgr()
                     DRIVEL << "Registering microcode loader for "
                            << loader->triple()
                            << "..."
-                           << endl;
+                           << std::endl;
 
-                    f_loaders.insert( make_pair< OpTriple, MicroLoader_ptr >
+                    f_loaders.insert( std::make_pair< OpTriple, MicroLoader_ptr >
                                       (loader->triple(), loader));
                 }
                 catch (MicroLoaderException mle) {
-                    string tmp(mle.what());
-                    WARN << tmp << endl;
+                    std::string tmp(mle.what());
+                    WARN
+                        << tmp
+                        << std::endl;
                 }
             }
         }
@@ -92,7 +101,7 @@ MicroMgr::MicroMgr()
         }
     }
     catch (const filesystem_error& ex) {
-        string tmp(ex.what());
+        std::string tmp(ex.what());
         ERR << tmp;
         exit(1);
     }
@@ -112,7 +121,7 @@ MicroLoader& MicroMgr::require(const OpTriple& triple)
     return * i->second;
 }
 
-ostream& operator<<(ostream& os, OpTriple triple)
+std::ostream& operator<<(std::ostream& os, OpTriple triple)
 {
     bool is_signed (triple.get<0>());
     os << (is_signed ? "s" : "u");

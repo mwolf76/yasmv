@@ -19,6 +19,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <boost/thread.hpp>
+
 #include <bmc/bmc.hh>
 #include <witness_mgr.hh>
 
@@ -26,7 +28,7 @@
 static unsigned progressive = 0;
 static const char *cex_trace_prfx = "cex_";
 
-BMC::BMC(ICommand& command, Model& model, Expr_ptr property, ExprVector& constraints)
+BMC::BMC(Command& command, Model& model, Expr_ptr property, ExprVector& constraints)
     : Algorithm(command, model)
     , f_property(property)
     , f_constraints(constraints)
@@ -36,7 +38,7 @@ BMC::BMC(ICommand& command, Model& model, Expr_ptr property, ExprVector& constra
     DEBUG
         << "Created BMC @"
         << this
-        << endl;
+        << std::endl;
 }
 
 BMC::~BMC()
@@ -71,18 +73,18 @@ void BMC::falsification( Expr_ptr phi )
             TRACE
                 << "Found CEX witness (k = " << k << "), invariant `" << invariant
                 << "` is FALSE."
-                << endl;
+                << std::endl;
 
             Witness& w(* new BMCCounterExample(phi, model(), engine, k, false));
             {
-                ostringstream oss;
+                std::ostringstream oss;
                 oss
                     << cex_trace_prfx
                     << (++ progressive);
                 w.set_id(oss.str());
             }
             {
-                ostringstream oss;
+                std::ostringstream oss;
                 oss
                     << "CEX witness for property `"
                     << phi
@@ -135,7 +137,7 @@ void BMC::kinduction( Expr_ptr phi )
             TRACE
                 << "Found k-induction proof (k = " << k << "), invariant `" << invariant
                 << "` is TRUE."
-                << endl;
+                << std::endl;
 
             set_status( MC_TRUE );
             break;
@@ -170,15 +172,15 @@ void BMC::process()
     if (normalizer.is_invariant()) {
         TRACE << f_property
               << " is an invariant (i.e. G-only) LTL property"
-              << endl;
+              << std::endl;
 
         Expr_ptr phi = normalizer.property();
 
         set_status( MC_UNKNOWN );
 
-        // launch parallel threads
-        thread base(&BMC::falsification, this, phi);
-        thread step(&BMC::kinduction, this, phi);
+        /* launch parallel threads */
+        boost::thread base(&BMC::falsification, this, phi);
+        boost::thread step(&BMC::kinduction, this, phi);
 
         base.join();
         step.join();
@@ -186,10 +188,10 @@ void BMC::process()
     else {
         TRACE << f_property
               << " is a full LTL property"
-              << endl;
+              << std::endl;
 
         assert( false );
         // bmc_ltlspec_check( normalizer.property() );
     }
-    TRACE << "Done." << endl;
+    TRACE << "Done." << std::endl;
 }

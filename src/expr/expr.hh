@@ -26,6 +26,9 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <vector>
+#include <set>
+
 #include <common.hh>
 
 typedef enum {
@@ -91,7 +94,7 @@ typedef enum {
 // context, in which the expression has to evaluated.
 
 /* using STL string as basic atom class */
-typedef string Atom;
+typedef std::string Atom;
 typedef Atom* Atom_ptr;
 
 typedef struct Expr_TAG *Expr_ptr;
@@ -170,10 +173,10 @@ typedef struct Expr_TAG {
 
 } Expr;
 
-typedef vector<Expr_ptr> ExprVector;
+typedef std::vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;
 
-typedef set<Expr_ptr> ExprSet;
+typedef std::set<Expr_ptr> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
 // TODO: split this into multiple headers
@@ -303,10 +306,10 @@ private:
     step_t f_base;
 };
 
-ostream& operator<<(ostream& os, const Expr_ptr expr);
-ostream& operator<<(ostream& os, const FQExpr& fqexpr);
-ostream& operator<<(ostream& os, const UCBI& ucbi);
-ostream& operator<<(ostream& os, const TCBI& tcbi);
+std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
+std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr);
+std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
+std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
 
 // TODO: move this!
 class BadWordConstException : public Exception {

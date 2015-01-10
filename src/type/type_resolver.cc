@@ -27,7 +27,9 @@
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)
 {
-    DEBUG << "Initialized Type Resolver instance @" << this << endl;
+    DEBUG
+        << "Initialized Type Resolver instance @" << this
+        << std::endl;
 }
 
 TypeResolver::~TypeResolver()

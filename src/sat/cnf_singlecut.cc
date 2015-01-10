@@ -195,7 +195,7 @@ public:
 
 private:
     Engine& f_sat;
-    unordered_set<DdNode*> f_seen;
+    boost::unordered_set<DdNode*> f_seen;
 
     DdNode* f_toplevel;
     step_t f_time;
@@ -212,7 +212,7 @@ private:
 
         DRIVEL
             << ps
-            << endl;
+            << std::endl;
 
         f_sat.add_clause(ps);
     }
@@ -228,7 +228,7 @@ private:
 
         DRIVEL
             << ps
-            << endl;
+            << std::endl;
 
         f_sat.add_clause(ps);
     }
@@ -245,7 +245,7 @@ private:
 
         DRIVEL
             << ps
-            << endl;
+            << std::endl;
         f_sat.add_clause(ps);
     }
 };
@@ -257,5 +257,5 @@ void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 
     DRIVEL
         << "------------------------------------------------------------"
-        << endl;
+        << std::endl;
 }

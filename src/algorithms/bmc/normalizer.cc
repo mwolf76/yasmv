@@ -43,10 +43,10 @@
 Normalizer::Normalizer(ModelMgr& owner)
     : f_owner(owner)
     , f_em(ExprMgr::INSTANCE())
-{ DEBUG << "Created Normalizer @" << this << endl; }
+{ DEBUG << "Created Normalizer @" << this << std::endl; }
 
 Normalizer::~Normalizer()
-{ DEBUG << "Destroying Normalizer @" << this << endl; }
+{ DEBUG << "Destroying Normalizer @" << this << std::endl; }
 
 Expr_ptr Normalizer::process(Expr_ptr expr)
 {

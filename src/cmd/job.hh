@@ -22,37 +22,29 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include <boost/thread.hpp>
+#include <vector>
+
 #include <common.hh>
 #include <opts.hh>
 
-#include <cmd/icommand.hh>
+#include <cmd/command.hh>
 
 typedef enum {
     RUNNING,
     FINISHED,
 } job_status_t;
 
+class Command;
 class Job {
 public:
-    Job( ICommand& command );
+    Job( Command& command );
     ~Job();
 
     Variant run();
 
-    inline Atom id() const
+    inline std::string id() const
     { return f_id; }
-
-    inline void join()
-    {
-        if (f_status != FINISHED)
-            f_thread.join();
-    }
-
-    inline void kill()
-    {
-        if (f_status != FINISHED)
-            f_command.kill();
-    }
 
     inline job_status_t status() const
     { return f_status; }
@@ -60,16 +52,19 @@ public:
     inline double elapsed() const
     { return (double) (clock() - f_t0) / CLOCKS_PER_SEC; }
 
-private:
-    ICommand& f_command;
-    thread f_thread;
+    void join();
+    void kill();
 
-    Atom f_id;
+private:
+    Command& f_command;
+    boost::thread f_thread;
+
+    std::string f_id;
     clock_t f_t0;
 
     job_status_t f_status;
 };
 typedef class Job* Job_ptr;
-typedef vector<Job_ptr> Jobs;
+typedef std::vector<Job_ptr> Jobs;
 
 #endif

@@ -45,7 +45,7 @@ MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVe
 {
 }
 
-ostream& operator<<(ostream& os, MicroDescriptor& md)
+std::ostream& operator<<(std::ostream& os, MicroDescriptor& md)
 {
     os
         << md.triple()
@@ -103,7 +103,7 @@ ostream& operator<<(ostream& os, MicroDescriptor& md)
     return os;
 }
 
-ostream& operator<<(ostream& os, MuxDescriptor& md)
+std::ostream& operator<<(std::ostream& os, MuxDescriptor& md)
 {
     os << "mux"
        << md.width()

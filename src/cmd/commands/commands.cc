@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <iostream>
+#include <sstream>
+
 #include <ctime>
 #include <common.hh>
 #include <commands.hh>
@@ -34,16 +37,16 @@ Command::Command(Interpreter& owner)
 {
     DRIVEL
         << "Initialized command @" << this
-        << endl;
+        << std::endl;
 }
 
 Command::~Command()
 {
     DRIVEL << "Deinitialized command @" << this
-           << endl;
+           << std::endl;
 }
 
-ModelLoadCommand::ModelLoadCommand(Interpreter& owner, const string &filename)
+ModelLoadCommand::ModelLoadCommand(Interpreter& owner, const std::string &filename)
     : Command(owner)
     , f_filename(filename)
 {}
@@ -69,13 +72,13 @@ ModelDumpCommand::ModelDumpCommand(Interpreter& owner)
 
 Variant ModelDumpCommand::operator()()
 {
-    ostringstream oss;
+    std::ostringstream oss;
 
     Model& model (ModelMgr::INSTANCE().model());
 
     oss
-        << endl
-        << endl;
+        << std::endl
+        << std::endl;
 
     const Modules& modules (model.modules());
     for (Modules::const_iterator m = modules.begin();
@@ -86,12 +89,12 @@ Variant ModelDumpCommand::operator()()
         oss
             << "MODULE "
             << module.name()
-            << endl;
+            << std::endl;
 
         /* INIT */
         const ExprVector init = module.init();
         if (init.begin() != init.end())
-            oss << endl;
+            oss << std::endl;
         for (ExprVector::const_iterator init_eye = init.begin();
              init_eye != init.end(); ++ init_eye) {
 
@@ -100,14 +103,14 @@ Variant ModelDumpCommand::operator()()
             oss
                 << "INIT "
                 << body << ";"
-                << endl;
+                << std::endl;
 
         }
 
         /* INVAR */
         const ExprVector invar = module.invar();
         if (invar.begin() != invar.end())
-            oss << endl;
+            oss << std::endl;
         for (ExprVector::const_iterator invar_eye = invar.begin();
              invar_eye != invar.end(); ++ invar_eye) {
 
@@ -116,13 +119,13 @@ Variant ModelDumpCommand::operator()()
             oss
                 << "INVAR "
                 << body << ";"
-                << endl;
+                << std::endl;
         }
 
         /* TRANS */
         const ExprVector trans = module.trans();
         if (trans.begin() != trans.end())
-            oss << endl;
+            oss << std::endl;
         for (ExprVector::const_iterator trans_eye = trans.begin();
              trans_eye != trans.end(); ++ trans_eye) {
 
@@ -131,7 +134,7 @@ Variant ModelDumpCommand::operator()()
             oss
                 << "TRANS "
                 << body << ";"
-                << endl;
+                << std::endl;
         }
     }
 
@@ -192,7 +195,7 @@ JobListCommand::JobListCommand(Interpreter& owner)
 Variant JobListCommand::operator()()
 {
     Jobs::const_iterator eye;
-    ostream &os(cout);
+    ostream &os(std::cout);
 
     const Jobs& jobs(Interpreter::INSTANCE().jobs());
     for (eye = jobs.begin(); eye != jobs.end(); ++ eye) {
@@ -200,10 +203,10 @@ Variant JobListCommand::operator()()
             << (*eye) -> id()
             << "\t\t"
             << (*eye) -> elapsed()
-            << endl;
+            << std::endl;
 
     }
-    os << endl;
+    os << std::endl;
 
     return Variant("Ok");
 }
@@ -222,7 +225,7 @@ Variant JobStatusCommand::operator()()
 
     // Job& w = Interpreter::INSTANCE().job( f_wid->atom() );
     // for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-    //     os << "-- @ " << 1 + time << endl;
+    //     os << "-- @ " << 1 + time << std::endl;
     //     TimeFrame& tf = w[ time ];
 
     //     SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
@@ -231,9 +234,9 @@ Variant JobStatusCommand::operator()()
     //         Expr_ptr expr (symb->expr());
     //         Expr_ptr value(tf.value(expr));
 
-    //         os << symb->expr() << " = " << value << endl;
+    //         os << symb->expr() << " = " << value << std::endl;
     //     }
-    //     os << endl;
+    //     os << std::endl;
     // }
 
     return Variant("Ok");
@@ -253,7 +256,7 @@ Variant JobKillCommand::operator()()
 
     // Job& w = JobMgr::INSTANCE().job( f_wid->atom() );
     // for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-    //     os << "-- @ " << 1 + time << endl;
+    //     os << "-- @ " << 1 + time << std::endl;
     //     TimeFrame& tf = w[ time ];
 
     //     SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
@@ -262,9 +265,9 @@ Variant JobKillCommand::operator()()
     //         Expr_ptr expr (symb->expr());
     //         Expr_ptr value(tf.value(expr));
 
-    //         os << symb->expr() << " = " << value << endl;
+    //         os << symb->expr() << " = " << value << std::endl;
     //     }
-    //     os << endl;
+    //     os << std::endl;
     // }
 
     return Variant("Ok");
@@ -282,7 +285,7 @@ VerifyCommand::VerifyCommand(Interpreter& owner, Expr_ptr formula, ExprVector& c
 
 Variant VerifyCommand::operator()()
 {
-    ostringstream tmp;
+    std::ostringstream tmp;
     f_bmc.process();
 
     switch (f_bmc.status()) {
@@ -322,7 +325,7 @@ SimulateCommand::SimulateCommand(Interpreter& owner,
 
 Variant SimulateCommand::operator()()
 {
-    ostringstream tmp;
+    std::ostringstream tmp;
     f_sim.process();
 
     switch (f_sim.status()) {
@@ -379,7 +382,7 @@ WitnessListCommand::WitnessListCommand(Interpreter& owner)
 Variant WitnessListCommand::operator()()
 {
     WitnessList::const_iterator eye;
-    ostream &os(cout);
+    ostream &os(std::cout);
 
     const WitnessList& witnesses(WitnessMgr::INSTANCE().witnesses());
     for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
@@ -389,9 +392,9 @@ Variant WitnessListCommand::operator()()
             << (*eye) -> desc()
             << "\t\t"
             << (*eye) -> length()
-            << endl;
+            << std::endl;
     }
-    os << endl;
+    os << std::endl;
 
     return Variant("Ok");
 }
@@ -406,11 +409,11 @@ WitnessDumpCommand::WitnessDumpCommand(Interpreter& owner, Expr_ptr wid)
 
 Variant WitnessDumpCommand::operator()()
 {
-    ostream &os(cout);
+    ostream &os(std::cout);
 
     Witness& w = WitnessMgr::INSTANCE().witness( f_wid->atom() );
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-        os << "-- @ " << 1 + time << endl;
+        os << "-- @ " << 1 + time << std::endl;
         TimeFrame& tf = w[ time ];
 
         SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
@@ -428,7 +431,7 @@ Variant WitnessDumpCommand::operator()()
                 catch (NoValue nv) {
                     value = ExprMgr::INSTANCE().make_undef();
                 }
-                os << expr << " = " << value << endl;
+                os << expr << " = " << value << std::endl;
             }
             else if (symb->is_define()) {
                 Expr_ptr ctx (symb->ctx());
@@ -440,13 +443,13 @@ Variant WitnessDumpCommand::operator()()
                 catch (NoValue nv) {
                     value = ExprMgr::INSTANCE().make_undef();
                 }
-                os << expr << " = " << value << endl;
+                os << expr << " = " << value << std::endl;
             }
             else
                 continue;
         }
 
-        os << endl;
+        os << std::endl;
     }
 
     return Variant("Ok");

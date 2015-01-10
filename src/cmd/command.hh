@@ -1,6 +1,6 @@
 /*
- * @file icommand.hh
- * @brief Command-interpreter subsystem (abstract interface)
+ * @file command.hh
+ * @brief Command-interpreter subsystem
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,16 +19,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef ICOMMAND_H
-#define ICOMMAND_H
+#ifndef COMMAND_H
+#define COMMAND_H
 
 #include <common.hh>
 #include <variant.hh>
 
-typedef class ICommand* ICommand_ptr;
+typedef class Command* Command_ptr;
 
-class ICommand {
+class Interpreter;
+class Command {
+protected:
+    Interpreter& f_owner;
+
 public:
+    Command(Interpreter& owner);
+    virtual ~Command();
+
     // functor-pattern
     Variant virtual operator()() =0;
 
@@ -36,7 +43,7 @@ public:
     virtual void kill() =0;
 
     // representation
-    friend ostream& operator<<(ostream& os, ICommand& cmd);
+    friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };
 
 #endif

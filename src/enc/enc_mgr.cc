@@ -24,6 +24,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
 
 #include <enc.hh>
 #include <enc_mgr.hh>
@@ -73,7 +74,7 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
 void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
 {
-    ostringstream oss;
+    std::ostringstream oss;
     f_fqexpr2enc_map [ key ] = enc;
 
     DDVector& bits = enc->bits();
@@ -87,9 +88,8 @@ void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
         oss << index;
 
         f_index2ucbi_map.
-            insert(pair<int, UCBI> (index, UCBI(key.ctx(),
-                                                key.expr(),
-                                                key.time(), i)));
+            insert( std::pair<int, UCBI>
+                    (index, UCBI(key.ctx(), key.expr(), key.time(), i)));
 
         if ( ++ i < bits.size())
             oss << ", ";
@@ -99,13 +99,11 @@ void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
     assert (di == bits.end());
     oss << "]";
 
-    const char *tmp = (strdup(oss.str().c_str()));
+    std::string tmp (oss.str());
     DEBUG
         << "Registered encoding: "
         << tmp
-        << endl;
-
-    free((void *) tmp);
+        << std::endl;
 }
 
 EncodingMgr::EncodingMgr()
@@ -121,10 +119,12 @@ EncodingMgr::EncodingMgr()
     DRIVEL
         << "Initialized EncodingMgr @ " << this
         << ", native word size is " << f_word_width
-        << endl;
+        << std::endl;
 }
 
 EncodingMgr::~EncodingMgr()
 {
-    DRIVEL << "Deinitialized EncodingMgr @ " << this << endl;
+    DRIVEL
+        << "Deinitialized EncodingMgr @ " << this
+        << std::endl;
 }

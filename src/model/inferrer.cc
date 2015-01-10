@@ -47,10 +47,17 @@ Inferrer::Inferrer(ModelMgr& owner)
     , f_type_stack()
     , f_ctx_stack()
     , f_owner(owner)
-{ /* DEBUG << "Created Inferrer @" << this << endl; */ }
+{
+    DRIVEL
+        << "Created Inferrer @" << this
+        << std::endl;
+}
 
 Inferrer::~Inferrer()
-{ /* DEBUG << "Destroying Inferrer @" << this << endl; */ }
+{ DRIVEL
+        << "Destroying Inferrer @" << this
+        << std::endl;
+}
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
 Type_ptr Inferrer::process(Expr_ptr expr, Expr_ptr ctx)
@@ -717,7 +724,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
         return expr;
     }
 
-    DEBUG << expr << endl;
+    DEBUG << expr << std::endl;
     assert ( false ); // unreachable
 }
 

@@ -38,13 +38,13 @@ typedef enum {
 } VariantType;
 
 class Variant {
-    friend ostream& operator<<(ostream& os, const Variant& variant);
+    friend std::ostream& operator<<(std::ostream& os, const Variant& variant);
 
 public:
     // variant constructors
     Variant();
 
-    Variant(const string &value);
+    Variant(const std::string &value);
     Variant(const char *value);
 
     Variant(bool value);
@@ -67,14 +67,14 @@ public:
     clock_t as_clock() const;
 
     bool is_string() const;
-    string as_string() const;
+    std::string as_string() const;
 
 private:
     VariantType f_type;
 
     bool f_bool;
     int f_int;
-    string f_str;
+    std::string f_str;
     clock_t f_clock;
 };
 

@@ -34,7 +34,7 @@ UnresolvedSymbol::UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
 
 const char* UnresolvedSymbol::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
 
     oss
         << "Unresolved symbol: `" << f_ctx << "::" << f_expr<< "`";

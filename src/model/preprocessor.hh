@@ -23,14 +23,17 @@
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
 
+#include <utility>
+#include <vector>
+
 #include <model.hh>
 #include <expr_walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector< pair< Expr_ptr, Expr_ptr> > ExprPairStack;
-typedef vector<Expr_ptr> ExprStack;
-typedef vector<Define_ptr> DefinesStack;
+typedef std::vector< std::pair< Expr_ptr, Expr_ptr> > ExprPairStack;
+typedef std::vector<Expr_ptr> ExprStack;
+typedef std::vector<Define_ptr> DefinesStack;
 
 /* shortcuts to simplify manipulation of the internal expr stack */
 #define POP_EXPR(op)                              \

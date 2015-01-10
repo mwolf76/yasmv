@@ -27,6 +27,8 @@
 #ifndef TYPE_MGR_H
 #define TYPE_MGR_H
 
+#include <boost/unordered_map.hpp>
+
 #include <expr.hh>
 #include <expr_mgr.hh>
 
@@ -36,8 +38,7 @@
 
 #include <type_resolver.hh>
 
-typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
-typedef pair<TypeMap::iterator, bool> TypeHit;
+typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 
 /* The TypeMgr has three well-defined responsibilites:
 

@@ -27,18 +27,21 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
+#include <vector>
+
+#include <boost/unordered_map.hpp>
+
 #include <expr_walker.hh>
 #include <expr/pool.hh>
 
 #include <witness.hh>
 
 /* local typedefs */
-typedef unordered_map<FQExpr, value_t, FQExprHash, FQExprEq> FQExprValueMap;
-typedef pair<FQExprValueMap::iterator, bool> FQExprValueMapHit;
+typedef boost::unordered_map<FQExpr, value_t, FQExprHash, FQExprEq> FQExprValueMap;
 
-typedef vector<Expr_ptr> ExprStack;
-typedef vector<step_t>   TimeStack;
-typedef vector<value_t>  ValuesStack;
+typedef std::vector<Expr_ptr> ExprStack;
+typedef std::vector<step_t>   TimeStack;
+typedef std::vector<value_t>  ValuesStack;
 
 /* shortcuts to to simplify manipulation of the internal values stack */
 #define POP_VALUE(op)                              \

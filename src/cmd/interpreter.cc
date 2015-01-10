@@ -20,6 +20,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <iostream>
+#include <sstream>
+
 #include <commands/commands.hh>
 #include <interpreter.hh>
 
@@ -106,14 +109,14 @@ Interpreter::Interpreter()
 {
     DEBUG
         << "Initialized command interpreter @" << this
-        << endl;
+        << std::endl;
 }
 
 Interpreter::~Interpreter()
 {
     DEBUG
         << "Deinitialized command interpreter @" << this
-        << endl;
+        << std::endl;
 }
 
 void Interpreter::quit(int retcode)
@@ -122,7 +125,7 @@ void Interpreter::quit(int retcode)
     f_leaving = true;
 }
 
-extern  ICommand* parseCommand(const char *command); // in utils.cc
+extern  Command* parseCommand(const char *command); // in utils.cc
 Variant& Interpreter::operator()(Command_ptr cmd)
 {
     assert(NULL != cmd);
@@ -149,16 +152,16 @@ Variant& Interpreter::operator()()
 
                 bool color (OptsMgr::INSTANCE().color());
                 if (color) {
-                    cout << green
-                         << "<< "
-                         << cmdline
-                         << normal
-                         << endl;
+                    std::cout << green
+                              << "<< "
+                              << cmdline
+                              << normal
+                              << std::endl;
                 }
                 else {
-                    cout << "<< "
-                         << cmdline
-                         << endl;
+                    std::cout << "<< "
+                              << cmdline
+                              << std::endl;
                 }
 
                 if (cmd -> blocking())
@@ -167,7 +170,7 @@ Variant& Interpreter::operator()()
                     Job& j (* new Job(*cmd));
                     register_job(j);
 
-                    ostringstream oss;
+                    std::ostringstream oss;
 
                     oss
                         << "Job "

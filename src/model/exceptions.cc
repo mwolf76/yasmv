@@ -29,13 +29,12 @@ ModuleNotFound::~ModuleNotFound() throw()
 
 const char* ModuleNotFound::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss
         << "Module not found: `"
         << f_module_name << "`";
 
-    const char *res (strdup(oss.str().c_str()));
-    return res;
+    return oss.str().c_str();
 }
 
 FailedResolution::FailedResolution(Expr_ptr symbol)
@@ -47,11 +46,10 @@ FailedResolution::~FailedResolution() throw()
 
 const char* FailedResolution::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss
         << "Could not resolve symbol: `"
         << f_symbol << "`";
 
-    const char *res (strdup(oss.str().c_str()));
-    return res;
+    return oss.str().c_str();
 }

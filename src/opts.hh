@@ -46,7 +46,7 @@ public:
     }
 
     // the usage message
-    string usage() const;
+    std::string usage() const;
 
     // true iff help has been required
     bool help() const;
@@ -62,7 +62,7 @@ public:
     void set_word_width(unsigned);
 
     // model filename
-    string model() const;
+    std::string model() const;
 
     // to be invoked by main
     void parse_command_line(int argc, const char **argv);

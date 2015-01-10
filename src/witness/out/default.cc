@@ -21,6 +21,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <iostream>
 #include <default.hh>
 
 void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
@@ -28,8 +29,8 @@ void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
     step_t i = j;
 
     while (i < k) {
-        cout << "-- @ " << i
-             << " --"  << endl;
+        std::cout << "-- @ " << i
+                  << " --"  << std::endl;
 
 
     }

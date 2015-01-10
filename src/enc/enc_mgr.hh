@@ -28,6 +28,9 @@
 #ifndef ENCODER_MGR_H
 #define ENCODER_MGR_H
 
+#include <vector>
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
 #include <expr.hh>
 #include <expr_mgr.hh>
@@ -39,7 +42,7 @@
 
 typedef class Encoding *Encoding_ptr; // fwd decl
 
-typedef vector<int> IndexVector;
+typedef std::vector<int> IndexVector;
 
 struct ADDHash {
     inline long operator() (ADD term) const
@@ -54,8 +57,8 @@ struct ADDEq {
     { return phi == psi; }
 };
 
-typedef unordered_map<FQExpr, Encoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
-typedef unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
+typedef boost::unordered_map<FQExpr, Encoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
+typedef boost::unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
 class EncodingMgr  {

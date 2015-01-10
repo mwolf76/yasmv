@@ -23,6 +23,9 @@
 #ifndef WITNESS_MGR_H
 #define WITNESS_MGR_H
 
+#include <map>
+#include <vector>
+
 #include <expr.hh>
 
 #include <model.hh>
@@ -32,8 +35,8 @@
 #include <witness.hh>
 
 typedef class WitnessMgr *WitnessMgr_ptr;
-typedef map<Atom, Witness_ptr> WitnessMap;
-typedef vector<Witness_ptr> WitnessList;
+typedef std::map<Atom, Witness_ptr> WitnessMap;
+typedef std::vector<Witness_ptr> WitnessList;
 
 class WitnessMgr  {
 public:

@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
 
     {
         Expr_ptr psi = parseExpression("x = 0 or y = 1 and x = 0 or y = 1");
-        cerr << psi << endl;
+        std::cerr << psi << std::endl;
         // BOOST_CHECK (phi == psi);
     }
 
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
                                                                em.make_const(0)),
                                                     em.make_ne(em.make_next(y),
                                                                em.make_const(0))));
-        cerr << phi << endl;
+        std::cerr << phi << std::endl;
         Expr_ptr psi = parseExpression("x = 0 and y = 0 -> next(x) != 0 or next(y) != 0");
         BOOST_CHECK (phi == psi);
     }

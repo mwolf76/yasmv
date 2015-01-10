@@ -59,7 +59,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
 {
     DEBUG
         << const_cast<MicroDescriptor&> (md)
-        << endl;
+        << std::endl;
 
     /* true */
     const Var alpha(0);
@@ -165,7 +165,7 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
 
         DRIVEL
             << ps
-            << endl;
+            << std::endl;
 
         f_sat.add_clause(ps);
     }
@@ -197,7 +197,7 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
 {
     DEBUG
         << const_cast<MuxDescriptor&> (md)
-        << endl;
+        << std::endl;
 
     /* true */
     const Var alpha(0);
@@ -234,7 +234,7 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
 
                 DRIVEL
                     << ps
-                    << endl;
+                    << std::endl;
 
                 f_sat.add_clause( ps );
             }
@@ -263,7 +263,7 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
 
                 DRIVEL
                     << ps
-                    << endl;
+                    << std::endl;
 
                 f_sat.add_clause( ps );
             }

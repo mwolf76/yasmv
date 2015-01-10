@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -28,78 +27,15 @@
 #include <csignal>
 #include <cctype>
 
-/* custom C definitions */
+/* low-level C definitions */
 #include <cdefs.h>
 
-#include <utility>
-using std::pair;
-using std::make_pair;
-
-#include <string>
-using std::string;
-typedef string Atom;
-typedef Atom* Atom_ptr;
-
-#include <sstream>
-using std::ostringstream;
-
-#include <iostream>
-using std::istream;
-using std::ifstream;
-
-using std::ostream;
-using std::ofstream;
-
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::flush;
-
-#include <list>
-using std::list;
-
-#include <vector>
-using std::vector;
-
-#include <stack>
-using std::stack;
-
-#include <set>
-using std::set;
-
-#include <algorithm>
-using std::find;
-
-#include <boost/algorithm/string.hpp>
-
-#include <boost/unordered_set.hpp>
-using boost::unordered_set;
-
-#include <boost/unordered_map.hpp>
-using boost::unordered_map;
-
-#include <map>
-using std::map;
-
-#include <boost/thread.hpp>
-using boost::thread;
-using boost::thread_interrupted;
-
-#include <boost/thread/mutex.hpp>
-using boost::mutex;
-
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-using boost::tuple;
-using boost::make_tuple;
-
-#include <boost/filesystem.hpp>
-using boost::filesystem::path;
-using boost::filesystem::directory_iterator;
-using boost::filesystem::filesystem_error;
-
-#include <algorithm>
-using std::max;
+#include <exception>
+class Exception : public std::exception {
+public:
+    virtual const char* what() const throw() =0;
+    virtual ~Exception() throw() {}
+};
 
 static inline bool _iff(bool a, bool b)
 { return (!(a) || (b)) && ((!b) || (a)); }
@@ -109,15 +45,6 @@ static inline bool _xor(bool a, bool b)
 
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <logging.hh>
-
-#include <exception>
-using std::exception;
-
-class Exception : public exception {
-public:
-    virtual const char* what() const throw() =0;
-    virtual ~Exception() throw() {}
-};
 
 /* environment variables and paths */
 extern const char *YASMV_HOME;

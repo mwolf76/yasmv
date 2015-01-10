@@ -33,10 +33,10 @@
 
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)
-{ DEBUG << "Created Evaluator @" << this << endl; }
+{ DEBUG << "Created Evaluator @" << this << std::endl; }
 
 Evaluator::~Evaluator()
-{ DEBUG << "Destroying Evaluator @" << this << endl; }
+{ DEBUG << "Destroying Evaluator @" << this << std::endl; }
 
 value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
                            Expr_ptr body, step_t time)
@@ -57,7 +57,7 @@ value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
     f_time_stack.push_back(time);
 
     FQExpr key(ctx, body, time);
-    DEBUG << "Evaluating " << key << endl;
+    DEBUG << "Evaluating " << key << std::endl;
 
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);

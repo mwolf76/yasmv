@@ -72,13 +72,13 @@ TCBI::TCBI(const TCBI& tcbi)
     , f_base(tcbi.base())
 {}
 
-ostream& operator<<(ostream& os, const Expr_ptr t)
+std::ostream& operator<<(std::ostream& os, const Expr_ptr t)
 {
     Printer (os) << t;
     return os;
 }
 
-ostream& operator<<(ostream& os, const FQExpr& fqexpr)
+std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr)
 {
     Expr_ptr ctx = fqexpr.ctx();
     Expr_ptr expr = fqexpr.expr();
@@ -90,7 +90,7 @@ ostream& operator<<(ostream& os, const FQExpr& fqexpr)
     return os;
 }
 
-ostream& operator<<(ostream& os, const UCBI& ucbi)
+std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
 {
     Expr_ptr ctx = ucbi.ctx();
     Expr_ptr expr = ucbi.expr();
@@ -110,7 +110,7 @@ ostream& operator<<(ostream& os, const UCBI& ucbi)
     return os;
 }
 
-ostream& operator<<(ostream& os, const TCBI& tcbi)
+std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
 {
     Expr_ptr ctx = tcbi.ctx();
     Expr_ptr expr = tcbi.expr();

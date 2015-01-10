@@ -27,6 +27,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
 
 #include <expr.hh>
@@ -114,8 +116,8 @@ public:
 };
 
 typedef Module* Module_ptr;
-typedef unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
-ostream& operator<<(ostream& os, Module& module);
+typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
+std::ostream& operator<<(std::ostream& os, Module& module);
 
 class Model {
     Modules f_modules;

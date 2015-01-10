@@ -19,14 +19,15 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
 #include <witness.hh>
 
 const char* DuplicateWitnessId::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "Duplicate witness ID:  "
         << f_id << " is already registered."
-        << endl
+        << std::endl
         ;
 
     return oss.str().c_str();
@@ -34,10 +35,10 @@ const char* DuplicateWitnessId::what() const throw()
 
 const char* UnknownWitnessId::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "Unknown witness ID:  "
         << f_id << " is not registered."
-        << endl
+        << std::endl
         ;
 
     return oss.str().c_str();
@@ -45,10 +46,10 @@ const char* UnknownWitnessId::what() const throw()
 
 const char* IllegalTime::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "Illegal time: "
         << f_time
-        << endl
+        << std::endl
         ;
 
     return oss.str().c_str();
@@ -56,7 +57,7 @@ const char* IllegalTime::what() const throw()
 
 const char* NoValue::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "No value for `" << f_id << "`";
 
     return oss.str().c_str();
@@ -110,9 +111,10 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
         << expr
         << " := "
         << value
-        << endl;
+        << std::endl;
 
-    f_map.insert( make_pair< Expr_ptr, Expr_ptr > (expr, value));
+    f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+                  (expr, value));
 }
 
 Witness::Witness(Atom id, Atom desc, step_t j)
@@ -125,7 +127,7 @@ Witness::Witness(Atom id, Atom desc, step_t j)
         << f_id
         << ", starting at time "
         << f_j
-        << endl;
+        << std::endl;
 }
 
 TimeFrame& Witness::extend(Witness& w)
@@ -151,7 +153,7 @@ TimeFrame& Witness::extend()
     DEBUG << "Added empty TimeFrame " << last
           << " to witness " << id()
           << " @" << tf
-          << endl;
+          << std::endl;
 
     assert(tf);
     return *tf;

@@ -91,6 +91,8 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include <list>
+
 #include <common.hh>
 #include <cudd_mgr.hh>
 
@@ -114,13 +116,13 @@ typedef class ArrayType* ArrayType_ptr;
 // reserved for resolution
 typedef class CtxType* CtxType_ptr;
 
-typedef list<Type_ptr> TypeList;
+typedef std::list<Type_ptr> TypeList;
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, Type_ptr type);
+std::ostream& operator<<(std::ostream& os, Type_ptr type);
 
-// ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, const Type_ptr type);
+// std::ostream helper, uses FQExpr printer (see expr/expr.cc)
+std::ostream& operator<<(std::ostream& os, const Type_ptr type);
 
 /** Exception classes */
 class TypeException : public Exception {

@@ -23,6 +23,10 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include <vector>
+
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
 #include <expr.hh>
 #include <pool.hh>
@@ -37,31 +41,31 @@ public:
     const char* what() const throw();
 };
 
-typedef vector<FQExpr> FQExprVector;
+typedef std::vector<FQExpr> FQExprVector;
 
 class Symbol;
 typedef Symbol* Symbol_ptr;
-typedef unordered_map<FQExpr, Symbol_ptr, FQExprHash, FQExprEq> Symbols;
+typedef boost::unordered_map<FQExpr, Symbol_ptr, FQExprHash, FQExprEq> Symbols;
 
 class Literal;
 typedef Literal* Literal_ptr;
-typedef unordered_map<FQExpr, Literal_ptr, FQExprHash, FQExprEq> Literals;
+typedef boost::unordered_map<FQExpr, Literal_ptr, FQExprHash, FQExprEq> Literals;
 
 class Enum;
 typedef Enum* Enum_ptr;
-typedef unordered_map<FQExpr, Enum_ptr, FQExprHash, FQExprEq> Enums;
+typedef boost::unordered_map<FQExpr, Enum_ptr, FQExprHash, FQExprEq> Enums;
 
 class Constant;
 typedef Constant* Constant_ptr;
-typedef unordered_map<FQExpr, Constant_ptr, FQExprHash, FQExprEq> Constants;
+typedef boost::unordered_map<FQExpr, Constant_ptr, FQExprHash, FQExprEq> Constants;
 
 class Variable;
 typedef Variable* Variable_ptr;
-typedef unordered_map<FQExpr, Variable_ptr, FQExprHash, FQExprEq> Variables;
+typedef boost::unordered_map<FQExpr, Variable_ptr, FQExprHash, FQExprEq> Variables;
 
 class Define;
 typedef Define* Define_ptr;
-typedef unordered_map<FQExpr, Define_ptr, FQExprHash, FQExprEq> Defines;
+typedef boost::unordered_map<FQExpr, Define_ptr, FQExprHash, FQExprEq> Defines;
 
 class Typed {
 public:
@@ -289,8 +293,8 @@ private:
     Model&  f_model;
     Expr_ptr f_formula; /* for COI */
 
-    vector<Symbol_ptr> f_symbols;
-    vector<Symbol_ptr>::const_iterator f_iter;
+    std::vector<Symbol_ptr> f_symbols;
+    std::vector<Symbol_ptr>::const_iterator f_iter;
 };
 
 #endif

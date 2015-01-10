@@ -212,17 +212,16 @@ void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
 
     // Define the ENUM
     Enum_ptr enm = new Enum(ctx, name, tp);
-    f_enums.insert( make_pair<FQExpr,
-                    Enum_ptr>( FQExpr( ctx, name), enm));
+    f_enums.insert( std::make_pair<FQExpr, Enum_ptr>
+                    ( FQExpr( ctx, name), enm));
 
     // Literals are all maintained together by the type mgr. This
     // greatly simplifies the resolver.
     for (ExprSet::iterator eye = lits.begin(); eye != lits.end(); ++ eye) {
         Expr_ptr lit = *eye;
 
-        f_lits.insert( make_pair<FQExpr,
-                                 Literal_ptr>(FQExpr( ctx, lit),
-                                               new Literal(enm, lit)));
+        f_lits.insert( std::make_pair<FQExpr, Literal_ptr>
+                       (FQExpr( ctx, lit), new Literal(enm, lit)));
     }
 
     // new type, needs to be registered before returning

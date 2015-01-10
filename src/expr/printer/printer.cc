@@ -30,10 +30,10 @@
 #include <printer.hh>
 
 Printer::Printer()
-    : f_os(cout)
+    : f_os(std::cout)
 {}
 
-Printer::Printer(ostream& os)
+Printer::Printer(std::ostream& os)
     : f_os(os)
 {}
 
@@ -44,7 +44,7 @@ void Printer::pre_hook()
 {}
 
 void Printer::post_hook()
-{ f_os << flush; }
+{ f_os << std::flush; }
 
 Printer& Printer::operator<<(Expr_ptr expr)
 { this->operator()(expr); return *this; }
@@ -52,8 +52,8 @@ Printer& Printer::operator<<(Expr_ptr expr)
 Printer& Printer::operator<<(Expr& expr)
 { this->operator()(&expr); return *this; }
 
-Printer& Printer::operator<< (const string& str)
-{ f_os << str << flush; return *this; }
+Printer& Printer::operator<< (const std::string& str)
+{ f_os << str << std::flush; return *this; }
 
 bool Printer::walk_F_preorder(const Expr_ptr expr)
 { f_os << "F ("; return true; }

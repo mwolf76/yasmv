@@ -22,6 +22,8 @@
 #ifndef SAT_CNF_REGISTRY_H
 #define SAT_CNF_REGISTRY_H
 
+#include <boost/unordered_map.hpp>
+
 #include <expr.hh>
 #include <pool.hh>
 
@@ -29,8 +31,8 @@
 
 class Engine; // fwd decl
 
-typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
 struct TimedDD {
 public:
@@ -59,7 +61,7 @@ struct TimedDDEq {
     inline bool operator() (const TimedDD& x, const TimedDD& y) const
     { return (x.node() == y.node() && x.time() == y.time()); }
 };
-typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
+typedef boost::unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
 
 struct TimedVar {
 public:
@@ -88,7 +90,7 @@ struct TimedVarEq {
     inline bool operator() (const TimedVar& x, const TimedVar& y) const
     { return (x.var() == y.var() && x.time() == y.time()); }
 };
-typedef unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
+typedef boost::unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
 
 class CNFRegistry {
 

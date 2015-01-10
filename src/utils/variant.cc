@@ -56,7 +56,7 @@ Variant::Variant(clock_t value)
     // DRIVEL << "Initialized CLOCK Variant @" << this << " (value = " << f_clock << ")" << endl;
 }
 
-Variant::Variant(const string &value)
+Variant::Variant(const std::string &value)
     : f_type(STRING)
     , f_str(value)
 {
@@ -83,7 +83,10 @@ Variant::Variant(const Variant& v)
     }
 
     void *tmp = (void *) &v;
-    DRIVEL << "Initialized COPY Variant @" << this << " (from @" << tmp << ")" << endl;
+    DRIVEL
+        << "Initialized COPY Variant @" << this
+        << " (from @" << tmp << ")"
+        << std::endl;
 }
 
 bool Variant::is_nil() const
@@ -106,10 +109,10 @@ clock_t Variant::as_clock() const
 
 bool Variant::is_string() const
 { return f_type == STRING; }
-string Variant::as_string() const
+std::string Variant::as_string() const
 { return f_str; }
 
-ostream& operator<<(ostream& os, const Variant& variant)
+std::ostream& operator<<(std::ostream& os, const Variant& variant)
 {
     if (variant.is_nil()) {
         return os << "(null)";

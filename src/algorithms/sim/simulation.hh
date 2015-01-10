@@ -27,7 +27,7 @@
 #include <witness.hh>
 #include <witness_mgr.hh>
 
-#include <cmd/icommand.hh>
+#include <cmd/command.hh>
 
 typedef enum {
     SIMULATION_DONE,
@@ -39,7 +39,7 @@ typedef enum {
 class Simulation : public Algorithm {
 
 public:
-    Simulation(ICommand& command,
+    Simulation(Command& command,
                Model& model,
                Expr_ptr condition,
                Expr_ptr witness_id,

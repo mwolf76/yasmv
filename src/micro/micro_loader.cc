@@ -33,7 +33,10 @@
  *
  **/
 
+#include <sstream>
 #include <common.hh>
+
+#include <boost/algorithm/string.hpp>
 
 #include <expr.hh>
 
@@ -51,8 +54,9 @@ MicroLoaderException::MicroLoaderException(const OpTriple& triple)
 
 const char* MicroLoaderException::what() const throw()
 {
-    ostringstream oss;
-    oss << "MicroLoaderException: can not instantiate loader for" << f_triple;
+    std::ostringstream oss;
+    oss
+        << "MicroLoaderException: can not instantiate loader for" << f_triple;
 
     return oss.str().c_str();
 }
@@ -60,10 +64,10 @@ const char* MicroLoaderException::what() const throw()
 MicroLoaderException::~MicroLoaderException() throw()
 {}
 
-MicroLoader::MicroLoader(const path& filepath)
+MicroLoader::MicroLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)
 {
-    const string native (filepath.filename().replace_extension().native());
+    const std::string native (filepath.filename().replace_extension().native());
 
     std::vector<std::string> fragments;
     split(fragments, native, boost::is_any_of("-"));
@@ -106,7 +110,7 @@ MicroLoader::~MicroLoader()
 
 const LitsVector& MicroLoader::microcode()
 {
-    mutex::scoped_lock lock(f_loading_mutex);
+    boost::mutex::scoped_lock lock(f_loading_mutex);
 
     if (0 == f_microcode.size()) {
 
@@ -115,7 +119,7 @@ const LitsVector& MicroLoader::microcode()
         double secs;
 
         Lits newClause;
-        ifstream json_file(f_fullpath.c_str());
+        std::ifstream json_file(f_fullpath.c_str());
 
         Json::Value obj;
         json_file >> obj;
@@ -125,7 +129,7 @@ const LitsVector& MicroLoader::microcode()
         DEBUG
             << "Loading microcode for " << f_triple
             << ", generated " << generated
-            << endl;
+            << std::endl;
 
         const Json::Value cnf (obj[ JSON_CNF ]);
         assert( cnf.type() == Json::arrayValue);
@@ -148,7 +152,7 @@ const LitsVector& MicroLoader::microcode()
             << count
             << " clauses fetched, took " << secs
             << " ms"
-            << endl;
+            << std::endl;
     }
 
     return f_microcode;

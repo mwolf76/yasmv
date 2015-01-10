@@ -23,6 +23,8 @@
 #ifndef INFERRER_H
 #define INFERRER_H
 
+#include <vector>
+
 #include <type.hh>
 #include <type_mgr.hh>
 
@@ -31,11 +33,10 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector<Type_ptr> TypeStack;
-typedef vector<Expr_ptr> ExprStack;
+typedef std::vector<Type_ptr> TypeStack;
+typedef std::vector<Expr_ptr> ExprStack;
 
-typedef unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
-typedef pair<TypeReg::iterator, bool> TypeRegHit;
+typedef boost::unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
 
 /* shortcuts to to simplify manipulation of the internal type stack */
 #define POP_TYPE(op)                              \

@@ -27,6 +27,8 @@
 #ifndef SAT_TIME_MAPPER_H
 #define SAT_TIME_MAPPER_H
 
+#include <boost/unordered_map.hpp>
+
 #include <expr.hh>
 #include <pool.hh>
 
@@ -34,8 +36,8 @@
 
 class Engine; // fwd decl
 
-typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
 class TimeMapper {
 

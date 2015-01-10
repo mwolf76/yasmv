@@ -19,7 +19,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
+#include <utility>
 #include <witness_mgr.hh>
 
 // static initialization
@@ -50,7 +50,7 @@ uint32_t WitnessMgr::register_witness( Witness& w )
         throw DuplicateWitnessId( id );
     }
 
-    f_map.insert( make_pair <Atom, Witness_ptr> (id, &w));
+    f_map.insert( std::make_pair <Atom, Witness_ptr> (id, &w));
     f_list.push_back( &w );
     return f_list.size() -1;
 }

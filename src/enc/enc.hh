@@ -24,9 +24,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef ENCODER_H
 #define ENCODER_H
+
+#include <vector>
+
+#include <boost/unordered_map.hpp>
 
 #include <common.hh>
 #include <opts.hh>
@@ -136,11 +139,8 @@ protected:
     unsigned range_repr_bits (value_t range);
 };
 
-typedef unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
-typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;
-
-typedef unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
-typedef pair<ExprValueMap::iterator, bool> ExprValueMapHit;
+typedef boost::unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
+typedef boost::unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
 
 typedef class EnumEncoding* EnumEncoding_ptr;
 class EnumEncoding : public MonolithicEncoding {
@@ -161,7 +161,7 @@ protected:
     ExprValueMap f_e2v_map;
 };
 
-typedef vector<Encoding_ptr> Encodings;
+typedef std::vector<Encoding_ptr> Encodings;
 typedef class ArrayEncoding* ArrayEncoding_ptr;
 class ArrayEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr

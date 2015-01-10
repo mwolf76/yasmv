@@ -23,6 +23,8 @@
 #ifndef NORMALIZER_H
 #define NORMALIZER_H
 
+#include <vector>
+
 #include <expr_mgr.hh>
 
 #include <type.hh>
@@ -32,7 +34,7 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector<Expr_ptr> ExprStack;
+typedef std::vector<Expr_ptr> ExprStack;
 
 class ModelMgr;
 class Normalizer : public ExprWalker {

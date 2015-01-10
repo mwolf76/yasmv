@@ -19,6 +19,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
 
 #include <type.hh>
 #include <type_mgr.hh>
@@ -32,20 +33,20 @@ BadType::~BadType() throw()
 
 const char* BadType::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss
         << "TypeError: operand has invalid type `"
         << f_repr << "`";
 
-    const char* res ( strdup(oss.str().c_str()));
-    return res;
+    return oss.str().c_str();
 }
 
 TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
     : f_repr_a(lhs -> repr())
     , f_repr_b(rhs -> repr())
 {
-    cout << "thomas";
+    // Ehm?!?
+    std::cout << "thomas";
 }
 
 TypeMismatch::~TypeMismatch() throw()
@@ -53,7 +54,7 @@ TypeMismatch::~TypeMismatch() throw()
 
 const char* TypeMismatch::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "TypeError: "
         << f_repr_a << " and "
         << f_repr_b << " do not match";
@@ -285,6 +286,6 @@ bool ArrayType::is_abstract() const
 { return 0 == f_nelems ; }
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, Type_ptr type)
+std::ostream& operator<<(std::ostream& os, Type_ptr type)
 { return os << type->repr(); }
 

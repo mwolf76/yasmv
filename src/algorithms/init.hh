@@ -32,7 +32,7 @@
 class Init : public Algorithm {
 
 public:
-    Init(ICommand& command, Model& model);
+    Init(Command& command, Model& model);
     ~Init();
 
     void process();

@@ -22,6 +22,10 @@
 #ifndef WITNESS_H
 #define WITNESS_H
 
+#include <vector>
+
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
 
 #include <expr.hh>
@@ -104,7 +108,7 @@ private:
     Expr_ptr f_id;
 };
 
-typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
 class Witness; // fwd decl
 
@@ -135,8 +139,8 @@ private:
     Witness& f_owner;
 };
 
-typedef vector<TimeFrame_ptr> TimeFrames;
-typedef vector<Expr_ptr> Exprs;
+typedef std::vector<TimeFrame_ptr> TimeFrames;
+typedef std::vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
 class Witness {

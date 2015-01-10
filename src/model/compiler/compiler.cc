@@ -18,6 +18,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <utility>
 #include <compiler.hh>
 
 #include <proxy.hh>
@@ -470,7 +471,7 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
         if (f_toplevel_map.end() != eye)
             parent = eye -> second;
 
-        f_toplevel_map.insert( make_pair< Expr_ptr, Expr_ptr >
+        f_toplevel_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                                ( expr->rhs(), parent ));
     }
 
@@ -677,7 +678,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
                 DRIVEL
                     << "Registering new encoding of type "
                     << type << " for " << key
-                    << endl;
+                    << std::endl;
 
                 enc = f_enc.make_encoding(type);
                 f_enc.register_encoding(key, enc);
@@ -702,7 +703,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
 CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
-    mutex::scoped_lock lock(f_process_mutex);
+    boost::mutex::scoped_lock lock(f_process_mutex);
 
     f_elapsed = clock();
 
@@ -759,7 +760,7 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
         << res_sz << " DDs, "
         << mcr_sz << " Microdescriptors, "
         << mux_sz << " Multiplexers."
-        << endl;
+        << std::endl;
 
     return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_map);
 }
@@ -781,7 +782,7 @@ Compiler::Compiler()
     DEBUG
         << "Created Compiler @"
         << this
-        << endl;
+        << std::endl;
 }
 
 Compiler::~Compiler()
@@ -789,6 +790,6 @@ Compiler::~Compiler()
     DEBUG
         << "Destroying Compiler @"
         << this
-        << endl;
+        << std::endl;
 }
 

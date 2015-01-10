@@ -61,26 +61,26 @@
 
 #include <micro_mgr.hh>
 
-static const string heading_msg = \
+static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
     "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
     "https://github.com/mwolf76/gnuSMV\n";
 
 /* these are unused, just for debugging purposes withing gdb */
 void pe(Expr_ptr e)
-{ cerr << e << endl; }
+{ std::cerr << e << std::endl; }
 
 void pf(FQExpr& e)
-{ cerr << e << endl; }
+{ std::cerr << e << std::endl; }
 
 void pu(UCBI& ucbi)
-{ cerr << ucbi << endl; }
+{ std::cerr << ucbi << std::endl; }
 
 void pt(TCBI& tcbi)
-{ cerr << tcbi << endl; }
+{ std::cerr << tcbi << std::endl; }
 
 void pd(MicroDescriptor& md)
-{ cerr << md << endl; }
+{ std::cerr << md << std::endl; }
 
 void batch(Command_ptr cmd)
 {
@@ -88,19 +88,19 @@ void batch(Command_ptr cmd)
     bool color (OptsMgr::INSTANCE().color());
     Variant& res = system(cmd);
     if (color) {
-        cout << endl << yellow << "<< "
-             << res << normal << endl;
+        std::cout << std::endl << yellow << "<< "
+             << res << normal << std::endl;
     }
     else {
-        cout << endl << "<< " << res
-             << endl;
+        std::cout << std::endl << "<< " << res
+             << std::endl;
     }
 }
 
 void sighandler(int signum)
 {
     if (signum == SIGINT) {
-        cout << endl << "Caught SIGINT signal" << endl;
+        std::cout << std::endl << "Caught SIGINT signal" << std::endl;
         sigint_caught = 1;
     }
 }
@@ -113,20 +113,20 @@ void process()
     Variant& res = system();
     bool color (OptsMgr::INSTANCE().color());
     if (color) {
-        cout << endl << yellow << "<< "
-             << res << normal << endl;
+        std::cout << std::endl << yellow << "<< "
+             << res << normal << std::endl;
     }
     else {
-        cout << endl << "<< " << res
-             << endl;
+        std::cout << std::endl << "<< " << res
+             << std::endl;
     }
 }
 
 int main(int argc, const char *argv[])
 {
-    cout
+    std::cout
         << heading_msg
-        << endl;
+        << std::endl;
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGINT, sighandler);
@@ -137,7 +137,7 @@ int main(int argc, const char *argv[])
     TRACE
         << micro_loaders
         << " microcode loaders registered."
-        << endl
+        << std::endl
     ;
 
     Interpreter& system = Interpreter::INSTANCE();
@@ -147,15 +147,15 @@ int main(int argc, const char *argv[])
         opts_mgr.parse_command_line(argc, argv);
 
         if (opts_mgr.help()) {
-            cout
+            std::cout
                 << OptsMgr::INSTANCE().usage()
-                << endl ;
+                << std::endl ;
 
             exit(0);
         }
 
         // Run options-generated commands (if any)
-        const string model_filename = opts_mgr.model();
+        const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
             Command_ptr cmd = CommandMgr::INSTANCE()
                 .make_model_load(model_filename.c_str());
@@ -169,7 +169,7 @@ int main(int argc, const char *argv[])
     }
 
     catch (Exception &e) {
-        cerr << red << e.what() << endl;
+        std::cerr << red << e.what() << std::endl;
     }
 
     return system.retcode();

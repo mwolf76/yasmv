@@ -31,20 +31,22 @@
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)
 {
-    DEBUG << "Initialized Model Resolver instance @" << this << endl;
+    DRIVEL
+        << "Initialized Model Resolver instance @" << this
+        << std::endl;
 
     // initialize global constants
-    f_owner.symbols().insert(make_pair<FQExpr,
-                             Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
-                                           new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                        ExprMgr::INSTANCE().make_false(),
-                                                        TypeMgr::INSTANCE().find_boolean(), 0)));
+    f_owner.symbols().insert( std::make_pair<FQExpr,
+                              Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
+                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                         ExprMgr::INSTANCE().make_false(),
+                                                         TypeMgr::INSTANCE().find_boolean(), 0)));
 
-    f_owner.symbols().insert(make_pair<FQExpr,
-                             Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
-                                           new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                        ExprMgr::INSTANCE().make_true(),
-                                                        TypeMgr::INSTANCE().find_boolean(), 1)));
+    f_owner.symbols().insert( std::make_pair<FQExpr,
+                              Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
+                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                         ExprMgr::INSTANCE().make_true(),
+                                                         TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()

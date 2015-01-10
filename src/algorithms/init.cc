@@ -21,7 +21,7 @@
  **/
 #include <init.hh>
 
-Init::Init(ICommand& command, Model& model)
+Init::Init(Command& command, Model& model)
     : Algorithm(command, model)
 {
     setup();
@@ -39,6 +39,6 @@ void Init::process()
 
     TRACE
         << "-- initialization completed, took " << secs
-          << " seconds" << endl;
+          << " seconds" << std::endl;
 
 }

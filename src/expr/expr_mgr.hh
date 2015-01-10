@@ -26,6 +26,8 @@
 #ifndef EXPR_MGR_H
 #define EXPR_MGR_H
 
+#include <boost/thread/mutex.hpp>
+
 #include <expr.hh>
 #include <pool.hh>
 
@@ -440,7 +442,7 @@ public:
     /* -- Builtin identifiers and constants --------------------------------- */
     inline Expr_ptr make_identifier(Atom atom)
     {
-        mutex::scoped_lock lock(f_atom_mutex);
+        boost::mutex::scoped_lock lock(f_atom_mutex);
 
         AtomPoolHit ah = f_atom_pool.insert(atom);
         const Atom& pooled_atom =  (* ah.first);
@@ -688,7 +690,7 @@ private:
 
     // synchronized low-level services
     inline Expr_ptr __make_expr(Expr_ptr expr) {
-        mutex::scoped_lock lock(f_expr_mutex);
+        boost::mutex::scoped_lock lock(f_expr_mutex);
 
         ExprPoolHit eh = f_expr_pool.insert(*expr);
         Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
@@ -725,10 +727,10 @@ private:
     Expr_ptr default_ctx_expr;
 
     /* synchronized shared pools */
-    mutex f_expr_mutex;
+    boost::mutex f_expr_mutex;
     ExprPool f_expr_pool;
 
-    mutex f_atom_mutex;
+    boost::mutex f_atom_mutex;
     AtomPool f_atom_pool;
 };
 

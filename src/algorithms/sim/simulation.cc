@@ -19,13 +19,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
 #include <sim/simulation.hh>
 
 // reserved for witnesses
 static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
 
-Simulation::Simulation(ICommand& command,
+Simulation::Simulation(Command& command,
                        Model& model,
                        Expr_ptr condition,
                        Expr_ptr resume_id,
@@ -76,7 +77,7 @@ void Simulation::process()
 
         DEBUG
             << "Starting simulation..."
-            << endl;
+            << std::endl;
     }
     else {
         // here we need to push all the values for variables in the
@@ -89,7 +90,7 @@ void Simulation::process()
 
         DEBUG
             << "Resuming simulation..."
-            << endl;
+            << std::endl;
 #else
         assert(0); // not now
 #endif
@@ -100,21 +101,21 @@ void Simulation::process()
 
         TRACE
             << "simulation initialized, took " << secs
-            << " seconds" << endl;
+            << " seconds" << std::endl;
 
         t0 = t1; // resetting clock
 
         if (! has_witness()) {
             Witness& w(* new SimulationWitness( model(), engine, k));
             {
-                ostringstream oss;
+                std::ostringstream oss;
                 oss
                     << simulation_trace_prfx
                     << (++ progressive);
                 w.set_id(oss.str());
             }
             {
-                ostringstream oss;
+                std::ostringstream oss;
                 oss
                     << "Simulation trace";
                 w.set_desc(oss.str());
@@ -154,7 +155,7 @@ void Simulation::process()
             TRACE
                 << "completed step " << k_
                 << ", took " << secs << " seconds"
-                << endl;
+                << std::endl;
 
             t0 = t1; // resetting clock
 
@@ -187,7 +188,7 @@ void Simulation::process()
             }
             else {
                 WARN << "Inconsistency detected in transition relation at step " << k
-                     << endl;
+                     << std::endl;
                 f_status = SIMULATION_DEADLOCKED;
                 return;
             }
@@ -195,7 +196,7 @@ void Simulation::process()
     }
     else {
         WARN << "Inconsistency detected in initial states"
-             << endl;
+             << std::endl;
         f_status = SIMULATION_DEADLOCKED;
     }
 }

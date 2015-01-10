@@ -29,6 +29,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+
 #include <compiler.hh>
 
 ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
@@ -40,7 +42,7 @@ ConstantTooLarge::~ConstantTooLarge() throw()
 
 const char* ConstantTooLarge::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "CompilerError: constant too large " << f_repr;
 
     return oss.str().c_str();

@@ -89,7 +89,7 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
     DEBUG
         << "Registered "
         << md
-        << endl;
+        << std::endl;
 }
 
 /* binary ops (both algebraic and relationals) */
@@ -102,7 +102,7 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
     DEBUG
         << "Registered "
         << md
-        << endl;
+        << std::endl;
 }
 
 void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
@@ -113,7 +113,7 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
     {
         MuxMap::const_iterator mi = f_mux_map.find( toplevel );
         if (f_mux_map.end() == mi)
-            f_mux_map.insert( make_pair< Expr_ptr, MuxDescriptors >
+            f_mux_map.insert( std::make_pair< Expr_ptr, MuxDescriptors >
                               (toplevel, MuxDescriptors()));
     }
 
@@ -130,7 +130,7 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
     DEBUG
         << "Registered "
         << md
-        << endl;
+        << std::endl;
 }
 
 /* post-processing for MUXes: for each descriptor, we need to conjunct
@@ -146,7 +146,7 @@ void Compiler::post_process_muxes()
         DRIVEL
             << "Processing MUX activation clauses for `"
             << toplevel << "`"
-            << endl;
+            << std::endl;
 
         ADD prev = f_enc.zero();
         for (MuxDescriptors::const_reverse_iterator j = descriptors.rbegin();
@@ -162,7 +162,7 @@ void Compiler::post_process_muxes()
 Expr_ptr Compiler::make_auto_id()
 {
     ExprMgr& em = f_owner.em();
-    ostringstream oss;
+    std::ostringstream oss;
     oss << "__tmp" << f_temp_auto_index ++ ;
     return em.make_identifier(oss.str());
 }
@@ -231,11 +231,11 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     if (f_preprocess)
         DRIVEL
             << "Preprocessing " << key << "..."
-            << endl;
+            << std::endl;
     else
         DRIVEL
             << "Processing " << key << "..."
-            << endl;
+            << std::endl;
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
@@ -273,7 +273,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert (dv.size() == width);
 
     /* memoize result */
-    f_cache.insert( make_pair<FQExpr, CompilationUnit> ( key,
+    f_cache.insert( std::make_pair<FQExpr, CompilationUnit> ( key,
             CompilationUnit( dv, f_micro_descriptors, f_mux_map)));
 
     unsigned res_sz (width);
@@ -286,7 +286,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
         << res_sz << " DDs, "
         << mcr_sz << " Microcode descriptors, "
         << mux_sz << " Multiplexer descriptors."
-        << endl;
+        << std::endl;
 }
 
 bool Compiler::cache_miss(const Expr_ptr expr)
@@ -300,7 +300,7 @@ bool Compiler::cache_miss(const Expr_ptr expr)
         const Type_ptr type = f_owner.type(expr, ctx);
         DEBUG << "Cache hit for " << expr
               << ", type is " << type
-              << endl;
+              << std::endl;
 
         CompilationUnit& unit = (*eye).second;
 

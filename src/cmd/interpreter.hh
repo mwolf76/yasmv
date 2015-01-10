@@ -22,20 +22,26 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include <iostream>
+
 #include <common.hh>
 #include <opts.hh>
 
-#include <cmd/icommand.hh>
+#include <cmd/command.hh>
 #include <cmd/job.hh>
 
 typedef class Interpreter* Interpreter_ptr;
+
+class Command;
+typedef Command* Command_ptr;
+
 class Interpreter {
 public:
     // singleton
     static Interpreter& INSTANCE();
 
     // external commands (will be consumed and destroyed)
-    Variant& operator()(ICommand_ptr cmd);
+    Variant& operator()(Command_ptr cmd);
 
     // cmd loop
     Variant& operator()();
@@ -58,19 +64,19 @@ public:
     void quit(int retcode);
 
 protected:
-    friend class ICommand;
+    friend class Command;
 
     Interpreter();
     virtual ~Interpreter();
 
     // for streams redirection
-    inline istream& in() const
+    inline std::istream& in() const
     { return *f_in; }
 
-    inline ostream& out() const
+    inline std::ostream& out() const
     { return *f_out; }
 
-    inline ostream& err() const
+    inline std::ostream& err() const
     { return *f_err; }
 
     // jobs mgmt
@@ -81,9 +87,9 @@ protected:
     int f_retcode;
     bool f_leaving;
 
-    istream *f_in;
-    ostream *f_out;
-    ostream *f_err;
+    std::istream *f_in;
+    std::ostream *f_out;
+    std::ostream *f_err;
 
     Variant f_last_result;
 

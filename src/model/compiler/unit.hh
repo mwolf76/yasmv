@@ -23,6 +23,7 @@
 #ifndef UNIT_H
 #define UNIT_H
 
+#include <vector>
 #include <micro/micro.hh>
 
 class CompilationUnit {
@@ -49,5 +50,5 @@ private:
     MicroDescriptors f_micro_descriptors;
     MuxMap f_mux_map;
 };
-typedef vector<CompilationUnit> CompilationUnits;
+typedef std::vector<CompilationUnit> CompilationUnits;
 #endif

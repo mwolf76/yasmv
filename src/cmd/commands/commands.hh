@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef COMMANDS_H
+#define COMMANDS_H
 
 #include <common.hh>
 #include <variant.hh>
@@ -34,24 +34,13 @@
 #include <bmc/bmc.hh>
 #include <sim/simulation.hh>
 
-#include <icommand.hh>
+#include <command.hh>
 
 // -- command definitions --------------------------------------------------
-class Command : public ICommand {
-public:
-    Command(Interpreter& owner);
-    virtual ~Command();
-
-protected:
-    Interpreter& f_owner;
-};
-
-typedef class ICommand* Command_ptr;
-
 class ModelLoadCommand : public Command {
 public:
     // from FILE
-    ModelLoadCommand(Interpreter& owner, const string& filename);
+    ModelLoadCommand(Interpreter& owner, const std::string& filename);
     virtual ~ModelLoadCommand();
 
     virtual bool blocking() const
@@ -63,7 +52,7 @@ public:
     Variant virtual operator()();
 
 private:
-    string f_filename;
+    std::string f_filename;
 };
 
 class ModelDumpCommand : public Command {

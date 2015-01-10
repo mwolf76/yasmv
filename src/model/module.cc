@@ -18,9 +18,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <utility>
 #include <model.hh>
 
-ostream& operator<<(ostream& os, Module& module)
+std::ostream& operator<<(std::ostream& os, Module& module)
 { return os << module.name(); }
 
 Module::Module(const Expr_ptr name)
@@ -40,12 +41,12 @@ void Module::add_var(Expr_ptr var_name, Variable_ptr var)
         << "Module " << (*this)
         << ", added var `" << var_name
         << "`, of type `" << type_repr << "`"
-        << endl;
+        << std::endl;
 
     f_locals.push_back(var_name);
 
     FQExpr key (name(), var_name);
-    f_localVars.insert(make_pair<FQExpr, Variable_ptr>
+    f_localVars.insert(std::make_pair<FQExpr, Variable_ptr>
                        (key, var));
 
 }
@@ -56,12 +57,12 @@ void Module::add_def(Expr_ptr def_name, Define_ptr body)
         << "Module " << (*this)
         << ", added local def `"
         << def_name << "`"
-        << endl;
+        << std::endl;
 
     f_locals.push_back(def_name);
 
     FQExpr key (name(), def_name);
-    f_localDefs.insert(make_pair<FQExpr, Define_ptr>
+    f_localDefs.insert(std::make_pair<FQExpr, Define_ptr>
                        (key, body));
 }
 
@@ -70,7 +71,7 @@ void Module::add_init(Expr_ptr expr)
     DEBUG
         << "Module `" << (*this) << "`, added INIT "
         << expr
-        << endl;
+        << std::endl;
 
     f_init.push_back(expr);
 }
@@ -80,7 +81,7 @@ void Module::add_invar(Expr_ptr expr)
     DEBUG
         << "Module `" << (*this) << "`, added INVAR "
         << expr
-        << endl;
+        << std::endl;
 
     f_invar.push_back(expr);
 }
@@ -90,7 +91,7 @@ void Module::add_trans(Expr_ptr expr)
     DEBUG
         << "Module `" << (*this) << "`, added TRANS "
         << expr
-        << endl;
+        << std::endl;
 
     f_trans.push_back(expr);
 }

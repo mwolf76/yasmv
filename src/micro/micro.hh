@@ -22,12 +22,19 @@
 #ifndef MICRO_H
 #define MICRO_H
 
+#include <vector>
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+
+#include <boost/unordered_map.hpp>
+
 #include <satdefs.hh>
 
 /* <symb, is_signed?, width> */
-typedef tuple<bool, ExprType, int> OpTriple;
+typedef boost::tuple<bool, ExprType, int> OpTriple;
 inline const OpTriple make_op_triple (bool is_signed, ExprType exprType, int width) {
-    return make_tuple <bool, ExprType, int> (is_signed, exprType, width);
+    return boost::make_tuple <bool, ExprType, int> (is_signed, exprType, width);
 }
 
 /* triple helper getters */
@@ -122,12 +129,13 @@ private:
 };
 
 // helpers
-ostream& operator<<(ostream& os, OpTriple triple);
-ostream& operator<<(ostream& os, MicroDescriptor& md);
-ostream& operator<<(ostream& os, MuxDescriptor& md);
+std::ostream& operator<<(std::ostream& os, OpTriple triple);
+std::ostream& operator<<(std::ostream& os, MicroDescriptor& md);
+std::ostream& operator<<(std::ostream& os, MuxDescriptor& md);
 
-typedef vector<MicroDescriptor> MicroDescriptors;
-typedef vector<MuxDescriptor> MuxDescriptors;
-typedef unordered_map<Expr_ptr, MuxDescriptors> MuxMap;
+typedef std::vector<MicroDescriptor> MicroDescriptors;
+typedef std::vector<MuxDescriptor> MuxDescriptors;
+
+typedef boost::unordered_map<Expr_ptr, MuxDescriptors> MuxMap;
 
 #endif

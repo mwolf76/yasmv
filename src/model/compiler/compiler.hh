@@ -40,9 +40,15 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef COMPILER_H
 #define COMPILER_H
+
+#include <vector>
+
+#include <boost/thread/mutex.hpp>
+
+#include <boost/unordered_map.hpp>
+
 #include <expr_walker.hh>
 
 #include <type.hh>
@@ -61,14 +67,14 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef vector<ADD> ADDStack;
+typedef std::vector<ADD> ADDStack;
 
 /* local typedefs */
-typedef vector<Expr_ptr> ExprList;
-typedef vector<step_t>   TimeStack;
+typedef std::vector<Expr_ptr> ExprList;
+typedef std::vector<step_t>   TimeStack;
 
-typedef unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
-typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
+typedef boost::unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
 
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
 
@@ -269,7 +275,7 @@ private:
     bool f_preprocess;
 
     /* synchronization */
-    mutex f_process_mutex;
+    boost::mutex f_process_mutex;
 
     clock_t f_elapsed; /* for benchmarking */
 

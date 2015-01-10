@@ -18,7 +18,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **/
-#include "opts.hh"
+#include <sstream>
+
+#include <opts.hh>
 
 // static initialization
 OptsMgr_ptr OptsMgr::f_instance = NULL;
@@ -56,7 +58,7 @@ OptsMgr::OptsMgr()
 
         (
          "model",
-         options::value<string>(),
+         options::value<std::string>(),
          "input model"
         )
         ;
@@ -98,7 +100,7 @@ void OptsMgr::set_word_width(unsigned value)
     TRACE
         << "Setting word width to "
         << value
-        << endl;
+        << std::endl;
 
     f_word_width = value;
 }
@@ -109,12 +111,12 @@ unsigned OptsMgr::word_width() const
         : f_vm["word-width"].as<unsigned>();
 }
 
-string OptsMgr::model() const
+std::string OptsMgr::model() const
 {
-    string res = "";
+    std::string res = "";
 
     if (f_vm.count("model")) {
-        res = f_vm["model"].as<string>();
+        res = f_vm["model"].as<std::string>();
     }
 
     return res;
@@ -125,9 +127,9 @@ bool OptsMgr::help() const
     return f_help;
 }
 
-string OptsMgr::usage() const
+std::string OptsMgr::usage() const
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << f_desc;
     return oss.str();
 }

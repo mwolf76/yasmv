@@ -22,6 +22,9 @@
 #ifndef DEFS_H
 #define DEFS_H
 
+#include <vector>
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
 #include <pool.hh>
 
@@ -43,8 +46,8 @@ using Minisat::Solver;
 using Minisat::SimpSolver;
 
 // for microcode
-typedef vector<Lit> Lits;
-typedef vector<Lits> LitsVector;
+typedef std::vector<Lit> Lits;
+typedef std::vector<Lits> LitsVector;
 
 typedef unsigned id_t;
 
@@ -55,10 +58,10 @@ typedef enum {
 } status_t;
 
 // streaming for various SAT related types
-ostream &operator<<(ostream &os, const Minisat::Lit &lit);
-ostream &operator<<(ostream &os, const vec<Lit> &lits);
-ostream &operator<<(ostream &os, const status_t &status);
-ostream &operator<<(ostream &os, const lbool &value);
+std::ostream &operator<<(std::ostream &os, const Minisat::Lit &lit);
+std::ostream &operator<<(std::ostream &os, const vec<Lit> &lits);
+std::ostream &operator<<(std::ostream &os, const status_t &status);
+std::ostream &operator<<(std::ostream &os, const lbool &value);
 
 // move me!
 template<class K>
@@ -73,7 +76,7 @@ const group_t MAINGROUP(0);
 
 typedef vec<group_t> Groups;
 
-typedef unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
+typedef boost::unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
 struct VarHash {
     inline long operator() (Var v) const
@@ -84,7 +87,7 @@ struct VarEq {
                             const Var y) const
     { return x == y; }
 };
-typedef unordered_map<Var, int, VarHash, VarEq> Var2IndexMap;
+typedef boost::unordered_map<Var, int, VarHash, VarEq> Var2IndexMap;
 
 struct GroupHash {
     inline long operator() (group_t group) const
@@ -95,7 +98,7 @@ struct GroupEq {
                             const group_t y) const
     { return x == y; }
 };
-typedef unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
+typedef boost::unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
 
 
 #endif

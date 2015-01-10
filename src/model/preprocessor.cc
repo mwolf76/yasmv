@@ -49,11 +49,11 @@ Preprocessor::Preprocessor(ModelMgr& owner)
     , f_owner(owner)
     , f_em(ExprMgr::INSTANCE())
 {
-    DEBUG << "Created Preprocessor @" << this << endl;
+    DEBUG << "Created Preprocessor @" << this << std::endl;
 }
 
 Preprocessor::~Preprocessor()
-{ DEBUG << "Destroying Preprocessor @" << this << endl; }
+{ DEBUG << "Destroying Preprocessor @" << this << std::endl; }
 
 Expr_ptr Preprocessor::process(Expr_ptr expr, Expr_ptr ctx)
 {
@@ -496,7 +496,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
         /* traverse the env stack, subst with the first occurence, if any */
         ExprPairStack::reverse_iterator env_iter;
         for (env_iter = f_env.rbegin(); env_iter != f_env.rend(); ++ env_iter) {
-            pair<Expr_ptr, Expr_ptr> entry = (*env_iter);
+            std::pair<Expr_ptr, Expr_ptr> entry = (*env_iter);
 
             if (entry.first == expr_) {
                 expr_ = entry.second;
@@ -573,14 +573,14 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
         Expr_ptr actual = (*ai);
         ExprPairStack::reverse_iterator eps_riter;
         for ( eps_riter = f_env.rbegin(); eps_riter != f_env.rend(); ++ eps_riter ) {
-            pair<Expr_ptr, Expr_ptr> tmp (*eps_riter);
+            std::pair<Expr_ptr, Expr_ptr> tmp (*eps_riter);
             if (tmp.first == actual) {
                 actual = tmp.second;
             }
         }
 
         Expr_ptr formal = (*fi);
-        f_env.push_back( make_pair <Expr_ptr, Expr_ptr>
+        f_env.push_back( std::make_pair <Expr_ptr, Expr_ptr>
                          ( formal, actual ));
     }
 
