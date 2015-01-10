@@ -506,7 +506,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
 
         /* Symb resolution */
         ResolverProxy proxy;
-        ISymbol_ptr symb = proxy.symbol(f_ctx_stack.back(), expr_);
+        Symbol_ptr symb = proxy.symbol(f_ctx_stack.back(), expr_);
 
         if (symb->is_const()) {
             Expr_ptr res = symb->as_const().expr();
@@ -553,7 +553,7 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
 
     /* LHS -> define name, extract formals for definition */
     assert ( f_em.is_identifier( expr->lhs()));
-    IDefine& define = proxy.symbol(f_ctx_stack.back(), expr -> lhs()) -> as_define();
+    Define& define = proxy.symbol(f_ctx_stack.back(), expr -> lhs()) -> as_define();
     const ExprVector& formals = define.formals();
 
     /* RHS -> comma separated lists of actual parameters */

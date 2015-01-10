@@ -507,7 +507,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
     else {
         /* Look for symbols in the witness */
-        ISymbol_ptr symb = ModelMgr::INSTANCE().resolver() -> symbol(ctx, expr);
+        Symbol_ptr symb = ModelMgr::INSTANCE().resolver() -> symbol(ctx, expr);
         if (symb->is_variable()) { // vars
 
             if (f_witness -> has_value( expr, time)) {

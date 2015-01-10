@@ -30,7 +30,7 @@
 // interface limitations. (i.e. absence of clear())
 typedef vector< pair< Expr_ptr, Expr_ptr> > ExprPairStack;
 typedef vector<Expr_ptr> ExprStack;
-typedef vector<IDefine_ptr> DefinesStack;
+typedef vector<Define_ptr> DefinesStack;
 
 /* shortcuts to simplify manipulation of the internal expr stack */
 #define POP_EXPR(op)                              \

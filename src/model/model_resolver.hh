@@ -30,18 +30,16 @@
 #include <resolver.hh>
 
 class ModelMgr; // fwd
-class ModelResolver : public IResolver {
+class ModelResolver : public Resolver {
 public:
     ModelResolver(ModelMgr& owner);
     ~ModelResolver();
 
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb);
-
-    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb);
+    Symbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
 
 private:
     ModelMgr& f_owner;
-
     Constants f_constants; // global consts
 };
 

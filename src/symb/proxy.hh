@@ -31,7 +31,7 @@
 #include <model_mgr.hh>
 #include <type_mgr.hh>
 
-class ResolverProxy : public IResolver {
+class ResolverProxy : public Resolver {
     TypeMgr& f_tm;
     ModelMgr& f_mm;
 
@@ -42,13 +42,13 @@ public:
     {}
 
     /** @brief register a symbol in the underlying storage */
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
     { assert(false); } // proxy is used read-only
 
     /** @brief fetch a symbol */
-    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr)
+    Symbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr)
     {
-        ISymbol_ptr res = NULL;
+        Symbol_ptr res = NULL;
 
         res = f_tm.resolver()->symbol(ctx, expr);
         if (NULL != res) return res;

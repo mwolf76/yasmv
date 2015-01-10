@@ -418,7 +418,7 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 
         if (lits.find(rhs) != lits.end()) {
             ResolverProxy proxy;
-            ISymbol_ptr symb = proxy.symbol(f_ctx_stack.back(), rhs);
+            Symbol_ptr symb = proxy.symbol(f_ctx_stack.back(), rhs);
 
             PUSH_TYPE(symb->as_literal().type());
         }
@@ -503,7 +503,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
         Expr_ptr ctx = f_ctx_stack.back();
 
         ResolverProxy proxy;
-        ISymbol_ptr symb = proxy.symbol(ctx, expr);
+        Symbol_ptr symb = proxy.symbol(ctx, expr);
 
         if (symb->is_const()) {
             Type_ptr res = symb->as_const().type();
@@ -533,7 +533,7 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
         // we keep this to retain the old lazy behavior with nullary defines
         // since it comes at no extra cost at all.
         else if (symb->is_define()) {
-            IDefine& define = symb->as_define();
+            Define& define = symb->as_define();
             assert( 0 == define.formals().size());
             (*this)(define.body());
             return;

@@ -35,22 +35,22 @@ ModelResolver::ModelResolver(ModelMgr& owner)
 
     // initialize global constants
     f_owner.symbols().insert(make_pair<FQExpr,
-                             IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                         ExprMgr::INSTANCE().make_false(),
-                                                         TypeMgr::INSTANCE().find_boolean(), 0)));
+                             Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
+                                           new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                        ExprMgr::INSTANCE().make_false(),
+                                                        TypeMgr::INSTANCE().find_boolean(), 0)));
 
     f_owner.symbols().insert(make_pair<FQExpr,
-                             IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                 ExprMgr::INSTANCE().make_true(),
-                                                         TypeMgr::INSTANCE().find_boolean(), 1)));
+                             Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
+                                           new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                                        ExprMgr::INSTANCE().make_true(),
+                                                        TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()
 {}
 
-void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
 {
     // global ctx, time arbitrarily set to 0.
     FQExpr key(ctx, expr, 0);
@@ -61,7 +61,7 @@ void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_
     f_owner.symbols()[ key ] = symb;
 }
 
-ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
+Symbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
     /* Fetch modules from model */
     const Modules& modules (f_owner.model().modules());

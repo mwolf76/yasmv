@@ -318,7 +318,7 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new Variable($smv::current_module->name(), id, tp);
+                Variable_ptr var = new Variable($smv::current_module->name(), id, tp);
                 $smv::current_module->add_var(id, var);
             }
     }
@@ -334,7 +334,7 @@ fsm_ivar_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr ivar = new Variable($smv::current_module->name(), id, tp, true);
+                Variable_ptr ivar = new Variable($smv::current_module->name(), id, tp, true);
                 $smv::current_module->add_var(id, ivar);
             }
     }
@@ -355,8 +355,8 @@ fsm_define_decl_clause
 }
 	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
-     IDefine_ptr def = new Define($smv::current_module->name(), id, formals, body);
-     $smv::current_module->add_def(id, def);
+      Define_ptr def = new Define($smv::current_module->name(), id, formals, body);
+      $smv::current_module->add_def(id, def);
     }
 	;
 

@@ -39,112 +39,258 @@ public:
 
 typedef vector<FQExpr> FQExprVector;
 
-class ISymbol;
-typedef ISymbol* ISymbol_ptr;
-typedef unordered_map<FQExpr, ISymbol_ptr, FQExprHash, FQExprEq> Symbols;
+class Symbol;
+typedef Symbol* Symbol_ptr;
+typedef unordered_map<FQExpr, Symbol_ptr, FQExprHash, FQExprEq> Symbols;
 
-class ILiteral;
-typedef ILiteral* ILiteral_ptr;
-typedef unordered_map<FQExpr, ILiteral_ptr, FQExprHash, FQExprEq> Literals;
+class Literal;
+typedef Literal* Literal_ptr;
+typedef unordered_map<FQExpr, Literal_ptr, FQExprHash, FQExprEq> Literals;
 
-class IEnum;
-typedef IEnum* IEnum_ptr;
-typedef unordered_map<FQExpr, IEnum_ptr, FQExprHash, FQExprEq> Enums;
+class Enum;
+typedef Enum* Enum_ptr;
+typedef unordered_map<FQExpr, Enum_ptr, FQExprHash, FQExprEq> Enums;
 
-class IConstant;
-typedef IConstant* IConstant_ptr;
-typedef unordered_map<FQExpr, IConstant_ptr, FQExprHash, FQExprEq> Constants;
+class Constant;
+typedef Constant* Constant_ptr;
+typedef unordered_map<FQExpr, Constant_ptr, FQExprHash, FQExprEq> Constants;
 
-class IVariable;
-typedef IVariable* IVariable_ptr;
-typedef unordered_map<FQExpr, IVariable_ptr, FQExprHash, FQExprEq> Variables;
+class Variable;
+typedef Variable* Variable_ptr;
+typedef unordered_map<FQExpr, Variable_ptr, FQExprHash, FQExprEq> Variables;
 
-class ITemporary;
-typedef ITemporary* ITemporary_ptr;
-typedef unordered_map<FQExpr, ITemporary_ptr, FQExprHash, FQExprEq> Temporaries;
+class Define;
+typedef Define* Define_ptr;
+typedef unordered_map<FQExpr, Define_ptr, FQExprHash, FQExprEq> Defines;
 
-class IDefine;
-typedef IDefine* IDefine_ptr;
-typedef unordered_map<FQExpr, IDefine_ptr, FQExprHash, FQExprEq> Defines;
-
-class ITyped : IObject {
+class Typed {
 public:
     virtual const Type_ptr type() const =0;
 };
 
-class IValue : IObject {
+class Value {
 public:
     virtual value_t value() const =0;
 };
 
-class IBody : IObject {
+class Body {
 public:
     virtual const Expr_ptr body() const =0;
 };
 
-class IParams: IObject {
+class Params {
 public:
     virtual const ExprVector& formals() const =0;
 };
 
-class ISymbol : IObject {
+class Symbol {
 public:
     virtual const Expr_ptr ctx()  const =0;
     virtual const Expr_ptr expr() const =0;
 
     bool is_const() const;
-    IConstant& as_const() const;
+    Constant& as_const() const;
 
     bool is_literal() const;
-    ILiteral& as_literal() const;
+    Literal& as_literal() const;
 
     bool is_variable() const;
-    IVariable& as_variable() const;
-
-    bool is_temporary() const;
-    ITemporary& as_temporary() const;
+    Variable& as_variable() const;
 
     bool is_define() const;
-    IDefine& as_define() const;
+    Define& as_define() const;
 
     bool is_enum() const;
-    IEnum& as_enum() const;
+    Enum& as_enum() const;
 };
 
-class IConstant
-    : public ISymbol
-    , public ITyped
-    , public IValue
-{};
-
-class ITemporary
-    : public ISymbol
-    , public ITyped
-{};
-
-class IVariable
-    : public ISymbol
-    , public ITyped
+class Constant
+    : public Symbol
+    , public Typed
+    , public Value
 {
+    Expr_ptr f_ctx;
+    Expr_ptr f_name;
+    Type_ptr f_type;
+    value_t f_value;
+
 public:
-    virtual bool input() const =0;
+    Constant(const Expr_ptr ctx, const Expr_ptr name, Type_ptr type, value_t value)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_type(type)
+        , f_value(value)
+    {}
+
+    const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    const Expr_ptr expr() const
+    { return f_name; }
+
+    const Type_ptr type() const
+    { return f_type; }
+
+    value_t value() const
+    { return f_value; }
 };
 
-class IEnum
-    : public ISymbol
-    , public ITyped
-{};
+class Variable
+    : public Symbol
+    , public Typed
+{
+    Expr_ptr f_ctx;
+    Expr_ptr f_name;
+    Type_ptr f_type;
+    bool     f_input;
+    bool     f_temp;
 
-class ILiteral
-    : public ISymbol
-    , public ITyped
-    , public IValue
-{};
+public:
+    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type, bool input = false, bool temp = false)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_type(type)
+        , f_input(input)
+    {}
 
-class IDefine
-    : public ISymbol
-    , public IParams
-    , public IBody
-{};
+    const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    const Expr_ptr expr() const
+    { return f_name; }
+
+    const Type_ptr type() const
+    { return f_type; }
+
+    inline bool input() const
+    { return f_input; }
+
+    inline bool temp() const
+    { return f_temp; }
+};
+
+class Enum
+    : public Symbol
+    , public Typed
+{
+    const Expr_ptr f_ctx;
+    const Expr_ptr f_name;
+    const EnumType_ptr f_type;
+
+public:
+    Enum(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_type(type)
+    {}
+
+    virtual const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    virtual const Expr_ptr name() const
+    { return f_name; }
+
+    virtual const Expr_ptr expr() const
+    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
+
+    virtual const Type_ptr type() const
+    { return f_type; }
+};
+
+class Literal
+    : public Symbol
+    , public Typed
+    , public Value
+{
+    const Enum_ptr f_owner;
+    const Expr_ptr f_name;
+
+public:
+    Literal(Enum_ptr owner, const Expr_ptr name)
+        : f_owner(owner)
+        , f_name(name)
+    {}
+
+    virtual const Expr_ptr ctx() const
+    { return f_owner->ctx(); }
+
+    virtual const Expr_ptr name() const
+    { return  f_name; }
+
+    virtual const Type_ptr type() const
+    { return f_owner->type(); }
+
+    virtual const Expr_ptr expr() const
+    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
+
+    virtual value_t value() const
+    { return dynamic_cast<EnumType_ptr> (type())->value(expr()); }
+};
+
+class Define
+    : public Symbol
+    , public Params
+    , public Body
+{
+    const Expr_ptr f_ctx;
+    const Expr_ptr f_name;
+    const ExprVector f_formals;
+    const Expr_ptr f_body;
+public:
+    Define(const Expr_ptr ctx, const Expr_ptr name,
+           const ExprVector& formals, const Expr_ptr body)
+        : f_ctx(ctx)
+        , f_name(name)
+        , f_formals(formals)
+        , f_body(body)
+    {}
+
+    const Expr_ptr ctx() const
+    { return f_ctx; }
+
+    const Expr_ptr expr() const
+    { return f_name; }
+
+    const Expr_ptr body() const
+    { return f_body; }
+
+    const ExprVector& formals() const
+    { return f_formals; }
+};
+
+/**
+ * Symbol iterator
+ *
+ * COI aware
+ * Preserves ordering
+ *
+ */
+class Model;
+class SymbIter {
+public:
+    /* Calculates COI if formula is non-NULL */
+    SymbIter(Model& model, Expr_ptr formula = NULL);
+
+    ~SymbIter();
+
+    /* true iff there are more symbols to be processed */
+    inline bool has_next() const
+    { return f_iter != f_symbols.end(); }
+
+    inline Symbol_ptr next()
+    {
+        Symbol_ptr res = (* f_iter);
+        ++ f_iter;
+
+        return res;
+    }
+
+private:
+    Model&  f_model;
+    Expr_ptr f_formula; /* for COI */
+
+    vector<Symbol_ptr> f_symbols;
+    vector<Symbol_ptr>::const_iterator f_iter;
+};
 
 #endif

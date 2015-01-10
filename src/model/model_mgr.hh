@@ -43,7 +43,7 @@ public:
     inline Model& model()
     { return f_model; }
 
-    inline IResolver_ptr resolver()
+    inline Resolver_ptr resolver()
     { return &f_resolver; }
 
     bool analyze();

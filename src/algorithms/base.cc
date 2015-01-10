@@ -192,59 +192,63 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
     /* define uniqueness_vars into the solver ... */
     while (symbs.has_next()) {
-        ISymbol_ptr symb = symbs.next();
+        Symbol_ptr symb = symbs.next();
 
-        if (symb->is_variable() && ! symb->as_variable().input()) {
+        if (symb->is_variable()) {
 
-            Expr_ptr ctx  (symb->ctx());
-            Expr_ptr expr (symb->expr());
+            Variable& var (symb->as_variable());
+            if (! var.input() && ! var.temp()) {
 
-            FQExpr key(ctx, expr);
-            IEncoding_ptr enc = f_bm.find_encoding(key);
+                Expr_ptr ctx  (var.ctx());
+                Expr_ptr expr (var.expr());
 
-            DDVector::const_iterator di;
-            unsigned ndx;
-            for (ndx = 0, di = enc->bits().begin();
-                 enc->bits().end() != di; ++ ndx, ++ di) {
+                FQExpr key(ctx, expr);
+                IEncoding_ptr enc = f_bm.find_encoding(key);
 
-                unsigned bit = (*di).getNode()->index;
+                DDVector::const_iterator di;
+                unsigned ndx;
+                for (ndx = 0, di = enc->bits().begin();
+                     enc->bits().end() != di; ++ ndx, ++ di) {
 
-                const UCBI& ucbi = f_bm.find_ucbi(bit);
-                const TCBI& jtcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                         ucbi.time(), ucbi.bitno(), j);
-                const TCBI& ktcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                         ucbi.time(), ucbi.bitno(), k);
+                    unsigned bit = (*di).getNode()->index;
 
-                Var jkne = engine.new_sat_var();
-                uniqueness_vars.push_back(jkne);
+                    const UCBI& ucbi = f_bm.find_ucbi(bit);
+                    const TCBI& jtcbi = TCBI(ucbi.ctx(), ucbi.expr(),
+                                             ucbi.time(), ucbi.bitno(), j);
+                    const TCBI& ktcbi = TCBI(ucbi.ctx(), ucbi.expr(),
+                                             ucbi.time(), ucbi.bitno(), k);
 
-                Var jvar = engine.tcbi_to_var(jtcbi);
-                Var kvar = engine.tcbi_to_var(ktcbi);
+                    Var jkne = engine.new_sat_var();
+                    uniqueness_vars.push_back(jkne);
 
-                {
-                    vec<Lit> ps;
-                    ps.push( mkLit( jkne, true));
-                    ps.push( mkLit( jvar, true));
-                    ps.push( mkLit( kvar, true));
+                    Var jvar = engine.tcbi_to_var(jtcbi);
+                    Var kvar = engine.tcbi_to_var(ktcbi);
 
-                    DRIVEL
-                        << ps
-                        << endl;
+                    {
+                        vec<Lit> ps;
+                        ps.push( mkLit( jkne, true));
+                        ps.push( mkLit( jvar, true));
+                        ps.push( mkLit( kvar, true));
 
-                    engine.add_clause(ps);
-                }
+                        DRIVEL
+                            << ps
+                            << endl;
 
-                {
-                    vec<Lit> ps;
-                    ps.push( mkLit( jkne, true));
-                    ps.push( mkLit( jvar, true));
-                    ps.push( mkLit( kvar, true));
+                        engine.add_clause(ps);
+                    }
 
-                    DRIVEL
-                        << ps
-                        << endl;
+                    {
+                        vec<Lit> ps;
+                        ps.push( mkLit( jkne, true));
+                        ps.push( mkLit( jvar, true));
+                        ps.push( mkLit( kvar, true));
 
-                    engine.add_clause(ps);
+                        DRIVEL
+                            << ps
+                            << endl;
+
+                        engine.add_clause(ps);
+                    }
                 }
             }
         }

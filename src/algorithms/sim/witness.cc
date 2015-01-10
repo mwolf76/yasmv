@@ -31,7 +31,7 @@ SimulationWitness::SimulationWitness(Model& model, SAT& engine, step_t k)
     /* Language */
     SymbIter si (model);
     while (si.has_next()) {
-        ISymbol_ptr symb = si.next();
+        Symbol_ptr symb = si.next();
         f_lang.push_back( symb -> expr());
     }
 
@@ -39,7 +39,7 @@ SimulationWitness::SimulationWitness(Model& model, SAT& engine, step_t k)
     TimeFrame& tf = extend();
     SymbIter vars( model, NULL );
     while (vars.has_next()) {
-        ISymbol_ptr symb = vars.next();
+        Symbol_ptr symb = vars.next();
 
         if (symb->is_variable()) {
 

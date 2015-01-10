@@ -33,12 +33,12 @@ TypeResolver::TypeResolver(TypeMgr& owner)
 TypeResolver::~TypeResolver()
 {}
 
-void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
 {
     assert (false); // TODO
 }
 
-ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
+Symbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
     FQExpr key(ctx, expr, 0); // time arbitrarily set to 0.
 

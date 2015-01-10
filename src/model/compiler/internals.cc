@@ -179,7 +179,9 @@ Expr_ptr Compiler::make_temporary_expr(ADD dds[], unsigned width)
 
     /* Register temporary symbol into resolver (temporaries are global) */
     f_owner.resolver()->add_symbol(em.make_temp(), expr,
-            new Temporary(expr, tm.find_unsigned( width )));
+                                   new Variable(em.make_main(), expr,
+                                                tm.find_unsigned(width),
+                                                false, true));
 
     /* register encoding, using fqexpr */
     const FQExpr& key = FQExpr(expr);

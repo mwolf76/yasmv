@@ -93,11 +93,11 @@ public:
 
     inline const Variables& vars() const
     { return f_localVars; }
-    void add_var(Expr_ptr expr, IVariable_ptr var);
+    void add_var(Expr_ptr expr, Variable_ptr var);
 
     const Defines& defs() const
     { return f_localDefs; }
-    void add_def(Expr_ptr expr, IDefine_ptr def);
+    void add_def(Expr_ptr expr, Define_ptr def);
 
     /* Finite State Machine definition */
     inline const ExprVector& init() const
@@ -132,145 +132,5 @@ public:
 };
 
 typedef Model* Model_ptr;
-
-class Variable : public IVariable {
-    Expr_ptr f_ctx;
-    Expr_ptr f_name;
-    Type_ptr f_type;
-    bool     f_input;
-
-public:
-    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type, bool input = false)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_type(type)
-        , f_input(input)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-
-    bool input() const
-    { return f_input; }
-};
-
-class Temporary : public ITemporary {
-private:
-    Expr_ptr f_ctx;
-    Expr_ptr f_name;
-    Type_ptr f_type;
-
-public:
-    Temporary(Expr_ptr name, Type_ptr type)
-        : f_ctx(ExprMgr::INSTANCE().make_main())
-        , f_name(name)
-        , f_type(type)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-};
-
-class Constant : public IConstant {
-    const Expr_ptr f_ctx;
-    const Expr_ptr f_name;
-    const Type_ptr f_type;
-    value_t f_value;
-
-public:
-    Constant(const Expr_ptr ctx, const Expr_ptr name, Type_ptr type, value_t value)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_type(type)
-        , f_value(value)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-
-    value_t value() const
-    { return f_value; }
-};
-
-class Define : public IDefine {
-    const Expr_ptr f_ctx;
-
-    const Expr_ptr f_name;
-    const ExprVector f_formals;
-    const Expr_ptr f_body;
-
-public:
-    Define(const Expr_ptr ctx, const Expr_ptr name,
-           const ExprVector& formals, const Expr_ptr body)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_formals(formals)
-        , f_body(body)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Expr_ptr body() const
-    { return f_body; }
-
-    const ExprVector& formals() const
-    { return f_formals; }
-};
-
-/**
- * Symbol iterator
- *
- * COI aware
- * Preserves ordering
- *
- */
-class SymbIter {
-public:
-    /* Calculates COI if formula is non-NULL */
-    SymbIter(Model& model, Expr_ptr formula = NULL);
-
-    ~SymbIter();
-
-    /* true iff there are more symbols to be processed */
-    inline bool has_next() const
-    { return f_iter != f_symbols.end(); }
-
-    inline ISymbol_ptr next()
-    {
-        ISymbol_ptr res = (* f_iter);
-        ++ f_iter;
-
-        return res;
-    }
-
-private:
-    Model&  f_model;
-    Expr_ptr f_formula; /* for COI */
-
-    vector<ISymbol_ptr> f_symbols;
-    vector<ISymbol_ptr>::const_iterator f_iter;
-};
 
 #endif

@@ -601,32 +601,32 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }
 
     ResolverProxy resolver;
-    ISymbol_ptr symb = resolver.symbol(ctx, expr);;
+    Symbol_ptr symb = resolver.symbol(ctx, expr);;
 
-    // 2. Temporary symbols are maintained internally by the compiler
-    ITemporary_ptr temp;
-    if (NULL != (temp = dynamic_cast<ITemporary_ptr>(symb))) {
-        Type_ptr type = NULL;
+    // // 2. Temporary symbols are maintained internally by the compiler
+    // ITemporary_ptr temp;
+    // if (NULL != (temp = dynamic_cast<ITemporary_ptr>(symb))) {
+    //     Type_ptr type = NULL;
 
-        type = symb->as_variable().type();
-        assert(type->is_algebraic());
+    //     type = symb->as_variable().type();
+    //     assert(type->is_algebraic());
 
-        // temporary encodings must be already defined.
-        FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
+    //     // temporary encodings must be already defined.
+    //     FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
 
-        eye = f_temp_encodings.find(key);
-        if (eye != f_temp_encodings.end()) {
-            enc = eye -> second;
-        }
-        else assert(false); // unexpected
+    //     eye = f_temp_encodings.find(key);
+    //     if (eye != f_temp_encodings.end()) {
+    //         enc = eye -> second;
+    //     }
+    //     else assert(false); // unexpected
 
-        push_dds(enc, type);
-        return;
-    } /* Temporary symbols */
+    //     push_dds(enc, type);
+    //     return;
+    // } /* Temporary symbols */
 
     // 3. bool/integer constant leaves
     if (symb->is_const()) {
-        IConstant& konst = symb->as_const();
+        Constant& konst = symb->as_const();
 
         f_type_stack.push_back(konst.type());
         f_add_stack.push_back(f_enc.constant(konst.value()));
@@ -635,10 +635,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     // 4. enum literals
     if (symb->is_literal()) {
-        ILiteral& konst =  symb->as_literal();
+        Literal& lit =  symb->as_literal();
 
         // push into type stack
-        Type_ptr type = konst.type();
+        Type_ptr type = lit.type();
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
@@ -654,7 +654,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         EnumEncoding_ptr eenc = dynamic_cast<EnumEncoding_ptr>( enc );
         assert( NULL != eenc );
 
-        f_type_stack.push_back(konst.type());
+        f_type_stack.push_back(lit.type());
         f_add_stack.push_back(f_enc.constant(eenc -> value( expr )));
         return;
     }

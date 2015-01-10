@@ -37,7 +37,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
     /* Language */
     SymbIter si (model);
     while (si.has_next()) {
-        ISymbol_ptr symb = si.next();
+        Symbol_ptr symb = si.next();
         f_lang.push_back( symb -> expr());
     }
 
@@ -47,7 +47,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
 
         SymbIter symbs( model, use_coi ? property : NULL );
         while (symbs.has_next()) {
-            ISymbol_ptr symb = symbs.next();
+            Symbol_ptr symb = symbs.next();
 
             if (symb->is_variable()) {
                 Expr_ptr ctx  (symb->ctx());

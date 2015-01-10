@@ -211,9 +211,9 @@ void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
     EnumType_ptr tp = new EnumType( *this, lits );
 
     // Define the ENUM
-    IEnum_ptr enm = new Enum(ctx, name, tp);
+    Enum_ptr enm = new Enum(ctx, name, tp);
     f_enums.insert( make_pair<FQExpr,
-                    IEnum_ptr>( FQExpr( ctx, name), enm));
+                    Enum_ptr>( FQExpr( ctx, name), enm));
 
     // Literals are all maintained together by the type mgr. This
     // greatly simplifies the resolver.
@@ -221,7 +221,7 @@ void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
         Expr_ptr lit = *eye;
 
         f_lits.insert( make_pair<FQExpr,
-                                 ILiteral_ptr>(FQExpr( ctx, lit),
+                                 Literal_ptr>(FQExpr( ctx, lit),
                                                new Literal(enm, lit)));
     }
 
