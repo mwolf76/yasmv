@@ -33,9 +33,12 @@ BadType::~BadType() throw()
 const char* BadType::what() const throw()
 {
     ostringstream oss;
-    oss << "TypeError: operand has invalid type " << f_repr;
+    oss
+        << "TypeError: operand has invalid type `"
+        << f_repr << "`";
 
-    return oss.str().c_str();
+    const char* res ( strdup(oss.str().c_str()));
+    return res;
 }
 
 TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)

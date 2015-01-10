@@ -15,7 +15,8 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = model.hh model_mgr.hh preprocessor.hh inferrer.hh model_resolver.hh
 
-PKG_CC = model.cc model_mgr.cc preprocessor.cc inferrer.cc model_resolver.cc
+PKG_CC = exceptions.cc model.cc module.cc symb_iter.cc model_mgr.cc	\
+preprocessor.cc inferrer.cc model_resolver.cc symb_iter.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

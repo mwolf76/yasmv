@@ -64,13 +64,13 @@ void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_
 ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
     /* Fetch modules from model */
-    const Modules& f_modules = f_owner.model()->modules();
-
-    Modules::const_iterator eye = f_modules.find(ctx);
-    if (eye == f_modules.end()) return NULL;
+    const Modules& modules (f_owner.model().modules());
+    Modules::const_iterator eye (modules.find(ctx));
+    if (eye == modules.end())
+        return NULL;
 
     // init lookup data
-    IModule_ptr module = (*eye).second;
+    Module_ptr module ((*eye).second);
     FQExpr key(ctx, expr, 0); // time arbitrarily set to 0
 
     { /* global constants and temporaries */

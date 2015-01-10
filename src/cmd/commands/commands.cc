@@ -71,13 +71,10 @@ Variant ModelDumpCommand::operator()()
 {
     ostringstream oss;
 
-    IModel& model (* ModelMgr::INSTANCE().model());
+    Model& model (ModelMgr::INSTANCE().model());
 
     oss
         << endl
-        << "FSM "
-        << model.name()
-        << ";"
         << endl;
 
     const Modules& modules (model.modules());
@@ -85,6 +82,11 @@ Variant ModelDumpCommand::operator()()
          m != modules.end(); ++ m) {
 
         Module& module = dynamic_cast <Module&> (*m->second);
+
+        oss
+            << "MODULE "
+            << module.name()
+            << endl;
 
         /* INIT */
         const ExprVector init = module.init();
@@ -97,8 +99,7 @@ Variant ModelDumpCommand::operator()()
 
             oss
                 << "INIT "
-                << body
-                << ";"
+                << body << ";"
                 << endl;
 
         }
@@ -114,8 +115,7 @@ Variant ModelDumpCommand::operator()()
 
             oss
                 << "INVAR "
-                << body
-                << ";"
+                << body << ";"
                 << endl;
         }
 
@@ -130,8 +130,7 @@ Variant ModelDumpCommand::operator()()
 
             oss
                 << "TRANS "
-                << body
-                << ";"
+                << body << ";"
                 << endl;
         }
     }
@@ -173,7 +172,7 @@ TimeCommand::~TimeCommand()
 // -- Init -------------------------------------------------------------
 InitCommand::InitCommand(Interpreter& owner)
     : Command(owner)
-    , f_init(*this, * ModelMgr::INSTANCE().model())
+    , f_init(*this, ModelMgr::INSTANCE().model())
 {}
 
 Variant InitCommand::operator()()
@@ -277,7 +276,7 @@ JobKillCommand::~JobKillCommand()
 // -- Verify -------------------------------------------------------------
 VerifyCommand::VerifyCommand(Interpreter& owner, Expr_ptr formula, ExprVector& constraints)
     : Command(owner)
-    , f_bmc(*this, * ModelMgr::INSTANCE().model(),
+    , f_bmc(*this, ModelMgr::INSTANCE().model(),
             formula, constraints)
 {}
 
@@ -317,7 +316,7 @@ SimulateCommand::SimulateCommand(Interpreter& owner,
                                  Expr_ptr resume_id,
                                  ExprVector& constraints)
     : Command(owner)
-    , f_sim(*this, * ModelMgr::INSTANCE().model(),
+    , f_sim(*this, ModelMgr::INSTANCE().model(),
             halt_cond, resume_id, constraints)
 {}
 
@@ -414,7 +413,7 @@ Variant WitnessDumpCommand::operator()()
         os << "-- @ " << 1 + time << endl;
         TimeFrame& tf = w[ time ];
 
-        SymbIter symbs( *ModelMgr::INSTANCE().model(), NULL );
+        SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
         while (symbs.has_next()) {
 
             ISymbol_ptr symb (symbs.next());

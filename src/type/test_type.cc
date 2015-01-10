@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(type_inference)
     ModelMgr& mm (ModelMgr::INSTANCE());
     ExprMgr& em (ExprMgr::INSTANCE());
     TypeMgr& tm (TypeMgr::INSTANCE());
-    Model& model (reinterpret_cast<Model&> (*mm.model()));
+    Model& model (mm.model());
     Module& main (* new Module(em.make_main()));
 
     /* done with setup, now on with the actual tests :-) */
@@ -148,10 +148,10 @@ BOOST_AUTO_TEST_CASE(type_inference)
         Type_ptr boolean = tm.find_boolean();
 
         Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
-        main.add_var(x, new Variable(main.expr(), x, boolean));
+        main.add_var(x, new Variable(main.name(), x, boolean));
         Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-        main.add_var(y, new Variable(main.expr(), y, boolean));
-        model.add_module( em.make_main(), &main);
+        main.add_var(y, new Variable(main.name(), y, boolean));
+        model.add_module(main);
 
         BOOST_CHECK( boolean ==
                      mm.type( em.make_F( x ),
@@ -210,10 +210,10 @@ BOOST_AUTO_TEST_CASE(type_inference)
         Type_ptr uint16 = tm.find_unsigned(16);
 
         Atom a_x("x2"); Expr_ptr x = em.make_identifier(a_x);
-        main.add_var(x, new Variable(main.expr(), x, uint16));
+        main.add_var(x, new Variable(main.name(), x, uint16));
         Atom a_y("y2"); Expr_ptr y = em.make_identifier(a_y);
-        main.add_var(y, new Variable(main.expr(), y, uint16));
-        model.add_module( em.make_main(), &main);
+        main.add_var(y, new Variable(main.name(), y, uint16));
+        model.add_module(main);
 
         // relationals
         BOOST_CHECK( tm.find_boolean() ==

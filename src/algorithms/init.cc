@@ -21,7 +21,7 @@
  **/
 #include <init.hh>
 
-Init::Init(ICommand& command, IModel& model)
+Init::Init(ICommand& command, Model& model)
     : Algorithm(command, model)
 {
     setup();

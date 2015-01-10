@@ -51,7 +51,7 @@ typedef enum {
 class Algorithm {
 
 public:
-    Algorithm(ICommand& command, IModel& model);
+    Algorithm(ICommand& command, Model& model);
     virtual ~Algorithm();
 
     /* Build encodings are perform model compilation */
@@ -81,7 +81,7 @@ public:
     inline Witness& witness() const
     { assert (NULL != f_witness); return *f_witness; }
 
-    inline IModel& model()
+    inline Model& model()
     { return f_model; }
 
     inline ModelMgr& mm()
@@ -116,7 +116,7 @@ private:
     ICommand& f_command;
 
     /* Model */
-    IModel& f_model;
+    Model& f_model;
 
     // managers
     ModelMgr& f_mm;

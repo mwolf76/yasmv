@@ -21,7 +21,7 @@
  **/
 #include <base.hh>
 
-Algorithm::Algorithm(ICommand& command, IModel& model)
+Algorithm::Algorithm(ICommand& command, Model& model)
     : f_command(command)
     , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
@@ -81,8 +81,8 @@ void Algorithm::setup()
             for (ExprVector::const_iterator init_eye = init.begin();
                  init_eye != init.end(); ++ init_eye) {
 
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*init_eye);
+                Expr_ptr ctx (module.name());
+                Expr_ptr body (*init_eye);
 
                 f_init.push_back( cmpl.process(ctx, body));
             }
@@ -92,8 +92,8 @@ void Algorithm::setup()
             for (ExprVector::const_iterator invar_eye = invar.begin();
                  invar_eye != invar.end(); ++ invar_eye) {
 
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*invar_eye);
+                Expr_ptr ctx (module.name());
+                Expr_ptr body (*invar_eye);
 
                 f_invar.push_back( cmpl.process(ctx, body));
             }
@@ -103,8 +103,8 @@ void Algorithm::setup()
             for (ExprVector::const_iterator trans_eye = trans.begin();
                  trans_eye != trans.end(); ++ trans_eye) {
 
-                Expr_ptr ctx = module.expr();
-                Expr_ptr body = (*trans_eye);
+                Expr_ptr ctx (module.name());
+                Expr_ptr body (*trans_eye);
 
                 f_trans.push_back( cmpl.process(ctx, body));
             }

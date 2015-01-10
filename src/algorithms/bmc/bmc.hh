@@ -32,7 +32,7 @@
 class BMC : public Algorithm {
 
 public:
-    BMC(ICommand& command, IModel& model, Expr_ptr formula, ExprVector& constraints);
+    BMC(ICommand& command, Model& model, Expr_ptr formula, ExprVector& constraints);
     ~BMC();
 
     void process();
@@ -66,7 +66,7 @@ private:
 /* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, IModel& model,
+    BMCCounterExample(Expr_ptr property, Model& model,
                       SAT& engine, unsigned k, bool use_coi);
 };
 

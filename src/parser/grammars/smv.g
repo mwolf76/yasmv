@@ -41,34 +41,27 @@ options {
 }
 
 @members {
-    // singleton managers
+    /* singleton managers */
     ExprMgr& em = ExprMgr::INSTANCE();
     ModelMgr& mm = ModelMgr::INSTANCE();
     TypeMgr& tm = TypeMgr::INSTANCE();
     OptsMgr& om  = OptsMgr::INSTANCE();
     CommandMgr& cm = CommandMgr::INSTANCE();
+
+    /* the model instance */
+    Model& model (mm.model());
 }
 
 /* SMV model Toplevel */
 smv
 scope {
-    IModel_ptr model;
-    IModule_ptr module;
+    Module_ptr current_module;
 }
-
-// TODO: support for multiple machines
-@init {
-    $smv::model = mm.model();
-}
-
     : model_directives
 
-    'FSM' id=identifier ';'
+    'MODULE' module_id=identifier ';'
     {
-        $smv::model->set_name(id);
-
-        $smv::module = new Module(em.make_main());
-        $smv::model->add_module(em.make_main(), $smv::module);
+            model.add_module(* ($smv::current_module = new Module(module_id)));
     }
 
     module_body ';'? // exit point
@@ -290,7 +283,7 @@ fsm_enum_decl_clause
     ExprSet lits;
 }
     : expr=identifier ':' fsm_enum_type_lits[lits]
-      { tm.register_enum( $smv::module->expr(), expr, lits ); }
+      { tm.register_enum( $smv::current_module->name(), expr, lits ); }
     ;
 
 fsm_enum_type_lits [ExprSet& lits]
@@ -325,8 +318,8 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new Variable($smv::module->expr(), id, tp);
-                $smv::module->add_var(id, var);
+                IVariable_ptr var = new Variable($smv::current_module->name(), id, tp);
+                $smv::current_module->add_var(id, var);
             }
     }
 	;
@@ -341,8 +334,8 @@ fsm_ivar_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr id = (*expr_iter);
-                IVariable_ptr ivar = new Variable($smv::module->expr(), id, tp, true);
-                $smv::module->add_var(id, ivar);
+                IVariable_ptr ivar = new Variable($smv::current_module->name(), id, tp, true);
+                $smv::current_module->add_var(id, ivar);
             }
     }
 	;
@@ -362,8 +355,8 @@ fsm_define_decl_clause
 }
 	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
-     IDefine_ptr def = new Define($smv::module->expr(), id, formals, body);
-     $smv::module->add_def(id, def);
+     IDefine_ptr def = new Define($smv::current_module->name(), id, formals, body);
+     $smv::current_module->add_def(id, def);
     }
 	;
 
@@ -378,7 +371,7 @@ fsm_init_decl_body
 
 fsm_init_decl_clause
 	: expr=toplevel_expression
-      { $smv::module->add_init(expr); }
+      { $smv::current_module->add_init(expr); }
 	;
 
 fsm_invar_decl
@@ -392,7 +385,7 @@ fsm_invar_decl_body
 
 fsm_invar_decl_clause
 	: expr=toplevel_expression
-      { $smv::module->add_invar(expr); }
+      { $smv::current_module->add_invar(expr); }
 	;
 
 fsm_trans_decl
@@ -406,7 +399,7 @@ fsm_trans_decl_body
 
 fsm_trans_decl_clause
 	: expr=toplevel_expression
-      { $smv::module->add_trans(expr); }
+      { $smv::current_module->add_trans(expr); }
 	;
 
 // entry point
@@ -911,7 +904,7 @@ signed_fxd_type returns [Type_ptr res]
 enum_type returns [Type_ptr res]
 @init {}
     : expr=identifier
-      { $res = tm.find_enum( $smv::module->expr(), expr ); }
+      { $res = tm.find_enum( $smv::current_module->name(), expr ); }
     ;
 
 literal returns [Expr_ptr res]

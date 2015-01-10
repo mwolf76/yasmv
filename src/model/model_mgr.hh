@@ -40,8 +40,8 @@ typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {
 
 public:
-    inline IModel_ptr model()
-    { return &f_model; }
+    inline Model& model()
+    { return f_model; }
 
     inline IResolver_ptr resolver()
     { return &f_resolver; }

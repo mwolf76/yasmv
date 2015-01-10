@@ -26,7 +26,7 @@
 static unsigned progressive = 0;
 static const char *cex_trace_prfx = "cex_";
 
-BMC::BMC(ICommand& command, IModel& model, Expr_ptr property, ExprVector& constraints)
+BMC::BMC(ICommand& command, Model& model, Expr_ptr property, ExprVector& constraints)
     : Algorithm(command, model)
     , f_property(property)
     , f_constraints(constraints)

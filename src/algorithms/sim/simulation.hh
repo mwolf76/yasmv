@@ -40,7 +40,7 @@ class Simulation : public Algorithm {
 
 public:
     Simulation(ICommand& command,
-               IModel& model,
+               Model& model,
                Expr_ptr condition,
                Expr_ptr witness_id,
                ExprVector& constraints);
@@ -65,7 +65,7 @@ private:
 class SimulationWitness : public Witness {
 
 public:
-    SimulationWitness(IModel& model, SAT& engine, step_t k);
+    SimulationWitness(Model& model, SAT& engine, step_t k);
 };
 
 #endif

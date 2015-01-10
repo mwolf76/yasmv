@@ -26,7 +26,7 @@
 #include <base.hh>
 #include <bmc.hh>
 
-BMCCounterExample::BMCCounterExample(Expr_ptr property, IModel& model,
+BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                                      SAT& engine, unsigned k,
                                      bool use_coi)
     : Witness()

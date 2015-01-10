@@ -70,7 +70,7 @@ void ModelMgr::second_pass()
         // Remark: ctx name is MODULE name, not instance's
         // rationale: you may have several instances but they
         // all should refer to the same entry on the type map.
-        Expr_ptr ctx = module.expr();
+        Expr_ptr ctx = module.name();
 
         // type inference: FSM
         const ExprVector& init = module.init();

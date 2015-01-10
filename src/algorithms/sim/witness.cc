@@ -22,7 +22,7 @@
 #include <simulation.hh>
 
 using Minisat::Var;
-SimulationWitness::SimulationWitness(IModel& model, SAT& engine, step_t k)
+SimulationWitness::SimulationWitness(Model& model, SAT& engine, step_t k)
     : Witness()
 {
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());

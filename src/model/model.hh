@@ -37,70 +37,40 @@
 
 #include <symbol.hh>
 
-class IModule;
-typedef IModule* IModule_ptr;
-typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
-
-class IModel;
-typedef IModel* IModel_ptr;
-
-/** Exception classes */
+/* -- Exception classes ----------------------------------------------------- */
 class ModelException : public Exception {
 public:
     virtual const char* what() const throw() =0;
 };
 
-class ResolutionException
-    : public ModelException {
-
+class ModuleNotFound : public ModelException {
 public:
-    ResolutionException(Expr_ptr expr);
+    ModuleNotFound(Expr_ptr expr);
+
     const char* what() const throw();
+    ~ModuleNotFound() throw();
 
 private:
-    Expr_ptr f_expr;
+    Expr_ptr f_module_name;
 };
 
-// -- composite decls ----------------------------------------------------------
-class IModule : public IObject {
+class FailedResolution : public ModelException {
+
 public:
-    virtual const Expr_ptr expr() const =0;
+    FailedResolution(Expr_ptr symbol);
 
-    // Symbols management, preserve decl ordering
-    virtual const ExprVector& locals() const =0;
+    const char* what() const throw();
+    ~FailedResolution() throw();
 
-    virtual const Variables& vars() const =0;
-    virtual void add_var(Expr_ptr expr, IVariable_ptr var) =0;
-
-    virtual const Defines& defs() const =0;
-    virtual void add_def(Expr_ptr expr, IDefine_ptr def) =0;
-
-    // Finite State Machine definition
-    virtual const ExprVector& init() const =0;
-    virtual void add_init(Expr_ptr expr) =0;
-
-    virtual const ExprVector& invar() const =0;
-    virtual void add_invar(Expr_ptr expr) =0;
-
-    virtual const ExprVector& trans() const =0;
-    virtual void add_trans(Expr_ptr expr) =0;
+private:
+    Expr_ptr f_symbol;
 };
 
-class IModel : public IObject {
-public:
-    virtual Expr_ptr name() const =0;
-    virtual void set_name(Expr_ptr name) =0;
+/* -- FSM decls ------------------------------------------------------------- */
 
-    virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
-    virtual IModule& get_module(Expr_ptr name) =0;
-
-    virtual const Modules& modules() const =0;
-};
-
-class Module : public IModule {
+class Module {
     Expr_ptr f_name;
 
-    // preserves symbols ordering
     ExprVector f_locals;
 
     Variables f_localVars;
@@ -111,33 +81,57 @@ class Module : public IModule {
     ExprVector f_trans;
 
 public:
-    Module(const Expr_ptr name);
+    Module(Expr_ptr name);
+    ~Module();
 
-    inline const Expr_ptr expr() const
+    inline const Expr_ptr name() const
     { return f_name; }
 
-    inline bool is_main() const
-    { return f_name == ExprMgr::INSTANCE().make_main(); }
+    /* Symbols management, preserves decl ordering */
+    inline const ExprVector& locals() const
+    { return f_locals; }
 
-    const ExprVector& locals() const;
+    inline const Variables& vars() const
+    { return f_localVars; }
+    void add_var(Expr_ptr expr, IVariable_ptr var);
 
-    void add_var(Expr_ptr name, IVariable_ptr var);
-    const Variables& vars() const;
+    const Defines& defs() const
+    { return f_localDefs; }
+    void add_def(Expr_ptr expr, IDefine_ptr def);
 
-    void add_def(Expr_ptr name, IDefine_ptr def);
-    const Defines& defs() const;
-
+    /* Finite State Machine definition */
+    inline const ExprVector& init() const
+    { return f_init; }
     void add_init(Expr_ptr expr);
-    const ExprVector& init() const;
 
+    const ExprVector& invar() const
+    { return f_invar; }
     void add_invar(Expr_ptr expr);
-    const ExprVector& invar() const;
 
+    inline const ExprVector& trans() const
+    { return f_trans; }
     void add_trans(Expr_ptr expr);
-    const ExprVector& trans() const;
 };
 
+typedef Module* Module_ptr;
+typedef unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
 ostream& operator<<(ostream& os, Module& module);
+
+class Model {
+    Modules f_modules;
+
+public:
+    Model();
+    ~Model();
+
+    inline const Modules& modules() const
+    { return f_modules; }
+
+    Module& add_module(Module& module);
+    Module& module(Expr_ptr module_name);
+};
+
+typedef Model* Model_ptr;
 
 class Variable : public IVariable {
     Expr_ptr f_ctx;
@@ -255,7 +249,7 @@ public:
 class SymbIter {
 public:
     /* Calculates COI if formula is non-NULL */
-    SymbIter(IModel& model, Expr_ptr formula = NULL);
+    SymbIter(Model& model, Expr_ptr formula = NULL);
 
     ~SymbIter();
 
@@ -272,43 +266,11 @@ public:
     }
 
 private:
-    IModel&  f_model;
+    Model&  f_model;
     Expr_ptr f_formula; /* for COI */
 
     vector<ISymbol_ptr> f_symbols;
     vector<ISymbol_ptr>::const_iterator f_iter;
-};
-
-class Model : public IModel {
-public:
-    Model();
-    ~Model();
-
-    Expr_ptr name() const
-    { return f_name; }
-
-    void set_name(Expr_ptr name)
-    { f_name = name; }
-
-    const Modules& modules() const
-    { return f_modules; }
-
-    void add_module(Expr_ptr name, IModule_ptr module);
-
-    IModule& get_module(Expr_ptr name)
-    {
-        const pair <Expr_ptr const, IModule_ptr> found = (*f_modules.find(name));
-
-        if (!found.second) {
-            // throw ModuleNotFoundException(name);
-        }
-
-        return *found.second;
-    }
-
-private:
-    Modules f_modules;
-    Expr_ptr f_name;
 };
 
 #endif

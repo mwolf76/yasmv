@@ -26,7 +26,7 @@ static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
 
 Simulation::Simulation(ICommand& command,
-                       IModel& model,
+                       Model& model,
                        Expr_ptr condition,
                        Expr_ptr resume_id,
                        ExprVector& constraints)
