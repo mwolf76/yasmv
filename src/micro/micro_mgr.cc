@@ -34,15 +34,16 @@
  **/
 #include <boost/filesystem.hpp>
 
+#include <3rdparty/jsoncpp/json.hh>
+
 #include <common.hh>
 
-#include <expr.hh>
+#include <expr/expr.hh>
 
-#include <type.hh>
-#include <micro.hh>
-#include <micro_mgr.hh>
+#include <type/type.hh>
 
-#include <3rdparty/jsoncpp/json.hh>
+#include <micro/micro.hh>
+#include <micro/micro_mgr.hh>
 
 // static initialization
 MicroMgr_ptr MicroMgr::f_instance = NULL;

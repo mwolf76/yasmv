@@ -18,8 +18,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <type.hh>
-#include <model.hh>
+
+#include <type/type.hh>
+
+#include <model/model.hh>
 
 // WHY HERE?!?
 std::ostream& operator<<(std::ostream& os, Exception& e)

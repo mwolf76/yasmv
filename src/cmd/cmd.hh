@@ -22,8 +22,8 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <commands/commands.hh>
-#include <interpreter.hh>
+#include <cmd/commands/commands.hh>
+#include <cmd/interpreter.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;

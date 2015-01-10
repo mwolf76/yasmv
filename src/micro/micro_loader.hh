@@ -25,7 +25,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
 
-#include <micro.hh>
+#include <micro/micro.hh>
 
 class MicroLoaderException : public Exception {
 public:

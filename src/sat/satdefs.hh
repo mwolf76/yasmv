@@ -26,9 +26,10 @@
 #include <boost/unordered_map.hpp>
 
 #include <common.hh>
-#include <pool.hh>
 
-#include <dd.hh>
+#include <expr/pool.hh>
+
+#include <dd/cudd_mgr.hh>
 
 // the Minisat SAT solver
 #include <minisat/core/Solver.h>

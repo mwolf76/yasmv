@@ -27,7 +27,7 @@
 #ifndef TYPE_RESOLVER_H
 #define TYPE_RESOLVER_H
 
-#include <resolver.hh>
+#include <symb/resolver.hh>
 
 class TypeResolver : public Resolver {
 public:

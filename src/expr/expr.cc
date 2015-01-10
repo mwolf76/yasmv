@@ -20,9 +20,9 @@
  *
  **/
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
 FQExpr::FQExpr(Expr_ptr expr)
     : f_ctx(ExprMgr::INSTANCE().make_main())

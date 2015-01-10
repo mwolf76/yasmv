@@ -22,12 +22,12 @@
 #ifndef SAT_CNF_REGISTRY_H
 #define SAT_CNF_REGISTRY_H
 
+#include <common.hh>
+
 #include <boost/unordered_map.hpp>
 
-#include <expr.hh>
-#include <pool.hh>
-
-#include <common.hh>
+#include <expr/expr.hh>
+#include <expr/pool.hh>
 
 class Engine; // fwd decl
 

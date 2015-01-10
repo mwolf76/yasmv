@@ -19,8 +19,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <sat.hh>
-#include <dd_walker.hh>
+#include <sat/sat.hh>
+
+#include <dd/dd_walker.hh>
 
 namespace Minisat {
 #if 0

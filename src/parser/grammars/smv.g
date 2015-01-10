@@ -28,16 +28,16 @@ options {
 #include <common.hh>
 
 /* cmd subsystem */
-#include <cmd.hh>
+#include <cmd/cmd.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
 }
 
 @members {

@@ -26,20 +26,20 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include <satdefs.hh>
-#include <cuddObj.hh>
+#include <sat/satdefs.hh>
 
-#include <cudd_mgr.hh>
-#include <enc_mgr.hh>
+#include <dd/cudd-2.5.0/obj/cuddObj.hh>
+#include <dd/cudd_mgr.hh>
 
-#include <compiler/unit.hh>
+#include <enc/enc_mgr.hh>
 
-#include <cnf_registry.hh>
-#include <time_mapper.hh>
+#include <model/compiler/unit.hh>
 
-using std::ostream;
-ostream &operator<<(ostream &out, const Lit &lit);
-ostream &operator<<(ostream &out, const vec<Lit> &lits);
+#include <sat/cnf_registry.hh>
+#include <sat/time_mapper.hh>
+
+std::ostream &operator<<(std::ostream &out, const Lit &lit);
+std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
 
 class Engine {
 

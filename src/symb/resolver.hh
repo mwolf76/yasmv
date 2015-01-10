@@ -27,7 +27,7 @@
 #ifndef RESOLVER_H
 #define RESOLVER_H
 
-#include <symbol.hh>
+#include <symb/symbol.hh>
 
 class Resolver {
 public:

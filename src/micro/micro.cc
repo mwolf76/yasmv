@@ -19,8 +19,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <type.hh>
-#include <micro.hh>
+#include <micro/micro.hh>
+#include <type/type.hh>
 
 MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x)
     : f_triple(triple)

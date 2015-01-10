@@ -195,7 +195,7 @@ JobListCommand::JobListCommand(Interpreter& owner)
 Variant JobListCommand::operator()()
 {
     Jobs::const_iterator eye;
-    ostream &os(std::cout);
+    std::ostream &os(std::cout);
 
     const Jobs& jobs(Interpreter::INSTANCE().jobs());
     for (eye = jobs.begin(); eye != jobs.end(); ++ eye) {
@@ -382,7 +382,7 @@ WitnessListCommand::WitnessListCommand(Interpreter& owner)
 Variant WitnessListCommand::operator()()
 {
     WitnessList::const_iterator eye;
-    ostream &os(std::cout);
+    std::ostream &os(std::cout);
 
     const WitnessList& witnesses(WitnessMgr::INSTANCE().witnesses());
     for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
@@ -409,7 +409,7 @@ WitnessDumpCommand::WitnessDumpCommand(Interpreter& owner, Expr_ptr wid)
 
 Variant WitnessDumpCommand::operator()()
 {
-    ostream &os(std::cout);
+    std::ostream &os(std::cout);
 
     Witness& w = WitnessMgr::INSTANCE().witness( f_wid->atom() );
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {

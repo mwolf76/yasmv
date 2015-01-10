@@ -23,21 +23,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <boost/unordered_map.hpp>
-
 #include <common.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <boost/unordered_map.hpp>
 
-#include <type.hh>
-#include <enc.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <symbol.hh>
+#include <type/type.hh>
+#include <enc/enc.hh>
+
+#include <symb/symbol.hh>
 
 /* -- Exception classes ----------------------------------------------------- */
 class ModelException : public Exception {
@@ -48,27 +47,11 @@ public:
 class ModuleNotFound : public ModelException {
 public:
     ModuleNotFound(Expr_ptr expr);
-
     const char* what() const throw();
-    ~ModuleNotFound() throw();
 
 private:
     Expr_ptr f_module_name;
 };
-
-class FailedResolution : public ModelException {
-
-public:
-    FailedResolution(Expr_ptr symbol);
-
-    const char* what() const throw();
-    ~FailedResolution() throw();
-
-private:
-    Expr_ptr f_symbol;
-};
-
-/* -- FSM decls ------------------------------------------------------------- */
 
 class Module {
     Expr_ptr f_name;

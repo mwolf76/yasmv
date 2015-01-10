@@ -23,11 +23,12 @@
 #ifndef BMC_ALGORITHM_H
 #define BMC_ALGORITHM_H
 
-#include <base.hh>
-#include <expr.hh>
-#include <witness.hh>
+#include <expr/expr.hh>
 
-#include <bmc/normalizer.hh>
+#include <algorithms/base.hh>
+#include <algorithms/bmc/normalizer.hh>
+
+#include <witness/witness.hh>
 
 class BMC : public Algorithm {
 

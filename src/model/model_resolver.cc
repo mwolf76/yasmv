@@ -23,10 +23,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <type.hh>
-#include <symbol.hh>
-#include <model_resolver.hh>
-#include <model_mgr.hh>
+#include <symb/symbol.hh>
+
+#include <type/type.hh>
+
+#include <model/model_resolver.hh>
+#include <model/model_mgr.hh>
 
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)

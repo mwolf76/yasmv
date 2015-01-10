@@ -23,18 +23,21 @@
 #define COMMANDS_H
 
 #include <common.hh>
-#include <variant.hh>
-#include <interpreter.hh>
-#include <expr.hh>
-#include <compiler/compiler.hh>
-#include <sat.hh>
+
+#include <expr/expr.hh>
+#include <model/compiler/compiler.hh>
+
+#include <cmd/interpreter.hh>
+#include <cmd/command.hh>
+
+#include <sat/sat.hh>
+
+#include <utils/variant.hh>
 
 /* algorithms */
-#include <init.hh>
-#include <bmc/bmc.hh>
-#include <sim/simulation.hh>
-
-#include <command.hh>
+#include <algorithms/init.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/sim/simulation.hh>
 
 // -- command definitions --------------------------------------------------
 class ModelLoadCommand : public Command {

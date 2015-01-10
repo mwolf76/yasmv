@@ -26,8 +26,9 @@
 #include <utility>
 #include <vector>
 
-#include <model.hh>
-#include <expr_walker.hh>
+#include <model/model.hh>
+
+#include <expr/walker/walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())

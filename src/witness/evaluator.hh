@@ -31,10 +31,10 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <expr_walker.hh>
 #include <expr/pool.hh>
+#include <expr/walker/walker.hh>
 
-#include <witness.hh>
+#include <witness/witness.hh>
 
 /* local typedefs */
 typedef boost::unordered_map<FQExpr, value_t, FQExprHash, FQExprEq> FQExprValueMap;

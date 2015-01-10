@@ -29,7 +29,7 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <satdefs.hh>
+#include <sat/satdefs.hh>
 
 /* <symb, is_signed?, width> */
 typedef boost::tuple<bool, ExprType, int> OpTriple;

@@ -22,22 +22,22 @@
 #ifndef WITNESS_H
 #define WITNESS_H
 
+#include <common.hh>
+
 #include <vector>
 
 #include <boost/unordered_map.hpp>
 
-#include <common.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
-
-#include <variant.hh>
+#include <utils/variant.hh>
 
 /** Exception classes */
 class WitnessException : public Exception {

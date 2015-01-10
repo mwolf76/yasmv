@@ -23,9 +23,10 @@
 #ifndef SIMULATION_ALGORITHM_H
 #define SIMULATION_ALGORITHM_H
 
-#include <base.hh>
-#include <witness.hh>
-#include <witness_mgr.hh>
+#include <algorithms/base.hh>
+
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
 
 #include <cmd/command.hh>
 

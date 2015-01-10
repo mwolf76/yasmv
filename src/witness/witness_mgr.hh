@@ -26,13 +26,13 @@
 #include <map>
 #include <vector>
 
-#include <expr.hh>
+#include <expr/expr.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
 
-#include <evaluator.hh>
-#include <witness.hh>
+#include <witness/evaluator.hh>
+#include <witness/witness.hh>
 
 typedef class WitnessMgr *WitnessMgr_ptr;
 typedef std::map<Atom, Witness_ptr> WitnessMap;

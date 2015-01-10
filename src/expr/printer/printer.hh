@@ -28,7 +28,7 @@
 #define PRINTER_H
 
 #include <string>
-#include <expr_walker.hh>
+#include <walker/walker.hh>
 
 class Printer : public ExprWalker {
     std::ostream& f_os;

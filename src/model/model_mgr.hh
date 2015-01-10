@@ -27,14 +27,14 @@
 #ifndef MODEL_MGR_H
 #define MODEL_MGR_H
 
-#include <model.hh>
-#include <model_resolver.hh>
+#include <model/model.hh>
+#include <model/model_resolver.hh>
+#include <model/preprocessor.hh>
+#include <model/inferrer.hh>
 
-#include <preprocessor.hh>
-#include <inferrer.hh>
+#include <expr/expr_mgr.hh>
 
-#include <expr_mgr.hh>
-#include <type_mgr.hh>
+#include <type/type_mgr.hh>
 
 typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {

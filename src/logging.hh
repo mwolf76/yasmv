@@ -23,11 +23,11 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
+#include <string>
 #include <iostream>
 #include <sstream>
-#include <string>
 
-#include "ezlogger_misc.hpp"
+#include <3rdparty/ezlogger/ezlogger_misc.hpp>
 #include <sys/timeb.h>
 
 namespace axter {
@@ -64,10 +64,10 @@ namespace axter {
 };
 
 
-#include "ezlogger_output_policy.hpp"
-#include "ezlogger_verbosity_level_policy.hpp"
-#include "ezlogger.hpp"
-#include "ezlogger_macros.hpp"
+#include <3rdparty/ezlogger/ezlogger_output_policy.hpp>
+#include <3rdparty/ezlogger/ezlogger_verbosity_level_policy.hpp>
+#include <3rdparty/ezlogger/ezlogger.hpp>
+#include <3rdparty/ezlogger/ezlogger_macros.hpp>
 
 // custom loggers
 #define ERR  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)

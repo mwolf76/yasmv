@@ -38,12 +38,14 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <expr.hh>
-
-#include <type.hh>
-#include <micro.hh>
-#include <micro_loader.hh>
 #include <3rdparty/jsoncpp/json.hh>
+
+#include <expr/expr.hh>
+
+#include <type/type.hh>
+
+#include <micro/micro.hh>
+#include <micro/micro_loader.hh>
 
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";

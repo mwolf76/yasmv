@@ -32,12 +32,12 @@
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <type.hh>
-#include <proxy.hh>
+#include <expr/expr.hh>
+#include <type/type.hh>
+#include <symb/proxy.hh>
 
-#include <inferrer.hh>
-#include <model_mgr.hh>
+#include <model/inferrer.hh>
+#include <model/model_mgr.hh>
 
 // uncommment following line to enable post_node_hook debug (verbose!)
 // #define DEBUG_INFERRER

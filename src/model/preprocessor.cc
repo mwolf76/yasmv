@@ -32,15 +32,12 @@
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <preprocessor.hh>
+#include <symb/proxy.hh>
 
-#include <model_mgr.hh>
+#include <expr/expr.hh>
 
-#include <proxy.hh>
-
-// uncommment following line to enable post_node_hook debug (verbose!)
-// #define DEBUG_PREPROCESSOR
+#include <model/preprocessor.hh>
+#include <model/model_mgr.hh>
 
 Preprocessor::Preprocessor(ModelMgr& owner)
     : f_ctx_stack()

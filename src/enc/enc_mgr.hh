@@ -29,16 +29,17 @@
 #define ENCODER_MGR_H
 
 #include <vector>
+
 #include <boost/unordered_map.hpp>
 
 #include <common.hh>
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type.hh>
+#include <type/type.hh>
 
-#include <cudd_mgr.hh>
-#include <cuddInt.h>  /* for cudd_isconstant */
+#include <dd/cudd_mgr.hh>
+#include <dd/cudd-2.5.0/cudd/cuddInt.h>  /* for cudd_isconstant */
 
 typedef class Encoding *Encoding_ptr; // fwd decl
 

@@ -26,8 +26,8 @@
 #include <minisat/core/Solver.h>
 #include <minisat/core/SolverTypes.h>
 
-#include <micro.hh>
-#include <micro_loader.hh>
+#include <micro/micro.hh>
+#include <micro/micro_loader.hh>
 
 typedef class MicroMgr *MicroMgr_ptr;
 class MicroMgr  {

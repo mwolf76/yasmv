@@ -24,14 +24,15 @@
  *
  **/
 #include <sat.hh>
+#include <iostream>
 
-ostream &operator<<(ostream &out, const Lit &lit)
+std::ostream &operator<<(std::ostream &out, const Lit &lit)
 {
     out << (sign(lit) ? "-" : "") << var(lit);
     return out;
 }
 
-ostream &operator<<(ostream &out, const vec<Lit> &lits)
+std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits)
 {
     for (int i = 0; i < lits.size()-1; ++i) {
         out << lits[i] << " ";
@@ -44,7 +45,7 @@ ostream &operator<<(ostream &out, const vec<Lit> &lits)
     return out;
 }
 
-ostream &operator<<(ostream &os, const lbool &lb)
+std::ostream &operator<<(std::ostream &os, const lbool &lb)
 {
     switch(toInt(lb)) {
     case 0:
@@ -63,7 +64,7 @@ ostream &operator<<(ostream &os, const lbool &lb)
     return os;
 }
 
-ostream &operator<<(ostream &os, const status_t &status)
+std::ostream &operator<<(std::ostream &os, const status_t &status)
 {
     switch (status) {
     case STATUS_SAT:

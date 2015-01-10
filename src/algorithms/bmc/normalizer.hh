@@ -25,12 +25,11 @@
 
 #include <vector>
 
-#include <expr_mgr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/walker/walker.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
-
-#include <expr_walker.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())

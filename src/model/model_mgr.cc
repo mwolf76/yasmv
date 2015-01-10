@@ -24,8 +24,9 @@
  *
  **/
 
-#include <symbol.hh>
-#include <model_mgr.hh>
+#include <symb/symbol.hh>
+
+#include <model/model_mgr.hh>
 
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;

@@ -93,11 +93,11 @@
 
 #include <list>
 
-#include <common.hh>
-#include <cudd_mgr.hh>
+// #include <common.hh>
+#include <dd/cudd_mgr.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
 /* _ptr typdefs */
 typedef class Type* Type_ptr;

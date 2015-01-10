@@ -31,6 +31,6 @@
 #include <climits>
 
 #include <common.hh>
-#include <cuddObj.hh>
+#include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
 #endif

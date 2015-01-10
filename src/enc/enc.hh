@@ -34,13 +34,13 @@
 #include <common.hh>
 #include <opts.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type.hh>
+#include <type/type.hh>
 
-#include <cudd_mgr.hh>
-#include <enc_mgr.hh>
+#include <dd/cudd_mgr.hh>
+#include <enc/enc_mgr.hh>
 
 // -- primary decls  --------------------------------------------------------------
 class Encoding {

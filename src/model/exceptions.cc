@@ -18,13 +18,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+
 #include <model.hh>
 
 ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
     : f_module_name(module_name)
-{}
-
-ModuleNotFound::~ModuleNotFound() throw()
 {}
 
 const char* ModuleNotFound::what() const throw()
@@ -37,19 +36,3 @@ const char* ModuleNotFound::what() const throw()
     return oss.str().c_str();
 }
 
-FailedResolution::FailedResolution(Expr_ptr symbol)
-    : f_symbol(symbol)
-{}
-
-FailedResolution::~FailedResolution() throw()
-{}
-
-const char* FailedResolution::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Could not resolve symbol: `"
-        << f_symbol << "`";
-
-    return oss.str().c_str();
-}

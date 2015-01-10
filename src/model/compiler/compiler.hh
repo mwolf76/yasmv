@@ -49,21 +49,20 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <expr_walker.hh>
+#include <expr/walker/walker.hh>
 
-#include <type.hh>
+#include <type/type.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+#include <model/compiler/unit.hh>
 
-#include <enc.hh>
-#include <enc_mgr.hh>
+#include <enc/enc.hh>
+#include <enc/enc_mgr.hh>
 
-#include <micro.hh>
+#include <micro/micro.hh>
 
-#include <dd_walker.hh>
-
-#include <compiler/unit.hh>
+#include <dd/dd_walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())

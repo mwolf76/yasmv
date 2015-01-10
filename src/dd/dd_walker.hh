@@ -26,7 +26,7 @@
 #include <common.hh>
 #include <stack>
 
-#include <dd.hh>
+#include <dd/dd.hh>
 #include <cuddInt.h>
 
 typedef enum {

@@ -24,8 +24,7 @@
  *
  **/
 
-#include <symbol.hh>
-#include <model.hh>
+#include <symb/symbol.hh>
 
 UnresolvedSymbol::UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
     : f_ctx(ctx)
@@ -42,7 +41,6 @@ const char* UnresolvedSymbol::what() const throw()
     const char* res (strdup( oss.str().c_str()));
     return res;
 }
-
 
 bool Symbol::is_variable(void) const
 {

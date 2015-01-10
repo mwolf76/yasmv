@@ -28,8 +28,8 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include <expr.hh>
-#include <pool.hh>
+#include <expr/expr.hh>
+#include <expr/pool.hh>
 
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {

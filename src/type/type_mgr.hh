@@ -29,14 +29,13 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <symb/symbol.hh>
 
-#include <type.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <symbol.hh>
-
-#include <type_resolver.hh>
+#include <type/type.hh>
+#include <type/type_resolver.hh>
 
 typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 

@@ -25,21 +25,18 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <sat.hh>
+#include <sat/sat.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+#include <model/compiler/compiler.hh>
 
-#include <enc.hh>
-#include <enc_mgr.hh>
+#include <enc/enc.hh>
+#include <enc/enc_mgr.hh>
 
-#include <witness.hh>
-#include <variant.hh>
+#include <witness/witness.hh>
 
-#include <cmd/command.hh>
-
-/* Model compiler */
-#include <compiler/compiler.hh>
+#include <utils/variant.hh>
 
 typedef boost::unordered_map<std::string, Variant> ParametersMap;
 
@@ -49,7 +46,10 @@ typedef enum {
     MC_UNKNOWN,
 } mc_status_t;
 
-// Engine-less algorithm base class. Engine instances are provided by strategies.
+class Command;
+
+/* Engine-less algorithm base class. Engine instances are provided by
+   strategies. */
 class Algorithm {
 
 public:

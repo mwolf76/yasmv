@@ -27,11 +27,12 @@
 #ifndef EXPR_WALKER_H
 #define EXPR_WALKER_H
 
+#include <common.hh>
+
 #include <sstream>
 #include <stack>
 
-#include <common.hh>
-#include <expr.hh>
+#include <expr/expr.hh>
 
 /* helper macros to declare walker hooks */
 #define UNARY_HOOK(op)                                       \

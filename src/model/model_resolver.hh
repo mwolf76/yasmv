@@ -27,7 +27,7 @@
 #ifndef MODEL_RESOLVER_H
 #define MODEL_RESOLVER_H
 
-#include <resolver.hh>
+#include <symb/resolver.hh>
 
 class ModelMgr; // fwd
 class ModelResolver : public Resolver {

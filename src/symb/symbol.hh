@@ -23,14 +23,14 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-#include <vector>
+#include <common.hh>
 
 #include <boost/unordered_map.hpp>
 
-#include <common.hh>
-#include <expr.hh>
-#include <pool.hh>
-#include <type.hh>
+#include <expr/expr.hh>
+#include <expr/pool.hh>
+
+#include <type/type.hh>
 
 class UnresolvedSymbol : public Exception {
     Expr_ptr f_ctx;
@@ -40,8 +40,6 @@ public:
     UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr);
     const char* what() const throw();
 };
-
-typedef std::vector<FQExpr> FQExprVector;
 
 class Symbol;
 typedef Symbol* Symbol_ptr;

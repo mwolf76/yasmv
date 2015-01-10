@@ -29,7 +29,7 @@
 #include <boost/unordered_set.hpp>
 #include <utility>
 
-#include <expr.hh>
+#include <expr/expr.hh>
 
 /* -- expr pool definitions -------------------------------------------------- */
 

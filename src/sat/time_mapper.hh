@@ -27,14 +27,14 @@
 #ifndef SAT_TIME_MAPPER_H
 #define SAT_TIME_MAPPER_H
 
-#include <boost/unordered_map.hpp>
-
-#include <expr.hh>
-#include <pool.hh>
-
 #include <common.hh>
 
-class Engine; // fwd decl
+#include <boost/unordered_map.hpp>
+
+#include <expr/expr.hh>
+#include <expr/pool.hh>
+
+class Engine;
 
 typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
 typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;

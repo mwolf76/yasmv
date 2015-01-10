@@ -22,7 +22,7 @@
 #include <common.hh>
 
 #include <expr.hh>
-#include <expr_walker.hh>
+#include <walker/walker.hh>
 
 ExprWalker& ExprWalker::operator() (const Expr_ptr expr)
 {

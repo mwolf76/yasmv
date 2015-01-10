@@ -26,10 +26,10 @@
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <evaluator.hh>
+#include <expr/expr.hh>
 
-#include <witness_mgr.hh>
+#include <witness/evaluator.hh>
+#include <witness/witness_mgr.hh>
 
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)

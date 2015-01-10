@@ -23,7 +23,8 @@
 #define COMMAND_H
 
 #include <common.hh>
-#include <variant.hh>
+
+#include <utils/variant.hh>
 
 typedef class Command* Command_ptr;
 
