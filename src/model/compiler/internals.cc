@@ -20,24 +20,6 @@
  **/
 #include <compiler.hh>
 
-/* encodes constant value into a DD vector */
-void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
-{
-    value_t value = konst -> value();
-    unsigned base = Cudd_V(f_enc.base().getNode());
-    if (value < 0)
-        value += pow(base, width); // 2's complement
-
-    for (unsigned i = 0; i < width; ++ i) {
-        ADD digit = f_enc.constant(value % base);
-        f_add_stack.push_back(digit);
-        value /= base;
-    }
-
-    if (value)
-        throw ConstantTooLarge(konst);
-}
-
 /* private service of walk_leaf */
 void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
 {

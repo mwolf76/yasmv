@@ -91,23 +91,4 @@ extern const char bold_dark_gray[];
 
 extern volatile sig_atomic_t sigint_caught;
 
-/* internal utils */
-static inline unsigned pow2(unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; i; -- i) {
-        res *= 2;
-    }
-    return res;
-}
-
-static inline unsigned msb(unsigned value)
-{
-    unsigned res = 0;
-    while (value >>= 1) {
-        ++ res;
-    }
-
-    return res;
-}
 #endif

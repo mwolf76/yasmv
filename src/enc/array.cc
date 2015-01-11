@@ -1,5 +1,5 @@
 /**
- *  @file enc.cc
+ *  @file array.cc
  *
  *  This module contains definitions and services that implement an
  *  encoder for symbols. For each symbol a boolean encoding is
@@ -25,38 +25,37 @@
  **/
 #include <enc.hh>
 
-// shared dctor
-Encoding::~Encoding()
-{}
-
-// low-level service for bits allocation
-ADD Encoding::make_bit()
+ArrayEncoding::ArrayEncoding(Encodings elements)
+    : f_elements(elements)
 {
-    ADD res = f_mgr.bit();
+    assert(0 < elements.size());
+    for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
 
-    /* keep track of every bit in the encoding, this is user later,
-       when evaluating the scalar value of a bit combination. */
-    f_bits.push_back(res);
+        /* digits */
+        DDVector& dv = (*i)->dv();
+        f_dv.insert( f_dv.end(), dv.begin(), dv.end() );
 
-    return res;
-}
-
-// base service, has to be in superclass for visibility
-ADD Encoding::make_monolithic_encoding(unsigned nbits)
-{
-    ADD res = make_bit();
-    ADD two = f_mgr.constant(2);
-
-    assert(0 < nbits);
-    unsigned i = 1;
-
-    while (i < nbits) {
-        res *= two;
-        res += make_bit();
-
-        ++ i;
+        /* bits */
+        DDVector& bits = (*i)->bits();
+        f_bits.insert( f_bits.end(), bits.begin(), bits.end() );
     }
-
-    return res;
 }
 
+Expr_ptr ArrayEncoding::expr(int* assignment)
+{
+    ExprMgr& em(ExprMgr::INSTANCE());
+    Expr_ptr acc(NULL);
+
+    for (Encodings::const_iterator i = f_elements.begin();
+         f_elements.end() != i; ++ i) {
+
+        Encoding_ptr enc(*i);
+        Expr_ptr value (enc->expr(assignment));
+        acc = (NULL == acc)
+            ? value
+            : em.make_comma(acc, value)
+        ;
+    }
+    assert(NULL != acc);
+    return em.make_set( acc );
+}

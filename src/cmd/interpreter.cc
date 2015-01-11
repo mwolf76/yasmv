@@ -28,6 +28,7 @@
 
 #include <config.h>
 
+
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
 #    include <readline/readline.h>

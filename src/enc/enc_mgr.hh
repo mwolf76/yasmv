@@ -128,11 +128,11 @@ public:
         return (*f_instance);
     }
 
-    inline ADD base() const
-    { return f_base; }
+    // inline ADD base() const
+    // { return f_base; }
 
-    inline ADD msb()
-    { return f_msb; }
+    // inline ADD msb()
+    // { return f_msb; }
 
     inline unsigned word_width() const
     { return f_word_width; }
@@ -156,8 +156,8 @@ private:
     /* Untimed Canonical Bit Identifiers register */
     Index2UCBIMap f_index2ucbi_map;
 
-    ADD f_base;  // (eg. 0x10)
-    ADD f_msb;   // (eg. 0x8)
+    // ADD f_base;  // (eg. 0x10)
+    // ADD f_msb;   // (eg. 0x8)
 
     unsigned f_word_width;
 };

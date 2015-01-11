@@ -88,19 +88,25 @@ void batch(Command_ptr cmd)
     bool color (OptsMgr::INSTANCE().color());
     Variant& res = system(cmd);
     if (color) {
-        std::cout << std::endl << yellow << "<< "
-             << res << normal << std::endl;
+        std::cout
+            << std::endl
+            << yellow << "<< " << res
+            << normal << std::endl;
     }
     else {
         std::cout << std::endl << "<< " << res
-             << std::endl;
+                  << std::endl;
     }
 }
 
 void sighandler(int signum)
 {
     if (signum == SIGINT) {
-        std::cout << std::endl << "Caught SIGINT signal" << std::endl;
+        std::cout
+            << std::endl
+            << "Caught SIGINT signal"
+            << std::endl;
+
         sigint_caught = 1;
     }
 }
@@ -113,12 +119,17 @@ void process()
     Variant& res = system();
     bool color (OptsMgr::INSTANCE().color());
     if (color) {
-        std::cout << std::endl << yellow << "<< "
-             << res << normal << std::endl;
+        std::cout
+            << std::endl
+            << yellow << "<< "
+            << res << normal
+            << std::endl;
     }
     else {
-        std::cout << std::endl << "<< " << res
-             << std::endl;
+        std::cout
+            << std::endl
+            << "<< " << res
+            << std::endl;
     }
 }
 

@@ -204,12 +204,6 @@ protected:
 
 /** -- Scalars ------------------------------------------------------------ */
 
-/** Abstract type interface. */
-class AbstractType {
-public:
-    virtual bool is_abstract() const =0;
-};
-
 /** Scalar type class. */
 class ScalarType : public Type {
 protected:
@@ -238,8 +232,7 @@ protected:
 };
 
 /** Algebraic type class. */
-class AlgebraicType : public ScalarType,
-                      public AbstractType {
+class AlgebraicType : public ScalarType {
 protected:
     AlgebraicType(TypeMgr &owner)
         : ScalarType(owner)
@@ -248,13 +241,12 @@ protected:
 
 /** Enumeratives */
 typedef class EnumType* EnumType_ptr;
-class EnumType : public MonolithicalType, public AbstractType {
+class EnumType : public MonolithicalType {
 protected:
     friend class TypeMgr; // ctors not public
     EnumType(TypeMgr& owner, ExprSet& literals);
 
 public:
-    bool is_abstract() const;
     unsigned width() const;
 
     const ExprSet& literals() const
@@ -277,27 +269,11 @@ private:
     ExprSet f_literals;
 };
 
-/** Integer constants */
-typedef class ConstantType* ConstantType_ptr;
-class ConstantType : public AlgebraicType {
-public:
-    unsigned width() const;
-    bool is_abstract() const;
-
-    ADD *dds() const
-    { return NULL; }
-
- protected:
-    friend class TypeMgr; // ctors not public
-    ConstantType(TypeMgr& owner);
-};
-
 /** Signed integers */
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 class SignedAlgebraicType : public AlgebraicType {
 public:
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -317,7 +293,6 @@ typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 class UnsignedAlgebraicType : public AlgebraicType {
 public:
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -344,7 +319,6 @@ public:
     { return f_fractional; }
 
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -372,7 +346,6 @@ public:
     { return f_fractional; }
 
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -395,10 +368,8 @@ protected:
 
 /** Array type class. */
 typedef class ArrayType* ArrayType_ptr;
-class ArrayType : public Type,
-                  public AbstractType {
+class ArrayType : public Type {
 public:
-    bool is_abstract() const;
     unsigned width() const;
     unsigned nelems() const
     { return f_nelems; }

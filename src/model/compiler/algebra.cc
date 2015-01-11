@@ -24,6 +24,38 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+static inline value_t pow2(unsigned exp)
+{
+    value_t res = 1;
+
+    if ( !exp )
+        return res;
+    while ( -- exp )
+        res <<= 1;
+
+    return res;
+}
+
+/* encodes constant value into a DD vector */
+void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
+{
+    const unsigned base (2);
+
+    value_t value = konst -> value();
+
+    if (value < 0)
+        value += pow2(width); // 2's complement
+
+    for (unsigned i = 0; i < width; ++ i) {
+        ADD digit = f_enc.constant(value % base);
+        f_add_stack.push_back(digit);
+        value /= base;
+    }
+
+    if (value)
+        throw ConstantTooLarge(konst);
+}
+
 /* Important Remark: operand arguments (which are DD vectors) are
    fetched from the internal DD stack in a big-endian fashion, that is
    MSB first. On the other hand, to ensure proper behavior the

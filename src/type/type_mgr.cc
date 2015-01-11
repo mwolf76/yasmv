@@ -42,9 +42,6 @@ TypeMgr::TypeMgr()
     register_type( f_em.make_boolean_type(),
                    new BooleanType(*this));
 
-    register_type( f_em.make_constant_type(),
-                   new ConstantType(*this));
-
     // (un)signed integers { 4, 8, 16, 32, 64 } bits wide
     for (int i = 2; i <= 16; i *= 2) {
         register_type( f_em.make_unsigned_int_type(i),
