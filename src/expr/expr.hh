@@ -176,7 +176,11 @@ typedef struct Expr_TAG {
 typedef std::vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;
 
-typedef std::set<Expr_ptr> ExprSet;
+struct LexicographicOrdering {
+    int operator() (const Expr_ptr x, const Expr_ptr y) const;
+};
+
+typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
 // TODO: split this into multiple headers

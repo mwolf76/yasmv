@@ -135,3 +135,10 @@ std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
 
     return os;
 }
+
+int LexicographicOrdering::operator() (const Expr_ptr x, const Expr_ptr y) const
+{
+    ExprMgr& em (ExprMgr::INSTANCE());
+    return em.is_identifier(x) && em.is_identifier(y)
+        ? x -> atom() < y -> atom() : 0 ;
+}

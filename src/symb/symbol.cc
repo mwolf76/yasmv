@@ -98,17 +98,3 @@ Literal& Symbol::as_literal(void) const
     return (*res);
 }
 
-bool Symbol::is_enum() const
-{
-    return NULL != dynamic_cast <const Enum_ptr>
-        (const_cast <const Symbol_ptr> (this));
-}
-
-Enum& Symbol::as_enum() const
-{
-    Enum_ptr res = dynamic_cast <const Enum_ptr>
-        (const_cast <const Symbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-

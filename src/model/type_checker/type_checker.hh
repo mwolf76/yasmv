@@ -93,7 +93,6 @@ private:
 
     Type_ptr check_logical(Expr_ptr expr);
     Type_ptr check_arithmetical(Expr_ptr expr);
-    Type_ptr check_enum(Expr_ptr expr);
     Type_ptr check_scalar(Expr_ptr expr);
     Type_ptr check_array(Expr_ptr expr);
 
@@ -115,6 +114,7 @@ private:
 
     void walk_binary_shift_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
+    void walk_binary_equality_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
     void walk_binary_cast_postorder(const Expr_ptr expr);
     void walk_ternary_ite_postorder(const Expr_ptr expr);

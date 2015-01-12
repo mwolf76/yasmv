@@ -42,21 +42,11 @@ void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_pt
 
 Symbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
-    FQExpr key(ctx, expr, 0); // time arbitrarily set to 0.
-
-    { /* enum types */
-        const Enums& enums = TypeMgr::INSTANCE().enums();
-        Enums::const_iterator iter = enums.find(key);
-        if (iter != enums.end()) {
-            return (*iter).second;
-        }
-    }
-
-    { /* enum literals */
+    { /* enum literals are globals, therefore no need for ctx here */
         const Literals& lits = TypeMgr::INSTANCE().literals();
-        Literals::const_iterator iter = lits.find(key);
+        Literals::const_iterator iter = lits.find(expr);
         if (iter != lits.end()) {
-            return (*iter).second;
+            return dynamic_cast<Symbol_ptr>((*iter).second);
         }
     }
 

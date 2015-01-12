@@ -111,10 +111,6 @@ EncodingMgr::EncodingMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_word_width ((OptsMgr::INSTANCE().word_width()))
 {
-    // unsigned base = 2;
-    // f_base = f_cudd.constant( base );
-    // f_msb  = f_cudd.constant( ::msb (base - 1));
-
     DRIVEL
         << "Initialized EncodingMgr @ " << this
         << ", native word size is " << f_word_width

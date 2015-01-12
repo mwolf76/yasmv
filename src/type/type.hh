@@ -143,6 +143,29 @@ public:
     ~BadType() throw();
 };
 
+/** Raised when the inferrer detects a wrong type */
+class IdentifierExpected : public TypeException {
+    Expr_ptr f_expr;
+
+public:
+    IdentifierExpected(Expr_ptr expr);
+
+    const char* what() const throw();
+    ~IdentifierExpected() throw();
+};
+
+/** Raised when the inferrer detects a wrong type */
+class DuplicateLiteral : public TypeException {
+    Expr_ptr f_expr;
+
+public:
+    DuplicateLiteral(Expr_ptr expr);
+
+    const char* what() const throw();
+    ~DuplicateLiteral() throw();
+};
+
+
 /** Raised when the inferrer detects two mismatching types */
 class TypeMismatch : public TypeException {
     Expr_ptr f_repr_a;

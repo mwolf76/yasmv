@@ -1,5 +1,5 @@
 /**
- *  @file type_checker/internals.cc
+ *  @file internals.cc
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -16,16 +16,6 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- *  This module contains definitions and services that implement a
- *  type inference engine. The type inference engine is implemented
- *  using a simple walker pattern: (a) on preorder, return true if the
- *  node has not yet been visited; (b) always do in-order (for binary
- *  nodes); (c) perform proper type checking in post-order
- *  hooks. Implicit conversion rules are designed to follow as closely
- *  as possible section 6.3.1 of iso/iec 9899:1999 (aka C99)
- *  standard. Type rules are implemented in the result_type methods of
- *  the TypeMgr class.
  *
  **/
 
@@ -108,6 +98,7 @@ void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
 void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
+
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
     Type_ptr lhs_type = check_arithmetical(expr->lhs());
     PUSH_TYPE( tm.result_type( expr, lhs_type, rhs_type));
@@ -254,18 +245,6 @@ Type_ptr TypeChecker::check_arithmetical(Expr_ptr expr)
     assert (NULL != res);
 
     if (res -> is_algebraic())
-        return res;
-
-    throw BadType(expr, res);
-    return NULL; /* unreachable */
-}
-
-Type_ptr TypeChecker::check_enum(Expr_ptr expr)
-{
-    POP_TYPE(res);
-    assert (NULL != res);
-
-    if (res -> is_enum())
         return res;
 
     throw BadType(expr, res);

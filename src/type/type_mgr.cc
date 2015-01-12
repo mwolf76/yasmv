@@ -38,18 +38,19 @@ TypeMgr::TypeMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_resolver(* new TypeResolver(* this))
 {
-    /* register predefined types */
-    register_type( f_em.make_boolean_type(),
-                   new BooleanType(*this));
+}
 
-    // (un)signed integers { 4, 8, 16, 32, 64 } bits wide
-    for (int i = 2; i <= 16; i *= 2) {
-        register_type( f_em.make_unsigned_int_type(i),
-                       new UnsignedAlgebraicType(*this, i, NULL));
+const ScalarType_ptr TypeMgr::find_boolean()
+{
+    Expr_ptr descr(f_em.make_boolean_type());
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr>(lookup_type(descr));
+    if (res)
+        return res;
 
-        register_type( f_em.make_signed_int_type(i),
-                       new SignedAlgebraicType(*this, i, NULL));
-    }
+    res = new BooleanType( *this);
+    register_type(descr, res);
+
+    return res;
 }
 
 const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
@@ -206,60 +207,24 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
     return res;
 }
 
-const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
+const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
 {
-    Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
+    Expr_ptr repr (em().make_enum_type(lits));
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type( repr ));
 
-    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (res)
-        return res;
+    if (! res) {
+        // new type, needs to be registered before returning
+        res = new EnumType( *this, lits );
+        register_type(repr, res);
 
-    // new type, needs to be registered before returning
-    res = new ArrayType( *this, of );
-
-    register_type(descr, res);
-    return res;
-}
-
-void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
-{
-    /*
-       IMPORTANT: lits ordering has to be canonical for enum types to
-       work as expected! Otherwise same set of lits with different
-       ordering could be mistakingly seen as a different type.
-    */
-    Expr_ptr fullname = ExprMgr::INSTANCE().make_dot( ctx, name );
-
-    if (lookup_type(fullname))
-        assert(0); // TODO: better error handling
-
-    EnumType_ptr tp = new EnumType( *this, lits );
-
-    // Define the ENUM
-    Enum_ptr enm = new Enum(ctx, name, tp);
-    f_enums.insert( std::make_pair<FQExpr, Enum_ptr>
-                    ( FQExpr( ctx, name), enm));
-
-    // Literals are all maintained together by the type mgr. This
-    // greatly simplifies the resolver.
-    for (ExprSet::iterator eye = lits.begin(); eye != lits.end(); ++ eye) {
-        Expr_ptr lit = *eye;
-
-        f_lits.insert( std::make_pair<FQExpr, Literal_ptr>
-                       (FQExpr( ctx, lit), new Literal(enm, lit)));
+        ExprSet::const_iterator i;
+        for (i = lits.begin(); lits.end() != i; ++ i) {
+            const Expr_ptr& expr(*i);
+            Literal* literal = new Literal(expr, res);
+            f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
+                          (expr, literal));
+        }
     }
-
-    // new type, needs to be registered before returning
-    register_type(fullname, tp);
-}
-
-const ScalarType_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
-{
-    ScalarType_ptr res =
-        dynamic_cast<ScalarType_ptr> (lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name)));
-
-    assert(res); // TODO error handling
-
     return res;
 }
 

@@ -62,3 +62,37 @@ const char* TypeMismatch::what() const throw()
     return oss.str().c_str();
 }
 
+IdentifierExpected::IdentifierExpected(Expr_ptr expr)
+    : f_expr(expr)
+{}
+
+IdentifierExpected::~IdentifierExpected() throw()
+{}
+
+const char* IdentifierExpected::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "TypeError: identifier expected while defining ENUM, got `"
+        << f_expr << "` instead";
+
+    return oss.str().c_str();
+}
+
+DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
+    : f_expr(expr)
+{}
+
+DuplicateLiteral::~DuplicateLiteral() throw()
+{}
+
+const char* DuplicateLiteral::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "TypeError: duplicate literal `"
+        << f_expr << "` detected";
+
+    return oss.str().c_str();
+}
+

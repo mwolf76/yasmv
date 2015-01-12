@@ -56,26 +56,13 @@ class TypeMgr {
     Type_ptr f_ctx_type;
 
     /* Shared enums and literals */
-    Enums f_enums;
     Literals f_lits;
 
 public:
 
-    inline Resolver_ptr resolver()
-    { return &f_resolver; }
-
     /* -- inference --------------------------------------------------------- */
-    inline const ScalarType_ptr find_boolean()
-    {
-        return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]);
-    }
+    const ScalarType_ptr find_boolean();
 
-    /* -- abstract types ---------------------------------------------------- */
-    // const ScalarType_ptr find_signed_type();
-    // const ScalarType_ptr find_unsigned_type();
-    const ArrayType_ptr find_array_type( ScalarType_ptr of );
-
-    /* -- decls ------------------------------------------------------------- */
     const ScalarType_ptr find_int_const(unsigned digits);
     const ScalarType_ptr find_signed(unsigned digits);
     const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
@@ -97,12 +84,9 @@ public:
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);
 
-    /* Remark: unambiguous enums resolution requires DOT fullnames */
-    void register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
-    const ScalarType_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
+    /* Remark: following C scoping rules for enums, enums are *globals* */
+    const ScalarType_ptr find_enum(ExprSet& lits);
 
-    const Enums& enums() const
-    { return f_enums; }
     const Literals& literals() const
     { return f_lits; }
 
@@ -111,6 +95,9 @@ public:
     Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
     Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
     Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
+
+    inline Resolver_ptr resolver()
+    { return &f_resolver; }
 
     /** Singleton instance accessor */
     static inline TypeMgr& INSTANCE() {

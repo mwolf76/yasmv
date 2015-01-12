@@ -47,11 +47,7 @@ typedef boost::unordered_map<FQExpr, Symbol_ptr, FQExprHash, FQExprEq> Symbols;
 
 class Literal;
 typedef Literal* Literal_ptr;
-typedef boost::unordered_map<FQExpr, Literal_ptr, FQExprHash, FQExprEq> Literals;
-
-class Enum;
-typedef Enum* Enum_ptr;
-typedef boost::unordered_map<FQExpr, Enum_ptr, FQExprHash, FQExprEq> Enums;
+typedef boost::unordered_map<Expr_ptr, Literal_ptr, PtrHash, PtrEq> Literals;
 
 class Constant;
 typedef Constant* Constant_ptr;
@@ -101,9 +97,6 @@ public:
 
     bool is_define() const;
     Define& as_define() const;
-
-    bool is_enum() const;
-    Enum& as_enum() const;
 };
 
 class Constant
@@ -171,62 +164,27 @@ public:
     { return f_temp; }
 };
 
-class Enum
+class Literal
     : public Symbol
     , public Typed
 {
-    const Expr_ptr f_ctx;
-    const Expr_ptr f_name;
-    const EnumType_ptr f_type;
+    const Expr_ptr f_expr;
+    const Type_ptr f_type;
 
 public:
-    Enum(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
-        : f_ctx(ctx)
-        , f_name(name)
+    Literal(const Expr_ptr expr, const Type_ptr type)
+        : f_expr(expr)
         , f_type(type)
     {}
 
     virtual const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    virtual const Expr_ptr name() const
-    { return f_name; }
+    { return NULL; }
 
     virtual const Expr_ptr expr() const
-    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
+    { return f_expr; }
 
     virtual const Type_ptr type() const
     { return f_type; }
-};
-
-class Literal
-    : public Symbol
-    , public Typed
-    , public Value
-{
-    const Enum_ptr f_owner;
-    const Expr_ptr f_name;
-
-public:
-    Literal(Enum_ptr owner, const Expr_ptr name)
-        : f_owner(owner)
-        , f_name(name)
-    {}
-
-    virtual const Expr_ptr ctx() const
-    { return f_owner->ctx(); }
-
-    virtual const Expr_ptr name() const
-    { return  f_name; }
-
-    virtual const Type_ptr type() const
-    { return f_owner->type(); }
-
-    virtual const Expr_ptr expr() const
-    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
-
-    virtual value_t value() const
-    { return dynamic_cast<EnumType_ptr> (type())->value(expr()); }
 };
 
 class Define

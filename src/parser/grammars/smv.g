@@ -88,7 +88,6 @@ module_decl
     :	/* variables and defines */
         fsm_var_decl
     |   fsm_ivar_decl
-    |   fsm_enum_decl
 	|	fsm_define_decl
 
 		/* FSM definition */
@@ -104,35 +103,6 @@ fsm_ivar_decl
 fsm_var_decl
     : 'VAR'  fsm_var_decl_body
     ;
-
-fsm_enum_decl
-    : 'ENUM' fsm_enum_decl_body
-    ;
-
-fsm_enum_decl_body
-    : fsm_enum_decl_clause
-        ( ';' fsm_enum_decl_clause)*
-    ;
-
-fsm_enum_decl_clause
-@init {
-    ExprSet lits;
-}
-    : expr=identifier ':' fsm_enum_type_lits[lits]
-      { tm.register_enum( $smv::current_module->name(), expr, lits ); }
-    ;
-
-fsm_enum_type_lits [ExprSet& lits]
-	:
-     '{'
-          lit=literal
-          { $lits.insert(lit); }
-
-          (',' lit=literal
-          { $lits.insert(lit); }
-          )*
-     '}'
-	;
 
 fsm_ivar_decl_body
 	: fsm_ivar_decl_clause
@@ -744,9 +714,11 @@ signed_fxd_type returns [Type_ptr res]
     ;
 
 enum_type returns [Type_ptr res]
-@init {}
-    : expr=identifier
-      { $res = tm.find_enum( $smv::current_module->name(), expr ); }
+@init {
+    ExprSet lits;
+}
+    : '{' lit=literal { lits.insert(lit); } (',' lit=literal { lits.insert(lit); })* '}'
+          { $res = tm.find_enum( lits ); }
     ;
 
 literal returns [Expr_ptr res]

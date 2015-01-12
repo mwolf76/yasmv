@@ -32,24 +32,22 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     : MonolithicalType(owner)
     , f_literals(literals)
 {
-    f_repr = f_owner.em().make_enum_type(f_literals);
-    ExprSet::iterator i;
+    TypeMgr& tm (TypeMgr::INSTANCE());
+    const Literals& lits (tm.literals());
 
-    for (i = literals.begin(); i != literals.end(); ++ i) {
-        Expr_ptr expr = *i;
-        assert(ExprMgr::INSTANCE().is_identifier(expr)); // debug only
+    for (ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++ i) {
+        const Expr_ptr& lit(*i);
+
+        if (! ExprMgr::INSTANCE().is_identifier(lit))
+            throw IdentifierExpected(lit);
+
+        if (lits.end() != lits.find(lit))
+            throw DuplicateLiteral(lit);
     }
+
+    f_repr = f_owner.em().make_enum_type(f_literals);
 }
 
 unsigned EnumType::width() const
-{
-    unsigned res = 0, pow = 1;
-
-    while (pow < f_literals.size()) {
-        ++ res;
-        pow *= 2;
-    }
-
-    return res;
-}
+{ return 1; }
 

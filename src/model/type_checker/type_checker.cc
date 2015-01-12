@@ -112,18 +112,6 @@ Type_ptr TypeChecker::check_arithmetical(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr TypeChecker::check_enum(Expr_ptr expr)
-{
-    POP_TYPE(res);
-    assert (NULL != res);
-
-    if (res -> is_enum())
-        return res;
-
-    throw BadType(expr, res);
-    return NULL; /* unreachable */
-}
-
 Type_ptr TypeChecker::check_scalar(Expr_ptr expr)
 {
     POP_TYPE(res);
@@ -330,14 +318,14 @@ bool TypeChecker::walk_eq_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_eq_postorder(const Expr_ptr expr)
-{ walk_binary_relational_postorder(expr); }
+{ walk_binary_equality_postorder(expr); }
 
 bool TypeChecker::walk_ne_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_ne_postorder(const Expr_ptr expr)
-{ walk_binary_relational_postorder(expr); }
+{ walk_binary_equality_postorder(expr); }
 
 bool TypeChecker::walk_gt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -501,11 +489,6 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
-        else if (symb->is_enum()) { // meta type
-            Type_ptr res = symb->as_enum().type();
-            PUSH_TYPE(res);
-            return;
-        }
         // else if (symb->is_array()) { // meta type
         //     Type_ptr res = symb->as_array().type();
         //     PUSH_TYPE(res);
@@ -603,6 +586,25 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
     Type_ptr lhs_type = check_arithmetical(expr->lhs());
     PUSH_TYPE( tm.result_type( expr, lhs_type, rhs_type));
 }
+
+// fun: B/A/E x B/A/E -> boolean
+void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm = f_owner.tm();
+    POP_TYPE(rhs_type);
+
+    if (rhs_type -> is_boolean())
+        PUSH_TYPE( tm.result_type( expr, check_logical(expr->lhs()), rhs_type));
+    else if (rhs_type -> is_algebraic())
+        PUSH_TYPE( tm.result_type( expr, check_arithmetical(expr->lhs()), rhs_type));
+    else {
+        POP_TYPE( lhs_type );
+        if (lhs_type != rhs_type)
+            throw BadType(expr->lhs(), lhs_type);
+        PUSH_TYPE( tm.find_boolean());
+    }
+}
+
 
 // fun:  boolean x T -> T
 void TypeChecker::walk_ternary_cond_postorder(const Expr_ptr expr)
