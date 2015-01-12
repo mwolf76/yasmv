@@ -1,6 +1,6 @@
 /**
- *  @file inferrer.hh
- *  @brief Expr type inferrer
+ *  @file type_checker.hh
+ *  @brief Expr type checker
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,8 +20,8 @@
  *
  **/
 
-#ifndef INFERRER_H
-#define INFERRER_H
+#ifndef TYPE_CHECKER_H
+#define TYPE_CHECKER_H
 
 #include <vector>
 
@@ -29,8 +29,6 @@
 
 #include <type/type.hh>
 #include <type/type_mgr.hh>
-
-#include <model/model.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
@@ -48,10 +46,10 @@ typedef boost::unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
         f_type_stack.push_back(tp)
 
 class ModelMgr;
-class Inferrer : public ExprWalker {
+class TypeChecker : public ExprWalker {
 public:
-    Inferrer(ModelMgr& owner);
-    ~Inferrer();
+    TypeChecker(ModelMgr& owner);
+    ~TypeChecker();
 
     /** @brief Returns Type object for given FQExpr (memoized). */
     Type_ptr type(Expr_ptr expr, Expr_ptr ctx);

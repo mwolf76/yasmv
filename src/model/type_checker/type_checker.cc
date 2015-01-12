@@ -1,6 +1,6 @@
 /**
- *  @file inferrer.cc
- *  @brief Expr type inferrer
+ *  @file type_checker.cc
+ *  @brief Expr type type_checker
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -36,31 +36,28 @@
 #include <type/type.hh>
 #include <symb/proxy.hh>
 
-#include <model/inferrer.hh>
-#include <model/model_mgr.hh>
+#include <model/type_checker/type_checker.hh>
 
-// uncommment following line to enable post_node_hook debug (verbose!)
-// #define DEBUG_INFERRER
-
-Inferrer::Inferrer(ModelMgr& owner)
+TypeChecker::TypeChecker(ModelMgr& owner)
     : f_map()
     , f_type_stack()
     , f_ctx_stack()
     , f_owner(owner)
 {
     DRIVEL
-        << "Created Inferrer @" << this
+        << "Created TypeChecker @" << this
         << std::endl;
 }
 
-Inferrer::~Inferrer()
-{ DRIVEL
-        << "Destroying Inferrer @" << this
+TypeChecker::~TypeChecker()
+{
+    DRIVEL
+        << "Destroying TypeChecker @" << this
         << std::endl;
 }
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
-Type_ptr Inferrer::process(Expr_ptr expr, Expr_ptr ctx)
+Type_ptr TypeChecker::process(Expr_ptr expr, Expr_ptr ctx)
 {
     // remove previous results
     f_type_stack.clear();
@@ -80,32 +77,18 @@ Type_ptr Inferrer::process(Expr_ptr expr, Expr_ptr ctx)
     return res;
 }
 
-void Inferrer::pre_hook()
+void TypeChecker::pre_hook()
 {}
-void Inferrer::post_hook()
-{}
-
-void Inferrer::pre_node_hook(Expr_ptr expr)
+void TypeChecker::post_hook()
 {}
 
-void Inferrer::post_node_hook(Expr_ptr expr)
-{
-    memoize_result(expr);
+void TypeChecker::pre_node_hook(Expr_ptr expr)
+{}
 
-#ifdef DEBUG_INFERRER
-    activation_record curr = f_recursion_stack.top();
-    DEBUG << "inferrer post-node hook, expr = " << curr.expr << endl;
+void TypeChecker::post_node_hook(Expr_ptr expr)
+{ memoize_result(expr); }
 
-    DEBUG << "Type Stack" << endl;
-    for (TypeStack::reverse_iterator i = f_type_stack.rbegin();
-         i != f_type_stack.rend(); ++ i) {
-        DEBUG << *i << endl;
-    }
-    DEBUG << "--------------------" << endl;
-#endif
-}
-
-Type_ptr Inferrer::check_logical(Expr_ptr expr)
+Type_ptr TypeChecker::check_logical(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -117,7 +100,7 @@ Type_ptr Inferrer::check_logical(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_arithmetical(Expr_ptr expr)
+Type_ptr TypeChecker::check_arithmetical(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -129,7 +112,7 @@ Type_ptr Inferrer::check_arithmetical(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_enum(Expr_ptr expr)
+Type_ptr TypeChecker::check_enum(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -141,7 +124,7 @@ Type_ptr Inferrer::check_enum(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_scalar(Expr_ptr expr)
+Type_ptr TypeChecker::check_scalar(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -153,7 +136,7 @@ Type_ptr Inferrer::check_scalar(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_array(Expr_ptr expr)
+Type_ptr TypeChecker::check_array(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -165,242 +148,242 @@ Type_ptr Inferrer::check_array(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-bool Inferrer::walk_F_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_F_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_F_postorder(const Expr_ptr expr)
+void TypeChecker::walk_F_postorder(const Expr_ptr expr)
 { walk_unary_ltl_postorder(expr); }
 
-bool Inferrer::walk_G_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_G_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_G_postorder(const Expr_ptr expr)
+void TypeChecker::walk_G_postorder(const Expr_ptr expr)
 { walk_unary_ltl_postorder(expr); }
 
-bool Inferrer::walk_X_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_X_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_X_postorder(const Expr_ptr expr)
+void TypeChecker::walk_X_postorder(const Expr_ptr expr)
 { walk_unary_ltl_postorder(expr); }
 
-bool Inferrer::walk_U_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_U_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_U_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_U_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_U_postorder(const Expr_ptr expr)
+void TypeChecker::walk_U_postorder(const Expr_ptr expr)
 { walk_binary_ltl_postorder(expr); }
 
-bool Inferrer::walk_R_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_R_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_R_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_R_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_R_postorder(const Expr_ptr expr)
+void TypeChecker::walk_R_postorder(const Expr_ptr expr)
 { walk_binary_ltl_postorder(expr); }
 
-bool Inferrer::walk_next_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_next_postorder(const Expr_ptr expr)
+void TypeChecker::walk_next_postorder(const Expr_ptr expr)
 { walk_unary_fsm_postorder(expr); }
 
-bool Inferrer::walk_neg_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_neg_postorder(const Expr_ptr expr)
+void TypeChecker::walk_neg_postorder(const Expr_ptr expr)
 { walk_unary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_not_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_not_postorder(const Expr_ptr expr)
+void TypeChecker::walk_not_postorder(const Expr_ptr expr)
 { walk_unary_logical_postorder(expr); }
 
-bool Inferrer::walk_bw_not_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_bw_not_postorder(const Expr_ptr expr)
+void TypeChecker::walk_bw_not_postorder(const Expr_ptr expr)
 { walk_unary_logical_postorder(expr); }
 
-bool Inferrer::walk_add_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_add_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_add_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_add_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_add_postorder(const Expr_ptr expr)
+void TypeChecker::walk_add_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_sub_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_sub_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_sub_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_sub_postorder(const Expr_ptr expr)
+void TypeChecker::walk_sub_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_div_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_div_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_div_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_div_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_div_postorder(const Expr_ptr expr)
+void TypeChecker::walk_div_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_mul_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_mul_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_mul_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_mul_postorder(const Expr_ptr expr)
+void TypeChecker::walk_mul_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_mod_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_mod_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_mod_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_mod_postorder(const Expr_ptr expr)
+void TypeChecker::walk_mod_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_and_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_and_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_and_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_and_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_and_postorder(const Expr_ptr expr)
+void TypeChecker::walk_and_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
-bool Inferrer::walk_bw_and_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_and_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_bw_and_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_and_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_bw_and_postorder(const Expr_ptr expr)
+void TypeChecker::walk_bw_and_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_or_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_or_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_or_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_or_postorder(const Expr_ptr expr)
+void TypeChecker::walk_or_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
-bool Inferrer::walk_bw_or_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_bw_or_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_bw_or_postorder(const Expr_ptr expr)
+void TypeChecker::walk_bw_or_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_bw_xor_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_xor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_bw_xor_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_bw_xor_postorder(const Expr_ptr expr)
+void TypeChecker::walk_bw_xor_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_bw_xnor_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_xnor_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_bw_xnor_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_bw_xnor_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_bw_xnor_postorder(const Expr_ptr expr)
+void TypeChecker::walk_bw_xnor_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
-bool Inferrer::walk_implies_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_implies_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_implies_postorder(const Expr_ptr expr)
+void TypeChecker::walk_implies_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
-bool Inferrer::walk_iff_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_iff_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_iff_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_iff_postorder(const Expr_ptr expr)
+void TypeChecker::walk_iff_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
-bool Inferrer::walk_cast_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_cast_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_cast_postorder(const Expr_ptr expr)
+void TypeChecker::walk_cast_postorder(const Expr_ptr expr)
 { walk_binary_cast_postorder(expr); }
 
-bool Inferrer::walk_type_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_type_preorder(const Expr_ptr expr)
 {
     Type_ptr tp = f_owner.tm().find_type_by_def(expr);
     f_type_stack.push_back( tp);
     return false;
 }
-bool Inferrer::walk_type_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_type_inorder(const Expr_ptr expr)
 {
     assert( false ); /* unreachable */
     return false;
 }
-void Inferrer::walk_type_postorder(const Expr_ptr expr)
+void TypeChecker::walk_type_postorder(const Expr_ptr expr)
 {
     assert( false ); /* unreachable */
 }
 
-bool Inferrer::walk_lshift_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_lshift_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_lshift_postorder(const Expr_ptr expr)
+void TypeChecker::walk_lshift_postorder(const Expr_ptr expr)
 { walk_binary_shift_postorder(expr); }
 
-bool Inferrer::walk_rshift_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_rshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_rshift_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_rshift_postorder(const Expr_ptr expr)
+void TypeChecker::walk_rshift_postorder(const Expr_ptr expr)
 { walk_binary_shift_postorder(expr); }
 
-bool Inferrer::walk_eq_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_eq_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_eq_postorder(const Expr_ptr expr)
+void TypeChecker::walk_eq_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_ne_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_ne_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_ne_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_ne_postorder(const Expr_ptr expr)
+void TypeChecker::walk_ne_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_gt_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_gt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_gt_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_gt_postorder(const Expr_ptr expr)
+void TypeChecker::walk_gt_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_ge_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_ge_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_ge_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_ge_postorder(const Expr_ptr expr)
+void TypeChecker::walk_ge_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_lt_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_lt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_lt_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_lt_postorder(const Expr_ptr expr)
+void TypeChecker::walk_lt_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_le_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_le_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_le_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_le_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_le_postorder(const Expr_ptr expr)
+void TypeChecker::walk_le_postorder(const Expr_ptr expr)
 { walk_binary_relational_postorder(expr); }
 
-bool Inferrer::walk_ite_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_ite_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_ite_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_ite_postorder(const Expr_ptr expr)
+void TypeChecker::walk_ite_postorder(const Expr_ptr expr)
 { walk_ternary_ite_postorder(expr); }
 
-bool Inferrer::walk_cond_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_cond_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_cond_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_cond_postorder(const Expr_ptr expr)
+void TypeChecker::walk_cond_postorder(const Expr_ptr expr)
 { walk_ternary_cond_postorder(expr); }
 
-bool Inferrer::walk_dot_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_dot_inorder(const Expr_ptr expr)
 {
     assert( false ); // TODO
     // Type_ptr tmp = f_type_stack.back(); // TODO: review this
@@ -409,7 +392,7 @@ bool Inferrer::walk_dot_inorder(const Expr_ptr expr)
 
     return true;
 }
-void Inferrer::walk_dot_postorder(const Expr_ptr expr)
+void TypeChecker::walk_dot_postorder(const Expr_ptr expr)
 {
     Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
     EnumType_ptr enm;
@@ -434,23 +417,23 @@ void Inferrer::walk_dot_postorder(const Expr_ptr expr)
 }
 
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
-bool Inferrer::walk_params_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_params_preorder(const Expr_ptr expr)
 {
     Expr_ptr ctx = f_ctx_stack.back();
     (*this)( f_owner.preprocess( expr, ctx));
 
     return false;
 }
-bool Inferrer::walk_params_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_params_inorder(const Expr_ptr expr)
 { assert( false ); return false; /* unreachable */ }
-void Inferrer::walk_params_postorder(const Expr_ptr expr)
+void TypeChecker::walk_params_postorder(const Expr_ptr expr)
 { assert( false ); return ; /* unreachable */ }
 
-bool Inferrer::walk_subscript_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-bool Inferrer::walk_subscript_inorder(const Expr_ptr expr)
+bool TypeChecker::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
-void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
+void TypeChecker::walk_subscript_postorder(const Expr_ptr expr)
 {
     POP_TYPE(index);
     if (! index -> is_algebraic())
@@ -461,20 +444,20 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
               -> as_array() -> of());
 }
 
-bool Inferrer::walk_set_preorder(const Expr_ptr expr)
+bool TypeChecker::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
-void Inferrer::walk_set_postorder(const Expr_ptr expr)
+void TypeChecker::walk_set_postorder(const Expr_ptr expr)
 {
     assert(false); // TODO
 }
 
-bool Inferrer::walk_comma_preorder(Expr_ptr expr)
+bool TypeChecker::walk_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }
 
-bool Inferrer::walk_comma_inorder(Expr_ptr expr)
+bool TypeChecker::walk_comma_inorder(Expr_ptr expr)
 { return true; }
 
-void Inferrer::walk_comma_postorder(Expr_ptr expr)
+void TypeChecker::walk_comma_postorder(Expr_ptr expr)
 {
     POP_TYPE(rhs);
     POP_TYPE(lhs);
@@ -485,7 +468,7 @@ void Inferrer::walk_comma_postorder(Expr_ptr expr)
     PUSH_TYPE(lhs);
 }
 
-void Inferrer::walk_leaf(const Expr_ptr expr)
+void TypeChecker::walk_leaf(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     ExprMgr& em = f_owner.em();
@@ -547,22 +530,22 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
 }
 
 // fun: T -> T
-void Inferrer::walk_unary_fsm_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_fsm_postorder(const Expr_ptr expr)
 { /* no checks */ }
 
-void Inferrer::walk_unary_ltl_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_ltl_postorder(const Expr_ptr expr)
 { /* no checks */ }
 
 // fun: arithm -> arithm
-void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 { PUSH_TYPE( check_arithmetical(expr->lhs())); }
 
 // fun: logical -> logical
-void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_logical_postorder(const Expr_ptr expr)
 { PUSH_TYPE( check_logical(expr->lhs())); }
 
 // fun: arithm, arithm -> arithm
-void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
@@ -571,7 +554,7 @@ void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 }
 
 // fun: logical x logical -> logical
-void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_fsm_postorder(const Expr_ptr expr)
 {
     Type_ptr rhs_type = check_logical(expr->rhs());
     (void) rhs_type;
@@ -581,7 +564,7 @@ void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
     PUSH_TYPE( lhs_type );
 }
 
-void Inferrer::walk_binary_ltl_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_ltl_postorder(const Expr_ptr expr)
 {
     Type_ptr rhs_type = check_logical(expr->rhs()); (void) rhs_type;
     Type_ptr lhs_type = check_logical(expr->lhs());
@@ -589,14 +572,14 @@ void Inferrer::walk_binary_ltl_postorder(const Expr_ptr expr)
 }
 
 // fun: logical x logical -> logical
-void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
 {
     Type_ptr rhs_type = check_logical( expr->rhs()); (void) rhs_type;
     Type_ptr lhs_type = check_logical( expr->lhs());
     PUSH_TYPE( lhs_type );
 }
 
-void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_cast_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
@@ -605,7 +588,7 @@ void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
 }
 
 /* specialized for shift ops (use rhs) */
-void Inferrer::walk_binary_shift_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
 {
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
     Type_ptr lhs_type = check_arithmetical(expr->lhs()); (void) lhs_type;
@@ -613,7 +596,7 @@ void Inferrer::walk_binary_shift_postorder(const Expr_ptr expr)
 }
 
 // fun: arithmetical x arithmetical -> boolean
-void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
@@ -622,7 +605,7 @@ void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 }
 
 // fun:  boolean x T -> T
-void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
+void TypeChecker::walk_ternary_cond_postorder(const Expr_ptr expr)
 {
     Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     Type_ptr lhs_type = check_logical(expr->lhs()); (void) lhs_type;
@@ -630,7 +613,7 @@ void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
 }
 
 // fun: (boolean ? T) x T -> T
-void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
+void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
 
@@ -641,7 +624,7 @@ void Inferrer::walk_ternary_ite_postorder(const Expr_ptr expr)
     PUSH_TYPE(res);
 }
 
-void Inferrer::memoize_result (Expr_ptr expr)
+void TypeChecker::memoize_result (Expr_ptr expr)
 {
     Type_ptr type = f_type_stack.back();
     f_map[ FQExpr(f_ctx_stack.back(),
@@ -650,7 +633,7 @@ void Inferrer::memoize_result (Expr_ptr expr)
 
 /* This is used to attempt for a better memoization, but it's not
    really critical */
-Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
+Expr_ptr TypeChecker::find_canonical_expr(Expr_ptr expr)
 {
     ExprMgr& em = f_owner.em();
 
@@ -711,7 +694,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
     assert ( false ); // unreachable
 }
 
-Type_ptr Inferrer::type(Expr_ptr expr, Expr_ptr ctx)
+Type_ptr TypeChecker::type(Expr_ptr expr, Expr_ptr ctx)
 {
     /* to avoid a number of cache misses due to compiler rewrites,
        we squeeze types in equivalence classes: Relationals -> lhs

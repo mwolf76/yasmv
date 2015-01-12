@@ -37,7 +37,7 @@ ModelMgr::ModelMgr()
     , f_tm(TypeMgr::INSTANCE())
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
-    , f_inferrer(* new Inferrer(* this))
+    , f_type_checker(* new TypeChecker(* this))
 {}
 
 // ResolutionException::ResolutionException(Expr_ptr expr)
@@ -83,7 +83,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing INIT " << fqdn << std::endl;
 
             try {
-                f_inferrer.process(body, ctx);
+                f_type_checker.process(body, ctx);
             }
             catch (Exception& ae) {
                 std::string tmp(ae.what());
@@ -107,7 +107,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing INVAR " << fqdn << std::endl;
 
             try {
-                f_inferrer.process(body, ctx);
+                f_type_checker.process(body, ctx);
             }
             catch (Exception& ae) {
                 std::string tmp (ae.what());
@@ -131,7 +131,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing TRANS " << fqdn << std::endl;
 
             try {
-                f_inferrer.process(body, ctx);
+                f_type_checker.process(body, ctx);
             }
             catch (Exception& ae) {
                 std::string tmp(ae.what());
@@ -154,7 +154,7 @@ void ModelMgr::second_pass()
             DEBUG << "processing DEFINE " << fqdn << std::endl;
 
             try {
-                f_inferrer.process(body, ctx);
+                f_type_checker.process(body, ctx);
             }
             catch (Exception& ae) {
                 std::string tmp (ae.what());

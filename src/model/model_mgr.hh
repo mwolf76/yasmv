@@ -30,7 +30,7 @@
 #include <model/model.hh>
 #include <model/model_resolver.hh>
 #include <model/preprocessor.hh>
-#include <model/inferrer.hh>
+#include <model/type_checker/type_checker.hh>
 
 #include <expr/expr_mgr.hh>
 
@@ -62,7 +62,7 @@ public:
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,
                          Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
-        return f_inferrer.type(body, ctx);
+        return f_type_checker.type(body, ctx);
     }
 
     // delegated param binding method
@@ -99,8 +99,8 @@ private:
     // ref to preprocessor (used for defines expr substitution)
     Preprocessor& f_preprocessor;
 
-    // ref to inferrer (used for model analysis)
-    Inferrer& f_inferrer;
+    // ref to type_checker (used for model analysis)
+    TypeChecker& f_type_checker;
 
     // analyzer passes
     bool f_status;
