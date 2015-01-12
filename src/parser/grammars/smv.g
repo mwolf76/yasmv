@@ -52,7 +52,7 @@ options {
     Model& model (mm.model());
 }
 
-/* SMV model Toplevel */
+// --- Model Description Language  ---------------------------------------------
 smv
 scope {
     Module_ptr current_module;
@@ -64,7 +64,7 @@ scope {
             model.add_module(* ($smv::current_module = new Module(module_id)));
     }
 
-    module_body ';'? // exit point
+    module_body ';'?
     ;
 
 model_directives
@@ -80,170 +80,6 @@ model_word_width_directive
     { om.set_word_width( width -> value()); }
     ;
 
-/* Scripting sub-system Toplevel */
-cmd returns [Command_ptr res]
-    : command = commands
-    { $res = command; }
-    ;
-
-commands returns [Command_ptr res]
-    :  c=help_command
-       { $res = c; }
-
-    |  c=time_command
-       { $res = c; }
-
-    | c=job_command
-      { $res = c; }
-
-    |  c=init_command
-       { $res = c; }
-
-    |  c=model_command
-       { $res = c; }
-
-    |  c=simulate_command
-       { $res = c; }
-
-    |  c=verify_command
-       { $res = c; }
-
-    |  c=witness_command
-       { $res = c; }
-
-    |  c=quit_command
-       { $res = c; }
-    ;
-
-help_command returns [Command_ptr res]
-@init {
-    Atom topic;
-}
-    : 'help'
-      ( IDENTIFIER { topic = (const char *) $IDENTIFIER.text->chars; } )?
-      { $res = cm.make_help(topic); }
-    ;
-
-time_command returns [Command_ptr res]
-    : 'time' { $res = cm.make_time(); }
-    ;
-
-init_command returns [Command_ptr res]
-    : 'init' { $res = cm.make_init(); }
-    ;
-
-job_command returns [Command_ptr res]
-    :   'job' (
-
-            'list'
-            { $res = cm.make_job_list(); }
-
-        |   'status' wid=identifier
-            { $res = cm.make_job_status(wid); }
-
-        |   'kill' wid=identifier
-            { $res = cm.make_job_kill(wid); }
-        )
-    ;
-model_command returns [Command_ptr res]
-    : 'model' (
-            'load' fp=filepath
-            { $res = cm.make_model_load(fp); }
-
-        |   'dump'
-            { $res = cm.make_model_dump(); }
-        )
-    ;
-
-
-verify_command returns[Command_ptr res]
-@init {
-    ExprVector constraints;
-}
-    : 'verify' property=toplevel_expression
-
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        { $res = cm.make_verify( property, constraints ); }
-    ;
-
-witness_command returns [Command_ptr res]
-    :   'witness' (
-
-            'list'
-            { $res = cm.make_witness_list(); }
-
-        |   'dump' wid=identifier
-            { $res = cm.make_witness_dump(wid); }
-
-        )
-    ;
-
-simulate_command returns [Command_ptr res]
-@init {
-    Expr_ptr halt_cond = NULL;
-    Expr_ptr resume_id = NULL;
-    ExprVector constraints;
-}
-    : 'simulate'
-
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        ( 'halt' expr=toplevel_expression
-          { halt_cond = expr; }
-        |  expr=constant
-          { halt_cond = expr; }
-        ) ?
-
-        (  'resume' wid=identifier
-           { resume_id = wid; }
-        )?
-
-        { $res = cm.make_simulate( halt_cond, resume_id, constraints ); }
-    ;
-
-quit_command returns [Command_ptr res]
-    :  'quit'
-       { $res = cm.make_quit(); }
-    ;
-
-// -------------------------------------------------------------------------------
-
-filepath returns [const char *res]
-@init { std::ostringstream oss; }
-    :
-        (
-            frag=filepath_fragment
-            { oss << frag; }
-        ) +
-        { $res = oss.str().c_str(); }
-    ;
-
-filepath_fragment returns [const char *res]
-    :
-        IDENTIFIER
-        { $res = (const char *) $IDENTIFIER.text->chars; }
-
-    |   '.'
-        { $res = "."; }
-
-    |   '/'
-        { $res = "/"; }
-    ;
-
-// FSM definition entry point
 module_body
     :	module_decl ( ';' module_decl )*
     ;
@@ -861,10 +697,12 @@ unsigned_fxd_type returns [Type_ptr res]
         UNSIGNED_FXD_TYPE
         {
             p = (char *) $UNSIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to magnitude
+            while (!isdigit(*p))
+                ++ p;
 
             q = p;
-            while (*q != '.') ++ q; // skip to fractional
+            while (*q != '.')
+                ++ q;
 
             *(q ++) = 0;
         }
@@ -886,10 +724,12 @@ signed_fxd_type returns [Type_ptr res]
         SIGNED_FXD_TYPE
         {
             p = (char *) $SIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to magnitude
+            while (!isdigit(*p))
+                ++ p;
 
             q = p;
-            while (*q != '.') ++ q; // skip to fractional
+            while (*q != '.')
+                ++ q;
 
             *(q ++) = 0;
         }
@@ -915,7 +755,168 @@ literal returns [Expr_ptr res]
        { $res = expr; }
     ;
 
-/** Lexer rules */
+// -- Scripting sub-system Toplevel ---------------------------------------------
+cmd returns [Command_ptr res]
+    : command = commands
+    { $res = command; }
+    ;
+
+commands returns [Command_ptr res]
+    :  c=help_command
+       { $res = c; }
+
+    |  c=time_command
+       { $res = c; }
+
+    | c=job_command
+      { $res = c; }
+
+    |  c=init_command
+       { $res = c; }
+
+    |  c=model_command
+       { $res = c; }
+
+    |  c=simulate_command
+       { $res = c; }
+
+    |  c=verify_command
+       { $res = c; }
+
+    |  c=witness_command
+       { $res = c; }
+
+    |  c=quit_command
+       { $res = c; }
+    ;
+
+help_command returns [Command_ptr res]
+@init {
+    Atom topic;
+}
+    : 'help'
+      ( IDENTIFIER { topic = (const char *) $IDENTIFIER.text->chars; } )?
+      { $res = cm.make_help(topic); }
+    ;
+
+time_command returns [Command_ptr res]
+    : 'time' { $res = cm.make_time(); }
+    ;
+
+init_command returns [Command_ptr res]
+    : 'init' { $res = cm.make_init(); }
+    ;
+
+job_command returns [Command_ptr res]
+    :   'job' (
+
+            'list'
+            { $res = cm.make_job_list(); }
+
+        |   'status' wid=identifier
+            { $res = cm.make_job_status(wid); }
+
+        |   'kill' wid=identifier
+            { $res = cm.make_job_kill(wid); }
+        )
+    ;
+model_command returns [Command_ptr res]
+    : 'model' (
+            'load' fp=filepath
+            { $res = cm.make_model_load(fp); }
+
+        |   'dump'
+            { $res = cm.make_model_dump(); }
+        )
+    ;
+
+
+verify_command returns[Command_ptr res]
+@init {
+    ExprVector constraints;
+}
+    : 'verify' property=toplevel_expression
+
+        ( 'with' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
+        ) ?
+
+        { $res = cm.make_verify( property, constraints ); }
+    ;
+
+witness_command returns [Command_ptr res]
+    :   'witness' (
+
+            'list'
+            { $res = cm.make_witness_list(); }
+
+        |   'dump' wid=identifier
+            { $res = cm.make_witness_dump(wid); }
+
+        )
+    ;
+
+simulate_command returns [Command_ptr res]
+@init {
+    Expr_ptr halt_cond = NULL;
+    Expr_ptr resume_id = NULL;
+    ExprVector constraints;
+}
+    : 'simulate'
+
+        ( 'with' expr=toplevel_expression
+          { constraints.push_back( expr ); }
+
+          ( ',' expr=toplevel_expression
+            { constraints.push_back( expr ); }
+          ) *
+        ) ?
+
+        ( 'halt' expr=toplevel_expression
+          { halt_cond = expr; }
+        |  expr=constant
+          { halt_cond = expr; }
+        ) ?
+
+        (  'resume' wid=identifier
+           { resume_id = wid; }
+        )?
+
+        { $res = cm.make_simulate( halt_cond, resume_id, constraints ); }
+    ;
+
+quit_command returns [Command_ptr res]
+    :  'quit'
+       { $res = cm.make_quit(); }
+    ;
+
+filepath returns [const char *res]
+@init { std::ostringstream oss; }
+    :
+        (
+            frag=filepath_fragment
+            { oss << frag; }
+        ) +
+        { $res = oss.str().c_str(); }
+    ;
+
+filepath_fragment returns [const char *res]
+    :
+        IDENTIFIER
+        { $res = (const char *) $IDENTIFIER.text->chars; }
+
+    |   '.'
+        { $res = "."; }
+
+    |   '/'
+        { $res = "/"; }
+    ;
+
+// -- Lexer rules --------------------------------------------------------------
 UNSIGNED_INT_TYPE
     :  'uint' TYPE_WIDTH?
     ;
