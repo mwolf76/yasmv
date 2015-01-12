@@ -1,6 +1,5 @@
 /**
  *  @file preprocessor.cc
- *  @brief Expr preprocessor
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -29,15 +28,9 @@
  *  the TypeMgr class.
  *
  **/
-
-#include <common.hh>
-
 #include <symb/proxy.hh>
 
-#include <expr/expr.hh>
-
-#include <model/preprocessor.hh>
-#include <model/model_mgr.hh>
+#include <model/preprocessor/preprocessor.hh>
 
 Preprocessor::Preprocessor(ModelMgr& owner)
     : f_ctx_stack()

@@ -19,9 +19,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
+
+#include <common.hh>
 
 #include <utility>
 #include <vector>

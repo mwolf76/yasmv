@@ -157,6 +157,7 @@ AC_CONFIG_FILES([Makefile
                  src/model/Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
+                 src/model/preprocessor/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile

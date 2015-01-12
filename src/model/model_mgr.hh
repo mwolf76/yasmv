@@ -29,7 +29,9 @@
 
 #include <model/model.hh>
 #include <model/model_resolver.hh>
-#include <model/preprocessor.hh>
+
+#include <model/preprocessor/preprocessor.hh>
+
 #include <model/type_checker/type_checker.hh>
 
 #include <expr/expr_mgr.hh>
