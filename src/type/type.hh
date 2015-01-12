@@ -107,6 +107,7 @@ typedef class ScalarType* ScalarType_ptr;
 typedef class MonolithicalType* MonolithicalType_ptr;
 typedef class BooleanType* BooleanType_ptr;
 typedef class EnumType* EnumType_ptr;
+typedef class ConstIntType* ConstIntType_ptr;
 typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
@@ -132,10 +133,11 @@ public:
 
 /** Raised when the inferrer detects a wrong type */
 class BadType : public TypeException {
+    Expr_ptr f_operand;
     Expr_ptr f_repr;
 
 public:
-    BadType(Type_ptr tp);
+    BadType(Expr_ptr operand, Type_ptr tp);
 
     const char* what() const throw();
     ~BadType() throw();
@@ -177,6 +179,9 @@ public:
 
     bool is_algebraic();
     AlgebraicType_ptr as_algebraic();
+
+    bool is_const_int();
+    ConstIntType_ptr as_const_int();
 
     bool is_signed_algebraic();
     SignedAlgebraicType_ptr as_signed_algebraic();
@@ -267,6 +272,22 @@ public:
 
 private:
     ExprSet f_literals;
+};
+
+/** Integer integers */
+typedef class ConstIntType* ConstIntType_ptr;
+class ConstIntType : public AlgebraicType {
+public:
+    unsigned width() const;
+
+    ADD *dds() const
+    { return NULL; }
+
+ protected:
+    friend class TypeMgr; // ctors not public
+    ConstIntType(TypeMgr& owner, unsigned width);
+
+    unsigned f_width;
 };
 
 /** Signed integers */

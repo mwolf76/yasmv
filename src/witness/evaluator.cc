@@ -500,7 +500,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     // 1. explicit constants are integer consts (e.g. 42) ..
-    else  if (em.is_numeric(expr)) {
+    else  if (em.is_int_numeric(expr)) {
         f_values_stack.push_back(expr -> value());
         return;
     }

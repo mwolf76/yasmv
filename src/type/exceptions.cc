@@ -22,8 +22,9 @@
 
 #include <type/type.hh>
 
-BadType::BadType(Type_ptr tp)
-    : f_repr(tp -> repr())
+BadType::BadType(Expr_ptr operand, Type_ptr tp)
+    : f_operand(operand)
+    , f_repr(tp -> repr())
 {}
 
 BadType::~BadType() throw()
@@ -33,7 +34,8 @@ const char* BadType::what() const throw()
 {
     std::ostringstream oss;
     oss
-        << "TypeError: operand has invalid type `"
+        << "TypeError: operand `"
+        << f_operand << "` has invalid type `"
         << f_repr << "`";
 
     return oss.str().c_str();

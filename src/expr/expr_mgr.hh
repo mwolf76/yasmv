@@ -391,6 +391,28 @@ public:
         return expr->f_symb == CAST;
     }
 
+    inline Expr_ptr make_const_int_type(unsigned digits)
+    {
+        return make_type(const_int_expr,
+                         make_const((value_t) digits));
+    }
+
+    inline bool is_const_int_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == const_int_expr;
+    }
+
+    inline Expr_ptr make_fixed_type(unsigned digits)
+    {
+        return make_type(const_int_expr,
+                         make_const((value_t) digits));
+    }
+
+    inline bool is_fixed_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == const_int_expr;
+    }
+
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
         return make_type(unsigned_int_expr,
@@ -429,14 +451,6 @@ public:
     inline bool is_boolean_type(const Expr_ptr expr) const {
         assert(expr);
         return expr == bool_expr;
-    }
-
-    inline Expr_ptr make_constant_type() const
-    { return const_int_expr; }
-
-    inline bool is_constant_type(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == const_int_expr;
     }
 
     /* -- Builtin identifiers and constants --------------------------------- */
@@ -589,7 +603,7 @@ public:
         return expr->f_symb == COMMA;
     }
 
-    inline bool is_numeric(const Expr_ptr expr) const {
+    inline bool is_int_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
@@ -711,6 +725,7 @@ private:
     Expr_ptr signed_int_expr;
 
     /* fixed */
+    Expr_ptr const_fxd_expr;
     Expr_ptr unsigned_fxd_expr;
     Expr_ptr signed_fxd_expr;
 

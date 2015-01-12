@@ -21,15 +21,24 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+unsigned ConstIntType::width() const
+{
+    assert( 0 != f_width );
+    return f_width;
+}
+
+ConstIntType::ConstIntType(TypeMgr& owner, unsigned width)
+    : AlgebraicType(owner)
+    , f_width(width)
+{ f_repr = f_owner.em().make_const_int_type(width); }
+
 SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
                                          unsigned width,
                                          ADD *dds)
     : AlgebraicType(owner)
     , f_width(width)
     , f_dds(dds)
-{
-    f_repr = f_owner.em().make_signed_int_type(width);
-}
+{ f_repr = f_owner.em().make_signed_int_type(width); }
 
 unsigned SignedAlgebraicType::width() const
 {

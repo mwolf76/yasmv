@@ -56,24 +56,42 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 {
     assert( f_em.is_type(expr));
 
-    if (f_em.is_unsigned_int( expr->lhs())) {
+    if (f_em.is_unsigned_int( expr->lhs()))
         return find_unsigned( expr->rhs()->value());
-    }
-    else if (f_em.is_signed_int( expr->lhs())) {
+
+    else if (f_em.is_signed_int( expr->lhs()))
         return find_signed( expr->rhs()->value());
-    }
-    else assert (false); /* unexpected */
+
+    else
+        assert (false); /* unexpected */
+
     return NULL;
+}
+
+const ScalarType_ptr TypeMgr::find_int_const(unsigned bits)
+{
+    Expr_ptr descr(f_em.make_const_int_type(bits));
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    if (res)
+        return res;
+
+    // new type, needs to be registered before returning
+    res = new ConstIntType( *this, bits);
+
+    register_type(descr, res);
+    return res;
 }
 
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
 {
     Expr_ptr descr(f_em.make_unsigned_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
     res = new UnsignedAlgebraicType( *this, bits);
+
     register_type(descr, res);
     return res;
 }
@@ -82,10 +100,12 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractio
 {
     Expr_ptr descr(f_em.make_unsigned_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
     res = new UnsignedFxdAlgebraicType( *this, magnitude, fractional);
+
     register_type(descr, res);
     return res;
 }
@@ -97,11 +117,12 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
                                         f_em.make_const(size)));
 
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this,
-                         find_unsigned(digits), size);
+    res = new ArrayType( *this, find_unsigned(digits), size);
+
     register_type(descr, res);
     return res;
 }
@@ -113,11 +134,12 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
     Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this,
-                         find_unsigned(magnitude, fractional), size);
+    res = new ArrayType( *this, find_unsigned(magnitude, fractional), size);
+
     register_type(descr, res);
     return res;
 }
@@ -127,10 +149,12 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
 {
     Expr_ptr descr(f_em.make_signed_int_type(bits));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
     res = new SignedAlgebraicType(*this, bits);
+
     register_type(descr, res);
     return res;
 }
@@ -139,10 +163,12 @@ const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractiona
 {
     Expr_ptr descr(f_em.make_signed_fxd_type(magnitude, fractional));
     ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
     res = new SignedFxdAlgebraicType(*this, magnitude, fractional);
+
     register_type(descr, res);
     return res;
 }
@@ -153,11 +179,12 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this,
-                         find_signed(digits), size);
+    res = new ArrayType( *this, find_signed(digits), size);
+
     register_type(descr, res);
     return res;
 }
@@ -169,11 +196,12 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
     Expr_ptr descr(f_em.make_subscript( f_em.make_signed_fxd_type(magnitude, fractional),
                                         f_em.make_const(size)));
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this,
-                         find_signed(magnitude, fractional), size);
+    res = new ArrayType( *this, find_signed(magnitude, fractional), size);
+
     register_type(descr, res);
     return res;
 }
@@ -183,7 +211,8 @@ const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of )
     Expr_ptr descr(f_em.make_abstract_array_type( of->repr() ));
 
     ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (NULL != res) return res;
+    if (res)
+        return res;
 
     // new type, needs to be registered before returning
     res = new ArrayType( *this, of );
@@ -201,9 +230,8 @@ void TypeMgr::register_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits)
     */
     Expr_ptr fullname = ExprMgr::INSTANCE().make_dot( ctx, name );
 
-    if (NULL != lookup_type(fullname)) {
+    if (lookup_type(fullname))
         assert(0); // TODO: better error handling
-    }
 
     EnumType_ptr tp = new EnumType( *this, lits );
 
@@ -230,7 +258,7 @@ const ScalarType_ptr TypeMgr::find_enum(Expr_ptr ctx, Expr_ptr name)
     ScalarType_ptr res =
         dynamic_cast<ScalarType_ptr> (lookup_type(ExprMgr::INSTANCE().make_dot(ctx, name)));
 
-    assert( NULL != res ); // TODO error handling
+    assert(res); // TODO error handling
 
     return res;
 }
@@ -244,22 +272,21 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
 {
     ExprMgr& em = f_em;
 
-    if (em.is_binary_arithmetical(expr)) {
+    if (em.is_binary_arithmetical(expr))
         return arithmetical_result_type(lhs, rhs);
-    }
-    else if (em.is_binary_logical(expr)) {
+
+    else if (em.is_binary_logical(expr))
         return logical_result_type(lhs, rhs);
-    }
+
     else if (em.is_binary_relational(expr) ||
-             em.is_binary_enumerative(expr)){
-        return find_boolean();
-    }
-    else if (em.is_cast(expr)) {
+             em.is_binary_enumerative(expr))
+        return relational_result_type(lhs, rhs);
+
+    else if (em.is_cast(expr))
         return cast_result_type(lhs, rhs);
-    }
-    else {
+
+    else
         assert (false); /* unexpected */
-    }
 }
 
 /* ternary variant */
@@ -274,7 +301,9 @@ Type_ptr TypeMgr::result_type(Expr_ptr expr, Type_ptr cnd,
 
 Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
 {
-    if (lhs == rhs)
+    if (lhs -> is_algebraic() &&
+        rhs -> is_algebraic() &&
+        lhs -> width() == rhs -> width())
         return lhs;
 
     return NULL;
@@ -282,8 +311,18 @@ Type_ptr TypeMgr::ite_result_type(Type_ptr lhs, Type_ptr rhs)
 
 Type_ptr TypeMgr::arithmetical_result_type(Type_ptr lhs, Type_ptr rhs)
 {
-    if (lhs -> is_algebraic() && rhs -> is_algebraic())
+    if (lhs -> is_algebraic() && rhs -> is_algebraic() &&
+        lhs -> width() == rhs -> width())
         return rhs;
+
+    return NULL;
+}
+
+Type_ptr TypeMgr::relational_result_type(Type_ptr lhs, Type_ptr rhs)
+{
+    if (lhs -> is_algebraic() && rhs -> is_algebraic() &&
+        lhs -> width() == rhs -> width())
+        return find_boolean();
 
     return NULL;
 }
@@ -305,23 +344,19 @@ Type_ptr TypeMgr::cast_result_type(Type_ptr lhs, Type_ptr rhs)
 
     /* algebraic -> boolean? */
     if (lhs -> is_boolean() &&
-        rhs -> is_algebraic()) {
+        rhs -> is_algebraic())
         return lhs;
-    }
 
     /* boolean -> algebraic? */
     if (lhs -> is_algebraic() &&
-        rhs -> is_boolean()) {
+        rhs -> is_boolean())
         return lhs;
-    }
 
     /* algebraic -> algebraic (of different signedness/width)? */
     if (lhs -> is_algebraic() &&
-        rhs -> is_algebraic()) {
+        rhs -> is_algebraic())
         return lhs;
-    }
 
     return NULL;
 }
-
 

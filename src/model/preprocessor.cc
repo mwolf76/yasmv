@@ -482,7 +482,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
     Expr_ptr expr_ = expr;
 
     // is an integer const ..
-    if (em.is_numeric(expr_)) {
+    if (em.is_int_numeric(expr_)) {
         PUSH_EXPR(expr_);
         return;
     }

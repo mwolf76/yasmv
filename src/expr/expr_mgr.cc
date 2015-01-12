@@ -36,33 +36,49 @@ ExprMgr::ExprMgr()
     false_expr = make_identifier(FALSE_TOKEN);
     true_expr = make_identifier(TRUE_TOKEN);
 
-    // {constant, signed, unsigned} integer types identifiers
+    /* {constant, signed, unsigned} integer types identifiers */
     {
         std::ostringstream oss;
         oss
-            << CONST_TOKEN << " " << INT_TOKEN;
+            << CONST_TOKEN << " "
+            << INT_TOKEN;
+
         const_int_expr = make_identifier(oss.str());
     }
     {
         std::ostringstream oss;
         oss
-            << UNSIGNED_TOKEN << " " << INT_TOKEN;
+            << UNSIGNED_TOKEN << " "
+            << INT_TOKEN;
+
         unsigned_int_expr = make_identifier(oss.str());
     }
     {
         std::ostringstream oss;
-        oss << SIGNED_TOKEN << " " << INT_TOKEN;
+        oss
+            << SIGNED_TOKEN << " "
+            << INT_TOKEN;
+
         signed_int_expr = make_identifier(oss.str());
     }
     {
-        std::ostringstream oss;
-        oss << UNSIGNED_TOKEN << " " << FXD_TOKEN;
-        unsigned_fxd_expr = make_identifier(oss.str());
+
+    /* {constant, signed, unsigned} fixed types identifiers */
     }
     {
         std::ostringstream oss;
         oss
-            << SIGNED_TOKEN << " " << FXD_TOKEN;
+            << CONST_TOKEN
+            << " " << FXD_TOKEN;
+
+        const_fxd_expr = make_identifier(oss.str());
+    }
+    {
+        std::ostringstream oss;
+        oss
+            << SIGNED_TOKEN << " "
+            << FXD_TOKEN;
+
         signed_fxd_expr = make_identifier(oss.str());
     }
 

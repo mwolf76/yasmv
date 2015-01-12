@@ -93,12 +93,11 @@ private:
         return true;
     }
 
-    Type_ptr check_logical();
-    Type_ptr check_arithmetical();
-    Type_ptr check_enum();
-    Type_ptr check_scalar();
-
-    Type_ptr check_array();
+    Type_ptr check_logical(Expr_ptr expr);
+    Type_ptr check_arithmetical(Expr_ptr expr);
+    Type_ptr check_enum(Expr_ptr expr);
+    Type_ptr check_scalar(Expr_ptr expr);
+    Type_ptr check_array(Expr_ptr expr);
 
     // post-orders only
     void walk_unary_fsm_postorder(const Expr_ptr expr);

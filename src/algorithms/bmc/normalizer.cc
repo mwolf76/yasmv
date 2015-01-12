@@ -339,7 +339,10 @@ void Normalizer::walk_ne_postorder(const Expr_ptr expr)
 { assert(false);}
 
 bool Normalizer::walk_gt_preorder(const Expr_ptr expr)
-{ return false; }
+{
+    f_result_stack.push_back( expr );
+    return false;
+}
 bool Normalizer::walk_gt_inorder(const Expr_ptr expr)
 { assert(false); return false; }
 void Normalizer::walk_gt_postorder(const Expr_ptr expr)

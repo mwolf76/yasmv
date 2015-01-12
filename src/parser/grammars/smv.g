@@ -815,7 +815,8 @@ unsigned_int_type returns [Type_ptr res]
         UNSIGNED_INT_TYPE
         {
             p = (char *) $UNSIGNED_INT_TYPE.text->chars;
-            while (*p && !isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p))
+                ++ p;
         }
         (
             '[' size=constant ']'
@@ -837,7 +838,8 @@ signed_int_type returns [Type_ptr res]
         SIGNED_INT_TYPE
         {
             p = (char *) $SIGNED_INT_TYPE.text->chars;
-            while (*p && !isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p))
+                ++ p;
         }
         (
             '[' size=constant ']'
@@ -846,7 +848,7 @@ signed_int_type returns [Type_ptr res]
     |
         {
             $res = tm.find_signed( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), size->value());
+                : OptsMgr::INSTANCE().word_width());
         }
     )
     ;

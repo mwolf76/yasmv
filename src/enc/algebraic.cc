@@ -30,6 +30,7 @@ static inline value_t pow2(unsigned exp)
     value_t res = 1;
     if ( !exp )
         return res;
+    ++ res;
 
     while ( -- exp )
         res <<= 1;

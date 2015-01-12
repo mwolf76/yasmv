@@ -30,6 +30,8 @@ static inline value_t pow2(unsigned exp)
 
     if ( !exp )
         return res;
+    ++ res;
+
     while ( -- exp )
         res <<= 1;
 
@@ -294,13 +296,11 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
 
-            lhs_type -> width() == rhs_type -> width() &&
-
-            _iff( lhs_type -> is_signed_algebraic(),
-                  rhs_type -> is_signed_algebraic()));
+            lhs_type -> width() == rhs_type -> width());
 
     unsigned width = rhs_type -> width();
-    bool signedness= rhs_type -> is_signed_algebraic();
+    bool signedness= lhs_type -> is_signed_algebraic() ||
+        rhs_type -> is_signed_algebraic();
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);

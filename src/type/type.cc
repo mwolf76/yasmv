@@ -43,6 +43,9 @@ EnumType_ptr Type::as_enum()
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
 
+bool Type::is_const_int()
+{ return NULL != dynamic_cast<ConstIntType_ptr> ( this ); }
+
 AlgebraicType_ptr Type::as_algebraic()
 { return dynamic_cast <const AlgebraicType_ptr> (this); }
 

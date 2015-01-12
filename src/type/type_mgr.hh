@@ -71,11 +71,12 @@ public:
     }
 
     /* -- abstract types ---------------------------------------------------- */
-    const ScalarType_ptr find_signed_type();
-    const ScalarType_ptr find_unsigned_type();
+    // const ScalarType_ptr find_signed_type();
+    // const ScalarType_ptr find_unsigned_type();
     const ArrayType_ptr find_array_type( ScalarType_ptr of );
 
     /* -- decls ------------------------------------------------------------- */
+    const ScalarType_ptr find_int_const(unsigned digits);
     const ScalarType_ptr find_signed(unsigned digits);
     const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
 
@@ -135,6 +136,7 @@ private:
 
     /** service of result_type */
     Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr relational_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);

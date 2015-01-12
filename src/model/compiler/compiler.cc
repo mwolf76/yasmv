@@ -594,7 +594,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     // 1. Explicit integer consts, perform booleanization immediately using
     // word-width property to determine the number of bits to be used.
-    if (em.is_numeric(expr)) {
+    if (em.is_int_numeric(expr)) {
         unsigned ww (OptsMgr::INSTANCE().word_width());
         f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_from_constant( expr, ww);

@@ -105,68 +105,63 @@ void Inferrer::post_node_hook(Expr_ptr expr)
 #endif
 }
 
-Type_ptr Inferrer::check_logical()
+Type_ptr Inferrer::check_logical(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
 
-    if (res -> is_boolean()) {
+    if (res -> is_boolean())
         return res;
-    }
 
-    throw BadType(res);
+    throw BadType(expr, res);
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_arithmetical()
+Type_ptr Inferrer::check_arithmetical(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
 
-    if (res -> is_algebraic()) {
+    if (res -> is_algebraic())
         return res;
-    }
 
-    throw BadType(res);
+    throw BadType(expr, res);
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_enum()
+Type_ptr Inferrer::check_enum(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
 
-    if (res -> is_enum()) {
+    if (res -> is_enum())
         return res;
-    }
 
-    throw BadType(res);
+    throw BadType(expr, res);
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_scalar()
+Type_ptr Inferrer::check_scalar(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
 
-    if (res -> is_scalar()) {
+    if (res -> is_scalar())
         return res;
-    }
 
-    throw BadType(res);
+    throw BadType(expr, res);
     return NULL; /* unreachable */
 }
 
-Type_ptr Inferrer::check_array()
+Type_ptr Inferrer::check_array(Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
 
-    if (res -> is_array()) {
+    if (res -> is_array())
         return res;
-    }
 
-    throw BadType(res);
+    throw BadType(expr, res);
     return NULL; /* unreachable */
 }
 
@@ -352,14 +347,14 @@ bool Inferrer::walk_eq_preorder(const Expr_ptr expr)
 bool Inferrer::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_eq_postorder(const Expr_ptr expr)
-{ walk_binary_boolean_or_relational_postorder(expr); }
+{ walk_binary_relational_postorder(expr); }
 
 bool Inferrer::walk_ne_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Inferrer::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Inferrer::walk_ne_postorder(const Expr_ptr expr)
-{ walk_binary_boolean_or_relational_postorder(expr); }
+{ walk_binary_relational_postorder(expr); }
 
 bool Inferrer::walk_gt_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -459,10 +454,11 @@ void Inferrer::walk_subscript_postorder(const Expr_ptr expr)
 {
     POP_TYPE(index);
     if (! index -> is_algebraic())
-        throw BadType(index);
+        throw BadType(expr->rhs(), index);
 
     /* return wrapped type */
-    PUSH_TYPE(check_array() -> as_array() -> of());
+    PUSH_TYPE(check_array(expr->lhs())
+              -> as_array() -> of());
 }
 
 bool Inferrer::walk_set_preorder(const Expr_ptr expr)
@@ -499,9 +495,9 @@ void Inferrer::walk_leaf(const Expr_ptr expr)
         return;
 
     // is an integer const ..
-    if (em.is_numeric(expr)) {
+    if (em.is_int_numeric(expr)) {
         unsigned ww (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE(tm.find_unsigned(ww));
+        PUSH_TYPE(tm.find_int_const(ww));
         return;
     }
 
@@ -559,91 +555,78 @@ void Inferrer::walk_unary_ltl_postorder(const Expr_ptr expr)
 
 // fun: arithm -> arithm
 void Inferrer::walk_unary_arithmetical_postorder(const Expr_ptr expr)
-{
-    PUSH_TYPE( check_arithmetical() );
-}
+{ PUSH_TYPE( check_arithmetical(expr->lhs())); }
 
 // fun: logical -> logical
 void Inferrer::walk_unary_logical_postorder(const Expr_ptr expr)
-{
-    PUSH_TYPE( check_logical() );
-}
+{ PUSH_TYPE( check_logical(expr->lhs())); }
 
 // fun: arithm, arithm -> arithm
 void Inferrer::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.result_type( expr,
-                               check_arithmetical(),
-                               check_arithmetical()));
+    Type_ptr rhs_type = check_arithmetical(expr->rhs());
+    Type_ptr lhs_type = check_arithmetical(expr->lhs());
+    PUSH_TYPE( tm.result_type( expr, lhs_type, rhs_type));
 }
 
 // fun: logical x logical -> logical
 void Inferrer::walk_binary_fsm_postorder(const Expr_ptr expr)
 {
-    check_logical();
-    PUSH_TYPE( check_logical() );
+    Type_ptr rhs_type = check_logical(expr->rhs());
+    (void) rhs_type;
+
+    Type_ptr lhs_type = check_logical(expr->lhs());
+
+    PUSH_TYPE( lhs_type );
 }
 
 void Inferrer::walk_binary_ltl_postorder(const Expr_ptr expr)
 {
-    check_logical();
-    PUSH_TYPE( check_logical() );
+    Type_ptr rhs_type = check_logical(expr->rhs()); (void) rhs_type;
+    Type_ptr lhs_type = check_logical(expr->lhs());
+    PUSH_TYPE( lhs_type );
 }
 
 // fun: logical x logical -> logical
 void Inferrer::walk_binary_logical_postorder(const Expr_ptr expr)
 {
-    check_logical();
-    PUSH_TYPE( check_logical() );
+    Type_ptr rhs_type = check_logical( expr->rhs()); (void) rhs_type;
+    Type_ptr lhs_type = check_logical( expr->lhs());
+    PUSH_TYPE( lhs_type );
 }
 
 void Inferrer::walk_binary_cast_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.result_type( expr,
-                               check_arithmetical(),
-                               check_arithmetical()));
+    Type_ptr rhs_type = check_arithmetical(expr->rhs());
+    Type_ptr lhs_type = check_arithmetical(expr->lhs());
+    PUSH_TYPE( tm.result_type( expr, lhs_type, rhs_type ));
 }
 
 /* specialized for shift ops (use rhs) */
 void Inferrer::walk_binary_shift_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs = check_arithmetical();
-    check_arithmetical(); // discard lhs
-    PUSH_TYPE( rhs );
+    Type_ptr rhs_type = check_arithmetical(expr->rhs());
+    Type_ptr lhs_type = check_arithmetical(expr->lhs()); (void) lhs_type;
+    PUSH_TYPE( rhs_type );
 }
 
 // fun: arithmetical x arithmetical -> boolean
 void Inferrer::walk_binary_relational_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm = f_owner.tm();
-    PUSH_TYPE( tm.result_type( expr,
-                               check_arithmetical(),
-                               check_arithmetical()));
+    Type_ptr rhs_type = check_arithmetical(expr->rhs());
+    Type_ptr lhs_type = check_arithmetical(expr->lhs());
+    PUSH_TYPE( tm.result_type( expr, lhs_type, rhs_type));
 }
-
-// fun: A/B/E x A/B/E -> B
-void Inferrer::walk_binary_boolean_or_relational_postorder(const Expr_ptr expr)
-{
-    TypeMgr& tm = f_owner.tm();
-    Type_ptr rhs = check_scalar();
-    Type_ptr lhs = check_scalar();
-
-    if (lhs != rhs)
-        throw TypeMismatch( lhs, rhs);
-
-    PUSH_TYPE( tm.result_type( expr, lhs, rhs));
-}
-
 
 // fun:  boolean x T -> T
 void Inferrer::walk_ternary_cond_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs = f_type_stack.back(); f_type_stack.pop_back();
-    check_logical(); // condition
-
-    PUSH_TYPE( rhs );
+    Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    Type_ptr lhs_type = check_logical(expr->lhs()); (void) lhs_type;
+    PUSH_TYPE( rhs_type );
 }
 
 // fun: (boolean ? T) x T -> T
@@ -720,7 +703,7 @@ Expr_ptr Inferrer::find_canonical_expr(Expr_ptr expr)
              em.is_ite(expr) ||
              em.is_cond(expr) ||
              em.is_identifier(expr) ||
-             em.is_numeric(expr)) {
+             em.is_int_numeric(expr)) {
         return expr;
     }
 
