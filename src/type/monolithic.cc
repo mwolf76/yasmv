@@ -22,14 +22,14 @@
 #include <type_mgr.hh>
 
 BooleanType::BooleanType(TypeMgr& owner)
-    : MonolithicalType(owner)
+    : MonolithicType(owner)
 { f_repr = f_owner.em().make_boolean_type(); }
 
 unsigned BooleanType::width() const
 { return 1; }
 
 EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
-    : MonolithicalType(owner)
+    : MonolithicType(owner)
     , f_literals(literals)
 {
     TypeMgr& tm (TypeMgr::INSTANCE());
@@ -51,3 +51,15 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
 unsigned EnumType::width() const
 { return 1; }
 
+value_t EnumType::value(Expr_ptr lit) const
+{
+    value_t res = 0;
+    for (ExprSet::iterator eye = f_literals.begin();
+         eye != f_literals.end(); ++ eye, ++ res) {
+
+        if (*eye == lit)
+            return res;
+    }
+
+    assert(false); // not found
+}

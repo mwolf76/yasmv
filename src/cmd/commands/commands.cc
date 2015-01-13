@@ -423,10 +423,15 @@ Variant WitnessDumpCommand::operator()()
             Expr_ptr value (NULL);
 
             if (symb->is_variable())  {
+                Expr_ptr ctx  (symb->ctx());
                 Expr_ptr expr (symb->expr());
 
                 try {
                     value = tf.value(expr);
+
+                    os
+                        << ctx << "."
+                        ;
 
                     os
                         << expr << " = "

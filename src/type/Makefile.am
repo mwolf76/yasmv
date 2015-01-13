@@ -12,7 +12,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = type.hh type_mgr.hh type_resolver.hh
 PKG_CC = type.cc type_mgr.cc type_resolver.cc exceptions.cc	\
-monolithic.cc algebraic.cc array.cc
+monolithic.cc algebraic.cc array.cc instance.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

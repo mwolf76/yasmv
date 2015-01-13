@@ -32,7 +32,7 @@ void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
     f_type_stack.push_back(type);
 
     /* booleans, monoliths are just one DD */
-    if (type->is_monolithical())
+    if (type->is_monolithic())
         f_add_stack.push_back(dds[0]);
 
     /* algebraics, reversed list of encoding DDs */

@@ -60,7 +60,6 @@ class TypeMgr {
 
 public:
 
-    /* -- inference --------------------------------------------------------- */
     const ScalarType_ptr find_boolean();
 
     const ScalarType_ptr find_int_const(unsigned digits);
@@ -86,6 +85,8 @@ public:
 
     /* Remark: following C scoping rules for enums, enums are *globals* */
     const ScalarType_ptr find_enum(ExprSet& lits);
+
+    const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
 
     const Literals& literals() const
     { return f_lits; }

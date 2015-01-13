@@ -489,6 +489,14 @@ public:
         return expr == main_expr;
     }
 
+    inline Expr_ptr make_empty() const
+    { return empty_expr; }
+
+    inline bool is_empty(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == empty_expr;
+    }
+
     inline Expr_ptr make_false() const
     { return false_expr; }
 
@@ -737,6 +745,9 @@ private:
 
     /* main module */
     Expr_ptr main_expr;
+
+    /* empty symbol */
+    Expr_ptr empty_expr;
 
     /* toplevel default ctx (for command line exprs) */
     Expr_ptr default_ctx_expr;

@@ -25,8 +25,8 @@
 bool Type::is_scalar()
 { return NULL != dynamic_cast<ScalarType_ptr>( this ); }
 
-bool Type::is_monolithical()
-{ return NULL != dynamic_cast<MonolithicalType_ptr>( this ); }
+bool Type::is_monolithic()
+{ return NULL != dynamic_cast<MonolithicType_ptr>( this ); }
 
 bool Type::is_boolean()
 { return NULL != dynamic_cast<BooleanType_ptr>( this ); }
@@ -39,6 +39,12 @@ bool Type::is_enum()
 
 EnumType_ptr Type::as_enum()
 { return dynamic_cast<EnumType_ptr> (this); }
+
+bool Type::is_instance()
+{ return NULL != dynamic_cast<InstanceType_ptr>( this ); }
+
+InstanceType_ptr Type::as_instance()
+{ return dynamic_cast<InstanceType_ptr> (this); }
 
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }

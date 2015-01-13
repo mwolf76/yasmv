@@ -29,7 +29,9 @@ const char *MICROCODE_PATH = "microcode";
 /* tokens */
 const char *MAIN_TOKEN = "main";
 
-const char *DEFAULT_CTX_TOKEN = "default";
+const char *EMPTY_TOKEN = "__empty";
+
+const char *DEFAULT_CTX_TOKEN = "__main";
 
 /* bool consts */
 const char *FALSE_TOKEN = "FALSE";

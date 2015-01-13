@@ -40,22 +40,59 @@ ModelMgr::ModelMgr()
     , f_type_checker(* new TypeChecker(* this))
 {}
 
-// ResolutionException::ResolutionException(Expr_ptr expr)
-//     : f_expr(expr)
-// {}
-
-// const char* ResolutionException::what() const throw()
-// {
-//     ostringstream oss;
-
-//     oss << "UnresolvedSymbol: " << f_expr;
-//     return oss.str().c_str();
-// }
-
-
 void ModelMgr::first_pass()
 {
-    DEBUG << "Not yet implemented" << std::endl;
+    ExprMgr& em (ExprMgr::INSTANCE());
+    Model& model(f_model);
+    const Modules& modules = model.modules();
+    Modules::const_iterator main_iter = modules.find(em.make_main());
+
+    if (modules.end() == main_iter)
+        throw ModuleNotFound( em.make_main());
+
+    typedef std::stack<Module_ptr> ModuleStack;
+    ModuleStack module_stack;
+    module_stack.push( main_iter->second );
+
+    typedef std::stack<Expr_ptr> ExprStack;
+    ExprStack params_stack;
+    params_stack.push( ExprMgr::INSTANCE().make_empty());
+
+    // recursive walk of all var decls, starting from main module
+    while (0 < module_stack.size()) {
+
+        assert( module_stack.size() == params_stack.size());
+        Module_ptr mi = module_stack.top(); module_stack.pop();
+        assert( mi );
+
+        Expr_ptr   ei = params_stack.top(); params_stack.pop();
+        assert( ei );
+
+        Module& module( *mi ); Variables vars ( module.vars());
+        Expr_ptr params( ei ); (void) params;
+
+        Variables::const_iterator vi;
+        for (vi = vars.begin(); vars.end() != vi; ++ vi) {
+            FQExpr fqdn (vi -> first);
+            Variable& var (* vi -> second);
+            Type_ptr vtype (var.type());
+
+            DEBUG
+                << "processing var `" << fqdn << "`, "
+                << "type " << vtype
+                << std::endl;
+
+            if (vtype -> is_instance()) {
+                InstanceType_ptr instance (vtype -> as_instance());
+
+                Module& instance_module ( model.module( instance -> name()));
+                module_stack.push( &instance_module );
+
+                Expr_ptr instance_params( instance -> params());
+                params_stack.push( instance_params );
+            }
+        }
+    }
 }
 
 void ModelMgr::second_pass()
@@ -65,22 +102,25 @@ void ModelMgr::second_pass()
 
     for (Modules::const_iterator mi = modules.begin(); mi != modules.end(); ++ mi ) {
 
-        Module& module = dynamic_cast <Module&> (*mi->second);
-        DEBUG << "processing module '" << module << "' " << std::endl;
+        Module& module = * mi->second;
+        DEBUG
+            << "processing module `" << module << "` "
+            << std::endl;
 
         // Remark: ctx name is MODULE name, not instance's
         // rationale: you may have several instances but they
         // all should refer to the same entry on the type map.
         Expr_ptr ctx = module.name();
 
-        // type inference: FSM
         const ExprVector& init = module.init();
         for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
 
             Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing INIT " << fqdn << std::endl;
+            DEBUG
+                << "processing INIT " << fqdn
+                << std::endl;
 
             try {
                 f_type_checker.process(body, ctx);
@@ -104,7 +144,9 @@ void ModelMgr::second_pass()
             Expr_ptr body = (*ii);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing INVAR " << fqdn << std::endl;
+            DEBUG
+                << "processing INVAR " << fqdn
+                << std::endl;
 
             try {
                 f_type_checker.process(body, ctx);
@@ -128,7 +170,9 @@ void ModelMgr::second_pass()
             Expr_ptr body = (*ti);
 
             FQExpr fqdn(ctx, body);
-            DEBUG << "processing TRANS " << fqdn << std::endl;
+            DEBUG
+                << "processing TRANS " << fqdn
+                << std::endl;
 
             try {
                 f_type_checker.process(body, ctx);
@@ -151,7 +195,9 @@ void ModelMgr::second_pass()
             FQExpr fqdn = (*di).first;
             Expr_ptr body = (*di).second -> body();
 
-            DEBUG << "processing DEFINE " << fqdn << std::endl;
+            DEBUG
+                << "processing DEFINE " << fqdn
+                << std::endl;
 
             try {
                 f_type_checker.process(body, ctx);
@@ -167,6 +213,7 @@ void ModelMgr::second_pass()
 
                 f_status = false;
             }
+
         } // for defines
 
     } // for module
@@ -176,22 +223,28 @@ bool ModelMgr::analyze()
 {
     f_status = true;
 
-    DEBUG << "-- first pass (binding)" << std::endl;
+    DEBUG
+        << "-- first pass (binding)"
+        << std::endl;
+
     // (binding) For each module m in M, A goes deep in the module
     // defs. Every variable decl is resolved either to a native type
     // (boolean, ranged int, ...) or to an instance. Due to (1) all
     // modules are defined so any unresolved symbol at this point is a
     // fatal. Native types are taken care of as well.
     first_pass();
-    if (! f_status) return false;
+    if (! f_status)
+        return false;
 
-    DEBUG << "-- second pass (type checking)" << std::endl;
-    // (typechecking) For each module m in M, A inspects FSM exprs:
-    // INVAR, TRANS, FAIRNESS have all to be boolean formulae; ASSIGNs
-    // have to match lvalue type. The type for every expression is
-    // inferred using the lazy walker strategy.
+    DEBUG
+        << "-- second pass (type checking)"
+        << std::endl;
+
+    // (typechecking) For each module m in M, inspect FSM exprs:
+    // INITs, INVARs and TRANSes have all to be boolean formulas;
     second_pass();
-    if (! f_status) return false;
+    if (! f_status)
+        return false;
 
     return true;
 }

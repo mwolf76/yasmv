@@ -225,6 +225,20 @@ const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
                           (expr, literal));
         }
     }
+
     return res;
 }
 
+const ScalarType_ptr TypeMgr::find_instance(Expr_ptr module, Expr_ptr params)
+{
+    Expr_ptr repr (em().make_params(module, params));
+    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type( repr ));
+
+    if (! res) {
+        // new type, needs to be registered before returning
+        res = new InstanceType( *this, module, params );
+        register_type(repr, res);
+    }
+
+    return res;
+}

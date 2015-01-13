@@ -102,20 +102,25 @@
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
 
+// 1. scalars
 typedef class ScalarType* ScalarType_ptr;
 
-typedef class MonolithicalType* MonolithicalType_ptr;
+// 1.1. monoliths
+typedef class MonolithicType* MonolithicType_ptr;
 typedef class BooleanType* BooleanType_ptr;
 typedef class EnumType* EnumType_ptr;
+
+// 1.2. algebraics
 typedef class ConstIntType* ConstIntType_ptr;
 typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 
-typedef class ArrayType* ArrayType_ptr;
+// 1.3. module instances
+typedef class InstanceType* InstanceType_ptr;
 
-// reserved for resolution
-typedef class CtxType* CtxType_ptr;
+// 2. arrays
+typedef class ArrayType* ArrayType_ptr;
 
 typedef std::list<Type_ptr> TypeList;
 
@@ -189,16 +194,16 @@ public:
     Expr_ptr repr() const
     { return f_repr; }
 
-    // This depends on Monolithical vs. Algebraic nature of type.
-    // (i.e. for Monoliths, size is the number of bits; for algebraics
-    // size is the number of ADDs.
+    /* This depends on the Monolithic vs. Algebraic nature of type.
+    (i.e. for Monolithics, size is 1; for algebraics size is the
+    number of ADDs). */
 
     // Bits width
     virtual unsigned width() const =0;
 
     // shortcuts
     bool is_scalar();
-    bool is_monolithical();
+    bool is_monolithic();
 
     bool is_boolean();
     BooleanType_ptr as_boolean();
@@ -217,6 +222,9 @@ public:
 
     bool is_enum();
     EnumType_ptr as_enum();
+
+    bool is_instance();
+    InstanceType_ptr as_instance();
 
     bool is_array();
     ArrayType_ptr as_array();
@@ -243,17 +251,17 @@ protected:
     {}
 };
 
-/** Monolithical type class. */
-class MonolithicalType : public ScalarType {
+/** Monolithic type class. */
+class MonolithicType : public ScalarType {
 protected:
-    MonolithicalType(TypeMgr &owner)
+    MonolithicType(TypeMgr &owner)
         : ScalarType(owner)
     {}
 };
 
 /** Boolean type */
 typedef class BooleanType* BooleanType_ptr;
-class BooleanType : public MonolithicalType {
+class BooleanType : public MonolithicType {
 public:
     unsigned width() const;
 
@@ -272,7 +280,7 @@ protected:
 
 /** Enumeratives */
 typedef class EnumType* EnumType_ptr;
-class EnumType : public MonolithicalType {
+class EnumType : public MonolithicType {
 protected:
     friend class TypeMgr; // ctors not public
     EnumType(TypeMgr& owner, ExprSet& literals);
@@ -280,24 +288,31 @@ protected:
 public:
     unsigned width() const;
 
-    const ExprSet& literals() const
+    inline const ExprSet& literals() const
     { return f_literals; }
 
-    value_t value(Expr_ptr lit) const
-    {
-        value_t res = 0;
-        for (ExprSet::iterator eye = f_literals.begin();
-             eye != f_literals.end(); ++ eye, ++ res) {
-
-            if (*eye == lit)
-                return res;
-        }
-
-        assert(false); // not found
-    }
+    value_t value(Expr_ptr lit) const;
 
 private:
     ExprSet f_literals;
+};
+
+/** Instances */
+typedef class InstanceType* InstanceType_ptr;
+class InstanceType : public ScalarType {
+public:
+    unsigned width() const;;
+    InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params);
+
+    inline Expr_ptr name() const
+    { return f_name; }
+
+    inline Expr_ptr params() const
+    { return f_params; }
+
+private:
+    Expr_ptr f_name;
+    Expr_ptr f_params;
 };
 
 /** Integer integers */

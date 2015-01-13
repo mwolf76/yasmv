@@ -26,8 +26,9 @@
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
 Printer::Printer()
     : f_os(std::cout)
@@ -319,6 +320,9 @@ using std::oct;
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
+    if (ExprMgr::INSTANCE().is_empty(expr))
+        return;
+
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;
     case HCONST: f_os << hex << "0x" << expr->value(); break;

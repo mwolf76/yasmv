@@ -41,6 +41,7 @@ options {
 }
 
 @members {
+
     /* singleton managers */
     ExprMgr& em (ExprMgr::INSTANCE());
     ModelMgr& mm (ModelMgr::INSTANCE());
@@ -57,14 +58,7 @@ smv
 scope {
     Module_ptr current_module;
 }
-    : model_directives
-
-    'MODULE' module_id=identifier ';'
-    {
-            model.add_module(* ($smv::current_module = new Module(module_id)));
-    }
-
-    module_body ';'?
+    : model_directives modules
     ;
 
 model_directives
@@ -78,6 +72,17 @@ model_directive
 model_word_width_directive
     : '#word-width' width=constant
     { om.set_word_width( width -> value()); }
+    ;
+
+modules
+    : module_def *
+    ;
+
+module_def
+    : 'MODULE' module_id=identifier
+      { model.add_module(* ($smv::current_module = new Module(module_id))); }
+
+      module_body ';'
     ;
 
 module_body
@@ -452,11 +457,12 @@ unary_expression returns [Expr_ptr res]
       { $res = em.make_neg(expr); }
 	;
 
-actual_params returns [Expr_ptr res]
+params returns [Expr_ptr res]
 @init {
     ExprVector actuals;
+    res = NULL;
 }
-	: expressions[&actuals]
+	: ( expressions[&actuals]
     {
             ExprVector::reverse_iterator expr_iter;
             res = NULL;
@@ -465,7 +471,13 @@ actual_params returns [Expr_ptr res]
                 Expr_ptr expr = (*expr_iter);
                 res = (!res) ? expr : em.make_comma( expr, res );
             }
+    })?
+
+    {
+      if (! res)
+          res = em.make_empty();
     }
+
 	;
 
 postfix_expression returns [Expr_ptr res]
@@ -477,7 +489,7 @@ postfix_expression returns [Expr_ptr res]
         '[' rhs=toplevel_expression ']'
         { $res = em.make_subscript($res, rhs); }
     |
-        '(' rhs=actual_params ')'
+        '(' rhs=params ')'
         { $res = em.make_params($res, rhs); }
 
         // TODO: nested dot not yet supported
@@ -585,6 +597,9 @@ type returns [Type_ptr res]
       { $res = tp; }
 
     | tp = enum_type
+      { $res = tp; }
+
+    | tp = instance_type
       { $res = tp; }
     ;
 
@@ -719,6 +734,13 @@ enum_type returns [Type_ptr res]
 }
     : '{' lit=literal { lits.insert(lit); } (',' lit=literal { lits.insert(lit); })* '}'
           { $res = tm.find_enum( lits ); }
+    ;
+
+instance_type returns [Type_ptr res]
+@init {
+}
+    : module=identifier '(' parameters=params ')'
+      { $res = tm.find_instance( module, parameters ); }
     ;
 
 literal returns [Expr_ptr res]
