@@ -91,6 +91,19 @@ private:
         return true;
     }
 
+    /** Determine the resulting type of an operation given the type of its
+        operands. */
+    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
+    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
+    Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
+
+    /** service of result_type */
+    Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr relational_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
+    Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
+
     Type_ptr check_logical(Expr_ptr expr);
     Type_ptr check_arithmetical(Expr_ptr expr);
     Type_ptr check_scalar(Expr_ptr expr);
@@ -120,8 +133,6 @@ private:
     void walk_ternary_ite_postorder(const Expr_ptr expr);
     void walk_ternary_cond_postorder(const Expr_ptr expr);
 
-    // useful for better caching
-    Expr_ptr find_canonical_expr(Expr_ptr expr);
     void memoize_result(Expr_ptr expr);
 };
 

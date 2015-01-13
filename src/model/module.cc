@@ -38,8 +38,8 @@ void Module::add_var(Expr_ptr var_name, Variable_ptr var)
 {
     Expr_ptr type_repr( var -> type() -> repr());
     DEBUG
-        << "Module " << (*this)
-        << ", added var `" << var_name
+        << "Module `" << (*this)
+        << "`, added var `" << var_name
         << "`, of type `" << type_repr << "`"
         << std::endl;
 

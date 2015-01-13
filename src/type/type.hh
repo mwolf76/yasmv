@@ -131,13 +131,15 @@ public:
     virtual const char* what() const throw() =0;
 };
 
-/** Raised when the inferrer detects a wrong type */
+/** Raised when the type checker detects a wrong type */
 class BadType : public TypeException {
-    Expr_ptr f_operand;
-    Expr_ptr f_repr;
+    Expr_ptr f_expr;
+    Expr_ptr f_lhs;
+    Expr_ptr f_rhs;
 
 public:
-    BadType(Expr_ptr operand, Type_ptr tp);
+    BadType(Expr_ptr expr, Type_ptr lhs);
+    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
 
     const char* what() const throw();
     ~BadType() throw();
@@ -168,11 +170,12 @@ public:
 
 /** Raised when the inferrer detects two mismatching types */
 class TypeMismatch : public TypeException {
+    Expr_ptr f_expr;
     Expr_ptr f_repr_a;
     Expr_ptr f_repr_b;
 
 public:
-    TypeMismatch(Type_ptr a, Type_ptr b);
+    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b);
 
     const char* what() const throw();
     ~TypeMismatch() throw();

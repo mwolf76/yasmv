@@ -22,9 +22,16 @@
 
 #include <type/type.hh>
 
-BadType::BadType(Expr_ptr operand, Type_ptr tp)
-    : f_operand(operand)
-    , f_repr(tp -> repr())
+BadType::BadType(Expr_ptr expr, Type_ptr lhs)
+    : f_expr(expr)
+    , f_lhs(lhs -> repr())
+    , f_rhs(NULL)
+{}
+
+BadType::BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+    : f_expr(expr)
+    , f_lhs(lhs -> repr())
+    , f_rhs(rhs -> repr())
 {}
 
 BadType::~BadType() throw()
@@ -33,21 +40,27 @@ BadType::~BadType() throw()
 const char* BadType::what() const throw()
 {
     std::ostringstream oss;
-    oss
-        << "TypeError: operand `"
-        << f_operand << "` has invalid type `"
-        << f_repr << "`";
+
+    if (! f_rhs)
+        oss
+            << "TypeError: operand `"
+            << f_expr << "` has invalid type `"
+            << f_lhs << "`";
+    else
+        oss
+            << "TypeError: operands `"
+            << f_expr -> lhs() << "` and `"
+            << f_expr -> rhs() << "` have invalid types `"
+            << f_lhs << "`, `" << f_rhs << "`";
 
     return oss.str().c_str();
 }
 
-TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
-    : f_repr_a(lhs -> repr())
+TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+    : f_expr(expr)
+    , f_repr_a(lhs -> repr())
     , f_repr_b(rhs -> repr())
-{
-    // Ehm?!?
-    std::cout << "thomas";
-}
+{}
 
 TypeMismatch::~TypeMismatch() throw()
 {}
@@ -55,9 +68,11 @@ TypeMismatch::~TypeMismatch() throw()
 const char* TypeMismatch::what() const throw()
 {
     std::ostringstream oss;
-    oss << "TypeError: "
-        << f_repr_a << " and "
-        << f_repr_b << " do not match";
+    oss << "TypeError: `"
+        << f_repr_a << "` and `"
+        << f_repr_b << "` do not match in expression `"
+        << f_expr   << "`"
+        << std::endl;
 
     return oss.str().c_str();
 }

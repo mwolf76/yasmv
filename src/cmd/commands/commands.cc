@@ -427,11 +427,14 @@ Variant WitnessDumpCommand::operator()()
 
                 try {
                     value = tf.value(expr);
+
+                    os
+                        << expr << " = "
+                        << value << std::endl;
                 }
                 catch (NoValue nv) {
-                    value = ExprMgr::INSTANCE().make_undef();
+                    // value = ExprMgr::INSTANCE().make_undef();
                 }
-                os << expr << " = " << value << std::endl;
             }
             else if (symb->is_define()) {
                 Expr_ptr ctx (symb->ctx());
@@ -439,11 +442,14 @@ Variant WitnessDumpCommand::operator()()
 
                 try {
                     value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
+
+                    os
+                        << expr << " = "
+                        << value << std::endl;
                 }
                 catch (NoValue nv) {
-                    value = ExprMgr::INSTANCE().make_undef();
+                    // value = ExprMgr::INSTANCE().make_undef();
                 }
-                os << expr << " = " << value << std::endl;
             }
             else
                 continue;

@@ -90,12 +90,6 @@ public:
     const Literals& literals() const
     { return f_lits; }
 
-    /** Determine the resulting type of an operation given the type of its
-        operands. */
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
-
     inline Resolver_ptr resolver()
     { return &f_resolver; }
 
@@ -120,13 +114,6 @@ private:
     static TypeMgr_ptr f_instance;
 
     /* --- low-level services ----------------------------------------------- */
-
-    /** service of result_type */
-    Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr relational_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
 
     // register a type
     inline void register_type(const Expr_ptr expr, Type_ptr vtype) {
