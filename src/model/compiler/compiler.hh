@@ -202,7 +202,7 @@ private:
     void enumerative_not_equals(const Expr_ptr expr);
     void enumerative_ite(const Expr_ptr expr);
 
-    /* casts */
+    /* -- casts ------------------------------------------------------------- */
     void algebraic_cast_from_boolean(const Expr_ptr expr);
     void boolean_cast_from_algebraic(const Expr_ptr expr);
     void algebraic_cast_from_algebraic(const Expr_ptr expr);
@@ -215,8 +215,6 @@ private:
     void algebraic_from_constant(Expr_ptr expr, unsigned width);
 
     Expr_ptr make_auto_id();
-    Expr_ptr make_temporary_expr(ADD dds[], unsigned width);
-
     void make_auto_ddvect(DDVector& dv, unsigned width);
     ADD  make_auto_dd();
 
@@ -236,34 +234,37 @@ private:
                                  DDVector& x, DDVector &y );
     void post_process_muxes();
 
-    // FQDN -> ( DD, micros, mux ) cache
+    void pre_hook();
+    void post_hook();
+
+    void pre_node_hook(Expr_ptr expr);
+    void post_node_hook(Expr_ptr expr);
+
+    /* FQDN -> ( DD, micros, mux ) cache */
     CompilationMap f_cache;
 
-    // FQDN -> temporary DD encodings
-    FQExpr2EncMap f_temp_encodings;
-
-    // microcode descriptors
+    /* microcode descriptors */
     MicroDescriptors f_micro_descriptors;
 
-    // mux descriptors
+    /* mux descriptors */
     MuxMap f_mux_map;
 
-    // ITEs
+    /* ITE toplevels */
     ITEUnionFindMap f_toplevel_map;
 
-    // look-ahead for type checking
+    /* type checking */
     TypeStack f_type_stack;
 
-    // partial results
+    /* compilation results */
     ADDStack f_add_stack;
 
-    // current ctx stack, for symbol resolution
+    /* current ctx stack, for symbol resolution */
     ExprList f_ctx_stack;
 
-    // current time frame, for unrolling
+    /* current time frame, for unrolling */
     TimeStack f_time_stack;
 
-    // managers
+    /* managers */
     ModelMgr& f_owner;
     EncodingMgr& f_enc;
 
@@ -276,14 +277,8 @@ private:
     /* synchronization */
     boost::mutex f_process_mutex;
 
-    clock_t f_elapsed; /* for benchmarking */
-
-    void pre_hook();
-    void post_hook();
-
-    void pre_node_hook(Expr_ptr expr);
-    void post_node_hook(Expr_ptr expr);
-
+    /* benchmarking */
+    clock_t f_elapsed;
 };
 
 #endif

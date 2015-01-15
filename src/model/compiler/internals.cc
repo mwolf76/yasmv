@@ -149,29 +149,6 @@ Expr_ptr Compiler::make_auto_id()
     return em.make_identifier(oss.str());
 }
 
-/* Builds a temporary expression out of a DD array. This is used by
-   some algebraic algorithms. Uses arrays instead of DDVectors due to
-   historic reasons. */
-Expr_ptr Compiler::make_temporary_expr(ADD dds[], unsigned width)
-{
-    ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
-
-    Expr_ptr expr(make_auto_id());
-
-    /* Register temporary symbol into resolver (temporaries are global) */
-    f_owner.resolver()->add_symbol(em.make_temp(), expr,
-                                   new Variable(em.make_main(), expr,
-                                                tm.find_unsigned(width),
-                                                false, true));
-
-    /* register encoding, using fqexpr */
-    const FQExpr& key = FQExpr(expr);
-    f_temp_encodings [ key ] = new AlgebraicEncoding(width, false, dds);
-
-    return expr;
-}
-
 /* build an auto fresh ADD variable and register its encoding */
 ADD Compiler::make_auto_dd()
 {

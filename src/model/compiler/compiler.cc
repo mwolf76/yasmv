@@ -306,22 +306,18 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
     f_type_stack.pop_back();
     f_type_stack.push_back( tgt_type);
 
-    if (src_type -> is_boolean() &&
-        tgt_type -> is_boolean()) {
+    if (src_type -> is_boolean() && tgt_type -> is_boolean())
         return; /* nop */
-    }
-    else if (src_type -> is_boolean() &&
-        tgt_type -> is_algebraic()) {
+
+    else if (src_type -> is_boolean() && tgt_type -> is_algebraic())
         algebraic_cast_from_boolean(expr);
-    }
-    else if (src_type -> is_algebraic() &&
-             tgt_type -> is_boolean()) {
+
+    else if (src_type -> is_algebraic() && tgt_type -> is_boolean())
         boolean_cast_from_algebraic(expr);
-    }
-    else if (src_type -> is_algebraic() &&
-             tgt_type -> is_algebraic()) {
+
+    else if (src_type -> is_algebraic() && tgt_type -> is_algebraic())
         algebraic_cast_from_algebraic(expr);
-    }
+
     else assert (false); // unreachable
 }
 
@@ -580,17 +576,18 @@ void Compiler::walk_comma_postorder(const Expr_ptr expr)
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    TypeMgr& tm = f_owner.tm();
+    ExprMgr& em (f_owner.em());
+    TypeMgr& tm (f_owner.tm());
 
     /* cached? */
-    if (! cache_miss(expr)) return;
+    if (! cache_miss(expr))
+        return;
 
-    Expr_ptr ctx = f_ctx_stack.back();
-    step_t time = f_time_stack.back();
+    Expr_ptr ctx (f_ctx_stack.back());
+    step_t time  (f_time_stack.back());
 
     FQExpr2EncMap::const_iterator eye;
-    Encoding_ptr enc = NULL;
+    Encoding_ptr enc (NULL);
 
     // 1. Explicit integer consts, perform booleanization immediately using
     // word-width property to determine the number of bits to be used.
@@ -602,44 +599,24 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }
 
     ResolverProxy resolver;
-    Symbol_ptr symb = resolver.symbol(ctx, expr);;
+    Symbol_ptr symb (resolver.symbol(ctx, expr));
 
-    // // 2. Temporary symbols are maintained internally by the compiler
-    // ITemporary_ptr temp;
-    // if (NULL != (temp = dynamic_cast<ITemporary_ptr>(symb))) {
-    //     Type_ptr type = NULL;
-
-    //     type = symb->as_variable().type();
-    //     assert(type->is_algebraic());
-
-    //     // temporary encodings must be already defined.
-    //     FQExpr key(ExprMgr::INSTANCE().make_main(), expr, time);
-
-    //     eye = f_temp_encodings.find(key);
-    //     if (eye != f_temp_encodings.end()) {
-    //         enc = eye -> second;
-    //     }
-    //     else assert(false); // unexpected
-
-    //     push_dds(enc, type);
-    //     return;
-    // } /* Temporary symbols */
-
-    // 3. bool/integer constant leaves
+    // TODO: review this, no longer applies to integers
+    // 2. bool/integer constant leaves
     if (symb->is_const()) {
-        Constant& konst = symb->as_const();
+        Constant& konst (symb->as_const());
 
         f_type_stack.push_back(konst.type());
         f_add_stack.push_back(f_enc.constant(konst.value()));
         return;
     }
 
-    // 4. enum literals
+    // 3. enum literals
     if (symb->is_literal()) {
-        Literal& lit =  symb->as_literal();
+        Literal& lit (symb->as_literal());
 
         // push into type stack
-        Type_ptr type = lit.type();
+        Type_ptr type (lit.type());
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
@@ -652,7 +629,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             f_enc.register_encoding(key, enc);
         }
 
-        EnumEncoding_ptr eenc = dynamic_cast<EnumEncoding_ptr>( enc );
+        EnumEncoding_ptr eenc (dynamic_cast<EnumEncoding_ptr>( enc ));
         assert( NULL != eenc );
 
         f_type_stack.push_back(lit.type());
@@ -660,11 +637,11 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    // 5.  variables
+    // 4.  variables
     else if (symb->is_variable()) {
 
         // push into type stack
-        Type_ptr type = symb->as_variable().type();
+        Type_ptr type (symb->as_variable().type());
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
@@ -690,11 +667,11 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     } /* variables */
 
-    // 6 Defines. Simply compile it recursively.  We keep this to
+    // 5. defines, simply compile it recursively.  We keep this to
     // retain the old lazy behavior with nullary defines since it
     // comes at no extra cost at all.
     else if (symb->is_define()) {
-        (*this)(symb->as_define().body());
+        (*this) (symb -> as_define().body());
         return;
     }
 
@@ -767,7 +744,6 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 
 Compiler::Compiler()
     : f_cache()
-    , f_temp_encodings()
     , f_micro_descriptors()
     , f_mux_map()
     , f_toplevel_map()

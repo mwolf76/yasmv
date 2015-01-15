@@ -438,13 +438,12 @@ void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
                                 f_ctx_stack.back());
 
     POP_DV(rhs, tp -> width());
-    ADD res = f_enc.zero();
-    for (unsigned i = 0; i < tp->width(); ++ i) {
-        res = res.Or( rhs[i]); // order is not relevant here
-    }
 
-    Expr_ptr temp = make_temporary_expr( &res, 1);
-    (*this)(temp);
+    ADD res = f_enc.zero();
+    for (unsigned i = 0; i < tp -> width(); ++ i)
+        res = res.Or( rhs[i]);
+
+    PUSH_DD(res);
 }
 
 void Compiler::algebraic_cast_from_algebraic(const Expr_ptr expr)
