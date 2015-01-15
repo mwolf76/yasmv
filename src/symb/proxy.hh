@@ -54,10 +54,12 @@ public:
         Symbol_ptr res = NULL;
 
         res = f_tm.resolver()->symbol(ctx, expr);
-        if (NULL != res) return res;
+        if (NULL != res)
+            return res;
 
         res = f_mm.resolver()->symbol(ctx, expr);
-        if (NULL != res) return res;
+        if (NULL != res)
+            return res;
 
         /* if all of the above fail... */
         WARN

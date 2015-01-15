@@ -49,7 +49,7 @@ void BMC::falsification( Expr_ptr phi )
     assert( em().is_G( phi ));
 
     Engine engine;
-    Expr_ptr ctx = em().make_main();
+    Expr_ptr ctx = em().make_empty();
 
     Expr_ptr invariant = phi->lhs();
     CompilationUnit ii (compiler().process( ctx, invariant));
@@ -118,7 +118,7 @@ void BMC::kinduction( Expr_ptr phi )
 
     /* thread locals */
     Engine engine;
-    Expr_ptr ctx = em().make_main();
+    Expr_ptr ctx = em().make_empty();
 
     Expr_ptr invariant = phi->lhs();
     CompilationUnit ii (compiler().process( ctx, invariant));

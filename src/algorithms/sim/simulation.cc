@@ -135,7 +135,7 @@ void Simulation::process()
             return;
         }
         else if (NULL != f_halt_cond && wm.eval ( witness(),
-                                                  em.make_main(),
+                                                  em.make_empty(),
                                                   f_halt_cond, k)) {
             f_status = SIMULATION_HALTED;
             return;
@@ -173,7 +173,7 @@ void Simulation::process()
                     return;
                 }
                 else if (NULL != f_halt_cond && wm.eval ( witness(),
-                                                          em.make_main(),
+                                                          em.make_empty(),
                                                           f_halt_cond, k)) {
                     f_status = SIMULATION_HALTED;
                     return;

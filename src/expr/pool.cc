@@ -30,6 +30,8 @@
 
 long ExprHash::operator() (const Expr& k) const
 {
+    return 0;
+
     if (k.f_symb == IDENT) {
         return (long)(k.u.f_atom);
     }

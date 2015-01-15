@@ -38,6 +38,8 @@
 
 #include <type/type_mgr.hh>
 
+typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> ContextMap;
+
 typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {
 
@@ -63,15 +65,18 @@ public:
 
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,
-                         Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
+                         Expr_ptr ctx = ExprMgr::INSTANCE().make_empty()) {
         return f_type_checker.type(body, ctx);
     }
 
     // delegated param binding method
     inline Expr_ptr preprocess(Expr_ptr body,
-                               Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
+                               Expr_ptr ctx = ExprMgr::INSTANCE().make_empty()) {
         return f_preprocessor.process(body, ctx);
     }
+
+    void register_scope(const std::pair< Expr_ptr, Module_ptr >& pair);
+    Module_ptr scope(Expr_ptr ctx);
 
 protected:
     ModelMgr();
@@ -108,6 +113,8 @@ private:
     bool f_status;
     void first_pass();
     void second_pass();
+
+    ContextMap f_context_map;
 };
 
 #endif

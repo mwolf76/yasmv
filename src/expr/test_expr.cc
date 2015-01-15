@@ -14,13 +14,17 @@ BOOST_AUTO_TEST_CASE(expr)
     Atom a_y("y");
 
     Expr_ptr x = em.make_identifier(a_x);
+    BOOST_CHECK( x == em.make_identifier(a_x));
+
     Expr_ptr y = em.make_identifier(a_y);
+    BOOST_CHECK( y == em.make_identifier(a_y));
 
     // LTL makers and is-a predicates
     Expr_ptr Fx = em.make_F(x);
     BOOST_CHECK (Fx->f_symb == F && Fx->lhs() == x && Fx->rhs() == NULL);
     BOOST_CHECK (em.is_F(Fx));
     BOOST_CHECK (em.is_LTL(Fx));
+
 
     Expr_ptr Gx = em.make_G(x);
     BOOST_CHECK (Gx->f_symb == G && Gx->lhs() == x && Gx->rhs() == NULL);
@@ -41,6 +45,12 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (xRy->f_symb == R && xRy->lhs() == x && xRy->rhs() == y);
     BOOST_CHECK (em.is_R(xRy));
     BOOST_CHECK (em.is_LTL(xRy));
+
+    BOOST_CHECK (em.make_F(x) == Fx);
+    BOOST_CHECK (em.make_G(x) == Gx);
+    BOOST_CHECK (em.make_X(x) == Xx);
+    BOOST_CHECK (em.make_U(x, y) == xUy);
+    BOOST_CHECK (em.make_R(x, y) == xRy);
 
     // primary makers and is-a predicates
     Expr_ptr next_x = em.make_next(x);
@@ -187,6 +197,8 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (x_params_y->f_symb == PARAMS &&
                  x_params_y->lhs() == x && x_params_y->rhs() == y);
     BOOST_CHECK (em.is_params(x_params_y));
+
+    BOOST_CHECK( em.make_dot(x, y) == x_dot_y);
 }
 
 BOOST_AUTO_TEST_CASE(builtin)
@@ -194,15 +206,19 @@ BOOST_AUTO_TEST_CASE(builtin)
     ExprMgr& em(ExprMgr::INSTANCE());
 
     Expr_ptr main_ = em.make_main();
-    BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom("main"));
+    BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom( MAIN_TOKEN ));
     BOOST_CHECK (em.is_main(main_));
 
+    Expr_ptr empty = em.make_empty();
+    BOOST_CHECK (em.is_identifier(empty) && empty->atom() == Atom( EMPTY_TOKEN ));
+    BOOST_CHECK (em.is_empty(empty));
+
     Expr_ptr false_ = em.make_false();
-    BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom("FALSE"));
+    BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom( FALSE_TOKEN ));
     BOOST_CHECK (em.is_false(false_));
 
     Expr_ptr true_ = em.make_true();
-    BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom("TRUE"));
+    BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom( TRUE_TOKEN ));
     BOOST_CHECK (em.is_true(true_));
 
     Expr_ptr zero = em.make_zero();

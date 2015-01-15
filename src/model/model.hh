@@ -54,6 +54,8 @@ private:
 };
 
 class Module {
+    friend std::ostream& operator<<(std::ostream& os, Module& module);
+
     Expr_ptr f_name;
 
     ExprVector f_locals;

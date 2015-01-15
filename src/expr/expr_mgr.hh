@@ -454,16 +454,7 @@ public:
     }
 
     /* -- Builtin identifiers and constants --------------------------------- */
-    inline Expr_ptr make_identifier(Atom atom)
-    {
-        boost::mutex::scoped_lock lock(f_atom_mutex);
 
-        AtomPoolHit ah = f_atom_pool.insert(atom);
-        const Atom& pooled_atom =  (* ah.first);
-
-        // no copy occurs here
-        return make_expr(pooled_atom);
-    }
 
     inline Expr_ptr make_temp() const
     { return temp_expr; }
@@ -471,14 +462,6 @@ public:
     inline bool is_temp(const Expr_ptr expr) const {
         assert(expr);
         return expr == temp_expr;
-    }
-
-    inline Expr_ptr make_default_ctx() const
-    { return default_ctx_expr; }
-
-    inline bool is_default_ctx(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == default_ctx_expr;
     }
 
     inline Expr_ptr make_main() const
@@ -556,6 +539,8 @@ public:
 
         return (UNDEF == symb);
     }
+
+    Expr_ptr left_associate(const Expr_ptr);
 
     // -- broad is-a predicates ------------------------------------------------
     inline bool is_temporal(const Expr_ptr expr) const {
@@ -690,6 +675,8 @@ public:
         return (*f_instance);
     }
 
+    Expr_ptr make_identifier(Atom atom);
+
 protected:
     ExprMgr();
     ~ExprMgr();
@@ -710,15 +697,8 @@ private:
         return __make_expr(&tmp);
     }
 
-    // synchronized low-level services
-    inline Expr_ptr __make_expr(Expr_ptr expr) {
-        boost::mutex::scoped_lock lock(f_expr_mutex);
-
-        ExprPoolHit eh = f_expr_pool.insert(*expr);
-        Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
-
-        return pooled_expr;
-    }
+    /* synchronized low-level service */
+    Expr_ptr __make_expr(Expr_ptr expr);
 
     /* -- data ------------------------------------------------------------- */
 
@@ -748,9 +728,6 @@ private:
 
     /* empty symbol */
     Expr_ptr empty_expr;
-
-    /* toplevel default ctx (for command line exprs) */
-    Expr_ptr default_ctx_expr;
 
     /* synchronized shared pools */
     boost::mutex f_expr_mutex;

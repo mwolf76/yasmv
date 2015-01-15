@@ -37,16 +37,15 @@ ModelResolver::ModelResolver(ModelMgr& owner)
         << "Initialized Model Resolver instance @" << this
         << std::endl;
 
-    // initialize global constants
     f_owner.symbols().insert( std::make_pair<FQExpr,
                               Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                            new Constant(ExprMgr::INSTANCE().make_empty(),
                                                          ExprMgr::INSTANCE().make_false(),
                                                          TypeMgr::INSTANCE().find_boolean(), 0)));
 
     f_owner.symbols().insert( std::make_pair<FQExpr,
                               Constant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
+                                            new Constant(ExprMgr::INSTANCE().make_empty(),
                                                          ExprMgr::INSTANCE().make_true(),
                                                          TypeMgr::INSTANCE().find_boolean(), 1)));
 }
@@ -67,15 +66,10 @@ void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_p
 
 Symbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 {
-    /* Fetch modules from model */
-    const Modules& modules (f_owner.model().modules());
-    Modules::const_iterator eye (modules.find(ctx));
-    if (eye == modules.end())
-        return NULL;
-
     // init lookup data
-    Module_ptr module ((*eye).second);
-    FQExpr key(ctx, expr, 0); // time arbitrarily set to 0
+    ModelMgr& mm (ModelMgr::INSTANCE());
+    Module_ptr module (mm.scope( ctx ));
+    FQExpr key(module->name(), expr, 0); // time arbitrarily set to 0
 
     { /* global constants and temporaries */
         const Symbols& symbols = f_owner.symbols();

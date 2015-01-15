@@ -30,6 +30,8 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
+#define SHOW_SCOPE_ASSOCIATIVITY 0
+
 Printer::Printer()
     : f_os(std::cout)
 {}
@@ -281,11 +283,26 @@ void Printer::walk_cond_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_dot_preorder(const Expr_ptr expr)
-{ return true; }
+{
+#if SHOW_SCOPE_ASSOCIATIVITY
+    f_os << "[[ ";
+#endif
+
+    return true;
+}
 bool Printer::walk_dot_inorder(const Expr_ptr expr)
-{ f_os << "."; return true; }
+{
+    if (! ExprMgr::INSTANCE().is_empty( expr -> lhs()))
+        f_os << ".";
+
+    return true;
+}
 void Printer::walk_dot_postorder(const Expr_ptr expr)
-{}
+{
+#if SHOW_SCOPE_ASSOCIATIVITY
+    f_os << " ]]";
+#endif
+}
 
 bool Printer::walk_params_preorder(const Expr_ptr expr)
 { return true; }

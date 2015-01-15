@@ -65,53 +65,68 @@ Variant& Algorithm::get_param(const std::string key)
 
 void Algorithm::setup()
 {
+#if 0
     Compiler& cmpl(compiler()); // just a local ref
-    const Modules& modules = f_model.modules();
+
+    ExprMgr& em (ExprMgr::INSTANCE());
+    ModelMgr& mm (ModelMgr::INSTANCE());
+
+    Model& model(f_model);
+    const Modules& modules = model.modules();
+    Expr_ptr main_module = em.make_main();
+
+    Modules::const_iterator main_iter = modules.find(main_module);
+
+    if (modules.end() == main_iter)
+        throw ModuleNotFound(main_module);
+
+    Module_ptr main_ = main_iter -> second;
 
     DEBUG
         << "Compiling FSM..."
         << std::endl;
 
+    std::stack< Expr_ptr > stack;
+    stack.push( em.make_empty());
+
+    // recursive walk of model, starting from main module
+    while (0 < stack.size()) {
     {
-        for (Modules::const_iterator m = modules.begin();
-             m != modules.end(); ++ m) {
+        Expr_ptr ctx (stack.top());
+        Module& module (mm.scope( ContextKey( curr_module, ctx)));
 
-            Module& module = dynamic_cast <Module&> (*m->second);
+        /* INIT */
+        const ExprVector init = module.init();
+        for (ExprVector::const_iterator init_eye = init.begin(); init_eye != init.end(); ++ init_eye)
+            f_init.push_back( cmpl.process(ctx, *init_eye));
 
-            /* INIT */
-            const ExprVector init = module.init();
-            for (ExprVector::const_iterator init_eye = init.begin();
-                 init_eye != init.end(); ++ init_eye) {
+        /* INVAR */
+        const ExprVector invar = module.invar();
+        for (ExprVector::const_iterator invar_eye = invar.begin(); invar_eye != invar.end(); ++ invar_eye)
+            f_invar.push_back( cmpl.process(ctx, *invar_eye));
 
-                Expr_ptr ctx (module.name());
-                Expr_ptr body (*init_eye);
+        /* TRANS */
+        const ExprVector trans = module.trans();
+        for (ExprVector::const_iterator trans_eye = trans.begin(); trans_eye != trans.end(); ++ trans_eye)
+            f_trans.push_back( cmpl.process(ctx, *trans_eye));
 
-                f_init.push_back( cmpl.process(ctx, body));
-            }
+        /* recursively visit child modules */
+        Variables attrs ( module -> vars());
+        for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+            Variable& var (* vi -> second);
+            Type_ptr vtype (var.type());
 
-            /* INVAR */
-            const ExprVector invar = module.invar();
-            for (ExprVector::const_iterator invar_eye = invar.begin();
-                 invar_eye != invar.end(); ++ invar_eye) {
+            if (vtype -> is_instance()) {
+                InstanceType_ptr instance = vtype -> as_instance();
 
-                Expr_ptr ctx (module.name());
-                Expr_ptr body (*invar_eye);
+                Expr_ptr module_name (instance -> name());
+                Module_ptr inst_module( & model.module(module_name));
 
-                f_invar.push_back( cmpl.process(ctx, body));
-            }
 
-            /* TRANS */
-            const ExprVector trans = module.trans();
-            for (ExprVector::const_iterator trans_eye = trans.begin();
-                 trans_eye != trans.end(); ++ trans_eye) {
-
-                Expr_ptr ctx (module.name());
-                Expr_ptr body (*trans_eye);
-
-                f_trans.push_back( cmpl.process(ctx, body));
             }
         }
-    } /* compile() */
+    }
+#endif
 }
 
 void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)

@@ -307,42 +307,23 @@ bool TypeChecker::walk_cond_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_cond_postorder(const Expr_ptr expr)
-{ }
+{ /* nop */ }
 
 bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_dot_inorder(const Expr_ptr expr)
 {
-    assert( false ); // TODO
-    // Type_ptr tmp = f_type_stack.back(); // TODO: review this
-    // Expr_ptr ctx = f_owner.em().make_dot( f_ctx_stack.back(), expr->lhs());
-    // f_ctx_stack.push_back(ctx);
+    ExprMgr& em (f_owner.em());
+
+    Expr_ptr ctx ( em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+    f_ctx_stack.push_back( ctx );
+
+    f_type_stack.pop_back();
 
     return true;
 }
 void TypeChecker::walk_dot_postorder(const Expr_ptr expr)
-{
-    Type_ptr type = f_type_stack.back(); f_type_stack.pop_back();
-    EnumType_ptr enm;
-
-    if (NULL != (enm = dynamic_cast<EnumType_ptr> (type))) {
-        const ExprSet& lits = enm->literals();
-        Expr_ptr rhs = expr->rhs();
-
-        if (lits.find(rhs) != lits.end()) {
-            ResolverProxy proxy;
-            Symbol_ptr symb = proxy.symbol(f_ctx_stack.back(), rhs);
-
-            PUSH_TYPE(symb->as_literal().type());
-        }
-    }
-
-    else assert(false);
-
-
-    // restore previous ctx
-    f_ctx_stack.pop_back();
-}
+{ f_ctx_stack.pop_back(); }
 
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool TypeChecker::walk_params_preorder(const Expr_ptr expr)

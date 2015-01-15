@@ -27,11 +27,8 @@ const char *YASMV_HOME = "YASMV_HOME";
 const char *MICROCODE_PATH = "microcode";
 
 /* tokens */
+const char *EMPTY_TOKEN = "__nil__";
 const char *MAIN_TOKEN = "main";
-
-const char *EMPTY_TOKEN = "__empty";
-
-const char *DEFAULT_CTX_TOKEN = "__main";
 
 /* bool consts */
 const char *FALSE_TOKEN = "FALSE";

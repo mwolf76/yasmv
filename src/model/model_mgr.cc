@@ -38,58 +38,91 @@ ModelMgr::ModelMgr()
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
     , f_type_checker(* new TypeChecker(* this))
-{}
+{
+}
 
+void ModelMgr::register_scope(const std::pair< Expr_ptr, Module_ptr >& pair)
+{
+    /* dot expressions need to be canonical (e.g. `(a.(b.c))` should
+       match `(a.b).c` */
+    Expr_ptr ckey (f_em.left_associate(pair.first));
+    Expr_ptr tgt (pair.second -> name());
+
+    DEBUG
+        << "Registering scope "
+        << "`" << ckey << "`"
+        << " :: " << tgt
+        << std::endl;
+
+    f_context_map.insert( pair );
+}
+
+Module_ptr ModelMgr::scope(Expr_ptr key)
+{
+    Expr_ptr ckey (f_em.left_associate(key));
+    DEBUG
+        << "Resolving scope `" << ckey << "` "
+        << std::endl;
+
+    ContextMap::const_iterator mi = f_context_map.find( ckey );
+    assert( f_context_map.end() != mi );
+
+    return mi -> second;
+}
+
+/* Build Context map by DFS traversal */
 void ModelMgr::first_pass()
 {
     ExprMgr& em (ExprMgr::INSTANCE());
+
     Model& model(f_model);
     const Modules& modules = model.modules();
-    Modules::const_iterator main_iter = modules.find(em.make_main());
+    Expr_ptr main_module = em.make_main();
+
+    Modules::const_iterator main_iter = modules.find(main_module);
 
     if (modules.end() == main_iter)
-        throw ModuleNotFound( em.make_main());
+        throw ModuleNotFound(main_module);
 
-    typedef std::stack<Module_ptr> ModuleStack;
-    ModuleStack module_stack;
-    module_stack.push( main_iter->second );
+    Module& main_ = *main_iter -> second;
 
-    typedef std::stack<Expr_ptr> ExprStack;
-    ExprStack params_stack;
-    params_stack.push( ExprMgr::INSTANCE().make_empty());
+    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
+    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                (em.make_empty(), &main_));
 
-    // recursive walk of all var decls, starting from main module
-    while (0 < module_stack.size()) {
+    /* walk of var decls, starting from main module */
+    while (0 < stack.size()) {
 
-        assert( module_stack.size() == params_stack.size());
-        Module_ptr mi = module_stack.top(); module_stack.pop();
-        assert( mi );
+        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
 
-        Expr_ptr   ei = params_stack.top(); params_stack.pop();
-        assert( ei );
+        /* register context resolution */
+        register_scope( top );
 
-        Module& module( *mi ); Variables vars ( module.vars());
-        Expr_ptr params( ei ); (void) params;
+        Expr_ptr ctx ( top.first );
+        Module& module ( * top.second );
 
+        Variables attrs (module.vars());
         Variables::const_iterator vi;
-        for (vi = vars.begin(); vars.end() != vi; ++ vi) {
-            FQExpr fqdn (vi -> first);
+        for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+
+            Expr_ptr id( vi -> first.expr());
+
             Variable& var (* vi -> second);
             Type_ptr vtype (var.type());
 
-            DEBUG
-                << "processing var `" << fqdn << "`, "
+            Expr_ptr local_ctx (em.make_dot( ctx, id));
+
+            DRIVEL
+                << "processing var `" << local_ctx << "`, "
                 << "type " << vtype
                 << std::endl;
 
             if (vtype -> is_instance()) {
-                InstanceType_ptr instance (vtype -> as_instance());
+                InstanceType_ptr instance = vtype -> as_instance();
+                Module&  module( model.module(instance -> name()));
 
-                Module& instance_module ( model.module( instance -> name()));
-                module_stack.push( &instance_module );
-
-                Expr_ptr instance_params( instance -> params());
-                params_stack.push( instance_params );
+                stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                            (local_ctx, &module));
             }
         }
     }
@@ -97,29 +130,38 @@ void ModelMgr::first_pass()
 
 void ModelMgr::second_pass()
 {
+    ExprMgr& em (ExprMgr::INSTANCE());
+
     Model& model(f_model);
     const Modules& modules = model.modules();
+    Expr_ptr main_module = em.make_main();
 
-    for (Modules::const_iterator mi = modules.begin(); mi != modules.end(); ++ mi ) {
+    Modules::const_iterator main_iter = modules.find(main_module);
 
-        Module& module = * mi->second;
-        DEBUG
-            << "processing module `" << module << "` "
-            << std::endl;
+    if (modules.end() == main_iter)
+        throw ModuleNotFound(main_module);
 
-        // Remark: ctx name is MODULE name, not instance's
-        // rationale: you may have several instances but they
-        // all should refer to the same entry on the type map.
-        Expr_ptr ctx = module.name();
+    Module& main_ = *main_iter -> second;
+
+    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
+    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                (em.make_empty(), &main_));
+
+    /* walk of var decls, starting from main module */
+    while (0 < stack.size()) {
+
+        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
+
+        Expr_ptr ctx ( top.first );
+        Module& module ( * top.second );
 
         const ExprVector& init = module.init();
         for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
 
             Expr_ptr body = (*ii);
-
-            FQExpr fqdn(ctx, body);
             DEBUG
-                << "processing INIT " << fqdn
+                << "processing INIT "
+                << ctx << "::" << body
                 << std::endl;
 
             try {
@@ -131,7 +173,7 @@ void ModelMgr::second_pass()
                     << tmp
                     << std::endl
                     << "  in INIT "
-                    << fqdn
+                    << ctx << "::" << body
                     << std::endl;
 
                 f_status = false;
@@ -142,10 +184,9 @@ void ModelMgr::second_pass()
         for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
 
             Expr_ptr body = (*ii);
-
-            FQExpr fqdn(ctx, body);
             DEBUG
-                << "processing INVAR " << fqdn
+                << "processing INVAR "
+                << ctx << "::" << body
                 << std::endl;
 
             try {
@@ -157,7 +198,7 @@ void ModelMgr::second_pass()
                     << tmp
                     << std::endl
                     << "  in INVAR "
-                    << fqdn
+                    << ctx << "::" << body
                     << std::endl;
 
                 f_status = false;
@@ -168,10 +209,9 @@ void ModelMgr::second_pass()
         for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
 
             Expr_ptr body = (*ti);
-
-            FQExpr fqdn(ctx, body);
             DEBUG
-                << "processing TRANS " << fqdn
+                << "processing TRANS "
+                << ctx << "::" << body
                 << std::endl;
 
             try {
@@ -183,7 +223,7 @@ void ModelMgr::second_pass()
                     << tmp
                     << std::endl
                     << "  in TRANS "
-                    << fqdn
+                    << ctx << "::" << body
                     << std::endl;
 
                 f_status = false;
@@ -192,11 +232,11 @@ void ModelMgr::second_pass()
 
         const Defines& defs = module.defs();
         for (Defines::const_iterator di = defs.begin(); di != defs.end(); ++ di ) {
-            FQExpr fqdn = (*di).first;
-            Expr_ptr body = (*di).second -> body();
 
+            Expr_ptr body = (*di).second -> body();
             DEBUG
-                << "processing DEFINE " << fqdn
+                << "processing DEFINE "
+                << ctx << "::" << body
                 << std::endl;
 
             try {
@@ -208,7 +248,7 @@ void ModelMgr::second_pass()
                     << tmp
                     << std::endl
                     << "  in DEFINE "
-                    << fqdn
+                    << ctx << "::" << body
                     << std::endl;
 
                 f_status = false;
@@ -216,7 +256,26 @@ void ModelMgr::second_pass()
 
         } // for defines
 
-    } // for module
+        Variables attrs (module.vars());
+        Variables::const_iterator vi;
+        for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+
+            Expr_ptr id( vi -> first.expr());
+
+            Variable& var (* vi -> second);
+            Type_ptr vtype (var.type());
+
+            Expr_ptr local_ctx (em.make_dot( ctx, id));
+
+            if (vtype -> is_instance()) {
+                InstanceType_ptr instance = vtype -> as_instance();
+                Module&  module( model.module(instance -> name()));
+
+                stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                            (local_ctx, &module));
+            }
+        }
+    }
 }
 
 bool ModelMgr::analyze()

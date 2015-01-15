@@ -26,6 +26,9 @@
 #include <common.hh>
 #include <expr_mgr.hh>
 
+#include <stack>
+#include <vector>
+
 // singleton instance initialization
 ExprMgr_ptr ExprMgr::f_instance = NULL;
 
@@ -88,8 +91,6 @@ ExprMgr::ExprMgr()
 
     empty_expr = make_identifier(EMPTY_TOKEN);
 
-    default_ctx_expr = make_identifier(DEFAULT_CTX_TOKEN);
-
     DEBUG
         << "ExprMgr @" << this
         << " initialized"
@@ -118,3 +119,74 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
     return make_set(res);
 }
 
+
+Expr_ptr ExprMgr::make_identifier(Atom atom)
+{
+    boost::mutex::scoped_lock lock(f_atom_mutex);
+
+    AtomPoolHit ah = f_atom_pool.insert(atom);
+    const Atom& pooled_atom =  (* ah.first);
+
+#if 0
+    if (ah.second) {
+        DEBUG
+            << "Added new atom to pool: `"
+            << pooled_atom << "`"
+            << std::endl;
+    }
+#endif
+
+    return make_expr(pooled_atom);
+}
+
+Expr_ptr ExprMgr::__make_expr(Expr_ptr expr) {
+    boost::mutex::scoped_lock lock(f_expr_mutex);
+
+    ExprPoolHit eh = f_expr_pool.insert(*expr);
+    Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
+
+#if 0
+    if (eh.second) {
+        void *p (pooled_expr);
+        DEBUG
+            << "Added new expr to pool: `"
+            << pooled_expr << "`, @"
+            << p
+            << std::endl;
+    }
+#endif
+
+    return pooled_expr;
+}
+
+Expr_ptr ExprMgr::left_associate(const Expr_ptr expr)
+{
+    if (! is_dot( expr))
+        return expr;
+
+    Expr_ptr res (NULL);
+    std::vector<Expr_ptr> fragments;
+
+    // 1. in-order visit, build reversed expr stack
+    std::stack<Expr_ptr> stack;
+    stack.push( expr );
+
+    while (0 < stack.size()) {
+        Expr_ptr top (stack.top());
+        stack.pop();
+
+        if (is_dot( top)) {
+            stack.push( top->rhs());
+            stack.push( top->lhs());
+            continue;
+        }
+
+        fragments.push_back(top);
+    }
+
+    // 2. good, now build canonical AST backwards
+    for (std::vector<Expr_ptr>::const_iterator i = fragments.begin(); fragments.end() != i; ++ i)
+        res = res ? make_dot( res, *i) : *i;
+
+    return res;
+}

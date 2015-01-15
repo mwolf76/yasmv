@@ -25,7 +25,7 @@
 #include <expr/printer/printer.hh>
 
 FQExpr::FQExpr(Expr_ptr expr)
-    : f_ctx(ExprMgr::INSTANCE().make_main())
+    : f_ctx(ExprMgr::INSTANCE().make_empty())
     , f_expr(expr)
     , f_time(0)
 {}
