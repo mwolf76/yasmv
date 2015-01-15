@@ -32,6 +32,9 @@
 
 #include <type/type.hh>
 
+#include <vector>
+#include <utility>
+
 class UnresolvedSymbol : public Exception {
     Expr_ptr f_ctx;
     Expr_ptr f_expr;
@@ -83,7 +86,7 @@ public:
 
 class Symbol {
 public:
-    virtual const Expr_ptr ctx()  const =0;
+    virtual const Expr_ptr module()  const =0;
     virtual const Expr_ptr expr() const =0;
 
     bool is_const() const;
@@ -104,21 +107,21 @@ class Constant
     , public Typed
     , public Value
 {
-    Expr_ptr f_ctx;
+    Expr_ptr f_module;
     Expr_ptr f_name;
     Type_ptr f_type;
     value_t f_value;
 
 public:
-    Constant(const Expr_ptr ctx, const Expr_ptr name, Type_ptr type, value_t value)
-        : f_ctx(ctx)
+    Constant(const Expr_ptr module, const Expr_ptr name, Type_ptr type, value_t value)
+        : f_module(module)
         , f_name(name)
         , f_type(type)
         , f_value(value)
     {}
 
-    const Expr_ptr ctx() const
-    { return f_ctx; }
+    const Expr_ptr module() const
+    { return f_module; }
 
     const Expr_ptr expr() const
     { return f_name; }
@@ -134,22 +137,22 @@ class Variable
     : public Symbol
     , public Typed
 {
-    Expr_ptr f_ctx;
+    Expr_ptr f_module;
     Expr_ptr f_name;
     Type_ptr f_type;
     bool     f_input;
     bool     f_temp;
 
 public:
-    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type, bool input = false, bool temp = false)
-        : f_ctx(ctx)
+    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type, bool input = false, bool temp = false)
+        : f_module(module)
         , f_name(name)
         , f_type(type)
         , f_input(input)
     {}
 
-    const Expr_ptr ctx() const
-    { return f_ctx; }
+    const Expr_ptr module() const
+    { return f_module; }
 
     const Expr_ptr expr() const
     { return f_name; }
@@ -177,7 +180,7 @@ public:
         , f_type(type)
     {}
 
-    virtual const Expr_ptr ctx() const
+    virtual const Expr_ptr module() const
     { return NULL; }
 
     virtual const Expr_ptr expr() const
@@ -192,21 +195,21 @@ class Define
     , public Params
     , public Body
 {
-    const Expr_ptr f_ctx;
+    const Expr_ptr f_module;
     const Expr_ptr f_name;
     const ExprVector f_formals;
     const Expr_ptr f_body;
 public:
-    Define(const Expr_ptr ctx, const Expr_ptr name,
+    Define(const Expr_ptr module, const Expr_ptr name,
            const ExprVector& formals, const Expr_ptr body)
-        : f_ctx(ctx)
+        : f_module(module)
         , f_name(name)
         , f_formals(formals)
         , f_body(body)
     {}
 
-    const Expr_ptr ctx() const
-    { return f_ctx; }
+    const Expr_ptr module() const
+    { return f_module; }
 
     const Expr_ptr expr() const
     { return f_name; }
@@ -237,9 +240,9 @@ public:
     inline bool has_next() const
     { return f_iter != f_symbols.end(); }
 
-    inline Symbol_ptr next()
+    inline std::pair <Expr_ptr, Symbol_ptr> next()
     {
-        Symbol_ptr res = (* f_iter);
+        std::pair< Expr_ptr, Symbol_ptr> res = (* f_iter);
         ++ f_iter;
 
         return res;
@@ -249,8 +252,8 @@ private:
     Model&  f_model;
     Expr_ptr f_formula; /* for COI */
 
-    std::vector<Symbol_ptr> f_symbols;
-    std::vector<Symbol_ptr>::const_iterator f_iter;
+    std::vector< std::pair< Expr_ptr, Symbol_ptr > >f_symbols;
+    std::vector< std::pair< Expr_ptr, Symbol_ptr> >::const_iterator f_iter;
 };
 
 #endif

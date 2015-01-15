@@ -419,11 +419,13 @@ Variant WitnessDumpCommand::operator()()
         SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
         while (symbs.has_next()) {
 
-            Symbol_ptr symb (symbs.next());
+            std::pair< Expr_ptr, Symbol_ptr > pair (symbs.next());
+            Expr_ptr ctx (pair.first);
+            Symbol_ptr symb (pair.second);
+
             Expr_ptr value (NULL);
 
             if (symb->is_variable())  {
-                Expr_ptr ctx  (symb->ctx());
                 Expr_ptr expr (symb->expr());
 
                 try {
@@ -442,7 +444,6 @@ Variant WitnessDumpCommand::operator()()
                 }
             }
             else if (symb->is_define()) {
-                Expr_ptr ctx (symb->ctx());
                 Expr_ptr expr (symb->expr());
 
                 try {

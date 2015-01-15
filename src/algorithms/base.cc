@@ -65,11 +65,8 @@ Variant& Algorithm::get_param(const std::string key)
 
 void Algorithm::setup()
 {
-#if 0
     Compiler& cmpl(compiler()); // just a local ref
-
     ExprMgr& em (ExprMgr::INSTANCE());
-    ModelMgr& mm (ModelMgr::INSTANCE());
 
     Model& model(f_model);
     const Modules& modules = model.modules();
@@ -80,53 +77,109 @@ void Algorithm::setup()
     if (modules.end() == main_iter)
         throw ModuleNotFound(main_module);
 
-    Module_ptr main_ = main_iter -> second;
+    Module& main_ = *main_iter -> second;
 
-    DEBUG
-        << "Compiling FSM..."
-        << std::endl;
+    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
+    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                (em.make_empty(), &main_));
 
-    std::stack< Expr_ptr > stack;
-    stack.push( em.make_empty());
-
-    // recursive walk of model, starting from main module
+    /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
-    {
-        Expr_ptr ctx (stack.top());
-        Module& module (mm.scope( ContextKey( curr_module, ctx)));
 
-        /* INIT */
-        const ExprVector init = module.init();
-        for (ExprVector::const_iterator init_eye = init.begin(); init_eye != init.end(); ++ init_eye)
-            f_init.push_back( cmpl.process(ctx, *init_eye));
+        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
 
-        /* INVAR */
-        const ExprVector invar = module.invar();
-        for (ExprVector::const_iterator invar_eye = invar.begin(); invar_eye != invar.end(); ++ invar_eye)
-            f_invar.push_back( cmpl.process(ctx, *invar_eye));
+        Expr_ptr ctx ( top.first );
+        Module& module ( * top.second );
 
-        /* TRANS */
-        const ExprVector trans = module.trans();
-        for (ExprVector::const_iterator trans_eye = trans.begin(); trans_eye != trans.end(); ++ trans_eye)
-            f_trans.push_back( cmpl.process(ctx, *trans_eye));
+        const ExprVector& init = module.init();
+        for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
 
-        /* recursively visit child modules */
-        Variables attrs ( module -> vars());
+            Expr_ptr body = (*ii);
+            DEBUG
+                << "processing INIT "
+                << ctx << "::" << body
+                << std::endl;
+
+            try {
+                f_init.push_back( cmpl.process(ctx, *ii));
+            }
+            catch (Exception& ae) {
+                std::string tmp(ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in INIT "
+                    << ctx << "::" << body
+                    << std::endl;
+            }
+        } // for init
+
+        const ExprVector& invar = module.invar();
+        for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
+
+            Expr_ptr body = (*ii);
+            DEBUG
+                << "processing INVAR "
+                << ctx << "::" << body
+                << std::endl;
+
+            try {
+                f_invar.push_back( cmpl.process(ctx, *ii));
+            }
+            catch (Exception& ae) {
+                std::string tmp (ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in INVAR "
+                    << ctx << "::" << body
+                    << std::endl;
+            }
+        } // for invar
+
+        const ExprVector& trans = module.trans();
+        for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
+
+            Expr_ptr body = (*ti);
+            DEBUG
+                << "processing TRANS "
+                << ctx << "::" << body
+                << std::endl;
+
+            try {
+                f_trans.push_back( cmpl.process(ctx, *ti));
+            }
+            catch (Exception& ae) {
+                std::string tmp(ae.what());
+                WARN
+                    << tmp
+                    << std::endl
+                    << "  in TRANS "
+                    << ctx << "::" << body
+                    << std::endl;
+            }
+        } // for trans
+
+        Variables attrs (module.vars());
+        Variables::const_iterator vi;
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+
+            Expr_ptr id( vi -> first.expr());
+
             Variable& var (* vi -> second);
             Type_ptr vtype (var.type());
 
+            Expr_ptr local_ctx (em.make_dot( ctx, id));
+
             if (vtype -> is_instance()) {
                 InstanceType_ptr instance = vtype -> as_instance();
+                Module&  module( model.module(instance -> name()));
 
-                Expr_ptr module_name (instance -> name());
-                Module_ptr inst_module( & model.module(module_name));
-
-
+                stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                            (local_ctx, &module));
             }
         }
     }
-#endif
 }
 
 void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
@@ -209,14 +262,15 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
     /* define uniqueness_vars into the solver ... */
     while (symbs.has_next()) {
-        Symbol_ptr symb = symbs.next();
+        std::pair< Expr_ptr, Symbol_ptr> pair( symbs.next());
+        Expr_ptr ctx (pair.first);
+        Symbol_ptr symb (pair.second);
 
         if (symb->is_variable()) {
 
             Variable& var (symb->as_variable());
             if (! var.input() && ! var.temp()) {
 
-                Expr_ptr ctx  (var.ctx());
                 Expr_ptr expr (var.expr());
 
                 FQExpr key(ctx, expr);

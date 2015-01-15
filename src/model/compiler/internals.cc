@@ -219,6 +219,9 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert( 0 < f_type_stack.size() );
     Type_ptr type = f_type_stack.back();
 
+    if (type -> is_instance())
+        return;
+
     /* collect dds */
     DDVector dv;
     unsigned i, width = type -> width();

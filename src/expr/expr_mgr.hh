@@ -357,8 +357,9 @@ public:
         return __make_expr(&tmp);
     }
 
+    /* canonical by construction */
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
-    { return make_expr(DOT, a, b); }
+    { return left_associate_dot( make_expr(DOT, a, b)); }
 
     inline Expr_ptr make_comma(Expr_ptr a, Expr_ptr b)
     { return make_expr(COMMA, a, b); }
@@ -540,8 +541,6 @@ public:
         return (UNDEF == symb);
     }
 
-    Expr_ptr left_associate(const Expr_ptr);
-
     // -- broad is-a predicates ------------------------------------------------
     inline bool is_temporal(const Expr_ptr expr) const {
         assert(expr);
@@ -699,6 +698,9 @@ private:
 
     /* synchronized low-level service */
     Expr_ptr __make_expr(Expr_ptr expr);
+
+    /* aux service of make_dot */
+    Expr_ptr left_associate_dot(const Expr_ptr);
 
     /* -- data ------------------------------------------------------------- */
 

@@ -19,6 +19,7 @@
  *
  **/
 #include <model.hh>
+#include <stack>
 
 SymbIter::SymbIter(Model& model, Expr_ptr formula)
     : f_model(model)
@@ -26,43 +27,49 @@ SymbIter::SymbIter(Model& model, Expr_ptr formula)
 {
     assert( !f_formula ); // TODO implement COI
 
-    /* Fetch modules from model */
-    const Modules& modules = f_model.modules();
+    ExprMgr& em (ExprMgr::INSTANCE());
 
-    for (Modules::const_iterator mi = modules.begin();
-         mi != modules.end(); ++ mi) {
+    const Modules& modules = model.modules();
+    Expr_ptr main_module = em.make_main();
 
-        Module& module = * (*mi).second;
+    Modules::const_iterator main_iter = modules.find(main_module);
 
-        const Defines& defs = module.defs();
-        const Variables& vars = module.vars();
+    if (modules.end() == main_iter)
+        throw ModuleNotFound(main_module);
 
-        /* iterate over locals to preserve symbols ordering */
-        const ExprVector& locals = module.locals();
+    Module& main_ = *main_iter -> second;
 
-        for (ExprVector::const_iterator i = locals.begin();
-             i != locals.end(); ++ i) {
+    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
+    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                (em.make_empty(), &main_));
 
-            FQExpr key( module.name(), *i);
-            Symbol_ptr symbol = NULL;
+    /* walk of var decls, starting from main module */
+    while (0 < stack.size()) {
 
-            do {
-                Defines::const_iterator di = defs.find(key);
-                if (di != defs.end()) {
-                    symbol = (*di).second;
-                    break;
-                }
+        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
 
-                Variables::const_iterator vi = vars.find(key);
-                if (vi != vars.end()) {
-                    symbol = (*vi).second;
-                    break;
-                }
-            } while(0);
+        Expr_ptr ctx ( top.first );
+        Module& module ( * top.second );
 
-            if (symbol)  {
-                f_symbols.push_back(symbol);
+        Variables attrs (module.vars());
+        Variables::const_iterator vi;
+        for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+
+            Expr_ptr id( vi -> first.expr());
+
+            Variable& var (* vi -> second);
+            Type_ptr vtype (var.type());
+            Expr_ptr local_ctx (em.make_dot( ctx, id));
+
+            if (vtype -> is_instance()) {
+                InstanceType_ptr instance = vtype -> as_instance();
+                Module&  module( model.module(instance -> name()));
+
+                stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                            (local_ctx, &module));
             }
+            else
+                f_symbols.push_back( std::make_pair< Expr_ptr, Symbol_ptr > (ctx, &var ));
         }
     }
 

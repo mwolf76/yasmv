@@ -43,14 +43,12 @@ ModelMgr::ModelMgr()
 
 void ModelMgr::register_scope(const std::pair< Expr_ptr, Module_ptr >& pair)
 {
-    /* dot expressions need to be canonical (e.g. `(a.(b.c))` should
-       match `(a.b).c` */
-    Expr_ptr ckey (f_em.left_associate(pair.first));
+    Expr_ptr key (pair.first);
     Expr_ptr tgt (pair.second -> name());
 
     DEBUG
         << "Registering scope "
-        << "`" << ckey << "`"
+        << "`" << key << "`"
         << " :: " << tgt
         << std::endl;
 
@@ -59,12 +57,11 @@ void ModelMgr::register_scope(const std::pair< Expr_ptr, Module_ptr >& pair)
 
 Module_ptr ModelMgr::scope(Expr_ptr key)
 {
-    Expr_ptr ckey (f_em.left_associate(key));
     DEBUG
-        << "Resolving scope `" << ckey << "` "
+        << "Resolving scope `" << key << "` "
         << std::endl;
 
-    ContextMap::const_iterator mi = f_context_map.find( ckey );
+    ContextMap::const_iterator mi = f_context_map.find( key );
     assert( f_context_map.end() != mi );
 
     return mi -> second;

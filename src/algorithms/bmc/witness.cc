@@ -31,6 +31,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                                      bool use_coi)
     : Witness()
 {
+#if 0
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
     int inputs[enc_mgr.nbits()];
 
@@ -94,4 +95,5 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
             }
         }
     }
+#endif
 }

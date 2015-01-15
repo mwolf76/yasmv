@@ -26,24 +26,29 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness()
 {
     EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
+    ExprMgr& em (ExprMgr::INSTANCE());
+
     int inputs[enc_mgr.nbits()];
 
     /* Language */
     SymbIter si (model);
     while (si.has_next()) {
-        Symbol_ptr symb = si.next();
-        f_lang.push_back( symb -> expr());
+        std::pair <Expr_ptr, Symbol_ptr> pair = si.next();
+        Expr_ptr ctx (pair.first);
+        Symbol_ptr symb (pair.second);
+        f_lang.push_back( em.make_dot( ctx, symb->expr()));
     }
 
     /* Just k-th timeframe */
     TimeFrame& tf = extend();
     SymbIter vars( model, NULL );
     while (vars.has_next()) {
-        Symbol_ptr symb = vars.next();
+        std::pair <Expr_ptr, Symbol_ptr> pair = vars.next();
+        Expr_ptr ctx (pair.first);
+        Symbol_ptr symb (pair.second);
 
         if (symb->is_variable()) {
 
-            Expr_ptr ctx (symb->ctx());
             Expr_ptr expr(symb->expr());
 
             /* time it, and fetch encoding for enc mgr */
@@ -79,7 +84,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                resulting value into time frame container. */
             Expr_ptr value = enc->expr(inputs);
             if (value) {
-                tf.set_value( expr, value );
+                tf.set_value( em.make_dot( ctx, expr), value );
             }
         }
     }

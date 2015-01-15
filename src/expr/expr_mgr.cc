@@ -159,11 +159,8 @@ Expr_ptr ExprMgr::__make_expr(Expr_ptr expr) {
     return pooled_expr;
 }
 
-Expr_ptr ExprMgr::left_associate(const Expr_ptr expr)
+Expr_ptr ExprMgr::left_associate_dot(const Expr_ptr expr)
 {
-    if (! is_dot( expr))
-        return expr;
-
     Expr_ptr res (NULL);
     std::vector<Expr_ptr> fragments;
 
@@ -186,7 +183,7 @@ Expr_ptr ExprMgr::left_associate(const Expr_ptr expr)
 
     // 2. good, now build canonical AST backwards
     for (std::vector<Expr_ptr>::const_iterator i = fragments.begin(); fragments.end() != i; ++ i)
-        res = res ? make_dot( res, *i) : *i;
+        res = res ? make_expr( DOT, res, *i) : *i;
 
     return res;
 }

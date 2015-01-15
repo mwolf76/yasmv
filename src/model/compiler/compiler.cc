@@ -503,34 +503,17 @@ bool Compiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_dot_inorder(const Expr_ptr expr)
 {
-    // ADD tmp = f_add_stack.back();
-    // Expr_ptr ctx = tmp->get_repr();
-    // f_ctx_stack.push_back(ctx);
+    ExprMgr& em (f_owner.em());
+
+    Expr_ptr ctx ( em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+    f_ctx_stack.push_back( ctx );
+
+    f_type_stack.pop_back();
+
     return true;
 }
 void Compiler::walk_dot_postorder(const Expr_ptr expr)
-{
-    if (f_preprocess)
-        return;
-
-    // ADD rhs_add;
-
-    // { // RHS, no checks necessary/possible
-    //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    //     rhs_add = top;
-    // }
-
-    // { // LHS, must be an instance (by assertion, otherwise leaf would have fail)
-    //     const ADD top = f_add_stack.back(); f_add_stack.pop_back();
-    //     assert(tm.is_instance(top));
-    // }
-
-    // // propagate rhs add
-    // f_add_stack.push_back(rhs_add);
-
-    // // restore previous ctx
-    // f_ctx_stack.pop_back();
-}
+{ f_ctx_stack.pop_back(); }
 
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
@@ -642,6 +625,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         // push into type stack
         Type_ptr type (symb->as_variable().type());
+        if (type -> is_instance()) {
+            f_type_stack.push_back(type);
+            return;
+        }
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.

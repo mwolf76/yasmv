@@ -61,7 +61,7 @@ public:
         if (NULL != res)
             return res;
 
-        /* if all of the above fail... */
+        /* if all of the above fails... */
         WARN
             << "Could not resolve symbol "
             << ctx << "::" << expr
