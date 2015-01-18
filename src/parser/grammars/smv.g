@@ -82,7 +82,7 @@ module_def
     : 'MODULE' module_id=identifier
       { model.add_module(* ($smv::current_module = new Module(module_id))); }
 
-      module_body ';'
+      fsm_param_decl? module_body ';'
     ;
 
 module_body
@@ -109,14 +109,23 @@ fsm_var_decl
     : 'VAR'  fsm_var_decl_body
     ;
 
+fsm_param_decl
+    : '(' fsm_param_decl_body ')'
+    ;
+
+fsm_var_decl_body
+	: fsm_var_decl_clause
+        ( ';' fsm_var_decl_clause)*
+	;
+
 fsm_ivar_decl_body
 	: fsm_ivar_decl_clause
         ( ';' fsm_ivar_decl_clause)*
 	;
 
-fsm_var_decl_body
-	: fsm_var_decl_clause
-        ( ';' fsm_var_decl_clause)*
+fsm_param_decl_body
+	: fsm_param_decl_clause
+        ( ',' fsm_param_decl_clause)*
 	;
 
 fsm_var_decl_clause
@@ -128,12 +137,29 @@ fsm_var_decl_clause
             ExprVector::iterator expr_iter;
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id = (*expr_iter);
-                Variable_ptr var = new Variable($smv::current_module->name(), id, tp);
-                $smv::current_module->add_var(id, var);
+                Expr_ptr vid (*expr_iter);
+                $smv::current_module->add_var(vid,
+                                              new Variable($smv::current_module->name(), vid, tp));
             }
     }
 	;
+
+fsm_param_decl_clause
+@init {
+    ExprVector ev;
+}
+	: ids=identifiers[&ev] ':' tp=type
+    {
+            ExprVector::iterator expr_iter;
+            assert(NULL != tp);
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr pid (*expr_iter);
+                $smv::current_module->add_parameter(pid,
+                                                    new Parameter($smv::current_module->name(), pid, tp));
+            }
+    }
+	;
+
 
 fsm_ivar_decl_clause
 @init {

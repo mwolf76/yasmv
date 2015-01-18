@@ -91,8 +91,12 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 bool TimeFrame::has_value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+    Exprs& lang
+        (f_owner.lang());
+    if (lang.end() == std::find( lang.begin(), lang.end(), expr)) {
+        std::cerr << expr << std::endl;
+        assert(false);
+    }
 
     Expr2ExprMap::iterator eye;
 

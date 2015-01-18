@@ -164,16 +164,20 @@ void Algorithm::setup()
         Variables::const_iterator vi;
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 
-            Expr_ptr id( vi -> first.expr());
-
-            Variable& var (* vi -> second);
-            Type_ptr vtype (var.type());
-
-            Expr_ptr local_ctx (em.make_dot( ctx, id));
+            Expr_ptr id
+                (vi -> first);
+            Variable& var
+                (* vi -> second);
+            Type_ptr vtype
+                (var.type());
+            Expr_ptr local_ctx
+                (em.make_dot( ctx, id));
 
             if (vtype -> is_instance()) {
-                InstanceType_ptr instance = vtype -> as_instance();
-                Module&  module( model.module(instance -> name()));
+                InstanceType_ptr instance
+                    (vtype -> as_instance());
+                Module&  module
+                    (model.module(instance -> name()));
 
                 stack.push( std::make_pair< Expr_ptr, Module_ptr >
                             (local_ctx, &module));
@@ -271,9 +275,9 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
             Variable& var (symb->as_variable());
             if (! var.input() && ! var.temp()) {
 
-                Expr_ptr expr (var.expr());
+                Expr_ptr expr (var.name());
 
-                FQExpr key(ctx, expr);
+                TimedExpr key( em().make_dot( ctx, expr), 0);
                 Encoding_ptr enc = f_bm.find_encoding(key);
 
                 DDVector::const_iterator di;
@@ -283,11 +287,9 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
                     unsigned bit = (*di).getNode()->index;
 
-                    const UCBI& ucbi = f_bm.find_ucbi(bit);
-                    const TCBI& jtcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                             ucbi.time(), ucbi.bitno(), j);
-                    const TCBI& ktcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                             ucbi.time(), ucbi.bitno(), k);
+                    const UCBI& ucbi  = f_bm.find_ucbi(bit);
+                    const TCBI  jtcbi = TCBI(ucbi, j);
+                    const TCBI  ktcbi = TCBI(ucbi, k);
 
                     Var jkne = engine.new_sat_var();
                     uniqueness_vars.push_back(jkne);

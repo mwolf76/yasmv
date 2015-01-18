@@ -34,8 +34,7 @@ public:
     TypeResolver(TypeMgr& owner);
     ~TypeResolver();
 
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb);
-    Symbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    Symbol_ptr symbol(const Expr_ptr key);
 
 private:
     TypeMgr& f_owner;

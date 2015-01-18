@@ -522,29 +522,29 @@ BOOST_AUTO_TEST_CASE(printer)
 
 }
 
-BOOST_AUTO_TEST_CASE(fqexpr)
-{
-    ExprMgr& em = ExprMgr::INSTANCE();
-    Atom a_x("x");
+// BOOST_AUTO_TEST_CASE(fqexpr)
+// {
+//     ExprMgr& em = ExprMgr::INSTANCE();
+//     Atom a_x("x");
 
-    Expr_ptr x = em.make_identifier(a_x);
-    Expr_ptr main_ = em.make_main();
+//     Expr_ptr x = em.make_identifier(a_x);
+//     Expr_ptr main_ = em.make_main();
 
-    {
+//     {
 
-        const FQExpr& fqexpr = FQExpr(main_, x, 7);
+//         const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
-        std::ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@7{main::x}"));
-    }
+//         std::ostringstream oss;
+//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@7{main::x}"));
+//     }
 
-    {
+//     {
 
-        const FQExpr& fqexpr = FQExpr(main_, x, 0);
+//         const FQExpr& fqexpr = FQExpr(main_, x, 0);
 
-        std::ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@0{main::x}"));
-    }
-}
+//         std::ostringstream oss;
+//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@0{main::x}"));
+//     }
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

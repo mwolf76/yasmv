@@ -245,8 +245,10 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
 
 void TypeChecker::memoize_result (Expr_ptr expr)
 {
-    FQExpr key( f_ctx_stack.back(), expr );
-    Type_ptr type = f_type_stack.back();
+    Expr_ptr key
+        (f_owner.em().make_dot( f_ctx_stack.back(), expr));
+    Type_ptr type
+        (f_type_stack.back());
 
     f_map[ key ] = type;
 }
@@ -256,10 +258,13 @@ Type_ptr TypeChecker::type(Expr_ptr expr, Expr_ptr ctx)
     /* to avoid a number of cache misses due to compiler rewrites,
        we squeeze types in equivalence classes: Relationals -> lhs
        '<' rhs, Arithmetical -> lhs '+' rhs */
-    FQExpr key( ctx, expr );
+    Expr_ptr key
+        (f_owner.em().make_dot(ctx, expr));
 
-    TypeReg::const_iterator eye = f_map.find(key);
-    Type_ptr res = NULL;
+    TypeReg::const_iterator eye
+        (f_map.find(key));
+    Type_ptr res
+        (NULL);
 
     // cache miss, fallback to walker
     if (eye == f_map.end())
@@ -328,3 +333,25 @@ Type_ptr TypeChecker::check_array(Expr_ptr expr)
     throw BadType(expr, res);
     return NULL; /* unreachable */
 }
+
+// services
+bool TypeChecker::cache_miss(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+    Expr_ptr key
+        (em.make_dot( f_ctx_stack.back(), expr));
+
+    TypeReg::iterator eye
+        (f_map.find(key));
+
+    if (eye != f_map.end()) {
+        Type_ptr res = (*eye).second;
+        PUSH_TYPE(res);
+        return false;
+    }
+
+    return true;
+}
+
+

@@ -409,7 +409,11 @@ WitnessDumpCommand::WitnessDumpCommand(Interpreter& owner, Expr_ptr wid)
 
 Variant WitnessDumpCommand::operator()()
 {
-    std::ostream &os(std::cout);
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    std::ostream &os
+        (std::cout);
 
     Witness& w = WitnessMgr::INSTANCE().witness( f_wid->atom() );
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
@@ -426,15 +430,11 @@ Variant WitnessDumpCommand::operator()()
             Expr_ptr value (NULL);
 
             if (symb->is_variable())  {
-                Expr_ptr expr (symb->expr());
+                Expr_ptr expr
+                    (em.make_dot( ctx, symb->name()));
 
                 try {
                     value = tf.value(expr);
-
-                    os
-                        << ctx << "."
-                        ;
-
                     os
                         << expr << " = "
                         << value << std::endl;
@@ -444,7 +444,7 @@ Variant WitnessDumpCommand::operator()()
                 }
             }
             else if (symb->is_define()) {
-                Expr_ptr expr (symb->expr());
+                Expr_ptr expr (symb->name());
 
                 try {
                     value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);

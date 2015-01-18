@@ -41,6 +41,9 @@ Evaluator::~Evaluator()
 value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
                            Expr_ptr body, step_t time)
 {
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     // remove previous results
     f_values_stack.clear();
     f_ctx_stack.clear();
@@ -56,8 +59,8 @@ value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
     // toplevel (time is assumed at 0, arbitrarily nested next allowed)
     f_time_stack.push_back(time);
 
-    FQExpr key(ctx, body, time);
-    DEBUG << "Evaluating " << key << std::endl;
+    TimedExpr key
+        (em.make_dot( ctx, body), time);
 
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
@@ -366,11 +369,19 @@ void Evaluator::walk_cond_postorder(const Expr_ptr expr)
 bool Evaluator::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_dot_inorder(const Expr_ptr expr)
-{ return true; }
-void Evaluator::walk_dot_postorder(const Expr_ptr expr)
 {
-    assert( false ); // yet to be implemented
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+
+    f_ctx_stack.push_back(ctx);
+
+    return true;
 }
+void Evaluator::walk_dot_postorder(const Expr_ptr expr)
+{ f_ctx_stack.pop_back(); }
 
 bool Evaluator::walk_params_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -479,23 +490,27 @@ void Evaluator::walk_cast_postorder(const Expr_ptr expr)
 
 void Evaluator::walk_leaf(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
+    ExprMgr& em
+        (f_owner.em());
 
     /* cached? */
-    if (! cache_miss(expr)) return;
+    if (! cache_miss(expr))
+        return;
 
-    Expr_ptr ctx = f_ctx_stack.back();
-    step_t time = f_time_stack.back();
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    step_t time
+        (f_time_stack.back());
 
     // 0. explicit boolean consts
     if (em.is_bool_const(expr)) {
 
-        if (em.is_false(expr)) {
+        if (em.is_false(expr))
             f_values_stack.push_back(0);
-        }
-        else if (em.is_true(expr)) {
+
+        else if (em.is_true(expr))
             f_values_stack.push_back(1);
-        }
+
         else assert(false) ; // unexpected
     }
 
@@ -506,36 +521,89 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     else {
-        /* Look for symbols in the witness */
-        Symbol_ptr symb = ModelMgr::INSTANCE().resolver() -> symbol(ctx, expr);
-        if (symb->is_variable()) { // vars
+        Expr_ptr full_expr
+            (em.make_dot( ctx, expr));
 
-            if (f_witness -> has_value( expr, time)) {
-                Expr_ptr value = f_witness -> value(expr, time);
+        /* Look for symbols in the witness */
+        Symbol_ptr symb
+            (ModelMgr::INSTANCE().resolver() ->
+             symbol(full_expr));
+
+        if (symb->is_variable()) {
+
+            Variable& var
+                (symb->as_variable());
+
+            Type_ptr symb_type
+                (var.type());
+
+            if (symb_type->is_instance())
+                return;
+
+            if (f_witness -> has_value( full_expr, time)) {
+                Expr_ptr value = f_witness -> value( full_expr, time);
 
                 // promote FALSE -> 0, TRUE -> 1
-                if (em.is_false(value)) {
+                if (em.is_false(value))
                     f_values_stack.push_back(0);
-                }
-                else if (em.is_true(value)) {
+
+                else if (em.is_true(value))
                     f_values_stack.push_back(1);
-                }
-                else {
+
+                else
                     f_values_stack.push_back(value -> value());
-                }
+
                 return;
             }
 
             assert( false ); /* unexpected */
         }
 
-        else if (symb->is_define()) { // defines
+        else if (symb->is_parameter()) {
+            assert(false);
+        }
+
+        else if (symb->is_define()) {
 
             // A little bit of magic, re-entrant invocation ;-)
             (*this)(symb->as_define().body());
             return;
         }
 
+        ERR
+            << full_expr
+            << std::endl;
+
         assert( false ); /* unexpected */
     }
+}
+
+bool Evaluator::cache_miss(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    assert(0 < f_ctx_stack.size());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    assert(0 < f_time_stack.size());
+    step_t step
+        (f_time_stack.back());
+
+    TimedExpr key
+        ( em.make_dot( ctx , expr), step);
+
+    TimedExprValueMap::iterator eye
+        (f_map.find(key));
+
+    if (eye != f_map.end()) {
+        value_t res
+            ((*eye).second);
+
+        PUSH_VALUE(res);
+        return false;
+    }
+
+    return true;
 }

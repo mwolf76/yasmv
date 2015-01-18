@@ -15,9 +15,6 @@ BOOST_AUTO_TEST_SUITE_END()
 void pe(Expr_ptr e)
 { DEBUG << e << std::endl; }
 
-void pf(FQExpr& e)
-{ DEBUG << e << std::endl; }
-
 // logging subsystem settings
 namespace axter {
     std::string get_log_prefix_format(const char*FileName,

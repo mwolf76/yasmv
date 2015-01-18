@@ -27,52 +27,82 @@ SymbIter::SymbIter(Model& model, Expr_ptr formula)
 {
     assert( !f_formula ); // TODO implement COI
 
-    ExprMgr& em (ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+    const Modules& modules
+        (model.modules());
+    Expr_ptr main_module
+        (em.make_main());
 
-    const Modules& modules = model.modules();
-    Expr_ptr main_module = em.make_main();
-
-    Modules::const_iterator main_iter = modules.find(main_module);
+    Modules::const_iterator main_iter
+        (modules.find(main_module));
 
     if (modules.end() == main_iter)
         throw ModuleNotFound(main_module);
 
-    Module& main_ = *main_iter -> second;
+    Module& main_
+        (*main_iter -> second);
 
-    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
-    stack.push( std::make_pair< Expr_ptr, Module_ptr >
-                (em.make_empty(), &main_));
+    /* two iterations, putting DEFINEs after VARs. This ensures
+       defines can be calculated on-the fly using a single pass. */
+#define SI_PASS_VARS (0)
+#define SI_PASS_DEFS (1)
+    for (int pass = 0; pass < 2; ++ pass) {
 
-    /* walk of var decls, starting from main module */
-    while (0 < stack.size()) {
+        std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
+        stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                    (em.make_empty(), &main_));
 
-        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
+        /* walk of var decls, starting from main module */
+        while (0 < stack.size()) {
 
-        Expr_ptr ctx ( top.first );
-        Module& module ( * top.second );
+            const std::pair< Expr_ptr, Module_ptr > top
+                (stack.top()); stack.pop();
 
-        Variables attrs (module.vars());
-        Variables::const_iterator vi;
-        for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
+            Expr_ptr full_name
+                (top.first);
+            Module& module
+                (* top.second);
+            Variables vars
+                (module.vars());
+            Variables::const_iterator vi;
+            for (vi = vars.begin(); vars.end() != vi; ++ vi) {
 
-            Expr_ptr id( vi -> first.expr());
+                Expr_ptr id
+                    (vi -> first);
+                Variable& var
+                    (* vi -> second);
+                Type_ptr vtype
+                    (var.type());
+                Expr_ptr inner_name
+                    (em.make_dot( full_name, id));
 
-            Variable& var (* vi -> second);
-            Type_ptr vtype (var.type());
-            Expr_ptr local_ctx (em.make_dot( ctx, id));
+                if (vtype -> is_instance()) {
+                    InstanceType_ptr instance = vtype -> as_instance();
+                    Module&  module( model.module(instance -> name()));
 
-            if (vtype -> is_instance()) {
-                InstanceType_ptr instance = vtype -> as_instance();
-                Module&  module( model.module(instance -> name()));
-
-                stack.push( std::make_pair< Expr_ptr, Module_ptr >
-                            (local_ctx, &module));
+                    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                                (inner_name, &module));
+                }
+                else if (SI_PASS_VARS == pass)
+                    f_symbols.push_back(std::make_pair< Expr_ptr, Symbol_ptr >
+                                        (full_name, &var ));
             }
-            else
-                f_symbols.push_back( std::make_pair< Expr_ptr, Symbol_ptr > (ctx, &var ));
+
+            if (SI_PASS_DEFS == pass) {
+                Defines defs (module.defs());
+                Defines::const_iterator di;
+                for (di = defs.begin(); defs.end() != di; ++ di) {
+
+                    Define& def
+                        (* di -> second);
+
+                    f_symbols.push_back(std::make_pair< Expr_ptr, Symbol_ptr >
+                                        (full_name, &def));
+                }
+            }
         }
     }
-
     f_iter = f_symbols.begin();
 }
 

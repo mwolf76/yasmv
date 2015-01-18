@@ -108,14 +108,13 @@ bool AtomEq::operator() (const Atom& x, const Atom& y) const
     return x == y;
 }
 
-long FQExprHash::operator() (const FQExpr& k) const
+long TimedExprHash::operator() (const TimedExpr& k) const
 {
     long x, res = 0;
     ExprHash eh;
 
-    long v0 = eh(*k.ctx());
-    long v1 = eh(*k.expr());
-    long v2 = k.time();
+    long v0 = eh(*k.expr());
+    long v1 = k.time();
 
     res = (res << 4) + v0;
     if ((x = res & 0xF0000000L) != 0) {
@@ -129,21 +128,50 @@ long FQExprHash::operator() (const FQExpr& k) const
     }
     res &= ~x;
 
-    res = (res << 4) + v2;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
-    }
-    res &= ~x;
-
     return res;
 }
 
-bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const
+bool TimedExprEq::operator()(const TimedExpr& x, const TimedExpr& y) const
 {
-    return (x.ctx() == y.ctx() &&
-            x.expr() == y.expr() &&
-            x.time() == y.time());
+    return (x.expr() == y.expr() && x.time() == y.time());
 }
+
+// long FQExprHash::operator() (const FQExpr& k) const
+// {
+//     long x, res = 0;
+//     ExprHash eh;
+
+//     long v0 = eh(*k.ctx());
+//     long v1 = eh(*k.expr());
+//     long v2 = k.time();
+
+//     res = (res << 4) + v0;
+//     if ((x = res & 0xF0000000L) != 0) {
+//         res ^= (x >> 24);
+//     }
+//     res &= ~x;
+
+//     res = (res << 4) + v1;
+//     if ((x = res & 0xF0000000L) != 0) {
+//         res ^= (x >> 24);
+//     }
+//     res &= ~x;
+
+//     res = (res << 4) + v2;
+//     if ((x = res & 0xF0000000L) != 0) {
+//         res ^= (x >> 24);
+//     }
+//     res &= ~x;
+
+//     return res;
+// }
+
+// bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const
+// {
+//     return (x.ctx() == y.ctx() &&
+//             x.expr() == y.expr() &&
+//             x.time() == y.time());
+// }
 
 long PtrHash::operator() (void *ptr) const
 {
@@ -187,8 +215,7 @@ long UCBIHash::operator() (const UCBI& k) const
 
 bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
 {
-    return (x.ctx() == y.ctx() &&
-            x.expr() == y.expr() &&
+    return (x.expr() == y.expr() &&
             x.time() == y.time() &&
             x.bitno() == y.bitno());
 }
@@ -199,11 +226,12 @@ long TCBIHash::operator() (const TCBI& k) const
 
 bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
 {
-    step_t abs_time_x = x.base() + x.time();
-    step_t abs_time_y = y.base() + y.time();
+    step_t abs_time_x
+        (x.base() + x.time());
+    step_t abs_time_y
+        (y.base() + y.time());
 
-    return (x.ctx() == y.ctx() &&
-            x.expr() == y.expr() &&
+    return (x.expr() == y.expr() &&
             x.bitno() == y.bitno() &&
             abs_time_x == abs_time_y);
 }

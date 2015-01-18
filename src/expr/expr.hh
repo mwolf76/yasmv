@@ -185,16 +185,9 @@ typedef ExprSet* ExprSet_ptr;
 
 // TODO: split this into multiple headers
 
-typedef class FQExpr* FQExpr_ptr;
-class FQExpr {
+class TimedExpr {
 public:
-    FQExpr(Expr_ptr expr); // default ctx, default time
-    FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
-
-    FQExpr(const FQExpr& fqexpr);
-
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
+    TimedExpr(Expr_ptr expr, step_t time);
 
     inline Expr_ptr expr() const
     { return f_expr; }
@@ -202,24 +195,49 @@ public:
     inline step_t time() const
     { return f_time; }
 
-    inline bool operator==(const FQExpr& other)
-    {
-        return
-            f_ctx  == other.f_ctx  &&
-            f_expr == other.f_expr &&
-            f_time == other.f_time  ;
-    }
+    inline bool operator==(const TimedExpr& other)
+    { return f_expr == other.f_expr && f_time == other.f_time; }
 
 private:
-    // expression ctx (default for the FSM is 'main')
-    Expr_ptr f_ctx;
-
-    // expression body
     Expr_ptr f_expr;
-
-    // expression time (default is 0)
     step_t f_time;
 };
+
+// typedef class FQExpr* FQExpr_ptr;
+// class FQExpr {
+// public:
+//     FQExpr(Expr_ptr expr); // default ctx, default time
+//     FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
+
+//     FQExpr(const FQExpr& fqexpr);
+
+//     inline Expr_ptr ctx() const
+//     { return f_ctx; }
+
+//     inline Expr_ptr expr() const
+//     { return f_expr; }
+
+//     inline step_t time() const
+//     { return f_time; }
+
+//     inline bool operator==(const FQExpr& other)
+//     {
+//         return
+//             f_ctx  == other.f_ctx  &&
+//             f_expr == other.f_expr &&
+//             f_time == other.f_time  ;
+//     }
+
+// private:
+//     // expression ctx (default for the FSM is 'main')
+//     Expr_ptr f_ctx;
+
+//     // expression body
+//     Expr_ptr f_expr;
+
+//     // expression time (default is 0)
+//     step_t f_time;
+// };
 
 /* Normal forms literals */
 class PolarizedLiteral {
@@ -243,11 +261,8 @@ private:
 /* Untimed Canonical Bit Identifiers */
 class UCBI {
 public:
-    UCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno);
+    UCBI(Expr_ptr expr, step_t time_ofs, unsigned bitno);
     UCBI(const UCBI& ucbi);
-
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
 
     inline Expr_ptr expr() const
     { return f_expr; }
@@ -259,9 +274,6 @@ public:
     { return f_bitno; }
 
 private:
-    // expression ctx (default is 'main')
-    Expr_ptr f_ctx;
-
     // expression body
     Expr_ptr f_expr;
 
@@ -275,11 +287,9 @@ private:
 /* Timed Canonical Bit Identifiers */
 class TCBI {
 public:
-    TCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);
+    // TCBI(Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);
+    TCBI(const UCBI& ucbi, step_t timebase);
     TCBI(const TCBI& tcbi);
-
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
 
     inline Expr_ptr expr() const
     { return f_expr; }
@@ -294,8 +304,6 @@ public:
     { return f_base; }
 
 private:
-    // expression ctx (default is 'main')
-    Expr_ptr f_ctx;
 
     // expression body
     Expr_ptr f_expr;
@@ -311,7 +319,8 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
-std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr);
+std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
+// std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr);
 std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
 std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
 

@@ -72,7 +72,7 @@ typedef std::vector<ADD> ADDStack;
 typedef std::vector<Expr_ptr> ExprList;
 typedef std::vector<step_t>   TimeStack;
 
-typedef boost::unordered_map<FQExpr, CompilationUnit, FQExprHash, FQExprEq> CompilationMap;
+typedef boost::unordered_map<TimedExpr, CompilationUnit, TimedExprHash, TimedExprEq> CompilationMap;
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
 
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
@@ -211,6 +211,7 @@ private:
     void clear_internals();
     bool cache_miss(const Expr_ptr expr);
     void memoize_result(const Expr_ptr expr);
+    Encoding_ptr find_encoding( const TimedExpr& timed_expr, const Type_ptr type);
 
     void algebraic_from_constant(Expr_ptr expr, unsigned width);
 

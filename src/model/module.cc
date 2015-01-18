@@ -18,6 +18,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <algorithm>
 #include <utility>
 #include <model.hh>
 
@@ -34,36 +35,59 @@ Module::Module(const Expr_ptr name)
     , f_trans()
 {}
 
-void Module::add_var(Expr_ptr var_name, Variable_ptr var)
+void Module::add_var(Expr_ptr symb_name, Variable_ptr var)
 {
-    Expr_ptr type_repr( var -> type() -> repr());
+    Expr_ptr type_repr
+        (var -> type() -> repr());
+
     DEBUG
         << "Module `" << (*this)
-        << "`, added var `" << var_name
+        << "`, added var `" << symb_name
         << "`, of type `" << type_repr << "`"
         << std::endl;
 
-    f_locals.push_back(var_name);
+    if (f_locals.end() != std::find( f_locals.begin(),
+                                     f_locals.end(), symb_name))
+        throw DuplicateIdentifier(symb_name);
 
-    FQExpr key (name(), var_name);
-    f_localVars.insert(std::make_pair<FQExpr, Variable_ptr>
-                       (key, var));
-
+    f_locals.push_back(symb_name);
+    f_localVars.insert(std::make_pair<Expr_ptr, Variable_ptr>
+                       (symb_name, var));
 }
 
-void Module::add_def(Expr_ptr def_name, Define_ptr body)
+void Module::add_parameter(Expr_ptr symb_name, Parameter_ptr param)
+{
+    Expr_ptr type_repr( param -> type() -> repr());
+    DEBUG
+        << "Module `" << (*this)
+        << "`, added parameter `" << symb_name
+        << "`, of type `" << type_repr << "`"
+        << std::endl;
+
+    if (f_locals.end() != std::find( f_locals.begin(),
+                                     f_locals.end(), symb_name))
+        throw DuplicateIdentifier(symb_name);
+
+    f_locals.push_back(symb_name);
+    f_localParams.push_back( std::make_pair<Expr_ptr, Parameter_ptr>
+                             (symb_name, param));
+}
+
+void Module::add_def(Expr_ptr symb_name, Define_ptr body)
 {
     DEBUG
         << "Module " << (*this)
         << ", added local def `"
-        << def_name << "`"
+        << symb_name << "`"
         << std::endl;
 
-    f_locals.push_back(def_name);
+    if (f_locals.end() != std::find( f_locals.begin(),
+                                     f_locals.end(), symb_name))
+        throw DuplicateIdentifier(symb_name);
 
-    FQExpr key (name(), def_name);
-    f_localDefs.insert(std::make_pair<FQExpr, Define_ptr>
-                       (key, body));
+    f_locals.push_back(symb_name);
+    f_localDefs.insert(std::make_pair<Expr_ptr, Define_ptr>
+                       (symb_name, body));
 }
 
 void Module::add_init(Expr_ptr expr)

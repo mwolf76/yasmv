@@ -80,8 +80,10 @@ bool Compiler::is_unary_boolean(const Expr_ptr expr)
 
 bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* unary : ? (), : (), NEG, NOT(bw) */
     if (em.is_unary_arithmetical(expr))
@@ -93,17 +95,15 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 /* checks lhs is array, and rhs is algebraic */
 bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* SUBSCRIPT */
-    if (em.is_subscript(expr)) {
-
-        FQExpr rhs(f_ctx_stack.back(), expr->rhs());
-        FQExpr lhs(f_ctx_stack.back(), expr->lhs());
+    if (em.is_subscript(expr))
         return (f_owner.type(expr->lhs(), ctx) -> is_array() &&
                 f_owner.type(expr->rhs(), ctx) -> is_algebraic()) ;
-    }
 
     return false;
 }

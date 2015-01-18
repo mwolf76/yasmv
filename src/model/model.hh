@@ -53,14 +53,37 @@ private:
     Expr_ptr f_module_name;
 };
 
+class DuplicateIdentifier : public ModelException {
+public:
+    DuplicateIdentifier(Expr_ptr expr);
+    const char* what() const throw();
+
+private:
+    Expr_ptr f_duplicate;
+};
+
+class BadParamCount : public ModelException {
+public:
+    BadParamCount(Expr_ptr instance, unsigned expected, unsigned got);
+    const char* what() const throw();
+
+private:
+    Expr_ptr f_instance;
+    unsigned f_expected;
+    unsigned f_got;
+};
+
+
 class Module {
     friend std::ostream& operator<<(std::ostream& os, Module& module);
 
     Expr_ptr f_name;
 
     ExprVector f_locals;
+    Expr_ptr f_input;
 
     Variables f_localVars;
+    Parameters f_localParams;
     Defines   f_localDefs;
 
     ExprVector f_init;
@@ -78,9 +101,18 @@ public:
     inline const ExprVector& locals() const
     { return f_locals; }
 
+    inline const Expr_ptr& input() const
+    { return f_input; }
+    void set_input(Expr_ptr input)
+    { f_input = input; }
+
     inline const Variables& vars() const
     { return f_localVars; }
     void add_var(Expr_ptr expr, Variable_ptr var);
+
+    inline const Parameters& parameters() const
+    { return f_localParams; }
+    void add_parameter(Expr_ptr expr, Parameter_ptr param);
 
     const Defines& defs() const
     { return f_localDefs; }
@@ -98,6 +130,8 @@ public:
     inline const ExprVector& trans() const
     { return f_trans; }
     void add_trans(Expr_ptr expr);
+
+
 };
 
 typedef Module* Module_ptr;

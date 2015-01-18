@@ -503,11 +503,13 @@ bool Compiler::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_dot_inorder(const Expr_ptr expr)
 {
-    ExprMgr& em (f_owner.em());
+    ExprMgr& em
+        (f_owner.em());
 
-    Expr_ptr ctx ( em.make_dot( f_ctx_stack.back(), expr -> lhs()));
-    f_ctx_stack.push_back( ctx );
+    Expr_ptr ctx
+        (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
 
+    f_ctx_stack.push_back(ctx);
     f_type_stack.pop_back();
 
     return true;
@@ -569,7 +571,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr ctx (f_ctx_stack.back());
     step_t time  (f_time_stack.back());
 
-    FQExpr2EncMap::const_iterator eye;
+    TimedExpr2EncMap::const_iterator eye;
     Encoding_ptr enc (NULL);
 
     // 1. Explicit integer consts, perform booleanization immediately using
@@ -582,7 +584,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }
 
     ResolverProxy resolver;
-    Symbol_ptr symb (resolver.symbol(ctx, expr));
+    Symbol_ptr symb
+        (resolver.symbol( em.make_dot( ctx, expr)));
 
     // TODO: review this, no longer applies to integers
     // 2. bool/integer constant leaves
@@ -599,11 +602,13 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Literal& lit (symb->as_literal());
 
         // push into type stack
-        Type_ptr type (lit.type());
+        Type_ptr type
+            (lit.type());
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
-        FQExpr key(ctx, expr, time);
+        TimedExpr key
+            (em.make_dot( ctx, expr), time);
 
         /* build a new encoding for this symbol if none is available. */
         if (NULL == (enc = f_enc.find_encoding(key))) {
@@ -624,37 +629,45 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     else if (symb->is_variable()) {
 
         // push into type stack
-        Type_ptr type (symb->as_variable().type());
+        Type_ptr type
+            (symb->as_variable().type());
         if (type -> is_instance()) {
             f_type_stack.push_back(type);
             return;
         }
 
-        // if encoding for variable is available reuse it,
-        // otherwise create and cache it.
-        FQExpr key(ctx, expr, time);
+        TimedExpr key
+            (em.make_dot(ctx, expr), time);
 
-        /* build a new encoding for this symbol if none is available. */
-        if (NULL == (enc = f_enc.find_encoding(key))) {
-            if (f_preprocess) {
-                assert (NULL != type);
-
-                DRIVEL
-                    << "Registering new encoding of type "
-                    << type << " for " << key
-                    << std::endl;
-
-                enc = f_enc.make_encoding(type);
-                f_enc.register_encoding(key, enc);
-            }
-            else assert( false ); // unexpected
-        }
-
+        /* encoding will be created on-the-fly if necessary */
+        enc = find_encoding(key, type);
         push_dds(enc, type);
         return;
     } /* variables */
 
-    // 5. defines, simply compile it recursively.  We keep this to
+    // 5. parameters
+    else if (symb->is_parameter()) {
+
+        // push into type stack
+        Type_ptr type
+            (symb->as_parameter().type());
+        if (type -> is_instance()) {
+            f_type_stack.push_back(type);
+            return;
+        }
+
+        /* parameters must be resolved against the Param map
+           maintained by the ModelMgr */
+        TimedExpr key
+            (f_owner.rewrite_parameter( em.make_dot(ctx, expr)), time);
+
+        /* encoding will be created on-the-fly if necessary */
+        enc = find_encoding(key, type);
+        push_dds(enc, type);
+        return;
+    } /* parameters */
+
+    // 6. defines, simply compile it recursively.  We keep this to
     // retain the old lazy behavior with nullary defines since it
     // comes at no extra cost at all.
     else if (symb->is_define()) {

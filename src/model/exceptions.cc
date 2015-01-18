@@ -36,3 +36,34 @@ const char* ModuleNotFound::what() const throw()
     return oss.str().c_str();
 }
 
+DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
+    : f_duplicate(duplicate)
+{}
+
+const char* DuplicateIdentifier::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "Duplicate identifier: `"
+        << f_duplicate << "`";
+
+    return oss.str().c_str();
+}
+
+BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
+    : f_instance(instance)
+    , f_expected(expected)
+    , f_got(got)
+{}
+
+const char* BadParamCount::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "Wrong parameters count in `"
+        << f_instance << "`, "
+        << f_expected << " expected, "
+        << " got " << f_got;
+
+    return oss.str().c_str();
+}

@@ -35,20 +35,16 @@ TypeResolver::TypeResolver(TypeMgr& owner)
 TypeResolver::~TypeResolver()
 {}
 
-void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
+Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
 {
-    assert (false); // TODO
-}
+    const Literals& lits
+        (TypeMgr::INSTANCE().literals());
 
-Symbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
-{
-    { /* enum literals are globals, therefore no need for ctx here */
-        const Literals& lits = TypeMgr::INSTANCE().literals();
-        Literals::const_iterator iter = lits.find(expr);
-        if (iter != lits.end()) {
-            return dynamic_cast<Symbol_ptr>((*iter).second);
-        }
-    }
+    Literals::const_iterator iter
+        (lits.find(key));
+
+    if (iter != lits.end())
+        return dynamic_cast<Symbol_ptr>((*iter).second);
 
     return NULL; /* unresolved */
 }

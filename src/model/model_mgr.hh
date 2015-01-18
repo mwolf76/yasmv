@@ -39,6 +39,14 @@
 #include <type/type_mgr.hh>
 
 typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> ContextMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
+
+typedef enum {
+    MMGR_BUILD_CTX_MAP,
+    MMGR_BUILD_PARAM_MAP,
+    MMGR_TYPE_CHECK,
+    MMGR_DONE
+} analyzer_pass_t;
 
 typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {
@@ -46,6 +54,9 @@ class ModelMgr  {
 public:
     inline Model& model()
     { return f_model; }
+
+    inline Module& module(Expr_ptr module_name)
+    { return f_model.module( module_name); }
 
     inline Resolver_ptr resolver()
     { return &f_resolver; }
@@ -75,8 +86,9 @@ public:
         return f_preprocessor.process(body, ctx);
     }
 
-    void register_scope(const std::pair< Expr_ptr, Module_ptr >& pair);
     Module_ptr scope(Expr_ptr ctx);
+
+    Expr_ptr rewrite_parameter( Expr_ptr expr );
 
 protected:
     ModelMgr();
@@ -109,12 +121,11 @@ private:
     // ref to type_checker (used for model analysis)
     TypeChecker& f_type_checker;
 
-    // analyzer passes
-    bool f_status;
-    void first_pass();
-    void second_pass();
-
     ContextMap f_context_map;
+    ParamMap f_param_map;
+
+    /* internals */
+    bool analyze_aux( analyzer_pass_t pass );
 };
 
 #endif

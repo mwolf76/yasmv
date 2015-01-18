@@ -36,17 +36,16 @@
 #include <utility>
 
 class UnresolvedSymbol : public Exception {
-    Expr_ptr f_ctx;
     Expr_ptr f_expr;
 
 public:
-    UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr);
+    UnresolvedSymbol(Expr_ptr expr);
     const char* what() const throw();
 };
 
 class Symbol;
 typedef Symbol* Symbol_ptr;
-typedef boost::unordered_map<FQExpr, Symbol_ptr, FQExprHash, FQExprEq> Symbols;
+typedef boost::unordered_map<Expr_ptr, Symbol_ptr, PtrHash, PtrEq> Symbols;
 
 class Literal;
 typedef Literal* Literal_ptr;
@@ -54,15 +53,19 @@ typedef boost::unordered_map<Expr_ptr, Literal_ptr, PtrHash, PtrEq> Literals;
 
 class Constant;
 typedef Constant* Constant_ptr;
-typedef boost::unordered_map<FQExpr, Constant_ptr, FQExprHash, FQExprEq> Constants;
+typedef boost::unordered_map<Expr_ptr, Constant_ptr, PtrHash, PtrEq> Constants;
 
 class Variable;
 typedef Variable* Variable_ptr;
-typedef boost::unordered_map<FQExpr, Variable_ptr, FQExprHash, FQExprEq> Variables;
+typedef boost::unordered_map<Expr_ptr, Variable_ptr, PtrHash, PtrEq> Variables;
+
+class Parameter;
+typedef Parameter* Parameter_ptr;
+typedef std::vector< std::pair< Expr_ptr, Parameter_ptr > > Parameters;
 
 class Define;
 typedef Define* Define_ptr;
-typedef boost::unordered_map<FQExpr, Define_ptr, FQExprHash, FQExprEq> Defines;
+typedef boost::unordered_map<Expr_ptr, Define_ptr, PtrHash, PtrEq> Defines;
 
 class Typed {
 public:
@@ -87,7 +90,7 @@ public:
 class Symbol {
 public:
     virtual const Expr_ptr module()  const =0;
-    virtual const Expr_ptr expr() const =0;
+    virtual const Expr_ptr name() const =0;
 
     bool is_const() const;
     Constant& as_const() const;
@@ -97,6 +100,9 @@ public:
 
     bool is_variable() const;
     Variable& as_variable() const;
+
+    bool is_parameter() const;
+    Parameter& as_parameter() const;
 
     bool is_define() const;
     Define& as_define() const;
@@ -123,7 +129,7 @@ public:
     const Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr expr() const
+    const Expr_ptr name() const
     { return f_name; }
 
     const Type_ptr type() const
@@ -144,7 +150,8 @@ class Variable
     bool     f_temp;
 
 public:
-    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type, bool input = false, bool temp = false)
+    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type,
+             bool input = false, bool temp = false)
         : f_module(module)
         , f_name(name)
         , f_type(type)
@@ -154,7 +161,7 @@ public:
     const Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr expr() const
+    const Expr_ptr name() const
     { return f_name; }
 
     const Type_ptr type() const
@@ -167,24 +174,50 @@ public:
     { return f_temp; }
 };
 
+class Parameter
+    : public Symbol
+    , public Typed
+{
+    Expr_ptr f_module;
+    Expr_ptr f_name;
+    Type_ptr f_type;
+
+public:
+    Parameter(Expr_ptr module, Expr_ptr name, Type_ptr type)
+        : f_module(module)
+        , f_name(name)
+        , f_type(type)
+    {}
+
+    const Expr_ptr module() const
+    { return f_module; }
+
+    const Expr_ptr name() const
+    { return f_name; }
+
+    const Type_ptr type() const
+    { return f_type; }
+
+};
+
 class Literal
     : public Symbol
     , public Typed
 {
-    const Expr_ptr f_expr;
+    const Expr_ptr f_name;
     const Type_ptr f_type;
 
 public:
-    Literal(const Expr_ptr expr, const Type_ptr type)
-        : f_expr(expr)
+    Literal(const Expr_ptr name, const Type_ptr type)
+        : f_name(name)
         , f_type(type)
     {}
 
     virtual const Expr_ptr module() const
     { return NULL; }
 
-    virtual const Expr_ptr expr() const
-    { return f_expr; }
+    virtual const Expr_ptr name() const
+    { return f_name; }
 
     virtual const Type_ptr type() const
     { return f_type; }
@@ -211,7 +244,7 @@ public:
     const Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr expr() const
+    const Expr_ptr name() const
     { return f_name; }
 
     const Expr_ptr body() const

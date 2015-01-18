@@ -49,8 +49,10 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
 
     /* LHS -> define name, extract formals for definition */
     assert ( f_em.is_identifier( expr->lhs()));
-    Define& define = proxy.symbol(f_ctx_stack.back(), expr -> lhs()) -> as_define();
-    const ExprVector& formals = define.formals();
+    Define& define = proxy.symbol( f_owner.em().
+                                   make_dot( f_ctx_stack.back(), expr -> lhs())) -> as_define();
+    const ExprVector& formals
+        (define.formals());
 
     /* RHS -> comma separated lists of actual parameters */
     ExprVector actuals; traverse_param_list( actuals, expr -> rhs());

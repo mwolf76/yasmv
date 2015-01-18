@@ -72,10 +72,23 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     return res;
 }
 
-void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
+Encoding_ptr EncodingMgr::find_encoding(const TimedExpr& key)
+{
+    const TimedExpr2EncMap::iterator eye
+        (f_timed_expr2enc_map.find(key));
+
+    if (eye != f_timed_expr2enc_map.end()) {
+        return (*eye).second;
+    }
+
+    return NULL;
+}
+
+
+void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
 {
     std::ostringstream oss;
-    f_fqexpr2enc_map [ key ] = enc;
+    f_timed_expr2enc_map [ key ] = enc;
 
     DDVector& bits = enc->bits();
 
@@ -89,7 +102,7 @@ void EncodingMgr::register_encoding(const FQExpr& key, Encoding_ptr enc)
 
         f_index2ucbi_map.
             insert( std::pair<int, UCBI>
-                    (index, UCBI(key.ctx(), key.expr(), key.time(), i)));
+                    (index, UCBI(key.expr(), key.time(), i)));
 
         if ( ++ i < bits.size())
             oss << ", ";

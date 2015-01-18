@@ -35,7 +35,7 @@
 typedef std::vector<Type_ptr> TypeStack;
 typedef std::vector<Expr_ptr> ExprStack;
 
-typedef boost::unordered_map<FQExpr, Type_ptr, FQExprHash, FQExprEq> TypeReg;
+typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeReg;
 
 /* shortcuts to to simplify manipulation of the internal type stack */
 #define POP_TYPE(op)                              \
@@ -76,20 +76,7 @@ private:
     // managers
     ModelMgr& f_owner;
 
-    // services
-    inline bool cache_miss(const Expr_ptr expr)
-    {
-        FQExpr key(f_ctx_stack.back(), expr);
-        TypeReg::iterator eye = f_map.find(key);
-
-        if (eye != f_map.end()) {
-            Type_ptr res = (*eye).second;
-            PUSH_TYPE(res);
-            return false;
-        }
-
-        return true;
-    }
+    bool cache_miss(const Expr_ptr expr);
 
     /** Determine the resulting type of an operation given the type of its
         operands. */

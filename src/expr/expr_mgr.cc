@@ -164,7 +164,7 @@ Expr_ptr ExprMgr::left_associate_dot(const Expr_ptr expr)
     Expr_ptr res (NULL);
     std::vector<Expr_ptr> fragments;
 
-    // 1. in-order visit, build reversed expr stack
+    // 1. in-order visit, build fwd expr stack
     std::stack<Expr_ptr> stack;
     stack.push( expr );
 
@@ -181,7 +181,7 @@ Expr_ptr ExprMgr::left_associate_dot(const Expr_ptr expr)
         fragments.push_back(top);
     }
 
-    // 2. good, now build canonical AST backwards
+    // 2. good, now build canonical AST
     for (std::vector<Expr_ptr>::const_iterator i = fragments.begin(); fragments.end() != i; ++ i)
         res = res ? make_expr( DOT, res, *i) : *i;
 

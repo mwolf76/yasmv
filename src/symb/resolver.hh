@@ -31,11 +31,8 @@
 
 class Resolver {
 public:
-    /** @brief register a symbol in the underlying storage */
-    virtual void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb) =0;
-
     /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr) =0;
+    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
 };
 
 typedef Resolver* Resolver_ptr;

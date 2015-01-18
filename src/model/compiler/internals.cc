@@ -152,20 +152,31 @@ Expr_ptr Compiler::make_auto_id()
 /* build an auto fresh ADD variable and register its encoding */
 ADD Compiler::make_auto_dd()
 {
-    TypeMgr& tm = f_owner.tm();
-    Type_ptr boolean(tm.find_boolean());
+    ExprMgr& em
+        (f_owner.em());
+    TypeMgr& tm
+        (f_owner.tm());
+    Type_ptr boolean
+        (tm.find_boolean());
 
-    BooleanEncoding_ptr be = reinterpret_cast<BooleanEncoding_ptr>
-        (f_enc.make_encoding( boolean ));
+    BooleanEncoding_ptr be
+        (reinterpret_cast<BooleanEncoding_ptr>
+         (f_enc.make_encoding( boolean )));
 
     // register encoding, a FQExpr is needed for UCBI booking
-    Expr_ptr aid = make_auto_id();
-    Expr_ptr ctx = f_ctx_stack.back();
-    step_t time = f_time_stack.back();
-    FQExpr key (ctx, aid, time);
-    f_enc.register_encoding( key, be);
+    Expr_ptr aid
+        (make_auto_id());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    step_t time
+        (f_time_stack.back());
 
-    return be -> bits() [0];
+    TimedExpr key
+        (em.make_dot( ctx, aid), time);
+    f_enc.register_encoding(key, be);
+
+    DDVector& bits (be -> bits());
+    return bits[0]; // just one
 }
 
 /* build an auto DD vector of fresh ADD variables. */
@@ -180,12 +191,15 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 {
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
-    Expr_ptr ctx = f_ctx_stack.back();
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
-    assert( 0 < f_time_stack.size() );
-    step_t time = f_time_stack.back();
+    assert(0 < f_time_stack.size());
+    step_t time
+        (f_time_stack.back());
 
-    FQExpr key(ctx, expr, time);
+    TimedExpr key
+        (f_owner.em().make_dot(ctx, expr), time);
 
     if (f_preprocess)
         DRIVEL
@@ -208,15 +222,18 @@ void Compiler::post_node_hook(Expr_ptr expr)
         return;
 
     /* assemble memoization key */
-    assert( 0 < f_ctx_stack.size() );
-    Expr_ptr ctx = f_ctx_stack.back();
+    assert(0 < f_ctx_stack.size());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
-    assert( 0 < f_time_stack.size() );
-    step_t time = f_time_stack.back();
+    assert(0 < f_time_stack.size());
+    step_t time
+        (f_time_stack.back());
 
-    FQExpr key(ctx, expr, time);
+    TimedExpr key
+        (f_owner.em().make_dot( ctx, expr), time);
 
-    assert( 0 < f_type_stack.size() );
+    assert(0 < f_type_stack.size());
     Type_ptr type = f_type_stack.back();
 
     if (type -> is_instance())
@@ -235,8 +252,8 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert (dv.size() == width);
 
     /* memoize result */
-    f_cache.insert( std::make_pair<FQExpr, CompilationUnit> ( key,
-            CompilationUnit( dv, f_micro_descriptors, f_mux_map)));
+    f_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
+                    ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_map)));
 
     unsigned res_sz (width);
     unsigned mcr_sz (f_micro_descriptors.size());
@@ -253,10 +270,14 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
 bool Compiler::cache_miss(const Expr_ptr expr)
 {
-    Expr_ptr ctx (f_ctx_stack.back());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
-    FQExpr key(f_ctx_stack.back(), expr, f_time_stack.back());
-    CompilationMap::iterator eye = f_cache.find(key);
+    TimedExpr key
+        (f_owner.em().make_dot( f_ctx_stack.back(), expr), f_time_stack.back());
+
+    CompilationMap::iterator eye
+        (f_cache.find(key));
 
     if (eye != f_cache.end()) {
         const Type_ptr type = f_owner.type(expr, ctx);
@@ -318,3 +339,22 @@ void Compiler::pre_hook()
 void Compiler::post_hook()
 {}
 
+Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
+{
+    Encoding_ptr res;
+
+    /* build a new encoding for this symbol if none is available. */
+    res = f_enc.find_encoding(key);
+    if (! res) {
+        DRIVEL
+            << "Registering new encoding of type "
+            << type << " for " << key
+            << std::endl;
+
+        res = f_enc.make_encoding(type);
+        f_enc.register_encoding(key, res);
+    }
+
+    assert( NULL != res );
+    return res;
+}

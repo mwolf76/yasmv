@@ -398,7 +398,8 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         Expr_ptr ctx = f_ctx_stack.back();
 
         ResolverProxy proxy;
-        Symbol_ptr symb = proxy.symbol(ctx, expr);
+        Symbol_ptr symb
+            (proxy.symbol( em.make_dot( ctx, expr)));
 
         if (symb->is_const()) {
             Type_ptr res = symb->as_const().type();
@@ -420,6 +421,12 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             PUSH_TYPE(res);
             return;
         }
+        else if (symb->is_parameter()) {
+            Type_ptr res = symb->as_parameter().type();
+            PUSH_TYPE(res);
+            return;
+        }
+
         // we keep this to retain the old lazy behavior with nullary defines
         // since it comes at no extra cost at all.
         else if (symb->is_define()) {

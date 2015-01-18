@@ -26,20 +26,18 @@
 
 #include <symb/symbol.hh>
 
-UnresolvedSymbol::UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
-    : f_ctx(ctx)
-    , f_expr(expr)
+UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
+    : f_expr(expr)
 {}
 
 const char* UnresolvedSymbol::what() const throw()
 {
     std::ostringstream oss;
-
     oss
-        << "Unresolved symbol: `" << f_ctx << "::" << f_expr<< "`";
+        << "Unresolved symbol: `"
+        << f_expr<< "`";
 
-    const char* res (strdup( oss.str().c_str()));
-    return res;
+    return oss.str().c_str();
 }
 
 bool Symbol::is_variable(void) const
@@ -51,6 +49,20 @@ bool Symbol::is_variable(void) const
 Variable& Symbol::as_variable(void) const
 {
     Variable_ptr res = dynamic_cast <const Variable_ptr>
+        (const_cast <const Symbol_ptr> (this));
+    assert (res);
+    return (*res);
+}
+
+bool Symbol::is_parameter(void) const
+{
+    return NULL != dynamic_cast <const Parameter_ptr>
+        (const_cast <const Symbol_ptr> (this));
+}
+
+Parameter& Symbol::as_parameter(void) const
+{
+    Parameter_ptr res = dynamic_cast <const Parameter_ptr>
         (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);

@@ -44,6 +44,19 @@ struct ExprEq {
 typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
+/* -- timed expr pool definitions --------------------------------------------- */
+
+struct TimedExprHash {
+    long operator() (const TimedExpr& k) const;
+};
+
+struct TimedExprEq {
+    bool operator() (const TimedExpr& x, const TimedExpr& y) const;
+};
+
+typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
+
 /* -- atom pool definitions -------------------------------------------------- */
 
 struct AtomHash {
@@ -57,18 +70,18 @@ struct AtomEq {
 typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;
 typedef std::pair<AtomPool::iterator, bool> AtomPoolHit;
 
-/* -- fqexpr pool definitions ------------------------------------------------ */
+// /* -- fqexpr pool definitions ------------------------------------------------ */
 
-struct FQExprHash {
-    long operator() (const FQExpr& k) const;
-};
+// struct FQExprHash {
+//     long operator() (const FQExpr& k) const;
+// };
 
-struct FQExprEq {
-    bool operator() (const FQExpr& x, const FQExpr& y) const;
-};
+// struct FQExprEq {
+//     bool operator() (const FQExpr& x, const FQExpr& y) const;
+// };
 
-typedef boost::unordered_set<FQExpr, FQExprHash, FQExprEq> FQExprPool;
-typedef std::pair<FQExprPool::iterator, bool> FQExprPoolHit;
+// typedef boost::unordered_set<FQExpr, FQExprHash, FQExprEq> FQExprPool;
+// typedef std::pair<FQExprPool::iterator, bool> FQExprPoolHit;
 
 /* -- generic ptr based definitions ------------------------------------------ */
 struct PtrHash {

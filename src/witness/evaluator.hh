@@ -37,7 +37,7 @@
 #include <witness/witness.hh>
 
 /* local typedefs */
-typedef boost::unordered_map<FQExpr, value_t, FQExprHash, FQExprEq> FQExprValueMap;
+typedef boost::unordered_map<TimedExpr, value_t, TimedExprHash, TimedExprEq> TimedExprValueMap;
 
 typedef std::vector<Expr_ptr> ExprStack;
 typedef std::vector<step_t>   TimeStack;
@@ -64,7 +64,7 @@ class Evaluator : public ExprWalker {
     Witness_ptr f_witness;
 
     // cache
-    FQExprValueMap f_map;
+    TimedExprValueMap f_map;
 
 public:
     Evaluator(WitnessMgr& owner); // defaults to std::cout
@@ -83,25 +83,7 @@ private:
     WitnessMgr &f_owner;
 
     // services
-    inline bool cache_miss(const Expr_ptr expr)
-    {
-        assert( 0 < f_ctx_stack.size());
-        Expr_ptr ctx = f_ctx_stack.back();
-
-        assert( 0 < f_time_stack.size());
-        step_t step = f_time_stack.back();
-
-        FQExpr key(ctx , expr, step);
-        FQExprValueMap::iterator eye = f_map.find(key);
-
-        if (eye != f_map.end()) {
-            value_t res = (*eye).second;
-            PUSH_VALUE(res);
-            return false;
-        }
-
-        return true;
-    }
+    bool cache_miss(const Expr_ptr expr);
 };
 
 #endif
