@@ -247,7 +247,7 @@ toplevel_expression returns [Expr_ptr res]
 
 conditional_expression returns [Expr_ptr res]
 @init { }
-	: expr=logical_or_expression {
+	: expr=logical_expression {
          $res = expr;
       } (
             '?' lhs=toplevel_expression ':' rhs=toplevel_expression
@@ -255,126 +255,134 @@ conditional_expression returns [Expr_ptr res]
       )?
 	;
 
+logical_expression returns [Expr_ptr res]
+    : expr=logical_iff_expression
+      { $res = expr; }
+    ;
+
+logical_iff_expression returns [Expr_ptr res]
+@init { }
+	:  lhs=logical_implies_expression
+       { $res = lhs; }
+
+    (
+       '<->' rhs=logical_implies_expression
+       { $res = em.make_iff($res, rhs); }
+    )*
+	;
+
+logical_implies_expression returns [Expr_ptr res]
+@init { }
+	: lhs=logical_or_expression
+      { $res = lhs; }
+
+    (
+      '->' rhs=logical_or_expression
+      { $res = em.make_implies($res, rhs); }
+    )*
+    ;
+
 logical_or_expression returns[Expr_ptr res]
 @init { }
     : lhs=logical_and_expression
       { $res = lhs; }
 
     (
-      'or' rhs=logical_and_expression
+      '||' rhs=logical_and_expression
       { $res = em.make_or($res, rhs); }
+
+    | 'xor' rhs=logical_and_expression
+      { $res = em.make_xor($res, rhs); }
     )*
     ;
 
 logical_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=inclusive_or_expression
+    : lhs=bw_or_expression
       { $res = lhs; }
 
     (
-      'and' rhs=inclusive_or_expression
+      '&&' rhs=bw_or_expression
       { $res = em.make_and($res, rhs); }
     )*
     ;
 
-inclusive_or_expression returns[Expr_ptr res]
+bw_or_expression returns[Expr_ptr res]
 @init { }
-    : lhs=exclusive_or_expression
+    : lhs=bw_xor_expression
       { $res = lhs; }
 
     (
-      '|' rhs=exclusive_or_expression
-      { $res = em.make_bw_or($res, rhs); }
+      '|' rhs=bw_xor_expression
+       { $res = em.make_bw_or($res, rhs); }
     )*
     ;
 
-exclusive_or_expression returns[Expr_ptr res]
+bw_xor_expression returns[Expr_ptr res]
 @init { }
-    : lhs=equivalence_expression
+    : lhs=bw_xnor_expression
       { $res = lhs; }
 
     (
-      '^' rhs=equivalence_expression
+      '^' rhs=bw_xnor_expression
       { $res = em.make_bw_xor($res, rhs); }
     )*
     ;
 
-equivalence_expression returns[Expr_ptr res]
+bw_xnor_expression returns[Expr_ptr res]
 @init { }
-    : lhs=and_expression
+    : lhs=bw_and_expression
       { $res = lhs; }
 
     (
-      '~' rhs=and_expression
+      '!^' rhs=bw_and_expression
       { $res = em.make_bw_xnor($res, rhs); }
     )*
     ;
 
-and_expression returns[Expr_ptr res]
+bw_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=iff_expression
+    : lhs=temporal_expression
       { $res = lhs; }
 
     (
-      '&' rhs=iff_expression
+      '&' rhs=temporal_expression
       { $res = em.make_bw_and($res, rhs); }
     )*
     ;
 
-iff_expression returns [Expr_ptr res]
-@init { }
-	:  lhs=implies_expression
-       { $res = lhs; }
-
-    (
-       '<->' rhs=implies_expression
-       { $res = em.make_iff($res, rhs); }
-    )*
-	;
-
-implies_expression returns [Expr_ptr res]
-@init { }
-	: lhs=temporal_formula
-      { $res = lhs; }
-
-    (
-      '->' rhs=temporal_formula
-      { $res = em.make_implies($res, rhs); }
-    )*
-    ;
-
-temporal_formula returns [Expr_ptr res]
+temporal_expression returns [Expr_ptr res]
 @init { }
     :
-        formula=binary_ltl_formula
-        { $res = formula; }
+        expr=binary_ltl_expression
+        { $res = expr; }
     ;
 
-binary_ltl_formula returns [Expr_ptr res]
+binary_ltl_expression returns [Expr_ptr res]
 @init { }
-    : lhs=unary_ltl_formula
+    : lhs=unary_ltl_expression
       { $res = lhs; } (
-            'U' rhs=unary_ltl_formula
+            'U' rhs=unary_ltl_expression
             { $res = em.make_U($res, rhs); }
 
-        |   'R' rhs=unary_ltl_formula
+        |   'R' rhs=unary_ltl_expression
             { $res = em.make_R($res, rhs); }
     )*
     ;
 
-unary_ltl_formula returns [Expr_ptr res]
+unary_ltl_expression returns [Expr_ptr res]
 @init { }
-    : 'G' formula=unary_ltl_formula
-      { $res = em.make_G(formula); }
+    : 'G' expr=unary_ltl_expression
+      { $res = em.make_G(expr); }
 
-    | 'F' formula=unary_ltl_formula
-      { $res = em.make_F(formula); }
+    | 'F' expr=unary_ltl_expression
+      { $res = em.make_F(expr); }
 
-    | 'X' formula=unary_ltl_formula
-      { $res = em.make_X(formula); }
+    | 'X' expr=unary_ltl_expression
+      { $res = em.make_X(expr); }
 
-    | formula=equality_expression
-      { $res = formula; }
+    | expr=equality_expression
+      { $res = expr; }
     ;
 
 equality_expression returns [Expr_ptr res]
@@ -473,10 +481,10 @@ unary_expression returns [Expr_ptr res]
 	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
-	| 'not' expr=postfix_expression
+	| '! ' expr=postfix_expression
       { $res = em.make_not(expr); }
 
-    | '!' expr=postfix_expression
+    | '~' expr=postfix_expression
       { $res = em.make_bw_not(expr); }
 
     | '-' expr=postfix_expression

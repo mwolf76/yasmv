@@ -108,6 +108,9 @@ void ExprWalker::walk ()
             case OR_1: goto entry_OR_1;
             case OR_2: goto entry_OR_2;
 
+            case XOR_1: goto entry_XOR_1;
+            case XOR_2: goto entry_XOR_2;
+
             case BW_OR_1: goto entry_BW_OR_1;
             case BW_OR_2: goto entry_BW_OR_2;
 
@@ -442,6 +445,24 @@ void ExprWalker::walk ()
 
             entry_OR_2:
                 walk_or_postorder(curr.expr);
+            }
+            break;
+
+        case XOR:
+            if (walk_xor_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = XOR_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_XOR_1:
+                if (walk_xor_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = XOR_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_XOR_2:
+                walk_xor_postorder(curr.expr);
             }
             break;
 

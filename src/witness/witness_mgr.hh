@@ -31,8 +31,8 @@
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
-#include <witness/evaluator.hh>
 #include <witness/witness.hh>
+#include <witness/evaluator.hh>
 
 typedef class WitnessMgr *WitnessMgr_ptr;
 typedef std::map<Atom, Witness_ptr> WitnessMap;

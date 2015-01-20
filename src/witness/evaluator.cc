@@ -33,22 +33,34 @@
 
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)
-{ DEBUG << "Created Evaluator @" << this << std::endl; }
+{
+    DRIVEL
+        << "Created Evaluator @"
+        << this
+        << std::endl;
+}
 
 Evaluator::~Evaluator()
-{ DEBUG << "Destroying Evaluator @" << this << std::endl; }
-
-value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
-                           Expr_ptr body, step_t time)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    DRIVEL
+        << "Destroying Evaluator @"
+        << this
+        << std::endl;
+}
 
-    // remove previous results
+void Evaluator::clear_internals()
+{
+    f_type_stack.clear();
     f_values_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
     f_map.clear();
+}
+
+value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
+                           Expr_ptr body, step_t time)
+{
+    clear_internals();
 
     // setting the environment
     f_witness = &witness;
@@ -59,14 +71,12 @@ value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
     // toplevel (time is assumed at 0, arbitrarily nested next allowed)
     f_time_stack.push_back(time);
 
-    TimedExpr key
-        (em.make_dot( ctx, body), time);
-
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 
     // sanity conditions
     assert(1 == f_values_stack.size());
+    assert(1 == f_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
@@ -203,6 +213,18 @@ void Evaluator::walk_or_postorder(const Expr_ptr expr)
     POP_VALUE(lhs);
     PUSH_VALUE(lhs || rhs);
 }
+
+bool Evaluator::walk_xor_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Evaluator::walk_xor_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_xor_postorder(const Expr_ptr expr)
+{
+    POP_VALUE(rhs);
+    POP_VALUE(lhs);
+    PUSH_VALUE((lhs && !rhs) || (!lhs && rhs));
+}
+
 
 bool Evaluator::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -502,6 +524,9 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     step_t time
         (f_time_stack.back());
 
+    if (em.is_empty(ctx) && em.is_empty(expr))
+        return ;
+
     // 0. explicit boolean consts
     if (em.is_bool_const(expr)) {
 
@@ -560,7 +585,14 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         }
 
         else if (symb->is_parameter()) {
-            assert(false);
+            ModelMgr& mm
+                (ModelMgr::INSTANCE());
+
+            Expr_ptr rewrite
+                (mm.rewrite_parameter( full_expr));
+
+            (*this)(rewrite);
+            return;
         }
 
         else if (symb->is_define()) {
@@ -570,7 +602,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             return;
         }
 
-        ERR
+        DEBUG
             << full_expr
             << std::endl;
 

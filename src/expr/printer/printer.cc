@@ -30,7 +30,7 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
-#define SHOW_SCOPE_ASSOCIATIVITY 0
+#define SHOW_SCOPE_ASSOCIATIVITY 1
 
 Printer::Printer()
     : f_os(std::cout)
@@ -163,6 +163,13 @@ bool Printer::walk_or_inorder(const Expr_ptr expr)
 void Printer::walk_or_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+bool Printer::walk_xor_preorder(const Expr_ptr expr)
+{ f_os << "("; return true; }
+bool Printer::walk_xor_inorder(const Expr_ptr expr)
+{ f_os << " xor "; return true; }
+void Printer::walk_xor_postorder(const Expr_ptr expr)
+{ f_os << ")"; }
+
 bool Printer::walk_bw_or_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_bw_or_inorder(const Expr_ptr expr)
@@ -292,8 +299,8 @@ bool Printer::walk_dot_preorder(const Expr_ptr expr)
 }
 bool Printer::walk_dot_inorder(const Expr_ptr expr)
 {
-    if (! ExprMgr::INSTANCE().is_empty( expr -> lhs()))
-        f_os << ".";
+    // if (! ExprMgr::INSTANCE().is_empty( expr -> lhs()))
+    f_os << ".";
 
     return true;
 }
@@ -337,8 +344,8 @@ using std::oct;
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-    if (ExprMgr::INSTANCE().is_empty(expr))
-        return;
+    // if (ExprMgr::INSTANCE().is_empty(expr))
+    //     return;
 
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;

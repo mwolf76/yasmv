@@ -198,6 +198,21 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+bool Compiler::walk_xor_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Compiler::walk_xor_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_xor_postorder(const Expr_ptr expr)
+{
+    if (f_preprocess)
+        return;
+
+    if (is_binary_boolean(expr))
+        boolean_xor(expr);
+
+    else assert( false ); // unreachable
+}
+
 bool Compiler::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_bw_or_inorder(const Expr_ptr expr)
@@ -561,15 +576,22 @@ void Compiler::walk_comma_postorder(const Expr_ptr expr)
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {
-    ExprMgr& em (f_owner.em());
-    TypeMgr& tm (f_owner.tm());
+    ExprMgr& em
+        (f_owner.em());
+    TypeMgr& tm
+        (f_owner.tm());
 
     /* cached? */
     if (! cache_miss(expr))
         return;
 
-    Expr_ptr ctx (f_ctx_stack.back());
-    step_t time  (f_time_stack.back());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    step_t time
+        (f_time_stack.back());
+
+    Expr_ptr full
+        (em.make_dot(ctx, expr));
 
     TimedExpr2EncMap::const_iterator eye;
     Encoding_ptr enc (NULL);
@@ -585,7 +607,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     ResolverProxy resolver;
     Symbol_ptr symb
-        (resolver.symbol( em.make_dot( ctx, expr)));
+        (resolver.symbol(full));
 
     // TODO: review this, no longer applies to integers
     // 2. bool/integer constant leaves
@@ -608,7 +630,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
         TimedExpr key
-            (em.make_dot( ctx, expr), time);
+            (full, time);
 
         /* build a new encoding for this symbol if none is available. */
         if (NULL == (enc = f_enc.find_encoding(key))) {
@@ -631,17 +653,19 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         // push into type stack
         Type_ptr type
             (symb->as_variable().type());
+
         if (type -> is_instance()) {
             f_type_stack.push_back(type);
             return;
         }
 
         TimedExpr key
-            (em.make_dot(ctx, expr), time);
+            (full, time);
 
         /* encoding will be created on-the-fly if necessary */
         enc = find_encoding(key, type);
         push_dds(enc, type);
+
         return;
     } /* variables */
 
@@ -651,6 +675,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         // push into type stack
         Type_ptr type
             (symb->as_parameter().type());
+
         if (type -> is_instance()) {
             f_type_stack.push_back(type);
             return;
@@ -658,12 +683,18 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         /* parameters must be resolved against the Param map
            maintained by the ModelMgr */
-        TimedExpr key
-            (f_owner.rewrite_parameter( em.make_dot(ctx, expr)), time);
+        Expr_ptr rewrite
+            (f_owner.rewrite_parameter(full));
 
-        /* encoding will be created on-the-fly if necessary */
-        enc = find_encoding(key, type);
-        push_dds(enc, type);
+        TRACE
+            << "Rewritten `"
+            << full << "` to "
+            << rewrite
+            << std::endl;
+
+        f_ctx_stack.push_back( rewrite -> lhs());
+        (*this) (rewrite -> rhs());
+        f_ctx_stack.pop_back();
         return;
     } /* parameters */
 
@@ -671,7 +702,17 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     // retain the old lazy behavior with nullary defines since it
     // comes at no extra cost at all.
     else if (symb->is_define()) {
-        (*this) (symb -> as_define().body());
+        Expr_ptr body
+            (symb -> as_define().body());
+
+        TRACE
+            << "Inlining `"
+            << expr
+            << "` := "
+            << body
+            << std::endl;
+
+        (*this) (body);
         return;
     }
 

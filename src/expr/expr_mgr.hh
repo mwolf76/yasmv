@@ -204,6 +204,14 @@ public:
         return expr->f_symb == OR;
     }
 
+    inline Expr_ptr make_xor(Expr_ptr a, Expr_ptr b)
+    { return make_expr(XOR, a, b); }
+
+    inline bool is_xor(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == XOR;
+    }
+
     inline Expr_ptr make_bw_or(Expr_ptr a, Expr_ptr b)
     { return make_expr(BW_OR, a, b); }
 
@@ -614,6 +622,7 @@ public:
 
         return ((AND == symb)  ||
                 (OR  == symb)  ||
+                (XOR == symb)  ||
                 (IFF == symb)  ||
                 (IMPLIES == symb));
     }

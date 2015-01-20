@@ -47,9 +47,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             (pair.second);
         Expr_ptr full_name
             ( em.make_dot( ctx, symb->name()));
-        DRIVEL
-            << full_name
-            << std::endl;
+
         f_lang.push_back( full_name );
     }
 

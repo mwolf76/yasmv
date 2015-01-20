@@ -257,7 +257,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
 
                 if (! f_em.is_empty(top))
-                    actuals.push_back(top);
+                    actuals.push_back( em.make_dot( em.make_empty(), top));
             }
 
             // 2. good, now associate formals and actuals

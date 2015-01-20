@@ -70,6 +70,9 @@ static const std::string heading_msg = \
 void pe(Expr_ptr e)
 { std::cerr << e << std::endl; }
 
+void pf(TimedExpr e)
+{ std::cerr << e << std::endl; }
+
 void pu(UCBI& ucbi)
 { std::cerr << ucbi << std::endl; }
 

@@ -48,7 +48,7 @@ typedef enum {
     BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
 
     /* logical operators */
-    NOT, AND, OR, IMPLIES, IFF,
+    NOT, AND, OR, XOR, IMPLIES, IFF,
 
     /* shift operators */
     LSHIFT, RSHIFT,

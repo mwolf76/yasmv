@@ -166,6 +166,7 @@ private:
     void boolean_not(const Expr_ptr expr);
     void boolean_and(const Expr_ptr expr);
     void boolean_or(const Expr_ptr expr);
+    void boolean_xor(const Expr_ptr expr);
     void boolean_implies(const Expr_ptr expr);
     void boolean_iff(const Expr_ptr expr);
     void boolean_equals(const Expr_ptr expr);

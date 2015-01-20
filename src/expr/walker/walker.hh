@@ -54,6 +54,7 @@
     BINARY_HOOK(mul);                              \
                                                    \
     BINARY_HOOK(and); BINARY_HOOK(or);             \
+    BINARY_HOOK(xor);                              \
     BINARY_HOOK(bw_and); BINARY_HOOK(bw_or);       \
     BINARY_HOOK(bw_xor); BINARY_HOOK(implies);     \
     BINARY_HOOK(bw_xnor); BINARY_HOOK(iff);        \
@@ -118,6 +119,7 @@ typedef enum {
     BW_AND_1, BW_AND_2,
 
     OR_1, OR_2,
+    XOR_1, XOR_2,
     BW_OR_1, BW_OR_2,
 
     BW_XOR_1, BW_XOR_2,
@@ -310,6 +312,10 @@ protected:
     virtual bool walk_or_preorder(const Expr_ptr expr) =0;
     virtual bool walk_or_inorder(const Expr_ptr expr) =0;
     virtual void walk_or_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_xor_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_xor_inorder(const Expr_ptr expr) =0;
+    virtual void walk_xor_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_bw_or_preorder(const Expr_ptr expr) =0;
     virtual bool walk_bw_or_inorder(const Expr_ptr expr) =0;

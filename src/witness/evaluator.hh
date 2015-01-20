@@ -55,7 +55,7 @@ typedef std::vector<value_t>  ValuesStack;
 class WitnessMgr;// fwd decl
 class Evaluator : public ExprWalker {
 
-    // ExprStack f_expr_stack;
+    TypeStack f_type_stack;
     ExprStack f_ctx_stack;
     TimeStack f_time_stack;
     ValuesStack f_values_stack;
@@ -84,6 +84,7 @@ private:
 
     // services
     bool cache_miss(const Expr_ptr expr);
+    void clear_internals();
 };
 
 #endif

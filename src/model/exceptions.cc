@@ -19,7 +19,6 @@
  *
  **/
 #include <sstream>
-
 #include <model.hh>
 
 ModuleNotFound::ModuleNotFound(Expr_ptr module_name)

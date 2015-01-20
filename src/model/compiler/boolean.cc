@@ -61,6 +61,15 @@ void Compiler::boolean_or(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
+void Compiler::boolean_xor(const Expr_ptr expr)
+{
+    POP_DD(rhs);
+    POP_DD(lhs);
+    PUSH_DD(lhs.Xor(rhs));
+
+    f_type_stack.pop_back(); // consume one, leave the other
+}
+
 void Compiler::boolean_implies(const Expr_ptr expr)
 {
     POP_DD(rhs);

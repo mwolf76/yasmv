@@ -292,6 +292,31 @@ void Normalizer::walk_implies_postorder(const Expr_ptr expr)
     f_result_stack.push_back( f_em.make_implies( lhs, rhs));
 }
 
+/* (a <-> b) === !( a -> b && b - > a) === ! ( a-> b ) || ! ( b -> a ) */
+bool Normalizer::walk_xor_preorder(const Expr_ptr expr)
+{
+    if (expr->lhs() == expr->rhs()) {
+        f_result_stack.push_back( f_em.make_true());
+        return false;
+    }
+
+    if (f_polarity)
+        rewrite( f_em.make_or( f_em.make_not( f_em.make_implies( expr->lhs(), expr->rhs())),
+                               f_em.make_not( f_em.make_implies( expr->rhs(), expr->lhs()))));
+
+    f_polarity = false;
+    return true;
+}
+bool Normalizer::walk_xor_inorder(const Expr_ptr expr)
+{ return true; }
+void Normalizer::walk_xor_postorder(const Expr_ptr expr)
+{
+    Expr_ptr rhs = f_result_stack.back(); f_result_stack.pop_back();
+    Expr_ptr lhs = f_result_stack.back(); f_result_stack.pop_back();
+
+    f_result_stack.push_back( f_em.make_xor( lhs, rhs));
+}
+
 /* ! (a <-> b) === !( a -> b && b - > a) === ! ( a-> b ) || ! ( b -> a ) */
 bool Normalizer::walk_iff_preorder(const Expr_ptr expr)
 {
