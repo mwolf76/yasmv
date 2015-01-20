@@ -23,77 +23,118 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <base.hh>
 #include <bmc.hh>
+#include <base.hh>
 
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
 BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                                      Engine& engine, unsigned k,
                                      bool use_coi)
     : Witness()
 {
-#if 0
-    EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
-    int inputs[enc_mgr.nbits()];
+    EncodingMgr& bm
+        (EncodingMgr::INSTANCE());
 
-    /* Language */
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    int inputs[bm.nbits()];
+
+    /* Collecting symbols for the witness' language */
     SymbIter si (model);
     while (si.has_next()) {
-        Symbol_ptr symb = si.next();
-        f_lang.push_back( symb -> expr());
+        std::pair <Expr_ptr, Symbol_ptr> pair
+            (si.next());
+        Expr_ptr ctx
+            (pair.first);
+        Symbol_ptr symb
+            (pair.second);
+        Expr_ptr full_name
+            ( em.make_dot( ctx, symb->name()));
+
+        f_lang.push_back( full_name );
     }
 
-    /* up to k (included) */
+    /* step 0 up to `k` (included) */
     for (step_t step = 0; step <= k; ++ step) {
-        TimeFrame& tf = extend();
 
-        SymbIter symbs( model, use_coi ? property : NULL );
-        while (symbs.has_next()) {
-            Symbol_ptr symb = symbs.next();
+        TimeFrame& tf
+            (extend());
+
+        SymbIter symbols
+            (model, use_coi ? property : NULL);
+
+        while (symbols.has_next()) {
+
+            std::pair <Expr_ptr, Symbol_ptr> pair
+                (symbols.next());
+
+            Expr_ptr ctx
+                (pair.first);
+
+            Symbol_ptr symb
+                (pair.second);
+
+            Expr_ptr symb_name
+                (symb->name());
+
+            Expr_ptr key
+                (em.make_dot( ctx, symb_name));
 
             if (symb->is_variable()) {
-                Expr_ptr ctx  (symb->ctx());
-                Expr_ptr expr (symb->expr());
 
                 /* time it, and fetch encoding for enc mgr */
-                FQExpr key(ctx, expr);
-                Encoding_ptr enc = enc_mgr.find_encoding(key);
-                if ( NULL == enc ) {
-                    // TRACE << symb->ctx()
-                    //       << "::" << symb->expr()
-                    //       << " not in COI, skipping..."
-                    //       << endl;
+                Encoding_ptr enc
+                    (bm.find_encoding( TimedExpr(key, 0)) );
 
+                if ( ! enc )
                     continue;
-                }
 
-                /* 1. for each bit int the encoding, fetch UCBI, time it
-                   into TCBI, fetch its value in MiniSAT model and set
-                   the corresponding entry in input. */
+                /* 1. for each bit int the encoding, fetch UCBI, time
+                   it into TCBI, fetch its value in MiniSAT model and
+                   set the corresponding entry in input. */
                 DDVector::const_iterator di;
                 unsigned ndx;
-
                 for (ndx = 0, di = enc->bits().begin();
                      enc->bits().end() != di; ++ ndx, ++ di) {
 
-                    unsigned bit = (*di).getNode()->index;
-
-                    const UCBI& ucbi = enc_mgr.find_ucbi(bit);
-                    const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(),
-                                            ucbi.time(), ucbi.bitno(),
-                                            step);
-
-                    Var var = engine.tcbi_to_var(tcbi);
-                    int value = engine.value(var); /* Don't care is assigned to 0 */
+                    unsigned bit
+                        ((*di).getNode()->index);
+                    const UCBI& ucbi
+                        (bm.find_ucbi(bit));
+                    const TCBI tcbi
+                        (TCBI(ucbi, step));
+                    Var var
+                        (engine.tcbi_to_var(tcbi));
+                    int value
+                        (engine.value(var)); /* XXX: don't cares assigned to 0 */
 
                     inputs[bit] = value;
                 }
 
-                /* 2. eval the encoding ADD with inputs and put
+                /* 2. eval the encoding DDs with inputs and put
                    resulting value into time frame container. */
-                Expr_ptr value = enc->expr(inputs);
-                tf.set_value( expr, value );
+            Expr_ptr value
+                (enc->expr(inputs));
+
+            if (value)
+                tf.set_value( key, value );
+            }
+
+            else if (symb->is_define()) {
+
+                WitnessMgr& wm
+                    (WitnessMgr::INSTANCE());
+
+                const Define& define
+                    (symb->as_define());
+
+                Expr_ptr value
+                    (wm.eval( *this, ctx, define.body(), 0));
+
+                tf.set_value( key, value );
             }
         }
     }
-#endif
 }

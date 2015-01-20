@@ -716,7 +716,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             Expr_ptr rewrite
                 (mm.rewrite_parameter(full));
 
-            TRACE
+            DRIVEL
                 << "Rewritten `"
                 << full << "` to "
                 << rewrite
@@ -738,7 +738,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             Expr_ptr body
                 (symb -> as_define().body());
 
-            TRACE
+            DRIVEL
                 << "Inlining `"
                 << expr
                 << "` := "
@@ -748,10 +748,6 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             (*this) (body);
             return;
         }
-
-        DEBUG
-            << full
-            << std::endl;
 
         assert( false ); /* unexpected */
     }

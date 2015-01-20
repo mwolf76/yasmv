@@ -679,7 +679,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Expr_ptr rewrite
             (f_owner.rewrite_parameter(full));
 
-        TRACE
+        DRIVEL
             << "Rewritten `"
             << full << "` to "
             << rewrite
@@ -698,7 +698,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Expr_ptr body
             (symb -> as_define().body());
 
-        TRACE
+        DRIVEL
             << "Inlining `"
             << expr
             << "` := "
@@ -789,7 +789,7 @@ Compiler::Compiler()
     , f_enc(EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
 {
-    DEBUG
+    DRIVEL
         << "Created Compiler @"
         << this
         << std::endl;
@@ -797,7 +797,7 @@ Compiler::Compiler()
 
 Compiler::~Compiler()
 {
-    DEBUG
+    DRIVEL
         << "Destroying Compiler @"
         << this
         << std::endl;

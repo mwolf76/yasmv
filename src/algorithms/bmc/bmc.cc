@@ -46,12 +46,12 @@ BMC::~BMC()
 
 void BMC::falsification( Expr_ptr phi )
 {
-    assert( em().is_G( phi ));
-
     Engine engine;
     Expr_ptr ctx = em().make_empty();
 
-    Expr_ptr invariant = phi->lhs();
+    Expr_ptr invariant
+        (phi);
+
     CompilationUnit ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
@@ -86,7 +86,7 @@ void BMC::falsification( Expr_ptr phi )
             {
                 std::ostringstream oss;
                 oss
-                    << "CEX witness for property `"
+                    << "CEX witness for invariant`"
                     << phi
                     << "`"
                 ;
@@ -114,13 +114,13 @@ void BMC::falsification( Expr_ptr phi )
 
 void BMC::kinduction( Expr_ptr phi )
 {
-    assert( em().is_G( phi ));
-
     /* thread locals */
     Engine engine;
     Expr_ptr ctx = em().make_empty();
 
-    Expr_ptr invariant = phi->lhs();
+    Expr_ptr invariant
+        (phi);
+
     CompilationUnit ii (compiler().process( ctx, invariant));
 
     Expr_ptr violation = em().make_not(invariant);
@@ -160,38 +160,32 @@ void BMC::kinduction( Expr_ptr phi )
 
 }
 
-// void BMC::bmc_ltlspec_check( Expr_ptr property )
-// {
-//     assert(false); // TODO: not yet implemented
-// }
-
 void BMC::process()
 {
-    Normalizer normalizer( ModelMgr::INSTANCE());
-    normalizer.process( f_property );
-    if (normalizer.is_invariant()) {
-        TRACE << f_property
-              << " is an invariant (i.e. G-only) LTL property"
-              << std::endl;
-
-        Expr_ptr phi = normalizer.property();
+    // Normalizer normalizer( ModelMgr::INSTANCE());
+    // normalizer.process( f_property );
+    if (1 /* normalizer.is_invariant() */) {
+        TRACE
+            << f_property
+            << " is an invariant (i.e. G-only) LTL property"
+            << std::endl;
 
         set_status( MC_UNKNOWN );
 
         /* launch parallel threads */
-        boost::thread base(&BMC::falsification, this, phi);
-        boost::thread step(&BMC::kinduction, this, phi);
+        boost::thread base(&BMC::falsification, this, f_property);
+        boost::thread step(&BMC::kinduction, this, f_property);
 
         base.join();
         step.join();
     }
     else {
-        TRACE << f_property
-              << " is a full LTL property"
-              << std::endl;
+        TRACE
+            << f_property
+            << " is a full LTL property"
+            << std::endl;
 
         assert( false );
-        // bmc_ltlspec_check( normalizer.property() );
     }
     TRACE << "Done." << std::endl;
 }

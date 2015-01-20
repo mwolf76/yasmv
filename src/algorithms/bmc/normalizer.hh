@@ -31,10 +31,6 @@
 #include <type/type.hh>
 #include <type/type_mgr.hh>
 
-// NOTE: here we're using a vector in order to bypass STL stack
-// interface limitations. (i.e. absence of clear())
-typedef std::vector<Expr_ptr> ExprStack;
-
 class ModelMgr;
 class Normalizer : public ExprWalker {
 public:
@@ -67,7 +63,7 @@ protected:
     bool f_polarity;
     bool f_invariant;
 
-    ExprStack f_result_stack;
+    ExprVector f_result_stack;
 
     // managers
     ModelMgr& f_owner;

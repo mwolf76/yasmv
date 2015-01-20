@@ -808,7 +808,7 @@ commands returns [Command_ptr res]
     |  c=simulate_command
        { $res = c; }
 
-    |  c=verify_command
+    |  c=check_invar_command
        { $res = c; }
 
     |  c=witness_command
@@ -859,11 +859,11 @@ model_command returns [Command_ptr res]
     ;
 
 
-verify_command returns[Command_ptr res]
+check_invar_command returns[Command_ptr res]
 @init {
     ExprVector constraints;
 }
-    : 'verify' property=toplevel_expression
+    : 'check_invar' property=toplevel_expression
 
         ( 'with' expr=toplevel_expression
           { constraints.push_back( expr ); }

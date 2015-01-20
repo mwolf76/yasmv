@@ -21,13 +21,12 @@
  **/
 #include <simulation.hh>
 
-using Minisat::Var;
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
+
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness()
 {
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
-
     EncodingMgr& bm
         (EncodingMgr::INSTANCE());
 
@@ -51,9 +50,13 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
         f_lang.push_back( full_name );
     }
 
-    /* Just k-th timeframe */
-    TimeFrame& tf = extend();
-    SymbIter symbols( model, NULL );
+    /* just step `k` */
+    TimeFrame& tf
+        (extend());
+
+    SymbIter symbols
+        (model, NULL);
+
     while (symbols.has_next()) {
 
         std::pair <Expr_ptr, Symbol_ptr> pair
@@ -75,7 +78,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
             /* time it, and fetch encoding for enc mgr */
             Encoding_ptr enc
-                (bm.find_encoding(TimedExpr(key,0)));
+                (bm.find_encoding( TimedExpr(key, 0)) );
 
             /* not in COI, skipping... */
             if ( ! enc )
@@ -113,6 +116,9 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
         }
 
         else if (symb->is_define()) {
+
+            WitnessMgr& wm
+                (WitnessMgr::INSTANCE());
 
             const Define& define
                 (symb->as_define());

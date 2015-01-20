@@ -525,11 +525,11 @@ void Normalizer::walk_cond_postorder(const Expr_ptr expr)
 { assert(false); }
 
 bool Normalizer::walk_dot_preorder(const Expr_ptr expr)
-{ assert(false); return false; }
+{ return false; }
 bool Normalizer::walk_dot_inorder(const Expr_ptr expr)
 { assert(false); return false; }
 void Normalizer::walk_dot_postorder(const Expr_ptr expr)
-{ assert(false); }
+{}
 
 bool Normalizer::walk_params_preorder(const Expr_ptr expr)
 { assert(false); return false; }
