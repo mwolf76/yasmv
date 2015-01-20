@@ -33,10 +33,10 @@
 class BMC : public Algorithm {
 
 public:
-    BMC(Command& command, Model& model, Expr_ptr formula, ExprVector& constraints);
+    BMC(Command& command, Model& model);
     ~BMC();
 
-    void process();
+    void process(const Expr_ptr phi);
 
     inline mc_status_t status() const
     { return f_status; }
@@ -44,24 +44,12 @@ public:
     inline void set_status(mc_status_t status)
     { f_status = status; }
 
-    Expr_ptr property() const
-    { return f_property; }
-
-    const ExprVector& constraints() const
-    { return f_constraints; }
-
 private:
-    Expr_ptr f_property;
-
-    ExprVector f_constraints;
     mc_status_t f_status;
 
     /* strategies */
     void falsification( Expr_ptr phi );
     void kinduction( Expr_ptr phi );
-
-    /* synchronization */
-
 };
 
 /* Specialized for BMC CEX */

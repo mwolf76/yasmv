@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file time.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef TIME_CMD_H
+#define TIME_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
 
-#include <utils/variant.hh>
+class Time : public Command {
+public:
+    Time(Interpreter& owner);
+    virtual ~Time();
+
+    Variant virtual operator()();
+};
 
 #endif
-

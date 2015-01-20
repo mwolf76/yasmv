@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file check_invar.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/check_invar.hh>
 
-#include <common.hh>
+CheckInvar::CheckInvar(Interpreter& owner, Expr_ptr phi)
+    : Command(owner)
+    , f_phi(phi)
+    , f_bmc(*this, ModelMgr::INSTANCE().model())
+{}
 
-#include <utils/variant.hh>
+Variant CheckInvar::operator()()
+{ return run(); }
 
-#endif
+Variant CheckInvar::run()
+{
+    std::ostringstream tmp;
+    f_bmc.process( f_phi );
+
+    switch (f_bmc.status()) {
+    case MC_FALSE:
+        tmp << "Property is FALSE";
+        break;
+    case MC_TRUE:
+        tmp << "Property is TRUE";
+        break;
+    case MC_UNKNOWN:
+        tmp << "Property could not be decided";
+        break;
+    default: assert( false ); /* unreachable */
+    } /* switch */
+    if (f_bmc.has_witness()) {
+        tmp
+            << ", registered CEX witness `"
+            << f_bmc.witness().id()
+            << "`";
+    }
+
+    return Variant(tmp.str());
+}
+
+CheckInvar::~CheckInvar()
+{}
 

@@ -46,26 +46,7 @@ Command::~Command()
            << std::endl;
 }
 
-ModelLoadCommand::ModelLoadCommand(Interpreter& owner, const std::string &filename)
-    : Command(owner)
-    , f_filename(filename)
-{}
-
-extern void parseFile(const char *filepath); // in utils.cc
-Variant ModelLoadCommand::operator()()
-{
-    // parsing
-    parseFile(f_filename.c_str());
-
-    // model analysis
-    bool status = ModelMgr::INSTANCE().analyze();
-
-    return Variant( status ? "Ok" : "ERROR" );
-}
-
-ModelLoadCommand::~ModelLoadCommand()
-{}
-
+#if 0
 ModelDumpCommand::ModelDumpCommand(Interpreter& owner)
     : Command(owner)
 {}
@@ -472,3 +453,4 @@ Variant WitnessDumpCommand::operator()()
 WitnessDumpCommand::~WitnessDumpCommand()
 {}
 
+#endif

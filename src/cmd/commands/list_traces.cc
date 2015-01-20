@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file list_traces.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/show_traces.hh>
+#include <witness/witness_mgr.hh>
 
-#include <common.hh>
+ListTraces::ListTraces(Interpreter& owner)
+    : Command(owner)
+{}
 
-#include <utils/variant.hh>
+Variant ListTraces::operator()()
+{
+    WitnessList::const_iterator eye;
+    std::ostream &os(std::cout);
 
-#endif
+    const WitnessList& witnesses(WitnessMgr::INSTANCE().witnesses());
+    for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
+        os
+            << (*eye) -> id()
+            << "\t\t"
+            << (*eye) -> desc()
+            << "\t\t"
+            << (*eye) -> length()
+            << std::endl;
+    }
+    os << std::endl;
+
+    return Variant("Ok");
+}
+
+ListTraces::~ListTraces()
+{}
 

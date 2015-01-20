@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file check_ltl.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CHECK_LTL_CMD_H
+#define CHECK_LTL_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
+#include <algorithms/ltl/ltl.hh>
 
-#include <utils/variant.hh>
+class CheckLTL : public Command {
+public:
+    CheckLTL(Interpreter& owner, Expr_ptr phi);
+    virtual ~CheckLTL();
+
+    Variant virtual operator()();
+
+private:
+    /* the LTL specification to be verified */
+    Expr_ptr f_phi;
+
+    /* LTL machinery */
+    LTL f_ltl;
+
+    Variant run();
+};
 
 #endif
-

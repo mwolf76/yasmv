@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file read_model.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef READ_MODEL_H
+#define READ_MODEL_H
 
-#include <common.hh>
+#include <cmd/command.hh>
 
-#include <utils/variant.hh>
+// -- command definitions --------------------------------------------------
+class ReadModel : public Command {
+public:
+    ReadModel(Interpreter& owner, const std::string& filename);
+    virtual ~ReadModel();
+
+    Variant virtual operator()();
+
+private:
+    std::string f_filename;
+};
 
 #endif
-

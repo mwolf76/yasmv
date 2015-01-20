@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file show_trace.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef SHOW_TRACE_CMD_H
+#define SHOW_TRACE_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
 
-#include <utils/variant.hh>
+class ShowTrace : public Command {
+    Expr_ptr f_trace_id;
+public:
+    ShowTrace (Interpreter& owner, Expr_ptr trace_id);
+    virtual ~ShowTrace();
+
+    Variant virtual operator()();
+};
 
 #endif
-

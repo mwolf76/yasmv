@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file help.cc
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/help.hh>
 
-#include <common.hh>
+Help::Help(Interpreter& owner, Atom topic)
+    : Command(owner)
+    , f_topic(topic)
+{}
 
-#include <utils/variant.hh>
+Variant Help::operator()()
+{
+    return Variant(clock());
+}
 
-#endif
-
+Help::~Help()
+{}

@@ -41,16 +41,25 @@ options {
 }
 
 @members {
-
     /* singleton managers */
-    ExprMgr& em (ExprMgr::INSTANCE());
-    ModelMgr& mm (ModelMgr::INSTANCE());
-    TypeMgr& tm (TypeMgr::INSTANCE());
-    OptsMgr& om  (OptsMgr::INSTANCE());
-    CommandMgr& cm (CommandMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    CommandMgr& cm
+        (CommandMgr::INSTANCE());
 
     /* the model instance */
-    Model& model (mm.model());
+    Model& model
+        (mm.model());
 }
 
 // --- Model Description Language  ---------------------------------------------
@@ -796,22 +805,31 @@ commands returns [Command_ptr res]
     |  c=time_command
        { $res = c; }
 
-    | c=job_command
-      { $res = c; }
-
-    |  c=init_command
+    |  c=read_model_command
        { $res = c; }
 
-    |  c=model_command
+    |  c=write_model_command
+       { $res = c; }
+
+    |  c=pick_state_command
        { $res = c; }
 
     |  c=simulate_command
        { $res = c; }
 
+    |  c=check_fsm_command
+       { $res = c; }
+
     |  c=check_invar_command
        { $res = c; }
 
-    |  c=witness_command
+    |  c=check_ltl_command
+       { $res = c  ; }
+
+    |  c=list_traces_command
+       { $res = c; }
+
+    |  c=show_trace_command
        { $res = c; }
 
     |  c=quit_command
@@ -831,90 +849,67 @@ time_command returns [Command_ptr res]
     : 'time' { $res = cm.make_time(); }
     ;
 
-init_command returns [Command_ptr res]
-    : 'init' { $res = cm.make_init(); }
+read_model_command returns [Command_ptr res]
+    :  'read_model' fp=filepath
+       { $res = cm.make_read_model(fp); }
     ;
 
-job_command returns [Command_ptr res]
-    :   'job' (
-
-            'list'
-            { $res = cm.make_job_list(); }
-
-        |   'status' wid=identifier
-            { $res = cm.make_job_status(wid); }
-
-        |   'kill' wid=identifier
-            { $res = cm.make_job_kill(wid); }
-        )
-    ;
-model_command returns [Command_ptr res]
-    : 'model' (
-            'load' fp=filepath
-            { $res = cm.make_model_load(fp); }
-
-        |   'dump'
-            { $res = cm.make_model_dump(); }
-        )
+write_model_command returns [Command_ptr res]
+    :  'write_model' fp=filepath
+       { $res = cm.make_write_model(fp); }
     ;
 
+check_fsm_command returns [Command_ptr res]
+    : 'check_fsm'
+      { $res = cm.make_check_fsm(); }
+    ;
 
 check_invar_command returns[Command_ptr res]
-@init {
-    ExprVector constraints;
-}
-    : 'check_invar' property=toplevel_expression
-
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        { $res = cm.make_verify( property, constraints ); }
+    : 'check_invar' phi=toplevel_expression
+      { $res = cm.make_check_invar(phi); }
     ;
 
-witness_command returns [Command_ptr res]
-    :   'witness' (
+check_ltl_command returns[Command_ptr res]
+    : 'check_ltl' phi=toplevel_expression
+      { $res = cm.make_check_ltl(phi); }
+    ;
 
-            'list'
-            { $res = cm.make_witness_list(); }
+list_traces_command returns [Command_ptr res]
+    : 'list_traces'
+      { $res = cm.make_list_traces(); }
+    ;
 
-        |   'dump' wid=identifier
-            { $res = cm.make_witness_dump(wid); }
+show_trace_command returns [Command_ptr res]
+    : 'show_trace' trace_id=identifier
+      { $res = cm.make_show_trace(trace_id); }
+    ;
 
-        )
+pick_state_command returns [Command_ptr res]
+@init {
+    Expr_ptr constraints
+        (NULL);
+}
+    :   'pick_state'
+        (
+            c=toplevel_expression
+            { constraints = c; }
+        )?
+
+        { $res = cm.make_pick_state(constraints); }
     ;
 
 simulate_command returns [Command_ptr res]
 @init {
-    Expr_ptr halt_cond = NULL;
-    Expr_ptr resume_id = NULL;
-    ExprVector constraints;
+    Expr_ptr constraints
+        (NULL);
 }
     : 'simulate'
+      (
+        c=toplevel_expression
+        { constraints = c; }
+      )?
 
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        ( 'halt' expr=toplevel_expression
-          { halt_cond = expr; }
-        |  expr=constant
-          { halt_cond = expr; }
-        ) ?
-
-        (  'resume' wid=identifier
-           { resume_id = wid; }
-        )?
-
-        { $res = cm.make_simulate( halt_cond, resume_id, constraints ); }
+      { $res = cm.make_simulate(constraints); }
     ;
 
 quit_command returns [Command_ptr res]

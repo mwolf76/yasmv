@@ -16,12 +16,11 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/			\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = commands.hh
-PKG_CC = commands.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = commands.cc read_model.cc write_model.cc help.cc time.cc	\
+quit.cc check_fsm.cc check_invar.cc check_ltl.cc pick_state.cc		\
+simulate.cc list_traces.cc show_trace.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libcommands.la
-libcommands_la_SOURCES = $(PKG_SOURCES)
+libcommands_la_SOURCES = $(PKG_CC)

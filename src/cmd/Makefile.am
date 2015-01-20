@@ -10,12 +10,9 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = cmd.hh interpreter.hh job.hh
-PKG_CC = cmd.cc interpreter.cc job.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = cmd.cc interpreter.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libcmd.la
-libcmd_la_SOURCES = $(PKG_SOURCES)
+libcmd_la_SOURCES = $(PKG_CC)

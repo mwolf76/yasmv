@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file check_ltl.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/check_ltl.hh>
 
-#include <common.hh>
+CheckLTL::CheckLTL(Interpreter& owner, Expr_ptr phi)
+    : Command(owner)
+    , f_phi(phi)
+    , f_ltl(*this, ModelMgr::INSTANCE().model())
+{}
 
-#include <utils/variant.hh>
+Variant CheckLTL::operator()()
+{ return run(); }
 
-#endif
+Variant CheckLTL::run()
+{
+    std::ostringstream tmp;
+    f_ltl.process( f_phi );
+
+    switch (f_ltl.status()) {
+    case MC_FALSE:
+        tmp << "Property is FALSE";
+        break;
+    case MC_TRUE:
+        tmp << "Property is TRUE";
+        break;
+    case MC_UNKNOWN:
+        tmp << "Property could not be decided";
+        break;
+    default: assert( false ); /* unreachable */
+    } /* switch */
+    if (f_ltl.has_witness()) {
+        tmp
+            << ", registered CEX witness `"
+            << f_ltl.witness().id()
+            << "`";
+    }
+
+    return Variant(tmp.str());
+}
+
+CheckLTL::~CheckLTL()
+{}
 

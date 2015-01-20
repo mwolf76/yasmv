@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file quit.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/quit.hh>
+#include <cmd/interpreter.hh>
 
-#include <common.hh>
+Quit::Quit(Interpreter& owner, int retcode)
+    : Command(owner)
+    , f_retcode(retcode)
+{}
 
-#include <utils/variant.hh>
+// sends a signal to the owner
+Variant Quit::operator()()
+{
+    f_owner.quit(f_retcode);
+    return Variant("BYE");
+}
 
-#endif
+Quit::~Quit()
+{}
 

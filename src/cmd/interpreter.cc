@@ -165,27 +165,9 @@ Variant& Interpreter::operator()()
                               << std::endl;
                 }
 
-                if (cmd -> blocking())
-                    (*this)(cmd);
-                else {
-                    Job& j (* new Job(*cmd));
-                    register_job(j);
-
-                    std::ostringstream oss;
-
-                    oss
-                        << "Job "
-                        << j.id()
-                        << " started"
-                    ;
-
-
-                    f_last_result = oss.str();
-                }
+                (*this)(cmd);
             }
-            else {
-                f_last_result = Variant("Parsing Error");
-            }
+            else f_last_result = Variant("Parsing Error");
         }
         else {
             f_last_result = Variant("BYE");

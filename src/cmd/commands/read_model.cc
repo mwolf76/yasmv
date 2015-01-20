@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file read_model.cc
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <cmd/commands/read_model.hh>
 
-#include <common.hh>
+#include <model/model_mgr.hh>
 
-#include <utils/variant.hh>
+ReadModel::ReadModel(Interpreter& owner, const std::string &filename)
+    : Command(owner)
+    , f_filename(filename)
+{}
 
-#endif
+extern void parseFile(const char *filepath); // in utils.cc
+Variant ReadModel::operator()()
+{
+    // parsing
+    parseFile(f_filename.c_str());
+
+    // model analysis
+    bool status = ModelMgr::INSTANCE().analyze();
+
+    return Variant( status ? "Ok" : "ERROR" );
+}
+
+ReadModel::~ReadModel()
+{}
 

@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file simulate.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef SIMULATE_H_CMD
+#define SIMULATE_H_CMD
 
-#include <common.hh>
+#include <cmd/command.hh>
+#include <algorithms/sim/simulation.hh>
 
-#include <utils/variant.hh>
+class Simulate : public Command {
+public:
+    Simulate(Interpreter& owner, Expr_ptr phi);
+    virtual ~Simulate();
+
+    Variant virtual operator()();
+
+private:
+    /* Optional propositional constraints */
+    Expr_ptr f_phi;
+
+    /* Simulation machinery */
+    Simulation f_sim;
+
+    Variant run();
+};
 
 #endif
 

@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file write_model.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef WRITE_MODEL_CMD_H
+#define WRITE_MODEL_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
 
-#include <utils/variant.hh>
+class WriteModel : public Command {
+public:
+    WriteModel(Interpreter& owner, const char *fp);
+    virtual ~WriteModel();
+
+    Variant virtual operator()();
+
+private:
+    Variant run();
+    Atom f_filepath;
+};
 
 #endif
-

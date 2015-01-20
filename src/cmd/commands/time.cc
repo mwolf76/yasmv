@@ -1,6 +1,5 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file time.cc
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,12 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
 
-#include <common.hh>
+#include <cmd/commands/time.hh>
 
-#include <utils/variant.hh>
+Time::Time(Interpreter& owner)
+    : Command(owner)
+{}
 
-#endif
+Variant Time::operator()()
+{ return Variant( clock()); }
+
+Time::~Time()
+{}
 

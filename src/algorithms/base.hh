@@ -59,9 +59,6 @@ public:
     /* Build encodings are perform model compilation */
     virtual void setup();
 
-    /* Actual MC algorithm (abstract) */
-    virtual void process() =0;
-
     // algorithm abstract param interface (key -> value map)
     void set_param(std::string key, Variant value);
     Variant& get_param(const std::string key);

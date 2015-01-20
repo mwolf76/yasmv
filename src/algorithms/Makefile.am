@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = bmc sim
+SUBDIRS = bmc fsm ltl sim
 
 AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
@@ -10,12 +10,8 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_HH = base.hh init.hh
-PKG_CC = base.cc init.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
-
+PKG_CC = base.cc
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libalgorithms.la
-libalgorithms_la_SOURCES = $(PKG_SOURCES)
+libalgorithms_la_SOURCES = $(PKG_CC)

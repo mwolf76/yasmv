@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file check_invar.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CHECK_INVAR_CMD_H
+#define CHECK_INVAR_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
+#include <algorithms/bmc/bmc.hh>
 
-#include <utils/variant.hh>
+class CheckInvar : public Command {
+public:
+    CheckInvar(Interpreter& owner, Expr_ptr phi);
+    virtual ~CheckInvar();
+
+    Variant virtual operator()();
+
+private:
+    /* the invariant to be verified */
+    Expr_ptr f_phi;
+
+    /* BMC machinery */
+    BMC f_bmc;
+
+    Variant run();
+};
 
 #endif
-

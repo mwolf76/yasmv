@@ -169,7 +169,7 @@ int main(int argc, const char *argv[])
         const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
             Command_ptr cmd = CommandMgr::INSTANCE()
-                .make_model_load(model_filename.c_str());
+                .make_read_model(model_filename.c_str());
             batch(cmd);
         }
 

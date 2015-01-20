@@ -28,21 +28,23 @@
 static unsigned progressive = 0;
 static const char *cex_trace_prfx = "cex_";
 
-BMC::BMC(Command& command, Model& model, Expr_ptr property, ExprVector& constraints)
+BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
-    , f_property(property)
-    , f_constraints(constraints)
 {
     setup();
-
-    DEBUG
+    DRIVEL
         << "Created BMC @"
         << this
         << std::endl;
 }
 
 BMC::~BMC()
-{}
+{
+    DRIVEL
+        << "Destroyed BMC @"
+        << this
+        << std::endl;
+}
 
 void BMC::falsification( Expr_ptr phi )
 {
@@ -160,32 +162,16 @@ void BMC::kinduction( Expr_ptr phi )
 
 }
 
-void BMC::process()
+void BMC::process(const Expr_ptr phi)
 {
-    // Normalizer normalizer( ModelMgr::INSTANCE());
-    // normalizer.process( f_property );
-    if (1 /* normalizer.is_invariant() */) {
-        TRACE
-            << f_property
-            << " is an invariant (i.e. G-only) LTL property"
-            << std::endl;
+    set_status( MC_UNKNOWN );
 
-        set_status( MC_UNKNOWN );
+    /* launch parallel threads */
+    boost::thread base(&BMC::falsification, this, phi);
+    boost::thread step(&BMC::kinduction, this, phi);
 
-        /* launch parallel threads */
-        boost::thread base(&BMC::falsification, this, f_property);
-        boost::thread step(&BMC::kinduction, this, f_property);
+    base.join();
+    step.join();
 
-        base.join();
-        step.join();
-    }
-    else {
-        TRACE
-            << f_property
-            << " is a full LTL property"
-            << std::endl;
-
-        assert( false );
-    }
     TRACE << "Done." << std::endl;
 }

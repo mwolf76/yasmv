@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file pick_state.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef PICK_STATE_CMD_H
+#define PICK_STATE_CMD_H
 
-#include <common.hh>
+#include <cmd/command.hh>
+#include <algorithms/sim/simulation.hh>
 
-#include <utils/variant.hh>
+class PickState : public Command {
+public:
+    PickState(Interpreter& owner, Expr_ptr phi);
+    virtual ~PickState();
+
+    Variant virtual operator()();
+
+private:
+    // Simulation machinery
+    Simulation f_sim;
+
+    // Optional propositional constraints
+    Expr_ptr f_phi;
+
+    Variant run();
+};
 
 #endif
-

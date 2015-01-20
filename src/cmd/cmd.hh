@@ -22,8 +22,25 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <cmd/commands/commands.hh>
 #include <cmd/interpreter.hh>
+
+/* -- commands */
+#include <cmd/commands/help.hh>
+#include <cmd/commands/time.hh>
+#include <cmd/commands/quit.hh>
+
+#include <cmd/commands/read_model.hh>
+#include <cmd/commands/write_model.hh>
+
+#include <cmd/commands/check_fsm.hh>
+#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/check_ltl.hh>
+
+#include <cmd/commands/pick_state.hh>
+#include <cmd/commands/simulate.hh>
+
+#include <cmd/commands/list_traces.hh>
+#include <cmd/commands/show_trace.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
@@ -41,43 +58,40 @@ public:
 
     // -- makers ----------------------------------------------------------------
     inline Command_ptr make_help(Atom topic)
-    { return new HelpCommand(f_interpreter, topic); }
+    { return new Help(f_interpreter, topic); }
 
     inline Command_ptr make_time()
-    { return new TimeCommand(f_interpreter); }
+    { return new Time(f_interpreter); }
 
     inline Command_ptr make_quit(int retcode =0)
-    { return new QuitCommand(f_interpreter, retcode); }
+    { return new Quit(f_interpreter, retcode); }
 
-    inline Command_ptr make_model_load(const char *filepath)
-    { return new ModelLoadCommand(f_interpreter, filepath); }
+    inline Command_ptr make_read_model(const char *filepath)
+    { return new ReadModel(f_interpreter, filepath); }
 
-    inline Command_ptr make_model_dump()
-    { return new ModelDumpCommand(f_interpreter); }
+    inline Command_ptr make_write_model(const char *filepath)
+    { return new WriteModel(f_interpreter, filepath); }
 
-    inline Command_ptr make_init()
-    { return new InitCommand(f_interpreter); }
+    inline Command_ptr make_check_fsm()
+    { return new CheckFSM(f_interpreter); }
 
-    inline Command_ptr make_job_list()
-    { return new JobListCommand(f_interpreter); }
+    inline Command_ptr make_check_invar(Expr_ptr phi)
+    { return new CheckInvar(f_interpreter, phi); }
 
-    inline Command_ptr make_job_status(Expr_ptr wid)
-    { return new JobStatusCommand(f_interpreter, wid); }
+    inline Command_ptr make_check_ltl(Expr_ptr phi)
+    { return new CheckLTL(f_interpreter, phi); }
 
-    inline Command_ptr make_job_kill(Expr_ptr wid)
-    { return new JobKillCommand(f_interpreter, wid); }
+    inline Command_ptr make_pick_state(Expr_ptr phi)
+    { return new PickState(f_interpreter, phi); }
 
-    inline Command_ptr make_simulate(Expr_ptr halt_cond, Expr_ptr resume_id, ExprVector& constraints)
-    { return new SimulateCommand(f_interpreter, halt_cond, resume_id, constraints); }
+    inline Command_ptr make_simulate(Expr_ptr phi)
+    { return new Simulate(f_interpreter, phi); }
 
-    inline Command_ptr make_verify(Expr_ptr formula, ExprVector& constraints)
-    { return new VerifyCommand(f_interpreter, formula, constraints); }
+    inline Command_ptr make_list_traces()
+    { return new ListTraces(f_interpreter); }
 
-    inline Command_ptr make_witness_list()
-    { return new WitnessListCommand(f_interpreter); }
-
-    inline Command_ptr make_witness_dump(Expr_ptr wid)
-    { return new WitnessDumpCommand(f_interpreter, wid); }
+    inline Command_ptr make_show_trace(Expr_ptr trace_id)
+    { return new ShowTrace(f_interpreter, trace_id); }
 
 protected:
     CommandMgr();

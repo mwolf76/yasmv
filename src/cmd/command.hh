@@ -23,10 +23,8 @@
 #define COMMAND_H
 
 #include <common.hh>
-
+#include <src/expr/expr.hh>
 #include <utils/variant.hh>
-
-typedef class Command* Command_ptr;
 
 class Interpreter;
 class Command {
@@ -40,11 +38,9 @@ public:
     // functor-pattern
     Variant virtual operator()() =0;
 
-    virtual bool blocking() const =0;
-    virtual void kill() =0;
-
     // representation
     friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };
+typedef class Command* Command_ptr;
 
 #endif

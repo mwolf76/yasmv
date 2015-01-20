@@ -1,6 +1,6 @@
 /**
- *  @file simulation.hh
- *  @brief SAT-based BMC simulation algorithm
+ *  @file ltl.hh
+ *  @brief SAT-based LTL Algorithms for property checking
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,48 +20,37 @@
  *
  **/
 
-#ifndef SIMULATION_ALGORITHM_H
-#define SIMULATION_ALGORITHM_H
+#ifndef LTL_ALGORITHM_H
+#define LTL_ALGORITHM_H
+
+#include <expr/expr.hh>
 
 #include <algorithms/base.hh>
-
 #include <witness/witness.hh>
-#include <witness/witness_mgr.hh>
 
-#include <cmd/command.hh>
-
-typedef enum {
-    SIMULATION_DONE,
-    SIMULATION_HALTED,
-    SIMULATION_DEADLOCKED,
-    SIMULATION_INTERRUPTED,
-} simulation_status_t;
-
-class Simulation : public Algorithm {
+class LTL : public Algorithm {
 
 public:
-    Simulation(Command& command, Model& model);
-    ~Simulation();
+    LTL(Command& command, Model& model);
+    ~LTL();
 
-    void process();
+    void process(const Expr_ptr phi);
 
-    inline simulation_status_t status() const
+    inline mc_status_t status() const
     { return f_status; }
 
+    inline void set_status(mc_status_t status)
+    { f_status = status; }
+
 private:
-    /* None of 'em, one of 'em, not both. */
-    Expr_ptr f_halt_cond;
-    Expr_ptr f_nsteps;
-
-    ExprVector f_constraints;
-
-    simulation_status_t f_status;
+    mc_status_t f_status;
 };
 
-class SimulationWitness : public Witness {
-
+/* Specialized for LTL CEX */
+class LTLCounterExample : public Witness {
 public:
-    SimulationWitness(Model& model, Engine& engine, step_t k);
+    LTLCounterExample(Expr_ptr property, Model& model,
+                      Engine& engine, unsigned k, bool use_coi);
 };
 
 #endif

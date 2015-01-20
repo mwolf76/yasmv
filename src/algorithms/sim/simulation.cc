@@ -26,30 +26,25 @@
 static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
 
-Simulation::Simulation(Command& command,
-                       Model& model,
-                       Expr_ptr condition,
-                       Expr_ptr resume_id,
-                       ExprVector& constraints)
+Simulation::Simulation(Command& command, Model& model)
     : Algorithm(command, model)
-    , f_halt_cond( NULL )
-    , f_nsteps( NULL )
-    , f_constraints(constraints)
 {
-    ExprMgr& em (ExprMgr::INSTANCE());
-    if (NULL != condition) {
-        if (em.is_constant( condition)) {
-            f_nsteps = condition;
-        }
-        else {
-            f_halt_cond = condition;
-        }
-    }
-    if (resume_id) {
-        Atom wid (resume_id->atom());
-        Witness& w = WitnessMgr::INSTANCE().witness(wid);
-        set_witness(w);
-    }
+    // ExprMgr& em
+    //     (ExprMgr::INSTANCE());
+
+    // if (NULL != condition) {
+    //     if (em.is_constant( condition)) {
+    //         f_nsteps = condition;
+    //     }
+    //     else {
+    //         f_halt_cond = condition;
+    //     }
+    // }
+    // if (resume_id) {
+    //     Atom wid (resume_id->atom());
+    //     Witness& w = WitnessMgr::INSTANCE().witness(wid);
+    //     set_witness(w);
+    // }
 
     setup();
 }

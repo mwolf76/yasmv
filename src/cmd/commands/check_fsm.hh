@@ -1,5 +1,5 @@
 /*
- * @file command.hh
+ * @file check_fsm.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,12 +19,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CHECK_FSM_H
+#define CHECK_FSM_H
 
-#include <common.hh>
+#include <cmd/command.hh>
+#include <algorithms/fsm/fsm.hh>
 
-#include <utils/variant.hh>
+class CheckFSM : public Command {
+public:
+    CheckFSM(Interpreter& owner);
+    virtual ~CheckFSM();
+
+    Variant virtual operator()();
+
+private:
+    Variant run();
+    FSM f_fsm;
+};
 
 #endif
-
