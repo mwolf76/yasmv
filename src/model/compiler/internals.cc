@@ -244,7 +244,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
     unsigned i, width = type -> width();
     assert(width <= f_add_stack.size());
 
-    ADDStack::reverse_iterator ri;
+    DDVector::reverse_iterator ri;
     for (i = 0, ri = f_add_stack.rbegin();
          i < width; ++ i, ++ ri) {
         dv.push_back(*ri);

@@ -22,13 +22,12 @@
 #ifndef MICRO_H
 #define MICRO_H
 
-#include <vector>
-
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 
 #include <boost/unordered_map.hpp>
 
+#include <dd/dd.hh>
 #include <sat/satdefs.hh>
 
 /* <symb, is_signed?, width> */

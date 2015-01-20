@@ -407,7 +407,6 @@ protected:
 
     // leaves
     virtual void walk_leaf(const Expr_ptr expr) =0;
-
 };
 
 #endif

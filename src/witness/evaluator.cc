@@ -54,7 +54,7 @@ void Evaluator::clear_internals()
     f_values_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_map.clear();
+    f_te2v_map.clear();
 }
 
 value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
@@ -627,9 +627,9 @@ bool Evaluator::cache_miss(const Expr_ptr expr)
         ( em.make_dot( ctx , expr), step);
 
     TimedExprValueMap::iterator eye
-        (f_map.find(key));
+        (f_te2v_map.find(key));
 
-    if (eye != f_map.end()) {
+    if (eye != f_te2v_map.end()) {
         value_t res
             ((*eye).second);
 

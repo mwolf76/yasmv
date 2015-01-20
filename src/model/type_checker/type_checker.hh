@@ -23,27 +23,13 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
-#include <vector>
-
 #include <expr/walker/walker.hh>
 
 #include <type/type.hh>
 #include <type/type_mgr.hh>
 
-// NOTE: here we're using a vector in order to bypass STL stack
-// interface limitations. (i.e. absence of clear())
-typedef std::vector<Type_ptr> TypeStack;
-typedef std::vector<Expr_ptr> ExprStack;
-
+#include <boost/unordered_map.hpp>
 typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeReg;
-
-/* shortcuts to to simplify manipulation of the internal type stack */
-#define POP_TYPE(op)                              \
-    const Type_ptr op = f_type_stack.back();      \
-    f_type_stack.pop_back()
-
-#define PUSH_TYPE(tp)                             \
-        f_type_stack.push_back(tp)
 
 class ModelMgr;
 class TypeChecker : public ExprWalker {
@@ -70,21 +56,15 @@ protected:
 private:
     TypeReg f_map; // cache
 
-    TypeStack f_type_stack;
-    ExprStack f_ctx_stack;
+    TypeVector f_type_stack;
+    ExprVector f_ctx_stack;
 
     // managers
     ModelMgr& f_owner;
 
     bool cache_miss(const Expr_ptr expr);
+    void memoize_result(Expr_ptr expr);
 
-    /** Determine the resulting type of an operation given the type of its
-        operands. */
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
-
-    /** service of result_type */
     Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr relational_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
@@ -119,8 +99,6 @@ private:
     void walk_binary_cast_postorder(const Expr_ptr expr);
     void walk_ternary_ite_postorder(const Expr_ptr expr);
     void walk_ternary_cond_postorder(const Expr_ptr expr);
-
-    void memoize_result(Expr_ptr expr);
 };
 
 #endif

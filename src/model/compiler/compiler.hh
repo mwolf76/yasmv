@@ -43,70 +43,26 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-#include <vector>
-
-#include <boost/thread/mutex.hpp>
-
-#include <boost/unordered_map.hpp>
+#include <dd/dd.hh>
+#include <dd/dd_walker.hh>
 
 #include <expr/walker/walker.hh>
 
 #include <type/type.hh>
 
-#include <model/model.hh>
-#include <model/model_mgr.hh>
-#include <model/compiler/unit.hh>
-
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
 #include <micro/micro.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+#include <model/compiler/unit.hh>
 
-#include <dd/dd_walker.hh>
-
-// NOTE: here we're using a vector in order to bypass STL stack
-// interface limitations. (i.e. absence of clear())
-typedef std::vector<ADD> ADDStack;
-
-/* local typedefs */
-typedef std::vector<Expr_ptr> ExprList;
-typedef std::vector<step_t>   TimeStack;
-
+#include <boost/unordered_map.hpp>
 typedef boost::unordered_map<TimedExpr, CompilationUnit, TimedExprHash, TimedExprEq> CompilationMap;
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
 
-/* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
-
-/** Fetch a single DD */
-#define POP_DD(op)                              \
-    const ADD op = f_add_stack.back();          \
-    f_add_stack.pop_back()
-
-/** Declare a fresh DD */
-#define FRESH_DD(var)                           \
-    ADD var = make_auto_dd()
-
-/** Push a single DD */
-#define PUSH_DD(add)                            \
-    f_add_stack.push_back(add)
-
-/** Fetch a DD vector of given width */
-#define POP_DV(vec, width)                      \
-    DDVector vec;                               \
-    for (unsigned i = 0; i < width ; ++ i) {    \
-        vec.push_back(f_add_stack.back());      \
-        f_add_stack.pop_back();                 \
-    }
-
-/** Declare a DD vector of given width */
-#define FRESH_DV(vec, width)                    \
-    DDVector vec;                               \
-    make_auto_ddvect(vec, width);               \
-    /* push DD vector in reversed order */      \
-    for (unsigned i = 0; i < width; ++ i) {     \
-        unsigned ndx = width - i - 1;           \
-        PUSH_DD(vec[ndx]);                      \
-    }
+#include <boost/thread/mutex.hpp>
 
 /** Exception classes */
 class CompilerException : public Exception {
@@ -255,16 +211,16 @@ private:
     ITEUnionFindMap f_toplevel_map;
 
     /* type checking */
-    TypeStack f_type_stack;
+    TypeVector f_type_stack;
 
     /* compilation results */
-    ADDStack f_add_stack;
+    DDVector f_add_stack;
 
     /* current ctx stack, for symbol resolution */
-    ExprList f_ctx_stack;
+    ExprVector f_ctx_stack;
 
     /* current time frame, for unrolling */
-    TimeStack f_time_stack;
+    TimeVector f_time_stack;
 
     /* managers */
     ModelMgr& f_owner;

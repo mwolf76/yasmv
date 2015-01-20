@@ -30,6 +30,20 @@
 /* low-level C definitions */
 #include <cdefs.h>
 
+#include <vector>
+typedef std::vector<step_t> TimeVector;
+
+typedef std::vector<value_t> ValueVector;
+
+/* shortcuts to to simplify manipulation of the internal values stack */
+#define POP_VALUE(op)                              \
+    assert(0 < f_values_stack.size());             \
+    const value_t op = f_values_stack.back();      \
+    f_values_stack.pop_back()
+
+#define PUSH_VALUE(op)                             \
+    f_values_stack.push_back(op)
+
 #include <exception>
 class Exception : public std::exception {
 public:

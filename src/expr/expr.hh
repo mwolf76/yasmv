@@ -203,42 +203,6 @@ private:
     step_t f_time;
 };
 
-// typedef class FQExpr* FQExpr_ptr;
-// class FQExpr {
-// public:
-//     FQExpr(Expr_ptr expr); // default ctx, default time
-//     FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
-
-//     FQExpr(const FQExpr& fqexpr);
-
-//     inline Expr_ptr ctx() const
-//     { return f_ctx; }
-
-//     inline Expr_ptr expr() const
-//     { return f_expr; }
-
-//     inline step_t time() const
-//     { return f_time; }
-
-//     inline bool operator==(const FQExpr& other)
-//     {
-//         return
-//             f_ctx  == other.f_ctx  &&
-//             f_expr == other.f_expr &&
-//             f_time == other.f_time  ;
-//     }
-
-// private:
-//     // expression ctx (default for the FSM is 'main')
-//     Expr_ptr f_ctx;
-
-//     // expression body
-//     Expr_ptr f_expr;
-
-//     // expression time (default is 0)
-//     step_t f_time;
-// };
-
 /* Normal forms literals */
 class PolarizedLiteral {
 public:
@@ -320,26 +284,7 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
 std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
-// std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr);
 std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
 std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
-
-// TODO: move this!
-class BadWordConstException : public Exception {
-public:
-    BadWordConstException(const char* msg)
-    : f_msg(msg)
-    {}
-
-    virtual const char* what() const throw() {
-        return f_msg;
-    }
-
-    virtual ~BadWordConstException() throw()
-    {}
-
-protected:
-    const char* f_msg;
-};
 
 #endif

@@ -452,12 +452,19 @@ protected:
     unsigned f_nelems;
 };
 
-// what whas this again?
-typedef class ResolutionCtxType* ResolutionCtxType_ptr;
-class ResolutionCtxType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    ResolutionCtxType(TypeMgr& owner);
-};
+/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
+#define TOP_TYPE(tp)                            \
+    const Type_ptr (tp)(f_type_stack.back())
+
+#define DROP_TYPE()                             \
+    f_type_stack.pop_back()
+
+#define POP_TYPE(tp)                            \
+    TOP_TYPE(tp); DROP_TYPE()
+
+#define PUSH_TYPE(tp)                           \
+    f_type_stack.push_back(tp)
+
+typedef std::vector<Type_ptr> TypeVector;
 
 #endif

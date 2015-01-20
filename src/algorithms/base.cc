@@ -261,8 +261,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
         << "CNFizing uniqueness(" << j << ", " << k << ")"
         << std::endl;
 
-    typedef std::vector<Var> Vars;
-    Vars uniqueness_vars;
+    VarVector uniqueness_vars;
 
     /* define uniqueness_vars into the solver ... */
     while (symbs.has_next()) {
@@ -331,7 +330,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     vec<Lit> ps;
     ps.push( mkLit( group, true));
 
-    for (Vars::iterator eye = uniqueness_vars.begin();
+    for (VarVector::const_iterator eye = uniqueness_vars.begin();
          eye != uniqueness_vars.end(); ++ eye) {
         ps.push( mkLit( *eye, false));
     }

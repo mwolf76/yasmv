@@ -39,6 +39,7 @@
 
 #include <type/type.hh>
 
+#include <dd/dd.hh>
 #include <dd/cudd_mgr.hh>
 #include <enc/enc_mgr.hh>
 

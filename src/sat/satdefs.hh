@@ -22,14 +22,9 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-#include <vector>
-#include <boost/unordered_map.hpp>
-
 #include <common.hh>
 
 #include <expr/pool.hh>
-
-#include <dd/cudd_mgr.hh>
 
 // the Minisat SAT solver
 #include <minisat/core/Solver.h>
@@ -42,6 +37,9 @@ using Minisat::mkLit;
 using Minisat::Var;
 using Minisat::lbool;
 using Minisat::vec;
+
+#include <vector>
+typedef std::vector<Var> VarVector;
 
 using Minisat::Solver;
 using Minisat::SimpSolver;
@@ -77,6 +75,7 @@ const group_t MAINGROUP(0);
 
 typedef vec<group_t> Groups;
 
+#include <boost/unordered_map.hpp>
 typedef boost::unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
 struct VarHash {

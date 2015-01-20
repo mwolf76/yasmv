@@ -99,9 +99,12 @@ void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
 void TypeChecker::walk_binary_cast_postorder(const Expr_ptr expr)
 {
     assert( false );
+    // TODO
+#if 0
     Type_ptr rhs_type = check_arithmetical(expr->rhs());
     Type_ptr lhs_type = check_arithmetical(expr->lhs());
     PUSH_TYPE( result_type( expr, lhs_type, rhs_type ));
+#endif
 }
 
 void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
