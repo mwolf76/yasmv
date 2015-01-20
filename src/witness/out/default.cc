@@ -31,8 +31,6 @@ void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
     while (i < k) {
         std::cout << "-- @ " << i
                   << " --"  << std::endl;
-
-
     }
 
 }

@@ -521,11 +521,11 @@ bool Compiler::walk_dot_inorder(const Expr_ptr expr)
     ExprMgr& em
         (f_owner.em());
 
+    f_type_stack.pop_back();
+
     Expr_ptr ctx
         (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
-
     f_ctx_stack.push_back(ctx);
-    f_type_stack.pop_back();
 
     return true;
 }
@@ -578,6 +578,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em
         (f_owner.em());
+
     TypeMgr& tm
         (f_owner.tm());
 
@@ -599,7 +600,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     // 1. Explicit integer consts, perform booleanization immediately using
     // word-width property to determine the number of bits to be used.
     if (em.is_int_numeric(expr)) {
-        unsigned ww (OptsMgr::INSTANCE().word_width());
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
         f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_from_constant( expr, ww);
         return;
@@ -671,15 +673,6 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     // 5. parameters
     else if (symb->is_parameter()) {
-
-        // push into type stack
-        Type_ptr type
-            (symb->as_parameter().type());
-
-        if (type -> is_instance()) {
-            f_type_stack.push_back(type);
-            return;
-        }
 
         /* parameters must be resolved against the Param map
            maintained by the ModelMgr */

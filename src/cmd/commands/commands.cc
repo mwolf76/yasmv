@@ -423,20 +423,23 @@ Variant WitnessDumpCommand::operator()()
         SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
         while (symbs.has_next()) {
 
-            std::pair< Expr_ptr, Symbol_ptr > pair (symbs.next());
-            Expr_ptr ctx (pair.first);
-            Symbol_ptr symb (pair.second);
-
-            Expr_ptr value (NULL);
+            std::pair< Expr_ptr, Symbol_ptr > pair
+                (symbs.next());
+            Expr_ptr ctx
+                (pair.first);
+            Symbol_ptr symb
+                (pair.second);
+            Expr_ptr value
+                (NULL);
+            Expr_ptr full
+                (em.make_dot( ctx, symb->name()));
 
             if (symb->is_variable())  {
-                Expr_ptr expr
-                    (em.make_dot( ctx, symb->name()));
 
                 try {
-                    value = tf.value(expr);
+                    value = tf.value(full);
                     os
-                        << expr << " = "
+                        << full << " = "
                         << value << std::endl;
                 }
                 catch (NoValue nv) {
@@ -444,13 +447,12 @@ Variant WitnessDumpCommand::operator()()
                 }
             }
             else if (symb->is_define()) {
-                Expr_ptr expr (symb->name());
+                Expr_ptr expr(symb->name());
 
                 try {
                     value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-
                     os
-                        << expr << " = "
+                        << full  << " = "
                         << value << std::endl;
                 }
                 catch (NoValue nv) {

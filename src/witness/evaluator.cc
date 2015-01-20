@@ -28,6 +28,8 @@
 
 #include <expr/expr.hh>
 
+#include <symb/proxy.hh>
+
 #include <witness/evaluator.hh>
 #include <witness/witness_mgr.hh>
 
@@ -57,9 +59,12 @@ void Evaluator::clear_internals()
     f_te2v_map.clear();
 }
 
-value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
+Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
                            Expr_ptr body, step_t time)
 {
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     clear_internals();
 
     // setting the environment
@@ -81,8 +86,20 @@ value_t Evaluator::process(Witness &witness, Expr_ptr ctx,
     assert(1 == f_time_stack.size());
 
     // Exactly one expression
-    value_t res = f_values_stack.back();
-    return res;
+    value_t res_value
+        (f_values_stack.back());
+
+    POP_TYPE(res_type);
+    if (res_type -> is_boolean())
+        return res_value ? em.make_true() : em.make_false();
+
+    else if (res_type -> is_enum())
+        assert(false);
+
+    else if (res_type -> is_algebraic())
+        return em.make_const(res_value);
+
+    else assert(false);
 }
 
 /*  Evaluation engine is implemented using a simple expression walker
@@ -122,6 +139,8 @@ bool Evaluator::walk_bw_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Evaluator::walk_bw_not_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(lhs);
     PUSH_VALUE(~ lhs);
 }
@@ -132,6 +151,8 @@ bool Evaluator::walk_add_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_add_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs + rhs);
@@ -143,6 +164,8 @@ bool Evaluator::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_sub_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs - rhs);
@@ -154,6 +177,8 @@ bool Evaluator::walk_div_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_div_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs / rhs);
@@ -165,6 +190,8 @@ bool Evaluator::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_mul_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs * rhs);
@@ -176,6 +203,8 @@ bool Evaluator::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_mod_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs % rhs);
@@ -187,6 +216,8 @@ bool Evaluator::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_and_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs && rhs);
@@ -198,6 +229,8 @@ bool Evaluator::walk_bw_and_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_bw_and_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs & rhs);
@@ -209,6 +242,8 @@ bool Evaluator::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_or_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs || rhs);
@@ -220,6 +255,8 @@ bool Evaluator::walk_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_xor_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE((lhs && !rhs) || (!lhs && rhs));
@@ -232,6 +269,8 @@ bool Evaluator::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_bw_or_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs | rhs);
@@ -243,6 +282,8 @@ bool Evaluator::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_bw_xor_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs ^ rhs);
@@ -254,6 +295,8 @@ bool Evaluator::walk_bw_xnor_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_bw_xnor_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( ! lhs | rhs ) & ( ! rhs | lhs ));
@@ -265,6 +308,8 @@ bool Evaluator::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_implies_postorder(const Expr_ptr expr)
 {
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( ! lhs || rhs ));
@@ -276,9 +321,11 @@ bool Evaluator::walk_iff_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_iff_postorder(const Expr_ptr expr)
 {
-  POP_VALUE(rhs);
-  POP_VALUE(lhs);
-  PUSH_VALUE(( ! lhs || rhs ) && ( ! rhs || lhs ));
+    DROP_TYPE();
+
+    POP_VALUE(rhs);
+    POP_VALUE(lhs);
+    PUSH_VALUE(( ! lhs || rhs ) && ( ! rhs || lhs ));
 }
 
 bool Evaluator::walk_lshift_preorder(const Expr_ptr expr)
@@ -287,6 +334,9 @@ bool Evaluator::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_lshift_postorder(const Expr_ptr expr)
 {
+    /* drops rhs, which is fine */
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs << rhs ));
@@ -298,6 +348,9 @@ bool Evaluator::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_rshift_postorder(const Expr_ptr expr)
 {
+    /* drop rhs, which is fine */
+    DROP_TYPE();
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs >> rhs ));
@@ -309,6 +362,13 @@ bool Evaluator::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_eq_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs == rhs ));
@@ -320,6 +380,13 @@ bool Evaluator::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_ne_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(lhs != rhs);
@@ -331,6 +398,13 @@ bool Evaluator::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_gt_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs > rhs ));
@@ -342,6 +416,13 @@ bool Evaluator::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_ge_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs >= rhs ));
@@ -353,6 +434,13 @@ bool Evaluator::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_lt_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs < rhs ));
@@ -364,6 +452,13 @@ bool Evaluator::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_le_postorder(const Expr_ptr expr)
 {
+    TypeMgr& tm
+        (f_owner.tm());
+
+    DROP_TYPE();
+    DROP_TYPE();
+    PUSH_TYPE(tm.find_boolean());
+
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( lhs <= rhs ));
@@ -375,10 +470,15 @@ bool Evaluator::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_ite_postorder(const Expr_ptr expr)
 {
-    POP_VALUE(rhs);
-    POP_VALUE(lhs);
-    POP_VALUE(cnd);
-    PUSH_VALUE(( cnd ? lhs : rhs ));
+   POP_TYPE(rhs_type);
+   DROP_TYPE();
+   DROP_TYPE();
+   PUSH_TYPE(rhs_type);
+
+   POP_VALUE(rhs);
+   POP_VALUE(lhs);
+   POP_VALUE(cnd);
+   PUSH_VALUE(( cnd ? lhs : rhs ));
 }
 
 bool Evaluator::walk_cond_preorder(const Expr_ptr expr)
@@ -395,15 +495,18 @@ bool Evaluator::walk_dot_inorder(const Expr_ptr expr)
     ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
-        (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+    DROP_TYPE();
 
-    f_ctx_stack.push_back(ctx);
+    TOP_CTX(parent_ctx);
+
+    Expr_ptr ctx
+        (em.make_dot( parent_ctx, expr -> lhs()));
+    PUSH_CTX(ctx);
 
     return true;
 }
 void Evaluator::walk_dot_postorder(const Expr_ptr expr)
-{ f_ctx_stack.pop_back(); }
+{ DROP_CTX(); }
 
 bool Evaluator::walk_params_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -515,68 +618,87 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     ExprMgr& em
         (f_owner.em());
 
+    TypeMgr& tm
+        (f_owner.tm());
+
     /* cached? */
     if (! cache_miss(expr))
         return;
 
-    Expr_ptr ctx
-        (f_ctx_stack.back());
-    step_t time
-        (f_time_stack.back());
-
-    if (em.is_empty(ctx) && em.is_empty(expr))
-        return ;
+    TOP_CTX(ctx);
+    TOP_TIME(time);
 
     // 0. explicit boolean consts
     if (em.is_bool_const(expr)) {
 
+        PUSH_TYPE(tm.find_boolean());
+
         if (em.is_false(expr))
-            f_values_stack.push_back(0);
-
+            PUSH_VALUE(0);
         else if (em.is_true(expr))
-            f_values_stack.push_back(1);
+            PUSH_VALUE(1);
+        else assert(false);
 
-        else assert(false) ; // unexpected
+        return;
     }
 
     // 1. explicit constants are integer consts (e.g. 42) ..
-    else  if (em.is_int_numeric(expr)) {
-        f_values_stack.push_back(expr -> value());
+    else if (em.is_int_numeric(expr)) {
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
+        PUSH_TYPE (tm.find_unsigned(ww));
+        PUSH_VALUE(expr -> value());
+
         return;
     }
 
     else {
-        Expr_ptr full_expr
+        ResolverProxy resolver;
+
+        Expr_ptr full
             (em.make_dot( ctx, expr));
 
-        /* Look for symbols in the witness */
         Symbol_ptr symb
-            (ModelMgr::INSTANCE().resolver() ->
-             symbol(full_expr));
+            (resolver.symbol(full));
 
-        if (symb->is_variable()) {
+        // 3. enum literals
+        if (symb->is_literal()) {
 
-            Variable& var
-                (symb->as_variable());
+            Literal& lit
+                (symb->as_literal());
 
-            Type_ptr symb_type
-                (var.type());
+            Type_ptr type
+                (lit.type());
+            PUSH_TYPE(type);
 
-            if (symb_type->is_instance())
+            value_t value
+                (lit.value());
+            PUSH_VALUE(value);
+        }
+
+        else if (symb->is_variable()) {
+
+            // push into type stack
+            Type_ptr type
+                (symb->as_variable().type());
+
+            PUSH_TYPE(type);
+            if (type->is_instance())
                 return;
 
-            if (f_witness -> has_value( full_expr, time)) {
-                Expr_ptr value = f_witness -> value( full_expr, time);
+            if (f_witness -> has_value( full, time)) {
+                Expr_ptr expr
+                    (f_witness -> value( full, time));
 
                 // promote FALSE -> 0, TRUE -> 1
-                if (em.is_false(value))
+                if (em.is_false(expr))
                     f_values_stack.push_back(0);
 
-                else if (em.is_true(value))
+                else if (em.is_true(expr))
                     f_values_stack.push_back(1);
 
                 else
-                    f_values_stack.push_back(value -> value());
+                    f_values_stack.push_back(expr -> value());
 
                 return;
             }
@@ -585,25 +707,50 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         }
 
         else if (symb->is_parameter()) {
+
             ModelMgr& mm
                 (ModelMgr::INSTANCE());
 
+            /* parameters must be resolved against the Param map
+               maintained by the ModelMgr */
             Expr_ptr rewrite
-                (mm.rewrite_parameter( full_expr));
+                (mm.rewrite_parameter(full));
 
-            (*this)(rewrite);
+            TRACE
+                << "Rewritten `"
+                << full << "` to "
+                << rewrite
+                << std::endl;
+
+            Expr_ptr rewritten_ctx
+                (rewrite -> lhs());
+            PUSH_CTX(rewritten_ctx);
+
+            Expr_ptr rewritten_expr
+                (rewrite -> rhs());
+            (*this) (rewritten_expr);
+
+            DROP_CTX();
             return;
         }
 
-        else if (symb->is_define()) {
+        else if (symb -> is_define()) {
+            Expr_ptr body
+                (symb -> as_define().body());
 
-            // A little bit of magic, re-entrant invocation ;-)
-            (*this)(symb->as_define().body());
+            TRACE
+                << "Inlining `"
+                << expr
+                << "` := "
+                << body
+                << std::endl;
+
+            (*this) (body);
             return;
         }
 
         DEBUG
-            << full_expr
+            << full
             << std::endl;
 
         assert( false ); /* unexpected */

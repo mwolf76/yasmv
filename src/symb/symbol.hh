@@ -206,11 +206,13 @@ class Literal
 {
     const Expr_ptr f_name;
     const Type_ptr f_type;
+    const value_t f_value;
 
 public:
-    Literal(const Expr_ptr name, const Type_ptr type)
+    Literal(const Expr_ptr name, const Type_ptr type, value_t value)
         : f_name(name)
         , f_type(type)
+        , f_value(value)
     {}
 
     virtual const Expr_ptr module() const
@@ -221,6 +223,9 @@ public:
 
     virtual const Type_ptr type() const
     { return f_type; }
+
+    virtual const value_t value() const
+    { return f_value; }
 };
 
 class Define

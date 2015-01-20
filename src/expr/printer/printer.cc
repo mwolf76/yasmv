@@ -30,7 +30,7 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
-#define SHOW_SCOPE_ASSOCIATIVITY 1
+#define DEBUG_CTX 0
 
 Printer::Printer()
     : f_os(std::cout)
@@ -98,12 +98,12 @@ void Printer::walk_neg_postorder(const Expr_ptr expr)
 {}
 
 bool Printer::walk_not_preorder(const Expr_ptr expr)
-{ f_os << "not "; return true; }
+{ f_os << "! "; return true; }
 void Printer::walk_not_postorder(const Expr_ptr expr)
 {}
 
 bool Printer::walk_bw_not_preorder(const Expr_ptr expr)
-{ f_os << "! "; return true; }
+{ f_os << "~ "; return true; }
 void Printer::walk_bw_not_postorder(const Expr_ptr expr)
 {}
 
@@ -145,7 +145,7 @@ void Printer::walk_mod_postorder(const Expr_ptr expr)
 bool Printer::walk_and_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_and_inorder(const Expr_ptr expr)
-{ f_os << " and "; return true; }
+{ f_os << " && "; return true; }
 void Printer::walk_and_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
@@ -159,7 +159,7 @@ void Printer::walk_bw_and_postorder(const Expr_ptr expr)
 bool Printer::walk_or_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_or_inorder(const Expr_ptr expr)
-{ f_os << " or "; return true; }
+{ f_os << " || "; return true; }
 void Printer::walk_or_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
@@ -187,7 +187,7 @@ void Printer::walk_bw_xor_postorder(const Expr_ptr expr)
 bool Printer::walk_bw_xnor_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_bw_xnor_inorder(const Expr_ptr expr)
-{ f_os << " ~ "; return true; }
+{ f_os << " !^ "; return true; }
 void Printer::walk_bw_xnor_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
@@ -291,7 +291,7 @@ void Printer::walk_cond_postorder(const Expr_ptr expr)
 
 bool Printer::walk_dot_preorder(const Expr_ptr expr)
 {
-#if SHOW_SCOPE_ASSOCIATIVITY
+#if DEBUG_CTX
     f_os << "[[ ";
 #endif
 
@@ -299,14 +299,17 @@ bool Printer::walk_dot_preorder(const Expr_ptr expr)
 }
 bool Printer::walk_dot_inorder(const Expr_ptr expr)
 {
-    // if (! ExprMgr::INSTANCE().is_empty( expr -> lhs()))
-    f_os << ".";
+    #if !DEBUG_CTX
+    if (! ExprMgr::INSTANCE().is_empty( expr -> lhs()))
+    #endif
+
+        f_os << ".";
 
     return true;
 }
 void Printer::walk_dot_postorder(const Expr_ptr expr)
 {
-#if SHOW_SCOPE_ASSOCIATIVITY
+#if DEBUG_CTX
     f_os << " ]]";
 #endif
 }
@@ -344,8 +347,10 @@ using std::oct;
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-    // if (ExprMgr::INSTANCE().is_empty(expr))
-    //     return;
+    #if !DEBUG_CTX
+    if (ExprMgr::INSTANCE().is_empty(expr))
+        return;
+    #endif
 
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;

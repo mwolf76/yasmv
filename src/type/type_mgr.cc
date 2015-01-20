@@ -218,9 +218,10 @@ const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
         register_type(repr, res);
 
         ExprSet::const_iterator i;
-        for (i = lits.begin(); lits.end() != i; ++ i) {
+        value_t v;
+        for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
             const Expr_ptr& expr(*i);
-            Literal* literal = new Literal(expr, res);
+            Literal* literal = new Literal(expr, res, v);
             f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
                           (expr, literal));
         }

@@ -52,7 +52,7 @@ public:
     Evaluator(WitnessMgr& owner);
     virtual ~Evaluator();
 
-    value_t process(Witness& witness, Expr_ptr ctx, Expr_ptr body, step_t time);
+    Expr_ptr process(Witness& witness, Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
     OP_HOOKS;

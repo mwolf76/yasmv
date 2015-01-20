@@ -53,15 +53,7 @@ public:
 
     // delegated method to the Evaluator functor
     inline const Expr_ptr eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
-    {
-        ExprMgr& em
-            (ExprMgr::INSTANCE());
-
-        value_t value
-            (f_evaluator.process( w, ctx, body, k));
-
-        return em.make_const( value );
-    }
+    { return f_evaluator.process( w, ctx, body, k); }
 
     inline const WitnessList& witnesses() const
     { return f_list; }
