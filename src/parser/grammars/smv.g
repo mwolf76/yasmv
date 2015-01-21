@@ -258,9 +258,11 @@ conditional_expression returns [Expr_ptr res]
 @init { }
 	: expr=logical_expression {
          $res = expr;
-      } (
+      }
+
+      (
             '?' lhs=toplevel_expression ':' rhs=toplevel_expression
-            { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
+            { $res = em.make_ite( em.make_cond($res, lhs), rhs); }
       )?
 	;
 
@@ -459,6 +461,7 @@ multiplicative_expression returns [Expr_ptr res]
 @init { }
 	: lhs=cast_expression
       { $res = lhs; }
+
     (
       '*' rhs=cast_expression
       { $res = em.make_mul($res, rhs); }
@@ -552,31 +555,35 @@ basic_expression returns [Expr_ptr res]
 	| '(' expr=toplevel_expression ')'
       { $res = expr; }
 
-    | 'switch' '(' expr=toplevel_expression ')'
-         clauses = case_clauses[expr]
-        'default' ':' dflt=toplevel_expression ';'
-      'end' {
-            $res = dflt;
-            for (ExprVector::reverse_iterator eye = clauses->rbegin();
-                 eye != clauses->rend(); ++ eye) {
+    | expr=case_expression
+      { $res = expr; }
+    ;
 
-                    $res = em.make_ite((*eye), $res);
-            }
-            delete clauses;
+case_expression returns [Expr_ptr res]
+@init {
+    typedef std::pair<Expr_ptr, Expr_ptr> CaseClause;
+    typedef std::vector<CaseClause> CaseClauses;
+
+    CaseClauses clauses;
+}  : 'case'
+
+     (lhs=toplevel_expression ':' rhs=toplevel_expression ';'
+     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
+
+     'else' ':' last=toplevel_expression ';'
+     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (NULL, last)); }
+
+     'end'
+     {
+        CaseClauses::reverse_iterator i = clauses.rbegin();
+        res = i -> second;
+        while (1) {
+            if ( ++ i == clauses.rend())
+                break;
+            $res = em.make_ite( em.make_cond(i -> first,
+                                             i -> second), $res);
         }
-	;
-
-case_clauses [Expr_ptr expr] returns [ExprVector_ptr res]
-@init { res = new ExprVector (); }
-    :
-    (
-      'case' lhs=toplevel_expression ':' rhs=toplevel_expression ';'
-      {
-       assert(lhs);
-       assert(rhs);
-       $res->push_back(em.make_cond( em.make_eq(lhs, expr), rhs));
-      }
-    )+
+     }
     ;
 
 identifiers [ExprVector* ids]
