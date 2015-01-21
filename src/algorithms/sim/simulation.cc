@@ -29,40 +29,77 @@ static const char *simulation_trace_prfx = "sim_";
 Simulation::Simulation(Command& command, Model& model)
     : Algorithm(command, model)
 {
-    // ExprMgr& em
-    //     (ExprMgr::INSTANCE());
-
-    // if (NULL != condition) {
-    //     if (em.is_constant( condition)) {
-    //         f_nsteps = condition;
-    //     }
-    //     else {
-    //         f_halt_cond = condition;
-    //     }
-    // }
-    // if (resume_id) {
-    //     Atom wid (resume_id->atom());
-    //     Witness& w = WitnessMgr::INSTANCE().witness(wid);
-    //     set_witness(w);
-    // }
-
     setup();
 }
 
 Simulation::~Simulation()
 {}
 
-void Simulation::process()
+void Simulation::pick_state()
 {
     clock_t t0 = clock(), t1;
     double secs;
 
     Engine engine;
 
-    ExprMgr& em = ExprMgr::INSTANCE();
-    WitnessMgr& wm = WitnessMgr::INSTANCE();
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
 
-    step_t k  = 0;
+    assert_fsm_init(engine, 0);
+    assert_fsm_invar(engine, 0);
+
+    if (STATUS_SAT == engine.solve()) {
+        t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+
+        TRACE
+            << "simulation initialized, took " << secs
+            << " seconds" << std::endl;
+
+        Witness& w
+            (*new SimulationWitness( model(), engine, 0));
+
+        {
+            std::ostringstream oss;
+            oss
+                << simulation_trace_prfx
+                << (++ progressive);
+            w.set_id(oss.str());
+        }
+        {
+            std::ostringstream oss;
+            oss
+                << "Simulation trace";
+            w.set_desc(oss.str());
+        }
+
+        wm.register_witness(w);
+        set_witness(w);
+    }
+    else {
+        WARN << "Inconsistency detected in initial states"
+             << std::endl;
+        f_status = SIMULATION_DEADLOCKED;
+    }
+}
+
+void Simulation::simulate()
+{}
+
+#if 0
+void Simulation::pick_state()
+{
+    clock_t t0 = clock(), t1;
+    double secs;
+
+    Engine engine;
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
+
+    step_t k  0;
 
     // if a witness is already there, we're resuming a previous
     // simulation. Hence, no need for initial states.
@@ -195,3 +232,5 @@ void Simulation::process()
         f_status = SIMULATION_DEADLOCKED;
     }
 }
+#endif
+

@@ -508,7 +508,7 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
 }
 
 bool Compiler::walk_cond_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{ return true; }
 bool Compiler::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cond_postorder(const Expr_ptr expr)
@@ -560,19 +560,76 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+/* non-deterministic expressions are not cachable */
 bool Compiler::walk_set_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{ return true; }
 void Compiler::walk_set_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{ }
 
+/* non-deterministic expression are not cachable */
 bool Compiler::walk_comma_preorder(const Expr_ptr expr)
-{  return cache_miss(expr); }
-
+{ return true; }
 bool Compiler::walk_comma_inorder(const Expr_ptr expr)
 { return true; }
-
 void Compiler::walk_comma_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    if (f_preprocess)
+        return;
+
+    POP_TYPE(rhs_type);
+    POP_TYPE(lhs_type);
+    assert (rhs_type == lhs_type);
+
+    if (rhs_type -> is_monolithic()) {
+
+        POP_DD(rhs);
+        POP_DD(lhs);
+
+        // anonymous determinization variable
+        FRESH_DD(det);
+        PUSH_DD(det);
+
+        PUSH_DD(lhs);
+        PUSH_DD(rhs);
+
+        PUSH_TYPE( tm.find_boolean());
+        PUSH_TYPE( lhs_type );
+        PUSH_TYPE( rhs_type );
+
+        if (rhs_type -> is_boolean())
+            boolean_ite(expr);
+        else if (rhs_type -> is_enum())
+            enumerative_ite(expr);
+        else assert(false);
+    }
+
+    else if (rhs_type -> is_algebraic()) {
+
+        unsigned width
+            (rhs_type -> width());
+
+        POP_DV( rhs, width );
+        POP_DV( lhs, width );
+
+        // anonymous determinization variable
+        FRESH_DD(det);
+        PUSH_DD(det);
+
+        PUSH_DV(lhs, width);
+        PUSH_DV(rhs, width);
+
+        PUSH_TYPE( tm.find_boolean());
+        PUSH_TYPE( lhs_type );
+        PUSH_TYPE( rhs_type );
+
+        algebraic_ite(expr);
+    }
+
+    else assert(false);
+}
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {

@@ -43,7 +43,8 @@ public:
     Simulation(Command& command, Model& model);
     ~Simulation();
 
-    void process();
+    void pick_state();
+    void simulate();
 
     inline simulation_status_t status() const
     { return f_status; }

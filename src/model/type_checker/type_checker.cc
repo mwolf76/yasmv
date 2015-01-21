@@ -363,9 +363,7 @@ void TypeChecker::walk_subscript_postorder(const Expr_ptr expr)
 bool TypeChecker::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void TypeChecker::walk_set_postorder(const Expr_ptr expr)
-{
-    assert(false); // TODO
-}
+{}
 
 bool TypeChecker::walk_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }

@@ -451,6 +451,7 @@ public:
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
     { return make_type( array_expr, of); }
 
+    Expr_ptr make_enum_expr(ExprSet& literals);
     Expr_ptr make_enum_type(ExprSet& literals);
 
     /* -- Builtin types ----------------------------------------------------- */
@@ -601,6 +602,11 @@ public:
     inline bool is_comma(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == COMMA;
+    }
+
+    inline bool is_set(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SET;
     }
 
     inline bool is_int_numeric(const Expr_ptr expr) const {

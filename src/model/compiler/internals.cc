@@ -213,6 +213,13 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
+    /* cache is disabled for SETs, COMMAs and CONDs. This allows for
+       anonymous determinization variables on the fly. */
+    if (f_owner.em().is_cond(expr) ||
+        f_owner.em().is_set(expr)  ||
+        f_owner.em().is_comma(expr))
+        return;
+
     /* no caching during preprocessing */
     if (f_preprocess)
         return;

@@ -163,6 +163,14 @@ int LexicographicOrdering::operator() (const Expr_ptr x, const Expr_ptr y) const
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    return em.is_identifier(x) && em.is_identifier(y)
-        ? x -> atom() < y -> atom() : 0 ;
+    if (em.is_constant(x) && em.is_identifier(y))
+        return 1;
+
+    if (em.is_constant(x) && em.is_constant(y))
+        return x -> value() < y -> value();
+
+    if (em.is_identifier(x) && em.is_identifier(y))
+        return x -> atom() < y -> atom();
+
+    assert(false);
 }

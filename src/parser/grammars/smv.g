@@ -490,6 +490,9 @@ unary_expression returns [Expr_ptr res]
 	: expr=postfix_expression
       { $res = expr; }
 
+    | expr=nondeterministic_expression
+      { $res = expr; }
+
 	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
@@ -502,6 +505,17 @@ unary_expression returns [Expr_ptr res]
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
 	;
+
+nondeterministic_expression returns[Expr_ptr res]
+@init {
+    ExprSet lits;
+}
+    : '{'
+          lit=literal { lits.insert(lit); }
+            (',' lit=literal { lits.insert(lit); })*
+      '}'
+      { $res = em.make_enum_expr( lits ); }
+    ;
 
 params returns [Expr_ptr res]
 @init {
@@ -782,8 +796,11 @@ enum_type returns [Type_ptr res]
 @init {
     ExprSet lits;
 }
-    : '{' lit=literal { lits.insert(lit); } (',' lit=literal { lits.insert(lit); })* '}'
-          { $res = tm.find_enum( lits ); }
+    : '{'
+          lit=literal { lits.insert(lit); }
+              (',' lit=literal { lits.insert(lit); })*
+      '}'
+      { $res = tm.find_enum( lits ); }
     ;
 
 instance_type returns [Type_ptr res]
@@ -796,6 +813,9 @@ instance_type returns [Type_ptr res]
 literal returns [Expr_ptr res]
 @init { }
     :  expr=identifier
+       { $res = expr; }
+
+    |  expr=constant
        { $res = expr; }
     ;
 

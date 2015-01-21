@@ -331,8 +331,6 @@ void Compiler::algebraic_le(const Expr_ptr expr)
 
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
-    assert(is_ite_algebraic(expr));
-
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr cnd_type = f_type_stack.back(); f_type_stack.pop_back();

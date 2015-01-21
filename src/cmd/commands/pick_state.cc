@@ -32,7 +32,8 @@ Variant PickState::operator()()
 Variant PickState::run()
 {
     std::ostringstream tmp;
-    f_sim.process();
+
+    f_sim.pick_state();
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:

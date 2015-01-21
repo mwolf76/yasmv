@@ -32,7 +32,7 @@ Variant Simulate::operator()()
 Variant Simulate::run()
 {
     std::ostringstream tmp;
-    f_sim.process();
+    f_sim.simulate();
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:
