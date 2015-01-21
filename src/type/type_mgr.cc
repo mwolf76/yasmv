@@ -209,19 +209,27 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
 
 const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
 {
-    Expr_ptr repr (em().make_enum_type(lits));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type( repr ));
+    Expr_ptr repr
+        (em().make_enum_type(lits));
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr> (lookup_type( repr )));
 
     if (! res) {
         // new type, needs to be registered before returning
         res = new EnumType( *this, lits );
         register_type(repr, res);
 
-        ExprSet::const_iterator i;
         value_t v;
+        ExprSet::const_iterator i;
         for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
-            const Expr_ptr& expr(*i);
-            Literal* literal = new Literal(expr, res, v);
+
+            const Expr_ptr& expr
+                (em().make_dot( em().make_empty(), *i));
+
+            Literal* literal
+                (new Literal(expr, res, v));
+
             f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
                           (expr, literal));
         }

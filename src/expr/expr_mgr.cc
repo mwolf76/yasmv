@@ -111,10 +111,13 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 
     /* reverse iteration */
     for (ExprSet::reverse_iterator eye = literals.rbegin();
-         eye != literals.rend(); eye ++) {
-        if (!res) res = (*eye);
-        else res = make_expr(COMMA, (*eye), res);
-    }
+         eye != literals.rend(); eye ++)
+
+        res = (!res) ? make_dot( make_empty(),
+                                 (*eye))
+            : make_expr(COMMA,
+                        make_dot( make_empty(),
+                                  (*eye)), res);
 
     return make_set(res);
 }
