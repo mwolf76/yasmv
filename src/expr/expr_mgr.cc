@@ -105,20 +105,6 @@ ExprMgr::~ExprMgr()
         << std::endl;
 }
 
-Expr_ptr ExprMgr::make_enum_expr(ExprSet& literals)
-{
-    Expr_ptr res = NULL;
-
-    /* reverse iteration */
-    for (ExprSet::reverse_iterator eye = literals.rbegin();
-         eye != literals.rend(); eye ++)
-
-        res = (!res) ? (*eye)
-            : make_expr(COMMA, (*eye), res);
-
-    return make_set(res);
-}
-
 Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 {
     Expr_ptr res = NULL;

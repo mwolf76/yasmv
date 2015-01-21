@@ -451,7 +451,7 @@ public:
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
     { return make_type( array_expr, of); }
 
-    Expr_ptr make_enum_expr(ExprSet& literals);
+
     Expr_ptr make_enum_type(ExprSet& literals);
 
     /* -- Builtin types ----------------------------------------------------- */

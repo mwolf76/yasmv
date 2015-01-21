@@ -30,7 +30,7 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
-#define DEBUG_CTX 1
+#define DEBUG_CTX 0
 
 Printer::Printer()
     : f_os(std::cout)

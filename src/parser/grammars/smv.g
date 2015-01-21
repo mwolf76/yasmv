@@ -508,13 +508,23 @@ unary_expression returns [Expr_ptr res]
 
 nondeterministic_expression returns[Expr_ptr res]
 @init {
-    ExprSet lits;
+    ExprVector clauses;
 }
     : '{'
-          lit=literal { lits.insert(lit); }
-            (',' lit=literal { lits.insert(lit); })*
+          c=toplevel_expression{ clauses.push_back(c); }
+            (',' c=toplevel_expression { clauses.push_back(c); })*
       '}'
-      { $res = em.make_enum_expr( lits ); }
+      {
+            ExprVector::reverse_iterator i
+                (clauses.rbegin());
+
+            while (clauses.rend() != i) {
+                $res = $res ? em.make_comma( *i, $res) : *i;
+                ++ i;
+            }
+
+            $res = em.make_set( $res );
+        }
     ;
 
 params returns [Expr_ptr res]

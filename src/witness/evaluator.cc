@@ -93,8 +93,23 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
     if (res_type -> is_boolean())
         return res_value ? em.make_true() : em.make_false();
 
-    else if (res_type -> is_enum())
-        assert(false);
+    else if (res_type -> is_enum()) {
+        EnumType_ptr enum_type
+            (res_type -> as_enum());
+
+        const ExprSet& literals
+            (enum_type -> literals());
+
+        ExprSet::const_iterator i
+            (literals.begin());
+
+        while (0 < res_value) {
+            -- res_value;
+            ++ i;
+        }
+
+        return *i;
+    }
 
     else if (res_type -> is_algebraic())
         return em.make_const(res_value);
@@ -652,105 +667,106 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    else {
-        ResolverProxy resolver;
+    ResolverProxy resolver;
 
-        Expr_ptr full
-            (em.make_dot( ctx, expr));
+    Expr_ptr full
+        (em.make_dot( ctx, expr));
 
-        Symbol_ptr symb
-            (resolver.symbol(full));
+    Symbol_ptr symb
+        (resolver.symbol(full));
 
-        // 3. enum literals
-        if (symb->is_literal()) {
+    // 3. enum literals
+    if (symb->is_literal()) {
 
-            Literal& lit
-                (symb->as_literal());
+        Literal& lit
+            (symb->as_literal());
 
-            Type_ptr type
-                (lit.type());
-            PUSH_TYPE(type);
+        Type_ptr type
+            (lit.type());
+        PUSH_TYPE(type);
 
-            value_t value
-                (lit.value());
-            PUSH_VALUE(value);
-        }
-
-        else if (symb->is_variable()) {
-
-            // push into type stack
-            Type_ptr type
-                (symb->as_variable().type());
-
-            PUSH_TYPE(type);
-            if (type->is_instance())
-                return;
-
-            if (f_witness -> has_value( full, time)) {
-                Expr_ptr expr
-                    (f_witness -> value( full, time));
-
-                // promote FALSE -> 0, TRUE -> 1
-                if (em.is_false(expr))
-                    f_values_stack.push_back(0);
-
-                else if (em.is_true(expr))
-                    f_values_stack.push_back(1);
-
-                else
-                    f_values_stack.push_back(expr -> value());
-
-                return;
-            }
-
-            assert( false ); /* unexpected */
-        }
-
-        else if (symb->is_parameter()) {
-
-            ModelMgr& mm
-                (ModelMgr::INSTANCE());
-
-            /* parameters must be resolved against the Param map
-               maintained by the ModelMgr */
-            Expr_ptr rewrite
-                (mm.rewrite_parameter(full));
-
-            DRIVEL
-                << "Rewritten `"
-                << full << "` to "
-                << rewrite
-                << std::endl;
-
-            Expr_ptr rewritten_ctx
-                (rewrite -> lhs());
-            PUSH_CTX(rewritten_ctx);
-
-            Expr_ptr rewritten_expr
-                (rewrite -> rhs());
-            (*this) (rewritten_expr);
-
-            DROP_CTX();
-            return;
-        }
-
-        else if (symb -> is_define()) {
-            Expr_ptr body
-                (symb -> as_define().body());
-
-            DRIVEL
-                << "Inlining `"
-                << expr
-                << "` := "
-                << body
-                << std::endl;
-
-            (*this) (body);
-            return;
-        }
-
-        assert( false ); /* unexpected */
+        value_t value
+            (lit.value());
+        PUSH_VALUE(value);
+        return;
     }
+
+    else if (symb->is_variable()) {
+
+        // push into type stack
+        Type_ptr type
+            (symb->as_variable().type());
+
+        PUSH_TYPE(type);
+        if (type->is_instance())
+            return;
+
+        if (f_witness -> has_value( full, time)) {
+            Expr_ptr expr
+                (f_witness -> value( full, time));
+
+            // promote FALSE -> 0, TRUE -> 1
+            if (em.is_false(expr))
+                f_values_stack.push_back(0);
+
+            else if (em.is_true(expr))
+                f_values_stack.push_back(1);
+
+            else
+                f_values_stack.push_back(expr -> value());
+
+            return;
+        }
+    }
+
+    else if (symb->is_parameter()) {
+
+        ModelMgr& mm
+            (ModelMgr::INSTANCE());
+
+        /* parameters must be resolved against the Param map
+           maintained by the ModelMgr */
+        Expr_ptr rewrite
+            (mm.rewrite_parameter(full));
+
+#if 0
+        DRIVEL
+            << "Rewritten `"
+            << full << "` to "
+            << rewrite
+            << std::endl;
+#endif
+
+        Expr_ptr rewritten_ctx
+            (rewrite -> lhs());
+        PUSH_CTX(rewritten_ctx);
+
+        Expr_ptr rewritten_expr
+            (rewrite -> rhs());
+        (*this) (rewritten_expr);
+
+        DROP_CTX();
+        return;
+    }
+
+    else if (symb -> is_define()) {
+        Expr_ptr body
+            (symb -> as_define().body());
+
+#if 0
+        DRIVEL
+            << "Inlining `"
+            << expr
+            << "` := "
+            << body
+            << std::endl;
+#endif
+
+        (*this) (body);
+        return;
+    }
+
+    assert( false ); /* unexpected */
 }
 
 bool Evaluator::cache_miss(const Expr_ptr expr)
