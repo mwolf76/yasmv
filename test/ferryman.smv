@@ -1,0 +1,49 @@
+MODULE main
+
+VAR
+        ferryman : boolean;
+        goat     : boolean;
+        cabbage  : boolean;
+        wolf     : boolean;
+        carry    : { NIL, GOAT, CABBAGE, WOLF };
+
+INIT
+        ! ferryman;
+
+INIT
+        ! goat;
+
+INIT
+        ! cabbage;
+
+INIT
+        ! wolf;
+
+INIT
+        carry = NIL;
+
+INVAR
+        ferryman xor cabbage -> goat xor cabbage;
+
+INVAR
+        ferryman xor goat -> wolf xor goat;
+
+TRANS
+        next(ferryman) <-> ! ferryman;
+
+TRANS
+        next(carry)   = { (ferryman <-> goat    ? GOAT    : NIL),
+                          (ferryman <-> cabbage ? CABBAGE : NIL),
+                          (ferryman <-> wolf    ? WOLF    : NIL) };
+TRANS
+        next(goat) <-> ( next(carry) = GOAT ? next(ferryman) : goat );
+
+TRANS
+        next(cabbage) <-> ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
+
+TRANS
+        next(wolf) <-> ( next(carry) = WOLF ? next(ferryman) : wolf );
+
+DEFINE
+        GOAL := cabbage && goat && wolf && ferryman;
+
