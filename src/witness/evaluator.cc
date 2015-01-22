@@ -702,16 +702,28 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             return;
 
         if (f_witness -> has_value( full, time)) {
+
             Expr_ptr expr
                 (f_witness -> value( full, time));
 
-            // promote FALSE -> 0, TRUE -> 1
             if (em.is_false(expr))
                 f_values_stack.push_back(0);
 
             else if (em.is_true(expr))
                 f_values_stack.push_back(1);
 
+            else if (em.is_identifier(expr)) {
+                Expr_ptr full_lit
+                    (em.make_dot(em.make_empty(), expr));
+                Symbol_ptr symb_lit
+                    (resolver.symbol(full_lit));
+                assert( symb_lit -> is_literal());
+                Literal& lit
+                    (symb_lit->as_literal());
+                value_t value
+                    (lit.value());
+                PUSH_VALUE(value);
+            }
             else
                 f_values_stack.push_back(expr -> value());
 

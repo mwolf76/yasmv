@@ -1,49 +1,47 @@
 MODULE main
 
 VAR
-        ferryman : boolean;
-        goat     : boolean;
-        cabbage  : boolean;
-        wolf     : boolean;
+        ferryman : { EAST, WEST };
+        goat     : { EAST, WEST };
+        cabbage  : { EAST, WEST };
+        wolf     : { EAST, WEST };
         carry    : { NIL, GOAT, CABBAGE, WOLF };
 
 INIT
-        ! ferryman;
+        ferryman = WEST;
 
 INIT
-        ! goat;
+        goat = WEST;
 
 INIT
-        ! cabbage;
+        cabbage = WEST;
 
 INIT
-        ! wolf;
+        wolf = WEST;
 
 INIT
         carry = NIL;
 
 INVAR
-        ferryman xor cabbage -> goat xor cabbage;
+        ferryman != cabbage -> goat != cabbage;
 
 INVAR
-        ferryman xor goat -> wolf xor goat;
+        ferryman != goat -> wolf != goat;
 
 TRANS
-        next(ferryman) <-> ! ferryman;
+        next(carry)   = {(ferryman = goat    ? GOAT    : NIL),
+                         (ferryman = cabbage ? CABBAGE : NIL),
+                         (ferryman = wolf    ? WOLF    : NIL)};
+TRANS
+        next(goat) = ( next(carry) = GOAT ? next(ferryman) : goat );
 
 TRANS
-        next(carry)   = { (ferryman <-> goat    ? GOAT    : NIL),
-                          (ferryman <-> cabbage ? CABBAGE : NIL),
-                          (ferryman <-> wolf    ? WOLF    : NIL) };
-TRANS
-        next(goat) <-> ( next(carry) = GOAT ? next(ferryman) : goat );
+        next(cabbage) = ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
 
 TRANS
-        next(cabbage) <-> ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
-
-TRANS
-        next(wolf) <-> ( next(carry) = WOLF ? next(ferryman) : wolf );
+        next(wolf) = ( next(carry) = WOLF ? next(ferryman) : wolf );
 
 DEFINE
-        GOAL := cabbage && goat && wolf && ferryman;
-
+        GOAL := cabbage = EAST &&
+                goat    = EAST &&
+                wolf    = EAST  ;
