@@ -74,6 +74,8 @@ void Simulation::pick_state()
 
         wm.register_witness(w);
         set_witness(w);
+
+        f_status = SIMULATION_INITIALIZED;
     }
     else {
         WARN << "Inconsistency detected in initial states"

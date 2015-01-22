@@ -37,14 +37,22 @@ TypeResolver::~TypeResolver()
 
 Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
 {
-    const Literals& lits
-        (TypeMgr::INSTANCE().literals());
+     ExprMgr& em
+        (ExprMgr::INSTANCE());
+     assert(em.is_dot(key));
 
-    Literals::const_iterator iter
-        (lits.find(key));
+     /* Types are globally scoped */
+     Expr_ptr key_
+         (em.make_dot( em.make_empty(), key -> rhs()));
 
-    if (iter != lits.end())
-        return dynamic_cast<Symbol_ptr>((*iter).second);
+     const Literals& lits
+         (TypeMgr::INSTANCE().literals());
 
-    return NULL; /* unresolved */
+     Literals::const_iterator iter
+         (lits.find(key_));
+
+     if (iter != lits.end())
+         return dynamic_cast<Symbol_ptr>((*iter).second);
+
+     return NULL; /* unresolved */
 }

@@ -1,6 +1,5 @@
 /*
- * @file check_ltl.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file dump_trace.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,27 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CHECK_LTL_CMD_H
-#define CHECK_LTL_CMD_H
+#ifndef DUMP_TRACE_CMD_H
+#define DUMP_TRACE_CMD_H
 
 #include <cmd/command.hh>
-#include <algorithms/ltl/ltl.hh>
 
-class CheckLTL : public Command {
+class DumpTrace : public Command {
+    Expr_ptr f_trace_id;
 public:
-    CheckLTL(Interpreter& owner, Expr_ptr phi);
-    virtual ~CheckLTL();
+    DumpTrace (Interpreter& owner, Expr_ptr trace_id);
+    virtual ~DumpTrace();
 
     Variant virtual operator()();
-
-private:
-    /* the LTL specification to be verified */
-    Expr_ptr f_phi;
-
-    /* LTL machinery */
-    LTL f_ltl;
-
-    Variant run();
 };
 
 #endif

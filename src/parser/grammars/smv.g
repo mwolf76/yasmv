@@ -854,19 +854,13 @@ commands returns [Command_ptr res]
     |  c=simulate_command
        { $res = c; }
 
-    |  c=check_fsm_command
-       { $res = c; }
-
     |  c=check_invar_command
        { $res = c; }
-
-    |  c=check_ltl_command
-       { $res = c  ; }
 
     |  c=list_traces_command
        { $res = c; }
 
-    |  c=show_trace_command
+    |  c=dump_trace_command
        { $res = c; }
 
     |  c=quit_command
@@ -896,19 +890,9 @@ write_model_command returns [Command_ptr res]
        { $res = cm.make_write_model(fp); }
     ;
 
-check_fsm_command returns [Command_ptr res]
-    : 'check_fsm'
-      { $res = cm.make_check_fsm(); }
-    ;
-
 check_invar_command returns[Command_ptr res]
     : 'check_invar' phi=toplevel_expression
       { $res = cm.make_check_invar(phi); }
-    ;
-
-check_ltl_command returns[Command_ptr res]
-    : 'check_ltl' phi=toplevel_expression
-      { $res = cm.make_check_ltl(phi); }
     ;
 
 list_traces_command returns [Command_ptr res]
@@ -916,9 +900,9 @@ list_traces_command returns [Command_ptr res]
       { $res = cm.make_list_traces(); }
     ;
 
-show_trace_command returns [Command_ptr res]
-    : 'show_trace' trace_id=identifier
-      { $res = cm.make_show_trace(trace_id); }
+dump_trace_command returns [Command_ptr res]
+    : 'dump_trace' trace_id=identifier
+      { $res = cm.make_dump_trace(trace_id); }
     ;
 
 pick_state_command returns [Command_ptr res]

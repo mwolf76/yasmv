@@ -1,8 +1,11 @@
-* Refactoring
-
-* Use BDDs instead of ADDs in the compiler
+* Commands
+- integration of libreadline
+- autocomplete support
+- help system
 
 * Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t)
+
+* Check array support
 
 * CNFization algorithm
 - Support for multiple CNF algorithms (no-cut, single-cut, mix-cut)
@@ -14,11 +17,6 @@
 
 * Interpolation based-algorithms
 - requires interpolant-capable SAT solver
-
-* Commands
-- integration of libreadline
-- autocomplete support
-- help system
 
 * Experiment with CEGAR, COI, Data abstraction
 - functional model (i.e. introduce the := operator)

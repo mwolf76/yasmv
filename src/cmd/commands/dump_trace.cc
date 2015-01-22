@@ -1,5 +1,5 @@
 /*
- * @file show_trace.cc
+ * @file dump_trace.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd/commands/show_trace.hh>
+#include <cmd/commands/dump_trace.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -27,12 +27,12 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-ShowTrace::ShowTrace(Interpreter& owner, Expr_ptr trace_id)
+DumpTrace::DumpTrace(Interpreter& owner, Expr_ptr trace_id)
     : Command(owner)
     , f_trace_id(trace_id)
 {}
 
-Variant ShowTrace::operator()()
+Variant DumpTrace::operator()()
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -96,6 +96,6 @@ Variant ShowTrace::operator()()
     return Variant("Ok");
 }
 
-ShowTrace::~ShowTrace()
+DumpTrace::~DumpTrace()
 {}
 

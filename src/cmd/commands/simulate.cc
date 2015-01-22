@@ -38,8 +38,8 @@ Variant Simulate::run()
     case SIMULATION_DONE:
         tmp << "Simulation done";
         break;
-    case SIMULATION_HALTED:
-        tmp << "Simulation halted";
+    case SIMULATION_INITIALIZED:
+        tmp << "Simulation initialized";
         break;
     case SIMULATION_DEADLOCKED:
         tmp << "Simulation deadlocked";

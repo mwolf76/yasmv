@@ -29,6 +29,7 @@ INVAR
         ferryman != goat -> wolf != goat;
 
 TRANS
+        -- non-deterministic choice
         next(carry)   = {(ferryman = goat    ? GOAT    : NIL),
                          (ferryman = cabbage ? CABBAGE : NIL),
                          (ferryman = wolf    ? WOLF    : NIL)};
@@ -41,7 +42,8 @@ TRANS
 TRANS
         next(wolf) = ( next(carry) = WOLF ? next(ferryman) : wolf );
 
-DEFINE
-        GOAL := cabbage = EAST &&
-                goat    = EAST &&
-                wolf    = EAST  ;
+-- To perform planning, we assert the negation of the desired GOAL.
+-- To solve the ferryman problem in this model try this:
+
+-- >> check_invar ! GOAL
+DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;

@@ -32,15 +32,13 @@
 #include <cmd/commands/read_model.hh>
 #include <cmd/commands/write_model.hh>
 
-#include <cmd/commands/check_fsm.hh>
 #include <cmd/commands/check_invar.hh>
-#include <cmd/commands/check_ltl.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
 
 #include <cmd/commands/list_traces.hh>
-#include <cmd/commands/show_trace.hh>
+#include <cmd/commands/dump_trace.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
@@ -72,14 +70,8 @@ public:
     inline Command_ptr make_write_model(const char *filepath)
     { return new WriteModel(f_interpreter, filepath); }
 
-    inline Command_ptr make_check_fsm()
-    { return new CheckFSM(f_interpreter); }
-
     inline Command_ptr make_check_invar(Expr_ptr phi)
     { return new CheckInvar(f_interpreter, phi); }
-
-    inline Command_ptr make_check_ltl(Expr_ptr phi)
-    { return new CheckLTL(f_interpreter, phi); }
 
     inline Command_ptr make_pick_state(Expr_ptr phi)
     { return new PickState(f_interpreter, phi); }
@@ -90,8 +82,8 @@ public:
     inline Command_ptr make_list_traces()
     { return new ListTraces(f_interpreter); }
 
-    inline Command_ptr make_show_trace(Expr_ptr trace_id)
-    { return new ShowTrace(f_interpreter, trace_id); }
+    inline Command_ptr make_dump_trace(Expr_ptr trace_id)
+    { return new DumpTrace(f_interpreter, trace_id); }
 
 protected:
     CommandMgr();
