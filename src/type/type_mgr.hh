@@ -62,23 +62,15 @@ public:
 
     const ScalarType_ptr find_boolean();
 
-    const ScalarType_ptr find_int_const(unsigned digits);
-    const ScalarType_ptr find_signed(unsigned digits);
-    const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
+    const ScalarType_ptr find_constant(unsigned width, bool is_fxd);
 
-    const ArrayType_ptr find_signed_array(unsigned digits,
-                                          unsigned size);
-    const ArrayType_ptr find_signed_array(unsigned magnitude,
-                                          unsigned fractional,
-                                          unsigned size);
+    const ScalarType_ptr find_signed(unsigned width, bool is_fxd);
+    const ArrayType_ptr  find_signed_array(unsigned width, bool is_fxd,
+                                           unsigned size);
 
-    const ScalarType_ptr find_unsigned(unsigned digits);
-    const ScalarType_ptr find_unsigned(unsigned magnitude, unsigned fractional);
+    const ScalarType_ptr find_unsigned(unsigned width, bool is_fxd);
 
-    const ArrayType_ptr find_unsigned_array(unsigned digits,
-                                            unsigned size);
-    const ArrayType_ptr find_unsigned_array(unsigned magnitude,
-                                            unsigned fractional,
+    const ArrayType_ptr find_unsigned_array(unsigned width, bool is_fxd,
                                             unsigned size);
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);

@@ -31,6 +31,8 @@
 #include <expr/expr.hh>
 #include <expr/pool.hh>
 
+#include <opts.hh>
+
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
@@ -343,7 +345,8 @@ public:
     {
         assert( expr->f_symb == ICONST ||
                 expr->f_symb == HCONST ||
-                expr->f_symb == OCONST );
+                expr->f_symb == OCONST ||
+                expr->f_symb == FCONST );
         return expr -> value();
     }
 
@@ -362,6 +365,12 @@ public:
     inline Expr_ptr make_oconst(value_t value) // octal
     {
         Expr tmp(OCONST, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_fconst(value_t value)
+    {
+        Expr tmp(FCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -411,6 +420,19 @@ public:
         return expr == const_int_expr;
     }
 
+    inline Expr_ptr make_const_fxd_type(unsigned width)
+    {
+        return make_type(const_fxd_expr,
+                         make_const((value_t) width));
+
+    }
+
+    inline bool is_const_fxd_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == const_fxd_expr;
+    }
+
+
     inline Expr_ptr make_fixed_type(unsigned digits)
     {
         return make_type(const_int_expr,
@@ -428,11 +450,10 @@ public:
                          make_const((value_t) digits));
     }
 
-    inline Expr_ptr make_unsigned_fxd_type(unsigned magnitude, unsigned fractional)
+    inline Expr_ptr make_unsigned_fxd_type(unsigned width)
     {
         return make_type(unsigned_fxd_expr,
-                         make_const((value_t) magnitude),
-                         make_const((value_t) fractional));
+                         make_const((value_t) width));
     }
 
     inline Expr_ptr make_signed_int_type(unsigned digits)
@@ -441,11 +462,10 @@ public:
                          make_const((value_t) digits));
     }
 
-    inline Expr_ptr make_signed_fxd_type(unsigned magnitude, unsigned fractional)
+    inline Expr_ptr make_signed_fxd_type(unsigned width)
     {
         return make_type(signed_fxd_expr,
-                         make_const((value_t) magnitude),
-                         make_const((value_t) fractional));
+                         make_const((value_t) width));
     }
 
     inline Expr_ptr make_abstract_array_type(Expr_ptr of)
@@ -537,6 +557,18 @@ public:
     inline Expr_ptr make_oct_const(Atom atom)
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
+    inline Expr_ptr make_fxd_const(Atom integer, Atom precision)
+    {
+        value_t int_
+            (strtoll(integer.c_str(), NULL, 10));
+        value_t fract_
+            (decimal_lookup(precision.c_str()));
+        value_t value
+            ((int_ << OptsMgr::INSTANCE().precision()) +
+             fract_);
+        return make_fconst( value );
+    }
+
     inline Expr_ptr make_undef()
     {
         Expr tmp(UNDEF); // we need a temp store
@@ -614,6 +646,11 @@ public:
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
             || (expr->f_symb == OCONST) ;
+    }
+
+    inline bool is_fxd_numeric(const Expr_ptr expr) const {
+        assert(expr);
+        return (expr->f_symb == FCONST);
     }
 
     // expr inspectors, used by compiler as helpers to determine operands type
@@ -716,6 +753,8 @@ private:
 
     /* aux service of make_dot */
     Expr_ptr left_associate_dot(const Expr_ptr);
+
+    value_t decimal_lookup(const char *decimal_repr);
 
     /* -- data ------------------------------------------------------------- */
 

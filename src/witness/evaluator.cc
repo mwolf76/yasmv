@@ -657,13 +657,21 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    // 1. explicit constants are integer consts (e.g. 42) ..
+    // 1. explicit int consts (e.g. 42) ...
     else if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE (tm.find_unsigned(ww));
+        PUSH_TYPE (tm.find_unsigned(ww, false));
         PUSH_VALUE(expr -> value());
+        return;
+    }
 
+    // 2. explicit fxd consts (e.g. 3.14) ...
+    else if (em.is_int_numeric(expr)) {
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
+        PUSH_TYPE (tm.find_unsigned(ww, true));
+        PUSH_VALUE(expr -> value());
         return;
     }
 

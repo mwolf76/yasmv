@@ -162,16 +162,29 @@ void BMC::kinduction( Expr_ptr phi )
 
 }
 
+#define ENABLE_FALSIFICATION
+// #define ENABLE_KINDUCTION
+
 void BMC::process(const Expr_ptr phi)
 {
     set_status( MC_UNKNOWN );
 
     /* launch parallel threads */
+    #ifdef ENABLE_FALSIFICATION
     boost::thread base(&BMC::falsification, this, phi);
-    boost::thread step(&BMC::kinduction, this, phi);
+    #endif
 
+    #ifdef ENABLE_KINDUCTION
+    boost::thread step(&BMC::kinduction, this, phi);
+    #endif
+
+    #ifdef ENABLE_FALSIFICATION
     base.join();
+    #endif
+
+    #ifdef ENABLE_KINDUCTION
     step.join();
+    #endif
 
     TRACE << "Done." << std::endl;
 }

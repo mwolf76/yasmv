@@ -46,27 +46,37 @@ void TypeChecker::walk_unary_logical_postorder(const Expr_ptr expr)
 // fun: arithm, arithm -> arithm
 void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs_type = check_arithmetical(expr->rhs());
-    Type_ptr lhs_type = check_arithmetical(expr->lhs());
+    Type_ptr rhs
+        (check_arithmetical(expr->rhs()));
 
-    if (rhs_type == lhs_type) {
-        PUSH_TYPE(rhs_type);
+    Type_ptr lhs
+        (check_arithmetical(expr->lhs()));
+
+    // matching types are most definitely ok
+    if (rhs == lhs ) {
+        PUSH_TYPE(rhs);
         return ;
     }
 
-    if (lhs_type -> width() !=
-        rhs_type -> width())
-        throw TypeMismatch( expr, lhs_type, rhs_type );
+    AlgebraicType_ptr arhs
+        (dynamic_cast <AlgebraicType_ptr>(rhs));
 
-    if (rhs_type -> is_const_int() &&
-        ! lhs_type -> is_const_int()) {
-        PUSH_TYPE(lhs_type);
+    AlgebraicType_ptr alhs
+        (dynamic_cast <AlgebraicType_ptr>(lhs));
+
+    if (alhs -> width() != arhs -> width())
+        throw TypeMismatch( expr, alhs, arhs );
+
+    if (_xor( alhs -> is_fxd(), arhs -> is_fxd()))
+        throw TypeMismatch( expr, alhs, arhs );
+
+    if (arhs -> is_constant() && ! alhs -> is_constant()) {
+        PUSH_TYPE(alhs);
         return ;
     }
 
-    if (lhs_type -> is_const_int() &&
-        ! rhs_type -> is_const_int()) {
-        PUSH_TYPE(rhs_type);
+    if (alhs -> is_constant() && ! arhs -> is_constant()) {
+        PUSH_TYPE(arhs);
         return ;
     }
 
@@ -117,36 +127,45 @@ void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
 // fun: arithmetical x arithmetical -> boolean
 void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-    POP_TYPE(rhs_type);
+    TypeMgr& tm
+        (f_owner.tm());
 
-    if (rhs_type -> is_algebraic()) {
-        Type_ptr lhs_type = check_arithmetical(expr->lhs());
+    Type_ptr boolean
+        (tm.find_boolean());
 
-        if (rhs_type == lhs_type)  {
-            PUSH_TYPE(tm.find_boolean());
-            return ;
-        }
+    Type_ptr rhs
+        (check_arithmetical(expr->rhs()));
 
-        if (lhs_type -> width() !=
-            rhs_type -> width())
-            throw TypeMismatch( expr, lhs_type, rhs_type );
+    Type_ptr lhs
+        (check_arithmetical(expr->lhs()));
 
-        if (rhs_type -> is_const_int() &&
-            ! lhs_type -> is_const_int()) {
-            PUSH_TYPE(tm.find_boolean());
-            return ;
-        }
-
-        if (lhs_type -> is_const_int() &&
-            ! rhs_type -> is_const_int()) {
-            PUSH_TYPE(tm.find_boolean());
-            return ;
-        }
-
-        assert(false);
+    // matching types are most definitely ok
+    if (rhs == lhs ) {
+        PUSH_TYPE(boolean);
+        return ;
     }
-    else assert(false);
+
+    AlgebraicType_ptr arhs
+        (dynamic_cast <AlgebraicType_ptr>(rhs));
+
+    AlgebraicType_ptr alhs
+        (dynamic_cast <AlgebraicType_ptr>(lhs));
+
+    if (alhs -> width() != arhs -> width())
+        throw TypeMismatch( expr, alhs, arhs );
+
+    if (_xor( alhs -> is_fxd(), arhs -> is_fxd()))
+        throw TypeMismatch( expr, alhs, arhs );
+
+    if (arhs -> is_constant() && ! alhs -> is_constant()) {
+        PUSH_TYPE(boolean);
+        return ;
+    }
+
+    if (alhs -> is_constant() && ! arhs -> is_constant()) {
+        PUSH_TYPE(boolean);
+        return ;
+    }
 }
 
 // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
@@ -171,14 +190,14 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
             rhs_type -> width())
             throw TypeMismatch( expr, lhs_type, rhs_type );
 
-        if (rhs_type -> is_const_int() &&
-            ! lhs_type -> is_const_int()) {
+        if (rhs_type -> is_constant() &&
+            ! lhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
 
-        if (lhs_type -> is_const_int() &&
-            ! rhs_type -> is_const_int()) {
+        if (lhs_type -> is_constant() &&
+            ! rhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
@@ -222,14 +241,14 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
             rhs_type -> width())
             throw TypeMismatch( expr, lhs_type, rhs_type );
 
-        if (rhs_type -> is_const_int() &&
-            ! lhs_type -> is_const_int()) {
+        if (rhs_type -> is_constant() &&
+            ! lhs_type -> is_constant()) {
             PUSH_TYPE( rhs_type );
             return ;
         }
 
-        if (lhs_type -> is_const_int() &&
-            ! rhs_type -> is_const_int()) {
+        if (lhs_type -> is_constant() &&
+            ! rhs_type -> is_constant()) {
             PUSH_TYPE( lhs_type );
             return ;
         }

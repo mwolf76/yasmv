@@ -21,24 +21,33 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
-unsigned ConstIntType::width() const
+unsigned ConstantType::width() const
 {
     assert( 0 != f_width );
     return f_width;
 }
 
-ConstIntType::ConstIntType(TypeMgr& owner, unsigned width)
-    : AlgebraicType(owner)
+ConstantType::ConstantType(TypeMgr& owner, unsigned width, bool is_fxd)
+    : AlgebraicType(owner, is_fxd)
     , f_width(width)
-{ f_repr = f_owner.em().make_const_int_type(width); }
+{
+    f_repr = is_fxd
+        ? f_owner.em().make_const_fxd_type(width)
+        : f_owner.em().make_const_int_type(width) ;
+}
 
 SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
                                          unsigned width,
+                                         bool is_fxd,
                                          ADD *dds)
-    : AlgebraicType(owner)
+    : AlgebraicType(owner, is_fxd)
     , f_width(width)
     , f_dds(dds)
-{ f_repr = f_owner.em().make_signed_int_type(width); }
+{
+    f_repr = is_fxd
+        ? f_owner.em().make_signed_fxd_type(width)
+        : f_owner.em().make_signed_int_type(width);
+}
 
 unsigned SignedAlgebraicType::width() const
 {
@@ -46,60 +55,23 @@ unsigned SignedAlgebraicType::width() const
     return f_width;
 }
 
-SignedFxdAlgebraicType::SignedFxdAlgebraicType(TypeMgr& owner,
-                                               unsigned magnitude,
-                                               unsigned fractional,
-                                               ADD *dds)
-    : AlgebraicType(owner)
-    , f_magnitude(magnitude)
-    , f_fractional(fractional)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_signed_fxd_type(magnitude,
-                                               fractional);
-}
-
-unsigned SignedFxdAlgebraicType::width() const
-{
-    assert( 0 != f_magnitude );
-    assert( 0 != f_fractional);
-    return f_magnitude + f_fractional;
-}
-
 UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
                                              unsigned width,
+                                             bool is_fxd,
                                              ADD *dds)
-    : AlgebraicType(owner)
+    : AlgebraicType(owner, is_fxd)
     , f_width(width)
     , f_dds(dds)
 {
-    f_repr = f_owner.em().make_unsigned_int_type(width);
+    f_repr = is_fxd
+        ? f_owner.em().make_unsigned_fxd_type(width)
+        : f_owner.em().make_unsigned_int_type(width);
 }
 
 unsigned UnsignedAlgebraicType::width() const
 {
     assert( 0 != f_width );
     return f_width;
-}
-
-UnsignedFxdAlgebraicType::UnsignedFxdAlgebraicType(TypeMgr& owner,
-                                                   unsigned magnitude,
-                                                   unsigned fractional,
-                                                   ADD *dds)
-    : AlgebraicType(owner)
-    , f_magnitude(magnitude)
-    , f_fractional(fractional)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_unsigned_fxd_type(magnitude,
-                                                 fractional);
-}
-
-unsigned UnsignedFxdAlgebraicType::width() const
-{
-    assert( 0 != f_magnitude );
-    assert( 0 != f_fractional);
-    return f_magnitude + f_fractional;
 }
 
 // -- Arrays ------------------------------------------------------------

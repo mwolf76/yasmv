@@ -38,9 +38,9 @@ static inline value_t pow2(unsigned exp)
     return res;
 }
 
-AlgebraicEncoding::AlgebraicEncoding(unsigned width, unsigned fract, bool is_signed, ADD *dds)
+AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_fxd, bool is_signed, ADD *dds)
     : f_width(width)
-    , f_fract(fract)
+    , f_is_fxd(is_fxd)
     , f_signed(is_signed)
     , f_temporary(NULL != dds)
 {
@@ -84,7 +84,10 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
         }
     }
 
-    return em.make_const(res);
+    return f_is_fxd
+        ? em.make_fconst(res)
+        : em.make_const(res)
+        ;
 }
 
 ArrayEncoding::ArrayEncoding(Encodings elements)

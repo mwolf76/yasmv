@@ -232,8 +232,9 @@ void TypeChecker::walk_cast_postorder(const Expr_ptr expr)
 
 bool TypeChecker::walk_type_preorder(const Expr_ptr expr)
 {
-    Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    f_type_stack.push_back( tp);
+    assert(false);
+    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
+    // f_type_stack.push_back( tp);
     return false;
 }
 bool TypeChecker::walk_type_inorder(const Expr_ptr expr)
@@ -384,8 +385,11 @@ void TypeChecker::walk_comma_postorder(Expr_ptr expr)
 
 void TypeChecker::walk_leaf(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
-    ExprMgr& em = f_owner.em();
+    TypeMgr& tm
+        (f_owner.tm());
+
+    ExprMgr& em
+        (f_owner.em());
 
     // cache miss took care of the stack already
     if (! cache_miss(expr))
@@ -393,16 +397,26 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
 
     // is an integer const ..
     if (em.is_int_numeric(expr)) {
-        unsigned ww (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE(tm.find_int_const(ww));
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
+        PUSH_TYPE(tm.find_constant(ww, false));
+        return;
+    }
+
+    else if (em.is_fxd_numeric(expr)) {
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
+        PUSH_TYPE(tm.find_constant(ww, true));
         return;
     }
 
     // .. or a symbol
     if (em.is_identifier(expr)) {
-        Expr_ptr ctx = f_ctx_stack.back();
+        Expr_ptr ctx
+            (f_ctx_stack.back());
 
         ResolverProxy proxy;
+
         Symbol_ptr symb
             (proxy.symbol( em.make_dot( ctx, expr)));
 

@@ -111,7 +111,7 @@ typedef class BooleanType* BooleanType_ptr;
 typedef class EnumType* EnumType_ptr;
 
 // 1.2. algebraics
-typedef class ConstIntType* ConstIntType_ptr;
+typedef class ConstantType* ConstantType_ptr;
 typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
@@ -211,8 +211,8 @@ public:
     bool is_algebraic();
     AlgebraicType_ptr as_algebraic();
 
-    bool is_const_int();
-    ConstIntType_ptr as_const_int();
+    bool is_constant();
+    ConstantType_ptr as_constant();
 
     bool is_signed_algebraic();
     SignedAlgebraicType_ptr as_signed_algebraic();
@@ -272,10 +272,17 @@ protected:
 
 /** Algebraic type class. */
 class AlgebraicType : public ScalarType {
+public:
+    inline bool is_fxd() const
+    { return f_is_fxd; }
+
 protected:
-    AlgebraicType(TypeMgr &owner)
+    AlgebraicType(TypeMgr &owner, bool is_fxd)
         : ScalarType(owner)
+        , f_is_fxd(is_fxd)
     {}
+
+    bool f_is_fxd;
 };
 
 /** Enumeratives */
@@ -315,9 +322,9 @@ private:
     Expr_ptr f_params;
 };
 
-/** Integer integers */
-typedef class ConstIntType* ConstIntType_ptr;
-class ConstIntType : public AlgebraicType {
+/** Numeric constants (both integers and fixed) */
+typedef class ConstantType* ConstantType_ptr;
+class ConstantType : public AlgebraicType {
 public:
     unsigned width() const;
 
@@ -326,12 +333,12 @@ public:
 
  protected:
     friend class TypeMgr; // ctors not public
-    ConstIntType(TypeMgr& owner, unsigned width);
+    ConstantType(TypeMgr& owner, unsigned width, bool is_fxd);
 
     unsigned f_width;
 };
 
-/** Signed integers */
+/** Signed algebraics (both integers and fixed) */
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 class SignedAlgebraicType : public AlgebraicType {
 public:
@@ -342,7 +349,8 @@ public:
 
  protected:
     friend class TypeMgr; // ctors not public
-    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+    SignedAlgebraicType(TypeMgr& owner, unsigned width,
+                        bool is_fxd, ADD *dds = NULL);
 
     unsigned f_width;
 
@@ -350,7 +358,7 @@ public:
     ADD *f_dds;
 };
 
-/** Unsigned integers */
+/** Unsigned algebraics (both integers and fixed) */
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 class UnsignedAlgebraicType : public AlgebraicType {
 public:
@@ -361,70 +369,14 @@ public:
 
 protected:
     friend class TypeMgr; // ctors not public
-    UnsignedAlgebraicType(TypeMgr& owner); // abstract
-    UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
+    UnsignedAlgebraicType(TypeMgr& owner, unsigned width,
+                          bool is_fxd, ADD *dds = NULL);
 
     unsigned f_width;
 
     // this is reserved for temp encodings, it's NULL for ordinary algebraics
     ADD *f_dds;
 };
-
-/** Signed fixed */
-typedef class SignedFxdAlgebraicType* SignedFxdAlgebraicType_ptr;
-class SignedFxdAlgebraicType : public AlgebraicType {
-public:
-    inline unsigned magnitude() const
-    { return f_magnitude; }
-
-    inline unsigned fractional() const
-    { return f_fractional; }
-
-    unsigned width() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
- protected:
-    friend class TypeMgr; // ctors not public
-    SignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
-                           unsigned fractional, ADD *dds = NULL);
-
-    unsigned f_magnitude;
-    unsigned f_fractional;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
-};
-
-/** Unsigned integers */
-typedef class UnsignedFxdAlgebraicType* UnsignedFxdAlgebraicType_ptr;
-class UnsignedFxdAlgebraicType : public AlgebraicType {
-public:
-    inline unsigned magnitude() const
-    { return f_magnitude; }
-
-    inline unsigned fractional() const
-    { return f_fractional; }
-
-    unsigned width() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    UnsignedFxdAlgebraicType(TypeMgr& owner); // abstract
-    UnsignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
-                             unsigned fractional, ADD *dds = NULL);
-
-    unsigned f_magnitude;
-    unsigned f_fractional;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
-};
-
 
 /** -- Arrays ------------------------------------------------------------ */
 

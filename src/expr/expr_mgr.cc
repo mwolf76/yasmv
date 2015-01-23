@@ -24,6 +24,7 @@
  *
  **/
 #include <common.hh>
+#include <cmath>
 #include <expr_mgr.hh>
 
 #include <stack>
@@ -51,7 +52,7 @@ ExprMgr::ExprMgr()
     {
         std::ostringstream oss;
         oss
-            << UNSIGNED_TOKEN << " "
+            << UNSIGNED_TOKEN
             << INT_TOKEN;
 
         unsigned_int_expr = make_identifier(oss.str());
@@ -59,7 +60,7 @@ ExprMgr::ExprMgr()
     {
         std::ostringstream oss;
         oss
-            << SIGNED_TOKEN << " "
+            << SIGNED_TOKEN
             << INT_TOKEN;
 
         signed_int_expr = make_identifier(oss.str());
@@ -79,7 +80,15 @@ ExprMgr::ExprMgr()
     {
         std::ostringstream oss;
         oss
-            << SIGNED_TOKEN << " "
+            << UNSIGNED_TOKEN
+            << FXD_TOKEN;
+
+        unsigned_fxd_expr = make_identifier(oss.str());
+    }
+    {
+        std::ostringstream oss;
+        oss
+            << SIGNED_TOKEN
             << FXD_TOKEN;
 
         signed_fxd_expr = make_identifier(oss.str());
@@ -189,4 +198,63 @@ Expr_ptr ExprMgr::left_associate_dot(const Expr_ptr expr)
         res = res ? make_expr( DOT, res, *i) : *i;
 
     return res;
+}
+
+static inline value_t pow2(unsigned exp)
+{
+    value_t res = 1;
+    if ( !exp )
+        return res;
+    ++ res;
+
+    while ( -- exp )
+        res <<= 1;
+
+    return res;
+}
+
+value_t ExprMgr::decimal_lookup(const char *decimal_repr)
+{
+    std::string tmp
+        (".");
+    tmp += decimal_repr;
+    double double_val
+        (strtod(tmp.c_str(), NULL));
+
+    unsigned precision
+        (OptsMgr::INSTANCE().precision());
+
+    value_t j, m, k;
+    double fm, dj, dm, dk, pp
+        (pow( 2.0, precision));
+
+    j = 0;
+    k = pow2(precision) -1;
+
+    while (k - j > 1) {
+        m = j + (k - j) / 2;
+        fm = (double) m / pp;
+
+        if (fm < double_val)
+            j = m;
+
+        else if (double_val < fm)
+            k = m;
+    }
+
+    dj = fabs(double_val - ((double) j / pp));
+    dm = fabs(double_val - ((double) m / pp));
+    dk = fabs(double_val - ((double) k / pp));
+
+    if (dj <= dm && dj <= dk)
+        return j;
+
+    else if (dk <= dj && dk <= dm)
+        return k;
+
+    else if (dm <= dj && dm <= dk)
+        return m;
+
+    // unreachable
+    assert(false);
 }

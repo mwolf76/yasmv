@@ -290,8 +290,9 @@ void Compiler::walk_iff_postorder(const Expr_ptr expr)
 
 bool Compiler::walk_type_preorder(const Expr_ptr expr)
 {
-    Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    f_type_stack.push_back( tp);
+    assert(false);
+    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
+    // f_type_stack.push_back( tp);
 
     return false;
 }
@@ -659,7 +660,15 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
-        f_type_stack.push_back(tm.find_unsigned(ww));
+        f_type_stack.push_back(tm.find_unsigned(ww, false));
+        algebraic_from_constant( expr, ww);
+        return;
+    }
+
+    if (em.is_fxd_numeric(expr)) {
+        unsigned ww
+            (OptsMgr::INSTANCE().word_width());
+        f_type_stack.push_back(tm.find_unsigned(ww, true));
         algebraic_from_constant( expr, ww);
         return;
     }

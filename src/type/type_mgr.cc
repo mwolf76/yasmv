@@ -42,8 +42,11 @@ TypeMgr::TypeMgr()
 
 const ScalarType_ptr TypeMgr::find_boolean()
 {
-    Expr_ptr descr(f_em.make_boolean_type());
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr>(lookup_type(descr));
+    Expr_ptr descr
+        (f_em.make_boolean_type());
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr>(lookup_type(descr)));
     if (res)
         return res;
 
@@ -53,6 +56,7 @@ const ScalarType_ptr TypeMgr::find_boolean()
     return res;
 }
 
+#if 0
 const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 {
     assert( f_em.is_type(expr));
@@ -68,140 +72,98 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 
     return NULL;
 }
+#endif
 
-const ScalarType_ptr TypeMgr::find_int_const(unsigned bits)
+const ScalarType_ptr TypeMgr::find_constant(unsigned width, bool is_fxd)
 {
-    Expr_ptr descr(f_em.make_const_int_type(bits));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    Expr_ptr descr
+        (is_fxd
+         ? f_em.make_const_fxd_type(width)
+         : f_em.make_const_int_type(width));
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr> (lookup_type(descr)));
     if (res)
         return res;
 
     // new type, needs to be registered before returning
-    res = new ConstIntType( *this, bits);
+    res = new ConstantType( *this, width, is_fxd);
 
     register_type(descr, res);
     return res;
 }
 
-const ScalarType_ptr TypeMgr::find_unsigned(unsigned bits)
+const ScalarType_ptr TypeMgr::find_unsigned(unsigned width, bool is_fxd)
 {
-    Expr_ptr descr(f_em.make_unsigned_int_type(bits));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    Expr_ptr descr
+        (is_fxd
+         ? f_em.make_unsigned_fxd_type(width)
+         : f_em.make_unsigned_int_type(width));
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr> (lookup_type(descr)));
     if (res)
         return res;
 
     // new type, needs to be registered before returning
-    res = new UnsignedAlgebraicType( *this, bits);
-
-    register_type(descr, res);
-    return res;
-}
-
-const ScalarType_ptr TypeMgr::find_unsigned(unsigned magnitude, unsigned fractional)
-{
-    Expr_ptr descr(f_em.make_unsigned_fxd_type(magnitude, fractional));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
-    if (res)
-        return res;
-
-    // new type, needs to be registered before returning
-    res = new UnsignedFxdAlgebraicType( *this, magnitude, fractional);
-
-    register_type(descr, res);
-    return res;
-}
-
-
-const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned digits, unsigned size)
-{
-    Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_int_type(digits),
-                                        f_em.make_const(size)));
-
-    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (res)
-        return res;
-
-    // new type, needs to be registered before returning
-    res = new ArrayType( *this, find_unsigned(digits), size);
-
-    register_type(descr, res);
-    return res;
-}
-
-const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned magnitude,
-                                                 unsigned fractional,
-                                                 unsigned size)
-{
-    Expr_ptr descr(f_em.make_subscript( f_em.make_unsigned_fxd_type(magnitude, fractional),
-                                        f_em.make_const(size)));
-    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (res)
-        return res;
-
-    // new type, needs to be registered before returning
-    res = new ArrayType( *this, find_unsigned(magnitude, fractional), size);
+    res = new UnsignedAlgebraicType( *this, width, is_fxd);
 
     register_type(descr, res);
     return res;
 }
 
 
-const ScalarType_ptr TypeMgr::find_signed(unsigned bits)
+const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned width, bool is_fxd, unsigned size)
 {
-    Expr_ptr descr(f_em.make_signed_int_type(bits));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    Expr_ptr descr
+        (f_em.make_subscript( is_fxd
+                              ? f_em.make_unsigned_fxd_type(width)
+                              : f_em.make_unsigned_int_type(width), f_em.make_const(size)));
+    ArrayType_ptr res
+        (dynamic_cast<ArrayType_ptr> (lookup_type(descr)));
     if (res)
         return res;
 
     // new type, needs to be registered before returning
-    res = new SignedAlgebraicType(*this, bits);
+    res = new ArrayType( *this, find_unsigned(width, is_fxd), size);
 
     register_type(descr, res);
     return res;
 }
 
-const ScalarType_ptr TypeMgr::find_signed(unsigned magnitude, unsigned fractional)
+const ScalarType_ptr TypeMgr::find_signed(unsigned width, bool is_fxd)
 {
-    Expr_ptr descr(f_em.make_signed_fxd_type(magnitude, fractional));
-    ScalarType_ptr res = dynamic_cast<ScalarType_ptr> (lookup_type(descr));
+    Expr_ptr descr
+        (is_fxd
+         ? f_em.make_signed_fxd_type(width)
+         : f_em.make_signed_int_type(width));
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr> (lookup_type(descr)));
     if (res)
         return res;
 
     // new type, needs to be registered before returning
-    res = new SignedFxdAlgebraicType(*this, magnitude, fractional);
+    res = new SignedAlgebraicType(*this, width, is_fxd);
 
     register_type(descr, res);
     return res;
 }
 
-
-const ArrayType_ptr TypeMgr::find_signed_array(unsigned digits, unsigned size)
+const ArrayType_ptr TypeMgr::find_signed_array(unsigned width, bool is_fxd, unsigned size)
 {
-    Expr_ptr descr(f_em.make_subscript( f_em.make_signed_int_type(digits),
-                                        f_em.make_const(size)));
-    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
+    Expr_ptr descr
+        (f_em.make_subscript( is_fxd
+                              ? f_em.make_signed_fxd_type(width)
+                              : f_em.make_signed_int_type(width), f_em.make_const(size)));
+
+    ArrayType_ptr res
+        (dynamic_cast<ArrayType_ptr> (lookup_type(descr)));
     if (res)
         return res;
 
     // new type, needs to be registered before returning
-    res = new ArrayType( *this, find_signed(digits), size);
-
-    register_type(descr, res);
-    return res;
-}
-
-const ArrayType_ptr TypeMgr::find_signed_array(unsigned magnitude,
-                                               unsigned fractional,
-                                               unsigned size)
-{
-    Expr_ptr descr(f_em.make_subscript( f_em.make_signed_fxd_type(magnitude, fractional),
-                                        f_em.make_const(size)));
-    ArrayType_ptr res = dynamic_cast<ArrayType_ptr> (lookup_type(descr));
-    if (res)
-        return res;
-
-    // new type, needs to be registered before returning
-    res = new ArrayType( *this, find_signed(magnitude, fractional), size);
+    res = new ArrayType( *this, find_signed(width, is_fxd), size);
 
     register_type(descr, res);
     return res;
@@ -214,25 +176,25 @@ const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
 
     ScalarType_ptr res
         (dynamic_cast<ScalarType_ptr> (lookup_type( repr )));
+    if (res)
+        return res;
 
-    if (! res) {
-        // new type, needs to be registered before returning
-        res = new EnumType( *this, lits );
-        register_type(repr, res);
+    // new type, needs to be registered before returning
+    res = new EnumType( *this, lits );
+    register_type(repr, res);
 
-        value_t v;
-        ExprSet::const_iterator i;
-        for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
+    value_t v;
+    ExprSet::const_iterator i;
+    for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
 
-            const Expr_ptr& expr
-                (em().make_dot( em().make_empty(), *i));
+        const Expr_ptr& expr
+            (em().make_dot( em().make_empty(), *i));
 
-            Literal* literal
-                (new Literal(expr, res, v));
+        Literal* literal
+            (new Literal(expr, res, v));
 
-            f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
-                          (expr, literal));
-        }
+        f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
+                      (expr, literal));
     }
 
     return res;

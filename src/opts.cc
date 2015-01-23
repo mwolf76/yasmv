@@ -111,6 +111,23 @@ unsigned OptsMgr::word_width() const
         : f_vm["word-width"].as<unsigned>();
 }
 
+void OptsMgr::set_precision(unsigned value)
+{
+    TRACE
+        << "Setting precision to "
+        << value
+        << std::endl;
+
+    f_precision = value;
+}
+
+unsigned OptsMgr::precision() const
+{
+    return (UINT_MAX != f_precision) ? f_precision
+        : f_vm["precision"].as<unsigned>();
+}
+
+
 std::string OptsMgr::model() const
 {
     std::string res = "";

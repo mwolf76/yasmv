@@ -864,6 +864,7 @@ void ExprWalker::walk ()
         case ICONST:
         case HCONST:
         case OCONST:
+        case FCONST:
         case IDENT:
         case UNDEF:
             walk_leaf(curr.expr);

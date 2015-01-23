@@ -81,6 +81,9 @@ model_directive
 model_word_width_directive
     : '#word-width' width=constant
     { om.set_word_width( width -> value()); }
+
+    | '#precision' precision=constant
+    { om.set_precision( precision -> value()); }
     ;
 
 modules
@@ -629,17 +632,24 @@ identifier returns [Expr_ptr res]
 	;
 
 constant returns [Expr_ptr res]
+@init {
+    Atom int_;
+    Atom frc_;
+}
 	: HEX_LITERAL
       {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
-   	| DECIMAL_LITERAL
-      {
-        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
-        $res = em.make_dec_const(tmp);
+   	| x=DECIMAL_LITERAL {
+        int_ = Atom((const char*)($x.text->chars));
       }
+
+      ('.' y=DECIMAL_LITERAL {
+                Atom tmp((const char*)($y.text->chars));
+                $res = em.make_fxd_const(int_, tmp); }
+      | { $res = em.make_dec_const(int_); })
 
     | OCTAL_LITERAL
       {
@@ -716,11 +726,11 @@ unsigned_int_type returns [Type_ptr res]
         (
             '[' size=constant ']'
             { $res = tm.find_unsigned_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), size->value()); }
+                : OptsMgr::INSTANCE().word_width(), false, size->value()); }
     |
         {
             $res = tm.find_unsigned( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width());
+                : OptsMgr::INSTANCE().word_width(), false);
         }
     )
     ;
@@ -739,38 +749,37 @@ signed_int_type returns [Type_ptr res]
         (
             '[' size=constant ']'
             { $res = tm.find_signed_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), size->value()); }
+                : OptsMgr::INSTANCE().word_width(), false, size->value()); }
     |
         {
             $res = tm.find_signed( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width());
+                : OptsMgr::INSTANCE().word_width(), false);
         }
     )
     ;
 
 unsigned_fxd_type returns [Type_ptr res]
 @init {
-    char *p, *q;
+    char *p, *q = NULL;
 }
 	:
         UNSIGNED_FXD_TYPE
         {
             p = (char *) $UNSIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p))
+            while (*p && !isdigit(*p))
                 ++ p;
-
-            q = p;
-            while (*q != '.')
-                ++ q;
-
-            *(q ++) = 0;
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_unsigned_array( atoi(p), atoi(q), size->value()); }
+            {
+                $res = tm.find_unsigned_array( *p ? atoi(p)
+                    : OptsMgr::INSTANCE().word_width(), true, size->value());
+            }
     |
         {
-            $res = tm.find_unsigned( atoi(p), atoi(q));
+            $res = tm.find_unsigned( *p ? atoi(p)
+                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
+                   : OptsMgr::INSTANCE().precision());
         }
     )
     ;
@@ -783,21 +792,29 @@ signed_fxd_type returns [Type_ptr res]
         SIGNED_FXD_TYPE
         {
             p = (char *) $SIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p))
+            while (*p && !isdigit(*p))
                 ++ p;
 
-            q = p;
-            while (*q != '.')
-                ++ q;
+            if (*p) {
+                q = p;
+                while (*q != '.')
+                    ++ q;
 
-            *(q ++) = 0;
+                *(q ++) = 0;
+            }
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_signed_array( atoi(p), atoi(q), size->value()); }
+            {
+                $res = tm.find_signed_array( *p ? atoi(p)
+                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
+                   : OptsMgr::INSTANCE().precision(), size->value());
+            }
     |
         {
-            $res = tm.find_signed( atoi(p), atoi(q));
+            $res = tm.find_signed( *p ? atoi(p)
+                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
+                   : OptsMgr::INSTANCE().precision());
         }
     )
     ;
@@ -823,9 +840,6 @@ instance_type returns [Type_ptr res]
 literal returns [Expr_ptr res]
 @init { }
     :  expr=identifier
-       { $res = expr; }
-
-    |  expr=constant
        { $res = expr; }
     ;
 
@@ -970,11 +984,11 @@ SIGNED_INT_TYPE
     ;
 
 UNSIGNED_FXD_TYPE
-    :  'ufxd' TYPE_MAG_FRAC
+    :  'ufxd' TYPE_WIDTH?
     ;
 
 SIGNED_FXD_TYPE
-    :  'fxd' TYPE_MAG_FRAC
+    :  'fxd' TYPE_WIDTH?
     ;
 
 IDENTIFIER
@@ -987,10 +1001,6 @@ FILEPATH
 
 fragment TYPE_WIDTH
     : DECIMAL_LITERAL
-    ;
-
-fragment TYPE_MAG_FRAC
-    : DECIMAL_LITERAL '.' DECIMAL_LITERAL
     ;
 
 fragment ID_FIRST_CHAR

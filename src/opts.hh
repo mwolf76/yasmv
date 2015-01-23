@@ -33,6 +33,7 @@ namespace options = boost::program_options;
 
 // -- system defaults
 const unsigned DEFAULT_WORD_WIDTH     = 16;
+const unsigned DEFAULT_PRECISION      = 0;
 const unsigned DEFAULT_VERBOSITY      = 0;
 
 class OptsMgr {
@@ -61,6 +62,10 @@ public:
     unsigned word_width() const;
     void set_word_width(unsigned);
 
+    // precision in bits, used for algebrization of constant ITEs and arrays
+    unsigned precision() const;
+    void set_precision(unsigned);
+
     // model filename
     std::string model() const;
 
@@ -84,7 +89,9 @@ private:
     bool f_help;
     bool f_color;
     bool f_started;
+
     unsigned f_word_width;
+    unsigned f_precision;
 };
 
 #endif

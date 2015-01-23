@@ -461,37 +461,37 @@ BOOST_AUTO_TEST_CASE(typedefs)
 
     // fxd types
     {
-        Expr_ptr phi = em.make_signed_fxd_type(4,4);
-        Expr_ptr psi = parseTypedef("fxd4.4");
+        Expr_ptr phi = em.make_signed_fxd_type(4);
+        Expr_ptr psi = parseTypedef("fxd4");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_signed_fxd_type(12,4);
+        Expr_ptr phi = em.make_signed_fxd_type(12);
         Expr_ptr psi = parseTypedef("fxd12.4");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_signed_fxd_type(12,10);
+        Expr_ptr phi = em.make_signed_fxd_type(12);
         Expr_ptr psi = parseTypedef("fxd12.10");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_unsigned_fxd_type(4,4);
+        Expr_ptr phi = em.make_unsigned_fxd_type(4);
         Expr_ptr psi = parseTypedef("ufxd4.4");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_unsigned_fxd_type(12,4);
+        Expr_ptr phi = em.make_unsigned_fxd_type(12);
         Expr_ptr psi = parseTypedef("ufxd12.4");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr phi = em.make_unsigned_fxd_type(12,10);
+        Expr_ptr phi = em.make_unsigned_fxd_type(12);
         Expr_ptr psi = parseTypedef("ufxd12.10");
         BOOST_CHECK (phi == psi);
     }

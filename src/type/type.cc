@@ -49,8 +49,8 @@ InstanceType_ptr Type::as_instance()
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
 
-bool Type::is_const_int()
-{ return NULL != dynamic_cast<ConstIntType_ptr> ( this ); }
+bool Type::is_constant()
+{ return NULL != dynamic_cast<ConstantType_ptr> ( this ); }
 
 AlgebraicType_ptr Type::as_algebraic()
 { return dynamic_cast <const AlgebraicType_ptr> (this); }

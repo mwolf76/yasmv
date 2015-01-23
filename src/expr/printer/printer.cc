@@ -345,6 +345,19 @@ using std::hex;
 using std::dec;
 using std::oct;
 
+static inline value_t pow2(unsigned exp)
+{
+    value_t res = 1;
+    if ( !exp )
+        return res;
+    ++ res;
+
+    while ( -- exp )
+        res <<= 1;
+
+    return res;
+}
+
 void Printer::walk_leaf(const Expr_ptr expr)
 {
     #if !DEBUG_CTX
@@ -354,6 +367,25 @@ void Printer::walk_leaf(const Expr_ptr expr)
 
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;
+    case FCONST: {
+        value_t value
+            (expr->value());
+        unsigned precision
+            (OptsMgr::INSTANCE().precision());
+
+        value_t int_part
+            (value >> precision);
+
+        value_t frc_part
+            (value & (pow2(precision) -1));
+        char frc_repr[20];
+        double frc_double
+            ((double) frc_part / pow(2, precision));
+        snprintf( frc_repr, 20, "%.2f", frc_double);
+        const char *p = &frc_repr[1];
+        f_os << dec << int_part << p;
+        break;
+    }
     case HCONST: f_os << hex << "0x" << expr->value(); break;
     case OCONST: f_os << oct << "0"  << expr->value(); break;
     case IDENT:  f_os << expr->atom(); break;
