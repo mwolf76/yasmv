@@ -119,6 +119,11 @@ void OptsMgr::set_precision(unsigned value)
         << std::endl;
 
     f_precision = value;
+
+    if (f_precision < 4)
+        WARN
+            << "Warning! No decimal digits will be shown in fixed-point values"
+            << std::endl;
 }
 
 unsigned OptsMgr::precision() const

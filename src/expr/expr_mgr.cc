@@ -215,11 +215,8 @@ static inline value_t pow2(unsigned exp)
 
 value_t ExprMgr::decimal_lookup(const char *decimal_repr)
 {
-    std::string tmp
-        (".");
-    tmp += decimal_repr;
-    double double_val
-        (strtod(tmp.c_str(), NULL));
+    double val
+        (strtod(decimal_repr, NULL));
 
     unsigned precision
         (OptsMgr::INSTANCE().precision());
@@ -235,16 +232,16 @@ value_t ExprMgr::decimal_lookup(const char *decimal_repr)
         m = j + (k - j) / 2;
         fm = (double) m / pp;
 
-        if (fm < double_val)
+        if (fm <= val)
             j = m;
 
-        else if (double_val < fm)
+        else if (val <= fm)
             k = m;
     }
 
-    dj = fabs(double_val - ((double) j / pp));
-    dm = fabs(double_val - ((double) m / pp));
-    dk = fabs(double_val - ((double) k / pp));
+    dj = fabs(val - ((double) j / pp));
+    dm = fabs(val - ((double) m / pp));
+    dk = fabs(val - ((double) k / pp));
 
     if (dj <= dm && dj <= dk)
         return j;

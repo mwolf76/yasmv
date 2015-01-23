@@ -367,29 +367,42 @@ void Printer::walk_leaf(const Expr_ptr expr)
 
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;
-    case FCONST: {
-        value_t value
-            (expr->value());
-        unsigned precision
-            (OptsMgr::INSTANCE().precision());
-
-        value_t int_part
-            (value >> precision);
-
-        value_t frc_part
-            (value & (pow2(precision) -1));
-        char frc_repr[20];
-        double frc_double
-            ((double) frc_part / pow(2, precision));
-        snprintf( frc_repr, 20, "%.2f", frc_double);
-        const char *p = &frc_repr[1];
-        f_os << dec << int_part << p;
-        break;
-    }
+    case FCONST: print_fxd_const(expr->value()); break;
     case HCONST: f_os << hex << "0x" << expr->value(); break;
     case OCONST: f_os << oct << "0"  << expr->value(); break;
     case IDENT:  f_os << expr->atom(); break;
     case UNDEF:  f_os << "UNDEF"; break;
     default: assert(0);
     }
+}
+
+void Printer::print_fxd_const(value_t value)
+{
+    unsigned precision
+        (OptsMgr::INSTANCE().precision());
+
+    unsigned tmp
+        (pow2(precision));
+
+    unsigned dec_digits
+        (0);
+
+    if (10 < tmp) {
+        while (tmp /= 10)
+            ++ dec_digits ;
+    }
+
+    value_t int_part
+        (value >> precision);
+
+    double frc_double
+        (((double) (value & (pow2(precision) -1)) / pow(2, precision)));
+
+    char fmt[10];
+    sprintf( fmt, "%%.%df", dec_digits);
+
+    char frc_repr[1 + 2 * dec_digits];
+    sprintf( frc_repr, fmt, frc_double);
+
+    f_os << dec << int_part << frc_repr +1;
 }

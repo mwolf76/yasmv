@@ -633,8 +633,7 @@ identifier returns [Expr_ptr res]
 
 constant returns [Expr_ptr res]
 @init {
-    Atom int_;
-    Atom frc_;
+    Atom integer;
 }
 	: HEX_LITERAL
       {
@@ -643,13 +642,14 @@ constant returns [Expr_ptr res]
       }
 
    	| x=DECIMAL_LITERAL {
-        int_ = Atom((const char*)($x.text->chars));
+        integer = Atom((const char*)($x.text->chars));
       }
 
         ( y=FRACTIONAL_LITERAL {
-                Atom tmp((const char*)($y.text->chars +1));
-                $res = em.make_fxd_const(int_, tmp); }
-          | { $res = em.make_dec_const(int_); })
+                Atom decimal
+                    ((const char*)($y.text->chars));
+                $res = em.make_fxd_const(integer, decimal); }
+          | { $res = em.make_dec_const(integer); })
 
     | OCTAL_LITERAL
       {

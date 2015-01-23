@@ -55,6 +55,9 @@ protected:
     OP_HOOKS;
 
     void walk_leaf(const Expr_ptr expr);
+
+private:
+    void print_fxd_const(value_t value);
 };
 
 #endif

@@ -564,8 +564,7 @@ public:
         value_t fract_
             (decimal_lookup(precision.c_str()));
         value_t value
-            ((int_ << OptsMgr::INSTANCE().precision()) +
-             fract_);
+            ((int_ << OptsMgr::INSTANCE().precision()) + fract_);
         return make_fconst( value );
     }
 
