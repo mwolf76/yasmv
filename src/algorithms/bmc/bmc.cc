@@ -163,7 +163,7 @@ void BMC::kinduction( Expr_ptr phi )
 }
 
 #define ENABLE_FALSIFICATION
-// #define ENABLE_KINDUCTION
+#define ENABLE_KINDUCTION
 
 void BMC::process(const Expr_ptr phi)
 {

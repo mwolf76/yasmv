@@ -646,10 +646,10 @@ constant returns [Expr_ptr res]
         int_ = Atom((const char*)($x.text->chars));
       }
 
-      ('.' y=DECIMAL_LITERAL {
-                Atom tmp((const char*)($y.text->chars));
+        ( y=FRACTIONAL_LITERAL {
+                Atom tmp((const char*)($y.text->chars +1));
                 $res = em.make_fxd_const(int_, tmp); }
-      | { $res = em.make_dec_const(int_); })
+          | { $res = em.make_dec_const(int_); })
 
     | OCTAL_LITERAL
       {
@@ -657,6 +657,10 @@ constant returns [Expr_ptr res]
         $res = em.make_oct_const(tmp);
       }
 	;
+
+decimal_literal
+    : DECIMAL_LITERAL
+    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
@@ -1026,6 +1030,10 @@ DECIMAL_LITERAL
    : ZERO | DECIMAL_FIRST DECIMAL_DIGIT*
    ;
 
+FRACTIONAL_LITERAL
+    : '.' FRACTIONAL_DIGIT*
+    ;
+
 OCTAL_LITERAL
    : ZERO OCTAL_DIGIT+
    ;
@@ -1049,6 +1057,10 @@ fragment HEX_DIGIT
 fragment ZERO
    : '0'
    ;
+
+fragment FRACTIONAL_DIGIT
+    : ZERO | DECIMAL_DIGIT
+    ;
 
 WS
    : (' '|'\r'|'\t'|'\u000C'|'\n')
