@@ -111,9 +111,15 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
         return *i;
     }
 
-    else if (res_type -> is_algebraic())
-        return em.make_const(res_value);
+    else if (res_type -> is_algebraic()) {
+        AlgebraicType_ptr atype
+            (res_type-> as_algebraic());
 
+        return atype -> is_fxd()
+            ? em.make_fconst(res_value)
+            : em.make_const(res_value)
+            ;
+    }
     else assert(false);
 }
 
@@ -667,7 +673,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     // 2. explicit fxd consts (e.g. 3.14) ...
-    else if (em.is_int_numeric(expr)) {
+    else if (em.is_fxd_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
         PUSH_TYPE (tm.find_unsigned(ww, true));

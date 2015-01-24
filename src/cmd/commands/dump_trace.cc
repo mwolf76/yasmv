@@ -56,13 +56,17 @@ Variant DumpTrace::operator()()
                 (pair.first);
             Symbol_ptr symb
                 (pair.second);
+            Expr_ptr name
+                (symb->name());
             Expr_ptr value
                 (NULL);
             Expr_ptr full
-                (em.make_dot( ctx, symb->name()));
+                (em.make_dot( ctx, name));
+
+            if (name -> atom()[0] == '@')
+                continue;
 
             if (symb->is_variable())  {
-
                 try {
                     value = tf.value(full);
                     os
