@@ -180,7 +180,7 @@ private:
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
 
-    /* microcode support */
+    /* Microcode support */
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                    DDVector& z, DDVector& x );
     void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
@@ -190,6 +190,8 @@ private:
     void register_muxdescriptor( Expr_ptr toplevel, unsigned width,
                                  DDVector& z, ADD cnd, ADD aux,
                                  DDVector& x, DDVector &y );
+    void register_muxdescriptor( unsigned width, DDVector& z );
+
     void post_process_muxes();
 
     void pre_hook();

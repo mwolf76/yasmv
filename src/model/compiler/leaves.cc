@@ -64,7 +64,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     Symbol_ptr symb
         (resolver.symbol(full));
 
-    /* 2. bool/integer constant leaves */
+    /* 2. bool constant leaves */
     if (symb->is_const()) {
         Constant& konst (symb->as_const());
 
@@ -89,19 +89,18 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Encoding_ptr enc
             (f_enc.find_encoding(key));
 
-        assert(enc);
-        // /* build a new encoding for this symbol if none is available. */
-        // if (NULL == (enc = ) {
-        //     assert (NULL != type);
-        //     enc = f_enc.make_encoding(type);
-        //     f_enc.register_encoding(key, enc);
-        // }
+        /* build a new encoding for this symbol if none is available. */
+        if (!enc) {
+            enc = f_enc.make_encoding(type);
+            f_enc.register_encoding(key, enc);
+        }
 
-        EnumEncoding_ptr eenc (dynamic_cast<EnumEncoding_ptr>( enc ));
+        EnumEncoding_ptr eenc
+            (dynamic_cast<EnumEncoding_ptr>(enc));
         assert( NULL != eenc );
 
         f_type_stack.push_back(type);
-        f_add_stack.push_back(f_enc.constant(eenc -> value( expr )));
+        f_add_stack.push_back(f_enc.constant(eenc -> value(expr)));
         return;
     }
 
@@ -139,9 +138,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    /* 6. defines, simply compile it recursively.  We keep this to
-     * retain the old lazy behavior with nullary defines since it
-     * comes at no extra cost at all.  */
+    /* 6. defines, simply compile them recursively :-) */
     else if (symb->is_define()) {
         Expr_ptr body
             (symb -> as_define().body());

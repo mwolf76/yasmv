@@ -39,10 +39,14 @@ public:
 
     inline void operator() (const MicroDescriptor& md)
     {
-        MicroMgr& mm(MicroMgr::INSTANCE());
+        MicroMgr& mm
+            (MicroMgr::INSTANCE());
 
-        OpTriple triple (md.triple());
-        MicroLoader& loader = mm.require(triple);
+        OpTriple triple
+            (md.triple());
+        MicroLoader& loader
+            (mm.require(triple));
+
         inject(md, loader.microcode());
     }
 
@@ -63,22 +67,29 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
         << std::endl;
 
     /* true */
-    const Var alpha(0);
+    const Var alpha
+        (0);
 
     /* local refs */
-    const DDVector& z(md.z());
-    const DDVector& x(md.x());
-    const DDVector& y(md.y());
+    const DDVector& z
+        (md.z());
+    const DDVector& x
+        (md.x());
+    const DDVector& y
+        (md.y());
 
-    int width( triple_width(md.triple()));
+    int width
+        (triple_width(md.triple()));
 
     // keep each injection in a separate cnf space
     f_sat.clear_cnf_map();
 
-    // foreach clause in microcode...
+    // foreach clause in microcode data...
     LitsVector::const_iterator i;
     for (i = microcode.begin(); microcode.end() != i; ++ i) {
-        const Lits& clause (*i);
+
+        const Lits& clause
+            (*i);
 
         Minisat::vec<Lit> ps;
         ps.push( mkLit( f_group, true));
@@ -89,15 +100,20 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
         // vars are kept distinct among distinct injections.
         Lits::const_iterator j;
         for (j = clause.begin(); clause.end() != j; ++ j)  {
-            Lit lit (*j);
+            Lit lit
+                (*j);
 
-            Var lit_var (Minisat::var(lit));
-            int lit_sign(Minisat::sign(lit));
+            Var lit_var
+                (Minisat::var(lit));
+            int lit_sign
+                (Minisat::sign(lit));
+
             Var tgt_var;
 
             /* z? */
             if (lit_var < width) {
-                int ndx = lit_var;
+                int ndx
+                    (lit_var);
                 assert(0 <= ndx && ndx < width);
 
                 const DdNode* node(NULL);
@@ -114,48 +130,60 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
                 }
                 // const DD support
                 else {
-                    value_t value = cuddV(node);
+                    value_t value
+                        (cuddV(node));
                     assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
             /* x? */
             else if (width <= lit_var && lit_var < 2 * width) {
-                int ndx = lit_var - width;
+                int ndx
+                    (lit_var - width);
                 assert(0 <= ndx && ndx < width);
 
-                const DdNode* node(x[ width - ndx - 1].getNode());
+                const DdNode* node
+                    (x[ width - ndx - 1].getNode());
+
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
                 // const DD support
                 else {
-                    value_t value = cuddV(node);
+                    value_t value
+                        (cuddV(node));
                     assert( value < 2); // 0 or 1
+
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
             /* y? */
             else if (2 * width <= lit_var && lit_var < 3 * width) {
-                int ndx = lit_var - 2 * width;
+                int ndx
+                    (lit_var - 2 * width);
                 assert(0 <= ndx && ndx < width);
 
-                const DdNode* node(y[ width - ndx - 1].getNode());
+                const DdNode* node
+                    (y[ width - ndx - 1].getNode());
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
                 // const DD support
                 else {
-                    value_t value = cuddV(node);
+                    value_t value
+                        (cuddV(node));
                     assert( value < 2); // 0 or 1
-                    ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
+                    ps.push( mkLit( alpha, value
+                                    ? lit_sign :
+                                    ! lit_sign));
                 }
             }
-            /* cnf var */
+            /* nope, it's a cnf var */
             else {
-                int ndx = lit_var - 3 * width;
+                int ndx
+                    (lit_var - 3 * width);
                 assert(0 <= ndx /* && ndx < width */);
 
                 tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
@@ -201,87 +229,92 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
         << std::endl;
 
     /* true */
-    const Var alpha(0);
+    const Var alpha
+        (0);
 
     /* local refs */
-    const DDVector& z(md.z());
-    const ADD& aux (md.aux());
-    const DDVector& x(md.x());
-    const DDVector& y(md.y());
+    const DDVector& z
+        (md.z());
+    const ADD& aux
+        (md.aux());
+    const DDVector& x
+        (md.x());
+    const DDVector& y
+        (md.y());
 
     /* allocate a fresh variable for ITE condition */
-    Var act = f_sat.find_dd_var( aux.getNode(), f_time);
+    Var act
+        (f_sat.find_dd_var( aux.getNode(), f_time));
 
-    { /* !a, ( Zi <-> Xi for all i ) */
+    /* !a, Zi <-> Xi for all i */
+    for (unsigned pol = 0; pol < 2; ++ pol) {
 
-        for (unsigned pol = 0; pol < 2; ++ pol) {
+        for (unsigned i = 0; i < md.width(); ++ i) {
+            Minisat::vec<Lit> ps;
+            ps.push( mkLit( f_group, true));
+            ps.push( mkLit( act, true));
 
-            for (unsigned i = 0; i < md.width(); ++ i) {
-                Minisat::vec<Lit> ps;
-                ps.push( mkLit( f_group, true));
-                ps.push( mkLit( act, true));
+            DdNode* znode
+                (z[i].getNode());
+            assert( znode && ! Cudd_IsConstant( znode));
+            ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
 
-                DdNode* znode (z[i].getNode());
-                assert( znode && ! Cudd_IsConstant( znode));
-                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
+            DdNode* xnode
+                (x[i].getNode()); assert( xnode );
 
-                DdNode* xnode (x[i].getNode()); assert( xnode );
-                Lit xlit;
-                if (Cudd_IsConstant( xnode ))
-                    xlit = mkLit( alpha, Cudd_V(xnode) ? pol : ! pol);
-                else
-                    xlit = mkLit( f_sat.find_dd_var( x[i].getNode(), f_time), pol );
-                ps.push( xlit );
+            Lit xlit
+                (Cudd_IsConstant(xnode)
+                 ? mkLit( alpha, Cudd_V(xnode) ? pol : ! pol)
+                 : mkLit( f_sat.find_dd_var( x[i].getNode(), f_time), pol));
 
-                DRIVEL
-                    << ps
-                    << std::endl;
+            ps.push( xlit );
 
-                f_sat.add_clause( ps );
-            }
+            DRIVEL
+                << ps
+                << std::endl;
+
+            f_sat.add_clause( ps );
         }
     }
 
-    { /* a, ( Zi <-> Yi for all i */
-        for (unsigned pol = 0; pol < 2; ++ pol) {
+    /* a, Zi <-> Yi for all i */
+    for (unsigned pol = 0; pol < 2; ++ pol) {
 
-            for (unsigned i = 0; i < md.width(); ++ i) {
-                Minisat::vec<Lit> ps;
-                ps.push( mkLit( f_group, true));
-                ps.push( mkLit( act, false));
+        for (unsigned i = 0; i < md.width(); ++ i) {
+            Minisat::vec<Lit> ps;
+            ps.push( mkLit( f_group, true));
+            ps.push( mkLit( act, false));
 
-                DdNode* znode (z[i].getNode());
-                assert( znode && ! Cudd_IsConstant( znode));
-                ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
+            DdNode* znode
+                (z[i].getNode());
+            assert( znode && ! Cudd_IsConstant( znode));
+            ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(), f_time), !pol ));
 
-                DdNode* ynode (y[i].getNode()); assert( ynode );
-                Lit ylit;
-                if (Cudd_IsConstant( ynode ))
-                    ylit = mkLit( alpha, Cudd_V(ynode) ? pol : ! pol );
-                else
-                    ylit = mkLit( f_sat.find_dd_var( y[i].getNode(), f_time), pol);
-                ps.push( ylit );
+            DdNode* ynode
+                (y[i].getNode()); assert( ynode );
 
-                DRIVEL
-                    << ps
-                    << std::endl;
+            Lit ylit
+                (Cudd_IsConstant(ynode)
+                 ? mkLit( alpha, Cudd_V(ynode) ? pol : ! pol )
+                 : mkLit( f_sat.find_dd_var( y[i].getNode(), f_time), pol));
 
-                f_sat.add_clause( ps );
-            }
+            ps.push( ylit );
+
+            DRIVEL
+                << ps
+                << std::endl;
+
+            f_sat.add_clause( ps );
         }
     }
-
-
 }
 
-// proxy
+// proxies
 void Engine::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
 {
     CNFMicrocodeInjector worker(*this, time, group);
     worker(md);
 }
-
-// proxy
 void Engine::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
 {
     CNFMuxcodeInjector worker(*this, time, group);

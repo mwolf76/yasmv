@@ -46,6 +46,7 @@ void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigne
         << std::endl;
 }
 
+/* ITEs */
 void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
                                        DDVector& z, ADD cnd, ADD aux,
                                        DDVector& x, DDVector &y )
@@ -72,6 +73,11 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
         << "Registered "
         << md
         << std::endl;
+}
+
+/* Arrays */
+void Compiler::register_muxdescriptor( unsigned width, DDVector& z )
+{
 }
 
 /* post-processing for MUXes: for each descriptor, we need to conjunct
