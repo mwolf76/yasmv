@@ -45,5 +45,5 @@ TRANS
 -- To perform planning, we assert the negation of the desired GOAL.
 -- To solve the ferryman problem in this model try this:
 
--- >> check_invar ! GOAL
-DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
+-- >> check_invar ! @GOAL
+DEFINE @GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
