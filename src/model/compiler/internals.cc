@@ -20,47 +20,6 @@
  **/
 #include <compiler.hh>
 
-/* private service of walk_leaf */
-void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
-{
-    assert (NULL != enc);
-    DDVector& dds = enc->dv();
-    unsigned width = dds.size();
-    assert( 0 < width );
-
-    // push into type stack
-    f_type_stack.push_back(type);
-
-    /* booleans, monoliths are just one DD */
-    if (type->is_monolithic())
-        f_add_stack.push_back(dds[0]);
-
-    /* algebraics, reversed list of encoding DDs */
-    else if (type->is_algebraic()) {
-        // type and enc width info has to match
-        assert( type -> as_algebraic()-> width() == width );
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
-            f_add_stack.push_back(*ri);
-        }
-    }
-
-    /* array of algebraics, same as above, times nelems (!) */
-    else if (type->is_array()) {
-
-        // type and enc width info has to match
-        assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
-                width / type -> as_array() -> nelems());
-
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
-            f_add_stack.push_back(*ri);
-        }
-    }
-
-    else assert( false ); // unexpected
-}
-
 /* unary ops */
 void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
                                          DDVector& z, DDVector& x )
