@@ -21,9 +21,11 @@
 #include <utility>
 #include <compiler.hh>
 
+// synchronized
 CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
-    boost::mutex::scoped_lock lock(f_process_mutex);
+    boost::mutex::scoped_lock lock
+        (f_process_mutex);
 
     f_elapsed = clock();
 
@@ -59,16 +61,23 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
-    // Exactly one 0-1 ADD.
-    ADD res = f_add_stack.back();
+    // Exactly one 0-1 ADD expected here
+    ADD res
+        (f_add_stack.back());
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
 
-    unsigned res_sz (f_add_stack.size());
-    unsigned mcr_sz (f_micro_descriptors.size());
-    unsigned mux_sz (f_mux_map.size());
+    unsigned res_sz
+        (f_add_stack.size());
+    unsigned mcr_sz
+        (f_micro_descriptors.size());
+    unsigned mux_sz
+        (f_mux_map.size());
 
-    /* generates additional fragments for MUXes activation */
+    /* generates additional fragments for MUXes activation, this is
+       required for proper encoding of ITEs and array selectors. See
+       worker class `CNFMuxcodeInjector` for more details on MUX
+       internals. */
     post_process_muxes();
 
     f_elapsed = clock() - f_elapsed;

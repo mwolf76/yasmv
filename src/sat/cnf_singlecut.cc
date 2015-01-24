@@ -208,13 +208,7 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
-
-        DRIVEL
-            << ps
-            << std::endl;
-
         f_sat.add_clause(ps);
     }
 
@@ -223,14 +217,8 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
-
-        DRIVEL
-            << ps
-            << std::endl;
-
         f_sat.add_clause(ps);
     }
 
@@ -239,24 +227,16 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
         ps.push( mkLit( w, pw ));
-
-        DRIVEL
-            << ps
-            << std::endl;
         f_sat.add_clause(ps);
     }
 };
 
 void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
-    CNFBuilderSingleCut worker(*this, time, group);
+    CNFBuilderSingleCut worker
+        (*this, time, group);
     worker(add);
-
-    DRIVEL
-        << "------------------------------------------------------------"
-        << std::endl;
 }

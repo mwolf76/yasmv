@@ -20,6 +20,7 @@
  *
  **/
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <bmc/bmc.hh>
 #include <witness_mgr.hh>
@@ -69,11 +70,16 @@ void BMC::falsification( Expr_ptr phi )
         /* assert violation in a separate group */
         assert_formula(engine, k, vv, engine.new_group());
 
-        if (STATUS_SAT == engine.solve()) {
-            WitnessMgr& wm = WitnessMgr::INSTANCE();
+        TRACE
+            << "Falsification: looking for CEX (k = " << k << ")..."
+            << std::endl;
 
+        if (STATUS_SAT == engine.solve()) {
+            test_and_set_status( MC_FALSE );
+
+            WitnessMgr& wm = WitnessMgr::INSTANCE();
             TRACE
-                << "Found CEX witness (k = " << k << "), invariant `" << invariant
+                << "CEX witness exists (k = " << k << "), invariant `" << invariant
                 << "` is FALSE."
                 << std::endl;
 
@@ -96,9 +102,7 @@ void BMC::falsification( Expr_ptr phi )
             }
 
             wm.register_witness(w);
-
             set_witness(w);
-            set_status( MC_FALSE );
 
             break;
         }
@@ -135,14 +139,17 @@ void BMC::kinduction( Expr_ptr phi )
         /* assert violation in a separate group */
         assert_formula(engine, k, vv, engine.new_group());
 
+        TRACE
+            << "K-induction: looking for proof (k = " << k << ")..."
+            << std::endl;
+
         if (STATUS_UNSAT == engine.solve()) {
             TRACE
                 << "Found k-induction proof (k = " << k << "), invariant `" << invariant
                 << "` is TRUE."
                 << std::endl;
-
-            set_status( MC_TRUE );
-            break;
+            test_and_set_status( MC_TRUE );
+            return;
         }
 
         /* disable violation and add invariant */
@@ -154,20 +161,25 @@ void BMC::kinduction( Expr_ptr phi )
         assert_fsm_trans(engine, k ++);
         assert_fsm_invar(engine, k);
 
-        /* build state uniqueness constraint for each pair of states (j, k), where j < k */
+        /* build state uniqueness constraint for each pair of states
+           (j, k), where j < k */
         for (j = 0; j < k; ++ j)
             assert_fsm_uniqueness(engine, j, k);
 
     } while (f_status == MC_UNKNOWN && !leave);
 
+    TRACE
+        << "K-induction: giving up."
+        << std::endl;
 }
 
+// comment out when debugging
 #define ENABLE_FALSIFICATION
 #define ENABLE_KINDUCTION
 
 void BMC::process(const Expr_ptr phi)
 {
-    set_status( MC_UNKNOWN );
+    f_status = MC_UNKNOWN;
 
     /* launch parallel threads */
     #ifdef ENABLE_FALSIFICATION
@@ -186,5 +198,29 @@ void BMC::process(const Expr_ptr phi)
     step.join();
     #endif
 
-    TRACE << "Done." << std::endl;
+    TRACE
+        << "Done."
+        << std::endl;
+}
+
+// synchronized
+mc_status_t BMC::status()
+{
+    boost::mutex::scoped_lock lock
+        (f_status_mutex);
+
+    return f_status;
+}
+
+// synchronized
+mc_status_t BMC::test_and_set_status(mc_status_t status)
+{
+    assert(status != MC_UNKNOWN);
+    boost::mutex::scoped_lock lock
+        (f_status_mutex);
+
+    if (f_status == MC_UNKNOWN)
+        f_status = status;
+
+    return f_status;
 }

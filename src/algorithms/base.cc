@@ -188,78 +188,26 @@ void Algorithm::setup()
 
 void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
 {
-    unsigned n = f_init.size();
-    DEBUG
-        << "CNFizing INIT @" << time
-        << "... (" << n << " fragments)"
-        << std::endl;
-
-    clock_t t0 = clock();
-
-    CompilationUnits::const_iterator i;
-    for (i = f_init.begin(); f_init.end() != i; ++ i) {
+    for (CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
         engine.push( *i, time, group);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG
-        << "Done. (took " << secs << " seconds)"
-        << std::endl;
 }
 
 void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
 {
-    unsigned n = f_invar.size();
-    DEBUG
-        << "CNFizing INVAR @" << time
-        << "... (" << n << " fragments)"
-        << std::endl;
-
-    clock_t t0 = clock();
-
-    CompilationUnits::const_iterator i;
-    for (i = f_invar.begin(); f_invar.end() != i; ++ i) {
+    for (CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
         engine.push( *i, time, group);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG
-        << "Done. (took " << secs << " seconds)"
-        << std::endl;
 }
 
 void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 {
-    unsigned n = f_trans.size();
-    DEBUG
-        << "CNFizing TRANS @" << time
-        << "... (" << n << " fragments)"
-        << std::endl;
-
-    clock_t t0 = clock();
-
-    CompilationUnits::const_iterator i;
-    for (i = f_trans.begin(); f_trans.end() != i; ++ i) {
+    for (CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
         engine.push( *i, time, group);
-    }
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG
-        << "Done. (took " << secs << " seconds)"
-        << std::endl;
 }
 
 void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
 {
-    SymbIter symbs( model(), NULL ); // no COI support yet
-
-    clock_t t0 = clock();
-    DEBUG
-        << "CNFizing uniqueness(" << j << ", " << k << ")"
-        << std::endl;
+    SymbIter symbs
+        (model(), NULL); // no COI support yet
 
     VarVector uniqueness_vars;
 
@@ -302,10 +250,6 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                         ps.push( mkLit( jvar, true));
                         ps.push( mkLit( kvar, true));
 
-                        DRIVEL
-                            << ps
-                            << std::endl;
-
                         engine.add_clause(ps);
                     }
 
@@ -314,10 +258,6 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                         ps.push( mkLit( jkne, true));
                         ps.push( mkLit( jvar, true));
                         ps.push( mkLit( kvar, true));
-
-                        DRIVEL
-                            << ps
-                            << std::endl;
 
                         engine.add_clause(ps);
                     }
@@ -335,33 +275,10 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
         ps.push( mkLit( *eye, false));
     }
 
-    DRIVEL
-        << ps
-        << std::endl;
-
     engine.add_clause(ps);
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG
-        << "Done. (took " << secs << " seconds)"
-        << std::endl;
 }
 
 void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& term, group_t group)
-{
-    clock_t t0 = clock();
-    DEBUG
-        << "CNFizing formula @" << time << " ..."
-        << std::endl;
-
-    engine.push( term, time, group);
-
-    clock_t elapsed = clock() - t0;
-    double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG
-        << "Done. (took " << secs << " seconds)"
-        << std::endl;
-}
+{ engine.push( term, time, group); }
 
 

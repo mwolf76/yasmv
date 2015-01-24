@@ -38,14 +38,12 @@ public:
 
     void process(const Expr_ptr phi);
 
-    inline mc_status_t status() const
-    { return f_status; }
-
-    inline void set_status(mc_status_t status)
-    { f_status = status; }
+    mc_status_t status();
+    mc_status_t test_and_set_status(mc_status_t status);
 
 private:
     mc_status_t f_status;
+    boost::mutex f_status_mutex;
 
     /* strategies */
     void falsification( Expr_ptr phi );

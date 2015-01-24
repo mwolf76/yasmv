@@ -57,8 +57,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     }
 
     DEBUG
-        << "Solving with following assumptions..."
-        << assumptions
+        << "Solving ..."
         << std::endl;
 
     f_status = f_solver.solve(assumptions)
@@ -85,30 +84,20 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
     {
         const DDVector& dv( cu.dds());
         unsigned n = dv.size();
-        DEBUG
-            << "CNFizing " << n
-            << " fragments"
-            << std::endl;
 
         DDVector::const_iterator i;
-        for (i = dv.begin(); dv.end() != i; ++ i) {
+        for (i = dv.begin(); dv.end() != i; ++ i)
             cnf_push_single_cut( *i, time, group );
-        }
     }
 
     /* push microcode */
     {
         const MicroDescriptors& micro_descriptors (cu.micro_descriptors());
         unsigned n = micro_descriptors.size();
-        DEBUG
-            << "Injecting " << n
-            << " microcode instances"
-            << std::endl;
 
         MicroDescriptors::const_iterator i;
-        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)  {
+        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)
             cnf_inject_microcode( *i, time, group );
-        }
     }
 
     /* push muxes */
@@ -119,19 +108,11 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         while (mux_map.end() != mmi) {
             Expr_ptr toplevel (mmi -> first);
             MuxDescriptors descriptors (mmi -> second);
-
             unsigned n = descriptors.size();
-            DEBUG
-                << "Injecting " << n
-                << " MUX instances"
-                << " for toplevel "
-                << toplevel
-                << std::endl;
 
             MuxDescriptors::const_iterator i;
-            for (i = descriptors.begin(); descriptors.end() != i; ++ i)  {
+            for (i = descriptors.begin(); descriptors.end() != i; ++ i)
                 cnf_inject_muxcode( *i, time, group );
-            }
 
             ++ mmi ;
         }
