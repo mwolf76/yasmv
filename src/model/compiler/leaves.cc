@@ -44,7 +44,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     /* 1. Explicit int or fxd constants, perform booleanization *
      * immediately. An exception will be thrown if conversion could
-     * con be completed. */
+     * not be completed. */
     if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
@@ -169,23 +169,17 @@ void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
     else if (type->is_algebraic()) {
         // type and enc width info has to match
         assert( type -> as_algebraic()-> width() == width );
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
+        for (DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
             f_add_stack.push_back(*ri);
-        }
     }
 
-    /* array of algebraics, same as above, times nelems (!) */
+    /* array of algebraics, same as above, times nelems */
     else if (type->is_array()) {
-
         // type and enc width info has to match
         assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
                 width / type -> as_array() -> nelems());
-
-        for (DDVector::reverse_iterator ri = dds.rbegin();
-             ri != dds.rend(); ++ ri) {
+        for (DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
             f_add_stack.push_back(*ri);
-        }
     }
 
     else assert( false ); // unexpected
@@ -208,15 +202,19 @@ static inline value_t pow2(unsigned exp)
 /* encodes constant value into a DD vector */
 void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
 {
-    const unsigned base (2);
+    const unsigned base
+        (2);
 
-    value_t value = konst -> value();
+    value_t value
+        (konst -> value());
 
     if (value < 0)
         value += pow2(width); // 2's complement
 
     for (unsigned i = 0; i < width; ++ i) {
-        ADD digit = f_enc.constant(value % base);
+        ADD digit
+            (f_enc.constant(value % base));
+
         f_add_stack.push_back(digit);
         value /= base;
     }

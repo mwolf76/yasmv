@@ -93,6 +93,33 @@ private:
     DDVector f_y;
 };
 
+class ArrayMuxDescriptor {
+public:
+    ArrayMuxDescriptor(unsigned elem_width, unsigned elem_count,
+                       DDVector& z, DDVector& cnds, DDVector& acts, DDVector& x);
+
+    inline unsigned elem_width() const
+    { return f_elem_width; }
+    inline unsigned elem_count() const
+    { return f_elem_count; }
+    inline const DDVector& z() const
+    { return f_z; }
+    inline const DDVector& cnds() const
+    { return f_cnds; }
+    inline const DDVector& acts() const
+    { return f_acts; }
+    inline const DDVector& x() const
+    { return f_x; }
+
+private:
+    unsigned f_elem_width;
+    unsigned f_elem_count;
+    DDVector f_z;
+    DDVector f_cnds;
+    DDVector f_acts;
+    DDVector f_x;
+};
+
 class MicroDescriptor {
 
 public:
@@ -131,9 +158,11 @@ private:
 std::ostream& operator<<(std::ostream& os, OpTriple triple);
 std::ostream& operator<<(std::ostream& os, MicroDescriptor& md);
 std::ostream& operator<<(std::ostream& os, MuxDescriptor& md);
+std::ostream& operator<<(std::ostream& os, ArrayMuxDescriptor& md);
 
 typedef std::vector<MicroDescriptor> MicroDescriptors;
 typedef std::vector<MuxDescriptor> MuxDescriptors;
+typedef std::vector<ArrayMuxDescriptor> ArrayMuxVector;
 
 typedef boost::unordered_map<Expr_ptr, MuxDescriptors> MuxMap;
 

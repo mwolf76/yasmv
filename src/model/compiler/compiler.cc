@@ -71,8 +71,10 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
         (f_add_stack.size());
     unsigned mcr_sz
         (f_micro_descriptors.size());
-    unsigned mux_sz
+    unsigned imux_sz
         (f_mux_map.size());
+    unsigned amux_sz
+        (f_array_mux_vector.size());
 
     /* generates additional fragments for MUXes activation, this is
        required for proper encoding of ITEs and array selectors. See
@@ -81,17 +83,19 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     post_process_muxes();
 
     f_elapsed = clock() - f_elapsed;
-    double secs = (double) f_elapsed / (double) CLOCKS_PER_SEC;
+    double secs
+        ((double) f_elapsed / (double) CLOCKS_PER_SEC);
 
     DEBUG
         << "Compilation of " << ctx << "::" << body
         << " took " << secs << " seconds, "
         << res_sz << " DDs, "
         << mcr_sz << " Microdescriptors, "
-        << mux_sz << " Multiplexers."
+        << imux_sz << " ITE MUXes, "
+        << amux_sz << " Array MUXes."
         << std::endl;
 
-    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_map);
+    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_map, f_array_mux_vector);
 }
 
 Compiler::Compiler()

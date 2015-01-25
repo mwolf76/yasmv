@@ -190,8 +190,9 @@ private:
     void register_muxdescriptor( Expr_ptr toplevel, unsigned width,
                                  DDVector& z, ADD cnd, ADD aux,
                                  DDVector& x, DDVector &y );
-    void register_muxdescriptor( unsigned width, DDVector& z );
-
+    void register_muxdescriptor( unsigned elem_width, unsigned elem_count,
+                                 DDVector& z, DDVector& cnds,
+                                 DDVector& acts, DDVector& x);
     void post_process_muxes();
 
     void pre_hook();
@@ -208,6 +209,7 @@ private:
 
     /* mux descriptors */
     MuxMap f_mux_map;
+    ArrayMuxVector f_array_mux_vector;
 
     /* ITE toplevels */
     ITEUnionFindMap f_toplevel_map;

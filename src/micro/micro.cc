@@ -42,8 +42,18 @@ MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVe
     , f_aux(aux)
     , f_x(x)
     , f_y(y)
-{
-}
+{}
+
+ArrayMuxDescriptor::ArrayMuxDescriptor(unsigned elem_width, unsigned elem_count,
+                                       DDVector& z, DDVector& cnds,
+                                       DDVector& acts, DDVector &x)
+    : f_elem_width(elem_width)
+    , f_elem_count(elem_count)
+    , f_z(z)
+    , f_cnds(cnds)
+    , f_acts(acts)
+    , f_x(x)
+{}
 
 std::ostream& operator<<(std::ostream& os, MicroDescriptor& md)
 {
@@ -105,7 +115,7 @@ std::ostream& operator<<(std::ostream& os, MicroDescriptor& md)
 
 std::ostream& operator<<(std::ostream& os, MuxDescriptor& md)
 {
-    os << "mux"
+    os << "ITE mux"
        << md.width()
        << "(z = [";
 
@@ -155,6 +165,64 @@ std::ostream& operator<<(std::ostream& os, MuxDescriptor& md)
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
 
         if (++ yi != y.end())
+            os << ", ";
+        else
+            break;
+    }
+    os << "])";
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, ArrayMuxDescriptor& md)
+{
+    os << "Array mux"
+       << md.elem_count()
+       << " x "
+       << md.elem_width()
+       << "(z = [";
+
+    const DDVector& z(md.z());
+    for (DDVector::const_iterator zi = z.begin();;) {
+        const DdNode* node (zi->getNode());
+        if (! Cudd_IsConstant(node))
+            os << node->index;
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ zi != z.end())
+            os << ", ";
+        else
+            break;
+    }
+
+    const DDVector& acts(md.acts());
+    if (acts.size()) {
+        os << ", acts = [";
+        for (DDVector::const_iterator actsi = acts.begin();;) {
+            const DdNode* node (actsi->getNode());
+            if (! Cudd_IsConstant(node))
+                os << node->index;
+            else
+                os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+            if (++ actsi != acts.end())
+                os << ", ";
+            else
+                break;
+        }
+        os << "]";
+    }
+
+    os << "], x = [";
+    const DDVector& x(md.x());
+    for (DDVector::const_iterator xi = x.begin();;) {
+        const DdNode* node (xi->getNode());
+        if (! Cudd_IsConstant(node))
+            os << node->index;
+        else
+            os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+        if (++ xi != x.end())
             os << ", ";
         else
             break;

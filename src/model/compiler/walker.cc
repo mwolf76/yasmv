@@ -555,6 +555,7 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
+    // TODO: add support for booleans and enums
     if (is_subscript_algebraic(expr))
         algebraic_subscript(expr);
 

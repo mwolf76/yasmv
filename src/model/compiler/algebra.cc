@@ -316,15 +316,18 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
+
+    /* Fetch cnd DD recursively */
     POP_DD(cnd);
 
+    /* Push MUX output DD vector */
     FRESH_DV(dv, width);
 
+    /* Register ITE MUX */
     Expr_ptr parent = expr;
     ITEUnionFindMap::const_iterator eye = f_toplevel_map.find( expr );
     if (f_toplevel_map.end() != eye)
         parent = eye -> second;
-
     register_muxdescriptor( parent, width, dv, cnd,
                             make_auto_dd(), lhs, rhs );
 }
@@ -333,55 +336,72 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 {
     assert(is_subscript_algebraic(expr));
 
+    EncodingMgr& bm
+        (f_enc);
+
     // index
-    Type_ptr t0 = f_type_stack.back(); f_type_stack.pop_back(); // consume index
-    assert( t0 -> is_algebraic() );
+    Type_ptr t0
+        (f_type_stack.back());
+    f_type_stack.pop_back(); // consume index
+    assert(t0 -> is_algebraic());
 
-    Type_ptr itype = t0 -> as_algebraic();
-    POP_DV(index, itype -> width());
+    Type_ptr itype
+        (t0 -> as_algebraic());
+    unsigned iwidth
+        (itype -> width());
 
-    assert( itype -> width() == f_enc.word_width());
+    POP_DV(index, iwidth);
+    assert(iwidth == bm.word_width()); // needed?
 
     // array
-    Type_ptr t1 = f_type_stack.back(); f_type_stack.pop_back(); // consume array
-    assert( t1 -> is_array());
-    ArrayType_ptr atype = t1 -> as_array();
+    Type_ptr t1
+        (f_type_stack.back());
+    f_type_stack.pop_back(); // consume array
+    assert(t1 -> is_array());
 
-    unsigned elem_size  = atype -> of() -> width();
-    unsigned elem_count = atype -> nelems();
-    POP_DV(vec, elem_size * elem_count);
+    ArrayType_ptr atype
+        (t1 -> as_array());
+    ScalarType_ptr type
+        (atype -> of());
 
-    // build the multiplexer
-    ADD mpx[ elem_size ];
-    for (unsigned i = 0; i < elem_size; ++ i) {
-        mpx[i] = f_enc.error(); // default to failure
-    }
+    unsigned elem_width
+        (type -> width());
+    unsigned elem_count
+        (atype -> nelems());
+    POP_DV(vec, elem_width * elem_count);
 
-    ExprMgr& em = f_owner.em();
-    unsigned j = elem_count; do {
+    /* Build selection DDs */
+    DDVector cnd_dds;
+    DDVector act_dds;
+    unsigned j_, j = 0; do {
 
-        -- j;
+        unsigned i;
+        ADD cnd
+            (bm.one());
 
-        /* A bit of magic: reusing eq code :-) */
-        (*this)( em.make_eq( expr->rhs(),
-                             em.make_const(j)));
+        i = 0; j_ = j; while (i < iwidth) {
+            ADD bit
+                ((j_ & 1) ? bm.one() : bm.zero());
+            unsigned ndx
+                (iwidth - i - 1);
+            j_ >>= 1;
 
-        ADD cnd = f_add_stack.back(); f_add_stack.pop_back();
-        f_type_stack.pop_back(); /* adjust type stack */
-
-        for (unsigned i = 0; i < elem_size; ++ i ) {
-            unsigned ndx = elem_size - i - 1;
-            mpx[ ndx ] = cnd.Ite( vec[ j * elem_size + i ], mpx[ ndx ]);
+            // Cudd_PrintMinterm( bm.dd().getManager(), index[i].getNode());
+            // Cudd_PrintMinterm( bm.dd().getManager(), bit.getNode());
+            cnd *= index[ ndx ].Xnor(bit);
+            ++ i;
         }
 
-    } while (j);
+        cnd_dds.push_back(cnd);
+        act_dds.push_back(make_auto_dd());
+    } while (++ j < elem_count);
 
-    // push mpx backwards
-    for (unsigned i = 0; i < elem_size; ++ i) {
-        PUSH_DD( mpx[ elem_size - i - 1]);
-    }
+    /* Push MUX output DD vector */
+    FRESH_DV(dv, elem_width);
+    PUSH_TYPE(type);
 
-    f_type_stack.push_back( atype -> of());
+    /* Register array MUX */
+    register_muxdescriptor( elem_width, elem_count, dv, cnd_dds, act_dds, vec);
 }
 
 /* add n-1 non significant zero, LSB is original bit */

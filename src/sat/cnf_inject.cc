@@ -283,6 +283,82 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
     }
 }
 
+class CNFArrayMuxcodeInjector {
+public:
+    CNFArrayMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
+        : f_sat(sat)
+        , f_time(time)
+        , f_group(group)
+    {}
+
+    ~CNFArrayMuxcodeInjector()
+    {}
+
+    inline void operator() (const ArrayMuxDescriptor& md)
+    { inject(md); }
+
+private:
+    void inject(const ArrayMuxDescriptor& md);
+
+    Engine& f_sat;
+    step_t f_time;
+    group_t f_group;
+};
+
+void CNFArrayMuxcodeInjector::inject(const ArrayMuxDescriptor& md)
+{
+    DEBUG
+        << const_cast<ArrayMuxDescriptor&> (md)
+        << std::endl;
+
+    /* true */
+    const Var alpha
+        (0);
+
+    /* local refs */
+    const DDVector& z
+        (md.z());
+    const DDVector& acts
+        (md.acts());
+    const DDVector& x
+        (md.x());
+
+    unsigned j
+        (0);
+    DDVector::const_iterator ai
+        (acts.begin());
+    while (j < md.elem_count()) {
+
+        /* allocate a fresh variable for ITE condition */
+        Var act
+            (f_sat.find_dd_var((*ai).getNode(), f_time));
+
+        /* ! a, Zi <-> Xi for all i */
+        for (unsigned pol = 0; pol < 2; ++ pol) {
+
+            for (unsigned i = 0; i < md.elem_width(); ++ i) {
+
+                unsigned ndx
+                    (i + j * md.elem_width());
+
+                Minisat::vec<Lit> ps;
+                ps.push( mkLit( f_group, true));
+                ps.push( mkLit( act, true));
+                ps.push( mkLit( f_sat.find_dd_var( z[ i ].getNode(),
+                                                   f_time), !pol ));
+                ps.push( mkLit( f_sat.find_dd_var( x[ ndx ].getNode(),
+                                                   f_time), pol));
+
+                f_sat.add_clause( ps );
+            }
+        }
+
+        ++ j;
+        ++ ai;
+    }
+}
+
+
 // proxies
 void Engine::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
 {
@@ -291,6 +367,7 @@ void Engine::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const 
 
     worker(md);
 }
+
 void Engine::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
 {
     CNFMuxcodeInjector worker
@@ -298,4 +375,14 @@ void Engine::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const grou
 
     worker(md);
 }
+
+void Engine::cnf_inject_amuxcode(const ArrayMuxDescriptor& md, step_t time, const group_t group)
+{
+    CNFArrayMuxcodeInjector worker
+        (*this, time, group);
+
+    worker(md);
+}
+
+
 

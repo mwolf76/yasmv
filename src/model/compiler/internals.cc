@@ -51,7 +51,8 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
                                        DDVector& z, ADD cnd, ADD aux,
                                        DDVector& x, DDVector &y )
 {
-    /* verify if entry for toplevel already exists. If not, create it */
+    /* verify if entry for toplevel already exists. If it doesn't,
+       create it */
     {
         MuxMap::const_iterator mi = f_mux_map.find( toplevel );
         if (f_mux_map.end() == mi)
@@ -59,7 +60,8 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
                               (toplevel, MuxDescriptors()));
     }
 
-    MuxDescriptor md( width, z, cnd, aux, x, y);
+    MuxDescriptor md
+        (width, z, cnd, aux, x, y);
 
     /* Entry for toplevel does exist for sure */
     {
@@ -76,31 +78,81 @@ void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
 }
 
 /* Arrays */
-void Compiler::register_muxdescriptor( unsigned width, DDVector& z )
+void Compiler::register_muxdescriptor( unsigned elem_width, unsigned elem_count,
+                                       DDVector& z, DDVector& cnds,
+                                       DDVector& acts, DDVector& x)
 {
+    ArrayMuxDescriptor amd
+        (elem_width, elem_count, z, cnds, acts, x);
+
+    f_array_mux_vector.push_back(amd);
+
+    DEBUG
+        << "Registered "
+        << amd
+        << std::endl;
 }
 
-/* post-processing for MUXes: for each descriptor, we need to conjunct
+/* post-processing for MUXes:
+
+   1. ITE MUXes, for each descriptor, we need to conjunct
    `! AND ( prev_conditions ) AND cnd <-> aux` to the original
-   formula */
+   formula.
+
+   2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
+   act_i, i in [0..n_elems[` to the original formula.
+*/
 void Compiler::post_process_muxes()
 {
-    for (MuxMap::const_iterator i = f_mux_map.begin(); f_mux_map.end() != i; ++ i) {
+    {
+        /* ITE MUXes */
+        for (MuxMap::const_iterator i = f_mux_map.begin(); f_mux_map.end() != i; ++ i) {
 
-        Expr_ptr toplevel (i -> first);
-        const MuxDescriptors& descriptors (i -> second);
+            Expr_ptr toplevel
+                (i -> first);
+            const MuxDescriptors& descriptors
+                (i -> second);
 
-        DRIVEL
-            << "Processing MUX activation clauses for `"
-            << toplevel << "`"
-            << std::endl;
+            DRIVEL
+                << "Processing ITE MUX activation clauses for `"
+                << toplevel << "`"
+                << std::endl;
 
-        ADD prev = f_enc.zero();
-        for (MuxDescriptors::const_reverse_iterator j = descriptors.rbegin();
-             descriptors.rend() != j; ++ j) {
-            ADD act (prev.Cmpl().Times(j -> cnd()));
-            PUSH_DD( act.Xnor(j -> aux()));
-            prev = act;
+            ADD prev
+                (f_enc.zero());
+
+            MuxDescriptors::const_reverse_iterator j;
+            for (j = descriptors.rbegin(); descriptors.rend() != j; ++ j) {
+                ADD act
+                    (prev.Cmpl().Times(j -> cnd()));
+
+                PUSH_DD( act.Xnor(j -> aux()));
+                prev = act;
+            }
+        }
+    }
+
+    {
+        /* Array MUXes */
+        ArrayMuxVector::const_iterator i;
+        for (i = f_array_mux_vector.begin(); f_array_mux_vector.end() != i; ++ i) {
+
+            const DDVector& cnds
+                (i -> cnds());
+            const DDVector& acts
+                ( i -> acts());
+
+            DDVector::const_iterator ci
+                (cnds.begin());
+            DDVector::const_iterator ai
+                (acts.begin());
+
+            while (cnds.end() != ci) {
+                PUSH_DD((*ci).Xnor(*ai));
+                ++ ci;
+                ++ ai;
+            }
+            assert(acts.end() == ai);
         }
     }
 }
@@ -225,7 +277,8 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     /* memoize result */
     f_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
-                    ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_map)));
+                    ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_map,
+                                            f_array_mux_vector)));
 
     unsigned res_sz (width);
     unsigned mcr_sz (f_micro_descriptors.size());
@@ -302,6 +355,7 @@ void Compiler::clear_internals()
     f_time_stack.clear();
     f_micro_descriptors.clear();
     f_mux_map.clear();
+    f_array_mux_vector.clear();
     f_toplevel_map.clear();
 }
 
