@@ -328,12 +328,21 @@ bool Compiler::cache_miss(const Expr_ptr expr)
                 f_micro_descriptors.push_back(*i);
         }
 
-        /* push cached multiplexer chains */
+        /* push cached ITE multiplexer chains */
         {
             const MuxMap& muxes (unit.mux_map());
             MuxMap::const_iterator i;
             for (i = muxes.begin(); muxes.end() != i; ++ i)
                 f_mux_map.insert(*i);
+        }
+
+        /* push cached Array multiplexer chains */
+        {
+            const ArrayMuxVector& muxes
+                (unit.array_mux_descriptors());
+            ArrayMuxVector::const_iterator i;
+            for (i = muxes.begin(); muxes.end() != i; ++ i)
+                f_array_mux_vector.push_back(*i);
         }
 
         /* push cached type */
