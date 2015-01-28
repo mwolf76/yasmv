@@ -38,6 +38,8 @@
 #include <sat/cnf_registry.hh>
 #include <sat/time_mapper.hh>
 
+#include <sat/helpers.hh>
+
 std::ostream &operator<<(std::ostream &out, const Lit &lit);
 std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
 
@@ -68,6 +70,11 @@ public:
      * @brief add a formula to the SAT problem instance.
      */
     void push(CompilationUnit cu, step_t time, group_t group = MAINGROUP);
+
+    /**
+     * @brief Enables lazy loading of inlined operator CNF clauses
+     */
+    MicroLoader& require(const InlinedOperatorSignature& triple);
 
     /**
      * @brief Invoke Minisat
@@ -119,7 +126,6 @@ public:
      */
     inline Var find_cnf_var(const DdNode* node, step_t time)
     { return f_registry.find_cnf_var(node, time);  }
-
 
     /**
      * @brief CNF registry for injection CNF var
@@ -200,14 +206,9 @@ private:
 
     status_t sat_solve_groups(const Groups& groups);
 
-    // CNFization algorithms
+    /* CNFization algorithms */
     void cnf_push_no_cut(ADD add, step_t time, const group_t group);
     void cnf_push_single_cut(ADD add, step_t time, const group_t group);
-
-    // CNF injection services
-    void cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group);
-    void cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group);
-    void cnf_inject_amuxcode(const ArrayMuxDescriptor& md, step_t time, const group_t group);
-}; // SAT instance
+};
 
 #endif

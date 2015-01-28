@@ -1,5 +1,5 @@
 /**
- *  @file micro.cc
+ *  @file unit.cc
  *  @brief Micro module
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,24 +19,23 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <micro/micro.hh>
+#include <model/compiler/unit.hh>
 #include <type/type.hh>
 
-#if 0
-MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x)
+InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature triple, DDVector& z, DDVector &x)
     : f_triple(triple)
     , f_z(z)
     , f_x(x)
 {}
 
-MicroDescriptor::MicroDescriptor(OpTriple triple, DDVector& z, DDVector &x, DDVector &y)
+InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature triple, DDVector& z, DDVector &x, DDVector &y)
     : f_triple(triple)
     , f_z(z)
     , f_x(x)
     , f_y(y)
 {}
 
-MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVector &x, DDVector &y)
+BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVector &x, DDVector &y)
     : f_width(width)
     , f_z(z)
     , f_cnd(cnd)
@@ -45,7 +44,7 @@ MuxDescriptor::MuxDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVe
     , f_y(y)
 {}
 
-ArrayMuxDescriptor::ArrayMuxDescriptor(unsigned elem_width, unsigned elem_count,
+MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width, unsigned elem_count,
                                        DDVector& z, DDVector& cnds,
                                        DDVector& acts, DDVector &x)
     : f_elem_width(elem_width)
@@ -56,7 +55,40 @@ ArrayMuxDescriptor::ArrayMuxDescriptor(unsigned elem_width, unsigned elem_count,
     , f_x(x)
 {}
 
-std::ostream& operator<<(std::ostream& os, MicroDescriptor& md)
+std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature triple)
+{
+    bool is_signed (triple.get<0>());
+    os << (is_signed ? "s" : "u");
+    switch (triple.get<1>()) {
+    case NEG: os << "neg"; break;
+    case NOT: os << "not"; break;
+
+    case PLUS: os << "add"; break;
+    case SUB:  os << "sub"; break;
+    case MUL:  os << "mul"; break;
+    case DIV:  os << "div"; break;
+    case MOD:  os << "mod"; break;
+
+    case BW_AND: os << "and"; break;
+    case BW_OR:  os << "or";  break;
+    case BW_XOR: os << "xor"; break;
+    case BW_XNOR:os << "xnor";break;
+    case IMPLIES: os << "implies"; break;
+
+    case EQ: os << "eq"; break;
+    case NE: os << "ne"; break;
+    case LT: os << "lt"; break;
+    case LE: os << "le"; break;
+    case GT: os << "gt"; break;
+    case GE: os << "ge"; break;
+
+    default: assert(false);
+    }
+    os << triple.get<2>();
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
 {
     os
         << md.triple()
@@ -114,7 +146,7 @@ std::ostream& operator<<(std::ostream& os, MicroDescriptor& md)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, MuxDescriptor& md)
+std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
 {
     os << "ITE mux"
        << md.width()
@@ -175,7 +207,7 @@ std::ostream& operator<<(std::ostream& os, MuxDescriptor& md)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, ArrayMuxDescriptor& md)
+std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)
 {
     os << "Array mux"
        << md.elem_count()
@@ -232,4 +264,4 @@ std::ostream& operator<<(std::ostream& os, ArrayMuxDescriptor& md)
 
     return os;
 }
-#endif
+

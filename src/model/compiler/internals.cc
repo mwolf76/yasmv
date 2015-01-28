@@ -20,143 +20,6 @@
  **/
 #include <compiler.hh>
 
-/* unary ops */
-void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
-                                         DDVector& z, DDVector& x )
-{
-    MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x);
-    f_micro_descriptors.push_back(md);
-
-    DEBUG
-        << "Registered "
-        << md
-        << std::endl;
-}
-
-/* binary ops (both algebraic and relationals) */
-void Compiler::register_microdescriptor( bool signedness, ExprType symb, unsigned width,
-                                         DDVector& z, DDVector& x, DDVector &y )
-{
-    MicroDescriptor md( make_op_triple( signedness, symb, width ), z, x, y);
-    f_micro_descriptors.push_back(md);
-
-    DEBUG
-        << "Registered "
-        << md
-        << std::endl;
-}
-
-/* ITEs */
-void Compiler::register_muxdescriptor( Expr_ptr toplevel, unsigned width,
-                                       DDVector& z, ADD cnd, ADD aux,
-                                       DDVector& x, DDVector &y )
-{
-    /* verify if entry for toplevel already exists. If it doesn't,
-       create it */
-    {
-        MuxMap::const_iterator mi = f_mux_map.find( toplevel );
-        if (f_mux_map.end() == mi)
-            f_mux_map.insert( std::make_pair< Expr_ptr, MuxDescriptors >
-                              (toplevel, MuxDescriptors()));
-    }
-
-    MuxDescriptor md
-        (width, z, cnd, aux, x, y);
-
-    /* Entry for toplevel does exist for sure */
-    {
-        MuxMap::iterator mi = f_mux_map.find( toplevel );
-        assert( f_mux_map.end() != mi );
-
-        mi -> second.push_back( md );
-    }
-
-    DEBUG
-        << "Registered "
-        << md
-        << std::endl;
-}
-
-/* Arrays */
-void Compiler::register_muxdescriptor( unsigned elem_width, unsigned elem_count,
-                                       DDVector& z, DDVector& cnds,
-                                       DDVector& acts, DDVector& x)
-{
-    ArrayMuxDescriptor amd
-        (elem_width, elem_count, z, cnds, acts, x);
-
-    f_array_mux_vector.push_back(amd);
-
-    DEBUG
-        << "Registered "
-        << amd
-        << std::endl;
-}
-
-/* post-processing for MUXes:
-
-   1. ITE MUXes, for each descriptor, we need to conjunct
-   `! AND ( prev_conditions ) AND cnd <-> aux` to the original
-   formula.
-
-   2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
-   act_i, i in [0..n_elems[` to the original formula.
-*/
-void Compiler::post_process_muxes()
-{
-    {
-        /* ITE MUXes */
-        for (MuxMap::const_iterator i = f_mux_map.begin(); f_mux_map.end() != i; ++ i) {
-
-            Expr_ptr toplevel
-                (i -> first);
-            const MuxDescriptors& descriptors
-                (i -> second);
-
-            DRIVEL
-                << "Processing ITE MUX activation clauses for `"
-                << toplevel << "`"
-                << std::endl;
-
-            ADD prev
-                (f_enc.zero());
-
-            MuxDescriptors::const_reverse_iterator j;
-            for (j = descriptors.rbegin(); descriptors.rend() != j; ++ j) {
-                ADD act
-                    (prev.Cmpl().Times(j -> cnd()));
-
-                PUSH_DD( act.Xnor(j -> aux()));
-                prev = act;
-            }
-        }
-    }
-
-    {
-        /* Array MUXes */
-        ArrayMuxVector::const_iterator i;
-        for (i = f_array_mux_vector.begin(); f_array_mux_vector.end() != i; ++ i) {
-
-            const DDVector& cnds
-                (i -> cnds());
-            const DDVector& acts
-                ( i -> acts());
-
-            DDVector::const_iterator ci
-                (cnds.begin());
-            DDVector::const_iterator ai
-                (acts.begin());
-
-            while (cnds.end() != ci) {
-                PUSH_DD((*ci).Xnor(*ai));
-                ++ ci;
-                ++ ai;
-            }
-            assert(acts.end() == ai);
-        }
-    }
-}
-
 /* auto id generator */
 Expr_ptr Compiler::make_auto_id()
 {
@@ -277,19 +140,25 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     /* memoize result */
     f_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
-                    ( key, CompilationUnit( dv, f_micro_descriptors, f_mux_map,
-                                            f_array_mux_vector)));
+                    ( key, CompilationUnit( dv, f_inlined_operator_descriptors, f_expr2bsd_map,
+                                            f_multiway_selection_descriptors)));
 
-    unsigned res_sz (width);
-    unsigned mcr_sz (f_micro_descriptors.size());
-    unsigned mux_sz (f_mux_map.size());
+    unsigned res_sz
+        (width);
+    unsigned mcr_sz
+        (f_inlined_operator_descriptors.size());
+    unsigned mux_sz
+        (f_expr2bsd_map.size());
+    unsigned amux_sz
+        (f_multiway_selection_descriptors.size());
 
     DRIVEL
         << "Cached " << key
         << ": "
         << res_sz << " DDs, "
         << mcr_sz << " Microcode descriptors, "
-        << mux_sz << " Multiplexer descriptors."
+        << mux_sz << " ITE Multiplexer descriptors, "
+        << amux_sz << " Array Multiplexer descriptors."
         << std::endl;
 }
 
@@ -306,15 +175,17 @@ bool Compiler::cache_miss(const Expr_ptr expr)
 
     if (eye != f_cache.end()) {
         const Type_ptr type = f_owner.type(expr, ctx);
-        DEBUG << "Cache hit for " << expr
-              << ", type is " << type
-              << std::endl;
+        DEBUG
+            << "Cache hit for " << expr
+            << ", type is " << type
+            << std::endl;
 
         CompilationUnit& unit = (*eye).second;
 
         /* push cached DDs (reversed) */
         {
-            const DDVector& dds (unit.dds());
+            const DDVector& dds
+                (unit.dds());
             DDVector::const_reverse_iterator i;
             for (i = dds.rbegin(); i != dds.rend(); ++ i )
                 f_add_stack.push_back(*i);
@@ -322,27 +193,29 @@ bool Compiler::cache_miss(const Expr_ptr expr)
 
         /* push cached microcode descriptors */
         {
-            const MicroDescriptors& micros (unit.micro_descriptors());
-            MicroDescriptors::const_iterator i;
+            const InlinedOperatorDescriptors& micros
+                (unit.micro_descriptors());
+            InlinedOperatorDescriptors::const_iterator i;
             for (i = micros.begin(); micros.end() != i; ++ i)
-                f_micro_descriptors.push_back(*i);
+                f_inlined_operator_descriptors.push_back(*i);
         }
 
         /* push cached ITE multiplexer chains */
         {
-            const MuxMap& muxes (unit.mux_map());
-            MuxMap::const_iterator i;
+            const Expr2BSDMap& muxes
+                (unit.mux_map());
+            Expr2BSDMap::const_iterator i;
             for (i = muxes.begin(); muxes.end() != i; ++ i)
-                f_mux_map.insert(*i);
+                f_expr2bsd_map.insert(*i);
         }
 
         /* push cached Array multiplexer chains */
         {
-            const ArrayMuxVector& muxes
+            const MultiwaySelectionDescriptors& muxes
                 (unit.array_mux_descriptors());
-            ArrayMuxVector::const_iterator i;
+            MultiwaySelectionDescriptors::const_iterator i;
             for (i = muxes.begin(); muxes.end() != i; ++ i)
-                f_array_mux_vector.push_back(*i);
+                f_multiway_selection_descriptors.push_back(*i);
         }
 
         /* push cached type */
@@ -362,17 +235,95 @@ void Compiler::clear_internals()
     f_type_stack.clear();
     f_ctx_stack.clear();
     f_time_stack.clear();
-    f_micro_descriptors.clear();
-    f_mux_map.clear();
-    f_array_mux_vector.clear();
-    f_toplevel_map.clear();
+
+    f_inlined_operator_descriptors.clear();
+    f_expr2bsd_map.clear();
+    f_multiway_selection_descriptors.clear();
+    f_ite_uf_map.clear();
 }
 
-/* TODO: refactor pre and post hooks, they're pretty useless like this :-/ */
 void Compiler::pre_hook()
 {}
+
+/* post-processing for MUXes:
+
+   1. ITE MUXes, for each descriptor, we need to conjunct
+   `! AND ( prev_conditions ) AND cnd <-> aux` to the original
+   formula.
+
+   2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
+   act_i, i in [0..n_elems[` to the original formula.
+*/
+
 void Compiler::post_hook()
-{}
+{
+    if (f_preprocess)
+        return;
+
+    // sanity conditions
+    assert(1 == f_add_stack.size());
+    assert(1 == f_type_stack.size());
+    assert(1 == f_ctx_stack.size());
+    assert(1 == f_time_stack.size());
+
+    // Exactly one 0-1 ADD expected here
+    ADD res
+        (f_add_stack.back());
+    assert( res.FindMin().Equals(f_enc.zero()) );
+    assert( res.FindMax().Equals(f_enc.one()) );
+
+    {
+        /* ITE MUXes */
+        for (Expr2BSDMap::const_iterator i = f_expr2bsd_map.begin(); f_expr2bsd_map.end() != i; ++ i) {
+
+            Expr_ptr toplevel
+                (i -> first);
+            const BinarySelectionDescriptors& descriptors
+                (i -> second);
+
+            DRIVEL
+                << "Processing ITE MUX activation clauses for `"
+                << toplevel << "`"
+                << std::endl;
+
+            ADD prev
+                (f_enc.zero());
+
+            BinarySelectionDescriptors::const_reverse_iterator j;
+            for (j = descriptors.rbegin(); descriptors.rend() != j; ++ j) {
+                ADD act
+                    (prev.Cmpl().Times(j -> cnd()));
+
+                PUSH_DD( act.Xnor(j -> aux()));
+                prev = act;
+            }
+        }
+    }
+
+    {
+        /* Array MUXes */
+        MultiwaySelectionDescriptors::const_iterator i;
+        for (i = f_multiway_selection_descriptors.begin(); f_multiway_selection_descriptors.end() != i; ++ i) {
+
+            const DDVector& cnds
+                (i -> cnds());
+            const DDVector& acts
+                ( i -> acts());
+
+            DDVector::const_iterator ci
+                (cnds.begin());
+            DDVector::const_iterator ai
+                (acts.begin());
+
+            while (cnds.end() != ci) {
+                PUSH_DD((*ci).Xnor(*ai));
+                ++ ci;
+                ++ ai;
+            }
+            assert(acts.end() == ai);
+        }
+    }
+}
 
 Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
 {

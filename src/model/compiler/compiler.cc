@@ -27,82 +27,45 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     boost::mutex::scoped_lock lock
         (f_process_mutex);
 
-    f_elapsed = clock();
+    {
+        /* pass 1: preprocessing */
+        clear_internals();
+        f_preprocess = true;
 
-    /* pass 1: preprocessing */
-    clear_internals();
-    f_preprocess = true;
+        // walk body in given ctx
+        f_ctx_stack.push_back(ctx);
 
-    // walk body in given ctx
-    f_ctx_stack.push_back(ctx);
+        // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+        f_time_stack.push_back(0);
 
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-    f_time_stack.push_back(0);
+        /* Invoke walker on the body of the expr to be processed */
+        (*this)(body);
+    }
 
-    /* Invoke walker on the body of the expr to be processed */
-    (*this)(body);
+    {
+        /* pass 2: compilation */
+        clear_internals();
+        f_preprocess = false;
 
-    /* pass 2: compilation */
-    clear_internals();
-    f_preprocess = false;
+        // walk body in given ctx
+        f_ctx_stack.push_back(ctx);
 
-    // walk body in given ctx
-    f_ctx_stack.push_back(ctx);
+        // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+        f_time_stack.push_back(0);
 
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-    f_time_stack.push_back(0);
+        /* Invoke walker on the body of the expr to be processed */
+        (*this)(body);
+    }
 
-    /* Invoke walker on the body of the expr to be processed */
-    (*this)(body);
-
-    // sanity conditions
-    assert(1 == f_add_stack.size());
-    assert(1 == f_type_stack.size());
-    assert(1 == f_ctx_stack.size());
-    assert(1 == f_time_stack.size());
-
-    // Exactly one 0-1 ADD expected here
-    ADD res
-        (f_add_stack.back());
-    assert( res.FindMin().Equals(f_enc.zero()) );
-    assert( res.FindMax().Equals(f_enc.one()) );
-
-    unsigned res_sz
-        (f_add_stack.size());
-    unsigned mcr_sz
-        (f_micro_descriptors.size());
-    unsigned imux_sz
-        (f_mux_map.size());
-    unsigned amux_sz
-        (f_array_mux_vector.size());
-
-    /* generates additional fragments for MUXes activation, this is
-       required for proper encoding of ITEs and array selectors. See
-       worker class `CNFMuxcodeInjector` for more details on MUX
-       internals. */
-    post_process_muxes();
-
-    f_elapsed = clock() - f_elapsed;
-    double secs
-        ((double) f_elapsed / (double) CLOCKS_PER_SEC);
-
-    DEBUG
-        << "Compilation of " << ctx << "::" << body
-        << " took " << secs << " seconds, "
-        << res_sz << " DDs, "
-        << mcr_sz << " Microdescriptors, "
-        << imux_sz << " ITE MUXes, "
-        << amux_sz << " Array MUXes."
-        << std::endl;
-
-    return CompilationUnit( f_add_stack, f_micro_descriptors, f_mux_map, f_array_mux_vector);
+    return CompilationUnit( f_add_stack, f_inlined_operator_descriptors,
+                            f_expr2bsd_map, f_multiway_selection_descriptors);
 }
 
 Compiler::Compiler()
     : f_cache()
-    , f_micro_descriptors()
-    , f_mux_map()
-    , f_toplevel_map()
+    , f_inlined_operator_descriptors()
+    , f_expr2bsd_map()
+    , f_ite_uf_map()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()

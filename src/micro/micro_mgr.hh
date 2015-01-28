@@ -30,28 +30,4 @@
 #include <micro/micro_loader.hh>
 
 typedef class MicroMgr *MicroMgr_ptr;
-class MicroMgr  {
-
-public:
-    static MicroMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new MicroMgr();
-        }
-        return (*f_instance);
-    }
-
-    MicroLoader& require(const OpTriple& triple);
-
-    inline const MicroLoaderMap& loaders() const
-    { return f_loaders; }
-
-protected:
-    MicroMgr();
-    ~MicroMgr();
-
-private:
-    static MicroMgr_ptr f_instance;
-    MicroLoaderMap f_loaders;
-};
-
 #endif

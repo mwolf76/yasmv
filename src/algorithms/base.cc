@@ -65,19 +65,26 @@ Variant& Algorithm::get_param(const std::string key)
 
 void Algorithm::setup()
 {
-    Compiler& cmpl(compiler()); // just a local ref
-    ExprMgr& em (ExprMgr::INSTANCE());
+    Compiler& cmpl
+        (compiler()); // just a local ref
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    Model& model(f_model);
-    const Modules& modules = model.modules();
-    Expr_ptr main_module = em.make_main();
+    Model& model
+        (f_model);
+    const Modules& modules
+        (model.modules());
+    Expr_ptr main_module
+        (em.make_main());
 
-    Modules::const_iterator main_iter = modules.find(main_module);
+    Modules::const_iterator main_iter
+        (modules.find(main_module));
 
     if (modules.end() == main_iter)
         throw ModuleNotFound(main_module);
 
-    Module& main_ = *main_iter -> second;
+    Module& main_
+        (*main_iter -> second);
 
     std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
     stack.push( std::make_pair< Expr_ptr, Module_ptr >
@@ -86,15 +93,21 @@ void Algorithm::setup()
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
 
-        const std::pair< Expr_ptr, Module_ptr > top (stack.top()); stack.pop();
+        const std::pair< Expr_ptr, Module_ptr > top
+            (stack.top());
+        stack.pop();
 
-        Expr_ptr ctx ( top.first );
-        Module& module ( * top.second );
+        Expr_ptr ctx
+            (top.first);
+        Module& module
+            (* top.second);
 
-        const ExprVector& init = module.init();
+        const ExprVector& init
+            (module.init());
         for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
 
-            Expr_ptr body = (*ii);
+            Expr_ptr body
+                (*ii);
             DEBUG
                 << "processing INIT "
                 << ctx << "::" << body
@@ -104,7 +117,8 @@ void Algorithm::setup()
                 f_init.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
-                std::string tmp(ae.what());
+                std::string tmp
+                    (ae.what());
                 WARN
                     << tmp
                     << std::endl
@@ -114,20 +128,22 @@ void Algorithm::setup()
             }
         } // for init
 
-        const ExprVector& invar = module.invar();
+        const ExprVector& invar
+            (module.invar());
         for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
 
-            Expr_ptr body = (*ii);
+            Expr_ptr body
+                (*ii);
             DEBUG
                 << "processing INVAR "
                 << ctx << "::" << body
                 << std::endl;
-
             try {
                 f_invar.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
-                std::string tmp (ae.what());
+                std::string tmp
+                    (ae.what());
                 WARN
                     << tmp
                     << std::endl
@@ -137,20 +153,21 @@ void Algorithm::setup()
             }
         } // for invar
 
-        const ExprVector& trans = module.trans();
+        const ExprVector& trans
+            (module.trans());
         for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
-
-            Expr_ptr body = (*ti);
+            Expr_ptr body
+                (*ti);
             DEBUG
                 << "processing TRANS "
                 << ctx << "::" << body
                 << std::endl;
-
             try {
                 f_trans.push_back( cmpl.process(ctx, *ti));
             }
             catch (Exception& ae) {
-                std::string tmp(ae.what());
+                std::string tmp
+                    (ae.what());
                 WARN
                     << tmp
                     << std::endl
@@ -160,7 +177,8 @@ void Algorithm::setup()
             }
         } // for trans
 
-        Variables attrs (module.vars());
+        Variables attrs
+            (module.vars());
         Variables::const_iterator vi;
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 

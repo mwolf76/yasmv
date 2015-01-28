@@ -46,7 +46,14 @@ void Compiler::algebraic_unary(const Expr_ptr expr)
     POP_DV(lhs, width);
     FRESH_DV(res, width);
 
-    register_microdescriptor( signedness, expr->symb(), width, res, lhs);
+    InlinedOperatorDescriptor iod
+        (make_ios( signedness, expr->symb(), width ), res, lhs);
+
+    f_inlined_operator_descriptors.push_back(iod);
+
+    DEBUG
+        << "Registered " << iod
+        << std::endl;
 }
 
 void Compiler::algebraic_neg(const Expr_ptr expr)
@@ -79,8 +86,15 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
     POP_DV(lhs, width);
     FRESH_DV(res, width);
 
-    register_microdescriptor( signedness, expr->symb(),
-                              width, res, lhs, rhs);
+    InlinedOperatorDescriptor md
+        (make_ios( signedness, expr->symb(), width ), res, lhs, rhs);
+
+    f_inlined_operator_descriptors.push_back(md);
+
+    DEBUG
+        << "Registered "
+        << md
+        << std::endl;
 }
 
 void Compiler::algebraic_plus(const Expr_ptr expr)
@@ -272,8 +286,15 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
     POP_DV(lhs, width);
     FRESH_DV(res, 1); // boolean
 
-    register_microdescriptor( signedness, expr->symb(),
-                              width, res, lhs, rhs);
+    InlinedOperatorDescriptor md
+        (make_ios( signedness, expr->symb(), width ), res, lhs, rhs);
+
+    f_inlined_operator_descriptors.push_back(md);
+
+    DEBUG
+        << "Registered "
+        << md
+        << std::endl;
 }
 
 void Compiler::algebraic_equals(const Expr_ptr expr)
@@ -321,15 +342,45 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     POP_DD(cnd);
 
     /* Push MUX output DD vector */
-    FRESH_DV(dv, width);
+    FRESH_DV(res, width);
 
     /* Register ITE MUX */
-    Expr_ptr parent = expr;
-    ITEUnionFindMap::const_iterator eye = f_toplevel_map.find( expr );
-    if (f_toplevel_map.end() != eye)
+    Expr_ptr parent
+        (expr);
+
+    ITEUnionFindMap::const_iterator eye
+        (f_ite_uf_map.find( expr ));
+
+    if (f_ite_uf_map.end() != eye)
         parent = eye -> second;
-    register_muxdescriptor( parent, width, dv, cnd,
-                            make_auto_dd(), lhs, rhs );
+
+    /* verify if entry for toplevel already exists. If it doesn't,
+       create it */
+    {
+        Expr2BSDMap::const_iterator mi
+            (f_expr2bsd_map.find(parent));
+
+        if (f_expr2bsd_map.end() == mi)
+            f_expr2bsd_map.insert( std::make_pair< Expr_ptr, BinarySelectionDescriptors >
+                                   (parent, BinarySelectionDescriptors()));
+    }
+
+    BinarySelectionDescriptor md
+        (width, res, cnd, make_auto_dd(), lhs, rhs);
+
+    /* Entry for toplevel does exist for sure */
+    {
+        Expr2BSDMap::iterator mi
+            (f_expr2bsd_map.find(parent));
+        assert( f_expr2bsd_map.end() != mi );
+
+        mi -> second.push_back( md );
+    }
+
+    DEBUG
+        << "Registered "
+        << md
+        << std::endl;
 }
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)
@@ -368,7 +419,7 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
         (type -> width());
     unsigned elem_count
         (atype -> nelems());
-    POP_DV(vec, elem_width * elem_count);
+    POP_DV(lhs, elem_width * elem_count);
 
     /* Build selection DDs */
     DDVector cnd_dds;
@@ -400,8 +451,14 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
     FRESH_DV(dv, elem_width);
     PUSH_TYPE(type);
 
-    /* Register array MUX */
-    register_muxdescriptor( elem_width, elem_count, dv, cnd_dds, act_dds, vec);
+    MultiwaySelectionDescriptor msd
+        (elem_width, elem_count, dv, cnd_dds, act_dds, lhs);
+
+    f_multiway_selection_descriptors.push_back(msd);
+
+    DEBUG
+        << "Registered " << msd
+        << std::endl;
 }
 
 /* add n-1 non significant zero, LSB is original bit */

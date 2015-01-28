@@ -56,6 +56,8 @@
 #include <micro/micro.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
+
+#include <model/compiler/exceptions.hh>
 #include <model/compiler/unit.hh>
 
 #include <boost/unordered_map.hpp>
@@ -63,23 +65,6 @@ typedef boost::unordered_map<TimedExpr, CompilationUnit, TimedExprHash, TimedExp
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
 
 #include <boost/thread/mutex.hpp>
-
-/** Exception classes */
-class CompilerException : public Exception {
-public:
-    virtual const char* what() const throw() =0;
-};
-
-/** Raised when a constant could not fit into a native word */
-class ConstantTooLarge : public CompilerException {
-    Expr_ptr f_repr;
-
-public:
-    ConstantTooLarge(Expr_ptr expr);
-
-    const char* what() const throw();
-    ~ConstantTooLarge() throw();
-};
 
 class Compiler : public ExprWalker {
 public:
@@ -180,39 +165,24 @@ private:
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
 
-    /* Microcode support */
-    void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
-                                   DDVector& z, DDVector& x );
-    void register_microdescriptor( bool signedness, ExprType symb, unsigned width,
-                                   DDVector& z, DDVector& x, DDVector &y );
-
-    /* MUXes support */
-    void register_muxdescriptor( Expr_ptr toplevel, unsigned width,
-                                 DDVector& z, ADD cnd, ADD aux,
-                                 DDVector& x, DDVector &y );
-    void register_muxdescriptor( unsigned elem_width, unsigned elem_count,
-                                 DDVector& z, DDVector& cnds,
-                                 DDVector& acts, DDVector& x);
-    void post_process_muxes();
-
     void pre_hook();
     void post_hook();
 
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    /* FQDN -> ( DD, micros, mux ) cache */
+    /* TimedExpr -> < DD, micros, imuxes, amuxes > cache */
     CompilationMap f_cache;
 
     /* microcode descriptors */
-    MicroDescriptors f_micro_descriptors;
+    InlinedOperatorDescriptors f_inlined_operator_descriptors;
 
     /* mux descriptors */
-    MuxMap f_mux_map;
-    ArrayMuxVector f_array_mux_vector;
+    Expr2BSDMap f_expr2bsd_map;
+    MultiwaySelectionDescriptors f_multiway_selection_descriptors;
 
     /* ITE toplevels */
-    ITEUnionFindMap f_toplevel_map;
+    ITEUnionFindMap f_ite_uf_map;
 
     /* type checking */
     TypeVector f_type_stack;
@@ -223,7 +193,7 @@ private:
     /* current ctx stack, for symbol resolution */
     ExprVector f_ctx_stack;
 
-    /* current time frame, for unrolling */
+    /* current time frame stack */
     TimeVector f_time_stack;
 
     /* managers */
@@ -238,9 +208,6 @@ private:
 
     /* synchronization */
     boost::mutex f_process_mutex;
-
-    /* benchmarking */
-    clock_t f_elapsed;
 };
 
 #endif

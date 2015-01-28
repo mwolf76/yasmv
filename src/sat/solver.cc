@@ -26,6 +26,8 @@
 #include <sat.hh>
 #include <cstdlib>
 
+#include <sat/helpers.hh>
+
 /**
  * @brief SAT instancte ctor
  */
@@ -89,30 +91,39 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
             cnf_push_single_cut( *i, time, group );
     }
 
-    /* push microcode */
+    /* push CNF for inlined operators */
     {
-        const MicroDescriptors& micro_descriptors
+        const InlinedOperatorDescriptors& micro_descriptors
             (cu.micro_descriptors());
-        MicroDescriptors::const_iterator i;
-        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i)
-            cnf_inject_microcode( *i, time, group );
+        InlinedOperatorDescriptors::const_iterator i;
+        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i) {
+            CNFMicrocodeInjector worker
+                (*this, time, group);
+
+            worker(*i);
+        }
     }
 
     /* push ITE muxes */
     {
-        const MuxMap& mux_map
+        const Expr2BSDMap& mux_map
             (cu.mux_map());
-        MuxMap::const_iterator mmi
+        Expr2BSDMap::const_iterator mmi
             (mux_map.begin());
 
         while (mux_map.end() != mmi) {
             Expr_ptr toplevel
                 (mmi -> first);
-            MuxDescriptors descriptors
+            BinarySelectionDescriptors descriptors
                 (mmi -> second);
-            MuxDescriptors::const_iterator i;
-            for (i = descriptors.begin(); descriptors.end() != i; ++ i)
-                cnf_inject_muxcode( *i, time, group );
+
+            BinarySelectionDescriptors::const_iterator i;
+            for (i = descriptors.begin(); descriptors.end() != i; ++ i) {
+                CNFMuxcodeInjector worker
+                    (*this, time, group);
+
+                worker(*i);
+            }
 
             ++ mmi ;
         }
@@ -120,10 +131,16 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
     /* push Array muxes */
     {
-        const ArrayMuxVector& muxes
+        const MultiwaySelectionDescriptors& muxes
             (cu.array_mux_descriptors());
-        ArrayMuxVector::const_iterator i;
-        for (i = muxes.begin(); muxes.end() != i; ++ i)
-            cnf_inject_amuxcode( *i, time, group);
+        MultiwaySelectionDescriptors::const_iterator i;
+        for (i = muxes.begin(); muxes.end() != i; ++ i) {
+
+            CNFArrayMuxcodeInjector worker
+                (*this, time, group);
+
+            worker(*i);
+        }
+
     }
 }

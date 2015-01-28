@@ -84,7 +84,7 @@ MicroMgr::MicroMgr()
                            << "..."
                            << std::endl;
 
-                    f_loaders.insert( std::make_pair< OpTriple, MicroLoader_ptr >
+                    f_loaders.insert( std::make_pair< InlinedOperatorSignature, MicroLoader_ptr >
                                       (loader->triple(), loader));
                 }
                 catch (MicroLoaderException mle) {
@@ -112,7 +112,7 @@ MicroMgr::MicroMgr()
  {
  }
 
-MicroLoader& MicroMgr::require(const OpTriple& triple)
+MicroLoader& MicroMgr::require(const InlinedOperatorSignature& triple)
 {
     MicroLoaderMap::const_iterator i = f_loaders.find( triple );
     if (i == f_loaders.end()) {
@@ -122,36 +122,36 @@ MicroLoader& MicroMgr::require(const OpTriple& triple)
     return * i->second;
 }
 
-std::ostream& operator<<(std::ostream& os, OpTriple triple)
-{
-    bool is_signed (triple.get<0>());
-    os << (is_signed ? "s" : "u");
-    switch (triple.get<1>()) {
-    case NEG: os << "neg"; break;
-    case NOT: os << "not"; break;
+// std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature triple)
+// {
+//     bool is_signed (triple.get<0>());
+//     os << (is_signed ? "s" : "u");
+//     switch (triple.get<1>()) {
+//     case NEG: os << "neg"; break;
+//     case NOT: os << "not"; break;
 
-    case PLUS: os << "add"; break;
-    case SUB:  os << "sub"; break;
-    case MUL:  os << "mul"; break;
-    case DIV:  os << "div"; break;
-    case MOD:  os << "mod"; break;
+//     case PLUS: os << "add"; break;
+//     case SUB:  os << "sub"; break;
+//     case MUL:  os << "mul"; break;
+//     case DIV:  os << "div"; break;
+//     case MOD:  os << "mod"; break;
 
-    case BW_AND: os << "and"; break;
-    case BW_OR:  os << "or";  break;
-    case BW_XOR: os << "xor"; break;
-    case BW_XNOR:os << "xnor";break;
-    case IMPLIES: os << "implies"; break;
+//     case BW_AND: os << "and"; break;
+//     case BW_OR:  os << "or";  break;
+//     case BW_XOR: os << "xor"; break;
+//     case BW_XNOR:os << "xnor";break;
+//     case IMPLIES: os << "implies"; break;
 
-    case EQ: os << "eq"; break;
-    case NE: os << "ne"; break;
-    case LT: os << "lt"; break;
-    case LE: os << "le"; break;
-    case GT: os << "gt"; break;
-    case GE: os << "ge"; break;
+//     case EQ: os << "eq"; break;
+//     case NE: os << "ne"; break;
+//     case LT: os << "lt"; break;
+//     case LE: os << "le"; break;
+//     case GT: os << "gt"; break;
+//     case GE: os << "ge"; break;
 
-    default: assert(false);
-    }
-    os << triple.get<2>();
-    return os;
-}
+//     default: assert(false);
+//     }
+//     os << triple.get<2>();
+//     return os;
+// }
 

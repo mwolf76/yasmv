@@ -19,51 +19,211 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <3rdparty/jsoncpp/json.hh>
+#include <boost/algorithm/string.hpp>
+
 #include <expr/pool.hh>
+
 #include <sat/sat.hh>
+#include <sat/helpers.hh>
 
 #include <dd/dd_walker.hh>
 
-#include <micro/micro_mgr.hh>
+static const char* JSON_GENERATED = "generated";
+static const char* JSON_CNF       = "cnf";
 
-class CNFMicrocodeInjector {
-public:
-    CNFMicrocodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
+MicroLoaderException::MicroLoaderException(const InlinedOperatorSignature& triple)
+    : f_triple(triple)
+{}
 
-    ~CNFMicrocodeInjector()
-    {}
+const char* MicroLoaderException::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "MicroLoaderException: can not instantiate loader for" << f_triple;
 
-    inline void operator() (const MicroDescriptor& md)
-    {
-        MicroMgr& mm
-            (MicroMgr::INSTANCE());
+    return oss.str().c_str();
+}
 
-        OpTriple triple
-            (md.triple());
-        MicroLoader& loader
-            (mm.require(triple));
+MicroLoaderException::~MicroLoaderException() throw()
+{}
 
-        inject(md, loader.microcode());
+MicroLoader::MicroLoader(const boost::filesystem::path& filepath)
+    : f_fullpath(filepath)
+{
+    const std::string native (filepath.filename().replace_extension().native());
+
+    std::vector<std::string> fragments;
+    split(fragments, native, boost::is_any_of("-"));
+
+    assert(3 == fragments.size());
+
+    const char* signedness(fragments[0].c_str());
+    assert( *signedness == 's' || *signedness == 'u');
+
+    const char* op (fragments[1].c_str());
+    ExprType op_type;
+    if      (!strcmp( "neg", op)) op_type = NEG;
+    else if (!strcmp( "add", op)) op_type = PLUS;
+    else if (!strcmp( "sub", op)) op_type = SUB;
+    else if (!strcmp( "div", op)) op_type = DIV;
+    else if (!strcmp( "mod", op)) op_type = MOD;
+    else if (!strcmp( "mul", op)) op_type = MUL;
+    else if (!strcmp( "not", op)) op_type = BW_NOT;
+    else if (!strcmp( "or",  op)) op_type = BW_OR;
+    else if (!strcmp( "and", op)) op_type = BW_AND;
+    else if (!strcmp( "xor", op)) op_type = BW_XOR;
+    else if (!strcmp( "xnor",op)) op_type = BW_XNOR;
+    else if (!strcmp( "eq",  op)) op_type = EQ;
+    else if (!strcmp( "ne",  op)) op_type = NE;
+    else if (!strcmp( "gt",  op)) op_type = GT;
+    else if (!strcmp( "ge",  op)) op_type = GE;
+    else if (!strcmp( "lt",  op)) op_type = LT;
+    else if (!strcmp( "le",  op)) op_type = LE;
+    else assert (false);
+
+    const char* width(fragments[2].c_str());
+    for (const char *p = width; *p; ++ p)
+        assert( isdigit(*p));
+
+    f_triple = make_ios( 's' == *signedness, op_type, atoi(width));
+}
+
+MicroLoader::~MicroLoader()
+{}
+
+const LitsVector& MicroLoader::microcode()
+{
+    boost::mutex::scoped_lock lock(f_loading_mutex);
+
+    if (0 == f_microcode.size()) {
+
+        unsigned count(0);
+        clock_t t0 = clock(), t1;
+        double secs;
+
+        Lits newClause;
+        std::ifstream json_file(f_fullpath.c_str());
+
+        Json::Value obj;
+        json_file >> obj;
+        assert(obj.type() == Json::objectValue);
+
+        const Json::Value generated (obj[ JSON_GENERATED ]);
+        DEBUG
+            << "Loading microcode for " << f_triple
+            << ", generated " << generated
+            << std::endl;
+
+        const Json::Value cnf (obj[ JSON_CNF ]);
+        assert( cnf.type() == Json::arrayValue);
+
+        for (Json::Value::const_iterator i = cnf.begin(); cnf.end() != i; ++ i) {
+            const Json::Value clause (*i);
+
+            assert( clause.type() == Json::arrayValue);
+            newClause.clear();
+            for (Json::Value::const_iterator j = clause.begin(); clause.end() != j; ++ j) {
+                const Json::Value literal (*j);
+                assert( literal.type() == Json::intValue );
+                newClause.push_back( Minisat::toLit(literal.asInt()));
+            }
+            f_microcode.push_back( newClause ); ++ count;
+        }
+        t1 = clock(); secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+
+        DRIVEL
+            << count
+            << " clauses fetched, took " << secs
+            << " ms"
+            << std::endl;
     }
 
-private:
-    void inject(const MicroDescriptor& md,
-                const LitsVector& microcode);
+    return f_microcode;
+}
 
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
+// static initialization
+MicroMgr_ptr MicroMgr::f_instance = NULL;
 
-void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
+MicroMgr::MicroMgr()
+{
+    using boost::filesystem::path;
+    using boost::filesystem::directory_iterator;
+    using boost::filesystem::filesystem_error;
+
+    char *basepath = getenv( YASMV_HOME );
+    if (NULL == basepath) {
+        ERR
+            << YASMV_HOME
+            << " is not set. Exiting..."
+            << std::endl;
+
+        exit(1);
+    }
+
+    path micropath = basepath / path ( MICROCODE_PATH );
+    try {
+        if (exists(micropath) && is_directory(micropath)) {
+            for (directory_iterator di = directory_iterator(micropath);
+                 di != directory_iterator(); ++ di) {
+
+                path entry (di->path());
+                if (strcmp(entry.extension().c_str(), ".json"))
+                    continue;
+
+                // lazy microcode-loaders registration
+                try {
+                    MicroLoader* loader = new MicroLoader(entry);
+                    assert(NULL != loader);
+
+                    DRIVEL << "Registering microcode loader for "
+                           << loader->triple()
+                           << "..."
+                           << std::endl;
+
+                    f_loaders.insert( std::make_pair< InlinedOperatorSignature, MicroLoader_ptr >
+                                      (loader->triple(), loader));
+                }
+                catch (MicroLoaderException mle) {
+                    std::string tmp(mle.what());
+                    WARN
+                        << tmp
+                        << std::endl;
+                }
+            }
+        }
+        else {
+            ERR << "Path " << micropath
+                << " does not exist or is not a readable directory.";
+            exit(1);
+        }
+    }
+    catch (const filesystem_error& ex) {
+        std::string tmp(ex.what());
+        ERR << tmp;
+        exit(1);
+    }
+ }
+
+ MicroMgr::~MicroMgr()
+ {
+ }
+
+MicroLoader& MicroMgr::require(const InlinedOperatorSignature& triple)
+{
+    MicroLoaderMap::const_iterator i = f_loaders.find( triple );
+    if (i == f_loaders.end()) {
+        throw MicroLoaderException(triple);
+    }
+
+    return * i->second;
+}
+
+void CNFMicrocodeInjector::inject(const InlinedOperatorDescriptor& md,
                                   const LitsVector& microcode)
 {
     DEBUG
-        << const_cast<MicroDescriptor&> (md)
+        << const_cast<InlinedOperatorDescriptor&> (md)
         << std::endl;
 
     /* true */
@@ -196,32 +356,10 @@ void CNFMicrocodeInjector::inject(const MicroDescriptor& md,
     }
 }
 
-class CNFMuxcodeInjector {
-public:
-    CNFMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
-
-    ~CNFMuxcodeInjector()
-    {}
-
-    inline void operator() (const MuxDescriptor& md)
-    { inject(md); }
-
-private:
-    void inject(const MuxDescriptor& md);
-
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
-
-void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
+void CNFMuxcodeInjector::inject(const BinarySelectionDescriptor& md)
 {
     DEBUG
-        << const_cast<MuxDescriptor&> (md)
+        << const_cast<BinarySelectionDescriptor&> (md)
         << std::endl;
 
     /* true */
@@ -283,32 +421,10 @@ void CNFMuxcodeInjector::inject(const MuxDescriptor& md)
     }
 }
 
-class CNFArrayMuxcodeInjector {
-public:
-    CNFArrayMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
-
-    ~CNFArrayMuxcodeInjector()
-    {}
-
-    inline void operator() (const ArrayMuxDescriptor& md)
-    { inject(md); }
-
-private:
-    void inject(const ArrayMuxDescriptor& md);
-
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
-
-void CNFArrayMuxcodeInjector::inject(const ArrayMuxDescriptor& md)
+void CNFArrayMuxcodeInjector::inject(const MultiwaySelectionDescriptor& md)
 {
     DEBUG
-        << const_cast<ArrayMuxDescriptor&> (md)
+        << const_cast<MultiwaySelectionDescriptor&> (md)
         << std::endl;
 
     /* true */
@@ -357,32 +473,3 @@ void CNFArrayMuxcodeInjector::inject(const ArrayMuxDescriptor& md)
         ++ ai;
     }
 }
-
-
-// proxies
-void Engine::cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group)
-{
-    CNFMicrocodeInjector worker
-        (*this, time, group);
-
-    worker(md);
-}
-
-void Engine::cnf_inject_muxcode(const MuxDescriptor& md, step_t time, const group_t group)
-{
-    CNFMuxcodeInjector worker
-        (*this, time, group);
-
-    worker(md);
-}
-
-void Engine::cnf_inject_amuxcode(const ArrayMuxDescriptor& md, step_t time, const group_t group)
-{
-    CNFArrayMuxcodeInjector worker
-        (*this, time, group);
-
-    worker(md);
-}
-
-
-

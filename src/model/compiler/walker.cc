@@ -477,13 +477,13 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
     if (! f_preprocess && is_ite_algebraic( expr -> rhs())) {
 
         /* perform a lookhead on RHS to collect nested ITEs */
-        ITEUnionFindMap::const_iterator eye = f_toplevel_map.find( expr );
+        ITEUnionFindMap::const_iterator eye = f_ite_uf_map.find( expr );
 
         Expr_ptr parent = expr;
-        if (f_toplevel_map.end() != eye)
+        if (f_ite_uf_map.end() != eye)
             parent = eye -> second;
 
-        f_toplevel_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+        f_ite_uf_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                                ( expr->rhs(), parent ));
     }
 

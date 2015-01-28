@@ -59,7 +59,7 @@
 
 #include <logging.hh>
 
-#include <micro_mgr.hh>
+#include <micro/micro_mgr.hh>
 
 static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
@@ -79,7 +79,7 @@ void pu(UCBI& ucbi)
 void pt(TCBI& tcbi)
 { std::cerr << tcbi << std::endl; }
 
-void pd(MicroDescriptor& md)
+void pd(InlinedOperatorDescriptor& md)
 { std::cerr << md << std::endl; }
 
 void batch(Command_ptr cmd)

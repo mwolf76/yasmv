@@ -25,40 +25,40 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
 
-#include <micro/micro.hh>
+#include <model/compiler/unit.hh>
 
-class MicroLoaderException : public Exception {
-public:
-    MicroLoaderException(const OpTriple& f_triple);
-    ~MicroLoaderException() throw();
+// class MicroLoaderException : public Exception {
+// public:
+//     MicroLoaderException(const InlinedOperatorSignature& f_triple);
+//     ~MicroLoaderException() throw();
 
-    const char* what() const throw();
+//     const char* what() const throw();
 
-private:
-    OpTriple f_triple;
-};
+// private:
+//     InlinedOperatorSignature f_triple;
+// };
 
 typedef class MicroLoader* MicroLoader_ptr;
-typedef boost::unordered_map<OpTriple, MicroLoader_ptr,
-                             OpTripleHash, OpTripleEq> MicroLoaderMap;
+typedef boost::unordered_map<InlinedOperatorSignature, MicroLoader_ptr,
+                             InlinedOperatorSignatureHash, InlinedOperatorSignatureEq> MicroLoaderMap;
 
-class MicroLoader {
-public:
-MicroLoader(const boost::filesystem::path& filepath);
-    ~MicroLoader();
+// class MicroLoader {
+// public:
+//     MicroLoader(const boost::filesystem::path& filepath);
+//     ~MicroLoader();
 
-    inline const OpTriple& triple() const
-    { return f_triple; }
+//     inline const InlinedOperatorSignature& triple() const
+//     { return f_triple; }
 
-    // synchronized
-    const LitsVector& microcode();
+//     // synchronized
+//     const LitsVector& microcode();
 
-private:
-    boost::mutex f_loading_mutex;
-    LitsVector f_microcode;
+// private:
+//     boost::mutex f_loading_mutex;
+//     LitsVector f_microcode;
 
-    boost::filesystem::path f_fullpath;
-    OpTriple f_triple;
-};
+//     boost::filesystem::path f_fullpath;
+//     InlinedOperatorSignature f_triple;
+// };
 
 #endif

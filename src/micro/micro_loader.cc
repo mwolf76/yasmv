@@ -50,7 +50,7 @@
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
-MicroLoaderException::MicroLoaderException(const OpTriple& triple)
+MicroLoaderException::MicroLoaderException(const InlinedOperatorSignature& triple)
     : f_triple(triple)
 {}
 
@@ -104,7 +104,7 @@ MicroLoader::MicroLoader(const boost::filesystem::path& filepath)
     for (const char *p = width; *p; ++ p)
         assert( isdigit(*p));
 
-    f_triple = make_op_triple( 's' == *signedness, op_type, atoi(width));
+    f_triple = make_ios( 's' == *signedness, op_type, atoi(width));
 }
 
 MicroLoader::~MicroLoader()
