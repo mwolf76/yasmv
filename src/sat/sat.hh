@@ -43,6 +43,7 @@
 std::ostream &operator<<(std::ostream &out, const Lit &lit);
 std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
 
+class MicroLoader;
 class Engine {
 
 public:

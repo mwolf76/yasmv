@@ -12,9 +12,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr			\
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb			\
 -I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/expr/printer	\
--I$(top_srcdir)/src/micro -I$(top_srcdir)/src/model			\
--I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/utils			\
--I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger	\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/cmd			\
+-I$(top_srcdir)/src/utils -I$(top_srcdir)/src/witness			\
+-I$(top_srcdir)/src/3rdparty/ezlogger					\
 -I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/algorithms	\
 -I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core	\
 -I$(top_srcdir)/src/sat -I$(top_srcdir)/src/sat/mtl			\
@@ -43,7 +43,6 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/model/compiler/libcompiler.la		\
         $(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
-        $(top_builddir)/src/micro/libmicro.la				\
         $(top_builddir)/src/expr/libexpr.la				\
         $(top_builddir)/src/expr/walker/libexpr_walker.la		\
         $(top_builddir)/src/expr/printer/libprinter.la			\
@@ -81,7 +80,6 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/model/compiler/libcompiler.la		\
 	$(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
-	$(top_builddir)/src/micro/libmicro.la				\
 	$(top_builddir)/src/expr/libexpr.la				\
 	$(top_builddir)/src/expr/walker/libexpr_walker.la		\
 	$(top_builddir)/src/expr/printer/libprinter.la			\

@@ -59,7 +59,7 @@
 
 #include <logging.hh>
 
-#include <micro/micro_mgr.hh>
+#include <sat/helpers.hh>
 
 static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"

@@ -53,7 +53,7 @@
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
-#include <micro/micro.hh>
+#include <sat/helpers.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
