@@ -26,7 +26,12 @@
 /*  Compilation engine is implemented using a simple expression walker
  *  pattern: (a) on preorder, return true if the node has not yet been
  *  visited; (b) always do in-order (for binary nodes); (c) perform
- *  proper compilation in post-order hooks. */
+ *  proper compilation in post-order hooks.
+
+ *  The compiler does two full traversals of the input expr:
+ *  1. f_preprocess, encodings are built - postorder hooks are
+ *  skipped, 2. ! f_preprocess proper compilation is carried out.
+ */
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();
@@ -477,14 +482,15 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
     if (! f_preprocess && is_ite_algebraic( expr -> rhs())) {
 
         /* perform a lookhead on RHS to collect nested ITEs */
-        ITEUnionFindMap::const_iterator eye = f_ite_uf_map.find( expr );
+        BinarySelectionUnionFindMap::const_iterator eye
+            (f_bsuf_map.find( expr ));
 
         Expr_ptr parent = expr;
-        if (f_ite_uf_map.end() != eye)
+        if (f_bsuf_map.end() != eye)
             parent = eye -> second;
 
-        f_ite_uf_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
-                               ( expr->rhs(), parent ));
+        f_bsuf_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+                           ( expr->rhs(), parent ));
     }
 
     return true;

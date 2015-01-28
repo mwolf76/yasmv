@@ -93,10 +93,10 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
     /* push CNF for inlined operators */
     {
-        const InlinedOperatorDescriptors& micro_descriptors
-            (cu.micro_descriptors());
+        const InlinedOperatorDescriptors& inlined_operator_descriptors
+            (cu.inlined_operator_descriptors());
         InlinedOperatorDescriptors::const_iterator i;
-        for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i) {
+        for (i = inlined_operator_descriptors.begin(); inlined_operator_descriptors.end() != i; ++ i) {
             CNFOperatorInliner worker
                 (*this, time, group);
 
@@ -106,12 +106,12 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
     /* push ITE muxes */
     {
-        const Expr2BSDMap& mux_map
-            (cu.mux_map());
-        Expr2BSDMap::const_iterator mmi
-            (mux_map.begin());
+        const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map
+            (cu.binary_selection_descriptors_map());
+        Expr2BinarySelectionDescriptorsMap::const_iterator mmi
+            (binary_selection_descriptors_map.begin());
 
-        while (mux_map.end() != mmi) {
+        while (binary_selection_descriptors_map.end() != mmi) {
             Expr_ptr toplevel
                 (mmi -> first);
             BinarySelectionDescriptors descriptors

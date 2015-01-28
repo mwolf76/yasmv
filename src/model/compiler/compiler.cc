@@ -62,10 +62,10 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 }
 
 Compiler::Compiler()
-    : f_cache()
+    : f_compilation_cache()
     , f_inlined_operator_descriptors()
     , f_expr2bsd_map()
-    , f_ite_uf_map()
+    , f_bsuf_map()
     , f_type_stack()
     , f_add_stack()
     , f_ctx_stack()

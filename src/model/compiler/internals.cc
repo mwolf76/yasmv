@@ -139,27 +139,9 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert (dv.size() == width);
 
     /* memoize result */
-    f_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
-                    ( key, CompilationUnit( dv, f_inlined_operator_descriptors, f_expr2bsd_map,
-                                            f_multiway_selection_descriptors)));
-
-    unsigned res_sz
-        (width);
-    unsigned mcr_sz
-        (f_inlined_operator_descriptors.size());
-    unsigned mux_sz
-        (f_expr2bsd_map.size());
-    unsigned amux_sz
-        (f_multiway_selection_descriptors.size());
-
-    DRIVEL
-        << "Cached " << key
-        << ": "
-        << res_sz << " DDs, "
-        << mcr_sz << " Microcode descriptors, "
-        << mux_sz << " ITE Multiplexer descriptors, "
-        << amux_sz << " Array Multiplexer descriptors."
-        << std::endl;
+    f_compilation_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
+                    ( key, CompilationUnit( dv, f_inlined_operator_descriptors,
+                                            f_expr2bsd_map, f_multiway_selection_descriptors)));
 }
 
 bool Compiler::cache_miss(const Expr_ptr expr)
@@ -171,50 +153,57 @@ bool Compiler::cache_miss(const Expr_ptr expr)
         (f_owner.em().make_dot( f_ctx_stack.back(), expr), f_time_stack.back());
 
     CompilationMap::iterator eye
-        (f_cache.find(key));
+        (f_compilation_cache.find(key));
 
-    if (eye != f_cache.end()) {
-        const Type_ptr type = f_owner.type(expr, ctx);
-        DEBUG
+    if (eye != f_compilation_cache.end()) {
+        const Type_ptr type
+            (f_owner.type(expr, ctx));
+
+        DRIVEL
             << "Cache hit for " << expr
             << ", type is " << type
             << std::endl;
 
-        CompilationUnit& unit = (*eye).second;
+        CompilationUnit& unit
+            ((*eye).second);
 
         /* push cached DDs (reversed) */
         {
             const DDVector& dds
                 (unit.dds());
+
             DDVector::const_reverse_iterator i;
             for (i = dds.rbegin(); i != dds.rend(); ++ i )
                 f_add_stack.push_back(*i);
         }
 
-        /* push cached microcode descriptors */
+        /* push cached microcode inlined operator descriptors */
         {
-            const InlinedOperatorDescriptors& micros
-                (unit.micro_descriptors());
+            const InlinedOperatorDescriptors& vec
+                (unit.inlined_operator_descriptors());
+
             InlinedOperatorDescriptors::const_iterator i;
-            for (i = micros.begin(); micros.end() != i; ++ i)
+            for (i = vec.begin(); vec.end() != i; ++ i)
                 f_inlined_operator_descriptors.push_back(*i);
         }
 
-        /* push cached ITE multiplexer chains */
+        /* push cached binary selection descriptors */
         {
-            const Expr2BSDMap& muxes
-                (unit.mux_map());
-            Expr2BSDMap::const_iterator i;
-            for (i = muxes.begin(); muxes.end() != i; ++ i)
+            const Expr2BinarySelectionDescriptorsMap& map
+                (unit.binary_selection_descriptors_map());
+
+            Expr2BinarySelectionDescriptorsMap::const_iterator i;
+            for (i = map.begin(); map.end() != i; ++ i)
                 f_expr2bsd_map.insert(*i);
         }
 
         /* push cached Array multiplexer chains */
         {
-            const MultiwaySelectionDescriptors& muxes
+            const MultiwaySelectionDescriptors& vec
                 (unit.array_mux_descriptors());
+
             MultiwaySelectionDescriptors::const_iterator i;
-            for (i = muxes.begin(); muxes.end() != i; ++ i)
+            for (i = vec.begin(); vec.end() != i; ++ i)
                 f_multiway_selection_descriptors.push_back(*i);
         }
 
@@ -239,7 +228,7 @@ void Compiler::clear_internals()
     f_inlined_operator_descriptors.clear();
     f_expr2bsd_map.clear();
     f_multiway_selection_descriptors.clear();
-    f_ite_uf_map.clear();
+    f_bsuf_map.clear();
 }
 
 void Compiler::pre_hook()
@@ -274,7 +263,8 @@ void Compiler::post_hook()
 
     {
         /* ITE MUXes */
-        for (Expr2BSDMap::const_iterator i = f_expr2bsd_map.begin(); f_expr2bsd_map.end() != i; ++ i) {
+        for (Expr2BinarySelectionDescriptorsMap::const_iterator i = f_expr2bsd_map.begin();
+             f_expr2bsd_map.end() != i; ++ i) {
 
             Expr_ptr toplevel
                 (i -> first);

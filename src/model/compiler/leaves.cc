@@ -49,14 +49,14 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
         f_type_stack.push_back(tm.find_unsigned(ww, false));
-        algebraic_from_constant(expr, ww);
+        algebraic_constant(expr, ww);
         return;
     }
     if (em.is_fxd_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
         f_type_stack.push_back(tm.find_unsigned(ww, true));
-        algebraic_from_constant(expr, ww);
+        algebraic_constant(expr, ww);
         return;
     }
 
@@ -200,7 +200,7 @@ static inline value_t pow2(unsigned exp)
 }
 
 /* encodes constant value into a DD vector */
-void Compiler::algebraic_from_constant(Expr_ptr konst, unsigned width)
+void Compiler::algebraic_constant(Expr_ptr konst, unsigned width)
 {
     const unsigned base
         (2);

@@ -333,7 +333,8 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
             _iff( lhs_type -> is_signed_algebraic(),
                   rhs_type -> is_signed_algebraic()));
 
-    unsigned width = rhs_type -> width();
+    unsigned width
+        (rhs_type -> width());
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
@@ -348,16 +349,16 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     Expr_ptr parent
         (expr);
 
-    ITEUnionFindMap::const_iterator eye
-        (f_ite_uf_map.find( expr ));
+    BinarySelectionUnionFindMap::const_iterator eye
+        (f_bsuf_map.find( expr ));
 
-    if (f_ite_uf_map.end() != eye)
+    if (f_bsuf_map.end() != eye)
         parent = eye -> second;
 
     /* verify if entry for toplevel already exists. If it doesn't,
        create it */
     {
-        Expr2BSDMap::const_iterator mi
+        Expr2BinarySelectionDescriptorsMap::const_iterator mi
             (f_expr2bsd_map.find(parent));
 
         if (f_expr2bsd_map.end() == mi)
@@ -370,7 +371,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
 
     /* Entry for toplevel does exist for sure */
     {
-        Expr2BSDMap::iterator mi
+        Expr2BinarySelectionDescriptorsMap::iterator mi
             (f_expr2bsd_map.find(parent));
         assert( f_expr2bsd_map.end() != mi );
 

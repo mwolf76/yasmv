@@ -61,8 +61,10 @@
 #include <model/compiler/unit.hh>
 
 #include <boost/unordered_map.hpp>
-typedef boost::unordered_map<TimedExpr, CompilationUnit, TimedExprHash, TimedExprEq> CompilationMap;
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> ITEUnionFindMap;
+typedef boost::unordered_map<TimedExpr, CompilationUnit,
+                             TimedExprHash, TimedExprEq> CompilationMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr,
+                             PtrHash, PtrEq> BinarySelectionUnionFindMap;
 
 #include <boost/thread/mutex.hpp>
 
@@ -150,20 +152,25 @@ private:
     void algebraic_cast_from_algebraic(const Expr_ptr expr);
 
     /* -- internals --------------------------------------------------------- */
-    void clear_internals();
-    bool cache_miss(const Expr_ptr expr);
-    void memoize_result(const Expr_ptr expr);
-    Encoding_ptr find_encoding( const TimedExpr& timed_expr, const Type_ptr type);
 
-    void algebraic_from_constant(Expr_ptr expr, unsigned width);
-
-    Expr_ptr make_auto_id();
-    void make_auto_ddvect(DDVector& dv, unsigned width);
-    ADD  make_auto_dd();
-
+    /* algebraic manipulations */
     void algebraic_unary(const Expr_ptr expr);
     void algebraic_binary(const Expr_ptr expr);
     void algebraic_relational(const Expr_ptr expr);
+    void algebraic_constant(Expr_ptr expr, unsigned width);
+
+    /* cache management */
+    void clear_internals();
+    bool cache_miss(const Expr_ptr expr);
+    void memoize_result(const Expr_ptr expr);
+
+    /* encoding management */
+    Encoding_ptr find_encoding(const TimedExpr& timed_expr, const Type_ptr type);
+
+    /* automatic inner variables (determinization, muxes, etc...) */
+    Expr_ptr make_auto_id();
+    void make_auto_ddvect(DDVector& dv, unsigned width);
+    ADD  make_auto_dd();
 
     void pre_hook();
     void post_hook();
@@ -171,18 +178,22 @@ private:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    /* TimedExpr -> < DD, micros, imuxes, amuxes > cache */
-    CompilationMap f_cache;
+    /* -- data -------------------------------------------------------------- */
+
+    /* TimedExpr -> Compilation Unit cache */
+    CompilationMap f_compilation_cache;
 
     /* microcode descriptors */
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
 
-    /* mux descriptors */
-    Expr2BSDMap f_expr2bsd_map;
-    MultiwaySelectionDescriptors f_multiway_selection_descriptors;
+    /* Binary selection descriptors */
+    Expr2BinarySelectionDescriptorsMap f_expr2bsd_map;
 
-    /* ITE toplevels */
-    ITEUnionFindMap f_ite_uf_map;
+    /* Binary selection (ITEs) toplevels */
+    BinarySelectionUnionFindMap f_bsuf_map;
+
+    /* Multiway selection (Arrays) descriptors */
+    MultiwaySelectionDescriptors f_multiway_selection_descriptors;
 
     /* type checking */
     TypeVector f_type_stack;
@@ -203,7 +214,10 @@ private:
     /* Auto expressions and DDs */
     unsigned f_temp_auto_index;
 
-    // TODO: can we get rid of this?
+    /* Two phase compilation:
+       1. (f_preprocess)  , build encodings
+       2. (! f_preprocess), perform compilation into CUs
+    */
     bool f_preprocess;
 
     /* synchronization */

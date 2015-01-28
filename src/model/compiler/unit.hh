@@ -168,36 +168,36 @@ typedef std::vector<InlinedOperatorDescriptor> InlinedOperatorDescriptors;
 typedef std::vector<BinarySelectionDescriptor> BinarySelectionDescriptors;
 typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
 
-typedef boost::unordered_map<Expr_ptr, BinarySelectionDescriptors> Expr2BSDMap;
+typedef boost::unordered_map<Expr_ptr, BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
 
 class CompilationUnit {
 public:
     CompilationUnit( DDVector& dds,
-                     InlinedOperatorDescriptors& micro_descriptors,
-                     Expr2BSDMap& mux_map,
+                     InlinedOperatorDescriptors& inlined_operator_descriptors,
+                     Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
                      MultiwaySelectionDescriptors& array_mux_descriptors)
         : f_dds( dds )
-        , f_micro_descriptors( micro_descriptors )
-        , f_mux_map( mux_map )
+        , f_inlined_operator_descriptors( inlined_operator_descriptors )
+        , f_binary_selection_descriptors_map( binary_selection_descriptors_map )
         , f_array_mux_descriptors (array_mux_descriptors)
     {}
 
     const DDVector& dds() const
     { return f_dds; }
 
-    const InlinedOperatorDescriptors& micro_descriptors() const
-    { return f_micro_descriptors; }
+    const InlinedOperatorDescriptors& inlined_operator_descriptors() const
+    { return f_inlined_operator_descriptors; }
 
-    const Expr2BSDMap& mux_map() const
-    { return f_mux_map; }
+    const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map() const
+    { return f_binary_selection_descriptors_map; }
 
     const MultiwaySelectionDescriptors& array_mux_descriptors() const
     { return f_array_mux_descriptors; }
 
 private:
     DDVector f_dds;
-    InlinedOperatorDescriptors f_micro_descriptors;
-    Expr2BSDMap f_mux_map;
+    InlinedOperatorDescriptors f_inlined_operator_descriptors;
+    Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
     MultiwaySelectionDescriptors f_array_mux_descriptors;
 };
 typedef std::vector<CompilationUnit> CompilationUnits;
