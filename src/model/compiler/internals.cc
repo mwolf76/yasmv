@@ -238,17 +238,6 @@ void Compiler::post_hook()
 {
 }
 
-/* post-processing for MUXes:
-
-   1. ITE MUXes, for each descriptor, we need to conjunct
-   `! AND ( prev_conditions ) AND cnd <-> aux` to the original
-   formula.
-
-   2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
-   act_i, i in [0..n_elems[` to the original formula.
-*/
-
-
 void Compiler::pass1(Expr_ptr ctx, Expr_ptr body)
 {
     /* pass 1: preprocessing */

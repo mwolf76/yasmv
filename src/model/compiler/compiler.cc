@@ -27,10 +27,22 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     boost::mutex::scoped_lock lock
         (f_process_mutex);
 
+    /* Pass 1: build encodings */
     pass1(ctx, body);
 
+    /* Pass 2: perform boolean compilation using DDs */
     pass2(ctx, body);
 
+    /* Pass 3: post-processing needed to activate binary and multiway
+       selection MUXes
+
+       1. ITE MUXes, for each descriptor, we need to conjunct
+       `! AND ( prev_conditions ) AND cnd <-> aux` to the original
+       formula.
+
+       2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
+       act_i, i in [0..n_elems[` to the original formula.
+    */
     pass3();
 
     return CompilationUnit(f_add_stack, f_inlined_operator_descriptors,
