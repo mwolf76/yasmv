@@ -30,13 +30,13 @@
 
 class InlinedOperatorLoaderException : public Exception {
 public:
-    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_triple);
+    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_ios);
     ~InlinedOperatorLoaderException() throw();
 
     const char* what() const throw();
 
 private:
-    InlinedOperatorSignature f_triple;
+    InlinedOperatorSignature f_ios;
 };
 
 typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
@@ -50,8 +50,8 @@ public:
     InlinedOperatorLoader(const boost::filesystem::path& filepath);
     ~InlinedOperatorLoader();
 
-    inline const InlinedOperatorSignature& triple() const
-    { return f_triple; }
+    inline const InlinedOperatorSignature& ios() const
+    { return f_ios; }
 
     // synchronized
     const LitsVector& clauses();
@@ -61,7 +61,7 @@ private:
     LitsVector f_clauses;
 
     boost::filesystem::path f_fullpath;
-    InlinedOperatorSignature f_triple;
+    InlinedOperatorSignature f_ios;
 };
 
 typedef class InlinedOperatorMgr *InlinedOperatorMgr_ptr;
@@ -75,7 +75,7 @@ public:
         return (*f_instance);
     }
 
-    InlinedOperatorLoader& require(const InlinedOperatorSignature& triple);
+    InlinedOperatorLoader& require(const InlinedOperatorSignature& ios);
 
     inline const InlinedOperatorLoaderMap& loaders() const
     { return f_loaders; }
@@ -106,10 +106,10 @@ public:
         InlinedOperatorMgr& mm
             (InlinedOperatorMgr::INSTANCE());
 
-        InlinedOperatorSignature triple
-            (md.triple());
+        InlinedOperatorSignature ios
+            (md.ios());
         InlinedOperatorLoader& loader
-            (mm.require(triple));
+            (mm.require(ios));
 
         inject(md, loader.clauses());
     }

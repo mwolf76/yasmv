@@ -73,11 +73,6 @@ public:
     void push(CompilationUnit cu, step_t time, group_t group = MAINGROUP);
 
     /**
-     * @brief Enables lazy loading of inlined operator CNF clauses
-     */
-    MicroLoader& require(const InlinedOperatorSignature& triple);
-
-    /**
      * @brief Invoke Minisat
      */
     inline status_t solve()

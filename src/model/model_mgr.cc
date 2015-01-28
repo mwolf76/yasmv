@@ -124,7 +124,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     f_type_checker.process(body, curr_ctx);
                 }
                 catch (Exception& ae) {
-                    std::string tmp(ae.what());
+                    std::string tmp
+                        (ae.what());
                     WARN
                         << tmp
                         << std::endl
@@ -149,7 +150,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     f_type_checker.process(body, curr_ctx);
                 }
                 catch (Exception& ae) {
-                    std::string tmp (ae.what());
+                    std::string tmp
+                        (ae.what());
                     WARN
                         << tmp
                         << std::endl
@@ -174,7 +176,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     f_type_checker.process(body, curr_ctx);
                 }
                 catch (Exception& ae) {
-                    std::string tmp(ae.what());
+                    std::string tmp
+                        (ae.what());
                     WARN
                         << tmp
                         << std::endl

@@ -33,19 +33,24 @@
 #include <dd/dd.hh>
 #include <sat/satdefs.hh>
 
-/* <symb, is_signed?, width> */
-typedef boost::tuple<bool, ExprType, int> InlinedOperatorSignature;
-inline const InlinedOperatorSignature make_ios (bool is_signed, ExprType exprType, int width) {
-    return boost::make_tuple <bool, ExprType, int> (is_signed, exprType, width);
+/* <symb, is_signed?, width, precision =0> */
+typedef boost::tuple<bool, ExprType, unsigned, unsigned> InlinedOperatorSignature;
+inline const InlinedOperatorSignature make_ios (bool is_signed, ExprType exprType,
+                                                unsigned width, unsigned precision =0)
+{
+    return boost::make_tuple <bool, ExprType, unsigned, unsigned>
+        (is_signed, exprType, width, precision);
 }
 
-/* triple helper getters */
-inline bool triple_issigned( const InlinedOperatorSignature& triple )
-{ return triple.get<0>(); }
-inline ExprType triple_optype( const InlinedOperatorSignature& triple )
-{ return triple.get<1>(); }
-inline int triple_width( const InlinedOperatorSignature& triple )
-{ return triple.get<2>(); }
+/* ios helper getters */
+inline bool ios_issigned( const InlinedOperatorSignature& ios )
+{ return ios.get<0>(); }
+inline ExprType ios_optype( const InlinedOperatorSignature& ios )
+{ return ios.get<1>(); }
+inline unsigned ios_width( const InlinedOperatorSignature& ios )
+{ return ios.get<2>(); }
+inline unsigned ios_precision( const InlinedOperatorSignature& ios )
+{ return ios.get<3>(); }
 
 struct InlinedOperatorSignatureHash {
     long operator() (const InlinedOperatorSignature& k) const
@@ -56,23 +61,27 @@ struct InlinedOperatorSignatureHash {
         res = prime * res + (k.get<0>() ? 1231 : 1237);
         res = prime * res + k.get<1>();
         res = prime * res + k.get<2>();
+        res = prime * res + k.get<3>();
         return res;
     }
 };
 
 struct InlinedOperatorSignatureEq {
-    bool operator() (const InlinedOperatorSignature& x, const InlinedOperatorSignature& y) const
+    bool operator() (const InlinedOperatorSignature& x,
+                     const InlinedOperatorSignature& y) const
     {
         return
             x.get<0>() == y.get<0>() &&
             x.get<1>() == y.get<1>() &&
-            x.get<2>() == y.get<2>()  ;
+            x.get<2>() == y.get<2>() &&
+            x.get<3>() == y.get<3>() ;
     }
 };
 
 class BinarySelectionDescriptor {
 public:
-    BinarySelectionDescriptor(unsigned width, DDVector& z, ADD cnd, ADD aux, DDVector& x, DDVector& y);
+    BinarySelectionDescriptor(unsigned width, DDVector& z, ADD cnd,
+                              ADD aux, DDVector& x, DDVector& y);
 
     inline unsigned width() const
     { return f_width; }
@@ -99,7 +108,8 @@ private:
 class MultiwaySelectionDescriptor {
 public:
     MultiwaySelectionDescriptor(unsigned elem_width, unsigned elem_count,
-                       DDVector& z, DDVector& cnds, DDVector& acts, DDVector& x);
+                                DDVector& z, DDVector& cnds,
+                                DDVector& acts, DDVector& x);
 
     inline unsigned elem_width() const
     { return f_elem_width; }
@@ -126,11 +136,13 @@ private:
 class InlinedOperatorDescriptor {
 
 public:
-    InlinedOperatorDescriptor(InlinedOperatorSignature triple, DDVector& z, DDVector &x);
-    InlinedOperatorDescriptor(InlinedOperatorSignature triple, DDVector& z, DDVector &x, DDVector &y);
+    InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                              DDVector& z, DDVector &x);
+    InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                              DDVector& z, DDVector &x, DDVector &y);
 
-    inline const InlinedOperatorSignature& triple() const
-    { return f_triple; }
+    inline const InlinedOperatorSignature& ios() const
+    { return f_ios; }
 
     inline const DDVector& z() const
     { return f_z; }
@@ -143,32 +155,28 @@ public:
     { return f_z.size() == 1; }
 
     inline bool is_binary() const
-    { return f_z.size() == f_x.size() &&
-             f_z.size() == f_y.size(); }
+    {
+        return f_z.size() == f_x.size() &&
+            f_z.size() == f_y.size();
+    }
 
     inline bool is_unary() const
     { return f_y.size() == 0; }
 
 private:
-    InlinedOperatorSignature f_triple;
+    InlinedOperatorSignature f_ios;
 
     DDVector f_z;
     DDVector f_x;
     DDVector f_y;
 };
 
-// helpers
-std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature triple);
-std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md);
-
-std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md);
-std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
-
 typedef std::vector<InlinedOperatorDescriptor> InlinedOperatorDescriptors;
 typedef std::vector<BinarySelectionDescriptor> BinarySelectionDescriptors;
 typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
 
-typedef boost::unordered_map<Expr_ptr, BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
+typedef boost::unordered_map<Expr_ptr,
+                             BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
 
 class CompilationUnit {
 public:
@@ -201,4 +209,12 @@ private:
     MultiwaySelectionDescriptors f_array_mux_descriptors;
 };
 typedef std::vector<CompilationUnit> CompilationUnits;
+
+/* helpers */
+std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios);
+std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md);
+
+std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md);
+std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
 #endif
+

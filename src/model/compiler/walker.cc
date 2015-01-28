@@ -405,7 +405,7 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
     if (is_binary_boolean(expr))
         boolean_not_equals(expr);
 
-    if (is_binary_enumerative(expr))
+    else if (is_binary_enumerative(expr))
         enumerative_not_equals(expr);
 
     else if (is_binary_algebraic(expr))

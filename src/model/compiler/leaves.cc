@@ -175,9 +175,17 @@ void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
 
     /* array of algebraics, same as above, times nelems */
     else if (type->is_array()) {
-        // type and enc width info has to match
-        assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
-                width / type -> as_array() -> nelems());
+
+        ScalarType_ptr scalar_type
+            (type->as_array()->of());
+
+        if (scalar_type->is_monolithic())
+            assert(1 == width / type -> as_array() -> nelems());
+
+        else if (scalar_type->is_algebraic())
+            assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
+                    width / type -> as_array() -> nelems());
+
         for (DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
             f_add_stack.push_back(*ri);
     }

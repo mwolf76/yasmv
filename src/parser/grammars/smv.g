@@ -712,8 +712,28 @@ native_type returns [Type_ptr res]
 
 boolean_type returns [Type_ptr res]
 @init {}
-    : 'boolean'
-    { $res = tm.find_boolean(); }
+    : 'boolean' (
+
+            '[' size=constant ']'
+            { $res = tm.find_boolean_array(size->value()); }
+
+            | { $res = tm.find_boolean(); }
+    )
+    ;
+
+enum_type returns [Type_ptr res]
+@init {
+    ExprSet lits;
+}
+    : '{'
+          lit=literal { lits.insert(lit); }
+              (',' lit=literal { lits.insert(lit); })*
+      '}' (
+            '[' size=constant ']'
+            { $res = tm.find_enum_array(lits, size->value()); }
+
+            | { $res = tm.find_enum( lits ); }
+    )
     ;
 
 unsigned_int_type returns [Type_ptr res]
@@ -821,17 +841,6 @@ signed_fxd_type returns [Type_ptr res]
                    : OptsMgr::INSTANCE().precision());
         }
     )
-    ;
-
-enum_type returns [Type_ptr res]
-@init {
-    ExprSet lits;
-}
-    : '{'
-          lit=literal { lits.insert(lit); }
-              (',' lit=literal { lits.insert(lit); })*
-      '}'
-      { $res = tm.find_enum( lits ); }
     ;
 
 instance_type returns [Type_ptr res]

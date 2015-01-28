@@ -40,6 +40,7 @@ TypeMgr::TypeMgr()
 {
 }
 
+/** Booleans */
 const ScalarType_ptr TypeMgr::find_boolean()
 {
     Expr_ptr descr
@@ -56,24 +57,73 @@ const ScalarType_ptr TypeMgr::find_boolean()
     return res;
 }
 
-#if 0
-const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
+const ArrayType_ptr TypeMgr::find_boolean_array(unsigned size)
 {
-    assert( f_em.is_type(expr));
+    Expr_ptr descr
+        (f_em.make_subscript(f_em.make_boolean_type(),
+                             f_em.make_const(size)));
+    ArrayType_ptr res
+        (dynamic_cast<ArrayType_ptr> (lookup_type(descr)));
+    if (res)
+        return res;
 
-    if (f_em.is_unsigned_int( expr->lhs()))
-        return find_unsigned( expr->rhs()->value());
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this, find_boolean(), size);
 
-    else if (f_em.is_signed_int( expr->lhs()))
-        return find_signed( expr->rhs()->value());
-
-    else
-        assert (false); /* unexpected */
-
-    return NULL;
+    register_type(descr, res);
+    return res;
 }
-#endif
 
+/** Enums */
+const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
+{
+    Expr_ptr repr
+        (em().make_enum_type(lits));
+
+    ScalarType_ptr res
+        (dynamic_cast<ScalarType_ptr> (lookup_type( repr )));
+    if (res)
+        return res;
+
+    // new type, needs to be registered before returning
+    res = new EnumType( *this, lits );
+    register_type(repr, res);
+
+    value_t v;
+    ExprSet::const_iterator i;
+    for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
+
+        const Expr_ptr& expr
+            (em().make_dot( em().make_empty(), *i));
+
+        Literal* literal
+            (new Literal(expr, res, v));
+
+        f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
+                      (expr, literal));
+    }
+
+    return res;
+}
+
+const ArrayType_ptr TypeMgr::find_enum_array(ExprSet& lits, unsigned size)
+{
+    Expr_ptr descr
+        (f_em.make_subscript(f_em.make_enum_type(lits),
+                             f_em.make_const(size)));
+    ArrayType_ptr res
+        (dynamic_cast<ArrayType_ptr> (lookup_type(descr)));
+    if (res)
+        return res;
+
+    // new type, needs to be registered before returning
+    res = new ArrayType( *this, find_enum(lits), size);
+
+    register_type(descr, res);
+    return res;
+}
+
+/** Constants */
 const ScalarType_ptr TypeMgr::find_constant(unsigned width, bool is_fxd)
 {
     Expr_ptr descr
@@ -93,6 +143,7 @@ const ScalarType_ptr TypeMgr::find_constant(unsigned width, bool is_fxd)
     return res;
 }
 
+/** Unsigned algebraics (both integer and fixed-point) */
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned width, bool is_fxd)
 {
     Expr_ptr descr
@@ -112,7 +163,6 @@ const ScalarType_ptr TypeMgr::find_unsigned(unsigned width, bool is_fxd)
     return res;
 }
 
-
 const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned width, bool is_fxd, unsigned size)
 {
     Expr_ptr descr
@@ -131,6 +181,7 @@ const ArrayType_ptr TypeMgr::find_unsigned_array(unsigned width, bool is_fxd, un
     return res;
 }
 
+/** Signed algebraics (both integer and fixed-point) */
 const ScalarType_ptr TypeMgr::find_signed(unsigned width, bool is_fxd)
 {
     Expr_ptr descr
@@ -169,37 +220,7 @@ const ArrayType_ptr TypeMgr::find_signed_array(unsigned width, bool is_fxd, unsi
     return res;
 }
 
-const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
-{
-    Expr_ptr repr
-        (em().make_enum_type(lits));
-
-    ScalarType_ptr res
-        (dynamic_cast<ScalarType_ptr> (lookup_type( repr )));
-    if (res)
-        return res;
-
-    // new type, needs to be registered before returning
-    res = new EnumType( *this, lits );
-    register_type(repr, res);
-
-    value_t v;
-    ExprSet::const_iterator i;
-    for (v = 0, i = lits.begin(); lits.end() != i; ++ i, ++ v) {
-
-        const Expr_ptr& expr
-            (em().make_dot( em().make_empty(), *i));
-
-        Literal* literal
-            (new Literal(expr, res, v));
-
-        f_lits.insert(std::make_pair<Expr_ptr, Literal_ptr>
-                      (expr, literal));
-    }
-
-    return res;
-}
-
+/** Instances */
 const ScalarType_ptr TypeMgr::find_instance(Expr_ptr module, Expr_ptr params)
 {
     Expr_ptr repr (em().make_params(module, params));
@@ -213,3 +234,24 @@ const ScalarType_ptr TypeMgr::find_instance(Expr_ptr module, Expr_ptr params)
 
     return res;
 }
+
+
+/** Typecasts */
+#if 0
+const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
+{
+    assert( f_em.is_type(expr));
+
+    if (f_em.is_unsigned_int( expr->lhs()))
+        return find_unsigned( expr->rhs()->value());
+
+    else if (f_em.is_signed_int( expr->lhs()))
+        return find_signed( expr->rhs()->value());
+
+    else
+        assert (false); /* unexpected */
+
+    return NULL;
+}
+#endif
+

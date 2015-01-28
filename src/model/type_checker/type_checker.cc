@@ -418,30 +418,29 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         ResolverProxy proxy;
 
         Symbol_ptr symb
-            (proxy.symbol( em.make_dot( ctx, expr)));
+            (proxy.symbol(em.make_dot( ctx, expr)));
 
         if (symb->is_const()) {
-            Type_ptr res = symb->as_const().type();
+            Type_ptr res
+                (symb->as_const().type());
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_literal()) {
-            Type_ptr res = symb->as_literal().type();
+            Type_ptr res
+                (symb->as_literal().type());
             PUSH_TYPE(res);
             return;
         }
-        // else if (symb->is_array()) { // meta type
-        //     Type_ptr res = symb->as_array().type();
-        //     PUSH_TYPE(res);
-        //     return;
-        // }
         else if (symb->is_variable()) {
-            Type_ptr res = symb->as_variable().type();
+            Type_ptr res
+                (symb->as_variable().type());
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_parameter()) {
-            Type_ptr res = symb->as_parameter().type();
+            Type_ptr res
+                (symb->as_parameter().type());
             PUSH_TYPE(res);
             return;
         }
@@ -449,9 +448,12 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         // we keep this to retain the old lazy behavior with nullary defines
         // since it comes at no extra cost at all.
         else if (symb->is_define()) {
-            Define& define = symb->as_define();
+            Define& define
+                (symb->as_define());
+
             assert( 0 == define.formals().size());
             (*this)(define.body());
+
             return;
         }
     }

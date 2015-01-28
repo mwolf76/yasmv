@@ -32,8 +32,8 @@
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& triple)
-    : f_triple(triple)
+InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
+    : f_ios(ios)
 {}
 
 const char* InlinedOperatorLoaderException::what() const throw()
@@ -41,7 +41,7 @@ const char* InlinedOperatorLoaderException::what() const throw()
     std::ostringstream oss;
     oss
         << "InlinedOperatorLoaderException: can not instantiate loader for"
-        << f_triple;
+        << f_ios;
 
     return oss.str().c_str();
 }
@@ -87,7 +87,7 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
     for (const char *p = width; *p; ++ p)
         assert( isdigit(*p));
 
-    f_triple = make_ios( 's' == *signedness, op_type, atoi(width));
+    f_ios = make_ios( 's' == *signedness, op_type, atoi(width));
 }
 
 InlinedOperatorLoader::~InlinedOperatorLoader()
@@ -112,7 +112,7 @@ const LitsVector& InlinedOperatorLoader::clauses()
 
         const Json::Value generated (obj[ JSON_GENERATED ]);
         DEBUG
-            << "Loading clauses for " << f_triple
+            << "Loading clauses for " << f_ios
             << ", generated " << generated
             << std::endl;
 
@@ -178,12 +178,12 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                     assert(NULL != loader);
 
                     DRIVEL << "Registering clauses loader for "
-                           << loader->triple()
+                           << loader->ios()
                            << "..."
                            << std::endl;
 
                     f_loaders.insert( std::make_pair< InlinedOperatorSignature, InlinedOperatorLoader_ptr >
-                                      (loader->triple(), loader));
+                                      (loader->ios(), loader));
                 }
                 catch (InlinedOperatorLoaderException mle) {
                     std::string tmp(mle.what());
@@ -210,13 +210,13 @@ InlinedOperatorMgr::~InlinedOperatorMgr()
 {
 }
 
-InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignature& triple)
+InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignature& ios)
 {
     InlinedOperatorLoaderMap::const_iterator i
-        (f_loaders.find( triple ));
+        (f_loaders.find( ios ));
 
     if (i == f_loaders.end())
-        throw InlinedOperatorLoaderException(triple);
+        throw InlinedOperatorLoaderException(ios);
 
     return * i->second;
 }
@@ -241,7 +241,7 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
         (md.y());
 
     int width
-        (triple_width(md.triple()));
+        (ios_width(md.ios()));
 
     // keep each injection in a separate cnf space
     f_sat.clear_cnf_map();

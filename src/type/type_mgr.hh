@@ -61,6 +61,11 @@ class TypeMgr {
 public:
 
     const ScalarType_ptr find_boolean();
+    const ArrayType_ptr find_boolean_array(unsigned size);
+
+    /* Remark: following C scoping rules for enums, enums are *globals* */
+    const ScalarType_ptr find_enum(ExprSet& lits);
+    const ArrayType_ptr find_enum_array(ExprSet& lits, unsigned size);
 
     const ScalarType_ptr find_constant(unsigned width, bool is_fxd);
 
@@ -74,9 +79,6 @@ public:
                                             unsigned size);
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);
-
-    /* Remark: following C scoping rules for enums, enums are *globals* */
-    const ScalarType_ptr find_enum(ExprSet& lits);
 
     const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
 

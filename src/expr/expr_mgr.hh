@@ -666,6 +666,8 @@ public:
                 (OR  == symb)  ||
                 (XOR == symb)  ||
                 (IFF == symb)  ||
+                (EQ  == symb)  ||
+                (NE  == symb)  ||
                 (IMPLIES == symb));
     }
 
