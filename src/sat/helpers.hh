@@ -28,10 +28,10 @@
 
 #include <dd/dd_walker.hh>
 
-class MicroLoaderException : public Exception {
+class InlinedOperatorLoaderException : public Exception {
 public:
-    MicroLoaderException(const InlinedOperatorSignature& f_triple);
-    ~MicroLoaderException() throw();
+    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_triple);
+    ~InlinedOperatorLoaderException() throw();
 
     const char* what() const throw();
 
@@ -39,99 +39,99 @@ private:
     InlinedOperatorSignature f_triple;
 };
 
-typedef class MicroLoader* MicroLoader_ptr;
-typedef boost::unordered_map<InlinedOperatorSignature, MicroLoader_ptr,
+typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
+typedef boost::unordered_map<InlinedOperatorSignature, InlinedOperatorLoader_ptr,
                              InlinedOperatorSignatureHash,
-                             InlinedOperatorSignatureEq> MicroLoaderMap;
+                             InlinedOperatorSignatureEq> InlinedOperatorLoaderMap;
 
 
-class MicroLoader {
+class InlinedOperatorLoader {
 public:
-    MicroLoader(const boost::filesystem::path& filepath);
-    ~MicroLoader();
+    InlinedOperatorLoader(const boost::filesystem::path& filepath);
+    ~InlinedOperatorLoader();
 
     inline const InlinedOperatorSignature& triple() const
     { return f_triple; }
 
     // synchronized
-    const LitsVector& microcode();
+    const LitsVector& clauses();
 
 private:
     boost::mutex f_loading_mutex;
-    LitsVector f_microcode;
+    LitsVector f_clauses;
 
     boost::filesystem::path f_fullpath;
     InlinedOperatorSignature f_triple;
 };
 
-typedef class MicroMgr *MicroMgr_ptr;
-class MicroMgr  {
+typedef class InlinedOperatorMgr *InlinedOperatorMgr_ptr;
+class InlinedOperatorMgr  {
 
 public:
-    static MicroMgr& INSTANCE() {
+    static InlinedOperatorMgr& INSTANCE() {
         if (! f_instance) {
-            f_instance = new MicroMgr();
+            f_instance = new InlinedOperatorMgr();
         }
         return (*f_instance);
     }
 
-    MicroLoader& require(const InlinedOperatorSignature& triple);
+    InlinedOperatorLoader& require(const InlinedOperatorSignature& triple);
 
-    inline const MicroLoaderMap& loaders() const
+    inline const InlinedOperatorLoaderMap& loaders() const
     { return f_loaders; }
 
 protected:
-    MicroMgr();
-    ~MicroMgr();
+    InlinedOperatorMgr();
+    ~InlinedOperatorMgr();
 
 private:
-    static MicroMgr_ptr f_instance;
-    MicroLoaderMap f_loaders;
+    static InlinedOperatorMgr_ptr f_instance;
+    InlinedOperatorLoaderMap f_loaders;
 };
 
 
-class CNFMicrocodeInjector {
+class CNFOperatorInliner {
 public:
-    CNFMicrocodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
+    CNFOperatorInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
         : f_sat(sat)
         , f_time(time)
         , f_group(group)
     {}
 
-    ~CNFMicrocodeInjector()
+    ~CNFOperatorInliner()
     {}
 
     inline void operator() (const InlinedOperatorDescriptor& md)
     {
-        MicroMgr& mm
-            (MicroMgr::INSTANCE());
+        InlinedOperatorMgr& mm
+            (InlinedOperatorMgr::INSTANCE());
 
         InlinedOperatorSignature triple
             (md.triple());
-        MicroLoader& loader
+        InlinedOperatorLoader& loader
             (mm.require(triple));
 
-        inject(md, loader.microcode());
+        inject(md, loader.clauses());
     }
 
 private:
     void inject(const InlinedOperatorDescriptor& md,
-                const LitsVector& microcode);
+                const LitsVector& clauses);
 
     Engine& f_sat;
     step_t f_time;
     group_t f_group;
 };
 
-class CNFMuxcodeInjector {
+class CNFBinarySelectionInliner {
 public:
-    CNFMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
+    CNFBinarySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
         : f_sat(sat)
         , f_time(time)
         , f_group(group)
     {}
 
-    ~CNFMuxcodeInjector()
+    ~CNFBinarySelectionInliner()
     {}
 
     inline void operator() (const BinarySelectionDescriptor& md)
@@ -145,15 +145,15 @@ private:
     group_t f_group;
 };
 
-class CNFArrayMuxcodeInjector {
+class CNFMultiwaySelectionInliner {
 public:
-    CNFArrayMuxcodeInjector(Engine& sat, step_t time, group_t group = MAINGROUP)
+    CNFMultiwaySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
         : f_sat(sat)
         , f_time(time)
         , f_group(group)
     {}
 
-    ~CNFArrayMuxcodeInjector()
+    ~CNFMultiwaySelectionInliner()
     {}
 
     inline void operator() (const MultiwaySelectionDescriptor& md)

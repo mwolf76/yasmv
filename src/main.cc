@@ -143,11 +143,12 @@ int main(int argc, const char *argv[])
     signal(SIGINT, sighandler);
 
     /* load microcode */
-    MicroMgr& mm = MicroMgr::INSTANCE();
-    uint32_t micro_loaders (mm.loaders().size());
+    InlinedOperatorMgr& mm = InlinedOperatorMgr::INSTANCE();
+    uint32_t nloaders
+        (mm.loaders().size());
     TRACE
-        << micro_loaders
-        << " microcode loaders registered."
+        << nloaders
+        << " loaders registered."
         << std::endl
     ;
 

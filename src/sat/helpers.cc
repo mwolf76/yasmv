@@ -32,23 +32,24 @@
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
-MicroLoaderException::MicroLoaderException(const InlinedOperatorSignature& triple)
+InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& triple)
     : f_triple(triple)
 {}
 
-const char* MicroLoaderException::what() const throw()
+const char* InlinedOperatorLoaderException::what() const throw()
 {
     std::ostringstream oss;
     oss
-        << "MicroLoaderException: can not instantiate loader for" << f_triple;
+        << "InlinedOperatorLoaderException: can not instantiate loader for"
+        << f_triple;
 
     return oss.str().c_str();
 }
 
-MicroLoaderException::~MicroLoaderException() throw()
+InlinedOperatorLoaderException::~InlinedOperatorLoaderException() throw()
 {}
 
-MicroLoader::MicroLoader(const boost::filesystem::path& filepath)
+InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)
 {
     const std::string native (filepath.filename().replace_extension().native());
@@ -89,14 +90,14 @@ MicroLoader::MicroLoader(const boost::filesystem::path& filepath)
     f_triple = make_ios( 's' == *signedness, op_type, atoi(width));
 }
 
-MicroLoader::~MicroLoader()
+InlinedOperatorLoader::~InlinedOperatorLoader()
 {}
 
-const LitsVector& MicroLoader::microcode()
+const LitsVector& InlinedOperatorLoader::clauses()
 {
     boost::mutex::scoped_lock lock(f_loading_mutex);
 
-    if (0 == f_microcode.size()) {
+    if (0 == f_clauses.size()) {
 
         unsigned count(0);
         clock_t t0 = clock(), t1;
@@ -111,7 +112,7 @@ const LitsVector& MicroLoader::microcode()
 
         const Json::Value generated (obj[ JSON_GENERATED ]);
         DEBUG
-            << "Loading microcode for " << f_triple
+            << "Loading clauses for " << f_triple
             << ", generated " << generated
             << std::endl;
 
@@ -128,7 +129,7 @@ const LitsVector& MicroLoader::microcode()
                 assert( literal.type() == Json::intValue );
                 newClause.push_back( Minisat::toLit(literal.asInt()));
             }
-            f_microcode.push_back( newClause ); ++ count;
+            f_clauses.push_back( newClause ); ++ count;
         }
         t1 = clock(); secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
@@ -139,13 +140,13 @@ const LitsVector& MicroLoader::microcode()
             << std::endl;
     }
 
-    return f_microcode;
+    return f_clauses;
 }
 
 // static initialization
-MicroMgr_ptr MicroMgr::f_instance = NULL;
+InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance = NULL;
 
-MicroMgr::MicroMgr()
+InlinedOperatorMgr::InlinedOperatorMgr()
 {
     using boost::filesystem::path;
     using boost::filesystem::directory_iterator;
@@ -171,20 +172,20 @@ MicroMgr::MicroMgr()
                 if (strcmp(entry.extension().c_str(), ".json"))
                     continue;
 
-                // lazy microcode-loaders registration
+                // lazy clauses-loaders registration
                 try {
-                    MicroLoader* loader = new MicroLoader(entry);
+                    InlinedOperatorLoader* loader = new InlinedOperatorLoader(entry);
                     assert(NULL != loader);
 
-                    DRIVEL << "Registering microcode loader for "
+                    DRIVEL << "Registering clauses loader for "
                            << loader->triple()
                            << "..."
                            << std::endl;
 
-                    f_loaders.insert( std::make_pair< InlinedOperatorSignature, MicroLoader_ptr >
+                    f_loaders.insert( std::make_pair< InlinedOperatorSignature, InlinedOperatorLoader_ptr >
                                       (loader->triple(), loader));
                 }
-                catch (MicroLoaderException mle) {
+                catch (InlinedOperatorLoaderException mle) {
                     std::string tmp(mle.what());
                     WARN
                         << tmp
@@ -203,24 +204,25 @@ MicroMgr::MicroMgr()
         ERR << tmp;
         exit(1);
     }
- }
+}
 
- MicroMgr::~MicroMgr()
- {
- }
-
-MicroLoader& MicroMgr::require(const InlinedOperatorSignature& triple)
+InlinedOperatorMgr::~InlinedOperatorMgr()
 {
-    MicroLoaderMap::const_iterator i = f_loaders.find( triple );
-    if (i == f_loaders.end()) {
-        throw MicroLoaderException(triple);
-    }
+}
+
+InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignature& triple)
+{
+    InlinedOperatorLoaderMap::const_iterator i
+        (f_loaders.find( triple ));
+
+    if (i == f_loaders.end())
+        throw InlinedOperatorLoaderException(triple);
 
     return * i->second;
 }
 
-void CNFMicrocodeInjector::inject(const InlinedOperatorDescriptor& md,
-                                  const LitsVector& microcode)
+void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
+                                const LitsVector& clauses)
 {
     DEBUG
         << const_cast<InlinedOperatorDescriptor&> (md)
@@ -244,9 +246,9 @@ void CNFMicrocodeInjector::inject(const InlinedOperatorDescriptor& md,
     // keep each injection in a separate cnf space
     f_sat.clear_cnf_map();
 
-    // foreach clause in microcode data...
+    // foreach clause in clauses data...
     LitsVector::const_iterator i;
-    for (i = microcode.begin(); microcode.end() != i; ++ i) {
+    for (i = clauses.begin(); clauses.end() != i; ++ i) {
 
         const Lits& clause
             (*i);
@@ -356,7 +358,7 @@ void CNFMicrocodeInjector::inject(const InlinedOperatorDescriptor& md,
     }
 }
 
-void CNFMuxcodeInjector::inject(const BinarySelectionDescriptor& md)
+void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 {
     DEBUG
         << const_cast<BinarySelectionDescriptor&> (md)
@@ -421,7 +423,7 @@ void CNFMuxcodeInjector::inject(const BinarySelectionDescriptor& md)
     }
 }
 
-void CNFArrayMuxcodeInjector::inject(const MultiwaySelectionDescriptor& md)
+void CNFMultiwaySelectionInliner::inject(const MultiwaySelectionDescriptor& md)
 {
     DEBUG
         << const_cast<MultiwaySelectionDescriptor&> (md)

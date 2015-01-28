@@ -97,7 +97,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
             (cu.micro_descriptors());
         InlinedOperatorDescriptors::const_iterator i;
         for (i = micro_descriptors.begin(); micro_descriptors.end() != i; ++ i) {
-            CNFMicrocodeInjector worker
+            CNFOperatorInliner worker
                 (*this, time, group);
 
             worker(*i);
@@ -119,7 +119,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
             BinarySelectionDescriptors::const_iterator i;
             for (i = descriptors.begin(); descriptors.end() != i; ++ i) {
-                CNFMuxcodeInjector worker
+                CNFBinarySelectionInliner worker
                     (*this, time, group);
 
                 worker(*i);
@@ -136,7 +136,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         MultiwaySelectionDescriptors::const_iterator i;
         for (i = muxes.begin(); muxes.end() != i; ++ i) {
 
-            CNFArrayMuxcodeInjector worker
+            CNFMultiwaySelectionInliner worker
                 (*this, time, group);
 
             worker(*i);
