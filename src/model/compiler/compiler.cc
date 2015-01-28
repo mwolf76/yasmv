@@ -27,38 +27,14 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     boost::mutex::scoped_lock lock
         (f_process_mutex);
 
-    {
-        /* pass 1: preprocessing */
-        clear_internals();
-        f_preprocess = true;
+    pass1(ctx, body);
 
-        // walk body in given ctx
-        f_ctx_stack.push_back(ctx);
+    pass2(ctx, body);
 
-        // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-        f_time_stack.push_back(0);
+    pass3();
 
-        /* Invoke walker on the body of the expr to be processed */
-        (*this)(body);
-    }
-
-    {
-        /* pass 2: compilation */
-        clear_internals();
-        f_preprocess = false;
-
-        // walk body in given ctx
-        f_ctx_stack.push_back(ctx);
-
-        // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-        f_time_stack.push_back(0);
-
-        /* Invoke walker on the body of the expr to be processed */
-        (*this)(body);
-    }
-
-    return CompilationUnit( f_add_stack, f_inlined_operator_descriptors,
-                            f_expr2bsd_map, f_multiway_selection_descriptors);
+    return CompilationUnit(f_add_stack, f_inlined_operator_descriptors,
+                           f_expr2bsd_map, f_multiway_selection_descriptors);
 }
 
 Compiler::Compiler()

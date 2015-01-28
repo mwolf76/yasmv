@@ -234,6 +234,10 @@ void Compiler::clear_internals()
 void Compiler::pre_hook()
 {}
 
+void Compiler::post_hook()
+{
+}
+
 /* post-processing for MUXes:
 
    1. ITE MUXes, for each descriptor, we need to conjunct
@@ -244,11 +248,42 @@ void Compiler::pre_hook()
    act_i, i in [0..n_elems[` to the original formula.
 */
 
-void Compiler::post_hook()
-{
-    if (f_preprocess)
-        return;
 
+void Compiler::pass1(Expr_ptr ctx, Expr_ptr body)
+{
+    /* pass 1: preprocessing */
+    clear_internals();
+    f_preprocess = true;
+
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
+
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
+}
+
+void Compiler::pass2(Expr_ptr ctx, Expr_ptr body)
+{
+    /* pass 2: compilation */
+    clear_internals();
+    f_preprocess = false;
+
+    // walk body in given ctx
+    f_ctx_stack.push_back(ctx);
+
+    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
+    f_time_stack.push_back(0);
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
+}
+
+
+void Compiler::pass3()
+{
     // sanity conditions
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());
@@ -314,6 +349,7 @@ void Compiler::post_hook()
         }
     }
 }
+
 
 Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
 {

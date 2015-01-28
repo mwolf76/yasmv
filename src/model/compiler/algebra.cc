@@ -44,7 +44,9 @@ void Compiler::algebraic_unary(const Expr_ptr expr)
     bool signedness = lhs_type -> is_signed_algebraic();
 
     POP_DV(lhs, width);
+
     FRESH_DV(res, width);
+    PUSH_DV(res, width);
 
     InlinedOperatorDescriptor iod
         (make_ios( signedness, expr->symb(), width ), res, lhs);
@@ -84,7 +86,9 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
+
     FRESH_DV(res, width);
+    PUSH_DV(res, width);
 
     InlinedOperatorDescriptor md
         (make_ios( signedness, expr->symb(), width ), res, lhs, rhs);
@@ -284,7 +288,9 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
+
     FRESH_DV(res, 1); // boolean
+    PUSH_DV(res, 1);
 
     InlinedOperatorDescriptor md
         (make_ios( signedness, expr->symb(), width ), res, lhs, rhs);
@@ -344,6 +350,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
 
     /* Push MUX output DD vector */
     FRESH_DV(res, width);
+    PUSH_DV(res, width);
 
     /* Register ITE MUX */
     Expr_ptr parent
@@ -450,6 +457,8 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 
     /* Push MUX output DD vector */
     FRESH_DV(dv, elem_width);
+    PUSH_DV(dv, elem_width);
+
     PUSH_TYPE(type);
 
     MultiwaySelectionDescriptor msd

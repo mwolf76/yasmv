@@ -59,18 +59,15 @@ typedef std::vector<ADD> DDVector;
         f_add_stack.pop_back();                 \
     }
 
-/** Push a DD vector of given width */
-#define PUSH_DV(vec, width)                     \
-    /* push DD vector in reversed order */      \
-    for (unsigned i = 0; i < width; ++ i) {     \
-        unsigned ndx = width - i - 1;           \
-        PUSH_DD(vec[ndx]);                      \
-    }
-
 /** Declare a DD vector of given width */
 #define FRESH_DV(vec, width)                    \
     DDVector vec;                               \
-    make_auto_ddvect(vec, width);               \
-    PUSH_DV(vec, width);
+    make_auto_ddvect(vec, width);
+
+/** Push a DD vector of given width */
+#define PUSH_DV(vec, width)                     \
+    /* push DD vector in reversed order */      \
+    for (unsigned i = 0; i < width; ++ i)       \
+        PUSH_DD(vec[width - i - 1]);
 
 #endif

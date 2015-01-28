@@ -178,6 +178,11 @@ private:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
+    /* compilation passes: encodings building, compilation, post-processing */
+    void pass1(Expr_ptr ctx, Expr_ptr body);
+    void pass2(Expr_ptr ctx, Expr_ptr body);
+    void pass3();
+
     /* -- data -------------------------------------------------------------- */
 
     /* TimedExpr -> Compilation Unit cache */
