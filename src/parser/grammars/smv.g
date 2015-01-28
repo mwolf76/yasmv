@@ -270,20 +270,9 @@ conditional_expression returns [Expr_ptr res]
 	;
 
 logical_expression returns [Expr_ptr res]
-    : expr=logical_iff_expression
+    : expr=logical_implies_expression
       { $res = expr; }
     ;
-
-logical_iff_expression returns [Expr_ptr res]
-@init { }
-	:  lhs=logical_implies_expression
-       { $res = lhs; }
-
-    (
-       '<->' rhs=logical_implies_expression
-       { $res = em.make_iff($res, rhs); }
-    )*
-	;
 
 logical_implies_expression returns [Expr_ptr res]
 @init { }
@@ -304,9 +293,6 @@ logical_or_expression returns[Expr_ptr res]
     (
       '||' rhs=logical_and_expression
       { $res = em.make_or($res, rhs); }
-
-    | 'xor' rhs=logical_and_expression
-      { $res = em.make_xor($res, rhs); }
     )*
     ;
 

@@ -203,21 +203,6 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_xor_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Compiler::walk_xor_inorder(const Expr_ptr expr)
-{ return true; }
-void Compiler::walk_xor_postorder(const Expr_ptr expr)
-{
-    if (f_preprocess)
-        return;
-
-    if (is_binary_boolean(expr))
-        boolean_xor(expr);
-
-    else assert( false ); // unreachable
-}
-
 bool Compiler::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_bw_or_inorder(const Expr_ptr expr)
@@ -274,21 +259,6 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
 
     if (is_binary_boolean(expr))
         boolean_implies(expr);
-
-    else assert( false ); // unreachable
-}
-
-bool Compiler::walk_iff_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Compiler::walk_iff_inorder(const Expr_ptr expr)
-{ return true; }
-void Compiler::walk_iff_postorder(const Expr_ptr expr)
-{
-    if (f_preprocess)
-        return;
-
-    if (is_binary_boolean(expr))
-        boolean_iff(expr);
 
     else assert( false ); // unreachable
 }
@@ -384,7 +354,7 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     if (is_binary_boolean(expr))
         boolean_equals(expr);
 
-    if (is_binary_enumerative(expr))
+    else if (is_binary_enumerative(expr))
         enumerative_equals(expr);
 
     else if (is_binary_algebraic(expr))

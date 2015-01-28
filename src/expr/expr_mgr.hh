@@ -206,14 +206,6 @@ public:
         return expr->f_symb == OR;
     }
 
-    inline Expr_ptr make_xor(Expr_ptr a, Expr_ptr b)
-    { return make_expr(XOR, a, b); }
-
-    inline bool is_xor(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == XOR;
-    }
-
     inline Expr_ptr make_bw_or(Expr_ptr a, Expr_ptr b)
     { return make_expr(BW_OR, a, b); }
 
@@ -260,14 +252,6 @@ public:
     inline bool is_implies(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IMPLIES;
-    }
-
-    inline Expr_ptr make_iff(Expr_ptr a, Expr_ptr b)
-    { return make_expr(IFF, a, b); }
-
-    inline bool is_iff(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == IFF;
     }
 
     /* -- Relational operators ---------------------------------------------- */
@@ -664,8 +648,6 @@ public:
 
         return ((AND == symb)  ||
                 (OR  == symb)  ||
-                (XOR == symb)  ||
-                (IFF == symb)  ||
                 (EQ  == symb)  ||
                 (NE  == symb)  ||
                 (IMPLIES == symb));

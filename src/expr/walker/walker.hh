@@ -54,11 +54,10 @@
     BINARY_HOOK(mul);                              \
                                                    \
     BINARY_HOOK(and); BINARY_HOOK(or);             \
-    BINARY_HOOK(xor);                              \
     BINARY_HOOK(bw_and); BINARY_HOOK(bw_or);       \
     BINARY_HOOK(bw_xor); BINARY_HOOK(implies);     \
-    BINARY_HOOK(bw_xnor); BINARY_HOOK(iff);        \
-    BINARY_HOOK(lshift); BINARY_HOOK(rshift);      \
+    BINARY_HOOK(bw_xnor); BINARY_HOOK(lshift);     \
+    BINARY_HOOK(rshift);                           \
                                                    \
     BINARY_HOOK(type); BINARY_HOOK(cast);          \
                                                    \
@@ -119,14 +118,12 @@ typedef enum {
     BW_AND_1, BW_AND_2,
 
     OR_1, OR_2,
-    XOR_1, XOR_2,
     BW_OR_1, BW_OR_2,
 
     BW_XOR_1, BW_XOR_2,
     BW_XNOR_1, BW_XNOR_2,
 
     IMPLIES_1, IMPLIES_2,
-    IFF_1, IFF_2,
 
     RSHIFT_1, RSHIFT_2,
     LSHIFT_1, LSHIFT_2,
@@ -313,10 +310,6 @@ protected:
     virtual bool walk_or_inorder(const Expr_ptr expr) =0;
     virtual void walk_or_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_xor_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_xor_inorder(const Expr_ptr expr) =0;
-    virtual void walk_xor_postorder(const Expr_ptr expr) =0;
-
     virtual bool walk_bw_or_preorder(const Expr_ptr expr) =0;
     virtual bool walk_bw_or_inorder(const Expr_ptr expr) =0;
     virtual void walk_bw_or_postorder(const Expr_ptr expr) =0;
@@ -332,10 +325,6 @@ protected:
     virtual bool walk_implies_preorder(const Expr_ptr expr) =0;
     virtual bool walk_implies_inorder(const Expr_ptr expr) =0;
     virtual void walk_implies_postorder(const Expr_ptr expr) =0;
-
-    virtual bool walk_iff_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_iff_inorder(const Expr_ptr expr) =0;
-    virtual void walk_iff_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_lshift_preorder(const Expr_ptr expr) =0;
     virtual bool walk_lshift_inorder(const Expr_ptr expr) =0;

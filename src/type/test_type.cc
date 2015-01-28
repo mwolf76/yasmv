@@ -200,10 +200,6 @@ BOOST_AUTO_TEST_CASE(type_inference)
         BOOST_CHECK( boolean ==
                      mm.type( em.make_implies( x, y ),
                               em.make_main()));
-
-        BOOST_CHECK( boolean ==
-                     mm.type( em.make_iff( x, y ),
-                              em.make_main()));
     }
 
     { /* uint16_t */
@@ -318,11 +314,6 @@ BOOST_AUTO_TEST_CASE(type_inference)
         BOOST_CHECK( tm.find_boolean() ==
                      mm.type( em.make_eq(y,
                                          em.make_implies( x, k)),
-                              em.make_main()));
-
-        BOOST_CHECK( tm.find_boolean() ==
-                     mm.type( em.make_eq(y,
-                                         em.make_iff( x, k)),
                               em.make_main()));
 
         BOOST_CHECK( tm.find_boolean() ==

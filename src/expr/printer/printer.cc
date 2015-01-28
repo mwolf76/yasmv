@@ -163,13 +163,6 @@ bool Printer::walk_or_inorder(const Expr_ptr expr)
 void Printer::walk_or_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
-bool Printer::walk_xor_preorder(const Expr_ptr expr)
-{ f_os << "("; return true; }
-bool Printer::walk_xor_inorder(const Expr_ptr expr)
-{ f_os << " xor "; return true; }
-void Printer::walk_xor_postorder(const Expr_ptr expr)
-{ f_os << ")"; }
-
 bool Printer::walk_bw_or_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_bw_or_inorder(const Expr_ptr expr)
@@ -196,13 +189,6 @@ bool Printer::walk_implies_preorder(const Expr_ptr expr)
 bool Printer::walk_implies_inorder(const Expr_ptr expr)
 { f_os << " -> "; return true; }
 void Printer::walk_implies_postorder(const Expr_ptr expr)
-{ f_os << ")"; }
-
-bool Printer::walk_iff_preorder(const Expr_ptr expr)
-{ f_os << "("; return true; }
-bool Printer::walk_iff_inorder(const Expr_ptr expr)
-{ f_os << " <-> "; return true; }
-void Printer::walk_iff_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_cast_preorder(const Expr_ptr expr)

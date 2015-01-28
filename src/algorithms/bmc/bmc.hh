@@ -26,7 +26,6 @@
 #include <expr/expr.hh>
 
 #include <algorithms/base.hh>
-#include <algorithms/bmc/normalizer.hh>
 
 #include <witness/witness.hh>
 

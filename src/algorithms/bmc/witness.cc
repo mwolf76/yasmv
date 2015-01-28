@@ -23,8 +23,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <bmc.hh>
-#include <base.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/base.hh>
 
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>

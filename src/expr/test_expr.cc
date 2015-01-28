@@ -131,11 +131,6 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_implies(x_implies_y));
     BOOST_CHECK (em.is_binary_logical(x_implies_y));
 
-    Expr_ptr x_iff_y = em.make_iff(x, y);
-    BOOST_CHECK (x_iff_y->f_symb == IFF && x_iff_y->lhs() == x && x_iff_y->rhs() == y);
-    BOOST_CHECK (em.is_iff(x_iff_y));
-    BOOST_CHECK (em.is_binary_logical(x_iff_y));
-
     Expr_ptr x_eq_y = em.make_eq(x, y);
     BOOST_CHECK (x_eq_y->f_symb == EQ && x_eq_y->lhs() == x && x_eq_y->rhs() == y);
     BOOST_CHECK (em.is_eq(x_eq_y));
@@ -362,13 +357,6 @@ BOOST_AUTO_TEST_CASE(printer)
         std::ostringstream oss;
         Printer printer(oss);
         printer << x_implies_y; BOOST_CHECK (oss.str() == std::string("(x -> y)"));
-    }
-
-    {
-        Expr_ptr x_iff_y = em.make_iff(x, y);
-        std::ostringstream oss;
-        Printer printer(oss);
-        printer << x_iff_y; BOOST_CHECK (oss.str() == std::string("(x <-> y)"));
     }
 
     {

@@ -270,20 +270,6 @@ void Evaluator::walk_or_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs || rhs);
 }
 
-bool Evaluator::walk_xor_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Evaluator::walk_xor_inorder(const Expr_ptr expr)
-{ return true; }
-void Evaluator::walk_xor_postorder(const Expr_ptr expr)
-{
-    DROP_TYPE();
-
-    POP_VALUE(rhs);
-    POP_VALUE(lhs);
-    PUSH_VALUE((lhs && !rhs) || (!lhs && rhs));
-}
-
-
 bool Evaluator::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_bw_or_inorder(const Expr_ptr expr)
@@ -334,19 +320,6 @@ void Evaluator::walk_implies_postorder(const Expr_ptr expr)
     POP_VALUE(rhs);
     POP_VALUE(lhs);
     PUSH_VALUE(( ! lhs || rhs ));
-}
-
-bool Evaluator::walk_iff_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool Evaluator::walk_iff_inorder(const Expr_ptr expr)
-{ return true; }
-void Evaluator::walk_iff_postorder(const Expr_ptr expr)
-{
-    DROP_TYPE();
-
-    POP_VALUE(rhs);
-    POP_VALUE(lhs);
-    PUSH_VALUE(( ! lhs || rhs ) && ( ! rhs || lhs ));
 }
 
 bool Evaluator::walk_lshift_preorder(const Expr_ptr expr)

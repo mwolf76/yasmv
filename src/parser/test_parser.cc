@@ -187,12 +187,6 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
     }
 
     {
-        Expr_ptr phi = em.make_iff(x, y);
-        Expr_ptr psi = parseExpression("x <-> y");
-        BOOST_CHECK (phi == psi);
-    }
-
-    {
         Expr_ptr phi = em.make_lshift(x, y);
         Expr_ptr psi = parseExpression("x << y");
         BOOST_CHECK (phi == psi);
@@ -315,13 +309,6 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
                                        em.make_eq( em.make_next(x),
                                                    em.make_const(1)));
         Expr_ptr psi = parseExpression("x = 0 -> next(x) = 1");
-        BOOST_CHECK (phi == psi);
-    }
-
-    {
-        Expr_ptr phi = em.make_iff(em.make_eq( x, em.make_const(0)),
-                                   em.make_eq( y, em.make_const(1)));
-        Expr_ptr psi = parseExpression("x = 0 <-> y = 1");
         BOOST_CHECK (phi == psi);
     }
 

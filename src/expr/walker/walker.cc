@@ -108,9 +108,6 @@ void ExprWalker::walk ()
             case OR_1: goto entry_OR_1;
             case OR_2: goto entry_OR_2;
 
-            case XOR_1: goto entry_XOR_1;
-            case XOR_2: goto entry_XOR_2;
-
             case BW_OR_1: goto entry_BW_OR_1;
             case BW_OR_2: goto entry_BW_OR_2;
 
@@ -122,9 +119,6 @@ void ExprWalker::walk ()
 
             case IMPLIES_1: goto entry_IMPLIES_1;
             case IMPLIES_2: goto entry_IMPLIES_2;
-
-            case IFF_1: goto entry_IFF_1;
-            case IFF_2: goto entry_IFF_2;
 
             case LSHIFT_1: goto entry_LSHIFT_1;
             case LSHIFT_2: goto entry_LSHIFT_2;
@@ -448,24 +442,6 @@ void ExprWalker::walk ()
             }
             break;
 
-        case XOR:
-            if (walk_xor_preorder(curr.expr) && ! f_rewritten) {
-                f_recursion_stack.top().pc = XOR_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_XOR_1:
-                if (walk_xor_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = XOR_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_XOR_2:
-                walk_xor_postorder(curr.expr);
-            }
-            break;
-
         case BW_OR:
             if (walk_bw_or_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = BW_OR_1;
@@ -535,24 +511,6 @@ void ExprWalker::walk ()
 
             entry_IMPLIES_2:
                 walk_implies_postorder(curr.expr);
-            }
-            break;
-
-        case IFF:
-            if (walk_iff_preorder(curr.expr) && ! f_rewritten) {
-                f_recursion_stack.top().pc = IFF_1;
-                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
-                goto loop;
-
-            entry_IFF_1:
-                if (walk_iff_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = IFF_2;
-                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
-                    goto loop;
-                }
-
-            entry_IFF_2:
-                walk_iff_postorder(curr.expr);
             }
             break;
 

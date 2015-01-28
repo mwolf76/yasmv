@@ -181,13 +181,6 @@ bool TypeChecker::walk_or_inorder(const Expr_ptr expr)
 void TypeChecker::walk_or_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
-bool TypeChecker::walk_xor_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool TypeChecker::walk_xor_inorder(const Expr_ptr expr)
-{ return true; }
-void TypeChecker::walk_xor_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
-
 bool TypeChecker::walk_bw_or_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_bw_or_inorder(const Expr_ptr expr)
@@ -214,13 +207,6 @@ bool TypeChecker::walk_implies_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_implies_postorder(const Expr_ptr expr)
-{ walk_binary_logical_postorder(expr); }
-
-bool TypeChecker::walk_iff_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
-bool TypeChecker::walk_iff_inorder(const Expr_ptr expr)
-{ return true; }
-void TypeChecker::walk_iff_postorder(const Expr_ptr expr)
 { walk_binary_logical_postorder(expr); }
 
 bool TypeChecker::walk_cast_preorder(const Expr_ptr expr)

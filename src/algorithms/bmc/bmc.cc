@@ -22,8 +22,8 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <bmc/bmc.hh>
-#include <witness_mgr.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <witness/witness_mgr.hh>
 
 // reserved for witnesses
 static unsigned progressive = 0;
