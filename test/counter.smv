@@ -1,0 +1,31 @@
+MODULE main
+
+VAR
+  bit0 : counter_cell(TRUE);
+  bit1 : counter_cell(bit0.carry_out);
+  bit2 : counter_cell(bit1.carry_out);
+
+DEFINE
+  x :=
+    ( ! bit0.value && ! bit1.value && ! bit2.value ) ? 0 :
+    (   bit0.value && ! bit1.value && ! bit2.value ) ? 1 :
+    ( ! bit0.value &&   bit1.value && ! bit2.value ) ? 2 :
+    (   bit0.value &&   bit1.value && ! bit2.value ) ? 3 :
+    ( ! bit0.value && ! bit1.value &&   bit2.value ) ? 4 :
+    (   bit0.value && ! bit1.value &&   bit2.value ) ? 5 :
+    ( ! bit0.value &&   bit1.value &&   bit2.value ) ? 6 : 7 ;
+
+MODULE counter_cell(carry_in : boolean)
+
+VAR
+  value : boolean;
+
+INIT
+  ! value ;
+
+TRANS
+  next(value) <-> (value xor carry_in);
+
+DEFINE
+  carry_out := value && carry_in;
+
