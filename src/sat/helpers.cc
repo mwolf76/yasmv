@@ -40,8 +40,8 @@ const char* InlinedOperatorLoaderException::what() const throw()
 {
     std::ostringstream oss;
     oss
-        << "InlinedOperatorLoaderException: can not instantiate loader for"
-        << f_ios;
+        << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
+        << f_ios << "`";
 
     return oss.str().c_str();
 }
@@ -52,7 +52,8 @@ InlinedOperatorLoaderException::~InlinedOperatorLoaderException() throw()
 InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)
 {
-    const std::string native (filepath.filename().replace_extension().native());
+    const std::string native
+        (filepath.filename().replace_extension().native());
 
     std::vector<std::string> fragments;
     split(fragments, native, boost::is_any_of("-"));
@@ -83,11 +84,22 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
     else if (!strcmp( "le",  op)) op_type = LE;
     else assert (false);
 
-    const char* width(fragments[2].c_str());
-    for (const char *p = width; *p; ++ p)
-        assert( isdigit(*p));
+    char buf[20];
+    strncpy( buf, fragments[2].c_str(), 20);
+    char* width
+        (buf);
+    const char *precision
+        ("");
+    for (char *p = width; *p; ++ p) {
+        if (*p == '#') {
+            *p = '\0';
+            precision = p + 1;
+            break;
+        }
+    }
 
-    f_ios = make_ios( 's' == *signedness, op_type, atoi(width));
+    f_ios = make_ios( 's' == *signedness, op_type,
+                      atoi(width), atoi(precision));
 }
 
 InlinedOperatorLoader::~InlinedOperatorLoader()
@@ -117,7 +129,7 @@ const LitsVector& InlinedOperatorLoader::clauses()
             << std::endl;
 
         const Json::Value cnf (obj[ JSON_CNF ]);
-        assert( cnf.type() == Json::arrayValue);
+        assert(cnf.type() == Json::arrayValue);
 
         for (Json::Value::const_iterator i = cnf.begin(); cnf.end() != i; ++ i) {
             const Json::Value clause (*i);
@@ -152,7 +164,8 @@ InlinedOperatorMgr::InlinedOperatorMgr()
     using boost::filesystem::directory_iterator;
     using boost::filesystem::filesystem_error;
 
-    char *basepath = getenv( YASMV_HOME );
+    char *basepath
+        (getenv( YASMV_HOME ));
     if (NULL == basepath) {
         ERR
             << YASMV_HOME
@@ -162,25 +175,24 @@ InlinedOperatorMgr::InlinedOperatorMgr()
         exit(1);
     }
 
-    path micropath = basepath / path ( MICROCODE_PATH );
+    path micropath
+        (basepath / path ( MICROCODE_PATH ));
+
     try {
         if (exists(micropath) && is_directory(micropath)) {
             for (directory_iterator di = directory_iterator(micropath);
                  di != directory_iterator(); ++ di) {
 
-                path entry (di->path());
+                path entry
+                    (di->path());
                 if (strcmp(entry.extension().c_str(), ".json"))
                     continue;
 
                 // lazy clauses-loaders registration
                 try {
-                    InlinedOperatorLoader* loader = new InlinedOperatorLoader(entry);
+                    InlinedOperatorLoader* loader
+                        (new InlinedOperatorLoader(entry));
                     assert(NULL != loader);
-
-                    DRIVEL << "Registering clauses loader for "
-                           << loader->ios()
-                           << "..."
-                           << std::endl;
 
                     f_loaders.insert( std::make_pair< InlinedOperatorSignature, InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));
@@ -194,14 +206,17 @@ InlinedOperatorMgr::InlinedOperatorMgr()
             }
         }
         else {
-            ERR << "Path " << micropath
+            ERR
+                << "Path " << micropath
                 << " does not exist or is not a readable directory.";
             exit(1);
         }
     }
     catch (const filesystem_error& ex) {
-        std::string tmp(ex.what());
-        ERR << tmp;
+        std::string tmp
+            (ex.what());
+        ERR
+            << tmp;
         exit(1);
     }
 }
@@ -214,6 +229,18 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignatur
 {
     InlinedOperatorLoaderMap::const_iterator i
         (f_loaders.find( ios ));
+
+    if (i == f_loaders.end()) {
+        DRIVEL
+            << ios
+            << " not found, falling back..."
+            << std::endl;
+
+        InlinedOperatorSignature fallback
+            (make_ios(ios_issigned(ios), ios_optype(ios), ios_width(ios)));
+
+        i = f_loaders.find( fallback );
+    }
 
     if (i == f_loaders.end())
         throw InlinedOperatorLoaderException(ios);

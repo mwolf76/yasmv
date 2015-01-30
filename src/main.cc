@@ -143,7 +143,8 @@ int main(int argc, const char *argv[])
     signal(SIGINT, sighandler);
 
     /* load microcode */
-    InlinedOperatorMgr& mm = InlinedOperatorMgr::INSTANCE();
+    InlinedOperatorMgr& mm
+        (InlinedOperatorMgr::INSTANCE());
     uint32_t nloaders
         (mm.loaders().size());
     TRACE

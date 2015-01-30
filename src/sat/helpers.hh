@@ -69,9 +69,9 @@ class InlinedOperatorMgr  {
 
 public:
     static InlinedOperatorMgr& INSTANCE() {
-        if (! f_instance) {
+        if (! f_instance)
             f_instance = new InlinedOperatorMgr();
-        }
+
         return (*f_instance);
     }
 

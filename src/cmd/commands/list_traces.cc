@@ -28,17 +28,36 @@ ListTraces::ListTraces(Interpreter& owner)
 
 Variant ListTraces::operator()()
 {
-    WitnessList::const_iterator eye;
-    std::ostream &os(std::cout);
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
 
-    const WitnessList& witnesses(WitnessMgr::INSTANCE().witnesses());
+    Witness& current
+        (wm.current());
+
+    WitnessList::const_iterator eye;
+
+    std::ostream &os
+        (std::cout);
+
+    const WitnessList& witnesses
+        (wm.witnesses());
     for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
+
+        Witness& w
+            (**eye);
+
+        const char* tmp
+            (w.id() == current.id()
+             ? "[*] "
+             : "    ");
+
         os
-            << (*eye) -> id()
+            << tmp
+            << w.id()
             << "\t\t"
-            << (*eye) -> desc()
+            << w.desc()
             << "\t\t"
-            << (*eye) -> length()
+            << w.length()
             << std::endl;
     }
     os << std::endl;

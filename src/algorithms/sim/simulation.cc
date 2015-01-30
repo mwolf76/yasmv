@@ -21,6 +21,7 @@
  **/
 #include <sstream>
 #include <sim/simulation.hh>
+#include <model/compiler/unit.hh>
 
 // reserved for witnesses
 static unsigned progressive = 0;
@@ -35,7 +36,7 @@ Simulation::Simulation(Command& command, Model& model)
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state()
+void Simulation::pick_state(Expr_ptr init_condition, Expr_ptr trace_uid)
 {
     clock_t t0 = clock(), t1;
     double secs;
@@ -48,6 +49,34 @@ void Simulation::pick_state()
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
 
+    if (init_condition) {
+
+        Compiler& cmpl
+            (compiler()); // just a local ref
+
+        Expr_ptr ctx
+            (em().make_empty());
+
+
+        try {
+            CompilationUnit term
+                (cmpl.process(ctx, init_condition));
+
+            assert_formula( engine, 0, term, 0);
+        }
+        catch (Exception& ae) {
+            std::string tmp
+                (ae.what());
+            WARN
+                << tmp
+                << std::endl
+                << "  in initial condition"
+                << ctx << "::" << init_condition
+                << std::endl;
+            return;
+        }
+    }
+
     if (STATUS_SAT == engine.solve()) {
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
@@ -58,7 +87,9 @@ void Simulation::pick_state()
         Witness& w
             (*new SimulationWitness( model(), engine, 0));
 
-        {
+        if (trace_uid)
+            w.set_id(trace_uid -> atom());
+        else {
             std::ostringstream oss;
             oss
                 << simulation_trace_prfx
@@ -72,8 +103,10 @@ void Simulation::pick_state()
             w.set_desc(oss.str());
         }
 
-        wm.register_witness(w);
         set_witness(w);
+
+        wm.record(w);
+        wm.set_current(w);
 
         f_status = SIMULATION_INITIALIZED;
     }
@@ -84,12 +117,14 @@ void Simulation::pick_state()
     }
 }
 
-void Simulation::simulate()
-{}
-
-#if 0
-void Simulation::pick_state()
+void Simulation::simulate(Expr_ptr invar_condition,
+                          Expr_ptr until_condition,
+                          step_t steps,
+                          Expr_ptr trace_uid,
+                          Expr_ptr duplicate_uid)
 {
+    status_t last_sat;
+
     clock_t t0 = clock(), t1;
     double secs;
 
@@ -101,138 +136,88 @@ void Simulation::pick_state()
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
-    step_t k  0;
+    Atom trace_name
+        (trace_uid ? trace_uid -> atom() : wm.current().id());
 
-    // if a witness is already there, we're resuming a previous
-    // simulation. Hence, no need for initial states.
-    if (! has_witness()) {
-        assert_fsm_init(engine, 0);
-        assert_fsm_invar(engine, 0);
+    Witness& trace
+        (wm.witness(trace_name));
 
-        DEBUG
-            << "Starting simulation..."
-            << std::endl;
-    }
-    else {
-        // here we need to push all the values for variables in the
-        // last state of resuming witness. A complete assignment to
-        // *all* state variables ensures full deterministic behavior
-        // (cfr. simulation restart).
-#if 0
-        k = witness().size() -1;
-        assert( false) ; // TODO
+    set_witness(trace);
 
-        DEBUG
-            << "Resuming simulation..."
-            << std::endl;
-#else
-        assert(0); // not now
-#endif
-    }
+    // here we need to push all the values for variables in the last
+    // state of resuming witness. A complete assignment to *all* state
+    // variables guarantees full deterministic behavior.
+    step_t init_time
+        (trace.last_time());
+    step_t k
+        (init_time);
+    TimeFrame& last
+        (trace.last());
 
-    if (STATUS_SAT == engine.solve()) {
+    assert_time_frame( engine, k, last);
+
+    /* inject full transition relation, trace may not be compatible
+       with current state's INVARs */
+    assert_fsm_invar(engine, k );
+    assert_fsm_trans(engine, 1 + k);
+    assert_fsm_invar(engine, 1 + k);
+
+    DEBUG
+        << "Resuming simulation..."
+        << std::endl;
+
+    while (STATUS_SAT == (last_sat = engine.solve())) {
+
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
-        TRACE
-            << "simulation initialized, took " << secs
-            << " seconds" << std::endl;
-
-        t0 = t1; // resetting clock
-
-        if (! has_witness()) {
-            Witness& w(* new SimulationWitness( model(), engine, k));
-            {
-                std::ostringstream oss;
-                oss
-                    << simulation_trace_prfx
-                    << (++ progressive);
-                w.set_id(oss.str());
-            }
-            {
-                std::ostringstream oss;
-                oss
-                    << "Simulation trace";
-                w.set_desc(oss.str());
-            }
-
-            wm.register_witness(w);
-            set_witness(w);
-        }
-        else {
-            Witness& w( *new SimulationWitness( model(), engine, k));
-            witness().extend(w);
-        }
-
-        /* halt simulation? */
-        if (0) {
-            f_status = SIMULATION_INTERRUPTED;
-            return;
-        }
-        else if (NULL != f_halt_cond && wm.eval ( witness(),
-                                                  em.make_empty(),
-                                                  f_halt_cond, k)) {
-            f_status = SIMULATION_HALTED;
-            return;
-        }
-        else if (NULL != f_nsteps) {
-            if (0 == f_nsteps->value()) {
-                f_status = SIMULATION_DONE;
-                return;
-            }
-            f_nsteps = em.make_const( f_nsteps->value() -1);
-        }
-
-        while (true) {
-            t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-            step_t k_ = 1 + k;
-
+        if (init_time == k) {
             TRACE
-                << "completed step " << k_
+                << "simulation initialized, took " << secs
+                << " seconds" << std::endl;
+        } else {
+            TRACE
+                << "simulation completed step " << k
                 << ", took " << secs << " seconds"
                 << std::endl;
-
-            t0 = t1; // resetting clock
-
-            // TODO: SAT restart after a given number of steps (e.g. 10) would help
-            // preventing performance degradation as k grows larger.
-            assert_fsm_trans(engine, k ++ );
-            assert_fsm_invar(engine, k);
-
-            if (STATUS_SAT == engine.solve()) {
-                Witness& w(* new SimulationWitness( model(), engine, k));
-                witness().extend(w);
-
-                if (sigint_caught) {
-                    f_status = SIMULATION_INTERRUPTED;
-                    return;
-                }
-                else if (NULL != f_halt_cond && wm.eval ( witness(),
-                                                          em.make_empty(),
-                                                          f_halt_cond, k)) {
-                    f_status = SIMULATION_HALTED;
-                    return;
-                }
-                else if (NULL != f_nsteps) {
-                    if (0 == f_nsteps->value()) {
-                        f_status = SIMULATION_DONE;
-                        return;
-                    }
-                    f_nsteps = em.make_const( f_nsteps->value() -1);
-                }
-            }
-            else {
-                WARN << "Inconsistency detected in transition relation at step " << k
-                     << std::endl;
-                f_status = SIMULATION_DEADLOCKED;
-                return;
-            }
         }
+        t0 = t1; // resetting clock
+
+        Witness& w
+            (*new SimulationWitness( model(), engine, k));
+        witness().extend(w);
+
+        /* interrupted by the user? */
+        if (sigint_caught) {
+            f_status = SIMULATION_INTERRUPTED;
+            break;
+        }
+
+        /* no more steps? */
+        if (! -- steps) {
+            f_status = SIMULATION_INTERRUPTED;
+            break;
+        }
+
+        /* until condition reached? */
+        if (NULL != until_condition && wm.eval (witness(),
+                                                em.make_empty(),
+                                                until_condition, k)) {
+            f_status = SIMULATION_HALTED;
+            break;
+        }
+
+        // TODO: SAT restart after a given number of steps (e.g. 10) would help
+            // preventing performance degradation as k grows larger.
+        assert_fsm_trans(engine, k ++ );
+        assert_fsm_invar(engine, k);
     }
-    else {
-        WARN << "Inconsistency detected in initial states"
-             << std::endl;
+
+    if (last_sat == STATUS_UNSAT) {
+        WARN
+            << "Inconsistency detected in transition relation at step " << k
+            << std::endl;
         f_status = SIMULATION_DEADLOCKED;
     }
 }
-#endif
+
 

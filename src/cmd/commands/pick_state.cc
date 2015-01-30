@@ -21,10 +21,21 @@
  **/
 #include <cmd/commands/pick_state.hh>
 
-PickState::PickState(Interpreter& owner, Expr_ptr constraints)
+PickState::PickState(Interpreter& owner)
     : Command(owner)
+    , f_init_condition(NULL)
+    , f_trace_uid(NULL)
     , f_sim(*this, ModelMgr::INSTANCE().model())
 {}
+
+PickState::~PickState()
+{}
+
+void PickState::set_init_condition(Expr_ptr init_condition)
+{ f_init_condition = init_condition; }
+
+void PickState::set_trace_uid(Expr_ptr trace_uid)
+{ f_trace_uid = trace_uid; }
 
 Variant PickState::operator()()
 { return run(); }
@@ -33,7 +44,7 @@ Variant PickState::run()
 {
     std::ostringstream tmp;
 
-    f_sim.pick_state();
+    f_sim.pick_state(f_init_condition, f_trace_uid);
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:
@@ -61,7 +72,3 @@ Variant PickState::run()
     }
     return Variant(tmp.str());
 }
-
-PickState::~PickState()
-{}
-

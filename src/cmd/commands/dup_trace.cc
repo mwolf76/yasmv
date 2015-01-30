@@ -1,5 +1,5 @@
 /*
- * @file dump_trace.cc
+ * @file dup_trace.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd/commands/dump_trace.hh>
+#include <cmd/commands/dup_trace.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -27,38 +27,24 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-DumpTrace::DumpTrace(Interpreter& owner, Expr_ptr trace_id)
+DupTrace::DupTrace(Interpreter& owner, Expr_ptr trace_id, Expr_ptr duplicate_id)
     : Command(owner)
     , f_trace_id(trace_id)
+    , f_duplicate_id(duplicate_id)
+{}
+
+Variant DupTrace::operator()()
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
-
-    if (! f_trace_id)
-        f_trace_id = em.make_identifier( wm.current().id());
-}
-
-Variant DumpTrace::operator()()
-{
+    assert(false); // tODO
+#if 0
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
     std::ostream &os
         (std::cout);
 
-    Atom wid
-        (f_trace_id->atom());
-
-    os
-        << "Witness: "
-        << wid
-        << std::endl;
-
     Witness& w
-        (WitnessMgr::INSTANCE().witness(wid));
+        (WitnessMgr::INSTANCE().witness(f_trace_id->atom()));
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
         os << "-- @ " << 1 + time << std::endl;
@@ -114,9 +100,11 @@ Variant DumpTrace::operator()()
         os << std::endl;
     }
 
+#endif
     return Variant("Ok");
+
 }
 
-DumpTrace::~DumpTrace()
+DupTrace::~DupTrace()
 {}
 

@@ -1,6 +1,5 @@
 /*
- * @file pick_state.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file dup_trace.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,35 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef PICK_STATE_CMD_H
-#define PICK_STATE_CMD_H
+#ifndef DUP_TRACE_CMD_H
+#define DUP_TRACE_CMD_H
 
 #include <cmd/command.hh>
-#include <algorithms/sim/simulation.hh>
 
-class PickState : public Command {
+class DupTrace : public Command {
+    Expr_ptr f_trace_id;
+    Expr_ptr f_duplicate_id;
 public:
-    PickState(Interpreter& owner);
-    virtual ~PickState();
+    DupTrace (Interpreter& owner, Expr_ptr trace_id, Expr_ptr dupicate_id);
+    virtual ~DupTrace();
 
     Variant virtual operator()();
-
-    void set_init_condition(Expr_ptr init_condition);
-    inline Expr_ptr init_condition() const
-    { return f_init_condition; }
-
-    void set_trace_uid(Expr_ptr trace_uid);
-    inline Expr_ptr trace_uid() const
-    { return f_trace_uid; }
-
-private:
-    Expr_ptr f_init_condition;
-    Expr_ptr f_trace_uid;
-
-    // Simulation machinery
-    Simulation f_sim;
-
-    Variant run();
 };
 
 #endif

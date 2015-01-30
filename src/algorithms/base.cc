@@ -296,7 +296,41 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     engine.add_clause(ps);
 }
 
-void Algorithm::assert_formula(Engine& engine, step_t time, CompilationUnit& term, group_t group)
+void Algorithm::assert_time_frame(Engine& engine,
+                                  step_t time,
+                                  TimeFrame& tf,
+                                  group_t group)
+{
+    Compiler& cmpl
+        (compiler()); // just a local ref
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+    Expr_ptr ctx
+        (em.make_empty());
+    ExprVector assignments
+        (tf.assignments());
+    ExprVector::const_iterator i
+        (assignments.begin());
+    while (i != assignments.end()) {
+        Expr_ptr assignment
+            (*i); ++ i;
+        try {
+            engine.push( cmpl.process(ctx,
+                                      assignment), time, group);
+        }
+        catch (Exception& ae) {
+            std::cerr
+                << ae.what()
+                << std::endl;
+            assert(false);
+        }
+    }
+}
+
+void Algorithm::assert_formula(Engine& engine,
+                               step_t time,
+                               CompilationUnit& term,
+                               group_t group)
 { engine.push( term, time, group); }
 
 

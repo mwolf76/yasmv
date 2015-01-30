@@ -110,6 +110,10 @@ public:
     void assert_formula(Engine& engine, step_t time, CompilationUnit& term,
                         group_t group = MAINGROUP);
 
+    /* TimeFrame from a witness */
+    void assert_time_frame(Engine& engine, step_t time, TimeFrame& tf,
+                           group_t group = MAINGROUP);
+
 private:
     /* Command */
     Command& f_command;

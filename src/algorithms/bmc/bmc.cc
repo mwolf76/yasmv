@@ -101,7 +101,8 @@ void BMC::falsification( Expr_ptr phi )
                 w.set_desc(oss.str());
             }
 
-            wm.register_witness(w);
+            wm.record(w);
+            wm.set_current(w);
             set_witness(w);
 
             break;

@@ -18,7 +18,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_CC = commands.cc read_model.cc write_model.cc help.cc time.cc	\
 quit.cc check_invar.cc pick_state.cc simulate.cc list_traces.cc		\
-dump_trace.cc
+dump_trace.cc dup_trace.cc
 
 # -------------------------------------------------------
 

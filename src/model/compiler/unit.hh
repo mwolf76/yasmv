@@ -187,7 +187,7 @@ public:
         : f_dds( dds )
         , f_inlined_operator_descriptors( inlined_operator_descriptors )
         , f_binary_selection_descriptors_map( binary_selection_descriptors_map )
-        , f_array_mux_descriptors (array_mux_descriptors)
+        , f_array_mux_descriptors( array_mux_descriptors )
     {}
 
     const DDVector& dds() const

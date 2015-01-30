@@ -876,6 +876,9 @@ commands returns [Command_ptr res]
     |  c=dump_trace_command
        { $res = c; }
 
+    |  c=dup_trace_command
+       { $res = c; }
+
     |  c=quit_command
        { $res = c; }
     ;
@@ -914,36 +917,53 @@ list_traces_command returns [Command_ptr res]
     ;
 
 dump_trace_command returns [Command_ptr res]
-    : 'dump_trace' trace_id=identifier
+    : 'dump_trace'
+      ( trace_id=identifier
       { $res = cm.make_dump_trace(trace_id); }
+
+      |
+
+      { $res = cm.make_dump_trace(NULL); }
+      )
+
+    ;
+
+dup_trace_command returns [Command_ptr res]
+    : 'dup_trace' trace_id=identifier duplicate_id=identifier
+      { $res = cm.make_dup_trace(trace_id, duplicate_id); }
     ;
 
 pick_state_command returns [Command_ptr res]
-@init {
-    Expr_ptr constraints
-        (NULL);
-}
     :   'pick_state'
-        (
-            c=toplevel_expression
-            { constraints = c; }
-        )?
+        { $res = cm.make_pick_state(); }
+    (
+         '-i' init_condition=toplevel_expression
+         { ((PickState *) $res)->set_init_condition(init_condition); }
 
-        { $res = cm.make_pick_state(constraints); }
+    |    '-t' trace_uid=identifier
+         { ((PickState *) $res)->set_trace_uid(trace_uid); }
+    )*
     ;
 
 simulate_command returns [Command_ptr res]
-@init {
-    Expr_ptr constraints
-        (NULL);
-}
     : 'simulate'
-      (
-        c=toplevel_expression
-        { constraints = c; }
-      )?
+      { $res = cm.make_simulate(); }
+    (
+       '-i' invar_condition=toplevel_expression
+        { ((Simulate *) $res)->set_invar_condition(invar_condition); }
 
-      { $res = cm.make_simulate(constraints); }
+    |  '-u' until_condition=toplevel_expression
+        { ((Simulate *) $res)->set_until_condition(until_condition); }
+
+    |  '-d' duplicate_id=identifier
+        { ((Simulate *) $res)->set_duplicate_id(duplicate_id); }
+
+    |   '-k' konst=constant
+        { ((Simulate *) $res)->set_k(konst->value()); }
+
+    |   '-t' trace_uid=identifier
+        { ((Simulate *) $res)->set_trace_uid(trace_uid); }
+    )*
     ;
 
 quit_command returns [Command_ptr res]

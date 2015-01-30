@@ -58,14 +58,17 @@ public:
     inline const WitnessList& witnesses() const
     { return f_list; }
 
+    // selects current witness
+    void set_current( Witness& witness );
+
+    // get currently selected witness
+    Witness& current();
+
     // get a registered witness by id
     Witness& witness( Atom id );
 
-    // get a registered witness by idx
-    Witness& witness( uint32_t index );
-
-    // register a new witness, yield back its index
-    uint32_t register_witness( Witness& w );
+    // record a new witness
+    void record( Witness& witness );
 
 protected:
     WitnessMgr();
@@ -83,6 +86,9 @@ private:
 
     // ref to type manager
     TypeMgr& f_tm;
+
+    // currently selected witness uid
+    Atom f_curr_uid;
 
     Evaluator f_evaluator;
 };

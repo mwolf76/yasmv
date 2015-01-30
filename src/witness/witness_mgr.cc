@@ -31,27 +31,56 @@ WitnessMgr::WitnessMgr()
     , f_evaluator(*this)
 {}
 
+Witness& WitnessMgr::current()
+{
+    if (! f_curr_uid.size())
+        throw NoCurrentlySelectedWitness();
+
+    return witness(f_curr_uid);
+}
+
+void WitnessMgr::set_current( Witness& witness )
+{
+    Atom uid
+        (witness.id());
+
+    WitnessMap::iterator eye
+        (f_map.find( uid ));
+
+    if (f_map.end() == eye)
+        throw UnknownWitnessId( uid );
+
+    f_curr_uid = uid;
+}
+
 Witness& WitnessMgr::witness( Atom id )
 {
-    WitnessMap::iterator eye = f_map.find( id );
-    if (f_map.end() == eye) {
-        throw UnknownWitnessId( id );
-    }
+    WitnessMap::iterator eye
+        (f_map.find( id ));
 
-    Witness_ptr wp = (*eye).second;
+    if (f_map.end() == eye)
+        throw UnknownWitnessId( id );
+
+    Witness_ptr wp
+        ((*eye).second);
+
     return *wp;
 }
 
-uint32_t WitnessMgr::register_witness( Witness& w )
+void WitnessMgr::record( Witness& witness )
 {
-    Atom id (w.id());
-    WitnessMap::iterator eye = f_map.find( id );
-    if (f_map.end() != eye) {
-        throw DuplicateWitnessId( id );
-    }
+    Atom uid
+        (witness.id());
 
-    f_map.insert( std::make_pair <Atom, Witness_ptr> (id, &w));
-    f_list.push_back( &w );
-    return f_list.size() -1;
+    WitnessMap::iterator eye
+        (f_map.find( uid ));
+
+    if (f_map.end() != eye)
+        throw DuplicateWitnessId( uid );
+
+    f_map.insert( std::make_pair <Atom, Witness_ptr>
+                  (uid, &witness));
+
+    f_list.push_back( &witness );
 }
 

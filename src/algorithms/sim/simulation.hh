@@ -35,6 +35,7 @@ typedef enum {
     SIMULATION_INITIALIZED,
     SIMULATION_DEADLOCKED,
     SIMULATION_INTERRUPTED,
+    SIMULATION_HALTED,
 } simulation_status_t;
 
 class Simulation : public Algorithm {
@@ -43,8 +44,11 @@ public:
     Simulation(Command& command, Model& model);
     ~Simulation();
 
-    void pick_state();
-    void simulate();
+    void pick_state(Expr_ptr init_condition,
+                    Expr_ptr trace_uid);
+    void simulate(Expr_ptr invar_condition,
+                  Expr_ptr until_condition, step_t k,
+                  Expr_ptr trace_uid, Expr_ptr duplicate_uid);
 
     inline simulation_status_t status() const
     { return f_status; }

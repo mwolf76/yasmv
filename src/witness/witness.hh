@@ -61,6 +61,20 @@ private:
     Atom f_id;
 };
 
+/** Raised when a given ID is registered more than once */
+class NoCurrentlySelectedWitness : public WitnessException {
+public:
+    NoCurrentlySelectedWitness()
+    {}
+
+    ~NoCurrentlySelectedWitness() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
+};
+
 /** Raised when a given ID is searched for and was not registered */
 class UnknownWitnessId : public WitnessException {
 public:
@@ -128,6 +142,9 @@ public:
     /* Sets value for expr */
     void set_value( Expr_ptr expr, Expr_ptr value );
 
+    /* Full list of assignments for this Time Frame */
+    ExprVector assignments();
+
 private:
     Expr2ExprMap f_map;
 
@@ -180,8 +197,14 @@ public:
     inline step_t first_time()
     { return f_j; }
 
+    inline TimeFrame& first()
+    { return operator[](first_time()); }
+
     inline step_t last_time()
     { return f_j + f_frames.size() -1; }
+
+    inline TimeFrame& last()
+    { return operator[](last_time()); }
 
     inline step_t length()
     { return f_frames.size(); }

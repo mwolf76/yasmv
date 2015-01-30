@@ -27,14 +27,38 @@
 
 class Simulate : public Command {
 public:
-    Simulate(Interpreter& owner, Expr_ptr phi);
+    Simulate(Interpreter& owner);
     virtual ~Simulate();
 
     Variant virtual operator()();
 
+    void set_invar_condition(Expr_ptr invar_condition);
+    inline Expr_ptr invar_condition() const
+    { return f_invar_condition; }
+
+    void set_until_condition(Expr_ptr until_condition);
+    inline Expr_ptr until_condition() const
+    { return f_until_condition; }
+
+    void set_duplicate_id(Expr_ptr duplicate_id);
+    inline Expr_ptr duplicate_id() const
+    { return f_duplicate_id; }
+
+    void set_k(step_t k);
+    inline step_t k() const
+    { return f_k; }
+
+    void set_trace_uid(Expr_ptr trace_uid);
+    inline Expr_ptr trace_uid() const
+    { return f_trace_uid; }
+
 private:
-    /* Optional propositional constraints */
-    Expr_ptr f_phi;
+    Expr_ptr f_invar_condition;
+    Expr_ptr f_until_condition;
+
+    step_t f_k;
+    Expr_ptr f_trace_uid;
+    Expr_ptr f_duplicate_id;
 
     /* Simulation machinery */
     Simulation f_sim;

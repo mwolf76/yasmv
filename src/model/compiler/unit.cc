@@ -100,7 +100,7 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
     }
     os << width;
     if (0 < precision)
-        os << "." << precision;
+        os << "#" << precision;
 
     return os;
 }

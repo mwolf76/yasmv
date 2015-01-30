@@ -25,7 +25,8 @@
 const char* DuplicateWitnessId::what() const throw()
 {
     std::ostringstream oss;
-    oss << "Duplicate witness ID:  "
+    oss
+        << "Duplicate witness ID:  "
         << f_id << " is already registered."
         << std::endl
         ;
@@ -33,10 +34,23 @@ const char* DuplicateWitnessId::what() const throw()
     return oss.str().c_str();
 }
 
+const char* NoCurrentlySelectedWitness::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "No currently selected witness."
+        << std::endl
+        ;
+
+    return oss.str().c_str();
+}
+
+
 const char* UnknownWitnessId::what() const throw()
 {
     std::ostringstream oss;
-    oss << "Unknown witness ID:  "
+    oss
+        << "Unknown witness ID:  "
         << f_id << " is not registered."
         << std::endl
         ;
@@ -47,7 +61,8 @@ const char* UnknownWitnessId::what() const throw()
 const char* IllegalTime::what() const throw()
 {
     std::ostringstream oss;
-    oss << "Illegal time: "
+    oss
+        << "Illegal time: "
         << f_time
         << std::endl
         ;
@@ -58,7 +73,9 @@ const char* IllegalTime::what() const throw()
 const char* NoValue::what() const throw()
 {
     std::ostringstream oss;
-    oss << "No value for `" << f_id << "`";
+    oss
+        << "No value for `"
+        << f_id << "`";
 
     return oss.str().c_str();
 }
@@ -108,7 +125,8 @@ bool TimeFrame::has_value( Expr_ptr expr )
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
 {
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
+    Exprs& lang
+        (f_owner.lang());
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
     DEBUG
@@ -119,6 +137,28 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
 
     f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                   (expr, value));
+}
+
+ExprVector TimeFrame::assignments()
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+    Exprs& lang
+        (f_owner.lang());
+
+    ExprVector res;
+
+    Exprs::const_iterator i
+        (lang.begin());
+    while (i != lang.end()) {
+        Expr_ptr symb
+            (*i); ++ i;
+
+        res.push_back( em.make_eq( symb->rhs(),
+                                   value(symb)));
+    }
+
+    return res;
 }
 
 Witness::Witness(Atom id, Atom desc, step_t j)

@@ -39,6 +39,7 @@
 
 #include <cmd/commands/list_traces.hh>
 #include <cmd/commands/dump_trace.hh>
+#include <cmd/commands/dup_trace.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
@@ -73,17 +74,20 @@ public:
     inline Command_ptr make_check_invar(Expr_ptr phi)
     { return new CheckInvar(f_interpreter, phi); }
 
-    inline Command_ptr make_pick_state(Expr_ptr phi)
-    { return new PickState(f_interpreter, phi); }
+    inline Command_ptr make_pick_state()
+    { return new PickState(f_interpreter); }
 
-    inline Command_ptr make_simulate(Expr_ptr phi)
-    { return new Simulate(f_interpreter, phi); }
+    inline Command_ptr make_simulate()
+    { return new Simulate(f_interpreter); }
 
     inline Command_ptr make_list_traces()
     { return new ListTraces(f_interpreter); }
 
     inline Command_ptr make_dump_trace(Expr_ptr trace_id)
     { return new DumpTrace(f_interpreter, trace_id); }
+
+    inline Command_ptr make_dup_trace(Expr_ptr trace_id, Expr_ptr duplicate_id)
+    { return new DupTrace(f_interpreter, trace_id, duplicate_id); }
 
 protected:
     CommandMgr();
