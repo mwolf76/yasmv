@@ -59,5 +59,7 @@ void DupTrace::set_duplicate_id(pconst_char duplicate_id)
 
 Variant DupTrace::operator()()
 {
+    assert(false);
+    return Variant("XXX");
 }
 
