@@ -99,6 +99,9 @@ typedef enum {
 typedef std::string Atom;
 typedef Atom* Atom_ptr;
 
+typedef const char* pconst_char;
+typedef char* pchar;
+
 typedef struct Expr_TAG *Expr_ptr;
 typedef struct Expr_TAG {
 
@@ -255,7 +258,6 @@ private:
 /* Timed Canonical Bit Identifiers */
 class TCBI {
 public:
-    // TCBI(Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);
     TCBI(const UCBI& ucbi, step_t timebase);
     TCBI(const TCBI& tcbi);
 

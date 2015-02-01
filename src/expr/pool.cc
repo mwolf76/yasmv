@@ -30,42 +30,35 @@
 
 long ExprHash::operator() (const Expr& k) const
 {
-    return 0;
-
-    if (k.f_symb == IDENT) {
+    if (k.f_symb == IDENT)
         return (long)(k.u.f_atom);
-    }
 
+    long v0, v1, x, res = (long)(k.f_symb);
+
+    if (k.f_symb == ICONST
+        || k.f_symb == HCONST
+        || k.f_symb == OCONST) {
+        v0 = (long)(k.u.f_value);
+        v1 = (long)(k.u.f_value >> sizeof(long));
+    }
     else {
-        long v0, v1, x, res = (long)(k.f_symb);
-
-        if (k.f_symb == ICONST
-            || k.f_symb == HCONST
-            || k.f_symb == OCONST) {
-            v0 = (long)(k.u.f_value);
-            v1 = (long)(k.u.f_value >> sizeof(long));
-        }
-        else {
-            v0 = (long)(k.u.f_lhs);
-            v1 = (long)(k.u.f_rhs);
-        }
-
-        res = (res << 4) + v0;
-        if ((x = res & 0xF0000000L) != 0) {
-            res ^= (x >> 24);
-        }
-        res &= ~x;
-
-        res = (res << 4) + v1;
-        if ((x = res & 0xF0000000L) != 0) {
-            res ^= (x >> 24);
-        }
-        res &= ~x;
-
-        return res;
+        v0 = (long)(k.u.f_lhs);
+        v1 = (long)(k.u.f_rhs);
     }
 
-    assert (0); // unreachable
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
 }
 
 bool ExprEq::operator() (const Expr& x, const Expr& y) const
@@ -136,43 +129,6 @@ bool TimedExprEq::operator()(const TimedExpr& x, const TimedExpr& y) const
     return (x.expr() == y.expr() && x.time() == y.time());
 }
 
-// long FQExprHash::operator() (const FQExpr& k) const
-// {
-//     long x, res = 0;
-//     ExprHash eh;
-
-//     long v0 = eh(*k.ctx());
-//     long v1 = eh(*k.expr());
-//     long v2 = k.time();
-
-//     res = (res << 4) + v0;
-//     if ((x = res & 0xF0000000L) != 0) {
-//         res ^= (x >> 24);
-//     }
-//     res &= ~x;
-
-//     res = (res << 4) + v1;
-//     if ((x = res & 0xF0000000L) != 0) {
-//         res ^= (x >> 24);
-//     }
-//     res &= ~x;
-
-//     res = (res << 4) + v2;
-//     if ((x = res & 0xF0000000L) != 0) {
-//         res ^= (x >> 24);
-//     }
-//     res &= ~x;
-
-//     return res;
-// }
-
-// bool FQExprEq::operator()(const FQExpr& x, const FQExpr& y) const
-// {
-//     return (x.ctx() == y.ctx() &&
-//             x.expr() == y.expr() &&
-//             x.time() == y.time());
-// }
-
 long PtrHash::operator() (void *ptr) const
 {
     return (long)(ptr);
@@ -209,20 +165,72 @@ bool PolarizedLiteralEq::operator() (const PolarizedLiteral& x,
              (!x.polarity() && !y.polarity())));
 }
 
-/* REVIEW: hash function */
 long UCBIHash::operator() (const UCBI& k) const
-{ return 0; }
+{
+    long x, res = 0;
+    ExprHash eh;
+
+    long v0 = eh(*k.expr());
+    long v1 = k.time();
+    long v2 = k.bitno();
+
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v2;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
+}
 
 bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
 {
-    return (x.expr() == y.expr() &&
-            x.time() == y.time() &&
-            x.bitno() == y.bitno());
+    return x.expr() == y.expr() &&
+        x.time() == y.time() &&
+        x.bitno() == y.bitno() ;
 }
 
-/* REVIEW: hash function */
 long TCBIHash::operator() (const TCBI& k) const
-{ return 0; }
+{
+    long x, res = 0;
+    ExprHash eh;
+
+    long v0 = eh(*k.expr());
+    long v1 = k.base() + k.time();
+    long v2 = k.bitno();
+
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v2;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
+}
 
 bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
 {
@@ -231,7 +239,8 @@ bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
     step_t abs_time_y
         (y.base() + y.time());
 
-    return (x.expr() == y.expr() &&
-            x.bitno() == y.bitno() &&
-            abs_time_x == abs_time_y);
+    return
+        x.expr() == y.expr() &&
+        x.bitno() == y.bitno() &&
+        abs_time_x == abs_time_y;
 }
