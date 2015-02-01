@@ -20,6 +20,8 @@
  *
  **/
 #include <sstream>
+#include <cstring>
+
 #include <witness.hh>
 
 const char* DuplicateWitnessId::what() const throw()
@@ -31,7 +33,7 @@ const char* DuplicateWitnessId::what() const throw()
         << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 const char* NoCurrentlySelectedWitness::what() const throw()
@@ -42,7 +44,7 @@ const char* NoCurrentlySelectedWitness::what() const throw()
         << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 
@@ -55,7 +57,7 @@ const char* UnknownWitnessId::what() const throw()
         << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 const char* IllegalTime::what() const throw()
@@ -67,7 +69,7 @@ const char* IllegalTime::what() const throw()
         << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 const char* NoValue::what() const throw()
@@ -77,7 +79,7 @@ const char* NoValue::what() const throw()
         << "No value for `"
         << f_id << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 TimeFrame::TimeFrame(Witness& owner)
@@ -97,9 +99,8 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     Expr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
-    if (f_map.end() == eye) {
+    if (f_map.end() == eye)
         throw NoValue(expr);
-    }
 
     return (*eye).second;
 }
@@ -110,6 +111,8 @@ bool TimeFrame::has_value( Expr_ptr expr )
     // symbol is defined in witness' language
     Exprs& lang
         (f_owner.lang());
+
+    // FIXME: proper exception
     if (lang.end() == std::find( lang.begin(), lang.end(), expr)) {
         std::cerr << expr << std::endl;
         assert(false);

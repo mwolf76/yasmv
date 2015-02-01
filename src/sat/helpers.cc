@@ -19,6 +19,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+#include <cstring>
+
 #include <3rdparty/jsoncpp/json.hh>
 #include <boost/algorithm/string.hpp>
 
@@ -43,7 +46,7 @@ const char* InlinedOperatorLoaderException::what() const throw()
         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
         << f_ios << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 InlinedOperatorLoaderException::~InlinedOperatorLoaderException() throw()
@@ -116,7 +119,8 @@ const LitsVector& InlinedOperatorLoader::clauses()
         double secs;
 
         Lits newClause;
-        std::ifstream json_file(f_fullpath.c_str());
+        std::ifstream json_file
+            (f_fullpath.c_str());
 
         Json::Value obj;
         json_file >> obj;

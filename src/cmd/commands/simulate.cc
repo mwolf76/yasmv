@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/simulate.hh>
 
 Simulate::Simulate(Interpreter& owner)
@@ -27,34 +30,44 @@ Simulate::Simulate(Interpreter& owner)
     , f_until_condition(NULL)
     , f_k(1)
     , f_trace_uid(NULL)
-    , f_duplicate_id(NULL)
     , f_sim(*this, ModelMgr::INSTANCE().model())
 {}
 
+
+Simulate::~Simulate()
+{
+    free(f_trace_uid);
+    f_trace_uid = NULL;
+}
+
 void Simulate::set_invar_condition(Expr_ptr invar_condition)
-{ f_invar_condition = invar_condition; }
+{
+    f_invar_condition = invar_condition;
+}
 
 void Simulate::set_until_condition(Expr_ptr until_condition)
-{ f_until_condition = until_condition; }
+{
+    f_until_condition = until_condition;
+}
 
-void Simulate::set_trace_uid(Expr_ptr trace_uid)
-{ f_trace_uid = trace_uid; }
-
-void Simulate::set_duplicate_id(Expr_ptr duplicate_uid)
-{ f_duplicate_id = duplicate_uid; }
+void Simulate::set_trace_uid(pconst_char trace_uid)
+{
+    free(f_trace_uid);
+    f_trace_uid = strdup(trace_uid);
+}
 
 void Simulate::set_k(step_t k)
-{ f_k = k; }
+{
+    f_k = k;
+}
 
 Variant Simulate::operator()()
-{ return run(); }
-
-Variant Simulate::run()
 {
     std::ostringstream tmp;
 
-    f_sim.simulate(f_invar_condition, f_until_condition,
-                   f_k, f_trace_uid, f_duplicate_id);
+    f_sim.simulate(f_invar_condition,
+                   f_until_condition,
+                   f_k, f_trace_uid);
 
     switch (f_sim.status()) {
     case SIMULATION_DONE:
@@ -82,7 +95,3 @@ Variant Simulate::run()
     }
     return Variant(tmp.str());
 }
-
-Simulate::~Simulate()
-{}
-

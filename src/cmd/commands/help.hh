@@ -24,14 +24,18 @@
 #include <cmd/command.hh>
 
 class Help : public Command {
+
+    pchar f_topic;
+
 public:
-    Help(Interpreter& owner, Atom topic);
+    Help(Interpreter& owner);
     virtual ~Help();
 
-    Variant virtual operator()();
+    void set_topic(pconst_char topic);
+    inline pconst_char topic() const
+    { return f_topic; }
 
-private:
-    Atom f_topic;
+    Variant virtual operator()();
 };
 
 #endif

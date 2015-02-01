@@ -45,10 +45,11 @@ public:
     ~Simulation();
 
     void pick_state(Expr_ptr init_condition,
-                    Expr_ptr trace_uid);
+                    pconst_char trace_uid);
+
     void simulate(Expr_ptr invar_condition,
                   Expr_ptr until_condition, step_t k,
-                  Expr_ptr trace_uid, Expr_ptr duplicate_uid);
+                  pconst_char trace_uid);
 
     inline simulation_status_t status() const
     { return f_status; }

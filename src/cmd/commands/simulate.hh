@@ -26,6 +26,19 @@
 #include <algorithms/sim/simulation.hh>
 
 class Simulate : public Command {
+
+    /* An invariant condition (optional) */
+    Expr_ptr f_invar_condition;
+
+    /* HALT condition (optional) */
+    Expr_ptr f_until_condition;
+
+    /* Number of simulation steps to be performed (optional) */
+    step_t f_k;
+
+    /* Simulation trace uid (optional) */
+    pchar f_trace_uid;
+
 public:
     Simulate(Interpreter& owner);
     virtual ~Simulate();
@@ -40,30 +53,17 @@ public:
     inline Expr_ptr until_condition() const
     { return f_until_condition; }
 
-    void set_duplicate_id(Expr_ptr duplicate_id);
-    inline Expr_ptr duplicate_id() const
-    { return f_duplicate_id; }
-
     void set_k(step_t k);
     inline step_t k() const
     { return f_k; }
 
-    void set_trace_uid(Expr_ptr trace_uid);
-    inline Expr_ptr trace_uid() const
+    void set_trace_uid(pconst_char trace_uid);
+    inline pconst_char trace_uid() const
     { return f_trace_uid; }
 
 private:
-    Expr_ptr f_invar_condition;
-    Expr_ptr f_until_condition;
-
-    step_t f_k;
-    Expr_ptr f_trace_uid;
-    Expr_ptr f_duplicate_id;
-
     /* Simulation machinery */
     Simulation f_sim;
-
-    Variant run();
 };
 
 #endif

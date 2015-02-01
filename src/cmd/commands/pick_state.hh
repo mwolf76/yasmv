@@ -26,28 +26,30 @@
 #include <algorithms/sim/simulation.hh>
 
 class PickState : public Command {
+
+    /* initial condition (optional) */
+    Expr_ptr f_init_condition;
+
+    /* trace id (optional) */
+    pchar f_trace_uid;
+
 public:
     PickState(Interpreter& owner);
     virtual ~PickState();
-
-    Variant virtual operator()();
 
     void set_init_condition(Expr_ptr init_condition);
     inline Expr_ptr init_condition() const
     { return f_init_condition; }
 
-    void set_trace_uid(Expr_ptr trace_uid);
-    inline Expr_ptr trace_uid() const
+    void set_trace_uid(pconst_char trace_uid);
+    inline pconst_char trace_uid() const
     { return f_trace_uid; }
 
-private:
-    Expr_ptr f_init_condition;
-    Expr_ptr f_trace_uid;
+    Variant virtual operator()();
 
+private:
     // Simulation machinery
     Simulation f_sim;
-
-    Variant run();
 };
 
 #endif

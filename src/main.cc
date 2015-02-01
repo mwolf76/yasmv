@@ -170,15 +170,17 @@ int main(int argc, const char *argv[])
         // Run options-generated commands (if any)
         const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
-            Command_ptr cmd = CommandMgr::INSTANCE()
-                .make_read_model(model_filename.c_str());
+            ReadModel* cmd
+                (reinterpret_cast<ReadModel*>
+                 (CommandMgr::INSTANCE().make_read_model()));
+
+            cmd -> set_input( model_filename.c_str());
             batch(cmd);
         }
 
-        do
+        do {
             process();
-
-        while (! system.is_leaving());
+        } while (! system.is_leaving());
     }
 
     catch (Exception &e) {

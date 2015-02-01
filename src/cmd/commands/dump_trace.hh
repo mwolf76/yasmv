@@ -23,10 +23,43 @@
 
 #include <cmd/command.hh>
 
-class DumpTrace : public Command {
-    Expr_ptr f_trace_id;
+/** Raised when the type checker detects a wrong type */
+class UnsupportedFormat : public CommandException {
+
+    pchar f_format;
+
 public:
-    DumpTrace (Interpreter& owner, Expr_ptr trace_id);
+    UnsupportedFormat(pconst_char format);
+    ~UnsupportedFormat() throw();
+
+    const char* what() const throw();
+};
+
+class DumpTrace : public Command {
+
+    /* the trace id (optional) */
+    pchar f_trace_id;
+
+    /* the format to use for dumping (must be one of "plain", "json", ...) */
+    pchar f_format;
+
+    /* the output filepath (optional) */
+    pchar f_output;
+
+public:
+    void set_trace_id(pconst_char trace_id);
+    inline pconst_char trace_id() const
+    { return f_trace_id; }
+
+    void set_format  (pconst_char format);
+    inline pconst_char format() const
+    { return f_format; }
+
+    void set_output  (pconst_char filepath);
+    inline pconst_char output() const
+    { return f_output; }
+
+    DumpTrace (Interpreter& owner);
     virtual ~DumpTrace();
 
     Variant virtual operator()();

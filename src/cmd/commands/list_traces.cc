@@ -26,6 +26,9 @@ ListTraces::ListTraces(Interpreter& owner)
     : Command(owner)
 {}
 
+ListTraces::~ListTraces()
+{}
+
 Variant ListTraces::operator()()
 {
     WitnessMgr& wm
@@ -50,21 +53,17 @@ Variant ListTraces::operator()()
             (w.id() == current.id()
              ? "[*] "
              : "    ");
-
         os
             << tmp
             << w.id()
             << "\t\t"
             << w.desc()
             << "\t\t"
-            << w.length()
+            << w.size()
             << std::endl;
     }
     os << std::endl;
 
     return Variant("Ok");
 }
-
-ListTraces::~ListTraces()
-{}
 

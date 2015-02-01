@@ -43,8 +43,10 @@ ConstantTooLarge::~ConstantTooLarge() throw()
 const char* ConstantTooLarge::what() const throw()
 {
     std::ostringstream oss;
-    oss << "CompilerError: constant too large " << f_repr;
+    oss
+        << "CompilerError: constant too large `"
+        << f_repr << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 

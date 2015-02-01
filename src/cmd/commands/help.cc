@@ -18,17 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/help.hh>
 
-Help::Help(Interpreter& owner, Atom topic)
+Help::Help(Interpreter& owner)
     : Command(owner)
-    , f_topic(topic)
+    , f_topic(NULL)
 {}
+
+Help::~Help()
+{
+    free(f_topic);
+    f_topic = NULL;
+}
+
+void Help::set_topic(pconst_char topic)
+{
+    free(f_topic);
+    f_topic = strdup(topic);
+}
 
 Variant Help::operator()()
 {
     return Variant(clock());
 }
 
-Help::~Help()
-{}
+

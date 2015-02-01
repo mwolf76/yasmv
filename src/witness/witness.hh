@@ -206,7 +206,7 @@ public:
     inline TimeFrame& last()
     { return operator[](last_time()); }
 
-    inline step_t length()
+    inline step_t size()
     { return f_frames.size(); }
 
     inline Exprs& lang()

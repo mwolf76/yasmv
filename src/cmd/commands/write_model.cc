@@ -19,19 +19,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/write_model.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
-WriteModel::WriteModel(Interpreter& owner, const char *filepath)
+WriteModel::WriteModel(Interpreter& owner)
     : Command(owner)
-    , f_filepath(filepath)
+    , f_output(NULL)
 {}
 
-Variant WriteModel::operator()()
-{ return run(); }
+WriteModel::~WriteModel()
+{
+    free(f_output);
+    f_output = NULL;
+}
 
-Variant WriteModel::run()
+void WriteModel::set_output(pconst_char output)
+{
+    free(f_output);
+    f_output = strdup(output);
+}
+
+Variant WriteModel::operator()()
 {
     std::ostringstream oss;
 
@@ -102,7 +114,4 @@ Variant WriteModel::run()
 
     return Variant (oss.str());
 }
-
-WriteModel::~WriteModel()
-{}
 

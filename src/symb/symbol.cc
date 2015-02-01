@@ -23,6 +23,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+#include <cstring>
 
 #include <symb/symbol.hh>
 
@@ -37,7 +39,7 @@ const char* UnresolvedSymbol::what() const throw()
         << "Unresolved symbol: `"
         << f_expr<< "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 bool Symbol::is_variable(void) const

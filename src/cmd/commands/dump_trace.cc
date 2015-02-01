@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/dump_trace.hh>
 
 #include <expr/expr.hh>
@@ -27,18 +30,62 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-DumpTrace::DumpTrace(Interpreter& owner, Expr_ptr trace_id)
-    : Command(owner)
-    , f_trace_id(trace_id)
+UnsupportedFormat::UnsupportedFormat(pconst_char format)
+    : f_format(strdup(format))
+{}
+
+const char* UnsupportedFormat::what() const throw()
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    std::ostringstream oss;
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    oss
+        << "CommandError: format `"
+        << f_format << "` is not supported.";
 
-    if (! f_trace_id)
-        f_trace_id = em.make_identifier( wm.current().id());
+    return strdup(oss.str().c_str());
+}
+
+UnsupportedFormat::~UnsupportedFormat() throw()
+{
+    free(f_format);
+}
+
+DumpTrace::DumpTrace(Interpreter& owner)
+    : Command(owner)
+    , f_trace_id(NULL)
+    , f_format(NULL)
+    , f_output(NULL)
+{
+    set_trace_id((char *) WitnessMgr::INSTANCE().current().id().c_str());
+}
+
+DumpTrace::~DumpTrace()
+{
+    free(f_trace_id);
+    free(f_format);
+    free(f_output);
+}
+
+void DumpTrace::set_format(pconst_char format)
+{
+    free(f_format);
+    f_format = strdup(format);
+
+    if (strcmp(f_format, TRACE_FMT_PLAIN) &&
+        strcmp(f_format, TRACE_FMT_JSON))
+        throw UnsupportedFormat(f_format);
+}
+
+void DumpTrace::set_trace_id(pconst_char trace_id)
+{
+    free(f_trace_id);
+    f_trace_id = strdup(trace_id);
+}
+
+void DumpTrace::set_output(pconst_char output)
+{
+    free(f_output);
+    f_output = strdup(output);
 }
 
 Variant DumpTrace::operator()()
@@ -50,7 +97,7 @@ Variant DumpTrace::operator()()
         (std::cout);
 
     Atom wid
-        (f_trace_id->atom());
+        (f_trace_id);
 
     os
         << "Witness: "
@@ -116,7 +163,4 @@ Variant DumpTrace::operator()()
 
     return Variant("Ok");
 }
-
-DumpTrace::~DumpTrace()
-{}
 

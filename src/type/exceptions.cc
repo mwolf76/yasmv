@@ -19,6 +19,7 @@
  *
  **/
 #include <sstream>
+#include <cstring>
 
 #include <type/type.hh>
 
@@ -53,7 +54,7 @@ const char* BadType::what() const throw()
             << f_expr -> rhs() << "` have invalid types `"
             << f_lhs << "`, `" << f_rhs << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
@@ -74,7 +75,7 @@ const char* TypeMismatch::what() const throw()
         << f_expr   << "`"
         << std::endl;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 IdentifierExpected::IdentifierExpected(Expr_ptr expr)
@@ -91,7 +92,7 @@ const char* IdentifierExpected::what() const throw()
         << "TypeError: identifier expected while defining ENUM, got `"
         << f_expr << "` instead";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
@@ -108,6 +109,6 @@ const char* DuplicateLiteral::what() const throw()
         << "TypeError: duplicate literal `"
         << f_expr << "` detected";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 

@@ -19,21 +19,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/check_invar.hh>
 
-CheckInvar::CheckInvar(Interpreter& owner, Expr_ptr phi)
+CheckInvar::CheckInvar(Interpreter& owner)
     : Command(owner)
-    , f_phi(phi)
+    , f_invar(NULL)
     , f_bmc(*this, ModelMgr::INSTANCE().model())
 {}
 
-Variant CheckInvar::operator()()
-{ return run(); }
-
-Variant CheckInvar::run()
+CheckInvar::~CheckInvar()
 {
+    free(f_invar);
+    f_invar = NULL;
+}
+
+void CheckInvar::set_invar(Expr_ptr invar)
+{
+    free(f_invar);
+    f_invar = invar;
+}
+
+Variant CheckInvar::operator()()
+{
+    if (! f_invar)
+        return Variant("No property given. Aborting...");
+
     std::ostringstream tmp;
-    f_bmc.process( f_phi );
+    f_bmc.process( f_invar );
 
     switch (f_bmc.status()) {
     case MC_FALSE:
@@ -48,15 +63,17 @@ Variant CheckInvar::run()
     default: assert( false ); /* unreachable */
     } /* switch */
     if (f_bmc.has_witness()) {
+        Witness& w
+            (f_bmc.witness());
+
         tmp
             << ", registered CEX witness `"
-            << f_bmc.witness().id()
-            << "`";
+            << w.id()
+            << "`, "
+            << w.size()
+            << " steps.";
     }
 
     return Variant(tmp.str());
 }
-
-CheckInvar::~CheckInvar()
-{}
 

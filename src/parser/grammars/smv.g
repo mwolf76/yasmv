@@ -884,31 +884,45 @@ commands returns [Command_ptr res]
     ;
 
 help_command returns [Command_ptr res]
-@init {
-    Atom topic;
-}
     : 'help'
-      ( IDENTIFIER { topic = (const char *) $IDENTIFIER.text->chars; } )?
-      { $res = cm.make_help(topic); }
+      { $res = cm.make_help(); }
+
+        ( cmd_name = string { ((Help*) $res) -> set_topic(cmd_name); } )?
     ;
 
 time_command returns [Command_ptr res]
-    : 'time' { $res = cm.make_time(); }
+    : 'time'
+      { $res = cm.make_time(); }
     ;
 
 read_model_command returns [Command_ptr res]
-    :  'read_model' fp=filepath
-       { $res = cm.make_read_model(fp); }
+    :  'read_model'
+        { $res = cm.make_read_model(); }
+
+        input=filepath
+        {
+            ((ReadModel*) $res) -> set_input(input);
+            free((void *) input);
+        }
     ;
 
 write_model_command returns [Command_ptr res]
-    :  'write_model' fp=filepath
-       { $res = cm.make_write_model(fp); }
+    :  'write_model'
+        { $res = cm.make_write_model(); }
+
+        output=filepath
+        {
+            ((WriteModel*) $res) -> set_output(output);
+            free((void *) output);
+        }
     ;
 
 check_invar_command returns[Command_ptr res]
-    : 'check_invar' phi=toplevel_expression
-      { $res = cm.make_check_invar(phi); }
+    : 'check_invar'
+      { $res = cm.make_check_invar(); }
+
+      invar=toplevel_expression
+      { ((CheckInvar *) $res) -> set_invar(invar); }
     ;
 
 list_traces_command returns [Command_ptr res]
@@ -918,19 +932,34 @@ list_traces_command returns [Command_ptr res]
 
 dump_trace_command returns [Command_ptr res]
     : 'dump_trace'
-      ( trace_id=identifier
-      { $res = cm.make_dump_trace(trace_id); }
+      { $res = cm.make_dump_trace(); }
 
-      |
+    (
+      '-f' format=string
+      { ((DumpTrace*) $res) -> set_format(format); }
 
-      { $res = cm.make_dump_trace(NULL); }
-      )
+    | '-o' output=filepath
+      {
+            ((DumpTrace*) $res) -> set_output(output);
+            free((void *) output);
+      }
+
+    )*
+
+    ( trace_id=string
+    { ((DumpTrace*) $res) -> set_trace_id(trace_id); } )?
 
     ;
 
 dup_trace_command returns [Command_ptr res]
-    : 'dup_trace' trace_id=identifier duplicate_id=identifier
-      { $res = cm.make_dup_trace(trace_id, duplicate_id); }
+    : 'dup_trace'
+      { $res = cm.make_dup_trace(); }
+
+      trace_id=string
+      { ((DupTrace*) $res) -> set_trace_id(trace_id); }
+
+      ( duplicate_uid=string
+        { ((DupTrace*) $res) -> set_duplicate_id(duplicate_uid); } )?
     ;
 
 pick_state_command returns [Command_ptr res]
@@ -938,10 +967,10 @@ pick_state_command returns [Command_ptr res]
         { $res = cm.make_pick_state(); }
     (
          '-i' init_condition=toplevel_expression
-         { ((PickState *) $res)->set_init_condition(init_condition); }
+         { ((PickState*) $res) -> set_init_condition(init_condition); }
 
-    |    '-t' trace_uid=identifier
-         { ((PickState *) $res)->set_trace_uid(trace_uid); }
+    |    '-t' trace_id=string
+         { ((PickState*) $res) -> set_trace_uid(trace_id); }
     )*
     ;
 
@@ -950,19 +979,16 @@ simulate_command returns [Command_ptr res]
       { $res = cm.make_simulate(); }
     (
        '-i' invar_condition=toplevel_expression
-        { ((Simulate *) $res)->set_invar_condition(invar_condition); }
+        { ((Simulate *) $res) -> set_invar_condition(invar_condition); }
 
     |  '-u' until_condition=toplevel_expression
-        { ((Simulate *) $res)->set_until_condition(until_condition); }
-
-    |  '-d' duplicate_id=identifier
-        { ((Simulate *) $res)->set_duplicate_id(duplicate_id); }
+        { ((Simulate*) $res) -> set_until_condition(until_condition); }
 
     |   '-k' konst=constant
-        { ((Simulate *) $res)->set_k(konst->value()); }
+        { ((Simulate*) $res) -> set_k(konst->value()); }
 
-    |   '-t' trace_uid=identifier
-        { ((Simulate *) $res)->set_trace_uid(trace_uid); }
+    |   '-t' trace_id=string
+        { ((Simulate*) $res) -> set_trace_uid(trace_id); }
     )*
     ;
 
@@ -971,20 +997,27 @@ quit_command returns [Command_ptr res]
        { $res = cm.make_quit(); }
     ;
 
-filepath returns [const char *res]
-@init { std::ostringstream oss; }
-    :
-        (
-            frag=filepath_fragment
-            { oss << frag; }
-        ) +
-        { $res = oss.str().c_str(); }
+string returns [pconst_char res]
+@init {}
+    : IDENTIFIER
+      { $res = (pconst_char) $IDENTIFIER.text -> chars; }
     ;
 
-filepath_fragment returns [const char *res]
+filepath returns [pconst_char res]
+@init {
+    std::ostringstream oss;
+}
+    : (
+            frag=filepath_fragment
+            { oss << frag; }
+    ) +
+    { $res = strdup(oss.str().c_str()); }
+    ;
+
+filepath_fragment returns [pconst_char res]
     :
-        IDENTIFIER
-        { $res = (const char *) $IDENTIFIER.text->chars; }
+        s=string
+        { $res = s; }
 
     |   '.'
         { $res = "."; }

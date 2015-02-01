@@ -24,11 +24,16 @@
 #include <cmd/command.hh>
 
 class DupTrace : public Command {
-    Expr_ptr f_trace_id;
-    Expr_ptr f_duplicate_id;
+
+    pchar f_trace_id;
+    pchar f_duplicate_id;
+
 public:
-    DupTrace (Interpreter& owner, Expr_ptr trace_id, Expr_ptr dupicate_id);
+    DupTrace (Interpreter& owner);
     virtual ~DupTrace();
+
+    void set_trace_id(pconst_char trace_id);
+    void set_duplicate_id(pconst_char duplicate_id);
 
     Variant virtual operator()();
 };

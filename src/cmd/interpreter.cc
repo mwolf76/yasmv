@@ -175,6 +175,10 @@ Variant& Interpreter::operator()()
         }
     }
     catch (Exception &e) {
+        std::cerr
+            << e.what()
+            << std::endl;
+
         f_last_result = Variant("Caught exception");
     }
 

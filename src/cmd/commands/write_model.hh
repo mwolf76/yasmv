@@ -25,15 +25,18 @@
 #include <cmd/command.hh>
 
 class WriteModel : public Command {
+
+    pchar f_output;
+
 public:
-    WriteModel(Interpreter& owner, const char *fp);
+    WriteModel(Interpreter& owner);
     virtual ~WriteModel();
 
-    Variant virtual operator()();
+    void set_output(pconst_char output);
+    inline pconst_char output() const
+    { return f_output; }
 
-private:
-    Variant run();
-    Atom f_filepath;
+    Variant virtual operator()();
 };
 
 #endif

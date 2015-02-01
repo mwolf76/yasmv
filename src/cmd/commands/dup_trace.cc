@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <cstdlib>
+#include <cstring>
+
 #include <cmd/commands/dup_trace.hh>
 
 #include <expr/expr.hh>
@@ -27,11 +30,23 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-DupTrace::DupTrace(Interpreter& owner, Expr_ptr trace_id, Expr_ptr duplicate_id)
+DupTrace::DupTrace(Interpreter& owner)
     : Command(owner)
-    , f_trace_id(trace_id)
-    , f_duplicate_id(duplicate_id)
+    , f_trace_id(NULL)
+    , f_duplicate_id(NULL)
 {}
+
+void DupTrace::set_trace_id(pconst_char trace_id)
+{
+    free(f_trace_id);
+    f_trace_id = strdup(trace_id);
+}
+
+void DupTrace::set_duplicate_id(pconst_char duplicate_id)
+{
+    free(f_duplicate_id);
+    f_duplicate_id = strdup(duplicate_id);
+}
 
 Variant DupTrace::operator()()
 {
@@ -106,5 +121,11 @@ Variant DupTrace::operator()()
 }
 
 DupTrace::~DupTrace()
-{}
+{
+    if (f_trace_id)
+        free (f_trace_id);
+
+    if (f_duplicate_id)
+        free (f_duplicate_id);
+}
 

@@ -43,4 +43,10 @@ public:
 };
 typedef class Command* Command_ptr;
 
+/** Exception classes */
+class CommandException : public Exception {
+public:
+    virtual const char* what() const throw() =0;
+};
+
 #endif

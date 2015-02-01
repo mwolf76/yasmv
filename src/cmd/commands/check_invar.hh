@@ -26,20 +26,21 @@
 #include <algorithms/bmc/bmc.hh>
 
 class CheckInvar : public Command {
+
+    /* the invariant to be verified */
+    Expr_ptr f_invar;
+
 public:
-    CheckInvar(Interpreter& owner, Expr_ptr phi);
+    CheckInvar(Interpreter& owner);
     virtual ~CheckInvar();
+
+    void set_invar(Expr_ptr invar);
 
     Variant virtual operator()();
 
 private:
-    /* the invariant to be verified */
-    Expr_ptr f_phi;
-
     /* BMC machinery */
     BMC f_bmc;
-
-    Variant run();
 };
 
 #endif

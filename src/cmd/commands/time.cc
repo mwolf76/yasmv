@@ -25,9 +25,11 @@ Time::Time(Interpreter& owner)
     : Command(owner)
 {}
 
+Time::~Time()
+{}
+
 Variant Time::operator()()
 { return Variant( clock()); }
 
-Time::~Time()
-{}
+
 

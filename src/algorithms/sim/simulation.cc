@@ -36,7 +36,7 @@ Simulation::Simulation(Command& command, Model& model)
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state(Expr_ptr init_condition, Expr_ptr trace_uid)
+void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
 {
     clock_t t0 = clock(), t1;
     double secs;
@@ -87,8 +87,8 @@ void Simulation::pick_state(Expr_ptr init_condition, Expr_ptr trace_uid)
         Witness& w
             (*new SimulationWitness( model(), engine, 0));
 
-        if (trace_uid)
-            w.set_id(trace_uid -> atom());
+        if (trace_name)
+            w.set_id(Atom(trace_name));
         else {
             std::ostringstream oss;
             oss
@@ -120,8 +120,7 @@ void Simulation::pick_state(Expr_ptr init_condition, Expr_ptr trace_uid)
 void Simulation::simulate(Expr_ptr invar_condition,
                           Expr_ptr until_condition,
                           step_t steps,
-                          Expr_ptr trace_uid,
-                          Expr_ptr duplicate_uid)
+                          pconst_char trace_name)
 {
     status_t last_sat;
 
@@ -136,11 +135,11 @@ void Simulation::simulate(Expr_ptr invar_condition,
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
-    Atom trace_name
-        (trace_uid ? trace_uid -> atom() : wm.current().id());
+    Atom trace_uid
+        (trace_name ? Atom(trace_name) : wm.current().id());
 
     Witness& trace
-        (wm.witness(trace_name));
+        (wm.witness(trace_uid));
 
     set_witness(trace);
 

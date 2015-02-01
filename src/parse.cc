@@ -37,13 +37,14 @@
 
 class FileInputException : public Exception {
 
-    virtual const char* what() const throw() {
+    virtual const char* what() const throw()
+    {
         std::ostringstream oss;
         oss
-            << "Can not read file `" << f_filename << "`";
+            << "Can not read file `"
+            << f_filename << "`";
 
-        const char *res (strdup(oss.str().c_str()));
-        return res;
+        return (strdup(oss.str().c_str()));
     }
 
     std::string f_filename;

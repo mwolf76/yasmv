@@ -29,18 +29,23 @@ PickState::PickState(Interpreter& owner)
 {}
 
 PickState::~PickState()
-{}
+{
+    free(f_trace_uid);
+    f_trace_uid = NULL;
+}
 
 void PickState::set_init_condition(Expr_ptr init_condition)
-{ f_init_condition = init_condition; }
+{
+    f_init_condition = init_condition;
+}
 
-void PickState::set_trace_uid(Expr_ptr trace_uid)
-{ f_trace_uid = trace_uid; }
+void PickState::set_trace_uid(pconst_char trace_uid)
+{
+    free(f_trace_uid);
+    f_trace_uid = strdup(trace_uid);
+}
 
 Variant PickState::operator()()
-{ return run(); }
-
-Variant PickState::run()
 {
     std::ostringstream tmp;
 

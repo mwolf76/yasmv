@@ -46,33 +46,26 @@ typedef CommandMgr* CommandMgr_ptr;
 
 class CommandMgr  {
 public:
-    static CommandMgr& INSTANCE()
-    {
-        if (! f_instance) {
-            f_instance = new CommandMgr();
-        }
-
-        return (*f_instance);
-    }
+    static CommandMgr& INSTANCE();
 
     // -- makers ----------------------------------------------------------------
-    inline Command_ptr make_help(Atom topic)
-    { return new Help(f_interpreter, topic); }
+    inline Command_ptr make_help()
+    { return new Help(f_interpreter); }
 
     inline Command_ptr make_time()
     { return new Time(f_interpreter); }
 
-    inline Command_ptr make_quit(int retcode =0)
-    { return new Quit(f_interpreter, retcode); }
+    inline Command_ptr make_quit()
+    { return new Quit(f_interpreter); }
 
-    inline Command_ptr make_read_model(const char *filepath)
-    { return new ReadModel(f_interpreter, filepath); }
+    inline Command_ptr make_read_model()
+    { return new ReadModel(f_interpreter); }
 
-    inline Command_ptr make_write_model(const char *filepath)
-    { return new WriteModel(f_interpreter, filepath); }
+    inline Command_ptr make_write_model()
+    { return new WriteModel(f_interpreter); }
 
-    inline Command_ptr make_check_invar(Expr_ptr phi)
-    { return new CheckInvar(f_interpreter, phi); }
+    inline Command_ptr make_check_invar()
+    { return new CheckInvar(f_interpreter); }
 
     inline Command_ptr make_pick_state()
     { return new PickState(f_interpreter); }
@@ -83,11 +76,11 @@ public:
     inline Command_ptr make_list_traces()
     { return new ListTraces(f_interpreter); }
 
-    inline Command_ptr make_dump_trace(Expr_ptr trace_id)
-    { return new DumpTrace(f_interpreter, trace_id); }
+    inline Command_ptr make_dump_trace()
+    { return new DumpTrace(f_interpreter); }
 
-    inline Command_ptr make_dup_trace(Expr_ptr trace_id, Expr_ptr duplicate_id)
-    { return new DupTrace(f_interpreter, trace_id, duplicate_id); }
+    inline Command_ptr make_dup_trace()
+    { return new DupTrace(f_interpreter); }
 
 protected:
     CommandMgr();

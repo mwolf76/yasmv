@@ -25,14 +25,18 @@
 
 // -- command definitions --------------------------------------------------
 class ReadModel : public Command {
+
+    pchar f_input;
+
 public:
-    ReadModel(Interpreter& owner, const std::string& filename);
+    ReadModel(Interpreter& owner);
     virtual ~ReadModel();
 
-    Variant virtual operator()();
+    void set_input(pconst_char input);
+    inline pconst_char input() const
+    { return f_input; }
 
-private:
-    std::string f_filename;
+    Variant virtual operator()();
 };
 
 #endif

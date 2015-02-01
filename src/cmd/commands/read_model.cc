@@ -18,27 +18,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd/commands/read_model.hh>
+#include <cstdlib>
+#include <cstring>
 
+#include <cmd/commands/read_model.hh>
 #include <model/model_mgr.hh>
 
-ReadModel::ReadModel(Interpreter& owner, const std::string &filename)
+ReadModel::ReadModel(Interpreter& owner)
     : Command(owner)
-    , f_filename(filename)
+    , f_input(NULL)
 {}
 
-extern void parseFile(const char *filepath); // in utils.cc
+ReadModel::~ReadModel()
+{
+    free(f_input);
+    f_input = NULL;
+}
+
+void ReadModel::set_input(pconst_char input)
+{
+    free(f_input);
+    f_input = strdup(input);
+}
+
+extern void parseFile(pconst_char input); // in utils.cc
 Variant ReadModel::operator()()
 {
     // parsing
-    parseFile(f_filename.c_str());
+    parseFile(f_input);
 
     // model analysis
-    bool status = ModelMgr::INSTANCE().analyze();
+    bool status
+        (ModelMgr::INSTANCE().analyze());
 
     return Variant( status ? "Ok" : "ERROR" );
 }
-
-ReadModel::~ReadModel()
-{}
 

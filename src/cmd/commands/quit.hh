@@ -24,14 +24,16 @@
 #include <cmd/command.hh>
 
 class Quit : public Command {
+
+    int f_retcode;
+
 public:
-    Quit(Interpreter& owner, int retcode);
+    Quit(Interpreter& owner);
     virtual ~Quit();
 
-    Variant virtual operator()();
+    void set_retcode(int retcode);
 
-private:
-    int f_retcode;
+    Variant virtual operator()();
 };
 
 #endif

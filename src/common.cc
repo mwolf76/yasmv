@@ -66,4 +66,7 @@ const char bold_cyan[] = { ESC, '[', '1', ';', '3', '6', 'm', 0 };
 const char bold_light_gray[] = { ESC, '[', '1', ';', '3', '7', 'm', 0 };
 const char bold_dark_gray[] = { ESC, '[', '1', ';', '3', '8', 'm', 0 };
 
+const char* TRACE_FMT_PLAIN = "plain";
+const char* TRACE_FMT_JSON  = "json";
+
 volatile sig_atomic_t sigint_caught = 0;

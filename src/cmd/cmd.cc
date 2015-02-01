@@ -24,6 +24,14 @@
 // static initialization
 CommandMgr_ptr CommandMgr::f_instance = NULL;
 
+CommandMgr& CommandMgr::INSTANCE()
+{
+    if (! f_instance)
+        f_instance = new CommandMgr();
+
+    return (*f_instance);
+}
+
 CommandMgr::CommandMgr()
     : f_interpreter(Interpreter::INSTANCE())
 {
@@ -38,3 +46,4 @@ CommandMgr::~CommandMgr()
         << "CommandMgr deinitialized"
         << std::endl;
 }
+

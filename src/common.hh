@@ -45,10 +45,11 @@ typedef std::vector<value_t> ValueVector;
     f_values_stack.push_back(op)
 
 #include <exception>
+#include <sstream>
 class Exception : public std::exception {
 public:
     virtual const char* what() const throw() =0;
-    virtual ~Exception() throw() {}
+    virtual ~Exception() throw() {};
 };
 
 static inline bool _iff(bool a, bool b)
@@ -105,6 +106,11 @@ extern const char bold_cyan[];
 extern const char bold_light_gray[];
 extern const char bold_dark_gray[];
 
+/* Witness trace formats */
+extern const char *TRACE_FMT_PLAIN;
+extern const char *TRACE_FMT_JSON;
+
 extern volatile sig_atomic_t sigint_caught;
+
 
 #endif

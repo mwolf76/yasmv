@@ -19,6 +19,8 @@
  *
  **/
 #include <sstream>
+#include <cstring>
+
 #include <model.hh>
 
 ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
@@ -32,7 +34,7 @@ const char* ModuleNotFound::what() const throw()
         << "Module not found: `"
         << f_module_name << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
@@ -46,7 +48,7 @@ const char* DuplicateIdentifier::what() const throw()
         << "Duplicate identifier: `"
         << f_duplicate << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
@@ -64,5 +66,5 @@ const char* BadParamCount::what() const throw()
         << f_expected << " expected, "
         << " got " << f_got;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }

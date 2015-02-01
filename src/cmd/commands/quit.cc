@@ -22,10 +22,18 @@
 #include <cmd/commands/quit.hh>
 #include <cmd/interpreter.hh>
 
-Quit::Quit(Interpreter& owner, int retcode)
+Quit::Quit(Interpreter& owner)
     : Command(owner)
-    , f_retcode(retcode)
+    , f_retcode(0)
 {}
+
+Quit::~Quit()
+{}
+
+void Quit::set_retcode(int retcode)
+{
+    f_retcode = retcode;
+}
 
 // sends a signal to the owner
 Variant Quit::operator()()
@@ -33,7 +41,4 @@ Variant Quit::operator()()
     f_owner.quit(f_retcode);
     return Variant("BYE");
 }
-
-Quit::~Quit()
-{}
 
