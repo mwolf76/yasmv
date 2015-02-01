@@ -49,4 +49,7 @@ public:
     virtual const char* what() const throw() =0;
 };
 
+typedef std::vector<Command_ptr> CommandVector;
+typedef CommandVector* CommandVector_ptr;
+
 #endif

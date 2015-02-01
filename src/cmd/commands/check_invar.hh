@@ -37,10 +37,6 @@ public:
     void set_invar(Expr_ptr invar);
 
     Variant virtual operator()();
-
-private:
-    /* BMC machinery */
-    BMC f_bmc;
 };
 
 #endif

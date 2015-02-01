@@ -601,14 +601,22 @@ case_expression returns [Expr_ptr res]
 
 identifiers [ExprVector* ids]
     :
-      ident=identifier { ids->push_back(ident); }
-      ( ',' ident=identifier { ids->push_back(ident); }  )*
+      ident=identifier
+      { ids->push_back(ident); }
+
+      ( ',' ident=identifier
+            { ids->push_back(ident); }
+      )*
     ;
 
 expressions [ExprVector* exprs]
     :
-      expr=toplevel_expression { exprs->push_back(expr); }
-      ( ',' expr=toplevel_expression { exprs->push_back(expr); }  )*
+      expr=toplevel_expression
+      { exprs->push_back(expr); }
+
+      ( ',' expr=toplevel_expression
+            { exprs->push_back(expr); }
+      )*
     ;
 
 identifier returns [Expr_ptr res]
@@ -843,12 +851,25 @@ literal returns [Expr_ptr res]
     ;
 
 // -- Scripting sub-system Toplevel ---------------------------------------------
-cmd returns [Command_ptr res]
-    : command = commands
-    { $res = command; }
+command_line returns [CommandVector_ptr res]
+@init {
+    res = new CommandVector();
+}
+    : commands[res]
     ;
 
-commands returns [Command_ptr res]
+commands [CommandVector_ptr cmds]
+    :
+        c=command
+        { cmds->push_back(c); }
+
+        (
+            ';' c=command
+            { cmds->push_back(c); }
+        )*
+    ;
+
+command returns [Command_ptr res]
     :  c=help_command
        { $res = c; }
 
@@ -886,8 +907,10 @@ commands returns [Command_ptr res]
 help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
-
-        ( cmd_name = string { ((Help*) $res) -> set_topic(cmd_name); } )?
+      (
+          cmd_name = string
+          { ((Help*) $res) -> set_topic(cmd_name); }
+      )?
     ;
 
 time_command returns [Command_ptr res]

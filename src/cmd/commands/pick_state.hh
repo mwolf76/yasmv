@@ -46,10 +46,6 @@ public:
     { return f_trace_uid; }
 
     Variant virtual operator()();
-
-private:
-    // Simulation machinery
-    Simulation f_sim;
 };
 
 #endif

@@ -55,9 +55,7 @@ DumpTrace::DumpTrace(Interpreter& owner)
     , f_trace_id(NULL)
     , f_format(NULL)
     , f_output(NULL)
-{
-    set_trace_id((char *) WitnessMgr::INSTANCE().current().id().c_str());
-}
+{}
 
 DumpTrace::~DumpTrace()
 {
@@ -97,7 +95,7 @@ Variant DumpTrace::operator()()
         (std::cout);
 
     Atom wid
-        (f_trace_id);
+        (f_trace_id ? f_trace_id : (char *) WitnessMgr::INSTANCE().current().id().c_str());
 
     os
         << "Witness: "

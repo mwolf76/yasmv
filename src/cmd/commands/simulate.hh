@@ -60,10 +60,6 @@ public:
     void set_trace_uid(pconst_char trace_uid);
     inline pconst_char trace_uid() const
     { return f_trace_uid; }
-
-private:
-    /* Simulation machinery */
-    Simulation f_sim;
 };
 
 #endif

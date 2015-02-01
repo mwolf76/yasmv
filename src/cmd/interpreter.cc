@@ -126,7 +126,7 @@ void Interpreter::quit(int retcode)
     f_leaving = true;
 }
 
-extern  Command* parseCommand(const char *command); // in utils.cc
+extern CommandVector_ptr parseCommand(const char *command_line);
 Variant& Interpreter::operator()(Command_ptr cmd)
 {
     assert(NULL != cmd);
@@ -150,46 +150,42 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 Variant& Interpreter::operator()()
 {
-    try {
-        char *cmdline;
-        if ((cmdline = rl_gets())) {
-            Command_ptr cmd = parseCommand(cmdline);
-            if (NULL != cmd) {
+    std::ostream& err
+        (std::cerr);
 
-                bool color (OptsMgr::INSTANCE().color());
-                if (color) {
-                    std::cout << green
-                              << "<< "
-                              << cmdline
-                              << normal
-                              << std::endl;
-                }
-                else {
-                    std::cout << "<< "
-                              << cmdline
-                              << std::endl;
-                }
+    char *cmdline
+        (rl_gets());
 
+    if (cmdline) {
+        CommandVector_ptr cmds
+            (parseCommand(cmdline));
+
+        for (CommandVector::const_iterator i = cmds->begin();
+             cmds->end() != i; ++ i) {
+
+            Command_ptr cmd
+                (*i);
+
+            try {
                 (*this)(cmd);
             }
-            else f_last_result = Variant("Parsing Error");
-        }
-        else {
-            f_last_result = Variant("BYE");
-            f_leaving = true;
+            catch (Exception &e) {
+                pconst_char what
+                    (e.what());
+
+                err
+                    << what
+                    << std::endl;
+
+                f_last_result = Variant("Caught exception");
+
+                free((void *) what);
+            }
         }
     }
-    catch (Exception &e) {
-        pconst_char what
-            (e.what());
-
-        std::cerr
-            << what
-            << std::endl;
-
-        f_last_result = Variant("Caught exception");
-
-        free((void *) what);
+    else {
+        f_last_result = Variant("BYE");
+        f_leaving = true;
     }
 
     return f_last_result;

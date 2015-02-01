@@ -25,7 +25,6 @@ PickState::PickState(Interpreter& owner)
     : Command(owner)
     , f_init_condition(NULL)
     , f_trace_uid(NULL)
-    , f_sim(*this, ModelMgr::INSTANCE().model())
 {}
 
 PickState::~PickState()
@@ -49,9 +48,12 @@ Variant PickState::operator()()
 {
     std::ostringstream tmp;
 
-    f_sim.pick_state(f_init_condition, f_trace_uid);
+    Simulation sim
+        (*this, ModelMgr::INSTANCE().model());
 
-    switch (f_sim.status()) {
+    sim.pick_state(f_init_condition, f_trace_uid);
+
+    switch (sim.status()) {
     case SIMULATION_DONE:
         tmp << "Simulation done";
         break;
@@ -66,10 +68,10 @@ Variant PickState::operator()()
         break;
     default: assert( false ); /* unreachable */
     } /* switch */
-    if (f_sim.has_witness()) {
+    if (sim.has_witness()) {
         tmp
             << ", registered witness `"
-            << f_sim.witness().id() << "`";
+            << sim.witness().id() << "`";
     }
     else {
         tmp

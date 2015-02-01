@@ -27,7 +27,6 @@
 CheckInvar::CheckInvar(Interpreter& owner)
     : Command(owner)
     , f_invar(NULL)
-    , f_bmc(*this, ModelMgr::INSTANCE().model())
 {}
 
 CheckInvar::~CheckInvar()
@@ -47,10 +46,13 @@ Variant CheckInvar::operator()()
     if (! f_invar)
         return Variant("No property given. Aborting...");
 
-    std::ostringstream tmp;
-    f_bmc.process( f_invar );
+    BMC bmc
+        (*this, ModelMgr::INSTANCE().model());
 
-    switch (f_bmc.status()) {
+    bmc.process( f_invar );
+
+    std::ostringstream tmp;
+    switch (bmc.status()) {
     case MC_FALSE:
         tmp << "Property is FALSE";
         break;
@@ -62,9 +64,9 @@ Variant CheckInvar::operator()()
         break;
     default: assert( false ); /* unreachable */
     } /* switch */
-    if (f_bmc.has_witness()) {
+    if (bmc.has_witness()) {
         Witness& w
-            (f_bmc.witness());
+            (bmc.witness());
 
         tmp
             << ", registered CEX witness `"

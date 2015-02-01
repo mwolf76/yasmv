@@ -30,7 +30,6 @@ Simulate::Simulate(Interpreter& owner)
     , f_until_condition(NULL)
     , f_k(1)
     , f_trace_uid(NULL)
-    , f_sim(*this, ModelMgr::INSTANCE().model())
 {}
 
 
@@ -63,13 +62,15 @@ void Simulate::set_k(step_t k)
 
 Variant Simulate::operator()()
 {
-    std::ostringstream tmp;
+    Simulation sim
+        (*this, ModelMgr::INSTANCE().model());
 
-    f_sim.simulate(f_invar_condition,
+    sim.simulate(f_invar_condition,
                    f_until_condition,
                    f_k, f_trace_uid);
 
-    switch (f_sim.status()) {
+    std::ostringstream tmp;
+    switch (sim.status()) {
     case SIMULATION_DONE:
         tmp << "Simulation done";
         break;
@@ -84,10 +85,10 @@ Variant Simulate::operator()()
         break;
     default: assert( false ); /* unreachable */
     } /* switch */
-    if (f_sim.has_witness()) {
+    if (sim.has_witness()) {
         tmp
             << ", registered witness `"
-            << f_sim.witness().id() << "`";
+            << sim.witness().id() << "`";
     }
     else {
         tmp
