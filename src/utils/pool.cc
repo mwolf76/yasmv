@@ -23,10 +23,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <expr.hh>
-#include <expr_mgr.hh>
-
-#include <pool.hh>
+#include <utils/pool.hh>
 
 long PtrHash::operator() (void *ptr) const
 {

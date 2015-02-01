@@ -19,7 +19,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <expr/pool.hh>
 #include <sat/sat.hh>
 
 #include <dd/dd_walker.hh>

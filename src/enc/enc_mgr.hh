@@ -44,6 +44,7 @@
 #include <dd/cudd-2.5.0/cudd/cuddInt.h>  /* for cudd_isconstant */
 
 #include <enc/ucbi.hh>
+#include <utils/pool.hh>
 
 typedef class Encoding *Encoding_ptr; // fwd decl
 

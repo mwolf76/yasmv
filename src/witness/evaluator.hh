@@ -27,7 +27,7 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
-#include <expr/pool.hh>
+#include <expr/timed_expr.hh>
 #include <expr/walker/walker.hh>
 
 #include <witness/witness.hh>

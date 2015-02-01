@@ -24,8 +24,6 @@
 
 #include <common.hh>
 
-#include <expr/pool.hh>
-
 // the Minisat SAT solver
 #include <minisat/core/Solver.h>
 #include <minisat/simp/SimpSolver.h>
@@ -76,6 +74,7 @@ const group_t MAINGROUP(0);
 typedef vec<group_t> Groups;
 
 #include <boost/unordered_map.hpp>
+#include <utils/pool.hh>
 typedef boost::unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
 struct VarHash {
@@ -99,6 +98,5 @@ struct GroupEq {
     { return x == y; }
 };
 typedef boost::unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
-
 
 #endif

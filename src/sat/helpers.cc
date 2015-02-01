@@ -25,7 +25,7 @@
 #include <3rdparty/jsoncpp/json.hh>
 #include <boost/algorithm/string.hpp>
 
-#include <expr/pool.hh>
+#include <utils/pool.hh>
 
 #include <sat/sat.hh>
 #include <sat/helpers.hh>

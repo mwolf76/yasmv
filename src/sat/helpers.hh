@@ -21,7 +21,6 @@
 #ifndef SAT_HELPERS
 #define SAT_HELPERS
 
-#include <expr/pool.hh>
 #include <sat/sat.hh>
 
 #include <boost/filesystem.hpp>

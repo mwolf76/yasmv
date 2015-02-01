@@ -28,7 +28,7 @@
 #include <boost/unordered_map.hpp>
 
 #include <expr/expr.hh>
-#include <expr/pool.hh>
+#include <utils/pool.hh>
 
 #include <type/type.hh>
 

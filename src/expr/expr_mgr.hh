@@ -29,7 +29,6 @@
 #include <boost/thread/mutex.hpp>
 
 #include <expr/expr.hh>
-#include <expr/pool.hh>
 
 #include <opts.hh>
 
