@@ -36,6 +36,15 @@ DupTrace::DupTrace(Interpreter& owner)
     , f_duplicate_id(NULL)
 {}
 
+DupTrace::~DupTrace()
+{
+    if (f_trace_id)
+        free (f_trace_id);
+
+    if (f_duplicate_id)
+        free (f_duplicate_id);
+}
+
 void DupTrace::set_trace_id(pconst_char trace_id)
 {
     free(f_trace_id);
@@ -50,82 +59,5 @@ void DupTrace::set_duplicate_id(pconst_char duplicate_id)
 
 Variant DupTrace::operator()()
 {
-    assert(false); // tODO
-#if 0
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
-    std::ostream &os
-        (std::cout);
-
-    Witness& w
-        (WitnessMgr::INSTANCE().witness(f_trace_id->atom()));
-
-    for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-        os << "-- @ " << 1 + time << std::endl;
-        TimeFrame& tf = w[ time ];
-
-        SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
-        while (symbs.has_next()) {
-
-            std::pair< Expr_ptr, Symbol_ptr > pair
-                (symbs.next());
-            Expr_ptr ctx
-                (pair.first);
-            Symbol_ptr symb
-                (pair.second);
-            Expr_ptr name
-                (symb->name());
-            Expr_ptr value
-                (NULL);
-            Expr_ptr full
-                (em.make_dot( ctx, name));
-
-            if (name -> atom()[0] == '@')
-                continue;
-
-            if (symb->is_variable())  {
-                try {
-                    value = tf.value(full);
-                    os
-                        << full << " = "
-                        << value << std::endl;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else if (symb->is_define()) {
-                Expr_ptr expr(symb->name());
-
-                try {
-                    value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-                    os
-                        << full  << " = "
-                        << value << std::endl;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else
-                continue;
-        }
-
-        os << std::endl;
-    }
-
-#endif
-    return Variant("Ok");
-
-}
-
-DupTrace::~DupTrace()
-{
-    if (f_trace_id)
-        free (f_trace_id);
-
-    if (f_duplicate_id)
-        free (f_duplicate_id);
 }
 

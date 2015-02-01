@@ -335,7 +335,7 @@ bw_xnor_expression returns[Expr_ptr res]
       { $res = lhs; }
 
     (
-      '!^' rhs=bw_and_expression
+      '~^' rhs=bw_and_expression
       { $res = em.make_bw_xnor($res, rhs); }
     )*
     ;
@@ -485,7 +485,7 @@ unary_expression returns [Expr_ptr res]
 	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
-	| '! ' expr=postfix_expression
+	| '!' expr=postfix_expression
       { $res = em.make_not(expr); }
 
     | '~' expr=postfix_expression
@@ -1079,7 +1079,7 @@ fragment TYPE_WIDTH
     ;
 
 fragment ID_FIRST_CHAR
-	:	'A'..'Z' | 'a'..'z' | '_' | '@'
+	:	'A'..'Z' | 'a'..'z' | '_'
 	;
 
 fragment FP_CHARS

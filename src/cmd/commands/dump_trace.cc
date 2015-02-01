@@ -125,7 +125,7 @@ Variant DumpTrace::operator()()
             Expr_ptr full
                 (em.make_dot( ctx, name));
 
-            if (name -> atom()[0] == '@')
+            if (name -> atom()[0] == '_')
                 continue;
 
             if (symb->is_variable())  {
