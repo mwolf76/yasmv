@@ -34,6 +34,8 @@
 
 #include <common.hh>
 #include <expr/expr.hh>
+#include <expr/timed_expr.hh>
+#include <expr/ucbi.hh>
 #include <expr/expr_mgr.hh>
 
 #include <type/type.hh>

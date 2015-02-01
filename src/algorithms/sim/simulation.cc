@@ -65,14 +65,17 @@ void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
             assert_formula( engine, 0, term, 0);
         }
         catch (Exception& ae) {
-            std::string tmp
+            pconst_char what
                 (ae.what());
+
             WARN
-                << tmp
+                << what
                 << std::endl
                 << "  in initial condition"
                 << ctx << "::" << init_condition
                 << std::endl;
+
+            free((void *) what);
             return;
         }
     }

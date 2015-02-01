@@ -24,141 +24,15 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
-TimedExpr::TimedExpr(Expr_ptr expr, step_t time)
-    : f_expr(expr)
-    , f_time(time)
-{}
-
-// FQExpr::FQExpr(Expr_ptr expr)
-//     : f_ctx(ExprMgr::INSTANCE().make_empty())
-//     , f_expr(expr)
-//     , f_time(0)
-// {}
-
-// FQExpr::FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time)
-//     : f_ctx(ctx)
-//     , f_expr(expr)
-//     , f_time(time)
-// {}
-
-// FQExpr::FQExpr(const FQExpr& fqexpr)
-//     : f_ctx(fqexpr.ctx())
-//     , f_expr(fqexpr.expr())
-//     , f_time(fqexpr.time())
-// {}
-
-UCBI::UCBI(Expr_ptr expr, step_t time, unsigned bitno)
-    : f_expr(expr)
-    , f_time(time)
-    , f_bitno(bitno)
-{}
-
-UCBI::UCBI(const UCBI& ucbi)
-    : f_expr(ucbi.expr())
-    , f_time(ucbi.time())
-    , f_bitno(ucbi.bitno())
-{}
-
-TCBI::TCBI(const UCBI& ucbi, step_t base)
-    : f_expr(ucbi.expr())
-    , f_time(ucbi.time())
-    , f_bitno(ucbi.bitno())
-    , f_base(base)
-{}
-
-TCBI::TCBI(const TCBI& tcbi)
-    : f_expr(tcbi.expr())
-    , f_time(tcbi.time())
-    , f_bitno(tcbi.bitno())
-    , f_base(tcbi.base())
-{}
-
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
-{ Printer (os) << expr; return os; }
-
-std::ostream& operator<<(std::ostream& os, const TimedExpr& timed_expr)
 {
-    Expr_ptr expr
-        (timed_expr.expr());
-    step_t time
-        (timed_expr.time());
-
-    os << "@" << time
-       << "{" << expr
-       << "}" ;
-
-    return os;
-}
-
-// std::ostream& operator<<(std::ostream& os, const FQExpr& fqexpr)
-// {
-//     Expr_ptr ctx
-//         (fqexpr.ctx());
-//     Expr_ptr expr
-//         (fqexpr.expr());
-//     step_t step
-//         (fqexpr.time());
-
-//     os << "@" <<  step
-//        << "{" << ctx
-//        << "::" << expr
-//        << "}" ;
-
-//     return os;
-// }
-
-std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
-{
-    Expr_ptr expr
-        (ucbi.expr());
-    step_t step
-        (ucbi.time());
-    unsigned bitno
-        (ucbi.bitno());
-
-    os << "+" << step
-       << "{" ;
-
     Printer (os)
-        << "::"
-        << expr ;
-
-    os << "}."
-       << bitno ;
-
+        << expr;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
-{
-    Expr_ptr expr
-        (tcbi.expr());
-    step_t step
-        (tcbi.time());
-    unsigned bitno
-        (tcbi.bitno());
-    step_t timebase
-        (tcbi.base());
-
-    os << "@" << timebase
-       << "{"
-
-       << "+" <<  step
-       << "{" ;
-
-    Printer (os)
-        << "::"
-        << expr ;
-
-    os << "}."
-       << bitno ;
-
-    os << "}" ;
-
-    return os;
-}
-
-int LexicographicOrdering::operator() (const Expr_ptr x, const Expr_ptr y) const
+int LexicographicOrdering::operator() (const Expr_ptr x,
+                                       const Expr_ptr y) const
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -174,3 +48,55 @@ int LexicographicOrdering::operator() (const Expr_ptr x, const Expr_ptr y) const
 
     assert(false);
 }
+
+long ExprHash::operator() (const Expr& k) const
+{
+    if (k.f_symb == IDENT)
+        return (long)(k.u.f_atom);
+
+    long v0, v1, x, res = (long)(k.f_symb);
+
+    if (k.f_symb == ICONST
+        || k.f_symb == HCONST
+        || k.f_symb == OCONST) {
+        v0 = (long)(k.u.f_value);
+        v1 = (long)(k.u.f_value >> sizeof(long));
+    }
+    else {
+        v0 = (long)(k.u.f_lhs);
+        v1 = (long)(k.u.f_rhs);
+    }
+
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
+}
+
+bool ExprEq::operator() (const Expr& x, const Expr& y) const
+{
+    return
+        // both exprs must be the same type and...
+        x.f_symb == y.f_symb
+        && (
+            /* ...either have the same identifier */
+            (x.f_symb == IDENT  && *x.u.f_atom == *y.u.f_atom) ||
+
+            /* ...or have the same constant value */
+            (x.f_symb >= ICONST && x.f_symb <= OCONST
+             && x.u.f_value == y.u.f_value) ||
+
+            /* ...or share the same subtrees */
+            (x.u.f_lhs == y.u.f_lhs &&
+             x.u.f_rhs == y.u.f_rhs));
+}
+

@@ -136,7 +136,12 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        f_last_result = Variant(e.what());
+        pconst_char what
+            (e.what());
+
+        f_last_result = Variant(what);
+
+        free((void *) what);
     }
 
     delete cmd;
@@ -175,11 +180,16 @@ Variant& Interpreter::operator()()
         }
     }
     catch (Exception &e) {
+        pconst_char what
+            (e.what());
+
         std::cerr
-            << e.what()
+            << what
             << std::endl;
 
         f_last_result = Variant("Caught exception");
+
+        free((void *) what);
     }
 
     return f_last_result;

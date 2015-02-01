@@ -44,6 +44,9 @@ typedef std::vector<value_t> ValueVector;
 #define PUSH_VALUE(op)                             \
     f_values_stack.push_back(op)
 
+typedef const char* pconst_char;
+typedef char* pchar;
+
 #include <exception>
 #include <sstream>
 class Exception : public std::exception {

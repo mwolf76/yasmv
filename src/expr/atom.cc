@@ -1,5 +1,5 @@
 /**
- *  @file pool.hh
+ *  @file atom.cc
  *  @brief Expression management, pooling subsystem
  *
  *  This module contains definitions and services that implement an
@@ -23,39 +23,27 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef POOL_H
-#define POOL_H
+#include <atom.hh>
 
-#include <common.hh>
+long AtomHash::operator() (const Atom& k) const
+{
+    unsigned long hash = 0;
+    unsigned long x    = 0;
 
-struct PtrHash {
-    long operator() (void *ptr) const;
-};
+    for (std::size_t i = 0; i < k.length(); i++) {
 
-struct PtrEq {
-    bool operator() (const void* x,
-                     const void* y) const;
-};
+        hash = (hash << 4) + k[i];
+        if((x = hash & 0xF0000000L) != 0) {
+            hash ^= (x >> 24);
+        }
+        hash &= ~x;
+    }
 
-/* -- integer key definitions (here to collect them all together) ------------ */
-struct ValueHash {
-    long operator() (value_t) const;
-};
+    return hash;
+}
 
-struct ValueEq {
-    bool operator() (const value_t x,
-                     const value_t y) const;
-};
+bool AtomEq::operator() (const Atom& x, const Atom& y) const
+{
+    return x == y;
+}
 
-struct IntHash {
-    inline long operator() (int term) const
-    { return (long) (term); }
-};
-
-struct IntEq {
-    inline bool operator() (const int phi,
-                            const int psi) const
-    { return phi == psi; }
-};
-
-#endif

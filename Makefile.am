@@ -41,6 +41,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/algorithms/libalgorithms.la			\
         $(top_builddir)/src/model/libmodel.la				\
         $(top_builddir)/src/model/compiler/libcompiler.la		\
+	$(top_builddir)/src/enc/libenc.la				\
         $(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
         $(top_builddir)/src/expr/libexpr.la				\
@@ -48,7 +49,6 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/expr/printer/libprinter.la			\
         $(top_builddir)/src/type/libtype.la				\
         $(top_builddir)/src/symb/libsymb.la				\
-        $(top_builddir)/src/enc/libenc.la				\
         $(top_builddir)/src/utils/libutils.la				\
         $(top_builddir)/src/witness/libwitness.la			\
         $(top_builddir)/src/sat/libsat.la				\
@@ -78,6 +78,7 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/algorithms/libalgorithms.la			\
 	$(top_builddir)/src/model/libmodel.la				\
 	$(top_builddir)/src/model/compiler/libcompiler.la		\
+	$(top_builddir)/src/enc/libenc.la				\
 	$(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
 	$(top_builddir)/src/expr/libexpr.la				\
@@ -85,7 +86,6 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/expr/printer/libprinter.la			\
 	$(top_builddir)/src/type/libtype.la				\
 	$(top_builddir)/src/symb/libsymb.la				\
-	$(top_builddir)/src/enc/libenc.la				\
 	$(top_builddir)/src/utils/libutils.la				\
 	$(top_builddir)/src/witness/libwitness.la			\
 	$(top_builddir)/src/sat/libsat.la				\

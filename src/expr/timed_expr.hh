@@ -1,10 +1,6 @@
 /**
- *  @file pool.cc
- *  @brief Expression management, pooling subsystem
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  @file timed_expr.hh
+ *  @brief Expression management
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,30 +19,40 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <expr.hh>
-#include <expr_mgr.hh>
+#ifndef TIMED_EXPR_H
+#define TIMED_EXPR_H
 
-#include <pool.hh>
+#include <expr/expr.hh>
 
-long PtrHash::operator() (void *ptr) const
-{
-    return (long)(ptr);
-}
+class TimedExpr {
+public:
+    TimedExpr(Expr_ptr expr, step_t time);
 
-bool PtrEq::operator() (const void* x,
-                        const void* y) const
-{
-    return x == y;
-}
+    inline Expr_ptr expr() const
+    { return f_expr; }
 
-long ValueHash::operator() (value_t k) const
-{
-    return (long)(k);
-}
+    inline step_t time() const
+    { return f_time; }
 
-bool ValueEq::operator() (const value_t x,
-                          const value_t y) const
-{
-    return x == y;
-}
+    inline bool operator==(const TimedExpr& other)
+    { return f_expr == other.f_expr && f_time == other.f_time; }
 
+private:
+    Expr_ptr f_expr;
+    step_t f_time;
+};
+
+std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
+
+struct TimedExprHash {
+    long operator() (const TimedExpr& k) const;
+};
+
+struct TimedExprEq {
+    bool operator() (const TimedExpr& x, const TimedExpr& y) const;
+};
+
+typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
+
+#endif

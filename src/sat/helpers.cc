@@ -201,11 +201,15 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                     f_loaders.insert( std::make_pair< InlinedOperatorSignature, InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));
                 }
-                catch (InlinedOperatorLoaderException mle) {
-                    std::string tmp(mle.what());
+                catch (InlinedOperatorLoaderException iole) {
+                    pconst_char what
+                        (iole.what());
+
                     WARN
-                        << tmp
+                        << what
                         << std::endl;
+
+                    free ((void *) what);
                 }
             }
         }
@@ -217,10 +221,13 @@ InlinedOperatorMgr::InlinedOperatorMgr()
         }
     }
     catch (const filesystem_error& ex) {
-        std::string tmp
+        pconst_char what
             (ex.what());
+
         ERR
-            << tmp;
+            << what;
+
+        free ((void *) what);
         exit(1);
     }
 }

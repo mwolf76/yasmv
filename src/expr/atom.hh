@@ -1,10 +1,6 @@
 /**
- *  @file pool.cc
- *  @brief Expression management, pooling subsystem
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  @file atom.hh
+ *  @brief Expression management
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,30 +19,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <expr.hh>
-#include <expr_mgr.hh>
+#ifndef ATOM_POOL_H
+#define ATOM_POOL_H
 
-#include <pool.hh>
+#include <string>
+#include <boost/unordered_set.hpp>
 
-long PtrHash::operator() (void *ptr) const
-{
-    return (long)(ptr);
-}
+/* using STL string as basic atom class */
+typedef std::string Atom;
+typedef Atom* Atom_ptr;
 
-bool PtrEq::operator() (const void* x,
-                        const void* y) const
-{
-    return x == y;
-}
+struct AtomHash {
+    long operator() (const Atom& k) const;
+};
 
-long ValueHash::operator() (value_t k) const
-{
-    return (long)(k);
-}
+struct AtomEq {
+    bool operator() (const Atom& x, const Atom& y) const;
+};
 
-bool ValueEq::operator() (const value_t x,
-                          const value_t y) const
-{
-    return x == y;
-}
+typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;
+typedef std::pair<AtomPool::iterator, bool> AtomPoolHit;
 
+#endif

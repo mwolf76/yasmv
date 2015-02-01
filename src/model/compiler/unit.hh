@@ -30,6 +30,8 @@
 
 #include <boost/unordered_map.hpp>
 
+#include <expr/expr.hh>
+
 #include <dd/dd.hh>
 #include <sat/satdefs.hh>
 

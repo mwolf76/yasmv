@@ -23,10 +23,6 @@
 
 #include <model/model.hh>
 
-// WHY HERE?!?
-std::ostream& operator<<(std::ostream& os, Exception& e)
-{ return os << e.what(); }
-
 Module& Model::add_module(Module& module)
 {
     Expr_ptr name (module.name());
@@ -63,5 +59,6 @@ Model::Model()
 Model::~Model()
 {
     // TODO: free memory for symbols... (they've been allocated using new)
+    assert(false); // XXX
 }
 

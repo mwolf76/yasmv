@@ -117,14 +117,17 @@ void Algorithm::setup()
                 f_init.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
-                std::string tmp
+                pconst_char what
                     (ae.what());
+
                 WARN
-                    << tmp
+                    << what
                     << std::endl
                     << "  in INIT "
                     << ctx << "::" << body
                     << std::endl;
+
+                free ((void *) what);
             }
         } // for init
 
@@ -142,14 +145,17 @@ void Algorithm::setup()
                 f_invar.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
-                std::string tmp
+                pconst_char what
                     (ae.what());
+
                 WARN
-                    << tmp
+                    << what
                     << std::endl
                     << "  in INVAR "
                     << ctx << "::" << body
                     << std::endl;
+
+                free((void *) what);
             }
         } // for invar
 
@@ -166,14 +172,17 @@ void Algorithm::setup()
                 f_trans.push_back( cmpl.process(ctx, *ti));
             }
             catch (Exception& ae) {
-                std::string tmp
+                pconst_char what
                     (ae.what());
+
                 WARN
-                    << tmp
+                    << what
                     << std::endl
                     << "  in TRANS "
                     << ctx << "::" << body
                     << std::endl;
+
+                free ((void *) what);
             }
         } // for trans
 
@@ -319,10 +328,15 @@ void Algorithm::assert_time_frame(Engine& engine,
                                       assignment), time, group);
         }
         catch (Exception& ae) {
+            pconst_char what
+                (ae.what());
+
             std::cerr
-                << ae.what()
+                << what
                 << std::endl;
-            assert(false);
+
+            free((void *) what);
+            assert(false); // XXX
         }
     }
 }

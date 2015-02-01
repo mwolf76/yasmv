@@ -1,10 +1,6 @@
 /**
- *  @file pool.cc
- *  @brief Expression management, pooling subsystem
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ *  @file ucbi.hh
+ *  @brief Expression management
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,30 +19,45 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <expr.hh>
-#include <expr_mgr.hh>
+#ifndef UCBI_H
+#define UCBI_H
 
-#include <pool.hh>
+#include <expr/expr.hh>
 
-long PtrHash::operator() (void *ptr) const
-{
-    return (long)(ptr);
-}
+/* Untimed Canonical Bit Identifiers */
+class UCBI {
+public:
+    UCBI(Expr_ptr expr, step_t time_ofs, unsigned bitno);
+    UCBI(const UCBI& ucbi);
 
-bool PtrEq::operator() (const void* x,
-                        const void* y) const
-{
-    return x == y;
-}
+    inline Expr_ptr expr() const
+    { return f_expr; }
 
-long ValueHash::operator() (value_t k) const
-{
-    return (long)(k);
-}
+    inline step_t time() const
+    { return f_time; }
 
-bool ValueEq::operator() (const value_t x,
-                          const value_t y) const
-{
-    return x == y;
-}
+    inline unsigned bitno() const
+    { return f_bitno; }
 
+private:
+    // expression body
+    Expr_ptr f_expr;
+
+    // expression time (default is 0)
+    step_t f_time;
+
+    // bit number
+    unsigned f_bitno;
+};
+
+std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
+
+struct UCBIHash {
+    long operator() (const UCBI& k) const;
+};
+
+struct UCBIEq {
+    bool operator() (const UCBI& x, const UCBI& y) const;
+};
+
+#endif

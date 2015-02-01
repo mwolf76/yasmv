@@ -27,7 +27,7 @@
 #include <boost/unordered_map.hpp>
 
 #include <expr/expr.hh>
-#include <expr/pool.hh>
+#include <expr/tcbi.hh>
 
 class Engine; // fwd decl
 

@@ -31,6 +31,8 @@
 
 #include <common.hh>
 
+#include <expr/atom.hh>
+
 typedef enum {
 
     // -- linear temporal logic expressions ------------------------------------
@@ -94,14 +96,6 @@ typedef enum {
 // An Expression consists of an AST symbol, which is the expression
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
-
-/* using STL string as basic atom class */
-typedef std::string Atom;
-typedef Atom* Atom_ptr;
-
-typedef const char* pconst_char;
-typedef char* pchar;
-
 typedef struct Expr_TAG *Expr_ptr;
 typedef struct Expr_TAG {
 
@@ -190,108 +184,18 @@ struct LexicographicOrdering {
 typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
-// TODO: split this into multiple headers
-
-class TimedExpr {
-public:
-    TimedExpr(Expr_ptr expr, step_t time);
-
-    inline Expr_ptr expr() const
-    { return f_expr; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    inline bool operator==(const TimedExpr& other)
-    { return f_expr == other.f_expr && f_time == other.f_time; }
-
-private:
-    Expr_ptr f_expr;
-    step_t f_time;
-};
-
-/* Normal forms literals */
-class PolarizedLiteral {
-public:
-    PolarizedLiteral(Expr_ptr literal, bool polarity = true);
-
-    inline Expr_ptr literal() const
-    { return f_literal; }
-
-    inline bool polarity() const
-    { return f_polarity; }
-
-private:
-    // literal
-    Expr_ptr f_literal;
-
-    // polarity
-    bool f_polarity;
-};
-
-/* Untimed Canonical Bit Identifiers */
-class UCBI {
-public:
-    UCBI(Expr_ptr expr, step_t time_ofs, unsigned bitno);
-    UCBI(const UCBI& ucbi);
-
-    inline Expr_ptr expr() const
-    { return f_expr; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    inline unsigned bitno() const
-    { return f_bitno; }
-
-private:
-    // expression body
-    Expr_ptr f_expr;
-
-    // expression time (default is 0)
-    step_t f_time;
-
-    // bit number
-    unsigned f_bitno;
-};
-
-/* Timed Canonical Bit Identifiers */
-class TCBI {
-public:
-    TCBI(const UCBI& ucbi, step_t timebase);
-    TCBI(const TCBI& tcbi);
-
-    inline Expr_ptr expr() const
-    { return f_expr; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    inline unsigned bitno() const
-    { return f_bitno; }
-
-    inline step_t base() const
-    { return f_base; }
-
-private:
-
-    // expression body
-    Expr_ptr f_expr;
-
-    // expression time (default is 0)
-    step_t f_time;
-
-    // bit number
-    unsigned f_bitno;
-
-    // time base (default is 0)
-    step_t f_base;
-};
-
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
-std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
-std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
-std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
+
+struct ExprHash {
+    long operator() (const Expr& k) const;
+};
+
+struct ExprEq {
+    bool operator() (const Expr& x, const Expr& y) const;
+};
+
+typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
 /** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
 #define TOP_CTX(tp)                            \

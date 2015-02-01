@@ -184,7 +184,14 @@ int main(int argc, const char *argv[])
     }
 
     catch (Exception &e) {
-        std::cerr << red << e.what() << std::endl;
+        pconst_char what
+            (e.what());
+
+        std::cerr
+            << red << what
+            << std::endl;
+
+        free ((void *) what);
     }
 
     return system.retcode();
