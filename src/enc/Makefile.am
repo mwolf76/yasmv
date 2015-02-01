@@ -8,12 +8,9 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = enc.hh enc_mgr.hh
-PKG_CC = enc.cc enc_mgr.cc monolithic.cc algebraic.cc array.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = enc.cc enc_mgr.cc monolithic.cc algebraic.cc array.cc ucbi.cc tcbi.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libenc.la
-libenc_la_SOURCES = $(PKG_SOURCES)
+libenc_la_SOURCES = $(PKG_CC)

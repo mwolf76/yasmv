@@ -33,15 +33,17 @@
 #include <boost/unordered_map.hpp>
 
 #include <common.hh>
+
 #include <expr/expr.hh>
 #include <expr/timed_expr.hh>
-#include <expr/ucbi.hh>
 #include <expr/expr_mgr.hh>
 
 #include <type/type.hh>
 
 #include <dd/cudd_mgr.hh>
 #include <dd/cudd-2.5.0/cudd/cuddInt.h>  /* for cudd_isconstant */
+
+#include <enc/ucbi.hh>
 
 typedef class Encoding *Encoding_ptr; // fwd decl
 

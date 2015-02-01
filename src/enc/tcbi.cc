@@ -20,8 +20,8 @@
  *
  **/
 
+#include <enc/tcbi.hh>
 #include <expr/printer/printer.hh>
-#include <expr/tcbi.hh>
 
 TCBI::TCBI(const UCBI& ucbi, step_t base)
     : f_expr(ucbi.expr())

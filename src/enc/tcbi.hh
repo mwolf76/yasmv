@@ -22,7 +22,7 @@
 #ifndef TCBI_H
 #define TCBI_H
 
-#include <expr/ucbi.hh>
+#include <enc/ucbi.hh>
 
 /* Timed Canonical Bit Identifiers */
 class TCBI {

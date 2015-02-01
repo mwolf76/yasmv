@@ -20,8 +20,8 @@
  *
  **/
 
+#include <enc/ucbi.hh>
 #include <expr/printer/printer.hh>
-#include <expr/ucbi.hh>
 
 UCBI::UCBI(Expr_ptr expr, step_t time, unsigned bitno)
     : f_expr(expr)
