@@ -328,8 +328,8 @@ public:
     {
         assert( expr->f_symb == ICONST ||
                 expr->f_symb == HCONST ||
-                expr->f_symb == OCONST ||
-                expr->f_symb == FCONST );
+                expr->f_symb == OCONST );
+
         return expr -> value();
     }
 
@@ -351,33 +351,36 @@ public:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_fconst(value_t value)
-    {
-        Expr tmp(FCONST, value); // we need a temp store
-        return __make_expr(&tmp);
-    }
-
     /* canonical by construction */
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return left_associate_dot( make_expr(DOT, a, b)); }
 
-    inline Expr_ptr make_comma(Expr_ptr a, Expr_ptr b)
-    { return make_expr(COMMA, a, b); }
-
     inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUBSCRIPT, a, b); }
+
+    inline Expr_ptr make_array(Expr_ptr a)
+    { return make_expr(ARRAY, a, NULL); }
+
+    inline Expr_ptr make_array_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(ARRAY_COMMA, a, b); }
 
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
 
+    inline Expr_ptr make_params_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(PARAMS_COMMA, a, b); }
+
     inline Expr_ptr make_set(Expr_ptr a)
     { return make_expr(SET, a, NULL); }
+
+    inline Expr_ptr make_set_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(SET_COMMA, a, b); }
 
     /* -- Types & Casts ----------------------------------------------------- */
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
     { return make_expr(TYPE, a, b); }
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b, Expr_ptr c)
-    { return make_expr(TYPE, a, make_expr(COMMA, b, c)); }
+    { return make_expr(TYPE, a, make_expr(DOT, b, c)); }
 
     inline bool is_type(const Expr_ptr expr) const {
         assert(expr);
@@ -403,40 +406,10 @@ public:
         return expr == const_int_expr;
     }
 
-    inline Expr_ptr make_const_fxd_type(unsigned width)
-    {
-        return make_type(const_fxd_expr,
-                         make_const((value_t) width));
-
-    }
-
-    inline bool is_const_fxd_type(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == const_fxd_expr;
-    }
-
-
-    inline Expr_ptr make_fixed_type(unsigned digits)
-    {
-        return make_type(const_int_expr,
-                         make_const((value_t) digits));
-    }
-
-    inline bool is_fixed_type(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == const_int_expr;
-    }
-
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
         return make_type(unsigned_int_expr,
                          make_const((value_t) digits));
-    }
-
-    inline Expr_ptr make_unsigned_fxd_type(unsigned width)
-    {
-        return make_type(unsigned_fxd_expr,
-                         make_const((value_t) width));
     }
 
     inline Expr_ptr make_signed_int_type(unsigned digits)
@@ -445,14 +418,11 @@ public:
                          make_const((value_t) digits));
     }
 
-    inline Expr_ptr make_signed_fxd_type(unsigned width)
+    inline Expr_ptr make_array_type(Expr_ptr of, unsigned width)
     {
-        return make_type(signed_fxd_expr,
-                         make_const((value_t) width));
+        return make_type( array_expr, of,
+                          make_const((value_t) width));
     }
-
-    inline Expr_ptr make_abstract_array_type(Expr_ptr of)
-    { return make_type( array_expr, of); }
 
 
     Expr_ptr make_enum_type(ExprSet& literals);
@@ -540,17 +510,6 @@ public:
     inline Expr_ptr make_oct_const(Atom atom)
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
-    inline Expr_ptr make_fxd_const(Atom integer, Atom precision)
-    {
-        value_t int_
-            (strtoll(integer.c_str(), NULL, 10));
-        value_t fract_
-            (decimal_lookup(precision.c_str()));
-        value_t value
-            ((int_ << OptsMgr::INSTANCE().precision()) + fract_);
-        return make_fconst( value );
-    }
-
     inline Expr_ptr make_undef()
     {
         Expr tmp(UNDEF); // we need a temp store
@@ -602,6 +561,10 @@ public:
         assert(expr);
         return expr->f_symb == PARAMS;
     }
+    inline bool is_params_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PARAMS_COMMA;
+    }
 
     inline bool is_subscript(const Expr_ptr expr) const {
         assert(expr);
@@ -613,9 +576,14 @@ public:
         return expr->f_symb == DOT;
     }
 
-    inline bool is_comma(const Expr_ptr expr) const {
+    inline bool is_array(const Expr_ptr expr) const {
         assert(expr);
-        return expr->f_symb == COMMA;
+        return expr->f_symb == ARRAY;
+    }
+
+    inline bool is_array_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == ARRAY_COMMA;
     }
 
     inline bool is_set(const Expr_ptr expr) const {
@@ -623,16 +591,16 @@ public:
         return expr->f_symb == SET;
     }
 
+    inline bool is_set_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SET_COMMA;
+    }
+
     inline bool is_int_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
             || (expr->f_symb == OCONST) ;
-    }
-
-    inline bool is_fxd_numeric(const Expr_ptr expr) const {
-        assert(expr);
-        return (expr->f_symb == FCONST);
     }
 
     // expr inspectors, used by compiler as helpers to determine operands type
@@ -680,6 +648,14 @@ public:
     }
 
     inline bool is_binary_enumerative(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ((EQ == symb) ||
+                (NE == symb));
+    }
+
+    inline bool is_binary_equality(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
 
@@ -749,11 +725,6 @@ private:
     Expr_ptr const_int_expr;
     Expr_ptr unsigned_int_expr;
     Expr_ptr signed_int_expr;
-
-    /* fixed */
-    Expr_ptr const_fxd_expr;
-    Expr_ptr unsigned_fxd_expr;
-    Expr_ptr signed_fxd_expr;
 
     /* reserved for abstract array types */
     Expr_ptr array_expr;

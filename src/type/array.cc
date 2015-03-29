@@ -39,19 +39,19 @@ ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
                                           f_owner.em().make_const(nelems));
 }
 
-ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
-    : Type(owner)
-    , f_of(of)
-    , f_nelems(0)
-{
-    // valid type
-    assert( NULL != of);
+// ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
+//     : Type(owner)
+//     , f_of(of)
+//     , f_nelems(0)
+// {
+//     // valid type
+//     assert( NULL != of);
 
-    // scalar type only. Consistency with comment above.
-    assert (f_of -> is_scalar());
+//     // scalar type only. Consistency with comment above.
+//     assert (f_of -> is_scalar());
 
-    f_repr = f_owner.em().make_abstract_array_type( of->repr());
-}
+//     f_repr = f_owner.em().make_abstract_array_type( of->repr());
+// }
 
 unsigned ArrayType::width() const
 {

@@ -159,10 +159,15 @@ void ExprWalker::walk ()
             case SUBSCRIPT_1: goto entry_SUBSCRIPT_1;
             case SUBSCRIPT_2: goto entry_SUBSCRIPT_2;
 
+            case ARRAY_1: goto entry_ARRAY_1;
+
+            case ARRAY_COMMA_1: goto entry_ARRAY_COMMA_1;
+            case ARRAY_COMMA_2: goto entry_ARRAY_COMMA_2;
+
             case SET_1: goto entry_SET_1;
 
-            case COMMA_1: goto entry_COMMA_1;
-            case COMMA_2: goto entry_COMMA_2;
+            case SET_COMMA_1: goto entry_SET_COMMA_1;
+            case SET_COMMA_2: goto entry_SET_COMMA_2;
 
             case CAST_1: goto entry_CAST_1;
             case CAST_2: goto entry_CAST_2;
@@ -752,6 +757,35 @@ void ExprWalker::walk ()
             }
             break;
 
+        case ARRAY:
+            if (walk_array_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = ARRAY_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_ARRAY_1:
+                walk_array_postorder(curr.expr);
+            }
+            break;
+
+        case ARRAY_COMMA:
+            if (walk_array_comma_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = ARRAY_COMMA_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_ARRAY_COMMA_1:
+                if (walk_array_comma_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = ARRAY_COMMA_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_ARRAY_COMMA_2:
+                walk_array_comma_postorder(curr.expr);
+            }
+            break;
+
         case SET:
             if (walk_set_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = SET_1;
@@ -763,21 +797,21 @@ void ExprWalker::walk ()
             }
             break;
 
-        case COMMA:
-            if (walk_comma_preorder(curr.expr) && ! f_rewritten) {
-                f_recursion_stack.top().pc = COMMA_1;
+        case SET_COMMA:
+            if (walk_set_comma_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = SET_COMMA_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
-            entry_COMMA_1:
-                if (walk_comma_inorder(curr.expr)) {
-                    f_recursion_stack.top().pc = COMMA_2;
+            entry_SET_COMMA_1:
+                if (walk_set_comma_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = SET_COMMA_2;
                     f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
                 }
 
-            entry_COMMA_2:
-                walk_comma_postorder(curr.expr);
+            entry_SET_COMMA_2:
+                walk_set_comma_postorder(curr.expr);
             }
             break;
 
@@ -822,7 +856,6 @@ void ExprWalker::walk ()
         case ICONST:
         case HCONST:
         case OCONST:
-        case FCONST:
         case IDENT:
         case UNDEF:
             walk_leaf(curr.expr);

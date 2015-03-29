@@ -67,9 +67,6 @@ void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
     if (alhs -> width() != arhs -> width())
         throw TypeMismatch( expr, alhs, arhs );
 
-    if (_xor( alhs -> is_fxd(), arhs -> is_fxd()))
-        throw TypeMismatch( expr, alhs, arhs );
-
     if (arhs -> is_constant() && ! alhs -> is_constant()) {
         PUSH_TYPE(alhs);
         return ;
@@ -152,9 +149,6 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
         (dynamic_cast <AlgebraicType_ptr>(lhs));
 
     if (alhs -> width() != arhs -> width())
-        throw TypeMismatch( expr, alhs, arhs );
-
-    if (_xor( alhs -> is_fxd(), arhs -> is_fxd()))
         throw TypeMismatch( expr, alhs, arhs );
 
     if (arhs -> is_constant() && ! alhs -> is_constant()) {

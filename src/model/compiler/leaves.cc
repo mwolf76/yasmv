@@ -42,20 +42,13 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     step_t time
         (f_time_stack.back());
 
-    /* 1. Explicit int or fxd constants, perform booleanization *
+    /* 1. Explicit int constants, perform booleanization
      * immediately. An exception will be thrown if conversion could
      * not be completed. */
     if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
-        f_type_stack.push_back(tm.find_unsigned(ww, false));
-        algebraic_constant(expr, ww);
-        return;
-    }
-    if (em.is_fxd_numeric(expr)) {
-        unsigned ww
-            (OptsMgr::INSTANCE().word_width());
-        f_type_stack.push_back(tm.find_unsigned(ww, true));
+        f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_constant(expr, ww);
         return;
     }

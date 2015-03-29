@@ -67,20 +67,19 @@ public:
     const ScalarType_ptr find_enum(ExprSet& lits);
     const ArrayType_ptr find_enum_array(ExprSet& lits, unsigned size);
 
-    const ScalarType_ptr find_constant(unsigned width, bool is_fxd);
+    const ScalarType_ptr find_constant(unsigned width);
 
-    const ScalarType_ptr find_signed(unsigned width, bool is_fxd);
-    const ArrayType_ptr  find_signed_array(unsigned width, bool is_fxd,
-                                           unsigned size);
+    const ScalarType_ptr find_signed(unsigned width);
+    const ArrayType_ptr  find_signed_array(unsigned width, unsigned size);
 
-    const ScalarType_ptr find_unsigned(unsigned width, bool is_fxd);
-
-    const ArrayType_ptr find_unsigned_array(unsigned width, bool is_fxd,
-                                            unsigned size);
+    const ScalarType_ptr find_unsigned(unsigned width);
+    const ArrayType_ptr find_unsigned_array(unsigned width, unsigned size);
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);
 
     const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
+
+    const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
 
     const Literals& literals() const
     { return f_lits; }

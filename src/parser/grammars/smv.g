@@ -1,17 +1,17 @@
 /**
-   Copyright (C) 2010-2012 Marco Pensallorto
+   Copyright (C) 2010-2015 Marco Pensallorto
 
-   This file is part of GNuSMV.
+   This file is part of YASMINE.
 
-   GNuSMV is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
+   YASMINE is free software: you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   GNuSMV is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   YASMINE is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
    along with GNuSMV.  If not, see <http://www.gnu.org/licenses/>.
@@ -81,9 +81,6 @@ model_directive
 model_word_width_directive
     : '#word-width' width=constant
     { om.set_word_width( width -> value()); }
-
-    | '#precision' precision=constant
-    { om.set_precision( precision -> value()); }
     ;
 
 modules
@@ -482,6 +479,9 @@ unary_expression returns [Expr_ptr res]
     | expr=nondeterministic_expression
       { $res = expr; }
 
+    | expr=array_expression
+      { $res = expr; }
+
 	| 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
@@ -508,13 +508,35 @@ nondeterministic_expression returns[Expr_ptr res]
                 (clauses.rbegin());
 
             while (clauses.rend() != i) {
-                $res = $res ? em.make_comma( *i, $res) : *i;
+                $res = $res ? em.make_set_comma( *i, $res) : *i;
                 ++ i;
             }
 
             $res = em.make_set( $res );
         }
     ;
+
+array_expression returns[Expr_ptr res]
+@init {
+    ExprVector clauses;
+}
+    : '['
+          c=toplevel_expression{ clauses.push_back(c); }
+            (',' c=toplevel_expression { clauses.push_back(c); })*
+      ']'
+      {
+            ExprVector::reverse_iterator i
+                (clauses.rbegin());
+
+            while (clauses.rend() != i) {
+                $res = $res ? em.make_array_comma( *i, $res) : *i;
+                ++ i;
+            }
+
+            $res = em.make_array( $res );
+        }
+    ;
+
 
 params returns [Expr_ptr res]
 @init {
@@ -528,7 +550,7 @@ params returns [Expr_ptr res]
 
             for (expr_iter = actuals.rbegin(); expr_iter != actuals.rend(); ++ expr_iter) {
                 Expr_ptr expr = (*expr_iter);
-                res = (!res) ? expr : em.make_comma( expr, res );
+                res = (!res) ? expr : em.make_params_comma( expr, res );
             }
     })?
 
@@ -551,7 +573,6 @@ postfix_expression returns [Expr_ptr res]
         '(' rhs=params ')'
         { $res = em.make_params($res, rhs); }
 
-        // TODO: nested dot not yet supported
     |   '.' rhs=identifier
         { $res = em.make_dot($res, rhs); }
     )*
@@ -627,34 +648,22 @@ identifier returns [Expr_ptr res]
 
 constant returns [Expr_ptr res]
 @init {
-    Atom integer;
 }
-	: HEX_LITERAL
-      {
+	: HEX_LITERAL {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
    	| x=DECIMAL_LITERAL {
-        integer = Atom((const char*)($x.text->chars));
+        Atom tmp (Atom((const char*)($x.text->chars)));
+        $res = em.make_dec_const(tmp);
       }
 
-        ( y=FRACTIONAL_LITERAL {
-                Atom decimal
-                    ((const char*)($y.text->chars));
-                $res = em.make_fxd_const(integer, decimal); }
-          | { $res = em.make_dec_const(integer); })
-
-    | OCTAL_LITERAL
-      {
+    | OCTAL_LITERAL {
         Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
         $res = em.make_oct_const(tmp);
       }
 	;
-
-decimal_literal
-    : DECIMAL_LITERAL
-    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
@@ -694,12 +703,6 @@ native_type returns [Type_ptr res]
       { $res = tp; }
 
     | tp = signed_int_type
-      { $res = tp; }
-
-    | tp = unsigned_fxd_type
-      { $res = tp; }
-
-    | tp = signed_fxd_type
       { $res = tp; }
 
     ;
@@ -744,11 +747,11 @@ unsigned_int_type returns [Type_ptr res]
         (
             '[' size=constant ']'
             { $res = tm.find_unsigned_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), false, size->value()); }
+                : OptsMgr::INSTANCE().word_width(), size->value()); }
     |
         {
             $res = tm.find_unsigned( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), false);
+                : OptsMgr::INSTANCE().word_width());
         }
     )
     ;
@@ -767,72 +770,11 @@ signed_int_type returns [Type_ptr res]
         (
             '[' size=constant ']'
             { $res = tm.find_signed_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), false, size->value()); }
+                : OptsMgr::INSTANCE().word_width(), size->value()); }
     |
         {
             $res = tm.find_signed( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), false);
-        }
-    )
-    ;
-
-unsigned_fxd_type returns [Type_ptr res]
-@init {
-    char *p, *q = NULL;
-}
-	:
-        UNSIGNED_FXD_TYPE
-        {
-            p = (char *) $UNSIGNED_FXD_TYPE.text->chars;
-            while (*p && !isdigit(*p))
-                ++ p;
-        }
-        (
-            '[' size=constant ']'
-            {
-                $res = tm.find_unsigned_array( *p ? atoi(p)
-                    : OptsMgr::INSTANCE().word_width(), true, size->value());
-            }
-    |
-        {
-            $res = tm.find_unsigned( *p ? atoi(p)
-                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
-                   : OptsMgr::INSTANCE().precision());
-        }
-    )
-    ;
-
-signed_fxd_type returns [Type_ptr res]
-@init {
-    char *p, *q;
-}
-	:
-        SIGNED_FXD_TYPE
-        {
-            p = (char *) $SIGNED_FXD_TYPE.text->chars;
-            while (*p && !isdigit(*p))
-                ++ p;
-
-            if (*p) {
-                q = p;
-                while (*q != '.')
-                    ++ q;
-
-                *(q ++) = 0;
-            }
-        }
-        (
-            '[' size=constant ']'
-            {
-                $res = tm.find_signed_array( *p ? atoi(p)
-                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
-                   : OptsMgr::INSTANCE().precision(), size->value());
-            }
-    |
-        {
-            $res = tm.find_signed( *p ? atoi(p)
-                   : OptsMgr::INSTANCE().word_width(), q ? atoi(q)
-                   : OptsMgr::INSTANCE().precision());
+                : OptsMgr::INSTANCE().word_width());
         }
     )
     ;
@@ -888,6 +830,9 @@ command returns [Command_ptr res]
     |  c=simulate_command
        { $res = c; }
 
+    |  c=check_init_command
+       { $res = c; }
+
     |  c=check_invar_command
        { $res = c; }
 
@@ -938,6 +883,14 @@ write_model_command returns [Command_ptr res]
             ((WriteModel*) $res) -> set_output(output);
             free((void *) output);
         }
+    ;
+
+check_init_command returns[Command_ptr res]
+    : 'check_init'
+      { $res = cm.make_check_init(); }
+
+      init=toplevel_expression
+      { ((CheckInit *) $res) -> set_init(init); }
     ;
 
 check_invar_command returns[Command_ptr res]
@@ -1056,14 +1009,6 @@ UNSIGNED_INT_TYPE
 
 SIGNED_INT_TYPE
     :  'int' TYPE_WIDTH?
-    ;
-
-UNSIGNED_FXD_TYPE
-    :  'ufxd' TYPE_WIDTH?
-    ;
-
-SIGNED_FXD_TYPE
-    :  'fxd' TYPE_WIDTH?
     ;
 
 IDENTIFIER

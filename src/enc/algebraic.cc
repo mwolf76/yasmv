@@ -38,9 +38,8 @@ static inline value_t pow2(unsigned exp)
     return res;
 }
 
-AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_fxd, bool is_signed, ADD *dds)
+AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     : f_width(width)
-    , f_is_fxd(is_fxd)
     , f_signed(is_signed)
     , f_temporary(NULL != dds)
 {
@@ -84,44 +83,41 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
         }
     }
 
-    return f_is_fxd
-        ? em.make_fconst(res)
-        : em.make_const(res)
-        ;
+    return em.make_const(res) ;
 }
 
-ArrayEncoding::ArrayEncoding(Encodings elements)
-    : f_elements(elements)
-{
-    assert(0 < elements.size());
-    for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
+// ArrayEncoding::ArrayEncoding(Encodings elements)
+//     : f_elements(elements)
+// {
+//     assert(0 < elements.size());
+//     for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
 
-        /* digits */
-        DDVector& dv = (*i)->dv();
-        f_dv.insert( f_dv.end(), dv.begin(), dv.end() );
+//         /* digits */
+//         DDVector& dv = (*i)->dv();
+//         f_dv.insert( f_dv.end(), dv.begin(), dv.end() );
 
-        /* bits */
-        DDVector& bits = (*i)->bits();
-        f_bits.insert( f_bits.end(), bits.begin(), bits.end() );
-    }
-}
+//         /* bits */
+//         DDVector& bits = (*i)->bits();
+//         f_bits.insert( f_bits.end(), bits.begin(), bits.end() );
+//     }
+// }
 
-Expr_ptr ArrayEncoding::expr(int* assignment)
-{
-    ExprMgr& em(ExprMgr::INSTANCE());
-    Expr_ptr acc(NULL);
+// Expr_ptr ArrayEncoding::expr(int* assignment)
+// {
+//     ExprMgr& em(ExprMgr::INSTANCE());
+//     Expr_ptr acc(NULL);
 
-    for (Encodings::const_iterator i = f_elements.begin();
-         f_elements.end() != i; ++ i) {
+//     for (Encodings::const_iterator i = f_elements.begin();
+//          f_elements.end() != i; ++ i) {
 
-        Encoding_ptr enc(*i);
-        Expr_ptr value (enc->expr(assignment));
-        acc = (NULL == acc)
-            ? value
-            : em.make_comma(acc, value)
-        ;
-    }
-    assert(NULL != acc);
-    return em.make_set( acc );
-}
+//         Encoding_ptr enc(*i);
+//         Expr_ptr value (enc->expr(assignment));
+//         acc = (NULL == acc)
+//             ? value
+//             : em.make_array_comma(acc, value)
+//         ;
+//     }
+//     assert(NULL != acc);
+//     return em.make_array( acc );
+// }
 

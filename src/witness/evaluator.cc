@@ -112,13 +112,7 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
     }
 
     else if (res_type -> is_algebraic()) {
-        AlgebraicType_ptr atype
-            (res_type-> as_algebraic());
-
-        return atype -> is_fxd()
-            ? em.make_fconst(res_value)
-            : em.make_const(res_value)
-            ;
+        return em.make_const(res_value);
     }
     else assert(false);
 }
@@ -509,6 +503,14 @@ bool Evaluator::walk_params_inorder(const Expr_ptr expr)
 void Evaluator::walk_params_postorder(const Expr_ptr expr)
 { assert (false); /* not yet implemented */ }
 
+bool Evaluator::walk_params_comma_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+bool Evaluator::walk_params_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_params_comma_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
+
 bool Evaluator::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_subscript_inorder(const Expr_ptr expr)
@@ -578,6 +580,20 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
 #endif
 }
 
+bool Evaluator::walk_array_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Evaluator::walk_array_postorder(const Expr_ptr expr)
+{
+    assert(false); // TODO
+}
+
+bool Evaluator::walk_array_comma_preorder(const Expr_ptr expr)
+{  return cache_miss(expr); }
+bool Evaluator::walk_array_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_array_comma_postorder(const Expr_ptr expr)
+{ assert (false); /* TODO support inlined non-determinism */ }
+
 bool Evaluator::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Evaluator::walk_set_postorder(const Expr_ptr expr)
@@ -585,11 +601,11 @@ void Evaluator::walk_set_postorder(const Expr_ptr expr)
     assert(false); // TODO
 }
 
-bool Evaluator::walk_comma_preorder(const Expr_ptr expr)
+bool Evaluator::walk_set_comma_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
-bool Evaluator::walk_comma_inorder(const Expr_ptr expr)
+bool Evaluator::walk_set_comma_inorder(const Expr_ptr expr)
 { return true; }
-void Evaluator::walk_comma_postorder(const Expr_ptr expr)
+void Evaluator::walk_set_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
 bool Evaluator::walk_type_preorder(const Expr_ptr expr)
@@ -640,16 +656,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     else if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE (tm.find_unsigned(ww, false));
-        PUSH_VALUE(expr -> value());
-        return;
-    }
-
-    // 2. explicit fxd consts (e.g. 3.14) ...
-    else if (em.is_fxd_numeric(expr)) {
-        unsigned ww
-            (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE (tm.find_unsigned(ww, true));
+        PUSH_TYPE (tm.find_unsigned(ww));
         PUSH_VALUE(expr -> value());
         return;
     }
@@ -662,7 +669,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     Symbol_ptr symb
         (resolver.symbol(full));
 
-    // 3. enum literals
+    // 2. enum literals
     if (symb->is_literal()) {
 
         Literal& lit

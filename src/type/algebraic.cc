@@ -27,26 +27,21 @@ unsigned ConstantType::width() const
     return f_width;
 }
 
-ConstantType::ConstantType(TypeMgr& owner, unsigned width, bool is_fxd)
-    : AlgebraicType(owner, is_fxd)
+ConstantType::ConstantType(TypeMgr& owner, unsigned width)
+    : AlgebraicType(owner)
     , f_width(width)
 {
-    f_repr = is_fxd
-        ? f_owner.em().make_const_fxd_type(width)
-        : f_owner.em().make_const_int_type(width) ;
+    f_repr = f_owner.em().make_const_int_type(width);
 }
 
 SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
                                          unsigned width,
-                                         bool is_fxd,
                                          ADD *dds)
-    : AlgebraicType(owner, is_fxd)
+    : AlgebraicType(owner)
     , f_width(width)
     , f_dds(dds)
 {
-    f_repr = is_fxd
-        ? f_owner.em().make_signed_fxd_type(width)
-        : f_owner.em().make_signed_int_type(width);
+    f_repr = f_owner.em().make_signed_int_type(width);
 }
 
 unsigned SignedAlgebraicType::width() const
@@ -57,15 +52,12 @@ unsigned SignedAlgebraicType::width() const
 
 UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
                                              unsigned width,
-                                             bool is_fxd,
                                              ADD *dds)
-    : AlgebraicType(owner, is_fxd)
+    : AlgebraicType(owner)
     , f_width(width)
     , f_dds(dds)
 {
-    f_repr = is_fxd
-        ? f_owner.em().make_unsigned_fxd_type(width)
-        : f_owner.em().make_unsigned_int_type(width);
+    f_repr = f_owner.em().make_unsigned_int_type(width);
 }
 
 unsigned UnsignedAlgebraicType::width() const
@@ -91,20 +83,6 @@ ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
 
     f_repr = f_owner.em().make_subscript( of->repr(),
                                           f_owner.em().make_const(nelems));
-}
-
-ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
-    : Type(owner)
-    , f_of(of)
-    , f_nelems(0)
-{
-    // valid type
-    assert( NULL != of);
-
-    // scalar type only. Consistency with comment above.
-    assert (f_of -> is_scalar());
-
-    f_repr = f_owner.em().make_abstract_array_type( of->repr());
 }
 
 unsigned ArrayType::width() const

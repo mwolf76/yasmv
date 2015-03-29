@@ -17,8 +17,8 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/			\
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_CC = commands.cc read_model.cc write_model.cc help.cc time.cc	\
-quit.cc check_invar.cc pick_state.cc simulate.cc list_traces.cc		\
-dump_trace.cc dup_trace.cc
+quit.cc check_invar.cc check_init.cc pick_state.cc simulate.cc		\
+list_traces.cc dump_trace.cc dup_trace.cc
 
 # -------------------------------------------------------
 

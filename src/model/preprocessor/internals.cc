@@ -34,7 +34,7 @@
 
 void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 {
-    if (f_em.is_comma( expr)) {
+    if (f_em.is_params_comma( expr)) {
         traverse_param_list( params, expr->lhs());
         traverse_param_list( params, expr->rhs());
     }

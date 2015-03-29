@@ -254,7 +254,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 Expr_ptr top (comma_stack.top());
                 comma_stack.pop();
 
-                if (f_em.is_comma( top)) {
+                if (f_em.is_params_comma( top)) {
                     comma_stack.push( top->rhs());
                     comma_stack.push( top->lhs());
                     continue;

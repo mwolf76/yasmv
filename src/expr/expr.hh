@@ -72,21 +72,21 @@ typedef enum {
 
     /* defines */
     PARAMS, // (), binary
+    PARAMS_COMMA,
 
     /* arrays */
+    ARRAY, // [] unary
+    ARRAY_COMMA,
+
     SUBSCRIPT, // [], binary
 
-    // TODO
     SET, // {}, unary
-
-    COMMA,
+    SET_COMMA,
 
     // -- Nullary
     ICONST, // decimal constants
     HCONST, // hex constants
     OCONST, // octal constants
-
-    FCONST, // fxd constants
 
     // undefined
     UNDEF,
@@ -129,7 +129,6 @@ typedef struct Expr_TAG {
     inline value_t value()
     {
         assert (ICONST == f_symb ||
-                FCONST == f_symb ||
                 HCONST == f_symb ||
                 OCONST == f_symb );
         return u.f_value;
@@ -158,7 +157,6 @@ typedef struct Expr_TAG {
         : f_symb(symb)
     {
         assert (symb == ICONST ||
-                symb == FCONST ||
                 symb == HCONST ||
                 symb == OCONST );
 

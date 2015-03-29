@@ -332,6 +332,13 @@ bool TypeChecker::walk_params_inorder(const Expr_ptr expr)
 void TypeChecker::walk_params_postorder(const Expr_ptr expr)
 { assert( false ); return ; /* unreachable */ }
 
+bool TypeChecker::walk_params_comma_preorder(const Expr_ptr expr)
+{ return true; }
+bool TypeChecker::walk_params_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void TypeChecker::walk_params_comma_postorder(const Expr_ptr expr)
+{ }
+
 bool TypeChecker::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_subscript_inorder(const Expr_ptr expr)
@@ -347,18 +354,67 @@ void TypeChecker::walk_subscript_postorder(const Expr_ptr expr)
               -> as_array() -> of());
 }
 
+bool TypeChecker::walk_array_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void TypeChecker::walk_array_postorder(const Expr_ptr expr)
+{}
+
+bool TypeChecker::walk_array_comma_preorder(Expr_ptr expr)
+{ return cache_miss(expr); }
+
+bool TypeChecker::walk_array_comma_inorder(Expr_ptr expr)
+{ return true; }
+
+void TypeChecker::walk_array_comma_postorder(Expr_ptr expr)
+{
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    POP_TYPE(rhs_type);
+    POP_TYPE(lhs_type);
+
+    ArrayType_ptr array_type
+        (NULL);
+
+    if (rhs_type -> is_array()) {
+        array_type = rhs_type -> as_array();
+        ScalarType_ptr of_type
+            (array_type -> of());
+
+        // XXX: review this
+        assert( lhs_type == of_type);
+
+        ArrayType_ptr new_array_type
+            (tm.find_array_type( of_type, 1 + array_type -> nelems()));
+
+        PUSH_TYPE(new_array_type);
+        return;
+    }
+
+    if (rhs_type -> is_scalar()) {
+        ScalarType_ptr of_type
+            (rhs_type -> as_scalar());
+
+        // XXX: review this
+        assert( lhs_type == of_type );
+
+        array_type = tm.find_array_type(of_type, 2);
+        PUSH_TYPE(array_type);
+    }
+}
+
 bool TypeChecker::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void TypeChecker::walk_set_postorder(const Expr_ptr expr)
 {}
 
-bool TypeChecker::walk_comma_preorder(Expr_ptr expr)
+bool TypeChecker::walk_set_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }
 
-bool TypeChecker::walk_comma_inorder(Expr_ptr expr)
+bool TypeChecker::walk_set_comma_inorder(Expr_ptr expr)
 { return true; }
 
-void TypeChecker::walk_comma_postorder(Expr_ptr expr)
+void TypeChecker::walk_set_comma_postorder(Expr_ptr expr)
 {
     POP_TYPE(rhs);
     POP_TYPE(lhs);
@@ -385,14 +441,7 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
     if (em.is_int_numeric(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE(tm.find_constant(ww, false));
-        return;
-    }
-
-    else if (em.is_fxd_numeric(expr)) {
-        unsigned ww
-            (OptsMgr::INSTANCE().word_width());
-        PUSH_TYPE(tm.find_constant(ww, true));
+        PUSH_TYPE(tm.find_constant(ww));
         return;
     }
 

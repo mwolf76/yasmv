@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(boolean_type)
 BOOST_AUTO_TEST_CASE(unsigned_int_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_unsigned(8, false);
+    Type_ptr type = tm.find_unsigned(8);
 
     BOOST_CHECK(! type->is_boolean());
     // BOOST_CHECK(! type->is_constant());
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(unsigned_int_type)
 BOOST_AUTO_TEST_CASE(signed_int_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_signed(8, false);
+    Type_ptr type = tm.find_signed(8);
 
     BOOST_CHECK(! type->is_boolean());
     // BOOST_CHECK(! type->is_constant());
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(type_inference)
     }
 
     { /* uint16_t */
-        Type_ptr uint16 = tm.find_unsigned(16, false);
+        Type_ptr uint16 = tm.find_unsigned(16);
 
         Atom a_x("x2"); Expr_ptr x = em.make_identifier(a_x);
         main.add_var(x, new Variable(main.name(), x, uint16));

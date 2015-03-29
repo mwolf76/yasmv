@@ -35,12 +35,11 @@ ExprMgr_ptr ExprMgr::f_instance = NULL;
 
 ExprMgr::ExprMgr()
 {
-    // boolean type identifier, false and true identifiers
+    /* generate internal symbol definitions */
     bool_expr = make_identifier(BOOL_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);
     true_expr = make_identifier(TRUE_TOKEN);
 
-    /* {constant, signed, unsigned} integer types identifiers */
     {
         std::ostringstream oss;
         oss
@@ -49,6 +48,7 @@ ExprMgr::ExprMgr()
 
         const_int_expr = make_identifier(oss.str());
     }
+
     {
         std::ostringstream oss;
         oss
@@ -57,6 +57,7 @@ ExprMgr::ExprMgr()
 
         unsigned_int_expr = make_identifier(oss.str());
     }
+
     {
         std::ostringstream oss;
         oss
@@ -65,39 +66,9 @@ ExprMgr::ExprMgr()
 
         signed_int_expr = make_identifier(oss.str());
     }
-    {
-
-    /* {constant, signed, unsigned} fixed types identifiers */
-    }
-    {
-        std::ostringstream oss;
-        oss
-            << CONST_TOKEN
-            << " " << FXD_TOKEN;
-
-        const_fxd_expr = make_identifier(oss.str());
-    }
-    {
-        std::ostringstream oss;
-        oss
-            << UNSIGNED_TOKEN
-            << FXD_TOKEN;
-
-        unsigned_fxd_expr = make_identifier(oss.str());
-    }
-    {
-        std::ostringstream oss;
-        oss
-            << SIGNED_TOKEN
-            << FXD_TOKEN;
-
-        signed_fxd_expr = make_identifier(oss.str());
-    }
 
     array_expr = make_identifier(ARRAY_TOKEN);
-
     main_expr = make_identifier(MAIN_TOKEN);
-
     empty_expr = make_identifier(EMPTY_TOKEN);
 
     DEBUG
@@ -124,7 +95,7 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
 
         res = (!res) ? make_dot( make_empty(),
                                  (*eye))
-            : make_expr(COMMA,
+            : make_expr(SET_COMMA,
                         make_dot( make_empty(),
                                   (*eye)), res);
 

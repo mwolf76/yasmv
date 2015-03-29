@@ -360,6 +360,9 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     else if (is_binary_algebraic(expr))
         algebraic_equals(expr);
 
+    else if (is_binary_array(expr))
+        array_equals(expr);
+
     else assert( false ); // unreachable
 }
 
@@ -522,6 +525,13 @@ bool Compiler::walk_params_inorder(const Expr_ptr expr)
 void Compiler::walk_params_postorder(const Expr_ptr expr)
 { assert( false ); return ; /* unreachable */ }
 
+bool Compiler::walk_params_comma_preorder(const Expr_ptr expr)
+{ return true; }
+bool Compiler::walk_params_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_params_comma_postorder(const Expr_ptr expr)
+{ }
+
 bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
@@ -531,25 +541,99 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    // TODO: add support for booleans and enums
-    if (is_subscript_algebraic(expr))
+    if (is_subscript_boolean(expr))
+        boolean_subscript(expr);
+
+    else if (is_subscript_enumerative(expr))
+        enumerative_subscript(expr);
+
+    else if (is_subscript_algebraic(expr))
         algebraic_subscript(expr);
 
     else assert( false ); // unreachable
+}
+
+bool Compiler::walk_array_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+void Compiler::walk_array_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    POP_TYPE(lhs_type);
+
+    if (lhs_type -> is_array()) {
+        PUSH_TYPE(lhs_type);
+        return;
+    }
+
+    if (lhs_type -> is_scalar()) {
+        ScalarType_ptr scalar_type
+            (lhs_type -> as_scalar());
+
+        ArrayType_ptr array_type
+            (tm.find_array_type( scalar_type, 1));
+        PUSH_TYPE(array_type);
+        return;
+    }
+
+    assert(false); // unreachable
+}
+
+bool Compiler::walk_array_comma_preorder(const Expr_ptr expr)
+{ return true; }
+bool Compiler::walk_array_comma_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
+{
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    POP_TYPE(rhs_type);
+    POP_TYPE(lhs_type);
+
+    ArrayType_ptr array_type
+        (NULL);
+
+    if (rhs_type -> is_array()) {
+        array_type = rhs_type -> as_array();
+        ScalarType_ptr of_type
+            (array_type -> of());
+
+        // XXX: review this
+        assert( lhs_type == of_type);
+
+        ArrayType_ptr new_array_type
+            (tm.find_array_type( of_type, 1 + array_type -> nelems()));
+
+        PUSH_TYPE(new_array_type);
+        return;
+    }
+
+    if (rhs_type -> is_scalar()) {
+        ScalarType_ptr of_type
+            (rhs_type -> as_scalar());
+
+        // XXX: review this
+        assert( lhs_type == of_type );
+
+        array_type = tm.find_array_type(of_type, 2);
+        PUSH_TYPE(array_type);
+    }
 }
 
 /* non-deterministic expressions are not cachable */
 bool Compiler::walk_set_preorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_set_postorder(const Expr_ptr expr)
-{ }
+{}
 
 /* non-deterministic expression are not cachable */
-bool Compiler::walk_comma_preorder(const Expr_ptr expr)
+bool Compiler::walk_set_comma_preorder(const Expr_ptr expr)
 { return true; }
-bool Compiler::walk_comma_inorder(const Expr_ptr expr)
+bool Compiler::walk_set_comma_inorder(const Expr_ptr expr)
 { return true; }
-void Compiler::walk_comma_postorder(const Expr_ptr expr)
+void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
 {
     TypeMgr& tm
         (TypeMgr::INSTANCE());

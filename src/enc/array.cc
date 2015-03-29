@@ -53,9 +53,9 @@ Expr_ptr ArrayEncoding::expr(int* assignment)
         Expr_ptr value (enc->expr(assignment));
         acc = (NULL == acc)
             ? value
-            : em.make_comma(acc, value)
+            : em.make_array_comma(acc, value)
         ;
     }
     assert(NULL != acc);
-    return em.make_set( acc );
+    return em.make_array( acc );
 }

@@ -97,7 +97,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
        anonymous determinization variables on the fly. */
     if (f_owner.em().is_cond(expr) ||
         f_owner.em().is_set(expr)  ||
-        f_owner.em().is_comma(expr))
+        f_owner.em().is_set_comma(expr))
         return;
 
     /* no caching during preprocessing */

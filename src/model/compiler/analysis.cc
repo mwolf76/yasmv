@@ -92,7 +92,73 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
     return false;
 }
 
-/* checks lhs is array, and rhs is algebraic */
+/* checks lhs is array of boolean, and rhs is algebraic */
+bool Compiler::is_subscript_boolean(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    if (! em.is_subscript(expr))
+        return false;
+
+    Type_ptr lhs_type
+        (f_owner.type(expr->lhs(), ctx));
+
+    if (lhs_type -> is_array()) {
+        ArrayType_ptr array_type
+            (lhs_type -> as_array());
+        ScalarType_ptr of_type
+            (array_type -> of());
+
+        if (! of_type -> is_boolean())
+            return false;
+    }
+
+    Type_ptr rhs_type
+        (f_owner.type(expr->rhs(), ctx));
+
+    if (! rhs_type -> is_algebraic())
+        return false;
+
+    return true;
+}
+
+/* checks lhs is array of boolean, and rhs is algebraic */
+bool Compiler::is_subscript_enumerative(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    if (! em.is_subscript(expr))
+        return false;
+
+    Type_ptr lhs_type
+        (f_owner.type(expr->lhs(), ctx));
+
+    if (lhs_type -> is_array()) {
+        ArrayType_ptr array_type
+            (lhs_type -> as_array());
+        ScalarType_ptr of_type
+            (array_type -> of());
+
+        if (! of_type -> is_enum())
+            return false;
+    }
+
+    Type_ptr rhs_type
+        (f_owner.type(expr->rhs(), ctx));
+
+    if (! rhs_type -> is_algebraic())
+        return false;
+
+    return true;
+}
+
+/* checks lhs is array of algebraics, and rhs is algebraic */
 bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em
@@ -100,12 +166,29 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
     Expr_ptr ctx
         (f_ctx_stack.back());
 
-    /* SUBSCRIPT */
-    if (em.is_subscript(expr))
-        return (f_owner.type(expr->lhs(), ctx) -> is_array() &&
-                f_owner.type(expr->rhs(), ctx) -> is_algebraic()) ;
+    if (! em.is_subscript(expr))
+        return false;
 
-    return false;
+    Type_ptr lhs_type
+        (f_owner.type(expr->lhs(), ctx));
+
+    if (lhs_type -> is_array()) {
+        ArrayType_ptr array_type
+            (lhs_type -> as_array());
+        ScalarType_ptr of_type
+            (array_type -> of());
+
+        if (! of_type -> is_algebraic())
+            return false;
+    }
+
+    Type_ptr rhs_type
+        (f_owner.type(expr->rhs(), ctx));
+
+    if (! rhs_type -> is_algebraic())
+        return false;
+
+    return true;
 }
 
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
@@ -163,3 +246,15 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
     return false;
 }
 
+bool Compiler::is_binary_array(const Expr_ptr expr)
+{
+    ExprMgr& em = f_owner.em();
+    Expr_ptr ctx (f_ctx_stack.back());
+
+    if (em.is_binary_equality(expr))
+        return
+            f_owner.type(expr->rhs(), ctx) -> is_array() &&
+            f_owner.type(expr->lhs(), ctx) -> is_array();
+
+    return false;
+}

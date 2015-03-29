@@ -25,6 +25,9 @@
 bool Type::is_scalar()
 { return NULL != dynamic_cast<ScalarType_ptr>( this ); }
 
+ScalarType_ptr Type::as_scalar()
+{ return dynamic_cast <const ScalarType_ptr> (this); }
+
 bool Type::is_monolithic()
 { return NULL != dynamic_cast<MonolithicType_ptr>( this ); }
 

@@ -418,6 +418,13 @@ bool Preprocessor::walk_params_inorder(const Expr_ptr expr)
 void Preprocessor::walk_params_postorder(const Expr_ptr expr)
 { assert(false); }
 
+bool Preprocessor::walk_params_comma_preorder(Expr_ptr expr)
+{ assert(false); return false; }
+bool Preprocessor::walk_params_comma_inorder(Expr_ptr expr)
+{ assert(false); return false; }
+void Preprocessor::walk_params_comma_postorder(Expr_ptr expr)
+{ assert(false); }
+
 bool Preprocessor::walk_subscript_preorder(const Expr_ptr expr)
 { return true; }
 bool Preprocessor::walk_subscript_inorder(const Expr_ptr expr)
@@ -429,6 +436,22 @@ void Preprocessor::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_subscript( lhs, rhs ));
 }
 
+bool Preprocessor::walk_array_preorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_array_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_array( lhs));
+}
+
+bool Preprocessor::walk_array_comma_preorder(Expr_ptr expr)
+{ assert(false); return false; }
+bool Preprocessor::walk_array_comma_inorder(Expr_ptr expr)
+{ assert(false); return false; }
+void Preprocessor::walk_array_comma_postorder(Expr_ptr expr)
+{ assert(false); }
+
+
 bool Preprocessor::walk_set_preorder(const Expr_ptr expr)
 { return true; }
 void Preprocessor::walk_set_postorder(const Expr_ptr expr)
@@ -437,11 +460,11 @@ void Preprocessor::walk_set_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_set( lhs));
 }
 
-bool Preprocessor::walk_comma_preorder(Expr_ptr expr)
+bool Preprocessor::walk_set_comma_preorder(Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_comma_inorder(Expr_ptr expr)
+bool Preprocessor::walk_set_comma_inorder(Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_comma_postorder(Expr_ptr expr)
+void Preprocessor::walk_set_comma_postorder(Expr_ptr expr)
 { assert(false); }
 
 bool Preprocessor::walk_cast_preorder(Expr_ptr expr)
@@ -513,7 +536,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
 
 void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 {
-    if (f_em.is_comma( expr)) {
+    if (f_em.is_params_comma( expr)) {
         traverse_param_list( params, expr->lhs());
         traverse_param_list( params, expr->rhs());
     }

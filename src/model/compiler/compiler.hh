@@ -103,6 +103,10 @@ private:
     bool is_unary_algebraic(const Expr_ptr expr);
     bool is_ite_algebraic(const Expr_ptr expr);
 
+    bool is_binary_array(const Expr_ptr expr);
+
+    bool is_subscript_boolean(const Expr_ptr expr);
+    bool is_subscript_enumerative(const Expr_ptr expr);
     bool is_subscript_algebraic(const Expr_ptr expr);
 
     /* -- boolean exprs ----------------------------------------------------- */
@@ -115,6 +119,7 @@ private:
     void boolean_equals(const Expr_ptr expr);
     void boolean_not_equals(const Expr_ptr expr);
     void boolean_ite(const Expr_ptr expr);
+    void boolean_subscript(const Expr_ptr expr);
 
     /* -- algebraic exprs --------------------------------------------------- */
     void algebraic_neg(const Expr_ptr expr);
@@ -137,14 +142,16 @@ private:
     void algebraic_lt(const Expr_ptr expr);
     void algebraic_le(const Expr_ptr expr);
     void algebraic_ite(const Expr_ptr expr);
-
-    /* -- subscripts -------------------------------------------------------- */
     void algebraic_subscript(const Expr_ptr expr);
 
     /* -- enumeratives ------------------------------------------------------ */
     void enumerative_equals(const Expr_ptr expr);
     void enumerative_not_equals(const Expr_ptr expr);
     void enumerative_ite(const Expr_ptr expr);
+    void enumerative_subscript(const Expr_ptr expr);
+
+    /* -- arrays ------------------------------------------------------------ */
+    void array_equals(const Expr_ptr expr);
 
     /* -- casts ------------------------------------------------------------- */
     void algebraic_cast_from_boolean(const Expr_ptr expr);
@@ -219,9 +226,10 @@ private:
     /* Auto expressions and DDs */
     unsigned f_temp_auto_index;
 
-    /* Two phase compilation:
+    /* Three phase compilation:
        1. (f_preprocess)  , build encodings
        2. (! f_preprocess), perform compilation into CUs
+       3. post-processing , add support for MUXes
     */
     bool f_preprocess;
 

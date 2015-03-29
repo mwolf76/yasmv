@@ -118,10 +118,9 @@ protected:
     { assert(0); }
 
     // width is number of *digits* here, dds is reserved for temporary encodings
-    AlgebraicEncoding(unsigned width, bool is_fxd, bool is_signed, ADD *dds = NULL);
+    AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds = NULL);
 
     unsigned f_width;
-    bool f_is_fxd;
     bool f_signed;
     bool f_temporary;
 };

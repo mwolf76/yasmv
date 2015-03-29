@@ -203,6 +203,8 @@ public:
 
     // shortcuts
     bool is_scalar();
+    ScalarType_ptr as_scalar();
+
     bool is_monolithic();
 
     bool is_boolean();
@@ -273,16 +275,11 @@ protected:
 /** Algebraic type class. */
 class AlgebraicType : public ScalarType {
 public:
-    inline bool is_fxd() const
-    { return f_is_fxd; }
 
 protected:
-    AlgebraicType(TypeMgr &owner, bool is_fxd)
+    AlgebraicType(TypeMgr &owner)
         : ScalarType(owner)
-        , f_is_fxd(is_fxd)
     {}
-
-    bool f_is_fxd;
 };
 
 /** Enumeratives */
@@ -333,7 +330,7 @@ public:
 
  protected:
     friend class TypeMgr; // ctors not public
-    ConstantType(TypeMgr& owner, unsigned width, bool is_fxd);
+    ConstantType(TypeMgr& owner, unsigned width);
 
     unsigned f_width;
 };
@@ -349,8 +346,7 @@ public:
 
  protected:
     friend class TypeMgr; // ctors not public
-    SignedAlgebraicType(TypeMgr& owner, unsigned width,
-                        bool is_fxd, ADD *dds = NULL);
+    SignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
 
     unsigned f_width;
 
@@ -369,8 +365,7 @@ public:
 
 protected:
     friend class TypeMgr; // ctors not public
-    UnsignedAlgebraicType(TypeMgr& owner, unsigned width,
-                          bool is_fxd, ADD *dds = NULL);
+    UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
 
     unsigned f_width;
 
@@ -394,11 +389,8 @@ public:
 protected:
     friend class TypeMgr; // ctors not public
 
-    // concrete array type
+    // array type
     ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems);
-
-    // abstract array type
-    ArrayType(TypeMgr& owner, ScalarType_ptr of);
 
     ScalarType_ptr f_of;
     unsigned f_nelems;

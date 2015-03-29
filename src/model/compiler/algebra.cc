@@ -92,8 +92,6 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
         (rhs_type -> as_algebraic());
     unsigned width
         (algebraic_type -> width());
-    unsigned precision
-        (algebraic_type -> is_fxd() ? OptsMgr::INSTANCE().precision() : 0);
     bool signedness
         (algebraic_type -> is_signed_algebraic());
 
@@ -104,7 +102,7 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
     PUSH_DV(res, width);
 
     InlinedOperatorDescriptor md
-        (make_ios( signedness, expr->symb(), width, precision), res, lhs, rhs);
+        (make_ios( signedness, expr->symb(), width), res, lhs, rhs);
 
     f_inlined_operator_descriptors.push_back(md);
 
@@ -406,8 +404,6 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)
 {
-    assert(is_subscript_algebraic(expr));
-
     EncodingMgr& bm
         (f_enc);
 
@@ -458,8 +454,6 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
                 (iwidth - i - 1);
             j_ >>= 1;
 
-            // Cudd_PrintMinterm( bm.dd().getManager(), index[i].getNode());
-            // Cudd_PrintMinterm( bm.dd().getManager(), bit.getNode());
             cnd *= index[ ndx ].Xnor(bit);
             ++ i;
         }

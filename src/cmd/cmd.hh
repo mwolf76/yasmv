@@ -33,6 +33,7 @@
 #include <cmd/commands/write_model.hh>
 
 #include <cmd/commands/check_invar.hh>
+#include <cmd/commands/check_init.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -66,6 +67,9 @@ public:
 
     inline Command_ptr make_check_invar()
     { return new CheckInvar(f_interpreter); }
+
+    inline Command_ptr make_check_init()
+    { return new CheckInit(f_interpreter); }
 
     inline Command_ptr make_pick_state()
     { return new PickState(f_interpreter); }

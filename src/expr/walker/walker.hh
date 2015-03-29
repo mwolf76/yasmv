@@ -68,9 +68,12 @@
                                                    \
     BINARY_HOOK(dot);                              \
     BINARY_HOOK(params);                           \
+    BINARY_HOOK(params_comma);                     \
     BINARY_HOOK(subscript);                        \
     UNARY_HOOK(set);                               \
-    BINARY_HOOK(comma)
+    BINARY_HOOK(set_comma);                        \
+    UNARY_HOOK(array);                             \
+    BINARY_HOOK(array_comma)
 
 #define LTL_HOOKS                                       \
     UNARY_HOOK(F); UNARY_HOOK(G); UNARY_HOOK(X);        \
@@ -147,11 +150,14 @@ typedef enum {
 
     // sets ({})
     SET_1,
+    SET_COMMA_1, SET_COMMA_2,
+
+    // arrays ([])
+    ARRAY_1,
+    ARRAY_COMMA_1, ARRAY_COMMA_2,
 
     // params (())
     PARAMS_1, PARAMS_2,
-
-    COMMA_1, COMMA_2,
 
     CAST_1, CAST_2,
     TYPE_1, TYPE_2,
@@ -358,7 +364,6 @@ protected:
     virtual bool walk_le_inorder(const Expr_ptr expr) =0;
     virtual void walk_le_postorder(const Expr_ptr expr) =0;
 
-    // ITE chains
     virtual bool walk_ite_preorder(const Expr_ptr expr) =0;
     virtual bool walk_ite_inorder(const Expr_ptr expr) =0;
     virtual void walk_ite_postorder(const Expr_ptr expr) =0;
@@ -375,16 +380,27 @@ protected:
     virtual bool walk_params_inorder(const Expr_ptr expr) =0;
     virtual void walk_params_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_params_comma_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_params_comma_inorder(const Expr_ptr expr) =0;
+    virtual void walk_params_comma_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_subscript_preorder(const Expr_ptr expr) =0;
     virtual bool walk_subscript_inorder(const Expr_ptr expr) =0;
     virtual void walk_subscript_postorder(const Expr_ptr expr) =0;
 
+    virtual bool walk_array_preorder(const Expr_ptr expr) =0;
+    virtual void walk_array_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_array_comma_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_array_comma_inorder(const Expr_ptr expr) =0;
+    virtual void walk_array_comma_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_set_preorder(const Expr_ptr expr) =0;
     virtual void walk_set_postorder(const Expr_ptr expr) =0;
 
-    virtual bool walk_comma_preorder(const Expr_ptr expr) =0;
-    virtual bool walk_comma_inorder(const Expr_ptr expr) =0;
-    virtual void walk_comma_postorder(const Expr_ptr expr) =0;
+    virtual bool walk_set_comma_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_set_comma_inorder(const Expr_ptr expr) =0;
+    virtual void walk_set_comma_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_cast_preorder(const Expr_ptr expr) =0;
     virtual bool walk_cast_inorder(const Expr_ptr expr) =0;
