@@ -113,6 +113,4 @@ extern const char *TRACE_FMT_PLAIN;
 extern const char *TRACE_FMT_JSON;
 
 extern volatile sig_atomic_t sigint_caught;
-
-
 #endif

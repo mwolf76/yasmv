@@ -19,6 +19,7 @@
  *
  **/
 
+#include <cmd/interpreter.hh>
 #include <cmd/commands/time.hh>
 
 Time::Time(Interpreter& owner)
@@ -29,11 +30,14 @@ Time::~Time()
 {}
 
 Variant Time::operator()()
-{ return Variant( clock()); }
+{
+    unsigned current = time(NULL) - Interpreter::INSTANCE().epoch();
+    return Variant(current);
+}
 
 void Time::usage()
 {
     std::cout
-        << "time - retrieves current running time"
+        << "time - retrieves current running time in seconds"
         << std::endl;
 }

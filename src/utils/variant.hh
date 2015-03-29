@@ -33,7 +33,6 @@ typedef enum {
     BOTTOM,
     BOOLEAN,
     INTEGER,
-    CLOCK,
     STRING,
 } VariantType;
 
@@ -49,8 +48,6 @@ public:
 
     Variant(bool value);
     Variant(int value);
-
-    Variant(clock_t value);
 
     Variant(const Variant& v);
 

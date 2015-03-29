@@ -63,6 +63,9 @@ public:
 
     void quit(int retcode);
 
+    inline unsigned epoch() const
+    { return f_epoch; }
+
 protected:
     friend class Command;
 
@@ -94,6 +97,7 @@ protected:
     Variant f_last_result;
 
     static Interpreter_ptr f_instance;
+    unsigned f_epoch;
 };
 
 #endif

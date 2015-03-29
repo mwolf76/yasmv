@@ -107,6 +107,8 @@ Interpreter::Interpreter()
     , f_in(& std::cin)
     , f_out(& std::cout)
     , f_err(& std::cerr)
+
+    , f_epoch(time(NULL))
 {
     DEBUG
         << "Initialized command interpreter @" << this
