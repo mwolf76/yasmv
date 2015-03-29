@@ -153,15 +153,15 @@ void Simulation::simulate(Expr_ptr invar_condition,
         (trace.last_time());
     step_t k
         (init_time);
+
     TimeFrame& last
         (trace.last());
-
-    assert_time_frame( engine, k, last);
+    assert_time_frame(engine, k, last);
 
     /* inject full transition relation, trace may not be compatible
        with current state's INVARs */
     assert_fsm_invar(engine, k );
-    assert_fsm_trans(engine, 1 + k);
+    assert_fsm_trans(engine, k );
     assert_fsm_invar(engine, 1 + k);
 
     DEBUG
@@ -170,18 +170,15 @@ void Simulation::simulate(Expr_ptr invar_condition,
 
     while (STATUS_SAT == (last_sat = engine.solve())) {
 
+        ++ k;
+
         t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
-        if (init_time == k) {
-            TRACE
-                << "simulation initialized, took " << secs
-                << " seconds" << std::endl;
-        } else {
-            TRACE
-                << "simulation completed step " << k
-                << ", took " << secs << " seconds"
-                << std::endl;
-        }
+        TRACE
+            << "simulation completed step " << k
+            << ", took " << secs << " seconds"
+            << std::endl;
+
         t0 = t1; // resetting clock
 
         Witness& w
@@ -209,8 +206,8 @@ void Simulation::simulate(Expr_ptr invar_condition,
         }
 
         // TODO: SAT restart after a given number of steps (e.g. 10) would help
-            // preventing performance degradation as k grows larger.
-        assert_fsm_trans(engine, k ++ );
+        // preventing performance degradation as k grows larger.
+        assert_fsm_trans(engine, k);
         assert_fsm_invar(engine, k);
     }
 
