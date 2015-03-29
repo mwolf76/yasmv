@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <base.hh>
+#include <symb/proxy.hh>
 
 Algorithm::Algorithm(Command& command, Model& model)
     : f_command(command)
@@ -310,41 +311,75 @@ void Algorithm::assert_time_frame(Engine& engine,
                                   TimeFrame& tf,
                                   group_t group)
 {
-    Compiler& cmpl
-        (compiler()); // just a local ref
     ExprMgr& em
         (ExprMgr::INSTANCE());
-    Expr_ptr ctx
-        (em.make_empty());
+    Compiler& cmpl
+        (compiler()); // just a local ref
+
     ExprVector assignments
         (tf.assignments());
     ExprVector::const_iterator i
         (assignments.begin());
+
+    ResolverProxy resolver;
+
+    unsigned count (0);
     while (i != assignments.end()) {
+
         Expr_ptr assignment
             (*i); ++ i;
-        try {
-            engine.push( cmpl.process(ctx,
-                                      assignment), time, group);
-        }
-        catch (Exception& ae) {
-            pconst_char what
-                (ae.what());
 
-            std::cerr
-                << what
-                << std::endl;
+        Expr_ptr full
+            (assignment -> lhs());
 
-            free((void *) what);
-            assert(false); // XXX
+        Symbol_ptr symb
+            (resolver.symbol(full));
+
+        if (symb -> is_variable()) {
+
+            Expr_ptr scope
+                (em.make_dot( em.make_empty(),
+                              assignment -> lhs() -> lhs() -> rhs()));
+
+            Expr_ptr symb
+                (assignment -> lhs() -> rhs());
+
+            Expr_ptr value
+                (assignment -> rhs());
+
+            Expr_ptr expr
+                (em.make_eq( symb, value));
+
+            try {
+                ++ count;
+                engine.push( cmpl.process(scope, expr), time, group);
+            }
+
+            catch (Exception& ae) {
+                pconst_char what
+                    (ae.what());
+
+                std::cerr
+                    << what
+                    << std::endl;
+
+                free((void *) what);
+                assert(false); // XXX
+            }
         }
     }
+
+    DEBUG
+        << "Pushed " << count << " assignments"
+        << std::endl;
 }
 
 void Algorithm::assert_formula(Engine& engine,
                                step_t time,
                                CompilationUnit& term,
                                group_t group)
-{ engine.push( term, time, group); }
+{
+    engine.push( term, time, group);
+}
 
 

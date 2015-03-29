@@ -37,10 +37,20 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     Expr_ptr ctx
         (f_ctx_stack.back());
-    Expr_ptr full
-        (em.make_dot(ctx, expr));
     step_t time
         (f_time_stack.back());
+
+    /* 0. Explicit boolean consts (TRUE, FALSE) */
+    if (em.is_false(expr)) {
+        f_type_stack.push_back(tm.find_boolean());
+        f_add_stack.push_back(f_enc.zero());
+        return;
+    }
+    if (em.is_true(expr)) {
+        f_type_stack.push_back(tm.find_boolean());
+        f_add_stack.push_back(f_enc.one());
+        return;
+    }
 
     /* 1. Explicit int constants, perform booleanization
      * immediately. An exception will be thrown if conversion could
@@ -53,12 +63,17 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
+    /* Ctx-aware symbol resolution */
+    Expr_ptr full
+        (em.make_dot(ctx, expr));
+
     ResolverProxy resolver;
     Symbol_ptr symb
         (resolver.symbol(full));
 
     /* 2. bool constant leaves */
     if (symb->is_const()) {
+        assert(false); // TODO: is this expected to be unreachable?
         Constant& konst (symb->as_const());
 
         f_type_stack.push_back(konst.type());
