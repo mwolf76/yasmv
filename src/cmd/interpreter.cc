@@ -160,28 +160,31 @@ Variant& Interpreter::operator()()
         CommandVector_ptr cmds
             (parseCommand(cmdline));
 
-        for (CommandVector::const_iterator i = cmds->begin();
-             cmds->end() != i; ++ i) {
+        if (cmds) {
+            for (CommandVector::const_iterator i = cmds->begin();
+                 cmds->end() != i; ++ i) {
 
-            Command_ptr cmd
-                (*i);
+                Command_ptr cmd
+                    (*i);
 
-            try {
-                (*this)(cmd);
-            }
-            catch (Exception &e) {
-                pconst_char what
-                    (e.what());
+                try {
+                    (*this)(cmd);
+                }
+                catch (Exception &e) {
+                    pconst_char what
+                        (e.what());
+                    err
+                        << what
+                        << std::endl;
 
-                err
-                    << what
-                    << std::endl;
+                    f_last_result = Variant("Caught exception");
 
-                f_last_result = Variant("Caught exception");
-
-                free((void *) what);
+                    free((void *) what);
+                }
             }
         }
+        else f_last_result = "No operation";
+
     }
     else {
         f_last_result = Variant("BYE");

@@ -41,16 +41,14 @@ void ReadModel::set_input(pconst_char input)
     f_input = strdup(input);
 }
 
-extern void parseFile(pconst_char input); // in utils.cc
+extern bool parseFile(pconst_char input); // in utils.cc
 Variant ReadModel::operator()()
 {
     // parsing
-    parseFile(f_input);
+    bool hasErrors = parseFile(f_input);
+    if (! hasErrors)
+        hasErrors = ! ModelMgr::INSTANCE().analyze();
 
-    // model analysis
-    bool status
-        (ModelMgr::INSTANCE().analyze());
-
-    return Variant( status ? "Ok" : "ERROR" );
+    return Variant( ! hasErrors ? "Ok" : "ERROR" );
 }
 
