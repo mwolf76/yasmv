@@ -79,3 +79,11 @@ Variant PickState::operator()()
     }
     return Variant(tmp.str());
 }
+
+void PickState::usage()
+{
+    std::cout
+        << "pick_state - Initializes a new simulation."
+        << std::endl;
+}
+

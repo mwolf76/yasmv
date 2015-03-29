@@ -36,6 +36,7 @@ public:
     void set_duplicate_id(pconst_char duplicate_id);
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

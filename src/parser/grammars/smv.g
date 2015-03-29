@@ -853,8 +853,8 @@ help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
       (
-          cmd_name = string
-          { ((Help*) $res) -> set_topic(cmd_name); }
+          topic = command
+          { ((Help*) $res) -> set_topic(topic); }
       )?
     ;
 

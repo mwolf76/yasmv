@@ -37,6 +37,7 @@ public:
     void set_invar(Expr_ptr invar);
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

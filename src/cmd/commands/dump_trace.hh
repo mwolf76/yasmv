@@ -63,6 +63,7 @@ public:
     virtual ~DumpTrace();
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

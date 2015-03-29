@@ -29,6 +29,7 @@ public:
     virtual ~ListTraces();
 
     Variant virtual operator()();
+    void usage();
 };
 
 #endif

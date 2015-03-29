@@ -162,3 +162,9 @@ Variant DumpTrace::operator()()
     return Variant("Ok");
 }
 
+void DumpTrace::usage()
+{
+    std::cout
+        << "dump_trace <trace_uid> - Dumps given trace."
+        << std::endl;
+}

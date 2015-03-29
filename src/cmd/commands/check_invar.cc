@@ -79,3 +79,10 @@ Variant CheckInvar::operator()()
     return Variant(tmp.str());
 }
 
+void CheckInvar::usage()
+{
+    std::cout
+        << "check_invar <expression> - Checks invariant property for given expression."
+        << std::endl;
+}
+

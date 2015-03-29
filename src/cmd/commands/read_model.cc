@@ -52,3 +52,10 @@ Variant ReadModel::operator()()
     return Variant( ! hasErrors ? "Ok" : "ERROR" );
 }
 
+void ReadModel::usage()
+{
+    std::cout
+        << "read_model <filename> - reads a model from given filename."
+        << std::endl;
+}
+

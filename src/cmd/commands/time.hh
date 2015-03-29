@@ -29,6 +29,7 @@ public:
     virtual ~Time();
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

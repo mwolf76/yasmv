@@ -63,3 +63,9 @@ Variant DupTrace::operator()()
     return Variant("XXX");
 }
 
+void DupTrace::usage()
+{
+    std::cout
+        << "dup_trace <trace_uid> - Dups given trace."
+        << std::endl;
+}

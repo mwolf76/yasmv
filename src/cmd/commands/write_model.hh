@@ -37,6 +37,7 @@ public:
     { return f_output; }
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

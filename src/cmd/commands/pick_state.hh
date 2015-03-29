@@ -46,6 +46,7 @@ public:
     { return f_trace_uid; }
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

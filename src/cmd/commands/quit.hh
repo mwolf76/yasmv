@@ -34,6 +34,7 @@ public:
     void set_retcode(int retcode);
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

@@ -67,3 +67,11 @@ Variant ListTraces::operator()()
     return Variant("Ok");
 }
 
+// void ListTraces::usage()
+// {
+//     std::cout
+//         << "list_traces - Lists available traces."
+//         << std::endl;
+// }
+
+

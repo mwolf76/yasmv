@@ -96,3 +96,11 @@ Variant Simulate::operator()()
     }
     return Variant(tmp.str());
 }
+
+void Simulate::usage()
+{
+    std::cout
+        << "simulate - Performs BMC simulation."
+        << std::endl;
+}
+

@@ -42,3 +42,10 @@ Variant Quit::operator()()
     return Variant("BYE");
 }
 
+void Quit::usage()
+{
+    std::cout
+        << "quit - Leave interactive shell"
+        << std::endl;
+}
+

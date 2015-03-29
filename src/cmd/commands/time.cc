@@ -31,5 +31,9 @@ Time::~Time()
 Variant Time::operator()()
 { return Variant( clock()); }
 
-
-
+void Time::usage()
+{
+    std::cout
+        << "time - retrieves current running time"
+        << std::endl;
+}

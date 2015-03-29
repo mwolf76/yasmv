@@ -44,6 +44,7 @@ public:
     virtual ~Simulate();
 
     Variant virtual operator()();
+    void virtual usage();
 
     void set_invar_condition(Expr_ptr invar_condition);
     inline Expr_ptr invar_condition() const

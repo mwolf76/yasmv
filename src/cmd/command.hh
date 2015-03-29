@@ -38,6 +38,9 @@ public:
     // functor-pattern
     Variant virtual operator()() =0;
 
+    // inline help system
+    void virtual usage() =0;
+
     // representation
     friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };

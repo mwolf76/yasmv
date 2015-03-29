@@ -25,17 +25,16 @@
 
 class Help : public Command {
 
-    pchar f_topic;
+    Command_ptr f_topic;
 
 public:
     Help(Interpreter& owner);
     virtual ~Help();
 
-    void set_topic(pconst_char topic);
-    inline pconst_char topic() const
-    { return f_topic; }
+    void set_topic(Command_ptr topic);
 
     Variant virtual operator()();
+    void virtual usage();
 };
 
 #endif

@@ -30,19 +30,45 @@ Help::Help(Interpreter& owner)
 
 Help::~Help()
 {
-    free(f_topic);
+    if (f_topic)
+        delete f_topic;
+
     f_topic = NULL;
 }
 
-void Help::set_topic(pconst_char topic)
+void Help::set_topic(Command_ptr topic)
 {
-    free(f_topic);
-    f_topic = strdup(topic);
+    f_topic = topic;
 }
 
 Variant Help::operator()()
 {
-    return Variant(clock());
+    if (f_topic)
+        f_topic->usage();
+
+    else
+        std::cout << "Available topics: " << std::endl
+                  << "- help" << std::endl
+                  << "- time" << std::endl
+                  << "- read_model" << std::endl
+                  << "- write_model" << std::endl
+                  << "- pick_state" << std::endl
+                  << "- simulate" << std::endl
+                  << "- check_init" << std::endl
+                  << "- check_invar" << std::endl
+                  << "- list_traces" << std::endl
+                  << "- dump_trace" << std::endl
+                  << "- dup_trace" << std::endl
+                  << "- quit" << std::endl
+                  << std::endl;
+
+    return Variant("Ok");
 }
 
+void Help::usage()
+{
+    std::cout
+        << "help <command> - shows a topic from the internal help system"
+        << std::endl;
+}
 

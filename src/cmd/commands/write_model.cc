@@ -115,3 +115,10 @@ Variant WriteModel::operator()()
     return Variant (oss.str());
 }
 
+void WriteModel::usage()
+{
+    std::cout
+        << "write_mode <filname> - Write current model to given filename."
+        << std::endl;
+}
+
