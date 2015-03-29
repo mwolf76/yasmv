@@ -81,14 +81,14 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     TimedExpr key
         (f_owner.em().make_dot(ctx, expr), time);
 
-    if (f_preprocess)
-        DRIVEL
-            << "Preprocessing " << key << "..."
-            << std::endl;
-    else
-        DRIVEL
-            << "Processing " << key << "..."
-            << std::endl;
+    // if (f_preprocess)
+    //     DRIVEL
+    //         << "Preprocessing " << key << "..."
+    //         << std::endl;
+    // else
+    //     DRIVEL
+    //         << "Processing " << key << "..."
+    //         << std::endl;
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
@@ -159,10 +159,10 @@ bool Compiler::cache_miss(const Expr_ptr expr)
         const Type_ptr type
             (f_owner.type(expr, ctx));
 
-        DRIVEL
-            << "Cache hit for " << expr
-            << ", type is " << type
-            << std::endl;
+        // DRIVEL
+        //     << "Cache hit for " << expr
+        //     << ", type is " << type
+        //     << std::endl;
 
         CompilationUnit& unit
             ((*eye).second);
@@ -282,6 +282,7 @@ void Compiler::pass3()
     // Exactly one 0-1 ADD expected here
     ADD res
         (f_add_stack.back());
+
     assert( res.FindMin().Equals(f_enc.zero()) );
     assert( res.FindMax().Equals(f_enc.one()) );
 
@@ -347,10 +348,10 @@ Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type 
     /* build a new encoding for this symbol if none is available. */
     res = f_enc.find_encoding(key);
     if (! res) {
-        DRIVEL
-            << "Registering new encoding of type "
-            << type << " for " << key
-            << std::endl;
+        // DRIVEL
+        //     << "Registering new encoding of type "
+        //     << type << " for " << key
+        //     << std::endl;
 
         res = f_enc.make_encoding(type);
         f_enc.register_encoding(key, res);

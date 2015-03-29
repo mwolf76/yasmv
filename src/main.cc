@@ -117,7 +117,9 @@ void process()
     Interpreter& system = Interpreter::INSTANCE();
 
     Variant& res = system();
-    bool color (OptsMgr::INSTANCE().color());
+    bool color
+        (OptsMgr::INSTANCE().color());
+
     if (color) {
         std::cout
             << std::endl
