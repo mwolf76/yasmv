@@ -32,6 +32,9 @@ OptsMgr::OptsMgr()
     , f_help(false)
     , f_word_width(UINT_MAX)
 {
+    f_started = false;
+    f_color = false;
+
     f_desc.add_options()
 
         (
