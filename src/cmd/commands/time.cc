@@ -31,8 +31,11 @@ Time::~Time()
 
 Variant Time::operator()()
 {
-    unsigned current = time(NULL) - Interpreter::INSTANCE().epoch();
-    return Variant(current);
+    time_t t1 = time(NULL);
+    time_t t0 = Interpreter::INSTANCE().epoch();
+    int res = t1 - t0;
+
+    return Variant(res);
 }
 
 void Time::usage()
