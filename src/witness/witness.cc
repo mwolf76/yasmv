@@ -157,8 +157,11 @@ ExprVector TimeFrame::assignments()
         Expr_ptr symb
             (*i); ++ i;
 
-        res.push_back( em.make_eq( symb,
-                                   value(symb)));
+        try {
+            res.push_back( em.make_eq( symb, value(symb)));
+        }
+
+        catch (NoValue nv) {}
     }
 
     return res;

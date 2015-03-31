@@ -338,17 +338,11 @@ void Algorithm::assert_time_frame(Engine& engine,
         if (symb -> is_variable()) {
 
             Expr_ptr scope
-                (em.make_dot( em.make_empty(),
-                              assignment -> lhs() -> lhs() -> rhs()));
-
-            Expr_ptr symb
-                (assignment -> lhs() -> rhs());
-
-            Expr_ptr value
-                (assignment -> rhs());
+                (full -> lhs());
 
             Expr_ptr expr
-                (em.make_eq( symb, value));
+                (em.make_eq( full -> rhs(),
+                             assignment -> rhs()));
 
             try {
                 ++ count;

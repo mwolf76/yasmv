@@ -123,10 +123,14 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             const Define& define
                 (symb->as_define());
 
-            Expr_ptr value
-                (wm.eval( *this, ctx, define.body(), 0));
+            try {
+                Expr_ptr value
+                    (wm.eval( *this, ctx, define.body(), 0));
 
-            tf.set_value( key, value );
+                tf.set_value( key, value );
+            }
+            catch (NoValue nv) {
+            }
         }
     }
 }
