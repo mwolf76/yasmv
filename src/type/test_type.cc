@@ -78,6 +78,7 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     BOOST_CHECK( 3 == et->literals().size() );
 
     // try all possible different orderings (3! = 6)
+
     { // #1
         ExprSet lhd;
         lhd.insert(l); lhd.insert(h); lhd.insert(d);
@@ -121,6 +122,8 @@ BOOST_AUTO_TEST_CASE(type_inference)
     ModelMgr& mm (ModelMgr::INSTANCE());
     ExprMgr& em (ExprMgr::INSTANCE());
     TypeMgr& tm (TypeMgr::INSTANCE());
+    OptsMgr& om (OptsMgr::INSTANCE());
+    om.set_word_width(16);
 
     Model& model (mm.model());
     Module& main (* new Module(em.make_main()));
@@ -263,7 +266,6 @@ BOOST_AUTO_TEST_CASE(type_inference)
     BOOST_CHECK( int16 ==
                  mm.type( em.make_rshift( u, v)));
 
-    #if 0
     // arithmetics with a constant
     Expr_ptr k = em.make_const(42);
 
@@ -296,7 +298,6 @@ BOOST_AUTO_TEST_CASE(type_inference)
 
     BOOST_CHECK( int16 ==
                  mm.type( em.make_mod( u, k)));
-    #endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()
