@@ -300,10 +300,13 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
     }
 
     {
+        Expr_ptr phi = em.make_or( em.make_or( em.make_eq( x, em.make_const(0)),
+                                               em.make_and( em.make_eq( y, em.make_const(1)),
+                                                            em.make_eq( x, em.make_const(0)))),
+                                   em.make_eq( y, em.make_const(1)));
+
         Expr_ptr psi = parseExpression("x = 0 || y = 1 && x = 0 || y = 1");
-        (void) psi;
-        // std::cerr << psi << std::endl;
-        // BOOST_CHECK (phi == psi);
+        BOOST_CHECK (phi == psi);
     }
 
 
