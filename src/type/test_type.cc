@@ -157,9 +157,10 @@ BOOST_AUTO_TEST_CASE(type_inference)
     Atom a_v("v"); Expr_ptr v = em.make_identifier(a_v);
     main.add_var(v, new Variable(main.name(), v, int16));
 
-    // add the main module to the model, model analysis will be
-    // triggered automatically when invoking the type checker.
+    // add the main module to the model
     model.add_module(main);
+
+    BOOST_CHECK(ModelMgr::INSTANCE().analyze());
 
     BOOST_CHECK(boolean ==
                 mm.type(x));

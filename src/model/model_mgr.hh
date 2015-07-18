@@ -61,12 +61,13 @@ public:
     inline Resolver_ptr resolver()
     { return &f_resolver; }
 
-    // this should be called *before* any type checking
+    // this must be called before any type checking
     bool analyze();
 
     static ModelMgr& INSTANCE() {
         if (! f_instance)
             f_instance = new ModelMgr();
+
         return (*f_instance);
     }
 
@@ -80,9 +81,7 @@ public:
     inline Type_ptr type(Expr_ptr body,
                          Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
     {
-        if (! f_analyzed)
-            analyze();
-
+        assert( f_analyzed );
         return f_type_checker.type(body, ctx);
     }
 
