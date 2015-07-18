@@ -38,6 +38,7 @@ ModelMgr::ModelMgr()
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
     , f_type_checker(* new TypeChecker(* this))
+    , f_analyzed(false)
 {
 }
 
@@ -326,5 +327,6 @@ bool ModelMgr::analyze()
         << "Ok"
         << std::endl;
 
+    f_analyzed = true;
     return true;
 }

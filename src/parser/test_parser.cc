@@ -176,6 +176,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         BOOST_CHECK (phi == psi);
     }
 
+    // TODO: kill this operator altogether
     // {
     //     Expr_ptr phi = em.make_bw_xnor(x, y);
     //     Expr_ptr psi = parseExpression("x !^ y");

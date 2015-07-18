@@ -61,10 +61,12 @@ public:
     inline Resolver_ptr resolver()
     { return &f_resolver; }
 
+    // this should be called *before* any type checking
     bool analyze();
 
     static ModelMgr& INSTANCE() {
-        if (! f_instance) f_instance = new ModelMgr();
+        if (! f_instance)
+            f_instance = new ModelMgr();
         return (*f_instance);
     }
 
@@ -76,7 +78,11 @@ public:
 
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,
-                         Expr_ptr ctx = ExprMgr::INSTANCE().make_empty()) {
+                         Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
+    {
+        if (! f_analyzed)
+            analyze();
+
         return f_type_checker.type(body, ctx);
     }
 
@@ -126,6 +132,7 @@ private:
 
     /* internals */
     bool analyze_aux( analyzer_pass_t pass );
+    bool f_analyzed;
 };
 
 #endif
