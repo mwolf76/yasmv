@@ -35,6 +35,8 @@ ExprMgr_ptr ExprMgr::f_instance = NULL;
 
 ExprMgr::ExprMgr()
 {
+    const void* instance(this);
+
     /* generate internal symbol definitions */
     bool_expr = make_identifier(BOOL_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);
@@ -72,15 +74,18 @@ ExprMgr::ExprMgr()
     empty_expr = make_identifier(EMPTY_TOKEN);
 
     DEBUG
-        << "ExprMgr @" << this
+        << "ExprMgr @"
+        << instance
         << " initialized"
         << std::endl;
 }
 
 ExprMgr::~ExprMgr()
 {
+    const void* instance(this);
     DEBUG
-        << "ExprMgr @" << this
+        << "ExprMgr @"
+        << instance
         << " deinitialized"
         << std::endl;
 }

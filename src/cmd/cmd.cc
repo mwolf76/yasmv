@@ -35,8 +35,10 @@ CommandMgr& CommandMgr::INSTANCE()
 CommandMgr::CommandMgr()
     : f_interpreter(Interpreter::INSTANCE())
 {
+    const void* instance(this);
     DRIVEL
-        << "CommandMgr initialized @" << this
+        << "CommandMgr initialized @"
+        << instance
         << std::endl;
 }
 

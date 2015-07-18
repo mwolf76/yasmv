@@ -30,19 +30,24 @@ CuddMgr_ptr CuddMgr::f_instance = NULL;
 
 CuddMgr::CuddMgr()
 {
+    const void* instance(this);
     DRIVEL
-        << "Initialized CuddMgr @ " << this
+        << "Initialized CuddMgr @ "
+        << instance
         << std::endl;
 }
 
 CuddMgr::~CuddMgr()
 {
+    const void* instance(this);
+
     CuddVector::iterator i;
     for (i = f_cudd_instances.begin(); i != f_cudd_instances.end(); ++ i)
         delete *i;
 
     DRIVEL
-        << "Deinitialized EncodingMgr @ " << this
+        << "Deinitialized EncodingMgr @ "
+        << instance
         << std::endl;
 }
 

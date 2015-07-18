@@ -27,18 +27,20 @@
 FSM::FSM(Command& command, Model& model)
     : Algorithm(command, model)
 {
+    const void* instance(this);
     setup();
     DRIVEL
         << "Created FSM @"
-        << this
+        << instance
         << std::endl;
 }
 
 FSM::~FSM()
 {
+    const void* instance(this);
     DRIVEL
         << "Destroyed FSM @"
-        << this
+        << instance
         << std::endl;
 }
 

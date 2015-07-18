@@ -37,11 +37,14 @@ Engine::Engine()
     , f_registry(* new CNFRegistry(*this))
     , f_solver()
 {
+    const void* instance(this);
+
     /* MAINGROUP (=0) is already there. */
     f_groups.push(new_sat_var());
 
     DEBUG
-        << "Initialized Engine instance @" << this
+        << "Initialized Engine instance @"
+        << instance
         << std::endl;
 }
 

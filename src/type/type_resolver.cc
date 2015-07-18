@@ -27,8 +27,10 @@
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)
 {
+    const void* instance(this);
     DEBUG
-        << "Initialized Type Resolver instance @" << this
+        << "Initialized Type Resolver instance @"
+        << instance
         << std::endl;
 }
 

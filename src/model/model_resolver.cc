@@ -35,11 +35,14 @@
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)
 {
+    const void* instance(this);
+
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
     DRIVEL
-        << "Initialized Model Resolver instance @" << this
+        << "Initialized Model Resolver instance @"
+        << instance
         << std::endl;
 
     f_owner.symbols().insert( std::make_pair<Expr_ptr,

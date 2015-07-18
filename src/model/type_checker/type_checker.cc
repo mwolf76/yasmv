@@ -43,15 +43,19 @@ TypeChecker::TypeChecker(ModelMgr& owner)
     , f_ctx_stack()
     , f_owner(owner)
 {
+    const void *instance(this);
     DRIVEL
-        << "Created TypeChecker @" << this
+        << "Created TypeChecker @"
+        << instance
         << std::endl;
 }
 
 TypeChecker::~TypeChecker()
 {
+    const void *instance(this);
     DRIVEL
-        << "Destroying TypeChecker @" << this
+        << "Destroying TypeChecker @"
+        << instance
         << std::endl;
 }
 

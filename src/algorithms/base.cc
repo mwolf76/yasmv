@@ -33,20 +33,22 @@ Algorithm::Algorithm(Command& command, Model& model)
     , f_tm(TypeMgr::INSTANCE())
     , f_witness(NULL)
 {
+    const void* instance(this);
     set_param("alg_name", "test");
     DEBUG
         << "Creating algorithm instance "
         << get_param("alg_name")
-        << " @" << this
+        << " @" << instance
         << std::endl;
 }
 
 Algorithm::~Algorithm()
 {
+    const void* instance(this);
     DEBUG
         << "Destroying algorithm instance "
         << get_param("alg_name")
-        << " @" << this
+        << " @" << instance
         << std::endl;
 }
 

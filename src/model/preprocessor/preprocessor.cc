@@ -39,11 +39,21 @@ Preprocessor::Preprocessor(ModelMgr& owner)
     , f_owner(owner)
     , f_em(ExprMgr::INSTANCE())
 {
-    DEBUG << "Created Preprocessor @" << this << std::endl;
+    const void *instance(this);
+    DEBUG
+        << "Created Preprocessor @"
+        << instance
+        << std::endl;
 }
 
 Preprocessor::~Preprocessor()
-{ DEBUG << "Destroying Preprocessor @" << this << std::endl; }
+{
+    const void *instance(this);
+    DEBUG
+        << "Destroying Preprocessor @"
+        << instance
+        << std::endl;
+}
 
 Expr_ptr Preprocessor::process(Expr_ptr expr, Expr_ptr ctx)
 {

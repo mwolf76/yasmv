@@ -32,18 +32,20 @@ static const char *cex_trace_prfx = "cex_";
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
 {
+    const void* instance(this);
     setup();
     DRIVEL
         << "Created BMC @"
-        << this
+        << instance
         << std::endl;
 }
 
 BMC::~BMC()
 {
+    const void* instance(this);
     DRIVEL
         << "Destroyed BMC @"
-        << this
+        << instance
         << std::endl;
 }
 

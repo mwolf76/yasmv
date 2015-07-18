@@ -50,9 +50,10 @@ Module& Model::module(Expr_ptr module_name)
 Model::Model()
     : f_modules()
 {
+    const void *instance(this);
     DEBUG
         << "Initialized Model instance @"
-        << this
+        << instance
         << std::endl;
 }
 

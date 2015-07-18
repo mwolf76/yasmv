@@ -110,15 +110,19 @@ Interpreter::Interpreter()
 
     , f_epoch(time(NULL))
 {
+    const void* instance(this);
     DEBUG
-        << "Initialized command interpreter @" << this
+        << "Initialized command interpreter @"
+        << instance
         << std::endl;
 }
 
 Interpreter::~Interpreter()
 {
+    const void* instance(this);
     DEBUG
-        << "Deinitialized command interpreter @" << this
+        << "Deinitialized command interpreter @"
+        << instance
         << std::endl;
 }
 

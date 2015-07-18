@@ -35,14 +35,18 @@
 Command::Command(Interpreter& owner)
     : f_owner(owner)
 {
+    const void *instance(this);
     DRIVEL
-        << "Initialized command @" << this
+        << "Initialized command @"
+        << instance
         << std::endl;
 }
 
 Command::~Command()
 {
-    DRIVEL << "Deinitialized command @" << this
+    const void *instance(this);
+    DRIVEL << "Deinitialized command @"
+           << instance
            << std::endl;
 }
 

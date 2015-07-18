@@ -31,18 +31,20 @@
 LTL::LTL(Command& command, Model& model)
     : Algorithm(command, model)
 {
+    const void* instance(this);
     setup();
     DRIVEL
         << "Created LTL @"
-        << this
+        << instance
         << std::endl;
 }
 
 LTL::~LTL()
 {
+    const void* instance(this);
     DRIVEL
         << "Destroyed LTL @"
-        << this
+        << instance
         << std::endl;
 }
 

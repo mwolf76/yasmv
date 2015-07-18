@@ -66,6 +66,8 @@ Variant::Variant(const char *value)
 Variant::Variant(const Variant& v)
     : f_type(v.f_type)
 {
+    const void* instance(this);
+
     switch (f_type) {
     case BOTTOM: return;
     case BOOLEAN: f_bool = v.f_bool; return;
@@ -76,7 +78,8 @@ Variant::Variant(const Variant& v)
 
     void *tmp = (void *) &v;
     DRIVEL
-        << "Initialized COPY Variant @" << this
+        << "Initialized COPY Variant @"
+        << instance
         << " (from @" << tmp << ")"
         << std::endl;
 }

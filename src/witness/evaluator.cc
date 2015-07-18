@@ -36,17 +36,19 @@
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)
 {
+    const void *instance(this);
     DRIVEL
         << "Created Evaluator @"
-        << this
+        << instance
         << std::endl;
 }
 
 Evaluator::~Evaluator()
 {
+    const void* instance(this);
     DRIVEL
         << "Destroying Evaluator @"
-        << this
+        << instance
         << std::endl;
 }
 

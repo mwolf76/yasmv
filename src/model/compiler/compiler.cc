@@ -62,17 +62,19 @@ Compiler::Compiler()
     , f_enc(EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
 {
+    const void* instance (this);
     DRIVEL
         << "Created Compiler @"
-        << this
+        << instance
         << std::endl;
 }
 
 Compiler::~Compiler()
 {
+    const void* instance(this);
     DRIVEL
         << "Destroying Compiler @"
-        << this
+        << instance
         << std::endl;
 }
 
