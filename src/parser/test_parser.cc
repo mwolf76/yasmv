@@ -5,9 +5,11 @@
 #include <expr_mgr.hh>
 #include <printer.hh>
 
+#include <type.hh>
+
 /* from src/parse.cc */
 extern Expr_ptr parseExpression(const char *string);
-extern Expr_ptr parseTypedef(const char *string);
+extern Type_ptr parseTypedef(const char *string);
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(basic_parsing)
@@ -110,13 +112,13 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
 
     {
         Expr_ptr phi = em.make_not(x);
-        Expr_ptr psi = parseExpression("not x");
+        Expr_ptr psi = parseExpression("! x");
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_bw_not(x);
-        Expr_ptr psi = parseExpression("! x");
+        Expr_ptr psi = parseExpression("~ x");
         BOOST_CHECK (phi == psi);
     }
 
@@ -146,7 +148,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
 
     {
         Expr_ptr phi = em.make_and(x, y);
-        Expr_ptr psi = parseExpression("x and y");
+        Expr_ptr psi = parseExpression("x && y");
         BOOST_CHECK (phi == psi);
     }
 
@@ -158,7 +160,7 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
 
     {
         Expr_ptr phi = em.make_or(x, y);
-        Expr_ptr psi = parseExpression("x or y");
+        Expr_ptr psi = parseExpression("x || y");
         BOOST_CHECK (phi == psi);
     }
 
@@ -174,11 +176,11 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         BOOST_CHECK (phi == psi);
     }
 
-    {
-        Expr_ptr phi = em.make_bw_xnor(x, y);
-        Expr_ptr psi = parseExpression("x ~ y");
-        BOOST_CHECK (phi == psi);
-    }
+    // {
+    //     Expr_ptr phi = em.make_bw_xnor(x, y);
+    //     Expr_ptr psi = parseExpression("x !^ y");
+    //     BOOST_CHECK (phi == psi);
+    // }
 
     {
         Expr_ptr phi = em.make_implies(x, y);
@@ -286,20 +288,21 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
     {
         Expr_ptr phi = em.make_and(em.make_eq( x, em.make_const(0)),
                                    em.make_eq( y, em.make_const(1)));
-        Expr_ptr psi = parseExpression("x = 0 and y = 1");
+        Expr_ptr psi = parseExpression("x = 0 && y = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_or(em.make_eq( x, em.make_const(0)),
                                   em.make_eq( y, em.make_const(1)));
-        Expr_ptr psi = parseExpression("x = 0 or y = 1");
+        Expr_ptr psi = parseExpression("x = 0 || y = 1");
         BOOST_CHECK (phi == psi);
     }
 
     {
-        Expr_ptr psi = parseExpression("x = 0 or y = 1 and x = 0 or y = 1");
-        std::cerr << psi << std::endl;
+        Expr_ptr psi = parseExpression("x = 0 || y = 1 && x = 0 || y = 1");
+        (void) psi;
+        // std::cerr << psi << std::endl;
         // BOOST_CHECK (phi == psi);
     }
 
@@ -382,8 +385,8 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
                                                                em.make_const(0)),
                                                     em.make_ne(em.make_next(y),
                                                                em.make_const(0))));
-        std::cerr << phi << std::endl;
-        Expr_ptr psi = parseExpression("x = 0 and y = 0 -> next(x) != 0 or next(y) != 0");
+        Expr_ptr psi =
+            parseExpression("(((x = 0) && (y = 0)) -> ((next(x) != 0) || (next(y) != 0)))");
         BOOST_CHECK (phi == psi);
     }
 }
@@ -393,58 +396,217 @@ BOOST_AUTO_TEST_CASE(typedefs)
     ExprMgr& em(ExprMgr::INSTANCE());
 
     {
-        Expr_ptr phi = em.make_boolean_type();
-        Expr_ptr psi = parseTypedef("boolean");
+       Expr_ptr phi = em.make_boolean_type();
+
+        Type_ptr tp = parseTypedef("boolean");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_boolean_type(),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("boolean[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_signed_int_type(8);
-        Expr_ptr psi = parseTypedef("int8");
+
+        Type_ptr tp = parseTypedef("int8");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_signed_int_type(8),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("int8[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_unsigned_int_type(8);
-        Expr_ptr psi = parseTypedef("uint8");
+
+        Type_ptr tp = parseTypedef("uint8");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_unsigned_int_type(8),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("uint8[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_signed_int_type(16);
-        Expr_ptr psi = parseTypedef("int16");
+
+        Type_ptr tp = parseTypedef("int16");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_signed_int_type(16),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("int16[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
 
     {
         Expr_ptr phi = em.make_unsigned_int_type(16);
-        Expr_ptr psi = parseTypedef("uint16");
+
+        Type_ptr tp = parseTypedef("uint16");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_unsigned_int_type(16),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("uint16[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_signed_int_type(32);
-        Expr_ptr psi = parseTypedef("int32");
+
+        Type_ptr tp = parseTypedef("int32");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_signed_int_type(32),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("int32[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
 
     {
         Expr_ptr phi = em.make_unsigned_int_type(32);
-        Expr_ptr psi = parseTypedef("uint32");
+
+        Type_ptr tp = parseTypedef("uint32");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_unsigned_int_type(32),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("uint32[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_signed_int_type(32);
-        Expr_ptr psi = parseTypedef("int32");
+
+        Type_ptr tp = parseTypedef("int32");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_signed_int_type(32),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("int32[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_signed_int_type(64);
+
+        Type_ptr tp = parseTypedef("int64");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_signed_int_type(64),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("int64[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
     {
         Expr_ptr phi = em.make_unsigned_int_type(64);
-        Expr_ptr psi = parseTypedef("uint64");
+
+        Type_ptr tp = parseTypedef("uint64");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_subscript(em.make_unsigned_int_type(64),
+                                         em.make_const(10));
+
+        Type_ptr tp = parseTypedef("uint64[10]");
+        BOOST_CHECK(tp);
+
+        Expr_ptr psi = (tp -> repr());
         BOOST_CHECK (phi == psi);
     }
 
 }
+
 BOOST_AUTO_TEST_SUITE_END()

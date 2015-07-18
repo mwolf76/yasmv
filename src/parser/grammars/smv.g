@@ -682,6 +682,7 @@ value returns [Expr_ptr res]
       { $res = expr; }
     ;
 
+/* typedecls */
 type returns [Type_ptr res]
 @init {}
     : tp = native_type
@@ -708,18 +709,27 @@ native_type returns [Type_ptr res]
     ;
 
 boolean_type returns [Type_ptr res]
-@init {}
+@init {
+    int array_size = 0;
+}
     : 'boolean' (
 
             '[' size=constant ']'
-            { $res = tm.find_boolean_array(size->value()); }
-
-            | { $res = tm.find_boolean(); }
-    )
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_boolean_array(array_size) :
+            (Type_ptr) tm.find_boolean();
+    }
     ;
 
 enum_type returns [Type_ptr res]
 @init {
+    int array_size = 0;
     ExprSet lits;
 }
     : '{'
@@ -727,14 +737,21 @@ enum_type returns [Type_ptr res]
               (',' lit=literal { lits.insert(lit); })*
       '}' (
             '[' size=constant ']'
-            { $res = tm.find_enum_array(lits, size->value()); }
-
-            | { $res = tm.find_enum( lits ); }
-    )
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_enum_array(lits, array_size) :
+            (Type_ptr) tm.find_enum(lits);
+    }
     ;
 
 unsigned_int_type returns [Type_ptr res]
 @init {
+    int array_size = 0;
     char *p;
 }
 	:
@@ -746,18 +763,24 @@ unsigned_int_type returns [Type_ptr res]
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_unsigned_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), size->value()); }
-    |
-        {
-            $res = tm.find_unsigned( *p ? atoi(p)
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_unsigned_array(*p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), array_size) :
+            (Type_ptr) tm.find_unsigned( *p ? atoi(p)
                 : OptsMgr::INSTANCE().word_width());
-        }
-    )
+    }
+
     ;
 
 signed_int_type returns [Type_ptr res]
 @init {
+    int array_size = 0;
     char *p;
 }
 	:
@@ -769,15 +792,21 @@ signed_int_type returns [Type_ptr res]
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_signed_array( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), size->value()); }
-    |
-        {
-            $res = tm.find_signed( *p ? atoi(p)
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_signed_array(*p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), array_size) :
+            (Type_ptr) tm.find_signed( *p ? atoi(p)
                 : OptsMgr::INSTANCE().word_width());
-        }
-    )
+    }
+
     ;
+
 
 instance_type returns [Type_ptr res]
 @init {

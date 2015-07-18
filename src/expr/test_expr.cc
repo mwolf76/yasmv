@@ -265,14 +265,14 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr not_x = em.make_not(x);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << not_x; BOOST_CHECK (oss.str() == std::string("not x"));
+        printer << not_x; BOOST_CHECK (oss.str() == std::string("! x"));
     }
 
     {
         Expr_ptr not_x = em.make_bw_not(x);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << not_x; BOOST_CHECK (oss.str() == std::string("! x"));
+        printer << not_x; BOOST_CHECK (oss.str() == std::string("~ x"));
     }
 
     {
@@ -314,14 +314,14 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr x_and_y = em.make_and(x, y);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << x_and_y; BOOST_CHECK (oss.str() == std::string("(x and y)"));
+        printer << x_and_y; BOOST_CHECK (oss.str() == std::string("(x && y)"));
     }
 
     {
         Expr_ptr x_or_y = em.make_or(x, y);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << x_or_y; BOOST_CHECK (oss.str() == std::string("(x or y)"));
+        printer << x_or_y; BOOST_CHECK (oss.str() == std::string("(x || y)"));
     }
 
     {
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr x_xnor_y = em.make_bw_xnor(x, y);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << x_xnor_y; BOOST_CHECK (oss.str() == std::string("(x ~ y)"));
+        printer << x_xnor_y; BOOST_CHECK (oss.str() == std::string("(x !^ y)"));
     }
 
     {
