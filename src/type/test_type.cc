@@ -186,6 +186,28 @@ BOOST_AUTO_TEST_CASE(type_inference)
     BOOST_CHECK( boolean ==
                  mm.type( em.make_implies( x, y )));
 
+    // type system violations
+    BOOST_CHECK_THROW(mm.type( em.make_neg( x )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_ge( x, y )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_gt( x, y )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_le( x, y )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_lt( x, y )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_lshift( x, y )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_rshift( x, y )),
+                      TypeException);
+
     // relationals (unsigned)
     BOOST_CHECK( boolean ==
                  mm.type( em.make_eq( s, t )));
@@ -205,6 +227,19 @@ BOOST_AUTO_TEST_CASE(type_inference)
     BOOST_CHECK( boolean ==
                  mm.type( em.make_lt( s, t )));
 
+    // type system violations
+    BOOST_CHECK_THROW(mm.type( em.make_not( s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_and( s, t )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_or( s, t )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_implies( s, t )),
+                      TypeException);
+
     // relationals (signed)
     BOOST_CHECK( boolean ==
                  mm.type( em.make_eq( u, v )));
@@ -223,6 +258,19 @@ BOOST_AUTO_TEST_CASE(type_inference)
 
     BOOST_CHECK( boolean ==
                  mm.type( em.make_lt( u, v )));
+
+    // type system violations
+    BOOST_CHECK_THROW(mm.type( em.make_not( u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_and( u, v )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_or( u, v )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_implies( u, v )),
+                      TypeException);
 
     // arithmetics
     BOOST_CHECK( uint16 ==
