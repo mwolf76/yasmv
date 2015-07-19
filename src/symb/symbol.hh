@@ -156,6 +156,7 @@ public:
         , f_name(name)
         , f_type(type)
         , f_input(input)
+        , f_temp(temp)
     {}
 
     const Expr_ptr module() const

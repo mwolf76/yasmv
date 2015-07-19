@@ -30,14 +30,10 @@ CheckInvar::CheckInvar(Interpreter& owner)
 {}
 
 CheckInvar::~CheckInvar()
-{
-    free(f_invar);
-    f_invar = NULL;
-}
+{}
 
 void CheckInvar::set_invar(Expr_ptr invar)
 {
-    free(f_invar);
     f_invar = invar;
 }
 
