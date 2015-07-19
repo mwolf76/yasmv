@@ -18,10 +18,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  **/
 
 #ifndef TYPE_MGR_H
@@ -39,14 +35,12 @@
 
 typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 
-/* The TypeMgr has three well-defined responsibilites:
+/*
+   The TypeMgr has two well-defined responsibilites:
 
    1. It keeps track of types that has been defined;
-
-   2. It instantiates (and owns) type descriptors (Type objects);
-
-   3. It is the single authoritative source for determining the
-   resulting type of an operand, via the result_type methods. */
+   2. It instantiates (and owns) type descriptors (Type objects).
+*/
 
 typedef class TypeMgr* TypeMgr_ptr;
 
@@ -115,7 +109,7 @@ private:
         f_register [ expr ] = vtype;
     }
 
-    // lookup up a type, returns NULL if not found
+    // lookup up a type from its repr, returns NULL if not found
     inline Type_ptr lookup_type(const Expr_ptr expr)
     { return f_register [ expr ]; }
 

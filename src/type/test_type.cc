@@ -23,6 +23,22 @@ BOOST_AUTO_TEST_CASE(boolean_type)
     BOOST_CHECK(! type->is_signed_algebraic());
     BOOST_CHECK(! type->is_unsigned_algebraic());
     BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(! type->is_array());
+    BOOST_CHECK(! type->is_instance());
+}
+
+BOOST_AUTO_TEST_CASE(boolean_array_type)
+{
+    TypeMgr& tm = TypeMgr::INSTANCE();
+    Type_ptr type = tm.find_boolean_array(10);
+
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(  type->is_array());
+    BOOST_CHECK(! type->is_instance());
 }
 
 BOOST_AUTO_TEST_CASE(unsigned_int_type)
@@ -35,6 +51,22 @@ BOOST_AUTO_TEST_CASE(unsigned_int_type)
     BOOST_CHECK(! type->is_signed_algebraic());
     BOOST_CHECK(  type->is_unsigned_algebraic());
     BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(! type->is_array());
+    BOOST_CHECK(! type->is_instance());
+}
+
+BOOST_AUTO_TEST_CASE(unsigned_int_array_type)
+{
+    TypeMgr& tm = TypeMgr::INSTANCE();
+    Type_ptr type = tm.find_unsigned_array(8, 10);
+
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(  type->is_array());
+    BOOST_CHECK(! type->is_instance());
 }
 
 BOOST_AUTO_TEST_CASE(signed_int_type)
@@ -47,9 +79,25 @@ BOOST_AUTO_TEST_CASE(signed_int_type)
     BOOST_CHECK(  type->is_signed_algebraic());
     BOOST_CHECK(! type->is_unsigned_algebraic());
     BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(! type->is_array());
+    BOOST_CHECK(! type->is_instance());
 }
 
-BOOST_AUTO_TEST_CASE(enum_type_symbolic)
+BOOST_AUTO_TEST_CASE(signed_int_array_type)
+{
+    TypeMgr& tm = TypeMgr::INSTANCE();
+    Type_ptr type = tm.find_signed_array(8, 10);
+
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(  type->is_array());
+    BOOST_CHECK(! type->is_instance());
+}
+
+BOOST_AUTO_TEST_CASE(enum_type)
 {
     TypeMgr& tm = TypeMgr::INSTANCE();
     ExprMgr& em = ExprMgr::INSTANCE();
@@ -70,6 +118,8 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     BOOST_CHECK(! type->is_signed_algebraic());
     BOOST_CHECK(! type->is_unsigned_algebraic());
     BOOST_CHECK(  type->is_enum());
+    BOOST_CHECK(! type->is_array());
+    BOOST_CHECK(! type->is_instance());
 
     // additional checks
     EnumType_ptr et = dynamic_cast<EnumType_ptr>(type);
@@ -116,12 +166,40 @@ BOOST_AUTO_TEST_CASE(enum_type_symbolic)
     }
 }
 
-BOOST_AUTO_TEST_CASE(type_inference)
+BOOST_AUTO_TEST_CASE(enum_array_type)
+{
+    TypeMgr& tm = TypeMgr::INSTANCE();
+    ExprMgr& em = ExprMgr::INSTANCE();
+
+    Expr_ptr h = em.make_identifier("huey");
+    Expr_ptr l = em.make_identifier("louie");
+    Expr_ptr d = em.make_identifier("dewey");
+
+    ExprSet ev;
+    ev.insert(h);
+    ev.insert(l);
+    ev.insert(d);
+
+    Type_ptr type = tm.find_enum_array(ev, 10);
+
+    BOOST_CHECK(! type->is_boolean());
+    BOOST_CHECK(! type->is_constant());
+    BOOST_CHECK(! type->is_algebraic());
+    BOOST_CHECK(! type->is_signed_algebraic());
+    BOOST_CHECK(! type->is_unsigned_algebraic());
+    BOOST_CHECK(! type->is_enum());
+    BOOST_CHECK(  type->is_array());
+    BOOST_CHECK(! type->is_instance());
+}
+
+BOOST_AUTO_TEST_CASE(type_checking)
 {
     /* a rather rough setup... */
     ModelMgr& mm (ModelMgr::INSTANCE());
     ExprMgr& em (ExprMgr::INSTANCE());
     TypeMgr& tm (TypeMgr::INSTANCE());
+
+    /* set word width to 16 bits */
     OptsMgr& om (OptsMgr::INSTANCE());
     om.set_word_width(16);
 
@@ -133,7 +211,8 @@ BOOST_AUTO_TEST_CASE(type_inference)
     Type_ptr uint16 = tm.find_unsigned(16);
     Type_ptr int16 = tm.find_signed(16);
 
-    /* A pair of variables for each type:
+    /*
+       A pair of variables for each type:
        (x, y) are booleans;
        (s, t) are unsigned(16);
        (u, v) are signed(16)
@@ -238,6 +317,42 @@ BOOST_AUTO_TEST_CASE(type_inference)
                       TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_implies( s, t )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_eq( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_eq( x, u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_ne( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_ne( x, u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_ge( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_ge( x, u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_gt( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_gt( x, u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_le( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_le( x, u )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_lt( x, s )),
+                      TypeException);
+
+    BOOST_CHECK_THROW(mm.type( em.make_lt( x, u )),
                       TypeException);
 
     // relationals (signed)
