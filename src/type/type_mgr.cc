@@ -261,7 +261,8 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of, unsigned nelems)
 {
     Expr_ptr descr
-        (f_em.make_array_type( of->repr(), nelems));
+        (f_em.make_subscript( of->repr(),
+                              f_em.make_const( nelems)));
 
     ArrayType_ptr res
         (dynamic_cast<ArrayType_ptr> (lookup_type(descr)));

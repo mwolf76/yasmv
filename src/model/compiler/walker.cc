@@ -563,6 +563,12 @@ void Compiler::walk_array_postorder(const Expr_ptr expr)
     POP_TYPE(lhs_type);
 
     if (lhs_type -> is_array()) {
+
+        ArrayType_ptr atype = lhs_type -> as_array();
+        unsigned width = atype -> width();
+        POP_DV(tmp, width);
+        PUSH_DV_REVERSED(tmp, width)
+
         PUSH_TYPE(lhs_type);
         return;
     }

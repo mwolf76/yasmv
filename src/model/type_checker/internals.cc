@@ -205,6 +205,13 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
 
         PUSH_TYPE( tm.find_boolean());
     }
+    else if (rhs_type -> is_array()) {
+        POP_TYPE( lhs_type );
+        if (lhs_type != rhs_type)
+            throw TypeMismatch(expr, lhs_type, rhs_type);
+
+        PUSH_TYPE( tm.find_boolean());
+    }
     else assert(false);
 }
 

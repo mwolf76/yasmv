@@ -70,4 +70,10 @@ typedef std::vector<ADD> DDVector;
     for (unsigned i = 0; i < width; ++ i)       \
         PUSH_DD(vec[width - i - 1]);
 
+/** Push a DD vector of given width */
+#define PUSH_DV_REVERSED(vec, width)            \
+    /* push DD vector in reversed order */      \
+    for (unsigned i = 0; i < width; ++ i)       \
+        PUSH_DD(vec[i]);
+
 #endif

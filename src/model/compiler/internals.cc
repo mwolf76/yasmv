@@ -126,22 +126,30 @@ void Compiler::post_node_hook(Expr_ptr expr)
     if (type -> is_instance())
         return;
 
-    /* collect dds */
-    DDVector dv;
-    unsigned i, width = type -> width();
-    assert(width <= f_add_stack.size());
+    if (type -> is_array())
+        return;
 
-    DDVector::reverse_iterator ri;
-    for (i = 0, ri = f_add_stack.rbegin();
-         i < width; ++ i, ++ ri) {
-        dv.push_back(*ri);
+    if (type -> is_scalar()) {
+        DDVector dv;
+        unsigned i, width = type -> width();
+        assert(width <= f_add_stack.size());
+
+        DDVector::reverse_iterator ri;
+        for (i = 0, ri = f_add_stack.rbegin();
+             i < width; ++ i, ++ ri) {
+            dv.push_back(*ri);
+        }
+        assert (dv.size() == width);
+
+        /* memoize result */
+        f_compilation_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
+            ( key, CompilationUnit( dv, f_inlined_operator_descriptors,
+                                    f_expr2bsd_map, f_multiway_selection_descriptors)));
+
+        return;
     }
-    assert (dv.size() == width);
 
-    /* memoize result */
-    f_compilation_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
-                    ( key, CompilationUnit( dv, f_inlined_operator_descriptors,
-                                            f_expr2bsd_map, f_multiway_selection_descriptors)));
+    assert(false);
 }
 
 bool Compiler::cache_miss(const Expr_ptr expr)
