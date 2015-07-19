@@ -106,7 +106,12 @@ Variant DumpTrace::operator()()
         (WitnessMgr::INSTANCE().witness(wid));
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
-        os << "-- @ " << 1 + time << std::endl;
+
+        os
+            << "-- @"
+            << time
+            << std::endl;
+
         TimeFrame& tf = w[ time ];
 
         SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
