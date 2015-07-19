@@ -1,0 +1,22 @@
+#word-width 64
+MODULE main
+
+VAR a : uint;
+VAR b : uint;
+
+INIT
+    a = 5175833502;
+
+INIT
+   b  = 520244859288;
+
+TRANS
+   next(a) = b;
+
+TRANS
+   next(b) = a % b;
+
+-- Symbols starting with an underline (_) do not show up in traces.
+DEFINE _GOAL := b = 0;
+
+
