@@ -128,7 +128,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         }
 
         TimedExpr key
-            (full, var.is_frozen() ? 0 : time);
+            (full, var.is_frozen() ? UINT_MAX : time);
 
         Encoding_ptr enc
             (find_encoding(key, type));

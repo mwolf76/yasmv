@@ -251,18 +251,25 @@ void BMC::kinduction( Expr_ptr phi )
     } while (f_status == MC_UNKNOWN && !leave);
 }
 
+#define ENABLE_CLOSURE
 void BMC::process(const Expr_ptr phi)
 {
     f_status = MC_UNKNOWN;
 
     /* launch parallel threads */
-    boost::thread expl(&BMC::exploration, this, phi);
     boost::thread base(&BMC::falsification, this, phi);
-    boost::thread step(&BMC::kinduction, this, phi);
 
-    expl.join();
+#ifdef ENABLE_CLOSURE
+    boost::thread expl(&BMC::exploration, this, phi);
+    boost::thread step(&BMC::kinduction, this, phi);
+#endif
+
     base.join();
+
+#ifdef ENABLE_CLOSURE
+    expl.join();
     step.join();
+#endif
 
     TRACE
         << "Done."

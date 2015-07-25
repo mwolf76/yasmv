@@ -84,9 +84,13 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
 
             if (symb->is_variable()) {
 
+                Variable& var
+                    (symb -> as_variable());
+
                 /* time it, and fetch encoding for enc mgr */
                 Encoding_ptr enc
-                    (bm.find_encoding( TimedExpr(key, 0)) );
+                    (bm.find_encoding( TimedExpr(key, var.is_frozen()
+                                                 ? UINT_MAX : 0)) );
 
                 if ( ! enc )
                     continue;

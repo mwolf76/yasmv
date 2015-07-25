@@ -249,48 +249,54 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
         if (symb->is_variable()) {
 
-            Variable& var (symb->as_variable());
-            if (! var.is_input() && ! var.is_temp()) {
+            Variable& var
+                (symb->as_variable());
 
-                Expr_ptr expr (var.name());
+            if (var.is_input() ||
+                var.is_frozen() ||
+                var.is_temp())
+                continue ;
 
-                TimedExpr key( em().make_dot( ctx, expr), 0);
-                Encoding_ptr enc = f_bm.find_encoding(key);
+            Expr_ptr expr
+                (var.name());
+            TimedExpr key
+                (em().make_dot( ctx, expr), 0);
+            Encoding_ptr enc
+                (f_bm.find_encoding(key));
 
-                DDVector::const_iterator di;
-                unsigned ndx;
-                for (ndx = 0, di = enc->bits().begin();
-                     enc->bits().end() != di; ++ ndx, ++ di) {
+            DDVector::const_iterator di;
+            unsigned ndx;
+            for (ndx = 0, di = enc->bits().begin();
+                 enc->bits().end() != di; ++ ndx, ++ di) {
 
-                    unsigned bit = (*di).getNode()->index;
+                unsigned bit = (*di).getNode()->index;
 
-                    const UCBI& ucbi  = f_bm.find_ucbi(bit);
-                    const TCBI  jtcbi = TCBI(ucbi, j);
-                    const TCBI  ktcbi = TCBI(ucbi, k);
+                const UCBI& ucbi  = f_bm.find_ucbi(bit);
+                const TCBI  jtcbi = TCBI(ucbi, j);
+                const TCBI  ktcbi = TCBI(ucbi, k);
 
-                    Var jkne = engine.new_sat_var();
-                    uniqueness_vars.push_back(jkne);
+                Var jkne = engine.new_sat_var();
+                uniqueness_vars.push_back(jkne);
 
-                    Var jvar = engine.tcbi_to_var(jtcbi);
-                    Var kvar = engine.tcbi_to_var(ktcbi);
+                Var jvar = engine.tcbi_to_var(jtcbi);
+                Var kvar = engine.tcbi_to_var(ktcbi);
 
-                    {
-                        vec<Lit> ps;
-                        ps.push( mkLit( jkne, true));
-                        ps.push( mkLit( jvar, true));
-                        ps.push( mkLit( kvar, true));
+                {
+                    vec<Lit> ps;
+                    ps.push( mkLit( jkne, true));
+                    ps.push( mkLit( jvar, true));
+                    ps.push( mkLit( kvar, true));
 
-                        engine.add_clause(ps);
-                    }
+                    engine.add_clause(ps);
+                }
 
-                    {
-                        vec<Lit> ps;
-                        ps.push( mkLit( jkne, true));
-                        ps.push( mkLit( jvar, false));
-                        ps.push( mkLit( kvar, false));
+                {
+                    vec<Lit> ps;
+                    ps.push( mkLit( jkne, true));
+                    ps.push( mkLit( jvar, false));
+                    ps.push( mkLit( kvar, false));
 
-                        engine.add_clause(ps);
-                    }
+                    engine.add_clause(ps);
                 }
             }
         }

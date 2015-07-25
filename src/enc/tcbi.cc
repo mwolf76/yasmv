@@ -72,7 +72,7 @@ long TCBIHash::operator() (const TCBI& k) const
     ExprHash eh;
 
     long v0 = eh(*k.expr());
-    long v1 = k.base() + k.time();
+    long v1 = k.absolute_time();
     long v2 = k.bitno();
 
     res = (res << 4) + v0;
@@ -99,9 +99,9 @@ long TCBIHash::operator() (const TCBI& k) const
 bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
 {
     step_t abs_time_x
-        (x.base() + x.time());
+        (x.absolute_time());
     step_t abs_time_y
-        (y.base() + y.time());
+        (y.absolute_time());
 
     return
         x.expr() == y.expr() &&

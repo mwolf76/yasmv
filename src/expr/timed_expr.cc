@@ -34,9 +34,14 @@ std::ostream& operator<<(std::ostream& os, const TimedExpr& timed_expr)
     step_t time
         (timed_expr.time());
 
-    os << "@" << time
-       << "{" << expr
-       << "}" ;
+    if (UINT_MAX != time)
+        os
+            << "@"
+            << time;
+
+    os
+        << "{" << expr
+        << "}" ;
 
     return os;
 }

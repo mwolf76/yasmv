@@ -33,11 +33,20 @@ public:
     inline Expr_ptr expr() const
     { return f_expr; }
 
-    inline step_t time() const
-    { return f_time; }
-
     inline unsigned bitno() const
     { return f_bitno; }
+
+    inline step_t absolute_time() const
+    {
+        // reserved for frozen variables
+        if (f_time == UINT_MAX)
+            return 0;
+
+        return f_time + f_base;
+    }
+
+    inline step_t time() const
+    { return f_time; }
 
     inline step_t base() const
     { return f_base; }
@@ -55,6 +64,7 @@ private:
 
     // time base (default is 0)
     step_t f_base;
+
 };
 
 std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);

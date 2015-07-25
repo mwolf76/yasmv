@@ -46,7 +46,13 @@ Var TimeMapper::var(const TCBI& tcbi)
         /* generate a new var and book it. */
         var = f_owner.new_sat_var();
 
-        // DRIVEL << "Adding VAR " << var << " for " << tcbi << endl;
+        DRIVEL
+            << "Adding VAR "
+            << var
+            << " for "
+            << tcbi
+            << std::endl;
+
         f_tcbi2var_map.insert( std::make_pair<TCBI, Var>(tcbi, var));
         f_var2tcbi_map.insert( std::make_pair<Var, TCBI>(var, tcbi));
     }
