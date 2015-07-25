@@ -40,9 +40,28 @@ void Module::add_var(Expr_ptr symb_name, Variable_ptr var)
     Expr_ptr type_repr
         (var -> type() -> repr());
 
+    std::ostringstream oss;
+
+    if (var -> is_hidden())
+        oss
+            << "hidden ";
+
+    if (var -> is_input())
+        oss
+            << "input ";
+
+    if (var -> is_frozen())
+        oss
+            << "frozen ";
+
+    const std::string tmp
+        (oss.str());
+
     DEBUG
         << "Module `" << (*this)
-        << "`, added var `" << symb_name
+        << "`, added "
+        << tmp
+        << "var `" << symb_name
         << "`, of type `" << type_repr << "`"
         << std::endl;
 
@@ -73,11 +92,23 @@ void Module::add_parameter(Expr_ptr symb_name, Parameter_ptr param)
                              (symb_name, param));
 }
 
-void Module::add_def(Expr_ptr symb_name, Define_ptr body)
+void Module::add_def(Expr_ptr symb_name, Define_ptr def)
 {
+    std::ostringstream oss;
+
+    if (def -> is_hidden())
+        oss
+            << "hidden ";
+
+    const std::string tmp
+        (oss.str());
+
     DEBUG
-        << "Module " << (*this)
-        << ", added local def `"
+        << "Module "
+        << (*this)
+        << ", added "
+        << tmp
+        << "define `"
         << symb_name << "`"
         << std::endl;
 
@@ -87,7 +118,7 @@ void Module::add_def(Expr_ptr symb_name, Define_ptr body)
 
     f_locals.push_back(symb_name);
     f_localDefs.insert(std::make_pair<Expr_ptr, Define_ptr>
-                       (symb_name, body));
+                       (symb_name, def));
 }
 
 void Module::add_init(Expr_ptr expr)

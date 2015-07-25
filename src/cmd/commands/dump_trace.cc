@@ -119,19 +119,20 @@ Variant DumpTrace::operator()()
 
             std::pair< Expr_ptr, Symbol_ptr > pair
                 (symbs.next());
-            Expr_ptr ctx
-                (pair.first);
+
             Symbol_ptr symb
                 (pair.second);
+            if (symb -> is_hidden())
+                continue;
+
+            Expr_ptr ctx
+                (pair.first);
             Expr_ptr name
                 (symb->name());
             Expr_ptr value
                 (NULL);
             Expr_ptr full
                 (em.make_dot( ctx, name));
-
-            if (name -> atom()[0] == '_')
-                continue;
 
             if (symb->is_variable())  {
                 try {

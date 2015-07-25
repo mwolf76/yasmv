@@ -112,3 +112,8 @@ Literal& Symbol::as_literal(void) const
     return (*res);
 }
 
+bool Symbol::is_hidden() const
+{ return f_hidden; }
+
+void Symbol::set_hidden(bool value)
+{ f_hidden = value; }

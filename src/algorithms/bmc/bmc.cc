@@ -31,6 +31,7 @@ static const char *cex_trace_prfx = "cex_";
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
+    , f_explored_k(UINT_MAX)
 {
     const void* instance(this);
     setup();
@@ -52,15 +53,20 @@ BMC::~BMC()
 void BMC::falsification( Expr_ptr phi )
 {
     Engine engine;
-    Expr_ptr ctx = em().make_empty();
+    Expr_ptr ctx
+        (em().make_empty());
 
     Expr_ptr invariant
         (phi);
 
-    CompilationUnit ii (compiler().process( ctx, invariant));
+    CompilationUnit ii
+        (compiler().process( ctx, invariant));
 
-    Expr_ptr violation = em().make_not(invariant);
-    CompilationUnit vv (compiler().process( ctx, violation));
+    Expr_ptr violation
+        (em().make_not(invariant));
+
+    CompilationUnit vv
+        (compiler().process( ctx, violation));
 
     step_t k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
@@ -118,8 +124,69 @@ void BMC::falsification( Expr_ptr phi )
         assert_fsm_trans(engine, k ++);
         assert_fsm_invar(engine, k);
 
+        if (sigint_caught)
+            leave = true;
+
     } while (f_status == MC_UNKNOWN && !leave);
 }
+
+void BMC::exploration( Expr_ptr phi )
+{
+    /* thread locals */
+    Engine engine;
+    Expr_ptr ctx = em().make_empty();
+
+    Expr_ptr invariant
+        (phi);
+
+    CompilationUnit ii
+        (compiler().process( ctx, invariant));
+
+    Expr_ptr violation
+        (em().make_not(invariant));
+
+    CompilationUnit vv
+        (compiler().process( ctx, violation));
+
+    step_t k = 0; // to infinity...
+    bool leave = false; // TODO: somebody telling us to stop
+
+    /* initial states */
+    assert_fsm_init(engine, k);
+    assert_fsm_invar(engine, k);
+
+    do {
+        TRACE
+            << "exploration: looking for loop-free path (k = " << k << ")..."
+            << std::endl;
+
+        if (STATUS_UNSAT == engine.solve()) {
+            TRACE
+                << "Found exploration proof (k = " << k << "), invariant `" << invariant
+                << "` is TRUE."
+                << std::endl;
+            test_and_set_status( MC_TRUE );
+            return;
+        }
+        else {
+            f_explored_k = k;
+        }
+
+        /* unrolling */
+        assert_fsm_trans(engine, k ++);
+        assert_fsm_invar(engine, k);
+
+        /* build state uniqueness constraint for each pair of states
+           (j, k), where j < k */
+        for (step_t j = 0; j < k; ++ j)
+            assert_fsm_uniqueness(engine, j, k);
+
+        if (sigint_caught)
+            leave = true;
+
+    } while (f_status == MC_UNKNOWN && !leave);
+}
+
 
 void BMC::kinduction( Expr_ptr phi )
 {
@@ -130,17 +197,26 @@ void BMC::kinduction( Expr_ptr phi )
     Expr_ptr invariant
         (phi);
 
-    CompilationUnit ii (compiler().process( ctx, invariant));
+    CompilationUnit ii
+        (compiler().process( ctx, invariant));
 
-    Expr_ptr violation = em().make_not(invariant);
-    CompilationUnit vv (compiler().process( ctx, violation));
+    Expr_ptr violation
+        (em().make_not(invariant));
 
-    step_t j, k = 0; // to infinity...
+    CompilationUnit vv
+        (compiler().process( ctx, violation));
+
+    step_t k = 0; // to infinity...
     bool leave = false; // TODO: somebody telling us to stop
 
     do {
         /* assert violation in a separate group */
         assert_formula(engine, k, vv, engine.new_group());
+
+        // busy waiting :-/
+        while (f_status == MC_UNKNOWN &&
+               (UINT_MAX == f_explored_k || f_explored_k < k))
+            ;
 
         TRACE
             << "K-induction: looking for proof (k = " << k << ")..."
@@ -166,40 +242,27 @@ void BMC::kinduction( Expr_ptr phi )
 
         /* build state uniqueness constraint for each pair of states
            (j, k), where j < k */
-        for (j = 0; j < k; ++ j)
+        for (step_t j = 0; j < k; ++ j)
             assert_fsm_uniqueness(engine, j, k);
 
+        if (sigint_caught)
+            leave = true;
+
     } while (f_status == MC_UNKNOWN && !leave);
-
-    TRACE
-        << "K-induction: giving up."
-        << std::endl;
 }
-
-// comment out when debugging
-#define ENABLE_FALSIFICATION
-#define ENABLE_KINDUCTION
 
 void BMC::process(const Expr_ptr phi)
 {
     f_status = MC_UNKNOWN;
 
     /* launch parallel threads */
-    #ifdef ENABLE_FALSIFICATION
+    boost::thread expl(&BMC::exploration, this, phi);
     boost::thread base(&BMC::falsification, this, phi);
-    #endif
-
-    #ifdef ENABLE_KINDUCTION
     boost::thread step(&BMC::kinduction, this, phi);
-    #endif
 
-    #ifdef ENABLE_FALSIFICATION
+    expl.join();
     base.join();
-    #endif
-
-    #ifdef ENABLE_KINDUCTION
     step.join();
-    #endif
 
     TRACE
         << "Done."

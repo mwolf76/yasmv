@@ -116,8 +116,11 @@ void Compiler::walk_leaf(const Expr_ptr expr)
      *    necessary */
     else if (symb->is_variable()) {
 
+        const Variable& var
+            (symb -> as_variable());
+
         Type_ptr type
-            (symb->as_variable().type());
+            (var.type());
 
         if (type -> is_instance()) {
             f_type_stack.push_back(type);
@@ -125,7 +128,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         }
 
         TimedExpr key
-            (full, time);
+            (full, var.is_frozen() ? 0 : time);
 
         Encoding_ptr enc
             (find_encoding(key, type));

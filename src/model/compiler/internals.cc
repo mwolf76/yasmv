@@ -356,10 +356,10 @@ Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type 
     /* build a new encoding for this symbol if none is available. */
     res = f_enc.find_encoding(key);
     if (! res) {
-        // DRIVEL
-        //     << "Registering new encoding of type "
-        //     << type << " for " << key
-        //     << std::endl;
+        DEBUG
+            << "Registering new encoding of type "
+            << type << " for " << key
+            << std::endl;
 
         res = f_enc.make_encoding(type);
         f_enc.register_encoding(key, res);

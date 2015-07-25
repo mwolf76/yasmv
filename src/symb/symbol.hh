@@ -89,6 +89,10 @@ public:
 
 class Symbol {
 public:
+    Symbol()
+        : f_hidden(false)
+    {}
+
     virtual const Expr_ptr module()  const =0;
     virtual const Expr_ptr name() const =0;
 
@@ -106,6 +110,12 @@ public:
 
     bool is_define() const;
     Define& as_define() const;
+
+    bool is_hidden() const;
+    void set_hidden(bool value);
+
+private:
+    bool f_hidden;
 };
 
 class Constant
@@ -148,15 +158,16 @@ class Variable
     Type_ptr f_type;
     bool     f_input;
     bool     f_temp;
+    bool     f_frozen;
 
 public:
-    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type,
-             bool input = false, bool temp = false)
+    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type)
         : f_module(module)
         , f_name(name)
         , f_type(type)
-        , f_input(input)
-        , f_temp(temp)
+        , f_input(false)
+        , f_temp(false)
+        , f_frozen(false)
     {}
 
     const Expr_ptr module() const
@@ -168,10 +179,22 @@ public:
     const Type_ptr type() const
     { return f_type; }
 
-    inline bool input() const
+    void set_input(bool value)
+    { f_input = value; }
+
+    inline bool is_input() const
     { return f_input; }
 
-    inline bool temp() const
+    void set_frozen(bool value)
+    { f_frozen = value; }
+
+    inline bool is_frozen() const
+    { return f_frozen; }
+
+    void set_temp(bool value)
+    { f_temp = value; }
+
+    inline bool is_temp() const
     { return f_temp; }
 };
 

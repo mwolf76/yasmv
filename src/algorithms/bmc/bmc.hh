@@ -44,8 +44,18 @@ private:
     mc_status_t f_status;
     boost::mutex f_status_mutex;
 
-    /* strategies */
+    /**
+     * strategies
+     */
+
+    /* is there a k-path leading to a violation of P? */
     void falsification( Expr_ptr phi );
+
+    /* is there a loop-free k-path from the initial states ? */
+    void exploration( Expr_ptr phi );
+    step_t f_explored_k;
+
+    /* is there a loop-free k-path leading to a violation of P? */
     void kinduction( Expr_ptr phi );
 };
 

@@ -101,7 +101,6 @@ module_body
 module_decl
     :	/* variables and defines */
         fsm_var_decl
-    |   fsm_ivar_decl
 	|	fsm_define_decl
 
 		/* FSM definition */
@@ -110,12 +109,21 @@ module_decl
 	|	fsm_trans_decl
     ;
 
-fsm_ivar_decl
-    : 'IVAR'  fsm_ivar_decl_body
-    ;
-
 fsm_var_decl
-    : 'VAR'  fsm_var_decl_body
+scope {
+    int hidden;
+    int input;
+    int frozen;
+}
+@init {
+    $fsm_var_decl::hidden = 0;
+    $fsm_var_decl::input = 0;
+    $fsm_var_decl::frozen = 0;
+}
+    : ( '@hidden' { $fsm_var_decl::hidden = 1; } )?
+      ( '@input'  { $fsm_var_decl::input  = 1; } )?
+      ( '@frozen' { $fsm_var_decl::frozen = 1; } )?
+        'VAR'  fsm_var_decl_body
     ;
 
 fsm_param_decl
@@ -125,11 +133,6 @@ fsm_param_decl
 fsm_var_decl_body
 	: fsm_var_decl_clause
         ( ';' fsm_var_decl_clause)*
-	;
-
-fsm_ivar_decl_body
-	: fsm_ivar_decl_clause
-        ( ';' fsm_ivar_decl_clause)*
 	;
 
 fsm_param_decl_body
@@ -147,8 +150,17 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr vid (*expr_iter);
-                $smv::current_module->add_var(vid,
-                                              new Variable($smv::current_module->name(), vid, tp));
+                Variable_ptr var
+                    (new Variable($smv::current_module->name(), vid, tp));
+
+                if ($fsm_var_decl::hidden)
+                    var -> set_hidden(true);
+                if ($fsm_var_decl::input)
+                    var -> set_input(true);
+                if ($fsm_var_decl::frozen)
+                    var -> set_frozen(true);
+
+                $smv::current_module->add_var(vid, var);
             }
     }
 	;
@@ -170,24 +182,15 @@ fsm_param_decl_clause
 	;
 
 
-fsm_ivar_decl_clause
-@init {
-    ExprVector ev;
-}
-	: ids=identifiers[&ev] ':' tp=type
-    {
-            ExprVector::iterator expr_iter;
-            assert(NULL != tp);
-            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id = (*expr_iter);
-                Variable_ptr ivar = new Variable($smv::current_module->name(), id, tp, true);
-                $smv::current_module->add_var(id, ivar);
-            }
-    }
-	;
-
 fsm_define_decl
-    : 'DEFINE' fsm_define_decl_body
+scope {
+    int hidden;
+}
+@init {
+    $fsm_define_decl::hidden = 0;
+}
+    : ( '@hidden' { $fsm_define_decl::hidden = 1; } )?
+        'DEFINE' fsm_define_decl_body
     ;
 
 fsm_define_decl_body
@@ -202,6 +205,10 @@ fsm_define_decl_clause
 	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
       Define_ptr def = new Define($smv::current_module->name(), id, formals, body);
+
+      if ($fsm_define_decl::hidden)
+          def -> set_hidden(true);
+
       $smv::current_module->add_def(id, def);
     }
 	;

@@ -250,7 +250,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
         if (symb->is_variable()) {
 
             Variable& var (symb->as_variable());
-            if (! var.input() && ! var.temp()) {
+            if (! var.is_input() && ! var.is_temp()) {
 
                 Expr_ptr expr (var.name());
 
@@ -286,8 +286,8 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                     {
                         vec<Lit> ps;
                         ps.push( mkLit( jkne, true));
-                        ps.push( mkLit( jvar, true));
-                        ps.push( mkLit( kvar, true));
+                        ps.push( mkLit( jvar, false));
+                        ps.push( mkLit( kvar, false));
 
                         engine.add_clause(ps);
                     }
@@ -297,15 +297,17 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     }
 
     // ... and then assert at least one of them is true
-    vec<Lit> ps;
-    ps.push( mkLit( group, true));
+    {
+        vec<Lit> ps;
+        ps.push( mkLit( group, true));
 
-    for (VarVector::const_iterator eye = uniqueness_vars.begin();
-         eye != uniqueness_vars.end(); ++ eye) {
-        ps.push( mkLit( *eye, false));
+        for (VarVector::const_iterator eye = uniqueness_vars.begin();
+             eye != uniqueness_vars.end(); ++ eye) {
+            ps.push( mkLit( *eye, false));
+        }
+
+        engine.add_clause(ps);
     }
-
-    engine.add_clause(ps);
 }
 
 void Algorithm::assert_time_frame(Engine& engine,
