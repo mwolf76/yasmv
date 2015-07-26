@@ -82,7 +82,7 @@ Variant CheckInit::operator()()
 void CheckInit::usage()
 {
     std::cout
-        << "check_init <expression> - Checks propositional satisfiability for given expression at time 0."
+        << "check-init <expression> - Checks propositional satisfiability for given expression at time 0."
         << std::endl;
 }
 

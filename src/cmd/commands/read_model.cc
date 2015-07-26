@@ -88,7 +88,7 @@ Variant ReadModel::operator()()
 void ReadModel::usage()
 {
     std::cout
-        << "read_model <filename> - Reads a model from given filename[*]."
+        << "read-model <filename> - Reads a model from given filename[*]."
         << std::endl
         << "[*] either in single or double quotes."
         << std::endl;

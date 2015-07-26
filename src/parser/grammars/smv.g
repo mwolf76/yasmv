@@ -936,7 +936,7 @@ time_command returns [Command_ptr res]
     ;
 
 read_model_command returns [Command_ptr res]
-    :  'read_model'
+    :  'read-model'
         { $res = cm.make_read_model(); }
 
         ( input=filepath {
@@ -945,7 +945,7 @@ read_model_command returns [Command_ptr res]
     ;
 
 write_model_command returns [Command_ptr res]
-    :  'write_model'
+    :  'write-model'
         { $res = cm.make_write_model(); }
 
         ( output=filepath {
@@ -954,7 +954,7 @@ write_model_command returns [Command_ptr res]
     ;
 
 check_init_command returns[Command_ptr res]
-    : 'check_init'
+    : 'check-init'
       { $res = cm.make_check_init(); }
 
       init=toplevel_expression
@@ -962,7 +962,7 @@ check_init_command returns[Command_ptr res]
     ;
 
 check_invar_command returns[Command_ptr res]
-    : 'check_invar'
+    : 'check-invar'
       { $res = cm.make_check_invar(); }
 
       invar=toplevel_expression
@@ -970,12 +970,12 @@ check_invar_command returns[Command_ptr res]
     ;
 
 list_traces_command returns [Command_ptr res]
-    : 'list_traces'
+    : 'list-traces'
       { $res = cm.make_list_traces(); }
     ;
 
 dump_trace_command returns [Command_ptr res]
-    : 'dump_trace'
+    : 'dump-trace'
       { $res = cm.make_dump_trace(); }
 
     (
@@ -996,7 +996,7 @@ dump_trace_command returns [Command_ptr res]
     ;
 
 dup_trace_command returns [Command_ptr res]
-    : 'dup_trace'
+    : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
       trace_id=string
@@ -1007,7 +1007,7 @@ dup_trace_command returns [Command_ptr res]
     ;
 
 pick_state_command returns [Command_ptr res]
-    :   'pick_state'
+    :   'pick-state'
         { $res = cm.make_pick_state(); }
     (
          '-i' init_condition=toplevel_expression

@@ -44,6 +44,7 @@ typedef enum {
     MC_FALSE,
     MC_TRUE,
     MC_UNKNOWN,
+    MC_ERROR,
 } mc_status_t;
 
 class Command;

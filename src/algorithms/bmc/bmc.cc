@@ -50,26 +50,14 @@ BMC::~BMC()
         << std::endl;
 }
 
-void BMC::falsification( Expr_ptr phi )
+void BMC::falsification( Expr_ptr phi,
+                         CompilationUnit& ii,
+                         CompilationUnit& vv)
 {
     Engine engine;
-    Expr_ptr ctx
-        (em().make_empty());
 
-    Expr_ptr invariant
-        (phi);
-
-    CompilationUnit ii
-        (compiler().process( ctx, invariant));
-
-    Expr_ptr violation
-        (em().make_not(invariant));
-
-    CompilationUnit vv
-        (compiler().process( ctx, violation));
-
-    step_t k = 0; // to infinity...
-    bool leave = false; // TODO: somebody telling us to stop
+    step_t k = 0;
+    bool leave = false;
 
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
@@ -87,7 +75,8 @@ void BMC::falsification( Expr_ptr phi )
 
             WitnessMgr& wm = WitnessMgr::INSTANCE();
             TRACE
-                << "CEX witness exists (k = " << k << "), invariant `" << invariant
+                << "CEX witness exists (k = " << k << "), invariant `"
+                << phi
                 << "` is FALSE."
                 << std::endl;
 
@@ -134,22 +123,9 @@ void BMC::exploration( Expr_ptr phi )
 {
     /* thread locals */
     Engine engine;
-    Expr_ptr ctx = em().make_empty();
 
-    Expr_ptr invariant
-        (phi);
-
-    CompilationUnit ii
-        (compiler().process( ctx, invariant));
-
-    Expr_ptr violation
-        (em().make_not(invariant));
-
-    CompilationUnit vv
-        (compiler().process( ctx, violation));
-
-    step_t k = 0; // to infinity...
-    bool leave = false; // TODO: somebody telling us to stop
+    step_t k = 0;
+    bool leave = false;
 
     /* initial states */
     assert_fsm_init(engine, k);
@@ -162,7 +138,8 @@ void BMC::exploration( Expr_ptr phi )
 
         if (STATUS_UNSAT == engine.solve()) {
             TRACE
-                << "Found exploration proof (k = " << k << "), invariant `" << invariant
+                << "Found exploration proof (k = " << k << "), invariant `"
+                << phi
                 << "` is TRUE."
                 << std::endl;
             test_and_set_status( MC_TRUE );
@@ -188,26 +165,13 @@ void BMC::exploration( Expr_ptr phi )
 }
 
 
-void BMC::kinduction( Expr_ptr phi )
+void BMC::kinduction( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv)
 {
     /* thread locals */
     Engine engine;
-    Expr_ptr ctx = em().make_empty();
 
-    Expr_ptr invariant
-        (phi);
-
-    CompilationUnit ii
-        (compiler().process( ctx, invariant));
-
-    Expr_ptr violation
-        (em().make_not(invariant));
-
-    CompilationUnit vv
-        (compiler().process( ctx, violation));
-
-    step_t k = 0; // to infinity...
-    bool leave = false; // TODO: somebody telling us to stop
+    step_t k = 0;
+    bool leave = false;
 
     do {
         /* assert violation in a separate group */
@@ -224,7 +188,8 @@ void BMC::kinduction( Expr_ptr phi )
 
         if (STATUS_UNSAT == engine.solve()) {
             TRACE
-                << "Found k-induction proof (k = " << k << "), invariant `" << invariant
+                << "Found k-induction proof (k = " << k << "), invariant `"
+                << phi
                 << "` is TRUE."
                 << std::endl;
             test_and_set_status( MC_TRUE );
@@ -254,22 +219,49 @@ void BMC::kinduction( Expr_ptr phi )
 #define ENABLE_CLOSURE
 void BMC::process(const Expr_ptr phi)
 {
-    f_status = MC_UNKNOWN;
+    /* check everyting is ok before spawning */
+    Expr_ptr ctx
+        (em().make_empty());
 
-    /* launch parallel threads */
-    boost::thread base(&BMC::falsification, this, phi);
+    try {
+        TRACE
+            << "Compiling formula..."
+            << std::endl;
+
+        CompilationUnit ii
+            (compiler().process( ctx, phi));
+
+        CompilationUnit vv
+            (compiler().process( ctx, em().make_not(phi)));
+
+        f_status = MC_UNKNOWN;
+        /* launch parallel threads */
+        boost::thread base(&BMC::falsification, this, phi, ii, vv);
 
 #ifdef ENABLE_CLOSURE
-    boost::thread expl(&BMC::exploration, this, phi);
-    boost::thread step(&BMC::kinduction, this, phi);
+        boost::thread expl(&BMC::exploration, this, phi);
+        boost::thread step(&BMC::kinduction, this, phi, ii, vv);
 #endif
 
-    base.join();
+        base.join();
 
 #ifdef ENABLE_CLOSURE
     expl.join();
     step.join();
 #endif
+
+    }
+    catch (Exception& e) {
+        const char* tmp
+            (strdup(e.what()));
+
+        std::cerr
+            << tmp
+            << std::endl;
+
+        f_status = MC_ERROR;
+        return;
+    }
 
     TRACE
         << "Done."

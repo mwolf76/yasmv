@@ -45,7 +45,7 @@ Variant CheckInvar::operator()()
     BMC bmc
         (*this, ModelMgr::INSTANCE().model());
 
-    bmc.process( f_invar );
+    bmc.process(f_invar);
 
     std::ostringstream tmp;
     switch (bmc.status()) {
@@ -58,8 +58,12 @@ Variant CheckInvar::operator()()
     case MC_UNKNOWN:
         tmp << "Property could not be decided";
         break;
+    case MC_ERROR:
+        tmp << "Error";
+        break;
     default: assert( false ); /* unreachable */
     } /* switch */
+
     if (bmc.has_witness()) {
         Witness& w
             (bmc.witness());
@@ -78,7 +82,7 @@ Variant CheckInvar::operator()()
 void CheckInvar::usage()
 {
     std::cout
-        << "check_invar <expression> - Checks invariant property for given expression."
+        << "check-invar <expression> - Checks invariant property for given expression."
         << std::endl;
 }
 

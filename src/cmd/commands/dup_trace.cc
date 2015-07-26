@@ -66,6 +66,6 @@ Variant DupTrace::operator()()
 void DupTrace::usage()
 {
     std::cout
-        << "dup_trace <trace_uid> - Dups given trace."
+        << "dup-trace <trace_uid> - Dups given trace."
         << std::endl;
 }

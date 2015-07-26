@@ -120,7 +120,7 @@ Variant WriteModel::operator()()
 void WriteModel::usage()
 {
     std::cout
-        << "write_model [<filename>] - Write current model to given filename[*]."
+        << "write-model [<filename>] - Write current model to given filename[*]."
         << std::endl
         << "[*] either in single or double quotes. If no filename is given, model is written to standard output"
         << std::endl;

@@ -70,7 +70,7 @@ Variant ListTraces::operator()()
 // void ListTraces::usage()
 // {
 //     std::cout
-//         << "list_traces - Lists available traces."
+//         << "list-traces - Lists available traces."
 //         << std::endl;
 // }
 

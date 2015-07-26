@@ -171,6 +171,6 @@ Variant DumpTrace::operator()()
 void DumpTrace::usage()
 {
     std::cout
-        << "dump_trace <trace_uid> - Dumps given trace."
+        << "dump-trace <trace_uid> - Dumps given trace."
         << std::endl;
 }
