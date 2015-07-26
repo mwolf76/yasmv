@@ -157,7 +157,7 @@ void BMC::exploration( Expr_ptr phi )
 
     do {
         TRACE
-            << "exploration: looking for loop-free path (k = " << k << ")..."
+            << "Exploration: looking for loop-free path (k = " << k << ")..."
             << std::endl;
 
         if (STATUS_UNSAT == engine.solve()) {
