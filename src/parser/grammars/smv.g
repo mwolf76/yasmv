@@ -38,6 +38,34 @@ options {
 
 #include <model/model.hh>
 #include <model/model_mgr.hh>
+
+#ifndef GRAMMAR_EXCEPTION
+#define GRAMMAR_EXCEPTION
+class GrammarException : public Exception {
+
+    virtual const char* what() const throw()
+    {
+        std::ostringstream oss;
+        oss
+            << "Grammar exception: "
+            << f_message
+            << std::endl
+            ;
+
+        return (strdup(oss.str().c_str()));
+    }
+
+    std::string f_message;
+
+public:
+    GrammarException(const std::string &message)
+        : f_message(message)
+    {}
+
+    virtual ~GrammarException() throw()
+    {}
+};
+#endif
 }
 
 @members {
@@ -95,35 +123,45 @@ module_def
     ;
 
 module_body
-    :	module_decl ( ';' module_decl )*
+    :   module_decl ( ';' module_decl )*
     ;
 
 module_decl
-    :	/* variables and defines */
-        fsm_var_decl
-	|	fsm_define_decl
-
-		/* FSM definition */
-	|	fsm_init_decl
-    |   fsm_invar_decl
-	|	fsm_trans_decl
-    ;
-
-fsm_var_decl
 scope {
     int hidden;
     int input;
     int frozen;
 }
 @init {
-    $fsm_var_decl::hidden = 0;
-    $fsm_var_decl::input = 0;
-    $fsm_var_decl::frozen = 0;
+    $module_decl::hidden = 0;
+    $module_decl::input = 0;
+    $module_decl::frozen = 0;
 }
-    : ( '@hidden' { $fsm_var_decl::hidden = 1; } )?
-      ( '@input'  { $fsm_var_decl::input  = 1; } )?
-      ( '@frozen' { $fsm_var_decl::frozen = 1; } )?
-        'VAR'  fsm_var_decl_body
+
+    :   /* variables and defines */
+        fsm_decl_modifiers (
+            fsm_var_decl | fsm_define_decl
+        )
+
+        /* FSM definition */
+    |   fsm_init_decl
+    |   fsm_invar_decl
+    |   fsm_trans_decl
+    ;
+
+fsm_decl_modifiers
+    : ( '@'
+            (
+                'hidden' { $module_decl::hidden = 1; } |
+                'frozen' { $module_decl::frozen = 1; } |
+                'input'  { $module_decl::input  = 1; }
+       )) *
+    ;
+
+
+fsm_var_decl
+    :
+        'VAR' fsm_var_decl_body
     ;
 
 fsm_param_decl
@@ -131,20 +169,20 @@ fsm_param_decl
     ;
 
 fsm_var_decl_body
-	: fsm_var_decl_clause
+    : fsm_var_decl_clause
         ( ';' fsm_var_decl_clause)*
-	;
+    ;
 
 fsm_param_decl_body
-	: fsm_param_decl_clause
+    : fsm_param_decl_clause
         ( ',' fsm_param_decl_clause)*
-	;
+    ;
 
 fsm_var_decl_clause
 @init {
     ExprVector ev;
 }
-	: ids=identifiers[&ev] ':' tp=type
+    : ids=identifiers[&ev] ':' tp=type
     {
             ExprVector::iterator expr_iter;
             assert(NULL != tp);
@@ -153,23 +191,23 @@ fsm_var_decl_clause
                 Variable_ptr var
                     (new Variable($smv::current_module->name(), vid, tp));
 
-                if ($fsm_var_decl::hidden)
+                if ($module_decl::hidden)
                     var -> set_hidden(true);
-                if ($fsm_var_decl::input)
+                if ($module_decl::input)
                     var -> set_input(true);
-                if ($fsm_var_decl::frozen)
+                if ($module_decl::frozen)
                     var -> set_frozen(true);
 
                 $smv::current_module->add_var(vid, var);
             }
     }
-	;
+    ;
 
 fsm_param_decl_clause
 @init {
     ExprVector ev;
 }
-	: ids=identifiers[&ev] ':' tp=type
+    : ids=identifiers[&ev] ':' tp=type
     {
             ExprVector::iterator expr_iter;
             assert(NULL != tp);
@@ -179,81 +217,79 @@ fsm_param_decl_clause
                                                     new Parameter($smv::current_module->name(), pid, tp));
             }
     }
-	;
+    ;
 
 
 fsm_define_decl
-scope {
-    int hidden;
-}
-@init {
-    $fsm_define_decl::hidden = 0;
-}
-    : ( '@hidden' { $fsm_define_decl::hidden = 1; } )?
+    :
         'DEFINE' fsm_define_decl_body
     ;
 
 fsm_define_decl_body
-	: fsm_define_decl_clause
+    : fsm_define_decl_clause
         ( ';' fsm_define_decl_clause)*
-	;
+    ;
 
 fsm_define_decl_clause
 @init {
     ExprVector formals;
 }
-	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
+    : id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
       Define_ptr def = new Define($smv::current_module->name(), id, formals, body);
 
-      if ($fsm_define_decl::hidden)
+      if ($module_decl::input)
+          throw GrammarException("@input modifier not supported in DEFINE decls");
+      if ($module_decl::frozen)
+          throw GrammarException("@frozen modifier not supported in DEFINE decls");
+      if ($module_decl::hidden)
           def -> set_hidden(true);
 
       $smv::current_module->add_def(id, def);
     }
-	;
+    ;
 
 fsm_init_decl
     : 'INIT' fsm_init_decl_body
     ;
 
 fsm_init_decl_body
-	: fsm_init_decl_clause
+    : fsm_init_decl_clause
         (';' fsm_init_decl_clause)*
-	;
+    ;
 
 fsm_init_decl_clause
-	: expr=toplevel_expression
+    : expr=toplevel_expression
       { $smv::current_module->add_init(expr); }
-	;
+    ;
 
 fsm_invar_decl
     : 'INVAR' fsm_invar_decl_body
     ;
 
 fsm_invar_decl_body
-	: fsm_invar_decl_clause
+    : fsm_invar_decl_clause
         (';' fsm_invar_decl_clause)*
-	;
+    ;
 
 fsm_invar_decl_clause
-	: expr=toplevel_expression
+    : expr=toplevel_expression
       { $smv::current_module->add_invar(expr); }
-	;
+    ;
 
 fsm_trans_decl
     : 'TRANS' fsm_trans_decl_body
     ;
 
 fsm_trans_decl_body
-	: fsm_trans_decl_clause
+    : fsm_trans_decl_clause
         (';' fsm_trans_decl_clause)*
-	;
+    ;
 
 fsm_trans_decl_clause
-	: expr=toplevel_expression
+    : expr=toplevel_expression
       { $smv::current_module->add_trans(expr); }
-	;
+    ;
 
 // entry point
 toplevel_expression returns [Expr_ptr res]
@@ -263,7 +299,7 @@ toplevel_expression returns [Expr_ptr res]
 
 conditional_expression returns [Expr_ptr res]
 @init { }
-	: expr=logical_expression {
+    : expr=logical_expression {
          $res = expr;
       }
 
@@ -271,7 +307,7 @@ conditional_expression returns [Expr_ptr res]
             '?' lhs=toplevel_expression ':' rhs=toplevel_expression
             { $res = em.make_ite( em.make_cond($res, lhs), rhs); }
       )?
-	;
+    ;
 
 logical_expression returns [Expr_ptr res]
     : expr=logical_implies_expression
@@ -280,7 +316,7 @@ logical_expression returns [Expr_ptr res]
 
 logical_implies_expression returns [Expr_ptr res]
 @init { }
-	: lhs=logical_or_expression
+    : lhs=logical_or_expression
       { $res = lhs; }
 
     (
@@ -391,7 +427,7 @@ unary_ltl_expression returns [Expr_ptr res]
 
 equality_expression returns [Expr_ptr res]
 @init { }
-	: lhs=relational_expression
+    : lhs=relational_expression
       { $res = lhs; }
 
     ( '=' rhs=relational_expression
@@ -400,11 +436,11 @@ equality_expression returns [Expr_ptr res]
     | '!=' rhs=relational_expression
      { $res = em.make_ne($res, rhs); }
     )*
-	;
+    ;
 
 relational_expression returns [Expr_ptr res]
 @init { }
-	: lhs=shift_expression
+    : lhs=shift_expression
       { $res = lhs; }
 
     (
@@ -420,11 +456,11 @@ relational_expression returns [Expr_ptr res]
     | '>' rhs=shift_expression
       { $res = em.make_gt($res, rhs); }
     )*
-	;
+    ;
 
 shift_expression returns [Expr_ptr res]
 @init { }
-	: lhs=additive_expression
+    : lhs=additive_expression
       { $res = lhs; }
 
     (
@@ -434,11 +470,11 @@ shift_expression returns [Expr_ptr res]
     | '>>' rhs=additive_expression
        { $res = em.make_rshift($res, rhs); }
     )*
-	;
+    ;
 
 additive_expression returns [Expr_ptr res]
 @init { }
-	: lhs=multiplicative_expression
+    : lhs=multiplicative_expression
       { $res = lhs; }
 
     (
@@ -448,11 +484,11 @@ additive_expression returns [Expr_ptr res]
     |   '-' rhs=multiplicative_expression
         { $res = em.make_sub($res, rhs); }
     )*
-	;
+    ;
 
 multiplicative_expression returns [Expr_ptr res]
 @init { }
-	: lhs=cast_expression
+    : lhs=cast_expression
       { $res = lhs; }
 
     (
@@ -465,7 +501,7 @@ multiplicative_expression returns [Expr_ptr res]
     | '%' rhs=cast_expression
       { $res = em.make_mod($res, rhs); }
     )*
-	;
+    ;
 
 cast_expression returns [Expr_ptr res]
 @init {
@@ -473,14 +509,14 @@ cast_expression returns [Expr_ptr res]
 }
     : '(' tp = native_type ')' expr = cast_expression
         { $res = em.make_cast( tp -> repr(), expr ); }
-	|
+    |
         expr = unary_expression
         { $res = expr; }
-	;
+    ;
 
 unary_expression returns [Expr_ptr res]
 @init { }
-	: expr=postfix_expression
+    : expr=postfix_expression
       { $res = expr; }
 
     | expr=nondeterministic_expression
@@ -489,10 +525,10 @@ unary_expression returns [Expr_ptr res]
     | expr=array_expression
       { $res = expr; }
 
-	| 'next' '(' expr=toplevel_expression ')'
+    | 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
-	| '!' expr=postfix_expression
+    | '!' expr=postfix_expression
       { $res = em.make_not(expr); }
 
     | '~' expr=postfix_expression
@@ -500,7 +536,7 @@ unary_expression returns [Expr_ptr res]
 
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
-	;
+    ;
 
 nondeterministic_expression returns[Expr_ptr res]
 @init {
@@ -550,7 +586,7 @@ params returns [Expr_ptr res]
     ExprVector actuals;
     res = NULL;
 }
-	: ( expressions[&actuals]
+    : ( expressions[&actuals]
     {
             ExprVector::reverse_iterator expr_iter;
             res = NULL;
@@ -566,11 +602,11 @@ params returns [Expr_ptr res]
           res = em.make_empty();
     }
 
-	;
+    ;
 
 postfix_expression returns [Expr_ptr res]
 @init { }
-	:   lhs=basic_expression
+    :   lhs=basic_expression
         { $res = lhs; }
 
     (
@@ -590,10 +626,10 @@ basic_expression returns [Expr_ptr res]
     : id=identifier
       { $res = id; }
 
-	| k=constant
+    | k=constant
       { $res = k; }
 
-	| '(' expr=toplevel_expression ')'
+    | '(' expr=toplevel_expression ')'
       { $res = expr; }
 
     | expr=case_expression
@@ -649,19 +685,19 @@ expressions [ExprVector* exprs]
 
 identifier returns [Expr_ptr res]
 @init { }
-	: IDENTIFIER
+    : IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
-	;
+    ;
 
 constant returns [Expr_ptr res]
 @init {
 }
-	: HEX_LITERAL {
+    : HEX_LITERAL {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
-   	| x=DECIMAL_LITERAL {
+    | x=DECIMAL_LITERAL {
         Atom tmp (Atom((const char*)($x.text->chars)));
         $res = em.make_dec_const(tmp);
       }
@@ -670,17 +706,17 @@ constant returns [Expr_ptr res]
         Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
         $res = em.make_oct_const(tmp);
       }
-	;
+    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
 @init {}
-	: 'next' '(' expr=postfix_expression ')'
+    : 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
-	| expr=postfix_expression
+    | expr=postfix_expression
       { $res = expr; }
-	;
+    ;
 
 /* ordinary values used elsewhere */
 value returns [Expr_ptr res]
@@ -761,7 +797,7 @@ unsigned_int_type returns [Type_ptr res]
     int array_size = 0;
     char *p;
 }
-	:
+    :
         UNSIGNED_INT_TYPE
         {
             p = (char *) $UNSIGNED_INT_TYPE.text->chars;
@@ -790,7 +826,7 @@ signed_int_type returns [Type_ptr res]
     int array_size = 0;
     char *p;
 }
-	:
+    :
         SIGNED_INT_TYPE
         {
             p = (char *) $SIGNED_INT_TYPE.text->chars;
@@ -903,22 +939,18 @@ read_model_command returns [Command_ptr res]
     :  'read_model'
         { $res = cm.make_read_model(); }
 
-        input=filepath
-        {
+        ( input=filepath {
             ((ReadModel*) $res) -> set_input(input);
-            free((void *) input);
-        }
+        }) ?
     ;
 
 write_model_command returns [Command_ptr res]
     :  'write_model'
         { $res = cm.make_write_model(); }
 
-        output=filepath
-        {
+        ( output=filepath {
             ((WriteModel*) $res) -> set_output(output);
-            free((void *) output);
-        }
+        }) ?
     ;
 
 check_init_command returns[Command_ptr res]
@@ -1016,26 +1048,11 @@ string returns [pconst_char res]
     ;
 
 filepath returns [pconst_char res]
-@init {
-    std::ostringstream oss;
-}
-    : (
-            frag=filepath_fragment
-            { oss << frag; }
-    ) +
-    { $res = strdup(oss.str().c_str()); }
-    ;
+    : QUOTE
+    { $res = (pconst_char) $QUOTE.text -> chars; }
 
-filepath_fragment returns [pconst_char res]
-    :
-        s=string
-        { $res = s; }
-
-    |   '.'
-        { $res = "."; }
-
-    |   '/'
-        { $res = "/"; }
+    | dquote = DQUOTE
+    { $res = (pconst_char) $DQUOTE.text -> chars; }
     ;
 
 // -- Lexer rules --------------------------------------------------------------
@@ -1048,11 +1065,15 @@ SIGNED_INT_TYPE
     ;
 
 IDENTIFIER
-	:	ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
-	;
+    :   ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
+    ;
 
-FILEPATH
-    :  (FP_CHARS)+
+DQUOTE
+    : '\'' ~'\''* '\''
+    ;
+
+QUOTE
+    : '"' ~'"'* '"'
     ;
 
 fragment TYPE_WIDTH
@@ -1060,17 +1081,17 @@ fragment TYPE_WIDTH
     ;
 
 fragment ID_FIRST_CHAR
-	:	'A'..'Z' | 'a'..'z' | '_'
-	;
+    :   'A'..'Z' | 'a'..'z' | '_'
+    ;
 
 fragment FP_CHARS
-	:	'/' | '.' | '..'
-	;
+    :   '/' | '.' | '..'
+    ;
 
 fragment ID_FOLLOWING_CHARS
-	:	 ID_FIRST_CHAR
+    :    ID_FIRST_CHAR
     |    DECIMAL_DIGIT
-	;
+    ;
 
 HEX_LITERAL
    : '0' ('x'|'X') HEX_DIGIT+
@@ -1079,10 +1100,6 @@ HEX_LITERAL
 DECIMAL_LITERAL
    : ZERO | DECIMAL_FIRST DECIMAL_DIGIT*
    ;
-
-FRACTIONAL_LITERAL
-    : '.' FRACTIONAL_DIGIT*
-    ;
 
 OCTAL_LITERAL
    : ZERO OCTAL_DIGIT+

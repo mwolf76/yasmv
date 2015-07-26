@@ -39,8 +39,10 @@ WriteModel::~WriteModel()
 
 void WriteModel::set_output(pconst_char output)
 {
-    free(f_output);
-    f_output = strdup(output);
+    if (output) {
+        free(f_output);
+        f_output = strdup(output);
+    }
 }
 
 Variant WriteModel::operator()()
@@ -118,7 +120,9 @@ Variant WriteModel::operator()()
 void WriteModel::usage()
 {
     std::cout
-        << "write_mode <filname> - Write current model to given filename."
+        << "write_model [<filename>] - Write current model to given filename[*]."
+        << std::endl
+        << "[*] either in single or double quotes. If no filename is given, model is written to standard output"
         << std::endl;
 }
 

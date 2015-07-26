@@ -37,13 +37,46 @@ ReadModel::~ReadModel()
 
 void ReadModel::set_input(pconst_char input)
 {
-    free(f_input);
-    f_input = strdup(input);
+
+    if (input) {
+        bool has_quotes
+            (false);
+
+        unsigned len
+            (strlen(input));
+
+        if (('\'' == *input && '\'' == *(input + len - 1)) ||
+            ('"'  == *input && '"'  == *(input + len - 1)))
+            has_quotes = true;
+
+        free(f_input);
+
+        if (has_quotes) {
+            f_input = strdup(1 + input);
+            f_input[len -  2] = '\0';
+        }
+        else
+            f_input = strdup(input);
+
+        DEBUG
+            << "set input: "
+            << f_input
+            << std::endl;
+    }
 }
 
 extern bool parseFile(pconst_char input); // in utils.cc
 Variant ReadModel::operator()()
 {
+
+    if (! f_input) {
+        WARN
+            << "No input filename provided!"
+            << std::endl;
+
+        return Variant( "ERROR" );
+    }
+
     // parsing
     bool hasErrors = parseFile(f_input);
     if (! hasErrors)
@@ -55,7 +88,9 @@ Variant ReadModel::operator()()
 void ReadModel::usage()
 {
     std::cout
-        << "read_model <filename> - reads a model from given filename."
+        << "read_model <filename> - Reads a model from given filename[*]."
+        << std::endl
+        << "[*] either in single or double quotes."
         << std::endl;
 }
 
