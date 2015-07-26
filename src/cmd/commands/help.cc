@@ -50,15 +50,15 @@ Variant Help::operator()()
         std::cout << "Available topics: " << std::endl
                   << "- help" << std::endl
                   << "- time" << std::endl
-                  << "- read_model" << std::endl
-                  << "- write_model" << std::endl
-                  << "- pick_state" << std::endl
+                  << "- read-model" << std::endl
+                  << "- write-model" << std::endl
+                  << "- pick-state" << std::endl
                   << "- simulate" << std::endl
-                  << "- check_init" << std::endl
-                  << "- check_invar" << std::endl
-                  << "- list_traces" << std::endl
-                  << "- dump_trace" << std::endl
-                  << "- dup_trace" << std::endl
+                  << "- check-init" << std::endl
+                  << "- check-invar" << std::endl
+                  << "- list-traces" << std::endl
+                  << "- dump-trace" << std::endl
+                  << "- dup-trace" << std::endl
                   << "- quit" << std::endl
                   << std::endl;
 
