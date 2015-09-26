@@ -21,7 +21,7 @@
 #ifndef LIST_TRACES_CMD_H
 #define LIST_TRACES_CMD_H
 
-#include <cmd/commands/commands.hh>
+#include <cmd/command.hh>
 
 class ListTraces : public Command {
 public:
@@ -29,7 +29,7 @@ public:
     virtual ~ListTraces();
 
     Variant virtual operator()();
-    void usage();
+    void virtual usage();
 };
 
 #endif
