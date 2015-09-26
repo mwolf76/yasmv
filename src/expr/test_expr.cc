@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr neg_x = em.make_neg(x);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << neg_x; BOOST_CHECK (oss.str() == std::string("- x"));
+        printer << neg_x; BOOST_CHECK (oss.str() == std::string("-x"));
     }
 
     {
