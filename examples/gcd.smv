@@ -1,8 +1,11 @@
+-- This file is part of the Yasmine distribution
+-- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
 #word-width 64
 MODULE main
 
 VAR a : uint;
-VAR b : uint;
+    b : uint;
 
 INIT
     a = 5175833502;
@@ -16,7 +19,11 @@ TRANS
 TRANS
    next(b) = a % b;
 
--- Symbols starting with an underline (_) do not show up in traces.
-DEFINE _GOAL := b = 0;
+@hidden
+DEFINE GOAL := b = 0;
+
+-- to calculate gcd issue the command:
+-- >> check-invar ! GOAL;
+
 
 
