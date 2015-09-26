@@ -1,3 +1,6 @@
+-- This file is part of the Yasmine distribution
+-- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
 MODULE main
 
 VAR
@@ -44,7 +47,8 @@ TRANS
 
 -- To perform planning, we assert the negation of the desired GOAL.
 -- To solve the ferryman problem in this model try this:
--- >> check_invar ! _GOAL
+-- >> check-invar ! GOAL
 
 -- Symbols starting with an underline (_) do not show up in traces.
-DEFINE _GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
+@hidden
+DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;

@@ -1,3 +1,6 @@
+-- This file is part of the Yasmine distribution
+-- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
 #word-width 6
 MODULE main
 
@@ -67,4 +70,4 @@ DEFINE
   GOAL := x = 7 && y = 7;
 
 -- to solve the labyrinth issue the command:
--- check_invar ! GOAL;
+-- >> check-invar ! GOAL;
