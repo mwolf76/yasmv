@@ -84,8 +84,11 @@
  * operator, type conversions take place as a pre-processing. The
  * following rules apply:
  *
- * 1. When one of the two operands is signed the other one is also converted to signed.
- * 2. The size of the result fits the largest size of the involved operands.
+ * 1. When one of the two operands is signed the other one is also
+ * converted to signed;
+ *
+ * 2. The size of the result fits the largest size of the involved
+ * operands.
  *
  **/
 #ifndef TYPE_H
@@ -93,7 +96,6 @@
 
 #include <list>
 
-// #include <common.hh>
 #include <dd/cudd_mgr.hh>
 
 #include <expr/expr.hh>
