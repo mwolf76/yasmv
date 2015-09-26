@@ -26,18 +26,20 @@
 
 #ifndef PRINTER_H
 #define PRINTER_H
-#include <expr_walker.hh>
+
+#include <string>
+#include <expr/walker/walker.hh>
 
 class Printer : public ExprWalker {
-    ostream& f_os;
+    std::ostream& f_os;
 
 public:
     Printer(); // defaults to std::cout
-    Printer(ostream& os);
+    Printer(std::ostream& os);
 
     ~Printer();
 
-    Printer& operator<<(const string& str);
+    Printer& operator<<(const std::string& str);
 
     Printer& operator<<(Expr& expr);
     Printer& operator<<(Expr_ptr expr);

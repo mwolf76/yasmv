@@ -18,7 +18,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **/
-#include "opts.hh"
+#include <sstream>
+
+#include <opts.hh>
 
 // static initialization
 OptsMgr_ptr OptsMgr::f_instance = NULL;
@@ -28,7 +30,11 @@ OptsMgr::OptsMgr()
     , f_pos()
     , f_vm()
     , f_help(false)
+    , f_word_width(UINT_MAX)
 {
+    f_started = false;
+    f_color = false;
+
     f_desc.add_options()
 
         (
@@ -44,7 +50,7 @@ OptsMgr::OptsMgr()
         (
          "word-width",
          options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
-         "native word size in bits, used for algebrization of constant ITEs and arrays"
+         "native word size in bits"
         )
 
         (
@@ -55,7 +61,7 @@ OptsMgr::OptsMgr()
 
         (
          "model",
-         options::value<string>(),
+         options::value<std::string>(),
          "input model"
         )
         ;
@@ -92,18 +98,50 @@ bool OptsMgr::color() const
     return f_color;
 }
 
-unsigned OptsMgr::word_width() const
+void OptsMgr::set_word_width(unsigned value)
 {
-    unsigned res = f_vm["word-width"].as<unsigned>();
-    return res;
+    TRACE
+        << "Setting word width to "
+        << value
+        << std::endl;
+
+    f_word_width = value;
 }
 
-string OptsMgr::model() const
+unsigned OptsMgr::word_width() const
 {
-    string res = "";
+    return (UINT_MAX != f_word_width) ? f_word_width
+        : f_vm["word-width"].as<unsigned>();
+}
+
+void OptsMgr::set_precision(unsigned value)
+{
+    TRACE
+        << "Setting precision to "
+        << value
+        << std::endl;
+
+    f_precision = value;
+
+    if (f_precision < 4)
+        WARN
+            << "Warning! No decimal digits will be shown in fixed-point values"
+            << std::endl;
+}
+
+unsigned OptsMgr::precision() const
+{
+    return (UINT_MAX != f_precision) ? f_precision
+        : f_vm["precision"].as<unsigned>();
+}
+
+
+std::string OptsMgr::model() const
+{
+    std::string res = "";
 
     if (f_vm.count("model")) {
-        res = f_vm["model"].as<string>();
+        res = f_vm["model"].as<std::string>();
     }
 
     return res;
@@ -114,9 +152,9 @@ bool OptsMgr::help() const
     return f_help;
 }
 
-string OptsMgr::usage() const
+std::string OptsMgr::usage() const
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << f_desc;
     return oss.str();
 }

@@ -1,3 +1,4 @@
+
 /*
  * @file interpreter.cc
  * @brief Command interpreter subsystem related classes and definitions.
@@ -19,8 +20,75 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <command.hh>
+#include <iostream>
+#include <sstream>
+
+#include <commands/commands.hh>
 #include <interpreter.hh>
+
+#include <config.h>
+
+
+#ifdef HAVE_LIBREADLINE
+#  if defined(HAVE_READLINE_READLINE_H)
+#    include <readline/readline.h>
+#  elif defined(HAVE_READLINE_H)
+#    include <readline.h>
+#  else /* !defined(HAVE_READLINE_H) */
+#    error Unsupported libreadline
+#  endif /* !defined(HAVE_READLINE_H) */
+#else /* !defined(HAVE_READLINE_READLINE_H) */
+/* no readline,  provide fallback */
+char* readline(const char *prompt)
+{
+    static char *buf= NULL;
+    const int LINE_BUFSIZE (0x200);
+
+    if (prompt)
+        fputs( prompt, stdout);
+
+    buf = (char *) malloc(LINE_BUFSIZE);
+    return fgets( buf, LINE_BUFSIZE, stdin);
+}
+#endif /* HAVE_LIBREADLINE */
+
+#ifdef HAVE_READLINE_HISTORY
+#  if defined(HAVE_READLINE_HISTORY_H)
+#    include <readline/history.h>
+#  elif defined(HAVE_HISTORY_H)
+#    include <history.h>
+#  else /* !defined(HAVE_HISTORY_H) */
+#    error Unsupported readline history
+#  endif /* defined(HAVE_READLINE_HISTORY_H) */
+#else /* HAVE_READLINE_HISTORY */
+/* no history, provide fallback */
+void add_history (const char*)
+{}
+#endif
+
+/* A static variable for holding the line. */
+static char *line_read = (char *)NULL;
+
+/* Read a string, and return a pointer to it.
+   Returns NULL on EOF. */
+char * rl_gets ()
+{
+    /* If the buffer has already been allocated, return the memory to
+       the free pool. */
+    if (line_read) {
+      free (line_read);
+      line_read = (char *)NULL;
+    }
+
+  /* Get a line from the user. */
+  line_read = readline (">> ");
+
+  /* If the line has any text in it, save it on the history. */
+  if (line_read && *line_read)
+      add_history (line_read);
+
+  return (line_read);
+}
 
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
@@ -39,13 +107,23 @@ Interpreter::Interpreter()
     , f_in(& std::cin)
     , f_out(& std::cout)
     , f_err(& std::cerr)
+
+    , f_epoch(time(NULL))
 {
-    DEBUG << "Initialized command interpreter @" << this << endl;
+    const void* instance(this);
+    DEBUG
+        << "Initialized command interpreter @"
+        << instance
+        << std::endl;
 }
 
 Interpreter::~Interpreter()
 {
-    DEBUG << "Deinitialized command interpreter @" << this << endl;
+    const void* instance(this);
+    DEBUG
+        << "Deinitialized command interpreter @"
+        << instance
+        << std::endl;
 }
 
 void Interpreter::quit(int retcode)
@@ -54,7 +132,7 @@ void Interpreter::quit(int retcode)
     f_leaving = true;
 }
 
-extern  ICommand* parseCommand(const char *command); // in utils.cc
+extern CommandVector_ptr parseCommand(const char *command_line);
 Variant& Interpreter::operator()(Command_ptr cmd)
 {
     assert(NULL != cmd);
@@ -64,7 +142,12 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        f_last_result = Variant(e.what());
+        pconst_char what
+            (e.what());
+
+        f_last_result = Variant(what);
+
+        free((void *) what);
     }
 
     delete cmd;
@@ -73,42 +156,52 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 Variant& Interpreter::operator()()
 {
-    prompt();
+    std::ostream& err
+        (std::cerr);
 
-    try {
-        string cmdLine;
-        if (std::getline(*f_in, cmdLine)) {
-            Command_ptr cmd = parseCommand(cmdLine.c_str());
-            if (NULL != cmd) {
+    char *cmdline
+        (rl_gets());
 
-                bool color (OptsMgr::INSTANCE().color());
-                if (color) {
-                    cout << green
-                         << "<< "
-                         << cmdLine
-                         << normal
-                         << endl;
+    if (cmdline) {
+        CommandVector_ptr cmds
+            (parseCommand(cmdline));
+
+        if (cmds) {
+            for (CommandVector::const_iterator i = cmds->begin();
+                 cmds->end() != i; ++ i) {
+
+                Command_ptr cmd
+                    (*i);
+
+                try {
+                    (*this)(cmd);
                 }
-                else {
-                    cout << "<< "
-                         << cmdLine
-                         << endl;
-                }
+                catch (Exception &e) {
+                    pconst_char what
+                        (e.what());
+                    err
+                        << what
+                        << std::endl;
 
-                (*this)(cmd);
-            }
-            else {
-                f_last_result = Variant("Parsing Error");
+                    f_last_result = Variant("Caught exception");
+
+                    free((void *) what);
+                }
             }
         }
-        else {
-            f_last_result = Variant("BYE");
-            f_leaving = true;
-        }
+        else f_last_result = "No operation";
+
     }
-    catch (Exception &e) {
-        f_last_result = Variant("Caught exception");
+    else {
+        f_last_result = Variant("BYE");
+        f_leaving = true;
     }
 
     return f_last_result;
 }
+
+void Interpreter::register_job( Job& job )
+{
+    f_jobs.push_back( &job );
+}
+

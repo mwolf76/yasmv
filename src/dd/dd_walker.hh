@@ -24,8 +24,9 @@
 #define DD_WALKER_H
 
 #include <common.hh>
+#include <stack>
 
-#include <dd.hh>
+#include <dd/dd.hh>
 #include <cuddInt.h>
 
 typedef enum {
@@ -44,7 +45,7 @@ struct add_activation_record {
         , node(dd)
     {}
 };
-typedef stack<struct add_activation_record> add_walker_stack;
+typedef std::stack<struct add_activation_record> add_walker_stack;
 
 class DDWalkerException : public Exception
 {

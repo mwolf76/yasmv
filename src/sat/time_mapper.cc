@@ -24,10 +24,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
+#include <utility>
 #include <sat.hh>
 
-TimeMapper::TimeMapper(SAT& owner)
+TimeMapper::TimeMapper(Engine& owner)
     : f_owner(owner)
 {}
 
@@ -46,9 +46,15 @@ Var TimeMapper::var(const TCBI& tcbi)
         /* generate a new var and book it. */
         var = f_owner.new_sat_var();
 
-        // DRIVEL << "Adding VAR " << var << " for " << tcbi << endl;
-        f_tcbi2var_map.insert( make_pair<TCBI, Var>(tcbi, var));
-        f_var2tcbi_map.insert( make_pair<Var, TCBI>(var, tcbi));
+        DRIVEL
+            << "Adding VAR "
+            << var
+            << " for "
+            << tcbi
+            << std::endl;
+
+        f_tcbi2var_map.insert( std::make_pair<TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( std::make_pair<Var, TCBI>(var, tcbi));
     }
 
     return var;

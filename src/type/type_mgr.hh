@@ -18,88 +18,31 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  **/
 
 #ifndef TYPE_MGR_H
 #define TYPE_MGR_H
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <boost/unordered_map.hpp>
 
-#include <type.hh>
+#include <symb/symbol.hh>
 
-#include <symbol.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type_resolver.hh>
+#include <type/type.hh>
+#include <type/type_resolver.hh>
 
-typedef unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
-typedef pair<TypeMap::iterator, bool> TypeHit;
+typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 
-/* The TypeMgr has three well-defined responsibilites:
+/*
+   The TypeMgr has two well-defined responsibilites:
 
    1. It keeps track of types that has been defined;
-
-   2. It instantiates (and owns) type descriptors (Type objects);
-
-   3. It is the single authoritative source for determining the
-   resulting type of an operand, via the result_type methods. */
+   2. It instantiates (and owns) type descriptors (Type objects).
+*/
 
 typedef class TypeMgr* TypeMgr_ptr;
-
-class Enum : public IEnum {
-    const Expr_ptr f_ctx;
-    const Expr_ptr f_name;
-    const EnumType_ptr f_type;
-
-public:
-    Enum(const Expr_ptr ctx, const Expr_ptr name, EnumType_ptr type)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_type(type)
-    {}
-
-    virtual const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    virtual const Expr_ptr name() const
-    { return f_name; }
-
-    virtual const Expr_ptr expr() const
-    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
-
-    virtual const Type_ptr type() const
-    { return f_type; }
-};
-
-class Literal : public ILiteral {
-    const IEnum_ptr f_owner;
-    const Expr_ptr f_name;
-
-public:
-    Literal(IEnum_ptr owner, const Expr_ptr name)
-        : f_owner(owner)
-        , f_name(name)
-    {}
-
-    virtual const Expr_ptr ctx() const
-    { return f_owner->ctx(); }
-
-    virtual const Expr_ptr name() const
-    { return  f_name; }
-
-    virtual const Type_ptr type() const
-    { return f_owner->type(); }
-
-    virtual const Expr_ptr expr() const
-    { return ExprMgr::INSTANCE().make_dot( ctx(), name() ); }
-
-    virtual value_t value() const
-    { return dynamic_cast<EnumType_ptr> (type())->value(expr()); }
-};
 
 class TypeMgr {
 
@@ -107,63 +50,36 @@ class TypeMgr {
     Type_ptr f_ctx_type;
 
     /* Shared enums and literals */
-    Enums f_enums;
     Literals f_lits;
 
 public:
 
-    inline IResolver_ptr resolver()
-    { return &f_resolver; }
+    const ScalarType_ptr find_boolean();
+    const ArrayType_ptr find_boolean_array(unsigned size);
 
-    /* -- inference --------------------------------------------------------- */
-    inline const ScalarType_ptr find_boolean()
-    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_boolean_type() ]); }
+    /* Remark: following C scoping rules for enums, enums are *globals* */
+    const ScalarType_ptr find_enum(ExprSet& lits);
+    const ArrayType_ptr find_enum_array(ExprSet& lits, unsigned size);
 
-    inline const ScalarType_ptr find_constant()
-    { return dynamic_cast<ScalarType_ptr> (f_register[ f_em.make_constant_type() ]); }
+    const ScalarType_ptr find_constant(unsigned width);
 
-    /* -- abstract types ---------------------------------------------------- */
-    const ScalarType_ptr find_signed_type();
-    const ScalarType_ptr find_unsigned_type();
-    const ArrayType_ptr find_array_type( ScalarType_ptr of );
+    const ScalarType_ptr find_signed(unsigned width);
+    const ArrayType_ptr  find_signed_array(unsigned width, unsigned size);
 
-    /* -- decls ------------------------------------------------------------- */
-    const ScalarType_ptr find_signed(unsigned digits);
-    const ScalarType_ptr find_signed(unsigned magnitude, unsigned fractional);
-
-    const ScalarType_ptr find_default_signed();
-    const ArrayType_ptr find_signed_array(unsigned digits,
-                                          unsigned size);
-    const ArrayType_ptr find_signed_array(unsigned magnitude,
-                                          unsigned fractional,
-                                          unsigned size);
-
-    const ScalarType_ptr find_unsigned(unsigned digits);
-    const ScalarType_ptr find_unsigned(unsigned magnitude, unsigned fractional);
-
-    const ScalarType_ptr find_default_unsigned();
-    const ArrayType_ptr find_unsigned_array(unsigned digits,
-                                            unsigned size);
-    const ArrayType_ptr find_unsigned_array(unsigned magnitude,
-                                            unsigned fractional,
-                                            unsigned size);
+    const ScalarType_ptr find_unsigned(unsigned width);
+    const ArrayType_ptr find_unsigned_array(unsigned width, unsigned size);
 
     const Type_ptr find_type_by_def(const Expr_ptr expr);
 
-    /* Remark: unambiguous enums resolution requires DOT fullnames */
-    void add_enum(Expr_ptr ctx, Expr_ptr name, ExprSet& lits);
-    const ScalarType_ptr find_enum(Expr_ptr ctx, Expr_ptr name);
+    const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
 
-    const Enums& enums() const
-    { return f_enums; }
+    const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
+
     const Literals& literals() const
     { return f_lits; }
 
-    /** Determine the resulting type of an operation given the type of its
-        operands. */
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-    Type_ptr result_type(Expr_ptr expr, Type_ptr cnd, Type_ptr lhs, Type_ptr rhs);
+    inline Resolver_ptr resolver()
+    { return &f_resolver; }
 
     /** Singleton instance accessor */
     static inline TypeMgr& INSTANCE() {
@@ -187,16 +103,13 @@ private:
 
     /* --- low-level services ----------------------------------------------- */
 
-    /** service of result_type */
-    Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
-
     // register a type
-    void register_type(const Expr_ptr expr, Type_ptr vtype);
+    inline void register_type(const Expr_ptr expr, Type_ptr vtype) {
+        assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
+        f_register [ expr ] = vtype;
+    }
 
-    // lookup up a type, returns NULL if not found
+    // lookup up a type from its repr, returns NULL if not found
     inline Type_ptr lookup_type(const Expr_ptr expr)
     { return f_register [ expr ]; }
 

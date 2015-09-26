@@ -59,37 +59,28 @@
 
 #include <logging.hh>
 
-#include <micro_mgr.hh>
+#include <sat/helpers.hh>
 
-static const string heading_msg = \
+static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
     "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
     "https://github.com/mwolf76/gnuSMV\n";
 
-static void heading()
-{ cout << heading_msg << endl; }
-
-static void usage()
-{
-    cout << OptsMgr::INSTANCE().usage()
-         << endl ;
-}
-
 /* these are unused, just for debugging purposes withing gdb */
 void pe(Expr_ptr e)
-{ cerr << e << endl; }
+{ std::cerr << e << std::endl; }
 
-void pf(FQExpr& e)
-{ cerr << e << endl; }
+void pf(TimedExpr e)
+{ std::cerr << e << std::endl; }
 
 void pu(UCBI& ucbi)
-{ cerr << ucbi << endl; }
+{ std::cerr << ucbi << std::endl; }
 
 void pt(TCBI& tcbi)
-{ cerr << tcbi << endl; }
+{ std::cerr << tcbi << std::endl; }
 
-void pd(MicroDescriptor& md)
-{ cerr << md << endl; }
+void pd(InlinedOperatorDescriptor& md)
+{ std::cerr << md << std::endl; }
 
 void batch(Command_ptr cmd)
 {
@@ -97,19 +88,25 @@ void batch(Command_ptr cmd)
     bool color (OptsMgr::INSTANCE().color());
     Variant& res = system(cmd);
     if (color) {
-        cout << endl << yellow << "<< "
-             << res << normal << endl;
+        std::cout
+            << std::endl
+            << yellow << "<< " << res
+            << normal << std::endl;
     }
     else {
-        cout << endl << "<< " << res
-             << endl;
+        std::cout << std::endl << "<< " << res
+                  << std::endl;
     }
 }
 
 void sighandler(int signum)
 {
     if (signum == SIGINT) {
-        cout << endl << "Caught SIGINT signal" << endl;
+        std::cout
+            << std::endl
+            << "Caught SIGINT signal"
+            << std::endl;
+
         sigint_caught = 1;
     }
 }
@@ -120,29 +117,42 @@ void process()
     Interpreter& system = Interpreter::INSTANCE();
 
     Variant& res = system();
-    bool color (OptsMgr::INSTANCE().color());
+    bool color
+        (OptsMgr::INSTANCE().color());
+
     if (color) {
-        cout << endl << yellow << "<< "
-             << res << normal << endl;
+        std::cout
+            << std::endl
+            << yellow << "<< "
+            << res << normal
+            << std::endl;
     }
     else {
-        cout << endl << "<< " << res
-             << endl;
+        std::cout
+            << std::endl
+            << "<< " << res
+            << std::endl;
     }
 }
 
 int main(int argc, const char *argv[])
 {
-    heading();
+    std::cout
+        << heading_msg
+        << std::endl;
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGINT, sighandler);
 
     /* load microcode */
-    MicroMgr& mm = MicroMgr::INSTANCE();
-    cout << mm.loaders().size()
-         << " microcode loaders registered."
-         << endl
+    InlinedOperatorMgr& mm
+        (InlinedOperatorMgr::INSTANCE());
+    uint32_t nloaders
+        (mm.loaders().size());
+    TRACE
+        << nloaders
+        << " loaders registered."
+        << std::endl
     ;
 
     Interpreter& system = Interpreter::INSTANCE();
@@ -152,26 +162,38 @@ int main(int argc, const char *argv[])
         opts_mgr.parse_command_line(argc, argv);
 
         if (opts_mgr.help()) {
-            usage();
+            std::cout
+                << OptsMgr::INSTANCE().usage()
+                << std::endl ;
+
             exit(0);
         }
 
         // Run options-generated commands (if any)
-        const string model_filename = opts_mgr.model();
+        const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
-            Command_ptr cmd = CommandMgr::INSTANCE().make_load_model(model_filename.c_str());
+            ReadModel* cmd
+                (reinterpret_cast<ReadModel*>
+                 (CommandMgr::INSTANCE().make_read_model()));
+
+            cmd -> set_input( model_filename.c_str());
             batch(cmd);
         }
 
-        // interactive cmd loop
         do {
-            thread t(&process);
-            t.join();
+            process();
         } while (! system.is_leaving());
     }
 
     catch (Exception &e) {
-        cerr << red << e.what() << endl;
+        pconst_char what
+            (e.what());
+
+        std::cerr
+            << red << what
+            << std::endl;
+
+        free ((void *) what);
     }
 
     return system.retcode();

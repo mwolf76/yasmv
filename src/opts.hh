@@ -33,18 +33,21 @@ namespace options = boost::program_options;
 
 // -- system defaults
 const unsigned DEFAULT_WORD_WIDTH     = 16;
+const unsigned DEFAULT_PRECISION      = 0;
 const unsigned DEFAULT_VERBOSITY      = 0;
 
 class OptsMgr {
 
 public:
     static OptsMgr& INSTANCE() {
-        if (! f_instance) f_instance = new OptsMgr();
+        if (! f_instance)
+            f_instance = new OptsMgr();
+
         return (*f_instance);
     }
 
     // the usage message
-    string usage() const;
+    std::string usage() const;
 
     // true iff help has been required
     bool help() const;
@@ -55,14 +58,16 @@ public:
     // colorized
     bool color() const;
 
-    // // number of bits per digit to be used in algebraic representation
-    // unsigned bits_per_digit() const;
-
     // native word size in bits, used for algebrization of constant ITEs and arrays
     unsigned word_width() const;
+    void set_word_width(unsigned);
+
+    // precision in bits, used for algebrization of constant ITEs and arrays
+    unsigned precision() const;
+    void set_precision(unsigned);
 
     // model filename
-    string model() const;
+    std::string model() const;
 
     // to be invoked by main
     void parse_command_line(int argc, const char **argv);
@@ -84,6 +89,9 @@ private:
     bool f_help;
     bool f_color;
     bool f_started;
+
+    unsigned f_word_width;
+    unsigned f_precision;
 };
 
 #endif

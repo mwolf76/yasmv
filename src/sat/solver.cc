@@ -26,22 +26,44 @@
 #include <sat.hh>
 #include <cstdlib>
 
-status_t SAT::sat_solve_groups(const Groups& groups)
+#include <sat/helpers.hh>
+
+/**
+ * @brief SAT instancte ctor
+ */
+Engine::Engine()
+    : f_enc_mgr(EncodingMgr::INSTANCE())
+    , f_mapper(* new TimeMapper(*this))
+    , f_registry(* new CNFRegistry(*this))
+    , f_solver()
+{
+    const void* instance(this);
+
+    /* MAINGROUP (=0) is already there. */
+    f_groups.push(new_sat_var());
+
+    DEBUG
+        << "Initialized Engine instance @"
+        << instance
+        << std::endl;
+}
+
+status_t Engine::sat_solve_groups(const Groups& groups)
 {
     vec<Lit> assumptions;
 
     clock_t t0 = clock();
-    DEBUG << "Solving ... " << endl;
-
-    Groups::const_iterator i;
-    for (i = groups.begin(); groups.end() != i; ++ i) {
-        int grp = *i;
+    for (int i = 0; i < groups.size(); ++ i) {
+        Var grp = groups[i];
 
         /* Assumptions work like "a -> phi", thus a non-negative
-           value enables group, whereas a negative value disables
-           it. */
+           value enables group, whereas a negative value disables it. */
         assumptions.push( mkLit( abs(grp), grp < 0));
     }
+
+    DEBUG
+        << "Solving ..."
+        << std::endl;
 
     f_status = f_solver.solve(assumptions)
         ? STATUS_SAT
@@ -50,8 +72,78 @@ status_t SAT::sat_solve_groups(const Groups& groups)
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;
-    DEBUG << "Took " << secs << " seconds. Status is " << f_status << "." << endl;
+
+    DEBUG
+        << "Took "
+        << secs
+        << " seconds. Status is "
+        << f_status << "."
+        << std::endl;
 
     return f_status;
 }
 
+void Engine::push(CompilationUnit cu, step_t time, group_t group)
+{
+    /* push DDs */
+    {
+        const DDVector& dv
+            (cu.dds());
+        DDVector::const_iterator i;
+        for (i = dv.begin(); dv.end() != i; ++ i)
+            cnf_push_single_cut( *i, time, group );
+    }
+
+    /* push CNF for inlined operators */
+    {
+        const InlinedOperatorDescriptors& inlined_operator_descriptors
+            (cu.inlined_operator_descriptors());
+        InlinedOperatorDescriptors::const_iterator i;
+        for (i = inlined_operator_descriptors.begin(); inlined_operator_descriptors.end() != i; ++ i) {
+            CNFOperatorInliner worker
+                (*this, time, group);
+
+            worker(*i);
+        }
+    }
+
+    /* push ITE muxes */
+    {
+        const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map
+            (cu.binary_selection_descriptors_map());
+        Expr2BinarySelectionDescriptorsMap::const_iterator mmi
+            (binary_selection_descriptors_map.begin());
+
+        while (binary_selection_descriptors_map.end() != mmi) {
+            Expr_ptr toplevel
+                (mmi -> first);
+            BinarySelectionDescriptors descriptors
+                (mmi -> second);
+
+            BinarySelectionDescriptors::const_iterator i;
+            for (i = descriptors.begin(); descriptors.end() != i; ++ i) {
+                CNFBinarySelectionInliner worker
+                    (*this, time, group);
+
+                worker(*i);
+            }
+
+            ++ mmi ;
+        }
+    }
+
+    /* push Array muxes */
+    {
+        const MultiwaySelectionDescriptors& muxes
+            (cu.array_mux_descriptors());
+        MultiwaySelectionDescriptors::const_iterator i;
+        for (i = muxes.begin(); muxes.end() != i; ++ i) {
+
+            CNFMultiwaySelectionInliner worker
+                (*this, time, group);
+
+            worker(*i);
+        }
+
+    }
+}

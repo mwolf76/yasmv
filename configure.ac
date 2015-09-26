@@ -9,7 +9,6 @@ AC_CONFIG_AUX_DIR([helpers])
 AC_CONFIG_MACRO_DIR([m4])
 AM_CONFIG_HEADER([config.h])
 
-# AM_INIT_AUTOMAKE([1.9 tar-ustar no-define])
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
@@ -108,6 +107,9 @@ AC_ANTLR
 # zlib check
 AX_CHECK_ZLIB
 
+# readline check
+AX_LIB_READLINE
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_HEADER_STDBOOL
@@ -141,6 +143,7 @@ AC_CONFIG_FILES([Makefile
                  src/3rdparty/Makefile
                  src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
+                 src/cmd/commands/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
                  src/expr/Makefile
@@ -148,11 +151,14 @@ AC_CONFIG_FILES([Makefile
                  src/expr/walker/Makefile
                  src/algorithms/Makefile
                  src/algorithms/bmc/Makefile
+                 src/algorithms/fsm/Makefile
+                 src/algorithms/ltl/Makefile
                  src/algorithms/sim/Makefile
                  src/symb/Makefile
-                 src/micro/Makefile
                  src/model/Makefile
                  src/model/compiler/Makefile
+                 src/model/type_checker/Makefile
+                 src/model/preprocessor/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile

@@ -49,14 +49,7 @@ Variant::Variant(int value)
     // DRIVEL << "Initialized INTEGER Variant @" << this << " (value = " << f_int << ")" << endl;
 }
 
-Variant::Variant(clock_t value)
-    : f_type(CLOCK)
-    , f_clock(value)
-{
-    // DRIVEL << "Initialized CLOCK Variant @" << this << " (value = " << f_clock << ")" << endl;
-}
-
-Variant::Variant(const string &value)
+Variant::Variant(const std::string &value)
     : f_type(STRING)
     , f_str(value)
 {
@@ -73,17 +66,22 @@ Variant::Variant(const char *value)
 Variant::Variant(const Variant& v)
     : f_type(v.f_type)
 {
+    const void* instance(this);
+
     switch (f_type) {
     case BOTTOM: return;
     case BOOLEAN: f_bool = v.f_bool; return;
     case INTEGER: f_int = v.f_int; return;
     case STRING: f_str = v.f_str; return;
-    case CLOCK: f_clock = v.f_clock; return;
     default: assert(0);
     }
 
     void *tmp = (void *) &v;
-    DRIVEL << "Initialized COPY Variant @" << this << " (from @" << tmp << ")" << endl;
+    DRIVEL
+        << "Initialized COPY Variant @"
+        << instance
+        << " (from @" << tmp << ")"
+        << std::endl;
 }
 
 bool Variant::is_nil() const
@@ -99,17 +97,12 @@ bool Variant::is_integer() const
 int Variant::as_integer() const
 { return f_int; }
 
-bool Variant::is_clock() const
-{ return f_type == CLOCK; }
-clock_t Variant::as_clock() const
-{ return f_clock; }
-
 bool Variant::is_string() const
 { return f_type == STRING; }
-string Variant::as_string() const
+std::string Variant::as_string() const
 { return f_str; }
 
-ostream& operator<<(ostream& os, const Variant& variant)
+std::ostream& operator<<(std::ostream& os, const Variant& variant)
 {
     if (variant.is_nil()) {
         return os << "(null)";
@@ -122,9 +115,6 @@ ostream& operator<<(ostream& os, const Variant& variant)
     }
     else if (variant.is_string()) {
         return os << variant.as_string();
-    }
-    else if (variant.is_clock()) {
-        return os << variant.as_clock();
     }
     else assert(0);
 }

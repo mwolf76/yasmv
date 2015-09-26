@@ -23,105 +23,97 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+#include <cstring>
 
-#include <symbol.hh>
-#include <model.hh>
+#include <symb/symbol.hh>
 
-UnresolvedSymbol::UnresolvedSymbol(Expr_ptr ctx, Expr_ptr expr)
-    : f_ctx(ctx)
-    , f_expr(expr)
+UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
+    : f_expr(expr)
 {}
 
 const char* UnresolvedSymbol::what() const throw()
 {
-    ostringstream oss;
+    std::ostringstream oss;
+    oss
+        << "Unresolved symbol: `"
+        << f_expr<< "`";
 
-    oss << "Unresolved symbol: " << f_ctx << "::" << f_expr;
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
-
-bool ISymbol::is_variable(void) const
+bool Symbol::is_variable(void) const
 {
-    return NULL != dynamic_cast <const IVariable_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    return NULL != dynamic_cast <const Variable_ptr>
+        (const_cast <const Symbol_ptr> (this));
 }
 
-IVariable& ISymbol::as_variable(void) const
+Variable& Symbol::as_variable(void) const
 {
-    IVariable_ptr res = dynamic_cast <const IVariable_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    Variable_ptr res = dynamic_cast <const Variable_ptr>
+        (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);
 }
 
-bool ISymbol::is_temporary(void) const
+bool Symbol::is_parameter(void) const
 {
-    return NULL != dynamic_cast <const ITemporary_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    return NULL != dynamic_cast <const Parameter_ptr>
+        (const_cast <const Symbol_ptr> (this));
 }
 
-ITemporary& ISymbol::as_temporary(void) const
+Parameter& Symbol::as_parameter(void) const
 {
-    ITemporary_ptr res = dynamic_cast <const ITemporary_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    Parameter_ptr res = dynamic_cast <const Parameter_ptr>
+        (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);
 }
 
-bool ISymbol::is_define(void) const
+bool Symbol::is_define(void) const
 {
-    return NULL != dynamic_cast <const IDefine_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    return NULL != dynamic_cast <const Define_ptr>
+        (const_cast <const Symbol_ptr> (this));
 }
 
-IDefine& ISymbol::as_define(void) const
+Define& Symbol::as_define(void) const
 {
-    IDefine_ptr res = dynamic_cast <const IDefine_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    Define_ptr res = dynamic_cast <const Define_ptr>
+        (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);
 }
 
-bool ISymbol::is_const() const
+bool Symbol::is_const() const
 {
-    return NULL != dynamic_cast <const IConstant_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    return NULL != dynamic_cast <const Constant_ptr>
+        (const_cast <const Symbol_ptr> (this));
 }
 
-IConstant& ISymbol::as_const(void) const
+Constant& Symbol::as_const(void) const
 {
-    IConstant_ptr res = dynamic_cast <const IConstant_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    Constant_ptr res = dynamic_cast <const Constant_ptr>
+        (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);
 }
 
-bool ISymbol::is_literal() const
+bool Symbol::is_literal() const
 {
-    return NULL != dynamic_cast <const ILiteral_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    return NULL != dynamic_cast <const Literal_ptr>
+        (const_cast <const Symbol_ptr> (this));
 }
 
-ILiteral& ISymbol::as_literal(void) const
+Literal& Symbol::as_literal(void) const
 {
-    ILiteral_ptr res = dynamic_cast <const ILiteral_ptr>
-        (const_cast <const ISymbol_ptr> (this));
+    Literal_ptr res = dynamic_cast <const Literal_ptr>
+        (const_cast <const Symbol_ptr> (this));
     assert (res);
     return (*res);
 }
 
-bool ISymbol::is_enum() const
-{
-    return NULL != dynamic_cast <const IEnum_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-}
+bool Symbol::is_hidden() const
+{ return f_hidden; }
 
-IEnum& ISymbol::as_enum() const
-{
-    IEnum_ptr res = dynamic_cast <const IEnum_ptr>
-        (const_cast <const ISymbol_ptr> (this));
-    assert (res);
-    return (*res);
-}
-
+void Symbol::set_hidden(bool value)
+{ f_hidden = value; }

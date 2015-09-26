@@ -26,11 +26,11 @@
 #ifndef EXPR_MGR_H
 #define EXPR_MGR_H
 
-#include <expr.hh>
-#include <pool.hh>
+#include <boost/thread/mutex.hpp>
 
-typedef unordered_map<ExprType, string> exprTypeToStringMap;
-typedef unordered_map<string, ExprType> exprTypeFromStringMap;
+#include <expr/expr.hh>
+
+#include <opts.hh>
 
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
@@ -253,14 +253,6 @@ public:
         return expr->f_symb == IMPLIES;
     }
 
-    inline Expr_ptr make_iff(Expr_ptr a, Expr_ptr b)
-    { return make_expr(IFF, a, b); }
-
-    inline bool is_iff(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == IFF;
-    }
-
     /* -- Relational operators ---------------------------------------------- */
     inline Expr_ptr make_eq(Expr_ptr a, Expr_ptr b)
     { return make_expr(EQ, a, b); }
@@ -337,6 +329,7 @@ public:
         assert( expr->f_symb == ICONST ||
                 expr->f_symb == HCONST ||
                 expr->f_symb == OCONST );
+
         return expr -> value();
     }
 
@@ -358,26 +351,36 @@ public:
         return __make_expr(&tmp);
     }
 
+    /* canonical by construction */
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
-    { return make_expr(DOT, a, b); }
-
-    inline Expr_ptr make_comma(Expr_ptr a, Expr_ptr b)
-    { return make_expr(COMMA, a, b); }
+    { return left_associate_dot( make_expr(DOT, a, b)); }
 
     inline Expr_ptr make_subscript(Expr_ptr a, Expr_ptr b)
     { return make_expr(SUBSCRIPT, a, b); }
 
+    inline Expr_ptr make_array(Expr_ptr a)
+    { return make_expr(ARRAY, a, NULL); }
+
+    inline Expr_ptr make_array_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(ARRAY_COMMA, a, b); }
+
     inline Expr_ptr make_params(Expr_ptr a, Expr_ptr b)
     { return make_expr(PARAMS, a, b); }
 
+    inline Expr_ptr make_params_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(PARAMS_COMMA, a, b); }
+
     inline Expr_ptr make_set(Expr_ptr a)
     { return make_expr(SET, a, NULL); }
+
+    inline Expr_ptr make_set_comma(Expr_ptr a, Expr_ptr b)
+    { return make_expr(SET_COMMA, a, b); }
 
     /* -- Types & Casts ----------------------------------------------------- */
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
     { return make_expr(TYPE, a, b); }
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b, Expr_ptr c)
-    { return make_expr(TYPE, a, make_expr(COMMA, b, c)); }
+    { return make_expr(TYPE, a, make_expr(DOT, b, c)); }
 
     inline bool is_type(const Expr_ptr expr) const {
         assert(expr);
@@ -392,17 +395,21 @@ public:
         return expr->f_symb == CAST;
     }
 
+    inline Expr_ptr make_const_int_type(unsigned digits)
+    {
+        return make_type(const_int_expr,
+                         make_const((value_t) digits));
+    }
+
+    inline bool is_const_int_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == const_int_expr;
+    }
+
     inline Expr_ptr make_unsigned_int_type(unsigned digits)
     {
         return make_type(unsigned_int_expr,
                          make_const((value_t) digits));
-    }
-
-    inline Expr_ptr make_unsigned_fxd_type(unsigned magnitude, unsigned fractional)
-    {
-        return make_type(unsigned_fxd_expr,
-                         make_const((value_t) magnitude),
-                         make_const((value_t) fractional));
     }
 
     inline Expr_ptr make_signed_int_type(unsigned digits)
@@ -411,15 +418,12 @@ public:
                          make_const((value_t) digits));
     }
 
-    inline Expr_ptr make_signed_fxd_type(unsigned magnitude, unsigned fractional)
+    inline Expr_ptr make_array_type(Expr_ptr of, unsigned width)
     {
-        return make_type(signed_fxd_expr,
-                         make_const((value_t) magnitude),
-                         make_const((value_t) fractional));
+        return make_type( array_expr, of,
+                          make_const((value_t) width));
     }
 
-    inline Expr_ptr make_abstract_array_type(Expr_ptr of)
-    { return make_type( array_expr, of); }
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
@@ -432,15 +436,9 @@ public:
         return expr == bool_expr;
     }
 
-    inline Expr_ptr make_constant_type() const
-    { return const_int_expr; }
-
-    inline bool is_constant_type(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == const_int_expr;
-    }
-
     /* -- Builtin identifiers and constants --------------------------------- */
+
+
     inline Expr_ptr make_temp() const
     { return temp_expr; }
 
@@ -449,20 +447,20 @@ public:
         return expr == temp_expr;
     }
 
-    inline Expr_ptr make_default_ctx() const
-    { return default_ctx_expr; }
-
-    inline bool is_default_ctx(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == default_ctx_expr;
-    }
-
     inline Expr_ptr make_main() const
     { return main_expr; }
 
     inline bool is_main(const Expr_ptr expr) const {
         assert(expr);
         return expr == main_expr;
+    }
+
+    inline Expr_ptr make_empty() const
+    { return empty_expr; }
+
+    inline bool is_empty(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == empty_expr;
     }
 
     inline Expr_ptr make_false() const
@@ -501,29 +499,6 @@ public:
     inline bool is_one(const Expr_ptr expr) const {
         assert(expr);
         return is_constant(expr) && (1 == expr->u.f_value);
-    }
-
-    // Here a bit of magic occurs, so it's better to keep a note:
-    // this method is used by the parser to build identifier
-    // nodes.  The function is fed with a const char* coming from
-    // the Lexer, an Atom object (which in current implementation
-    // is in fact a std::string) is built on-the-fly and used to
-    // search the atom pool. The atom resulting from the search is
-    // always the one stored in the pool. The auto atom object,
-    // however gets destroyed as it gets out of scope, so no leak
-    // occurs.
-    inline Expr_ptr make_identifier(Atom atom)
-    {
-        AtomPoolHit ah = f_atom_pool.insert(atom);
-        const Atom& pooled_atom =  (* ah.first);
-#if 0
-        if (ah.second) {
-            DRIVEL << "Added new atom to pool: '"
-                   << pooled_atom << "'" << endl;
-        }
-#endif
-        // no copy occurs here
-        return make_expr(pooled_atom);
     }
 
     inline Expr_ptr make_dec_const(Atom atom)
@@ -586,6 +561,10 @@ public:
         assert(expr);
         return expr->f_symb == PARAMS;
     }
+    inline bool is_params_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == PARAMS_COMMA;
+    }
 
     inline bool is_subscript(const Expr_ptr expr) const {
         assert(expr);
@@ -597,12 +576,27 @@ public:
         return expr->f_symb == DOT;
     }
 
-    inline bool is_comma(const Expr_ptr expr) const {
+    inline bool is_array(const Expr_ptr expr) const {
         assert(expr);
-        return expr->f_symb == COMMA;
+        return expr->f_symb == ARRAY;
     }
 
-    inline bool is_numeric(const Expr_ptr expr) const {
+    inline bool is_array_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == ARRAY_COMMA;
+    }
+
+    inline bool is_set(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SET;
+    }
+
+    inline bool is_set_comma(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SET_COMMA;
+    }
+
+    inline bool is_int_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == HCONST)
@@ -621,7 +615,8 @@ public:
 
         return ((AND == symb)  ||
                 (OR  == symb)  ||
-                (IFF == symb)  ||
+                (EQ  == symb)  ||
+                (NE  == symb)  ||
                 (IMPLIES == symb));
     }
 
@@ -660,6 +655,14 @@ public:
                 (NE == symb));
     }
 
+    inline bool is_binary_equality(const Expr_ptr expr) const {
+        assert(expr);
+        ExprType symb = expr->f_symb;
+
+        return ((EQ == symb) ||
+                (NE == symb));
+    }
+
     inline bool is_binary_relational(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
@@ -681,8 +684,7 @@ public:
         return (*f_instance);
     }
 
-    ExprType exprTypeFromString (string exprTypeString );
-    string exprTypeToString(ExprType exprType);
+    Expr_ptr make_identifier(Atom atom);
 
 protected:
     ExprMgr();
@@ -691,8 +693,7 @@ protected:
 private:
     static ExprMgr_ptr f_instance;
 
-
-    /* mid level services, inlined for performance */
+    /* mid level services */
     inline Expr_ptr make_expr(ExprType et, Expr_ptr a, Expr_ptr b)
     {
         Expr tmp(et, a, b); // we need a temp store
@@ -705,18 +706,13 @@ private:
         return __make_expr(&tmp);
     }
 
-    // low-level, inlined for performance
-    inline Expr_ptr __make_expr(Expr_ptr expr) {
-        ExprPoolHit eh = f_expr_pool.insert(*expr);
-        Expr_ptr pooled_expr = const_cast<Expr_ptr> (& (*eh.first));
-#if 0
-        if (eh.second) {
-            DRIVEL << "Added new expr to pool: '"
-                   << pooled_expr << "'" << endl;
-        }
-#endif
-        return pooled_expr;
-    }
+    /* synchronized low-level service */
+    Expr_ptr __make_expr(Expr_ptr expr);
+
+    /* aux service of make_dot */
+    Expr_ptr left_associate_dot(const Expr_ptr);
+
+    value_t decimal_lookup(const char *decimal_repr);
 
     /* -- data ------------------------------------------------------------- */
 
@@ -730,10 +726,6 @@ private:
     Expr_ptr unsigned_int_expr;
     Expr_ptr signed_int_expr;
 
-    /* fixed */
-    Expr_ptr unsigned_fxd_expr;
-    Expr_ptr signed_fxd_expr;
-
     /* reserved for abstract array types */
     Expr_ptr array_expr;
 
@@ -743,14 +735,17 @@ private:
     /* main module */
     Expr_ptr main_expr;
 
-    /* toplevel default ctx (for command line exprs) */
-    Expr_ptr default_ctx_expr;
+    /* empty symbol */
+    Expr_ptr empty_expr;
 
-    /* shared pools */
+    /* synchronized shared pools */
+    boost::mutex f_expr_mutex;
     ExprPool f_expr_pool;
-    AtomPool f_atom_pool;
 
-    exprTypeFromStringMap f_s2e;
+    boost::mutex f_atom_mutex;
+    AtomPool f_atom_pool;
 };
+
+// TODO: split this into multiple headers
 
 #endif

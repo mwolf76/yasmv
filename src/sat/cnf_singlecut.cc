@@ -19,18 +19,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <pool.hh>
-#include <sat.hh>
+#include <sat/sat.hh>
 
-#include <dd_walker.hh>
-#include <cnf_registry.hh>
+#include <dd/dd_walker.hh>
 
-// comment following to disable insanely verbose CNF debug logging
-#define DEBUG_CNF
+#include <sat/cnf_registry.hh>
+
+// #define DEBUG_CNF_LITERALS
 
 class CNFBuilderSingleCut : public ADDWalker {
 public:
-    CNFBuilderSingleCut(SAT& sat, step_t time,
+    CNFBuilderSingleCut(Engine& sat, step_t time,
                         group_t group = MAINGROUP)
         : f_sat(sat)
         , f_toplevel(NULL)
@@ -71,7 +70,7 @@ public:
     }
 
     void zero()
-    { push1(0, true); /* makes formula UNSAT */ }
+    { push1(0, true); /* makes formula unsatisfiable */ }
 
     void one()
     { /* nop */ }
@@ -197,8 +196,8 @@ public:
     }
 
 private:
-    SAT& f_sat;
-    unordered_set<DdNode*> f_seen;
+    Engine& f_sat;
+    boost::unordered_set<DdNode*> f_seen;
 
     DdNode* f_toplevel;
     step_t f_time;
@@ -210,12 +209,14 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
+#ifdef DEBUG_CNF_LITERALS
+        DRIVEL
+            << ps
+            << std::endl;
 #endif
+
         f_sat.add_clause(ps);
     }
 
@@ -224,13 +225,15 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
+#ifdef DEBUG_CNF_LITERALS
+        DRIVEL
+            << ps
+            << std::endl;
 #endif
+
         f_sat.add_clause(ps);
     }
 
@@ -239,20 +242,29 @@ private:
     {
         vec<Lit> ps;
         ps.push( mkLit( f_group, true));
-
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
         ps.push( mkLit( w, pw ));
 
-#ifdef DEBUG_CNF
-        DRIVEL << ps << endl;
+#ifdef DEBUG_CNF_LITERALS
+        DRIVEL
+            << ps
+            << std::endl;
 #endif
+
         f_sat.add_clause(ps);
     }
 };
 
-void SAT::cnf_push_single_cut(ADD add, step_t time, const group_t group)
+void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
-    CNFBuilderSingleCut worker(*this, time, group);
+    CNFBuilderSingleCut worker
+        (*this, time, group);
     worker(add);
+
+#ifdef DEBUG_CNF_LITERALS
+    DRIVEL
+        << "------------------------------------------------------------"
+        << std::endl;
+#endif
 }

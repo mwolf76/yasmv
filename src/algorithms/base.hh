@@ -23,51 +23,51 @@
 #ifndef BASE_ALGORITHM_H
 #define BASE_ALGORITHM_H
 
-#include <sat.hh>
+#include <boost/unordered_map.hpp>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <sat/sat.hh>
 
-#include <enc.hh>
-#include <enc_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+#include <model/compiler/compiler.hh>
 
-#include <witness.hh>
-#include <variant.hh>
+#include <enc/enc.hh>
+#include <enc/enc_mgr.hh>
 
-/* Model compiler */
-#include <compiler/compiler.hh>
+#include <witness/witness.hh>
 
-typedef unordered_map<string, Variant> ParametersMap;
+#include <utils/variant.hh>
+
+typedef boost::unordered_map<std::string, Variant> ParametersMap;
 
 typedef enum {
     MC_FALSE,
     MC_TRUE,
     MC_UNKNOWN,
+    MC_ERROR,
 } mc_status_t;
 
+class Command;
+
+/* Engine-less algorithm base class. Engine instances are provided by
+   strategies. */
 class Algorithm {
 
 public:
-    Algorithm(IModel& model);
+    Algorithm(Command& command, Model& model);
     virtual ~Algorithm();
 
-    /* Build encodings */
-    virtual void prepare();
-
-    /* Perform compilation */
-    virtual void compile();
-
-    /* Actual MC algorithm (abstract) */
-    virtual void process() =0;
+    /* Build encodings are perform model compilation */
+    virtual void setup();
 
     // algorithm abstract param interface (key -> value map)
-    void set_param(string key, Variant value);
-    Variant& get_param(const string key);
+    void set_param(std::string key, Variant value);
+    Variant& get_param(const std::string key);
 
     inline Compiler& compiler()
     { return f_compiler; }
 
-    mc_status_t status() const;
+    inline mc_status_t status() const;
 
     inline bool has_witness() const
     { return NULL != f_witness; }
@@ -81,10 +81,9 @@ public:
     inline Witness& witness() const
     { assert (NULL != f_witness); return *f_witness; }
 
-    inline IModel& model()
+    inline Model& model()
     { return f_model; }
 
-protected:
     inline ModelMgr& mm()
     { return f_mm; }
 
@@ -94,46 +93,51 @@ protected:
     inline TypeMgr& tm()
     { return f_tm; }
 
-    inline SAT& engine()
-    { return f_engine; }
-
     /* FSM */
-    void assert_fsm_init(step_t time,
+    void assert_fsm_init(Engine& engine, step_t time,
                          group_t group = MAINGROUP);
 
-    void assert_fsm_invar(step_t time,
+    void assert_fsm_invar(Engine& engine, step_t time,
                           group_t group = MAINGROUP);
 
-    void assert_fsm_trans(step_t time,
+    void assert_fsm_trans(Engine& engine, step_t time,
                           group_t group = MAINGROUP);
+
+    /* Generate uniqueness constraints between j-th and k-th state */
+    void assert_fsm_uniqueness(Engine& engine, step_t j, step_t k,
+                               group_t group = MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(step_t time, Term& term,
+    void assert_formula(Engine& engine, step_t time, CompilationUnit& term,
                         group_t group = MAINGROUP);
 
+    /* TimeFrame from a witness */
+    void assert_time_frame(Engine& engine, step_t time, TimeFrame& tf,
+                           group_t group = MAINGROUP);
+
 private:
+    /* Command */
+    Command& f_command;
+
     /* Model */
-    IModel& f_model;
+    Model& f_model;
 
     // managers
     ModelMgr& f_mm;
+    EncodingMgr& f_bm;
     ExprMgr& f_em;
     TypeMgr& f_tm;
 
     /* Model Compiler */
     Compiler f_compiler;
 
-    /* The Engine */
-    SAT& f_engine;
-
     /* Parameters */
     ParametersMap f_params;
 
     /* Formulas */
-    Terms f_init;
-    Terms f_invar;
-    Terms f_trans;
-    Terms f_formula;
+    CompilationUnits f_init;
+    CompilationUnits f_invar;
+    CompilationUnits f_trans;
 
     /* Witness */
     Witness_ptr f_witness;

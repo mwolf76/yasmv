@@ -23,87 +23,67 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef MODEL_H
 #define MODEL_H
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <boost/unordered_map.hpp>
 
-#include <type.hh>
-#include <enc.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <symbol.hh>
+#include <type/type.hh>
+#include <enc/enc.hh>
 
-class IModule;
-typedef IModule* IModule_ptr;
-typedef unordered_map<Expr_ptr, IModule_ptr, PtrHash, PtrEq> Modules;
+#include <symb/symbol.hh>
 
-class IModel;
-typedef IModel* IModel_ptr;
-
-/** Exception classes */
+/* -- Exception classes ----------------------------------------------------- */
 class ModelException : public Exception {
 public:
     virtual const char* what() const throw() =0;
 };
 
-class ResolutionException
-    : public ModelException {
-
+class ModuleNotFound : public ModelException {
 public:
-    ResolutionException(Expr_ptr expr);
+    ModuleNotFound(Expr_ptr expr);
     const char* what() const throw();
 
 private:
-    Expr_ptr f_expr;
+    Expr_ptr f_module_name;
 };
 
-// -- composite decls ----------------------------------------------------------
-class IModule : public IObject {
+class DuplicateIdentifier : public ModelException {
 public:
-    virtual const Expr_ptr expr() const =0;
+    DuplicateIdentifier(Expr_ptr expr);
+    const char* what() const throw();
 
-    // Symbols management, preserve decl ordering
-    virtual const ExprVector& locals() const =0;
-
-    virtual const Variables& vars() const =0;
-    virtual void add_var(Expr_ptr expr, IVariable_ptr var) =0;
-
-    virtual const Defines& defs() const =0;
-    virtual void add_def(Expr_ptr expr, IDefine_ptr def) =0;
-
-    // Finite State Machine definition
-    virtual const ExprVector& init() const =0;
-    virtual void add_init(Expr_ptr expr) =0;
-
-    virtual const ExprVector& invar() const =0;
-    virtual void add_invar(Expr_ptr expr) =0;
-
-    virtual const ExprVector& trans() const =0;
-    virtual void add_trans(Expr_ptr expr) =0;
+private:
+    Expr_ptr f_duplicate;
 };
 
-class IModel : public IObject {
+class BadParamCount : public ModelException {
 public:
-    virtual Expr_ptr name() const =0;
-    virtual void set_name(Expr_ptr name) =0;
+    BadParamCount(Expr_ptr instance, unsigned expected, unsigned got);
+    const char* what() const throw();
 
-    virtual void add_module(Expr_ptr name, IModule_ptr module) =0;
-    virtual IModule& get_module(Expr_ptr name) =0;
-
-    virtual const Modules& modules() const =0;
+private:
+    Expr_ptr f_instance;
+    unsigned f_expected;
+    unsigned f_got;
 };
 
-class Module : public IModule {
+
+class Module {
+    friend std::ostream& operator<<(std::ostream& os, Module& module);
+
     Expr_ptr f_name;
 
-    // preserves symbols ordering
     ExprVector f_locals;
+    Expr_ptr f_input;
 
     Variables f_localVars;
+    Parameters f_localParams;
     Defines   f_localDefs;
 
     ExprVector f_init;
@@ -111,199 +91,67 @@ class Module : public IModule {
     ExprVector f_trans;
 
 public:
-    Module(const Expr_ptr name);
+    Module(Expr_ptr name);
+    ~Module();
 
-    inline const Expr_ptr expr() const
+    inline const Expr_ptr name() const
     { return f_name; }
 
-    inline bool is_main() const
-    { return f_name == ExprMgr::INSTANCE().make_main(); }
+    /* Symbols management, preserves decl ordering */
+    inline const ExprVector& locals() const
+    { return f_locals; }
 
-    const ExprVector& locals() const;
+    inline const Expr_ptr& input() const
+    { return f_input; }
+    void set_input(Expr_ptr input)
+    { f_input = input; }
 
-    void add_var(Expr_ptr name, IVariable_ptr var);
-    const Variables& vars() const;
+    inline const Variables& vars() const
+    { return f_localVars; }
+    void add_var(Expr_ptr expr, Variable_ptr var);
 
-    void add_def(Expr_ptr name, IDefine_ptr def);
-    const Defines& defs() const;
+    inline const Parameters& parameters() const
+    { return f_localParams; }
+    void add_parameter(Expr_ptr expr, Parameter_ptr param);
 
+    const Defines& defs() const
+    { return f_localDefs; }
+    void add_def(Expr_ptr expr, Define_ptr def);
+
+    /* Finite State Machine definition */
+    inline const ExprVector& init() const
+    { return f_init; }
     void add_init(Expr_ptr expr);
-    const ExprVector& init() const;
 
+    const ExprVector& invar() const
+    { return f_invar; }
     void add_invar(Expr_ptr expr);
-    const ExprVector& invar() const;
 
+    inline const ExprVector& trans() const
+    { return f_trans; }
     void add_trans(Expr_ptr expr);
-    const ExprVector& trans() const;
+
+
 };
 
-ostream& operator<<(ostream& os, Module& module);
+typedef Module* Module_ptr;
+typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
+std::ostream& operator<<(std::ostream& os, Module& module);
 
-class Variable : public IVariable {
-    Expr_ptr f_ctx;
-    Expr_ptr f_name;
-    Type_ptr f_type;
+class Model {
+    Modules f_modules;
 
-public:
-    Variable(Expr_ptr ctx, Expr_ptr name, Type_ptr type)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_type(type)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-};
-
-class Temporary : public ITemporary {
-private:
-    Expr_ptr f_ctx;
-    Expr_ptr f_name;
-    Type_ptr f_type;
-
-public:
-    Temporary(Expr_ptr name, Type_ptr type)
-        : f_ctx(ExprMgr::INSTANCE().make_main())
-        , f_name(name)
-        , f_type(type)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-};
-
-class Constant : public IConstant {
-    const Expr_ptr f_ctx;
-    const Expr_ptr f_name;
-    const Type_ptr f_type;
-    value_t f_value;
-
-public:
-    Constant(const Expr_ptr ctx, const Expr_ptr name, Type_ptr type, value_t value)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_type(type)
-        , f_value(value)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Type_ptr type() const
-    { return f_type; }
-
-    value_t value() const
-    { return f_value; }
-};
-
-class Define : public IDefine {
-    const Expr_ptr f_ctx;
-
-    const Expr_ptr f_name;
-    const ExprVector f_formals;
-    const Expr_ptr f_body;
-
-public:
-    Define(const Expr_ptr ctx, const Expr_ptr name,
-           const ExprVector& formals, const Expr_ptr body)
-        : f_ctx(ctx)
-        , f_name(name)
-        , f_formals(formals)
-        , f_body(body)
-    {}
-
-    const Expr_ptr ctx() const
-    { return f_ctx; }
-
-    const Expr_ptr expr() const
-    { return f_name; }
-
-    const Expr_ptr body() const
-    { return f_body; }
-
-    const ExprVector& formals() const
-    { return f_formals; }
-};
-
-/**
- * Symbol iterator
- *
- * COI aware
- * Preserves ordering
- *
- */
-class SymbIter {
-public:
-    /* Calculates COI if formula is non-NULL */
-    SymbIter(IModel& model, Expr_ptr formula = NULL);
-
-    ~SymbIter();
-
-    /* true iff there are more symbols to be processed */
-    inline bool has_next() const
-    { return f_iter != f_symbols.end(); }
-
-    inline ISymbol_ptr next()
-    {
-        ISymbol_ptr res = (* f_iter);
-        ++ f_iter;
-
-        return res;
-    }
-
-private:
-    IModel&  f_model;
-    Expr_ptr f_formula; /* for COI */
-
-    vector<ISymbol_ptr> f_symbols;
-    vector<ISymbol_ptr>::const_iterator f_iter;
-};
-
-class Model : public IModel {
 public:
     Model();
     ~Model();
 
-    Expr_ptr name() const
-    { return f_name; }
-
-    void set_name(Expr_ptr name)
-    { f_name = name; }
-
-    const Modules& modules() const
+    inline const Modules& modules() const
     { return f_modules; }
 
-    void add_module(Expr_ptr name, IModule_ptr module);
-
-    IModule& get_module(Expr_ptr name)
-    {
-        const pair <Expr_ptr const, IModule_ptr> found = (*f_modules.find(name));
-
-        if (!found.second) {
-            // throw ModuleNotFoundException(name);
-        }
-
-        return *found.second;
-    }
-
-private:
-    Modules f_modules;
-    Expr_ptr f_name;
+    Module& add_module(Module& module);
+    Module& module(Expr_ptr module_name);
 };
+
+typedef Model* Model_ptr;
 
 #endif

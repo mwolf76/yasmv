@@ -27,9 +27,8 @@ const char *YASMV_HOME = "YASMV_HOME";
 const char *MICROCODE_PATH = "microcode";
 
 /* tokens */
+const char *EMPTY_TOKEN = "__nil__";
 const char *MAIN_TOKEN = "main";
-
-const char *DEFAULT_CTX_TOKEN = "default";
 
 /* bool consts */
 const char *FALSE_TOKEN = "FALSE";
@@ -37,11 +36,10 @@ const char *TRUE_TOKEN = "TRUE";
 
 /* types */
 const char *BOOL_TOKEN      = "boolean";
-const char *UNSIGNED_TOKEN  = "unsigned";
-const char *SIGNED_TOKEN    = "signed";
+const char *UNSIGNED_TOKEN  = "u";
+const char *SIGNED_TOKEN    = "";
 const char *CONST_TOKEN     = "const";
 const char *INT_TOKEN       = "int";
-const char *FXD_TOKEN       = "fxd";
 const char *ARRAY_TOKEN     = "array";
 
 /* color support for *nix systems */
@@ -66,5 +64,8 @@ const char bold_purple[] = { ESC, '[', '1', ';', '3', '5', 'm', 0 };
 const char bold_cyan[] = { ESC, '[', '1', ';', '3', '6', 'm', 0 };
 const char bold_light_gray[] = { ESC, '[', '1', ';', '3', '7', 'm', 0 };
 const char bold_dark_gray[] = { ESC, '[', '1', ';', '3', '8', 'm', 0 };
+
+const char* TRACE_FMT_PLAIN = "plain";
+const char* TRACE_FMT_JSON  = "json";
 
 volatile sig_atomic_t sigint_caught = 0;

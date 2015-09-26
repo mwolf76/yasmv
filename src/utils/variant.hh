@@ -33,44 +33,21 @@ typedef enum {
     BOTTOM,
     BOOLEAN,
     INTEGER,
-    CLOCK,
     STRING,
 } VariantType;
 
-// Variant iface
-class IVariant : public IObject {
-public:
-    virtual bool is_nil() const =0;
-
-    virtual bool is_boolean() const =0;
-    virtual bool as_boolean() const =0;
-
-    virtual bool is_integer() const =0;
-    virtual int as_integer() const =0;
-
-    virtual bool is_clock() const =0;
-    virtual clock_t as_clock() const =0;
-
-    virtual bool is_string() const =0;
-    virtual string as_string() const =0;
-};
-
-
-// Variant implementation
-class Variant : public IVariant {
-    friend ostream& operator<<(ostream& os, const Variant& variant);
+class Variant {
+    friend std::ostream& operator<<(std::ostream& os, const Variant& variant);
 
 public:
     // variant constructors
     Variant();
 
-    Variant(const string &value);
+    Variant(const std::string &value);
     Variant(const char *value);
 
     Variant(bool value);
     Variant(int value);
-
-    Variant(clock_t value);
 
     Variant(const Variant& v);
 
@@ -87,14 +64,14 @@ public:
     clock_t as_clock() const;
 
     bool is_string() const;
-    string as_string() const;
+    std::string as_string() const;
 
 private:
     VariantType f_type;
 
     bool f_bool;
     int f_int;
-    string f_str;
+    std::string f_str;
     clock_t f_clock;
 };
 

@@ -19,47 +19,67 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sstream>
+#include <cstring>
+
 #include <witness.hh>
 
 const char* DuplicateWitnessId::what() const throw()
 {
-    ostringstream oss;
-    oss << "Duplicate witness ID:  "
+    std::ostringstream oss;
+    oss
+        << "Duplicate witness ID:  "
         << f_id << " is already registered."
-        << endl
+        << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
+
+const char* NoCurrentlySelectedWitness::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "No currently selected witness."
+        << std::endl
+        ;
+
+    return strdup(oss.str().c_str());
+}
+
 
 const char* UnknownWitnessId::what() const throw()
 {
-    ostringstream oss;
-    oss << "Unknown witness ID:  "
+    std::ostringstream oss;
+    oss
+        << "Unknown witness ID:  "
         << f_id << " is not registered."
-        << endl
+        << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 const char* IllegalTime::what() const throw()
 {
-    ostringstream oss;
-    oss << "Illegal time: "
+    std::ostringstream oss;
+    oss
+        << "Illegal time: "
         << f_time
-        << endl
+        << std::endl
         ;
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 const char* NoValue::what() const throw()
 {
-    ostringstream oss;
-    oss << "No value for `" << f_id << "`";
+    std::ostringstream oss;
+    oss
+        << "No value for `"
+        << f_id << "`";
 
-    return oss.str().c_str();
+    return strdup(oss.str().c_str());
 }
 
 TimeFrame::TimeFrame(Witness& owner)
@@ -79,9 +99,8 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     Expr2ExprMap::iterator eye;
 
     eye = f_map.find( expr );
-    if (f_map.end() == eye) {
+    if (f_map.end() == eye)
         throw NoValue(expr);
-    }
 
     return (*eye).second;
 }
@@ -90,8 +109,14 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 bool TimeFrame::has_value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+    Exprs& lang
+        (f_owner.lang());
+
+    // FIXME: proper exception
+    if (lang.end() == std::find( lang.begin(), lang.end(), expr)) {
+        std::cerr << expr << std::endl;
+        assert(false);
+    }
 
     Expr2ExprMap::iterator eye;
 
@@ -103,15 +128,48 @@ bool TimeFrame::has_value( Expr_ptr expr )
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
 {
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
+    Exprs& lang
+        (f_owner.lang());
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    DRIVEL << expr << " := " << value << endl;
-    f_map.insert( make_pair< Expr_ptr, Expr_ptr > (expr, value));
+    DEBUG
+        << expr
+        << " := "
+        << value
+        << std::endl;
+
+    f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+                  (expr, value));
 }
 
-Witness::Witness(string name, step_t j)
-    : f_id(name)
+ExprVector TimeFrame::assignments()
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+    Exprs& lang
+        (f_owner.lang());
+
+    ExprVector res;
+
+    Exprs::const_iterator i
+        (lang.begin());
+    while (i != lang.end()) {
+        Expr_ptr symb
+            (*i); ++ i;
+
+        try {
+            res.push_back( em.make_eq( symb, value(symb)));
+        }
+
+        catch (NoValue nv) {}
+    }
+
+    return res;
+}
+
+Witness::Witness(Atom id, Atom desc, step_t j)
+    : f_id(id)
+    , f_desc(desc)
     , f_j(j)
 {
     DEBUG
@@ -119,7 +177,7 @@ Witness::Witness(string name, step_t j)
         << f_id
         << ", starting at time "
         << f_j
-        << endl;
+        << std::endl;
 }
 
 TimeFrame& Witness::extend(Witness& w)
@@ -145,7 +203,7 @@ TimeFrame& Witness::extend()
     DEBUG << "Added empty TimeFrame " << last
           << " to witness " << id()
           << " @" << tf
-          << endl;
+          << std::endl;
 
     assert(tf);
     return *tf;

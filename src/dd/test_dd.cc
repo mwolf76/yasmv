@@ -18,6 +18,7 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
     ADD lhs = dd.addVar();
     ADD rhs = dd.addVar();
     ADD zero (dd.addZero());
+    ADD one  (dd.addOne());
 
     {
         ADD neg_neg = lhs.Cmpl().Cmpl();
@@ -31,9 +32,37 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
     }
 
     {
+        ADD x_and_0 = lhs.Times(zero);
+        BOOST_CHECK(x_and_0 == zero);
+
+        ADD x_and_1 = rhs.Times(one);
+        BOOST_CHECK(x_and_1 == rhs);
+
+        ADD _0_and_y = zero.Times(rhs);
+        BOOST_CHECK(_0_and_y == zero);
+
+        ADD _1_and_y = one.Times(rhs);
+        BOOST_CHECK(_1_and_y == rhs);
+    }
+
+    {
         ADD x_or_y = lhs.Or(rhs);
         ADD y_or_x = rhs.Or(lhs);
         BOOST_CHECK(x_or_y == y_or_x);
+    }
+
+    {
+        ADD x_or_0 = lhs.Or(zero);
+        BOOST_CHECK(x_or_0 == lhs);
+
+        ADD x_or_1 = rhs.Or(one);
+        BOOST_CHECK(x_or_1 == one);
+
+        ADD _0_or_y = zero.Or(rhs);
+        BOOST_CHECK(_0_or_y == rhs);
+
+        ADD _1_or_y = one.Or(rhs);
+        BOOST_CHECK(_1_or_y == one);
     }
 
     {
@@ -41,9 +70,13 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
         ADD y_xor_x = rhs.Xor(lhs);
         ADD x_xor_x = lhs.Xor(lhs);
         ADD y_xor_y = rhs.Xor(rhs);
+        ADD _0_xor_1 = zero.Xor(one);
+        ADD _1_xor_0 = one.Xor(zero);
         BOOST_CHECK(x_xor_y == y_xor_x);
         BOOST_CHECK(x_xor_x == zero);
         BOOST_CHECK(y_xor_y == zero);
+        BOOST_CHECK(_0_xor_1 == one);
+        BOOST_CHECK(_1_xor_0 == one);
     }
 
     {
@@ -145,10 +178,10 @@ BOOST_AUTO_TEST_CASE(dd_bitwise)
     ADD lhs = dd.addVar();
     ADD rhs = dd.addVar();
 
-    // {
-    //     ADD neg_neg = lhs.Cmpl().Cmpl();
-    //     BOOST_CHECK(lhs == neg_neg);
-    // }
+    {
+        ADD neg_neg = lhs.Cmpl().Cmpl();
+        BOOST_CHECK(lhs == neg_neg);
+    }
 
     {
         ADD x_and_y = lhs.BWTimes(rhs);
@@ -180,12 +213,6 @@ BOOST_AUTO_TEST_CASE(dd_bitwise)
         BOOST_CHECK(x_xnor_y == y_xnor_x);
     }
 
-    /* disabled for now, pending */
-    // {
-    //     ADD x_xnor_y = lhs.BWXnor(rhs);
-    //     ADD y_xnor_x = rhs.BWXor(lhs).BWCmpl();
-    //     BOOST_CHECK(x_xnor_y == y_xnor_x);
-    // }
 }
 
 BOOST_AUTO_TEST_CASE(dd_relational)
@@ -195,23 +222,15 @@ BOOST_AUTO_TEST_CASE(dd_relational)
     ADD lhs = make_integer_encoding(dd, 4, false);
     ADD rhs = make_integer_encoding(dd, 4, false);
 
-    {
-        ADD x_equals_y = lhs.Equals(rhs);
-        ADD y_equals_x = rhs.Equals(lhs);
-        BOOST_CHECK(x_equals_y == y_equals_x);
-    }
+    ADD x_equals_y = lhs.Equals(rhs);
+    ADD y_equals_x = rhs.Equals(lhs);
+    BOOST_CHECK(x_equals_y == y_equals_x);
 
-    {
-        ADD x_lt_y = lhs.LT(rhs);
-        ADD y_lt_x = rhs.LT(lhs);
-        BOOST_CHECK(x_lt_y != y_lt_x);
-    }
+    ADD x_lt_y = lhs.LT(rhs);
+    ADD y_lt_x = rhs.LT(lhs);
+    BOOST_CHECK(x_lt_y != y_lt_x);
 
-    {
-        ADD x_leq_y = lhs.LEQ(rhs);
-        ADD y_leq_x = rhs.LEQ(lhs);
-        BOOST_CHECK(x_leq_y != y_leq_x);
-    }
+    BOOST_CHECK( x_equals_y.Or(x_lt_y) == lhs.LEQ(rhs) );
 }
 
 

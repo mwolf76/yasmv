@@ -31,10 +31,6 @@ typedef long value_t;
 /* Reserved for ADD ops error checking. */
 static const value_t error_value = LONG_MIN;
 
-/* Number of bits per digit. TODO: move this to configurable option */
-// static const value_t bits_per_digit = 2;
-
 /* Reserved for time frames representation. */
 typedef unsigned step_t;
-
 #endif

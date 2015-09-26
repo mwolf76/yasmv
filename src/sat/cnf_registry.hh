@@ -1,6 +1,6 @@
 /**
  *  @file cnf_registry.hh
- *  @brief SAT interface (CNF registry sub-component)
+ *  @brief Engine interface (CNF registry sub-component)
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -22,15 +22,18 @@
 #ifndef SAT_CNF_REGISTRY_H
 #define SAT_CNF_REGISTRY_H
 
-#include <expr.hh>
-#include <pool.hh>
-
 #include <common.hh>
 
-class SAT; // fwd decl
+#include <boost/unordered_map.hpp>
 
-typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+#include <expr/expr.hh>
+
+#include <enc/tcbi.hh>
+
+class Engine; // fwd decl
+
+typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
 
 struct TimedDD {
 public:
@@ -59,7 +62,7 @@ struct TimedDDEq {
     inline bool operator() (const TimedDD& x, const TimedDD& y) const
     { return (x.node() == y.node() && x.time() == y.time()); }
 };
-typedef unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
+typedef boost::unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
 
 struct TimedVar {
 public:
@@ -88,12 +91,12 @@ struct TimedVarEq {
     inline bool operator() (const TimedVar& x, const TimedVar& y) const
     { return (x.var() == y.var() && x.time() == y.time()); }
 };
-typedef unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
+typedef boost::unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
 
-class CNFRegistry : public IObject {
+class CNFRegistry {
 
     /* ctor and dctor are available only to SAT owner */
-    friend class SAT;
+    friend class Engine;
 
 public:
 
@@ -106,10 +109,10 @@ void clear_cnf_map();
 Var rewrite_cnf_var(Var index, step_t time);
 
 private:
-    CNFRegistry(SAT& sat);
+    CNFRegistry(Engine& sat);
     ~CNFRegistry();
 
-    SAT& f_sat;
+    Engine& f_sat;
 
     TDD2VarMap f_tdd2var_map;
     RewriteMap f_rewrite_map;

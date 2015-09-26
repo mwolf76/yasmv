@@ -23,16 +23,20 @@
 #ifndef WITNESS_MGR_H
 #define WITNESS_MGR_H
 
-#include <expr.hh>
+#include <map>
+#include <vector>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <expr/expr.hh>
 
-#include <evaluator.hh>
-#include <witness.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+
+#include <witness/witness.hh>
+#include <witness/evaluator.hh>
 
 typedef class WitnessMgr *WitnessMgr_ptr;
-typedef map<Atom, Witness_ptr> WitnessMap;
+typedef std::map<Atom, Witness_ptr> WitnessMap;
+typedef std::vector<Witness_ptr> WitnessList;
 
 class WitnessMgr  {
 public:
@@ -48,20 +52,23 @@ public:
     { return f_tm; }
 
     // delegated method to the Evaluator functor
-    inline const Expr_ptr eval( Witness&w, Expr_ptr ctx, Expr_ptr formula, step_t k)
-    {
-        value_t value = f_evaluator.process( w, ctx, formula, k);
-        return ExprMgr::INSTANCE().make_const( value );
-    }
+    inline const Expr_ptr eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
+    { return f_evaluator.process( w, ctx, body, k); }
 
-    inline const WitnessMap& witnesses() const
-    { return f_map; }
+    inline const WitnessList& witnesses() const
+    { return f_list; }
 
-    // get a registered witness
+    // selects current witness
+    void set_current( Witness& witness );
+
+    // get currently selected witness
+    Witness& current();
+
+    // get a registered witness by id
     Witness& witness( Atom id );
 
-    // register a new witness
-    void register_witness( Witness& w );
+    // record a new witness
+    void record( Witness& witness );
 
 protected:
     WitnessMgr();
@@ -72,12 +79,16 @@ private:
 
     // Witness register internal map: id -> witness
     WitnessMap f_map;
+    WitnessList f_list;
 
     // ref to expr manager
     ExprMgr& f_em;
 
     // ref to type manager
     TypeMgr& f_tm;
+
+    // currently selected witness uid
+    Atom f_curr_uid;
 
     Evaluator f_evaluator;
 };

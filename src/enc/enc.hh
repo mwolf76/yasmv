@@ -24,42 +24,40 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef ENCODER_H
 #define ENCODER_H
+
+#include <vector>
+
+#include <boost/unordered_map.hpp>
 
 #include <common.hh>
 #include <opts.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type.hh>
+#include <type/type.hh>
 
-#include <cudd_mgr.hh>
-#include <enc_mgr.hh>
+#include <dd/dd.hh>
+#include <dd/cudd_mgr.hh>
+#include <enc/enc_mgr.hh>
 
 // -- primary decls  --------------------------------------------------------------
-typedef class IEncoding *IEncoding_ptr;
-class IEncoding : public IObject {
+class Encoding {
 public:
-    /* Full-Digit DDs (roots), used in manipulation of algebraics (e.g.. compiler) */
-    virtual DDVector& dv() =0;
-
-    /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT solver) */
-    virtual DDVector& bits() =0;
-
-    // vector of DD leaves (consts) -> expr
-    virtual Expr_ptr expr(int* assignment) =0;
-};
-
-class Encoding : public IEncoding {
-public:
+    /* Full-Digit DDs (roots), used in manipulation of algebraics
+       (e.g.. compiler) */
     DDVector& dv()
     { return f_dv; }
 
+    /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT
+       solver) */
     DDVector& bits()
     { return f_bits; }
+
+    /* vector of DD leaves (consts) -> expr */
+    virtual Expr_ptr expr(int* assignment) =0;
 
 protected:
     Encoding()
@@ -77,6 +75,8 @@ protected:
     ADD make_bit();
     ADD make_monolithic_encoding(unsigned nbits);
 };
+
+typedef Encoding* Encoding_ptr;
 
 // 1-bit boolean var (identity encoding)
 typedef class BooleanEncoding* BooleanEncoding_ptr;
@@ -118,11 +118,9 @@ protected:
     { assert(0); }
 
     // width is number of *digits* here, dds is reserved for temporary encodings
-    AlgebraicEncoding(unsigned width, unsigned fract, bool is_signed, ADD *dds = NULL);
+    AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds = NULL);
 
     unsigned f_width;
-    unsigned f_fract; // non-zero for fixed encodings (FUTURE)
-
     bool f_signed;
     bool f_temporary;
 };
@@ -140,11 +138,8 @@ protected:
     unsigned range_repr_bits (value_t range);
 };
 
-typedef unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
-typedef pair<ValueExprMap::iterator, bool> ValueExprMapHit;
-
-typedef unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
-typedef pair<ExprValueMap::iterator, bool> ExprValueMapHit;
+typedef boost::unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
+typedef boost::unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
 
 typedef class EnumEncoding* EnumEncoding_ptr;
 class EnumEncoding : public MonolithicEncoding {
@@ -165,7 +160,7 @@ protected:
     ExprValueMap f_e2v_map;
 };
 
-typedef vector<IEncoding_ptr> Encodings;
+typedef std::vector<Encoding_ptr> Encodings;
 typedef class ArrayEncoding* ArrayEncoding_ptr;
 class ArrayEncoding : public Encoding {
 friend class EncodingMgr; // expose ctors only to mgr

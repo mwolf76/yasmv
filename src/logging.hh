@@ -23,7 +23,11 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-#include "ezlogger_misc.hpp"
+#include <string>
+#include <iostream>
+#include <sstream>
+
+#include <3rdparty/ezlogger/ezlogger_misc.hpp>
 #include <sys/timeb.h>
 
 namespace axter {
@@ -38,13 +42,13 @@ namespace axter {
         {
             struct timeb now;
 
-            const string filename(FileName);
-            const string funcname(FunctionName);
+            const std::string filename(FileName);
+            const std::string funcname(FunctionName);
 
-            ostringstream oss;
+            std::ostringstream oss;
 
             ftime(&now);
-            string timestr = ctime(&now.time);
+            std::string timestr = ctime(&now.time);
             if (timestr.size()) timestr[timestr.size() -1] = ']';
 
             oss << "[" << timestr << "." << now.millitm << " "
@@ -60,16 +64,16 @@ namespace axter {
 };
 
 
-#include "ezlogger_output_policy.hpp"
-#include "ezlogger_verbosity_level_policy.hpp"
-#include "ezlogger.hpp"
-#include "ezlogger_macros.hpp"
+#include <3rdparty/ezlogger/ezlogger_output_policy.hpp>
+#include <3rdparty/ezlogger/ezlogger_verbosity_level_policy.hpp>
+#include <3rdparty/ezlogger/ezlogger.hpp>
+#include <3rdparty/ezlogger/ezlogger_macros.hpp>
 
 // custom loggers
-#define ERR  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, cerr)
-#define WARN EZLOGGERVLSTREAM2(axter::log_always, cerr)
-#define TRACE EZLOGGERVLSTREAM2(axter::log_often, cerr)
-#define INFO EZLOGGERVLSTREAM2(axter::log_regularly, cerr)
-#define DEBUG EZLOGGERVLSTREAM2(axter::log_rarely, cerr)
-#define DRIVEL EZLOGGERVLSTREAM2(axter::log_very_rarely, cerr)
+#define ERR  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)
+#define WARN EZLOGGERVLSTREAM2(axter::log_always, std::cerr)
+#define TRACE EZLOGGERVLSTREAM2(axter::log_often, std::cerr)
+#define INFO EZLOGGERVLSTREAM2(axter::log_regularly, std::cerr)
+#define DEBUG EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr)
+#define DRIVEL EZLOGGERVLSTREAM2(axter::log_very_rarely, std::cerr)
 #endif

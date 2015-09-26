@@ -1,17 +1,17 @@
 /**
-   Copyright (C) 2010-2012 Marco Pensallorto
+   Copyright (C) 2010-2015 Marco Pensallorto
 
-   This file is part of GNuSMV.
+   This file is part of YASMINE.
 
-   GNuSMV is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
+   YASMINE is free software: you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
-   GNuSMV is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   YASMINE is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
    along with GNuSMV.  If not, see <http://www.gnu.org/licenses/>.
@@ -28,393 +28,268 @@ options {
 #include <common.hh>
 
 /* cmd subsystem */
-#include <cmd.hh>
+#include <cmd/cmd.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+
+#ifndef GRAMMAR_EXCEPTION
+#define GRAMMAR_EXCEPTION
+class GrammarException : public Exception {
+
+    virtual const char* what() const throw()
+    {
+        std::ostringstream oss;
+        oss
+            << "Grammar exception: "
+            << f_message
+            << std::endl
+            ;
+
+        return (strdup(oss.str().c_str()));
+    }
+
+    std::string f_message;
+
+public:
+    GrammarException(const std::string &message)
+        : f_message(message)
+    {}
+
+    virtual ~GrammarException() throw()
+    {}
+};
+#endif
 }
 
 @members {
-    // singleton managers
-    ExprMgr& em = ExprMgr::INSTANCE();
-    ModelMgr& mm = ModelMgr::INSTANCE();
-    TypeMgr& tm = TypeMgr::INSTANCE();
+    /* singleton managers */
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    // cmd subsystem
-    CommandMgr& cm = CommandMgr::INSTANCE();
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    CommandMgr& cm
+        (CommandMgr::INSTANCE());
+
+    /* the model instance */
+    Model& model
+        (mm.model());
 }
 
-/* SMV model Toplevel */
+// --- Model Description Language  ---------------------------------------------
 smv
 scope {
-    IModel_ptr model;
-    IModule_ptr module;
+    Module_ptr current_module;
 }
-
-
-// TODO: support for multiple machines
-@init {
-    $smv::model = mm.model();
-}
-    : 'FSM' id=identifier ';'
-      {
-            $smv::model->set_name(id);
-
-            $smv::module = new Module(em.make_main());
-            $smv::model->add_module(em.make_main(), $smv::module);
-      }
-
-      module_body ';'? // exit point
+    : model_directives modules
     ;
 
-/* Scripting sub-system Toplevel */
-cmd returns [Command_ptr res]
-    : command = commands
-    { $res = command; }
+model_directives
+    : model_directive*
     ;
 
-/* Commands to be implemented:
-
- * SAT <expr> [ ; <expr]* -- pure satisfiability problem on a (set of)
- propositional formulas. Requires variable definitions in separate
- model. Returns UNSAT, or a witness #
-
- * I/O
- READ MODEL <filename> - load a new model from file (stdin not supported)
- Returns OK, <0 errcode otherwise
-
- DUMP MODEL [ TO <filename> ] - save a new model to file
- Returns OK, <0 errcode otherwise
-
- READ TRACE <filename> - load a trace from .json file (stdin not supported)
- Returns trace#, <0 errcode otherwise
-
- DUMP TRACE #trace [ TO <filename> ] - save a trace to .json file
- Returns OK, <0 errcode otherwise
-
- * Model
- ANALYZE - analyzes the model and prints stats to stdout.
- Returns nothing.
-
- * MC
-
- VERIFY <expr>, model checking of given properties.
- Returns witness index or UNKNOWN if no witness was found, TRUE if property was found to be true.
-
- SIMULATE ( RUN | RESUME ) [ CONSTRAINED constraint ( "," constraint )*  ] ( #steps )? [ HALT | PAUSE ON <halt_condition> ]
- Returns witness index or UNSAT if simulation failed.
-
- >> SIMULATE
- OK. Created Trace (#4)
-
- * TRACE
-
- SHOW TRACES
- TRACE
-
- PRINT TRACE
-
- * OTHERS
-
- CLK
- Returns CPU time in millisecs
-
- FORMAT "FMT", ...
- Returns a formatted message.
-
- PRINT "FMT", ...
- Same as above. Always prints to STDOUT.
-
- SH <shell command>
- Returns the output of an embedded shell command.
-
- SET "name" TO "value" (eg. SET general.verbosity TO TRUE)
- Returns current value
-
- GET "name"
- Returns current value
-
- * CONTROL
- LET <var> BE <expr> (e.g. LET t0 BE NOW -q)
-
- IF (...) DO  ... END, if control block
- WHILE (...) DO ... END, while control block
-
- QUIT [-r retcode], terminates the program
-*/
-commands returns [Command_ptr res]
-    :  c=help_command
-       { $res = c; }
-
-    |  c=time_command
-       { $res = c; }
-
-    |  c=init_command
-       { $res = c; }
-
-    |  c=model_command
-       { $res = c; }
-
-    |  c=simulate_command
-       { $res = c; }
-
-    |  c=verify_command
-       { $res = c; }
-
-    |  c=witness_command
-       { $res = c; }
-
-    |  c=quit_command
-       { $res = c; }
+model_directive
+    : model_word_width_directive
     ;
 
-help_command returns [Command_ptr res]
-@init {
-    Atom topic;
-}
-    : 'help'
-      ( IDENTIFIER { topic = (const char *) $IDENTIFIER.text->chars; } )?
-      { $res = cm.make_help(topic); }
+model_word_width_directive
+    : '#word-width' width=constant
+    { om.set_word_width( width -> value()); }
     ;
 
-time_command returns [Command_ptr res]
-    : 'time' { $res = cm.make_time(); }
+modules
+    : module_def *
     ;
 
-init_command returns [Command_ptr res]
-    : 'init' { $res = cm.make_init(); }
+module_def
+    : 'MODULE' module_id=identifier
+      { model.add_module(* ($smv::current_module = new Module(module_id))); }
+
+      fsm_param_decl? module_body ';'
     ;
 
-model_command returns [Command_ptr res]
-    : 'model' fp=filepath
-      { $res = cm.make_load_model(fp); }
-    ;
-
-verify_command returns[Command_ptr res]
-@init {
-    ExprVector constraints;
-}
-    : 'verify' property=toplevel_expression
-
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        { $res = cm.make_verify( property, constraints ); }
-    ;
-
-witness_command returns [Command_ptr res]
-    :   'witness' (
-
-            'list'
-            { $res = cm.make_witness_list(); }
-
-        |   'show' wid=identifier
-            { $res = cm.make_witness_show(wid); }
-
-        )
-    ;
-
-simulate_command returns [Command_ptr res]
-@init {
-    Expr_ptr halt_cond = NULL;
-    Expr_ptr resume_id = NULL;
-    ExprVector constraints;
-}
-    : 'simulate'
-
-        ( 'with' expr=toplevel_expression
-          { constraints.push_back( expr ); }
-
-          ( ',' expr=toplevel_expression
-            { constraints.push_back( expr ); }
-          ) *
-        ) ?
-
-        ( 'halt' expr=toplevel_expression
-          { halt_cond = expr; }
-        |  expr=constant
-          { halt_cond = expr; }
-        ) ?
-
-        (  'resume' wid=identifier
-           { resume_id = wid; }
-        )?
-
-        { $res = cm.make_simulate( halt_cond, resume_id, constraints ); }
-    ;
-
-quit_command returns [Command_ptr res]
-    :  'quit'
-       { $res = cm.make_quit(); }
-    ;
-
-// -------------------------------------------------------------------------------
-
-filepath returns [const char *res]
-@init { std::ostringstream oss; }
-    :
-        (
-            frag=filepath_fragment
-            { oss << frag; }
-        ) +
-        { $res = oss.str().c_str(); }
-    ;
-
-filepath_fragment returns [const char *res]
-    :
-        IDENTIFIER
-        { $res = (const char *) $IDENTIFIER.text->chars; }
-
-    |   '.'
-        { $res = "."; }
-
-    |   '/'
-        { $res = "/"; }
-    ;
-
-// FSM definition entry point
 module_body
-    :	module_decl ( ';' module_decl )*
+    :   module_decl ( ';' module_decl )*
     ;
 
 module_decl
-    :	/* variables and defines */
-        fsm_var_decl
-    |   fsm_enum_decl
-	|	fsm_define_decl
+scope {
+    int hidden;
+    int input;
+    int frozen;
+}
+@init {
+    $module_decl::hidden = 0;
+    $module_decl::input = 0;
+    $module_decl::frozen = 0;
+}
 
-		/* FSM definition */
-	|	fsm_init_decl
+    :   /* variables and defines */
+        fsm_decl_modifiers (
+            fsm_var_decl | fsm_define_decl
+        )
+
+        /* FSM definition */
+    |   fsm_init_decl
     |   fsm_invar_decl
-	|	fsm_trans_decl
+    |   fsm_trans_decl
     ;
+
+fsm_decl_modifiers
+    : ( '@'
+            (
+                'hidden' { $module_decl::hidden = 1; } |
+                'frozen' { $module_decl::frozen = 1; } |
+                'input'  { $module_decl::input  = 1; }
+       )) *
+    ;
+
 
 fsm_var_decl
-    : 'VAR'  fsm_var_decl_body
+    :
+        'VAR' fsm_var_decl_body
     ;
 
-fsm_enum_decl
-    : 'ENUM' fsm_enum_decl_body
+fsm_param_decl
+    : '(' fsm_param_decl_body ')'
     ;
-
-fsm_enum_decl_body
-    : fsm_enum_decl_clause
-        ( ';' fsm_enum_decl_clause)*
-    ;
-
-fsm_enum_decl_clause
-@init {
-    ExprSet lits;
-}
-    : expr=identifier ':' fsm_enum_type_lits[lits]
-      { tm.add_enum( $smv::module->expr(), expr, lits ); }
-    ;
-
-fsm_enum_type_lits [ExprSet& lits]
-	:
-     '{'
-          lit=literal
-          { $lits.insert(lit); }
-
-          (',' lit=literal
-          { $lits.insert(lit); }
-          )*
-     '}'
-	;
 
 fsm_var_decl_body
-	: fsm_var_decl_clause
+    : fsm_var_decl_clause
         ( ';' fsm_var_decl_clause)*
-	;
+    ;
+
+fsm_param_decl_body
+    : fsm_param_decl_clause
+        ( ',' fsm_param_decl_clause)*
+    ;
 
 fsm_var_decl_clause
 @init {
     ExprVector ev;
 }
-	: ids=identifiers[&ev] ':' tp=type
+    : ids=identifiers[&ev] ':' tp=type
     {
             ExprVector::iterator expr_iter;
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id = (*expr_iter);
-                IVariable_ptr var = new Variable($smv::module->expr(), id, tp);
-                $smv::module->add_var(id, var);
+                Expr_ptr vid (*expr_iter);
+                Variable_ptr var
+                    (new Variable($smv::current_module->name(), vid, tp));
+
+                if ($module_decl::hidden)
+                    var -> set_hidden(true);
+                if ($module_decl::input)
+                    var -> set_input(true);
+                if ($module_decl::frozen)
+                    var -> set_frozen(true);
+
+                $smv::current_module->add_var(vid, var);
             }
     }
-	;
+    ;
+
+fsm_param_decl_clause
+@init {
+    ExprVector ev;
+}
+    : ids=identifiers[&ev] ':' tp=type
+    {
+            ExprVector::iterator expr_iter;
+            assert(NULL != tp);
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr pid (*expr_iter);
+                $smv::current_module->add_parameter(pid,
+                                                    new Parameter($smv::current_module->name(), pid, tp));
+            }
+    }
+    ;
+
 
 fsm_define_decl
-    : 'DEFINE' fsm_define_decl_body
+    :
+        'DEFINE' fsm_define_decl_body
     ;
 
 fsm_define_decl_body
-	: fsm_define_decl_clause
+    : fsm_define_decl_clause
         ( ';' fsm_define_decl_clause)*
-	;
+    ;
 
 fsm_define_decl_clause
 @init {
     ExprVector formals;
 }
-	: id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
+    : id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
     {
-     IDefine_ptr def = new Define($smv::module->expr(), id, formals, body);
-     $smv::module->add_def(id, def);
+      Define_ptr def = new Define($smv::current_module->name(), id, formals, body);
+
+      if ($module_decl::input)
+          throw GrammarException("@input modifier not supported in DEFINE decls");
+      if ($module_decl::frozen)
+          throw GrammarException("@frozen modifier not supported in DEFINE decls");
+      if ($module_decl::hidden)
+          def -> set_hidden(true);
+
+      $smv::current_module->add_def(id, def);
     }
-	;
+    ;
 
 fsm_init_decl
     : 'INIT' fsm_init_decl_body
     ;
 
 fsm_init_decl_body
-	: fsm_init_decl_clause
+    : fsm_init_decl_clause
         (';' fsm_init_decl_clause)*
-	;
+    ;
 
 fsm_init_decl_clause
-	: expr=toplevel_expression
-      { $smv::module->add_init(expr); }
-	;
+    : expr=toplevel_expression
+      { $smv::current_module->add_init(expr); }
+    ;
 
 fsm_invar_decl
     : 'INVAR' fsm_invar_decl_body
     ;
 
 fsm_invar_decl_body
-	: fsm_invar_decl_clause
+    : fsm_invar_decl_clause
         (';' fsm_invar_decl_clause)*
-	;
+    ;
 
 fsm_invar_decl_clause
-	: expr=toplevel_expression
-      { $smv::module->add_invar(expr); }
-	;
+    : expr=toplevel_expression
+      { $smv::current_module->add_invar(expr); }
+    ;
 
 fsm_trans_decl
     : 'TRANS' fsm_trans_decl_body
     ;
 
 fsm_trans_decl_body
-	: fsm_trans_decl_clause
+    : fsm_trans_decl_clause
         (';' fsm_trans_decl_clause)*
-	;
+    ;
 
 fsm_trans_decl_clause
-	: expr=toplevel_expression
-      { $smv::module->add_trans(expr); }
-	;
+    : expr=toplevel_expression
+      { $smv::current_module->add_trans(expr); }
+    ;
 
 // entry point
 toplevel_expression returns [Expr_ptr res]
@@ -424,13 +299,31 @@ toplevel_expression returns [Expr_ptr res]
 
 conditional_expression returns [Expr_ptr res]
 @init { }
-	: expr=logical_or_expression {
+    : expr=logical_expression {
          $res = expr;
-      } (
+      }
+
+      (
             '?' lhs=toplevel_expression ':' rhs=toplevel_expression
-            { $res = em.make_ite(em.make_cond($res, lhs), rhs); }
+            { $res = em.make_ite( em.make_cond($res, lhs), rhs); }
       )?
-	;
+    ;
+
+logical_expression returns [Expr_ptr res]
+    : expr=logical_implies_expression
+      { $res = expr; }
+    ;
+
+logical_implies_expression returns [Expr_ptr res]
+@init { }
+    : lhs=logical_or_expression
+      { $res = lhs; }
+
+    (
+      '->' rhs=logical_or_expression
+      { $res = em.make_implies($res, rhs); }
+    )*
+    ;
 
 logical_or_expression returns[Expr_ptr res]
 @init { }
@@ -438,125 +331,103 @@ logical_or_expression returns[Expr_ptr res]
       { $res = lhs; }
 
     (
-      'or' rhs=logical_and_expression
+      '||' rhs=logical_and_expression
       { $res = em.make_or($res, rhs); }
     )*
     ;
 
 logical_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=inclusive_or_expression
+    : lhs=bw_or_expression
       { $res = lhs; }
 
     (
-      'and' rhs=inclusive_or_expression
+      '&&' rhs=bw_or_expression
       { $res = em.make_and($res, rhs); }
     )*
     ;
 
-inclusive_or_expression returns[Expr_ptr res]
+bw_or_expression returns[Expr_ptr res]
 @init { }
-    : lhs=exclusive_or_expression
+    : lhs=bw_xor_expression
       { $res = lhs; }
 
     (
-      '|' rhs=exclusive_or_expression
-      { $res = em.make_bw_or($res, rhs); }
+      '|' rhs=bw_xor_expression
+       { $res = em.make_bw_or($res, rhs); }
     )*
     ;
 
-exclusive_or_expression returns[Expr_ptr res]
+bw_xor_expression returns[Expr_ptr res]
 @init { }
-    : lhs=equivalence_expression
+    : lhs=bw_xnor_expression
       { $res = lhs; }
 
     (
-      '^' rhs=equivalence_expression
+      '^' rhs=bw_xnor_expression
       { $res = em.make_bw_xor($res, rhs); }
     )*
     ;
 
-equivalence_expression returns[Expr_ptr res]
+bw_xnor_expression returns[Expr_ptr res]
 @init { }
-    : lhs=and_expression
+    : lhs=bw_and_expression
       { $res = lhs; }
 
     (
-      '~' rhs=and_expression
+      '~^' rhs=bw_and_expression
       { $res = em.make_bw_xnor($res, rhs); }
     )*
     ;
 
-and_expression returns[Expr_ptr res]
+bw_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=iff_expression
+    : lhs=temporal_expression
       { $res = lhs; }
 
     (
-      '&' rhs=iff_expression
+      '&' rhs=temporal_expression
       { $res = em.make_bw_and($res, rhs); }
     )*
     ;
 
-iff_expression returns [Expr_ptr res]
-@init { }
-	:  lhs=implies_expression
-       { $res = lhs; }
-
-    (
-       '<->' rhs=implies_expression
-       { $res = em.make_iff($res, rhs); }
-    )*
-	;
-
-implies_expression returns [Expr_ptr res]
-@init { }
-	: lhs=temporal_formula
-      { $res = lhs; }
-
-    (
-      '->' rhs=temporal_formula
-      { $res = em.make_implies($res, rhs); }
-    )*
-    ;
-
-temporal_formula returns [Expr_ptr res]
+temporal_expression returns [Expr_ptr res]
 @init { }
     :
-        formula=binary_ltl_formula
-        { $res = formula; }
+        expr=binary_ltl_expression
+        { $res = expr; }
     ;
 
-binary_ltl_formula returns [Expr_ptr res]
+binary_ltl_expression returns [Expr_ptr res]
 @init { }
-    : lhs=unary_ltl_formula
+    : lhs=unary_ltl_expression
       { $res = lhs; } (
-            'U' rhs=unary_ltl_formula
+            'U' rhs=unary_ltl_expression
             { $res = em.make_U($res, rhs); }
 
-        |   'R' rhs=unary_ltl_formula
+        |   'R' rhs=unary_ltl_expression
             { $res = em.make_R($res, rhs); }
     )*
     ;
 
-unary_ltl_formula returns [Expr_ptr res]
+unary_ltl_expression returns [Expr_ptr res]
 @init { }
-    : 'G' formula=unary_ltl_formula
-      { $res = em.make_G(formula); }
+    : 'G' expr=unary_ltl_expression
+      { $res = em.make_G(expr); }
 
-    | 'F' formula=unary_ltl_formula
-      { $res = em.make_F(formula); }
+    | 'F' expr=unary_ltl_expression
+      { $res = em.make_F(expr); }
 
-    | 'X' formula=unary_ltl_formula
-      { $res = em.make_X(formula); }
+    | 'X' expr=unary_ltl_expression
+      { $res = em.make_X(expr); }
 
-    | formula=equality_expression
-      { $res = formula; }
+    | expr=equality_expression
+      { $res = expr; }
     ;
 
 equality_expression returns [Expr_ptr res]
 @init { }
-	: lhs=relational_expression
+    : lhs=relational_expression
       { $res = lhs; }
 
     ( '=' rhs=relational_expression
@@ -565,11 +436,11 @@ equality_expression returns [Expr_ptr res]
     | '!=' rhs=relational_expression
      { $res = em.make_ne($res, rhs); }
     )*
-	;
+    ;
 
 relational_expression returns [Expr_ptr res]
 @init { }
-	: lhs=shift_expression
+    : lhs=shift_expression
       { $res = lhs; }
 
     (
@@ -585,11 +456,11 @@ relational_expression returns [Expr_ptr res]
     | '>' rhs=shift_expression
       { $res = em.make_gt($res, rhs); }
     )*
-	;
+    ;
 
 shift_expression returns [Expr_ptr res]
 @init { }
-	: lhs=additive_expression
+    : lhs=additive_expression
       { $res = lhs; }
 
     (
@@ -599,11 +470,11 @@ shift_expression returns [Expr_ptr res]
     | '>>' rhs=additive_expression
        { $res = em.make_rshift($res, rhs); }
     )*
-	;
+    ;
 
 additive_expression returns [Expr_ptr res]
 @init { }
-	: lhs=multiplicative_expression
+    : lhs=multiplicative_expression
       { $res = lhs; }
 
     (
@@ -613,12 +484,13 @@ additive_expression returns [Expr_ptr res]
     |   '-' rhs=multiplicative_expression
         { $res = em.make_sub($res, rhs); }
     )*
-	;
+    ;
 
 multiplicative_expression returns [Expr_ptr res]
 @init { }
-	: lhs=cast_expression
+    : lhs=cast_expression
       { $res = lhs; }
+
     (
       '*' rhs=cast_expression
       { $res = em.make_mul($res, rhs); }
@@ -629,66 +501,121 @@ multiplicative_expression returns [Expr_ptr res]
     | '%' rhs=cast_expression
       { $res = em.make_mod($res, rhs); }
     )*
-	;
+    ;
 
 cast_expression returns [Expr_ptr res]
 @init {
     Expr_ptr cast = NULL;
 }
-    : '(' tp = castable_type ')' expr = cast_expression
+    : '(' tp = native_type ')' expr = cast_expression
         { $res = em.make_cast( tp -> repr(), expr ); }
-	|
+    |
         expr = unary_expression
         { $res = expr; }
-	;
+    ;
 
 unary_expression returns [Expr_ptr res]
 @init { }
-	: expr=postfix_expression
+    : expr=postfix_expression
       { $res = expr; }
 
-	| 'next' '(' expr=toplevel_expression ')'
+    | expr=nondeterministic_expression
+      { $res = expr; }
+
+    | expr=array_expression
+      { $res = expr; }
+
+    | 'next' '(' expr=toplevel_expression ')'
       { $res = em.make_next(expr); }
 
-	| 'not' expr=postfix_expression
+    | '!' expr=postfix_expression
       { $res = em.make_not(expr); }
 
-    | '!' expr=postfix_expression
+    | '~' expr=postfix_expression
       { $res = em.make_bw_not(expr); }
 
     | '-' expr=postfix_expression
       { $res = em.make_neg(expr); }
-	;
+    ;
 
-actual_params returns [Expr_ptr res]
+nondeterministic_expression returns[Expr_ptr res]
+@init {
+    ExprVector clauses;
+}
+    : '{'
+          c=toplevel_expression{ clauses.push_back(c); }
+            (',' c=toplevel_expression { clauses.push_back(c); })*
+      '}'
+      {
+            ExprVector::reverse_iterator i
+                (clauses.rbegin());
+
+            while (clauses.rend() != i) {
+                $res = $res ? em.make_set_comma( *i, $res) : *i;
+                ++ i;
+            }
+
+            $res = em.make_set( $res );
+        }
+    ;
+
+array_expression returns[Expr_ptr res]
+@init {
+    ExprVector clauses;
+}
+    : '['
+          c=toplevel_expression{ clauses.push_back(c); }
+            (',' c=toplevel_expression { clauses.push_back(c); })*
+      ']'
+      {
+            ExprVector::reverse_iterator i
+                (clauses.rbegin());
+
+            while (clauses.rend() != i) {
+                $res = $res ? em.make_array_comma( *i, $res) : *i;
+                ++ i;
+            }
+
+            $res = em.make_array( $res );
+        }
+    ;
+
+
+params returns [Expr_ptr res]
 @init {
     ExprVector actuals;
+    res = NULL;
 }
-	: expressions[&actuals]
+    : ( expressions[&actuals]
     {
             ExprVector::reverse_iterator expr_iter;
             res = NULL;
 
             for (expr_iter = actuals.rbegin(); expr_iter != actuals.rend(); ++ expr_iter) {
                 Expr_ptr expr = (*expr_iter);
-                res = (!res) ? expr : em.make_comma( expr, res );
+                res = (!res) ? expr : em.make_params_comma( expr, res );
             }
+    })?
+
+    {
+      if (! res)
+          res = em.make_empty();
     }
-	;
+
+    ;
 
 postfix_expression returns [Expr_ptr res]
 @init { }
-	:   lhs=basic_expression
+    :   lhs=basic_expression
         { $res = lhs; }
 
     (
         '[' rhs=toplevel_expression ']'
         { $res = em.make_subscript($res, rhs); }
     |
-        '(' rhs=actual_params ')'
+        '(' rhs=params ')'
         { $res = em.make_params($res, rhs); }
 
-        // TODO: nested dot not yet supported
     |   '.' rhs=identifier
         { $res = em.make_dot($res, rhs); }
     )*
@@ -699,86 +626,97 @@ basic_expression returns [Expr_ptr res]
     : id=identifier
       { $res = id; }
 
-	| k=constant
+    | k=constant
       { $res = k; }
 
-	| '(' expr=toplevel_expression ')'
+    | '(' expr=toplevel_expression ')'
       { $res = expr; }
 
-    | 'switch' '(' expr=toplevel_expression ')'
-         clauses = case_clauses[expr]
-        'default' ':' dflt=toplevel_expression ';'
-      'end' {
-            $res = dflt;
-            for (ExprVector::reverse_iterator eye = clauses->rbegin();
-                 eye != clauses->rend(); ++ eye) {
+    | expr=case_expression
+      { $res = expr; }
+    ;
 
-                    $res = em.make_ite((*eye), $res);
-            }
-            delete clauses;
+case_expression returns [Expr_ptr res]
+@init {
+    typedef std::pair<Expr_ptr, Expr_ptr> CaseClause;
+    typedef std::vector<CaseClause> CaseClauses;
+
+    CaseClauses clauses;
+}  : 'case'
+
+     (lhs=toplevel_expression ':' rhs=toplevel_expression ';'
+     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
+
+     'else' ':' last=toplevel_expression ';'
+     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (NULL, last)); }
+
+     'end'
+     {
+        CaseClauses::reverse_iterator i = clauses.rbegin();
+        res = i -> second;
+        while (1) {
+            if ( ++ i == clauses.rend())
+                break;
+            $res = em.make_ite( em.make_cond(i -> first,
+                                             i -> second), $res);
         }
-	;
-
-case_clauses [Expr_ptr expr] returns [ExprVector_ptr res]
-@init { res = new ExprVector (); }
-    :
-    (
-      'case' lhs=toplevel_expression ':' rhs=toplevel_expression ';'
-      {
-       assert(lhs);
-       assert(rhs);
-       $res->push_back(em.make_cond( em.make_eq(lhs, expr), rhs));
-      }
-    )+
+     }
     ;
 
 identifiers [ExprVector* ids]
     :
-      ident=identifier { ids->push_back(ident); }
-      ( ',' ident=identifier { ids->push_back(ident); }  )*
+      ident=identifier
+      { ids->push_back(ident); }
+
+      ( ',' ident=identifier
+            { ids->push_back(ident); }
+      )*
     ;
 
 expressions [ExprVector* exprs]
     :
-      expr=toplevel_expression { exprs->push_back(expr); }
-      ( ',' expr=toplevel_expression { exprs->push_back(expr); }  )*
+      expr=toplevel_expression
+      { exprs->push_back(expr); }
+
+      ( ',' expr=toplevel_expression
+            { exprs->push_back(expr); }
+      )*
     ;
 
 identifier returns [Expr_ptr res]
 @init { }
-	: IDENTIFIER
+    : IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
-	;
+    ;
 
 constant returns [Expr_ptr res]
-	: HEX_LITERAL
-      {
+@init {
+}
+    : HEX_LITERAL {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
-   	| DECIMAL_LITERAL
-      {
-        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+    | x=DECIMAL_LITERAL {
+        Atom tmp (Atom((const char*)($x.text->chars)));
         $res = em.make_dec_const(tmp);
       }
 
-    | OCTAL_LITERAL
-      {
+    | OCTAL_LITERAL {
         Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
         $res = em.make_oct_const(tmp);
       }
-	;
+    ;
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [Expr_ptr res]
 @init {}
-	: 'next' '(' expr=postfix_expression ')'
+    : 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
-	| expr=postfix_expression
+    | expr=postfix_expression
       { $res = expr; }
-	;
+    ;
 
 /* ordinary values used elsewhere */
 value returns [Expr_ptr res]
@@ -787,16 +725,20 @@ value returns [Expr_ptr res]
       { $res = expr; }
     ;
 
+/* typedecls */
 type returns [Type_ptr res]
 @init {}
-    : tp = castable_type
+    : tp = native_type
       { $res = tp; }
 
     | tp = enum_type
       { $res = tp; }
+
+    | tp = instance_type
+      { $res = tp; }
     ;
 
-castable_type returns [Type_ptr res]
+native_type returns [Type_ptr res]
 @init {}
     : tp = boolean_type
       { $res = tp; }
@@ -807,114 +749,113 @@ castable_type returns [Type_ptr res]
     | tp = signed_int_type
       { $res = tp; }
 
-    | tp = unsigned_fxd_type
-      { $res = tp; }
-
-    | tp = signed_fxd_type
-      { $res = tp; }
-
     ;
 
 boolean_type returns [Type_ptr res]
-@init {}
-    : 'boolean'
-    { $res = tm.find_boolean(); }
+@init {
+    int array_size = 0;
+}
+    : 'boolean' (
+
+            '[' size=constant ']'
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_boolean_array(array_size) :
+            (Type_ptr) tm.find_boolean();
+    }
+    ;
+
+enum_type returns [Type_ptr res]
+@init {
+    int array_size = 0;
+    ExprSet lits;
+}
+    : '{'
+          lit=literal { lits.insert(lit); }
+              (',' lit=literal { lits.insert(lit); })*
+      '}' (
+            '[' size=constant ']'
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_enum_array(lits, array_size) :
+            (Type_ptr) tm.find_enum(lits);
+    }
     ;
 
 unsigned_int_type returns [Type_ptr res]
 @init {
+    int array_size = 0;
     char *p;
 }
-	:
+    :
         UNSIGNED_INT_TYPE
         {
             p = (char *) $UNSIGNED_INT_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p))
+                ++ p;
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_unsigned_array( atoi(p), size->value()); }
-    |
-        {
-            $res = tm.find_unsigned( atoi(p));
-        }
-    )
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_unsigned_array(*p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), array_size) :
+            (Type_ptr) tm.find_unsigned( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width());
+    }
+
     ;
 
 signed_int_type returns [Type_ptr res]
 @init {
+    int array_size = 0;
     char *p;
 }
-	:
+    :
         SIGNED_INT_TYPE
         {
             p = (char *) $SIGNED_INT_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to width
+            while (*p && !isdigit(*p))
+                ++ p;
         }
         (
             '[' size=constant ']'
-            { $res = tm.find_signed_array( atoi(p), size->value()); }
-    |
-        {
-            $res = tm.find_signed( atoi(p));
-        }
-    )
+            {
+                array_size = size->value();
+                assert(0 < array_size);
+            }
+    ) ?
+    {
+        $res = array_size ?
+            (Type_ptr) tm.find_signed_array(*p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width(), array_size) :
+            (Type_ptr) tm.find_signed( *p ? atoi(p)
+                : OptsMgr::INSTANCE().word_width());
+    }
+
     ;
 
-unsigned_fxd_type returns [Type_ptr res]
+
+instance_type returns [Type_ptr res]
 @init {
-    char *p, *q;
 }
-	:
-        UNSIGNED_FXD_TYPE
-        {
-            p = (char *) $UNSIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to magnitude
-
-            q = p;
-            while (*q != '.') ++ q; // skip to fractional
-
-            *(q ++) = 0;
-        }
-        (
-            '[' size=constant ']'
-            { $res = tm.find_unsigned_array( atoi(p), atoi(q), size->value()); }
-    |
-        {
-            $res = tm.find_unsigned( atoi(p), atoi(q));
-        }
-    )
-    ;
-
-signed_fxd_type returns [Type_ptr res]
-@init {
-    char *p, *q;
-}
-	:
-        SIGNED_FXD_TYPE
-        {
-            p = (char *) $SIGNED_FXD_TYPE.text->chars;
-            while (!isdigit(*p)) ++ p; // skip to magnitude
-
-            q = p;
-            while (*q != '.') ++ q; // skip to fractional
-
-            *(q ++) = 0;
-        }
-        (
-            '[' size=constant ']'
-            { $res = tm.find_signed_array( atoi(p), atoi(q), size->value()); }
-    |
-        {
-            $res = tm.find_signed( atoi(p), atoi(q));
-        }
-    )
-    ;
-
-enum_type returns [Type_ptr res]
-@init {}
-    : expr=identifier
-      { $res = tm.find_enum( $smv::module->expr(), expr ); }
+    : module=identifier '(' parameters=params ')'
+      { $res = tm.find_instance( module, parameters ); }
     ;
 
 literal returns [Expr_ptr res]
@@ -923,53 +864,234 @@ literal returns [Expr_ptr res]
        { $res = expr; }
     ;
 
-/** Lexer rules */
+// -- Scripting sub-system Toplevel ---------------------------------------------
+command_line returns [CommandVector_ptr res]
+@init {
+    res = new CommandVector();
+}
+    : commands[res]
+    ;
+
+commands [CommandVector_ptr cmds]
+    :
+        c=command
+        { cmds->push_back(c); }
+
+        (
+            ';' c=command
+            { cmds->push_back(c); }
+        )*
+    ;
+
+command returns [Command_ptr res]
+    :  c=help_command
+       { $res = c; }
+
+    |  c=time_command
+       { $res = c; }
+
+    |  c=read_model_command
+       { $res = c; }
+
+    |  c=write_model_command
+       { $res = c; }
+
+    |  c=pick_state_command
+       { $res = c; }
+
+    |  c=simulate_command
+       { $res = c; }
+
+    |  c=check_init_command
+       { $res = c; }
+
+    |  c=check_invar_command
+       { $res = c; }
+
+    |  c=list_traces_command
+       { $res = c; }
+
+    |  c=dump_trace_command
+       { $res = c; }
+
+    |  c=dup_trace_command
+       { $res = c; }
+
+    |  c=quit_command
+       { $res = c; }
+    ;
+
+help_command returns [Command_ptr res]
+    : 'help'
+      { $res = cm.make_help(); }
+      (
+          topic = command
+          { ((Help*) $res) -> set_topic(topic); }
+      )?
+    ;
+
+time_command returns [Command_ptr res]
+    : 'time'
+      { $res = cm.make_time(); }
+    ;
+
+read_model_command returns [Command_ptr res]
+    :  'read-model'
+        { $res = cm.make_read_model(); }
+
+        ( input=filepath {
+            ((ReadModel*) $res) -> set_input(input);
+        }) ?
+    ;
+
+write_model_command returns [Command_ptr res]
+    :  'write-model'
+        { $res = cm.make_write_model(); }
+
+        ( output=filepath {
+            ((WriteModel*) $res) -> set_output(output);
+        }) ?
+    ;
+
+check_init_command returns[Command_ptr res]
+    : 'check-init'
+      { $res = cm.make_check_init(); }
+
+      init=toplevel_expression
+      { ((CheckInit *) $res) -> set_init(init); }
+    ;
+
+check_invar_command returns[Command_ptr res]
+    : 'check-invar'
+      { $res = cm.make_check_invar(); }
+
+      invar=toplevel_expression
+      { ((CheckInvar *) $res) -> set_invar(invar); }
+    ;
+
+list_traces_command returns [Command_ptr res]
+    : 'list-traces'
+      { $res = cm.make_list_traces(); }
+    ;
+
+dump_trace_command returns [Command_ptr res]
+    : 'dump-trace'
+      { $res = cm.make_dump_trace(); }
+
+    (
+      '-f' format=string
+      { ((DumpTrace*) $res) -> set_format(format); }
+
+    | '-o' output=filepath
+      {
+            ((DumpTrace*) $res) -> set_output(output);
+            free((void *) output);
+      }
+
+    )*
+
+    ( trace_id=string
+    { ((DumpTrace*) $res) -> set_trace_id(trace_id); } )?
+
+    ;
+
+dup_trace_command returns [Command_ptr res]
+    : 'dup-trace'
+      { $res = cm.make_dup_trace(); }
+
+      trace_id=string
+      { ((DupTrace*) $res) -> set_trace_id(trace_id); }
+
+      ( duplicate_uid=string
+        { ((DupTrace*) $res) -> set_duplicate_id(duplicate_uid); } )?
+    ;
+
+pick_state_command returns [Command_ptr res]
+    :   'pick-state'
+        { $res = cm.make_pick_state(); }
+    (
+         '-i' init_condition=toplevel_expression
+         { ((PickState*) $res) -> set_init_condition(init_condition); }
+
+    |    '-t' trace_id=string
+         { ((PickState*) $res) -> set_trace_uid(trace_id); }
+    )*
+    ;
+
+simulate_command returns [Command_ptr res]
+    : 'simulate'
+      { $res = cm.make_simulate(); }
+    (
+       '-i' invar_condition=toplevel_expression
+        { ((Simulate *) $res) -> set_invar_condition(invar_condition); }
+
+    |  '-u' until_condition=toplevel_expression
+        { ((Simulate*) $res) -> set_until_condition(until_condition); }
+
+    |   '-k' konst=constant
+        { ((Simulate*) $res) -> set_k(konst->value()); }
+
+    |   '-t' trace_id=string
+        { ((Simulate*) $res) -> set_trace_uid(trace_id); }
+    )*
+    ;
+
+quit_command returns [Command_ptr res]
+    :  'quit'
+       { $res = cm.make_quit(); }
+    ;
+
+string returns [pconst_char res]
+@init {}
+    : IDENTIFIER
+      { $res = (pconst_char) $IDENTIFIER.text -> chars; }
+    ;
+
+filepath returns [pconst_char res]
+    : QUOTE
+    { $res = (pconst_char) $QUOTE.text -> chars; }
+
+    | dquote = DQUOTE
+    { $res = (pconst_char) $DQUOTE.text -> chars; }
+    ;
+
+// -- Lexer rules --------------------------------------------------------------
 UNSIGNED_INT_TYPE
-    :  'uint' TYPE_WIDTH
+    :  'uint' TYPE_WIDTH?
     ;
 
 SIGNED_INT_TYPE
-    :  'int' TYPE_WIDTH
-    ;
-
-UNSIGNED_FXD_TYPE
-    :  'ufxd' TYPE_MAG_FRAC
-    ;
-
-SIGNED_FXD_TYPE
-    :  'fxd' TYPE_MAG_FRAC
+    :  'int' TYPE_WIDTH?
     ;
 
 IDENTIFIER
-	:	ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
-	;
+    :   ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
+    ;
 
-FILEPATH
-    :  (FP_CHARS)+
+DQUOTE
+    : '\'' ~'\''* '\''
+    ;
+
+QUOTE
+    : '"' ~'"'* '"'
     ;
 
 fragment TYPE_WIDTH
     : DECIMAL_LITERAL
     ;
 
-fragment TYPE_MAG_FRAC
-    : DECIMAL_LITERAL '.' DECIMAL_LITERAL
+fragment ID_FIRST_CHAR
+    :   'A'..'Z' | 'a'..'z' | '_'
     ;
 
-fragment ID_FIRST_CHAR
-	:	'A'..'Z' | 'a'..'z' | '_'
-	;
-
 fragment FP_CHARS
-	:	'/' | '.' | '..'
-	;
+    :   '/' | '.' | '..'
+    ;
 
 fragment ID_FOLLOWING_CHARS
-	:	 ID_FIRST_CHAR
+    :    ID_FIRST_CHAR
     |    DECIMAL_DIGIT
-    |    '$'
-    |    '#'
-	;
+    ;
 
 HEX_LITERAL
    : '0' ('x'|'X') HEX_DIGIT+
@@ -1002,6 +1124,10 @@ fragment HEX_DIGIT
 fragment ZERO
    : '0'
    ;
+
+fragment FRACTIONAL_DIGIT
+    : ZERO | DECIMAL_DIGIT
+    ;
 
 WS
    : (' '|'\r'|'\t'|'\u000C'|'\n')

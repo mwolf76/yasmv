@@ -26,7 +26,12 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <vector>
+#include <set>
+
 #include <common.hh>
+
+#include <expr/atom.hh>
 
 typedef enum {
 
@@ -45,7 +50,7 @@ typedef enum {
     BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
 
     /* logical operators */
-    NOT, AND, OR, IMPLIES, IFF,
+    NOT, AND, OR, IMPLIES,
 
     /* shift operators */
     LSHIFT, RSHIFT,
@@ -67,14 +72,16 @@ typedef enum {
 
     /* defines */
     PARAMS, // (), binary
+    PARAMS_COMMA,
 
     /* arrays */
+    ARRAY, // [] unary
+    ARRAY_COMMA,
+
     SUBSCRIPT, // [], binary
 
-    // TODO
     SET, // {}, unary
-
-    COMMA,
+    SET_COMMA,
 
     // -- Nullary
     ICONST, // decimal constants
@@ -89,11 +96,6 @@ typedef enum {
 // An Expression consists of an AST symbol, which is the expression
 // main operator, operands which depend on the type of operator and a
 // context, in which the expression has to evaluated.
-
-/* using STL string as basic atom class */
-typedef string Atom;
-typedef Atom* Atom_ptr;
-
 typedef struct Expr_TAG *Expr_ptr;
 typedef struct Expr_TAG {
 
@@ -170,160 +172,53 @@ typedef struct Expr_TAG {
 
 } Expr;
 
-typedef vector<Expr_ptr> ExprVector;
+typedef std::vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;
 
-typedef set<Expr_ptr> ExprSet;
+struct LexicographicOrdering {
+    int operator() (const Expr_ptr x, const Expr_ptr y) const;
+};
+
+typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;
 typedef ExprSet* ExprSet_ptr;
 
-// TODO: split this into multiple headers
+std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
 
-typedef class FQExpr* FQExpr_ptr;
-class FQExpr {
-public:
-    FQExpr(Expr_ptr expr); // default ctx, default time
-    FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time = 0);
-
-    FQExpr(const FQExpr& fqexpr);
-
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
-
-    inline Expr_ptr expr() const
-    { return f_expr; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    inline bool operator==(const FQExpr& other)
-    {
-        return
-            f_ctx  == other.f_ctx  &&
-            f_expr == other.f_expr &&
-            f_time == other.f_time  ;
-    }
-
-private:
-    // expression ctx (default for the FSM is 'main')
-    Expr_ptr f_ctx;
-
-    // expression body
-    Expr_ptr f_expr;
-
-    // expression time (default is 0)
-    step_t f_time;
+struct ExprHash {
+    long operator() (const Expr& k) const;
 };
 
-/* Normal forms literals */
-class PolarizedLiteral {
-public:
-    PolarizedLiteral(Expr_ptr literal, bool polarity = true);
-
-    inline Expr_ptr literal() const
-    { return f_literal; }
-
-    inline bool polarity() const
-    { return f_polarity; }
-
-private:
-    // literal
-    Expr_ptr f_literal;
-
-    // polarity
-    bool f_polarity;
+struct ExprEq {
+    bool operator() (const Expr& x, const Expr& y) const;
 };
 
-/* Untimed Canonical Bit Identifiers */
-class UCBI {
-public:
-    UCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno);
-    UCBI(const UCBI& ucbi);
+typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
+/** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
+#define TOP_CTX(tp)                            \
+    const Expr_ptr (tp)(f_ctx_stack.back())
 
-    inline Expr_ptr expr() const
-    { return f_expr; }
+#define DROP_CTX()                             \
+    f_ctx_stack.pop_back()
 
-    inline step_t time() const
-    { return f_time; }
+#define POP_CTX(tp)                            \
+    TOP_CTX(tp); DROP_CTX()
 
-    inline unsigned bitno() const
-    { return f_bitno; }
+#define PUSH_CTX(tp)                           \
+    f_ctx_stack.push_back(tp)
 
-private:
-    // expression ctx (default is 'main')
-    Expr_ptr f_ctx;
+/** -- shortcurts to simplify the manipulation of the internal time stack -- */
+#define TOP_TIME(step)                          \
+    const step_t (step)(f_time_stack.back())
 
-    // expression body
-    Expr_ptr f_expr;
+#define DROP_TIME()                             \
+    f_time_stack.pop_back()
 
-    // expression time (default is 0)
-    step_t f_time;
+#define POP_TIME(step)                          \
+    TOP_TIME(step); DROP_TIME()
 
-    // bit number
-    unsigned f_bitno;
-};
-
-/* Timed Canonical Bit Identifiers */
-class TCBI {
-public:
-    TCBI(Expr_ptr ctx, Expr_ptr expr, step_t timeofs, unsigned bitno, step_t timebase);
-    TCBI(const TCBI& tcbi);
-
-    inline Expr_ptr ctx() const
-    { return f_ctx; }
-
-    inline Expr_ptr expr() const
-    { return f_expr; }
-
-    inline step_t time() const
-    { return f_time; }
-
-    inline unsigned bitno() const
-    { return f_bitno; }
-
-    inline step_t base() const
-    { return f_base; }
-
-private:
-    // expression ctx (default is 'main')
-    Expr_ptr f_ctx;
-
-    // expression body
-    Expr_ptr f_expr;
-
-    // expression time (default is 0)
-    step_t f_time;
-
-    // bit number
-    unsigned f_bitno;
-
-    // time base (default is 0)
-    step_t f_base;
-};
-
-ostream& operator<<(ostream& os, const Expr_ptr expr);
-ostream& operator<<(ostream& os, const FQExpr& fqexpr);
-ostream& operator<<(ostream& os, const UCBI& ucbi);
-ostream& operator<<(ostream& os, const TCBI& tcbi);
-
-// TODO: move this!
-class BadWordConstException : public Exception {
-public:
-    BadWordConstException(const char* msg)
-    : f_msg(msg)
-    {}
-
-    virtual const char* what() const throw() {
-        return f_msg;
-    }
-
-    virtual ~BadWordConstException() throw()
-    {}
-
-protected:
-    const char* f_msg;
-};
+#define PUSH_TIME(step)                         \
+    f_time_stack.push_back(step)
 
 #endif

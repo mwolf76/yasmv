@@ -1,0 +1,29 @@
+-- This file is part of the Yasmine distribution
+-- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
+#word-width 64
+MODULE main
+
+VAR a : uint;
+    b : uint;
+
+INIT
+    a = 5175833502;
+
+INIT
+   b  = 520244859288;
+
+TRANS
+   next(a) = b;
+
+TRANS
+   next(b) = a % b;
+
+@hidden
+DEFINE GOAL := b = 0;
+
+-- to calculate gcd issue the command:
+-- >> check-invar ! GOAL;
+
+
+

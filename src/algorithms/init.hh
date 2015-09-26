@@ -27,12 +27,12 @@
 #ifndef INIT_ALGORITHM_H
 #define INIT_ALGORITHM_H
 
-#include <base.hh>
+#include <algorithms/base.hh>
 
 class Init : public Algorithm {
 
 public:
-    Init(IModel& model);
+    Init(Command& command, Model& model);
     ~Init();
 
     void process();

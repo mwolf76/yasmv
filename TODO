@@ -1,29 +1,22 @@
-TODO
-====
+* Commands
+- integration of libreadline
+- autocomplete support
+- help system
 
-High priority tasks:
---------------------
+* CNFization algorithm
+- Support for multiple CNF algorithms (no-cut, single-cut, mix-cut)
 
-* Unified checking algorithm (i.e.)
-- propositional formulas (SAT on initial states only)
-- invariant properties (G <formula>)
-- full LTL properties
-* Verbosity levels and Colorized output [usability]
+* Unified checking algorithm
+- full LTL properties (not yet suported)
 
-Medium priority tasks:
-----------------------
+* SAT optimizations
 
-* Commands hierarchy and help system
-* Efficient CNFization algorithm [core]
-* Readline support
-* Strip away unused parts from Cudd [maintenance]
-* Consolidate Unit-testing [maintenance]
+* Interpolation based-algorithms
+- requires interpolant-capable SAT solver
 
-Low priority tasks:
--------------------
+* Experiment with CEGAR, COI, Data abstraction
+- functional model (i.e. introduce the := operator)
 
-* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t) [core]
-* CEGAR, COI [core]
-* Explore load distribution over multiple cores [experimental]
-* FSM Editor + Code generator :-] [extension]
+* FSM Editor + Code generator
+
 * Emacs mode for editing [usability]

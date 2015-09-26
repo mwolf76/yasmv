@@ -26,24 +26,25 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include <satdefs.hh>
-#include <cuddObj.hh>
+#include <sat/satdefs.hh>
 
-#include <cudd_mgr.hh>
-#include <enc_mgr.hh>
+#include <dd/cudd-2.5.0/obj/cuddObj.hh>
+#include <dd/cudd_mgr.hh>
 
-#include <micro.hh>
+#include <enc/enc_mgr.hh>
 
-#include <cnf_registry.hh>
-#include <time_mapper.hh>
+#include <model/compiler/unit.hh>
 
-using std::ostream;
-ostream &operator<<(ostream &out, const Lit &lit);
-ostream &operator<<(ostream &out, const vec<Lit> &lits);
+#include <sat/cnf_registry.hh>
+#include <sat/time_mapper.hh>
 
-class SAT : public IObject {
-    //    friend class CNFBuilderSingleCut;
-    // friend class CNFBuilderNoCut;
+#include <sat/helpers.hh>
+
+std::ostream &operator<<(std::ostream &out, const Lit &lit);
+std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
+
+class MicroLoader;
+class Engine {
 
 public:
     /**
@@ -52,13 +53,16 @@ public:
     inline group_t new_group()
     {
         group_t res = new_sat_var();
-        f_groups.push_back(res);
+        f_groups.push(res);
 
         return res;
     }
 
     /**
      * @brief Returns the complete set of defined SAT groups.
+     *
+     * A positive value of the i-th element of this array enables the
+     * i-th group, whereas a negative value disables it.
      */
     inline Groups& groups()
     { return f_groups; }
@@ -66,32 +70,7 @@ public:
     /**
      * @brief add a formula to the SAT problem instance.
      */
-    inline void push(Term term, step_t time, group_t group = MAINGROUP)
-    {
-        unsigned n, m;
-
-        // push DDs
-        const DDVector& dv( term.formula()); n = dv.size();
-        DEBUG << "CNFizing "<< n << " fragments" << endl;
-
-        DDVector::const_iterator i;
-        for (i = dv.begin(); dv.end() != i; ++ i) {
-            // TODO: additional CNF algorithms
-            cnf_push_single_cut( *i, time, group );
-        }
-
-        const MicroDescriptors& descriptors (term.descriptors()); m = descriptors.size();
-        DEBUG << "Injecting " << m << " microcode descriptors" << endl;
-
-        MicroDescriptors::const_iterator j;
-        for (j = descriptors.begin(); descriptors.end() != j; ++ j)  {
-            cnf_inject_microcode( *j, time, group );
-        }
-    }
-
-    /* shortcut */
-    inline void toggle_last_group()
-    { (*f_groups.rbegin()) *= -1; }
+    void push(CompilationUnit cu, step_t time, group_t group = MAINGROUP);
 
     /**
      * @brief Invoke Minisat
@@ -144,7 +123,6 @@ public:
     inline Var find_cnf_var(const DdNode* node, step_t time)
     { return f_registry.find_cnf_var(node, time);  }
 
-
     /**
      * @brief CNF registry for injection CNF var
      */
@@ -167,22 +145,14 @@ public:
     { f_solver.addClause_(ps); }
 
     /**
-     * @brief SAT instancte ctor
+     * @brief SAT instance ctor
      */
-    SAT()
-        : f_enc_mgr(EncodingMgr::INSTANCE())
-        , f_mapper(* new TimeMapper(*this))
-        , f_registry(* new CNFRegistry(*this))
-        , f_solver()
-    {
-        f_groups.push_back(new_sat_var()); // MAINGROUP is already there.
-        DEBUG << "Initialized SAT instance @" << this << endl;
-    }
+    Engine();
 
     /**
      * @brief SAT instance dctor
      */
-    ~SAT() {}
+    ~Engine() {}
 
 private:
     EncodingMgr& f_enc_mgr;
@@ -232,12 +202,9 @@ private:
 
     status_t sat_solve_groups(const Groups& groups);
 
-    // CNFization algorithms
+    /* CNFization algorithms */
     void cnf_push_no_cut(ADD add, step_t time, const group_t group);
     void cnf_push_single_cut(ADD add, step_t time, const group_t group);
-
-    // CNF injection algorithm
-    void cnf_inject_microcode(const MicroDescriptor& md, step_t time, const group_t group);
-}; // SAT instance
+};
 
 #endif

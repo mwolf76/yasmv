@@ -27,30 +27,32 @@
 #ifndef SAT_TIME_MAPPER_H
 #define SAT_TIME_MAPPER_H
 
-#include <expr.hh>
-#include <pool.hh>
-
 #include <common.hh>
 
-class SAT; // fwd decl
+#include <boost/unordered_map.hpp>
 
-typedef unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-typedef unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+#include <expr/expr.hh>
+#include <utils/pool.hh>
 
-class TimeMapper : public IObject {
+class Engine;
+
+typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+
+class TimeMapper {
 
     /* ctor and dctor are available only to SAT owner */
-    friend class SAT;
+    friend class Engine;
 
 public:
     Var var(const TCBI& tcbi );
     const TCBI& tcbi( Var var );
 
 private:
-    TimeMapper(SAT& owner);
+    TimeMapper(Engine& owner);
     ~TimeMapper();
 
-    SAT& f_owner;
+    Engine& f_owner;
 
     /* Bidirectional mapping */
     TCBI2VarMap f_tcbi2var_map;

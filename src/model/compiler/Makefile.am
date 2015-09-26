@@ -12,14 +12,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-PKG_HH = compiler.hh
-
-PKG_CC = compiler.cc algebra.cc boolean.cc integer.cc	\
-enumerative.cc internals.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = compiler.cc algebra.cc boolean.cc enumerative.cc array.cc	\
+internals.cc leaves.cc analysis.cc exceptions.cc walker.cc unit.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libcompiler.la
-libcompiler_la_SOURCES = $(PKG_SOURCES)
+libcompiler_la_SOURCES = $(PKG_CC)

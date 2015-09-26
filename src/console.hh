@@ -40,7 +40,8 @@ class ConsoleMgr {
 
 public:
     static ConsoleMgr& INSTANCE() {
-        if (! f_instance) f_instance = new ConsoleMgr();
+        if (! f_instance)
+            f_instance = new ConsoleMgr();
         return (*f_instance);
     }
 

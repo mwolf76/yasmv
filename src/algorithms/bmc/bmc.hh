@@ -23,46 +23,47 @@
 #ifndef BMC_ALGORITHM_H
 #define BMC_ALGORITHM_H
 
-#include <base.hh>
-#include <witness.hh>
+#include <expr/expr.hh>
 
-#include <bmc/normalizer.hh>
+#include <algorithms/base.hh>
+
+#include <witness/witness.hh>
 
 class BMC : public Algorithm {
 
 public:
-    BMC(IModel& model, Expr_ptr formula, ExprVector& constraints);
+    BMC(Command& command, Model& model);
     ~BMC();
 
-    void process();
+    void process(const Expr_ptr phi);
 
-    mc_status_t status() const
-    { return f_status; }
-
-    Expr_ptr property() const
-    { return f_property; }
-
-    const ExprVector& constraints() const
-    { return f_constraints; }
+    mc_status_t status();
+    mc_status_t test_and_set_status(mc_status_t status);
 
 private:
-    Expr_ptr f_property;
-
-    ExprVector f_constraints;
     mc_status_t f_status;
+    boost::mutex f_status_mutex;
 
-    /* invariant checking */
-    void bmc_invarspec_check( Expr_ptr property );
+    /**
+     * strategies
+     */
 
-    /* full LTL checking */
-    void bmc_ltlspec_check( Expr_ptr property );
+    /* is there a k-path leading to a violation of P? */
+    void falsification( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+
+    /* is there a loop-free k-path from the initial states ? */
+    void exploration( Expr_ptr phi );
+    step_t f_explored_k;
+
+    /* is there a loop-free k-path leading to a violation of P? */
+    void kinduction( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
 };
 
-/* Specialized for BMC ctx */
+/* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, IModel& model,
-                      SAT& engine, unsigned k, bool use_coi);
+    BMCCounterExample(Expr_ptr property, Model& model,
+                      Engine& engine, unsigned k, bool use_coi);
 };
 
 #endif

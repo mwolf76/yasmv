@@ -19,48 +19,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #include <type.hh>
 #include <type_mgr.hh>
-
-BadType::BadType(Type_ptr tp)
-    : f_repr(tp -> repr())
-{}
-
-BadType::~BadType() throw()
-{}
-
-const char* BadType::what() const throw()
-{
-    ostringstream oss;
-    oss << "TypeError: operand has invalid type " << f_repr;
-
-    return oss.str().c_str();
-}
-
-TypeMismatch::TypeMismatch(Type_ptr lhs, Type_ptr rhs)
-    : f_repr_a(lhs -> repr())
-    , f_repr_b(rhs -> repr())
-{}
-
-TypeMismatch::~TypeMismatch() throw()
-{}
-
-const char* TypeMismatch::what() const throw()
-{
-    ostringstream oss;
-    oss << "TypeError: "
-        << f_repr_a << " and "
-        << f_repr_b << " do not match";
-
-    return oss.str().c_str();
-}
 
 bool Type::is_scalar()
 { return NULL != dynamic_cast<ScalarType_ptr>( this ); }
 
-bool Type::is_monolithical()
-{ return NULL != dynamic_cast<MonolithicalType_ptr>( this ); }
+ScalarType_ptr Type::as_scalar()
+{ return dynamic_cast <const ScalarType_ptr> (this); }
+
+bool Type::is_monolithic()
+{ return NULL != dynamic_cast<MonolithicType_ptr>( this ); }
 
 bool Type::is_boolean()
 { return NULL != dynamic_cast<BooleanType_ptr>( this ); }
@@ -73,6 +42,12 @@ bool Type::is_enum()
 
 EnumType_ptr Type::as_enum()
 { return dynamic_cast<EnumType_ptr> (this); }
+
+bool Type::is_instance()
+{ return NULL != dynamic_cast<InstanceType_ptr>( this ); }
+
+InstanceType_ptr Type::as_instance()
+{ return dynamic_cast<InstanceType_ptr> (this); }
 
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
@@ -103,186 +78,7 @@ ArrayType_ptr Type::as_array()
 
 Type::~Type() {}
 
-// -- Monolithicals ------------------------------------------------------------
-BooleanType::BooleanType(TypeMgr& owner)
-    : MonolithicalType(owner)
-{
-    f_repr = f_owner.em().make_boolean_type();
-}
-
-unsigned BooleanType::width() const
-{ return 1; }
-
-bool EnumType::is_abstract() const
-{ return 0 == f_literals.size(); }
-
-EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
-    : MonolithicalType(owner)
-    , f_literals(literals)
-{
-    f_repr = f_owner.em().make_enum_type(f_literals);
-    ExprSet::iterator i;
-
-    for (i = literals.begin(); i != literals.end(); ++ i) {
-        Expr_ptr expr = *i;
-        assert(ExprMgr::INSTANCE().is_identifier(expr)); // debug only
-    }
-}
-
-unsigned EnumType::width() const
-{
-    unsigned res = 0, pow = 1;
-
-    while (pow < f_literals.size()) {
-        ++ res;
-        pow *= 2;
-    }
-
-    return res;
-}
-
-// -- Algebraics ------------------------------------------------------------
-bool ConstantType::is_abstract() const
-{ return true; }
-
-unsigned ConstantType::width() const
-{ return 1; }
-
-ConstantType::ConstantType(TypeMgr& owner)
-    : AlgebraicType(owner)
-{
-    f_repr = f_owner.em().make_constant_type();
-}
-
-bool SignedAlgebraicType::is_abstract() const
-{ return false; }
-
-SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
-                                         unsigned width,
-                                         ADD *dds)
-    : AlgebraicType(owner)
-    , f_width(width)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_signed_int_type(width);
-}
-
-unsigned SignedAlgebraicType::width() const
-{
-    assert( 0 != f_width );
-    return f_width;
-}
-
-bool SignedFxdAlgebraicType::is_abstract() const
-{ return false; }
-
-SignedFxdAlgebraicType::SignedFxdAlgebraicType(TypeMgr& owner,
-                                               unsigned magnitude,
-                                               unsigned fractional,
-                                               ADD *dds)
-    : AlgebraicType(owner)
-    , f_magnitude(magnitude)
-    , f_fractional(fractional)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_signed_fxd_type(magnitude,
-                                               fractional);
-}
-
-unsigned SignedFxdAlgebraicType::width() const
-{
-    assert( 0 != f_magnitude );
-    assert( 0 != f_fractional);
-    return f_magnitude + f_fractional;
-}
-
-bool UnsignedAlgebraicType::is_abstract() const
-{ return false; }
-
-UnsignedAlgebraicType::UnsignedAlgebraicType(TypeMgr& owner,
-                                             unsigned width,
-                                             ADD *dds)
-    : AlgebraicType(owner)
-    , f_width(width)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_unsigned_int_type(width);
-}
-
-unsigned UnsignedAlgebraicType::width() const
-{
-    assert( 0 != f_width );
-    return f_width;
-}
-
-bool UnsignedFxdAlgebraicType::is_abstract() const
-{ return false; }
-
-UnsignedFxdAlgebraicType::UnsignedFxdAlgebraicType(TypeMgr& owner,
-                                                   unsigned magnitude,
-                                                   unsigned fractional,
-                                                   ADD *dds)
-    : AlgebraicType(owner)
-    , f_magnitude(magnitude)
-    , f_fractional(fractional)
-    , f_dds(dds)
-{
-    f_repr = f_owner.em().make_unsigned_fxd_type(magnitude,
-                                                 fractional);
-}
-
-unsigned UnsignedFxdAlgebraicType::width() const
-{
-    assert( 0 != f_magnitude );
-    assert( 0 != f_fractional);
-    return f_magnitude + f_fractional;
-}
-
-// -- Arrays ------------------------------------------------------------
-ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
-    : Type(owner)
-    , f_of(of)
-    , f_nelems(nelems)
-{
-    // 0 is reserved for abstract arrays
-    assert (0 < nelems);
-
-    // valid type
-    assert( NULL != of);
-
-    // scalar type, non-abstract only. Make sure we know how to calculate size()
-    assert (f_of -> is_scalar() && (! f_of -> is_algebraic() ||
-                                    ! f_of -> as_algebraic() -> is_abstract()));
-
-    f_repr = f_owner.em().make_subscript( of->repr(),
-                                          f_owner.em().make_const(nelems));
-}
-
-ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
-    : Type(owner)
-    , f_of(of)
-    , f_nelems(0)
-{
-    // valid type
-    assert( NULL != of);
-
-    // scalar type, non-abstract only. Consistency with comment above.
-    assert (f_of -> is_scalar() && (! f_of -> is_algebraic() ||
-                                    ! f_of -> as_algebraic() -> is_abstract()));
-
-    f_repr = f_owner.em().make_abstract_array_type( of->repr());
-}
-
-unsigned ArrayType::width() const
-{
-    assert( 0 != f_nelems );
-    return f_nelems * f_of -> width();
-}
-
-bool ArrayType::is_abstract() const
-{ return 0 == f_nelems ; }
-
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, Type_ptr type)
+std::ostream& operator<<(std::ostream& os, Type_ptr type)
 { return os << type->repr(); }
 

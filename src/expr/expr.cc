@@ -20,118 +20,83 @@
  *
  **/
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
-FQExpr::FQExpr(Expr_ptr expr)
-    : f_ctx(ExprMgr::INSTANCE().make_main())
-    , f_expr(expr)
-    , f_time(0)
-{}
-
-FQExpr::FQExpr(Expr_ptr ctx, Expr_ptr expr, step_t time)
-    : f_ctx(ctx)
-    , f_expr(expr)
-    , f_time(time)
-{}
-
-FQExpr::FQExpr(const FQExpr& fqexpr)
-    : f_ctx(fqexpr.ctx())
-    , f_expr(fqexpr.expr())
-    , f_time(fqexpr.time())
-{}
-
-UCBI::UCBI(Expr_ptr ctx, Expr_ptr expr, step_t time, unsigned bitno)
-    : f_ctx(ctx)
-    , f_expr(expr)
-    , f_time(time)
-    , f_bitno(bitno)
-{}
-
-UCBI::UCBI(const UCBI& ucbi)
-    : f_ctx(ucbi.ctx())
-    , f_expr(ucbi.expr())
-    , f_time(ucbi.time())
-    , f_bitno(ucbi.bitno())
-{}
-
-TCBI::TCBI(Expr_ptr ctx, Expr_ptr expr, step_t time, unsigned bitno, step_t base)
-    : f_ctx(ctx)
-    , f_expr(expr)
-    , f_time(time)
-    , f_bitno(bitno)
-    , f_base(base)
-{}
-
-TCBI::TCBI(const TCBI& tcbi)
-    : f_ctx(tcbi.ctx())
-    , f_expr(tcbi.expr())
-    , f_time(tcbi.time())
-    , f_bitno(tcbi.bitno())
-    , f_base(tcbi.base())
-{}
-
-ostream& operator<<(ostream& os, const Expr_ptr t)
+std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
 {
-    Printer (os) << t;
+    Printer (os)
+        << expr;
     return os;
 }
 
-ostream& operator<<(ostream& os, const FQExpr& fqexpr)
+int LexicographicOrdering::operator() (const Expr_ptr x,
+                                       const Expr_ptr y) const
 {
-    Expr_ptr ctx = fqexpr.ctx();
-    Expr_ptr expr = fqexpr.expr();
-    step_t step = fqexpr.time();
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    os << "@" <<  step
-       << "{" << ctx << "::" << expr << "}" ;
+    if (em.is_constant(x) && em.is_identifier(y))
+        return 1;
 
-    return os;
+    if (em.is_constant(x) && em.is_constant(y))
+        return x -> value() < y -> value();
+
+    if (em.is_identifier(x) && em.is_identifier(y))
+        return x -> atom() < y -> atom();
+
+    assert(false);
 }
 
-ostream& operator<<(ostream& os, const UCBI& ucbi)
+long ExprHash::operator() (const Expr& k) const
 {
-    Expr_ptr ctx = ucbi.ctx();
-    Expr_ptr expr = ucbi.expr();
-    step_t step = ucbi.time();
-    unsigned bitno = ucbi.bitno();
+    if (k.f_symb == IDENT)
+        return (long)(k.u.f_atom);
 
-    os << "+" << step
-       << "{" ;
+    long v0, v1, x, res = (long)(k.f_symb);
 
-    Printer (os) << ctx
-                 << "::"
-                 << expr ;
+    if (k.f_symb == ICONST
+        || k.f_symb == HCONST
+        || k.f_symb == OCONST) {
+        v0 = (long)(k.u.f_value);
+        v1 = (long)(k.u.f_value >> sizeof(long));
+    }
+    else {
+        v0 = (long)(k.u.f_lhs);
+        v1 = (long)(k.u.f_rhs);
+    }
 
-    os << "}."
-       << bitno ;
+    res = (res << 4) + v0;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
 
-    return os;
+    res = (res << 4) + v1;
+    if ((x = res & 0xF0000000L) != 0) {
+        res ^= (x >> 24);
+    }
+    res &= ~x;
+
+    return res;
 }
 
-ostream& operator<<(ostream& os, const TCBI& tcbi)
+bool ExprEq::operator() (const Expr& x, const Expr& y) const
 {
-    Expr_ptr ctx = tcbi.ctx();
-    Expr_ptr expr = tcbi.expr();
-    step_t step = tcbi.time();
-    unsigned bitno = tcbi.bitno();
-    step_t timebase = tcbi.base();
+    return
+        // both exprs must be the same type and...
+        x.f_symb == y.f_symb
+        && (
+            /* ...either have the same identifier */
+            (x.f_symb == IDENT  && *x.u.f_atom == *y.u.f_atom) ||
 
-    os << "@" << timebase
-       << "{"
+            /* ...or have the same constant value */
+            (x.f_symb >= ICONST && x.f_symb <= OCONST
+             && x.u.f_value == y.u.f_value) ||
 
-       << "+" <<  step
-       << "{" ;
-
-    Printer (os) << ctx
-                 << "::"
-                 << expr ;
-
-    os << "}."
-       << bitno ;
-
-    os << "}" ;
-
-    return os;
+            /* ...or share the same subtrees */
+            (x.u.f_lhs == y.u.f_lhs &&
+             x.u.f_rhs == y.u.f_rhs));
 }
+

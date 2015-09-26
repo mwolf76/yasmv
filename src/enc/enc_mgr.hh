@@ -28,18 +28,27 @@
 #ifndef ENCODER_MGR_H
 #define ENCODER_MGR_H
 
+#include <vector>
+
+#include <boost/unordered_map.hpp>
+
 #include <common.hh>
-#include <expr.hh>
-#include <expr_mgr.hh>
 
-#include <type.hh>
+#include <expr/expr.hh>
+#include <expr/timed_expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <cudd_mgr.hh>
-#include <cuddInt.h>  /* for cudd_isconstant */
+#include <type/type.hh>
 
-typedef class IEncoding *IEncoding_ptr; // fwd decl
+#include <dd/cudd_mgr.hh>
+#include <dd/cudd-2.5.0/cudd/cuddInt.h>  /* for cudd_isconstant */
 
-typedef vector<int> IndexVector;
+#include <enc/ucbi.hh>
+#include <utils/pool.hh>
+
+typedef class Encoding *Encoding_ptr; // fwd decl
+
+typedef std::vector<int> IndexVector;
 
 struct ADDHash {
     inline long operator() (ADD term) const
@@ -54,8 +63,8 @@ struct ADDEq {
     { return phi == psi; }
 };
 
-typedef unordered_map<FQExpr, IEncoding_ptr, FQExprHash, FQExprEq> FQExpr2EncMap;
-typedef unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
+typedef boost::unordered_map<TimedExpr, Encoding_ptr, TimedExprHash, TimedExprEq> TimedExpr2EncMap;
+typedef boost::unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
 class EncodingMgr  {
@@ -93,10 +102,10 @@ public:
     { return f_cudd.ReadSize(); }
 
     // Makes a new encoding. Used by the compiler
-    IEncoding_ptr make_encoding(Type_ptr type);
+    Encoding_ptr make_encoding(Type_ptr type);
 
     // Registers an encoding. Used by the compiler
-    void register_encoding(const FQExpr& fqexpr, IEncoding_ptr enc);
+    void register_encoding(const TimedExpr& key, Encoding_ptr enc);
 
     // Retrieves Untimed Canonical Bit Id for index
     inline const UCBI& find_ucbi(int index)
@@ -104,15 +113,7 @@ public:
 
     // Retrieves an encoding previously created using
     // make_encoding. User by the SAT model evaluator
-    inline IEncoding_ptr find_encoding(const FQExpr& fqexpr)
-    {
-        FQExpr2EncMap::iterator eye = f_fqexpr2enc_map.find(fqexpr);
-        if (eye != f_fqexpr2enc_map.end()) {
-            return (*eye).second;
-        }
-
-        return NULL;
-    }
+    Encoding_ptr find_encoding(const TimedExpr& key);
 
     inline ExprMgr& em()
     { return f_em; }
@@ -124,12 +125,6 @@ public:
         return (*f_instance);
     }
 
-    inline ADD base() const
-    { return f_base; }
-
-    inline ADD msb()
-    { return f_msb; }
-
     inline unsigned word_width() const
     { return f_word_width; }
 
@@ -140,20 +135,14 @@ protected:
 private:
     static EncodingMgr_ptr f_instance;
 
-    /* low-level services */
-
-    /* local data */
     Cudd& f_cudd;
     ExprMgr& f_em;
 
     /* encodings register */
-    FQExpr2EncMap f_fqexpr2enc_map;
+    TimedExpr2EncMap f_timed_expr2enc_map;
 
     /* Untimed Canonical Bit Identifiers register */
     Index2UCBIMap f_index2ucbi_map;
-
-    ADD f_base;  // (eg. 0x10)
-    ADD f_msb;   // (eg. 0x8)
 
     unsigned f_word_width;
 };

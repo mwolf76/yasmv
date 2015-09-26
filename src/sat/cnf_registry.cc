@@ -24,10 +24,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <utility>
 
 #include <sat.hh>
 
-CNFRegistry::CNFRegistry(SAT& owner)
+CNFRegistry::CNFRegistry(Engine& owner)
     : f_sat(owner)
 {}
 
@@ -37,9 +38,10 @@ CNFRegistry::~CNFRegistry()
 Var CNFRegistry:: find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
-    const UCBI& ucbi = f_sat.find_ucbi(node->index);
-    const TCBI& tcbi = TCBI (ucbi.ctx(), ucbi.expr(),
-                             ucbi.time(), ucbi.bitno(), time);
+    const UCBI& ucbi
+        (f_sat.find_ucbi(node->index));
+    const TCBI tcbi
+        (ucbi, time);
     return f_sat.tcbi_to_var(tcbi);
 }
 
@@ -57,7 +59,7 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
         res = f_sat.new_sat_var();
 
         /* Insert into tdd2var map */
-        f_tdd2var_map.insert( make_pair<TimedDD, Var>
+        f_tdd2var_map.insert( std::make_pair<TimedDD, Var>
                               (timed_node, res));
     }
     else {
@@ -83,7 +85,7 @@ Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
         res = f_sat.new_sat_var();
 
         /* Insert into tvv2var map */
-        f_rewrite_map.insert( make_pair<TimedVar, Var>
+        f_rewrite_map.insert( std::make_pair<TimedVar, Var>
                               (timed_var, res));
     }
     else {

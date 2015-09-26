@@ -23,59 +23,69 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <type.hh>
-#include <symbol.hh>
-#include <model_resolver.hh>
-#include <model_mgr.hh>
+#include <symb/symbol.hh>
+
+#include <type/type.hh>
+
+#include <model/model_resolver.hh>
+#include <model/model_mgr.hh>
+
+#include <algorithm>
 
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)
 {
-    DEBUG << "Initialized Model Resolver instance @" << this << endl;
+    const void* instance(this);
 
-    // initialize global constants
-    f_owner.symbols().insert(make_pair<FQExpr,
-                             IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_false()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                         ExprMgr::INSTANCE().make_false(),
-                                                         TypeMgr::INSTANCE().find_boolean(), 0)));
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    f_owner.symbols().insert(make_pair<FQExpr,
-                             IConstant_ptr>(FQExpr(ExprMgr::INSTANCE().make_true()),
-                                            new Constant(ExprMgr::INSTANCE().make_main(), // default ctx
-                                                 ExprMgr::INSTANCE().make_true(),
-                                                         TypeMgr::INSTANCE().find_boolean(), 1)));
+    DRIVEL
+        << "Initialized Model Resolver instance @"
+        << instance
+        << std::endl;
+
+    f_owner.symbols().insert( std::make_pair<Expr_ptr,
+                              Constant_ptr>( em.make_false(),
+                                             new Constant(ExprMgr::INSTANCE().make_empty(),
+                                                          ExprMgr::INSTANCE().make_false(),
+                                                          TypeMgr::INSTANCE().find_boolean(), 0)));
+
+    f_owner.symbols().insert( std::make_pair<Expr_ptr,
+                              Constant_ptr>( em.make_true(),
+                                             new Constant(ExprMgr::INSTANCE().make_empty(),
+                                                          ExprMgr::INSTANCE().make_true(),
+                                                          TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()
 {}
 
-void ModelResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+void ModelResolver::add_symbol(const Expr_ptr key, Symbol_ptr symb)
 {
-    // global ctx, time arbitrarily set to 0.
-    FQExpr key(ctx, expr, 0);
-
     // TODO: turn this into an exception
     assert( NULL == f_owner.symbols() [ key ]);
 
     f_owner.symbols()[ key ] = symb;
 }
 
-ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
+Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
 {
-    /* Fetch modules from model */
-    const Modules& f_modules = f_owner.model()->modules();
-
-    Modules::const_iterator eye = f_modules.find(ctx);
-    if (eye == f_modules.end()) return NULL;
-
     // init lookup data
-    IModule_ptr module = (*eye).second;
-    FQExpr key(ctx, expr, 0); // time arbitrarily set to 0
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    assert( em.is_dot(key));
+    Module_ptr module
+        (mm.scope(key -> lhs()));
+    Expr_ptr symb_name
+        (key -> rhs());
 
     { /* global constants and temporaries */
         const Symbols& symbols = f_owner.symbols();
-        Symbols::const_iterator iter = symbols.find(key);
+        Symbols::const_iterator iter = symbols.find(symb_name);
         if (iter != f_owner.symbols().end()) {
             return (*iter).second;
         }
@@ -83,15 +93,26 @@ ISymbol_ptr ModelResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
 
     { /* variables */
         const Variables& vars = module->vars();
-        Variables::const_iterator iter = vars.find(key);
+        Variables::const_iterator iter = vars.find(symb_name);
         if (iter != vars.end()) {
             return (*iter).second;
         }
     }
 
+    { /* parameters */
+        const Parameters& params = module->parameters();
+        Parameters::const_iterator iter = params.begin();
+        while (params.end() != iter) {
+            if (iter -> first == symb_name)
+                return iter -> second;
+
+            ++ iter;
+        }
+    }
+
     { /* defines */
         const Defines& defs = module->defs();
-        Defines::const_iterator iter = defs.find(key);
+        Defines::const_iterator iter = defs.find(symb_name);
         if (iter != defs.end()) {
             return (*iter).second;
         }

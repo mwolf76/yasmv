@@ -1,10 +1,5 @@
 /**
  *  @file model.cc
- *  @brief Model module
- *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,162 +18,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <type.hh>
-#include <model.hh>
 
-ostream& operator<<(ostream& os, Module& module)
-{ return os << module.expr(); }
+#include <type/type.hh>
 
-ostream& operator<<(ostream& os, Exception& e)
-{ return os << e.what(); }
+#include <model/model.hh>
 
-void Model::add_module(Expr_ptr name, IModule_ptr module)
+Module& Model::add_module(Module& module)
 {
-    DEBUG << "Added module: '" << name << "'" << endl;
-    f_modules.insert( make_pair<Expr_ptr, IModule_ptr> (name, module));
+    Expr_ptr name (module.name());
+
+    DEBUG
+        << "Added module: `"
+        << name << "`"
+        << std::endl;
+
+    f_modules.insert( std::make_pair<Expr_ptr, Module_ptr>
+                      (name, &module));
+
+    return module;
 }
 
-Module::Module(const Expr_ptr name)
-    : f_name(name)
-
-    , f_localVars()
-    , f_localDefs()
-
-    , f_init()
-    , f_trans()
-{}
-
-void Module::add_var(Expr_ptr name, IVariable_ptr var)
+Module& Model::module(Expr_ptr module_name)
 {
-    DEBUG << "Module " << (*this)
-          << ", added local var " << var << endl;
-    f_locals.push_back(name);
-    f_localVars.insert(make_pair<FQExpr,
-                       IVariable_ptr>(FQExpr(expr(), name), var));
+    Modules::const_iterator i = f_modules.find(module_name);
+    if (i == f_modules.end())
+        throw ModuleNotFound(module_name);
+
+    return *(i -> second);
 }
-
-const ExprVector& Module::locals() const
-{
-    return f_locals;
-}
-
-const Variables& Module::vars() const
-{
-    return f_localVars;
-}
-
-void Module::add_def(Expr_ptr name, IDefine_ptr body)
-{
-    DEBUG << "Module " << (*this)
-          << ", added local def " << name << endl;
-    f_locals.push_back(name);
-    f_localDefs.insert(make_pair<FQExpr,
-                       IDefine_ptr>(FQExpr(expr(), name), body));
-}
-
-const Defines& Module::defs() const
-{
-    return f_localDefs;
-}
-
-void Module::add_init(Expr_ptr expr)
-{
-    DEBUG << "Module " << (*this)
-          << ", added INIT " << expr << endl;
-    f_init.push_back(expr);
-}
-
-const ExprVector& Module::init() const
-{
-    return f_init;
-}
-
-void Module::add_invar(Expr_ptr expr)
-{
-    DEBUG << "Module " << (*this)
-          << ", added INVAR " << expr << endl;
-    f_invar.push_back(expr);
-}
-
-const ExprVector& Module::invar() const
-{
-    return f_invar;
-}
-
-
-void Module::add_trans(Expr_ptr expr)
-{
-    DEBUG << "Module " << (*this)
-          << ", added TRANS " << expr << endl;
-    f_trans.push_back(expr);
-}
-
-const ExprVector& Module::trans() const
-{
-    return f_trans;
-}
-
 
 Model::Model()
     : f_modules()
 {
-    DEBUG << "Initialized Model instance @" << this << endl;
+    const void *instance(this);
+    DEBUG
+        << "Initialized Model instance @"
+        << instance
+        << std::endl;
 }
 
 Model::~Model()
 {
     // TODO: free memory for symbols... (they've been allocated using new)
+    assert(false); // XXX
 }
 
-SymbIter::SymbIter(IModel& model, Expr_ptr formula)
-    : f_model(model)
-    , f_formula(formula)
-{
-    assert( !f_formula ); // TODO implement COI
-
-    /* Fetch modules from model */
-    const Modules& modules = f_model.modules();
-
-    for (Modules::const_iterator mi = modules.begin();
-         mi != modules.end(); ++ mi) {
-
-        IModule& module = * (*mi).second;
-
-        const Defines& defs = module.defs();
-        const Variables& vars = module.vars();
-
-        /* iterate over locals to preserve symbols ordering */
-        const ExprVector& locals = module.locals();
-
-        for (ExprVector::const_iterator i = locals.begin();
-             i != locals.end(); ++ i) {
-
-            FQExpr key( module.expr(), *i);
-            ISymbol_ptr symbol = NULL;
-
-            do {
-                Defines::const_iterator di = defs.find(key);
-                if (di != defs.end()) {
-                    symbol = (*di).second;
-                    break;
-                }
-
-                Variables::const_iterator vi = vars.find(key);
-                if (vi != vars.end()) {
-                    symbol = (*vi).second;
-                    break;
-                }
-            } while(0);
-
-            if (symbol)  {
-                f_symbols.push_back(symbol);
-            }
-        }
-    }
-
-    f_iter = f_symbols.begin();
-}
-
-SymbIter::~SymbIter()
-{
-}

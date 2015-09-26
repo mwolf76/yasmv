@@ -7,8 +7,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -DSIZEOF_VOID_P=@SIZEOF_VOID_P@	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/st				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/obj				\
--I$(top_srcdir)/src/3rdparty/ezlogger
+-I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 AM_CFLAGS = @AM_CFLAGS@
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function

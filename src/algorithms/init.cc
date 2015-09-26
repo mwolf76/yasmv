@@ -21,9 +21,11 @@
  **/
 #include <init.hh>
 
-Init::Init(IModel& model)
-    : Algorithm(model)
-{}
+Init::Init(Command& command, Model& model)
+    : Algorithm(command, model)
+{
+    setup();
+}
 
 Init::~Init()
 {}
@@ -33,14 +35,10 @@ void Init::process()
     clock_t t0 = clock(), t1;
     double secs;
 
-    prepare();
-
-    compile();
-
     t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
     TRACE
         << "-- initialization completed, took " << secs
-          << " seconds" << endl;
+          << " seconds" << std::endl;
 
 }

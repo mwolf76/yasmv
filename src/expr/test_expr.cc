@@ -14,13 +14,17 @@ BOOST_AUTO_TEST_CASE(expr)
     Atom a_y("y");
 
     Expr_ptr x = em.make_identifier(a_x);
+    BOOST_CHECK( x == em.make_identifier(a_x));
+
     Expr_ptr y = em.make_identifier(a_y);
+    BOOST_CHECK( y == em.make_identifier(a_y));
 
     // LTL makers and is-a predicates
     Expr_ptr Fx = em.make_F(x);
     BOOST_CHECK (Fx->f_symb == F && Fx->lhs() == x && Fx->rhs() == NULL);
     BOOST_CHECK (em.is_F(Fx));
     BOOST_CHECK (em.is_LTL(Fx));
+
 
     Expr_ptr Gx = em.make_G(x);
     BOOST_CHECK (Gx->f_symb == G && Gx->lhs() == x && Gx->rhs() == NULL);
@@ -41,6 +45,12 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (xRy->f_symb == R && xRy->lhs() == x && xRy->rhs() == y);
     BOOST_CHECK (em.is_R(xRy));
     BOOST_CHECK (em.is_LTL(xRy));
+
+    BOOST_CHECK (em.make_F(x) == Fx);
+    BOOST_CHECK (em.make_G(x) == Gx);
+    BOOST_CHECK (em.make_X(x) == Xx);
+    BOOST_CHECK (em.make_U(x, y) == xUy);
+    BOOST_CHECK (em.make_R(x, y) == xRy);
 
     // primary makers and is-a predicates
     Expr_ptr next_x = em.make_next(x);
@@ -121,11 +131,6 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_implies(x_implies_y));
     BOOST_CHECK (em.is_binary_logical(x_implies_y));
 
-    Expr_ptr x_iff_y = em.make_iff(x, y);
-    BOOST_CHECK (x_iff_y->f_symb == IFF && x_iff_y->lhs() == x && x_iff_y->rhs() == y);
-    BOOST_CHECK (em.is_iff(x_iff_y));
-    BOOST_CHECK (em.is_binary_logical(x_iff_y));
-
     Expr_ptr x_eq_y = em.make_eq(x, y);
     BOOST_CHECK (x_eq_y->f_symb == EQ && x_eq_y->lhs() == x && x_eq_y->rhs() == y);
     BOOST_CHECK (em.is_eq(x_eq_y));
@@ -165,17 +170,17 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_ite(x_ite_y));
 
     Expr_ptr iconst_42 = em.make_const(42);
-    BOOST_CHECK (em.is_numeric(iconst_42) && iconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(iconst_42) && iconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(iconst_42));
     BOOST_CHECK (42 == em.const_value(iconst_42));
 
     Expr_ptr hconst_42 = em.make_hconst(0x2a);
-    BOOST_CHECK (em.is_numeric(hconst_42) && hconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(hconst_42) && hconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(hconst_42));
     BOOST_CHECK (42 == em.const_value(hconst_42));
 
     Expr_ptr oconst_42 = em.make_oconst(052);
-    BOOST_CHECK (em.is_numeric(oconst_42) && oconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_numeric(oconst_42) && oconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(oconst_42));
     BOOST_CHECK (42 == em.const_value(oconst_42));
 
@@ -187,6 +192,8 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (x_params_y->f_symb == PARAMS &&
                  x_params_y->lhs() == x && x_params_y->rhs() == y);
     BOOST_CHECK (em.is_params(x_params_y));
+
+    BOOST_CHECK( em.make_dot(x, y) == x_dot_y);
 }
 
 BOOST_AUTO_TEST_CASE(builtin)
@@ -194,15 +201,19 @@ BOOST_AUTO_TEST_CASE(builtin)
     ExprMgr& em(ExprMgr::INSTANCE());
 
     Expr_ptr main_ = em.make_main();
-    BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom("main"));
+    BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom( MAIN_TOKEN ));
     BOOST_CHECK (em.is_main(main_));
 
+    Expr_ptr empty = em.make_empty();
+    BOOST_CHECK (em.is_identifier(empty) && empty->atom() == Atom( EMPTY_TOKEN ));
+    BOOST_CHECK (em.is_empty(empty));
+
     Expr_ptr false_ = em.make_false();
-    BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom("FALSE"));
+    BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom( FALSE_TOKEN ));
     BOOST_CHECK (em.is_false(false_));
 
     Expr_ptr true_ = em.make_true();
-    BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom("TRUE"));
+    BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom( TRUE_TOKEN ));
     BOOST_CHECK (em.is_true(true_));
 
     Expr_ptr zero = em.make_zero();
@@ -223,312 +234,305 @@ BOOST_AUTO_TEST_CASE(printer)
 
     Expr_ptr x = em.make_identifier(a_x);
     {
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x; BOOST_CHECK (oss.str() == string("x"));
+        printer << x; BOOST_CHECK (oss.str() == std::string("x"));
     }
 
     Expr_ptr y = em.make_identifier(a_y);
     {
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << y; BOOST_CHECK (oss.str() == string("y"));
+        printer << y; BOOST_CHECK (oss.str() == std::string("y"));
     }
 
     // primary printers
     {
         Expr_ptr next_x = em.make_next(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << next_x; BOOST_CHECK (oss.str() == string("next(x)"));
+        printer << next_x; BOOST_CHECK (oss.str() == std::string("next(x)"));
     }
 
     {
         Expr_ptr neg_x = em.make_neg(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << neg_x; BOOST_CHECK (oss.str() == string("- x"));
+        printer << neg_x; BOOST_CHECK (oss.str() == std::string("-x"));
     }
 
     {
         Expr_ptr not_x = em.make_not(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << not_x; BOOST_CHECK (oss.str() == string("not x"));
+        printer << not_x; BOOST_CHECK (oss.str() == std::string("! x"));
     }
 
     {
         Expr_ptr not_x = em.make_bw_not(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << not_x; BOOST_CHECK (oss.str() == string("! x"));
+        printer << not_x; BOOST_CHECK (oss.str() == std::string("~ x"));
     }
 
     {
         Expr_ptr x_add_y = em.make_add(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_add_y; BOOST_CHECK (oss.str() == string("(x + y)"));
+        printer << x_add_y; BOOST_CHECK (oss.str() == std::string("(x + y)"));
     }
 
     {
         Expr_ptr x_sub_y = em.make_sub(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_sub_y; BOOST_CHECK (oss.str() == string("(x - y)"));
+        printer << x_sub_y; BOOST_CHECK (oss.str() == std::string("(x - y)"));
     }
 
     {
         Expr_ptr x_div_y = em.make_div(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_div_y; BOOST_CHECK (oss.str() == string("(x / y)"));
+        printer << x_div_y; BOOST_CHECK (oss.str() == std::string("(x / y)"));
     }
 
     {
         Expr_ptr x_mod_y = em.make_mod(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_mod_y; BOOST_CHECK (oss.str() == string("(x % y)"));
+        printer << x_mod_y; BOOST_CHECK (oss.str() == std::string("(x % y)"));
     }
 
     {
         Expr_ptr x_mul_y = em.make_mul(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_mul_y; BOOST_CHECK (oss.str() == string("(x * y)"));
+        printer << x_mul_y; BOOST_CHECK (oss.str() == std::string("(x * y)"));
     }
 
     {
         Expr_ptr x_and_y = em.make_and(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_and_y; BOOST_CHECK (oss.str() == string("(x and y)"));
+        printer << x_and_y; BOOST_CHECK (oss.str() == std::string("(x && y)"));
     }
 
     {
         Expr_ptr x_or_y = em.make_or(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_or_y; BOOST_CHECK (oss.str() == string("(x or y)"));
+        printer << x_or_y; BOOST_CHECK (oss.str() == std::string("(x || y)"));
     }
 
     {
         Expr_ptr x_lshift_y = em.make_lshift(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_lshift_y; BOOST_CHECK (oss.str() == string("(x << y)"));
+        printer << x_lshift_y; BOOST_CHECK (oss.str() == std::string("(x << y)"));
     }
 
     {
         Expr_ptr x_rshift_y = em.make_rshift(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_rshift_y; BOOST_CHECK (oss.str() == string("(x >> y)"));
+        printer << x_rshift_y; BOOST_CHECK (oss.str() == std::string("(x >> y)"));
     }
 
     {
         Expr_ptr x_xor_y = em.make_bw_xor(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_xor_y; BOOST_CHECK (oss.str() == string("(x ^ y)"));
+        printer << x_xor_y; BOOST_CHECK (oss.str() == std::string("(x ^ y)"));
     }
 
     {
         Expr_ptr x_xnor_y = em.make_bw_xnor(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_xnor_y; BOOST_CHECK (oss.str() == string("(x ~ y)"));
+        printer << x_xnor_y; BOOST_CHECK (oss.str() == std::string("(x !^ y)"));
     }
 
     {
         Expr_ptr x_implies_y = em.make_implies(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_implies_y; BOOST_CHECK (oss.str() == string("(x -> y)"));
-    }
-
-    {
-        Expr_ptr x_iff_y = em.make_iff(x, y);
-        ostringstream oss;
-        Printer printer(oss);
-        printer << x_iff_y; BOOST_CHECK (oss.str() == string("(x <-> y)"));
+        printer << x_implies_y; BOOST_CHECK (oss.str() == std::string("(x -> y)"));
     }
 
     {
         Expr_ptr x_eq_y = em.make_eq(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_eq_y; BOOST_CHECK (oss.str() == string("(x = y)"));
+        printer << x_eq_y; BOOST_CHECK (oss.str() == std::string("(x = y)"));
     }
 
     {
         Expr_ptr x_ne_y = em.make_ne(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_ne_y; BOOST_CHECK (oss.str() == string("(x != y)"));
+        printer << x_ne_y; BOOST_CHECK (oss.str() == std::string("(x != y)"));
     }
 
     {
         Expr_ptr x_ge_y = em.make_ge(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_ge_y; BOOST_CHECK (oss.str() == string("(x >= y)"));
+        printer << x_ge_y; BOOST_CHECK (oss.str() == std::string("(x >= y)"));
     }
 
     {
         Expr_ptr x_gt_y = em.make_gt(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_gt_y; BOOST_CHECK (oss.str() == string("(x > y)"));
+        printer << x_gt_y; BOOST_CHECK (oss.str() == std::string("(x > y)"));
     }
 
     {
         Expr_ptr x_le_y = em.make_le(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_le_y; BOOST_CHECK (oss.str() == string("(x <= y)"));
+        printer << x_le_y; BOOST_CHECK (oss.str() == std::string("(x <= y)"));
     }
 
     {
         Expr_ptr x_lt_y = em.make_lt(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_lt_y; BOOST_CHECK (oss.str() == string("(x < y)"));
+        printer << x_lt_y; BOOST_CHECK (oss.str() == std::string("(x < y)"));
     }
 
     {
         Expr_ptr x_cond_y = em.make_cond(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_cond_y; BOOST_CHECK (oss.str() == string("(x ? y)"));
+        printer << x_cond_y; BOOST_CHECK (oss.str() == std::string("(x ? y)"));
     }
 
     {
         Expr_ptr x_ite_y = em.make_ite(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_ite_y; BOOST_CHECK (oss.str() == string("(x : y)"));
+        printer << x_ite_y; BOOST_CHECK (oss.str() == std::string("(x : y)"));
     }
 
     {
         Expr_ptr iconst_42 = em.make_const(42);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << iconst_42; BOOST_CHECK (oss.str() == string("42"));
+        printer << iconst_42; BOOST_CHECK (oss.str() == std::string("42"));
     }
 
     {
         Expr_ptr hconst_42 = em.make_hconst(0x2a);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << hconst_42; BOOST_CHECK (oss.str() == string("0x2a"));
+        printer << hconst_42; BOOST_CHECK (oss.str() == std::string("0x2a"));
     }
 
     {
         Expr_ptr oconst_42 = em.make_oconst(052);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << oconst_42; BOOST_CHECK (oss.str() == string("052"));
+        printer << oconst_42; BOOST_CHECK (oss.str() == std::string("052"));
     }
 
     {
         Expr_ptr x_dot_y = em.make_dot(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_dot_y; BOOST_CHECK (oss.str() == string("x.y"));
+        printer << x_dot_y; BOOST_CHECK (oss.str() == std::string("x.y"));
     }
 
     {
         Expr_ptr x_params_y = em.make_params(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << x_params_y; BOOST_CHECK (oss.str() == string("x(y)"));
+        printer << x_params_y; BOOST_CHECK (oss.str() == std::string("x(y)"));
     }
 
     // LTL
     {
         Expr_ptr Fx = em.make_F(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << Fx; BOOST_CHECK (oss.str() == string("F (x)"));
+        printer << Fx; BOOST_CHECK (oss.str() == std::string("F (x)"));
     }
 
     {
         Expr_ptr Gx = em.make_G(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << Gx; BOOST_CHECK (oss.str() == string("G (x)"));
+        printer << Gx; BOOST_CHECK (oss.str() == std::string("G (x)"));
     }
 
     {
         Expr_ptr Xx = em.make_X(x);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << Xx; BOOST_CHECK (oss.str() == string("X (x)"));
+        printer << Xx; BOOST_CHECK (oss.str() == std::string("X (x)"));
     }
 
     {
         Expr_ptr xUy = em.make_U(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << xUy; BOOST_CHECK (oss.str() == string("(x U y)"));
+        printer << xUy; BOOST_CHECK (oss.str() == std::string("(x U y)"));
     }
 
     {
         Expr_ptr xRy = em.make_R(x, y);
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << xRy; BOOST_CHECK (oss.str() == string("(x R y)"));
+        printer << xRy; BOOST_CHECK (oss.str() == std::string("(x R y)"));
     }
 
     {
         Expr_ptr main_ = em.make_main();
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << main_; BOOST_CHECK (oss.str() == string("main"));
+        printer << main_; BOOST_CHECK (oss.str() == std::string("main"));
     }
 
     {
         Expr_ptr false_ = em.make_false();
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << false_; BOOST_CHECK (oss.str() == string("FALSE"));
+        printer << false_; BOOST_CHECK (oss.str() == std::string("FALSE"));
     }
 
 
     {
         Expr_ptr true_ = em.make_true();
-        ostringstream oss;
+        std::ostringstream oss;
         Printer printer(oss);
-        printer << true_; BOOST_CHECK (oss.str() == string("TRUE"));
+        printer << true_; BOOST_CHECK (oss.str() == std::string("TRUE"));
     }
 
 }
 
-BOOST_AUTO_TEST_CASE(fqexpr)
-{
-    ExprMgr& em = ExprMgr::INSTANCE();
-    Atom a_x("x");
+// BOOST_AUTO_TEST_CASE(fqexpr)
+// {
+//     ExprMgr& em = ExprMgr::INSTANCE();
+//     Atom a_x("x");
 
-    Expr_ptr x = em.make_identifier(a_x);
-    Expr_ptr main_ = em.make_main();
+//     Expr_ptr x = em.make_identifier(a_x);
+//     Expr_ptr main_ = em.make_main();
 
-    {
+//     {
 
-        const FQExpr& fqexpr = FQExpr(main_, x, 7);
+//         const FQExpr& fqexpr = FQExpr(main_, x, 7);
 
-        ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("@7{main::x}"));
-    }
+//         std::ostringstream oss;
+//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@7{main::x}"));
+//     }
 
-    {
+//     {
 
-        const FQExpr& fqexpr = FQExpr(main_, x, 0);
+//         const FQExpr& fqexpr = FQExpr(main_, x, 0);
 
-        ostringstream oss;
-        oss << fqexpr; BOOST_CHECK (oss.str() == string("@0{main::x}"));
-    }
-}
+//         std::ostringstream oss;
+//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@0{main::x}"));
+//     }
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

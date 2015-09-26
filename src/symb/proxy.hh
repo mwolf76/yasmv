@@ -27,11 +27,14 @@
 #ifndef RESOLVER_PROXY_H
 #define RESOLVER_PROXY_H
 
-#include <resolver.hh>
-#include <model_mgr.hh>
-#include <type_mgr.hh>
+#include <symb/resolver.hh>
 
-class ResolverProxy : public IResolver {
+#include <type/type_mgr.hh>
+
+#include <model/model_mgr.hh>
+
+
+class ResolverProxy : public Resolver {
     TypeMgr& f_tm;
     ModelMgr& f_mm;
 
@@ -42,23 +45,23 @@ public:
     {}
 
     /** @brief register a symbol in the underlying storage */
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
     { assert(false); } // proxy is used read-only
 
     /** @brief fetch a symbol */
-    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr)
+    Symbol_ptr symbol(const Expr_ptr key)
     {
-        ISymbol_ptr res = NULL;
+        Symbol_ptr res = NULL;
 
-        res = f_tm.resolver()->symbol(ctx, expr);
-        if (NULL != res) return res;
+        res = f_tm.resolver()->symbol(key);
+        if (NULL != res)
+            return res;
 
-        res = f_mm.resolver()->symbol(ctx, expr);
-        if (NULL != res) return res;
+        res = f_mm.resolver()->symbol(key);
+        if (NULL != res)
+            return res;
 
-        /* if all of the above fail... */
-        WARN << "Could not resolve symbol " << ctx << "::" << expr << endl;
-        throw UnresolvedSymbol(ctx, expr);
+        throw UnresolvedSymbol(key);
     }
 };
 

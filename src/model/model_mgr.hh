@@ -27,29 +27,47 @@
 #ifndef MODEL_MGR_H
 #define MODEL_MGR_H
 
-#include <model.hh>
-#include <model_resolver.hh>
+#include <model/model.hh>
+#include <model/model_resolver.hh>
 
-#include <preprocessor.hh>
-#include <inferrer.hh>
+#include <model/preprocessor/preprocessor.hh>
 
-#include <expr_mgr.hh>
-#include <type_mgr.hh>
+#include <model/type_checker/type_checker.hh>
+
+#include <expr/expr_mgr.hh>
+
+#include <type/type_mgr.hh>
+
+typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> ContextMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
+
+typedef enum {
+    MMGR_BUILD_CTX_MAP,
+    MMGR_BUILD_PARAM_MAP,
+    MMGR_TYPE_CHECK,
+    MMGR_DONE
+} analyzer_pass_t;
 
 typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {
 
 public:
-    inline IModel_ptr model()
-    { return &f_model; }
+    inline Model& model()
+    { return f_model; }
 
-    inline IResolver_ptr resolver()
+    inline Module& module(Expr_ptr module_name)
+    { return f_model.module( module_name); }
+
+    inline Resolver_ptr resolver()
     { return &f_resolver; }
 
+    // this must be called before any type checking
     bool analyze();
 
     static ModelMgr& INSTANCE() {
-        if (! f_instance) f_instance = new ModelMgr();
+        if (! f_instance)
+            f_instance = new ModelMgr();
+
         return (*f_instance);
     }
 
@@ -61,15 +79,21 @@ public:
 
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,
-                         Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
-        return f_inferrer.type(body, ctx);
+                         Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
+    {
+        assert( f_analyzed );
+        return f_type_checker.type(body, ctx);
     }
 
     // delegated param binding method
     inline Expr_ptr preprocess(Expr_ptr body,
-                               Expr_ptr ctx = ExprMgr::INSTANCE().make_default_ctx()) {
+                               Expr_ptr ctx = ExprMgr::INSTANCE().make_empty()) {
         return f_preprocessor.process(body, ctx);
     }
+
+    Module_ptr scope(Expr_ptr ctx);
+
+    Expr_ptr rewrite_parameter( Expr_ptr expr );
 
 protected:
     ModelMgr();
@@ -99,13 +123,15 @@ private:
     // ref to preprocessor (used for defines expr substitution)
     Preprocessor& f_preprocessor;
 
-    // ref to inferrer (used for model analysis)
-    Inferrer& f_inferrer;
+    // ref to type_checker (used for model analysis)
+    TypeChecker& f_type_checker;
 
-    // analyzer passes
-    bool f_status;
-    void first_pass();
-    void second_pass();
+    ContextMap f_context_map;
+    ParamMap f_param_map;
+
+    /* internals */
+    bool analyze_aux( analyzer_pass_t pass );
+    bool f_analyzed;
 };
 
 #endif

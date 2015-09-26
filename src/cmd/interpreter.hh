@@ -22,20 +22,26 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include <iostream>
+
 #include <common.hh>
 #include <opts.hh>
 
-class ICommand; // fwd decls
-typedef class ICommand* ICommand_ptr;
+#include <cmd/command.hh>
+#include <cmd/job.hh>
 
 typedef class Interpreter* Interpreter_ptr;
+
+class Command;
+typedef Command* Command_ptr;
+
 class Interpreter {
 public:
     // singleton
     static Interpreter& INSTANCE();
 
     // external commands (will be consumed and destroyed)
-    Variant& operator()(ICommand_ptr cmd);
+    Variant& operator()(Command_ptr cmd);
 
     // cmd loop
     Variant& operator()();
@@ -51,45 +57,47 @@ public:
     inline int retcode() const
     { return f_retcode; }
 
+    // background jobs
+    inline const Jobs& jobs() const
+    { return f_jobs; }
+
     void quit(int retcode);
 
+    inline unsigned epoch() const
+    { return f_epoch; }
+
 protected:
-    friend class ICommand;
+    friend class Command;
 
     Interpreter();
     virtual ~Interpreter();
 
     // for streams redirection
-    inline istream& in() const
+    inline std::istream& in() const
     { return *f_in; }
 
-    inline ostream& out() const
+    inline std::ostream& out() const
     { return *f_out; }
 
-    inline ostream& err() const
+    inline std::ostream& err() const
     { return *f_err; }
 
-    inline void prompt() const
-    {
-        bool color (OptsMgr::INSTANCE().color());
-        if (color) {
-            (*f_out) << normal << ">> ";
-        }
-        else {
-            (*f_out) <<  ">> ";
-        }
-    }
+    // jobs mgmt
+    Jobs f_jobs;
+
+    void register_job( Job& job );
 
     int f_retcode;
     bool f_leaving;
 
-    istream *f_in;
-    ostream *f_out;
-    ostream *f_err;
+    std::istream *f_in;
+    std::ostream *f_out;
+    std::ostream *f_err;
 
     Variant f_last_result;
 
     static Interpreter_ptr f_instance;
+    unsigned f_epoch;
 };
 
 #endif

@@ -21,93 +21,116 @@
  **/
 #include <simulation.hh>
 
-static unsigned progressive = 0;
-static const char *prfx = "sim_";
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
 
-using Minisat::Var;
-SimulationWitness::SimulationWitness(IModel& model, SAT& engine,
-                                     step_t k, bool unique_id)
+SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness()
 {
-    if (unique_id) {
-        ostringstream oss; oss << prfx << (++ progressive);
-        set_id(oss.str());
-    }
+    EncodingMgr& bm
+        (EncodingMgr::INSTANCE());
 
-    EncodingMgr& enc_mgr(EncodingMgr::INSTANCE());
-    int inputs[enc_mgr.nbits()];
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    /* Language */
+    int inputs[bm.nbits()];
+
+    /* Collecting symbols for the witness' language */
     SymbIter si (model);
     while (si.has_next()) {
-        ISymbol_ptr symb = si.next();
-        f_lang.push_back( symb -> expr());
+        std::pair <Expr_ptr, Symbol_ptr> pair
+            (si.next());
+        Expr_ptr ctx
+            (pair.first);
+        Symbol_ptr symb
+            (pair.second);
+        Expr_ptr full_name
+            ( em.make_dot( ctx, symb->name()));
+
+        f_lang.push_back( full_name );
     }
 
-    /* Just k-th timeframe */
-    TimeFrame& tf = extend();
-    SymbIter vars( model, NULL );
-    while (vars.has_next()) {
-        ISymbol_ptr symb = vars.next();
+    /* just step `k` */
+    TimeFrame& tf
+        (extend());
+
+    SymbIter symbols
+        (model, NULL);
+
+    while (symbols.has_next()) {
+
+        std::pair <Expr_ptr, Symbol_ptr> pair
+            (symbols.next());
+
+        Expr_ptr ctx
+            (pair.first);
+
+        Symbol_ptr symb
+            (pair.second);
+
+        Expr_ptr symb_name
+                (symb->name());
+
+        Expr_ptr key
+            (em.make_dot( ctx, symb_name));
 
         if (symb->is_variable()) {
 
-            Expr_ptr ctx (symb->ctx());
-            Expr_ptr expr(symb->expr());
-
             /* time it, and fetch encoding for enc mgr */
-            FQExpr key(ctx, expr);
-            IEncoding_ptr enc = enc_mgr.find_encoding(key);
+            Encoding_ptr enc
+                (bm.find_encoding( TimedExpr(key, 0)) );
 
             /* not in COI, skipping... */
-            if ( NULL == enc ) {
+            if ( ! enc )
                 continue;
-            }
 
             /* 1. for each bit int the encoding, fetch UCBI, time it
                into TCBI, fetch its value in solver model and set the
                corresponding entry in inputs array. */
             DDVector::const_iterator di;
             unsigned ndx;
-
             for (ndx = 0, di = enc->bits().begin();
                  enc->bits().end() != di; ++ ndx, ++ di) {
 
-                unsigned bit = (*di).getNode()->index;
-
-                const UCBI& ucbi = enc_mgr.find_ucbi(bit);
-                const TCBI& tcbi = TCBI(ucbi.ctx(), ucbi.expr(), 0, ucbi.bitno(), k);
-
-                Var var = engine.tcbi_to_var(tcbi);
-                int value = engine.value(var); /* Don't care is assigned to 0 */
+                unsigned bit
+                    ((*di).getNode()->index);
+                const UCBI& ucbi
+                    (bm.find_ucbi(bit));
+                const TCBI tcbi
+                    (TCBI(ucbi, k));
+                Var var
+                    (engine.tcbi_to_var(tcbi));
+                int value
+                    (engine.value(var)); /* Don't care is assigned to 0 */
 
                 inputs[bit] = value;
             }
 
-            /* 2. eval the encoding ADD with inputs and put
-               resulting value into time frame container. */
-            Expr_ptr value = enc->expr(inputs);
-            if (value) {
-                tf.set_value( expr, value );
-            }
+            /* 2. eval the encoding DDs with inputs and put resulting
+               value into time frame container. */
+            Expr_ptr value
+                (enc->expr(inputs));
+
+            if (value)
+                tf.set_value( key, value );
         }
-    }
 
-#if 0 // maybe later
-    /* Second pass, defs only */
-    for (step_t step = 0; step <= k; ++ step) {
-        TimeFrame& tf = ith_frame( step );
+        else if (symb->is_define()) {
 
-        SymbIter defs( model, NULL );
-        while (defs.has_next()) {
-            ISymbol_ptr symb = defs.next();
+            WitnessMgr& wm
+                (WitnessMgr::INSTANCE());
 
-            if (symb->is_define()) {
-                Expr_ptr value = f_evaluator.process( symb->ctx(), symb-> expr(), step);
-                FQExpr key(symb->ctx(), symb->expr(), 0);
+            const Define& define
+                (symb->as_define());
+
+            try {
+                Expr_ptr value
+                    (wm.eval( *this, ctx, define.body(), 0));
+
                 tf.set_value( key, value );
             }
+            catch (NoValue nv) {
+            }
         }
     }
-#endif
 }

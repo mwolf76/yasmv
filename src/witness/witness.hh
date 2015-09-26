@@ -24,16 +24,20 @@
 
 #include <common.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <vector>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <boost/unordered_map.hpp>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <variant.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
+
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+
+#include <utils/variant.hh>
 
 /** Exception classes */
 class WitnessException : public Exception {
@@ -55,6 +59,20 @@ public:
 
 private:
     Atom f_id;
+};
+
+/** Raised when a given ID is registered more than once */
+class NoCurrentlySelectedWitness : public WitnessException {
+public:
+    NoCurrentlySelectedWitness()
+    {}
+
+    ~NoCurrentlySelectedWitness() throw()
+    {}
+
+    const char* what() const throw();
+
+private:
 };
 
 /** Raised when a given ID is searched for and was not registered */
@@ -104,12 +122,12 @@ private:
     Expr_ptr f_id;
 };
 
-typedef unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
 class Witness; // fwd decl
 
 typedef class TimeFrame* TimeFrame_ptr;
-class TimeFrame : public IObject {
+class TimeFrame {
 
 public:
     TimeFrame(Witness& owner);
@@ -124,6 +142,9 @@ public:
     /* Sets value for expr */
     void set_value( Expr_ptr expr, Expr_ptr value );
 
+    /* Full list of assignments for this Time Frame */
+    ExprVector assignments();
+
 private:
     Expr2ExprMap f_map;
 
@@ -135,13 +156,13 @@ private:
     Witness& f_owner;
 };
 
-typedef vector<TimeFrame_ptr> TimeFrames;
-typedef vector<Expr_ptr> Exprs;
+typedef std::vector<TimeFrame_ptr> TimeFrames;
+typedef std::vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
-class Witness : public IObject {
+class Witness {
 public:
-    Witness(Atom id = "<Noname>", step_t j = 0);
+    Witness(Atom id = "<Noname>", Atom desc = "<No description>", step_t j = 0);
 
     /* data storage */
     inline TimeFrames& frames()
@@ -164,14 +185,29 @@ public:
     inline const Atom& id() const
     { return f_id; }
 
-    inline void set_id(string id)
+    inline void set_id(Atom id)
     { f_id = id; }
+
+    inline const Atom& desc() const
+    { return f_desc; }
+
+    inline void set_desc(Atom desc)
+    { f_desc = desc; }
 
     inline step_t first_time()
     { return f_j; }
 
+    inline TimeFrame& first()
+    { return operator[](first_time()); }
+
     inline step_t last_time()
     { return f_j + f_frames.size() -1; }
+
+    inline TimeFrame& last()
+    { return operator[](last_time()); }
+
+    inline step_t size()
+    { return f_frames.size(); }
 
     inline Exprs& lang()
     { return f_lang; }
@@ -192,6 +228,9 @@ protected:
     /* this witness' id */
     Atom f_id;
 
+    /* this witness' description */
+    Atom f_desc;
+
     /* distance (i.e. number of transitions) from time 0 of the first frame */
     step_t f_j;
 
@@ -202,7 +241,7 @@ protected:
     Exprs f_lang;
 };
 
-class WitnessPrinter : public IObject {
+class WitnessPrinter {
 public:
     virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
 };

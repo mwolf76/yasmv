@@ -23,26 +23,33 @@
 #ifndef SIMULATION_ALGORITHM_H
 #define SIMULATION_ALGORITHM_H
 
-#include <base.hh>
-#include <witness.hh>
-#include <witness_mgr.hh>
+#include <algorithms/base.hh>
+
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
+
+#include <cmd/command.hh>
 
 typedef enum {
     SIMULATION_DONE,
-    SIMULATION_HALTED,
+    SIMULATION_INITIALIZED,
     SIMULATION_DEADLOCKED,
     SIMULATION_INTERRUPTED,
+    SIMULATION_HALTED,
 } simulation_status_t;
 
 class Simulation : public Algorithm {
 
 public:
-    Simulation(IModel& model, Expr_ptr condition,
-               Expr_ptr witness_id, ExprVector& constraints);
-
+    Simulation(Command& command, Model& model);
     ~Simulation();
 
-    void process();
+    void pick_state(Expr_ptr init_condition,
+                    pconst_char trace_uid);
+
+    void simulate(Expr_ptr invar_condition,
+                  Expr_ptr until_condition, step_t k,
+                  pconst_char trace_uid);
 
     inline simulation_status_t status() const
     { return f_status; }
@@ -60,8 +67,7 @@ private:
 class SimulationWitness : public Witness {
 
 public:
-    SimulationWitness(IModel& model, SAT& engine, step_t k,
-                      bool unique_id = false);
+    SimulationWitness(Model& model, Engine& engine, step_t k);
 };
 
 #endif

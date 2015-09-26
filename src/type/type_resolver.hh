@@ -27,16 +27,14 @@
 #ifndef TYPE_RESOLVER_H
 #define TYPE_RESOLVER_H
 
-#include <resolver.hh>
+#include <symb/resolver.hh>
 
-class TypeResolver : public IResolver {
+class TypeResolver : public Resolver {
 public:
     TypeResolver(TypeMgr& owner);
     ~TypeResolver();
 
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb);
-
-    ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr symb);
+    Symbol_ptr symbol(const Expr_ptr key);
 
 private:
     TypeMgr& f_owner;

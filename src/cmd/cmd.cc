@@ -24,15 +24,28 @@
 // static initialization
 CommandMgr_ptr CommandMgr::f_instance = NULL;
 
+CommandMgr& CommandMgr::INSTANCE()
+{
+    if (! f_instance)
+        f_instance = new CommandMgr();
+
+    return (*f_instance);
+}
+
 CommandMgr::CommandMgr()
     : f_interpreter(Interpreter::INSTANCE())
 {
-    // TODO: macros for init/deinit logging
-    DEBUG << "CommandMgr initialized @" << this << endl;
+    const void* instance(this);
+    DRIVEL
+        << "CommandMgr initialized @"
+        << instance
+        << std::endl;
 }
 
 CommandMgr::~CommandMgr()
 {
-    // TODO: macros for init/deinit logging
-    DEBUG << "CommandMgr deinitialized" << endl;
+    DRIVEL
+        << "CommandMgr deinitialized"
+        << std::endl;
 }
+

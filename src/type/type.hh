@@ -84,44 +84,53 @@
  * operator, type conversions take place as a pre-processing. The
  * following rules apply:
  *
- * 1. When one of the two operands is signed the other one is also converted to signed.
- * 2. The size of the result fits the largest size of the involved operands.
+ * 1. When one of the two operands is signed the other one is also
+ * converted to signed;
+ *
+ * 2. The size of the result fits the largest size of the involved
+ * operands.
  *
  **/
 #ifndef TYPE_H
 #define TYPE_H
 
-#include <common.hh>
-#include <cudd_mgr.hh>
+#include <list>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <dd/cudd_mgr.hh>
+
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
 
+// 1. scalars
 typedef class ScalarType* ScalarType_ptr;
 
-typedef class MonolithicalType* MonolithicalType_ptr;
+// 1.1. monoliths
+typedef class MonolithicType* MonolithicType_ptr;
 typedef class BooleanType* BooleanType_ptr;
 typedef class EnumType* EnumType_ptr;
-typedef class AlgebraicType* AlgebraicType_ptr;
+
+// 1.2. algebraics
 typedef class ConstantType* ConstantType_ptr;
+typedef class AlgebraicType* AlgebraicType_ptr;
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 
+// 1.3. module instances
+typedef class InstanceType* InstanceType_ptr;
+
+// 2. arrays
 typedef class ArrayType* ArrayType_ptr;
 
-// reserved for resolution
-typedef class CtxType* CtxType_ptr;
-
-typedef list<Type_ptr> TypeList;
+typedef std::list<Type_ptr> TypeList;
 
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, Type_ptr type);
+std::ostream& operator<<(std::ostream& os, Type_ptr type);
 
-// ostream helper, uses FQExpr printer (see expr/expr.cc)
-ostream& operator<<(ostream& os, const Type_ptr type);
+// std::ostream helper, uses FQExpr printer (see expr/expr.cc)
+std::ostream& operator<<(std::ostream& os, const Type_ptr type);
 
 /** Exception classes */
 class TypeException : public Exception {
@@ -129,24 +138,51 @@ public:
     virtual const char* what() const throw() =0;
 };
 
-/** Raised when the inferrer detects a wrong type */
+/** Raised when the type checker detects a wrong type */
 class BadType : public TypeException {
-    Expr_ptr f_repr;
+    Expr_ptr f_expr;
+    Expr_ptr f_lhs;
+    Expr_ptr f_rhs;
 
 public:
-    BadType(Type_ptr tp);
+    BadType(Expr_ptr expr, Type_ptr lhs);
+    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
 
     const char* what() const throw();
     ~BadType() throw();
 };
 
+/** Raised when the inferrer detects a wrong type */
+class IdentifierExpected : public TypeException {
+    Expr_ptr f_expr;
+
+public:
+    IdentifierExpected(Expr_ptr expr);
+
+    const char* what() const throw();
+    ~IdentifierExpected() throw();
+};
+
+/** Raised when the inferrer detects a wrong type */
+class DuplicateLiteral : public TypeException {
+    Expr_ptr f_expr;
+
+public:
+    DuplicateLiteral(Expr_ptr expr);
+
+    const char* what() const throw();
+    ~DuplicateLiteral() throw();
+};
+
+
 /** Raised when the inferrer detects two mismatching types */
 class TypeMismatch : public TypeException {
+    Expr_ptr f_expr;
     Expr_ptr f_repr_a;
     Expr_ptr f_repr_b;
 
 public:
-    TypeMismatch(Type_ptr a, Type_ptr b);
+    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b);
 
     const char* what() const throw();
     ~TypeMismatch() throw();
@@ -155,21 +191,23 @@ public:
 class TypeMgr; // fwd
 
 /** Basic Type class. */
-class Type : public Object {
+class Type {
 public:
     Expr_ptr repr() const
     { return f_repr; }
 
-    // This depends on Monolithical vs. Algebraic nature of type.
-    // (i.e. for Monoliths, size is the number of bits; for algebraics
-    // size is the number of ADDs.
+    /* This depends on the Monolithic vs. Algebraic nature of type.
+    (i.e. for Monolithics, size is 1; for algebraics size is the
+    number of ADDs). */
 
     // Bits width
     virtual unsigned width() const =0;
 
     // shortcuts
     bool is_scalar();
-    bool is_monolithical();
+    ScalarType_ptr as_scalar();
+
+    bool is_monolithic();
 
     bool is_boolean();
     BooleanType_ptr as_boolean();
@@ -189,6 +227,9 @@ public:
     bool is_enum();
     EnumType_ptr as_enum();
 
+    bool is_instance();
+    InstanceType_ptr as_instance();
+
     bool is_array();
     ArrayType_ptr as_array();
 
@@ -206,12 +247,6 @@ protected:
 
 /** -- Scalars ------------------------------------------------------------ */
 
-/** Abstract type interface. */
-class AbstractType {
-public:
-    virtual bool is_abstract() const =0;
-};
-
 /** Scalar type class. */
 class ScalarType : public Type {
 protected:
@@ -220,17 +255,17 @@ protected:
     {}
 };
 
-/** Monolithical type class. */
-class MonolithicalType : public ScalarType {
+/** Monolithic type class. */
+class MonolithicType : public ScalarType {
 protected:
-    MonolithicalType(TypeMgr &owner)
+    MonolithicType(TypeMgr &owner)
         : ScalarType(owner)
     {}
 };
 
 /** Boolean type */
 typedef class BooleanType* BooleanType_ptr;
-class BooleanType : public MonolithicalType {
+class BooleanType : public MonolithicType {
 public:
     unsigned width() const;
 
@@ -240,8 +275,9 @@ protected:
 };
 
 /** Algebraic type class. */
-class AlgebraicType : public ScalarType,
-                      public AbstractType {
+class AlgebraicType : public ScalarType {
+public:
+
 protected:
     AlgebraicType(TypeMgr &owner)
         : ScalarType(owner)
@@ -250,56 +286,62 @@ protected:
 
 /** Enumeratives */
 typedef class EnumType* EnumType_ptr;
-class EnumType : public MonolithicalType, public AbstractType {
+class EnumType : public MonolithicType {
 protected:
     friend class TypeMgr; // ctors not public
     EnumType(TypeMgr& owner, ExprSet& literals);
 
 public:
-    bool is_abstract() const;
     unsigned width() const;
 
-    const ExprSet& literals() const
+    inline const ExprSet& literals() const
     { return f_literals; }
 
-    value_t value(Expr_ptr lit) const
-    {
-        value_t res = 0;
-        for (ExprSet::iterator eye = f_literals.begin();
-             eye != f_literals.end(); ++ eye, ++ res) {
-
-            if (*eye == lit)
-                return res;
-        }
-
-        assert(false); // not found
-    }
+    value_t value(Expr_ptr lit) const;
 
 private:
     ExprSet f_literals;
 };
 
-/** Integer constants */
+/** Instances */
+typedef class InstanceType* InstanceType_ptr;
+class InstanceType : public ScalarType {
+public:
+    unsigned width() const;;
+    InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params);
+
+    inline Expr_ptr name() const
+    { return f_name; }
+
+    inline Expr_ptr params() const
+    { return f_params; }
+
+private:
+    Expr_ptr f_name;
+    Expr_ptr f_params;
+};
+
+/** Numeric constants (both integers and fixed) */
 typedef class ConstantType* ConstantType_ptr;
 class ConstantType : public AlgebraicType {
 public:
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return NULL; }
 
  protected:
     friend class TypeMgr; // ctors not public
-    ConstantType(TypeMgr& owner);
+    ConstantType(TypeMgr& owner, unsigned width);
+
+    unsigned f_width;
 };
 
-/** Signed integers */
+/** Signed algebraics (both integers and fixed) */
 typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
 class SignedAlgebraicType : public AlgebraicType {
 public:
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
@@ -314,19 +356,17 @@ public:
     ADD *f_dds;
 };
 
-/** Unsigned integers */
+/** Unsigned algebraics (both integers and fixed) */
 typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 class UnsignedAlgebraicType : public AlgebraicType {
 public:
     unsigned width() const;
-    bool is_abstract() const;
 
     ADD *dds() const
     { return f_dds; }
 
 protected:
     friend class TypeMgr; // ctors not public
-    UnsignedAlgebraicType(TypeMgr& owner); // abstract
     UnsignedAlgebraicType(TypeMgr& owner, unsigned width, ADD *dds = NULL);
 
     unsigned f_width;
@@ -335,72 +375,12 @@ protected:
     ADD *f_dds;
 };
 
-/** Signed fixed */
-typedef class SignedFxdAlgebraicType* SignedFxdAlgebraicType_ptr;
-class SignedFxdAlgebraicType : public AlgebraicType {
-public:
-    inline unsigned magnitude() const
-    { return f_magnitude; }
-
-    inline unsigned fractional() const
-    { return f_fractional; }
-
-    unsigned width() const;
-    bool is_abstract() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
- protected:
-    friend class TypeMgr; // ctors not public
-    SignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
-                           unsigned fractional, ADD *dds = NULL);
-
-    unsigned f_magnitude;
-    unsigned f_fractional;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
-};
-
-/** Unsigned integers */
-typedef class UnsignedFxdAlgebraicType* UnsignedFxdAlgebraicType_ptr;
-class UnsignedFxdAlgebraicType : public AlgebraicType {
-public:
-    inline unsigned magnitude() const
-    { return f_magnitude; }
-
-    inline unsigned fractional() const
-    { return f_fractional; }
-
-    unsigned width() const;
-    bool is_abstract() const;
-
-    ADD *dds() const
-    { return f_dds; }
-
-protected:
-    friend class TypeMgr; // ctors not public
-    UnsignedFxdAlgebraicType(TypeMgr& owner); // abstract
-    UnsignedFxdAlgebraicType(TypeMgr& owner, unsigned magnitude,
-                             unsigned fractional, ADD *dds = NULL);
-
-    unsigned f_magnitude;
-    unsigned f_fractional;
-
-    // this is reserved for temp encodings, it's NULL for ordinary algebraics
-    ADD *f_dds;
-};
-
-
 /** -- Arrays ------------------------------------------------------------ */
 
 /** Array type class. */
 typedef class ArrayType* ArrayType_ptr;
-class ArrayType : public Type,
-                  public AbstractType {
+class ArrayType : public Type {
 public:
-    bool is_abstract() const;
     unsigned width() const;
     unsigned nelems() const
     { return f_nelems; }
@@ -411,22 +391,26 @@ public:
 protected:
     friend class TypeMgr; // ctors not public
 
-    // concrete array type
+    // array type
     ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems);
-
-    // abstract array type
-    ArrayType(TypeMgr& owner, ScalarType_ptr of);
 
     ScalarType_ptr f_of;
     unsigned f_nelems;
 };
 
-// what whas this again?
-typedef class ResolutionCtxType* ResolutionCtxType_ptr;
-class ResolutionCtxType : public Type {
-protected:
-    friend class TypeMgr; // ctors not public
-    ResolutionCtxType(TypeMgr& owner);
-};
+/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
+#define TOP_TYPE(tp)                            \
+    const Type_ptr (tp)(f_type_stack.back())
+
+#define DROP_TYPE()                             \
+    f_type_stack.pop_back()
+
+#define POP_TYPE(tp)                            \
+    TOP_TYPE(tp); DROP_TYPE()
+
+#define PUSH_TYPE(tp)                           \
+    f_type_stack.push_back(tp)
+
+typedef std::vector<Type_ptr> TypeVector;
 
 #endif

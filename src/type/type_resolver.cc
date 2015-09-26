@@ -27,36 +27,34 @@
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)
 {
-    DEBUG << "Initialized Type Resolver instance @" << this << endl;
+    const void* instance(this);
+    DEBUG
+        << "Initialized Type Resolver instance @"
+        << instance
+        << std::endl;
 }
 
 TypeResolver::~TypeResolver()
 {}
 
-void TypeResolver::add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb)
+Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
 {
-    assert (false); // TODO
-}
+     ExprMgr& em
+        (ExprMgr::INSTANCE());
+     assert(em.is_dot(key));
 
-ISymbol_ptr TypeResolver::symbol(const Expr_ptr ctx, const Expr_ptr expr)
-{
-    FQExpr key(ctx, expr, 0); // time arbitrarily set to 0.
+     /* Types are globally scoped */
+     Expr_ptr key_
+         (em.make_dot( em.make_empty(), key -> rhs()));
 
-    { /* enum types */
-        const Enums& enums = TypeMgr::INSTANCE().enums();
-        Enums::const_iterator iter = enums.find(key);
-        if (iter != enums.end()) {
-            return (*iter).second;
-        }
-    }
+     const Literals& lits
+         (TypeMgr::INSTANCE().literals());
 
-    { /* enum literals */
-        const Literals& lits = TypeMgr::INSTANCE().literals();
-        Literals::const_iterator iter = lits.find(key);
-        if (iter != lits.end()) {
-            return (*iter).second;
-        }
-    }
+     Literals::const_iterator iter
+         (lits.find(key_));
 
-    return NULL; /* unresolved */
+     if (iter != lits.end())
+         return dynamic_cast<Symbol_ptr>((*iter).second);
+
+     return NULL; /* unresolved */
 }

@@ -22,50 +22,69 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <command.hh>
-#include <interpreter.hh>
+#include <cmd/interpreter.hh>
+
+/* -- commands */
+#include <cmd/commands/help.hh>
+#include <cmd/commands/time.hh>
+#include <cmd/commands/quit.hh>
+
+#include <cmd/commands/read_model.hh>
+#include <cmd/commands/write_model.hh>
+
+#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/check_init.hh>
+
+#include <cmd/commands/pick_state.hh>
+#include <cmd/commands/simulate.hh>
+
+#include <cmd/commands/list_traces.hh>
+#include <cmd/commands/dump_trace.hh>
+#include <cmd/commands/dup_trace.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
 
 class CommandMgr  {
 public:
-    static CommandMgr& INSTANCE()
-    {
-        if (! f_instance) {
-            f_instance = new CommandMgr();
-        }
-
-        return (*f_instance);
-    }
+    static CommandMgr& INSTANCE();
 
     // -- makers ----------------------------------------------------------------
-    inline Command_ptr make_help(Atom topic)
-    { return new HelpCommand(f_interpreter, topic); }
+    inline Command_ptr make_help()
+    { return new Help(f_interpreter); }
 
     inline Command_ptr make_time()
-    { return new TimeCommand(f_interpreter); }
+    { return new Time(f_interpreter); }
 
-    inline Command_ptr make_quit(int retcode =0)
-    { return new QuitCommand(f_interpreter, retcode); }
+    inline Command_ptr make_quit()
+    { return new Quit(f_interpreter); }
 
-    inline Command_ptr make_load_model(const char *filepath)
-    { return new LoadModelCommand(f_interpreter, filepath); }
+    inline Command_ptr make_read_model()
+    { return new ReadModel(f_interpreter); }
 
-    inline Command_ptr make_init()
-    { return new InitCommand(f_interpreter); }
+    inline Command_ptr make_write_model()
+    { return new WriteModel(f_interpreter); }
 
-    inline Command_ptr make_simulate(Expr_ptr halt_cond, Expr_ptr resume_id, ExprVector& constraints)
-    { return new SimulateCommand(f_interpreter, halt_cond, resume_id, constraints); }
+    inline Command_ptr make_check_invar()
+    { return new CheckInvar(f_interpreter); }
 
-    inline Command_ptr make_verify(Expr_ptr formula, ExprVector& constraints)
-    { return new VerifyCommand(f_interpreter, formula, constraints); }
+    inline Command_ptr make_check_init()
+    { return new CheckInit(f_interpreter); }
 
-    inline Command_ptr make_witness_list()
-    { return new WitnessListCommand(f_interpreter); }
+    inline Command_ptr make_pick_state()
+    { return new PickState(f_interpreter); }
 
-    inline Command_ptr make_witness_show(Expr_ptr wid)
-    { return new WitnessShowCommand(f_interpreter, wid); }
+    inline Command_ptr make_simulate()
+    { return new Simulate(f_interpreter); }
+
+    inline Command_ptr make_list_traces()
+    { return new ListTraces(f_interpreter); }
+
+    inline Command_ptr make_dump_trace()
+    { return new DumpTrace(f_interpreter); }
+
+    inline Command_ptr make_dup_trace()
+    { return new DupTrace(f_interpreter); }
 
 protected:
     CommandMgr();

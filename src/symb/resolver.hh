@@ -27,17 +27,14 @@
 #ifndef RESOLVER_H
 #define RESOLVER_H
 
-#include <symbol.hh>
+#include <symb/symbol.hh>
 
-class IResolver : public IObject {
+class Resolver {
 public:
-    /** @brief register a symbol in the underlying storage */
-    virtual void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, ISymbol_ptr symb) =0;
-
     /** @brief fetch a symbol */
-    virtual ISymbol_ptr symbol(const Expr_ptr ctx, const Expr_ptr expr) =0;
+    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
 };
 
-typedef IResolver* IResolver_ptr;
+typedef Resolver* Resolver_ptr;
 
 #endif

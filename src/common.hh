@@ -19,83 +19,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-
 #ifndef COMMON_H
 #define COMMON_H
 
 #include <cassert>
 #include <cstdlib>
 #include <csignal>
+#include <cctype>
 
-/* custom C definitions */
+/* low-level C definitions */
 #include <cdefs.h>
 
-#include <utility>
-using std::pair;
-using std::make_pair;
-
-#include <string>
-using std::string;
-typedef string Atom;
-typedef Atom* Atom_ptr;
-
-#include <sstream>
-using std::ostringstream;
-
-#include <iostream>
-using std::istream;
-using std::ifstream;
-
-using std::ostream;
-using std::ofstream;
-
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::flush;
-
-#include <list>
-using std::list;
-
 #include <vector>
-using std::vector;
+typedef std::vector<step_t> TimeVector;
 
-#include <stack>
-using std::stack;
+typedef std::vector<value_t> ValueVector;
 
-#include <set>
-using std::set;
+/* shortcuts to to simplify manipulation of the internal values stack */
+#define POP_VALUE(op)                              \
+    assert(0 < f_values_stack.size());             \
+    const value_t op = f_values_stack.back();      \
+    f_values_stack.pop_back()
 
-#include <algorithm>
-using std::find;
+#define PUSH_VALUE(op)                             \
+    f_values_stack.push_back(op)
 
-#include <boost/algorithm/string.hpp>
+typedef const char* pconst_char;
+typedef char* pchar;
 
-#include <boost/unordered_set.hpp>
-using boost::unordered_set;
-
-#include <boost/unordered_map.hpp>
-using boost::unordered_map;
-
-#include <map>
-using std::map;
-
-#include <boost/thread.hpp>
-using boost::thread;
-using boost::thread_interrupted;
-
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-using boost::tuple;
-using boost::make_tuple;
-
-#include <boost/filesystem.hpp>
-using boost::filesystem::path;
-using boost::filesystem::directory_iterator;
-using boost::filesystem::filesystem_error;
-
-#include <algorithm>
-using std::max;
+#include <exception>
+#include <sstream>
+class Exception : public std::exception {
+public:
+    virtual const char* what() const throw() =0;
+    virtual ~Exception() throw() {};
+};
 
 static inline bool _iff(bool a, bool b)
 { return (!(a) || (b)) && ((!b) || (a)); }
@@ -105,43 +63,6 @@ static inline bool _xor(bool a, bool b)
 
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <logging.hh>
-
-#include <exception>
-using std::exception;
-
-class Exception : public exception {
-public:
-    virtual const char* what() const throw() =0;
-    virtual ~Exception() throw() {}
-};
-
-class FileInputException : public Exception {
-    virtual const char* what() const throw() {
-        ostringstream oss;
-        oss << "Can not read file '" << f_filename << "'";
-        return oss.str().c_str();
-    }
-
-    string f_filename;
-
-public:
-    FileInputException(const string &filename)
-        : f_filename(filename)
-    {}
-
-    virtual ~FileInputException() throw()
-    {}
-};
-
-/* the base class definition, including a virtual destructor */
-class IObject {
-public:
-    virtual ~IObject()
-    {}
-};
-
-class Object : public IObject {
-};
 
 /* environment variables and paths */
 extern const char *YASMV_HOME;
@@ -156,11 +77,12 @@ extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;
 extern const char *CONST_TOKEN;
 extern const char *INT_TOKEN;
-extern const char *FXD_TOKEN;
 
 extern const char *ARRAY_TOKEN;
 
 extern const char *MAIN_TOKEN;
+
+extern const char* EMPTY_TOKEN;
 
 extern const char *DEFAULT_CTX_TOKEN;
 
@@ -186,25 +108,9 @@ extern const char bold_cyan[];
 extern const char bold_light_gray[];
 extern const char bold_dark_gray[];
 
+/* Witness trace formats */
+extern const char *TRACE_FMT_PLAIN;
+extern const char *TRACE_FMT_JSON;
+
 extern volatile sig_atomic_t sigint_caught;
-
-/* internal utils */
-static inline unsigned pow2(unsigned exp)
-{
-    value_t res = 1;
-    for (unsigned i = exp; i; -- i) {
-        res *= 2;
-    }
-    return res;
-}
-
-static inline unsigned msb(unsigned value)
-{
-    unsigned res = 0;
-    while (value >>= 1) {
-        ++ res;
-    }
-
-    return res;
-}
 #endif
