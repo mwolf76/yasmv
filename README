@@ -1,66 +1,47 @@
 README
 ======
 
-The YASMINE (Yet Another Symbolic Modelling INteractive Engine)
+  The YASMINE (Yet Another Symbolic Modeling INteractive Engine)
 project started off in fall 2011 as a tentative and partial C++
-reimplementation of the NuSMV2 model checker. As a former member of
-the NuSMV2 development team (in the years from 2008 to 2011) I was
-never happy with a few architectural choices, inherited from the long
-history of the NuSMV model checker and/or due to the amount of legacy
-code and tools that relied on it. Don't get me wrong, I really think
-NuSMV is a great piece of software. And I owe to the developers and
-researchers in FBK most - if not all - of my scientific and software
-engineering training. Those people are really fantastic. It's just
-that I have been wondering for years what that project would have been
-like, if one was completely free to redesign it all from the
-scratch. This is exactly why this project exists in the first place.
+re-implementation of the NuSMV2 model checker. As a former member of
+the NuSMV2 development team (in the years between 2008 and 2011) I was
+never completely happy with a few architectural choices, inherited
+from the long history of the NuSMV model checker and/or due to the
+amount of legacy code and tools that relied on it. Don't get me wrong,
+I really think NuSMV is a great piece of software. And I owe to the
+developers and researchers in FBK most - if not all - of my scientific
+and software engineering training. Those people are really
+fantastic. It's just that I have been wondering for years what that
+project would have been like, if one was completely free to redesign
+it all from the scratch. This is exactly why this project exists in
+the first place.
 
-Overtime, YASMINE has significantly diverged from the original goal of
-making a NuSMV re-implementation. The input language for YASMINE is a
-dialect of SMV which retains only partial compatibility with NuSMV's
-original SMV language. Current goal is to match as closely as possible
-the data model of the C language, in order to have a working
-verification engine to be used in formal verification of C code. But
-this is antipaticing the future. There still is an insane amount of
-work that needs to be done, before it's even conceivable to start
-trying. I think of this project as a full-fledged interactive
-environment for symbolic model verification among other things. The
-tool is designed and crafted with high flexibility requirements as a
-test bed for new ideas - knowing for sure some of them will prove
+  Overtime, YASMINE has significantly diverged from the original goal
+of making a NuSMV re-implementation. The input language for YASMINE is
+a dialect of SMV which retains only partial compatibility with NuSMV's
+original SMV language. In this area, my interest is about making the
+language easy to use, while not giving up on expressiveness.
+
+  The tool is designed and crafted with high flexibility requirements
+as a test bed for new ideas - knowing for sure some of them will prove
 quite unsatisfactory. Of course, feedback (and criticism too) is very
-welcome, expecially if constructive.
+welcome, especially if constructive.
 
-According to my best knowledge, the main differences between the two
-systems are:
+BUILD
+=====
 
-0. Technology
+  The build system uses autools.
 
-   YASMINE is 100% gnu++98 C++ code, using Algebraic Decision Diagrams
-   (ADDs) to perform manipulation of formulas. Reasoning technology is
-   SAT-based. On the other hand, NuSMV evolved overtime from a pure
-   BDD-based system to a hybrid BDD/SAT model checker.
+  The following packages are required to perform a build:
 
-   YASMINE natively uses a portfolio-like approach, spawning multiple
-   processes for each model checking problem, in order to exploit
-   modern multi-core CPUs parallel processing capabilities. AFAICT,
-   NuSMV is not (yet) natively capable of performing multiple checking
-   algorithms on the same property in parallel, I'm not aware though,
-   whether or not this is already in the works.
-
-   The parser for both the input model language and the interpreter
-   shell is a LL(1) (with a few exceptions) top-down parser built with
-   the ANTLR parser generator, using Jim Idle's back-end for C code
-   generation. AFAIK, NuSMV uses a more standard bottom-up GNU LALR
-   Bison parser.
-
-   The well known C++ BOOST libraries are extensively used for
-   high-performance hashtables, automated unit and integration
-   testing, program options parsing and regular expression matching.
+  The following packages are optional.
 
 1. Input language
 
+
+
 1.1. The type system and operator semantics has been carefully
-     redesigned, to match standard C semanthics as closely as
+     redesigned, to match standard C-like semantics as closely as
      possible. As stated above, main driving application scenario for
      this design is software model checking. *All* integer arithmetic
      is 2's complement as it would be performed by any C compiler.
@@ -78,7 +59,7 @@ systems are:
 
      1.1.4. All C standard notations for integers (octal, decimal,
             hexadecimal) are supported (e.g. 052, 42, 0x2a). NuSMV's
-            special-purpose format for bitvectors is *not* supported;
+            special-purpose format for bit-vectors is *not* supported;
 
      1.1.5. Non-determinism is supported using the ANY construct; (FUTURE)
             (e.g. x = ANY(2, 3, 5, 7, 11, 13, 17, 19, 23))
@@ -86,7 +67,7 @@ systems are:
 1.2. No INVARSPEC, LTLSPEC, CTLSPEC, (...) in input models. YASMINE
      models are just that: models (namely, FSM descriptions). Support
      is given at the command level in the interactive shell, in order
-     to allow specifing properties to be checked. Currently only
+     to allow specifying properties to be checked. Currently only
      invariant checking is in scope;
 
 2. Interactive environment
@@ -107,5 +88,5 @@ Lesser General Public License for more details.
 
 YASMINE is in no way related to, or endorsed by, the NuSMV2
 development board and/or FBK. YASMINE does not contain *a single* line
-of code coming from NuSMV's codebase, with the possible exception of
+of code coming from NuSMV's code base, with the possible exception of
 the custom MiniSAT solver that was part of *my* B. Sc. dissertation.
