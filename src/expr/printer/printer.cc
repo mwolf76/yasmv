@@ -93,7 +93,7 @@ void Printer::walk_next_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_neg_preorder(const Expr_ptr expr)
-{ f_os << "- "; return true; }
+{ f_os << "-"; return true; }
 void Printer::walk_neg_postorder(const Expr_ptr expr)
 {}
 
