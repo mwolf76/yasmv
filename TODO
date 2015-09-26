@@ -3,10 +3,6 @@
 - autocomplete support
 - help system
 
-* Fixed-point types support (e.g. ufxd6.2_t, fxd10.4_t)
-
-* Check array support
-
 * CNFization algorithm
 - Support for multiple CNF algorithms (no-cut, single-cut, mix-cut)
 
