@@ -560,30 +560,39 @@ void Compiler::walk_array_postorder(const Expr_ptr expr)
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
-    POP_TYPE(lhs_type);
+    unsigned elems, width;
 
-    if (lhs_type -> is_array()) {
+    POP_TYPE(type);
 
-        ArrayType_ptr atype = lhs_type -> as_array();
-        unsigned width = atype -> width();
-        POP_DV(tmp, width);
-        PUSH_DV_REVERSED(tmp, width)
-
-        PUSH_TYPE(lhs_type);
-        return;
-    }
-
-    if (lhs_type -> is_scalar()) {
-        ScalarType_ptr scalar_type
-            (lhs_type -> as_scalar());
-
+    if (type -> is_array()) {
         ArrayType_ptr array_type
-            (tm.find_array_type( scalar_type, 1));
-        PUSH_TYPE(array_type);
-        return;
-    }
+            (type -> as_array());
 
-    assert(false); // unreachable
+        elems = array_type -> nelems();
+        width = array_type -> of() -> width();
+
+        PUSH_TYPE(array_type);
+
+        /* Here we fiddle a bit with the ordering of DDs to
+           keep consistency with the array equals op. */
+        POP_DV(dvs, width * elems);
+        for (unsigned i = 0; i < elems; ++ i) {
+            for (unsigned j = 0; j < width; ++ j) {
+                PUSH_DD(dvs[i * width + width - j - 1]);
+            }
+        }
+    }
+    else if (type -> is_scalar()) {
+        ScalarType_ptr scalar_type
+            (type -> as_scalar());
+        ArrayType_ptr array_type
+            (tm.find_array_type(scalar_type, 1));
+        PUSH_TYPE(array_type);
+        return; /* no need to do anything */
+    }
+    else assert(false); // unreachable
+
+
 }
 
 bool Compiler::walk_array_comma_preorder(const Expr_ptr expr)
@@ -606,8 +615,8 @@ void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
         ScalarType_ptr of_type
             (array_type -> of());
 
-        // XXX: review this
-        assert( lhs_type == of_type);
+        // not necessarily the same type, but compatible
+        assert( lhs_type -> width() == of_type -> width());
 
         ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
@@ -620,8 +629,8 @@ void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
         ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
-        // XXX: review this
-        assert( lhs_type == of_type );
+        // not necessarily the same type, but compatible
+        assert( lhs_type -> width() == of_type -> width());
 
         array_type = tm.find_array_type(of_type, 2);
         PUSH_TYPE(array_type);

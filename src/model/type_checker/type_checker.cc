@@ -361,7 +361,32 @@ void TypeChecker::walk_subscript_postorder(const Expr_ptr expr)
 bool TypeChecker::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void TypeChecker::walk_array_postorder(const Expr_ptr expr)
-{}
+{
+    /* Here we need to handle the singleton corner case
+       (e.g. [42]). We can do it here because nested arrays are not
+       supported. */
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    /* inspect head... */
+    POP_TYPE(type);
+
+    /* is it already an array type? */
+    if (type -> is_array()) {
+        PUSH_TYPE(type);
+        return;
+    }
+
+    ScalarType_ptr scalar_type
+        (type -> as_scalar());
+
+    /* build a singleton array type */
+    ArrayType_ptr new_array_type
+        (tm.find_array_type(scalar_type, 1));
+
+    PUSH_TYPE(new_array_type);
+    return;
+}
 
 bool TypeChecker::walk_array_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }

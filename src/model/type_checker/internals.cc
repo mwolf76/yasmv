@@ -207,8 +207,29 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     }
     else if (rhs_type -> is_array()) {
         POP_TYPE( lhs_type );
-        if (lhs_type != rhs_type)
-            throw TypeMismatch(expr, lhs_type, rhs_type);
+
+        if (lhs_type != rhs_type) {
+
+            if (! lhs_type -> is_array())
+                throw TypeMismatch(expr, lhs_type, rhs_type);
+
+            ArrayType_ptr a_lhs
+                (lhs_type -> as_array());
+            ArrayType_ptr a_rhs
+                (rhs_type -> as_array());
+
+            if (a_lhs -> nelems() != a_rhs -> nelems())
+                throw TypeMismatch(expr, lhs_type, rhs_type);
+
+            Type_ptr lhs_of
+                (a_lhs -> of());
+            Type_ptr rhs_of
+                (a_rhs -> of());
+
+            if (lhs_of -> width() != rhs_of -> width())
+                throw TypeMismatch(expr, lhs_type, rhs_type);
+
+        }
 
         PUSH_TYPE( tm.find_boolean());
     }

@@ -28,7 +28,9 @@ void Compiler::array_equals(const Expr_ptr expr)
 {
     const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
     const Type_ptr lhs_type = f_type_stack.back();
-    assert( rhs_type == lhs_type && rhs_type -> is_array());
+
+    assert( lhs_type -> is_array() &&
+            rhs_type -> is_array() );
 
     const ArrayType_ptr atype = rhs_type -> as_array();
 

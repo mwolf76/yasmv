@@ -43,19 +43,26 @@ ArrayEncoding::ArrayEncoding(Encodings elements)
 
 Expr_ptr ArrayEncoding::expr(int* assignment)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
-    Expr_ptr acc(NULL);
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+    Expr_ptr acc
+        (NULL);
 
-    for (Encodings::const_iterator i = f_elements.begin();
-         f_elements.end() != i; ++ i) {
+    for (Encodings::const_reverse_iterator i = f_elements.rbegin();
+         f_elements.rend() != i; ++ i) {
 
-        Encoding_ptr enc(*i);
-        Expr_ptr value (enc->expr(assignment));
+        Encoding_ptr enc
+            (*i);
+
+        Expr_ptr value
+            (enc->expr(assignment));
+
         acc = (NULL == acc)
             ? value
-            : em.make_array_comma(acc, value)
+            : em.make_array_comma(value, acc)
         ;
     }
+
     assert(NULL != acc);
     return em.make_array( acc );
 }
