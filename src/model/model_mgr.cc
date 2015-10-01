@@ -44,7 +44,8 @@ ModelMgr::ModelMgr()
 
 Module_ptr ModelMgr::scope(Expr_ptr key)
 {
-    ContextMap::const_iterator mi = f_context_map.find( key );
+    ContextMap::const_iterator mi
+        (f_context_map.find( key ));
     assert( f_context_map.end() != mi );
 
     return mi -> second;
@@ -55,6 +56,7 @@ Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
     ParamMap::const_iterator i
         (f_param_map.find(expr));
     assert(f_param_map.end() != i);
+
     return i->second;
 }
 
@@ -92,9 +94,12 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             (stack.top()); stack.pop();
 
         if (MMGR_BUILD_CTX_MAP == pass) {
-            Expr_ptr key (top.get<0>());
-            Module_ptr tgt (top.get<1>());
-            Expr_ptr tgt_name (tgt -> name());
+            Expr_ptr key
+                (top.get<0>());
+            Module_ptr tgt
+                (top.get<1>());
+            Expr_ptr tgt_name
+                (tgt -> name());
 
             DRIVEL
                 << "Registering scope "
@@ -107,15 +112,23 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
 
         }
 
-        Expr_ptr curr_ctx(top.get<0>());
-        Module& curr_module(* top.get<1>());
-        Expr_ptr curr_params(top.get<2>());
+        Expr_ptr curr_ctx
+            (top.get<0>());
+        Module& curr_module
+            (* top.get<1>());
+        Expr_ptr curr_params
+            (top.get<2>());
 
         if (MMGR_TYPE_CHECK == pass) {
-            const ExprVector& init = curr_module.init();
-            for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
+            const ExprVector& init
+                (curr_module.init());
 
-                Expr_ptr body = (*ii);
+            for (ExprVector::const_iterator ii = init.begin();
+                 ii != init.end(); ++ ii ) {
+
+                Expr_ptr body
+                    (*ii);
+
                 DEBUG
                     << "Typechecking INIT "
                     << curr_ctx << "::" << body
@@ -127,6 +140,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 catch (Exception& ae) {
                     std::string tmp
                         (ae.what());
+
                     WARN
                         << tmp
                         << std::endl
@@ -139,9 +153,12 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             } // for init
 
             const ExprVector& invar = curr_module.invar();
-            for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
+            for (ExprVector::const_iterator ii = invar.begin();
+                 ii != invar.end(); ++ ii ) {
 
-                Expr_ptr body = (*ii);
+                Expr_ptr body
+                    (*ii);
+
                 DEBUG
                     << "Typechecking INVAR "
                     << curr_ctx << "::" << body
@@ -153,6 +170,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 catch (Exception& ae) {
                     std::string tmp
                         (ae.what());
+
                     WARN
                         << tmp
                         << std::endl
@@ -165,9 +183,12 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             } // for invar
 
             const ExprVector& trans = curr_module.trans();
-            for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
+            for (ExprVector::const_iterator ti = trans.begin();
+                 ti != trans.end(); ++ ti ) {
 
-                Expr_ptr body = (*ti);
+                Expr_ptr body
+                    (*ti);
+
                 DEBUG
                     << "Typechecking TRANS "
                     << curr_ctx << "::" << body
@@ -190,10 +211,15 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for trans
 
-            const Defines& defs = curr_module.defs();
-            for (Defines::const_iterator di = defs.begin(); di != defs.end(); ++ di ) {
+            const Defines& defs
+                (curr_module.defs());
 
-                Expr_ptr body = (*di).second -> body();
+            for (Defines::const_iterator di = defs.begin();
+                 di != defs.end(); ++ di ) {
+
+                Expr_ptr body
+                    ((*di).second -> body());
+
                 DEBUG
                     << "Typechecking DEFINE "
                     << curr_ctx << "::" << body
@@ -218,12 +244,15 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             } // for defines
         }
 
-        Variables attrs (curr_module.vars());
+        Variables attrs
+            (curr_module.vars());
         Variables::const_iterator vi;
+
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 
             Expr_ptr var_name
                (vi -> first);
+
             Type_ptr var_tp
                 ((* vi -> second).type());
 
@@ -252,7 +281,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             comma_stack.push( curr_params );
 
             while (0 < comma_stack.size()) {
-                Expr_ptr top (comma_stack.top());
+                Expr_ptr top
+                    (comma_stack.top());
                 comma_stack.pop();
 
                 if (f_em.is_params_comma( top)) {
@@ -266,7 +296,9 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             }
 
             // 2. good, now associate formals and actuals
-            const Parameters& formals (curr_module.parameters());
+            const Parameters& formals
+                (curr_module.parameters());
+
             if (actuals.size() != formals.size())
                 throw BadParamCount( curr_module.name(), formals.size(), actuals.size());
 
@@ -308,7 +340,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
    analyzer_pass_t enum definition for the exact sequence of actions. */
 bool ModelMgr::analyze()
 {
-    analyzer_pass_t pass = (analyzer_pass_t) 0;
+    analyzer_pass_t pass
+        ((analyzer_pass_t) 0);
 
     while (pass < MMGR_DONE) {
         DRIVEL

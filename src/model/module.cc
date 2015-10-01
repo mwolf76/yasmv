@@ -76,7 +76,9 @@ void Module::add_var(Expr_ptr symb_name, Variable_ptr var)
 
 void Module::add_parameter(Expr_ptr symb_name, Parameter_ptr param)
 {
-    Expr_ptr type_repr( param -> type() -> repr());
+    Expr_ptr type_repr
+        (param -> type() -> repr());
+
     DEBUG
         << "Module `" << (*this)
         << "`, added parameter `" << symb_name
@@ -150,4 +152,3 @@ void Module::add_trans(Expr_ptr expr)
 
     f_trans.push_back(expr);
 }
-
