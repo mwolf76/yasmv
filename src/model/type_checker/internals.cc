@@ -53,7 +53,7 @@ void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
         (check_arithmetical(expr->lhs()));
 
     // matching types are most definitely ok
-    if (rhs == lhs ) {
+    if (rhs == lhs) {
         PUSH_TYPE(rhs);
         return ;
     }
@@ -83,23 +83,38 @@ void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 // fun: logical x logical -> logical
 void TypeChecker::walk_binary_fsm_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs_type = check_logical(expr->rhs()); (void) rhs_type;
-    Type_ptr lhs_type = check_logical(expr->lhs());
+    Type_ptr rhs_type
+        (check_logical(expr->rhs()));
+    (void) rhs_type;
+
+    Type_ptr lhs_type
+        (check_logical(expr->lhs()));
+
     PUSH_TYPE( lhs_type );
 }
 
 void TypeChecker::walk_binary_ltl_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs_type = check_logical(expr->rhs()); (void) rhs_type;
-    Type_ptr lhs_type = check_logical(expr->lhs());
+    Type_ptr rhs_type
+        (check_logical(expr->rhs()));
+    (void) rhs_type;
+
+    Type_ptr lhs_type
+        (check_logical(expr->lhs()));
+
     PUSH_TYPE( lhs_type );
 }
 
 // fun: logical x logical -> logical
 void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs_type = check_logical( expr->rhs()); (void) rhs_type;
-    Type_ptr lhs_type = check_logical( expr->lhs());
+    Type_ptr rhs_type
+        (check_logical( expr->rhs()));
+    (void) rhs_type;
+
+    Type_ptr lhs_type
+        (check_logical( expr->lhs()));
+
     PUSH_TYPE( lhs_type );
 }
 
@@ -165,15 +180,21 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
 // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
 void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm = f_owner.tm();
+    TypeMgr& tm
+        (f_owner.tm());
+
     POP_TYPE(rhs_type);
 
     if (rhs_type -> is_boolean()) {
-        Type_ptr lhs_type = check_logical(expr->lhs()); (void) lhs_type;
-        PUSH_TYPE( tm.find_boolean());
+        Type_ptr lhs_type
+            (check_logical(expr->lhs()));
+        (void) lhs_type;
+
+        PUSH_TYPE(tm.find_boolean());
     }
     else if (rhs_type -> is_algebraic()) {
-        Type_ptr lhs_type = check_arithmetical(expr->lhs());
+        Type_ptr lhs_type
+            (check_arithmetical(expr->lhs()));
 
         /* not necessarily same type, but compatible */
         if (lhs_type -> width() ==
@@ -230,7 +251,6 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
 
             if (lhs_of -> width() != rhs_of -> width())
                 throw TypeMismatch(expr, lhs_type, rhs_type);
-
         }
 
         PUSH_TYPE( tm.find_boolean());
@@ -250,11 +270,15 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
 
     PUSH_TYPE(lhs_type);
     if (rhs_type -> is_boolean()) {
-        Type_ptr lhs_type = check_logical(expr->lhs()); (void) lhs_type;
-        PUSH_TYPE( TypeMgr::INSTANCE().find_boolean());
+        Type_ptr lhs_type
+            (check_logical(expr->lhs()));
+        (void) lhs_type;
+
+        PUSH_TYPE(TypeMgr::INSTANCE().find_boolean());
     }
     else if (rhs_type -> is_algebraic()) {
-        Type_ptr lhs_type = check_arithmetical(expr->lhs());
+        Type_ptr lhs_type
+            (check_arithmetical(expr->lhs()));
 
         if (rhs_type == lhs_type)  {
             PUSH_TYPE( rhs_type );
@@ -280,7 +304,7 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
         assert(false);
     }
     else if (rhs_type -> is_enum()) {
-        POP_TYPE( lhs_type );
+        POP_TYPE(lhs_type);
         if (lhs_type != rhs_type)
             throw TypeMismatch(expr, lhs_type, rhs_type);
 

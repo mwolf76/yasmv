@@ -17,16 +17,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement a
- *  type inference engine. The type inference engine is implemented
- *  using a simple walker pattern: (a) on preorder, return true if the
- *  node has not yet been visited; (b) always do in-order (for binary
- *  nodes); (c) perform proper type checking in post-order
- *  hooks. Implicit conversion rules are designed to follow as closely
- *  as possible section 6.3.1 of iso/iec 9899:1999 (aka C99)
- *  standard. Type rules are implemented in the result_type methods of
- *  the TypeMgr class.
- *
  **/
 
 #include <common.hh>
@@ -43,7 +33,9 @@ TypeChecker::TypeChecker(ModelMgr& owner)
     , f_ctx_stack()
     , f_owner(owner)
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Created TypeChecker @"
         << instance
@@ -52,7 +44,9 @@ TypeChecker::TypeChecker(ModelMgr& owner)
 
 TypeChecker::~TypeChecker()
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Destroying TypeChecker @"
         << instance
@@ -311,11 +305,13 @@ bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_dot_inorder(const Expr_ptr expr)
 {
-    ExprMgr& em (f_owner.em());
+    ExprMgr& em
+        (f_owner.em());
 
-    Expr_ptr ctx ( em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+    Expr_ptr ctx
+        (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+
     f_ctx_stack.push_back( ctx );
-
     f_type_stack.pop_back();
 
     return true;
@@ -326,8 +322,10 @@ void TypeChecker::walk_dot_postorder(const Expr_ptr expr)
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool TypeChecker::walk_params_preorder(const Expr_ptr expr)
 {
-    Expr_ptr ctx = f_ctx_stack.back();
-    (*this)( f_owner.preprocess( expr, ctx));
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    (*this)(f_owner.preprocess(expr, ctx));
 
     return false;
 }
