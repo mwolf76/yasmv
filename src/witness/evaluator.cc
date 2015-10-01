@@ -721,8 +721,39 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                 (lit.value());
             PUSH_VALUE(value);
         }
-        else
-            f_values_stack.push_back(expr -> value());
+        else {
+            if (em.is_constant(expr)) {
+                /* scalar value, easy case */
+                f_values_stack.push_back(expr -> value());
+            }
+            else if (em.is_array(expr)) {
+                /* array value, push each element right-to-left */
+                ExprStack
+                    stack;
+                Expr_ptr eye
+                    (expr -> lhs());
+
+                while (em.is_array_comma(eye)) {
+                    stack.push_back(eye);
+                    eye = eye -> rhs();
+                }
+
+                while (0 < stack.size()) {
+                    Expr_ptr top
+                        (stack.back());
+                    stack.pop_back();
+
+                    if (em.is_array_comma(top)) {
+                        f_values_stack.push_back(top -> lhs() -> value());
+                    }
+                    else {
+                        f_values_stack.push_back(top -> value());
+                    }
+                }
+            }
+            else assert(false);
+        }
+
 
         return;
     }

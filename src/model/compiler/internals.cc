@@ -81,14 +81,14 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     TimedExpr key
         (f_owner.em().make_dot(ctx, expr), time);
 
-    // if (f_preprocess)
-    //     DRIVEL
-    //         << "Preprocessing " << key << "..."
-    //         << std::endl;
-    // else
-    //     DRIVEL
-    //         << "Processing " << key << "..."
-    //         << std::endl;
+    if (f_preprocess)
+        DRIVEL
+            << "Preprocessing " << key << "..."
+            << std::endl;
+    else
+        DRIVEL
+            << "Processing " << key << "..."
+            << std::endl;
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)

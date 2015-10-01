@@ -30,7 +30,8 @@
 
  *  The compiler does two full traversals of the input expr:
  *  1. f_preprocess, encodings are built - postorder hooks are
- *  skipped, 2. ! f_preprocess proper compilation is carried out.
+ *     skipped;
+ *  2. ! f_preprocess proper compilation is carried out.
  */
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
@@ -557,6 +558,9 @@ bool Compiler::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_array_postorder(const Expr_ptr expr)
 {
+    if (f_preprocess)
+        return;
+
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
@@ -601,6 +605,9 @@ bool Compiler::walk_array_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
 {
+    if (f_preprocess)
+        return;
+
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
@@ -650,11 +657,11 @@ bool Compiler::walk_set_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
-
     if (f_preprocess)
         return;
+
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);
