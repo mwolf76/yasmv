@@ -30,7 +30,6 @@
    *result* of the operation has to be pushed in reverse order. */
 
 // unary ops -------------------------------------------------------------------
-
 void Compiler::algebraic_unary(const Expr_ptr expr)
 {
     assert(is_unary_algebraic(expr));
@@ -138,22 +137,25 @@ void Compiler::algebraic_bw_xnor(const Expr_ptr expr)
 void Compiler::algebraic_lshift(const Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
-    ExprMgr& em = f_owner.em();
 
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    ExprMgr& em
+        (f_owner.em());
 
-    // both operands are algebraic, same width and signedness
+    const Type_ptr rhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr lhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
+            lhs_type -> width() == rhs_type -> width());
 
-            lhs_type -> width() == rhs_type -> width() &&
-
-            _iff( lhs_type -> is_signed_algebraic(),
-                  rhs_type -> is_signed_algebraic()));
-
-    unsigned width = rhs_type -> width();
-    //bool signedness= rhs_type -> is_signed_algebraic();
+    unsigned width
+        (rhs_type -> width());
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
@@ -168,14 +170,19 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
-    ADD mask(f_enc.constant(1));
+    ADD mask
+        (f_enc.constant(1));
     ADD carry;
 
     for (unsigned k = 0; k < width; ++ k) {
 
         /* compile selection condition (re-entrant invocation) */
         (*this)(em.make_eq( expr->rhs(), em.make_const(k)));
-        ADD cond = f_add_stack.back(); f_add_stack.pop_back();
+
+        ADD cond
+            (f_add_stack.back());
+        f_add_stack.pop_back();
+
         f_type_stack.pop_back(); /* adjust type stack */
 
         if (! cond.IsZero()) {
@@ -184,8 +191,8 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
                 unsigned ndx = width - i - 1;
 
                 /* c' = (0 < D & MSB_MASK); */
-                ADD next_carry = f_enc.zero().
-                    LT( tmp[ndx].BWTimes( mask ));
+                ADD next_carry
+                    (f_enc.zero().LT( tmp[ndx].BWTimes( mask )));
 
                 /* x[i] = ( x[i] << 1 ) | carry */
                 tmp[ndx] = tmp[ndx].BWLShift().BWOr(carry);
@@ -206,22 +213,24 @@ void Compiler::algebraic_lshift(const Expr_ptr expr)
 void Compiler::algebraic_rshift(const Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
-    ExprMgr& em = f_owner.em();
+    ExprMgr& em
+        (f_owner.em());
 
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr rhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
 
-    // both operands are algebraic, same width and signedness
+    const Type_ptr lhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
+            lhs_type -> width() == rhs_type -> width());
 
-            lhs_type -> width() == rhs_type -> width() &&
-
-            _iff( lhs_type -> is_signed_algebraic(),
-                  rhs_type -> is_signed_algebraic()));
-
-    unsigned width = rhs_type -> width();
-    //bool signedness= rhs_type -> is_signed_algebraic();
+    unsigned width
+        (rhs_type -> width());
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
@@ -236,7 +245,8 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
         res[i] = f_enc.zero();
     }
 
-    ADD weight(f_enc.constant(0));
+    ADD weight
+        (f_enc.constant(0));
 
     ADD carry;
     for (unsigned k = 0; k < width; ++ k) {
@@ -277,10 +287,18 @@ void Compiler::algebraic_rshift(const Expr_ptr expr)
 void Compiler::algebraic_relational(const Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
-    TypeMgr& tm (f_owner.tm());
 
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    TypeMgr& tm
+        (f_owner.tm());
+
+    const Type_ptr rhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr lhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
     f_type_stack.push_back( tm.find_boolean());
 
     // both operands are algebraic, same width
@@ -315,7 +333,6 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
 void Compiler::algebraic_equals(const Expr_ptr expr)
 { algebraic_relational(expr); }
 
-// TODO: evaluate which approach is more efficient
 void Compiler::algebraic_not_equals(const Expr_ptr expr)
 { algebraic_relational(expr); }
 
@@ -333,20 +350,25 @@ void Compiler::algebraic_le(const Expr_ptr expr)
 
 void Compiler::algebraic_ite(const Expr_ptr expr)
 {
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    const Type_ptr cnd_type = f_type_stack.back(); f_type_stack.pop_back();
+    const Type_ptr rhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr lhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr cnd_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
     f_type_stack.push_back( rhs_type );
 
-    // both operands are algebraic, same width and signedness
+    // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
             cnd_type -> is_boolean() &&
-
-            lhs_type -> width() == rhs_type -> width() &&
-
-            _iff( lhs_type -> is_signed_algebraic(),
-                  rhs_type -> is_signed_algebraic()));
+            lhs_type -> width() == rhs_type -> width());
 
     unsigned width
         (rhs_type -> width());
@@ -371,8 +393,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     if (f_bsuf_map.end() != eye)
         parent = eye -> second;
 
-    /* verify if entry for toplevel already exists. If it doesn't,
-       create it */
+    /* verify if entry for toplevel already exists. If it doesn't, create it */
     {
         Expr2BinarySelectionDescriptorsMap::const_iterator mi
             (f_expr2bsd_map.find(parent));
@@ -490,12 +511,15 @@ void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
 /* squeeze all bits in a big Or */
 void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
 {
-    Type_ptr tp = f_owner.type( expr->rhs(),
-                                f_ctx_stack.back());
+    Type_ptr tp
+        (f_owner.type( expr->rhs(),
+                       f_ctx_stack.back()));
 
     POP_DV(rhs, tp -> width());
 
-    ADD res = f_enc.zero();
+    ADD res
+        (f_enc.zero());
+
     for (unsigned i = 0; i < tp -> width(); ++ i)
         res = res.Or( rhs[i]);
 
@@ -504,13 +528,16 @@ void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
 
 void Compiler::algebraic_cast_from_algebraic(const Expr_ptr expr)
 {
-    Expr_ptr ctx (f_ctx_stack.back());
-    Type_ptr src_type = f_owner.type( expr->rhs(), ctx);
-    Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    Type_ptr src_type
+        (f_owner.type( expr->rhs(), ctx));
+    Type_ptr tgt_type
+        (f_owner.type( expr->lhs(), ctx));
 
-    if (src_type -> width() == tgt_type -> width()) {
+    if (src_type -> width() == tgt_type -> width())
         return; /* nop */
-    }
+
     else if (src_type -> width() < tgt_type -> width()) {
         /* grow */
         if (tgt_type -> is_signed_algebraic()) {

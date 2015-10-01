@@ -77,4 +77,3 @@ Compiler::~Compiler()
         << instance
         << std::endl;
 }
-

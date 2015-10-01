@@ -2,16 +2,6 @@
  *  @file compiler.cc
  *  @brief Boolean expressions compiler
  *
- *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  subsequent phases of the model checking process. Current
- *  implementation uses CUDD ADDs to perform expression manipulation
- *  and booleanization. Expressions are assumed to be type-safe, only
- *  boolean expressions on arithmetic predicates are supported. The
- *  result of the compilation process must be a 0-1 ADD. This format
- *  is then suitable for Time-instantiation and then CNFization of the
- *  clauses injection directly into the SAT solver.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -49,4 +39,3 @@ const char* ConstantTooLarge::what() const throw()
 
     return strdup(oss.str().c_str());
 }
-

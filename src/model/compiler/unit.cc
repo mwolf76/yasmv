@@ -313,4 +313,3 @@ std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)
 
     return os;
 }
-

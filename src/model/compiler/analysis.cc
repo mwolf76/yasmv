@@ -22,8 +22,11 @@
 
 bool Compiler::is_binary_boolean(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* AND, OR, XOR, XNOR, IFF, IMPLIES */
     if (em.is_binary_logical(expr))
@@ -36,8 +39,11 @@ bool Compiler::is_binary_boolean(const Expr_ptr expr)
 
 bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
        IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
@@ -52,8 +58,11 @@ bool Compiler::is_binary_enumerative(const Expr_ptr expr)
 
 bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     if ((em.is_binary_logical(expr)) ||
         (em.is_binary_arithmetical(expr)) ||
@@ -68,8 +77,11 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
 
 bool Compiler::is_unary_boolean(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /*  NOT, () ? */
     if (em.is_unary_logical(expr))
@@ -82,6 +94,7 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em
         (f_owner.em());
+
     Expr_ptr ctx
         (f_ctx_stack.back());
 
@@ -97,6 +110,7 @@ bool Compiler::is_subscript_boolean(const Expr_ptr expr)
 {
     ExprMgr& em
         (f_owner.em());
+
     Expr_ptr ctx
         (f_ctx_stack.back());
 
@@ -130,6 +144,7 @@ bool Compiler::is_subscript_enumerative(const Expr_ptr expr)
 {
     ExprMgr& em
         (f_owner.em());
+
     Expr_ptr ctx
         (f_ctx_stack.back());
 
@@ -140,8 +155,10 @@ bool Compiler::is_subscript_enumerative(const Expr_ptr expr)
         (f_owner.type(expr->lhs(), ctx));
 
     if (lhs_type -> is_array()) {
+
         ArrayType_ptr array_type
             (lhs_type -> as_array());
+
         ScalarType_ptr of_type
             (array_type -> of());
 
@@ -163,6 +180,7 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 {
     ExprMgr& em
         (f_owner.em());
+
     Expr_ptr ctx
         (f_ctx_stack.back());
 
@@ -173,8 +191,10 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
         (f_owner.type(expr->lhs(), ctx));
 
     if (lhs_type -> is_array()) {
+
         ArrayType_ptr array_type
             (lhs_type -> as_array());
+
         ScalarType_ptr of_type
             (array_type -> of());
 
@@ -193,8 +213,11 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
 
 bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     if ((em.is_unary_logical(expr)) ||
         (em.is_unary_arithmetical(expr)))
@@ -207,8 +230,11 @@ bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 /* same as is_binary_boolean, checks only lhs and rhs */
 bool Compiler::is_ite_boolean(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* ITE */
     if (em.is_ite(expr))
@@ -221,8 +247,11 @@ bool Compiler::is_ite_boolean(const Expr_ptr expr)
 /* same as  is_binary_enumerative, checks only lhs and rhs */
 bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     /* ITE (bw) */
     if (em.is_ite(expr))
@@ -235,8 +264,11 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 /* similar to is_binary_algebraic, checks only lhs and rhs */
 bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     if (em.is_ite(expr))
         return
@@ -248,8 +280,11 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
 
 bool Compiler::is_binary_array(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr ctx (f_ctx_stack.back());
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
 
     if (em.is_binary_equality(expr))
         return

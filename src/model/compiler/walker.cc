@@ -35,7 +35,8 @@
  */
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
-    step_t curr_time = f_time_stack.back();
+    step_t curr_time
+        (f_time_stack.back());
     f_time_stack.push_back(curr_time + 1);
     return true;
 }
@@ -289,9 +290,12 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    Expr_ptr ctx (f_ctx_stack.back());
-    Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
-    Type_ptr src_type = f_owner.type( expr->rhs(), ctx);
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    Type_ptr tgt_type
+        (f_owner.type( expr->lhs(), ctx));
+    Type_ptr src_type
+        (f_owner.type( expr->rhs(), ctx));
 
     assert (f_type_stack.back() == src_type);
     f_type_stack.pop_back();
@@ -516,8 +520,10 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
 {
-    Expr_ptr ctx = f_ctx_stack.back();
-    (*this)( f_owner.preprocess( expr, ctx));
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    (*this)(f_owner.preprocess( expr, ctx));
 
     return false;
 }
@@ -595,8 +601,6 @@ void Compiler::walk_array_postorder(const Expr_ptr expr)
         return; /* no need to do anything */
     }
     else assert(false); // unreachable
-
-
 }
 
 bool Compiler::walk_array_comma_preorder(const Expr_ptr expr)

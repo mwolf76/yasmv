@@ -23,9 +23,12 @@
 /* auto id generator */
 Expr_ptr Compiler::make_auto_id()
 {
-    ExprMgr& em = f_owner.em();
+    ExprMgr& em
+        (f_owner.em());
+
     std::ostringstream oss;
     oss << "__tmp" << f_temp_auto_index ++ ;
+
     return em.make_identifier(oss.str());
 }
 
@@ -326,7 +329,8 @@ void Compiler::pass3()
     {
         /* Array MUXes */
         MultiwaySelectionDescriptors::const_iterator i;
-        for (i = f_multiway_selection_descriptors.begin(); f_multiway_selection_descriptors.end() != i; ++ i) {
+        for (i = f_multiway_selection_descriptors.begin();
+             f_multiway_selection_descriptors.end() != i; ++ i) {
 
             const DDVector& cnds
                 (i -> cnds());
