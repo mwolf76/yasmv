@@ -79,26 +79,22 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
     const Type_ptr lhs_type
         (f_type_stack.back());
 
-    // both operands are algebraic, same width and signedness
+    // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
+            lhs_type -> width() == rhs_type -> width());
 
-            lhs_type -> width() == rhs_type -> width() &&
-
-            _iff( lhs_type -> is_signed_algebraic(),
-                  rhs_type -> is_signed_algebraic()));
-
-    const AlgebraicType_ptr algebraic_type
-        (rhs_type -> as_algebraic());
     unsigned width
-        (algebraic_type -> width());
+        (rhs_type -> width());
+
     bool signedness
-        (algebraic_type -> is_signed_algebraic());
+        (lhs_type -> is_signed_algebraic() ||
+         rhs_type -> is_signed_algebraic() );
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);
 
-    FRESH_DV(res, width);
+    FRESH_DV(res, width); // algebraic, same width
     PUSH_DV(res, width);
 
     InlinedOperatorDescriptor md
@@ -287,15 +283,17 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
     const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
     f_type_stack.push_back( tm.find_boolean());
 
-    // both operands are algebraic, same width and signedness
+    // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
-
             lhs_type -> width() == rhs_type -> width());
 
-    unsigned width = rhs_type -> width();
-    bool signedness= lhs_type -> is_signed_algebraic() ||
-        rhs_type -> is_signed_algebraic();
+    unsigned width
+        (rhs_type -> width());
+
+    bool signedness
+        (lhs_type -> is_signed_algebraic() ||
+         rhs_type -> is_signed_algebraic() );
 
     POP_DV(rhs, width);
     POP_DV(lhs, width);

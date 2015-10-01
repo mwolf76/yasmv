@@ -175,30 +175,32 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     else if (rhs_type -> is_algebraic()) {
         Type_ptr lhs_type = check_arithmetical(expr->lhs());
 
-        if (rhs_type == lhs_type)  {
+        /* not necessarily same type, but compatible */
+        if (lhs_type -> width() ==
+            rhs_type -> width()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
 
-        if (lhs_type -> width() !=
-            rhs_type -> width())
-            throw TypeMismatch( expr, lhs_type, rhs_type );
-
+        /* constant on the right */
         if (rhs_type -> is_constant() &&
             ! lhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
 
+        /* constant on the left */
         if (lhs_type -> is_constant() &&
             ! rhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
 
-        assert(false);
+        throw TypeMismatch( expr, lhs_type, rhs_type );
     }
+
     else if (rhs_type -> is_enum()) {
+
         POP_TYPE( lhs_type );
         if (lhs_type != rhs_type)
             throw TypeMismatch(expr, lhs_type, rhs_type);
@@ -397,5 +399,3 @@ bool TypeChecker::cache_miss(const Expr_ptr expr)
 
     return true;
 }
-
-
