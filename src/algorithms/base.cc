@@ -33,7 +33,9 @@ Algorithm::Algorithm(Command& command, Model& model)
     , f_tm(TypeMgr::INSTANCE())
     , f_witness(NULL)
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     set_param("alg_name", "test");
     DEBUG
         << "Creating algorithm instance "
@@ -44,7 +46,9 @@ Algorithm::Algorithm(Command& command, Model& model)
 
 Algorithm::~Algorithm()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DEBUG
         << "Destroying algorithm instance "
         << get_param("alg_name")
@@ -385,5 +389,3 @@ void Algorithm::assert_formula(Engine& engine,
 {
     engine.push( term, time, group);
 }
-
-
