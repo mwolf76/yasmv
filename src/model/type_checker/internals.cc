@@ -120,19 +120,25 @@ void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
 
 void TypeChecker::walk_binary_cast_postorder(const Expr_ptr expr)
 {
-    assert( false );
-    // TODO
-#if 0
-    Type_ptr rhs_type = check_arithmetical(expr->rhs());
-    Type_ptr lhs_type = check_arithmetical(expr->lhs());
-    PUSH_TYPE( result_type( expr, lhs_type, rhs_type ));
-#endif
+    Type_ptr rhs_type
+        (check_arithmetical(expr->rhs()));
+    (void) rhs_type;
+
+    Type_ptr lhs_type
+        (check_arithmetical(expr->lhs()));
+
+    PUSH_TYPE( lhs_type );
 }
 
 void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
 {
-    Type_ptr rhs_type = check_arithmetical(expr->rhs());
-    Type_ptr lhs_type = check_arithmetical(expr->lhs()); (void) lhs_type;
+    Type_ptr rhs_type
+        (check_arithmetical(expr->rhs()));
+
+    Type_ptr lhs_type
+        (check_arithmetical(expr->lhs()));
+    (void) lhs_type;
+
     PUSH_TYPE( rhs_type );
 }
 
@@ -183,6 +189,9 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     TypeMgr& tm
         (f_owner.tm());
 
+    EncodingMgr& bm
+        (EncodingMgr::INSTANCE());
+
     POP_TYPE(rhs_type);
 
     if (rhs_type -> is_boolean()) {
@@ -203,16 +212,16 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
             return ;
         }
 
-        /* constant on the right */
-        if (rhs_type -> is_constant() &&
-            ! lhs_type -> is_constant()) {
+        /* constant on the right, word-width matches lhs width */
+        if (! lhs_type -> is_constant() && lhs_type -> width() == bm.word_width() &&
+            rhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }
 
         /* constant on the left */
-        if (lhs_type -> is_constant() &&
-            ! rhs_type -> is_constant()) {
+        if (! rhs_type -> is_constant() && rhs_type -> width() == bm.word_width() &&
+            lhs_type -> is_constant()) {
             PUSH_TYPE( tm.find_boolean());
             return ;
         }

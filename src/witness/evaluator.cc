@@ -611,18 +611,18 @@ void Evaluator::walk_set_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
 bool Evaluator::walk_type_preorder(const Expr_ptr expr)
-{  return cache_miss(expr); }
+{ return false; }
 bool Evaluator::walk_type_inorder(const Expr_ptr expr)
-{ return true; }
+{ assert(false); return false; }
 void Evaluator::walk_type_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{ assert (false); }
 
 bool Evaluator::walk_cast_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_cast_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{ /* nop */ }
 
 
 void Evaluator::walk_leaf(const Expr_ptr expr)

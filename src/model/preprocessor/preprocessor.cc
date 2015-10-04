@@ -17,16 +17,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement a
- *  type inference engine. The type inference engine is implemented
- *  using a simple walker pattern: (a) on preorder, return true if the
- *  node has not yet been visited; (b) always do in-order (for binary
- *  nodes); (c) perform proper type checking in post-order
- *  hooks. Implicit conversion rules are designed to follow as closely
- *  as possible section 6.3.1 of iso/iec 9899:1999 (aka C99)
- *  standard. Type rules are implemented in the result_type methods of
- *  the TypeMgr class.
- *
  **/
 #include <symb/proxy.hh>
 
@@ -39,7 +29,9 @@ Preprocessor::Preprocessor(ModelMgr& owner)
     , f_owner(owner)
     , f_em(ExprMgr::INSTANCE())
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DEBUG
         << "Created Preprocessor @"
         << instance
@@ -48,7 +40,9 @@ Preprocessor::Preprocessor(ModelMgr& owner)
 
 Preprocessor::~Preprocessor()
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DEBUG
         << "Destroying Preprocessor @"
         << instance
@@ -493,8 +487,11 @@ void Preprocessor::walk_type_postorder(Expr_ptr expr)
 
 void Preprocessor::walk_leaf(const Expr_ptr expr)
 {
-    ExprMgr& em = f_owner.em();
-    Expr_ptr expr_ = expr;
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr expr_
+        (expr);
 
     // is an integer const ..
     if (em.is_int_numeric(expr_)) {
@@ -508,7 +505,9 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
         /* traverse the env stack, subst with the first occurence, if any */
         ExprPairStack::reverse_iterator env_iter;
         for (env_iter = f_env.rbegin(); env_iter != f_env.rend(); ++ env_iter) {
-            std::pair<Expr_ptr, Expr_ptr> entry = (*env_iter);
+
+            std::pair<Expr_ptr, Expr_ptr> entry
+                (*env_iter);
 
             if (entry.first == expr_) {
                 expr_ = entry.second;
@@ -564,10 +563,13 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
     Define& define
         (proxy.symbol( f_owner.em().
                        make_dot( f_ctx_stack.back(), expr -> lhs())) -> as_define());
-    const ExprVector& formals = define.formals();
+
+    const ExprVector& formals
+        (define.formals());
 
     /* RHS -> comma separated lists of actual parameters */
-    ExprVector actuals; traverse_param_list( actuals, expr -> rhs());
+    ExprVector actuals;
+    traverse_param_list( actuals, expr -> rhs());
 
     /* Populate the subst environment */
     assert( formals.size() == actuals.size());
@@ -580,16 +582,23 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
         /* actual may have been introduced by a nested define, so we
            chain-resolve it to the outermost, real model variable,
            actual using the nested environment stack. */
-        Expr_ptr actual = (*ai);
+        Expr_ptr actual
+            (*ai);
+
         ExprPairStack::reverse_iterator eps_riter;
         for ( eps_riter = f_env.rbegin(); eps_riter != f_env.rend(); ++ eps_riter ) {
-            std::pair<Expr_ptr, Expr_ptr> tmp (*eps_riter);
+
+            std::pair<Expr_ptr, Expr_ptr> tmp
+                (*eps_riter);
+
             if (tmp.first == actual) {
                 actual = tmp.second;
             }
         }
 
-        Expr_ptr formal = (*fi);
+        Expr_ptr formal
+            (*fi);
+
         f_env.push_back( std::make_pair <Expr_ptr, Expr_ptr>
                          ( formal, actual ));
     }

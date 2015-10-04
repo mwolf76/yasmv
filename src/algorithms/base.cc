@@ -263,10 +263,15 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
             Expr_ptr expr
                 (var.name());
+
             TimedExpr key
                 (em().make_dot( ctx, expr), 0);
+
             Encoding_ptr enc
                 (f_bm.find_encoding(key));
+
+            if (!enc)
+                continue;
 
             DDVector::const_iterator di;
             unsigned ndx;

@@ -267,19 +267,17 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
 
 bool Compiler::walk_type_preorder(const Expr_ptr expr)
 {
-    assert(false);
-    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    // f_type_stack.push_back( tp);
+    Type_ptr tp
+        (f_owner.tm().find_type_by_def(expr));
+
+    f_type_stack.push_back(tp);
 
     return false;
 }
 bool Compiler::walk_type_inorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-    return false;
-}
+{ return false; }
 void Compiler::walk_type_postorder(const Expr_ptr expr)
-{ assert( false ); }
+{ assert(false); }
 
 bool Compiler::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -296,11 +294,15 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
         (f_owner.type( expr->lhs(), ctx));
     Type_ptr src_type
         (f_owner.type( expr->rhs(), ctx));
+    Type_ptr cur_type
+        (f_type_stack.back());
 
-    assert (f_type_stack.back() == src_type);
+    assert  (cur_type -> width() ==
+             src_type -> width()) ;
+
     f_type_stack.pop_back();
     f_type_stack.pop_back();
-    f_type_stack.push_back( tgt_type);
+    f_type_stack.push_back(tgt_type);
 
     if (src_type -> is_boolean() && tgt_type -> is_boolean())
         return; /* nop */
@@ -669,7 +671,7 @@ void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
 
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);
-    assert (rhs_type == lhs_type);
+    assert(rhs_type -> width() == lhs_type -> width());
 
     if (rhs_type -> is_monolithic()) {
 

@@ -216,20 +216,21 @@ void TypeChecker::walk_cast_postorder(const Expr_ptr expr)
 
 bool TypeChecker::walk_type_preorder(const Expr_ptr expr)
 {
-    assert(false);
-    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    // f_type_stack.push_back( tp);
+    TypeMgr& tm
+        (f_owner.tm());
+
+    Type_ptr tp
+        (tm.find_type_by_def(expr));
+
+    f_type_stack.push_back(tp);
+
+    /* no need to process further */
     return false;
 }
 bool TypeChecker::walk_type_inorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-    return false;
-}
+{ assert(false); /* unreachable */ return false; }
 void TypeChecker::walk_type_postorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-}
+{ assert(false); /* unreachable */ }
 
 bool TypeChecker::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

@@ -201,9 +201,9 @@ void Printer::walk_cast_postorder(const Expr_ptr expr)
 bool Printer::walk_type_preorder(const Expr_ptr expr)
 { return true; }
 bool Printer::walk_type_inorder(const Expr_ptr expr)
-{ f_os << "("; return true; }
+{ return true; }
 void Printer::walk_type_postorder(const Expr_ptr expr)
-{ f_os << ")";}
+{}
 
 bool Printer::walk_lshift_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
