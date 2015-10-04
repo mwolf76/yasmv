@@ -22,6 +22,7 @@
 #define DUMP_TRACE_CMD_H
 
 #include <cmd/command.hh>
+#include <witness/witness.hh>
 
 /** Raised when the type checker detects a wrong type */
 class UnsupportedFormat : public CommandException {
@@ -41,7 +42,7 @@ class DumpTrace : public Command {
     pchar f_trace_id;
 
     /* the format to use for dumping (must be one of "plain", "json", ...) */
-    pchar f_format;
+    pconst_char f_format;
 
     /* the output filepath (optional) */
     pchar f_output;
@@ -64,6 +65,10 @@ public:
 
     Variant virtual operator()();
     void virtual usage();
+
+private:
+    void dump_plain(std::ostream& os, Witness& w);
+    void dump_json(std::ostream& os, Witness& w);
 };
 
 #endif
