@@ -74,6 +74,7 @@ void Algorithm::setup()
 {
     Compiler& cmpl
         (compiler()); // just a local ref
+
     ExprMgr& em
         (ExprMgr::INSTANCE());
 

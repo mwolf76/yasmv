@@ -135,8 +135,15 @@ public:
     /**
      * @brief a new Minisat variable
      */
-    inline Var new_sat_var() // proxy
-    { return f_solver.newVar(); }
+    inline Var new_sat_var(bool frozen=false) // proxy
+    {
+        Var var
+            (f_solver.newVar());
+
+        f_solver.setFrozen(var, frozen);
+
+        return var;
+    }
 
     /**
      * @brief add a CNF clause
@@ -164,7 +171,7 @@ private:
     CNFRegistry f_registry;
 
     // SAT solver, currently Minisat
-    Solver f_solver;
+    SimpSolver f_solver;
 
     // used to partition the formula to be solved
     Groups f_groups;

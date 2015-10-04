@@ -43,14 +43,12 @@ Var TimeMapper::var(const TCBI& tcbi)
         var = eye->second;
     }
     else {
-        /* generate a new var and book it. */
-        var = f_owner.new_sat_var();
+        /* generate a new var and book it. Newly created var is not eliminable. */
+        var = f_owner.new_sat_var(true);
 
         DRIVEL
-            << "Adding VAR "
-            << var
-            << " for "
-            << tcbi
+            << "Adding VAR " << var
+            << " for " << tcbi
             << std::endl;
 
         f_tcbi2var_map.insert( std::make_pair<TCBI, Var>(tcbi, var));
