@@ -109,8 +109,10 @@ extern const char bold_light_gray[];
 extern const char bold_dark_gray[];
 
 /* Witness trace formats */
+extern const char *TRACE_FMT_DEFAULT;
 extern const char *TRACE_FMT_PLAIN;
 extern const char *TRACE_FMT_JSON;
+extern const char *TRACE_FMT_XML;
 
 extern volatile sig_atomic_t sigint_caught;
 #endif

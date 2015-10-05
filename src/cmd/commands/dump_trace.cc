@@ -55,7 +55,7 @@ UnsupportedFormat::~UnsupportedFormat() throw()
 DumpTrace::DumpTrace(Interpreter& owner)
     : Command(owner)
     , f_trace_id(NULL)
-    , f_format(strdup(TRACE_FMT_JSON))
+    , f_format(strdup(TRACE_FMT_DEFAULT))
     , f_output(NULL)
 {}
 
@@ -71,7 +71,9 @@ void DumpTrace::set_format(pconst_char format)
     f_format = strdup(format);
 
     if (strcmp(f_format, TRACE_FMT_PLAIN) &&
-        strcmp(f_format, TRACE_FMT_JSON))
+        strcmp(f_format, TRACE_FMT_JSON) &&
+        strcmp(f_format, TRACE_FMT_XML))
+
         throw UnsupportedFormat(f_format);
 }
 
@@ -266,6 +268,195 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
         << std::endl;
 }
 
+
+void DumpTrace::process_time_frame(Witness& w, step_t time,
+                                   ExprVector& input_vars_assignments,
+                                   ExprVector& state_vars_assignments,
+                                   ExprVector& defines_assignments)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
+
+    TimeFrame& tf
+        (w[time]);
+
+    SymbIter symbs
+        ( ModelMgr::INSTANCE().model(), NULL );
+
+    while (symbs.has_next()) {
+
+        std::pair< Expr_ptr, Symbol_ptr > pair
+            (symbs.next());
+
+        Symbol_ptr symb
+            (pair.second);
+
+        if (symb -> is_hidden())
+            continue;
+
+        Expr_ptr ctx
+            (pair.first);
+        Expr_ptr name
+            (symb->name());
+        Expr_ptr value
+            (NULL);
+        Expr_ptr full
+            (em.make_dot( ctx, name));
+
+        if (symb -> is_variable())  {
+
+            Variable& var
+                (symb -> as_variable());
+
+            try {
+                value = tf.value(full);
+                if (var.is_input())
+                    input_vars_assignments.push_back( em.make_eq( full, value));
+                else
+                    state_vars_assignments.push_back( em.make_eq( full, value));
+            }
+            catch (NoValue nv) {}
+        }
+        else if (symb -> is_define()) {
+            Expr_ptr expr(symb->name());
+
+            try {
+                value = wm.eval( w, ctx, expr, time);
+                defines_assignments.push_back( em.make_eq( full, value));
+            }
+            catch (NoValue nv) {}
+        }
+        else
+            continue;
+    }
+}
+
+
+void DumpTrace::dump_xml(std::ostream& os, Witness& w)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    const char* FIRST_LVL
+        ("    ");
+    const char* SECOND_LVL
+        ("        ");
+    const char *THIRD_LVL
+        ("            ");
+
+    os
+        << "<?xml version=\"1.0\">" << std::endl
+        << "<witness id=\"" << w.id() << "\"" << ">" << std::endl
+        ;
+
+    for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+        os
+            << FIRST_LVL
+            << "<step time=\"" << time << "\">"
+            << std::endl;
+
+        ExprVector input_vars_assignments;
+        ExprVector state_vars_assignments;
+        ExprVector defines_assignments;
+        process_time_frame(w, time,
+                           input_vars_assignments,
+                           state_vars_assignments,
+                           defines_assignments);
+
+         // -- input variables
+         if (! input_vars_assignments.empty()) {
+
+             os
+                 << SECOND_LVL
+                 << "<input-variables>"
+                 << std::endl;
+
+             for (ExprVector::const_iterator ei = input_vars_assignments.begin();
+                  ei != input_vars_assignments.end(); ++ ei) {
+
+                 Expr_ptr eq
+                     (*ei);
+
+                 os
+                     << THIRD_LVL
+                     << "<item name=\"" << eq -> lhs() << "\" "
+                     << "value=\"" << eq -> rhs() << "\">"
+                     << std::endl;
+             }
+
+             os
+                 << SECOND_LVL
+                 << "</input-variables>"
+                 << std::endl;
+         }
+
+         // -- state variables
+         if (! state_vars_assignments.empty()) {
+
+             os
+                 << SECOND_LVL
+                 << "<state-variables>"
+                 << std::endl;
+
+             for (ExprVector::const_iterator ei = state_vars_assignments.begin();
+                  ei != state_vars_assignments.end(); ++ ei) {
+
+                 Expr_ptr eq
+                     (*ei);
+
+                 os
+                     << THIRD_LVL
+                     << "<item name=\"" << eq -> lhs() << "\" "
+                     << "value=\"" << eq -> rhs() << "\">"
+                     << std::endl;
+             }
+
+             os
+                 << SECOND_LVL
+                 << "</state-variables>"
+                 << std::endl;
+         }
+
+         // -- defines
+         if (! defines_assignments.empty()) {
+
+             os
+                 << SECOND_LVL
+                 << "<defines>"
+                 << std::endl;
+
+             for (ExprVector::const_iterator ei = defines_assignments.begin();
+                  ei != defines_assignments.end(); ++ ei) {
+
+                 Expr_ptr eq
+                     (*ei);
+
+                 os
+                     << THIRD_LVL
+                     << "<item name=\"" << eq -> lhs() << "\" "
+                     << "value=\"" << eq -> rhs() << "\">"
+                     << std::endl;
+             }
+
+             os
+                 << SECOND_LVL
+                 << "</defines>"
+                 << std::endl;
+         }
+
+         os
+             << FIRST_LVL
+             << "</step>"
+             << std::endl;
+    }
+
+    os
+        << "</witness>" << std::endl;
+}
+
 Variant DumpTrace::operator()()
 {
     std::ostream &os
@@ -284,6 +475,9 @@ Variant DumpTrace::operator()()
 
     else if (!strcmp( f_format, TRACE_FMT_JSON))
         dump_json(os, w);
+
+    else if (!strcmp( f_format, TRACE_FMT_XML))
+        dump_xml(os, w);
 
     else assert(false); /* unsupported */
 
