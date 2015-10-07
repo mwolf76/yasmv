@@ -91,7 +91,7 @@ void BMC::falsification( Expr_ptr phi,
             {
                 std::ostringstream oss;
                 oss
-                    << "CEX witness for invariant`"
+                    << "CEX witness for invariant `"
                     << phi
                     << "`"
                 ;

@@ -32,6 +32,12 @@
 
 #include <iostream>
 
+#include <boost/preprocessor/repetition/repeat.hpp>
+
+/* a boost hack to generate indentation consts :-) */
+#define _SPACE(z, n, str)  " "
+#define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
+
 UnsupportedFormat::UnsupportedFormat(pconst_char format)
     : f_format(strdup(format))
 {}
@@ -89,6 +95,42 @@ void DumpTrace::set_output(pconst_char output)
     f_output = strdup(output);
 }
 
+void DumpTrace::dump_plain_section(std::ostream& os,
+                                   const char* section,
+                                   ExprVector& ev)
+{
+    const char* TAB
+        (SPACES(3));
+
+    if (ev.empty())
+        return;
+
+    os
+        << "-- "
+        << section
+        << std::endl;
+
+    for (ExprVector::const_iterator ei = ev.begin();
+         ei != ev.end(); ) {
+
+        Expr_ptr eq
+            (*ei);
+
+        os
+            << TAB
+            << eq -> lhs()
+            << " = "
+            << eq -> rhs()
+            << std::endl;
+
+        ++ ei ;
+    }
+
+    os
+        << std::endl;
+}
+
+
 void DumpTrace::dump_plain(std::ostream& os, Witness& w)
 {
     ExprMgr& em
@@ -97,69 +139,80 @@ void DumpTrace::dump_plain(std::ostream& os, Witness& w)
     os
         << "Witness: "
         << w.id()
+        << " [[ " << w.desc() << " ]]"
         << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
         os
-            << "-- @"
+            << ":: @"
             << time
             << std::endl;
 
-        TimeFrame& tf
-            (w[ time ]);
+        ExprVector input_vars_assignments;
+        ExprVector state_vars_assignments;
+        ExprVector defines_assignments;
 
-        SymbIter symbs( ModelMgr::INSTANCE().model(), NULL );
-        while (symbs.has_next()) {
+        process_time_frame(w, time,
+                           input_vars_assignments,
+                           state_vars_assignments,
+                           defines_assignments);
 
-            std::pair< Expr_ptr, Symbol_ptr > pair
-                (symbs.next());
-
-            Symbol_ptr symb
-                (pair.second);
-            if (symb -> is_hidden())
-                continue;
-
-            Expr_ptr ctx
-                (pair.first);
-            Expr_ptr name
-                (symb->name());
-            Expr_ptr value
-                (NULL);
-            Expr_ptr full
-                (em.make_dot( ctx, name));
-
-            if (symb->is_variable())  {
-                try {
-                    value = tf.value(full);
-                    os
-                        << full << " = "
-                        << value << std::endl;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else if (symb->is_define()) {
-                Expr_ptr expr(symb->name());
-
-                try {
-                    value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-                    os
-                        << full  << " = "
-                        << value << std::endl;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else
-                continue;
-        }
-
-        os << std::endl;
+        dump_plain_section(os, "input", input_vars_assignments);
+        dump_plain_section(os, "state", state_vars_assignments);
+        dump_plain_section(os, "defines", defines_assignments);
     }
+
+    os
+        << std::endl;
 }
+
+
+void DumpTrace::dump_json_section(std::ostream& os,
+                                  const char* section,
+                                  ExprVector& ev)
+{
+    const char* SECOND_LVL
+        (SPACES(18));
+
+    const char *THIRD_LVL
+        (SPACES(22));
+
+    os
+        << SECOND_LVL
+        << "\""
+        << section
+        << "\": {"
+        << std::endl;
+
+    for (ExprVector::const_iterator ei = ev.begin();
+         ei != ev.end(); ) {
+
+        Expr_ptr eq
+            (*ei);
+
+        os
+            << THIRD_LVL
+            << "\"" << eq -> lhs()
+            << "\": \"" << eq -> rhs() << "\"" ;
+
+        ++ ei ;
+
+        if (ei != ev.end()) {
+            os
+                << ", "
+                << std::endl;
+        }
+        else
+            os
+                << std::endl;
+    }
+
+    os
+        << SECOND_LVL
+        << "}" ;
+}
+
 
 void DumpTrace::dump_json(std::ostream& os, Witness& w)
 {
@@ -167,89 +220,39 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
         (ExprMgr::INSTANCE());
 
     const char* FIRST_LVL
-        ("    ");
+        (SPACES(4));
+
     const char* SECOND_LVL
-        ("              ");
-    const char *THIRD_LVL
-        ("                ");
+        (SPACES(14));
 
     os
         << "{"
         << std::endl << FIRST_LVL << "\"id\": " << "\"" << w.id() << "\"" << ","
+        << std::endl << FIRST_LVL << "\"description\": " << "\"" << w.desc() << "\"" << ","
         << std::endl << FIRST_LVL << "\"steps\": [{" << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
-        TimeFrame& tf
-            (w[ time ]);
+        ExprVector input_vars_assignments;
+        ExprVector state_vars_assignments;
+        ExprVector defines_assignments;
 
-        SymbIter symbs
-            ( ModelMgr::INSTANCE().model(), NULL );
+        process_time_frame(w, time,
+                           input_vars_assignments,
+                           state_vars_assignments,
+                           defines_assignments);
 
-        bool first
-            (true);
+        dump_json_section(os, "input", input_vars_assignments);
+        os
+            << ", "
+            << std::endl;
 
-        while (symbs.has_next()) {
+        dump_json_section(os, "state", state_vars_assignments);
+        os
+            << ", "
+            << std::endl;
 
-            std::pair< Expr_ptr, Symbol_ptr > pair
-                (symbs.next());
-
-            Symbol_ptr symb
-                (pair.second);
-
-            if (symb -> is_hidden())
-                continue;
-
-            if ( !first )
-                os
-                    << ", "
-                    << std::endl
-                    ;
-
-            else
-                first = false;
-
-            Expr_ptr ctx
-                (pair.first);
-            Expr_ptr name
-                (symb->name());
-            Expr_ptr value
-                (NULL);
-            Expr_ptr full
-                (em.make_dot( ctx, name));
-
-            if (symb->is_variable())  {
-                try {
-                    value = tf.value(full);
-                    os
-                        << THIRD_LVL
-                        << "\"" << full << "\"" << ": "
-                        << "\"" << value << "\""
-                        ;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else if (symb->is_define()) {
-                Expr_ptr expr(symb->name());
-
-                try {
-                    value = WitnessMgr::INSTANCE().eval( w, ctx, expr, time);
-                    os
-                        << THIRD_LVL
-                        << "\"" << full << "\"" << ": "
-                        << "\"" << value << "\""
-                        ;
-                }
-                catch (NoValue nv) {
-                    // value = ExprMgr::INSTANCE().make_undef();
-                }
-            }
-            else
-                continue;
-        }
-
+        dump_json_section(os, "defines", defines_assignments);
         os
             << std::endl;
 
@@ -307,7 +310,6 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             (em.make_dot( ctx, name));
 
         if (symb -> is_variable())  {
-
             Variable& var
                 (symb -> as_variable());
 
@@ -334,6 +336,47 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
     }
 }
 
+void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVector& ev)
+{
+    const char *SECOND_LVL
+        (SPACES(8));
+
+    const char *THIRD_LVL
+        (SPACES(12));
+
+    if (ev.empty()) {
+        os
+            << SECOND_LVL
+            << "<" << section << "/>"
+            << std::endl;
+
+        return;
+    }
+
+    os
+        << SECOND_LVL
+        << "<" << section << ">"
+        << std::endl;
+
+    for (ExprVector::const_iterator ei = ev.begin();
+         ei != ev.end(); ++ ei) {
+
+        Expr_ptr eq
+            (*ei);
+
+        os
+            << THIRD_LVL
+            << "<item name=\"" << eq -> lhs() << "\" "
+            << "value=\"" << eq -> rhs() << "\"/>"
+            << std::endl;
+    }
+
+    os
+        << SECOND_LVL
+        << "</" << section << ">"
+        << std::endl;
+}
+
 
 void DumpTrace::dump_xml(std::ostream& os, Witness& w)
 {
@@ -341,18 +384,19 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
         (ExprMgr::INSTANCE());
 
     const char* FIRST_LVL
-        ("    ");
-    const char* SECOND_LVL
-        ("        ");
-    const char *THIRD_LVL
-        ("            ");
+        (SPACES(4));
 
     os
-        << "<?xml version=\"1.0\">" << std::endl
-        << "<witness id=\"" << w.id() << "\"" << ">" << std::endl
+        << "<?xml version=\"1.0\"?>" << std::endl
+        << "<witness"
+        << " id=\"" << w.id() << "\""
+        << " description=\"" << w.desc() << "\""
+        << ">"
+        << std::endl
         ;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+
         os
             << FIRST_LVL
             << "<step time=\"" << time << "\">"
@@ -361,96 +405,20 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
         ExprVector input_vars_assignments;
         ExprVector state_vars_assignments;
         ExprVector defines_assignments;
+
         process_time_frame(w, time,
                            input_vars_assignments,
                            state_vars_assignments,
                            defines_assignments);
 
-         // -- input variables
-         if (! input_vars_assignments.empty()) {
+        dump_xml_section(os, "input", input_vars_assignments);
+        dump_xml_section(os, "state", state_vars_assignments);
+        dump_xml_section(os, "defines", defines_assignments);
 
-             os
-                 << SECOND_LVL
-                 << "<input-variables>"
-                 << std::endl;
-
-             for (ExprVector::const_iterator ei = input_vars_assignments.begin();
-                  ei != input_vars_assignments.end(); ++ ei) {
-
-                 Expr_ptr eq
-                     (*ei);
-
-                 os
-                     << THIRD_LVL
-                     << "<item name=\"" << eq -> lhs() << "\" "
-                     << "value=\"" << eq -> rhs() << "\">"
-                     << std::endl;
-             }
-
-             os
-                 << SECOND_LVL
-                 << "</input-variables>"
-                 << std::endl;
-         }
-
-         // -- state variables
-         if (! state_vars_assignments.empty()) {
-
-             os
-                 << SECOND_LVL
-                 << "<state-variables>"
-                 << std::endl;
-
-             for (ExprVector::const_iterator ei = state_vars_assignments.begin();
-                  ei != state_vars_assignments.end(); ++ ei) {
-
-                 Expr_ptr eq
-                     (*ei);
-
-                 os
-                     << THIRD_LVL
-                     << "<item name=\"" << eq -> lhs() << "\" "
-                     << "value=\"" << eq -> rhs() << "\">"
-                     << std::endl;
-             }
-
-             os
-                 << SECOND_LVL
-                 << "</state-variables>"
-                 << std::endl;
-         }
-
-         // -- defines
-         if (! defines_assignments.empty()) {
-
-             os
-                 << SECOND_LVL
-                 << "<defines>"
-                 << std::endl;
-
-             for (ExprVector::const_iterator ei = defines_assignments.begin();
-                  ei != defines_assignments.end(); ++ ei) {
-
-                 Expr_ptr eq
-                     (*ei);
-
-                 os
-                     << THIRD_LVL
-                     << "<item name=\"" << eq -> lhs() << "\" "
-                     << "value=\"" << eq -> rhs() << "\">"
-                     << std::endl;
-             }
-
-             os
-                 << SECOND_LVL
-                 << "</defines>"
-                 << std::endl;
-         }
-
-         os
-             << FIRST_LVL
-             << "</step>"
-             << std::endl;
+        os
+            << FIRST_LVL
+            << "</step>"
+            << std::endl;
     }
 
     os
@@ -488,6 +456,13 @@ Variant DumpTrace::operator()()
 void DumpTrace::usage()
 {
     std::cout
-        << "dump-trace <trace_uid> - Dumps given trace."
-        << std::endl;
+        << "dump-trace [-o filename] [-f format] [<trace_uid>] - Dumps given trace."
+        << std::endl
+        << std::endl
+        << "options"
+        << std::endl
+        << "  -f format, format can be either `plain`, `xml` or `json`."
+        << "  -o filename, filename must be a writeable path on disk."
+        << std::endl ;
 }
+

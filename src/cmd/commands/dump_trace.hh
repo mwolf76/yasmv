@@ -68,8 +68,19 @@ public:
 
 private:
     void dump_plain(std::ostream& os, Witness& w);
+    void dump_plain_section(std::ostream&os,
+                            const char* section,
+                            ExprVector& ev);
+
     void dump_json(std::ostream& os, Witness& w);
+    void dump_json_section(std::ostream&os,
+                           const char* section,
+                           ExprVector& ev);
+
     void dump_xml(std::ostream& os, Witness& w);
+    void dump_xml_section(std::ostream&os,
+                          const char* section,
+                          ExprVector& ev);
 
     void process_time_frame(Witness& w, step_t time,
                             ExprVector& input_vars_assignments,
