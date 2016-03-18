@@ -59,6 +59,12 @@ public:
     }
 
     /**
+     * @brief Disable last activated group for the SAT instance.
+     */
+    inline void disable_last_group()
+    { f_groups.last() *= -1; }
+
+    /**
      * @brief Returns the complete set of defined SAT groups.
      *
      * A positive value of the i-th element of this array enables the
