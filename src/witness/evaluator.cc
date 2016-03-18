@@ -726,6 +726,10 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                 /* scalar value, easy case */
                 f_values_stack.push_back(expr -> value());
             }
+            else if (em.is_neg(expr) && em.is_constant(expr -> lhs())) {
+                /* negative scalar value, easy case */
+                f_values_stack.push_back(- expr -> lhs() -> value());
+            }
             else if (em.is_array(expr)) {
                 /* array value, push each element right-to-left */
                 ExprStack
@@ -751,7 +755,15 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                     }
                 }
             }
-            else assert(false);
+            else {
+                ERR
+                    << "Cannot evaluate `"
+                    << expr
+                    << "`"
+                    << std::endl;
+
+                assert(false);
+            }
         }
 
 
