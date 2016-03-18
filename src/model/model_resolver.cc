@@ -2,10 +2,6 @@
  *  @file resolver.cc
  *  @brief Symbol resolution module
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -35,7 +31,8 @@
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)
 {
-    const void* instance(this);
+    const void* instance
+        (this);
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -84,24 +81,33 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
         (key -> rhs());
 
     { /* global constants and temporaries */
-        const Symbols& symbols = f_owner.symbols();
-        Symbols::const_iterator iter = symbols.find(symb_name);
+        const Symbols& symbols
+            (f_owner.symbols());
+        Symbols::const_iterator iter
+            (symbols.find(symb_name));
+
         if (iter != f_owner.symbols().end()) {
             return (*iter).second;
         }
     }
 
     { /* variables */
-        const Variables& vars = module->vars();
-        Variables::const_iterator iter = vars.find(symb_name);
+        const Variables& vars
+            (module->vars());
+        Variables::const_iterator iter
+            (vars.find(symb_name));
+
         if (iter != vars.end()) {
             return (*iter).second;
         }
     }
 
     { /* parameters */
-        const Parameters& params = module->parameters();
-        Parameters::const_iterator iter = params.begin();
+        const Parameters& params
+            (module->parameters());
+        Parameters::const_iterator iter
+            (params.begin());
+
         while (params.end() != iter) {
             if (iter -> first == symb_name)
                 return iter -> second;
@@ -111,8 +117,11 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
     }
 
     { /* defines */
-        const Defines& defs = module->defs();
-        Defines::const_iterator iter = defs.find(symb_name);
+        const Defines& defs
+            (module->defs());
+        Defines::const_iterator iter
+            (defs.find(symb_name));
+
         if (iter != defs.end()) {
             return (*iter).second;
         }

@@ -611,18 +611,18 @@ void Evaluator::walk_set_comma_postorder(const Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
 bool Evaluator::walk_type_preorder(const Expr_ptr expr)
-{  return cache_miss(expr); }
+{ return false; }
 bool Evaluator::walk_type_inorder(const Expr_ptr expr)
-{ return true; }
+{ assert(false); return false; }
 void Evaluator::walk_type_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{ assert (false); }
 
 bool Evaluator::walk_cast_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_cast_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{ /* nop */ }
 
 
 void Evaluator::walk_leaf(const Expr_ptr expr)
@@ -721,8 +721,51 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                 (lit.value());
             PUSH_VALUE(value);
         }
-        else
-            f_values_stack.push_back(expr -> value());
+        else {
+            if (em.is_constant(expr)) {
+                /* scalar value, easy case */
+                f_values_stack.push_back(expr -> value());
+            }
+            else if (em.is_neg(expr) && em.is_constant(expr -> lhs())) {
+                /* negative scalar value, easy case */
+                f_values_stack.push_back(- expr -> lhs() -> value());
+            }
+            else if (em.is_array(expr)) {
+                /* array value, push each element right-to-left */
+                ExprStack
+                    stack;
+                Expr_ptr eye
+                    (expr -> lhs());
+
+                while (em.is_array_comma(eye)) {
+                    stack.push_back(eye);
+                    eye = eye -> rhs();
+                }
+
+                while (0 < stack.size()) {
+                    Expr_ptr top
+                        (stack.back());
+                    stack.pop_back();
+
+                    if (em.is_array_comma(top)) {
+                        f_values_stack.push_back(top -> lhs() -> value());
+                    }
+                    else {
+                        f_values_stack.push_back(top -> value());
+                    }
+                }
+            }
+            else {
+                ERR
+                    << "Cannot evaluate `"
+                    << expr
+                    << "`"
+                    << std::endl;
+
+                assert(false);
+            }
+        }
+
 
         return;
     }

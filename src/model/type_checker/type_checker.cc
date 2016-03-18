@@ -17,16 +17,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement a
- *  type inference engine. The type inference engine is implemented
- *  using a simple walker pattern: (a) on preorder, return true if the
- *  node has not yet been visited; (b) always do in-order (for binary
- *  nodes); (c) perform proper type checking in post-order
- *  hooks. Implicit conversion rules are designed to follow as closely
- *  as possible section 6.3.1 of iso/iec 9899:1999 (aka C99)
- *  standard. Type rules are implemented in the result_type methods of
- *  the TypeMgr class.
- *
  **/
 
 #include <common.hh>
@@ -43,7 +33,9 @@ TypeChecker::TypeChecker(ModelMgr& owner)
     , f_ctx_stack()
     , f_owner(owner)
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Created TypeChecker @"
         << instance
@@ -52,7 +44,9 @@ TypeChecker::TypeChecker(ModelMgr& owner)
 
 TypeChecker::~TypeChecker()
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Destroying TypeChecker @"
         << instance
@@ -222,20 +216,21 @@ void TypeChecker::walk_cast_postorder(const Expr_ptr expr)
 
 bool TypeChecker::walk_type_preorder(const Expr_ptr expr)
 {
-    assert(false);
-    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    // f_type_stack.push_back( tp);
+    TypeMgr& tm
+        (f_owner.tm());
+
+    Type_ptr tp
+        (tm.find_type_by_def(expr));
+
+    f_type_stack.push_back(tp);
+
+    /* no need to process further */
     return false;
 }
 bool TypeChecker::walk_type_inorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-    return false;
-}
+{ assert(false); /* unreachable */ return false; }
 void TypeChecker::walk_type_postorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-}
+{ assert(false); /* unreachable */ }
 
 bool TypeChecker::walk_lshift_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -311,11 +306,13 @@ bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_dot_inorder(const Expr_ptr expr)
 {
-    ExprMgr& em (f_owner.em());
+    ExprMgr& em
+        (f_owner.em());
 
-    Expr_ptr ctx ( em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+    Expr_ptr ctx
+        (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
+
     f_ctx_stack.push_back( ctx );
-
     f_type_stack.pop_back();
 
     return true;
@@ -326,8 +323,10 @@ void TypeChecker::walk_dot_postorder(const Expr_ptr expr)
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool TypeChecker::walk_params_preorder(const Expr_ptr expr)
 {
-    Expr_ptr ctx = f_ctx_stack.back();
-    (*this)( f_owner.preprocess( expr, ctx));
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    (*this)(f_owner.preprocess(expr, ctx));
 
     return false;
 }
@@ -361,7 +360,32 @@ void TypeChecker::walk_subscript_postorder(const Expr_ptr expr)
 bool TypeChecker::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void TypeChecker::walk_array_postorder(const Expr_ptr expr)
-{}
+{
+    /* Here we need to handle the singleton corner case
+       (e.g. [42]). We can do it here because nested arrays are not
+       supported. */
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    /* inspect head... */
+    POP_TYPE(type);
+
+    /* is it already an array type? */
+    if (type -> is_array()) {
+        PUSH_TYPE(type);
+        return;
+    }
+
+    ScalarType_ptr scalar_type
+        (type -> as_scalar());
+
+    /* build a singleton array type */
+    ArrayType_ptr new_array_type
+        (tm.find_array_type(scalar_type, 1));
+
+    PUSH_TYPE(new_array_type);
+    return;
+}
 
 bool TypeChecker::walk_array_comma_preorder(Expr_ptr expr)
 { return cache_miss(expr); }

@@ -23,9 +23,12 @@
 /* auto id generator */
 Expr_ptr Compiler::make_auto_id()
 {
-    ExprMgr& em = f_owner.em();
+    ExprMgr& em
+        (f_owner.em());
+
     std::ostringstream oss;
     oss << "__tmp" << f_temp_auto_index ++ ;
+
     return em.make_identifier(oss.str());
 }
 
@@ -81,14 +84,14 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     TimedExpr key
         (f_owner.em().make_dot(ctx, expr), time);
 
-    // if (f_preprocess)
-    //     DRIVEL
-    //         << "Preprocessing " << key << "..."
-    //         << std::endl;
-    // else
-    //     DRIVEL
-    //         << "Processing " << key << "..."
-    //         << std::endl;
+    if (f_preprocess)
+        DRIVEL
+            << "Preprocessing " << key << "..."
+            << std::endl;
+    else
+        DRIVEL
+            << "Processing " << key << "..."
+            << std::endl;
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
@@ -326,7 +329,8 @@ void Compiler::pass3()
     {
         /* Array MUXes */
         MultiwaySelectionDescriptors::const_iterator i;
-        for (i = f_multiway_selection_descriptors.begin(); f_multiway_selection_descriptors.end() != i; ++ i) {
+        for (i = f_multiway_selection_descriptors.begin();
+             f_multiway_selection_descriptors.end() != i; ++ i) {
 
             const DDVector& cnds
                 (i -> cnds());

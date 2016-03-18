@@ -2,19 +2,6 @@
  *  @file boolean.cc
  *  @brief Boolean compiler - boolean manipulations
  *
- *  This module contains definitions and services that implement the
- *  booolean expressions compilation into a form which is suitable for
- *  the SAT analysis. Current implementation uses ADDs to perform
- *  expression manipulation and booleanization. Expressions are
- *  assumed to be type-safe, only boolean expressions on arithmetic
- *  predicates are supported. The final result of expression
- *  compilation must be a 0-1 ADD which is suitable for CNF clauses
- *  injection directly into the SAT solver. The compilation engine is
- *  implemented using a simple walker pattern: (a) on preorder, return
- *  true if the node has not yet been visited; (b) always do in-order
- *  (for binary nodes); (c) perform proper compilation in post-order
- *  hooks.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or

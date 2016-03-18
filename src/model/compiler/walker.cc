@@ -30,11 +30,13 @@
 
  *  The compiler does two full traversals of the input expr:
  *  1. f_preprocess, encodings are built - postorder hooks are
- *  skipped, 2. ! f_preprocess proper compilation is carried out.
+ *     skipped;
+ *  2. ! f_preprocess proper compilation is carried out.
  */
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
-    step_t curr_time = f_time_stack.back();
+    step_t curr_time
+        (f_time_stack.back());
     f_time_stack.push_back(curr_time + 1);
     return true;
 }
@@ -265,19 +267,17 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
 
 bool Compiler::walk_type_preorder(const Expr_ptr expr)
 {
-    assert(false);
-    // Type_ptr tp = f_owner.tm().find_type_by_def(expr);
-    // f_type_stack.push_back( tp);
+    Type_ptr tp
+        (f_owner.tm().find_type_by_def(expr));
+
+    f_type_stack.push_back(tp);
 
     return false;
 }
 bool Compiler::walk_type_inorder(const Expr_ptr expr)
-{
-    assert( false ); /* unreachable */
-    return false;
-}
+{ return false; }
 void Compiler::walk_type_postorder(const Expr_ptr expr)
-{ assert( false ); }
+{ assert(false); }
 
 bool Compiler::walk_cast_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -288,14 +288,21 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
     if (f_preprocess)
         return;
 
-    Expr_ptr ctx (f_ctx_stack.back());
-    Type_ptr tgt_type = f_owner.type( expr->lhs(), ctx);
-    Type_ptr src_type = f_owner.type( expr->rhs(), ctx);
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    Type_ptr tgt_type
+        (f_owner.type( expr->lhs(), ctx));
+    Type_ptr src_type
+        (f_owner.type( expr->rhs(), ctx));
+    Type_ptr cur_type
+        (f_type_stack.back());
 
-    assert (f_type_stack.back() == src_type);
+    assert  (cur_type -> width() ==
+             src_type -> width()) ;
+
     f_type_stack.pop_back();
     f_type_stack.pop_back();
-    f_type_stack.push_back( tgt_type);
+    f_type_stack.push_back(tgt_type);
 
     if (src_type -> is_boolean() && tgt_type -> is_boolean())
         return; /* nop */
@@ -515,8 +522,10 @@ void Compiler::walk_dot_postorder(const Expr_ptr expr)
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
 bool Compiler::walk_params_preorder(const Expr_ptr expr)
 {
-    Expr_ptr ctx = f_ctx_stack.back();
-    (*this)( f_owner.preprocess( expr, ctx));
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    (*this)(f_owner.preprocess( expr, ctx));
 
     return false;
 }
@@ -557,33 +566,43 @@ bool Compiler::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_array_postorder(const Expr_ptr expr)
 {
+    if (f_preprocess)
+        return;
+
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
-    POP_TYPE(lhs_type);
+    unsigned elems, width;
 
-    if (lhs_type -> is_array()) {
+    POP_TYPE(type);
 
-        ArrayType_ptr atype = lhs_type -> as_array();
-        unsigned width = atype -> width();
-        POP_DV(tmp, width);
-        PUSH_DV_REVERSED(tmp, width)
-
-        PUSH_TYPE(lhs_type);
-        return;
-    }
-
-    if (lhs_type -> is_scalar()) {
-        ScalarType_ptr scalar_type
-            (lhs_type -> as_scalar());
-
+    if (type -> is_array()) {
         ArrayType_ptr array_type
-            (tm.find_array_type( scalar_type, 1));
-        PUSH_TYPE(array_type);
-        return;
-    }
+            (type -> as_array());
 
-    assert(false); // unreachable
+        elems = array_type -> nelems();
+        width = array_type -> of() -> width();
+
+        PUSH_TYPE(array_type);
+
+        /* Here we fiddle a bit with the ordering of DDs to
+           keep consistency with the array equals op. */
+        POP_DV(dvs, width * elems);
+        for (unsigned i = 0; i < elems; ++ i) {
+            for (unsigned j = 0; j < width; ++ j) {
+                PUSH_DD(dvs[i * width + width - j - 1]);
+            }
+        }
+    }
+    else if (type -> is_scalar()) {
+        ScalarType_ptr scalar_type
+            (type -> as_scalar());
+        ArrayType_ptr array_type
+            (tm.find_array_type(scalar_type, 1));
+        PUSH_TYPE(array_type);
+        return; /* no need to do anything */
+    }
+    else assert(false); // unreachable
 }
 
 bool Compiler::walk_array_comma_preorder(const Expr_ptr expr)
@@ -592,6 +611,9 @@ bool Compiler::walk_array_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
 {
+    if (f_preprocess)
+        return;
+
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
@@ -606,8 +628,8 @@ void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
         ScalarType_ptr of_type
             (array_type -> of());
 
-        // XXX: review this
-        assert( lhs_type == of_type);
+        // not necessarily the same type, but compatible
+        assert( lhs_type -> width() == of_type -> width());
 
         ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
@@ -620,8 +642,8 @@ void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
         ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
-        // XXX: review this
-        assert( lhs_type == of_type );
+        // not necessarily the same type, but compatible
+        assert( lhs_type -> width() == of_type -> width());
 
         array_type = tm.find_array_type(of_type, 2);
         PUSH_TYPE(array_type);
@@ -641,15 +663,15 @@ bool Compiler::walk_set_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
-
     if (f_preprocess)
         return;
 
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);
-    assert (rhs_type == lhs_type);
+    assert(rhs_type -> width() == lhs_type -> width());
 
     if (rhs_type -> is_monolithic()) {
 

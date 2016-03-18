@@ -59,6 +59,12 @@ public:
     }
 
     /**
+     * @brief Disable last activated group for the SAT instance.
+     */
+    inline void disable_last_group()
+    { f_groups.last() *= -1; }
+
+    /**
      * @brief Returns the complete set of defined SAT groups.
      *
      * A positive value of the i-th element of this array enables the
@@ -135,8 +141,15 @@ public:
     /**
      * @brief a new Minisat variable
      */
-    inline Var new_sat_var() // proxy
-    { return f_solver.newVar(); }
+    inline Var new_sat_var(bool frozen=false) // proxy
+    {
+        Var var
+            (f_solver.newVar());
+
+        f_solver.setFrozen(var, frozen);
+
+        return var;
+    }
 
     /**
      * @brief add a CNF clause
@@ -164,7 +177,7 @@ private:
     CNFRegistry f_registry;
 
     // SAT solver, currently Minisat
-    Solver f_solver;
+    SimpSolver f_solver;
 
     // used to partition the formula to be solved
     Groups f_groups;

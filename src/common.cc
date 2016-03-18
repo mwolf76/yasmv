@@ -67,5 +67,8 @@ const char bold_dark_gray[] = { ESC, '[', '1', ';', '3', '8', 'm', 0 };
 
 const char* TRACE_FMT_PLAIN = "plain";
 const char* TRACE_FMT_JSON  = "json";
+const char* TRACE_FMT_XML  = "xml";
+
+const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);
 
 volatile sig_atomic_t sigint_caught = 0;

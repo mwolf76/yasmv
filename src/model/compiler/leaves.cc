@@ -165,8 +165,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
 {
     assert (NULL != enc);
-    DDVector& dds = enc->dv();
-    unsigned width = dds.size();
+    DDVector& dds
+        (enc->dv());
+    unsigned width
+        (dds.size());
     assert( 0 < width );
 
     // push into type stack
@@ -241,4 +243,3 @@ void Compiler::algebraic_constant(Expr_ptr konst, unsigned width)
     if (value)
         throw ConstantTooLarge(konst);
 }
-

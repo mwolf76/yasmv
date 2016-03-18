@@ -33,7 +33,9 @@ Algorithm::Algorithm(Command& command, Model& model)
     , f_tm(TypeMgr::INSTANCE())
     , f_witness(NULL)
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     set_param("alg_name", "test");
     DEBUG
         << "Creating algorithm instance "
@@ -44,7 +46,9 @@ Algorithm::Algorithm(Command& command, Model& model)
 
 Algorithm::~Algorithm()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DEBUG
         << "Destroying algorithm instance "
         << get_param("alg_name")
@@ -70,6 +74,7 @@ void Algorithm::setup()
 {
     Compiler& cmpl
         (compiler()); // just a local ref
+
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
@@ -259,10 +264,15 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
             Expr_ptr expr
                 (var.name());
+
             TimedExpr key
                 (em().make_dot( ctx, expr), 0);
+
             Encoding_ptr enc
                 (f_bm.find_encoding(key));
+
+            if (!enc)
+                continue;
 
             DDVector::const_iterator di;
             unsigned ndx;
@@ -385,5 +395,3 @@ void Algorithm::assert_formula(Engine& engine,
 {
     engine.push( term, time, group);
 }
-
-

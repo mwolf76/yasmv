@@ -48,12 +48,12 @@ class Encoding {
 public:
     /* Full-Digit DDs (roots), used in manipulation of algebraics
        (e.g.. compiler) */
-    DDVector& dv()
+    inline DDVector& dv()
     { return f_dv; }
 
     /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT
        solver) */
-    DDVector& bits()
+    inline DDVector& bits()
     { return f_bits; }
 
     /* vector of DD leaves (consts) -> expr */

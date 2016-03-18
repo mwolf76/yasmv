@@ -49,14 +49,11 @@ private:
      */
 
     /* is there a k-path leading to a violation of P? */
-    void falsification( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void forward( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
 
-    /* is there a loop-free k-path from the initial states ? */
-    void exploration( Expr_ptr phi );
-    step_t f_explored_k;
-
-    /* is there a loop-free k-path leading to a violation of P? */
-    void kinduction( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    /* is there a loop-free k-path leading to a violation of P? This
+       is sound provided that no CEX exists up to k - 1. */
+    void backward( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
 };
 
 /* Specialized for BMC CEX */

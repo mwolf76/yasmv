@@ -198,7 +198,9 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                         (new InlinedOperatorLoader(entry));
                     assert(NULL != loader);
 
-                    f_loaders.insert( std::make_pair< InlinedOperatorSignature, InlinedOperatorLoader_ptr >
+                    f_loaders.insert( std::make_pair
+                                      < InlinedOperatorSignature,
+                                      InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));
                 }
                 catch (InlinedOperatorLoaderException iole) {
@@ -215,8 +217,11 @@ InlinedOperatorMgr::InlinedOperatorMgr()
         }
         else {
             ERR
-                << "Path " << micropath
-                << " does not exist or is not a readable directory.";
+                << "Path "
+                << micropath
+                << " does not exist or is not a readable directory."
+                << std::endl;
+
             exit(1);
         }
     }

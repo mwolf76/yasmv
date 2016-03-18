@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd/commands/show_traces.hh>
+#include <cmd/commands/list_traces.hh>
 #include <witness/witness_mgr.hh>
 
 ListTraces::ListTraces(Interpreter& owner)
@@ -67,11 +67,9 @@ Variant ListTraces::operator()()
     return Variant("Ok");
 }
 
-// void ListTraces::usage()
-// {
-//     std::cout
-//         << "list-traces - Lists available traces."
-//         << std::endl;
-// }
-
-
+void ListTraces::usage()
+{
+    std::cout
+        << "list-traces - Lists currently available traces."
+        << std::endl;
+}

@@ -25,7 +25,8 @@
 
 Module& Model::add_module(Module& module)
 {
-    Expr_ptr name (module.name());
+    Expr_ptr name
+        (module.name());
 
     DEBUG
         << "Added module: `"
@@ -40,7 +41,9 @@ Module& Model::add_module(Module& module)
 
 Module& Model::module(Expr_ptr module_name)
 {
-    Modules::const_iterator i = f_modules.find(module_name);
+    Modules::const_iterator i
+        (f_modules.find(module_name));
+
     if (i == f_modules.end())
         throw ModuleNotFound(module_name);
 
@@ -50,7 +53,9 @@ Module& Model::module(Expr_ptr module_name)
 Model::Model()
     : f_modules()
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DEBUG
         << "Initialized Model instance @"
         << instance
@@ -62,4 +67,3 @@ Model::~Model()
     // TODO: free memory for symbols... (they've been allocated using new)
     assert(false); // XXX
 }
-

@@ -18,11 +18,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
- *
  **/
 #include <opts.hh>
 
@@ -240,7 +235,6 @@ const ScalarType_ptr TypeMgr::find_instance(Expr_ptr module, Expr_ptr params)
 
 
 /** Typecasts */
-#if 0
 const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 {
     assert( f_em.is_type(expr));
@@ -256,8 +250,9 @@ const Type_ptr TypeMgr::find_type_by_def(const Expr_ptr expr)
 
     return NULL;
 }
-#endif
 
+
+/** Arrays */
 const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of, unsigned nelems)
 {
     Expr_ptr descr
