@@ -22,16 +22,18 @@ DEFINE O := TRUE;
 -- cells. The labyrinth doesn't change overtime.
 INVAR
    0 <= x && 0 <= y;
+
 INVAR
   x <= 7 && y <= 7;
-INIT
+
+INVAR
     space = [_,_,O,O,_,O,O,O,
              O,_,O,O,_,_,_,_,
              O,_,O,_,_,O,O,_,
              O,_,O,_,_,_,O,_,
              _,_,_,O,O,_,O,_,
              _,_,_,_,O,_,O,_,
-             _,O,O,_,_,_,O,O,
+             _,O,O,_,_,_,O,_,
              _,_,_,_,O,O,O,O];
 
 -- our guy starts at the top-left corner,
