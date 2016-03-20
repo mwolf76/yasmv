@@ -61,6 +61,8 @@
 
 #include <sat/helpers.hh>
 
+#include <boost/chrono.hpp>
+
 static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
     "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
@@ -101,13 +103,36 @@ void batch(Command_ptr cmd)
 
 void sighandler(int signum)
 {
+    static boost::chrono::system_clock::time_point last;
+
+    /* A single Control-C requires current solving stats. Double
+       Control-C (within 1 sec) requires interruption */
     if (signum == SIGINT) {
-        std::cout
-            << std::endl
-            << "Caught SIGINT signal"
+
+        EngineMgr& mgr
+            (EngineMgr::INSTANCE());
+
+        std::cerr
             << std::endl;
 
-        sigint_caught = 1;
+        boost::chrono::system_clock::time_point now
+            (boost::chrono::system_clock::now());
+
+        boost::chrono::duration<double> sec
+            (boost::chrono::system_clock::now() - last);
+
+        if (sec.count() < 1.00) {
+            std::cerr
+                << "Interrupting all active threads (this may take a while)..."
+                << std::endl;
+
+            mgr.interrupt();
+            sigint_caught = 1;
+        }
+        else {
+            mgr.dump_stats(std::cerr);
+            last = now;
+        }
     }
 }
 

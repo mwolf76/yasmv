@@ -38,11 +38,18 @@ public:
     void process(const Expr_ptr phi);
 
     mc_status_t status();
-    mc_status_t test_and_set_status(mc_status_t status);
+
+    mc_status_t sync_status();
+    void sync_set_status(mc_status_t status);
+
+    step_t sync_k(void);
+    void sync_set_k(step_t k);
 
 private:
-    mc_status_t f_status;
     boost::mutex f_status_mutex;
+
+    mc_status_t f_status;
+    step_t f_k;
 
     /**
      * strategies

@@ -124,7 +124,9 @@ EncodingMgr::EncodingMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_word_width ((OptsMgr::INSTANCE().word_width()))
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DRIVEL
         << "Initialized EncodingMgr @ " << instance
         << ", native word size is " << f_word_width
@@ -133,7 +135,9 @@ EncodingMgr::EncodingMgr()
 
 EncodingMgr::~EncodingMgr()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DRIVEL
         << "Deinitialized EncodingMgr @ " << instance
         << std::endl;

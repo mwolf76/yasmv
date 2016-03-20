@@ -32,7 +32,9 @@ static const char *cex_trace_prfx = "cex_";
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     setup();
     DRIVEL
         << "Created BMC @"
@@ -53,7 +55,9 @@ void BMC::forward( Expr_ptr phi,
                    CompilationUnit& ii,
                    CompilationUnit& vv)
 {
-    Engine engine;
+    Engine engine
+        ("forward");
+
     step_t k = 0;
 
     /* initial constraints */
@@ -61,83 +65,126 @@ void BMC::forward( Expr_ptr phi,
     assert_fsm_invar(engine, 0);
 
     do {
-        /* assert violation in a new group */
-        assert_formula(engine, k, vv,
-                       engine.new_group());
 
-        TRACE
-            << "forward: looking for CEX (k = " << k << ")..."
-            << std::endl;
+        { /* looking for CEX : BMC(k-1) ^ ! P(k) */
+            assert_formula(engine, k, vv,
+                           engine.new_group());
 
-        if (STATUS_SAT == engine.solve()) {
-            test_and_set_status( MC_FALSE );
-
-            WitnessMgr& wm = WitnessMgr::INSTANCE();
             TRACE
-                << "CEX witness exists (k = " << k << "), invariant `"
-                << phi
-                << "` is FALSE."
-                << std::endl;
-
-            Witness& w(* new BMCCounterExample(phi, model(), engine, k, false));
-            {
-                std::ostringstream oss;
-                oss
-                    << cex_trace_prfx
-                    << (++ progressive);
-                w.set_id(oss.str());
-            }
-            {
-                std::ostringstream oss;
-                oss
-                    << "CEX witness for invariant `"
-                    << phi
-                    << "`"
+                << "forward: looking for CEX (k = " << k << ")..."
+                << std::endl
                 ;
-                w.set_desc(oss.str());
-            }
 
-            wm.record(w);
-            wm.set_current(w);
-            set_witness(w);
-            return;
+            status_t status
+                (engine.solve());
+
+            if (STATUS_UNKNOWN == status) {
+                if (sigint_caught)
+                    goto cleanup;
+            }
+            if (STATUS_UNSAT == status) {
+            }
+            else if (STATUS_SAT == engine.solve()) {
+                sync_set_status( MC_FALSE );
+
+                WitnessMgr& wm = WitnessMgr::INSTANCE();
+                TRACE
+                    << "CEX witness exists (k = " << k << "), invariant `"
+                    << phi
+                    << "` is FALSE."
+                    << std::endl;
+
+                Witness& w(* new BMCCounterExample(phi, model(), engine, k, false));
+                {
+                    std::ostringstream oss;
+                    oss
+                        << cex_trace_prfx
+                        << (++ progressive);
+                    w.set_id(oss.str());
+                }
+                {
+                    std::ostringstream oss;
+                    oss
+                        << "CEX witness for invariant `"
+                        << phi
+                        << "`" ;
+
+                    w.set_desc(oss.str());
+                }
+
+                wm.record(w);
+                wm.set_current(w);
+                set_witness(w);
+                goto cleanup;
+            }
         }
 
-        /* disable violation */
-        engine.disable_last_group();
+        if (sync_status() == MC_UNKNOWN) {
 
-        /* assert invariant in main group */
-        assert_formula(engine, k, ii);
+            /* disable violation */
+            engine.disable_last_group();
 
-        /* unrolling */
-        assert_fsm_trans(engine, k ++);
-        assert_fsm_invar(engine, k);
+            /* assert invariant in main group */
+            assert_formula(engine, k, ii);
 
-        /* does a new unseen state exist? assert uniqueness main
-           group and test for satisfiability */
-        TRACE
-            << "forward: looking for proof (k = " << k << ")..."
-            << std::endl;
+            /* unrolling */
+            assert_fsm_trans(engine, k ++);
+            assert_fsm_invar(engine, k);
 
-        /* build state uniqueness constraint for each pair of states
-           (j, k), where j < k */
-        for (step_t j = 0; j < k; ++ j)
-            assert_fsm_uniqueness(engine, j, k);
+            {
+                /* looking for exploration proof: does a new unseen state
+                   exist?  assert uniqueness and test for unsatisfiability */
+                TRACE
+                    << "forward: looking for proof (k = " << k << ")..."
+                    << std::endl
+                    ;
 
-        if (STATUS_UNSAT == engine.solve()) {
-            TRACE
-                << "Found forward proof (k = " << k << "), invariant `"
-                << phi
-                << "` is TRUE."
-                << std::endl;
-            test_and_set_status( MC_TRUE );
-            return;
+                /* build state uniqueness constraint for each pair of states
+                   (j, k), where j < k */
+                for (step_t j = 0; j < k; ++ j)
+                    assert_fsm_uniqueness(engine, j, k);
+
+                status_t status
+                    (engine.solve());
+
+                if (STATUS_UNKNOWN == status) {
+                    if (sigint_caught)
+                        goto cleanup;
+                }
+                if (STATUS_UNSAT == status) {
+                    TRACE
+                        << "Found forward proof (k = " << k << "), invariant `"
+                        << phi
+                        << "` is TRUE."
+                        << std::endl;
+
+                    sync_set_status( MC_TRUE );
+                    goto cleanup;
+                }
+
+                else if (STATUS_SAT == status) {
+                    /* signal backward that a k-path is
+                       possible. Backwards check on a k-long path now
+                       makes sense.*/
+                    sync_set_k(k);
+                }
+            }
         }
 
         /* handle user interruption */
         if (sigint_caught)
-            break;
-    } while (f_status == MC_UNKNOWN);
+            goto cleanup;
+
+    } while (sync_status() == MC_UNKNOWN);
+
+ cleanup:
+    /* signal other threads it's time to go home */
+    EngineMgr::INSTANCE()
+        .interrupt();
+
+    TRACE
+        << engine
+        << std::endl;
 } /* forward() */
 
 void BMC::backward( Expr_ptr phi,
@@ -145,25 +192,49 @@ void BMC::backward( Expr_ptr phi,
                     CompilationUnit& vv)
 {
     /* thread locals */
-    Engine engine;
+    Engine engine
+        ("backward");
+
     step_t k = 0;
 
     do {
+
+        /* wait for forward strategy to check a k-long path feasibility */
+        while (sync_k() <= k) {
+            sleep(1);
+
+            /* quit immediately if forward solved the instance or a
+               user interrupt has been signalled */
+            if (sigint_caught || sync_status() != MC_UNKNOWN)
+                goto cleanup;
+        }
+
         /* assert violation in a separate group */
         assert_formula(engine, k, vv, engine.new_group());
 
         TRACE
             << "backward: looking for proof (k = " << k << ")..."
-            << std::endl;
+            << std::endl
+            ;
 
-        if (STATUS_UNSAT == engine.solve()) {
+        status_t status
+            (engine.solve());
+
+        if (STATUS_UNKNOWN == status) {
+            if (sigint_caught)
+                goto cleanup;
+        }
+        else if (STATUS_UNSAT == status) {
             TRACE
-                << "Found backward proof (k = " << k << "), invariant `"
+                << "found backward proof (k = " << k << "), invariant `"
                 << phi
                 << "` is TRUE."
                 << std::endl;
-            test_and_set_status( MC_TRUE );
-            return;
+
+            sync_set_status( MC_TRUE );
+            goto cleanup;
+        }
+        else if (STATUS_SAT == status) {
         }
 
         /* disable violation */
@@ -182,11 +253,20 @@ void BMC::backward( Expr_ptr phi,
             assert_fsm_uniqueness(engine, j, k);
 
         if (sigint_caught)
-            break;
+            goto cleanup;
 
-    } while (f_status == MC_UNKNOWN);
+    } while (sync_status() == MC_UNKNOWN);
 
+ cleanup:
+    /* signal other threads it's time to go home */
+    EngineMgr::INSTANCE()
+        .interrupt();
+
+    TRACE
+        << engine
+        << std::endl;
 } /* backward() */
+
 
 void BMC::process(const Expr_ptr phi)
 {
@@ -231,8 +311,11 @@ void BMC::process(const Expr_ptr phi)
         << std::endl;
 }
 
-// synchronized
 mc_status_t BMC::status()
+{ return sync_status(); }
+
+/* synchronized */
+mc_status_t BMC::sync_status()
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
@@ -240,15 +323,36 @@ mc_status_t BMC::status()
     return f_status;
 }
 
-// synchronized
-mc_status_t BMC::test_and_set_status(mc_status_t status)
+/* synchronized */
+void BMC::sync_set_status(mc_status_t status)
 {
-    assert(status != MC_UNKNOWN);
     boost::mutex::scoped_lock lock
         (f_status_mutex);
 
-    if (f_status == MC_UNKNOWN)
-        f_status = status;
+    /* consistency check */
+    assert(f_status == status ||
+           (status != MC_UNKNOWN && f_status == MC_UNKNOWN));
 
-    return f_status;
+    f_status = status;
 }
+
+/* synchronized */
+step_t BMC::sync_k()
+{
+    boost::mutex::scoped_lock lock
+        (f_status_mutex);
+
+    return f_k;
+}
+
+void BMC::sync_set_k(step_t k)
+{
+    boost::mutex::scoped_lock lock
+        (f_status_mutex);
+
+    /* consistency check */
+    assert(k >= f_k);
+
+    f_k = k;
+}
+

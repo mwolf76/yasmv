@@ -67,7 +67,7 @@ public:
     inline Compiler& compiler()
     { return f_compiler; }
 
-    inline mc_status_t status() const;
+    inline mc_status_t status();
 
     inline bool has_witness() const
     { return NULL != f_witness; }

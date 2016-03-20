@@ -41,7 +41,8 @@ void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine;
+    Engine engine
+        ("pick_state");
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
@@ -130,7 +131,8 @@ void Simulation::simulate(Expr_ptr invar_condition,
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine;
+    Engine engine
+        ("simulation");
 
     ExprMgr& em
         (ExprMgr::INSTANCE());

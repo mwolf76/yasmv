@@ -1,5 +1,6 @@
 # AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = src doc
+AUTOMAKE_OPTIONS = subdir-objects
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -56,7 +57,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
         $(top_builddir)/src/3rdparty/jsoncpp/libjson.la			\
         $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)		\
-        $(BOOST_THREAD_LIBS)
+        $(BOOST_THREAD_LIBS) $(BOOST_CHRONO_LIBS)
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
@@ -93,7 +94,8 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
 	$(top_builddir)/src/3rdparty/jsoncpp/libjson.la			\
 	$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)		\
-	$(BOOST_THREAD_LIBS) -lboost_unit_test_framework
+	$(BOOST_THREAD_LIBS) $(BOOST_CHRONO_LIBS)			\
+	-lboost_unit_test_framework
 
 tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 

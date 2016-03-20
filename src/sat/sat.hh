@@ -44,8 +44,54 @@ std::ostream &operator<<(std::ostream &out, const Lit &lit);
 std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
 
 class MicroLoader;
-class Engine {
 
+typedef class Engine* Engine_ptr;
+typedef class EngineMgr* EngineMgr_ptr;
+
+typedef boost::unordered_set<Engine_ptr> EngineSet;
+
+class EngineMgr {
+
+public:
+    /**
+     * @brief Signals an interrupt to all running instances
+     */
+    void interrupt();
+
+    /**
+     * @brief Requires a stats printout from all existing instances
+     */
+    void dump_stats(std::ostream& os);
+
+    static EngineMgr& INSTANCE() {
+        if (! f_instance) {
+            f_instance = new EngineMgr();
+        }
+        return (*f_instance);
+    }
+
+protected:
+    EngineMgr();
+    ~EngineMgr();
+
+private: /* reserved to Engine */
+    friend class Engine;
+
+    /**
+     * @brief Registers a new engine instance. Used by Engine ctor
+     */
+    void register_instance(Engine_ptr engine);
+
+    /**
+     * @brief Unregisters an existing engine instance. Used by Engine dctor.
+     */
+    void unregister_instance(Engine_ptr engine);
+
+    static EngineMgr_ptr f_instance;
+    EngineSet f_engines;
+};
+
+class Engine {
 public:
     /**
      * @brief Adds a new formula group to the SAT instance.
@@ -83,6 +129,21 @@ public:
      */
     inline status_t solve()
     { return sat_solve_groups(f_groups); }
+
+    /**
+     * @brief Interrupt Minisat
+     */
+    inline void interrupt()
+    { f_solver.interrupt(); }
+
+    /**
+     * @brief Configure Minisat
+     */
+    inline void configure(int64_t conf_budget, int64_t prop_budget)
+    {
+        f_solver.setConfBudget(conf_budget);
+        f_solver.setPropBudget(prop_budget);
+    }
 
     /**
      * @brief Last solving status
@@ -160,14 +221,16 @@ public:
     /**
      * @brief SAT instance ctor
      */
-    Engine();
+    Engine(const char* instance_name);
 
     /**
      * @brief SAT instance dctor
      */
-    ~Engine() {}
+    ~Engine();
 
 private:
+    const char* f_instance_name;
+
     EncodingMgr& f_enc_mgr;
 
     // TCBI <-> var mapping
@@ -218,6 +281,10 @@ private:
     /* CNFization algorithms */
     void cnf_push_no_cut(ADD add, step_t time, const group_t group);
     void cnf_push_single_cut(ADD add, step_t time, const group_t group);
+
+    friend std::ostream& operator<<(std::ostream& os, const Engine& engine);
 };
+
+std::ostream& operator<<(std::ostream& os, const Engine& engine);
 
 #endif

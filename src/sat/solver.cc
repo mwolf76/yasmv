@@ -28,24 +28,168 @@
 
 #include <sat/helpers.hh>
 
+EngineMgr_ptr EngineMgr::f_instance = NULL;
+
+EngineMgr::EngineMgr()
+{
+    const void* instance
+        (this);
+
+    DRIVEL
+        << "Initialized EngineMgr @ " << instance
+        << std::endl;
+}
+
+EngineMgr::~EngineMgr()
+{
+    const void* instance
+        (this);
+
+    DRIVEL
+        << "Deinitialized EngineMgr @ " << instance
+        << std::endl;
+}
+
+void EngineMgr::register_instance(Engine_ptr engine)
+{
+    /* this engine is not yet registered */
+    assert (f_engines.find(engine) == f_engines.end());
+
+    DEBUG
+        << "Registered engine instance"
+        << "@"
+        << engine
+        << std::endl;
+
+    f_engines.insert(engine);
+}
+
+void EngineMgr::unregister_instance(Engine_ptr engine)
+{
+    /* this engine is registered */
+    assert (f_engines.find(engine) != f_engines.end());
+
+    DEBUG
+        << "Unregistered engine instance"
+        << "@"
+        << engine
+        << std::endl;
+
+    f_engines.erase(engine);
+}
+
+void EngineMgr::interrupt()
+{
+    EngineSet::iterator esi;
+    for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
+        Engine_ptr pe
+            (*esi);
+
+        pe -> interrupt();
+    }
+}
+
+void EngineMgr::dump_stats(std::ostream& os)
+{
+    if (f_engines.empty()) {
+        os
+            << "Solver is not running. No stats available."
+            << std::endl;
+    }
+
+    else {
+        EngineSet::iterator esi;
+        for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
+            Engine_ptr pe
+                (*esi);
+
+            os
+                << (*pe)
+                << std::endl ;
+        }
+
+        os
+            << std::endl ;
+    }
+}
+
+std::ostream& operator<<(std::ostream& os, const Engine& engine)
+{
+    const Solver& solver
+        (engine.f_solver);
+
+    os
+        << "Solver: `"
+        << engine.f_instance_name
+
+        << "`, solves: "
+        << solver.solves
+
+        << ", starts: "
+        << solver.starts
+
+        << ", decs: "
+        << solver.decisions
+
+        << ", rnd decs: "
+        << solver.rnd_decisions
+
+        << ", props: "
+        << solver.propagations
+
+        << ", conflicts: "
+        << solver.conflicts
+
+        << ", dec vars: "
+        << solver.dec_vars
+
+        << ", clause lits: "
+        << solver.clauses_literals
+
+        << ", learnt lits: "
+        << solver.learnts_literals
+
+        << ", max lits: "
+        << solver.max_literals
+
+        << ", tot lits: "
+        << solver.tot_literals
+
+        ;
+
+    return os;
+}
+
+
 /**
  * @brief SAT instancte ctor
  */
-Engine::Engine()
-    : f_enc_mgr(EncodingMgr::INSTANCE())
+Engine::Engine(const char* instance_name)
+    : f_instance_name(instance_name)
+    , f_enc_mgr(EncodingMgr::INSTANCE())
     , f_mapper(* new TimeMapper(*this))
     , f_registry(* new CNFRegistry(*this))
     , f_solver()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
 
     /* MAINGROUP (=0) is already there. */
     f_groups.push(new_sat_var());
+
+    EngineMgr::INSTANCE()
+        .register_instance(this);
 
     DEBUG
         << "Initialized Engine instance @"
         << instance
         << std::endl;
+}
+
+Engine::~Engine()
+{
+    EngineMgr::INSTANCE()
+        .unregister_instance(this);
 }
 
 status_t Engine::sat_solve_groups(const Groups& groups)
@@ -65,10 +209,16 @@ status_t Engine::sat_solve_groups(const Groups& groups)
         << "Solving ..."
         << std::endl;
 
-    f_status = f_solver.solve(assumptions)
-        ? STATUS_SAT
-        : STATUS_UNSAT
-        ;
+    Minisat::lbool status
+        (f_solver.solveLimited(assumptions));
+
+    if (status == l_True)
+        f_status = STATUS_SAT;
+    else if (status == l_False)
+        f_status = STATUS_UNSAT;
+    else if (status == l_Undef)
+        f_status = STATUS_UNKNOWN;
+    else assert(false); /* unreachable */
 
     clock_t elapsed = clock() - t0;
     double secs = (double) elapsed / (double) CLOCKS_PER_SEC;

@@ -72,6 +72,10 @@ Variant& Algorithm::get_param(const std::string key)
 
 void Algorithm::setup()
 {
+    /* Force mgr to exist */
+    EngineMgr& mgr
+        (EngineMgr::INSTANCE());
+
     Compiler& cmpl
         (compiler()); // just a local ref
 
