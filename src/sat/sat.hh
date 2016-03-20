@@ -89,6 +89,8 @@ private: /* reserved to Engine */
 
     static EngineMgr_ptr f_instance;
     EngineSet f_engines;
+
+    boost::mutex f_mutex;
 };
 
 class Engine {

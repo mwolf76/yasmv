@@ -52,6 +52,9 @@ EngineMgr::~EngineMgr()
 
 void EngineMgr::register_instance(Engine_ptr engine)
 {
+    boost::mutex::scoped_lock lock
+        (f_mutex);
+
     /* this engine is not yet registered */
     assert (f_engines.find(engine) == f_engines.end());
 
@@ -66,6 +69,9 @@ void EngineMgr::register_instance(Engine_ptr engine)
 
 void EngineMgr::unregister_instance(Engine_ptr engine)
 {
+    boost::mutex::scoped_lock lock
+        (f_mutex);
+
     /* this engine is registered */
     assert (f_engines.find(engine) != f_engines.end());
 
@@ -80,6 +86,9 @@ void EngineMgr::unregister_instance(Engine_ptr engine)
 
 void EngineMgr::interrupt()
 {
+    boost::mutex::scoped_lock lock
+        (f_mutex);
+
     EngineSet::iterator esi;
     for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
         Engine_ptr pe
@@ -91,6 +100,9 @@ void EngineMgr::interrupt()
 
 void EngineMgr::dump_stats(std::ostream& os)
 {
+    boost::mutex::scoped_lock lock
+        (f_mutex);
+
     if (f_engines.empty()) {
         os
             << "Solver is not running. No stats available."
