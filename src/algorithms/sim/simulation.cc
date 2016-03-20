@@ -187,12 +187,6 @@ void Simulation::simulate(Expr_ptr invar_condition,
             (*new SimulationWitness( model(), engine, k));
         witness().extend(w);
 
-        /* interrupted by the user? */
-        if (sigint_caught) {
-            f_status = SIMULATION_INTERRUPTED;
-            break;
-        }
-
         /* no more steps? */
         if (! -- steps) {
             f_status = SIMULATION_INTERRUPTED;
@@ -213,10 +207,15 @@ void Simulation::simulate(Expr_ptr invar_condition,
         assert_fsm_invar(engine, k);
     }
 
-    if (last_sat == STATUS_UNSAT) {
+    if (last_sat == STATUS_UNKNOWN) {
+        f_status = SIMULATION_INTERRUPTED;
+    }
+
+    else if (last_sat == STATUS_UNSAT) {
         WARN
             << "Inconsistency detected in transition relation at step " << k
             << std::endl;
+
         f_status = SIMULATION_DEADLOCKED;
     }
 }

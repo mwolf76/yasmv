@@ -127,7 +127,6 @@ void sighandler(int signum)
                 << std::endl;
 
             mgr.interrupt();
-            sigint_caught = 1;
         }
         else {
             mgr.dump_stats(std::cerr);

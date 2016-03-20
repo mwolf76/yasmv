@@ -56,7 +56,7 @@ void BMC::forward( Expr_ptr phi,
                    CompilationUnit& vv)
 {
     Engine engine
-        ("forward");
+        ("Forward");
 
     step_t k = 0;
 
@@ -70,8 +70,8 @@ void BMC::forward( Expr_ptr phi,
             assert_formula(engine, k, vv,
                            engine.new_group());
 
-            TRACE
-                << "forward: looking for CEX (k = " << k << ")..."
+            INFO
+                << "Forward: now looking for CEX (k = " << k << ")..."
                 << std::endl
                 ;
 
@@ -79,16 +79,19 @@ void BMC::forward( Expr_ptr phi,
                 (engine.solve());
 
             if (STATUS_UNKNOWN == status) {
-                if (sigint_caught)
-                    goto cleanup;
+                goto cleanup;
             }
             if (STATUS_UNSAT == status) {
+                INFO
+                    << "Forward: no BMC CEX found (k = " << k << ")..."
+                    << std::endl
+                    ;
             }
-            else if (STATUS_SAT == engine.solve()) {
+            else if (STATUS_SAT == status) {
                 sync_set_status( MC_FALSE );
 
                 WitnessMgr& wm = WitnessMgr::INSTANCE();
-                TRACE
+                INFO
                     << "CEX witness exists (k = " << k << "), invariant `"
                     << phi
                     << "` is FALSE."
@@ -134,8 +137,8 @@ void BMC::forward( Expr_ptr phi,
             {
                 /* looking for exploration proof: does a new unseen state
                    exist?  assert uniqueness and test for unsatisfiability */
-                TRACE
-                    << "forward: looking for proof (k = " << k << ")..."
+                INFO
+                    << "Forward: looking for proof (k = " << k << ")..."
                     << std::endl
                     ;
 
@@ -148,12 +151,11 @@ void BMC::forward( Expr_ptr phi,
                     (engine.solve());
 
                 if (STATUS_UNKNOWN == status) {
-                    if (sigint_caught)
-                        goto cleanup;
+                    goto cleanup;
                 }
                 if (STATUS_UNSAT == status) {
-                    TRACE
-                        << "Found forward proof (k = " << k << "), invariant `"
+                    INFO
+                        << "Forward: found proof (k = " << k << "), invariant `"
                         << phi
                         << "` is TRUE."
                         << std::endl;
@@ -163,6 +165,10 @@ void BMC::forward( Expr_ptr phi,
                 }
 
                 else if (STATUS_SAT == status) {
+                    INFO
+                        << "Forward: no proof found (k = " << k << ")"
+                        << std::endl;
+
                     /* signal backward that a k-path is
                        possible. Backwards check on a k-long path now
                        makes sense.*/
@@ -170,11 +176,6 @@ void BMC::forward( Expr_ptr phi,
                 }
             }
         }
-
-        /* handle user interruption */
-        if (sigint_caught)
-            goto cleanup;
-
     } while (sync_status() == MC_UNKNOWN);
 
  cleanup:
@@ -182,7 +183,7 @@ void BMC::forward( Expr_ptr phi,
     EngineMgr::INSTANCE()
         .interrupt();
 
-    TRACE
+    INFO
         << engine
         << std::endl;
 } /* forward() */
@@ -193,7 +194,7 @@ void BMC::backward( Expr_ptr phi,
 {
     /* thread locals */
     Engine engine
-        ("backward");
+        ("Backward");
 
     step_t k = 0;
 
@@ -205,15 +206,15 @@ void BMC::backward( Expr_ptr phi,
 
             /* quit immediately if forward solved the instance or a
                user interrupt has been signalled */
-            if (sigint_caught || sync_status() != MC_UNKNOWN)
+            if (sync_status() != MC_UNKNOWN)
                 goto cleanup;
         }
 
         /* assert violation in a separate group */
         assert_formula(engine, k, vv, engine.new_group());
 
-        TRACE
-            << "backward: looking for proof (k = " << k << ")..."
+        INFO
+            << "Backward: looking for proof (k = " << k << ")..."
             << std::endl
             ;
 
@@ -221,12 +222,11 @@ void BMC::backward( Expr_ptr phi,
             (engine.solve());
 
         if (STATUS_UNKNOWN == status) {
-            if (sigint_caught)
-                goto cleanup;
+            goto cleanup;
         }
         else if (STATUS_UNSAT == status) {
-            TRACE
-                << "found backward proof (k = " << k << "), invariant `"
+            INFO
+                << "Backward: found proof (k = " << k << "), invariant `"
                 << phi
                 << "` is TRUE."
                 << std::endl;
@@ -235,6 +235,9 @@ void BMC::backward( Expr_ptr phi,
             goto cleanup;
         }
         else if (STATUS_SAT == status) {
+            INFO
+                << "Backward: found no proof (k = " << k << ")"
+                << std::endl;
         }
 
         /* disable violation */
@@ -252,9 +255,6 @@ void BMC::backward( Expr_ptr phi,
         for (step_t j = 0; j < k; ++ j)
             assert_fsm_uniqueness(engine, j, k);
 
-        if (sigint_caught)
-            goto cleanup;
-
     } while (sync_status() == MC_UNKNOWN);
 
  cleanup:
@@ -262,7 +262,7 @@ void BMC::backward( Expr_ptr phi,
     EngineMgr::INSTANCE()
         .interrupt();
 
-    TRACE
+    INFO
         << engine
         << std::endl;
 } /* backward() */
@@ -275,7 +275,7 @@ void BMC::process(const Expr_ptr phi)
         (em().make_empty());
 
     try {
-        TRACE
+        INFO
             << "Compiling formula..."
             << std::endl;
 
@@ -306,7 +306,7 @@ void BMC::process(const Expr_ptr phi)
         return;
     }
 
-    TRACE
+    INFO
         << "Done."
         << std::endl;
 }

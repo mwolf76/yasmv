@@ -186,6 +186,13 @@ Engine::Engine(const char* instance_name)
     const void* instance
         (this);
 
+    /* Default configuration */
+    f_solver.random_var_freq = .1;
+    // f_solver.ccmin_mode = 0;
+    // f_solver.phase_saving = 0;
+    f_solver.rnd_init_act = true;
+    f_solver.garbage_frac = 0.50;
+
     /* MAINGROUP (=0) is already there. */
     f_groups.push(new_sat_var());
 

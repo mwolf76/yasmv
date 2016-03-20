@@ -70,5 +70,3 @@ const char* TRACE_FMT_JSON  = "json";
 const char* TRACE_FMT_XML  = "xml";
 
 const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);
-
-volatile sig_atomic_t sigint_caught = 0;
