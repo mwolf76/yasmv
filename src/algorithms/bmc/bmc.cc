@@ -83,7 +83,7 @@ void BMC::forward( Expr_ptr phi,
             }
             if (STATUS_UNSAT == status) {
                 INFO
-                    << "Forward: no BMC CEX found (k = " << k << ")..."
+                    << "Forward: no CEX found (k = " << k << ")..."
                     << std::endl
                     ;
             }
@@ -92,7 +92,7 @@ void BMC::forward( Expr_ptr phi,
 
                 WitnessMgr& wm = WitnessMgr::INSTANCE();
                 INFO
-                    << "CEX witness exists (k = " << k << "), invariant `"
+                    << "Forward: CEX witness exists (k = " << k << "), invariant `"
                     << phi
                     << "` is FALSE."
                     << std::endl;
@@ -108,7 +108,7 @@ void BMC::forward( Expr_ptr phi,
                 {
                     std::ostringstream oss;
                     oss
-                        << "CEX witness for invariant `"
+                        << "BMC CEX witness for invariant `"
                         << phi
                         << "`" ;
 
