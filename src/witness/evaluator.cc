@@ -62,7 +62,7 @@ void Evaluator::clear_internals()
 }
 
 Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
-                           Expr_ptr body, step_t time)
+                            Expr_ptr body, step_t time)
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -81,21 +81,25 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
     /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 
-    // sanity conditions
-    assert(1 == f_values_stack.size());
-    assert(1 == f_type_stack.size());
-    assert(1 == f_ctx_stack.size());
-    assert(1 == f_time_stack.size());
+    // sanity conditions, relaxed for arrays
+    assert (0 < f_values_stack.size() &&
+            1 == f_type_stack.size()  &&
+            1 == f_ctx_stack.size()   &&
+            1 == f_time_stack.size()) ;
 
-    // Exactly one expression
-    value_t res_value
-        (f_values_stack.back());
-
+    /* exactly one type in all cases */
     POP_TYPE(res_type);
-    if (res_type -> is_boolean())
-        return res_value ? em.make_true() : em.make_false();
 
+    if (res_type -> is_boolean()) {
+        assert(1 == f_values_stack.size());
+        value_t res_value
+            (f_values_stack.back());
+        return res_value ? em.make_true() : em.make_false();
+    }
     else if (res_type -> is_enum()) {
+        assert(1 == f_values_stack.size());
+        value_t res_value
+            (f_values_stack.back());
         EnumType_ptr enum_type
             (res_type -> as_enum());
 
@@ -112,9 +116,36 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
 
         return *i;
     }
-
     else if (res_type -> is_algebraic()) {
+        assert(1 == f_values_stack.size());
+        value_t res_value
+            (f_values_stack.back());
         return em.make_const(res_value);
+    }
+    else if (res_type -> is_array()) {
+        ArrayType_ptr atype
+            (res_type -> as_array());
+
+        assert(atype -> nelems() ==
+               f_values_stack.size());
+
+        Expr_ptr lst
+            (NULL);
+
+        /* assemble array values list */
+        for (unsigned i = 0; i < atype -> nelems(); ++ i) {
+            value_t lst_value
+                (f_values_stack.back());
+            f_values_stack.pop_back();
+
+            lst = lst
+                ? em.make_array_comma(lst, em.make_const(lst_value))
+                : em.make_const(lst_value)
+                ;
+        }
+
+        /* wrap list in ARRAY node and return */
+        return em.make_array(lst);
     }
     else assert(false);
 }
@@ -520,66 +551,31 @@ bool Evaluator::walk_subscript_inorder(const Expr_ptr expr)
 
 void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
 {
-#if 0
-    unsigned base = Cudd_V(f_enc.base().getNode());
+    value_t res;
 
-    const Type_ptr rhs_type = f_type_stack.back(); f_type_stack.pop_back();
+    POP_TYPE(rhs_type);
+    assert(rhs_type -> is_algebraic());
 
-    /* algebrize selection expr (rhs), using machine width */
-    assert (rhs_type->is_algebraic());
-    // algebrize_unary_subscript();
-    assert(false); // tODO
+    POP_TYPE(lhs_type);
+    assert(lhs_type -> is_array());
 
-    ADD selector[2]; // TODO
-    for (unsigned i = 0; i < 2; ++ i) {
-        selector[i] = f_add_stack.back(); f_add_stack.pop_back();
+    ArrayType_ptr alhs_type
+        (lhs_type -> as_array());
+
+    /* fetch the index */
+    POP_VALUE(index);
+
+    /* fetch all items, record the interesting one */
+    for (unsigned i = 0; i < alhs_type -> nelems(); ++ i) {
+        POP_VALUE(elem);
+
+        if (i == index)
+            res = elem;
     }
 
-    const Type_ptr lhs_type = f_type_stack.back(); f_type_stack.pop_back();
-    unsigned size = lhs_type -> size();
-
-    const Type_ptr scalar_type = lhs_type -> as_array() ->of();
-    unsigned width = scalar_type->size();
-
-    /* fetch DDs from the stack */
-    ADD dds[width * size];
-    for (unsigned i = 0; i < width * size; ++ i) {
-        dds[i] = f_add_stack.back(); f_add_stack.pop_back();
-    }
-
-    ADD res; /* one digit at a time */
-    for (unsigned i = 0; i < width; ++ i) {
-        unsigned ndx = width - i - 1;
-        res = f_enc.zero(); // TODO: FAILURE here
-
-        for (unsigned j = 0; j < size; ++ j) {
-
-            /* selected index */
-            unsigned selection = size - j -1;
-
-            ADD cond = f_enc.one();
-            value_t value = ndx;
-
-            /* encode the case selection as a conjunction of
-               Equals ADD digit-by-digit (inlined) */
-            for (unsigned k = 0; k < width; ++ k) {
-
-                ADD digit = f_enc.constant(value % base);
-                f_add_stack.push_back(digit);
-                value /= base;
-
-                /* case selection */
-                cond *= selector[ndx].Equals(digit);
-            }
-            assert (value == 0); // not overflowing
-
-            /* chaining */
-            res = cond.Ite( dds[width * selection + i], res);
-        }
-
-        f_add_stack.push_back(res);
-    }
-#endif
+    /* return the value and scalar type*/
+    PUSH_TYPE(alhs_type -> of());
+    PUSH_VALUE(res);
 }
 
 bool Evaluator::walk_array_preorder(const Expr_ptr expr)
@@ -741,6 +737,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                     stack.push_back(eye);
                     eye = eye -> rhs();
                 }
+                stack.push_back(eye); /* last */
 
                 while (0 < stack.size()) {
                     Expr_ptr top

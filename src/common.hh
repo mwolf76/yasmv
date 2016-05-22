@@ -44,6 +44,9 @@ typedef std::vector<value_t> ValueVector;
 #define PUSH_VALUE(op)                             \
     f_values_stack.push_back(op)
 
+#define DROP_VALUE()                               \
+    f_values_stack.pop_back()
+
 typedef const char* pconst_char;
 typedef char* pchar;
 
