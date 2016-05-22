@@ -168,11 +168,12 @@ InlinedOperatorMgr::InlinedOperatorMgr()
     using boost::filesystem::directory_iterator;
     using boost::filesystem::filesystem_error;
 
-    char *basepath
-        (getenv( YASMV_HOME ));
-    if (NULL == basepath) {
+    char *env_microcode_path
+        (getenv( YASMV_MICROCODE_PATH ));
+
+    if (NULL == env_microcode_path) {
         ERR
-            << YASMV_HOME
+            << YASMV_MICROCODE_PATH
             << " is not set. Exiting..."
             << std::endl;
 
@@ -180,7 +181,7 @@ InlinedOperatorMgr::InlinedOperatorMgr()
     }
 
     path micropath
-        (basepath / path ( MICROCODE_PATH ));
+        (env_microcode_path);
 
     try {
         if (exists(micropath) && is_directory(micropath)) {

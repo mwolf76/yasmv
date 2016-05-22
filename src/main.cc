@@ -65,8 +65,8 @@
 
 static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
-    "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
-    "https://github.com/mwolf76/gnuSMV\n";
+    "(c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
+    "https://github.com/mwolf76/yasmine\n";
 
 /* these are unused, just for debugging purposes withing gdb */
 void pe(Expr_ptr e)
@@ -175,7 +175,7 @@ int main(int argc, const char *argv[])
         (mm.loaders().size());
     TRACE
         << nloaders
-        << " loaders registered."
+        << " microcode fragments registered."
         << std::endl
     ;
 

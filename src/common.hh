@@ -65,8 +65,7 @@ static inline bool _xor(bool a, bool b)
 #include <logging.hh>
 
 /* environment variables and paths */
-extern const char *YASMV_HOME;
-extern const char *MICROCODE_PATH;
+extern const char *YASMV_MICROCODE_PATH;
 
 /* internal tokens, defined in common.cc */
 extern const char *FALSE_TOKEN;

@@ -23,8 +23,7 @@
 #include <common.hh>
 
 /* environment variables and paths */
-const char *YASMV_HOME = "YASMV_HOME";
-const char *MICROCODE_PATH = "microcode";
+const char *YASMV_MICROCODE_PATH = "YASMV_MICROCODE";
 
 /* tokens */
 const char *EMPTY_TOKEN = "__nil__";
