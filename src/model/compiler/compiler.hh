@@ -104,6 +104,7 @@ private:
     bool is_ite_algebraic(const Expr_ptr expr);
 
     bool is_binary_array(const Expr_ptr expr);
+    bool is_ite_array(const Expr_ptr expr);
 
     bool is_subscript_boolean(const Expr_ptr expr);
     bool is_subscript_enumerative(const Expr_ptr expr);
@@ -152,6 +153,7 @@ private:
 
     /* -- arrays ------------------------------------------------------------ */
     void array_equals(const Expr_ptr expr);
+    void array_ite(const Expr_ptr expr);
 
     /* -- casts ------------------------------------------------------------- */
     void algebraic_cast_from_boolean(const Expr_ptr expr);

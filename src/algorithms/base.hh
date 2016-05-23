@@ -93,6 +93,9 @@ public:
     inline TypeMgr& tm()
     { return f_tm; }
 
+    inline bool ok() const
+    { return f_ok; }
+
     /* FSM */
     void assert_fsm_init(Engine& engine, step_t time,
                          group_t group = MAINGROUP);
@@ -116,6 +119,9 @@ public:
                            group_t group = MAINGROUP);
 
 private:
+    /* no fatal error */
+    bool f_ok;
+
     /* Command */
     Command& f_command;
 

@@ -72,6 +72,8 @@ Variant& Algorithm::get_param(const std::string key)
 
 void Algorithm::setup()
 {
+    f_ok = true;
+
     /* Force mgr to exist */
     EngineMgr& mgr
         (EngineMgr::INSTANCE());
@@ -129,10 +131,12 @@ void Algorithm::setup()
                 f_init.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
+                f_ok = false;
+
                 pconst_char what
                     (ae.what());
 
-                WARN
+                ERR
                     << what
                     << std::endl
                     << "  in INIT "
@@ -157,10 +161,12 @@ void Algorithm::setup()
                 f_invar.push_back( cmpl.process(ctx, *ii));
             }
             catch (Exception& ae) {
+                f_ok = false;
+
                 pconst_char what
                     (ae.what());
 
-                WARN
+                ERR
                     << what
                     << std::endl
                     << "  in INVAR "
@@ -176,18 +182,22 @@ void Algorithm::setup()
         for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
             Expr_ptr body
                 (*ti);
+
             DEBUG
                 << "processing TRANS "
                 << ctx << "::" << body
                 << std::endl;
+
             try {
                 f_trans.push_back( cmpl.process(ctx, *ti));
             }
             catch (Exception& ae) {
+                f_ok = false;
+
                 pconst_char what
                     (ae.what());
 
-                WARN
+                ERR
                     << what
                     << std::endl
                     << "  in TRANS "
@@ -374,6 +384,8 @@ void Algorithm::assert_time_frame(Engine& engine,
             }
 
             catch (Exception& ae) {
+                f_ok = false;
+
                 pconst_char what
                     (ae.what());
 

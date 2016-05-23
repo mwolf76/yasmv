@@ -81,3 +81,54 @@ void Compiler::array_equals(const Expr_ptr expr)
 
     PUSH_DD(res);
 }
+
+void Compiler::array_ite(const Expr_ptr expr)
+{
+    const Type_ptr rhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr lhs_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    const Type_ptr cnd_type
+        (f_type_stack.back());
+    f_type_stack.pop_back();
+
+    assert( cnd_type -> is_boolean() &&
+            lhs_type -> is_array() &&
+            rhs_type -> is_array());
+
+    const ArrayType_ptr atype
+        (rhs_type -> as_array());
+
+    unsigned width
+        (atype -> of() -> width());
+    unsigned elems
+        (atype -> nelems());
+
+    unsigned nbits
+        (width * elems);
+
+    f_type_stack.push_back( rhs_type );
+
+    // both operands are arrays, same width (lazy)
+    assert( rhs_type -> is_array() &&
+            lhs_type -> is_array() &&
+            cnd_type -> is_boolean() &&
+            lhs_type -> width() == rhs_type -> width());
+
+    POP_DV(rhs, nbits);
+    POP_DV(lhs, nbits);
+
+    /* Fetch cnd DD */
+    POP_DD(cnd);
+
+    /* PUSH ITEs for each bit in res array */
+    for (unsigned j = 0; j < nbits; ++ j) {
+        unsigned ndx = nbits - j - 1;
+        PUSH_DD(cnd.Ite(lhs[ndx], rhs[ndx]));
+    }
+}
+

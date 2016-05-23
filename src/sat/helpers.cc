@@ -89,20 +89,12 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
 
     char buf[20];
     strncpy( buf, fragments[2].c_str(), 20);
+
     char* width
         (buf);
-    const char *precision
-        ("");
-    for (char *p = width; *p; ++ p) {
-        if (*p == '#') {
-            *p = '\0';
-            precision = p + 1;
-            break;
-        }
-    }
 
-    f_ios = make_ios( 's' == *signedness, op_type,
-                      atoi(width), atoi(precision));
+    f_ios = make_ios( 's' == *signedness,
+                      op_type, atoi(width));
 }
 
 InlinedOperatorLoader::~InlinedOperatorLoader()

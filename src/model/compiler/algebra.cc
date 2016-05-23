@@ -376,7 +376,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     POP_DV(rhs, width);
     POP_DV(lhs, width);
 
-    /* Fetch cnd DD recursively */
+    /* Fetch cnd DD */
     POP_DD(cnd);
 
     /* Push MUX output DD vector */

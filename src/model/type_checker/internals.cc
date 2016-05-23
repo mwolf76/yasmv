@@ -287,7 +287,7 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
     }
     else if (rhs_type -> is_algebraic()) {
         Type_ptr lhs_type
-            (check_arithmetical(expr->lhs()));
+            (check_arithmetical(expr -> lhs()));
 
         if (rhs_type == lhs_type)  {
             PUSH_TYPE( rhs_type );
@@ -306,6 +306,45 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
 
         if (lhs_type -> is_constant() &&
             ! rhs_type -> is_constant()) {
+            PUSH_TYPE( lhs_type );
+            return ;
+        }
+
+        assert(false);
+    }
+    else if (rhs_type -> is_array()) {
+        Type_ptr lhs_type
+            (check_array(expr -> lhs()));
+
+        if (rhs_type == lhs_type)  {
+            PUSH_TYPE( rhs_type );
+            return ;
+        }
+
+        ArrayType_ptr alhs_type
+            (lhs_type -> as_array());
+        ArrayType_ptr arhs_type
+            (rhs_type -> as_array());
+
+        /* probably a bit too relaxed */
+        if (alhs_type -> width() !=
+            arhs_type -> width())
+            throw TypeMismatch( expr, lhs_type, rhs_type );
+
+        ScalarType_ptr alhs_of_type
+            (alhs_type -> of());
+
+        ScalarType_ptr arhs_of_type
+            (arhs_type -> of());
+
+        if (arhs_of_type -> is_constant() &&
+            ! alhs_of_type -> is_constant()) {
+            PUSH_TYPE( rhs_type );
+            return ;
+        }
+
+        if (alhs_of_type -> is_constant() &&
+            ! arhs_of_type -> is_constant()) {
             PUSH_TYPE( lhs_type );
             return ;
         }

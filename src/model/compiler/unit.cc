@@ -22,12 +22,36 @@
 #include <model/compiler/unit.hh>
 #include <type/type.hh>
 
+UnitException::UnitException(const char* msg)
+{
+    f_msg = strdup(msg);
+}
+
+const char* UnitException::what() const throw()
+{ return f_msg; }
+
+static void check_dd_vector(const DDVector& w, const char *message)
+{
+    for (DDVector::const_iterator wi = w.begin(); wi != w.end(); ++ wi) {
+        const DdNode* node
+            (wi->getNode());
+
+        if (! Cudd_IsConstant(node) && 0 == node -> index)
+            throw UnitException(message);
+    }
+}
+
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      DDVector& z, DDVector &x)
     : f_ios(ios)
     , f_z(z)
     , f_x(x)
-{}
+{
+    check_dd_vector(z,
+                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+    check_dd_vector(x,
+                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+}
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      DDVector& z, DDVector &x, DDVector &y)
@@ -35,7 +59,16 @@ InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature io
     , f_z(z)
     , f_x(x)
     , f_y(y)
-{}
+{
+    check_dd_vector(z,
+                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+
+    check_dd_vector(x,
+                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+
+    check_dd_vector(y,
+                    "Y vector contains a non-leaf DD in InlinedOperatorDescriptor");
+}
 
 BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z,
                                                      ADD cnd, ADD aux, DDVector &x, DDVector &y)
@@ -45,7 +78,16 @@ BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z
     , f_aux(aux)
     , f_x(x)
     , f_y(y)
-{}
+{
+    check_dd_vector(z,
+                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+
+    check_dd_vector(x,
+                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+
+    check_dd_vector(y,
+                    "Y vector contains a non-leaf DD in InlinedOperatorDescriptor");
+}
 
 MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
                                                          unsigned elem_count,
@@ -57,7 +99,13 @@ MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
     , f_cnds(cnds)
     , f_acts(acts)
     , f_x(x)
-{}
+{
+    check_dd_vector(z,
+                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+
+    check_dd_vector(x,
+                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+}
 
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
 {
@@ -67,8 +115,6 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
         (ios_optype(ios));
     unsigned width
         (ios_width(ios));
-    unsigned precision
-        (ios_precision(ios));
 
     os <<
         (is_signed ? "s" : "u");
@@ -97,10 +143,9 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
     case GE: os << "ge"; break;
 
     default: assert(false);
-    }
+    } /* switch() */
+
     os << width;
-    if (0 < precision)
-        os << "#" << precision;
 
     return os;
 }

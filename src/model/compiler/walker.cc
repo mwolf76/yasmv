@@ -491,6 +491,9 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     else if (is_ite_algebraic(expr))
         algebraic_ite(expr);
 
+    else if (is_ite_array(expr))
+        array_ite(expr);
+
     else assert( false ); // unreachable
 }
 

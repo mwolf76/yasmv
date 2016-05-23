@@ -36,6 +36,8 @@ BMC::BMC(Command& command, Model& model)
         (this);
 
     setup();
+    assert(ok());
+
     DRIVEL
         << "Created BMC @"
         << instance

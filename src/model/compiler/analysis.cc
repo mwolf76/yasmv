@@ -293,3 +293,19 @@ bool Compiler::is_binary_array(const Expr_ptr expr)
 
     return false;
 }
+
+bool Compiler::is_ite_array(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    if (em.is_ite(expr))
+        return
+            f_owner.type(expr->rhs(), ctx) -> is_array() &&
+            f_owner.type(expr->lhs(), ctx) -> is_array();
+
+    return false;
+}

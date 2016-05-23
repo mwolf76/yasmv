@@ -35,13 +35,24 @@
 #include <dd/dd.hh>
 #include <sat/satdefs.hh>
 
-/* <symb, is_signed?, width, precision =0> */
-typedef boost::tuple<bool, ExprType, unsigned, unsigned> InlinedOperatorSignature;
-inline const InlinedOperatorSignature make_ios (bool is_signed, ExprType exprType,
-                                                unsigned width, unsigned precision =0)
+/** Exception classes */
+class UnitException : public Exception {
+public:
+    const char* what() const throw();
+    UnitException(const char *msg);
+
+private:
+    const char* f_msg;
+};
+
+/* <symb, is_signed?, width> */
+typedef boost::tuple<bool, ExprType, unsigned> InlinedOperatorSignature;
+inline const InlinedOperatorSignature make_ios (bool is_signed,
+                                                ExprType exprType,
+                                                unsigned width)
 {
-    return boost::make_tuple <bool, ExprType, unsigned, unsigned>
-        (is_signed, exprType, width, precision);
+    return boost::make_tuple <bool, ExprType, unsigned>
+        (is_signed, exprType, width);
 }
 
 /* ios helper getters */
@@ -51,8 +62,6 @@ inline ExprType ios_optype( const InlinedOperatorSignature& ios )
 { return ios.get<1>(); }
 inline unsigned ios_width( const InlinedOperatorSignature& ios )
 { return ios.get<2>(); }
-inline unsigned ios_precision( const InlinedOperatorSignature& ios )
-{ return ios.get<3>(); }
 
 struct InlinedOperatorSignatureHash {
     long operator() (const InlinedOperatorSignature& k) const
@@ -63,7 +72,6 @@ struct InlinedOperatorSignatureHash {
         res = prime * res + (k.get<0>() ? 1231 : 1237);
         res = prime * res + k.get<1>();
         res = prime * res + k.get<2>();
-        res = prime * res + k.get<3>();
         return res;
     }
 };
@@ -75,8 +83,7 @@ struct InlinedOperatorSignatureEq {
         return
             x.get<0>() == y.get<0>() &&
             x.get<1>() == y.get<1>() &&
-            x.get<2>() == y.get<2>() &&
-            x.get<3>() == y.get<3>() ;
+            x.get<2>() == y.get<2>() ;
     }
 };
 
