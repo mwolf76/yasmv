@@ -36,8 +36,40 @@ static void check_dd_vector(const DDVector& w, const char *message)
         const DdNode* node
             (wi->getNode());
 
-        if (! Cudd_IsConstant(node) && 0 == node -> index)
+        if (! Cudd_IsConstant(node) && 0 == node -> index) {
+
+            std::stringstream oss;
+
+            oss
+                << "[ " ;
+
+            for (DDVector::const_iterator wi = w.begin();;) {
+                const DdNode* node
+                    (wi->getNode());
+
+                if (! Cudd_IsConstant(node))
+                    oss << node->index;
+                else
+                    oss << ((Cudd_V(node) == 0) ? 'F' : 'T');
+
+                if (++ wi != w.end())
+                    oss << ", ";
+                else
+                    break;
+            }
+
+            oss
+                << " ]" ;
+
+            const char *repr
+                (strdup(oss.str().c_str()));
+
+            WARN
+                << repr
+                << std::endl ;
+
             throw UnitException(message);
+        }
     }
 }
 
