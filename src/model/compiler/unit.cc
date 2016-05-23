@@ -30,6 +30,7 @@ UnitException::UnitException(const char* msg)
 const char* UnitException::what() const throw()
 { return f_msg; }
 
+/* DD vectors must either contain leave nodes or constants */
 static void check_dd_vector(const DDVector& w, const char *message)
 {
     for (DDVector::const_iterator wi = w.begin(); wi != w.end(); ++ wi) {
@@ -80,9 +81,9 @@ InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature io
     , f_x(x)
 {
     check_dd_vector(z,
-                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Z vector contains invalid DD in InlinedOperatorDescriptor");
     check_dd_vector(x,
-                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "X vector contains invalid DD in InlinedOperatorDescriptor");
 }
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
@@ -93,13 +94,13 @@ InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature io
     , f_y(y)
 {
     check_dd_vector(z,
-                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Z vector contains invalid DD in InlinedOperatorDescriptor");
 
     check_dd_vector(x,
-                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "X vector contains invalid DD in InlinedOperatorDescriptor");
 
     check_dd_vector(y,
-                    "Y vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Y vector contains invalid DD in InlinedOperatorDescriptor");
 }
 
 BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z,
@@ -112,13 +113,13 @@ BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z
     , f_y(y)
 {
     check_dd_vector(z,
-                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Z vector contains invalid DD in BinarySelectionDescriptor");
 
     check_dd_vector(x,
-                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "X vector contains invalid DD in BinarySelectionDescriptor");
 
     check_dd_vector(y,
-                    "Y vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Y vector contains invalid DD in BinarySelectionDescriptor");
 }
 
 MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
@@ -133,10 +134,10 @@ MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
     , f_x(x)
 {
     check_dd_vector(z,
-                    "Z vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "Z vector contains invalid DD in MultiwaySelectionDescriptor");
 
     check_dd_vector(x,
-                    "X vector contains a non-leaf DD in InlinedOperatorDescriptor");
+                    "X vector contains invalid DD in MultiwaySelectionDescriptor");
 }
 
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
