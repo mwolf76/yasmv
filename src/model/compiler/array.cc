@@ -34,7 +34,7 @@ void Compiler::array_equals(const Expr_ptr expr)
         (f_type_stack.back());
 
     assert( lhs_type -> is_array() &&
-            rhs_type -> is_array() );
+            rhs_type -> is_array());
 
     const ArrayType_ptr atype
         (rhs_type -> as_array());
@@ -96,39 +96,77 @@ void Compiler::array_ite(const Expr_ptr expr)
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    assert( cnd_type -> is_boolean() &&
-            lhs_type -> is_array() &&
-            rhs_type -> is_array());
-
-    const ArrayType_ptr atype
+    const ArrayType_ptr rhs_atype
         (rhs_type -> as_array());
+    unsigned rhs_width
+        (rhs_atype -> of() -> width());
+    unsigned rhs_nelems
+        (rhs_atype -> nelems());
 
-    unsigned width
-        (atype -> of() -> width());
-    unsigned elems
-        (atype -> nelems());
+    const ArrayType_ptr lhs_atype
+        (lhs_type -> as_array());
+    unsigned lhs_width
+        (lhs_atype -> of() -> width());
+    unsigned lhs_nelems
+        (lhs_atype -> nelems());
 
-    unsigned nbits
-        (width * elems);
-
-    f_type_stack.push_back( rhs_type );
-
-    // both operands are arrays, same width (lazy)
+    // both operands are algebraic, same width & nelems
     assert( rhs_type -> is_array() &&
             lhs_type -> is_array() &&
             cnd_type -> is_boolean() &&
-            lhs_type -> width() == rhs_type -> width());
+            lhs_width == rhs_width &&
+            lhs_nelems == rhs_nelems);
 
-    POP_DV(rhs, nbits);
-    POP_DV(lhs, nbits);
+    f_type_stack.push_back( rhs_type );
+
+    unsigned width
+        (lhs_width * lhs_nelems);
+
+    POP_DV(rhs, width);
+    POP_DV(lhs, width);
 
     /* Fetch cnd DD */
     POP_DD(cnd);
 
-    /* PUSH ITEs for each bit in res array */
-    for (unsigned j = 0; j < nbits; ++ j) {
-        unsigned ndx = nbits - j - 1;
-        PUSH_DD(cnd.Ite(lhs[ndx], rhs[ndx]));
+    /* Push MUX output DD vector */
+    FRESH_DV(res, width);
+    PUSH_DV(res, width);
+
+    /* Register ITE MUX */
+    Expr_ptr parent
+        (expr);
+
+    BinarySelectionUnionFindMap::const_iterator eye
+        (f_bsuf_map.find( expr ));
+
+    if (f_bsuf_map.end() != eye)
+        parent = eye -> second;
+
+    /* verify if entry for toplevel already exists. If it doesn't, create it */
+    {
+        Expr2BinarySelectionDescriptorsMap::const_iterator mi
+            (f_expr2bsd_map.find(parent));
+
+        if (f_expr2bsd_map.end() == mi)
+            f_expr2bsd_map.insert( std::make_pair< Expr_ptr, BinarySelectionDescriptors >
+                                   (parent, BinarySelectionDescriptors()));
     }
+
+    BinarySelectionDescriptor md
+        (width, res, cnd, make_auto_dd(), lhs, rhs);
+
+    /* Entry for toplevel does exist for sure */
+    {
+        Expr2BinarySelectionDescriptorsMap::iterator mi
+            (f_expr2bsd_map.find(parent));
+        assert( f_expr2bsd_map.end() != mi );
+
+        mi -> second.push_back( md );
+    }
+
+    DEBUG
+        << "Registered "
+        << md
+        << std::endl;
 }
 

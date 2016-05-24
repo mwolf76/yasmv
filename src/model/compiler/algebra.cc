@@ -362,13 +362,13 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    f_type_stack.push_back( rhs_type );
-
     // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
             cnd_type -> is_boolean() &&
             lhs_type -> width() == rhs_type -> width());
+
+    f_type_stack.push_back( rhs_type );
 
     unsigned width
         (rhs_type -> width());
