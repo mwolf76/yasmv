@@ -30,61 +30,12 @@ UnitException::UnitException(const char* msg)
 const char* UnitException::what() const throw()
 { return f_msg; }
 
-/* DD vectors must either contain leave nodes or constants */
-static void check_dd_vector(const DDVector& w, const char *message)
-{
-    for (DDVector::const_iterator wi = w.begin(); wi != w.end(); ++ wi) {
-        const DdNode* node
-            (wi->getNode());
-
-        if (! Cudd_IsConstant(node) && 0 == node -> index) {
-
-            std::stringstream oss;
-
-            oss
-                << "[ " ;
-
-            for (DDVector::const_iterator wi = w.begin();;) {
-                const DdNode* node
-                    (wi->getNode());
-
-                if (! Cudd_IsConstant(node))
-                    oss << node->index;
-                else
-                    oss << ((Cudd_V(node) == 0) ? 'F' : 'T');
-
-                if (++ wi != w.end())
-                    oss << ", ";
-                else
-                    break;
-            }
-
-            oss
-                << " ]" ;
-
-            const char *repr
-                (strdup(oss.str().c_str()));
-
-            WARN
-                << repr
-                << std::endl ;
-
-            throw UnitException(message);
-        }
-    }
-}
-
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      DDVector& z, DDVector &x)
     : f_ios(ios)
     , f_z(z)
     , f_x(x)
-{
-    check_dd_vector(z,
-                    "Z vector contains invalid DD in InlinedOperatorDescriptor");
-    check_dd_vector(x,
-                    "X vector contains invalid DD in InlinedOperatorDescriptor");
-}
+{}
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      DDVector& z, DDVector &x, DDVector &y)
@@ -92,16 +43,7 @@ InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature io
     , f_z(z)
     , f_x(x)
     , f_y(y)
-{
-    check_dd_vector(z,
-                    "Z vector contains invalid DD in InlinedOperatorDescriptor");
-
-    check_dd_vector(x,
-                    "X vector contains invalid DD in InlinedOperatorDescriptor");
-
-    check_dd_vector(y,
-                    "Y vector contains invalid DD in InlinedOperatorDescriptor");
-}
+{}
 
 BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z,
                                                      ADD cnd, ADD aux, DDVector &x, DDVector &y)
@@ -111,16 +53,7 @@ BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z
     , f_aux(aux)
     , f_x(x)
     , f_y(y)
-{
-    check_dd_vector(z,
-                    "Z vector contains invalid DD in BinarySelectionDescriptor");
-
-    check_dd_vector(x,
-                    "X vector contains invalid DD in BinarySelectionDescriptor");
-
-    check_dd_vector(y,
-                    "Y vector contains invalid DD in BinarySelectionDescriptor");
-}
+{}
 
 MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
                                                          unsigned elem_count,
@@ -132,13 +65,7 @@ MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
     , f_cnds(cnds)
     , f_acts(acts)
     , f_x(x)
-{
-    check_dd_vector(z,
-                    "Z vector contains invalid DD in MultiwaySelectionDescriptor");
-
-    check_dd_vector(x,
-                    "X vector contains invalid DD in MultiwaySelectionDescriptor");
-}
+{}
 
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
 {
