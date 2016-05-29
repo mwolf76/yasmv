@@ -447,13 +447,18 @@ Variant DumpTrace::operator()()
 void DumpTrace::usage()
 {
     std::cout
-        << "dump-trace [-o filename] [-f format] [<trace_uid>] - Dumps given trace."
+        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace."
         << std::endl
         << std::endl
-        << "options"
+        << "options:"
         << std::endl
-        << "  -f format, format can be either `plain`, `xml` or `json`."
+        << "  -f <format>, format can be either `plain`, `xml` or `json`."
+        << std::endl
         << "  -o filename, filename must be a writeable path on disk."
-        << std::endl ;
+        << std::endl
+        << std::endl
+        << "`trace-uid` is the index of the trace to be dumped. If omitted, current"
+        << std::endl
+        << "trace will be dumped." ;
 }
 
