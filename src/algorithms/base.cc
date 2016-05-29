@@ -78,6 +78,9 @@ void Algorithm::setup()
     EngineMgr& mgr
         (EngineMgr::INSTANCE());
 
+    /* suppress warning */
+    (void) mgr;
+
     Compiler& cmpl
         (compiler()); // just a local ref
 

@@ -133,9 +133,6 @@ void DumpTrace::dump_plain_section(std::ostream& os,
 
 void DumpTrace::dump_plain(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     os
         << "Witness: "
         << w.id()
@@ -216,9 +213,6 @@ void DumpTrace::dump_json_section(std::ostream& os,
 
 void DumpTrace::dump_json(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
@@ -380,20 +374,17 @@ void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVect
 
 void DumpTrace::dump_xml(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
     os
-        << "<?xml version=\"1.0\"?>" << std::endl
+        << "<?xml version=\"1.0\"?>"
+        << std::endl
         << "<witness"
         << " id=\"" << w.id() << "\""
         << " description=\"" << w.desc() << "\""
         << ">"
-        << std::endl
-        ;
+        << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 

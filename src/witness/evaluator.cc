@@ -569,7 +569,7 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
     for (unsigned i = 0; i < alhs_type -> nelems(); ++ i) {
         POP_VALUE(elem);
 
-        if (i == index)
+        if (i == (unsigned) index)
             res = elem;
     }
 
