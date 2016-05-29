@@ -386,13 +386,60 @@ void Evaluator::walk_eq_postorder(const Expr_ptr expr)
     TypeMgr& tm
         (f_owner.tm());
 
-    DROP_TYPE();
-    DROP_TYPE();
-    PUSH_TYPE(tm.find_boolean());
+    POP_TYPE(rhs_type);
+    POP_TYPE(lhs_type);
 
-    POP_VALUE(rhs);
-    POP_VALUE(lhs);
-    PUSH_VALUE(( lhs == rhs ));
+    if (rhs_type -> is_scalar() &&
+        lhs_type -> is_scalar()) {
+
+        POP_VALUE(rhs);
+        POP_VALUE(lhs);
+
+        PUSH_VALUE(( lhs == rhs ));
+    }
+
+    else if (rhs_type -> is_array() &&
+             lhs_type -> is_array()) {
+
+        ArrayType_ptr arhs_type
+            (rhs_type -> as_array());
+        ArrayType_ptr alhs_type
+            (lhs_type -> as_array());
+
+        assert (arhs_type -> width() ==
+                alhs_type -> width() &&
+                arhs_type -> nelems() ==
+                alhs_type -> nelems());
+
+        unsigned nelems
+            (arhs_type -> nelems());
+
+        value_t rhs[nelems];
+        for (unsigned i = 0; i < nelems; ++ i) {
+            rhs[i] = TOP_VALUE();
+            DROP_VALUE();
+        }
+
+        value_t lhs[nelems];
+        for (unsigned i = 0; i < nelems; ++ i) {
+            lhs[i] = TOP_VALUE();
+            DROP_VALUE();
+        }
+
+        bool res
+            (true);
+
+        for (unsigned i = 0; res && i < nelems; ++ i) {
+            if (rhs[i] != lhs[i])
+                res = false;
+        }
+
+        PUSH_VALUE((value_t) res);
+    }
+
+    else assert(false);
+
+    PUSH_TYPE(tm.find_boolean());
 }
 
 bool Evaluator::walk_ne_preorder(const Expr_ptr expr)
@@ -569,7 +616,7 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
     for (unsigned i = 0; i < alhs_type -> nelems(); ++ i) {
         POP_VALUE(elem);
 
-        if (i == index)
+        if (i == alhs_type -> nelems() - index - 1)
             res = elem;
     }
 
@@ -581,16 +628,32 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
 bool Evaluator::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Evaluator::walk_array_postorder(const Expr_ptr expr)
-{
-    assert(false); // TODO
-}
+{}
 
 bool Evaluator::walk_array_comma_preorder(const Expr_ptr expr)
 {  return cache_miss(expr); }
 bool Evaluator::walk_array_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_array_comma_postorder(const Expr_ptr expr)
-{ assert (false); /* TODO support inlined non-determinism */ }
+{
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    POP_TYPE(rhs_type);
+
+    unsigned nelems
+        (rhs_type -> is_scalar()
+         ? 2 /* base */
+         : 1 + rhs_type -> as_array() -> nelems());
+
+    POP_TYPE(lhs_type);
+    assert(lhs_type -> is_scalar());
+
+    ArrayType_ptr atmp_type
+        (tm.find_array_type(lhs_type -> as_scalar(), nelems));
+
+    PUSH_TYPE(atmp_type);
+}
 
 bool Evaluator::walk_set_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -711,8 +774,10 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             Symbol_ptr symb_lit
                 (resolver.symbol(full_lit));
             assert( symb_lit -> is_literal());
+
             Literal& lit
                 (symb_lit->as_literal());
+
             value_t value
                 (lit.value());
             PUSH_VALUE(value);
@@ -727,30 +792,15 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
                 f_values_stack.push_back(- expr -> lhs() -> value());
             }
             else if (em.is_array(expr)) {
-                /* array value, push each element right-to-left */
-                ExprStack
-                    stack;
+                /* array value, push each element */
+
                 Expr_ptr eye
                     (expr -> lhs());
-
                 while (em.is_array_comma(eye)) {
-                    stack.push_back(eye);
+                    f_values_stack.push_back(eye -> lhs() -> value());
                     eye = eye -> rhs();
                 }
-                stack.push_back(eye); /* last */
-
-                while (0 < stack.size()) {
-                    Expr_ptr top
-                        (stack.back());
-                    stack.pop_back();
-
-                    if (em.is_array_comma(top)) {
-                        f_values_stack.push_back(top -> lhs() -> value());
-                    }
-                    else {
-                        f_values_stack.push_back(top -> value());
-                    }
-                }
+                f_values_stack.push_back(eye -> value()); /* last */
             }
             else {
                 ERR
