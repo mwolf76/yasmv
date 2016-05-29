@@ -409,8 +409,8 @@ void TypeChecker::walk_array_comma_postorder(Expr_ptr expr)
         ScalarType_ptr of_type
             (array_type -> of());
 
-        // XXX: review this
-        assert( lhs_type == of_type);
+        assert( lhs_type -> is_scalar() &&
+                lhs_type -> width() == of_type -> width());
 
         ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
@@ -423,8 +423,8 @@ void TypeChecker::walk_array_comma_postorder(Expr_ptr expr)
         ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
-        // XXX: review this
-        assert( lhs_type == of_type );
+        assert( lhs_type -> is_scalar() &&
+                lhs_type -> width() == of_type -> width());
 
         array_type = tm.find_array_type(of_type, 2);
         PUSH_TYPE(array_type);

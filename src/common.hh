@@ -47,6 +47,9 @@ typedef std::vector<value_t> ValueVector;
 #define DROP_VALUE()                               \
     f_values_stack.pop_back()
 
+#define TOP_VALUE()                                \
+    f_values_stack.back()
+
 typedef const char* pconst_char;
 typedef char* pchar;
 
