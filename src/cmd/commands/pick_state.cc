@@ -83,7 +83,14 @@ Variant PickState::operator()()
 void PickState::usage()
 {
     std::cout
-        << "pick-state - Initializes a new simulation."
-        << std::endl;
+        << "pick-state [ -c <expr> ] - Initializes a new simulation."
+        << std::endl
+        << std::endl
+        << "options:"
+        << std::endl
+        << "  -c <expr>, specifies an additional constraint (INIT)."
+        << std::endl
+        << std::endl
+        << "Creates a new trace and selects it as current." ;
 }
 

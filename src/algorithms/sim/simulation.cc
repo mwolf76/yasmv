@@ -45,6 +45,9 @@ void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
     Engine engine
         ("pick_state");
 
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
@@ -57,8 +60,7 @@ void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
             (compiler()); // just a local ref
 
         Expr_ptr ctx
-            (em().make_empty());
-
+            (em.make_empty());
 
         try {
             CompilationUnit term
@@ -166,6 +168,37 @@ void Simulation::simulate(Expr_ptr invar_condition,
     assert_fsm_invar(engine, k );
     assert_fsm_trans(engine, k );
     assert_fsm_invar(engine, 1 + k);
+
+    /* assert additional constraints */
+    if (invar_condition) {
+
+        Compiler& cmpl
+            (compiler()); // just a local ref
+
+        Expr_ptr ctx
+            (em.make_empty());
+
+        try {
+            CompilationUnit term
+                (cmpl.process(ctx, invar_condition));
+
+            assert_formula( engine, 1 + k, term, 0);
+        }
+        catch (Exception& ae) {
+            pconst_char what
+                (ae.what());
+
+            WARN
+                << what
+                << std::endl
+                << "  in additional constraint"
+                << ctx << "::" << invar_condition
+                << std::endl;
+
+            free((void *) what);
+            return;
+        }
+    }
 
     DEBUG
         << "Resuming simulation..."

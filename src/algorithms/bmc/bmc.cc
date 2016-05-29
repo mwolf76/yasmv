@@ -31,6 +31,7 @@ static const char *cex_trace_prfx = "cex_";
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
+    , f_k(0)
 {
     const void* instance
         (this);

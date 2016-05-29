@@ -133,9 +133,6 @@ void DumpTrace::dump_plain_section(std::ostream& os,
 
 void DumpTrace::dump_plain(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     os
         << "Witness: "
         << w.id()
@@ -216,9 +213,6 @@ void DumpTrace::dump_json_section(std::ostream& os,
 
 void DumpTrace::dump_json(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
@@ -380,20 +374,17 @@ void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVect
 
 void DumpTrace::dump_xml(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
     os
-        << "<?xml version=\"1.0\"?>" << std::endl
+        << "<?xml version=\"1.0\"?>"
+        << std::endl
         << "<witness"
         << " id=\"" << w.id() << "\""
         << " description=\"" << w.desc() << "\""
         << ">"
-        << std::endl
-        ;
+        << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
@@ -456,13 +447,18 @@ Variant DumpTrace::operator()()
 void DumpTrace::usage()
 {
     std::cout
-        << "dump-trace [-o filename] [-f format] [<trace_uid>] - Dumps given trace."
+        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace."
         << std::endl
         << std::endl
-        << "options"
+        << "options:"
         << std::endl
-        << "  -f format, format can be either `plain`, `xml` or `json`."
+        << "  -f <format>, format can be either `plain`, `xml` or `json`."
+        << std::endl
         << "  -o filename, filename must be a writeable path on disk."
-        << std::endl ;
+        << std::endl
+        << std::endl
+        << "`trace-uid` is the index of the trace to be dumped. If omitted, current"
+        << std::endl
+        << "trace will be dumped." ;
 }
 

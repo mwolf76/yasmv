@@ -42,6 +42,11 @@ Simulate::~Simulate()
 void Simulate::set_invar_condition(Expr_ptr invar_condition)
 {
     f_invar_condition = invar_condition;
+
+    ERR
+        << "Additional constraint: "
+        << invar_condition
+        << std::endl;
 }
 
 void Simulate::set_until_condition(Expr_ptr until_condition)
@@ -66,8 +71,8 @@ Variant Simulate::operator()()
         (*this, ModelMgr::INSTANCE().model());
 
     sim.simulate(f_invar_condition,
-                   f_until_condition,
-                   f_k, f_trace_uid);
+                 f_until_condition,
+                 f_k, f_trace_uid);
 
     std::ostringstream tmp;
     switch (sim.status()) {
@@ -100,7 +105,25 @@ Variant Simulate::operator()()
 void Simulate::usage()
 {
     std::cout
-        << "simulate - Performs BMC simulation."
-        << std::endl;
+        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation."
+        << std::endl
+        << std::endl
+        << "options:"
+        << std::endl
+        << "  -c <expr>, specifies an additional state constraint."
+        << std::endl
+        << "  -u <expr>, specifies an until condition."
+        << std::endl
+        << "  -k <steps>, the number of steps to simulate."
+        << std::endl
+        << "  -t <trace-uid>, the simulation trace UID."
+        << std::endl
+        << std::endl
+        << "Extends an existing trace with simulated steps. The simulation will follow"
+        << std::endl
+        << "any additional constraint and will terminate due to (a) having reached"
+        << "the until condition; or (b) having reached the specified number of steps."
+        << std::endl
+        << "If neither -k nor -u is used, -k 1 is assumed." ;
 }
 
