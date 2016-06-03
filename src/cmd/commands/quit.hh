@@ -34,7 +34,14 @@ public:
     void set_retcode(int retcode);
 
     Variant virtual operator()();
+};
+
+class QuitTopic : public CommandTopic {
+public:
+    QuitTopic(Interpreter& owner);
+    virtual ~QuitTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // QUIT_CMD_H

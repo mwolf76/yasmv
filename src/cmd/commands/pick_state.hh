@@ -46,7 +46,14 @@ public:
     { return f_trace_uid; }
 
     Variant virtual operator()();
+};
+
+class PickStateTopic : public CommandTopic {
+public:
+    PickStateTopic(Interpreter& owner);
+    virtual ~PickStateTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // PICK_STATE_CMD_H

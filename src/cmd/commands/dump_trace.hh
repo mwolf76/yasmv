@@ -64,7 +64,6 @@ public:
     virtual ~DumpTrace();
 
     Variant virtual operator()();
-    void virtual usage();
 
 private:
     void dump_plain(std::ostream& os, Witness& w);
@@ -89,4 +88,12 @@ private:
 
 };
 
-#endif
+class DumpTraceTopic : public CommandTopic {
+public:
+    DumpTraceTopic(Interpreter& owner);
+    virtual ~DumpTraceTopic();
+
+    void virtual usage();
+};
+
+#endif // DUMP_TRACE_CMD_H

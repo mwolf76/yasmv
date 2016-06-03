@@ -67,9 +67,19 @@ Variant ListTraces::operator()()
     return Variant("Ok");
 }
 
-void ListTraces::usage()
+ListTracesTopic::ListTracesTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+ListTracesTopic::~ListTracesTopic()
+{
+    TRACE
+        << "Destroyed list-traces topic"
+        << std::endl;
+}
+
+void ListTracesTopic::usage()
 {
     std::cout
-        << "list-traces - Lists currently available traces."
-        << std::endl;
+        << "list-traces - Lists currently available traces." ;
 }

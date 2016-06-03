@@ -63,9 +63,19 @@ Variant DupTrace::operator()()
     return Variant("XXX");
 }
 
-void DupTrace::usage()
+DupTraceTopic::DupTraceTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+DupTraceTopic::~DupTraceTopic()
+{
+    TRACE
+        << "Destroyed dup-trace topic"
+        << std::endl;
+}
+
+void DupTraceTopic::usage()
 {
     std::cout
-        << "dup-trace <trace_uid> - Dups given trace."
-        << std::endl;
+        << "dup-trace <trace_uid> - Dups given trace." ;
 }

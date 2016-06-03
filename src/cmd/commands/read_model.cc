@@ -85,12 +85,20 @@ Variant ReadModel::operator()()
     return Variant( ! hasErrors ? "Ok" : "ERROR" );
 }
 
-void ReadModel::usage()
+ReadModelTopic::ReadModelTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+ReadModelTopic::~ReadModelTopic()
 {
-    std::cout
-        << "read-model <filename> - Reads a model from given filename[*]."
-        << std::endl
-        << "[*] either in single or double quotes."
+    TRACE
+        << "Destroyed read-model topic"
         << std::endl;
 }
 
+void ReadModelTopic::usage()
+{
+    std::cout
+        << "read-model <filename> - Reads a model from given filename[*].\n"
+        << "[*] either in single or double quotes." ;
+}

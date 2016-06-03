@@ -51,6 +51,20 @@ const char* DuplicateIdentifier::what() const throw()
     return strdup(oss.str().c_str());
 }
 
+UnknownIdentifier::UnknownIdentifier(Expr_ptr unknown)
+    : f_unknown(unknown)
+{}
+
+const char* UnknownIdentifier::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "Unknown identifier: `"
+        << f_unknown << "`";
+
+    return strdup(oss.str().c_str());
+}
+
 BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
     : f_instance(instance)
     , f_expected(expected)

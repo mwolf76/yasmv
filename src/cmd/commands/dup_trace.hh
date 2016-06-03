@@ -36,7 +36,14 @@ public:
     void set_duplicate_id(pconst_char duplicate_id);
 
     Variant virtual operator()();
+};
+
+class DupTraceTopic : public CommandTopic {
+public:
+    DupTraceTopic(Interpreter& owner);
+    virtual ~DupTraceTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // DUP_TRACE_CMD_H

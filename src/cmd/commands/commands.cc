@@ -50,6 +50,25 @@ Command::~Command()
            << std::endl;
 }
 
+CommandTopic::CommandTopic(Interpreter& owner)
+    : f_owner(owner)
+{
+    const void *instance(this);
+    DRIVEL
+        << "Initialized command topic @"
+        << instance
+        << std::endl;
+}
+
+CommandTopic::~CommandTopic()
+{
+    const void *instance(this);
+    DRIVEL << "Deinitialized command topic @"
+           << instance
+           << std::endl;
+}
+
+
 #if 0
 ModelDumpCommand::ModelDumpCommand(Interpreter& owner)
     : Command(owner)

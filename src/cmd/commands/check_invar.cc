@@ -79,10 +79,22 @@ Variant CheckInvar::operator()()
     return Variant(tmp.str());
 }
 
-void CheckInvar::usage()
+CheckInvarTopic::CheckInvarTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+CheckInvarTopic::~CheckInvarTopic()
 {
-    std::cout
-        << "check-invar <expression> - Checks invariant property for given expression."
+    TRACE
+        << "Destroyed check-invar topic"
         << std::endl;
 }
 
+void CheckInvarTopic::usage()
+{
+    std::cout
+        << "check-invar [ -D < id := value > ; ]* < expression > - Checks invariant property on a given expression.\n\n"
+        << "If the invariant expression holds no trace is generated. Otherwise, a BMC counterexample\n"
+        << "witness trace for the given property is generated. -D can be used multiple times to override \n"
+        << "existing model defines with input values." ;
+}

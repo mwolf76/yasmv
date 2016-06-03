@@ -27,6 +27,7 @@
 #include <utils/variant.hh>
 
 class Interpreter;
+
 class Command {
 protected:
     Interpreter& f_owner;
@@ -38,21 +39,30 @@ public:
     // functor-pattern
     Variant virtual operator()() =0;
 
-    // inline help system
-    void virtual usage() =0;
-
     // representation
     friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };
 typedef class Command* Command_ptr;
+
+class CommandTopic {
+protected:
+    Interpreter& f_owner;
+
+public:
+    CommandTopic(Interpreter& owner);
+    virtual ~CommandTopic();
+
+    // inline help system
+    void virtual usage() =0;
+};
+
+typedef std::vector<Command_ptr> CommandVector;
+typedef CommandVector* CommandVector_ptr;
 
 /** Exception classes */
 class CommandException : public Exception {
 public:
     virtual const char* what() const throw() =0;
 };
-
-typedef std::vector<Command_ptr> CommandVector;
-typedef CommandVector* CommandVector_ptr;
 
 #endif

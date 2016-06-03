@@ -34,10 +34,18 @@ public:
     CheckInvar(Interpreter& owner);
     virtual ~CheckInvar();
 
+    /** cmd params */
     void set_invar(Expr_ptr invar);
 
     Variant virtual operator()();
+};
+
+class CheckInvarTopic : public CommandTopic {
+public:
+    CheckInvarTopic(Interpreter& owner);
+    virtual ~CheckInvarTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // CHECK_INVAR_CMD_H

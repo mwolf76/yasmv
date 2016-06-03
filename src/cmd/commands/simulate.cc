@@ -102,28 +102,28 @@ Variant Simulate::operator()()
     return Variant(tmp.str());
 }
 
-void Simulate::usage()
+SimulateTopic::SimulateTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+SimulateTopic::~SimulateTopic()
 {
-    std::cout
-        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation."
-        << std::endl
-        << std::endl
-        << "options:"
-        << std::endl
-        << "  -c <expr>, specifies an additional state constraint."
-        << std::endl
-        << "  -u <expr>, specifies an until condition."
-        << std::endl
-        << "  -k <steps>, the number of steps to simulate."
-        << std::endl
-        << "  -t <trace-uid>, the simulation trace UID."
-        << std::endl
-        << std::endl
-        << "Extends an existing trace with simulated steps. The simulation will follow"
-        << std::endl
-        << "any additional constraint and will terminate due to (a) having reached"
-        << "the until condition; or (b) having reached the specified number of steps."
-        << std::endl
-        << "If neither -k nor -u is used, -k 1 is assumed." ;
+    TRACE
+        << "Destroyed simulate topic"
+        << std::endl;
 }
 
+void SimulateTopic::usage()
+{
+    std::cout
+        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation.\n\n"
+        << "options:\n"
+        << "  -c <expr>, specifies an additional state constraint.\n"
+        << "  -u <expr>, specifies an until condition.\n"
+        << "  -k <steps>, the number of steps to simulate.\n"
+        << "  -t <trace-uid>, the simulation trace UID.\n\n"
+        << "Extends an existing trace with simulated steps. The simulation will follow\n"
+        << "any additional constraint and will terminate due to (a) having reached\n"
+        << "the until condition; or (b) having reached the specified number of steps.\n"
+        << "If neither -k nor -u is used, -k 1 is assumed." ;
+}

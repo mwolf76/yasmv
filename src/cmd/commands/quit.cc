@@ -42,10 +42,20 @@ Variant Quit::operator()()
     return Variant("BYE");
 }
 
-void Quit::usage()
+
+QuitTopic::QuitTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+QuitTopic::~QuitTopic()
 {
-    std::cout
-        << "quit - Leave interactive shell"
+    TRACE
+        << "Destroyed quit topic"
         << std::endl;
 }
 
+void QuitTopic::usage()
+{
+    std::cout
+        << "quit - Leave interactive shell\n" ;
+}

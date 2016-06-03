@@ -123,6 +123,40 @@ void Module::add_def(Expr_ptr symb_name, Define_ptr def)
                        (symb_name, def));
 }
 
+void Module::ovd_def(Expr_ptr symb_name, Define_ptr def)
+{
+    std::ostringstream oss;
+
+    if (def -> is_hidden())
+        oss
+            << "hidden ";
+
+    const std::string tmp
+        (oss.str());
+
+    if (f_locals.end() == std::find( f_locals.begin(),
+                                     f_locals.end(), symb_name))
+        throw UnknownIdentifier(symb_name);
+
+    Expr_ptr body
+        (def -> body());
+
+    DEBUG
+        << "Module "
+        << (*this)
+        << ", overridden "
+        << tmp
+        << "define `"
+        << symb_name << "`"
+        << " to "
+        << body
+        << std::endl;
+
+    f_localDefs.insert(std::make_pair<Expr_ptr, Define_ptr>
+                       (symb_name, def));
+}
+
+
 void Module::add_init(Expr_ptr expr)
 {
     DEBUG

@@ -35,6 +35,9 @@ typedef class Interpreter* Interpreter_ptr;
 class Command;
 typedef Command* Command_ptr;
 
+class CommandTopic;
+typedef CommandTopic* CommandTopic_ptr;
+
 class Interpreter {
 public:
     // singleton

@@ -80,17 +80,22 @@ Variant PickState::operator()()
     return Variant(tmp.str());
 }
 
-void PickState::usage()
+PickStateTopic::PickStateTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+PickStateTopic::~PickStateTopic()
 {
-    std::cout
-        << "pick-state [ -c <expr> ] - Initializes a new simulation."
-        << std::endl
-        << std::endl
-        << "options:"
-        << std::endl
-        << "  -c <expr>, specifies an additional constraint (INIT)."
-        << std::endl
-        << std::endl
-        << "Creates a new trace and selects it as current." ;
+    TRACE
+        << "Destroyed pick-state topic"
+        << std::endl;
 }
 
+void PickStateTopic::usage()
+{
+    std::cout
+        << "pick-state [ -c <expr> ] - Initializes a new simulation.\n\n"
+        << "options:\n"
+        << "  -c <expr>, specifies an additional constraint (INIT).\n\n"
+        << "Creates a new trace and selects it as current." ;
+}

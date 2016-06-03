@@ -44,7 +44,6 @@ public:
     virtual ~Simulate();
 
     Variant virtual operator()();
-    void virtual usage();
 
     void set_invar_condition(Expr_ptr invar_condition);
     inline Expr_ptr invar_condition() const
@@ -63,5 +62,12 @@ public:
     { return f_trace_uid; }
 };
 
-#endif
+class SimulateTopic : public CommandTopic {
+public:
+    SimulateTopic(Interpreter& owner);
+    virtual ~SimulateTopic();
 
+    void virtual usage();
+};
+
+#endif // SIMULATE_H_CMD

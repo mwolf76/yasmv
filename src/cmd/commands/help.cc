@@ -36,7 +36,7 @@ Help::~Help()
     f_topic = NULL;
 }
 
-void Help::set_topic(Command_ptr topic)
+void Help::set_topic(CommandTopic_ptr topic)
 {
     f_topic = topic;
 }
@@ -65,10 +65,19 @@ Variant Help::operator()()
     return Variant("Ok");
 }
 
-void Help::usage()
+HelpTopic::HelpTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+HelpTopic::~HelpTopic()
 {
-    std::cout
-        << "help <command> - shows a topic from the internal help system"
+    TRACE
+        << "Destroyed help topic"
         << std::endl;
 }
 
+void HelpTopic::usage()
+{
+    std::cout
+        << "help <command> - shows a topic from the internal help system\n";
+}

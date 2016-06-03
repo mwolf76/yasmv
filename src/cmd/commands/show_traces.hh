@@ -31,4 +31,12 @@ public:
     Variant virtual operator()();
 };
 
-#endif
+class ShowTracesTopic : public CommandTopic {
+public:
+    ShowTracesTopic(Interpreter& owner);
+    virtual ~ShowTracesTopic();
+
+    void virtual usage();
+};
+
+#endif // LIST_TRACES_CMD_H

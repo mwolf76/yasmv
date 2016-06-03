@@ -37,7 +37,14 @@ public:
     { return f_input; }
 
     Variant virtual operator()();
+};
+
+class ReadModelTopic : public CommandTopic {
+public:
+    ReadModelTopic(Interpreter& owner);
+    virtual ~ReadModelTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // READ_MODEL_H

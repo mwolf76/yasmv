@@ -1,5 +1,5 @@
 /**
-   Copyright (C) 2010-2015 Marco Pensallorto
+   Copyright (C) 2010-2016 Marco Pensallorto
 
    This file is part of YASMINE.
 
@@ -883,6 +883,44 @@ commands [CommandVector_ptr cmds]
         )*
     ;
 
+command_topic returns [CommandTopic_ptr res]
+    :  c=help_command_topic
+       { $res = c; }
+
+    |  c=time_command_topic
+       { $res = c; }
+
+    |  c=read_model_command_topic
+       { $res = c; }
+
+    |  c=write_model_command_topic
+       { $res = c; }
+
+    |  c=pick_state_command_topic
+       { $res = c; }
+
+    |  c=simulate_command_topic
+       { $res = c; }
+
+    |  c=check_init_command_topic
+       { $res = c; }
+
+    |  c=check_invar_command_topic
+       { $res = c; }
+
+    |  c=list_traces_command_topic
+       { $res = c; }
+
+    |  c=dump_trace_command_topic
+       { $res = c; }
+
+    |  c=dup_trace_command_topic
+       { $res = c; }
+
+    |  c=quit_command_topic
+       { $res = c; }
+    ;
+
 command returns [Command_ptr res]
     :  c=help_command
        { $res = c; }
@@ -925,14 +963,24 @@ help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
       (
-          topic = command
+          topic = command_topic
           { ((Help*) $res) -> set_topic(topic); }
       )?
+    ;
+
+help_command_topic returns [CommandTopic_ptr res]
+    : 'help'
+      { $res = cm.topic_help(); }
     ;
 
 time_command returns [Command_ptr res]
     : 'time'
       { $res = cm.make_time(); }
+    ;
+
+time_command_topic returns [CommandTopic_ptr res]
+    : 'time'
+      { $res = cm.topic_time(); }
     ;
 
 read_model_command returns [Command_ptr res]
@@ -944,6 +992,11 @@ read_model_command returns [Command_ptr res]
         }) ?
     ;
 
+read_model_command_topic returns [CommandTopic_ptr res]
+    :  'read-model'
+        { $res = cm.topic_read_model(); }
+    ;
+
 write_model_command returns [Command_ptr res]
     :  'write-model'
         { $res = cm.make_write_model(); }
@@ -951,6 +1004,11 @@ write_model_command returns [Command_ptr res]
         ( output=filepath {
             ((WriteModel*) $res) -> set_output(output);
         }) ?
+    ;
+
+write_model_command_topic returns [CommandTopic_ptr res]
+    :  'write-model'
+        { $res = cm.topic_write_model(); }
     ;
 
 check_init_command returns[Command_ptr res]
@@ -961,17 +1019,40 @@ check_init_command returns[Command_ptr res]
       { ((CheckInit *) $res) -> set_init(init); }
     ;
 
+check_init_command_topic returns [CommandTopic_ptr res]
+    :  'check-init'
+        { $res = cm.topic_check_init(); }
+    ;
+
 check_invar_command returns[Command_ptr res]
     : 'check-invar'
       { $res = cm.make_check_invar(); }
 
-      invar=toplevel_expression
-      { ((CheckInvar *) $res) -> set_invar(invar); }
+        ( '-D' id=identifier ':=' body=toplevel_expression ';'
+        {
+            Define_ptr def = new Define( ExprMgr::INSTANCE().main(),
+                                         id, ExprVector(), body);
+            ModelMgr::INSTANCE().main().ovd_def(id, def);
+        }
+        )*
+
+        invar=toplevel_expression
+        { ((CheckInvar *) $res) -> set_invar(invar); }
+    ;
+
+check_invar_command_topic returns [CommandTopic_ptr res]
+    :  'check-invar'
+        { $res = cm.topic_check_invar(); }
     ;
 
 list_traces_command returns [Command_ptr res]
     : 'list-traces'
       { $res = cm.make_list_traces(); }
+    ;
+
+list_traces_command_topic returns [CommandTopic_ptr res]
+    :  'list-traces'
+        { $res = cm.topic_list_traces(); }
     ;
 
 dump_trace_command returns [Command_ptr res]
@@ -995,6 +1076,12 @@ dump_trace_command returns [Command_ptr res]
 
     ;
 
+dump_trace_command_topic returns [CommandTopic_ptr res]
+    :  'dump-trace'
+        { $res = cm.topic_dump_trace(); }
+    ;
+
+
 dup_trace_command returns [Command_ptr res]
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
@@ -1004,6 +1091,11 @@ dup_trace_command returns [Command_ptr res]
 
       ( duplicate_uid=string
         { ((DupTrace*) $res) -> set_duplicate_id(duplicate_uid); } )?
+    ;
+
+dup_trace_command_topic returns [CommandTopic_ptr res]
+    :  'dup-trace'
+        { $res = cm.topic_dup_trace(); }
     ;
 
 pick_state_command returns [Command_ptr res]
@@ -1016,6 +1108,11 @@ pick_state_command returns [Command_ptr res]
     |    '-t' trace_id=string
          { ((PickState*) $res) -> set_trace_uid(trace_id); }
     )*
+    ;
+
+pick_state_command_topic returns [CommandTopic_ptr res]
+    :  'pick-state'
+        { $res = cm.topic_pick_state(); }
     ;
 
 simulate_command returns [Command_ptr res]
@@ -1036,10 +1133,21 @@ simulate_command returns [Command_ptr res]
     )*
     ;
 
+simulate_command_topic returns [CommandTopic_ptr res]
+    :  'simulate'
+        { $res = cm.topic_simulate(); }
+    ;
+
 quit_command returns [Command_ptr res]
     :  'quit'
        { $res = cm.make_quit(); }
     ;
+
+quit_command_topic returns [CommandTopic_ptr res]
+    :  'quit'
+        { $res = cm.topic_quit(); }
+    ;
+
 
 string returns [pconst_char res]
 @init {}

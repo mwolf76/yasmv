@@ -79,10 +79,21 @@ Variant CheckInit::operator()()
     return Variant(tmp.str());
 }
 
-void CheckInit::usage()
+CheckInitTopic::CheckInitTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+CheckInitTopic::~CheckInitTopic()
 {
-    std::cout
-        << "check-init <expression> - Checks propositional satisfiability for given expression at time 0."
+    TRACE
+        << "Destroyed check-init topic"
         << std::endl;
 }
 
+void CheckInitTopic::usage()
+{
+    std::cout
+        << "check-init [ -a ] <expression> - Checks propositional satisfiability for given expression at initial time.\n\n"
+        << "If no inconsistency is found one INIT state witness trace is generated.\n"
+        << "If -a is specified all witness traces are generated (ALLSAT). Fails if no initial state exists.";
+}

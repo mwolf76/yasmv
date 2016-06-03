@@ -686,6 +686,11 @@ public:
 
     Expr_ptr make_identifier(Atom atom);
 
+    inline Expr_ptr main() const
+    { return main_expr; }
+
+
+
 protected:
     ExprMgr();
     ~ExprMgr();

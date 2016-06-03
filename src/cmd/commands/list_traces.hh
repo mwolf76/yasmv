@@ -29,7 +29,14 @@ public:
     virtual ~ListTraces();
 
     Variant virtual operator()();
+};
+
+class ListTracesTopic : public CommandTopic {
+public:
+    ListTracesTopic(Interpreter& owner);
+    virtual ~ListTracesTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // LIST_TRACES_CMD_H

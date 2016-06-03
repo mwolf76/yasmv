@@ -22,19 +22,24 @@
 #define HELP_H
 
 #include <cmd/command.hh>
+typedef CommandTopic* CommandTopic_ptr;
 
 class Help : public Command {
-
-    Command_ptr f_topic;
+    CommandTopic_ptr f_topic;
 
 public:
     Help(Interpreter& owner);
     virtual ~Help();
 
-    void set_topic(Command_ptr topic);
-
+    void set_topic(CommandTopic_ptr topic);
     Variant virtual operator()();
-    void virtual usage();
 };
 
-#endif
+class HelpTopic : public CommandTopic {
+public:
+    HelpTopic(Interpreter& owner);
+    virtual ~HelpTopic();
+
+    void virtual usage();
+};
+#endif // HELP_H

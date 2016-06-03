@@ -34,10 +34,19 @@ public:
     CheckInit(Interpreter& owner);
     virtual ~CheckInit();
 
+    /** cmd params */
     void set_init(Expr_ptr init);
 
+    /* run() */
     Variant virtual operator()();
+};
+
+class CheckInitTopic : public CommandTopic {
+public:
+    CheckInitTopic(Interpreter& owner);
+    virtual ~CheckInitTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // CHECK_INIT_CMD_H

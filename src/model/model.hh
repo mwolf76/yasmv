@@ -62,6 +62,15 @@ private:
     Expr_ptr f_duplicate;
 };
 
+class UnknownIdentifier : public ModelException {
+public:
+    UnknownIdentifier(Expr_ptr expr);
+    const char* what() const throw();
+
+private:
+    Expr_ptr f_unknown;
+};
+
 class BadParamCount : public ModelException {
 public:
     BadParamCount(Expr_ptr instance, unsigned expected, unsigned got);
@@ -117,6 +126,7 @@ public:
     const Defines& defs() const
     { return f_localDefs; }
     void add_def(Expr_ptr expr, Define_ptr def);
+    void ovd_def(Expr_ptr expr, Define_ptr def);
 
     /* Finite State Machine definition */
     inline const ExprVector& init() const

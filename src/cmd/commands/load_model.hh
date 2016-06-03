@@ -35,4 +35,12 @@ private:
     std::string f_filename;
 };
 
-#endif
+class ReadModelTopic : public CommandTopic {
+public:
+    ReadModelTopic(Interpreter& owner);
+    virtual ~ReadModelTopic();
+
+    void virtual usage();
+};
+
+#endif // LOAD_MODEL_H

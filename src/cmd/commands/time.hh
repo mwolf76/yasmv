@@ -29,7 +29,15 @@ public:
     virtual ~Time();
 
     Variant virtual operator()();
+};
+
+
+class TimeTopic : public CommandTopic {
+public:
+    TimeTopic(Interpreter& owner);
+    virtual ~TimeTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // TIME_CMD_H

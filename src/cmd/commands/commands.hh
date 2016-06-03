@@ -23,8 +23,6 @@
 #define COMMANDS_H
 
 #include <common.hh>
-
 #include <utils/variant.hh>
 
-#endif
-
+#endif // COMMANDS_H

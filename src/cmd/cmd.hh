@@ -86,6 +86,43 @@ public:
     inline Command_ptr make_dup_trace()
     { return new DupTrace(f_interpreter); }
 
+    // -- topicrs ----------------------------------------------------------------
+    inline CommandTopic_ptr topic_help()
+    { return new HelpTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_time()
+    { return new TimeTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_quit()
+    { return new QuitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_read_model()
+    { return new ReadModelTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_write_model()
+    { return new WriteModelTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_check_invar()
+    { return new CheckInvarTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_check_init()
+    { return new CheckInitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_pick_state()
+    { return new PickStateTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_simulate()
+    { return new SimulateTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_list_traces()
+    { return new ListTracesTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_dump_trace()
+    { return new DumpTraceTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_dup_trace()
+    { return new DupTraceTopic(f_interpreter); }
+
 protected:
     CommandMgr();
     ~CommandMgr();

@@ -117,12 +117,20 @@ Variant WriteModel::operator()()
     return Variant (oss.str());
 }
 
-void WriteModel::usage()
+WriteModelTopic::WriteModelTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+WriteModelTopic::~WriteModelTopic()
 {
-    std::cout
-        << "write-model [<filename>] - Write current model to given filename[*]."
-        << std::endl
-        << "[*] either in single or double quotes. If no filename is given, model is written to standard output"
+    TRACE
+        << "Destroyed write-model topic"
         << std::endl;
 }
 
+void WriteModelTopic::usage()
+{
+    std::cout
+        << "write-model [<filename>] - Write current model to given filename[*].\n"
+        << "[*] either in single or double quotes. If no filename is given, model is written to standard output";
+}

@@ -37,7 +37,14 @@ public:
     { return f_output; }
 
     Variant virtual operator()();
+};
+
+class WriteModelTopic : public CommandTopic {
+public:
+    WriteModelTopic(Interpreter& owner);
+    virtual ~WriteModelTopic();
+
     void virtual usage();
 };
 
-#endif
+#endif // WRITE_MODEL_CMD_H

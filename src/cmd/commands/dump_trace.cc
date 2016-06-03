@@ -444,21 +444,24 @@ Variant DumpTrace::operator()()
     return Variant("Ok");
 }
 
-void DumpTrace::usage()
+DumpTraceTopic::DumpTraceTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+DumpTraceTopic::~DumpTraceTopic()
 {
-    std::cout
-        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace."
-        << std::endl
-        << std::endl
-        << "options:"
-        << std::endl
-        << "  -f <format>, format can be either `plain`, `xml` or `json`."
-        << std::endl
-        << "  -o filename, filename must be a writeable path on disk."
-        << std::endl
-        << std::endl
-        << "`trace-uid` is the index of the trace to be dumped. If omitted, current"
-        << std::endl
-        << "trace will be dumped." ;
+    TRACE
+        << "Destroyed dump-trace topic"
+        << std::endl;
 }
 
+void DumpTraceTopic::usage()
+{
+    std::cout
+        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
+        << "options:\n"
+        << "  -f <format>, format can be either `plain`, `xml` or `json`.\n"
+        << "  -o filename, filename must be a writeable path on disk.\n\n"
+        << "`trace-uid` is the index of the trace to be dumped. If omitted, current\n"
+        << "trace will be dumped." ;
+}

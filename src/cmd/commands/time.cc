@@ -38,9 +38,19 @@ Variant Time::operator()()
     return Variant(res);
 }
 
-void Time::usage()
+TimeTopic::TimeTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+TimeTopic::~TimeTopic()
+{
+    TRACE
+        << "Destroyed time topic"
+        << std::endl;
+}
+
+void TimeTopic::usage()
 {
     std::cout
-        << "time - retrieves current running time in seconds"
-        << std::endl;
+        << "time - retrieves current running time in seconds" ;
 }

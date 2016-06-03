@@ -55,6 +55,9 @@ public:
     inline Model& model()
     { return f_model; }
 
+    inline Module& main()
+    { return f_model.module( ExprMgr::INSTANCE().main()); }
+
     inline Module& module(Expr_ptr module_name)
     { return f_model.module( module_name); }
 
