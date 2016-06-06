@@ -121,6 +121,7 @@ void BMC::forward( Expr_ptr phi,
                 wm.record(w);
                 wm.set_current(w);
                 set_witness(w);
+
                 goto cleanup;
             }
         }
@@ -136,6 +137,11 @@ void BMC::forward( Expr_ptr phi,
             /* unrolling */
             assert_fsm_trans(engine, k ++);
             assert_fsm_invar(engine, k);
+
+#if 0
+            /* TODO: enabling the next line turns full forward
+               strategy into pure BMC falsification */ continue;
+#endif
 
             {
                 /* looking for exploration proof: does a new unseen state
@@ -358,4 +364,3 @@ void BMC::sync_set_k(step_t k)
 
     f_k = k;
 }
-
