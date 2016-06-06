@@ -126,7 +126,7 @@ public:
     const Defines& defs() const
     { return f_localDefs; }
     void add_def(Expr_ptr expr, Define_ptr def);
-    void ovd_def(Expr_ptr expr, Define_ptr def);
+    void override(Expr_ptr expr, Define_ptr def);
 
     /* Finite State Machine definition */
     inline const ExprVector& init() const

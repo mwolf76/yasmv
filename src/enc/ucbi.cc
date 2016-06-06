@@ -93,4 +93,3 @@ bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
         x.time() == y.time() &&
         x.bitno() == y.bitno() ;
 }
-

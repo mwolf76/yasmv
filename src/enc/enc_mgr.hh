@@ -67,6 +67,7 @@ typedef boost::unordered_map<TimedExpr, Encoding_ptr, TimedExprHash, TimedExprEq
 typedef boost::unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
+
 class EncodingMgr  {
     friend class Encoding;
 

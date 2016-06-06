@@ -254,21 +254,31 @@ status_t Engine::sat_solve_groups(const Groups& groups)
 
 void Engine::push(CompilationUnit cu, step_t time, group_t group)
 {
-    /* push DDs */
+    /**
+     * 1. Pushing DDs
+     */
     {
         const DDVector& dv
             (cu.dds());
+
         DDVector::const_iterator i;
-        for (i = dv.begin(); dv.end() != i; ++ i)
+        for (i = dv.begin(); dv.end() != i; ++ i) {
             cnf_push_single_cut( *i, time, group );
+            // cnf_push_no_cut( *i, time, group );
+        }
     }
 
-    /* push CNF for inlined operators */
+    /**
+     * 2. Pushing CNF for inlined operators
+     */
     {
         const InlinedOperatorDescriptors& inlined_operator_descriptors
             (cu.inlined_operator_descriptors());
+
         InlinedOperatorDescriptors::const_iterator i;
-        for (i = inlined_operator_descriptors.begin(); inlined_operator_descriptors.end() != i; ++ i) {
+        for (i = inlined_operator_descriptors.begin();
+             inlined_operator_descriptors.end() != i; ++ i) {
+
             CNFOperatorInliner worker
                 (*this, time, group);
 
@@ -276,10 +286,13 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         }
     }
 
-    /* push ITE muxes */
+    /**
+     * 3. Pushing ITE MUXes
+     */
     {
         const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map
             (cu.binary_selection_descriptors_map());
+
         Expr2BinarySelectionDescriptorsMap::const_iterator mmi
             (binary_selection_descriptors_map.begin());
 
@@ -291,6 +304,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
             BinarySelectionDescriptors::const_iterator i;
             for (i = descriptors.begin(); descriptors.end() != i; ++ i) {
+
                 CNFBinarySelectionInliner worker
                     (*this, time, group);
 
@@ -301,7 +315,9 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         }
     }
 
-    /* push Array muxes */
+    /**
+     * 4. Pushing ARRAY MUXes
+     */
     {
         const MultiwaySelectionDescriptors& muxes
             (cu.array_mux_descriptors());
@@ -313,6 +329,5 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
 
             worker(*i);
         }
-
     }
 }

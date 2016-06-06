@@ -123,7 +123,7 @@ void Module::add_def(Expr_ptr symb_name, Define_ptr def)
                        (symb_name, def));
 }
 
-void Module::ovd_def(Expr_ptr symb_name, Define_ptr def)
+void Module::override(Expr_ptr symb_name, Define_ptr def)
 {
     std::ostringstream oss;
 
