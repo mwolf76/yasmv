@@ -1,5 +1,5 @@
 /// Json-cpp amalgated header (http://jsoncpp.sourceforge.net/).
-/// It is intented to be used with #include </home/markus/Code/github/gnuSMV/src/3rdparty/jsoncpp/json.hh>
+/// It is intented to be used with #include <yasmine/src/3rdparty/jsoncpp/json.hh>
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
