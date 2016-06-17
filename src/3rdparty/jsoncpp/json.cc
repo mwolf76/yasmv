@@ -73,7 +73,7 @@ license you like.
 
 
 
-#include "/home/markus/Code/github/gnuSMV/src/3rdparty/jsoncpp/json.hh"
+#include "src/3rdparty/jsoncpp/json.hh"
 
 
 // //////////////////////////////////////////////////////////////////////
