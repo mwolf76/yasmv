@@ -40,6 +40,7 @@
 
 typedef boost::unordered_map<std::string, Variant> ParametersMap;
 
+/* TODO: move this to BMC, this is not truly base */
 typedef enum {
     MC_FALSE,
     MC_TRUE,

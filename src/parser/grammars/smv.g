@@ -1015,8 +1015,19 @@ check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
 
-      init=toplevel_expression
-      { ((CheckInit *) $res) -> set_init(init); }
+        ( '-D' id=identifier ':=' body=toplevel_expression ';'
+        {
+            Define_ptr def = new Define( ExprMgr::INSTANCE().main(),
+                                         id, ExprVector(), body);
+            ModelMgr::INSTANCE().main().override(id, def);
+        }
+        | '-a'
+        { ((CheckInit *) $res) -> set_allsat(true); }
+
+        )*
+
+        (init=toplevel_expression
+        { ((CheckInit *) $res) -> set_init(init); })?
     ;
 
 check_init_command_topic returns [CommandTopic_ptr res]
@@ -1032,7 +1043,7 @@ check_invar_command returns[Command_ptr res]
         {
             Define_ptr def = new Define( ExprMgr::INSTANCE().main(),
                                          id, ExprVector(), body);
-            ModelMgr::INSTANCE().main().ovd_def(id, def);
+            ModelMgr::INSTANCE().main().override(id, def);
         }
         )*
 

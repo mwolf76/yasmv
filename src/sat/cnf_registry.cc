@@ -35,11 +35,20 @@ CNFRegistry::CNFRegistry(Engine& owner)
 CNFRegistry::~CNFRegistry()
 {}
 
-Var CNFRegistry:: find_dd_var(const DdNode* node, step_t time)
+Var CNFRegistry::find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
     const UCBI& ucbi
         (f_sat.find_ucbi(node->index));
+    const TCBI tcbi
+        (ucbi, time);
+    return f_sat.tcbi_to_var(tcbi);
+}
+
+Var CNFRegistry::find_dd_var(int node_index, step_t time)
+{
+    const UCBI& ucbi
+        (f_sat.find_ucbi(node_index));
     const TCBI tcbi
         (ucbi, time);
     return f_sat.tcbi_to_var(tcbi);
@@ -93,4 +102,3 @@ Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
     }
     return res;
 }
-

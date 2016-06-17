@@ -187,6 +187,12 @@ public:
     { return f_registry.find_dd_var(node, time); }
 
     /**
+     * @brief Timed model DD nodes to Minisat variable mapping
+     */
+    inline Var find_dd_var(int node_index, step_t time)
+    { return f_registry.find_dd_var(node_index, time); }
+
+    /**
      * @brief Artifactory DD nodes to Minisat variable mapping
      */
     inline Var find_cnf_var(const DdNode* node, step_t time)
@@ -229,6 +235,9 @@ public:
      * @brief SAT instance dctor
      */
     ~Engine();
+
+    inline EncodingMgr& enc() const
+    { return f_enc_mgr; }
 
 private:
     const char* f_instance_name;

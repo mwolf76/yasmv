@@ -1,6 +1,6 @@
 /**
  *  @file sat.cc
- *  @brief SAT interface implementation
+ *  @brief Engine interface implementation
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,69 +23,70 @@
 
 #include <dd/dd_walker.hh>
 
-namespace Minisat {
-#if 0
+class CNFBuilderNoCut : public ADDWalker {
+public:
+    CNFBuilderNoCut(Engine& sat, step_t time,
+                    group_t group = MAINGROUP)
+        : f_sat(sat)
+        , f_time(time)
+        , f_group(group)
+    {}
 
-    class CNFBuilderNoCut : public ADDWalker {
-    public:
-        CNFBuilderNoCut(SAT& sat, step_t time, group_t group, color_t color)
-            : f_sat(sat)
-            // , f_time(time),
-            // , f_group(group)
-            // , f_color(color)
-            , f_owner(CuddMgr::INSTANCE())
-        {}
+    ~CNFBuilderNoCut()
+    {}
 
-        ~CNFBuilderNoCut()
-        {}
-
-        bool condition(const DdNode *node)
-        {
-            /* if it's a zero leaf */
-            return (node == f_owner.dd().getManager()->zero);
-        }
-
-        void action(const DdNode *node)
-        {
-            value_t value = Cudd_V(node);
-
-            // FIXME...
-            group_t group = MAINGROUP;
-            color_t color = BACKGROUND;
-
-            vec<Lit> ps; ps.push( f_sat.cnf_find_group_lit( group));
-            unsigned i, size = f_owner.dd().getManager()->size;
-            for (i = 0; i < size; ++ i) {
-
-                if (value == 0) {
-                    ps.push( mkLit( f_sat.cnf_find_index_var(i), false));
-                }
-                else if (value == 1) {
-                    ps.push( mkLit( f_sat.cnf_find_index_var(i), true));
-                }
-                else {
-                    // it's a don't care, but we need the variable for
-                    // mapback REVIEW: it could be an interesting tweak to
-                    // do with options, to allow the user to prevent don't
-                    // care vars to make their way to minisat.
-
-                    // REVIEW
-                    // f_sat.cnf_find_index_lit(i, false);
-                }
-            }
-            f_sat.f_solver.addClause_(ps, color);
-        }
-
-    private:
-        SAT& f_sat;
-        CuddMgr& f_owner;
-    };
-
-    void SAT::cnf_push_no_cut(Term phi, step_t time, const group_t group, const color_t color)
+    bool condition(const DdNode *node)
     {
-        CNFBuilderNoCut builder(*this, time, group, color);
-        builder(phi);
+        /* if it's a zero leaf */
+        return (node == f_sat.enc().dd().getManager() -> zero);
     }
-#endif
+
+    void zero()
+    { assert(false); /* unused */ }
+
+    void one()
+    { assert(false); /* unused* */ }
+
+    void pre_hook()
+    {}
+
+    void post_hook()
+    {}
+
+    void action(const DdNode *node)
+    {
+        DdManager* dd_mgr
+            (f_sat.enc().dd().getManager());
+
+        value_t value = Cudd_V(node);
+
+        vec<Lit> ps;
+        ps.push( mkLit( f_group, true));
+
+        unsigned i, size = dd_mgr -> size;
+        for (i = 0; i < size; ++ i)
+            ps.push( mkLit( f_sat.find_dd_var(i, f_time),
+                            value != 0));
+
+        f_sat.add_clause(ps);
+    }
+
+private:
+    Engine& f_sat;
+    step_t f_time;
+    group_t f_group;
 };
 
+void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)
+{
+    CNFBuilderNoCut worker
+        (*this, time, group);
+
+    worker(add);
+}
+
+#ifdef DEBUG_CNF_LITERALS
+DRIVEL
+<< "------------------------------------------------------------"
+<< std::endl;
+#endif

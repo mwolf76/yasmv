@@ -200,8 +200,8 @@ private:
     boost::unordered_set<DdNode*> f_seen;
 
     DdNode* f_toplevel;
-    step_t f_time;
 
+    step_t f_time;
     group_t f_group;
 
     /* push 1 var clause */
@@ -260,6 +260,7 @@ void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
 {
     CNFBuilderSingleCut worker
         (*this, time, group);
+
     worker(add);
 
 #ifdef DEBUG_CNF_LITERALS

@@ -102,6 +102,8 @@ public:
 
 // services for CNF builder
 Var find_dd_var(const DdNode* node, step_t time);
+Var find_dd_var(int node_index, step_t time);
+
 Var find_cnf_var(const DdNode* node, step_t time);
 
 // services for CNF injector

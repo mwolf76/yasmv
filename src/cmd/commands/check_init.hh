@@ -29,6 +29,7 @@ class CheckInit : public Command {
 
     /* the initiant to be verified */
     Expr_ptr f_init;
+    bool f_allsat;
 
 public:
     CheckInit(Interpreter& owner);
@@ -36,6 +37,8 @@ public:
 
     /** cmd params */
     void set_init(Expr_ptr init);
+
+    void set_allsat(bool allsat);
 
     /* run() */
     Variant virtual operator()();

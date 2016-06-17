@@ -27,6 +27,7 @@
 CheckInit::CheckInit(Interpreter& owner)
     : Command(owner)
     , f_init(NULL)
+    , f_allsat(false)
 {}
 
 CheckInit::~CheckInit()
@@ -41,10 +42,16 @@ void CheckInit::set_init(Expr_ptr init)
     f_init = init;
 }
 
+void CheckInit::set_allsat(bool allsat)
+{
+    f_allsat = allsat;
+}
+
 Variant CheckInit::operator()()
 {
+    /* if no INIT formula is given, proceed with trivial truth */
     if (! f_init)
-        return Variant("No property given. Aborting...");
+        f_init = ExprMgr::INSTANCE().make_true();
 
     BMC bmc
         (*this, ModelMgr::INSTANCE().model());
@@ -56,12 +63,15 @@ Variant CheckInit::operator()()
     case MC_FALSE:
         tmp << "Property is FALSE";
         break;
+
     case MC_TRUE:
         tmp << "Property is TRUE";
         break;
+
     case MC_UNKNOWN:
         tmp << "Property could not be decided";
         break;
+
     default: assert( false ); /* unreachable */
     } /* switch */
     if (bmc.has_witness()) {
