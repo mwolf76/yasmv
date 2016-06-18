@@ -1,16 +1,12 @@
 The YASMINE project
-(c) 2014 Marco Pensallort < marco DOT pensallorto AT gmail DOT com >
+(c) 2014 Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
 
 README
 ======
 
 This directory contains the microcode files for YASMINE. Due to its
-size, the microcode is currently distributed as a bz2 tarball called
-`microcode.tar.bz2`. Unpack the contents of this tarball and set the
-environment variable `YASMV_HOME` to its parent directory.
-
-The microcode covers the full set of supported operators on n-bits
-integers (n varying from 1 to 64). It is *required* to enable support
-for integer and (FUTURE) fixed-point arithmetic.
-
+hefty size, the microcode is currently distributed as a bz2 tarball
+called `microcode.tar.bz2`. Unpack the contents of this tarball in a
+directory of choice and set the environment variable `YASMV_MICROCODE`
+to point to it.
 

@@ -10,17 +10,17 @@ from the long history of the NuSMV model checker and/or due to the
 amount of legacy code and tools that relied on it. Don't get me wrong,
 I really think NuSMV is a great piece of software. And I owe to the
 developers and researchers in FBK most - if not all - of my scientific
-and software engineering training. Those people are really
-fantastic. It's just that I have been wondering for years what that
-project would have been like, if one was completely free to redesign
-it all from the scratch. This is exactly why this project exists in
-the first place.
+and software engineering training. It's just that I have been
+wondering for years what that project would have been like, if one was
+completely free to redesign it all from the scratch. This is exactly
+why this project exists in the first place.
 
-  Overtime, YASMINE has significantly diverged from the original goal
-of making a NuSMV re-implementation. The input language for YASMINE is
-a dialect of SMV which retains only partial compatibility with NuSMV's
-original SMV language. In this area, my interest is about making the
-language easy to use, while not giving up on expressiveness.
+  Overtime, however, YASMINE has significantly diverged from the
+original goal of making a NuSMV re-implementation. The input language
+for YASMINE is now a "dialect" of SMV which retains only partial
+compatibility with NuSMV's original SMV language. In this area, my
+interest is all about making the language easy to use, while not
+giving up on expressiveness.
 
   The project has now approached a stage in which the program is
 usable to perform basic reachability analysis. I have included a few
@@ -29,26 +29,37 @@ examples to demonstrate how it can be used to solve planning problems.
 BUILD
 =====
 
-  The build system uses autools.
+  To install required dependencies on a Debian-like GNU/Linux distribution:
 
-  when all required packages are installed the build should boil down
-  to this:
+  $ sudo apt-get install autoconf libtool gcc g++ libboost-all-dev \
+  zlib1g-dev make minisat antlr3 libantlr3c-dev
 
-  $ autoreconf -vif
-  $ ./configure
+  when all the required packages are installed, launching the build
+  should boil down to this:
+
+  $ autoreconf -vif (you only need to do this once)
+
+  $ ./setup.sh
   $ make
 
-  On my current development platform - Debian 8 a.k.a "Jessie" - the
-  whole thing builds with no warnings (it may take some time,
-  though). Please note that the parser is written with ANTLR so you
-  will need some java JRE to generate the parser and lexer code for
-  the build. The generated code itself is C++, so as long as you don't
-  modify the grammar source files you will no longer need the JRE to
-  make a build.
+  The build may take quite a while. If your machine has multiple cores
+  using -j <number-of-parallel-tasks> option when running `make` may
+  help in reducing significantly build time, e.g.
 
-  To run, the program requires access to the microcode package which
-  is released as a bz2'd tarball due to its size. Unpack the microcode
-  tarball with:
+  $ make -j8
+
+  On my current development platform - Debian 8 a.k.a "Jessie" - the
+  whole thing builds with no warnings. The parser is written with
+  ANTLR so you will need some java JRE installed at build time. to
+  generate the parser and lexer code for the build. The generated code
+  itself is C++, so as long as you don't modify the grammar source
+  files you will no longer need the JRE to make a build. No JRE is
+  needed to run the final executable either.
+
+  After completing the build there is one more step to take before
+  being able to actually run the program. YASMINE requires access to
+  the microcode data package, which is released in the source code as
+  a bz2'd tarball due to its size. Unpack the microcode tarball with:
 
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
@@ -69,6 +80,12 @@ BUILD
   [Sat May 21 17:21:57 2016].459 src/main.cc:176 :: 2176 microcode fragments registered.
   >>
 
+  When launched the program will parse the contents of the `microcode`
+  directory and display the number of fragments it has found. The
+  default microcode distribution consists of 2176 fragments and covers
+  the full set of supported algebraic operations on n-bits integers (1
+  <= n <= 64).
+
   For further information on the microcode, please refer to the README
   file in the microcode bzip2'd tarball.
 
@@ -76,24 +93,20 @@ BUILD
 
   $ ./tests --log_level=all
 
-  Of course, the program can also be installed system-wide:
-
-  $ sudo make install
-
-  The following packages are required to perform a build:
-
-  TODO
-
-  The following packages are optional.
-
-  TODO
+  The default build for C++ code uses a low level of optimization
+  (-O0) to make life easier for debugging. If you want to, feel free
+  to enable higher level of optimization for the C++ code (the C code
+  already uses '-O2' by default). Do not expect major performance
+  gains though, as the core services (cudd and minisat) are compiled
+  and/or installed separately and already use a higher level of
+  optimization.
 
 DISCLAIMER
 ==========
 
 This code is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 YASMINE is in no way related to, or endorsed by, the NuSMV2
