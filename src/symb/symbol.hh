@@ -252,6 +252,10 @@ public:
     { return f_value; }
 };
 
+/**
+ * Defines can now have no body, that is they're actually INPUTs
+ * waiting to be bound with user-provided data when launched.
+ */
 class Define
     : public Symbol
     , public Params
@@ -268,6 +272,12 @@ public:
         , f_name(name)
         , f_formals(formals)
         , f_body(body)
+    {}
+
+    Define(const Expr_ptr module, const Expr_ptr name)
+        : f_module(module)
+        , f_name(name)
+	, f_body(NULL)
     {}
 
     const Expr_ptr module() const

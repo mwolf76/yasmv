@@ -140,7 +140,9 @@ scope {
 
     :   /* variables and defines */
         fsm_decl_modifiers (
-            fsm_var_decl | fsm_define_decl
+            fsm_var_decl
+        | fsm_define_decl
+        | fsm_input_decl
         )
 
         /* FSM definition */
@@ -242,6 +244,33 @@ fsm_define_decl_clause
           throw GrammarException("@input modifier not supported in DEFINE decls");
       if ($module_decl::frozen)
           throw GrammarException("@frozen modifier not supported in DEFINE decls");
+      if ($module_decl::hidden)
+          def -> set_hidden(true);
+
+      $smv::current_module->add_def(id, def);
+    }
+    ;
+
+fsm_input_decl
+    :
+        'INPUT' fsm_input_decl_body
+    ;
+
+fsm_input_decl_body
+    : fsm_input_decl_clause
+        ( ';' fsm_input_decl_clause)*
+    ;
+
+fsm_input_decl_clause
+@init {
+    ExprVector formals;
+}
+    : id=identifier
+    {
+      Define_ptr def = new Define($smv::current_module->name(), id);
+
+      if ($module_decl::frozen)
+          throw GrammarException("@frozen modifier is implied in INPUT decls");
       if ($module_decl::hidden)
           def -> set_hidden(true);
 

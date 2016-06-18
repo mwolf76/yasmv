@@ -603,6 +603,8 @@ void Preprocessor::substitute_expression(const Expr_ptr expr)
                          ( formal, actual ));
     }
 
+    assert((*this)(define.body());
+
     /* Here comes a bit of magic: we just relaunch the preprocessor on the
        define body, to perform the substitution :-D */
     (*this)(define.body());
