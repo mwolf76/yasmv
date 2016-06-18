@@ -43,23 +43,23 @@ BUILD
   $ make
 
   The build may take quite a while. If your machine has multiple cores
-  using -j <number-of-parallel-tasks> option when running `make` may
-  help in reducing significantly build time, e.g.
+  using -j <number-of-parallel-tasks> option when running `make`
+  should help in reducing significantly build time, e.g.
 
   $ make -j8
 
   On my current development platform - Debian 8 a.k.a "Jessie" - the
   whole thing builds with no warnings. The parser is written with
-  ANTLR so you will need some java JRE installed at build time. to
-  generate the parser and lexer code for the build. The generated code
-  itself is C++, so as long as you don't modify the grammar source
-  files you will no longer need the JRE to make a build. No JRE is
-  needed to run the final executable either.
+  ANTLR3[*] so you will need some java JRE installed at build time. to
+  generate the parser and lexer code. Generated code itself is C++, so
+  as long as you don't change the grammar source files you will no
+  longer need the JRE to build. No JRE is needed when running the
+  final executable either.
 
   After completing the build there is one more step to take before
   being able to actually run the program. YASMINE requires access to
-  the microcode data package, which is released in the source code as
-  a bz2'd tarball due to its size. Unpack the microcode tarball with:
+  the microcode data package, which is released as a bz2'd tarball due
+  to its size. Unpack the microcode tarball with:
 
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
@@ -81,10 +81,10 @@ BUILD
   >>
 
   When launched the program will parse the contents of the `microcode`
-  directory and display the number of fragments it has found. The
-  default microcode distribution consists of 2176 fragments and covers
-  the full set of supported algebraic operations on n-bits integers (1
-  <= n <= 64).
+  directory and display the number of fragments it found. The default
+  microcode distribution consists of 2176 fragments and covers the
+  full set of supported algebraic operations on n-bits integers (1 <=
+  n <= 64).
 
   For further information on the microcode, please refer to the README
   file in the microcode bzip2'd tarball.
@@ -93,13 +93,15 @@ BUILD
 
   $ ./tests --log_level=all
 
-  The default build for C++ code uses a low level of optimization
-  (-O0) to make life easier for debugging. If you want to, feel free
-  to enable higher level of optimization for the C++ code (the C code
-  already uses '-O2' by default). Do not expect major performance
-  gains though, as the core services (cudd and minisat) are compiled
-  and/or installed separately and already use a higher level of
+Remark: The default build for C++ code uses a low level of
+  optimization (-O0) to make life easier for debugging. If you want
+  to, feel free to enable higher level of optimization for the C++
+  code (C code already uses '-O2' by default). Do not expect major
+  performance gains though, as core services Cudd and Minisat are
+  compiled/installed separately and already use a higher level of
   optimization.
+
+[*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
 DISCLAIMER
 ==========
