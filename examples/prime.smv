@@ -1,0 +1,28 @@
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+#word-width 32
+MODULE main
+
+VAR
+        x : uint;
+        y : uint;
+
+INPUT
+        n : uint;
+
+INIT
+        x = n;
+
+INIT
+        1 < y;
+
+INIT
+        y < x;
+
+INIT
+        x % y = 0;
+
+-- to test for primality an arbitrary 32-bit number use: 'check-init
+-- -D n := <number>' or 'pick-state -D n := <number>'
+
+
