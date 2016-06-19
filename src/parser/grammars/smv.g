@@ -140,7 +140,7 @@ scope {
 
     :   /* variables and defines */
         fsm_decl_modifiers (
-            fsm_var_decl
+          fsm_var_decl
         | fsm_define_decl
         | fsm_input_decl
         )
@@ -263,18 +263,31 @@ fsm_input_decl_body
 
 fsm_input_decl_clause
 @init {
-    ExprVector formals;
+    ExprVector ev;
 }
-    : id=identifier
+    : ids=identifiers[&ev] ':' tp=type
     {
-      Define_ptr def = new Define($smv::current_module->name(), id);
+            ExprVector::iterator expr_iter;
+            assert(NULL != tp);
+            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
+                Expr_ptr id (*expr_iter);
 
-      if ($module_decl::frozen)
-          throw GrammarException("@frozen modifier is implied in INPUT decls");
-      if ($module_decl::hidden)
-          def -> set_hidden(true);
+                /* INPUTs are supported as undefined DEFINEs */
+                Define_ptr input
+                    (new Define($smv::current_module->name(), id, tp));
 
-      $smv::current_module->add_def(id, def);
+                if ($module_decl::hidden)
+                    input -> set_hidden(true);
+                if ($module_decl::input)
+                    WARN
+                        << "@input modifier ignored in INPUT decls"
+                        << std::endl;
+                if ($module_decl::frozen)
+                    WARN
+                        << "@input modifier ignored in INPUT decls"
+                        << std::endl;
+                $smv::current_module->add_def(id, input);
+            }
     }
     ;
 

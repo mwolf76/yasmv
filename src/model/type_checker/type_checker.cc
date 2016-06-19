@@ -508,14 +508,24 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             return;
         }
 
-        // we keep this to retain the old lazy behavior with nullary defines
-        // since it comes at no extra cost at all.
+
+        /* if define has a definite type, it is an INPUT so we
+           propagate its type. Otherwise we can safely recur into its
+           body. */
         else if (symb->is_define()) {
             Define& define
                 (symb->as_define());
 
-            assert( 0 == define.formals().size());
-            (*this)(define.body());
+            Type_ptr tp
+                (define.type());
+
+            if (tp) {
+                PUSH_TYPE(tp);
+            }
+            else {
+                assert( 0 == define.formals().size());
+                (*this)(define.body());
+            }
 
             return;
         }

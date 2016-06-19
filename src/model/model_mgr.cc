@@ -217,7 +217,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     ((*di).second -> body());
 
                 DEBUG
-                    << "Typechecking DEFINE "
+                    << "Typechecking "
                     << curr_ctx << "::" << body
                     << std::endl;
 

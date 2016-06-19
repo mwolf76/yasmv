@@ -149,10 +149,22 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    /* 6. defines, simply compile them recursively :-) */
+    /* 6. DEFINEs and INPUTs, simply compile them recursively :-) */
     else if (symb->is_define()) {
+
+        Type_ptr tp
+            (symb -> as_define().type());
         Expr_ptr body
-            (symb -> as_define().body());
+            (NULL);
+
+        if (!tp) {
+            /* DEFINEs have no definite type */
+            body = symb -> as_define().body();
+        }
+        else {
+            /* INPUTs */
+            assert(false);
+        }
 
         (*this) (body);
         return;

@@ -265,6 +265,8 @@ class Define
     const Expr_ptr f_name;
     const ExprVector f_formals;
     const Expr_ptr f_body;
+    const Type_ptr f_type; /* used only for INPUTs */
+
 public:
     Define(const Expr_ptr module, const Expr_ptr name,
            const ExprVector& formals, const Expr_ptr body)
@@ -272,13 +274,19 @@ public:
         , f_name(name)
         , f_formals(formals)
         , f_body(body)
-    {}
+        , f_type(NULL)
+    {
+        assert(body);
+    }
 
-    Define(const Expr_ptr module, const Expr_ptr name)
+    Define(const Expr_ptr module, const Expr_ptr name, const Type_ptr type)
         : f_module(module)
         , f_name(name)
-	, f_body(NULL)
-    {}
+	, f_body(name)
+        , f_type(type)
+    {
+        assert(type);
+    }
 
     const Expr_ptr module() const
     { return f_module; }
@@ -288,6 +296,9 @@ public:
 
     const Expr_ptr body() const
     { return f_body; }
+
+    const Type_ptr type() const
+    { return f_type; }
 
     const ExprVector& formals() const
     { return f_formals; }
