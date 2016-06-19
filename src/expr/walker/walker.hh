@@ -182,6 +182,21 @@ public:
     virtual const char* what() const throw() =0;
 };
 
+// raised when the walker has encountered a null expression
+class NullExpressionException : public WalkerException {
+public:
+    NullExpressionException()
+    {}
+
+    virtual const char* what() const throw() {
+        std::ostringstream oss;
+        oss
+	  << "null expression encountered";
+
+        return oss.str().c_str();
+    }
+};
+
 // raised when the walker has encountered an unsupported entry point
 class UnsupportedEntryPointException : public WalkerException {
 public:

@@ -180,7 +180,9 @@ void ExprWalker::walk ()
             }
         }
 
-        assert(NULL != curr.expr);
+	/* pre-node hooks */
+        if (! curr.expr)
+	  throw NullExpressionException();
         pre_node_hook(curr.expr);
 
         switch (curr.expr->f_symb) {
