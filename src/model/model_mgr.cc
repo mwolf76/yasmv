@@ -47,6 +47,21 @@ Module_ptr ModelMgr::scope(Expr_ptr key)
     return mi -> second;
 }
 
+Expr_ptr ModelMgr::get_input(const Expr_ptr key)
+{
+  const InputsMap::iterator eye
+    (f_inputs.find(key));
+
+  if (eye != f_inputs.end())
+    return (*eye).second;
+
+  throw UnknownIdentifier(key);
+  return NULL; /* unreachable */
+}
+
+void ModelMgr::set_input(Expr_ptr key, Expr_ptr value)
+{ f_inputs [ key ] = value; }
+
 Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
 {
     ParamMap::const_iterator i

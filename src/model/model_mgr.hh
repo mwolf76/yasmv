@@ -2,10 +2,6 @@
  *  @file model_mgr.hh
  *  @brief Model module (ModelMgr class)
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
- *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  *  This library is free software; you can redistribute it and/or
@@ -35,6 +31,7 @@
 #include <model/type_checker/type_checker.hh>
 
 #include <expr/expr_mgr.hh>
+typedef boost::unordered_map<Expr_ptr, Expr_ptr> InputsMap;
 
 #include <type/type_mgr.hh>
 
@@ -57,6 +54,10 @@ public:
 
     inline Module& main()
     { return f_model.module( ExprMgr::INSTANCE().main()); }
+
+    // command input support
+    void set_input(Expr_ptr id, Expr_ptr value);
+    Expr_ptr get_input(Expr_ptr id);
 
     inline Module& module(Expr_ptr module_name)
     { return f_model.module( module_name); }
@@ -113,6 +114,9 @@ private:
 
     /* local data */
     Model f_model;
+
+    /* INPUTs */
+    InputsMap f_inputs;
 
     // ref to expr manager
     ExprMgr& f_em;

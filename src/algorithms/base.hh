@@ -58,7 +58,7 @@ public:
     Algorithm(Command& command, Model& model);
     virtual ~Algorithm();
 
-    /* Build encodings are perform model compilation */
+    /* Build encodings to perform model compilation */
     virtual void setup();
 
     // algorithm abstract param interface (key -> value map)

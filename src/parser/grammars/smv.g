@@ -1059,9 +1059,7 @@ check_init_command returns[Command_ptr res]
 
         ( '-D' id=identifier ':=' body=toplevel_expression ';'
         {
-            Define_ptr def = new Define( ExprMgr::INSTANCE().main(),
-                                         id, ExprVector(), body);
-            ModelMgr::INSTANCE().main().override(id, def);
+            ModelMgr::INSTANCE().set_input(id, body);
         }
         | '-a'
         { ((CheckInit *) $res) -> set_allsat(true); }
