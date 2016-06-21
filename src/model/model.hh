@@ -140,17 +140,34 @@ public:
     inline const ExprVector& trans() const
     { return f_trans; }
     void add_trans(Expr_ptr expr);
-
-
 };
 
 typedef Module* Module_ptr;
 typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
 std::ostream& operator<<(std::ostream& os, Module& module);
 
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Values;
+
+class Environment {
+    friend std::ostream& operator<<(std::ostream& os,
+				    Environment& environment);
+
+    Values f_localValues;
+
+public:
+    Environment();
+    ~Environment();
+
+    const Expr_ptr value(Expr_ptr key) const;
+    void add_value(Expr_ptr expr, Expr_ptr value);
+};
+
+typedef Environment* Environment_ptr;
+std::ostream& operator<<(std::ostream& os, Environment& environment);
+
 class Model {
     Modules f_modules;
-
+  
 public:
     Model();
     ~Model();
