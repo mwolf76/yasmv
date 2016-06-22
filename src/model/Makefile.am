@@ -9,7 +9,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_SOURCES = exceptions.cc model.cc module.cc environment. cc	\
+PKG_SOURCES = exceptions.cc model.cc module.cc environment.cc	\
 symb_iter.cc model_mgr.cc model_resolver.cc symb_iter.cc
 
 # -------------------------------------------------------

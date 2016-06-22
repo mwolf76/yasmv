@@ -22,28 +22,61 @@
 #include <utility>
 #include <model.hh>
 
-std::ostream& operator<<(std::ostream& os, Environment& environment)
-{ return os << environment.name(); }
+std::ostream& operator<<(std::ostream& os, Environment& env)
+{
+  os
+    << "Bindings"
+    << std::endl;
 
-Environment::Environment(const Expr_ptr name)
-{}
+  const Values& values
+    (env.values());
+
+  for (Values::const_iterator i = values.begin(); values.end() != i; ++ i) {
+
+    std::pair<Expr_ptr, Expr_ptr> p
+      (*i);
+
+    os
+      << "  "
+      << p.first
+      << " := "
+      << p.second
+      << std::endl
+      ;
+  }
+
+  return os;
+}
+
+Environment::Environment()
+  : f_localValues()
+{
+  DEBUG
+        << "Created environment"
+        << std::endl;
+
+}
 
 Environment::~Environment()
-{}
+{
+  DEBUG
+    << "Destroyed environment"
+    << std::endl;
+}
 
 void Environment::add_value(Expr_ptr symbol, Expr_ptr value)
 {
   f_localValues.insert(std::make_pair<Expr_ptr, Expr_ptr>
-                       (symbol, value))
+                       (symbol, value));
 }
 
-Expr_ptr& Model::value(Expr_ptr key)
+const Expr_ptr Environment::value(Expr_ptr key) const
 {
     Values::const_iterator i
-      (f_localValues.find());
+      (f_localValues.find(key));
 
     if (i == f_localValues.end())
-        throw UndefinedIdentifier(key);
+        throw UnknownIdentifier(key);
 
-    return *(i -> second);
+    return i -> second;
 }

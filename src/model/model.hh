@@ -160,6 +160,10 @@ public:
 
     const Expr_ptr value(Expr_ptr key) const;
     void add_value(Expr_ptr expr, Expr_ptr value);
+
+  const inline Values& values() const
+  { return f_localValues; }
+
 };
 
 typedef Environment* Environment_ptr;
@@ -167,7 +171,7 @@ std::ostream& operator<<(std::ostream& os, Environment& environment);
 
 class Model {
     Modules f_modules;
-  
+
 public:
     Model();
     ~Model();

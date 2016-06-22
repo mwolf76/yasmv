@@ -162,7 +162,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 	(define.type());
 
       if (!tp) {
-	/* rewrite INPUTs into their correspondent value */
+	/* rewrite INPUTs body into their correspondent value */
 	body = ModelMgr::INSTANCE().get_input(body);
       }
 
