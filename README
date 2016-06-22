@@ -48,6 +48,9 @@ BUILD
 
   $ make -j8
 
+  Another option is to use distcc. The setup.sh script contains a
+  working example. Refer to distcc documentation for more details.
+
   On my current development platform - Debian 8 a.k.a "Jessie" - the
   whole thing builds with no warnings. The parser is written with
   ANTLR3[*] so you will need some java JRE installed at build time. to
