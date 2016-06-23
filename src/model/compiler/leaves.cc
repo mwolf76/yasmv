@@ -161,9 +161,18 @@ void Compiler::walk_leaf(const Expr_ptr expr)
       Type_ptr tp
 	(define.type());
 
-      if (!tp) {
+      if (tp) {
 	/* rewrite INPUTs body into their correspondent value */
-	body = ModelMgr::INSTANCE().get_input(body);
+          Expr_ptr value
+              (ModelMgr::INSTANCE().get_input(body));
+
+          TRACE
+              << body
+              << " := "
+              << value
+              << std::endl;
+
+          body = value;
       }
 
       (*this) (body);
