@@ -53,6 +53,7 @@ Variant CheckInit::operator()()
     if (! f_init)
         f_init = ExprMgr::INSTANCE().make_true();
 
+    /* TODO: turn this into CONSISTENCY */
     BMC bmc
         (*this, ModelMgr::INSTANCE().model());
 

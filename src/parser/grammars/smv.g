@@ -1164,6 +1164,12 @@ pick_state_command returns [Command_ptr res]
 pick_state_command_topic returns [CommandTopic_ptr res]
     :  'pick-state'
         { $res = cm.topic_pick_state(); }
+
+        ('-D' id=identifier ':=' body=toplevel_expression ';'
+        {
+            ModelMgr::INSTANCE().set_input(id, body);
+        }
+        )*
     ;
 
 simulate_command returns [Command_ptr res]
@@ -1181,6 +1187,11 @@ simulate_command returns [Command_ptr res]
 
     |   '-t' trace_id=string
         { ((Simulate*) $res) -> set_trace_uid(trace_id); }
+
+    |   '-D' id=identifier ':=' body=toplevel_expression ';'
+        {
+            ModelMgr::INSTANCE().set_input(id, body);
+        }
     )*
     ;
 
