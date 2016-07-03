@@ -85,7 +85,6 @@ SetTopic::~SetTopic()
 
 void SetTopic::usage()
 {
-    std::cout
-        <<
+    std::cout <<
         "set <identifier> <value> - Sets current value of <identifier>.\n\n";
 }

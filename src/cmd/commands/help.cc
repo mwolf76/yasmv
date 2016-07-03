@@ -50,6 +50,9 @@ Variant Help::operator()()
         std::cout << "Available topics: " << std::endl
                   << "- help" << std::endl
                   << "- time" << std::endl
+                  << "- get" << std::endl
+                  << "- set" << std::endl
+                  << "- clear" << std::endl
                   << "- read-model" << std::endl
                   << "- write-model" << std::endl
                   << "- pick-state" << std::endl

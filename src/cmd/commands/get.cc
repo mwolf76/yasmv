@@ -111,8 +111,7 @@ GetTopic::~GetTopic()
 
 void GetTopic::usage()
 {
-    std::cout
-        <<
+    std::cout <<
         "get [ <identifier> ] - Dumps current value of <identifier>.\n\n"
         "All assignments in the current environment are dumped if no argument is given." ;
 }
