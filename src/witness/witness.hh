@@ -123,7 +123,7 @@ private:
 };
 
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
-
+typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
 class Witness; // fwd decl
 
 typedef class TimeFrame* TimeFrame_ptr;
@@ -157,7 +157,6 @@ private:
 };
 
 typedef std::vector<TimeFrame_ptr> TimeFrames;
-typedef std::vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
 class Witness {
@@ -209,7 +208,7 @@ public:
     inline step_t size()
     { return f_frames.size(); }
 
-    inline Exprs& lang()
+    inline ExprVector& lang()
     { return f_lang; }
 
     /* Extends trace by k appending the given one, yields last timeframe */
@@ -238,7 +237,7 @@ protected:
     TimeFrames f_frames;
 
     /* Language (i.e. full list of symbols) */
-    Exprs f_lang;
+    ExprVector f_lang;
 };
 
 class WitnessPrinter {

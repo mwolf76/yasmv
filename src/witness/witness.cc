@@ -93,8 +93,10 @@ TimeFrame::~TimeFrame()
 Expr_ptr TimeFrame::value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+    ExprVector& lang
+        (f_owner.lang());
+
+    assert( find(lang.begin(), lang.end(), expr) != lang.end());
 
     Expr2ExprMap::iterator eye;
 
@@ -109,7 +111,7 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 bool TimeFrame::has_value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
 
     // FIXME: proper exception
@@ -128,7 +130,7 @@ bool TimeFrame::has_value( Expr_ptr expr )
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
 {
     // symbol is defined in witness' language
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
@@ -146,12 +148,12 @@ ExprVector TimeFrame::assignments()
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
 
     ExprVector res;
 
-    Exprs::const_iterator i
+    ExprVector::const_iterator i
         (lang.begin());
     while (i != lang.end()) {
         Expr_ptr symb
@@ -228,4 +230,3 @@ bool Witness::has_value( Expr_ptr expr, step_t time)
     return f_frames[ time ]
         -> has_value( expr );
 }
-

@@ -1,6 +1,5 @@
 /*
- * @file cmd.cc
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file set.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,32 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd.hh>
+#ifndef SET_CMD_H
+#define SET_CMD_H
 
-// static initialization
-CommandMgr_ptr CommandMgr::f_instance = NULL;
+#include <cmd/command.hh>
+#include <env/environment.hh>
 
-CommandMgr& CommandMgr::INSTANCE()
-{
-    if (! f_instance)
-        f_instance = new CommandMgr();
+class Set : public Command {
 
-    return (*f_instance);
-}
+    Expr_ptr f_identifier;
+    Expr_ptr f_value;
 
-CommandMgr::CommandMgr()
-    : f_interpreter(Interpreter::INSTANCE())
-{
-    const void* instance(this);
-    DRIVEL
-        << "CommandMgr initialized @"
-        << instance
-        << std::endl;
-}
+public:
+    Set(Interpreter& owner);
+    virtual ~Set();
 
-CommandMgr::~CommandMgr()
-{
-    DRIVEL
-        << "CommandMgr deinitialized"
-        << std::endl;
-}
+    void set_identifier(Expr_ptr id);
+    void set_value(Expr_ptr value);
+    Variant virtual operator()();
+};
+
+class SetTopic : public CommandTopic {
+public:
+    SetTopic(Interpreter& owner);
+    virtual ~SetTopic();
+
+    void virtual usage();
+};
+
+#endif // SET_CMD_H

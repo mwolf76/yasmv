@@ -997,6 +997,15 @@ command returns [Command_ptr res]
     |  c=dup_trace_command
        { $res = c; }
 
+    | c=get_command
+       { $res = c; }
+
+    | c=set_command
+       { $res = c; }
+
+    | c=clear_command
+       { $res = c; }
+
     |  c=quit_command
        { $res = c; }
     ;
@@ -1189,6 +1198,54 @@ simulate_command returns [Command_ptr res]
 simulate_command_topic returns [CommandTopic_ptr res]
     :  'simulate'
         { $res = cm.topic_simulate(); }
+    ;
+
+get_command returns [Command_ptr res]
+    : 'get'
+      { $res = cm.make_get(); }
+
+      ( id=identifier
+      { ((Get*) $res) -> set_identifier(id); })?
+
+    ;
+
+get_command_topic returns [CommandTopic_ptr res]
+    :  'get'
+        { $res = cm.topic_get(); }
+    ;
+
+set_command returns [Command_ptr res]
+    : 'set'
+      { $res = cm.make_set(); }
+
+      id=identifier
+      { ((Set*) $res) -> set_identifier(id); }
+
+      val=toplevel_expression
+      { ((Set*) $res) -> set_value(val); }
+    ;
+
+set_command_topic returns [CommandTopic_ptr res]
+    :  'set'
+        { $res = cm.topic_set(); }
+
+        id=identifier
+        { ((Set*) $res) -> set_identifier(id); }
+
+
+    ;
+
+clear_command returns [Command_ptr res]
+    : 'clear'
+      { $res = cm.make_clear(); }
+
+      ( id=identifier
+      { ((Clear*) $res) -> set_identifier(id); })?
+    ;
+
+clear_command_topic returns [CommandTopic_ptr res]
+    :  'clear'
+        { $res = cm.topic_clear(); }
     ;
 
 quit_command returns [Command_ptr res]

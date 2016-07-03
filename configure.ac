@@ -147,6 +147,7 @@ AC_CONFIG_FILES([Makefile
                  src/cmd/commands/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
+                 src/env/Makefile
                  src/expr/Makefile
                  src/expr/printer/Makefile
                  src/expr/walker/Makefile

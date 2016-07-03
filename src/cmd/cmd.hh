@@ -42,6 +42,10 @@
 #include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/dup_trace.hh>
 
+#include <cmd/commands/get.hh>
+#include <cmd/commands/set.hh>
+#include <cmd/commands/clear.hh>
+
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
 
@@ -86,6 +90,15 @@ public:
     inline Command_ptr make_dup_trace()
     { return new DupTrace(f_interpreter); }
 
+    inline Command_ptr make_get()
+    { return new Get(f_interpreter); }
+
+    inline Command_ptr make_set()
+    { return new Set(f_interpreter); }
+
+    inline Command_ptr make_clear()
+    { return new Clear(f_interpreter); }
+
     // -- topicrs ----------------------------------------------------------------
     inline CommandTopic_ptr topic_help()
     { return new HelpTopic(f_interpreter); }
@@ -122,6 +135,15 @@ public:
 
     inline CommandTopic_ptr topic_dup_trace()
     { return new DupTraceTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_get()
+    { return new GetTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_set()
+    { return new SetTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_clear()
+    { return new ClearTopic(f_interpreter); }
 
 protected:
     CommandMgr();

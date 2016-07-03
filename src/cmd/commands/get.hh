@@ -1,6 +1,5 @@
 /*
- * @file cmd.cc
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file get.hh
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,32 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd.hh>
+#ifndef GET_CMD_H
+#define GET_CMD_H
 
-// static initialization
-CommandMgr_ptr CommandMgr::f_instance = NULL;
+#include <cmd/command.hh>
+#include <env/environment.hh>
 
-CommandMgr& CommandMgr::INSTANCE()
-{
-    if (! f_instance)
-        f_instance = new CommandMgr();
+class Get : public Command {
 
-    return (*f_instance);
-}
+    Expr_ptr f_identifier;
 
-CommandMgr::CommandMgr()
-    : f_interpreter(Interpreter::INSTANCE())
-{
-    const void* instance(this);
-    DRIVEL
-        << "CommandMgr initialized @"
-        << instance
-        << std::endl;
-}
+public:
+    Get(Interpreter& owner);
+    virtual ~Get();
 
-CommandMgr::~CommandMgr()
-{
-    DRIVEL
-        << "CommandMgr deinitialized"
-        << std::endl;
-}
+    void set_identifier(Expr_ptr id);
+    Variant virtual operator()();
+};
+
+class GetTopic : public CommandTopic {
+public:
+    GetTopic(Interpreter& owner);
+    virtual ~GetTopic();
+
+    void virtual usage();
+};
+
+#endif // GET_CMD_H

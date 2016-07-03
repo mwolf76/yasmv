@@ -1,6 +1,6 @@
 /*
- * @file cmd.cc
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file environment.hh
+ * @brief Command environment subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,32 +19,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#include <cmd.hh>
+#include <environment.hh>
 
-// static initialization
-CommandMgr_ptr CommandMgr::f_instance = NULL;
+Environment_ptr Environment::f_instance = NULL;
 
-CommandMgr& CommandMgr::INSTANCE()
+Environment& Environment::INSTANCE()
 {
     if (! f_instance)
-        f_instance = new CommandMgr();
+        f_instance = new Environment();
 
-    return (*f_instance);
+    return *f_instance;
 }
 
-CommandMgr::CommandMgr()
-    : f_interpreter(Interpreter::INSTANCE())
+Expr_ptr Environment::get(Expr_ptr id) const
 {
-    const void* instance(this);
-    DRIVEL
-        << "CommandMgr initialized @"
-        << instance
-        << std::endl;
+    Expr2ExprMap::const_iterator eye
+        (f_env.find(id));
+
+    if (eye == f_env.end())
+        throw NoSuchIdentifier(id);
+
+    /* NULL value means deleted entry */
+    if (! eye -> second)
+        throw NoSuchIdentifier(id);
+
+    return eye -> second; /* non-NULL */
 }
 
-CommandMgr::~CommandMgr()
+void Environment::set(Expr_ptr id, Expr_ptr value)
 {
-    DRIVEL
-        << "CommandMgr deinitialized"
-        << std::endl;
+    if (value)
+        f_identifiers.insert(id);
+    else
+        f_identifiers.erase(id);
+
+    f_env.insert(std::make_pair<Expr_ptr, Expr_ptr> (id, value));
+}
+
+void Environment::clear()
+{
+    f_identifiers.clear();
+    f_env.clear();
 }

@@ -1,4 +1,3 @@
-
 /*
  * @file interpreter.cc
  * @brief Command interpreter subsystem related classes and definitions.
@@ -93,10 +92,10 @@ char * rl_gets ()
 Interpreter_ptr Interpreter::f_instance = NULL;
 Interpreter& Interpreter::INSTANCE()
 {
-    if (! f_instance) {
+    if (! f_instance)
         f_instance = new Interpreter();
-    }
-    return (*f_instance);
+
+    return *f_instance;
 }
 
 Interpreter::Interpreter()
@@ -204,4 +203,3 @@ void Interpreter::register_job( Job& job )
 {
     f_jobs.push_back( &job );
 }
-

@@ -23,12 +23,16 @@
 #define INTERPRETER_H
 
 #include <iostream>
+#include <boost/unordered_map.hpp>
 
 #include <common.hh>
+#include <utils/pool.hh>
 #include <opts.hh>
 
 #include <cmd/command.hh>
 #include <cmd/job.hh>
+
+#include <env/environment.hh>
 
 typedef class Interpreter* Interpreter_ptr;
 
