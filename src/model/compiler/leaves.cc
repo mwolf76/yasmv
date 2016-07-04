@@ -152,25 +152,35 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     /* 6. DEFINEs and INPUTs, simply compile them recursively :-) */
     else if (symb->is_define()) {
 
-        Type_ptr tp
-            (symb -> as_define().type());
-        Expr_ptr body
-            (NULL);
+      Define& define
+	(symb -> as_define());
 
-        if (!tp) {
-            /* DEFINEs have no definite type */
-            body = symb -> as_define().body();
-        }
-        else {
-            /* INPUTs */
-            assert(false);
-        }
+      Expr_ptr body
+	(define.body());
 
-        (*this) (body);
-        return;
+      Type_ptr tp
+	(define.type());
+
+      if (tp) {
+	/* rewrite INPUTs body into their correspondent value */
+          Expr_ptr value
+              (ModelMgr::INSTANCE().get_input(body));
+
+          TRACE
+              << body
+              << " := "
+              << value
+              << std::endl;
+
+          body = value;
+      }
+
+      (*this) (body);
+      return;
     }
 
-    assert( false ); /* give up, TODO: exception */
+    /* give up, TODO: exception */
+    assert( false );
 }
 
 /* private service of walk_leaf */

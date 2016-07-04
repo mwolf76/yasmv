@@ -8,10 +8,10 @@ VAR
         y : uint;
 
 INPUT
-        n : uint;
+        number : uint;
 
 INIT
-        x = n;
+        x = number;
 
 INIT
         1 < y;

@@ -24,6 +24,8 @@
 #include <base.hh>
 #include <symb/proxy.hh>
 
+#include <model/model.hh>
+
 Algorithm::Algorithm(Command& command, Model& model)
     : f_command(command)
     , f_model(model)
