@@ -42,13 +42,7 @@ public:
         : f_id(id)
     {}
 
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-        oss
-            << "No such identifier: `" << f_id << "`";
-
-        return oss.str().c_str();
-    }
+    virtual const char* what() const throw();
 
 private:
     Expr_ptr f_id;

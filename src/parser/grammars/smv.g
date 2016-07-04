@@ -1066,11 +1066,8 @@ check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
 
-        ( '-D' id=identifier ':=' body=toplevel_expression ';'
-        {
-            ModelMgr::INSTANCE().set_input(id, body);
-        }
-        | '-a'
+        (
+        '-a'
         { ((CheckInit *) $res) -> set_allsat(true); }
 
         )*
@@ -1087,14 +1084,6 @@ check_init_command_topic returns [CommandTopic_ptr res]
 check_invar_command returns[Command_ptr res]
     : 'check-invar'
       { $res = cm.make_check_invar(); }
-
-        ( '-D' id=identifier ':=' body=toplevel_expression ';'
-        {
-            Define_ptr def = new Define( ExprMgr::INSTANCE().main(),
-                                         id, ExprVector(), body);
-            ModelMgr::INSTANCE().main().override(id, def);
-        }
-        )*
 
         invar=toplevel_expression
         { ((CheckInvar *) $res) -> set_invar(invar); }
@@ -1173,12 +1162,6 @@ pick_state_command returns [Command_ptr res]
 pick_state_command_topic returns [CommandTopic_ptr res]
     :  'pick-state'
         { $res = cm.topic_pick_state(); }
-
-        ('-D' id=identifier ':=' body=toplevel_expression ';'
-        {
-            ModelMgr::INSTANCE().set_input(id, body);
-        }
-        )*
     ;
 
 simulate_command returns [Command_ptr res]
@@ -1196,11 +1179,6 @@ simulate_command returns [Command_ptr res]
 
     |   '-t' trace_id=string
         { ((Simulate*) $res) -> set_trace_uid(trace_id); }
-
-    |   '-D' id=identifier ':=' body=toplevel_expression ';'
-        {
-            ModelMgr::INSTANCE().set_input(id, body);
-        }
     )*
     ;
 

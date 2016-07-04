@@ -24,6 +24,8 @@
 
 #include <model/model_mgr.hh>
 
+#include <env/environment.hh>
+
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
@@ -49,18 +51,11 @@ Module_ptr ModelMgr::scope(Expr_ptr key)
 
 Expr_ptr ModelMgr::get_input(const Expr_ptr key)
 {
-  const InputsMap::iterator eye
-    (f_inputs.find(key));
+    Environment& env
+        (Environment::INSTANCE());
 
-  if (eye != f_inputs.end())
-    return (*eye).second;
-
-  throw UnknownIdentifier(key);
-  return NULL; /* unreachable */
+    return env.get(key);
 }
-
-void ModelMgr::set_input(Expr_ptr key, Expr_ptr value)
-{ f_inputs [ key ] = value; }
 
 Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
 {

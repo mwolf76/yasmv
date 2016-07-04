@@ -21,8 +21,15 @@
  **/
 #include <environment.hh>
 
-Environment_ptr Environment::f_instance = NULL;
+const char* NoSuchIdentifier::what() const throw() {
+    std::ostringstream oss;
+    oss
+        << "No such identifier: `" << f_id << "`";
 
+    return strdup(oss.str().c_str());
+}
+
+Environment_ptr Environment::f_instance = NULL;
 Environment& Environment::INSTANCE()
 {
     if (! f_instance)

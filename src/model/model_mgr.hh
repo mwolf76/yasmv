@@ -30,9 +30,6 @@
 
 #include <model/type_checker/type_checker.hh>
 
-#include <expr/expr_mgr.hh>
-typedef boost::unordered_map<Expr_ptr, Expr_ptr> InputsMap;
-
 #include <type/type_mgr.hh>
 
 typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> ContextMap;
@@ -56,7 +53,6 @@ public:
     { return f_model.module( ExprMgr::INSTANCE().main()); }
 
     // command input support
-    void set_input(Expr_ptr id, Expr_ptr value);
     Expr_ptr get_input(Expr_ptr id);
 
     inline Module& module(Expr_ptr module_name)
@@ -114,9 +110,6 @@ private:
 
     /* local data */
     Model f_model;
-
-    /* INPUTs */
-    InputsMap f_inputs;
 
     // ref to expr manager
     ExprMgr& f_em;

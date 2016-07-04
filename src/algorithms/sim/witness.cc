@@ -123,9 +123,29 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             const Define& define
                 (symb->as_define());
 
+            Type_ptr tp
+                (define.type());
+
+            Expr_ptr body
+                (define.body());
+
+            if (tp) {
+                /* rewrite INPUTs body into their correspondent value */
+                Expr_ptr value
+                    (ModelMgr::INSTANCE().get_input(body));
+
+                TRACE
+                    << body
+                    << " := "
+                    << value
+                    << std::endl;
+
+                body = value;
+            }
+
             try {
                 Expr_ptr value
-                    (wm.eval( *this, ctx, define.body(), 0));
+                    (wm.eval( *this, ctx, body, 0));
 
                 tf.set_value( key, value );
             }

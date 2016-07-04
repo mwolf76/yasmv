@@ -317,10 +317,32 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             catch (NoValue nv) {}
         }
         else if (symb -> is_define()) {
-            Expr_ptr expr(symb->name());
+
+            Define& define
+                (symb -> as_define());
+
+            Expr_ptr body
+                (define.body());
+
+            Type_ptr tp
+                (define.type());
+
+            if (tp) {
+                /* rewrite INPUTs body into their correspondent value */
+                Expr_ptr value
+                    (ModelMgr::INSTANCE().get_input(body));
+
+                TRACE
+                    << body
+                    << " := "
+                    << value
+                    << std::endl;
+
+                body = value;
+            }
 
             try {
-                value = wm.eval( w, ctx, expr, time);
+                value = wm.eval( w, ctx, body, time);
                 defines_assignments.push_back( em.make_eq( full, value));
             }
             catch (NoValue nv) {}
