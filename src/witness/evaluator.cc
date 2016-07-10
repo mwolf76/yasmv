@@ -33,6 +33,8 @@
 #include <witness/evaluator.hh>
 #include <witness/witness_mgr.hh>
 
+#include <env/environment.hh>
+
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)
 {
@@ -683,6 +685,66 @@ bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
 void Evaluator::walk_cast_postorder(const Expr_ptr expr)
 { /* nop */ }
 
+void Evaluator::push_value(const Expr_ptr expr)
+{
+    ResolverProxy resolver;
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    if (em.is_false(expr))
+        f_values_stack.push_back(0);
+
+    else if (em.is_true(expr))
+        f_values_stack.push_back(1);
+
+    else if (em.is_identifier(expr)) {
+        Expr_ptr full_lit
+            (em.make_dot(em.make_empty(), expr));
+        Symbol_ptr symb_lit
+            (resolver.symbol(full_lit));
+        assert( symb_lit -> is_literal());
+
+        Literal& lit
+            (symb_lit->as_literal());
+
+        value_t value
+            (lit.value());
+        PUSH_VALUE(value);
+    }
+    else {
+        if (em.is_constant(expr)) {
+            /* scalar value, easy case */
+            f_values_stack.push_back(expr -> value());
+        }
+        else if (em.is_neg(expr) &&
+                 em.is_constant(expr -> lhs())) {
+            /* negative scalar value, easy case */
+            f_values_stack.push_back(- expr -> lhs() -> value());
+        }
+        else if (em.is_array(expr)) {
+            /* array value, push each element */
+
+            Expr_ptr eye
+                (expr -> lhs());
+            while (em.is_array_comma(eye)) {
+                f_values_stack.push_back(eye -> lhs() -> value());
+                eye = eye -> rhs();
+            }
+            f_values_stack.push_back(eye -> value()); /* last */
+        }
+        else {
+            ERR
+                << "Cannot evaluate `"
+                << expr
+                << "`"
+                << std::endl;
+
+            assert(false);
+        }
+    }
+}
+
 
 void Evaluator::walk_leaf(const Expr_ptr expr)
 {
@@ -748,74 +810,29 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
     else if (symb->is_variable()) {
 
+        Variable& var
+            (symb -> as_variable());
+
         // push into type stack
         Type_ptr type
-            (symb->as_variable().type());
+            (var.type());
 
         PUSH_TYPE(type);
         if (type->is_instance())
             return;
 
-        if (! f_witness -> has_value( full, time))
-            throw NoValue(full);
-
-        Expr_ptr expr
-            (f_witness -> value( full, time));
-
-        if (em.is_false(expr))
-            f_values_stack.push_back(0);
-
-        else if (em.is_true(expr))
-            f_values_stack.push_back(1);
-
-        else if (em.is_identifier(expr)) {
-            Expr_ptr full_lit
-                (em.make_dot(em.make_empty(), expr));
-            Symbol_ptr symb_lit
-                (resolver.symbol(full_lit));
-            assert( symb_lit -> is_literal());
-
-            Literal& lit
-                (symb_lit->as_literal());
-
-            value_t value
-                (lit.value());
-            PUSH_VALUE(value);
-        }
-        else {
-            if (em.is_constant(expr)) {
-                /* scalar value, easy case */
-                f_values_stack.push_back(expr -> value());
-            }
-            else if (em.is_neg(expr) && em.is_constant(expr -> lhs())) {
-                /* negative scalar value, easy case */
-                f_values_stack.push_back(- expr -> lhs() -> value());
-            }
-            else if (em.is_array(expr)) {
-                /* array value, push each element */
-
-                Expr_ptr eye
-                    (expr -> lhs());
-                while (em.is_array_comma(eye)) {
-                    f_values_stack.push_back(eye -> lhs() -> value());
-                    eye = eye -> rhs();
-                }
-                f_values_stack.push_back(eye -> value()); /* last */
-            }
-            else {
-                ERR
-                    << "Cannot evaluate `"
-                    << expr
-                    << "`"
-                    << std::endl;
-
-                assert(false);
-            }
+        else if (var.is_input()) {
+            push_value(Environment::INSTANCE().get(expr));
         }
 
+        else if (f_witness -> has_value( full, time)) {
+            push_value(f_witness -> value( full, time));
+        }
+
+        else throw NoValue(full);
 
         return;
-    }
+    } /* is_variable() */
 
     else if (symb->is_parameter()) {
 
