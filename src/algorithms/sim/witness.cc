@@ -24,6 +24,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+#include <env/environment.hh>
+
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness()
 {
@@ -76,43 +78,57 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
         if (symb->is_variable()) {
 
-            /* time it, and fetch encoding for enc mgr */
-            Encoding_ptr enc
-                (bm.find_encoding( TimedExpr(key, 0)) );
+            const Variable& var
+                (symb->as_variable());
 
-            /* not in COI, skipping... */
-            if ( ! enc )
-                continue;
+            /* INPUT vars are in fact bodyless, typed DEFINEs */
+            if (var.is_input()) {
+                Expr_ptr value
+                    (Environment::INSTANCE().get(symb_name));
 
-            /* 1. for each bit int the encoding, fetch UCBI, time it
-               into TCBI, fetch its value in solver model and set the
-               corresponding entry in inputs array. */
-            DDVector::const_iterator di;
-            unsigned ndx;
-            for (ndx = 0, di = enc->bits().begin();
-                 enc->bits().end() != di; ++ ndx, ++ di) {
-
-                unsigned bit
-                    ((*di).getNode()->index);
-                const UCBI& ucbi
-                    (bm.find_ucbi(bit));
-                const TCBI tcbi
-                    (TCBI(ucbi, k));
-                Var var
-                    (engine.tcbi_to_var(tcbi));
-                int value
-                    (engine.value(var)); /* Don't care is assigned to 0 */
-
-                inputs[bit] = value;
+                tf.set_value( key, value );
             }
 
-            /* 2. eval the encoding DDs with inputs and put resulting
-               value into time frame container. */
-            Expr_ptr value
-                (enc->expr(inputs));
+            else {
 
-            if (value)
-                tf.set_value( key, value );
+                /* time it, and fetch encoding for enc mgr */
+                Encoding_ptr enc
+                    (bm.find_encoding( TimedExpr(key, 0)) );
+
+                /* not in COI, skipping... */
+                if ( ! enc )
+                    continue;
+
+                /* 1. for each bit int the encoding, fetch UCBI, time it
+                   into TCBI, fetch its value in solver model and set the
+                   corresponding entry in inputs array. */
+                DDVector::const_iterator di;
+                unsigned ndx;
+                for (ndx = 0, di = enc->bits().begin();
+                     enc->bits().end() != di; ++ ndx, ++ di) {
+
+                    unsigned bit
+                        ((*di).getNode()->index);
+                    const UCBI& ucbi
+                        (bm.find_ucbi(bit));
+                    const TCBI tcbi
+                        (TCBI(ucbi, k));
+                    Var var
+                        (engine.tcbi_to_var(tcbi));
+                    int value
+                        (engine.value(var)); /* Don't care is assigned to 0 */
+
+                    inputs[bit] = value;
+                }
+
+                /* 2. eval the encoding DDs with inputs and put resulting
+                   value into time frame container. */
+                Expr_ptr value
+                    (enc->expr(inputs));
+
+                if (value)
+                    tf.set_value( key, value );
+            }
         }
 
         else if (symb->is_define()) {
@@ -123,25 +139,8 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             const Define& define
                 (symb->as_define());
 
-            Type_ptr tp
-                (define.type());
-
             Expr_ptr body
                 (define.body());
-
-            if (tp) {
-                /* rewrite INPUTs body into their correspondent value */
-                Expr_ptr value
-                    (ModelMgr::INSTANCE().get_input(body));
-
-                TRACE
-                    << body
-                    << " := "
-                    << value
-                    << std::endl;
-
-                body = value;
-            }
 
             try {
                 Expr_ptr value
@@ -149,6 +148,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
                 tf.set_value( key, value );
             }
+
             catch (NoValue nv) {
             }
         }

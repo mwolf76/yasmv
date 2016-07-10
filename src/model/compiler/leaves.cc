@@ -23,6 +23,8 @@
 
 #include <proxy.hh>
 
+#include <env/environment.hh>
+
 static inline value_t pow2(unsigned exp);
 
 void Compiler::walk_leaf(const Expr_ptr expr)
@@ -122,18 +124,29 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Type_ptr type
             (var.type());
 
-        if (type -> is_instance()) {
-            f_type_stack.push_back(type);
-            return;
+        /* INPUT vars are in fact bodyless, typed DEFINEs */
+        if (var.is_input()) {
+            Expr_ptr value
+              (Environment::INSTANCE().get(expr));
+
+            (*this) (value);
         }
 
-        TimedExpr key
-            (full, var.is_frozen() ? UINT_MAX : time);
+        /* REVIEW THIS */
+        else if (type -> is_instance()) {
+            f_type_stack.push_back(type);
+        }
 
-        Encoding_ptr enc
-            (find_encoding(key, type));
+        else {
+            TimedExpr key
+                (full, var.is_frozen() ? UINT_MAX : time);
 
-        push_dds(enc, type);
+            Encoding_ptr enc
+                (find_encoding(key, type));
+
+            push_dds(enc, type);
+        }
+
         return;
     }
 
@@ -149,7 +162,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    /* 6. DEFINEs and INPUTs, simply compile them recursively :-) */
+    /* 6. DEFINEs, simply compile them recursively :-) */
     else if (symb->is_define()) {
 
       Define& define
@@ -157,23 +170,6 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
       Expr_ptr body
 	(define.body());
-
-      Type_ptr tp
-	(define.type());
-
-      if (tp) {
-          /* rewrite INPUTs body into their correspondent value */
-          Expr_ptr value
-              (ModelMgr::INSTANCE().get_input(body));
-
-          TRACE
-              << body
-              << " := "
-              << value
-              << std::endl;
-
-          body = value;
-      }
 
       (*this) (body);
       return;

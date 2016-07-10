@@ -25,47 +25,21 @@ options {
 }
 
 @header {
-#include <common.hh>
+  #include <common.hh>
 
-/* cmd subsystem */
-#include <cmd/cmd.hh>
+  /* cmd subsystem */
+  #include <cmd/cmd.hh>
 
-#include <expr/expr.hh>
-#include <expr/expr_mgr.hh>
+  #include <expr/expr.hh>
+  #include <expr/expr_mgr.hh>
 
-#include <type/type.hh>
-#include <type/type_mgr.hh>
+  #include <type/type.hh>
+  #include <type/type_mgr.hh>
 
-#include <model/model.hh>
-#include <model/model_mgr.hh>
+  #include <model/model.hh>
+  #include <model/model_mgr.hh>
 
-#ifndef GRAMMAR_EXCEPTION
-#define GRAMMAR_EXCEPTION
-class GrammarException : public Exception {
-
-    virtual const char* what() const throw()
-    {
-        std::ostringstream oss;
-        oss
-            << "Grammar exception: "
-            << f_message
-            << std::endl
-            ;
-
-        return (strdup(oss.str().c_str()));
-    }
-
-    std::string f_message;
-
-public:
-    GrammarException(const std::string &message)
-        : f_message(message)
-    {}
-
-    virtual ~GrammarException() throw()
-    {}
-};
-#endif
+  #include <parser/grammars/grammar.hh>
 }
 
 @members {
@@ -142,7 +116,6 @@ scope {
         fsm_decl_modifiers (
           fsm_var_decl
         | fsm_define_decl
-        | fsm_input_decl
         )
 
         /* FSM definition */
@@ -233,12 +206,9 @@ fsm_define_decl_body
     ;
 
 fsm_define_decl_clause
-@init {
-    ExprVector formals;
-}
-    : id=identifier ( '(' identifiers[&formals] ')' )? ':=' body=toplevel_expression
+    : id=identifier ':=' body=toplevel_expression
     {
-      Define_ptr def = new Define($smv::current_module->name(), id, formals, body);
+      Define_ptr def = new Define($smv::current_module->name(), id, body);
 
       if ($module_decl::input)
           throw GrammarException("@input modifier not supported in DEFINE decls");
@@ -248,46 +218,6 @@ fsm_define_decl_clause
           def -> set_hidden(true);
 
       $smv::current_module->add_def(id, def);
-    }
-    ;
-
-fsm_input_decl
-    :
-        'INPUT' fsm_input_decl_body
-    ;
-
-fsm_input_decl_body
-    : fsm_input_decl_clause
-        ( ';' fsm_input_decl_clause)*
-    ;
-
-fsm_input_decl_clause
-@init {
-    ExprVector ev;
-}
-    : ids=identifiers[&ev] ':' tp=type
-    {
-            ExprVector::iterator expr_iter;
-            assert(NULL != tp);
-            for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr id (*expr_iter);
-
-                /* INPUTs are supported as undefined DEFINEs */
-                Define_ptr input
-                    (new Define($smv::current_module->name(), id, tp));
-
-                if ($module_decl::hidden)
-                    input -> set_hidden(true);
-                if ($module_decl::input)
-                    WARN
-                        << "@input modifier ignored in INPUT decls"
-                        << std::endl;
-                if ($module_decl::frozen)
-                    WARN
-                        << "@input modifier ignored in INPUT decls"
-                        << std::endl;
-                $smv::current_module->add_def(id, input);
-            }
     }
     ;
 

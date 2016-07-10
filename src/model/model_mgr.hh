@@ -52,9 +52,6 @@ public:
     inline Module& main()
     { return f_model.module( ExprMgr::INSTANCE().main()); }
 
-    // command input support
-    Expr_ptr get_input(Expr_ptr id);
-
     inline Module& module(Expr_ptr module_name)
     { return f_model.module( module_name); }
 

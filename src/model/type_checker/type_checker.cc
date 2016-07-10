@@ -508,25 +508,12 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             return;
         }
 
-
-        /* if define has a definite type, it is an INPUT so we
-           propagate its type. Otherwise we can safely recur into its
-           body. */
+        /* DEFINE, we can safely recur into its body. */
         else if (symb->is_define()) {
             Define& define
                 (symb->as_define());
 
-            Type_ptr tp
-                (define.type());
-
-            if (tp) {
-                PUSH_TYPE(tp);
-            }
-            else {
-                assert( 0 == define.formals().size());
-                (*this)(define.body());
-            }
-
+            (*this)(define.body());
             return;
         }
     }

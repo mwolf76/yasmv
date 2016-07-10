@@ -102,15 +102,8 @@ void Module::add_def(Expr_ptr symb_name, Define_ptr def)
         oss
             << "hidden ";
 
-    Type_ptr tp
-        (def -> type());
-
-    if (!tp)
-        oss
-            << "DEFINE";
-    else
-        oss
-            << "INPUT";
+    oss
+        << "DEFINE";
 
     const std::string tmp
         (oss.str());

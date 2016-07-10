@@ -53,6 +53,7 @@ Variable& Symbol::as_variable(void) const
     Variable_ptr res = dynamic_cast <const Variable_ptr>
         (const_cast <const Symbol_ptr> (this));
     assert (res);
+
     return (*res);
 }
 

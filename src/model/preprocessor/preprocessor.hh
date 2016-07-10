@@ -89,7 +89,7 @@ private:
     ExprMgr& f_em;
 
     /* internals */
-    void substitute_expression(const Expr_ptr expr);
+    // void substitute_expression(const Expr_ptr expr);
     void traverse_param_list(ExprVector& params, const Expr_ptr expr);
 };
 

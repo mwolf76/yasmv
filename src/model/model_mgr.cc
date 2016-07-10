@@ -24,8 +24,6 @@
 
 #include <model/model_mgr.hh>
 
-#include <env/environment.hh>
-
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
 
@@ -47,14 +45,6 @@ Module_ptr ModelMgr::scope(Expr_ptr key)
     assert( f_context_map.end() != mi );
 
     return mi -> second;
-}
-
-Expr_ptr ModelMgr::get_input(const Expr_ptr key)
-{
-    Environment& env
-        (Environment::INSTANCE());
-
-    return env.get(key);
 }
 
 Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
