@@ -669,9 +669,10 @@ constant returns [Expr_ptr res]
         $res = em.make_hex_const(tmp);
       }
 
-    | DECIMAL_LITERAL {
-        Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
-        $res = em.make_dec_const(tmp);
+    |
+        BINARY_LITERAL {
+        Atom tmp((const char*)($BINARY_LITERAL.text->chars));
+        $res = em.make_bin_const(tmp);
       }
 
     | OCTAL_LITERAL {
@@ -679,9 +680,9 @@ constant returns [Expr_ptr res]
         $res = em.make_oct_const(tmp);
       }
 
-    | BINARY_LITERAL {
-        Atom tmp((const char*)($BINARY_LITERAL.text->chars));
-        $res = em.make_bin_const(tmp);
+    | DECIMAL_LITERAL {
+        Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
+        $res = em.make_dec_const(tmp);
       }
 
     ;
@@ -1235,7 +1236,7 @@ fragment ID_FOLLOWING_CHARS
     ;
 
 HEX_LITERAL
-   : '0' ('x'|'X') HEX_DIGIT+
+   : ZERO ('x'|'X') HEX_DIGIT+
    ;
 
 DECIMAL_LITERAL
@@ -1247,7 +1248,7 @@ OCTAL_LITERAL
    ;
 
 BINARY_LITERAL
-   : '0' ('b' | 'B') BINARY_DIGIT+
+   : ZERO ('b'|'B') BINARY_DIGIT+
    ;
 
 fragment BINARY_DIGIT

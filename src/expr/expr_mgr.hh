@@ -327,6 +327,7 @@ public:
     inline value_t const_value(Expr_ptr expr)
     {
         assert( expr->f_symb == ICONST ||
+                expr->f_symb == BCONST ||
                 expr->f_symb == HCONST ||
                 expr->f_symb == OCONST );
 
@@ -517,7 +518,11 @@ public:
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
 
     inline Expr_ptr make_bin_const(Atom atom)
-    { return make_bconst( strtoll(atom.c_str(), NULL, 2)); }
+    {
+        const char *p (atom.c_str() + 2);
+        std::cerr << p << std::endl;
+        return make_bconst( strtoll(p, NULL, 2));
+    }
 
     inline Expr_ptr make_undef()
     {
@@ -562,6 +567,7 @@ public:
         assert(expr);
         return
             expr -> f_symb == ICONST ||
+            expr -> f_symb == BCONST ||
             expr -> f_symb == OCONST ||
             expr -> f_symb == HCONST  ;
     }
@@ -608,6 +614,7 @@ public:
     inline bool is_int_numeric(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
+            || (expr->f_symb == BCONST)
             || (expr->f_symb == HCONST)
             || (expr->f_symb == OCONST) ;
     }

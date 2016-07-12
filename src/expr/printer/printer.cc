@@ -373,6 +373,7 @@ void Printer::walk_leaf(const Expr_ptr expr)
     switch (expr->f_symb) {
     case ICONST: f_os << dec << expr->value(); break;
     case HCONST: f_os << hex << "0x" << expr->value(); break;
+    case BCONST: f_os << oct << "0b"  << expr->value(); break;
     case OCONST: f_os << oct << "0"  << expr->value(); break;
     case IDENT:  f_os << expr->atom(); break;
     case UNDEF:  f_os << "UNDEF"; break;

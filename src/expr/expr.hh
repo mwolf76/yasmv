@@ -131,7 +131,8 @@ typedef struct Expr_TAG {
     {
         assert (ICONST == f_symb ||
                 HCONST == f_symb ||
-                OCONST == f_symb );
+                OCONST == f_symb ||
+                BCONST == f_symb);
         return u.f_value;
     }
 
@@ -159,7 +160,8 @@ typedef struct Expr_TAG {
     {
         assert (symb == ICONST ||
                 symb == HCONST ||
-                symb == OCONST );
+                symb == OCONST ||
+                symb == BCONST);
 
         u.f_value = value;
     }

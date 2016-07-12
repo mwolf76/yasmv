@@ -58,6 +58,7 @@ long ExprHash::operator() (const Expr& k) const
 
     if (k.f_symb == ICONST
         || k.f_symb == HCONST
+        || k.f_symb == BCONST
         || k.f_symb == OCONST) {
         v0 = (long)(k.u.f_value);
         v1 = (long)(k.u.f_value >> sizeof(long));
@@ -99,4 +100,3 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
             (x.u.f_lhs == y.u.f_lhs &&
              x.u.f_rhs == y.u.f_rhs));
 }
-
