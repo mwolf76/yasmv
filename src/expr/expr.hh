@@ -87,6 +87,7 @@ typedef enum {
     ICONST, // decimal constants
     HCONST, // hex constants
     OCONST, // octal constants
+    BCONST, // binary constants
 
     // undefined
     UNDEF,

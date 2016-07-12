@@ -351,6 +351,12 @@ public:
         return __make_expr(&tmp);
     }
 
+    inline Expr_ptr make_bconst(value_t value) // octal
+    {
+        Expr tmp(BCONST, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
     /* canonical by construction */
     inline Expr_ptr make_dot(Expr_ptr a, Expr_ptr b)
     { return left_associate_dot( make_expr(DOT, a, b)); }
@@ -509,6 +515,9 @@ public:
 
     inline Expr_ptr make_oct_const(Atom atom)
     { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
+
+    inline Expr_ptr make_bin_const(Atom atom)
+    { return make_bconst( strtoll(atom.c_str(), NULL, 2)); }
 
     inline Expr_ptr make_undef()
     {
