@@ -125,28 +125,27 @@ static void print_ident_leaf(const Expr_ptr expr, std::ostream& os)
         << atom;
 }
 
-/* this one's public */
-void print_leaf(const Expr_ptr expr, std::ostream& os)
+void Printer::print_leaf(const Expr_ptr expr)
 {
     switch (expr -> f_symb) {
     case ICONST:
-        print_dec_leaf(expr, os);
+        print_dec_leaf(expr, f_os);
         break;
 
     case HCONST:
-        print_hex_leaf(expr, os);
+        print_hex_leaf(expr, f_os);
         break;
 
     case BCONST:
-        print_bin_leaf(expr, os);
+        print_bin_leaf(expr, f_os);
         break;
 
     case OCONST:
-        print_oct_leaf(expr, os);
+        print_oct_leaf(expr, f_os);
         break;
 
     case IDENT:
-        print_ident_leaf(expr, os);
+        print_ident_leaf(expr, f_os);
         break;
 
     case UNDEF:
@@ -154,7 +153,7 @@ void print_leaf(const Expr_ptr expr, std::ostream& os)
             << "Encountered UNDEF leaf expression"
             << std::endl;
 
-        os
+        f_os
             << "UNDEF";
         break;
 

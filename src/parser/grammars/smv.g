@@ -105,18 +105,27 @@ scope {
     int hidden;
     int input;
     int frozen;
+
+    int binary;
+    int octal;
+    int decimal;
+    int hexadecimal;
 }
 @init {
     $module_decl::hidden = 0;
     $module_decl::input = 0;
     $module_decl::frozen = 0;
+
+    $module_decl::binary = 0;
+    $module_decl::octal = 0;
+    $module_decl::decimal = 0;
+    $module_decl::hexadecimal = 0;
 }
 
     :   /* variables and defines */
         fsm_decl_modifiers (
-          fsm_var_decl
-        | fsm_define_decl
-        )
+         fsm_var_decl
+      |  fsm_define_decl )
 
         /* FSM definition */
     |   fsm_init_decl
@@ -129,10 +138,14 @@ fsm_decl_modifiers
             (
                 'hidden' { $module_decl::hidden = 1; } |
                 'frozen' { $module_decl::frozen = 1; } |
-                'input'  { $module_decl::input  = 1; }
-       )) *
-    ;
+                'input'  { $module_decl::input  = 1; } |
 
+                'bin' { $module_decl::binary = 1; } |
+                'oct' { $module_decl::octal = 1; } |
+                'dec' { $module_decl::decimal = 1; } |
+                'hex' { $module_decl::hexadecimal = 1; }
+            )) *
+    ;
 
 fsm_var_decl
     :
@@ -173,6 +186,16 @@ fsm_var_decl_clause
                 if ($module_decl::frozen)
                     var -> set_frozen(true);
 
+                /* these are mutually exclusive, default is hexadecimal */
+                if ($module_decl::binary)
+                    var -> set_binary(true);
+                else if ($module_decl::octal)
+                    var -> set_octal(true);
+                else if ($module_decl::decimal)
+                    var -> set_decimal(true);
+                else
+                    var -> set_hexadecimal(true);
+
                 $smv::current_module->add_var(vid, var);
             }
     }
@@ -189,7 +212,8 @@ fsm_param_decl_clause
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr pid (*expr_iter);
                 $smv::current_module->add_parameter(pid,
-                                                    new Parameter($smv::current_module->name(), pid, tp));
+                                                    new Parameter($smv::current_module->name(),
+                                                                  pid, tp));
             }
     }
     ;
@@ -216,6 +240,16 @@ fsm_define_decl_clause
           throw GrammarException("@frozen modifier not supported in DEFINE decls");
       if ($module_decl::hidden)
           def -> set_hidden(true);
+
+      /* these are mutually exclusive, default is hexadecimal */
+      if ($module_decl::binary)
+          def -> set_binary(true);
+      else if ($module_decl::octal)
+          def -> set_octal(true);
+      else if ($module_decl::decimal)
+          def -> set_decimal(true);
+      else
+          def -> set_hexadecimal(true);
 
       $smv::current_module->add_def(id, def);
     }

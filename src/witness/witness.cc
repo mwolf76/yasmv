@@ -92,6 +92,9 @@ TimeFrame::~TimeFrame()
 /* Retrieves value for expr, throws an exception if no value exists. */
 Expr_ptr TimeFrame::value( Expr_ptr expr )
 {
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     // symbol is defined in witness' language
     ExprVector& lang
         (f_owner.lang());
@@ -104,7 +107,38 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     if (f_map.end() == eye)
         throw NoValue(expr);
 
-    return (*eye).second;
+    Expr_ptr vexpr
+        ((*eye).second);
+
+    value_format_t fmt
+        (format(expr));
+
+    /* force conversion of constants to required format. TODO: extend
+       this to sets */
+    if (em.is_constant(vexpr)) {
+        switch (fmt) {
+        case FORMAT_BINARY:
+            vexpr = em.make_bconst(vexpr -> value());
+            break;
+
+        case FORMAT_OCTAL:
+            vexpr = em.make_oconst(vexpr -> value());
+            break;
+
+        case FORMAT_DECIMAL:
+            vexpr = em.make_const(vexpr -> value());
+            break;
+
+        case FORMAT_HEXADECIMAL:
+            vexpr = em.make_hconst(vexpr -> value());
+            break;
+
+        default:
+            assert(false); /* TODO: turno into exception */
+        } /* switch() */
+    }
+
+    return vexpr;
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
@@ -143,6 +177,37 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
     f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                   (expr, value));
 }
+
+/* Retrieves format for expr, default to FORMAT_DECIMAL if no format is defined. */
+value_format_t TimeFrame::format( Expr_ptr expr )
+{
+    // symbol is defined in witness' language
+    ExprVector& lang
+        (f_owner.lang());
+
+    assert( find(lang.begin(), lang.end(), expr) != lang.end());
+
+    Expr2FormatMap::iterator eye;
+
+    eye = f_format_map.find( expr );
+    if (f_format_map.end() == eye)
+        return FORMAT_DECIMAL; /* TODO: make this parametric */
+
+    return (*eye).second;
+}
+
+/* Sets format for expr */
+void TimeFrame::set_format( Expr_ptr expr, value_format_t format )
+{
+    // symbol is defined in witness' language
+    ExprVector& lang
+        (f_owner.lang());
+    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+
+    f_format_map.insert( std::make_pair< Expr_ptr, value_format_t >
+                         (expr, format));
+}
+
 
 ExprVector TimeFrame::assignments()
 {
@@ -217,8 +282,11 @@ Expr_ptr Witness::value( Expr_ptr expr, step_t time)
     if (time < first_time() || time > last_time()) {
         throw IllegalTime(time);
     }
-    return f_frames[ time ]
-        -> value( expr );
+
+    Expr_ptr vexpr
+        (f_frames[ time ] -> value( expr ));
+
+    return vexpr;
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */

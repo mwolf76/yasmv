@@ -10,7 +10,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_CC = atom.cc expr.cc leaf.cc timed_expr.cc expr_mgr.cc
+PKG_CC = atom.cc expr.cc timed_expr.cc expr_mgr.cc
 
 # -------------------------------------------------------
 

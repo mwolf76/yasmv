@@ -366,5 +366,5 @@ void Printer::walk_leaf(const Expr_ptr expr)
 #endif
 
     /* proxy call */
-    print_leaf(expr, f_os);
+    print_leaf(expr);
 }

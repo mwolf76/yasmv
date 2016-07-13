@@ -118,3 +118,27 @@ bool Symbol::is_hidden() const
 
 void Symbol::set_hidden(bool value)
 { f_hidden = value; }
+
+bool Symbol::is_decimal() const
+{ return f_decimal; }
+
+void Symbol::set_decimal(bool value)
+{ f_decimal = value; }
+
+bool Symbol::is_binary() const
+{ return f_binary; }
+
+void Symbol::set_binary(bool value)
+{ f_binary = value; }
+
+bool Symbol::is_octal() const
+{ return f_octal; }
+
+void Symbol::set_octal(bool value)
+{ f_octal = value; }
+
+bool Symbol::is_hexadecimal() const
+{ return f_hexadecimal; }
+
+void Symbol::set_hexadecimal(bool value)
+{ f_hexadecimal = value; }

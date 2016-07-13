@@ -175,9 +175,6 @@ typedef struct Expr_TAG {
 
 } Expr;
 
-/* repr helper */
-void print_leaf(const Expr_ptr expr, std::ostream& os);
-
 typedef std::vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;
 

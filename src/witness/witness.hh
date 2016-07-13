@@ -122,8 +122,19 @@ private:
     Expr_ptr f_id;
 };
 
+typedef enum {
+    FORMAT_BINARY,
+    FORMAT_OCTAL,
+    FORMAT_DECIMAL,
+    FORMAT_HEXADECIMAL
+} value_format_t;
+
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
+
+typedef boost::unordered_map<Expr_ptr, value_format_t, PtrHash, PtrEq> Expr2FormatMap;
+typedef Expr2FormatMap::iterator Expr2FormatMapIterator;
+
 class Witness; // fwd decl
 
 typedef class TimeFrame* TimeFrame_ptr;
@@ -142,11 +153,18 @@ public:
     /* Sets value for expr */
     void set_value( Expr_ptr expr, Expr_ptr value );
 
+    /* Retrieves value for expr. If expr has no defined format, defaults to decimal. */
+    value_format_t format( Expr_ptr expr );
+
+    /* Set format for expr. */
+    void set_format( Expr_ptr expr, value_format_t format);
+
     /* Full list of assignments for this Time Frame */
     ExprVector assignments();
 
 private:
     Expr2ExprMap f_map;
+    Expr2FormatMap f_format_map;
 
     // forbid copy
     TimeFrame(const TimeFrame &other)

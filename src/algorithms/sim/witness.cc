@@ -87,6 +87,15 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                     (Environment::INSTANCE().get(symb_name));
 
                 tf.set_value( key, value );
+
+                if (symb -> is_binary())
+                    tf.set_format(key, FORMAT_BINARY);
+                else if (symb -> is_octal())
+                    tf.set_format(key, FORMAT_OCTAL);
+                else if (symb -> is_decimal())
+                    tf.set_format(key, FORMAT_DECIMAL);
+                else if (symb -> is_hexadecimal())
+                    tf.set_format(key, FORMAT_HEXADECIMAL);
             }
 
             else {
@@ -126,8 +135,18 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 Expr_ptr value
                     (enc->expr(inputs));
 
-                if (value)
+                if (value) {
                     tf.set_value( key, value );
+
+                    if (symb -> is_binary())
+                        tf.set_format(key, FORMAT_BINARY);
+                    else if (symb -> is_octal())
+                        tf.set_format(key, FORMAT_OCTAL);
+                    else if (symb -> is_decimal())
+                        tf.set_format(key, FORMAT_DECIMAL);
+                    else if (symb -> is_hexadecimal())
+                        tf.set_format(key, FORMAT_HEXADECIMAL);
+                }
             }
         }
 

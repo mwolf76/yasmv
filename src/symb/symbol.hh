@@ -87,10 +87,22 @@ public:
     virtual const ExprVector& formals() const =0;
 };
 
+typedef enum {
+    VALUE_MODIFIER_UNDEFINED,
+    VALUE_MODIFIER_BINARY,
+    VALUE_MODIFIER_OCTAL,
+    VALUE_MODIFIER_DECIMAL,
+    VALUE_MODIFIER_HEXADECIMAL
+} value_modifier_t;
+
 class Symbol {
 public:
     Symbol()
-        : f_hidden(false)
+        : f_binary(false)
+        , f_octal(false)
+        , f_decimal(false)
+        , f_hexadecimal(false)
+        , f_hidden(false)
     {}
 
     virtual const Expr_ptr module()  const =0;
@@ -111,8 +123,27 @@ public:
     bool is_define() const;
     Define& as_define() const;
 
+    /* format modifiers */
     bool is_hidden() const;
     void set_hidden(bool value);
+
+    bool is_binary() const;
+    void set_binary(bool value);
+
+    bool is_octal() const;
+    void set_octal(bool value);
+
+    bool is_decimal() const;
+    void set_decimal(bool value);
+
+    bool is_hexadecimal() const;
+    void set_hexadecimal(bool value);
+
+protected:
+    bool f_binary;
+    bool f_octal;
+    bool f_decimal;
+    bool f_hexadecimal;
 
 private:
     bool f_hidden;
