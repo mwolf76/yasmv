@@ -60,6 +60,12 @@ void Environment::set(Expr_ptr id, Expr_ptr value)
     else
         f_identifiers.erase(id);
 
+    Expr2ExprMap::const_iterator eye
+        (f_env.find(id));
+
+    if (eye != f_env.end())
+        f_env.erase(eye);
+
     f_env.insert(std::make_pair<Expr_ptr, Expr_ptr> (id, value));
 }
 
