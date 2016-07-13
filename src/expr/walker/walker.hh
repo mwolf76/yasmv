@@ -235,6 +235,20 @@ private:
     ExprType f_et;
 };
 
+class UnsupportedLeaf : public WalkerException {
+public:
+
+    virtual const char* what() const throw() {
+        std::ostringstream oss;
+        oss
+            << "Unsupported leaf encountered"
+            << std::endl
+            ;
+
+        return strdup(oss.str().c_str());
+    }
+};
+
 class ExprWalker {
 public:
     ExprWalker()

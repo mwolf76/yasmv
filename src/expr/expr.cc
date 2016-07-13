@@ -24,6 +24,10 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
+#include <enc/enc_mgr.hh>
+
+#include <iomanip>
+
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
 {
     Printer (os)

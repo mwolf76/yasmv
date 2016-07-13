@@ -857,6 +857,7 @@ void ExprWalker::walk ()
         // leaves
         case ICONST:
         case HCONST:
+        case BCONST:
         case OCONST:
         case IDENT:
         case UNDEF:

@@ -345,11 +345,6 @@ bool Printer::walk_set_comma_inorder(const Expr_ptr expr)
 void Printer::walk_set_comma_postorder(const Expr_ptr expr)
 {}
 
-#include <iomanip>
-using std::hex;
-using std::dec;
-using std::oct;
-
 static inline value_t pow2(unsigned exp)
 {
     value_t res = 1;
@@ -365,18 +360,11 @@ static inline value_t pow2(unsigned exp)
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-    #if !DEBUG_CTX
+#if ! DEBUG_CTX
     if (ExprMgr::INSTANCE().is_empty(expr))
         return;
-    #endif
+#endif
 
-    switch (expr->f_symb) {
-    case ICONST: f_os << dec << expr->value(); break;
-    case HCONST: f_os << hex << "0x" << expr->value(); break;
-    case BCONST: f_os << oct << "0b"  << expr->value(); break;
-    case OCONST: f_os << oct << "0"  << expr->value(); break;
-    case IDENT:  f_os << expr->atom(); break;
-    case UNDEF:  f_os << "UNDEF"; break;
-    default: assert(0);
-    }
+    /* proxy call */
+    print_leaf(expr, f_os);
 }

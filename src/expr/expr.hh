@@ -26,8 +26,8 @@
 #ifndef EXPR_H
 #define EXPR_H
 
-#include <vector>
 #include <set>
+#include <vector>
 
 #include <common.hh>
 
@@ -127,7 +127,7 @@ typedef struct Expr_TAG {
         return *u.f_atom;
     }
 
-    inline value_t value()
+    inline value_t value() const
     {
         assert (ICONST == f_symb ||
                 HCONST == f_symb ||
@@ -174,6 +174,9 @@ typedef struct Expr_TAG {
     }
 
 } Expr;
+
+/* repr helper */
+void print_leaf(const Expr_ptr expr, std::ostream& os);
 
 typedef std::vector<Expr_ptr> ExprVector;
 typedef ExprVector* ExprVector_ptr;

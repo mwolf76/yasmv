@@ -512,15 +512,26 @@ public:
     { return make_const( strtoll(atom.c_str(), NULL, 10)); }
 
     inline Expr_ptr make_hex_const(Atom atom)
-    { return make_hconst( strtoll(atom.c_str(), NULL, 0x10)); }
+     {
+        const char *p
+            (atom.c_str() + 2);
+
+        return make_hconst( strtoll(p, NULL, 0x10));
+    }
 
     inline Expr_ptr make_oct_const(Atom atom)
-    { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
+    {
+        const char *p
+            (atom.c_str() + 1);
+
+        return make_oconst( strtoll(p, NULL, 010));
+    }
 
     inline Expr_ptr make_bin_const(Atom atom)
     {
-        const char *p (atom.c_str() + 2);
-        std::cerr << p << std::endl;
+        const char *p
+            (atom.c_str() + 2);
+
         return make_bconst( strtoll(p, NULL, 2));
     }
 
