@@ -37,7 +37,8 @@ BMC::BMC(Command& command, Model& model)
         (this);
 
     setup();
-    assert(ok());
+    if (!ok())
+        throw AlgorithmException();
 
     DRIVEL
         << "Created BMC @"

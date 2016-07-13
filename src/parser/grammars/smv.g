@@ -106,20 +106,14 @@ scope {
     int input;
     int frozen;
 
-    int binary;
-    int octal;
-    int decimal;
-    int hexadecimal;
+    value_format_t format;
 }
 @init {
     $module_decl::hidden = 0;
     $module_decl::input = 0;
     $module_decl::frozen = 0;
 
-    $module_decl::binary = 0;
-    $module_decl::octal = 0;
-    $module_decl::decimal = 0;
-    $module_decl::hexadecimal = 0;
+    $module_decl::format = FORMAT_DEFAULT;
 }
 
     :   /* variables and defines */
@@ -136,14 +130,14 @@ scope {
 fsm_decl_modifiers
     : ( '@'
             (
-                'hidden' { $module_decl::hidden = 1; } |
-                'frozen' { $module_decl::frozen = 1; } |
-                'input'  { $module_decl::input  = 1; } |
+              'hidden' { $module_decl::hidden = 1; }
+            | 'frozen' { $module_decl::frozen = 1; }
+            | 'input'  { $module_decl::input  = 1; }
 
-                'bin' { $module_decl::binary = 1; } |
-                'oct' { $module_decl::octal = 1; } |
-                'dec' { $module_decl::decimal = 1; } |
-                'hex' { $module_decl::hexadecimal = 1; }
+            | 'bin' { $module_decl::format = FORMAT_BINARY;      }
+            | 'oct' { $module_decl::format = FORMAT_OCTAL;       }
+            | 'dec' { $module_decl::format = FORMAT_DECIMAL;     }
+            | 'hex' { $module_decl::format = FORMAT_HEXADECIMAL; }
             )) *
     ;
 
@@ -186,15 +180,8 @@ fsm_var_decl_clause
                 if ($module_decl::frozen)
                     var -> set_frozen(true);
 
-                /* these are mutually exclusive, default is hexadecimal */
-                if ($module_decl::binary)
-                    var -> set_binary(true);
-                else if ($module_decl::octal)
-                    var -> set_octal(true);
-                else if ($module_decl::decimal)
-                    var -> set_decimal(true);
-                else
-                    var -> set_hexadecimal(true);
+                if ($module_decl::format != FORMAT_DEFAULT)
+                    var -> set_format($module_decl::format);
 
                 $smv::current_module->add_var(vid, var);
             }
@@ -242,14 +229,8 @@ fsm_define_decl_clause
           def -> set_hidden(true);
 
       /* these are mutually exclusive, default is hexadecimal */
-      if ($module_decl::binary)
-          def -> set_binary(true);
-      else if ($module_decl::octal)
-          def -> set_octal(true);
-      else if ($module_decl::decimal)
-          def -> set_decimal(true);
-      else
-          def -> set_hexadecimal(true);
+      if ($module_decl::format != FORMAT_DEFAULT)
+          def -> set_format($module_decl::format);
 
       $smv::current_module->add_def(id, def);
     }

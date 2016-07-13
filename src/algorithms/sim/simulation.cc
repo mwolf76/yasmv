@@ -31,7 +31,8 @@ Simulation::Simulation(Command& command, Model& model)
     : Algorithm(command, model)
 {
     setup();
-    assert(ok());
+    if (!ok())
+        throw AlgorithmException();
 }
 
 Simulation::~Simulation()

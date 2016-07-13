@@ -26,6 +26,17 @@
 
 #include <model/model.hh>
 
+const char* AlgorithmException::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "Failure detected. Operation aborted."
+        << std::endl
+        ;
+
+    return strdup(oss.str().c_str());
+}
+
 Algorithm::Algorithm(Command& command, Model& model)
     : f_command(command)
     , f_model(model)

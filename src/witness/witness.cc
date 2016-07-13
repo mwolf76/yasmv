@@ -47,7 +47,6 @@ const char* NoCurrentlySelectedWitness::what() const throw()
     return strdup(oss.str().c_str());
 }
 
-
 const char* UnknownWitnessId::what() const throw()
 {
     std::ostringstream oss;
@@ -110,8 +109,15 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     Expr_ptr vexpr
         ((*eye).second);
 
+    Expr2FormatMap::iterator format_eye
+        (f_format_map.find( expr ));
+
+    if (f_format_map.end() == format_eye)
+        assert(false); /* unreachable */
+
+    /* got value format */
     value_format_t fmt
-        (format(expr));
+        ((*format_eye).second);
 
     /* force conversion of constants to required format. TODO: extend
        this to sets */
@@ -125,16 +131,13 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
             vexpr = em.make_oconst(vexpr -> value());
             break;
 
-        case FORMAT_DECIMAL:
-            vexpr = em.make_const(vexpr -> value());
-            break;
-
         case FORMAT_HEXADECIMAL:
             vexpr = em.make_hconst(vexpr -> value());
             break;
 
         default:
-            assert(false); /* TODO: turno into exception */
+            //case FORMAT_DECIMAL:
+            vexpr = em.make_const(vexpr -> value());
         } /* switch() */
     }
 
@@ -161,53 +164,21 @@ bool TimeFrame::has_value( Expr_ptr expr )
 }
 
 /* Sets value for expr */
-void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
+void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
 {
     // symbol is defined in witness' language
     ExprVector& lang
         (f_owner.lang());
     assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    DEBUG
-        << expr
-        << " := "
-        << value
-        << std::endl;
 
+    /* populate both maps at the same time. This ensures consistency. */
     f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                   (expr, value));
-}
-
-/* Retrieves format for expr, default to FORMAT_DECIMAL if no format is defined. */
-value_format_t TimeFrame::format( Expr_ptr expr )
-{
-    // symbol is defined in witness' language
-    ExprVector& lang
-        (f_owner.lang());
-
-    assert( find(lang.begin(), lang.end(), expr) != lang.end());
-
-    Expr2FormatMap::iterator eye;
-
-    eye = f_format_map.find( expr );
-    if (f_format_map.end() == eye)
-        return FORMAT_DECIMAL; /* TODO: make this parametric */
-
-    return (*eye).second;
-}
-
-/* Sets format for expr */
-void TimeFrame::set_format( Expr_ptr expr, value_format_t format )
-{
-    // symbol is defined in witness' language
-    ExprVector& lang
-        (f_owner.lang());
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
     f_format_map.insert( std::make_pair< Expr_ptr, value_format_t >
                          (expr, format));
 }
-
 
 ExprVector TimeFrame::assignments()
 {

@@ -30,6 +30,8 @@
 #include <expr/expr.hh>
 #include <utils/pool.hh>
 
+#include <src/parser/grammars/grammar.hh>
+
 #include <type/type.hh>
 
 #include <vector>
@@ -87,21 +89,10 @@ public:
     virtual const ExprVector& formals() const =0;
 };
 
-typedef enum {
-    VALUE_MODIFIER_UNDEFINED,
-    VALUE_MODIFIER_BINARY,
-    VALUE_MODIFIER_OCTAL,
-    VALUE_MODIFIER_DECIMAL,
-    VALUE_MODIFIER_HEXADECIMAL
-} value_modifier_t;
-
 class Symbol {
 public:
     Symbol()
-        : f_binary(false)
-        , f_octal(false)
-        , f_decimal(false)
-        , f_hexadecimal(false)
+        : f_format(FORMAT_DEFAULT)
         , f_hidden(false)
     {}
 
@@ -123,27 +114,17 @@ public:
     bool is_define() const;
     Define& as_define() const;
 
-    /* format modifiers */
     bool is_hidden() const;
     void set_hidden(bool value);
 
-    bool is_binary() const;
-    void set_binary(bool value);
+    value_format_t format() const
+    { return f_format; }
 
-    bool is_octal() const;
-    void set_octal(bool value);
-
-    bool is_decimal() const;
-    void set_decimal(bool value);
-
-    bool is_hexadecimal() const;
-    void set_hexadecimal(bool value);
+    void set_format(value_format_t fmt)
+    { f_format = fmt; }
 
 protected:
-    bool f_binary;
-    bool f_octal;
-    bool f_decimal;
-    bool f_hexadecimal;
+    value_format_t f_format;
 
 private:
     bool f_hidden;

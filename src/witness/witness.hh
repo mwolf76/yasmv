@@ -122,13 +122,6 @@ private:
     Expr_ptr f_id;
 };
 
-typedef enum {
-    FORMAT_BINARY,
-    FORMAT_OCTAL,
-    FORMAT_DECIMAL,
-    FORMAT_HEXADECIMAL
-} value_format_t;
-
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
 
@@ -150,14 +143,12 @@ public:
     /* Returns true iff expr has an assigned value within this time frame. */
     bool has_value( Expr_ptr expr );
 
-    /* Sets value for expr */
-    void set_value( Expr_ptr expr, Expr_ptr value );
+    /* Sets value (and optionally also format) for expr */
+    void set_value( Expr_ptr expr, Expr_ptr value,
+                    value_format_t format = FORMAT_DECIMAL);
 
-    /* Retrieves value for expr. If expr has no defined format, defaults to decimal. */
-    value_format_t format( Expr_ptr expr );
-
-    /* Set format for expr. */
-    void set_format( Expr_ptr expr, value_format_t format);
+    /* Retrieves format for expr, throws an exception if no value exists. */
+    // value_format_t format( Expr_ptr expr );
 
     /* Full list of assignments for this Time Frame */
     ExprVector assignments();

@@ -43,4 +43,13 @@ public:
     {}
 };
 
+typedef enum {
+    FORMAT_DEFAULT,
+
+    FORMAT_BINARY,
+    FORMAT_OCTAL,
+    FORMAT_DECIMAL,
+    FORMAT_HEXADECIMAL
+} value_format_t;
+
 #endif /* _GRAMMAR_H_ */
