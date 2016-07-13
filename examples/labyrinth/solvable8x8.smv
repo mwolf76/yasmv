@@ -9,6 +9,7 @@ MODULE main
 VAR
     SPACE: boolean[64];
 
+@oct
 VAR
     x, y : uint;
 
