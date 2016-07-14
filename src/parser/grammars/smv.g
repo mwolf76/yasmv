@@ -940,6 +940,18 @@ command returns [Command_ptr res]
     |  c=check_invar_command
        { $res = c; }
 
+    |  c=add_init_command
+       { $res = c; }
+
+    |  c=add_invar_command
+       { $res = c; }
+
+    |  c=add_trans_command
+       { $res = c; }
+
+    |  c=check_fsm_command
+       { $res = c; }
+
     |  c=list_traces_command
        { $res = c; }
 
@@ -949,13 +961,13 @@ command returns [Command_ptr res]
     |  c=dup_trace_command
        { $res = c; }
 
-    | c=get_command
+    |  c=get_command
        { $res = c; }
 
-    | c=set_command
+    |  c=set_command
        { $res = c; }
 
-    | c=clear_command
+    |  c=clear_command
        { $res = c; }
 
     |  c=quit_command
@@ -1014,6 +1026,45 @@ write_model_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_write_model(); }
     ;
 
+add_init_command returns[Command_ptr res]
+    : 'add-init'
+      { $res = cm.make_add_init(); }
+
+      init=toplevel_expression
+      { ((AddInit *) $res) -> set_init(init); }
+    ;
+
+add_init_command_topic returns [CommandTopic_ptr res]
+    :  'add-init'
+        { $res = cm.topic_add_init(); }
+    ;
+
+add_invar_command returns[Command_ptr res]
+    : 'add-invar'
+      { $res = cm.make_add_invar(); }
+
+      invar=toplevel_expression
+      { ((AddInvar *) $res) -> set_invar(invar); }
+    ;
+
+add_invar_command_topic returns [CommandTopic_ptr res]
+    :  'add-invar'
+        { $res = cm.topic_add_invar(); }
+    ;
+
+add_trans_command returns[Command_ptr res]
+    : 'add-trans'
+      { $res = cm.make_add_trans(); }
+
+        trans=toplevel_expression
+        { ((AddTrans *) $res) -> set_trans(trans); }
+    ;
+
+add_trans_command_topic returns [CommandTopic_ptr res]
+    :  'add-trans'
+        { $res = cm.topic_add_trans(); }
+    ;
+
 check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
@@ -1044,6 +1095,16 @@ check_invar_command returns[Command_ptr res]
 check_invar_command_topic returns [CommandTopic_ptr res]
     :  'check-invar'
         { $res = cm.topic_check_invar(); }
+    ;
+
+check_fsm_command returns[Command_ptr res]
+    : 'check-fsm'
+      { $res = cm.make_check_fsm(); }
+    ;
+
+check_fsm_command_topic returns [CommandTopic_ptr res]
+    :  'check-fsm'
+        { $res = cm.topic_check_fsm(); }
     ;
 
 list_traces_command returns [Command_ptr res]

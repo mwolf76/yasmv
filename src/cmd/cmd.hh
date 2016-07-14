@@ -32,8 +32,13 @@
 #include <cmd/commands/read_model.hh>
 #include <cmd/commands/write_model.hh>
 
+#include <cmd/commands/add_init.hh>
+#include <cmd/commands/add_invar.hh>
+#include <cmd/commands/add_trans.hh>
+
 #include <cmd/commands/check_invar.hh>
 #include <cmd/commands/check_init.hh>
+#include <cmd/commands/check_fsm.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -69,11 +74,23 @@ public:
     inline Command_ptr make_write_model()
     { return new WriteModel(f_interpreter); }
 
+    inline Command_ptr make_add_init()
+    { return new AddInit(f_interpreter); }
+
+    inline Command_ptr make_add_invar()
+    { return new AddInvar(f_interpreter); }
+
+    inline Command_ptr make_add_trans()
+    { return new AddTrans(f_interpreter); }
+
     inline Command_ptr make_check_invar()
     { return new CheckInvar(f_interpreter); }
 
     inline Command_ptr make_check_init()
     { return new CheckInit(f_interpreter); }
+
+    inline Command_ptr make_check_fsm()
+    { return new CheckFsm(f_interpreter); }
 
     inline Command_ptr make_pick_state()
     { return new PickState(f_interpreter); }
@@ -115,11 +132,23 @@ public:
     inline CommandTopic_ptr topic_write_model()
     { return new WriteModelTopic(f_interpreter); }
 
+    inline CommandTopic_ptr topic_add_init()
+    { return new AddInitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_add_invar()
+    { return new AddInvarTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_add_trans()
+    { return new AddTransTopic(f_interpreter); }
+
     inline CommandTopic_ptr topic_check_invar()
     { return new CheckInvarTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_check_init()
     { return new CheckInitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_check_fsm()
+    { return new CheckFsmTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_pick_state()
     { return new PickStateTopic(f_interpreter); }
