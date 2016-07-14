@@ -126,6 +126,11 @@ public:
                            group_t group = MAINGROUP);
 
 private:
+    /* internals */
+    void process_init (Expr_ptr ctx, const ExprVector& init);
+    void process_invar(Expr_ptr ctx, const ExprVector& invar);
+    void process_trans(Expr_ptr ctx, const ExprVector& trans);
+
     /* no fatal error */
     bool f_ok;
 

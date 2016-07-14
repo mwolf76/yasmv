@@ -74,3 +74,21 @@ void Environment::clear()
     f_identifiers.clear();
     f_env.clear();
 }
+
+void Environment::add_extra_init(Expr_ptr constraint)
+{
+    assert(constraint);
+    f_extra_inits.push_back(constraint);
+}
+
+void Environment::add_extra_invar(Expr_ptr constraint)
+{
+    assert(constraint);
+    f_extra_invars.push_back(constraint);
+}
+
+void Environment::add_extra_trans(Expr_ptr constraint)
+{
+    assert(constraint);
+    f_extra_transes.push_back(constraint);
+}

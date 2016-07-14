@@ -24,70 +24,33 @@
 
 #include <cmd/commands/add_init.hh>
 
+#include <env/environment.hh>
+
 AddInit::AddInit(Interpreter& owner)
     : Command(owner)
-    , f_init(NULL)
-    , f_allsat(false)
+    , f_constraint(NULL)
 {}
 
 AddInit::~AddInit()
 {
-    free(f_init);
-    f_init = NULL;
+    free(f_constraint);
+    f_constraint = NULL;
 }
 
-void AddInit::set_init(Expr_ptr init)
+void AddInit::set_constraint(Expr_ptr constraint)
 {
-    free(f_init);
-    f_init = init;
-}
-
-void AddInit::set_allsat(bool allsat)
-{
-    f_allsat = allsat;
+    f_constraint = constraint;
 }
 
 Variant AddInit::operator()()
 {
-    /* if no INIT formula is given, proceed with trivial truth */
-    if (! f_init)
-        f_init = ExprMgr::INSTANCE().make_true();
+    Environment& env
+        (Environment::INSTANCE());
 
-    /* TODO: turn this into CONSISTENCY */
-    BMC bmc
-        (*this, ModelMgr::INSTANCE().model());
+    assert(f_constraint);
+    env.add_extra_init(f_constraint);
 
-    bmc.process( f_init );
-
-    std::ostringstream tmp;
-    switch (bmc.status()) {
-    case MC_FALSE:
-        tmp << "Property is FALSE";
-        break;
-
-    case MC_TRUE:
-        tmp << "Property is TRUE";
-        break;
-
-    case MC_UNKNOWN:
-        tmp << "Property could not be decided";
-        break;
-
-    default: assert( false ); /* unreachable */
-    } /* switch */
-    if (bmc.has_witness()) {
-        Witness& w
-            (bmc.witness());
-
-        tmp
-            << ", registered CEX witness `"
-            << w.id()
-            << "`, "
-            << w.size()
-            << " steps.";
-    }
-
-    return Variant(tmp.str());
+    return Variant("Ok");
 }
 
 AddInitTopic::AddInitTopic(Interpreter& owner)

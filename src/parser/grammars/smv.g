@@ -896,6 +896,18 @@ command_topic returns [CommandTopic_ptr res]
     |  c=simulate_command_topic
        { $res = c; }
 
+    |  c=add_init_command_topic
+       { $res = c; }
+
+    |  c=add_invar_command_topic
+       { $res = c; }
+
+    |  c=add_trans_command_topic
+       { $res = c; }
+
+    |  c=check_fsm_command_topic
+       { $res = c; }
+
     |  c=check_init_command_topic
        { $res = c; }
 
@@ -1031,7 +1043,7 @@ add_init_command returns[Command_ptr res]
       { $res = cm.make_add_init(); }
 
       init=toplevel_expression
-      { ((AddInit *) $res) -> set_init(init); }
+      { ((AddInit *) $res) -> set_constraint(init); }
     ;
 
 add_init_command_topic returns [CommandTopic_ptr res]
@@ -1044,12 +1056,12 @@ add_invar_command returns[Command_ptr res]
       { $res = cm.make_add_invar(); }
 
       invar=toplevel_expression
-      { ((AddInvar *) $res) -> set_invar(invar); }
+      { ((AddInvar *) $res) -> set_constraint(invar); }
     ;
 
 add_invar_command_topic returns [CommandTopic_ptr res]
     :  'add-invar'
-        { $res = cm.topic_add_invar(); }
+       { $res = cm.topic_add_invar(); }
     ;
 
 add_trans_command returns[Command_ptr res]
@@ -1057,7 +1069,7 @@ add_trans_command returns[Command_ptr res]
       { $res = cm.make_add_trans(); }
 
         trans=toplevel_expression
-        { ((AddTrans *) $res) -> set_trans(trans); }
+        { ((AddTrans *) $res) -> set_constraint(trans); }
     ;
 
 add_trans_command_topic returns [CommandTopic_ptr res]
