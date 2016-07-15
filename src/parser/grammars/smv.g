@@ -920,7 +920,7 @@ command_topic returns [CommandTopic_ptr res]
     |  c=check_init_command_topic
        { $res = c; }
 
-    |  c=check_invar_command_topic
+    |  c=reach_command_topic
        { $res = c; }
 
     |  c=list_traces_command_topic
@@ -958,7 +958,7 @@ command returns [Command_ptr res]
     |  c=check_init_command
        { $res = c; }
 
-    |  c=check_invar_command
+    |  c=reach_command
        { $res = c; }
 
     |  c=add_init_command
@@ -1096,17 +1096,17 @@ check_init_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_check_init(); }
     ;
 
-check_invar_command returns[Command_ptr res]
-    : 'check-invar'
-      { $res = cm.make_check_invar(); }
+reach_command returns[Command_ptr res]
+    : 'reach'
+      { $res = cm.make_reach(); }
 
-        invar=toplevel_expression
-        { ((CheckInvar *) $res) -> set_invar(invar); }
+        target=toplevel_expression
+        { ((Reach *) $res) -> set_target(target); }
     ;
 
-check_invar_command_topic returns [CommandTopic_ptr res]
-    :  'check-invar'
-        { $res = cm.topic_check_invar(); }
+reach_command_topic returns [CommandTopic_ptr res]
+    :  'reach'
+        { $res = cm.topic_reach(); }
     ;
 
 check_trans_command returns[Command_ptr res]

@@ -1,5 +1,5 @@
 /*
- * @file check_invar.cc
+ * @file reach.cc
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -22,41 +22,43 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/reach.hh>
 
-CheckInvar::CheckInvar(Interpreter& owner)
+Reach::Reach(Interpreter& owner)
     : Command(owner)
-    , f_invar(NULL)
+    , f_target(NULL)
 {}
 
-CheckInvar::~CheckInvar()
+Reach::~Reach()
 {}
 
-void CheckInvar::set_invar(Expr_ptr invar)
+void Reach::set_target(Expr_ptr target)
 {
-    f_invar = invar;
+    f_target = target;
 }
 
-Variant CheckInvar::operator()()
+Variant Reach::operator()()
 {
-    if (! f_invar)
+    if (! f_target)
         return Variant("No property given. Aborting...");
 
     BMC bmc
         (*this, ModelMgr::INSTANCE().model());
 
-    bmc.process(f_invar);
+    bmc.process(f_target);
 
     std::ostringstream tmp;
     switch (bmc.status()) {
     case MC_FALSE:
-        tmp << "Property is FALSE";
+        tmp << "Target is reachable";
         break;
+
     case MC_TRUE:
-        tmp << "Property is TRUE";
+        tmp << "Target is unreachable";
         break;
+
     case MC_UNKNOWN:
-        tmp << "Property could not be decided";
+        tmp << "Reachability could not be decided";
         break;
     case MC_ERROR:
         tmp << "Error";
@@ -79,22 +81,22 @@ Variant CheckInvar::operator()()
     return Variant(tmp.str());
 }
 
-CheckInvarTopic::CheckInvarTopic(Interpreter& owner)
+ReachTopic::ReachTopic(Interpreter& owner)
     : CommandTopic(owner)
 {}
 
-CheckInvarTopic::~CheckInvarTopic()
+ReachTopic::~ReachTopic()
 {
     TRACE
-        << "Destroyed check-invar topic"
+        << "Destroyed check-target topic"
         << std::endl;
 }
 
-void CheckInvarTopic::usage()
+void ReachTopic::usage()
 {
     std::cout
-        << "check-invar [ -D < id := value > ; ]* < expression > - Checks invariant property on a given expression.\n\n"
-        << "If the invariant expression holds no trace is generated. Otherwise, a BMC counterexample\n"
+        << "check-target [ -D < id := value > ; ]* < expression > - Checks targetiant property on a given expression.\n\n"
+        << "If the targetiant expression holds no trace is generated. Otherwise, a BMC counterexample\n"
         << "witness trace for the given property is generated. -D can be used multiple times to override \n"
         << "existing model defines with input values." ;
 }

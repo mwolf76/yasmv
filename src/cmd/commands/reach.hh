@@ -1,5 +1,5 @@
 /*
- * @file check_invar.hh
+ * @file reach.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,33 +19,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CHECK_INVAR_CMD_H
-#define CHECK_INVAR_CMD_H
+#ifndef REACH_CMD_H
+#define REACH_CMD_H
 
 #include <cmd/command.hh>
 #include <algorithms/bmc/bmc.hh>
 
-class CheckInvar : public Command {
+class Reach : public Command {
 
-    /* the invariant to be verified */
-    Expr_ptr f_invar;
+    /* the targetiant to be verified */
+    Expr_ptr f_target;
 
 public:
-    CheckInvar(Interpreter& owner);
-    virtual ~CheckInvar();
+    Reach(Interpreter& owner);
+    virtual ~Reach();
 
     /** cmd params */
-    void set_invar(Expr_ptr invar);
+    void set_target(Expr_ptr target);
 
     Variant virtual operator()();
 };
 
-class CheckInvarTopic : public CommandTopic {
+class ReachTopic : public CommandTopic {
 public:
-    CheckInvarTopic(Interpreter& owner);
-    virtual ~CheckInvarTopic();
+    ReachTopic(Interpreter& owner);
+    virtual ~ReachTopic();
 
     void virtual usage();
 };
 
-#endif // CHECK_INVAR_CMD_H
+#endif // REACH_CMD_H

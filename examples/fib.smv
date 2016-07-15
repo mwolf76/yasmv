@@ -6,7 +6,12 @@ MODULE main
 
 VAR f : uint;
     g : uint;
-    i : uint;
+
+@hidden
+VAR i : uint;
+
+@input
+VAR n : uint;
 
 INIT
     f = 0;
@@ -27,7 +32,7 @@ TRANS
   next(i) = i + 1;
 
 @hidden
-DEFINE GOAL := i >= 50;
+DEFINE N := i >= n;
 
--- to generate the sequence of the first 50 fibonacci numbers issue the command:
--- >> check-invar ! GOAL;
+-- to generate the sequence of the first n fibonacci numbers issue the command:
+-- >> set n 10; check-invar ! GOAL;

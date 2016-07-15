@@ -37,7 +37,7 @@
 #include <cmd/commands/add_trans.hh>
 
 #include <cmd/commands/check_init.hh>
-#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/reach.hh>
 #include <cmd/commands/check_trans.hh>
 
 #include <cmd/commands/pick_state.hh>
@@ -83,8 +83,8 @@ public:
     inline Command_ptr make_add_trans()
     { return new AddTrans(f_interpreter); }
 
-    inline Command_ptr make_check_invar()
-    { return new CheckInvar(f_interpreter); }
+    inline Command_ptr make_reach()
+    { return new Reach(f_interpreter); }
 
     inline Command_ptr make_check_init()
     { return new CheckInit(f_interpreter); }
@@ -141,8 +141,8 @@ public:
     inline CommandTopic_ptr topic_add_trans()
     { return new AddTransTopic(f_interpreter); }
 
-    inline CommandTopic_ptr topic_check_invar()
-    { return new CheckInvarTopic(f_interpreter); }
+    inline CommandTopic_ptr topic_reach()
+    { return new ReachTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_check_init()
     { return new CheckInitTopic(f_interpreter); }

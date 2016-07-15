@@ -1,6 +1,14 @@
 -- This file is part of the YASMINE distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
-#word-width 32
+
+-- To test for primality an arbitrary 64-bit n use:
+-- >> set n 42; pick-state
+--
+-- If no such state exists, the number is prime. Otherwise a witness
+-- showing a known divisor for the number can be printed.
+-- >> dump-trace
+
+#word-width 64
 MODULE main
 
 VAR
@@ -9,10 +17,10 @@ VAR
 
 @input
 VAR
-        number : uint;
+        n : uint;
 
 INIT
-        x = number;
+        x = n;
 
 INIT
         1 < y;
@@ -22,8 +30,4 @@ INIT
 
 INIT
         x % y = 0;
-
--- to test for primality an arbitrary 32-bit number use: 'check-init
--- -D n := <number>' or 'pick-state -D n := <number>'
-
 

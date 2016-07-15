@@ -31,9 +31,58 @@ Time::~Time()
 
 Variant Time::operator()()
 {
-    time_t t1 = time(NULL);
-    time_t t0 = Interpreter::INSTANCE().epoch();
-    int res = t1 - t0;
+    std::ostringstream oss;
+
+    time_t uptime = time(NULL) - Interpreter::INSTANCE().epoch();
+
+    unsigned secs = uptime % 60;
+    unsigned mins = uptime / 60;
+    unsigned hrs = 0;
+
+    if (60 < mins) {
+        mins = mins % 60;
+        hrs  = mins / 60;
+    }
+
+    oss
+        << "Session time:" ;
+
+    bool a
+        (false);
+    if (0 < hrs) {
+        oss
+            << " "
+            << hrs
+            << " h";
+        a = true;
+    }
+
+    bool b
+        (false);
+    if (0 < mins) {
+        if (a)
+            oss
+                << ", ";
+        oss
+            << mins
+            << " m";
+        b = true;
+    }
+
+    if (0 < secs) {
+        if (b)
+            oss
+                << ", ";
+        oss
+            << " "
+            << secs
+            << " s";
+    }
+
+    oss << ".";
+
+    const char* res
+        (oss.str().c_str());
 
     return Variant(res);
 }

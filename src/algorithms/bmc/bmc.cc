@@ -141,7 +141,7 @@ void BMC::forward( Expr_ptr phi,
 
 #if 0
             /* TODO: enabling the next line turns full forward
-               strategy into pure BMC falsification */ continue;
+               strategy into pure BMC reachability */ continue;
 #endif
 
             {
@@ -298,8 +298,8 @@ void BMC::process(const Expr_ptr phi)
         f_status = MC_UNKNOWN;
 
         /* launch parallel checking strategies */
-        boost::thread fwd(&BMC::forward, this, phi, ii, vv);
-        boost::thread bwd(&BMC::backward, this, phi, ii, vv);
+        boost::thread fwd(&BMC::forward, this, phi, vv, ii);
+        boost::thread bwd(&BMC::backward, this, phi, vv, ii);
 
         fwd.join();
         bwd.join();
