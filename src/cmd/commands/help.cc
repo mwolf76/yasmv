@@ -60,8 +60,8 @@ Variant Help::operator()()
                   << "- add-trans" << std::endl
                   << "- pick-state" << std::endl
                   << "- simulate" << std::endl
-                  << "- check-fsm" << std::endl
                   << "- check-init" << std::endl
+                  << "- check-trans" << std::endl
                   << "- check-invar" << std::endl
                   << "- list-traces" << std::endl
                   << "- dump-trace" << std::endl
