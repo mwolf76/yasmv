@@ -71,7 +71,7 @@ EnumEncoding::EnumEncoding(const ExprSet& lits)
 
     value_t v;
     ExprSet::iterator eye;
-    for (v = 0, eye= lits.begin(); eye != lits.end(); ++ eye, ++ v) {
+    for (v = 0, eye = lits.begin(); eye != lits.end(); ++ eye, ++ v) {
 
         f_v2e_map[v] = *eye;
         f_e2v_map[*eye] = v;
@@ -92,6 +92,6 @@ Expr_ptr EnumEncoding::expr(int *assignment)
     assert (cuddIsConstant(eval.getNode()));
 
     value_t lindex = Cudd_V(eval.getNode());
+
     return f_v2e_map [lindex];
 }
-

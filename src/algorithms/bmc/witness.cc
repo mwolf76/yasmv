@@ -39,8 +39,6 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    int inputs[bm.nbits()];
-
     /* Collecting symbols for the witness' language */
     SymbIter si (model);
     while (si.has_next()) {
@@ -95,6 +93,9 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                 if ( ! enc )
                     continue;
 
+                int inputs[bm.nbits()];
+                memset(inputs, 0, sizeof(inputs));
+
                 /* 1. for each bit int the encoding, fetch UCBI, time
                    it into TCBI, fetch its value in MiniSAT model and
                    set the corresponding entry in input. */
@@ -125,6 +126,11 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                 if (value)
                     tf.set_value( key, value,
                                   symb -> format());
+                else
+                    WARN
+                        << key
+                        << " has no value"
+                        << std::endl;
             }
 
             else if (symb->is_define()) {
