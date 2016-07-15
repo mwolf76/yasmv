@@ -1,26 +1,27 @@
 -- This file is part of the Yasmine distribution
 -- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 
-#word-width 64
+#word-width 8
 MODULE main
 
-VAR a : uint;
-    b : uint;
+@input
+VAR a, b : uint;
+VAR x, y : uint;
 
 INIT
-    a = 5175833502;
+    x = a; -- 5175833502;
 
 INIT
-   b  = 520244859288;
+   y = b; -- 520244859288;
 
 TRANS
-   next(a) = b;
+   next(x) = y;
 
 TRANS
-   next(b) = a % b;
+   next(y) = x % y;
 
 @hidden
-DEFINE GOAL := b = 0;
+DEFINE GOAL := y = 0;
 
 -- to calculate gcd issue the command:
 -- >> check-invar ! GOAL;

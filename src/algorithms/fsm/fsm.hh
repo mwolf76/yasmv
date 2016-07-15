@@ -28,29 +28,47 @@
 #include <algorithms/base.hh>
 #include <witness/witness.hh>
 
-class FSM : public Algorithm {
+typedef enum {
+    FSM_CONSISTENCY_OK,
+    FSM_CONSISTENCY_KO
+} fsm_consistency_t;
+
+class CheckInitConsistency : public Algorithm {
 
 public:
-    FSM(Command& command, Model& model);
-    ~FSM();
+    CheckInitConsistency(Command& command, Model& model);
+    ~CheckInitConsistency();
 
     void process();
 
-    inline mc_status_t status() const
+    inline fsm_consistency_t status() const
     { return f_status; }
 
-    inline void set_status(mc_status_t status)
+    inline void set_status(fsm_consistency_t status)
     { f_status = status; }
 
 private:
-    mc_status_t f_status;
+    boost::mutex f_status_mutex;
+    fsm_consistency_t f_status;
 };
 
-/* Specialized for FSM CEX */
-class FSMCounterExample : public Witness {
+class CheckTransConsistency : public Algorithm {
+
 public:
-    FSMCounterExample(Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k, bool use_coi);
+    CheckTransConsistency(Command& command, Model& model);
+    ~CheckTransConsistency();
+
+    void process();
+
+    inline fsm_consistency_t status() const
+    { return f_status; }
+
+    inline void set_status(fsm_consistency_t status)
+    { f_status = status; }
+
+private:
+    boost::mutex f_status_mutex;
+    fsm_consistency_t f_status;
 };
 
 #endif

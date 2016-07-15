@@ -36,9 +36,9 @@
 #include <cmd/commands/add_invar.hh>
 #include <cmd/commands/add_trans.hh>
 
-#include <cmd/commands/check_invar.hh>
 #include <cmd/commands/check_init.hh>
-#include <cmd/commands/check_fsm.hh>
+#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/check_trans.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -89,8 +89,8 @@ public:
     inline Command_ptr make_check_init()
     { return new CheckInit(f_interpreter); }
 
-    inline Command_ptr make_check_fsm()
-    { return new CheckFsm(f_interpreter); }
+    inline Command_ptr make_check_trans()
+    { return new CheckTrans(f_interpreter); }
 
     inline Command_ptr make_pick_state()
     { return new PickState(f_interpreter); }
@@ -147,8 +147,8 @@ public:
     inline CommandTopic_ptr topic_check_init()
     { return new CheckInitTopic(f_interpreter); }
 
-    inline CommandTopic_ptr topic_check_fsm()
-    { return new CheckFsmTopic(f_interpreter); }
+    inline CommandTopic_ptr topic_check_trans()
+    { return new CheckTransTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_pick_state()
     { return new PickStateTopic(f_interpreter); }

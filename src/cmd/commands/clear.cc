@@ -45,8 +45,7 @@ void Clear::set_identifier(Expr_ptr id)
 
 Variant Clear::operator()()
 {
-    assert(false); /* Not yet implemented */
-    return Variant("XXX");
+    return Variant("Ok");
 }
 
 ClearTopic::ClearTopic(Interpreter& owner)
@@ -63,5 +62,6 @@ ClearTopic::~ClearTopic()
 void ClearTopic::usage()
 {
     std::cout <<
-        "clear [ <identifier> ] - Clears current value of <identifier>.\n\n";
+        "clear [ <identifier> ] - Clears current value of <identifier>.\n\n"
+        "All assignments in the current environment are cleared if no argument is given." ;
 }

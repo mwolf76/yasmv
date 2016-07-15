@@ -1,5 +1,5 @@
 /*
- * @file check_fsm.hh
+ * @file check_trans.hh
  * @brief Command-interpreter subsystem related classes and deffsmions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CHECK_FSM_CMD_H
-#define CHECK_FSM_CMD_H
+#ifndef CHECK_TRANS_CMD_H
+#define CHECK_TRANS_CMD_H
 
 #include <cmd/command.hh>
 #include <algorithms/fsm/fsm.hh>
@@ -46,4 +46,4 @@ public:
     void virtual usage();
 };
 
-#endif // CHECK_FSM_CMD_H
+#endif // CHECK_TRANS_CMD_H

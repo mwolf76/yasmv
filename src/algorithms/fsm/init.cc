@@ -24,29 +24,53 @@
 #include <algorithms/fsm/fsm.hh>
 #include <witness_mgr.hh>
 
-FSM::FSM(Command& command, Model& model)
+CheckInitConsistency::CheckInitConsistency(Command& command, Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
     setup();
     DRIVEL
-        << "Created FSM @"
+        << "Created CheckInitConsistency @"
         << instance
         << std::endl;
 }
 
-FSM::~FSM()
+CheckInitConsistency::~CheckInitConsistency()
 {
     const void* instance(this);
     DRIVEL
-        << "Destroyed FSM @"
+        << "Destroyed CheckInitConsistency @"
         << instance
         << std::endl;
 }
 
-void FSM::process()
+void CheckInitConsistency::process()
 {
-    assert (false); // XXX: TODO
+    Engine engine
+        ("Initial");
 
-    TRACE << "Done." << std::endl;
+    assert_fsm_init(engine, 0);
+    assert_fsm_invar(engine, 0);
+
+    status_t status
+        (engine.solve());
+
+    if (STATUS_UNKNOWN == status) {
+        goto cleanup;
+    }
+    if (STATUS_UNSAT == status) {
+        INFO
+            << "INIT inconsistency detected."
+            << std::endl ;
+    }
+    else if (STATUS_SAT == status) {
+        INFO
+            << "INIT consistency check ok"
+            << std::endl;
+    }
+
+ cleanup:
+    /* signal other threads it's time to go home */
+    EngineMgr::INSTANCE()
+        .interrupt();
 }

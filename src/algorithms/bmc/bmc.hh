@@ -47,7 +47,6 @@ public:
 
 private:
     boost::mutex f_status_mutex;
-
     mc_status_t f_status;
     step_t f_k;
 

@@ -1,5 +1,6 @@
+
 /*
- * @file check_fsm.cc
+ * @file check_trans.cc
  * @brief Command-interpreter subsystem related classes and deffsmions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -22,7 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/check_fsm.hh>
+#include <cmd/commands/check_trans.hh>
 
 CheckFsm::CheckFsm(Interpreter& owner)
     : Command(owner)
@@ -51,7 +52,5 @@ CheckFsmTopic::~CheckFsmTopic()
 void CheckFsmTopic::usage()
 {
     std::cout
-        << "check-fsm [ -a ] <expression> - Checks propositional satisfiability for given expression at fsmial time.\n\n"
-        << "If no inconsistency is found one FSM state witness trace is generated.\n"
-        << "If -a is specified all witness traces are generated (ALLSAT). Fails if no fsmial state exists.";
+        << "check-fsm - Checks propositional satisfiability for initial states and transition relation.\n";
 }

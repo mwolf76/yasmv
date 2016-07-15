@@ -86,5 +86,7 @@ SetTopic::~SetTopic()
 void SetTopic::usage()
 {
     std::cout <<
-        "set <identifier> <value> - Sets current value of <identifier>.\n\n";
+        "set <identifier> <value> - Sets current value of <identifier>.\n\n"
+        "This command is useful to set @input variables to the desired value \n"
+        "before issuing a check- or simulate- command.\n";
 }

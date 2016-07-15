@@ -1,3 +1,36 @@
+BAcklog:
+
+Added check-fsm, add-init, add-invar, add-trans
+
+check-fsm:
+
+-I: skip initial states checking
+-T: skip trans checking
+
+* Consistency checking of INIT (SAT?)
+* Consistency checking of TRANS (SAT?)
+
+Ok if no inconsistencies detected, false otherwise.
+
+check-init:
+
+kill
+
+add-init:
+
+Add a constraint to INIT
+
+add-invar:
+
+Add a constraint to INAVR
+
+add-TRNS:
+
+Add a constraint to TRANS
+
+
+
+
 * Commands
 - integration of libreadline
 - autocomplete support

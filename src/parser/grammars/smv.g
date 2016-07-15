@@ -884,6 +884,15 @@ command_topic returns [CommandTopic_ptr res]
     |  c=time_command_topic
        { $res = c; }
 
+    |  c=get_command_topic
+       { $res = c; }
+
+    |  c=set_command_topic
+       { $res = c; }
+
+    |  c=clear_command_topic
+       { $res = c; }
+
     |  c=read_model_command_topic
        { $res = c; }
 
@@ -894,6 +903,18 @@ command_topic returns [CommandTopic_ptr res]
        { $res = c; }
 
     |  c=simulate_command_topic
+       { $res = c; }
+
+    |  c=add_init_command_topic
+       { $res = c; }
+
+    |  c=add_invar_command_topic
+       { $res = c; }
+
+    |  c=add_trans_command_topic
+       { $res = c; }
+
+    |  c=check_trans_command_topic
        { $res = c; }
 
     |  c=check_init_command_topic
@@ -949,7 +970,7 @@ command returns [Command_ptr res]
     |  c=add_trans_command
        { $res = c; }
 
-    |  c=check_fsm_command
+    |  c=check_trans_command
        { $res = c; }
 
     |  c=list_traces_command
@@ -1097,14 +1118,14 @@ check_invar_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_check_invar(); }
     ;
 
-check_fsm_command returns[Command_ptr res]
+check_trans_command returns[Command_ptr res]
     : 'check-fsm'
-      { $res = cm.make_check_fsm(); }
+      { $res = cm.make_check_trans(); }
     ;
 
-check_fsm_command_topic returns [CommandTopic_ptr res]
+check_trans_command_topic returns [CommandTopic_ptr res]
     :  'check-fsm'
-        { $res = cm.topic_check_fsm(); }
+        { $res = cm.topic_check_trans(); }
     ;
 
 list_traces_command returns [Command_ptr res]
@@ -1228,11 +1249,6 @@ set_command returns [Command_ptr res]
 set_command_topic returns [CommandTopic_ptr res]
     :  'set'
         { $res = cm.topic_set(); }
-
-        id=identifier
-        { ((Set*) $res) -> set_identifier(id); }
-
-
     ;
 
 clear_command returns [Command_ptr res]
