@@ -28,11 +28,14 @@ CheckInitConsistency::CheckInitConsistency(Command& command, Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
+
     setup();
     DRIVEL
         << "Created CheckInitConsistency @"
         << instance
         << std::endl;
+
+    f_status = FSM_CONSISTENCY_UNDECIDED;
 }
 
 CheckInitConsistency::~CheckInitConsistency()
@@ -56,21 +59,13 @@ void CheckInitConsistency::process()
         (engine.solve());
 
     if (STATUS_UNKNOWN == status) {
-        goto cleanup;
+        f_status = FSM_CONSISTENCY_UNDECIDED;
     }
-    if (STATUS_UNSAT == status) {
-        INFO
-            << "INIT inconsistency detected."
-            << std::endl ;
+    else if (STATUS_UNSAT == status) {
+        f_status = FSM_CONSISTENCY_KO;
     }
     else if (STATUS_SAT == status) {
-        INFO
-            << "INIT consistency check ok"
-            << std::endl;
+        f_status = FSM_CONSISTENCY_OK;
     }
 
- cleanup:
-    /* signal other threads it's time to go home */
-    EngineMgr::INSTANCE()
-        .interrupt();
 }

@@ -23,69 +23,39 @@
 #include <cstring>
 
 #include <cmd/commands/check_init.hh>
+#include <algorithms/fsm/fsm.hh>
+
 
 CheckInit::CheckInit(Interpreter& owner)
     : Command(owner)
-    , f_init(NULL)
-    , f_allsat(false)
 {}
 
 CheckInit::~CheckInit()
-{
-    free(f_init);
-    f_init = NULL;
-}
-
-void CheckInit::set_init(Expr_ptr init)
-{
-    free(f_init);
-    f_init = init;
-}
-
-void CheckInit::set_allsat(bool allsat)
-{
-    f_allsat = allsat;
-}
+{}
 
 Variant CheckInit::operator()()
 {
-    /* if no INIT formula is given, proceed with trivial truth */
-    if (! f_init)
-        f_init = ExprMgr::INSTANCE().make_true();
-
-    /* TODO: turn this into CONSISTENCY */
-    BMC bmc
+    CheckInitConsistency algorithm
         (*this, ModelMgr::INSTANCE().model());
 
-    bmc.process( f_init );
+    algorithm.process();
 
     std::ostringstream tmp;
-    switch (bmc.status()) {
-    case MC_FALSE:
-        tmp << "Property is FALSE";
+    switch (algorithm.status()) {
+    case FSM_CONSISTENCY_OK:
+        tmp << "INIT is consistent";
         break;
 
-    case MC_TRUE:
-        tmp << "Property is TRUE";
+    case FSM_CONSISTENCY_KO:
+        tmp << "INIT is inconsistent";
         break;
 
-    case MC_UNKNOWN:
-        tmp << "Property could not be decided";
+    case FSM_CONSISTENCY_UNDECIDED:
+        tmp << "Consistency could not be decided";
         break;
 
     default: assert( false ); /* unreachable */
     } /* switch */
-    if (bmc.has_witness()) {
-        Witness& w
-            (bmc.witness());
-
-        tmp
-            << ", registered CEX witness `"
-            << w.id()
-            << "`, "
-            << w.size()
-            << " steps.";
-    }
 
     return Variant(tmp.str());
 }
@@ -104,7 +74,5 @@ CheckInitTopic::~CheckInitTopic()
 void CheckInitTopic::usage()
 {
     std::cout
-        << "check-init [ -a ] <expression> - Checks propositional satisfiability for given expression at initial time.\n\n"
-        << "If no inconsistency is found one INIT state witness trace is generated.\n"
-        << "If -a is specified all witness traces are generated (ALLSAT). Fails if no initial state exists.";
+        << "check-init [ -a ] <expression> - Checks propositional satisfiability for INIT formulas.\n\n";
 }

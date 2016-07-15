@@ -28,11 +28,14 @@ CheckTransConsistency::CheckTransConsistency(Command& command, Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
+
     setup();
     DRIVEL
         << "Created CheckTransConsistency @"
         << instance
         << std::endl;
+
+    f_status = FSM_CONSISTENCY_UNDECIDED;
 }
 
 CheckTransConsistency::~CheckTransConsistency()
@@ -47,30 +50,22 @@ CheckTransConsistency::~CheckTransConsistency()
 void CheckTransConsistency::process()
 {
     Engine engine
-        ("Transition");
+        ("Transial");
 
+    assert_fsm_trans(engine, 0);
     assert_fsm_invar(engine, 0);
-    assert_fsm_invar(engine, 1);
 
     status_t status
         (engine.solve());
 
     if (STATUS_UNKNOWN == status) {
-        goto cleanup;
+        f_status = FSM_CONSISTENCY_UNDECIDED;
     }
-    if (STATUS_UNSAT == status) {
-        INFO
-            << "TRANS inconsistency detected."
-            << std::endl ;
+    else if (STATUS_UNSAT == status) {
+        f_status = FSM_CONSISTENCY_KO;
     }
     else if (STATUS_SAT == status) {
-        INFO
-            << "TRANS consistency check ok"
-            << std::endl;
+        f_status = FSM_CONSISTENCY_OK;
     }
 
- cleanup:
-    /* signal other threads it's time to go home */
-    EngineMgr::INSTANCE()
-        .interrupt();
 }

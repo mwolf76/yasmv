@@ -23,22 +23,11 @@
 #define CHECK_INIT_CMD_H
 
 #include <cmd/command.hh>
-#include <algorithms/bmc/bmc.hh>
 
 class CheckInit : public Command {
-
-    /* the initiant to be verified */
-    Expr_ptr f_init;
-    bool f_allsat;
-
 public:
     CheckInit(Interpreter& owner);
     virtual ~CheckInit();
-
-    /** cmd params */
-    void set_init(Expr_ptr init);
-
-    void set_allsat(bool allsat);
 
     /* run() */
     Variant virtual operator()();

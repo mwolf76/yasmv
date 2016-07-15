@@ -1089,15 +1089,6 @@ add_trans_command_topic returns [CommandTopic_ptr res]
 check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
-
-        (
-        '-a'
-        { ((CheckInit *) $res) -> set_allsat(true); }
-
-        )*
-
-        (init=toplevel_expression
-        { ((CheckInit *) $res) -> set_init(init); })?
     ;
 
 check_init_command_topic returns [CommandTopic_ptr res]
@@ -1119,12 +1110,12 @@ check_invar_command_topic returns [CommandTopic_ptr res]
     ;
 
 check_trans_command returns[Command_ptr res]
-    : 'check-fsm'
+    : 'check-trans'
       { $res = cm.make_check_trans(); }
     ;
 
 check_trans_command_topic returns [CommandTopic_ptr res]
-    :  'check-fsm'
+    :  'check-trans'
         { $res = cm.topic_check_trans(); }
     ;
 

@@ -30,7 +30,8 @@
 
 typedef enum {
     FSM_CONSISTENCY_OK,
-    FSM_CONSISTENCY_KO
+    FSM_CONSISTENCY_KO,
+    FSM_CONSISTENCY_UNDECIDED
 } fsm_consistency_t;
 
 class CheckInitConsistency : public Algorithm {

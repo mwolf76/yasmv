@@ -1,7 +1,6 @@
-
 /*
  * @file check_trans.cc
- * @brief Command-interpreter subsystem related classes and deffsmions.
+ * @brief Command-interpreter subsystem related classes and deftransions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,6 +23,8 @@
 #include <cstring>
 
 #include <cmd/commands/check_trans.hh>
+#include <algorithms/fsm/fsm.hh>
+
 
 CheckTrans::CheckTrans(Interpreter& owner)
     : Command(owner)
@@ -34,8 +35,29 @@ CheckTrans::~CheckTrans()
 
 Variant CheckTrans::operator()()
 {
-    assert(false); /* not yet implemented */
-    return Variant("Not yet implemented");
+    CheckTransConsistency algorithm
+        (*this, ModelMgr::INSTANCE().model());
+
+    algorithm.process();
+
+    std::ostringstream tmp;
+    switch (algorithm.status()) {
+    case FSM_CONSISTENCY_OK:
+        tmp << "TRANS is consistent";
+        break;
+
+    case FSM_CONSISTENCY_KO:
+        tmp << "TRANS is inconsistent";
+        break;
+
+    case FSM_CONSISTENCY_UNDECIDED:
+        tmp << "Consistency could not be decided";
+        break;
+
+    default: assert( false ); /* unreachable */
+    } /* switch */
+
+    return Variant(tmp.str());
 }
 
 CheckTransTopic::CheckTransTopic(Interpreter& owner)
@@ -52,5 +74,5 @@ CheckTransTopic::~CheckTransTopic()
 void CheckTransTopic::usage()
 {
     std::cout
-        << "check-trans - Checks propositional satisfiability for initial states and transition relation.\n";
+        << "check-trans [ -a ] <expression> - Checks propositional satisfiability for TRANS formulas.\n\n";
 }
