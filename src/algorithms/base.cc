@@ -26,6 +26,8 @@
 
 #include <model/model.hh>
 
+#include <env/environment.hh>
+
 const char* AlgorithmException::what() const throw()
 {
     std::ostringstream oss;
@@ -100,6 +102,9 @@ void Algorithm::setup()
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
+    Environment& env
+        (Environment::INSTANCE());
+
     Model& model
         (f_model);
     const Modules& modules
@@ -132,97 +137,20 @@ void Algorithm::setup()
         Module& module
             (* top.second);
 
+        /* module INITs */
         const ExprVector& init
             (module.init());
-        for (ExprVector::const_iterator ii = init.begin(); ii != init.end(); ++ ii ) {
+        process_init(ctx, init);
 
-            Expr_ptr body
-                (*ii);
-            DEBUG
-                << "processing INIT "
-                << ctx << "::" << body
-                << std::endl;
-
-            try {
-                f_init.push_back( cmpl.process(ctx, *ii));
-            }
-            catch (Exception& ae) {
-                f_ok = false;
-
-                pconst_char what
-                    (ae.what());
-
-                ERR
-                    << what
-                    << std::endl
-                    << "  in INIT "
-                    << ctx << "::" << body
-                    << std::endl;
-
-                free ((void *) what);
-            }
-        } // for init
-
+        /* module INVARs */
         const ExprVector& invar
             (module.invar());
-        for (ExprVector::const_iterator ii = invar.begin(); ii != invar.end(); ++ ii ) {
+        process_invar(ctx, invar);
 
-            Expr_ptr body
-                (*ii);
-            DEBUG
-                << "processing INVAR "
-                << ctx << "::" << body
-                << std::endl;
-            try {
-                f_invar.push_back( cmpl.process(ctx, *ii));
-            }
-            catch (Exception& ae) {
-                f_ok = false;
-
-                pconst_char what
-                    (ae.what());
-
-                ERR
-                    << what
-                    << std::endl
-                    << "  in INVAR "
-                    << ctx << "::" << body
-                    << std::endl;
-
-                free((void *) what);
-            }
-        } // for invar
-
+        /* module TRANSes */
         const ExprVector& trans
             (module.trans());
-        for (ExprVector::const_iterator ti = trans.begin(); ti != trans.end(); ++ ti ) {
-            Expr_ptr body
-                (*ti);
-
-            DEBUG
-                << "processing TRANS "
-                << ctx << "::" << body
-                << std::endl;
-
-            try {
-                f_trans.push_back( cmpl.process(ctx, *ti));
-            }
-            catch (Exception& ae) {
-                f_ok = false;
-
-                pconst_char what
-                    (ae.what());
-
-                ERR
-                    << what
-                    << std::endl
-                    << "  in TRANS "
-                    << ctx << "::" << body
-                    << std::endl;
-
-                free ((void *) what);
-            }
-        } // for trans
+        process_trans(ctx, trans);
 
         Variables attrs
             (module.vars());
@@ -248,8 +176,128 @@ void Algorithm::setup()
                             (local_ctx, &module));
             }
         }
-    }
+    } /* while() */
+
+    /* processing environment extra constraints */
+    const ExprVector& extra_init
+        (env.extra_init());
+    process_init(NULL, extra_init);
+
+    /* environment INVARs */
+    const ExprVector& extra_invar
+        (env.extra_invar());
+    process_invar(NULL, extra_invar);
+
+    /* environment TRANSes */
+    const ExprVector& extra_trans
+        (env.extra_trans());
+    process_trans(NULL, extra_trans);
 }
+
+void Algorithm::process_init(Expr_ptr ctx, const ExprVector& exprs)
+{
+    Compiler& cmpl
+        (compiler()); // just a local ref
+
+    for (ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
+
+        Expr_ptr body
+            (*ii);
+        DEBUG
+            << "processing INIT "
+            << ctx << "::" << body
+            << std::endl;
+
+        try {
+            f_init.push_back( cmpl.process(ctx, *ii));
+        }
+        catch (Exception& ae) {
+            f_ok = false;
+
+            pconst_char what
+                (ae.what());
+
+            ERR
+                << what
+                << std::endl
+                << "  in INIT "
+                << ctx << "::" << body
+                << std::endl;
+
+            free ((void *) what);
+        }
+    }
+} /* process_init() */
+
+void Algorithm::process_invar(Expr_ptr ctx, const ExprVector& exprs)
+{
+    Compiler& cmpl
+        (compiler()); // just a local ref
+
+    for (ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
+
+            Expr_ptr body
+                (*ii);
+
+            DEBUG
+                << "processing INVAR "
+                << ctx << "::" << body
+                << std::endl;
+            try {
+                f_invar.push_back( cmpl.process(ctx, *ii));
+            }
+            catch (Exception& ae) {
+                f_ok = false;
+
+                pconst_char what
+                    (ae.what());
+
+                ERR
+                    << what
+                    << std::endl
+                    << "  in INVAR "
+                    << ctx << "::" << body
+                    << std::endl;
+
+                free((void *) what);
+            }
+        }
+} /* process_invar() */
+
+void Algorithm::process_trans(Expr_ptr ctx, const ExprVector& exprs)
+{
+    Compiler& cmpl
+        (compiler()); // just a local ref
+
+    for (ExprVector::const_iterator ti = exprs.begin(); ti != exprs.end(); ++ ti ) {
+        Expr_ptr body
+            (*ti);
+
+        DEBUG
+            << "processing TRANS "
+            << ctx << "::" << body
+            << std::endl;
+
+        try {
+            f_trans.push_back( cmpl.process(ctx, *ti));
+        }
+        catch (Exception& ae) {
+            f_ok = false;
+
+            pconst_char what
+                (ae.what());
+
+            ERR
+                << what
+                << std::endl
+                << "  in TRANS "
+                << ctx << "::" << body
+                << std::endl;
+
+            free ((void *) what);
+        }
+    }
+} /* process_trans() */
 
 void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
 {

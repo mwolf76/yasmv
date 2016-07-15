@@ -27,18 +27,14 @@
 
 class AddTrans : public Command {
 
-    /* the transiant to be verified */
-    Expr_ptr f_trans;
-    bool f_allsat;
+    Expr_ptr f_constraint;
 
 public:
     AddTrans(Interpreter& owner);
     virtual ~AddTrans();
 
     /** cmd params */
-    void set_trans(Expr_ptr trans);
-
-    void set_allsat(bool allsat);
+    void set_constraint(Expr_ptr constraint);
 
     /* run() */
     Variant virtual operator()();

@@ -27,18 +27,15 @@
 
 class AddInit : public Command {
 
-    /* the initiant to be verified */
-    Expr_ptr f_init;
-    bool f_allsat;
+    /* the INIT constraint to be added to current FSM */
+    Expr_ptr f_constraint;
 
 public:
     AddInit(Interpreter& owner);
     virtual ~AddInit();
 
     /** cmd params */
-    void set_init(Expr_ptr init);
-
-    void set_allsat(bool allsat);
+    void set_constraint(Expr_ptr contraint);
 
     /* run() */
     Variant virtual operator()();

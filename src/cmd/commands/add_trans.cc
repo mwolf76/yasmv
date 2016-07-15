@@ -24,70 +24,33 @@
 
 #include <cmd/commands/add_trans.hh>
 
+#include <env/environment.hh>
+
 AddTrans::AddTrans(Interpreter& owner)
     : Command(owner)
-    , f_trans(NULL)
-    , f_allsat(false)
+    , f_constraint(NULL)
 {}
 
 AddTrans::~AddTrans()
 {
-    free(f_trans);
-    f_trans = NULL;
+    free(f_constraint);
+    f_constraint = NULL;
 }
 
-void AddTrans::set_trans(Expr_ptr trans)
+void AddTrans::set_constraint(Expr_ptr constraint)
 {
-    free(f_trans);
-    f_trans = trans;
-}
-
-void AddTrans::set_allsat(bool allsat)
-{
-    f_allsat = allsat;
+    f_constraint = constraint;
 }
 
 Variant AddTrans::operator()()
 {
-    /* if no TRANS formula is given, proceed with trivial truth */
-    if (! f_trans)
-        f_trans = ExprMgr::INSTANCE().make_true();
+    Environment& env
+        (Environment::INSTANCE());
 
-    /* TODO: turn this into CONSISTENCY */
-    BMC bmc
-        (*this, ModelMgr::INSTANCE().model());
+    assert(f_constraint);
+    env.add_extra_trans(f_constraint);
 
-    bmc.process( f_trans );
-
-    std::ostringstream tmp;
-    switch (bmc.status()) {
-    case MC_FALSE:
-        tmp << "Property is FALSE";
-        break;
-
-    case MC_TRUE:
-        tmp << "Property is TRUE";
-        break;
-
-    case MC_UNKNOWN:
-        tmp << "Property could not be decided";
-        break;
-
-    default: assert( false ); /* unreachable */
-    } /* switch */
-    if (bmc.has_witness()) {
-        Witness& w
-            (bmc.witness());
-
-        tmp
-            << ", registered CEX witness `"
-            << w.id()
-            << "`, "
-            << w.size()
-            << " steps.";
-    }
-
-    return Variant(tmp.str());
+    return Variant("Ok");
 }
 
 AddTransTopic::AddTransTopic(Interpreter& owner)

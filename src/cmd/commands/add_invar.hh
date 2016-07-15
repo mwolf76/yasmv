@@ -27,18 +27,15 @@
 
 class AddInvar : public Command {
 
-    /* the invariant to be verified */
-    Expr_ptr f_invar;
-    bool f_allsat;
+    /* the invariant to be added to environment */
+    Expr_ptr f_constraint;
 
 public:
     AddInvar(Interpreter& owner);
     virtual ~AddInvar();
 
     /** cmd params */
-    void set_invar(Expr_ptr invar);
-
-    void set_allsat(bool allsat);
+    void set_constraint(Expr_ptr constraint);
 
     /* run() */
     Variant virtual operator()();

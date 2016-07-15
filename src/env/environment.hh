@@ -61,11 +61,29 @@ public:
     inline const ExprSet& identifiers() const
     { return f_identifiers; }
 
+    void add_extra_init(Expr_ptr constraint);
+    inline const ExprVector& extra_init() const
+    { return f_extra_inits; }
+
+    void add_extra_invar(Expr_ptr constraint);
+    inline const ExprVector& extra_invar() const
+    { return f_extra_invars; }
+
+    void add_extra_trans(Expr_ptr constraint);
+    inline const ExprVector& extra_trans() const
+    { return f_extra_transes; }
+
 private:
+
+    /* input vars */
     Expr2ExprMap f_env;
     ExprSet f_identifiers;
-
     Expr2ExprMap::iterator f_env_iter;
+
+    /* additional INIT, INVAR and TRANS constraints */
+    ExprVector f_extra_inits;
+    ExprVector f_extra_invars;
+    ExprVector f_extra_transes;
 
     static Environment_ptr f_instance;
 };

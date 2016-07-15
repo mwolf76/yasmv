@@ -55,8 +55,12 @@ Variant Help::operator()()
                   << "- clear" << std::endl
                   << "- read-model" << std::endl
                   << "- write-model" << std::endl
+                  << "- add-init" << std::endl
+                  << "- add-invar" << std::endl
+                  << "- add-trans" << std::endl
                   << "- pick-state" << std::endl
                   << "- simulate" << std::endl
+                  << "- check-fsm" << std::endl
                   << "- check-init" << std::endl
                   << "- check-invar" << std::endl
                   << "- list-traces" << std::endl
