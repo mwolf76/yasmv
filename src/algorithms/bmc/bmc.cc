@@ -92,6 +92,9 @@ void BMC::forward( Expr_ptr phi,
                     ;
             }
             else if (STATUS_SAT == status) {
+                ExprMgr& em
+                    (ExprMgr::INSTANCE());
+
                 sync_set_status( MC_FALSE );
 
                 WitnessMgr& wm = WitnessMgr::INSTANCE();
@@ -101,7 +104,8 @@ void BMC::forward( Expr_ptr phi,
                     << "` is FALSE."
                     << std::endl;
 
-                Witness& w(* new BMCCounterExample(phi, model(), engine, k, false));
+                Witness& w(* new BMCCounterExample(em.make_not(phi), model(),
+                                                   engine, k, false));
                 {
                     std::ostringstream oss;
                     oss
