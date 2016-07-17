@@ -1276,7 +1276,7 @@ filepath returns [pconst_char res]
     : QUOTE
     { $res = (pconst_char) $QUOTE.text -> chars; }
 
-    | dquote = DQUOTE
+    | DQUOTE
     { $res = (pconst_char) $DQUOTE.text -> chars; }
     ;
 
