@@ -1176,11 +1176,11 @@ pick_state_command returns [Command_ptr res]
     :   'pick-state'
         { $res = cm.make_pick_state(); }
     (
-         '-i' init_condition=toplevel_expression
-         { ((PickState*) $res) -> set_init_condition(init_condition); }
+         '-a'
+         { ((PickState*) $res) -> set_allsat(true); }
 
-    |    '-t' trace_id=string
-         { ((PickState*) $res) -> set_trace_uid(trace_id); }
+    |    '-l' limit=constant
+         { ((PickState*) $res) -> set_limit(limit->value()); }
     )*
     ;
 

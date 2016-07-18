@@ -38,8 +38,12 @@ Simulation::Simulation(Command& command, Model& model)
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
+void Simulation::pick_state(bool allsat, value_t limit)
 {
+    int k = ! allsat
+        ? 1
+        : limit;
+
     clock_t t0 = clock(), t1;
     double secs;
 
@@ -55,74 +59,79 @@ void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
 
-    if (init_condition) {
+    // if (init_condition) {
 
-        Compiler& cmpl
-            (compiler()); // just a local ref
+    //     Compiler& cmpl
+    //         (compiler()); // just a local ref
 
-        Expr_ptr ctx
-            (em.make_empty());
+    //     Expr_ptr ctx
+    //         (em.make_empty());
 
-        try {
-            CompilationUnit term
-                (cmpl.process(ctx, init_condition));
+    //     try {
+    //         CompilationUnit term
+    //             (cmpl.process(ctx, init_condition));
 
-            assert_formula( engine, 0, term, 0);
+    //         assert_formula( engine, 0, term, 0);
+    //     }
+    //     catch (Exception& ae) {
+    //         pconst_char what
+    //             (ae.what());
+
+    //         WARN
+    //             << what
+    //             << std::endl
+    //             << "  in initial condition"
+    //             << ctx << "::" << init_condition
+    //             << std::endl;
+
+    //         free((void *) what);
+    //         return;
+    //     }
+    // }
+
+    while ( k -- ) {
+
+        Witness_ptr w;
+        if (STATUS_SAT == engine.solve()) {
+            t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+
+            TRACE
+                << "simulation initialized, took " << secs
+                << " seconds" << std::endl;
+
+            w = new SimulationWitness( model(), engine, 0);;
+
+            {
+                std::ostringstream oss;
+                oss
+                    << simulation_trace_prfx
+                    << (++ progressive);
+                w -> set_id(oss.str());
+            }
+
+            {
+                std::ostringstream oss;
+                oss
+                    << "Simulation trace";
+                w -> set_desc(oss.str());
+            }
+
+            /* REVIEW THESE */
+            set_witness(*w);
+
+            wm.record(*w);
+            wm.set_current(*w);
+
+            f_status = SIMULATION_INITIALIZED;
         }
-        catch (Exception& ae) {
-            pconst_char what
-                (ae.what());
-
-            WARN
-                << what
-                << std::endl
-                << "  in initial condition"
-                << ctx << "::" << init_condition
-                << std::endl;
-
-            free((void *) what);
-            return;
-        }
-    }
-
-    if (STATUS_SAT == engine.solve()) {
-        t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-
-        TRACE
-            << "simulation initialized, took " << secs
-            << " seconds" << std::endl;
-
-        Witness& w
-            (*new SimulationWitness( model(), engine, 0));
-
-        if (trace_name)
-            w.set_id(Atom(trace_name));
         else {
-            std::ostringstream oss;
-            oss
-                << simulation_trace_prfx
-                << (++ progressive);
-            w.set_id(oss.str());
+            WARN << "Inconsistency detected in initial states"
+                 << std::endl;
+            f_status = SIMULATION_DEADLOCKED;
+
+            break;
         }
-        {
-            std::ostringstream oss;
-            oss
-                << "Simulation trace";
-            w.set_desc(oss.str());
-        }
-
-        set_witness(w);
-
-        wm.record(w);
-        wm.set_current(w);
-
-        f_status = SIMULATION_INITIALIZED;
-    }
-    else {
-        WARN << "Inconsistency detected in initial states"
-             << std::endl;
-        f_status = SIMULATION_DEADLOCKED;
-    }
+    } /* while ( -- k ) */
 }
 
 void Simulation::simulate(Expr_ptr invar_condition,

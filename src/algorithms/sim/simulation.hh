@@ -44,8 +44,7 @@ public:
     Simulation(Command& command, Model& model);
     ~Simulation();
 
-    void pick_state(Expr_ptr init_condition,
-                    pconst_char trace_uid);
+    void pick_state(bool allsat, value_t limit);
 
     void simulate(Expr_ptr invar_condition,
                   Expr_ptr until_condition, step_t k,

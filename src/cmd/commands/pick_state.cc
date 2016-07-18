@@ -23,8 +23,8 @@
 
 PickState::PickState(Interpreter& owner)
     : Command(owner)
-    , f_init_condition(NULL)
-    , f_trace_uid(NULL)
+    , f_allsat(false)
+    , f_limit(-1)
 {}
 
 PickState::~PickState()
@@ -33,15 +33,14 @@ PickState::~PickState()
     f_trace_uid = NULL;
 }
 
-void PickState::set_init_condition(Expr_ptr init_condition)
+void PickState::set_allsat(bool allsat)
 {
-    f_init_condition = init_condition;
+    f_allsat = allsat;
 }
 
-void PickState::set_trace_uid(pconst_char trace_uid)
+void PickState::set_limit(value_t limit)
 {
-    free(f_trace_uid);
-    f_trace_uid = strdup(trace_uid);
+    f_limit = limit;
 }
 
 Variant PickState::operator()()
@@ -51,7 +50,7 @@ Variant PickState::operator()()
     Simulation sim
         (*this, ModelMgr::INSTANCE().model());
 
-    sim.pick_state(f_init_condition, f_trace_uid);
+    sim.pick_state(f_allsat, f_limit);
 
     switch (sim.status()) {
     case SIMULATION_DONE:
@@ -94,8 +93,13 @@ PickStateTopic::~PickStateTopic()
 void PickStateTopic::usage()
 {
     std::cout
-        << "pick-state [ -c <expr> ] - Initializes a new simulation.\n\n"
+        << "pick-state [ -a | -l <limit> ] - Initializes a new simulation.\n\n"
         << "options:\n"
-        << "  -c <expr>, specifies an additional constraint (INIT).\n\n"
-        << "Creates a new trace and selects it as current." ;
+        << "  -a, requires an ALLSAT enumeration of all feasible initial states.\n"
+        << "  -l <limit>, limits the number of enumerated solutions. Default is infinity.\n\n"
+        << "Creates a new trace and selects it as current. If -a is used a number of traces\n"
+        << "will be created, according to the number of distinct feasible initial states for\n"
+        << "for the simulation.\n"
+        ;
+
 }

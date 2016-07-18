@@ -107,7 +107,7 @@ void sighandler(int signum)
 
     /* A single Control-C requires current solving stats. Double
        Control-C (within 1 sec) requires interruption */
-    if (signum == SIGINT) {
+    if (signum == SIGTSTP) {
 
         EngineMgr& mgr
             (EngineMgr::INSTANCE());
@@ -166,7 +166,7 @@ int main(int argc, const char *argv[])
         << std::endl;
 
     /* you may also prefer sigaction() instead of signal() */
-    signal(SIGINT, sighandler);
+    signal(SIGTSTP, sighandler);
 
     /* load microcode */
     InlinedOperatorMgr& mm

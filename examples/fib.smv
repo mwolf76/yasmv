@@ -1,5 +1,9 @@
 -- This file is part of the Yasmine distribution
 -- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+--
+
+-- To generate the sequence of the first n fibonacci numbers issue the
+-- command: >> set n 10; reach LIMIT;
 
 #word-width 64
 MODULE main
@@ -32,7 +36,5 @@ TRANS
   next(i) = i + 1;
 
 @hidden
-DEFINE N := i >= n;
+DEFINE LIMIT := i >= n;
 
--- to generate the sequence of the first n fibonacci numbers issue the command:
--- >> set n 10; check-invar ! GOAL;

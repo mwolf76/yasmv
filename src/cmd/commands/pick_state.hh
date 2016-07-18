@@ -27,23 +27,23 @@
 
 class PickState : public Command {
 
-    /* initial condition (optional) */
-    Expr_ptr f_init_condition;
+    /* perform ALLSAT enumeration? */
+    bool f_allsat;
 
-    /* trace id (optional) */
-    pchar f_trace_uid;
+    /* ALLSAT enumeration limit (optional) */
+    unsigned f_limit;
 
 public:
     PickState(Interpreter& owner);
     virtual ~PickState();
 
-    void set_init_condition(Expr_ptr init_condition);
-    inline Expr_ptr init_condition() const
-    { return f_init_condition; }
+    void set_allsat(bool value);
+    inline bool allsat() const
+    { return f_allsat; }
 
-    void set_trace_uid(pconst_char trace_uid);
-    inline pconst_char trace_uid() const
-    { return f_trace_uid; }
+    void set_limit(value_t limit);
+    inline value_t limit() const
+    { return f_limit; }
 
     Variant virtual operator()();
 };
