@@ -28,7 +28,7 @@
 
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
-BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
+BMCCounterExample::BMCCounterExample(Expr_ptr target, Model& model,
                                      Engine& engine, unsigned k,
                                      bool use_coi)
     : Witness()
@@ -61,7 +61,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
             (extend());
 
         SymbIter symbols
-            (model, use_coi ? property : NULL);
+            (model, use_coi ? target : NULL);
 
         while (symbols.has_next()) {
 

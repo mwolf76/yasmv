@@ -65,7 +65,7 @@ private:
 /* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, Model& model,
+    BMCCounterExample(Expr_ptr target, Model& model,
                       Engine& engine, unsigned k, bool use_coi);
 };
 

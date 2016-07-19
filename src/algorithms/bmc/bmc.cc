@@ -27,7 +27,7 @@
 
 // reserved for witnesses
 static unsigned progressive = 0;
-static const char *cex_trace_prfx = "cex_";
+static const char *reach_trace_prfx = "reach_";
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
@@ -55,7 +55,7 @@ BMC::~BMC()
         << std::endl;
 }
 
-void BMC::forward( Expr_ptr phi,
+void BMC::forward( Expr_ptr target,
                    CompilationUnit& ii,
                    CompilationUnit& vv)
 {
@@ -70,12 +70,12 @@ void BMC::forward( Expr_ptr phi,
 
     do {
 
-        { /* looking for CEX : BMC(k-1) ^ ! P(k) */
+        { /* looking for witness : BMC(k-1) ^ ! P(k) */
             assert_formula(engine, k, vv,
                            engine.new_group());
 
             INFO
-                << "Forward: now looking for CEX (k = " << k << ")..."
+                << "Forward: now looking for reachability witness (k = " << k << ")..."
                 << std::endl
                 ;
 
@@ -87,7 +87,7 @@ void BMC::forward( Expr_ptr phi,
             }
             if (STATUS_UNSAT == status) {
                 INFO
-                    << "Forward: no CEX found (k = " << k << ")..."
+                    << "Forward: no reachability witness found (k = " << k << ")..."
                     << std::endl
                     ;
             }
@@ -99,25 +99,25 @@ void BMC::forward( Expr_ptr phi,
 
                 WitnessMgr& wm = WitnessMgr::INSTANCE();
                 INFO
-                    << "Forward: CEX witness exists (k = " << k << "), invariant `"
-                    << phi
-                    << "` is FALSE."
+                    << "Forward: Reachability witness exists (k = " << k << "), target `"
+                    << target
+                    << "` is REACHABLE."
                     << std::endl;
 
-                Witness& w(* new BMCCounterExample(em.make_not(phi), model(),
+                Witness& w(* new BMCCounterExample(em.make_not(target), model(),
                                                    engine, k, false));
                 {
                     std::ostringstream oss;
                     oss
-                        << cex_trace_prfx
+                        << reach_trace_prfx
                         << (++ progressive);
                     w.set_id(oss.str());
                 }
                 {
                     std::ostringstream oss;
                     oss
-                        << "BMC CEX witness for invariant `"
-                        << phi
+                        << "Reachability witness for target `"
+                        << target
                         << "`" ;
 
                     w.set_desc(oss.str());
@@ -170,7 +170,7 @@ void BMC::forward( Expr_ptr phi,
                 if (STATUS_UNSAT == status) {
                     INFO
                         << "Forward: found proof (k = " << k << "), invariant `"
-                        << phi
+                        << target
                         << "` is TRUE."
                         << std::endl;
 
@@ -202,7 +202,7 @@ void BMC::forward( Expr_ptr phi,
         << std::endl;
 } /* forward() */
 
-void BMC::backward( Expr_ptr phi,
+void BMC::backward( Expr_ptr target,
                     CompilationUnit& ii,
                     CompilationUnit& vv)
 {
@@ -241,7 +241,7 @@ void BMC::backward( Expr_ptr phi,
         else if (STATUS_UNSAT == status) {
             INFO
                 << "Backward: found proof (k = " << k << "), invariant `"
-                << phi
+                << target
                 << "` is TRUE."
                 << std::endl;
 
@@ -282,7 +282,7 @@ void BMC::backward( Expr_ptr phi,
 } /* backward() */
 
 
-void BMC::process(const Expr_ptr phi)
+void BMC::process(const Expr_ptr target)
 {
     /* check everyting is ok before spawning */
     Expr_ptr ctx
@@ -294,16 +294,16 @@ void BMC::process(const Expr_ptr phi)
             << std::endl;
 
         CompilationUnit ii
-            (compiler().process( ctx, phi));
+            (compiler().process( ctx, target));
 
         CompilationUnit vv
-            (compiler().process( ctx, em().make_not(phi)));
+            (compiler().process( ctx, em().make_not(target)));
 
         f_status = MC_UNKNOWN;
 
         /* launch parallel checking strategies */
-        boost::thread fwd(&BMC::forward, this, phi, vv, ii);
-        boost::thread bwd(&BMC::backward, this, phi, vv, ii);
+        boost::thread fwd(&BMC::forward, this, target, vv, ii);
+        boost::thread bwd(&BMC::backward, this, target, vv, ii);
 
         fwd.join();
         bwd.join();
