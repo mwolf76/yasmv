@@ -21,10 +21,7 @@ TRANS
    next(y) = x % y;
 
 @hidden
-DEFINE GOAL := y = 0;
+DEFINE TARGET := y = 0;
 
 -- to calculate gcd issue the command:
--- >> reach GOAL;
-
-
-
+-- >> reach TARGET;

@@ -65,10 +65,10 @@ INVAR
    (next(x) != x) && (next(y)  = y) ||
    (next(x)  = x) && (next(y) != y) ;
 
--- his goal is the bottom-right corner
+-- his target is the bottom-right corner
 @hidden
 DEFINE
-  GOAL := x = 7 && y = 7;
+  TARGET := x = 7 && y = 7;
 
 -- to solve the labyrinth issue the command:
--- >> check-invar ! GOAL;
+-- >> reach TARGET;

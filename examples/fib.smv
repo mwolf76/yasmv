@@ -36,5 +36,4 @@ TRANS
   next(i) = i + 1;
 
 @hidden
-DEFINE LIMIT := i >= n;
-
+DEFINE END := i >= n;
