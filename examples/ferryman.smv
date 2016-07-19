@@ -44,11 +44,11 @@ TRANS
         next(wolf) = ( next(carry) = WOLF ? next(ferryman) : wolf );
 
 -- To perform planning, we assert the negation of the desired
--- GOAL. Our GOAL here is to have all the items on the EAST bank.
+-- TARGET. Our TARGET here is to have all the items on the EAST bank.
 
 -- To solve the ferryman problem in this model try this:
--- >> check-invar ! GOAL
+-- >> check-invar ! TARGET
 
 -- Symbols annotated with `@hidden` do not show up in traces.
 @hidden
-DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
+DEFINE TARGET := cabbage = EAST && goat = EAST && wolf = EAST;
