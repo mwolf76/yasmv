@@ -48,12 +48,16 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
     if ((btype = dynamic_cast<BooleanType_ptr>(tp)))
         res = new BooleanEncoding();
+
     else if ((sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(sa_type->width(), true, sa_type->dds());
+
     else if ((ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(ua_type->width(), false, ua_type->dds());
+
     else if ((etype = dynamic_cast<EnumType_ptr>(tp)))
         res = new EnumEncoding(etype->literals());
+
     else if ((vtype = dynamic_cast<ArrayType_ptr>(tp))) {
         Encodings encodings;
 
@@ -63,6 +67,7 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         }
         res = new ArrayEncoding(encodings);
     }
+
     else assert(false); /* unexpected or unsupported */
 
     /* enable DD reordering */
