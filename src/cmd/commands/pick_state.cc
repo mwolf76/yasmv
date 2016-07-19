@@ -28,10 +28,7 @@ PickState::PickState(Interpreter& owner)
 {}
 
 PickState::~PickState()
-{
-    free(f_trace_uid);
-    f_trace_uid = NULL;
-}
+{}
 
 void PickState::set_allsat(bool allsat)
 {
@@ -56,17 +53,22 @@ Variant PickState::operator()()
     case SIMULATION_DONE:
         tmp << "Simulation done";
         break;
+
     case SIMULATION_INITIALIZED:
         tmp << "Simulation initialized";
         break;
+
     case SIMULATION_DEADLOCKED:
         tmp << "Simulation deadlocked";
         break;
+
     case SIMULATION_INTERRUPTED:
         tmp << "Simulation interrupted";
         break;
+
     default: assert( false ); /* unreachable */
     } /* switch */
+
     if (sim.has_witness()) {
         tmp
             << ", registered witness `"
