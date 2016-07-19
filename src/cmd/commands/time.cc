@@ -45,38 +45,36 @@ Variant Time::operator()()
     }
 
     oss
-        << "Session time:" ;
+        << "Session time: " ;
 
     bool a
         (false);
     if (0 < hrs) {
         oss
-            << " "
             << hrs
-            << " h";
+            << "h";
         a = true;
     }
 
     bool b
-        (false);
+        (a);
     if (0 < mins) {
         if (a)
             oss
-                << ", ";
+                << " ";
         oss
             << mins
-            << " m";
+            << "m";
         b = true;
     }
 
     if (0 < secs) {
         if (b)
             oss
-                << ", ";
+                << " ";
         oss
-            << " "
             << secs
-            << " s";
+            << "s";
     }
 
     oss << ".";
