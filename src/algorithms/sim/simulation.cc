@@ -40,9 +40,15 @@ Simulation::~Simulation()
 
 void Simulation::pick_state(bool allsat, value_t limit)
 {
+    EncodingMgr& bm
+        (EncodingMgr::INSTANCE());
+
     int k = ! allsat
         ? 1
         : limit;
+
+    bool first
+        (true);
 
     clock_t t0 = clock(), t1;
     double secs;
@@ -56,40 +62,90 @@ void Simulation::pick_state(bool allsat, value_t limit)
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
+    /* INITs and INVARs at time 0 */
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
 
-    // if (init_condition) {
-
-    //     Compiler& cmpl
-    //         (compiler()); // just a local ref
-
-    //     Expr_ptr ctx
-    //         (em.make_empty());
-
-    //     try {
-    //         CompilationUnit term
-    //             (cmpl.process(ctx, init_condition));
-
-    //         assert_formula( engine, 0, term, 0);
-    //     }
-    //     catch (Exception& ae) {
-    //         pconst_char what
-    //             (ae.what());
-
-    //         WARN
-    //             << what
-    //             << std::endl
-    //             << "  in initial condition"
-    //             << ctx << "::" << init_condition
-    //             << std::endl;
-
-    //         free((void *) what);
-    //         return;
-    //     }
-    // }
-
     while ( k -- ) {
+
+        if (allsat) {
+
+            /* skip first cycle */
+            if (first) {
+                first = false;
+            }
+            else {
+                /* In ALLSAT mode, for each bit int the encoding,
+                   fetch UCBI, time it into TCBI at time 0, fetch its
+                   value in MiniSAT model and negate it in the
+                   exclusion clause. */
+                vec<Lit> exclusion;
+
+                SymbIter symbols
+                    (model());
+
+                while (symbols.has_next()) {
+
+                    std::pair <Expr_ptr, Symbol_ptr> pair
+                        (symbols.next());
+
+                    Expr_ptr ctx
+                        (pair.first);
+
+                    Symbol_ptr symb
+                        (pair.second);
+
+                    Expr_ptr symb_name
+                        (symb->name());
+
+                    Expr_ptr key
+                        (em.make_dot( ctx, symb_name));
+
+                    if (symb->is_variable()) {
+
+                        Variable& var
+                            (symb -> as_variable());
+
+                        /* INPUT vars are not really vars ... */
+                        if (var.is_input())
+                            continue;
+
+                        /* time it, and fetch encoding for enc mgr */
+                        Encoding_ptr enc
+                            (bm.find_encoding( TimedExpr(key,  0)) );
+
+                        if ( ! enc )
+                            continue;
+
+                        /* for each bit in this encoding, fetch UCBI,
+                           time it into TCBI at time 0, fetch its
+                           value in MiniSAT model and append its
+                           negation to exclusion clause.. */
+                        DDVector::const_iterator di;
+                        unsigned ndx;
+                        for (ndx = 0, di = enc->bits().begin();
+                             enc->bits().end() != di; ++ ndx, ++ di) {
+
+                            unsigned bit
+                                ((*di).getNode()->index);
+                            const UCBI& ucbi
+                                (bm.find_ucbi(bit));
+                            const TCBI tcbi
+                                (TCBI(ucbi, 0));
+                            Var var
+                                (engine.tcbi_to_var(tcbi));
+                            int value
+                                (engine.value(var)); /* don't cares assigned to 0 */
+
+                            exclusion.push( mkLit(var, value));
+                        }
+                    }
+                }
+
+                /* add exclusion clause to SAT instance */
+                engine.add_clause(exclusion);
+            }
+        } /* if (allsat) */
 
         Witness_ptr w;
         if (STATUS_SAT == engine.solve()) {
