@@ -1273,11 +1273,8 @@ string returns [pconst_char res]
     ;
 
 filepath returns [pconst_char res]
-    : QUOTE
-    { $res = (pconst_char) $QUOTE.text -> chars; }
-
-    | DQUOTE
-    { $res = (pconst_char) $DQUOTE.text -> chars; }
+    : FILEPATH
+    { $res = (pconst_char) $FILEPATH.text -> chars; }
     ;
 
 // -- Lexer rules --------------------------------------------------------------
@@ -1293,28 +1290,33 @@ IDENTIFIER
     :   ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
     ;
 
-DQUOTE
-    : '\'' ~'\''* '\''
-    ;
-
-QUOTE
-    : '"' ~'"'* '"'
+FILEPATH
+    :  FP_FIRST_CHAR (FP_FOLLOWING_CHARS)*
     ;
 
 fragment TYPE_WIDTH
     : DECIMAL_LITERAL
     ;
 
-fragment ID_FIRST_CHAR
-    :   'A'..'Z' | 'a'..'z' | '_'
+fragment FP_FIRST_CHAR
+    :   'A'..'Z' | 'a'..'z' | '_' | '.' | '/'
     ;
 
 fragment FP_CHARS
     :   '/' | '.' | '..'
     ;
 
+fragment ID_FIRST_CHAR
+    :   'A'..'Z' | 'a'..'z' | '_'
+    ;
+
 fragment ID_FOLLOWING_CHARS
     :    ID_FIRST_CHAR
+    |    DECIMAL_DIGIT
+    ;
+
+fragment FP_FOLLOWING_CHARS
+    :    FP_FIRST_CHAR
     |    DECIMAL_DIGIT
     ;
 
