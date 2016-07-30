@@ -1,22 +1,26 @@
 /**
- *  @file witness.cc
- *  @brief Witness module
+ * @file witness.cc
+ * @brief Witness module
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This header file contains definitions and services that implement
+ * the abstract interface for the witness subsystem.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 #include <sstream>
@@ -87,6 +91,20 @@ TimeFrame::TimeFrame(Witness& owner)
 
 TimeFrame::~TimeFrame()
 {}
+
+TimeFrame& Witness::operator[](step_t i)
+{
+    if (i < f_j)
+        throw IllegalTime(i);
+
+    i -= f_j;
+    assert(0 <= i);
+
+    if (f_frames.size() -1 < i)
+        throw IllegalTime(f_j + i);
+
+    return * f_frames [i];
+}
 
 /* Retrieves value for expr, throws an exception if no value exists. */
 Expr_ptr TimeFrame::value( Expr_ptr expr )
@@ -205,10 +223,11 @@ ExprVector TimeFrame::assignments()
     return res;
 }
 
-Witness::Witness(Atom id, Atom desc, step_t j)
+Witness::Witness(Engine_ptr pe, Atom id, Atom desc, step_t j)
     : f_id(id)
     , f_desc(desc)
     , f_j(j)
+    , p_engine(pe)
 {
     DEBUG
         << "Created new witness: "
@@ -268,4 +287,11 @@ bool Witness::has_value( Expr_ptr expr, step_t time)
     }
     return f_frames[ time ]
         -> has_value( expr );
+}
+
+/* Engine registration can be done only once */
+void Witness::register_engine(Engine& e)
+{
+    assert( ! p_engine );
+    p_engine = &e;
 }

@@ -49,20 +49,26 @@ Variant Reach::operator()()
 
     std::ostringstream tmp;
     switch (bmc.status()) {
-    case MC_FALSE:
-        tmp << "Target is reachable";
+    case BMC_REACHABLE:
+        tmp
+            << "Target is reachable";
         break;
 
-    case MC_TRUE:
-        tmp << "Target is unreachable";
+    case BMC_UNREACHABLE:
+        tmp
+            << "Target is unreachable";
         break;
 
-    case MC_UNKNOWN:
-        tmp << "Reachability could not be decided";
+    case BMC_UNKNOWN:
+        tmp
+            << "Reachability could not be decided";
         break;
-    case MC_ERROR:
-        tmp << "Error";
+
+    case BMC_ERROR:
+        tmp
+            << "Error";
         break;
+
     default: assert( false ); /* unreachable */
     } /* switch */
 
