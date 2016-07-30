@@ -53,7 +53,7 @@ BUILD
 
   On my current development platform - Debian 8 a.k.a "Jessie" - the
   whole thing builds with no warnings. The parser is written with
-  ANTLR3[*] so you will need some java JRE installed at build time. to
+  ANTLR3[*] so you will need some java JRE installed at build time to
   generate the parser and lexer code. Generated code itself is C++, so
   as long as you don't change the grammar source files you will no
   longer need the JRE to build. No JRE is needed when running the
@@ -84,10 +84,10 @@ BUILD
   >>
 
   When launched the program will parse the contents of the `microcode`
-  directory and display the number of fragments it found. The default
-  microcode distribution consists of 2176 fragments and covers the
-  full set of supported algebraic operations on n-bits integers (1 <=
-  n <= 64).
+  directory and display the number of microcode fragments it
+  found. The default microcode distribution consists of 2176 fragments
+  and covers the full set of supported algebraic operations on n-bits
+  integers (1 <= n <= 64).
 
   For further information on the microcode, please refer to the README
   file in the microcode bzip2'd tarball.
@@ -97,11 +97,11 @@ BUILD
   $ ./tests --log_level=all
 
 Remark: The default build for C++ code uses a low level of
-  optimization (-O0) to make life easier for debugging. If you want
-  to, feel free to enable higher level of optimization for the C++
-  code (C code already uses '-O2' by default). Do not expect major
-  performance gains though, as core services Cudd and Minisat are
-  compiled/installed separately and already use a higher level of
+  optimization (-O0) to make life a whole lot easier for debugging. If
+  you want to, feel free to enable higher level of optimization for
+  the C++ code (C code already uses '-O2' by default). Do not expect
+  major performance gains though, as core services Cudd and Minisat
+  are compiled/installed separately and already use a higher level of
   optimization.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
