@@ -77,7 +77,7 @@ Variant Reach::operator()()
             (bmc.witness());
 
         tmp
-            << ", registered CEX witness `"
+            << ", registered witness `"
             << w.id()
             << "`, "
             << w.size()

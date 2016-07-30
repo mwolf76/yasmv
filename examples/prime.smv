@@ -4,8 +4,11 @@
 -- To test for primality an arbitrary 64-bit n use:
 -- >> set n 42; pick-state
 --
+-- To gather all existing divisors of n you can use -a switch in pick-state;
+-- this will enumerate all feasible distint initial states.
+--
 -- If no such state exists, the number is prime. Otherwise a witness
--- showing a known divisor for the number can be printed.
+-- showing a known divisor for the number can be printed using dump-trace.
 -- >> dump-trace
 
 #word-width 32
@@ -30,4 +33,3 @@ INIT
 
 INIT
         x % y = 0;
-

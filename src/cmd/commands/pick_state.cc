@@ -101,7 +101,5 @@ void PickStateTopic::usage()
         << "  -l <limit>, limits the number of enumerated solutions. Default is infinity.\n\n"
         << "Creates a new trace and selects it as current. If -a is used a number of traces\n"
         << "will be created, according to the number of distinct feasible initial states for\n"
-        << "for the simulation.\n"
-        ;
-
+        << "for the simulation.\n" ;
 }
