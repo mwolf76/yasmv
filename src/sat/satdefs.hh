@@ -1,26 +1,32 @@
 /**
- *  @file satdefs.hh
- *  @brief SAT interface
+ * @file satdefs.hh
+ * @brief SAT interface
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This header file contains the declarations required to implement a
+ * range of helpers needed during the compilation to SAT.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
-#ifndef DEFS_H
-#define DEFS_H
+
+/* TODO: merge this with helpers.hh? */
+#ifndef SAT_DEFS_H
+#define SAT_DEFS_H
 
 #include <common.hh>
 
@@ -75,28 +81,33 @@ typedef vec<group_t> Groups;
 
 #include <boost/unordered_map.hpp>
 #include <utils/pool.hh>
+
 typedef boost::unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
 
 struct VarHash {
     inline long operator() (Var v) const
     { return (long) (v); }
 };
+
 struct VarEq {
     inline bool operator() (const Var x,
                             const Var y) const
     { return x == y; }
 };
+
 typedef boost::unordered_map<Var, int, VarHash, VarEq> Var2IndexMap;
 
 struct GroupHash {
     inline long operator() (group_t group) const
     { return (long) (group); }
 };
+
 struct GroupEq {
     inline bool operator() (const group_t x,
                             const group_t y) const
     { return x == y; }
 };
+
 typedef boost::unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
 
-#endif
+#endif /* SATDEFS_H */

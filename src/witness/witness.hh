@@ -1,24 +1,29 @@
 /**
- *  @file witness.hh
- *  @brief Witness module
+ * @file witness.hh
+ * @brief Witness module
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This module contains definitions and services that implement the
+ * abstract interface for the witness subsystem.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef WITNESS_H
 #define WITNESS_H
 
@@ -36,6 +41,8 @@
 
 #include <model/model.hh>
 #include <model/model_mgr.hh>
+
+#include <sat/sat.hh>
 
 #include <utils/variant.hh>
 
@@ -170,25 +177,16 @@ typedef std::vector<TimeFrame_ptr> TimeFrames;
 typedef class Witness* Witness_ptr;
 class Witness {
 public:
-    Witness(Atom id = "<Noname>", Atom desc = "<No description>", step_t j = 0);
+    Witness(Engine_ptr pengine = NULL,
+            Atom id = "<Noname>",
+            Atom desc = "<No description>",
+            step_t j = 0);
 
     /* data storage */
     inline TimeFrames& frames()
     { return f_frames; }
 
-    inline TimeFrame& operator[](step_t i)
-    {
-        if (i < f_j) {
-            throw IllegalTime(i);
-        }
-        i -= f_j;
-        assert(0 <= i);
-
-        if (f_frames.size() -1 < i) {
-            throw IllegalTime(f_j + i);
-        }
-        return * f_frames [i];
-    }
+    TimeFrame& operator[](step_t i);
 
     inline const Atom& id() const
     { return f_id; }
@@ -247,6 +245,22 @@ protected:
 
     /* Language (i.e. full list of symbols) */
     ExprVector f_lang;
+
+    /* An engine that can be used to extend this witness. This is not
+       necessarily the engine that created the trace. Ordinarily it
+       should be a simulation engine. */
+    Engine_ptr p_engine;
+
+    inline bool has_engine() const
+    { return NULL != p_engine; }
+
+    inline Engine& engine()
+    {
+        assert (NULL != p_engine);
+        return * p_engine;
+    }
+
+    void register_engine(Engine& e);
 };
 
 class WitnessPrinter {
@@ -254,4 +268,4 @@ public:
     virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
 };
 
-#endif
+#endif /* WITNESS_H */

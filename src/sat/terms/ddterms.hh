@@ -1,9 +1,11 @@
+#if 0
+
 /**
- *  @file ddterms.hh
- *  @brief DD (ADD) terms support
+ * @file ddterms.hh
+ * @brief DD (ADD) terms support
  *
- *  This module contains the definitions for terms manipulation,
- *  specialized for cudd ADDs.
+ * This module contains the definitions for terms manipulation,
+ * specialized for cudd ADDs.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -32,5 +34,7 @@
 namespace Minisat {
 
 } // namespace Minisat
+
+#endif
 
 #endif

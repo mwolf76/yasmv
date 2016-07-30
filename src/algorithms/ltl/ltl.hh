@@ -2,6 +2,9 @@
  * @file ltl.hh
  * @brief SAT-based SBMC Algorithm for LTL properties checking
  *
+ * This header file contains the declarations required to implement
+ * the LTL SAT-based SBMC model checking algorithm.
+ *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or

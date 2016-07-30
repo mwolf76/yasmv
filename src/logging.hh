@@ -2,21 +2,25 @@
  * @file logging.hh
  * @brief Logging support
  *
+ * This header file contains logging-related definitions and services
+ * used throughout the whole program.
+ *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -63,17 +67,28 @@ namespace axter {
                                              ext_data levels_format_usage_data);
 };
 
-
 #include <3rdparty/ezlogger/ezlogger_output_policy.hpp>
 #include <3rdparty/ezlogger/ezlogger_verbosity_level_policy.hpp>
 #include <3rdparty/ezlogger/ezlogger.hpp>
 #include <3rdparty/ezlogger/ezlogger_macros.hpp>
 
 // custom loggers
-#define ERR  EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)
-#define WARN EZLOGGERVLSTREAM2(axter::log_always, std::cerr)
-#define TRACE EZLOGGERVLSTREAM2(axter::log_often, std::cerr)
-#define INFO EZLOGGERVLSTREAM2(axter::log_regularly, std::cerr)
-#define DEBUG EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr)
-#define DRIVEL EZLOGGERVLSTREAM2(axter::log_very_rarely, std::cerr)
-#endif
+#define ERR                                                     \
+    EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)
+
+#define WARN                                            \
+    EZLOGGERVLSTREAM2(axter::log_always, std::cerr)
+
+#define TRACE                                           \
+    EZLOGGERVLSTREAM2(axter::log_often, std::cerr)
+
+#define INFO                                            \
+    EZLOGGERVLSTREAM2(axter::log_regularly, std::cerr)
+
+#define DEBUG                                           \
+    EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr)
+
+#define DRIVEL                                                  \
+    EZLOGGERVLSTREAM2(axter::log_very_rarely, std::cerr)
+
+#endif /* LOGGING_H */

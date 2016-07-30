@@ -2,39 +2,55 @@
  * @file console.hh
  * @brief Command line options management
  *
+ * This header file contains console-related definitions and services
+ * used throughout the whole program.
+ *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
  **/
 
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-/* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
+/* logging support using ezlogger (cfr. http://axter.com/ezlogger) */
 #include <logging.hh>
 
 class ConsoleMgr;
 typedef ConsoleMgr* ConsoleMgr_ptr;
 
 // system-wide loggers
-#define ERR  ConsoleMgr::INSTANCE().err()
-#define WARN ConsoleMgr::INSTANCE().warn()
-#define TRACE ConsoleMgr::INSTANCE().trace()
-#define INFO ConsoleMgr::INSTANCE().info()
-#define DEBUG  ConsoleMgr::INSTANCE().debug()
-#define DRIVEL ConsoleMgr::INSTANCE().drivel()
+#define ERR                                     \
+    ConsoleMgr::INSTANCE().err()
+
+#define WARN                                    \
+    ConsoleMgr::INSTANCE().warn()
+
+#define TRACE                                   \
+    ConsoleMgr::INSTANCE().trace()
+
+#define INFO                                    \
+    ConsoleMgr::INSTANCE().info()
+
+#define DEBUG                                   \
+    ConsoleMgr::INSTANCE().debug()
+
+#define DRIVEL                                  \
+    ConsoleMgr::INSTANCE().drivel()
 
 class ConsoleMgr {
 
@@ -66,4 +82,4 @@ private:
     axter::ezlogger<> f_drivel;
 };
 
-#endif
+#endif /* CONSOLE_H */

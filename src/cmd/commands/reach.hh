@@ -1,6 +1,9 @@
-/*
+/**
  * @file reach.hh
  * @brief Command-interpreter subsystem related classes and definitions.
+ *
+ * This header file contains the handler inteface for the `reach`
+ * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,6 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+
 #ifndef REACH_CMD_H
 #define REACH_CMD_H
 
@@ -48,4 +52,4 @@ public:
     void virtual usage();
 };
 
-#endif // REACH_CMD_H
+#endif /* REACH_CMD_H */

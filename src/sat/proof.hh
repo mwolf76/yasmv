@@ -1,3 +1,5 @@
+#if 0
+
 /**
  *  @file proof.hh
  *  @brief UNSAT proof logging
@@ -284,5 +286,7 @@ namespace Minisat {
 #endif
     };
 }
+
+#endif
 
 #endif

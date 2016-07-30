@@ -1,24 +1,29 @@
 /**
- *  @file cnf_registry.hh
- *  @brief Engine interface (CNF registry sub-component)
+ * @file cnf_registry.hh
+ * @brief Engine interface (CNF registry sub-component)
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This header file contains the declarations required to implement
+ * the SAT CNF registry component.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef SAT_CNF_REGISTRY_H
 #define SAT_CNF_REGISTRY_H
 
@@ -54,14 +59,17 @@ public:
     // expression time (default is 0)
     step_t f_time;
 };
+
 struct TimedDDHash {
     inline long operator() (const TimedDD& k) const
     { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
 };
+
 struct TimedDDEq {
     inline bool operator() (const TimedDD& x, const TimedDD& y) const
     { return (x.node() == y.node() && x.time() == y.time()); }
 };
+
 typedef boost::unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
 
 struct TimedVar {
@@ -83,14 +91,17 @@ public:
     // expression time (default is 0)
     step_t f_time;
 };
+
 struct TimedVarHash {
     inline long operator() (const TimedVar& k) const
     { return 0L; }
 };
+
 struct TimedVarEq {
     inline bool operator() (const TimedVar& x, const TimedVar& y) const
     { return (x.var() == y.var() && x.time() == y.time()); }
 };
+
 typedef boost::unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
 
 class CNFRegistry {
@@ -120,4 +131,4 @@ private:
     RewriteMap f_rewrite_map;
 };
 
-#endif
+#endif /* SAT_CNF_REGISTRY_H */

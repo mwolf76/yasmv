@@ -1,60 +1,74 @@
 /**
- *  @file type.hh
- *  @brief Type system classes
+ * @file type.hh
+ * @brief Type system classes
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT
- *  gmail DOT com >
+ * This header file contains the declarations and type definitions
+ * required by YASMINE type system classes.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1
- *  of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free
- *  Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301 USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
- *  This module contains definitions and services that implement type
- *  classes. YASMINE's types can be classified as (a) Monolithic types
- *  (i.e. that can be represented using a single DD), (b) Algebraic
- *  types (i.e. that are represented using a vector of DDs) or (c)
- *  Array types. The type system is organized as follows:
- *
- *  MONOLITHIC types
- *  ================
- *  + Booleans
- *  + Enumeratives (e.g. { LOUIE, HUEWEY, DEWEY })
+ **/
 
- *  ALGEBRAIC types
- *  ===============
- *  + Signed integers(N) (type keyword is 'signed int' or just 'int'),
- *  where N is the number of hexadecimal digits used in the
- *  representation. MSB is the sign bit. (e.g. an int(4) ranges from
- *  -8 to 7)
+#ifndef TYPE_H
+#define TYPE_H
+
+#include <list>
+
+#include <dd/cudd_mgr.hh>
+
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+
+/*
+ * YASMINE's types can be classified as (a) Monolithic types
+ * (i.e. that can be represented using a single DD), (b) Algebraic
+ * types (i.e. that are represented using a vector of DDs) or (c)
+ * Array types. The type system is organized as follows:
  *
- *  + Unsigned integers(N) (type keyword is 'unsigned int'), where N
- *  has the same meaning as above. (e.g. an unsigned int(4) ranges
- *  from 0 to 15.
+ * MONOLITHIC types
+ * ================
+ * + Booleans
+ * + Enumeratives (e.g. { LOUIE, HUEWEY, DEWEY })
+
+ * ALGEBRAIC types
+ * ===============
+ *
+ * + Signed integers(N) (type keyword is 'signed int' or just 'int'),
+ * where N is the number of hexadecimal digits used in the
+ * representation. MSB is the sign bit. (e.g. an int(4) ranges from -8
+ * to 7)
+ *
+ * + Unsigned integers(N) (type keyword is 'unsigned int'), where N
+ * has the same meaning as above. (e.g. an unsigned int(4) ranges from
+ * 0 to 15.
  *
  * Remark: numeric constants are *always* unsigned and have the
  * special reserved abstract types 'unsigned int(0)'.
  *
- *  ARRAY types
- *  ===============
+ * ARRAY types
+ * ===============
  *
- *  + ARRAY of booleans
- *  + ARRAY of enumeratives
- *  + ARRAY of signed integers
- *  + ARRAY of unsigned integers
+ * + ARRAY of booleans
+ * + ARRAY of enumeratives
+ * + ARRAY of signed integers
+ * + ARRAY of unsigned integers
  *
-* Type Aliases
+ * Type Aliases
  * ============
  *
  * A few type aliases are provided, to bring YASMINE's type system
@@ -91,15 +105,6 @@
  * operands.
  *
  **/
-#ifndef TYPE_H
-#define TYPE_H
-
-#include <list>
-
-#include <dd/cudd_mgr.hh>
-
-#include <expr/expr.hh>
-#include <expr/expr_mgr.hh>
 
 /* _ptr typdefs */
 typedef class Type* Type_ptr;
@@ -173,7 +178,6 @@ public:
     const char* what() const throw();
     ~DuplicateLiteral() throw();
 };
-
 
 /** Raised when the inferrer detects two mismatching types */
 class TypeMismatch : public TypeException {
@@ -413,4 +417,4 @@ protected:
 
 typedef std::vector<Type_ptr> TypeVector;
 
-#endif
+#endif /* TYPE_H */

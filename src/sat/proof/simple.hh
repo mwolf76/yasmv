@@ -1,3 +1,5 @@
+#if 0
+
 // -*- C++ -*-
 
 #ifndef SIMPLETERMS_H_INCLUDED
@@ -8,7 +10,7 @@
 #include <sstream>
 
 namespace Minisat {
-  
+
   enum SimpleTermKind { FALSE, TRUE, VAR, NOT, OR, AND };
 
   class SimpleTerm {
@@ -18,7 +20,7 @@ namespace Minisat {
 
     union {
       Var f_variable;
-      
+
       struct {
         SimpleTerm* f_car;
         SimpleTerm* f_cdr;
@@ -40,7 +42,7 @@ namespace Minisat {
     inline bool is_var() const
     { return f_kind == VAR; }
 
-    inline bool is_true() const 
+    inline bool is_true() const
     { return f_kind == TRUE; }
 
     inline bool is_false() const
@@ -70,7 +72,7 @@ namespace Minisat {
     ostream& f_os;
 
   public:
-    
+
     SimpleTermWriter(ostream& os)
       : f_os(os)
     {}
@@ -83,7 +85,7 @@ namespace Minisat {
     SimpleTermWriter& operator<<(Term t)
     {
       SimpleTerm& term = * (reinterpret_cast<SimpleTerm *> (t) );
-      
+
       if (term.is_true()) {
         (*this) << "TRUE";
       }
@@ -121,7 +123,7 @@ namespace Minisat {
   public:
     SimpleTermFactory() {}
     ~SimpleTermFactory() {}
-    
+
     // term makers, unsafe casts for minimum fuss
     inline Term make_true()
     { return (Term) (new SimpleTerm(TRUE)); }
@@ -130,14 +132,14 @@ namespace Minisat {
     { return (Term) (new SimpleTerm(FALSE)); }
 
     inline Term make_var(Var v)
-    { 
+    {
       SimpleTerm* res = new SimpleTerm(VAR);
       res->f_data.f_variable = v;
       return (Term)(res);
     }
-    
+
     inline Term make_and(Term t1, Term t2)
-    { 
+    {
       SimpleTerm* res = new SimpleTerm(AND);
       res->f_data.f_children.f_car = (SimpleTerm*)(t1);
       res->f_data.f_children.f_cdr = (SimpleTerm*)(t2);
@@ -165,3 +167,5 @@ namespace Minisat {
 } // namespace Minisat
 
 #endif // TERMBANK_H_INCLUDED
+
+#endif
