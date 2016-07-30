@@ -1,22 +1,23 @@
 /**
- *  @file ltl.hh
- *  @brief SAT-based LTL Algorithms for property checking
+ * @file ltl.hh
+ * @brief SAT-based SBMC Algorithm for LTL properties checking
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -28,6 +29,13 @@
 #include <algorithms/base.hh>
 #include <witness/witness.hh>
 
+typedef enum {
+    LTL_FALSE,
+    LTL_TRUE,
+    LTL_UNKNOWN,
+    LTL_ERROR,
+} ltl_status_t;
+
 class LTL : public Algorithm {
 
 public:
@@ -36,21 +44,21 @@ public:
 
     void process(const Expr_ptr phi);
 
-    inline mc_status_t status() const
+    inline ltl_status_t status() const
     { return f_status; }
 
-    inline void set_status(mc_status_t status)
+    inline void set_status(ltl_status_t status)
     { f_status = status; }
 
 private:
-    mc_status_t f_status;
+    ltl_status_t f_status;
 };
 
 /* Specialized for LTL CEX */
 class LTLCounterExample : public Witness {
 public:
     LTLCounterExample(Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k, bool use_coi);
+                      Engine& engine, unsigned k);
 };
 
-#endif
+#endif /* LTL_ALGORITHM_H */

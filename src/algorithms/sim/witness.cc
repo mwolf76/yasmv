@@ -1,22 +1,27 @@
 /**
- *  @file BMC Simulation witnesses
- *  @brief BMC Simulation witnesses
+ * @file BMC Simulation witnesses
+ * @brief BMC Simulation witnesses
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This module contains definitions and services that implement the
+ * extraction of a CEX (CounterEXample) witness for SAT-based BMC
+ * simulation algorithm.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 #include <simulation.hh>
@@ -27,7 +32,7 @@
 #include <env/environment.hh>
 
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
-    : Witness()
+    : Witness(&engine)
 {
     EncodingMgr& bm
         (EncodingMgr::INSTANCE());
@@ -40,12 +45,16 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     /* Collecting symbols for the witness' language */
     SymbIter si (model);
     while (si.has_next()) {
+
         std::pair <Expr_ptr, Symbol_ptr> pair
             (si.next());
+
         Expr_ptr ctx
             (pair.first);
+
         Symbol_ptr symb
             (pair.second);
+
         Expr_ptr full_name
             ( em.make_dot( ctx, symb->name()));
 
@@ -86,7 +95,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 Expr_ptr value
                     (Environment::INSTANCE().get(symb_name));
 
-                tf.set_value( key, value, symb -> format());
+                tf.set_value( key, value, symb->format());
             }
 
             else {
@@ -99,9 +108,9 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 if ( ! enc )
                     continue;
 
-                /* 1. for each bit int the encoding, fetch UCBI, time it
-                   into TCBI, fetch its value in solver model and set the
-                   corresponding entry in inputs array. */
+                /* 1. for each bit int the encoding, fetch UCBI, time
+                   it into TCBI, fetch its value in solver model and
+                   set the corresponding entry in inputs array. */
                 DDVector::const_iterator di;
                 unsigned ndx;
                 for (ndx = 0, di = enc->bits().begin();
@@ -109,26 +118,30 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
                     unsigned bit
                         ((*di).getNode()->index);
+
                     const UCBI& ucbi
                         (bm.find_ucbi(bit));
+
                     const TCBI tcbi
                         (TCBI(ucbi, k));
+
                     Var var
                         (engine.tcbi_to_var(tcbi));
+
                     int value
-                        (engine.value(var)); /* Don't care is assigned to 0 */
+                        (engine.value(var)); /* Don't care is assigned
+                                                to 0 */
 
                     inputs[bit] = value;
                 }
 
-                /* 2. eval the encoding DDs with inputs and put resulting
-                   value into time frame container. */
+                /* 2. eval the encoding DDs with inputs and put
+                   resulting value into time frame container. */
                 Expr_ptr value
                     (enc->expr(inputs));
 
                 if (value)
-                    tf.set_value( key, value,
-                                  symb -> format());
+                    tf.set_value( key, value, symb->format());
             }
         }
 
@@ -147,10 +160,15 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 Expr_ptr value
                     (wm.eval( *this, ctx, body, 0));
 
-                tf.set_value( key, value );
+                tf.set_value( key, value);
             }
 
             catch (NoValue nv) {
+                WARN
+                    << "Cannot evaluate define `"
+                    << key
+                    << " `"
+                    << std::endl;
             }
         }
     }

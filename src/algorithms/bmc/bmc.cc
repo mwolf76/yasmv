@@ -1,24 +1,29 @@
 /**
- *  @file bmc.cc
- *  @brief SAT-based BMC Algorithms for property checking
+ * @file bmc.cc
+ * @brief SAT-based BMC Algorithms for property checking
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This module contains definitions and services that implement the
+ * SAT-based BMC reachability algorithm.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -55,9 +60,9 @@ BMC::~BMC()
         << std::endl;
 }
 
-void BMC::forward( Expr_ptr phi,
-                   CompilationUnit& ii,
-                   CompilationUnit& vv)
+void BMC::forward(Expr_ptr phi,
+                  CompilationUnit& ii,
+                  CompilationUnit& vv)
 {
     Engine engine
         ("Forward");
@@ -82,20 +87,21 @@ void BMC::forward( Expr_ptr phi,
             status_t status
                 (engine.solve());
 
-            if (STATUS_UNKNOWN == status) {
+            if (STATUS_UNKNOWN == status)
                 goto cleanup;
-            }
-            if (STATUS_UNSAT == status) {
+
+            else if (STATUS_UNSAT == status) {
                 INFO
                     << "Forward: no CEX found (k = " << k << ")..."
                     << std::endl
                     ;
             }
+
             else if (STATUS_SAT == status) {
                 ExprMgr& em
                     (ExprMgr::INSTANCE());
 
-                sync_set_status( MC_FALSE );
+                sync_set_status(BMC_REACHABLE);
 
                 WitnessMgr& wm = WitnessMgr::INSTANCE();
                 INFO
@@ -104,13 +110,15 @@ void BMC::forward( Expr_ptr phi,
                     << "` is FALSE."
                     << std::endl;
 
-                Witness& w(* new BMCCounterExample(em.make_not(phi), model(),
-                                                   engine, k, false));
+                Witness& w
+                    (* new BMCCounterExample(em.make_not(phi),
+                                             model(), engine, k));
                 {
                     std::ostringstream oss;
                     oss
                         << cex_trace_prfx
                         << (++ progressive);
+
                     w.set_id(oss.str());
                 }
                 {
@@ -131,7 +139,7 @@ void BMC::forward( Expr_ptr phi,
             }
         }
 
-        if (sync_status() == MC_UNKNOWN) {
+        if (sync_status() == BMC_UNKNOWN) {
 
             /* disable violation */
             engine.disable_last_group();
@@ -174,7 +182,7 @@ void BMC::forward( Expr_ptr phi,
                         << "` is TRUE."
                         << std::endl;
 
-                    sync_set_status( MC_TRUE );
+                    sync_set_status(BMC_UNREACHABLE);
                     goto cleanup;
                 }
 
@@ -190,7 +198,7 @@ void BMC::forward( Expr_ptr phi,
                 }
             }
         }
-    } while (sync_status() == MC_UNKNOWN);
+    } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
     /* signal other threads it's time to go home */
@@ -220,7 +228,7 @@ void BMC::backward( Expr_ptr phi,
 
             /* quit immediately if forward solved the instance or a
                user interrupt has been signalled */
-            if (sync_status() != MC_UNKNOWN)
+            if (sync_status() != BMC_UNKNOWN)
                 goto cleanup;
         }
 
@@ -245,7 +253,7 @@ void BMC::backward( Expr_ptr phi,
                 << "` is TRUE."
                 << std::endl;
 
-            sync_set_status( MC_TRUE );
+            sync_set_status(BMC_UNREACHABLE);
             goto cleanup;
         }
         else if (STATUS_SAT == status) {
@@ -269,7 +277,7 @@ void BMC::backward( Expr_ptr phi,
         for (step_t j = 0; j < k; ++ j)
             assert_fsm_uniqueness(engine, j, k);
 
-    } while (sync_status() == MC_UNKNOWN);
+    } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
     /* signal other threads it's time to go home */
@@ -299,7 +307,7 @@ void BMC::process(const Expr_ptr phi)
         CompilationUnit vv
             (compiler().process( ctx, em().make_not(phi)));
 
-        f_status = MC_UNKNOWN;
+        f_status = BMC_UNKNOWN;
 
         /* launch parallel checking strategies */
         boost::thread fwd(&BMC::forward, this, phi, vv, ii);
@@ -309,14 +317,14 @@ void BMC::process(const Expr_ptr phi)
         bwd.join();
     }
     catch (Exception& e) {
-        const char* tmp
+        const char* what
             (strdup(e.what()));
 
         std::cerr
-            << tmp
+            << what
             << std::endl;
 
-        f_status = MC_ERROR;
+        f_status = BMC_ERROR;
         return;
     }
 
@@ -325,11 +333,11 @@ void BMC::process(const Expr_ptr phi)
         << std::endl;
 }
 
-mc_status_t BMC::status()
+reachability_status_t BMC::status()
 { return sync_status(); }
 
 /* synchronized */
-mc_status_t BMC::sync_status()
+reachability_status_t BMC::sync_status()
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
@@ -338,14 +346,14 @@ mc_status_t BMC::sync_status()
 }
 
 /* synchronized */
-void BMC::sync_set_status(mc_status_t status)
+void BMC::sync_set_status(reachability_status_t status)
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
 
     /* consistency check */
     assert(f_status == status ||
-           (status != MC_UNKNOWN && f_status == MC_UNKNOWN));
+           (status != BMC_UNKNOWN && f_status == BMC_UNKNOWN));
 
     f_status = status;
 }

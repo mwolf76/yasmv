@@ -1,24 +1,26 @@
 /**
- *  @file simulation.cc
- *  @brief SAT-based BMC simulation algorithm
+ * @file simulation.cc
+ * @brief SAT-based BMC simulation algorithm
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <sstream>
 #include <sim/simulation.hh>
 #include <model/compiler/unit.hh>
@@ -31,6 +33,7 @@ Simulation::Simulation(Command& command, Model& model)
     : Algorithm(command, model)
 {
     setup();
+
     if (!ok())
         throw AlgorithmException();
 }
@@ -104,7 +107,7 @@ void Simulation::pick_state(bool allsat, value_t limit)
                     if (symb->is_variable()) {
 
                         Variable& var
-                            (symb -> as_variable());
+                            (symb->as_variable());
 
                         /* INPUT vars are not really vars ... */
                         if (var.is_input())
@@ -112,7 +115,7 @@ void Simulation::pick_state(bool allsat, value_t limit)
 
                         /* time it, and fetch encoding for enc mgr */
                         Encoding_ptr enc
-                            (bm.find_encoding( TimedExpr(key,  0)) );
+                            (bm.find_encoding( TimedExpr(key, 0)));
 
                         if ( ! enc )
                             continue;
@@ -128,12 +131,16 @@ void Simulation::pick_state(bool allsat, value_t limit)
 
                             unsigned bit
                                 ((*di).getNode()->index);
+
                             const UCBI& ucbi
                                 (bm.find_ucbi(bit));
+
                             const TCBI tcbi
                                 (TCBI(ucbi, 0));
+
                             Var var
                                 (engine.tcbi_to_var(tcbi));
+
                             int value
                                 (engine.value(var)); /* don't cares assigned to 0 */
 
@@ -162,14 +169,16 @@ void Simulation::pick_state(bool allsat, value_t limit)
                 oss
                     << simulation_trace_prfx
                     << (++ progressive);
-                w -> set_id(oss.str());
+
+                w->set_id(oss.str());
             }
 
             {
                 std::ostringstream oss;
                 oss
                     << "Simulation trace";
-                w -> set_desc(oss.str());
+
+                w->set_desc(oss.str());
             }
 
             /* REVIEW THESE */
@@ -222,11 +231,13 @@ void Simulation::simulate(Expr_ptr invar_condition,
     // variables guarantees full deterministic behavior.
     step_t init_time
         (trace.last_time());
+
     step_t k
         (init_time);
 
     TimeFrame& last
         (trace.last());
+
     assert_time_frame(engine, k, last);
 
     /* inject full transition relation, trace may not be compatible
@@ -307,9 +318,8 @@ void Simulation::simulate(Expr_ptr invar_condition,
         assert_fsm_invar(engine, k);
     }
 
-    if (last_sat == STATUS_UNKNOWN) {
+    if (last_sat == STATUS_UNKNOWN)
         f_status = SIMULATION_INTERRUPTED;
-    }
 
     else if (last_sat == STATUS_UNSAT) {
         WARN
