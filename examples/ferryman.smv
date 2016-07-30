@@ -47,8 +47,9 @@ TRANS
 -- GOAL. Our GOAL here is to have all the items on the EAST bank.
 
 -- To solve the ferryman problem in this model try this:
--- >> check-invar ! GOAL
+-- >> reach TGT
 
 -- Symbols annotated with `@hidden` do not show up in traces.
 @hidden
-DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
+DEFINE TGT :=
+       cabbage = EAST && goat = EAST && wolf = EAST;
