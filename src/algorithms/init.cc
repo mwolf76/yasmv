@@ -20,6 +20,8 @@
  *  Boston, MA 02110-1301 USA
  *
  **/
+
+
 #include <init.hh>
 
 Init::Init(Command& command, Model& model)

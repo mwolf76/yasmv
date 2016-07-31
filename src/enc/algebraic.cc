@@ -1,10 +1,6 @@
 /**
- * @file enc.cc
- *
- * This module contains definitions and services that implement an
- * encoder for symbols. For each symbol a boolean encoding is
- * maintained, the encoder takes care of ADD variables definitions
- * and is provides mapback services as well.
+ * @file algebraic.cc
+ * @brief Encoding management subsystem, algebraic classes implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

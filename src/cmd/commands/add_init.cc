@@ -1,9 +1,6 @@
-/*
+/**
  * @file add_init.cc
- * @brief Command-interpreter subsystem related classes and definitions.
- *
- * This module contains the handler implementation for the `add-init`
- * command.
+ * @brief Command `add-init` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

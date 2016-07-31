@@ -1,6 +1,6 @@
 /*
  * @file environment.hh
- * @brief Command environment subsystem related classes and definitions.
+ * @brief Command environment subsystem implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+
 #include <environment.hh>
 
 const char* NoSuchIdentifier::what() const throw() {

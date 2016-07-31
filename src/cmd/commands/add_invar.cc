@@ -1,9 +1,6 @@
-/*
+/**
  * @file add_invar.cc
- * @brief Command-interpreter subsystem related classes and definvarions.
- *
- * This module contains the handler implementation for the `add-init`
- * command.
+ * @brief Command `add-invar` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

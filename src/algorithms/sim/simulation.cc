@@ -1,6 +1,6 @@
 /**
  * @file simulation.cc
- * @brief SAT-based BMC simulation algorithm
+ * @brief SAT-based BMC simulation algorithm implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

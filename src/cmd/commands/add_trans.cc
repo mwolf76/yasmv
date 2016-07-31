@@ -1,9 +1,6 @@
 /*
  * @file add_trans.cc
- * @brief Command-interpreter subsystem related classes and deftransions.
- *
- * This module contains the handler implementation for the `add-trans`
- * command.
+ * @brief Command `add-trans` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,6 +20,7 @@
  * 02110-1301 USA
  *
  **/
+
 #include <cstdlib>
 #include <cstring>
 

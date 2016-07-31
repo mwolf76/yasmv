@@ -1,6 +1,6 @@
-/*
+/**
  * @file interpreter.cc
- * @brief Command interpreter subsystem related classes and definitions.
+ * @brief Command interpreter subsystem, Interpreter class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,6 +20,7 @@
  * 02110-1301 USA
  *
  **/
+
 #include <iostream>
 #include <sstream>
 

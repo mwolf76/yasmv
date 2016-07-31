@@ -1,9 +1,6 @@
 /**
- * @file opts.cc
- * @brief Command line options management
- *
- * This module contains common definitions and services that implement
- * the options management system.
+ * @file opts_mgr.cc
+ * @brief Options Manager class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +18,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
+ *
  **/
+
 #include <sstream>
 
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 // static initialization
 OptsMgr_ptr OptsMgr::f_instance = NULL;

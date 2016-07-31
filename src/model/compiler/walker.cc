@@ -1,38 +1,42 @@
 /**
- *  @file walker.cc
+ * @file walker.cc
+ * @brief Expression compiler subsystem, walker pattern implementations.
  *
- *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <utility>
 #include <compiler.hh>
 
 #include <proxy.hh>
 
-/*  Compilation engine is implemented using a simple expression walker
- *  pattern: (a) on preorder, return true if the node has not yet been
- *  visited; (b) always do in-order (for binary nodes); (c) perform
- *  proper compilation in post-order hooks.
+/**
+ * Compilation engine is implemented using a simple expression walker
+ * pattern: (a) on preorder, return true if the node has not yet been
+ * visited; (b) always do in-order (for binary nodes); (c) perform
+ * proper compilation in post-order hooks.
 
- *  The compiler does two full traversals of the input expr:
- *  1. f_preprocess, encodings are built - postorder hooks are
- *     skipped;
- *  2. ! f_preprocess proper compilation is carried out.
+ * The compiler does two full traversals of the input expr:
+ * 1. f_preprocess, encodings are built - postorder hooks are skipped;
+ * 2. ! f_preprocess proper compilation is carried out.
  */
+
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time

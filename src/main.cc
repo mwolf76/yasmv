@@ -2,24 +2,22 @@
  * @file main.cc
  * @brief Program main body
  *
- * This module contains the program's main function body.
- *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301 USA
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  * @mainpage YASMINE - Yet Another Symolic Modelling INteractive Environment
  * @author Marco Pensallorto < marco DOT pensallorto AT gmail DOT com>\n
@@ -36,14 +34,13 @@
  * years from 2008 to 2011), I was never happy with a few
  * architectural choices that were inherited from the long history of
  * the NuSMV model checker and/or were due to the amount of legacy
- * code and tools that relied on its "peculiar" behavior. Don't get
- * me wrong, I really think NuSMV is a great piece of software. And I
- * owe to the developers and researchers in FBK most - if not all -
- * of my scientific and software engineering training. It's just that
- * I have been wondering for years what that project would have been
- * like, if one was completely free to redesign it all
- * from-the-scratch. This is exactly why this project exists in the
- * first place.
+ * code and tools that relied on its "peculiar" behavior. Don't get me
+ * wrong, I really think NuSMV is a great piece of software. And I owe
+ * to the developers and researchers in FBK most - if not all - of my
+ * scientific and software engineering training. It's just that I have
+ * been wondering for years what that project would have been like, if
+ * one was completely free to redesign it all from-the-scratch. This
+ * is exactly why this project exists in the first place.
  *
  **/
 
@@ -56,7 +53,7 @@
 
 #include <model.hh>
 
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 #include <smvLexer.h>
 #include <smvParser.h>

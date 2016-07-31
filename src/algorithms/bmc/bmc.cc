@@ -1,9 +1,6 @@
 /**
  * @file bmc.cc
- * @brief SAT-based BMC Algorithms for property checking
- *
- * This module contains definitions and services that implement the
- * SAT-based BMC reachability algorithm.
+ * @brief SAT-based BMC reachability analysis algorithm implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

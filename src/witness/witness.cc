@@ -1,9 +1,6 @@
 /**
  * @file witness.cc
- * @brief Witness module
- *
- * This header file contains definitions and services that implement
- * the abstract interface for the witness subsystem.
+ * @brief Base witness class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,6 +20,7 @@
  * 02110-1301 USA
  *
  **/
+
 #include <sstream>
 #include <cstring>
 

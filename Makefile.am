@@ -31,7 +31,9 @@ bin_PROGRAMS = yasmv tests
 tags:
 	@ctags -Ref TAGS $(top_srcdir)
 
-yasmv_SOURCES = src/opts.cc src/main.cc src/parse.cc src/common.cc
+yasmv_SOURCES = src/opts_mgr.cc src/main.cc src/parse.cc	\
+	src/common.cc
+
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/cmd/libcmd.la				\
 	$(top_builddir)/src/cmd/commands/libcommands.la			\
@@ -62,8 +64,8 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
-tests_SOURCES = src/opts.cc src/parse.cc src/common.cc src/tests.cc	\
-	src/expr/test_expr.cc src/parser/test_parser.cc			\
+tests_SOURCES = src/opts_mgr.cc src/parse.cc src/common.cc		\
+	src/tests.cc src/expr/test_expr.cc src/parser/test_parser.cc	\
 	src/type/test_type.cc src/dd/test_dd.cc src/enc/test_enc.cc	\
 	src/model/test_compiler.cc
 

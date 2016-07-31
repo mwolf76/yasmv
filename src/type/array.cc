@@ -1,21 +1,25 @@
 /**
- *  @file array.cc
+ * @file array.cc
+ * @brief Array type class implementation
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This module contains the implementation for the Array type class.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 #include <type.hh>
@@ -38,20 +42,6 @@ ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
     f_repr = f_owner.em().make_subscript( of->repr(),
                                           f_owner.em().make_const(nelems));
 }
-
-// ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of)
-//     : Type(owner)
-//     , f_of(of)
-//     , f_nelems(0)
-// {
-//     // valid type
-//     assert( NULL != of);
-
-//     // scalar type only. Consistency with comment above.
-//     assert (f_of -> is_scalar());
-
-//     f_repr = f_owner.em().make_abstract_array_type( of->repr());
-// }
 
 unsigned ArrayType::width() const
 {

@@ -1,9 +1,6 @@
 /**
  * @file enc.hh
- * @brief Encoder module
- *
- * This module contains definitions and services that implement an
- * encoder for symbols.
+ * @brief Encoding subsystem declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -27,18 +24,12 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-/**
- * For each symbol a boolean encoding is maintained, the encoder takes
- * care of ADD variables definitions and is provides mapback services
- * as well.
- **/
-
 #include <vector>
 
 #include <boost/unordered_map.hpp>
 
 #include <common.hh>
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -49,8 +40,15 @@
 #include <dd/cudd_mgr.hh>
 #include <enc/enc_mgr.hh>
 
+/**
+ * For each symbol a boolean encoding is maintained, the encoder takes
+ * care of ADD variables definitions and provides mapback services as
+ * well.
+ **/
+
 // -- primary decls  --------------------------------------------------------------
 class Encoding {
+
 public:
     /* Full-Digit DDs (roots), used in manipulation of algebraics
        (e.g.. compiler) */
@@ -86,8 +84,11 @@ typedef Encoding* Encoding_ptr;
 
 // 1-bit boolean var (identity encoding)
 typedef class BooleanEncoding* BooleanEncoding_ptr;
+
 class BooleanEncoding : public Encoding {
-friend class EncodingMgr; // expose ctors only to mgr
+
+    friend class EncodingMgr; // expose ctors only to mgr
+
 public:
     // here assignment *must* have size 1
     Expr_ptr expr(int* assignment);
@@ -103,9 +104,12 @@ protected:
 };
 
 typedef class AlgebraicEncoding* AlgebraicEncoding_ptr;
+
 class AlgebraicEncoding : public Encoding {
-friend class EncodingMgr; // expose ctors only to mgr
-friend class Compiler;  // for temporaries
+
+    friend class EncodingMgr; // expose ctors only to mgr
+    friend class Compiler;  // for temporaries
+
 public:
     // here assignment *must* have size 1
     virtual Expr_ptr expr(int* assignment);
@@ -134,7 +138,9 @@ protected:
 
 // base class for finite int based
 typedef class MonolithicEncoding* MonolithicEncoding_ptr;
+
 class MonolithicEncoding : public Encoding {
+
 protected:
     virtual ~MonolithicEncoding()
     { assert(0); }
@@ -148,8 +154,11 @@ typedef boost::unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap
 typedef boost::unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
 
 typedef class EnumEncoding* EnumEncoding_ptr;
+
 class EnumEncoding : public MonolithicEncoding {
-friend class EncodingMgr; // expose ctors only to mgr
+
+    friend class EncodingMgr; // expose ctors only to mgr
+
 public:
     // here assignment *must* have size 1
     virtual Expr_ptr expr(int* assignment);
@@ -168,8 +177,11 @@ protected:
 
 typedef std::vector<Encoding_ptr> Encodings;
 typedef class ArrayEncoding* ArrayEncoding_ptr;
+
 class ArrayEncoding : public Encoding {
-friend class EncodingMgr; // expose ctors only to mgr
+
+    friend class EncodingMgr; // expose ctors only to mgr
+
 public:
     virtual Expr_ptr expr(int* assignment);
 

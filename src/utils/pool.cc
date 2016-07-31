@@ -1,10 +1,6 @@
 /**
  * @file pool.cc
- * @brief Expression management, pooling subsystem
- *
- * This module contains definitions and services that implement an
- * optimized storage for expressions. Expressions are stored in a
- * Directed Acyclic Graph (DAG) for data sharing.
+ * @brief Expression management, pooling subsystem implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -26,6 +22,12 @@
  **/
 
 #include <utils/pool.hh>
+
+/**
+ * This module contains definitions and services that implement an
+ * optimized storage for expressions. Expressions are stored in a
+ * Directed Acyclic Graph (DAG) for data sharing.
+ */
 
 long PtrHash::operator() (void *ptr) const
 {

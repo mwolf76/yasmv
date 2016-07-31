@@ -1,9 +1,6 @@
 /**
  * @file variant.cc
- * @brief Variant type implementation
- *
- * This module contains definitions and services that implement a
- * variant type, used mainly as a return type for commands.
+ * @brief Variant class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

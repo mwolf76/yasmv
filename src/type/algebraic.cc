@@ -1,5 +1,8 @@
 /**
  * @file algebraic.cc
+ * @brief Algebraic type classes implementation
+ *
+ * This module contains the implementation for Alegbraic type classes.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

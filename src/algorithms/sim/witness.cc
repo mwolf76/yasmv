@@ -1,10 +1,6 @@
 /**
- * @file BMC Simulation witnesses
- * @brief BMC Simulation witnesses
- *
- * This module contains definitions and services that implement the
- * extraction of a CEX (CounterEXample) witness for SAT-based BMC
- * simulation algorithm.
+ * @file witness.cc
+ * @brief BMC Simulation algorithm, Witness class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

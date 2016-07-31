@@ -1,10 +1,6 @@
 /**
- * @file Base Algorithm.cc
- * @brief Base Algorithm
- *
- * This module contains definitions and services that provide the
- * foundations for all the SAT-based algorithms (i.e. reachability,
- * simulation, ltl property checking).
+ * @file base.cc
+ * @brief foundations for all the SAT-based algorithms.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

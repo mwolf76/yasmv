@@ -1,6 +1,6 @@
 /*
  * @file interpreter.hh
- * @brief Command interpreter subsystem related classes and definitions.
+ * @brief Command interpreter subsystem declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -20,6 +20,7 @@
  * 02110-1301 USA
  *
  **/
+
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
@@ -28,7 +29,8 @@
 
 #include <common.hh>
 #include <utils/pool.hh>
-#include <opts.hh>
+
+#include <opts_mgr.hh>
 
 #include <cmd/command.hh>
 #include <cmd/job.hh>
@@ -108,4 +110,4 @@ protected:
     unsigned f_epoch;
 };
 
-#endif
+#endif /* INTERPRETER_H */
