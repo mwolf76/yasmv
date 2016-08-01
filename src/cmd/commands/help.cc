@@ -44,33 +44,56 @@ void Help::set_topic(CommandTopic_ptr topic)
     f_topic = topic;
 }
 
+/*
+- add-init
+- add-invar
+- add-trans
+- check-init
+- check-trans
+- clear
+- dump-trace
+- dup-trace
+- get
+- help
+- list-traces
+- pick-state
+- quit
+- reach
+- read-model
+- set
+- simulate
+- time
+- write-model
+*/
+
 Variant Help::operator()()
 {
     if (f_topic)
         f_topic->usage();
 
     else
-        std::cout << "Available topics: " << std::endl
-                  << "- help" << std::endl
-                  << "- time" << std::endl
-                  << "- get" << std::endl
-                  << "- set" << std::endl
-                  << "- clear" << std::endl
-                  << "- read-model" << std::endl
-                  << "- write-model" << std::endl
-                  << "- add-init" << std::endl
-                  << "- add-invar" << std::endl
-                  << "- add-trans" << std::endl
-                  << "- pick-state" << std::endl
-                  << "- simulate" << std::endl
-                  << "- check-init" << std::endl
-                  << "- check-trans" << std::endl
-                  << "- check-invar" << std::endl
-                  << "- list-traces" << std::endl
-                  << "- dump-trace" << std::endl
-                  << "- dup-trace" << std::endl
-                  << "- quit" << std::endl
-                  << std::endl;
+        std::cout
+            << "Available topics: " << std::endl
+            << "- add-init" << std::endl
+            << "- add-invar" << std::endl
+            << "- add-trans" << std::endl
+            << "- check-init" << std::endl
+            << "- check-trans" << std::endl
+            << "- clear" << std::endl
+            << "- dump-trace" << std::endl
+            << "- dup-trace" << std::endl
+            << "- get" << std::endl
+            << "- help" << std::endl
+            << "- list-traces" << std::endl
+            << "- pick-state" << std::endl
+            << "- quit" << std::endl
+            << "- reach" << std::endl
+            << "- read-model" << std::endl
+            << "- set" << std::endl
+            << "- simulate" << std::endl
+            << "- time" << std::endl
+            << "- write-model" << std::endl
+            << std::endl;
 
     return Variant("Ok");
 }
