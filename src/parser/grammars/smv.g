@@ -1291,19 +1291,12 @@ IDENTIFIER
     ;
 
 FILEPATH
-    :  FP_FIRST_CHAR (FP_FOLLOWING_CHARS)*
+    : '"' .+ '"'
+    | '\'' .+ '\''
     ;
 
 fragment TYPE_WIDTH
     : DECIMAL_LITERAL
-    ;
-
-fragment FP_FIRST_CHAR
-    :   'A'..'Z' | 'a'..'z' | '_' | '.' | '/'
-    ;
-
-fragment FP_CHARS
-    :   '/' | '.' | '..'
     ;
 
 fragment ID_FIRST_CHAR
@@ -1312,11 +1305,6 @@ fragment ID_FIRST_CHAR
 
 fragment ID_FOLLOWING_CHARS
     :    ID_FIRST_CHAR
-    |    DECIMAL_DIGIT
-    ;
-
-fragment FP_FOLLOWING_CHARS
-    :    FP_FIRST_CHAR
     |    DECIMAL_DIGIT
     ;
 

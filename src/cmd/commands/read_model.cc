@@ -74,7 +74,7 @@ Variant ReadModel::operator()()
 
     if (! f_input) {
         WARN
-            << "No input filename provided!"
+            << "No input filename provided (missing quotes?)"
             << std::endl;
 
         return Variant( "ERROR" );
