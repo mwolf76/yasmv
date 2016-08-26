@@ -1300,7 +1300,7 @@ fragment TYPE_WIDTH
     ;
 
 fragment ID_FIRST_CHAR
-    :   'A'..'Z' | 'a'..'z' | '_'
+    :   'A'..'Z' | 'a'..'z' | '_' | '$' | '#'
     ;
 
 fragment ID_FOLLOWING_CHARS
