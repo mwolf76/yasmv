@@ -1,0 +1,68 @@
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+MODULE ferryboat
+
+VAR
+        ferryman : { EAST, WEST };
+        goat     : { EAST, WEST };
+        cabbage  : { EAST, WEST };
+        wolf     : { EAST, WEST };
+        carry    : { NIL, GOAT, CABBAGE, WOLF };
+
+VAR
+        running  : boolean;
+
+-- Everything is on the WEST bank at the beginning
+INIT
+        ferryman = WEST &&
+        goat     = WEST &&
+        cabbage  = WEST &&
+        wolf     = WEST &&
+        carry    = NIL   ;
+
+-- If the ferryman has left the CABBAGE, the GOAT is not with the CABBAGE
+INVAR
+        ferryman != cabbage -> goat != cabbage;
+
+-- If the ferryman has left the GOAT, the WOLD is not with the GOAT
+INVAR
+        ferryman != goat -> wolf != goat;
+
+-- The `carry` variable holds a non-deterministic choice
+TRANS
+        carry := {(ferryman = goat    ? GOAT    : NIL),
+                  (ferryman = cabbage ? CABBAGE : NIL),
+                  (ferryman = wolf    ? WOLF    : NIL)};
+
+-- If the FERRYMAN is carrying the GOAT, FERRYMAN and GOAT will have the same location
+TRANS
+        goat  := ( next(carry) = GOAT ? next(ferryman) : goat );
+
+-- If the FERRYMAN is carrying the CABBAGE, FERRYMAN and CABBAGE will have the same location
+TRANS
+        cabbage := ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
+
+TRANS
+        running :
+                ferryman :=
+                         (ferryman = WEST ? EAST : WEST);
+
+-- frame condition (auto-generated)
+TRANS
+        ! running :
+                ferryman := ferryman;
+
+-- If the FERRYMAN is carrying the WOLF, FERRYMAN and WOLF will have the same location
+TRANS
+        wolf := ( next(carry) = WOLF ? next(ferryman) : wolf );
+
+-- To perform planning, we assert the negation of the desired
+-- TARGET. Our TARGET here is to have all the items on the EAST bank.
+
+-- To solve the ferryman problem in this model try this:
+-- >> reach TGT
+
+-- Symbols annotated with `@hidden` do not show up in traces.
+@hidden
+DEFINE TGT :=
+       cabbage = EAST && goat = EAST && wolf = EAST;
