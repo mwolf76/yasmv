@@ -118,8 +118,9 @@ scope {
 
     :   /* variables and defines */
         fsm_decl_modifiers (
-         fsm_var_decl
-      |  fsm_define_decl )
+            fsm_var_decl
+        |   fsm_define_decl
+        )
 
         /* FSM definition */
     |   fsm_init_decl
@@ -274,8 +275,11 @@ fsm_trans_decl_body
     ;
 
 fsm_trans_decl_clause
-    : expr=toplevel_expression
-      { $smv::current_module->add_trans(expr); }
+    : (toplevel_expression ':' toplevel_expression) => lhs=toplevel_expression ':' rhs=toplevel_expression
+      { $smv::current_module->add_trans(em.make_implies(lhs, rhs)); }
+
+    | rhs=toplevel_expression
+      { $smv::current_module->add_trans(em.make_implies(em.make_true(), rhs)); }
     ;
 
 // entry point
@@ -417,12 +421,16 @@ equality_expression returns [Expr_ptr res]
     : lhs=relational_expression
       { $res = lhs; }
 
-    ( '=' rhs=relational_expression
-     { $res = em.make_eq($res, rhs); }
+      ( '=' rhs=relational_expression
+      { $res = em.make_eq($res, rhs); }
 
-    | '!=' rhs=relational_expression
-     { $res = em.make_ne($res, rhs); }
-    )*
+      | '!=' rhs=relational_expression
+      { $res = em.make_ne($res, rhs); }
+
+      /* currently just synctactic sugar for `next(x) =` */
+      | ':=' rhs=relational_expression
+      { $res = em.make_assignment($res, rhs); }
+    )?
     ;
 
 relational_expression returns [Expr_ptr res]
