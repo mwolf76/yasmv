@@ -40,6 +40,18 @@ const char* ModuleNotFound::what() const throw()
     return strdup(oss.str().c_str());
 }
 
+MainModuleNotFound::MainModuleNotFound()
+{}
+
+const char* MainModuleNotFound::what() const throw()
+{
+    std::ostringstream oss;
+    oss
+        << "Main module not found";
+
+    return strdup(oss.str().c_str());
+}
+
 DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
     : f_duplicate(duplicate)
 {}

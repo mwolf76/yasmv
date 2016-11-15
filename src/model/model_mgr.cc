@@ -65,20 +65,8 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     Model& model
         (f_model);
 
-    const Modules& modules
-        (model.modules());
-
-    Expr_ptr main_module
-        (f_em.make_main());
-
-    Modules::const_iterator main_iter
-        (modules.find(main_module));
-
-    if (modules.end() == main_iter)
-        throw ModuleNotFound(main_module);
-
     Module& main_
-        (*main_iter -> second);
+        (model.main_module());
 
     std::stack< boost::tuple<Expr_ptr, Module_ptr, Expr_ptr> > stack;
     stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >

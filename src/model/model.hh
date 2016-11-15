@@ -54,6 +54,12 @@ private:
     Expr_ptr f_module_name;
 };
 
+class MainModuleNotFound : public ModelException {
+public:
+    MainModuleNotFound();
+    const char* what() const throw();
+};
+
 class DuplicateIdentifier : public ModelException {
 public:
     DuplicateIdentifier(Expr_ptr expr);
@@ -159,6 +165,8 @@ public:
 
     Module& add_module(Module& module);
     Module& module(Expr_ptr module_name);
+
+    Module& main_module();
 };
 
 typedef Model* Model_ptr;

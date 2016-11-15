@@ -34,17 +34,9 @@ SymbIter::SymbIter(Model& model, Expr_ptr formula)
         (ExprMgr::INSTANCE());
     const Modules& modules
         (model.modules());
-    Expr_ptr main_module
-        (em.make_main());
-
-    Modules::const_iterator main_iter
-        (modules.find(main_module));
-
-    if (modules.end() == main_iter)
-        throw ModuleNotFound(main_module);
 
     Module& main_
-        (*main_iter -> second);
+        (model.main_module());
 
     /* two iterations, putting DEFINEs after VARs. This ensures
        defines can be calculated on-the fly using a single pass. */

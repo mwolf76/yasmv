@@ -47,7 +47,18 @@ Module& Model::module(Expr_ptr module_name)
         (f_modules.find(module_name));
 
     if (i == f_modules.end())
-        throw ModuleNotFound(module_name);
+        throw MainModuleNotFound();
+
+    return *(i -> second);
+}
+
+Module& Model::main_module()
+{
+    if (! f_modules.size())
+        throw MainModuleNotFound();
+
+    Modules::const_iterator i
+        (f_modules.begin());
 
     return *(i -> second);
 }

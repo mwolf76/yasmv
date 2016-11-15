@@ -80,20 +80,8 @@ void Algorithm::setup()
     Model& model
         (f_model);
 
-    const Modules& modules
-        (model.modules());
-
-    Expr_ptr main_module
-        (em.make_main());
-
-    Modules::const_iterator main_iter
-        (modules.find(main_module));
-
-    if (modules.end() == main_iter)
-        throw ModuleNotFound(main_module);
-
     Module& main_
-        (*main_iter->second);
+        (model.main_module());
 
     std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
     stack.push( std::make_pair< Expr_ptr, Module_ptr >
