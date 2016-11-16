@@ -1,4 +1,62 @@
-BAcklog:
+TODO
+====
+
+(a) add support for assignment in TRANS sections only; assignments are
+not to be accepted in the context of INIT and INVAR sections; DEFINEs
+are intended to behave like macros and thus are supposed transparent
+with respect to this feature;
+
+in TRANSes, '<identifier> :=' is equivalent to 'next(<identifier>) = '
+
+we pone the explicit restriction that <identifier> must be a state
+variable identifier; this is necessary to implement mutual-exclusion
+all the guarded claues talking about variable `x`.
+
+(b) add support for guarded transitions semantics in TRANS
+section. Guarded transitions are a generalization of ordinary TRANSes. The
+grammar of a guarded transition is as follows:
+
+-- when guard is true, the assignment clause applies
+TRANS
+guard:
+        <state-variable> := <rhs-expr>;
+
+-- the former semantics is preserved with a backward-compatible syntax
+TRANS
+        <state-variable> := <rhs-expr>;
+
+the latter is equivalent to:
+
+TRANS
+TRUE:
+        <state-variable> := <rhs-expr>;
+
+(c) Auto frame condition generation
+
+Upon model compilation(?TODO review and redefine model processing
+phases?) all guards for each state-variable are analyzed for mutual
+exclusion; For each variable, if any two guards g1 and g2 are found to
+be compatible (i.e. ! UNSAT(g1, g2)) an error in generated and the
+compilation process is halted.
+
+If the guard analysis for g1, g2, ... gk is completed without
+reporting an error, a final clause is generated:
+
+g0 ::= ! g1 & ! g2 & ... & ! gk
+
+One final TRANS is automatically added to the model:
+TRANS
+g0:
+        <state-variable> := <state-variable>
+
+This is called a frame condition. A frame conditions implements the
+basic inertial principle so that a variable which is not assigned a
+new value retains its previous value. This, any variable is expected
+to retain its value unless a relevant (for that variable) TRANS is
+taken by the FSM.
+
+BACKLOG (aka old stuff)
+=======
 
 Added check-fsm, add-init, add-invar, add-trans
 
@@ -24,12 +82,8 @@ add-invar:
 
 Add a constraint to INAVR
 
-add-TRNS:
-
+add-TRANS:
 Add a constraint to TRANS
-
-
-
 
 * Commands
 - integration of libreadline
