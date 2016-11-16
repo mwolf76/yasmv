@@ -122,8 +122,21 @@ scope {
         |   fsm_define_decl
         )
 
-        /* FSM definition */
-    |   fsm_init_decl
+        fsm_formula_decl
+    ;
+
+fsm_formula_decl
+scope {
+    #define FSM_FORMULA_INIT  (1)
+    #define FSM_FORMULA_INVAR (2)
+    #define FSM_FORMULA_TRANS (3)
+    int formula_decl_type;
+}
+@init {
+    $fsm_formula_decl::formula_decl_type = 0; /* undecided */
+}
+    : /* FSM definition */
+        fsm_init_decl
     |   fsm_invar_decl
     |   fsm_trans_decl
     ;
@@ -223,9 +236,11 @@ fsm_define_decl_clause
       Define_ptr def = new Define($smv::current_module->name(), id, body);
 
       if ($module_decl::input)
-          throw GrammarException("@input modifier not supported in DEFINE decls");
+          throw SyntaxException("@input modifier not supported in DEFINE decls");
+
       if ($module_decl::frozen)
-          throw GrammarException("@frozen modifier not supported in DEFINE decls");
+          throw SyntaxException("@frozen modifier not supported in DEFINE decls");
+
       if ($module_decl::hidden)
           def -> set_hidden(true);
 
@@ -238,7 +253,7 @@ fsm_define_decl_clause
     ;
 
 fsm_init_decl
-    : 'INIT' fsm_init_decl_body
+    : 'INIT' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_INIT; } fsm_init_decl_body
     ;
 
 fsm_init_decl_body
@@ -252,7 +267,7 @@ fsm_init_decl_clause
     ;
 
 fsm_invar_decl
-    : 'INVAR' fsm_invar_decl_body
+    : 'INVAR' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_INVAR; } fsm_invar_decl_body
     ;
 
 fsm_invar_decl_body
@@ -266,7 +281,7 @@ fsm_invar_decl_clause
     ;
 
 fsm_trans_decl
-    : 'TRANS' fsm_trans_decl_body
+    : 'TRANS' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_TRANS; } fsm_trans_decl_body
     ;
 
 fsm_trans_decl_body
@@ -429,7 +444,13 @@ equality_expression returns [Expr_ptr res]
 
       /* currently just synctactic sugar for `next(x) =` */
       | ':=' rhs=relational_expression
-      { $res = em.make_assignment($res, rhs); }
+      {
+                if ($fsm_formula_decl::formula_decl_type == FSM_FORMULA_TRANS)
+                    $res = em.make_assignment($res, rhs);
+
+                else
+                    throw SemanticException("assignments not allowed in this context");
+      }
     )?
     ;
 

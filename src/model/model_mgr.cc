@@ -94,7 +94,6 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
 
             f_context_map.insert( std::make_pair< Expr_ptr, Module_ptr >
                                   ( key, tgt ));
-
         }
 
         Expr_ptr curr_ctx

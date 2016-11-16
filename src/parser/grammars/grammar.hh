@@ -27,12 +27,12 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H
 
-class GrammarException : public Exception {
+class SyntaxException : public Exception {
 
     virtual const char* what() const throw() {
         std::ostringstream oss;
         oss
-            << "Grammar exception: "
+            << "Syntax Error: "
             << f_message
             << std::endl
             ;
@@ -43,11 +43,35 @@ class GrammarException : public Exception {
     std::string f_message;
 
 public:
-    GrammarException(const std::string &message)
+    SyntaxException(const std::string &message)
         : f_message(message)
     {}
 
-    virtual ~GrammarException() throw()
+    virtual ~SyntaxException() throw()
+    {}
+};
+
+class SemanticException : public Exception {
+
+    virtual const char* what() const throw() {
+        std::ostringstream oss;
+        oss
+            << "Semantic Error: "
+            << f_message
+            << std::endl
+            ;
+
+        return (strdup(oss.str().c_str()));
+    }
+
+    std::string f_message;
+
+public:
+    SemanticException(const std::string &message)
+        : f_message(message)
+    {}
+
+    virtual ~SemanticException() throw()
     {}
 };
 
