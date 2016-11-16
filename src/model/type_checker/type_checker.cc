@@ -204,6 +204,7 @@ void TypeChecker::walk_bw_xnor_postorder(const Expr_ptr expr)
 
 bool TypeChecker::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
+
 bool TypeChecker::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_implies_postorder(const Expr_ptr expr)

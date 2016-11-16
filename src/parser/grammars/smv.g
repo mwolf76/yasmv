@@ -120,9 +120,9 @@ scope {
         fsm_decl_modifiers (
             fsm_var_decl
         |   fsm_define_decl
-        )
+        )*
 
-        fsm_formula_decl
+        fsm_formula_decl*
     ;
 
 fsm_formula_decl

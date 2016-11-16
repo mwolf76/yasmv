@@ -158,6 +158,7 @@ AC_CONFIG_FILES([Makefile
                  src/algorithms/sim/Makefile
                  src/symb/Makefile
                  src/model/Makefile
+                 src/model/analyzer/Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
                  src/model/preprocessor/Makefile

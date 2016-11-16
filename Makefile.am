@@ -46,6 +46,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la			\
         $(top_builddir)/src/model/compiler/libcompiler.la		\
 	$(top_builddir)/src/enc/libenc.la				\
 	$(top_builddir)/src/env/libenv.la				\
+	$(top_builddir)/src/model/analyzer/libanalyzer.la		\
         $(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
         $(top_builddir)/src/expr/libexpr.la				\
@@ -81,6 +82,7 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 	$(top_builddir)/src/model/compiler/libcompiler.la		\
 	$(top_builddir)/src/enc/libenc.la				\
 	$(top_builddir)/src/env/libenv.la				\
+	$(top_builddir)/src/model/analyzer/libanalyzer.la		\
 	$(top_builddir)/src/model/type_checker/libtype_checker.la	\
         $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
 	$(top_builddir)/src/expr/libexpr.la				\

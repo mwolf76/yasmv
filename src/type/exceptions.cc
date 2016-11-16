@@ -26,6 +26,24 @@
 
 #include <type/type.hh>
 
+BadAssignmentContext::BadAssignmentContext(Expr_ptr expr)
+    : f_expr(expr)
+{}
+
+BadAssignmentContext::~BadAssignmentContext() throw()
+{}
+
+const char* BadAssignmentContext::what() const throw()
+{
+    std::ostringstream oss;
+
+    oss
+        << "TypeError: assignments can only used as toplevels in `"
+        << f_expr << "`" ;
+
+    return strdup(oss.str().c_str());
+}
+
 BadType::BadType(Expr_ptr expr, Type_ptr lhs)
     : f_expr(expr)
     , f_lhs(lhs -> repr())
@@ -114,4 +132,3 @@ const char* DuplicateLiteral::what() const throw()
 
     return strdup(oss.str().c_str());
 }
-

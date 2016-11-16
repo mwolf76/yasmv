@@ -32,6 +32,7 @@
 
 #include <model/preprocessor/preprocessor.hh>
 
+#include <model/analyzer/analyzer.hh>
 #include <model/type_checker/type_checker.hh>
 
 #include <type/type_mgr.hh>
@@ -42,6 +43,7 @@ typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
 typedef enum {
     MMGR_BUILD_CTX_MAP,
     MMGR_BUILD_PARAM_MAP,
+    MMGR_ANALYZE,
     MMGR_TYPE_CHECK,
     MMGR_DONE
 } analyzer_pass_t;
@@ -123,6 +125,9 @@ private:
 
     // ref to preprocessor (used for defines expr substitution)
     Preprocessor& f_preprocessor;
+
+    // ref to analyzer (used for model analysis)
+    Analyzer& f_analyzer;
 
     // ref to type_checker (used for model analysis)
     TypeChecker& f_type_checker;

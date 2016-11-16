@@ -47,6 +47,9 @@ public:
     // walker toplevel
     Type_ptr process(Expr_ptr expr, Expr_ptr ctx);
 
+    inline ModelMgr& owner()
+    { return f_owner; }
+
 protected:
     void pre_hook();
     void post_hook();

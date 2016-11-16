@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = compiler type_checker preprocessor
+SUBDIRS = analyzer compiler type_checker preprocessor
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
