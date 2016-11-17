@@ -256,7 +256,12 @@ public:
 
     /* -- Assignment operator ----------------------------------------------- */
     inline Expr_ptr make_assignment(Expr_ptr a, Expr_ptr b)
-    { return make_expr(EQ, make_next(a), b); }
+    { return make_expr(ASSIGNMENT, a, b); }
+
+    inline bool is_assignment(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == ASSIGNMENT;
+    }
 
     /* -- Relational operators ---------------------------------------------- */
     inline Expr_ptr make_eq(Expr_ptr a, Expr_ptr b)

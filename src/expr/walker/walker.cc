@@ -128,6 +128,9 @@ void ExprWalker::walk ()
             case RSHIFT_1: goto entry_RSHIFT_1;
             case RSHIFT_2: goto entry_RSHIFT_2;
 
+            case ASSIGNMENT_1: goto entry_ASSIGNMENT_1;
+            case ASSIGNMENT_2: goto entry_ASSIGNMENT_2;
+
             case EQ_1: goto entry_EQ_1;
             case EQ_2: goto entry_EQ_2;
 
@@ -556,6 +559,25 @@ void ExprWalker::walk ()
 
             entry_RSHIFT_2:
                 walk_rshift_postorder(curr.expr);
+            }
+            break;
+
+        // assignment
+        case ASSIGNMENT:
+            if (walk_assignment_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = ASSIGNMENT_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_ASSIGNMENT_1:
+                if (walk_assignment_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = ASSIGNMENT_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_ASSIGNMENT_2:
+                walk_assignment_postorder(curr.expr);
             }
             break;
 

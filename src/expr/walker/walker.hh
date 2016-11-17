@@ -60,6 +60,8 @@
                                                    \
     BINARY_HOOK(type); BINARY_HOOK(cast);          \
                                                    \
+    BINARY_HOOK(assignment);                       \
+                                                   \
     BINARY_HOOK(eq); BINARY_HOOK(ne);              \
     BINARY_HOOK(le); BINARY_HOOK(lt);              \
     BINARY_HOOK(ge); BINARY_HOOK(gt);              \
@@ -129,6 +131,8 @@ typedef enum {
 
     RSHIFT_1, RSHIFT_2,
     LSHIFT_1, LSHIFT_2,
+
+    ASSIGNMENT_1, ASSIGNMENT_2,
 
     EQ_1, EQ_2,
     NE_1, NE_2,
@@ -367,6 +371,10 @@ protected:
     virtual bool walk_rshift_preorder(const Expr_ptr expr) =0;
     virtual bool walk_rshift_inorder(const Expr_ptr expr) =0;
     virtual void walk_rshift_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_assignment_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_assignment_inorder(const Expr_ptr expr) =0;
+    virtual void walk_assignment_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_eq_preorder(const Expr_ptr expr) =0;
     virtual bool walk_eq_inorder(const Expr_ptr expr) =0;

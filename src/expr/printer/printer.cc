@@ -216,6 +216,13 @@ bool Printer::walk_rshift_inorder(const Expr_ptr expr)
 void Printer::walk_rshift_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+bool Printer::walk_assignment_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_assignment_inorder(const Expr_ptr expr)
+{ f_os << " := "; return true; }
+void Printer::walk_assignment_postorder(const Expr_ptr expr)
+{ }
+
 bool Printer::walk_eq_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_eq_inorder(const Expr_ptr expr)

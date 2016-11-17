@@ -58,6 +58,9 @@ typedef enum {
     /* type operators */
     TYPE, CAST,
 
+    /* assignment operator */
+    ASSIGNMENT,
+
     /* relational operators */
     EQ, NE, GE, GT, LE, LT,
 
