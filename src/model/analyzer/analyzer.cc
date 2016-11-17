@@ -72,8 +72,31 @@ void Analyzer::process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section)
 
     // invoke walker on the body of the expr to be processed
     (*this)(expr);
-
     assert(! f_expr_stack.size());
+
+    // post-processing: collect all deps and build the frame condition
+    DEBUG
+        << "A list of all detected dependencies follows:"
+        << std::endl;
+
+    for (DependencyMap::const_iterator i = f_dep_map.begin();
+         i != f_dep_map.end(); ++ i) {
+
+        std::pair<Expr_ptr, Expr_ptr> entry
+            (*i);
+
+        Expr_ptr guard
+            (i->first);
+
+        Expr_ptr ident
+            (i->second);
+
+        DEBUG
+            << guard
+            << " -> "
+            << ident
+            << std::endl;
+    }
 }
 
 bool Analyzer::walk_F_preorder(const Expr_ptr expr)
@@ -204,6 +227,9 @@ void Analyzer::walk_bw_xnor_postorder(const Expr_ptr expr)
 
 bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
 {
+    ExprMgr& em
+        (owner().em());
+
     if (f_section == ANALYZE_INIT)
         throw SemanticException("Guards not allowed in INITs");
 
@@ -216,6 +242,28 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
     /* now we know it's a TRANS */
     if (1 != f_expr_stack.size())
         throw SemanticException("Guards are only allowed toplevel in TRANSes");
+
+    Expr_ptr guard
+        (expr->lhs());
+
+    Expr_ptr action
+        (expr->rhs());
+
+    if (!em.is_assignment(action))
+        throw SemanticException("Guarded actions must be assignments");
+
+    Expr_ptr ident
+        (action->lhs());
+
+    DEBUG
+        << "Tracking dependency: "
+        << guard
+        << " -> "
+        << ident
+        << std::endl;
+
+    f_dep_map.insert(std::make_pair<Expr_ptr, Expr_ptr>
+                     (guard, ident));
 
     return true;
 }
@@ -231,7 +279,6 @@ bool Analyzer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_implies_postorder(const Expr_ptr expr)
 {}
-
 
 bool Analyzer::walk_cast_preorder(const Expr_ptr expr)
 { return true; }

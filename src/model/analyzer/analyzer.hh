@@ -32,6 +32,11 @@
 #include <type/type.hh>
 #include <type/type_mgr.hh>
 
+#include <boost/unordered_map.hpp>
+
+/* guard -> identifier map */
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> DependencyMap;
+
 class ModelMgr;
 typedef enum {
     ANALYZE_INIT,
@@ -70,6 +75,8 @@ private:
 
     // the type of expr we're analyzing
     analyze_section_t f_section;
+
+    DependencyMap f_dep_map;
 };
 
 #endif /* ANALYZER_H */
