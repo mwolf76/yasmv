@@ -249,6 +249,13 @@ bool TypeChecker::walk_rshift_inorder(const Expr_ptr expr)
 void TypeChecker::walk_rshift_postorder(const Expr_ptr expr)
 { walk_binary_shift_postorder(expr); }
 
+bool TypeChecker::walk_assignment_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool TypeChecker::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void TypeChecker::walk_assignment_postorder(const Expr_ptr expr)
+{ walk_binary_equality_postorder(expr); }
+
 bool TypeChecker::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_eq_inorder(const Expr_ptr expr)
