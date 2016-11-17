@@ -169,10 +169,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     else if (symb->is_define()) {
 
       Define& define
-	(symb -> as_define());
+          (symb -> as_define());
 
       Expr_ptr body
-	(define.body());
+          (define.body());
 
       (*this) (body);
       return;
