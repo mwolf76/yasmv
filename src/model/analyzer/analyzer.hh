@@ -33,13 +33,20 @@
 #include <type/type_mgr.hh>
 
 class ModelMgr;
+typedef enum {
+    ANALYZE_INIT,
+    ANALYZE_INVAR,
+    ANALYZE_TRANS,
+    ANALYZE_DEFINE
+} analyze_section_t ;
+
 class Analyzer : public ExprWalker {
 public:
     Analyzer(ModelMgr& owner);
     ~Analyzer();
 
     // walker toplevel
-    void process(Expr_ptr expr, Expr_ptr ctx);
+    void process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section);
 
     inline ModelMgr& owner()
     { return f_owner; }
@@ -60,6 +67,9 @@ private:
 
     // managers
     ModelMgr& f_owner;
+
+    // the type of expr we're analyzing
+    analyze_section_t f_section;
 };
 
 #endif /* ANALYZER_H */

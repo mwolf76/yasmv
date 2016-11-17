@@ -53,8 +53,15 @@ Analyzer::~Analyzer()
         << std::endl;
 }
 
-void Analyzer::process(Expr_ptr expr, Expr_ptr ctx)
+void Analyzer::process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section)
 {
+    assert(section == ANALYZE_INIT  ||
+           section == ANALYZE_INVAR ||
+           section == ANALYZE_TRANS);
+
+    // this needs to be set only once
+    f_section = section;
+
     // remove previous results
     f_expr_stack.clear();
     f_ctx_stack.clear();
@@ -201,9 +208,8 @@ bool Analyzer::walk_implies_preorder(const Expr_ptr expr)
         (this->owner().em());
 
     if (1 != f_expr_stack.size() &&
-        em.is_eq(expr->rhs()) &&
-        em.is_next(expr->rhs()->lhs()) &&
-        em.is_identifier(expr->rhs()->lhs()->lhs()))
+        em.is_assignment(expr->rhs()) &&
+        em.is_identifier(expr->rhs()->lhs()))
         throw BadAssignmentContext(expr);
 
     return true;
@@ -241,6 +247,66 @@ bool Analyzer::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_rshift_postorder(const Expr_ptr expr)
 {}
+
+bool Analyzer::walk_assignment_preorder(const Expr_ptr expr)
+{ return true; }
+bool Analyzer::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
+{
+    if (f_section == ANALYZE_INIT)
+        throw SemanticException("Assignments not allowed in INITs");
+
+    if (f_section == ANALYZE_INVAR)
+        throw SemanticException("Assignments not allowed in INVARs");
+
+    if (f_section == ANALYZE_DEFINE)
+        throw SemanticException("Assignments not allowed in DEFINEs");
+
+    ExprMgr& em
+        (owner().em());
+
+    if (! em.is_identifier(expr->lhs()))
+        throw SemanticException("Assignments require an identifier for lhs");
+
+    /* assignment lhs *must* be an ordinary state variable */
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    Expr_ptr full
+        (em.make_dot(ctx, expr));
+
+    ResolverProxy resolver;
+
+    Symbol_ptr symb
+        (resolver.symbol(full));
+
+    if (symb->is_variable()) {
+
+        const Variable& var
+            (symb -> as_variable());
+
+        /* INPUT vars are in fact bodyless, typed DEFINEs */
+        if (var.is_input())
+            throw SemanticException("Assignments not allowed on input vars.");
+
+        /* FROZEN vars can not be assigned */
+        if (var.is_frozen())
+            throw SemanticException("Assignments can not be used on frozen vars.");
+    }
+
+    /* 6. DEFINEs, simply process them recursively :-) */
+    else if (symb->is_define()) {
+
+      Define& define
+        (symb -> as_define());
+
+      Expr_ptr body
+        (define.body());
+
+      /* recur in body */
+      walk_assignment_postorder(body);
+    }
+}
 
 bool Analyzer::walk_eq_preorder(const Expr_ptr expr)
 { return true; }
