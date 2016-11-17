@@ -255,11 +255,33 @@ void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
 }
 
 bool Compiler::walk_guard_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    /* rewrite GUARD into IMPLIES */
+    Expr_ptr rewrite
+        (em.make_implies( expr->lhs(), expr->rhs()));
+
+    DEBUG
+        << "Rewrote "
+        << expr
+        << " into "
+        << rewrite
+        << std::endl;
+
+    /* compiling rewritten expression */
+    (*this) (rewrite);
+
+    return false;
+}
 bool Compiler::walk_guard_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_guard_postorder(const Expr_ptr expr)
-{ assert(false); /* unreachable */ }
+{
+    if (f_preprocess)
+        return;
+}
 
 bool Compiler::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -361,11 +383,33 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
 }
 
 bool Compiler::walk_assignment_preorder(const Expr_ptr expr)
-{ return cache_miss(expr); }
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    /* rewrite `x := <expr>` into `NEXT(x) = <expr>` */
+    Expr_ptr rewrite
+        (em.make_eq( em.make_next(expr->lhs()), expr->rhs()));
+
+    DEBUG
+        << "Rewrote "
+        << expr
+        << " into "
+        << rewrite
+        << std::endl;
+
+    /* compiling rewritten expression */
+    (*this)(rewrite);
+
+    return false;
+}
 bool Compiler::walk_assignment_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_assignment_postorder(const Expr_ptr expr)
-{ assert(false); /* unreachable */ }
+{
+    if (f_preprocess)
+        return;
+}
 
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }

@@ -57,7 +57,8 @@ void Analyzer::process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section)
 {
     assert(section == ANALYZE_INIT  ||
            section == ANALYZE_INVAR ||
-           section == ANALYZE_TRANS);
+           section == ANALYZE_TRANS ||
+           section == ANALYZE_DEFINE);
 
     // this needs to be set only once
     f_section = section;
@@ -278,14 +279,17 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
     ExprMgr& em
         (owner().em());
 
-    if (! em.is_identifier(expr->lhs()))
+    Expr_ptr ident
+        (expr->lhs());
+
+    if (! em.is_identifier(ident))
         throw SemanticException("Assignments require an identifier for lhs");
 
     /* assignment lhs *must* be an ordinary state variable */
     Expr_ptr ctx
         (f_ctx_stack.back());
     Expr_ptr full
-        (em.make_dot(ctx, expr));
+        (em.make_dot(ctx, ident));
 
     ResolverProxy resolver;
 
