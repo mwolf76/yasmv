@@ -115,7 +115,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Analzying INIT "
+                    << "Analyzing INIT "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -145,7 +145,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Analzying INVAR "
+                    << "Analyzing INVAR "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -175,7 +175,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ti);
 
                 DEBUG
-                    << "Analzying TRANS "
+                    << "Analyzing TRANS "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -206,7 +206,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     ((*di).second -> body());
 
                 DEBUG
-                    << "Analzying "
+                    << "Analyzing "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -240,7 +240,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Analzying INIT "
+                    << "Type checking INIT "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -270,7 +270,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Analzying INVAR "
+                    << "Type checking INVAR "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -300,7 +300,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ti);
 
                 DEBUG
-                    << "Analzying TRANS "
+                    << "Type checking TRANS "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -331,7 +331,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     ((*di).second -> body());
 
                 DEBUG
-                    << "Analzying "
+                    << "Type checking "
                     << curr_ctx << "::" << body
                     << std::endl;
 
