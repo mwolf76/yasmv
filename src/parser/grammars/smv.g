@@ -281,11 +281,12 @@ fsm_trans_decl_body
     ;
 
 fsm_trans_decl_clause
-    : (toplevel_expression ':' toplevel_expression) => lhs=toplevel_expression ':' rhs=toplevel_expression
-      { $smv::current_module->add_trans(em.make_implies(lhs, rhs)); }
+    : (toplevel_expression ':' toplevel_expression) =>
+        lhs=toplevel_expression ':' rhs=toplevel_expression
+      { $smv::current_module->add_trans(em.make_guard(lhs, rhs)); }
 
     | rhs=toplevel_expression
-      { $smv::current_module->add_trans(em.make_implies(em.make_true(), rhs)); }
+      { $smv::current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
 // entry point

@@ -201,24 +201,36 @@ bool Analyzer::walk_bw_xnor_inorder(const Expr_ptr expr)
 void Analyzer::walk_bw_xnor_postorder(const Expr_ptr expr)
 {}
 
-bool Analyzer::walk_implies_preorder(const Expr_ptr expr)
+bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
 {
-    /* checks for `top-levelness` in assignments ;-) */
-    ExprMgr& em
-        (this->owner().em());
+    if (f_section == ANALYZE_INIT)
+        throw SemanticException("Guards not allowed in INITs");
 
-    if (1 != f_expr_stack.size() &&
-        em.is_assignment(expr->rhs()) &&
-        em.is_identifier(expr->rhs()->lhs()))
-        throw BadAssignmentContext(expr);
+    if (f_section == ANALYZE_INVAR)
+        throw SemanticException("Guards not allowed in INVARs");
+
+    if (f_section == ANALYZE_DEFINE)
+        throw SemanticException("Guards not allowed in DEFINEs");
+
+    /* now we know it's a TRANS */
+    if (1 != f_expr_stack.size())
+        throw SemanticException("Guards are only allowed toplevel in TRANSes");
 
     return true;
 }
 
+bool Analyzer::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_guard_postorder(const Expr_ptr expr)
+{}
+
+bool Analyzer::walk_implies_preorder(const Expr_ptr expr)
+{ return true; }
 bool Analyzer::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_implies_postorder(const Expr_ptr expr)
 {}
+
 
 bool Analyzer::walk_cast_preorder(const Expr_ptr expr)
 { return true; }

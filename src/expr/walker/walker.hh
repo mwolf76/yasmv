@@ -55,6 +55,7 @@
     BINARY_HOOK(and); BINARY_HOOK(or);             \
     BINARY_HOOK(bw_and); BINARY_HOOK(bw_or);       \
     BINARY_HOOK(bw_xor); BINARY_HOOK(implies);     \
+    BINARY_HOOK(guard);                            \
     BINARY_HOOK(bw_xnor); BINARY_HOOK(lshift);     \
     BINARY_HOOK(rshift);                           \
                                                    \
@@ -127,6 +128,7 @@ typedef enum {
     BW_XOR_1, BW_XOR_2,
     BW_XNOR_1, BW_XNOR_2,
 
+    GUARD_1, GUARD_2,
     IMPLIES_1, IMPLIES_2,
 
     RSHIFT_1, RSHIFT_2,
@@ -359,6 +361,10 @@ protected:
     virtual bool walk_bw_xnor_preorder(const Expr_ptr expr) =0;
     virtual bool walk_bw_xnor_inorder(const Expr_ptr expr) =0;
     virtual void walk_bw_xnor_postorder(const Expr_ptr expr) =0;
+
+    virtual bool walk_guard_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_guard_inorder(const Expr_ptr expr) =0;
+    virtual void walk_guard_postorder(const Expr_ptr expr) =0;
 
     virtual bool walk_implies_preorder(const Expr_ptr expr) =0;
     virtual bool walk_implies_inorder(const Expr_ptr expr) =0;

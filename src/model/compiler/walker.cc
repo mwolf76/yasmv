@@ -254,6 +254,13 @@ void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+bool Compiler::walk_guard_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Compiler::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_guard_postorder(const Expr_ptr expr)
+{ assert(false); /* unreachable */ }
+
 bool Compiler::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_implies_inorder(const Expr_ptr expr)

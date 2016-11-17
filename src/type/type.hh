@@ -143,17 +143,6 @@ public:
     virtual const char* what() const throw() =0;
 };
 
-/** Raised when assignments are used in a wrong context */
-class BadAssignmentContext : public TypeException {
-    Expr_ptr f_expr;
-
-public:
-    BadAssignmentContext(Expr_ptr expr);
-
-    const char* what() const throw();
-    ~BadAssignmentContext() throw();
-};
-
 /** Raised when the type checker detects a wrong type */
 class BadType : public TypeException {
     Expr_ptr f_expr;

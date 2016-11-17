@@ -335,6 +335,13 @@ void Evaluator::walk_bw_xnor_postorder(const Expr_ptr expr)
     PUSH_VALUE(( ! lhs | rhs ) & ( ! rhs | lhs ));
 }
 
+bool Evaluator::walk_guard_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Evaluator::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_guard_postorder(const Expr_ptr expr)
+{ assert(false); /* unreachable */ }
+
 bool Evaluator::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_implies_inorder(const Expr_ptr expr)

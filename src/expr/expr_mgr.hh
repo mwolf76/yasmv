@@ -246,6 +246,14 @@ public:
         return expr->f_symb == BW_XNOR;
     }
 
+    inline Expr_ptr make_guard(Expr_ptr a, Expr_ptr b)
+    { return make_expr(GUARD, a, b); }
+
+    inline bool is_guard(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == GUARD;
+    }
+
     inline Expr_ptr make_implies(Expr_ptr a, Expr_ptr b)
     { return make_expr(IMPLIES, a, b); }
 
@@ -654,7 +662,8 @@ public:
                 (OR  == symb)  ||
                 (EQ  == symb)  ||
                 (NE  == symb)  ||
-                (IMPLIES == symb));
+                (IMPLIES == symb) ||
+                (GUARD   == symb) );
     }
 
     inline bool is_unary_arithmetical(const Expr_ptr expr) const {

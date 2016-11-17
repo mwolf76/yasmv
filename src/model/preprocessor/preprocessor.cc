@@ -285,6 +285,17 @@ void Preprocessor::walk_bw_xnor_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_bw_xnor( lhs, rhs ));
 }
 
+bool Preprocessor::walk_guard_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_guard_postorder(const Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_implies( lhs, rhs )); /* rewrite guard into an implication */
+}
+
 bool Preprocessor::walk_implies_preorder(const Expr_ptr expr)
 { return true; }
 bool Preprocessor::walk_implies_inorder(const Expr_ptr expr)

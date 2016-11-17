@@ -119,6 +119,9 @@ void ExprWalker::walk ()
             case BW_XNOR_1: goto entry_BW_XNOR_1;
             case BW_XNOR_2: goto entry_BW_XNOR_2;
 
+            case GUARD_1: goto entry_GUARD_1;
+            case GUARD_2: goto entry_GUARD_2;
+
             case IMPLIES_1: goto entry_IMPLIES_1;
             case IMPLIES_2: goto entry_IMPLIES_2;
 
@@ -505,6 +508,24 @@ void ExprWalker::walk ()
 
             entry_BW_XNOR_2:
                 walk_bw_xnor_postorder(curr.expr);
+            }
+            break;
+
+        case GUARD:
+            if (walk_guard_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = GUARD_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_GUARD_1:
+                if (walk_guard_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = GUARD_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_GUARD_2:
+                walk_guard_postorder(curr.expr);
             }
             break;
 

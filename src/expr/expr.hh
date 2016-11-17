@@ -50,7 +50,7 @@ typedef enum {
     BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
 
     /* logical operators */
-    NOT, AND, OR, IMPLIES,
+    NOT, AND, OR, IMPLIES, GUARD /* reserved for TRANSes */,
 
     /* shift operators */
     LSHIFT, RSHIFT,
