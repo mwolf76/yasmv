@@ -376,6 +376,13 @@ void Evaluator::walk_rshift_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs >> rhs ));
 }
 
+bool Evaluator::walk_assignment_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Evaluator::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void Evaluator::walk_assignment_postorder(const Expr_ptr expr)
+{ assert(false); /* unreachable */ }
+
 bool Evaluator::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_eq_inorder(const Expr_ptr expr)
