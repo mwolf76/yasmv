@@ -318,6 +318,22 @@ void Preprocessor::walk_rshift_postorder(const Expr_ptr expr)
     PUSH_EXPR(f_em.make_rshift( lhs, rhs ));
 }
 
+bool Preprocessor::walk_assignment_preorder(const Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_assignment_postorder(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_em);
+
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+
+    PUSH_EXPR( em.make_assignment( em.make_next(lhs),
+                                   rhs ));
+}
+
 bool Preprocessor::walk_eq_preorder(const Expr_ptr expr)
 { return true; }
 bool Preprocessor::walk_eq_inorder(const Expr_ptr expr)
