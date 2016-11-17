@@ -14,7 +14,7 @@ PKG_HH = grammars/smvLexer.h grammars/smvParser.h
 PKG_CC = grammars/smvLexer.cc grammars/smvParser.cc
 
 grammars/.timestamp: grammars/smv.g
-	@echo "compiling ANTLR grammar... (this may take a while)"
+	@echo "compiling ANTLRv3 grammar smv.g ..."
 	@antlr3 grammars/smv.g
 	@touch grammars/.timestamp
 

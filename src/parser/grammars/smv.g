@@ -126,15 +126,6 @@ scope {
     ;
 
 fsm_formula_decl
-scope {
-    #define FSM_FORMULA_INIT  (1)
-    #define FSM_FORMULA_INVAR (2)
-    #define FSM_FORMULA_TRANS (3)
-    int formula_decl_type;
-}
-@init {
-    $fsm_formula_decl::formula_decl_type = 0; /* undecided */
-}
     : /* FSM definition */
         fsm_init_decl
     |   fsm_invar_decl
@@ -253,7 +244,7 @@ fsm_define_decl_clause
     ;
 
 fsm_init_decl
-    : 'INIT' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_INIT; } fsm_init_decl_body
+    : 'INIT' fsm_init_decl_body
     ;
 
 fsm_init_decl_body
@@ -267,7 +258,7 @@ fsm_init_decl_clause
     ;
 
 fsm_invar_decl
-    : 'INVAR' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_INVAR; } fsm_invar_decl_body
+    : 'INVAR' fsm_invar_decl_body
     ;
 
 fsm_invar_decl_body
@@ -281,7 +272,7 @@ fsm_invar_decl_clause
     ;
 
 fsm_trans_decl
-    : 'TRANS' { $fsm_formula_decl::formula_decl_type = FSM_FORMULA_TRANS; } fsm_trans_decl_body
+    : 'TRANS' fsm_trans_decl_body
     ;
 
 fsm_trans_decl_body
@@ -328,8 +319,7 @@ logical_implies_expression returns [Expr_ptr res]
     (
       '->' rhs=logical_or_expression
       { $res = em.make_implies($res, rhs); }
-    )*
-    ;
+    )* ;
 
 logical_or_expression returns[Expr_ptr res]
 @init { }
@@ -339,8 +329,7 @@ logical_or_expression returns[Expr_ptr res]
     (
       '||' rhs=logical_and_expression
       { $res = em.make_or($res, rhs); }
-    )*
-    ;
+    )* ;
 
 logical_and_expression returns[Expr_ptr res]
 @init { }
@@ -350,8 +339,7 @@ logical_and_expression returns[Expr_ptr res]
     (
       '&&' rhs=bw_or_expression
       { $res = em.make_and($res, rhs); }
-    )*
-    ;
+    )* ;
 
 bw_or_expression returns[Expr_ptr res]
 @init { }
@@ -361,8 +349,7 @@ bw_or_expression returns[Expr_ptr res]
     (
       '|' rhs=bw_xor_expression
        { $res = em.make_bw_or($res, rhs); }
-    )*
-    ;
+    )* ;
 
 bw_xor_expression returns[Expr_ptr res]
 @init { }
@@ -372,8 +359,7 @@ bw_xor_expression returns[Expr_ptr res]
     (
       '^' rhs=bw_xnor_expression
       { $res = em.make_bw_xor($res, rhs); }
-    )*
-    ;
+    )* ;
 
 bw_xnor_expression returns[Expr_ptr res]
 @init { }
@@ -383,8 +369,7 @@ bw_xnor_expression returns[Expr_ptr res]
     (
       '~^' rhs=bw_and_expression
       { $res = em.make_bw_xnor($res, rhs); }
-    )*
-    ;
+    )* ;
 
 bw_and_expression returns[Expr_ptr res]
 @init { }
@@ -394,8 +379,7 @@ bw_and_expression returns[Expr_ptr res]
     (
       '&' rhs=temporal_expression
       { $res = em.make_bw_and($res, rhs); }
-    )*
-    ;
+    )* ;
 
 temporal_expression returns [Expr_ptr res]
 @init { }
@@ -413,8 +397,7 @@ binary_ltl_expression returns [Expr_ptr res]
 
         |   'R' rhs=unary_ltl_expression
             { $res = em.make_R($res, rhs); }
-    )*
-    ;
+    )* ;
 
 unary_ltl_expression returns [Expr_ptr res]
 @init { }
@@ -437,22 +420,14 @@ equality_expression returns [Expr_ptr res]
       { $res = lhs; }
 
       ( '=' rhs=relational_expression
-      { $res = em.make_eq($res, rhs); }
+            { $res = em.make_eq($res, rhs); }
 
-      | '!=' rhs=relational_expression
-      { $res = em.make_ne($res, rhs); }
+        | '!=' rhs=relational_expression
+            { $res = em.make_ne($res, rhs); }
 
-      /* currently just synctactic sugar for `next(x) =` */
-      | ':=' rhs=relational_expression
-      {
-                if ($fsm_formula_decl::formula_decl_type == FSM_FORMULA_TRANS)
-                    $res = em.make_assignment($res, rhs);
-
-                else
-                    throw SemanticException("assignments not allowed in this context");
-      }
-    )?
-    ;
+        | ':=' rhs=relational_expression
+            { $res = em.make_assignment($res, rhs); }
+      )? ;
 
 relational_expression returns [Expr_ptr res]
 @init { }
@@ -471,8 +446,7 @@ relational_expression returns [Expr_ptr res]
 
     | '>' rhs=shift_expression
       { $res = em.make_gt($res, rhs); }
-    )*
-    ;
+    )* ;
 
 shift_expression returns [Expr_ptr res]
 @init { }
@@ -485,8 +459,7 @@ shift_expression returns [Expr_ptr res]
 
     | '>>' rhs=additive_expression
        { $res = em.make_rshift($res, rhs); }
-    )*
-    ;
+    )* ;
 
 additive_expression returns [Expr_ptr res]
 @init { }
@@ -499,8 +472,7 @@ additive_expression returns [Expr_ptr res]
 
     |   '-' rhs=multiplicative_expression
         { $res = em.make_sub($res, rhs); }
-    )*
-    ;
+    )* ;
 
 multiplicative_expression returns [Expr_ptr res]
 @init { }
@@ -516,8 +488,7 @@ multiplicative_expression returns [Expr_ptr res]
 
     | '%' rhs=cast_expression
       { $res = em.make_mod($res, rhs); }
-    )*
-    ;
+    )* ;
 
 cast_expression returns [Expr_ptr res]
 @init {
@@ -617,7 +588,6 @@ params returns [Expr_ptr res]
       if (! res)
           res = em.make_empty();
     }
-
     ;
 
 postfix_expression returns [Expr_ptr res]
@@ -634,8 +604,7 @@ postfix_expression returns [Expr_ptr res]
 
     |   '.' rhs=identifier
         { $res = em.make_dot($res, rhs); }
-    )*
-    ;
+    )* ;
 
 basic_expression returns [Expr_ptr res]
 @init { }
@@ -686,8 +655,7 @@ identifiers [ExprVector* ids]
 
       ( ',' ident=identifier
             { ids->push_back(ident); }
-      )*
-    ;
+      )* ;
 
 expressions [ExprVector* exprs]
     :
@@ -696,8 +664,7 @@ expressions [ExprVector* exprs]
 
       ( ',' expr=toplevel_expression
             { exprs->push_back(expr); }
-      )*
-    ;
+      )* ;
 
 identifier returns [Expr_ptr res]
 @init { }
@@ -728,7 +695,6 @@ constant returns [Expr_ptr res]
         Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
         $res = em.make_dec_const(tmp);
       }
-
     ;
 
 /* pvalue is used in param passing (actuals) */
@@ -771,7 +737,6 @@ native_type returns [Type_ptr res]
 
     | tp = signed_int_type
       { $res = tp; }
-
     ;
 
 boolean_type returns [Type_ptr res]
@@ -841,7 +806,6 @@ unsigned_int_type returns [Type_ptr res]
             (Type_ptr) tm.find_unsigned( *p ? atoi(p)
                 : OptsMgr::INSTANCE().word_width());
     }
-
     ;
 
 signed_int_type returns [Type_ptr res]
@@ -862,7 +826,7 @@ signed_int_type returns [Type_ptr res]
                 array_size = size->value();
                 assert(0 < array_size);
             }
-    ) ?
+        )?
     {
         $res = array_size ?
             (Type_ptr) tm.find_signed_array(*p ? atoi(p)
@@ -870,7 +834,6 @@ signed_int_type returns [Type_ptr res]
             (Type_ptr) tm.find_signed( *p ? atoi(p)
                 : OptsMgr::INSTANCE().word_width());
     }
-
     ;
 
 
@@ -903,8 +866,7 @@ commands [CommandVector_ptr cmds]
         (
             ';' c=command
             { cmds->push_back(c); }
-        )*
-    ;
+        )* ;
 
 command_topic returns [CommandTopic_ptr res]
     :  c=help_command_topic
@@ -1030,8 +992,7 @@ help_command returns [Command_ptr res]
       (
           topic = command_topic
           { ((Help*) $res) -> set_topic(topic); }
-      )?
-    ;
+      )? ;
 
 help_command_topic returns [CommandTopic_ptr res]
     : 'help'
@@ -1176,7 +1137,6 @@ dump_trace_command returns [Command_ptr res]
 
     ( trace_id=string
     { ((DumpTrace*) $res) -> set_trace_id(trace_id); } )?
-
     ;
 
 dump_trace_command_topic returns [CommandTopic_ptr res]
@@ -1210,8 +1170,7 @@ pick_state_command returns [Command_ptr res]
 
     |    '-l' limit=constant
          { ((PickState*) $res) -> set_limit(limit->value()); }
-    )*
-    ;
+    )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]
     :  'pick-state'
@@ -1233,8 +1192,7 @@ simulate_command returns [Command_ptr res]
 
     |   '-t' trace_id=string
         { ((Simulate*) $res) -> set_trace_uid(trace_id); }
-    )*
-    ;
+    )* ;
 
 simulate_command_topic returns [CommandTopic_ptr res]
     :  'simulate'
@@ -1247,7 +1205,6 @@ get_command returns [Command_ptr res]
 
       ( id=identifier
       { ((Get*) $res) -> set_identifier(id); })?
-
     ;
 
 get_command_topic returns [CommandTopic_ptr res]
@@ -1293,7 +1250,6 @@ quit_command_topic returns [CommandTopic_ptr res]
     :  'quit'
         { $res = cm.topic_quit(); }
     ;
-
 
 string returns [pconst_char res]
 @init {}
