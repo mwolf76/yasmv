@@ -2,11 +2,11 @@ TODO
 ====
 
 (a) add support for assignment in TRANS sections only; assignments are
-not to be accepted in the context of INIT and INVAR sections; DEFINEs
-are intended to behave like macros and thus are supposed transparent
-with respect to this feature;
+not to be accepted in the context of INIT and INVAR or DEFINE sections;
 
-in TRANSes, '<identifier> :=' is equivalent to 'next(<identifier>) = '
+in TRANSes, '<identifier> :=' is equivalent to 'next(<identifier>) =
+'. The preprocessor takes on the duty of rewriting the original
+expression into the equivalent lower-level one.
 
 we pone the explicit restriction that <identifier> must be a state
 variable identifier; this is necessary to implement mutual-exclusion
@@ -15,6 +15,28 @@ all the guarded claues talking about variable `x`.
 (b) add support for guarded transitions semantics in TRANS
 section. Guarded transitions are a generalization of ordinary TRANSes. The
 grammar of a guarded transition is as follows:
+
+TRANS
+<guard> ':'
+        ( <state-var> := <expr> ';' ) +
+
+In particular, multiple assignments are supported under the same
+guard. This is just a shortcut to allow the user to express something like:
+
+TRANS
+running:
+        x := x + 1;
+        y := y - 1;
+
+instead of having to write two separate TRANS sections.
+
+TRANS
+running:
+        x := x + 1;
+
+TRANS
+running:
+        y := y - 1;
 
 -- when guard is true, the assignment clause applies
 TRANS
@@ -55,7 +77,10 @@ new value retains its previous value. This, any variable is expected
 to retain its value unless a relevant (for that variable) TRANS is
 taken by the FSM.
 
-BACKLOG (aka old stuff)
+Review doxygen docs. It would be nice to have some documentation for
+the language too.
+
+BACKLOG (old stuff)
 =======
 
 Added check-fsm, add-init, add-invar, add-trans
