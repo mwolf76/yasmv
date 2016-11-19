@@ -40,7 +40,8 @@ TimeMapper::~TimeMapper()
 Var TimeMapper::var(const TCBI& tcbi)
 {
     Var var;
-    const TCBI2VarMap::iterator eye = f_tcbi2var_map.find(tcbi);
+    const TCBI2VarMap::iterator eye
+        (f_tcbi2var_map.find(tcbi));
 
     if (f_tcbi2var_map.end() != eye) {
         var = eye->second;
