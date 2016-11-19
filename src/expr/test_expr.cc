@@ -223,10 +223,6 @@ BOOST_AUTO_TEST_CASE(builtin)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
 
-    Expr_ptr synth = em.make_synth();
-    BOOST_CHECK (em.is_identifier(synth) && synth->atom() == Atom( SYNTH_TOKEN ));
-    BOOST_CHECK (em.is_synth(synth));
-
     Expr_ptr empty = em.make_empty();
     BOOST_CHECK (em.is_identifier(empty) && empty->atom() == Atom( EMPTY_TOKEN ));
     BOOST_CHECK (em.is_empty(empty));
@@ -510,19 +506,11 @@ BOOST_AUTO_TEST_CASE(printer)
     }
 
     {
-        Expr_ptr synth = em.make_synth();
-        std::ostringstream oss;
-        Printer printer(oss);
-        printer << synth; BOOST_CHECK (oss.str() == std::string("__synth"));
-    }
-
-    {
         Expr_ptr false_ = em.make_false();
         std::ostringstream oss;
         Printer printer(oss);
         printer << false_; BOOST_CHECK (oss.str() == std::string("FALSE"));
     }
-
 
     {
         Expr_ptr true_ = em.make_true();
