@@ -89,11 +89,11 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
     if (f_preprocess)
         DRIVEL
-            << "Preprocessing " << key << "..."
+            << "(pass 1) " << key << "..."
             << std::endl;
     else
         DRIVEL
-            << "Processing " << key << "..."
+            << "(pass 2) " << key << "..."
             << std::endl;
 }
 

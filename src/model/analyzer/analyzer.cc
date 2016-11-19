@@ -78,7 +78,7 @@ void Analyzer::process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section)
 void Analyzer::generate_framing_conditions()
 {
     DEBUG
-        << "Generating frame conditions ..."
+        << "Generating framing conditions ..."
         << std::endl ;
 
     /* identifer -> list of guards */

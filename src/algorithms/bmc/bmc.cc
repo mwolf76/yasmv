@@ -157,7 +157,7 @@ void BMC::forward(Expr_ptr target,
                 /* looking for exploration proof: does a new unseen state
                    exist?  assert uniqueness and test for unsatisfiability */
                 INFO
-                    << "Forward: looking for proof (k = " << k << ")..."
+                    << "Forward: looking for unreachability proof (k = " << k << ")..."
                     << std::endl
                     ;
 
@@ -174,7 +174,7 @@ void BMC::forward(Expr_ptr target,
                 }
                 if (STATUS_UNSAT == status) {
                     INFO
-                        << "Forward: found proof (k = " << k << "), invariant `"
+                        << "Forward: found unreachability proof (k = " << k << "), invariant `"
                         << target
                         << "` is TRUE."
                         << std::endl;
@@ -185,7 +185,7 @@ void BMC::forward(Expr_ptr target,
 
                 else if (STATUS_SAT == status) {
                     INFO
-                        << "Forward: no proof found (k = " << k << ")"
+                        << "Forward: no unreachability proof found (k = " << k << ")"
                         << std::endl;
 
                     /* signal backward that a k-path is
@@ -233,7 +233,7 @@ void BMC::backward(Expr_ptr target,
         assert_formula(engine, k, vv, engine.new_group());
 
         INFO
-            << "Backward: looking for proof (k = " << k << ")..."
+            << "Backward: looking for unreachability proof (k = " << k << ")..."
             << std::endl
             ;
 
@@ -245,7 +245,7 @@ void BMC::backward(Expr_ptr target,
         }
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Backward: found proof (k = " << k << "), invariant `"
+                << "Backward: found unreachability proof (k = " << k << "), invariant `"
                 << target
                 << "` is TRUE."
                 << std::endl;
@@ -255,7 +255,7 @@ void BMC::backward(Expr_ptr target,
         }
         else if (STATUS_SAT == status) {
             INFO
-                << "Backward: found no proof (k = " << k << ")"
+                << "Backward: found no unreachability proof (k = " << k << ")"
                 << std::endl;
         }
 
@@ -295,7 +295,9 @@ void BMC::process(const Expr_ptr target)
 
     try {
         INFO
-            << "Compiling formula..."
+            << "Compiling formula `"
+            << target
+            << "` ..."
             << std::endl;
 
         CompilationUnit ii
