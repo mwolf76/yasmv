@@ -27,7 +27,9 @@
 #include <type/type.hh>
 #include <symb/proxy.hh>
 
+#include <sat/sat.hh>
 #include <model/analyzer/analyzer.hh>
+#include <model/compiler/compiler.hh>
 
 Analyzer::Analyzer(ModelMgr& owner)
     : f_ctx_stack()
@@ -155,18 +157,17 @@ void Analyzer::generate_framing_conditions()
                         oss
                             << "Found two guards that are NOT mutually exclusive for identifier `"
                             << ident
-                            << "`:"
-                            << std::endl
+                            << "`: `"
                             << p
-                            << std::endl
+                            << "` and `"
                             << q
+                            << "`"
                             << std::endl;
 
                         const char *tmp
                             (oss.str().c_str());
 
-                        WARN
-                            << tmp;
+                        throw SemanticException(tmp);
                     }
                 }
             }
@@ -204,16 +205,41 @@ void Analyzer::generate_framing_conditions()
                 ;
         }
 
-        /* Add this synthetic TRANS will be added to the `synthetic` module. */
+        /* Add this synthetic TRANS will be added to the module. */
         main.add_trans(em.make_implies(guard,
                                        em.make_eq(em.make_next(ident),
                                                   ident)));
     }
 }
 
-bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q) const
+bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
 {
-    return true;
+    DEBUG
+        << "Testing `"
+        << p
+        << "` && `"
+        << q
+        << "` for unsatisfiability ..."
+        << std::endl ;
+
+    ExprMgr& em
+        (owner().em());
+
+    Engine engine
+        ("Analyzer");
+
+    Compiler compiler;
+
+    Expr_ptr ctx
+        (em.make_empty());
+
+    engine.push(compiler.process(ctx, p), 0);
+    engine.push(compiler.process(ctx, q), 0);
+
+    status_t status
+        (engine.solve());
+
+    return status == STATUS_UNSAT;
 }
 
 bool Analyzer::walk_F_preorder(const Expr_ptr expr)
@@ -379,8 +405,7 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
         << guard
         << std::endl;
 
-    f_dependency_tracking_map.insert(std::make_pair<Expr_ptr, Expr_ptr>
-                     (guard, ident));
+    f_dependency_tracking_map.insert(std::make_pair<Expr_ptr, Expr_ptr> (guard, ident));
 
     return true;
 }

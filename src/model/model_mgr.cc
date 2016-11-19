@@ -468,12 +468,12 @@ bool ModelMgr::analyze()
         }
     }
 
+    f_analyzed = true;
     f_analyzer.generate_framing_conditions();
 
     TRACE
         << "Ok"
         << std::endl;
 
-    f_analyzed = true;
     return true;
 }

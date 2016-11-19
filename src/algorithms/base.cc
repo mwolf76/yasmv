@@ -80,12 +80,12 @@ void Algorithm::setup()
     Model& model
         (f_model);
 
-    Module& main_
+    Module& main_module
         (model.main_module());
 
     std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
     stack.push( std::make_pair< Expr_ptr, Module_ptr >
-                (em.make_empty(), &main_));
+                (em.make_empty(), &main_module));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {

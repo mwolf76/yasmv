@@ -85,7 +85,7 @@ private:
     DependencyTrackingMap f_dependency_tracking_map;
 
     // helpers
-    bool mutually_exclusive(Expr_ptr p, Expr_ptr q) const;
+    bool mutually_exclusive(Expr_ptr p, Expr_ptr q);
 };
 
 #endif /* ANALYZER_H */
