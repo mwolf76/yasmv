@@ -51,6 +51,7 @@ void Help::set_topic(CommandTopic_ptr topic)
 - check-init
 - check-trans
 - clear
+- dump-model
 - dump-trace
 - dup-trace
 - get
@@ -63,7 +64,6 @@ void Help::set_topic(CommandTopic_ptr topic)
 - set
 - simulate
 - time
-- write-model
 */
 
 Variant Help::operator()()
@@ -80,6 +80,7 @@ Variant Help::operator()()
             << "- check-init" << std::endl
             << "- check-trans" << std::endl
             << "- clear" << std::endl
+            << "- dump-model" << std::endl
             << "- dump-trace" << std::endl
             << "- dup-trace" << std::endl
             << "- get" << std::endl
@@ -92,7 +93,6 @@ Variant Help::operator()()
             << "- set" << std::endl
             << "- simulate" << std::endl
             << "- time" << std::endl
-            << "- write-model" << std::endl
             << std::endl;
 
     return Variant("Ok");

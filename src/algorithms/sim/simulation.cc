@@ -175,8 +175,11 @@ void Simulation::pick_state(bool allsat, value_t limit)
 
             {
                 std::ostringstream oss;
+
                 oss
-                    << "Simulation trace";
+                    << "Simulation trace for module `"
+                    << model().main_module().name()
+                    << "`" ;
 
                 w->set_desc(oss.str());
             }

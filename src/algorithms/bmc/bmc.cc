@@ -45,7 +45,7 @@ BMC::BMC(Command& command, Model& model)
     DRIVEL
         << "Created BMC @"
         << instance
-        << std::endl;
+        << std::endl ;
 }
 
 BMC::~BMC()
@@ -54,7 +54,7 @@ BMC::~BMC()
     DRIVEL
         << "Destroyed BMC @"
         << instance
-        << std::endl;
+        << std::endl ;
 }
 
 void BMC::forward(Expr_ptr target,
@@ -78,8 +78,7 @@ void BMC::forward(Expr_ptr target,
 
             INFO
                 << "Forward: now looking for reachability witness (k = " << k << ")..."
-                << std::endl
-                ;
+                << std::endl ;
 
             status_t status
                 (engine.solve());
@@ -90,8 +89,7 @@ void BMC::forward(Expr_ptr target,
             else if (STATUS_UNSAT == status) {
                 INFO
                     << "Forward: no reachability witness found (k = " << k << ")..."
-                    << std::endl
-                    ;
+                    << std::endl ;
             }
 
             else if (STATUS_SAT == status) {
@@ -120,9 +118,12 @@ void BMC::forward(Expr_ptr target,
 
                 {
                     std::ostringstream oss;
+
                     oss
                         << "Reachability witness for target `"
                         << target
+                        << "` in module `"
+                        << model().main_module().name()
                         << "`" ;
 
                     w.set_desc(oss.str());
