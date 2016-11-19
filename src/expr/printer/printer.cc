@@ -184,7 +184,7 @@ void Printer::walk_bw_xnor_postorder(const Expr_ptr expr)
 bool Printer::walk_guard_preorder(const Expr_ptr expr)
 { return true; }
 bool Printer::walk_guard_inorder(const Expr_ptr expr)
-{ f_os << ": "; return true; }
+{ f_os << ":: "; return true; }
 void Printer::walk_guard_postorder(const Expr_ptr expr)
 { }
 

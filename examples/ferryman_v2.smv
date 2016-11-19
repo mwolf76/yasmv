@@ -1,6 +1,6 @@
 -- This file is part of the YASMINE distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
-MODULE ferryboat
+MODULE ferry
 
 VAR
         ferryman : { EAST, WEST };
@@ -20,15 +20,15 @@ INIT
         wolf     = WEST &&
         carry    = NIL   ;
 
--- If the ferryman has left the CABBAGE, the GOAT is not with the CABBAGE
+-- If the FERRYMAN has left the CABBAGE behind, the GOAT is not with the CABBAGE
 INVAR
         ferryman != cabbage -> goat != cabbage;
 
--- If the ferryman has left the GOAT, the WOLF is not with the GOAT
+-- If the FERRYMAN has left the GOAT behind, the WOLF is not with the GOAT
 INVAR
         ferryman != goat -> wolf != goat;
 
--- A non-deterministic choice
+-- A mandatory non-deterministic choice. Notice that this TRANS is unguarded.
 TRANS
         carry := {(ferryman = goat    ? GOAT    : NIL),
                   (ferryman = cabbage ? CABBAGE : NIL),
@@ -36,30 +36,33 @@ TRANS
 
 -- If the FERRYMAN is carrying the GOAT, FERRYMAN and GOAT will have the same location
 TRANS
-        next(carry) = GOAT :
+        next(carry) = GOAT ::
                       goat := next(ferryman);
 
 -- If the FERRYMAN is carrying the CABBAGE, FERRYMAN and CABBAGE will have the same location
 TRANS
-       next(carry) = CABBAGE :
+       next(carry) = CABBAGE ::
                      cabbage := next(ferryman);
 
 -- If the FERRYMAN is carrying the WOLF, FERRYMAN and WOLF will have the same location
 TRANS
-     next(carry) = WOLF :
+     next(carry) = WOLF ::
                    wolf := next(ferryman);
+
+-- If the FERRYMAN is RUNNING, she has to switch sides at each step
 TRANS
-     running :
+     running ::
              ferryman :=
                        (ferryman = WEST ? EAST : WEST);
 
--- To perform planning, we assert the negation of the desired
--- TARGET. Our TARGET here is to have all the items on the EAST bank.
-
--- To solve the ferryman problem in this model try this:
--- >> reach TGT
+-- To perform planning, we need to assert the negation of the desired TARGET.
+-- Our TARGET here is to have all the required items on the EAST bank.
 
 -- Symbols annotated with `@hidden` do not show up in traces.
 @hidden
 DEFINE TGT :=
        cabbage = EAST && goat = EAST && wolf = EAST;
+
+-- To solve the ferryman problem in this model try this:
+-- >> reach TGT
+
