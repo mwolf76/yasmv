@@ -1286,12 +1286,17 @@ fragment TYPE_WIDTH
     ;
 
 fragment ID_FIRST_CHAR
-    :   'A'..'Z' | 'a'..'z' | '_' | '$' | '#'
+    :   'A'..'Z'
+    |   'a'..'z'
     ;
 
 fragment ID_FOLLOWING_CHARS
     :    ID_FIRST_CHAR
     |    DECIMAL_DIGIT
+    |    '-'
+    |    '_'
+    |    '#'
+    |    '$'
     ;
 
 HEX_LITERAL
