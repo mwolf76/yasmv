@@ -13,7 +13,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+< *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -25,6 +25,8 @@
 #include <cstring>
 
 #include <type/type.hh>
+
+#include <utils/misc.hh>
 
 BadType::BadType(Expr_ptr expr, Type_ptr lhs)
     : f_expr(expr)
@@ -57,7 +59,7 @@ const char* BadType::what() const throw()
             << f_expr -> rhs() << "` have invalid types `"
             << f_lhs << "`, `" << f_rhs << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
@@ -78,7 +80,7 @@ const char* TypeMismatch::what() const throw()
         << f_expr   << "`"
         << std::endl;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 IdentifierExpected::IdentifierExpected(Expr_ptr expr)
@@ -95,7 +97,7 @@ const char* IdentifierExpected::what() const throw()
         << "TypeError: identifier expected while defining ENUM, got `"
         << f_expr << "` instead";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
@@ -112,5 +114,5 @@ const char* DuplicateLiteral::what() const throw()
         << "TypeError: duplicate literal `"
         << f_expr << "` detected";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }

@@ -34,6 +34,8 @@
 
 #include <dd/dd_walker.hh>
 
+#include <utils/misc.hh>
+
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
@@ -44,11 +46,12 @@ InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOper
 const char* InlinedOperatorLoaderException::what() const throw()
 {
     std::ostringstream oss;
+
     oss
         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
         << f_ios << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 InlinedOperatorLoaderException::~InlinedOperatorLoaderException() throw()

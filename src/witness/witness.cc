@@ -26,16 +26,18 @@
 
 #include <witness.hh>
 
+#include <utils/misc.hh>
+
 const char* DuplicateWitnessId::what() const throw()
 {
     std::ostringstream oss;
+
     oss
         << "Duplicate witness ID:  "
         << f_id << " is already registered."
-        << std::endl
-        ;
+        << std::endl ;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 const char* NoCurrentlySelectedWitness::what() const throw()
@@ -43,10 +45,9 @@ const char* NoCurrentlySelectedWitness::what() const throw()
     std::ostringstream oss;
     oss
         << "No currently selected witness."
-        << std::endl
-        ;
+        << std::endl ;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 const char* UnknownWitnessId::what() const throw()
@@ -55,10 +56,9 @@ const char* UnknownWitnessId::what() const throw()
     oss
         << "Unknown witness ID:  "
         << f_id << " is not registered."
-        << std::endl
-        ;
+        << std::endl ;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 const char* IllegalTime::what() const throw()
@@ -67,10 +67,9 @@ const char* IllegalTime::what() const throw()
     oss
         << "Illegal time: "
         << f_time
-        << std::endl
-        ;
+        << std::endl ;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 const char* NoValue::what() const throw()
@@ -80,7 +79,7 @@ const char* NoValue::what() const throw()
         << "No value for `"
         << f_id << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 TimeFrame::TimeFrame(Witness& owner)

@@ -26,6 +26,8 @@
 
 #include <symb/symbol.hh>
 
+#include <utils/misc.hh>
+
 UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
     : f_expr(expr)
 {}
@@ -37,7 +39,7 @@ const char* UnresolvedSymbol::what() const throw()
         << "Unresolved symbol: `"
         << f_expr<< "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 bool Symbol::is_variable(void) const

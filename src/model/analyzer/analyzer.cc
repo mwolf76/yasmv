@@ -31,6 +31,9 @@
 #include <model/analyzer/analyzer.hh>
 #include <model/compiler/compiler.hh>
 
+
+#include <utils/misc.hh>
+
 Analyzer::Analyzer(ModelMgr& owner)
     : f_ctx_stack()
     , f_owner(owner)
@@ -165,7 +168,7 @@ void Analyzer::generate_framing_conditions()
                             << std::endl;
 
                         const char *tmp
-                            (oss.str().c_str());
+                            (oss2cstr(oss));
 
                         throw SemanticException(tmp);
                     }

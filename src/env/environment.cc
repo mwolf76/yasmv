@@ -22,12 +22,14 @@
 
 #include <environment.hh>
 
+#include <utils/misc.hh>
+
 const char* NoSuchIdentifier::what() const throw() {
     std::ostringstream oss;
     oss
         << "No such identifier: `" << f_id << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 Environment_ptr Environment::f_instance = NULL;

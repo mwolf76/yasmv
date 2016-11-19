@@ -30,6 +30,8 @@
 
 #include <env/environment.hh>
 
+#include <utils/misc.hh>
+
 const char* AlgorithmException::what() const throw()
 {
     std::ostringstream oss;
@@ -38,10 +40,7 @@ const char* AlgorithmException::what() const throw()
         << "Failure detected. Operation aborted."
         << std::endl;
 
-    pconst_char ret
-        (strdup(oss.str().c_str()));
-
-    return ret;
+    return oss2cstr(oss);
 }
 
 Algorithm::Algorithm(Command& command, Model& model)

@@ -1,6 +1,6 @@
 /**
- * @file exceptions.cc
- * @brief Expression compiler subsystem, exception classes implementations.
+ * @file misc.hh
+ * @brief Generic utils module head file
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,26 +21,12 @@
  *
  **/
 
+#ifndef MISC_H
+#define MISC_H
+
 #include <sstream>
 
-#include <compiler.hh>
+inline const char* oss2cstr(std::ostringstream& oss)
+{ return strdup(oss.str().c_str()); }
 
-#include <utils/misc.hh>
-
-ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
-    : f_repr(expr)
-{}
-
-ConstantTooLarge::~ConstantTooLarge() throw()
-{}
-
-const char* ConstantTooLarge::what() const throw()
-{
-    std::ostringstream oss;
-
-    oss
-        << "CompilerError: constant too large `"
-        << f_repr << "`";
-
-    return oss2cstr(oss);
-}
+#endif /* MISC_H */

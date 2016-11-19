@@ -26,6 +26,8 @@
 
 #include <model.hh>
 
+#include <utils/misc.hh>
+
 ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
     : f_module_name(module_name)
 {}
@@ -37,7 +39,7 @@ const char* ModuleNotFound::what() const throw()
         << "Module not found: `"
         << f_module_name << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 MainModuleNotFound::MainModuleNotFound()
@@ -49,7 +51,7 @@ const char* MainModuleNotFound::what() const throw()
     oss
         << "Main module not found";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
@@ -63,7 +65,7 @@ const char* DuplicateIdentifier::what() const throw()
         << "Duplicate identifier: `"
         << f_duplicate << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 UnknownIdentifier::UnknownIdentifier(Expr_ptr unknown)
@@ -77,7 +79,7 @@ const char* UnknownIdentifier::what() const throw()
         << "Unknown identifier: `"
         << f_unknown << "`";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
@@ -95,5 +97,5 @@ const char* BadParamCount::what() const throw()
         << f_expected << " expected, "
         << " got " << f_got;
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }

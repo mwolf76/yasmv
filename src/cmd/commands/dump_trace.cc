@@ -36,6 +36,8 @@
 
 #include <boost/preprocessor/repetition/repeat.hpp>
 
+#include <utils/misc.hh>
+
 /* a boost hack to generate indentation consts :-) */
 #define _SPACE(z, n, str)  " "
 #define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
@@ -52,7 +54,7 @@ const char* UnsupportedFormat::what() const throw()
         << "CommandError: format `"
         << f_format << "` is not supported.";
 
-    return strdup(oss.str().c_str());
+    return oss2cstr(oss);
 }
 
 UnsupportedFormat::~UnsupportedFormat() throw()

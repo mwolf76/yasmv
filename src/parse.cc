@@ -36,6 +36,8 @@
 #include <smvLexer.h>
 #include <smvParser.h>
 
+#include <utils/misc.hh>
+
 /* Antlr 3.4 has a slightly different interface. Enable this if necessary */
 #define HAVE_ANTLR_34 0
 
@@ -71,7 +73,7 @@ class FileInputException : public Exception {
             << "Can not read file `"
             << f_filename << "`";
 
-        return (strdup(oss.str().c_str()));
+        return oss2cstr(oss);
     }
 
     std::string f_filename;
