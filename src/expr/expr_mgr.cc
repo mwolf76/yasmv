@@ -67,7 +67,6 @@ ExprMgr::ExprMgr()
     }
 
     array_expr = make_identifier(ARRAY_TOKEN);
-    main_expr = make_identifier(MAIN_TOKEN);
     empty_expr = make_identifier(EMPTY_TOKEN);
 
     DEBUG

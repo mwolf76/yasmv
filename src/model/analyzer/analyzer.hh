@@ -34,8 +34,11 @@
 
 #include <boost/unordered_map.hpp>
 
-/* guard -> identifier map */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> DependencyMap;
+/* guard -> identifier map (first pass) */
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> DependencyTrackingMap;
+
+/* identifier -> framing condition clause */
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> FramingConditionMap;
 
 class ModelMgr;
 typedef enum {
@@ -55,6 +58,9 @@ public:
 
     inline ModelMgr& owner()
     { return f_owner; }
+
+    // generates framing conditions, adds them in the module
+    void generate_framing_conditions();
 
 protected:
     void pre_hook();
@@ -76,7 +82,10 @@ private:
     // the type of expr we're analyzing
     analyze_section_t f_section;
 
-    DependencyMap f_dep_map;
+    DependencyTrackingMap f_dependency_tracking_map;
+
+    // helpers
+    bool mutually_exclusive(Expr_ptr p, Expr_ptr q) const;
 };
 
 #endif /* ANALYZER_H */

@@ -90,8 +90,6 @@ extern const char *INT_TOKEN;
 
 extern const char *ARRAY_TOKEN;
 
-extern const char *MAIN_TOKEN;
-
 extern const char* EMPTY_TOKEN;
 
 extern const char *DEFAULT_CTX_TOKEN;

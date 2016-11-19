@@ -472,14 +472,6 @@ public:
         return expr == temp_expr;
     }
 
-    inline Expr_ptr make_main() const
-    { return main_expr; }
-
-    inline bool is_main(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == main_expr;
-    }
-
     inline Expr_ptr make_empty() const
     { return empty_expr; }
 
@@ -732,11 +724,6 @@ public:
 
     Expr_ptr make_identifier(Atom atom);
 
-    inline Expr_ptr main() const
-    { return main_expr; }
-
-
-
 protected:
     ExprMgr();
     ~ExprMgr();
@@ -782,9 +769,6 @@ private:
 
     /* reserved for temp symbols ctx */
     Expr_ptr temp_expr;
-
-    /* main module */
-    Expr_ptr main_expr;
 
     /* empty symbol */
     Expr_ptr empty_expr;

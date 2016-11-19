@@ -66,12 +66,12 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     Model& model
         (f_model);
 
-    Module& main_
+    Module& main_module
         (model.main_module());
 
     std::stack< boost::tuple<Expr_ptr, Module_ptr, Expr_ptr> > stack;
     stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >
-                (em.make_empty(), &main_, em.make_empty()));
+                (em.make_empty(), &main_module, em.make_empty()));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
@@ -453,6 +453,8 @@ bool ModelMgr::analyze()
     analyzer_pass_t pass
         ((analyzer_pass_t) 0);
 
+
+
     while (pass < MMGR_DONE) {
         DRIVEL
             << "Model analysis (pass " << pass << ")"
@@ -466,7 +468,7 @@ bool ModelMgr::analyze()
         }
     }
 
-
+    f_analyzer.generate_framing_conditions();
 
     TRACE
         << "Ok"

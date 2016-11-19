@@ -52,6 +52,20 @@ Module& Model::module(Expr_ptr module_name)
     return *(i -> second);
 }
 
+Module& Model::synthetic_module()
+{
+    assert (f_modules.size());
+
+    Modules::const_iterator i
+        (f_modules.begin());
+
+    /* main is the second module (first slot is reserved for synthetic) */
+    if (++ i == f_modules.end())
+        throw MainModuleNotFound();
+
+    return *(i -> second);
+}
+
 Module& Model::main_module()
 {
     if (! f_modules.size())
@@ -61,7 +75,7 @@ Module& Model::main_module()
         (f_modules.begin());
 
     return *(i -> second);
-}
+} 
 
 Model::Model()
     : f_modules()

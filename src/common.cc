@@ -28,7 +28,6 @@ const char *YASMV_MICROCODE_PATH = "YASMV_MICROCODE";
 
 /* tokens */
 const char *EMPTY_TOKEN = "__nil__";
-const char *MAIN_TOKEN = "main";
 
 /* bool consts */
 const char *FALSE_TOKEN = "FALSE";

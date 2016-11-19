@@ -55,9 +55,6 @@ public:
     inline Model& model()
     { return f_model; }
 
-    inline Module& main()
-    { return f_model.module( ExprMgr::INSTANCE().main()); }
-
     inline Module& module(Expr_ptr module_name)
     { return f_model.module( module_name); }
 
@@ -79,6 +76,9 @@ public:
 
     inline TypeMgr& tm() const
     { return f_tm; }
+
+    inline Analyzer& analyzer() const
+    { return f_analyzer; }
 
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,

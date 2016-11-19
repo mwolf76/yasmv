@@ -24,11 +24,11 @@ INIT
 INVAR
         ferryman != cabbage -> goat != cabbage;
 
--- If the ferryman has left the GOAT, the WOLD is not with the GOAT
+-- If the ferryman has left the GOAT, the WOLF is not with the GOAT
 INVAR
         ferryman != goat -> wolf != goat;
 
--- The `carry` variable holds a non-deterministic choice
+-- A non-deterministic choice
 TRANS
         carry := {(ferryman = goat    ? GOAT    : NIL),
                   (ferryman = cabbage ? CABBAGE : NIL),
@@ -36,25 +36,22 @@ TRANS
 
 -- If the FERRYMAN is carrying the GOAT, FERRYMAN and GOAT will have the same location
 TRANS
-        goat  := ( next(carry) = GOAT ? next(ferryman) : goat );
+        next(carry) = GOAT :
+                      goat := next(ferryman);
 
 -- If the FERRYMAN is carrying the CABBAGE, FERRYMAN and CABBAGE will have the same location
 TRANS
-        cabbage := ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
-
-TRANS
-        running :
-                ferryman :=
-                         (ferryman = WEST ? EAST : WEST);
-
--- frame condition (auto-generated)
-TRANS
-        ! running :
-                ferryman := ferryman;
+       next(carry) = CABBAGE :
+                     cabbage := next(ferryman);
 
 -- If the FERRYMAN is carrying the WOLF, FERRYMAN and WOLF will have the same location
 TRANS
-        wolf := ( next(carry) = WOLF ? next(ferryman) : wolf );
+     next(carry) = WOLF :
+                   wolf := next(ferryman);
+TRANS
+     running :
+             ferryman :=
+                       (ferryman = WEST ? EAST : WEST);
 
 -- To perform planning, we assert the negation of the desired
 -- TARGET. Our TARGET here is to have all the items on the EAST bank.

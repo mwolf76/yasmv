@@ -215,6 +215,7 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
     BOOST_CHECK(! type->is_instance());
 }
 
+#if 0
 BOOST_AUTO_TEST_CASE(type_checking)
 {
     /* a rather rough setup... */
@@ -486,5 +487,6 @@ BOOST_AUTO_TEST_CASE(type_checking)
     BOOST_CHECK( int16 ==
                  mm.type( em.make_mod( u, k)));
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
