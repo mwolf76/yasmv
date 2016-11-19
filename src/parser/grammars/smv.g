@@ -888,7 +888,7 @@ command_topic returns [CommandTopic_ptr res]
     |  c=read_model_command_topic
        { $res = c; }
 
-    |  c=write_model_command_topic
+    |  c=dump_model_command_topic
        { $res = c; }
 
     |  c=pick_state_command_topic
@@ -938,7 +938,7 @@ command returns [Command_ptr res]
     |  c=read_model_command
        { $res = c; }
 
-    |  c=write_model_command
+    |  c=dump_model_command
        { $res = c; }
 
     |  c=pick_state_command
@@ -1024,18 +1024,18 @@ read_model_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_read_model(); }
     ;
 
-write_model_command returns [Command_ptr res]
-    :  'write-model'
-        { $res = cm.make_write_model(); }
+dump_model_command returns [Command_ptr res]
+    :  'dump-model'
+        { $res = cm.make_dump_model(); }
 
         ( output=filepath {
-            ((WriteModel*) $res) -> set_output(output);
+            ((DumpModel*) $res) -> set_output(output);
         }) ?
     ;
 
-write_model_command_topic returns [CommandTopic_ptr res]
-    :  'write-model'
-        { $res = cm.topic_write_model(); }
+dump_model_command_topic returns [CommandTopic_ptr res]
+    :  'dump-model'
+        { $res = cm.topic_dump_model(); }
     ;
 
 add_init_command returns[Command_ptr res]
@@ -1288,13 +1288,13 @@ fragment TYPE_WIDTH
 fragment ID_FIRST_CHAR
     :   'A'..'Z'
     |   'a'..'z'
+    |    '_'
     ;
 
 fragment ID_FOLLOWING_CHARS
     :    ID_FIRST_CHAR
     |    DECIMAL_DIGIT
     |    '-'
-    |    '_'
     |    '#'
     |    '$'
     ;

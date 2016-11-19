@@ -1,10 +1,10 @@
 /**
- * @file write_model.hh
+ * @file dump_model.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- * This header file contains the handler inteface for the `write-model`
+ * This header file contains the handler inteface for the `dump-model`
  * command.
  *
  * This library is free software; you can redistribute it and/or
@@ -24,18 +24,18 @@
  *
  **/
 
-#ifndef WRITE_MODEL_CMD_H
-#define WRITE_MODEL_CMD_H
+#ifndef DUMP_MODEL_CMD_H
+#define DUMP_MODEL_CMD_H
 
 #include <cmd/command.hh>
 
-class WriteModel : public Command {
+class DumpModel : public Command {
 
     pchar f_output;
 
 public:
-    WriteModel(Interpreter& owner);
-    virtual ~WriteModel();
+    DumpModel(Interpreter& owner);
+    virtual ~DumpModel();
 
     void set_output(pconst_char output);
     inline pconst_char output() const
@@ -44,12 +44,12 @@ public:
     Variant virtual operator()();
 };
 
-class WriteModelTopic : public CommandTopic {
+class DumpModelTopic : public CommandTopic {
 public:
-    WriteModelTopic(Interpreter& owner);
-    virtual ~WriteModelTopic();
+    DumpModelTopic(Interpreter& owner);
+    virtual ~DumpModelTopic();
 
     void virtual usage();
 };
 
-#endif /* WRITE_MODEL_CMD_H */
+#endif /* DUMP_MODEL_CMD_H */

@@ -30,7 +30,7 @@
 #include <cmd/commands/quit.hh>
 
 #include <cmd/commands/read_model.hh>
-#include <cmd/commands/write_model.hh>
+#include <cmd/commands/dump_model.hh>
 
 #include <cmd/commands/add_init.hh>
 #include <cmd/commands/add_invar.hh>
@@ -71,8 +71,8 @@ public:
     inline Command_ptr make_read_model()
     { return new ReadModel(f_interpreter); }
 
-    inline Command_ptr make_write_model()
-    { return new WriteModel(f_interpreter); }
+    inline Command_ptr make_dump_model()
+    { return new DumpModel(f_interpreter); }
 
     inline Command_ptr make_add_init()
     { return new AddInit(f_interpreter); }
@@ -129,8 +129,8 @@ public:
     inline CommandTopic_ptr topic_read_model()
     { return new ReadModelTopic(f_interpreter); }
 
-    inline CommandTopic_ptr topic_write_model()
-    { return new WriteModelTopic(f_interpreter); }
+    inline CommandTopic_ptr topic_dump_model()
+    { return new DumpModelTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_add_init()
     { return new AddInitTopic(f_interpreter); }

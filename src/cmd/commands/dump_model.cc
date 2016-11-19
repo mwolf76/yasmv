@@ -1,6 +1,6 @@
 /**
- * @file write_model.cc
- * @brief Command `write-model` class implementation.
+ * @file dump_model.cc
+ * @brief Command `dump-model` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,22 +24,22 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/write_model.hh>
+#include <cmd/commands/dump_model.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
-WriteModel::WriteModel(Interpreter& owner)
+DumpModel::DumpModel(Interpreter& owner)
     : Command(owner)
     , f_output(NULL)
 {}
 
-WriteModel::~WriteModel()
+DumpModel::~DumpModel()
 {
     free(f_output);
     f_output = NULL;
 }
 
-void WriteModel::set_output(pconst_char output)
+void DumpModel::set_output(pconst_char output)
 {
     if (output) {
         free(f_output);
@@ -47,7 +47,7 @@ void WriteModel::set_output(pconst_char output)
     }
 }
 
-Variant WriteModel::operator()()
+Variant DumpModel::operator()()
 {
     std::ostringstream oss;
 
@@ -119,20 +119,20 @@ Variant WriteModel::operator()()
     return Variant (oss.str());
 }
 
-WriteModelTopic::WriteModelTopic(Interpreter& owner)
+DumpModelTopic::DumpModelTopic(Interpreter& owner)
     : CommandTopic(owner)
 {}
 
-WriteModelTopic::~WriteModelTopic()
+DumpModelTopic::~DumpModelTopic()
 {
     TRACE
-        << "Destroyed write-model topic"
+        << "Destroyed dump-model topic"
         << std::endl;
 }
 
-void WriteModelTopic::usage()
+void DumpModelTopic::usage()
 {
     std::cout
-        << "write-model [<filename>] - Write current model to given filename[*].\n"
+        << "dump-model [<filename>] - Dump current model to given filename[*].\n"
         << "[*] either in single or double quotes. If no filename is given, model is written to standard output";
 }
