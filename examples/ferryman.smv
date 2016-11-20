@@ -1,6 +1,6 @@
 -- This file is part of the YASMINE distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
-MODULE ferry-test
+MODULE ferryman
 
 VAR
         ferryman : { EAST, WEST };
