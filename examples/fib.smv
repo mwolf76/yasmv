@@ -3,10 +3,10 @@
 --
 
 -- To generate the sequence of the first n fibonacci numbers issue the
--- command: >> set n 10; reach LIMIT;
+-- command: >> set n 10; reach END; dump-trace
 
 #word-width 64
-MODULE main
+MODULE fibonacci
 
 VAR f : uint;
     g : uint;
@@ -27,13 +27,13 @@ INIT
     i = 0;
 
 TRANS
-  next(f) = g;
+  f := g;
 
 TRANS
-  next(g) = f + g;
+  g := f + g;
 
 TRANS
-  next(i) = i + 1;
+  i := i + 1;
 
 @hidden
 DEFINE END := i >= n;
