@@ -33,6 +33,8 @@
 
 #include <expr/expr.hh>
 
+#include <utils/misc.hh>
+
 /* helper macros to declare walker hooks */
 #define UNARY_HOOK(op)                                       \
     bool walk_## op ## _preorder(const Expr_ptr expr);       \
@@ -196,9 +198,11 @@ public:
     virtual const char* what() const throw() {
         std::ostringstream oss;
         oss
-	  << "null expression encountered";
+            << "null expression encountered"
+            << std::endl;
 
-        return oss.str().c_str();
+
+        return oss2cstr(oss);
     }
 };
 
@@ -214,7 +218,7 @@ public:
         oss
             << "Unsupported entry point (" << f_ep << ")";
 
-        return oss.str().c_str();
+        return oss2cstr(oss);
     }
 
 private:
@@ -231,9 +235,10 @@ public:
     virtual const char* what() const throw() {
         std::ostringstream oss;
         oss
-            << "Unsupported operator (" << f_et << ")";
+            << "Unsupported operator (" << f_et << ")"
+            << std::endl;
 
-        return oss.str().c_str();
+        return oss2cstr(oss);
     }
 
 private:
@@ -250,8 +255,31 @@ public:
             << std::endl
             ;
 
-        return strdup(oss.str().c_str());
+        return oss2cstr(oss);
     }
+};
+
+class InternalError : public WalkerException {
+public:
+    InternalError(std::string message)
+        : f_message(message)
+    {}
+
+    virtual const char* what() const throw() {
+        std::ostringstream oss;
+
+        oss
+            << "Internal error: "
+            << f_message
+            << std::endl;
+
+        return oss2cstr(oss);
+    }
+
+    virtual ~InternalError() throw() {}
+
+private:
+    std::string f_message;
 };
 
 class ExprWalker {

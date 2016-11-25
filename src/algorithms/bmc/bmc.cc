@@ -39,6 +39,7 @@ BMC::BMC(Command& command, Model& model)
         (this);
 
     setup();
+
     if (!ok())
         throw AlgorithmException();
 

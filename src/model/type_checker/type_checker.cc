@@ -68,7 +68,8 @@ Type_ptr TypeChecker::process(Expr_ptr expr, Expr_ptr ctx)
     // invoke walker on the body of the expr to be processed
     (*this)(expr);
 
-    assert(1 == f_type_stack.size());
+    if (1 != f_type_stack.size())
+        throw InternalError("TypeChecker::process post-condition checks failed");
 
     POP_TYPE(res);
     assert(NULL != res);
@@ -309,14 +310,21 @@ bool TypeChecker::walk_ite_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_ite_postorder(const Expr_ptr expr)
-{ walk_ternary_ite_postorder(expr); }
+{ walk_binary_ite_postorder(expr); }
 
 bool TypeChecker::walk_cond_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_cond_postorder(const Expr_ptr expr)
-{ /* nop */ }
+{
+    POP_TYPE(lhs_type);
+    POP_TYPE(cnd);
+    if (! cnd -> is_boolean())
+        throw BadType( expr -> lhs() -> lhs(), cnd );
+
+    PUSH_TYPE(lhs_type);
+}
 
 bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -529,7 +537,16 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             Define& define
                 (symb->as_define());
 
-            (*this)(define.body());
+            Expr_ptr body
+                (define.body());
+
+            DEBUG
+                << "Recurring in `"
+                << body
+                << "`"
+                << std::endl;
+
+            (*this)(body);
             return;
         }
     }

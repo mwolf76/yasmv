@@ -155,10 +155,8 @@ void Analyzer::generate_framing_conditions()
                         (ev[j]);
 
                     if (! mutually_exclusive(p, q)) {
-                        std::ostringstream oss;
-
-                        oss
-                            << "Found two guards that are NOT mutually exclusive for identifier `"
+                        WARN
+                            << "Found two guards that could be NOT mutually exclusive for identifier `"
                             << ident
                             << "`: `"
                             << p
@@ -166,11 +164,6 @@ void Analyzer::generate_framing_conditions()
                             << q
                             << "`"
                             << std::endl;
-
-                        const char *tmp
-                            (oss2cstr(oss));
-
-                        throw SemanticException(tmp);
                     }
                 }
             }
@@ -215,6 +208,7 @@ void Analyzer::generate_framing_conditions()
     }
 }
 
+// under model invariants
 bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
 {
     DEBUG
@@ -235,6 +229,24 @@ bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
 
     Expr_ptr ctx
         (em.make_empty());
+
+    /* adding INVARs @0 and @1 from main module */
+    const ExprVector& invar
+        (ModelMgr::INSTANCE().model().main_module().invar());
+    for (ExprVector::const_iterator ii = invar.begin();
+         ii != invar.end(); ++ ii ) {
+
+        Expr_ptr body
+            (*ii);
+
+        DEBUG
+            << "Pushing INVAR "
+            << ctx << "::" << body
+            << std::endl;
+
+        engine.push(compiler.process(ctx, body), 0);
+        engine.push(compiler.process(ctx, body), 1);
+    }
 
     engine.push(compiler.process(ctx, p), 0);
     engine.push(compiler.process(ctx, q), 0);
@@ -395,8 +407,9 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
     Expr_ptr action
         (expr->rhs());
 
-    if (! em.is_assignment(action))
+    if (! em.is_assignment(action)) {
         throw SemanticException("Guarded actions must be assignments");
+    }
 
     Expr_ptr ident
         (action->lhs());

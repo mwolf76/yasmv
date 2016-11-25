@@ -185,6 +185,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 catch (Exception& ae) {
                     std::string tmp
                         (ae.what());
+
                     WARN
                         << tmp
                         << std::endl

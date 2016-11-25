@@ -392,10 +392,11 @@ bool Compiler::walk_assignment_preorder(const Expr_ptr expr)
         (em.make_eq( em.make_next(expr->lhs()), expr->rhs()));
 
     DEBUG
-        << "Rewrote "
+        << "Rewrote `"
         << expr
-        << " into "
+        << "` into `"
         << rewrite
+        << "`"
         << std::endl;
 
     /* compiling rewritten expression */

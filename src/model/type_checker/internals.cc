@@ -160,7 +160,7 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
         (check_arithmetical(expr->lhs()));
 
     // matching types are most definitely ok
-    if (rhs == lhs ) {
+    if (rhs == lhs) {
         PUSH_TYPE(boolean);
         return ;
     }
@@ -269,17 +269,10 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     else assert(false);
 }
 
-// fun: (boolean ? T) x T -> T
-void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_ite_postorder(Expr_ptr expr)
 {
     POP_TYPE(rhs_type);
-    POP_TYPE(lhs_type);
 
-    POP_TYPE(cnd);
-    if (! cnd -> is_boolean())
-        throw BadType( expr -> lhs() -> lhs(), cnd );
-
-    PUSH_TYPE(lhs_type);
     if (rhs_type -> is_boolean()) {
         Type_ptr lhs_type
             (check_logical(expr->lhs()));
@@ -367,8 +360,21 @@ void TypeChecker::memoize_result (Expr_ptr expr)
 {
     Expr_ptr key
         (f_owner.em().make_dot( f_ctx_stack.back(), expr));
+
     Type_ptr type
         (f_type_stack.back());
+
+#if defined DEBUG_TYPE_CHECKER
+    Expr_ptr type_repr
+        (type->repr());
+
+    DEBUG
+        << "TYPE ("
+        << key
+        << ") = "
+        << type_repr
+        << std::endl;
+#endif
 
     f_map[ key ] = type;
 }
@@ -402,9 +408,45 @@ void TypeChecker::post_hook()
 {}
 
 void TypeChecker::pre_node_hook(Expr_ptr expr)
-{}
+{
+#if defined DEBUG_TYPE_CHECKER
+    DEBUG
+        << "Type checking "
+        << expr
+        << "..."
+        << std::endl;
+#endif
+}
 void TypeChecker::post_node_hook(Expr_ptr expr)
-{ memoize_result(expr); }
+{
+#if defined DEBUG_TYPE_CHECKER
+    DEBUG
+        << expr
+        << std::endl;
+
+    int depth;
+    TypeVector::const_reverse_iterator ti;
+
+    for (depth = 0, ti = f_type_stack.rbegin(); ti != f_type_stack.rend(); ++ depth, ++ ti ) {
+        Type_ptr type
+            (*ti);
+        Expr_ptr repr
+            (type->repr());
+
+        DEBUG
+            << depth
+            << ": "
+            << repr
+            << std::endl;
+    }
+
+    DEBUG
+        << "----------"
+        << std::endl;
+#endif
+
+    memoize_result(expr);
+}
 
 Type_ptr TypeChecker::check_logical(Expr_ptr expr)
 {
@@ -466,8 +508,22 @@ bool TypeChecker::cache_miss(const Expr_ptr expr)
         (f_map.find(key));
 
     if (eye != f_map.end()) {
-        Type_ptr res = (*eye).second;
+        Type_ptr res
+            ((*eye).second);
         PUSH_TYPE(res);
+
+#if defined DEBUG_TYPE_CHECKER
+        Expr_ptr repr
+            (res->repr());
+
+        DEBUG
+            << "cache hit for `"
+            << expr
+            << "`: "
+            << repr
+            << std::endl;
+#endif
+
         return false;
     }
 

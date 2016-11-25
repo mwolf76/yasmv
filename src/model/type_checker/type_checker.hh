@@ -35,6 +35,9 @@
 #include <boost/unordered_map.hpp>
 typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeReg;
 
+/* enable the following macro to debug the TypeChecker */
+// #define DEBUG_TYPE_CHECKER
+
 class ModelMgr;
 class TypeChecker : public ExprWalker {
 public:
@@ -102,10 +105,9 @@ private:
     void walk_binary_shift_postorder(const Expr_ptr expr);
     void walk_binary_relational_postorder(const Expr_ptr expr);
     void walk_binary_equality_postorder(const Expr_ptr expr);
+    void walk_binary_ite_postorder(const Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const Expr_ptr expr);
     void walk_binary_cast_postorder(const Expr_ptr expr);
-    void walk_ternary_ite_postorder(const Expr_ptr expr);
-    void walk_ternary_cond_postorder(const Expr_ptr expr);
 };
 
 #endif /* TYPE_CHECKER_H */
