@@ -176,9 +176,7 @@ void BMC::forward(Expr_ptr target,
                 }
                 if (STATUS_UNSAT == status) {
                     INFO
-                        << "Forward: found unreachability proof (k = " << k << "), invariant `"
-                        << target
-                        << "` is TRUE."
+                        << "Forward: found unreachability proof (k = " << k << ")"
                         << std::endl;
 
                     sync_set_status(BMC_UNREACHABLE);
@@ -247,9 +245,7 @@ void BMC::backward(Expr_ptr target,
         }
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Backward: found unreachability proof (k = " << k << "), invariant `"
-                << target
-                << "` is TRUE."
+                << "Backward: found unreachability proof (k = " << k << ")"
                 << std::endl;
 
             sync_set_status(BMC_UNREACHABLE);
@@ -329,8 +325,10 @@ void BMC::process(const Expr_ptr target)
         return;
     }
 
-    INFO
-        << "Done."
+    std::cout
+        << (f_status == BMC_REACHABLE
+            ? "Target is REACHABLE"
+            : "Target is UNREACHABLE")
         << std::endl;
 }
 
