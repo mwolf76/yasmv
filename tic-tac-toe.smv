@@ -1,0 +1,144 @@
+#word-width 4
+MODULE tic-tac-toe
+
+VAR
+  grid : uint[9];
+  move : { TOP-LEFT, TOP-CENTER, TOP-RIGHT, MID-LEFT, MID-CENTER, MID-RIGHT, BOTTOM-LEFT, BOTTOM-CENTER, BOTTOM-RIGHT };
+
+@hidden
+DEFINE
+  _ := 0;
+
+@hidden
+DEFINE
+  A := 1;
+
+@hidden
+DEFINE
+  B := 2;
+
+@hidden
+DEFINE
+    OVER := AWINS ||
+            BWINS ||
+            (grid[0] != _ && grid[1] != _ && grid[2] != _ &&
+             grid[3] != _ && grid[4] != _ && grid[5] != _ &&
+             grid[6] != _ && grid[7] != _ && grid[8] != _ );
+
+@hidden
+DEFINE
+    AWINS :=
+          (grid[0] = A && grid[1] = A && grid[2] = A) ||
+          (grid[3] = A && grid[4] = A && grid[5] = A) ||
+          (grid[6] = A && grid[7] = A && grid[8] = A) ||
+
+          (grid[0] = A && grid[3] = A && grid[6] = A) ||
+          (grid[1] = A && grid[4] = A && grid[7] = A) ||
+          (grid[2] = A && grid[5] = A && grid[8] = A) ||
+
+          (grid[0] = A && grid[4] = A && grid[8] = A) ||
+          (grid[6] = A && grid[4] = A && grid[2] = A) ;
+
+@hidden
+DEFINE
+    BWINS :=
+          (grid[0] = B && grid[1] = B && grid[2] = B) ||
+          (grid[3] = B && grid[4] = B && grid[5] = B) ||
+          (grid[6] = B && grid[7] = B && grid[8] = B) ||
+
+          (grid[0] = B && grid[3] = B && grid[6] = B) ||
+          (grid[1] = B && grid[4] = B && grid[7] = B) ||
+          (grid[2] = B && grid[5] = B && grid[8] = B) ||
+
+          (grid[0] = B && grid[4] = B && grid[8] = B) ||
+          (grid[6] = B && grid[4] = B && grid[2] = B) ;
+
+VAR
+    turn : { PLAYER_A, PLAYER_B };
+  
+INIT
+  grid = [ _, _, _,
+           _, A, _,
+           _, _, _ ] &&
+
+  turn = PLAYER_B;
+
+INVAR
+    move = TOP-LEFT -> grid[0] = _ ;
+
+INVAR
+    move = TOP-CENTER -> grid[1] = _ ;
+
+INVAR
+    move = TOP-RIGHT -> grid[2] = _ ;
+
+INVAR
+    move = MID-LEFT -> grid[3] = _ ;
+
+INVAR
+    move = MID-CENTER -> grid[4] = _ ;
+
+INVAR
+    move = MID-RIGHT -> grid[5] = _ ;
+
+INVAR
+    move = BOTTOM-LEFT -> grid[6] = _ ;
+
+INVAR
+    move = BOTTOM-CENTER -> grid[7] = _ ;
+
+INVAR
+    move = BOTTOM-RIGHT -> grid[8] = _ ;
+
+TRANS
+  turn := 
+         ((turn = PLAYER_A) ? PLAYER_B : PLAYER_A) ;
+
+TRANS
+    move = TOP-LEFT ?:
+         grid := ((turn = PLAYER_A) ? [ A, grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
+                                    : [ B, grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = TOP-CENTER ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], A, grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
+                                    : [ grid[0], B, grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = TOP-RIGHT ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], A, grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
+                                    : [ grid[0], grid[1], B, grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = MID-LEFT ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], A, grid[4], grid[5], grid[6], grid[7], grid[8] ]
+                                    : [ grid[0], grid[1], grid[2], B, grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = MID-CENTER ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], A, grid[5], grid[6], grid[7], grid[8] ]
+                                    : [ grid[0], grid[1], grid[2], grid[3], B, grid[5], grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = MID-RIGHT ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], A, grid[6], grid[7], grid[8] ]
+                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], B, grid[6], grid[7], grid[8] ]) ;
+
+TRANS
+    move = BOTTOM-LEFT ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], A, grid[7], grid[8] ]
+                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], B, grid[7], grid[8] ]) ;
+
+TRANS
+    move = BOTTOM-CENTER ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], A, grid[8] ]
+                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], grid[6], B, grid[8] ]) ;
+
+TRANS
+    move = BOTTOM-RIGHT ?:
+         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], A ]
+                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], grid[6], grid[7], B ]) ;
+
+@hidden
+DEFINE
+    GOAL := OVER && ! AWINS && ! BWINS ;
