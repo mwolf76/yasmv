@@ -1,5 +1,5 @@
 /**
- * @file module.cc
+ * @file model/classes.cc
  * @brief Model management subsystem, module class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -23,8 +23,65 @@
 
 #include <algorithm>
 #include <utility>
-#include <model.hh>
 
+#include <model/classes.hh>
+#include <model/exceptions.hh>
+
+Module& Model::add_module(Module& module)
+{
+    Expr_ptr name
+        (module.name());
+
+    DEBUG
+        << "Added module: `"
+        << name << "`"
+        << std::endl;
+
+    f_modules.insert( std::make_pair<Expr_ptr, Module_ptr>
+                      (name, &module));
+
+    return module;
+}
+
+Module& Model::module(Expr_ptr module_name)
+{
+    Modules::const_iterator i
+        (f_modules.find(module_name));
+
+    if (i == f_modules.end())
+        throw MainModuleNotFound();
+
+    return *(i -> second);
+}
+
+Module& Model::main_module()
+{
+    if (! f_modules.size())
+        throw MainModuleNotFound();
+
+    Modules::const_iterator i
+        (f_modules.begin());
+
+    return *(i -> second);
+} 
+
+Model::Model()
+    : f_modules()
+{
+    const void *instance
+        (this);
+
+    DEBUG
+        << "Initialized Model instance @"
+        << instance
+        << std::endl;
+}
+
+Model::~Model()
+{
+    // TODO: free memory for symbols... (they've been allocated using new)
+    assert(false); // XXX
+}
 std::ostream& operator<<(std::ostream& os, Module& module)
 { return os << module.name(); }
 
@@ -165,7 +222,9 @@ void Module::override(Expr_ptr symb_name, Define_ptr def)
 void Module::add_init(Expr_ptr expr)
 {
     DEBUG
-        << "Module `" << (*this) << "`, added INIT "
+        << "Module `"
+        << (*this)
+        << "`, added INIT "
         << expr
         << std::endl;
 
@@ -175,7 +234,9 @@ void Module::add_init(Expr_ptr expr)
 void Module::add_invar(Expr_ptr expr)
 {
     DEBUG
-        << "Module `" << (*this) << "`, added INVAR "
+        << "Module `"
+        << (*this)
+        << "`, added INVAR "
         << expr
         << std::endl;
 
@@ -185,7 +246,9 @@ void Module::add_invar(Expr_ptr expr)
 void Module::add_trans(Expr_ptr expr)
 {
     DEBUG
-        << "Module `" << (*this) << "`, added TRANS "
+        << "Module `"
+        << (*this)
+        << "`, added TRANS "
         << expr
         << std::endl;
 

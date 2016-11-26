@@ -1,9 +1,6 @@
 /**
- * @file symb/resolver.hh
- * @brief Symbol resolution module, resolver interface.
- *
- * This header file contains the declarations required by the Resolver
- * class.
+ * @file type/printers.cc.cc
+ * @brief Toplevel type class implementation, printer helpers.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +21,12 @@
  *
  **/
 
-#ifndef SYMB_RESOLVER_H
-#define SYMB_RESOLVER_H
+#include <type/classes.hh>
+#include <type/printers.hh>
 
-#include <symb/typedefs.hh>
+// ostream helper, uses FQExpr printer (see expr/expr.cc)
+std::ostream& operator<<(std::ostream& os, Type_ptr type)
+{
+    return os << type->repr();
+}
 
-class Resolver {
-public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
-};
-
-
-
-#endif /* SYMB_RESOLVER_H */

@@ -34,10 +34,8 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
-#include <type/type.hh>
+#include <type/typedefs.hh>
 #include <type/type_resolver.hh>
-
-typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 
 /*
    The TypeMgr has two well-defined responsibilites:
@@ -45,8 +43,6 @@ typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
    1. It keeps track of types that has been defined;
    2. It instantiates (and owns) type descriptors (Type objects).
 */
-
-typedef class TypeMgr* TypeMgr_ptr;
 
 class TypeMgr {
 

@@ -1,9 +1,9 @@
 /**
- * @file symb/resolver.hh
- * @brief Symbol resolution module, resolver interface.
+ * @file model/typedefs.hh
+ * @brief Model module, typedefs.
  *
- * This header file contains the declarations required by the Resolver
- * class.
+ * This header file contains the declarations required by the Model
+ * class and its dependencies.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +24,14 @@
  *
  **/
 
-#ifndef SYMB_RESOLVER_H
-#define SYMB_RESOLVER_H
+#ifndef MODEL_TYPEDEFS_H
+#define MODEL_TYPEDEFS_H
 
-#include <symb/typedefs.hh>
+typedef class Module* Module_ptr;
+typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
 
-class Resolver {
-public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
-};
+typedef class Model* Model_ptr;
 
+std::ostream& operator<<(std::ostream& os, Module& module);
 
-
-#endif /* SYMB_RESOLVER_H */
+#endif /* MODEL_TYPEDEFS_H */

@@ -1,6 +1,6 @@
 /**
  * @file type.hh
- * @brief Type system module header file.
+ * @brief Type system module header file, helpers.
  *
  * This header file contains the declarations and type definitions
  * required by YASMINE type system classes.
@@ -24,21 +24,8 @@
  *
  **/
 
-#ifndef TYPE_H
-#define TYPE_H
-
-#include <list>
-
-#include <dd/cudd_mgr.hh>
-
-#include <expr/expr.hh>
-#include <expr/expr_mgr.hh>
-
-#include <type/typedefs.hh>
-#include <type/printers.hh>
-#include <type/exceptions.hh>
-#include <type/classes.hh>
-#include <type/helpers.hh>
+#ifndef TYPE_HELPERS_H
+#define TYPE_HELPERS_H
 
 /** -- shortcurts to simplify the manipulation of the internal Type stack -- */
 #define TOP_TYPE(tp)                            \
@@ -55,4 +42,4 @@
 
 typedef std::vector<Type_ptr> TypeVector;
 
-#endif /* TYPE_H */
+#endif /* TYPE_HELPERS_H */

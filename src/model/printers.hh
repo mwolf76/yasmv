@@ -1,9 +1,9 @@
 /**
- * @file symb/resolver.hh
- * @brief Symbol resolution module, resolver interface.
+ * @file model/printer.hh
+ * @brief Model module, printer helpers.
  *
- * This header file contains the declarations required by the Resolver
- * class.
+ * This header file contains the declarations required by the Model
+ * class and its dependencies.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +24,12 @@
  *
  **/
 
-#ifndef SYMB_RESOLVER_H
-#define SYMB_RESOLVER_H
+#ifndef MODEL_PRINTERH_H
+#define MODEL_PRINTERS_H
 
-#include <symb/typedefs.hh>
+#include <common.hh>
+#include <model/classes.hh>
 
-class Resolver {
-public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
-};
+std::ostream& operator<<(std::ostream& os, Module& module);
 
-
-
-#endif /* SYMB_RESOLVER_H */
+#endif /* MODEL_PRINTERS_H */

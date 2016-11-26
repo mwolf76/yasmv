@@ -1,9 +1,8 @@
 /**
- * @file symb/resolver.hh
- * @brief Symbol resolution module, resolver interface.
+ * @file symb/iter.cc
+ * @brief Symbol interface, symbol iterator implementation
  *
- * This header file contains the declarations required by the Resolver
- * class.
+ * This file contains the method definitions required by the symbol resolver.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +23,19 @@
  *
  **/
 
-#ifndef SYMB_RESOLVER_H
-#define SYMB_RESOLVER_H
+#include <symb/iter.hh>
 
-#include <symb/typedefs.hh>
+bool SymbIter::has_next() const
+{
+    return f_iter != f_symbols.end();
+}
 
-class Resolver {
-public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
-};
+/* true iff there are more symbols to be processed */
+std::pair <Expr_ptr, Symbol_ptr> SymbIter::next()
+{
+    std::pair< Expr_ptr, Symbol_ptr> res = (* f_iter);
+    ++ f_iter;
 
+    return res;
+}
 
-
-#endif /* SYMB_RESOLVER_H */

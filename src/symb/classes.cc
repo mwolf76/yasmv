@@ -1,6 +1,6 @@
 /**
- * @file symbol.cc
- * @brief Symbol classes implementation.
+ * @file symb/classes.cc
+ * @brief Symbol module, classes implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,26 +21,12 @@
  *
  **/
 
+#include <symb/symbol.hh>
+
 #include <sstream>
 #include <cstring>
 
-#include <symb/symbol.hh>
-
 #include <utils/misc.hh>
-
-UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
-    : f_expr(expr)
-{}
-
-const char* UnresolvedSymbol::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Unresolved symbol: `"
-        << f_expr<< "`";
-
-    return oss2cstr(oss);
-}
 
 bool Symbol::is_variable(void) const
 {

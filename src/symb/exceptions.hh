@@ -1,9 +1,9 @@
 /**
- * @file symb/resolver.hh
- * @brief Symbol resolution module, resolver interface.
+ * @file symb/exceptions.hh
+ * @brief Symbol module header file, exception classes
  *
- * This header file contains the declarations required by the Resolver
- * class.
+ * This header file contains the declarations required by the symbol
+ * resolver.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +24,17 @@
  *
  **/
 
-#ifndef SYMB_RESOLVER_H
-#define SYMB_RESOLVER_H
+#ifndef SYMBOL_EXCEPTIONS_H
+#define SYMBOL_EXCEPTIONS_H
 
-#include <symb/typedefs.hh>
+#include <common.hh>
 
-class Resolver {
+class UnresolvedSymbol : public Exception {
+    Expr_ptr f_expr;
+
 public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
+    UnresolvedSymbol(Expr_ptr expr);
+    const char* what() const throw();
 };
 
-
-
-#endif /* SYMB_RESOLVER_H */
+#endif /* SYMBOL_EXCEPTIONS_H */

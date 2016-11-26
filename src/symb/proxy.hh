@@ -27,12 +27,10 @@
 #ifndef RESOLVER_PROXY_H
 #define RESOLVER_PROXY_H
 
+#include <expr/expr.hh>
 #include <symb/resolver.hh>
-
 #include <type/type_mgr.hh>
-
 #include <model/model_mgr.hh>
-
 
 class ResolverProxy : public Resolver {
     TypeMgr& f_tm;

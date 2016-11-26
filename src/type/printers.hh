@@ -1,6 +1,6 @@
 /**
- * @file type.hh
- * @brief Type system module header file.
+ * @file type/printers.hh
+ * @brief Type system module, printer helpers.
  *
  * This header file contains the declarations and type definitions
  * required by YASMINE type system classes.
@@ -24,35 +24,16 @@
  *
  **/
 
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef TYPE_PRINTERS_H
+#define TYPE_PRINTERS_H
 
-#include <list>
+#include <common.hh>
 
-#include <dd/cudd_mgr.hh>
+// ostream helper, uses FQExpr printer (see expr/expr.cc)
+std::ostream& operator<<(std::ostream& os, Type_ptr type);
 
-#include <expr/expr.hh>
-#include <expr/expr_mgr.hh>
+// std::ostream helper, uses FQExpr printer (see expr/expr.cc)
+std::ostream& operator<<(std::ostream& os, const Type_ptr type);
 
-#include <type/typedefs.hh>
-#include <type/printers.hh>
-#include <type/exceptions.hh>
-#include <type/classes.hh>
-#include <type/helpers.hh>
+#endif /* TYPE_PRINTERS_H */
 
-/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
-#define TOP_TYPE(tp)                            \
-    const Type_ptr (tp)(f_type_stack.back())
-
-#define DROP_TYPE()                             \
-    f_type_stack.pop_back()
-
-#define POP_TYPE(tp)                            \
-    TOP_TYPE(tp); DROP_TYPE()
-
-#define PUSH_TYPE(tp)                           \
-    f_type_stack.push_back(tp)
-
-typedef std::vector<Type_ptr> TypeVector;
-
-#endif /* TYPE_H */

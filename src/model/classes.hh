@@ -1,6 +1,6 @@
 /**
- * @file model.hh
- * @brief Model module
+ * @file model/classes.hh
+ * @brief Model module, classes declarations.
  *
  * This header file contains the declarations required by the Model
  * class and its dependencies.
@@ -24,22 +24,13 @@
  *
  **/
 
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef MODEL_CLASSES_H
+#define MODEL_CLASSES_H
 
 #include <common.hh>
-
-#include <boost/unordered_map.hpp>
-
 #include <expr/expr.hh>
-#include <expr/expr_mgr.hh>
-
-#include <type/type.hh>
-#include <enc/enc.hh>
-
 #include <symb/symbol.hh>
-
-#include <model/exceptions.hh>
+#include <model/typedefs.hh>
 
 class Module {
     friend std::ostream& operator<<(std::ostream& os, Module& module);
@@ -100,10 +91,7 @@ public:
     void add_trans(Expr_ptr expr);
 };
 
-typedef Module* Module_ptr;
-typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
-std::ostream& operator<<(std::ostream& os, Module& module);
-
+/* main container class */
 class Model {
     Modules f_modules;
 
@@ -122,4 +110,4 @@ public:
 
 typedef Model* Model_ptr;
 
-#endif /* MODEL_H */
+#endif /* MODEL_CLASSES_H */

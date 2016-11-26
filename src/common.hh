@@ -37,8 +37,10 @@
 
 #include <vector>
 typedef std::vector<step_t> TimeVector;
-
 typedef std::vector<value_t> ValueVector;
+
+/* used ubiquitously in the system */
+#include <boost/unordered_map.hpp>
 
 /* shortcuts to to simplify manipulation of the internal values stack */
 #define POP_VALUE(op)                              \

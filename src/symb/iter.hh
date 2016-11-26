@@ -1,6 +1,6 @@
 /**
- * @file symbol.hh
- * @brief Symbol interface
+ * @file symb/iter.hh
+ * @brief Symbol interface, typedefs
  *
  * This header file contains the declarations required by the symbol
  * resolver.
@@ -23,24 +23,45 @@
  * 02110-1301 USA
  *
  **/
-#ifndef SYMBOL_H
-#define SYMBOL_H
+
+#ifndef SYMBOL_ITER_H
+#define SYMBOL_ITER_H
 
 #include <common.hh>
+#include <expr/expr.hh>
+#include <utils/pool.hh>
 
-#include <boost/unordered_map.hpp>
-
-#include <src/parser/grammars/grammar.hh>
-
-#include <type/type.hh>
-
-#include <vector>
-#include <utility>
-
-#include <symb/exceptions.hh>
 #include <symb/typedefs.hh>
-#include <symb/classes.hh>
-#include <symb/resolver.hh>
-#include <symb/iter.hh>
 
-#endif /* SYMBOL_H */
+/**
+ * Symbol iterator
+ *
+ * COI aware
+ * Preserves ordering
+ *
+ */
+class Model;
+class Symbol;
+
+class SymbIter {
+public:
+    /* Calculates COI if formula is non-NULL */
+    SymbIter(Model& model, Expr_ptr formula = NULL);
+
+    ~SymbIter();
+
+    /* true iff there are more symbols to be processed */
+    bool has_next() const;
+
+    /* yields next symbol, raises an exception if no such symbol exists. */
+    std::pair <Expr_ptr, Symbol_ptr> next();
+
+private:
+    Model&  f_model;
+    Expr_ptr f_formula; /* for COI */
+
+    std::vector< std::pair< Expr_ptr, Symbol_ptr > >f_symbols;
+    std::vector< std::pair< Expr_ptr, Symbol_ptr> >::const_iterator f_iter;
+};
+
+#endif /* SYMBOL_ITER_H */

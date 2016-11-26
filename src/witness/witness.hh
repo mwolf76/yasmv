@@ -1,6 +1,6 @@
 /**
  * @file witness.hh
- * @brief Witness module
+ * @brief Witness module header file
  *
  * This module contains definitions and services that implement the
  * abstract interface for the witness subsystem.
@@ -46,88 +46,7 @@
 
 #include <utils/variant.hh>
 
-/** Exception classes */
-class WitnessException : public Exception {
-public:
-    virtual const char* what() const throw() =0;
-};
-
-/** Raised when a given ID is registered more than once */
-class DuplicateWitnessId : public WitnessException {
-public:
-    DuplicateWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~DuplicateWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Atom f_id;
-};
-
-/** Raised when a given ID is registered more than once */
-class NoCurrentlySelectedWitness : public WitnessException {
-public:
-    NoCurrentlySelectedWitness()
-    {}
-
-    ~NoCurrentlySelectedWitness() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-};
-
-/** Raised when a given ID is searched for and was not registered */
-class UnknownWitnessId : public WitnessException {
-public:
-    UnknownWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~UnknownWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Atom f_id;
-};
-
-/** Raised when TimeFrame for requested time does not exist. */
-class IllegalTime : public WitnessException {
-public:
-    IllegalTime(step_t time)
-        : f_time(time)
-    {}
-
-    ~IllegalTime() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    step_t f_time;
-};
-
-class NoValue : public WitnessException {
-public:
-    NoValue(Expr_ptr id)
-        : f_id(id)
-    {}
-
-    ~NoValue() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_id;
-};
+#include <witness/exceptions.hh>
 
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;

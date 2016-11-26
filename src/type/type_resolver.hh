@@ -26,8 +26,10 @@
 #ifndef TYPE_RESOLVER_H
 #define TYPE_RESOLVER_H
 
+#include <common.hh>
 #include <symb/resolver.hh>
 
+class TypeMgr;
 class TypeResolver : public Resolver {
 public:
     TypeResolver(TypeMgr& owner);
