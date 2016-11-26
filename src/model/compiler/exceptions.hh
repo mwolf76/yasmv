@@ -27,7 +27,7 @@
 #ifndef COMPILER_EXCEPTIONS_H
 #define COMPILER_EXCEPTIONS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 /** Exception classes */
 class CompilerException : public Exception {

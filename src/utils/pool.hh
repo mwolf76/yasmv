@@ -28,7 +28,7 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 struct PtrHash {
     long operator() (void *ptr) const;

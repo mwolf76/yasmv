@@ -1,6 +1,9 @@
-/*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+/**
+ * @file utils/values.hh
+ * @brief System-wide definitions.
+ *
+ * This header file contains common definitions used throughout the
+ * whole program.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +24,25 @@
  *
  **/
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef UTILS_VALUES_H
+#define UTILS_VALUES_H
 
-#include <common/common.hh>
-#include <utils/variant.hh>
+#include <vector>
+typedef std::vector<value_t> ValueVector;
 
-#endif /* COMMANDS_H */
+/* shortcuts to to simplify manipulation of the internal values stack */
+#define POP_VALUE(op)                              \
+    assert(0 < f_values_stack.size());             \
+    const value_t op = f_values_stack.back();      \
+    f_values_stack.pop_back()
+
+#define PUSH_VALUE(op)                             \
+    f_values_stack.push_back(op)
+
+#define DROP_VALUE()                               \
+    f_values_stack.pop_back()
+
+#define TOP_VALUE()                                \
+    f_values_stack.back()
+
+#endif /* UTILS_VALUES_H */

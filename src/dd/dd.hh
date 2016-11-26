@@ -33,7 +33,7 @@
 #include <climits>
 #include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
 typedef std::vector<ADD> DDVector;

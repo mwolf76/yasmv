@@ -30,8 +30,7 @@
 class OptsMgr;
 typedef OptsMgr* OptsMgr_ptr;
 
-#include <common.hh>
-#include <logging.hh>
+#include <common/common.hh>
 #include <boost/program_options.hpp>
 
 namespace options = boost::program_options;

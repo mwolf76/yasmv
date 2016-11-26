@@ -44,7 +44,7 @@
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <cmd.hh>
 
@@ -57,8 +57,6 @@
 
 #include <smvLexer.h>
 #include <smvParser.h>
-
-#include <logging.hh>
 
 #include <sat/helpers.hh>
 

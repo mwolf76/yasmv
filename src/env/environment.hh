@@ -32,7 +32,7 @@
 #include <iostream>
 #include <boost/unordered_map.hpp>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <utils/pool.hh>
 
 /* key -> value map for env */

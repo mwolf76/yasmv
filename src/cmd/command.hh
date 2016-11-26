@@ -27,7 +27,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <src/expr/expr.hh>
 #include <utils/variant.hh>
 

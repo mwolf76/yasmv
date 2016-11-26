@@ -26,7 +26,7 @@
 #ifndef EXPR_WALKER_H
 #define EXPR_WALKER_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <sstream>
 #include <stack>

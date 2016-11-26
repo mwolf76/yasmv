@@ -22,7 +22,7 @@
  **/
 
 #include <sstream>
-#include <common.hh>
+#include <common/common.hh>
 
 #include <cmd.hh>
 

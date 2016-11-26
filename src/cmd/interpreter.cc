@@ -21,14 +21,13 @@
  *
  **/
 
-#include <iostream>
-#include <sstream>
-
-#include <commands/commands.hh>
 #include <interpreter.hh>
 
+#include <iostream>
+#include <sstream>
 #include <config.h>
 
+#include <commands/commands.hh>
 
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)

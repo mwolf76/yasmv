@@ -27,7 +27,7 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <ctime>
 
 typedef enum {

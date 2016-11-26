@@ -64,6 +64,8 @@
 #include <model/compiler/exceptions.hh>
 #include <model/compiler/unit.hh>
 
+#include <utils/time.hh>
+
 #include <boost/unordered_map.hpp>
 typedef boost::unordered_map<TimedExpr, CompilationUnit,
                              TimedExprHash, TimedExprEq> CompilationMap;

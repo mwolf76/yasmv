@@ -27,7 +27,7 @@
 #ifndef WITNESS_H
 #define WITNESS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <vector>
 

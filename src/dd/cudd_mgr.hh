@@ -29,7 +29,7 @@
 
 #include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <cuddObj.hh>
 
 typedef class CuddMgr* CuddMgr_ptr;

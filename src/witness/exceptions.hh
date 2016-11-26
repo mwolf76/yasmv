@@ -27,7 +27,7 @@
 #ifndef WITNESS_EXCEPTIONS_H
 #define WITNESS_EXCEPTIONS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 class WitnessException : public Exception {
 public:

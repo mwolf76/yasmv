@@ -1,6 +1,9 @@
-/*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+/**
+ * @file common/exceptions.hh
+ * @brief System-wide definitions, base exception class
+ *
+ * This header file contains common definitions used throughout the
+ * whole program.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +24,14 @@
  *
  **/
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef COMMON_EXCEPTION_H
+#define COMMON_EXCEPTION_H
 
-#include <common/common.hh>
-#include <utils/variant.hh>
+#include <exception>
+class Exception : public std::exception {
+public:
+    virtual const char* what() const throw() =0;
+    virtual ~Exception() throw() {};
+};
 
-#endif /* COMMANDS_H */
+#endif /* COMMON_EXCEPTION_H */

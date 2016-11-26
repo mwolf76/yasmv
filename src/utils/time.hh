@@ -1,6 +1,9 @@
-/*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+/**
+ * @file utils/time.hh
+ * @brief System-wide definitions.
+ *
+ * This header file contains common definitions used throughout the
+ * whole program.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +24,11 @@
  *
  **/
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef UTILS_TIME_H
+#define UTILS_TIME_H
 
 #include <common/common.hh>
-#include <utils/variant.hh>
+#include <vector>
+typedef std::vector<step_t> TimeVector;
 
-#endif /* COMMANDS_H */
+#endif /* UTILS_TIME_H */

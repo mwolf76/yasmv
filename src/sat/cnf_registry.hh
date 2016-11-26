@@ -27,7 +27,7 @@
 #ifndef SAT_CNF_REGISTRY_H
 #define SAT_CNF_REGISTRY_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <boost/unordered_map.hpp>
 

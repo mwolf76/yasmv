@@ -27,7 +27,7 @@
 #ifndef MODEL_CLASSES_H
 #define MODEL_CLASSES_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <expr/expr.hh>
 #include <symb/symbol.hh>
 #include <model/typedefs.hh>

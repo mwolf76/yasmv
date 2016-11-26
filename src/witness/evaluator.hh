@@ -32,8 +32,12 @@
 
 #include <witness/witness.hh>
 
+#include <utils/time.hh>
+#include <utils/values.hh>
+
 #include <boost/unordered_map.hpp>
-typedef boost::unordered_map<TimedExpr, value_t, TimedExprHash, TimedExprEq> TimedExprValueMap;
+typedef boost::unordered_map<TimedExpr, value_t,
+                             TimedExprHash, TimedExprEq> TimedExprValueMap;
 
 class WitnessMgr;
 class Evaluator : public ExprWalker {

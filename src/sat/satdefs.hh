@@ -28,7 +28,7 @@
 #ifndef SAT_DEFS_H
 #define SAT_DEFS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 // the Minisat SAT solver
 #include <minisat/core/Solver.h>

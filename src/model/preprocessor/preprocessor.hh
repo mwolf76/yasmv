@@ -27,7 +27,7 @@
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <utility>
 #include <vector>

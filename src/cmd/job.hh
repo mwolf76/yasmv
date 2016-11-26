@@ -27,7 +27,7 @@
 #include <boost/thread.hpp>
 #include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <opts_mgr.hh>
 
 #include <cmd/command.hh>

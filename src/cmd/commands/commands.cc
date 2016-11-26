@@ -21,14 +21,16 @@
  *
  **/
 
+#include <common/common.hh>
+#include <expr.hh>
+
 #include <iostream>
 #include <sstream>
 
 #include <ctime>
-#include <common.hh>
+
 #include <commands.hh>
 
-#include <expr.hh>
 
 /* algorithms */
 #include <bmc/bmc.hh>

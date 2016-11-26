@@ -21,7 +21,7 @@
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 #include <dd_walker.hh>
 
 /* --- ADD Walker ----------------------------------------------------------- */

@@ -26,34 +26,35 @@
 #ifndef SYMBOL_TYPEDEFS_H
 #define SYMBOL_TYPEDEFS_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <utils/pool.hh>
 
-class Symbol;
-typedef Symbol* Symbol_ptr;
-typedef boost::unordered_map<Expr_ptr, Symbol_ptr, PtrHash, PtrEq> Symbols;
+#include <vector>
+#include <boost/unordered_map.hpp>
 
-class Literal;
-typedef Literal* Literal_ptr;
-typedef boost::unordered_map<Expr_ptr, Literal_ptr, PtrHash, PtrEq> Literals;
+typedef class Symbol* Symbol_ptr;
+typedef boost::unordered_map<Expr_ptr, Symbol_ptr,
+                             PtrHash, PtrEq> Symbols;
 
-class Constant;
-typedef Constant* Constant_ptr;
-typedef boost::unordered_map<Expr_ptr, Constant_ptr, PtrHash, PtrEq> Constants;
+typedef class Literal* Literal_ptr;
+typedef boost::unordered_map<Expr_ptr, Literal_ptr,
+                             PtrHash, PtrEq> Literals;
 
-class Variable;
-typedef Variable* Variable_ptr;
-typedef boost::unordered_map<Expr_ptr, Variable_ptr, PtrHash, PtrEq> Variables;
+typedef class Constant* Constant_ptr;
+typedef boost::unordered_map<Expr_ptr, Constant_ptr,
+                             PtrHash, PtrEq> Constants;
 
-class Parameter;
-typedef Parameter* Parameter_ptr;
+typedef class Variable* Variable_ptr;
+typedef boost::unordered_map<Expr_ptr, Variable_ptr,
+                             PtrHash, PtrEq> Variables;
+
+typedef class Parameter* Parameter_ptr;
 typedef std::vector< std::pair< Expr_ptr, Parameter_ptr > > Parameters;
 
-class Define;
-typedef Define* Define_ptr;
-typedef boost::unordered_map<Expr_ptr, Define_ptr, PtrHash, PtrEq> Defines;
+typedef class Define* Define_ptr;
+typedef boost::unordered_map<Expr_ptr, Define_ptr,
+                             PtrHash, PtrEq> Defines;
 
-class Resolver;
-typedef Resolver* Resolver_ptr;
+typedef class Resolver* Resolver_ptr;
 
 #endif /* SYMBOL_TYPEDEFS_H */

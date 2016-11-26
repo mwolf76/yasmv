@@ -27,7 +27,7 @@
 #ifndef SYMBOL_CLASSES_H
 #define SYMBOL_CLASSES_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/expr.hh>
 #include <utils/pool.hh>

@@ -23,7 +23,7 @@
 #ifndef DD_WALKER_H
 #define DD_WALKER_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <stack>
 
 #include <dd/dd.hh>

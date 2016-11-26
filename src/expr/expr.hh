@@ -29,7 +29,7 @@
 #include <set>
 #include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/atom.hh>
 

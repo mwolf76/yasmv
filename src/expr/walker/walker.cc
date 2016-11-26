@@ -21,7 +21,7 @@
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr.hh>
 #include <walker/walker.hh>

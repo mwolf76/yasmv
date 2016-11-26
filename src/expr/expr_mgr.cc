@@ -20,7 +20,8 @@
  * 02110-1301 USA
  *
  **/
-#include <common.hh>
+
+#include <common/common.hh>
 #include <cmath>
 #include <expr_mgr.hh>
 

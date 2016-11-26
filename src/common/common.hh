@@ -35,47 +35,11 @@
 /* low-level C definitions */
 #include <cdefs.h>
 
-#include <vector>
-typedef std::vector<step_t> TimeVector;
-typedef std::vector<value_t> ValueVector;
-
-/* used ubiquitously in the system */
-#include <boost/unordered_map.hpp>
-
-/* shortcuts to to simplify manipulation of the internal values stack */
-#define POP_VALUE(op)                              \
-    assert(0 < f_values_stack.size());             \
-    const value_t op = f_values_stack.back();      \
-    f_values_stack.pop_back()
-
-#define PUSH_VALUE(op)                             \
-    f_values_stack.push_back(op)
-
-#define DROP_VALUE()                               \
-    f_values_stack.pop_back()
-
-#define TOP_VALUE()                                \
-    f_values_stack.back()
-
-typedef const char* pconst_char;
-typedef char* pchar;
-
-#include <exception>
-#include <sstream>
-class Exception : public std::exception {
-public:
-    virtual const char* what() const throw() =0;
-    virtual ~Exception() throw() {};
-};
-
-static inline bool _iff(bool a, bool b)
-{ return (!(a) || (b)) && ((!b) || (a)); }
-
-static inline bool _xor(bool a, bool b)
-{ return (!(a) && (b)) || ((!b) && (a)); }
+/* base exception class */
+#include <common/exceptions.hh>
 
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
-#include <logging.hh>
+#include <common/logging.hh>
 
 /* environment variables and paths */
 extern const char *YASMV_MICROCODE_PATH;

@@ -28,7 +28,7 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <opts_mgr.hh>
 
 #include <expr/expr.hh>

@@ -1,6 +1,6 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file common.cc
+ * @brief System wide definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +21,11 @@
  *
  **/
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+/* environment variables and paths */
+const char *YASMV_MICROCODE_PATH = "YASMV_MICROCODE";
 
-#include <common/common.hh>
-#include <utils/variant.hh>
+const char* TRACE_FMT_PLAIN = "plain";
+const char* TRACE_FMT_JSON  = "json";
+const char* TRACE_FMT_XML  = "xml";
 
-#endif /* COMMANDS_H */
+const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);

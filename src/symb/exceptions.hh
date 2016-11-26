@@ -27,7 +27,7 @@
 #ifndef SYMBOL_EXCEPTIONS_H
 #define SYMBOL_EXCEPTIONS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 class UnresolvedSymbol : public Exception {
     Expr_ptr f_expr;

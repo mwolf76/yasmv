@@ -26,7 +26,7 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <boost/unordered_map.hpp>
 

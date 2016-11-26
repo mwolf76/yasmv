@@ -29,7 +29,7 @@
 #ifndef SAT_TIME_MAPPER_H
 #define SAT_TIME_MAPPER_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <boost/unordered_map.hpp>
 

@@ -22,6 +22,7 @@
  * 02110-1301 USA
  *
  **/
+
 #include <type.hh>
 #include <type_mgr.hh>
 
@@ -48,4 +49,3 @@ unsigned ArrayType::width() const
     assert( 0 != f_nelems );
     return f_nelems * f_of -> width();
 }
-

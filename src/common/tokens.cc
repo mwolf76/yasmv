@@ -1,6 +1,6 @@
 /*
- * @file command.hh
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @file common/tokens.cc
+ * @brief System wide definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,10 +21,18 @@
  *
  **/
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#include <common/tokens.hh>
 
-#include <common/common.hh>
-#include <utils/variant.hh>
+const char *EMPTY_TOKEN = "__nil__";
 
-#endif /* COMMANDS_H */
+/* bool consts */
+const char *FALSE_TOKEN = "FALSE";
+const char *TRUE_TOKEN  = "TRUE";
+
+/* types */
+const char *BOOL_TOKEN      = "boolean";
+const char *UNSIGNED_TOKEN  = "u";
+const char *SIGNED_TOKEN    = "";
+const char *CONST_TOKEN     = "const";
+const char *INT_TOKEN       = "int";
+const char *ARRAY_TOKEN     = "array";

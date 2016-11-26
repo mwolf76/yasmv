@@ -26,7 +26,7 @@
 #ifndef TYPE_RESOLVER_H
 #define TYPE_RESOLVER_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <symb/resolver.hh>
 
 class TypeMgr;

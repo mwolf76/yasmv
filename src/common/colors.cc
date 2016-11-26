@@ -1,5 +1,5 @@
 /*
- * @file common.cc
+ * @file common/colors.cc
  * @brief System wide definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,25 +21,7 @@
  *
  **/
 
-#include <common.hh>
-
-/* environment variables and paths */
-const char *YASMV_MICROCODE_PATH = "YASMV_MICROCODE";
-
-/* tokens */
-const char *EMPTY_TOKEN = "__nil__";
-
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN = "TRUE";
-
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+#include <common/colors.hh>
 
 /* color support for *nix systems */
 const char ESC  = 0x1b;
@@ -63,9 +45,3 @@ const char bold_purple[] = { ESC, '[', '1', ';', '3', '5', 'm', 0 };
 const char bold_cyan[] = { ESC, '[', '1', ';', '3', '6', 'm', 0 };
 const char bold_light_gray[] = { ESC, '[', '1', ';', '3', '7', 'm', 0 };
 const char bold_dark_gray[] = { ESC, '[', '1', ';', '3', '8', 'm', 0 };
-
-const char* TRACE_FMT_PLAIN = "plain";
-const char* TRACE_FMT_JSON  = "json";
-const char* TRACE_FMT_XML  = "xml";
-
-const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);

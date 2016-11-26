@@ -24,10 +24,11 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include <common/common.hh>
+
 #include <iostream>
 #include <boost/unordered_map.hpp>
 
-#include <common.hh>
 #include <utils/pool.hh>
 
 #include <opts_mgr.hh>

@@ -27,7 +27,7 @@
 #ifndef SYMBOL_ITER_H
 #define SYMBOL_ITER_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <expr/expr.hh>
 #include <utils/pool.hh>
 

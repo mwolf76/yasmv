@@ -40,19 +40,4 @@
 #include <type/classes.hh>
 #include <type/helpers.hh>
 
-/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
-#define TOP_TYPE(tp)                            \
-    const Type_ptr (tp)(f_type_stack.back())
-
-#define DROP_TYPE()                             \
-    f_type_stack.pop_back()
-
-#define POP_TYPE(tp)                            \
-    TOP_TYPE(tp); DROP_TYPE()
-
-#define PUSH_TYPE(tp)                           \
-    f_type_stack.push_back(tp)
-
-typedef std::vector<Type_ptr> TypeVector;
-
 #endif /* TYPE_H */

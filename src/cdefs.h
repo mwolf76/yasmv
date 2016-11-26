@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
-#ifndef CDEFS_DEFINED
-#define CDEFS_DEFINED
+#ifndef CDEFS_H
+#define CDEFS_H
 
 #include <limits.h>
 
@@ -33,4 +33,9 @@ static const value_t error_value = LONG_MIN;
 
 /* Reserved for time frames representation. */
 typedef unsigned step_t;
-#endif
+
+/* C string pointers */
+typedef char* pchar;
+typedef const char* pconst_char;
+
+#endif /* CDEFS_H */
