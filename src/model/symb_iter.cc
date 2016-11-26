@@ -21,7 +21,7 @@
  *
  **/
 
-#include <model.hh>
+#include <model/classes.hh>
 #include <stack>
 
 SymbIter::SymbIter(Model& model, Expr_ptr formula)
@@ -98,9 +98,9 @@ SymbIter::SymbIter(Model& model, Expr_ptr formula)
             }
         }
     }
+
     f_iter = f_symbols.begin();
 }
 
 SymbIter::~SymbIter()
-{
-}
+{}

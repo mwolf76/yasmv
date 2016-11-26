@@ -22,7 +22,7 @@
  **/
 
 #include <symb/symbol.hh>
-
+#include <model/exceptions.hh>
 #include <model/model_mgr.hh>
 
 // static initialization

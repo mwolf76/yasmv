@@ -108,6 +108,4 @@ public:
     Module& main_module();
 };
 
-typedef Model* Model_ptr;
-
 #endif /* MODEL_CLASSES_H */

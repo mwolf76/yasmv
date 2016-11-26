@@ -21,12 +21,13 @@
  *
  **/
 
+#include <common.hh>
+#include <expr/expr.hh>
+#include <model/exceptions.hh>
+#include <utils/misc.hh>
+
 #include <sstream>
 #include <cstring>
-
-#include <model.hh>
-
-#include <utils/misc.hh>
 
 ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
     : f_module_name(module_name)

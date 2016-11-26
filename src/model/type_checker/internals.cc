@@ -27,6 +27,8 @@
 #include <type/type.hh>
 #include <symb/proxy.hh>
 
+#include <enc/enc_mgr.hh>
+
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
 
