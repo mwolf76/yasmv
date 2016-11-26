@@ -1,6 +1,6 @@
 /**
- * @file colors.hh
- * @brief System-wide definitions, ANSI colors.
+ * @file common/cdata.hh
+ * @brief System-wide definitions
  *
  * This header file contains common definitions used throughout the
  * whole program.
@@ -24,28 +24,16 @@
  *
  **/
 
-#ifndef COLORS_H
-#define COLORS_H
+#ifndef COMMON_CDATA_H
+#define COMMON_CDATA_H
 
-extern const char normal[];
+/* environment variables and paths */
+extern const char *YASMV_MICROCODE_PATH;
 
-extern const char black[];
-extern const char red[];
-extern const char green[];
-extern const char yellow[];
-extern const char blue[];
-extern const char purple[];
-extern const char cyan[];
+/* Witness trace formats */
+extern const char *TRACE_FMT_DEFAULT;
+extern const char *TRACE_FMT_PLAIN;
+extern const char *TRACE_FMT_JSON;
+extern const char *TRACE_FMT_XML;
 
-extern const char light_gray[];
-extern const char dark_gray[];
-extern const char bold_red[];
-extern const char bold_green[];
-extern const char bold_yellow[];
-extern const char bold_blue[];
-extern const char bold_purple[];
-extern const char bold_cyan[];
-extern const char bold_light_gray[];
-extern const char bold_dark_gray[];
-
-#endif /* COLORS */
+#endif /* COMMON_CDATA_H  */

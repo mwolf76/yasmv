@@ -33,7 +33,7 @@
 #include <cctype>
 
 /* low-level C definitions */
-#include <cdefs.h>
+#include <common/cdefs.h>
 
 /* base exception class */
 #include <common/exceptions.hh>
@@ -41,51 +41,13 @@
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <common/logging.hh>
 
-/* environment variables and paths */
-extern const char *YASMV_MICROCODE_PATH;
+/* reserved symbols */
+#include <common/tokens.hh>
 
-/* internal tokens, defined in common.cc */
-extern const char *FALSE_TOKEN;
-extern const char *TRUE_TOKEN;
-extern const char *BOOL_TOKEN;
+/* ANSI colors */
+#include <common/colors.hh>
 
-extern const char *UNSIGNED_TOKEN;
-extern const char *SIGNED_TOKEN;
-extern const char *CONST_TOKEN;
-extern const char *INT_TOKEN;
-
-extern const char *ARRAY_TOKEN;
-
-extern const char* EMPTY_TOKEN;
-
-extern const char *DEFAULT_CTX_TOKEN;
-
-/* ANSI colors TODO move into a separate namespace */
-extern const char normal[];
-
-extern const char black[];
-extern const char red[];
-extern const char green[];
-extern const char yellow[];
-extern const char blue[];
-extern const char purple[];
-extern const char cyan[];
-
-extern const char light_gray[];
-extern const char dark_gray[];
-extern const char bold_red[];
-extern const char bold_green[];
-extern const char bold_yellow[];
-extern const char bold_blue[];
-extern const char bold_purple[];
-extern const char bold_cyan[];
-extern const char bold_light_gray[];
-extern const char bold_dark_gray[];
-
-/* Witness trace formats */
-extern const char *TRACE_FMT_DEFAULT;
-extern const char *TRACE_FMT_PLAIN;
-extern const char *TRACE_FMT_JSON;
-extern const char *TRACE_FMT_XML;
+/* const data */
+#include <common/cdata.hh>
 
 #endif /* COMMON_H */

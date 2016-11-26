@@ -1,9 +1,6 @@
-/**
- * @file colors.hh
- * @brief System-wide definitions, ANSI colors.
- *
- * This header file contains common definitions used throughout the
- * whole program.
+/*
+ * @file common/cdata.cc
+ * @brief System wide definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,28 +21,11 @@
  *
  **/
 
-#ifndef COLORS_H
-#define COLORS_H
+/* environment variables and paths */
+const char *YASMV_MICROCODE_PATH ("YASMV_MICROCODE");
 
-extern const char normal[];
+const char* TRACE_FMT_PLAIN ("plain");
+const char* TRACE_FMT_JSON ("json");
+const char* TRACE_FMT_XML  ("xml");
 
-extern const char black[];
-extern const char red[];
-extern const char green[];
-extern const char yellow[];
-extern const char blue[];
-extern const char purple[];
-extern const char cyan[];
-
-extern const char light_gray[];
-extern const char dark_gray[];
-extern const char bold_red[];
-extern const char bold_green[];
-extern const char bold_yellow[];
-extern const char bold_blue[];
-extern const char bold_purple[];
-extern const char bold_cyan[];
-extern const char bold_light_gray[];
-extern const char bold_dark_gray[];
-
-#endif /* COLORS */
+const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);
