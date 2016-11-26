@@ -25,7 +25,7 @@ options {
 }
 
 @header {
-  #include <common.hh>
+  #include <common/common.hh>
 
   /* cmd subsystem */
   #include <cmd/cmd.hh>
