@@ -1,6 +1,19 @@
 TODO
 ====
 
+* Refactor exceptions system-wide;
+
+* Implement symmetric four-way reachability/closure analysis as follows:
+
+(a) forward reachability witness search;
+(b) forward unreachability proof search;
+(c) backward reachability witness search;
+(d) backward unreachability proof search.
+
+----------
+
+* Add support for guarded transitions
+
 (a) add support for assignment in TRANS sections only; assignments are
 not to be accepted in the context of INIT and INVAR or DEFINE sections;
 
