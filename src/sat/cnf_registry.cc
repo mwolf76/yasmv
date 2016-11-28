@@ -19,8 +19,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sat/cnf_registry.hh>
+#include <sat/engine.hh>
+
+#include <model/compiler/compiler.hh>
+
 #include <utility>
-#include <sat.hh>
 
 /**
  * This module contains the interface for services that implement the

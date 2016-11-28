@@ -37,7 +37,6 @@
 #include <expr/expr.hh>
 
 #include <dd/dd.hh>
-#include <sat/satdefs.hh>
 
 /** Exception classes */
 class UnitException : public Exception {

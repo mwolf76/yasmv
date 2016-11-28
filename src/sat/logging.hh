@@ -1,6 +1,6 @@
 /**
- * @file sat.hh
- * @brief SAT module, toplevel header file.
+ * @file sat/logging.hh
+ * @brief SAT interface, logging helpers declarations.
  *
  * This module contains the interface for services that implement an
  * CNF clauses generation in a form that is suitable for direct
@@ -25,36 +25,18 @@
  *
  **/
 
-#ifndef SAT_H
-#define SAT_H
-
-// #include <dd/cudd-2.5.0/obj/cuddObj.hh>
-// #include <dd/cudd_mgr.hh>
-
-// #include <enc/enc_mgr.hh>
-
-// #include <model/compiler/unit.hh>
-
-#include <sat/exceptions.hh>
+#ifndef SAT_LOGGING_H
+#define SAT_LOGGING_H
 
 #include <sat/typedefs.hh>
 
-/* CNF registry class */
-#include <sat/cnf_registry.hh>
+// streaming for various SAT related types
+std::ostream &operator<<(std::ostream &os, const Minisat::Lit &lit);
+std::ostream &operator<<(std::ostream &os, const vec<Lit> &lits);
+std::ostream &operator<<(std::ostream &os, const status_t &status);
+std::ostream &operator<<(std::ostream &os, const lbool &value);
 
-/* time mapper class */
-#include <sat/time_mapper.hh>
+std::ostream &operator<<(std::ostream &out, const Lit &lit);
+std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
 
-/* inlining helpers */
-#include <sat/inlining.hh>
-
-/* logging helpers */
-#include <sat/logging.hh>
-
-/* Engine class */
-#include <sat/engine.hh>
-
-/* Engine Mgr class */
-#include <sat/engine_mgr.hh>
-
-#endif /* SAT_H */
+#endif /* SAT_LOGGING_H */

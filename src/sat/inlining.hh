@@ -1,5 +1,5 @@
 /**
- * @file helpers.hh
+ * @file sat/helpers.hh
  *
  * This header file contains the declarations required to implement a
  * range of helpers needed during the compilation to SAT.
@@ -23,26 +23,18 @@
  *
  **/
 
-/* TODO: merge this with satdefs.hh? */
 #ifndef SAT_HELPERS
 #define SAT_HELPERS
 
-#include <sat/sat.hh>
-
-#include <boost/filesystem.hpp>
-
+#include <sat/typedefs.hh>
 #include <dd/dd_walker.hh>
 
-class InlinedOperatorLoaderException : public Exception {
-public:
-    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_ios);
-    ~InlinedOperatorLoaderException() throw();
+#include <model/compiler/unit.hh>
 
-    const char* what() const throw();
+#include <boost/filesystem.hpp>
+#include <boost/thread/mutex.hpp>
 
-private:
-    InlinedOperatorSignature f_ios;
-};
+class Engine;
 
 typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
 typedef boost::unordered_map<InlinedOperatorSignature, InlinedOperatorLoader_ptr,

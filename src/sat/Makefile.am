@@ -8,9 +8,9 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I/usr/local/include -I$(top_srcdir)/src	\
 AM_CFLAGS = @AM_CFLAGS@
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
 
-PKG_HH = satdefs.hh sat.hh
+PKG_HH = sat.hh exceptions.hh inlining.hh typedefs.hh engine.hh engine_mgr.hh
 PKG_CC = cnf_registry.cc time_mapper.cc cnf_nocut.cc cnf_singlecut.cc	\
-helpers.cc solver.cc logger.cc
+inlining.cc logging.cc exceptions.cc engine.cc engine_mgr.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

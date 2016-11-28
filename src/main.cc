@@ -58,7 +58,7 @@
 #include <smvLexer.h>
 #include <smvParser.h>
 
-#include <sat/helpers.hh>
+#include <sat/sat.hh>
 
 #include <boost/chrono.hpp>
 

@@ -1,9 +1,6 @@
 /**
- * @file cnf_registry.hh
- * @brief Engine interface (CNF registry sub-component)
- *
- * This header file contains the declarations required to implement
- * the SAT CNF registry component.
+ * @file sat/exceptions.hh
+ * @brief SAT module, exception classes declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,46 +21,23 @@
  *
  **/
 
-#ifndef SAT_CNF_REGISTRY_H
-#define SAT_CNF_REGISTRY_H
+#ifndef SAT_EXCEPTIONS_H
+#define SAT_EXCEPTIONS_H
 
 #include <common/common.hh>
-
-#include <expr/expr.hh>
-#include <dd/cudd-2.5.0/obj/cuddObj.hh>
-#include <dd/cudd_mgr.hh>
-
-#include <boost/unordered_map.hpp>
 
 #include <sat/typedefs.hh>
 #include <sat/inlining.hh>
 
-class Engine;
-class CNFRegistry {
-
-    /* ctor and dctor are available only to SAT owner */
-    friend class Engine;
-
+class InlinedOperatorLoaderException : public Exception {
 public:
+    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_ios);
+    ~InlinedOperatorLoaderException() throw();
 
-// services for CNF builder
-Var find_dd_var(const DdNode* node, step_t time);
-Var find_dd_var(int node_index, step_t time);
-
-Var find_cnf_var(const DdNode* node, step_t time);
-
-// services for CNF injector
-void clear_cnf_map();
-Var rewrite_cnf_var(Var index, step_t time);
+    const char* what() const throw();
 
 private:
-    CNFRegistry(Engine& sat);
-    ~CNFRegistry();
-
-    Engine& f_sat;
-
-    TDD2VarMap f_tdd2var_map;
-    RewriteMap f_rewrite_map;
+    InlinedOperatorSignature f_ios;
 };
 
-#endif /* SAT_CNF_REGISTRY_H */
+#endif /* SAT_EXCEPTIONS_H */

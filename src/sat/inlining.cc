@@ -27,13 +27,14 @@
 #include <3rdparty/jsoncpp/json.hh>
 #include <boost/algorithm/string.hpp>
 
-#include <utils/pool.hh>
-
-#include <sat/sat.hh>
-#include <sat/helpers.hh>
+#include <sat/typedefs.hh>
+#include <sat/inlining.hh>
+#include <sat/exceptions.hh>
+#include <sat/engine.hh>
 
 #include <dd/dd_walker.hh>
 
+#include <utils/pool.hh>
 #include <utils/misc.hh>
 
 static const char* JSON_GENERATED = "generated";

@@ -57,7 +57,7 @@
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
-#include <sat/helpers.hh>
+// #include <sat/helpers.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
@@ -69,6 +69,7 @@
 #include <boost/unordered_map.hpp>
 typedef boost::unordered_map<TimedExpr, CompilationUnit,
                              TimedExprHash, TimedExprEq> CompilationMap;
+
 typedef boost::unordered_map<Expr_ptr, Expr_ptr,
                              PtrHash, PtrEq> BinarySelectionUnionFindMap;
 

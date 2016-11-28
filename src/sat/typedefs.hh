@@ -1,9 +1,6 @@
 /**
- * @file satdefs.hh
- * @brief SAT interface
- *
- * This header file contains the declarations required to implement a
- * range of helpers needed during the compilation to SAT.
+ * @file sat/typedefs.hh
+ * @brief SAT module, module-specific type definitions.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +21,19 @@
  *
  **/
 
-/* TODO: merge this with helpers.hh? */
-#ifndef SAT_DEFS_H
-#define SAT_DEFS_H
+#ifndef SAT_TYPEDEFS_H
+#define SAT_TYPEDEFS_H
 
 #include <common/common.hh>
 
-// the Minisat SAT solver
+#include <dd/dd.hh>
+
+/* decls from the Minisat SAT solver */
 #include <minisat/core/Solver.h>
 #include <minisat/simp/SimpSolver.h>
-
 #include <minisat/core/SolverTypes.h>
+
+#include <utils/pool.hh>
 
 using Minisat::Lit;
 using Minisat::mkLit;
@@ -45,8 +44,16 @@ using Minisat::vec;
 #include <vector>
 typedef std::vector<Var> VarVector;
 
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
+
 using Minisat::Solver;
 using Minisat::SimpSolver;
+
+// Engine mgmt
+typedef class Engine* Engine_ptr;
+typedef class EngineMgr* EngineMgr_ptr;
+typedef boost::unordered_set<Engine_ptr> EngineSet;
 
 // for microcode
 typedef std::vector<Lit> Lits;
@@ -60,19 +67,83 @@ typedef enum {
     STATUS_UNKNOWN,
 } status_t;
 
-// streaming for various SAT related types
-std::ostream &operator<<(std::ostream &os, const Minisat::Lit &lit);
-std::ostream &operator<<(std::ostream &os, const vec<Lit> &lits);
-std::ostream &operator<<(std::ostream &os, const status_t &status);
-std::ostream &operator<<(std::ostream &os, const lbool &value);
+#include <enc/tcbi.hh>
+typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+
+struct TimedVar {
+public:
+    TimedVar(Var var, step_t time)
+        : f_var(var)
+        , f_time(time)
+    {}
+
+    inline Var var() const
+    { return f_var; }
+
+    inline step_t time() const
+    { return f_time; }
+
+    // The CNF var
+    Var f_var;
+
+    // expression time (default is 0)
+    step_t f_time;
+};
+
+struct TimedVarHash {
+    inline long operator() (const TimedVar& k) const
+    { return 0L; }
+};
+
+struct TimedVarEq {
+    inline bool operator() (const TimedVar& x, const TimedVar& y) const
+    { return (x.var() == y.var() && x.time() == y.time()); }
+};
+
+typedef boost::unordered_map<TimedVar, Var, TimedVarHash, TimedVarEq> RewriteMap;
+
+struct TimedDD {
+public:
+  TimedDD(DdNode *node, step_t time)
+    : f_node(node)
+    , f_time(time)
+  {}
+  
+  inline DdNode* node() const
+  { return f_node; }
+  
+  inline step_t time() const
+  { return f_time; }
+  
+  // The DdNode node
+  DdNode* f_node;
+  
+  // expression time (default is 0)
+  step_t f_time;
+};
+
+struct TimedDDHash {
+  inline long operator() (const TimedDD& k) const
+  { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
+};
+
+struct TimedDDEq {
+  inline bool operator() (const TimedDD& x, const TimedDD& y) const
+  { return (x.node() == y.node() && x.time() == y.time()); }
+};
+
+typedef boost::unordered_map<TimedDD, Var, TimedDDHash, TimedDDEq> TDD2VarMap;
 
 // move me!
+#if 0
 template<class K>
 struct ptr_hasher  {
     uint32_t operator()(const K& k) const {
         return (uint32_t)(reinterpret_cast<size_t>(k));
     }
 };
+#endif
 
 typedef Var group_t;
 const group_t MAINGROUP(0);
@@ -110,4 +181,4 @@ struct GroupEq {
 
 typedef boost::unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
 
-#endif /* SATDEFS_H */
+#endif /* SAT_TYPDEFS_H */

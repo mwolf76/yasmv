@@ -1,6 +1,6 @@
 /**
- * @file solver.cc
- * @brief SAT interface subsystem implementation.
+ * @file sat/engine.cc
+ * @brief SAT interface subsystem, Engine class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,55 +23,6 @@
 
 #include <sat.hh>
 #include <cstdlib>
-
-#if 0
-std::ostream& operator<<(std::ostream& os, const Engine& engine)
-{
-    const Solver& solver
-        (engine.f_solver);
-
-    os
-        << "Solver: `"
-        << engine.f_instance_name
-
-        << "`, solves: "
-        << solver.solves
-
-        << ", starts: "
-        << solver.starts
-
-        << ", decs: "
-        << solver.decisions
-
-        << ", rnd decs: "
-        << solver.rnd_decisions
-
-        << ", props: "
-        << solver.propagations
-
-        << ", conflicts: "
-        << solver.conflicts
-
-        << ", dec vars: "
-        << solver.dec_vars
-
-        << ", clause lits: "
-        << solver.clauses_literals
-
-        << ", learnt lits: "
-        << solver.learnts_literals
-
-        << ", max lits: "
-        << solver.max_literals
-
-        << ", tot lits: "
-        << solver.tot_literals
-
-        ;
-
-    return os;
-}
-
 
 /**
  * @brief SAT instancte ctor
@@ -231,4 +182,4 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
         }
     }
 }
-#endif
+

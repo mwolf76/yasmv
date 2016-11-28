@@ -1,6 +1,6 @@
 /**
- * @file logger.cc
- * @brief SAT interface subsystem, logging classes implementation.
+ * @file sat/logger.cc
+ * @brief SAT interface subsystem, logging helpers implementation.
  *
  * This module contains the interface for services that implement an
  * CNF clauses generation in a form that is suitable for direct
@@ -25,7 +25,9 @@
  *
  **/
 
-#include <sat.hh>
+#include <sat/logging.hh>
+#include <sat/engine.hh>
+
 #include <iostream>
 
 std::ostream &operator<<(std::ostream &out, const Lit &lit)
@@ -85,4 +87,50 @@ std::ostream &operator<<(std::ostream &os, const status_t &status)
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const Engine& engine)
+{
+    const Solver& solver
+        (engine.f_solver);
+
+    os
+        << "Solver: `"
+        << engine.f_instance_name
+
+        << "`, solves: "
+        << solver.solves
+
+        << ", starts: "
+        << solver.starts
+
+        << ", decs: "
+        << solver.decisions
+
+        << ", rnd decs: "
+        << solver.rnd_decisions
+
+        << ", props: "
+        << solver.propagations
+
+        << ", conflicts: "
+        << solver.conflicts
+
+        << ", dec vars: "
+        << solver.dec_vars
+
+        << ", clause lits: "
+        << solver.clauses_literals
+
+        << ", learnt lits: "
+        << solver.learnts_literals
+
+        << ", max lits: "
+        << solver.max_literals
+
+        << ", tot lits: "
+        << solver.tot_literals
+
+        ;
+
+    return os;
+}
 

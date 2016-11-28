@@ -1,10 +1,6 @@
 /**
- * @file sat.hh
- * @brief SAT module, toplevel header file.
- *
- * This module contains the interface for services that implement an
- * CNF clauses generation in a form that is suitable for direct
- * injection into the SAT solver.
+ * @file sat/exceptions.cc
+ * @brief SAT implementation, exception classes implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -25,36 +21,21 @@
  *
  **/
 
-#ifndef SAT_H
-#define SAT_H
-
-// #include <dd/cudd-2.5.0/obj/cuddObj.hh>
-// #include <dd/cudd_mgr.hh>
-
-// #include <enc/enc_mgr.hh>
-
-// #include <model/compiler/unit.hh>
-
 #include <sat/exceptions.hh>
+#include <utils/misc.hh>
 
-#include <sat/typedefs.hh>
+InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
+    : f_ios(ios)
+{}
 
-/* CNF registry class */
-#include <sat/cnf_registry.hh>
+const char* InlinedOperatorLoaderException::what() const throw()
+{
+    std::ostringstream oss;
 
-/* time mapper class */
-#include <sat/time_mapper.hh>
+    oss
+        << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
+        << f_ios << "`";
 
-/* inlining helpers */
-#include <sat/inlining.hh>
+    return oss2cstr(oss);
+}
 
-/* logging helpers */
-#include <sat/logging.hh>
-
-/* Engine class */
-#include <sat/engine.hh>
-
-/* Engine Mgr class */
-#include <sat/engine_mgr.hh>
-
-#endif /* SAT_H */
