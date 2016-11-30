@@ -1,7 +1,8 @@
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 #word-width 3
 MODULE koenisberg
 
-@hidden
 VAR
   location: { A, B, C, D } ;
   marked  : boolean[7];
@@ -11,10 +12,11 @@ INIT
   marked = [ FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE ];
 
 DEFINE
-  GOAL := marked = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];
+  GOAL :=
+       marked = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];
 
 INVAR
-  choice >= 0 || choice <= 6;
+  choice <= 6;
 
 INVAR
   location = A -> next(location) = { B, C, D };
@@ -64,4 +66,3 @@ TRANS
              (choice = 4 ? TRUE : marked[4]),
              (choice = 5 ? TRUE : marked[5]),
              (choice = 6 ? TRUE : marked[6])];
-
