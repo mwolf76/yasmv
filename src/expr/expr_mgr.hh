@@ -564,9 +564,20 @@ public:
         return expr->f_symb == NEXT;
     }
 
+    inline bool is_lvalue(const Expr_ptr expr) const {
+        return
+            is_identifier(expr) ||
+            is_subscript(expr);
+    }
+
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
+    }
+
+    inline bool is_subscript(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SUBSCRIPT;
     }
 
     inline bool is_unsigned_int(const Expr_ptr expr) const {
@@ -597,11 +608,6 @@ public:
     inline bool is_params_comma(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == PARAMS_COMMA;
-    }
-
-    inline bool is_subscript(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == SUBSCRIPT;
     }
 
     inline bool is_dot(const Expr_ptr expr) const {

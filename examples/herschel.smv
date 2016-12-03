@@ -42,32 +42,17 @@ INVAR
     end;
 
 -- mark chosen vertex as visited
-INVAR
-    next(visited[0]) = ((vertex = a) ? TRUE : visited[0]);
-
--- TODO: should be possibile to express the former as:
--- TRANS vertex = a ?: visited[0] := TRUE;
-
-INVAR
-    next(visited[1]) = ((vertex = b) ? TRUE : visited[1]);
-INVAR
-    next(visited[2]) = ((vertex = c) ? TRUE : visited[2]);
-INVAR
-    next(visited[3]) = ((vertex = d) ? TRUE : visited[3]);
-INVAR
-    next(visited[4]) = ((vertex = e) ? TRUE : visited[4]);
-INVAR
-    next(visited[5]) = ((vertex = f) ? TRUE : visited[5]);
-INVAR
-    next(visited[6]) = ((vertex = g) ? TRUE : visited[6]);
-INVAR
-    next(visited[7]) = ((vertex = h) ? TRUE : visited[7]);
-INVAR
-    next(visited[8]) = ((vertex = i) ? TRUE : visited[8]);
-INVAR
-    next(visited[9]) = ((vertex = j) ? TRUE : visited[9]);
-INVAR
-    next(visited[10]) = ((vertex = k) ? TRUE : visited[10]);
+TRANS vertex = a ?: visited[0] := TRUE;
+TRANS vertex = b ?: visited[1] := TRUE;
+TRANS vertex = c ?: visited[2] := TRUE;
+TRANS vertex = d ?: visited[3] := TRUE;
+TRANS vertex = e ?: visited[4] := TRUE;
+TRANS vertex = f ?: visited[5] := TRUE;
+TRANS vertex = g ?: visited[6] := TRUE;
+TRANS vertex = h ?: visited[7] := TRUE;
+TRANS vertex = i ?: visited[8] := TRUE;
+TRANS vertex = j ?: visited[9] := TRUE;
+TRANS vertex = k ?: visited[10] := TRUE;
 
 -- pick next vertex
 TRANS
