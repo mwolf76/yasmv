@@ -59,6 +59,9 @@ public:
     Expr_ptr process(Witness& witness, Expr_ptr ctx, Expr_ptr body, step_t time);
 
 protected:
+    inline WitnessMgr& owner() const
+    { return f_owner; }
+
     OP_HOOKS;
     LTL_STUBS;
     void walk_leaf(const Expr_ptr expr);
@@ -69,6 +72,7 @@ private:
     bool cache_miss(const Expr_ptr expr);
     void clear_internals();
 
+    value_t value(const Expr_ptr expr);
     void push_value(const Expr_ptr expr);
 };
 

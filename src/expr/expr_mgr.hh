@@ -585,12 +585,9 @@ public:
     }
 
     inline bool is_constant(const Expr_ptr expr) const {
-        assert(expr);
         return
-            expr -> f_symb == ICONST ||
-            expr -> f_symb == BCONST ||
-            expr -> f_symb == OCONST ||
-            expr -> f_symb == HCONST  ;
+            is_bool_const(expr) ||
+            is_int_const (expr) ;
     }
 
     inline bool is_params(const Expr_ptr expr) const {
@@ -632,7 +629,7 @@ public:
         return expr->f_symb == SET_COMMA;
     }
 
-    inline bool is_int_numeric(const Expr_ptr expr) const {
+    inline bool is_int_const(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
             || (expr->f_symb == BCONST)

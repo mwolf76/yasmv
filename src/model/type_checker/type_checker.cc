@@ -490,7 +490,7 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         return;
 
     // is an integer const ..
-    if (em.is_int_numeric(expr)) {
+    if (em.is_int_const(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
         PUSH_TYPE(tm.find_constant(ww));

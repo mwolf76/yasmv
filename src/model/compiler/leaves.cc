@@ -60,9 +60,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     /* 1. Explicit int constants, perform booleanization
      * immediately. An exception will be thrown if conversion could
      * not be completed. */
-    if (em.is_int_numeric(expr)) {
+    if (em.is_int_const(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
+
         f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_constant(expr, ww);
         return;

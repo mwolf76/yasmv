@@ -139,20 +139,20 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     if (em.is_constant(vexpr)) {
         switch (fmt) {
         case FORMAT_BINARY:
-            vexpr = em.make_bconst(vexpr -> value());
+            vexpr = em.make_bconst(vexpr->value());
             break;
 
         case FORMAT_OCTAL:
-            vexpr = em.make_oconst(vexpr -> value());
+            vexpr = em.make_oconst(vexpr->value());
             break;
 
         case FORMAT_HEXADECIMAL:
-            vexpr = em.make_hconst(vexpr -> value());
+            vexpr = em.make_hconst(vexpr->value());
             break;
 
         default:
             //case FORMAT_DECIMAL:
-            vexpr = em.make_const(vexpr -> value());
+            vexpr = em.make_const(vexpr->value());
         } /* switch() */
     }
 
@@ -184,8 +184,9 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
     // symbol is defined in witness' language
     ExprVector& lang
         (f_owner.lang());
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
+    assert( find( lang.begin(),
+                  lang.end(), expr) != lang.end());
 
     /* populate both maps at the same time. This ensures consistency. */
     f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
@@ -206,10 +207,12 @@ ExprVector TimeFrame::assignments()
 
     ExprVector::const_iterator i
         (lang.begin());
+
     while (i != lang.end()) {
         Expr_ptr symb
-            (*i); ++ i;
+            (*i);
 
+        ++ i;
         try {
             res.push_back( em.make_eq( symb, value(symb)));
         }
@@ -237,7 +240,9 @@ Witness::Witness(Engine_ptr pe, Atom id, Atom desc, step_t j)
 TimeFrame& Witness::extend(Witness& w)
 {
     // seizing ownership of the TimeFrames from w
-    TimeFrame_ptr last = NULL;
+    TimeFrame_ptr last
+        (NULL);
+
     for (TimeFrames::iterator i = w.frames().begin(); i != w.frames().end(); ++ i) {
         f_frames.push_back(*i);
         last = (*i);
@@ -250,10 +255,14 @@ TimeFrame& Witness::extend(Witness& w)
 
 TimeFrame& Witness::extend()
 {
-    TimeFrame_ptr tf = new TimeFrame(*this);
+    TimeFrame_ptr tf
+        (new TimeFrame(*this));
+
     f_frames.push_back(tf);
 
-    step_t last = 1 + last_time();
+    step_t last
+        (1 + last_time());
+
     DEBUG << "Added empty TimeFrame " << last
           << " to witness " << id()
           << " @" << tf
@@ -263,15 +272,14 @@ TimeFrame& Witness::extend()
     return *tf;
 }
 
-/* Retrieves value for expr, throws an exception if no value exists. */
+/* Retrieves value for expr, throws an exception if no such value exists. */
 Expr_ptr Witness::value( Expr_ptr expr, step_t time)
 {
-    if (time < first_time() || time > last_time()) {
+    if (time < first_time() || time > last_time())
         throw IllegalTime(time);
-    }
 
     Expr_ptr vexpr
-        (f_frames[ time ] -> value( expr ));
+        (f_frames[time]->value(expr));
 
     return vexpr;
 }
@@ -279,11 +287,11 @@ Expr_ptr Witness::value( Expr_ptr expr, step_t time)
 /* Returns true iff expr has an assigned value within this time frame. */
 bool Witness::has_value( Expr_ptr expr, step_t time)
 {
-    if (time < first_time() || time > last_time()) {
+    if (time < first_time() ||
+        time > last_time())
         return false;
-    }
-    return f_frames[ time ]
-        -> has_value( expr );
+
+    return f_frames[time]->has_value(expr);
 }
 
 /* Engine registration can be done only once */
