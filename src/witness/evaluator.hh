@@ -72,7 +72,6 @@ private:
     bool cache_miss(const Expr_ptr expr);
     void clear_internals();
 
-    value_t value(const Expr_ptr expr);
     void push_value(const Expr_ptr expr);
 };
 

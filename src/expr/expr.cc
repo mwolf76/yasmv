@@ -29,6 +29,25 @@
 
 #include <iomanip>
 
+value_t Expr_TAG::value() const
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    if (em.is_false(const_cast<Expr_ptr> (this)))
+        return 0;
+
+    if (em.is_true(const_cast<Expr_ptr> (this)))
+        return 1;
+
+    assert (ICONST == f_symb ||
+            HCONST == f_symb ||
+            OCONST == f_symb ||
+            BCONST == f_symb);
+
+    return u.f_value;
+}
+
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
 {
     Printer (os)

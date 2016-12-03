@@ -130,14 +130,7 @@ typedef struct Expr_TAG {
         return *u.f_atom;
     }
 
-    inline value_t value() const
-    {
-        assert (ICONST == f_symb ||
-                HCONST == f_symb ||
-                OCONST == f_symb ||
-                BCONST == f_symb);
-        return u.f_value;
-    }
+    value_t value() const;
 
     inline Expr_ptr lhs()
     { return u.f_lhs; }

@@ -20,75 +20,79 @@
  * 02110-1301 USA
  *
  **/
+#define  DEBUG_CNF_LITERALS
 
 #include <sat/sat.hh>
-
 #include <dd/dd_walker.hh>
 
 class CNFBuilderNoCut : public ADDWalker {
 public:
-    CNFBuilderNoCut(Engine& sat, step_t time,
-                    group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
+  CNFBuilderNoCut(Engine& sat, step_t time,
+                  group_t group = MAINGROUP)
+    : f_sat(sat)
+    , f_time(time)
+    , f_group(group)
+  {}
 
-    ~CNFBuilderNoCut()
-    {}
+  ~CNFBuilderNoCut()
+  {}
 
-    bool condition(const DdNode *node)
-    {
-        /* if it's a zero leaf */
-        return (node == f_sat.enc().dd().getManager() -> zero);
+  bool condition(const DdNode *node)
+  {
+    /* if it's a zero leaf */
+    return (node == f_sat.enc().dd().getManager() -> zero);
+  }
+
+  void zero()
+  { assert(false); /* unused */ }
+
+  void one()
+  { assert(false); /* unused* */ }
+
+  void pre_hook()
+  {}
+
+  void post_hook()
+  {}
+
+  void action(const DdNode *node)
+  {
+    DdManager* dd_mgr
+      (f_sat.enc().dd().getManager());
+
+    value_t value
+      (Cudd_V(node));
+
+    vec<Lit> ps;
+    ps.push( mkLit( f_group, true));
+
+    unsigned i, size = dd_mgr -> size;
+    for (i = 0; i < size; ++ i) {
+      Lit lit
+        (mkLit( f_sat.find_dd_var(i, f_time), value != 0));
+
+      ps.push(lit);
     }
 
-    void zero()
-    { assert(false); /* unused */ }
+    f_sat.add_clause(ps);
 
-    void one()
-    { assert(false); /* unused* */ }
-
-    void pre_hook()
-    {}
-
-    void post_hook()
-    {}
-
-    void action(const DdNode *node)
-    {
-        DdManager* dd_mgr
-            (f_sat.enc().dd().getManager());
-
-        value_t value = Cudd_V(node);
-
-        vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
-
-        unsigned i, size = dd_mgr -> size;
-        for (i = 0; i < size; ++ i)
-            ps.push( mkLit( f_sat.find_dd_var(i, f_time),
-                            value != 0));
-
-        f_sat.add_clause(ps);
-    }
+    DEBUG
+      << ps
+      << std::endl;
+  }
 
 private:
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
+  Engine& f_sat;
+
+  step_t f_time;
+  group_t f_group;
 };
 
 void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)
 {
-    CNFBuilderNoCut worker
-        (*this, time, group);
+  CNFBuilderNoCut worker
+    (*this, time, group);
 
-    worker(add);
+  worker(add);
 }
 
-#ifdef DEBUG_CNF_LITERALS
-DRIVEL
-<< "------------------------------------------------------------"
-<< std::endl;
-#endif

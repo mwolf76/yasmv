@@ -30,20 +30,6 @@
 #include <utils/time.hh>
 #include <utils/values.hh>
 
-value_t Evaluator::value(const Expr_ptr expr)
-{
-    ExprMgr& em
-        (owner().em());
-
-    if (em.is_false(expr))
-        return 0;
-
-    if (em.is_true(expr))
-        return 1;
-
-    return expr->value();
-}
-
 void Evaluator::push_value(const Expr_ptr expr)
 {
     ResolverProxy resolver;
@@ -72,7 +58,7 @@ void Evaluator::push_value(const Expr_ptr expr)
 
     if (em.is_constant(expr)) {
         /* scalar value, easy case */
-        PUSH_VALUE(value(expr));
+        PUSH_VALUE(expr->value());
         return;
     }
 
@@ -80,7 +66,7 @@ void Evaluator::push_value(const Expr_ptr expr)
         em.is_constant(expr->lhs())) {
 
         /* negative scalar value, easy case */
-        PUSH_VALUE(- value(expr->lhs()));
+        PUSH_VALUE(- expr->lhs()->value());
         return;
     }
 
@@ -90,11 +76,11 @@ void Evaluator::push_value(const Expr_ptr expr)
             (expr->lhs());
 
         while (em.is_array_comma(eye)) {
-            PUSH_VALUE(value(eye->lhs()));
+            PUSH_VALUE(eye->lhs()->value());
             eye = eye->rhs();
         }
 
-        PUSH_VALUE(value(eye)); /* last */
+        PUSH_VALUE(eye->value()); /* last */
         return;
     }
 
