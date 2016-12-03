@@ -1,7 +1,7 @@
 -- This file is part of the YASMINE distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 --
--- This example demonstrated the Herschel graph has no hamiltonian cycles.
+-- This example proves the Herschel graph has no hamiltonian cycles.
 -- The GOAL defined in this model is expected to be UNREACHABLE.
 --
 -- e. g.
