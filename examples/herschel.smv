@@ -1,0 +1,109 @@
+MODULE herschel;
+
+VAR
+  vertex: { NIL, a, b, c, d, e, f, g, h, i, j, k };
+  visited: boolean[11];
+
+INIT
+  vertex = NIL;
+
+INIT
+  visited = [ FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE ];
+
+@hidden
+DEFINE
+  GOAL :=
+       visited = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];
+
+-- won't visit already visited vertexes
+INVAR
+  ! case vertex = a: visited[0];
+         vertex = b: visited[1];
+         vertex = c: visited[2];
+         vertex = d: visited[3];
+         vertex = e: visited[4];
+         vertex = f: visited[5];
+         vertex = g: visited[6];
+         vertex = h: visited[7];
+         vertex = i: visited[8];
+         vertex = j: visited[9];
+         vertex = k: visited[10];
+         else: FALSE;
+    end;
+
+-- mark chosen vertex as visited
+INVAR
+    next(visited[0]) = ((vertex = a) ? TRUE : visited[0]);
+
+-- TODO: should be possibile to express the former as:
+-- TRANS vertex = a ?: visited[0] := TRUE;
+
+INVAR
+    next(visited[1]) = ((vertex = b) ? TRUE : visited[1]);
+INVAR
+    next(visited[2]) = ((vertex = c) ? TRUE : visited[2]);
+INVAR
+    next(visited[3]) = ((vertex = d) ? TRUE : visited[3]);
+INVAR
+    next(visited[4]) = ((vertex = e) ? TRUE : visited[4]);
+INVAR
+    next(visited[5]) = ((vertex = f) ? TRUE : visited[5]);
+INVAR
+    next(visited[6]) = ((vertex = g) ? TRUE : visited[6]);
+INVAR
+    next(visited[7]) = ((vertex = h) ? TRUE : visited[7]);
+INVAR
+    next(visited[8]) = ((vertex = i) ? TRUE : visited[8]);
+INVAR
+    next(visited[9]) = ((vertex = j) ? TRUE : visited[9]);
+INVAR
+    next(visited[10]) = ((vertex = k) ? TRUE : visited[10]);
+
+-- pick next vertex
+TRANS
+  vertex = NIL ?:
+         vertex := { a, b, c, d, e, f, g, h, i, j, k };
+
+TRANS
+  vertex = a ?:
+         vertex := { b, c, d, e };
+
+TRANS
+  vertex = b ?:
+         vertex := { a, f, i };
+
+TRANS
+  vertex = c ?:
+         vertex := { a, f, g };
+
+TRANS
+  vertex = d ?:
+         vertex := { a, g, h };
+
+TRANS
+  vertex = e ?:
+         vertex := { a, h, i };
+
+TRANS
+  vertex = f ?:
+         vertex := { b, c, j, k };
+
+TRANS
+  vertex = g ?:
+         vertex := { c, d, k };
+
+TRANS
+  vertex = h ?:
+         vertex := { d, e, j, k };
+
+TRANS
+  vertex = i ?:
+         vertex := { b, e, j };
+
+TRANS
+  vertex = j ?:
+         vertex := { f, h, i };
+
+TRANS
+  vertex = k ?:
+         vertex := { f, g, h };
