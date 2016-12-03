@@ -53,6 +53,10 @@ DEFINE
           (grid[0] = B && grid[4] = B && grid[8] = B) ||
           (grid[6] = B && grid[4] = B && grid[2] = B) ;
 
+@hidden
+DEFINE
+    MARK := (turn = PLAYER_A ? A : B);
+
 VAR
     turn : { PLAYER_A, PLAYER_B };
   
@@ -96,48 +100,39 @@ TRANS
 
 TRANS
     move = TOP-LEFT ?:
-         grid := ((turn = PLAYER_A) ? [ A, grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
-                                    : [ B, grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+           grid[0] := MARK;
 
 TRANS
     move = TOP-CENTER ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], A, grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
-                                    : [ grid[0], B, grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+           grid[1] := MARK;
 
 TRANS
     move = TOP-RIGHT ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], A, grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]
-                                    : [ grid[0], grid[1], B, grid[3], grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+           grid[2] := MARK;
 
 TRANS
     move = MID-LEFT ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], A, grid[4], grid[5], grid[6], grid[7], grid[8] ]
-                                    : [ grid[0], grid[1], grid[2], B, grid[4], grid[5], grid[6], grid[7], grid[8] ]) ;
+           grid[3] := MARK;
 
 TRANS
     move = MID-CENTER ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], A, grid[5], grid[6], grid[7], grid[8] ]
-                                    : [ grid[0], grid[1], grid[2], grid[3], B, grid[5], grid[6], grid[7], grid[8] ]) ;
+           grid[4] := MARK;
 
 TRANS
     move = MID-RIGHT ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], A, grid[6], grid[7], grid[8] ]
-                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], B, grid[6], grid[7], grid[8] ]) ;
+           grid[5] := MARK;
 
 TRANS
     move = BOTTOM-LEFT ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], A, grid[7], grid[8] ]
-                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], B, grid[7], grid[8] ]) ;
+           grid[6] := MARK;
 
 TRANS
     move = BOTTOM-CENTER ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], A, grid[8] ]
-                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], grid[6], B, grid[8] ]) ;
+           grid[7] := MARK;
 
 TRANS
     move = BOTTOM-RIGHT ?:
-         grid := ((turn = PLAYER_A) ? [ grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], A ]
-                                    : [ grid[0], grid[1], grid[2], grid[3], grid[5], grid[5], grid[6], grid[7], B ]) ;
+           grid[8] := MARK;
 
 @hidden
 DEFINE
