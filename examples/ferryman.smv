@@ -60,9 +60,9 @@ TRANS
 
 -- Symbols annotated with `@hidden` do not show up in traces.
 @hidden
-DEFINE TGT :=
+DEFINE GOAL :=
        cabbage = EAST && goat = EAST && wolf = EAST;
 
 -- To solve the ferryman problem in this model try this:
--- >> reach TGT
+-- >> reach GOAL; dump-trace
 
