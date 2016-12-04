@@ -12,6 +12,35 @@ TODO
 
 ----------
 
+Introduce support for timed constraints (AT-expressions)
+
+(a)
+AT 0
+   x = 0;
+
+is equivalent to:
+INIT
+    x = 0;
+
+(b)
+AT 0 .. *
+   x = 0;
+
+is equivalent to:
+INVAR
+     x = 0;
+
+(c)
+AT 3 .. 5
+   x = 0;
+
+is a constraint only valid when analyzing the transition relation for k = { 3, 4, 5 };
+
+AT <from> ( .. <to> )?
+   <expr>
+
+----------
+
 * Add support for guarded transitions
 
 (a) add support for assignment in TRANS sections only; assignments are
