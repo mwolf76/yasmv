@@ -27,46 +27,38 @@
 #define EXPR_WALKER_EXCEPTIONS_H
 
 #include <common/common.hh>
+#include <expr/exceptions.hh>
 #include <expr/walker/typedefs.hh>
-#include <utils/misc.hh>
-
-class WalkerException : public Exception {
-public:
-    WalkerException(const std::string& subtype,
-                    const std::string& message="(no message)")
-        : Exception("WalkerException", subtype, message)
-    {}
-};
 
 // raised when the walker has encountered an unsupported entry point
-class UnsupportedEntryPoint : public WalkerException {
+class UnsupportedEntryPoint : public ExprException {
 public:
     UnsupportedEntryPoint(entry_point ep)
-        : WalkerException("UnsupportedEntryPoint",
+        : ExprException("UnsupportedEntryPoint",
                           "encountered " + ep)
     {}
 };
 
 // raised when the walker has encountered an unsupported operator
-class UnsupportedOperator : public WalkerException {
+class UnsupportedOperator : public ExprException {
 public:
     UnsupportedOperator(ExprType et)
-        : WalkerException("UnsupportedOperator",
+        : ExprException("UnsupportedOperator",
                           "encountered " + et)
     {}
 };
 
-class UnsupportedLeaf : public WalkerException {
+class UnsupportedLeaf : public ExprException {
 public:
     UnsupportedLeaf()
-        : WalkerException("UnsupportedLeaf")
+        : ExprException("UnsupportedLeaf")
     {}
 };
 
-class InternalError : public WalkerException {
+class InternalError : public ExprException {
 public:
     InternalError(const std::string& message)
-        : WalkerException("InternalError", message)
+        : ExprException("InternalError", message)
     {}
 };
 

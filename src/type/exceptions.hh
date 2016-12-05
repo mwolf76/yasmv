@@ -31,7 +31,7 @@
 class TypeException : public Exception {
 public:
     TypeException(const std::string& subtype,
-                  const std::string& message="(no message)")
+                  const std::string& message="")
         : Exception("TypeException", subtype, message)
     {}
 };

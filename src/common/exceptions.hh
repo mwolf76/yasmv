@@ -31,18 +31,14 @@ class Exception : public std::exception {
 public:
     Exception(const std::string& type,
               const std::string& subtype,
-              const std::string& message)
-    : f_text(type + "/" + subtype + ": " + message + "\n")
-  {}
+              const std::string& message) ;
 
-  ~Exception() throw()
-  {}
+    ~Exception() throw() ;
 
-  const char* text() const throw()
-  { return f_text.c_str(); }
+    const char* what() const throw();
 
 protected:
-  const std::string f_text;
+    std::string f_what;
 };
 
 #endif /* COMMON_EXCEPTION_H */

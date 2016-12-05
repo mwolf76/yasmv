@@ -146,8 +146,6 @@ Variant& Interpreter::operator()(Command_ptr cmd)
             (e.what());
 
         f_last_result = Variant(what);
-
-        free((void *) what);
     }
 
     delete cmd;
@@ -183,9 +181,7 @@ Variant& Interpreter::operator()()
                         << what
                         << std::endl;
 
-                    f_last_result = Variant("Caught exception");
-
-                    free((void *) what);
+                    f_last_result = Variant("ERROR");
                 }
             }
         }

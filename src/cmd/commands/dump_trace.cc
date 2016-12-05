@@ -447,7 +447,6 @@ Variant DumpTrace::operator()()
 
     else assert(false); /* unsupported */
 
-
     return Variant("Ok");
 }
 

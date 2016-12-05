@@ -29,7 +29,7 @@
 class ModelException : public Exception {
 public:
     ModelException(const std::string& subtype,
-                   const std::string& message="(no message)")
+                   const std::string& message="")
         : Exception("ModelException", subtype, message)
     {}
 };

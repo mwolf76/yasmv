@@ -201,13 +201,13 @@ void Analyzer::generate_framing_conditions()
                 ;
         }
 
-        /* Add this synthetic TRANS will be added to the module. */
+        /* synthetic TRANS will be added to the module. */
         Expr_ptr synth_trans
             (em.make_implies(guard,
                              em.make_eq(em.make_next(ident),
                                         ident)));
         INFO
-            << "Adding syntethic TRANS: "
+            << "Adding synthetic TRANS: "
             << synth_trans
             << std::endl;
 

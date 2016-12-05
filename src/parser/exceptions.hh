@@ -30,7 +30,7 @@
 class GrammarException : public Exception {
 public:
     GrammarException(const std::string& subtype,
-                    const std::string& message="(no message)")
+                    const std::string& message="")
         : Exception("GrammarException", subtype, message)
     {}
 };

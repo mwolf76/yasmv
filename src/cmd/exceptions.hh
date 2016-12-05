@@ -31,7 +31,7 @@
 class CommandException : public Exception {
 public:
     CommandException(const std::string& subtype,
-                     const std::string& message="(no message)")
+                     const std::string& message="")
         : Exception("CommandException", subtype, message)
     {}
 };

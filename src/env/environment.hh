@@ -44,7 +44,7 @@ class EnvironmentException : public Exception
 {
 public:
     EnvironmentException(const std::string& subtype,
-                         const std::string& message="(no message)")
+                         const std::string& message="")
         : Exception("EnvironmentException", subtype, message)
     {}
 };

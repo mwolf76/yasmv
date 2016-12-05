@@ -34,10 +34,9 @@ static std::string build_duplicate_witness_id_error_message(Atom id)
     std::ostringstream oss;
 
     oss
-        << "Duplicate witness ID:  "
+        << "`"
         << id
-        << " is already registered."
-        << std::endl ;
+        << "` is already registered." ;
 
     return oss.str();
 }
@@ -47,21 +46,9 @@ DuplicateWitnessId::DuplicateWitnessId(Atom id)
                        build_duplicate_witness_id_error_message(id))
 {}
 
-static std::string build_no_currently_selected_witness_error_message()
-{
-    std::ostringstream oss;
-
-    oss
-        << "No currently selected witness."
-        << std::endl ;
-
-    return oss.str();
-}
-
 /** Raised when a given ID is registered more than once */
 NoCurrentlySelectedWitness::NoCurrentlySelectedWitness()
-    : WitnessException("NoCurrentlySelectedWitness",
-                       build_no_currently_selected_witness_error_message())
+    : WitnessException("NoCurrentlySelectedWitness")
 {}
 
 static std::string build_unknown_witness_error_message(Atom id)
@@ -69,10 +56,10 @@ static std::string build_unknown_witness_error_message(Atom id)
     std::ostringstream oss;
 
     oss
-        << "Unknown witness ID:  "
+        << "`"
         << id
-        << " is not registered."
-        << std::endl ;
+        << "` is not registered." ;
+
 
     return oss.str();
 }
@@ -88,9 +75,7 @@ static std::string build_illegal_time_error_message(step_t time)
     std::ostringstream oss;
 
     oss
-        << "Illegal time: "
-        << time
-        << std::endl ;
+        << time ;
 
     return oss.str();
 }
@@ -117,4 +102,3 @@ NoValue::NoValue(Expr_ptr id)
     : WitnessException("NoValue",
                        build_no_value_error_message(id))
 {}
-

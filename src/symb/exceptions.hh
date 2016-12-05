@@ -34,7 +34,7 @@ class SymbolException : public Exception
 {
 public:
     SymbolException(const std::string& subtype,
-                    const std::string& message="(no message)")
+                    const std::string& message="")
         : Exception("SymbolException", subtype, message)
     {}
 };

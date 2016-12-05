@@ -313,6 +313,7 @@ void BMC::process(const Expr_ptr target)
         fwd.join();
         bwd.join();
     }
+
     catch (Exception& e) {
         const char* what
             (strdup(e.what()));
@@ -324,12 +325,6 @@ void BMC::process(const Expr_ptr target)
         f_status = BMC_ERROR;
         return;
     }
-
-    std::cout
-        << (f_status == BMC_REACHABLE
-            ? "Target is REACHABLE"
-            : "Target is UNREACHABLE")
-        << std::endl;
 }
 
 reachability_status_t BMC::status()

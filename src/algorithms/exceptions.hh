@@ -32,7 +32,7 @@
 class AlgorithmException : public Exception {
 public:
     AlgorithmException(const std::string& subtype,
-                       const std::string& message="(no message)")
+                       const std::string& message="")
         : Exception("AlgorithmException", subtype, message)
     {}
 };

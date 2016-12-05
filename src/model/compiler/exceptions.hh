@@ -28,19 +28,11 @@
 #define COMPILER_EXCEPTIONS_H
 
 #include <common/common.hh>
+#include <model/exceptions.hh>
 
 /** Exception classes */
-class CompilerError : public Exception
-{
-public:
-    CompilerError(const std::string& subtype,
-                  const std::string& message="(no message)")
-        : Exception("CompilerError", subtype, message)
-    {}
-};
-
 /** Raised when a constant could not fit into a native word */
-class ConstantTooLarge : public CompilerError {
+class ConstantTooLarge : public ModelException {
 public:
     ConstantTooLarge(Expr_ptr expr);
 };

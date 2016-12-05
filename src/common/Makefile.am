@@ -6,7 +6,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src																\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_CC = colors.cc tokens.cc cdata.cc
+PKG_CC = colors.cc tokens.cc cdata.cc exceptions.cc
 
 # -------------------------------------------------------
 
