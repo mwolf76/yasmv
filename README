@@ -44,18 +44,19 @@ BUILD
   Another option is to use distcc. The setup.sh script contains a
   working example. Refer to distcc documentation for more details.
 
-  On my current development platform - Debian 8 a.k.a "Jessie" - the
+  On my current development platform - Debian 8.6 ("Jessie") - the
   whole thing builds with no warnings. The parser is written with
   ANTLR3[*] so you will need some java JRE installed at build time to
-  generate the parser and lexer code. Generated code itself is C++, so
-  as long as you don't change the grammar source files you will no
-  longer need the JRE to build. No JRE is needed when running the
-  final executable either.
+  generate the parser and lexer code. Generated parser and lexer code
+  itself is C ++, so as long as you don't change the grammar source
+  files you will no longer need the JRE to make the build. No JRE is
+  needed when running the final executable either.
 
-  After completing the build there is one more step to take before
-  being able to actually run the program. YASMINE requires access to
-  the microcode data package, which is released as a bz2'd tarball due
-  to its size. Unpack the microcode tarball with:
+  After completing the build there is one more step that needs to be
+  taken before being able to actually run the program. YASMINE
+  requires access to the microcode data package, which is released as
+  a bz2'd tarball due to its size (currently 34 MB). Unpack the
+  microcode tarball with:
 
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
@@ -82,20 +83,21 @@ BUILD
   and covers the full set of supported algebraic operations on n-bits
   integers (1 <= n <= 64).
 
-  For further information on the microcode, please refer to the README
+  For further information on microcode, please refer to the README
   file in the microcode bzip2'd tarball.
 
   Unit tests can be run using:
 
   $ ./tests --log_level=all
 
-Remark: The default build for C++ code uses a low level of optimization (-O0) to
-  make life a whole lot easier for debugging. If you want to, feel free to
-  enable higher level of optimization for the C++ code (C code already uses
-  '-O2' by default). Do not expect major performance gains though, as core
-  services Cudd (used int the expression compiler) and Minisat (which powers the
-  solving engine) are compiled/installed separately and already use a higher
-  level of optimization.
+Remark: The default build for C ++ code uses a low level of
+  optimization (-O0) to make life a whole lot easier for debugging. If
+  you want to, feel free to enable higher level of optimization for
+  the C ++ code (C code already uses '-O2' by default). Do not expect
+  major performance gains though, as core services Cudd (used int the
+  expression compiler) and Minisat (which powers the solving engine)
+  are compiled/installed separately and already use a higher level of
+  optimization.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
