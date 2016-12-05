@@ -1,9 +1,6 @@
 /**
- * @file type.hh
- * @brief Parser subsystem, header declarations.
- *
- * This header file contains the declarations and type definitions
- * required by YASMINE auto-generated parser and lexer.
+ * @file parser/exceptions.hh
+ * @brief Parser subsystem, exception class declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +21,30 @@
  *
  **/
 
-#ifndef GRAMMAR_H
-#define GRAMMAR_H
+#ifndef PARSER_EXCEPTIONS_H
+#define PARSER_EXCEPTIONS_H
 
-#include <parser/exceptions.hh>
+#include <common/common.hh>
+#include <string>
 
-typedef enum {
-    FORMAT_DEFAULT,
-    FORMAT_BINARY,
-    FORMAT_OCTAL,
-    FORMAT_DECIMAL,
-    FORMAT_HEXADECIMAL
-} value_format_t;
+class GrammarException : public Exception {
+public:
+    GrammarException(const std::string& subtype,
+                    const std::string& message="(no message)")
+        : Exception("GrammarException", subtype, message)
+    {}
+};
 
-#endif /* GRAMMAR_H */
+class SyntaxError : public GrammarException {
+public:
+    SyntaxError(const std::string& message)
+        : GrammarException("SyntaxError", message)
+    {}
+};
+
+class FileInputException : public GrammarException {
+public:
+    FileInputException(const std::string &filename);
+};
+
+#endif /* PARSER_EXCEPTIONS_H */

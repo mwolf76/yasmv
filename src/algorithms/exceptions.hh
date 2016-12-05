@@ -1,9 +1,10 @@
 /**
- * @file type.hh
- * @brief Parser subsystem, header declarations.
+ * @file Base Algorithm.hh
+ * @brief Base Algorithm definitions
  *
- * This header file contains the declarations and type definitions
- * required by YASMINE auto-generated parser and lexer.
+ * This header file contains definitions and services that provide the
+ * foundations for all the SAT-based algorithms (i.e. reachability,
+ * simulation, ltl property checking).
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +25,23 @@
  *
  **/
 
-#ifndef GRAMMAR_H
-#define GRAMMAR_H
+#ifndef BASE_ALGORITHM_EXCEPTIONS_H
+#define BASE_ALGORITHM_EXCEPTIONS_H
 
-#include <parser/exceptions.hh>
+/** Exception classes */
+class AlgorithmException : public Exception {
+public:
+    AlgorithmException(const std::string& subtype,
+                       const std::string& message="(no message)")
+        : Exception("AlgorithmException", subtype, message)
+    {}
+};
 
-typedef enum {
-    FORMAT_DEFAULT,
-    FORMAT_BINARY,
-    FORMAT_OCTAL,
-    FORMAT_DECIMAL,
-    FORMAT_HEXADECIMAL
-} value_format_t;
+class FailedSetup : public AlgorithmException {
+public:
+    FailedSetup()
+        : AlgorithmException("FailedSetup")
+    {}
+};
 
-#endif /* GRAMMAR_H */
+#endif /* BASE_ALGORITHM_EXCEPTIONS_H */

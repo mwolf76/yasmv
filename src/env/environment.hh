@@ -40,17 +40,25 @@ typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
 typedef class Environment* Environment_ptr;
 
-class NoSuchIdentifier : public Exception
+class EnvironmentException : public Exception
 {
 public:
-    NoSuchIdentifier(Expr_ptr id)
-        : f_id(id)
+    EnvironmentException(const std::string& subtype,
+                         const std::string& message="(no message)")
+        : Exception("EnvironmentException", subtype, message)
     {}
+};
 
-    virtual const char* what() const throw();
+// helpers
+std::string build_no_such_identifier_error_message(Expr_ptr expr);
 
-private:
-    Expr_ptr f_id;
+class NoSuchIdentifier : public EnvironmentException
+{
+public:
+    NoSuchIdentifier(Expr_ptr expr)
+        : EnvironmentException("NoSuchIdentifier",
+                               build_no_such_identifier_error_message(expr))
+    {}
 };
 
 class Environment {

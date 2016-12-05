@@ -31,6 +31,9 @@
 #include <src/expr/expr.hh>
 #include <utils/variant.hh>
 
+#include <cmd/typedefs.hh>
+#include <cmd/exceptions.hh>
+
 class Interpreter;
 
 class Command {
@@ -63,11 +66,5 @@ public:
 
 typedef std::vector<Command_ptr> CommandVector;
 typedef CommandVector* CommandVector_ptr;
-
-/** Exception classes */
-class CommandException : public Exception {
-public:
-    virtual const char* what() const throw() =0;
-};
 
 #endif /* COMMAND_H */

@@ -21,98 +21,75 @@
  *
  **/
 
-#include <sstream>
-#include <cstring>
-
+#include <expr/expr.hh>
 #include <type/type.hh>
 
-#include <utils/misc.hh>
+#include <string>
+#include <sstream>
 
-BadType::BadType(Expr_ptr expr, Type_ptr lhs)
-    : f_expr(expr)
-    , f_lhs(lhs -> repr())
-    , f_rhs(NULL)
-{}
-
-BadType::BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
-    : f_expr(expr)
-    , f_lhs(lhs -> repr())
-    , f_rhs(rhs -> repr())
-{}
-
-BadType::~BadType() throw()
-{}
-
-const char* BadType::what() const throw()
+std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs)
 {
     std::ostringstream oss;
 
-    if (! f_rhs)
-        oss
-            << "TypeError: operand `"
-            << f_expr << "` has invalid type `"
-            << f_lhs << "`";
-    else
-        oss
-            << "TypeError: operands `"
-            << f_expr -> lhs() << "` and `"
-            << f_expr -> rhs() << "` have invalid types `"
-            << f_lhs << "`, `" << f_rhs << "`";
+    oss
+        << "operand `"
+        << expr << "` has invalid type `"
+        << lhs << "`";
 
-    return oss2cstr(oss);
+    return oss.str();
 }
 
-TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
-    : f_expr(expr)
-    , f_repr_a(lhs -> repr())
-    , f_repr_b(rhs -> repr())
-{}
-
-TypeMismatch::~TypeMismatch() throw()
-{}
-
-const char* TypeMismatch::what() const throw()
+std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
 {
     std::ostringstream oss;
-    oss << "TypeError: `"
-        << f_repr_a << "` and `"
-        << f_repr_b << "` do not match in expression `"
-        << f_expr   << "`"
+
+    oss
+        << "operands `"
+        << expr->lhs() << "` and `"
+        << expr->rhs() << "` have invalid types `"
+        << lhs << "`, `"
+        << rhs << "`";
+
+    return oss.str();
+}
+
+std::string build_identifier_expected_error_message(Expr_ptr expr)
+{
+    std::ostringstream oss;
+
+    oss
+        << "identifier expected while defining ENUM, got `"
+        << expr
+        << "` instead";
+
+    return oss.str();
+}
+
+std::string build_duplicate_literal_error_message(Expr_ptr expr)
+{
+    std::ostringstream oss;
+
+    oss
+        << "duplicate literal `"
+        << expr
+        << "` detected";
+
+    return oss.str();
+}
+
+std::string build_type_mismatch_error_message(Expr_ptr expr, Type_ptr a, Type_ptr b)
+{
+    std::ostringstream oss;
+
+    oss
+        << "`"
+        << a
+        << "` and `"
+        << b
+        << "` do not match in expression `"
+        << expr
+        << "`"
         << std::endl;
 
-    return oss2cstr(oss);
-}
-
-IdentifierExpected::IdentifierExpected(Expr_ptr expr)
-    : f_expr(expr)
-{}
-
-IdentifierExpected::~IdentifierExpected() throw()
-{}
-
-const char* IdentifierExpected::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "TypeError: identifier expected while defining ENUM, got `"
-        << f_expr << "` instead";
-
-    return oss2cstr(oss);
-}
-
-DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
-    : f_expr(expr)
-{}
-
-DuplicateLiteral::~DuplicateLiteral() throw()
-{}
-
-const char* DuplicateLiteral::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "TypeError: duplicate literal `"
-        << f_expr << "` detected";
-
-    return oss2cstr(oss);
+    return oss.str();
 }

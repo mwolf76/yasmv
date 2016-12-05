@@ -1,30 +1,23 @@
 README
 ======
 
-  The YASMINE (Yet Another Symbolic Modeling INteractive Engine)
-project started off in fall 2011 as a tentative and partial C++
-re-implementation of the NuSMV2 model checker. As a former member of
-the NuSMV2 development team (in the years between 2008 and 2011) I was
-never completely happy with a few architectural choices, inherited
-from the long history of the NuSMV model checker and/or due to the
-amount of legacy code and tools that relied on it. Don't get me wrong,
-I really think NuSMV is a great piece of software. And I owe to the
-developers and researchers in FBK most - if not all - of my scientific
-and software engineering training. It's just that I have been
-wondering for years what that project would have been like, if one was
-completely free to redesign it all from the scratch. This is exactly
-why this project exists in the first place.
+  The YASMINE (Yet Another Symbolic Modeling INteractive Engine) project started
+off in fall 2011 as a tentative and partial C++ re-implementation of the NuSMV2
+model checker. As a former member of the NuSMV2 development team (in the years
+between 2008 and 2011) I was never completely happy with a few architectural
+choices, inherited from the long history of the NuSMV model checker and/or due
+to the amount of legacy code and tools that relied on it.
 
-  Overtime, however, YASMINE has significantly diverged from the
-original goal of making a NuSMV re-implementation. The input language
-for YASMINE is now a "dialect" of SMV which retains only partial
-compatibility with NuSMV's original SMV language. In this area, my
-interest is all about making the language easy to use, while not
-giving up on expressiveness.
+  Overtime, however, YASMINE has significantly diverged from the original goal
+of making a NuSMV re-implementation. The input language for YASMINE is now a
+dialect of the SMV language which retains only partial compatibility with
+NuSMV's original input language. In this area, my interest is all about
+exploring ways to improve language expressiveness and usability.
 
-  The project has now approached a stage in which the program is
-usable to perform basic reachability analysis. I have included a few
-examples to demonstrate how it can be used to solve planning problems.
+  The project has now approached a stage in which the program is usable to
+perform basic reachability analysis and step-by-step simulation. The source
+distribution includes a few examples to demonstrate how the program can be used
+to solve planning problems.
 
 BUILD
 =====
@@ -96,13 +89,13 @@ BUILD
 
   $ ./tests --log_level=all
 
-Remark: The default build for C++ code uses a low level of
-  optimization (-O0) to make life a whole lot easier for debugging. If
-  you want to, feel free to enable higher level of optimization for
-  the C++ code (C code already uses '-O2' by default). Do not expect
-  major performance gains though, as core services Cudd and Minisat
-  are compiled/installed separately and already use a higher level of
-  optimization.
+Remark: The default build for C++ code uses a low level of optimization (-O0) to
+  make life a whole lot easier for debugging. If you want to, feel free to
+  enable higher level of optimization for the C++ code (C code already uses
+  '-O2' by default). Do not expect major performance gains though, as core
+  services Cudd (used int the expression compiler) and Minisat (which powers the
+  solving engine) are compiled/installed separately and already use a higher
+  level of optimization.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 

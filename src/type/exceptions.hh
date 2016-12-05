@@ -30,56 +30,59 @@
 /** Exception classes */
 class TypeException : public Exception {
 public:
-    virtual const char* what() const throw() =0;
+    TypeException(const std::string& subtype,
+                  const std::string& message="(no message)")
+        : Exception("TypeException", subtype, message)
+    {}
 };
 
-/** Raised when the type checker detects a wrong type */
-class BadType : public TypeException {
-    Expr_ptr f_expr;
-    Expr_ptr f_lhs;
-    Expr_ptr f_rhs;
-
-public:
-    BadType(Expr_ptr expr, Type_ptr lhs);
-    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-
-    const char* what() const throw();
-    ~BadType() throw();
-};
+/* helpers */
+std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs);
+std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
+std::string build_identifier_expected_error_message(Expr_ptr expr);
+std::string build_duplicate_literal_error_message(Expr_ptr expr);
+std::string build_type_mismatch_error_message(Expr_ptr expr, Type_ptr a, Type_ptr b);
 
 /** Raised when the inferrer detects a wrong type */
-class IdentifierExpected : public TypeException {
-    Expr_ptr f_expr;
-
+class BadType : public TypeException {
 public:
-    IdentifierExpected(Expr_ptr expr);
+    BadType(Expr_ptr expr, Type_ptr lhs)
+        : TypeException("BadType",
+                        build_bad_type_error_message(expr, lhs))
+    {}
 
-    const char* what() const throw();
-    ~IdentifierExpected() throw();
+    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+        : TypeException("BadType",
+                        build_bad_type_error_message(expr, lhs, rhs))
+    {}
+
+};
+
+class IdentifierExpected : public TypeException {
+public:
+    IdentifierExpected(Expr_ptr expr)
+        : TypeException("IdentifierExpected",
+                        build_identifier_expected_error_message(expr))
+    {}
 };
 
 /** Raised when the inferrer detects a wrong type */
 class DuplicateLiteral : public TypeException {
-    Expr_ptr f_expr;
-
 public:
-    DuplicateLiteral(Expr_ptr expr);
-
-    const char* what() const throw();
-    ~DuplicateLiteral() throw();
+    DuplicateLiteral(Expr_ptr expr)
+        : TypeException("DuplicateLiteral",
+                        build_duplicate_literal_error_message(expr))
+    {}
 };
 
 /** Raised when the inferrer detects two mismatching types */
+
 class TypeMismatch : public TypeException {
-    Expr_ptr f_expr;
-    Expr_ptr f_repr_a;
-    Expr_ptr f_repr_b;
-
 public:
-    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b);
-
-    const char* what() const throw();
-    ~TypeMismatch() throw();
+    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
+        : TypeException("TypeMismatch",
+                        build_type_mismatch_error_message(expr, a, b))
+    {}
 };
 
 #endif /* TYPE_EXCEPTIONS_H */

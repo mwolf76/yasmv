@@ -27,76 +27,93 @@
 #include <utils/misc.hh>
 
 #include <sstream>
-#include <cstring>
+#include <string>
 
-ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
-    : f_module_name(module_name)
-{}
-
-const char* ModuleNotFound::what() const throw()
+static std::string build_module_not_found_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
+
     oss
         << "Module not found: `"
-        << f_module_name << "`";
+        << expr
+        << "`";
 
-    return oss2cstr(oss);
+    return oss.str();
 }
 
-MainModuleNotFound::MainModuleNotFound()
+ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
+    : ModelException("ModuleNotFound",
+                     build_module_not_found_error_message(module_name))
 {}
 
-const char* MainModuleNotFound::what() const throw()
+static std::string build_main_module_not_found_error_message()
 {
     std::ostringstream oss;
+
     oss
         << "Main module not found";
 
-    return oss2cstr(oss);
+    return oss.str();
+}
+
+MainModuleNotFound::MainModuleNotFound()
+    : ModelException("MainModuleNotFound",
+                     build_main_module_not_found_error_message())
+{}
+
+static std::string build_duplicate_identifier_error_message(Expr_ptr expr)
+{
+    std::ostringstream oss;
+    oss
+        << "identifier: `"
+        << expr
+        << "`";
+
+    return oss.str();
 }
 
 DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
-    : f_duplicate(duplicate)
+    : ModelException("DuplicateIdentifier",
+                     build_duplicate_identifier_error_message(duplicate))
 {}
 
-const char* DuplicateIdentifier::what() const throw()
+static std::string build_unknown_identifier_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
-    oss
-        << "Duplicate identifier: `"
-        << f_duplicate << "`";
 
-    return oss2cstr(oss);
+    oss
+        << "Unknown identifier: `"
+        << expr
+        << "`";
+
+    return oss.str();
 }
 
 UnknownIdentifier::UnknownIdentifier(Expr_ptr unknown)
-    : f_unknown(unknown)
+    : ModelException("UnknownIdentifier",
+                     build_unknown_identifier_error_message(unknown))
 {}
 
-const char* UnknownIdentifier::what() const throw()
+static std::string build_bad_param_count_error_message(Expr_ptr instance,
+                                                       unsigned expected,
+                                                       unsigned got)
 {
     std::ostringstream oss;
-    oss
-        << "Unknown identifier: `"
-        << f_unknown << "`";
 
-    return oss2cstr(oss);
+    oss
+        << "Wrong parameters count in `"
+        << instance
+        << "`, "
+        << expected
+        << " expected, "
+        << " got "
+        << got;
+
+    return oss.str();
 }
 
 BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
-    : f_instance(instance)
-    , f_expected(expected)
-    , f_got(got)
+    : ModelException("BadParamCount",
+                     build_bad_param_count_error_message(instance, expected, got))
 {}
 
-const char* BadParamCount::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Wrong parameters count in `"
-        << f_instance << "`, "
-        << f_expected << " expected, "
-        << " got " << f_got;
-
-    return oss2cstr(oss);
-}

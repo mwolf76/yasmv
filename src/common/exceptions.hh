@@ -1,9 +1,6 @@
 /**
  * @file common/exceptions.hh
- * @brief System-wide definitions, base exception class
- *
- * This header file contains common definitions used throughout the
- * whole program.
+ * @brief System-wide definitions, base exception class declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -28,10 +25,24 @@
 #define COMMON_EXCEPTION_H
 
 #include <exception>
+#include <string>
+
 class Exception : public std::exception {
 public:
-    virtual const char* what() const throw() =0;
-    virtual ~Exception() throw() {};
+    Exception(const std::string& type,
+              const std::string& subtype,
+              const std::string& message)
+    : f_text(type + "/" + subtype + ": " + message + "\n")
+  {}
+
+  ~Exception() throw()
+  {}
+
+  const char* text() const throw()
+  { return f_text.c_str(); }
+
+protected:
+  const std::string f_text;
 };
 
 #endif /* COMMON_EXCEPTION_H */

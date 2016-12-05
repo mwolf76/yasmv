@@ -227,10 +227,10 @@ fsm_define_decl_clause
       Define_ptr def = new Define($smv::current_module->name(), id, body);
 
       if ($module_decl::input)
-          throw SyntaxException("@input modifier not supported in DEFINE decls");
+          throw SyntaxError("@input modifier not supported in DEFINE decls");
 
       if ($module_decl::frozen)
-          throw SyntaxException("@frozen modifier not supported in DEFINE decls");
+          throw SyntaxError("@frozen modifier not supported in DEFINE decls");
 
       if ($module_decl::hidden)
           def -> set_hidden(true);

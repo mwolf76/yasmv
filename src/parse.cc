@@ -64,29 +64,6 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
     parseErrors = true;
 }
 
-class FileInputException : public Exception {
-
-    virtual const char* what() const throw()
-    {
-        std::ostringstream oss;
-        oss
-            << "Can not read file `"
-            << f_filename << "`";
-
-        return oss2cstr(oss);
-    }
-
-    std::string f_filename;
-
-public:
-    FileInputException(const std::string &filename)
-        : f_filename(filename)
-    {}
-
-    virtual ~FileInputException() throw()
-    {}
-};
-
 bool parseFile(const char* fName)
 {
     pANTLR3_INPUT_STREAM input;

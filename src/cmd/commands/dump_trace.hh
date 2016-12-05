@@ -32,14 +32,8 @@
 
 /** Raised when the type checker detects a wrong type */
 class UnsupportedFormat : public CommandException {
-
-    pchar f_format;
-
 public:
     UnsupportedFormat(pconst_char format);
-    ~UnsupportedFormat() throw();
-
-    const char* what() const throw();
 };
 
 class DumpTrace : public Command {

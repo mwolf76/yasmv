@@ -24,18 +24,18 @@
 #include <sat/exceptions.hh>
 #include <utils/misc.hh>
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
-    : f_ios(ios)
-{}
+// InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
+//     : f_ios(ios)
+// {}
 
-const char* InlinedOperatorLoaderException::what() const throw()
-{
-    std::ostringstream oss;
+// const char* InlinedOperatorLoaderException::what() const throw()
+// {
+//     std::ostringstream oss;
 
-    oss
-        << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
-        << f_ios << "`";
+//     oss
+//         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
+//         << f_ios << "`";
 
-    return oss2cstr(oss);
-}
+//     return oss2cstr(oss);
+// }
 

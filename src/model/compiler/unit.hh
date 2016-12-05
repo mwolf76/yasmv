@@ -224,10 +224,16 @@ typedef std::vector<CompilationUnit> CompilationUnits;
 
 /* helpers */
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios);
-std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md);
+std::string ios2string(InlinedOperatorSignature ios);
+
+std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& iod);
+std::string iod2string(InlinedOperatorSignature& ios);
 
 std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md);
+std::string bsd2string(InlinedOperatorSignature& ios);
+
 std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
+std::string msd2string(InlinedOperatorSignature& ios);
 
 #endif /* COMPILATION_UNIT_H */
 

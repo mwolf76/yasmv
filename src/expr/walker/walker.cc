@@ -183,13 +183,13 @@ void ExprWalker::walk ()
             case TYPE_1: goto entry_TYPE_1;
             case TYPE_2: goto entry_TYPE_2;
 
-            default: throw UnsupportedEntryPointException(curr.pc);
+            default: throw UnsupportedEntryPoint(curr.pc);
             }
         }
 
         /* pre-node hooks */
         if (! curr.expr)
-            throw NullExpressionException();
+            throw InternalError("NULL expression encountered (walker pre-node() hook)");
         pre_node_hook(curr.expr);
 
         switch (curr.expr->f_symb) {
@@ -909,7 +909,7 @@ void ExprWalker::walk ()
             break;
 
         default:
-            throw UnsupportedOperatorException(curr.expr->f_symb);
+            throw UnsupportedOperator(curr.expr->f_symb);
 
         } // switch
 

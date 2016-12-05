@@ -1,9 +1,9 @@
-/**
- * @file type.hh
- * @brief Parser subsystem, header declarations.
+/*
+ * @file command.hh
+ * @brief Command-interpreter subsystem
  *
- * This header file contains the declarations and type definitions
- * required by YASMINE auto-generated parser and lexer.
+ * This header file contains the declarations required by the Command
+ * class.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +24,13 @@
  *
  **/
 
-#ifndef GRAMMAR_H
-#define GRAMMAR_H
+#ifndef COMMAND_TYPEDEFS_H
+#define COMMAND_TYPEDEFS_H
 
-#include <parser/exceptions.hh>
+#include <common/common.hh>
 
-typedef enum {
-    FORMAT_DEFAULT,
-    FORMAT_BINARY,
-    FORMAT_OCTAL,
-    FORMAT_DECIMAL,
-    FORMAT_HEXADECIMAL
-} value_format_t;
+typedef class Command* Command_ptr;
+typedef std::vector<Command_ptr> CommandVector;
+typedef CommandVector* CommandVector_ptr;
 
-#endif /* GRAMMAR_H */
+#endif /* COMMAND_TYPEDEFS_H */

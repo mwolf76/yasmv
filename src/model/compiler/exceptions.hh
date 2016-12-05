@@ -30,20 +30,19 @@
 #include <common/common.hh>
 
 /** Exception classes */
-class CompilerException : public Exception {
+class CompilerError : public Exception
+{
 public:
-    virtual const char* what() const throw() =0;
+    CompilerError(const std::string& subtype,
+                  const std::string& message="(no message)")
+        : Exception("CompilerError", subtype, message)
+    {}
 };
 
 /** Raised when a constant could not fit into a native word */
-class ConstantTooLarge : public CompilerException {
-    Expr_ptr f_repr;
-
+class ConstantTooLarge : public CompilerError {
 public:
     ConstantTooLarge(Expr_ptr expr);
-
-    const char* what() const throw();
-    ~ConstantTooLarge() throw();
 };
 
 #endif /* COMPILER_EXCEPTIONS_H */

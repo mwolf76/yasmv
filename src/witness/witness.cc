@@ -28,60 +28,6 @@
 
 #include <utils/misc.hh>
 
-const char* DuplicateWitnessId::what() const throw()
-{
-    std::ostringstream oss;
-
-    oss
-        << "Duplicate witness ID:  "
-        << f_id << " is already registered."
-        << std::endl ;
-
-    return oss2cstr(oss);
-}
-
-const char* NoCurrentlySelectedWitness::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "No currently selected witness."
-        << std::endl ;
-
-    return oss2cstr(oss);
-}
-
-const char* UnknownWitnessId::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Unknown witness ID:  "
-        << f_id << " is not registered."
-        << std::endl ;
-
-    return oss2cstr(oss);
-}
-
-const char* IllegalTime::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Illegal time: "
-        << f_time
-        << std::endl ;
-
-    return oss2cstr(oss);
-}
-
-const char* NoValue::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "No value for `"
-        << f_id << "`";
-
-    return oss2cstr(oss);
-}
-
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
 {}

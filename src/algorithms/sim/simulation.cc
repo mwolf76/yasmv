@@ -35,7 +35,7 @@ Simulation::Simulation(Command& command, Model& model)
     setup();
 
     if (!ok())
-        throw AlgorithmException();
+        throw FailedSetup();
 }
 
 Simulation::~Simulation()

@@ -1,9 +1,6 @@
 /**
- * @file type.hh
- * @brief Parser subsystem, header declarations.
- *
- * This header file contains the declarations and type definitions
- * required by YASMINE auto-generated parser and lexer.
+ * @file grammars/exception.cc
+ * @brief Expression compiler subsystem, exception classes implementations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,17 +21,24 @@
  *
  **/
 
-#ifndef GRAMMAR_H
-#define GRAMMAR_H
-
 #include <parser/exceptions.hh>
 
-typedef enum {
-    FORMAT_DEFAULT,
-    FORMAT_BINARY,
-    FORMAT_OCTAL,
-    FORMAT_DECIMAL,
-    FORMAT_HEXADECIMAL
-} value_format_t;
+#include <string>
+#include <sstream>
 
-#endif /* GRAMMAR_H */
+static std::string build_file_input_error_message(const std::string& filename)
+{
+    std::ostringstream oss;
+
+    oss
+        << "Can not read file `"
+        << filename
+        << "`";
+
+    return oss.str();
+}
+
+FileInputException::FileInputException(const std::string& filename)
+    : GrammarException("FileInputException",
+                       build_file_input_error_message(filename))
+{}

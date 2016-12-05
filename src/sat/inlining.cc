@@ -40,23 +40,16 @@
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
-    : f_ios(ios)
-{}
+// const char* InlinedOperatorLoaderException::what() const throw()
+// {
+//     std::ostringstream oss;
 
-const char* InlinedOperatorLoaderException::what() const throw()
-{
-    std::ostringstream oss;
+//     oss
+//         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
+//         << f_ios << "`";
 
-    oss
-        << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
-        << f_ios << "`";
-
-    return oss2cstr(oss);
-}
-
-InlinedOperatorLoaderException::~InlinedOperatorLoaderException() throw()
-{}
+//     return oss2cstr(oss);
+// }
 
 InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)

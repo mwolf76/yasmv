@@ -165,17 +165,17 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
         (owner().em());
 
     if (f_section == ANALYZE_INIT)
-        throw SemanticException("Guards not allowed in INITs");
+        throw SemanticError("Guards not allowed in INITs");
 
     if (f_section == ANALYZE_INVAR)
-        throw SemanticException("Guards not allowed in INVARs");
+        throw SemanticError("Guards not allowed in INVARs");
 
     if (f_section == ANALYZE_DEFINE)
-        throw SemanticException("Guards not allowed in DEFINEs");
+        throw SemanticError("Guards not allowed in DEFINEs");
 
     /* now we know it's a TRANS */
     if (1 != f_expr_stack.size())
-        throw SemanticException("Guards are only allowed toplevel in TRANSes");
+        throw SemanticError("Guards are only allowed toplevel in TRANSes");
 
     Expr_ptr guard
         (expr->lhs());
@@ -184,7 +184,7 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
         (expr->rhs());
 
     if (! em.is_assignment(action)) {
-        throw SemanticException("Guarded actions must be assignments");
+        throw SemanticError("Guarded actions must be assignments");
     }
 
     Expr_ptr lhs
@@ -249,13 +249,13 @@ bool Analyzer::walk_assignment_inorder(const Expr_ptr expr)
 void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
 {
     if (f_section == ANALYZE_INIT)
-        throw SemanticException("Assignments not allowed in INITs");
+        throw SemanticError("Assignments not allowed in INITs");
 
     if (f_section == ANALYZE_INVAR)
-        throw SemanticException("Assignments not allowed in INVARs");
+        throw SemanticError("Assignments not allowed in INVARs");
 
     if (f_section == ANALYZE_DEFINE)
-        throw SemanticException("Assignments not allowed in DEFINEs");
+        throw SemanticError("Assignments not allowed in DEFINEs");
 
     ExprMgr& em
         (owner().em());
@@ -264,7 +264,7 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
         (expr->lhs());
 
     if (! em.is_lvalue(lhs))
-        throw SemanticException("Assignments require an lvalue for lhs");
+        throw SemanticError("Assignments require an lvalue for lhs");
 
     /* strip [] */
     if (em.is_subscript(lhs))
@@ -288,11 +288,11 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
 
         /* INPUT vars are in fact bodyless, typed DEFINEs */
         if (var.is_input())
-            throw SemanticException("Assignments not allowed on input vars.");
+            throw SemanticError("Assignments not allowed on input vars.");
 
         /* FROZEN vars can not be assigned */
         if (var.is_frozen())
-            throw SemanticException("Assignments can not be used on frozen vars.");
+            throw SemanticError("Assignments can not be used on frozen vars.");
     }
 
     /* 6. DEFINEs, simply process them recursively :-) */

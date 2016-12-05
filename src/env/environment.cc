@@ -22,14 +22,19 @@
 
 #include <environment.hh>
 
-#include <utils/misc.hh>
+#include <string>
+#include <sstream>
 
-const char* NoSuchIdentifier::what() const throw() {
+std::string build_no_such_identifier_error_message(Expr_ptr expr)
+{
     std::ostringstream oss;
-    oss
-        << "No such identifier: `" << f_id << "`";
 
-    return oss2cstr(oss);
+    oss
+        << "No such identifier: `"
+        << expr
+        << "`";
+
+    return oss.str();
 }
 
 Environment_ptr Environment::f_instance = NULL;

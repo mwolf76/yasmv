@@ -28,51 +28,42 @@
 
 class ModelException : public Exception {
 public:
-    virtual const char* what() const throw() =0;
+    ModelException(const std::string& subtype,
+                   const std::string& message="(no message)")
+        : Exception("ModelException", subtype, message)
+    {}
+};
+
+class SemanticError : public ModelException {
+public:
+    SemanticError(const std::string &message)
+        : ModelException("SemanticError", message)
+    {}
 };
 
 class ModuleNotFound : public ModelException {
 public:
     ModuleNotFound(Expr_ptr expr);
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_module_name;
 };
 
 class MainModuleNotFound : public ModelException {
 public:
     MainModuleNotFound();
-    const char* what() const throw();
 };
 
 class DuplicateIdentifier : public ModelException {
 public:
     DuplicateIdentifier(Expr_ptr expr);
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_duplicate;
 };
 
 class UnknownIdentifier : public ModelException {
 public:
     UnknownIdentifier(Expr_ptr expr);
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_unknown;
 };
 
 class BadParamCount : public ModelException {
 public:
     BadParamCount(Expr_ptr instance, unsigned expected, unsigned got);
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_instance;
-    unsigned f_expected;
-    unsigned f_got;
 };
 
 #endif /* MODEL_EXCEPTIONS_H */

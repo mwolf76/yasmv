@@ -28,13 +28,20 @@
 #define SYMBOL_EXCEPTIONS_H
 
 #include <common/common.hh>
+#include <expr/expr.hh>
 
-class UnresolvedSymbol : public Exception {
-    Expr_ptr f_expr;
+class SymbolException : public Exception
+{
+public:
+    SymbolException(const std::string& subtype,
+                    const std::string& message="(no message)")
+        : Exception("SymbolException", subtype, message)
+    {}
+};
 
+class UnresolvedSymbol : public SymbolException {
 public:
     UnresolvedSymbol(Expr_ptr expr);
-    const char* what() const throw();
 };
 
 #endif /* SYMBOL_EXCEPTIONS_H */

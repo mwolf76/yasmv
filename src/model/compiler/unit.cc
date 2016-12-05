@@ -24,14 +24,6 @@
 #include <model/compiler/unit.hh>
 #include <type/type.hh>
 
-UnitException::UnitException(const char* msg)
-{
-    f_msg = strdup(msg);
-}
-
-const char* UnitException::what() const throw()
-{ return f_msg; }
-
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      DDVector& z, DDVector &x)
     : f_ios(ios)
@@ -112,6 +104,15 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
     return os;
 }
 
+std::string ios2string(InlinedOperatorSignature ios)
+{
+    std::ostringstream oss;
+    oss
+        << ios;
+
+    return oss.str();
+}
+
 std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
 {
     os
@@ -178,6 +179,15 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
     os << ")";
 
     return os;
+}
+
+std::string ios2string(InlinedOperatorDescriptor& iod)
+{
+    std::ostringstream oss;
+    oss
+        << iod;
+
+    return oss.str();
 }
 
 std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
@@ -254,6 +264,26 @@ std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
     os << "])";
 
     return os;
+}
+
+std::string bsd2string(BinarySelectionDescriptor& bsd)
+{
+    std::ostringstream oss;
+
+    oss
+        << bsd;
+
+    return oss.str();
+}
+
+std::string msd2string(MultiwaySelectionDescriptor& msd)
+{
+    std::ostringstream oss;
+
+    oss
+        << msd;
+
+    return oss.str();
 }
 
 std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)

@@ -21,26 +21,23 @@
  *
  **/
 
-#include <sstream>
-
 #include <compiler.hh>
 
-#include <utils/misc.hh>
+#include <string>
+#include <sstream>
 
-ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
-    : f_repr(expr)
-{}
-
-ConstantTooLarge::~ConstantTooLarge() throw()
-{}
-
-const char* ConstantTooLarge::what() const throw()
+static std::string build_constant_too_large_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
 
     oss
-        << "CompilerError: constant too large `"
-        << f_repr << "`";
+        << "constant too large `"
+        << expr
+        << "`";
 
     return oss2cstr(oss);
 }
+ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
+    : CompilerError(build_constant_too_large_error_message(expr))
+{}
+

@@ -30,103 +30,44 @@
 #include <expr/walker/typedefs.hh>
 #include <utils/misc.hh>
 
-class WalkerException : public Exception
-{
+class WalkerException : public Exception {
 public:
-    virtual const char* what() const throw() =0;
-};
-
-// raised when the walker has encountered a null expression
-class NullExpressionException : public WalkerException {
-public:
-    NullExpressionException()
+    WalkerException(const std::string& subtype,
+                    const std::string& message="(no message)")
+        : Exception("WalkerException", subtype, message)
     {}
-
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-        oss
-            << "null expression encountered"
-            << std::endl;
-
-
-        return oss2cstr(oss);
-    }
 };
 
 // raised when the walker has encountered an unsupported entry point
-class UnsupportedEntryPointException : public WalkerException {
+class UnsupportedEntryPoint : public WalkerException {
 public:
-    UnsupportedEntryPointException(entry_point ep)
-        : f_ep(ep)
+    UnsupportedEntryPoint(entry_point ep)
+        : WalkerException("UnsupportedEntryPoint",
+                          "encountered " + ep)
     {}
-
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-        oss
-            << "Unsupported entry point (" << f_ep << ")";
-
-        return oss2cstr(oss);
-    }
-
-private:
-    entry_point f_ep;
 };
 
 // raised when the walker has encountered an unsupported operator
-class UnsupportedOperatorException : public WalkerException {
+class UnsupportedOperator : public WalkerException {
 public:
-    UnsupportedOperatorException(ExprType et)
-        : f_et(et)
+    UnsupportedOperator(ExprType et)
+        : WalkerException("UnsupportedOperator",
+                          "encountered " + et)
     {}
-
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-        oss
-            << "Unsupported operator (" << f_et << ")"
-            << std::endl;
-
-        return oss2cstr(oss);
-    }
-
-private:
-    ExprType f_et;
 };
 
 class UnsupportedLeaf : public WalkerException {
 public:
-
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-        oss
-            << "Unsupported leaf encountered"
-            << std::endl
-            ;
-
-        return oss2cstr(oss);
-    }
+    UnsupportedLeaf()
+        : WalkerException("UnsupportedLeaf")
+    {}
 };
 
 class InternalError : public WalkerException {
 public:
-    InternalError(std::string message)
-        : f_message(message)
+    InternalError(const std::string& message)
+        : WalkerException("InternalError", message)
     {}
-
-    virtual const char* what() const throw() {
-        std::ostringstream oss;
-
-        oss
-            << "Internal error: "
-            << f_message
-            << std::endl;
-
-        return oss2cstr(oss);
-    }
-
-    virtual ~InternalError() throw() {}
-
-private:
-    std::string f_message;
 };
 
 #endif /* EXPR_WALKER_EXCEPTIONS_H */

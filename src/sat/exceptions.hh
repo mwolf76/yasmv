@@ -29,15 +29,21 @@
 #include <sat/typedefs.hh>
 #include <sat/inlining.hh>
 
-class InlinedOperatorLoaderException : public Exception {
+class EngineException : public Exception
+{
 public:
-    InlinedOperatorLoaderException(const InlinedOperatorSignature& f_ios);
-    ~InlinedOperatorLoaderException() throw();
+    EngineException(const std::string& subtype,
+                    const std::string& message="(no message)")
+        : Exception("EngineException", subtype, message)
+    {}
+};
 
-    const char* what() const throw();
-
-private:
-    InlinedOperatorSignature f_ios;
+class InlinedOperatorLoaderException : public EngineException {
+public:
+    InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
+        : EngineException("InlinedOperatorLoaderException",
+                          "can not instantiate loader for operator `" + ios2string(ios) + "`")
+    {}
 };
 
 #endif /* SAT_EXCEPTIONS_H */

@@ -42,14 +42,9 @@
 #include <witness/witness.hh>
 
 #include <utils/variant.hh>
+#include <algorithms/exceptions.hh>
 
 class Command;
-
-/** Exception classes */
-class AlgorithmException : public Exception {
-public:
-    virtual const char* what() const throw();
-};
 
 /* Engine-less algorithm base class. Engine instances are provided by
    strategies. */

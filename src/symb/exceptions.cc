@@ -21,22 +21,24 @@
  *
  **/
 
+#include <symb/exceptions.hh>
+
 #include <sstream>
 #include <cstring>
 
-#include <symb/symbol.hh>
-#include <utils/misc.hh>
-
-UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
-    : f_expr(expr)
-{}
-
-const char* UnresolvedSymbol::what() const throw()
+static std::string build_unresolved_symbol_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
+
     oss
         << "Unresolved symbol: `"
-        << f_expr<< "`";
+        << expr
+        << "`";
 
-    return oss2cstr(oss);
+    return oss.str();
 }
+
+UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
+    : SymbolException("UnresolvedSymbol",
+                      build_unresolved_symbol_error_message(expr))
+{}

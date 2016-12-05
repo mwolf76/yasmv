@@ -42,25 +42,21 @@
 #define _SPACE(z, n, str)  " "
 #define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
 
-UnsupportedFormat::UnsupportedFormat(pconst_char format)
-    : f_format(strdup(format))
-{}
-
-const char* UnsupportedFormat::what() const throw()
+static std::string build_unsupported_format_error_message(pconst_char format)
 {
     std::ostringstream oss;
 
     oss
         << "CommandError: format `"
-        << f_format << "` is not supported.";
+        << format
+        << "` is not supported.";
 
-    return oss2cstr(oss);
+    return oss.str();
 }
 
-UnsupportedFormat::~UnsupportedFormat() throw()
-{
-    free(f_format);
-}
+UnsupportedFormat::UnsupportedFormat(pconst_char format)
+    : CommandException(build_unsupported_format_error_message(format))
+{}
 
 DumpTrace::DumpTrace(Interpreter& owner)
     : Command(owner)
