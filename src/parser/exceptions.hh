@@ -27,22 +27,20 @@
 #include <common/common.hh>
 #include <string>
 
-class GrammarException : public Exception {
+class ParserException : public Exception {
 public:
-    GrammarException(const std::string& subtype,
+    ParserException(const std::string& subtype,
                     const std::string& message="")
-        : Exception("GrammarException", subtype, message)
+        : Exception("ParserException", subtype, message)
     {}
 };
 
-class SyntaxError : public GrammarException {
+class SyntaxError : public ParserException {
 public:
-    SyntaxError(const std::string& message)
-        : GrammarException("SyntaxError", message)
-    {}
+    SyntaxError(const std::string& message);
 };
 
-class FileInputException : public GrammarException {
+class FileInputException : public ParserException {
 public:
     FileInputException(const std::string &filename);
 };

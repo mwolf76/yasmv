@@ -142,10 +142,7 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        pconst_char what
-            (e.what());
-
-        f_last_result = Variant(what);
+        f_last_result = Variant(e.what());
     }
 
     delete cmd;
@@ -175,10 +172,8 @@ Variant& Interpreter::operator()()
                     (*this)(cmd);
                 }
                 catch (Exception &e) {
-                    pconst_char what
-                        (e.what());
                     err
-                        << what
+                        << e.what()
                         << std::endl;
 
                     f_last_result = Variant("ERROR");

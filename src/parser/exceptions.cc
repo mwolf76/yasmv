@@ -26,6 +26,10 @@
 #include <string>
 #include <sstream>
 
+SyntaxError::SyntaxError(const std::string& message)
+    : ParserException("SyntaxError", message)
+{}
+
 static std::string build_file_input_error_message(const std::string& filename)
 {
     std::ostringstream oss;
@@ -39,6 +43,6 @@ static std::string build_file_input_error_message(const std::string& filename)
 }
 
 FileInputException::FileInputException(const std::string& filename)
-    : GrammarException("FileInputException",
-                       build_file_input_error_message(filename))
+    : ParserException("FileInputException",
+                      build_file_input_error_message(filename))
 {}
