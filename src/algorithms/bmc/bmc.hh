@@ -53,24 +53,31 @@ public:
     reachability_status_t sync_status();
     void sync_set_status(reachability_status_t status);
 
-    step_t sync_k(void);
-    void sync_set_k(step_t k);
+    step_t sync_fwd_k(void);
+    void sync_set_fwd_k(step_t k);
+
+    step_t sync_bwd_k(void);
+    void sync_set_bwd_k(step_t k);
 
 private:
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
-    step_t f_k;
+
+    boost::mutex f_fwd_k_mutex;
+    step_t f_fwd_k;
+
+    boost::mutex f_bwd_k_mutex;
+    step_t f_bwd_k;
 
     /**
      * strategies
      */
 
-    /* is there a k-path leading to a violation of P? */
-    void forward( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void forward_violation( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void forward_proof( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
 
-    /* is there a loop-free k-path leading to a violation of P? This
-       is sound provided that no CEX exists up to k - 1. */
-    void backward( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void backward_violation( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void backward_proof( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
 };
 
 /* Specialized for BMC CEX */

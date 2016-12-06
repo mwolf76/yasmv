@@ -74,6 +74,9 @@ public:
     // record a new witness
     void record( Witness& witness );
 
+    // get a unique autoincrement index
+    unsigned sync_autoincrement();
+
 protected:
     WitnessMgr();
     ~WitnessMgr();
@@ -95,6 +98,10 @@ private:
     Atom f_curr_uid;
 
     Evaluator f_evaluator;
+
+    // reserved for autoincrement index
+    unsigned f_autoincrement;
+    boost::mutex f_autoincrement_mutex;
 };
 
 #endif

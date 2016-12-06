@@ -86,3 +86,11 @@ void WitnessMgr::record( Witness& witness )
     f_list.push_back( &witness );
 }
 
+unsigned WitnessMgr::sync_autoincrement()
+{
+    boost::mutex::scoped_lock lock
+        (f_autoincrement_mutex);
+
+    return ++ f_autoincrement;
+}
+
