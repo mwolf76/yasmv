@@ -31,6 +31,7 @@ WitnessMgr::WitnessMgr()
     : f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_evaluator(*this)
+    , f_autoincrement(0)
 {}
 
 Witness& WitnessMgr::current()
@@ -86,11 +87,8 @@ void WitnessMgr::record( Witness& witness )
     f_list.push_back( &witness );
 }
 
-unsigned WitnessMgr::sync_autoincrement()
+unsigned WitnessMgr::autoincrement()
 {
-    boost::mutex::scoped_lock lock
-        (f_autoincrement_mutex);
-
     return ++ f_autoincrement;
 }
 

@@ -30,18 +30,13 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("fwd_reach_");
 
-void BMC::forward_violation(Expr_ptr target,
-                            CompilationUnit& ii,
-                            CompilationUnit& vv)
+void BMC::forward_reachability(CompilationUnit& goal)
 {
     Engine engine
-        ("forward violation strategy");
+        ("fwd reachability");
 
     step_t k
         (0);
-
-    /* unused */
-    (void) ii;
 
     /* initial constraints */
     assert_fsm_init(engine, k);
@@ -49,7 +44,7 @@ void BMC::forward_violation(Expr_ptr target,
 
     do {
         /* looking for witness : BMC(k-1) ^ ! P(k) */
-        assert_formula(engine, k, vv, engine.new_group());
+        assert_formula(engine, k, goal, engine.new_group());
 
         INFO
             << "Forward: now looking for reachability witness (k = " << k << ")..."
@@ -61,50 +56,38 @@ void BMC::forward_violation(Expr_ptr target,
         if (STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (STATUS_UNSAT == status)
-            INFO
-                << "Forward: no reachability witness found (k = " << k << ")..."
-                << std::endl ;
-
         else if (STATUS_SAT == status) {
-            ExprMgr& em
-                (ExprMgr::INSTANCE());
-
-            WitnessMgr& wm
-                (WitnessMgr::INSTANCE());
-
-            sync_set_status(BMC_REACHABLE);
-
             INFO
                 << "Forward: Reachability witness exists (k = " << k << "), target `"
-                << target
+                << f_phi
                 << "` is REACHABLE."
                 << std::endl;
 
+            sync_set_status(BMC_REACHABLE);
+
+            /* Extract reachability witness */
+            WitnessMgr& wm
+                (WitnessMgr::INSTANCE());
+
             Witness& w
-                (* new BMCCounterExample(target, model(), engine, k));
+                (* new BMCCounterExample(f_phi, model(), engine, k));
 
-            {
-                std::ostringstream oss;
-                oss
-                    << reach_trace_prfx
-                    << wm.sync_autoincrement();
+            /* witness identifier */
+            std::ostringstream oss_id;
+            oss_id
+                << reach_trace_prfx
+                << wm.autoincrement();
+            w.set_id(oss_id.str());
 
-                w.set_id(oss.str());
-            }
-
-            {
-                std::ostringstream oss;
-
-                oss
-                    << "Reachability witness for target `"
-                    << target
-                    << "` in module `"
-                    << model().main_module().name()
-                    << "`" ;
-
-                w.set_desc(oss.str());
-            }
+            /* witness description */
+            std::ostringstream oss_desc;
+            oss_desc
+                << "Reachability witness for target `"
+                << f_phi
+                << "` in module `"
+                << model().main_module().name()
+                << "`" ;
+            w.set_desc(oss_desc.str());
 
             wm.record(w);
             wm.set_current(w);
@@ -113,19 +96,23 @@ void BMC::forward_violation(Expr_ptr target,
             goto cleanup;
         }
 
-        if (sync_status() == BMC_UNKNOWN) {
+        else if (STATUS_UNSAT == status) {
+            INFO
+                << "Forward: no reachability witness found (k = " << k << ")..."
+                << std::endl ;
 
-            /* let forward proof searching algorithm there is no k-long path
-               leading to a violation from initial states. */
-            sync_set_fwd_k(++ k);
-
-            /* disable violation */
+            /* let forward unreachability searching algorithm there is no k-long path
+               leading to a reachability from initial states. */
+            /* disable reachability */
             engine.disable_last_group();
 
-            /* unrolling */
+            /* unrolling next and synchronizing with unreachability strategy */
             assert_fsm_trans(engine, k);
+            sync_set_fwd_k(++ k);
+
             assert_fsm_invar(engine, k);
         }
+
     } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
@@ -136,14 +123,12 @@ void BMC::forward_violation(Expr_ptr target,
     INFO
         << engine
         << std::endl;
-} /* forward_violation() */
+} /* forward_reachability() */
 
-void BMC::forward_proof(Expr_ptr target,
-                        CompilationUnit& ii,
-                        CompilationUnit& vv)
+void BMC::forward_unreachability()
 {
     Engine engine
-        ("fwd proof");
+        ("fwd unreachability");
 
     step_t k
         (0);
@@ -152,18 +137,20 @@ void BMC::forward_proof(Expr_ptr target,
     assert_fsm_invar(engine, 0);
 
     do {
-        /* wait for green light from violation algorithm */
-        while (sync_fwd_k() <= k)
+        /* busy wait for green light from reachability strategy */
+        while (sync_status() == BMC_UNKNOWN && sync_fwd_k() <= k)
             ;
 
-        /* unrolling */
-        assert_fsm_trans(engine, k ++);
+        /* unrolling next */
+        assert_fsm_trans(engine, k);
+        ++ k;
+
         assert_fsm_invar(engine, k);
 
-        /* looking for exploration proof: does a new unseen state
-           exist?  assert uniqueness and test for unsatisfiability */
+        /* looking for exploration unreachability: does a new reachable not-yet-seen
+           state exist? assert uniqueness and test for unsatisfiability */
         INFO
-            << "Forward: looking for unreachability proof (k = " << k << ")..."
+            << "Forward: looking for unreachability unreachability (k = " << k << ")..."
             << std::endl
             ;
 
@@ -182,20 +169,22 @@ void BMC::forward_proof(Expr_ptr target,
         if (STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (STATUS_SAT == status)
-            INFO
-                << "Forward: no unreachability proof found (k = " << k << ")"
-                << std::endl;
-
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Forward: found unreachability proof (k = " << k << ")"
+                << "Forward: found unreachability unreachability (k = " << k << ")"
                 << std::endl;
 
             sync_set_status(BMC_UNREACHABLE);
             goto cleanup;
         }
+
+        else if (STATUS_SAT == status)
+            INFO
+                << "Forward: no unreachability unreachability found (k = " << k << ")"
+                << std::endl;
+
         else assert(false); /* unreachable */
+
     } while (sync_status() == BMC_UNKNOWN);
 
 cleanup:
@@ -206,4 +195,4 @@ cleanup:
     INFO
         << engine
         << std::endl;
-} /* forward_proof() */
+} /* forward_unreachability() */

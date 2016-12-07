@@ -69,15 +69,16 @@ private:
     boost::mutex f_bwd_k_mutex;
     step_t f_bwd_k;
 
+    Expr_ptr f_phi; /* GOAL */
+
     /**
-     * strategies
+     * search strategies
      */
+    void forward_reachability(CompilationUnit& goal);
+    void forward_unreachability();
 
-    void forward_violation( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
-    void forward_proof( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
-
-    void backward_violation( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
-    void backward_proof( Expr_ptr phi, CompilationUnit& ii, CompilationUnit& vv);
+    void backward_reachability(CompilationUnit& goal);
+    void backward_unreachability();
 };
 
 /* Specialized for BMC CEX */
@@ -86,5 +87,12 @@ public:
     BMCCounterExample(Expr_ptr property, Model& model,
                       Engine& engine, unsigned k);
 };
+
+class BMCReversedCounterExample : public Witness {
+public:
+    BMCReversedCounterExample(Expr_ptr property, Model& model,
+                              Engine& engine, unsigned k);
+};
+
 
 #endif /* BMC_ALGORITHM_H */

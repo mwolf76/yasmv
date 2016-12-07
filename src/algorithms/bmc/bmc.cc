@@ -29,15 +29,16 @@
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
-    , f_fwd_k(-1)
-    , f_bwd_k(-1)
+    , f_fwd_k(0)
+    , f_bwd_k(0)
+    , f_phi(NULL)
 {
     const void* instance
         (this);
 
     setup();
 
-    if (!ok())
+    if (! ok())
         throw FailedSetup();
 
     DRIVEL
@@ -57,6 +58,9 @@ BMC::~BMC()
 
 void BMC::process(const Expr_ptr target)
 {
+    f_phi = target;
+    assert(f_phi);
+
     /* check everyting is ok before spawning */
     Expr_ptr ctx
         (em().make_empty());
@@ -64,37 +68,28 @@ void BMC::process(const Expr_ptr target)
     try {
         INFO
             << "Compiling formula `"
-            << target
+            << f_phi
             << "` ..."
             << std::endl;
 
-        CompilationUnit ii
-            (compiler().process( ctx, target));
-
-        CompilationUnit vv
-            (compiler().process( ctx, em().make_not(target)));
+        CompilationUnit goal
+            (compiler().process( ctx, f_phi));
 
         f_status = BMC_UNKNOWN;
 
-        /* launch parallel checking strategies */
+        /* reachability strategies */
+        boost::thread fwd_reachability(&BMC::forward_reachability, this, goal);
+        boost::thread bwd_reachability(&BMC::backward_reachability, this, goal);
 
-        /* violation-looking strategies */
-        boost::thread fwd_violation(&BMC::forward_violation,
-                                    this, target, vv, ii);
-        boost::thread bwd_violation(&BMC::backward_violation,
-                                    this, target, vv, ii);
-
-        /* proof-looking strategies */
-        boost::thread fwd_proof(&BMC::forward_proof,
-                                this, target, vv, ii);
-        boost::thread bwd_proof(&BMC::backward_proof,
-                                this, target, vv, ii);
+        /* unreachability strategies */
+        boost::thread fwd_unreachability(&BMC::forward_unreachability, this);
+        boost::thread bwd_unreachability(&BMC::backward_unreachability, this);
 
         /* join'em all */
-        fwd_violation.join();
-        bwd_violation.join();
-        fwd_proof.join();
-        bwd_proof.join();
+        fwd_reachability.join();
+        bwd_reachability.join();
+        fwd_unreachability.join();
+        bwd_unreachability.join();
     }
 
     catch (Exception& e) {
@@ -132,6 +127,7 @@ void BMC::sync_set_status(reachability_status_t status)
     assert(f_status == status ||
            (status != BMC_UNKNOWN && f_status == BMC_UNKNOWN));
 
+    /* set status, extract witness if reachable */
     f_status = status;
 }
 
@@ -139,7 +135,7 @@ void BMC::sync_set_status(reachability_status_t status)
 step_t BMC::sync_fwd_k()
 {
     boost::mutex::scoped_lock lock
-        (f_status_mutex);
+        (f_fwd_k_mutex);
 
     return f_fwd_k;
 }
@@ -147,7 +143,7 @@ step_t BMC::sync_fwd_k()
 void BMC::sync_set_fwd_k(step_t k)
 {
     boost::mutex::scoped_lock lock
-        (f_status_mutex);
+        (f_fwd_k_mutex);
 
     /* consistency check */
     assert(k >= f_fwd_k);
@@ -158,7 +154,7 @@ void BMC::sync_set_fwd_k(step_t k)
 step_t BMC::sync_bwd_k()
 {
     boost::mutex::scoped_lock lock
-        (f_status_mutex);
+        (f_bwd_k_mutex);
 
     return f_bwd_k;
 }
@@ -166,11 +162,10 @@ step_t BMC::sync_bwd_k()
 void BMC::sync_set_bwd_k(step_t k)
 {
     boost::mutex::scoped_lock lock
-        (f_status_mutex);
+        (f_bwd_k_mutex);
 
     /* consistency check */
     assert(k >= f_bwd_k);
 
     f_bwd_k = k;
 }
-

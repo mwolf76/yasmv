@@ -75,7 +75,7 @@ public:
     void record( Witness& witness );
 
     // get a unique autoincrement index
-    unsigned sync_autoincrement();
+    unsigned autoincrement();
 
 protected:
     WitnessMgr();
@@ -101,7 +101,6 @@ private:
 
     // reserved for autoincrement index
     unsigned f_autoincrement;
-    boost::mutex f_autoincrement_mutex;
 };
 
 #endif

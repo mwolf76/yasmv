@@ -30,21 +30,16 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("bwd_reach_");
 
-void BMC::backward_violation(Expr_ptr target,
-                             CompilationUnit& ii,
-                             CompilationUnit& vv)
+void BMC::backward_reachability(CompilationUnit& goal)
 {
     Engine engine
-        ("backward violation strategy");
+        ("bwd reachability");
 
     step_t k
         (0);
 
-    /* unused */
-    (void) ii;
-
     /* goal state constraints */
-    assert_formula(engine, UINT_MAX - k, vv);
+    assert_formula(engine, UINT_MAX - k, goal);
     assert_fsm_invar(engine, UINT_MAX - k);
 
     do {
@@ -61,51 +56,35 @@ void BMC::backward_violation(Expr_ptr target,
         if (STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (STATUS_UNSAT == status)
-            INFO
-                << "Backward: no reachability witness found (k = " << k << ")..."
-                << std::endl ;
-
         else if (STATUS_SAT == status) {
             ExprMgr& em
                 (ExprMgr::INSTANCE());
 
             sync_set_status(BMC_REACHABLE);
 
+            /* Extract reachability witness */
             WitnessMgr& wm
                 (WitnessMgr::INSTANCE());
 
-            INFO
-                << "Backward: Reachability witness exists (k = " << k << "), target `"
-                << target
-                << "` is REACHABLE."
-                << std::endl;
-
             Witness& w
-                (* new BMCCounterExample(target, model(), engine, k));
+                (* new BMCReversedCounterExample(f_phi, model(), engine, k));
 
-            {
-                std::ostringstream oss;
+            /* witness identifier */
+            std::ostringstream oss_id;
+            oss_id
+                << reach_trace_prfx
+                << wm.autoincrement();
+            w.set_id(oss_id.str());
 
-                oss
-                    << reach_trace_prfx
-                    << wm.sync_autoincrement();
-
-                w.set_id(oss.str());
-            }
-
-            {
-                std::ostringstream oss;
-
-                oss
-                    << "Reachability witness for target `"
-                    << target
-                    << "` in module `"
-                    << model().main_module().name()
-                    << "`" ;
-
-                w.set_desc(oss.str());
-            }
+            /* witness description */
+            std::ostringstream oss_desc;
+            oss_desc
+                << "Reversed reachability witness for target `"
+                << f_phi
+                << "` in module `"
+                << model().main_module().name()
+                << "`" ;
+            w.set_desc(oss_desc.str());
 
             wm.record(w);
             wm.set_current(w);
@@ -114,18 +93,23 @@ void BMC::backward_violation(Expr_ptr target,
             goto cleanup;
         }
 
-        if (sync_status() == BMC_UNKNOWN) {
-            /* let backward proof searching algorithm there is no k-long path
-               leading to a violation from initial states. */
-            sync_set_bwd_k(++ k);
+        else if (STATUS_UNSAT == status) {
+            INFO
+                << "Backward: no reachability witness found (k = " << k << ")..."
+                << std::endl ;
 
-            /* disable violation */
+            /* let forward unreachability searching algorithm there is no k-long path
+               leading to a reachability from initial states. */
+            /* disable reachability */
             engine.disable_last_group();
 
-            /* unrolling */
+            sync_set_bwd_k(++ k);
+
+            /* unrolling next and synchronizing with unreachability strategy */
             assert_fsm_trans(engine, UINT_MAX - k);
             assert_fsm_invar(engine, UINT_MAX - k);
         }
+
     } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
@@ -136,14 +120,12 @@ void BMC::backward_violation(Expr_ptr target,
     INFO
         << engine
         << std::endl;
-} /* backward_violation() */
+} /* backward_reachability() */
 
-void BMC::backward_proof(Expr_ptr target,
-                        CompilationUnit& ii,
-                        CompilationUnit& vv)
+void BMC::backward_unreachability()
 {
     Engine engine
-        ("fwd proof");
+        ("fwd unreachability");
 
     step_t k
         (0);
@@ -152,7 +134,7 @@ void BMC::backward_proof(Expr_ptr target,
     assert_fsm_invar(engine, UINT_MAX - 0);
 
     do {
-        /* wait for green light from violation algorithm */
+        /* wait for green light from reachability algorithm */
         while (sync_bwd_k() <= k)
             ;
 
@@ -161,10 +143,10 @@ void BMC::backward_proof(Expr_ptr target,
         ++ k ;
         assert_fsm_invar(engine, UINT_MAX - k);
 
-        /* looking for exploration proof: does a new unseen state
+        /* looking for exploration unreachability: does a new unseen state
            exist?  assert uniqueness and test for unsatisfiability */
         INFO
-            << "Backward: looking for unreachability proof (k = " << k << ")..."
+            << "Backward: looking for unreachability unreachability (k = " << k << ")..."
             << std::endl
             ;
 
@@ -185,12 +167,12 @@ void BMC::backward_proof(Expr_ptr target,
 
         else if (STATUS_SAT == status)
             INFO
-                << "Backward: no unreachability proof found (k = " << k << ")"
+                << "Backward: no unreachability unreachability found (k = " << k << ")"
                 << std::endl;
 
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Backward: found unreachability proof (k = " << k << ")"
+                << "Backward: found unreachability unreachability (k = " << k << ")"
                 << std::endl;
 
             sync_set_status(BMC_UNREACHABLE);
@@ -207,4 +189,4 @@ cleanup:
     INFO
         << engine
         << std::endl;
-} /* backward_proof() */
+} /* backward_unreachability() */
