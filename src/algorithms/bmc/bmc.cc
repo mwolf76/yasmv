@@ -75,9 +75,6 @@ void BMC::process(const Expr_ptr target)
         CompilationUnit goal
             (compiler().process( ctx, f_phi));
 
-        CompilationUnit ngoal
-            (compiler().process( ctx, em().make_not(f_phi)));
-
         f_status = BMC_UNKNOWN;
 
         /* reachability strategies */
