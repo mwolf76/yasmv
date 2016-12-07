@@ -150,7 +150,7 @@ void BMC::forward_unreachability()
         /* looking for exploration unreachability: does a new reachable not-yet-seen
            state exist? assert uniqueness and test for unsatisfiability */
         INFO
-            << "Forward: looking for unreachability unreachability (k = " << k << ")..."
+            << "Forward: looking for unreachability proof (k = " << k << ")..."
             << std::endl
             ;
 
@@ -171,7 +171,7 @@ void BMC::forward_unreachability()
 
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Forward: found unreachability unreachability (k = " << k << ")"
+                << "Forward: found unreachability proof (k = " << k << ")"
                 << std::endl;
 
             sync_set_status(BMC_UNREACHABLE);
@@ -180,7 +180,7 @@ void BMC::forward_unreachability()
 
         else if (STATUS_SAT == status)
             INFO
-                << "Forward: no unreachability unreachability found (k = " << k << ")"
+                << "Forward: no unreachability proof found (k = " << k << ")"
                 << std::endl;
 
         else assert(false); /* unreachable */

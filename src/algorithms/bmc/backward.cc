@@ -122,7 +122,7 @@ void BMC::backward_reachability(CompilationUnit& goal)
         << std::endl;
 } /* backward_reachability() */
 
-void BMC::backward_unreachability()
+void BMC::backward_unreachability(CompilationUnit& goal)
 {
     Engine engine
         ("fwd unreachability");
@@ -130,23 +130,23 @@ void BMC::backward_unreachability()
     step_t k
         (0);
 
-    assert_fsm_init(engine, UINT_MAX - 0);
-    assert_fsm_invar(engine, UINT_MAX - 0);
+    /* goal state constraints */
+    assert_formula(engine, UINT_MAX - k, goal);
+    assert_fsm_invar(engine, UINT_MAX - k);
 
     do {
-        /* wait for green light from reachability algorithm */
-        while (sync_bwd_k() <= k)
+        while (sync_status() == BMC_UNKNOWN && sync_bwd_k() <= k)
             ;
 
         /* unrolling */
-        assert_fsm_trans(engine, UINT_MAX - k);
         ++ k ;
+        assert_fsm_trans(engine, UINT_MAX - k);
         assert_fsm_invar(engine, UINT_MAX - k);
 
         /* looking for exploration unreachability: does a new unseen state
            exist?  assert uniqueness and test for unsatisfiability */
         INFO
-            << "Backward: looking for unreachability unreachability (k = " << k << ")..."
+            << "Backward: looking for unreachability proof (k = " << k << ")..."
             << std::endl
             ;
 
@@ -167,18 +167,19 @@ void BMC::backward_unreachability()
 
         else if (STATUS_SAT == status)
             INFO
-                << "Backward: no unreachability unreachability found (k = " << k << ")"
+                << "Backward: no unreachability proof found (k = " << k << ")"
                 << std::endl;
 
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Backward: found unreachability unreachability (k = " << k << ")"
+                << "Backward: found unreachability proof (k = " << k << ")"
                 << std::endl;
 
             sync_set_status(BMC_UNREACHABLE);
             goto cleanup;
         }
         else assert(false); /* unreachable */
+
     } while (sync_status() == BMC_UNKNOWN);
 
 cleanup:

@@ -75,6 +75,9 @@ void BMC::process(const Expr_ptr target)
         CompilationUnit goal
             (compiler().process( ctx, f_phi));
 
+        CompilationUnit ngoal
+            (compiler().process( ctx, em().make_not(f_phi)));
+
         f_status = BMC_UNKNOWN;
 
         /* reachability strategies */
@@ -83,7 +86,7 @@ void BMC::process(const Expr_ptr target)
 
         /* unreachability strategies */
         boost::thread fwd_unreachability(&BMC::forward_unreachability, this);
-        boost::thread bwd_unreachability(&BMC::backward_unreachability, this);
+        boost::thread bwd_unreachability(&BMC::backward_unreachability, this, goal);
 
         /* join'em all */
         fwd_reachability.join();

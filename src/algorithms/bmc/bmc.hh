@@ -75,10 +75,10 @@ private:
      * search strategies
      */
     void forward_reachability(CompilationUnit& goal);
-    void forward_unreachability();
+    void forward_unreachability(); /* unused */
 
     void backward_reachability(CompilationUnit& goal);
-    void backward_unreachability();
+    void backward_unreachability(CompilationUnit& goal);
 };
 
 /* Specialized for BMC CEX */
