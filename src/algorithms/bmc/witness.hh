@@ -24,14 +24,28 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_H
-#define BMC_ALGORITHM_H
-
-#include <expr/expr.hh>
+#ifndef BMC_ALGORITHM_WITNESS_H
+#define BMC_ALGORITHM_WITNESS_H
 
 #include <algorithms/base.hh>
 #include <algorithms/bmc/typedefs.hh>
-#include <algorithms/bmc/classes.hh>
 #include <algorithms/bmc/witness.hh>
 
-#endif /* BMC_ALGORITHM_H */
+#include <expr/expr.hh>
+
+#include <witness/witness.hh>
+
+/* Specialized for BMC CEX */
+class BMCCounterExample : public Witness {
+public:
+    BMCCounterExample(Expr_ptr property, Model& model,
+                      Engine& engine, unsigned k);
+};
+
+class BMCReversedCounterExample : public Witness {
+public:
+    BMCReversedCounterExample(Expr_ptr property, Model& model,
+                              Engine& engine, unsigned k);
+};
+
+#endif /* BMC_ALGORITHM_WITNESS_H */

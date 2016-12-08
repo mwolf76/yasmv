@@ -30,7 +30,7 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("bwd_reach_");
 
-void BMC::backward_reachability(CompilationUnit& goal)
+void BMC::backward_strategy(CompilationUnit& goal)
 {
     Engine engine
         ("bwd reachability");
@@ -41,6 +41,28 @@ void BMC::backward_reachability(CompilationUnit& goal)
     /* goal state constraints */
     assert_formula(engine, UINT_MAX - k, goal);
     assert_fsm_invar(engine, UINT_MAX - k);
+
+    status_t status
+        (engine.solve());
+
+    if (STATUS_UNKNOWN == status)
+        goto cleanup;
+
+    else if (STATUS_UNSAT == status) {
+        INFO
+            << "Backward: found inconsistency in GOAL states. Target is trivially UNREACHABLE."
+            << std::endl;
+
+        sync_set_status(BMC_UNREACHABLE);
+        goto cleanup;
+    }
+
+    else if (STATUS_SAT == status)
+        INFO
+            << "Backward: GOAL states consistency check ok."
+            << std::endl;
+
+    else assert(false); /* unreachable */
 
     do {
         /* looking for witness : I(k-1) ^ BMC(k-1) ^ ... ^! P(0) */
@@ -98,16 +120,42 @@ void BMC::backward_reachability(CompilationUnit& goal)
                 << "Backward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
-            /* let forward unreachability searching algorithm there is no k-long path
-               leading to a reachability from initial states. */
-            /* disable reachability */
             engine.disable_last_group();
 
-            sync_set_bwd_k(++ k);
-
-            /* unrolling next and synchronizing with unreachability strategy */
+            /* unrolling next */
+            ++ k;
             assert_fsm_trans(engine, UINT_MAX - k);
             assert_fsm_invar(engine, UINT_MAX - k);
+
+            /* build state uniqueness constraint for each pair of states
+               (j, k), where j < k */
+            for (step_t j = 0; j < k; ++ j)
+                assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
+
+            /* is this still relevant? */
+            if (sync_status() != BMC_UNKNOWN)
+                goto cleanup;
+
+            status_t status
+                (engine.solve());
+
+            if (STATUS_UNKNOWN == status)
+                goto cleanup;
+
+            else if (STATUS_SAT == status)
+                INFO
+                    << "Backward: no unreachability proof found (k = " << k << ")"
+                    << std::endl;
+
+            else if (STATUS_UNSAT == status) {
+                INFO
+                    << "Backward: found unreachability proof (k = " << k << ")"
+                    << std::endl;
+
+                sync_set_status(BMC_UNREACHABLE);
+                goto cleanup;
+            }
+            else assert(false); /* unreachable */
         }
 
     } while (sync_status() == BMC_UNKNOWN);
@@ -120,73 +168,5 @@ void BMC::backward_reachability(CompilationUnit& goal)
     INFO
         << engine
         << std::endl;
-} /* backward_reachability() */
+} /* BMC::backward_strategy() */
 
-void BMC::backward_unreachability()
-{
-    Engine engine
-        ("fwd unreachability");
-
-    step_t k
-        (0);
-
-    assert_fsm_init(engine, UINT_MAX - 0);
-    assert_fsm_invar(engine, UINT_MAX - 0);
-
-    do {
-        /* wait for green light from reachability algorithm */
-        while (sync_bwd_k() <= k)
-            ;
-
-        /* unrolling */
-        assert_fsm_trans(engine, UINT_MAX - k);
-        ++ k ;
-        assert_fsm_invar(engine, UINT_MAX - k);
-
-        /* looking for exploration unreachability: does a new unseen state
-           exist?  assert uniqueness and test for unsatisfiability */
-        INFO
-            << "Backward: looking for unreachability unreachability (k = " << k << ")..."
-            << std::endl
-            ;
-
-        /* build state uniqueness constraint for each pair of states
-           (j, k), where j < k */
-        for (step_t j = 0; j < k; ++ j)
-            assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
-
-        /* is this still relevant? */
-        if (sync_status() != BMC_UNKNOWN)
-            goto cleanup;
-
-        status_t status
-            (engine.solve());
-
-        if (STATUS_UNKNOWN == status)
-            goto cleanup;
-
-        else if (STATUS_SAT == status)
-            INFO
-                << "Backward: no unreachability unreachability found (k = " << k << ")"
-                << std::endl;
-
-        else if (STATUS_UNSAT == status) {
-            INFO
-                << "Backward: found unreachability unreachability (k = " << k << ")"
-                << std::endl;
-
-            sync_set_status(BMC_UNREACHABLE);
-            goto cleanup;
-        }
-        else assert(false); /* unreachable */
-    } while (sync_status() == BMC_UNKNOWN);
-
-cleanup:
-    /* signal other threads it's time to go home */
-    EngineMgr::INSTANCE()
-        .interrupt();
-
-    INFO
-        << engine
-        << std::endl;
-} /* backward_unreachability() */

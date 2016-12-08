@@ -1,9 +1,6 @@
 /**
- * @file bmc.hh
- * @brief SAT-based BMC reachability algorithm for invariant properties checking
- *
- * This header file contains the declarations required to implement
- * the BMC reachability checking algorithm.
+ * @file bmc/typedefs.hh
+ * @brief SAT-based BMC reachability analysis algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,14 +21,14 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_H
-#define BMC_ALGORITHM_H
+#ifndef BMC_ALGORITHM_TYPEDEFS_H
+#define BMC_ALGORITHM_TYPEDEFS_H
 
-#include <expr/expr.hh>
+typedef enum {
+    BMC_REACHABLE,
+    BMC_UNREACHABLE,
+    BMC_UNKNOWN,
+    BMC_ERROR,
+} reachability_status_t;
 
-#include <algorithms/base.hh>
-#include <algorithms/bmc/typedefs.hh>
-#include <algorithms/bmc/classes.hh>
-#include <algorithms/bmc/witness.hh>
-
-#endif /* BMC_ALGORITHM_H */
+#endif /* BMC_ALGORITHM_TYPEDEFS_H */

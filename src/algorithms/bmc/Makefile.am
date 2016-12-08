@@ -5,7 +5,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src																	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_CC = bmc.cc forward.cc backward.cc witness.cc
+PKG_CC = classes.cc forward.cc backward.cc witness.cc
 
 # -------------------------------------------------------
 

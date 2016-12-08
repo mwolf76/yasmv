@@ -207,7 +207,7 @@ void Analyzer::generate_framing_conditions()
                              em.make_eq(em.make_next(ident),
                                         ident)));
         INFO
-            << "Adding synthetic TRANS: "
+            << "Adding synthetic INVAR: "
             << synth_trans
             << std::endl;
 

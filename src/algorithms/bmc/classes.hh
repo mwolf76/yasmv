@@ -1,9 +1,6 @@
 /**
- * @file bmc.hh
- * @brief SAT-based BMC reachability algorithm for invariant properties checking
- *
- * This header file contains the declarations required to implement
- * the BMC reachability checking algorithm.
+ * @file bmc/classes.hh
+ * @brief SAT-based BMC reachability algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,14 +21,35 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_H
-#define BMC_ALGORITHM_H
-
-#include <expr/expr.hh>
+#ifndef BMC_ALGORITHM_CLASSES_H
+#define BMC_ALGORITHM_CLASSES_H
 
 #include <algorithms/base.hh>
 #include <algorithms/bmc/typedefs.hh>
-#include <algorithms/bmc/classes.hh>
-#include <algorithms/bmc/witness.hh>
 
-#endif /* BMC_ALGORITHM_H */
+class BMC : public Algorithm {
+
+public:
+    BMC(Command& command, Model& model);
+    ~BMC();
+
+    void process(const Expr_ptr phi);
+
+    inline reachability_status_t status()
+    { return sync_status(); }
+
+    reachability_status_t sync_status();
+    void sync_set_status(reachability_status_t status);
+
+private:
+    boost::mutex f_status_mutex;
+    reachability_status_t f_status;
+
+    Expr_ptr f_phi; /* GOAL */
+
+    /* strategies */
+    void forward_strategy(CompilationUnit& goal);
+    void backward_strategy(CompilationUnit& goal);
+};
+
+#endif /* BMC_ALGORITHM_CLASSES_H */
