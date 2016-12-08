@@ -33,7 +33,7 @@ static const char *reach_trace_prfx ("fwd_reach_");
 void BMC::forward_strategy(CompilationUnit& goal)
 {
     Engine engine
-        ("fwd reachability");
+        ("forward");
 
     step_t k
         (0);

@@ -33,7 +33,7 @@ static const char *reach_trace_prfx ("bwd_reach_");
 void BMC::backward_strategy(CompilationUnit& goal)
 {
     Engine engine
-        ("bwd reachability");
+        ("backward");
 
     step_t k
         (0);
