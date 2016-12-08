@@ -473,7 +473,7 @@ bool ModelMgr::analyze()
     f_analyzer.generate_framing_conditions();
 
     TRACE
-        << "Ok"
+        << "Model analysis complete"
         << std::endl;
 
     return true;
