@@ -1,9 +1,6 @@
 /**
  * @file bmc.hh
- * @brief SAT-based BMC reachability algorithm for invariant properties checking
- *
- * This header file contains the declarations required to implement
- * the BMC reachability checking algorithm.
+ * @brief SAT-based BMC reachability analysis algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
