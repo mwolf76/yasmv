@@ -1,14 +1,15 @@
 TODO
 ====
 
-* Refactor exceptions system-wide;
+Backward BMC strategy works ok (and strangely somewhat faster than forward
+strategy?) but it produces reversed CTX witnesses. It would be nice to have them
+straight.
 
-* Implement symmetric four-way reachability/closure analysis as follows:
+Name ordering not preserved in witnesses. It would be nice to preserve symbol
+declaration ordering.
 
-(a) forward reachability witness search;
-(b) forward unreachability proof search;
-(c) backward reachability witness search;
-(d) backward unreachability proof search.
+Unsynchronized logging output from concurrent threads can jumble up messages.
+Would be possible to synchronize logging without losing locality information?
 
 ----------
 
