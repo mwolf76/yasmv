@@ -139,6 +139,10 @@ void BMC::forward_strategy(CompilationUnit& goal)
             if (sync_status() != BMC_UNKNOWN)
                 goto cleanup;
 
+            INFO
+                << "Forward: now looking for unreachability proof (k = " << k << ")..."
+                << std::endl ;
+
             status_t status
                 (engine.solve());
 
