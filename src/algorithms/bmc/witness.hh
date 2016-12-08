@@ -38,14 +38,8 @@
 /* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k);
-};
-
-class BMCReversedCounterExample : public Witness {
-public:
-    BMCReversedCounterExample(Expr_ptr property, Model& model,
-                              Engine& engine, unsigned k);
+    BMCCounterExample(Expr_ptr property, Model& model, Engine& engine,
+                      unsigned k, bool reversed = false);
 };
 
 #endif /* BMC_ALGORITHM_WITNESS_H */

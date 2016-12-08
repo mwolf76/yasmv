@@ -50,7 +50,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
 
     else if (STATUS_UNSAT == status) {
         INFO
-            << "Backward: found inconsistency in GOAL states. Target is trivially UNREACHABLE."
+            << "Backward: empty final states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(BMC_UNREACHABLE);
@@ -59,7 +59,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
 
     else if (STATUS_SAT == status)
         INFO
-            << "Backward: GOAL states consistency check ok."
+            << "Backward: GOAL consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
@@ -89,7 +89,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
                 (WitnessMgr::INSTANCE());
 
             Witness& w
-                (* new BMCReversedCounterExample(f_phi, model(), engine, k));
+                (* new BMCCounterExample(f_phi, model(), engine, k, true)); /* reversed */
 
             /* witness identifier */
             std::ostringstream oss_id;

@@ -50,7 +50,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
 
     else if (STATUS_UNSAT == status) {
         INFO
-            << "Forward: found inconsistency in INIT states. Target is trivially UNREACHABLE."
+            << "Forward: Empty initial states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(BMC_UNREACHABLE);
@@ -59,7 +59,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
 
     else if (STATUS_SAT == status)
         INFO
-            << "Forward: INIT states consistency check ok."
+            << "Forward: INIT consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
