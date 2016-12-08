@@ -1,29 +1,33 @@
 /**
- *  @file internals.cc
+ * @file internals.cc
+ * @brief Type checking subsystem, internals implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/expr.hh>
 #include <type/type.hh>
 #include <symb/proxy.hh>
+
+#include <enc/enc_mgr.hh>
 
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
@@ -158,7 +162,7 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
         (check_arithmetical(expr->lhs()));
 
     // matching types are most definitely ok
-    if (rhs == lhs ) {
+    if (rhs == lhs) {
         PUSH_TYPE(boolean);
         return ;
     }
@@ -267,17 +271,10 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     else assert(false);
 }
 
-// fun: (boolean ? T) x T -> T
-void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_ite_postorder(Expr_ptr expr)
 {
     POP_TYPE(rhs_type);
-    POP_TYPE(lhs_type);
 
-    POP_TYPE(cnd);
-    if (! cnd -> is_boolean())
-        throw BadType( expr -> lhs() -> lhs(), cnd );
-
-    PUSH_TYPE(lhs_type);
     if (rhs_type -> is_boolean()) {
         Type_ptr lhs_type
             (check_logical(expr->lhs()));
@@ -287,7 +284,7 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
     }
     else if (rhs_type -> is_algebraic()) {
         Type_ptr lhs_type
-            (check_arithmetical(expr->lhs()));
+            (check_arithmetical(expr -> lhs()));
 
         if (rhs_type == lhs_type)  {
             PUSH_TYPE( rhs_type );
@@ -312,6 +309,45 @@ void TypeChecker::walk_ternary_ite_postorder(const Expr_ptr expr)
 
         assert(false);
     }
+    else if (rhs_type -> is_array()) {
+        Type_ptr lhs_type
+            (check_array(expr -> lhs()));
+
+        if (rhs_type == lhs_type)  {
+            PUSH_TYPE( rhs_type );
+            return ;
+        }
+
+        ArrayType_ptr alhs_type
+            (lhs_type -> as_array());
+        ArrayType_ptr arhs_type
+            (rhs_type -> as_array());
+
+        /* probably a bit too relaxed */
+        if (alhs_type -> width() !=
+            arhs_type -> width())
+            throw TypeMismatch( expr, lhs_type, rhs_type );
+
+        ScalarType_ptr alhs_of_type
+            (alhs_type -> of());
+
+        ScalarType_ptr arhs_of_type
+            (arhs_type -> of());
+
+        if (arhs_of_type -> is_constant() &&
+            ! alhs_of_type -> is_constant()) {
+            PUSH_TYPE( rhs_type );
+            return ;
+        }
+
+        if (alhs_of_type -> is_constant() &&
+            ! arhs_of_type -> is_constant()) {
+            PUSH_TYPE( lhs_type );
+            return ;
+        }
+
+        assert(false);
+    }
     else if (rhs_type -> is_enum()) {
         POP_TYPE(lhs_type);
         if (lhs_type != rhs_type)
@@ -326,8 +362,21 @@ void TypeChecker::memoize_result (Expr_ptr expr)
 {
     Expr_ptr key
         (f_owner.em().make_dot( f_ctx_stack.back(), expr));
+
     Type_ptr type
         (f_type_stack.back());
+
+#if defined DEBUG_TYPE_CHECKER
+    Expr_ptr type_repr
+        (type->repr());
+
+    DEBUG
+        << "TYPE ("
+        << key
+        << ") = "
+        << type_repr
+        << std::endl;
+#endif
 
     f_map[ key ] = type;
 }
@@ -361,9 +410,45 @@ void TypeChecker::post_hook()
 {}
 
 void TypeChecker::pre_node_hook(Expr_ptr expr)
-{}
+{
+#if defined DEBUG_TYPE_CHECKER
+    DEBUG
+        << "Type checking "
+        << expr
+        << "..."
+        << std::endl;
+#endif
+}
 void TypeChecker::post_node_hook(Expr_ptr expr)
-{ memoize_result(expr); }
+{
+#if defined DEBUG_TYPE_CHECKER
+    DEBUG
+        << expr
+        << std::endl;
+
+    int depth;
+    TypeVector::const_reverse_iterator ti;
+
+    for (depth = 0, ti = f_type_stack.rbegin(); ti != f_type_stack.rend(); ++ depth, ++ ti ) {
+        Type_ptr type
+            (*ti);
+        Expr_ptr repr
+            (type->repr());
+
+        DEBUG
+            << depth
+            << ": "
+            << repr
+            << std::endl;
+    }
+
+    DEBUG
+        << "----------"
+        << std::endl;
+#endif
+
+    memoize_result(expr);
+}
 
 Type_ptr TypeChecker::check_logical(Expr_ptr expr)
 {
@@ -425,8 +510,22 @@ bool TypeChecker::cache_miss(const Expr_ptr expr)
         (f_map.find(key));
 
     if (eye != f_map.end()) {
-        Type_ptr res = (*eye).second;
+        Type_ptr res
+            ((*eye).second);
         PUSH_TYPE(res);
+
+#if defined DEBUG_TYPE_CHECKER
+        Expr_ptr repr
+            (res->repr());
+
+        DEBUG
+            << "cache hit for `"
+            << expr
+            << "`: "
+            << repr
+            << std::endl;
+#endif
+
         return false;
     }
 

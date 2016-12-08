@@ -1,28 +1,26 @@
 /**
- *  @file monolithic.cc
+ * @file monolithic.cc
+ * @brief Encoding management subsystem, algebraic classes implementation.
  *
- *  This module contains definitions and services that implement an
- *  encoder for symbols. For each symbol a boolean encoding is
- *  maintained, the encoder takes care of ADD variables definitions
- *  and is provides mapback services as well.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <enc.hh>
 
 // boolean 1(1 bit) var
@@ -71,7 +69,7 @@ EnumEncoding::EnumEncoding(const ExprSet& lits)
 
     value_t v;
     ExprSet::iterator eye;
-    for (v = 0, eye= lits.begin(); eye != lits.end(); ++ eye, ++ v) {
+    for (v = 0, eye = lits.begin(); eye != lits.end(); ++ eye, ++ v) {
 
         f_v2e_map[v] = *eye;
         f_e2v_map[*eye] = v;
@@ -92,6 +90,6 @@ Expr_ptr EnumEncoding::expr(int *assignment)
     assert (cuddIsConstant(eval.getNode()));
 
     value_t lindex = Cudd_V(eval.getNode());
+
     return f_v2e_map [lindex];
 }
-

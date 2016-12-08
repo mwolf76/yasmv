@@ -30,10 +30,15 @@
 #include <cmd/commands/quit.hh>
 
 #include <cmd/commands/read_model.hh>
-#include <cmd/commands/write_model.hh>
+#include <cmd/commands/dump_model.hh>
 
-#include <cmd/commands/check_invar.hh>
+#include <cmd/commands/add_init.hh>
+#include <cmd/commands/add_invar.hh>
+#include <cmd/commands/add_trans.hh>
+
 #include <cmd/commands/check_init.hh>
+#include <cmd/commands/reach.hh>
+#include <cmd/commands/check_trans.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -41,6 +46,10 @@
 #include <cmd/commands/list_traces.hh>
 #include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/dup_trace.hh>
+
+#include <cmd/commands/get.hh>
+#include <cmd/commands/set.hh>
+#include <cmd/commands/clear.hh>
 
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
@@ -62,14 +71,26 @@ public:
     inline Command_ptr make_read_model()
     { return new ReadModel(f_interpreter); }
 
-    inline Command_ptr make_write_model()
-    { return new WriteModel(f_interpreter); }
+    inline Command_ptr make_dump_model()
+    { return new DumpModel(f_interpreter); }
 
-    inline Command_ptr make_check_invar()
-    { return new CheckInvar(f_interpreter); }
+    inline Command_ptr make_add_init()
+    { return new AddInit(f_interpreter); }
+
+    inline Command_ptr make_add_invar()
+    { return new AddInvar(f_interpreter); }
+
+    inline Command_ptr make_add_trans()
+    { return new AddTrans(f_interpreter); }
+
+    inline Command_ptr make_reach()
+    { return new Reach(f_interpreter); }
 
     inline Command_ptr make_check_init()
     { return new CheckInit(f_interpreter); }
+
+    inline Command_ptr make_check_trans()
+    { return new CheckTrans(f_interpreter); }
 
     inline Command_ptr make_pick_state()
     { return new PickState(f_interpreter); }
@@ -85,6 +106,73 @@ public:
 
     inline Command_ptr make_dup_trace()
     { return new DupTrace(f_interpreter); }
+
+    inline Command_ptr make_get()
+    { return new Get(f_interpreter); }
+
+    inline Command_ptr make_set()
+    { return new Set(f_interpreter); }
+
+    inline Command_ptr make_clear()
+    { return new Clear(f_interpreter); }
+
+    // -- topicrs ----------------------------------------------------------------
+    inline CommandTopic_ptr topic_help()
+    { return new HelpTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_time()
+    { return new TimeTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_quit()
+    { return new QuitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_read_model()
+    { return new ReadModelTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_dump_model()
+    { return new DumpModelTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_add_init()
+    { return new AddInitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_add_invar()
+    { return new AddInvarTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_add_trans()
+    { return new AddTransTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_reach()
+    { return new ReachTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_check_init()
+    { return new CheckInitTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_check_trans()
+    { return new CheckTransTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_pick_state()
+    { return new PickStateTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_simulate()
+    { return new SimulateTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_list_traces()
+    { return new ListTracesTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_dump_trace()
+    { return new DumpTraceTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_dup_trace()
+    { return new DupTraceTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_get()
+    { return new GetTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_set()
+    { return new SetTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_clear()
+    { return new ClearTopic(f_interpreter); }
 
 protected:
     CommandMgr();

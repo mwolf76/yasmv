@@ -1,22 +1,26 @@
 /**
- *  @file unit.hh
- *  @brief Basic expressions compiler - Output type definition
+ * @file unit.hh
+ * @brief Basic expressions compiler - Output type definition
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This header file contains the declarations required by the
+ * compilation unit.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -33,15 +37,25 @@
 #include <expr/expr.hh>
 
 #include <dd/dd.hh>
-#include <sat/satdefs.hh>
 
-/* <symb, is_signed?, width, precision =0> */
-typedef boost::tuple<bool, ExprType, unsigned, unsigned> InlinedOperatorSignature;
-inline const InlinedOperatorSignature make_ios (bool is_signed, ExprType exprType,
-                                                unsigned width, unsigned precision =0)
+/** Exception classes */
+class UnitException : public Exception {
+public:
+    const char* what() const throw();
+    UnitException(const char *msg);
+
+private:
+    const char* f_msg;
+};
+
+/* <symb, is_signed?, width> */
+typedef boost::tuple<bool, ExprType, unsigned> InlinedOperatorSignature;
+inline const InlinedOperatorSignature make_ios (bool is_signed,
+                                                ExprType exprType,
+                                                unsigned width)
 {
-    return boost::make_tuple <bool, ExprType, unsigned, unsigned>
-        (is_signed, exprType, width, precision);
+    return boost::make_tuple <bool, ExprType, unsigned>
+        (is_signed, exprType, width);
 }
 
 /* ios helper getters */
@@ -51,8 +65,6 @@ inline ExprType ios_optype( const InlinedOperatorSignature& ios )
 { return ios.get<1>(); }
 inline unsigned ios_width( const InlinedOperatorSignature& ios )
 { return ios.get<2>(); }
-inline unsigned ios_precision( const InlinedOperatorSignature& ios )
-{ return ios.get<3>(); }
 
 struct InlinedOperatorSignatureHash {
     long operator() (const InlinedOperatorSignature& k) const
@@ -63,7 +75,6 @@ struct InlinedOperatorSignatureHash {
         res = prime * res + (k.get<0>() ? 1231 : 1237);
         res = prime * res + k.get<1>();
         res = prime * res + k.get<2>();
-        res = prime * res + k.get<3>();
         return res;
     }
 };
@@ -75,8 +86,7 @@ struct InlinedOperatorSignatureEq {
         return
             x.get<0>() == y.get<0>() &&
             x.get<1>() == y.get<1>() &&
-            x.get<2>() == y.get<2>() &&
-            x.get<3>() == y.get<3>() ;
+            x.get<2>() == y.get<2>() ;
     }
 };
 
@@ -214,9 +224,16 @@ typedef std::vector<CompilationUnit> CompilationUnits;
 
 /* helpers */
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios);
-std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md);
+std::string ios2string(InlinedOperatorSignature ios);
+
+std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& iod);
+std::string iod2string(InlinedOperatorSignature& ios);
 
 std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md);
+std::string bsd2string(InlinedOperatorSignature& ios);
+
 std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
-#endif
+std::string msd2string(InlinedOperatorSignature& ios);
+
+#endif /* COMPILATION_UNIT_H */
 

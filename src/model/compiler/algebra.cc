@@ -1,33 +1,37 @@
 /**
- *  @file algebra.cc
- *  @brief Boolean compiler - algebraic manipulations module.
+ * @file algebra.cc
+ * @brief Expression compiler subsystem, algebraic operators implementations.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
-#include <common.hh>
+
+#include <common/common.hh>
 
 #include <expr.hh>
 #include <compiler.hh>
 
-/* Important Remark: operand arguments (which are DD vectors) are
-   fetched from the internal DD stack in a big-endian fashion, that is
-   MSB first. On the other hand, to ensure proper behavior the
-   *result* of the operation has to be pushed in reverse order. */
+/**
+ * REMARK: operand arguments (which are DD vectors) are fetched from
+ * the internal DD stack in a big-endian fashion, that is MSB
+ * first. On the other hand, to ensure proper behavior the result of
+ * any such operation has to be pushed in reversed order.
+ */
 
 // unary ops -------------------------------------------------------------------
 void Compiler::algebraic_unary(const Expr_ptr expr)
@@ -362,13 +366,13 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    f_type_stack.push_back( rhs_type );
-
     // both operands are algebraic, same width
     assert( rhs_type -> is_algebraic() &&
             lhs_type -> is_algebraic() &&
             cnd_type -> is_boolean() &&
             lhs_type -> width() == rhs_type -> width());
+
+    f_type_stack.push_back( rhs_type );
 
     unsigned width
         (rhs_type -> width());
@@ -376,7 +380,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     POP_DV(rhs, width);
     POP_DV(lhs, width);
 
-    /* Fetch cnd DD recursively */
+    /* Fetch cnd DD */
     POP_DD(cnd);
 
     /* Push MUX output DD vector */

@@ -1,47 +1,51 @@
 /**
- *  @file compiler.hh
- *  @brief Propositional logic compiler
+ * @file compiler.hh
+ * @brief Propositional logic compiler
  *
- *  This module contains definitions and services that implement the
- *  compilation of propositional logic expressions into a form which
- *  is suitable for subsequent phases of the model checking
- *  process. Current implementation uses DDs to perform expression
- *  manipulation. The compilation engine is implemented using a simple
- *  walker pattern: (a) on preorder, return true if the node has not
- *  yet been visited; (b) always do in-order (for binary nodes); (c)
- *  perform proper compilation in post-order hooks. Expressions are
- *  checked to be type safe, The final result of expression
- *  compilation shall be the conjunction of DDs suitable for CNF
- *  injection directly into the SAT solver. In previous versions, the
- *  compiler used DDs also to perform booleanization of algebraic
- *  expressions. Experimental results proved this approach unfeasible
- *  for realistic (i.e. >= 32) word sizes, at least for certain
- *  operators. To circumvent this limitation a different approach is
- *  needed. Therefore, for unary and binary algebraic operators as
- *  well as relational operators all we do here is (1) pushing bit
- *  results DDs representing boolean formulas for the results and (2)
- *  register in a supporting complementary structure the information
- *  necessary to fully express those results at a later stage.
+ * This header file contains the declarations required to implement
+ * the compilation of propositional logic expressions.
  *
- *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef COMPILER_H
 #define COMPILER_H
+
+/**
+ * Current implementation uses DDs to perform expression
+ * manipulation. The compilation engine is implemented using a simple
+ * walker pattern: (a) on preorder, return true if the node has not
+ * yet been visited; (b) always do in-order (for binary nodes); (c)
+ * perform proper compilation in post-order hooks. Expressions are
+ * checked to be type safe, The final result of expression compilation
+ * shall be the conjunction of DDs suitable for CNF injection directly
+ * into the SAT solver. In previous versions, the compiler used DDs
+ * also to perform booleanization of algebraic
+ * expressions. Experimental results proved this approach unfeasible
+ * for realistic (i.e. >= 32) word sizes, at least for certain
+ * operators. To circumvent this limitation a different approach is
+ * needed. Therefore, for unary and binary algebraic operators as well
+ * as relational operators all we do here is (1) pushing bit results
+ * DDs representing boolean formulas for the results and (2) register
+ * in a supporting complementary structure the information necessary
+ * to fully express those results at a later stage.
+ */
 
 #include <dd/dd.hh>
 #include <dd/dd_walker.hh>
@@ -53,16 +57,19 @@
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
-#include <sat/helpers.hh>
+// #include <sat/helpers.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
 #include <model/compiler/exceptions.hh>
 #include <model/compiler/unit.hh>
 
+#include <utils/time.hh>
+
 #include <boost/unordered_map.hpp>
 typedef boost::unordered_map<TimedExpr, CompilationUnit,
                              TimedExprHash, TimedExprEq> CompilationMap;
+
 typedef boost::unordered_map<Expr_ptr, Expr_ptr,
                              PtrHash, PtrEq> BinarySelectionUnionFindMap;
 
@@ -78,8 +85,8 @@ public:
 private:
     /* Remark: the compiler does NOT support LTL ops. To enable
        verification of temporal properties, the LTL operators needs to
-       be rewritten by the bmc algorithms before feeding the formula
-       into the compiler. */
+       be rewritten by the checking algorithm before feeding the
+       formula into the compiler. */
     LTL_STUBS;
 
     /* basic expr operators support */
@@ -104,6 +111,7 @@ private:
     bool is_ite_algebraic(const Expr_ptr expr);
 
     bool is_binary_array(const Expr_ptr expr);
+    bool is_ite_array(const Expr_ptr expr);
 
     bool is_subscript_boolean(const Expr_ptr expr);
     bool is_subscript_enumerative(const Expr_ptr expr);
@@ -152,6 +160,7 @@ private:
 
     /* -- arrays ------------------------------------------------------------ */
     void array_equals(const Expr_ptr expr);
+    void array_ite(const Expr_ptr expr);
 
     /* -- casts ------------------------------------------------------------- */
     void algebraic_cast_from_boolean(const Expr_ptr expr);

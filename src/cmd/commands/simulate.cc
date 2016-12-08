@@ -1,24 +1,26 @@
 /*
  * @file simulate.cc
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @brief Command `simulate` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <cstdlib>
 #include <cstring>
 
@@ -42,6 +44,11 @@ Simulate::~Simulate()
 void Simulate::set_invar_condition(Expr_ptr invar_condition)
 {
     f_invar_condition = invar_condition;
+
+    ERR
+        << "Additional constraint: "
+        << invar_condition
+        << std::endl;
 }
 
 void Simulate::set_until_condition(Expr_ptr until_condition)
@@ -66,8 +73,8 @@ Variant Simulate::operator()()
         (*this, ModelMgr::INSTANCE().model());
 
     sim.simulate(f_invar_condition,
-                   f_until_condition,
-                   f_k, f_trace_uid);
+                 f_until_condition,
+                 f_k, f_trace_uid);
 
     std::ostringstream tmp;
     switch (sim.status()) {
@@ -97,10 +104,28 @@ Variant Simulate::operator()()
     return Variant(tmp.str());
 }
 
-void Simulate::usage()
+SimulateTopic::SimulateTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+SimulateTopic::~SimulateTopic()
 {
-    std::cout
-        << "simulate - Performs BMC simulation."
+    TRACE
+        << "Destroyed simulate topic"
         << std::endl;
 }
 
+void SimulateTopic::usage()
+{
+    std::cout
+        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation.\n\n"
+        << "options:\n"
+        << "  -c <expr>, specifies an additional state constraint.\n"
+        << "  -u <expr>, specifies an until condition.\n"
+        << "  -k <steps>, the number of steps to simulate.\n"
+        << "  -t <trace-uid>, the simulation trace UID.\n\n"
+        << "Extends an existing trace with simulated steps. The simulation will follow\n"
+        << "any additional constraint and will terminate due to (a) having reached\n"
+        << "the until condition; or (b) having reached the specified number of steps.\n"
+        << "If neither -k nor -u is used, -k 1 is assumed." ;
+}

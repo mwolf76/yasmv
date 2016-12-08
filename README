@@ -1,92 +1,114 @@
 README
 ======
 
-  The YASMINE (Yet Another Symbolic Modeling INteractive Engine)
-project started off in fall 2011 as a tentative and partial C++
-re-implementation of the NuSMV2 model checker. As a former member of
-the NuSMV2 development team (in the years between 2008 and 2011) I was
-never completely happy with a few architectural choices, inherited
-from the long history of the NuSMV model checker and/or due to the
-amount of legacy code and tools that relied on it. Don't get me wrong,
-I really think NuSMV is a great piece of software. And I owe to the
-developers and researchers in FBK most - if not all - of my scientific
-and software engineering training. Those people are really
-fantastic. It's just that I have been wondering for years what that
-project would have been like, if one was completely free to redesign
-it all from the scratch. This is exactly why this project exists in
-the first place.
+  The YASMINE (Yet Another Symbolic Modeling INteractive Engine) project started
+off in fall 2011 as a tentative and partial C++ re-implementation of the NuSMV2
+model checker. As a former member of the NuSMV2 development team (in the years
+between 2008 and 2011) I was never completely happy with a few architectural
+choices, inherited from the long history of the NuSMV model checker and/or due
+to the amount of legacy code and tools that relied on it.
 
-  Overtime, YASMINE has significantly diverged from the original goal
-of making a NuSMV re-implementation. The input language for YASMINE is
-a dialect of SMV which retains only partial compatibility with NuSMV's
-original SMV language. In this area, my interest is about making the
-language easy to use, while not giving up on expressiveness.
+  Overtime, however, YASMINE has significantly diverged from the original goal
+of making a NuSMV re-implementation. The input language for YASMINE is now a
+dialect of the SMV language which retains only partial compatibility with
+NuSMV's original input language. In this area, my interest is all about
+exploring ways to improve language expressiveness and usability.
 
-  The tool is designed and crafted with high flexibility requirements
-as a test bed for new ideas - knowing for sure some of them will prove
-quite unsatisfactory. Of course, feedback (and criticism too) is very
-welcome, especially if constructive.
+  The project has now approached a stage in which the program is usable to
+perform basic reachability analysis and step-by-step simulation. The source
+distribution includes a few examples to demonstrate how the program can be used
+to solve planning problems.
 
 BUILD
 =====
 
-  The build system uses autools.
+  To install required dependencies on a Debian-like GNU/Linux distribution:
 
-  The following packages are required to perform a build:
+  $ sudo apt-get install autoconf libtool gcc g++ libboost-all-dev \
+  zlib1g-dev make minisat antlr3 libantlr3c-dev
 
-  The following packages are optional.
+  when all the required packages are installed, launching the build
+  should boil down to this:
 
-1. Input language
+  $ autoreconf -vif (you only need to do this once)
 
+  $ ./setup.sh
+  $ make
 
+  The build may take quite a while. If your machine has multiple cores
+  using -j <number-of-parallel-tasks> option when running `make`
+  should help in reducing significantly build time, e.g.
 
-1.1. The type system and operator semantics has been carefully
-     redesigned, to match standard C-like semantics as closely as
-     possible. As stated above, main driving application scenario for
-     this design is software model checking. *All* integer arithmetic
-     is 2's complement as it would be performed by any C compiler.
+  $ make -j8
 
-     1.1.1. NuSMV's finite range integer types and int enumeratives
-            are not supported. Models should use ordinary integer
-            types (either signed or unsigned). Users are encouraged to
-            adopt c99 integer types: (u)int8_t, (u)int16_t,
-            (u)int32_t, (u)int64_t;
+  Another option is to use distcc. The setup.sh script contains a
+  working example. Refer to distcc documentation for more details.
 
-     1.1.2. Support for Fixed-point rational arithmetic;
+  On my current development platform - Debian 8.6 ("Jessie") - the
+  whole thing builds with no warnings. The parser is written with
+  ANTLR3[*] so you will need some java JRE installed at build time to
+  generate the parser and lexer code. Generated parser and lexer code
+  itself is C ++, so as long as you don't change the grammar source
+  files you will no longer need the JRE to make the build. No JRE is
+  needed when running the final executable either.
 
-     1.1.3. Enumeratives must be pure symbolic (all literals as
-            identifiers) AND disjunct;
+  After completing the build there is one more step that needs to be
+  taken before being able to actually run the program. YASMINE
+  requires access to the microcode data package, which is released as
+  a bz2'd tarball due to its size (currently 34 MB). Unpack the
+  microcode tarball with:
 
-     1.1.4. All C standard notations for integers (octal, decimal,
-            hexadecimal) are supported (e.g. 052, 42, 0x2a). NuSMV's
-            special-purpose format for bit-vectors is *not* supported;
+  $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
-     1.1.5. Non-determinism is supported using the ANY construct; (FUTURE)
-            (e.g. x = ANY(2, 3, 5, 7, 11, 13, 17, 19, 23))
+  and ensure the YASMV_MICROCODE environment variable points to the
+  `microcode` directory you've just created. For example, assuming you
+  want the microcode distribution unpacked in the the same location as
+  the program source code:
 
-1.2. No INVARSPEC, LTLSPEC, CTLSPEC, (...) in input models. YASMINE
-     models are just that: models (namely, FSM descriptions). Support
-     is given at the command level in the interactive shell, in order
-     to allow specifying properties to be checked. Currently only
-     invariant checking is in scope;
+  $ cd yasmine
+  $ tar xfj microcode.tar.bz2
+  $ export YASMV_MICROCODE=`pwd`/microcode
+  $ ./yasmv
 
-2. Interactive environment
+  YASMINE - Yet Another Symbolic Modelling INteractive Environment
+  (c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
+  https://github.com/mwolf76/yasmine
 
-2.1. The YASMINE shell provides a fully Turing-complete interpreted
-     language for process control: constructs are provided for result
-     inspection (IF), looping (WHILE), and formatted output (PRINT)
-     among other things. The tool is designed to be fully scriptable;
-     (FUTURE)
+  [Sat May 21 17:21:57 2016].459 src/main.cc:176 :: 2176 microcode fragments registered.
+  >>
+
+  When launched the program will parse the contents of the `microcode`
+  directory and display the number of microcode fragments it
+  found. The default microcode distribution consists of 2176 fragments
+  and covers the full set of supported algebraic operations on n-bits
+  integers (1 <= n <= 64).
+
+  For further information on microcode, please refer to the README
+  file in the microcode bzip2'd tarball.
+
+  Unit tests can be run using:
+
+  $ ./tests --log_level=all
+
+Remark: The default build for C ++ code uses a low level of
+  optimization (-O0) to make life a whole lot easier for debugging. If
+  you want to, feel free to enable higher level of optimization for
+  the C ++ code (C code already uses '-O2' by default). Do not expect
+  major performance gains though, as core services Cudd (used int the
+  expression compiler) and Minisat (which powers the solving engine)
+  are compiled/installed separately and already use a higher level of
+  optimization.
+
+[*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
 DISCLAIMER
 ==========
 
 This code is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 YASMINE is in no way related to, or endorsed by, the NuSMV2
-development board and/or FBK. YASMINE does not contain *a single* line
-of code coming from NuSMV's code base, with the possible exception of
-the custom MiniSAT solver that was part of *my* B. Sc. dissertation.
+development board and/or FBK. YASMINE does not contain any code from
+NuSMV's code base.

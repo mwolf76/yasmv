@@ -38,6 +38,7 @@ BOOST_FILESYSTEM
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
 BOOST_THREADS
+BOOST_CHRONO
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
@@ -144,8 +145,10 @@ AC_CONFIG_FILES([Makefile
                  src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
                  src/cmd/commands/Makefile
+                 src/common/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
+                 src/env/Makefile
                  src/expr/Makefile
                  src/expr/printer/Makefile
                  src/expr/walker/Makefile
@@ -156,6 +159,7 @@ AC_CONFIG_FILES([Makefile
                  src/algorithms/sim/Makefile
                  src/symb/Makefile
                  src/model/Makefile
+                 src/model/analyzer/Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
                  src/model/preprocessor/Makefile

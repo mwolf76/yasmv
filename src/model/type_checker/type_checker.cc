@@ -1,25 +1,27 @@
 /**
- *  @file type_checker.cc
+ * @file type_checker.cc
+ * @brief Type checking subsystem, Type checker class implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/expr.hh>
 #include <type/type.hh>
@@ -66,7 +68,8 @@ Type_ptr TypeChecker::process(Expr_ptr expr, Expr_ptr ctx)
     // invoke walker on the body of the expr to be processed
     (*this)(expr);
 
-    assert(1 == f_type_stack.size());
+    if (1 != f_type_stack.size())
+        throw InternalError("TypeChecker::process post-condition checks failed");
 
     POP_TYPE(res);
     assert(NULL != res);
@@ -200,6 +203,13 @@ bool TypeChecker::walk_bw_xnor_inorder(const Expr_ptr expr)
 void TypeChecker::walk_bw_xnor_postorder(const Expr_ptr expr)
 { walk_binary_arithmetical_postorder(expr); }
 
+bool TypeChecker::walk_guard_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool TypeChecker::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void TypeChecker::walk_guard_postorder(const Expr_ptr expr)
+{ walk_binary_logical_postorder(expr); }
+
 bool TypeChecker::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_implies_inorder(const Expr_ptr expr)
@@ -245,6 +255,13 @@ bool TypeChecker::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_rshift_postorder(const Expr_ptr expr)
 { walk_binary_shift_postorder(expr); }
+
+bool TypeChecker::walk_assignment_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool TypeChecker::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void TypeChecker::walk_assignment_postorder(const Expr_ptr expr)
+{ walk_binary_equality_postorder(expr); }
 
 bool TypeChecker::walk_eq_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -293,14 +310,21 @@ bool TypeChecker::walk_ite_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_ite_postorder(const Expr_ptr expr)
-{ walk_ternary_ite_postorder(expr); }
+{ walk_binary_ite_postorder(expr); }
 
 bool TypeChecker::walk_cond_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool TypeChecker::walk_cond_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_cond_postorder(const Expr_ptr expr)
-{ /* nop */ }
+{
+    POP_TYPE(lhs_type);
+    POP_TYPE(cnd);
+    if (! cnd -> is_boolean())
+        throw BadType( expr -> lhs() -> lhs(), cnd );
+
+    PUSH_TYPE(lhs_type);
+}
 
 bool TypeChecker::walk_dot_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -409,8 +433,8 @@ void TypeChecker::walk_array_comma_postorder(Expr_ptr expr)
         ScalarType_ptr of_type
             (array_type -> of());
 
-        // XXX: review this
-        assert( lhs_type == of_type);
+        assert( lhs_type -> is_scalar() &&
+                lhs_type -> width() == of_type -> width());
 
         ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
@@ -423,8 +447,8 @@ void TypeChecker::walk_array_comma_postorder(Expr_ptr expr)
         ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
-        // XXX: review this
-        assert( lhs_type == of_type );
+        assert( lhs_type -> is_scalar() &&
+                lhs_type -> width() == of_type -> width());
 
         array_type = tm.find_array_type(of_type, 2);
         PUSH_TYPE(array_type);
@@ -466,7 +490,7 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         return;
 
     // is an integer const ..
-    if (em.is_int_numeric(expr)) {
+    if (em.is_int_const(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
         PUSH_TYPE(tm.find_constant(ww));
@@ -508,15 +532,21 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
             return;
         }
 
-        // we keep this to retain the old lazy behavior with nullary defines
-        // since it comes at no extra cost at all.
+        /* DEFINE, we can safely recur into its body. */
         else if (symb->is_define()) {
             Define& define
                 (symb->as_define());
 
-            assert( 0 == define.formals().size());
-            (*this)(define.body());
+            Expr_ptr body
+                (define.body());
 
+            DEBUG
+                << "Recurring in `"
+                << body
+                << "`"
+                << std::endl;
+
+            (*this)(body);
             return;
         }
     }

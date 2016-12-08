@@ -1,30 +1,27 @@
 /**
- *  @file printer.cc
- *  @brief Expr printers
+ * @file printer.cc
+ * @brief Expr printer class implementation
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -184,6 +181,13 @@ bool Printer::walk_bw_xnor_inorder(const Expr_ptr expr)
 void Printer::walk_bw_xnor_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+bool Printer::walk_guard_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_guard_inorder(const Expr_ptr expr)
+{ f_os << " ?: "; return true; }
+void Printer::walk_guard_postorder(const Expr_ptr expr)
+{ }
+
 bool Printer::walk_implies_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
 bool Printer::walk_implies_inorder(const Expr_ptr expr)
@@ -218,6 +222,13 @@ bool Printer::walk_rshift_inorder(const Expr_ptr expr)
 { f_os << " >> "; return true; }
 void Printer::walk_rshift_postorder(const Expr_ptr expr)
 { f_os << ")"; }
+
+bool Printer::walk_assignment_preorder(const Expr_ptr expr)
+{ return true; }
+bool Printer::walk_assignment_inorder(const Expr_ptr expr)
+{ f_os << " := "; return true; }
+void Printer::walk_assignment_postorder(const Expr_ptr expr)
+{ }
 
 bool Printer::walk_eq_preorder(const Expr_ptr expr)
 { f_os << "("; return true; }
@@ -345,11 +356,6 @@ bool Printer::walk_set_comma_inorder(const Expr_ptr expr)
 void Printer::walk_set_comma_postorder(const Expr_ptr expr)
 {}
 
-#include <iomanip>
-using std::hex;
-using std::dec;
-using std::oct;
-
 static inline value_t pow2(unsigned exp)
 {
     value_t res = 1;
@@ -365,17 +371,11 @@ static inline value_t pow2(unsigned exp)
 
 void Printer::walk_leaf(const Expr_ptr expr)
 {
-    #if !DEBUG_CTX
+#if ! DEBUG_CTX
     if (ExprMgr::INSTANCE().is_empty(expr))
         return;
-    #endif
+#endif
 
-    switch (expr->f_symb) {
-    case ICONST: f_os << dec << expr->value(); break;
-    case HCONST: f_os << hex << "0x" << expr->value(); break;
-    case OCONST: f_os << oct << "0"  << expr->value(); break;
-    case IDENT:  f_os << expr->atom(); break;
-    case UNDEF:  f_os << "UNDEF"; break;
-    default: assert(0);
-    }
+    /* proxy call */
+    print_leaf(expr);
 }

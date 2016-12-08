@@ -2,31 +2,40 @@
  * @file command.hh
  * @brief Command-interpreter subsystem
  *
+ * This header file contains the declarations required by the Command
+ * class.
+ *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include <common.hh>
+#include <common/common.hh>
 #include <src/expr/expr.hh>
 #include <utils/variant.hh>
 
+#include <cmd/typedefs.hh>
+#include <cmd/exceptions.hh>
+
 class Interpreter;
+
 class Command {
 protected:
     Interpreter& f_owner;
@@ -38,21 +47,24 @@ public:
     // functor-pattern
     Variant virtual operator()() =0;
 
-    // inline help system
-    void virtual usage() =0;
-
     // representation
     friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };
 typedef class Command* Command_ptr;
 
-/** Exception classes */
-class CommandException : public Exception {
+class CommandTopic {
+protected:
+    Interpreter& f_owner;
+
 public:
-    virtual const char* what() const throw() =0;
+    CommandTopic(Interpreter& owner);
+    virtual ~CommandTopic();
+
+    // inline help system
+    void virtual usage() =0;
 };
 
 typedef std::vector<Command_ptr> CommandVector;
 typedef CommandVector* CommandVector_ptr;
 
-#endif
+#endif /* COMMAND_H */

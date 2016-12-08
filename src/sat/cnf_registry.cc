@@ -1,11 +1,6 @@
 /**
  *  @file cnf_registry.cc
- *  @brief SAT interface implementation - CNF Registry
- *
- *  This module contains the interface for services that implement the
- *  CNF Registry. This components is used to keep a central registry
- *  of CNF variables, that both CNF builders and CNF injectors need to
- *  perform their work.
+ *  @brief SAT interface subsystem, CNF registry class implementation.
  *
  *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,9 +19,19 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+#include <sat/cnf_registry.hh>
+#include <sat/engine.hh>
+
+#include <model/compiler/compiler.hh>
+
 #include <utility>
 
-#include <sat.hh>
+/**
+ * This module contains the interface for services that implement the
+ * CNF Registry. This components is used to keep a central registry of
+ * CNF variables, that both CNF builders and CNF injectors need to
+ * perform their work.
+ */
 
 CNFRegistry::CNFRegistry(Engine& owner)
     : f_sat(owner)
@@ -35,11 +40,20 @@ CNFRegistry::CNFRegistry(Engine& owner)
 CNFRegistry::~CNFRegistry()
 {}
 
-Var CNFRegistry:: find_dd_var(const DdNode* node, step_t time)
+Var CNFRegistry::find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
     const UCBI& ucbi
         (f_sat.find_ucbi(node->index));
+    const TCBI tcbi
+        (ucbi, time);
+    return f_sat.tcbi_to_var(tcbi);
+}
+
+Var CNFRegistry::find_dd_var(int node_index, step_t time)
+{
+    const UCBI& ucbi
+        (f_sat.find_ucbi(node_index));
     const TCBI tcbi
         (ucbi, time);
     return f_sat.tcbi_to_var(tcbi);
@@ -93,4 +107,3 @@ Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
     }
     return res;
 }
-

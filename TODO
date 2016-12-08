@@ -1,3 +1,158 @@
+TODO
+====
+
+Backward BMC strategy works ok (and strangely somewhat faster than forward
+strategy?) but it produces reversed CTX witnesses. It would be nice to have them
+straight.
+
+Name ordering not preserved in witnesses. It would be nice to preserve symbol
+declaration ordering.
+
+Unsynchronized logging output from concurrent threads can jumble up messages.
+Would be possible to synchronize logging without losing locality information?
+
+----------
+
+Introduce support for timed constraints (AT-expressions)
+
+(a)
+AT 0
+   x = 0;
+
+is equivalent to:
+INIT
+    x = 0;
+
+(b)
+AT 0 .. *
+   x = 0;
+
+is equivalent to:
+INVAR
+     x = 0;
+
+(c)
+AT 3 .. 5
+   x = 0;
+
+is a constraint only valid when analyzing the transition relation for k = { 3, 4, 5 };
+
+AT <from> ( .. <to> )?
+   <expr>
+
+----------
+
+* Add support for guarded transitions
+
+(a) add support for assignment in TRANS sections only; assignments are
+not to be accepted in the context of INIT and INVAR or DEFINE sections;
+
+in TRANSes, '<identifier> :=' is equivalent to 'next(<identifier>) =
+'. The preprocessor takes on the duty of rewriting the original
+expression into the equivalent lower-level one.
+
+we pone the explicit restriction that <identifier> must be a state
+variable identifier; this is necessary to implement mutual-exclusion
+all the guarded claues talking about variable `x`.
+
+(b) add support for guarded transitions semantics in TRANS
+section. Guarded transitions are a generalization of ordinary TRANSes. The
+grammar of a guarded transition is as follows:
+
+TRANS
+<guard> ':'
+        ( <state-var> := <expr> ';' ) +
+
+In particular, multiple assignments are supported under the same
+guard. This is just a shortcut to allow the user to express something like:
+
+TRANS
+running:
+        x := x + 1;
+        y := y - 1;
+
+instead of having to write two separate TRANS sections.
+
+TRANS
+running:
+        x := x + 1;
+
+TRANS
+running:
+        y := y - 1;
+
+-- when guard is true, the assignment clause applies
+TRANS
+guard:
+        <state-variable> := <rhs-expr>;
+
+-- the former semantics is preserved with a backward-compatible syntax
+TRANS
+        <state-variable> := <rhs-expr>;
+
+the latter is equivalent to:
+
+TRANS
+TRUE:
+        <state-variable> := <rhs-expr>;
+
+(c) Auto frame condition generation
+
+Upon model compilation(?TODO review and redefine model processing
+phases?) all guards for each state-variable are analyzed for mutual
+exclusion; For each variable, if any two guards g1 and g2 are found to
+be compatible (i.e. ! UNSAT(g1, g2)) an error in generated and the
+compilation process is halted.
+
+If the guard analysis for g1, g2, ... gk is completed without
+reporting an error, a final clause is generated:
+
+g0 ::= ! g1 & ! g2 & ... & ! gk
+
+One final TRANS is automatically added to the model:
+TRANS
+g0:
+        <state-variable> := <state-variable>
+
+This is called a frame condition. A frame conditions implements the
+basic inertial principle so that a variable which is not assigned a
+new value retains its previous value. This, any variable is expected
+to retain its value unless a relevant (for that variable) TRANS is
+taken by the FSM.
+
+Review doxygen docs. It would be nice to have some documentation for
+the language too.
+
+BACKLOG (old stuff)
+=======
+
+Added check-fsm, add-init, add-invar, add-trans
+
+check-fsm:
+
+-I: skip initial states checking
+-T: skip trans checking
+
+* Consistency checking of INIT (SAT?)
+* Consistency checking of TRANS (SAT?)
+
+Ok if no inconsistencies detected, false otherwise.
+
+check-init:
+
+kill
+
+add-init:
+
+Add a constraint to INIT
+
+add-invar:
+
+Add a constraint to INAVR
+
+add-TRANS:
+Add a constraint to TRANS
+
 * Commands
 - integration of libreadline
 - autocomplete support

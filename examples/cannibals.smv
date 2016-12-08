@@ -1,0 +1,123 @@
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+#word-width 3
+MODULE cannibals
+
+@hidden
+VAR
+  west-cannibals: int;
+  east-cannibals: int;
+
+  west-missionaries: int;
+  east-missionaries: int;
+
+@hidden
+VAR
+  boat: { WEST, EAST };
+
+VAR
+  carry: { MM, MC, CC, M_, C_, DONE };
+
+INIT
+  west-cannibals = 3 &&
+  east-cannibals = 0;
+
+INIT
+  west-missionaries  = 3 &&
+  east-missionaries = 0;
+
+@hidden
+DEFINE
+  GOAL := west-cannibals = 0 &&
+          east-cannibals = 3 &&
+
+          west-missionaries = 0 &&
+          east-missionaries = 3;
+
+INIT
+  boat = WEST;
+
+TRANS
+  ! GOAL ?:
+    boat := ((boat = WEST) ? EAST : WEST);
+
+INVAR
+  GOAL -> carry = DONE;
+
+INVAR
+  west-cannibals >= 0;
+
+INVAR
+  east-cannibals >= 0;
+
+INVAR
+  west-missionaries >= 0;
+
+INVAR
+  east-missionaries >= 0;
+
+INVAR
+  west-missionaries = 1 ->
+      west-cannibals < 2;
+
+INVAR
+  east-missionaries = 1 ->
+      east-cannibals < 2;
+
+@hidden
+DEFINE
+  MCARRY :=
+         case
+           carry = MM: 2;
+           carry = MC: 1;
+           carry = M_: 1;
+           else: 0;
+         end;
+
+@hidden
+DEFINE
+  CCARRY :=
+         case
+           carry = CC: 2;
+           carry = MC: 1;
+           carry = C_: 1;
+           else: 0;
+         end;           
+
+INVAR
+  ! GOAL ->
+      MCARRY > 0 || CCARRY > 0;
+
+-- WEST
+TRANS
+  next(boat) = WEST ?:
+      west-missionaries := west-missionaries + MCARRY;
+            
+TRANS
+  next(boat) = WEST ?:
+      east-missionaries := east-missionaries - MCARRY;
+
+TRANS
+  next(boat) = WEST ?:
+      west-cannibals := west-cannibals + CCARRY;
+
+TRANS
+  next(boat) = WEST ?:
+      east-cannibals := east-cannibals - CCARRY;
+
+-- EAST
+TRANS
+  next(boat) = EAST ?:
+      west-missionaries := west-missionaries - MCARRY ;
+
+TRANS
+  next(boat) = EAST ?:
+      east-missionaries := east-missionaries + MCARRY ;
+
+TRANS
+  next(boat) = EAST ?:
+      west-cannibals := west-cannibals - CCARRY;
+
+TRANS
+  next(boat) = EAST ?:
+      east-cannibals := east-cannibals + CCARRY;

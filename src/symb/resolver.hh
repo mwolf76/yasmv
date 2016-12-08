@@ -1,33 +1,33 @@
 /**
- *  @file resolver.hh
- *  @brief Symbol resolution module
+ * @file symb/resolver.hh
+ * @brief Symbol resolution module, resolver interface.
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ * This header file contains the declarations required by the Resolver
+ * class.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
-#ifndef RESOLVER_H
-#define RESOLVER_H
+#ifndef SYMB_RESOLVER_H
+#define SYMB_RESOLVER_H
 
-#include <symb/symbol.hh>
+#include <symb/typedefs.hh>
 
 class Resolver {
 public:
@@ -35,6 +35,6 @@ public:
     virtual Symbol_ptr symbol(const Expr_ptr key) =0;
 };
 
-typedef Resolver* Resolver_ptr;
 
-#endif
+
+#endif /* SYMB_RESOLVER_H */

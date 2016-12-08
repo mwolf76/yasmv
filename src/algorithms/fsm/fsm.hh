@@ -1,22 +1,26 @@
 /**
- *  @file fsm.hh
- *  @brief SAT-based FSM Algorithms for property checking
+ * @file fsm.hh
+ * @brief SAT-based FSM Algorithms for consistency checking
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This header file contains the declarations required to implement
+ * the consistency checking of initial states and transition relation.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -28,29 +32,48 @@
 #include <algorithms/base.hh>
 #include <witness/witness.hh>
 
-class FSM : public Algorithm {
+typedef enum {
+    FSM_CONSISTENCY_OK,
+    FSM_CONSISTENCY_KO,
+    FSM_CONSISTENCY_UNDECIDED
+} fsm_consistency_t;
+
+class CheckInitConsistency : public Algorithm {
 
 public:
-    FSM(Command& command, Model& model);
-    ~FSM();
+    CheckInitConsistency(Command& command, Model& model);
+    ~CheckInitConsistency();
 
     void process();
 
-    inline mc_status_t status() const
+    inline fsm_consistency_t status() const
     { return f_status; }
 
-    inline void set_status(mc_status_t status)
+    inline void set_status(fsm_consistency_t status)
     { f_status = status; }
 
 private:
-    mc_status_t f_status;
+    boost::mutex f_status_mutex;
+    fsm_consistency_t f_status;
 };
 
-/* Specialized for FSM CEX */
-class FSMCounterExample : public Witness {
+class CheckTransConsistency : public Algorithm {
+
 public:
-    FSMCounterExample(Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k, bool use_coi);
+    CheckTransConsistency(Command& command, Model& model);
+    ~CheckTransConsistency();
+
+    void process();
+
+    inline fsm_consistency_t status() const
+    { return f_status; }
+
+    inline void set_status(fsm_consistency_t status)
+    { f_status = status; }
+
+private:
+    boost::mutex f_status_mutex;
+    fsm_consistency_t f_status;
 };
 
-#endif
+#endif /* FSM_ALGORITHM_H */

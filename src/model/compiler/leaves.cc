@@ -1,27 +1,32 @@
 /**
- *  @file leaves.cc
+ * @file leaves.cc
+ * @brief Model compiler subsystem, leaves services.
  *
- *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <utility>
 #include <compiler.hh>
 
 #include <proxy.hh>
+
+#include <env/environment.hh>
 
 static inline value_t pow2(unsigned exp);
 
@@ -55,9 +60,10 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     /* 1. Explicit int constants, perform booleanization
      * immediately. An exception will be thrown if conversion could
      * not be completed. */
-    if (em.is_int_numeric(expr)) {
+    if (em.is_int_const(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
+
         f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_constant(expr, ww);
         return;
@@ -122,18 +128,29 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         Type_ptr type
             (var.type());
 
-        if (type -> is_instance()) {
-            f_type_stack.push_back(type);
-            return;
+        /* INPUT vars are in fact bodyless, typed DEFINEs */
+        if (var.is_input()) {
+            Expr_ptr value
+              (Environment::INSTANCE().get(expr));
+
+            (*this) (value);
         }
 
-        TimedExpr key
-            (full, var.is_frozen() ? UINT_MAX : time);
+        /* REVIEW THIS */
+        else if (type -> is_instance()) {
+            f_type_stack.push_back(type);
+        }
 
-        Encoding_ptr enc
-            (find_encoding(key, type));
+        else {
+            TimedExpr key
+                (full, var.is_frozen() ? UINT_MAX : time);
 
-        push_dds(enc, type);
+            Encoding_ptr enc
+                (find_encoding(key, type));
+
+            push_dds(enc, type);
+        }
+
         return;
     }
 
@@ -149,16 +166,21 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    /* 6. defines, simply compile them recursively :-) */
+    /* 6. DEFINEs, simply compile them recursively :-) */
     else if (symb->is_define()) {
-        Expr_ptr body
-            (symb -> as_define().body());
 
-        (*this) (body);
-        return;
+      Define& define
+          (symb -> as_define());
+
+      Expr_ptr body
+          (define.body());
+
+      (*this) (body);
+      return;
     }
 
-    assert( false ); /* give up, TODO: exception */
+    /* give up, TODO: exception */
+    assert( false );
 }
 
 /* private service of walk_leaf */

@@ -1,0 +1,104 @@
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+--
+-- This model implements a vending machine change calculation algorithm. The
+-- caller must provide due-amount and credit as inputs. All values are expressed
+-- as hundredth fractions of value (cents, eurocents). The model is limited to
+-- 20.00 EUR for performance.
+--
+-- try this:
+-- >> set due-amount 475; set credit 2000; reach GOAL; dump-trace
+
+#word-width 11
+MODULE vending
+
+VAR
+    choice : { CHOICE_1CENT,
+               CHOICE_2CENT,
+               CHOICE_5CENT,
+               CHOICE_10CENT,
+               CHOICE_20CENT,
+               CHOICE_50CENT,
+               CHOICE_100CENT,
+               CHOICE_200CENT,
+               CHOICE_500CENT,
+               CHOICE_1000CENT,
+               CHOICE_IDLE };
+
+@input
+VAR
+    due-amount : uint;
+
+@input
+VAR
+    credit     : uint;
+
+VAR
+    change     : uint;
+
+INIT
+    change = credit - due-amount ;
+
+@hidden
+DEFINE
+    GOAL := change = 0;
+
+-- next value to be yield
+INVAR
+    choice = case
+                change >= 1000 : CHOICE_1000CENT;
+                change >= 500  : CHOICE_500CENT;
+                change >= 200  : CHOICE_200CENT;
+                change >= 100  : CHOICE_100CENT;
+                change >= 50   : CHOICE_50CENT;
+                change >= 20   : CHOICE_20CENT;
+                change >= 10   : CHOICE_10CENT;
+                change >= 5    : CHOICE_5CENT;
+                change >= 2    : CHOICE_2CENT;
+                change >= 1    : CHOICE_1CENT;
+                else           : CHOICE_IDLE;
+             end;
+
+-- partitioned transition relation expressed as a collection of
+-- mutually-exclusive guarded TRANSes. This is used to update the
+-- value of the `change` variable. Calculation terminated when `change`
+-- reaches 0.
+TRANS
+    choice = CHOICE_1000CENT ?:
+         change := change - 1000;
+
+TRANS
+    choice = CHOICE_500CENT ?:
+         change := change - 500;
+
+TRANS
+    choice = CHOICE_200CENT ?:
+         change := change - 200;
+
+TRANS
+    choice = CHOICE_100CENT ?:
+         change := change - 100;
+
+TRANS
+    choice = CHOICE_50CENT ?:
+         change := change - 50;
+
+TRANS
+    choice = CHOICE_20CENT ?:
+         change := change - 20;
+
+TRANS
+    choice = CHOICE_10CENT ?:
+         change := change - 10;
+
+TRANS
+    choice = CHOICE_5CENT ?:
+         change := change - 5;
+
+TRANS
+     choice = CHOICE_2CENT ?:
+          change := change - 2;
+
+TRANS
+     choice = CHOICE_1CENT ?:
+          change := change - 1;

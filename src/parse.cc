@@ -1,25 +1,28 @@
 /**
  * @file parse.cc
- * @brief Parsing services
+ * @brief Parsing services implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
  **/
+
 #include <sstream>
-#include <common.hh>
+#include <common/common.hh>
 
 #include <cmd.hh>
 
@@ -28,11 +31,14 @@
 
 #include <model.hh>
 
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 #include <smvLexer.h>
 #include <smvParser.h>
 
+#include <utils/misc.hh>
+
+/* Antlr 3.4 has a slightly different interface. Enable this if necessary */
 #define HAVE_ANTLR_34 0
 
 static bool parseErrors;
@@ -57,29 +63,6 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
 
     parseErrors = true;
 }
-
-class FileInputException : public Exception {
-
-    virtual const char* what() const throw()
-    {
-        std::ostringstream oss;
-        oss
-            << "Can not read file `"
-            << f_filename << "`";
-
-        return (strdup(oss.str().c_str()));
-    }
-
-    std::string f_filename;
-
-public:
-    FileInputException(const std::string &filename)
-        : f_filename(filename)
-    {}
-
-    virtual ~FileInputException() throw()
-    {}
-};
 
 bool parseFile(const char* fName)
 {

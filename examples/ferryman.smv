@@ -1,7 +1,6 @@
--- This file is part of the Yasmine distribution
--- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
-
-MODULE main
+-- This file is part of the YASMINE distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+MODULE ferryman
 
 VAR
         ferryman : { EAST, WEST };
@@ -10,45 +9,60 @@ VAR
         wolf     : { EAST, WEST };
         carry    : { NIL, GOAT, CABBAGE, WOLF };
 
-INIT
-        ferryman = WEST;
+VAR
+        running  : boolean;
 
+-- Everything is on the WEST bank at the beginning
 INIT
-        goat = WEST;
+        ferryman = WEST &&
+        goat     = WEST &&
+        cabbage  = WEST &&
+        wolf     = WEST &&
+        carry    = NIL   ;
 
-INIT
-        cabbage = WEST;
-
-INIT
-        wolf = WEST;
-
-INIT
-        carry = NIL;
-
+-- If the FERRYMAN has left the CABBAGE behind, the GOAT is not with the CABBAGE.
 INVAR
         ferryman != cabbage -> goat != cabbage;
 
+-- If the FERRYMAN has left the GOAT behind, the WOLF is not with the GOAT.
 INVAR
         ferryman != goat -> wolf != goat;
 
+-- A mandatory non-deterministic choice. Notice that this TRANS is unguarded.
 TRANS
-        -- non-deterministic choice
-        next(carry)   = {(ferryman = goat    ? GOAT    : NIL),
-                         (ferryman = cabbage ? CABBAGE : NIL),
-                         (ferryman = wolf    ? WOLF    : NIL)};
+        carry := {(ferryman = goat    ? GOAT    : NIL),
+                  (ferryman = cabbage ? CABBAGE : NIL),
+                  (ferryman = wolf    ? WOLF    : NIL)};
+
+-- If the FERRYMAN is carrying the GOAT, FERRYMAN and GOAT will have the same location.
 TRANS
-        next(goat) = ( next(carry) = GOAT ? next(ferryman) : goat );
+        next(carry) = GOAT ?:
+                      goat := next(ferryman);
 
+-- If the FERRYMAN is carrying the CABBAGE, FERRYMAN and CABBAGE will have the same location.
 TRANS
-        next(cabbage) = ( next(carry) = CABBAGE ? next(ferryman) : cabbage );
+       next(carry) = CABBAGE ?:
+                     cabbage := next(ferryman);
 
+-- If the FERRYMAN is carrying the WOLF, FERRYMAN and WOLF will have the same location.
 TRANS
-        next(wolf) = ( next(carry) = WOLF ? next(ferryman) : wolf );
+     next(carry) = WOLF ?:
+                   wolf := next(ferryman);
 
--- To perform planning, we assert the negation of the desired GOAL.
--- To solve the ferryman problem in this model try this:
--- >> check-invar ! GOAL
+-- If the FERRYMAN is RUNNING, she has to switch sides at each step.
+TRANS
+     running ?:
+             ferryman :=
+                       (ferryman = WEST ? EAST : WEST);
 
--- Symbols starting with an underline (_) do not show up in traces.
+-- To perform planning, we need to assert the negation of the desired TARGET.
+-- Our TARGET here is to have all the required items on the EAST bank.
+
+-- Symbols annotated with `@hidden` do not show up in traces.
 @hidden
-DEFINE GOAL := cabbage = EAST && goat = EAST && wolf = EAST;
+DEFINE GOAL :=
+       cabbage = EAST && goat = EAST && wolf = EAST;
+
+-- To solve the ferryman problem in this model try this:
+-- >> reach GOAL; dump-trace
+

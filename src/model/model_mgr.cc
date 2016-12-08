@@ -1,27 +1,28 @@
 /**
- *  @file model_mgr.cc
- *  @brief Model module (ModelMgr class)
+ * @file model_mgr.cc
+ * @brief Model management subsystem, Model Manager class implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
 #include <symb/symbol.hh>
-
+#include <model/exceptions.hh>
 #include <model/model_mgr.hh>
 
 // static initialization
@@ -33,6 +34,7 @@ ModelMgr::ModelMgr()
     , f_tm(TypeMgr::INSTANCE())
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
+    , f_analyzer(* new Analyzer(* this))
     , f_type_checker(* new TypeChecker(* this))
     , f_analyzed(false)
 {
@@ -64,24 +66,12 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     Model& model
         (f_model);
 
-    const Modules& modules
-        (model.modules());
-
-    Expr_ptr main_module
-        (f_em.make_main());
-
-    Modules::const_iterator main_iter
-        (modules.find(main_module));
-
-    if (modules.end() == main_iter)
-        throw ModuleNotFound(main_module);
-
-    Module& main_
-        (*main_iter -> second);
+    Module& main_module
+        (model.main_module());
 
     std::stack< boost::tuple<Expr_ptr, Module_ptr, Expr_ptr> > stack;
     stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >
-                (em.make_empty(), &main_, em.make_empty()));
+                (em.make_empty(), &main_module, em.make_empty()));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
@@ -105,7 +95,6 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
 
             f_context_map.insert( std::make_pair< Expr_ptr, Module_ptr >
                                   ( key, tgt ));
-
         }
 
         Expr_ptr curr_ctx
@@ -115,7 +104,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
         Expr_ptr curr_params
             (top.get<2>());
 
-        if (MMGR_TYPE_CHECK == pass) {
+        if (MMGR_ANALYZE == pass) {
             const ExprVector& init
                 (curr_module.init());
 
@@ -126,7 +115,133 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Typechecking INIT "
+                    << "Analyzing INIT "
+                    << curr_ctx << "::" << body
+                    << std::endl;
+
+                try {
+                    f_analyzer.process(body, curr_ctx, ANALYZE_INIT);
+                }
+                catch (Exception& ae) {
+                    std::string tmp
+                        (ae.what());
+
+                    WARN
+                        << tmp
+                        << std::endl
+                        << "  in INIT "
+                        << curr_ctx << "::" << body
+                        << std::endl;
+
+                    return false;
+                }
+            } // for init
+
+            const ExprVector& invar = curr_module.invar();
+            for (ExprVector::const_iterator ii = invar.begin();
+                 ii != invar.end(); ++ ii ) {
+
+                Expr_ptr body
+                    (*ii);
+
+                DEBUG
+                    << "Analyzing INVAR "
+                    << curr_ctx << "::" << body
+                    << std::endl;
+
+                try {
+                    f_analyzer.process(body, curr_ctx, ANALYZE_INVAR);
+                }
+                catch (Exception& ae) {
+                    std::string tmp
+                        (ae.what());
+
+                    WARN
+                        << tmp
+                        << std::endl
+                        << "  in INVAR "
+                        << curr_ctx << "::" << body
+                        << std::endl;
+
+                    return false;
+                }
+            } // for invar
+
+            const ExprVector& trans = curr_module.trans();
+            for (ExprVector::const_iterator ti = trans.begin();
+                 ti != trans.end(); ++ ti ) {
+
+                Expr_ptr body
+                    (*ti);
+
+                DEBUG
+                    << "Analyzing TRANS "
+                    << curr_ctx << "::" << body
+                    << std::endl;
+
+                try {
+                    f_analyzer.process(body, curr_ctx, ANALYZE_TRANS);
+                }
+                catch (Exception& ae) {
+                    std::string tmp
+                        (ae.what());
+
+                    WARN
+                        << tmp
+                        << std::endl
+                        << "  in TRANS "
+                        << curr_ctx << "::" << body
+                        << std::endl;
+
+                    return false;
+                }
+            } // for trans
+
+            const Defines& defs
+                (curr_module.defs());
+
+            for (Defines::const_iterator di = defs.begin();
+                 di != defs.end(); ++ di ) {
+
+                Expr_ptr body
+                    ((*di).second -> body());
+
+                DEBUG
+                    << "Analyzing "
+                    << curr_ctx << "::" << body
+                    << std::endl;
+
+                try {
+                    f_analyzer.process(body, curr_ctx, ANALYZE_DEFINE);
+                }
+                catch (Exception& ae) {
+                    std::string tmp
+                        (ae.what());
+
+                    WARN
+                        << tmp
+                        << std::endl
+                        << "  in DEFINE "
+                        << curr_ctx << "::" << body
+                        << std::endl;
+
+                    return false;
+                }
+            } // for defines
+        } /* MMGR_ANALYZE */
+
+        else if (MMGR_TYPE_CHECK == pass) {
+            const ExprVector& init
+                (curr_module.init());
+
+            for (ExprVector::const_iterator ii = init.begin();
+                 ii != init.end(); ++ ii ) {
+
+                Expr_ptr body
+                    (*ii);
+
+                DEBUG
+                    << "Type checking INIT "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -156,7 +271,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ii);
 
                 DEBUG
-                    << "Typechecking INVAR "
+                    << "Type checking INVAR "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -186,7 +301,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     (*ti);
 
                 DEBUG
-                    << "Typechecking TRANS "
+                    << "Type checking TRANS "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -217,7 +332,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     ((*di).second -> body());
 
                 DEBUG
-                    << "Typechecking DEFINE "
+                    << "Type checking "
                     << curr_ctx << "::" << body
                     << std::endl;
 
@@ -238,7 +353,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     return false;
                 }
             } // for defines
-        }
+        } /* MMGR_TYPE_CHECK */
 
         Variables attrs
             (curr_module.vars());
@@ -339,6 +454,8 @@ bool ModelMgr::analyze()
     analyzer_pass_t pass
         ((analyzer_pass_t) 0);
 
+
+
     while (pass < MMGR_DONE) {
         DRIVEL
             << "Model analysis (pass " << pass << ")"
@@ -352,10 +469,12 @@ bool ModelMgr::analyze()
         }
     }
 
+    f_analyzed = true;
+    f_analyzer.generate_framing_conditions();
+
     TRACE
         << "Ok"
         << std::endl;
 
-    f_analyzed = true;
     return true;
 }

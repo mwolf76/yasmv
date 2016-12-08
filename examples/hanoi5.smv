@@ -1,0 +1,201 @@
+#word-width 3
+MODULE hanoi;
+
+VAR
+    a : uint[5];
+    b : uint[5];
+    c : uint[5];
+    
+    move : { A2B, A2C, B2A, B2C, C2A, C2B };
+
+-- The initial condition
+INIT
+    a = [ 5, 4, 3, 2, 1 ] &&
+    b = [ 0, 0, 0, 0, 0 ] &&
+    c = [ 0, 0, 0, 0, 0 ]  ;
+
+-- Cannot move from an empty stack
+INVAR
+    HEIGHT_A = 0 -> move != A2B && move != A2C ;
+
+INVAR
+    HEIGHT_B = 0 -> move != B2A && move != B2C ;
+
+INVAR
+    HEIGHT_C = 0 -> move != C2A && move != C2B ;
+
+-- Cannot move to a full stack
+INVAR
+    HEIGHT_A = 5 -> move != B2A && move != C2A ;
+
+INVAR
+    HEIGHT_B = 5 -> move != A2B && move != C2B ;
+
+INVAR
+    HEIGHT_C = 5 -> move != A2C && move != B2C ;
+
+-- The goal condition
+@hidden
+DEFINE GOAL :=
+       a = [ 0, 0, 0, 0, 0 ] &&
+       b = [ 0, 0, 0, 0, 0 ] &&
+       c = [ 5, 4, 3, 2, 1 ] ;
+
+-- Discs are always stacked in descending order on stack A
+INVAR
+    a[0] >= a[1] &&
+    a[1] >= a[2] &&
+    a[2] >= a[3] &&
+    a[3] >= a[4] ;
+
+-- Discs are always stacked in descending order on stack B
+INVAR
+    b[0] >= b[1] &&
+    b[1] >= b[2] &&
+    b[2] >= b[3] &&
+    b[3] >= b[4] ;
+
+-- Discs are always stacked in descending order on stack C
+INVAR
+    c[0] >= c[1] &&
+    c[1] >= c[2] &&
+    c[2] >= c[3] &&
+    c[3] >= c[4] ;
+
+-- How many discs in stack A?
+@hidden
+DEFINE HEIGHT_A :=
+       case a[4] > 0: 5;
+            a[3] > 0: 4;
+            a[2] > 0: 3;
+            a[1] > 0: 2;
+            a[0] > 0: 1;
+            else    : 0;
+       end;
+
+-- Which is the topmost disc in stack A?
+@hidden
+DEFINE TOP_A := a[HEIGHT_A - 1];
+
+-- How many discs in stack B?
+@hidden
+DEFINE HEIGHT_B :=
+       case b[4] > 0: 5;
+            b[3] > 0: 4;
+            b[2] > 0: 3;
+            b[1] > 0: 2;
+            b[0] > 0: 1;
+            else    : 0;
+        end;
+
+-- Which is the topmost disc in stack B?
+@hidden
+DEFINE TOP_B := b[HEIGHT_B - 1];
+
+-- How many discs  on stack C?
+@hidden
+DEFINE HEIGHT_C :=
+       case c[4] > 0: 5;
+            c[3] > 0: 4;
+            c[2] > 0: 3;
+            c[1] > 0: 2;
+            c[0] > 0: 1;
+            else    : 0;
+       end;
+
+-- Which is the topmost disc in stack C?
+@hidden
+DEFINE TOP_C := c[HEIGHT_C - 1];
+
+-- outgoing 
+TRANS
+      move = { A2B, A2C } ?:
+                 a := case
+                   HEIGHT_A = 5: [ a[0], a[1], a[2], a[3], 0 ] ;
+                   HEIGHT_A = 4: [ a[0], a[1], a[2],    0, 0 ] ;
+                   HEIGHT_A = 3: [ a[0], a[1],    0,    0, 0 ] ;
+                   HEIGHT_A = 2: [ a[0],    0,    0,    0, 0 ] ;
+                   else        : [    0,    0,    0,    0, 0 ] ;
+                 end;
+
+TRANS
+      move = { B2A, B2C } ?:
+                 b := case
+                   HEIGHT_B = 5: [ b[0], b[1], b[2], b[3], 0 ] ;
+                   HEIGHT_B = 4: [ b[0], b[1], b[2],    0, 0 ] ;
+                   HEIGHT_B = 3: [ b[0], b[1],    0,    0, 0 ] ;
+                   HEIGHT_B = 2: [ b[0],    0,    0,    0, 0 ] ;
+                   else        : [    0,    0,    0,    0, 0 ] ;
+                 end;
+
+TRANS
+      move = { C2A, C2B } ?:
+                 c := case
+                   HEIGHT_C = 5: [ c[0], c[1], c[2], c[3], 0 ] ;
+                   HEIGHT_C = 4: [ c[0], c[1], c[2],    0, 0 ] ;
+                   HEIGHT_C = 3: [ c[0], c[1],    0,    0, 0 ] ;
+                   HEIGHT_C = 2: [ c[0],     0,   0,    0, 0 ] ;
+                   else        : [    0,     0,   0,    0, 0 ] ;
+                 end;
+
+-- incoming
+TRANS
+    move = B2A ?:
+               a := case
+                 HEIGHT_A = 4: [ a[0], a[1], a[2], a[3], TOP_B ];
+                 HEIGHT_A = 3: [ a[0], a[1], a[2], TOP_B, 0 ];
+                 HEIGHT_A = 2: [ a[0], a[1], TOP_B, 0, 0 ];
+                 HEIGHT_A = 1: [ a[0], TOP_B, 0, 0, 0 ];
+                 else        : [ TOP_B, 0, 0, 0, 0 ];
+               end;
+
+TRANS
+    move = C2A ?:
+               a := case
+                 HEIGHT_A = 4: [ a[0], a[1], a[2], a[3], TOP_C ];
+                 HEIGHT_A = 3: [ a[0], a[1], a[2], TOP_C, 0 ];
+                 HEIGHT_A = 2: [ a[0], a[1], TOP_C, 0, 0 ];
+                 HEIGHT_A = 1: [ a[0], TOP_C, 0, 0, 0 ];
+                 else        : [ TOP_C, 0, 0, 0, 0 ];
+               end;
+
+TRANS
+    move = A2B ?:
+               b := case
+                 HEIGHT_B = 4: [ b[0], b[1], b[2], b[3], TOP_A ];
+                 HEIGHT_B = 3: [ b[0], b[1], b[2], TOP_A, 0 ];
+                 HEIGHT_B = 2: [ b[0], b[1], TOP_A, 0, 0 ];
+                 HEIGHT_B = 1: [ b[0], TOP_A, 0, 0, 0 ];
+                 else        : [ TOP_A, 0, 0, 0, 0 ];
+               end;
+
+TRANS
+    move = C2B ?:
+               b := case
+                 HEIGHT_B = 4: [ b[0], b[1], b[2], b[3], TOP_C ];
+                 HEIGHT_B = 3: [ b[0], b[1], b[2], TOP_C, 0 ];
+                 HEIGHT_B = 2: [ b[0], b[1], TOP_C, 0, 0 ];
+                 HEIGHT_B = 1: [ b[0], TOP_C, 0, 0, 0 ];
+                 else        : [ TOP_C, 0, 0, 0, 0 ];
+               end;
+
+TRANS
+    move = A2C ?:
+               c := case
+                 HEIGHT_C = 4: [ c[0], c[1], c[2], c[3], TOP_A ];
+                 HEIGHT_C = 3: [ c[0], c[1], c[2], TOP_A, 0 ];
+                 HEIGHT_C = 2: [ c[0], c[1], TOP_A, 0, 0 ];
+                 HEIGHT_C = 1: [ c[0], TOP_A, 0, 0, 0 ];
+                 else        : [ TOP_A, 0, 0, 0, 0 ];
+               end;
+
+TRANS
+    move = B2C ?:
+               c := case
+                 HEIGHT_C = 4: [ c[0], c[1], c[2], c[3], TOP_B ];
+                 HEIGHT_C = 3: [ c[0], c[1], c[2], TOP_B, 0 ];
+                 HEIGHT_C = 2: [ c[0], c[1], TOP_B, 0, 0 ];
+                 HEIGHT_C = 1: [ c[0], TOP_B, 0, 0, 0 ];
+                 else        : [ TOP_B, 0, 0, 0, 0 ];
+               end;
+

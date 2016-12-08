@@ -1,20 +1,19 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = grammars
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
--I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
--I$(top_srcdir)/src/dd/cudd-2.5.0/mtr		\
--I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
--I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src																\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st -I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -DANTLR3_INLINE_INPUT_8BIT
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function	\
+-Wno-unused-but-set-variable -DANTLR3_INLINE_INPUT_8BIT
 
-PKG_HH = grammars/smvLexer.h grammars/smvParser.h
-PKG_CC = grammars/smvLexer.cc grammars/smvParser.cc
+PKG_HH = grammars/smvLexer.h grammars/smvParser.h exceptions.hh
+PKG_CC = grammars/smvLexer.cc grammars/smvParser.cc exceptions.cc
 
 grammars/.timestamp: grammars/smv.g
-	@echo "compiling ANTLR grammar... (this may take a while)"
+	@echo "compiling ANTLRv3 grammar smv.g ..."
 	@antlr3 grammars/smv.g
 	@touch grammars/.timestamp
 

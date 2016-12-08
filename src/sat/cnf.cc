@@ -1,6 +1,6 @@
 /**
  *  @file sat.cc
- *  @brief SAT interface implementation
+ *  @brief SAT interface subsystem,
  *
  *  This module contains the interface for services that implement an
  *  CNF clauses generation in a form that is suitable for direct

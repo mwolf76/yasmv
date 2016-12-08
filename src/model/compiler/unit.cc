@@ -1,24 +1,26 @@
 /**
- *  @file unit.cc
- *  @brief Micro module
+ * @file unit.cc
+ * @brief Expression compiler subsystem, output unit classes implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <model/compiler/unit.hh>
 #include <type/type.hh>
 
@@ -67,8 +69,6 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
         (ios_optype(ios));
     unsigned width
         (ios_width(ios));
-    unsigned precision
-        (ios_precision(ios));
 
     os <<
         (is_signed ? "s" : "u");
@@ -97,12 +97,20 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
     case GE: os << "ge"; break;
 
     default: assert(false);
-    }
+    } /* switch() */
+
     os << width;
-    if (0 < precision)
-        os << "#" << precision;
 
     return os;
+}
+
+std::string ios2string(InlinedOperatorSignature ios)
+{
+    std::ostringstream oss;
+    oss
+        << ios;
+
+    return oss.str();
 }
 
 std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
@@ -171,6 +179,15 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
     os << ")";
 
     return os;
+}
+
+std::string ios2string(InlinedOperatorDescriptor& iod)
+{
+    std::ostringstream oss;
+    oss
+        << iod;
+
+    return oss.str();
 }
 
 std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
@@ -247,6 +264,26 @@ std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
     os << "])";
 
     return os;
+}
+
+std::string bsd2string(BinarySelectionDescriptor& bsd)
+{
+    std::ostringstream oss;
+
+    oss
+        << bsd;
+
+    return oss.str();
+}
+
+std::string msd2string(MultiwaySelectionDescriptor& msd)
+{
+    std::ostringstream oss;
+
+    oss
+        << msd;
+
+    return oss.str();
 }
 
 std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)

@@ -74,9 +74,9 @@ extern "C" {
 #define CUDD_VERSION "2.5.0"
 
 #if HAVE_CONFIG
-#include "config.h"
+#  include "config.h"
 #endif
-#include <cdefs.h>
+#include <common/cdefs.h>
 
 #define CUDD_TRUE 1
 #define CUDD_FALSE 0

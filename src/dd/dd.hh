@@ -1,27 +1,29 @@
 /**
- *  @file dd.hh
- *  @brief Decision Diagram class
+ * @file dd.hh
+ * @brief Decision Diagram class
  *
- *  This module contains definitions and services that implement a
- *  lightweight decision diagram class or DD. DDs are used to store
- *  compilation result in a time-independent fashion, in order to make
- *  it easy to instantiate timed expressions and convert them to CNF.
+ * This header file contains declarations required by the
+ * implementation of a lightweight decision diagram class or DD. DDs
+ * are used to store compilation result in a time-independent fashion,
+ * in order to make it easy to instantiate timed expressions and
+ * convert them to CNF.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -31,7 +33,7 @@
 #include <climits>
 #include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 #include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
 typedef std::vector<ADD> DDVector;
@@ -70,4 +72,4 @@ typedef std::vector<ADD> DDVector;
     for (unsigned i = 0; i < width; ++ i)       \
         PUSH_DD(vec[width - i - 1]);
 
-#endif
+#endif /* DECISION_DIAGRAMS_H */

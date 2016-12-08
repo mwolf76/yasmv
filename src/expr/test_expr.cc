@@ -1,3 +1,26 @@
+/**
+ * @file test_expr.cc
+ * @brief Expressions subsystem unit tests.
+ *
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
+ *
+ **/
+
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
@@ -170,17 +193,17 @@ BOOST_AUTO_TEST_CASE(expr)
     BOOST_CHECK (em.is_ite(x_ite_y));
 
     Expr_ptr iconst_42 = em.make_const(42);
-    BOOST_CHECK (em.is_int_numeric(iconst_42) && iconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_const(iconst_42) && iconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(iconst_42));
     BOOST_CHECK (42 == em.const_value(iconst_42));
 
     Expr_ptr hconst_42 = em.make_hconst(0x2a);
-    BOOST_CHECK (em.is_int_numeric(hconst_42) && hconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_const(hconst_42) && hconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(hconst_42));
     BOOST_CHECK (42 == em.const_value(hconst_42));
 
     Expr_ptr oconst_42 = em.make_oconst(052);
-    BOOST_CHECK (em.is_int_numeric(oconst_42) && oconst_42->value() == 42);
+    BOOST_CHECK (em.is_int_const(oconst_42) && oconst_42->value() == 42);
     BOOST_CHECK (em.is_constant(oconst_42));
     BOOST_CHECK (42 == em.const_value(oconst_42));
 
@@ -199,10 +222,6 @@ BOOST_AUTO_TEST_CASE(expr)
 BOOST_AUTO_TEST_CASE(builtin)
 {
     ExprMgr& em(ExprMgr::INSTANCE());
-
-    Expr_ptr main_ = em.make_main();
-    BOOST_CHECK (em.is_identifier(main_) && main_->atom() == Atom( MAIN_TOKEN ));
-    BOOST_CHECK (em.is_main(main_));
 
     Expr_ptr empty = em.make_empty();
     BOOST_CHECK (em.is_identifier(empty) && empty->atom() == Atom( EMPTY_TOKEN ));
@@ -487,19 +506,11 @@ BOOST_AUTO_TEST_CASE(printer)
     }
 
     {
-        Expr_ptr main_ = em.make_main();
-        std::ostringstream oss;
-        Printer printer(oss);
-        printer << main_; BOOST_CHECK (oss.str() == std::string("main"));
-    }
-
-    {
         Expr_ptr false_ = em.make_false();
         std::ostringstream oss;
         Printer printer(oss);
         printer << false_; BOOST_CHECK (oss.str() == std::string("FALSE"));
     }
-
 
     {
         Expr_ptr true_ = em.make_true();

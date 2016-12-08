@@ -1,0 +1,75 @@
+-- This file is part of the Yasmine distribution
+-- (c) 2011-16 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+#word-width 6
+MODULE maze
+
+@hidden
+@frozen
+VAR
+    SPACE: boolean[64];
+
+@oct
+VAR
+    x, y : uint;
+
+@hidden
+DEFINE _ := FALSE;
+
+@hidden
+DEFINE O := TRUE;
+
+-- define the labyrinth space. 'O's are obstacles, while '_' are free
+-- cells. The labyrinth doesn't change overtime.
+INVAR
+   0 <= x && 0 <= y;
+
+INVAR
+  x <= 7 && y <= 7;
+
+INIT
+   SPACE = [_,_,O,O,_,O,O,O,
+            O,_,O,O,_,_,_,_,
+            O,_,O,_,_,O,O,_,
+            O,_,O,_,_,_,O,_,
+            _,_,_,O,O,_,O,_,
+            _,_,_,_,O,_,O,_,
+            _,O,O,_,_,_,O,_,
+            _,_,_,_,O,O,O,_];
+
+-- our guy starts at the top-left corner,
+INIT
+   x = 0 && y = 0;
+
+-- he can not occupy a cell which holds an obstacle...
+@hidden
+DEFINE
+  position := 8 * y + x;
+
+INVAR
+  !  SPACE [position];
+
+-- can move one step at the time on the X axis
+INVAR
+   x < next(x) -> next(x) - x = 1;
+
+INVAR
+   next(x) < x -> x - next(x) = 1;
+
+-- ... or the Y axis,
+INVAR
+   y < next(y) -> next(y) - y = 1;
+INVAR
+   next(y) < y -> y - next(y) = 1;
+
+-- ... not both
+INVAR
+   (next(x) != x) && (next(y)  = y) ||
+   (next(x)  = x) && (next(y) != y) ;
+
+-- his target is the bottom-right corner
+@hidden
+DEFINE
+  GOAL := x = 7 && y = 7;
+
+-- to solve the labyrinth issue the command:
+-- >> reach GOAL;

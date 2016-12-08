@@ -1,29 +1,25 @@
 /**
- *  @file enc_mgr.cc
- *  @brief Encoder module (EncMgr class)
+ * @file enc_mgr.cc
+ * @brief Encoding subsystem, Encoding Manager class implementation.
  *
- *  This module contains definitions and services that implement an
- *  encoder for symbols. For each symbol a boolean encoding is
- *  maintained, the encoder takes care of ADD variables definitions
- *  and is provides mapback services as well.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+
 #include <sstream>
 
 #include <enc.hh>
@@ -48,12 +44,16 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
 
     if ((btype = dynamic_cast<BooleanType_ptr>(tp)))
         res = new BooleanEncoding();
+
     else if ((sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(sa_type->width(), true, sa_type->dds());
+
     else if ((ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(ua_type->width(), false, ua_type->dds());
+
     else if ((etype = dynamic_cast<EnumType_ptr>(tp)))
         res = new EnumEncoding(etype->literals());
+
     else if ((vtype = dynamic_cast<ArrayType_ptr>(tp))) {
         Encodings encodings;
 
@@ -63,6 +63,7 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
         }
         res = new ArrayEncoding(encodings);
     }
+
     else assert(false); /* unexpected or unsupported */
 
     /* enable DD reordering */
@@ -124,7 +125,9 @@ EncodingMgr::EncodingMgr()
     , f_em(ExprMgr::INSTANCE())
     , f_word_width ((OptsMgr::INSTANCE().word_width()))
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DRIVEL
         << "Initialized EncodingMgr @ " << instance
         << ", native word size is " << f_word_width
@@ -133,7 +136,9 @@ EncodingMgr::EncodingMgr()
 
 EncodingMgr::~EncodingMgr()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DRIVEL
         << "Deinitialized EncodingMgr @ " << instance
         << std::endl;

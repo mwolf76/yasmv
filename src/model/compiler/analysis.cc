@@ -1,23 +1,26 @@
 /**
- *  @file analysis.cc
+ * @file analysis.cc
+ * @brief Expression compiler subsystem, analysis helpers.
  *
- *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <compiler.hh>
 
 bool Compiler::is_binary_boolean(const Expr_ptr expr)
@@ -287,6 +290,22 @@ bool Compiler::is_binary_array(const Expr_ptr expr)
         (f_ctx_stack.back());
 
     if (em.is_binary_equality(expr))
+        return
+            f_owner.type(expr->rhs(), ctx) -> is_array() &&
+            f_owner.type(expr->lhs(), ctx) -> is_array();
+
+    return false;
+}
+
+bool Compiler::is_ite_array(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+
+    if (em.is_ite(expr))
         return
             f_owner.type(expr->rhs(), ctx) -> is_array() &&
             f_owner.type(expr->lhs(), ctx) -> is_array();

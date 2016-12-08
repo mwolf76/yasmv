@@ -1,22 +1,23 @@
 /**
- *  @file expr.cc
- *  @brief Expression management
+ * @file expr.cc
+ * @brief Expression management
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -24,10 +25,34 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
+#include <enc/enc_mgr.hh>
+
+#include <iomanip>
+
+value_t Expr_TAG::value() const
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    if (em.is_false(const_cast<Expr_ptr> (this)))
+        return 0;
+
+    if (em.is_true(const_cast<Expr_ptr> (this)))
+        return 1;
+
+    assert (ICONST == f_symb ||
+            HCONST == f_symb ||
+            OCONST == f_symb ||
+            BCONST == f_symb);
+
+    return u.f_value;
+}
+
 std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
 {
     Printer (os)
         << expr;
+
     return os;
 }
 
@@ -58,6 +83,7 @@ long ExprHash::operator() (const Expr& k) const
 
     if (k.f_symb == ICONST
         || k.f_symb == HCONST
+        || k.f_symb == BCONST
         || k.f_symb == OCONST) {
         v0 = (long)(k.u.f_value);
         v1 = (long)(k.u.f_value >> sizeof(long));
@@ -99,4 +125,3 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
             (x.u.f_lhs == y.u.f_lhs &&
              x.u.f_rhs == y.u.f_rhs));
 }
-

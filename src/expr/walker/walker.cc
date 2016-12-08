@@ -1,25 +1,27 @@
 /**
  * @file expr_walker.cc
- * @brief Expression walker
+ * @brief Expression walker class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHqANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
-#include <common.hh>
+
+#include <common/common.hh>
 
 #include <expr.hh>
 #include <walker/walker.hh>
@@ -117,6 +119,9 @@ void ExprWalker::walk ()
             case BW_XNOR_1: goto entry_BW_XNOR_1;
             case BW_XNOR_2: goto entry_BW_XNOR_2;
 
+            case GUARD_1: goto entry_GUARD_1;
+            case GUARD_2: goto entry_GUARD_2;
+
             case IMPLIES_1: goto entry_IMPLIES_1;
             case IMPLIES_2: goto entry_IMPLIES_2;
 
@@ -125,6 +130,9 @@ void ExprWalker::walk ()
 
             case RSHIFT_1: goto entry_RSHIFT_1;
             case RSHIFT_2: goto entry_RSHIFT_2;
+
+            case ASSIGNMENT_1: goto entry_ASSIGNMENT_1;
+            case ASSIGNMENT_2: goto entry_ASSIGNMENT_2;
 
             case EQ_1: goto entry_EQ_1;
             case EQ_2: goto entry_EQ_2;
@@ -175,12 +183,13 @@ void ExprWalker::walk ()
             case TYPE_1: goto entry_TYPE_1;
             case TYPE_2: goto entry_TYPE_2;
 
-            default: throw UnsupportedEntryPointException(curr.pc);
-
+            default: throw UnsupportedEntryPoint(curr.pc);
             }
         }
 
-        assert(NULL != curr.expr);
+        /* pre-node hooks */
+        if (! curr.expr)
+            throw InternalError("NULL expression encountered (walker pre-node() hook)");
         pre_node_hook(curr.expr);
 
         switch (curr.expr->f_symb) {
@@ -501,6 +510,24 @@ void ExprWalker::walk ()
             }
             break;
 
+        case GUARD:
+            if (walk_guard_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = GUARD_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_GUARD_1:
+                if (walk_guard_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = GUARD_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_GUARD_2:
+                walk_guard_postorder(curr.expr);
+            }
+            break;
+
         case IMPLIES:
             if (walk_implies_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = IMPLIES_1;
@@ -552,6 +579,25 @@ void ExprWalker::walk ()
 
             entry_RSHIFT_2:
                 walk_rshift_postorder(curr.expr);
+            }
+            break;
+
+        // assignment
+        case ASSIGNMENT:
+            if (walk_assignment_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = ASSIGNMENT_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_ASSIGNMENT_1:
+                if (walk_assignment_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = ASSIGNMENT_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_ASSIGNMENT_2:
+                walk_assignment_postorder(curr.expr);
             }
             break;
 
@@ -855,6 +901,7 @@ void ExprWalker::walk ()
         // leaves
         case ICONST:
         case HCONST:
+        case BCONST:
         case OCONST:
         case IDENT:
         case UNDEF:
@@ -862,7 +909,7 @@ void ExprWalker::walk ()
             break;
 
         default:
-            throw UnsupportedOperatorException(curr.expr->f_symb);
+            throw UnsupportedOperator(curr.expr->f_symb);
 
         } // switch
 

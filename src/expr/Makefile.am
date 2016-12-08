@@ -1,7 +1,13 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = walker printer
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/obj
+
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_CC = atom.cc expr.cc timed_expr.cc expr_mgr.cc

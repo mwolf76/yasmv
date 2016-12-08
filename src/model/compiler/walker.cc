@@ -1,38 +1,42 @@
 /**
- *  @file walker.cc
+ * @file walker.cc
+ * @brief Expression compiler subsystem, walker pattern implementations.
  *
- *  Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <utility>
 #include <compiler.hh>
 
 #include <proxy.hh>
 
-/*  Compilation engine is implemented using a simple expression walker
- *  pattern: (a) on preorder, return true if the node has not yet been
- *  visited; (b) always do in-order (for binary nodes); (c) perform
- *  proper compilation in post-order hooks.
+/**
+ * Compilation engine is implemented using a simple expression walker
+ * pattern: (a) on preorder, return true if the node has not yet been
+ * visited; (b) always do in-order (for binary nodes); (c) perform
+ * proper compilation in post-order hooks.
 
- *  The compiler does two full traversals of the input expr:
- *  1. f_preprocess, encodings are built - postorder hooks are
- *     skipped;
- *  2. ! f_preprocess proper compilation is carried out.
+ * The compiler does two full traversals of the input expr:
+ * 1. f_preprocess, encodings are built - postorder hooks are skipped;
+ * 2. ! f_preprocess proper compilation is carried out.
  */
+
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time
@@ -250,6 +254,35 @@ void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
+bool Compiler::walk_guard_preorder(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    /* rewrite GUARD into IMPLIES */
+    Expr_ptr rewrite
+        (em.make_implies( expr->lhs(), expr->rhs()));
+
+    DEBUG
+        << "Rewrote "
+        << expr
+        << " into "
+        << rewrite
+        << std::endl;
+
+    /* compiling rewritten expression */
+    (*this) (rewrite);
+
+    return false;
+}
+bool Compiler::walk_guard_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_guard_postorder(const Expr_ptr expr)
+{
+    if (f_preprocess)
+        return;
+}
+
 bool Compiler::walk_implies_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Compiler::walk_implies_inorder(const Expr_ptr expr)
@@ -347,6 +380,36 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
         algebraic_rshift(expr);
 
     else assert( false ); // unreachable
+}
+
+bool Compiler::walk_assignment_preorder(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (f_owner.em());
+
+    /* rewrite `x := <expr>` into `NEXT(x) = <expr>` */
+    Expr_ptr rewrite
+        (em.make_eq( em.make_next(expr->lhs()), expr->rhs()));
+
+    DEBUG
+        << "Rewrote `"
+        << expr
+        << "` into `"
+        << rewrite
+        << "`"
+        << std::endl;
+
+    /* compiling rewritten expression */
+    (*this)(rewrite);
+
+    return false;
+}
+bool Compiler::walk_assignment_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_assignment_postorder(const Expr_ptr expr)
+{
+    if (f_preprocess)
+        return;
 }
 
 bool Compiler::walk_eq_preorder(const Expr_ptr expr)
@@ -490,6 +553,9 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
 
     else if (is_ite_algebraic(expr))
         algebraic_ite(expr);
+
+    else if (is_ite_array(expr))
+        array_ite(expr);
 
     else assert( false ); // unreachable
 }

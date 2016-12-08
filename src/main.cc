@@ -5,18 +5,19 @@
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  * @mainpage YASMINE - Yet Another Symolic Modelling INteractive Environment
  * @author Marco Pensallorto < marco DOT pensallorto AT gmail DOT com>\n
@@ -36,14 +37,14 @@
  * code and tools that relied on its "peculiar" behavior. Don't get me
  * wrong, I really think NuSMV is a great piece of software. And I owe
  * to the developers and researchers in FBK most - if not all - of my
- * scientific and software engineering training. Those people are
- * really fantastic. It's just that I have been wondering for years
- * what that project would have been like, if one was completely free
- * to redesign it all from-the-scratch. This is exactly why this
- * project exists in the first place.
+ * scientific and software engineering training. It's just that I have
+ * been wondering for years what that project would have been like, if
+ * one was completely free to redesign it all from-the-scratch. This
+ * is exactly why this project exists in the first place.
  *
  **/
-#include <common.hh>
+
+#include <common/common.hh>
 
 #include <cmd.hh>
 
@@ -52,21 +53,22 @@
 
 #include <model.hh>
 
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 #include <smvLexer.h>
 #include <smvParser.h>
 
-#include <logging.hh>
+#include <sat/sat.hh>
 
-#include <sat/helpers.hh>
+#include <boost/chrono.hpp>
 
 static const std::string heading_msg = \
     "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
-    "(c) 2011-2013, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
-    "https://github.com/mwolf76/gnuSMV\n";
+    "(c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
+    "https://github.com/mwolf76/yasmine\n";
 
-/* these are unused, just for debugging purposes withing gdb */
+/* printing helpers: these functions are unused in the code, they're
+   here just for debugging purposes withing gdb */
 void pe(Expr_ptr e)
 { std::cerr << e << std::endl; }
 
@@ -101,13 +103,35 @@ void batch(Command_ptr cmd)
 
 void sighandler(int signum)
 {
-    if (signum == SIGINT) {
-        std::cout
-            << std::endl
-            << "Caught SIGINT signal"
+    static boost::chrono::system_clock::time_point last;
+
+    /* A single Control-Z requires current solving stats. Double
+       Control-Z (within 1 sec) requires interruption */
+    if (signum == SIGTSTP) {
+
+        EngineMgr& mgr
+            (EngineMgr::INSTANCE());
+
+        std::cerr
             << std::endl;
 
-        sigint_caught = 1;
+        boost::chrono::system_clock::time_point now
+            (boost::chrono::system_clock::now());
+
+        boost::chrono::duration<double> sec
+            (boost::chrono::system_clock::now() - last);
+
+        if (sec.count() < 1.00) {
+            std::cerr
+                << "Interrupting all active threads (this may take a while)..."
+                << std::endl;
+
+            mgr.interrupt();
+        }
+        else {
+            mgr.dump_stats(std::cerr);
+            last = now;
+        }
     }
 }
 
@@ -142,18 +166,18 @@ int main(int argc, const char *argv[])
         << std::endl;
 
     /* you may also prefer sigaction() instead of signal() */
-    signal(SIGINT, sighandler);
+    signal(SIGTSTP, sighandler);
 
     /* load microcode */
     InlinedOperatorMgr& mm
         (InlinedOperatorMgr::INSTANCE());
     uint32_t nloaders
         (mm.loaders().size());
+
     TRACE
         << nloaders
-        << " loaders registered."
-        << std::endl
-    ;
+        << " microcode fragments registered."
+        << std::endl;
 
     Interpreter& system = Interpreter::INSTANCE();
     try {
@@ -186,14 +210,10 @@ int main(int argc, const char *argv[])
     }
 
     catch (Exception &e) {
-        pconst_char what
-            (e.what());
-
         std::cerr
-            << red << what
+            << red
+            << e.what()
             << std::endl;
-
-        free ((void *) what);
     }
 
     return system.retcode();

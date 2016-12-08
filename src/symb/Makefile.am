@@ -10,8 +10,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = symbol.hh resolver.hh
-
-PKG_CC = symbol.cc
+PKG_CC = classes.cc iter.cc exceptions.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

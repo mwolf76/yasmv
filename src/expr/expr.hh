@@ -1,35 +1,35 @@
 /**
- *  @file expr.hh
- *  @brief Expression management
+ * @file expr.hh
+ * @brief Expression management
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ * This header file contains the declarations required by the Expr
+ * struct.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **/
+
 #ifndef EXPR_H
 #define EXPR_H
 
-#include <vector>
 #include <set>
+#include <vector>
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <expr/atom.hh>
 
@@ -50,13 +50,16 @@ typedef enum {
     BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
 
     /* logical operators */
-    NOT, AND, OR, IMPLIES,
+    NOT, AND, OR, IMPLIES, GUARD /* reserved for TRANSes */,
 
     /* shift operators */
     LSHIFT, RSHIFT,
 
     /* type operators */
     TYPE, CAST,
+
+    /* assignment operator */
+    ASSIGNMENT,
 
     /* relational operators */
     EQ, NE, GE, GT, LE, LT,
@@ -87,6 +90,7 @@ typedef enum {
     ICONST, // decimal constants
     HCONST, // hex constants
     OCONST, // octal constants
+    BCONST, // binary constants
 
     // undefined
     UNDEF,
@@ -126,13 +130,7 @@ typedef struct Expr_TAG {
         return *u.f_atom;
     }
 
-    inline value_t value()
-    {
-        assert (ICONST == f_symb ||
-                HCONST == f_symb ||
-                OCONST == f_symb );
-        return u.f_value;
-    }
+    value_t value() const;
 
     inline Expr_ptr lhs()
     { return u.f_lhs; }
@@ -158,7 +156,8 @@ typedef struct Expr_TAG {
     {
         assert (symb == ICONST ||
                 symb == HCONST ||
-                symb == OCONST );
+                symb == OCONST ||
+                symb == BCONST);
 
         u.f_value = value;
     }
@@ -195,6 +194,8 @@ struct ExprEq {
 typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
+/* FIXME: how does this stuff belong here?!? */
+
 /** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
 #define TOP_CTX(tp)                            \
     const Expr_ptr (tp)(f_ctx_stack.back())
@@ -221,4 +222,4 @@ typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 #define PUSH_TIME(step)                         \
     f_time_stack.push_back(step)
 
-#endif
+#endif /* EXPR_H */

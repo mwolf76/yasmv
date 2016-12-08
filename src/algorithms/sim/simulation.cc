@@ -1,24 +1,26 @@
 /**
- *  @file simulation.cc
- *  @brief SAT-based BMC simulation algorithm
+ * @file simulation.cc
+ * @brief SAT-based BMC simulation algorithm implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <sstream>
 #include <sim/simulation.hh>
 #include <model/compiler/unit.hh>
@@ -31,93 +33,173 @@ Simulation::Simulation(Command& command, Model& model)
     : Algorithm(command, model)
 {
     setup();
+
+    if (!ok())
+        throw FailedSetup();
 }
 
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state(Expr_ptr init_condition, pconst_char trace_name)
+void Simulation::pick_state(bool allsat, value_t limit)
 {
+    EncodingMgr& bm
+        (EncodingMgr::INSTANCE());
+
+    int k = ! allsat
+        ? 1
+        : limit;
+
+    bool first
+        (true);
+
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine;
+    Engine engine
+        ("pick_state");
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
+    /* INITs and INVARs at time 0 */
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
 
-    if (init_condition) {
+    while ( k -- ) {
 
-        Compiler& cmpl
-            (compiler()); // just a local ref
+        if (allsat) {
 
-        Expr_ptr ctx
-            (em().make_empty());
+            /* skip first cycle */
+            if (first) {
+                first = false;
+            }
+            else {
+                /* In ALLSAT mode, for each bit int the encoding,
+                   fetch UCBI, time it into TCBI at time 0, fetch its
+                   value in MiniSAT model and negate it in the
+                   exclusion clause. */
+                vec<Lit> exclusion;
 
+                SymbIter symbols
+                    (model());
 
-        try {
-            CompilationUnit term
-                (cmpl.process(ctx, init_condition));
+                while (symbols.has_next()) {
 
-            assert_formula( engine, 0, term, 0);
+                    std::pair <Expr_ptr, Symbol_ptr> pair
+                        (symbols.next());
+
+                    Expr_ptr ctx
+                        (pair.first);
+
+                    Symbol_ptr symb
+                        (pair.second);
+
+                    Expr_ptr symb_name
+                        (symb->name());
+
+                    Expr_ptr key
+                        (em.make_dot( ctx, symb_name));
+
+                    if (symb->is_variable()) {
+
+                        Variable& var
+                            (symb->as_variable());
+
+                        /* INPUT vars are not really vars ... */
+                        if (var.is_input())
+                            continue;
+
+                        /* time it, and fetch encoding for enc mgr */
+                        Encoding_ptr enc
+                            (bm.find_encoding( TimedExpr(key, 0)));
+
+                        if ( ! enc )
+                            continue;
+
+                        /* for each bit in this encoding, fetch UCBI,
+                           time it into TCBI at time 0, fetch its
+                           value in MiniSAT model and append its
+                           negation to exclusion clause.. */
+                        DDVector::const_iterator di;
+                        unsigned ndx;
+                        for (ndx = 0, di = enc->bits().begin();
+                             enc->bits().end() != di; ++ ndx, ++ di) {
+
+                            unsigned bit
+                                ((*di).getNode()->index);
+
+                            const UCBI& ucbi
+                                (bm.find_ucbi(bit));
+
+                            const TCBI tcbi
+                                (TCBI(ucbi, 0));
+
+                            Var var
+                                (engine.tcbi_to_var(tcbi));
+
+                            int value
+                                (engine.value(var)); /* don't cares assigned to 0 */
+
+                            exclusion.push( mkLit(var, value));
+                        }
+                    }
+                }
+
+                /* add exclusion clause to SAT instance */
+                engine.add_clause(exclusion);
+            }
+        } /* if (allsat) */
+
+        Witness_ptr w;
+        if (STATUS_SAT == engine.solve()) {
+            t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+
+            TRACE
+                << "simulation initialized, took " << secs
+                << " seconds" << std::endl;
+
+            w = new SimulationWitness( model(), engine, 0);;
+
+            {
+                std::ostringstream oss;
+                oss
+                    << simulation_trace_prfx
+                    << (++ progressive);
+
+                w->set_id(oss.str());
+            }
+
+            {
+                std::ostringstream oss;
+
+                oss
+                    << "Simulation trace for module `"
+                    << model().main_module().name()
+                    << "`" ;
+
+                w->set_desc(oss.str());
+            }
+
+            /* REVIEW THESE */
+            set_witness(*w);
+
+            wm.record(*w);
+            wm.set_current(*w);
+
+            f_status = SIMULATION_INITIALIZED;
         }
-        catch (Exception& ae) {
-            pconst_char what
-                (ae.what());
-
-            WARN
-                << what
-                << std::endl
-                << "  in initial condition"
-                << ctx << "::" << init_condition
-                << std::endl;
-
-            free((void *) what);
-            return;
-        }
-    }
-
-    if (STATUS_SAT == engine.solve()) {
-        t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
-
-        TRACE
-            << "simulation initialized, took " << secs
-            << " seconds" << std::endl;
-
-        Witness& w
-            (*new SimulationWitness( model(), engine, 0));
-
-        if (trace_name)
-            w.set_id(Atom(trace_name));
         else {
-            std::ostringstream oss;
-            oss
-                << simulation_trace_prfx
-                << (++ progressive);
-            w.set_id(oss.str());
+            WARN << "Inconsistency detected in initial states"
+                 << std::endl;
+            f_status = SIMULATION_DEADLOCKED;
+
+            break;
         }
-        {
-            std::ostringstream oss;
-            oss
-                << "Simulation trace";
-            w.set_desc(oss.str());
-        }
-
-        set_witness(w);
-
-        wm.record(w);
-        wm.set_current(w);
-
-        f_status = SIMULATION_INITIALIZED;
-    }
-    else {
-        WARN << "Inconsistency detected in initial states"
-             << std::endl;
-        f_status = SIMULATION_DEADLOCKED;
-    }
+    } /* while ( -- k ) */
 }
 
 void Simulation::simulate(Expr_ptr invar_condition,
@@ -130,7 +212,8 @@ void Simulation::simulate(Expr_ptr invar_condition,
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine;
+    Engine engine
+        ("simulation");
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -151,11 +234,13 @@ void Simulation::simulate(Expr_ptr invar_condition,
     // variables guarantees full deterministic behavior.
     step_t init_time
         (trace.last_time());
+
     step_t k
         (init_time);
 
     TimeFrame& last
         (trace.last());
+
     assert_time_frame(engine, k, last);
 
     /* inject full transition relation, trace may not be compatible
@@ -163,6 +248,37 @@ void Simulation::simulate(Expr_ptr invar_condition,
     assert_fsm_invar(engine, k );
     assert_fsm_trans(engine, k );
     assert_fsm_invar(engine, 1 + k);
+
+    /* assert additional constraints */
+    if (invar_condition) {
+
+        Compiler& cmpl
+            (compiler()); // just a local ref
+
+        Expr_ptr ctx
+            (em.make_empty());
+
+        try {
+            CompilationUnit term
+                (cmpl.process(ctx, invar_condition));
+
+            assert_formula( engine, 1 + k, term, 0);
+        }
+        catch (Exception& ae) {
+            pconst_char what
+                (ae.what());
+
+            WARN
+                << what
+                << std::endl
+                << "  in additional constraint"
+                << ctx << "::" << invar_condition
+                << std::endl;
+
+            free((void *) what);
+            return;
+        }
+    }
 
     DEBUG
         << "Resuming simulation..."
@@ -185,12 +301,6 @@ void Simulation::simulate(Expr_ptr invar_condition,
             (*new SimulationWitness( model(), engine, k));
         witness().extend(w);
 
-        /* interrupted by the user? */
-        if (sigint_caught) {
-            f_status = SIMULATION_INTERRUPTED;
-            break;
-        }
-
         /* no more steps? */
         if (! -- steps) {
             f_status = SIMULATION_INTERRUPTED;
@@ -211,10 +321,14 @@ void Simulation::simulate(Expr_ptr invar_condition,
         assert_fsm_invar(engine, k);
     }
 
-    if (last_sat == STATUS_UNSAT) {
+    if (last_sat == STATUS_UNKNOWN)
+        f_status = SIMULATION_INTERRUPTED;
+
+    else if (last_sat == STATUS_UNSAT) {
         WARN
             << "Inconsistency detected in transition relation at step " << k
             << std::endl;
+
         f_status = SIMULATION_DEADLOCKED;
     }
 }

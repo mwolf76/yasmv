@@ -1,28 +1,33 @@
 /**
- *  @file witness.hh
- *  @brief Witness module
+ * @file witness.hh
+ * @brief Witness module header file
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * This module contains definitions and services that implement the
+ * abstract interface for the witness subsystem.
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef WITNESS_H
 #define WITNESS_H
 
-#include <common.hh>
+#include <common/common.hh>
 
 #include <vector>
 
@@ -37,92 +42,17 @@
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
+#include <sat/sat.hh>
+
 #include <utils/variant.hh>
 
-/** Exception classes */
-class WitnessException : public Exception {
-public:
-    virtual const char* what() const throw() =0;
-};
-
-/** Raised when a given ID is registered more than once */
-class DuplicateWitnessId : public WitnessException {
-public:
-    DuplicateWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~DuplicateWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Atom f_id;
-};
-
-/** Raised when a given ID is registered more than once */
-class NoCurrentlySelectedWitness : public WitnessException {
-public:
-    NoCurrentlySelectedWitness()
-    {}
-
-    ~NoCurrentlySelectedWitness() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-};
-
-/** Raised when a given ID is searched for and was not registered */
-class UnknownWitnessId : public WitnessException {
-public:
-    UnknownWitnessId(Atom id)
-        : f_id(id)
-    {}
-
-    ~UnknownWitnessId() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Atom f_id;
-};
-
-/** Raised when TimeFrame for requested time does not exist. */
-class IllegalTime : public WitnessException {
-public:
-    IllegalTime(step_t time)
-        : f_time(time)
-    {}
-
-    ~IllegalTime() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    step_t f_time;
-};
-
-class NoValue : public WitnessException {
-public:
-    NoValue(Expr_ptr id)
-        : f_id(id)
-    {}
-
-    ~NoValue() throw()
-    {}
-
-    const char* what() const throw();
-
-private:
-    Expr_ptr f_id;
-};
+#include <witness/exceptions.hh>
 
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
+typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
+
+typedef boost::unordered_map<Expr_ptr, value_format_t, PtrHash, PtrEq> Expr2FormatMap;
+typedef Expr2FormatMap::iterator Expr2FormatMapIterator;
 
 class Witness; // fwd decl
 
@@ -139,14 +69,19 @@ public:
     /* Returns true iff expr has an assigned value within this time frame. */
     bool has_value( Expr_ptr expr );
 
-    /* Sets value for expr */
-    void set_value( Expr_ptr expr, Expr_ptr value );
+    /* Sets value (and optionally also format) for expr */
+    void set_value( Expr_ptr expr, Expr_ptr value,
+                    value_format_t format = FORMAT_DECIMAL);
+
+    /* Retrieves format for expr, throws an exception if no value exists. */
+    // value_format_t format( Expr_ptr expr );
 
     /* Full list of assignments for this Time Frame */
     ExprVector assignments();
 
 private:
     Expr2ExprMap f_map;
+    Expr2FormatMap f_format_map;
 
     // forbid copy
     TimeFrame(const TimeFrame &other)
@@ -157,30 +92,20 @@ private:
 };
 
 typedef std::vector<TimeFrame_ptr> TimeFrames;
-typedef std::vector<Expr_ptr> Exprs;
 
 typedef class Witness* Witness_ptr;
 class Witness {
 public:
-    Witness(Atom id = "<Noname>", Atom desc = "<No description>", step_t j = 0);
+    Witness(Engine_ptr pengine = NULL,
+            Atom id = "<Noname>",
+            Atom desc = "<No description>",
+            step_t j = 0);
 
     /* data storage */
     inline TimeFrames& frames()
     { return f_frames; }
 
-    inline TimeFrame& operator[](step_t i)
-    {
-        if (i < f_j) {
-            throw IllegalTime(i);
-        }
-        i -= f_j;
-        assert(0 <= i);
-
-        if (f_frames.size() -1 < i) {
-            throw IllegalTime(f_j + i);
-        }
-        return * f_frames [i];
-    }
+    TimeFrame& operator[](step_t i);
 
     inline const Atom& id() const
     { return f_id; }
@@ -209,7 +134,7 @@ public:
     inline step_t size()
     { return f_frames.size(); }
 
-    inline Exprs& lang()
+    inline ExprVector& lang()
     { return f_lang; }
 
     /* Extends trace by k appending the given one, yields last timeframe */
@@ -238,7 +163,23 @@ protected:
     TimeFrames f_frames;
 
     /* Language (i.e. full list of symbols) */
-    Exprs f_lang;
+    ExprVector f_lang;
+
+    /* An engine that can be used to extend this witness. This is not
+       necessarily the engine that created the trace. Ordinarily it
+       should be a simulation engine. */
+    Engine_ptr p_engine;
+
+    inline bool has_engine() const
+    { return NULL != p_engine; }
+
+    inline Engine& engine()
+    {
+        assert (NULL != p_engine);
+        return * p_engine;
+    }
+
+    void register_engine(Engine& e);
 };
 
 class WitnessPrinter {
@@ -246,4 +187,4 @@ public:
     virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
 };
 
-#endif
+#endif /* WITNESS_H */

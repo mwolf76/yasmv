@@ -1,86 +1,32 @@
 /**
- *  @file witness.cc
- *  @brief Witness module
+ * @file witness.cc
+ * @brief Base witness class implementation.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <sstream>
 #include <cstring>
 
 #include <witness.hh>
 
-const char* DuplicateWitnessId::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Duplicate witness ID:  "
-        << f_id << " is already registered."
-        << std::endl
-        ;
-
-    return strdup(oss.str().c_str());
-}
-
-const char* NoCurrentlySelectedWitness::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "No currently selected witness."
-        << std::endl
-        ;
-
-    return strdup(oss.str().c_str());
-}
-
-
-const char* UnknownWitnessId::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Unknown witness ID:  "
-        << f_id << " is not registered."
-        << std::endl
-        ;
-
-    return strdup(oss.str().c_str());
-}
-
-const char* IllegalTime::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "Illegal time: "
-        << f_time
-        << std::endl
-        ;
-
-    return strdup(oss.str().c_str());
-}
-
-const char* NoValue::what() const throw()
-{
-    std::ostringstream oss;
-    oss
-        << "No value for `"
-        << f_id << "`";
-
-    return strdup(oss.str().c_str());
-}
+#include <utils/misc.hh>
 
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
@@ -89,12 +35,31 @@ TimeFrame::TimeFrame(Witness& owner)
 TimeFrame::~TimeFrame()
 {}
 
+TimeFrame& Witness::operator[](step_t i)
+{
+    if (i < f_j)
+        throw IllegalTime(i);
+
+    i -= f_j;
+    assert(0 <= i);
+
+    if (f_frames.size() -1 < i)
+        throw IllegalTime(f_j + i);
+
+    return * f_frames [i];
+}
+
 /* Retrieves value for expr, throws an exception if no value exists. */
 Expr_ptr TimeFrame::value( Expr_ptr expr )
 {
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     // symbol is defined in witness' language
-    Exprs& lang = f_owner.lang();
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
+    ExprVector& lang
+        (f_owner.lang());
+
+    assert( find(lang.begin(), lang.end(), expr) != lang.end());
 
     Expr2ExprMap::iterator eye;
 
@@ -102,14 +67,49 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     if (f_map.end() == eye)
         throw NoValue(expr);
 
-    return (*eye).second;
+    Expr_ptr vexpr
+        ((*eye).second);
+
+    Expr2FormatMap::iterator format_eye
+        (f_format_map.find( expr ));
+
+    if (f_format_map.end() == format_eye)
+        assert(false); /* unreachable */
+
+    /* got value format */
+    value_format_t fmt
+        ((*format_eye).second);
+
+    /* force conversion of constants to required format. TODO: extend
+       this to sets */
+    if (em.is_constant(vexpr)) {
+        switch (fmt) {
+        case FORMAT_BINARY:
+            vexpr = em.make_bconst(vexpr->value());
+            break;
+
+        case FORMAT_OCTAL:
+            vexpr = em.make_oconst(vexpr->value());
+            break;
+
+        case FORMAT_HEXADECIMAL:
+            vexpr = em.make_hconst(vexpr->value());
+            break;
+
+        default:
+            //case FORMAT_DECIMAL:
+            vexpr = em.make_const(vexpr->value());
+        } /* switch() */
+    }
+
+    return vexpr;
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
 bool TimeFrame::has_value( Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
 
     // FIXME: proper exception
@@ -125,38 +125,40 @@ bool TimeFrame::has_value( Expr_ptr expr )
 }
 
 /* Sets value for expr */
-void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value )
+void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
 {
     // symbol is defined in witness' language
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
-    assert( find( lang.begin(), lang.end(), expr) != lang.end());
 
-    DEBUG
-        << expr
-        << " := "
-        << value
-        << std::endl;
+    assert( find( lang.begin(),
+                  lang.end(), expr) != lang.end());
 
+    /* populate both maps at the same time. This ensures consistency. */
     f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
                   (expr, value));
+
+    f_format_map.insert( std::make_pair< Expr_ptr, value_format_t >
+                         (expr, format));
 }
 
 ExprVector TimeFrame::assignments()
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
-    Exprs& lang
+    ExprVector& lang
         (f_owner.lang());
 
     ExprVector res;
 
-    Exprs::const_iterator i
+    ExprVector::const_iterator i
         (lang.begin());
+
     while (i != lang.end()) {
         Expr_ptr symb
-            (*i); ++ i;
+            (*i);
 
+        ++ i;
         try {
             res.push_back( em.make_eq( symb, value(symb)));
         }
@@ -167,10 +169,11 @@ ExprVector TimeFrame::assignments()
     return res;
 }
 
-Witness::Witness(Atom id, Atom desc, step_t j)
+Witness::Witness(Engine_ptr pe, Atom id, Atom desc, step_t j)
     : f_id(id)
     , f_desc(desc)
     , f_j(j)
+    , p_engine(pe)
 {
     DEBUG
         << "Created new witness: "
@@ -183,7 +186,9 @@ Witness::Witness(Atom id, Atom desc, step_t j)
 TimeFrame& Witness::extend(Witness& w)
 {
     // seizing ownership of the TimeFrames from w
-    TimeFrame_ptr last = NULL;
+    TimeFrame_ptr last
+        (NULL);
+
     for (TimeFrames::iterator i = w.frames().begin(); i != w.frames().end(); ++ i) {
         f_frames.push_back(*i);
         last = (*i);
@@ -196,10 +201,14 @@ TimeFrame& Witness::extend(Witness& w)
 
 TimeFrame& Witness::extend()
 {
-    TimeFrame_ptr tf = new TimeFrame(*this);
+    TimeFrame_ptr tf
+        (new TimeFrame(*this));
+
     f_frames.push_back(tf);
 
-    step_t last = 1 + last_time();
+    step_t last
+        (1 + last_time());
+
     DEBUG << "Added empty TimeFrame " << last
           << " to witness " << id()
           << " @" << tf
@@ -209,23 +218,31 @@ TimeFrame& Witness::extend()
     return *tf;
 }
 
-/* Retrieves value for expr, throws an exception if no value exists. */
+/* Retrieves value for expr, throws an exception if no such value exists. */
 Expr_ptr Witness::value( Expr_ptr expr, step_t time)
 {
-    if (time < first_time() || time > last_time()) {
+    if (time < first_time() || time > last_time())
         throw IllegalTime(time);
-    }
-    return f_frames[ time ]
-        -> value( expr );
+
+    Expr_ptr vexpr
+        (f_frames[time]->value(expr));
+
+    return vexpr;
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
 bool Witness::has_value( Expr_ptr expr, step_t time)
 {
-    if (time < first_time() || time > last_time()) {
+    if (time < first_time() ||
+        time > last_time())
         return false;
-    }
-    return f_frames[ time ]
-        -> has_value( expr );
+
+    return f_frames[time]->has_value(expr);
 }
 
+/* Engine registration can be done only once */
+void Witness::register_engine(Engine& e)
+{
+    assert( ! p_engine );
+    p_engine = &e;
+}

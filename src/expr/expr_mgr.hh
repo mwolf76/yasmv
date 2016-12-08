@@ -1,28 +1,29 @@
 /**
- *  @file expr_mgr.hh
- *  @brief Expression management. ExprMgr class
+ * @file expr_mgr.hh
+ * @brief Expression management. ExprMgr class
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ * This header file contains the declarations required by the
+ * Expression Manager class.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #ifndef EXPR_MGR_H
 #define EXPR_MGR_H
 
@@ -30,7 +31,7 @@
 
 #include <expr/expr.hh>
 
-#include <opts.hh>
+#include <opts_mgr.hh>
 
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
@@ -245,12 +246,29 @@ public:
         return expr->f_symb == BW_XNOR;
     }
 
+    inline Expr_ptr make_guard(Expr_ptr a, Expr_ptr b)
+    { return make_expr(GUARD, a, b); }
+
+    inline bool is_guard(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == GUARD;
+    }
+
     inline Expr_ptr make_implies(Expr_ptr a, Expr_ptr b)
     { return make_expr(IMPLIES, a, b); }
 
     inline bool is_implies(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IMPLIES;
+    }
+
+    /* -- Assignment operator ----------------------------------------------- */
+    inline Expr_ptr make_assignment(Expr_ptr a, Expr_ptr b)
+    { return make_expr(ASSIGNMENT, a, b); }
+
+    inline bool is_assignment(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == ASSIGNMENT;
     }
 
     /* -- Relational operators ---------------------------------------------- */
@@ -327,6 +345,7 @@ public:
     inline value_t const_value(Expr_ptr expr)
     {
         assert( expr->f_symb == ICONST ||
+                expr->f_symb == BCONST ||
                 expr->f_symb == HCONST ||
                 expr->f_symb == OCONST );
 
@@ -348,6 +367,12 @@ public:
     inline Expr_ptr make_oconst(value_t value) // octal
     {
         Expr tmp(OCONST, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
+    inline Expr_ptr make_bconst(value_t value) // octal
+    {
+        Expr tmp(BCONST, value); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -447,14 +472,6 @@ public:
         return expr == temp_expr;
     }
 
-    inline Expr_ptr make_main() const
-    { return main_expr; }
-
-    inline bool is_main(const Expr_ptr expr) const {
-        assert(expr);
-        return expr == main_expr;
-    }
-
     inline Expr_ptr make_empty() const
     { return empty_expr; }
 
@@ -505,10 +522,28 @@ public:
     { return make_const( strtoll(atom.c_str(), NULL, 10)); }
 
     inline Expr_ptr make_hex_const(Atom atom)
-    { return make_hconst( strtoll(atom.c_str(), NULL, 0x10)); }
+     {
+        const char *p
+            (atom.c_str() + 2);
+
+        return make_hconst( strtoll(p, NULL, 0x10));
+    }
 
     inline Expr_ptr make_oct_const(Atom atom)
-    { return make_oconst( strtoll(atom.c_str(), NULL, 010)); }
+    {
+        const char *p
+            (atom.c_str() + 1);
+
+        return make_oconst( strtoll(p, NULL, 010));
+    }
+
+    inline Expr_ptr make_bin_const(Atom atom)
+    {
+        const char *p
+            (atom.c_str() + 2);
+
+        return make_bconst( strtoll(p, NULL, 2));
+    }
 
     inline Expr_ptr make_undef()
     {
@@ -529,9 +564,20 @@ public:
         return expr->f_symb == NEXT;
     }
 
+    inline bool is_lvalue(const Expr_ptr expr) const {
+        return
+            is_identifier(expr) ||
+            is_subscript(expr);
+    }
+
     inline bool is_identifier(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == IDENT;
+    }
+
+    inline bool is_subscript(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == SUBSCRIPT;
     }
 
     inline bool is_unsigned_int(const Expr_ptr expr) const {
@@ -550,11 +596,9 @@ public:
     }
 
     inline bool is_constant(const Expr_ptr expr) const {
-        assert(expr);
         return
-            expr -> f_symb == ICONST ||
-            expr -> f_symb == OCONST ||
-            expr -> f_symb == HCONST  ;
+            is_bool_const(expr) ||
+            is_int_const (expr) ;
     }
 
     inline bool is_params(const Expr_ptr expr) const {
@@ -564,11 +608,6 @@ public:
     inline bool is_params_comma(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == PARAMS_COMMA;
-    }
-
-    inline bool is_subscript(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == SUBSCRIPT;
     }
 
     inline bool is_dot(const Expr_ptr expr) const {
@@ -596,9 +635,10 @@ public:
         return expr->f_symb == SET_COMMA;
     }
 
-    inline bool is_int_numeric(const Expr_ptr expr) const {
+    inline bool is_int_const(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == ICONST)
+            || (expr->f_symb == BCONST)
             || (expr->f_symb == HCONST)
             || (expr->f_symb == OCONST) ;
     }
@@ -617,7 +657,8 @@ public:
                 (OR  == symb)  ||
                 (EQ  == symb)  ||
                 (NE  == symb)  ||
-                (IMPLIES == symb));
+                (IMPLIES == symb) ||
+                (GUARD   == symb) );
     }
 
     inline bool is_unary_arithmetical(const Expr_ptr expr) const {
@@ -732,9 +773,6 @@ private:
     /* reserved for temp symbols ctx */
     Expr_ptr temp_expr;
 
-    /* main module */
-    Expr_ptr main_expr;
-
     /* empty symbol */
     Expr_ptr empty_expr;
 
@@ -746,6 +784,4 @@ private:
     AtomPool f_atom_pool;
 };
 
-// TODO: split this into multiple headers
-
-#endif
+#endif /* EXPR_MGR_H */

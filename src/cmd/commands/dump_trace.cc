@@ -1,24 +1,26 @@
 /*
  * @file dump_trace.cc
- * @brief Command-interpreter subsystem related classes and definitions.
+ * @brief Command `dump-trace` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
+
 #include <cstdlib>
 #include <cstring>
 
@@ -34,29 +36,27 @@
 
 #include <boost/preprocessor/repetition/repeat.hpp>
 
+#include <utils/misc.hh>
+
 /* a boost hack to generate indentation consts :-) */
 #define _SPACE(z, n, str)  " "
 #define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
 
-UnsupportedFormat::UnsupportedFormat(pconst_char format)
-    : f_format(strdup(format))
-{}
-
-const char* UnsupportedFormat::what() const throw()
+static std::string build_unsupported_format_error_message(pconst_char format)
 {
     std::ostringstream oss;
 
     oss
         << "CommandError: format `"
-        << f_format << "` is not supported.";
+        << format
+        << "` is not supported.";
 
-    return strdup(oss.str().c_str());
+    return oss.str();
 }
 
-UnsupportedFormat::~UnsupportedFormat() throw()
-{
-    free(f_format);
-}
+UnsupportedFormat::UnsupportedFormat(pconst_char format)
+    : CommandException(build_unsupported_format_error_message(format))
+{}
 
 DumpTrace::DumpTrace(Interpreter& owner)
     : Command(owner)
@@ -133,9 +133,6 @@ void DumpTrace::dump_plain_section(std::ostream& os,
 
 void DumpTrace::dump_plain(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     os
         << "Witness: "
         << w.id()
@@ -216,9 +213,6 @@ void DumpTrace::dump_json_section(std::ostream& os,
 
 void DumpTrace::dump_json(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
@@ -323,13 +317,20 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             catch (NoValue nv) {}
         }
         else if (symb -> is_define()) {
-            Expr_ptr expr(symb->name());
+
+            Define& define
+                (symb -> as_define());
+
+            Expr_ptr body
+                (define.body());
 
             try {
-                value = wm.eval( w, ctx, expr, time);
-                defines_assignments.push_back( em.make_eq( full, value));
+                value = wm.eval( w, ctx, body, time);
+                defines_assignments.push_back( em.make_eq( full,
+                                                           value));
             }
-            catch (NoValue nv) {}
+            catch (NoValue nv) {
+            }
         }
         else
             continue;
@@ -380,20 +381,17 @@ void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVect
 
 void DumpTrace::dump_xml(std::ostream& os, Witness& w)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     const char* FIRST_LVL
         (SPACES(4));
 
     os
-        << "<?xml version=\"1.0\"?>" << std::endl
+        << "<?xml version=\"1.0\"?>"
+        << std::endl
         << "<witness"
         << " id=\"" << w.id() << "\""
         << " description=\"" << w.desc() << "\""
         << ">"
-        << std::endl
-        ;
+        << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
@@ -449,20 +447,27 @@ Variant DumpTrace::operator()()
 
     else assert(false); /* unsupported */
 
-
     return Variant("Ok");
 }
 
-void DumpTrace::usage()
+DumpTraceTopic::DumpTraceTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+DumpTraceTopic::~DumpTraceTopic()
 {
-    std::cout
-        << "dump-trace [-o filename] [-f format] [<trace_uid>] - Dumps given trace."
-        << std::endl
-        << std::endl
-        << "options"
-        << std::endl
-        << "  -f format, format can be either `plain`, `xml` or `json`."
-        << "  -o filename, filename must be a writeable path on disk."
-        << std::endl ;
+    TRACE
+        << "Destroyed dump-trace topic"
+        << std::endl;
 }
 
+void DumpTraceTopic::usage()
+{
+    std::cout
+        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
+        << "options:\n"
+        << "  -f <format>, format can be either `plain`, `xml` or `json`.\n"
+        << "  -o filename, filename must be a writeable path on disk.\n\n"
+        << "`trace-uid` is the index of the trace to be dumped. If omitted, current\n"
+        << "trace will be dumped." ;
+}

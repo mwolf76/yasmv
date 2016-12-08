@@ -1,26 +1,26 @@
 /**
- *  @file model_mgr.hh
- *  @brief Model module (ModelMgr class)
+ * @file model_mgr.hh
+ * @brief Model module (ModelMgr class)
  *
- *  This module contains definitions and services that implement an
- *  optimized storage for expressions. Expressions are stored in a
- *  Directed Acyclic Graph (DAG) for data sharing.
+ * This header file contains the declarations required by the Model
+ * Manager class.
  *
- *  Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA
  *
  **/
 
@@ -32,9 +32,8 @@
 
 #include <model/preprocessor/preprocessor.hh>
 
+#include <model/analyzer/analyzer.hh>
 #include <model/type_checker/type_checker.hh>
-
-#include <expr/expr_mgr.hh>
 
 #include <type/type_mgr.hh>
 
@@ -44,6 +43,7 @@ typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
 typedef enum {
     MMGR_BUILD_CTX_MAP,
     MMGR_BUILD_PARAM_MAP,
+    MMGR_ANALYZE,
     MMGR_TYPE_CHECK,
     MMGR_DONE
 } analyzer_pass_t;
@@ -76,6 +76,9 @@ public:
 
     inline TypeMgr& tm() const
     { return f_tm; }
+
+    inline Analyzer& analyzer() const
+    { return f_analyzer; }
 
     // delegated type inference method
     inline Type_ptr type(Expr_ptr body,
@@ -123,6 +126,9 @@ private:
     // ref to preprocessor (used for defines expr substitution)
     Preprocessor& f_preprocessor;
 
+    // ref to analyzer (used for model analysis)
+    Analyzer& f_analyzer;
+
     // ref to type_checker (used for model analysis)
     TypeChecker& f_type_checker;
 
@@ -134,4 +140,4 @@ private:
     bool f_analyzed;
 };
 
-#endif
+#endif /* MODEL_MGR_H */
