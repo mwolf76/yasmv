@@ -16,7 +16,7 @@ DEFINE
        marked = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];
 
 INVAR
-  choice <= 6;
+  ! GOAL -> choice <= 6;
 
 INVAR
   location = A -> next(location) = { B, C, D };
