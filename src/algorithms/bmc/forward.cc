@@ -81,7 +81,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
         else if (STATUS_SAT == status) {
             INFO
                 << "Forward: Reachability witness exists (k = " << k << "), target `"
-                << f_phi
+                << f_goal
                 << "` is REACHABLE."
                 << std::endl;
 
@@ -92,7 +92,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
                 (WitnessMgr::INSTANCE());
 
             Witness& w
-                (* new BMCCounterExample(f_phi, model(), engine, k));
+                (* new BMCCounterExample(f_goal, model(), engine, k));
 
             /* witness identifier */
             std::ostringstream oss_id;
@@ -105,7 +105,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
             std::ostringstream oss_desc;
             oss_desc
                 << "Reachability witness for target `"
-                << f_phi
+                << f_goal
                 << "` in module `"
                 << model().main_module().name()
                 << "`" ;

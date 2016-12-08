@@ -28,7 +28,7 @@
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
-    , f_phi(NULL)
+    , f_goal(NULL)
 {
     const void* instance
         (this);
@@ -55,10 +55,10 @@ BMC::~BMC()
         << std::endl ;
 }
 
-void BMC::process(const Expr_ptr target)
+void BMC::process(const Expr_ptr goal)
 {
-    f_phi = target;
-    assert(f_phi);
+    f_goal = goal;
+    assert(f_goal);
 
     /* check everyting is ok before spawning */
     Expr_ptr ctx
@@ -67,20 +67,20 @@ void BMC::process(const Expr_ptr target)
     try {
         INFO
             << "Compiling formula `"
-            << f_phi
+            << f_goal
             << "` ..."
             << std::endl;
 
-        CompilationUnit goal
-            (compiler().process( ctx, f_phi));
+        CompilationUnit unit
+            (compiler().process(ctx, f_goal));
 
         f_status = BMC_UNKNOWN;
 
         /* fire up strategies */
         boost::thread fwd(&BMC::forward_strategy,
-                          this, goal);
+                          this, unit);
         boost::thread bwd(&BMC::backward_strategy,
-                          this, goal);
+                          this, unit);
 
         /* wait for termination */
         fwd.join();
@@ -88,15 +88,11 @@ void BMC::process(const Expr_ptr target)
     }
 
     catch (Exception& e) {
-        const char* what
-            (strdup(e.what()));
-
         std::cerr
-            << what
+            << e.what()
             << std::endl;
 
         f_status = BMC_ERROR;
-        return;
     }
 }
 

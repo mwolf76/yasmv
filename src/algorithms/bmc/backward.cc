@@ -89,7 +89,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
                 (WitnessMgr::INSTANCE());
 
             Witness& w
-                (* new BMCCounterExample(f_phi, model(), engine, k, true)); /* reversed */
+                (* new BMCCounterExample(f_goal, model(), engine, k, true)); /* reversed */
 
             /* witness identifier */
             std::ostringstream oss_id;
@@ -102,7 +102,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
             std::ostringstream oss_desc;
             oss_desc
                 << "Reversed reachability witness for target `"
-                << f_phi
+                << f_goal
                 << "` in module `"
                 << model().main_module().name()
                 << "`" ;

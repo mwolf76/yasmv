@@ -42,10 +42,10 @@ public:
     void sync_set_status(reachability_status_t status);
 
 private:
+    Expr_ptr f_goal;
+
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
-
-    Expr_ptr f_phi; /* GOAL */
 
     /* strategies */
     void forward_strategy(CompilationUnit& goal);
