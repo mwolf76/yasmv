@@ -1,2 +1,3 @@
 reach GOAL
+time
 quit
