@@ -152,12 +152,8 @@ void Printer::print_leaf(const Expr_ptr expr)
         break;
 
     case UNDEF:
-        WARN
-            << "Encountered UNDEF leaf expression"
-            << std::endl;
-
         f_os
-            << "UNDEF";
+            << "UNDEFINED";
         break;
 
     default:

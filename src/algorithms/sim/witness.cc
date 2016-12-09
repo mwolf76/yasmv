@@ -91,7 +91,8 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 Expr_ptr value
                     (Environment::INSTANCE().get(symb_name));
 
-                tf.set_value( key, value, symb->format());
+                if (value)
+                    tf.set_value( key, value, symb->format());
             }
 
             else {
@@ -156,7 +157,8 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 Expr_ptr value
                     (wm.eval( *this, ctx, body, 0));
 
-                tf.set_value( key, value);
+                if (value)
+                    tf.set_value( key, value);
             }
 
             catch (NoValue nv) {

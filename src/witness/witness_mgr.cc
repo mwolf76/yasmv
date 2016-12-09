@@ -92,3 +92,17 @@ unsigned WitnessMgr::autoincrement()
     return ++ f_autoincrement;
 }
 
+Expr_ptr WitnessMgr::eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
+{
+    Expr_ptr res;
+
+    try {
+        res = f_evaluator.process(w, ctx, body, k);
+    }
+    catch (NoValue& nv) {
+        res = NULL;
+    }
+
+    return res;
+}
+

@@ -136,14 +136,9 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                 Expr_ptr value
                     (enc->expr(inputs));
 
+                /* NULL values here indicate UNDEFs */
                 if (value)
-                    tf.set_value( key, value,
-                                  symb->format());
-                else
-                    WARN
-                        << key
-                        << " has no value"
-                        << std::endl;
+                    tf.set_value( key, value, symb->format());
             }
 
             else if (symb->is_define()) {
@@ -157,7 +152,9 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
                 Expr_ptr value
                     (wm.eval( *this, ctx, define.body(), 0));
 
-                tf.set_value( key, value, symb->format());
+                /* NULL values here indicate UNDEFs */
+                if (value)
+                    tf.set_value( key, value, symb->format());
             }
         }
 

@@ -55,10 +55,6 @@ public:
     inline TypeMgr& tm() const
     { return f_tm; }
 
-    // delegated method to the Evaluator functor
-    inline const Expr_ptr eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
-    { return f_evaluator.process( w, ctx, body, k); }
-
     inline const WitnessList& witnesses() const
     { return f_list; }
 
@@ -76,6 +72,8 @@ public:
 
     // get a unique autoincrement index
     unsigned autoincrement();
+
+    Expr_ptr eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k);
 
 protected:
     WitnessMgr();

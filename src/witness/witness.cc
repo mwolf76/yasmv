@@ -127,6 +127,8 @@ bool TimeFrame::has_value( Expr_ptr expr )
 /* Sets value for expr */
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
 {
+    assert(value);
+
     // symbol is defined in witness' language
     ExprVector& lang
         (f_owner.lang());
@@ -146,6 +148,7 @@ ExprVector TimeFrame::assignments()
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
+
     ExprVector& lang
         (f_owner.lang());
 
@@ -163,7 +166,8 @@ ExprVector TimeFrame::assignments()
             res.push_back( em.make_eq( symb, value(symb)));
         }
 
-        catch (NoValue nv) {}
+        catch (NoValue& nv) {
+        }
     }
 
     return res;
