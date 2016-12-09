@@ -145,10 +145,12 @@ void DumpTrace::dump_plain(std::ostream& os, Witness& w)
     ExprVector input_assignments;
     process_input(w, input_assignments);
 
-    os
-        << ":: ENV"
-        << std::endl;
-    dump_plain_section(os, "input", input_assignments);
+    if (0 < input_assignments.size()) {
+        os
+            << ":: ENV"
+            << std::endl;
+        dump_plain_section(os, "input", input_assignments);
+    }
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
@@ -226,16 +228,21 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
     os
         << "{"
         << std::endl << FIRST_LVL << "\"id\": " << "\"" << w.id() << "\"" << ","
-        << std::endl << FIRST_LVL << "\"description\": " << "\"" << w.desc() << "\"" << ","
-        << std::endl << FIRST_LVL << "\"env\": {" << std::endl;
+        << std::endl << FIRST_LVL << "\"description\": " << "\"" << w.desc() << "\"" << "," ;
 
     ExprVector input_vars_assignments;
     process_input(w, input_vars_assignments);
 
-    dump_json_section(os, "input", input_vars_assignments);
+    if (0 < input_vars_assignments.size()) {
+        os
+            << std::endl << FIRST_LVL << "\"env\": {"
+            << std::endl;
 
-    os
-        << std::endl << FIRST_LVL << "}, " ;
+        dump_json_section(os, "input", input_vars_assignments);
+
+        os
+            << std::endl << FIRST_LVL << "}, " ;
+    }
 
     os
         << std::endl << FIRST_LVL << "\"steps\": [{" << std::endl;
@@ -458,17 +465,19 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
     ExprVector input_assignments;
     process_input(w, input_assignments);
 
-    os
-        << FIRST_LVL
-        << "<env>"
-        << std::endl;
+    if (0 < input_assignments.size()) {
+        os
+            << FIRST_LVL
+            << "<env>"
+            << std::endl;
 
-    dump_xml_section(os, "input", input_assignments);
+        dump_xml_section(os, "input", input_assignments);
 
-    os
-        << FIRST_LVL
-        << "</env>"
-        << std::endl;
+        os
+            << FIRST_LVL
+            << "</env>"
+            << std::endl;
+    }
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
