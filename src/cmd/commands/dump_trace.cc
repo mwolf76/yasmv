@@ -27,6 +27,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/dump_trace.hh>
 
+#include <env/environment.hh>
+
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
@@ -119,9 +121,9 @@ void DumpTrace::dump_plain_section(std::ostream& os,
 
         os
             << TAB
-            << eq -> lhs()
+            << eq->lhs()
             << " = "
-            << eq -> rhs()
+            << eq->rhs()
             << std::endl;
 
         ++ ei ;
@@ -140,6 +142,14 @@ void DumpTrace::dump_plain(std::ostream& os, Witness& w)
         << " [[ " << w.desc() << " ]]"
         << std::endl;
 
+    ExprVector input_assignments;
+    process_input(w, input_assignments);
+
+    os
+        << ":: ENV"
+        << std::endl;
+    dump_plain_section(os, "input", input_assignments);
+
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
         os
@@ -147,16 +157,13 @@ void DumpTrace::dump_plain(std::ostream& os, Witness& w)
             << time
             << std::endl;
 
-        ExprVector input_vars_assignments;
         ExprVector state_vars_assignments;
         ExprVector defines_assignments;
 
         process_time_frame(w, time,
-                           input_vars_assignments,
                            state_vars_assignments,
                            defines_assignments);
 
-        dump_plain_section(os, "input", input_vars_assignments);
         dump_plain_section(os, "state", state_vars_assignments);
         dump_plain_section(os, "defines", defines_assignments);
     }
@@ -187,8 +194,8 @@ void DumpTrace::dump_json_section(std::ostream& os,
 
         os
             << THIRD_LVL
-            << "\"" << eq -> lhs()
-            << "\": \"" << eq -> rhs() << "\"" ;
+            << "\"" << eq->lhs()
+            << "\": \"" << eq->rhs() << "\"" ;
 
         ++ ei ;
 
@@ -220,23 +227,27 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
         << "{"
         << std::endl << FIRST_LVL << "\"id\": " << "\"" << w.id() << "\"" << ","
         << std::endl << FIRST_LVL << "\"description\": " << "\"" << w.desc() << "\"" << ","
+        << std::endl << FIRST_LVL << "\"env\": {" << std::endl;
+
+    ExprVector input_vars_assignments;
+    process_input(w, input_vars_assignments);
+
+    dump_json_section(os, "input", input_vars_assignments);
+
+    os
+        << std::endl << FIRST_LVL << "}, " ;
+
+    os
         << std::endl << FIRST_LVL << "\"steps\": [{" << std::endl;
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
-        ExprVector input_vars_assignments;
         ExprVector state_vars_assignments;
         ExprVector defines_assignments;
 
         process_time_frame(w, time,
-                           input_vars_assignments,
                            state_vars_assignments,
                            defines_assignments);
-
-        dump_json_section(os, "input", input_vars_assignments);
-        os
-            << ", "
-            << std::endl;
 
         dump_json_section(os, "state", state_vars_assignments);
         os
@@ -262,21 +273,18 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
         << std::endl;
 }
 
+void DumpTrace::process_input(Witness& w,
+                              ExprVector& input_assignments)
+{
 
-/* here UNDEF is used to fill up symbols not showing up in the witness where
-   they're expected to. (i. e. UNDEF is only a UI entity) */
-void DumpTrace::process_time_frame(Witness& w, step_t
-time, ExprVector& input_vars_assignments, ExprVector& state_vars_assignments,
-ExprVector& defines_assignments) { ExprMgr& em (ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
-    TimeFrame& tf
-        (w[time]);
-
     SymbIter symbs
-        ( ModelMgr::INSTANCE().model(), NULL );
+        (ModelMgr::INSTANCE().model(), NULL);
 
     while (symbs.has_next()) {
 
@@ -286,7 +294,7 @@ ExprVector& defines_assignments) { ExprMgr& em (ExprMgr::INSTANCE());
         Symbol_ptr symb
             (pair.second);
 
-        if (symb -> is_hidden())
+        if (symb->is_hidden())
             continue;
 
         Expr_ptr ctx
@@ -296,25 +304,83 @@ ExprVector& defines_assignments) { ExprMgr& em (ExprMgr::INSTANCE());
         Expr_ptr full
             (em.make_dot( ctx, name));
 
-        if (symb -> is_variable())  {
+        if (symb->is_variable())  {
+
             Variable& var
-                (symb -> as_variable());
+                (symb->as_variable());
+
+            /* we're interested onlyl in INPUT vars here ... */
+            if (! var.is_input())
+                continue;
+
+            Expr_ptr value
+                (Environment::INSTANCE().get(name));
+
+            if (!value)
+                value = em.make_undef();
+
+            input_assignments.push_back(em.make_eq(full, value));
+        }
+    }
+}
+
+/* here UNDEF is used to fill up symbols not showing up in the witness where
+   they're expected to. (i. e. UNDEF is only a UI entity) */
+void DumpTrace::process_time_frame(Witness& w, step_t time,
+                                   ExprVector& state_vars_assignments,
+                                   ExprVector& defines_assignments)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
+
+    TimeFrame& tf
+        (w[time]);
+
+    SymbIter symbs
+        (ModelMgr::INSTANCE().model(), NULL);
+
+    while (symbs.has_next()) {
+
+        std::pair< Expr_ptr, Symbol_ptr > pair
+            (symbs.next());
+
+        Symbol_ptr symb
+            (pair.second);
+
+        if (symb->is_hidden())
+            continue;
+
+        Expr_ptr ctx
+            (pair.first);
+        Expr_ptr name
+            (symb->name());
+        Expr_ptr full
+            (em.make_dot( ctx, name));
+
+        if (symb->is_variable())  {
+
+            Variable& var
+                (symb->as_variable());
+
+            /* INPUT vars do not belong in traces */
+            if (var.is_input())
+                continue;
 
             Expr_ptr value
                 (tf.has_value(full)
                  ? tf.value(full)
                  : em.make_undef());
 
-            if (var.is_input())
-                input_vars_assignments.push_back( em.make_eq( full, value));
-            else
-                state_vars_assignments.push_back( em.make_eq( full, value));
+            state_vars_assignments.push_back( em.make_eq( full, value));
         }
 
-        else if (symb -> is_define()) {
+        else if (symb->is_define()) {
 
             Define& define
-                (symb -> as_define());
+                (symb->as_define());
 
             Expr_ptr body
                 (define.body());
@@ -389,6 +455,21 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
         << ">"
         << std::endl;
 
+    ExprVector input_assignments;
+    process_input(w, input_assignments);
+
+    os
+        << FIRST_LVL
+        << "<env>"
+        << std::endl;
+
+    dump_xml_section(os, "input", input_assignments);
+
+    os
+        << FIRST_LVL
+        << "</env>"
+        << std::endl;
+
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
         os
@@ -396,16 +477,13 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
             << "<step time=\"" << time << "\">"
             << std::endl;
 
-        ExprVector input_vars_assignments;
         ExprVector state_vars_assignments;
         ExprVector defines_assignments;
 
         process_time_frame(w, time,
-                           input_vars_assignments,
                            state_vars_assignments,
                            defines_assignments);
 
-        dump_xml_section(os, "input", input_vars_assignments);
         dump_xml_section(os, "state", state_vars_assignments);
         dump_xml_section(os, "defines", defines_assignments);
 

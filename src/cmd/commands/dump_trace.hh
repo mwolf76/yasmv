@@ -81,8 +81,12 @@ private:
                           const char* section,
                           ExprVector& ev);
 
+    /* these values actually come from the current environment */
+    void process_input(Witness& w,
+                       ExprVector& input_vars_assignments);
+
+    /* these values actually belong to the trace */
     void process_time_frame(Witness& w, step_t time,
-                            ExprVector& input_vars_assignments,
                             ExprVector& state_vars_assignments,
                             ExprVector& defines_assignments);
 
