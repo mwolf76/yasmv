@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/get.hh>
 
 #include <expr/expr.hh>
@@ -71,7 +72,7 @@ Variant Get::operator()()
                 << std::endl;
         }
 
-        return Variant("Ok");
+        return Variant(okMessage);
     }
     else {
         try {
@@ -85,7 +86,7 @@ Variant Get::operator()()
                 << value
                 << std::endl;
 
-            return Variant("Ok");
+            return Variant(okMessage);
         }
         catch (NoSuchIdentifier nsi) {
             const char *tmp

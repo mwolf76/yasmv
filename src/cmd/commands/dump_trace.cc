@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/dump_trace.hh>
 
 #include <expr/expr.hh>
@@ -159,11 +160,7 @@ void DumpTrace::dump_plain(std::ostream& os, Witness& w)
         dump_plain_section(os, "state", state_vars_assignments);
         dump_plain_section(os, "defines", defines_assignments);
     }
-
-    os
-        << std::endl;
 }
-
 
 void DumpTrace::dump_json_section(std::ostream& os,
                                   const char* section,
@@ -266,13 +263,11 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
 }
 
 
-void DumpTrace::process_time_frame(Witness& w, step_t time,
-                                   ExprVector& input_vars_assignments,
-                                   ExprVector& state_vars_assignments,
-                                   ExprVector& defines_assignments)
-{
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+/* here UNDEF is used to fill up symbols not showing up in the witness where
+   they're expected to. (i. e. UNDEF is only a UI entity) */
+void DumpTrace::process_time_frame(Witness& w, step_t
+time, ExprVector& input_vars_assignments, ExprVector& state_vars_assignments,
+ExprVector& defines_assignments) { ExprMgr& em (ExprMgr::INSTANCE());
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
@@ -298,8 +293,6 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             (pair.first);
         Expr_ptr name
             (symb->name());
-        Expr_ptr value
-            (NULL);
         Expr_ptr full
             (em.make_dot( ctx, name));
 
@@ -307,15 +300,17 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             Variable& var
                 (symb -> as_variable());
 
-            try {
-                value = tf.value(full);
-                if (var.is_input())
-                    input_vars_assignments.push_back( em.make_eq( full, value));
-                else
-                    state_vars_assignments.push_back( em.make_eq( full, value));
-            }
-            catch (NoValue nv) {}
+            Expr_ptr value
+                (tf.has_value(full)
+                 ? tf.value(full)
+                 : em.make_undef());
+
+            if (var.is_input())
+                input_vars_assignments.push_back( em.make_eq( full, value));
+            else
+                state_vars_assignments.push_back( em.make_eq( full, value));
         }
+
         else if (symb -> is_define()) {
 
             Define& define
@@ -324,14 +319,15 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             Expr_ptr body
                 (define.body());
 
-            try {
-                value = wm.eval( w, ctx, body, time);
-                defines_assignments.push_back( em.make_eq( full,
-                                                           value));
-            }
-            catch (NoValue nv) {
-            }
+            Expr_ptr value
+                (wm.eval( w, ctx, body, time));
+
+            if (! value)
+                value = em.make_undef();
+
+            defines_assignments.push_back(em.make_eq(full, value));
         }
+
         else
             continue;
     }
@@ -447,7 +443,7 @@ Variant DumpTrace::operator()()
 
     else assert(false); /* unsupported */
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 DumpTraceTopic::DumpTraceTopic(Interpreter& owner)

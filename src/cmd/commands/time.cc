@@ -87,10 +87,7 @@ Variant Time::operator()()
 
     oss << ".";
 
-    const char* res
-        (oss.str().c_str());
-
-    return Variant(res);
+    return Variant(oss.str());
 }
 
 TimeTopic::TimeTopic(Interpreter& owner)
