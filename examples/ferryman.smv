@@ -9,9 +9,6 @@ VAR
         wolf     : { EAST, WEST };
         carry    : { NIL, GOAT, CABBAGE, WOLF };
 
-VAR
-        running  : boolean;
-
 -- Everything is on the WEST bank at the beginning
 INIT
         ferryman = WEST &&
@@ -51,9 +48,8 @@ TRANS
 
 -- If the FERRYMAN is RUNNING, she has to switch sides at each step.
 TRANS
-     running ?:
-             ferryman :=
-                       (ferryman = WEST ? EAST : WEST);
+     ferryman :=
+              (ferryman = WEST ? EAST : WEST);
 
 -- To perform planning, we need to assert the negation of the desired TARGET.
 -- Our TARGET here is to have all the required items on the EAST bank.
