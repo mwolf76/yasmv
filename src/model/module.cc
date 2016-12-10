@@ -30,13 +30,15 @@
 
 Module::Module(const Expr_ptr name)
     : f_name(name)
+{
+    const void *instance
+        (this);
 
-    , f_localVars()
-    , f_localDefs()
-
-    , f_init()
-    , f_trans()
-{}
+    DEBUG
+        << "Initialized Module instance @"
+        << instance
+        << std::endl;
+}
 
 void Module::add_var(Expr_ptr symb_name, Variable_ptr var)
 {
@@ -61,7 +63,8 @@ void Module::add_var(Expr_ptr symb_name, Variable_ptr var)
         (oss.str());
 
     DEBUG
-        << "Module `" << (*this)
+        << "Module `"
+        << (*this)
         << "`, added "
         << tmp
         << "var `" << symb_name

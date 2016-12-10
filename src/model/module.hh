@@ -35,7 +35,6 @@ class Module {
     Expr_ptr f_name;
 
     ExprVector f_locals;
-    Expr_ptr f_input;
 
     Variables f_localVars;
     Parameters f_localParams;
@@ -55,11 +54,6 @@ public:
     /* Symbols management, preserves decl ordering */
     inline const ExprVector& locals() const
     { return f_locals; }
-
-    inline const Expr_ptr& input() const
-    { return f_input; }
-    void set_input(Expr_ptr input)
-    { f_input = input; }
 
     inline const Variables& vars() const
     { return f_localVars; }
