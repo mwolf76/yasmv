@@ -21,7 +21,7 @@
  *
  **/
 
-#include <model/classes.hh>
+#include <model/model.hh>
 #include <stack>
 
 SymbIter::SymbIter(Model& model, Expr_ptr formula)

@@ -1,6 +1,6 @@
 /**
- * @file model/classes.cc
- * @brief Model management subsystem, module class implementation.
+ * @file model/module.cc
+ * @brief Model management subsystem, Module class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,67 +23,10 @@
 
 #include <algorithm>
 #include <utility>
+#include <string>
 
-#include <model/classes.hh>
 #include <model/exceptions.hh>
-
-Module& Model::add_module(Module& module)
-{
-    Expr_ptr name
-        (module.name());
-
-    DEBUG
-        << "Added module: `"
-        << name << "`"
-        << std::endl;
-
-    f_modules.insert( std::make_pair<Expr_ptr, Module_ptr>
-                      (name, &module));
-
-    return module;
-}
-
-Module& Model::module(Expr_ptr module_name)
-{
-    Modules::const_iterator i
-        (f_modules.find(module_name));
-
-    if (i == f_modules.end())
-        throw MainModuleNotFound();
-
-    return *(i -> second);
-}
-
-Module& Model::main_module()
-{
-    if (! f_modules.size())
-        throw MainModuleNotFound();
-
-    Modules::const_iterator i
-        (f_modules.begin());
-
-    return *(i -> second);
-} 
-
-Model::Model()
-    : f_modules()
-{
-    const void *instance
-        (this);
-
-    DEBUG
-        << "Initialized Model instance @"
-        << instance
-        << std::endl;
-}
-
-Model::~Model()
-{
-    // TODO: free memory for symbols... (they've been allocated using new)
-    assert(false); // XXX
-}
-std::ostream& operator<<(std::ostream& os, Module& module)
-{ return os << module.name(); }
+#include <model/module.hh>
 
 Module::Module(const Expr_ptr name)
     : f_name(name)

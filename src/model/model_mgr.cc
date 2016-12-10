@@ -1,6 +1,6 @@
 /**
- * @file model_mgr.cc
- * @brief Model management subsystem, Model Manager class implementation.
+ * @file model/model_mgr.cc
+ * @brief Model management subsystem, ModelMgr class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,6 +24,14 @@
 #include <symb/symbol.hh>
 #include <model/exceptions.hh>
 #include <model/model_mgr.hh>
+
+ModelMgr& ModelMgr::INSTANCE()
+{
+    if (! f_instance)
+        f_instance = new ModelMgr();
+
+    return (*f_instance);
+}
 
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;

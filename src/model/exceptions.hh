@@ -26,6 +26,9 @@
 #ifndef MODEL_EXCEPTIONS_H
 #define MODEL_EXCEPTIONS_H
 
+#include <common/common.hh>
+#include <expr/expr.hh>
+
 class ModelException : public Exception {
 public:
     ModelException(const std::string& subtype,

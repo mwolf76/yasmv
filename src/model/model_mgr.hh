@@ -52,6 +52,9 @@ typedef class ModelMgr *ModelMgr_ptr;
 class ModelMgr  {
 
 public:
+    /* singleton */
+    static ModelMgr& INSTANCE();
+
     inline Model& model()
     { return f_model; }
 
@@ -63,13 +66,6 @@ public:
 
     // this must be called before any type checking
     bool analyze();
-
-    static ModelMgr& INSTANCE() {
-        if (! f_instance)
-            f_instance = new ModelMgr();
-
-        return (*f_instance);
-    }
 
     inline ExprMgr& em() const
     { return f_em; }
@@ -90,7 +86,8 @@ public:
 
     // delegated param binding method
     inline Expr_ptr preprocess(Expr_ptr body,
-                               Expr_ptr ctx = ExprMgr::INSTANCE().make_empty()) {
+                               Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
+    {
         return f_preprocessor.process(body, ctx);
     }
 
