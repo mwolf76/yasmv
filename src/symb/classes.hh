@@ -34,8 +34,6 @@
 
 #include <src/parser/grammars/grammar.hh>
 
-// #include <type/type.hh>
-
 #include <vector>
 #include <utility>
 

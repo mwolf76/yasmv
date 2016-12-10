@@ -41,6 +41,6 @@
 #include <symb/typedefs.hh>
 #include <symb/classes.hh>
 #include <symb/resolver.hh>
-#include <symb/iter.hh>
+#include <symb/symb_iter.hh>
 
 #endif /* SYMBOL_H */

@@ -23,7 +23,7 @@
  *
  **/
 
-#include <symb/iter.hh>
+#include <symb/symb_iter.hh>
 
 bool SymbIter::has_next() const
 {
