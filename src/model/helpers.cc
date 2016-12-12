@@ -1,9 +1,6 @@
 /**
- * @file symb/iter.hh
- * @brief Symbol interface, typedefs
- *
- * This header file contains the declarations required by the symbol
- * resolver.
+ * @file model/module.cc
+ * @brief Model management subsystem, helpers implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,34 +21,12 @@
  *
  **/
 
-#ifndef SYMBOL_ITER_H
-#define SYMBOL_ITER_H
+#include <string>
+#include <fstream>
+#include <model/module.hh>
 
-#include <common/common.hh>
-#include <expr/expr.hh>
-#include <utils/pool.hh>
+std::ostream& operator<<(std::ostream& os, Module& module)
+{
+    return os << module.name();
+}
 
-#include <symb/typedefs.hh>
-
-class Model;
-class Symbol;
-
-class SymbIter {
-public:
-    SymbIter(Model& model);
-    ~SymbIter();
-
-    /* true iff there are more symbols to be processed */
-    bool has_next() const;
-
-    /* yields next symbol, raises an exception if no such symbol exists. */
-    std::pair <Expr_ptr, Symbol_ptr> next();
-
-private:
-    Model&  f_model;
-
-    SymbIterable f_symbols;
-    SymbIterable::const_iterator f_iter;
-};
-
-#endif /* SYMBOL_ITER_H */

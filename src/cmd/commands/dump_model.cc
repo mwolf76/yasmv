@@ -25,8 +25,10 @@
 #include <cstring>
 
 #include <cmd/commands/dump_model.hh>
-#include <model/model.hh>
+
 #include <model/model_mgr.hh>
+#include <model/model.hh>
+#include <model/module.hh>
 
 DumpModel::DumpModel(Interpreter& owner)
     : Command(owner)

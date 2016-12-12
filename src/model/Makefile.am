@@ -8,7 +8,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src																\
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_SOURCES = exceptions.cc model.cc module.cc model_mgr.cc model_resolver.cc	\
-symb_iter.cc
+symb_iter.cc helpers.cc
 
 # -------------------------------------------------------
 

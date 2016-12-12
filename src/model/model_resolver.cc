@@ -27,6 +27,8 @@
 
 #include <model/model_resolver.hh>
 #include <model/model_mgr.hh>
+#include <model/model.hh>
+#include <model/module.hh>
 
 #include <algorithm>
 

@@ -20,12 +20,12 @@
  * 02110-1301 USA
  *
  **/
+#include <algorithms/bmc/bmc.hh>
+
+#include <witness/witness_mgr.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-
-#include <algorithms/bmc/bmc.hh>
-#include <witness/witness_mgr.hh>
 
 // reserved for witnesses
 static const char *reach_trace_prfx ("fwd_reach_");

@@ -57,4 +57,6 @@ typedef boost::unordered_map<Expr_ptr, Define_ptr,
 
 typedef class Resolver* Resolver_ptr;
 
+typedef std::vector< std::pair< Expr_ptr, Symbol_ptr > > SymbIterable;
+
 #endif /* SYMBOL_TYPEDEFS_H */

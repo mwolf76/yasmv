@@ -68,7 +68,7 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
             (extend());
 
         SymbIter symbols
-            (model, NULL); /* COI not yet supported */
+            (model);
 
         while (symbols.has_next()) {
 

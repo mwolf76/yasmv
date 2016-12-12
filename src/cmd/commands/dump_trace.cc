@@ -283,15 +283,17 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
 void DumpTrace::process_input(Witness& w,
                               ExprVector& input_assignments)
 {
-
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
 
+    Model& model
+        (ModelMgr::INSTANCE().model());
+
     SymbIter symbs
-        (ModelMgr::INSTANCE().model(), NULL);
+        (model);
 
     while (symbs.has_next()) {
 
@@ -328,7 +330,14 @@ void DumpTrace::process_input(Witness& w,
 
             input_assignments.push_back(em.make_eq(full, value));
         }
-    }
+    } /* while (symbs.has_next()) */
+
+    OrderingPreservingComparisonFunctor fun
+        (model);
+
+    sort(input_assignments.begin(),
+         input_assignments.end(),
+         fun);
 }
 
 /* here UNDEF is used to fill up symbols not showing up in the witness where
@@ -346,8 +355,11 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
     TimeFrame& tf
         (w[time]);
 
+    Model& model
+        (ModelMgr::INSTANCE().model());
+
     SymbIter symbs
-        (ModelMgr::INSTANCE().model(), NULL);
+        (model);
 
     while (symbs.has_next()) {
 
@@ -365,7 +377,7 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
         Expr_ptr name
             (symb->name());
         Expr_ptr full
-            (em.make_dot( ctx, name));
+            (em.make_dot(ctx, name));
 
         if (symb->is_variable())  {
 
@@ -400,10 +412,16 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
 
             defines_assignments.push_back(em.make_eq(full, value));
         }
+    } /* while(symbs.has_next()) */
 
-        else
-            continue;
-    }
+    OrderingPreservingComparisonFunctor fun
+        (model);
+
+    sort(state_vars_assignments.begin(),
+         state_vars_assignments.end(), fun);
+
+    sort(defines_assignments.begin(),
+         defines_assignments.end(), fun);
 }
 
 void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVector& ev)

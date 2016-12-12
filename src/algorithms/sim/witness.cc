@@ -62,7 +62,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
         (extend());
 
     SymbIter symbols
-        (model, NULL);
+        (model);
 
     while (symbols.has_next()) {
 

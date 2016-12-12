@@ -24,14 +24,13 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <model/module.hh>
+#include <common/common.hh>
+
 #include <model/exceptions.hh>
 #include <model/typedefs.hh>
 
 /* main container class */
 class Model {
-    Modules f_modules;
-
 public:
     Model();
     ~Model();
@@ -44,6 +43,16 @@ public:
 
     /* retrieve main module */
     Module& main_module();
+
+    /* reserved to Module class */
+    void autoIndexSymbol(Expr_ptr identifier);
+    unsigned symbol_index(Expr_ptr identifier);
+
+private:
+    Modules f_modules;
+
+    unsigned f_autoincrement;
+    SymbolIndexMap f_symbol_index_map;
 };
 
 #endif /* MODEL_H */

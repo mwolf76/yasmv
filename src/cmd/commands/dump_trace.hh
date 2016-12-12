@@ -36,6 +36,32 @@ public:
     UnsupportedFormat(pconst_char format);
 };
 
+/* Model ordering-preserving comparison helper */
+class OrderingPreservingComparisonFunctor {
+    Model& f_model;
+
+public:
+    OrderingPreservingComparisonFunctor(Model& model)
+        : f_model(model)
+    {}
+
+    bool operator() (Expr_ptr a, Expr_ptr b)
+    {
+        assert(a);
+        assert(b);
+
+        Expr_ptr lhs_a
+            (a->lhs());
+
+        Expr_ptr lhs_b
+            (b->lhs());
+
+        return
+            f_model.symbol_index(lhs_a) <
+            f_model.symbol_index(lhs_b) ;
+    }
+};
+
 class DumpTrace : public Command {
 
     /* the trace id (optional) */

@@ -28,9 +28,10 @@
 #include <symb/proxy.hh>
 
 #include <sat/sat.hh>
+
+#include <model/module.hh>
 #include <model/analyzer/analyzer.hh>
 #include <model/compiler/compiler.hh>
-
 
 #include <utils/misc.hh>
 

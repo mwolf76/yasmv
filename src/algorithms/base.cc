@@ -278,7 +278,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
 {
     SymbIter symbs
-        (model(), NULL); // no COI support yet
+        (model());
 
     /* this will hold the activation vars for the uniqueness clauses
        defined below */

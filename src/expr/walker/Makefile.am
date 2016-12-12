@@ -1,13 +1,11 @@
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr	\
--I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger	\
--I$(top_srcdir)/src/dd/cudd-2.5.0/cudd				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/mtr				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/st				\
--I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr										\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/3rdparty/ezlogger								\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st -I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-PKG_HH = walker.hh
-PKG_CC = walker.cc
+PKG_HH = helpers.hh walker.hh exceptions.hh
+PKG_CC = walker.cc exceptions.cc
 
 PKG_SOURCES = $(PKG_H) $(PKG_CC)
 

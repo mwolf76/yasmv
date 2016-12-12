@@ -30,30 +30,12 @@
 #include <model/typedefs.hh>
 
 class Module {
-    friend std::ostream& operator<<(std::ostream& os, Module& module);
-
-    Expr_ptr f_name;
-
-    ExprVector f_locals;
-
-    Variables f_localVars;
-    Parameters f_localParams;
-    Defines   f_localDefs;
-
-    ExprVector f_init;
-    ExprVector f_invar;
-    ExprVector f_trans;
-
 public:
     Module(Expr_ptr name);
     ~Module();
 
     inline const Expr_ptr name() const
     { return f_name; }
-
-    /* Symbols management, preserves decl ordering */
-    inline const ExprVector& locals() const
-    { return f_locals; }
 
     inline const Variables& vars() const
     { return f_localVars; }
@@ -80,6 +62,37 @@ public:
     inline const ExprVector& trans() const
     { return f_trans; }
     void add_trans(Expr_ptr expr);
+
+private:
+    friend std::ostream& operator<<(std::ostream& os, Module& module);
+
+    friend class Model;
+    Model* f_owner;
+    inline Model& owner() const
+    {
+        assert(f_owner);
+        return *f_owner;
+    }
+
+    void register_owner(Model_ptr model_ptr)
+    {
+        assert(! f_owner);
+        f_owner = model_ptr;
+    }
+
+    Expr_ptr f_name;
+
+    /* used to detect duplicates */
+    ExprSet f_locals;
+    void checkDuplicates(Expr_ptr expr);
+
+    Variables f_localVars;
+    Parameters f_localParams;
+    Defines   f_localDefs;
+
+    ExprVector f_init;
+    ExprVector f_invar;
+    ExprVector f_trans;
 };
 
 #endif /* MODEL_MODULE_H */

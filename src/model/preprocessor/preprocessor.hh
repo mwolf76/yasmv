@@ -34,6 +34,7 @@
 
 #include <model/model.hh>
 
+#include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
 
 // NOTE: here we're using a vector in order to bypass STL stack
