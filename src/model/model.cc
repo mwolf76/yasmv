@@ -90,15 +90,12 @@ void Model::autoIndexSymbol(Expr_ptr identifier)
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
+    // TODO: this is not going to work for other modules
     Expr_ptr ctx
         (em.make_empty());
 
     Expr_ptr full
         (em.make_dot(ctx, identifier));
-
-    DEBUG
-        << full
-        << std::endl;
 
     f_symbol_index_map.insert(std::make_pair<Expr_ptr, unsigned>
                               (full, ++ f_autoincrement));

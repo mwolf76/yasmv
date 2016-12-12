@@ -41,10 +41,9 @@ public:
     Module& add_module(Module& module);
     Module& module(Expr_ptr module_name);
 
-    /* retrieve main module */
+    /* topmost module in the model */
     Module& main_module();
 
-    /* reserved to Module class */
     void autoIndexSymbol(Expr_ptr identifier);
     unsigned symbol_index(Expr_ptr identifier);
 
