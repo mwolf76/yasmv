@@ -36,53 +36,29 @@ public:
     {}
 };
 
-/* helpers */
-std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs);
-std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-std::string build_identifier_expected_error_message(Expr_ptr expr);
-std::string build_duplicate_literal_error_message(Expr_ptr expr);
-std::string build_type_mismatch_error_message(Expr_ptr expr, Type_ptr a, Type_ptr b);
-
 /** Raised when the inferrer detects a wrong type */
 class BadType : public TypeException {
 public:
-    BadType(Expr_ptr expr, Type_ptr lhs)
-        : TypeException("BadType",
-                        build_bad_type_error_message(expr, lhs))
-    {}
-
-    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
-        : TypeException("BadType",
-                        build_bad_type_error_message(expr, lhs, rhs))
-    {}
-
+    BadType(Expr_ptr expr, Type_ptr lhs);
+    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
 };
 
 class IdentifierExpected : public TypeException {
 public:
-    IdentifierExpected(Expr_ptr expr)
-        : TypeException("IdentifierExpected",
-                        build_identifier_expected_error_message(expr))
-    {}
+    IdentifierExpected(Expr_ptr expr);
 };
 
 /** Raised when the inferrer detects a wrong type */
 class DuplicateLiteral : public TypeException {
 public:
-    DuplicateLiteral(Expr_ptr expr)
-        : TypeException("DuplicateLiteral",
-                        build_duplicate_literal_error_message(expr))
-    {}
+    DuplicateLiteral(Expr_ptr expr);
 };
 
 /** Raised when the inferrer detects two mismatching types */
 
 class TypeMismatch : public TypeException {
 public:
-    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
-        : TypeException("TypeMismatch",
-                        build_type_mismatch_error_message(expr, a, b))
-    {}
+    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b);
 };
 
 #endif /* TYPE_EXCEPTIONS_H */

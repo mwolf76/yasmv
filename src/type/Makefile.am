@@ -10,7 +10,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = type.hh type_mgr.hh type_resolver.hh
+PKG_HH = classes.hh exceptions.hh type.hh type_mgr.hh type_resolver.hh
 PKG_CC = classes.cc printers.cc type_mgr.cc type_resolver.cc exceptions.cc	\
 monolithic.cc algebraic.cc array.cc instance.cc
 
