@@ -21,8 +21,8 @@
  *
  **/
 
-#include <algorithm>
-#include <utility>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
 #include <model/model.hh>
 #include <model/module.hh>

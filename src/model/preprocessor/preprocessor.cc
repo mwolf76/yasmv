@@ -22,6 +22,7 @@
  **/
 
 #include <symb/proxy.hh>
+#include <symb/classes.hh>
 
 #include <model/preprocessor/preprocessor.hh>
 

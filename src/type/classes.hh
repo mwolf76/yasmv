@@ -34,6 +34,9 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
+#include <type/typedefs.hh>
+#include <type/classes.hh>
+
 /*
  * YASMINE's types can be classified as (a) Monolithic types
  * (i.e. that can be represented using a single DD), (b) Algebraic

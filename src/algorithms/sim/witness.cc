@@ -20,12 +20,19 @@
  * 02110-1301 USA
  *
  **/
-#include <simulation.hh>
+
+#include <common/common.hh>
+
+#include <env/environment.hh>
 
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-#include <env/environment.hh>
+#include <sim/simulation.hh>
+
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+#include <symb/symb_iter.hh>
 
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness(&engine)

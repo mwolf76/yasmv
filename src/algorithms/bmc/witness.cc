@@ -29,6 +29,8 @@
 #include <algorithms/bmc/bmc.hh>
 #include <algorithms/bmc/witness.hh>
 
+#include <symb/symb_iter.hh>
+
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 

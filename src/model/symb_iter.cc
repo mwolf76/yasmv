@@ -27,6 +27,10 @@
 #include <model/module.hh>
 
 #include <symb/symb_iter.hh>
+
+#include <type/typedefs.hh>
+#include <type/classes.hh>
+
 #include <stack>
 
 SymbIter::SymbIter(Model& model)

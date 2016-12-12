@@ -21,12 +21,12 @@
  *
  **/
 
-#include <sstream>
-#include <cstring>
-
 #include <witness.hh>
 
 #include <utils/misc.hh>
+
+#include <sstream>
+#include <cstring>
 
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)

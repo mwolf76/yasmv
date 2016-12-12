@@ -25,6 +25,8 @@
 
 #include <expr/expr.hh>
 #include <type/type.hh>
+
+#include <symb/classes.hh>
 #include <symb/proxy.hh>
 
 #include <sat/sat.hh>

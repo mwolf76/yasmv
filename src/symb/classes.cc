@@ -21,12 +21,14 @@
  *
  **/
 
-#include <symb/symbol.hh>
+#include <symb/exceptions.hh>
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+
+#include <utils/misc.hh>
 
 #include <sstream>
 #include <cstring>
-
-#include <utils/misc.hh>
 
 bool Symbol::is_variable(void) const
 {

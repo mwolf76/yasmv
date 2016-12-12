@@ -26,7 +26,8 @@
 #ifndef SYMBOL_TYPEDEFS_H
 #define SYMBOL_TYPEDEFS_H
 
-#include <common/common.hh>
+#include <expr/expr.hh>
+
 #include <utils/pool.hh>
 
 #include <vector>

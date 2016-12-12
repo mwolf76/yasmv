@@ -27,6 +27,9 @@
 #include <type_mgr.hh>
 #include <type_resolver.hh>
 
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 

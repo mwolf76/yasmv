@@ -29,8 +29,6 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <symb/symbol.hh>
-
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 

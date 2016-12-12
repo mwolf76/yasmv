@@ -21,12 +21,16 @@
  *
  **/
 
-#include <symb/symbol.hh>
-#include <model/exceptions.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
-#include <model/model_mgr.hh>
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+
+#include <model/exceptions.hh>
 #include <model/model.hh>
 #include <model/module.hh>
+#include <model/model_mgr.hh>
 
 ModelMgr& ModelMgr::INSTANCE()
 {

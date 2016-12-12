@@ -21,13 +21,16 @@
  *
  **/
 
-#include <algorithm>
-#include <utility>
-#include <string>
-
 #include <model/exceptions.hh>
 #include <model/model.hh>
 #include <model/module.hh>
+
+#include <type/typedefs.hh>
+#include <type/classes.hh>
+
+#include <algorithm>
+#include <utility>
+#include <string>
 
 Module::Module(const Expr_ptr name)
     : f_owner(NULL)

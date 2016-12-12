@@ -25,7 +25,9 @@
 
 #include <expr/expr.hh>
 #include <type/type.hh>
+
 #include <symb/proxy.hh>
+#include <symb/classes.hh>
 
 #include <model/type_checker/type_checker.hh>
 

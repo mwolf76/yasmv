@@ -24,9 +24,11 @@
 #ifndef MODEL_MODULE_H
 #define MODEL_MODULE_H
 
-#include <common/common.hh>
 #include <expr/expr.hh>
-#include <symb/symbol.hh>
+
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+
 #include <model/typedefs.hh>
 
 class Module {
