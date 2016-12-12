@@ -109,16 +109,16 @@ public:
     : f_node(node)
     , f_time(time)
   {}
-  
+
   inline DdNode* node() const
   { return f_node; }
-  
+
   inline step_t time() const
   { return f_time; }
-  
+
   // The DdNode node
   DdNode* f_node;
-  
+
   // expression time (default is 0)
   step_t f_time;
 };
