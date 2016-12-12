@@ -4,8 +4,8 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src																	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
-
-PKG_CC = classes.cc forward.cc backward.cc witness.cc
+PKG_HH = bmc.hh typedefs.hh witness.hh
+PKG_CC = bmc.cc forward.cc backward.cc witness.cc
 
 # -------------------------------------------------------
 

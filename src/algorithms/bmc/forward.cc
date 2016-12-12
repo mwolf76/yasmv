@@ -20,15 +20,15 @@
  * 02110-1301 USA
  *
  **/
-#include <algorithms/bmc/bmc.hh>
 
-#include <witness/witness_mgr.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/bmc/witness.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
 // reserved for witnesses
-static const char *reach_trace_prfx ("fwd_reach_");
+static const char *reach_trace_prfx ("reach_");
 
 void BMC::forward_strategy(CompilationUnit& goal)
 {

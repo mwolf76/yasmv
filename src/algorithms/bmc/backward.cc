@@ -21,14 +21,14 @@
  *
  **/
 
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/bmc/witness.hh>
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <algorithms/bmc/bmc.hh>
-#include <witness/witness_mgr.hh>
-
 // reserved for witnesses
-static const char *reach_trace_prfx ("bwd_reach_");
+static const char *reach_trace_prfx ("reach_");
 
 void BMC::backward_strategy(CompilationUnit& goal)
 {

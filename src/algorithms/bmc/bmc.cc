@@ -1,5 +1,5 @@
 /**
- * @file bmc/classes.hh
+ * @file bmc/bmc.cc
  * @brief SAT-based BMC reachability algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,7 +21,8 @@
  *
  **/
 
-#include <algorithms/bmc/classes.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/bmc/witness.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>

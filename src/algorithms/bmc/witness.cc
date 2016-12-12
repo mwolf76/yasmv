@@ -1,6 +1,6 @@
 /**
- * @file witness.cc
- * @brief SAT-based BMC reachability analysis, witness class implementation.
+ * @file bmc/witness.cc
+ * @brief SAT-based BMC reachability analysis, BMC CEX witness class implementation.
  *
  * This module contains definitions and services that implement the
  * extraction of a CEX (CounterEXample) witness for SAT-based BMC
@@ -25,8 +25,9 @@
  *
  **/
 
-#include <algorithms/bmc/bmc.hh>
 #include <algorithms/base.hh>
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/bmc/witness.hh>
 
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
