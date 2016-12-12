@@ -85,37 +85,38 @@ void BMC::forward_strategy(CompilationUnit& goal)
                 << "` is REACHABLE."
                 << std::endl;
 
-            sync_set_status(BMC_REACHABLE);
+            if (sync_set_status(BMC_REACHABLE)) {
 
-            /* Extract reachability witness */
-            WitnessMgr& wm
-                (WitnessMgr::INSTANCE());
+                /* Extract reachability witness */
+                WitnessMgr& wm
+                    (WitnessMgr::INSTANCE());
 
-            Witness& w
-                (* new BMCCounterExample(f_goal, model(), engine, k));
+                Witness& w
+                    (* new BMCCounterExample(f_goal, model(), engine, k));
 
-            /* witness identifier */
-            std::ostringstream oss_id;
-            oss_id
-                << reach_trace_prfx
-                << wm.autoincrement();
-            w.set_id(oss_id.str());
+                /* witness identifier */
+                std::ostringstream oss_id;
+                oss_id
+                    << reach_trace_prfx
+                    << wm.autoincrement();
+                w.set_id(oss_id.str());
 
-            /* witness description */
-            std::ostringstream oss_desc;
-            oss_desc
-                << "Reachability witness for target `"
-                << f_goal
-                << "` in module `"
-                << model().main_module().name()
-                << "`" ;
-            w.set_desc(oss_desc.str());
+                /* witness description */
+                std::ostringstream oss_desc;
+                oss_desc
+                    << "Reachability witness for target `"
+                    << f_goal
+                    << "` in module `"
+                    << model().main_module().name()
+                    << "`" ;
+                w.set_desc(oss_desc.str());
 
-            wm.record(w);
-            wm.set_current(w);
-            set_witness(w);
+                wm.record(w);
+                wm.set_current(w);
+                set_witness(w);
 
-            goto cleanup;
+                goto cleanup;
+            }
         }
 
         else if (STATUS_UNSAT == status) {

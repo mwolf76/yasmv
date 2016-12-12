@@ -39,7 +39,7 @@ public:
     { return sync_status(); }
 
     reachability_status_t sync_status();
-    void sync_set_status(reachability_status_t status);
+    bool sync_set_status(reachability_status_t status);
 
 private:
     Expr_ptr f_goal;

@@ -106,7 +106,7 @@ reachability_status_t BMC::sync_status()
 }
 
 /* synchronized */
-void BMC::sync_set_status(reachability_status_t status)
+bool BMC::sync_set_status(reachability_status_t status)
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
@@ -115,6 +115,11 @@ void BMC::sync_set_status(reachability_status_t status)
     assert(f_status == status ||
            (status != BMC_UNKNOWN && f_status == BMC_UNKNOWN));
 
+    bool res
+        (f_status != status);
+
     /* set status, extract witness if reachable */
     f_status = status;
+
+    return res;
 }
