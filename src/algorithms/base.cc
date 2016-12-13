@@ -431,23 +431,21 @@ void Algorithm::assert_time_frame(Engine& engine,
                 (em.make_eq( full->rhs(),
                              assignment->rhs()));
 
+            DEBUG
+                << expr
+                << std::endl;
+
             try {
                 ++ count;
                 engine.push( cmpl.process(scope, expr), time, group);
             }
 
-            catch (Exception& ae) {
+            catch (Exception& e) {
                 f_ok = false;
 
-                pconst_char what
-                    (ae.what());
-
                 std::cerr
-                    << what
+                    << e.what()
                     << std::endl;
-
-                free((void *) what);
-                assert(false); // XXX
             }
         }
     }

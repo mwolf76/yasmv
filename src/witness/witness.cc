@@ -82,7 +82,10 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 
     /* force conversion of constants to required format. TODO: extend
        this to sets */
-    if (em.is_constant(vexpr)) {
+    if (em.is_bool_const(vexpr))
+        return vexpr;
+
+    else if (em.is_int_const(vexpr)) {
         switch (fmt) {
         case FORMAT_BINARY:
             vexpr = em.make_bconst(vexpr->value());
@@ -128,6 +131,12 @@ bool TimeFrame::has_value( Expr_ptr expr )
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
 {
     assert(value);
+
+    DEBUG
+        << expr
+        << " := "
+        << value
+        << std::endl;
 
     // symbol is defined in witness' language
     ExprVector& lang
