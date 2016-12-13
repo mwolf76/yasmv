@@ -31,10 +31,23 @@
 #include <model/exceptions.hh>
 
 /** Exception classes */
+class CompilerException : public Exception {
+public:
+    CompilerException(const std::string& subtype,
+                      const std::string& message="")
+        : Exception("CompilerException", subtype, message)
+    {}
+};
+
 /** Raised when a constant could not fit into a native word */
-class ConstantTooLarge : public ModelException {
+class ConstantTooLarge : public CompilerException {
 public:
     ConstantTooLarge(Expr_ptr expr);
+};
+
+class UnexpectedExpression : public CompilerException {
+public:
+    UnexpectedExpression(Expr_ptr expr);
 };
 
 #endif /* COMPILER_EXCEPTIONS_H */

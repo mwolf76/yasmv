@@ -433,7 +433,7 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     else if (is_binary_array(expr))
         array_equals(expr);
 
-    else assert( false ); // unreachable
+    else throw UnexpectedExpression(expr);
 }
 
 bool Compiler::walk_ne_preorder(const Expr_ptr expr)
