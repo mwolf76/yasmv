@@ -1,9 +1,11 @@
 #word-width 4
 MODULE tic-tac-toe
 
+@inertial
 VAR
   grid : uint[9];
-  move : { TOP-LEFT, TOP-CENTER, TOP-RIGHT, MID-LEFT, MID-CENTER, MID-RIGHT, BOTTOM-LEFT, BOTTOM-CENTER, BOTTOM-RIGHT };
+  move : { TOP-LEFT, TOP-CENTER, TOP-RIGHT, MID-LEFT, MID-CENTER,
+           MID-RIGHT, BOTTOM-LEFT, BOTTOM-CENTER, BOTTOM-RIGHT };
 
 @hidden
 DEFINE
@@ -57,6 +59,7 @@ DEFINE
 DEFINE
     MARK := (turn = PLAYER_A ? A : B);
 
+@inertial
 VAR
     turn : { PLAYER_A, PLAYER_B };
   

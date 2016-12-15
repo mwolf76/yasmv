@@ -13,6 +13,7 @@
 --
 MODULE automation
 
+@inertial
 VAR
         pos : {
             HOME,
@@ -22,7 +23,6 @@ VAR
             NEGATIVE, POSITIVE
         };
 
-VAR
         edge : {
              IDLE,
 

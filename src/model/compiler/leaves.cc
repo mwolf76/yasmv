@@ -28,9 +28,6 @@
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
-
-
-
 static inline value_t pow2(unsigned exp);
 
 void Compiler::walk_leaf(const Expr_ptr expr)

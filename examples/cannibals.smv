@@ -3,6 +3,7 @@
 #word-width 3
 MODULE cannibals
 
+@inertial
 VAR
   west-cannibals: int;
   east-cannibals: int;
@@ -11,6 +12,7 @@ VAR
   east-missionaries: int;
 
 @hidden
+@inertial
 VAR
   boat: { WEST, EAST };
 

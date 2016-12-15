@@ -10,6 +10,7 @@
 --
 MODULE herschel;
 
+@inertial
 VAR
   vertex: { NIL, a, b, c, d, e, f, g, h, i, j, k };
   visited: boolean[11];

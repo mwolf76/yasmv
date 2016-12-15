@@ -310,7 +310,7 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
         (define.body());
 
       /* recur in body */
-      walk_assignment_postorder(body);
+      (*this)(body);
     }
 }
 
@@ -439,39 +439,43 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
     ExprMgr& em
         (owner().em());
 
-    Expr_ptr ctx
-        (f_ctx_stack.back());
-    Expr_ptr full
-        (em.make_dot(ctx, expr));
+    if (em.is_identifier(expr)) {
 
-    ResolverProxy resolver;
+        Expr_ptr ctx
+            (f_ctx_stack.back());
+        Expr_ptr full
+            (em.make_dot(ctx, expr));
 
-    Symbol_ptr symb
-        (resolver.symbol(full));
+        ResolverProxy resolver;
 
-    if (symb->is_variable()) {
-        const Variable& var
-            (symb->as_variable());
+        Symbol_ptr symb
+            (resolver.symbol(full));
 
-        /* Sanity checks on var modifiers */
-        if (var.is_input() && var.is_inertial())
-            throw SemanticError("@input and @inertial not simultaneously allowed on the same var.");
+        if (symb->is_variable()) {
+            const Variable& var
+                (symb->as_variable());
 
-        if (var.is_input() && var.is_frozen())
-            throw SemanticError("@input and @frozen not simultaneously allowed on the same var.");
+            /* Sanity checks on var modifiers */
+            if (var.is_input() && var.is_inertial())
+                throw SemanticError("@input and @inertial not simultaneously allowed on the same var.");
 
-        if (var.is_inertial() && var.is_frozen())
-            throw SemanticError("@inertial and @frozen not simultaneously allowed on the same var.");
-    }
-    else if (symb->is_define()) {
+            if (var.is_input() && var.is_frozen())
+                throw SemanticError("@input and @frozen not simultaneously allowed on the same var.");
 
-        Define& define
-            (symb->as_define());
+            if (var.is_inertial() && var.is_frozen())
+                throw SemanticError("@inertial and @frozen not simultaneously allowed on the same var.");
+        }
+        else if (symb->is_define()) {
 
-        Expr_ptr body
-            (define.body());
+            Define& define
+                (symb->as_define());
 
-        /* recur in body */
-        walk_assignment_postorder(body);
+            Expr_ptr body
+                (define.body());
+
+            /* recur in body */
+            (*this)(body);
+        }
     }
 }
+

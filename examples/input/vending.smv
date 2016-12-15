@@ -33,6 +33,7 @@ VAR
 VAR
     credit     : uint;
 
+@inertial
 VAR
     change     : uint;
 

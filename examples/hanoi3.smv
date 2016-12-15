@@ -3,6 +3,7 @@
 #word-width 2
 MODULE hanoi;
 
+@inertial
 VAR
     a : uint[3];
     b : uint[3];
