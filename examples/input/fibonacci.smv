@@ -8,10 +8,12 @@
 #word-width 64
 MODULE fibonacci
 
+@inertial
 VAR f : uint;
     g : uint;
 
 @hidden
+@inertial
 VAR i : uint;
 
 @input
