@@ -295,6 +295,10 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
         /* FROZEN vars can not be assigned */
         if (var.is_frozen())
             throw SemanticError("Assignments can not be used on frozen vars.");
+
+        /* assignments can only be used on INERTIAL vars */
+        if (! var.is_inertial())
+            throw SemanticError("Assignments can only be used on inertial vars.");
     }
 
     /* 6. DEFINEs, simply process them recursively :-) */

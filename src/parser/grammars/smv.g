@@ -82,7 +82,7 @@ model_directive
 
 model_word_width_directive
     : '#word-width' width=constant
-    { om.set_word_width( width -> value()); }
+    { om.set_word_width( width->value()); }
     ;
 
 modules
@@ -105,6 +105,7 @@ scope {
     int hidden;
     int input;
     int frozen;
+    int inertial;
 
     value_format_t format;
 }
@@ -112,6 +113,7 @@ scope {
     $module_decl::hidden = 0;
     $module_decl::input = 0;
     $module_decl::frozen = 0;
+    $module_decl::inertial = 0;
 
     $module_decl::format = FORMAT_DEFAULT;
 }
@@ -135,9 +137,10 @@ fsm_formula_decl
 fsm_decl_modifiers
     : ( '@'
             (
-              'hidden' { $module_decl::hidden = 1; }
-            | 'frozen' { $module_decl::frozen = 1; }
-            | 'input'  { $module_decl::input  = 1; }
+              'hidden'   { $module_decl::hidden   = 1; }
+            | 'frozen'   { $module_decl::frozen   = 1; }
+            | 'inertial' { $module_decl::inertial = 1; }
+            | 'input'    { $module_decl::input    = 1; }
 
             | 'bin' { $module_decl::format = FORMAT_BINARY;      }
             | 'oct' { $module_decl::format = FORMAT_OCTAL;       }
@@ -179,14 +182,16 @@ fsm_var_decl_clause
                     (new Variable($smv::current_module->name(), vid, tp));
 
                 if ($module_decl::hidden)
-                    var -> set_hidden(true);
+                    var->set_hidden(true);
                 if ($module_decl::input)
-                    var -> set_input(true);
+                    var->set_input(true);
+                if ($module_decl::inertial)
+                    var->set_inertial(true);
                 if ($module_decl::frozen)
-                    var -> set_frozen(true);
+                    var->set_frozen(true);
 
                 if ($module_decl::format != FORMAT_DEFAULT)
-                    var -> set_format($module_decl::format);
+                    var->set_format($module_decl::format);
 
                 $smv::current_module->add_var(vid, var);
             }
@@ -232,12 +237,15 @@ fsm_define_decl_clause
       if ($module_decl::frozen)
           throw SyntaxError("@frozen modifier not supported in DEFINE decls");
 
+      if ($module_decl::inertial)
+          throw SyntaxError("@inertial modifier not supported in DEFINE decls");
+
       if ($module_decl::hidden)
-          def -> set_hidden(true);
+          def->set_hidden(true);
 
       /* these are mutually exclusive, default is hexadecimal */
       if ($module_decl::format != FORMAT_DEFAULT)
-          def -> set_format($module_decl::format);
+          def->set_format($module_decl::format);
 
       $smv::current_module->add_def(id, def);
     }
@@ -496,7 +504,7 @@ cast_expression returns [Expr_ptr res]
     Expr_ptr cast = NULL;
 }
     : '(' tp = native_type ')' expr = cast_expression
-        { $res = em.make_cast( tp -> repr(), expr ); }
+        { $res = em.make_cast( tp->repr(), expr ); }
     |
         expr = unary_expression
         { $res = expr; }
@@ -639,12 +647,12 @@ case_expression returns [Expr_ptr res]
      'end'
      {
         CaseClauses::reverse_iterator i = clauses.rbegin();
-        res = i -> second;
+        res = i->second;
         while (1) {
             if ( ++ i == clauses.rend())
                 break;
-            $res = em.make_ite( em.make_cond(i -> first,
-                                             i -> second), $res);
+            $res = em.make_ite( em.make_cond(i->first,
+                                             i->second), $res);
         }
      }
     ;
@@ -992,7 +1000,7 @@ help_command returns [Command_ptr res]
       { $res = cm.make_help(); }
       (
           topic = command_topic
-          { ((Help*) $res) -> set_topic(topic); }
+          { ((Help*) $res)->set_topic(topic); }
       )? ;
 
 help_command_topic returns [CommandTopic_ptr res]
@@ -1015,7 +1023,7 @@ read_model_command returns [Command_ptr res]
         { $res = cm.make_read_model(); }
 
         ( input=filepath {
-            ((ReadModel*) $res) -> set_input(input);
+            ((ReadModel*) $res)->set_input(input);
         }) ?
     ;
 
@@ -1029,7 +1037,7 @@ dump_model_command returns [Command_ptr res]
         { $res = cm.make_dump_model(); }
 
         ( output=filepath {
-            ((DumpModel*) $res) -> set_output(output);
+            ((DumpModel*) $res)->set_output(output);
         }) ?
     ;
 
@@ -1043,7 +1051,7 @@ add_init_command returns[Command_ptr res]
       { $res = cm.make_add_init(); }
 
       init=toplevel_expression
-      { ((AddInit *) $res) -> set_constraint(init); }
+      { ((AddInit *) $res)->set_constraint(init); }
     ;
 
 add_init_command_topic returns [CommandTopic_ptr res]
@@ -1056,7 +1064,7 @@ add_invar_command returns[Command_ptr res]
       { $res = cm.make_add_invar(); }
 
       invar=toplevel_expression
-      { ((AddInvar *) $res) -> set_constraint(invar); }
+      { ((AddInvar *) $res)->set_constraint(invar); }
     ;
 
 add_invar_command_topic returns [CommandTopic_ptr res]
@@ -1069,7 +1077,7 @@ add_trans_command returns[Command_ptr res]
       { $res = cm.make_add_trans(); }
 
         trans=toplevel_expression
-        { ((AddTrans *) $res) -> set_constraint(trans); }
+        { ((AddTrans *) $res)->set_constraint(trans); }
     ;
 
 add_trans_command_topic returns [CommandTopic_ptr res]
@@ -1092,7 +1100,7 @@ reach_command returns[Command_ptr res]
       { $res = cm.make_reach(); }
 
         target=toplevel_expression
-        { ((Reach *) $res) -> set_target(target); }
+        { ((Reach *) $res)->set_target(target); }
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]
@@ -1126,18 +1134,18 @@ dump_trace_command returns [Command_ptr res]
 
     (
       '-f' format=string
-      { ((DumpTrace*) $res) -> set_format(format); }
+      { ((DumpTrace*) $res)->set_format(format); }
 
     | '-o' output=filepath
       {
-            ((DumpTrace*) $res) -> set_output(output);
+            ((DumpTrace*) $res)->set_output(output);
             free((void *) output);
       }
 
     )*
 
     ( trace_id=string
-    { ((DumpTrace*) $res) -> set_trace_id(trace_id); } )?
+    { ((DumpTrace*) $res)->set_trace_id(trace_id); } )?
     ;
 
 dump_trace_command_topic returns [CommandTopic_ptr res]
@@ -1151,10 +1159,10 @@ dup_trace_command returns [Command_ptr res]
       { $res = cm.make_dup_trace(); }
 
       trace_id=string
-      { ((DupTrace*) $res) -> set_trace_id(trace_id); }
+      { ((DupTrace*) $res)->set_trace_id(trace_id); }
 
       ( duplicate_uid=string
-        { ((DupTrace*) $res) -> set_duplicate_id(duplicate_uid); } )?
+        { ((DupTrace*) $res)->set_duplicate_id(duplicate_uid); } )?
     ;
 
 dup_trace_command_topic returns [CommandTopic_ptr res]
@@ -1167,10 +1175,10 @@ pick_state_command returns [Command_ptr res]
         { $res = cm.make_pick_state(); }
     (
          '-a'
-         { ((PickState*) $res) -> set_allsat(true); }
+         { ((PickState*) $res)->set_allsat(true); }
 
     |    '-l' limit=constant
-         { ((PickState*) $res) -> set_limit(limit->value()); }
+         { ((PickState*) $res)->set_limit(limit->value()); }
     )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]
@@ -1183,16 +1191,16 @@ simulate_command returns [Command_ptr res]
       { $res = cm.make_simulate(); }
     (
        '-i' invar_condition=toplevel_expression
-        { ((Simulate *) $res) -> set_invar_condition(invar_condition); }
+        { ((Simulate *) $res)->set_invar_condition(invar_condition); }
 
     |  '-u' until_condition=toplevel_expression
-        { ((Simulate*) $res) -> set_until_condition(until_condition); }
+        { ((Simulate*) $res)->set_until_condition(until_condition); }
 
     |   '-k' konst=constant
-        { ((Simulate*) $res) -> set_k(konst->value()); }
+        { ((Simulate*) $res)->set_k(konst->value()); }
 
     |   '-t' trace_id=string
-        { ((Simulate*) $res) -> set_trace_uid(trace_id); }
+        { ((Simulate*) $res)->set_trace_uid(trace_id); }
     )* ;
 
 simulate_command_topic returns [CommandTopic_ptr res]
@@ -1205,7 +1213,7 @@ get_command returns [Command_ptr res]
       { $res = cm.make_get(); }
 
       ( id=identifier
-      { ((Get*) $res) -> set_identifier(id); })?
+      { ((Get*) $res)->set_identifier(id); })?
     ;
 
 get_command_topic returns [CommandTopic_ptr res]
@@ -1218,10 +1226,10 @@ set_command returns [Command_ptr res]
       { $res = cm.make_set(); }
 
       id=identifier
-      { ((Set*) $res) -> set_identifier(id); }
+      { ((Set*) $res)->set_identifier(id); }
 
       val=toplevel_expression
-      { ((Set*) $res) -> set_value(val); }
+      { ((Set*) $res)->set_value(val); }
     ;
 
 set_command_topic returns [CommandTopic_ptr res]
@@ -1234,7 +1242,7 @@ clear_command returns [Command_ptr res]
       { $res = cm.make_clear(); }
 
       ( id=identifier
-      { ((Clear*) $res) -> set_identifier(id); })?
+      { ((Clear*) $res)->set_identifier(id); })?
     ;
 
 clear_command_topic returns [CommandTopic_ptr res]
@@ -1255,12 +1263,12 @@ quit_command_topic returns [CommandTopic_ptr res]
 string returns [pconst_char res]
 @init {}
     : IDENTIFIER
-      { $res = (pconst_char) $IDENTIFIER.text -> chars; }
+      { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
 
 filepath returns [pconst_char res]
     : FILEPATH
-    { $res = (pconst_char) $FILEPATH.text -> chars; }
+    { $res = (pconst_char) $FILEPATH.text->chars; }
     ;
 
 // -- Lexer rules --------------------------------------------------------------
