@@ -1,5 +1,5 @@
 /**
- * @file sat.cc
+ * @file sat/cnf_nocut.cc
  * @brief Engine interface implementation, CNFization algorithm #1 (No cut) implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -27,72 +27,112 @@
 
 class CNFBuilderNoCut : public ADDWalker {
 public:
-  CNFBuilderNoCut(Engine& sat, step_t time,
-                  group_t group = MAINGROUP)
-    : f_sat(sat)
-    , f_time(time)
-    , f_group(group)
-  {}
+    CNFBuilderNoCut(Engine& sat, step_t time,
+                    group_t group = MAINGROUP)
+        : f_sat(sat)
+        , f_time(time)
+        , f_group(group)
+    {}
 
-  ~CNFBuilderNoCut()
-  {}
+    ~CNFBuilderNoCut()
+    {}
 
-  bool condition(const DdNode *node)
-  {
-    /* if it's a zero leaf */
-    return (node == f_sat.enc().dd().getManager() -> zero);
-  }
+    void pre_hook()
+    {
+        assert(1 == f_recursion_stack.size());
 
-  void zero()
-  { assert(false); /* unused */ }
-
-  void one()
-  { assert(false); /* unused* */ }
-
-  void pre_hook()
-  {}
-
-  void post_hook()
-  {}
-
-  void action(const DdNode *node)
-  {
-    DdManager* dd_mgr
-      (f_sat.enc().dd().getManager());
-
-    value_t value
-      (Cudd_V(node));
-
-    vec<Lit> ps;
-    ps.push( mkLit( f_group, true));
-
-    unsigned i, size = dd_mgr -> size;
-    for (i = 0; i < size; ++ i) {
-      Lit lit
-        (mkLit( f_sat.find_dd_var(i, f_time), value != 0));
-
-      ps.push(lit);
+        add_activation_record curr = f_recursion_stack.top();
+        f_toplevel = const_cast<DdNode *>(curr.node);
     }
 
-    f_sat.add_clause(ps);
+    void post_hook()
+    {
+        // /* build and push clause toplevel */
+        // vec<Lit> ps;
+        // ps.push( mkLit( f_group, true));
 
-    DEBUG
-      << ps
-      << std::endl;
-  }
+        // assert (NULL != f_toplevel);
+
+        // /* assert toplevel fun */
+        // push1( f_sat.find_cnf_var(f_toplevel, f_time), false);
+    }
+
+    inline bool is_unseen(const DdNode* node) const
+    { return f_seen.end() == f_seen.find(const_cast<DdNode *>(node)); }
+
+    inline void mark(const DdNode* node)
+    { f_seen.insert(const_cast<DdNode *>(node)); }
+
+    bool condition(const DdNode *node)
+    {
+        return
+            cuddIsConstant(node) && cuddV(node);
+    }
+
+    void action(const DdNode *node)
+    {
+        if (is_unseen(node)) {
+            mark(node);
+
+            DdManager* dd_mgr
+                (f_sat.enc().dd().getManager());
+
+            Cudd_PrintMinterm(dd_mgr, (DdNode *) node);
+
+            value_t value
+                (Cudd_V(node));
+            assert(0 != value);
+
+            vec<Lit> ps;
+            ps.push( mkLit( f_group, true));
+
+            unsigned i, size = dd_mgr->size;
+            for (i = 0; i < size; ++ i) {
+                Lit lit
+                    (mkLit( f_sat.find_dd_var(i, f_time), true));
+
+                ps.push(lit);
+            }
+
+            f_sat.add_clause(ps);
+
+            DEBUG
+                << ps
+                << std::endl;
+        }
+    }
 
 private:
-  Engine& f_sat;
+    Engine& f_sat;
+    boost::unordered_set<DdNode*> f_seen;
 
-  step_t f_time;
-  group_t f_group;
+    DdNode* f_toplevel;
+
+    step_t f_time;
+    group_t f_group;
+
+    /* push 1 var clause */
+    inline void push1( Var x, bool px )
+    {
+        vec<Lit> ps;
+        ps.push( mkLit( f_group, true));
+        ps.push( mkLit( x, px ));
+
+#ifdef DEBUG_CNF_LITERALS
+        DRIVEL
+            << ps
+            << std::endl;
+#endif
+
+        f_sat.add_clause(ps);
+    }
 };
 
 void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)
 {
-  CNFBuilderNoCut worker
-    (*this, time, group);
+    CNFBuilderNoCut worker
+        (*this, time, group);
 
-  worker(add);
+    worker(add);
 }
 

@@ -1,5 +1,5 @@
 /**
- * @file cnf_singlecut.cc
+ * @file sat/cnf_singlecut.cc
  * @brief Engine interface implementation, CNFization algorithm #2 (Single cut) implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -68,6 +68,9 @@ public:
     inline bool is_unseen(const DdNode* node) const
     { return f_seen.end() == f_seen.find(const_cast<DdNode *>(node)); }
 
+    inline void mark(const DdNode* node)
+    { f_seen.insert(const_cast<DdNode *>(node)); }
+
     bool condition(const DdNode* node)
     {
         assert(NULL != node);
@@ -89,7 +92,7 @@ public:
             }
         }
         else {
-            f_seen.insert(const_cast<DdNode *>(node)); /* mark as visited */
+            mark(node);
 
             Var f
                 (f_sat.find_cnf_var(node, f_time));
