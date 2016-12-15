@@ -73,6 +73,10 @@ void Module::add_var(Expr_ptr identifier, Variable_ptr var)
         oss
             << "input ";
 
+    if (var->is_inertial())
+        oss
+            << "inertial ";
+
     if (var->is_frozen())
         oss
             << "frozen ";
@@ -205,4 +209,3 @@ void Module::add_trans(Expr_ptr expr)
 
     f_trans.push_back(expr);
 }
-

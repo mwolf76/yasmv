@@ -286,7 +286,7 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
     if (symb->is_variable()) {
 
         const Variable& var
-            (symb -> as_variable());
+            (symb->as_variable());
 
         /* INPUT vars are in fact bodyless, typed DEFINEs */
         if (var.is_input())
@@ -301,11 +301,10 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
             throw SemanticError("Assignments can only be used on inertial vars.");
     }
 
-    /* 6. DEFINEs, simply process them recursively :-) */
     else if (symb->is_define()) {
 
       Define& define
-        (symb -> as_define());
+        (symb->as_define());
 
       Expr_ptr body
         (define.body());
@@ -436,4 +435,43 @@ void Analyzer::walk_set_comma_postorder(Expr_ptr expr)
 {}
 
 void Analyzer::walk_leaf(const Expr_ptr expr)
-{}
+{
+    ExprMgr& em
+        (owner().em());
+
+    Expr_ptr ctx
+        (f_ctx_stack.back());
+    Expr_ptr full
+        (em.make_dot(ctx, expr));
+
+    ResolverProxy resolver;
+
+    Symbol_ptr symb
+        (resolver.symbol(full));
+
+    if (symb->is_variable()) {
+        const Variable& var
+            (symb->as_variable());
+
+        /* Sanity checks on var modifiers */
+        if (var.is_input() && var.is_inertial())
+            throw SemanticError("@input and @inertial not simultaneously allowed on the same var.");
+
+        if (var.is_input() && var.is_frozen())
+            throw SemanticError("@input and @frozen not simultaneously allowed on the same var.");
+
+        if (var.is_inertial() && var.is_frozen())
+            throw SemanticError("@inertial and @frozen not simultaneously allowed on the same var.");
+    }
+    else if (symb->is_define()) {
+
+        Define& define
+            (symb->as_define());
+
+        Expr_ptr body
+            (define.body());
+
+        /* recur in body */
+        walk_assignment_postorder(body);
+    }
+}
