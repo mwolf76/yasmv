@@ -50,8 +50,8 @@ Var TimeMapper::var(const TCBI& tcbi)
         /* generate a new var and book it. Newly created var is not eliminable. */
         var = f_owner.new_sat_var(true);
 
-        DRIVEL
-            << "Adding VAR " << var
+        DEBUG
+            << "Adding model var " << var
             << " for " << tcbi
             << std::endl;
 

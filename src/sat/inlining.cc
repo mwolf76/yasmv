@@ -40,17 +40,6 @@
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
-// const char* InlinedOperatorLoaderException::what() const throw()
-// {
-//     std::ostringstream oss;
-
-//     oss
-//         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
-//         << f_ios << "`";
-
-//     return oss2cstr(oss);
-// }
-
 InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)
 {
@@ -117,11 +106,14 @@ const LitsVector& InlinedOperatorLoader::clauses()
         json_file >> obj;
         assert(obj.type() == Json::objectValue);
 
-        const Json::Value generated (obj[ JSON_GENERATED ]);
+        const Json::Value generated
+            (obj[ JSON_GENERATED ]);
+
         DEBUG
-            << "Loading clauses for " << f_ios
-            << ", generated " << generated
-            << std::endl;
+            << "Loading clauses for "
+            << f_ios
+            << ", generated "
+            << generated ;
 
         const Json::Value cnf (obj[ JSON_CNF ]);
         assert(cnf.type() == Json::arrayValue);
@@ -270,8 +262,10 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
     /* local refs */
     const DDVector& z
         (md.z());
+
     const DDVector& x
         (md.x());
+
     const DDVector& y
         (md.y());
 
@@ -281,7 +275,7 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
     // keep each injection in a separate cnf space
     f_sat.clear_cnf_map();
 
-    // foreach clause in clauses data...
+    // foreach clause ...
     LitsVector::const_iterator i;
     for (i = clauses.begin(); clauses.end() != i; ++ i) {
 
@@ -291,10 +285,10 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
         Minisat::vec<Lit> ps;
         ps.push( mkLit( f_group, true));
 
-        // for each literal in clause, determine whether associated
-        // var belongs to z, x, y or is a cnf var. For each group in
-        // (z, x, y) fetch appropriate dd var from the registry. CNF
-        // vars are kept distinct among distinct injections.
+        /* For each literal in clause, determine whether associated var belongs
+           to z, x, y or is a cnf var. For each group in (z, x, y) fetch
+           appropriate DD var from the registry. Note: cnf vars must be kept
+           distinct among distinct injections. */
         Lits::const_iterator j;
         for (j = clause.begin(); clause.end() != j; ++ j)  {
             Lit lit
@@ -302,6 +296,7 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
 
             Var lit_var
                 (Minisat::var(lit));
+
             int lit_sign
                 (Minisat::sign(lit));
 
@@ -313,9 +308,10 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     (lit_var);
                 assert(0 <= ndx && ndx < width);
 
-                const DdNode* node(NULL);
+                const DdNode* node
+                    (NULL);
                 if (md.is_relational()) {
-                    assert(!ndx);
+                    assert(! ndx);
                     node = z[0].getNode();
                 }
                 else
@@ -329,14 +325,17 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                 else {
                     value_t value
                         (cuddV(node));
+
                     assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
+
             /* x? */
             else if (width <= lit_var && lit_var < 2 * width) {
                 int ndx
                     (lit_var - width);
+
                 assert(0 <= ndx && ndx < width);
 
                 const DdNode* node
@@ -350,19 +349,21 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                 else {
                     value_t value
                         (cuddV(node));
-                    assert( value < 2); // 0 or 1
 
+                    assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
+
             /* y? */
             else if (2 * width <= lit_var && lit_var < 3 * width) {
                 int ndx
                     (lit_var - 2 * width);
-                assert(0 <= ndx && ndx < width);
 
+                assert(0 <= ndx && ndx < width);
                 const DdNode* node
                     (y[ width - ndx - 1].getNode());
+
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
@@ -371,13 +372,15 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                 else {
                     value_t value
                         (cuddV(node));
+
                     assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value
                                     ? lit_sign :
                                     ! lit_sign));
                 }
             }
-            /* nope, it's a cnf var */
+
+            /* none of the above, it's a cnf var */
             else {
                 int ndx
                     (lit_var - 3 * width);
@@ -390,8 +393,9 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
         } /* for (j = clause...) */
 
         f_sat.add_clause(ps);
-    }
-}
+    } /* foreach clause ... */
+
+} /* CNFOperatorInliner::inject */
 
 void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 {

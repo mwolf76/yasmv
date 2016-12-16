@@ -41,8 +41,15 @@ public:
      */
     inline group_t new_group()
     {
-        group_t res = new_sat_var();
+        group_t res
+            (new_sat_var());
+
         f_groups.push(res);
+
+        DEBUG
+            << "Created new group var "
+            << res
+            << std::endl;
 
         return res;
     }
