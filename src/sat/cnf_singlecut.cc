@@ -53,9 +53,6 @@ public:
     void post_hook()
     {
         /* build and push clause toplevel */
-        vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
-
         assert (NULL != f_toplevel);
 
         /* assert toplevel fun */
@@ -228,7 +225,10 @@ private:
     inline void push1( Var x, bool px )
     {
         vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
+
+        if (MAINGROUP != f_group)
+            ps.push( mkLit( f_group, true));
+
         ps.push( mkLit( x, px ));
 
 #ifdef DEBUG_CNF_LITERALS
@@ -244,7 +244,10 @@ private:
     inline void push2( Var x, bool px, Var y, bool py )
     {
         vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
+
+        if (MAINGROUP != f_group)
+            ps.push( mkLit( f_group, true));
+
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
 
@@ -261,7 +264,10 @@ private:
     inline void push3( Var x, bool px, Var y, bool py, Var w, bool pw )
     {
         vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
+
+        if (MAINGROUP != f_group)
+            ps.push( mkLit( f_group, true));
+
         ps.push( mkLit( x, px ));
         ps.push( mkLit( y, py ));
         ps.push( mkLit( w, pw ));
