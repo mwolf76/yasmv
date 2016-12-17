@@ -11,7 +11,7 @@
 -- showing a known divisor for the number can be printed using dump-trace.
 -- >> dump-trace
 
-#word-width 32
+#word-width 64
 MODULE main
 
 VAR
