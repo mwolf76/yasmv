@@ -272,25 +272,25 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
     int width
         (ios_width(md.ios()));
 
-    // keep each injection in a separate cnf space
+    /* keep each injection in a separate cnf space */
     f_sat.clear_cnf_map();
 
-    // foreach clause ...
-    LitsVector::const_iterator i;
-    for (i = clauses.begin(); clauses.end() != i; ++ i) {
+    for (LitsVector::const_iterator i = clauses.begin(); clauses.end() != i; ++ i) {
 
         const Lits& clause
             (*i);
 
         Minisat::vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
+        if (MAINGROUP != f_group)
+            ps.push( mkLit( f_group, true));
 
-        /* For each literal in clause, determine whether associated var belongs
+        /* for each literal in clause, determine whether associated var belongs
            to z, x, y or is a cnf var. For each group in (z, x, y) fetch
-           appropriate DD var from the registry. Note: cnf vars must be kept
-           distinct among distinct injections. */
-        Lits::const_iterator j;
-        for (j = clause.begin(); clause.end() != j; ++ j)  {
+           appropriate DD var from the registry; cnf vars gets rewritten into
+           new sat vars. Remark: rewritten cnf vars must be kept distinct among
+           distinct injections. */
+        for (Lits::const_iterator j = clause.begin(); clause.end() != j; ++ j)  {
+
             Lit lit
                 (*j);
 
@@ -306,10 +306,12 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
             if (lit_var < width) {
                 int ndx
                     (lit_var);
+
                 assert(0 <= ndx && ndx < width);
 
                 const DdNode* node
                     (NULL);
+
                 if (md.is_relational()) {
                     assert(! ndx);
                     node = z[0].getNode();
@@ -321,7 +323,6 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
@@ -345,7 +346,6 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
@@ -361,6 +361,7 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     (lit_var - 2 * width);
 
                 assert(0 <= ndx && ndx < width);
+
                 const DdNode* node
                     (y[ width - ndx - 1].getNode());
 
@@ -368,7 +369,6 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
@@ -380,10 +380,11 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                 }
             }
 
-            /* none of the above, it's a cnf var */
+            /* none of the above, it's a cnf var. */
             else {
                 int ndx
                     (lit_var - 3 * width);
+
                 assert(0 <= ndx /* && ndx < width */);
 
                 tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
@@ -425,11 +426,15 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
     for (unsigned pol = 0; pol < 2; ++ pol) {
 
         for (unsigned i = 0; i < md.width(); ++ i) {
+
             Minisat::vec<Lit> ps;
-            ps.push( mkLit( f_group, true));
+
+            if (MAINGROUP != f_group)
+                ps.push( mkLit( f_group, true));
+
             ps.push( mkLit( act, true));
             ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(),
-                                               f_time), !pol ));
+                                               f_time), ! pol));
             DdNode* xnode
                 (x[i].getNode());
 
@@ -446,7 +451,10 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 
         for (unsigned i = 0; i < md.width(); ++ i) {
             Minisat::vec<Lit> ps;
-            ps.push( mkLit( f_group, true));
+
+            if (MAINGROUP != f_group)
+                ps.push( mkLit( f_group, true));
+
             ps.push( mkLit( act, false));
             ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(),
                                                f_time), !pol ));
@@ -499,13 +507,15 @@ void CNFMultiwaySelectionInliner::inject(const MultiwaySelectionDescriptor& md)
                     (i + j * md.elem_width());
 
                 Minisat::vec<Lit> ps;
-                ps.push( mkLit( f_group, true));
+
+                if (MAINGROUP != f_group)
+                    ps.push( mkLit( f_group, true));
+
                 ps.push( mkLit( act, true));
                 ps.push( mkLit( f_sat.find_dd_var( z[ i ].getNode(),
-                                                   f_time), !pol ));
+                                                   f_time), ! pol));
                 ps.push( mkLit( f_sat.find_dd_var( x[ ndx ].getNode(),
                                                    f_time), pol));
-
                 f_sat.add_clause( ps );
             }
         }
