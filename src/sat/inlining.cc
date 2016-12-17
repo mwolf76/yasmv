@@ -56,23 +56,23 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
 
     const char* op (fragments[1].c_str());
     ExprType op_type;
-    if      (!strcmp( "neg", op)) op_type = NEG;
-    else if (!strcmp( "add", op)) op_type = PLUS;
-    else if (!strcmp( "sub", op)) op_type = SUB;
-    else if (!strcmp( "div", op)) op_type = DIV;
-    else if (!strcmp( "mod", op)) op_type = MOD;
-    else if (!strcmp( "mul", op)) op_type = MUL;
-    else if (!strcmp( "not", op)) op_type = BW_NOT;
-    else if (!strcmp( "or",  op)) op_type = BW_OR;
-    else if (!strcmp( "and", op)) op_type = BW_AND;
-    else if (!strcmp( "xor", op)) op_type = BW_XOR;
-    else if (!strcmp( "xnor",op)) op_type = BW_XNOR;
-    else if (!strcmp( "eq",  op)) op_type = EQ;
-    else if (!strcmp( "ne",  op)) op_type = NE;
-    else if (!strcmp( "gt",  op)) op_type = GT;
-    else if (!strcmp( "ge",  op)) op_type = GE;
-    else if (!strcmp( "lt",  op)) op_type = LT;
-    else if (!strcmp( "le",  op)) op_type = LE;
+    if      (! strcmp( "neg", op)) op_type = NEG;
+    else if (! strcmp( "add", op)) op_type = PLUS;
+    else if (! strcmp( "sub", op)) op_type = SUB;
+    else if (! strcmp( "div", op)) op_type = DIV;
+    else if (! strcmp( "mod", op)) op_type = MOD;
+    else if (! strcmp( "mul", op)) op_type = MUL;
+    else if (! strcmp( "not", op)) op_type = BW_NOT;
+    else if (! strcmp( "or",  op)) op_type = BW_OR;
+    else if (! strcmp( "and", op)) op_type = BW_AND;
+    else if (! strcmp( "xor", op)) op_type = BW_XOR;
+    else if (! strcmp( "xnor",op)) op_type = BW_XNOR;
+    else if (! strcmp( "eq",  op)) op_type = EQ;
+    else if (! strcmp( "ne",  op)) op_type = NE;
+    else if (! strcmp( "gt",  op)) op_type = GT;
+    else if (! strcmp( "ge",  op)) op_type = GE;
+    else if (! strcmp( "lt",  op)) op_type = LT;
+    else if (! strcmp( "le",  op)) op_type = LE;
     else assert (false);
 
     char buf[20];
@@ -457,7 +457,7 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 
             ps.push( mkLit( act, false));
             ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(),
-                                               f_time), !pol ));
+                                               f_time), ! pol));
             DdNode* ynode
                 (y[i].getNode());
 
