@@ -15,7 +15,7 @@ smvLexer*
 smvParser*
 helpers/
 libtool
-gnusmv.pc
+yasmine.pc
 INSTALL
 TAGS
 .timestamp

@@ -104,4 +104,4 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
-pkgconf_DATA = gnusmv.pc
+pkgconf_DATA = yasmine.pc

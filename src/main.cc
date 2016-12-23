@@ -24,7 +24,7 @@
  * Copyright (C) 2011-2012\n
  * @section DownloadSourceCode Download
  * Source code is available on Github:\n
- * https://github.com/mwolf76/gnuSMV
+ * https://github.com/mwolf76/yasmine
  * \n\n
  *
  * <H1><CENTER>Overview</CENTER></H1>YASMINE (Yet Another Symbolic

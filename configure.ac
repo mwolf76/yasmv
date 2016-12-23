@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
 
-AC_INIT([gnusmv], [0.0.1], [marco.pensallorto@gmail.com])
+AC_INIT([yasmine], [0.0.5], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -171,6 +171,6 @@ AC_CONFIG_FILES([Makefile
                  src/witness/Makefile
                  src/witness/out/Makefile
                  doc/Makefile
-                 gnusmv.pc])
+                 yasmine.pc])
 
 AC_OUTPUT

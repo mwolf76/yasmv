@@ -1,5 +1,4 @@
 /// Json-cpp amalgated forward header (http://jsoncpp.sourceforge.net/).
-/// It is intented to be used with #include </home/markus/Code/github/gnuSMV/src/3rdparty/jsoncpp/json-forwards.hh>
 /// This header provides forward declaration for all JsonCpp types.
 
 // //////////////////////////////////////////////////////////////////////

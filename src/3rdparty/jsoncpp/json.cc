@@ -1,5 +1,4 @@
 /// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).
-/// It is intented to be used with #include "/home/markus/Code/github/gnuSMV/src/3rdparty/jsoncpp/json.cc"
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
