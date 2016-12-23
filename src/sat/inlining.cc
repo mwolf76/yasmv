@@ -90,7 +90,8 @@ InlinedOperatorLoader::~InlinedOperatorLoader()
 
 const LitsVector& InlinedOperatorLoader::clauses()
 {
-    boost::mutex::scoped_lock lock(f_loading_mutex);
+    boost::mutex::scoped_lock lock
+        (f_loading_mutex);
 
     if (0 == f_clauses.size()) {
 
@@ -188,14 +189,13 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                                       (loader->ios(), loader));
                 }
                 catch (InlinedOperatorLoaderException iole) {
+
                     pconst_char what
                         (iole.what());
 
                     WARN
                         << what
                         << std::endl;
-
-                    free ((void *) what);
                 }
             }
         }
@@ -209,14 +209,15 @@ InlinedOperatorMgr::InlinedOperatorMgr()
             exit(1);
         }
     }
-    catch (const filesystem_error& ex) {
+    catch (const filesystem_error& fse) {
         pconst_char what
-            (ex.what());
+            (fse.what());
 
         ERR
-            << what;
+            << what
+            << std::endl;
 
-        free ((void *) what);
+        /* leave immediately */
         exit(1);
     }
 }
@@ -231,6 +232,7 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignatur
         (f_loaders.find( ios ));
 
     if (i == f_loaders.end()) {
+
         DRIVEL
             << ios
             << " not found, falling back..."
