@@ -8,11 +8,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/expr	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 PKG_HH = printer.hh
-PKG_CC = printer.cc leaf.cc
-
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = leaf.cc printer.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libprinter.la
-libprinter_la_SOURCES = $(PKG_SOURCES)
+libprinter_la_SOURCES = $(PKG_HH) $(PKG_CC)

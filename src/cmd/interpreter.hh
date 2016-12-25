@@ -31,10 +31,9 @@
 
 #include <utils/pool.hh>
 
-#include <opts_mgr.hh>
+#include <opts/opts_mgr.hh>
 
 #include <cmd/command.hh>
-#include <cmd/job.hh>
 
 #include <env/environment.hh>
 
@@ -68,10 +67,6 @@ public:
     inline int retcode() const
     { return f_retcode; }
 
-    // background jobs
-    inline const Jobs& jobs() const
-    { return f_jobs; }
-
     void quit(int retcode);
 
     inline unsigned epoch() const
@@ -92,11 +87,6 @@ protected:
 
     inline std::ostream& err() const
     { return *f_err; }
-
-    // jobs mgmt
-    Jobs f_jobs;
-
-    void register_job( Job& job );
 
     int f_retcode;
     bool f_leaving;

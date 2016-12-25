@@ -14,9 +14,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd		\
 PKG_HH = default.hh
 PKG_CC = default.cc
 
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
-
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libwitness_out.la
-libwitness_out_la_SOURCES = $(PKG_SOURCES)
+libwitness_out_la_SOURCES = $(PKG_HH) $(PKG_CC)

@@ -142,6 +142,7 @@ AC_SUBST(AM_CXXFLAGS)
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/3rdparty/Makefile
+                 src/3rdparty/ezlogger/Makefile
                  src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
                  src/cmd/commands/Makefile
@@ -163,6 +164,7 @@ AC_CONFIG_FILES([Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
                  src/model/preprocessor/Makefile
+		 src/opts/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile

@@ -31,7 +31,7 @@
 
 #include <model.hh>
 
-#include <opts_mgr.hh>
+#include <opts/opts_mgr.hh>
 
 #include <smvLexer.h>
 #include <smvParser.h>

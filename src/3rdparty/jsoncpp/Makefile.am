@@ -1,7 +1,7 @@
 PKG_HH = json.hh
 PKG_CC = json.cc
 
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_SOURCES = $(PKG_HH) $(PKG_CC)
 
 # -------------------------------------------------------
 

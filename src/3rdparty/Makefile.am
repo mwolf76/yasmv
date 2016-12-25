@@ -1,7 +1,6 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = jsoncpp
+SUBDIRS = ezlogger jsoncpp
 
 # -------------------------------------------------------
 
-noinst_LTLIBRARIES = lib3rdparty.la
-lib3rdparty_la_SOURCES = $(PKG_SOURCES)
+

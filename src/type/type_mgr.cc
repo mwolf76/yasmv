@@ -21,7 +21,7 @@
  *
  **/
 
-#include <opts_mgr.hh>
+#include <opts/opts_mgr.hh>
 
 #include <type.hh>
 #include <type_mgr.hh>

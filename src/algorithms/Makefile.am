@@ -10,8 +10,10 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
+PKG_HH = base.hh exceptions.hh
 PKG_CC = base.cc
+
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libalgorithms.la
-libalgorithms_la_SOURCES = $(PKG_CC)
+libalgorithms_la_SOURCES = $(PKG_HH) $(PKG_CC)
