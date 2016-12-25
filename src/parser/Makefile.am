@@ -25,6 +25,9 @@ grammars/smvLexer.cc: grammars/.timestamp
 grammars/smvParser.cc: grammars/.timestamp
 	@cp grammars/smvParser.c grammars/smvParser.cc
 
+clean-local:
+	rm -f smv.tokens
+
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libparser.la
