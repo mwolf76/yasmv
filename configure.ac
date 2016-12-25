@@ -143,7 +143,6 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/3rdparty/Makefile
                  src/3rdparty/ezlogger/Makefile
-                 src/3rdparty/jsoncpp/Makefile
                  src/cmd/Makefile
                  src/cmd/commands/Makefile
                  src/common/Makefile

@@ -24,7 +24,7 @@
 #include <sstream>
 #include <cstring>
 
-#include <3rdparty/jsoncpp/json.hh>
+#include <jsoncpp/json/json.h>
 #include <boost/algorithm/string.hpp>
 
 #include <sat/typedefs.hh>
