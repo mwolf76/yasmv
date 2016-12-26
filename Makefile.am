@@ -25,7 +25,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-bin_PROGRAMS = yasmv tests
+bin_PROGRAMS = yasmv
+EXTRA_PROGRAMS = yasmv_tests
 
 # tags target helper  (uses exuberant ctags)
 tags:
@@ -66,12 +67,12 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
-tests_SOURCES = src/parse.cc testing/tests.cc testing/test_expr.cc	\
-	testing/test_parser.cc testing/test_type.cc			\
-	testing/test_dd.cc testing/test_enc.cc				\
-	testing/test_compiler.cc
+yasmv_tests_SOURCES = src/parse.cc testing/tests.cc		\
+		testing/test_expr.cc testing/test_parser.cc	\
+		testing/test_type.cc testing/test_dd.cc		\
+		testing/test_enc.cc testing/test_compiler.cc
 
-tests_LDADD = $(top_builddir)/src/parser/libparser.la				\
+yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/cmd/libcmd.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
 		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
@@ -102,7 +103,7 @@ tests_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
 		$(BOOST_CHRONO_LIBS) -lboost_unit_test_framework
 
-tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
+yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
 pkgconf_DATA = yasmine.pc
