@@ -56,9 +56,6 @@ void Algorithm::setup()
     /* suppress warning */
     (void) mgr;
 
-    Compiler& cmpl
-        (compiler()); // just a local ref
-
     ExprMgr& em
         (ExprMgr::INSTANCE());
 

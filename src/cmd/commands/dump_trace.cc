@@ -286,9 +286,6 @@ void DumpTrace::process_input(Witness& w,
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
-
     Model& model
         (ModelMgr::INSTANCE().model());
 

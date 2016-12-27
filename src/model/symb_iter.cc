@@ -39,9 +39,6 @@ SymbIter::SymbIter(Model& model)
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    const Modules& modules
-        (model.modules());
-
     Module& main_
         (model.main_module());
 
