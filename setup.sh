@@ -64,7 +64,7 @@ SETTINGS="$DEFINES $COMMON_OPTIONS $OPTIONS $FLAGS"
 autoreconf -vif
 
 # invoking configure script with above settings
-./configure CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
+./configure --prefix=/usr/local CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
 
 # exploding microcode tarball in its standard location (do this only once)
 if [ -d microcode ] && [ `find microcode/* | wc -w` -eq 2177 ]; then

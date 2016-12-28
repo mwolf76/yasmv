@@ -147,7 +147,7 @@ const LitsVector& InlinedOperatorLoader::clauses()
 InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance = NULL;
 
 InlinedOperatorMgr::InlinedOperatorMgr()
-    : f_builtin_microcode_path(STRING(YASMV_MICROCODE_PATH))
+    : f_builtin_microcode_path(STRING(YASMV_MICROCODE))
 {
     using boost::filesystem::path;
     using boost::filesystem::directory_iterator;
