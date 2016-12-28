@@ -26,18 +26,31 @@
 #include <string>
 #include <sstream>
 
-static std::string build_constant_too_large_error_message(Expr_ptr expr)
+static std::string format_constant_too_large(Expr_ptr expr)
 {
     std::ostringstream oss;
 
     oss
-        << "`"
-        << expr
-        << "`";
+        << expr;
 
     return oss.str();
 }
+
 ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
-    : ModelException(build_constant_too_large_error_message(expr))
+    : CompilerException("ConstantTooLarge",
+                        format_constant_too_large(expr))
 {}
 
+static std::string format_unexpected_expression(Expr_ptr expr)
+{
+    std::ostringstream oss;
+
+    oss
+        << expr;
+
+    return oss.str();
+}
+UnexpectedExpression::UnexpectedExpression(Expr_ptr expr)
+    : CompilerException("UnexpectedExpression",
+                        format_unexpected_expression(expr))
+{}

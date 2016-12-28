@@ -44,6 +44,10 @@
 
 #include <sat/sat.hh>
 
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+#include <symb/symb_iter.hh>
+
 #include <utils/variant.hh>
 
 #include <witness/exceptions.hh>

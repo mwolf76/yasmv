@@ -1,2 +1,0 @@
-reach GOAL
-quit

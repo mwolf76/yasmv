@@ -2,9 +2,6 @@
  * @file type/classes.hh
  * @brief Type system module header file, type system classes.
  *
- * This header file contains the declarations and type definitions
- * required by YASMINE type system classes.
- *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
@@ -34,11 +31,14 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
+#include <type/typedefs.hh>
+#include <type/classes.hh>
+
 /*
- * YASMINE's types can be classified as (a) Monolithic types
- * (i.e. that can be represented using a single DD), (b) Algebraic
- * types (i.e. that are represented using a vector of DDs) or (c)
- * Array types. The type system is organized as follows:
+ * yasmv data types can be classified as (a) Monolithic types (i.e. that can be
+ * represented using a single DD), (b) Algebraic types (i.e. that are
+ * represented using a vector of DDs) or (c) Array types. The type system is
+ * organized as follows:
  *
  * MONOLITHIC types
  * ================
@@ -71,10 +71,9 @@
  * Type Aliases
  * ============
  *
- * A few type aliases are provided, to bring YASMINE's type system
- * closer to C99's. These type aliases are just synctactig sugar for
- * the type classes defined above, and their usage though recommended
- * is in no way mandatory.
+ * A few type aliases are provided, to bring this type system closer to C99's.
+ * These type aliases are just synctactig sugar for the type classes defined
+ * above, and their usage though recommended is in no way mandatory.
  *
  * INTEGER type aliases:
  * uint4_t,  int4_t

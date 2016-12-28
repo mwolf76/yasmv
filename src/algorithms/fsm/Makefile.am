@@ -14,9 +14,10 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
+PKG_HH = fsm.hh
 PKG_CC = init.cc trans.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libfsm.la
-libfsm_la_SOURCES = $(PKG_CC)
+libfsm_la_SOURCES = $(PKG_HH) $(PKG_CC)

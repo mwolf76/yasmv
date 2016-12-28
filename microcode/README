@@ -1,12 +1,11 @@
-The YASMINE project
-(c) 2014 Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
+The yasmv (Yet Another Symbolic Model Verifier) project
+(c) 2011-2016 Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
 
 README
 ======
 
-This directory contains the microcode files for YASMINE. Due to its
-hefty size, the microcode is currently distributed as a bz2 tarball
-called `microcode.tar.bz2`. Unpack the contents of this tarball in a
-directory of choice and set the environment variable `YASMV_MICROCODE`
-to point to it.
+This directory contains the microcode files for yasmv. Due to its hefty size,
+the microcode is currently distributed as a bz2 tarball called
+`microcode.tar.bz2`. Unpack the contents of this tarball in a directory of
+choice and set the environment variable `YASMV_MICROCODE` to point to it.
 

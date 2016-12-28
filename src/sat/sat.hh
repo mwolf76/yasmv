@@ -28,16 +28,8 @@
 #ifndef SAT_H
 #define SAT_H
 
-// #include <dd/cudd-2.5.0/obj/cuddObj.hh>
-// #include <dd/cudd_mgr.hh>
-
-// #include <enc/enc_mgr.hh>
-
-// #include <model/compiler/unit.hh>
-
-#include <sat/exceptions.hh>
-
 #include <sat/typedefs.hh>
+#include <sat/exceptions.hh>
 
 /* CNF registry class */
 #include <sat/cnf_registry.hh>

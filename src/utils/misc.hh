@@ -26,14 +26,13 @@
 
 #include <sstream>
 
-static inline const char* oss2cstr(std::ostringstream& oss)
-{ return strdup(oss.str().c_str()); }
-
 static inline bool _iff(bool a, bool b)
 { return (!(a) || (b)) && ((!b) || (a)); }
 
 static inline bool _xor(bool a, bool b)
 { return (!(a) && (b)) || ((!b) && (a)); }
 
+#define INLINE(str) #str
+#define STRING(str) INLINE(str)
 
 #endif /* MISC_H */

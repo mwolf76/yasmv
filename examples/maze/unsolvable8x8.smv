@@ -1,4 +1,4 @@
--- This file is part of the Yasmine distribution
+-- This file is part of the yasmv distribution
 -- (c) 2011-16 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 #word-width 6
 MODULE maze
@@ -30,10 +30,10 @@ INVAR
              O,_,O,O,_,_,_,_,
              O,_,O,_,_,O,O,_,
              O,_,O,_,_,_,O,_,
-             _,_,_,O,O,_,O,_,
+             _,_,_,O,O,_,O,O,
              _,_,_,_,O,_,O,_,
              _,O,O,_,_,_,O,_,
-             _,_,_,_,O,O,O,O];
+             _,_,_,_,O,O,O,_];
 
 -- our guy starts at the top-left corner,
 INIT

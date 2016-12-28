@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/add_trans.hh>
 
 #include <env/environment.hh>
@@ -52,7 +53,7 @@ Variant AddTrans::operator()()
     assert(f_constraint);
     env.add_extra_trans(f_constraint);
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 AddTransTopic::AddTransTopic(Interpreter& owner)

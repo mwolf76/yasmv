@@ -21,12 +21,12 @@
  *
  **/
 
-#include <sstream>
-#include <cstring>
-
 #include <witness.hh>
 
 #include <utils/misc.hh>
+
+#include <sstream>
+#include <cstring>
 
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
@@ -82,7 +82,10 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 
     /* force conversion of constants to required format. TODO: extend
        this to sets */
-    if (em.is_constant(vexpr)) {
+    if (em.is_bool_const(vexpr))
+        return vexpr;
+
+    else if (em.is_int_const(vexpr)) {
         switch (fmt) {
         case FORMAT_BINARY:
             vexpr = em.make_bconst(vexpr->value());
@@ -127,6 +130,14 @@ bool TimeFrame::has_value( Expr_ptr expr )
 /* Sets value for expr */
 void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
 {
+    assert(value);
+
+    DEBUG
+        << expr
+        << " := "
+        << value
+        << std::endl;
+
     // symbol is defined in witness' language
     ExprVector& lang
         (f_owner.lang());
@@ -146,6 +157,7 @@ ExprVector TimeFrame::assignments()
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
+
     ExprVector& lang
         (f_owner.lang());
 
@@ -163,7 +175,8 @@ ExprVector TimeFrame::assignments()
             res.push_back( em.make_eq( symb, value(symb)));
         }
 
-        catch (NoValue nv) {}
+        catch (NoValue& nv) {
+        }
     }
 
     return res;

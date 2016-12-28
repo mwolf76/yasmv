@@ -43,10 +43,13 @@ CNFRegistry::~CNFRegistry()
 Var CNFRegistry::find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
+
     const UCBI& ucbi
         (f_sat.find_ucbi(node->index));
+
     const TCBI tcbi
         (ucbi, time);
+
     return f_sat.tcbi_to_var(tcbi);
 }
 
@@ -54,8 +57,10 @@ Var CNFRegistry::find_dd_var(int node_index, step_t time)
 {
     const UCBI& ucbi
         (f_sat.find_ucbi(node_index));
+
     const TCBI tcbi
         (ucbi, time);
+
     return f_sat.tcbi_to_var(tcbi);
 }
 
@@ -64,10 +69,11 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
     Var res;
 
     assert (NULL != node);
-    TimedDD timed_node (const_cast<DdNode*> (node), time);
+    TimedDD timed_node
+        (const_cast<DdNode*> (node), time);
 
-    TDD2VarMap::const_iterator eye = \
-        f_tdd2var_map.find( timed_node );
+    TDD2VarMap::const_iterator eye
+        (f_tdd2var_map.find( timed_node ));
 
     if (f_tdd2var_map.end() == eye) {
         res = f_sat.new_sat_var();
@@ -75,6 +81,13 @@ Var CNFRegistry::find_cnf_var(const DdNode* node, step_t time)
         /* Insert into tdd2var map */
         f_tdd2var_map.insert( std::make_pair<TimedDD, Var>
                               (timed_node, res));
+
+        DEBUG
+            << "Created cnf var "
+            << res
+            << " for DD node "
+            << node
+            << std::endl;
     }
     else {
         res = (*eye).second;
@@ -101,6 +114,13 @@ Var CNFRegistry::rewrite_cnf_var(Var v, step_t time)
         /* Insert into tvv2var map */
         f_rewrite_map.insert( std::make_pair<TimedVar, Var>
                               (timed_var, res));
+
+        DEBUG
+            << "Rewrote microcode cnf var "
+            << v << "@" << time
+            << " as "
+            << res
+            << std::endl;
     }
     else {
         res = (*eye).second;

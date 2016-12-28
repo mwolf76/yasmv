@@ -33,6 +33,7 @@
 #include <sat/sat.hh>
 
 #include <model/model.hh>
+#include <model/module.hh>
 #include <model/model_mgr.hh>
 #include <model/compiler/compiler.hh>
 

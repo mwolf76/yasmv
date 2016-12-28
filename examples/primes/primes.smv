@@ -1,0 +1,35 @@
+-- This file is part of the yasmv distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
+-- To test for primality an arbitrary 64-bit n use:
+-- >> set n 42; pick-state
+--
+-- To gather all existing divisors of n you can use -a switch in pick-state;
+-- this will enumerate all feasible distint initial states.
+--
+-- If no such state exists, the number is prime. Otherwise a witness
+-- showing a known divisor for the number can be printed using dump-trace.
+-- >> dump-trace
+
+#word-width 64
+MODULE main
+
+VAR
+        x : uint;
+        y : uint;
+
+@input
+VAR
+        n : uint;
+
+INIT
+        x = n;
+
+INIT
+        1 < y;
+
+INIT
+        y < x;
+
+INIT
+        x % y = 0;

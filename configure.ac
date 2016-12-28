@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
 
-AC_INIT([gnusmv], [0.0.1], [marco.pensallorto@gmail.com])
+AC_INIT([yasmv], [0.0.5], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -43,8 +43,8 @@ BOOST_CHRONO
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
-AC_DEFINE_UNQUOTED(PROGRAM_NAME, "Yasmine", Program Name)
-AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.1", Program Version)
+AC_DEFINE_UNQUOTED(PROGRAM_NAME, "yasmv", Program Name)
+AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.5", Program Version)
 AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
 AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
 AC_DEFINE_UNQUOTED(PROGRAM_EMAIL, "marco.pensallorto@gmail.com", Program Email)
@@ -105,9 +105,6 @@ AC_CHECK_HEADER(malloc.h,
 # antlr checks
 AC_ANTLR
 
-# zlib check
-AX_CHECK_ZLIB
-
 # readline check
 AX_LIB_READLINE
 
@@ -130,7 +127,8 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
                 strrchr strstr strtol, random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
-AM_CPPFLAGS="$BOOST_CPPFLAGS"
+
+AM_CPPFLAGS="$BOOST_CPPFLAGS -DYASMV_MICROCODE=$datadir/$PACKAGE"
 AC_SUBST(AM_CPPFLAGS)
 
 AM_CFLAGS="-Wall -Wstrict-prototypes"
@@ -142,7 +140,7 @@ AC_SUBST(AM_CXXFLAGS)
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/3rdparty/Makefile
-                 src/3rdparty/jsoncpp/Makefile
+                 src/3rdparty/ezlogger/Makefile
                  src/cmd/Makefile
                  src/cmd/commands/Makefile
                  src/common/Makefile
@@ -163,6 +161,7 @@ AC_CONFIG_FILES([Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
                  src/model/preprocessor/Makefile
+                 src/opts/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
@@ -171,6 +170,6 @@ AC_CONFIG_FILES([Makefile
                  src/witness/Makefile
                  src/witness/out/Makefile
                  doc/Makefile
-                 gnusmv.pc])
+                 yasmv.pc])
 
 AC_OUTPUT

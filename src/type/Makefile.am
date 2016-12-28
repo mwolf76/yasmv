@@ -10,13 +10,14 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = type.hh type_mgr.hh type_resolver.hh
-PKG_CC = classes.cc printers.cc type_mgr.cc type_resolver.cc exceptions.cc	\
-monolithic.cc algebraic.cc array.cc instance.cc
+PKG_HH = classes.hh exceptions.hh helpers.hh printers.hh typedefs.hh	\
+type.hh type_mgr.hh type_resolver.hh
 
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+PKG_CC = algebraic.cc array.cc classes.cc exceptions.cc instance.cc	\
+monolithic.cc printers.cc type.cc type_mgr.cc type_resolver.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libtype.la
-libtype_la_SOURCES = $(PKG_SOURCES)
+libtype_la_SOURCES = $(PKG_HH) $(PKG_CC)
+

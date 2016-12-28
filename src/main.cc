@@ -19,53 +19,49 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA
  *
- * @mainpage YASMINE - Yet Another Symolic Modelling INteractive Environment
+ * @mainpage yasmv - Yet Another Symbolic Model Verifier
  * @author Marco Pensallorto < marco DOT pensallorto AT gmail DOT com>\n
- * Copyright (C) 2011-2012\n
+ * Copyright (C) 2011-2016\n
  * @section DownloadSourceCode Download
  * Source code is available on Github:\n
- * https://github.com/mwolf76/gnuSMV
+ * https://github.com/mwolf76/yasmv
  * \n\n
  *
- * <H1><CENTER>Overview</CENTER></H1>YASMINE (Yet Another Symbolic
- * Modelling INteractive Environment) started off in fall 2011 as a
- * tentative and partial C++ reimplementation of the NuSMV2 model
- * checker. As a former member of the NuSMV2 development team (in the
- * years from 2008 to 2011), I was never happy with a few
- * architectural choices that were inherited from the long history of
- * the NuSMV model checker and/or were due to the amount of legacy
- * code and tools that relied on its "peculiar" behavior. Don't get me
- * wrong, I really think NuSMV is a great piece of software. And I owe
- * to the developers and researchers in FBK most - if not all - of my
- * scientific and software engineering training. It's just that I have
- * been wondering for years what that project would have been like, if
- * one was completely free to redesign it all from-the-scratch. This
- * is exactly why this project exists in the first place.
+ * <H1><CENTER>Overview</CENTER></H1>yasmv (Yet Another Symbolic Model Verifier)
+ * started off in fall 2011 as a tentative and partial C++ reimplementation of
+ * the NuSMV2 model checker. As a former member of the NuSMV2 development team
+ * (in the years from 2008 to 2011), I was never happy with a few architectural
+ * choices that were inherited from the long history of the NuSMV model checker
+ * and/or were due to the amount of legacy code and tools that relied on its
+ * "peculiar" behavior. Don't get me wrong, I really think NuSMV is a great
+ * piece of software. And I owe to the developers and researchers in FBK most -
+ * if not all - of my scientific and software engineering training. It's just
+ * that I have been wondering for years what that project would have been like,
+ * if one was completely free to redesign it all from-the-scratch. This is
+ * exactly why this project exists in the first place.
  *
  **/
 
-#include <common/common.hh>
+#include <cmd/cmd.hh>
 
-#include <cmd.hh>
+#include <expr/expr.hh>
+#include <expr/printer/printer.hh>
 
-#include <expr.hh>
-#include <printer.hh>
+#include <model/model.hh>
 
-#include <model.hh>
+#include <opts/opts_mgr.hh>
 
-#include <opts_mgr.hh>
-
-#include <smvLexer.h>
-#include <smvParser.h>
+#include <parser/grammars/smvLexer.h>
+#include <parser/grammars/smvParser.h>
 
 #include <sat/sat.hh>
 
 #include <boost/chrono.hpp>
 
 static const std::string heading_msg = \
-    "YASMINE - Yet Another Symbolic Modelling INteractive Environment\n"
+    "yasmv - Yet Another Symbolic Model Verifier\n"
     "(c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
-    "https://github.com/mwolf76/yasmine\n";
+    "https://github.com/mwolf76/yasmv\n";
 
 /* printing helpers: these functions are unused in the code, they're
    here just for debugging purposes withing gdb */

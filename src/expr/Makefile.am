@@ -10,9 +10,10 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
+PKG_HH = atom.hh exceptions.hh expr.hh expr_mgr.hh timed_expr.hh
 PKG_CC = atom.cc expr.cc timed_expr.cc expr_mgr.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libexpr.la
-libexpr_la_SOURCES = $(PKG_CC)
+libexpr_la_SOURCES = $(PKG_HH) $(PKG_CC)

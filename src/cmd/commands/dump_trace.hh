@@ -36,6 +36,32 @@ public:
     UnsupportedFormat(pconst_char format);
 };
 
+/* Model ordering-preserving comparison helper */
+class OrderingPreservingComparisonFunctor {
+    Model& f_model;
+
+public:
+    OrderingPreservingComparisonFunctor(Model& model)
+        : f_model(model)
+    {}
+
+    bool operator() (Expr_ptr a, Expr_ptr b)
+    {
+        assert(a);
+        assert(b);
+
+        Expr_ptr lhs_a
+            (a->lhs());
+
+        Expr_ptr lhs_b
+            (b->lhs());
+
+        return
+            f_model.symbol_index(lhs_a) <
+            f_model.symbol_index(lhs_b) ;
+    }
+};
+
 class DumpTrace : public Command {
 
     /* the trace id (optional) */
@@ -81,8 +107,12 @@ private:
                           const char* section,
                           ExprVector& ev);
 
+    /* these values actually come from the current environment */
+    void process_input(Witness& w,
+                       ExprVector& input_vars_assignments);
+
+    /* these values actually belong to the trace */
     void process_time_frame(Witness& w, step_t time,
-                            ExprVector& input_vars_assignments,
                             ExprVector& state_vars_assignments,
                             ExprVector& defines_assignments);
 

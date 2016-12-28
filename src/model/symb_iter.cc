@@ -21,19 +21,23 @@
  *
  **/
 
-#include <model/classes.hh>
+#include <expr/expr_mgr.hh>
+
+#include <model/model.hh>
+#include <model/module.hh>
+
+#include <symb/symb_iter.hh>
+
+#include <type/typedefs.hh>
+#include <type/classes.hh>
+
 #include <stack>
 
-SymbIter::SymbIter(Model& model, Expr_ptr formula)
+SymbIter::SymbIter(Model& model)
     : f_model(model)
-    , f_formula(formula)
 {
-    assert( !f_formula ); // TODO implement COI
-
     ExprMgr& em
         (ExprMgr::INSTANCE());
-    const Modules& modules
-        (model.modules());
 
     Module& main_
         (model.main_module());
@@ -56,12 +60,14 @@ SymbIter::SymbIter(Model& model, Expr_ptr formula)
 
             Expr_ptr full_name
                 (top.first);
+
             Module& module
                 (* top.second);
+
             Variables vars
                 (module.vars());
-            Variables::const_iterator vi;
-            for (vi = vars.begin(); vars.end() != vi; ++ vi) {
+
+            for (Variables::const_iterator vi = vars.begin(); vars.end() != vi; ++ vi) {
 
                 Expr_ptr id
                     (vi -> first);

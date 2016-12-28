@@ -1,24 +1,34 @@
-AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd				\
--I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr															\
--I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/type											\
--I$(top_srcdir)/src/symb -I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/micro		\
--I$(top_srcdir)/src/model -I$(top_srcdir)/src/sat															\
--I$(top_srcdir)/src/algorithms -I$(top_srcdir)/src/witness										\
--I$(top_srcdir)/src/utils -I$(top_srcdir)/src/sat/core												\
--I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof											\
--I$(top_srcdir)/src/sat/utils -I$(top_srcdir)/src/parser/grammars							\
--I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd	\
--I$(top_srcdir)/src/dd/cudd-2.5.0/mtr -I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
--I$(top_srcdir)/src/dd/cudd-2.5.0/util -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/			\
+-I$(top_srcdir)/src/dd -I$(top_srcdir)/src/enc				\
+-I$(top_srcdir)/src/expr -I$(top_srcdir)/src/expr/walker		\
+-I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb			\
+-I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/micro			\
+-I$(top_srcdir)/src/model -I$(top_srcdir)/src/sat			\
+-I$(top_srcdir)/src/algorithms -I$(top_srcdir)/src/witness		\
+-I$(top_srcdir)/src/utils -I$(top_srcdir)/src/sat/core			\
+-I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof		\
+-I$(top_srcdir)/src/sat/utils -I$(top_srcdir)/src/parser/grammars	\
+-I$(top_srcdir)/src/3rdparty/ezlogger					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_CC = commands.cc read_model.cc dump_model.cc help.cc time.cc quit.cc		\
-add_init.cc add_invar.cc add_trans.cc reach.cc check_init.cc check_trans.cc	\
-pick_state.cc simulate.cc list_traces.cc dump_trace.cc dup_trace.cc get.cc	\
-set.cc clear.cc
+PKG_HH = add_init.hh add_invar.hh add_trans.hh check_init.hh		\
+check_trans.hh clear.hh commands.hh dump_model.hh dump_trace.hh		\
+dup_trace.hh get.hh help.hh list_traces.hh load_model.hh		\
+pick_state.hh quit.hh reach.hh read_model.hh set.hh show_traces.hh	\
+simulate.hh time.hh
+
+PKG_CC = add_init.cc add_invar.cc add_trans.cc check_init.cc		\
+check_trans.cc clear.cc commands.cc dump_model.cc dump_trace.cc		\
+dup_trace.cc get.cc help.cc list_traces.cc pick_state.cc quit.cc	\
+reach.cc read_model.cc set.cc simulate.cc time.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libcommands.la
-libcommands_la_SOURCES = $(PKG_CC)
+libcommands_la_SOURCES = $(PKG_HH) $(PKG_CC)

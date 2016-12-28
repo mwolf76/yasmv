@@ -2,9 +2,10 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_CC = variant.cc pool.cc
+PKG_HH = misc.hh pool.hh time.hh values.hh variant.hh
+PKG_CC = misc.cc variant.cc pool.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libutils.la
-libutils_la_SOURCES = $(PKG_CC)
+libutils_la_SOURCES = $(PKG_HH) $(PKG_CC)

@@ -14,9 +14,10 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
+PKG_HH = ltl.hh
 PKG_CC = ltl.cc
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libltl.la
-libltl_la_SOURCES = $(PKG_CC)
+libltl_la_SOURCES = $(PKG_HH) $(PKG_CC)

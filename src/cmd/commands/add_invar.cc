@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/add_invar.hh>
 
 #include <env/environment.hh>
@@ -52,7 +53,7 @@ Variant AddInvar::operator()()
     assert(f_constraint);
     env.add_extra_invar(f_constraint);
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 AddInvarTopic::AddInvarTopic(Interpreter& owner)

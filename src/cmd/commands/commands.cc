@@ -30,7 +30,9 @@
 #include <ctime>
 
 #include <commands.hh>
-
+const std::string okMessage ("Ok");
+const std::string errMessage ("ERROR");
+const std::string byeMessage ("Bye");
 
 /* algorithms */
 #include <bmc/bmc.hh>
@@ -189,7 +191,7 @@ InitCommand::InitCommand(Interpreter& owner)
 Variant InitCommand::operator()()
 {
     f_init.process();
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 InitCommand::~InitCommand()
@@ -216,7 +218,7 @@ Variant JobListCommand::operator()()
     }
     os << std::endl;
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 JobListCommand::~JobListCommand()
@@ -247,7 +249,7 @@ Variant JobStatusCommand::operator()()
     //     os << std::endl;
     // }
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 JobStatusCommand::~JobStatusCommand()
@@ -278,7 +280,7 @@ Variant JobKillCommand::operator()()
     //     os << std::endl;
     // }
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 JobKillCommand::~JobKillCommand()
@@ -404,7 +406,7 @@ Variant WitnessListCommand::operator()()
     }
     os << std::endl;
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 WitnessListCommand::~WitnessListCommand()
@@ -474,7 +476,7 @@ Variant WitnessDumpCommand::operator()()
         os << std::endl;
     }
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 WitnessDumpCommand::~WitnessDumpCommand()

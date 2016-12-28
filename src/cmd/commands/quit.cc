@@ -41,7 +41,7 @@ void Quit::set_retcode(int retcode)
 Variant Quit::operator()()
 {
     f_owner.quit(f_retcode);
-    return Variant("BYE");
+    return Variant(byeMessage);
 }
 
 

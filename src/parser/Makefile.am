@@ -1,9 +1,11 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = grammars
 
-AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src																\
--I$(top_srcdir)/src/dd/cudd-2.5.0/cudd -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr	\
--I$(top_srcdir)/src/dd/cudd-2.5.0/st -I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
+AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/mtr		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/st		\
+-I$(top_srcdir)/src/dd/cudd-2.5.0/util		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function	\
@@ -23,9 +25,10 @@ grammars/smvLexer.cc: grammars/.timestamp
 grammars/smvParser.cc: grammars/.timestamp
 	@cp grammars/smvParser.c grammars/smvParser.cc
 
-PKG_SOURCES = $(PKG_H) $(PKG_CC)
+clean-local:
+	rm -f smv.tokens
 
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libparser.la
-libparser_la_SOURCES = $(PKG_SOURCES)
+libparser_la_SOURCES = $(PKG_HH) $(PKG_CC)

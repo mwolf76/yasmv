@@ -44,8 +44,7 @@ public:
     // variant ctors
     Variant();
 
-    Variant(const std::string &value);
-    Variant(const char *value);
+    Variant(const std::string& value);
 
     Variant(bool value);
     Variant(int value);

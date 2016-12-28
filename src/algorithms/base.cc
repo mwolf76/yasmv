@@ -56,9 +56,6 @@ void Algorithm::setup()
     /* suppress warning */
     (void) mgr;
 
-    Compiler& cmpl
-        (compiler()); // just a local ref
-
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
@@ -278,7 +275,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
 {
     SymbIter symbs
-        (model(), NULL); // no COI support yet
+        (model());
 
     /* this will hold the activation vars for the uniqueness clauses
        defined below */
@@ -431,23 +428,21 @@ void Algorithm::assert_time_frame(Engine& engine,
                 (em.make_eq( full->rhs(),
                              assignment->rhs()));
 
+            DEBUG
+                << expr
+                << std::endl;
+
             try {
                 ++ count;
                 engine.push( cmpl.process(scope, expr), time, group);
             }
 
-            catch (Exception& ae) {
+            catch (Exception& e) {
                 f_ok = false;
 
-                pconst_char what
-                    (ae.what());
-
                 std::cerr
-                    << what
+                    << e.what()
                     << std::endl;
-
-                free((void *) what);
-                assert(false); // XXX
             }
         }
     }

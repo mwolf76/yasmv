@@ -28,59 +28,44 @@ Variant NilValue;
 // variant constructors
 Variant::Variant()
     : f_type(BOTTOM)
-{
-    // DRIVEL << "Initialized BOTTOM Variant @" << this << endl;
-}
+{}
 
 Variant::Variant(bool value)
     : f_type(BOOLEAN)
     , f_bool(value)
-{
-    // DRIVEL << "Initialized BOOLEAN Variant @" << this << " (value = " << f_bool << ")" << endl;
-}
+{}
 
 Variant::Variant(int value)
     : f_type(INTEGER)
     , f_int(value)
-{
-    // DRIVEL << "Initialized INTEGER Variant @" << this << " (value = " << f_int << ")" << endl;
-}
+{}
 
-Variant::Variant(const std::string &value)
+Variant::Variant(const std::string& value)
     : f_type(STRING)
     , f_str(value)
-{
-    // DRIVEL << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
-}
-
-Variant::Variant(const char *value)
-    : f_type(STRING)
-    , f_str(value)
-{
-    // DRIVEL << "Initialized STRING Variant @" << this << " (value = " << f_str << ")" << endl;
-}
+{}
 
 Variant::Variant(const Variant& v)
     : f_type(v.f_type)
 {
-    const void* instance(this);
-
     switch (f_type) {
-    case BOTTOM: return;
-    case BOOLEAN: f_bool = v.f_bool; return;
-    case INTEGER: f_int = v.f_int; return;
-    case STRING: f_str = v.f_str; return;
-    default: assert(0);
+    case BOTTOM:
+        return;
+
+    case BOOLEAN:
+        f_bool = v.f_bool;
+        return;
+
+    case INTEGER:
+        f_int = v.f_int;
+        return;
+
+    case STRING:
+        f_str = v.f_str;
+        return;
+
+    default: assert(false);
     }
-
-    void *tmp
-        ((void *) &v);
-
-    DRIVEL
-        << "Initialized COPY Variant @"
-        << instance
-        << " (from @" << tmp << ")"
-        << std::endl;
 }
 
 bool Variant::is_nil() const

@@ -70,6 +70,8 @@ Variant Time::operator()()
         b = true;
     }
 
+    bool c
+        (b);
     if (0 < secs) {
         if (b)
             oss
@@ -77,14 +79,15 @@ Variant Time::operator()()
         oss
             << secs
             << "s";
+        c = true;
     }
+
+    if (! a && ! b && ! c)
+        oss << "<1s";
 
     oss << ".";
 
-    const char* res
-        (oss.str().c_str());
-
-    return Variant(res);
+    return Variant(oss.str());
 }
 
 TimeTopic::TimeTopic(Interpreter& owner)

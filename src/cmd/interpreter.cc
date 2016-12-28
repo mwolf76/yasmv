@@ -191,7 +191,3 @@ Variant& Interpreter::operator()()
     return f_last_result;
 }
 
-void Interpreter::register_job( Job& job )
-{
-    f_jobs.push_back( &job );
-}

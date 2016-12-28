@@ -1,6 +1,6 @@
 /**
- * @file model_mgr.cc
- * @brief Model management subsystem, Model Manager class implementation.
+ * @file model/model_mgr.cc
+ * @brief Model management subsystem, ModelMgr class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,9 +21,24 @@
  *
  **/
 
-#include <symb/symbol.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+
 #include <model/exceptions.hh>
+#include <model/model.hh>
+#include <model/module.hh>
 #include <model/model_mgr.hh>
+
+ModelMgr& ModelMgr::INSTANCE()
+{
+    if (! f_instance)
+        f_instance = new ModelMgr();
+
+    return (*f_instance);
+}
 
 // static initialization
 ModelMgr_ptr ModelMgr::f_instance = NULL;
@@ -46,7 +61,7 @@ Module_ptr ModelMgr::scope(Expr_ptr key)
         (f_context_map.find( key ));
     assert( f_context_map.end() != mi );
 
-    return mi -> second;
+    return mi->second;
 }
 
 Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
@@ -85,7 +100,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             Module_ptr tgt
                 (top.get<1>());
             Expr_ptr tgt_name
-                (tgt -> name());
+                (tgt->name());
 
             DRIVEL
                 << "Registering scope "
@@ -204,7 +219,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                  di != defs.end(); ++ di ) {
 
                 Expr_ptr body
-                    ((*di).second -> body());
+                    ((*di).second->body());
 
                 DEBUG
                     << "Analyzing "
@@ -329,7 +344,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                  di != defs.end(); ++ di ) {
 
                 Expr_ptr body
-                    ((*di).second -> body());
+                    ((*di).second->body());
 
                 DEBUG
                     << "Type checking "
@@ -362,20 +377,20 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 
             Expr_ptr var_name
-               (vi -> first);
+               (vi->first);
 
             Type_ptr var_tp
-                ((* vi -> second).type());
+                ((* vi->second).type());
 
-            if (var_tp -> is_instance()) {
+            if (var_tp->is_instance()) {
                 InstanceType_ptr instance
-                    (var_tp -> as_instance());
+                    (var_tp->as_instance());
                 Expr_ptr inner_ctx
                     (em.make_dot( curr_ctx, var_name));
                 Expr_ptr inner_params
-                    (instance -> params());
+                    (instance->params());
                 Module&  module_
-                    ( module(instance -> name()));
+                    ( module(instance->name()));
 
                 stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >
                             (inner_ctx, &module_, inner_params));
@@ -422,7 +437,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             while (formals.end() != fi) {
 
                 Expr_ptr formal
-                    (em.make_dot( curr_ctx, ((* fi -> second).name())));
+                    (em.make_dot( curr_ctx, ((* fi->second).name())));
 
                 Expr_ptr actual
                     (*ai);
@@ -473,7 +488,7 @@ bool ModelMgr::analyze()
     f_analyzer.generate_framing_conditions();
 
     TRACE
-        << "Ok"
+        << "Model analysis complete"
         << std::endl;
 
     return true;

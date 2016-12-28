@@ -24,7 +24,7 @@
 #include <sstream>
 #include <cstring>
 
-#include <3rdparty/jsoncpp/json.hh>
+#include <jsoncpp/json/json.h>
 #include <boost/algorithm/string.hpp>
 
 #include <sat/typedefs.hh>
@@ -39,17 +39,6 @@
 
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
-
-// const char* InlinedOperatorLoaderException::what() const throw()
-// {
-//     std::ostringstream oss;
-
-//     oss
-//         << "InlinedOperatorLoaderException: can not instantiate loader for operator `"
-//         << f_ios << "`";
-
-//     return oss2cstr(oss);
-// }
 
 InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
     : f_fullpath(filepath)
@@ -67,23 +56,23 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
 
     const char* op (fragments[1].c_str());
     ExprType op_type;
-    if      (!strcmp( "neg", op)) op_type = NEG;
-    else if (!strcmp( "add", op)) op_type = PLUS;
-    else if (!strcmp( "sub", op)) op_type = SUB;
-    else if (!strcmp( "div", op)) op_type = DIV;
-    else if (!strcmp( "mod", op)) op_type = MOD;
-    else if (!strcmp( "mul", op)) op_type = MUL;
-    else if (!strcmp( "not", op)) op_type = BW_NOT;
-    else if (!strcmp( "or",  op)) op_type = BW_OR;
-    else if (!strcmp( "and", op)) op_type = BW_AND;
-    else if (!strcmp( "xor", op)) op_type = BW_XOR;
-    else if (!strcmp( "xnor",op)) op_type = BW_XNOR;
-    else if (!strcmp( "eq",  op)) op_type = EQ;
-    else if (!strcmp( "ne",  op)) op_type = NE;
-    else if (!strcmp( "gt",  op)) op_type = GT;
-    else if (!strcmp( "ge",  op)) op_type = GE;
-    else if (!strcmp( "lt",  op)) op_type = LT;
-    else if (!strcmp( "le",  op)) op_type = LE;
+    if      (! strcmp( "neg", op)) op_type = NEG;
+    else if (! strcmp( "add", op)) op_type = PLUS;
+    else if (! strcmp( "sub", op)) op_type = SUB;
+    else if (! strcmp( "div", op)) op_type = DIV;
+    else if (! strcmp( "mod", op)) op_type = MOD;
+    else if (! strcmp( "mul", op)) op_type = MUL;
+    else if (! strcmp( "not", op)) op_type = BW_NOT;
+    else if (! strcmp( "or",  op)) op_type = BW_OR;
+    else if (! strcmp( "and", op)) op_type = BW_AND;
+    else if (! strcmp( "xor", op)) op_type = BW_XOR;
+    else if (! strcmp( "xnor",op)) op_type = BW_XNOR;
+    else if (! strcmp( "eq",  op)) op_type = EQ;
+    else if (! strcmp( "ne",  op)) op_type = NE;
+    else if (! strcmp( "gt",  op)) op_type = GT;
+    else if (! strcmp( "ge",  op)) op_type = GE;
+    else if (! strcmp( "lt",  op)) op_type = LT;
+    else if (! strcmp( "le",  op)) op_type = LE;
     else assert (false);
 
     char buf[20];
@@ -101,7 +90,8 @@ InlinedOperatorLoader::~InlinedOperatorLoader()
 
 const LitsVector& InlinedOperatorLoader::clauses()
 {
-    boost::mutex::scoped_lock lock(f_loading_mutex);
+    boost::mutex::scoped_lock lock
+        (f_loading_mutex);
 
     if (0 == f_clauses.size()) {
 
@@ -117,11 +107,14 @@ const LitsVector& InlinedOperatorLoader::clauses()
         json_file >> obj;
         assert(obj.type() == Json::objectValue);
 
-        const Json::Value generated (obj[ JSON_GENERATED ]);
+        const Json::Value generated
+            (obj[ JSON_GENERATED ]);
+
         DEBUG
-            << "Loading clauses for " << f_ios
-            << ", generated " << generated
-            << std::endl;
+            << "Loading clauses for "
+            << f_ios
+            << ", generated "
+            << generated ;
 
         const Json::Value cnf (obj[ JSON_CNF ]);
         assert(cnf.type() == Json::arrayValue);
@@ -154,6 +147,7 @@ const LitsVector& InlinedOperatorLoader::clauses()
 InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance = NULL;
 
 InlinedOperatorMgr::InlinedOperatorMgr()
+    : f_builtin_microcode_path(STRING(YASMV_MICROCODE))
 {
     using boost::filesystem::path;
     using boost::filesystem::directory_iterator;
@@ -162,17 +156,10 @@ InlinedOperatorMgr::InlinedOperatorMgr()
     char *env_microcode_path
         (getenv( YASMV_MICROCODE_PATH ));
 
-    if (NULL == env_microcode_path) {
-        ERR
-            << YASMV_MICROCODE_PATH
-            << " is not set. Exiting..."
-            << std::endl;
-
-        exit(1);
-    }
-
     path micropath
-        (env_microcode_path);
+        (env_microcode_path
+         ? env_microcode_path
+         : f_builtin_microcode_path.c_str());
 
     try {
         if (exists(micropath) && is_directory(micropath)) {
@@ -196,14 +183,13 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                                       (loader->ios(), loader));
                 }
                 catch (InlinedOperatorLoaderException iole) {
+
                     pconst_char what
                         (iole.what());
 
                     WARN
                         << what
                         << std::endl;
-
-                    free ((void *) what);
                 }
             }
         }
@@ -217,14 +203,15 @@ InlinedOperatorMgr::InlinedOperatorMgr()
             exit(1);
         }
     }
-    catch (const filesystem_error& ex) {
+    catch (const filesystem_error& fse) {
         pconst_char what
-            (ex.what());
+            (fse.what());
 
         ERR
-            << what;
+            << what
+            << std::endl;
 
-        free ((void *) what);
+        /* leave immediately */
         exit(1);
     }
 }
@@ -239,6 +226,7 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignatur
         (f_loaders.find( ios ));
 
     if (i == f_loaders.end()) {
+
         DRIVEL
             << ios
             << " not found, falling back..."
@@ -270,38 +258,41 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
     /* local refs */
     const DDVector& z
         (md.z());
+
     const DDVector& x
         (md.x());
+
     const DDVector& y
         (md.y());
 
     int width
         (ios_width(md.ios()));
 
-    // keep each injection in a separate cnf space
+    /* keep each injection in a separate cnf space */
     f_sat.clear_cnf_map();
 
-    // foreach clause in clauses data...
-    LitsVector::const_iterator i;
-    for (i = clauses.begin(); clauses.end() != i; ++ i) {
+    for (LitsVector::const_iterator i = clauses.begin(); clauses.end() != i; ++ i) {
 
         const Lits& clause
             (*i);
 
         Minisat::vec<Lit> ps;
-        ps.push( mkLit( f_group, true));
+        if (MAINGROUP != f_group)
+            ps.push( mkLit( f_group, true));
 
-        // for each literal in clause, determine whether associated
-        // var belongs to z, x, y or is a cnf var. For each group in
-        // (z, x, y) fetch appropriate dd var from the registry. CNF
-        // vars are kept distinct among distinct injections.
-        Lits::const_iterator j;
-        for (j = clause.begin(); clause.end() != j; ++ j)  {
+        /* for each literal in clause, determine whether associated var belongs
+           to z, x, y or is a cnf var. For each group in (z, x, y) fetch
+           appropriate DD var from the registry; cnf vars gets rewritten into
+           new sat vars. Remark: rewritten cnf vars must be kept distinct among
+           distinct injections. */
+        for (Lits::const_iterator j = clause.begin(); clause.end() != j; ++ j)  {
+
             Lit lit
                 (*j);
 
             Var lit_var
                 (Minisat::var(lit));
+
             int lit_sign
                 (Minisat::sign(lit));
 
@@ -311,11 +302,14 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
             if (lit_var < width) {
                 int ndx
                     (lit_var);
+
                 assert(0 <= ndx && ndx < width);
 
-                const DdNode* node(NULL);
+                const DdNode* node
+                    (NULL);
+
                 if (md.is_relational()) {
-                    assert(!ndx);
+                    assert(! ndx);
                     node = z[0].getNode();
                 }
                 else
@@ -325,18 +319,20 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
+
                     assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
+
             /* x? */
             else if (width <= lit_var && lit_var < 2 * width) {
                 int ndx
                     (lit_var - width);
+
                 assert(0 <= ndx && ndx < width);
 
                 const DdNode* node
@@ -346,41 +342,45 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
-                    assert( value < 2); // 0 or 1
 
+                    assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value ? lit_sign : ! lit_sign));
                 }
             }
+
             /* y? */
             else if (2 * width <= lit_var && lit_var < 3 * width) {
                 int ndx
                     (lit_var - 2 * width);
+
                 assert(0 <= ndx && ndx < width);
 
                 const DdNode* node
                     (y[ width - ndx - 1].getNode());
+
                 if (! Cudd_IsConstant(node)) {
                     tgt_var = f_sat.find_dd_var(node, f_time);
                     ps.push( mkLit( tgt_var, lit_sign));
                 }
-                // const DD support
                 else {
                     value_t value
                         (cuddV(node));
+
                     assert( value < 2); // 0 or 1
                     ps.push( mkLit( alpha, value
                                     ? lit_sign :
                                     ! lit_sign));
                 }
             }
-            /* nope, it's a cnf var */
+
+            /* none of the above, it's a cnf var. */
             else {
                 int ndx
                     (lit_var - 3 * width);
+
                 assert(0 <= ndx /* && ndx < width */);
 
                 tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
@@ -390,8 +390,9 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
         } /* for (j = clause...) */
 
         f_sat.add_clause(ps);
-    }
-}
+    } /* foreach clause ... */
+
+} /* CNFOperatorInliner::inject */
 
 void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 {
@@ -421,11 +422,15 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
     for (unsigned pol = 0; pol < 2; ++ pol) {
 
         for (unsigned i = 0; i < md.width(); ++ i) {
+
             Minisat::vec<Lit> ps;
-            ps.push( mkLit( f_group, true));
+
+            if (MAINGROUP != f_group)
+                ps.push( mkLit( f_group, true));
+
             ps.push( mkLit( act, true));
             ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(),
-                                               f_time), !pol ));
+                                               f_time), ! pol));
             DdNode* xnode
                 (x[i].getNode());
 
@@ -442,10 +447,13 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 
         for (unsigned i = 0; i < md.width(); ++ i) {
             Minisat::vec<Lit> ps;
-            ps.push( mkLit( f_group, true));
+
+            if (MAINGROUP != f_group)
+                ps.push( mkLit( f_group, true));
+
             ps.push( mkLit( act, false));
             ps.push( mkLit( f_sat.find_dd_var( z[i].getNode(),
-                                               f_time), !pol ));
+                                               f_time), ! pol));
             DdNode* ynode
                 (y[i].getNode());
 
@@ -495,13 +503,15 @@ void CNFMultiwaySelectionInliner::inject(const MultiwaySelectionDescriptor& md)
                     (i + j * md.elem_width());
 
                 Minisat::vec<Lit> ps;
-                ps.push( mkLit( f_group, true));
+
+                if (MAINGROUP != f_group)
+                    ps.push( mkLit( f_group, true));
+
                 ps.push( mkLit( act, true));
                 ps.push( mkLit( f_sat.find_dd_var( z[ i ].getNode(),
-                                                   f_time), !pol ));
+                                                   f_time), ! pol));
                 ps.push( mkLit( f_sat.find_dd_var( x[ ndx ].getNode(),
                                                    f_time), pol));
-
                 f_sat.add_clause( ps );
             }
         }

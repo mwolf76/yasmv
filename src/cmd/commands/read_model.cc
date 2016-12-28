@@ -24,7 +24,9 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/read_model.hh>
+
 #include <model/model_mgr.hh>
 
 ReadModel::ReadModel(Interpreter& owner)
@@ -85,7 +87,7 @@ Variant ReadModel::operator()()
     if (! hasErrors)
         hasErrors = ! ModelMgr::INSTANCE().analyze();
 
-    return Variant( ! hasErrors ? "Ok" : "ERROR" );
+    return Variant( ! hasErrors ? okMessage : errMessage );
 }
 
 ReadModelTopic::ReadModelTopic(Interpreter& owner)

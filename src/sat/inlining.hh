@@ -83,6 +83,8 @@ protected:
 
 private:
     static InlinedOperatorMgr_ptr f_instance;
+    std::string f_builtin_microcode_path;
+
     InlinedOperatorLoaderMap f_loaders;
 };
 

@@ -116,8 +116,10 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
         if (em.is_false(expr))
             PUSH_VALUE(0);
+
         else if (em.is_true(expr))
             PUSH_VALUE(1);
+
         else assert(false);
 
         return;
@@ -217,14 +219,12 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         Expr_ptr body
             (symb->as_define().body());
 
-#if 0
-        DRIVEL
+        DEBUG
             << "Inlining `"
             << expr
             << "` := "
             << body
             << std::endl;
-#endif
 
         (*this) (body);
         return;

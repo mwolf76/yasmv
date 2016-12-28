@@ -27,11 +27,18 @@
 #ifndef MODEL_TYPEDEFS_H
 #define MODEL_TYPEDEFS_H
 
+#include <common/common.hh>
+
+#include <boost/unordered_map.hpp>
+#include <utils/pool.hh>
+
+typedef class Model* Model_ptr;
 typedef class Module* Module_ptr;
 typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> Modules;
 
-typedef class Model* Model_ptr;
+typedef boost::unordered_map<Expr_ptr, unsigned, PtrHash, PtrEq> SymbolIndexMap;
 
+/* streaming helper */
 std::ostream& operator<<(std::ostream& os, Module& module);
 
 #endif /* MODEL_TYPEDEFS_H */

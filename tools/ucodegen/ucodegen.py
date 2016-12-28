@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-ucodegen.py - micro code generator for gnuSMV
+ucodegen.py - micro code generator
 (c) 2014 Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
 
-This tool is part of the YASMINE project.
+This tool is part of the yasmv project.
 """
 
 import re
@@ -30,7 +30,7 @@ class BaseMicrocodeGenerator(object):
     maxbits = 64
     signedness = ( 'unsigned', 'signed' )
 
-    workdir = "/home/markus/Code/markus/github/gnuSMV/tools/ucodegen/workdir"
+    workdir = "/home/markus/Code/markus/github/yasmv/tools/ucodegen/workdir"
     ops     = None
 
     def __call__(self):

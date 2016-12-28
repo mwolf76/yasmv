@@ -32,9 +32,9 @@
 #include <expr/expr.hh>
 #include <utils/pool.hh>
 
-#include <src/parser/grammars/grammar.hh>
+#include <type/typedefs.hh>
 
-// #include <type/type.hh>
+#include <parser/grammars/grammar.hh>
 
 #include <vector>
 #include <utility>
@@ -144,6 +144,7 @@ class Variable
     bool     f_input;
     bool     f_temp;
     bool     f_frozen;
+    bool     f_inertial;
 
 public:
     Variable(Expr_ptr module, Expr_ptr name, Type_ptr type)
@@ -153,6 +154,7 @@ public:
         , f_input(false)
         , f_temp(false)
         , f_frozen(false)
+        , f_inertial(false)
     {}
 
     const Expr_ptr module() const
@@ -169,6 +171,12 @@ public:
 
     inline bool is_input() const
     { return f_input; }
+
+    void set_inertial(bool value)
+    { f_inertial = value; }
+
+    inline bool is_inertial() const
+    { return f_inertial; }
 
     void set_frozen(bool value)
     { f_frozen = value; }

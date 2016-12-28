@@ -27,6 +27,7 @@
 #define QUIT_CMD_H
 
 #include <cmd/command.hh>
+#include <cmd/commands/commands.hh>
 
 class Quit : public Command {
 

@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/clear.hh>
 
 #include <expr/expr.hh>
@@ -47,7 +48,7 @@ void Clear::set_identifier(Expr_ptr id)
 
 Variant Clear::operator()()
 {
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 ClearTopic::ClearTopic(Interpreter& owner)

@@ -40,10 +40,7 @@ public:
 
 class InlinedOperatorLoaderException : public EngineException {
 public:
-    InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
-        : EngineException("InlinedOperatorLoaderException",
-                          "can not instantiate loader for operator `" + ios2string(ios) + "`")
-    {}
+    InlinedOperatorLoaderException(const InlinedOperatorSignature& ios);
 };
 
 #endif /* SAT_EXCEPTIONS_H */

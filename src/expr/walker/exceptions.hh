@@ -33,33 +33,23 @@
 // raised when the walker has encountered an unsupported entry point
 class UnsupportedEntryPoint : public ExprException {
 public:
-    UnsupportedEntryPoint(entry_point ep)
-        : ExprException("UnsupportedEntryPoint",
-                          "encountered " + ep)
-    {}
+    UnsupportedEntryPoint(entry_point ep);
 };
 
 // raised when the walker has encountered an unsupported operator
 class UnsupportedOperator : public ExprException {
 public:
-    UnsupportedOperator(ExprType et)
-        : ExprException("UnsupportedOperator",
-                          "encountered " + et)
-    {}
+    UnsupportedOperator(ExprType et);
 };
 
 class UnsupportedLeaf : public ExprException {
 public:
-    UnsupportedLeaf()
-        : ExprException("UnsupportedLeaf")
-    {}
+    UnsupportedLeaf();
 };
 
 class InternalError : public ExprException {
 public:
-    InternalError(const std::string& message)
-        : ExprException("InternalError", message)
-    {}
+    InternalError(const std::string& message);
 };
 
 #endif /* EXPR_WALKER_EXCEPTIONS_H */

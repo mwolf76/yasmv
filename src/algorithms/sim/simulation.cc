@@ -21,9 +21,15 @@
  *
  **/
 
-#include <sstream>
-#include <sim/simulation.hh>
 #include <model/compiler/unit.hh>
+
+#include <sim/simulation.hh>
+
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
+#include <symb/symb_iter.hh>
+
+#include <sstream>
 
 // reserved for witnesses
 static unsigned progressive = 0;

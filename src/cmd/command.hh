@@ -28,11 +28,10 @@
 #define COMMAND_H
 
 #include <common/common.hh>
-#include <src/expr/expr.hh>
-#include <utils/variant.hh>
-
+#include <expr/expr.hh>
 #include <cmd/typedefs.hh>
 #include <cmd/exceptions.hh>
+#include <utils/variant.hh>
 
 class Interpreter;
 

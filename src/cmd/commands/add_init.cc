@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/add_init.hh>
 
 #include <env/environment.hh>
@@ -52,7 +53,7 @@ Variant AddInit::operator()()
     assert(f_constraint);
     env.add_extra_init(f_constraint);
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 AddInitTopic::AddInitTopic(Interpreter& owner)

@@ -1,9 +1,6 @@
 /**
- * @file bmc.hh
- * @brief SAT-based BMC reachability algorithm for invariant properties checking
- *
- * This header file contains the declarations required to implement
- * the BMC reachability checking algorithm.
+ * @file bmc/witness.hh
+ * @brief SAT-based BMC reachability algorithm, BMC CEX witness class declaration.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -34,18 +31,13 @@
 #include <expr/expr.hh>
 
 #include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
 
 /* Specialized for BMC CEX */
 class BMCCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k);
-};
-
-class BMCReversedCounterExample : public Witness {
-public:
-    BMCReversedCounterExample(Expr_ptr property, Model& model,
-                              Engine& engine, unsigned k);
+    BMCCounterExample(Expr_ptr property, Model& model, Engine& engine,
+                      unsigned k, bool reversed = false);
 };
 
 #endif /* BMC_ALGORITHM_WITNESS_H */

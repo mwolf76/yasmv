@@ -1,0 +1,41 @@
+-- This file is part of the yasmv distribution
+-- (c) 2011-15 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+--
+
+-- To generate the sequence of the first n fibonacci numbers issue the
+-- command: >> set n 10; reach GOAL; dump-trace
+
+#word-width 64
+MODULE fibonacci
+
+@inertial
+VAR f : uint;
+    g : uint;
+
+@hidden
+@inertial
+VAR i : uint;
+
+@input
+VAR n : uint;
+
+INIT
+    f = 0;
+
+INIT
+    g = 1;
+
+INIT
+    i = 0;
+
+TRANS
+  f := g;
+
+TRANS
+  g := f + g;
+
+TRANS
+  i := i + 1;
+
+@hidden
+DEFINE GOAL := i >= n;

@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/help.hh>
 
 Help::Help(Interpreter& owner)
@@ -95,7 +96,7 @@ Variant Help::operator()()
             << "- time" << std::endl
             << std::endl;
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 HelpTopic::HelpTopic(Interpreter& owner)

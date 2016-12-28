@@ -31,7 +31,7 @@
 
 #include <expr/expr.hh>
 
-#include <opts_mgr.hh>
+#include <opts/opts_mgr.hh>
 
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {

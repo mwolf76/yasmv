@@ -28,9 +28,10 @@
 #include <symb/proxy.hh>
 
 #include <sat/sat.hh>
+
+#include <model/module.hh>
 #include <model/analyzer/analyzer.hh>
 #include <model/compiler/compiler.hh>
-
 
 #include <utils/misc.hh>
 
@@ -207,7 +208,7 @@ void Analyzer::generate_framing_conditions()
                              em.make_eq(em.make_next(ident),
                                         ident)));
         INFO
-            << "Adding synthetic INVAR: "
+            << "Adding inertial INVAR: "
             << synth_trans
             << std::endl;
 

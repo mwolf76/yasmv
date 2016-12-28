@@ -31,12 +31,6 @@ ADDWalker::ADDWalker()
 ADDWalker::~ADDWalker()
 {}
 
-void ADDWalker::pre_hook()
-{}
-
-void ADDWalker::post_hook()
-{}
-
 ADDWalker& ADDWalker::operator() (ADD dd)
 {
     /* setup toplevel act. record and perform walk. */
@@ -44,10 +38,12 @@ ADDWalker& ADDWalker::operator() (ADD dd)
         (dd.getNode());
     f_recursion_stack.push(call);
 
+    /* actions before the walk */
     pre_hook();
 
     walk();
 
+    /* actions after the walk */
     post_hook();
 
     return *this;
@@ -57,52 +53,41 @@ ADDWalker& ADDWalker::operator() (ADD dd)
 void ADDWalker::walk ()
 {
     while(0 != f_recursion_stack.size()) {
-    call:
-        add_activation_record curr = f_recursion_stack.top();
-        assert ( !Cudd_IsComplement(curr.node));
+    loop:
+        add_activation_record curr
+            (f_recursion_stack.top());
+        assert (!Cudd_IsComplement(curr.node));
 
-        if (cuddIsConstant(curr.node)) {
-            // leaves ignored unless at the toplevel
-            if (1 == f_recursion_stack.size()) {
-                if (! Cudd_V(curr.node))
-                    zero();
-                else
-                    one();
-            }
+        register const DdNode *node
+            (curr.node);
 
-            f_recursion_stack.pop();
-            continue;
-        }
+        /* leaves have no children */
+        if (cuddIsConstant(node))
+            curr.pc = DD_WALK_NODE;
 
         // restore caller location (simulate call return behavior)
-        if (curr.pc != DD_PREORDER) {
-            switch(curr.pc) {
-            case DD_INORDER: goto entry_node_INORDER;
-            case DD_POSTORDER: goto entry_node_POSTORDER;
-            default: assert( false ); // unexpected
-            }
-        }
-
-        /* if node is not a constant and fulfills condition, perform
-           action on it. Recur into its children afterwards (pre-order). */
-        if (condition(curr.node)) {
+        switch(curr.pc) {
+        case DD_WALK_LHS:
             /* recur in THEN */
-            f_recursion_stack.top().pc = DD_INORDER;
-            f_recursion_stack.push( add_activation_record( cuddT(curr.node)));
-            goto call;
+            f_recursion_stack.top().pc = DD_WALK_RHS;
+            f_recursion_stack.push( add_activation_record( cuddT(node)));
+            goto loop;
 
-        entry_node_INORDER:
+        case DD_WALK_RHS:
             /* recur in ELSE */
-            f_recursion_stack.top().pc = DD_POSTORDER;
-            f_recursion_stack.push( add_activation_record( cuddE(curr.node)));
-            goto call;
+            f_recursion_stack.top().pc = DD_WALK_NODE;
+            f_recursion_stack.push( add_activation_record( cuddE(node)));
+            goto loop;
 
-        entry_node_POSTORDER:
+        case DD_WALK_NODE:
             /* process node in post-order. */
-            action(curr.node);
-        }
+            if (condition(node))
+                action(node);
+            f_recursion_stack.pop();
+            break;
 
-        f_recursion_stack.pop();
+        default: assert( false ); // unexpected
+        } /* switch() */
     } // while
 }
 

@@ -21,7 +21,9 @@
  *
  **/
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/list_traces.hh>
+
 #include <witness/witness_mgr.hh>
 
 ListTraces::ListTraces(Interpreter& owner)
@@ -66,7 +68,7 @@ Variant ListTraces::operator()()
     }
     os << std::endl;
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 ListTracesTopic::ListTracesTopic(Interpreter& owner)

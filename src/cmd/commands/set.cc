@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/set.hh>
 
 #include <expr/expr.hh>
@@ -71,7 +72,7 @@ Variant Set::operator()()
     else
         env.set(f_identifier, f_value);
 
-    return Variant("Ok");
+    return Variant(okMessage);
 }
 
 SetTopic::SetTopic(Interpreter& owner)

@@ -21,14 +21,14 @@
  *
  **/
 
+#include <algorithms/bmc/bmc.hh>
+#include <algorithms/bmc/witness.hh>
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <algorithms/bmc/bmc.hh>
-#include <witness/witness_mgr.hh>
-
 // reserved for witnesses
-static const char *reach_trace_prfx ("bwd_reach_");
+static const char *reach_trace_prfx ("reach_");
 
 void BMC::backward_strategy(CompilationUnit& goal)
 {
@@ -50,7 +50,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
 
     else if (STATUS_UNSAT == status) {
         INFO
-            << "Backward: found inconsistency in GOAL states. Target is trivially UNREACHABLE."
+            << "Backward: empty final states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(BMC_UNREACHABLE);
@@ -59,7 +59,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
 
     else if (STATUS_SAT == status)
         INFO
-            << "Backward: GOAL states consistency check ok."
+            << "Backward: GOAL consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
@@ -79,40 +79,39 @@ void BMC::backward_strategy(CompilationUnit& goal)
             goto cleanup;
 
         else if (STATUS_SAT == status) {
-            ExprMgr& em
-                (ExprMgr::INSTANCE());
 
-            sync_set_status(BMC_REACHABLE);
+            if (sync_set_status(BMC_REACHABLE)) {
 
-            /* Extract reachability witness */
-            WitnessMgr& wm
-                (WitnessMgr::INSTANCE());
+                /* Extract reachability witness */
+                WitnessMgr& wm
+                    (WitnessMgr::INSTANCE());
 
-            Witness& w
-                (* new BMCReversedCounterExample(f_phi, model(), engine, k));
+                Witness& w
+                    (* new BMCCounterExample(f_goal, model(), engine, k, true)); /* reversed */
 
-            /* witness identifier */
-            std::ostringstream oss_id;
-            oss_id
-                << reach_trace_prfx
-                << wm.autoincrement();
-            w.set_id(oss_id.str());
+                /* witness identifier */
+                std::ostringstream oss_id;
+                oss_id
+                    << reach_trace_prfx
+                    << wm.autoincrement();
+                w.set_id(oss_id.str());
 
-            /* witness description */
-            std::ostringstream oss_desc;
-            oss_desc
-                << "Reversed reachability witness for target `"
-                << f_phi
-                << "` in module `"
-                << model().main_module().name()
-                << "`" ;
-            w.set_desc(oss_desc.str());
+                /* witness description */
+                std::ostringstream oss_desc;
+                oss_desc
+                    << "Reversed reachability witness for target `"
+                    << f_goal
+                    << "` in module `"
+                    << model().main_module().name()
+                    << "`" ;
+                w.set_desc(oss_desc.str());
 
-            wm.record(w);
-            wm.set_current(w);
-            set_witness(w);
+                wm.record(w);
+                wm.set_current(w);
+                set_witness(w);
 
-            goto cleanup;
+                goto cleanup;
+            }
         }
 
         else if (STATUS_UNSAT == status) {

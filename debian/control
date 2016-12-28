@@ -1,0 +1,25 @@
+Source: yasmv
+Maintainer: Marco Pensallorto <marco.pensallorto@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: yasmv
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Yet Another Symbolic Model Verifier
+ The yasmv project started off in fall 2011 as a tentative and partial C++
+ re-implementation of the NuSMV2 model checker. As a former member of the NuSMV2
+ development team (in the years between 2008 and 2011) I was never completely
+ happy with a few architectural choices, inherited from the long history of the
+ NuSMV model checker and/or due to the amount of legacy code and tools that
+ relied on it. Overtime, however, the project has significantly diverged from
+ the original goal of making a NuSMV re-implementation. The input language for
+ yasmv is now a dialect of the smv language which retains only partial
+ compatibility with NuSMV's original input language. In this area, my interest
+ is all about exploring ways to improve language expressiveness and usability.
+ The project has now approached a stage in which the program is usable to
+ perform basic reachability analysis and step-by-step simulation. The source
+ distribution includes a few examples to demonstrate how the program can be used
+ to solve planning problems.

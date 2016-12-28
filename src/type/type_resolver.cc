@@ -21,9 +21,12 @@
  *
  **/
 
-#include <type.hh>
-#include <type_mgr.hh>
-#include <type_resolver.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
+#include <type/type_resolver.hh>
+
+#include <symb/typedefs.hh>
+#include <symb/classes.hh>
 
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)

@@ -25,83 +25,86 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util					\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-bin_PROGRAMS = yasmv tests
+bin_PROGRAMS = yasmv
+EXTRA_PROGRAMS = yasmv_tests
+dist_pkgdata_DATA = microcode/*
 
 # tags target helper  (uses exuberant ctags)
 tags:
 	@ctags -Ref TAGS $(top_srcdir)
 
-yasmv_SOURCES = src/opts_mgr.cc src/main.cc src/parse.cc
+yasmv_SOURCES = src/main.cc src/parse.cc
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
-	        $(top_builddir)/src/cmd/libcmd.la				\
-	        $(top_builddir)/src/cmd/commands/libcommands.la			\
-	        $(top_builddir)/src/algorithms/bmc/libbmc.la			\
-	        $(top_builddir)/src/algorithms/fsm/libfsm.la			\
-	        $(top_builddir)/src/algorithms/ltl/libltl.la			\
-	        $(top_builddir)/src/algorithms/sim/libsim.la			\
-	        $(top_builddir)/src/algorithms/libalgorithms.la			\
-	        $(top_builddir)/src/model/libmodel.la				\
-	        $(top_builddir)/src/model/compiler/libcompiler.la		\
-	        $(top_builddir)/src/enc/libenc.la				\
-	        $(top_builddir)/src/env/libenv.la				\
-	        $(top_builddir)/src/model/analyzer/libanalyzer.la		\
-	        $(top_builddir)/src/model/type_checker/libtype_checker.la	\
-	        $(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
-	        $(top_builddir)/src/expr/libexpr.la				\
-	        $(top_builddir)/src/expr/walker/libexpr_walker.la		\
-	        $(top_builddir)/src/expr/printer/libprinter.la			\
-	        $(top_builddir)/src/type/libtype.la				\
-	        $(top_builddir)/src/symb/libsymb.la				\
-	        $(top_builddir)/src/utils/libutils.la				\
-	        $(top_builddir)/src/witness/libwitness.la			\
-	        $(top_builddir)/src/sat/libsat.la				\
-	        $(top_builddir)/src/common/libcommon.la				\
+		$(top_builddir)/src/cmd/libcmd.la				\
+		$(top_builddir)/src/cmd/commands/libcommands.la			\
+		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
+		$(top_builddir)/src/algorithms/ltl/libltl.la			\
+		$(top_builddir)/src/algorithms/sim/libsim.la			\
+		$(top_builddir)/src/algorithms/libalgorithms.la			\
+		$(top_builddir)/src/model/libmodel.la				\
+		$(top_builddir)/src/model/compiler/libcompiler.la		\
+		$(top_builddir)/src/enc/libenc.la				\
+		$(top_builddir)/src/env/libenv.la				\
+		$(top_builddir)/src/model/analyzer/libanalyzer.la		\
+		$(top_builddir)/src/model/type_checker/libtype_checker.la	\
+		$(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
+		$(top_builddir)/src/expr/libexpr.la				\
+		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
+		$(top_builddir)/src/expr/printer/libprinter.la			\
+		$(top_builddir)/src/type/libtype.la				\
+		$(top_builddir)/src/symb/libsymb.la				\
+		$(top_builddir)/src/utils/libutils.la				\
+		$(top_builddir)/src/witness/libwitness.la			\
+		$(top_builddir)/src/sat/libsat.la				\
+		$(top_builddir)/src/common/libcommon.la				\
+		$(top_builddir)/src/opts/libopts.la				\
 										\
-        $(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c			\
-        $(top_builddir)/src/3rdparty/jsoncpp/libjson.la				\
-        $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)			\
-        $(BOOST_THREAD_LIBS) $(BOOST_CHRONO_LIBS)
+		$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
+		-ljsoncpp $(BOOST_PROGRAM_OPTIONS_LIBS)				\
+		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
+		$(BOOST_CHRONO_LIBS)
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
-tests_SOURCES = src/opts_mgr.cc src/parse.cc src/tests.cc		\
-	src/expr/test_expr.cc src/parser/test_parser.cc			\
-	src/type/test_type.cc src/dd/test_dd.cc src/enc/test_enc.cc	\
-	src/model/test_compiler.cc
+yasmv_tests_SOURCES = src/parse.cc testing/tests.cc		\
+		testing/test_expr.cc testing/test_parser.cc	\
+		testing/test_type.cc testing/test_dd.cc		\
+		testing/test_enc.cc testing/test_compiler.cc
 
-tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
-	$(top_builddir)/src/cmd/libcmd.la				\
-	$(top_builddir)/src/cmd/commands/libcommands.la			\
-	$(top_builddir)/src/algorithms/bmc/libbmc.la			\
-	$(top_builddir)/src/algorithms/fsm/libfsm.la			\
-	$(top_builddir)/src/algorithms/ltl/libltl.la			\
-	$(top_builddir)/src/algorithms/sim/libsim.la			\
-	$(top_builddir)/src/algorithms/libalgorithms.la			\
-	$(top_builddir)/src/model/libmodel.la				\
-	$(top_builddir)/src/model/compiler/libcompiler.la		\
-	$(top_builddir)/src/enc/libenc.la				\
-	$(top_builddir)/src/env/libenv.la				\
-	$(top_builddir)/src/model/analyzer/libanalyzer.la		\
-	$(top_builddir)/src/model/type_checker/libtype_checker.la	\
-	$(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
-	$(top_builddir)/src/expr/libexpr.la				\
-	$(top_builddir)/src/expr/walker/libexpr_walker.la		\
-	$(top_builddir)/src/expr/printer/libprinter.la			\
-	$(top_builddir)/src/type/libtype.la				\
-	$(top_builddir)/src/symb/libsymb.la				\
-	$(top_builddir)/src/utils/libutils.la				\
-	$(top_builddir)/src/witness/libwitness.la			\
-	$(top_builddir)/src/sat/libsat.la				\
-	$(top_builddir)/src/common/libcommon.la				\
-									\
-	$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
-	$(top_builddir)/src/3rdparty/jsoncpp/libjson.la			\
-	$(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_FILESYSTEM_LIBS)		\
-	$(BOOST_THREAD_LIBS) $(BOOST_CHRONO_LIBS)			\
-	-lboost_unit_test_framework
+yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
+		$(top_builddir)/src/cmd/libcmd.la				\
+		$(top_builddir)/src/cmd/commands/libcommands.la			\
+		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
+		$(top_builddir)/src/algorithms/ltl/libltl.la			\
+		$(top_builddir)/src/algorithms/sim/libsim.la			\
+		$(top_builddir)/src/algorithms/libalgorithms.la			\
+		$(top_builddir)/src/model/libmodel.la				\
+		$(top_builddir)/src/model/compiler/libcompiler.la		\
+		$(top_builddir)/src/enc/libenc.la				\
+		$(top_builddir)/src/env/libenv.la				\
+		$(top_builddir)/src/model/analyzer/libanalyzer.la		\
+		$(top_builddir)/src/model/type_checker/libtype_checker.la	\
+		$(top_builddir)/src/model/preprocessor/libpreprocessor.la	\
+		$(top_builddir)/src/expr/libexpr.la				\
+		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
+		$(top_builddir)/src/expr/printer/libprinter.la			\
+		$(top_builddir)/src/type/libtype.la				\
+		$(top_builddir)/src/symb/libsymb.la				\
+		$(top_builddir)/src/utils/libutils.la				\
+		$(top_builddir)/src/witness/libwitness.la			\
+		$(top_builddir)/src/sat/libsat.la				\
+		$(top_builddir)/src/common/libcommon.la				\
+		$(top_builddir)/src/opts/libopts.la				\
+										\
+		$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
+		-ljsoncpp $(BOOST_PROGRAM_OPTIONS_LIBS)				\
+		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
+		$(BOOST_CHRONO_LIBS) -lboost_unit_test_framework
 
-tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
+yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
-pkgconf_DATA = gnusmv.pc
+pkgconf_DATA = yasmv.pc

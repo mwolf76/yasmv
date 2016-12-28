@@ -41,34 +41,4 @@ extern const char *ARRAY_TOKEN;
 
 extern const char* EMPTY_TOKEN;
 
-extern const char *DEFAULT_CTX_TOKEN;
-
-/* ANSI colors TODO move into a separate namespace */
-extern const char normal[];
-
-extern const char black[];
-extern const char red[];
-extern const char green[];
-extern const char yellow[];
-extern const char blue[];
-extern const char purple[];
-extern const char cyan[];
-
-extern const char light_gray[];
-extern const char dark_gray[];
-extern const char bold_red[];
-extern const char bold_green[];
-extern const char bold_yellow[];
-extern const char bold_blue[];
-extern const char bold_purple[];
-extern const char bold_cyan[];
-extern const char bold_light_gray[];
-extern const char bold_dark_gray[];
-
-/* Witness trace formats */
-extern const char *TRACE_FMT_DEFAULT;
-extern const char *TRACE_FMT_PLAIN;
-extern const char *TRACE_FMT_JSON;
-extern const char *TRACE_FMT_XML;
-
 #endif /* TOKENS*/

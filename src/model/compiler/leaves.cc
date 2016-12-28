@@ -21,12 +21,12 @@
  *
  **/
 
-#include <utility>
-#include <compiler.hh>
-
-#include <proxy.hh>
+#include <model/compiler/compiler.hh>
 
 #include <env/environment.hh>
+
+#include <symb/classes.hh>
+#include <symb/proxy.hh>
 
 static inline value_t pow2(unsigned exp);
 

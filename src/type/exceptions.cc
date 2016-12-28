@@ -22,12 +22,14 @@
  **/
 
 #include <expr/expr.hh>
-#include <type/type.hh>
+
+#include <type/typedefs.hh>
+#include <type/exceptions.hh>
 
 #include <string>
 #include <sstream>
 
-std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs)
+static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs)
 {
     std::ostringstream oss;
 
@@ -39,7 +41,8 @@ std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs)
     return oss.str();
 }
 
-std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+/** Raised when the inferrer detects a wrong type */
+static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
 {
     std::ostringstream oss;
 
@@ -53,7 +56,17 @@ std::string build_bad_type_error_message(Expr_ptr expr, Type_ptr lhs, Type_ptr r
     return oss.str();
 }
 
-std::string build_identifier_expected_error_message(Expr_ptr expr)
+BadType::BadType(Expr_ptr expr, Type_ptr lhs)
+    : TypeException("BadType",
+                    format_bad_type(expr, lhs))
+{}
+
+BadType::BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+    : TypeException("BadType",
+                    format_bad_type(expr, lhs, rhs))
+{}
+
+std::string format_identifier_expected(Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -65,7 +78,12 @@ std::string build_identifier_expected_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-std::string build_duplicate_literal_error_message(Expr_ptr expr)
+IdentifierExpected::IdentifierExpected(Expr_ptr expr)
+    : TypeException("IdentifierExpected",
+                    format_identifier_expected(expr))
+{}
+
+std::string format_duplicate_literal(Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -77,7 +95,13 @@ std::string build_duplicate_literal_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-std::string build_type_mismatch_error_message(Expr_ptr expr, Type_ptr a, Type_ptr b)
+DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
+    : TypeException("DuplicateLiteral",
+                    format_duplicate_literal(expr))
+{}
+
+/** Raised when the inferrer detects two mismatching types */
+std::string format_type_mismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
 {
     std::ostringstream oss;
 
@@ -93,3 +117,8 @@ std::string build_type_mismatch_error_message(Expr_ptr expr, Type_ptr a, Type_pt
 
     return oss.str();
 }
+
+TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
+    : TypeException("TypeMismatch",
+                    format_type_mismatch(expr, a, b))
+{}

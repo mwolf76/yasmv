@@ -1,9 +1,6 @@
 /**
- * @file model.hh
- * @brief Model module
- *
- * This header file contains the declarations required by the Model
- * class and its dependencies.
+ * @file model/model.hh
+ * @brief Model module, main container class declarations.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -27,8 +24,34 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <model/classes.hh>
+#include <common/common.hh>
+
 #include <model/exceptions.hh>
 #include <model/typedefs.hh>
+
+/* main container class */
+class Model {
+public:
+    Model();
+    ~Model();
+
+    inline const Modules& modules() const
+    { return f_modules; }
+
+    Module& add_module(Module& module);
+    Module& module(Expr_ptr module_name);
+
+    /* topmost module in the model */
+    Module& main_module();
+
+    void autoIndexSymbol(Expr_ptr identifier);
+    unsigned symbol_index(Expr_ptr identifier);
+
+private:
+    Modules f_modules;
+
+    unsigned f_autoincrement;
+    SymbolIndexMap f_symbol_index_map;
+};
 
 #endif /* MODEL_H */
