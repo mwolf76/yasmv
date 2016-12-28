@@ -1,36 +1,37 @@
 README
 ======
 
-  The YASMINE (Yet Another Symbolic Modeling INteractive Engine) project started
-off in fall 2011 as a tentative and partial C++ re-implementation of the NuSMV2
-model checker. As a former member of the NuSMV2 development team (in the years
-between 2008 and 2011) I was never completely happy with a few architectural
-choices, inherited from the long history of the NuSMV model checker and/or due
-to the amount of legacy code and tools that relied on it.
+  The yasmv (Yet Another Symbolic Model Verifier) project started off
+in fall 2011 as a tentative and partial C++ re-implementation of the
+NuSMV2 model checker. As a former member of the NuSMV2 development
+team (in the years between 2008 and 2011) I was never completely happy
+with a few architectural choices, inherited from the long history of
+the NuSMV model checker and/or due to the amount of legacy code and
+tools that relied on it.
 
-  Overtime, however, YASMINE has significantly diverged from the original goal
-of making a NuSMV re-implementation. The input language for YASMINE is now a
-dialect of the SMV language which retains only partial compatibility with
-NuSMV's original input language. In this area, my interest is all about
-exploring ways to improve language expressiveness and usability.
+  Overtime, however, the project has significantly diverged from the
+original goal of making a NuSMV re-implementation. The input language
+for yasmv is now a dialect of the smv language which retains only
+partial compatibility with NuSMV's original input language. In this
+area, my interest is all about exploring ways to improve language
+expressiveness and usability.
 
-  The project has now approached a stage in which the program is usable to
-perform basic reachability analysis and step-by-step simulation. The source
-distribution includes a few examples to demonstrate how the program can be used
-to solve planning problems.
+  The project has now approached a stage in which the program is
+usable to perform basic reachability analysis and step-by-step
+simulation. The source distribution includes a few examples to
+demonstrate how the program can be used to solve planning problems.
 
 BUILD
 =====
 
-  To install required dependencies on a Debian-like GNU/Linux distribution:
+  To install required dependencies on a Debian-like GNU/Linux
+  distribution:
 
   $ sudo apt-get install autoconf libtool gcc g++ libboost-all-dev \
   zlib1g-dev make minisat antlr3 libantlr3c-dev
 
   when all the required packages are installed, launching the build
   should boil down to this:
-
-  $ autoreconf -vif (you only need to do this once)
 
   $ ./setup.sh
   $ make
@@ -52,11 +53,11 @@ BUILD
   files you will no longer need the JRE to make the build. No JRE is
   needed when running the final executable either.
 
-  After completing the build there is one more step that needs to be
-  taken before being able to actually run the program. YASMINE
-  requires access to the microcode data package, which is released as
-  a bz2'd tarball due to its size (currently 34 MB). Unpack the
-  microcode tarball with:
+  If you didn't run the setup.sh script, when done with the build
+  there is one more step that needs to be taken in order to being able
+  to actually run the program. yasmv requires access to the microcode
+  data package, which is currently released along with the source code
+  as a bz2'd tarball. Unpack the microcode tarball with:
 
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
@@ -65,14 +66,13 @@ BUILD
   want the microcode distribution unpacked in the the same location as
   the program source code:
 
-  $ cd yasmine
   $ tar xfj microcode.tar.bz2
   $ export YASMV_MICROCODE=`pwd`/microcode
   $ ./yasmv
 
-  YASMINE - Yet Another Symbolic Modelling INteractive Environment
+  yasmv - Yet Another Symbolic Model Verifier
   (c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
-  https://github.com/mwolf76/yasmine
+  https://github.com/mwolf76/yasmv
 
   [Sat May 21 17:21:57 2016].459 src/main.cc:176 :: 2176 microcode fragments registered.
   >>
@@ -109,6 +109,6 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
-YASMINE is in no way related to, or endorsed by, the NuSMV2
-development board and/or FBK. YASMINE does not contain any code from
-NuSMV's code base.
+yasmv is in no way related to, or endorsed by, the NuSMV2 development
+board and/or FBK. yasmv does not contain any code from NuSMV's code
+base.

@@ -106,4 +106,4 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
-pkgconf_DATA = yasmine.pc
+pkgconf_DATA = yasmv.pc

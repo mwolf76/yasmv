@@ -15,11 +15,11 @@ smvLexer*
 smvParser*
 helpers/
 libtool
-yasmine.pc
 INSTALL
 TAGS
 .timestamp
 smv.tokens
 stamp-h1
+yasmv.pc
 yasmv
 yasmv_tests

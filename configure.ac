@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
 
-AC_INIT([yasmine], [0.0.5], [marco.pensallorto@gmail.com])
+AC_INIT([yasmv], [0.0.5], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -43,8 +43,8 @@ BOOST_CHRONO
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
-AC_DEFINE_UNQUOTED(PROGRAM_NAME, "Yasmine", Program Name)
-AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.1", Program Version)
+AC_DEFINE_UNQUOTED(PROGRAM_NAME, "yasmv", Program Name)
+AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.5", Program Version)
 AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
 AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
 AC_DEFINE_UNQUOTED(PROGRAM_EMAIL, "marco.pensallorto@gmail.com", Program Email)
@@ -172,6 +172,6 @@ AC_CONFIG_FILES([Makefile
                  src/witness/Makefile
                  src/witness/out/Makefile
                  doc/Makefile
-                 yasmine.pc])
+                 yasmv.pc])
 
 AC_OUTPUT
