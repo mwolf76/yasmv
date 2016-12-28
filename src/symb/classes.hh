@@ -34,7 +34,7 @@
 
 #include <type/typedefs.hh>
 
-#include <src/parser/grammars/grammar.hh>
+#include <parser/grammars/grammar.hh>
 
 #include <vector>
 #include <utility>

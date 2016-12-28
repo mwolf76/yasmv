@@ -27,6 +27,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests
+dist_pkgdata_DATA = microcode/*
 
 # tags target helper  (uses exuberant ctags)
 tags:

@@ -42,19 +42,17 @@
  *
  **/
 
-#include <common/common.hh>
+#include <cmd/cmd.hh>
 
-#include <cmd.hh>
+#include <expr/expr.hh>
+#include <expr/printer/printer.hh>
 
-#include <expr.hh>
-#include <printer.hh>
-
-#include <model.hh>
+#include <model/model.hh>
 
 #include <opts/opts_mgr.hh>
 
-#include <smvLexer.h>
-#include <smvParser.h>
+#include <parser/grammars/smvLexer.h>
+#include <parser/grammars/smvParser.h>
 
 #include <sat/sat.hh>
 

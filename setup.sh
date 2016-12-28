@@ -66,6 +66,10 @@ autoreconf -vif
 # invoking configure script with above settings
 ./configure CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
 
-# exploding microcode tarball in its standard location
-echo "extracting microcode..."
-tar xfj microcode.tar.bz2
+# exploding microcode tarball in its standard location (do this only once)
+if [ -d microcode ] && [ `find microcode/* | wc -w` -eq 2177 ]; then
+    echo "skipping microcode extraction..."
+else
+    echo "extracting microcode..."
+    tar xfj microcode.tar.bz2
+fi

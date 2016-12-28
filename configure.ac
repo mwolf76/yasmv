@@ -105,9 +105,6 @@ AC_CHECK_HEADER(malloc.h,
 # antlr checks
 AC_ANTLR
 
-# zlib check
-AX_CHECK_ZLIB
-
 # readline check
 AX_LIB_READLINE
 
@@ -130,7 +127,8 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
                 strrchr strstr strtol, random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
-AM_CPPFLAGS="$BOOST_CPPFLAGS"
+
+AM_CPPFLAGS="$BOOST_CPPFLAGS -DYASMV_MICROCODE=$datadir/$PACKAGE"
 AC_SUBST(AM_CPPFLAGS)
 
 AM_CFLAGS="-Wall -Wstrict-prototypes"
@@ -163,7 +161,7 @@ AC_CONFIG_FILES([Makefile
                  src/model/compiler/Makefile
                  src/model/type_checker/Makefile
                  src/model/preprocessor/Makefile
-		 src/opts/Makefile
+                 src/opts/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile
                  src/sat/Makefile
