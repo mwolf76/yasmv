@@ -147,6 +147,7 @@ const LitsVector& InlinedOperatorLoader::clauses()
 InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance = NULL;
 
 InlinedOperatorMgr::InlinedOperatorMgr()
+    : f_builtin_microcode_path(STRING(YASMV_MICROCODE_PATH))
 {
     using boost::filesystem::path;
     using boost::filesystem::directory_iterator;
@@ -155,17 +156,10 @@ InlinedOperatorMgr::InlinedOperatorMgr()
     char *env_microcode_path
         (getenv( YASMV_MICROCODE_PATH ));
 
-    if (NULL == env_microcode_path) {
-        ERR
-            << YASMV_MICROCODE_PATH
-            << " is not set. Exiting..."
-            << std::endl;
-
-        exit(1);
-    }
-
     path micropath
-        (env_microcode_path);
+        (env_microcode_path
+         ? env_microcode_path
+         : f_builtin_microcode_path.c_str());
 
     try {
         if (exists(micropath) && is_directory(micropath)) {
