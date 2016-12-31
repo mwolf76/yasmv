@@ -61,8 +61,9 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
-		-ljsoncpp $(BOOST_PROGRAM_OPTIONS_LIBS)				\
+		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS)				\
+		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
 		$(BOOST_CHRONO_LIBS)
 
@@ -99,8 +100,9 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la -lminisat -lantlr3c		\
-		-ljsoncpp $(BOOST_PROGRAM_OPTIONS_LIBS)				\
+		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(ANTLR_LIBS) ($LIBJSONCPP_LIBS)				\
+		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
 		$(BOOST_CHRONO_LIBS) -lboost_unit_test_framework
 

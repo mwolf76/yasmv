@@ -1,4 +1,4 @@
-# antlr.m4: Locate Antlr3 build and runtime deps for autoconf-based projects.
+# antlr.m4: Locate ANTLR3 build and runtime deps for autoconf-based projects.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,60 +19,54 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_DEFUN([AC_ANTLR], [
-  AC_ARG_WITH(
+AC_DEFUN([AC_ANTLR3], [
+
+    AC_ARG_WITH(
     [antlr-prefix],
     AC_HELP_STRING(
       [--with-antlr-prefix=PATH],
-      [find the Antlr headers and libraries in `PATH/include` and `PATH/lib`.
-	       By default, checks in $default_search_path.
-	      ]),
-	    antlr_prefxes="$withval",
-	      antlr_prefixes="$default_search_path")
+      [find the ANTLR3 headers and libraries in `PATH/include` and `PATH/lib`. By default, checks in /usr.]),
+            antlr_prefix="$withval",
+            antlr_prefix="/usr")
 
-	  AC_CHECK_PROG(ANTLR_JAVA, java, java, [])
-	  if test x$ANTLR_JAVA = "x"; then
-	    AC_MSG_ERROR([antlr requires java to run])
-	  fi
-	  AC_CHECK_PROG(ANTLR, antlr, antlr, [])
-	  if test x$ANTLR != "x"; then
+      AC_CHECK_PROG(ANTLR_JAVA, java, java, [])
+      if test x$ANTLR_JAVA = "x"; then
+         AC_MSG_ERROR([antlr3 requires java to run])
+      fi
 
-	    save_CFLAGS=$CPPFLAGS
-	    save_LIBS=$LIBS
-	    AC_LANG_PUSH(C++)
-	    for antlr_prefix in $antlr_prefixes
-	    do
-	        AC_MSG_CHECKING([whether linking with -lantlr in $antlr_prefix works])
-	        CPPFLAGS="$save_CFLAGS -I$antlr_prefix/include"
-	        LIBS="$save_LIBS -L$antlr_prefix/lib -lantlr"
-	        AC_LINK_IFELSE( [AC_LANG_SOURCE ([
-	      #include <antlr/CommonAST.hpp>
-	      class TestAST : public ANTLR_USE_NAMESPACE(antlr)CommonAST {
-	      };
+      AC_CHECK_PROG(ANTLR, antlr3, antlr, [])
+      if test x$ANTLR = "x"; then
+         AC_MSG_ERROR([antlr3 required to compile grammars])
 
-	      int main(int, char **argv)
-	      {
-	        TestAST testAST;
-	        return 0;
-	      }
-	        ])], [
-	          AC_MSG_RESULT(yes)
-	          ANTLR_CFLAGS="-I$antlr_prefix/include"
-	          ANTLR_LIBS="-L$antlr_prefix/lib -lantlr"
-	          break
-	        ], [
-	          AC_MSG_RESULT(no)
-	          dnl AC_MSG_ERROR([Could not link with -lantlr])
-	        ]
-	        )
-	    done
+      else
+         save_CPPFLAGS=$CPPFLAGS
+         save_LIBS=$LIBS
 
-	    AC_LANG_POP()
-	    CPPFLAGS=$save_CFLAGS
-	    LIBS=$save_LIBS
-	  fi
+         AC_LANG_PUSH([C++])
+         ANTLR_CPPFLAGS="-I$antlr_prefix/include"
+         CPPFLAGS="$save_CFLAGS $ANTLR_CPPFLAGS"
 
-	  AC_SUBST(ANTLR)
-	  AC_SUBST(ANTLR_CFLAGS)
-	  AC_SUBST(ANTLR_LIBS)
-	])
+         AC_CHECK_HEADER(antlr3.h,
+         [],
+         [AC_MSG_ERROR([ANTLR headers not found])])
+
+         ANTLR_LIBS="-L$antlr_prefix/lib -lantlr3c"
+         LIBS="$save_LIBS $ANTLR_LIBS"
+
+         AC_MSG_CHECKING([whether linking with -lantlr3c in $antlr_prefix works])
+         AC_LINK_IFELSE( [AC_LANG_PROGRAM(
+                         [#include <antlr3.h>]
+			 [pANTLR3_INPUT_STREAM input =
+                         antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)
+                         "Hello World", strlen("Hello World"), NULL);])],
+                         [AC_MSG_RESULT([yes])], [AC_MSG_ERROR([no])])
+
+         AC_LANG_POP([C++])
+         CPPFLAGS=$save_CFLAGS
+         LIBS=$save_LIBS
+      fi
+
+      AC_SUBST(ANTLR)
+      AC_SUBST(ANTLR_CPPFLAGS)
+      AC_SUBST(ANTLR_LIBS)
+])

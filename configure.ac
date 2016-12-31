@@ -30,16 +30,6 @@ if test -z "$DOXYGEN";
    then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
 fi
 
-dnl First look for Boost
-BOOST_REQUIRE([1.48])
-
-dnl Then look for specific Boost libraries you need:
-BOOST_FILESYSTEM
-BOOST_PROGRAM_OPTIONS
-BOOST_TEST
-BOOST_THREADS
-BOOST_CHRONO
-
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
@@ -102,8 +92,14 @@ AC_CHECK_HEADER(malloc.h,
          #endif
         ])
 
-# antlr checks
-AC_ANTLR
+# libjsoncpp
+AC_LIBJSONCPP
+
+# ANTLR3 checks
+AC_ANTLR3
+
+# minisat checks
+AC_MINISAT
 
 # readline check
 AX_LIB_READLINE
@@ -128,7 +124,17 @@ AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
                 strrchr strstr strtol, random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
 
-AM_CPPFLAGS="$BOOST_CPPFLAGS -DYASMV_MICROCODE=$datadir/$PACKAGE"
+dnl First look for Boost
+BOOST_REQUIRE([1.48])
+
+dnl Then look for specific Boost libraries you need:
+BOOST_FILESYSTEM
+BOOST_PROGRAM_OPTIONS
+BOOST_TEST
+BOOST_THREADS
+BOOST_CHRONO
+
+AM_CPPFLAGS="$BOOST_CPPFLAGS $ANTLR_CPPFLAGS -DYASMV_MICROCODE=$datadir/$PACKAGE"
 AC_SUBST(AM_CPPFLAGS)
 
 AM_CFLAGS="-Wall -Wstrict-prototypes"
