@@ -166,6 +166,11 @@ void BMC::forward_strategy(CompilationUnit& goal)
 
             else assert(false); /* unreachable */
         }
+
+        TRACE
+            << "Forward: done with k = " << k << "..."
+            << std::endl ;
+
     } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
