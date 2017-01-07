@@ -165,7 +165,6 @@ void BMC::backward_strategy(CompilationUnit& goal)
             << "Backward: done with k = " << k << "..."
             << std::endl ;
 
-
     } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:
