@@ -31,9 +31,6 @@
 #include <sat/typedefs.hh>
 #include <sat/exceptions.hh>
 
-/* time mapper class */
-#include <sat/time_mapper.hh>
-
 /* inlining helpers */
 #include <sat/inlining.hh>
 

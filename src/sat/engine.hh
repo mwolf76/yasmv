@@ -33,7 +33,6 @@
 #include <model/compiler/unit.hh>
 
 #include <sat/typedefs.hh>
-#include <sat/time_mapper.hh>
 
 class Engine {
 public:
@@ -114,19 +113,17 @@ public:
     /**
      * @brief TCBI -> Minisat variable mapping
      */
-    inline Var tcbi_to_var(const TCBI& tcbi)
-    { return f_mapper.var(tcbi); }
+    Var tcbi_to_var(const TCBI& tcbi);
 
     /**
      * @brief Minisat variable -> TCBI mapping
      */
-    inline const TCBI& var_to_tcbi(Var var)
-    { return f_mapper.tcbi(var); }
+    TCBI& var_to_tcbi(Var var);
 
     /**
      * @brief DD index -> UCBI mapping
      */
-    inline const UCBI& find_ucbi(int index)
+    const UCBI& find_ucbi(int index)
     { return f_enc_mgr.find_ucbi(index); }
 
     /**
@@ -191,17 +188,18 @@ private:
 
     EncodingMgr& f_enc_mgr;
 
-    // TCBI <-> var mapping
-    TimeMapper& f_mapper;
-
-    // CNF registry,
+    // CNF registry
     TDD2VarMap f_tdd2var_map;
     RewriteMap f_rewrite_map;
+
+    // Bidirectional time mapping
+    TCBI2VarMap f_tcbi2var_map;
+    Var2TCBIMap f_var2tcbi_map;
 
     // SAT solver, currently Minisat
     SimpSolver f_solver;
 
-    // used to partition the formula to be solved
+    // used to partition the formula to be solved using assumptions
     Groups f_groups;
 
     // last solve() status

@@ -30,7 +30,6 @@
 Engine::Engine(const char* instance_name)
     : f_instance_name(instance_name)
     , f_enc_mgr(EncodingMgr::INSTANCE())
-    , f_mapper(* new TimeMapper(*this))
 {
     const void* instance
         (this);
@@ -270,3 +269,40 @@ Var Engine::rewrite_cnf_var(Var v, step_t time)
     }
     return res;
 }
+
+Var Engine::tcbi_to_var(const TCBI& tcbi)
+{
+    Var var;
+    const TCBI2VarMap::iterator eye
+        (f_tcbi2var_map.find(tcbi));
+
+    if (f_tcbi2var_map.end() != eye) {
+        var = eye->second;
+    }
+    else {
+        /* generate a new var and book it. Newly created var is not eliminable. */
+        var = new_sat_var(true);
+
+        DEBUG
+            << "Adding model var " << var
+            << " for " << tcbi
+            << std::endl;
+
+        f_tcbi2var_map.insert( std::make_pair<TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( std::make_pair<Var, TCBI>(var, tcbi));
+    }
+
+    return var;
+}
+
+TCBI& Engine::var_to_tcbi(Var var)
+{
+    const Var2TCBIMap::iterator eye
+        (f_var2tcbi_map.find(var));
+
+    /* TCBI *has* to be there already. */
+    assert (f_var2tcbi_map.end() != eye);
+
+    return eye->second;
+}
+
