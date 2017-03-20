@@ -46,22 +46,23 @@ class CNFRegistry {
 
 public:
 
-// services for CNF builder
-Var find_dd_var(const DdNode* node, step_t time);
-Var find_dd_var(int node_index, step_t time);
+    // services for CNF builder
+    Var find_dd_var(const DdNode* node, step_t time);
+    Var find_dd_var(int node_index, step_t time);
 
-Var find_cnf_var(const DdNode* node, step_t time);
+    Var find_cnf_var(const DdNode* node, step_t time);
+    size_t count_cnf_vars();
 
-// services for CNF injector
-void clear_cnf_map();
-Var rewrite_cnf_var(Var index, step_t time);
+    // services for CNF injector
+    void clear_cnf_map();
+    Var rewrite_cnf_var(Var index, step_t time);
 
 private:
     CNFRegistry(Engine& sat);
     ~CNFRegistry();
 
     Engine& f_sat;
-
+    
     TDD2VarMap f_tdd2var_map;
     RewriteMap f_rewrite_map;
 };

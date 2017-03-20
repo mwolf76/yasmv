@@ -131,29 +131,27 @@ public:
     /**
      * @brief Timed model DD nodes to Minisat variable mapping
      */
-    inline Var find_dd_var(const DdNode* node, step_t time)
-    { return f_registry.find_dd_var(node, time); }
+    Var find_dd_var(const DdNode* node, step_t time);
 
     /**
      * @brief Timed model DD nodes to Minisat variable mapping
      */
-    inline Var find_dd_var(int node_index, step_t time)
-    { return f_registry.find_dd_var(node_index, time); }
+    Var find_dd_var(int node_index, step_t time);
 
     /**
      * @brief Artifactory DD nodes to Minisat variable mapping
      */
-    inline Var find_cnf_var(const DdNode* node, step_t time)
-    { return f_registry.find_cnf_var(node, time);  }
+    Var find_cnf_var(const DdNode* node, step_t time);
 
     /**
      * @brief CNF registry for injection CNF var
      */
-    inline void clear_cnf_map()
-    { f_registry.clear_cnf_map(); }
+    void clear_cnf_map();
 
-    inline Var rewrite_cnf_var(Var var, step_t time)
-    { return f_registry.rewrite_cnf_var(var, time); }
+    /**
+     * @brief Rewrites a CNF var
+     */
+    Var rewrite_cnf_var(Var var, step_t time);
 
     /**
      * @brief a new Minisat variable
@@ -196,7 +194,8 @@ private:
     TimeMapper& f_mapper;
 
     // CNF registry,
-    CNFRegistry f_registry;
+    TDD2VarMap f_tdd2var_map;
+    RewriteMap f_rewrite_map;
 
     // SAT solver, currently Minisat
     SimpSolver f_solver;

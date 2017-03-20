@@ -84,9 +84,9 @@ public:
     void action(const DdNode* node)
     {
         if (cuddIsConstant(node)) {
-            if (is_toplevel() && ! Cudd_V(node)) {
+            assert(is_toplevel());
+            if (! Cudd_V(node))
                 push1(0, true); /* makes formula unsatisfiable */
-            }
         }
         else {
             mark(node);

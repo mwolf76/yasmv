@@ -31,8 +31,6 @@ Engine::Engine(const char* instance_name)
     : f_instance_name(instance_name)
     , f_enc_mgr(EncodingMgr::INSTANCE())
     , f_mapper(* new TimeMapper(*this))
-    , f_registry(* new CNFRegistry(*this))
-    , f_solver()
 {
     const void* instance
         (this);
@@ -82,7 +80,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
         << std::endl;
 
     Minisat::lbool status
-        (f_solver.solve(assumptions));
+        (f_solver.solveLimited(assumptions));
 
     if (status == l_True)
         f_status = STATUS_SAT;
@@ -185,3 +183,90 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
     }
 }
 
+Var Engine::find_dd_var(const DdNode* node, step_t time)
+{
+    assert (NULL != node && ! Cudd_IsConstant(node));
+
+    const UCBI& ucbi
+        (find_ucbi(node->index));
+
+    const TCBI tcbi
+        (ucbi, time);
+
+    return tcbi_to_var(tcbi);
+}
+
+Var Engine::find_dd_var(int node_index, step_t time)
+{
+    const UCBI& ucbi
+        (find_ucbi(node_index));
+
+    const TCBI tcbi
+        (ucbi, time);
+
+    return tcbi_to_var(tcbi);
+}
+
+Var Engine::find_cnf_var(const DdNode* node, step_t time)
+{
+    Var res;
+
+    assert (NULL != node);
+    TimedDD timed_node
+        (const_cast<DdNode*> (node), time);
+
+    TDD2VarMap::const_iterator eye
+        (f_tdd2var_map.find( timed_node ));
+
+    if (f_tdd2var_map.end() == eye) {
+        res = new_sat_var();
+
+        /* Insert into tdd2var map */
+        f_tdd2var_map.insert( std::make_pair<TimedDD, Var>
+                              (timed_node, res));
+
+        DEBUG
+            << "Created cnf var "
+            << res
+            << " for DD node "
+            << node
+            << std::endl;
+    }
+    else {
+        res = (*eye).second;
+    }
+    return res;
+}
+
+void Engine::clear_cnf_map()
+{
+    f_rewrite_map.clear();
+}
+
+Var Engine::rewrite_cnf_var(Var v, step_t time)
+{
+    Var res;
+
+    TimedVar timed_var (v, time);
+    RewriteMap::const_iterator eye = \
+        f_rewrite_map.find( timed_var );
+
+    if (f_rewrite_map.end() == eye) {
+        res = new_sat_var();
+
+        /* Insert into tvv2var map */
+        f_rewrite_map.insert( std::make_pair<TimedVar, Var>
+                              (timed_var, res));
+
+        DEBUG
+            << "Rewrote microcode cnf var "
+            << v << "@" << time
+            << " as "
+            << res
+            << std::endl;
+    }
+    else {
+        res = (*eye).second;
+    }
+    return res;
+}
