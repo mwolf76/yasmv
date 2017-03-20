@@ -119,7 +119,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
                 << "Backward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
-            engine.disable_last_group();
+            engine.invert_last_group();
 
             /* unrolling next */
             ++ k;

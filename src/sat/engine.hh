@@ -55,9 +55,9 @@ public:
     }
 
     /**
-     * @brief Disable last activated group for the SAT instance.
+     * @brief Invert last group for the SAT instance.
      */
-    inline void disable_last_group()
+    inline void invert_last_group()
     { f_groups.last() *= -1; }
 
     /**

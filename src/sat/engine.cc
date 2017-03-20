@@ -70,8 +70,10 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     for (int i = 0; i < groups.size(); ++ i) {
         Var grp = groups[i];
 
-        /* Assumptions work like "a -> phi", thus a non-negative
-           value enables group, whereas a negative value disables it. */
+        /* Assumptions work like "a -> phi". Here we use both polarities of the
+           implication, that is a positive group var asserts the formulas in the
+           group whereas a negative group bar asserts the negation of the
+           formulas in the group. */
         assumptions.push( mkLit( abs(grp), grp < 0));
     }
 
@@ -80,7 +82,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
         << std::endl;
 
     Minisat::lbool status
-        (f_solver.solveLimited(assumptions));
+        (f_solver.solve(assumptions));
 
     if (status == l_True)
         f_status = STATUS_SAT;
