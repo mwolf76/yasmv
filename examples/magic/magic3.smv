@@ -1,0 +1,104 @@
+-- This file is part of the yasmv distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
+-- To build a 3x3 magic square type:
+-- >> pick-state
+-- >> dump-trace
+
+#word-width 8
+MODULE main
+
+VAR
+        A : uint[9];
+
+INVAR
+  0 < A[0] && A[0] < 10 &&
+  0 < A[1] && A[1] < 10 &&
+  0 < A[2] && A[2] < 10 &&
+  0 < A[3] && A[3] < 10 &&
+  0 < A[4] && A[4] < 10 &&
+  0 < A[5] && A[5] < 10 &&
+  0 < A[6] && A[6] < 10 &&
+  0 < A[7] && A[7] < 10 &&
+  0 < A[8] && A[8] < 10 ;
+
+INVAR
+  A[0] != A[1] &&
+  A[0] != A[2] &&
+  A[0] != A[3] &&
+  A[0] != A[4] &&
+  A[0] != A[5] &&
+  A[0] != A[6] &&
+  A[0] != A[7] &&
+  A[0] != A[8] ;
+
+INVAR
+  A[1] != A[2] &&
+  A[1] != A[3] &&
+  A[1] != A[4] &&
+  A[1] != A[5] &&
+  A[1] != A[6] &&
+  A[1] != A[7] &&
+  A[1] != A[8] ;
+
+INVAR
+  A[2] != A[3] &&
+  A[2] != A[4] &&
+  A[2] != A[5] &&
+  A[2] != A[6] &&
+  A[2] != A[7] &&
+  A[2] != A[8] ;
+
+INVAR
+  A[3] != A[4] &&
+  A[3] != A[5] &&
+  A[3] != A[6] &&
+  A[3] != A[7] &&
+  A[3] != A[8] ;
+
+INVAR
+  A[4] != A[5] &&
+  A[4] != A[6] &&
+  A[4] != A[7] &&
+  A[4] != A[8] ;
+
+INVAR
+  A[5] != A[6] &&
+  A[5] != A[7] &&
+  A[5] != A[8] ;
+
+INVAR
+  A[6] != A[7] &&
+  A[6] != A[8] ;
+
+INVAR
+  A[7] != A[8] ;
+  
+INIT
+  A[0] + A[1] + A[2] = 
+  A[3] + A[4] + A[5] ;
+
+INIT
+  A[3] + A[4] + A[5] =
+  A[6] + A[7] + A[8] ;
+
+INIT
+  A[6] + A[7] + A[8] =
+  A[0] + A[3] + A[6] ;
+
+INIT
+  A[0] + A[3] + A[6] = 
+  A[1] + A[4] + A[7] ;
+
+INIT
+  A[1] + A[4] + A[7] =
+  A[2] + A[5] + A[8] ;
+
+INIT
+  A[2] + A[5] + A[8] =
+  A[0] + A[4] + A[8] ;
+
+INIT
+  A[0] + A[4] + A[8] =
+  A[2] + A[4] + A[6] ;
+
