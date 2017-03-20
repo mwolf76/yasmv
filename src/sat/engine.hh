@@ -209,10 +209,11 @@ private:
     Index2VarMap f_index2var_map;
     inline Var index2var(int index)
     {
-        Index2VarMap::const_iterator eye = f_index2var_map.find(index);
-        if (eye != f_index2var_map.end()) {
+        Index2VarMap::const_iterator eye
+            (f_index2var_map.find(index));
+
+        if (eye != f_index2var_map.end())
             return (*eye).second;
-        }
 
         return -1; /* cnf var */
     }
@@ -220,10 +221,11 @@ private:
     Var2IndexMap f_var2index_map;
     inline int var2index(Var v)
     {
-        Var2IndexMap::const_iterator eye = f_var2index_map.find(v);
-        if (eye != f_var2index_map.end()) {
+        Var2IndexMap::const_iterator eye
+            (f_var2index_map.find(v));
+
+        if (eye != f_var2index_map.end())
             return (*eye).second;
-        }
 
         return -1; /* cnf var */
     }

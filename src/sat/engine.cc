@@ -69,8 +69,8 @@ status_t Engine::sat_solve_groups(const Groups& groups)
 
         /* Assumptions work like "a -> phi". Here we use both polarities of the
            implication, that is a positive group var asserts the formulas in the
-           group whereas a negative group bar asserts the negation of the
-           formulas in the group. */
+           group whereas a negative group var asserts the negation of those
+           formulas. */
         assumptions.push( mkLit( abs(grp), grp < 0));
     }
 
