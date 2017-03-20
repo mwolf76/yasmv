@@ -25,8 +25,6 @@
 
 #include <dd/dd_walker.hh>
 
-#include <sat/cnf_registry.hh>
-
 // #define DEBUG_CNF_LITERALS
 
 class CNFBuilderSingleCut : public ADDWalker {

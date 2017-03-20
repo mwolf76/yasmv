@@ -30,9 +30,10 @@
 
 #include <enc/enc_mgr.hh>
 
+#include <model/compiler/unit.hh>
+
 #include <sat/typedefs.hh>
 #include <sat/time_mapper.hh>
-#include <sat/cnf_registry.hh>
 
 class Engine {
 public:
