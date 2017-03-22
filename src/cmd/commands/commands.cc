@@ -41,7 +41,9 @@ const std::string byeMessage ("Bye");
 Command::Command(Interpreter& owner)
     : f_owner(owner)
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Initialized command @"
         << instance
@@ -50,8 +52,10 @@ Command::Command(Interpreter& owner)
 
 Command::~Command()
 {
-    const void *instance(this);
-    DRIVEL << "Deinitialized command @"
+    const void *instance
+        (this);
+
+    DRIVEL << "Destroyed command @"
            << instance
            << std::endl;
 }
@@ -59,7 +63,9 @@ Command::~Command()
 CommandTopic::CommandTopic(Interpreter& owner)
     : f_owner(owner)
 {
-    const void *instance(this);
+    const void *instance
+        (this);
+
     DRIVEL
         << "Initialized command topic @"
         << instance
@@ -68,8 +74,10 @@ CommandTopic::CommandTopic(Interpreter& owner)
 
 CommandTopic::~CommandTopic()
 {
-    const void *instance(this);
-    DRIVEL << "Deinitialized command topic @"
+    const void *instance
+        (this);
+
+    DRIVEL << "Destroyed command topic @"
            << instance
            << std::endl;
 }

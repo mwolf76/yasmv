@@ -41,7 +41,7 @@ CommandMgr::CommandMgr()
         (this);
 
     DEBUG
-        << "CommandMgr initialized @"
+        << "Initialized CommandMgr @"
         << instance
         << std::endl;
 }
@@ -49,6 +49,6 @@ CommandMgr::CommandMgr()
 CommandMgr::~CommandMgr()
 {
     DEBUG
-        << "CommandMgr deinitialized"
+        << "Destroyed CommandMgr"
         << std::endl;
 }

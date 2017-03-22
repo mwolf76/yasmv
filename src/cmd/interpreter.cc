@@ -110,18 +110,22 @@ Interpreter::Interpreter()
 
     , f_epoch(time(NULL))
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DEBUG
-        << "Initialized command interpreter @"
+        << "Initialized Interpreter @"
         << instance
         << std::endl;
 }
 
 Interpreter::~Interpreter()
 {
-    const void* instance(this);
+    const void* instance
+        (this);
+
     DEBUG
-        << "Deinitialized command interpreter @"
+        << "Destroyed Interpreter @"
         << instance
         << std::endl;
 }
@@ -168,16 +172,19 @@ Variant& Interpreter::operator()()
                 Command_ptr cmd
                     (*i);
 
-                try {
-                    (*this)(cmd);
-                }
-                catch (Exception &e) {
-                    err
-                        << e.what()
-                        << std::endl;
+                (*this)(cmd);
 
-                    f_last_result = Variant("ERROR");
-                }
+                // try {
+                //     (*this)(cmd);
+                // }
+                // catch (Exception &e) {
+                //     err
+                //         << e.what()
+                //         << std::endl;
+
+                //     f_last_result = Variant("ERROR");
+                // }
+
             }
         }
         else f_last_result = "No operation";

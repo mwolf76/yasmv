@@ -37,6 +37,9 @@ CheckInit::~CheckInit()
 
 Variant CheckInit::operator()()
 {
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
     CheckInitConsistency algorithm
         (*this, ModelMgr::INSTANCE().model());
 
@@ -45,15 +48,15 @@ Variant CheckInit::operator()()
     std::ostringstream tmp;
     switch (algorithm.status()) {
     case FSM_CONSISTENCY_OK:
-        tmp << "INIT is consistent";
+        tmp << "OK";
         break;
 
     case FSM_CONSISTENCY_KO:
-        tmp << "INIT is inconsistent";
+        tmp << "KO";
         break;
 
     case FSM_CONSISTENCY_UNDECIDED:
-        tmp << "Consistency could not be decided";
+        tmp << "??";
         break;
 
     default: assert( false ); /* unreachable */
@@ -76,5 +79,9 @@ CheckInitTopic::~CheckInitTopic()
 void CheckInitTopic::usage()
 {
     std::cout
-        << "check-init [ -a ] <expression> - Checks propositional satisfiability for INIT formulas.\n\n";
+        << "check-init - Checks propositional satisfiability for INIT formulas.\n\n"
+        << "Initial states are checked for consistency. Returns `OK` if initial\n"
+        << "states are consistent, `KO` if initial are found to be inconsistent.\n"
+        << "If no decision could be made returns `??`."
+        << std::endl;
 }

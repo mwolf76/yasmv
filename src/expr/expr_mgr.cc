@@ -81,9 +81,8 @@ ExprMgr::~ExprMgr()
 {
     const void* instance(this);
     DEBUG
-        << "ExprMgr @"
+        << "Destroyed ExprMgr @"
         << instance
-        << " deinitialized"
         << std::endl;
 }
 

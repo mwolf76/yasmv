@@ -46,9 +46,6 @@ void Help::set_topic(CommandTopic_ptr topic)
 }
 
 /*
-- add-init
-- add-invar
-- add-trans
 - check-init
 - check-trans
 - clear
@@ -75,9 +72,6 @@ Variant Help::operator()()
     else
         std::cout
             << "Available topics: " << std::endl
-            << "- add-init" << std::endl
-            << "- add-invar" << std::endl
-            << "- add-trans" << std::endl
             << "- check-init" << std::endl
             << "- check-trans" << std::endl
             << "- clear" << std::endl
