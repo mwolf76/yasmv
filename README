@@ -53,10 +53,10 @@ RUN
 =====
 
   If you didn't run the setup.sh script, when done with the build there is one
-  more step that needs to be taken in order to being able to actually run the
-  program. yasmv requires access to the microcode data package, which is
-  currently released along with the source code as a bz2'd tarball. Unpack the
-  microcode tarball with:
+  more step that needs to be taken in order to being able to run the program.
+  yasmv requires access to the microcode data package, which is currently
+  released along with the source code as a bz2'd tarball. Unpack the microcode
+  tarball with:
 
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
 
@@ -87,7 +87,7 @@ RUN
 
   $ make test
 
-  Remark: The default build for C ++ code uses a low level of optimization (-O0)
+  Remark: The default build for C++ code uses a low level of optimization (-O0)
   to make life a whole lot easier for debugging. If you want to, feel free to
   enable higher level of optimization for the C++ code (C code already uses
   '-O2' by default). Do not expect major performance gains though, as core
