@@ -54,7 +54,7 @@ bool Compiler::walk_neg_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_neg_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_unary_algebraic(expr))
@@ -67,7 +67,7 @@ bool Compiler::walk_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_not_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_unary_boolean(expr))
@@ -80,7 +80,7 @@ bool Compiler::walk_bw_not_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_bw_not_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_unary_algebraic(expr))
@@ -95,7 +95,7 @@ bool Compiler::walk_add_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_add_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -110,7 +110,7 @@ bool Compiler::walk_sub_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_sub_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr)) {
@@ -125,7 +125,7 @@ bool Compiler::walk_div_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_div_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -140,7 +140,7 @@ bool Compiler::walk_mul_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mul_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -155,7 +155,7 @@ bool Compiler::walk_mod_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_mod_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -170,7 +170,7 @@ bool Compiler::walk_and_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_and_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_boolean(expr))
@@ -185,7 +185,7 @@ bool Compiler::walk_bw_and_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_and_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -200,7 +200,7 @@ bool Compiler::walk_or_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_or_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_boolean(expr))
@@ -215,7 +215,7 @@ bool Compiler::walk_bw_or_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_or_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -230,7 +230,7 @@ bool Compiler::walk_bw_xor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_xor_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -245,7 +245,7 @@ bool Compiler::walk_bw_xnor_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -279,7 +279,7 @@ bool Compiler::walk_guard_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_guard_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 }
 
@@ -289,7 +289,7 @@ bool Compiler::walk_implies_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_implies_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_boolean(expr))
@@ -318,7 +318,7 @@ bool Compiler::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_cast_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     Expr_ptr ctx
@@ -358,7 +358,7 @@ bool Compiler::walk_lshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lshift_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -373,7 +373,7 @@ bool Compiler::walk_rshift_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_rshift_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -408,7 +408,7 @@ bool Compiler::walk_assignment_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_assignment_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 }
 
@@ -418,7 +418,7 @@ bool Compiler::walk_eq_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_eq_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_boolean(expr))
@@ -442,7 +442,7 @@ bool Compiler::walk_ne_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ne_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_boolean(expr))
@@ -463,7 +463,7 @@ bool Compiler::walk_gt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_gt_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -478,7 +478,7 @@ bool Compiler::walk_ge_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ge_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -493,7 +493,7 @@ bool Compiler::walk_lt_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_lt_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -508,7 +508,7 @@ bool Compiler::walk_le_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_le_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_binary_algebraic(expr))
@@ -522,7 +522,8 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
     if (!cache_miss(expr))
         return false;
 
-    if (! f_preprocess && is_ite_algebraic( expr -> rhs())) {
+    if (COMPILING == f_status &&
+        is_ite_algebraic( expr -> rhs())) {
 
         /* perform a lookhead on RHS to collect nested ITEs */
         BinarySelectionUnionFindMap::const_iterator eye
@@ -542,7 +543,7 @@ bool Compiler::walk_ite_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_ite_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_ite_boolean(expr))
@@ -613,7 +614,7 @@ bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_subscript_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     if (is_subscript_boolean(expr))
@@ -632,7 +633,7 @@ bool Compiler::walk_array_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 void Compiler::walk_array_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     TypeMgr& tm
@@ -677,7 +678,7 @@ bool Compiler::walk_array_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     TypeMgr& tm
@@ -729,7 +730,7 @@ bool Compiler::walk_set_comma_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
 {
-    if (f_preprocess)
+    if (ENCODING == f_status)
         return;
 
     TypeMgr& tm

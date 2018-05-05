@@ -2,7 +2,8 @@
  * @file compiler.cc
  * @brief Model compiler subsystem implementation.
  *
- * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2011-2015 Marco Pensallorto < marco AT pensallorto DOT gmail
+ * DOT com >
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -24,29 +25,32 @@
 #include <utility>
 #include <compiler.hh>
 
-// synchronized
+ECompilerStatus& operator++(ECompilerStatus& status) {
+    return status = static_cast<ECompilerStatus> (1 + static_cast <int> (status));
+}
+
 CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
-    boost::mutex::scoped_lock lock
-        (f_process_mutex);
+    boost::mutex::scoped_lock lock { f_process_mutex };
+
+    f_status = READY;
 
     /* Pass 1: build encodings */
-    pass1(ctx, body);
+    build_encodings(ctx, body);
 
     /* Pass 2: perform boolean compilation using DDs */
-    pass2(ctx, body);
+    compile(ctx, body);
 
-    /* Pass 3: post-processing needed to activate binary and multiway
-       selection MUXes
+    /* Pass 3: checking internal structures */
+    check_internals();
 
-       1. ITE MUXes, for each descriptor, we need to conjunct
-       `! AND ( prev_conditions ) AND cnd <-> aux` to the original
-       formula.
+    /* Pass 4: ITE MUXes, for each descriptor, we need to conjunct `! AND (
+       prev_conditions ) AND cnd <-> aux` to the original formula. */
+    activate_ite_muxes();
 
-       2. Array MUXes, for each descriptor, push a conjunct `cnd_i <->
-       act_i, i in [0..n_elems[` to the original formula.
-    */
-    pass3();
+    /* Pass 5: Array MUXes, for each descriptor, push a conjunct `cnd_i <-> act_i, i in
+       [0..n_elems[` to the original formula. */
+    activate_array_muxes();
 
     return CompilationUnit(f_add_stack, f_inlined_operator_descriptors,
                            f_expr2bsd_map, f_multiway_selection_descriptors);
@@ -65,9 +69,7 @@ Compiler::Compiler()
     , f_enc(EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
 {
-    const void* instance
-        (this);
-
+    const void* instance { this };
     DRIVEL
         << "Initialized Compiler @"
         << instance
@@ -76,9 +78,7 @@ Compiler::Compiler()
 
 Compiler::~Compiler()
 {
-    const void* instance
-        (this);
-
+    const void* instance { this };
     DRIVEL
         << "Destroyed Compiler @"
         << instance

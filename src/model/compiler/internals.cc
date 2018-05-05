@@ -87,14 +87,15 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     TimedExpr key
         (f_owner.em().make_dot(ctx, expr), time);
 
-    if (f_preprocess)
+    if (f_status == ENCODING)
         DRIVEL
-            << "(pass 1) " << key << "..."
+            << "(encoding) " << key << "..."
             << std::endl;
-    else
+    else if (f_status == COMPILING)
         DRIVEL
-            << "(pass 2) " << key << "..."
+            << "(compiling) " << key << "..."
             << std::endl;
+    else assert(false); /* unreachable */
 }
 
 void Compiler::post_node_hook(Expr_ptr expr)
@@ -106,8 +107,8 @@ void Compiler::post_node_hook(Expr_ptr expr)
         f_owner.em().is_set_comma(expr))
         return;
 
-    /* no caching during preprocessing */
-    if (f_preprocess)
+    /* no caching during encoding */
+    if (f_status == ENCODING)
         return;
 
     /* no cache when compiling types */
@@ -249,14 +250,31 @@ void Compiler::pre_hook()
 {}
 
 void Compiler::post_hook()
+{}
+
+void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
 {
+    assert (READY == f_status);
+    ++ f_status;
+
+    clear_internals();
+
+    /* walk body in given ctx */
+    f_ctx_stack.push_back(ctx);
+
+    /* toplevel (time is assumed at 0, arbitraryly nested next allowed) */
+    f_time_stack.push_back(0);
+
+    /* Invoke walker on the body of the expr to be processed */
+    (*this)(body);
 }
 
-void Compiler::pass1(Expr_ptr ctx, Expr_ptr body)
+void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
 {
-    /* pass 1: preprocessing */
+    assert (ENCODING == f_status);
+    ++ f_status;
+
     clear_internals();
-    f_preprocess = true;
 
     // walk body in given ctx
     f_ctx_stack.push_back(ctx);
@@ -268,93 +286,76 @@ void Compiler::pass1(Expr_ptr ctx, Expr_ptr body)
     (*this)(body);
 }
 
-void Compiler::pass2(Expr_ptr ctx, Expr_ptr body)
+void Compiler::check_internals()
 {
-    /* pass 2: compilation */
-    clear_internals();
-    f_preprocess = false;
+    assert (COMPILING == f_status);
+    ++ f_status;
 
-    // walk body in given ctx
-    f_ctx_stack.push_back(ctx);
-
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
-    f_time_stack.push_back(0);
-
-    /* Invoke walker on the body of the expr to be processed */
-    (*this)(body);
-}
-
-
-void Compiler::pass3()
-{
-    // sanity conditions
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
-    // Exactly one 0-1 ADD expected here
-    ADD res
-        (f_add_stack.back());
+    /* Exactly one 0-1 ADD expected here */
+    ADD res { f_add_stack.back() };
 
-    assert( res.FindMin().Equals(f_enc.zero()) );
-    assert( res.FindMax().Equals(f_enc.one()) );
+    assert(res.FindMin().Equals(f_enc.zero()));
+    assert(res.FindMax().Equals(f_enc.one()));
+}
 
-    {
-        /* ITE MUXes */
-        for (Expr2BinarySelectionDescriptorsMap::const_iterator i = f_expr2bsd_map.begin();
-             f_expr2bsd_map.end() != i; ++ i) {
+void Compiler::activate_ite_muxes()
+{
+    assert (CHECKING == f_status);
+    ++ f_status;
 
-            Expr_ptr toplevel
-                (i -> first);
-            const BinarySelectionDescriptors& descriptors
-                (i -> second);
+    /* ITE MUXes */
+    for (Expr2BinarySelectionDescriptorsMap::const_iterator i = f_expr2bsd_map.begin();
+         f_expr2bsd_map.end() != i; ++ i) {
 
-            DRIVEL
-                << "Processing ITE MUX activation clauses for `"
-                << toplevel << "`"
-                << std::endl;
+        Expr_ptr toplevel { i -> first };
+        const BinarySelectionDescriptors& descriptors { i -> second };
 
-            ADD prev
-                (f_enc.zero());
+        DRIVEL
+            << "Processing ITE MUX activation clauses for `"
+            << toplevel << "`"
+            << std::endl;
 
-            BinarySelectionDescriptors::const_reverse_iterator j;
-            for (j = descriptors.rbegin(); descriptors.rend() != j; ++ j) {
-                ADD act
-                    (prev.Cmpl().Times(j -> cnd()));
+        ADD prev { f_enc.zero() };
 
-                PUSH_DD( act.Xnor(j -> aux()));
-                prev = act;
-            }
-        }
-    }
+        BinarySelectionDescriptors::const_reverse_iterator j;
+        for (j = descriptors.rbegin(); descriptors.rend() != j; ++ j) {
+            ADD act { prev.Cmpl().Times(j -> cnd()) };
 
-    {
-        /* Array MUXes */
-        MultiwaySelectionDescriptors::const_iterator i;
-        for (i = f_multiway_selection_descriptors.begin();
-             f_multiway_selection_descriptors.end() != i; ++ i) {
-
-            const DDVector& cnds
-                (i -> cnds());
-            const DDVector& acts
-                ( i -> acts());
-
-            DDVector::const_iterator ci
-                (cnds.begin());
-            DDVector::const_iterator ai
-                (acts.begin());
-
-            while (cnds.end() != ci) {
-                PUSH_DD((*ci).Xnor(*ai));
-                ++ ci;
-                ++ ai;
-            }
-            assert(acts.end() == ai);
+            PUSH_DD(act.Xnor(j -> aux()));
+            prev = act;
         }
     }
 }
 
+void Compiler::activate_array_muxes()
+{
+    assert (ACTIVATING_ITE_MUXES == f_status);
+    ++ f_status;
+
+    /* Array MUXes */
+    MultiwaySelectionDescriptors::const_iterator i;
+    for (i = f_multiway_selection_descriptors.begin();
+         f_multiway_selection_descriptors.end() != i; ++ i) {
+
+        const DDVector& cnds { i -> cnds() };
+        const DDVector& acts { i -> acts() };
+
+        DDVector::const_iterator ci { cnds.begin() };
+        DDVector::const_iterator ai { acts.begin() };
+
+        while (cnds.end() != ci) {
+            PUSH_DD((*ci).Xnor(*ai));
+            ++ ci;
+            ++ ai;
+        }
+        assert(acts.end() == ai);
+    }
+}
 
 Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
 {
