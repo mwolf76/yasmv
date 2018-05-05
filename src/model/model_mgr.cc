@@ -108,7 +108,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 << " instance of `" << tgt_name << "`"
                 << std::endl;
 
-            f_context_map.insert( std::make_pair< Expr_ptr, Module_ptr >
+            f_context_map.insert( std::pair< Expr_ptr, Module_ptr >
                                   ( key, tgt ));
         }
 
@@ -449,7 +449,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     << actual << "`"
                     << std::endl;
 
-                f_param_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+                f_param_map.insert( std::pair< Expr_ptr, Expr_ptr >
                                     ( formal, actual ));
 
                 ++ fi;

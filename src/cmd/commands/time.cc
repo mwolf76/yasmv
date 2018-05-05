@@ -24,6 +24,8 @@
 #include <cmd/interpreter.hh>
 #include <cmd/commands/time.hh>
 
+#include <iomanip>
+
 Time::Time(Interpreter& owner)
     : Command(owner)
 {}
@@ -31,12 +33,32 @@ Time::Time(Interpreter& owner)
 Time::~Time()
 {}
 
+struct timespec timespec_diff(struct timespec from, struct timespec to)
+{
+    const uint64_t BILLION { 1000000000L };
+
+    uint64_t t_from {from.tv_sec * BILLION + from.tv_nsec};
+    uint64_t t_to {to.tv_sec * BILLION + to.tv_nsec};
+    uint64_t t_diff {t_to - t_from};
+
+    uint64_t tv_sec { t_diff / BILLION };
+    uint64_t tv_nsec { t_diff % BILLION };
+
+    return { (time_t) tv_sec, (long) tv_nsec };
+
+}
+
 Variant Time::operator()()
 {
     std::ostringstream oss;
 
-    time_t uptime = time(NULL) - Interpreter::INSTANCE().epoch();
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
 
+    struct timespec epoch { Interpreter::INSTANCE().epoch() };
+    struct timespec diff { timespec_diff(epoch, now) };
+
+    time_t uptime { diff.tv_sec };
     unsigned secs = uptime % 60;
     unsigned mins = uptime / 60;
     unsigned hrs = 0;
@@ -70,22 +92,14 @@ Variant Time::operator()()
         b = true;
     }
 
-    bool c
-        (b);
-    if (0 < secs) {
-        if (b)
-            oss
-                << " ";
+    if (b)
         oss
-            << secs
-            << "s";
-        c = true;
-    }
+            << " ";
 
-    if (! a && ! b && ! c)
-        oss << "<1s";
-
-    oss << ".";
+    oss
+        << std::setprecision(3)
+        << secs + (double) diff.tv_nsec / 1000000000L
+        << "s";
 
     return Variant(oss.str());
 }

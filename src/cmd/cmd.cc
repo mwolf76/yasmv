@@ -35,13 +35,12 @@ CommandMgr& CommandMgr::INSTANCE()
 }
 
 CommandMgr::CommandMgr()
-    : f_interpreter(Interpreter::INSTANCE())
+    : f_interpreter { Interpreter::INSTANCE() }
 {
-    const void* instance
-        (this);
+    const void* instance { this };
 
     DEBUG
-        << "CommandMgr initialized @"
+        << "Initialized CommandMgr @"
         << instance
         << std::endl;
 }
@@ -49,6 +48,6 @@ CommandMgr::CommandMgr()
 CommandMgr::~CommandMgr()
 {
     DEBUG
-        << "CommandMgr deinitialized"
+        << "Destroyed CommandMgr"
         << std::endl;
 }

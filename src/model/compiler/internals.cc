@@ -148,7 +148,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
         assert (dv.size() == width);
 
         /* memoize result */
-        f_compilation_cache.insert( std::make_pair<TimedExpr, CompilationUnit>
+        f_compilation_cache.insert( std::pair<TimedExpr, CompilationUnit>
             ( key, CompilationUnit( dv, f_inlined_operator_descriptors,
                                     f_expr2bsd_map, f_multiway_selection_descriptors)));
 

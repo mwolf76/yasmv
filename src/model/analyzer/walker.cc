@@ -199,7 +199,7 @@ bool Analyzer::walk_guard_preorder(const Expr_ptr expr)
         << guard
         << std::endl;
 
-    f_dependency_tracking_map.insert(std::make_pair<Expr_ptr, Expr_ptr> (guard, lhs));
+    f_dependency_tracking_map.insert(std::pair<Expr_ptr, Expr_ptr> (guard, lhs));
 
     return true;
 }

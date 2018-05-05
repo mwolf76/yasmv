@@ -146,10 +146,10 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
                   lang.end(), expr) != lang.end());
 
     /* populate both maps at the same time. This ensures consistency. */
-    f_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+    f_map.insert( std::pair< Expr_ptr, Expr_ptr >
                   (expr, value));
 
-    f_format_map.insert( std::make_pair< Expr_ptr, value_format_t >
+    f_format_map.insert( std::pair< Expr_ptr, value_format_t >
                          (expr, format));
 }
 

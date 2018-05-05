@@ -124,7 +124,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
                 << "Forward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
-            engine.disable_last_group();
+            engine.invert_last_group();
 
             /* unrolling next */
             assert_fsm_trans(engine, k);
@@ -166,6 +166,11 @@ void BMC::forward_strategy(CompilationUnit& goal)
 
             else assert(false); /* unreachable */
         }
+
+        TRACE
+            << "Forward: done with k = " << k << "..."
+            << std::endl ;
+
     } while (sync_status() == BMC_UNKNOWN);
 
  cleanup:

@@ -81,7 +81,7 @@ void WitnessMgr::record( Witness& witness )
     if (f_map.end() != eye)
         throw DuplicateWitnessId( uid );
 
-    f_map.insert( std::make_pair <Atom, Witness_ptr>
+    f_map.insert( std::pair <Atom, Witness_ptr>
                   (uid, &witness));
 
     f_list.push_back( &witness );

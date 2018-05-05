@@ -45,15 +45,15 @@ Variant CheckTrans::operator()()
     std::ostringstream tmp;
     switch (algorithm.status()) {
     case FSM_CONSISTENCY_OK:
-        tmp << "TRANS is consistent";
+        tmp << "OK";
         break;
 
     case FSM_CONSISTENCY_KO:
-        tmp << "TRANS is inconsistent";
+        tmp << "KO";
         break;
 
     case FSM_CONSISTENCY_UNDECIDED:
-        tmp << "Consistency could not be decided";
+        tmp << "??";
         break;
 
     default: assert( false ); /* unreachable */
@@ -76,5 +76,10 @@ CheckTransTopic::~CheckTransTopic()
 void CheckTransTopic::usage()
 {
     std::cout
-        << "check-trans [ -a ] <expression> - Checks propositional satisfiability for TRANS formulas.\n\n";
+        << "check-trans - Checks propositional satisfiability for TRANS formulas.\n\n"
+        << "Transition relation is for consistency. Returns `OK` if transition relation\n"
+        << "is consistent, `KO` if transition relation is found to be inconsistent.\n"
+        << "If no decision could be made returns `??`."
+        << std::endl;
 }
+

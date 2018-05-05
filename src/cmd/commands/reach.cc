@@ -103,8 +103,7 @@ ReachTopic::~ReachTopic()
 void ReachTopic::usage()
 {
     std::cout
-        << "check-target [ -D < id := value > ; ]* < expression > - Checks targetiant property on a given expression.\n\n"
-        << "If the targetiant expression holds no trace is generated. Otherwise, a BMC counterexample\n"
-        << "witness trace for the given property is generated. -D can be used multiple times to override \n"
-        << "existing model defines with input values." ;
+        << "reach < expression > - Verify reachability of given expression.\n\n"
+        << "If a state satisfying the target expression is unreachable yields TRUE.\n"
+        << "Otherwise, a BMC counterexample witness trace for the given property is generated." ;
 }

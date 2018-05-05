@@ -140,6 +140,6 @@ EncodingMgr::~EncodingMgr()
         (this);
 
     DRIVEL
-        << "Deinitialized EncodingMgr @ " << instance
+        << "Destroyed EncodingMgr @ " << instance
         << std::endl;
 }

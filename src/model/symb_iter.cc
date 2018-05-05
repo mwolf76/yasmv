@@ -49,7 +49,7 @@ SymbIter::SymbIter(Model& model)
     for (int pass = 0; pass < 2; ++ pass) {
 
         std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
-        stack.push( std::make_pair< Expr_ptr, Module_ptr >
+        stack.push( std::pair< Expr_ptr, Module_ptr >
                     (em.make_empty(), &main_));
 
         /* walk of var decls, starting from main module */
@@ -82,11 +82,11 @@ SymbIter::SymbIter(Model& model)
                     InstanceType_ptr instance = vtype -> as_instance();
                     Module&  module( model.module(instance -> name()));
 
-                    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                    stack.push( std::pair< Expr_ptr, Module_ptr >
                                 (inner_name, &module));
                 }
                 else if (SI_PASS_VARS == pass)
-                    f_symbols.push_back(std::make_pair< Expr_ptr, Symbol_ptr >
+                    f_symbols.push_back(std::pair< Expr_ptr, Symbol_ptr >
                                         (full_name, &var ));
             }
 
@@ -98,7 +98,7 @@ SymbIter::SymbIter(Model& model)
                     Define& def
                         (* di -> second);
 
-                    f_symbols.push_back(std::make_pair< Expr_ptr, Symbol_ptr >
+                    f_symbols.push_back(std::pair< Expr_ptr, Symbol_ptr >
                                         (full_name, &def));
                 }
             }

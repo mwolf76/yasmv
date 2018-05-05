@@ -42,7 +42,7 @@ EngineMgr::~EngineMgr()
         (this);
 
     DRIVEL
-        << "Deinitialized EngineMgr @ " << instance
+        << "Destroyed EngineMgr @ " << instance
         << std::endl;
 }
 

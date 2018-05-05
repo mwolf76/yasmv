@@ -30,9 +30,6 @@
 Engine::Engine(const char* instance_name)
     : f_instance_name(instance_name)
     , f_enc_mgr(EncodingMgr::INSTANCE())
-    , f_mapper(* new TimeMapper(*this))
-    , f_registry(* new CNFRegistry(*this))
-    , f_solver()
 {
     const void* instance
         (this);
@@ -70,8 +67,10 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     for (int i = 0; i < groups.size(); ++ i) {
         Var grp = groups[i];
 
-        /* Assumptions work like "a -> phi", thus a non-negative
-           value enables group, whereas a negative value disables it. */
+        /* Assumptions work like "a -> phi". Here we use both polarities of the
+           implication, that is a positive group var asserts the formulas in the
+           group whereas a negative group var asserts the negation of those
+           formulas. */
         assumptions.push( mkLit( abs(grp), grp < 0));
     }
 
@@ -181,5 +180,129 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
             worker(*i);
         }
     }
+}
+
+Var Engine::find_dd_var(const DdNode* node, step_t time)
+{
+    assert (NULL != node && ! Cudd_IsConstant(node));
+
+    const UCBI& ucbi
+        (find_ucbi(node->index));
+
+    const TCBI tcbi
+        (ucbi, time);
+
+    return tcbi_to_var(tcbi);
+}
+
+Var Engine::find_dd_var(int node_index, step_t time)
+{
+    const UCBI& ucbi
+        (find_ucbi(node_index));
+
+    const TCBI tcbi
+        (ucbi, time);
+
+    return tcbi_to_var(tcbi);
+}
+
+Var Engine::find_cnf_var(const DdNode* node, step_t time)
+{
+    Var res;
+
+    assert (NULL != node);
+    TimedDD timed_node
+        (const_cast<DdNode*> (node), time);
+
+    TDD2VarMap::const_iterator eye
+        (f_tdd2var_map.find( timed_node ));
+
+    if (f_tdd2var_map.end() == eye) {
+        res = new_sat_var();
+
+        /* Insert into tdd2var map */
+        f_tdd2var_map.insert( std::pair<TimedDD, Var>
+                              (timed_node, res));
+
+        DEBUG
+            << "Created cnf var "
+            << res
+            << " for DD node "
+            << node
+            << std::endl;
+    }
+    else {
+        res = (*eye).second;
+    }
+    return res;
+}
+
+void Engine::clear_cnf_map()
+{
+    f_rewrite_map.clear();
+}
+
+Var Engine::rewrite_cnf_var(Var v, step_t time)
+{
+    Var res;
+
+    TimedVar timed_var (v, time);
+    RewriteMap::const_iterator eye = \
+        f_rewrite_map.find( timed_var );
+
+    if (f_rewrite_map.end() == eye) {
+        res = new_sat_var();
+
+        /* Insert into tvv2var map */
+        f_rewrite_map.insert( std::pair<TimedVar, Var>
+                              (timed_var, res));
+
+        DEBUG
+            << "Rewrote microcode cnf var "
+            << v << "@" << time
+            << " as "
+            << res
+            << std::endl;
+    }
+    else {
+        res = (*eye).second;
+    }
+    return res;
+}
+
+Var Engine::tcbi_to_var(const TCBI& tcbi)
+{
+    Var var;
+    const TCBI2VarMap::iterator eye
+        (f_tcbi2var_map.find(tcbi));
+
+    if (f_tcbi2var_map.end() != eye) {
+        var = eye->second;
+    }
+    else {
+        /* generate a new var and book it. Newly created var is not eliminable. */
+        var = new_sat_var(true);
+
+        DEBUG
+            << "Adding model var " << var
+            << " for " << tcbi
+            << std::endl;
+
+        f_tcbi2var_map.insert( std::pair<TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( std::pair<Var, TCBI>(var, tcbi));
+    }
+
+    return var;
+}
+
+TCBI& Engine::var_to_tcbi(Var var)
+{
+    const Var2TCBIMap::iterator eye
+        (f_var2tcbi_map.find(var));
+
+    /* TCBI *has* to be there already. */
+    assert (f_var2tcbi_map.end() != eye);
+
+    return eye->second;
 }
 

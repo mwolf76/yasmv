@@ -638,10 +638,10 @@ case_expression returns [Expr_ptr res]
 }  : 'case'
 
      (lhs=toplevel_expression ':' rhs=toplevel_expression ';'
-     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
+     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
 
      'else' ':' last=toplevel_expression ';'
-     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (NULL, last)); }
+     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (NULL, last)); }
 
      'end'
      {
@@ -904,15 +904,6 @@ command_topic returns [CommandTopic_ptr res]
     |  c=simulate_command_topic
        { $res = c; }
 
-    |  c=add_init_command_topic
-       { $res = c; }
-
-    |  c=add_invar_command_topic
-       { $res = c; }
-
-    |  c=add_trans_command_topic
-       { $res = c; }
-
     |  c=check_trans_command_topic
        { $res = c; }
 
@@ -958,15 +949,6 @@ command returns [Command_ptr res]
        { $res = c; }
 
     |  c=reach_command
-       { $res = c; }
-
-    |  c=add_init_command
-       { $res = c; }
-
-    |  c=add_invar_command
-       { $res = c; }
-
-    |  c=add_trans_command
        { $res = c; }
 
     |  c=check_trans_command
@@ -1043,45 +1025,6 @@ dump_model_command returns [Command_ptr res]
 dump_model_command_topic returns [CommandTopic_ptr res]
     :  'dump-model'
         { $res = cm.topic_dump_model(); }
-    ;
-
-add_init_command returns[Command_ptr res]
-    : 'add-init'
-      { $res = cm.make_add_init(); }
-
-      init=toplevel_expression
-      { ((AddInit *) $res)->set_constraint(init); }
-    ;
-
-add_init_command_topic returns [CommandTopic_ptr res]
-    :  'add-init'
-        { $res = cm.topic_add_init(); }
-    ;
-
-add_invar_command returns[Command_ptr res]
-    : 'add-invar'
-      { $res = cm.make_add_invar(); }
-
-      invar=toplevel_expression
-      { ((AddInvar *) $res)->set_constraint(invar); }
-    ;
-
-add_invar_command_topic returns [CommandTopic_ptr res]
-    :  'add-invar'
-       { $res = cm.topic_add_invar(); }
-    ;
-
-add_trans_command returns[Command_ptr res]
-    : 'add-trans'
-      { $res = cm.make_add_trans(); }
-
-        trans=toplevel_expression
-        { ((AddTrans *) $res)->set_constraint(trans); }
-    ;
-
-add_trans_command_topic returns [CommandTopic_ptr res]
-    :  'add-trans'
-        { $res = cm.topic_add_trans(); }
     ;
 
 check_init_command returns[Command_ptr res]

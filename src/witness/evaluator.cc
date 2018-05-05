@@ -328,7 +328,7 @@ void Evaluator::walk_bw_xnor_postorder(const Expr_ptr expr)
 
     POP_VALUE(rhs);
     POP_VALUE(lhs);
-    PUSH_VALUE(( ! lhs | rhs ) & ( ! rhs | lhs ));
+    PUSH_VALUE(( (! lhs) | rhs ) & ((! rhs) | lhs ));
 }
 
 bool Evaluator::walk_guard_preorder(const Expr_ptr expr)

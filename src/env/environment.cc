@@ -74,7 +74,7 @@ void Environment::set(Expr_ptr id, Expr_ptr value)
     if (eye != f_env.end())
         f_env.erase(eye);
 
-    f_env.insert(std::make_pair<Expr_ptr, Expr_ptr> (id, value));
+    f_env.insert(std::pair<Expr_ptr, Expr_ptr> (id, value));
 }
 
 void Environment::clear()

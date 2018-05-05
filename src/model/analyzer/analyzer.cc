@@ -106,7 +106,7 @@ void Analyzer::generate_framing_conditions()
             (map.find(ident));
 
         if (map.end() == pmi)
-            map.insert(std::make_pair<Expr_ptr, ExprVector>
+            map.insert(std::pair<Expr_ptr, ExprVector>
                        (ident, ExprVector()));
     }
 

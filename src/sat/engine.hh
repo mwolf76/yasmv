@@ -30,9 +30,9 @@
 
 #include <enc/enc_mgr.hh>
 
+#include <model/compiler/unit.hh>
+
 #include <sat/typedefs.hh>
-#include <sat/time_mapper.hh>
-#include <sat/cnf_registry.hh>
 
 class Engine {
 public:
@@ -55,9 +55,9 @@ public:
     }
 
     /**
-     * @brief Disable last activated group for the SAT instance.
+     * @brief Invert last group for the SAT instance.
      */
-    inline void disable_last_group()
+    inline void invert_last_group()
     { f_groups.last() *= -1; }
 
     /**
@@ -113,47 +113,43 @@ public:
     /**
      * @brief TCBI -> Minisat variable mapping
      */
-    inline Var tcbi_to_var(const TCBI& tcbi)
-    { return f_mapper.var(tcbi); }
+    Var tcbi_to_var(const TCBI& tcbi);
 
     /**
      * @brief Minisat variable -> TCBI mapping
      */
-    inline const TCBI& var_to_tcbi(Var var)
-    { return f_mapper.tcbi(var); }
+    TCBI& var_to_tcbi(Var var);
 
     /**
      * @brief DD index -> UCBI mapping
      */
-    inline const UCBI& find_ucbi(int index)
+    const UCBI& find_ucbi(int index)
     { return f_enc_mgr.find_ucbi(index); }
 
     /**
      * @brief Timed model DD nodes to Minisat variable mapping
      */
-    inline Var find_dd_var(const DdNode* node, step_t time)
-    { return f_registry.find_dd_var(node, time); }
+    Var find_dd_var(const DdNode* node, step_t time);
 
     /**
      * @brief Timed model DD nodes to Minisat variable mapping
      */
-    inline Var find_dd_var(int node_index, step_t time)
-    { return f_registry.find_dd_var(node_index, time); }
+    Var find_dd_var(int node_index, step_t time);
 
     /**
      * @brief Artifactory DD nodes to Minisat variable mapping
      */
-    inline Var find_cnf_var(const DdNode* node, step_t time)
-    { return f_registry.find_cnf_var(node, time);  }
+    Var find_cnf_var(const DdNode* node, step_t time);
 
     /**
      * @brief CNF registry for injection CNF var
      */
-    inline void clear_cnf_map()
-    { f_registry.clear_cnf_map(); }
+    void clear_cnf_map();
 
-    inline Var rewrite_cnf_var(Var var, step_t time)
-    { return f_registry.rewrite_cnf_var(var, time); }
+    /**
+     * @brief Rewrites a CNF var
+     */
+    Var rewrite_cnf_var(Var var, step_t time);
 
     /**
      * @brief a new Minisat variable
@@ -192,16 +188,18 @@ private:
 
     EncodingMgr& f_enc_mgr;
 
-    // TCBI <-> var mapping
-    TimeMapper& f_mapper;
+    // CNF registry
+    TDD2VarMap f_tdd2var_map;
+    RewriteMap f_rewrite_map;
 
-    // CNF registry,
-    CNFRegistry f_registry;
+    // Bidirectional time mapping
+    TCBI2VarMap f_tcbi2var_map;
+    Var2TCBIMap f_var2tcbi_map;
 
     // SAT solver, currently Minisat
     SimpSolver f_solver;
 
-    // used to partition the formula to be solved
+    // used to partition the formula to be solved using assumptions
     Groups f_groups;
 
     // last solve() status
@@ -211,10 +209,11 @@ private:
     Index2VarMap f_index2var_map;
     inline Var index2var(int index)
     {
-        Index2VarMap::const_iterator eye = f_index2var_map.find(index);
-        if (eye != f_index2var_map.end()) {
+        Index2VarMap::const_iterator eye
+            (f_index2var_map.find(index));
+
+        if (eye != f_index2var_map.end())
             return (*eye).second;
-        }
 
         return -1; /* cnf var */
     }
@@ -222,10 +221,11 @@ private:
     Var2IndexMap f_var2index_map;
     inline int var2index(Var v)
     {
-        Var2IndexMap::const_iterator eye = f_var2index_map.find(v);
-        if (eye != f_var2index_map.end()) {
+        Var2IndexMap::const_iterator eye
+            (f_var2index_map.find(v));
+
+        if (eye != f_var2index_map.end())
             return (*eye).second;
-        }
 
         return -1; /* cnf var */
     }

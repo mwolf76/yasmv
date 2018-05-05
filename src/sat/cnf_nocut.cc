@@ -47,14 +47,14 @@ public:
 
     void post_hook()
     {
-        // /* build and push clause toplevel */
-        // vec<Lit> ps;
-        // ps.push( mkLit( f_group, true));
+        /* build and push clause toplevel */
+        vec<Lit> ps;
+        ps.push( mkLit( f_group, true));
 
-        // assert (NULL != f_toplevel);
+        assert (NULL != f_toplevel);
 
-        // /* assert toplevel fun */
-        // push1( f_sat.find_cnf_var(f_toplevel, f_time), false);
+        /* assert toplevel fun */
+        push1( f_sat.find_cnf_var(f_toplevel, f_time), false);
     }
 
     inline bool is_unseen(const DdNode* node) const
@@ -66,41 +66,36 @@ public:
     bool condition(const DdNode *node)
     {
         return
-            cuddIsConstant(node) && cuddV(node);
+            cuddIsConstant(node) && ! cuddV(node);
     }
 
     void action(const DdNode *node)
     {
-        if (is_unseen(node)) {
-            mark(node);
+        DdManager* dd_mgr
+            (f_sat.enc().dd().getManager());
 
-            DdManager* dd_mgr
-                (f_sat.enc().dd().getManager());
+        value_t value
+            (Cudd_V(node));
+        assert(! value);
 
-            Cudd_PrintMinterm(dd_mgr, (DdNode *) node);
-
-            value_t value
-                (Cudd_V(node));
-            assert(0 != value);
-
-            vec<Lit> ps;
+        vec<Lit> ps;
+        if (MAINGROUP != f_group)
             ps.push( mkLit( f_group, true));
 
-            unsigned i, size = dd_mgr->size;
-            for (i = 0; i < size; ++ i) {
-                Lit lit
-                    (mkLit( f_sat.find_dd_var(i, f_time), true));
+        unsigned i, size = dd_mgr->size;
+        for (i = 0; i < size; ++ i) {
+            Lit lit
+                (mkLit( f_sat.find_dd_var(i, f_time), true));
 
-                ps.push(lit);
-            }
-
-            f_sat.add_clause(ps);
-
-            DEBUG
-                << ps
-                << std::endl;
+            ps.push(lit);
         }
-    }
+
+        f_sat.add_clause(ps);
+
+        DEBUG
+            << ps
+            << std::endl;
+}
 
 private:
     Engine& f_sat;

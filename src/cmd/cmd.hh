@@ -32,13 +32,9 @@
 #include <cmd/commands/read_model.hh>
 #include <cmd/commands/dump_model.hh>
 
-#include <cmd/commands/add_init.hh>
-#include <cmd/commands/add_invar.hh>
-#include <cmd/commands/add_trans.hh>
-
 #include <cmd/commands/check_init.hh>
-#include <cmd/commands/reach.hh>
 #include <cmd/commands/check_trans.hh>
+#include <cmd/commands/reach.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -73,15 +69,6 @@ public:
 
     inline Command_ptr make_dump_model()
     { return new DumpModel(f_interpreter); }
-
-    inline Command_ptr make_add_init()
-    { return new AddInit(f_interpreter); }
-
-    inline Command_ptr make_add_invar()
-    { return new AddInvar(f_interpreter); }
-
-    inline Command_ptr make_add_trans()
-    { return new AddTrans(f_interpreter); }
 
     inline Command_ptr make_reach()
     { return new Reach(f_interpreter); }
@@ -132,23 +119,14 @@ public:
     inline CommandTopic_ptr topic_dump_model()
     { return new DumpModelTopic(f_interpreter); }
 
-    inline CommandTopic_ptr topic_add_init()
-    { return new AddInitTopic(f_interpreter); }
-
-    inline CommandTopic_ptr topic_add_invar()
-    { return new AddInvarTopic(f_interpreter); }
-
-    inline CommandTopic_ptr topic_add_trans()
-    { return new AddTransTopic(f_interpreter); }
-
-    inline CommandTopic_ptr topic_reach()
-    { return new ReachTopic(f_interpreter); }
-
     inline CommandTopic_ptr topic_check_init()
     { return new CheckInitTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_check_trans()
     { return new CheckTransTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_reach()
+    { return new ReachTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_pick_state()
     { return new PickStateTopic(f_interpreter); }
