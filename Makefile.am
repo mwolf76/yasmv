@@ -25,6 +25,10 @@ bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests
 dist_pkgdata_DATA = microcode/*
 
+# test target helper
+test: yasmv_tests
+	YASMV_HOME=`pwd` ./yasmv_tests --log_level=test_suite
+
 # tags target helper  (uses exuberant ctags)
 tags:
 	@ctags -Ref TAGS $(top_srcdir)
