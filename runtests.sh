@@ -1,2 +1,2 @@
 #!/bin/sh
-YASMV_HOME=`pwd` ./tests --log_level=test_suite
+YASMV_HOME=`pwd` ./yasmv_tests --log_level=test_suite
