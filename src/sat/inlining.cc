@@ -177,7 +177,7 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                         (new InlinedOperatorLoader(entry));
                     assert(NULL != loader);
 
-                    f_loaders.insert( std::make_pair
+                    f_loaders.insert( std::pair
                                       < InlinedOperatorSignature,
                                       InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));

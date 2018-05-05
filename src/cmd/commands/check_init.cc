@@ -37,9 +37,6 @@ CheckInit::~CheckInit()
 
 Variant CheckInit::operator()()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
-
     CheckInitConsistency algorithm
         (*this, ModelMgr::INSTANCE().model());
 

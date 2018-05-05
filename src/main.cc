@@ -88,7 +88,9 @@ void batch(Command_ptr cmd)
     if (color) {
         std::cout
             << std::endl
-            << yellow << "<< " << res
+            << yellow
+            << "<< "
+            << res
             << normal << std::endl;
     }
     else {
@@ -131,28 +133,29 @@ void sighandler(int signum)
     }
 }
 
-// run each command in a separate thread
+/* run each command in a separate thread */
 void process()
 {
-    Interpreter& system = Interpreter::INSTANCE();
-
-    Variant& res = system();
-    bool color
-        (OptsMgr::INSTANCE().color());
-
+    Interpreter& system { Interpreter::INSTANCE() };
+    bool color { OptsMgr::INSTANCE().color() };
+    Variant& res { system() };
     if (color) {
         std::cout
             << std::endl
-            << yellow << "<< "
-            << res << normal
-            << std::endl;
+            << yellow
+            << "<< ";
     }
-    else {
+
+    std::cout
+        << res;
+
+    if (color) {
         std::cout
-            << std::endl
-            << "<< " << res
-            << std::endl;
+            << normal;
     }
+
+    std::cout
+        << std::endl;
 }
 
 int main(int argc, const char *argv[])
@@ -165,10 +168,8 @@ int main(int argc, const char *argv[])
     signal(SIGTSTP, sighandler);
 
     /* load microcode */
-    InlinedOperatorMgr& mm
-        (InlinedOperatorMgr::INSTANCE());
-    uint32_t nloaders
-        (mm.loaders().size());
+    InlinedOperatorMgr& mm { InlinedOperatorMgr::INSTANCE() };
+    size_t nloaders { mm.loaders().size() };
 
     TRACE
         << nloaders
@@ -177,7 +178,7 @@ int main(int argc, const char *argv[])
 
     Interpreter& system = Interpreter::INSTANCE();
     try {
-        // parse command line options
+        /* parse command line options */
         OptsMgr& opts_mgr = OptsMgr::INSTANCE();
         opts_mgr.parse_command_line(argc, argv);
 
@@ -189,7 +190,7 @@ int main(int argc, const char *argv[])
             exit(0);
         }
 
-        // Run options-generated commands (if any)
+        /* run options-generated commands (if any) */
         const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
             ReadModel* cmd
@@ -215,7 +216,7 @@ int main(int argc, const char *argv[])
     return system.retcode();
 }
 
-// logging subsystem settings
+/* logging subsystem settings */
 namespace axter {
     std::string get_log_prefix_format(const char*FileName,
                                       int LineNo, const char*FunctionName,
@@ -230,7 +231,7 @@ namespace axter {
         return ezlogger_output_policy::get_log_stream();
     }
 
-    // delegated to OptsMgr
+    /* delegated to OptsMgr */
     verbosity get_verbosity_level_tolerance() {
         return OptsMgr::INSTANCE().get_verbosity_level_tolerance();
     }

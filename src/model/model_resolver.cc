@@ -44,13 +44,13 @@ ModelResolver::ModelResolver(ModelMgr& owner)
         << instance
         << std::endl;
 
-    f_owner.symbols().insert( std::make_pair<Expr_ptr,
+    f_owner.symbols().insert( std::pair<Expr_ptr,
                               Constant_ptr>( em.make_false(),
                                              new Constant(ExprMgr::INSTANCE().make_empty(),
                                                           ExprMgr::INSTANCE().make_false(),
                                                           TypeMgr::INSTANCE().find_boolean(), 0)));
 
-    f_owner.symbols().insert( std::make_pair<Expr_ptr,
+    f_owner.symbols().insert( std::pair<Expr_ptr,
                               Constant_ptr>( em.make_true(),
                                              new Constant(ExprMgr::INSTANCE().make_empty(),
                                                           ExprMgr::INSTANCE().make_true(),

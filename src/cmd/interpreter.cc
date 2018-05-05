@@ -107,11 +107,11 @@ Interpreter::Interpreter()
     , f_in(& std::cin)
     , f_out(& std::cout)
     , f_err(& std::cerr)
-
-    , f_epoch(time(NULL))
 {
     const void* instance
         (this);
+
+    clock_gettime(CLOCK_MONOTONIC, &f_epoch);
 
     DEBUG
         << "Initialized Interpreter @"
@@ -146,17 +146,25 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        f_last_result = Variant(e.what());
+        std::stringstream ss;
+
+        ss
+            << "Exception!! "
+            << e.what();
+
+        f_last_result = Variant(ss.str());
     }
 
-    delete cmd;
+    delete cmd; /* claims ownership! */
     return f_last_result;
 }
 
 Variant& Interpreter::operator()()
 {
     std::ostream& err
-        (std::cerr);
+      (std::cerr);
+
+    (void) err;
 
     char *cmdline
         (rl_gets());
@@ -168,27 +176,11 @@ Variant& Interpreter::operator()()
         if (cmds) {
             for (CommandVector::const_iterator i = cmds->begin();
                  cmds->end() != i; ++ i) {
-
-                Command_ptr cmd
-                    (*i);
-
+                Command_ptr cmd { *i };
                 (*this)(cmd);
-
-                // try {
-                //     (*this)(cmd);
-                // }
-                // catch (Exception &e) {
-                //     err
-                //         << e.what()
-                //         << std::endl;
-
-                //     f_last_result = Variant("ERROR");
-                // }
-
             }
         }
         else f_last_result = "No operation";
-
     }
     else {
         f_last_result = Variant("BYE");

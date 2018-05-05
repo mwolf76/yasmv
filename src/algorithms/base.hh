@@ -65,10 +65,7 @@ public:
     { return NULL != f_witness; }
 
     inline void set_witness(Witness &witness)
-    {
-        assert(NULL != &witness);
-        f_witness = &witness;
-    }
+    { f_witness = &witness; }
 
     inline Witness& witness() const
     { assert (NULL != f_witness); return *f_witness; }

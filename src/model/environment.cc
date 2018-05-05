@@ -69,7 +69,7 @@ Environment::~Environment()
 
 void Environment::add_value(Expr_ptr symbol, Expr_ptr value)
 {
-  f_localValues.insert(std::make_pair<Expr_ptr, Expr_ptr>
+  f_localValues.insert(std::pair<Expr_ptr, Expr_ptr>
                        (symbol, value));
 }
 

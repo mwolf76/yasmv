@@ -100,5 +100,5 @@ std::ostream& operator<<(std::ostream& os, const Variant& variant)
     else if (variant.is_string())
         return os << variant.as_string();
 
-    else assert(0); /* what the hell is this?!? */
+    else assert(0); /* you shouldn't see me ... */
 }

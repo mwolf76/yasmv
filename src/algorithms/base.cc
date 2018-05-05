@@ -69,7 +69,7 @@ void Algorithm::setup()
         (model.main_module());
 
     std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
-    stack.push( std::make_pair< Expr_ptr, Module_ptr >
+    stack.push( std::pair< Expr_ptr, Module_ptr >
                 (em.make_empty(), &main_module));
 
     /* walk of var decls, starting from main module */
@@ -125,7 +125,7 @@ void Algorithm::setup()
                 Module&  module
                     (model.module(instance->name()));
 
-                stack.push( std::make_pair< Expr_ptr, Module_ptr >
+                stack.push( std::pair< Expr_ptr, Module_ptr >
                             (local_ctx, &module));
             }
         }

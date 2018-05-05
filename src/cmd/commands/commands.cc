@@ -481,7 +481,8 @@ Variant WitnessDumpCommand::operator()()
                 continue;
         }
 
-        os << std::endl;
+        os
+            << std::endl;
     }
 
     return Variant(okMessage);

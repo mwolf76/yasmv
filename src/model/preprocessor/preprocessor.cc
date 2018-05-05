@@ -634,7 +634,7 @@ void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 //         Expr_ptr formal
 //             (*fi);
 
-//         f_env.push_back( std::make_pair <Expr_ptr, Expr_ptr>
+//         f_env.push_back( std::pair <Expr_ptr, Expr_ptr>
 //                          ( formal, actual ));
 //     }
 

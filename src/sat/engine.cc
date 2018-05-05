@@ -221,7 +221,7 @@ Var Engine::find_cnf_var(const DdNode* node, step_t time)
         res = new_sat_var();
 
         /* Insert into tdd2var map */
-        f_tdd2var_map.insert( std::make_pair<TimedDD, Var>
+        f_tdd2var_map.insert( std::pair<TimedDD, Var>
                               (timed_node, res));
 
         DEBUG
@@ -254,7 +254,7 @@ Var Engine::rewrite_cnf_var(Var v, step_t time)
         res = new_sat_var();
 
         /* Insert into tvv2var map */
-        f_rewrite_map.insert( std::make_pair<TimedVar, Var>
+        f_rewrite_map.insert( std::pair<TimedVar, Var>
                               (timed_var, res));
 
         DEBUG
@@ -288,8 +288,8 @@ Var Engine::tcbi_to_var(const TCBI& tcbi)
             << " for " << tcbi
             << std::endl;
 
-        f_tcbi2var_map.insert( std::make_pair<TCBI, Var>(tcbi, var));
-        f_var2tcbi_map.insert( std::make_pair<Var, TCBI>(var, tcbi));
+        f_tcbi2var_map.insert( std::pair<TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( std::pair<Var, TCBI>(var, tcbi));
     }
 
     return var;

@@ -532,7 +532,7 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
         if (f_bsuf_map.end() != eye)
             parent = eye -> second;
 
-        f_bsuf_map.insert( std::make_pair< Expr_ptr, Expr_ptr >
+        f_bsuf_map.insert( std::pair< Expr_ptr, Expr_ptr >
                            ( expr->rhs(), parent ));
     }
 

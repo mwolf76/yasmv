@@ -150,7 +150,7 @@ void Compiler::array_ite(const Expr_ptr expr)
             (f_expr2bsd_map.find(parent));
 
         if (f_expr2bsd_map.end() == mi)
-            f_expr2bsd_map.insert( std::make_pair< Expr_ptr, BinarySelectionDescriptors >
+            f_expr2bsd_map.insert( std::pair< Expr_ptr, BinarySelectionDescriptors >
                                    (parent, BinarySelectionDescriptors()));
     }
 

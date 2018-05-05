@@ -69,7 +69,7 @@ public:
 
     void quit(int retcode);
 
-    inline unsigned epoch() const
+    inline struct timespec epoch() const
     { return f_epoch; }
 
 protected:
@@ -98,7 +98,7 @@ protected:
     Variant f_last_result;
 
     static Interpreter_ptr f_instance;
-    unsigned f_epoch;
+    struct timespec f_epoch;
 };
 
 #endif /* INTERPRETER_H */

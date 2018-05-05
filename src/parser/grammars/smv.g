@@ -638,10 +638,10 @@ case_expression returns [Expr_ptr res]
 }  : 'case'
 
      (lhs=toplevel_expression ':' rhs=toplevel_expression ';'
-     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
+     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
 
      'else' ':' last=toplevel_expression ';'
-     { clauses.push_back( std::make_pair< Expr_ptr, Expr_ptr > (NULL, last)); }
+     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (NULL, last)); }
 
      'end'
      {

@@ -55,7 +55,7 @@ Module& Model::add_module(Module& module)
         << name << "`"
         << std::endl;
 
-    f_modules.insert( std::make_pair<Expr_ptr, Module_ptr>
+    f_modules.insert( std::pair<Expr_ptr, Module_ptr>
                       (name, &module));
 
     module.register_owner(this);
@@ -97,7 +97,7 @@ void Model::autoIndexSymbol(Expr_ptr identifier)
     Expr_ptr full
         (em.make_dot(ctx, identifier));
 
-    f_symbol_index_map.insert(std::make_pair<Expr_ptr, unsigned>
+    f_symbol_index_map.insert(std::pair<Expr_ptr, unsigned>
                               (full, ++ f_autoincrement));
 }
 
