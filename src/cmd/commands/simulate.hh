@@ -67,6 +67,8 @@ public:
     { return f_trace_uid; }
 };
 
+typedef Simulate* Simulate_ptr;
+
 class SimulateTopic : public CommandTopic {
 public:
     SimulateTopic(Interpreter& owner);

@@ -161,21 +161,15 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 Variant& Interpreter::operator()()
 {
-    std::ostream& err
-      (std::cerr);
-
-    (void) err;
-
-    char *cmdline
-        (rl_gets());
+    char *cmdline { rl_gets() };
 
     if (cmdline) {
-        CommandVector_ptr cmds
-            (parseCommand(cmdline));
+        CommandVector_ptr cmds { parseCommand(cmdline) };
 
         if (cmds) {
             for (CommandVector::const_iterator i = cmds->begin();
                  cmds->end() != i; ++ i) {
+
                 Command_ptr cmd { *i };
                 (*this)(cmd);
             }
@@ -189,4 +183,3 @@ Variant& Interpreter::operator()()
 
     return f_last_result;
 }
-

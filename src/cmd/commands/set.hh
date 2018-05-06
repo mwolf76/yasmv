@@ -43,6 +43,7 @@ public:
     void set_value(Expr_ptr value);
     Variant virtual operator()();
 };
+typedef Set* Set_ptr;
 
 class SetTopic : public CommandTopic {
 public:

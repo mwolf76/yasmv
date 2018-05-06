@@ -44,6 +44,7 @@ public:
 
     Variant virtual operator()();
 };
+typedef ReadModel* ReadModel_ptr;
 
 class ReadModelTopic : public CommandTopic {
 public:

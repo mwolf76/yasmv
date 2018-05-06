@@ -26,6 +26,8 @@
 
 /* -- commands */
 #include <cmd/commands/help.hh>
+#include <cmd/commands/echo.hh>
+#include <cmd/commands/last.hh>
 #include <cmd/commands/time.hh>
 #include <cmd/commands/quit.hh>
 
@@ -57,6 +59,12 @@ public:
     // -- makers ----------------------------------------------------------------
     inline Command_ptr make_help()
     { return new Help(f_interpreter); }
+
+    inline Command_ptr make_echo()
+    { return new Echo(f_interpreter); }
+
+    inline Command_ptr make_last()
+    { return new Last(f_interpreter); }
 
     inline Command_ptr make_time()
     { return new Time(f_interpreter); }
@@ -106,6 +114,12 @@ public:
     // -- topicrs ----------------------------------------------------------------
     inline CommandTopic_ptr topic_help()
     { return new HelpTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_echo()
+    { return new EchoTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_last()
+    { return new LastTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_time()
     { return new TimeTopic(f_interpreter); }

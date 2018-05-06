@@ -37,6 +37,7 @@ public:
 
     Variant virtual operator()();
 };
+typedef DupTrace* DupTrace_ptr;
 
 class DupTraceTopic : public CommandTopic {
 public:

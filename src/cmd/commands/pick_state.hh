@@ -53,6 +53,8 @@ public:
     Variant virtual operator()();
 };
 
+typedef PickState* PickState_ptr;
+
 class PickStateTopic : public CommandTopic {
 public:
     PickStateTopic(Interpreter& owner);

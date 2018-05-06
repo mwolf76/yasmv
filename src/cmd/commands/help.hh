@@ -40,6 +40,7 @@ public:
     void set_topic(CommandTopic_ptr topic);
     Variant virtual operator()();
 };
+typedef Help* Help_ptr;
 
 class HelpTopic : public CommandTopic {
 public:

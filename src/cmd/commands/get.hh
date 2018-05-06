@@ -41,6 +41,8 @@ public:
     Variant virtual operator()();
 };
 
+typedef Get* Get_ptr;
+
 class GetTopic : public CommandTopic {
 public:
     GetTopic(Interpreter& owner);

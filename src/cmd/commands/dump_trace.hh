@@ -118,6 +118,8 @@ private:
 
 };
 
+typedef DumpTrace* DumpTrace_ptr;
+
 class DumpTraceTopic : public CommandTopic {
 public:
     DumpTraceTopic(Interpreter& owner);
