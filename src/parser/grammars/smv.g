@@ -880,6 +880,12 @@ command_topic returns [CommandTopic_ptr res]
     :  c=help_command_topic
        { $res = c; }
 
+    |  c=echo_command_topic
+        { $res = c; }
+
+    |  c=last_command_topic
+        { $res = c; }
+
     |  c=time_command_topic
        { $res = c; }
 
@@ -928,6 +934,12 @@ command_topic returns [CommandTopic_ptr res]
 
 command returns [Command_ptr res]
     :  c=help_command
+       { $res = c; }
+
+    |  c=echo_command
+       { $res = c; }
+
+    |  c=last_command
        { $res = c; }
 
     |  c=time_command
@@ -981,12 +993,35 @@ help_command returns [Command_ptr res]
       { $res = cm.make_help(); }
       (
           topic = command_topic
-          { ((Help*) $res)->set_topic(topic); }
+          { ((Help_ptr) $res)->set_topic(topic); }
       )? ;
 
 help_command_topic returns [CommandTopic_ptr res]
     : 'help'
       { $res = cm.topic_help(); }
+    ;
+
+echo_command returns [Command_ptr res]
+    : 'echo'
+      { $res = cm.make_echo(); }
+      (
+            msg = pcchar_quoted_string
+            { ((Echo_ptr) $res)->set_message(msg); }
+      )? ;
+
+echo_command_topic returns [CommandTopic_ptr res]
+    : 'echo'
+       { $res = cm.topic_echo(); }
+    ;
+
+last_command returns [Command_ptr res]
+    : 'last'
+      { $res = cm.make_last(); }
+    ;
+
+last_command_topic returns [CommandTopic_ptr res]
+    : 'last'
+       { $res = cm.topic_last(); }
     ;
 
 time_command returns [Command_ptr res]
@@ -1003,8 +1038,8 @@ read_model_command returns [Command_ptr res]
     :  'read-model'
         { $res = cm.make_read_model(); }
 
-        ( input=filepath {
-            ((ReadModel*) $res)->set_input(input);
+        ( input=pcchar_quoted_string {
+            ((ReadModel_ptr) $res)->set_input(input);
         }) ?
     ;
 
@@ -1017,8 +1052,8 @@ dump_model_command returns [Command_ptr res]
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
-        ( output=filepath {
-            ((DumpModel*) $res)->set_output(output);
+        ( output=pcchar_quoted_string {
+            ((DumpModel_ptr) $res)->set_output(output);
         }) ?
     ;
 
@@ -1042,7 +1077,7 @@ reach_command returns[Command_ptr res]
       { $res = cm.make_reach(); }
 
         target=toplevel_expression
-        { ((Reach *) $res)->set_target(target); }
+        { ((Reach_ptr) $res)->set_target(target); }
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]
@@ -1075,19 +1110,19 @@ dump_trace_command returns [Command_ptr res]
       { $res = cm.make_dump_trace(); }
 
     (
-      '-f' format=string
-      { ((DumpTrace*) $res)->set_format(format); }
+      '-f' format=pcchar_identifier
+      { ((DumpTrace_ptr) $res)->set_format(format); }
 
-    | '-o' output=filepath
+    | '-o' output=pcchar_quoted_string
       {
-            ((DumpTrace*) $res)->set_output(output);
+            ((DumpTrace_ptr) $res)->set_output(output);
             free((void *) output);
       }
 
     )*
 
-    ( trace_id=string
-    { ((DumpTrace*) $res)->set_trace_id(trace_id); } )?
+    ( trace_id=pcchar_identifier
+    { ((DumpTrace_ptr) $res)->set_trace_id(trace_id); } )?
     ;
 
 dump_trace_command_topic returns [CommandTopic_ptr res]
@@ -1100,11 +1135,11 @@ dup_trace_command returns [Command_ptr res]
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
-      trace_id=string
-      { ((DupTrace*) $res)->set_trace_id(trace_id); }
+      trace_id=pcchar_identifier
+      { ((DupTrace_ptr) $res)->set_trace_id(trace_id); }
 
-      ( duplicate_uid=string
-        { ((DupTrace*) $res)->set_duplicate_id(duplicate_uid); } )?
+      ( duplicate_uid=pcchar_identifier
+        { ((DupTrace_ptr) $res)->set_duplicate_id(duplicate_uid); } )?
     ;
 
 dup_trace_command_topic returns [CommandTopic_ptr res]
@@ -1117,10 +1152,10 @@ pick_state_command returns [Command_ptr res]
         { $res = cm.make_pick_state(); }
     (
          '-a'
-         { ((PickState*) $res)->set_allsat(true); }
+         { ((PickState_ptr) $res)->set_allsat(true); }
 
     |    '-l' limit=constant
-         { ((PickState*) $res)->set_limit(limit->value()); }
+         { ((PickState_ptr) $res)->set_limit(limit->value()); }
     )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]
@@ -1133,16 +1168,16 @@ simulate_command returns [Command_ptr res]
       { $res = cm.make_simulate(); }
     (
        '-i' invar_condition=toplevel_expression
-        { ((Simulate *) $res)->set_invar_condition(invar_condition); }
+        { ((Simulate_ptr) $res)->set_invar_condition(invar_condition); }
 
     |  '-u' until_condition=toplevel_expression
-        { ((Simulate*) $res)->set_until_condition(until_condition); }
+        { ((Simulate_ptr) $res)->set_until_condition(until_condition); }
 
     |   '-k' konst=constant
-        { ((Simulate*) $res)->set_k(konst->value()); }
+        { ((Simulate_ptr) $res)->set_k(konst->value()); }
 
-    |   '-t' trace_id=string
-        { ((Simulate*) $res)->set_trace_uid(trace_id); }
+    |   '-t' trace_id=pcchar_identifier
+        { ((Simulate_ptr) $res)->set_trace_uid(trace_id); }
     )* ;
 
 simulate_command_topic returns [CommandTopic_ptr res]
@@ -1155,7 +1190,7 @@ get_command returns [Command_ptr res]
       { $res = cm.make_get(); }
 
       ( id=identifier
-      { ((Get*) $res)->set_identifier(id); })?
+      { ((Get_ptr) $res)->set_identifier(id); })?
     ;
 
 get_command_topic returns [CommandTopic_ptr res]
@@ -1168,10 +1203,10 @@ set_command returns [Command_ptr res]
       { $res = cm.make_set(); }
 
       id=identifier
-      { ((Set*) $res)->set_identifier(id); }
+      { ((Set_ptr) $res)->set_identifier(id); }
 
       val=toplevel_expression
-      { ((Set*) $res)->set_value(val); }
+      { ((Set_ptr) $res)->set_value(val); }
     ;
 
 set_command_topic returns [CommandTopic_ptr res]
@@ -1184,7 +1219,7 @@ clear_command returns [Command_ptr res]
       { $res = cm.make_clear(); }
 
       ( id=identifier
-      { ((Clear*) $res)->set_identifier(id); })?
+      { ((Clear_ptr) $res)->set_identifier(id); })?
     ;
 
 clear_command_topic returns [CommandTopic_ptr res]
@@ -1202,15 +1237,15 @@ quit_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_quit(); }
     ;
 
-string returns [pconst_char res]
+pcchar_identifier returns [pconst_char res]
 @init {}
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
-
-filepath returns [pconst_char res]
-    : FILEPATH
-    { $res = (pconst_char) $FILEPATH.text->chars; }
+    
+pcchar_quoted_string returns [pconst_char res]
+    : QUOTED_STRING
+    { $res = (pconst_char) $QUOTED_STRING.text->chars; }
     ;
 
 // -- Lexer rules --------------------------------------------------------------
@@ -1226,7 +1261,7 @@ IDENTIFIER
     :   ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
     ;
 
-FILEPATH
+QUOTED_STRING
     : '"' .+ '"'
     | '\'' .+ '\''
     ;
