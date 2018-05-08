@@ -22,7 +22,7 @@
  **/
 
 /* environment variables and paths */
-const char *YASMV_MICROCODE_PATH ("YASMV_MICROCODE");
+const char* YASMV_MICROCODE_PATH ("YASMV_MICROCODE");
 
 const char* TRACE_FMT_PLAIN ("plain");
 const char* TRACE_FMT_JSON ("json");
