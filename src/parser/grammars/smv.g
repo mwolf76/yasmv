@@ -936,10 +936,16 @@ command returns [Command_ptr res]
     :  c=help_command
        { $res = c; }
 
+    |  c=do_command
+       { $res = c; }
+
     |  c=echo_command
        { $res = c; }
 
     |  c=last_command
+       { $res = c; }
+
+    |  c=on_command
        { $res = c; }
 
     |  c=time_command
@@ -1001,6 +1007,14 @@ help_command_topic returns [CommandTopic_ptr res]
       { $res = cm.topic_help(); }
     ;
 
+do_command returns [Command_ptr res]
+    : 'do'
+      { $res = cm.make_do(); }
+      (
+            subcommand = command ';'
+            { ((Do_ptr) res)->add_command(subcommand); }
+      )+ ;
+
 echo_command returns [Command_ptr res]
     : 'echo'
       { $res = cm.make_echo(); }
@@ -1023,6 +1037,16 @@ last_command_topic returns [CommandTopic_ptr res]
     : 'last'
        { $res = cm.topic_last(); }
     ;
+
+on_command returns [Command_ptr res]
+    :
+    'on' { $res = cm.make_on(); } (
+      ( 'success' tc=command ';' { assert (tc != NULL); ((On_ptr) $res)->set_then(tc); } )
+      ( 'else'    ec=command ';' { assert (ec != NULL); ((On_ptr) $res)->set_else(ec); } )? ) |
+
+    (
+      ( 'failure' ec=command ';' { assert (ec != NULL); ((On_ptr) $res)->set_else(ec); } )
+      ( 'else'    tc=command ';' { assert (tc != NULL); ((On_ptr) $res)->set_then(tc); } )? ) ;
 
 time_command returns [Command_ptr res]
     : 'time'
