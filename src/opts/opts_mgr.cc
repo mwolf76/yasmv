@@ -33,16 +33,27 @@ OptsMgr::OptsMgr()
     , f_pos()
     , f_vm()
     , f_help(false)
+    , f_quiet(false)
+    , f_color(false)
+    , f_started(false)
+    , f_version { PACKAGE_VERSION }
     , f_word_width(UINT_MAX)
 {
-    f_started = false;
-    f_color = false;
-
     f_desc.add_options()
 
         (
          "help",
          "produce help message"
+        )
+
+        (
+         "version",
+         "produce version number"
+        )
+
+        (
+         "quiet",
+         "avoid any extra output"
         )
 
         (
@@ -83,6 +94,18 @@ void OptsMgr::parse_command_line(int argc, const char **argv)
         f_help = true;
     }
 
+    if (f_vm.count("version")) {
+        std::cout
+            << PACKAGE_VERSION
+            << std::endl;
+
+        exit(0);
+    }
+
+    if (f_vm.count("quiet")) {
+        f_quiet = true;
+    }
+
     if (f_vm.count("color")) {
         f_color = true;
     }
@@ -99,6 +122,11 @@ unsigned OptsMgr::verbosity() const
 bool OptsMgr::color() const
 {
     return f_color;
+}
+
+bool OptsMgr::quiet() const
+{
+    return f_quiet;
 }
 
 void OptsMgr::set_word_width(unsigned value)
