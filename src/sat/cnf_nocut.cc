@@ -1,6 +1,7 @@
 /**
  * @file sat/cnf_nocut.cc
- * @brief Engine interface implementation, CNFization algorithm #1 (No cut) implementation.
+ * @brief Engine interface implementation, CNFization algorithm #1 (No cut)
+ * implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
