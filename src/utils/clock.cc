@@ -21,8 +21,15 @@
  *
  **/
 
-#include <clock.hh>
 #include <cstdint>
+#include <iomanip>
+#include <sstream>
+#include <clock.hh>
+
+struct stopclock_t {
+    time_t tv_sec;
+    double tv_msecs;
+};
 
 const uint64_t ONE_BILLION { 1000000000L };
 struct stopclock_t timespec_diff(struct timespec from, struct timespec to)
@@ -37,7 +44,50 @@ struct stopclock_t timespec_diff(struct timespec from, struct timespec to)
     return { (time_t) tv_sec, (double) tv_nsec / ONE_BILLION };
 }
 
+std::string elapsed_repr(struct timespec from, struct timespec to)
+{
+    struct stopclock_t diff { timespec_diff(from, to) };
+    time_t uptime { diff.tv_sec };
+    unsigned secs = uptime % 60;
+    unsigned mins = uptime / 60;
+    unsigned hrs = 0;
 
+    if (60 < mins) {
+        mins = mins % 60;
+        hrs  = mins / 60;
+    }
 
+    std::ostringstream ss;
 
+    bool a
+        (false);
+    if (0 < hrs) {
+        ss
+            << hrs
+            << "h";
+        a = true;
+    }
 
+    bool b
+        (a);
+    if (0 < mins) {
+        if (a)
+            ss
+                << " ";
+        ss
+            << mins
+            << "m";
+        b = true;
+    }
+
+    if (b)
+        ss
+            << " ";
+
+    ss
+        << std::setprecision(3)
+        << secs + diff.tv_msecs
+        << "s" ;
+
+    return ss.str();
+}

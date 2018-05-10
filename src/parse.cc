@@ -37,6 +37,7 @@
 #include <parser/grammars/smvParser.h>
 
 #include <utils/misc.hh>
+#include <utils/clock.hh>
 
 /* Antlr 3.4 has a slightly different interface. Enable this if necessary */
 #define HAVE_ANTLR_34 0
@@ -64,6 +65,23 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
     parseErrors = true;
 }
 
+void reportParserStatus(bool parseErrors, timespec start, timespec stop)
+{
+    const std::string elapsed { elapsed_repr(start, stop) };
+    if (parseErrors)
+        DEBUG
+            << "Parser terminated with errors in "
+            << elapsed
+            << "."
+            << std::endl;
+    else
+        DEBUG
+            << "Parser terminated successfully in "
+            << elapsed
+            << "."
+            << std::endl;
+}
+
 bool parseFile(const char* fName)
 {
     pANTLR3_INPUT_STREAM input;
@@ -73,8 +91,13 @@ bool parseFile(const char* fName)
     psmvLexer  lxr;
 
     DEBUG
-        << "Preparing for parsing file " << fName
+        << "Parsing smv file "
+        << fName
+        << " ..."
         << std::endl;
+
+    struct timespec start_clock;
+    clock_gettime(CLOCK_MONOTONIC, &start_clock);
 
 #if HAVE_ANTLR_34
     input = antlr3FileStreamNew((pANTLR3_UINT8) fName, ANTLR3_ENC_UTF8);
@@ -105,6 +128,10 @@ bool parseFile(const char* fName)
     lxr->free(lxr);
     input->close(input);
 
+    struct timespec stop_clock;
+    clock_gettime(CLOCK_MONOTONIC, &stop_clock);
+
+    reportParserStatus(parseErrors, start_clock, stop_clock);
     return parseErrors;
 }
 
@@ -116,6 +143,13 @@ CommandVector_ptr parseCommand(const char *command_line)
 
     psmvParser psr;
     psmvLexer  lxr;
+
+    DEBUG
+        << "Parsing command ..."
+        << std::endl;
+
+    struct timespec start_clock;
+    clock_gettime(CLOCK_MONOTONIC, &start_clock);
 
 #if HAVE_ANTLR_34
     input = antlr3StringStreamNew((pANTLR3_UINT8) command_line,
@@ -148,6 +182,10 @@ CommandVector_ptr parseCommand(const char *command_line)
     lxr->free(lxr);
     input->close(input);
 
+    struct timespec stop_clock;
+    clock_gettime(CLOCK_MONOTONIC, &stop_clock);
+
+    reportParserStatus(parseErrors, start_clock, stop_clock);
     return ! parseErrors
         ? res : NULL;
 }

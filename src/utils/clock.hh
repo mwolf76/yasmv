@@ -24,13 +24,9 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#include <string>
 #include <ctime>
 
-struct stopclock_t {
-    time_t tv_sec;
-    double tv_msecs;
-};
-
-struct stopclock_t timespec_diff(struct timespec from, struct timespec to);
+std::string elapsed_repr(struct timespec from, struct timespec to);
 
 #endif /* CLOCK_H */

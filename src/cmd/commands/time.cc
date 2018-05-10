@@ -45,50 +45,10 @@ Variant Time::operator()()
     clock_gettime(CLOCK_MONOTONIC, &now);
 
     struct timespec epoch { Interpreter::INSTANCE().epoch() };
-    struct stopclock_t diff { timespec_diff(epoch, now) };
-
-    time_t uptime { diff.tv_sec };
-    unsigned secs = uptime % 60;
-    unsigned mins = uptime / 60;
-    unsigned hrs = 0;
-
-    if (60 < mins) {
-        mins = mins % 60;
-        hrs  = mins / 60;
-    }
-
     out
-        << "Session time: " ;
-
-    bool a
-        (false);
-    if (0 < hrs) {
-        out
-            << hrs
-            << "h";
-        a = true;
-    }
-
-    bool b
-        (a);
-    if (0 < mins) {
-        if (a)
-            out
-                << " ";
-        out
-            << mins
-            << "m";
-        b = true;
-    }
-
-    if (b)
-        out
-            << " ";
-
-    out
-        << std::setprecision(3)
-        << secs + diff.tv_msecs
-        << "s"
+        << "Session time: "
+        << elapsed_repr(epoch, now)
+        << "."
         << std::endl;
 
     return Variant(okMessage);
