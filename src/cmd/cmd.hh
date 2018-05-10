@@ -25,9 +25,11 @@
 #include <cmd/interpreter.hh>
 
 /* -- commands */
+#include <cmd/commands/do.hh>
 #include <cmd/commands/help.hh>
 #include <cmd/commands/echo.hh>
 #include <cmd/commands/last.hh>
+#include <cmd/commands/on.hh>
 #include <cmd/commands/time.hh>
 #include <cmd/commands/quit.hh>
 
@@ -60,11 +62,17 @@ public:
     inline Command_ptr make_help()
     { return new Help(f_interpreter); }
 
+    inline Command_ptr make_do()
+    { return new Do(f_interpreter); }
+
     inline Command_ptr make_echo()
     { return new Echo(f_interpreter); }
 
     inline Command_ptr make_last()
     { return new Last(f_interpreter); }
+
+    inline Command_ptr make_on()
+    { return new On(f_interpreter); }
 
     inline Command_ptr make_time()
     { return new Time(f_interpreter); }
@@ -165,6 +173,12 @@ public:
 
     inline CommandTopic_ptr topic_clear()
     { return new ClearTopic(f_interpreter); }
+
+    inline bool is_success(Variant& v)
+        { return v.is_string() && v.as_string() == okMessage; }
+
+    inline bool is_failure(Variant& v)
+        { return v.is_string() && v.as_string() == errMessage; }
 
 protected:
     CommandMgr();
