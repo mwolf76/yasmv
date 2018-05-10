@@ -21,10 +21,14 @@
  *
  **/
 
-#include <cmd/interpreter.hh>
-#include <cmd/commands/time.hh>
-
 #include <iomanip>
+
+#include <utils/clock.hh>
+
+#include <cmd/interpreter.hh>
+
+#include <cmd/commands/commands.hh>
+#include <cmd/commands/time.hh>
 
 Time::Time(Interpreter& owner)
     : Command(owner)
@@ -33,30 +37,15 @@ Time::Time(Interpreter& owner)
 Time::~Time()
 {}
 
-struct timespec timespec_diff(struct timespec from, struct timespec to)
-{
-    const uint64_t BILLION { 1000000000L };
-
-    uint64_t t_from {from.tv_sec * BILLION + from.tv_nsec};
-    uint64_t t_to {to.tv_sec * BILLION + to.tv_nsec};
-    uint64_t t_diff {t_to - t_from};
-
-    uint64_t tv_sec { t_diff / BILLION };
-    uint64_t tv_nsec { t_diff % BILLION };
-
-    return { (time_t) tv_sec, (long) tv_nsec };
-
-}
-
 Variant Time::operator()()
 {
-    std::ostringstream oss;
+    std::ostream& out = std::cout;
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
 
     struct timespec epoch { Interpreter::INSTANCE().epoch() };
-    struct timespec diff { timespec_diff(epoch, now) };
+    struct stopclock_t diff { timespec_diff(epoch, now) };
 
     time_t uptime { diff.tv_sec };
     unsigned secs = uptime % 60;
@@ -68,13 +57,13 @@ Variant Time::operator()()
         hrs  = mins / 60;
     }
 
-    oss
+    out
         << "Session time: " ;
 
     bool a
         (false);
     if (0 < hrs) {
-        oss
+        out
             << hrs
             << "h";
         a = true;
@@ -84,24 +73,25 @@ Variant Time::operator()()
         (a);
     if (0 < mins) {
         if (a)
-            oss
+            out
                 << " ";
-        oss
+        out
             << mins
             << "m";
         b = true;
     }
 
     if (b)
-        oss
+        out
             << " ";
 
-    oss
+    out
         << std::setprecision(3)
-        << secs + (double) diff.tv_nsec / 1000000000L
-        << "s";
+        << secs + diff.tv_msecs
+        << "s"
+        << std::endl;
 
-    return Variant(oss.str());
+    return Variant(okMessage);
 }
 
 TimeTopic::TimeTopic(Interpreter& owner)
