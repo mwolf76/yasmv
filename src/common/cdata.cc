@@ -22,11 +22,11 @@
  **/
 
 /* environment variables and paths */
-const char* YASMV_MICROCODE_PATH ("YASMV_MICROCODE");
+const char* YASMV_MICROCODE_PATH { "YASMV_MICROCODE" };
 
-const char* TRACE_FMT_PLAIN ("plain");
-const char* TRACE_FMT_JSON ("json");
-const char* TRACE_FMT_XML  ("xml");
-const char* TRACE_FMT_YASM ("yaml");
+const char* TRACE_FMT_PLAIN { "plain" };
+const char* TRACE_FMT_JSON  { "json" };
+const char* TRACE_FMT_XML   { "xml" };
+const char* TRACE_FMT_YAML  { "yaml" };
 
-const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);
+const char* TRACE_FMT_DEFAULT { TRACE_FMT_PLAIN };

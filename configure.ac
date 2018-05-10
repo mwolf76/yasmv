@@ -96,6 +96,9 @@ AC_CHECK_HEADER(malloc.h,
 # libjsoncpp
 AC_LIBJSONCPP
 
+# Yaml support
+AC_LIBYAMLCPP
+
 # ANTLR3 checks
 AC_ANTLR3
 

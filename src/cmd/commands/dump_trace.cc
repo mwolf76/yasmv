@@ -81,7 +81,8 @@ void DumpTrace::set_format(pconst_char format)
 
     if (strcmp(f_format, TRACE_FMT_PLAIN) &&
         strcmp(f_format, TRACE_FMT_JSON) &&
-        strcmp(f_format, TRACE_FMT_XML))
+        strcmp(f_format, TRACE_FMT_XML) &&
+        strcmp(f_format, TRACE_FMT_YAML))
 
         throw UnsupportedFormat(f_format);
 }
@@ -277,6 +278,98 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
 
     os
         << "}"
+        << std::endl;
+}
+
+void DumpTrace::dump_yaml_section(YAML::Emitter& out,
+                                  const char* section,
+                                  ExprVector& ev)
+{
+    out
+        << YAML::BeginMap
+        << YAML::Key << section
+        << YAML::Value << YAML::BeginSeq;
+
+    for (ExprVector::const_iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
+        Expr_ptr eq { *ei };
+
+        std::stringstream key_stream;
+        key_stream << eq->lhs();
+
+        std::stringstream value_stream;
+        value_stream << eq->rhs();
+
+        out
+            << YAML::BeginMap
+            << YAML::Key << key_stream.str()
+            << YAML::Value << value_stream.str()
+            << YAML::EndMap;
+    }
+
+    out
+        << YAML::EndSeq
+        << YAML::EndMap;
+}
+
+void DumpTrace::dump_yaml(std::ostream& os, Witness& w)
+{
+    YAML::Emitter out;
+
+    out
+        << YAML::BeginMap
+        << YAML::Key << "witness"
+
+        << YAML::Value
+        << YAML::BeginMap
+        << YAML::Key << "id"
+        << YAML::Value << w.id()
+        << YAML::Key << "description"
+        << YAML::Value << w.desc()
+        << YAML::EndMap;
+
+    ExprVector input_assignments;
+    process_input(w, input_assignments);
+
+    if (0 < input_assignments.size()) {
+        out
+            << YAML::Key << "env" ;
+
+        dump_yaml_section(out, "input", input_assignments);
+    }
+
+    out
+        << YAML::BeginMap
+        << YAML::Key << "steps"
+        << YAML::Value << YAML::BeginSeq;
+
+    for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
+        out
+            << YAML::BeginMap
+            << YAML::Key << "time"
+            << YAML::Value << time;
+
+        ExprVector state_vars_assignments;
+        ExprVector defines_assignments;
+
+        process_time_frame(w, time,
+                           state_vars_assignments,
+                           defines_assignments);
+
+        dump_yaml_section(out, "state", state_vars_assignments);
+        dump_yaml_section(out, "defines", defines_assignments);
+
+        out
+            << YAML::EndMap;
+    }
+
+    out
+        << YAML::EndSeq
+        << YAML::EndMap
+        << YAML::EndMap;
+
+    assert(out.good());
+    os
+        << out.c_str()
         << std::endl;
 }
 
@@ -542,6 +635,9 @@ Variant DumpTrace::operator()()
 
     else if (!strcmp( f_format, TRACE_FMT_XML))
         dump_xml(os, w);
+
+    else if (!strcmp( f_format, TRACE_FMT_YAML))
+        dump_yaml(os, w);
 
     else assert(false); /* unsupported */
 
