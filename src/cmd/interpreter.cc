@@ -167,11 +167,13 @@ Variant& Interpreter::operator()(Command_ptr cmd)
 
 void chomp(char *p)
 {
+    assert(p != NULL);
     while (*p)
         ++ p;
 
     -- p;
-    *p = 0;
+    if (isspace(*p))
+        *p = 0;
 }
 
 Variant& Interpreter::operator()()
@@ -188,26 +190,29 @@ Variant& Interpreter::operator()()
         cmdline = fgets(buf, LINE_BUFSIZE, stdin);
     }
 
-    if (cmdline) {
-        try {
-            CommandVector_ptr cmds { parseCommand(cmdline) };
-            if (cmds) {
-                for (CommandVector::const_iterator i = cmds->begin();
-                     cmds->end() != i; ++ i) {
+    if (cmdline != NULL) {
+        chomp(cmdline);
+        if (cmdline && 0 < strlen(cmdline)) {
+            try {
+                CommandVector_ptr cmds { parseCommand(cmdline) };
+                if (cmds) {
+                    for (CommandVector::const_iterator i = cmds->begin();
+                         cmds->end() != i; ++ i) {
 
-                    Command_ptr cmd { *i };
-                    (*this)(cmd);
+                        Command_ptr cmd { *i };
+                        (*this)(cmd);
+                    }
                 }
+                else f_last_result = Variant(okMessage);
+            } catch (Exception& e) {
+                std::stringstream ss;
+
+                ss
+                    << "Exception!! "
+                    << e.what();
+
+                f_last_result = Variant(errMessage);
             }
-            else f_last_result = Variant(okMessage);
-        } catch (Exception& e) {
-            std::stringstream ss;
-
-            ss
-                << "Exception!! "
-                << e.what();
-
-            f_last_result = Variant(errMessage);
         }
     }
     else {

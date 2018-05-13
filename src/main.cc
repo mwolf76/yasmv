@@ -192,6 +192,9 @@ int main(int argc, const char *argv[])
         do {
             system();
         } while (! system.is_leaving());
+
+        if (isatty(STDIN_FILENO))
+            std::cout << std::endl;
     }
 
     catch (Exception &e) {
