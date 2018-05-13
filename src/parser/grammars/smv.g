@@ -892,122 +892,190 @@ commands [CommandVector_ptr cmds]
         )* ;
 
 command_topic returns [CommandTopic_ptr res]
-    :  c=help_command_topic
-       { $res = c; }
-
-    |  c=echo_command_topic
-        { $res = c; }
-
-    |  c=last_command_topic
-        { $res = c; }
-
-    |  c=time_command_topic
-       { $res = c; }
-
-    |  c=get_command_topic
-       { $res = c; }
-
-    |  c=set_command_topic
-       { $res = c; }
-
-    |  c=clear_command_topic
-       { $res = c; }
-
-    |  c=read_model_command_topic
-       { $res = c; }
-
-    |  c=dump_model_command_topic
-       { $res = c; }
-
-    |  c=pick_state_command_topic
-       { $res = c; }
-
-    |  c=simulate_command_topic
+    :  c=check_init_command_topic
        { $res = c; }
 
     |  c=check_trans_command_topic
        { $res = c; }
 
-    |  c=check_init_command_topic
+    |  c=clear_command_topic
        { $res = c; }
 
-    |  c=reach_command_topic
+    |  c=do_command_topic
+       { $res = c; }
+
+    |  c=dump_model_command_topic
+        { $res = c; }
+
+    |  c=dump_trace_command_topic
+        { $res = c; }
+
+    |  c=dup_trace_command_topic
+        { $res = c; }
+
+    |  c=echo_command_topic
+       { $res = c; }
+
+    |  c=get_command_topic
+       { $res = c; }
+
+    |  c=help_command_topic
+       { $res = c; }
+
+    |  c=last_command_topic
        { $res = c; }
 
     |  c=list_traces_command_topic
        { $res = c; }
 
-    |  c=dump_trace_command_topic
+    |  c=on_command_topic
+       {$res = c; }
+
+    |  c=read_model_command_topic
        { $res = c; }
 
-    |  c=dup_trace_command_topic
+    |  c=pick_state_command_topic
        { $res = c; }
 
     |  c=quit_command_topic
        { $res = c; }
+
+    |  c=reach_command_topic
+       { $res = c; }
+
+    |  c=set_command_topic
+       { $res = c; }
+
+    |  c=simulate_command_topic
+       { $res = c; }
+
+    |  c=time_command_topic
+       { $res = c; }
     ;
 
 command returns [Command_ptr res]
-    :  c=help_command
-       { $res = c; }
-
-    |  c=do_command
-       { $res = c; }
-
-    |  c=echo_command
-       { $res = c; }
-
-    |  c=last_command
-       { $res = c; }
-
-    |  c=on_command
-       { $res = c; }
-
-    |  c=time_command
-       { $res = c; }
-
-    |  c=read_model_command
-       { $res = c; }
-
-    |  c=dump_model_command
-       { $res = c; }
-
-    |  c=pick_state_command
-       { $res = c; }
-
-    |  c=simulate_command
-       { $res = c; }
-
-    |  c=check_init_command
-       { $res = c; }
-
-    |  c=reach_command
+    :  c=check_init_command
        { $res = c; }
 
     |  c=check_trans_command
        { $res = c; }
 
-    |  c=list_traces_command
+    |  c=clear_command
        { $res = c; }
+
+    |  c=do_command
+       { $res = c; }
+
+    |  c=dump_model_command
+        { $res = c; }
 
     |  c=dump_trace_command
-       { $res = c; }
+        { $res = c; }
 
     |  c=dup_trace_command
+        { $res = c; }
+
+    |  c=echo_command
        { $res = c; }
 
     |  c=get_command
        { $res = c; }
 
-    |  c=set_command
+    |  c=help_command
        { $res = c; }
 
-    |  c=clear_command
+    |  c=last_command
+       { $res = c; }
+
+    |  c=list_traces_command
+       { $res = c; }
+
+    |  c=on_command
+       {$res = c; }
+
+    |  c=read_model_command
+       { $res = c; }
+
+    |  c=pick_state_command
        { $res = c; }
 
     |  c=quit_command
        { $res = c; }
+
+    |  c=reach_command
+       { $res = c; }
+
+    |  c=set_command
+       { $res = c; }
+
+    |  c=simulate_command
+       { $res = c; }
+
+    |  c=time_command
+       { $res = c; }
     ;
+
+// command returns [Command_ptr res]
+//     :  c=help_command
+//        { $res = c; }
+
+//     |  c=do_command
+//        { $res = c; }
+
+//     |  c=echo_command
+//        { $res = c; }
+
+//     |  c=last_command
+//        { $res = c; }
+
+//     |  c=on_command
+//        { $res = c; }
+
+//     |  c=time_command
+//        { $res = c; }
+
+//     |  c=read_model_command
+//        { $res = c; }
+
+//     |  c=dump_model_command
+//        { $res = c; }
+
+//     |  c=pick_state_command
+//        { $res = c; }
+
+//     |  c=simulate_command
+//        { $res = c; }
+
+//     |  c=check_init_command
+//        { $res = c; }
+
+//     |  c=reach_command
+//        { $res = c; }
+
+//     |  c=check_trans_command
+//        { $res = c; }
+
+//     |  c=list_traces_command
+//        { $res = c; }
+
+//     |  c=dump_trace_command
+//        { $res = c; }
+
+//     |  c=dup_trace_command
+//        { $res = c; }
+
+//     |  c=get_command
+//        { $res = c; }
+
+//     |  c=set_command
+//        { $res = c; }
+
+//     |  c=clear_command
+//        { $res = c; }
+
+//     |  c=quit_command
+//        { $res = c; }
+//     ;
 
 help_command returns [Command_ptr res]
     : 'help'
@@ -1029,6 +1097,11 @@ do_command returns [Command_ptr res]
             subcommand = command ';'
             { ((Do_ptr) res)->add_command(subcommand); }
       )+ ;
+
+do_command_topic returns [CommandTopic_ptr res]
+    : 'do'
+       { $res = cm.topic_do(); }
+    ;
 
 echo_command returns [Command_ptr res]
 @init {
@@ -1069,6 +1142,11 @@ on_command returns [Command_ptr res]
 
           'failure' { $res = cm.make_on(); }
             ec=command { ((On_ptr) $res)->set_else(ec); } )
+    ;
+
+on_command_topic returns [CommandTopic_ptr res]
+    : 'on'
+        { $res = cm.topic_on(); }
     ;
 
 time_command returns [Command_ptr res]

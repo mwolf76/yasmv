@@ -27,6 +27,9 @@
 #include <common/common.hh>
 #include <utils/variant.hh>
 
+extern const std::string outPrefix;
+extern const std::string wrnPrefix;
+
 extern const std::string okMessage;
 extern const std::string errMessage;
 extern const std::string byeMessage;

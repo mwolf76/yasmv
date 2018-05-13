@@ -123,6 +123,12 @@ public:
     inline CommandTopic_ptr topic_help()
     { return new HelpTopic(f_interpreter); }
 
+    inline CommandTopic_ptr topic_do()
+    { return new DoTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_on()
+    { return new OnTopic(f_interpreter); }
+
     inline CommandTopic_ptr topic_echo()
     { return new EchoTopic(f_interpreter); }
 

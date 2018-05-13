@@ -46,59 +46,64 @@ void Get::set_identifier(Expr_ptr id)
     f_identifier = id;
 }
 
+void Get::print_assignment(std::ostream& os, Expr_ptr id)
+{
+    Environment& env { Environment::INSTANCE() };
+    Expr_ptr value { env.get(id) }; /* raises an exception */
+
+    os
+        << outPrefix
+        << id
+        << " := "
+        << value
+        << std::endl;
+} 
+
+void Get::print_all_assignments(std::ostream& os)
+{
+    Environment& env { Environment::INSTANCE() };
+    const ExprSet& identifiers { env.identifiers() };
+
+    for (ExprSet::const_iterator i = identifiers.begin();
+         i != identifiers.end(); ++ i) {
+
+        Expr_ptr id { *i };
+        print_assignment(os, id);
+    }
+}
+
+Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
+{
+    Variant res { errMessage };
+
+    try {
+        print_assignment(os, id);
+        res = Variant(okMessage);
+    }
+    catch (NoSuchIdentifier nsi) {
+        const char *what { nsi.what() };
+
+        os
+            << wrnPrefix
+            << what
+            << std::endl;
+    }
+
+    return res;
+}
+
 Variant Get::operator()()
 {
-    Environment& env
-        (Environment::INSTANCE());
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
 
     if (NULL == f_identifier) {
-        const ExprSet& identifiers
-            (env.identifiers());
-
-        for (ExprSet::const_iterator i = identifiers.begin();
-             i != identifiers.end(); ++ i) {
-
-            Expr_ptr id
-                (*i);
-
-            Expr_ptr value
-                (env.get(id));
-
-            std::cout
-                << "-- "
-                << id
-                << " := "
-                << value
-                << std::endl;
-        }
-
+        print_all_assignments(out);
         return Variant(okMessage);
     }
     else {
-        try {
-            Expr_ptr value
-                (env.get(f_identifier));
-
-            std::cout
-                << "-- "
-                << f_identifier
-                << " := "
-                << value
-                << std::endl;
-
-            return Variant(okMessage);
-        }
-        catch (NoSuchIdentifier nsi) {
-            const char *tmp
-                (nsi.what());
-
-            std::cerr
-                << tmp
-                << std::endl;
-        }
+        return print_one_assignment(out, f_identifier);
     }
-
-    return Variant("ERR");
 }
 
 GetTopic::GetTopic(Interpreter& owner)
@@ -116,5 +121,5 @@ void GetTopic::usage()
 {
     std::cout <<
         "get [ <identifier> ] - Dumps current value of <identifier>.\n\n"
-        "All assignments in the current environment are dumped if no argument is given." ;
+        "All assignments in the current environment are dumped if no argument is given.\n" ;
 }

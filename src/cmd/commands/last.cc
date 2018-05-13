@@ -39,7 +39,41 @@ Last::~Last()
 
 Variant Last::operator()()
 {
-    return Interpreter::INSTANCE().last_result();
+    Variant res = Variant(okMessage);
+
+    OptsMgr& om { OptsMgr::INSTANCE() };
+    std::ostream& out { std::cout };
+
+    Variant& last { Interpreter::INSTANCE().last_result() };
+    if (last.is_string()) {
+        std::string value { last.as_string() };
+        if (value == okMessage) {
+            if (! om.quiet())
+                out << outPrefix;
+
+            out
+                << "Last command was SUCCESSFUL"
+                << std::endl;
+        } else if (value == errMessage) {
+            if (! om.quiet())
+                out << outPrefix;
+
+            out
+                << "Last command was UNSUCCESSFUL"
+                << std::endl;
+        } else assert(false); /* unexpected */
+    } else {
+        if (! om.quiet())
+            out << outPrefix;
+
+        out
+            << "No status available"
+            << std::endl;
+
+        res = Variant(errMessage);
+    }
+
+    return res;
 }
 
 LastTopic::LastTopic(Interpreter& owner)
@@ -56,5 +90,5 @@ LastTopic::~LastTopic()
 void LastTopic::usage()
 {
     std::cout
-        << "last - yields the result of last command." ;
+        << "last - prints the result of last command.\n" ;
 }

@@ -127,5 +127,5 @@ void SimulateTopic::usage()
         << "Extends an existing trace with simulated steps. The simulation will follow\n"
         << "any additional constraint and will terminate due to (a) having reached\n"
         << "the until condition; or (b) having reached the specified number of steps.\n"
-        << "If neither -k nor -u is used, -k 1 is assumed." ;
+        << "If neither -k nor -u is used, -k 1 is assumed.\n" ;
 }

@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/dump_model.hh>
 
 #include <model/model_mgr.hh>
@@ -51,14 +52,11 @@ void DumpModel::set_output(pconst_char output)
 
 Variant DumpModel::operator()()
 {
-    std::ostringstream oss;
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
 
     Model& model
         (ModelMgr::INSTANCE().model());
-
-    oss
-        << std::endl
-        << std::endl;
 
     const Modules& modules (model.modules());
     for (Modules::const_iterator m = modules.begin();
@@ -66,7 +64,7 @@ Variant DumpModel::operator()()
 
         Module& module = dynamic_cast <Module&> (*m->second);
 
-        oss
+        out
             << "MODULE "
             << module.name()
             << std::endl;
@@ -74,13 +72,13 @@ Variant DumpModel::operator()()
         /* INIT */
         const ExprVector init = module.init();
         if (init.begin() != init.end())
-            oss << std::endl;
+            out << std::endl;
         for (ExprVector::const_iterator init_eye = init.begin();
              init_eye != init.end(); ++ init_eye) {
 
             Expr_ptr body (*init_eye);
 
-            oss
+            out
                 << "INIT "
                 << body << ";"
                 << std::endl;
@@ -90,13 +88,13 @@ Variant DumpModel::operator()()
         /* INVAR */
         const ExprVector invar = module.invar();
         if (invar.begin() != invar.end())
-            oss << std::endl;
+            out << std::endl;
         for (ExprVector::const_iterator invar_eye = invar.begin();
              invar_eye != invar.end(); ++ invar_eye) {
 
             Expr_ptr body (*invar_eye);
 
-            oss
+            out
                 << "INVAR "
                 << body << ";"
                 << std::endl;
@@ -105,20 +103,20 @@ Variant DumpModel::operator()()
         /* TRANS */
         const ExprVector trans = module.trans();
         if (trans.begin() != trans.end())
-            oss << std::endl;
+            out << std::endl;
         for (ExprVector::const_iterator trans_eye = trans.begin();
              trans_eye != trans.end(); ++ trans_eye) {
 
             Expr_ptr body (*trans_eye);
 
-            oss
+            out
                 << "TRANS "
                 << body << ";"
                 << std::endl;
         }
     }
 
-    return Variant (oss.str());
+    return Variant(okMessage);
 }
 
 DumpModelTopic::DumpModelTopic(Interpreter& owner)
@@ -136,5 +134,5 @@ void DumpModelTopic::usage()
 {
     std::cout
         << "dump-model [<filename>] - Dump current model to given filename[*].\n"
-        << "[*] either in single or double quotes. If no filename is given, model is written to standard output";
+        << "[*] either in single or double quotes. If no filename is given, model is written to standard output\n";
 }

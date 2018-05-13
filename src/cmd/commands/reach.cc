@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>
 
 Reach::Reach(Interpreter& owner)
@@ -41,52 +42,53 @@ void Reach::set_target(Expr_ptr target)
 
 Variant Reach::operator()()
 {
-    if (! f_target)
-        return Variant("No property given. Aborting...");
+    std::ostream& out { std::cout };
+    bool res { false };
 
-    BMC bmc
-        (*this, ModelMgr::INSTANCE().model());
+    if (! f_target) {
+        out
+            << wrnPrefix
+            << "No property given. Aborting..."
+            << std::endl;
+
+        return Variant(errMessage);
+    }
+
+    BMC bmc { *this, ModelMgr::INSTANCE().model() };
 
     bmc.process(f_target);
 
-    std::ostringstream tmp;
-    switch (bmc.status()) {
-    case BMC_REACHABLE:
-        tmp
+    reachability_status_t status { bmc.status() };
+    if (status == BMC_REACHABLE) {
+        res = true;
+        out
             << "Target is reachable";
-        break;
 
-    case BMC_UNREACHABLE:
-        tmp
-            << "Target is unreachable";
-        break;
+        if (bmc.has_witness()) {
+            Witness& w
+                (bmc.witness());
 
-    case BMC_UNKNOWN:
-        tmp
-            << "Reachability could not be decided";
-        break;
+            out
+                << ", registered witness `"
+                << w.id()
+                << "`, "
+                << w.size()
+                << " steps."
+                << std::endl;
+        }
+    } else if (status == BMC_UNREACHABLE) {
+        out
+            << "Target is unreachable."
+            << std::endl;
+    } else if (status == BMC_UNKNOWN) {
+        out
+            << "Reachability could not be decided."
+            << std::endl;
+    } else if (status == BMC_ERROR) ; /* ssshhh... */
 
-    case BMC_ERROR:
-        tmp
-            << "Error";
-        break;
+    else assert( false ); /* unreachable */
 
-    default: assert( false ); /* unreachable */
-    } /* switch */
-
-    if (bmc.has_witness()) {
-        Witness& w
-            (bmc.witness());
-
-        tmp
-            << ", registered witness `"
-            << w.id()
-            << "`, "
-            << w.size()
-            << " steps.";
-    }
-
-    return Variant(tmp.str());
+    return Variant(res ? okMessage : errMessage);
 }
 
 ReachTopic::ReachTopic(Interpreter& owner)
@@ -105,5 +107,5 @@ void ReachTopic::usage()
     std::cout
         << "reach < expression > - Verify reachability of given expression.\n\n"
         << "If a state satisfying the target expression is unreachable yields TRUE.\n"
-        << "Otherwise, a BMC counterexample witness trace for the given property is generated." ;
+        << "Otherwise, a BMC counterexample witness trace for the given property is generated.\n" ;
 }

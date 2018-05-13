@@ -39,6 +39,12 @@ public:
 
     void set_identifier(Expr_ptr id);
     Variant virtual operator()();
+
+private:
+    void print_all_assignments(std::ostream& os);
+    Variant print_one_assignment(std::ostream& os, Expr_ptr id);
+
+    void print_assignment(std::ostream& os, Expr_ptr id);
 };
 
 typedef Get* Get_ptr;

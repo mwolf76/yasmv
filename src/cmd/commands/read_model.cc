@@ -105,5 +105,5 @@ void ReadModelTopic::usage()
 {
     std::cout
         << "read-model <filename> - Reads a model from given filename[*].\n"
-        << "[*] either in single or double quotes." ;
+        << "[*] either in single or double quotes.\n" ;
 }

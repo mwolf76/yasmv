@@ -45,25 +45,6 @@ void Help::set_topic(CommandTopic_ptr topic)
     f_topic = topic;
 }
 
-/*
-- check-init
-- check-trans
-- clear
-- dump-model
-- dump-trace
-- dup-trace
-- get
-- help
-- list-traces
-- pick-state
-- quit
-- reach
-- read-model
-- set
-- simulate
-- time
-*/
-
 Variant Help::operator()()
 {
     if (f_topic)
@@ -75,12 +56,16 @@ Variant Help::operator()()
             << "- check-init" << std::endl
             << "- check-trans" << std::endl
             << "- clear" << std::endl
+            << "- do" << std::endl
             << "- dump-model" << std::endl
             << "- dump-trace" << std::endl
             << "- dup-trace" << std::endl
+            << "- echo" << std::endl
             << "- get" << std::endl
             << "- help" << std::endl
+            << "- last" << std::endl
             << "- list-traces" << std::endl
+            << "- on" << std::endl
             << "- pick-state" << std::endl
             << "- quit" << std::endl
             << "- reach" << std::endl

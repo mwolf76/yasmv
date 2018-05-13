@@ -663,5 +663,5 @@ void DumpTraceTopic::usage()
         << "  -f <format>, format can be either `plain`, `xml` or `json`.\n"
         << "  -o filename, filename must be a writeable path on disk.\n\n"
         << "`trace-uid` is the index of the trace to be dumped. If omitted, current\n"
-        << "trace will be dumped." ;
+        << "trace will be dumped.\n" ;
 }
