@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/simulate.hh>
 
 Simulate::Simulate(Interpreter& owner)
@@ -69,6 +70,10 @@ void Simulate::set_k(step_t k)
 
 Variant Simulate::operator()()
 {
+    OptsMgr& om { OptsMgr::INSTANCE() };
+    std::ostream& out { std::cout };
+    bool res { false };
+
     Simulation sim
         (*this, ModelMgr::INSTANCE().model());
 
@@ -76,32 +81,66 @@ Variant Simulate::operator()()
                  f_until_condition,
                  f_k, f_trace_uid);
 
-    std::ostringstream tmp;
     switch (sim.status()) {
     case SIMULATION_DONE:
-        tmp << "Simulation done";
+        res = true;
+        if (! om.quiet())
+            out
+                << outPrefix;
+        out
+            << "Simulation done";
         break;
+
     case SIMULATION_INITIALIZED:
-        tmp << "Simulation initialized";
+        if (! om.quiet())
+            out
+                << outPrefix;
+        out
+            << "Simulation initialized"
+            << std::endl;
         break;
+
     case SIMULATION_DEADLOCKED:
-        tmp << "Simulation deadlocked";
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+        out
+            << "Simulation deadlocked"
+            << std::endl;
         break;
+
     case SIMULATION_INTERRUPTED:
-        tmp << "Simulation interrupted";
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+        out
+            << "Simulation interrupted"
+            << std::endl;
         break;
+
     default: assert( false ); /* unreachable */
-    } /* switch */
+    }
+
     if (sim.has_witness()) {
-        tmp
-            << ", registered witness `"
-            << sim.witness().id() << "`";
+        if (! om.quiet())
+            out
+                << outPrefix;
+        out
+            << "Registered witness `"
+            << sim.witness().id()
+            << "`"
+            << std::endl;
     }
     else {
-        tmp
-            << "(no witness available)";
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+        out
+            << "(no witness available)"
+            << std::endl;
     }
-    return Variant(tmp.str());
+
+    return Variant(res ? okMessage : errMessage);
 }
 
 SimulateTopic::SimulateTopic(Interpreter& owner)

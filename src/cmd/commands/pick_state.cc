@@ -21,6 +21,7 @@
  *
  **/
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/pick_state.hh>
 
 PickState::PickState(Interpreter& owner)
@@ -44,7 +45,9 @@ void PickState::set_limit(value_t limit)
 
 Variant PickState::operator()()
 {
-    std::ostringstream tmp;
+    OptsMgr& om { OptsMgr::INSTANCE() };
+    std::ostream& out { std::cout };
+    bool res { false };
 
     Simulation sim
         (*this, ModelMgr::INSTANCE().model());
@@ -53,34 +56,59 @@ Variant PickState::operator()()
 
     switch (sim.status()) {
     case SIMULATION_DONE:
-        tmp << "Simulation done";
+        res = true;
+        if (! om.quiet())
+            out
+                << outPrefix;
+        out
+            << "Simulation done";
+
+        assert (sim.has_witness());
+        out
+            << ", registered witness `"
+            << sim.witness().id()
+            << "`"
+            << std::endl;
         break;
 
     case SIMULATION_INITIALIZED:
-        tmp << "Simulation initialized";
+        res = true;
+        if (! om.quiet())
+            out
+                << outPrefix;
+        out
+            << "Simulation initialized" ;
+
+        assert (sim.has_witness());
+        out
+            << ", registered witness `"
+            << sim.witness().id()
+            << "`"
+            << std::endl;
         break;
 
     case SIMULATION_DEADLOCKED:
-        tmp << "Simulation deadlocked";
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+        out
+            << "Simulation deadlocked"
+            << std::endl;
         break;
 
     case SIMULATION_INTERRUPTED:
-        tmp << "Simulation interrupted";
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+        out
+            << "Simulation interrupted"
+            << std::endl;
         break;
 
     default: assert( false ); /* unreachable */
-    } /* switch */
+    }
 
-    if (sim.has_witness()) {
-        tmp
-            << ", registered witness `"
-            << sim.witness().id() << "`";
-    }
-    else {
-        tmp
-            << "(no witness available)";
-    }
-    return Variant(tmp.str());
+    return Variant(res ? okMessage : errMessage);
 }
 
 PickStateTopic::PickStateTopic(Interpreter& owner)

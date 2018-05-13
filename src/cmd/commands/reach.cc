@@ -56,13 +56,11 @@ Variant Reach::operator()()
     }
 
     BMC bmc { *this, ModelMgr::INSTANCE().model() };
-
     bmc.process(f_target);
 
-    reachability_status_t status { bmc.status() };
-    if (status == BMC_REACHABLE) {
+    switch (bmc.status()) {
+    case BMC_REACHABLE:
         res = true;
-
         if (! om.quiet())
             out
                 << outPrefix;
@@ -81,21 +79,29 @@ Variant Reach::operator()()
                 << " steps."
                 << std::endl;
         }
-    } else if (status == BMC_UNREACHABLE) {
-        if (! om.quiet())
+        break;
+
+        case BMC_UNREACHABLE:
+            if (! om.quiet())
+                out
+                    << wrnPrefix;
             out
-                << wrnPrefix;
+                << "Target is unreachable."
+                << std::endl;
+            break;
 
-        out
-            << "Target is unreachable."
-            << std::endl;
-    } else if (status == BMC_UNKNOWN) {
-        out
-            << "Reachability could not be decided."
-            << std::endl;
-    } else if (status == BMC_ERROR) ; /* ssshhh... */
+        case BMC_UNKNOWN:
+            out
+                << "Reachability could not be decided."
+                << std::endl;
+            break;
 
-    else assert( false ); /* unreachable */
+        case BMC_ERROR:
+            /* ssshhh... */
+            break;
+
+        default: assert(false); /* unexpected */
+    }
 
     return Variant(res ? okMessage : errMessage);
 }
