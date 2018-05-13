@@ -703,6 +703,21 @@ constant returns [Expr_ptr res]
         Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
         $res = em.make_dec_const(tmp);
       }
+
+    | QUOTED_STRING {
+            pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
+            pANTLR3_UINT8 q; for (q = p; *q; ++ q) ;
+
+            assert (*p == '\'' || *p == '\"');
+            p ++ ;  /* cut lhs quote */
+
+            q -- ;
+            assert (*q == '\'' || *q == '\"');
+            *q = 0; /* cut rhs quote */
+
+            Atom atom { (const char *) p };
+            $res = em.make_qstring(atom);
+      }
     ;
 
 /* pvalue is used in param passing (actuals) */
@@ -1016,12 +1031,20 @@ do_command returns [Command_ptr res]
       )+ ;
 
 echo_command returns [Command_ptr res]
-    : 'echo'
+@init {
+    ExprVector ev;
+}
+    : 'echo'?
       { $res = cm.make_echo(); }
       (
-            msg = pcchar_quoted_string
-            { ((Echo_ptr) $res)->set_message(msg); }
-      )? ;
+            exprs = expressions[&ev]
+            {
+                for (ExprVector::iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
+                    Expr_ptr expr { *ei };
+                    ((Echo_ptr) $res) -> append_expression(expr);
+                }
+            }
+      ) ;
 
 echo_command_topic returns [CommandTopic_ptr res]
     : 'echo'
@@ -1040,13 +1063,13 @@ last_command_topic returns [CommandTopic_ptr res]
 
 on_command returns [Command_ptr res]
     :
-    'on' { $res = cm.make_on(); } (
-      ( 'success' tc=command ';' { assert (tc != NULL); ((On_ptr) $res)->set_then(tc); } )
-      ( 'else'    ec=command ';' { assert (ec != NULL); ((On_ptr) $res)->set_else(ec); } )? ) |
+      'on'
+        ('success' { $res = cm.make_on(); }
+            tc=command { ((On_ptr) $res)->set_then(tc); } |
 
-    (
-      ( 'failure' ec=command ';' { assert (ec != NULL); ((On_ptr) $res)->set_else(ec); } )
-      ( 'else'    tc=command ';' { assert (tc != NULL); ((On_ptr) $res)->set_then(tc); } )? ) ;
+          'failure' { $res = cm.make_on(); }
+            ec=command { ((On_ptr) $res)->set_else(ec); } )
+    ;
 
 time_command returns [Command_ptr res]
     : 'time'
@@ -1266,7 +1289,7 @@ pcchar_identifier returns [pconst_char res]
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
-    
+
 pcchar_quoted_string returns [pconst_char res]
     : QUOTED_STRING
     { $res = (pconst_char) $QUOTED_STRING.text->chars; }

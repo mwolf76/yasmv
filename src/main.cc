@@ -83,19 +83,26 @@ void pd(InlinedOperatorDescriptor& md)
 void batch(Command_ptr cmd)
 {
     Interpreter& system = Interpreter::INSTANCE();
-    bool color (OptsMgr::INSTANCE().color());
+    OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+
+    bool quiet { opts_mgr.quiet() };
+    bool color { opts_mgr.color() };
+
+    /* In batch mode, we print res unless in quiet mode */
     Variant& res = system(cmd);
-    if (color) {
-        std::cout
-            << std::endl
-            << yellow
-            << "<< "
-            << res
-            << normal << std::endl;
-    }
-    else {
-        std::cout << std::endl << "<< " << res
-                  << std::endl;
+    if (! quiet) {
+        if (color) {
+            std::cout
+                << std::endl
+                << yellow
+                << "<< "
+                << res
+                << normal << std::endl;
+        }
+        else {
+            std::cout << std::endl << "<< " << res
+                      << std::endl;
+        }
     }
 }
 
@@ -133,31 +140,6 @@ void sighandler(int signum)
     }
 }
 
-/* run each command in a separate thread */
-void process()
-{
-    Interpreter& system { Interpreter::INSTANCE() };
-    bool color { OptsMgr::INSTANCE().color() };
-    Variant& res { system() };
-    if (color) {
-        std::cout
-            << std::endl
-            << yellow
-            << "<< ";
-    }
-
-    std::cout
-        << res;
-
-    if (color) {
-        std::cout
-            << normal;
-    }
-
-    std::cout
-        << std::endl;
-}
-
 int main(int argc, const char *argv[])
 {
     Interpreter& system = Interpreter::INSTANCE();
@@ -178,19 +160,22 @@ int main(int argc, const char *argv[])
             exit(0);
         }
 
-        if (! opts_mgr.quiet())
+        if (! opts_mgr.quiet()) {
             std::cout
                 << heading_msg
                 << std::endl;
+        }
 
         /* load microcode */
         InlinedOperatorMgr& mm { InlinedOperatorMgr::INSTANCE() };
         size_t nloaders { mm.loaders().size() };
 
-        TRACE
-            << nloaders
-            << " microcode fragments registered."
-            << std::endl;
+        if (! opts_mgr.quiet()) {
+            TRACE
+                << nloaders
+                << " microcode fragments registered."
+                << std::endl;
+        }
 
         /* run options-generated commands (if any) */
         const std::string model_filename = opts_mgr.model();
@@ -199,19 +184,22 @@ int main(int argc, const char *argv[])
                 (reinterpret_cast<ReadModel*>
                  (CommandMgr::INSTANCE().make_read_model()));
 
-            cmd -> set_input( model_filename.c_str());
+            cmd->set_input( model_filename.c_str());
             batch(cmd);
         }
 
+        /* run interactive commands */
         do {
-            process();
+            system();
         } while (! system.is_leaving());
     }
 
     catch (Exception &e) {
         std::cerr
             << red
+            << "Uncaught exception!! "
             << e.what()
+            << normal
             << std::endl;
     }
 

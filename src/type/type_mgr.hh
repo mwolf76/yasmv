@@ -70,6 +70,7 @@ public:
     const Type_ptr find_type_by_def(const Expr_ptr expr);
 
     const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
+    const StringType_ptr find_string();
 
     const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
 

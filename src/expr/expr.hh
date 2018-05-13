@@ -68,7 +68,7 @@ typedef enum {
     ITE, COND,
 
     /* identifiers */
-    IDENT, DOT,
+    QSTRING, IDENT, DOT,
 
     /* declarations */
     BOOL, SIGNED, UNSIGNED,
@@ -126,7 +126,7 @@ typedef struct Expr_TAG {
 
     inline Atom& atom() const
     {
-        assert (IDENT == f_symb);
+        assert (IDENT == f_symb || QSTRING == f_symb);
         return *u.f_atom;
     }
 
@@ -137,10 +137,13 @@ typedef struct Expr_TAG {
     inline Expr_ptr rhs()
     { return u.f_rhs; }
 
-    // identifiers
-    inline Expr_TAG(const Atom& atom)
-    : f_symb(IDENT)
-    { u.f_atom = const_cast<Atom *>(& atom); }
+    // identifiers and strings
+    inline Expr_TAG(ExprType symb, const Atom& atom)
+    {
+        assert(IDENT == symb || QSTRING == symb);
+        f_symb = symb;
+        u.f_atom = const_cast<Atom *>(& atom);
+    }
 
     // binary expr (rhs is NULL for unary ops)
     inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)

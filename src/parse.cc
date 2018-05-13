@@ -44,44 +44,13 @@
 
 static bool parseErrors;
 static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
-                                          pANTLR3_UINT8 * tokenNames)
-{
-    if (! parseErrors) {
-        std::cerr
-            << "Syntax error";
+                                          pANTLR3_UINT8 * tokenNames);
+static void reportParserStatus(bool parseErrors, timespec start,
+                               timespec stop);
 
-        if (0 <= recognizer->state->exception->charPositionInLine) {
-
-            std::cerr << " in line "
-                      << recognizer->state->exception->line
-                      << ", offset "
-                      << recognizer->state->exception->charPositionInLine ;
-        }
-
-        std::cerr << "."
-                  << std::endl;
-    }
-
-    parseErrors = true;
-}
-
-void reportParserStatus(bool parseErrors, timespec start, timespec stop)
-{
-    const std::string elapsed { elapsed_repr(start, stop) };
-    if (parseErrors)
-        DEBUG
-            << "Parser terminated with errors in "
-            << elapsed
-            << "."
-            << std::endl;
-    else
-        DEBUG
-            << "Parser terminated successfully in "
-            << elapsed
-            << "."
-            << std::endl;
-}
-
+/**
+ * Runs the parser SMV rule on an input .smv file.
+ */
 bool parseFile(const char* fName)
 {
     pANTLR3_INPUT_STREAM input;
@@ -135,7 +104,10 @@ bool parseFile(const char* fName)
     return parseErrors;
 }
 
-// TODO: proper error handling
+/**
+ * Runs the parser COMMAND_LINE rule on an input line string.
+ */
+// FIXME: proper error handling
 CommandVector_ptr parseCommand(const char *command_line)
 {
     pANTLR3_INPUT_STREAM input;
@@ -190,6 +162,9 @@ CommandVector_ptr parseCommand(const char *command_line)
         ? res : NULL;
 }
 
+/**
+ * Runs the parser TOPLEVEL_EXPRESSION rule on a single string.
+ */
 Expr_ptr parseExpression(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
@@ -217,8 +192,7 @@ Expr_ptr parseExpression(const char *string)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
-    Expr_ptr res
-        (psr -> toplevel_expression(psr));
+    Expr_ptr res { psr -> toplevel_expression(psr) };
 
     psr->free(psr);
     tstream->free(tstream);
@@ -226,9 +200,13 @@ Expr_ptr parseExpression(const char *string)
     input->close(input);
 
     return ! parseErrors
-        ? res : NULL;
+        ? res
+        : NULL;
 }
 
+/**
+ * Runs the parser TYPE rule on a single string.
+ */
 Type_ptr parseTypedef(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
@@ -271,4 +249,43 @@ Type_ptr parseTypedef(const char *string)
 
     return ! parseErrors
         ? res : NULL;
+}
+
+/* -- static helpers ------------------------------------------------------- */
+static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
+                                          pANTLR3_UINT8 * tokenNames)
+{
+    if (! parseErrors) {
+        std::cerr
+            << "Syntax error";
+
+        if (0 <= recognizer->state->exception->charPositionInLine) {
+            std::cerr << " in line "
+                      << recognizer->state->exception->line
+                      << ", offset "
+                      << recognizer->state->exception->charPositionInLine ;
+        }
+
+        std::cerr << "."
+                  << std::endl;
+    }
+
+    parseErrors = true;
+}
+
+static void reportParserStatus(bool parseErrors, timespec start, timespec stop)
+{
+    const std::string elapsed { elapsed_repr(start, stop) };
+    if (parseErrors)
+        DEBUG
+            << "Parser terminated with errors in "
+            << elapsed
+            << "."
+            << std::endl;
+    else
+        DEBUG
+            << "Parser terminated successfully in "
+            << elapsed
+            << "."
+            << std::endl;
 }

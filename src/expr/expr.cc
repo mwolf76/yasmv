@@ -43,7 +43,8 @@ value_t Expr_TAG::value() const
     assert (ICONST == f_symb ||
             HCONST == f_symb ||
             OCONST == f_symb ||
-            BCONST == f_symb);
+            BCONST == f_symb ||
+            QSTRING == f_symb);
 
     return u.f_value;
 }

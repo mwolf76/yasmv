@@ -29,6 +29,10 @@
 
 #include <commands/commands.hh>
 
+#include <cstdio>
+#include <cstdlib>
+
+
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
 #    include <readline/readline.h>
@@ -48,7 +52,7 @@ char* readline(const char *prompt)
         fputs( prompt, stdout);
 
     buf = (char *) malloc(LINE_BUFSIZE);
-    return fgets( buf, LINE_BUFSIZE, stdin);
+    return fgets(buf, LINE_BUFSIZE, stdin);
 }
 #endif /* HAVE_LIBREADLINE */
 
@@ -67,27 +71,29 @@ void add_history (const char*)
 #endif
 
 /* A static variable for holding the line. */
-static char *line_read = (char *)NULL;
+static char* line_buf = NULL;
 
 /* Read a string, and return a pointer to it.
    Returns NULL on EOF. */
-char * rl_gets ()
+static char* rl_gets()
 {
+    OptsMgr& om { OptsMgr::INSTANCE() };
+
     /* If the buffer has already been allocated, return the memory to
        the free pool. */
-    if (line_read) {
-      free (line_read);
-      line_read = (char *)NULL;
+    if (NULL != line_buf) {
+        free (line_buf);
+        line_buf = NULL;
     }
 
-  /* Get a line from the user. */
-  line_read = readline (">> ");
+    /* Get a line from the user. */
+    line_buf = readline(om.quiet() ? NULL : ">> ");
 
-  /* If the line has any text in it, save it on the history. */
-  if (line_read && *line_read)
-      add_history (line_read);
+    /* If the line has any text in it, save it on the history. */
+    if (line_buf && *line_buf)
+        add_history (line_buf);
 
-  return (line_read);
+    return line_buf;
 }
 
 Interpreter_ptr Interpreter::f_instance = NULL;
@@ -152,32 +158,60 @@ Variant& Interpreter::operator()(Command_ptr cmd)
             << "Exception!! "
             << e.what();
 
-        f_last_result = Variant(ss.str());
+        f_last_result = Variant(errMessage);
     }
 
     delete cmd; /* claims ownership! */
     return f_last_result;
 }
 
+void chomp(char *p)
+{
+    while (*p)
+        ++ p;
+
+    -- p;
+    *p = 0;
+}
+
 Variant& Interpreter::operator()()
 {
-    char *cmdline { rl_gets() };
+    char *cmdline { NULL };
+    if (isatty(STDIN_FILENO))
+        cmdline = rl_gets();
+    else {
+        /* FIXME: memleaks */
+        static char *buf= NULL;
+        const int LINE_BUFSIZE (0x200);
+
+        buf = (char *) malloc(LINE_BUFSIZE);
+        cmdline = fgets(buf, LINE_BUFSIZE, stdin);
+    }
 
     if (cmdline) {
-        CommandVector_ptr cmds { parseCommand(cmdline) };
+        try {
+            CommandVector_ptr cmds { parseCommand(cmdline) };
+            if (cmds) {
+                for (CommandVector::const_iterator i = cmds->begin();
+                     cmds->end() != i; ++ i) {
 
-        if (cmds) {
-            for (CommandVector::const_iterator i = cmds->begin();
-                 cmds->end() != i; ++ i) {
-
-                Command_ptr cmd { *i };
-                (*this)(cmd);
+                    Command_ptr cmd { *i };
+                    (*this)(cmd);
+                }
             }
+            else f_last_result = Variant(okMessage);
+        } catch (Exception& e) {
+            std::stringstream ss;
+
+            ss
+                << "Exception!! "
+                << e.what();
+
+            f_last_result = Variant(errMessage);
         }
-        else f_last_result = "No operation";
     }
     else {
-        f_last_result = Variant("BYE");
+        f_last_result = Variant(okMessage);
         f_leaving = true;
     }
 

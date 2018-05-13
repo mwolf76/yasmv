@@ -1,6 +1,9 @@
-/*
- * @file common/tokens.cc
- * @brief System wide definitions.
+/**
+ * @file do.hh
+ * @brief Command-interpreter subsystem related classes and definitions.
+ *
+ * This header file contains the handler inteface for the `do`
+ * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,19 +24,30 @@
  *
  **/
 
-#include <common/tokens.hh>
+#ifndef DO_H
+#define DO_H
 
-const char *EMPTY_TOKEN = "__nil__";
+#include <cmd/command.hh>
+typedef CommandTopic* CommandTopic_ptr;
 
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN  = "TRUE";
+using Commands = std::vector<Command_ptr>;
+class Do : public Command {
+    Commands f_commands;
 
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *STRING_TOKEN    = "string";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+public:
+    Do(Interpreter& owner);
+    virtual ~Do();
+    void add_command(Command_ptr command);
+
+    Variant virtual operator()();
+};
+typedef Do* Do_ptr;
+
+class DoTopic : public CommandTopic {
+public:
+    DoTopic(Interpreter& owner);
+    virtual ~DoTopic();
+
+    void virtual usage();
+};
+#endif /* DO_H */

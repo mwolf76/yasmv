@@ -1,6 +1,6 @@
-/*
- * @file common/tokens.cc
- * @brief System wide definitions.
+/**
+ * @file last.cc
+ * @brief Command `last` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,19 +21,40 @@
  *
  **/
 
-#include <common/tokens.hh>
+#include <cmd/interpreter.hh>
 
-const char *EMPTY_TOKEN = "__nil__";
+#include <cmd/commands/last.hh>
+#include <cmd/commands/commands.hh>
 
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN  = "TRUE";
+#include <iomanip>
 
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *STRING_TOKEN    = "string";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+Last::Last(Interpreter& owner)
+    : Command(owner)
+    , f_message(NULL)
+{}
+
+Last::~Last()
+{
+}
+
+Variant Last::operator()()
+{
+    return Interpreter::INSTANCE().last_result();
+}
+
+LastTopic::LastTopic(Interpreter& owner)
+    : CommandTopic(owner)
+{}
+
+LastTopic::~LastTopic()
+{
+    TRACE
+        << "Destroyed last topic"
+        << std::endl;
+}
+
+void LastTopic::usage()
+{
+    std::cout
+        << "last - yields the result of last command." ;
+}

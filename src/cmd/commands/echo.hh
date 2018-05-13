@@ -1,6 +1,9 @@
-/*
- * @file common/tokens.cc
- * @brief System wide definitions.
+/**
+ * @file echo.hh
+ * @brief Command-interpreter subsystem related classes and definitions.
+ *
+ * This header file contains the handler inteface for the `echo`
+ * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,19 +24,29 @@
  *
  **/
 
-#include <common/tokens.hh>
+#ifndef ECHO_H
+#define ECHO_H
 
-const char *EMPTY_TOKEN = "__nil__";
+#include <cmd/command.hh>
+class Echo : public Command {
+    using expressions = std::vector<Expr_ptr>;
+    expressions f_expressions;
 
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN  = "TRUE";
+public:
+    Echo(Interpreter& owner);
+    virtual ~Echo();
 
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *STRING_TOKEN    = "string";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+    void append_expression(Expr_ptr expression);
+
+    Variant virtual operator()();
+};
+typedef Echo* Echo_ptr;
+
+class EchoTopic : public CommandTopic {
+public:
+    EchoTopic(Interpreter& owner);
+    virtual ~EchoTopic();
+
+    void virtual usage();
+};
+#endif /* ECHO_H */

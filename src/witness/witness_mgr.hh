@@ -99,6 +99,8 @@ private:
 
     // reserved for autoincrement index
     unsigned f_autoincrement;
+
+    Witness f_empty_witness;
 };
 
 #endif

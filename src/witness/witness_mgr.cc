@@ -37,7 +37,7 @@ WitnessMgr::WitnessMgr()
 Witness& WitnessMgr::current()
 {
     if (! f_curr_uid.size())
-        throw NoCurrentlySelectedWitness();
+        return f_empty_witness;
 
     return witness(f_curr_uid);
 }

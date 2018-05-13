@@ -146,6 +146,23 @@ const ScalarType_ptr TypeMgr::find_constant(unsigned width)
     return res;
 }
 
+const StringType_ptr TypeMgr::find_string()
+{
+    Expr_ptr descr
+        (f_em.make_string_type());
+
+    StringType_ptr res
+        (dynamic_cast<StringType_ptr>(lookup_type(descr)));
+
+    if (res)
+        return res;
+
+    res = new StringType( *this);
+    register_type(descr, res);
+
+    return res;
+}
+
 /** Unsigned algebraics (both integer and fixed-point) */
 const ScalarType_ptr TypeMgr::find_unsigned(unsigned width)
 {

@@ -31,6 +31,7 @@
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
 extern const char *BOOL_TOKEN;
+extern const char *STRING_TOKEN;
 
 extern const char *UNSIGNED_TOKEN;
 extern const char *SIGNED_TOKEN;
