@@ -1,4 +1,4 @@
 pick-state
-dump-trace
+on success do dump-trace ;
 time
 quit
