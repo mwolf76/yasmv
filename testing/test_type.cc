@@ -24,15 +24,16 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include <model.hh>
-#include <model_mgr.hh>
+#include <model/model.hh>
+#include <model/model_mgr.hh>
+#include <model/module.hh>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
 
@@ -215,7 +216,6 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
     BOOST_CHECK(! type->is_instance());
 }
 
-#if 0
 BOOST_AUTO_TEST_CASE(type_checking)
 {
     /* a rather rough setup... */
@@ -228,7 +228,9 @@ BOOST_AUTO_TEST_CASE(type_checking)
     om.set_word_width(16);
 
     Model& model (mm.model());
-    Module& main (* new Module(em.make_main()));
+    Atom a_main("main");
+    Module& main (* new Module(em.make_identifier(a_main)));
+    model.add_module(main);
 
     /* A few types */
     Type_ptr boolean = tm.find_boolean();
@@ -487,6 +489,6 @@ BOOST_AUTO_TEST_CASE(type_checking)
     BOOST_CHECK( int16 ==
                  mm.type( em.make_mod( u, k)));
 }
-#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()
