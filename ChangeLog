@@ -1,0 +1,7 @@
+	0.0.7 - Initial rework of command interpreter
+
+	--quiet mode command line switch;
+	--version command line switch;
+	introduced a few new commands: echo (can be omitted), do, on, last;
+	finer grained session timer;
+
