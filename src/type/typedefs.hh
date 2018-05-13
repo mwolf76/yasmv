@@ -41,6 +41,7 @@ typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeMap;
 
 /* 1. scalars */
 typedef class ScalarType* ScalarType_ptr;
+typedef class StringType* StringType_ptr;
 
 /* 1.1. monoliths */
 typedef class MonolithicType* MonolithicType_ptr;

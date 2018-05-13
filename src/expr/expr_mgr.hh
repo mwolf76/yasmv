@@ -36,12 +36,11 @@
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
-
     inline ExprType symb(Expr_ptr expr) const {
         return expr->f_symb;
     }
 
-    /* -- LTL expressions --------------------------------------------------- */
+    /* -- LTL expressions -------------------------------------------------- */
     inline Expr_ptr make_F(Expr_ptr expr)
     { return make_expr(F, expr, NULL); }
 
@@ -107,7 +106,7 @@ public:
             expr->f_symb == R ;
     }
 
-    /* -- Temporal operators ------------------------------------------------ */
+    /* -- Temporal operators ---------------------------------------------- */
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 
@@ -116,7 +115,7 @@ public:
         return expr->f_symb == NEXT;
     }
 
-    /* -- Arithmetical operators -------------------------------------------- */
+    /* -- Arithmetical operators ------------------------------------------- */
     inline Expr_ptr make_neg(Expr_ptr expr)
     { return make_expr(NEG, expr, NULL); }
 
@@ -165,7 +164,7 @@ public:
         return expr->f_symb == MOD;
     }
 
-    /* -- Logical/Bitwise operators ----------------------------------------- */
+    /* -- Logical/Bitwise operators ---------------------------------------- */
     inline Expr_ptr make_not(Expr_ptr expr)
     { return make_expr(NOT, expr, NULL); }
 
@@ -262,7 +261,7 @@ public:
         return expr->f_symb == IMPLIES;
     }
 
-    /* -- Assignment operator ----------------------------------------------- */
+    /* -- Assignment operator ---------------------------------------------- */
     inline Expr_ptr make_assignment(Expr_ptr a, Expr_ptr b)
     { return make_expr(ASSIGNMENT, a, b); }
 
@@ -271,7 +270,7 @@ public:
         return expr->f_symb == ASSIGNMENT;
     }
 
-    /* -- Relational operators ---------------------------------------------- */
+    /* -- Relational operators --------------------------------------------- */
     inline Expr_ptr make_eq(Expr_ptr a, Expr_ptr b)
     { return make_expr(EQ, a, b); }
 
@@ -320,7 +319,7 @@ public:
         return expr->f_symb == LT;
     }
 
-    /* -- ITEs -------------------------------------------------------------- */
+    /* -- ITEs ------------------------------------------------------------- */
     inline Expr_ptr make_cond(Expr_ptr a, Expr_ptr b)
     { return make_expr(COND, a, b); }
 
@@ -341,7 +340,7 @@ public:
         return (ITE == symb);
     }
 
-    /* -- constants --------------------------------------------------------- */
+    /* -- constants -------------------------------------------------------- */
     inline value_t const_value(Expr_ptr expr)
     {
         assert( expr->f_symb == ICONST ||
@@ -401,7 +400,7 @@ public:
     inline Expr_ptr make_set_comma(Expr_ptr a, Expr_ptr b)
     { return make_expr(SET_COMMA, a, b); }
 
-    /* -- Types & Casts ----------------------------------------------------- */
+    /* -- Types & Casts ---------------------------------------------------- */
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b)
     { return make_expr(TYPE, a, b); }
     inline Expr_ptr make_type(Expr_ptr a, Expr_ptr b, Expr_ptr c)
@@ -452,7 +451,7 @@ public:
 
     Expr_ptr make_enum_type(ExprSet& literals);
 
-    /* -- Builtin types ----------------------------------------------------- */
+    /* -- Builtin types ---------------------------------------------------- */
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
@@ -461,9 +460,15 @@ public:
         return expr == bool_expr;
     }
 
-    /* -- Builtin identifiers and constants --------------------------------- */
+    inline Expr_ptr make_string_type() const
+    { return string_expr; }
 
+    inline bool is_string_type(const Expr_ptr expr) const {
+        assert(expr);
+        return expr == string_expr;
+    }
 
+    /* -- Builtin identifiers, constants and qstrings ---------------------- */
     inline Expr_ptr make_temp() const
     { return temp_expr; }
 
@@ -558,7 +563,21 @@ public:
         return (UNDEF == symb);
     }
 
-    // -- broad is-a predicates ------------------------------------------------
+    inline bool is_identifier(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == IDENT;
+    }
+
+    Expr_ptr make_identifier(Atom atom);
+
+    inline bool is_qstring(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == QSTRING;
+    }
+
+    Expr_ptr make_qstring(Atom atom);
+
+    /* -- broad is-a predicates -------------------------------------------- */
     inline bool is_temporal(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == NEXT;
@@ -568,11 +587,6 @@ public:
         return
             is_identifier(expr) ||
             is_subscript(expr);
-    }
-
-    inline bool is_identifier(const Expr_ptr expr) const {
-        assert(expr);
-        return expr->f_symb == IDENT;
     }
 
     inline bool is_subscript(const Expr_ptr expr) const {
@@ -643,7 +657,7 @@ public:
             || (expr->f_symb == OCONST) ;
     }
 
-    // expr inspectors, used by compiler as helpers to determine operands type
+    /* -- expr inspectors -------------------------------------------------- */
     inline bool is_unary_logical(const Expr_ptr expr) const {
         assert(expr);
         ExprType symb = expr->f_symb;
@@ -716,7 +730,6 @@ public:
                 (GE == symb));
     }
 
-    // singleton instance accessor
     static inline ExprMgr& INSTANCE() {
         if (! f_instance) {
             f_instance = new ExprMgr();
@@ -724,8 +737,6 @@ public:
 
         return (*f_instance);
     }
-
-    Expr_ptr make_identifier(Atom atom);
 
 protected:
     ExprMgr();
@@ -741,9 +752,10 @@ private:
         return __make_expr(&tmp);
     }
 
-    inline Expr_ptr make_expr(const Atom& atom)
+    /* identifiers & strings */
+    inline Expr_ptr make_expr(ExprType et, const Atom& atom)
     {
-        Expr tmp(atom); // we need a temp store
+        Expr tmp(et, atom); // we need a temp store
         return __make_expr(&tmp);
     }
 
@@ -757,8 +769,8 @@ private:
 
     /* -- data ------------------------------------------------------------- */
 
-    /* boolean exprs type and constants */
     Expr_ptr bool_expr;
+    Expr_ptr string_expr;
     Expr_ptr false_expr;
     Expr_ptr true_expr;
 

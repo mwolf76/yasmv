@@ -26,6 +26,7 @@
 
 #ifndef COMMON_CDATA_H
 #define COMMON_CDATA_H
+#include "config.h"
 
 /* environment variables and paths */
 extern const char *YASMV_MICROCODE_PATH;
@@ -35,5 +36,5 @@ extern const char *TRACE_FMT_DEFAULT;
 extern const char *TRACE_FMT_PLAIN;
 extern const char *TRACE_FMT_JSON;
 extern const char *TRACE_FMT_XML;
-
+extern const char *TRACE_FMT_YAML;
 #endif /* COMMON_CDATA_H  */

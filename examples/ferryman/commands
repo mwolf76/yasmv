@@ -1,4 +1,4 @@
 reach GOAL
-dump-trace
+on success dump-trace -f xml
 time
 quit

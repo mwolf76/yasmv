@@ -30,6 +30,9 @@
 #include <ctime>
 
 #include <commands.hh>
+const std::string outPrefix ("-- ");
+const std::string wrnPrefix ("!! ");
+
 const std::string okMessage ("Ok");
 const std::string errMessage ("ERROR");
 const std::string byeMessage ("Bye");

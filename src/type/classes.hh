@@ -151,6 +151,9 @@ public:
     bool is_array();
     ArrayType_ptr as_array();
 
+    bool is_string();
+    StringType_ptr as_string();
+
     virtual ~Type();
 
 protected:
@@ -164,6 +167,18 @@ protected:
 };
 
 /** -- Scalars ------------------------------------------------------------ */
+
+/** String type class */
+class StringType : public Type {
+private:
+    unsigned width() const
+    { assert(false); return 0; }
+
+public:
+    StringType(TypeMgr& owner)
+        : Type(owner)
+    {}
+};
 
 /** Scalar type class. */
 class ScalarType : public Type {

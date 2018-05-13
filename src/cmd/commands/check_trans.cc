@@ -24,7 +24,9 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/check_trans.hh>
+
 #include <algorithms/fsm/fsm.hh>
 
 
@@ -37,29 +39,40 @@ CheckTrans::~CheckTrans()
 
 Variant CheckTrans::operator()()
 {
-    CheckTransConsistency algorithm
-        (*this, ModelMgr::INSTANCE().model());
+    Variant res = Variant(errMessage);
 
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
+
+    CheckTransConsistency algorithm { *this, ModelMgr::INSTANCE().model() } ;
     algorithm.process();
 
-    std::ostringstream tmp;
     switch (algorithm.status()) {
     case FSM_CONSISTENCY_OK:
-        tmp << "OK";
+        out
+            << outPrefix
+            << "Transition relation consistency check ok."
+            << std::endl;
         break;
 
     case FSM_CONSISTENCY_KO:
-        tmp << "KO";
+        out
+            << outPrefix
+            << "Transition relation consistency check failed."
+            << std::endl;
         break;
 
     case FSM_CONSISTENCY_UNDECIDED:
-        tmp << "??";
+        out
+            << outPrefix
+            << "Could not decide transition relation consistency check."
+            << std::endl;
         break;
 
     default: assert( false ); /* unreachable */
     } /* switch */
 
-    return Variant(tmp.str());
+    return res;
 }
 
 CheckTransTopic::CheckTransTopic(Interpreter& owner)

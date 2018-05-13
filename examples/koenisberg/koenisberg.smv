@@ -12,6 +12,7 @@ VAR
 INIT
   marked = [ FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE ];
 
+@hidden
 DEFINE
   GOAL :=
        marked = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];

@@ -30,6 +30,9 @@
 #include <cmd/command.hh>
 #include <witness/witness.hh>
 
+#include <yaml-cpp/yaml.h>
+
+
 /** Raised when the type checker detects a wrong type */
 class UnsupportedFormat : public CommandException {
 public:
@@ -107,6 +110,11 @@ private:
                           const char* section,
                           ExprVector& ev);
 
+    void dump_yaml(std::ostream& os, Witness& w);
+    void dump_yaml_section(YAML::Emitter& out,
+                           const char* section,
+                           ExprVector& ev);
+
     /* these values actually come from the current environment */
     void process_input(Witness& w,
                        ExprVector& input_vars_assignments);
@@ -117,6 +125,8 @@ private:
                             ExprVector& defines_assignments);
 
 };
+
+typedef DumpTrace* DumpTrace_ptr;
 
 class DumpTraceTopic : public CommandTopic {
 public:

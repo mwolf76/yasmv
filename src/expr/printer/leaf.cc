@@ -119,7 +119,7 @@ static void print_oct_leaf(const Expr_ptr expr, std::ostream& os)
         << value;
 }
 
-static void print_ident_leaf(const Expr_ptr expr, std::ostream& os)
+static void print_atom_leaf(const Expr_ptr expr, std::ostream& os)
 {
     Atom& atom
         (expr->atom());
@@ -148,7 +148,8 @@ void Printer::print_leaf(const Expr_ptr expr)
         break;
 
     case IDENT:
-        print_ident_leaf(expr, f_os);
+    case QSTRING:
+        print_atom_leaf(expr, f_os);
         break;
 
     case UNDEF:

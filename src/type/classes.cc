@@ -48,35 +48,41 @@ EnumType_ptr Type::as_enum()
 { return dynamic_cast<EnumType_ptr> (this); }
 
 bool Type::is_instance()
-{ return NULL != dynamic_cast<InstanceType_ptr>( this ); }
+{ return NULL != dynamic_cast<InstanceType_ptr> (this); }
 
 InstanceType_ptr Type::as_instance()
 { return dynamic_cast<InstanceType_ptr> (this); }
 
 bool Type::is_algebraic()
-{ return NULL != dynamic_cast<AlgebraicType_ptr>( this ); }
+{ return NULL != dynamic_cast<AlgebraicType_ptr> (this); }
 
 bool Type::is_constant()
-{ return NULL != dynamic_cast<ConstantType_ptr> ( this ); }
+{ return NULL != dynamic_cast<ConstantType_ptr> (this); }
 
 AlgebraicType_ptr Type::as_algebraic()
 { return dynamic_cast <const AlgebraicType_ptr> (this); }
 
 bool Type::is_signed_algebraic()
-{ return NULL != dynamic_cast<SignedAlgebraicType_ptr>( this ); }
+{ return NULL != dynamic_cast<SignedAlgebraicType_ptr> (this); }
 
 SignedAlgebraicType_ptr Type::as_signed_algebraic()
 { return dynamic_cast <const SignedAlgebraicType_ptr> (this); }
 
 bool Type::is_unsigned_algebraic()
-{ return NULL != dynamic_cast<UnsignedAlgebraicType_ptr>( this ); }
+{ return NULL != dynamic_cast<UnsignedAlgebraicType_ptr> (this); }
 
 UnsignedAlgebraicType_ptr Type::as_unsigned_algebraic()
 { return dynamic_cast <const UnsignedAlgebraicType_ptr> (this); }
 
 bool Type::is_array()
-{ return NULL != dynamic_cast<ArrayType_ptr>( this ); }
+{ return NULL != dynamic_cast<ArrayType_ptr> (this); }
 
 ArrayType_ptr Type::as_array()
 { return dynamic_cast<ArrayType_ptr> (this); }
+
+bool Type::is_string()
+{ return NULL != dynamic_cast<StringType_ptr> (this); }
+
+StringType_ptr Type::as_string()
+{ return dynamic_cast<const StringType_ptr> (this); }
 

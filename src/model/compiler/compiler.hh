@@ -75,6 +75,18 @@ typedef boost::unordered_map<Expr_ptr, Expr_ptr,
 
 #include <boost/thread/mutex.hpp>
 
+enum ECompilerStatus {
+    READY,
+    ENCODING,
+    COMPILING,
+    CHECKING,
+    ACTIVATING_ITE_MUXES,
+    ACTIVATING_ARRAY_MUXES
+};
+
+/* decl only */
+ECompilerStatus& operator++(ECompilerStatus& status);
+
 class Compiler : public ExprWalker {
 public:
     Compiler();
@@ -194,10 +206,14 @@ private:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    /* compilation passes: encodings building, compilation, post-processing */
-    void pass1(Expr_ptr ctx, Expr_ptr body);
-    void pass2(Expr_ptr ctx, Expr_ptr body);
-    void pass3();
+    /* compilation passes: encodings building, compilation */
+    void build_encodings(Expr_ptr ctx, Expr_ptr body);
+    void compile(Expr_ptr ctx, Expr_ptr body);
+
+    /* post-processing */
+    void check_internals();
+    void activate_ite_muxes();
+    void activate_array_muxes();
 
     /* -- data -------------------------------------------------------------- */
 
@@ -235,12 +251,8 @@ private:
     /* Auto expressions and DDs */
     unsigned f_temp_auto_index;
 
-    /* Three phase compilation:
-       1. (f_preprocess)  , build encodings
-       2. (! f_preprocess), perform compilation into CUs
-       3. post-processing , add support for MUXes
-    */
-    bool f_preprocess;
+    /* Compiler status (see above) */
+    ECompilerStatus f_status;
 
     /* synchronization */
     boost::mutex f_process_mutex;

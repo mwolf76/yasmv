@@ -48,6 +48,18 @@ void Clear::set_identifier(Expr_ptr id)
 
 Variant Clear::operator()()
 {
+    OptsMgr& om { OptsMgr::INSTANCE() };
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
+
+    if (! om.quiet())
+        out
+            << outPrefix;
+
+    out
+        << "WARNING: this commands currently does nothing!"
+        << std::endl;
+
     return Variant(okMessage);
 }
 
@@ -66,5 +78,5 @@ void ClearTopic::usage()
 {
     std::cout <<
         "clear [ <identifier> ] - Clears current value of <identifier>.\n\n"
-        "All assignments in the current environment are cleared if no argument is given." ;
+        "All assignments in the current environment are cleared if no argument is given.\n" ;
 }

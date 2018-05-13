@@ -1,8 +1,7 @@
 # -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
-
-AC_INIT([yasmv], [0.0.5], [marco.pensallorto@gmail.com])
+AC_INIT([yasmv], [0.0.7], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -34,7 +33,7 @@ AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
 AC_DEFINE_UNQUOTED(PROGRAM_NAME, "yasmv", Program Name)
-AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.5", Program Version)
+AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.7", Program Version)
 AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
 AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
 AC_DEFINE_UNQUOTED(PROGRAM_EMAIL, "marco.pensallorto@gmail.com", Program Email)
@@ -62,6 +61,7 @@ AC_SUBST(SIZEOF_LONG)
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [exp])
+AX_CHECK_ZLIB()
 
 AM_CONDITIONAL([HAVE_DOXYGEN],
 [test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/Doxyfile])])
@@ -94,6 +94,9 @@ AC_CHECK_HEADER(malloc.h,
 
 # libjsoncpp
 AC_LIBJSONCPP
+
+# Yaml support
+AC_LIBYAMLCPP
 
 # ANTLR3 checks
 AC_ANTLR3

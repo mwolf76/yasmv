@@ -2,7 +2,7 @@
  * @file main.cc
  * @brief Program main body
  *
- * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012-2018 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -58,9 +58,9 @@
 
 #include <boost/chrono.hpp>
 
-static const std::string heading_msg = \
+static const std::string heading_msg =              \
     "yasmv - Yet Another Symbolic Model Verifier\n"
-    "(c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
+    "(c) 2011-2018, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
     "https://github.com/mwolf76/yasmv\n";
 
 /* printing helpers: these functions are unused in the code, they're
@@ -83,19 +83,26 @@ void pd(InlinedOperatorDescriptor& md)
 void batch(Command_ptr cmd)
 {
     Interpreter& system = Interpreter::INSTANCE();
-    bool color (OptsMgr::INSTANCE().color());
+    OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+
+    bool quiet { opts_mgr.quiet() };
+    bool color { opts_mgr.color() };
+
+    /* In batch mode, we print res unless in quiet mode */
     Variant& res = system(cmd);
-    if (color) {
-        std::cout
-            << std::endl
-            << yellow
-            << "<< "
-            << res
-            << normal << std::endl;
-    }
-    else {
-        std::cout << std::endl << "<< " << res
-                  << std::endl;
+    if (! quiet) {
+        if (color) {
+            std::cout
+                << std::endl
+                << yellow
+                << "<< "
+                << res
+                << normal << std::endl;
+        }
+        else {
+            std::cout << std::endl << "<< " << res
+                      << std::endl;
+        }
     }
 }
 
@@ -133,50 +140,13 @@ void sighandler(int signum)
     }
 }
 
-/* run each command in a separate thread */
-void process()
-{
-    Interpreter& system { Interpreter::INSTANCE() };
-    bool color { OptsMgr::INSTANCE().color() };
-    Variant& res { system() };
-    if (color) {
-        std::cout
-            << std::endl
-            << yellow
-            << "<< ";
-    }
-
-    std::cout
-        << res;
-
-    if (color) {
-        std::cout
-            << normal;
-    }
-
-    std::cout
-        << std::endl;
-}
-
 int main(int argc, const char *argv[])
 {
-    std::cout
-        << heading_msg
-        << std::endl;
+    Interpreter& system = Interpreter::INSTANCE();
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGTSTP, sighandler);
 
-    /* load microcode */
-    InlinedOperatorMgr& mm { InlinedOperatorMgr::INSTANCE() };
-    size_t nloaders { mm.loaders().size() };
-
-    TRACE
-        << nloaders
-        << " microcode fragments registered."
-        << std::endl;
-
-    Interpreter& system = Interpreter::INSTANCE();
     try {
         /* parse command line options */
         OptsMgr& opts_mgr = OptsMgr::INSTANCE();
@@ -190,6 +160,23 @@ int main(int argc, const char *argv[])
             exit(0);
         }
 
+        if (! opts_mgr.quiet()) {
+            std::cout
+                << heading_msg
+                << std::endl;
+        }
+
+        /* load microcode */
+        InlinedOperatorMgr& mm { InlinedOperatorMgr::INSTANCE() };
+        size_t nloaders { mm.loaders().size() };
+
+        if (! opts_mgr.quiet()) {
+            TRACE
+                << nloaders
+                << " microcode fragments registered."
+                << std::endl;
+        }
+
         /* run options-generated commands (if any) */
         const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
@@ -197,24 +184,31 @@ int main(int argc, const char *argv[])
                 (reinterpret_cast<ReadModel*>
                  (CommandMgr::INSTANCE().make_read_model()));
 
-            cmd -> set_input( model_filename.c_str());
+            cmd->set_input( model_filename.c_str());
             batch(cmd);
         }
 
+        /* run interactive commands */
         do {
-            process();
+            system();
         } while (! system.is_leaving());
+
+        if (isatty(STDIN_FILENO))
+            std::cout << std::endl;
     }
 
     catch (Exception &e) {
         std::cerr
             << red
+            << "Uncaught exception!! "
             << e.what()
+            << normal
             << std::endl;
     }
 
     return system.retcode();
-}
+
+};
 
 /* logging subsystem settings */
 namespace axter {

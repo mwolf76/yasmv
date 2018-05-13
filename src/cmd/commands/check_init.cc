@@ -24,7 +24,9 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/check_init.hh>
+
 #include <algorithms/fsm/fsm.hh>
 
 
@@ -37,29 +39,41 @@ CheckInit::~CheckInit()
 
 Variant CheckInit::operator()()
 {
-    CheckInitConsistency algorithm
-        (*this, ModelMgr::INSTANCE().model());
+    Variant res = Variant(errMessage);
 
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
+
+    CheckInitConsistency algorithm { *this, ModelMgr::INSTANCE().model() };
     algorithm.process();
 
-    std::ostringstream tmp;
     switch (algorithm.status()) {
     case FSM_CONSISTENCY_OK:
-        tmp << "OK";
+        out
+            << outPrefix
+            << "Initial states consistency check ok."
+            << std::endl;
+
+        res = Variant(okMessage);
         break;
 
     case FSM_CONSISTENCY_KO:
-        tmp << "KO";
-        break;
+        out
+            << outPrefix
+            << "Initial states consistency check failed."
+            << std::endl;
 
     case FSM_CONSISTENCY_UNDECIDED:
-        tmp << "??";
+        out
+            << outPrefix
+            << "Could not decide initial states consistency check."
+            << std::endl;
         break;
 
     default: assert( false ); /* unreachable */
     } /* switch */
 
-    return Variant(tmp.str());
+    return res;
 }
 
 CheckInitTopic::CheckInitTopic(Interpreter& owner)

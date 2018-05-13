@@ -1,6 +1,7 @@
 /**
  * @file sat/cnf_singlecut.cc
- * @brief Engine interface implementation, CNFization algorithm #2 (Single cut) implementation.
+ * @brief Engine interface implementation, CNFization algorithm #2 (Single cut)
+ * implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

@@ -469,8 +469,6 @@ bool ModelMgr::analyze()
     analyzer_pass_t pass
         ((analyzer_pass_t) 0);
 
-
-
     while (pass < MMGR_DONE) {
         DRIVEL
             << "Model analysis (pass " << pass << ")"

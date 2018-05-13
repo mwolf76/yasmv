@@ -56,8 +56,10 @@ void Evaluator::clear_internals()
     f_te2v_map.clear();
 }
 
-Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
-                            Expr_ptr body, step_t time)
+Expr_ptr Evaluator::process(Witness &witness,
+                            Expr_ptr ctx,
+                            Expr_ptr body,
+                            step_t time)
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -89,7 +91,16 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
         assert(1 == f_values_stack.size());
         value_t res_value
             (f_values_stack.back());
-        return res_value ? em.make_true() : em.make_false();
+
+        return res_value
+            ? em.make_true()
+            : em.make_false();
+    }
+    else if (res_type->is_string()) {
+        assert(1 == f_values_stack.size());
+        value_t cp { f_values_stack.at(0) };
+        Atom atom { (const char *) cp };
+        return em.make_qstring(atom);
     }
     else if (res_type->is_enum()) {
         assert(1 == f_values_stack.size());
@@ -143,6 +154,8 @@ Expr_ptr Evaluator::process(Witness &witness, Expr_ptr ctx,
         return em.make_array(lst);
     }
     else assert(false);
+
+
 }
 
 /*  Evaluation engine is implemented using a simple expression walker

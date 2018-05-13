@@ -1,6 +1,6 @@
-/**
- * @file time.cc
- * @brief Command `time` class implementation.
+/*
+ * @file do.cc
+ * @brief Command `do` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,55 +21,62 @@
  *
  **/
 
-#include <iomanip>
-
-#include <utils/clock.hh>
-
-#include <cmd/interpreter.hh>
+#include <cstdlib>
+#include <cstring>
 
 #include <cmd/commands/commands.hh>
-#include <cmd/commands/time.hh>
+#include <cmd/commands/do.hh>
 
-Time::Time(Interpreter& owner)
+#include <cmd/cmd.hh>
+
+Do::Do(Interpreter& owner)
     : Command(owner)
+    , f_commands()
 {}
 
-Time::~Time()
-{}
-
-Variant Time::operator()()
+Do::~Do()
 {
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
-
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-
-    out
-        << outPrefix
-        << "Session time: "
-        << elapsed_repr(Interpreter::INSTANCE().epoch(), now)
-        << "."
-        << std::endl;
-
-    return Variant(okMessage);
+    f_commands.clear();
 }
 
-TimeTopic::TimeTopic(Interpreter& owner)
+Variant Do::operator()()
+{
+    CommandMgr& cm { CommandMgr::INSTANCE() };
+
+    Variant res;
+    Commands::iterator i = f_commands.begin();
+    while (i != f_commands.end()) {
+        Command_ptr c { *i };
+        assert(NULL != c);
+
+        res = (*c)();
+        if (cm.is_failure(res))
+            break;
+
+        ++ i;
+    }
+
+    return res;
+}
+
+void Do::add_command(Command_ptr c)
+{
+    f_commands.push_back(c);
+}
+
+DoTopic::DoTopic(Interpreter& owner)
     : CommandTopic(owner)
 {}
 
-TimeTopic::~TimeTopic()
+DoTopic::~DoTopic()
 {
     TRACE
-        << "Destroyed time topic"
+        << "Destroyed do topic"
         << std::endl;
 }
 
-void TimeTopic::usage()
+void DoTopic::usage()
 {
     std::cout
-        << "time - retrieves current running time\n\n"
-        << "This command can be used to measure time elapsed running previous commands\n"
-        << "as in this example: >> reach GOAL; time\n"; 
+        << "do [ <command> ';' ... ] done - Builds a sequence of commands\n";
 }

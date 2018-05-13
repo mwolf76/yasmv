@@ -703,6 +703,21 @@ constant returns [Expr_ptr res]
         Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
         $res = em.make_dec_const(tmp);
       }
+
+    | QUOTED_STRING {
+            pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
+            pANTLR3_UINT8 q; for (q = p; *q; ++ q) ;
+
+            assert (*p == '\'' || *p == '\"');
+            p ++ ;  /* cut lhs quote */
+
+            q -- ;
+            assert (*q == '\'' || *q == '\"');
+            *q = 0; /* cut rhs quote */
+
+            Atom atom { (const char *) p };
+            $res = em.make_qstring(atom);
+      }
     ;
 
 /* pvalue is used in param passing (actuals) */
@@ -877,116 +892,261 @@ commands [CommandVector_ptr cmds]
         )* ;
 
 command_topic returns [CommandTopic_ptr res]
-    :  c=help_command_topic
-       { $res = c; }
-
-    |  c=time_command_topic
-       { $res = c; }
-
-    |  c=get_command_topic
-       { $res = c; }
-
-    |  c=set_command_topic
-       { $res = c; }
-
-    |  c=clear_command_topic
-       { $res = c; }
-
-    |  c=read_model_command_topic
-       { $res = c; }
-
-    |  c=dump_model_command_topic
-       { $res = c; }
-
-    |  c=pick_state_command_topic
-       { $res = c; }
-
-    |  c=simulate_command_topic
+    :  c=check_init_command_topic
        { $res = c; }
 
     |  c=check_trans_command_topic
        { $res = c; }
 
-    |  c=check_init_command_topic
+    |  c=clear_command_topic
        { $res = c; }
 
-    |  c=reach_command_topic
+    |  c=do_command_topic
+       { $res = c; }
+
+    |  c=dump_model_command_topic
+        { $res = c; }
+
+    |  c=dump_trace_command_topic
+        { $res = c; }
+
+    |  c=dup_trace_command_topic
+        { $res = c; }
+
+    |  c=echo_command_topic
+       { $res = c; }
+
+    |  c=get_command_topic
+       { $res = c; }
+
+    |  c=help_command_topic
+       { $res = c; }
+
+    |  c=last_command_topic
        { $res = c; }
 
     |  c=list_traces_command_topic
        { $res = c; }
 
-    |  c=dump_trace_command_topic
+    |  c=on_command_topic
+       {$res = c; }
+
+    |  c=read_model_command_topic
        { $res = c; }
 
-    |  c=dup_trace_command_topic
+    |  c=pick_state_command_topic
        { $res = c; }
 
     |  c=quit_command_topic
        { $res = c; }
+
+    |  c=reach_command_topic
+       { $res = c; }
+
+    |  c=set_command_topic
+       { $res = c; }
+
+    |  c=simulate_command_topic
+       { $res = c; }
+
+    |  c=time_command_topic
+       { $res = c; }
     ;
 
 command returns [Command_ptr res]
-    :  c=help_command
-       { $res = c; }
-
-    |  c=time_command
-       { $res = c; }
-
-    |  c=read_model_command
-       { $res = c; }
-
-    |  c=dump_model_command
-       { $res = c; }
-
-    |  c=pick_state_command
-       { $res = c; }
-
-    |  c=simulate_command
-       { $res = c; }
-
-    |  c=check_init_command
-       { $res = c; }
-
-    |  c=reach_command
+    :  c=check_init_command
        { $res = c; }
 
     |  c=check_trans_command
        { $res = c; }
 
-    |  c=list_traces_command
+    |  c=clear_command
        { $res = c; }
+
+    |  c=do_command
+       { $res = c; }
+
+    |  c=dump_model_command
+        { $res = c; }
 
     |  c=dump_trace_command
-       { $res = c; }
+        { $res = c; }
 
     |  c=dup_trace_command
+        { $res = c; }
+
+    |  c=echo_command
        { $res = c; }
 
     |  c=get_command
        { $res = c; }
 
-    |  c=set_command
+    |  c=help_command
        { $res = c; }
 
-    |  c=clear_command
+    |  c=last_command
+       { $res = c; }
+
+    |  c=list_traces_command
+       { $res = c; }
+
+    |  c=on_command
+       {$res = c; }
+
+    |  c=read_model_command
+       { $res = c; }
+
+    |  c=pick_state_command
        { $res = c; }
 
     |  c=quit_command
        { $res = c; }
+
+    |  c=reach_command
+       { $res = c; }
+
+    |  c=set_command
+       { $res = c; }
+
+    |  c=simulate_command
+       { $res = c; }
+
+    |  c=time_command
+       { $res = c; }
     ;
+
+// command returns [Command_ptr res]
+//     :  c=help_command
+//        { $res = c; }
+
+//     |  c=do_command
+//        { $res = c; }
+
+//     |  c=echo_command
+//        { $res = c; }
+
+//     |  c=last_command
+//        { $res = c; }
+
+//     |  c=on_command
+//        { $res = c; }
+
+//     |  c=time_command
+//        { $res = c; }
+
+//     |  c=read_model_command
+//        { $res = c; }
+
+//     |  c=dump_model_command
+//        { $res = c; }
+
+//     |  c=pick_state_command
+//        { $res = c; }
+
+//     |  c=simulate_command
+//        { $res = c; }
+
+//     |  c=check_init_command
+//        { $res = c; }
+
+//     |  c=reach_command
+//        { $res = c; }
+
+//     |  c=check_trans_command
+//        { $res = c; }
+
+//     |  c=list_traces_command
+//        { $res = c; }
+
+//     |  c=dump_trace_command
+//        { $res = c; }
+
+//     |  c=dup_trace_command
+//        { $res = c; }
+
+//     |  c=get_command
+//        { $res = c; }
+
+//     |  c=set_command
+//        { $res = c; }
+
+//     |  c=clear_command
+//        { $res = c; }
+
+//     |  c=quit_command
+//        { $res = c; }
+//     ;
 
 help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
       (
           topic = command_topic
-          { ((Help*) $res)->set_topic(topic); }
+          { ((Help_ptr) $res)->set_topic(topic); }
       )? ;
 
 help_command_topic returns [CommandTopic_ptr res]
     : 'help'
       { $res = cm.topic_help(); }
+    ;
+
+do_command returns [Command_ptr res]
+    : 'do'
+      { $res = cm.make_do(); }
+      (
+            subcommand = command ';'
+            { ((Do_ptr) res)->add_command(subcommand); }
+      )+ ;
+
+do_command_topic returns [CommandTopic_ptr res]
+    : 'do'
+       { $res = cm.topic_do(); }
+    ;
+
+echo_command returns [Command_ptr res]
+@init {
+    ExprVector ev;
+}
+    : 'echo'?
+      { $res = cm.make_echo(); }
+      (
+            exprs = expressions[&ev]
+            {
+                for (ExprVector::iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
+                    Expr_ptr expr { *ei };
+                    ((Echo_ptr) $res) -> append_expression(expr);
+                }
+            }
+      ) ;
+
+echo_command_topic returns [CommandTopic_ptr res]
+    : 'echo'
+       { $res = cm.topic_echo(); }
+    ;
+
+last_command returns [Command_ptr res]
+    : 'last'
+      { $res = cm.make_last(); }
+    ;
+
+last_command_topic returns [CommandTopic_ptr res]
+    : 'last'
+       { $res = cm.topic_last(); }
+    ;
+
+on_command returns [Command_ptr res]
+    :
+      'on'
+        ('success' { $res = cm.make_on(); }
+            tc=command { ((On_ptr) $res)->set_then(tc); } |
+
+          'failure' { $res = cm.make_on(); }
+            ec=command { ((On_ptr) $res)->set_else(ec); } )
+    ;
+
+on_command_topic returns [CommandTopic_ptr res]
+    : 'on'
+        { $res = cm.topic_on(); }
     ;
 
 time_command returns [Command_ptr res]
@@ -1003,8 +1163,8 @@ read_model_command returns [Command_ptr res]
     :  'read-model'
         { $res = cm.make_read_model(); }
 
-        ( input=filepath {
-            ((ReadModel*) $res)->set_input(input);
+        ( input=pcchar_quoted_string {
+            ((ReadModel_ptr) $res)->set_input(input);
         }) ?
     ;
 
@@ -1017,8 +1177,8 @@ dump_model_command returns [Command_ptr res]
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
-        ( output=filepath {
-            ((DumpModel*) $res)->set_output(output);
+        ( output=pcchar_quoted_string {
+            ((DumpModel_ptr) $res)->set_output(output);
         }) ?
     ;
 
@@ -1042,7 +1202,7 @@ reach_command returns[Command_ptr res]
       { $res = cm.make_reach(); }
 
         target=toplevel_expression
-        { ((Reach *) $res)->set_target(target); }
+        { ((Reach_ptr) $res)->set_target(target); }
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]
@@ -1075,19 +1235,19 @@ dump_trace_command returns [Command_ptr res]
       { $res = cm.make_dump_trace(); }
 
     (
-      '-f' format=string
-      { ((DumpTrace*) $res)->set_format(format); }
+      '-f' format=pcchar_identifier
+      { ((DumpTrace_ptr) $res)->set_format(format); }
 
-    | '-o' output=filepath
+    | '-o' output=pcchar_quoted_string
       {
-            ((DumpTrace*) $res)->set_output(output);
+            ((DumpTrace_ptr) $res)->set_output(output);
             free((void *) output);
       }
 
     )*
 
-    ( trace_id=string
-    { ((DumpTrace*) $res)->set_trace_id(trace_id); } )?
+    ( trace_id=pcchar_identifier
+    { ((DumpTrace_ptr) $res)->set_trace_id(trace_id); } )?
     ;
 
 dump_trace_command_topic returns [CommandTopic_ptr res]
@@ -1100,11 +1260,11 @@ dup_trace_command returns [Command_ptr res]
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
-      trace_id=string
-      { ((DupTrace*) $res)->set_trace_id(trace_id); }
+      trace_id=pcchar_identifier
+      { ((DupTrace_ptr) $res)->set_trace_id(trace_id); }
 
-      ( duplicate_uid=string
-        { ((DupTrace*) $res)->set_duplicate_id(duplicate_uid); } )?
+      ( duplicate_uid=pcchar_identifier
+        { ((DupTrace_ptr) $res)->set_duplicate_id(duplicate_uid); } )?
     ;
 
 dup_trace_command_topic returns [CommandTopic_ptr res]
@@ -1117,10 +1277,10 @@ pick_state_command returns [Command_ptr res]
         { $res = cm.make_pick_state(); }
     (
          '-a'
-         { ((PickState*) $res)->set_allsat(true); }
+         { ((PickState_ptr) $res)->set_allsat(true); }
 
     |    '-l' limit=constant
-         { ((PickState*) $res)->set_limit(limit->value()); }
+         { ((PickState_ptr) $res)->set_limit(limit->value()); }
     )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]
@@ -1133,16 +1293,16 @@ simulate_command returns [Command_ptr res]
       { $res = cm.make_simulate(); }
     (
        '-i' invar_condition=toplevel_expression
-        { ((Simulate *) $res)->set_invar_condition(invar_condition); }
+        { ((Simulate_ptr) $res)->set_invar_condition(invar_condition); }
 
     |  '-u' until_condition=toplevel_expression
-        { ((Simulate*) $res)->set_until_condition(until_condition); }
+        { ((Simulate_ptr) $res)->set_until_condition(until_condition); }
 
     |   '-k' konst=constant
-        { ((Simulate*) $res)->set_k(konst->value()); }
+        { ((Simulate_ptr) $res)->set_k(konst->value()); }
 
-    |   '-t' trace_id=string
-        { ((Simulate*) $res)->set_trace_uid(trace_id); }
+    |   '-t' trace_id=pcchar_identifier
+        { ((Simulate_ptr) $res)->set_trace_uid(trace_id); }
     )* ;
 
 simulate_command_topic returns [CommandTopic_ptr res]
@@ -1155,7 +1315,7 @@ get_command returns [Command_ptr res]
       { $res = cm.make_get(); }
 
       ( id=identifier
-      { ((Get*) $res)->set_identifier(id); })?
+      { ((Get_ptr) $res)->set_identifier(id); })?
     ;
 
 get_command_topic returns [CommandTopic_ptr res]
@@ -1168,10 +1328,10 @@ set_command returns [Command_ptr res]
       { $res = cm.make_set(); }
 
       id=identifier
-      { ((Set*) $res)->set_identifier(id); }
+      { ((Set_ptr) $res)->set_identifier(id); }
 
       val=toplevel_expression
-      { ((Set*) $res)->set_value(val); }
+      { ((Set_ptr) $res)->set_value(val); }
     ;
 
 set_command_topic returns [CommandTopic_ptr res]
@@ -1184,7 +1344,7 @@ clear_command returns [Command_ptr res]
       { $res = cm.make_clear(); }
 
       ( id=identifier
-      { ((Clear*) $res)->set_identifier(id); })?
+      { ((Clear_ptr) $res)->set_identifier(id); })?
     ;
 
 clear_command_topic returns [CommandTopic_ptr res]
@@ -1202,15 +1362,15 @@ quit_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_quit(); }
     ;
 
-string returns [pconst_char res]
+pcchar_identifier returns [pconst_char res]
 @init {}
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
 
-filepath returns [pconst_char res]
-    : FILEPATH
-    { $res = (pconst_char) $FILEPATH.text->chars; }
+pcchar_quoted_string returns [pconst_char res]
+    : QUOTED_STRING
+    { $res = (pconst_char) $QUOTED_STRING.text->chars; }
     ;
 
 // -- Lexer rules --------------------------------------------------------------
@@ -1226,7 +1386,7 @@ IDENTIFIER
     :   ID_FIRST_CHAR (ID_FOLLOWING_CHARS)*
     ;
 
-FILEPATH
+QUOTED_STRING
     : '"' .+ '"'
     | '\'' .+ '\''
     ;

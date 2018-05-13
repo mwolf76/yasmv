@@ -1,3 +1,5 @@
 reach GOAL
+on success echo "*** unexpected result ***"
+on failure echo "As old Euler said, there really is *no* way to cross all the bridges in Koenisberg exactly once."
 time
 quit

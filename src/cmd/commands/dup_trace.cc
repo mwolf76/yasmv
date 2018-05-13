@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cmd/commands/commands.hh>
 #include <cmd/commands/dup_trace.hh>
 
 #include <expr/expr.hh>
@@ -61,8 +62,15 @@ void DupTrace::set_duplicate_id(pconst_char duplicate_id)
 
 Variant DupTrace::operator()()
 {
-    assert(false);
-    return Variant("XXX");
+/* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out { std::cout };
+
+    out
+        << outPrefix
+        << "WARNING: this commands currently does nothing!"
+        << std::endl;
+
+    return Variant(okMessage);
 }
 
 DupTraceTopic::DupTraceTopic(Interpreter& owner)

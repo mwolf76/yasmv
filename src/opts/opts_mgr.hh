@@ -59,6 +59,9 @@ public:
     // level of verbosity
     unsigned verbosity() const;
 
+    // quiet
+    bool quiet() const;
+
     // colorized
     bool color() const;
 
@@ -91,8 +94,10 @@ private:
     options::variables_map f_vm;
 
     bool f_help;
+    bool f_quiet;
     bool f_color;
     bool f_started;
+    bool f_version;
 
     unsigned f_word_width;
     unsigned f_precision;

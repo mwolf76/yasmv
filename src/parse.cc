@@ -37,33 +37,20 @@
 #include <parser/grammars/smvParser.h>
 
 #include <utils/misc.hh>
+#include <utils/clock.hh>
 
 /* Antlr 3.4 has a slightly different interface. Enable this if necessary */
 #define HAVE_ANTLR_34 0
 
 static bool parseErrors;
 static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
-                                          pANTLR3_UINT8 * tokenNames)
-{
-    if (! parseErrors) {
-        std::cerr
-            << "Syntax error";
+                                          pANTLR3_UINT8 * tokenNames);
+static void reportParserStatus(bool parseErrors, timespec start,
+                               timespec stop);
 
-        if (0 <= recognizer->state->exception->charPositionInLine) {
-
-            std::cerr << " in line "
-                      << recognizer->state->exception->line
-                      << ", offset "
-                      << recognizer->state->exception->charPositionInLine ;
-        }
-
-        std::cerr << "."
-                  << std::endl;
-    }
-
-    parseErrors = true;
-}
-
+/**
+ * Runs the parser SMV rule on an input .smv file.
+ */
 bool parseFile(const char* fName)
 {
     pANTLR3_INPUT_STREAM input;
@@ -73,8 +60,13 @@ bool parseFile(const char* fName)
     psmvLexer  lxr;
 
     DEBUG
-        << "Preparing for parsing file " << fName
+        << "Parsing smv file "
+        << fName
+        << " ..."
         << std::endl;
+
+    struct timespec start_clock;
+    clock_gettime(CLOCK_MONOTONIC, &start_clock);
 
 #if HAVE_ANTLR_34
     input = antlr3FileStreamNew((pANTLR3_UINT8) fName, ANTLR3_ENC_UTF8);
@@ -105,10 +97,17 @@ bool parseFile(const char* fName)
     lxr->free(lxr);
     input->close(input);
 
+    struct timespec stop_clock;
+    clock_gettime(CLOCK_MONOTONIC, &stop_clock);
+
+    reportParserStatus(parseErrors, start_clock, stop_clock);
     return parseErrors;
 }
 
-// TODO: proper error handling
+/**
+ * Runs the parser COMMAND_LINE rule on an input line string.
+ */
+// FIXME: proper error handling
 CommandVector_ptr parseCommand(const char *command_line)
 {
     pANTLR3_INPUT_STREAM input;
@@ -116,6 +115,13 @@ CommandVector_ptr parseCommand(const char *command_line)
 
     psmvParser psr;
     psmvLexer  lxr;
+
+    DEBUG
+        << "Parsing command ..."
+        << std::endl;
+
+    struct timespec start_clock;
+    clock_gettime(CLOCK_MONOTONIC, &start_clock);
 
 #if HAVE_ANTLR_34
     input = antlr3StringStreamNew((pANTLR3_UINT8) command_line,
@@ -148,10 +154,17 @@ CommandVector_ptr parseCommand(const char *command_line)
     lxr->free(lxr);
     input->close(input);
 
+    struct timespec stop_clock;
+    clock_gettime(CLOCK_MONOTONIC, &stop_clock);
+
+    reportParserStatus(parseErrors, start_clock, stop_clock);
     return ! parseErrors
         ? res : NULL;
 }
 
+/**
+ * Runs the parser TOPLEVEL_EXPRESSION rule on a single string.
+ */
 Expr_ptr parseExpression(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
@@ -179,8 +192,7 @@ Expr_ptr parseExpression(const char *string)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
-    Expr_ptr res
-        (psr -> toplevel_expression(psr));
+    Expr_ptr res { psr -> toplevel_expression(psr) };
 
     psr->free(psr);
     tstream->free(tstream);
@@ -188,9 +200,13 @@ Expr_ptr parseExpression(const char *string)
     input->close(input);
 
     return ! parseErrors
-        ? res : NULL;
+        ? res
+        : NULL;
 }
 
+/**
+ * Runs the parser TYPE rule on a single string.
+ */
 Type_ptr parseTypedef(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
@@ -233,4 +249,43 @@ Type_ptr parseTypedef(const char *string)
 
     return ! parseErrors
         ? res : NULL;
+}
+
+/* -- static helpers ------------------------------------------------------- */
+static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
+                                          pANTLR3_UINT8 * tokenNames)
+{
+    if (! parseErrors) {
+        std::cerr
+            << "Syntax error";
+
+        if (0 <= recognizer->state->exception->charPositionInLine) {
+            std::cerr << " in line "
+                      << recognizer->state->exception->line
+                      << ", offset "
+                      << recognizer->state->exception->charPositionInLine ;
+        }
+
+        std::cerr << "."
+                  << std::endl;
+    }
+
+    parseErrors = true;
+}
+
+static void reportParserStatus(bool parseErrors, timespec start, timespec stop)
+{
+    const std::string elapsed { elapsed_repr(start, stop) };
+    if (parseErrors)
+        DEBUG
+            << "Parser terminated with errors in "
+            << elapsed
+            << "."
+            << std::endl;
+    else
+        DEBUG
+            << "Parser terminated successfully in "
+            << elapsed
+            << "."
+            << std::endl;
 }

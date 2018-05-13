@@ -37,6 +37,7 @@ ExprMgr::ExprMgr()
 
     /* generate internal symbol definitions */
     bool_expr = make_identifier(BOOL_TOKEN);
+    string_expr = make_identifier(STRING_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);
     true_expr = make_identifier(TRUE_TOKEN);
 
@@ -120,7 +121,26 @@ Expr_ptr ExprMgr::make_identifier(Atom atom)
     }
 #endif
 
-    return make_expr(pooled_atom);
+    return make_expr(IDENT, pooled_atom);
+}
+
+Expr_ptr ExprMgr::make_qstring(Atom atom)
+{
+    boost::mutex::scoped_lock lock(f_atom_mutex);
+
+    AtomPoolHit ah = f_atom_pool.insert(atom);
+    const Atom& pooled_atom =  (* ah.first);
+
+#if 0
+    if (ah.second) {
+        DEBUG
+            << "Added new atom to pool: `"
+            << pooled_atom << "`"
+            << std::endl;
+    }
+#endif
+
+    return make_expr(QSTRING, pooled_atom);
 }
 
 Expr_ptr ExprMgr::__make_expr(Expr_ptr expr) {

@@ -30,7 +30,6 @@
 #include <cmd/command.hh>
 
 class DumpModel : public Command {
-
     pchar f_output;
 
 public:
@@ -43,6 +42,7 @@ public:
 
     Variant virtual operator()();
 };
+typedef DumpModel* DumpModel_ptr;
 
 class DumpModelTopic : public CommandTopic {
 public:

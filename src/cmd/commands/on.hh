@@ -1,6 +1,9 @@
-/*
- * @file common/tokens.cc
- * @brief System wide definitions.
+/**
+ * @file on.hh
+ * @brief Command-interpreter subsystem related classes and definitions.
+ *
+ * This header file contains the handler inteface for the `on`
+ * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,19 +24,31 @@
  *
  **/
 
-#include <common/tokens.hh>
+#ifndef ON_H
+#define ON_H
 
-const char *EMPTY_TOKEN = "__nil__";
+#include <cmd/command.hh>
+typedef CommandTopic* CommandTopic_ptr;
 
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN  = "TRUE";
+class On : public Command {
+    Command_ptr f_then;
+    Command_ptr f_else;
 
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *STRING_TOKEN    = "string";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+public:
+    On(Interpreter& owner);
+    virtual ~On();
+
+    void set_then(Command_ptr c);
+    void set_else(Command_ptr c);
+    Variant virtual operator()();
+};
+typedef On* On_ptr;
+
+class OnTopic : public CommandTopic {
+public:
+    OnTopic(Interpreter& owner);
+    virtual ~OnTopic();
+
+    void virtual usage();
+};
+#endif /* ON_H */

@@ -904,6 +904,7 @@ void ExprWalker::walk ()
         case BCONST:
         case OCONST:
         case IDENT:
+        case QSTRING:
         case UNDEF:
             walk_leaf(curr.expr);
             break;

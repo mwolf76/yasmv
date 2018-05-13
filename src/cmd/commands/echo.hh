@@ -1,6 +1,9 @@
-/*
- * @file common.cc
- * @brief System wide definitions.
+/**
+ * @file echo.hh
+ * @brief Command-interpreter subsystem related classes and definitions.
+ *
+ * This header file contains the handler inteface for the `echo`
+ * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,11 +24,29 @@
  *
  **/
 
-/* environment variables and paths */
-const char *YASMV_MICROCODE_PATH = "YASMV_MICROCODE";
+#ifndef ECHO_H
+#define ECHO_H
 
-const char* TRACE_FMT_PLAIN = "plain";
-const char* TRACE_FMT_JSON  = "json";
-const char* TRACE_FMT_XML  = "xml";
+#include <cmd/command.hh>
+class Echo : public Command {
+    using expressions = std::vector<Expr_ptr>;
+    expressions f_expressions;
 
-const char* TRACE_FMT_DEFAULT (TRACE_FMT_PLAIN);
+public:
+    Echo(Interpreter& owner);
+    virtual ~Echo();
+
+    void append_expression(Expr_ptr expression);
+
+    Variant virtual operator()();
+};
+typedef Echo* Echo_ptr;
+
+class EchoTopic : public CommandTopic {
+public:
+    EchoTopic(Interpreter& owner);
+    virtual ~EchoTopic();
+
+    void virtual usage();
+};
+#endif /* ECHO_H */

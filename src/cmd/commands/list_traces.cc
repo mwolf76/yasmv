@@ -85,5 +85,5 @@ ListTracesTopic::~ListTracesTopic()
 void ListTracesTopic::usage()
 {
     std::cout
-        << "list-traces - Lists currently available traces." ;
+        << "list-traces - Lists currently available traces.\n" ;
 }

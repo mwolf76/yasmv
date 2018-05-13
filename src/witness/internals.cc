@@ -109,7 +109,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     TOP_CTX(ctx);
     TOP_TIME(time);
 
-    // 0. explicit boolean consts
+    // explicit boolean consts
     if (em.is_bool_const(expr)) {
 
         PUSH_TYPE(tm.find_boolean());
@@ -125,13 +125,20 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    // 1. explicit int consts (e.g. 42) ...
+    // explicit int consts (e.g. 42) ...
     if (em.is_int_const(expr)) {
         unsigned ww
             (OptsMgr::INSTANCE().word_width());
 
         PUSH_TYPE (tm.find_unsigned(ww));
         PUSH_VALUE(expr->value());
+        return;
+    }
+
+    // explicit string consts (e.g. "hello") ...
+    if (em.is_qstring(expr)) {
+        PUSH_TYPE (tm.find_string());
+        PUSH_VALUE((value_t) expr->atom().c_str());
         return;
     }
 

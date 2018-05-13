@@ -43,6 +43,7 @@ public:
 
     Variant virtual operator()();
 };
+typedef Reach* Reach_ptr;
 
 class ReachTopic : public CommandTopic {
 public:

@@ -42,6 +42,8 @@ public:
     Variant virtual operator()();
 };
 
+typedef Clear* Clear_ptr;
+
 class ClearTopic : public CommandTopic {
 public:
     ClearTopic(Interpreter& owner);

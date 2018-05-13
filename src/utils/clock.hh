@@ -1,6 +1,6 @@
-/*
- * @file common/tokens.cc
- * @brief System wide definitions.
+/**
+ * @file clock.hh
+ * @brief Generic utils module head file
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,19 +21,12 @@
  *
  **/
 
-#include <common/tokens.hh>
+#ifndef CLOCK_H
+#define CLOCK_H
 
-const char *EMPTY_TOKEN = "__nil__";
+#include <string>
+#include <ctime>
 
-/* bool consts */
-const char *FALSE_TOKEN = "FALSE";
-const char *TRUE_TOKEN  = "TRUE";
+std::string elapsed_repr(struct timespec from, struct timespec to);
 
-/* types */
-const char *BOOL_TOKEN      = "boolean";
-const char *STRING_TOKEN    = "string";
-const char *UNSIGNED_TOKEN  = "u";
-const char *SIGNED_TOKEN    = "";
-const char *CONST_TOKEN     = "const";
-const char *INT_TOKEN       = "int";
-const char *ARRAY_TOKEN     = "array";
+#endif /* CLOCK_H */
