@@ -1,6 +1,5 @@
-set from HOME
-set to POSITIVE
+do set from HOME; set to POSITIVE;
 reach GOAL
-dump-trace
+on success dump-trace
 time
 quit

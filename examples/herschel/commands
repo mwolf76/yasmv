@@ -1,3 +1,4 @@
 reach GOAL
+on failure echo "Expected result"
 time
 quit
