@@ -42,6 +42,7 @@ void Reach::set_target(Expr_ptr target)
 
 Variant Reach::operator()()
 {
+    OptsMgr& om { OptsMgr::INSTANCE() };
     std::ostream& out { std::cout };
     bool res { false };
 
@@ -61,6 +62,10 @@ Variant Reach::operator()()
     reachability_status_t status { bmc.status() };
     if (status == BMC_REACHABLE) {
         res = true;
+
+        if (! om.quiet())
+            out
+                << outPrefix;
         out
             << "Target is reachable";
 
@@ -77,6 +82,10 @@ Variant Reach::operator()()
                 << std::endl;
         }
     } else if (status == BMC_UNREACHABLE) {
+        if (! om.quiet())
+            out
+                << wrnPrefix;
+
         out
             << "Target is unreachable."
             << std::endl;

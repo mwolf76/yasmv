@@ -203,7 +203,7 @@ Variant& Interpreter::operator()()
                         (*this)(cmd);
                     }
                 }
-                else f_last_result = Variant(okMessage);
+                else f_last_result = Variant(errMessage);
             } catch (Exception& e) {
                 std::stringstream ss;
 
