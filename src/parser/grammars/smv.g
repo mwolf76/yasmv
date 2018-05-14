@@ -1015,68 +1015,6 @@ command returns [Command_ptr res]
        { $res = c; }
     ;
 
-// command returns [Command_ptr res]
-//     :  c=help_command
-//        { $res = c; }
-
-//     |  c=do_command
-//        { $res = c; }
-
-//     |  c=echo_command
-//        { $res = c; }
-
-//     |  c=last_command
-//        { $res = c; }
-
-//     |  c=on_command
-//        { $res = c; }
-
-//     |  c=time_command
-//        { $res = c; }
-
-//     |  c=read_model_command
-//        { $res = c; }
-
-//     |  c=dump_model_command
-//        { $res = c; }
-
-//     |  c=pick_state_command
-//        { $res = c; }
-
-//     |  c=simulate_command
-//        { $res = c; }
-
-//     |  c=check_init_command
-//        { $res = c; }
-
-//     |  c=reach_command
-//        { $res = c; }
-
-//     |  c=check_trans_command
-//        { $res = c; }
-
-//     |  c=list_traces_command
-//        { $res = c; }
-
-//     |  c=dump_trace_command
-//        { $res = c; }
-
-//     |  c=dup_trace_command
-//        { $res = c; }
-
-//     |  c=get_command
-//        { $res = c; }
-
-//     |  c=set_command
-//        { $res = c; }
-
-//     |  c=clear_command
-//        { $res = c; }
-
-//     |  c=quit_command
-//        { $res = c; }
-//     ;
-
 help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
