@@ -28,6 +28,7 @@
 #define DUMP_MODEL_CMD_H
 
 #include <cmd/command.hh>
+#include <model/module.hh>
 
 class DumpModel : public Command {
     pchar f_output;
@@ -41,6 +42,13 @@ public:
     { return f_output; }
 
     Variant virtual operator()();
+
+private:
+    void dump_heading(std::ostream& os, Module& module);
+    void dump_variables(std::ostream& os, Module& module);
+    void dump_inits(std::ostream &os, Module& module);
+    void dump_invars(std::ostream& os, Module& module);
+    void dump_transes(std::ostream&os, Module& module);
 };
 typedef DumpModel* DumpModel_ptr;
 
