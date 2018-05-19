@@ -205,11 +205,10 @@ Variant& Interpreter::operator()()
                 }
                 else f_last_result = Variant(errMessage);
             } catch (Exception& e) {
-                std::stringstream ss;
-
-                ss
-                    << "Exception!! "
-                    << e.what();
+                std::string what { e.what() };
+                ERR
+                    << what
+                    << std::endl;
 
                 f_last_result = Variant(errMessage);
             }

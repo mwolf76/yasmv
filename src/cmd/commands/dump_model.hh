@@ -44,6 +44,9 @@ public:
     Variant virtual operator()();
 
 private:
+    std::ostream* f_outfile { NULL };
+    std::ostream& get_output_stream();
+
     void dump_heading(std::ostream& os, Module& module);
     void dump_variables(std::ostream& os, Module& module);
     void dump_inits(std::ostream &os, Module& module);

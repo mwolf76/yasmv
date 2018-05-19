@@ -158,10 +158,28 @@ void DumpModel::dump_transes(std::ostream& os, Module& module)
     }
 }
 
+std::ostream& DumpModel::get_output_stream()
+{
+    auto* res { &std::cout } ;
+    if (f_output) {
+        if (f_outfile == NULL) {
+            DEBUG
+                << "Writing output to file `"
+                << f_output
+                << "`"
+                << std::endl;
+
+            f_outfile = new std::ofstream(f_output, std::ofstream::binary);
+        }
+        res = f_outfile;
+    }
+
+    return *res;
+}
+
 Variant DumpModel::operator()()
 {
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    std::ostream& out { get_output_stream() };
 
     Model& model
         (ModelMgr::INSTANCE().model());

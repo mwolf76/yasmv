@@ -1179,7 +1179,6 @@ dump_trace_command returns [Command_ptr res]
     | '-o' output=pcchar_quoted_string
       {
             ((DumpTrace_ptr) $res)->set_output(output);
-            free((void *) output);
       }
 
     )*
@@ -1308,7 +1307,19 @@ pcchar_identifier returns [pconst_char res]
 
 pcchar_quoted_string returns [pconst_char res]
     : QUOTED_STRING
-    { $res = (pconst_char) $QUOTED_STRING.text->chars; }
+        {
+            pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
+            pANTLR3_UINT8 q; for (q = p; *q; ++ q) ;
+
+            assert (*p == '\'' || *p == '\"');
+            p ++ ;  /* cut lhs quote */
+
+            q -- ;
+            assert (*q == '\'' || *q == '\"');
+            *q = 0; /* cut rhs quote */
+
+            $res = (pconst_char) p; // $QUOTED_STRING.text->chars;
+        }
     ;
 
 // -- Lexer rules --------------------------------------------------------------

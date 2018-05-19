@@ -95,6 +95,9 @@ public:
     Variant virtual operator()();
 
 private:
+    std::ostream* f_outfile { NULL } ;
+    std::ostream& get_output_stream() ;
+
     void dump_plain(std::ostream& os, Witness& w);
     void dump_plain_section(std::ostream&os,
                             const char* section,
