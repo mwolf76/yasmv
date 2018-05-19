@@ -214,6 +214,6 @@ DumpModelTopic::~DumpModelTopic()
 void DumpModelTopic::usage()
 {
     std::cout
-        << "dump-model [<filename>] - Dump current model to given filename[*].\n"
-        << "[*] either in single or double quotes. If no filename is given, model is written to standard output\n";
+        << "dump-model [<filename>] - Dump current model to given filename.\n"
+        << "If no filename is given, model is written to standard output.\n";
 }
