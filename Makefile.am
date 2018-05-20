@@ -30,7 +30,7 @@ dist_pkgdata_DATA = microcode/*
 
 # test target helper
 test: yasmv_tests
-	YASMV_HOME=`pwd` ./yasmv_tests --log_level=test_suite
+	YASMV_HOME=`pwd` ./yasmv_tests --log_level=error
 
 # tags target helper  (uses exuberant ctags)
 tags:
