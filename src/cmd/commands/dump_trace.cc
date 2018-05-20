@@ -78,7 +78,6 @@ DumpTrace::~DumpTrace()
 void DumpTrace::set_format(pconst_char format)
 {
     f_format = strdup(format);
-
     if (strcmp(f_format, TRACE_FMT_PLAIN) &&
         strcmp(f_format, TRACE_FMT_JSON) &&
         strcmp(f_format, TRACE_FMT_XML) &&
