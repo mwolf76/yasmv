@@ -458,15 +458,12 @@ BOOST_AUTO_TEST_CASE(at_expressions)
         BOOST_CHECK (phi == psi);
     }
 
-#if 1
     {
         Expr_ptr phi = em.make_at(em.make_const(0),
                                   em.make_at(em.make_const(2), x));
-        Expr_ptr psi = parseExpression("@0{ @2{x} }");
-        std::cerr << "parsed:" << psi << std::endl;
+        Expr_ptr psi = parseExpression("@0{(@2{x})}");
         BOOST_CHECK (phi == psi);
     }
-#endif
 }
 
 BOOST_AUTO_TEST_CASE(complex_expressions)

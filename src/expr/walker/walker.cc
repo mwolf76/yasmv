@@ -269,20 +269,20 @@ void ExprWalker::walk ()
 
         // binary temporal
         case AT:
-            if (walk_add_preorder(curr.expr) && ! f_rewritten) {
+            if (walk_at_preorder(curr.expr) && ! f_rewritten) {
                 f_recursion_stack.top().pc = AT_1;
                 f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
                 goto loop;
 
             entry_AT_1:
-                if (walk_add_inorder(curr.expr)) {
+                if (walk_at_inorder(curr.expr)) {
                     f_recursion_stack.top().pc = AT_2;
                     f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
                     goto loop;
                 }
 
             entry_AT_2:
-                walk_add_postorder(curr.expr);
+                walk_at_postorder(curr.expr);
             }
             break;
 
