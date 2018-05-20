@@ -25,22 +25,22 @@ VAR
                CHOICE_1000CENT,
                CHOICE_IDLE };
 
-@input
+#input
 VAR
     due-amount : uint;
 
-@input
+#input
 VAR
     credit     : uint;
 
-@inertial
+#inertial
 VAR
     change     : uint;
 
 INIT
     change = credit - due-amount ;
 
-@hidden
+#hidden
 DEFINE
     GOAL := change = 0;
 

@@ -1,5 +1,5 @@
 /**
-   Copyright (C) 2011-2016 Marco Pensallorto
+   Copyright (C) 2011-2018 Marco Pensallorto
 
    This file is part of yasmv.
 
@@ -134,7 +134,7 @@ fsm_formula_decl
     ;
 
 fsm_decl_modifiers
-    : ( '@'
+    : ( '#'
             (
               'hidden'   { $module_decl::hidden   = 1; }
             | 'frozen'   { $module_decl::frozen   = 1; }
@@ -296,9 +296,15 @@ fsm_trans_decl_clause
       { $smv::current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
-// entry point
 toplevel_expression returns [Expr_ptr res]
-    : expr=conditional_expression
+    : expr=at_expression
+      { $res = expr; }
+    ;
+
+at_expression returns [Expr_ptr res]
+    : '@' time=constant '{' expr=conditional_expression '}'
+      { $res = em.make_at(time, expr); }
+    | expr=conditional_expression
       { $res = expr; }
     ;
 

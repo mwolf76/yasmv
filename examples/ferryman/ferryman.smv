@@ -2,7 +2,7 @@
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 MODULE ferryman
 
-@inertial
+#inertial
 VAR
         ferryman : { EAST, WEST };
         goat     : { EAST, WEST };
@@ -55,8 +55,8 @@ TRANS
 -- To perform planning, we need to assert the negation of the desired TARGET.
 -- Our TARGET here is to have all the required items on the EAST bank.
 
--- Symbols annotated with `@hidden` do not show up in traces.
-@hidden
+-- Symbols annotated with `#hidden` do not show up in traces.
+#hidden
 DEFINE GOAL :=
        cabbage = EAST && goat = EAST && wolf = EAST;
 

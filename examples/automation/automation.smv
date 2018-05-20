@@ -1,11 +1,11 @@
 -- This file is part of the yasmv distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 --
--- This example demonstrates how @input variables van be used to
+-- This example demonstrates how #input variables van be used to
 -- enter input data into a planning reachability problem.
 --
--- to run it, the @input vars `from` and `to` must be already defined
--- in the environment. @input variables can be defined using the `set`
+-- to run it, the #input vars `from` and `to` must be already defined
+-- in the environment. #input variables can be defined using the `set`
 -- command.
 --
 -- e. g.
@@ -13,7 +13,7 @@
 --
 MODULE automation
 
-@inertial
+#inertial
 VAR
         pos : {
             HOME,
@@ -48,7 +48,7 @@ VAR
              POSITIVE_TO_HOME
         };
 
-@input
+#input
 VAR
         from : {
             HOME,
@@ -72,7 +72,7 @@ INIT
 INIT
         edge = IDLE;
 
-@hidden
+#hidden
 DEFINE
         GOAL := pos = to;
 

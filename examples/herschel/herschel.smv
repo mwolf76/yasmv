@@ -10,7 +10,7 @@
 --
 MODULE herschel;
 
-@inertial
+#inertial
 VAR
   vertex: { NIL, a, b, c, d, e, f, g, h, i, j, k };
   visited: boolean[11];
@@ -21,7 +21,7 @@ INIT
 INIT
   visited = [ FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE ];
 
-@hidden
+#hidden
 DEFINE
   GOAL :=
        visited = [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ];

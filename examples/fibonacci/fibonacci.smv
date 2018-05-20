@@ -8,15 +8,15 @@
 #word-width 64
 MODULE fibonacci
 
-@inertial
+#inertial
 VAR f : uint;
     g : uint;
 
-@hidden
-@inertial
+#hidden
+#inertial
 VAR i : uint;
 
-@input
+#input
 VAR n : uint;
 
 INIT
@@ -37,5 +37,5 @@ TRANS
 TRANS
   i := i + 1;
 
-@hidden
+#hidden
 DEFINE GOAL := i >= n;
