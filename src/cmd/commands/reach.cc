@@ -55,31 +55,33 @@ Variant Reach::operator()()
         return Variant(errMessage);
     }
 
-    BMC bmc { *this, ModelMgr::INSTANCE().model() };
-    bmc.process(f_target);
+    Model& model { ModelMgr::INSTANCE().model() };
+    if (0 < model.modules().size()) {
+        BMC bmc { *this, model };
+        bmc.process(f_target);
 
-    switch (bmc.status()) {
-    case BMC_REACHABLE:
-        res = true;
-        if (! om.quiet())
+        switch (bmc.status()) {
+        case BMC_REACHABLE:
+            res = true;
+            if (! om.quiet())
+                out
+                    << outPrefix;
             out
-                << outPrefix;
-        out
-            << "Target is reachable";
+                << "Target is reachable";
 
-        if (bmc.has_witness()) {
-            Witness& w
-                (bmc.witness());
+            if (bmc.has_witness()) {
+                Witness& w
+                    (bmc.witness());
 
-            out
-                << ", registered witness `"
-                << w.id()
-                << "`, "
-                << w.size()
-                << " steps."
-                << std::endl;
-        }
-        break;
+                out
+                    << ", registered witness `"
+                    << w.id()
+                    << "`, "
+                    << w.size()
+                    << " steps."
+                    << std::endl;
+            }
+            break;
 
         case BMC_UNREACHABLE:
             if (! om.quiet())
@@ -101,6 +103,12 @@ Variant Reach::operator()()
             break;
 
         default: assert(false); /* unexpected */
+        }
+    } else {
+        out
+            << wrnPrefix
+            << "Model not loaded."
+            << std::endl;
     }
 
     return Variant(res ? okMessage : errMessage);
