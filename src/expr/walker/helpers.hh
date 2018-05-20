@@ -37,7 +37,7 @@
     void walk_## op ## _postorder(const Expr_ptr expr)
 
 #define OP_HOOKS                                   \
-    UNARY_HOOK(next);                              \
+    BINARY_HOOK(at); UNARY_HOOK(next);             \
     UNARY_HOOK(neg); UNARY_HOOK(not);              \
     UNARY_HOOK(bw_not);                            \
                                                    \

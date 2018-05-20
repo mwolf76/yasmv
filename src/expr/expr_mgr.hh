@@ -107,6 +107,17 @@ public:
     }
 
     /* -- Temporal operators ---------------------------------------------- */
+    inline Expr_ptr make_at(Expr_ptr time, Expr_ptr expr)
+    {
+        assert(is_int_const(time));
+        return make_expr(AT, time, expr);
+    }
+
+    inline bool is_at(const Expr_ptr expr) const {
+        assert(expr);
+        return expr->f_symb == AT;
+    }
+
     inline Expr_ptr make_next(Expr_ptr expr)
     { return make_expr(NEXT, expr, NULL); }
 

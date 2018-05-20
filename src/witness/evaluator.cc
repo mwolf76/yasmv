@@ -162,6 +162,22 @@ Expr_ptr Evaluator::process(Witness &witness,
  *  pattern: (a) on preorder, return true if the node has not yet been
  *  visited; (b) always do in-order (for binary nodes); (c) perform
  *  proper compilation in post-order hooks. */
+bool Evaluator::walk_at_preorder(const Expr_ptr expr)
+{ return cache_miss(expr); }
+bool Evaluator::walk_at_inorder(const Expr_ptr expr)
+{
+    step_t curr_time = f_time_stack.back();
+
+    assert (NULL != expr->lhs());
+    f_time_stack.push_back(curr_time + expr->lhs()->value());
+
+    return true;
+}
+void Evaluator::walk_at_postorder(const Expr_ptr expr)
+{
+    assert (0 < f_time_stack.size());
+    f_time_stack.pop_back(); // reset time stack
+}
 
 bool Evaluator::walk_next_preorder(const Expr_ptr expr)
 {

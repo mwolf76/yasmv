@@ -64,6 +64,13 @@ bool Analyzer::walk_R_inorder(const Expr_ptr expr)
 void Analyzer::walk_R_postorder(const Expr_ptr expr)
 {}
 
+bool Analyzer::walk_at_preorder(const Expr_ptr expr)
+{ return true; }
+bool Analyzer::walk_at_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_at_postorder(const Expr_ptr expr)
+{}
+
 bool Analyzer::walk_next_preorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_next_postorder(const Expr_ptr expr)

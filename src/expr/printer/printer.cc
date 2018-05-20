@@ -84,6 +84,13 @@ bool Printer::walk_R_inorder(const Expr_ptr expr)
 void Printer::walk_R_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
+bool Printer::walk_at_preorder(const Expr_ptr expr)
+{ f_os << "@"; return true; }
+bool Printer::walk_at_inorder(const Expr_ptr expr)
+{ f_os << "{"; return true; }
+void Printer::walk_at_postorder(const Expr_ptr expr)
+{ f_os << "}"; }
+
 bool Printer::walk_next_preorder(const Expr_ptr expr)
 { f_os << "next("; return true; }
 void Printer::walk_next_postorder(const Expr_ptr expr)
