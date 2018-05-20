@@ -154,8 +154,6 @@ Expr_ptr Evaluator::process(Witness &witness,
         return em.make_array(lst);
     }
     else assert(false);
-
-
 }
 
 /*  Evaluation engine is implemented using a simple expression walker
@@ -175,6 +173,14 @@ bool Evaluator::walk_at_inorder(const Expr_ptr expr)
 }
 void Evaluator::walk_at_postorder(const Expr_ptr expr)
 {
+    POP_TYPE(rhs_type);
+    DROP_TYPE();
+    PUSH_TYPE(rhs_type);
+
+    POP_VALUE(rhs);
+    DROP_VALUE();
+    PUSH_VALUE(rhs);
+
     assert (0 < f_time_stack.size());
     f_time_stack.pop_back(); // reset time stack
 }
