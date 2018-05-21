@@ -91,7 +91,7 @@ void Simulation::pick_state(bool allsat,
 
     INFO
         << nconstraints
-        << " additional constraints found."
+        << " constraints found."
         << std::endl;
 
     /* INITs and INVARs at time 0 */
@@ -99,9 +99,10 @@ void Simulation::pick_state(bool allsat,
     assert_fsm_invar(engine, 0);
 
     /* Additional constraints */
-    
-
-
+    for (auto i { begin(constraint_cus) };
+         i != end(constraint_cus); ++ i) {
+        assert_formula(engine, 0, *i);
+    }
 
     while ( k -- ) {
 
@@ -227,10 +228,10 @@ void Simulation::pick_state(bool allsat,
             f_status = SIMULATION_INITIALIZED;
         }
         else {
-            WARN << "Inconsistency detected in initial states"
-                 << std::endl;
+            WARN
+                << "Inconsistency detected trying to pick-state"
+                << std::endl;
             f_status = SIMULATION_DEADLOCKED;
-
             break;
         }
     } /* while ( -- k ) */
