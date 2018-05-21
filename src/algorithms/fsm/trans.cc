@@ -49,13 +49,45 @@ CheckTransConsistency::~CheckTransConsistency()
         << std::endl;
 }
 
-void CheckTransConsistency::process()
+void CheckTransConsistency::process(ExprVector constraints)
 {
-    Engine engine
-        ("Transial");
+    Engine engine { "Transitional" };
+    Expr_ptr ctx { em().make_empty() };
 
+    unsigned nconstraints { 0 };
+    for (auto ci = cbegin(constraints); ci != cend(constraints);
+         ++ ci , ++ nconstraints) {
+        Expr_ptr constraint { (*ci) };
+
+        INFO
+            << "Compiling constraint `"
+            << constraint
+            << "` ..."
+            << std::endl;
+
+        CompilationUnit unit
+            (compiler().process(ctx, constraint));
+
+        f_constraint_cus.push_back(unit);
+    }
+
+    INFO
+        << nconstraints
+        << " additional constraints found."
+        << std::endl;
+
+    /* FSM constraints */
     assert_fsm_trans(engine, 0);
     assert_fsm_invar(engine, 0);
+
+    /* Additional constraints, times 0 and 1 */
+    for (step_t time = 0; time < 2; ++ time) {
+        for (auto ci = begin(f_constraint_cus); ci != end(f_constraint_cus);
+             ++ ci) {
+            CompilationUnit& unit { *ci };
+            assert_formula(engine, time, unit);
+        }
+    }
 
     status_t status
         (engine.solve());
@@ -69,5 +101,4 @@ void CheckTransConsistency::process()
     else if (STATUS_SAT == status) {
         f_status = FSM_CONSISTENCY_OK;
     }
-
 }

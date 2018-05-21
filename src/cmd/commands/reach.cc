@@ -29,9 +29,9 @@
 
 Reach::Reach(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
     , f_target(NULL)
     , f_constraints()
-    , f_out(std::cout)
 {}
 
 Reach::~Reach()
@@ -49,7 +49,7 @@ void Reach::add_constraint(Expr_ptr constraint)
     f_constraints.push_back(constraint);
 }
 
-bool Reach::check_parameters()
+bool Reach::check_requirements()
 {
     if (! f_target) {
         f_out
@@ -78,7 +78,7 @@ Variant Reach::operator()()
     bool res { false };
     OptsMgr& om { OptsMgr::INSTANCE() };
 
-    if (! check_parameters())
+    if (! check_requirements())
         return Variant(errMessage);
 
     BMC bmc { *this, ModelMgr::INSTANCE().model() };
@@ -130,7 +130,7 @@ Variant Reach::operator()()
         break;
 
     default: assert(false); /* unexpected */
-}
+    } /* switch */
 
     return Variant(res ? okMessage : errMessage);
 }

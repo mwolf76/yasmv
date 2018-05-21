@@ -1134,6 +1134,9 @@ dump_model_command_topic returns [CommandTopic_ptr res]
 check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
+
+      ( '-c' constraint=toplevel_expression
+      { ((CheckInit_ptr) $res)->add_constraint(constraint); })*
     ;
 
 check_init_command_topic returns [CommandTopic_ptr res]
@@ -1160,6 +1163,9 @@ reach_command_topic returns [CommandTopic_ptr res]
 check_trans_command returns[Command_ptr res]
     : 'check-trans'
       { $res = cm.make_check_trans(); }
+
+      ( '-c' constraint=toplevel_expression
+      { ((CheckTrans_ptr) $res)->add_constraint(constraint); })*
     ;
 
 check_trans_command_topic returns [CommandTopic_ptr res]
@@ -1227,6 +1233,9 @@ pick_state_command returns [Command_ptr res]
 
     |    '-l' limit=constant
          { ((PickState_ptr) $res)->set_limit(limit->value()); }
+
+    |    '-c' constraint=toplevel_expression
+         { ((PickState_ptr) $res)->add_constraint(constraint); }
     )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]

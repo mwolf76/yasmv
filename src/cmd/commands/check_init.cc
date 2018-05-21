@@ -29,51 +29,79 @@
 
 #include <algorithms/fsm/fsm.hh>
 
-
 CheckInit::CheckInit(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
 {}
 
 CheckInit::~CheckInit()
 {}
 
+void CheckInit::add_constraint(Expr_ptr constraint)
+{
+    f_constraints.push_back(constraint);
+}
+
+bool CheckInit::check_requirements()
+{
+    Model& model { ModelMgr::INSTANCE().model() };
+    if (0 == model.modules().size()) {
+        f_out
+            << wrnPrefix
+            << "Model not loaded."
+            << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
 Variant CheckInit::operator()()
 {
-    Variant res = Variant(errMessage);
+    bool res { false };
+    OptsMgr& om { OptsMgr::INSTANCE() };
 
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    if (check_requirements()) {
+        CheckInitConsistency check_init { *this,
+                ModelMgr::INSTANCE().model() };
+        check_init.process(f_constraints);
 
-    CheckInitConsistency algorithm { *this, ModelMgr::INSTANCE().model() };
-    algorithm.process();
+        switch (check_init.status()) {
+        case FSM_CONSISTENCY_OK:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Initial states consistency check ok."
+                << std::endl;
 
-    switch (algorithm.status()) {
-    case FSM_CONSISTENCY_OK:
-        out
-            << outPrefix
-            << "Initial states consistency check ok."
-            << std::endl;
+            res = true;
+            break;
 
-        res = Variant(okMessage);
-        break;
+        case FSM_CONSISTENCY_KO:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Initial states consistency check failed."
+                << std::endl;
+            break;
 
-    case FSM_CONSISTENCY_KO:
-        out
-            << outPrefix
-            << "Initial states consistency check failed."
-            << std::endl;
+        case FSM_CONSISTENCY_UNDECIDED:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Could not decide initial states consistency check."
+                << std::endl;
+            break;
 
-    case FSM_CONSISTENCY_UNDECIDED:
-        out
-            << outPrefix
-            << "Could not decide initial states consistency check."
-            << std::endl;
-        break;
+        default: assert(false); /* unreachable */
+        } /* switch */
+    }
 
-    default: assert( false ); /* unreachable */
-    } /* switch */
-
-    return res;
+    return Variant(res ? okMessage : errMessage);
 }
 
 CheckInitTopic::CheckInitTopic(Interpreter& owner)

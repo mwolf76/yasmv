@@ -62,9 +62,7 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
     f_target = target;
     assert(f_target);
 
-    /* check everyting is ok before spawning */
-    Expr_ptr ctx
-        (em().make_empty());
+    Expr_ptr ctx { em().make_empty() };
 
     try {
         unsigned nconstraints { 0 };

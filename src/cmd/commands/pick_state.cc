@@ -26,6 +26,7 @@
 
 PickState::PickState(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
     , f_allsat(false)
     , f_limit(-1)
 {}
@@ -43,69 +44,89 @@ void PickState::set_limit(value_t limit)
     f_limit = limit;
 }
 
+void PickState::add_constraint(Expr_ptr constraint)
+{
+    f_constraints.push_back(constraint);
+}
+
+bool PickState::check_requirements()
+{
+    Model& model { ModelMgr::INSTANCE().model() };
+    if (0 == model.modules().size()) {
+        f_out
+            << wrnPrefix
+            << "Model not loaded."
+            << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
 Variant PickState::operator()()
 {
     OptsMgr& om { OptsMgr::INSTANCE() };
-    std::ostream& out { std::cout };
     bool res { false };
 
-    Simulation sim
-        (*this, ModelMgr::INSTANCE().model());
+    if (check_requirements()) {
 
-    sim.pick_state(f_allsat, f_limit);
+        Simulation sim { *this, ModelMgr::INSTANCE().model() };
+        sim.pick_state(f_allsat, f_limit, f_constraints);
 
-    switch (sim.status()) {
-    case SIMULATION_DONE:
-        res = true;
-        if (! om.quiet())
-            out
-                << outPrefix;
-        out
-            << "Simulation done";
+        switch (sim.status()) {
+        case SIMULATION_DONE:
+            res = true;
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Simulation done";
 
-        assert (sim.has_witness());
-        out
-            << ", registered witness `"
-            << sim.witness().id()
-            << "`"
-            << std::endl;
-        break;
+            assert (sim.has_witness());
+            f_out
+                << ", registered witness `"
+                << sim.witness().id()
+                << "`"
+                << std::endl;
+            break;
 
-    case SIMULATION_INITIALIZED:
-        res = true;
-        if (! om.quiet())
-            out
-                << outPrefix;
-        out
-            << "Simulation initialized" ;
+        case SIMULATION_INITIALIZED:
+            res = true;
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Simulation initialized" ;
 
-        assert (sim.has_witness());
-        out
-            << ", registered witness `"
-            << sim.witness().id()
-            << "`"
-            << std::endl;
-        break;
+            assert (sim.has_witness());
+            f_out
+                << ", registered witness `"
+                << sim.witness().id()
+                << "`"
+                << std::endl;
+            break;
 
-    case SIMULATION_DEADLOCKED:
-        if (! om.quiet())
-            out
-                << wrnPrefix;
-        out
-            << "Simulation deadlocked"
-            << std::endl;
-        break;
+        case SIMULATION_DEADLOCKED:
+            if (! om.quiet())
+                f_out
+                    << wrnPrefix;
+            f_out
+                << "Simulation deadlocked"
+                << std::endl;
+            break;
 
-    case SIMULATION_INTERRUPTED:
-        if (! om.quiet())
-            out
-                << wrnPrefix;
-        out
-            << "Simulation interrupted"
-            << std::endl;
-        break;
+        case SIMULATION_INTERRUPTED:
+            if (! om.quiet())
+                f_out
+                    << wrnPrefix;
+            f_out
+                << "Simulation interrupted"
+                << std::endl;
+            break;
 
-    default: assert( false ); /* unreachable */
+        default: assert( false ); /* unreachable */
+        } /* switch */
     }
 
     return Variant(res ? okMessage : errMessage);

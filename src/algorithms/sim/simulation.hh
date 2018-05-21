@@ -48,10 +48,14 @@ public:
     Simulation(Command& command, Model& model);
     ~Simulation();
 
-    void pick_state(bool allsat, value_t limit);
+    void pick_state(bool allsat,
+                    value_t limit,
+                    ExprVector constraints);
 
     void simulate(Expr_ptr invar_condition,
-                  Expr_ptr until_condition, step_t k,
+                  Expr_ptr until_condition,
+                  ExprVector constraints,
+                  step_t k,
                   pconst_char trace_uid);
 
     inline simulation_status_t status() const

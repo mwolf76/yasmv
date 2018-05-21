@@ -47,7 +47,9 @@ Simulation::Simulation(Command& command, Model& model)
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state(bool allsat, value_t limit)
+void Simulation::pick_state(bool allsat,
+                            value_t limit,
+                            ExprVector constraints)
 {
     EncodingMgr& bm
         (EncodingMgr::INSTANCE());
@@ -62,18 +64,44 @@ void Simulation::pick_state(bool allsat, value_t limit)
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine
-        ("pick_state");
+    Engine engine { "pick_state" };
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    ExprMgr& em { ExprMgr::INSTANCE() };
+    Expr_ptr ctx { em.make_empty() };
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    WitnessMgr& wm { WitnessMgr::INSTANCE() };
+
+    CompilationUnits constraint_cus;
+    unsigned nconstraints { 0 };
+    for (auto ci = cbegin(constraints); ci != cend(constraints);
+         ++ ci , ++ nconstraints) {
+        Expr_ptr constraint { (*ci) };
+
+        INFO
+            << "Compiling constraint `"
+            << constraint
+            << "` ..."
+            << std::endl;
+
+        CompilationUnit unit
+            (compiler().process(ctx, constraint));
+
+        constraint_cus.push_back(unit);
+    }
+
+    INFO
+        << nconstraints
+        << " additional constraints found."
+        << std::endl;
 
     /* INITs and INVARs at time 0 */
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
+
+    /* Additional constraints */
+    
+
+
 
     while ( k -- ) {
 
@@ -210,6 +238,7 @@ void Simulation::pick_state(bool allsat, value_t limit)
 
 void Simulation::simulate(Expr_ptr invar_condition,
                           Expr_ptr until_condition,
+                          ExprVector constraints,
                           step_t steps,
                           pconst_char trace_name)
 {
