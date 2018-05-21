@@ -21,6 +21,8 @@
  *
  **/
 
+#include <algorithm>
+
 #include <algorithms/bmc/bmc.hh>
 #include <algorithms/bmc/witness.hh>
 
@@ -30,17 +32,18 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::forward_strategy(CompilationUnit& goal)
+void BMC::forward_strategy()
 {
-    Engine engine
-        ("forward");
-
-    step_t k
-        (0);
+    Engine engine { "forward" };
+    step_t k  { 0 };
 
     /* initial constraints */
     assert_fsm_init(engine, k);
     assert_fsm_invar(engine, k);
+    for (auto i { begin(f_constraint_cus) };
+         i != end(f_constraint_cus); ++ i) {
+        assert_formula(engine, k, *i);
+    }
 
     status_t status
         (engine.solve());
@@ -66,7 +69,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
 
     do {
         /* looking for witness : BMC(k-1) ^ ! P(k) */
-        assert_formula(engine, k, goal, engine.new_group());
+        assert_formula(engine, k, *f_target_cu, engine.new_group());
 
         INFO
             << "Forward: now looking for reachability witness (k = " << k << ")..."
@@ -81,7 +84,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
         else if (STATUS_SAT == status) {
             INFO
                 << "Forward: Reachability witness exists (k = " << k << "), target `"
-                << f_goal
+                << f_target
                 << "` is REACHABLE."
                 << std::endl;
 
@@ -92,7 +95,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
                     (WitnessMgr::INSTANCE());
 
                 Witness& w
-                    (* new BMCCounterExample(f_goal, model(), engine, k));
+                    (* new BMCCounterExample(f_target, model(), engine, k));
 
                 /* witness identifier */
                 std::ostringstream oss_id;
@@ -105,7 +108,7 @@ void BMC::forward_strategy(CompilationUnit& goal)
                 std::ostringstream oss_desc;
                 oss_desc
                     << "Reachability witness for target `"
-                    << f_goal
+                    << f_target
                     << "` in module `"
                     << model().main_module().name()
                     << "`" ;
@@ -130,6 +133,10 @@ void BMC::forward_strategy(CompilationUnit& goal)
             assert_fsm_trans(engine, k);
             ++ k;
             assert_fsm_invar(engine, k);
+            for (auto i { begin(f_constraint_cus) };
+                 i != end(f_constraint_cus); ++ i) {
+                assert_formula(engine, k, *i);
+            }
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */

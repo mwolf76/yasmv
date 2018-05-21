@@ -30,17 +30,18 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::backward_strategy(CompilationUnit& goal)
+void BMC::backward_strategy()
 {
-    Engine engine
-        ("backward");
-
-    step_t k
-        (0);
+    Engine engine { "backward" };
+    step_t k { 0 };
 
     /* goal state constraints */
-    assert_formula(engine, UINT_MAX - k, goal);
+    assert_formula(engine, UINT_MAX - k, *f_target_cu);
     assert_fsm_invar(engine, UINT_MAX - k);
+    for (auto i { begin(f_constraint_cus) };
+         i != end(f_constraint_cus); ++ i) {
+        assert_formula(engine, k, *i);
+    }
 
     status_t status
         (engine.solve());
@@ -87,7 +88,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
                     (WitnessMgr::INSTANCE());
 
                 Witness& w
-                    (* new BMCCounterExample(f_goal, model(), engine, k, true)); /* reversed */
+                    (* new BMCCounterExample(f_target, model(), engine, k, true)); /* reversed */
 
                 /* witness identifier */
                 std::ostringstream oss_id;
@@ -100,7 +101,7 @@ void BMC::backward_strategy(CompilationUnit& goal)
                 std::ostringstream oss_desc;
                 oss_desc
                     << "Reversed reachability witness for target `"
-                    << f_goal
+                    << f_target
                     << "` in module `"
                     << model().main_module().name()
                     << "`" ;
@@ -125,6 +126,10 @@ void BMC::backward_strategy(CompilationUnit& goal)
             ++ k;
             assert_fsm_trans(engine, UINT_MAX - k);
             assert_fsm_invar(engine, UINT_MAX - k);
+            for (auto i { begin(f_constraint_cus) };
+                 i != end(f_constraint_cus); ++ i) {
+                assert_formula(engine, k, *i);
+            }
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */

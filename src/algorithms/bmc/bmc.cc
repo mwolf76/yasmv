@@ -29,7 +29,8 @@
 
 BMC::BMC(Command& command, Model& model)
     : Algorithm(command, model)
-    , f_goal(NULL)
+    , f_target(NULL)
+    , f_target_cu(NULL)
 {
     const void* instance
         (this);
@@ -56,32 +57,53 @@ BMC::~BMC()
         << std::endl ;
 }
 
-void BMC::process(const Expr_ptr goal)
+void BMC::process(Expr_ptr target, ExprVector constraints)
 {
-    f_goal = goal;
-    assert(f_goal);
+    f_target = target;
+    assert(f_target);
 
     /* check everyting is ok before spawning */
     Expr_ptr ctx
         (em().make_empty());
 
     try {
+        unsigned nconstraints { 0 };
+        for (auto ci = cbegin(constraints); ci != cend(constraints);
+             ++ ci , ++ nconstraints) {
+            Expr_ptr constraint { (*ci) };
+
+            INFO
+                << "Compiling constraint `"
+                << constraint
+                << "` ..."
+                << std::endl;
+
+            CompilationUnit unit
+                (compiler().process(ctx, constraint));
+
+            f_constraint_cus.push_back(unit);
+        }
+
         INFO
-            << "Compiling formula `"
-            << f_goal
+            << nconstraints
+            << " additional constraints found."
+            << std::endl;
+
+        INFO
+            << "Compiling target `"
+            << f_target
             << "` ..."
             << std::endl;
 
         CompilationUnit unit
-            (compiler().process(ctx, f_goal));
+            (compiler().process(ctx, f_target));
 
-        f_status = BMC_UNKNOWN;
+        f_target_cu = &unit;
 
         /* fire up strategies */
-        boost::thread fwd(&BMC::forward_strategy,
-                          this, unit);
-        boost::thread bwd(&BMC::backward_strategy,
-                          this, unit);
+        f_status = BMC_UNKNOWN;
+        boost::thread fwd(&BMC::forward_strategy, this);
+        boost::thread bwd(&BMC::backward_strategy, this);
 
         /* wait for termination */
         fwd.join();

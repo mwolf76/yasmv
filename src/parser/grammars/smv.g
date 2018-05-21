@@ -1142,11 +1142,14 @@ check_init_command_topic returns [CommandTopic_ptr res]
     ;
 
 reach_command returns[Command_ptr res]
-    : 'reach'
-      { $res = cm.make_reach(); }
+    :   'reach'
+        { $res = cm.make_reach(); }
 
         target=toplevel_expression
         { ((Reach_ptr) $res)->set_target(target); }
+
+        ( '-c' constraint=toplevel_expression
+        { ((Reach_ptr) $res)->add_constraint(constraint); })*
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]

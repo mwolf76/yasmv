@@ -220,6 +220,7 @@ private:
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
     MultiwaySelectionDescriptors f_array_mux_descriptors;
 };
+typedef CompilationUnit* CompilationUnit_ptr;
 typedef std::vector<CompilationUnit> CompilationUnits;
 
 /* helpers */
