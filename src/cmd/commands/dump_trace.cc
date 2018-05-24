@@ -265,7 +265,7 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
 
         if (time < w.last_time())
             os
-                << SECOND_LVL << "}, {"
+                << SECOND_LVL << "},  {"
                 << std::endl;
         else
             os
