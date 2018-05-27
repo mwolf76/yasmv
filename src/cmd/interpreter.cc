@@ -152,11 +152,10 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        std::stringstream ss;
-
-        ss
+        err()
             << "Exception!! "
-            << e.what();
+            << e.what()
+            << std::endl;
 
         f_last_result = Variant(errMessage);
     }
