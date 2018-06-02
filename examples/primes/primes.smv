@@ -33,3 +33,7 @@ INIT
 
 INIT
         x % y = 0;
+
+DEFINE
+        nxt := x / y;
+
