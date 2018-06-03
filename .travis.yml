@@ -1,0 +1,27 @@
+sudo: false
+language: cpp
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - antlr3
+      - autoconf
+      - build-essential
+      - gcc
+      - g++
+      - libantlr3c-dev
+      - libboost-all-dev
+      - libjsoncpp-dev
+      - libtool
+      - libyaml-cpp-dev
+      - make
+      - minisat
+      - openjdk-7-jdk
+      - zlib1g-dev
+
+# Build steps
+script:
+  - make
+  - make test
