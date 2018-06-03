@@ -1,6 +1,6 @@
 ## CI status
-###### develop [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)
-###### master [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)
+*develop* [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)
+*master* [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)
 
 ## ABOUT
 
