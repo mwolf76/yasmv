@@ -23,7 +23,7 @@ addons:
 
 script:
   - autoreconf -vif
-  - ./configure
+  - ./configure CXXFLAG="-std=c++"
   - make
   - make test
 
