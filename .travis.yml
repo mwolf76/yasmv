@@ -21,7 +21,3 @@ addons:
       - openjdk-7-jdk
       - zlib1g-dev
 
-# Build steps
-script:
-  - make
-  - make test
