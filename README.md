@@ -1,5 +1,7 @@
-README
-======
+[![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)
+
+
+## README
 
   The yasmv (Yet Another Symbolic Model Verifier) project started off in fall
 2011 as a tentative and partial C++ re-implementation of the NuSMV2 model
@@ -19,13 +21,25 @@ perform basic reachability analysis and step-by-step simulation. The source
 distribution includes a few examples to demonstrate how the program can be used
 to solve planning problems.
 
-BUILD
-=====
+## BUILD
 
-  To install required dependencies on a Debian-like GNU/Linux distribution:
+  Here is the complete list of build dependencies. Thse package names are from
+  Ubuntu 14.04 (Trusty), used in Travis CI.
 
-  $ sudo apt-get install autoconf libtool gcc g++ libboost-all-dev \
-  zlib1g-dev make minisat antlr3 libantlr3c-dev
+  - antlr3
+  - autoconf
+  - build-essential
+  - gcc
+  - g++
+  - libantlr3c-dev
+  - libboost-all-dev
+  - libjsoncpp-dev
+  - libtool
+  - libyaml-cpp-dev
+  - openjdk-7-jdk
+  - make
+  - minisat
+  - zlib1g-dev
 
   when all the required packages are installed, launching the build should boil
   down to this:
@@ -49,8 +63,7 @@ BUILD
   the grammar source files you will no longer need the JRE to make the build. No
   JRE is needed when running the final executable either.
 
-RUN
-=====
+## RUN
 
   If you didn't run the setup.sh script, when done with the build there is one
   more step that needs to be taken in order to being able to run the program.
@@ -97,8 +110,7 @@ RUN
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
-DISCLAIMER
-==========
+## DISCLAIMER
 
 This code is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
