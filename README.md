@@ -2,7 +2,7 @@
 ###### develop [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)
 ###### master [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)
 
-## README
+## ABOUT
 
   The yasmv (Yet Another Symbolic Model Verifier) project started off in the Fall
 2011 as a tentative and partial C++ re-implementation of the NuSMV model
