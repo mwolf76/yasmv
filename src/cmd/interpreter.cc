@@ -77,7 +77,8 @@ static char* line_buf = NULL;
    Returns NULL on EOF. */
 static char* rl_gets()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
 
     /* If the buffer has already been allocated, return the memory to
        the free pool. */

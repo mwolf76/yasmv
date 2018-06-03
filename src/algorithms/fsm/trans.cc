@@ -21,6 +21,8 @@
  *
  **/
 
+#include <algorithm>
+
 #include <boost/thread.hpp>
 
 #include <algorithms/fsm/fsm.hh>
@@ -55,21 +57,21 @@ void CheckTransConsistency::process(ExprVector constraints)
     Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
-    for (auto ci = cbegin(constraints); ci != cend(constraints);
-         ++ ci , ++ nconstraints) {
-        Expr_ptr constraint { (*ci) };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
 
-        INFO
-            << "Compiling constraint `"
-            << constraint
-            << "` ..."
-            << std::endl;
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
 
-        CompilationUnit unit
-            (compiler().process(ctx, constraint));
-
-        f_constraint_cus.push_back(unit);
-    }
+                      f_constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
 
     INFO
         << nconstraints
@@ -82,11 +84,11 @@ void CheckTransConsistency::process(ExprVector constraints)
 
     /* Additional constraints, times 0 and 1 */
     for (step_t time = 0; time < 2; ++ time) {
-        for (auto ci = begin(f_constraint_cus); ci != end(f_constraint_cus);
-             ++ ci) {
-            CompilationUnit& unit { *ci };
-            assert_formula(engine, time, unit);
-        }
+        std::for_each(begin(f_constraint_cus),
+                      end(f_constraint_cus),
+                      [this, &engine, time](CompilationUnit& cu) {
+                          this->assert_formula(engine, time, cu);
+                      });
     }
 
     status_t status

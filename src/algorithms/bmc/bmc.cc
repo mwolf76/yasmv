@@ -21,6 +21,8 @@
  *
  **/
 
+#include <algorithm>
+
 #include <algorithms/bmc/bmc.hh>
 #include <algorithms/bmc/witness.hh>
 
@@ -66,21 +68,21 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
 
     try {
         unsigned nconstraints { 0 };
-        for (auto ci = cbegin(constraints); ci != cend(constraints);
-             ++ ci , ++ nconstraints) {
-            Expr_ptr constraint { (*ci) };
+        std::for_each(begin(constraints),
+                      end(constraints),
+                      [this, ctx, &nconstraints](Expr_ptr expr) {
+                          INFO
+                              << "Compiling constraint `"
+                              << expr
+                              << "` ..."
+                              << std::endl;
 
-            INFO
-                << "Compiling constraint `"
-                << constraint
-                << "` ..."
-                << std::endl;
+                          CompilationUnit unit
+                              (compiler().process(ctx, expr));
 
-            CompilationUnit unit
-                (compiler().process(ctx, constraint));
-
-            f_constraint_cus.push_back(unit);
-        }
+                          f_constraint_cus.push_back(unit);
+                          ++ nconstraints;
+                      });
 
         INFO
             << nconstraints

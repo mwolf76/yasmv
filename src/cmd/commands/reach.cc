@@ -51,6 +51,12 @@ void Reach::add_constraint(Expr_ptr constraint)
 
 bool Reach::check_requirements()
 {
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    Model& model
+        (mm.model());
+
     if (! f_target) {
         f_out
             << wrnPrefix
@@ -60,7 +66,6 @@ bool Reach::check_requirements()
         return false;
     }
 
-    Model& model { ModelMgr::INSTANCE().model() };
     if (0 == model.modules().size()) {
         f_out
             << wrnPrefix
@@ -75,8 +80,10 @@ bool Reach::check_requirements()
 
 Variant Reach::operator()()
 {
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
     bool res { false };
-    OptsMgr& om { OptsMgr::INSTANCE() };
 
     if (! check_requirements())
         return Variant(errMessage);

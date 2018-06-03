@@ -39,7 +39,8 @@
 
 bool Compiler::walk_at_preorder(const Expr_ptr expr)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     Expr_ptr lhs { expr->lhs() };
     assert(em.is_int_const(lhs));

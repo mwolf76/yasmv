@@ -62,8 +62,9 @@ void DupTrace::set_duplicate_id(pconst_char duplicate_id)
 
 Variant DupTrace::operator()()
 {
-/* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    /* FIXME: implement stream redirection for std{out,err} */
+    std::ostream& out
+        (std::cout);
 
     out
         << outPrefix

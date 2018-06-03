@@ -40,10 +40,11 @@ void BMC::forward_strategy()
     /* initial constraints */
     assert_fsm_init(engine, k);
     assert_fsm_invar(engine, k);
-    for (auto i { begin(f_constraint_cus) };
-         i != end(f_constraint_cus); ++ i) {
-        assert_formula(engine, k, *i);
-    }
+    std::for_each(begin(f_constraint_cus),
+                  end(f_constraint_cus),
+                  [this, &engine, k](CompilationUnit& cu) {
+                      this->assert_formula(engine, k, cu);
+                  });
 
     status_t status
         (engine.solve());
@@ -133,10 +134,11 @@ void BMC::forward_strategy()
             assert_fsm_trans(engine, k);
             ++ k;
             assert_fsm_invar(engine, k);
-            for (auto i { begin(f_constraint_cus) };
-                 i != end(f_constraint_cus); ++ i) {
-                assert_formula(engine, k, *i);
-            }
+            std::for_each(begin(f_constraint_cus),
+                          end(f_constraint_cus),
+                          [this, &engine, k](CompilationUnit& cu) {
+                              this->assert_formula(engine, k, cu);
+                          });
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */

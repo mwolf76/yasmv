@@ -613,7 +613,9 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
 
 std::ostream& DumpTrace::get_output_stream()
 {
-    auto* res { &std::cout } ;
+    std::ostream* res
+        (&std::cout);
+
     if (f_output) {
         if (f_outfile == NULL) {
             DEBUG
@@ -632,13 +634,17 @@ std::ostream& DumpTrace::get_output_stream()
 
 Variant DumpTrace::operator()()
 {
-    std::ostream& os { get_output_stream() };
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
+
+    std::ostream& os
+        (get_output_stream());
 
     Atom wid = { f_trace_id
                  ? Atom(f_trace_id)
-                 : WitnessMgr::INSTANCE().current().id() };
-
-    Witness& w { WitnessMgr::INSTANCE().witness(wid) };
+                 : wm.current().id() };
+    Witness& w
+        (wm.witness(wid));
 
     if (! strcmp( f_format, TRACE_FMT_PLAIN))
         dump_plain(os, w);

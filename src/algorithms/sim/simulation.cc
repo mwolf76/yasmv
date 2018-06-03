@@ -54,6 +54,12 @@ void Simulation::pick_state(bool allsat,
     EncodingMgr& bm
         (EncodingMgr::INSTANCE());
 
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
+
     int k = ! allsat
         ? 1
         : limit;
@@ -66,28 +72,25 @@ void Simulation::pick_state(bool allsat,
 
     Engine engine { "pick_state" };
 
-    ExprMgr& em { ExprMgr::INSTANCE() };
     Expr_ptr ctx { em.make_empty() };
-
-    WitnessMgr& wm { WitnessMgr::INSTANCE() };
 
     CompilationUnits constraint_cus;
     unsigned nconstraints { 0 };
-    for (auto ci = cbegin(constraints); ci != cend(constraints);
-         ++ ci , ++ nconstraints) {
-        Expr_ptr constraint { (*ci) };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints, &constraint_cus](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
 
-        INFO
-            << "Compiling constraint `"
-            << constraint
-            << "` ..."
-            << std::endl;
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
 
-        CompilationUnit unit
-            (compiler().process(ctx, constraint));
-
-        constraint_cus.push_back(unit);
-    }
+                      constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
 
     INFO
         << nconstraints
@@ -99,10 +102,11 @@ void Simulation::pick_state(bool allsat,
     assert_fsm_invar(engine, 0);
 
     /* Additional constraints */
-    for (auto i { begin(constraint_cus) };
-         i != end(constraint_cus); ++ i) {
-        assert_formula(engine, 0, *i);
-    }
+    std::for_each(begin(constraint_cus),
+                  end(constraint_cus),
+                  [this, &engine](CompilationUnit& cu) {
+                      this->assert_formula(engine, 0, cu);
+                  });
 
     while ( k -- ) {
 

@@ -45,7 +45,12 @@ void CheckTrans::add_constraint(Expr_ptr constraint)
 
 bool CheckTrans::check_requirements()
 {
-    Model& model { ModelMgr::INSTANCE().model() };
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    Model& model
+        (mm.model());
+
     if (0 == model.modules().size()) {
         f_out
             << wrnPrefix
@@ -60,8 +65,10 @@ bool CheckTrans::check_requirements()
 
 Variant CheckTrans::operator()()
 {
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
     Variant res { false };
-    OptsMgr& om { OptsMgr::INSTANCE() };
 
     if (check_requirements()) {
         CheckTransConsistency check_trans { *this,

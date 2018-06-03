@@ -67,9 +67,10 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
     Variables variables = module.vars();
     std::for_each(std::begin(variables),
                   std::end(variables),
-                  [&](auto pair) {
+                  [&](std::pair<Expr_ptr, Variable_ptr> pair) {
+                      auto id = pair.first;
+                      auto pvar = pair.second;
 
-                      auto pvar=pair.second;
                       if (pvar->is_frozen()) {
                           os
                               << "@frozen"
@@ -94,7 +95,7 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
 
                       os
                           << "VAR "
-                          << pair.first
+                          << id
                           << ": "
                           << pvar->type()
                           << ";"
@@ -160,7 +161,9 @@ void DumpModel::dump_transes(std::ostream& os, Module& module)
 
 std::ostream& DumpModel::get_output_stream()
 {
-    auto* res { &std::cout } ;
+    std::ostream* res
+        (&std::cout);
+
     if (f_output) {
         if (f_outfile == NULL) {
             DEBUG
@@ -179,13 +182,16 @@ std::ostream& DumpModel::get_output_stream()
 
 Variant DumpModel::operator()()
 {
-    std::ostream& out { get_output_stream() };
-
     Model& model
         (ModelMgr::INSTANCE().model());
 
+    std::ostream& out
+        (get_output_stream());
+
     /* FIXME: add system directives to the model */
-    const Modules& modules (model.modules());
+    const Modules& modules
+        (model.modules());
+
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
 

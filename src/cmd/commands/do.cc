@@ -41,7 +41,8 @@ Do::~Do()
 
 Variant Do::operator()()
 {
-    CommandMgr& cm { CommandMgr::INSTANCE() };
+    CommandMgr& cm
+        (CommandMgr::INSTANCE());
 
     Variant res;
     Commands::iterator i = f_commands.begin();

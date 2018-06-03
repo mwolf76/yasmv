@@ -55,21 +55,21 @@ void CheckInitConsistency::process(ExprVector constraints)
     Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
-    for (auto ci = cbegin(constraints); ci != cend(constraints);
-         ++ ci , ++ nconstraints) {
-        Expr_ptr constraint { (*ci) };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
 
-        INFO
-            << "Compiling constraint `"
-            << constraint
-            << "` ..."
-            << std::endl;
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
 
-        CompilationUnit unit
-            (compiler().process(ctx, constraint));
-
-        f_constraint_cus.push_back(unit);
-    }
+                      f_constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
 
     INFO
         << nconstraints
@@ -81,11 +81,11 @@ void CheckInitConsistency::process(ExprVector constraints)
     assert_fsm_invar(engine, 0);
 
     /* Additional constraints */
-    for (auto ci = begin(f_constraint_cus); ci != end(f_constraint_cus);
-         ++ ci) {
-        CompilationUnit& unit { *ci };
-        assert_formula(engine, 0, unit);
-    }
+    std::for_each(begin(f_constraint_cus),
+                  end(f_constraint_cus),
+                  [this, &engine](CompilationUnit& cu) {
+                      this->assert_formula(engine, 0, cu);
+                  });
 
     status_t status
         (engine.solve());

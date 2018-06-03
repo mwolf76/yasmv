@@ -62,8 +62,14 @@ void On::set_else(Command_ptr c)
 
 Variant On::operator()()
 {
-    CommandMgr& cm { CommandMgr::INSTANCE() } ;
-    Variant& res { Interpreter::INSTANCE().last_result() };
+    CommandMgr& cm
+        (CommandMgr::INSTANCE());
+
+    Interpreter& interpreter
+        (Interpreter::INSTANCE());
+
+    Variant& res
+        (interpreter.last_result());
 
     if (cm.is_success(res)) {
         if (f_then)

@@ -51,7 +51,12 @@ void PickState::add_constraint(Expr_ptr constraint)
 
 bool PickState::check_requirements()
 {
-    Model& model { ModelMgr::INSTANCE().model() };
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    Model& model
+        (mm.model());
+
     if (0 == model.modules().size()) {
         f_out
             << wrnPrefix
@@ -66,7 +71,9 @@ bool PickState::check_requirements()
 
 Variant PickState::operator()()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
     bool res { false };
 
     if (check_requirements()) {

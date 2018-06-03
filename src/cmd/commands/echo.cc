@@ -51,26 +51,33 @@ void Echo::append_expression(Expr_ptr expr)
 
 Variant Echo::operator()()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() } ;
-    WitnessMgr& wm { WitnessMgr::INSTANCE() } ;
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
 
     /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    std::ostream& out
+        (std::cout);
 
     if (! om.quiet()) {
         out
             << outPrefix;
     }
 
+    /* TODO: not really compatible with the grammar... restrict to 1 expr */
     std::for_each(f_expressions.begin(),
                   f_expressions.end(),
-                  [&](auto e)
+                  [&](Expr_ptr expr)
                   {
-                      Witness& current { wm.current() } ;
+                      Witness& current
+                          (wm.current());
+
                       out
                           << wm.eval(current,
                                      ExprMgr::INSTANCE().make_empty(),
-                                     e, current.last_time())
+                                     expr, current.last_time())
                           << " " ;
                   });
 

@@ -40,7 +40,8 @@ Time::~Time()
 Variant Time::operator()()
 {
     /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    std::ostream& out
+        (std::cout);
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);

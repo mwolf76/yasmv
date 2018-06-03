@@ -71,11 +71,16 @@ void Simulate::set_k(step_t k)
 
 Variant Simulate::operator()()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
-    bool res { false };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
 
     Simulation sim
-        (*this, ModelMgr::INSTANCE().model());
+        (*this, mm.model());
+
+    bool res { false };
 
     ExprVector f_constraints;
     sim.simulate(f_invar_condition,
