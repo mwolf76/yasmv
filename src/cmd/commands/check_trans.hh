@@ -36,9 +36,23 @@ public:
     CheckTrans(Interpreter& owner);
     virtual ~CheckTrans();
 
+    /** cmd params */
+    void add_constraint(Expr_ptr constraint);
+
     /* run() */
     Variant virtual operator()();
+
+private:
+    std::ostream& f_out;
+
+    /* (optional) additional constraints */
+    ExprVector f_constraints;
+
+    // -- helpers -------------------------------------------------------------
+    bool check_requirements();
 };
+
+typedef CheckTrans* CheckTrans_ptr;
 
 class CheckTransTopic : public CommandTopic {
 public:

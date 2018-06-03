@@ -1,9 +1,9 @@
--- This file is part of the yasmv distribution
+>-- This file is part of the yasmv distribution
 -- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
 #word-width 3
 MODULE hanoi;
 
-@inertial
+#inertial
 VAR
     a : uint[4];
     b : uint[4];
@@ -38,7 +38,7 @@ INVAR
     HEIGHT_C = 4 -> move != A2C && move != B2C ;
 
 -- The goal condition
-@hidden
+#hidden
 DEFINE GOAL :=
        a = [ 0, 0, 0, 0 ] &&
        b = [ 0, 0, 0, 0 ] &&
@@ -63,7 +63,7 @@ INVAR
     c[2] >= c[3] ;
 
 -- How many discs in stack A?
-@hidden
+#hidden
 DEFINE HEIGHT_A :=
        case a[3] > 0: 4;
             a[2] > 0: 3;
@@ -73,11 +73,11 @@ DEFINE HEIGHT_A :=
        end;
 
 -- Which is the topmost disc in stack A?
-@hidden
+#hidden
 DEFINE TOP_A := a[HEIGHT_A - 1];
 
 -- How many discs in stack B?
-@hidden
+#hidden
 DEFINE HEIGHT_B :=
        case b[3] > 0: 4;
             b[2] > 0: 3;
@@ -87,11 +87,11 @@ DEFINE HEIGHT_B :=
         end;
 
 -- Which is the topmost disc in stack B?
-@hidden
+#hidden
 DEFINE TOP_B := b[HEIGHT_B - 1];
 
 -- How many discs  on stack C?
-@hidden
+#hidden
 DEFINE HEIGHT_C :=
        case c[3] > 0: 4;
             c[2] > 0: 3;
@@ -101,7 +101,7 @@ DEFINE HEIGHT_C :=
        end;
 
 -- Which is the topmost disc in stack C?
-@hidden
+#hidden
 DEFINE TOP_C := c[HEIGHT_C - 1];
 
 -- outgoing 

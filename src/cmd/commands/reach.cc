@@ -29,49 +29,81 @@
 
 Reach::Reach(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
     , f_target(NULL)
+    , f_constraints()
 {}
 
 Reach::~Reach()
-{}
+{
+    f_constraints.clear();
+}
 
 void Reach::set_target(Expr_ptr target)
 {
     f_target = target;
 }
 
-Variant Reach::operator()()
+void Reach::add_constraint(Expr_ptr constraint)
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
-    std::ostream& out { std::cout };
-    bool res { false };
+    f_constraints.push_back(constraint);
+}
+
+bool Reach::check_requirements()
+{
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    Model& model
+        (mm.model());
 
     if (! f_target) {
-        out
+        f_out
             << wrnPrefix
-            << "No property given. Aborting..."
+            << "No target given. Aborting..."
             << std::endl;
 
-        return Variant(errMessage);
+        return false;
     }
 
+    if (0 == model.modules().size()) {
+        f_out
+            << wrnPrefix
+            << "Model not loaded."
+            << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
+Variant Reach::operator()()
+{
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    bool res { false };
+
+    if (! check_requirements())
+        return Variant(errMessage);
+
     BMC bmc { *this, ModelMgr::INSTANCE().model() };
-    bmc.process(f_target);
+    bmc.process(f_target, f_constraints);
 
     switch (bmc.status()) {
     case BMC_REACHABLE:
-        res = true;
         if (! om.quiet())
-            out
+            f_out
                 << outPrefix;
-        out
+        f_out
             << "Target is reachable";
 
         if (bmc.has_witness()) {
             Witness& w
                 (bmc.witness());
 
-            out
+            f_out
                 << ", registered witness `"
                 << w.id()
                 << "`, "
@@ -79,29 +111,33 @@ Variant Reach::operator()()
                 << " steps."
                 << std::endl;
         }
+        res = true;
         break;
 
-        case BMC_UNREACHABLE:
-            if (! om.quiet())
-                out
-                    << wrnPrefix;
-            out
-                << "Target is unreachable."
-                << std::endl;
-            break;
+    case BMC_UNREACHABLE:
+        if (! om.quiet())
+            f_out
+                << wrnPrefix;
+        f_out
+            << "Target is unreachable."
+            << std::endl;
+        break;
 
-        case BMC_UNKNOWN:
-            out
-                << "Reachability could not be decided."
-                << std::endl;
-            break;
+    case BMC_UNKNOWN:
+        f_out
+            << "Reachability could not be decided."
+            << std::endl;
+        break;
 
-        case BMC_ERROR:
-            /* ssshhh... */
-            break;
+    case BMC_ERROR:
+        f_out
+            << "Unexpected error."
+            << std::endl;
 
-        default: assert(false); /* unexpected */
-    }
+        break;
+
+    default: assert(false); /* unexpected */
+    } /* switch */
 
     return Variant(res ? okMessage : errMessage);
 }

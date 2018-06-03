@@ -33,7 +33,7 @@ public:
     BMC(Command& command, Model& model);
     ~BMC();
 
-    void process(const Expr_ptr phi);
+    void process(Expr_ptr target, ExprVector constraints);
 
     inline reachability_status_t status()
     { return sync_status(); }
@@ -42,14 +42,18 @@ public:
     bool sync_set_status(reachability_status_t status);
 
 private:
-    Expr_ptr f_goal;
+    Expr_ptr f_target;
+    CompilationUnit_ptr f_target_cu;
+
+    ExprVector f_constraints;
+    CompilationUnits f_constraint_cus;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
 
     /* strategies */
-    void forward_strategy(CompilationUnit& goal);
-    void backward_strategy(CompilationUnit& goal);
+    void forward_strategy();
+    void backward_strategy();
 };
 
 #endif /* BMC_ALGORITHM_CLASSES_H */

@@ -35,24 +35,37 @@ extern Expr_ptr parseExpression(const char *string);
 extern Type_ptr parseTypedef(const char *string);
 
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(basic_parsing)
+BOOST_AUTO_TEST_CASE(parsing_identifiers)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     Atom a_x("x");
     Atom a_y("y");
-    Atom a_w("w");
 
     Expr_ptr x = em.make_identifier(a_x);
     Expr_ptr y = em.make_identifier(a_y);
-    Expr_ptr w = em.make_identifier(a_w);
-    BOOST_CHECK ( x != y );
+    BOOST_CHECK (x != y);
 
-    // test identifiers canonicity
-    BOOST_CHECK( x == em.make_identifier(a_x));
-    BOOST_CHECK( y == em.make_identifier(a_y));
+    /* test identifiers canonicity */
+    BOOST_CHECK(x == em.make_identifier(a_x));
+    BOOST_CHECK(x == em.make_identifier("x"));
 
-    // test LTL basic exprs
+    BOOST_CHECK(y == em.make_identifier(a_y));
+    BOOST_CHECK(y == em.make_identifier("y"));
+}
+
+BOOST_AUTO_TEST_CASE(ltl_expressions)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x("x");
+    Atom a_y("y");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr y = em.make_identifier(a_y);
+
     {
         Expr_ptr phi = em.make_F(x);
         Expr_ptr psi = parseExpression("F x");
@@ -83,7 +96,6 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         BOOST_CHECK (phi == psi);
     }
 
-    // a few more LTL tests
     {
         Expr_ptr phi = em.make_G( em.make_F(x));
         Expr_ptr psi = parseExpression("G F x");
@@ -119,8 +131,19 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         Expr_ptr psi = parseExpression("F G (x)");
         BOOST_CHECK (phi == psi);
     }
+}
 
-    // test basic exprs
+BOOST_AUTO_TEST_CASE(toplevel_expressions)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x("x");
+    Atom a_y("y");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr y = em.make_identifier(a_y);
+
     {
         Expr_ptr phi = em.make_next(x);
         Expr_ptr psi = parseExpression("next(x)");
@@ -199,12 +222,11 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         BOOST_CHECK (phi == psi);
     }
 
-    // TODO: kill this operator altogether
-    // {
-    //     Expr_ptr phi = em.make_bw_xnor(x, y);
-    //     Expr_ptr psi = parseExpression("x !^ y");
-    //     BOOST_CHECK (phi == psi);
-    // }
+    {
+        Expr_ptr phi = em.make_bw_xnor(x, y);
+        Expr_ptr psi = parseExpression("x ~^ y");
+        BOOST_CHECK (phi == psi);
+    }
 
     {
         Expr_ptr phi = em.make_implies(x, y);
@@ -267,18 +289,25 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
     }
 
     {
-        Expr_ptr phi = em.make_ite(em.make_cond(x, y), em.make_const(42));
-        Expr_ptr psi = parseExpression("x ? y : 42");
-        BOOST_CHECK (phi == psi);
-    }
-
-    {
         Expr_ptr phi = em.make_subscript(x, em.make_const(42));
         Expr_ptr psi = parseExpression("x[42]");
         BOOST_CHECK (phi == psi);
     }
+}
 
-    /* operators precedence */
+BOOST_AUTO_TEST_CASE(operators_precedence)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x("x");
+    Atom a_y("y");
+    Atom a_w("w");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr y = em.make_identifier(a_y);
+    Expr_ptr w = em.make_identifier(a_w);
+
     {
         Expr_ptr phi = em.make_add(x, em.make_mul(y, em.make_const(42)));
         Expr_ptr psi = parseExpression("x + y * 42");
@@ -404,6 +433,57 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
         Expr_ptr psi = parseExpression("next(x + y)");
         BOOST_CHECK (phi == psi);
     }
+}
+
+BOOST_AUTO_TEST_CASE(at_expressions)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x("x");
+    Atom a_y("y");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr y = em.make_identifier(a_y);
+
+    {
+        Expr_ptr phi = em.make_at(em.make_const(0), x);
+        Expr_ptr psi = parseExpression("@0{x}");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_at(em.make_const(0),
+                                  em.make_add(x, y));
+        Expr_ptr psi = parseExpression("@0{x + y}");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_at(em.make_const(0),
+                                  em.make_next(x));
+        Expr_ptr psi = parseExpression("@0{next(x)}");
+        BOOST_CHECK (phi == psi);
+    }
+
+    {
+        Expr_ptr phi = em.make_at(em.make_const(0),
+                                  em.make_at(em.make_const(2), x));
+        Expr_ptr psi = parseExpression("@0{(@2{x})}");
+        BOOST_CHECK (phi == psi);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(complex_expressions)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x("x");
+    Atom a_y("y");
+
+    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr y = em.make_identifier(a_y);
 
     {
         Expr_ptr phi = em.make_implies( em.make_and( em.make_eq(x, em.make_const(0)),
@@ -412,15 +492,17 @@ BOOST_AUTO_TEST_CASE(basic_parsing)
                                                                em.make_const(0)),
                                                     em.make_ne(em.make_next(y),
                                                                em.make_const(0))));
-        Expr_ptr psi =
-            parseExpression("(((x = 0) && (y = 0)) -> ((next(x) != 0) || (next(y) != 0)))");
+        Expr_ptr psi = parseExpression(
+            "(((x = 0) && (y = 0)) -> ((next(x) != 0) || (next(y) != 0)))");
+
         BOOST_CHECK (phi == psi);
     }
 }
 
 BOOST_AUTO_TEST_CASE(typedefs)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     {
        Expr_ptr phi = em.make_boolean_type();

@@ -128,7 +128,8 @@ BOOST_AUTO_TEST_CASE(expr)
 
     Expr_ptr x_lshift_y = em.make_lshift(x, y);
     BOOST_CHECK (x_lshift_y->f_symb == LSHIFT &&
-                 x_lshift_y->lhs() == x && x_lshift_y->rhs() == y);
+                 x_lshift_y->lhs() == x &&
+                 x_lshift_y->rhs() == y);
     BOOST_CHECK (em.is_lshift(x_lshift_y));
     BOOST_CHECK (em.is_binary_arithmetical(x_lshift_y));
 
@@ -368,7 +369,7 @@ BOOST_AUTO_TEST_CASE(printer)
         Expr_ptr x_xnor_y = em.make_bw_xnor(x, y);
         std::ostringstream oss;
         Printer printer(oss);
-        printer << x_xnor_y; BOOST_CHECK (oss.str() == std::string("(x !^ y)"));
+        printer << x_xnor_y; BOOST_CHECK (oss.str() == std::string("(x ~^ y)"));
     }
 
     {

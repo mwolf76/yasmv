@@ -31,19 +31,6 @@
 #include <algorithms/sim/simulation.hh>
 
 class Simulate : public Command {
-
-    /* An invariant condition (optional) */
-    Expr_ptr f_invar_condition;
-
-    /* HALT condition (optional) */
-    Expr_ptr f_until_condition;
-
-    /* Number of simulation steps to be performed (optional) */
-    step_t f_k;
-
-    /* Simulation trace uid (optional) */
-    pchar f_trace_uid;
-
 public:
     Simulate(Interpreter& owner);
     virtual ~Simulate();
@@ -65,6 +52,24 @@ public:
     void set_trace_uid(pconst_char trace_uid);
     inline pconst_char trace_uid() const
     { return f_trace_uid; }
+
+private:
+    std::ostream& f_out;
+
+    /* (optional) additional constraints */
+    ExprVector f_constraints;
+
+    /* An invariant condition (optional) */
+    Expr_ptr f_invar_condition;
+
+    /* HALT condition (optional) */
+    Expr_ptr f_until_condition;
+
+    /* Number of simulation steps to be performed (optional) */
+    step_t f_k;
+
+    /* Simulation trace uid (optional) */
+    pchar f_trace_uid;
 };
 
 typedef Simulate* Simulate_ptr;

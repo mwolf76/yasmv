@@ -47,10 +47,18 @@ Simulation::Simulation(Command& command, Model& model)
 Simulation::~Simulation()
 {}
 
-void Simulation::pick_state(bool allsat, value_t limit)
+void Simulation::pick_state(bool allsat,
+                            value_t limit,
+                            ExprVector constraints)
 {
     EncodingMgr& bm
         (EncodingMgr::INSTANCE());
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
 
     int k = ! allsat
         ? 1
@@ -62,18 +70,43 @@ void Simulation::pick_state(bool allsat, value_t limit)
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine
-        ("pick_state");
+    Engine engine { "pick_state" };
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    Expr_ptr ctx { em.make_empty() };
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    CompilationUnits constraint_cus;
+    unsigned nconstraints { 0 };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints, &constraint_cus](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
+
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
+
+                      constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
+
+    INFO
+        << nconstraints
+        << " constraints found."
+        << std::endl;
 
     /* INITs and INVARs at time 0 */
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
+
+    /* Additional constraints */
+    std::for_each(begin(constraint_cus),
+                  end(constraint_cus),
+                  [this, &engine](CompilationUnit& cu) {
+                      this->assert_formula(engine, 0, cu);
+                  });
 
     while ( k -- ) {
 
@@ -199,10 +232,10 @@ void Simulation::pick_state(bool allsat, value_t limit)
             f_status = SIMULATION_INITIALIZED;
         }
         else {
-            WARN << "Inconsistency detected in initial states"
-                 << std::endl;
+            WARN
+                << "Inconsistency detected trying to pick-state"
+                << std::endl;
             f_status = SIMULATION_DEADLOCKED;
-
             break;
         }
     } /* while ( -- k ) */
@@ -210,6 +243,7 @@ void Simulation::pick_state(bool allsat, value_t limit)
 
 void Simulation::simulate(Expr_ptr invar_condition,
                           Expr_ptr until_condition,
+                          ExprVector constraints,
                           step_t steps,
                           pconst_char trace_name)
 {

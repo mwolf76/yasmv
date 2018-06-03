@@ -49,13 +49,43 @@ CheckInitConsistency::~CheckInitConsistency()
         << std::endl;
 }
 
-void CheckInitConsistency::process()
+void CheckInitConsistency::process(ExprVector constraints)
 {
-    Engine engine
-        ("Initial");
+    Engine engine { "Initial" };
+    Expr_ptr ctx { em().make_empty() };
 
+    unsigned nconstraints { 0 };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
+
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
+
+                      f_constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
+
+    INFO
+        << nconstraints
+        << " additional constraints found."
+        << std::endl;
+
+    /* FSM constraints */
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
+
+    /* Additional constraints */
+    std::for_each(begin(f_constraint_cus),
+                  end(f_constraint_cus),
+                  [this, &engine](CompilationUnit& cu) {
+                      this->assert_formula(engine, 0, cu);
+                  });
 
     status_t status
         (engine.solve());
@@ -69,5 +99,4 @@ void CheckInitConsistency::process()
     else if (STATUS_SAT == status) {
         f_status = FSM_CONSISTENCY_OK;
     }
-
 }

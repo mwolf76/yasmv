@@ -76,9 +76,9 @@ private:
         return *f_owner;
     }
 
-    void register_owner(Model_ptr model_ptr)
+    void set_owner(Model_ptr model_ptr)
     {
-        assert(! f_owner);
+        // assert(! f_owner);
         f_owner = model_ptr;
     }
 

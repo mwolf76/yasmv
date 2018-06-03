@@ -21,6 +21,8 @@
  *
  **/
 
+#include <algorithm>
+
 #include <boost/thread.hpp>
 
 #include <algorithms/fsm/fsm.hh>
@@ -49,13 +51,45 @@ CheckTransConsistency::~CheckTransConsistency()
         << std::endl;
 }
 
-void CheckTransConsistency::process()
+void CheckTransConsistency::process(ExprVector constraints)
 {
-    Engine engine
-        ("Transial");
+    Engine engine { "Transitional" };
+    Expr_ptr ctx { em().make_empty() };
 
+    unsigned nconstraints { 0 };
+    std::for_each(begin(constraints),
+                  end(constraints),
+                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                      INFO
+                          << "Compiling constraint `"
+                          << expr
+                          << "` ..."
+                          << std::endl;
+
+                      CompilationUnit unit
+                          (compiler().process(ctx, expr));
+
+                      f_constraint_cus.push_back(unit);
+                      ++ nconstraints;
+                  });
+
+    INFO
+        << nconstraints
+        << " additional constraints found."
+        << std::endl;
+
+    /* FSM constraints */
     assert_fsm_trans(engine, 0);
     assert_fsm_invar(engine, 0);
+
+    /* Additional constraints, times 0 and 1 */
+    for (step_t time = 0; time < 2; ++ time) {
+        std::for_each(begin(f_constraint_cus),
+                      end(f_constraint_cus),
+                      [this, &engine, time](CompilationUnit& cu) {
+                          this->assert_formula(engine, time, cu);
+                      });
+    }
 
     status_t status
         (engine.solve());
@@ -69,5 +103,4 @@ void CheckTransConsistency::process()
     else if (STATUS_SAT == status) {
         f_status = FSM_CONSISTENCY_OK;
     }
-
 }

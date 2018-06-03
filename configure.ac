@@ -1,7 +1,7 @@
 # -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
-AC_INIT([yasmv], [0.0.7], [marco.pensallorto@gmail.com])
+AC_INIT([yasmv], [0.0.8], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -92,6 +92,14 @@ AC_CHECK_HEADER(malloc.h,
          #endif
         ])
 
+# Boost depedencies
+BOOST_REQUIRE([1.48])
+BOOST_FILESYSTEM
+BOOST_PROGRAM_OPTIONS
+BOOST_TEST
+BOOST_THREADS
+BOOST_CHRONO
+
 # libjsoncpp
 AC_LIBJSONCPP
 
@@ -126,16 +134,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
                 strrchr strstr strtol, random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
-
-dnl First look for Boost
-BOOST_REQUIRE([1.48])
-
-dnl Then look for specific Boost libraries you need:
-BOOST_FILESYSTEM
-BOOST_PROGRAM_OPTIONS
-BOOST_TEST
-BOOST_THREADS
-BOOST_CHRONO
 
 AM_CPPFLAGS="$BOOST_CPPFLAGS $ANTLR_CPPFLAGS -DYASMV_MICROCODE=$datadir/$PACKAGE"
 AC_SUBST(AM_CPPFLAGS)

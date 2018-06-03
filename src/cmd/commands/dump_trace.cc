@@ -71,20 +71,18 @@ DumpTrace::DumpTrace(Interpreter& owner)
 DumpTrace::~DumpTrace()
 {
     free(f_trace_id);
-    free( (pchar) f_format);
+    free((pchar) f_format);
     free(f_output);
 }
 
 void DumpTrace::set_format(pconst_char format)
 {
     f_format = strdup(format);
-
     if (strcmp(f_format, TRACE_FMT_PLAIN) &&
         strcmp(f_format, TRACE_FMT_JSON) &&
         strcmp(f_format, TRACE_FMT_XML) &&
         strcmp(f_format, TRACE_FMT_YAML))
-
-        throw UnsupportedFormat(f_format);
+    throw UnsupportedFormat(f_format);
 }
 
 void DumpTrace::set_trace_id(pconst_char trace_id)
@@ -217,7 +215,6 @@ void DumpTrace::dump_json_section(std::ostream& os,
         << "}" ;
 }
 
-
 void DumpTrace::dump_json(std::ostream& os, Witness& w)
 {
     const char* FIRST_LVL
@@ -268,7 +265,7 @@ void DumpTrace::dump_json(std::ostream& os, Witness& w)
 
         if (time < w.last_time())
             os
-                << SECOND_LVL << "}, {"
+                << SECOND_LVL << "},  {"
                 << std::endl;
         else
             os
@@ -614,18 +611,40 @@ void DumpTrace::dump_xml(std::ostream& os, Witness& w)
         << "</witness>" << std::endl;
 }
 
+std::ostream& DumpTrace::get_output_stream()
+{
+    std::ostream* res
+        (&std::cout);
+
+    if (f_output) {
+        if (f_outfile == NULL) {
+            DEBUG
+                << "Writing output to file `"
+                << f_output
+                << "`"
+                << std::endl;
+
+            f_outfile = new std::ofstream(f_output, std::ofstream::binary);
+        }
+        res = f_outfile;
+    }
+
+    return *res;
+}
+
 Variant DumpTrace::operator()()
 {
-    std::ostream &os
-        (std::cout);
+    WitnessMgr& wm
+        (WitnessMgr::INSTANCE());
 
-    Atom wid
-        (f_trace_id
-         ? f_trace_id
-         : (char *) WitnessMgr::INSTANCE().current().id().c_str());
+    std::ostream& os
+        (get_output_stream());
 
+    Atom wid = { f_trace_id
+                 ? Atom(f_trace_id)
+                 : wm.current().id() };
     Witness& w
-        (WitnessMgr::INSTANCE().witness(wid));
+        (wm.witness(wid));
 
     if (! strcmp( f_format, TRACE_FMT_PLAIN))
         dump_plain(os, w);
@@ -658,10 +677,10 @@ DumpTraceTopic::~DumpTraceTopic()
 void DumpTraceTopic::usage()
 {
     std::cout
-        << "dump-trace [-o filename] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
+        << "dump-trace [-o <filename>] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
         << "options:\n"
         << "  -f <format>, format can be either `plain`, `xml` or `json`.\n"
-        << "  -o filename, filename must be a writeable path on disk.\n\n"
+        << "  -o <filename>, filename must be a writeable path on disk.\n\n"
         << "`trace-uid` is the index of the trace to be dumped. If omitted, current\n"
         << "trace will be dumped.\n" ;
 }

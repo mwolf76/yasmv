@@ -20,6 +20,7 @@
  * 02110-1301 USA
  *
  **/
+#include <algorithm>
 
 #include <cstdlib>
 #include <cstring>
@@ -30,6 +31,8 @@
 #include <model/model_mgr.hh>
 #include <model/model.hh>
 #include <model/module.hh>
+
+#include <type/type.hh>
 
 DumpModel::DumpModel(Interpreter& owner)
     : Command(owner)
@@ -50,70 +53,154 @@ void DumpModel::set_output(pconst_char output)
     }
 }
 
+void DumpModel::dump_heading(std::ostream& os, Module& module)
+{
+    os
+        << "MODULE "
+        << module.name()
+        << std::endl;
+}
+
+void DumpModel::dump_variables(std::ostream& os, Module& module)
+{
+    /* Variables */
+    Variables variables = module.vars();
+    std::for_each(std::begin(variables),
+                  std::end(variables),
+                  [&](std::pair<Expr_ptr, Variable_ptr> pair) {
+                      auto id = pair.first;
+                      auto pvar = pair.second;
+
+                      if (pvar->is_frozen()) {
+                          os
+                              << "@frozen"
+                              << std::endl;
+                      }
+                      if (pvar->is_hidden()) {
+                          os
+                              << "@hidden"
+                              << std::endl;
+
+                      }
+                      if (pvar->is_inertial()) {
+                          os
+                              << "@inertial"
+                              << std::endl;
+                      }
+                      if (pvar->is_input()) {
+                          os
+                                  << "@input"
+                                  << std::endl;
+                      }
+
+                      os
+                          << "VAR "
+                          << id
+                          << ": "
+                          << pvar->type()
+                          << ";"
+                          << std::endl;
+                  });
+}
+
+void DumpModel::dump_inits(std::ostream& os, Module& module)
+{
+    const ExprVector init  { module.init() };
+    if (init.begin() != init.end())
+        os
+            << std::endl;
+
+    for (ExprVector::const_iterator init_eye = init.begin();
+         init_eye != init.end(); ++ init_eye) {
+
+        Expr_ptr body { *init_eye };
+        os
+            << "INIT "
+            << body
+            << ";"
+            << std::endl;
+    }
+}
+
+void DumpModel::dump_invars(std::ostream& os, Module& module)
+{
+    const ExprVector invar { module.invar() };
+    if (invar.begin() != invar.end())
+        os
+            << std::endl;
+
+    for (ExprVector::const_iterator invar_eye = invar.begin();
+         invar_eye != invar.end(); ++ invar_eye) {
+
+        Expr_ptr body { *invar_eye };
+        os
+            << "INVAR "
+            << body
+            << ";"
+            << std::endl;
+    }
+}
+
+void DumpModel::dump_transes(std::ostream& os, Module& module)
+{
+    const ExprVector trans { module.trans() };
+    if (trans.begin() != trans.end())
+        os
+            << std::endl;
+
+    for (ExprVector::const_iterator trans_eye = trans.begin();
+         trans_eye != trans.end(); ++ trans_eye) {
+
+        Expr_ptr body (*trans_eye);
+        os
+            << "TRANS "
+            << body << ";"
+            << std::endl;
+    }
+}
+
+std::ostream& DumpModel::get_output_stream()
+{
+    std::ostream* res
+        (&std::cout);
+
+    if (f_output) {
+        if (f_outfile == NULL) {
+            DEBUG
+                << "Writing output to file `"
+                << f_output
+                << "`"
+                << std::endl;
+
+            f_outfile = new std::ofstream(f_output, std::ofstream::binary);
+        }
+        res = f_outfile;
+    }
+
+    return *res;
+}
+
 Variant DumpModel::operator()()
 {
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
-
     Model& model
         (ModelMgr::INSTANCE().model());
 
-    const Modules& modules (model.modules());
+    std::ostream& out
+        (get_output_stream());
+
+    /* FIXME: add system directives to the model */
+    const Modules& modules
+        (model.modules());
+
     for (Modules::const_iterator m = modules.begin();
          m != modules.end(); ++ m) {
 
         Module& module = dynamic_cast <Module&> (*m->second);
-
-        out
-            << "MODULE "
-            << module.name()
-            << std::endl;
-
-        /* INIT */
-        const ExprVector init = module.init();
-        if (init.begin() != init.end())
-            out << std::endl;
-        for (ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); ++ init_eye) {
-
-            Expr_ptr body (*init_eye);
-
-            out
-                << "INIT "
-                << body << ";"
-                << std::endl;
-
-        }
-
-        /* INVAR */
-        const ExprVector invar = module.invar();
-        if (invar.begin() != invar.end())
-            out << std::endl;
-        for (ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); ++ invar_eye) {
-
-            Expr_ptr body (*invar_eye);
-
-            out
-                << "INVAR "
-                << body << ";"
-                << std::endl;
-        }
-
-        /* TRANS */
-        const ExprVector trans = module.trans();
-        if (trans.begin() != trans.end())
-            out << std::endl;
-        for (ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); ++ trans_eye) {
-
-            Expr_ptr body (*trans_eye);
-
-            out
-                << "TRANS "
-                << body << ";"
-                << std::endl;
-        }
+        dump_heading(out, module);
+        dump_variables(out, module);
+        dump_inits(out, module);
+        dump_invars(out, module);
+        dump_transes(out, module);
     }
 
     return Variant(okMessage);
@@ -133,6 +220,6 @@ DumpModelTopic::~DumpModelTopic()
 void DumpModelTopic::usage()
 {
     std::cout
-        << "dump-model [<filename>] - Dump current model to given filename[*].\n"
-        << "[*] either in single or double quotes. If no filename is given, model is written to standard output\n";
+        << "dump-model [<filename>] - Dump current model to given filename.\n"
+        << "If no filename is given, model is written to standard output.\n";
 }

@@ -58,8 +58,7 @@ Module& Model::add_module(Module& module)
     f_modules.insert( std::pair<Expr_ptr, Module_ptr>
                       (name, &module));
 
-    module.register_owner(this);
-
+    module.set_owner(this);
     return module;
 }
 

@@ -43,7 +43,7 @@ typedef enum {
     R_1, R_2,
 
     // -- Simple walkers
-    NEXT_1, PREV_1, NEG_1, NOT_1, BW_NOT_1,
+    AT_1, AT_2, NEXT_1, PREV_1, NEG_1, NOT_1, BW_NOT_1,
 
     PLUS_1, PLUS_2,
     SUB_1, SUB_2,

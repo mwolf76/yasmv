@@ -77,7 +77,8 @@ static char* line_buf = NULL;
    Returns NULL on EOF. */
 static char* rl_gets()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
 
     /* If the buffer has already been allocated, return the memory to
        the free pool. */
@@ -152,11 +153,10 @@ Variant& Interpreter::operator()(Command_ptr cmd)
     }
 
     catch (Exception& e) {
-        std::stringstream ss;
-
-        ss
+        err()
             << "Exception!! "
-            << e.what();
+            << e.what()
+            << std::endl;
 
         f_last_result = Variant(errMessage);
     }
@@ -205,11 +205,10 @@ Variant& Interpreter::operator()()
                 }
                 else f_last_result = Variant(errMessage);
             } catch (Exception& e) {
-                std::stringstream ss;
-
-                ss
-                    << "Exception!! "
-                    << e.what();
+                std::string what { e.what() };
+                ERR
+                    << what
+                    << std::endl;
 
                 f_last_result = Variant(errMessage);
             }

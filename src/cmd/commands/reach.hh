@@ -30,19 +30,30 @@
 #include <algorithms/bmc/bmc.hh>
 
 class Reach : public Command {
-
-    /* the targetiant to be verified */
-    Expr_ptr f_target;
-
 public:
     Reach(Interpreter& owner);
     virtual ~Reach();
 
     /** cmd params */
     void set_target(Expr_ptr target);
+    void add_constraint(Expr_ptr constraint);
 
+    /* run() */
     Variant virtual operator()();
+
+private:
+    std::ostream& f_out;
+
+    /* the negation of invariant property to be verified */
+    Expr_ptr f_target;
+
+    /* (optional) additional constraints */
+    ExprVector f_constraints;
+
+    // -- helpers -------------------------------------------------------------
+    bool check_requirements();
 };
+
 typedef Reach* Reach_ptr;
 
 class ReachTopic : public CommandTopic {

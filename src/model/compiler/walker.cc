@@ -37,6 +37,33 @@
  * 2. ! f_preprocess proper compilation is carried out.
  */
 
+bool Compiler::walk_at_preorder(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Expr_ptr lhs { expr->lhs() };
+    assert(em.is_int_const(lhs));
+
+    Expr_ptr rhs { expr->rhs() };
+    assert(NULL != rhs);
+
+    value_t value { expr->value() };
+
+    step_t curr_time
+        (f_time_stack.back());
+    f_time_stack.push_back(curr_time + value);
+
+    return true;
+}
+bool Compiler::walk_at_inorder(const Expr_ptr expr)
+{ return true; }
+void Compiler::walk_at_postorder(const Expr_ptr expr)
+{
+    assert (0 < f_time_stack.size());
+    f_time_stack.pop_back(); // reset time stack
+}
+
 bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time

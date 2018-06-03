@@ -85,7 +85,11 @@ protected:
     virtual bool walk_R_inorder(const Expr_ptr expr) =0;
     virtual void walk_R_postorder(const Expr_ptr expr) =0;
 
-    // unary temporal ops
+    // temporal ops
+    virtual bool walk_at_preorder(const Expr_ptr expr) =0;
+    virtual bool walk_at_inorder(const Expr_ptr expr) =0;
+    virtual void walk_at_postorder(const Expr_ptr expr) =0;
+
     virtual bool walk_next_preorder(const Expr_ptr expr) =0;
     virtual void walk_next_postorder(const Expr_ptr expr) =0;
 

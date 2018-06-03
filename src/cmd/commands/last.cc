@@ -39,10 +39,18 @@ Last::~Last()
 
 Variant Last::operator()()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
-    std::ostream& out { std::cout };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
 
-    Variant& last { Interpreter::INSTANCE().last_result() };
+    Interpreter& interpreter
+        (Interpreter::INSTANCE());
+
+    std::ostream& out
+        (std::cout);
+
+    Variant& last
+        (interpreter.last_result());
+
     if (last.is_string()) {
         if (! om.quiet())
             out << outPrefix;

@@ -3,25 +3,25 @@
 #word-width 4
 MODULE tic-tac-toe
 
-@inertial
+#inertial
 VAR
   grid : uint[9];
   move : { TOP-LEFT, TOP-CENTER, TOP-RIGHT, MID-LEFT, MID-CENTER,
            MID-RIGHT, BOTTOM-LEFT, BOTTOM-CENTER, BOTTOM-RIGHT };
 
-@hidden
+#hidden
 DEFINE
   _ := 0;
 
-@hidden
+#hidden
 DEFINE
   A := 1;
 
-@hidden
+#hidden
 DEFINE
   B := 2;
 
-@hidden
+#hidden
 DEFINE
     OVER := AWINS ||
             BWINS ||
@@ -29,7 +29,7 @@ DEFINE
              grid[3] != _ && grid[4] != _ && grid[5] != _ &&
              grid[6] != _ && grid[7] != _ && grid[8] != _ );
 
-@hidden
+#hidden
 DEFINE
     AWINS :=
           (grid[0] = A && grid[1] = A && grid[2] = A) ||
@@ -43,7 +43,7 @@ DEFINE
           (grid[0] = A && grid[4] = A && grid[8] = A) ||
           (grid[6] = A && grid[4] = A && grid[2] = A) ;
 
-@hidden
+#hidden
 DEFINE
     BWINS :=
           (grid[0] = B && grid[1] = B && grid[2] = B) ||
@@ -57,11 +57,11 @@ DEFINE
           (grid[0] = B && grid[4] = B && grid[8] = B) ||
           (grid[6] = B && grid[4] = B && grid[2] = B) ;
 
-@hidden
+#hidden
 DEFINE
     MARK := (turn = PLAYER_A ? A : B);
 
-@inertial
+#inertial
 VAR
     turn : { PLAYER_A, PLAYER_B };
   
@@ -139,6 +139,6 @@ TRANS
     move = BOTTOM-RIGHT ?:
            grid[8] := MARK;
 
-@hidden
+#hidden
 DEFINE
     GOAL := OVER && ! AWINS && ! BWINS ;

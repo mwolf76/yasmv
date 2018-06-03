@@ -142,7 +142,8 @@ void sighandler(int signum)
 
 int main(int argc, const char *argv[])
 {
-    Interpreter& system = Interpreter::INSTANCE();
+    Interpreter& interpreter
+        (Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGTSTP, sighandler);
@@ -167,7 +168,9 @@ int main(int argc, const char *argv[])
         }
 
         /* load microcode */
-        InlinedOperatorMgr& mm { InlinedOperatorMgr::INSTANCE() };
+        InlinedOperatorMgr& mm
+            (InlinedOperatorMgr::INSTANCE());
+
         size_t nloaders { mm.loaders().size() };
 
         if (! opts_mgr.quiet()) {
@@ -190,8 +193,8 @@ int main(int argc, const char *argv[])
 
         /* run interactive commands */
         do {
-            system();
-        } while (! system.is_leaving());
+            interpreter();
+        } while (! interpreter.is_leaving());
 
         if (isatty(STDIN_FILENO))
             std::cout << std::endl;
@@ -206,7 +209,7 @@ int main(int argc, const char *argv[])
             << std::endl;
     }
 
-    return system.retcode();
+    return interpreter.retcode();
 
 };
 

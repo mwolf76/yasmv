@@ -42,31 +42,9 @@ ReadModel::~ReadModel()
 
 void ReadModel::set_input(pconst_char input)
 {
-
     if (input) {
-        bool has_quotes
-            (false);
-
-        unsigned len
-            (strlen(input));
-
-        if (('\'' == *input && '\'' == *(input + len - 1)) ||
-            ('"'  == *input && '"'  == *(input + len - 1)))
-            has_quotes = true;
-
         free(f_input);
-
-        if (has_quotes) {
-            f_input = strdup(1 + input);
-            f_input[len -  2] = '\0';
-        }
-        else
-            f_input = strdup(input);
-
-        DEBUG
-            << "set input: "
-            << f_input
-            << std::endl;
+        f_input = strdup(input);
     }
 }
 
@@ -104,6 +82,6 @@ ReadModelTopic::~ReadModelTopic()
 void ReadModelTopic::usage()
 {
     std::cout
-        << "read-model <filename> - Reads a model from given filename[*].\n"
-        << "[*] either in single or double quotes.\n" ;
+        << "read-model <filename> - Reads a model from given filename.\n\n";
+
 }

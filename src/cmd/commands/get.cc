@@ -48,8 +48,10 @@ void Get::set_identifier(Expr_ptr id)
 
 void Get::print_assignment(std::ostream& os, Expr_ptr id)
 {
-    Environment& env { Environment::INSTANCE() };
-    Expr_ptr value { env.get(id) }; /* raises an exception */
+    Environment& env
+        (Environment::INSTANCE());
+
+    Expr_ptr value { env.get(id) }; /* raises an exception on failures */
 
     os
         << outPrefix
@@ -61,7 +63,9 @@ void Get::print_assignment(std::ostream& os, Expr_ptr id)
 
 void Get::print_all_assignments(std::ostream& os)
 {
-    Environment& env { Environment::INSTANCE() };
+    Environment& env
+        (Environment::INSTANCE());
+
     const ExprSet& identifiers { env.identifiers() };
 
     for (ExprSet::const_iterator i = identifiers.begin();
@@ -95,7 +99,8 @@ Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
 Variant Get::operator()()
 {
     /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    std::ostream& out
+        (std::cout);
 
     if (NULL == f_identifier) {
         print_all_assignments(out);

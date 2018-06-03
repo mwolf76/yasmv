@@ -46,7 +46,9 @@ struct stopclock_t timespec_diff(struct timespec from, struct timespec to)
 
 std::string elapsed_repr(struct timespec from, struct timespec to)
 {
-    struct stopclock_t diff { timespec_diff(from, to) };
+    struct stopclock_t diff
+        (timespec_diff(from, to));
+
     time_t uptime { diff.tv_sec };
     unsigned secs = uptime % 60;
     unsigned mins = uptime / 60;

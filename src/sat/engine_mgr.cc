@@ -24,6 +24,8 @@
 #include <sat/engine.hh>
 #include <sat/engine_mgr.hh>
 
+#include <csignal>
+
 EngineMgr_ptr EngineMgr::f_instance = NULL;
 
 EngineMgr::EngineMgr()
@@ -38,18 +40,17 @@ EngineMgr::EngineMgr()
 
 EngineMgr::~EngineMgr()
 {
-    const void* instance
-        (this);
+    const void* instance { this } ;
 
     DRIVEL
-        << "Destroyed EngineMgr @ " << instance
+        << "Destroyed EngineMgr @ "
+        << instance
         << std::endl;
 }
 
 void EngineMgr::register_instance(Engine_ptr engine)
 {
-    boost::mutex::scoped_lock lock
-        (f_mutex);
+    boost::mutex::scoped_lock lock { f_mutex };
 
     /* this engine is not yet registered */
     assert (f_engines.find(engine) == f_engines.end());
@@ -65,8 +66,7 @@ void EngineMgr::register_instance(Engine_ptr engine)
 
 void EngineMgr::unregister_instance(Engine_ptr engine)
 {
-    boost::mutex::scoped_lock lock
-        (f_mutex);
+    boost::mutex::scoped_lock lock { f_mutex };
 
     /* this engine is registered */
     assert (f_engines.find(engine) != f_engines.end());
@@ -82,34 +82,24 @@ void EngineMgr::unregister_instance(Engine_ptr engine)
 
 void EngineMgr::interrupt()
 {
-    boost::mutex::scoped_lock lock
-        (f_mutex);
+    boost::mutex::scoped_lock lock { f_mutex };
 
     EngineSet::iterator esi;
-    for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
-        Engine_ptr pe
-            (*esi);
-
+    for (esi = begin(f_engines); end(f_engines) != esi; ++ esi) {
+        Engine_ptr pe { *esi };
         pe -> interrupt();
     }
 }
 
 void EngineMgr::dump_stats(std::ostream& os)
 {
-    boost::mutex::scoped_lock lock
-        (f_mutex);
+    boost::mutex::scoped_lock lock { f_mutex };
 
-    if (f_engines.empty()) {
-        os
-            << "Solver is not running. No stats available."
-            << std::endl;
-    }
-
+    if (f_engines.empty()) {}
     else {
         EngineSet::iterator esi;
         for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
-            Engine_ptr pe
-                (*esi);
+            Engine_ptr pe { *esi };
 
             os
                 << (*pe)

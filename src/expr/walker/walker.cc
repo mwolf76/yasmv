@@ -80,6 +80,9 @@ void ExprWalker::walk ()
             case R_1: goto entry_R_1;
             case R_2: goto entry_R_2;
 
+            case AT_1: goto entry_AT_1;
+            case AT_2: goto entry_AT_2;
+
             case NEXT_1: goto entry_NEXT_1;
 
             case NEG_1: goto entry_NEG_1;
@@ -261,6 +264,25 @@ void ExprWalker::walk ()
 
             entry_R_2:
                 walk_R_postorder(curr.expr);
+            }
+            break;
+
+        // binary temporal
+        case AT:
+            if (walk_at_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = AT_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_AT_1:
+                if (walk_at_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = AT_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_AT_2:
+                walk_at_postorder(curr.expr);
             }
             break;
 

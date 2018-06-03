@@ -35,7 +35,7 @@ CommandMgr& CommandMgr::INSTANCE()
 }
 
 CommandMgr::CommandMgr()
-    : f_interpreter { Interpreter::INSTANCE() }
+    : f_interpreter (Interpreter::INSTANCE())
 {
     const void* instance { this };
 

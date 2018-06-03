@@ -44,7 +44,7 @@ public:
     CheckInitConsistency(Command& command, Model& model);
     ~CheckInitConsistency();
 
-    void process();
+    void process(ExprVector constraints);
 
     inline fsm_consistency_t status() const
     { return f_status; }
@@ -53,6 +53,9 @@ public:
     { f_status = status; }
 
 private:
+    ExprVector f_constraints;
+    CompilationUnits f_constraint_cus;
+
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
 };
@@ -63,7 +66,7 @@ public:
     CheckTransConsistency(Command& command, Model& model);
     ~CheckTransConsistency();
 
-    void process();
+    void process(ExprVector constraints);
 
     inline fsm_consistency_t status() const
     { return f_status; }
@@ -72,6 +75,9 @@ public:
     { f_status = status; }
 
 private:
+    ExprVector f_constraints;
+    CompilationUnits f_constraint_cus;
+
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
 };

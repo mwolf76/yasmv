@@ -1,5 +1,5 @@
 /**
-   Copyright (C) 2011-2016 Marco Pensallorto
+   Copyright (C) 2011-2018 Marco Pensallorto
 
    This file is part of yasmv.
 
@@ -134,7 +134,7 @@ fsm_formula_decl
     ;
 
 fsm_decl_modifiers
-    : ( '@'
+    : ( '#'
             (
               'hidden'   { $module_decl::hidden   = 1; }
             | 'frozen'   { $module_decl::frozen   = 1; }
@@ -231,13 +231,13 @@ fsm_define_decl_clause
       Define_ptr def = new Define($smv::current_module->name(), id, body);
 
       if ($module_decl::input)
-          throw SyntaxError("@input modifier not supported in DEFINE decls");
+          throw SyntaxError("#input modifier not supported in DEFINE decls");
 
       if ($module_decl::frozen)
-          throw SyntaxError("@frozen modifier not supported in DEFINE decls");
+          throw SyntaxError("#frozen modifier not supported in DEFINE decls");
 
       if ($module_decl::inertial)
-          throw SyntaxError("@inertial modifier not supported in DEFINE decls");
+          throw SyntaxError("#inertial modifier not supported in DEFINE decls");
 
       if ($module_decl::hidden)
           def->set_hidden(true);
@@ -296,9 +296,15 @@ fsm_trans_decl_clause
       { $smv::current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
-// entry point
 toplevel_expression returns [Expr_ptr res]
-    : expr=conditional_expression
+    : expr=at_expression
+      { $res = expr; }
+    ;
+
+at_expression returns [Expr_ptr res]
+    : '@' time=constant '{' expr=conditional_expression '}'
+      { $res = em.make_at(time, expr); }
+    | expr=conditional_expression
       { $res = expr; }
     ;
 
@@ -1015,68 +1021,6 @@ command returns [Command_ptr res]
        { $res = c; }
     ;
 
-// command returns [Command_ptr res]
-//     :  c=help_command
-//        { $res = c; }
-
-//     |  c=do_command
-//        { $res = c; }
-
-//     |  c=echo_command
-//        { $res = c; }
-
-//     |  c=last_command
-//        { $res = c; }
-
-//     |  c=on_command
-//        { $res = c; }
-
-//     |  c=time_command
-//        { $res = c; }
-
-//     |  c=read_model_command
-//        { $res = c; }
-
-//     |  c=dump_model_command
-//        { $res = c; }
-
-//     |  c=pick_state_command
-//        { $res = c; }
-
-//     |  c=simulate_command
-//        { $res = c; }
-
-//     |  c=check_init_command
-//        { $res = c; }
-
-//     |  c=reach_command
-//        { $res = c; }
-
-//     |  c=check_trans_command
-//        { $res = c; }
-
-//     |  c=list_traces_command
-//        { $res = c; }
-
-//     |  c=dump_trace_command
-//        { $res = c; }
-
-//     |  c=dup_trace_command
-//        { $res = c; }
-
-//     |  c=get_command
-//        { $res = c; }
-
-//     |  c=set_command
-//        { $res = c; }
-
-//     |  c=clear_command
-//        { $res = c; }
-
-//     |  c=quit_command
-//        { $res = c; }
-//     ;
-
 help_command returns [Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
@@ -1190,6 +1134,9 @@ dump_model_command_topic returns [CommandTopic_ptr res]
 check_init_command returns[Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
+
+      ( '-c' constraint=toplevel_expression
+      { ((CheckInit_ptr) $res)->add_constraint(constraint); })*
     ;
 
 check_init_command_topic returns [CommandTopic_ptr res]
@@ -1198,11 +1145,14 @@ check_init_command_topic returns [CommandTopic_ptr res]
     ;
 
 reach_command returns[Command_ptr res]
-    : 'reach'
-      { $res = cm.make_reach(); }
+    :   'reach'
+        { $res = cm.make_reach(); }
 
         target=toplevel_expression
         { ((Reach_ptr) $res)->set_target(target); }
+
+        ( '-c' constraint=toplevel_expression
+        { ((Reach_ptr) $res)->add_constraint(constraint); })*
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]
@@ -1213,6 +1163,9 @@ reach_command_topic returns [CommandTopic_ptr res]
 check_trans_command returns[Command_ptr res]
     : 'check-trans'
       { $res = cm.make_check_trans(); }
+
+      ( '-c' constraint=toplevel_expression
+      { ((CheckTrans_ptr) $res)->add_constraint(constraint); })*
     ;
 
 check_trans_command_topic returns [CommandTopic_ptr res]
@@ -1241,7 +1194,6 @@ dump_trace_command returns [Command_ptr res]
     | '-o' output=pcchar_quoted_string
       {
             ((DumpTrace_ptr) $res)->set_output(output);
-            free((void *) output);
       }
 
     )*
@@ -1281,6 +1233,9 @@ pick_state_command returns [Command_ptr res]
 
     |    '-l' limit=constant
          { ((PickState_ptr) $res)->set_limit(limit->value()); }
+
+    |    '-c' constraint=toplevel_expression
+         { ((PickState_ptr) $res)->add_constraint(constraint); }
     )* ;
 
 pick_state_command_topic returns [CommandTopic_ptr res]
@@ -1370,7 +1325,19 @@ pcchar_identifier returns [pconst_char res]
 
 pcchar_quoted_string returns [pconst_char res]
     : QUOTED_STRING
-    { $res = (pconst_char) $QUOTED_STRING.text->chars; }
+        {
+            pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
+            pANTLR3_UINT8 q; for (q = p; *q; ++ q) ;
+
+            assert (*p == '\'' || *p == '\"');
+            p ++ ;  /* cut lhs quote */
+
+            q -- ;
+            assert (*q == '\'' || *q == '\"');
+            *q = 0; /* cut rhs quote */
+
+            $res = (pconst_char) p; // $QUOTED_STRING.text->chars;
+        }
     ;
 
 // -- Lexer rules --------------------------------------------------------------

@@ -29,6 +29,7 @@
 
 Simulate::Simulate(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
     , f_invar_condition(NULL)
     , f_until_condition(NULL)
     , f_k(1)
@@ -70,50 +71,56 @@ void Simulate::set_k(step_t k)
 
 Variant Simulate::operator()()
 {
-    OptsMgr& om { OptsMgr::INSTANCE() };
-    std::ostream& out { std::cout };
-    bool res { false };
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
 
     Simulation sim
-        (*this, ModelMgr::INSTANCE().model());
+        (*this, mm.model());
 
+    bool res { false };
+
+    ExprVector f_constraints;
     sim.simulate(f_invar_condition,
                  f_until_condition,
+                 f_constraints,
                  f_k, f_trace_uid);
 
     switch (sim.status()) {
     case SIMULATION_DONE:
         res = true;
         if (! om.quiet())
-            out
+            f_out
                 << outPrefix;
-        out
+        f_out
             << "Simulation done";
         break;
 
     case SIMULATION_INITIALIZED:
         if (! om.quiet())
-            out
+            f_out
                 << outPrefix;
-        out
+        f_out
             << "Simulation initialized"
             << std::endl;
         break;
 
     case SIMULATION_DEADLOCKED:
         if (! om.quiet())
-            out
+            f_out
                 << wrnPrefix;
-        out
+        f_out
             << "Simulation deadlocked"
             << std::endl;
         break;
 
     case SIMULATION_INTERRUPTED:
         if (! om.quiet())
-            out
+            f_out
                 << wrnPrefix;
-        out
+        f_out
             << "Simulation interrupted"
             << std::endl;
         break;
@@ -123,9 +130,9 @@ Variant Simulate::operator()()
 
     if (sim.has_witness()) {
         if (! om.quiet())
-            out
+            f_out
                 << outPrefix;
-        out
+        f_out
             << "Registered witness `"
             << sim.witness().id()
             << "`"
@@ -133,9 +140,9 @@ Variant Simulate::operator()()
     }
     else {
         if (! om.quiet())
-            out
+            f_out
                 << wrnPrefix;
-        out
+        f_out
             << "(no witness available)"
             << std::endl;
     }

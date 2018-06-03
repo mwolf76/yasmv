@@ -3,18 +3,18 @@
 #word-width 6
 MODULE maze
 
-@hidden
-@frozen
+#hidden
+#frozen
 VAR
     space: boolean[64];
 
 VAR
     x, y : uint;
 
-@hidden
+#hidden
 DEFINE _ := FALSE;
 
-@hidden
+#hidden
 DEFINE O := TRUE;
 
 -- Define the labyrinth space. 'O's are obstacles, while '_' are free
@@ -41,7 +41,7 @@ INIT
 
 -- he can not occupy a cell which holds an obstacle...
 
-@hidden
+#hidden
 DEFINE
   addr := 8 * y + x;
 
@@ -66,7 +66,7 @@ INVAR
    (next(x)  = x) && (next(y) != y) ;
 
 -- his target is the bottom-right corner
-@hidden
+#hidden
 DEFINE
   GOAL := x = 7 && y = 7;
 

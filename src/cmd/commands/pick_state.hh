@@ -31,16 +31,12 @@
 #include <algorithms/sim/simulation.hh>
 
 class PickState : public Command {
-
-    /* perform ALLSAT enumeration? */
-    bool f_allsat;
-
-    /* ALLSAT enumeration limit (optional) */
-    unsigned f_limit;
-
 public:
     PickState(Interpreter& owner);
     virtual ~PickState();
+
+    /** cmd params */
+    void add_constraint(Expr_ptr constraint);
 
     void set_allsat(bool value);
     inline bool allsat() const
@@ -51,6 +47,21 @@ public:
     { return f_limit; }
 
     Variant virtual operator()();
+
+private:
+    std::ostream& f_out;
+
+    /* (optional) additional constraints */
+    ExprVector f_constraints;
+
+    /* perform ALLSAT enumeration? */
+    bool f_allsat;
+
+    /* ALLSAT enumeration limit (optional) */
+    unsigned f_limit;
+
+    // -- helpers -------------------------------------------------------------
+    bool check_requirements();
 };
 
 typedef PickState* PickState_ptr;

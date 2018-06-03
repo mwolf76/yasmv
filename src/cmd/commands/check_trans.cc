@@ -32,45 +32,82 @@
 
 CheckTrans::CheckTrans(Interpreter& owner)
     : Command(owner)
+    , f_out(std::cout)
 {}
 
 CheckTrans::~CheckTrans()
 {}
 
+void CheckTrans::add_constraint(Expr_ptr constraint)
+{
+    f_constraints.push_back(constraint);
+}
+
+bool CheckTrans::check_requirements()
+{
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    Model& model
+        (mm.model());
+
+    if (0 == model.modules().size()) {
+        f_out
+            << wrnPrefix
+            << "Model not loaded."
+            << std::endl;
+
+        return false;
+    }
+
+    return true;
+}
+
 Variant CheckTrans::operator()()
 {
-    Variant res = Variant(errMessage);
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
 
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out { std::cout };
+    Variant res { false };
 
-    CheckTransConsistency algorithm { *this, ModelMgr::INSTANCE().model() } ;
-    algorithm.process();
+    if (check_requirements()) {
+        CheckTransConsistency check_trans { *this,
+                ModelMgr::INSTANCE().model() } ;
+        check_trans.process(f_constraints);
 
-    switch (algorithm.status()) {
-    case FSM_CONSISTENCY_OK:
-        out
-            << outPrefix
-            << "Transition relation consistency check ok."
-            << std::endl;
-        break;
+        switch (check_trans.status()) {
+        case FSM_CONSISTENCY_OK:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Transition relation consistency check ok."
+                << std::endl;
 
-    case FSM_CONSISTENCY_KO:
-        out
-            << outPrefix
-            << "Transition relation consistency check failed."
-            << std::endl;
-        break;
+            res = true;
+            break;
 
-    case FSM_CONSISTENCY_UNDECIDED:
-        out
-            << outPrefix
-            << "Could not decide transition relation consistency check."
-            << std::endl;
-        break;
+        case FSM_CONSISTENCY_KO:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Transition relation consistency check failed."
+                << std::endl;
+            break;
 
-    default: assert( false ); /* unreachable */
-    } /* switch */
+        case FSM_CONSISTENCY_UNDECIDED:
+            if (! om.quiet())
+                f_out
+                    << outPrefix;
+            f_out
+                << "Could not decide transition relation consistency check."
+                << std::endl;
+            break;
+
+        default: assert( false ); /* unreachable */
+        } /* switch */
+    }
 
     return res;
 }
