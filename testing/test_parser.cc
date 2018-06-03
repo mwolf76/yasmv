@@ -37,7 +37,8 @@ extern Type_ptr parseTypedef(const char *string);
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(parsing_identifiers)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     Atom a_x("x");
     Atom a_y("y");
@@ -56,7 +57,8 @@ BOOST_AUTO_TEST_CASE(parsing_identifiers)
 
 BOOST_AUTO_TEST_CASE(ltl_expressions)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     Atom a_x("x");
     Atom a_y("y");
@@ -133,7 +135,9 @@ BOOST_AUTO_TEST_CASE(ltl_expressions)
 
 BOOST_AUTO_TEST_CASE(toplevel_expressions)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     Atom a_x("x");
     Atom a_y("y");
 
@@ -293,7 +297,9 @@ BOOST_AUTO_TEST_CASE(toplevel_expressions)
 
 BOOST_AUTO_TEST_CASE(operators_precedence)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     Atom a_x("x");
     Atom a_y("y");
     Atom a_w("w");
@@ -431,7 +437,9 @@ BOOST_AUTO_TEST_CASE(operators_precedence)
 
 BOOST_AUTO_TEST_CASE(at_expressions)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     Atom a_x("x");
     Atom a_y("y");
 
@@ -468,7 +476,9 @@ BOOST_AUTO_TEST_CASE(at_expressions)
 
 BOOST_AUTO_TEST_CASE(complex_expressions)
 {
-    ExprMgr& em { ExprMgr::INSTANCE() };
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
     Atom a_x("x");
     Atom a_y("y");
 
@@ -491,7 +501,8 @@ BOOST_AUTO_TEST_CASE(complex_expressions)
 
 BOOST_AUTO_TEST_CASE(typedefs)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
     {
        Expr_ptr phi = em.make_boolean_type();
