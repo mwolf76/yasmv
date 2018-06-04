@@ -1,6 +1,6 @@
 #!/bin/bash
 EXAMPLES="examples"
-YASMV="./yasmv"
+YASMV="yasmv"
 
 function test() {
     diff $1-out "$EXAMPLES/$1/$1-out-ref"
@@ -11,15 +11,15 @@ function test() {
     fi
 }
 
-$YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands" > cannibals-out
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands" > cannibals-out
 test cannibals
 
-$YASMV --quiet "$EXAMPLES/vending/vending.smv" < "$EXAMPLES/vending/commands" > vending-out
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/vending/vending.smv" < "$EXAMPLES/vending/commands" > vending-out
 test vending
 
-$YASMV --quiet "$EXAMPLES/herschel/herschel.smv" < "$EXAMPLES/herschel/commands" > herschel-out
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/herschel/herschel.smv" < "$EXAMPLES/herschel/commands" > herschel-out
 test herschel
 
-$YASMV --quiet "$EXAMPLES/koenisberg/koenisberg.smv" < "$EXAMPLES/koenisberg/commands" > koenisberg-out
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/koenisberg/koenisberg.smv" < "$EXAMPLES/koenisberg/commands" > koenisberg-out
 test koenisberg
 
