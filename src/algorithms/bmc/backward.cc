@@ -101,7 +101,7 @@ void BMC::backward_strategy()
                 /* witness description */
                 std::ostringstream oss_desc;
                 oss_desc
-                    << "Reversed reachability witness for target `"
+                    << "Reachability witness for target `"
                     << f_target
                     << "` in module `"
                     << model().main_module().name()
