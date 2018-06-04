@@ -112,6 +112,9 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
         /* wait for termination */
         fwd.join();
         bwd.join();
+
+        ffwd.join();
+        fbwd.join();
     }
 
     catch (Exception& e) {
