@@ -105,6 +105,10 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
         boost::thread fwd(&BMC::forward_strategy, this);
         boost::thread bwd(&BMC::backward_strategy, this);
 
+        /* falsification only */
+        boost::thread ffwd(&BMC::fast_forward_strategy, this);
+        boost::thread fbwd(&BMC::fast_backward_strategy, this);
+
         /* wait for termination */
         fwd.join();
         bwd.join();
