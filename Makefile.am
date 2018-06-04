@@ -33,7 +33,7 @@ unittest: yasmv_tests
 	YASMV_HOME=`pwd` ./yasmv_tests --log_level=error
 
 functionaltest: yasmv_tests
-	tools/run-functional-tests.sh
+	@tools/run-functional-tests.sh
 
 test: unittest functionaltest
 	@echo "*** All tests passed Ok"
