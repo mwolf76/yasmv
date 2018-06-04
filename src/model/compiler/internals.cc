@@ -174,10 +174,10 @@ bool Compiler::cache_miss(const Expr_ptr expr)
         const Type_ptr type
             (f_owner.type(expr, ctx));
 
-        // DRIVEL
-        //     << "Cache hit for " << expr
-        //     << ", type is " << type
-        //     << std::endl;
+        DRIVEL
+            << "Cache hit for " << expr
+            << ", type is " << type
+            << std::endl;
 
         CompilationUnit& unit
             ((*eye).second);
@@ -233,6 +233,12 @@ bool Compiler::cache_miss(const Expr_ptr expr)
     return true;
 }
 
+void Compiler::pre_hook()
+{}
+
+void Compiler::post_hook()
+{}
+
 void Compiler::clear_internals()
 {
     f_add_stack.clear();
@@ -246,26 +252,14 @@ void Compiler::clear_internals()
     f_bsuf_map.clear();
 }
 
-void Compiler::pre_hook()
-{}
-
-void Compiler::post_hook()
-{}
-
 void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
 {
     assert (READY == f_status);
     ++ f_status;
 
     clear_internals();
-
-    /* walk body in given ctx */
     f_ctx_stack.push_back(ctx);
-
-    /* toplevel (time is assumed at 0, arbitraryly nested next allowed) */
     f_time_stack.push_back(0);
-
-    /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 }
 
@@ -275,14 +269,8 @@ void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
     ++ f_status;
 
     clear_internals();
-
-    // walk body in given ctx
     f_ctx_stack.push_back(ctx);
-
-    // toplevel (time is assumed at 0, arbitraryly nested next allowed)
     f_time_stack.push_back(0);
-
-    /* Invoke walker on the body of the expr to be processed */
     (*this)(body);
 }
 
@@ -345,8 +333,8 @@ void Compiler::activate_array_muxes()
         const DDVector& cnds { i -> cnds() };
         const DDVector& acts { i -> acts() };
 
-        DDVector::const_iterator ci { cnds.begin() };
-        DDVector::const_iterator ai { acts.begin() };
+        DDVector::const_iterator ci { begin(cnds) };
+        DDVector::const_iterator ai { begin(acts) };
 
         while (cnds.end() != ci) {
             PUSH_DD((*ci).Xnor(*ai));
