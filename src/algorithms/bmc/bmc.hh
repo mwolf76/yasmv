@@ -54,6 +54,9 @@ private:
     /* strategies */
     void forward_strategy();
     void backward_strategy();
+
+    void fast_forward_strategy();
+    void fast_backward_strategy();
 };
 
 #endif /* BMC_ALGORITHM_CLASSES_H */

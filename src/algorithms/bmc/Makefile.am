@@ -8,7 +8,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
 PKG_HH = bmc.hh typedefs.hh witness.hh
-PKG_CC = bmc.cc forward.cc backward.cc witness.cc
+PKG_CC = bmc.cc forward.cc backward.cc fast_forward.cc fast_backward.cc witness.cc
 
 # -------------------------------------------------------
 

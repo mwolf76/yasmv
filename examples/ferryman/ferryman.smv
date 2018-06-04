@@ -52,14 +52,10 @@ TRANS
      ferryman :=
               (ferryman = WEST ? EAST : WEST);
 
--- To perform planning, we need to assert the negation of the desired TARGET.
--- Our TARGET here is to have all the required items on the EAST bank.
-
 -- Symbols annotated with `#hidden` do not show up in traces.
 #hidden
 DEFINE GOAL :=
        cabbage = EAST && goat = EAST && wolf = EAST;
 
--- To solve the ferryman problem in this model try this:
--- >> reach GOAL; dump-trace
-
+-- To solve the ferryman problem in this model type:
+-- >> reach GOAL; on success dump-trace
