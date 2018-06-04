@@ -29,8 +29,14 @@ EXTRA_PROGRAMS = yasmv_tests
 dist_pkgdata_DATA = microcode/*
 
 # test target helper
-test: yasmv_tests
+unittest: yasmv_tests
 	YASMV_HOME=`pwd` ./yasmv_tests --log_level=error
+
+functionaltest: yasmv_tests
+	tools/run-functional-tests.sh
+
+test: unittest functionaltest
+	@echo "*** All tests passed Ok"
 
 # tags target helper  (uses exuberant ctags)
 tags:

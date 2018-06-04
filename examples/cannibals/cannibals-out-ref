@@ -1,0 +1,98 @@
+Target is reachable, registered witness `reach_1`, 12 steps.
+Witness: reach_1 [[ Reachability witness for target `GOAL` in module `cannibals` ]]
+:: @0
+-- state
+   west-cannibals = 3
+   east-cannibals = 0
+   west-missionaries = 3
+   east-missionaries = 0
+   carry = MC
+
+:: @1
+-- state
+   west-cannibals = 2
+   east-cannibals = 1
+   west-missionaries = 2
+   east-missionaries = 1
+   carry = M_
+
+:: @2
+-- state
+   west-cannibals = 2
+   east-cannibals = 1
+   west-missionaries = 3
+   east-missionaries = 0
+   carry = CC
+
+:: @3
+-- state
+   west-cannibals = 0
+   east-cannibals = 3
+   west-missionaries = 3
+   east-missionaries = 0
+   carry = C_
+
+:: @4
+-- state
+   west-cannibals = 1
+   east-cannibals = 2
+   west-missionaries = 3
+   east-missionaries = 0
+   carry = MM
+
+:: @5
+-- state
+   west-cannibals = 1
+   east-cannibals = 2
+   west-missionaries = 1
+   east-missionaries = 2
+   carry = MC
+
+:: @6
+-- state
+   west-cannibals = 2
+   east-cannibals = 1
+   west-missionaries = 2
+   east-missionaries = 1
+   carry = MM
+
+:: @7
+-- state
+   west-cannibals = 2
+   east-cannibals = 1
+   west-missionaries = 0
+   east-missionaries = 3
+   carry = C_
+
+:: @8
+-- state
+   west-cannibals = 3
+   east-cannibals = 0
+   west-missionaries = 0
+   east-missionaries = 3
+   carry = CC
+
+:: @9
+-- state
+   west-cannibals = 1
+   east-cannibals = 2
+   west-missionaries = 0
+   east-missionaries = 3
+   carry = M_
+
+:: @10
+-- state
+   west-cannibals = 1
+   east-cannibals = 2
+   west-missionaries = 1
+   east-missionaries = 2
+   carry = MC
+
+:: @11
+-- state
+   west-cannibals = 0
+   east-cannibals = 3
+   west-missionaries = 0
+   east-missionaries = 3
+   carry = DONE
+

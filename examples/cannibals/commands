@@ -1,4 +1,3 @@
 reach GOAL
-on success dump-trace
-time
+on success dump-trace -f plain
 quit
