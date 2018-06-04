@@ -1,6 +1,6 @@
 #!/bin/bash
 EXAMPLES="examples"
-YASMV="yasmv"
+YASMV="./yasmv"
 
 function test() {
     diff $1-out "$EXAMPLES/$1/$1-out-ref"
