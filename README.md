@@ -1,6 +1,6 @@
-develop [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)
+develop [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv)
 &nbsp;
-master [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)
+master [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv)
 
 ## ABOUT
 
@@ -24,7 +24,7 @@ to solve planning problems.
 
 ## BUILD
 
-  Here is the complete list of build dependencies. Thse package names are from
+  Here is the complete list of build dependencies. These package names are from
   Ubuntu 14.04 (Trusty), used in Travis CI.
 
   - antlr3
@@ -57,8 +57,8 @@ to solve planning problems.
   $ make -j8
   ```
 
-  Another option is to use distcc. The setup.sh script contains a working
-  example. Refer to distcc documentation for more details.
+  Another option is to use `distcc`. The setup.sh script contains a working
+  example. Refer to `distcc` documentation for more details.
 
   On my current development platform - Debian 9.4 ("Stretch") - the whole thing
   builds with no warnings. The parser is written with ANTLR3[*] so you will need
@@ -102,7 +102,7 @@ to solve planning problems.
   For further information on microcode, please refer to the `README` file in the
   microcode bzip2'd tarball.
 
-  Unit tests can be run using:
+  Unit and functional tests can be run using:
   ```
   $ make test
   ```
