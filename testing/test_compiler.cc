@@ -32,10 +32,11 @@
 
 #include <model.hh>
 #include <model_mgr.hh>
+#include <model/module.hh>
+#include <model/compiler/compiler.hh>
 
-#include <dd_walker.hh>
 
-# if 0
+#include <dd_leaf_walker.hh>
 
 class TestWalker : public DDLeafWalker {
 public:
@@ -322,46 +323,66 @@ public:
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(compiler)
 {
-    ModelMgr& mm(ModelMgr::INSTANCE());
-    ExprMgr& em(ExprMgr::INSTANCE());
-    TypeMgr& tm(TypeMgr::INSTANCE());
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+    om.set_verbosity(4);
 
     Compiler f_compiler;
 
-    Expr_ptr main_expr(em.make_main());
-    IModule_ptr main_module = new Module( main_expr );
+    Model& model
+        (mm.model());
+
+    Atom a_main("main");
+    Expr_ptr main_expr(em.make_identifier(a_main));
+
+    Module_ptr main_module = new Module(main_expr);
+    model.add_module(*main_module);
+
     Type_ptr u2 = tm.find_unsigned(2);
 
     Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
-    main_module->add_localVar(x, new StateVar(main_expr, x, u2));
+    main_module->add_var(x, new Variable(main_expr, x, u2));
 
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_localVar(y, new StateVar(main_expr, y, u2));
-
-    mm.model()->add_module(main_expr, main_module);
+    main_module->add_var(y, new Variable(main_expr, y, u2));
 
     {
-        Atom a_d("d_plus_1"); Expr_ptr define = em.make_identifier(a_d);
-
         /* y := x + 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        // main_module->add_def(define, new Define(main_expr, define, test_expr));
         PlusTestWalker ptw(CuddMgr::INSTANCE());
 
-        ptw(f_compiler.process( main_expr, define, 0));
+        CompilationUnit cu
+            (f_compiler.process(em.make_empty(), test_expr));
+
+        ptw(cu.dds()[0]);
     }
+
+#if 0
 
     {
         Atom a_d("d_plus_2"); Expr_ptr define = em.make_identifier(a_d);
 
         /* y := x + 17 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_iconst(17)));
+        Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_const(17)));
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
         PlusTestWalker ptw(CuddMgr::INSTANCE(), 17);
 
-        ptw(f_compiler.process( main_expr, define, 0));
+        CompilationUnit cu
+            (f_compiler.process(main_expr, test_expr));
+
+        ptw(cu.dds()[0]);
     }
 
     {
@@ -370,22 +391,28 @@ BOOST_AUTO_TEST_CASE(compiler)
         /* y := 1 + x */
         Expr_ptr test_expr = em.make_eq( y, em.make_add( em.make_one(), x));
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
         PlusTestWalker ptw(CuddMgr::INSTANCE());
 
-        ptw(f_compiler.process( main_expr, define, 0));
+        CompilationUnit cu
+            (f_compiler.process(main_expr, test_expr));
+
+        ptw(cu.dds()[0]);
     }
 
     {
         Atom a_d("d_plus_4"); Expr_ptr define = em.make_identifier(a_d);
 
         /* y := 17 + x */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( em.make_iconst(17), x));
+        Expr_ptr test_expr = em.make_eq( y, em.make_add( em.make_const(17), x));
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
         PlusTestWalker ptw(CuddMgr::INSTANCE(), 17);
 
-        ptw(f_compiler.process( main_expr, define, 0));
+        CompilationUnit cu
+            (f_compiler.process(main_expr, test_expr));
+
+        ptw(cu.dds()[0]);
     }
 
     {
@@ -394,7 +421,7 @@ BOOST_AUTO_TEST_CASE(compiler)
         /* y := 2 * x */
         Expr_ptr test_expr = em.make_eq( y, em.make_mul( em.make_iconst(2), x));
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
         MulTestWalker mtw(CuddMgr::INSTANCE(), 2);
 
         mtw(f_compiler.process( main_expr, define, 0));
@@ -405,7 +432,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := - x */
         Expr_ptr test_expr = em.make_eq( y, em.make_neg( x ));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         NegTestWalker ntw(CuddMgr::INSTANCE());
         ntw(f_compiler.process( main_expr, define, 0));
@@ -416,7 +443,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := x - 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         SubTestWalker stw(CuddMgr::INSTANCE());
         stw(f_compiler.process( main_expr, define, 0));
@@ -427,7 +454,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := x - 42 */
         Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_iconst(42)));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         SubTestWalker stw(CuddMgr::INSTANCE(), 42);
         stw(f_compiler.process( main_expr, define, 0));
@@ -438,7 +465,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := x & 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_and( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         AndTestWalker atw(CuddMgr::INSTANCE());
         atw(f_compiler.process( main_expr, define, 0));
@@ -449,7 +476,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := x & 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_or( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         OrTestWalker atw(CuddMgr::INSTANCE());
         atw(f_compiler.process( main_expr, define, 0));
@@ -460,7 +487,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := x ^ 1 */
         Expr_ptr test_expr = em.make_eq( y, em.make_xor( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         XorTestWalker atw(CuddMgr::INSTANCE());
         atw(f_compiler.process( main_expr, define, 0));
@@ -471,7 +498,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y := ~ (x ^ 1) */
         Expr_ptr test_expr = em.make_eq( y, em.make_xnor( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         XnorTestWalker atw(CuddMgr::INSTANCE());
         atw(f_compiler.process( main_expr, define, 0));
@@ -482,7 +509,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y < x */
         Expr_ptr test_expr = em.make_lt( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         LtTestWalker ltw(CuddMgr::INSTANCE());
         ltw(f_compiler.process( main_expr, define, 0));
@@ -493,7 +520,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y <= x */
         Expr_ptr test_expr = em.make_le( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         LeTestWalker lew(CuddMgr::INSTANCE());
         lew(f_compiler.process( main_expr, define, 0));
@@ -504,7 +531,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y > x */
         Expr_ptr test_expr = em.make_gt( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         GtTestWalker gtw(CuddMgr::INSTANCE());
         gtw(f_compiler.process( main_expr, define, 0));
@@ -515,7 +542,7 @@ BOOST_AUTO_TEST_CASE(compiler)
 
         /* y >= x */
         Expr_ptr test_expr = em.make_ge( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+        main_module->add_def(define, new Define(main_expr, define, test_expr));
 
         GeTestWalker gew(CuddMgr::INSTANCE());
         gew(f_compiler.process( main_expr, define, 0));
@@ -524,14 +551,14 @@ BOOST_AUTO_TEST_CASE(compiler)
     // {
     //     Atom a_d("d_lsh_1"); Expr_ptr define = em.make_identifier(a_d);
 
-    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+    //     main_module->add_def(define, new Define(main_expr, define, test_expr));
 
     //     GeTestWalker gew(CuddMgr::INSTANCE());
     //     gew(f_compiler.process( main_expr, define, 0));
     // }
+#endif
 
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif

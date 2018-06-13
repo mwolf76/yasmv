@@ -56,7 +56,7 @@ cudd-2.5.0/util/cpu_time.c cudd-2.5.0/util/pipefork.c			\
 cudd-2.5.0/util/safe_mem.c cudd-2.5.0/util/state.c			\
 cudd-2.5.0/util/stub.c cudd-2.5.0/st/st.c cudd-2.5.0/obj/cuddObj.cc
 
-PKG_CC = $(CUDD_CC) cudd_mgr.cc dd_walker.cc
+PKG_CC = $(CUDD_CC) cudd_mgr.cc dd_walker.cc dd_leaf_walker.cc
 
 # -------------------------------------------------------
 
