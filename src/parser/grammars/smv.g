@@ -1054,14 +1054,12 @@ echo_command returns [Command_ptr res]
     : 'echo'?
       { $res = cm.make_echo(); }
       (
-            exprs = expressions[&ev]
+            expr = toplevel_expression
             {
-                for (ExprVector::iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
-                    Expr_ptr expr { *ei };
-                    ((Echo_ptr) $res) -> append_expression(expr);
-                }
+                ((Echo_ptr) $res) -> append_expression(expr);
             }
-      ) ;
+      )
+      ;
 
 echo_command_topic returns [CommandTopic_ptr res]
     : 'echo'
