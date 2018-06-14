@@ -1121,7 +1121,7 @@ dump_model_command returns [Command_ptr res]
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
-        ( output=pcchar_quoted_string {
+        ( '-o' output=pcchar_quoted_string {
             ((DumpModel_ptr) $res)->set_output(output);
         }) ?
     ;
