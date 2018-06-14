@@ -82,6 +82,9 @@ ReadModelTopic::~ReadModelTopic()
 void ReadModelTopic::usage()
 {
     std::cout
-        << "read-model <filename> - Reads a model from given filename.\n\n";
-
+        << "read-model \"<filename>\" - Reads a model from given filename.\n\n"
+        << "Reads a model from file with specified name. This is equivalent\n"
+        << "to passing a model on the command line. In fact, the name as argument\n"
+        << "is converted in a `read-model` command internally. Thus, the two ways are\n"
+        << "one and the same.\n\n";
 }

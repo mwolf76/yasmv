@@ -125,7 +125,7 @@ CheckInitTopic::~CheckInitTopic()
 void CheckInitTopic::usage()
 {
     std::cout
-        << "check-init [ -c <expr> ] - Checks propositional satisfiability for INIT formulas.\n"
+        << "check-init [-c <expr>] - Checks propositional satisfiability for INIT formulas.\n"
         << "[ Requires model ]\n\n"
         << "Initial states are checked for consistency. Returns `OK` if initial\n"
         << "states are consistent, `KO` if initial are found to be inconsistent.\n"

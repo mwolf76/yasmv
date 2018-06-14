@@ -220,6 +220,7 @@ DumpModelTopic::~DumpModelTopic()
 void DumpModelTopic::usage()
 {
     std::cout
-        << "dump-model [<filename>] - Dump current model to given filename.\n"
+        << "dump-model [-o <filename>] - Dump current model to given filename.\n"
+        << "[ Requires model ]\n\n"
         << "If no filename is given, model is written to standard output.\n";
 }

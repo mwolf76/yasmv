@@ -677,7 +677,7 @@ DumpTraceTopic::~DumpTraceTopic()
 void DumpTraceTopic::usage()
 {
     std::cout
-        << "dump-trace [-o <filename>] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
+        << "dump-trace [-o \"<filename>\"] [-f <format>] [<trace-uid>] - Dumps given trace.\n\n"
         << "options:\n"
         << "  -f <format>, format can be either `plain`, `xml`, `json` or `yaml`.\n"
         << "  -o \"<filename>\", filename must be a writeable path on disk.\n\n"
