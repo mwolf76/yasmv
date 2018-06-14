@@ -51,21 +51,42 @@ void ReadModel::set_input(pconst_char input)
 extern bool parseFile(pconst_char input); // in utils.cc
 Variant ReadModel::operator()()
 {
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+    (void) mm;
+
+    bool ok
+        (true);
 
     if (! f_input) {
         WARN
             << "No input filename provided. (missing quotes?)"
             << std::endl;
 
-        return Variant( "ERROR" );
+        ok = false;
     }
 
-    // parsing
-    bool hasErrors = parseFile(f_input);
-    if (! hasErrors)
-        hasErrors = ! ModelMgr::INSTANCE().analyze();
+    // make sure it's a file and it's readable
+    std::ifstream exists
+        (f_input);
 
-    return Variant( ! hasErrors ? okMessage : errMessage );
+    if (! exists.good()) {
+        WARN
+            << "Specified file does not exists or is not readable"
+            << std::endl;
+
+        ok = false;
+    }
+
+    // if (! mm.analyze()) {
+    //     WARN
+    //         << "Semantic error detected"
+    //         << std::endl;
+
+    //     ok = false;
+    // }
+
+    return Variant(ok ? okMessage : errMessage);
 }
 
 ReadModelTopic::ReadModelTopic(Interpreter& owner)
