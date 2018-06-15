@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <boost/filesystem.hpp>
+
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/read_model.hh>
 
@@ -63,11 +65,11 @@ Variant ReadModel::operator()()
             << std::endl;
         ok = false;
     } else {
-        // make sure it's a file and it's readable
-        std::ifstream exists
+        boost::filesystem::path modelpath
             (f_input);
 
-        if (! exists.good()) {
+        if (! exists(modelpath) ||
+            ! is_regular_file(modelpath)) {
             WARN
                 << "Specified file does not exists or is not readable"
                 << std::endl;

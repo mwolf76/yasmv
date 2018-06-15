@@ -1121,7 +1121,12 @@ dump_model_command returns [Command_ptr res]
 
         ( '-o' output=pcchar_quoted_string {
             ((DumpModel_ptr) $res)->set_output(output);
-        }) ?
+        }
+
+        | '-s' ('state' { ((DumpModel_ptr) $res)->select_state(); }
+        |       'init'  { ((DumpModel_ptr) $res)->select_init();  }
+        |       'trans' { ((DumpModel_ptr) $res)->select_trans(); })
+        ) *
     ;
 
 dump_model_command_topic returns [CommandTopic_ptr res]
