@@ -83,5 +83,5 @@ void DoTopic::usage()
         << "This command can be used to build sequences of other commands that are\n"
         << "all evaluated as one single task. It's particularly useful when used in\n"
         << "combination with the `on` command. For example\n\n"
-        << "do pick-state; on success do simulate on success do simulate\n\n";
+        << "pick-state; on success do simulate; time;\n";
 }

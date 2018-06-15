@@ -41,11 +41,19 @@ public:
     inline pconst_char output() const
     { return f_output; }
 
+    void select_state();
+    void select_init();
+    void select_trans();
+
     Variant virtual operator()();
 
 private:
     std::ostream* f_outfile { NULL };
     std::ostream& get_output_stream();
+
+    bool f_state;
+    bool f_init;
+    bool f_trans;
 
     void dump_heading(std::ostream& os, Module& module);
     void dump_variables(std::ostream& os, Module& module);

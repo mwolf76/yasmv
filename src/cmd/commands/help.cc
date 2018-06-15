@@ -92,5 +92,10 @@ HelpTopic::~HelpTopic()
 void HelpTopic::usage()
 {
     std::cout
-        << "help <command> - shows a topic from the internal help system\n";
+        << "help [<command>] - shows a topic from the internal help system\n\n"
+        << "This command can be used to obtain the documentation and command\n"
+        << "usage for all the commands supported by the program. Argument can\n"
+        << "be a valid command or nothing. If no such argument is passed, the\n"
+        << "full list of supported commands are printed.\n" ;
+
 }
