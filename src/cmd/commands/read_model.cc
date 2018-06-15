@@ -53,7 +53,6 @@ Variant ReadModel::operator()()
 {
     ModelMgr& mm
         (ModelMgr::INSTANCE());
-    (void) mm;
 
     bool ok
         (true);
@@ -62,29 +61,33 @@ Variant ReadModel::operator()()
         WARN
             << "No input filename provided. (missing quotes?)"
             << std::endl;
-
         ok = false;
+    } else {
+        // make sure it's a file and it's readable
+        std::ifstream exists
+            (f_input);
+
+        if (! exists.good()) {
+            WARN
+                << "Specified file does not exists or is not readable"
+                << std::endl;
+            ok = false;
+        } else {
+            if (! parseFile(f_input)) {
+                WARN
+                    << "Syntax error?"
+                    << std::endl;
+                ok = false;
+            } else {
+                if (! mm.analyze()) {
+                    WARN
+                        << "Semantic error?"
+                        << std::endl;
+                    ok = false;
+                }
+            }
+        }
     }
-
-    // make sure it's a file and it's readable
-    std::ifstream exists
-        (f_input);
-
-    if (! exists.good()) {
-        WARN
-            << "Specified file does not exists or is not readable"
-            << std::endl;
-
-        ok = false;
-    }
-
-    // if (! mm.analyze()) {
-    //     WARN
-    //         << "Semantic error detected"
-    //         << std::endl;
-
-    //     ok = false;
-    // }
 
     return Variant(ok ? okMessage : errMessage);
 }
