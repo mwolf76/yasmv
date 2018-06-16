@@ -164,7 +164,8 @@ SimulateTopic::~SimulateTopic()
 void SimulateTopic::usage()
 {
     std::cout
-        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation.\n\n"
+        << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation.\n"
+        << "[ Requires model ]\n\n"
         << "options:\n"
         << "  -c <expr>, specifies an additional state constraint.\n"
         << "  -u <expr>, specifies an until condition.\n"

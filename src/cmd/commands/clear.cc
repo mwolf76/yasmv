@@ -79,7 +79,8 @@ ClearTopic::~ClearTopic()
 
 void ClearTopic::usage()
 {
-    std::cout <<
-        "clear [ <identifier> ] - Clears current value of <identifier>.\n\n"
-        "All assignments in the current environment are cleared if no argument is given.\n" ;
+    std::cout
+        << "clear [<identifier>] - Clears current value of environment variables.\n\n"
+        << "Argument must be a valid environment identifier or nothing. If no argument\n"
+        << "is given all assignments in the current environment are cleared if no argument is given.\n" ;
 }

@@ -101,6 +101,6 @@ EchoTopic::~EchoTopic()
 void EchoTopic::usage()
 {
     std::cout
-        << "echo <arg-1> . [...] <arg-n> - write arguments to the standard output.\n\n"
-        << "Each argument can either be a string or a valid expression in current environment.\n" ;
+        << "echo <expr> - write evaluated expression to the standard output.\n\n"
+        << "Argument can either be a string or a valid expression in current environment.\n" ;
 }

@@ -156,7 +156,8 @@ ReachTopic::~ReachTopic()
 void ReachTopic::usage()
 {
     std::cout
-        << "reach < expression > - Verify reachability of given expression.\n\n"
-        << "If a state satisfying the target expression is unreachable yields TRUE.\n"
-        << "Otherwise, a BMC counterexample witness trace for the given property is generated.\n" ;
+        << "reach < expression > - Verify reachability of given expression.\n"
+        << "[ Requires model ]\n\n"
+        << "If a state satisfying the target expression is reachable yields SUCCESS.\n"
+        << "In this case, a BMC witness trace for the given property is generated.\n" ;
 }
