@@ -2,7 +2,7 @@
  * @file read_model.cc
  * @brief Command `read-model` class implementation.
  *
- * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012-2018 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -68,26 +68,34 @@ Variant ReadModel::operator()()
         boost::filesystem::path modelpath
             (f_input);
 
-        if (! exists(modelpath) ||
-            ! is_regular_file(modelpath)) {
+        if (! exists(modelpath)) {
             WARN
-                << "Specified file does not exists or is not readable"
+                << "File `"
+                << f_input
+                << "` does not exist."
                 << std::endl;
+
             ok = false;
-        } else {
-            if (! parseFile(f_input)) {
-                WARN
-                    << "Syntax error?"
-                    << std::endl;
-                ok = false;
-            } else {
-                if (! mm.analyze()) {
-                    WARN
-                        << "Semantic error?"
-                        << std::endl;
-                    ok = false;
-                }
-            }
+        } else if (! is_regular_file(modelpath)) {
+            WARN
+                << "File `"
+                << f_input
+                << "` is not a regular file."
+                << std::endl;
+
+            ok = false;
+        } else if (! parseFile(f_input)) {
+            WARN
+                << "Syntax error"
+                << std::endl;
+
+            ok = false;
+        } else if (! mm.analyze()) {
+            WARN
+                << "Semantic error"
+                << std::endl;
+
+            ok = false;
         }
     }
 
