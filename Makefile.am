@@ -40,7 +40,7 @@ test: unittest functionaltest
 
 # tags target helper  (uses exuberant ctags)
 tags:
-	@ctags -Ref TAGS $(top_srcdir)
+	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
 yasmv_SOURCES = src/main.cc src/parse.cc
 
