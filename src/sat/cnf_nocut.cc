@@ -72,8 +72,8 @@ public:
 
     void action(const DdNode *node)
     {
-        DdManager* dd_mgr
-            (f_sat.enc().dd().getManager());
+      DdManager* dd_mgr
+        (f_sat.enc().dd().getManager());
 
         value_t value
             (Cudd_V(node));
