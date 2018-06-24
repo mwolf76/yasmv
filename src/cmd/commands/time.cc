@@ -90,7 +90,9 @@ TimeTopic::~TimeTopic()
 void TimeTopic::usage()
 {
     std::cout
-        << "time - retrieves current running time\n\n"
-        << "This command can be used to measure time elapsed running previous commands\n"
-        << "as in this example: >> reach GOAL; time\n"; 
+        << "time - shows running time\n\n"
+        << "When invoked for the first time, this command prints the current session time.\n"
+        << "From second invocation on, the command will also print the elapsed session time\n"
+        << "since last query."
+        << std::endl;
 }
