@@ -58,7 +58,7 @@
 
 #include <boost/chrono.hpp>
 
-static const std::string heading_msg =              \
+static const std::string heading_msg =
     "yasmv - Yet Another Symbolic Model Verifier\n"
     "(c) 2011-2018, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
     "https://github.com/mwolf76/yasmv\n";
