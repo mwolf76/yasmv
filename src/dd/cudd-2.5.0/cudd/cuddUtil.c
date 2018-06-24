@@ -233,11 +233,15 @@ Cudd_PrintMinterm(
     zero = Cudd_Not(manager->one);
     list = ALLOC(int,manager->size);
     if (list == NULL) {
-	manager->errorCode = CUDD_MEMORY_OUT;
-	return(0);
+        manager->errorCode = CUDD_MEMORY_OUT;
+        return(0);
     }
-    for (i = 0; i < manager->size; i++) list[i] = 2;
+
+    for (i = 0; i < manager->size; i++)
+        list[i] = 2;
+
     ddPrintMintermAux(manager,node,list);
+
     FREE(list);
     return(1);
 
@@ -272,16 +276,21 @@ Cudd_MintermCallback(
     zero = Cudd_Not(manager->one);
     list = ALLOC(int,manager->size);
     if (list == NULL) {
-	manager->errorCode = CUDD_MEMORY_OUT;
-	return(0);
+        manager->errorCode = CUDD_MEMORY_OUT;
+        return(0);
     }
-    for (i = 0; i < manager->size; i++) list[i] = 2;
-    gl_callback = callback; assert(callback);
-    gl_obj = obj; gl_polarity = polarity;
-    ddCallbackAux(manager,node,list);
+
+    for (i = 0; i < manager->size; i++)
+        list[i] = 2;
+
+    assert(callback);
+    gl_callback = callback;
+    gl_obj = obj;
+    gl_polarity = polarity;
+    ddCallbackAux(manager, node, list);
+
     FREE(list);
     return(1);
-
 } /* end of Cudd_PrintMinterm */
 
 
@@ -3230,40 +3239,48 @@ ddCallbackAux(
     N = Cudd_Regular(node);
 
     if (cuddIsConstant(N)) {
-	/* Terminal case: Print one cube based on the current recursion
-	** path, unless we have reached the background value (ADDs) or
-	** the logical zero (BDDs).
-	*/
+        /* Terminal case: Print one cube based on the current recursion
+        ** path, unless we have reached the background value (ADDs) or
+        ** the logical zero (BDDs).
+        */
         int cond = gl_polarity
             ? (node != background && node != zero)
             : (node == background || node == zero)
             ;
-	if (cond) {
-	    /* for (i = 0; i < dd->size; i++) { */
-	    /*     v = list[i]; */
-	    /*     if (v == 0) (void) fprintf(dd->out,"0"); */
-	    /*     else if (v == 1) (void) fprintf(dd->out,"1"); */
-	    /*     else (void) fprintf(dd->out,"-"); */
-	    /* } */
-	    /* (void) fprintf(dd->out," %lx\n", cuddV(node)); */
-            gl_callback(gl_obj, list, dd->size);
-	}
-    } else {
-	Nv  = cuddT(N);
-	Nnv = cuddE(N);
-	if (Cudd_IsComplement(node)) {
-	    Nv  = Cudd_Not(Nv);
-	    Nnv = Cudd_Not(Nnv);
-	}
-	index = N->index;
-	list[index] = 0;
-	ddCallbackAux(dd,Nnv,list);
-	list[index] = 1;
-	ddCallbackAux(dd,Nv,list);
-	list[index] = 2;
-    }
-    return;
 
+        if (cond) {
+#if 0
+            for (i = 0; i < dd->size; i++) {
+                v = list[i];
+                if (v == 0)
+                    fprintf(dd->out, "0");
+                else if (v == 1)
+                    fprintf(dd->out, "1");
+                else
+                    fprintf(dd->out, "-");
+            }
+            fprintf(dd->out, " %lx\n", cuddV(node));
+#endif
+            gl_callback(gl_obj, list, dd->size);
+        }
+    } else {
+        Nv  = cuddT(N);
+        Nnv = cuddE(N);
+        if (Cudd_IsComplement(node)) {
+            Nv  = Cudd_Not(Nv);
+            Nnv = Cudd_Not(Nnv);
+        }
+
+        index = N->index;
+
+        list[index] = 0;
+        ddCallbackAux(dd,Nnv,list);
+
+        list[index] = 1;
+        ddCallbackAux(dd,Nv,list);
+
+        list[index] = 2;
+    }
 } /* end of ddCallbackAux */
 
 /**Function********************************************************************
