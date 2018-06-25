@@ -58,7 +58,6 @@ public:
 
     // level of verbosity
     unsigned verbosity() const;
-    void set_verbosity(unsigned);
 
     // quiet
     bool quiet() const;

@@ -119,12 +119,6 @@ unsigned OptsMgr::verbosity() const
     return res;
 }
 
-void OptsMgr::set_verbosity(unsigned value)
-{
-    f_version = value;
-}
-
-
 bool OptsMgr::color() const
 {
     return f_color;

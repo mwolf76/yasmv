@@ -126,10 +126,6 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
-    om.set_verbosity(4);
-
     Compiler f_compiler;
 
     Model& model
@@ -162,6 +158,30 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
       DDChecker checker {
         {F}
+      } ;
+
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
+    }
+
+    /* NOT NOT x */
+    {
+      Expr_ptr test_expr
+        (em.make_not(em.make_not(x)));
+
+      DDChecker checker {
+        {T}
       } ;
 
       CompilationUnit cu
@@ -228,6 +248,32 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
       BOOST_CHECK(checker.check());
     }
 
+    /* (NOT x NE y) <-> x EQ y */
+    {
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_ne(x, y)),
+                    em.make_eq(x, y)));
+
+      DDChecker checker {
+        {X, X}
+      };
+
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      // dd.PrintMinterm();
+      BOOST_CHECK(checker.check());
+    }
+
     /* x AND y */
     {
       Expr_ptr test_expr
@@ -276,6 +322,56 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
       BOOST_CHECK(checker.check());
     }
 
+    /* (NOT (X AND Y)) == (NOT X) OR (NOT Y) */
+    {
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_and(x, y)),
+                    em.make_or(em.make_not(x), em.make_not(y))));
+
+      DDChecker checker {
+        {X, X}
+      } ;
+
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
+    }
+
+    /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
+    {
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_or(x, y)),
+                    em.make_and(em.make_not(x), em.make_not(y))));
+
+      DDChecker checker {
+        {X, X}
+      } ;
+
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
+    }
+
     /* x IMPL y */
     {
       Expr_ptr test_expr
@@ -284,6 +380,32 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
       DDChecker checker {
         {F, X}, {T, T}
       };
+
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
+    }
+
+    /* (x IMPL y) AND (y IMPL X) == (x == y) */
+    {
+      Expr_ptr test_expr
+        (em.make_eq(em.make_and(em.make_implies(x, y),
+                                em.make_implies(y, x)),
+                    em.make_eq(x, y)));
+
+      DDChecker checker {
+        {X, X}
+      } ;
 
       CompilationUnit cu
         (f_compiler.process(em.make_empty(),
