@@ -35,12 +35,13 @@
 #include <model/module.hh>
 #include <model/compiler/compiler.hh>
 
+using LList = std::initializer_list<std::initializer_list<int>>;
 class DDChecker {
   std::list<std::list<int>> f_expected;
   std::list<std::list<int>> f_actual;
 
 public:
-  DDChecker(std::initializer_list<std::initializer_list<int>> list_of_ints)
+  DDChecker(LList list_of_ints)
   {
     std::list<int> tmp;
     for (auto literals : list_of_ints) {
@@ -73,7 +74,6 @@ public:
                                         << elem
                                         << " ";
                                     });
-
                       std::cerr
                         << std::endl;
                     });
@@ -90,7 +90,6 @@ public:
                                         << elem
                                         << " ";
                                     });
-
                       std::cerr
                         << std::endl;
                     });
