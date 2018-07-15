@@ -57,7 +57,4 @@ QuitTopic::~QuitTopic()
 }
 
 void QuitTopic::usage()
-{
-    std::cout
-        << "quit - Leave interactive shell\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/quit.nroff | less", NULL ); }

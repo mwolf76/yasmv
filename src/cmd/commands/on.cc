@@ -101,15 +101,4 @@ OnTopic::~OnTopic()
 }
 
 void OnTopic::usage()
-{
-    std::cout
-        << "on <command> - performs conditional execution\n\n"
-        << "This command has two different modes of invocation:\n"
-        << "The `success` mode which executes what follows if last com\n"
-        << "mand was successful, and the `failure` mode which executes\n"
-        << "what follows if last command has failed.\n\n"
-        << "reach GOAL\n"
-        << "on success do dump-trace time\n"
-        << "on failure echo \"Help, I'm trapped into a maze!\"\n\n";
-
-}
+{ execlp( "bash", "bash", "-c", "nroff help/on.nroff | less", NULL ); }

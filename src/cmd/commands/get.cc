@@ -123,9 +123,5 @@ GetTopic::~GetTopic()
 }
 
 void GetTopic::usage()
-{
-    std::cout
-        << "get [<identifier>] - Dumps current value of <identifier>.\n\n"
-        << "Fetches the value of a given environment identifier. If no argument is passed,\n"
-        << "all assignments in the current environment are dumped.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/get.nroff | less", NULL ); }
+

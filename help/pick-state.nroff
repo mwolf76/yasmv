@@ -1,0 +1,34 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+pick-state pick-state [ -a | -l <limit> ] [ -c <expr> ]
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Initializes a new simulation. (Requires model).
+
+OPTIONS:
+
+  -a, requires an ALLSAT enumeration of all feasible initial states.
+  -l <limit>, limits the number of enumerated solutions. Default is infinity.
+  -c <expr>, allows the user to further constrain the initial states.
+
+Creates a new trace and selects it as current. If -a is used a number of traces
+will be created, according to the number of distinct feasible initial states for
+for the simulation.
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

@@ -1,0 +1,30 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+read-model
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Reads a model from given filename.
+
+
+Reads a model from file with specified name. This is equivalent to passing a
+model on the command line. In fact, passing the name as argument is internally
+converted in a `read-model` command.
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

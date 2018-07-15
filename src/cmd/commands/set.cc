@@ -87,9 +87,4 @@ SetTopic::~SetTopic()
 }
 
 void SetTopic::usage()
-{
-    std::cout <<
-        "set <identifier> <value> - Sets current value of <identifier>.\n\n"
-        "This command is useful to set @input variables to the desired value \n"
-        "before issuing a check- or simulate- command.\n";
-}
+{ execlp( "bash", "bash", "-c", "nroff help/read-model.nroff | less", NULL ); }

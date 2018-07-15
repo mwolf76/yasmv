@@ -1,0 +1,33 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+dup-trace <trace-id>
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Dumps given trace.
+
+Options:
+  -f <format>, format can be either `plain`, `xml`, `json` or `yaml`.
+  -o "<filename>", filename must be a writeable path on disk.
+
+Arguments:
+  `trace-uid` is the index of the trace to be dumped. If omitted, current trace
+will be dumped.
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

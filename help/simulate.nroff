@@ -1,0 +1,38 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ]
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Performs BMC simulation. (Requires model).
+
+
+OPTIONS:
+  -c <expr>, specifies an additional state constraint.
+  -u <expr>, specifies an until condition.
+  -k <steps>, the number of steps to simulate.
+  -t <trace-uid>, the simulation trace UID.
+
+
+Extends an existing trace with simulated steps. The simulation will follow any
+additional constraint and will terminate due to (a) having reached the until
+condition; or (b) having reached the specified number of steps. If neither -k
+nor -u is used, -k 1 is assumed.
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

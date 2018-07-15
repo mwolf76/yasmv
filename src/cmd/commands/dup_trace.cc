@@ -86,7 +86,4 @@ DupTraceTopic::~DupTraceTopic()
 }
 
 void DupTraceTopic::usage()
-{
-    std::cout
-        << "dup-trace <trace_uid> - Dups given trace." ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/dup-trace.nroff | less", NULL ); }

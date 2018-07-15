@@ -154,10 +154,6 @@ ReachTopic::~ReachTopic()
 }
 
 void ReachTopic::usage()
-{
-    std::cout
-        << "reach < expression > - Verify reachability of given expression.\n"
-        << "[ Requires model ]\n\n"
-        << "If a state satisfying the target expression is reachable yields SUCCESS.\n"
-        << "In this case, a BMC witness trace for the given property is generated.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/reach.nroff | less", NULL ); }
+
+

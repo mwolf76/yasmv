@@ -1,0 +1,30 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+help [<topic>]?
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Shows a manual page from the internal help system about the specified topic.
+
+
+This command can be used to obtain the documentation and command usage for all
+the commands supported by the program. Argument can be a valid command or
+nothing. If no such argument is passed, the full list of supported commands are
+printed.
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

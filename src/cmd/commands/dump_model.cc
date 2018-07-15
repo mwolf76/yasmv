@@ -236,26 +236,16 @@ Variant DumpModel::operator()()
     return Variant(okMessage);
 }
 
-        DumpModelTopic::DumpModelTopic(Interpreter& owner)
-        : CommandTopic(owner)
-    {}
+DumpModelTopic::DumpModelTopic(Interpreter& owner)
+  : CommandTopic(owner)
+{}
 
-    DumpModelTopic::~DumpModelTopic()
-    {
-        TRACE
-            << "Destroyed dump-model topic"
-            << std::endl;
-    }
+DumpModelTopic::~DumpModelTopic()
+{
+  TRACE
+    << "Destroyed dump-model topic"
+    << std::endl;
+}
 
-    void DumpModelTopic::usage()
-    {
-        std::cout
-            << "dump-model [-o <filename>] [-s state|init|trans]* - Dump current model to given filename.\n"
-            << "[ Requires model ]\n\n"
-            << "Writes the full contents (or just the selected sections) of the model\n"
-            << "to the specified output file If no filename is given, model is written\n"
-            << "to the standard output. To select only specific sections to be dumped,\n"
-            << "you can use the `-s` option. `state` will select variabled and definitions,\n"
-            << "`init` will select the INIT constraints and `trans` will select the transi-\n"
-            << "tion relation formulas (INVARs and TRANSes).\n";
-    }
+void DumpModelTopic::usage()
+{ execlp( "bash", "bash", "-c", "nroff help/dump-model.nroff | less", NULL ); }

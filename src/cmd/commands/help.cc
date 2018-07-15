@@ -21,8 +21,18 @@
  *
  **/
 
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+
 #include <cstdlib>
 #include <cstring>
+
+#include <unistd.h>
+#include <sys/wait.h>
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/help.hh>
@@ -47,35 +57,100 @@ void Help::set_topic(CommandTopic_ptr topic)
 
 Variant Help::operator()()
 {
-    if (f_topic)
+  if (f_topic) {
+
+    int status;
+    pid_t parent_pid;
+    pid_t child_pid;
+
+    // so the child can send a signal to the parent if needed
+    parent_pid = getpid();
+
+    switch(child_pid = fork()) {
+    case -1:
+      perror( "[fork-exec-test] fork failed" );
+      exit( EXIT_FAILURE );
+      break;
+
+      case 0:
         f_topic->usage();
 
-    else
-        std::cout
-            << "Available topics: " << std::endl
-            << "- check-init" << std::endl
-            << "- check-trans" << std::endl
-            << "- clear" << std::endl
-            << "- do" << std::endl
-            << "- dump-model" << std::endl
-            << "- dump-trace" << std::endl
-            << "- dup-trace" << std::endl
-            << "- echo" << std::endl
-            << "- get" << std::endl
-            << "- help" << std::endl
-            << "- last" << std::endl
-            << "- list-traces" << std::endl
-            << "- on" << std::endl
-            << "- pick-state" << std::endl
-            << "- quit" << std::endl
-            << "- reach" << std::endl
-            << "- read-model" << std::endl
-            << "- set" << std::endl
-            << "- simulate" << std::endl
-            << "- time" << std::endl
-            << std::endl;
+        // should't return
+        perror( "[fork-exec-test] exec failed" );
+        exit( EXIT_FAILURE );
+        break;
+
+    default:
+      // no errors
+      break;
+    }
+
+    // informational messages
+    DEBUG
+      << "[fork-exec-test] parent PID: "
+      << parent_pid
+      << std::endl;
+
+    DEBUG
+      << "[fork-exec-test] child PID: "
+      << child_pid
+      << std::endl;
+
+    // wait for state changes in the child (aka for it to return)
+    wait( &status );
+
+    if (WIFEXITED(status)) {
+      // no errors occurred in the child
+      TRACE
+        << "[fork-exec-test] print-argv terminated  normally"
+        << std::endl;
+
+      int exit_status = WEXITSTATUS(status);
+
+      // which doesn't mean the program returned success (zero)
+      WARN
+        << "[fork-exec-test] print-argv exit status: "
+        << exit_status
+        << std::endl;
+    } else {
+      // something went wrong
+      WARN
+        << "[fork-exec-test] print-argv wasn't executed"
+        << std::endl;
+    }
+
+    TRACE
+      << "[fork-exec-test] end"
+      << std::endl;
 
     return Variant(okMessage);
+  } else {
+    std::cout
+      << "Available topics: " << std::endl
+      << "- check-init" << std::endl
+      << "- check-trans" << std::endl
+      << "- clear" << std::endl
+      << "- do" << std::endl
+      << "- dump-model" << std::endl
+      << "- dump-trace" << std::endl
+      << "- dup-trace" << std::endl
+      << "- echo" << std::endl
+      << "- get" << std::endl
+      << "- help" << std::endl
+      << "- last" << std::endl
+      << "- list-traces" << std::endl
+      << "- on" << std::endl
+      << "- pick-state" << std::endl
+      << "- quit" << std::endl
+      << "- reach" << std::endl
+      << "- read-model" << std::endl
+      << "- set" << std::endl
+      << "- simulate" << std::endl
+      << "- time" << std::endl
+      << std::endl;
+
+    return Variant(okMessage);
+  }
 }
 
 HelpTopic::HelpTopic(Interpreter& owner)
@@ -90,12 +165,5 @@ HelpTopic::~HelpTopic()
 }
 
 void HelpTopic::usage()
-{
-    std::cout
-        << "help [<command>] - shows a topic from the internal help system\n\n"
-        << "This command can be used to obtain the documentation and command\n"
-        << "usage for all the commands supported by the program. Argument can\n"
-        << "be a valid command or nothing. If no such argument is passed, the\n"
-        << "full list of supported commands are printed.\n" ;
+{ execlp( "bash", "bash", "-c", "nroff help/help.nroff | less", NULL ); }
 
-}

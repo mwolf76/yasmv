@@ -1,0 +1,30 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+check-trans [ -c <expr> ]
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Checks propositional satisfiability for TRANS formulas. (requires model).
+
+Transition relation is for consistency. Returns `OK` if transition relation is
+consistent, `KO` if transition relation is found to be inconsistent. If no
+decision could be made (e.g. user interruption) returns `??`. Further
+constraints can be specified using -c, these constraints will add up with the
+existing TRANS constraints.
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

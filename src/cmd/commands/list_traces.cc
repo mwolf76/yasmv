@@ -83,7 +83,6 @@ ListTracesTopic::~ListTracesTopic()
 }
 
 void ListTracesTopic::usage()
-{
-    std::cout
-        << "list-traces - Lists currently available traces.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/list-traces.nroff | less", NULL ); }
+
+

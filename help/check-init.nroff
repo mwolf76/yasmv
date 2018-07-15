@@ -1,0 +1,32 @@
+.nf
+YASMV inline help system                                check-init
+
+.ti 0
+SYNOPSIS
+
+.in 3
+check-init [ -c <expr> ]
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Checks propositional satisfiability for INIT formulas. (requires model).
+
+Initial states are checked for consistency. Returns `OK` if initial states are
+consistent, `KO` if initial are found to be inconsistent. If no decision could
+be made (e.g. user interruption) returns `??`.
+
+Further constraints can be specified using -c, these constraints will add up
+with the existing INIT constraints.
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
+

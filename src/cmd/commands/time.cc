@@ -88,11 +88,4 @@ TimeTopic::~TimeTopic()
 }
 
 void TimeTopic::usage()
-{
-    std::cout
-        << "time - shows running time\n\n"
-        << "When invoked for the first time, this command prints the current session time.\n"
-        << "From second invocation on, the command will also print the elapsed session time\n"
-        << "since last query."
-        << std::endl;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/time.nroff | less", NULL ); }

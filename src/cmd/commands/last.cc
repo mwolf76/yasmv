@@ -91,7 +91,5 @@ LastTopic::~LastTopic()
 }
 
 void LastTopic::usage()
-{
-    std::cout
-        << "last - prints the result of last command.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/last.nroff | less", NULL ); }
+

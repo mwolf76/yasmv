@@ -99,8 +99,4 @@ EchoTopic::~EchoTopic()
 }
 
 void EchoTopic::usage()
-{
-    std::cout
-        << "echo <expr> - write evaluated expression to the standard output.\n\n"
-        << "Argument can either be a string or a valid expression in current environment.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/echo.nroff | less", NULL ); }

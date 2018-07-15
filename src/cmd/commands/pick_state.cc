@@ -151,15 +151,6 @@ PickStateTopic::~PickStateTopic()
 }
 
 void PickStateTopic::usage()
-{
-    std::cout
-        << "pick-state [ -a | -l <limit> ] [ -c <expr> ] - Initializes a new simulation.\n"
-        << "[ Requires model ]\n\n"
-        << "options:\n"
-        << "  -a, requires an ALLSAT enumeration of all feasible initial states.\n"
-        << "  -l <limit>, limits the number of enumerated solutions. Default is infinity.\n"
-        << "  -c <expr>, allows the user to further constrain the initial states.\n\n"
-        << "Creates a new trace and selects it as current. If -a is used a number of traces\n"
-        << "will be created, according to the number of distinct feasible initial states for\n"
-        << "for the simulation.\n" ;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/pick-state.nroff | less", NULL ); }
+
+

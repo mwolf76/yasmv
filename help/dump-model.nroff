@@ -1,0 +1,32 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+dump-model [-o <filename>] [-s state|init|trans]*
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Dumps current model to given filename.
+
+
+Writes the full contents (or just the selected sections) of the model to the
+specified output file If no filename is given, model is written to the standard
+output. To select only specific sections to be dumped, you can use the `-s`
+option. `state` will select variabled and definitions, `init` will select the
+INIT constraints and `trans` will select the transition relation formulas
+(INVARs and TRANSes).
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

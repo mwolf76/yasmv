@@ -123,14 +123,5 @@ CheckInitTopic::~CheckInitTopic()
 }
 
 void CheckInitTopic::usage()
-{
-    std::cout
-        << "check-init [-c <expr>] - Checks propositional satisfiability for INIT formulas.\n"
-        << "[ Requires model ]\n\n"
-        << "Initial states are checked for consistency. Returns `OK` if initial\n"
-        << "states are consistent, `KO` if initial are found to be inconsistent.\n"
-        << "If no decision could be made (e.g. user interruption) returns `??`.\n\n"
-        << "Further constraints can be specified using -c, these constraints will\n"
-        << "add up with the existing INIT constraints."
-        << std::endl;
-}
+{ execlp( "bash", "bash", "-c", "nroff help/check-init.nroff | less", NULL ); }
+

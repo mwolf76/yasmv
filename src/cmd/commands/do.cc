@@ -77,11 +77,4 @@ DoTopic::~DoTopic()
 }
 
 void DoTopic::usage()
-{
-    std::cout
-        << "do [<command> ';' ...] done - Builds a sequence of commands\n\n"
-        << "This command can be used to build sequences of other commands that are\n"
-        << "all evaluated as one single task. It's particularly useful when used in\n"
-        << "combination with the `on` command. For example\n\n"
-        << "pick-state; on success do simulate; time;\n";
-}
+{ execlp( "bash", "bash", "-c", "nroff help/do.nroff | less", NULL ); }

@@ -1,0 +1,29 @@
+.nf
+YASMV inline help system                              check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+get [<identifier>]?
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Dumps current value of <identifier>.
+
+
+Fetches the value of a given environment identifier. If no argument is passed,
+all assignments in the current environment are dumped.
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
