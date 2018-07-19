@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                           list-traces
 
 .ti 0
 SYNOPSIS
@@ -14,6 +14,25 @@ DESCRIPTION
 .fi
 .in 3
 Shows the list of currently available traces.
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+>> pick-state
+-- Simulation initialized, registered witness `sim_1`
+
+>> pick-state
+-- Simulation initialized, registered witness `sim_2`
+
+>> reach GOAL
+-- Target is reachable, registered witness `reach_1`, 8 steps.
+
+>> list-traces
+    sim_1		Simulation trace for module `ferryman`		1
+    sim_2		Simulation trace for module `ferryman`		1
+[*] reach_1		Reachability witness for target `GOAL` in module `ferryman`		8
 
 
 .ti 0

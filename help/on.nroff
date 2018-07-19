@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                                check-init
+YASMV manual                                                   on
 
 .ti 0
 SYNOPSIS
@@ -27,9 +27,17 @@ on failure echo "Help, I'm trapped into a maze!"
 This command can be used to build sequences of other commands that are all
 evaluated as one single task. It's particularly useful when used in combination
 with the `on` command.
-For example:
 
-pick-state; on success do simulate; time;
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+>> pick-state
+-- Simulation initialized, registered witness `sim_1`
+>> on success do simulate; time;
+
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

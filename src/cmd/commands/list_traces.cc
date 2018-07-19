@@ -48,27 +48,36 @@ Variant ListTraces::operator()()
 
     const WitnessList& witnesses
         (wm.witnesses());
-    for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
+
+    if (! witnesses.empty()) {
+      for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
 
         Witness& w
-            (**eye);
+          (**eye);
 
         const char* tmp
-            (w.id() == current.id()
-             ? "[*] "
-             : "    ");
+          (w.id() == current.id()
+           ? "[*] "
+           : "    ");
         os
-            << tmp
-            << w.id()
-            << "\t\t"
-            << w.desc()
-            << "\t\t"
-            << w.size()
-            << std::endl;
-    }
-    os << std::endl;
+          << tmp
+          << w.id()
+          << "\t\t"
+          << w.desc()
+          << "\t\t"
+          << w.size()
+          << std::endl;
+      }
 
-    return Variant(okMessage);
+      os << std::endl;
+      return Variant(okMessage);
+    } else {
+      os
+        << "No traces to list."
+        << std::endl;
+      os << std::endl;
+      return Variant(errMessage);
+    }
 }
 
 ListTracesTopic::ListTracesTopic(Interpreter& owner)

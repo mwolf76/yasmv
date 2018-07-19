@@ -1,12 +1,12 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                                 echo
 
 .ti 0
 SYNOPSIS
 
 .in 3
-echo 
-
+echo <expression>
+<expression>
 
 .ti 0
 DESCRIPTION
@@ -15,6 +15,28 @@ DESCRIPTION
 .in 3
 Dumps the result of evaluating an expression to the standard output. Argument
 can either be a string or a valid expression in current environment.
+
+This command holds a particular role in yasmv as it is the `default` command.
+That is useful to turn yasmv into an integer calculator on arbitrarily complex
+expressions. No model checking is performed to execute these calculations.
+Integer math can be evaluated quickly (if compared to how long a model checking
+problems may take). You can use the `--quiet`` flag to suppress all output but
+the calculated result of an expression. This way, you can reuse the yasmv
+executable as a quick bc-like calc program.
+
+-- seconds in a year
+.br
+$ echo '86400 * 365' | yasmv --quiet
+.br
+31536000
+
+.ti 0
+EXAMPLES
+
+.nf
+>> 86400 * 365
+-- 31536000
+
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

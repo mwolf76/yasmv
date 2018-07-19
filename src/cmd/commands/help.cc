@@ -68,16 +68,20 @@ Variant Help::operator()()
 
     switch(child_pid = fork()) {
     case -1:
-      perror( "[fork-exec-test] fork failed" );
-      exit( EXIT_FAILURE );
+      ERR
+        << "[fork-exec-test] fork failed"
+        << std::endl;
+      exit(EXIT_FAILURE);
       break;
 
       case 0:
         f_topic->usage();
 
         // should't return
-        perror( "[fork-exec-test] exec failed" );
-        exit( EXIT_FAILURE );
+        ERR
+          << "[fork-exec-test] exec failed"
+          << std::endl;
+        exit(EXIT_FAILURE);
         break;
 
     default:
@@ -86,12 +90,12 @@ Variant Help::operator()()
     }
 
     // informational messages
-    DEBUG
+    TRACE
       << "[fork-exec-test] parent PID: "
       << parent_pid
       << std::endl;
 
-    DEBUG
+    TRACE
       << "[fork-exec-test] child PID: "
       << child_pid
       << std::endl;
@@ -108,7 +112,7 @@ Variant Help::operator()()
       int exit_status = WEXITSTATUS(status);
 
       // which doesn't mean the program returned success (zero)
-      WARN
+      TRACE
         << "[fork-exec-test] print-argv exit status: "
         << exit_status
         << std::endl;

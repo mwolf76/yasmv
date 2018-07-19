@@ -1,10 +1,11 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                             simulate
 
 .ti 0
 SYNOPSIS
 
 .in 3
+[[ REQUIRES MODEL ]]
 simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ]
 
 
@@ -13,7 +14,7 @@ DESCRIPTION
 
 .fi
 .in 3
-Performs BMC simulation. (Requires model).
+Performs BMC simulation.
 
 
 OPTIONS:
@@ -27,6 +28,107 @@ Extends an existing trace with simulated steps. The simulation will follow any
 additional constraint and will terminate due to (a) having reached the until
 condition; or (b) having reached the specified number of steps. If neither -k
 nor -u is used, -k 1 is assumed.
+
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+>> pick-state
+-- Simulation initialized, registered witness `sim_1`
+>> simulate -k 10
+!! Simulation interrupted
+-- Registered witness `sim_1`
+>> dump-trace
+Witness: sim_1 [[ Simulation trace for module `ferryman` ]]
+:: @0
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = WEST
+   wolf = WEST
+   carry = NIL
+
+:: @1
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = WEST
+   wolf = WEST
+   carry = GOAT
+
+:: @2
+-- state
+   ferryman = WEST
+   goat = EAST
+   cabbage = WEST
+   wolf = WEST
+   carry = NIL
+
+:: @3
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = EAST
+   wolf = WEST
+   carry = CABBAGE
+
+:: @4
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = EAST
+   wolf = WEST
+   carry = GOAT
+
+:: @5
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = EAST
+   wolf = WEST
+   carry = GOAT
+
+:: @6
+-- state
+   ferryman = WEST
+   goat = EAST
+   cabbage = WEST
+   wolf = WEST
+   carry = CABBAGE
+
+:: @7
+-- state
+   ferryman = EAST
+   goat = WEST
+   cabbage = WEST
+   wolf = EAST
+   carry = NIL
+
+:: @8
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = EAST
+   wolf = WEST
+   carry = WOLF
+
+:: @9
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = EAST
+   wolf = WEST
+   carry = GOAT
+
+:: @10
+-- state
+   ferryman = WEST
+   goat = EAST
+   cabbage = EAST
+   wolf = WEST
+   carry = NIL
 
 
 .ti 0

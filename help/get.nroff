@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                                  get
 
 .ti 0
 SYNOPSIS
@@ -18,6 +18,26 @@ Dumps current value of <identifier>.
 
 Fetches the value of a given environment identifier. If no argument is passed,
 all assignments in the current environment are dumped.
+
+
+.ti 0
+EXAMPLES
+
+.nf
+>> set a 0
+>> set b 1
+>> set c 1
+>> get
+-- a := 0
+-- b := 1
+-- c := 1
+>> get a
+-- a := 0
+>> get b
+-- b := 1
+>> get c
+-- c := 1
+>> 
 
 
 .ti 0

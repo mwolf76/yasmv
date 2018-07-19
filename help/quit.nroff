@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                                 quit
 
 .ti 0
 SYNOPSIS
@@ -17,6 +17,17 @@ Leaves interactive shell.
 
 Terminates current running instance of the program. All unsaved data will be
 permanently lost.
+
+
+.ti 0
+EXAMPLES
+
+.nf
+>> quit
+
+markus@snowball:~/Code/markus/yasmv
+[[ develop ]]$ 
+
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

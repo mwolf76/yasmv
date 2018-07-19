@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                                 reach
 
 .ti 0
 SYNOPSIS
@@ -19,6 +19,13 @@ Runs BMC reachability analysis algorithm on the given formula. If the formula is
 found to be reachable, a witness trace is produced. On ther hand, if the formula
 can be proved to be not reachable the algorithm will mark it as UNREACHABLE.
 
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/maze/solvable12x12.smv'
+>> reach GOAL
+-- Target is reachable, registered witness `reach_1`, 25 steps.
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

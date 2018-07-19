@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                           pick-state
 
 .ti 0
 SYNOPSIS
@@ -18,12 +18,28 @@ Initializes a new simulation. (Requires model).
 OPTIONS:
 
   -a, requires an ALLSAT enumeration of all feasible initial states.
+
   -l <limit>, limits the number of enumerated solutions. Default is infinity.
+
   -c <expr>, allows the user to further constrain the initial states.
 
 Creates a new trace and selects it as current. If -a is used a number of traces
 will be created, according to the number of distinct feasible initial states for
 for the simulation.
+
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+
+>> pick-state -c ferryman=WEST
+-- Simulation initialized, registered witness `sim_1`
+
+>> pick-state -c ferryman=EAST
+!! Simulation deadlocked
+
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

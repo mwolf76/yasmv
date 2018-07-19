@@ -26,7 +26,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests
-dist_pkgdata_DATA = microcode/*
+dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
 unittest: yasmv_tests

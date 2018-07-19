@@ -1,12 +1,11 @@
 .nf
-YASMV manual                                            dump-trace
+YASMV manual                                             dup-trace
 
 .ti 0
 SYNOPSIS
 
 .in 3
-[[ REQUIRES MODEL ]]
-dump-trace [ -f <format> ] [ -o "<filename>" ] [ <trace-uid> ]
+dup-trace [ <trace-uid> ]
 
 
 .ti 0
@@ -14,14 +13,7 @@ DESCRIPTION
 
 .fi
 .in 3
-Dumps a trace.
-
--f <format>, selects a format for trace printout. Format can be either `plain`, `xml`, `json` or `yaml`.
-
--o "<filename>", filename must be a valid writable file path. Existing files will be overwritten.
-
-`trace-uid` is the index of the trace to be dumped. If omitted, current trace
-will be dumped.
+Duplicates a trace.
 
 
 .ti 0

@@ -1,11 +1,12 @@
 .nf
-YASMV inline help system                              check-trans
+YASMV manual                                           dump-model
 
 .ti 0
 SYNOPSIS
 
 .in 3
-dump-model [-o <filename>] [-s state|init|trans]*
+[[ REQUIRES MODEL ]]
+dump-model [-o <filename>] [-s state|init|trans]* 
 
 
 .ti 0
@@ -16,12 +17,30 @@ DESCRIPTION
 Dumps current model to given filename.
 
 
-Writes the full contents (or just the selected sections) of the model to the
-specified output file If no filename is given, model is written to the standard
+Writes the full contents, or just the selected sections, of the model to the
+specified output file. If no filename is given, model is written to standard
 output. To select only specific sections to be dumped, you can use the `-s`
-option. `state` will select variabled and definitions, `init` will select the
+option. `state` will select variables and definitions, `init` will select the
 INIT constraints and `trans` will select the transition relation formulas
 (INVARs and TRANSes).
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+>> dump-model -s state
+
+@inertial
+VAR ferryman: {EAST, WEST};
+@inertial
+VAR goat: {EAST, WEST};
+@inertial
+VAR cabbage: {EAST, WEST};
+@inertial
+VAR wolf: {EAST, WEST};
+@inertial
+VAR carry: {CABBAGE, GOAT, NIL, WOLF};
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

@@ -1,5 +1,5 @@
 .nf
-YASMV inline help system                                check-init
+YASMV manual                                                   do
 
 .ti 0
 SYNOPSIS
@@ -18,9 +18,12 @@ Builds a sequence of commands.
 This command can be used to build sequences of other commands that are all
 evaluated as one single task. It's particularly useful when used in combination
 with the `on` command.
-For example:
 
--- pick-state; on success do simulate; time;
+.ti 0
+EXAMPLES
+
+.nf
+>> pick-state; on success do simulate; time;
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.
