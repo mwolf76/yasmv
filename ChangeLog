@@ -1,3 +1,4 @@
+	0.0.9 - Introduced nroff-based help system
 	0.0.7 - Initial rework of command interpreter
 
 	--quiet mode command line switch;
