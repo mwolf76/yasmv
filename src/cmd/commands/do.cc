@@ -77,4 +77,4 @@ DoTopic::~DoTopic()
 }
 
 void DoTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/do.nroff | less", NULL ); }
+{ display_manpage("do"); }

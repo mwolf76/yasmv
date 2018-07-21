@@ -9,7 +9,7 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src																	\
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = cmd.hh command.hh exceptions.hh interpreter.hh typedefs.hh
-PKG_CC = cmd.cc interpreter.cc
+PKG_CC = cmd.cc command.cc interpreter.cc
 
 # -------------------------------------------------------
 

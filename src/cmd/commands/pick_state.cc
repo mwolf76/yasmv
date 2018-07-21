@@ -151,6 +151,6 @@ PickStateTopic::~PickStateTopic()
 }
 
 void PickStateTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/pick-state.nroff | less", NULL ); }
+{ display_manpage("pick-state"); }
 
 

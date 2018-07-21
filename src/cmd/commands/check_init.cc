@@ -123,5 +123,5 @@ CheckInitTopic::~CheckInitTopic()
 }
 
 void CheckInitTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/check-init.nroff | less", NULL ); }
+{ display_manpage("check-init"); }
 

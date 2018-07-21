@@ -248,4 +248,4 @@ DumpModelTopic::~DumpModelTopic()
 }
 
 void DumpModelTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/dump-model.nroff | less", NULL ); }
+{ display_manpage("dump-model"); }

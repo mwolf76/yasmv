@@ -77,13 +77,5 @@ ClearTopic::~ClearTopic()
         << std::endl;
 }
 
-// void ClearTopic::usage()
-// {
-//   std::cout
-//     << "clear [<identifier>] - Clears current value of environment variables.\n\n"
-//     << "Argument must be a valid environment identifier or nothing. If no argument\n"
-//     << "is given all assignments in the current environment are cleared if no argument is given.\n" ;
-// }
-
 void ClearTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/clear.nroff | less", NULL ); }
+{ display_manpage("clear"); }

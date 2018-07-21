@@ -675,4 +675,4 @@ DumpTraceTopic::~DumpTraceTopic()
 }
 
 void DumpTraceTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/dump-trace.nroff | less", NULL ); }
+{ display_manpage("dump-trace"); }

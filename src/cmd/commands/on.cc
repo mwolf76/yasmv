@@ -101,4 +101,4 @@ OnTopic::~OnTopic()
 }
 
 void OnTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/on.nroff | less", NULL ); }
+{ display_manpage("on"); }

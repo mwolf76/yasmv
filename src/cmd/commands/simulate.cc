@@ -162,7 +162,7 @@ SimulateTopic::~SimulateTopic()
 }
 
 void SimulateTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/simulate.nroff | less", NULL ); }
+{ display_manpage("simulate"); }
 
 
 // void SimulateTopic::usage()

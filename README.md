@@ -78,12 +78,14 @@ to solve planning problems.
   $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
   ```
 
-  and ensure the `YASMV_MICROCODE` environment variable points to the `microcode`
-  directory you've just created. For example, assuming you want the microcode
-  distribution unpacked in the the same location as the program source code:
+  and ensure the `YASMV_HOME` environment variable points to the
+  parent of the `microcode` directory you've just created. For
+  example, assuming you want the microcode distribution unpacked in
+  the the same location as the program source code:
+
   ```
   $ tar xfj microcode.tar.bz2
-  $ export YASMV_MICROCODE=`pwd`/microcode
+  $ export YASMV_HOME=`pwd`
   $ ./yasmv
   
   yasmv - Yet Another Symbolic Model Verifier

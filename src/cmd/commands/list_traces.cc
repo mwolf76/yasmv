@@ -92,6 +92,6 @@ ListTracesTopic::~ListTracesTopic()
 }
 
 void ListTracesTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/list-traces.nroff | less", NULL ); }
+{ display_manpage("list-traces"); }
 
 

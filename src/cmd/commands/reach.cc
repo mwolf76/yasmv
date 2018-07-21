@@ -154,6 +154,6 @@ ReachTopic::~ReachTopic()
 }
 
 void ReachTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/reach.nroff | less", NULL ); }
+{ display_manpage("reach"); }
 
 

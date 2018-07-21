@@ -26,7 +26,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd		\
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests
-dist_pkgdata_DATA = microcode/* help/*
+nobase_dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
 unittest: yasmv_tests
@@ -45,8 +45,8 @@ tags:
 yasmv_SOURCES = src/main.cc src/parse.cc
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
-		$(top_builddir)/src/cmd/libcmd.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
+		$(top_builddir)/src/cmd/libcmd.la				\
 		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
 		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
 		$(top_builddir)/src/algorithms/ltl/libltl.la			\

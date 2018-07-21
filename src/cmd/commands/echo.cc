@@ -99,4 +99,4 @@ EchoTopic::~EchoTopic()
 }
 
 void EchoTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/echo.nroff | less", NULL ); }
+{ display_manpage("echo"); }

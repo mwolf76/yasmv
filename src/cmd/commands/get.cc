@@ -123,5 +123,5 @@ GetTopic::~GetTopic()
 }
 
 void GetTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/get.nroff | less", NULL ); }
+{ display_manpage("get"); }
 

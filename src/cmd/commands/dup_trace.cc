@@ -86,4 +86,4 @@ DupTraceTopic::~DupTraceTopic()
 }
 
 void DupTraceTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/dup-trace.nroff | less", NULL ); }
+{ display_manpage("dup-trace"); }

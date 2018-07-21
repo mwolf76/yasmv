@@ -169,5 +169,5 @@ HelpTopic::~HelpTopic()
 }
 
 void HelpTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/help.nroff | less", NULL ); }
+{ display_manpage("help"); }
 

@@ -114,7 +114,7 @@ ReadModelTopic::~ReadModelTopic()
 }
 
 void ReadModelTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/read-model.nroff | less", NULL ); }
+{ display_manpage("read-model"); }
 
 
 

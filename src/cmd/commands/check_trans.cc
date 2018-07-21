@@ -123,19 +123,6 @@ CheckTransTopic::~CheckTransTopic()
         << std::endl;
 }
 
-// void CheckTransTopic::usage()
-// {
-//   std::cout
-//     << "check-trans [-c <expr>] - Checks propositional satisfiability for TRANS formulas.\n"
-//     << "[ Requires model ]\n\n"
-//     << "Transition relation is for consistency. Returns `OK` if transition relation\n"
-//     << "is consistent, `KO` if transition relation is found to be inconsistent.\n"
-//     << "If no decision could be made (e.g. user interruption) returns `??`.\n"
-//     << "Further constraints can be specified using -c, these constraints will\n"
-//     << "add up with the existing TRANS constraints."
-//     << std::endl;
-// }
-
 void CheckTransTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/check-trans.nroff | less", NULL ); }
+{ display_manpage("check-trans"); }
 

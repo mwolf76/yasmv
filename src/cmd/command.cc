@@ -1,6 +1,9 @@
 /*
- * @file quit.cc
- * @brief Command `quit` class implementation.
+ * @file command.cc
+ * @brief Command-interpreter subsystem
+ *
+ * This header file contains the declarations required by the Command
+ * class.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,40 +24,37 @@
  *
  **/
 
-#include <cmd/commands/quit.hh>
-#include <cmd/interpreter.hh>
+#include <boost/filesystem.hpp>
+#include "command.hh"
 
-Quit::Quit(Interpreter& owner)
-    : Command(owner)
-    , f_retcode(0)
-{}
-
-Quit::~Quit()
-{}
-
-void Quit::set_retcode(int retcode)
+void CommandTopic::display_manpage(const char *topic)
 {
-    f_retcode = retcode;
-}
+    std::stringstream oss;
 
-// sends a signal to the owner
-Variant Quit::operator()()
-{
-    f_owner.quit(f_retcode);
-    return Variant(byeMessage);
-}
+    boost::filesystem::path fullpath
+        (getenv( YASMV_HOME_PATH ));
 
+    fullpath += "/help/";
+    fullpath += topic;
+    fullpath += ".nroff";
 
-QuitTopic::QuitTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
-
-QuitTopic::~QuitTopic()
-{
-    TRACE
-        << "Destroyed quit topic"
+    oss
+        << "nroff "
+        << fullpath.native()
+        << " | less"
         << std::endl;
+
+    const std::string& s
+        (oss.str());
+
+    const char *tmp
+        (s.c_str());
+
+    DEBUG
+        << "##"
+        << tmp
+        << std::endl;
+
+    execlp( "bash", "bash", "-c", tmp, NULL );
 }
 
-void QuitTopic::usage()
-{ display_manpage("quit"); }

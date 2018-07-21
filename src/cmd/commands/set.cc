@@ -87,4 +87,4 @@ SetTopic::~SetTopic()
 }
 
 void SetTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/read-model.nroff | less", NULL ); }
+{ display_manpage("set"); }

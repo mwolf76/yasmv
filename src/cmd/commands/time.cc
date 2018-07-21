@@ -88,4 +88,4 @@ TimeTopic::~TimeTopic()
 }
 
 void TimeTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/time.nroff | less", NULL ); }
+{ display_manpage("time"); }

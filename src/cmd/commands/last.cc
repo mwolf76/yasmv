@@ -91,5 +91,5 @@ LastTopic::~LastTopic()
 }
 
 void LastTopic::usage()
-{ execlp( "bash", "bash", "-c", "nroff help/last.nroff | less", NULL ); }
+{ display_manpage("last"); }
 
