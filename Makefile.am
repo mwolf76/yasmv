@@ -84,8 +84,8 @@ yasmv_tests_SOURCES = src/parse.cc testing/tests.cc		\
 		testing/test_enc.cc testing/test_compiler.cc
 
 yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
-		$(top_builddir)/src/cmd/libcmd.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
+		$(top_builddir)/src/cmd/libcmd.la				\
 		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
 		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
 		$(top_builddir)/src/algorithms/ltl/libltl.la			\
