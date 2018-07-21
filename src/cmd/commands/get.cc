@@ -123,8 +123,5 @@ GetTopic::~GetTopic()
 }
 
 void GetTopic::usage()
-{
-    std::cout <<
-        "get [ <identifier> ] - Dumps current value of <identifier>.\n\n"
-        "All assignments in the current environment are dumped if no argument is given.\n" ;
-}
+{ display_manpage("get"); }
+

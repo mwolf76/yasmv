@@ -32,506 +32,394 @@
 
 #include <model.hh>
 #include <model_mgr.hh>
+#include <model/module.hh>
+#include <model/compiler/compiler.hh>
 
-#include <dd_walker.hh>
+using LList = std::initializer_list<std::initializer_list<int>>;
+class DDChecker {
+  std::list<std::list<int>> f_expected;
+  std::list<std::list<int>> f_actual;
 
-# if 0
-
-class TestWalker : public DDLeafWalker {
 public:
-    TestWalker(CuddMgr& owner)
-        : DDLeafWalker(owner)
-    {}
+  DDChecker(LList list_of_ints)
+  {
+    std::list<int> tmp;
+    for (auto literals : list_of_ints) {
+      tmp.clear();
+      for (auto value : literals) {
+        tmp.push_back(value);
+      }
+      f_expected.push_back(tmp);
+    }
+  }
 
-    bool condition(const DdNode *node)
-    {
-        DdNode *N = Cudd_Regular(node);
-        if (! cuddIsConstant(N)) return false;
+  void add(std::list<int> lst) {
+    f_actual.push_back(lst);
+  }
 
-        /* arithmetical zero */
-        if (node == f_owner.dd().getManager()->zero) {
-            return false;
-        }
+  bool check() const
+  {
+    bool res { f_expected == f_actual };
 
-        return true;
+    if (! res) {
+      std::cerr
+        << "Expected"
+        << std::endl ;
+
+      std::for_each(begin(f_expected), end(f_expected),
+                    [](std::list<int> lst) {
+                      std::for_each(begin(lst), end(lst),
+                                    [](int elem) {
+                                      std::cerr
+                                        << elem
+                                        << " ";
+                                    });
+                      std::cerr
+                        << std::endl;
+                    });
+
+      std::cerr
+        << "Actual"
+        << std::endl;
+
+      std::for_each(begin(f_actual), end(f_actual),
+                    [](std::list<int> lst) {
+                      std::for_each(begin(lst), end(lst),
+                                    [](int elem) {
+                                      std::cerr
+                                        << elem
+                                        << " ";
+                                    });
+                      std::cerr
+                        << std::endl;
+                    });
     }
 
-    virtual void action(const DdNode *node) =0;
-
-protected:
-
-    /* services */
-    value_t pow2(unsigned exp)
-    {
-        value_t res = 1;
-        for (unsigned i = exp; i; -- i) {
-            res *= 2;
-        }
-
-        return res;
-    }
-
-    value_t value(bool msb)
-    {
-        long i, res = 0;
-        int size = f_owner.dd().getManager()->size;
-        assert( 0 == size % 2); // size is even
-
-        int half = size/2;
-        char *data = (msb)
-            ? f_data
-            : f_data + half;
-
-        for (i = half -1; 0 <= i; -- i) {
-            if ( *data == 1 ) {
-                res += pow2(i);
-            }
-
-            ++ data;
-        }
-
-        return res;
-
-    }
-
-    inline value_t msb_value()
-    { return value (true); }
-
-    inline value_t lsb_value()
-    { return value (false); }
-
+    return res;
+  }
 };
 
-class PlusTestWalker : public TestWalker {
-public:
-    PlusTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
+static void callback(void *obj, int* list, int size)
+{
+  assert (NULL != obj);
+  DDChecker* pchecker = (DDChecker *) obj;
 
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
+  std::list<int> tmp;
+  for (int i = 0; i < size; ++ i) {
+    int c { *(list+i) };
+    tmp.push_back(c);
+  }
 
-        value_t msb = msb_value();
-        value_t lsb = lsb_value();
-
-        BOOST_CHECK(msb == (f_ofs + lsb) % 0x100);
-    }
-
-private:
-    int f_ofs;
-};
-
-class MulTestWalker : public TestWalker {
-public:
-    MulTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value() * f_ofs;
-        BOOST_CHECK(lhs == rhs);
-    }
-
-private:
-    int f_ofs;
-};
-
-
-class NegTestWalker : public TestWalker {
-public:
-    NegTestWalker(CuddMgr& owner)
-        : TestWalker(owner)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        value_t msb = msb_value();
-        value_t lsb = lsb_value();
-        BOOST_CHECK(0 == ((msb + lsb) % 0x100));
-    }
-};
-
-class SubTestWalker : public TestWalker {
-public:
-    SubTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value() - f_ofs;
-        BOOST_CHECK(lhs == rhs);
-    }
-
-private:
-    int f_ofs;
-};
-
-class AndTestWalker : public TestWalker {
-public:
-    AndTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(lhs == (rhs & f_ofs));
-    }
-
-private:
-    int f_ofs;
-};
-
-class OrTestWalker : public TestWalker {
-public:
-    OrTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(lhs == (rhs | f_ofs));
-    }
-
-private:
-    int f_ofs;
-};
-
-class XorTestWalker : public TestWalker {
-public:
-    XorTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(lhs == (rhs ^ f_ofs));
-    }
-
-private:
-    int f_ofs;
-};
-
-class XnorTestWalker : public TestWalker {
-public:
-    XnorTestWalker(CuddMgr& owner, int ofs = 1)
-        : TestWalker(owner)
-        , f_ofs(ofs)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        BOOST_CHECK(1 == Cudd_V(node)); /* 0-1 ADDs */
-
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) ~ ((lsb_value() ^ f_ofs));
-        BOOST_CHECK(lhs == rhs);
-    }
-
-private:
-    int f_ofs;
-};
-
-class LtTestWalker : public TestWalker {
-public:
-    LtTestWalker(CuddMgr& owner)
-        : TestWalker(owner)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == Cudd_V(node));
-        BOOST_CHECK(lhs < rhs);
-    }
-};
-
-class LeTestWalker : public TestWalker {
-public:
-    LeTestWalker(CuddMgr& owner)
-        : TestWalker(owner)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == Cudd_V(node));
-        BOOST_CHECK(lhs <= rhs);
-    }
-};
-
-class GtTestWalker : public TestWalker {
-public:
-    GtTestWalker(CuddMgr& owner)
-        : TestWalker(owner)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == Cudd_V(node));
-        BOOST_CHECK(lhs > rhs);
-    }
-};
-
-class GeTestWalker : public TestWalker {
-public:
-    GeTestWalker(CuddMgr& owner)
-        : TestWalker(owner)
-    {}
-
-    virtual void action(const DdNode *node)
-    {
-        uint8_t lhs = (uint8_t) msb_value();
-        uint8_t rhs = (uint8_t) lsb_value();
-        BOOST_CHECK(1 == Cudd_V(node));
-        BOOST_CHECK(lhs >= rhs);
-    }
-};
+  pchecker->add(tmp);
+}
 
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(compiler)
+BOOST_AUTO_TEST_CASE(compiler_boolean)
 {
-    ModelMgr& mm(ModelMgr::INSTANCE());
-    ExprMgr& em(ExprMgr::INSTANCE());
-    TypeMgr& tm(TypeMgr::INSTANCE());
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
 
     Compiler f_compiler;
 
-    Expr_ptr main_expr(em.make_main());
-    IModule_ptr main_module = new Module( main_expr );
+    Model& model
+        (mm.model());
+
+    Atom a_main("main");
+    Expr_ptr main_expr(em.make_identifier(a_main));
+
+    Module_ptr main_module = new Module(main_expr);
+    model.add_module(*main_module);
+
     Type_ptr u2 = tm.find_unsigned(2);
 
     Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
-    main_module->add_localVar(x, new StateVar(main_expr, x, u2));
+    main_module->add_var(x, new Variable(main_expr, x, u2));
 
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_localVar(y, new StateVar(main_expr, y, u2));
+    main_module->add_var(y, new Variable(main_expr, y, u2));
 
-    mm.model()->add_module(main_expr, main_module);
+    // mm.analyze();
 
+    const int F = 0;
+    const int T = 1;
+    const int X = 2; /* DON'T CARE */
+
+    /* NOT x */
     {
-        Atom a_d("d_plus_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_not(x));
 
-        /* y := x + 1 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_one()));
+      DDChecker checker {
+        {F}
+      } ;
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-        PlusTestWalker ptw(CuddMgr::INSTANCE());
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
 
-        ptw(f_compiler.process( main_expr, define, 0));
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* NOT NOT x */
     {
-        Atom a_d("d_plus_2"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_not(em.make_not(x)));
 
-        /* y := x + 17 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( x, em.make_iconst(17)));
+      DDChecker checker {
+        {T}
+      } ;
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-        PlusTestWalker ptw(CuddMgr::INSTANCE(), 17);
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
 
-        ptw(f_compiler.process( main_expr, define, 0));
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* x NE y */
     {
-        Atom a_d("d_plus_3"); Expr_ptr define = em.make_identifier(a_d);
+        Expr_ptr test_expr
+          (em.make_ne(x, y));
 
-        /* y := 1 + x */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( em.make_one(), x));
+        DDChecker checker {
+          {F, T}, {T, F}
+        };
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-        PlusTestWalker ptw(CuddMgr::INSTANCE());
+        CompilationUnit cu
+            (f_compiler.process(em.make_empty(),
+                                test_expr));
 
-        ptw(f_compiler.process( main_expr, define, 0));
+        DDVector dv
+            (cu.dds());
+
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd
+            (dv.at(0));
+
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
+    /* x EQ y */
     {
-        Atom a_d("d_plus_4"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_eq(x, y));
 
-        /* y := 17 + x */
-        Expr_ptr test_expr = em.make_eq( y, em.make_add( em.make_iconst(17), x));
+      DDChecker checker {
+        {F, F}, {T, T}
+      };
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-        PlusTestWalker ptw(CuddMgr::INSTANCE(), 17);
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
 
-        ptw(f_compiler.process( main_expr, define, 0));
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      // dd.PrintMinterm();
+      BOOST_CHECK(checker.check());
     }
 
+    /* (NOT x NE y) <-> x EQ y */
     {
-        Atom a_d("d_mul_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_ne(x, y)),
+                    em.make_eq(x, y)));
 
-        /* y := 2 * x */
-        Expr_ptr test_expr = em.make_eq( y, em.make_mul( em.make_iconst(2), x));
+      DDChecker checker {
+        {X, X}
+      };
 
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-        MulTestWalker mtw(CuddMgr::INSTANCE(), 2);
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
 
-        mtw(f_compiler.process( main_expr, define, 0));
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      // dd.PrintMinterm();
+      BOOST_CHECK(checker.check());
     }
 
+    /* x AND y */
     {
-        Atom a_d("d_neg"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_and(x, y));
 
-        /* y := - x */
-        Expr_ptr test_expr = em.make_eq( y, em.make_neg( x ));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {T, T}
+      };
 
-        NegTestWalker ntw(CuddMgr::INSTANCE());
-        ntw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* x OR y */
     {
-        Atom a_d("d_sub_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_or(x, y));
 
-        /* y := x - 1 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {F, T}, {T, X}
+      };
 
-        SubTestWalker stw(CuddMgr::INSTANCE());
-        stw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* (NOT (X AND Y)) == (NOT X) OR (NOT Y) */
     {
-        Atom a_d("d_sub_2"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_and(x, y)),
+                    em.make_or(em.make_not(x), em.make_not(y))));
 
-        /* y := x - 42 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_sub( x, em.make_iconst(42)));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {X, X}
+      } ;
 
-        SubTestWalker stw(CuddMgr::INSTANCE(), 42);
-        stw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
     {
-        Atom a_d("d_and_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_eq(em.make_not(em.make_or(x, y)),
+                    em.make_and(em.make_not(x), em.make_not(y))));
 
-        /* y := x & 1 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_and( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {X, X}
+      } ;
 
-        AndTestWalker atw(CuddMgr::INSTANCE());
-        atw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* x IMPL y */
     {
-        Atom a_d("d_or_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_implies(x, y));
 
-        /* y := x & 1 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_or( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {F, X}, {T, T}
+      };
 
-        OrTestWalker atw(CuddMgr::INSTANCE());
-        atw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
 
+    /* (x IMPL y) AND (y IMPL X) == (x == y) */
     {
-        Atom a_d("d_xor_1"); Expr_ptr define = em.make_identifier(a_d);
+      Expr_ptr test_expr
+        (em.make_eq(em.make_and(em.make_implies(x, y),
+                                em.make_implies(y, x)),
+                    em.make_eq(x, y)));
 
-        /* y := x ^ 1 */
-        Expr_ptr test_expr = em.make_eq( y, em.make_xor( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
+      DDChecker checker {
+        {X, X}
+      } ;
 
-        XorTestWalker atw(CuddMgr::INSTANCE());
-        atw(f_compiler.process( main_expr, define, 0));
+      CompilationUnit cu
+        (f_compiler.process(em.make_empty(),
+                            test_expr));
+
+      DDVector dv
+        (cu.dds());
+
+      BOOST_CHECK(dv.size() == 1);
+      ADD dd
+        (dv.at(0));
+
+      dd.Callback(callback, &checker, 1);
+      BOOST_CHECK(checker.check());
     }
-
-    {
-        Atom a_d("d_xnor_1"); Expr_ptr define = em.make_identifier(a_d);
-
-        /* y := ~ (x ^ 1) */
-        Expr_ptr test_expr = em.make_eq( y, em.make_xnor( x, em.make_one()));
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-        XnorTestWalker atw(CuddMgr::INSTANCE());
-        atw(f_compiler.process( main_expr, define, 0));
-    }
-
-    {
-        Atom a_d("d_lt_1"); Expr_ptr define = em.make_identifier(a_d);
-
-        /* y < x */
-        Expr_ptr test_expr = em.make_lt( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-        LtTestWalker ltw(CuddMgr::INSTANCE());
-        ltw(f_compiler.process( main_expr, define, 0));
-    }
-
-    {
-        Atom a_d("d_le_1"); Expr_ptr define = em.make_identifier(a_d);
-
-        /* y <= x */
-        Expr_ptr test_expr = em.make_le( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-        LeTestWalker lew(CuddMgr::INSTANCE());
-        lew(f_compiler.process( main_expr, define, 0));
-    }
-
-    {
-        Atom a_d("d_gt_1"); Expr_ptr define = em.make_identifier(a_d);
-
-        /* y > x */
-        Expr_ptr test_expr = em.make_gt( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-        GtTestWalker gtw(CuddMgr::INSTANCE());
-        gtw(f_compiler.process( main_expr, define, 0));
-    }
-
-    {
-        Atom a_d("d_ge_1"); Expr_ptr define = em.make_identifier(a_d);
-
-        /* y >= x */
-        Expr_ptr test_expr = em.make_ge( y, x );
-        main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-        GeTestWalker gew(CuddMgr::INSTANCE());
-        gew(f_compiler.process( main_expr, define, 0));
-    }
-
-    // {
-    //     Atom a_d("d_lsh_1"); Expr_ptr define = em.make_identifier(a_d);
-
-    //     main_module->add_localDef(define, new Define(main_expr, define, test_expr));
-
-    //     GeTestWalker gew(CuddMgr::INSTANCE());
-    //     gew(f_compiler.process( main_expr, define, 0));
-    // }
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif

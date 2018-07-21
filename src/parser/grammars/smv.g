@@ -1054,14 +1054,12 @@ echo_command returns [Command_ptr res]
     : 'echo'?
       { $res = cm.make_echo(); }
       (
-            exprs = expressions[&ev]
+            expr = toplevel_expression
             {
-                for (ExprVector::iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
-                    Expr_ptr expr { *ei };
-                    ((Echo_ptr) $res) -> append_expression(expr);
-                }
+                ((Echo_ptr) $res) -> append_expression(expr);
             }
-      ) ;
+      )
+      ;
 
 echo_command_topic returns [CommandTopic_ptr res]
     : 'echo'
@@ -1121,9 +1119,14 @@ dump_model_command returns [Command_ptr res]
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
-        ( output=pcchar_quoted_string {
+        ( '-o' output=pcchar_quoted_string {
             ((DumpModel_ptr) $res)->set_output(output);
-        }) ?
+        }
+
+        | '-s' ('state' { ((DumpModel_ptr) $res)->select_state(); }
+        |       'init'  { ((DumpModel_ptr) $res)->select_init();  }
+        |       'trans' { ((DumpModel_ptr) $res)->select_trans(); })
+        ) *
     ;
 
 dump_model_command_topic returns [CommandTopic_ptr res]

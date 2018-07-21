@@ -1,0 +1,49 @@
+.nf
+YASMV manual                                                   on
+
+.ti 0
+SYNOPSIS
+
+.in 3
+on [ 'success' | 'failure' ] <block>
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Builds a sequence of commands.
+
+This command has two different modes of invocation:
+
+The `success` mode which executes what follows if last command was successful,
+and the `failure` mode which executes what follows if last command has failed.
+
+reach GOAL
+on success do dump-trace time
+on failure echo "Help, I'm trapped into a maze!"
+
+This command can be used to build sequences of other commands that are all
+evaluated as one single task. It's particularly useful when used in combination
+with the `on` command.
+
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+>> pick-state
+-- Simulation initialized, registered witness `sim_1`
+>> on success do simulate; time;
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
+

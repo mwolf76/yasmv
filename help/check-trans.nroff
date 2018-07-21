@@ -1,0 +1,42 @@
+.nf
+YASMV manual                                           check-trans
+
+.ti 0
+SYNOPSIS
+
+.in 3
+[[ REQUIRES MODEL ]]
+check-trans [ -c <expr> ]+                
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Checks compatibility with the transition relation. (req
+
+Checks transition relation's consistency. Returns `OK` if transition relation is found consistent, `KO` if transition relation is found to be inconsistent. If no decision could be made (e.g. user interruption), returns `??`.
+
+Further constraints can be specified using -c, these constraints will add up with the existing TRANS constraints. The -c option can be used arbitrarily many times.
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+
+>> check-trans
+-- Transition relation consistency check ok.
+
+>> check-trans -c next(ferryman)=WEST
+-- Transition relation consistency check ok.
+
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.

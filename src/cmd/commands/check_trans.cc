@@ -124,12 +124,5 @@ CheckTransTopic::~CheckTransTopic()
 }
 
 void CheckTransTopic::usage()
-{
-    std::cout
-        << "check-trans - Checks propositional satisfiability for TRANS formulas.\n\n"
-        << "Transition relation is for consistency. Returns `OK` if transition relation\n"
-        << "is consistent, `KO` if transition relation is found to be inconsistent.\n"
-        << "If no decision could be made returns `??`."
-        << std::endl;
-}
+{ display_manpage("check-trans"); }
 

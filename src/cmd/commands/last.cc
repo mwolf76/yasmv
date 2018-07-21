@@ -91,7 +91,5 @@ LastTopic::~LastTopic()
 }
 
 void LastTopic::usage()
-{
-    std::cout
-        << "last - prints the result of last command.\n" ;
-}
+{ display_manpage("last"); }
+

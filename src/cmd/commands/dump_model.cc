@@ -37,6 +37,9 @@
 DumpModel::DumpModel(Interpreter& owner)
     : Command(owner)
     , f_output(NULL)
+    , f_state(false)
+    , f_init(false)
+    , f_trans(false)
 {}
 
 DumpModel::~DumpModel()
@@ -51,6 +54,21 @@ void DumpModel::set_output(pconst_char output)
         free(f_output);
         f_output = strdup(output);
     }
+}
+
+void DumpModel::select_state()
+{
+    f_state = true;
+}
+
+void DumpModel::select_init()
+{
+    f_init = true;
+}
+
+void DumpModel::select_trans()
+{
+    f_trans = true;
 }
 
 void DumpModel::dump_heading(std::ostream& os, Module& module)
@@ -89,8 +107,8 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
                       }
                       if (pvar->is_input()) {
                           os
-                                  << "@input"
-                                  << std::endl;
+                              << "@input"
+                              << std::endl;
                       }
 
                       os
@@ -185,41 +203,49 @@ Variant DumpModel::operator()()
     Model& model
         (ModelMgr::INSTANCE().model());
 
-    std::ostream& out
-        (get_output_stream());
-
-    /* FIXME: add system directives to the model */
     const Modules& modules
         (model.modules());
 
-    for (Modules::const_iterator m = modules.begin();
-         m != modules.end(); ++ m) {
+    std::ostream& out
+        (get_output_stream());
 
-        Module& module = dynamic_cast <Module&> (*m->second);
-        dump_heading(out, module);
-        dump_variables(out, module);
-        dump_inits(out, module);
-        dump_invars(out, module);
-        dump_transes(out, module);
-    }
+    bool dump_all { ! f_state && ! f_init && ! f_trans };
+
+    std::for_each(begin(modules), end(modules),
+                  [this, dump_all, &out] (std::pair<Expr_ptr,
+                                          Module_ptr> descriptor) {
+
+                      Module& module
+                          (*descriptor.second);
+
+                      if (dump_all)
+                          dump_heading(out, module);
+
+                      if (dump_all || f_state)
+                          dump_variables(out, module);
+
+                      if (dump_all || f_init)
+                          dump_inits(out, module);
+
+                      if (dump_all || f_trans) {
+                          dump_invars(out, module);
+                          dump_transes(out, module);
+                      }
+                  });
 
     return Variant(okMessage);
 }
 
 DumpModelTopic::DumpModelTopic(Interpreter& owner)
-    : CommandTopic(owner)
+  : CommandTopic(owner)
 {}
 
 DumpModelTopic::~DumpModelTopic()
 {
-    TRACE
-        << "Destroyed dump-model topic"
-        << std::endl;
+  TRACE
+    << "Destroyed dump-model topic"
+    << std::endl;
 }
 
 void DumpModelTopic::usage()
-{
-    std::cout
-        << "dump-model [<filename>] - Dump current model to given filename.\n"
-        << "If no filename is given, model is written to standard output.\n";
-}
+{ display_manpage("dump-model"); }

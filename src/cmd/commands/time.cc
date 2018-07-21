@@ -39,19 +39,39 @@ Time::~Time()
 
 Variant Time::operator()()
 {
+    OptsMgr& om
+        (OptsMgr::INSTANCE());
+
+    static struct timespec old;
+    static bool first { true };
+
     /* FIXME: implement stream redirection for std{out,err} */
     std::ostream& out
         (std::cout);
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
+    Interpreter& interpreter
+        (Interpreter::INSTANCE());
+
+    if (! om.quiet())
+        out
+            << outPrefix
+            << "Session time: ";
 
     out
-        << outPrefix
-        << "Session time: "
-        << elapsed_repr(Interpreter::INSTANCE().epoch(), now)
-        << "."
+        << elapsed_repr(interpreter.epoch(), now)
         << std::endl;
+
+    if (! first)
+        out
+            << outPrefix
+            << "Elapsed time: "
+            << elapsed_repr(old, now)
+            << std::endl;
+
+    old = now;
+    first = false;
 
     return Variant(okMessage);
 }
@@ -68,9 +88,4 @@ TimeTopic::~TimeTopic()
 }
 
 void TimeTopic::usage()
-{
-    std::cout
-        << "time - retrieves current running time\n\n"
-        << "This command can be used to measure time elapsed running previous commands\n"
-        << "as in this example: >> reach GOAL; time\n"; 
-}
+{ display_manpage("time"); }

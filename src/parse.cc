@@ -50,6 +50,8 @@ static void reportParserStatus(bool parseErrors, timespec start,
 
 /**
  * Runs the parser SMV rule on an input .smv file.
+ *
+ * @returns true if parsing was successful, false otherwise.
  */
 bool parseFile(const char* fName)
 {
@@ -101,7 +103,7 @@ bool parseFile(const char* fName)
     clock_gettime(CLOCK_MONOTONIC, &stop_clock);
 
     reportParserStatus(parseErrors, start_clock, stop_clock);
-    return parseErrors;
+    return ! parseErrors;
 }
 
 /**

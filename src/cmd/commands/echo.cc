@@ -99,8 +99,4 @@ EchoTopic::~EchoTopic()
 }
 
 void EchoTopic::usage()
-{
-    std::cout
-        << "echo <arg-1> . [...] <arg-n> - write arguments to the standard output.\n\n"
-        << "Each argument can either be a string or a valid expression in current environment.\n" ;
-}
+{ display_manpage("echo"); }

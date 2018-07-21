@@ -77,7 +77,4 @@ DoTopic::~DoTopic()
 }
 
 void DoTopic::usage()
-{
-    std::cout
-        << "do [ <command> ';' ... ] done - Builds a sequence of commands\n";
-}
+{ display_manpage("do"); }

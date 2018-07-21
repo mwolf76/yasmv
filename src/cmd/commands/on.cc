@@ -101,7 +101,4 @@ OnTopic::~OnTopic()
 }
 
 void OnTopic::usage()
-{
-    std::cout
-        << "on <command> - performs conditional execution\n";
-}
+{ display_manpage("on"); }

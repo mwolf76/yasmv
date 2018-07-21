@@ -1,0 +1,45 @@
+Target is reachable, registered witness `reach_1`, 6 steps.
+witness:
+  id: reach_1
+  description: Reachability witness for target `GOAL` in module `vending`
+env:
+  input:
+    - due-amount: 1255
+    - credit: 2000
+? steps:
+    - time: 0
+      ? state:
+          - choice: CHOICE_500CENT
+          - change: 745
+      : defines:
+          []
+    - time: 1
+      ? state:
+          - choice: CHOICE_200CENT
+          - change: 245
+      : defines:
+          []
+    - time: 2
+      ? state:
+          - choice: CHOICE_20CENT
+          - change: 45
+      : defines:
+          []
+    - time: 3
+      ? state:
+          - choice: CHOICE_20CENT
+          - change: 25
+      : defines:
+          []
+    - time: 4
+      ? state:
+          - choice: CHOICE_5CENT
+          - change: 5
+      : defines:
+          []
+    - time: 5
+      ? state:
+          - choice: CHOICE_IDLE
+          - change: 0
+      : defines:
+          []

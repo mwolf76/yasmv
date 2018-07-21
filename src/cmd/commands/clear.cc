@@ -78,8 +78,4 @@ ClearTopic::~ClearTopic()
 }
 
 void ClearTopic::usage()
-{
-    std::cout <<
-        "clear [ <identifier> ] - Clears current value of <identifier>.\n\n"
-        "All assignments in the current environment are cleared if no argument is given.\n" ;
-}
+{ display_manpage("clear"); }

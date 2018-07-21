@@ -1,0 +1,13 @@
+The yasmv (Yet Another Symbolic Model Verifier) project
+(c) 2011-2018 Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
+
+README
+======
+
+This directory contains the help files for yasmv. The help files are shown when
+the corresponding help <topic> command is given in the interactive shell. These
+help files can also be viewed using the standard unix man utility. Just point the
+man cli to the file you want to read, like in the following example:
+
+$ man ./check-init.nroff
+

@@ -1,0 +1,53 @@
+.nf
+YASMV manual                                           check-init
+
+.ti 0
+SYNOPSIS
+
+.in 3
+[[ REQUIRES MODEL ]]
+check-init [ -c <expr> ]+                 
+
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Checks initial states for consistency.
+
+Initial states (i.e. INIT formulas) are checked for propositional
+satisfiability. Thie command returns SUCCESS if initial states are found to be
+consistent, FAILURE if initial states are found to be inconsistent. If no decision
+could be made (e.g. user interruption), the command returns `??`.
+
+Further constraints can be specified using -c, these constraints will add up
+with the existing INIT constraints. The -c option can be repeated arbitrarily
+many times.
+
+.ti 0
+EXAMPLES
+
+.nf
+>> read-model 'examples/ferryman/ferryman.smv'
+
+>> check-init
+-- Initial states consistency check ok.
+
+>> check-init -c ferryman!=wolf
+-- Initial states consistency check failed.
+
+>> check-init -c ferryman=wolf -c ferryman=goat -c ferryman=cabbage
+-- Initial states consistency check ok.
+
+>> check-init -c ferryman=goat -c ferryman=cabbage -c ferryman=EAST
+-- Initial states consistency check failed.
+
+.ti 0
+Copyright (c) M. Pensallorto 2011-2018.
+ 
+.fi
+.in 3
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
+

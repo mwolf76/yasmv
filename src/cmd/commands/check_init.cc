@@ -123,11 +123,5 @@ CheckInitTopic::~CheckInitTopic()
 }
 
 void CheckInitTopic::usage()
-{
-    std::cout
-        << "check-init - Checks propositional satisfiability for INIT formulas.\n\n"
-        << "Initial states are checked for consistency. Returns `OK` if initial\n"
-        << "states are consistent, `KO` if initial are found to be inconsistent.\n"
-        << "If no decision could be made returns `??`."
-        << std::endl;
-}
+{ display_manpage("check-init"); }
+

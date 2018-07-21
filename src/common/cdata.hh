@@ -29,7 +29,7 @@
 #include "config.h"
 
 /* environment variables and paths */
-extern const char *YASMV_MICROCODE_PATH;
+extern const char *YASMV_HOME_PATH;
 
 /* Witness trace formats */
 extern const char *TRACE_FMT_DEFAULT;

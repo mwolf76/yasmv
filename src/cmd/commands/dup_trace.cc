@@ -86,7 +86,4 @@ DupTraceTopic::~DupTraceTopic()
 }
 
 void DupTraceTopic::usage()
-{
-    std::cout
-        << "dup-trace <trace_uid> - Dups given trace." ;
-}
+{ display_manpage("dup-trace"); }

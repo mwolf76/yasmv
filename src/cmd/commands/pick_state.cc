@@ -151,13 +151,6 @@ PickStateTopic::~PickStateTopic()
 }
 
 void PickStateTopic::usage()
-{
-    std::cout
-        << "pick-state [ -a | -l <limit> ] - Initializes a new simulation.\n\n"
-        << "options:\n"
-        << "  -a, requires an ALLSAT enumeration of all feasible initial states.\n"
-        << "  -l <limit>, limits the number of enumerated solutions. Default is infinity.\n\n"
-        << "Creates a new trace and selects it as current. If -a is used a number of traces\n"
-        << "will be created, according to the number of distinct feasible initial states for\n"
-        << "for the simulation.\n" ;
-}
+{ display_manpage("pick-state"); }
+
+

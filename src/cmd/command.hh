@@ -33,6 +33,8 @@
 #include <cmd/exceptions.hh>
 #include <utils/variant.hh>
 
+#include <string>
+
 class Interpreter;
 
 class Command {
@@ -54,6 +56,7 @@ typedef class Command* Command_ptr;
 class CommandTopic {
 protected:
     Interpreter& f_owner;
+    void display_manpage(const char *topic);
 
 public:
     CommandTopic(Interpreter& owner);

@@ -4755,7 +4755,7 @@ ABDD::Callback(void (*cb)(void *obj, int *list, int size),
     DdManager *mgr = p->manager;
     int result = Cudd_MintermCallback(mgr, node, cb, obj, polarity);
     checkReturnValue(result);
-}
+} // should be called ABDD::CallbackMinterm
 
 void
 BDD::PrintCover() const

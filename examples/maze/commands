@@ -1,4 +1,5 @@
 reach GOAL
-dump-trace
-time
+on success dump-trace
+on failure echo "Help, I'm trapped into a maze!"
 quit
+

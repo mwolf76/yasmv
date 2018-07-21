@@ -57,7 +57,4 @@ QuitTopic::~QuitTopic()
 }
 
 void QuitTopic::usage()
-{
-    std::cout
-        << "quit - Leave interactive shell\n" ;
-}
+{ display_manpage("quit"); }
