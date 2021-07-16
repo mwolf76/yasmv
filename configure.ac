@@ -112,6 +112,9 @@ AC_ANTLR3
 # minisat checks
 AC_MINISAT
 
+# libpthread
+AX_PTHREAD
+
 # readline check
 AX_LIB_READLINE
 

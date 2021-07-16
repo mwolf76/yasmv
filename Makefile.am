@@ -35,6 +35,10 @@ unittest: yasmv_tests
 functionaltest: yasmv_tests
 	@tools/run-functional-tests.sh
 
+.PHONY: microcode
+microcode:
+	@tar cfj microcode.tar.bz2 microcode/
+
 test: unittest functionaltest
 	@echo "*** All tests passed Ok"
 
@@ -74,7 +78,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
-		$(BOOST_CHRONO_LIBS)
+		$(BOOST_CHRONO_LIBS) $(PTHREAD_LIBS)
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
@@ -113,7 +117,8 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
-		$(BOOST_CHRONO_LIBS) -lboost_unit_test_framework
+		$(BOOST_CHRONO_LIBS) $(PTHREAD_LIBS)				\
+		-lboost_unit_test_framework
 
 yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 

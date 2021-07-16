@@ -84,7 +84,7 @@ Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
         print_assignment(os, id);
         res = Variant(okMessage);
     }
-    catch (NoSuchIdentifier nsi) {
+    catch (NoSuchIdentifier& nsi) {
         const char *what { nsi.what() };
 
         os

@@ -38,7 +38,7 @@ else
     CXX="g++"
 fi
 
-COMMON_OPTIONS="-fPIC"
+COMMON_OPTIONS="-fPIC -std=c++11"
 
 if [ $USE_DEBUGGER -eq 1 ];
 then
@@ -67,9 +67,5 @@ autoreconf -vif
 ./configure --prefix=/usr/local CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
 
 # exploding microcode tarball in its standard location (do this only once)
-if [ -d microcode ] && [ `find microcode/* | wc -w` -eq 2177 ]; then
-    echo "skipping microcode extraction..."
-else
-    echo "extracting microcode..."
-    tar xfj microcode.tar.bz2
-fi
+echo "extracting microcode ..."
+rm -rf microcode && tar xfj microcode.tar.bz2

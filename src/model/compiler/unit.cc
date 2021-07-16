@@ -77,17 +77,22 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
     case NEG: os << "neg"; break;
     case NOT: os << "not"; break;
 
-    case PLUS: os << "add"; break;
+    case PLUS: os << "add"; break; // see expr/expr.hh
     case SUB:  os << "sub"; break;
     case MUL:  os << "mul"; break;
     case DIV:  os << "div"; break;
     case MOD:  os << "mod"; break;
 
+    case BW_NOT: os << "not"; break;
     case BW_AND: os << "and"; break;
     case BW_OR:  os << "or";  break;
+
     case BW_XOR: os << "xor"; break;
-    case BW_XNOR:os << "xnor";break;
+    case BW_XNOR: os << "xnor"; break;
     case IMPLIES: os << "implies"; break;
+
+    case LSHIFT: os << "lsh"; break;
+    case RSHIFT: os << "rsh"; break;
 
     case EQ: os << "eq"; break;
     case NE: os << "ne"; break;

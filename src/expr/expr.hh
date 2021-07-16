@@ -5,7 +5,7 @@
  * This header file contains the declarations required by the Expr
  * struct.
  *
- * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
+ * Copyright (C) 2012-2021 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,13 +44,16 @@ typedef enum {
     AT, NEXT,
 
     /* arithmetical operators */
-    NEG, PLUS, SUB, DIV, MUL, MOD,
+    NEG, PLUS, SUB, DIV, MUL, MOD, /* not using the more familiar word 'ADD' for addition to prevent confusion with ADDs. */
 
     /* bitwise operators */
     BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
 
     /* logical operators */
-    NOT, AND, OR, IMPLIES, GUARD /* reserved for TRANSes */,
+    NOT, AND, OR, IMPLIES,
+
+    /* reserved for TRANSes */
+    GUARD,
 
     /* shift operators */
     LSHIFT, RSHIFT,

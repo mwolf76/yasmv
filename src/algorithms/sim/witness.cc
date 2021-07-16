@@ -168,7 +168,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                     tf.set_value( key, value);
             }
 
-            catch (NoValue nv) {
+            catch (NoValue& nv) {
                 WARN
                     << "Cannot evaluate define `"
                     << key

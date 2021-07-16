@@ -67,13 +67,22 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
     else if (! strcmp( "and", op)) op_type = BW_AND;
     else if (! strcmp( "xor", op)) op_type = BW_XOR;
     else if (! strcmp( "xnor",op)) op_type = BW_XNOR;
+    else if (! strcmp( "impl",op)) op_type = IMPLIES;
     else if (! strcmp( "eq",  op)) op_type = EQ;
     else if (! strcmp( "ne",  op)) op_type = NE;
     else if (! strcmp( "gt",  op)) op_type = GT;
     else if (! strcmp( "ge",  op)) op_type = GE;
     else if (! strcmp( "lt",  op)) op_type = LT;
     else if (! strcmp( "le",  op)) op_type = LE;
-    else assert (false);
+    else if (! strcmp( "lsh", op)) op_type = LSHIFT;
+    else if (! strcmp( "rsh", op)) op_type = RSHIFT;
+    else {
+      ERR
+        << "Unsupported mnemonic: "
+        << op
+        << std::endl;
+      assert(false);
+    }
 
     char buf[20];
     strncpy( buf, fragments[2].c_str(), 20);
@@ -190,7 +199,7 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                                       InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));
                 }
-                catch (InlinedOperatorLoaderException iole) {
+                catch (InlinedOperatorLoaderException& iole) {
 
                     pconst_char what
                         (iole.what());

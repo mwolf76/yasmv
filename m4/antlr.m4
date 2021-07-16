@@ -57,8 +57,8 @@ AC_DEFUN([AC_ANTLR3], [
          AC_LINK_IFELSE( [AC_LANG_PROGRAM(
                          [#include <antlr3.h>]
 			 [pANTLR3_INPUT_STREAM input =
-                         antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)
-                         "Hello World", strlen("Hello World"), NULL);])],
+                         antlr3StringStreamNew((pANTLR3_UINT8)
+                         "Hello World", ANTLR3_ENC_8BIT, strlen("Hello World"), NULL);])],
                          [AC_MSG_RESULT([yes])], [AC_MSG_ERROR([no])])
 
          AC_LANG_POP([C++])
