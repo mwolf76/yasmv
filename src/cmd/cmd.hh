@@ -25,6 +25,8 @@
 #include <cmd/interpreter.hh>
 
 /* -- commands */
+#include <cmd/commands/bmc.hh>
+
 #include <cmd/commands/do.hh>
 #include <cmd/commands/help.hh>
 #include <cmd/commands/echo.hh>
@@ -61,6 +63,9 @@ public:
     // -- makers ----------------------------------------------------------------
     inline Command_ptr make_help()
     { return new Help(f_interpreter); }
+
+    inline Command_ptr make_bmc()
+    { return new Bmc(f_interpreter); }
 
     inline Command_ptr make_do()
     { return new Do(f_interpreter); }
@@ -122,6 +127,9 @@ public:
     // -- topicrs ----------------------------------------------------------------
     inline CommandTopic_ptr topic_help()
     { return new HelpTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_bmc()
+    { return new BmcTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_do()
     { return new DoTopic(f_interpreter); }

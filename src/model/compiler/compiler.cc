@@ -31,6 +31,7 @@ ECompilerStatus& operator++(ECompilerStatus& status) {
 
 CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
+    // TODO: can we make instances of this class thread-local?
     boost::mutex::scoped_lock lock { f_process_mutex };
 
     f_status = READY;
