@@ -65,7 +65,3 @@ autoreconf -vif
 
 # invoking configure script with above settings
 ./configure --prefix=/usr/local CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
-
-# exploding microcode tarball in its standard location (do this only once)
-echo "extracting microcode ..."
-rm -rf microcode && tar xfj microcode.tar.bz2

@@ -37,6 +37,11 @@ Bmc::Bmc(Interpreter& owner)
 Bmc::~Bmc()
 {}
 
+void Bmc::set_property(Expr_ptr property)
+{
+    f_property = property;
+}
+
 void Bmc::add_constraint(Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
@@ -65,6 +70,12 @@ bool Bmc::check_requirements()
 Variant Bmc::operator()()
 {
     bool res { false };
+
+    DEBUG
+        << "Property to check is `"
+        << f_property
+        << "`."
+        << std::endl;
 
     return Variant(res ? okMessage : errMessage);
 }

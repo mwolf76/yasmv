@@ -35,6 +35,7 @@ public:
     virtual ~Bmc();
 
     /** cmd params */
+    void set_property(Expr_ptr property);
     void add_constraint(Expr_ptr constraint);
 
     /* run() */
@@ -42,6 +43,9 @@ public:
 
 private:
     std::ostream& f_out;
+
+    /* the property to be verified */
+    Expr_ptr f_property;
 
     /* (optional) additional constraints */
     ExprVector f_constraints;

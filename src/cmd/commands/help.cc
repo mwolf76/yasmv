@@ -131,6 +131,7 @@ Variant Help::operator()()
   } else {
     std::cout
       << "Available topics: " << std::endl
+      << "- bmc" << std::endl
       << "- check-init" << std::endl
       << "- check-trans" << std::endl
       << "- clear" << std::endl
