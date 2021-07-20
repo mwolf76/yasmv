@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(binary_arithmetic_expressions)
     BOOST_CHECK(em.make_bw_and(x, y) == parseExpression("x & y"));
     BOOST_CHECK(em.make_bw_or(x, y) == parseExpression("x | y"));
     BOOST_CHECK(em.make_bw_xor(x, y) == parseExpression("x ^ y"));
-    BOOST_CHECK(em.make_bw_xnor(x, y) == parseExpression("x ~^ y"));
+    BOOST_CHECK(em.make_bw_xnor(x, y) == parseExpression("x <-> y"));
 }
 
 

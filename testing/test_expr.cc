@@ -26,7 +26,9 @@
 
 #include <expr.hh>
 #include <expr_mgr.hh>
+
 #include <printer.hh>
+#include <nnfizer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(expr)
@@ -222,44 +224,50 @@ BOOST_AUTO_TEST_CASE(expr)
 
 BOOST_AUTO_TEST_CASE(builtin)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    Expr_ptr empty = em.make_empty();
+    Expr_ptr empty
+        (em.make_empty());
+
     BOOST_CHECK (em.is_identifier(empty) && empty->atom() == Atom( EMPTY_TOKEN ));
     BOOST_CHECK (em.is_empty(empty));
 
-    Expr_ptr false_ = em.make_false();
+    Expr_ptr false_ (em.make_false());
     BOOST_CHECK (em.is_identifier(false_) && false_->atom() == Atom( FALSE_TOKEN ));
     BOOST_CHECK (em.is_false(false_));
 
-    Expr_ptr true_ = em.make_true();
+    Expr_ptr true_ (em.make_true());
     BOOST_CHECK (em.is_identifier(true_) && true_->atom() == Atom( TRUE_TOKEN ));
     BOOST_CHECK (em.is_true(true_));
 
-    Expr_ptr zero = em.make_zero();
+    Expr_ptr zero (em.make_zero());
     BOOST_CHECK( em.is_constant(zero));
     BOOST_CHECK( em.is_zero( zero));
 
-    Expr_ptr one = em.make_one();
+    Expr_ptr one(em.make_one());
     BOOST_CHECK( em.is_constant(one));
     BOOST_CHECK( em.is_one( one));
 }
 
 BOOST_AUTO_TEST_CASE(printer)
 {
-    ExprMgr& em(ExprMgr::INSTANCE());
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
 
-    Atom a_x("x");
-    Atom a_y("y");
+    Atom a_x
+        ("x");
+    Atom a_y
+        ("y");
 
-    Expr_ptr x = em.make_identifier(a_x);
+    Expr_ptr x (em.make_identifier(a_x));
     {
         std::ostringstream oss;
         Printer printer(oss);
         printer << x; BOOST_CHECK (oss.str() == std::string("x"));
     }
 
-    Expr_ptr y = em.make_identifier(a_y);
+    Expr_ptr y (em.make_identifier(a_y));
     {
         std::ostringstream oss;
         Printer printer(oss);
@@ -519,7 +527,42 @@ BOOST_AUTO_TEST_CASE(printer)
         Printer printer(oss);
         printer << true_; BOOST_CHECK (oss.str() == std::string("TRUE"));
     }
+}
 
+BOOST_AUTO_TEST_CASE(nnfizer)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Atom a_x
+        ("x");
+    Expr_ptr x
+        (em.make_identifier(a_x));
+
+    Atom a_y
+        ("y");
+    Expr_ptr y
+        (em.make_identifier(a_y));
+
+    Nnfizer nnfizer;
+
+    BOOST_CHECK(x == nnfizer.process(x));
+    BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
+
+    BOOST_CHECK(em.make_F(em.make_not(x)) ==
+                nnfizer.process(em.make_not(em.make_G(x))));
+
+    BOOST_CHECK(em.make_G(em.make_not(x)) ==
+                nnfizer.process(em.make_not(em.make_F(x))));
+
+    BOOST_CHECK(em.make_U(em.make_not(x), em.make_not(y)) ==
+                nnfizer.process(em.make_not(em.make_R(x, y))));
+
+    BOOST_CHECK(em.make_R(em.make_not(x), em.make_not(y)) ==
+                nnfizer.process(em.make_not(em.make_U(x, y))));
+
+    BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
+                nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
 }
 
 // BOOST_AUTO_TEST_CASE(fqexpr)

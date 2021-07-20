@@ -481,7 +481,7 @@ bw_xnor_expression returns[Expr_ptr res]
       { $res = lhs; }
 
     (
-      '~^' rhs=bw_and_expression
+      '<->' rhs=bw_and_expression
       { $res = em.make_bw_xnor($res, rhs); }
     )* ;
 

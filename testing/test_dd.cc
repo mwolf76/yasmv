@@ -81,11 +81,15 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
     /* x ^ y == y ^ x */
     BOOST_CHECK(lhs.Xor(rhs) == rhs.Xor(lhs));
 
-    /* x ~^ x == 1 */
+    /* x <-> x == 1 */
     BOOST_CHECK(lhs.Xnor(lhs) == one);
 
-    /* x ~^ (! x) == 0 */
+    /* x <-> (! x) == 0 */
     BOOST_CHECK(lhs.Xnor(lhs.Cmpl()) == zero);
+
+    /* x = y <-> (! x || y) && (! y || x) */
+    BOOST_CHECK(lhs.Equals(rhs) ==
+                lhs.Cmpl().Or(rhs).Times(rhs.Cmpl().Or(lhs)));
 }
 
 // duplicate code... :-/
