@@ -297,25 +297,84 @@ fsm_trans_decl_clause
     ;
 
 toplevel_expression returns [Expr_ptr res]
-    : expr=at_expression
+    : expr=timed_expression
       { $res = expr; }
     ;
 
-at_expression returns [Expr_ptr res]
-    : '@' time=constant '{' expr=conditional_expression '}'
+timed_expression returns [Expr_ptr res]
+    : '@' time=constant '{' expr=temporal_expression '}'
       { $res = em.make_at(time, expr); }
-    | expr=conditional_expression
+
+    | expr=temporal_expression
+      { $res = expr; }
+
+    ;
+
+temporal_expression returns [Expr_ptr res]
+    : expr=binary_ltl_expression
       { $res = expr; }
     ;
 
-conditional_expression returns [Expr_ptr res]
+binary_ltl_expression returns [Expr_ptr res]
+@init { }
+    : lhs=unary_ltl_expression
+      { $res = lhs; } (
+            'U' rhs=unary_ltl_expression
+            { $res = em.make_U($res, rhs); }
+
+        |   'R' rhs=unary_ltl_expression
+            { $res = em.make_R($res, rhs); }
+      )* ;
+
+unary_ltl_expression returns [Expr_ptr res]
+@init { }
+    : 'G' expr=unary_ltl_expression
+        { $res = em.make_G(expr); }
+
+    | 'F' expr=unary_ltl_expression
+        { $res = em.make_F(expr); }
+
+    | 'X' expr=unary_ltl_expression
+        { $res = em.make_X(expr); }
+
+    /* common shortcuts */
+    | 'GF' expr=unary_ltl_expression
+        { $res = em.make_G(em.make_F(expr)); }
+
+    | 'GX' expr=unary_ltl_expression
+        { $res = em.make_G(em.make_X(expr)); }
+
+    | 'FG' expr=unary_ltl_expression
+        { $res = em.make_F(em.make_G(expr)); }
+
+    | 'FX' expr=unary_ltl_expression
+        { $res = em.make_F(em.make_X(expr)); }
+
+    | 'XG' expr=unary_ltl_expression
+        { $res = em.make_X(em.make_G(expr)); }
+
+    | 'XF' expr=unary_ltl_expression
+        { $res = em.make_X(em.make_F(expr)); }
+
+    | expr=propositional_expression
+      { $res = expr; }
+    ;
+
+propositional_expression returns [Expr_ptr res]
+@init { }
+    : expr=ite_expression {
+         $res = expr;
+      }
+    ;
+
+ite_expression returns [Expr_ptr res]
 @init { }
     : expr=logical_expression {
          $res = expr;
       }
 
       (
-            '?' lhs=toplevel_expression ':' rhs=toplevel_expression
+            '?' lhs=logical_expression ':' rhs=logical_expression
             { $res = em.make_ite( em.make_cond($res, lhs), rhs); }
       )?
     ;
@@ -347,13 +406,54 @@ logical_or_expression returns[Expr_ptr res]
 
 logical_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=bw_or_expression
+    : lhs=equality_expression
       { $res = lhs; }
 
     (
-      '&&' rhs=bw_or_expression
+      '&&' rhs=equality_expression
       { $res = em.make_and($res, rhs); }
     )* ;
+
+equality_expression returns [Expr_ptr res]
+@init { }
+    : lhs=relational_expression
+      { $res = lhs; }
+
+      ( '=' rhs=relational_expression
+            { $res = em.make_eq($res, rhs); }
+
+      | '!=' rhs=relational_expression
+            { $res = em.make_ne($res, rhs); }
+
+      | ':=' rhs=relational_expression
+            { $res = em.make_assignment($res, rhs); }
+
+      )? /* predicates are binary */;
+
+relational_expression returns [Expr_ptr res]
+@init { }
+    : lhs=algebraic_expression
+      { $res = lhs; }
+
+      ( '<' rhs=algebraic_expression
+            { $res = em.make_lt($res, rhs); }
+
+      | '<=' rhs=algebraic_expression
+            { $res = em.make_le($res, rhs); }
+
+      | '>=' rhs=algebraic_expression
+            { $res = em.make_ge($res, rhs); }
+
+      | '>' rhs=algebraic_expression
+            { $res = em.make_gt($res, rhs); }
+      )? /* predicates are binary */ ;
+
+algebraic_expression returns [Expr_ptr res]
+@init { }
+    :
+        expr=bw_or_expression
+        { $res = expr; }
+    ;
 
 bw_or_expression returns[Expr_ptr res]
 @init { }
@@ -387,79 +487,12 @@ bw_xnor_expression returns[Expr_ptr res]
 
 bw_and_expression returns[Expr_ptr res]
 @init { }
-    : lhs=temporal_expression
-      { $res = lhs; }
-
-    (
-      '&' rhs=temporal_expression
-      { $res = em.make_bw_and($res, rhs); }
-    )* ;
-
-temporal_expression returns [Expr_ptr res]
-@init { }
-    :
-        expr=binary_ltl_expression
-        { $res = expr; }
-    ;
-
-binary_ltl_expression returns [Expr_ptr res]
-@init { }
-    : lhs=unary_ltl_expression
-      { $res = lhs; } (
-            'U' rhs=unary_ltl_expression
-            { $res = em.make_U($res, rhs); }
-
-        |   'R' rhs=unary_ltl_expression
-            { $res = em.make_R($res, rhs); }
-    )* ;
-
-unary_ltl_expression returns [Expr_ptr res]
-@init { }
-    : 'G' expr=unary_ltl_expression
-      { $res = em.make_G(expr); }
-
-    | 'F' expr=unary_ltl_expression
-      { $res = em.make_F(expr); }
-
-    | 'X' expr=unary_ltl_expression
-      { $res = em.make_X(expr); }
-
-    | expr=equality_expression
-      { $res = expr; }
-    ;
-
-equality_expression returns [Expr_ptr res]
-@init { }
-    : lhs=relational_expression
-      { $res = lhs; }
-
-      ( '=' rhs=relational_expression
-            { $res = em.make_eq($res, rhs); }
-
-        | '!=' rhs=relational_expression
-            { $res = em.make_ne($res, rhs); }
-
-        | ':=' rhs=relational_expression
-            { $res = em.make_assignment($res, rhs); }
-      )? ;
-
-relational_expression returns [Expr_ptr res]
-@init { }
     : lhs=shift_expression
       { $res = lhs; }
 
     (
-      '<' rhs=shift_expression
-      { $res = em.make_lt($res, rhs); }
-
-    | '<=' rhs=shift_expression
-      { $res = em.make_le($res, rhs); }
-
-    | '>=' rhs=shift_expression
-      { $res = em.make_ge($res, rhs); }
-
-    | '>' rhs=shift_expression
-      { $res = em.make_gt($res, rhs); }
+      '&' rhs=shift_expression
+      { $res = em.make_bw_and($res, rhs); }
     )* ;
 
 shift_expression returns [Expr_ptr res]
@@ -1144,7 +1177,10 @@ bmc_command returns[Command_ptr res]
     : 'bmc'
       { $res = cm.make_bmc(); }
 
-      ( '-c' constraint=toplevel_expression
+      property=temporal_expression
+      { ((Bmc_ptr) $res)->set_property(property); }
+
+      ( '-c' constraint=temporal_expression
       { ((Bmc_ptr) $res)->add_constraint(constraint); })*
     ;
 

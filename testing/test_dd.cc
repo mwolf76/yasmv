@@ -38,87 +38,54 @@ BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(dd_boolean)
 {
     Cudd dd;
-    ADD lhs = dd.addVar();
-    ADD rhs = dd.addVar();
-    ADD zero (dd.addZero());
-    ADD one  (dd.addOne());
 
-    {
-        ADD neg_neg = lhs.Cmpl().Cmpl();
-        BOOST_CHECK(lhs == neg_neg);
-    }
+    ADD lhs
+        (dd.addVar());
+    ADD rhs
+        (dd.addVar());
+    ADD zero
+        (dd.addZero());
+    ADD one
+        (dd.addOne());
 
-    {
-        ADD x_and_y = lhs.Times(rhs);
-        ADD y_and_x = rhs.Times(lhs);
-        BOOST_CHECK(x_and_y == y_and_x);
-    }
+    /* ! 0 == 1 */
+    BOOST_CHECK(zero.Cmpl() == one);
 
-    {
-        ADD x_and_0 = lhs.Times(zero);
-        BOOST_CHECK(x_and_0 == zero);
+    /* ! 1 == 0 */
+    BOOST_CHECK(one.Cmpl() == zero);
 
-        ADD x_and_1 = rhs.Times(one);
-        BOOST_CHECK(x_and_1 == rhs);
+    /* !! x == x */
+    BOOST_CHECK(lhs.Cmpl().Cmpl() == lhs);
 
-        ADD _0_and_y = zero.Times(rhs);
-        BOOST_CHECK(_0_and_y == zero);
+    /* x && 0 == 0 */
+    BOOST_CHECK(lhs.Times(zero) == zero);
 
-        ADD _1_and_y = one.Times(rhs);
-        BOOST_CHECK(_1_and_y == rhs);
-    }
+    /* x && 1 == x */
+    BOOST_CHECK(lhs.Times(one) == lhs);
 
-    {
-        ADD x_or_y = lhs.Or(rhs);
-        ADD y_or_x = rhs.Or(lhs);
-        BOOST_CHECK(x_or_y == y_or_x);
-    }
+    /* 0 && y == 0 */
+    BOOST_CHECK(zero.Times(rhs) == zero);
 
-    {
-        ADD x_or_0 = lhs.Or(zero);
-        BOOST_CHECK(x_or_0 == lhs);
+    /* 1 && y == y */
+    BOOST_CHECK(one.Times(rhs) == rhs);
 
-        ADD x_or_1 = rhs.Or(one);
-        BOOST_CHECK(x_or_1 == one);
+    /* x || y == y || x */
+    BOOST_CHECK(lhs.Or(rhs) == rhs.Or(lhs));
 
-        ADD _0_or_y = zero.Or(rhs);
-        BOOST_CHECK(_0_or_y == rhs);
+    /* x ^ x == 0 */
+    BOOST_CHECK(lhs.Xor(lhs) == zero);
 
-        ADD _1_or_y = one.Or(rhs);
-        BOOST_CHECK(_1_or_y == one);
-    }
+    /* x ^ (! x) == 1 */
+    BOOST_CHECK(lhs.Xor(lhs.Cmpl()) == one);
 
-    {
-        ADD x_xor_y = lhs.Xor(rhs);
-        ADD y_xor_x = rhs.Xor(lhs);
-        ADD x_xor_x = lhs.Xor(lhs);
-        ADD y_xor_y = rhs.Xor(rhs);
-        ADD _0_xor_1 = zero.Xor(one);
-        ADD _1_xor_0 = one.Xor(zero);
-        BOOST_CHECK(x_xor_y == y_xor_x);
-        BOOST_CHECK(x_xor_x == zero);
-        BOOST_CHECK(y_xor_y == zero);
-        BOOST_CHECK(_0_xor_1 == one);
-        BOOST_CHECK(_1_xor_0 == one);
-    }
+    /* x ^ y == y ^ x */
+    BOOST_CHECK(lhs.Xor(rhs) == rhs.Xor(lhs));
 
-    {
-        ADD x_xnor_y = lhs.Xnor(rhs);
-        ADD y_xnor_x = rhs.Xnor(lhs);
-        BOOST_CHECK(x_xnor_y == y_xnor_x);
-    }
+    /* x ~^ x == 1 */
+    BOOST_CHECK(lhs.Xnor(lhs) == one);
 
-    {
-        ADD x_xnor_y = lhs.Xnor(rhs);
-        ADD y_xnor_x = rhs.Xnor(lhs);
-        BOOST_CHECK(x_xnor_y == y_xnor_x);
-    }
-
-    {
-        ADD x_xnor_y = lhs.Xnor(rhs);
-        ADD y_xnor_x = rhs.Xor(lhs).Cmpl();
-        BOOST_CHECK(x_xnor_y == y_xnor_x);
-    }
+    /* x ~^ (! x) == 0 */
+    BOOST_CHECK(lhs.Xnor(lhs.Cmpl()) == zero);
 }
 
 // duplicate code... :-/
@@ -156,13 +123,12 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
 {
     Cudd dd;
 
-    ADD lhs = make_integer_encoding(dd, 4, false);
-    ADD rhs = make_integer_encoding(dd, 4, false);
+    ADD lhs
+        (make_integer_encoding(dd, 4, false));
+    ADD rhs
+        (make_integer_encoding(dd, 4, false));
 
-    {
-        ADD neg_neg = lhs.Negate().Negate();
-        BOOST_CHECK(lhs == neg_neg);
-    }
+    BOOST_CHECK(lhs == lhs.Negate().Negate());
 
     {
         ADD x_plus_y = lhs.Plus(rhs);
