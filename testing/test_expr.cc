@@ -563,6 +563,9 @@ BOOST_AUTO_TEST_CASE(nnfizer)
 
     BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
                 nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
+
+    BOOST_CHECK(em.make_and(em.make_G(em.make_F(x)), em.make_not(y)) ==
+                nnfizer.process(em.make_not(em.make_implies(em.make_not(em.make_G(em.make_F(x))), em.make_not(y)))));
 }
 
 // BOOST_AUTO_TEST_CASE(fqexpr)
