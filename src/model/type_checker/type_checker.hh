@@ -61,6 +61,8 @@ protected:
     void post_node_hook(Expr_ptr expr);
 
     LTL_HOOKS; OP_HOOKS;
+
+    void walk_instant(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
 private:
@@ -81,6 +83,8 @@ private:
     Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
     Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
 
+    Type_ptr check_any(Expr_ptr expr);
+    Type_ptr check_timed(Expr_ptr expr);
     Type_ptr check_logical(Expr_ptr expr);
     Type_ptr check_arithmetical(Expr_ptr expr);
     Type_ptr check_scalar(Expr_ptr expr);
@@ -95,6 +99,7 @@ private:
 
     void walk_unary_arithmetical_postorder(const Expr_ptr expr);
     void walk_binary_arithmetical_postorder(const Expr_ptr expr);
+    void walk_binary_timed_postorder(const Expr_ptr expr);
 
     void walk_unary_logical_postorder(const Expr_ptr expr);
     void walk_unary_bitwise_postorder(const Expr_ptr expr);

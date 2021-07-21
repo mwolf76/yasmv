@@ -61,6 +61,12 @@ MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
     , f_x(x)
 {}
 
+std::ostream& operator<<(std::ostream& os, CompilationUnit& cu)
+{
+    return os
+        << cu.expr();
+}
+
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
 {
     bool is_signed

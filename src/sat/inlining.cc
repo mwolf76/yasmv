@@ -264,7 +264,7 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const InlinedOperatorSignatur
 void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
                                 const LitsVector& clauses)
 {
-    DEBUG
+    DRIVEL
         << const_cast<InlinedOperatorDescriptor&> (md)
         << std::endl;
 
@@ -413,7 +413,7 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
 
 void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
 {
-    DEBUG
+    DRIVEL
         << const_cast<BinarySelectionDescriptor&> (md)
         << std::endl;
 

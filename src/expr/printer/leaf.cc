@@ -132,6 +132,7 @@ void Printer::print_leaf(const Expr_ptr expr)
 {
     switch (expr -> f_symb) {
     case ICONST:
+    case INSTANT:
         print_dec_leaf(expr, f_os);
         break;
 

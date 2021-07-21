@@ -31,7 +31,7 @@ ECompilerStatus& operator++(ECompilerStatus& status) {
 
 CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
 {
-    // TODO: can we make instances of this class thread-local?
+    /* the compiler can be shared among multiple strategies running on multiple threads */
     boost::mutex::scoped_lock lock { f_process_mutex };
 
     f_status = READY;
@@ -53,7 +53,10 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
        [0..n_elems[` to the original formula. */
     activate_array_muxes();
 
-    return CompilationUnit(f_add_stack, f_inlined_operator_descriptors,
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    return CompilationUnit(em.make_dot( ctx, body), f_time_polarity, f_add_stack, f_inlined_operator_descriptors,
                            f_expr2bsd_map, f_multiway_selection_descriptors);
 }
 
@@ -69,6 +72,8 @@ Compiler::Compiler()
     , f_owner(ModelMgr::INSTANCE())
     , f_enc(EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
+    , f_status(READY)
+    , f_time_polarity(UNDECIDED)
 {
     const void* instance { this };
     DRIVEL

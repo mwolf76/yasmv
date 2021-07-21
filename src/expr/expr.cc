@@ -44,7 +44,8 @@ value_t Expr_TAG::value() const
             HCONST == f_symb ||
             OCONST == f_symb ||
             BCONST == f_symb ||
-            QSTRING == f_symb);
+            QSTRING == f_symb ||
+            INSTANT == f_symb );
 
     return u.f_value;
 }
@@ -85,7 +86,8 @@ long ExprHash::operator() (const Expr& k) const
     if (k.f_symb == ICONST
         || k.f_symb == HCONST
         || k.f_symb == BCONST
-        || k.f_symb == OCONST) {
+        || k.f_symb == OCONST
+        || k.f_symb == INSTANT) {
         v0 = (long)(k.u.f_value);
         v1 = (long)(k.u.f_value >> sizeof(long));
     }
@@ -119,7 +121,7 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
             (x.f_symb == IDENT  && *x.u.f_atom == *y.u.f_atom) ||
 
             /* ...or have the same constant value */
-            (x.f_symb >= ICONST && x.f_symb <= OCONST
+            (x.f_symb >= ICONST && x.f_symb <= INSTANT
              && x.u.f_value == y.u.f_value) ||
 
             /* ...or share the same subtrees */

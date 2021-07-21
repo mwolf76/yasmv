@@ -40,6 +40,25 @@ TypeMgr::TypeMgr()
 {
 }
 
+/** Time */
+const TimeType_ptr TypeMgr::find_time()
+{
+    Expr_ptr descr
+        (f_em.make_time_type());
+
+    TimeType_ptr res
+        (dynamic_cast<TimeType_ptr>(lookup_type(descr)));
+
+    if (res)
+        return res;
+
+    res = new TimeType( *this);
+    register_type(descr, res);
+
+    return res;
+}
+
+
 /** Booleans */
 const ScalarType_ptr TypeMgr::find_boolean()
 {
@@ -294,3 +313,16 @@ const ArrayType_ptr TypeMgr::find_array_type( ScalarType_ptr of, unsigned nelems
 }
 
 
+// register a type
+void TypeMgr::register_type(const Expr_ptr expr, Type_ptr vtype) {
+    void* ptr { vtype };
+    DEBUG
+        << "Registering type `"
+        << expr
+        << "` at "
+        << ptr
+        << std::endl;
+
+    assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
+    f_register [ expr ] = vtype;
+}

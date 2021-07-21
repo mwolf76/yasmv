@@ -113,7 +113,7 @@ bool TypeChecker::walk_at_preorder(const Expr_ptr expr)
 bool TypeChecker::walk_at_inorder(const Expr_ptr expr)
 { return true; }
 void TypeChecker::walk_at_postorder(const Expr_ptr expr)
-{ walk_binary_arithmetical_postorder(expr); }
+{ walk_binary_timed_postorder(expr); }
 
 bool TypeChecker::walk_next_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
@@ -485,6 +485,15 @@ void TypeChecker::walk_set_comma_postorder(Expr_ptr expr)
 
     PUSH_TYPE(lhs);
 }
+
+void TypeChecker::walk_instant(const Expr_ptr expr)
+{
+    TypeMgr& tm
+        (f_owner.tm());
+
+    PUSH_TYPE(tm.find_time());
+}
+
 
 void TypeChecker::walk_leaf(const Expr_ptr expr)
 {

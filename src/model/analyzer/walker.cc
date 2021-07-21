@@ -441,6 +441,9 @@ bool Analyzer::walk_set_comma_inorder(Expr_ptr expr)
 void Analyzer::walk_set_comma_postorder(Expr_ptr expr)
 {}
 
+void Analyzer::walk_instant(const Expr_ptr expr)
+{}
+
 void Analyzer::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em

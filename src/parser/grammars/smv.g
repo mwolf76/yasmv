@@ -302,8 +302,8 @@ toplevel_expression returns [Expr_ptr res]
     ;
 
 timed_expression returns [Expr_ptr res]
-    : '@' time=constant '{' expr=temporal_expression '}'
-      { $res = em.make_at(time, expr); }
+    : '@' when=instant '{' expr=temporal_expression '}'
+      { $res = em.make_at(when, expr); }
 
     | expr=temporal_expression
       { $res = expr; }
@@ -719,16 +719,22 @@ identifier returns [Expr_ptr res]
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
     ;
 
+instant returns [Expr_ptr res]
+@init { }
+    : DECIMAL_LITERAL {
+        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+        $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
+      }
+    ;
+
 constant returns [Expr_ptr res]
-@init {
-}
+@init { }
     : HEX_LITERAL {
         Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
-    |
-        BINARY_LITERAL {
+    | BINARY_LITERAL {
         Atom tmp((const char*)($BINARY_LITERAL.text->chars));
         $res = em.make_bin_const(tmp);
       }
@@ -739,7 +745,7 @@ constant returns [Expr_ptr res]
       }
 
     | DECIMAL_LITERAL {
-        Atom tmp (Atom((const char*)($DECIMAL_LITERAL.text->chars)));
+        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_dec_const(tmp);
       }
 

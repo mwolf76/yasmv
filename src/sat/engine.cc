@@ -224,7 +224,7 @@ Var Engine::find_cnf_var(const DdNode* node, step_t time)
         f_tdd2var_map.insert( std::pair<TimedDD, Var>
                               (timed_node, res));
 
-        DEBUG
+        DRIVEL
             << "Created cnf var "
             << res
             << " for DD node "
@@ -257,7 +257,7 @@ Var Engine::rewrite_cnf_var(Var v, step_t time)
         f_rewrite_map.insert( std::pair<TimedVar, Var>
                               (timed_var, res));
 
-        DEBUG
+        DRIVEL
             << "Rewrote microcode cnf var "
             << v << "@" << time
             << " as "

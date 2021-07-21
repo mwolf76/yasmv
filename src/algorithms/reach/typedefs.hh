@@ -1,5 +1,5 @@
 /**
- * @file bmc/typedefs.hh
+ * @file reach/typedefs.hh
  * @brief SAT-based BMC reachability analysis algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,14 +21,14 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_TYPEDEFS_H
-#define BMC_ALGORITHM_TYPEDEFS_H
+#ifndef REACHABILITY_ALGORITHM_TYPEDEFS_H
+#define REACHABILITY_ALGORITHM_TYPEDEFS_H
 
 typedef enum {
-    BMC_REACHABLE,
-    BMC_UNREACHABLE,
-    BMC_UNKNOWN,
-    BMC_ERROR,
+    REACHABILITY_REACHABLE,
+    REACHABILITY_UNREACHABLE,
+    REACHABILITY_UNKNOWN,
+    REACHABILITY_ERROR,
 } reachability_status_t;
 
-#endif /* BMC_ALGORITHM_TYPEDEFS_H */
+#endif /* REACHABILITY_ALGORITHM_TYPEDEFS_H */

@@ -30,18 +30,27 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::backward_strategy()
+void Reachability::backward_strategy()
 {
+    assert(! f_positive_time_constraints.size());
+
     Engine engine { "backward" };
     step_t k { 0 };
 
     /* goal state constraints */
-    assert_formula(engine, UINT_MAX - k, *f_target_cu);
-    assert_fsm_invar(engine, UINT_MAX - k);
-    std::for_each(begin(f_constraint_cus),
-                  end(f_constraint_cus),
+    assert_formula(engine, UINT_MAX, *f_target_cu);
+    assert_fsm_invar(engine, UINT_MAX);
+
+    std::for_each(begin(f_negative_time_constraints),
+                  end(f_negative_time_constraints),
                   [this, &engine, k](CompilationUnit& cu) {
-                      this->assert_formula(engine, k, cu);
+                      this->assert_formula(engine, UINT_MAX, cu);
+                  });
+
+    std::for_each(begin(f_globally_time_constraints),
+                      end(f_globally_time_constraints),
+                  [this, &engine, k](CompilationUnit& cu) {
+                      this->assert_formula(engine, UINT_MAX, cu);
                   });
 
     status_t status
@@ -55,7 +64,7 @@ void BMC::backward_strategy()
             << "Backward: empty final states. Target is trivially UNREACHABLE."
             << std::endl;
 
-        sync_set_status(BMC_UNREACHABLE);
+        sync_set_status(REACHABILITY_UNREACHABLE);
         goto cleanup;
     }
 
@@ -67,9 +76,8 @@ void BMC::backward_strategy()
     else assert(false); /* unreachable */
 
     do {
-        /* looking for witness : I(k-1) ^ BMC(k-1) ^ ... ^! P(0) */
+        /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
         assert_fsm_init(engine, UINT_MAX - k, engine.new_group());
-
         INFO
             << "Backward: now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
@@ -82,14 +90,14 @@ void BMC::backward_strategy()
 
         else if (STATUS_SAT == status) {
 
-            if (sync_set_status(BMC_REACHABLE)) {
+            if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                 /* Extract reachability witness */
                 WitnessMgr& wm
                     (WitnessMgr::INSTANCE());
 
                 Witness& w
-                    (* new BMCCounterExample(f_target, model(), engine, k, true)); /* reversed */
+                    (* new ReachabilityCounterExample(f_target, model(), engine, k, true)); /* reversed */
 
                 /* witness identifier */
                 std::ostringstream oss_id;
@@ -127,11 +135,12 @@ void BMC::backward_strategy()
             ++ k;
             assert_fsm_trans(engine, UINT_MAX - k);
             assert_fsm_invar(engine, UINT_MAX - k);
-            std::for_each(begin(f_constraint_cus),
-                          end(f_constraint_cus),
-                          [this, &engine, k](CompilationUnit& cu) {
-                              this->assert_formula(engine, k, cu);
-                          });
+
+            std::for_each(begin(f_globally_time_constraints),
+                      end(f_globally_time_constraints),
+                  [this, &engine, k](CompilationUnit& cu) {
+                      this->assert_formula(engine, UINT_MAX - k, cu);
+                  });
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */
@@ -139,7 +148,7 @@ void BMC::backward_strategy()
                 assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
 
             /* is this still relevant? */
-            if (sync_status() != BMC_UNKNOWN)
+            if (sync_status() != REACHABILITY_UNKNOWN)
                 goto cleanup;
 
             INFO
@@ -162,7 +171,7 @@ void BMC::backward_strategy()
                     << "Backward: found unreachability proof (k = " << k << ")"
                     << std::endl;
 
-                sync_set_status(BMC_UNREACHABLE);
+                sync_set_status(REACHABILITY_UNREACHABLE);
                 goto cleanup;
             }
             else assert(false); /* unreachable */
@@ -172,7 +181,7 @@ void BMC::backward_strategy()
             << "Backward: done with k = " << k << "..."
             << std::endl ;
 
-    } while (sync_status() == BMC_UNKNOWN);
+    } while (sync_status() == REACHABILITY_UNKNOWN);
 
  cleanup:
     /* signal other threads it's time to go home */
@@ -182,5 +191,5 @@ void BMC::backward_strategy()
     INFO
         << engine
         << std::endl;
-} /* BMC::backward_strategy() */
+} /* Reachability::backward_strategy() */
 

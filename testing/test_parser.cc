@@ -344,16 +344,16 @@ BOOST_AUTO_TEST_CASE(at_expressions)
     Expr_ptr y
         (em.make_identifier(a_y));
 
-    BOOST_CHECK (em.make_at(em.make_const(0), x) ==
+    BOOST_CHECK (em.make_at(em.make_instant(0), x) ==
                  parseExpression("@0{x}"));
 
-    BOOST_CHECK (em.make_at(em.make_const(0), em.make_add(x, y)) ==
+    BOOST_CHECK (em.make_at(em.make_instant(0), em.make_add(x, y)) ==
                  parseExpression("@0{x + y}"));
 
-    BOOST_CHECK (em.make_at(em.make_const(0), em.make_next(x)) ==
+    BOOST_CHECK (em.make_at(em.make_instant(0), em.make_next(x)) ==
                  parseExpression("@0{next(x)}"));
 
-    BOOST_CHECK (em.make_at(em.make_const(0), em.make_at(em.make_const(2), x)) ==
+    BOOST_CHECK (em.make_at(em.make_instant(0), em.make_at(em.make_instant(2), x)) ==
                  parseExpression("@0{(@2{x})}"));
 }
 

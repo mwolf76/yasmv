@@ -75,6 +75,11 @@ void Compiler::make_auto_ddvect(DDVector& dv, unsigned width)
 
 void Compiler::pre_node_hook(Expr_ptr expr)
 {
+    DRIVEL
+        << "compiler pre-node: "
+        << expr
+        << std::endl;
+
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
     Expr_ptr ctx
@@ -100,11 +105,19 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
 void Compiler::post_node_hook(Expr_ptr expr)
 {
+    DRIVEL
+        << "compiler post-node: "
+        << expr
+        << std::endl;
+
+    ExprMgr& em
+        (f_owner.em());
+
     /* cache is disabled for SETs, COMMAs and CONDs. This allows for
        anonymous determinization variables on the fly. */
-    if (f_owner.em().is_cond(expr) ||
-        f_owner.em().is_set(expr)  ||
-        f_owner.em().is_set_comma(expr))
+    if (em.is_cond(expr) ||
+        em.is_set(expr)  ||
+        em.is_set_comma(expr))
         return;
 
     /* no caching during encoding */
@@ -112,7 +125,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
         return;
 
     /* no cache when compiling types */
-    if (f_owner.em().is_type(expr))
+    if (em.is_type(expr))
         return;
 
     /* assemble memoization key */
@@ -125,10 +138,13 @@ void Compiler::post_node_hook(Expr_ptr expr)
         (f_time_stack.back());
 
     TimedExpr key
-        (f_owner.em().make_dot( ctx, expr), time);
+        (em.make_dot( ctx, expr), time);
 
     assert(0 < f_type_stack.size());
     Type_ptr type = f_type_stack.back();
+
+    if (type -> is_time())
+        return;
 
     if (type -> is_instance())
         return;
@@ -139,7 +155,19 @@ void Compiler::post_node_hook(Expr_ptr expr)
     if (type -> is_scalar()) {
         DDVector dv;
         unsigned i, width = type -> width();
-        assert(width <= f_add_stack.size());
+
+        if (width > f_add_stack.size()) {
+            unsigned add_stack_size
+                (f_add_stack.size());
+
+            ERR
+                << "width: "
+                << width
+                << ", max expected: "
+                << add_stack_size
+                << std::endl;
+            assert(false);
+        }
 
         DDVector::reverse_iterator ri;
         for (i = 0, ri = f_add_stack.rbegin();
@@ -148,9 +176,12 @@ void Compiler::post_node_hook(Expr_ptr expr)
         }
         assert (dv.size() == width);
 
+        Expr_ptr timedExpression
+            (em.make_at(em.make_instant(time), em.make_dot(ctx, expr)));
+
         /* memoize result */
         f_compilation_cache.insert( std::pair<TimedExpr, CompilationUnit>
-            ( key, CompilationUnit( dv, f_inlined_operator_descriptors,
+            ( key, CompilationUnit( timedExpression, f_time_polarity, dv, f_inlined_operator_descriptors,
                                     f_expr2bsd_map, f_multiway_selection_descriptors)));
 
         return;
@@ -278,6 +309,12 @@ void Compiler::check_internals()
 {
     assert (COMPILING == f_status);
     ++ f_status;
+
+    if (1 < f_add_stack.size()) {
+        ERR
+            << "Thomas"
+            << std::endl;
+    }
 
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());

@@ -94,6 +94,15 @@ void Evaluator::push_value(const Expr_ptr expr)
 }
 
 
+/* the evaluator treats time relatively */
+void Evaluator::walk_instant(const Expr_ptr expr)
+{
+    step_t curr_time
+        (f_time_stack.back());
+
+    f_time_stack.push_back(curr_time + expr->value());
+}
+
 void Evaluator::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em

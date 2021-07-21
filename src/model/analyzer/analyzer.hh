@@ -70,6 +70,8 @@ protected:
     void post_node_hook(Expr_ptr expr);
 
     LTL_HOOKS; OP_HOOKS;
+
+    void walk_instant(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
 private:

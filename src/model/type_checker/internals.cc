@@ -32,9 +32,9 @@
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
 
-// fun: T -> T
+// fun: any -> any
 void TypeChecker::walk_unary_fsm_postorder(const Expr_ptr expr)
-{ /* no checks */ }
+{ PUSH_TYPE( check_any(expr->lhs()) ); }
 
 void TypeChecker::walk_unary_ltl_postorder(const Expr_ptr expr)
 { PUSH_TYPE( check_logical(expr->lhs())); }
@@ -46,6 +46,10 @@ void TypeChecker::walk_unary_arithmetical_postorder(const Expr_ptr expr)
 // fun: logical -> logical
 void TypeChecker::walk_unary_logical_postorder(const Expr_ptr expr)
 { PUSH_TYPE( check_logical(expr->lhs())); }
+
+// fun: instant, (timed) any -> any
+void TypeChecker::walk_binary_timed_postorder(const Expr_ptr expr)
+{ PUSH_TYPE( check_timed(expr)); }
 
 // fun: arithm, arithm -> arithm
 void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
@@ -450,6 +454,21 @@ void TypeChecker::post_node_hook(Expr_ptr expr)
     memoize_result(expr);
 }
 
+Type_ptr TypeChecker::check_timed(Expr_ptr expr)
+{
+    POP_TYPE(res);
+    assert (NULL != res);
+
+    POP_TYPE(instant);
+    assert (NULL != instant);
+
+    if (instant -> is_time())
+        return res;
+
+    throw BadType(expr, res);
+    return NULL; /* unreachable */
+}
+
 Type_ptr TypeChecker::check_logical(Expr_ptr expr)
 {
     POP_TYPE(res);
@@ -484,6 +503,14 @@ Type_ptr TypeChecker::check_scalar(Expr_ptr expr)
 
     throw BadType(expr, res);
     return NULL; /* unreachable */
+}
+
+Type_ptr TypeChecker::check_any(Expr_ptr expr)
+{
+    POP_TYPE(res);
+    assert (NULL != res);
+
+    return res;
 }
 
 Type_ptr TypeChecker::check_array(Expr_ptr expr)

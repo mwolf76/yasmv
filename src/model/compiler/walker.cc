@@ -40,19 +40,13 @@
 bool Compiler::walk_at_preorder(const Expr_ptr expr)
 {
     ExprMgr& em
-        (ExprMgr::INSTANCE());
+        (f_owner.em());
 
     Expr_ptr lhs { expr->lhs() };
-    assert(em.is_int_const(lhs));
+    assert(em.is_instant(lhs));
 
     Expr_ptr rhs { expr->rhs() };
     assert(NULL != rhs);
-
-    value_t value { expr->value() };
-
-    step_t curr_time
-        (f_time_stack.back());
-    f_time_stack.push_back(curr_time + value);
 
     return true;
 }
@@ -60,7 +54,34 @@ bool Compiler::walk_at_inorder(const Expr_ptr expr)
 { return true; }
 void Compiler::walk_at_postorder(const Expr_ptr expr)
 {
+    if (ENCODING == f_status)
+        return;
+
+    const Type_ptr rhs_type
+        (f_type_stack.back()); f_type_stack.pop_back();
+
+    const Type_ptr lhs_type
+        (f_type_stack.back()); f_type_stack.pop_back();
+    assert(lhs_type -> is_time());
+
+    f_type_stack.push_back(rhs_type);
+
     assert (0 < f_time_stack.size());
+
+    value_t time
+        (f_time_stack.back());
+
+    if (0 <= time) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == POSITIVE);
+
+        f_time_polarity = POSITIVE;
+    } else if (time < 0) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == NEGATIVE);
+
+        f_time_polarity = NEGATIVE;
+    }
     f_time_stack.pop_back(); // reset time stack
 }
 
@@ -68,12 +89,28 @@ bool Compiler::walk_next_preorder(const Expr_ptr expr)
 {
     step_t curr_time
         (f_time_stack.back());
+
     f_time_stack.push_back(curr_time + 1);
     return true;
 }
 void Compiler::walk_next_postorder(const Expr_ptr expr)
 {
     assert (0 < f_time_stack.size());
+
+    value_t time
+        (f_time_stack.back());
+
+    if (0 <= time) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == POSITIVE);
+
+        f_time_polarity = POSITIVE;
+    } else if (time < 0) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == NEGATIVE);
+
+        f_time_polarity = NEGATIVE;
+    }
     f_time_stack.pop_back(); // reset time stack
 }
 

@@ -1,5 +1,5 @@
 /**
- * @file bmc/bmc.hh
+ * @file reach/reach.hh
  * @brief SAT-based BMC reachability algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,17 +21,17 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_H
-#define BMC_ALGORITHM_H
+#ifndef REACHABILITY_ALGORITHM_H
+#define REACHABILITY_ALGORITHM_H
 
 #include <algorithms/base.hh>
 #include <algorithms/reach/typedefs.hh>
 
-class BMC : public Algorithm {
+class Reachability : public Algorithm {
 
 public:
-    BMC(Command& command, Model& model);
-    ~BMC();
+    Reachability(Command& command, Model& model);
+    ~Reachability();
 
     void process(Expr_ptr target, ExprVector constraints);
 
@@ -46,7 +46,10 @@ private:
     CompilationUnit_ptr f_target_cu;
 
     ExprVector f_constraints;
-    CompilationUnits f_constraint_cus;
+
+    CompilationUnits f_positive_time_constraints; /* requires forward strategy */
+    CompilationUnits f_negative_time_constraints; /* requires backward strategy */
+    CompilationUnits f_globally_time_constraints;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
@@ -59,4 +62,4 @@ private:
     void fast_backward_strategy();
 };
 
-#endif /* BMC_ALGORITHM_CLASSES_H */
+#endif /* Reachability_ALGORITHM_CLASSES_H */

@@ -457,5 +457,12 @@ void Algorithm::assert_formula(Engine& engine,
                                CompilationUnit& term,
                                group_t group)
 {
+    INFO
+        << "asserting formula at time "
+        << time
+        << ": "
+        << term
+        << std::endl;
+
     engine.push( term, time, group);
 }

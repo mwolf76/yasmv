@@ -1,5 +1,5 @@
 /**
- * @file bmc/witness.cc
+ * @file reach/witness.cc
  * @brief SAT-based BMC reachability analysis, BMC CEX witness class implementation.
  *
  * This module contains definitions and services that implement the
@@ -34,8 +34,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
-                                     Engine& engine, unsigned k, bool reversed)
+ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model& model,
+                                                       Engine& engine, unsigned k, bool reversed)
     : Witness()
 {
     EncodingMgr& bm
@@ -166,5 +166,5 @@ BMCCounterExample::BMCCounterExample(Expr_ptr property, Model& model,
             (! reversed && step > k))
             break;
     } while (1);
-} /* BMCCounterExample::BMCCounterExample() */
+} /* ReachabilityCounterExample::ReachabilityCounterExample() */
 

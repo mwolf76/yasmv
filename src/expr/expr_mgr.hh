@@ -107,10 +107,10 @@ public:
     }
 
     /* -- Temporal operators ---------------------------------------------- */
-    inline Expr_ptr make_at(Expr_ptr time, Expr_ptr expr)
+    inline Expr_ptr make_at(Expr_ptr instant, Expr_ptr expr)
     {
-        assert(is_int_const(time));
-        return make_expr(AT, time, expr);
+        assert(is_instant(instant));
+        return make_expr(AT, instant, expr);
     }
 
     inline bool is_at(const Expr_ptr expr) const {
@@ -368,6 +368,12 @@ public:
         return __make_expr(&tmp);
     }
 
+    inline Expr_ptr make_instant(value_t value)
+    {
+        Expr tmp(INSTANT, value); // we need a temp store
+        return __make_expr(&tmp);
+    }
+
     inline Expr_ptr make_hconst(value_t value) // hexadecimal
     {
         Expr tmp(HCONST, value); // we need a temp store
@@ -463,6 +469,9 @@ public:
     Expr_ptr make_enum_type(ExprSet& literals);
 
     /* -- Builtin types ---------------------------------------------------- */
+    inline Expr_ptr make_time_type() const
+    { return time_expr; }
+
     inline Expr_ptr make_boolean_type() const
     { return bool_expr; }
 
@@ -626,6 +635,11 @@ public:
             is_int_const (expr) ;
     }
 
+    inline bool is_instant(const Expr_ptr expr) const {
+        assert(expr);
+        return (expr->f_symb == INSTANT);
+    }
+
     inline bool is_params(const Expr_ptr expr) const {
         assert(expr);
         return expr->f_symb == PARAMS;
@@ -779,7 +793,7 @@ private:
     value_t decimal_lookup(const char *decimal_repr);
 
     /* -- data ------------------------------------------------------------- */
-
+    Expr_ptr time_expr;
     Expr_ptr bool_expr;
     Expr_ptr string_expr;
     Expr_ptr false_expr;

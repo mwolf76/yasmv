@@ -64,6 +64,8 @@ protected:
 
     OP_HOOKS;
     LTL_STUBS;
+
+    void walk_instant(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
 private:

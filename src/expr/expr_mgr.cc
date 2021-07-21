@@ -36,6 +36,7 @@ ExprMgr::ExprMgr()
     const void* instance(this);
 
     /* generate internal symbol definitions */
+    time_expr = make_identifier(TIME_TOKEN);
     bool_expr = make_identifier(BOOL_TOKEN);
     string_expr = make_identifier(STRING_TOKEN);
     false_expr = make_identifier(FALSE_TOKEN);

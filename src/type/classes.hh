@@ -154,6 +154,9 @@ public:
     bool is_string();
     StringType_ptr as_string();
 
+    bool is_time();
+    TimeType_ptr as_time();
+
     virtual ~Type();
 
 protected:
@@ -178,6 +181,14 @@ public:
     StringType(TypeMgr& owner)
         : Type(owner)
     {}
+};
+
+/** Time constants */
+typedef class TimeType* TimeType_ptr;
+class TimeType : public Type {
+public:
+    TimeType(TypeMgr& owner);
+    unsigned width() const;
 };
 
 /** Scalar type class. */
@@ -240,7 +251,7 @@ private:
 typedef class InstanceType* InstanceType_ptr;
 class InstanceType : public ScalarType {
 public:
-    unsigned width() const;;
+    unsigned width() const;
     InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params);
 
     inline Expr_ptr name() const

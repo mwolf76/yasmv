@@ -239,6 +239,7 @@ protected:
     virtual void walk_type_postorder(const Expr_ptr expr) =0;
 
     // leaves
+    virtual void walk_instant(const Expr_ptr expr) =0;
     virtual void walk_leaf(const Expr_ptr expr) =0;
 };
 

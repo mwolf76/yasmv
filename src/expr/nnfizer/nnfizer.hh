@@ -51,6 +51,7 @@ protected:
     // support for basic ops
     OP_HOOKS;
 
+    void walk_instant(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
 private:

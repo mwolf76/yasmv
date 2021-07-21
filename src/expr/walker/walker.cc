@@ -919,8 +919,7 @@ void ExprWalker::walk ()
             }
             break;
 
-
-        // leaves
+            // leaves
         case ICONST:
         case HCONST:
         case BCONST:
@@ -929,6 +928,10 @@ void ExprWalker::walk ()
         case QSTRING:
         case UNDEF:
             walk_leaf(curr.expr);
+            break;
+
+        case INSTANT:
+            walk_instant(curr.expr);
             break;
 
         default:

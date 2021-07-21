@@ -104,6 +104,7 @@ private:
     /* basic expr operators support */
     OP_HOOKS;
 
+    void walk_instant(const Expr_ptr expr);
     void walk_leaf(const Expr_ptr expr);
 
     /* push DDs and type information for variables (used by walk_leaf) */
@@ -253,6 +254,9 @@ private:
 
     /* Compiler status (see above) */
     ECompilerStatus f_status;
+
+    /* Time polarity (see above) */
+    ECompilerTimePolarity f_time_polarity;
 
     /* synchronization */
     boost::mutex f_process_mutex;

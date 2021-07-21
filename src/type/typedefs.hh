@@ -57,6 +57,9 @@ typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 /* 1.3. module instances */
 typedef class InstanceType* InstanceType_ptr;
 
+/* 1.4. time constants */
+typedef class TimeType* TimeType_ptr;
+
 /* 2. arrays */
 typedef class ArrayType* ArrayType_ptr;
 

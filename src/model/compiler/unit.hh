@@ -190,17 +190,37 @@ typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
 typedef boost::unordered_map<Expr_ptr,
                              BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
 
+enum ECompilerTimePolarity {
+    UNDECIDED,
+    POSITIVE,
+    NEGATIVE
+};
+
 class CompilationUnit {
 public:
-    CompilationUnit( DDVector& dds,
+    CompilationUnit( Expr_ptr expr, ECompilerTimePolarity time_polarity, DDVector& dds,
                      InlinedOperatorDescriptors& inlined_operator_descriptors,
                      Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
                      MultiwaySelectionDescriptors& array_mux_descriptors)
-        : f_dds( dds )
+        : f_expr(expr)
+        , f_time_polarity(time_polarity)
+        , f_dds(dds)
         , f_inlined_operator_descriptors( inlined_operator_descriptors )
         , f_binary_selection_descriptors_map( binary_selection_descriptors_map )
         , f_array_mux_descriptors( array_mux_descriptors )
     {}
+
+    const bool is_positive_time() const
+    { return f_time_polarity == ECompilerTimePolarity::POSITIVE; }
+
+    const bool is_negative_time() const
+    { return f_time_polarity == ECompilerTimePolarity::NEGATIVE; }
+
+    const bool is_globally_valid() const
+    { return f_time_polarity == ECompilerTimePolarity::UNDECIDED; }
+
+    const Expr_ptr expr() const
+    { return f_expr; }
 
     const DDVector& dds() const
     { return f_dds; }
@@ -215,6 +235,8 @@ public:
     { return f_array_mux_descriptors; }
 
 private:
+    Expr_ptr f_expr;
+    bool f_time_polarity;
     DDVector f_dds;
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
@@ -224,6 +246,8 @@ typedef CompilationUnit* CompilationUnit_ptr;
 typedef std::vector<CompilationUnit> CompilationUnits;
 
 /* helpers */
+std::ostream& operator<<(std::ostream& os, CompilationUnit& cu);
+
 std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios);
 std::string ios2string(InlinedOperatorSignature ios);
 

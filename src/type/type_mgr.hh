@@ -51,6 +51,7 @@ class TypeMgr {
     Literals f_lits;
 
 public:
+    const TimeType_ptr find_time();
 
     const ScalarType_ptr find_boolean();
     const ArrayType_ptr find_boolean_array(unsigned size);
@@ -102,15 +103,11 @@ private:
 
     /* --- low-level services ----------------------------------------------- */
 
-    // register a type
-    inline void register_type(const Expr_ptr expr, Type_ptr vtype) {
-        assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
-        f_register [ expr ] = vtype;
-    }
-
     // lookup up a type from its repr, returns NULL if not found
     inline Type_ptr lookup_type(const Expr_ptr expr)
     { return f_register [ expr ]; }
+
+    void register_type(const Expr_ptr expr, Type_ptr vtype);
 
     /* local data */
     TypeMap f_register;

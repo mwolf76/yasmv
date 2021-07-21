@@ -30,6 +30,7 @@ const char *FALSE_TOKEN = "FALSE";
 const char *TRUE_TOKEN  = "TRUE";
 
 /* types */
+const char *TIME_TOKEN      = "time";
 const char *BOOL_TOKEN      = "boolean";
 const char *STRING_TOKEN    = "string";
 const char *UNSIGNED_TOKEN  = "u";

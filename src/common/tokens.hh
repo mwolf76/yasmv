@@ -30,6 +30,7 @@
 /* internal tokens, defined in common.cc */
 extern const char *FALSE_TOKEN;
 extern const char *TRUE_TOKEN;
+extern const char *TIME_TOKEN;
 extern const char *BOOL_TOKEN;
 extern const char *STRING_TOKEN;
 

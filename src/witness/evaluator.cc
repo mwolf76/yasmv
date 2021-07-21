@@ -163,14 +163,7 @@ Expr_ptr Evaluator::process(Witness &witness,
 bool Evaluator::walk_at_preorder(const Expr_ptr expr)
 { return cache_miss(expr); }
 bool Evaluator::walk_at_inorder(const Expr_ptr expr)
-{
-    step_t curr_time = f_time_stack.back();
-
-    assert (NULL != expr->lhs());
-    f_time_stack.push_back(curr_time + expr->lhs()->value());
-
-    return true;
-}
+{ return true; }
 void Evaluator::walk_at_postorder(const Expr_ptr expr)
 {
     POP_TYPE(rhs_type);

@@ -53,6 +53,12 @@ bool Type::is_instance()
 InstanceType_ptr Type::as_instance()
 { return dynamic_cast<InstanceType_ptr> (this); }
 
+bool Type::is_time()
+{ return NULL != dynamic_cast<TimeType_ptr> (this); }
+
+TimeType_ptr Type::as_time()
+{ return dynamic_cast<TimeType_ptr> (this); }
+
 bool Type::is_algebraic()
 { return NULL != dynamic_cast<AlgebraicType_ptr> (this); }
 

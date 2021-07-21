@@ -1,5 +1,5 @@
 /**
- * @file bmc/witness.hh
+ * @file reach/witness.hh
  * @brief SAT-based BMC reachability algorithm, BMC CEX witness class declaration.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,8 +21,8 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_WITNESS_H
-#define BMC_ALGORITHM_WITNESS_H
+#ifndef REACHABILITY_ALGORITHM_WITNESS_H
+#define REACHABILITY_ALGORITHM_WITNESS_H
 
 #include <algorithms/base.hh>
 #include <algorithms/reach/typedefs.hh>
@@ -33,11 +33,11 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-/* Specialized for BMC CEX */
-class BMCCounterExample : public Witness {
+/* Specialized for Reachability CEX */
+class ReachabilityCounterExample : public Witness {
 public:
-    BMCCounterExample(Expr_ptr property, Model& model, Engine& engine,
+    ReachabilityCounterExample(Expr_ptr property, Model& model, Engine& engine,
                       unsigned k, bool reversed = false);
 };
 
-#endif /* BMC_ALGORITHM_WITNESS_H */
+#endif /* REACHABILITY_ALGORITHM_WITNESS_H */

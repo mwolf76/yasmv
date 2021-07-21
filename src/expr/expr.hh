@@ -95,6 +95,9 @@ typedef enum {
     OCONST, // octal constants
     BCONST, // binary constants
 
+    // -- Time constants
+    INSTANT,
+
     // undefined
     UNDEF,
 
@@ -163,7 +166,8 @@ typedef struct Expr_TAG {
         assert (symb == ICONST ||
                 symb == HCONST ||
                 symb == OCONST ||
-                symb == BCONST);
+                symb == BCONST ||
+                symb == INSTANT);
 
         u.f_value = value;
     }

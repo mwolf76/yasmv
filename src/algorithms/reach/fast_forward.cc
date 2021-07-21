@@ -32,18 +32,27 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::fast_forward_strategy()
+void Reachability::fast_forward_strategy()
 {
+    assert(! f_negative_time_constraints.size());
+
     Engine engine { "fast_forward" };
     step_t k  { 0 };
 
     /* initial constraints */
-    assert_fsm_init(engine, k);
-    assert_fsm_invar(engine, k);
-    std::for_each(begin(f_constraint_cus),
-                  end(f_constraint_cus),
+    assert_fsm_init(engine, 0);
+    assert_fsm_invar(engine, 0);
+
+    std::for_each(begin(f_positive_time_constraints),
+                  end(f_positive_time_constraints),
                   [this, &engine, k](CompilationUnit& cu) {
-                      this->assert_formula(engine, k, cu);
+                      this->assert_formula(engine, 0, cu);
+                  });
+
+    std::for_each(begin(f_globally_time_constraints),
+                  end(f_globally_time_constraints),
+                  [this, &engine, k](CompilationUnit& cu) {
+                      this->assert_formula(engine, 0, cu);
                   });
 
     status_t status
@@ -57,7 +66,7 @@ void BMC::fast_forward_strategy()
             << "Fast_Forward: Empty initial states. Target is trivially UNREACHABLE."
             << std::endl;
 
-        sync_set_status(BMC_UNREACHABLE);
+        sync_set_status(REACHABILITY_UNREACHABLE);
         goto cleanup;
     }
 
@@ -69,7 +78,7 @@ void BMC::fast_forward_strategy()
     else assert(false); /* unreachable */
 
     do {
-        /* looking for witness : BMC(k-1) ^ ! P(k) */
+        /* looking for witness : Reachability(k-1) ^ ! P(k) */
         assert_formula(engine, k, *f_target_cu, engine.new_group());
 
         INFO
@@ -89,14 +98,14 @@ void BMC::fast_forward_strategy()
                 << "` is REACHABLE."
                 << std::endl;
 
-            if (sync_set_status(BMC_REACHABLE)) {
+            if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                 /* Extract reachability witness */
                 WitnessMgr& wm
                     (WitnessMgr::INSTANCE());
 
                 Witness& w
-                    (* new BMCCounterExample(f_target, model(), engine, k));
+                    (* new ReachabilityCounterExample(f_target, model(), engine, k));
 
                 /* witness identifier */
                 std::ostringstream oss_id;
@@ -134,13 +143,19 @@ void BMC::fast_forward_strategy()
             assert_fsm_trans(engine, k);
             ++ k;
             assert_fsm_invar(engine, k);
+
+            std::for_each(begin(f_globally_time_constraints),
+                          end(f_globally_time_constraints),
+                          [this, &engine, k](CompilationUnit& cu) {
+                              this->assert_formula(engine, k, cu);
+                          });
         }
 
         TRACE
             << "Fast_Forward: done with k = " << k << "..."
             << std::endl ;
 
-    } while (sync_status() == BMC_UNKNOWN);
+    } while (sync_status() == REACHABILITY_UNKNOWN);
 
  cleanup:
     /* signal other threads it's time to go home */
@@ -150,5 +165,5 @@ void BMC::fast_forward_strategy()
     INFO
         << engine
         << std::endl;
-} /* BMC::fast_forward_strategy() */
+} /* Reachability::fast_forward_strategy() */
 

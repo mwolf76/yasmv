@@ -1,6 +1,6 @@
 /**
- * @file bmc/bmc.cc
- * @brief SAT-based BMC reachability algorithm.
+ * @file reach/reach.cc
+ * @brief SAT-based REACHABILITY reachability algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -29,7 +29,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-BMC::BMC(Command& command, Model& model)
+Reachability::Reachability(Command& command, Model& model)
     : Algorithm(command, model)
     , f_target(NULL)
     , f_target_cu(NULL)
@@ -43,23 +43,23 @@ BMC::BMC(Command& command, Model& model)
         throw FailedSetup();
 
     DRIVEL
-        << "Created BMC @"
+        << "Created Reachability @"
         << instance
         << std::endl ;
 }
 
-BMC::~BMC()
+Reachability::~Reachability()
 {
     const void *instance
         (this);
 
     DRIVEL
-        << "Destroyed BMC @"
+        << "Destroyed Reachability @"
         << instance
         << std::endl ;
 }
 
-void BMC::process(Expr_ptr target, ExprVector constraints)
+void Reachability::process(Expr_ptr target, ExprVector constraints)
 {
     f_target = target;
     assert(f_target);
@@ -68,6 +68,10 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
 
     try {
         unsigned nconstraints { 0 };
+        unsigned positive_time{ 0 };
+        unsigned negative_time{ 0 };
+        unsigned globally_time{ 0 };
+
         std::for_each(begin(constraints),
                       end(constraints),
                       [this, ctx, &nconstraints](Expr_ptr expr) {
@@ -79,14 +83,32 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
 
                           CompilationUnit unit
                               (compiler().process(ctx, expr));
-
-                          f_constraint_cus.push_back(unit);
                           ++ nconstraints;
+
+                          if (unit.is_positive_time()) {
+                              f_positive_time_constraints.push_back(unit);
+                              ++ positive_time ;
+                          } else if (unit.is_negative_time()) {
+                              f_negative_time_constraints.push_back(unit);
+                              ++ negative_time ;
+                          } else {
+                              f_globally_time_constraints.push_back(unit);
+                              ++ globally_time ;
+                          }
                       });
+
+        /* can't be both true */
+        assert (! positive_time || ! negative_time);
 
         INFO
             << nconstraints
-            << " additional constraints found."
+            << " additional constraints found: "
+            << positive_time
+            << " positive time, "
+            << negative_time
+            << " negative time, "
+            << globally_time
+            << " globally valid."
             << std::endl;
 
         INFO
@@ -101,20 +123,17 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
         f_target_cu = &unit;
 
         /* fire up strategies */
-        f_status = BMC_UNKNOWN;
-        boost::thread fwd(&BMC::forward_strategy, this);
-        boost::thread bwd(&BMC::backward_strategy, this);
+        f_status = REACHABILITY_UNKNOWN;
 
-        /* falsification only */
-        boost::thread ffwd(&BMC::fast_forward_strategy, this);
-        boost::thread fbwd(&BMC::fast_backward_strategy, this);
-
-        /* wait for termination */
-        fwd.join();
-        bwd.join();
-
-        ffwd.join();
-        fbwd.join();
+        if (positive_time) {
+            boost::thread ffwd(&Reachability::fast_forward_strategy, this);
+            boost::thread fwd(&Reachability::forward_strategy, this);
+            ffwd.join(); fwd.join();
+        } else if (negative_time) {
+            boost::thread fbwd(&Reachability::fast_backward_strategy, this);
+            boost::thread bwd(&Reachability::backward_strategy, this);
+            bwd.join(); fbwd.join();
+        }
     }
 
     catch (Exception& e) {
@@ -122,12 +141,12 @@ void BMC::process(Expr_ptr target, ExprVector constraints)
             << e.what()
             << std::endl;
 
-        f_status = BMC_ERROR;
+        f_status = REACHABILITY_ERROR;
     }
 }
 
 /* synchronized */
-reachability_status_t BMC::sync_status()
+reachability_status_t Reachability::sync_status()
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
@@ -136,14 +155,14 @@ reachability_status_t BMC::sync_status()
 }
 
 /* synchronized */
-bool BMC::sync_set_status(reachability_status_t status)
+bool Reachability::sync_set_status(reachability_status_t status)
 {
     boost::mutex::scoped_lock lock
         (f_status_mutex);
 
     /* consistency check */
     assert(f_status == status ||
-           (status != BMC_UNKNOWN && f_status == BMC_UNKNOWN));
+           (status != REACHABILITY_UNKNOWN && f_status == REACHABILITY_UNKNOWN));
 
     bool res
         (f_status != status);

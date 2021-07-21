@@ -531,6 +531,9 @@ bool Preprocessor::walk_type_inorder(Expr_ptr expr)
 void Preprocessor::walk_type_postorder(Expr_ptr expr)
 { assert(false); }
 
+void Preprocessor::walk_instant(const Expr_ptr expr)
+{}
+
 void Preprocessor::walk_leaf(const Expr_ptr expr)
 {
     ExprMgr& em

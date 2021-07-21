@@ -586,6 +586,9 @@ bool Nnfizer::walk_set_comma_inorder(const Expr_ptr expr)
 void Nnfizer::walk_set_comma_postorder(const Expr_ptr expr)
 {}
 
+void Nnfizer::walk_instant(const Expr_ptr expr)
+{ f_expr_stack.push_back(expr); }
+
 void Nnfizer::walk_leaf(const Expr_ptr expr)
 {
     const bool polarity

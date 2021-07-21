@@ -85,7 +85,7 @@ void Printer::walk_R_postorder(const Expr_ptr expr)
 { f_os << ")"; }
 
 bool Printer::walk_at_preorder(const Expr_ptr expr)
-{ f_os << "@"; return true; }
+{ return true; }
 bool Printer::walk_at_inorder(const Expr_ptr expr)
 { f_os << "{"; return true; }
 void Printer::walk_at_postorder(const Expr_ptr expr)
@@ -383,6 +383,11 @@ void Printer::walk_leaf(const Expr_ptr expr)
         return;
 #endif
 
-    /* proxy call */
+    print_leaf(expr);
+}
+
+void Printer::walk_instant(const Expr_ptr expr)
+{
+    f_os << "@";
     print_leaf(expr);
 }
