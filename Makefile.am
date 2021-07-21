@@ -51,9 +51,9 @@ yasmv_SOURCES = src/main.cc src/parse.cc
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
 		$(top_builddir)/src/cmd/libcmd.la				\
-		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+		$(top_builddir)/src/algorithms/check/libcheck.la		\
 		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
-		$(top_builddir)/src/algorithms/ltl/libltl.la			\
+		$(top_builddir)/src/algorithms/reach/libreach.la		\
 		$(top_builddir)/src/algorithms/sim/libsim.la			\
 		$(top_builddir)/src/algorithms/libalgorithms.la			\
 		$(top_builddir)/src/model/libmodel.la				\
@@ -91,9 +91,9 @@ yasmv_tests_SOURCES = src/parse.cc testing/tests.cc		\
 yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
 		$(top_builddir)/src/cmd/libcmd.la				\
-		$(top_builddir)/src/algorithms/bmc/libbmc.la			\
+		$(top_builddir)/src/algorithms/check/libcheck.la		\
 		$(top_builddir)/src/algorithms/fsm/libfsm.la			\
-		$(top_builddir)/src/algorithms/ltl/libltl.la			\
+		$(top_builddir)/src/algorithms/reach/libreach.la		\
 		$(top_builddir)/src/algorithms/sim/libsim.la			\
 		$(top_builddir)/src/algorithms/libalgorithms.la			\
 		$(top_builddir)/src/model/libmodel.la				\

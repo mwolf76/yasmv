@@ -26,8 +26,8 @@
  **/
 
 #include <algorithms/base.hh>
-#include <algorithms/bmc/bmc.hh>
-#include <algorithms/bmc/witness.hh>
+#include <algorithms/reach/reach.hh>
+#include <algorithms/reach/witness.hh>
 
 #include <symb/symb_iter.hh>
 

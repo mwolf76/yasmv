@@ -38,7 +38,8 @@ const std::string errMessage ("ERROR");
 const std::string byeMessage ("Bye");
 
 /* algorithms */
-#include <bmc/bmc.hh>
+#include <check/check.hh>
+#include <reach/reach.hh>
 #include <sim/simulation.hh>
 
 Command::Command(Interpreter& owner)

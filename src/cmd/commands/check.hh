@@ -1,8 +1,8 @@
 /**
- * @file bmc.hh
+ * @file check.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `bmc`
+ * This header file contains the handler inteface for the `check`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -24,15 +24,15 @@
  *
  **/
 
-#ifndef BMC_CMD_H
-#define BMC_CMD_H
+#ifndef CHECK_CMD_H
+#define CHECK_CMD_H
 
 #include <cmd/command.hh>
 
-class Bmc : public Command {
+class Check : public Command {
 public:
-    Bmc(Interpreter& owner);
-    virtual ~Bmc();
+    Check(Interpreter& owner);
+    virtual ~Check();
 
     /** cmd params */
     void set_property(Expr_ptr property);
@@ -54,14 +54,14 @@ private:
     bool check_requirements();
 };
 
-typedef Bmc* Bmc_ptr;
+typedef Check* Check_ptr;
 
-class BmcTopic : public CommandTopic {
+class CheckTopic : public CommandTopic {
 public:
-    BmcTopic(Interpreter& owner);
-    virtual ~BmcTopic();
+    CheckTopic(Interpreter& owner);
+    virtual ~CheckTopic();
 
     void virtual usage();
 };
 
-#endif /* BMC_CMD_H */
+#endif /* CHECK_CMD_H */

@@ -931,7 +931,7 @@ commands [CommandVector_ptr cmds]
         )* ;
 
 command_topic returns [CommandTopic_ptr res]
-    :  c=bmc_command_topic
+    :  c=check_command_topic
        { $res = c; }
 
     |  c=check_init_command_topic
@@ -996,7 +996,7 @@ command_topic returns [CommandTopic_ptr res]
     ;
 
 command returns [Command_ptr res]
-    :  c = bmc_command
+    :  c = check_command
        { $res = c; }
 
     |  c=check_init_command
@@ -1173,20 +1173,20 @@ dump_model_command_topic returns [CommandTopic_ptr res]
         { $res = cm.topic_dump_model(); }
     ;
 
-bmc_command returns[Command_ptr res]
-    : 'bmc'
-      { $res = cm.make_bmc(); }
+check_command returns[Command_ptr res]
+    : 'check'
+      { $res = cm.make_check(); }
 
       property=temporal_expression
-      { ((Bmc_ptr) $res)->set_property(property); }
+      { ((Check_ptr) $res)->set_property(property); }
 
       ( '-c' constraint=temporal_expression
-      { ((Bmc_ptr) $res)->add_constraint(constraint); })*
+      { ((Check_ptr) $res)->add_constraint(constraint); })*
     ;
 
-bmc_command_topic returns[CommandTopic_ptr res]
-    : 'bmc'
-       { $res = cm.topic_bmc(); }
+check_command_topic returns[CommandTopic_ptr res]
+    : 'check'
+       { $res = cm.topic_check(); }
     ;
 
 check_init_command returns[Command_ptr res]

@@ -1,6 +1,6 @@
 /**
- * @file bmc.cc
- * @brief Command `bmc` class implementation.
+ * @file check.cc
+ * @brief Command `check` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -25,29 +25,29 @@
 #include <cstring>
 
 #include <cmd/commands/commands.hh>
-#include <cmd/commands/bmc.hh>
+#include <cmd/commands/check.hh>
 
-#include <algorithms/bmc/bmc.hh>
+#include <algorithms/check/check.hh>
 
-Bmc::Bmc(Interpreter& owner)
+Check::Check(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
 {}
 
-Bmc::~Bmc()
+Check::~Check()
 {}
 
-void Bmc::set_property(Expr_ptr property)
+void Check::set_property(Expr_ptr property)
 {
     f_property = property;
 }
 
-void Bmc::add_constraint(Expr_ptr constraint)
+void Check::add_constraint(Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
 }
 
-bool Bmc::check_requirements()
+bool Check::check_requirements()
 {
     ModelMgr& mm
         (ModelMgr::INSTANCE());
@@ -67,7 +67,7 @@ bool Bmc::check_requirements()
     return true;
 }
 
-Variant Bmc::operator()()
+Variant Check::operator()()
 {
     bool res { false };
 
@@ -80,17 +80,17 @@ Variant Bmc::operator()()
     return Variant(res ? okMessage : errMessage);
 }
 
-BmcTopic::BmcTopic(Interpreter& owner)
+CheckTopic::CheckTopic(Interpreter& owner)
     : CommandTopic(owner)
 {}
 
-BmcTopic::~BmcTopic()
+CheckTopic::~CheckTopic()
 {
     TRACE
-        << "Destroyed bmc topic"
+        << "Destroyed check topic"
         << std::endl;
 }
 
-void BmcTopic::usage()
-{ display_manpage("bmc"); }
+void CheckTopic::usage()
+{ display_manpage("check"); }
 

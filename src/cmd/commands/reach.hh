@@ -27,7 +27,7 @@
 #define REACH_CMD_H
 
 #include <cmd/command.hh>
-#include <algorithms/bmc/bmc.hh>
+#include <algorithms/reach/reach.hh>
 
 class Reach : public Command {
 public:

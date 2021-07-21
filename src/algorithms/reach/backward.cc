@@ -1,5 +1,5 @@
 /**
- * @file bmc/fast_backward.cc
+ * @file bmc/backward.cc
  * @brief SAT-based BMC reachability analysis algorithm implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -21,8 +21,8 @@
  *
  **/
 
-#include <algorithms/bmc/bmc.hh>
-#include <algorithms/bmc/witness.hh>
+#include <algorithms/reach/reach.hh>
+#include <algorithms/reach/witness.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -30,9 +30,9 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::fast_backward_strategy()
+void BMC::backward_strategy()
 {
-    Engine engine { "fast_backward" };
+    Engine engine { "backward" };
     step_t k { 0 };
 
     /* goal state constraints */
@@ -52,7 +52,7 @@ void BMC::fast_backward_strategy()
 
     else if (STATUS_UNSAT == status) {
         INFO
-            << "Fast_Backward: empty final states. Target is trivially UNREACHABLE."
+            << "Backward: empty final states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(BMC_UNREACHABLE);
@@ -61,7 +61,7 @@ void BMC::fast_backward_strategy()
 
     else if (STATUS_SAT == status)
         INFO
-            << "Fast_Backward: GOAL consistency check ok."
+            << "Backward: GOAL consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
@@ -71,7 +71,7 @@ void BMC::fast_backward_strategy()
         assert_fsm_init(engine, UINT_MAX - k, engine.new_group());
 
         INFO
-            << "Fast_Backward: now looking for reachability witness (k = " << k << ")..."
+            << "Backward: now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
         status_t status
@@ -118,7 +118,7 @@ void BMC::fast_backward_strategy()
 
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Fast_Backward: no reachability witness found (k = " << k << ")..."
+                << "Backward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
             engine.invert_last_group();
@@ -132,10 +132,44 @@ void BMC::fast_backward_strategy()
                           [this, &engine, k](CompilationUnit& cu) {
                               this->assert_formula(engine, k, cu);
                           });
+
+            /* build state uniqueness constraint for each pair of states
+               (j, k), where j < k */
+            for (step_t j = 0; j < k; ++ j)
+                assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
+
+            /* is this still relevant? */
+            if (sync_status() != BMC_UNKNOWN)
+                goto cleanup;
+
+            INFO
+                << "Backward: now looking for unreachability proof (k = " << k << ")..."
+                << std::endl ;
+
+            status_t status
+                (engine.solve());
+
+            if (STATUS_UNKNOWN == status)
+                goto cleanup;
+
+            else if (STATUS_SAT == status)
+                INFO
+                    << "Backward: no unreachability proof found (k = " << k << ")"
+                    << std::endl;
+
+            else if (STATUS_UNSAT == status) {
+                INFO
+                    << "Backward: found unreachability proof (k = " << k << ")"
+                    << std::endl;
+
+                sync_set_status(BMC_UNREACHABLE);
+                goto cleanup;
+            }
+            else assert(false); /* unreachable */
         }
 
         TRACE
-            << "Fast_Backward: done with k = " << k << "..."
+            << "Backward: done with k = " << k << "..."
             << std::endl ;
 
     } while (sync_status() == BMC_UNKNOWN);
@@ -148,5 +182,5 @@ void BMC::fast_backward_strategy()
     INFO
         << engine
         << std::endl;
-} /* BMC::fast_backward_strategy() */
+} /* BMC::backward_strategy() */
 

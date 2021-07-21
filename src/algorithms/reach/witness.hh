@@ -1,6 +1,6 @@
 /**
- * @file bmc/bmc.hh
- * @brief SAT-based BMC reachability algorithm.
+ * @file bmc/witness.hh
+ * @brief SAT-based BMC reachability algorithm, BMC CEX witness class declaration.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,42 +21,23 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_H
-#define BMC_ALGORITHM_H
+#ifndef BMC_ALGORITHM_WITNESS_H
+#define BMC_ALGORITHM_WITNESS_H
 
 #include <algorithms/base.hh>
-#include <algorithms/bmc/typedefs.hh>
+#include <algorithms/reach/typedefs.hh>
+#include <algorithms/reach/witness.hh>
 
-class BMC : public Algorithm {
+#include <expr/expr.hh>
 
+#include <witness/witness.hh>
+#include <witness/witness_mgr.hh>
+
+/* Specialized for BMC CEX */
+class BMCCounterExample : public Witness {
 public:
-    BMC(Command& command, Model& model);
-    ~BMC();
-
-    void process(Expr_ptr target, ExprVector constraints);
-
-    inline reachability_status_t status()
-    { return sync_status(); }
-
-    reachability_status_t sync_status();
-    bool sync_set_status(reachability_status_t status);
-
-private:
-    Expr_ptr f_target;
-    CompilationUnit_ptr f_target_cu;
-
-    ExprVector f_constraints;
-    CompilationUnits f_constraint_cus;
-
-    boost::mutex f_status_mutex;
-    reachability_status_t f_status;
-
-    /* strategies */
-    void forward_strategy();
-    void backward_strategy();
-
-    void fast_forward_strategy();
-    void fast_backward_strategy();
+    BMCCounterExample(Expr_ptr property, Model& model, Engine& engine,
+                      unsigned k, bool reversed = false);
 };
 
-#endif /* BMC_ALGORITHM_CLASSES_H */
+#endif /* BMC_ALGORITHM_WITNESS_H */

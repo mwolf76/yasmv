@@ -1,6 +1,9 @@
 /**
- * @file bmc/witness.hh
- * @brief SAT-based BMC reachability algorithm, BMC CEX witness class declaration.
+ * @file bmc.hh
+ * @brief SAT-based SBMC Algorithm for LTL properties checking
+ *
+ * This header file contains the declarations required to implement
+ * the LTL SAT-based SBMC model checking algorithm.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -21,23 +24,44 @@
  *
  **/
 
-#ifndef BMC_ALGORITHM_WITNESS_H
-#define BMC_ALGORITHM_WITNESS_H
-
-#include <algorithms/base.hh>
-#include <algorithms/bmc/typedefs.hh>
-#include <algorithms/bmc/witness.hh>
+#ifndef LTL_ALGORITHM_H
+#define LTL_ALGORITHM_H
 
 #include <expr/expr.hh>
 
+#include <algorithms/base.hh>
 #include <witness/witness.hh>
-#include <witness/witness_mgr.hh>
 
-/* Specialized for BMC CEX */
-class BMCCounterExample : public Witness {
+typedef enum {
+    LTL_FALSE,
+    LTL_TRUE,
+    LTL_UNKNOWN,
+    LTL_ERROR,
+} ltl_status_t;
+
+class LTL : public Algorithm {
+
 public:
-    BMCCounterExample(Expr_ptr property, Model& model, Engine& engine,
-                      unsigned k, bool reversed = false);
+    LTL(Command& command, Model& model);
+    ~LTL();
+
+    void process(const Expr_ptr phi);
+
+    inline ltl_status_t status() const
+    { return f_status; }
+
+    inline void set_status(ltl_status_t status)
+    { f_status = status; }
+
+private:
+    ltl_status_t f_status;
 };
 
-#endif /* BMC_ALGORITHM_WITNESS_H */
+/* Specialized for LTL CEX */
+class LTLCounterExample : public Witness {
+public:
+    LTLCounterExample(Expr_ptr property, Model& model,
+                      Engine& engine, unsigned k);
+};
+
+#endif /* LTL_ALGORITHM_H */

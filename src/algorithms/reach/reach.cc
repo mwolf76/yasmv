@@ -23,8 +23,8 @@
 
 #include <algorithm>
 
-#include <algorithms/bmc/bmc.hh>
-#include <algorithms/bmc/witness.hh>
+#include <algorithms/reach/reach.hh>
+#include <algorithms/reach/witness.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>

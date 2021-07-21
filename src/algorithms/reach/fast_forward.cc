@@ -1,5 +1,5 @@
 /**
- * @file bmc/forward.cc
+ * @file bmc/fast_forward.cc
  * @brief SAT-based BMC reachability analysis algorithm implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -23,8 +23,8 @@
 
 #include <algorithm>
 
-#include <algorithms/bmc/bmc.hh>
-#include <algorithms/bmc/witness.hh>
+#include <algorithms/reach/reach.hh>
+#include <algorithms/reach/witness.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -32,9 +32,9 @@
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void BMC::forward_strategy()
+void BMC::fast_forward_strategy()
 {
-    Engine engine { "forward" };
+    Engine engine { "fast_forward" };
     step_t k  { 0 };
 
     /* initial constraints */
@@ -54,7 +54,7 @@ void BMC::forward_strategy()
 
     else if (STATUS_UNSAT == status) {
         INFO
-            << "Forward: Empty initial states. Target is trivially UNREACHABLE."
+            << "Fast_Forward: Empty initial states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(BMC_UNREACHABLE);
@@ -63,7 +63,7 @@ void BMC::forward_strategy()
 
     else if (STATUS_SAT == status)
         INFO
-            << "Forward: INIT consistency check ok."
+            << "Fast_Forward: INIT consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
@@ -73,7 +73,7 @@ void BMC::forward_strategy()
         assert_formula(engine, k, *f_target_cu, engine.new_group());
 
         INFO
-            << "Forward: now looking for reachability witness (k = " << k << ")..."
+            << "Fast_Forward: now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
         status_t status
@@ -84,7 +84,7 @@ void BMC::forward_strategy()
 
         else if (STATUS_SAT == status) {
             INFO
-                << "Forward: Reachability witness exists (k = " << k << "), target `"
+                << "Fast_Forward: Reachability witness exists (k = " << k << "), target `"
                 << f_target
                 << "` is REACHABLE."
                 << std::endl;
@@ -125,7 +125,7 @@ void BMC::forward_strategy()
 
         else if (STATUS_UNSAT == status) {
             INFO
-                << "Forward: no reachability witness found (k = " << k << ")..."
+                << "Fast_Forward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
             engine.invert_last_group();
@@ -134,50 +134,10 @@ void BMC::forward_strategy()
             assert_fsm_trans(engine, k);
             ++ k;
             assert_fsm_invar(engine, k);
-            std::for_each(begin(f_constraint_cus),
-                          end(f_constraint_cus),
-                          [this, &engine, k](CompilationUnit& cu) {
-                              this->assert_formula(engine, k, cu);
-                          });
-
-            /* build state uniqueness constraint for each pair of states
-               (j, k), where j < k */
-            for (step_t j = 0; j < k; ++ j)
-                assert_fsm_uniqueness(engine, j, k);
-
-            /* is this still relevant? */
-            if (sync_status() != BMC_UNKNOWN)
-                goto cleanup;
-
-            INFO
-                << "Forward: now looking for unreachability proof (k = " << k << ")..."
-                << std::endl ;
-
-            status_t status
-                (engine.solve());
-
-            if (STATUS_UNKNOWN == status)
-                goto cleanup;
-
-            else if (STATUS_UNSAT == status) {
-                INFO
-                    << "Forward: found unreachability proof (k = " << k << ")"
-                    << std::endl;
-
-                sync_set_status(BMC_UNREACHABLE);
-                goto cleanup;
-            }
-
-            else if (STATUS_SAT == status)
-                INFO
-                    << "Forward: no unreachability proof found (k = " << k << ")"
-                    << std::endl;
-
-            else assert(false); /* unreachable */
         }
 
         TRACE
-            << "Forward: done with k = " << k << "..."
+            << "Fast_Forward: done with k = " << k << "..."
             << std::endl ;
 
     } while (sync_status() == BMC_UNKNOWN);
@@ -190,5 +150,5 @@ void BMC::forward_strategy()
     INFO
         << engine
         << std::endl;
-} /* BMC::forward_strategy() */
+} /* BMC::fast_forward_strategy() */
 

@@ -25,8 +25,6 @@
 #include <cmd/interpreter.hh>
 
 /* -- commands */
-#include <cmd/commands/bmc.hh>
-
 #include <cmd/commands/do.hh>
 #include <cmd/commands/help.hh>
 #include <cmd/commands/echo.hh>
@@ -38,6 +36,7 @@
 #include <cmd/commands/read_model.hh>
 #include <cmd/commands/dump_model.hh>
 
+#include <cmd/commands/check.hh>
 #include <cmd/commands/check_init.hh>
 #include <cmd/commands/check_trans.hh>
 #include <cmd/commands/reach.hh>
@@ -64,9 +63,6 @@ public:
     inline Command_ptr make_help()
     { return new Help(f_interpreter); }
 
-    inline Command_ptr make_bmc()
-    { return new Bmc(f_interpreter); }
-
     inline Command_ptr make_do()
     { return new Do(f_interpreter); }
 
@@ -90,6 +86,9 @@ public:
 
     inline Command_ptr make_dump_model()
     { return new DumpModel(f_interpreter); }
+
+    inline Command_ptr make_check()
+    { return new Check(f_interpreter); }
 
     inline Command_ptr make_reach()
     { return new Reach(f_interpreter); }
@@ -128,9 +127,6 @@ public:
     inline CommandTopic_ptr topic_help()
     { return new HelpTopic(f_interpreter); }
 
-    inline CommandTopic_ptr topic_bmc()
-    { return new BmcTopic(f_interpreter); }
-
     inline CommandTopic_ptr topic_do()
     { return new DoTopic(f_interpreter); }
 
@@ -155,14 +151,17 @@ public:
     inline CommandTopic_ptr topic_dump_model()
     { return new DumpModelTopic(f_interpreter); }
 
+    inline CommandTopic_ptr topic_check()
+    { return new CheckTopic(f_interpreter); }
+
+    inline CommandTopic_ptr topic_reach()
+    { return new ReachTopic(f_interpreter); }
+
     inline CommandTopic_ptr topic_check_init()
     { return new CheckInitTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_check_trans()
     { return new CheckTransTopic(f_interpreter); }
-
-    inline CommandTopic_ptr topic_reach()
-    { return new ReachTopic(f_interpreter); }
 
     inline CommandTopic_ptr topic_pick_state()
     { return new PickStateTopic(f_interpreter); }

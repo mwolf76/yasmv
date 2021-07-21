@@ -23,7 +23,7 @@
 
 #include <boost/thread.hpp>
 
-#include <algorithms/ltl/ltl.hh>
+#include <algorithms/check/check.hh>
 #include <witness_mgr.hh>
 
 LTL::LTL(Command& command, Model& model)
