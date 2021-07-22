@@ -32,6 +32,10 @@ static inline value_t pow2(unsigned exp);
 
 void Compiler::walk_instant(const Expr_ptr expr)
 {
+    DEBUG
+        << expr
+        << std::endl;
+
     TypeMgr& tm
         (f_owner.tm());
 
@@ -41,6 +45,10 @@ void Compiler::walk_instant(const Expr_ptr expr)
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {
+    DEBUG
+        << expr
+        << std::endl;
+
     ExprMgr& em
         (f_owner.em());
     TypeMgr& tm
@@ -51,8 +59,21 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     Expr_ptr ctx
         (f_ctx_stack.back());
+
     step_t time
         (f_time_stack.back());
+
+    if (is_positive(time)) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == POSITIVE);
+
+        f_time_polarity = POSITIVE;
+    } else if (is_negative(time)) {
+        assert(f_time_polarity == UNDECIDED ||
+               f_time_polarity == NEGATIVE);
+
+        f_time_polarity = NEGATIVE;
+    }
 
     /* 0. Explicit boolean consts (TRUE, FALSE) */
     if (em.is_false(expr)) {

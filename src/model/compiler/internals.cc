@@ -285,6 +285,14 @@ void Compiler::clear_internals()
 
 void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
 {
+    const void *p { ctx };
+    DEBUG
+        << "(pass 1/5) building encodings for "
+        << "`" << ctx << "` (@" << p << ")"
+        << " :: "
+        << body
+        << std::endl;
+
     assert (READY == f_status);
     ++ f_status;
 
@@ -296,6 +304,14 @@ void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
 
 void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
 {
+    const void *p { ctx };
+    DEBUG
+        << "(pass 2/5) compiling for "
+        << "`" << ctx << "` (@" << p << ")"
+        << " :: "
+        << body
+        << std::endl;
+
     assert (ENCODING == f_status);
     ++ f_status;
 
@@ -305,32 +321,44 @@ void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
     (*this)(body);
 }
 
-void Compiler::check_internals()
+void Compiler::check_internals(Expr_ptr ctx, Expr_ptr body)
 {
+    const void *p { ctx };
+    DEBUG
+        << "(pass 3/5) checking internals for "
+        << "`" << ctx << "` (@" << p << ")"
+        << " :: "
+        << body
+        << std::endl;
+
     assert (COMPILING == f_status);
     ++ f_status;
 
-    if (1 < f_add_stack.size()) {
-        ERR
-            << "Thomas"
-            << std::endl;
-    }
+    /* Exactly one 0-1 ADD expected here */
+    ADD res { f_add_stack.back() };
+    assert(1 == f_add_stack.size());
 
     assert(1 == f_add_stack.size());
     assert(1 == f_type_stack.size());
     assert(1 == f_ctx_stack.size());
     assert(1 == f_time_stack.size());
 
-    /* Exactly one 0-1 ADD expected here */
-    ADD res { f_add_stack.back() };
-
     assert(res.FindMin().Equals(f_enc.zero()));
     assert(res.FindMax().Equals(f_enc.one()));
 }
 
-void Compiler::activate_ite_muxes()
+void Compiler::activate_ite_muxes(Expr_ptr ctx, Expr_ptr body)
 {
-    assert (CHECKING == f_status);
+    const void *p { ctx };
+
+    DEBUG
+        << "(pass 4/5) activating ITE MUXes for "
+        << "`" << ctx << "` (@" << p << ")"
+        << " :: "
+        << body
+        << std::endl;
+
+   assert (CHECKING == f_status);
     ++ f_status;
 
     /* ITE MUXes */
@@ -357,8 +385,16 @@ void Compiler::activate_ite_muxes()
     }
 }
 
-void Compiler::activate_array_muxes()
+void Compiler::activate_array_muxes(Expr_ptr ctx, Expr_ptr body)
 {
+    const void *p { ctx };
+    DEBUG
+        << "(pass 4/5) activating array MUXes for  "
+        << "`" << ctx << "` (@" << p << ")"
+        << " :: "
+        << body
+        << std::endl;
+
     assert (ACTIVATING_ITE_MUXES == f_status);
     ++ f_status;
 

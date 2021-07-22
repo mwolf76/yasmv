@@ -210,14 +210,11 @@ public:
         , f_array_mux_descriptors( array_mux_descriptors )
     {}
 
-    const bool is_positive_time() const
+    const bool has_positive_time_polarity() const
     { return f_time_polarity == ECompilerTimePolarity::POSITIVE; }
 
-    const bool is_negative_time() const
+    const bool has_negative_time_polarity() const
     { return f_time_polarity == ECompilerTimePolarity::NEGATIVE; }
-
-    const bool is_globally_valid() const
-    { return f_time_polarity == ECompilerTimePolarity::UNDECIDED; }
 
     const Expr_ptr expr() const
     { return f_expr; }

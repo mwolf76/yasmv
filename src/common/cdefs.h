@@ -31,9 +31,6 @@ typedef long value_t;
 /* Reserved for ADD ops error checking. */
 static const value_t error_value = LONG_MIN;
 
-/* Reserved for time frames representation. */
-typedef unsigned step_t;
-
 /* C string pointers */
 typedef char* pchar;
 typedef const char* pconst_char;

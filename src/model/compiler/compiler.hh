@@ -207,18 +207,18 @@ private:
     void pre_node_hook(Expr_ptr expr);
     void post_node_hook(Expr_ptr expr);
 
-    /* compilation passes: encodings building, compilation */
+    /* compilation passes: building encodings, compilation */
     void build_encodings(Expr_ptr ctx, Expr_ptr body);
     void compile(Expr_ptr ctx, Expr_ptr body);
 
-    /* post-processing */
-    void check_internals();
-    void activate_ite_muxes();
-    void activate_array_muxes();
+    /* post-processing stages */
+    void check_internals(Expr_ptr ctx, Expr_ptr body);
+    void activate_ite_muxes(Expr_ptr ctx, Expr_ptr body);
+    void activate_array_muxes(Expr_ptr ctx, Expr_ptr body);
 
     /* -- data -------------------------------------------------------------- */
 
-    /* TimedExpr -> Compilation Unit cache */
+   /* TimedExpr -> Compilation Unit cache */
     CompilationMap f_compilation_cache;
 
     /* microcode descriptors */
@@ -257,6 +257,8 @@ private:
 
     /* Time polarity (see above) */
     ECompilerTimePolarity f_time_polarity;
+
+    const Expr_ptr f_empty; /* debug only */
 
     /* synchronization */
     boost::mutex f_process_mutex;

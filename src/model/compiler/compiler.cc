@@ -43,15 +43,15 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     compile(ctx, body);
 
     /* Pass 3: checking internal structures */
-    check_internals();
+    check_internals(ctx, body);
 
     /* Pass 4: ITE MUXes, for each descriptor, we need to conjunct `! AND (
        prev_conditions ) AND cnd <-> aux` to the original formula. */
-    activate_ite_muxes();
+    activate_ite_muxes(ctx, body);
 
     /* Pass 5: Array MUXes, for each descriptor, push a conjunct `cnd_i <-> act_i, i in
        [0..n_elems[` to the original formula. */
-    activate_array_muxes();
+    activate_array_muxes(ctx, body);
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -74,6 +74,7 @@ Compiler::Compiler()
     , f_temp_auto_index(0)
     , f_status(READY)
     , f_time_polarity(UNDECIDED)
+    , f_empty(f_owner.em().make_empty())
 {
     const void* instance { this };
     DRIVEL

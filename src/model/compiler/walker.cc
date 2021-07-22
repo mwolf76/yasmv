@@ -62,26 +62,12 @@ void Compiler::walk_at_postorder(const Expr_ptr expr)
 
     const Type_ptr lhs_type
         (f_type_stack.back()); f_type_stack.pop_back();
+
     assert(lhs_type -> is_time());
 
     f_type_stack.push_back(rhs_type);
 
     assert (0 < f_time_stack.size());
-
-    value_t time
-        (f_time_stack.back());
-
-    if (0 <= time) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == POSITIVE);
-
-        f_time_polarity = POSITIVE;
-    } else if (time < 0) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == NEGATIVE);
-
-        f_time_polarity = NEGATIVE;
-    }
     f_time_stack.pop_back(); // reset time stack
 }
 
@@ -95,22 +81,10 @@ bool Compiler::walk_next_preorder(const Expr_ptr expr)
 }
 void Compiler::walk_next_postorder(const Expr_ptr expr)
 {
+    if (ENCODING == f_status)
+        return;
+
     assert (0 < f_time_stack.size());
-
-    value_t time
-        (f_time_stack.back());
-
-    if (0 <= time) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == POSITIVE);
-
-        f_time_polarity = POSITIVE;
-    } else if (time < 0) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == NEGATIVE);
-
-        f_time_polarity = NEGATIVE;
-    }
     f_time_stack.pop_back(); // reset time stack
 }
 

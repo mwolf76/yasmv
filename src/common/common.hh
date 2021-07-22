@@ -41,6 +41,9 @@
 /* logging support using ezlogger (cfr. http://axter.com/ezlogger/) */
 #include <common/logging.hh>
 
+/* time support */
+#include <common/time.hh>
+
 /* reserved symbols */
 #include <common/tokens.hh>
 

@@ -11,7 +11,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 PKG_H = cdefs.h
 
 PKG_HH = cdata.hh colors.hh common.hh console.hh exceptions.hh	\
-logging.hh tokens.hh
+logging.hh time.hh tokens.hh
 
 PKG_CC = cdata.cc colors.cc exceptions.cc tokens.cc
 

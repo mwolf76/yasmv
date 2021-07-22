@@ -34,6 +34,8 @@
 #include <3rdparty/ezlogger/ezlogger_misc.hpp>
 #include <sys/timeb.h>
 
+#include <common/strings.hh>
+
 namespace axter {
     // custom format
     class ezlogger_format_policy  {
@@ -45,20 +47,18 @@ namespace axter {
                                           ext_data levels_format_usage_data)
         {
             struct timeb now;
+            ftime(&now);
 
-            const std::string filename(FileName);
-            const std::string funcname(FunctionName);
+            std::string time_str { ctime(&now.time) };
+            rtrim(time_str);
 
             std::ostringstream oss;
+            oss
+                << "[" << time_str << " +" << now.millitm << " ms] "
+                << FileName << ":" << LineNo
+                << " (" << FunctionName << ") ";
 
-            ftime(&now);
-            std::string timestr = ctime(&now.time);
-            if (timestr.size()) timestr[timestr.size() -1] = ']';
-
-            oss << "[" << timestr << "." << now.millitm << " "
-                << filename << ":" << LineNo << " :: "  ;
-
-            return oss.str().c_str();
+            return oss.str();
         }
     };
 
@@ -74,21 +74,27 @@ namespace axter {
 
 // custom loggers
 #define ERR                                                     \
-    EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)
+    EZLOGGERVLSTREAM2(axter::log_verbosity_not_set, std::cerr)  \
+    << "E :: "
 
 #define WARN                                            \
-    EZLOGGERVLSTREAM2(axter::log_always, std::cerr)
+    EZLOGGERVLSTREAM2(axter::log_always, std::cerr)     \
+    << "W :: "
 
 #define TRACE                                           \
-    EZLOGGERVLSTREAM2(axter::log_often, std::cerr)
+    EZLOGGERVLSTREAM2(axter::log_often, std::cerr)      \
+    << "T :: "
 
 #define INFO                                            \
-    EZLOGGERVLSTREAM2(axter::log_regularly, std::cerr)
+    EZLOGGERVLSTREAM2(axter::log_regularly, std::cerr)  \
+    << "I :: "
 
 #define DEBUG                                           \
-    EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr)
+    EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr)     \
+    << "D :: "
 
-#define DRIVEL                                                  \
-    EZLOGGERVLSTREAM2(axter::log_very_rarely, std::cerr)
+#define DRIVEL                                              \
+    EZLOGGERVLSTREAM2(axter::log_very_rarely, std::cerr)    \
+    << "V :: "
 
 #endif /* LOGGING_H */

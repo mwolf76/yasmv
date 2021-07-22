@@ -88,10 +88,10 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
                               (compiler().process(ctx, expr));
                           ++ nconstraints;
 
-                          if (unit.is_positive_time()) {
+                          if (unit.has_positive_time_polarity()) {
                               f_positive_time_constraints.push_back(unit);
                               ++ positive_time ;
-                          } else if (unit.is_negative_time()) {
+                          } else if (unit.has_negative_time_polarity()) {
                               f_negative_time_constraints.push_back(unit);
                               ++ negative_time ;
                           } else {
