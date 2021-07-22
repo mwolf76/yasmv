@@ -150,11 +150,9 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
             INFO
                 << "Forward strategies enabled"
                 << std::endl;
-            boost::thread ffwd(&Reachability::fast_forward_strategy, this);
-            tasks.push_back(&ffwd);
 
-            boost::thread fwd(&Reachability::forward_strategy, this);
-            tasks.push_back(&fwd);
+            tasks.push_back(new boost::thread (&Reachability::fast_forward_strategy, this));
+            tasks.push_back(new boost::thread (&Reachability::forward_strategy, this));
         }
 
         if (use_backward) {
@@ -162,15 +160,16 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
                 << "Forward strategies enabled"
                 << std::endl;
 
-            boost::thread fbwd(&Reachability::fast_backward_strategy, this);
-            tasks.push_back(&fbwd);
-
-            boost::thread bwd(&Reachability::backward_strategy, this);
-            tasks.push_back(&bwd);
+            tasks.push_back(new boost::thread (&Reachability::fast_backward_strategy, this));
+            tasks.push_back(new boost::thread (&Reachability::backward_strategy, this));
         }
 
-        /* join all active threads */
-        std::for_each(begin(tasks), end(tasks), [](thread_ptr task) { task->join(); });
+        /* join and destroy all active threads */
+        std::for_each(begin(tasks), end(tasks),
+                      [](thread_ptr task) {
+                          task->join();
+                          delete task;
+                      });
     }
 
     catch (Exception& e) {
