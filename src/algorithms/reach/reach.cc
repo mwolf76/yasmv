@@ -29,6 +29,9 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
+typedef boost::thread* thread_ptr;
+typedef std::vector<thread_ptr> thread_ptrs;
+
 Reachability::Reachability(Command& command, Model& model)
     : Algorithm(command, model)
     , f_target(NULL)
@@ -74,7 +77,7 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
 
         std::for_each(begin(constraints),
                       end(constraints),
-                      [this, ctx, &nconstraints](Expr_ptr expr) {
+                      [this, ctx, &nconstraints, &positive_time, &negative_time, &globally_time](Expr_ptr expr) {
                           INFO
                               << "Compiling constraint `"
                               << expr
@@ -97,9 +100,6 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
                           }
                       });
 
-        /* can't be both true */
-        assert (! positive_time || ! negative_time);
-
         INFO
             << nconstraints
             << " additional constraints found: "
@@ -110,6 +110,25 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
             << globally_time
             << " globally valid."
             << std::endl;
+
+        /* Guided reachability has currently limited support: forward
+           strategies can be used for positive and globally valid
+           constraints, backward strategies can be used for negative
+           and globally valid constraints. In principle, it should be
+           possible to introduce fully symmetric support for all
+           constraints on both strategies, but this would require a
+           significant amount of change to the compiler and other
+           internals. */
+        bool use_forward { ! negative_time };
+        bool use_backward{ ! positive_time };
+        if (!use_forward && !use_backward) {
+            ERR
+                << "Mixing positive- and negative- time constraints currently not supported."
+                << std::endl;
+
+            f_status = REACHABILITY_ERROR;
+            return ;
+        }
 
         INFO
             << "Compiling target `"
@@ -125,15 +144,33 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
         /* fire up strategies */
         f_status = REACHABILITY_UNKNOWN;
 
-        if (positive_time) {
+        thread_ptrs tasks;
+
+        if (use_forward) {
+            INFO
+                << "Forward strategies enabled"
+                << std::endl;
             boost::thread ffwd(&Reachability::fast_forward_strategy, this);
+            tasks.push_back(&ffwd);
+
             boost::thread fwd(&Reachability::forward_strategy, this);
-            ffwd.join(); fwd.join();
-        } else if (negative_time) {
-            boost::thread fbwd(&Reachability::fast_backward_strategy, this);
-            boost::thread bwd(&Reachability::backward_strategy, this);
-            bwd.join(); fbwd.join();
+            tasks.push_back(&fwd);
         }
+
+        if (use_backward) {
+            INFO
+                << "Forward strategies enabled"
+                << std::endl;
+
+            boost::thread fbwd(&Reachability::fast_backward_strategy, this);
+            tasks.push_back(&fbwd);
+
+            boost::thread bwd(&Reachability::backward_strategy, this);
+            tasks.push_back(&bwd);
+        }
+
+        /* join all active threads */
+        std::for_each(begin(tasks), end(tasks), [](thread_ptr task) { task->join(); });
     }
 
     catch (Exception& e) {

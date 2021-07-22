@@ -236,7 +236,7 @@ public:
 
 private:
     Expr_ptr f_expr;
-    bool f_time_polarity;
+    ECompilerTimePolarity f_time_polarity;
     DDVector f_dds;
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;

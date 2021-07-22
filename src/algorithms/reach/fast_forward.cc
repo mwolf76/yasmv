@@ -43,12 +43,14 @@ void Reachability::fast_forward_strategy()
     assert_fsm_init(engine, 0);
     assert_fsm_invar(engine, 0);
 
+    /* positive time constraints can be pushed permanently */
     std::for_each(begin(f_positive_time_constraints),
                   end(f_positive_time_constraints),
                   [this, &engine, k](CompilationUnit& cu) {
                       this->assert_formula(engine, 0, cu);
                   });
 
+    /* globally valid constraints can be pushed permanently */
     std::for_each(begin(f_globally_time_constraints),
                   end(f_globally_time_constraints),
                   [this, &engine, k](CompilationUnit& cu) {
