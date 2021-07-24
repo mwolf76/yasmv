@@ -1,9 +1,10 @@
 #!/bin/bash
 EXAMPLES="examples"
+REFERENCE="out"
 YASMV="./yasmv"
 
 function test() {
-    diff $1-out "$EXAMPLES/$1/$1-out-ref"
+    diff $1-out "$REFERENCE/$1-out-ref"
     if [ $? == 0 ]; then
 	echo "### $1 ok"
     else
@@ -11,8 +12,11 @@ function test() {
     fi
 }
 
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands" > cannibals-out
-test cannibals
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands.forward" > cannibals-forward-out
+test cannibals-forward
+
+YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands.backward" > cannibals-backward-out
+test cannibals-backward
 
 YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/vending/vending.smv" < "$EXAMPLES/vending/commands" > vending-out
 test vending

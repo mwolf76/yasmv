@@ -32,7 +32,7 @@ static inline value_t pow2(unsigned exp);
 
 void Compiler::walk_instant(const Expr_ptr expr)
 {
-    DEBUG
+    DRIVEL
         << expr
         << std::endl;
 
@@ -45,7 +45,7 @@ void Compiler::walk_instant(const Expr_ptr expr)
 
 void Compiler::walk_leaf(const Expr_ptr expr)
 {
-    DEBUG
+    DRIVEL
         << expr
         << std::endl;
 
@@ -62,18 +62,6 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     step_t time
         (f_time_stack.back());
-
-    if (is_positive(time)) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == POSITIVE);
-
-        f_time_polarity = POSITIVE;
-    } else if (is_negative(time)) {
-        assert(f_time_polarity == UNDECIDED ||
-               f_time_polarity == NEGATIVE);
-
-        f_time_polarity = NEGATIVE;
-    }
 
     /* 0. Explicit boolean consts (TRUE, FALSE) */
     if (em.is_false(expr)) {
@@ -173,7 +161,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         else {
             TimedExpr key
-                (full, var.is_frozen() ? UINT_MAX : time);
+                (full, var.is_frozen() ? FROZEN : time);
 
             Encoding_ptr enc
                 (find_encoding(key, type));

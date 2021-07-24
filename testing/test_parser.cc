@@ -347,8 +347,14 @@ BOOST_AUTO_TEST_CASE(at_expressions)
     BOOST_CHECK (em.make_at(em.make_instant(0), x) ==
                  parseExpression("@0{x}"));
 
+    BOOST_CHECK (em.make_at(em.make_instant(UINT_MAX), x) ==
+                 parseExpression("$0{x}"));
+
     BOOST_CHECK (em.make_at(em.make_instant(0), em.make_add(x, y)) ==
                  parseExpression("@0{x + y}"));
+
+    BOOST_CHECK (em.make_at(em.make_instant(UINT_MAX), em.make_add(x, y)) ==
+                 parseExpression("$0{x + y}"));
 
     BOOST_CHECK (em.make_at(em.make_instant(0), em.make_next(x)) ==
                  parseExpression("@0{next(x)}"));

@@ -33,7 +33,7 @@ public:
     Reachability(Command& command, Model& model);
     ~Reachability();
 
-    void process(Expr_ptr target, ExprVector constraints);
+    void process(Expr_ptr target, ExprVector forward_constraints, ExprVector backward_constraints, ExprVector global_constraints);
 
     inline reachability_status_t status()
     { return sync_status(); }

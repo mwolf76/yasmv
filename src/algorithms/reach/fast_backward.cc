@@ -38,20 +38,15 @@ void Reachability::fast_backward_strategy()
     step_t k { 0 };
 
     /* goal state constraints */
-    assert_formula(engine, UINT_MAX, *f_target_cu);
-    assert_fsm_invar(engine, UINT_MAX);
+    assert_formula(engine, FINAL_STATE - k, *f_target_cu);
+    assert_fsm_invar(engine, FINAL_STATE -k);
 
-    std::for_each(begin(f_negative_time_constraints),
-                  end(f_negative_time_constraints),
-                  [this, &engine, k](CompilationUnit& cu) {
-                      this->assert_formula(engine, UINT_MAX, cu);
-                  });
-
-    std::for_each(begin(f_globally_time_constraints),
-                  end(f_globally_time_constraints),
-                  [this, &engine, k](CompilationUnit& cu) {
-                      this->assert_formula(engine, UINT_MAX, cu);
-                  });
+    std::for_each(
+        begin(f_negative_time_constraints),
+        end(f_negative_time_constraints),
+        [this, &engine, k](CompilationUnit& cu) {
+            this->assert_formula(engine, FINAL_STATE - k, cu);
+        });
 
     status_t status
         (engine.solve());
@@ -77,7 +72,7 @@ void Reachability::fast_backward_strategy()
 
     do {
         /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
-        assert_fsm_init(engine, UINT_MAX - k, engine.new_group());
+        assert_fsm_init(engine, FINAL_STATE - k, engine.new_group());
 
         INFO
             << "Fast_Backward: now looking for reachability witness (k = " << k << ")..."
@@ -134,14 +129,8 @@ void Reachability::fast_backward_strategy()
 
             /* unrolling next */
             ++ k;
-            assert_fsm_trans(engine, UINT_MAX - k);
-            assert_fsm_invar(engine, UINT_MAX - k);
-
-            std::for_each(begin(f_globally_time_constraints),
-                  end(f_negative_time_constraints),
-                  [this, &engine, k](CompilationUnit& cu) {
-                      this->assert_formula(engine, UINT_MAX - k, cu);
-                  });
+            assert_fsm_trans(engine, FINAL_STATE - k);
+            assert_fsm_invar(engine, FINAL_STATE - k);
         }
 
         TRACE

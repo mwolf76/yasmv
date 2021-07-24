@@ -97,8 +97,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
 
                 /* time it, and fetch encoding for enc mgr */
                 Encoding_ptr enc
-                    (bm.find_encoding( TimedExpr(key, var.is_frozen()
-                                                 ? UINT_MAX : 0)) );
+                    (bm.find_encoding( TimedExpr(key, var.is_frozen() ? FROZEN : 0)) );
 
                 if ( ! enc )
                     continue;
@@ -122,8 +121,8 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
 
                     const TCBI tcbi
                         (TCBI(ucbi, reversed
-                              ? UINT_MAX - step
-                              : step));
+                              ? FINAL_STATE - step
+                              : FIRST_STATE + step));
 
                     Var var
                         (engine.tcbi_to_var(tcbi));
@@ -162,7 +161,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
         }
 
         step += reversed ? -1 :  1 ;
-        if ((reversed && step == UINT_MAX) ||
+        if ((reversed && step == FINAL_STATE) ||
             (! reversed && step > k))
             break;
     } while (1);

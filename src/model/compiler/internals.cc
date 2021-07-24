@@ -181,7 +181,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
         /* memoize result */
         f_compilation_cache.insert( std::pair<TimedExpr, CompilationUnit>
-            ( key, CompilationUnit( timedExpression, f_time_polarity, dv, f_inlined_operator_descriptors,
+            ( key, CompilationUnit( timedExpression, dv, f_inlined_operator_descriptors,
                                     f_expr2bsd_map, f_multiway_selection_descriptors)));
 
         return;

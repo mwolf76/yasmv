@@ -31,12 +31,16 @@ Reach::Reach(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
     , f_target(NULL)
-    , f_constraints()
+    , f_forward_constraints()
+    , f_backward_constraints()
+    , f_global_constraints()
 {}
 
 Reach::~Reach()
 {
-    f_constraints.clear();
+    f_forward_constraints.clear();
+    f_backward_constraints.clear();
+    f_global_constraints.clear();
 }
 
 void Reach::set_target(Expr_ptr target)
@@ -44,9 +48,19 @@ void Reach::set_target(Expr_ptr target)
     f_target = target;
 }
 
-void Reach::add_constraint(Expr_ptr constraint)
+void Reach::add_forward_constraint(Expr_ptr constraint)
 {
-    f_constraints.push_back(constraint);
+    f_forward_constraints.push_back(constraint);
+}
+
+void Reach::add_backward_constraint(Expr_ptr constraint)
+{
+    f_backward_constraints.push_back(constraint);
+}
+
+void Reach::add_global_constraint(Expr_ptr constraint)
+{
+    f_global_constraints.push_back(constraint);
 }
 
 bool Reach::check_requirements()
@@ -89,7 +103,7 @@ Variant Reach::operator()()
         return Variant(errMessage);
 
     Reachability bmc { *this, ModelMgr::INSTANCE().model() };
-    bmc.process(f_target, f_constraints);
+    bmc.process(f_target, f_forward_constraints, f_backward_constraints, f_global_constraints);
 
     switch (bmc.status()) {
     case REACHABILITY_REACHABLE:

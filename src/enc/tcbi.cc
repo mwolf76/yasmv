@@ -49,20 +49,16 @@ std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
     step_t timebase
         (tcbi.base());
 
-    os << "@" << timebase
-       << "{"
+    os
+        << "@" << timebase
+        << "+" << step
+        << "::" ;
 
-       << "+" <<  step
-       << "{" ;
-
-    Printer (os)
-        << "::"
+    Printer(os)
         << expr ;
 
-    os << "}."
+    os << "."
        << bitno ;
-
-    os << "}" ;
 
     return os;
 }

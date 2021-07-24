@@ -43,9 +43,13 @@ public:
 
     inline step_t absolute_time() const
     {
-        // reserved for frozen variables
-        if (f_time == UINT_MAX)
+        /* reserved for frozen variables */
+        if (f_time == FROZEN)
             return 0;
+
+        /* always treat negative time as absolute */
+        if (is_negative(f_time))
+            return f_time;
 
         return f_time + f_base;
     }

@@ -62,7 +62,10 @@ Reachability::~Reachability()
         << std::endl ;
 }
 
-void Reachability::process(Expr_ptr target, ExprVector constraints)
+void Reachability::process(Expr_ptr target,
+                           ExprVector forward_constraints,
+                           ExprVector backward_constraints,
+                           ExprVector global_constraints)
 {
     f_target = target;
     assert(f_target);
@@ -70,60 +73,72 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
     Expr_ptr ctx { em().make_empty() };
 
     try {
-        unsigned nconstraints { 0 };
-        unsigned positive_time{ 0 };
-        unsigned negative_time{ 0 };
-        unsigned globally_time{ 0 };
+        /* compile forward constraints */
+        unsigned no_forward_constraints { 0 };
+        std::for_each(
+            begin(forward_constraints), end(forward_constraints),
+            [this, ctx, &no_forward_constraints](Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
 
-        std::for_each(begin(constraints),
-                      end(constraints),
-                      [this, ctx, &nconstraints, &positive_time, &negative_time, &globally_time](Expr_ptr expr) {
-                          INFO
-                              << "Compiling constraint `"
-                              << expr
-                              << "` ..."
-                              << std::endl;
+                CompilationUnit unit
+                    (compiler().process(ctx, expr));
+                ++ no_forward_constraints;
+            });
 
-                          CompilationUnit unit
-                              (compiler().process(ctx, expr));
-                          ++ nconstraints;
+        /* compile backward constraints */
+        unsigned no_backward_constraints { 0 };
+        std::for_each(
+            begin(backward_constraints), end(backward_constraints),
+            [this, ctx, &no_backward_constraints](Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
 
-                          if (unit.has_positive_time_polarity()) {
-                              f_positive_time_constraints.push_back(unit);
-                              ++ positive_time ;
-                          } else if (unit.has_negative_time_polarity()) {
-                              f_negative_time_constraints.push_back(unit);
-                              ++ negative_time ;
-                          } else {
-                              f_globally_time_constraints.push_back(unit);
-                              ++ globally_time ;
-                          }
-                      });
+                CompilationUnit unit
+                    (compiler().process(ctx, expr));
+                ++ no_backward_constraints;
+            });
 
+        /* compile global constraints */
+        unsigned no_global_constraints { 0 };
+        std::for_each(
+            begin(global_constraints), end(global_constraints),
+            [this, ctx, &no_global_constraints](Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
+
+                CompilationUnit unit
+                    (compiler().process(ctx, expr));
+                ++ no_global_constraints;
+            });
+
+        unsigned no_constraints { no_forward_constraints + no_backward_constraints + no_global_constraints };
         INFO
-            << nconstraints
-            << " additional constraints found: "
-            << positive_time
-            << " positive time, "
-            << negative_time
-            << " negative time, "
-            << globally_time
-            << " globally valid."
+            << no_constraints
+            << " additional constraints were provided: "
+            << no_forward_constraints
+            << " forward, "
+            << no_backward_constraints
+            << " backward, "
+            << no_global_constraints
+            << " global."
             << std::endl;
 
-        /* Guided reachability has currently limited support: forward
-           strategies can be used for positive and globally valid
-           constraints, backward strategies can be used for negative
-           and globally valid constraints. In principle, it should be
-           possible to introduce fully symmetric support for all
-           constraints on both strategies, but this would require a
-           significant amount of change to the compiler and other
-           internals. */
-        bool use_forward { ! negative_time };
-        bool use_backward{ ! positive_time };
+        bool use_forward { ! no_backward_constraints };
+        bool use_backward{ ! no_forward_constraints };
         if (!use_forward && !use_backward) {
+            /* TODO: consider introducing support for this: a bit trickier, but doable */
             ERR
-                << "Mixing positive- and negative- time constraints currently not supported."
+                << "Mixing forward and backward guided reachability constraints currently not supported."
                 << std::endl;
 
             f_status = REACHABILITY_ERROR;
@@ -157,7 +172,7 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
 
         if (use_backward) {
             INFO
-                << "Forward strategies enabled"
+                << "Backward strategies enabled"
                 << std::endl;
 
             tasks.push_back(new boost::thread (&Reachability::fast_backward_strategy, this));
@@ -165,11 +180,12 @@ void Reachability::process(Expr_ptr target, ExprVector constraints)
         }
 
         /* join and destroy all active threads */
-        std::for_each(begin(tasks), end(tasks),
-                      [](thread_ptr task) {
-                          task->join();
-                          delete task;
-                      });
+        std::for_each(
+            begin(tasks), end(tasks),
+            [](thread_ptr task) {
+                task->join();
+                delete task;
+            });
     }
 
     catch (Exception& e) {

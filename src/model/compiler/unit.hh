@@ -198,23 +198,16 @@ enum ECompilerTimePolarity {
 
 class CompilationUnit {
 public:
-    CompilationUnit( Expr_ptr expr, ECompilerTimePolarity time_polarity, DDVector& dds,
+    CompilationUnit( Expr_ptr expr, DDVector& dds,
                      InlinedOperatorDescriptors& inlined_operator_descriptors,
                      Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
                      MultiwaySelectionDescriptors& array_mux_descriptors)
         : f_expr(expr)
-        , f_time_polarity(time_polarity)
         , f_dds(dds)
         , f_inlined_operator_descriptors( inlined_operator_descriptors )
         , f_binary_selection_descriptors_map( binary_selection_descriptors_map )
         , f_array_mux_descriptors( array_mux_descriptors )
     {}
-
-    const bool has_positive_time_polarity() const
-    { return f_time_polarity == ECompilerTimePolarity::POSITIVE; }
-
-    const bool has_negative_time_polarity() const
-    { return f_time_polarity == ECompilerTimePolarity::NEGATIVE; }
 
     const Expr_ptr expr() const
     { return f_expr; }
@@ -233,7 +226,6 @@ public:
 
 private:
     Expr_ptr f_expr;
-    ECompilerTimePolarity f_time_polarity;
     DDVector f_dds;
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;

@@ -305,6 +305,9 @@ timed_expression returns [Expr_ptr res]
     : '@' when=instant '{' expr=temporal_expression '}'
       { $res = em.make_at(when, expr); }
 
+    | '$' when=instant '{' expr=temporal_expression '}'
+      { $res = em.make_at(em.make_instant(UINT_MAX - when->value()), expr); }
+
     | expr=temporal_expression
       { $res = expr; }
 
@@ -1215,8 +1218,19 @@ reach_command returns[Command_ptr res]
         target=toplevel_expression
         { ((Reach_ptr) $res)->set_target(target); }
 
-        ( '-c' constraint=toplevel_expression
-        { ((Reach_ptr) $res)->add_constraint(constraint); })*
+        /* forward guide */
+        ( '-f' constraint=toplevel_expression
+          { ((Reach_ptr) $res)->add_forward_constraint(constraint); }
+
+        /* backward guide */
+        | '-b' constraint=toplevel_expression
+          { ((Reach_ptr) $res)->add_backward_constraint(constraint); }
+
+        /* global guide */
+        | '-g' constraint=toplevel_expression
+          { ((Reach_ptr) $res)->add_global_constraint(constraint); }
+
+        )*
     ;
 
 reach_command_topic returns [CommandTopic_ptr res]

@@ -56,7 +56,7 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    return CompilationUnit(em.make_dot( ctx, body), f_time_polarity, f_add_stack, f_inlined_operator_descriptors,
+    return CompilationUnit(em.make_dot( ctx, body), f_add_stack, f_inlined_operator_descriptors,
                            f_expr2bsd_map, f_multiway_selection_descriptors);
 }
 
@@ -73,7 +73,6 @@ Compiler::Compiler()
     , f_enc(EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
     , f_status(READY)
-    , f_time_polarity(UNDECIDED)
     , f_empty(f_owner.em().make_empty())
 {
     const void* instance { this };

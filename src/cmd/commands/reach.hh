@@ -36,7 +36,11 @@ public:
 
     /** cmd params */
     void set_target(Expr_ptr target);
-    void add_constraint(Expr_ptr constraint);
+
+    /* guided reachability support: forward, backward and global guides */
+    void add_forward_constraint(Expr_ptr constraint);
+    void add_backward_constraint(Expr_ptr constraint);
+    void add_global_constraint(Expr_ptr constraint);
 
     /* run() */
     Variant virtual operator()();
@@ -47,8 +51,9 @@ private:
     /* the negation of invariant property to be verified */
     Expr_ptr f_target;
 
-    /* (optional) additional constraints */
-    ExprVector f_constraints;
+    ExprVector f_forward_constraints;
+    ExprVector f_backward_constraints;
+    ExprVector f_global_constraints;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();
