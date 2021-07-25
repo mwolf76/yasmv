@@ -23,6 +23,8 @@
 
 #include <enc.hh>
 
+namespace enc {
+
 ArrayEncoding::ArrayEncoding(Encodings elements)
     : f_elements(elements)
 {
@@ -64,3 +66,5 @@ Expr_ptr ArrayEncoding::expr(int* assignment)
     assert(NULL != acc);
     return em.make_array( acc );
 }
+
+};

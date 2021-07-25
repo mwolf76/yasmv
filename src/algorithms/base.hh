@@ -124,7 +124,7 @@ private:
 
     /* Managers */
     ModelMgr& f_mm;
-    EncodingMgr& f_bm;
+    enc::EncodingMgr& f_bm;
     ExprMgr& f_em;
     TypeMgr& f_tm;
 

@@ -71,10 +71,10 @@ void pe(Expr_ptr e)
 void pf(TimedExpr e)
 { std::cerr << e << std::endl; }
 
-void pu(UCBI& ucbi)
+void pu(enc::UCBI& ucbi)
 { std::cerr << ucbi << std::endl; }
 
-void pt(TCBI& tcbi)
+void pt(enc::TCBI& tcbi)
 { std::cerr << tcbi << std::endl; }
 
 void pd(InlinedOperatorDescriptor& md)

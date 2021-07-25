@@ -40,6 +40,8 @@
 #include <dd/cudd_mgr.hh>
 #include <enc/enc_mgr.hh>
 
+namespace enc {
+
 /**
  * For each symbol a boolean encoding is maintained, the encoder takes
  * care of ADD variables definitions and provides mapback services as
@@ -192,6 +194,8 @@ protected:
     { assert(0); }
 
     Encodings f_elements;
+};
+
 };
 
 #endif /* ENCODER_H */

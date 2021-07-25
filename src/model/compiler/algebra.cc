@@ -284,7 +284,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
 
 void Compiler::algebraic_subscript(const Expr_ptr expr)
 {
-    EncodingMgr& bm
+    enc::EncodingMgr& bm
         (f_enc);
 
     // index

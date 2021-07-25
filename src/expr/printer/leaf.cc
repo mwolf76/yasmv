@@ -69,8 +69,8 @@ static inline value_t pow2(unsigned exp)
 
 static void print_bin_leaf(const Expr_ptr expr, std::ostream& os)
 {
-    EncodingMgr& bm
-        (EncodingMgr::INSTANCE());
+    enc::EncodingMgr& bm
+        (enc::EncodingMgr::INSTANCE());
 
     std::vector<bool> booleanization;
 

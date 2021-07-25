@@ -110,7 +110,7 @@ void Compiler::boolean_ite(const Expr_ptr expr)
 
 void Compiler::boolean_subscript(const Expr_ptr expr)
 {
-    EncodingMgr& bm
+    enc::EncodingMgr& bm
         (f_enc);
 
     // index

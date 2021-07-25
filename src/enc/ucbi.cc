@@ -24,6 +24,8 @@
 #include <enc/ucbi.hh>
 #include <expr/printer/printer.hh>
 
+namespace enc {
+
 UCBI::UCBI(Expr_ptr expr, step_t time, unsigned bitno)
     : f_expr(expr)
     , f_time(time)
@@ -94,3 +96,5 @@ bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
         x.time() == y.time() &&
         x.bitno() == y.bitno() ;
 }
+
+};

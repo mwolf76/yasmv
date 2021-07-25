@@ -36,7 +36,7 @@ Algorithm::Algorithm(Command& command, Model& model)
     : f_command(command)
     , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
-    , f_bm(EncodingMgr::INSTANCE())
+    , f_bm(enc::EncodingMgr::INSTANCE())
     , f_em(ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_witness(NULL)
@@ -308,7 +308,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
             TimedExpr key
                 (em().make_dot( ctx, expr), 0);
 
-            Encoding_ptr enc
+            enc::Encoding_ptr enc
                 (f_bm.find_encoding(key));
 
             if (!enc)
@@ -322,14 +322,14 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                 unsigned bit
                     ((*di).getNode()->index);
 
-                const UCBI& ucbi
+                const enc::UCBI& ucbi
                     (f_bm.find_ucbi(bit));
 
-                const TCBI jtcbi
-                    (TCBI(ucbi, j));
+                const enc::TCBI jtcbi
+                    (enc::TCBI(ucbi, j));
 
-                const TCBI ktcbi
-                    (TCBI(ucbi, k));
+                const enc::TCBI ktcbi
+                    (enc::TCBI(ucbi, k));
 
                 Var jkne
                     (engine.new_sat_var());

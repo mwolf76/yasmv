@@ -108,7 +108,7 @@ private:
     void walk_leaf(const Expr_ptr expr);
 
     /* push DDs and type information for variables (used by walk_leaf) */
-    void push_dds(Encoding_ptr enc, Type_ptr type);
+    void push_dds(enc::Encoding_ptr enc, Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const Expr_ptr expr);
@@ -194,7 +194,7 @@ private:
     void memoize_result(const Expr_ptr expr);
 
     /* encoding management */
-    Encoding_ptr find_encoding(const TimedExpr& timed_expr, const Type_ptr type);
+    enc::Encoding_ptr find_encoding(const TimedExpr& timed_expr, const Type_ptr type);
 
     /* automatic inner variables (determinization, muxes, etc...) */
     Expr_ptr make_auto_id();
@@ -247,7 +247,7 @@ private:
 
     /* managers */
     ModelMgr& f_owner;
-    EncodingMgr& f_enc;
+    enc::EncodingMgr& f_enc;
 
     /* Auto expressions and DDs */
     unsigned f_temp_auto_index;

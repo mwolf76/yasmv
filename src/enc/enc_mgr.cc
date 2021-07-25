@@ -25,6 +25,8 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
+namespace enc {
+
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
 Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
@@ -143,3 +145,5 @@ EncodingMgr::~EncodingMgr()
         << "Destroyed EncodingMgr @ " << instance
         << std::endl;
 }
+
+};

@@ -23,6 +23,8 @@
 
 #include <enc.hh>
 
+namespace enc {
+
 // boolean 1(1 bit) var
 BooleanEncoding::BooleanEncoding()
     : Encoding()
@@ -93,3 +95,5 @@ Expr_ptr EnumEncoding::expr(int *assignment)
 
     return f_v2e_map [lindex];
 }
+
+};

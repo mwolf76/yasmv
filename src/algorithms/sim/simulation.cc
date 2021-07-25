@@ -53,8 +53,8 @@ void Simulation::pick_state(bool allsat,
                             value_t limit,
                             ExprVector constraints)
 {
-    EncodingMgr& bm
-        (EncodingMgr::INSTANCE());
+    enc::EncodingMgr& bm
+        (enc::EncodingMgr::INSTANCE());
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -155,7 +155,7 @@ void Simulation::pick_state(bool allsat,
                             continue;
 
                         /* time it, and fetch encoding for enc mgr */
-                        Encoding_ptr enc
+                        enc::Encoding_ptr enc
                             (bm.find_encoding( TimedExpr(key, 0)));
 
                         if ( ! enc )
@@ -173,11 +173,11 @@ void Simulation::pick_state(bool allsat,
                             unsigned bit
                                 ((*di).getNode()->index);
 
-                            const UCBI& ucbi
+                            const enc::UCBI& ucbi
                                 (bm.find_ucbi(bit));
 
-                            const TCBI tcbi
-                                (TCBI(ucbi, 0));
+                            const enc::TCBI tcbi
+                                (enc::TCBI(ucbi, 0));
 
                             Var var
                                 (engine.tcbi_to_var(tcbi));

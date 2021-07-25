@@ -197,8 +197,8 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     TypeMgr& tm
         (f_owner.tm());
 
-    EncodingMgr& bm
-        (EncodingMgr::INSTANCE());
+    enc::EncodingMgr& bm
+        (enc::EncodingMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
 

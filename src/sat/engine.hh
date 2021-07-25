@@ -113,17 +113,17 @@ public:
     /**
      * @brief TCBI -> Minisat variable mapping
      */
-    Var tcbi_to_var(const TCBI& tcbi);
+    Var tcbi_to_var(const enc::TCBI& tcbi);
 
     /**
      * @brief Minisat variable -> TCBI mapping
      */
-    TCBI& var_to_tcbi(Var var);
+    enc::TCBI& var_to_tcbi(Var var);
 
     /**
      * @brief DD index -> UCBI mapping
      */
-    const UCBI& find_ucbi(int index)
+    const enc::UCBI& find_ucbi(int index)
     { return f_enc_mgr.find_ucbi(index); }
 
     /**
@@ -180,13 +180,13 @@ public:
      */
     ~Engine();
 
-    inline EncodingMgr& enc() const
+    inline enc::EncodingMgr& enc() const
     { return f_enc_mgr; }
 
 private:
     const char* f_instance_name;
 
-    EncodingMgr& f_enc_mgr;
+    enc::EncodingMgr& f_enc_mgr;
 
     // CNF registry
     TDD2VarMap f_tdd2var_map;

@@ -45,8 +45,8 @@ ADD Compiler::make_auto_dd()
     Type_ptr boolean
         (tm.find_boolean());
 
-    BooleanEncoding_ptr be
-        (reinterpret_cast<BooleanEncoding_ptr>
+    enc::BooleanEncoding_ptr be
+        (reinterpret_cast<enc::BooleanEncoding_ptr>
          (f_enc.make_encoding( boolean )));
 
     // register encoding, a FQExpr is needed for UCBI booking
@@ -418,9 +418,9 @@ void Compiler::activate_array_muxes(Expr_ptr ctx, Expr_ptr body)
     }
 }
 
-Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
+enc::Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
 {
-    Encoding_ptr res;
+    enc::Encoding_ptr res;
 
     /* build a new encoding for this symbol if none is available. */
     res = f_enc.find_encoding(key);

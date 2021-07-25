@@ -29,7 +29,7 @@
  */
 Engine::Engine(const char* instance_name)
     : f_instance_name(instance_name)
-    , f_enc_mgr(EncodingMgr::INSTANCE())
+    , f_enc_mgr(enc::EncodingMgr::INSTANCE())
 {
     const void* instance
         (this);
@@ -186,10 +186,10 @@ Var Engine::find_dd_var(const DdNode* node, step_t time)
 {
     assert (NULL != node && ! Cudd_IsConstant(node));
 
-    const UCBI& ucbi
+    const enc::UCBI& ucbi
         (find_ucbi(node->index));
 
-    const TCBI tcbi
+    const enc::TCBI tcbi
         (ucbi, time);
 
     return tcbi_to_var(tcbi);
@@ -197,10 +197,10 @@ Var Engine::find_dd_var(const DdNode* node, step_t time)
 
 Var Engine::find_dd_var(int node_index, step_t time)
 {
-    const UCBI& ucbi
+    const enc::UCBI& ucbi
         (find_ucbi(node_index));
 
-    const TCBI tcbi
+    const enc::TCBI tcbi
         (ucbi, time);
 
     return tcbi_to_var(tcbi);
@@ -270,7 +270,7 @@ Var Engine::rewrite_cnf_var(Var v, step_t time)
     return res;
 }
 
-Var Engine::tcbi_to_var(const TCBI& tcbi)
+Var Engine::tcbi_to_var(const enc::TCBI& tcbi)
 {
     Var var;
     const TCBI2VarMap::iterator eye
@@ -288,14 +288,14 @@ Var Engine::tcbi_to_var(const TCBI& tcbi)
             << " for " << tcbi
             << std::endl;
 
-        f_tcbi2var_map.insert( std::pair<TCBI, Var>(tcbi, var));
-        f_var2tcbi_map.insert( std::pair<Var, TCBI>(var, tcbi));
+        f_tcbi2var_map.insert( std::pair<enc::TCBI, Var>(tcbi, var));
+        f_var2tcbi_map.insert( std::pair<Var, enc::TCBI>(var, tcbi));
     }
 
     return var;
 }
 
-TCBI& Engine::var_to_tcbi(Var var)
+enc::TCBI& Engine::var_to_tcbi(Var var)
 {
     const Var2TCBIMap::iterator eye
         (f_var2tcbi_map.find(var));

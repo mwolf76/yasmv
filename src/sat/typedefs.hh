@@ -68,8 +68,8 @@ typedef enum {
 } status_t;
 
 #include <enc/tcbi.hh>
-typedef boost::unordered_map<TCBI, Var, TCBIHash, TCBIEq> TCBI2VarMap;
-typedef boost::unordered_map<Var, TCBI, IntHash, IntEq> Var2TCBIMap;
+typedef boost::unordered_map<enc::TCBI, Var, enc::TCBIHash, enc::TCBIEq> TCBI2VarMap;
+typedef boost::unordered_map<Var, enc::TCBI, IntHash, IntEq> Var2TCBIMap;
 
 struct TimedVar {
 public:

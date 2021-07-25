@@ -24,6 +24,8 @@
 #include <enc/tcbi.hh>
 #include <expr/printer/printer.hh>
 
+namespace enc {
+
 TCBI::TCBI(const UCBI& ucbi, step_t base)
     : f_expr(ucbi.expr())
     , f_time(ucbi.time())
@@ -105,3 +107,5 @@ bool TCBIEq::operator() (const TCBI& x, const TCBI& y) const
         x.bitno() == y.bitno() &&
         abs_time_x == abs_time_y;
 }
+
+};

@@ -28,6 +28,8 @@
 
 #include <expr/expr.hh>
 
+namespace enc {
+
 /* Untimed Canonical Bit Identifiers */
 class UCBI {
 public:
@@ -62,6 +64,8 @@ struct UCBIHash {
 
 struct UCBIEq {
     bool operator() (const UCBI& x, const UCBI& y) const;
+};
+
 };
 
 #endif

@@ -40,8 +40,8 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
                                                        Engine& engine, unsigned k, bool reversed)
     : Witness()
 {
-    EncodingMgr& bm
-        (EncodingMgr::INSTANCE());
+    enc::EncodingMgr& bm
+        (enc::EncodingMgr::INSTANCE());
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -98,7 +98,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
                     (symb->as_variable());
 
                 /* time it, and fetch encoding for enc mgr */
-                Encoding_ptr enc
+                enc::Encoding_ptr enc
                     (bm.find_encoding( TimedExpr(key, var.is_frozen() ? FROZEN : 0)) );
 
                 if ( ! enc )
@@ -118,11 +118,11 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
                     unsigned bit
                         ((*di).getNode()->index);
 
-                    const UCBI& ucbi
+                    const enc::UCBI& ucbi
                         (bm.find_ucbi(bit));
 
-                    const TCBI tcbi
-                        (TCBI(ucbi, reversed
+                    const enc::TCBI tcbi
+                        (enc::TCBI(ucbi, reversed
                               ? FINAL_STATE - step
                               : FIRST_STATE + step));
 

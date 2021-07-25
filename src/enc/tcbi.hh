@@ -29,6 +29,8 @@
 
 #include <enc/ucbi.hh>
 
+namespace enc {
+
 /* Timed Canonical Bit Identifiers */
 class TCBI {
 public:
@@ -84,6 +86,8 @@ struct TCBIHash {
 
 struct TCBIEq {
     bool operator() (const TCBI& x, const TCBI& y) const;
+};
+
 };
 
 #endif

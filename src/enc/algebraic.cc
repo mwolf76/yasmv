@@ -23,6 +23,8 @@
 
 #include <enc.hh>
 
+namespace enc {
+
 static inline value_t pow2(unsigned exp)
 {
     value_t res = 1;
@@ -84,3 +86,5 @@ Expr_ptr AlgebraicEncoding::expr(int *assignment)
 
     return em.make_const(res) ;
 }
+
+};

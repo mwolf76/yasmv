@@ -118,7 +118,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         TimedExpr key
             (full, time);
 
-        Encoding_ptr enc
+        enc::Encoding_ptr enc
             (f_enc.find_encoding(key));
 
         /* build a new encoding for this symbol if none is available. */
@@ -127,8 +127,8 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             f_enc.register_encoding(key, enc);
         }
 
-        EnumEncoding_ptr eenc
-            (dynamic_cast<EnumEncoding_ptr>(enc));
+        enc::EnumEncoding_ptr eenc
+            (dynamic_cast<enc::EnumEncoding_ptr>(enc));
         assert( NULL != eenc );
 
         f_type_stack.push_back(type);
@@ -163,7 +163,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
             TimedExpr key
                 (full, var.is_frozen() ? FROZEN : time);
 
-            Encoding_ptr enc
+            enc::Encoding_ptr enc
                 (find_encoding(key, type));
 
             push_dds(enc, type);
@@ -202,7 +202,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 }
 
 /* private service of walk_leaf */
-void Compiler::push_dds(Encoding_ptr enc, Type_ptr type)
+void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
 {
     assert (NULL != enc);
     DDVector& dds

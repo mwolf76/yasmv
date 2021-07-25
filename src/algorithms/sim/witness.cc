@@ -39,8 +39,8 @@ namespace sim {
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness(&engine)
 {
-    EncodingMgr& bm
-        (EncodingMgr::INSTANCE());
+    enc::EncodingMgr& bm
+        (enc::EncodingMgr::INSTANCE());
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -107,7 +107,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             else {
 
                 /* time it, and fetch encoding for enc mgr */
-                Encoding_ptr enc
+                enc::Encoding_ptr enc
                     (bm.find_encoding( TimedExpr(key, 0)) );
 
                 /* not in COI, skipping... */
@@ -125,11 +125,11 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                     unsigned bit
                         ((*di).getNode()->index);
 
-                    const UCBI& ucbi
+                    const enc::UCBI& ucbi
                         (bm.find_ucbi(bit));
 
-                    const TCBI tcbi
-                        (TCBI(ucbi, k));
+                    const enc::TCBI tcbi
+                        (enc::TCBI(ucbi, k));
 
                     Var var
                         (engine.tcbi_to_var(tcbi));

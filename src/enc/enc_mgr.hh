@@ -45,6 +45,8 @@
 #include <enc/ucbi.hh>
 #include <utils/pool.hh>
 
+namespace enc {
+
 typedef class Encoding *Encoding_ptr; // fwd decl
 
 typedef std::vector<int> IndexVector;
@@ -147,4 +149,5 @@ private:
     unsigned f_word_width;
 };
 
+};
 #endif /* ENCODING_MGR_H */
