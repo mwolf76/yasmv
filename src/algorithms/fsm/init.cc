@@ -26,6 +26,8 @@
 #include <algorithms/fsm/fsm.hh>
 #include <witness_mgr.hh>
 
+namespace fsm {
+
 CheckInitConsistency::CheckInitConsistency(Command& command, Model& model)
     : Algorithm(command, model)
 {
@@ -100,3 +102,5 @@ void CheckInitConsistency::process(ExprVector constraints)
         f_status = FSM_CONSISTENCY_OK;
     }
 }
+
+};

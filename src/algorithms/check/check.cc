@@ -26,6 +26,8 @@
 #include <algorithms/check/check.hh>
 #include <witness_mgr.hh>
 
+namespace check {
+
 LTL::LTL(Command& command, Model& model)
     : Algorithm(command, model)
 {
@@ -53,3 +55,5 @@ void LTL::process(const Expr_ptr phi)
 
     TRACE << "Done." << std::endl;
 }
+
+};

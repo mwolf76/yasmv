@@ -70,12 +70,12 @@ Variant CheckInit::operator()()
     bool res { false };
 
     if (check_requirements()) {
-        CheckInitConsistency check_init { *this,
-                ModelMgr::INSTANCE().model() };
+        fsm::CheckInitConsistency check_init
+            { *this, ModelMgr::INSTANCE().model() };
         check_init.process(f_constraints);
 
         switch (check_init.status()) {
-        case FSM_CONSISTENCY_OK:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
             if (! om.quiet())
                 f_out
                     << outPrefix;
@@ -86,7 +86,7 @@ Variant CheckInit::operator()()
             res = true;
             break;
 
-        case FSM_CONSISTENCY_KO:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
             if (! om.quiet())
                 f_out
                     << outPrefix;
@@ -95,7 +95,7 @@ Variant CheckInit::operator()()
                 << std::endl;
             break;
 
-        case FSM_CONSISTENCY_UNDECIDED:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
             if (! om.quiet())
                 f_out
                     << outPrefix;

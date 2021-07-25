@@ -20,9 +20,10 @@
  * 02110-1301 USA
  *
  **/
-
 #ifndef REACHABILITY_ALGORITHM_TYPEDEFS_H
 #define REACHABILITY_ALGORITHM_TYPEDEFS_H
+
+namespace reach {
 
 typedef enum {
     REACHABILITY_REACHABLE,
@@ -30,5 +31,7 @@ typedef enum {
     REACHABILITY_UNKNOWN,
     REACHABILITY_ERROR,
 } reachability_status_t;
+
+};
 
 #endif /* REACHABILITY_ALGORITHM_TYPEDEFS_H */

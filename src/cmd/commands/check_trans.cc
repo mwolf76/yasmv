@@ -71,12 +71,12 @@ Variant CheckTrans::operator()()
     Variant res { false };
 
     if (check_requirements()) {
-        CheckTransConsistency check_trans { *this,
-                ModelMgr::INSTANCE().model() } ;
+        fsm::CheckTransConsistency check_trans
+            { *this, ModelMgr::INSTANCE().model() } ;
         check_trans.process(f_constraints);
 
         switch (check_trans.status()) {
-        case FSM_CONSISTENCY_OK:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
             if (! om.quiet())
                 f_out
                     << outPrefix;
@@ -87,7 +87,7 @@ Variant CheckTrans::operator()()
             res = true;
             break;
 
-        case FSM_CONSISTENCY_KO:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
             if (! om.quiet())
                 f_out
                     << outPrefix;
@@ -96,7 +96,7 @@ Variant CheckTrans::operator()()
                 << std::endl;
             break;
 
-        case FSM_CONSISTENCY_UNDECIDED:
+        case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
             if (! om.quiet())
                 f_out
                     << outPrefix;

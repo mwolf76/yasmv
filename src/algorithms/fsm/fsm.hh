@@ -32,6 +32,8 @@
 #include <algorithms/base.hh>
 #include <witness/witness.hh>
 
+namespace fsm {
+
 typedef enum {
     FSM_CONSISTENCY_OK,
     FSM_CONSISTENCY_KO,
@@ -80,6 +82,8 @@ private:
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
+};
+
 };
 
 #endif /* FSM_ALGORITHM_H */

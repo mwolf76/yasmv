@@ -77,19 +77,19 @@ Variant Simulate::operator()()
     ModelMgr& mm
         (ModelMgr::INSTANCE());
 
-    Simulation sim
+    sim::Simulation simulation
         (*this, mm.model());
 
     bool res { false };
 
     ExprVector f_constraints;
-    sim.simulate(f_invar_condition,
+    simulation.simulate(f_invar_condition,
                  f_until_condition,
                  f_constraints,
                  f_k, f_trace_uid);
 
-    switch (sim.status()) {
-    case SIMULATION_DONE:
+    switch (simulation.status()) {
+    case sim::simulation_status_t::SIMULATION_DONE:
         res = true;
         if (! om.quiet())
             f_out
@@ -98,7 +98,7 @@ Variant Simulate::operator()()
             << "Simulation done";
         break;
 
-    case SIMULATION_INITIALIZED:
+    case sim::simulation_status_t::SIMULATION_INITIALIZED:
         if (! om.quiet())
             f_out
                 << outPrefix;
@@ -107,7 +107,7 @@ Variant Simulate::operator()()
             << std::endl;
         break;
 
-    case SIMULATION_DEADLOCKED:
+    case sim::simulation_status_t::SIMULATION_DEADLOCKED:
         if (! om.quiet())
             f_out
                 << wrnPrefix;
@@ -116,7 +116,7 @@ Variant Simulate::operator()()
             << std::endl;
         break;
 
-    case SIMULATION_INTERRUPTED:
+    case sim::simulation_status_t::SIMULATION_INTERRUPTED:
         if (! om.quiet())
             f_out
                 << wrnPrefix;
@@ -128,13 +128,13 @@ Variant Simulate::operator()()
     default: assert( false ); /* unreachable */
     }
 
-    if (sim.has_witness()) {
+    if (simulation.has_witness()) {
         if (! om.quiet())
             f_out
                 << outPrefix;
         f_out
             << "Registered witness `"
-            << sim.witness().id()
+            << simulation.witness().id()
             << "`"
             << std::endl;
     }

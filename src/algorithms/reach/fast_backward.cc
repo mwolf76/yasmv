@@ -27,6 +27,8 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
+namespace reach {
+
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
@@ -149,3 +151,4 @@ void Reachability::fast_backward_strategy()
         << std::endl;
 } /* Reachability::fast_backward_strategy() */
 
+};

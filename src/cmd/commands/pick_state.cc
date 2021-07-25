@@ -78,11 +78,11 @@ Variant PickState::operator()()
 
     if (check_requirements()) {
 
-        Simulation sim { *this, ModelMgr::INSTANCE().model() };
-        sim.pick_state(f_allsat, f_limit, f_constraints);
+        sim::Simulation simulation { *this, ModelMgr::INSTANCE().model() };
+        simulation.pick_state(f_allsat, f_limit, f_constraints);
 
-        switch (sim.status()) {
-        case SIMULATION_DONE:
+        switch (simulation.status()) {
+        case sim::simulation_status_t::SIMULATION_DONE:
             res = true;
             if (! om.quiet())
                 f_out
@@ -90,15 +90,15 @@ Variant PickState::operator()()
             f_out
                 << "Simulation done";
 
-            assert (sim.has_witness());
+            assert (simulation.has_witness());
             f_out
                 << ", registered witness `"
-                << sim.witness().id()
+                << simulation.witness().id()
                 << "`"
                 << std::endl;
             break;
 
-        case SIMULATION_INITIALIZED:
+        case sim::simulation_status_t::SIMULATION_INITIALIZED:
             res = true;
             if (! om.quiet())
                 f_out
@@ -106,15 +106,15 @@ Variant PickState::operator()()
             f_out
                 << "Simulation initialized" ;
 
-            assert (sim.has_witness());
+            assert (simulation.has_witness());
             f_out
                 << ", registered witness `"
-                << sim.witness().id()
+                << simulation.witness().id()
                 << "`"
                 << std::endl;
             break;
 
-        case SIMULATION_DEADLOCKED:
+        case sim::simulation_status_t::SIMULATION_DEADLOCKED:
             if (! om.quiet())
                 f_out
                     << wrnPrefix;
@@ -123,7 +123,7 @@ Variant PickState::operator()()
                 << std::endl;
             break;
 
-        case SIMULATION_INTERRUPTED:
+        case sim::simulation_status_t::SIMULATION_INTERRUPTED:
             if (! om.quiet())
                 f_out
                     << wrnPrefix;
@@ -152,5 +152,3 @@ PickStateTopic::~PickStateTopic()
 
 void PickStateTopic::usage()
 { display_manpage("pick-state"); }
-
-

@@ -27,6 +27,8 @@
 #include <algorithms/base.hh>
 #include <algorithms/reach/typedefs.hh>
 
+namespace reach {
+
 class Reachability : public Algorithm {
 
 public:
@@ -60,6 +62,8 @@ private:
 
     void fast_forward_strategy();
     void fast_backward_strategy();
+};
+
 };
 
 #endif /* Reachability_ALGORITHM_CLASSES_H */

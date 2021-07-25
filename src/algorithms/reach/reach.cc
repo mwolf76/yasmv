@@ -20,7 +20,6 @@
  * 02110-1301 USA
  *
  **/
-
 #include <algorithm>
 
 #include <algorithms/reach/reach.hh>
@@ -28,6 +27,8 @@
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+
+namespace reach {
 
 typedef boost::thread* thread_ptr;
 typedef std::vector<thread_ptr> thread_ptrs;
@@ -227,3 +228,5 @@ bool Reachability::sync_set_status(reachability_status_t status)
 
     return res;
 }
+
+};

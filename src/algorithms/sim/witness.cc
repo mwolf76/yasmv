@@ -34,6 +34,8 @@
 #include <symb/classes.hh>
 #include <symb/symb_iter.hh>
 
+namespace sim {
+
 SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     : Witness(&engine)
 {
@@ -178,3 +180,5 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
         }
     }
 }
+
+};

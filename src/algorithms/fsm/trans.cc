@@ -28,6 +28,8 @@
 #include <algorithms/fsm/fsm.hh>
 #include <witness_mgr.hh>
 
+namespace fsm {
+
 CheckTransConsistency::CheckTransConsistency(Command& command, Model& model)
     : Algorithm(command, model)
 {
@@ -104,3 +106,5 @@ void CheckTransConsistency::process(ExprVector constraints)
         f_status = FSM_CONSISTENCY_OK;
     }
 }
+
+};

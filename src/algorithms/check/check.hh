@@ -32,6 +32,8 @@
 #include <algorithms/base.hh>
 #include <witness/witness.hh>
 
+namespace check {
+
 typedef enum {
     LTL_FALSE,
     LTL_TRUE,
@@ -64,4 +66,7 @@ public:
                       Engine& engine, unsigned k);
 };
 
+};
+
 #endif /* LTL_ALGORITHM_H */
+

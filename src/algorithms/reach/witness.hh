@@ -33,11 +33,15 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace reach {
+
 /* Specialized for Reachability CEX */
 class ReachabilityCounterExample : public Witness {
 public:
     ReachabilityCounterExample(Expr_ptr property, Model& model, Engine& engine,
                       unsigned k, bool reversed = false);
+};
+
 };
 
 #endif /* REACHABILITY_ALGORITHM_WITNESS_H */

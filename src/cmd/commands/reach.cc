@@ -102,11 +102,11 @@ Variant Reach::operator()()
     if (! check_requirements())
         return Variant(errMessage);
 
-    Reachability bmc { *this, ModelMgr::INSTANCE().model() };
+    reach::Reachability bmc { *this, ModelMgr::INSTANCE().model() };
     bmc.process(f_target, f_forward_constraints, f_backward_constraints, f_global_constraints);
 
     switch (bmc.status()) {
-    case REACHABILITY_REACHABLE:
+    case reach::reachability_status_t::REACHABILITY_REACHABLE:
         if (! om.quiet())
             f_out
                 << outPrefix;
@@ -128,7 +128,7 @@ Variant Reach::operator()()
         res = true;
         break;
 
-    case REACHABILITY_UNREACHABLE:
+    case reach::reachability_status_t::REACHABILITY_UNREACHABLE:
         if (! om.quiet())
             f_out
                 << wrnPrefix;
@@ -137,13 +137,13 @@ Variant Reach::operator()()
             << std::endl;
         break;
 
-    case REACHABILITY_UNKNOWN:
+    case reach::reachability_status_t::REACHABILITY_UNKNOWN:
         f_out
             << "Reachability could not be decided."
             << std::endl;
         break;
 
-    case REACHABILITY_ERROR:
+    case reach::reachability_status_t::REACHABILITY_ERROR:
         f_out
             << "Unexpected error."
             << std::endl;

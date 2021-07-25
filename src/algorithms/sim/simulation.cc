@@ -31,6 +31,8 @@
 
 #include <sstream>
 
+namespace sim {
+
 // reserved for witnesses
 static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
@@ -372,5 +374,7 @@ void Simulation::simulate(Expr_ptr invar_condition,
         f_status = SIMULATION_DEADLOCKED;
     }
 }
+
+};
 
 

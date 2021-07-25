@@ -34,6 +34,8 @@
 
 #include <cmd/command.hh>
 
+namespace sim {
+
 typedef enum {
     SIMULATION_DONE,
     SIMULATION_INITIALIZED,
@@ -75,6 +77,8 @@ class SimulationWitness : public Witness {
 
 public:
     SimulationWitness(Model& model, Engine& engine, step_t k);
+};
+
 };
 
 #endif /* SIMULATION_ALGORITHM_H */

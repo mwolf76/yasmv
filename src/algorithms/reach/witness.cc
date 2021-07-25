@@ -34,6 +34,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace reach {
+
 ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model& model,
                                                        Engine& engine, unsigned k, bool reversed)
     : Witness()
@@ -167,3 +169,4 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
     } while (1);
 } /* ReachabilityCounterExample::ReachabilityCounterExample() */
 
+};

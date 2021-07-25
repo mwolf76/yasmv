@@ -20,7 +20,6 @@
  * 02110-1301 USA
  *
  **/
-
 #include <algorithm>
 
 #include <algorithms/reach/reach.hh>
@@ -28,6 +27,8 @@
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+
+namespace reach {
 
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
@@ -191,3 +192,4 @@ void Reachability::forward_strategy()
         << std::endl;
 } /* Reachability::forward_strategy() */
 
+};
