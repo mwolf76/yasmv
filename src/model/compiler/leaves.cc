@@ -149,7 +149,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         /* INPUT vars are in fact bodyless, typed DEFINEs */
         if (var.is_input()) {
             Expr_ptr value
-              (Environment::INSTANCE().get(expr));
+              (env::Environment::INSTANCE().get(expr));
 
             (*this) (value);
         }

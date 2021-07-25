@@ -62,8 +62,8 @@ void Set::set_value(Expr_ptr value)
 
 Variant Set::operator()()
 {
-    Environment& env
-        (Environment::INSTANCE());
+    env::Environment& env
+        (env::Environment::INSTANCE());
 
     if (NULL == f_identifier || NULL == f_value) {
         SetTopic(f_owner)

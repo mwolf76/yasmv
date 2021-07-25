@@ -25,6 +25,8 @@
 #include <string>
 #include <sstream>
 
+namespace env {
+
 std::string build_no_such_identifier_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
@@ -100,3 +102,5 @@ void Environment::add_extra_trans(Expr_ptr constraint)
     assert(constraint);
     f_extra_transes.push_back(constraint);
 }
+
+};

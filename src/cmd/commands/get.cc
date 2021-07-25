@@ -48,8 +48,8 @@ void Get::set_identifier(Expr_ptr id)
 
 void Get::print_assignment(std::ostream& os, Expr_ptr id)
 {
-    Environment& env
-        (Environment::INSTANCE());
+    env::Environment& env
+        (env::Environment::INSTANCE());
 
     Expr_ptr value { env.get(id) }; /* raises an exception on failures */
 
@@ -63,8 +63,8 @@ void Get::print_assignment(std::ostream& os, Expr_ptr id)
 
 void Get::print_all_assignments(std::ostream& os)
 {
-    Environment& env
-        (Environment::INSTANCE());
+    env::Environment& env
+        (env::Environment::INSTANCE());
 
     const ExprSet& identifiers { env.identifiers() };
 
@@ -84,7 +84,7 @@ Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
         print_assignment(os, id);
         res = Variant(okMessage);
     }
-    catch (NoSuchIdentifier& nsi) {
+    catch (env::NoSuchIdentifier& nsi) {
         const char *what { nsi.what() };
 
         os

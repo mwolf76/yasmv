@@ -98,7 +98,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             /* INPUT vars are in fact bodyless, typed DEFINEs */
             if (var.is_input()) {
                 Expr_ptr value
-                    (Environment::INSTANCE().get(symb_name));
+                    (env::Environment::INSTANCE().get(symb_name));
 
                 if (value)
                     tf.set_value( key, value, symb->format());

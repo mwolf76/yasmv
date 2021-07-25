@@ -59,8 +59,8 @@ void Algorithm::setup()
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    Environment& env
-        (Environment::INSTANCE());
+    env::Environment& env
+        (env::Environment::INSTANCE());
 
     Model& model
         (f_model);

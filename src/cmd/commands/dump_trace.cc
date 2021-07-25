@@ -410,7 +410,7 @@ void DumpTrace::process_input(Witness& w,
                 continue;
 
             Expr_ptr value
-                (Environment::INSTANCE().get(name));
+                (env::Environment::INSTANCE().get(name));
 
             if (!value)
                 value = em.make_undef();

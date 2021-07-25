@@ -189,7 +189,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             return;
 
         else if (var.is_input()) {
-            push_value(Environment::INSTANCE().get(expr));
+            push_value(env::Environment::INSTANCE().get(expr));
         }
 
         else if (f_witness->has_value( full, time)) {

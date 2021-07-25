@@ -35,6 +35,8 @@
 #include <common/common.hh>
 #include <utils/pool.hh>
 
+namespace env {
+
 /* key -> value map for env */
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
 
@@ -99,6 +101,8 @@ private:
     ExprVector f_extra_transes;
 
     static Environment_ptr f_instance;
+};
+
 };
 
 #endif /* ENVIRONMENT_H */
