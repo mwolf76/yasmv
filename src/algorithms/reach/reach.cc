@@ -86,6 +86,7 @@ void Reachability::process(Expr_ptr target,
 
                 CompilationUnit unit
                     (compiler().process(ctx, expr));
+                f_forward_constraint_cus.push_back(unit);
                 ++ no_forward_constraints;
             });
 
@@ -102,6 +103,7 @@ void Reachability::process(Expr_ptr target,
 
                 CompilationUnit unit
                     (compiler().process(ctx, expr));
+                f_backward_constraint_cus.push_back(unit);
                 ++ no_backward_constraints;
             });
 
@@ -118,6 +120,7 @@ void Reachability::process(Expr_ptr target,
 
                 CompilationUnit unit
                     (compiler().process(ctx, expr));
+                f_global_constraint_cus.push_back(unit);
                 ++ no_global_constraints;
             });
 

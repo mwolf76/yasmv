@@ -4,26 +4,24 @@ REFERENCE="out"
 YASMV="./yasmv"
 
 function test() {
-    diff $1-out "$REFERENCE/$1-out-ref"
-    if [ $? == 0 ]; then
-	echo "### $1 ok"
+    echo -n "Running functional test $1/$2 ... "
+    rm -f "$2-out"
+
+    YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$1/$1.smv" < "$EXAMPLES/$1/commands.$2" > "$2-out"
+    diff "$REFERENCE/$2-out-ref" "$2-out" &> /dev/null
+    if [[ $? == 0 ]]; then
+	    echo "OK"
     else
+        echo "FAILED!"
+        echo "####### Showing EXPECTED and ACTUAL output for $1/$2"
+        diff -W $(( $(tput cols) - 2 )) -y "$REFERENCE/$2-out-ref" "$2-out"
     	exit 1
     fi
 }
 
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands.forward" > cannibals-forward-out
-test cannibals-forward
-
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/cannibals/cannibals.smv" < "$EXAMPLES/cannibals/commands.backward" > cannibals-backward-out
-test cannibals-backward
-
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/vending/vending.smv" < "$EXAMPLES/vending/commands" > vending-out
-test vending
-
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/herschel/herschel.smv" < "$EXAMPLES/herschel/commands" > herschel-out
-test herschel
-
-YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/koenisberg/koenisberg.smv" < "$EXAMPLES/koenisberg/commands" > koenisberg-out
-test koenisberg
+test cannibals cannibals-forward
+test cannibals cannibals-backward
+test vending vending
+test herschel herschel
+test koenisberg koenisberg
 

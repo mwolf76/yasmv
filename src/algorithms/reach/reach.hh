@@ -47,9 +47,9 @@ private:
 
     ExprVector f_constraints;
 
-    CompilationUnits f_positive_time_constraints; /* requires forward strategy */
-    CompilationUnits f_negative_time_constraints; /* requires backward strategy */
-    CompilationUnits f_globally_time_constraints;
+    CompilationUnits f_forward_constraint_cus; /* requires forward strategy */
+    CompilationUnits f_backward_constraint_cus; /* requires backward strategy */
+    CompilationUnits f_global_constraint_cus;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;

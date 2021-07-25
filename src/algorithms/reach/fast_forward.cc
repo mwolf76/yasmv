@@ -34,7 +34,7 @@ static const char *reach_trace_prfx ("reach_");
 
 void Reachability::fast_forward_strategy()
 {
-    assert(! f_negative_time_constraints.size());
+    assert(! f_backward_constraint_cus.size());
 
     Engine engine { "fast_forward" };
     step_t k  { 0 };
@@ -45,8 +45,8 @@ void Reachability::fast_forward_strategy()
 
     /* positive time constraints can be pushed permanently */
     std::for_each(
-        begin(f_positive_time_constraints),
-        end(f_positive_time_constraints),
+        begin(f_forward_constraint_cus),
+        end(f_forward_constraint_cus),
         [this, &engine, k](CompilationUnit& cu) {
             this->assert_formula(engine, k, cu);
         });

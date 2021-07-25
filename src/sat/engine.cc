@@ -283,7 +283,7 @@ Var Engine::tcbi_to_var(const TCBI& tcbi)
         /* generate a new var and book it. Newly created var is not eliminable. */
         var = new_sat_var(true);
 
-        DEBUG
+        DRIVEL
             << "Adding model var " << var
             << " for " << tcbi
             << std::endl;

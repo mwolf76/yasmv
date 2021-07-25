@@ -29,13 +29,13 @@ EXTRA_PROGRAMS = yasmv_tests
 nobase_dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
-unittest: yasmv_tests
+unit-test: yasmv yasmv_tests
 	YASMV_HOME=`pwd` ./yasmv_tests --log_level=all
 
-functionaltest: yasmv_tests
+functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh
 
-test: unittest functionaltest
+test: unit-test functional-test
 	@echo "*** All tests passed Ok"
 
 .PHONY: microcode

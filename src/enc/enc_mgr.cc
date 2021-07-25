@@ -114,7 +114,7 @@ void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
     oss << "]";
 
     std::string tmp (oss.str());
-    DEBUG
+    DRIVEL
         << "Registered encoding: "
         << tmp
         << std::endl;

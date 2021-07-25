@@ -32,7 +32,7 @@ static const char *reach_trace_prfx ("reach_");
 
 void Reachability::backward_strategy()
 {
-    assert(! f_positive_time_constraints.size());
+    assert(! f_forward_constraint_cus.size());
 
     Engine engine { "backward" };
     step_t k { 0 };
@@ -42,8 +42,8 @@ void Reachability::backward_strategy()
     assert_fsm_invar(engine, FINAL_STATE - k);
 
     std::for_each(
-        begin(f_negative_time_constraints),
-        end(f_negative_time_constraints),
+        begin(f_backward_constraint_cus),
+        end(f_backward_constraint_cus),
         [this, &engine, k](CompilationUnit& cu) {
             this->assert_formula(engine, FINAL_STATE - k, cu);
         });
