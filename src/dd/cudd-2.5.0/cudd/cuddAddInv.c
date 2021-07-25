@@ -102,7 +102,7 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddInv.c,v 1.10 2012/02/05 01:07:18 fa
 /**Function********************************************************************
 
   Synopsis    [Computes the scalar inverse of an ADD.]
-  
+
   Description [Computes an n ADD where the discriminants are the
   multiplicative inverses of the corresponding discriminants of the
   argument ADD.  Returns a pointer to the resulting ADD in case of
@@ -198,4 +198,3 @@ cuddAddScalarInverseRecur(
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-

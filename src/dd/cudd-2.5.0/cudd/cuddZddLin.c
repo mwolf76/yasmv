@@ -968,4 +968,3 @@ cuddZddUndoMovesOutOfMem:
     return((Move *) CUDD_OUT_OF_MEM);
 
 } /* end of cuddZddUndoMoves */
-

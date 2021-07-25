@@ -54,7 +54,7 @@ lib$(P).a: $(POBJ)
 	$(RANLIB) $@
 
 .c.o: $(PSRC) $(PHDR)
-	$(CC) -c  $< -I$(INCLUDE) $(CFLAGS) $(MTRDEBUG) 
+	$(CC) -c  $< -I$(INCLUDE) $(CFLAGS) $(MTRDEBUG)
 
 optimize_dec: lib$(P).b
 

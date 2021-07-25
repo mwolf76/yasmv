@@ -263,7 +263,7 @@ bddCorrelationAux(
 	g = Cudd_Not(g);
     }
     /* From now on, f is regular. */
-    
+
     entry = ALLOC(HashEntry,1);
     if (entry == NULL) {
 	dd->errorCode = CUDD_MEMORY_OUT;
@@ -296,13 +296,13 @@ bddCorrelationAux(
 	FREE(entry);
 	return(CUDD_OUT_OF_MEM);
     }
-    min2 = bddCorrelationAux(dd, Fnv, Gnv, table) / 2.0; 
+    min2 = bddCorrelationAux(dd, Fnv, Gnv, table) / 2.0;
     if (min2 == (double)CUDD_OUT_OF_MEM) {
 	FREE(entry);
 	return(CUDD_OUT_OF_MEM);
     }
     min = (min1+min2);
-    
+
     pmin = ALLOC(double,1);
     if (pmin == NULL) {
 	dd->errorCode = CUDD_MEMORY_OUT;
@@ -366,7 +366,7 @@ bddCorrelationWeightsAux(
 	g = Cudd_Not(g);
     }
     /* From now on, f is regular. */
-    
+
     entry = ALLOC(HashEntry,1);
     if (entry == NULL) {
 	dd->errorCode = CUDD_MEMORY_OUT;
@@ -405,13 +405,13 @@ bddCorrelationWeightsAux(
 	FREE(entry);
 	return((double)CUDD_OUT_OF_MEM);
     }
-    min2 = bddCorrelationWeightsAux(dd, Fnv, Gnv, prob, table) * (1.0 - prob[index]); 
+    min2 = bddCorrelationWeightsAux(dd, Fnv, Gnv, prob, table) * (1.0 - prob[index]);
     if (min2 == (double)CUDD_OUT_OF_MEM) {
 	FREE(entry);
 	return((double)CUDD_OUT_OF_MEM);
     }
     min = (min1+min2);
-    
+
     pmin = ALLOC(double,1);
     if (pmin == NULL) {
 	dd->errorCode = CUDD_MEMORY_OUT;
@@ -512,4 +512,3 @@ CorrelCleanUp(
     return ST_CONTINUE;
 
 } /* end of CorrelCleanUp */
-

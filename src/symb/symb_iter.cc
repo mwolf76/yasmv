@@ -38,4 +38,3 @@ std::pair <Expr_ptr, Symbol_ptr> SymbIter::next()
 
     return res;
 }
-

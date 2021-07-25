@@ -103,7 +103,7 @@ one usually needs supplementary libraries.  On Ubuntu and Debian Linux,
 one needs g++-multilib, which can be installed with
 "apt-get install g++-multilib."
 
-Added functions 
+Added functions
 
 DdNode *Cudd_Inequality (DdManager * dd, int  N, int c, DdNode ** x,
 DdNode ** y);

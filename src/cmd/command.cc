@@ -57,4 +57,3 @@ void CommandTopic::display_manpage(const char *topic)
 
     execlp( "bash", "bash", "-c", tmp, NULL );
 }
-

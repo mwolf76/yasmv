@@ -133,7 +133,7 @@ Cudd_addMatrixMultiply(
   int  nz)
 {
     int i, nvars, *vars;
-    DdNode *res; 
+    DdNode *res;
 
     /* Array vars says what variables are "summation" variables. */
     nvars = dd->size;
@@ -185,7 +185,7 @@ Cudd_addTimesPlus(
   DdNode ** z,
   int  nz)
 {
-    DdNode *w, *cube, *tmp, *res; 
+    DdNode *w, *cube, *tmp, *res;
     int i;
     tmp = Cudd_addApply(dd,Cudd_addTimes,A,B);
     if (tmp == NULL) return(NULL);
@@ -644,7 +644,7 @@ cuddAddOuterSumRecur(
 
     statLine(dd);
     /* Check special cases. */
-    if (r == DD_PLUS_INFINITY(dd) || c == DD_PLUS_INFINITY(dd)) return(M); 
+    if (r == DD_PLUS_INFINITY(dd) || c == DD_PLUS_INFINITY(dd)) return(M);
 
     if (cuddIsConstant(c) && cuddIsConstant(r)) {
 	R = cuddUniqueConst(dd,Cudd_V(c)+Cudd_V(r));
@@ -654,7 +654,7 @@ cuddAddOuterSumRecur(
 		cuddDeref(R);
 	        return(R);
 	    } else {
-	        Cudd_RecursiveDeref(dd,R);       
+	        Cudd_RecursiveDeref(dd,R);
 		return(M);
 	    }
 	} else {

@@ -116,4 +116,3 @@ BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
     : ModelException("BadParamCount",
                      build_bad_param_count_error_message(instance, expected, got))
 {}
-

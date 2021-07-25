@@ -126,4 +126,3 @@ yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
 pkgconfdir = $(libdir)/pkgconfig
 pkgconf_DATA = yasmv.pc
-

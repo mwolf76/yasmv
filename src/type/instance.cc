@@ -34,4 +34,3 @@ InstanceType::InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params)
 {
     f_repr = ExprMgr::INSTANCE().make_params( name, params );
 }
-

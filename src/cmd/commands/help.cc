@@ -171,4 +171,3 @@ HelpTopic::~HelpTopic()
 
 void HelpTopic::usage()
 { display_manpage("help"); }
-

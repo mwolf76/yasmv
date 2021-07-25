@@ -53,7 +53,7 @@ TRANS
            choice := 5 ;
 
 TRANS
-  location = C && next(location) = D || 
+  location = C && next(location) = D ||
   location = D && next(location) = C ?:
            choice := 6;
 

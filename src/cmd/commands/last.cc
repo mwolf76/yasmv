@@ -92,4 +92,3 @@ LastTopic::~LastTopic()
 
 void LastTopic::usage()
 { display_manpage("last"); }
-

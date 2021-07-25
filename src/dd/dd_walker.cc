@@ -90,4 +90,3 @@ void ADDWalker::walk ()
         } /* switch() */
     } // while
 }
-

@@ -39,7 +39,7 @@ void Myfunction()
 {
    const char* function_name = "Myfunction";
 }
-@endverbatim 
+@endverbatim
 If this approach is used, than all functions that call an EzLogger macro within
 that translation unit would have to declare the function_name variable.
 Moreover, this define would have to be included in each translation unit that
@@ -49,7 +49,7 @@ requires this approach.
 #if !defined(__FUNCTION__) && !defined(__GNUC__) //The GNU compiler and VC++ 7.x supports this macro
 #define __FUNCTION__ ""  //If compiler does not support it, then use empty string
 #endif //!defined(__FUNCTION__) && !defined(__GNUC__)
-// @endcond 
+// @endcond
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ requires this approach.
 EZLOGGER(MyStr);
 EZLOGGER(a, b);
 EZLOGGER(a, b, c);
-@endverbatim 
+@endverbatim
 The argument can be any type that stringstream can convert to a string.
 @note
 EZLOGGER has a fixed verbosity level logic, and it's implemented and called on
@@ -78,7 +78,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERSTREAM << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERSTREAM has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -91,7 +91,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERSTREAM2(std::cout) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERSTREAM2 has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -104,7 +104,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERPRINT("i = %i and somedata = %s", i, somedata.c_str());
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERPRINT has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -136,12 +136,12 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVAR(somevariable);
-@endverbatim 
+@endverbatim
 Only takes one argument, but it will work with the following syntax:
 @verbatim
 bool SomeConditionVar = true;
 EZLOGGERVAR(SomeConditionVar == false);
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVAR has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -154,7 +154,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERMARKER;
-@endverbatim 
+@endverbatim
 This macro takes not arguments, and it's main purpose is to log the source
 code path of an executable.
 @note
@@ -173,7 +173,7 @@ void FunctFoo()
 EZLOGGERFUNCTRACKER;
 //Function Foo code here....
 }
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERFUNCTRACKER has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -191,7 +191,7 @@ void FunctFoo()
 	EZLOGGERFUNCTRACKER;
 	EZLOGGERDISPLAY_STACK;  //Display includes current function
 }
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERDISPLAY_STACK has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -206,7 +206,7 @@ both debug and release version.
 int main(int argc, char**argv)
 {
 	EZLOGGER_PRG_MAIN_ARG(argc, argv);
-@endverbatim 
+@endverbatim
 @note
 EZLOGGER_PRG_MAIN_ARG has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -228,7 +228,7 @@ both debug and release version.
 EZLOGGERVL(axter::log_often)(MyStr);
 EZLOGGERVL(axter::log_rarely)(a, b);
 EZLOGGERVL(axter::log_very_rarely)(a, b, c);
-@endverbatim 
+@endverbatim
 The argument can be any type that stringstream can convert to a string.
 @note
 EZLOGGERVL has verbosity level logic, and it's implemented and called on
@@ -242,7 +242,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVLSTREAM(axter::log_rarely) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLSTREAM has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -255,7 +255,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVLSTREAM2(axter::log_rarely, std::cerr) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLSTREAM2 has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -268,7 +268,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVLPRINT(axter::log_often)("i = %i and somedata = %s", i, somedata.c_str());
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLPRINT has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -300,12 +300,12 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVLVAR(axter::log_often, somevariable);
-@endverbatim 
+@endverbatim
 Only takes one argument, but it will work with the following syntax:
 @verbatim
 bool SomeConditionVar = true;
 EZLOGGERVLVAR(axter::log_always, SomeConditionVar == false);
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLVAR has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -318,7 +318,7 @@ both debug and release version.
 @section ExampleUsage Example Usage
 @verbatim
 EZLOGGERVLMARKER(axter::log_often);
-@endverbatim 
+@endverbatim
 This macro takes not arguments, and it's main purpose is to log the source
 code path of an executable.
 @note
@@ -337,7 +337,7 @@ void FunctFoo()
     EZLOGGERVLFUNCTRACKER(axter::log_often);
 	//Function Foo code here....
 }
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLFUNCTRACKER has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -355,7 +355,7 @@ void FunctFoo()
 	EZLOGGERVLFUNCTRACKER(axter::log_often);
 	EZLOGGERVLDISPLAY_STACK(axter::log_often);  //Display includes current function
 }
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVLDISPLAY_STACK has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -370,7 +370,7 @@ both debug and release version.
 int main(int argc, char**argv)
 {
 EZLOGGERVL_PRG_MAIN_ARG(axter::log_always, argc, argv);
-@endverbatim 
+@endverbatim
 @note
 EZLOGGERVL_PRG_MAIN_ARG has verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -400,7 +400,7 @@ both debug and release version.
 EZDBGONLYLOGGER(MyStr);
 EZDBGONLYLOGGER(a, b);
 EZDBGONLYLOGGER(a, b, c);
-@endverbatim 
+@endverbatim
 The argument can be any type that stringstream can convert to a string.
 */
 #define EZDBGONLYLOGGER axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__)
@@ -410,7 +410,7 @@ The argument can be any type that stringstream can convert to a string.
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERSTREAM << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 */
 #define EZDBGONLYLOGGERSTREAM axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, axter::log_default_verbosity_level, true)
 
@@ -419,7 +419,7 @@ EZDBGONLYLOGGERSTREAM << "This is data1 " << data1 << "This is data2 " << data2 
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERSTREAM2(std::cout) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @note
 EZDBGONLYLOGGERSTREAM2 has a fixed verbosity level logic, and it's implemented and called only on debug version.
 @see EZLOGGERSTREAM, EZLOGGERVLSTREAM, EZDBGONLYLOGGERSTREAM, EZDBGONLYLOGGERVLSTREAM
@@ -431,7 +431,7 @@ EZDBGONLYLOGGERSTREAM2 has a fixed verbosity level logic, and it's implemented a
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERPRINT("i = %i and somedata = %s", i, somedata.c_str());
-@endverbatim 
+@endverbatim
 */
 #define EZDBGONLYLOGGERPRINT axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__).cprint
 
@@ -440,12 +440,12 @@ EZDBGONLYLOGGERPRINT("i = %i and somedata = %s", i, somedata.c_str());
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVAR(somevariable);
-@endverbatim 
+@endverbatim
 Only takes one argument, but it will work with the following syntax:
 @verbatim
 bool SomeConditionVar = true;
 EZDBGONLYLOGGERVAR(SomeConditionVar == false);
-@endverbatim 
+@endverbatim
 */
 #define EZDBGONLYLOGGERVAR(x) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__)(axter::ezlogger<>::to_str(#x) + axter::ezlogger<>::to_str(" = '") + axter::ezlogger<>::to_str(x) + axter::ezlogger<>::to_str("'"))
 
@@ -454,7 +454,7 @@ EZDBGONLYLOGGERVAR(SomeConditionVar == false);
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERMARKER;
-@endverbatim 
+@endverbatim
 This macro takes not arguments, and it's main purpose is to log the source
 code path of an executable.
 */
@@ -470,7 +470,7 @@ void FunctFoo()
 	EZDBGONLYLOGGERFUNCTRACKER;
 	//Function Foo code here....
 }
-@endverbatim 
+@endverbatim
 @note
 EZDBGONLYLOGGERFUNCTRACKER has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -488,7 +488,7 @@ void FunctFoo()
 	EZLOGGERFUNCTRACKER;
 	EZDBGONLYLOGGERDISPLAY_STACK;  //Display includes current function
 }
-@endverbatim 
+@endverbatim
 @note
 EZDBGONLYLOGGERDISPLAY_STACK has a fixed verbosity level logic, and it's implemented and called on
 both debug and release version.
@@ -503,7 +503,7 @@ both debug and release version.
 int main(int argc, char**argv)
 {
 EZDBGONLYLOGGER_PRG_MAIN_ARG(argc, argv);
-@endverbatim 
+@endverbatim
 */
 #define EZDBGONLYLOGGER_PRG_MAIN_ARG(argc, argv) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__).prg_main_arg(argc, argv)
 //@}
@@ -522,7 +522,7 @@ EZDBGONLYLOGGER_PRG_MAIN_ARG(argc, argv);
 EZDBGONLYLOGGERVL(axter::log_often)(MyStr);
 EZDBGONLYLOGGERVL(axter::log_rarely)(a, b);
 EZDBGONLYLOGGERVL(axter::log_very_rarely)(a, b, c);
-@endverbatim 
+@endverbatim
 The argument can be any type that stringstream can convert to a string.
 @see EZLOGGER, EZLOGGERVL, EZDBGONLYLOGGER, EZDBGONLYLOGGERVL
 */
@@ -533,7 +533,7 @@ The argument can be any type that stringstream can convert to a string.
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVLSTREAM(axter::log_rarely) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @see EZLOGGERSTREAM, EZLOGGERVLSTREAM, EZDBGONLYLOGGERSTREAM, EZDBGONLYLOGGERVLSTREAM
 */
 #define EZDBGONLYLOGGERVLSTREAM(verbosity_level) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level, true)
@@ -543,7 +543,7 @@ EZDBGONLYLOGGERVLSTREAM(axter::log_rarely) << "This is data1 " << data1 << "This
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVLSTREAM2(axter::log_rarely, std::cerr) << "This is data1 " << data1 << "This is data2 " << data2 << std::endl;
-@endverbatim 
+@endverbatim
 @see EZLOGGERSTREAM, EZLOGGERVLSTREAM, EZDBGONLYLOGGERSTREAM, EZDBGONLYLOGGERVLSTREAM
 */
 #define EZDBGONLYLOGGERVLSTREAM2(verbosity_level, alterante_stream) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level, true, &alterante_stream)
@@ -553,7 +553,7 @@ EZDBGONLYLOGGERVLSTREAM2(axter::log_rarely, std::cerr) << "This is data1 " << da
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVLPRINT(axter::log_often)("i = %i and somedata = %s", i, somedata.c_str());
-@endverbatim 
+@endverbatim
 @see EZLOGGERPRINT, EZLOGGERVLPRINT, EZDBGONLYLOGGERPRINT, EZDBGONLYLOGGERVLPRINT
 */
 #define EZDBGONLYLOGGERVLPRINT(verbosity_level) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level).cprint
@@ -563,12 +563,12 @@ EZDBGONLYLOGGERVLPRINT(axter::log_often)("i = %i and somedata = %s", i, somedata
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVLVAR(axter::log_often, somevariable);
-@endverbatim 
+@endverbatim
 Only takes one argument, but it will work with the following syntax:
 @verbatim
 bool SomeConditionVar = true;
 EZDBGONLYLOGGERVLVAR(axter::log_always, SomeConditionVar == false);
-@endverbatim 
+@endverbatim
 @see EZLOGGERVAR, EZLOGGERVLVAR, EZDBGONLYLOGGERVAR, EZDBGONLYLOGGERVLVAR
 */
 #define EZDBGONLYLOGGERVLVAR(verbosity_level, x) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level)(axter::ezlogger<>::to_str(#x) + axter::ezlogger<>::to_str(" = '") + axter::ezlogger<>::to_str(x) + axter::ezlogger<>::to_str("'")),x
@@ -578,7 +578,7 @@ EZDBGONLYLOGGERVLVAR(axter::log_always, SomeConditionVar == false);
 @section ExampleUsage Example Usage
 @verbatim
 EZDBGONLYLOGGERVLMARKER(axter::log_often);
-@endverbatim 
+@endverbatim
 This macro takes not arguments, and it's main purpose is to log the source
 code path of an executable.
 @see EZLOGGERMARKER, EZLOGGERVLMARKER, EZDBGONLYLOGGERMARKER, EZDBGONLYLOGGERVLMARKER
@@ -594,7 +594,7 @@ void FunctFoo()
 	EZDBGONLYLOGGERVLFUNCTRACKER(axter::log_often);
 	//Function Foo code here....
 }
-@endverbatim 
+@endverbatim
 @see EZLOGGERFUNCTRACKER, EZLOGGERVLFUNCTRACKER, EZDBGONLYLOGGERFUNCTRACKER, EZDBGONLYLOGGERVLFUNCTRACKER
 */
 #define EZDBGONLYLOGGERVLFUNCTRACKER(verbosity_level) axter::ezfunction_tracker my_function_tracker##__LINE__(__FILE__, __LINE__, __FUNCTION__, verbosity_level)
@@ -609,7 +609,7 @@ void FunctFoo()
 	EZDBGONLYLOGGERVLFUNCTRACKER(axter::log_often);
 	EZDBGONLYLOGGERVLDISPLAY_STACK(axter::log_often);  //Display includes current function
 }
-@endverbatim 
+@endverbatim
 @see EZLOGGERDISPLAY_STACK, EZLOGGERVLDISPLAY_STACK, EZDBGONLYLOGGERDISPLAY_STACK, EZDBGONLYLOGGERVLDISPLAY_STACK
 */
 #define EZDBGONLYLOGGERVLDISPLAY_STACK(verbosity_level) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level).display_stack();
@@ -621,7 +621,7 @@ void FunctFoo()
 int main(int argc, char**argv)
 {
 EZDBGONLYLOGGERVL_PRG_MAIN_ARG(axter::log_always, argc, argv);
-@endverbatim 
+@endverbatim
 @see EZLOGGER_PRG_MAIN_ARG, EZLOGGERVL_PRG_MAIN_ARG, EZDBGONLYLOGGER_PRG_MAIN_ARG, EZDBGONLYLOGGERVL_PRG_MAIN_ARG
 */
 #define EZDBGONLYLOGGERVL_PRG_MAIN_ARG(verbosity_level, argc, argv) axter::ezlogger<>(__FILE__, __LINE__, __FUNCTION__, verbosity_level).prg_main_arg(argc, argv)
@@ -630,20 +630,20 @@ EZDBGONLYLOGGERVL_PRG_MAIN_ARG(axter::log_always, argc, argv);
 
 #else //EZLOGGER_IMPLEMENT_DEBUGLOGGING
 
-#define EZDBGONLYLOGGER if (1);else 
+#define EZDBGONLYLOGGER if (1);else
 #define EZDBGONLYLOGGERSTREAM if (1);else std::cout
 #define EZDBGONLYLOGGERSTREAM2(alterante_stream) if (1);else std::cout
-#define EZDBGONLYLOGGERPRINT if (1);else 
-#define EZDBGONLYLOGGERVAR(x)  
-#define EZDBGONLYLOGGERMARKER  
-#define EZDBGONLYLOGGERFUNCTRACKER  
-#define EZDBGONLYLOGGERDISPLAY_STACK  
-#define EZDBGONLYLOGGER_PRG_MAIN_ARG(argc, argv) 
+#define EZDBGONLYLOGGERPRINT if (1);else
+#define EZDBGONLYLOGGERVAR(x)
+#define EZDBGONLYLOGGERMARKER
+#define EZDBGONLYLOGGERFUNCTRACKER
+#define EZDBGONLYLOGGERDISPLAY_STACK
+#define EZDBGONLYLOGGER_PRG_MAIN_ARG(argc, argv)
 
 #define EZDBGONLYLOGGERVL(verbosity_level) if (1);else std::cout
 #define EZDBGONLYLOGGERVLSTREAM(verbosity_level) if (1);else std::cout
 #define EZDBGONLYLOGGERVLSTREAM2(verbosity_level, alterante_stream) if (1);else std::cout
-#define EZDBGONLYLOGGERVLPRINT(verbosity_level)  if (1);else 
+#define EZDBGONLYLOGGERVLPRINT(verbosity_level)  if (1);else
 #define EZDBGONLYLOGGERVLVAR(verbosity_level, x)
 #define EZDBGONLYLOGGERVLMARKER(verbosity_level)
 #define EZDBGONLYLOGGERVLFUNCTRACKER(verbosity_level)
@@ -660,7 +660,7 @@ EZDBGONLYLOGGERVL_PRG_MAIN_ARG(axter::log_always, argc, argv);
 int main(int argc, char**argv)
 {
 EZLOGGER_BEEP_AND_SLEEP(45);
-@endverbatim 
+@endverbatim
 This macro can be used in any function, and it's main purpose is to allow the developer
 time to attach to a running process for debugging.
 The macro will beep twice before going to sleep mode, and than beep once

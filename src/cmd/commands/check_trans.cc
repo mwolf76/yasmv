@@ -125,4 +125,3 @@ CheckTransTopic::~CheckTransTopic()
 
 void CheckTransTopic::usage()
 { display_manpage("check-trans"); }
-

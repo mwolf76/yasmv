@@ -2,4 +2,3 @@ reach GOAL -f @32{!GOAL}
 on success dump-trace
 on failure echo "Help, I'm trapped into a maze!"
 quit
-

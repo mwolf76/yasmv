@@ -83,4 +83,3 @@ Type::~Type() {}
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 std::ostream& operator<<(std::ostream& os, Type_ptr type)
 { return os << type->repr(); }
-

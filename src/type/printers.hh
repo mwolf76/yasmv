@@ -33,4 +33,3 @@ std::ostream& operator<<(std::ostream& os, Type_ptr type);
 std::ostream& operator<<(std::ostream& os, const Type_ptr type);
 
 #endif /* TYPE_PRINTERS_H */
-

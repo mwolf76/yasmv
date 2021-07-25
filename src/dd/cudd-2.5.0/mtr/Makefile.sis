@@ -58,7 +58,7 @@ clean:
 
 tags: _force
 	@for i in $(PSRC) $(PHDR); do			\
-	    cwd=`pwd`; ctags -a $$cwd/$$i;		
+	    cwd=`pwd`; ctags -a $$cwd/$$i;
 	done;
 
 strip_depend:
@@ -80,4 +80,3 @@ ibmdist: $(PSRC) $(PHDR)
 	rdist -Richw $(PSRC) $(PHDR) $(IBMHOST):$(IBMDIST)
 #-------------------------------------------------------------
 _force:
-

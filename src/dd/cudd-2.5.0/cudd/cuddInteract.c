@@ -429,4 +429,3 @@ ddClearGlobal(
     }
 
 } /* end of ddClearGlobal */
-

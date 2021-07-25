@@ -488,4 +488,3 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
         }
     }
 }
-

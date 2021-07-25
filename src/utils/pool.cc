@@ -50,4 +50,3 @@ bool ValueEq::operator() (const value_t x,
 {
     return x == y;
 }
-

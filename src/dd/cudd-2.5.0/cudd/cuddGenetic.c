@@ -957,4 +957,3 @@ roulette(
     return(1);
 
 } /* end of roulette */
-

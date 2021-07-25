@@ -221,7 +221,7 @@ int nbytes;
 int
 util_save_image(char const *orig_file_name, char const *save_file_name)
 {
-    (void) fprintf(stderr, 
+    (void) fprintf(stderr,
 	"util_save_image: not implemented on your operating system\n");
     return 0;
 }

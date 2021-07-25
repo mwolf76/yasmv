@@ -36,4 +36,3 @@ INIT
 
 DEFINE
         nxt := x / y;
-

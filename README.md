@@ -87,11 +87,11 @@ to solve planning problems.
   $ tar xfj microcode.tar.bz2
   $ export YASMV_HOME=`pwd`
   $ ./yasmv
-  
+
   yasmv - Yet Another Symbolic Model Verifier
   (c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
   https://github.com/mwolf76/yasmv
-   
+
   [Sat May 21 17:21:57 2016].459 src/main.cc:176 :: 2176 microcode fragments registered.
   >>
   ```

@@ -154,7 +154,7 @@ Cudd_addBddThreshold(
 {
     DdNode *res;
     DdNode *val;
-    
+
     val = cuddUniqueConst(dd,value);
     if (val == NULL) return(NULL);
     cuddRef(val);
@@ -187,7 +187,7 @@ Cudd_addBddThreshold(
 
   SideEffects [None]
 
-  SeeAlso     [Cudd_addBddInterval Cudd_addBddPattern Cudd_BddToAdd 
+  SeeAlso     [Cudd_addBddInterval Cudd_addBddPattern Cudd_BddToAdd
   Cudd_addBddThreshold]
 
 ******************************************************************************/
@@ -199,7 +199,7 @@ Cudd_addBddStrictThreshold(
 {
     DdNode *res;
     DdNode *val;
-    
+
     val = cuddUniqueConst(dd,value);
     if (val == NULL) return(NULL);
     cuddRef(val);
@@ -232,7 +232,7 @@ Cudd_addBddStrictThreshold(
 
   SideEffects [None]
 
-  SeeAlso     [Cudd_addBddThreshold Cudd_addBddStrictThreshold 
+  SeeAlso     [Cudd_addBddThreshold Cudd_addBddStrictThreshold
   Cudd_addBddPattern Cudd_BddToAdd]
 
 ******************************************************************************/
@@ -246,7 +246,7 @@ Cudd_addBddInterval(
     DdNode *res;
     DdNode *l;
     DdNode *u;
-    
+
     /* Create constant nodes for the interval bounds, so that we can use
     ** the global cache.
     */
@@ -306,7 +306,7 @@ Cudd_addBddIthBit(
 {
     DdNode *res;
     DdNode *index;
-    
+
     index = cuddUniqueConst(dd,(CUDD_VALUE_TYPE) bit);
     if (index == NULL) return(NULL);
     cuddRef(index);
@@ -377,7 +377,7 @@ Cudd_addBddPattern(
   DdNode * f)
 {
     DdNode *res;
-    
+
     do {
 	dd->reordered = 0;
 	res = cuddAddBddDoPattern(dd, f);
@@ -971,7 +971,7 @@ cuddBddTransferRecur(
     /* Check the cache. */
     if (st_lookup(table, f, &res))
 	return(Cudd_NotCond(res,comple));
-    
+
     /* Recursive step. */
     index = f->index;
     ft = cuddT(f); fe = cuddE(f);
@@ -1013,4 +1013,3 @@ cuddBddTransferRecur(
     return(Cudd_NotCond(res,comple));
 
 } /* end of cuddBddTransferRecur */
-

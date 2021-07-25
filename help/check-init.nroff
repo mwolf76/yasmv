@@ -6,7 +6,7 @@ SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-check-init [ -c <expr> ]+                 
+check-init [ -c <expr> ]+
 
 
 .ti 0
@@ -45,9 +45,8 @@ EXAMPLES
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.
- 
+
 .fi
 .in 3
 This document is part of the YASMV distribution, and as such is covered by the
 GPLv3 license that covers the whole project.
-

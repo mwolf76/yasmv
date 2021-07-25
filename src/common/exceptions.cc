@@ -53,4 +53,3 @@ const char* Exception::what() const throw()
 {
     return f_what.c_str();
 }
-

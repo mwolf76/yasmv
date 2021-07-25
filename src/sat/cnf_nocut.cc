@@ -131,4 +131,3 @@ void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)
 
     worker(add);
 }
-

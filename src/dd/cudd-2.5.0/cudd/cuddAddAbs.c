@@ -259,8 +259,8 @@ cuddAddExistAbstractRecur(
     statLine(manager);
     zero = DD_ZERO(manager);
 
-    /* Cube is guaranteed to be a cube at this point. */	
-    if (f == zero || cuddIsConstant(cube)) {  
+    /* Cube is guaranteed to be a cube at this point. */
+    if (f == zero || cuddIsConstant(cube)) {
         return(f);
     }
 
@@ -335,7 +335,7 @@ cuddAddExistAbstractRecur(
 	cuddDeref(res2);
 	cuddCacheInsert2(manager, Cudd_addExistAbstract, f, cube, res);
         return(res);
-    }	    
+    }
 
 } /* end of cuddAddExistAbstractRecur */
 
@@ -368,7 +368,7 @@ cuddAddUnivAbstractRecur(
     /* Cube is guaranteed to be a cube at this point.
     ** zero and one are the only constatnts c such that c*c=c.
     */
-    if (f == zero || f == one || cube == one) {  
+    if (f == zero || f == one || cube == one) {
 	return(f);
     }
 
@@ -473,7 +473,7 @@ cuddAddOrAbstractRecur(
     one = DD_ONE(manager);
 
     /* Cube is guaranteed to be a cube at this point. */
-    if (cuddIsConstant(f) || cube == one) {  
+    if (cuddIsConstant(f) || cube == one) {
 	return(f);
     }
 
@@ -576,4 +576,3 @@ addCheckPositiveCube(
     return(0);
 
 } /* end of addCheckPositiveCube */
-

@@ -105,4 +105,3 @@ Expr_ptr WitnessMgr::eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
 
     return res;
 }
-

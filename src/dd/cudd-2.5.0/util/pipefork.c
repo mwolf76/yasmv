@@ -86,7 +86,7 @@ util_pipefork(
     (void) close(frompipe[1]);
     return 1;
 #else
-    (void) fprintf(stderr, 
+    (void) fprintf(stderr,
 	"util_pipefork: not implemented on your operating system\n");
     return 0;
 #endif

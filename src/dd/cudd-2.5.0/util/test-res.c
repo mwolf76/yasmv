@@ -23,13 +23,13 @@ char **environ;
     (void) printf("argc is %d\n", argc);
 
     for(i = 0, ep = argv; *ep != 0; i++, ep++) {
-	(void) printf("%08x (%08x-%08x)\targv[%d]:\t%s\n", 
+	(void) printf("%08x (%08x-%08x)\targv[%d]:\t%s\n",
 	    ep, *ep, *ep + strlen(*ep), i, *ep);
     }
 
     i = 0;
     for(i = 0, ep = environ; *ep != 0; ep++, i++) {
-	(void) printf("%08x (%08x-%08x)\tenviron[%d]:\t%s\n", 
+	(void) printf("%08x (%08x-%08x)\tenviron[%d]:\t%s\n",
 	    ep, *ep, *ep + strlen(*ep), i, *ep);
     }
 

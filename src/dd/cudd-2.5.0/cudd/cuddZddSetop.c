@@ -393,7 +393,7 @@ Cudd_zddChange(
     DdNode	*res;
 
     if ((unsigned int) var >= CUDD_MAXINDEX - 1) return(NULL);
-    
+
     do {
 	dd->reordered = 0;
 	res = cuddZddChange(dd, P, var);
@@ -1163,4 +1163,3 @@ zddVarToConst(
     }
 
 } /* end of zddVarToConst */
-

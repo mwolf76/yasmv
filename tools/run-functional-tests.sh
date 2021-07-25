@@ -8,7 +8,7 @@ function test() {
     rm -f "$2-out"
 
     YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$1/$1.smv" < "$EXAMPLES/$1/commands.$2" > "$2-out"
-    diff "$REFERENCE/$2-out-ref" "$2-out" &> /dev/null
+    diff -wB "$REFERENCE/$2-out-ref" "$2-out" &> /dev/null
     if [[ $? == 0 ]]; then
 	    echo "OK"
     else
@@ -24,4 +24,3 @@ test cannibals cannibals-backward
 test vending vending
 test herschel herschel
 test koenisberg koenisberg
-

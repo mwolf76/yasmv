@@ -497,8 +497,8 @@ Cudd_addRestrict(
   Berthet and J. C. Madre.
   Returns a pointer to an array containing the result if successful; NULL
   otherwise. The size of the array equals the number of variables in the
-  manager. The components of the solution have their reference counts 
-  already incremented (unlike the results of most other functions in 
+  manager. The components of the solution have their reference counts
+  already incremented (unlike the results of most other functions in
   the package).]
 
   SideEffects [None]
@@ -816,7 +816,7 @@ cuddBddConstrainRecur(
     if (r != NULL) {
 	return(Cudd_NotCond(r,comple));
     }
-    
+
     /* Recursive step. */
     topf = dd->perm[f->index];
     topc = dd->perm[Cudd_Regular(c)->index];
@@ -1227,7 +1227,7 @@ cuddAddConstrainRecur(
     if (r != NULL) {
 	return(r);
     }
-    
+
     /* Recursive step. */
     topf = dd->perm[f->index];
     topc = dd->perm[c->index];
@@ -1912,7 +1912,7 @@ MarkCacheCompare(
 
     entry1 = (MarkCacheKey *) ptr1;
     entry2 = (MarkCacheKey *) ptr2;
-    
+
     return((entry1->f != entry2->f) || (entry1->c != entry2->c));
 
 } /* end of MarkCacheCompare */

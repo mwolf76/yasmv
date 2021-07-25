@@ -250,4 +250,3 @@ std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
 std::string msd2string(InlinedOperatorSignature& ios);
 
 #endif /* COMPILATION_UNIT_H */
-

@@ -115,6 +115,3 @@ ReadModelTopic::~ReadModelTopic()
 
 void ReadModelTopic::usage()
 { display_manpage("read-model"); }
-
-
-

@@ -95,4 +95,3 @@ Witness: reach_1 [[ Reachability witness for target `GOAL` in module `cannibals`
    west-missionaries = 0
    east-missionaries = 3
    carry = DONE
-

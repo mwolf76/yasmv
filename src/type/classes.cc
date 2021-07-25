@@ -91,4 +91,3 @@ bool Type::is_string()
 
 StringType_ptr Type::as_string()
 { return dynamic_cast<const StringType_ptr> (this); }
-

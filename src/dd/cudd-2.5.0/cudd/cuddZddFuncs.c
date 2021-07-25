@@ -1232,7 +1232,7 @@ cuddZddDivide(
     Cudd_RecursiveDerefZdd(dd, f0);
     Cudd_RecursiveDerefZdd(dd, g1);
     Cudd_RecursiveDerefZdd(dd, g0);
-    
+
     cuddCacheInsert2(dd, cuddZddDivide, f, g, r);
     Cudd_Deref(r);
     return(r);
@@ -1332,7 +1332,7 @@ cuddZddDivideF(
     Cudd_RecursiveDerefZdd(dd, f0);
     Cudd_RecursiveDerefZdd(dd, g1);
     Cudd_RecursiveDerefZdd(dd, g0);
-    
+
     cuddCacheInsert2(dd, cuddZddDivideF, f, g, r);
     Cudd_Deref(r);
     return(r);

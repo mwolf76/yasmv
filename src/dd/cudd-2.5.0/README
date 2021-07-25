@@ -46,7 +46,7 @@ The Makefile supports several targets:
     make testmtr:
         Builds a test program for the mtr package.  To run the program,
 	go to the mtr directory and type "./testmtr -p 1 test.groups".
-    
+
     make clean:
 	Cleans directories, but leaves libraries and programs.
 
@@ -57,7 +57,7 @@ The Makefile supports several targets:
 The following targets are more or less obsolete and may disappear or
 change in the future.
 
-    make check_leaks: 
+    make check_leaks:
 	Creates a version of the program with the mnemosyne library
 	linked to it. It also builds the mnemalyse program, which
 	helps in finding memory leaks. This target does not work on the

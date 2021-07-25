@@ -6,7 +6,7 @@ SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-dump-model [-o <filename>] [-s state|init|trans]* 
+dump-model [-o <filename>] [-s state|init|trans]*
 
 
 .ti 0
@@ -44,7 +44,7 @@ VAR carry: {CABBAGE, GOAT, NIL, WOLF};
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.
- 
+
 .fi
 .in 3
 This document is part of the YASMV distribution, and as such is covered by the

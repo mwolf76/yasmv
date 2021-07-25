@@ -22,7 +22,7 @@
   appears at most once in the queue. They do so by keeping a hash
   table where the node is used as key.  Queue items are recycled via a
   free list for efficiency.
-  
+
   Internal procedures provided by this module:
                 <ul>
 		<li> cuddLevelQueueInit()
@@ -479,7 +479,7 @@ hashInsert(
     queue->buckets[posn] = item;
 
     return(1);
-    
+
 } /* end of hashInsert */
 
 

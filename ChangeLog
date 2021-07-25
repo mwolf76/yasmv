@@ -5,4 +5,3 @@
 	--version command line switch;
 	introduced a few new commands: echo (can be omitted), do, on, last;
 	finer grained session timer;
-

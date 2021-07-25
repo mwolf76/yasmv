@@ -157,7 +157,7 @@ Cudd_CheckCube(
   DdNode * g)
 {
     DdNode *g1,*g0,*one,*zero;
-    
+
     one = DD_ONE(dd);
     if (g == one) return(1);
     if (Cudd_IsConstant(g)) return(0);
@@ -324,4 +324,3 @@ cuddCofactorRecur(
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-

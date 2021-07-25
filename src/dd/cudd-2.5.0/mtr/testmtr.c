@@ -1,5 +1,5 @@
 /**CFile***********************************************************************
- 
+
    FileName    [testmtr.c]
 
    PackageName [mtr]
@@ -11,7 +11,7 @@
    SeeAlso     []
 
    Author      [Fabio Somenzi]
-   
+
   Copyright   [Copyright (c) 1995-2012, Regents of the University of Colorado
 
   All rights reserved.
@@ -104,7 +104,7 @@ main(
 	    pr = 0;
     FILE    *fp;
     const char *file = NULL;
-    
+
     (void) printf("# %s\n", TESTMTR_VERSION);
     /* Echo command line and arguments. */
     (void) printf("#");
@@ -267,4 +267,3 @@ open_file(
     return(fp);
 
 } /* end of open_file */
-

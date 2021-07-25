@@ -30,7 +30,7 @@
  *   util_cpu_time -- return a long which represents the elapsed processor
  *   time in milliseconds since some constant reference
  */
-long 
+long
 util_cpu_time()
 {
     long t = 0;

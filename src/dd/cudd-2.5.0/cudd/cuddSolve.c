@@ -152,9 +152,9 @@ Cudd_SolveEqn(
 
   Synopsis    [Checks the solution of F(x,y) = 0.]
 
-  Description [Checks the solution of F(x,y) = 0. This procedure 
-  substitutes the solution components for the unknowns of F and returns 
-  the resulting BDD for F.] 
+  Description [Checks the solution of F(x,y) = 0. This procedure
+  substitutes the solution components for the unknowns of F and returns
+  the resulting BDD for F.]
 
   SideEffects [Frees the memory pointed by yIndex.]
 
@@ -192,7 +192,7 @@ Cudd_VerifySol(
 
   Synopsis    [Implements the recursive step of Cudd_SolveEqn.]
 
-  Description [Implements the recursive step of Cudd_SolveEqn. 
+  Description [Implements the recursive step of Cudd_SolveEqn.
   Returns NULL if the intermediate solution blows up
   or reordering occurs. The parametric solutions are
   stored in the array G.]
@@ -347,7 +347,7 @@ cuddVerifySol(
 	if (w) {
 	    cuddRef(w);
 	} else {
-	    return(NULL); 
+	    return(NULL);
 	}
 	Cudd_RecursiveDeref(bdd,R);
 	R = w;
@@ -363,4 +363,3 @@ cuddVerifySol(
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-

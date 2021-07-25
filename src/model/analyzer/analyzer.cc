@@ -264,4 +264,3 @@ bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
 
     return status == STATUS_UNSAT;
 }
-

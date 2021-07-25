@@ -17,4 +17,4 @@ PKG_CC = classes.cc exceptions.cc symb_iter.cc
 # -------------------------------------------------------
 
 noinst_LTLIBRARIES = libsymb.la
-libsymb_la_SOURCES = $(PKG_HH) $(PKG_CC) 
+libsymb_la_SOURCES = $(PKG_HH) $(PKG_CC)

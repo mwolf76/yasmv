@@ -83,7 +83,7 @@ DEFINE
            carry = MC: 1;
            carry = C_: 1;
            else: 0;
-         end;           
+         end;
 
 INVAR
   ! GOAL ->
@@ -93,7 +93,7 @@ INVAR
 TRANS
   next(boat) = WEST ?:
       west-missionaries := west-missionaries + MCARRY;
-            
+
 TRANS
   next(boat) = WEST ?:
       east-missionaries := east-missionaries - MCARRY;

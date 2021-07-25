@@ -43,4 +43,3 @@ bool AtomEq::operator() (const Atom& x, const Atom& y) const
 {
     return x == y;
 }
-

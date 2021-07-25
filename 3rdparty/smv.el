@@ -1,5 +1,5 @@
 ;;;; Major mode for writing SMV programs.
-;;;; Sergey Berezin, Jan. 1998. Send bugs and suggestions to 
+;;;; Sergey Berezin, Jan. 1998. Send bugs and suggestions to
 ;;;; sergey.berezin@cs.cmu.edu
 ;;;;
 ;;;; This file can be used and modified freely.
@@ -48,7 +48,7 @@
 ;;;;
 ;;;; ;;; SMV mode
 ;;;; (autoload 'smv-mode "smv-mode" "SMV specifications editing mode." t)
-;;;; (setq auto-mode-alist 
+;;;; (setq auto-mode-alist
 ;;;;       (append  (list '("\\.smv$" . smv-mode) '("\\.ord$" . smv-ord-mode))
 ;;;; 	       auto-mode-alist))
 ;;;; (setq completion-ignored-extensions
@@ -62,7 +62,7 @@
 ;;;; (global-font-lock-mode t) ;; if you use gnu-emacs, or
 ;;;; (setq-default font-lock-auto-fontify t) ;; if you use xemacs.
 ;;;;
-;;;; In GNU emacs faces `font-lock-preprocessor-face' and 
+;;;; In GNU emacs faces `font-lock-preprocessor-face' and
 ;;;; `font-lock-variable-name-face' may not be predefined.
 ;;;; In this case they are defined automatically when smv-mode.el
 ;;;; is loaded the first time. You can also define them yourself in .emacs:
@@ -106,7 +106,7 @@
 
 ;;; Add smv-mode to the list of fontified modes
 (if (string-match "XEmacs" emacs-version) ()
-  (setq font-lock-defaults-alist 
+  (setq font-lock-defaults-alist
 	(cons '(smv-mode smv-font-lock-keywords
 			 nil nil nil nil)
 	      font-lock-defaults-alist)))
@@ -178,7 +178,7 @@
 
 (defconst smv-assignment-regexp
   (concat "\\(\\(\\(" (smv-keyword-match "init") "\\|"
-		  (smv-keyword-match "next") 
+		  (smv-keyword-match "next")
 		  "\\)(\\s-*\\([][_?.A-Za-z0-9-]+\\)\\s-*)\\)"
 		  "\\|\\(\\s-*[][_?.A-Za-z0-9-]+\\)\\)\\s-*:=")
   "Regexp matching the beginning of an assignment. Used for indentation
@@ -239,22 +239,22 @@ concatenation of `smv-infix-operators' and `smv-other-operators'.")
   "Additional expressions to highlight in SMV mode.")
 
 (defconst smv-font-lock-keywords-2
-  (purecopy 
+  (purecopy
    (append smv-font-lock-keywords-1
 	   (list
 	    (list "\\([{}]\\)" 1 'font-lock-type-face)
 	    (list (concat "\\(" smv-separator-regexp "\\)")
 		  1 'smv-font-lock-separator-face 'prepend))))
   "Additional expressions to highlight in SMV mode.")
-  
+
 (defconst smv-font-lock-keywords
   (if font-lock-maximum-decoration
       smv-font-lock-keywords-2
       smv-font-lock-keywords-1))
 
-;;;; Running SMV 
+;;;; Running SMV
 
-(defvar smv-command "smv" 
+(defvar smv-command "smv"
   "The command name to run SMV. The defaul is usually \"smv\"")
 
 (defvar smv-cache-size 32749
@@ -285,7 +285,7 @@ However, any value higher than \"2\" is equivalent to \"2\".
 This value is passed to the SMV process as -v opton.
 If nil, don't use verbose mode.")
 
-(defvar smv-heuristic-factor nil 
+(defvar smv-heuristic-factor nil
 "Must be string representing real in [0.0..1.0] or nil. The variable
 ordering is determined by a heuristic procedure which is based on the
 syntactic structure of the program, and a floating point
@@ -307,10 +307,10 @@ This variable is updated automatically each time SMV process takes off.")
   (mapconcat 'identity
 	     (append
 	      (if smv-cache-size (list "-c" (format "%s" smv-cache-size)) nil)
-	      (if smv-mini-cache-size 
+	      (if smv-mini-cache-size
 		  (list "-m" (format "%s" smv-mini-cache-size))
 		nil)
-	      (if smv-key-table-size 
+	      (if smv-key-table-size
 		  (list "-k" (format "%s" smv-key-table-size))
 		nil)
 	      (if smv-forward-search '("-f") nil)
@@ -318,7 +318,7 @@ This variable is updated automatically each time SMV process takes off.")
 	      (if smv-order-file (list "-i" smv-order-file) nil)
 	      (if smv-verbose-level (list "-v" smv-verbose-level) nil)
 	      (if smv-heuristic-factor (list "-h" smv-heuristic-factor) nil)
-	      (if smv-command-line-args 
+	      (if smv-command-line-args
 		  (if (string-match "%s" smv-command-line-args)
 		      (list (format smv-command-line-args file))
 		    (list smv-command-line-args file))
@@ -333,7 +333,7 @@ This variable is updated automatically each time SMV process takes off.")
     (if (buffer-file-name)
 	(progn
 	  (if (buffer-modified-p) (smv-save-buffer))
-	  (setq smv-compile-buffer 
+	  (setq smv-compile-buffer
 		(compile-internal
 		 (concat smv-command " " (smv-args (buffer-file-name)))
 				  "No more errors"
@@ -365,11 +365,11 @@ This variable is updated automatically each time SMV process takes off.")
 	      (setq smv-compile-buffer (get-buffer-create "*smv*"))
 	      (set-buffer smv-compile-buffer)
 	      (goto-char (point-max))
-	      (let ((exit-code 
-                  (apply 'call-process smv-command nil smv-compile-buffer nil 
+	      (let ((exit-code
+                  (apply 'call-process smv-command nil smv-compile-buffer nil
 			    "-o" order-file-name
-			    (append 
-			     (if smv-heuristic-factor 
+			    (append
+			     (if smv-heuristic-factor
 				 (list "-h" (format "%s" smv-heuristic-factor))
 			       nil)
 			     (list buffer-file)))))
@@ -412,7 +412,7 @@ no such file, generate it and load (see `smv-generate-order-file')."
   "Saves current options in *.opt file."
   (interactive)
   (let* ((buffer (current-buffer))
-	 (opt-file-name 
+	 (opt-file-name
 	  (let ((match (string-match "\\.smv$"
 				     (buffer-file-name))))
 	    (if match
@@ -420,7 +420,7 @@ no such file, generate it and load (see `smv-generate-order-file')."
 				   0 match)
 			".opt")
 	      (concat (buffer-file-name) ".opt"))))
-	 (opt-buffer-name 
+	 (opt-buffer-name
 	  (let ((match (string-match "\\.smv$"
 				     (buffer-name))))
 	    (if match
@@ -430,10 +430,10 @@ no such file, generate it and load (see `smv-generate-order-file')."
 	      (concat (buffer-name) ".opt"))))
 	 (opt-buffer-exists (get-buffer opt-buffer-name))
 	 (opt-buffer (get-buffer-create opt-buffer-name))
-	 (save-options-from-buffer 
-	  (and opt-buffer-exists 
+	 (save-options-from-buffer
+	  (and opt-buffer-exists
 	       (buffer-modified-p opt-buffer)
-	       (y-or-n-p (format "buffer %s is modified. Save options from that buffer?" 
+	       (y-or-n-p (format "buffer %s is modified. Save options from that buffer?"
 				 (buffer-name opt-buffer)))))
 	 (options (format ";;;; This file is generated automatically.\n(setq smv-cache-size %S)\n(setq smv-mini-cache-size %S)\n(setq smv-key-table-size %S)\n(setq smv-forward-search %S)\n(setq smv-report-option %S)\n(setq smv-order-file %S)\n(setq smv-verbose-level %S)\n(setq smv-heuristic-factor %S)\n(setq smv-command-line-args %S)\n"
              smv-cache-size
@@ -463,7 +463,7 @@ it tries to make a few reasonable guesses. If no SMV buffer is found,
 only saves the current buffer.
 
 Normally is called from the *.opt file while editing options for SMV
-specification." 
+specification."
   (interactive)
   (let* ((buffer (current-buffer))
 	 (buffer-file (buffer-file-name))
@@ -486,7 +486,7 @@ specification."
 	  (set-buffer smv-buffer)
 	  (load buffer-file)
 	  (setq smv-current-buffer smv-buffer)
-	  (if smv-window 
+	  (if smv-window
 	      (select-window smv-window)
 	    (switch-to-buffer smv-buffer))
 	  (if (get-buffer-window buffer)
@@ -520,10 +520,10 @@ for SMV specification. Bound to \\[smv-save-and-return]"
     (if smv-buffer
 	(let ((smv-window (get-buffer-window smv-buffer)))
 	  (setq smv-current-buffer smv-buffer)
-	  (if smv-window 
+	  (if smv-window
 	      (select-window smv-window)
 	    (switch-to-buffer smv-buffer))
-	  (if (get-buffer-window buffer) 
+	  (if (get-buffer-window buffer)
 	      (delete-window (get-buffer-window buffer)))))) )
 
 (defun smv-edit-options ()
@@ -531,7 +531,7 @@ for SMV specification. Bound to \\[smv-save-and-return]"
 Run \\[eval-buffer] when done."
   (interactive)
   (let* ((buffer (current-buffer))
-	 (opt-file-name 
+	 (opt-file-name
 	  (let ((match (string-match "\\.smv$"
 				     (buffer-file-name))))
 	    (if match
@@ -539,7 +539,7 @@ Run \\[eval-buffer] when done."
 				   0 match)
 			".opt")
 	      (concat (buffer-file-name) ".opt"))))
-	 (opt-buffer-name 
+	 (opt-buffer-name
 	  (let ((match (string-match "\\.smv$"
 				     (buffer-name))))
 	    (if match
@@ -589,13 +589,13 @@ Run \\[eval-buffer] when done."
 	(error "Your SMV version does not support signal handling"))
     (error "SMV is not running")))
 
-(defun smv-send-usr1 () 
+(defun smv-send-usr1 ()
   "Sends SIGUSR1 to the current SMV process. I have a version of SMV
 that uses it to toggle dynamic variable ordering."
   (interactive)
   (smv-send-signal 10))
 
-(defun smv-send-usr2 () 
+(defun smv-send-usr2 ()
   "Sends SIGUSR2 to the current SMV process. I have a version of SMV
 that uses it to force garbage collection."
   (interactive)
@@ -610,35 +610,35 @@ that uses it to force garbage collection."
 	(setq smv-cache-size arg)
 	(setq smv-options-changed t))
     (error "Not a string. The value is not set.")))
-  
+
 (defun smv-set-key-table-size (arg)
   "Sets SMV key table size to use in command line option -c."
   (interactive (list (read-from-minibuffer "Set key table size to: "
 			       smv-key-table-size)))
   (if (stringp arg)
-      (progn 
+      (progn
 	(setq smv-key-table-size arg)
 	(setq smv-options-changed t))
     (error "Not a string. The value is not set.")))
-  
+
 (defun smv-forward-search (&optional arg)
-  "Toggles the use of -f option (forward search). 
+  "Toggles the use of -f option (forward search).
 With positive arg set to on."
   (interactive "P")
   (setq smv-options-changed t)
   (if arg
       (setq smv-forward-search t)
     (setq smv-forward-search (not smv-forward-search))) )
-  
+
 (defun smv-report-option (&optional arg)
-  "Toggles the use of -r option (report statistics). 
+  "Toggles the use of -r option (report statistics).
 With positive arg set to on."
   (interactive "P")
   (setq smv-options-changed t)
   (if arg
       (setq smv-report-option t)
     (setq smv-report-option (not smv-report-option))) )
-  
+
 (defun smv-set-order-file (arg)
   "Sets SMV variable ordering file to use in command line option -i.
 If empty line is given, don't use any ordering file."
@@ -650,7 +650,7 @@ If empty line is given, don't use any ordering file."
 	  (setq smv-order-file arg))
 	(setq smv-options-changed t))
     (error "Not a string. The value is not set.")))
-  
+
 (defun smv-set-verbose-level (arg)
   "Sets SMV verbose level to use in command line option -v.
 If empty line is given, don't use any ordering file."
@@ -682,7 +682,7 @@ If empty line is given, don't use any ordering file."
   (interactive (list (read-from-minibuffer "Other arguments: "
 			       smv-command-line-args)))
   (if (stringp arg)
-      (progn 
+      (progn
 	(if (string= arg "") (setq smv-command-line-args nil)
 	  (setq smv-command-line-args arg))
 	(setq smv-options-changed t))
@@ -693,7 +693,7 @@ If empty line is given, don't use any ordering file."
   "Saves SMV file together with options. Prompts the user whether to
 override the *.opt file if the options have changed."
   (interactive)
-  (let ((opt-file-name 
+  (let ((opt-file-name
 	 (let ((match (string-match "\\.smv$"
 				    (buffer-file-name))))
 	   (if match
@@ -707,7 +707,7 @@ override the *.opt file if the options have changed."
 		 (progn
 		   (smv-save-options)
 		   (setq smv-options-changed nil))))
-	  (smv-options-changed 
+	  (smv-options-changed
 	     (smv-save-options)
 	     (setq smv-options-changed nil))))
     (save-buffer))
@@ -726,7 +726,7 @@ the current one and positions the cursor on the first non-blank character."
     (beginning-of-line)
     (skip-chars-forward " \t")))
 
-(defun smv-previous-indentation () 
+(defun smv-previous-indentation ()
   "Returns a pair (INDENT . TYPE). INDENT is the indentation of the
 previous string, if there is one, and TYPE is 'openning, 'declaration
 or 'plain, depending on whether previous string starts with an
@@ -757,7 +757,7 @@ improvement."
 		   (indent (car indent-data))
 		   (type (cdr indent-data)))
 	      (setq indent
-		    (cond ((looking-at smv-closing-keywords-regexp) 
+		    (cond ((looking-at smv-closing-keywords-regexp)
 			   (if (< indent 2) 0 (- indent 2)))
 			  ((or (eq type 'openning) (eq type 'declaration))
 			   (+ indent 2))
@@ -797,7 +797,7 @@ improvement."
     (define-key smv-mode-map "\t"  'smv-indent-line)))
 
 (defun smv-mode ()
-  "Major mode for SMV specification files. 
+  "Major mode for SMV specification files.
 
 \\{smv-mode-map}
 
@@ -858,7 +858,7 @@ Please send bugs and suggestions to berez+@cs.cmu.edu."
   (setq major-mode 'smv-mode)
   (setq mode-name "SMV")
 ;;; Load command line options for SMV process
-  (let ((opt-file-name 
+  (let ((opt-file-name
 	 (let ((match (string-match "\\.smv$"
 				    (buffer-file-name))))
 	   (if match
@@ -869,7 +869,7 @@ Please send bugs and suggestions to berez+@cs.cmu.edu."
     (if (file-exists-p opt-file-name)
 	(load opt-file-name)))
 ;;; Do fontification, if necessary
-  (setq font-lock-keywords 
+  (setq font-lock-keywords
 	(if font-lock-maximum-decoration
 	    smv-font-lock-keywords-2
 	  smv-font-lock-keywords-1))
@@ -877,14 +877,14 @@ Please send bugs and suggestions to berez+@cs.cmu.edu."
 	   smv-font-lock-mode-on font-lock-global-modes window-system)
       (progn
 	(font-lock-mode 1)
-;;;	(if (string-match "XEmacs" emacs-version) () 
+;;;	(if (string-match "XEmacs" emacs-version) ()
 ;;;	  (font-lock-fontify-buffer))
 	))
   (setq mode-line-process nil) ; put 'smv-status when hooked up to inferior SMV
   (run-hooks 'smv-mode-hook))
 
 (defun smv-ord-mode ()
-  "Major mode for SMV variable ordering files. 
+  "Major mode for SMV variable ordering files.
 \\[smv-save-and-return] will save the buffer and get you back to
 the accosiated SMV file."
   (interactive)
@@ -907,7 +907,7 @@ the accosiated SMV file."
   (setq major-mode 'smv-ord-mode)
   (setq mode-name "SMV Order")
 ;;; Do fontification, if necessary
-  (setq font-lock-keywords 
+  (setq font-lock-keywords
 	(if font-lock-maximum-decoration
 	    smv-font-lock-keywords-2
 	  smv-font-lock-keywords-1))
@@ -918,7 +918,7 @@ the accosiated SMV file."
 
 (defun smv-options-edit-mode ()
   "Major mode for editing SMV options. Actually, this is Emacs Lisp
-mode with a few changes. In particular, \\[smv-save-and-load-options] will save the file, 
+mode with a few changes. In particular, \\[smv-save-and-load-options] will save the file,
 find the associated SMV file and updates its options accordingly.  See
 `\\[describe-bindings]' for key bindings.  "
   (interactive)
@@ -938,7 +938,7 @@ find the associated SMV file and updates its options accordingly.  See
   (make-local-variable 'smv-options-changed)
   (setq major-mode 'smv-options-edit-mode)
   (setq mode-name "SMV Options")
-;  (setq font-lock-keywords '(t ("^(\\(def\\(\\(const\\(\\|ant\\)\\|ine-key\\(\\|-after\\)\\|var\\)\\|\\(class\\|struct\\|type\\)\\|\\([^ 	
+;  (setq font-lock-keywords '(t ("^(\\(def\\(\\(const\\(\\|ant\\)\\|ine-key\\(\\|-after\\)\\|var\\)\\|\\(class\\|struct\\|type\\)\\|\\([^
 ;()]+\\)\\)\\)\\>[ 	'(]*\\(\\sw+\\)?" (1 font-lock-keyword-face) (8 (cond ((match-beginning 3) font-lock-variable-name-face) ((match-beginning 6) font-lock-type-face) (t font-lock-function-name-face)) nil t))))
   (if (and (not (string-match "XEmacs" emacs-version))
 	   smv-font-lock-mode-on  font-lock-global-modes window-system)
@@ -947,4 +947,3 @@ find the associated SMV file and updates its options accordingly.  See
   (local-set-key "\C-c\C-c" 'smv-save-and-load-options))
 
 (provide 'smv-mode)
-

@@ -56,7 +56,7 @@ util_file_search(
 	}
 	FREE(filename);
 	path = ++cp;
-    } while (! quit); 
+    } while (! quit);
 
     FREE(save_path);
     return 0;

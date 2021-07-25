@@ -69,4 +69,3 @@ public:
 };
 
 #endif /* LTL_ALGORITHM_H */
-

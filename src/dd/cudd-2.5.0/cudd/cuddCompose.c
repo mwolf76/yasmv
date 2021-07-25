@@ -1059,7 +1059,7 @@ cuddAddPermuteRecur(
     DdNode	*T,*E;
     DdNode	*res,*var;
     int		index;
-    
+
     statLine(manager);
     /* Check for terminal case of constant node. */
     if (cuddIsConstant(node)) {
@@ -1678,7 +1678,7 @@ cuddBddVectorComposeRecur(
     }
     cuddRef(res);
     Cudd_IterDerefBdd(dd, T);
-    Cudd_IterDerefBdd(dd, E);	
+    Cudd_IterDerefBdd(dd, E);
 
     /* Do not keep the result if the reference count is only 1, since
     ** it will not be visited again.
@@ -1742,7 +1742,7 @@ ddIsIthAddVarPair(
   DdNode * g,
   unsigned int  i)
 {
-    return(f->index == i && g->index == i && 
+    return(f->index == i && g->index == i &&
 	   cuddT(f) == DD_ONE(dd) && cuddE(f) == DD_ZERO(dd) &&
 	   cuddT(g) == DD_ZERO(dd) && cuddE(g) == DD_ONE(dd));
 

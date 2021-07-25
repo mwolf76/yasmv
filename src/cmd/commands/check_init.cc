@@ -124,4 +124,3 @@ CheckInitTopic::~CheckInitTopic()
 
 void CheckInitTopic::usage()
 { display_manpage("check-init"); }
-

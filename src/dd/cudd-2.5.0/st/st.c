@@ -150,7 +150,7 @@ static int rehash (st_table *);
   <pre>
 	 strcmp(x,y) - the standard library function
   </pre>
-  It is recommended to use these particular functions if they fit your 
+  It is recommended to use these particular functions if they fit your
   needs, since st will recognize certain of them and run more quickly
   because of it.]
 
@@ -327,7 +327,7 @@ st_lookup_int(st_table *table, void *key, int *value)
     hash_val = do_hash(key, table);
 
     FIND_ENTRY(table, hash_val, key, ptr, last);
-    
+
     if (ptr == NIL(st_table_entry)) {
 	return 0;
     } else {
@@ -411,7 +411,7 @@ st_add_direct(st_table *table, void *key, void *value)
 {
     int hash_val;
     st_table_entry *newt;
-    
+
     hash_val = do_hash(key, table);
     if (table->num_entries / table->num_bins >= table->max_density) {
 	if (rehash(table) == ST_OUT_OF_MEM) {
@@ -578,7 +578,7 @@ st_copy(st_table *old_table)
     if (new_table == NIL(st_table)) {
 	return NIL(st_table);
     }
-    
+
     *new_table = *old_table;
     new_table->bins = ALLOC(st_table_entry *, num_bins);
     if (new_table->bins == NIL(st_table_entry *)) {
@@ -640,7 +640,7 @@ st_delete(st_table *table, void *keyp, void *value)
     hash_val = do_hash(key, table);
 
     FIND_ENTRY(table, hash_val, key, ptr ,last);
-    
+
     if (ptr == NIL(st_table_entry)) {
 	return 0;
     }
@@ -767,7 +767,7 @@ st_strhash(char *string, int modulus)
 {
     int val = 0;
     int c;
-    
+
     while ((c = *string++) != '\0') {
 	val = val*997 + c;
     }
@@ -949,7 +949,7 @@ st_gen(st_generator *gen, void *key_p, void *value_p)
   SeeAlso     [st_gen]
 
 ******************************************************************************/
-int 
+int
 st_gen_int(st_generator *gen, void *key_p, int *value_p)
 {
     int i;

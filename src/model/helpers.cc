@@ -29,4 +29,3 @@ std::ostream& operator<<(std::ostream& os, Module& module)
 {
     return os << module.name();
 }
-

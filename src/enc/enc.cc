@@ -57,4 +57,3 @@ ADD Encoding::make_monolithic_encoding(unsigned nbits)
 
     return res;
 }
-

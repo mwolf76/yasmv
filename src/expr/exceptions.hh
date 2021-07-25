@@ -34,4 +34,3 @@ public:
 };
 
 #endif /* EXPR_EXCEPTIONS_H */
-

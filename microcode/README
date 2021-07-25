@@ -8,4 +8,3 @@ This directory contains the microcode files for yasmv. Due to its hefty size,
 the microcode is currently distributed as a bz2 tarball called
 `microcode.tar.bz2`. Unpack the contents of this tarball in a directory of
 choice and set the environment variable `YASMV_HOME` to point to its parent.
-

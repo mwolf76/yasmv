@@ -5,7 +5,7 @@
 
 /*
  *  These are interface routines to be placed between a program and the
- *  system memory allocator.  
+ *  system memory allocator.
  *
  *  It forces well-defined semantics for several 'borderline' cases:
  *
@@ -17,7 +17,7 @@
  *	    to malloc/realloc is a 'long' to catch this condition
  *
  *  The function pointer MMoutOfMemory() contains a vector to handle a
- *  'out-of-memory' error (which, by default, points at a simple wrap-up 
+ *  'out-of-memory' error (which, by default, points at a simple wrap-up
  *  and exit routine).
  */
 
@@ -37,7 +37,7 @@ void (*MMoutOfMemory)(long) = MMout_of_memory;
 
 
 /* MMout_of_memory -- out of memory for lazy people, flush and exit */
-void 
+void
 MMout_of_memory(long size)
 {
     (void) fflush(stdout);

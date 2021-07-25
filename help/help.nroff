@@ -29,7 +29,7 @@ EXAMPLES
 
 .nf
 >> help
-Available topics: 
+Available topics:
 - check-init
 - check-trans
 - clear

@@ -18,9 +18,9 @@ static char *new_file_name;
 
 char *util_save_sp;		/* set by util_restart_save_state() */
 extern char *sbrk();
-
+
 static void
-grow_stack() 
+grow_stack()
 {
     int i, space[256];
 
@@ -84,7 +84,7 @@ restart_program()
 
     util_restart_restore_state();	/* jump back into handle_sigquit() */
 }
-
+
 void
 util_restart(char const *old, char const *neW, int interval)
 {
@@ -98,7 +98,7 @@ util_restart(char const *old, char const *neW, int interval)
 #endif
 #endif
 #ifdef sun
-    stack_hi_addr = (char *) 0x0effffff;	/* Sun OS 3.2, 3.4 */ 
+    stack_hi_addr = (char *) 0x0effffff;	/* Sun OS 3.2, 3.4 */
 #endif
 
     old_file_name = old;
@@ -130,7 +130,7 @@ util_restart(char const *old, char const *neW, int interval)
 void
 util_restart(char const *old, char const *neW, int interval)
 {
-    (void) fprintf(stderr, 
+    (void) fprintf(stderr,
 	"util_restart: not supported on your operating system/hardware\n");
 }
 

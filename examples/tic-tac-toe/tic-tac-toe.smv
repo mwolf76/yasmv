@@ -64,7 +64,7 @@ DEFINE
 #inertial
 VAR
     turn : { PLAYER_A, PLAYER_B };
-  
+
 INIT
   grid = [ _, _, _,
            _, A, _,
@@ -100,7 +100,7 @@ INVAR
     move = BOTTOM-RIGHT -> grid[8] = _ ;
 
 TRANS
-  turn := 
+  turn :=
          ((turn = PLAYER_A) ? PLAYER_B : PLAYER_A) ;
 
 TRANS

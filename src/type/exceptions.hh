@@ -59,4 +59,3 @@ public:
 };
 
 #endif /* TYPE_EXCEPTIONS_H */
-

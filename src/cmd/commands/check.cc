@@ -93,4 +93,3 @@ CheckTopic::~CheckTopic()
 
 void CheckTopic::usage()
 { display_manpage("check"); }
-

@@ -20,4 +20,3 @@ monolithic.cc printers.cc time.cc type.cc type_mgr.cc type_resolver.cc
 
 noinst_LTLIBRARIES = libtype.la
 libtype_la_SOURCES = $(PKG_HH) $(PKG_CC)
-

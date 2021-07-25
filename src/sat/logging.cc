@@ -133,4 +133,3 @@ std::ostream& operator<<(std::ostream& os, const Engine& engine)
 
     return os;
 }
-

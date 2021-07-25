@@ -70,9 +70,9 @@
 /*---------------------------------------------------------------------------*/
 
 /* Annealing parameters */
-#define BETA 0.6 
+#define BETA 0.6
 #define ALPHA 0.90
-#define EXC_PROB 0.4 
+#define EXC_PROB 0.4
 #define JUMP_UP_PROB 0.36
 #define MAXGEN_RATIO 15.0
 #define STOP_TEMP 1.0
@@ -167,7 +167,7 @@ cuddAnnealing(
     double	rand1;
     int         innerloop, maxGen;
     int         ecount, ucount, dcount;
-   
+
     nvars = upper - lower + 1;
 
     result = cuddSifting(table,lower,upper);
@@ -195,7 +195,7 @@ cuddAnnealing(
     c3 = size;
     c4 = c2 + 10;
     ecount = ucount = dcount = 0;
- 
+
     while (!stopping_criterion(c1, c2, c3, c4, temp)) {
 #ifdef DD_STATS
 	(void) fprintf(table->out,"temp=%f\tsize=%d\tgen=%d\t",
@@ -708,7 +708,7 @@ siftBackwardProb(
 	    best_size = move->size;
 	}
     }
-    
+
     /* If best_size equals size, the last sifting did not produce any
     ** improvement. We now toss a coin to decide whether to retain
     ** this change or not.
@@ -811,4 +811,3 @@ restoreOrder(
     return(1);
 
 } /* end of restoreOrder */
-

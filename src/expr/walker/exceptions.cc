@@ -46,5 +46,3 @@ UnsupportedLeaf::UnsupportedLeaf()
 InternalError::InternalError(const std::string& message)
     : ExprException("InternalError", message)
 {}
-
-

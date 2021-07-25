@@ -198,7 +198,7 @@ Cudd_SplitSet(
 		FREE(varSeen);
 		return(S);
 	    }
-	    
+
 	    result = cuddSplitSetRecur(manager,mtable,varSeen,S,m,max,0);
 	    if (result)
 		cuddRef(result);
@@ -254,7 +254,7 @@ cuddSplitSetRecur(
     DdNode *result;
     double *dummy, numT, numE;
     int variable, positive;
-  
+
     statLine(manager);
     one = DD_ONE(manager);
     zero = Cudd_Not(one);
@@ -300,7 +300,7 @@ cuddSplitSetRecur(
 	cuddDeref(r);
 	return(r);
     }
-  
+
     /* Lookup the # of minterms in the onset of the node from the table. */
     if (!Cudd_IsConstant(Nv)) {
 	if (!st_lookup(mtable, Nv, &dummy)) return(NULL);
@@ -310,7 +310,7 @@ cuddSplitSetRecur(
     } else {
 	numT = 0;
     }
-  
+
     if (!Cudd_IsConstant(Nnv)) {
 	if (!st_lookup(mtable, Nnv, &dummy)) return(NULL);
 	numE = *dummy/(2*(1<<index));
@@ -389,7 +389,7 @@ cuddSplitSetRecur(
 	cuddRef(r);
 	Cudd_RecursiveDeref(manager,q);
 	Cudd_RecursiveDeref(manager,v);
-	cuddDeref(r);    
+	cuddDeref(r);
 	return(r);
     }
 
@@ -533,7 +533,7 @@ selectMintermsFromUniverse(
     ** numVars variables.
     */
     result = mintermsFromUniverse(manager,vars,numVars,n, 0);
-    if (result) 
+    if (result)
 	cuddRef(result);
 
     for (i = 0; i < numVars; i++)
@@ -565,7 +565,7 @@ mintermsFromUniverse(
     DdNode *one, *zero;
     DdNode *q, *result;
     double max, max2;
-    
+
     statLine(manager);
     one = DD_ONE(manager);
     zero = Cudd_Not(one);
@@ -601,7 +601,7 @@ mintermsFromUniverse(
 	cuddRef(q);
 	result = cuddBddAndRecur(manager,vars[index],q);
     }
-    
+
     if (result == NULL) {
 	Cudd_RecursiveDeref(manager,q);
 	return(NULL);
@@ -651,8 +651,8 @@ bddAnnotateMintermCount(
 
     if (st_lookup(table, node, &dummy)) {
 	return(*dummy);
-    }	
-  
+    }
+
     Nv = cuddT(N);
     Nnv = cuddE(N);
     if (N != node) {
@@ -680,7 +680,7 @@ bddAnnotateMintermCount(
 	FREE(pmin);
 	return((double)CUDD_OUT_OF_MEM);
     }
-    
+
     return(min_N);
 
 } /* end of bddAnnotateMintermCount */

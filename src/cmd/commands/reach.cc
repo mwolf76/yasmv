@@ -169,4 +169,3 @@ ReachTopic::~ReachTopic()
 
 void ReachTopic::usage()
 { display_manpage("reach"); }
-

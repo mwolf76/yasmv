@@ -376,5 +376,3 @@ void Simulation::simulate(Expr_ptr invar_condition,
 }
 
 };
-
-

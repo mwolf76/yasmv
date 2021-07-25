@@ -179,7 +179,7 @@ Cudd_bddExistAbstractLimit(
         return(NULL);
     }
 
-    manager->maxLive = (manager->keys - manager->dead) + 
+    manager->maxLive = (manager->keys - manager->dead) +
         (manager->keysZ - manager->deadZ) + limit;
     do {
 	manager->reordered = 0;
@@ -401,8 +401,8 @@ cuddBddExistAbstractRecur(
     one = DD_ONE(manager);
     F = Cudd_Regular(f);
 
-    /* Cube is guaranteed to be a cube at this point. */	
-    if (cube == one || F == one) {  
+    /* Cube is guaranteed to be a cube at this point. */
+    if (cube == one || F == one) {
         return(f);
     }
     /* From now on, f and cube are non-constant. */
@@ -480,7 +480,7 @@ cuddBddExistAbstractRecur(
 	if (F->ref != 1)
 	    cuddCacheInsert2(manager, Cudd_bddExistAbstract, f, cube, res);
         return(res);
-    }	    
+    }
 
 } /* end of cuddBddExistAbstractRecur */
 
@@ -757,4 +757,3 @@ bddCheckPositiveCube(
     return(0);
 
 } /* end of bddCheckPositiveCube */
-

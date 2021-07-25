@@ -171,4 +171,3 @@ void Compiler::array_ite(const Expr_ptr expr)
         << md
         << std::endl;
 }
-

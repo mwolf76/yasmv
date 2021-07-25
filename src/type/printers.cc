@@ -29,4 +29,3 @@ std::ostream& operator<<(std::ostream& os, Type_ptr type)
 {
     return os << type->repr();
 }
-

@@ -151,9 +151,9 @@ testBdd(
     BDD g = y + !x;
     if (verbosity) cout << "g"; g.print(2,verbosity);
 
-    if (verbosity) 
+    if (verbosity)
         cout << "f and g are" << (f == !g ? "" : " not") << " complementary\n";
-    if (verbosity) 
+    if (verbosity)
         cout << "f is" << (f <= g ? "" : " not") << " less than or equal to g\n";
 
     g = f | ~g;
@@ -210,7 +210,7 @@ testAdd(
     if (verbosity) cout << "s"; s.print(2,verbosity);
 
     // Test relational operators.
-    if (verbosity) 
+    if (verbosity)
         cout << "p is" << (p <= r ? "" : " not") << " less than or equal to r\n";
 
     // Test logical operators.
@@ -389,7 +389,7 @@ testBdd3(
 
     BDD f1 = f.RemapUnderApprox(6);
     if (verbosity) cout << "f1"; f1.print(6,verbosity);
-    if (verbosity) 
+    if (verbosity)
         cout << "f1 is" << (f1 <= f ? "" : " not") << " less than or equal to f\n";
 
     BDD g;
@@ -517,7 +517,7 @@ testBdd4(
     if (verbosity) cout << "g"; g.print(3,verbosity);
 
     BDD h = g.Transfer(mgr);
-    if (verbosity) 
+    if (verbosity)
         cout << "f and h are" << (f == h ? "" : " not") << " identical\n";
 
 } // testBdd4

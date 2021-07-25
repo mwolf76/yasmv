@@ -10,4 +10,3 @@ help files can also be viewed using the standard unix man utility. Just point th
 man cli to the file you want to read, like in the following example:
 
 $ man ./check-init.nroff
-

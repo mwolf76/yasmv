@@ -146,7 +146,7 @@ typedef struct GlobalQueueItem {
     double impactP;
     double impactN;
 } GlobalQueueItem;
- 
+
 typedef struct LocalQueueItem {
     struct LocalQueueItem *next;
     struct LocalQueueItem *cnext;
@@ -154,7 +154,7 @@ typedef struct LocalQueueItem {
     int localRef;
 } LocalQueueItem;
 
-    
+
 /*---------------------------------------------------------------------------*/
 /* Variable declarations                                                     */
 /*---------------------------------------------------------------------------*/
@@ -274,14 +274,14 @@ Cudd_OverApprox(
 {
     DdNode *subset, *g;
 
-    g = Cudd_Not(f);    
+    g = Cudd_Not(f);
     do {
 	dd->reordered = 0;
 	subset = cuddUnderApprox(dd, g, numVars, threshold, safe, quality);
     } while (dd->reordered == 1);
-    
+
     return(Cudd_NotCond(subset, (subset != NULL)));
-    
+
 } /* end of Cudd_OverApprox */
 
 
@@ -364,14 +364,14 @@ Cudd_RemapOverApprox(
 {
     DdNode *subset, *g;
 
-    g = Cudd_Not(f);    
+    g = Cudd_Not(f);
     do {
 	dd->reordered = 0;
 	subset = cuddRemapUnderApprox(dd, g, numVars, threshold, quality);
     } while (dd->reordered == 1);
-    
+
     return(Cudd_NotCond(subset, (subset != NULL)));
-    
+
 } /* end of Cudd_RemapOverApprox */
 
 
@@ -463,15 +463,15 @@ Cudd_BiasedOverApprox(
 {
     DdNode *subset, *g;
 
-    g = Cudd_Not(f);    
+    g = Cudd_Not(f);
     do {
 	dd->reordered = 0;
 	subset = cuddBiasedUnderApprox(dd, g, b, numVars, threshold, quality1,
 				      quality0);
     } while (dd->reordered == 1);
-    
+
     return(Cudd_NotCond(subset, (subset != NULL)));
-    
+
 } /* end of Cudd_BiasedOverApprox */
 
 
@@ -1257,7 +1257,7 @@ UAmarkNodes(
 
 /**Function********************************************************************
 
-  Synopsis    [Builds the subset BDD.] 
+  Synopsis    [Builds the subset BDD.]
 
   Description [Builds the subset BDD. Based on the info table,
   replaces selected nodes by zero. Returns a pointer to the result if

@@ -59,7 +59,7 @@ void Get::print_assignment(std::ostream& os, Expr_ptr id)
         << " := "
         << value
         << std::endl;
-} 
+}
 
 void Get::print_all_assignments(std::ostream& os)
 {
@@ -124,4 +124,3 @@ GetTopic::~GetTopic()
 
 void GetTopic::usage()
 { display_manpage("get"); }
-

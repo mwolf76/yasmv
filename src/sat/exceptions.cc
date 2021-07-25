@@ -43,4 +43,3 @@ InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOper
     : EngineException("InlinedOperatorLoaderException",
                       format_loader_exception(ios))
 {}
-

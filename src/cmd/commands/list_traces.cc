@@ -93,5 +93,3 @@ ListTracesTopic::~ListTracesTopic()
 
 void ListTracesTopic::usage()
 { display_manpage("list-traces"); }
-
-

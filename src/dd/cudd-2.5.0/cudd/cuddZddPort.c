@@ -378,4 +378,3 @@ zddPortToBddStep(
     return(res);
 
 } /* end of zddPortToBddStep */
-

@@ -719,4 +719,3 @@ bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_cast_postorder(const Expr_ptr expr)
 { /* nop */ }
-

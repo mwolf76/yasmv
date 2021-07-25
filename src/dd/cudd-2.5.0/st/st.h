@@ -201,7 +201,7 @@ typedef int (*ST_PFICPI)(char *, int);     /* type for hash function */
 /*---------------------------------------------------------------------------*/
 
 extern st_table *st_init_table_with_params (ST_PFICPCP, ST_PFICPI, int, int, double, int);
-extern st_table *st_init_table (ST_PFICPCP, ST_PFICPI); 
+extern st_table *st_init_table (ST_PFICPCP, ST_PFICPI);
 extern void st_free_table (st_table *);
 extern int st_lookup (st_table *, void *, void *);
 extern int st_lookup_int (st_table *, void *, int *);
