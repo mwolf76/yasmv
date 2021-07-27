@@ -82,10 +82,10 @@ void DumpModel::dump_heading(std::ostream& os, Module& module)
 void DumpModel::dump_variables(std::ostream& os, Module& module)
 {
     /* Variables */
-    Variables variables = module.vars();
+    symb::Variables variables = module.vars();
     std::for_each(std::begin(variables),
                   std::end(variables),
-                  [&](std::pair<Expr_ptr, Variable_ptr> pair) {
+                  [&](std::pair<Expr_ptr, symb::Variable_ptr> pair) {
                       auto id = pair.first;
                       auto pvar = pair.second;
 

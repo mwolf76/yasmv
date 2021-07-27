@@ -139,10 +139,10 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     Type_ptr u2 = tm.find_unsigned(2);
 
     Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
-    main_module->add_var(x, new Variable(main_expr, x, u2));
+    main_module->add_var(x, new symb::Variable(main_expr, x, u2));
 
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_var(y, new Variable(main_expr, y, u2));
+    main_module->add_var(y, new symb::Variable(main_expr, y, u2));
 
     // mm.analyze();
 

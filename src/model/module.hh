@@ -39,18 +39,18 @@ public:
     inline const Expr_ptr name() const
     { return f_name; }
 
-    inline const Variables& vars() const
+    inline const symb::Variables& vars() const
     { return f_localVars; }
-    void add_var(Expr_ptr expr, Variable_ptr var);
+    void add_var(Expr_ptr expr, symb::Variable_ptr var);
 
-    inline const Parameters& parameters() const
+    inline const symb::Parameters& parameters() const
     { return f_localParams; }
-    void add_parameter(Expr_ptr expr, Parameter_ptr param);
+    void add_parameter(Expr_ptr expr, symb::Parameter_ptr param);
 
-    const Defines& defs() const
+    const symb::Defines& defs() const
     { return f_localDefs; }
-    void add_def(Expr_ptr expr, Define_ptr def);
-    void override(Expr_ptr expr, Define_ptr def);
+    void add_def(Expr_ptr expr, symb::Define_ptr def);
+    void override(Expr_ptr expr, symb::Define_ptr def);
 
     /* Finite State Machine definition */
     inline const ExprVector& init() const
@@ -88,10 +88,11 @@ private:
     ExprSet f_locals;
     void checkDuplicates(Expr_ptr expr);
 
-    Variables f_localVars;
-    Parameters f_localParams;
-    Defines   f_localDefs;
+    symb::Variables f_localVars;
+    symb::Parameters f_localParams;
+    symb::Defines   f_localDefs;
 
+    /* transition relation formulas */
     ExprVector f_init;
     ExprVector f_invar;
     ExprVector f_trans;

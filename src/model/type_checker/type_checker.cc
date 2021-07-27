@@ -520,9 +520,9 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
         Expr_ptr ctx
             (f_ctx_stack.back());
 
-        ResolverProxy proxy;
+        symb::ResolverProxy proxy;
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (proxy.symbol(em.make_dot( ctx, expr)));
 
         if (symb->is_const()) {
@@ -552,7 +552,7 @@ void TypeChecker::walk_leaf(const Expr_ptr expr)
 
         /* DEFINE, we can safely recur into its body. */
         else if (symb->is_define()) {
-            Define& define
+            symb::Define& define
                 (symb->as_define());
 
             Expr_ptr body

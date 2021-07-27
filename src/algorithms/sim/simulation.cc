@@ -125,18 +125,17 @@ void Simulation::pick_state(bool allsat,
                    exclusion clause. */
                 vec<Lit> exclusion;
 
-                SymbIter symbols
+                symb::SymbIter symbols
                     (model());
 
                 while (symbols.has_next()) {
-
-                    std::pair <Expr_ptr, Symbol_ptr> pair
+                    std::pair <Expr_ptr, symb::Symbol_ptr> pair
                         (symbols.next());
 
                     Expr_ptr ctx
                         (pair.first);
 
-                    Symbol_ptr symb
+                    symb::Symbol_ptr symb
                         (pair.second);
 
                     Expr_ptr symb_name
@@ -147,7 +146,7 @@ void Simulation::pick_state(bool allsat,
 
                     if (symb->is_variable()) {
 
-                        Variable& var
+                        symb::Variable& var
                             (symb->as_variable());
 
                         /* INPUT vars are not really vars ... */

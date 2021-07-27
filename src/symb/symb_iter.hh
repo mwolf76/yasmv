@@ -31,10 +31,11 @@
 #include <expr/expr.hh>
 #include <utils/pool.hh>
 
+#include <model/model.hh>
+
 #include <symb/typedefs.hh>
 
-class Model;
-class Symbol;
+namespace symb {
 
 class SymbIter {
 public:
@@ -52,6 +53,8 @@ private:
 
     SymbIterable f_symbols;
     SymbIterable::const_iterator f_iter;
+};
+
 };
 
 #endif /* SYMBOL_ITER_H */

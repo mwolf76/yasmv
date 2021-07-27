@@ -33,6 +33,8 @@
 #include <vector>
 #include <boost/unordered_map.hpp>
 
+namespace symb {
+
 typedef class Symbol* Symbol_ptr;
 typedef boost::unordered_map<Expr_ptr, Symbol_ptr,
                              PtrHash, PtrEq> Symbols;
@@ -59,5 +61,7 @@ typedef boost::unordered_map<Expr_ptr, Define_ptr,
 typedef class Resolver* Resolver_ptr;
 
 typedef std::vector< std::pair< Expr_ptr, Symbol_ptr > > SymbIterable;
+
+};
 
 #endif /* SYMBOL_TYPEDEFS_H */

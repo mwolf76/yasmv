@@ -37,6 +37,8 @@
 
 #include <model/model_mgr.hh>
 
+namespace symb {
+
 class ResolverProxy : public Resolver {
     TypeMgr& f_tm;
     ModelMgr& f_mm;
@@ -66,6 +68,8 @@ public:
 
         throw UnresolvedSymbol(key);
     }
+};
+
 };
 
 #endif /* RESOLVER_PROXY_H */

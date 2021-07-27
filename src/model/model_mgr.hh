@@ -61,7 +61,7 @@ public:
     inline Module& module(Expr_ptr module_name)
     { return f_model.module( module_name); }
 
-    inline Resolver_ptr resolver()
+    inline symb::Resolver_ptr resolver()
     { return &f_resolver; }
 
     // this must be called before any type checking
@@ -101,8 +101,8 @@ protected:
 
     friend class ModelResolver;
 
-    Symbols f_symbols;
-    inline Symbols& symbols()
+    symb::Symbols f_symbols;
+    inline symb::Symbols& symbols()
     { return f_symbols; }
 
 private:

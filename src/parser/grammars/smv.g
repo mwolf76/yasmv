@@ -177,8 +177,8 @@ fsm_var_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr vid (*expr_iter);
-                Variable_ptr var
-                    (new Variable($smv::current_module->name(), vid, tp));
+                symb::Variable_ptr var
+                    (new symb::Variable($smv::current_module->name(), vid, tp));
 
                 if ($module_decl::hidden)
                     var->set_hidden(true);
@@ -208,8 +208,8 @@ fsm_param_decl_clause
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 Expr_ptr pid (*expr_iter);
                 $smv::current_module->add_parameter(pid,
-                                                    new Parameter($smv::current_module->name(),
-                                                                  pid, tp));
+                                                    new symb::Parameter($smv::current_module->name(),
+                                                                        pid, tp));
             }
     }
     ;
@@ -228,7 +228,8 @@ fsm_define_decl_body
 fsm_define_decl_clause
     : id=identifier ':=' body=toplevel_expression
     {
-      Define_ptr def = new Define($smv::current_module->name(), id, body);
+      symb::Define_ptr def =
+          new symb::Define($smv::current_module->name(), id, body);
 
       if ($module_decl::input)
           throw SyntaxError("#input modifier not supported in DEFINE decls");

@@ -565,8 +565,8 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
         }
 
         /* Symb resolution */
-        ResolverProxy proxy;
-        Symbol_ptr symb
+        symb::ResolverProxy proxy;
+        symb::Symbol_ptr symb
             (proxy.symbol( em.make_dot( f_ctx_stack.back(), expr_)));
 
         if (symb->is_const()) {

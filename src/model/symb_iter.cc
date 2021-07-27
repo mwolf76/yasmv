@@ -33,7 +33,7 @@
 
 #include <stack>
 
-SymbIter::SymbIter(Model& model)
+symb::SymbIter::SymbIter(Model& model)
     : f_model(model)
 {
     ExprMgr& em
@@ -108,5 +108,5 @@ SymbIter::SymbIter(Model& model)
     f_iter = f_symbols.begin();
 }
 
-SymbIter::~SymbIter()
+symb::SymbIter::~SymbIter()
 {}

@@ -285,14 +285,14 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
     Expr_ptr full
         (em.make_dot(ctx, lhs));
 
-    ResolverProxy resolver;
+    symb::ResolverProxy resolver;
 
-    Symbol_ptr symb
+    symb::Symbol_ptr symb
         (resolver.symbol(full));
 
     if (symb->is_variable()) {
 
-        const Variable& var
+        const symb::Variable& var
             (symb->as_variable());
 
         /* INPUT vars are in fact bodyless, typed DEFINEs */
@@ -310,7 +310,7 @@ void Analyzer::walk_assignment_postorder(const Expr_ptr expr)
 
     else if (symb->is_define()) {
 
-      Define& define
+      symb::Define& define
         (symb->as_define());
 
       Expr_ptr body
@@ -456,13 +456,13 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
         Expr_ptr full
             (em.make_dot(ctx, expr));
 
-        ResolverProxy resolver;
+        symb::ResolverProxy resolver;
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (resolver.symbol(full));
 
         if (symb->is_variable()) {
-            const Variable& var
+            const symb::Variable& var
                 (symb->as_variable());
 
             /* Sanity checks on var modifiers */
@@ -477,7 +477,7 @@ void Analyzer::walk_leaf(const Expr_ptr expr)
         }
         else if (symb->is_define()) {
 
-            Define& define
+            symb::Define& define
                 (symb->as_define());
 
             Expr_ptr body

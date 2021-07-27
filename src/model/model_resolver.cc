@@ -45,22 +45,22 @@ ModelResolver::ModelResolver(ModelMgr& owner)
         << std::endl;
 
     f_owner.symbols().insert( std::pair<Expr_ptr,
-                              Constant_ptr>( em.make_false(),
-                                             new Constant(ExprMgr::INSTANCE().make_empty(),
-                                                          ExprMgr::INSTANCE().make_false(),
-                                                          TypeMgr::INSTANCE().find_boolean(), 0)));
+                              symb::Constant_ptr>( em.make_false(),
+                                                   new symb::Constant(ExprMgr::INSTANCE().make_empty(),
+                                                                      ExprMgr::INSTANCE().make_false(),
+                                                                      TypeMgr::INSTANCE().find_boolean(), 0)));
 
     f_owner.symbols().insert( std::pair<Expr_ptr,
-                              Constant_ptr>( em.make_true(),
-                                             new Constant(ExprMgr::INSTANCE().make_empty(),
-                                                          ExprMgr::INSTANCE().make_true(),
-                                                          TypeMgr::INSTANCE().find_boolean(), 1)));
+                              symb::Constant_ptr>( em.make_true(),
+                                                   new symb::Constant(ExprMgr::INSTANCE().make_empty(),
+                                                                      ExprMgr::INSTANCE().make_true(),
+                                                                      TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()
 {}
 
-void ModelResolver::add_symbol(const Expr_ptr key, Symbol_ptr symb)
+void ModelResolver::add_symbol(const Expr_ptr key, symb::Symbol_ptr symb)
 {
     // TODO: turn this into an exception
     assert( NULL == f_owner.symbols() [ key ]);
@@ -68,7 +68,7 @@ void ModelResolver::add_symbol(const Expr_ptr key, Symbol_ptr symb)
     f_owner.symbols()[ key ] = symb;
 }
 
-Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
+symb::Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
 {
     // init lookup data
     ModelMgr& mm
@@ -83,9 +83,9 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
         (key -> rhs());
 
     { /* global constants and temporaries */
-        const Symbols& symbols
+        const symb::Symbols& symbols
             (f_owner.symbols());
-        Symbols::const_iterator iter
+        symb::Symbols::const_iterator iter
             (symbols.find(symb_name));
 
         if (iter != f_owner.symbols().end()) {
@@ -94,9 +94,9 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
     }
 
     { /* variables */
-        const Variables& vars
+        const symb::Variables& vars
             (module->vars());
-        Variables::const_iterator iter
+        symb::Variables::const_iterator iter
             (vars.find(symb_name));
 
         if (iter != vars.end()) {
@@ -105,9 +105,9 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
     }
 
     { /* parameters */
-        const Parameters& params
+        const symb::Parameters& params
             (module->parameters());
-        Parameters::const_iterator iter
+        symb::Parameters::const_iterator iter
             (params.begin());
 
         while (params.end() != iter) {
@@ -119,9 +119,9 @@ Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
     }
 
     { /* defines */
-        const Defines& defs
+        const symb::Defines& defs
             (module->defs());
-        Defines::const_iterator iter
+        symb::Defines::const_iterator iter
             (defs.find(symb_name));
 
         if (iter != defs.end()) {

@@ -41,7 +41,7 @@
 // interface limitations. (i.e. absence of clear())
 typedef std::vector< std::pair< Expr_ptr, Expr_ptr> > ExprPairStack;
 typedef std::vector<Expr_ptr> ExprStack;
-typedef std::vector<Define_ptr> DefinesStack;
+typedef std::vector<symb::Define_ptr> DefinesStack;
 
 /* shortcuts to simplify manipulation of the internal expr stack */
 #define POP_EXPR(op)                              \

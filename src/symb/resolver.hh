@@ -29,12 +29,14 @@
 
 #include <symb/typedefs.hh>
 
+namespace symb {
+
 class Resolver {
 public:
     /** @brief fetch a symbol */
     virtual Symbol_ptr symbol(const Expr_ptr key) =0;
 };
 
-
+};
 
 #endif /* SYMB_RESOLVER_H */

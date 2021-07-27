@@ -48,7 +48,7 @@ class TypeMgr {
     Type_ptr f_ctx_type;
 
     /* Shared enums and literals */
-    Literals f_lits;
+    symb::Literals f_lits;
 
 public:
     const TimeType_ptr find_time();
@@ -75,10 +75,10 @@ public:
 
     const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
 
-    const Literals& literals() const
+    const symb::Literals& literals() const
     { return f_lits; }
 
-    inline Resolver_ptr resolver()
+    inline symb::Resolver_ptr resolver()
     { return &f_resolver; }
 
     /** Singleton instance accessor */

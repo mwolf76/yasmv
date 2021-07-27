@@ -245,22 +245,22 @@ BOOST_AUTO_TEST_CASE(type_checking)
     */
     Atom a_x("x");
     Expr_ptr x = em.make_identifier(a_x);
-    main.add_var(x, new Variable(main.name(), x, boolean));
+    main.add_var(x, new symb::Variable(main.name(), x, boolean));
 
     Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
-    main.add_var(y, new Variable(main.name(), y, boolean));
+    main.add_var(y, new symb::Variable(main.name(), y, boolean));
 
     Atom a_s("s"); Expr_ptr s = em.make_identifier(a_s);
-    main.add_var(s, new Variable(main.name(), s, uint16));
+    main.add_var(s, new symb::Variable(main.name(), s, uint16));
 
     Atom a_t("t"); Expr_ptr t = em.make_identifier(a_t);
-    main.add_var(t, new Variable(main.name(), t, uint16));
+    main.add_var(t, new symb::Variable(main.name(), t, uint16));
 
     Atom a_u("u"); Expr_ptr u = em.make_identifier(a_u);
-    main.add_var(u, new Variable(main.name(), u, int16));
+    main.add_var(u, new symb::Variable(main.name(), u, int16));
 
     Atom a_v("v"); Expr_ptr v = em.make_identifier(a_v);
-    main.add_var(v, new Variable(main.name(), v, int16));
+    main.add_var(v, new symb::Variable(main.name(), v, int16));
 
     // add the main module to the model
     model.add_module(main);

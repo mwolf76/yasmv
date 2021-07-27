@@ -118,11 +118,12 @@ const ScalarType_ptr TypeMgr::find_enum(ExprSet& lits)
         const Expr_ptr& expr
             (em().make_dot( em().make_empty(), *i));
 
-        Literal* literal
-            (new Literal(expr, res, v));
+        symb::Literal_ptr literal
+            (new symb::Literal(expr, res, v));
 
-        f_lits.insert(std::pair<Expr_ptr, Literal_ptr>
-                      (expr, literal));
+        f_lits.insert(
+            std::pair<Expr_ptr, symb::Literal_ptr>
+            (expr, literal));
     }
 
     return res;

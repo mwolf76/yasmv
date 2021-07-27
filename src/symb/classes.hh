@@ -39,9 +39,8 @@
 #include <vector>
 #include <utility>
 
-/*******************************************************************************
- * Symbol classes
- ******************************************************************************/
+namespace symb {
+
 class Typed {
 public:
     virtual const Type_ptr type() const =0;
@@ -268,6 +267,8 @@ public:
 
     const Expr_ptr body() const
     { return f_body; }
+};
+
 };
 
 #endif /* SYMBOL_CLASSES_H */

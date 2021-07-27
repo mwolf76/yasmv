@@ -30,6 +30,8 @@
 #include <common/common.hh>
 #include <expr/expr.hh>
 
+namespace symb {
+
 class SymbolException : public Exception
 {
 public:
@@ -42,6 +44,8 @@ public:
 class UnresolvedSymbol : public SymbolException {
 public:
     UnresolvedSymbol(Expr_ptr expr);
+};
+
 };
 
 #endif /* SYMBOL_EXCEPTIONS_H */

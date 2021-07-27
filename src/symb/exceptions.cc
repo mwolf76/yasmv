@@ -26,6 +26,8 @@
 #include <sstream>
 #include <cstring>
 
+namespace symb {
+
 static std::string build_unresolved_symbol_error_message(Expr_ptr expr)
 {
     std::ostringstream oss;
@@ -42,3 +44,5 @@ UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
     : SymbolException("UnresolvedSymbol",
                       build_unresolved_symbol_error_message(expr))
 {}
+
+};

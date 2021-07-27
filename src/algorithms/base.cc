@@ -100,15 +100,14 @@ void Algorithm::setup()
             (module.trans());
         process_trans(ctx, trans);
 
-        Variables attrs
+        symb::Variables attrs
             (module.vars());
-        Variables::const_iterator vi;
+        symb::Variables::const_iterator vi;
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
-
             Expr_ptr id
                 (vi->first);
 
-            Variable& var
+            symb::Variable& var
                 (* vi->second);
 
             Type_ptr vtype
@@ -274,7 +273,7 @@ void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
 
 void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
 {
-    SymbIter symbs
+    symb::SymbIter symbs
         (model());
 
     /* this will hold the activation vars for the uniqueness clauses
@@ -283,18 +282,17 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
     while (symbs.has_next()) {
 
-        std::pair< Expr_ptr, Symbol_ptr> pair
+        std::pair< Expr_ptr, symb::Symbol_ptr> pair
             (symbs.next());
 
         Expr_ptr ctx
             (pair.first);
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         if (symb->is_variable()) {
-
-            Variable& var
+            symb::Variable& var
                 (symb->as_variable());
 
             if (var.is_input() ||
@@ -405,7 +403,7 @@ void Algorithm::assert_time_frame(Engine& engine,
     ExprVector::const_iterator i
         (assignments.begin());
 
-    ResolverProxy resolver;
+    symb::ResolverProxy resolver;
 
     unsigned count (0);
     while (i != assignments.end()) {
@@ -416,11 +414,10 @@ void Algorithm::assert_time_frame(Engine& engine,
         Expr_ptr full
             (assignment->lhs());
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (resolver.symbol(full));
 
         if (symb->is_variable()) {
-
             Expr_ptr scope
                 (full->lhs());
 

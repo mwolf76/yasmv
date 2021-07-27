@@ -41,7 +41,7 @@ TypeResolver::TypeResolver(TypeMgr& owner)
 TypeResolver::~TypeResolver()
 {}
 
-Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
+symb::Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
 {
      ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -51,14 +51,14 @@ Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
      Expr_ptr key_
          (em.make_dot( em.make_empty(), key -> rhs()));
 
-     const Literals& lits
+     const symb::Literals& lits
          (TypeMgr::INSTANCE().literals());
 
-     Literals::const_iterator iter
+     symb::Literals::const_iterator iter
          (lits.find(key_));
 
      if (iter != lits.end())
-         return dynamic_cast<Symbol_ptr>((*iter).second);
+         return dynamic_cast<symb::Symbol_ptr>((*iter).second);
 
      return NULL; /* unresolved */
 }

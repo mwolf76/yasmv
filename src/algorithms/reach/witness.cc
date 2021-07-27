@@ -47,15 +47,15 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
         (ExprMgr::INSTANCE());
 
     /* Collecting symbols for the witness' language */
-    SymbIter si (model);
+    symb::SymbIter si (model);
     while (si.has_next()) {
-        std::pair <Expr_ptr, Symbol_ptr> pair
+        std::pair <Expr_ptr, symb::Symbol_ptr> pair
             (si.next());
 
         Expr_ptr ctx
             (pair.first);
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         Expr_ptr full_name
@@ -72,18 +72,17 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
         TimeFrame& tf
             (extend());
 
-        SymbIter symbols
+        symb::SymbIter symbols
             (model);
 
         while (symbols.has_next()) {
-
-            std::pair <Expr_ptr, Symbol_ptr> pair
+            std::pair <Expr_ptr, symb::Symbol_ptr> pair
                 (symbols.next());
 
             Expr_ptr ctx
                 (pair.first);
 
-            Symbol_ptr symb
+            symb::Symbol_ptr symb
                 (pair.second);
 
             Expr_ptr symb_name
@@ -93,8 +92,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
                 (em.make_dot( ctx, symb_name));
 
             if (symb->is_variable()) {
-
-                Variable& var
+                symb::Variable& var
                     (symb->as_variable());
 
                 /* time it, and fetch encoding for enc mgr */
@@ -146,11 +144,10 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
             }
 
             else if (symb->is_define()) {
-
                 WitnessMgr& wm
                     (WitnessMgr::INSTANCE());
 
-                const Define& define
+                const symb::Define& define
                     (symb->as_define());
 
                 Expr_ptr value

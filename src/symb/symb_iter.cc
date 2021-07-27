@@ -25,6 +25,8 @@
 
 #include <symb/symb_iter.hh>
 
+namespace symb {
+
 bool SymbIter::has_next() const
 {
     return f_iter != f_symbols.end();
@@ -38,3 +40,5 @@ std::pair <Expr_ptr, Symbol_ptr> SymbIter::next()
 
     return res;
 }
+
+};

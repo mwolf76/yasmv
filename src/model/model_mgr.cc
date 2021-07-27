@@ -212,10 +212,10 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for trans
 
-            const Defines& defs
+            const symb::Defines& defs
                 (curr_module.defs());
 
-            for (Defines::const_iterator di = defs.begin();
+            for (symb::Defines::const_iterator di = defs.begin();
                  di != defs.end(); ++ di ) {
 
                 Expr_ptr body
@@ -337,10 +337,10 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for trans
 
-            const Defines& defs
+            const symb::Defines& defs
                 (curr_module.defs());
 
-            for (Defines::const_iterator di = defs.begin();
+            for (symb::Defines::const_iterator di = defs.begin();
                  di != defs.end(); ++ di ) {
 
                 Expr_ptr body
@@ -370,9 +370,9 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             } // for defines
         } /* MMGR_TYPE_CHECK */
 
-        Variables attrs
+        symb::Variables attrs
             (curr_module.vars());
-        Variables::const_iterator vi;
+        symb::Variables::const_iterator vi;
 
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 
@@ -422,13 +422,13 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             }
 
             // 2. good, now associate formals and actuals
-            const Parameters& formals
+            const symb::Parameters& formals
                 (curr_module.parameters());
 
             if (actuals.size() != formals.size())
                 throw BadParamCount( curr_module.name(), formals.size(), actuals.size());
 
-            Parameters::const_iterator fi
+            symb::Parameters::const_iterator fi
                 (formals.begin());
 
             std::vector<Expr_ptr>::const_iterator ai

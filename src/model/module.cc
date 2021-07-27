@@ -58,7 +58,7 @@ void Module::checkDuplicates(Expr_ptr identifier)
     owner().autoIndexSymbol(identifier);
 }
 
-void Module::add_var(Expr_ptr identifier, Variable_ptr var)
+void Module::add_var(Expr_ptr identifier, symb::Variable_ptr var)
 {
     Expr_ptr type_repr
         (var->type()->repr());
@@ -94,11 +94,11 @@ void Module::add_var(Expr_ptr identifier, Variable_ptr var)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localVars.insert(std::pair<Expr_ptr, Variable_ptr>
+    f_localVars.insert(std::pair<Expr_ptr, symb::Variable_ptr>
                        (identifier, var));
 }
 
-void Module::add_parameter(Expr_ptr identifier, Parameter_ptr param)
+void Module::add_parameter(Expr_ptr identifier, symb::Parameter_ptr param)
 {
     Expr_ptr type_repr
         (param->type()->repr());
@@ -110,11 +110,11 @@ void Module::add_parameter(Expr_ptr identifier, Parameter_ptr param)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localParams.push_back( std::pair<Expr_ptr, Parameter_ptr>
+    f_localParams.push_back( std::pair<Expr_ptr, symb::Parameter_ptr>
                              (identifier, param));
 }
 
-void Module::add_def(Expr_ptr identifier, Define_ptr def)
+void Module::add_def(Expr_ptr identifier, symb::Define_ptr def)
 {
     std::ostringstream oss;
 
@@ -137,11 +137,11 @@ void Module::add_def(Expr_ptr identifier, Define_ptr def)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localDefs.insert(std::pair<Expr_ptr, Define_ptr>
+    f_localDefs.insert(std::pair<Expr_ptr, symb::Define_ptr>
                        (identifier, def));
 }
 
-void Module::override(Expr_ptr symb_name, Define_ptr def)
+void Module::override(Expr_ptr symb_name, symb::Define_ptr def)
 {
     std::ostringstream oss;
 
@@ -170,7 +170,7 @@ void Module::override(Expr_ptr symb_name, Define_ptr def)
         << body
         << std::endl;
 
-    f_localDefs.insert(std::pair<Expr_ptr, Define_ptr>
+    f_localDefs.insert(std::pair<Expr_ptr, symb::Define_ptr>
                        (symb_name, def));
 }
 

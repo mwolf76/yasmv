@@ -32,7 +32,7 @@
 
 void Evaluator::push_value(const Expr_ptr expr)
 {
-    ResolverProxy resolver;
+    symb::ResolverProxy resolver;
 
     ExprMgr& em
         (ExprMgr::INSTANCE());
@@ -41,12 +41,12 @@ void Evaluator::push_value(const Expr_ptr expr)
         Expr_ptr full_lit
             (em.make_dot(em.make_empty(), expr));
 
-        Symbol_ptr symb_lit
+        symb::Symbol_ptr symb_lit
             (resolver.symbol(full_lit));
 
         assert(symb_lit->is_literal());
 
-        Literal& lit
+        symb::Literal& lit
             (symb_lit->as_literal());
 
         value_t value
@@ -151,18 +151,17 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
         return;
     }
 
-    ResolverProxy resolver;
+    symb::ResolverProxy resolver;
 
     Expr_ptr full
         (em.make_dot( ctx, expr));
 
-    Symbol_ptr symb
+    symb::Symbol_ptr symb
         (resolver.symbol(full));
 
     // 2. enum literals
     if (symb->is_literal()) {
-
-        Literal& lit
+        symb::Literal& lit
             (symb->as_literal());
 
         Type_ptr type
@@ -176,8 +175,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     if (symb->is_variable()) {
-
-        Variable& var
+        symb::Variable& var
             (symb->as_variable());
 
         // push into type stack
@@ -202,7 +200,6 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     } /* is_variable() */
 
     if (symb->is_parameter()) {
-
         ModelMgr& mm
             (ModelMgr::INSTANCE());
 

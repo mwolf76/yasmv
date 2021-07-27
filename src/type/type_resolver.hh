@@ -30,12 +30,12 @@
 #include <symb/resolver.hh>
 
 class TypeMgr;
-class TypeResolver : public Resolver {
+class TypeResolver : public symb::Resolver {
 public:
     TypeResolver(TypeMgr& owner);
     ~TypeResolver();
 
-    Symbol_ptr symbol(const Expr_ptr key);
+    symb::Symbol_ptr symbol(const Expr_ptr key);
 
 private:
     TypeMgr& f_owner;

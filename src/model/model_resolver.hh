@@ -30,17 +30,17 @@
 #include <symb/resolver.hh>
 
 class ModelMgr; // fwd
-class ModelResolver : public Resolver {
+class ModelResolver : public symb::Resolver {
 public:
     ModelResolver(ModelMgr& owner);
     ~ModelResolver();
 
-    void add_symbol(const Expr_ptr key, Symbol_ptr symb);
-    Symbol_ptr symbol(const Expr_ptr key);
+    void add_symbol(const Expr_ptr key, symb::Symbol_ptr symb);
+    symb::Symbol_ptr symbol(const Expr_ptr key);
 
 private:
     ModelMgr& f_owner;
-    Constants f_constants; // global consts
+    symb::Constants f_constants; // global consts
 };
 
 #endif /* MODEL_RESOLVER_H */

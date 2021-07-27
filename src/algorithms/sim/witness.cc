@@ -48,16 +48,16 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     int inputs[bm.nbits()];
 
     /* Collecting symbols for the witness' language */
-    SymbIter si (model);
+    symb::SymbIter si { model };
     while (si.has_next()) {
 
-        std::pair <Expr_ptr, Symbol_ptr> pair
+        std::pair <Expr_ptr, symb::Symbol_ptr> pair
             (si.next());
 
         Expr_ptr ctx
             (pair.first);
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         Expr_ptr full_name
@@ -70,18 +70,18 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     TimeFrame& tf
         (extend());
 
-    SymbIter symbols
+    symb::SymbIter symbols
         (model);
 
     while (symbols.has_next()) {
 
-        std::pair <Expr_ptr, Symbol_ptr> pair
+        std::pair <Expr_ptr, symb::Symbol_ptr> pair
             (symbols.next());
 
         Expr_ptr ctx
             (pair.first);
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         Expr_ptr symb_name
@@ -92,7 +92,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
         if (symb->is_variable()) {
 
-            const Variable& var
+            const symb::Variable& var
                 (symb->as_variable());
 
             /* INPUT vars are in fact bodyless, typed DEFINEs */
@@ -156,7 +156,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             WitnessMgr& wm
                 (WitnessMgr::INSTANCE());
 
-            const Define& define
+            const symb::Define& define
                 (symb->as_define());
 
             Expr_ptr body

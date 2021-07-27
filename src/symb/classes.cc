@@ -30,6 +30,8 @@
 #include <sstream>
 #include <cstring>
 
+namespace symb {
+
 bool Symbol::is_variable(void) const
 {
     return NULL != dynamic_cast <const Variable_ptr>
@@ -106,3 +108,5 @@ bool Symbol::is_hidden() const
 
 void Symbol::set_hidden(bool value)
 { f_hidden = value; }
+
+};

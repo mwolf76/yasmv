@@ -36,7 +36,7 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
     , f_literals(literals)
 {
     TypeMgr& tm (TypeMgr::INSTANCE());
-    const Literals& lits (tm.literals());
+    const symb::Literals& lits (tm.literals());
 
     for (ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++ i) {
         const Expr_ptr& lit(*i);

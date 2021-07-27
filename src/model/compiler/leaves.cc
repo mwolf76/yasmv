@@ -91,14 +91,14 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     Expr_ptr full
         (em.make_dot(ctx, expr));
 
-    ResolverProxy resolver;
-    Symbol_ptr symb
+    symb::ResolverProxy resolver;
+    symb::Symbol_ptr symb
         (resolver.symbol(full));
 
     /* 2. bool constant leaves */
     if (symb->is_const()) {
         assert(false); // TODO: is this expected to be unreachable?
-        Constant& konst (symb->as_const());
+        symb::Constant& konst (symb->as_const());
 
         f_type_stack.push_back(konst.type());
         f_add_stack.push_back(f_enc.constant(konst.value()));
@@ -107,7 +107,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     /* 3. enum literals */
     if (symb->is_literal()) {
-        Literal& lit (symb->as_literal());
+        symb::Literal& lit (symb->as_literal());
 
         // push into type stack
         Type_ptr type
@@ -140,7 +140,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
      *    necessary */
     else if (symb->is_variable()) {
 
-        const Variable& var
+        const symb::Variable& var
             (symb -> as_variable());
 
         Type_ptr type
@@ -149,7 +149,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         /* INPUT vars are in fact bodyless, typed DEFINEs */
         if (var.is_input()) {
             Expr_ptr value
-              (env::Environment::INSTANCE().get(expr));
+                (env::Environment::INSTANCE().get(expr));
 
             (*this) (value);
         }
@@ -186,15 +186,14 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
     /* 6. DEFINEs, simply compile them recursively :-) */
     else if (symb->is_define()) {
+        symb::Define& define
+            (symb -> as_define());
 
-      Define& define
-          (symb -> as_define());
+        Expr_ptr body
+            (define.body());
 
-      Expr_ptr body
-          (define.body());
-
-      (*this) (body);
-      return;
+        (*this) (body);
+        return;
     }
 
     /* give up, TODO: exception */

@@ -379,15 +379,14 @@ void DumpTrace::process_input(Witness& w,
     Model& model
         (ModelMgr::INSTANCE().model());
 
-    SymbIter symbs
+    symb::SymbIter symbs
         (model);
 
     while (symbs.has_next()) {
-
-        std::pair< Expr_ptr, Symbol_ptr > pair
+        std::pair< Expr_ptr, symb::Symbol_ptr > pair
             (symbs.next());
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         if (symb->is_hidden())
@@ -401,8 +400,7 @@ void DumpTrace::process_input(Witness& w,
             (em.make_dot( ctx, name));
 
         if (symb->is_variable())  {
-
-            Variable& var
+            symb::Variable& var
                 (symb->as_variable());
 
             /* we're interested onlyl in INPUT vars here ... */
@@ -445,15 +443,14 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
     Model& model
         (ModelMgr::INSTANCE().model());
 
-    SymbIter symbs
+    symb::SymbIter symbs
         (model);
 
     while (symbs.has_next()) {
-
-        std::pair< Expr_ptr, Symbol_ptr > pair
+        std::pair< Expr_ptr, symb::Symbol_ptr > pair
             (symbs.next());
 
-        Symbol_ptr symb
+        symb::Symbol_ptr symb
             (pair.second);
 
         if (symb->is_hidden())
@@ -467,8 +464,7 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
             (em.make_dot(ctx, name));
 
         if (symb->is_variable())  {
-
-            Variable& var
+            symb::Variable& var
                 (symb->as_variable());
 
             /* INPUT vars do not belong in traces */
@@ -484,8 +480,7 @@ void DumpTrace::process_time_frame(Witness& w, step_t time,
         }
 
         else if (symb->is_define()) {
-
-            Define& define
+            symb::Define& define
                 (symb->as_define());
 
             Expr_ptr body
