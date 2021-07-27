@@ -41,11 +41,11 @@ ArrayEncoding::ArrayEncoding(Encodings elements)
     }
 }
 
-Expr_ptr ArrayEncoding::expr(int* assignment)
+expr::Expr_ptr ArrayEncoding::expr(int* assignment)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-    Expr_ptr acc
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
+    expr::Expr_ptr acc
         (NULL);
 
     for (Encodings::const_reverse_iterator i = f_elements.rbegin();
@@ -54,7 +54,7 @@ Expr_ptr ArrayEncoding::expr(int* assignment)
         Encoding_ptr enc
             (*i);
 
-        Expr_ptr value
+        expr::Expr_ptr value
             (enc->expr(assignment));
 
         acc = (NULL == acc)

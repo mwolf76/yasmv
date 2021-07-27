@@ -47,7 +47,7 @@ public:
     LTL(Command& command, Model& model);
     ~LTL();
 
-    void process(const Expr_ptr phi);
+    void process(const expr::Expr_ptr phi);
 
     inline ltl_status_t status() const
     { return f_status; }
@@ -62,7 +62,7 @@ private:
 /* Specialized for LTL CEX */
 class LTLCounterExample : public witness::Witness {
 public:
-    LTLCounterExample(Expr_ptr property, Model& model,
+    LTLCounterExample(expr::Expr_ptr property, Model& model,
                       Engine& engine, unsigned k);
 };
 

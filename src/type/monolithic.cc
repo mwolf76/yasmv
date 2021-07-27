@@ -31,17 +31,17 @@ BooleanType::BooleanType(TypeMgr& owner)
 unsigned BooleanType::width() const
 { return 1; }
 
-EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
+EnumType::EnumType(TypeMgr& owner, expr::ExprSet& literals)
     : MonolithicType(owner)
     , f_literals(literals)
 {
     TypeMgr& tm (TypeMgr::INSTANCE());
     const symb::Literals& lits (tm.literals());
 
-    for (ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++ i) {
-        const Expr_ptr& lit(*i);
+    for (expr::ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++ i) {
+        const expr::Expr_ptr& lit(*i);
 
-        if (! ExprMgr::INSTANCE().is_identifier(lit))
+        if (! expr::ExprMgr::INSTANCE().is_identifier(lit))
             throw IdentifierExpected(lit);
 
         if (lits.end() != lits.find(lit))
@@ -54,10 +54,10 @@ EnumType::EnumType(TypeMgr& owner, ExprSet& literals)
 unsigned EnumType::width() const
 { return 1; }
 
-value_t EnumType::value(Expr_ptr lit) const
+value_t EnumType::value(expr::Expr_ptr lit) const
 {
     value_t res = 0;
-    for (ExprSet::iterator eye = f_literals.begin();
+    for (expr::ExprSet::iterator eye = f_literals.begin();
          eye != f_literals.end(); ++ eye, ++ res) {
 
         if (*eye == lit)

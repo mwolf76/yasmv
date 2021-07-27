@@ -28,7 +28,7 @@
 
 namespace symb {
 
-static std::string build_unresolved_symbol_error_message(Expr_ptr expr)
+static std::string build_unresolved_symbol_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -40,7 +40,7 @@ static std::string build_unresolved_symbol_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-UnresolvedSymbol::UnresolvedSymbol(Expr_ptr expr)
+UnresolvedSymbol::UnresolvedSymbol(expr::Expr_ptr expr)
     : SymbolException("UnresolvedSymbol",
                       build_unresolved_symbol_error_message(expr))
 {}

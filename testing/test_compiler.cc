@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     ModelMgr& mm
         (ModelMgr::INSTANCE());
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     TypeMgr& tm
         (TypeMgr::INSTANCE());
@@ -130,18 +130,18 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     Model& model
         (mm.model());
 
-    Atom a_main("main");
-    Expr_ptr main_expr(em.make_identifier(a_main));
+    expr::Atom a_main("main");
+    expr::Expr_ptr main_expr(em.make_identifier(a_main));
 
     Module_ptr main_module = new Module(main_expr);
     model.add_module(*main_module);
 
     Type_ptr u2 = tm.find_unsigned(2);
 
-    Atom a_x("x"); Expr_ptr x = em.make_identifier(a_x);
+    expr::Atom a_x("x"); expr::Expr_ptr x = em.make_identifier(a_x);
     main_module->add_var(x, new symb::Variable(main_expr, x, u2));
 
-    Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
+    expr::Atom a_y("y"); expr::Expr_ptr y = em.make_identifier(a_y);
     main_module->add_var(y, new symb::Variable(main_expr, y, u2));
 
     // mm.analyze();
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* NOT x */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_not(x));
 
       DDChecker checker {
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* NOT NOT x */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_not(em.make_not(x)));
 
       DDChecker checker {
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x NE y */
     {
-        Expr_ptr test_expr
+        expr::Expr_ptr test_expr
           (em.make_ne(x, y));
 
         DDChecker checker {
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x EQ y */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_eq(x, y));
 
       DDChecker checker {
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* (NOT x NE y) <-> x EQ y */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_eq(em.make_not(em.make_ne(x, y)),
                     em.make_eq(x, y)));
 
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x AND y */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_and(x, y));
 
       DDChecker checker {
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x OR y */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_or(x, y));
 
       DDChecker checker {
@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* (NOT (X AND Y)) == (NOT X) OR (NOT Y) */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_eq(em.make_not(em.make_and(x, y)),
                     em.make_or(em.make_not(x), em.make_not(y))));
 
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_eq(em.make_not(em.make_or(x, y)),
                     em.make_and(em.make_not(x), em.make_not(y))));
 
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x IMPL y */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_implies(x, y));
 
       DDChecker checker {
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* (x IMPL y) AND (y IMPL X) == (x == y) */
     {
-      Expr_ptr test_expr
+      expr::Expr_ptr test_expr
         (em.make_eq(em.make_and(em.make_implies(x, y),
                                 em.make_implies(y, x)),
                     em.make_eq(x, y)));

@@ -38,7 +38,7 @@ CheckTrans::CheckTrans(Interpreter& owner)
 CheckTrans::~CheckTrans()
 {}
 
-void CheckTrans::add_constraint(Expr_ptr constraint)
+void CheckTrans::add_constraint(expr::Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
 }

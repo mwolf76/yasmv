@@ -27,10 +27,10 @@
 unsigned InstanceType::width() const
 { assert(false); }
 
-InstanceType::InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params)
+InstanceType::InstanceType(TypeMgr& owner, expr::Expr_ptr name, expr::Expr_ptr params)
     : ScalarType(owner)
     , f_name(name)
     , f_params(params)
 {
-    f_repr = ExprMgr::INSTANCE().make_params( name, params );
+    f_repr = expr::ExprMgr::INSTANCE().make_params( name, params );
 }

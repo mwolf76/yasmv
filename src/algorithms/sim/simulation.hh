@@ -52,11 +52,11 @@ public:
 
     void pick_state(bool allsat,
                     value_t limit,
-                    ExprVector constraints);
+                    expr::ExprVector constraints);
 
-    void simulate(Expr_ptr invar_condition,
-                  Expr_ptr until_condition,
-                  ExprVector constraints,
+    void simulate(expr::Expr_ptr invar_condition,
+                  expr::Expr_ptr until_condition,
+                  expr::ExprVector constraints,
                   step_t k,
                   pconst_char trace_uid);
 
@@ -65,10 +65,10 @@ public:
 
 private:
     /* None of 'em, one of 'em, not both. */
-    Expr_ptr f_halt_cond;
-    Expr_ptr f_nsteps;
+    expr::Expr_ptr f_halt_cond;
+    expr::Expr_ptr f_nsteps;
 
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     simulation_status_t f_status;
 };

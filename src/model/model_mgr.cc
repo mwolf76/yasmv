@@ -45,7 +45,7 @@ ModelMgr_ptr ModelMgr::f_instance = NULL;
 
 ModelMgr::ModelMgr()
     : f_model()
-    , f_em(ExprMgr::INSTANCE())
+    , f_em(expr::ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
@@ -55,7 +55,7 @@ ModelMgr::ModelMgr()
 {
 }
 
-Module_ptr ModelMgr::scope(Expr_ptr key)
+Module_ptr ModelMgr::scope(expr::Expr_ptr key)
 {
     ContextMap::const_iterator mi
         (f_context_map.find( key ));
@@ -64,7 +64,7 @@ Module_ptr ModelMgr::scope(Expr_ptr key)
     return mi->second;
 }
 
-Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
+expr::Expr_ptr ModelMgr::rewrite_parameter(expr::Expr_ptr expr)
 {
     ParamMap::const_iterator i
         (f_param_map.find(expr));
@@ -75,8 +75,8 @@ Expr_ptr ModelMgr::rewrite_parameter(Expr_ptr expr)
 
 bool ModelMgr::analyze_aux(analyzer_pass_t pass)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     Model& model
         (f_model);
@@ -84,22 +84,22 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     Module& main_module
         (model.main_module());
 
-    std::stack< boost::tuple<Expr_ptr, Module_ptr, Expr_ptr> > stack;
-    stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >
+    std::stack< boost::tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr> > stack;
+    stack.push( boost::make_tuple< expr::Expr_ptr, Module_ptr, expr::Expr_ptr >
                 (em.make_empty(), &main_module, em.make_empty()));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
 
-        boost::tuple< Expr_ptr, Module_ptr, Expr_ptr > top
+        boost::tuple< expr::Expr_ptr, Module_ptr, expr::Expr_ptr > top
             (stack.top()); stack.pop();
 
         if (MMGR_BUILD_CTX_MAP == pass) {
-            Expr_ptr key
+            expr::Expr_ptr key
                 (top.get<0>());
             Module_ptr tgt
                 (top.get<1>());
-            Expr_ptr tgt_name
+            expr::Expr_ptr tgt_name
                 (tgt->name());
 
             DRIVEL
@@ -108,25 +108,25 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 << " instance of `" << tgt_name << "`"
                 << std::endl;
 
-            f_context_map.insert( std::pair< Expr_ptr, Module_ptr >
+            f_context_map.insert( std::pair< expr::Expr_ptr, Module_ptr >
                                   ( key, tgt ));
         }
 
-        Expr_ptr curr_ctx
+        expr::Expr_ptr curr_ctx
             (top.get<0>());
         Module& curr_module
             (* top.get<1>());
-        Expr_ptr curr_params
+        expr::Expr_ptr curr_params
             (top.get<2>());
 
         if (MMGR_ANALYZE == pass) {
-            const ExprVector& init
+            const expr::ExprVector& init
                 (curr_module.init());
 
-            for (ExprVector::const_iterator ii = init.begin();
+            for (expr::ExprVector::const_iterator ii = init.begin();
                  ii != init.end(); ++ ii ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ii);
 
                 DEBUG
@@ -152,11 +152,11 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for init
 
-            const ExprVector& invar = curr_module.invar();
-            for (ExprVector::const_iterator ii = invar.begin();
+            const expr::ExprVector& invar = curr_module.invar();
+            for (expr::ExprVector::const_iterator ii = invar.begin();
                  ii != invar.end(); ++ ii ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ii);
 
                 DEBUG
@@ -182,11 +182,11 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for invar
 
-            const ExprVector& trans = curr_module.trans();
-            for (ExprVector::const_iterator ti = trans.begin();
+            const expr::ExprVector& trans = curr_module.trans();
+            for (expr::ExprVector::const_iterator ti = trans.begin();
                  ti != trans.end(); ++ ti ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ti);
 
                 DEBUG
@@ -218,7 +218,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             for (symb::Defines::const_iterator di = defs.begin();
                  di != defs.end(); ++ di ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     ((*di).second->body());
 
                 DEBUG
@@ -246,13 +246,13 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
         } /* MMGR_ANALYZE */
 
         else if (MMGR_TYPE_CHECK == pass) {
-            const ExprVector& init
+            const expr::ExprVector& init
                 (curr_module.init());
 
-            for (ExprVector::const_iterator ii = init.begin();
+            for (expr::ExprVector::const_iterator ii = init.begin();
                  ii != init.end(); ++ ii ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ii);
 
                 DEBUG
@@ -278,11 +278,11 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for init
 
-            const ExprVector& invar = curr_module.invar();
-            for (ExprVector::const_iterator ii = invar.begin();
+            const expr::ExprVector& invar = curr_module.invar();
+            for (expr::ExprVector::const_iterator ii = invar.begin();
                  ii != invar.end(); ++ ii ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ii);
 
                 DEBUG
@@ -308,11 +308,11 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                 }
             } // for invar
 
-            const ExprVector& trans = curr_module.trans();
-            for (ExprVector::const_iterator ti = trans.begin();
+            const expr::ExprVector& trans = curr_module.trans();
+            for (expr::ExprVector::const_iterator ti = trans.begin();
                  ti != trans.end(); ++ ti ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     (*ti);
 
                 DEBUG
@@ -343,7 +343,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             for (symb::Defines::const_iterator di = defs.begin();
                  di != defs.end(); ++ di ) {
 
-                Expr_ptr body
+                expr::Expr_ptr body
                     ((*di).second->body());
 
                 DEBUG
@@ -376,7 +376,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
 
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
 
-            Expr_ptr var_name
+            expr::Expr_ptr var_name
                (vi->first);
 
             Type_ptr var_tp
@@ -385,14 +385,14 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             if (var_tp->is_instance()) {
                 InstanceType_ptr instance
                     (var_tp->as_instance());
-                Expr_ptr inner_ctx
+                expr::Expr_ptr inner_ctx
                     (em.make_dot( curr_ctx, var_name));
-                Expr_ptr inner_params
+                expr::Expr_ptr inner_params
                     (instance->params());
                 Module&  module_
                     ( module(instance->name()));
 
-                stack.push( boost::make_tuple< Expr_ptr, Module_ptr, Expr_ptr >
+                stack.push( boost::make_tuple< expr::Expr_ptr, Module_ptr, expr::Expr_ptr >
                             (inner_ctx, &module_, inner_params));
             }
         }
@@ -400,14 +400,14 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
         if (MMGR_BUILD_PARAM_MAP == pass) {
 
             // analyze_params( curr_module, curr_params );
-            std::vector<Expr_ptr> actuals;
+            std::vector<expr::Expr_ptr> actuals;
 
             // 1. in-order visit, build fwd expr stack
-            std::stack<Expr_ptr> comma_stack;
+            std::stack<expr::Expr_ptr> comma_stack;
             comma_stack.push( curr_params );
 
             while (0 < comma_stack.size()) {
-                Expr_ptr top
+                expr::Expr_ptr top
                     (comma_stack.top());
                 comma_stack.pop();
 
@@ -431,15 +431,15 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             symb::Parameters::const_iterator fi
                 (formals.begin());
 
-            std::vector<Expr_ptr>::const_iterator ai
+            std::vector<expr::Expr_ptr>::const_iterator ai
                 (actuals.begin());
 
             while (formals.end() != fi) {
 
-                Expr_ptr formal
+                expr::Expr_ptr formal
                     (em.make_dot( curr_ctx, ((* fi->second).name())));
 
-                Expr_ptr actual
+                expr::Expr_ptr actual
                     (*ai);
 
                 DEBUG
@@ -449,7 +449,7 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
                     << actual << "`"
                     << std::endl;
 
-                f_param_map.insert( std::pair< Expr_ptr, Expr_ptr >
+                f_param_map.insert( std::pair< expr::Expr_ptr, expr::Expr_ptr >
                                     ( formal, actual ));
 
                 ++ fi;

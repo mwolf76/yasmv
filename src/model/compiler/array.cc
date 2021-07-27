@@ -26,7 +26,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-void Compiler::array_equals(const Expr_ptr expr)
+void Compiler::array_equals(const expr::Expr_ptr expr)
 {
     const Type_ptr rhs_type
         (f_type_stack.back());
@@ -68,7 +68,7 @@ void Compiler::array_equals(const Expr_ptr expr)
 
         FRESH_DV(act, 1);
         InlinedOperatorDescriptor md
-            (make_ios( false, EQ, width), act,
+            (make_ios( false, expr::EQ, width), act,
              lhs_fragment, rhs_fragment);
 
         f_inlined_operator_descriptors.push_back(md);
@@ -84,7 +84,7 @@ void Compiler::array_equals(const Expr_ptr expr)
     PUSH_DD(res);
 }
 
-void Compiler::array_ite(const Expr_ptr expr)
+void Compiler::array_ite(const expr::Expr_ptr expr)
 {
     const Type_ptr rhs_type
         (f_type_stack.back());
@@ -135,7 +135,7 @@ void Compiler::array_ite(const Expr_ptr expr)
     PUSH_DV(res, width);
 
     /* Register ITE MUX */
-    Expr_ptr parent
+    expr::Expr_ptr parent
         (expr);
 
     BinarySelectionUnionFindMap::const_iterator eye
@@ -150,7 +150,7 @@ void Compiler::array_ite(const Expr_ptr expr)
             (f_expr2bsd_map.find(parent));
 
         if (f_expr2bsd_map.end() == mi)
-            f_expr2bsd_map.insert( std::pair< Expr_ptr, BinarySelectionDescriptors >
+            f_expr2bsd_map.insert( std::pair< expr::Expr_ptr, BinarySelectionDescriptors >
                                    (parent, BinarySelectionDescriptors()));
     }
 

@@ -39,14 +39,14 @@
 
 namespace witness {
 
-typedef boost::unordered_map<TimedExpr, value_t,
-                             TimedExprHash, TimedExprEq> TimedExprValueMap;
+typedef boost::unordered_map<expr::TimedExpr, value_t,
+                             expr::TimedExprHash, expr::TimedExprEq> TimedExprValueMap;
 
 class WitnessMgr;
-class Evaluator : public ExprWalker {
+class Evaluator : public expr::ExprWalker {
 
     TypeVector f_type_stack;
-    ExprVector f_ctx_stack;
+    expr::ExprVector f_ctx_stack;
     utils::TimeVector f_time_stack;
     utils::ValueVector f_values_stack;
 
@@ -59,7 +59,7 @@ public:
     Evaluator(WitnessMgr& owner);
     virtual ~Evaluator();
 
-    Expr_ptr process(Witness& witness, Expr_ptr ctx, Expr_ptr body, step_t time);
+    expr::Expr_ptr process(Witness& witness, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t time);
 
 protected:
     inline WitnessMgr& owner() const
@@ -68,16 +68,16 @@ protected:
     OP_HOOKS;
     LTL_STUBS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+    void walk_instant(const expr::Expr_ptr expr);
+    void walk_leaf(const expr::Expr_ptr expr);
 
 private:
     WitnessMgr &f_owner;
 
-    bool cache_miss(const Expr_ptr expr);
+    bool cache_miss(const expr::Expr_ptr expr);
     void clear_internals();
 
-    void push_value(const Expr_ptr expr);
+    void push_value(const expr::Expr_ptr expr);
 };
 
 };

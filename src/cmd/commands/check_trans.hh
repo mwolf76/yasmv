@@ -37,7 +37,7 @@ public:
     virtual ~CheckTrans();
 
     /** cmd params */
-    void add_constraint(Expr_ptr constraint);
+    void add_constraint(expr::Expr_ptr constraint);
 
     /* run() */
     utils::Variant virtual operator()();
@@ -46,7 +46,7 @@ private:
     std::ostream& f_out;
 
     /* (optional) additional constraints */
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();

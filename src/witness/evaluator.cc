@@ -58,13 +58,13 @@ void Evaluator::clear_internals()
     f_te2v_map.clear();
 }
 
-Expr_ptr Evaluator::process(Witness &witness,
-                            Expr_ptr ctx,
-                            Expr_ptr body,
-                            step_t time)
+expr::Expr_ptr Evaluator::process(Witness &witness,
+                                  expr::Expr_ptr ctx,
+                                  expr::Expr_ptr body,
+                                  step_t time)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     clear_internals();
 
@@ -101,7 +101,7 @@ Expr_ptr Evaluator::process(Witness &witness,
     else if (res_type->is_string()) {
         assert(1 == f_values_stack.size());
         value_t cp { f_values_stack.at(0) };
-        Atom atom { (const char *) cp };
+        expr::Atom atom { (const char *) cp };
         return em.make_qstring(atom);
     }
     else if (res_type->is_enum()) {
@@ -111,10 +111,10 @@ Expr_ptr Evaluator::process(Witness &witness,
         EnumType_ptr enum_type
             (res_type->as_enum());
 
-        const ExprSet& literals
+        const expr::ExprSet& literals
             (enum_type->literals());
 
-        ExprSet::const_iterator i
+        expr::ExprSet::const_iterator i
             (literals.begin());
 
         while (0 < res_value) {
@@ -137,7 +137,7 @@ Expr_ptr Evaluator::process(Witness &witness,
         assert(atype->nelems() ==
                f_values_stack.size());
 
-        Expr_ptr lst
+        expr::Expr_ptr lst
             (NULL);
 
         /* assemble array values list */
@@ -162,11 +162,11 @@ Expr_ptr Evaluator::process(Witness &witness,
  *  pattern: (a) on preorder, return true if the node has not yet been
  *  visited; (b) always do in-order (for binary nodes); (c) perform
  *  proper compilation in post-order hooks. */
-bool Evaluator::walk_at_preorder(const Expr_ptr expr)
+bool Evaluator::walk_at_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_at_inorder(const Expr_ptr expr)
+bool Evaluator::walk_at_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_at_postorder(const Expr_ptr expr)
+void Evaluator::walk_at_postorder(const expr::Expr_ptr expr)
 {
     POP_TYPE(rhs_type);
     DROP_TYPE();
@@ -180,37 +180,37 @@ void Evaluator::walk_at_postorder(const Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
-bool Evaluator::walk_next_preorder(const Expr_ptr expr)
+bool Evaluator::walk_next_preorder(const expr::Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();
     f_time_stack.push_back(curr_time + 1);
     return true;
 }
-void Evaluator::walk_next_postorder(const Expr_ptr expr)
+void Evaluator::walk_next_postorder(const expr::Expr_ptr expr)
 {
     assert (0 < f_time_stack.size());
     f_time_stack.pop_back(); // reset time stack
 }
 
-bool Evaluator::walk_neg_preorder(const Expr_ptr expr)
+bool Evaluator::walk_neg_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Evaluator::walk_neg_postorder(const Expr_ptr expr)
+void Evaluator::walk_neg_postorder(const expr::Expr_ptr expr)
 {
     POP_VALUE(lhs);
     PUSH_VALUE(- lhs);
 }
 
-bool Evaluator::walk_not_preorder(const Expr_ptr expr)
+bool Evaluator::walk_not_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Evaluator::walk_not_postorder(const Expr_ptr expr)
+void Evaluator::walk_not_postorder(const expr::Expr_ptr expr)
 {
     POP_VALUE(lhs);
     PUSH_VALUE(! lhs);
 }
 
-bool Evaluator::walk_bw_not_preorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_not_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Evaluator::walk_bw_not_postorder(const Expr_ptr expr)
+void Evaluator::walk_bw_not_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -218,11 +218,11 @@ void Evaluator::walk_bw_not_postorder(const Expr_ptr expr)
     PUSH_VALUE(~ lhs);
 }
 
-bool Evaluator::walk_add_preorder(const Expr_ptr expr)
+bool Evaluator::walk_add_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_add_inorder(const Expr_ptr expr)
+bool Evaluator::walk_add_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_add_postorder(const Expr_ptr expr)
+void Evaluator::walk_add_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -231,11 +231,11 @@ void Evaluator::walk_add_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs + rhs);
 }
 
-bool Evaluator::walk_sub_preorder(const Expr_ptr expr)
+bool Evaluator::walk_sub_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_sub_inorder(const Expr_ptr expr)
+bool Evaluator::walk_sub_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_sub_postorder(const Expr_ptr expr)
+void Evaluator::walk_sub_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -244,11 +244,11 @@ void Evaluator::walk_sub_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs - rhs);
 }
 
-bool Evaluator::walk_div_preorder(const Expr_ptr expr)
+bool Evaluator::walk_div_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_div_inorder(const Expr_ptr expr)
+bool Evaluator::walk_div_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_div_postorder(const Expr_ptr expr)
+void Evaluator::walk_div_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -257,11 +257,11 @@ void Evaluator::walk_div_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs / rhs);
 }
 
-bool Evaluator::walk_mul_preorder(const Expr_ptr expr)
+bool Evaluator::walk_mul_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_mul_inorder(const Expr_ptr expr)
+bool Evaluator::walk_mul_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_mul_postorder(const Expr_ptr expr)
+void Evaluator::walk_mul_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -270,11 +270,11 @@ void Evaluator::walk_mul_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs * rhs);
 }
 
-bool Evaluator::walk_mod_preorder(const Expr_ptr expr)
+bool Evaluator::walk_mod_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_mod_inorder(const Expr_ptr expr)
+bool Evaluator::walk_mod_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_mod_postorder(const Expr_ptr expr)
+void Evaluator::walk_mod_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -283,11 +283,11 @@ void Evaluator::walk_mod_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs % rhs);
 }
 
-bool Evaluator::walk_and_preorder(const Expr_ptr expr)
+bool Evaluator::walk_and_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_and_inorder(const Expr_ptr expr)
+bool Evaluator::walk_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_and_postorder(const Expr_ptr expr)
+void Evaluator::walk_and_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -296,11 +296,11 @@ void Evaluator::walk_and_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs && rhs);
 }
 
-bool Evaluator::walk_bw_and_preorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_and_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_bw_and_inorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_bw_and_postorder(const Expr_ptr expr)
+void Evaluator::walk_bw_and_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -309,11 +309,11 @@ void Evaluator::walk_bw_and_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs & rhs);
 }
 
-bool Evaluator::walk_or_preorder(const Expr_ptr expr)
+bool Evaluator::walk_or_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_or_inorder(const Expr_ptr expr)
+bool Evaluator::walk_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_or_postorder(const Expr_ptr expr)
+void Evaluator::walk_or_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -322,11 +322,11 @@ void Evaluator::walk_or_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs || rhs);
 }
 
-bool Evaluator::walk_bw_or_preorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_or_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_bw_or_inorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_bw_or_postorder(const Expr_ptr expr)
+void Evaluator::walk_bw_or_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -335,11 +335,11 @@ void Evaluator::walk_bw_or_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs | rhs);
 }
 
-bool Evaluator::walk_bw_xor_preorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_xor_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_bw_xor_inorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_xor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_bw_xor_postorder(const Expr_ptr expr)
+void Evaluator::walk_bw_xor_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -348,11 +348,11 @@ void Evaluator::walk_bw_xor_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs ^ rhs);
 }
 
-bool Evaluator::walk_bw_xnor_preorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_xnor_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_bw_xnor_inorder(const Expr_ptr expr)
+bool Evaluator::walk_bw_xnor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_bw_xnor_postorder(const Expr_ptr expr)
+void Evaluator::walk_bw_xnor_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -361,18 +361,18 @@ void Evaluator::walk_bw_xnor_postorder(const Expr_ptr expr)
     PUSH_VALUE(( (! lhs) | rhs ) & ((! rhs) | lhs ));
 }
 
-bool Evaluator::walk_guard_preorder(const Expr_ptr expr)
+bool Evaluator::walk_guard_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_guard_inorder(const Expr_ptr expr)
+bool Evaluator::walk_guard_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_guard_postorder(const Expr_ptr expr)
+void Evaluator::walk_guard_postorder(const expr::Expr_ptr expr)
 { assert(false); /* unreachable */ }
 
-bool Evaluator::walk_implies_preorder(const Expr_ptr expr)
+bool Evaluator::walk_implies_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_implies_inorder(const Expr_ptr expr)
+bool Evaluator::walk_implies_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_implies_postorder(const Expr_ptr expr)
+void Evaluator::walk_implies_postorder(const expr::Expr_ptr expr)
 {
     DROP_TYPE();
 
@@ -381,11 +381,11 @@ void Evaluator::walk_implies_postorder(const Expr_ptr expr)
     PUSH_VALUE(( ! lhs || rhs ));
 }
 
-bool Evaluator::walk_lshift_preorder(const Expr_ptr expr)
+bool Evaluator::walk_lshift_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_lshift_inorder(const Expr_ptr expr)
+bool Evaluator::walk_lshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_lshift_postorder(const Expr_ptr expr)
+void Evaluator::walk_lshift_postorder(const expr::Expr_ptr expr)
 {
     /* drops rhs, which is fine */
     DROP_TYPE();
@@ -395,11 +395,11 @@ void Evaluator::walk_lshift_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs << rhs ));
 }
 
-bool Evaluator::walk_rshift_preorder(const Expr_ptr expr)
+bool Evaluator::walk_rshift_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_rshift_inorder(const Expr_ptr expr)
+bool Evaluator::walk_rshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_rshift_postorder(const Expr_ptr expr)
+void Evaluator::walk_rshift_postorder(const expr::Expr_ptr expr)
 {
     /* drop rhs, which is fine */
     DROP_TYPE();
@@ -409,18 +409,18 @@ void Evaluator::walk_rshift_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs >> rhs ));
 }
 
-bool Evaluator::walk_assignment_preorder(const Expr_ptr expr)
+bool Evaluator::walk_assignment_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_assignment_inorder(const Expr_ptr expr)
+bool Evaluator::walk_assignment_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_assignment_postorder(const Expr_ptr expr)
+void Evaluator::walk_assignment_postorder(const expr::Expr_ptr expr)
 { assert(false); /* unreachable */ }
 
-bool Evaluator::walk_eq_preorder(const Expr_ptr expr)
+bool Evaluator::walk_eq_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_eq_inorder(const Expr_ptr expr)
+bool Evaluator::walk_eq_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_eq_postorder(const Expr_ptr expr)
+void Evaluator::walk_eq_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -481,11 +481,11 @@ void Evaluator::walk_eq_postorder(const Expr_ptr expr)
     PUSH_TYPE(tm.find_boolean());
 }
 
-bool Evaluator::walk_ne_preorder(const Expr_ptr expr)
+bool Evaluator::walk_ne_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_ne_inorder(const Expr_ptr expr)
+bool Evaluator::walk_ne_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_ne_postorder(const Expr_ptr expr)
+void Evaluator::walk_ne_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -499,11 +499,11 @@ void Evaluator::walk_ne_postorder(const Expr_ptr expr)
     PUSH_VALUE(lhs != rhs);
 }
 
-bool Evaluator::walk_gt_preorder(const Expr_ptr expr)
+bool Evaluator::walk_gt_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_gt_inorder(const Expr_ptr expr)
+bool Evaluator::walk_gt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_gt_postorder(const Expr_ptr expr)
+void Evaluator::walk_gt_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -517,11 +517,11 @@ void Evaluator::walk_gt_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs > rhs ));
 }
 
-bool Evaluator::walk_ge_preorder(const Expr_ptr expr)
+bool Evaluator::walk_ge_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_ge_inorder(const Expr_ptr expr)
+bool Evaluator::walk_ge_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_ge_postorder(const Expr_ptr expr)
+void Evaluator::walk_ge_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -535,11 +535,11 @@ void Evaluator::walk_ge_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs >= rhs ));
 }
 
-bool Evaluator::walk_lt_preorder(const Expr_ptr expr)
+bool Evaluator::walk_lt_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_lt_inorder(const Expr_ptr expr)
+bool Evaluator::walk_lt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_lt_postorder(const Expr_ptr expr)
+void Evaluator::walk_lt_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -553,11 +553,11 @@ void Evaluator::walk_lt_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs < rhs ));
 }
 
-bool Evaluator::walk_le_preorder(const Expr_ptr expr)
+bool Evaluator::walk_le_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_le_inorder(const Expr_ptr expr)
+bool Evaluator::walk_le_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_le_postorder(const Expr_ptr expr)
+void Evaluator::walk_le_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -571,11 +571,11 @@ void Evaluator::walk_le_postorder(const Expr_ptr expr)
     PUSH_VALUE(( lhs <= rhs ));
 }
 
-bool Evaluator::walk_ite_preorder(const Expr_ptr expr)
+bool Evaluator::walk_ite_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_ite_inorder(const Expr_ptr expr)
+bool Evaluator::walk_ite_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_ite_postorder(const Expr_ptr expr)
+void Evaluator::walk_ite_postorder(const expr::Expr_ptr expr)
 {
    POP_TYPE(rhs_type);
    DROP_TYPE();
@@ -588,54 +588,54 @@ void Evaluator::walk_ite_postorder(const Expr_ptr expr)
    PUSH_VALUE(( cnd ? lhs : rhs ));
 }
 
-bool Evaluator::walk_cond_preorder(const Expr_ptr expr)
+bool Evaluator::walk_cond_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_cond_inorder(const Expr_ptr expr)
+bool Evaluator::walk_cond_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_cond_postorder(const Expr_ptr expr)
+void Evaluator::walk_cond_postorder(const expr::Expr_ptr expr)
 { /* nop */ }
 
-bool Evaluator::walk_dot_preorder(const Expr_ptr expr)
+bool Evaluator::walk_dot_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_dot_inorder(const Expr_ptr expr)
+bool Evaluator::walk_dot_inorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     DROP_TYPE();
 
     TOP_CTX(parent_ctx);
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (em.make_dot( parent_ctx, expr->lhs()));
     PUSH_CTX(ctx);
 
     return true;
 }
-void Evaluator::walk_dot_postorder(const Expr_ptr expr)
+void Evaluator::walk_dot_postorder(const expr::Expr_ptr expr)
 { DROP_CTX(); }
 
-bool Evaluator::walk_params_preorder(const Expr_ptr expr)
+bool Evaluator::walk_params_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_params_inorder(const Expr_ptr expr)
+bool Evaluator::walk_params_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_params_postorder(const Expr_ptr expr)
+void Evaluator::walk_params_postorder(const expr::Expr_ptr expr)
 { assert (false); /* not yet implemented */ }
 
-bool Evaluator::walk_params_comma_preorder(const Expr_ptr expr)
+bool Evaluator::walk_params_comma_preorder(const expr::Expr_ptr expr)
 {  return cache_miss(expr); }
-bool Evaluator::walk_params_comma_inorder(const Expr_ptr expr)
+bool Evaluator::walk_params_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_params_comma_postorder(const Expr_ptr expr)
+void Evaluator::walk_params_comma_postorder(const expr::Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
 
-bool Evaluator::walk_subscript_preorder(const Expr_ptr expr)
+bool Evaluator::walk_subscript_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Evaluator::walk_subscript_inorder(const Expr_ptr expr)
+bool Evaluator::walk_subscript_inorder(const expr::Expr_ptr expr)
 { return true; }
 
-void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
+void Evaluator::walk_subscript_postorder(const expr::Expr_ptr expr)
 {
     value_t res;
 
@@ -664,16 +664,16 @@ void Evaluator::walk_subscript_postorder(const Expr_ptr expr)
     PUSH_VALUE(res);
 }
 
-bool Evaluator::walk_array_preorder(const Expr_ptr expr)
+bool Evaluator::walk_array_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Evaluator::walk_array_postorder(const Expr_ptr expr)
+void Evaluator::walk_array_postorder(const expr::Expr_ptr expr)
 {}
 
-bool Evaluator::walk_array_comma_preorder(const Expr_ptr expr)
+bool Evaluator::walk_array_comma_preorder(const expr::Expr_ptr expr)
 {  return cache_miss(expr); }
-bool Evaluator::walk_array_comma_inorder(const Expr_ptr expr)
+bool Evaluator::walk_array_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_array_comma_postorder(const Expr_ptr expr)
+void Evaluator::walk_array_comma_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (TypeMgr::INSTANCE());
@@ -694,32 +694,32 @@ void Evaluator::walk_array_comma_postorder(const Expr_ptr expr)
     PUSH_TYPE(atmp_type);
 }
 
-bool Evaluator::walk_set_preorder(const Expr_ptr expr)
+bool Evaluator::walk_set_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Evaluator::walk_set_postorder(const Expr_ptr expr)
+void Evaluator::walk_set_postorder(const expr::Expr_ptr expr)
 {
     assert(false); // TODO
 }
 
-bool Evaluator::walk_set_comma_preorder(const Expr_ptr expr)
+bool Evaluator::walk_set_comma_preorder(const expr::Expr_ptr expr)
 {  return cache_miss(expr); }
-bool Evaluator::walk_set_comma_inorder(const Expr_ptr expr)
+bool Evaluator::walk_set_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_set_comma_postorder(const Expr_ptr expr)
+void Evaluator::walk_set_comma_postorder(const expr::Expr_ptr expr)
 { assert (false); /* TODO support inlined non-determinism */ }
 
-bool Evaluator::walk_type_preorder(const Expr_ptr expr)
+bool Evaluator::walk_type_preorder(const expr::Expr_ptr expr)
 { return false; }
-bool Evaluator::walk_type_inorder(const Expr_ptr expr)
+bool Evaluator::walk_type_inorder(const expr::Expr_ptr expr)
 { assert(false); return false; }
-void Evaluator::walk_type_postorder(const Expr_ptr expr)
+void Evaluator::walk_type_postorder(const expr::Expr_ptr expr)
 { assert (false); }
 
-bool Evaluator::walk_cast_preorder(const Expr_ptr expr)
+bool Evaluator::walk_cast_preorder(const expr::Expr_ptr expr)
 {  return cache_miss(expr); }
-bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
+bool Evaluator::walk_cast_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Evaluator::walk_cast_postorder(const Expr_ptr expr)
+void Evaluator::walk_cast_postorder(const expr::Expr_ptr expr)
 { /* nop */ }
 
 };

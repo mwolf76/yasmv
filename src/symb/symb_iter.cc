@@ -33,9 +33,11 @@ bool SymbIter::has_next() const
 }
 
 /* true iff there are more symbols to be processed */
-std::pair <Expr_ptr, Symbol_ptr> SymbIter::next()
+std::pair <expr::Expr_ptr, Symbol_ptr> SymbIter::next()
 {
-    std::pair< Expr_ptr, Symbol_ptr> res = (* f_iter);
+    std::pair<expr::Expr_ptr, Symbol_ptr> res
+        (* f_iter);
+
     ++ f_iter;
 
     return res;

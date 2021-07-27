@@ -31,7 +31,7 @@
 
 namespace witness {
 
-static std::string build_duplicate_witness_id_error_message(Atom id)
+static std::string build_duplicate_witness_id_error_message(expr::Atom id)
 {
     std::ostringstream oss;
 
@@ -43,7 +43,7 @@ static std::string build_duplicate_witness_id_error_message(Atom id)
     return oss.str();
 }
 
-DuplicateWitnessId::DuplicateWitnessId(Atom id)
+DuplicateWitnessId::DuplicateWitnessId(expr::Atom id)
     : WitnessException("DuplicateWitnessId",
                        build_duplicate_witness_id_error_message(id))
 {}
@@ -53,7 +53,7 @@ NoCurrentlySelectedWitness::NoCurrentlySelectedWitness()
     : WitnessException("NoCurrentlySelectedWitness")
 {}
 
-static std::string build_unknown_witness_error_message(Atom id)
+static std::string build_unknown_witness_error_message(expr::Atom id)
 {
     std::ostringstream oss;
 
@@ -67,7 +67,7 @@ static std::string build_unknown_witness_error_message(Atom id)
 }
 
 /** Raised when a given ID is searched for and was not registered */
-UnknownWitnessId::UnknownWitnessId(Atom id)
+UnknownWitnessId::UnknownWitnessId(expr::Atom id)
     : WitnessException("UnknownWitnessId",
                        build_unknown_witness_error_message(id))
 {}
@@ -88,7 +88,7 @@ IllegalTime::IllegalTime(step_t time)
                        build_illegal_time_error_message(time))
 {}
 
-static std::string build_no_value_error_message(Expr_ptr id)
+static std::string build_no_value_error_message(expr::Expr_ptr id)
 {
     std::ostringstream oss;
 
@@ -100,7 +100,7 @@ static std::string build_no_value_error_message(Expr_ptr id)
     return oss.str();
 }
 
-NoValue::NoValue(Expr_ptr id)
+NoValue::NoValue(expr::Expr_ptr id)
     : WitnessException("NoValue",
                        build_no_value_error_message(id))
 {}

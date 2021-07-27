@@ -30,7 +30,7 @@ namespace witness {
 WitnessMgr_ptr WitnessMgr::f_instance = NULL;
 
 WitnessMgr::WitnessMgr()
-    : f_em(ExprMgr::INSTANCE())
+    : f_em(expr::ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_evaluator(*this)
     , f_autoincrement(0)
@@ -46,7 +46,7 @@ Witness& WitnessMgr::current()
 
 void WitnessMgr::set_current( Witness& witness )
 {
-    Atom uid
+    expr::Atom uid
         (witness.id());
 
     WitnessMap::iterator eye
@@ -58,7 +58,7 @@ void WitnessMgr::set_current( Witness& witness )
     f_curr_uid = uid;
 }
 
-Witness& WitnessMgr::witness( Atom id )
+Witness& WitnessMgr::witness( expr::Atom id )
 {
     WitnessMap::iterator eye
         (f_map.find( id ));
@@ -74,7 +74,7 @@ Witness& WitnessMgr::witness( Atom id )
 
 void WitnessMgr::record( Witness& witness )
 {
-    Atom uid
+    expr::Atom uid
         (witness.id());
 
     WitnessMap::iterator eye
@@ -83,7 +83,7 @@ void WitnessMgr::record( Witness& witness )
     if (f_map.end() != eye)
         throw DuplicateWitnessId( uid );
 
-    f_map.insert( std::pair <Atom, Witness_ptr>
+    f_map.insert( std::pair <expr::Atom, Witness_ptr>
                   (uid, &witness));
 
     f_list.push_back( &witness );
@@ -94,9 +94,9 @@ unsigned WitnessMgr::autoincrement()
     return ++ f_autoincrement;
 }
 
-Expr_ptr WitnessMgr::eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
+expr::Expr_ptr WitnessMgr::eval(Witness &w, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t k)
 {
-    Expr_ptr res;
+    expr::Expr_ptr res;
 
     try {
         res = f_evaluator.process(w, ctx, body, k);

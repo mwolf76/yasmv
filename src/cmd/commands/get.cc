@@ -41,17 +41,17 @@ Get::Get(Interpreter& owner)
 Get::~Get()
 {}
 
-void Get::set_identifier(Expr_ptr id)
+void Get::set_identifier(expr::Expr_ptr id)
 {
     f_identifier = id;
 }
 
-void Get::print_assignment(std::ostream& os, Expr_ptr id)
+void Get::print_assignment(std::ostream& os, expr::Expr_ptr id)
 {
     env::Environment& env
         (env::Environment::INSTANCE());
 
-    Expr_ptr value { env.get(id) }; /* raises an exception on failures */
+    expr::Expr_ptr value { env.get(id) }; /* raises an exception on failures */
 
     os
         << outPrefix
@@ -66,17 +66,17 @@ void Get::print_all_assignments(std::ostream& os)
     env::Environment& env
         (env::Environment::INSTANCE());
 
-    const ExprSet& identifiers { env.identifiers() };
+    const expr::ExprSet& identifiers { env.identifiers() };
 
-    for (ExprSet::const_iterator i = identifiers.begin();
+    for (expr::ExprSet::const_iterator i = identifiers.begin();
          i != identifiers.end(); ++ i) {
 
-        Expr_ptr id { *i };
+        expr::Expr_ptr id { *i };
         print_assignment(os, id);
     }
 }
 
-utils::Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
+utils::Variant Get::print_one_assignment(std::ostream& os, expr::Expr_ptr id)
 {
     utils::Variant res { errMessage };
 

@@ -25,13 +25,13 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-void Compiler::boolean_not(const Expr_ptr expr)
+void Compiler::boolean_not(const expr::Expr_ptr expr)
 {
     POP_DD(lhs);
     f_add_stack.push_back(lhs.Cmpl());
 }
 
-void Compiler::boolean_and(const Expr_ptr expr)
+void Compiler::boolean_and(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -40,7 +40,7 @@ void Compiler::boolean_and(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_or(const Expr_ptr expr)
+void Compiler::boolean_or(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -49,7 +49,7 @@ void Compiler::boolean_or(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_xor(const Expr_ptr expr)
+void Compiler::boolean_xor(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -58,7 +58,7 @@ void Compiler::boolean_xor(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_implies(const Expr_ptr expr)
+void Compiler::boolean_implies(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -67,7 +67,7 @@ void Compiler::boolean_implies(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_iff(const Expr_ptr expr)
+void Compiler::boolean_iff(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -77,7 +77,7 @@ void Compiler::boolean_iff(const Expr_ptr expr)
 }
 
 // implemented as xnor (logical equivalence)
-void Compiler::boolean_equals(const Expr_ptr expr)
+void Compiler::boolean_equals(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -87,7 +87,7 @@ void Compiler::boolean_equals(const Expr_ptr expr)
 }
 
 // implemented as negation of the former (i.e xor)
-void Compiler::boolean_not_equals(const Expr_ptr expr)
+void Compiler::boolean_not_equals(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -96,7 +96,7 @@ void Compiler::boolean_not_equals(const Expr_ptr expr)
     f_type_stack.pop_back(); // consume one, leave the other
 }
 
-void Compiler::boolean_ite(const Expr_ptr expr)
+void Compiler::boolean_ite(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -108,7 +108,7 @@ void Compiler::boolean_ite(const Expr_ptr expr)
     f_type_stack.pop_back();
 }
 
-void Compiler::boolean_subscript(const Expr_ptr expr)
+void Compiler::boolean_subscript(const expr::Expr_ptr expr)
 {
     enc::EncodingMgr& bm
         (f_enc);

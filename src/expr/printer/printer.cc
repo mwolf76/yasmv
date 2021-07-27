@@ -21,13 +21,15 @@
  *
  **/
 
+#define DEBUG_CTX (0)
+
 #include <common/common.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
-#define DEBUG_CTX (0)
+namespace expr {
 
 Printer::Printer()
     : f_os(std::cout)
@@ -391,3 +393,5 @@ void Printer::walk_instant(const Expr_ptr expr)
     f_os << "@";
     print_leaf(expr);
 }
+
+};

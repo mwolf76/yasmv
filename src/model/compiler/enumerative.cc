@@ -24,7 +24,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-void Compiler::enumerative_equals(const Expr_ptr expr)
+void Compiler::enumerative_equals(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -38,7 +38,7 @@ void Compiler::enumerative_equals(const Expr_ptr expr)
     f_type_stack.push_back( tm.find_boolean());
 }
 
-void Compiler::enumerative_not_equals(const Expr_ptr expr)
+void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -52,7 +52,7 @@ void Compiler::enumerative_not_equals(const Expr_ptr expr)
     f_type_stack.push_back( tm.find_boolean());
 }
 
-void Compiler::enumerative_ite(const Expr_ptr expr)
+void Compiler::enumerative_ite(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
     POP_DD(lhs);
@@ -70,7 +70,7 @@ void Compiler::enumerative_ite(const Expr_ptr expr)
     f_type_stack.push_back(type);
 }
 
-void Compiler::enumerative_subscript(const Expr_ptr expr)
+void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
 {
     enc::EncodingMgr& bm
         (f_enc);

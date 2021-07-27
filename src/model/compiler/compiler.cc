@@ -29,7 +29,7 @@ ECompilerStatus& operator++(ECompilerStatus& status) {
     return status = static_cast<ECompilerStatus> (1 + static_cast <int> (status));
 }
 
-CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
+CompilationUnit Compiler::process(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     /* the compiler can be shared among multiple strategies running on multiple threads */
     boost::mutex::scoped_lock lock { f_process_mutex };
@@ -53,8 +53,8 @@ CompilationUnit Compiler::process(Expr_ptr ctx, Expr_ptr body)
        [0..n_elems[` to the original formula. */
     activate_array_muxes(ctx, body);
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     return CompilationUnit(em.make_dot( ctx, body), f_add_stack, f_inlined_operator_descriptors,
                            f_expr2bsd_map, f_multiway_selection_descriptors);

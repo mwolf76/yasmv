@@ -53,15 +53,15 @@ CheckTransConsistency::~CheckTransConsistency()
         << std::endl;
 }
 
-void CheckTransConsistency::process(ExprVector constraints)
+void CheckTransConsistency::process(expr::ExprVector constraints)
 {
     Engine engine { "Transitional" };
-    Expr_ptr ctx { em().make_empty() };
+    expr::Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
     std::for_each(begin(constraints),
                   end(constraints),
-                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                  [this, ctx, &nconstraints](expr::Expr_ptr expr) {
                       INFO
                           << "Compiling constraint `"
                           << expr

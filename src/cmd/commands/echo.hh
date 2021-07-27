@@ -29,14 +29,14 @@
 
 #include <cmd/command.hh>
 class Echo : public Command {
-    using expressions = std::vector<Expr_ptr>;
+    using expressions = std::vector<expr::Expr_ptr>;
     expressions f_expressions;
 
 public:
     Echo(Interpreter& owner);
     virtual ~Echo();
 
-    void append_expression(Expr_ptr expression);
+    void append_expression(expr::Expr_ptr expression);
 
     utils::Variant virtual operator()();
 };

@@ -34,7 +34,7 @@ namespace symb {
 class Resolver {
 public:
     /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const Expr_ptr key) =0;
+    virtual Symbol_ptr symbol(const expr::Expr_ptr key) =0;
 };
 
 };

@@ -23,12 +23,12 @@
 
 #include <compiler.hh>
 
-bool Compiler::is_binary_boolean(const Expr_ptr expr)
+bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /* AND, OR, XOR, XNOR, IFF, IMPLIES */
@@ -40,12 +40,12 @@ bool Compiler::is_binary_boolean(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_binary_enumerative(const Expr_ptr expr)
+bool Compiler::is_binary_enumerative(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
@@ -59,12 +59,12 @@ bool Compiler::is_binary_enumerative(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_binary_algebraic(const Expr_ptr expr)
+bool Compiler::is_binary_algebraic(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if ((em.is_binary_logical(expr)) ||
@@ -78,12 +78,12 @@ bool Compiler::is_binary_algebraic(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_unary_boolean(const Expr_ptr expr)
+bool Compiler::is_unary_boolean(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /*  NOT, () ? */
@@ -93,12 +93,12 @@ bool Compiler::is_unary_boolean(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_unary_enumerative(const Expr_ptr expr)
+bool Compiler::is_unary_enumerative(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /* unary : ? (), : (), NEG, NOT(bw) */
@@ -109,12 +109,12 @@ bool Compiler::is_unary_enumerative(const Expr_ptr expr)
 }
 
 /* checks lhs is array of boolean, and rhs is algebraic */
-bool Compiler::is_subscript_boolean(const Expr_ptr expr)
+bool Compiler::is_subscript_boolean(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (! em.is_subscript(expr))
@@ -143,12 +143,12 @@ bool Compiler::is_subscript_boolean(const Expr_ptr expr)
 }
 
 /* checks lhs is array of boolean, and rhs is algebraic */
-bool Compiler::is_subscript_enumerative(const Expr_ptr expr)
+bool Compiler::is_subscript_enumerative(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (! em.is_subscript(expr))
@@ -179,12 +179,12 @@ bool Compiler::is_subscript_enumerative(const Expr_ptr expr)
 }
 
 /* checks lhs is array of algebraics, and rhs is algebraic */
-bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
+bool Compiler::is_subscript_algebraic(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (! em.is_subscript(expr))
@@ -214,12 +214,12 @@ bool Compiler::is_subscript_algebraic(const Expr_ptr expr)
     return true;
 }
 
-bool Compiler::is_unary_algebraic(const Expr_ptr expr)
+bool Compiler::is_unary_algebraic(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if ((em.is_unary_logical(expr)) ||
@@ -231,12 +231,12 @@ bool Compiler::is_unary_algebraic(const Expr_ptr expr)
 }
 
 /* same as is_binary_boolean, checks only lhs and rhs */
-bool Compiler::is_ite_boolean(const Expr_ptr expr)
+bool Compiler::is_ite_boolean(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /* ITE */
@@ -248,12 +248,12 @@ bool Compiler::is_ite_boolean(const Expr_ptr expr)
 }
 
 /* same as  is_binary_enumerative, checks only lhs and rhs */
-bool Compiler::is_ite_enumerative(const Expr_ptr expr)
+bool Compiler::is_ite_enumerative(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     /* ITE (bw) */
@@ -265,12 +265,12 @@ bool Compiler::is_ite_enumerative(const Expr_ptr expr)
 }
 
 /* similar to is_binary_algebraic, checks only lhs and rhs */
-bool Compiler::is_ite_algebraic(const Expr_ptr expr)
+bool Compiler::is_ite_algebraic(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (em.is_ite(expr))
@@ -281,12 +281,12 @@ bool Compiler::is_ite_algebraic(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_binary_array(const Expr_ptr expr)
+bool Compiler::is_binary_array(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (em.is_binary_equality(expr))
@@ -297,12 +297,12 @@ bool Compiler::is_binary_array(const Expr_ptr expr)
     return false;
 }
 
-bool Compiler::is_ite_array(const Expr_ptr expr)
+bool Compiler::is_ite_array(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     if (em.is_ite(expr))

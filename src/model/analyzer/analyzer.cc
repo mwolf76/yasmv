@@ -59,7 +59,7 @@ Analyzer::~Analyzer()
         << std::endl;
 }
 
-void Analyzer::process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section)
+void Analyzer::process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section)
 {
     assert(section == ANALYZE_INIT  ||
            section == ANALYZE_INVAR ||
@@ -88,9 +88,9 @@ void Analyzer::generate_framing_conditions()
         << std::endl ;
 
     /* identifer -> list of guards */
-    typedef boost::unordered_map<Expr_ptr, ExprVector, utils::PtrHash, utils::PtrEq> ProcessingMap;
+    typedef boost::unordered_map<expr::Expr_ptr, expr::ExprVector, utils::PtrHash, utils::PtrEq> ProcessingMap;
 
-    ExprMgr& em
+    expr::ExprMgr& em
         (owner().em());
 
     ProcessingMap map;
@@ -99,25 +99,26 @@ void Analyzer::generate_framing_conditions()
     for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
          i != f_dependency_tracking_map.end(); ++ i) {
 
-        Expr_ptr ident
+        expr::Expr_ptr ident
             (i->second);
 
         ProcessingMap::const_iterator pmi
             (map.find(ident));
 
         if (map.end() == pmi)
-            map.insert(std::pair<Expr_ptr, ExprVector>
-                       (ident, ExprVector()));
+            map.insert(
+                std::pair<expr::Expr_ptr, expr::ExprVector>
+                (ident, expr::ExprVector()));
     }
 
     /* pass 2: group together all guards associated with each var identifier */
     for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
          i != f_dependency_tracking_map.end(); ++ i) {
 
-        Expr_ptr guard
+        expr::Expr_ptr guard
             (i->first);
 
-        Expr_ptr ident
+        expr::Expr_ptr ident
             (i->second);
 
         ProcessingMap::iterator pmi
@@ -126,7 +127,7 @@ void Analyzer::generate_framing_conditions()
         /* right? */
         assert(map.end() != pmi);
 
-        ExprVector& ev
+        expr::ExprVector& ev
             (pmi->second);
 
         ev.push_back(guard);
@@ -137,10 +138,10 @@ void Analyzer::generate_framing_conditions()
     for (ProcessingMap::iterator i = map.begin();
          i != map.end(); ++ i) {
 
-        Expr_ptr ident
+        expr::Expr_ptr ident
             (i->first);
 
-        const ExprVector& ev
+        const expr::ExprVector& ev
             (i->second);
 
         unsigned input_length
@@ -148,11 +149,11 @@ void Analyzer::generate_framing_conditions()
 
         if (2 <= input_length) {
             for (unsigned i = 0; i < input_length - 1; ++ i) {
-                Expr_ptr p
+                expr::Expr_ptr p
                     (ev[i]);
 
                 for (unsigned j = i + 1; j < input_length; ++ j) {
-                    Expr_ptr q
+                    expr::Expr_ptr q
                         (ev[j]);
 
                     if (! mutually_exclusive(p, q)) {
@@ -181,19 +182,19 @@ void Analyzer::generate_framing_conditions()
     for (ProcessingMap::iterator i = map.begin();
          i != map.end(); ++ i) {
 
-        Expr_ptr ident
+        expr::Expr_ptr ident
             (i->first);
 
-        ExprVector& ev
+        expr::ExprVector& ev
             (i->second);
 
-        Expr_ptr guard
+        expr::Expr_ptr guard
             (NULL);
 
-        for (ExprVector::const_iterator j = ev.begin();
+        for (expr::ExprVector::const_iterator j = ev.begin();
              j != ev.end(); ++ j) {
 
-            Expr_ptr expr
+            expr::Expr_ptr expr
                 (*j);
 
             guard = (guard)
@@ -203,7 +204,7 @@ void Analyzer::generate_framing_conditions()
         }
 
         /* synthetic TRANS will be added to the module. */
-        Expr_ptr synth_trans
+        expr::Expr_ptr synth_trans
             (em.make_implies(guard,
                              em.make_eq(em.make_next(ident),
                                         ident)));
@@ -217,7 +218,7 @@ void Analyzer::generate_framing_conditions()
 }
 
 // under model invariants
-bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
+bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
 {
     DEBUG
         << "Testing `"
@@ -227,7 +228,7 @@ bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
         << "` for unsatisfiability ..."
         << std::endl ;
 
-    ExprMgr& em
+    expr::ExprMgr& em
         (owner().em());
 
     Engine engine
@@ -235,16 +236,16 @@ bool Analyzer::mutually_exclusive(Expr_ptr p, Expr_ptr q)
 
     Compiler compiler;
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (em.make_empty());
 
     /* adding INVARs @0 and @1 from main module */
-    const ExprVector& invar
+    const expr::ExprVector& invar
         (ModelMgr::INSTANCE().model().main_module().invar());
-    for (ExprVector::const_iterator ii = invar.begin();
+    for (expr::ExprVector::const_iterator ii = invar.begin();
          ii != invar.end(); ++ ii ) {
 
-        Expr_ptr body
+        expr::Expr_ptr body
             (*ii);
 
         DEBUG

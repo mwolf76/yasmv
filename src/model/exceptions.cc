@@ -29,7 +29,7 @@
 #include <sstream>
 #include <string>
 
-static std::string build_module_not_found_error_message(Expr_ptr expr)
+static std::string build_module_not_found_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -41,7 +41,7 @@ static std::string build_module_not_found_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-ModuleNotFound::ModuleNotFound(Expr_ptr module_name)
+ModuleNotFound::ModuleNotFound(expr::Expr_ptr module_name)
     : ModelException("ModuleNotFound",
                      build_module_not_found_error_message(module_name))
 {}
@@ -61,7 +61,7 @@ MainModuleNotFound::MainModuleNotFound()
                      build_main_module_not_found_error_message())
 {}
 
-static std::string build_duplicate_identifier_error_message(Expr_ptr expr)
+static std::string build_duplicate_identifier_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
     oss
@@ -72,12 +72,12 @@ static std::string build_duplicate_identifier_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-DuplicateIdentifier::DuplicateIdentifier(Expr_ptr duplicate)
+DuplicateIdentifier::DuplicateIdentifier(expr::Expr_ptr duplicate)
     : ModelException("DuplicateIdentifier",
                      build_duplicate_identifier_error_message(duplicate))
 {}
 
-static std::string build_unknown_identifier_error_message(Expr_ptr expr)
+static std::string build_unknown_identifier_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -89,12 +89,12 @@ static std::string build_unknown_identifier_error_message(Expr_ptr expr)
     return oss.str();
 }
 
-UnknownIdentifier::UnknownIdentifier(Expr_ptr unknown)
+UnknownIdentifier::UnknownIdentifier(expr::Expr_ptr unknown)
     : ModelException("UnknownIdentifier",
                      build_unknown_identifier_error_message(unknown))
 {}
 
-static std::string build_bad_param_count_error_message(Expr_ptr instance,
+static std::string build_bad_param_count_error_message(expr::Expr_ptr instance,
                                                        unsigned expected,
                                                        unsigned got)
 {
@@ -112,7 +112,7 @@ static std::string build_bad_param_count_error_message(Expr_ptr instance,
     return oss.str();
 }
 
-BadParamCount::BadParamCount(Expr_ptr instance, unsigned expected, unsigned got)
+BadParamCount::BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got)
     : ModelException("BadParamCount",
                      build_bad_param_count_error_message(instance, expected, got))
 {}

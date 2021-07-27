@@ -26,7 +26,7 @@
 
 namespace enc {
 
-UCBI::UCBI(Expr_ptr expr, step_t time, unsigned bitno)
+UCBI::UCBI(expr::Expr_ptr expr, step_t time, unsigned bitno)
     : f_expr(expr)
     , f_time(time)
     , f_bitno(bitno)
@@ -40,7 +40,7 @@ UCBI::UCBI(const UCBI& ucbi)
 
 std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
 {
-    Expr_ptr expr
+    expr::Expr_ptr expr
         (ucbi.expr());
     step_t step
         (ucbi.time());
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
     os << "+" << step
        << "{" ;
 
-    Printer (os)
+    expr::Printer (os)
         << "::"
         << expr ;
 
@@ -63,7 +63,7 @@ std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
 long UCBIHash::operator() (const UCBI& k) const
 {
     long x, res = 0;
-    ExprHash eh;
+    expr::ExprHash eh;
 
     long v0 = eh(*k.expr());
     long v1 = k.time();

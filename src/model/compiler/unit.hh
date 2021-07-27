@@ -49,19 +49,19 @@ private:
 };
 
 /* <symb, is_signed?, width> */
-typedef boost::tuple<bool, ExprType, unsigned> InlinedOperatorSignature;
+typedef boost::tuple<bool, expr::ExprType, unsigned> InlinedOperatorSignature;
 inline const InlinedOperatorSignature make_ios (bool is_signed,
-                                                ExprType exprType,
+                                                expr::ExprType exprType,
                                                 unsigned width)
 {
-    return boost::make_tuple <bool, ExprType, unsigned>
+    return boost::make_tuple <bool, expr::ExprType, unsigned>
         (is_signed, exprType, width);
 }
 
 /* ios helper getters */
 inline bool ios_issigned( const InlinedOperatorSignature& ios )
 { return ios.get<0>(); }
-inline ExprType ios_optype( const InlinedOperatorSignature& ios )
+inline expr::ExprType ios_optype( const InlinedOperatorSignature& ios )
 { return ios.get<1>(); }
 inline unsigned ios_width( const InlinedOperatorSignature& ios )
 { return ios.get<2>(); }
@@ -187,7 +187,7 @@ typedef std::vector<InlinedOperatorDescriptor> InlinedOperatorDescriptors;
 typedef std::vector<BinarySelectionDescriptor> BinarySelectionDescriptors;
 typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
 
-typedef boost::unordered_map<Expr_ptr,
+typedef boost::unordered_map<expr::Expr_ptr,
                              BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
 
 enum ECompilerTimePolarity {
@@ -198,7 +198,7 @@ enum ECompilerTimePolarity {
 
 class CompilationUnit {
 public:
-    CompilationUnit( Expr_ptr expr, dd::DDVector& dds,
+    CompilationUnit( expr::Expr_ptr expr, dd::DDVector& dds,
                      InlinedOperatorDescriptors& inlined_operator_descriptors,
                      Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
                      MultiwaySelectionDescriptors& array_mux_descriptors)
@@ -209,7 +209,7 @@ public:
         , f_array_mux_descriptors( array_mux_descriptors )
     {}
 
-    const Expr_ptr expr() const
+    const expr::Expr_ptr expr() const
     { return f_expr; }
 
     const dd::DDVector& dds() const
@@ -225,7 +225,7 @@ public:
     { return f_array_mux_descriptors; }
 
 private:
-    Expr_ptr f_expr;
+    expr::Expr_ptr f_expr;
     dd::DDVector f_dds;
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;

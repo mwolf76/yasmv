@@ -43,7 +43,7 @@ Simulate::~Simulate()
     f_trace_uid = NULL;
 }
 
-void Simulate::set_invar_condition(Expr_ptr invar_condition)
+void Simulate::set_invar_condition(expr::Expr_ptr invar_condition)
 {
     f_invar_condition = invar_condition;
 
@@ -53,7 +53,7 @@ void Simulate::set_invar_condition(Expr_ptr invar_condition)
         << std::endl;
 }
 
-void Simulate::set_until_condition(Expr_ptr until_condition)
+void Simulate::set_until_condition(expr::Expr_ptr until_condition)
 {
     f_until_condition = until_condition;
 }
@@ -82,7 +82,7 @@ utils::Variant Simulate::operator()()
 
     bool res { false };
 
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
     simulation.simulate(f_invar_condition,
                  f_until_condition,
                  f_constraints,

@@ -123,14 +123,19 @@ BOOST_AUTO_TEST_CASE(signed_int_array_type)
 
 BOOST_AUTO_TEST_CASE(enum_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Expr_ptr h = em.make_identifier("huey");
-    Expr_ptr l = em.make_identifier("louie");
-    Expr_ptr d = em.make_identifier("dewey");
+    expr::Expr_ptr h
+        (em.make_identifier("huey"));
+    expr::Expr_ptr l
+        (em.make_identifier("louie"));
+    expr::Expr_ptr d
+        (em.make_identifier("dewey"));
 
-    ExprSet ev;
+    expr::ExprSet ev;
     ev.insert(h);
     ev.insert(l);
     ev.insert(d);
@@ -154,37 +159,37 @@ BOOST_AUTO_TEST_CASE(enum_type)
     // try all possible different orderings (3! = 6)
 
     { // #1
-        ExprSet lhd;
+        expr::ExprSet lhd;
         lhd.insert(l); lhd.insert(h); lhd.insert(d);
         BOOST_CHECK(type == tm.find_enum(lhd));
     }
 
     { // #2
-        ExprSet ldh;
+        expr::ExprSet ldh;
         ldh.insert(l); ldh.insert(d); ldh.insert(h);
         BOOST_CHECK(type == tm.find_enum(ldh));
     }
 
     { // #3
-        ExprSet hld;
+        expr::ExprSet hld;
         hld.insert(h); hld.insert(l); hld.insert(d);
         BOOST_CHECK(type == tm.find_enum(hld));
     }
 
     { // #4
-        ExprSet hdl;
+        expr::ExprSet hdl;
         hdl.insert(h); hdl.insert(d); hdl.insert(l);
         BOOST_CHECK(type == tm.find_enum(hdl));
     }
 
     { // #5
-        ExprSet dlh;
+        expr::ExprSet dlh;
         dlh.insert(d); dlh.insert(l); dlh.insert(h);
         BOOST_CHECK(type == tm.find_enum(dlh));
     }
 
     { // #6
-        ExprSet dhl;
+        expr::ExprSet dhl;
         dhl.insert(d); dhl.insert(h); dhl.insert(l);
         BOOST_CHECK(type == tm.find_enum(dhl));
     }
@@ -192,19 +197,25 @@ BOOST_AUTO_TEST_CASE(enum_type)
 
 BOOST_AUTO_TEST_CASE(enum_array_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    ExprMgr& em = ExprMgr::INSTANCE();
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Expr_ptr h = em.make_identifier("huey");
-    Expr_ptr l = em.make_identifier("louie");
-    Expr_ptr d = em.make_identifier("dewey");
+    expr::Expr_ptr h
+        (em.make_identifier("huey"));
+    expr::Expr_ptr l
+        (em.make_identifier("louie"));
+    expr::Expr_ptr d
+        (em.make_identifier("dewey"));
 
-    ExprSet ev;
+    expr::ExprSet ev;
     ev.insert(h);
     ev.insert(l);
     ev.insert(d);
 
-    Type_ptr type = tm.find_enum_array(ev, 10);
+    Type_ptr type
+        (tm.find_enum_array(ev, 10));
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(! type->is_constant());
@@ -219,16 +230,19 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
 BOOST_AUTO_TEST_CASE(type_checking)
 {
     /* a rather rough setup... */
-    ModelMgr& mm (ModelMgr::INSTANCE());
-    ExprMgr& em (ExprMgr::INSTANCE());
-    TypeMgr& tm (TypeMgr::INSTANCE());
+    ModelMgr& mm
+        (ModelMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
+    TypeMgr& tm
+        (TypeMgr::INSTANCE());
 
     /* set word width to 16 bits */
     opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
     om.set_word_width(16);
 
     Model& model (mm.model());
-    Atom a_main("main");
+    expr::Atom a_main("main");
     Module& main (* new Module(em.make_identifier(a_main)));
     model.add_module(main);
 
@@ -243,23 +257,23 @@ BOOST_AUTO_TEST_CASE(type_checking)
        (s, t) are unsigned(16);
        (u, v) are signed(16)
     */
-    Atom a_x("x");
-    Expr_ptr x = em.make_identifier(a_x);
+    expr::Atom a_x("x");
+    expr::Expr_ptr x = em.make_identifier(a_x);
     main.add_var(x, new symb::Variable(main.name(), x, boolean));
 
-    Atom a_y("y"); Expr_ptr y = em.make_identifier(a_y);
+    expr::Atom a_y("y"); expr::Expr_ptr y = em.make_identifier(a_y);
     main.add_var(y, new symb::Variable(main.name(), y, boolean));
 
-    Atom a_s("s"); Expr_ptr s = em.make_identifier(a_s);
+    expr::Atom a_s("s"); expr::Expr_ptr s = em.make_identifier(a_s);
     main.add_var(s, new symb::Variable(main.name(), s, uint16));
 
-    Atom a_t("t"); Expr_ptr t = em.make_identifier(a_t);
+    expr::Atom a_t("t"); expr::Expr_ptr t = em.make_identifier(a_t);
     main.add_var(t, new symb::Variable(main.name(), t, uint16));
 
-    Atom a_u("u"); Expr_ptr u = em.make_identifier(a_u);
+    expr::Atom a_u("u"); expr::Expr_ptr u = em.make_identifier(a_u);
     main.add_var(u, new symb::Variable(main.name(), u, int16));
 
-    Atom a_v("v"); Expr_ptr v = em.make_identifier(a_v);
+    expr::Atom a_v("v"); expr::Expr_ptr v = em.make_identifier(a_v);
     main.add_var(v, new symb::Variable(main.name(), v, int16));
 
     // add the main module to the model
@@ -457,7 +471,7 @@ BOOST_AUTO_TEST_CASE(type_checking)
                  mm.type( em.make_rshift( u, v)));
 
     // arithmetics with a constant
-    Expr_ptr k = em.make_const(42);
+    expr::Expr_ptr k = em.make_const(42);
 
     BOOST_CHECK( uint16 ==
                  mm.type( em.make_add( s, k)));

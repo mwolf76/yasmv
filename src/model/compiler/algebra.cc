@@ -34,7 +34,7 @@
  */
 
 // unary ops -------------------------------------------------------------------
-void Compiler::algebraic_unary(const Expr_ptr expr)
+void Compiler::algebraic_unary(const expr::Expr_ptr expr)
 {
     assert(is_unary_algebraic(expr));
 
@@ -66,14 +66,14 @@ void Compiler::algebraic_unary(const Expr_ptr expr)
         << std::endl;
 }
 
-void Compiler::algebraic_neg(const Expr_ptr expr)
+void Compiler::algebraic_neg(const expr::Expr_ptr expr)
 { algebraic_unary(expr); }
 
-void Compiler::algebraic_bw_not(const Expr_ptr expr)
+void Compiler::algebraic_bw_not(const expr::Expr_ptr expr)
 { algebraic_unary(expr); }
 
 // -- binary ops ---------------------------------------------------------------
-void Compiler::algebraic_binary(const Expr_ptr expr)
+void Compiler::algebraic_binary(const expr::Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
 
@@ -111,41 +111,41 @@ void Compiler::algebraic_binary(const Expr_ptr expr)
         << std::endl;
 }
 
-void Compiler::algebraic_plus(const Expr_ptr expr)
+void Compiler::algebraic_plus(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_sub(const Expr_ptr expr)
+void Compiler::algebraic_sub(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_mul(const Expr_ptr expr)
+void Compiler::algebraic_mul(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_div(const Expr_ptr expr)
+void Compiler::algebraic_div(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_mod(const Expr_ptr expr)
+void Compiler::algebraic_mod(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_bw_and(const Expr_ptr expr)
+void Compiler::algebraic_bw_and(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_bw_or(const Expr_ptr expr)
+void Compiler::algebraic_bw_or(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_bw_xor(const Expr_ptr expr)
+void Compiler::algebraic_bw_xor(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_bw_xnor(const Expr_ptr expr)
+void Compiler::algebraic_bw_xnor(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_lshift(const Expr_ptr expr)
+void Compiler::algebraic_lshift(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
-void Compiler::algebraic_rshift(const Expr_ptr expr)
+void Compiler::algebraic_rshift(const expr::Expr_ptr expr)
 { algebraic_binary(expr); }
 
 // relationals -----------------------------------------------------------------
-void Compiler::algebraic_relational(const Expr_ptr expr)
+void Compiler::algebraic_relational(const expr::Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
 
@@ -191,25 +191,25 @@ void Compiler::algebraic_relational(const Expr_ptr expr)
         << std::endl;
 }
 
-void Compiler::algebraic_equals(const Expr_ptr expr)
+void Compiler::algebraic_equals(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_not_equals(const Expr_ptr expr)
+void Compiler::algebraic_not_equals(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_gt(const Expr_ptr expr)
+void Compiler::algebraic_gt(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_ge(const Expr_ptr expr)
+void Compiler::algebraic_ge(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_lt(const Expr_ptr expr)
+void Compiler::algebraic_lt(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_le(const Expr_ptr expr)
+void Compiler::algebraic_le(const expr::Expr_ptr expr)
 { algebraic_relational(expr); }
 
-void Compiler::algebraic_ite(const Expr_ptr expr)
+void Compiler::algebraic_ite(const expr::Expr_ptr expr)
 {
     const Type_ptr rhs_type
         (f_type_stack.back());
@@ -245,7 +245,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
     PUSH_DV(res, width);
 
     /* Register ITE MUX */
-    Expr_ptr parent
+    expr::Expr_ptr parent
         (expr);
 
     BinarySelectionUnionFindMap::const_iterator eye
@@ -260,7 +260,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
             (f_expr2bsd_map.find(parent));
 
         if (f_expr2bsd_map.end() == mi)
-            f_expr2bsd_map.insert( std::pair< Expr_ptr, BinarySelectionDescriptors >
+            f_expr2bsd_map.insert( std::pair< expr::Expr_ptr, BinarySelectionDescriptors >
                                    (parent, BinarySelectionDescriptors()));
     }
 
@@ -282,7 +282,7 @@ void Compiler::algebraic_ite(const Expr_ptr expr)
         << std::endl;
 }
 
-void Compiler::algebraic_subscript(const Expr_ptr expr)
+void Compiler::algebraic_subscript(const expr::Expr_ptr expr)
 {
     enc::EncodingMgr& bm
         (f_enc);
@@ -359,7 +359,7 @@ void Compiler::algebraic_subscript(const Expr_ptr expr)
 }
 
 /* add n-1 non significant zero, LSB is original bit */
-void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
+void Compiler::algebraic_cast_from_boolean(const expr::Expr_ptr expr)
 {
     Type_ptr tp = f_owner.type( expr->lhs(),
                                 f_ctx_stack.back());
@@ -370,7 +370,7 @@ void Compiler::algebraic_cast_from_boolean(const Expr_ptr expr)
 }
 
 /* squeeze all bits in a big Or */
-void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
+void Compiler::boolean_cast_from_algebraic(const expr::Expr_ptr expr)
 {
     Type_ptr tp
         (f_owner.type( expr->rhs(),
@@ -387,9 +387,9 @@ void Compiler::boolean_cast_from_algebraic(const Expr_ptr expr)
     PUSH_DD(res);
 }
 
-void Compiler::algebraic_cast_from_algebraic(const Expr_ptr expr)
+void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
 {
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
     Type_ptr src_type
         (f_owner.type( expr->rhs(), ctx));

@@ -42,7 +42,7 @@ TCBI::TCBI(const TCBI& tcbi)
 
 std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
 {
-    Expr_ptr expr
+    expr::Expr_ptr expr
         (tcbi.expr());
     step_t step
         (tcbi.time());
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
         << "+" << step
         << "::" ;
 
-    Printer(os)
+    expr::Printer(os)
         << expr ;
 
     os << "."
@@ -68,7 +68,7 @@ std::ostream& operator<<(std::ostream& os, const TCBI& tcbi)
 long TCBIHash::operator() (const TCBI& k) const
 {
     long x, res = 0;
-    ExprHash eh;
+    expr::ExprHash eh;
 
     long v0 = eh(*k.expr());
     long v1 = k.absolute_time();

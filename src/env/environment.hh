@@ -38,7 +38,7 @@
 namespace env {
 
 /* key -> value map for env */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
 
 typedef class Environment* Environment_ptr;
 
@@ -52,12 +52,12 @@ public:
 };
 
 // helpers
-std::string build_no_such_identifier_error_message(Expr_ptr expr);
+std::string build_no_such_identifier_error_message(expr::Expr_ptr expr);
 
 class NoSuchIdentifier : public EnvironmentException
 {
 public:
-    NoSuchIdentifier(Expr_ptr expr)
+    NoSuchIdentifier(expr::Expr_ptr expr)
         : EnvironmentException("NoSuchIdentifier",
                                build_no_such_identifier_error_message(expr))
     {}
@@ -68,37 +68,37 @@ public:
     // singleton
     static Environment& INSTANCE();
 
-    Expr_ptr get(Expr_ptr id) const;
-    void set(Expr_ptr id, Expr_ptr value); /* use NULL to unset */
+    expr::Expr_ptr get(expr::Expr_ptr id) const;
+    void set(expr::Expr_ptr id, expr::Expr_ptr value); /* use NULL to unset */
 
     void clear();
 
-    inline const ExprSet& identifiers() const
+    inline const expr::ExprSet& identifiers() const
     { return f_identifiers; }
 
-    void add_extra_init(Expr_ptr constraint);
-    inline const ExprVector& extra_init() const
+    void add_extra_init(expr::Expr_ptr constraint);
+    inline const expr::ExprVector& extra_init() const
     { return f_extra_inits; }
 
-    void add_extra_invar(Expr_ptr constraint);
-    inline const ExprVector& extra_invar() const
+    void add_extra_invar(expr::Expr_ptr constraint);
+    inline const expr::ExprVector& extra_invar() const
     { return f_extra_invars; }
 
-    void add_extra_trans(Expr_ptr constraint);
-    inline const ExprVector& extra_trans() const
+    void add_extra_trans(expr::Expr_ptr constraint);
+    inline const expr::ExprVector& extra_trans() const
     { return f_extra_transes; }
 
 private:
 
     /* input vars */
     Expr2ExprMap f_env;
-    ExprSet f_identifiers;
+    expr::ExprSet f_identifiers;
     Expr2ExprMap::iterator f_env_iter;
 
     /* additional INIT, INVAR and TRANS constraints */
-    ExprVector f_extra_inits;
-    ExprVector f_extra_invars;
-    ExprVector f_extra_transes;
+    expr::ExprVector f_extra_inits;
+    expr::ExprVector f_extra_invars;
+    expr::ExprVector f_extra_transes;
 
     static Environment_ptr f_instance;
 };

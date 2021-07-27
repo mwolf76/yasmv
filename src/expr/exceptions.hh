@@ -24,6 +24,8 @@
 #ifndef EXPR_EXCEPTIONS_H
 #define EXPR_EXCEPTIONS_H
 
+namespace expr {
+
 /** Exception classes */
 class ExprException : public Exception {
 public:
@@ -31,6 +33,8 @@ public:
                   const std::string& message="")
         : Exception("ExprException", subexpr, message)
     {}
+};
+
 };
 
 #endif /* EXPR_EXCEPTIONS_H */

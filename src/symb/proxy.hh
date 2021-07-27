@@ -50,11 +50,11 @@ public:
     {}
 
     /** @brief register a symbol in the underlying storage */
-    void add_symbol(const Expr_ptr ctx, const Expr_ptr expr, Symbol_ptr symb)
+    void add_symbol(const expr::Expr_ptr ctx, const expr::Expr_ptr expr, Symbol_ptr symb)
     { assert(false); } // proxy is used read-only
 
     /** @brief fetch a symbol */
-    Symbol_ptr symbol(const Expr_ptr key)
+    Symbol_ptr symbol(const expr::Expr_ptr key)
     {
         Symbol_ptr res = NULL;
 

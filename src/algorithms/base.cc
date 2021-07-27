@@ -37,7 +37,7 @@ Algorithm::Algorithm(Command& command, Model& model)
     , f_model(model)
     , f_mm(ModelMgr::INSTANCE())
     , f_bm(enc::EncodingMgr::INSTANCE())
-    , f_em(ExprMgr::INSTANCE())
+    , f_em(expr::ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
     , f_witness(NULL)
 {}
@@ -56,8 +56,8 @@ void Algorithm::setup()
     /* suppress warning */
     (void) mgr;
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     env::Environment& env
         (env::Environment::INSTANCE());
@@ -68,35 +68,35 @@ void Algorithm::setup()
     Module& main_module
         (model.main_module());
 
-    std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
-    stack.push( std::pair< Expr_ptr, Module_ptr >
+    std::stack< std::pair<expr::Expr_ptr, Module_ptr> > stack;
+    stack.push( std::pair<expr::Expr_ptr, Module_ptr >
                 (em.make_empty(), &main_module));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
 
-        const std::pair< Expr_ptr, Module_ptr > top
+        const std::pair<expr::Expr_ptr, Module_ptr > top
             (stack.top());
         stack.pop();
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (top.first);
 
         Module& module
             (* top.second);
 
         /* module INITs */
-        const ExprVector& init
+        const expr::ExprVector& init
             (module.init());
         process_init(ctx, init);
 
         /* module INVARs */
-        const ExprVector& invar
+        const expr::ExprVector& invar
             (module.invar());
         process_invar(ctx, invar);
 
         /* module TRANSes */
-        const ExprVector& trans
+        const expr::ExprVector& trans
             (module.trans());
         process_trans(ctx, trans);
 
@@ -104,7 +104,7 @@ void Algorithm::setup()
             (module.vars());
         symb::Variables::const_iterator vi;
         for (vi = attrs.begin(); attrs.end() != vi; ++ vi) {
-            Expr_ptr id
+            expr::Expr_ptr id
                 (vi->first);
 
             symb::Variable& var
@@ -113,7 +113,7 @@ void Algorithm::setup()
             Type_ptr vtype
                 (var.type());
 
-            Expr_ptr local_ctx
+            expr::Expr_ptr local_ctx
                 (em.make_dot( ctx, id));
 
             if (vtype->is_instance()) {
@@ -124,36 +124,36 @@ void Algorithm::setup()
                 Module&  module
                     (model.module(instance->name()));
 
-                stack.push( std::pair< Expr_ptr, Module_ptr >
+                stack.push( std::pair< expr::Expr_ptr, Module_ptr >
                             (local_ctx, &module));
             }
         }
     } /* while() */
 
     /* processing environment extra constraints */
-    const ExprVector& extra_init
+    const expr::ExprVector& extra_init
         (env.extra_init());
     process_init(NULL, extra_init);
 
     /* environment INVARs */
-    const ExprVector& extra_invar
+    const expr::ExprVector& extra_invar
         (env.extra_invar());
     process_invar(NULL, extra_invar);
 
     /* environment TRANSes */
-    const ExprVector& extra_trans
+    const expr::ExprVector& extra_trans
         (env.extra_trans());
     process_trans(NULL, extra_trans);
 }
 
-void Algorithm::process_init(Expr_ptr ctx, const ExprVector& exprs)
+void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
     Compiler& cmpl
         (compiler()); // just a local ref
 
-    for (ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
+    for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
 
-        Expr_ptr body
+        expr::Expr_ptr body
             (*ii);
 
         DEBUG
@@ -182,14 +182,14 @@ void Algorithm::process_init(Expr_ptr ctx, const ExprVector& exprs)
     }
 } /* process_init() */
 
-void Algorithm::process_invar(Expr_ptr ctx, const ExprVector& exprs)
+void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
     Compiler& cmpl
         (compiler()); // just a local ref
 
-    for (ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
+    for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
 
-            Expr_ptr body
+            expr::Expr_ptr body
                 (*ii);
 
             DEBUG
@@ -217,14 +217,14 @@ void Algorithm::process_invar(Expr_ptr ctx, const ExprVector& exprs)
         }
 } /* process_invar() */
 
-void Algorithm::process_trans(Expr_ptr ctx, const ExprVector& exprs)
+void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
     Compiler& cmpl
         (compiler()); // just a local ref
 
-    for (ExprVector::const_iterator ti = exprs.begin(); ti != exprs.end(); ++ ti ) {
+    for (expr::ExprVector::const_iterator ti = exprs.begin(); ti != exprs.end(); ++ ti ) {
 
-        Expr_ptr body
+        expr::Expr_ptr body
             (*ti);
 
         DEBUG
@@ -282,10 +282,10 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
     while (symbs.has_next()) {
 
-        std::pair< Expr_ptr, symb::Symbol_ptr> pair
+        std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair
             (symbs.next());
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (pair.first);
 
         symb::Symbol_ptr symb
@@ -300,10 +300,10 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
                 var.is_temp())
                 continue ;
 
-            Expr_ptr expr
+            expr::Expr_ptr expr
                 (var.name());
 
-            TimedExpr key
+            expr::TimedExpr key
                 (em().make_dot( ctx, expr), 0);
 
             enc::Encoding_ptr enc
@@ -391,16 +391,16 @@ void Algorithm::assert_time_frame(Engine& engine,
                                   witness::TimeFrame& tf,
                                   group_t group)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     Compiler& cmpl
         (compiler()); // just a local ref
 
-    ExprVector assignments
+    expr::ExprVector assignments
         (tf.assignments());
 
-    ExprVector::const_iterator i
+    expr::ExprVector::const_iterator i
         (assignments.begin());
 
     symb::ResolverProxy resolver;
@@ -408,20 +408,20 @@ void Algorithm::assert_time_frame(Engine& engine,
     unsigned count (0);
     while (i != assignments.end()) {
 
-        Expr_ptr assignment
+        expr::Expr_ptr assignment
             (*i); ++ i;
 
-        Expr_ptr full
+        expr::Expr_ptr full
             (assignment->lhs());
 
         symb::Symbol_ptr symb
             (resolver.symbol(full));
 
         if (symb->is_variable()) {
-            Expr_ptr scope
+            expr::Expr_ptr scope
                 (full->lhs());
 
-            Expr_ptr expr
+            expr::Expr_ptr expr
                 (em.make_eq( full->rhs(),
                              assignment->rhs()));
 

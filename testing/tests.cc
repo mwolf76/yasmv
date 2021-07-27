@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE_END()
 #include <common/common.hh>
 
 // just for debugging purposes within gdb
-void pe(Expr_ptr e)
+void pe(expr::Expr_ptr e)
 {
     std::cerr
         << e

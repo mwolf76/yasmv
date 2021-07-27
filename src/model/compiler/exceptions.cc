@@ -26,7 +26,7 @@
 #include <string>
 #include <sstream>
 
-static std::string format_constant_too_large(Expr_ptr expr)
+static std::string format_constant_too_large(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -36,12 +36,12 @@ static std::string format_constant_too_large(Expr_ptr expr)
     return oss.str();
 }
 
-ConstantTooLarge::ConstantTooLarge(Expr_ptr expr)
+ConstantTooLarge::ConstantTooLarge(expr::Expr_ptr expr)
     : CompilerException("ConstantTooLarge",
                         format_constant_too_large(expr))
 {}
 
-static std::string format_unexpected_expression(Expr_ptr expr)
+static std::string format_unexpected_expression(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -50,7 +50,7 @@ static std::string format_unexpected_expression(Expr_ptr expr)
 
     return oss.str();
 }
-UnexpectedExpression::UnexpectedExpression(Expr_ptr expr)
+UnexpectedExpression::UnexpectedExpression(expr::Expr_ptr expr)
     : CompilerException("UnexpectedExpression",
                         format_unexpected_expression(expr))
 {}

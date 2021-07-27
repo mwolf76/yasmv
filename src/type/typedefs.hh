@@ -37,7 +37,7 @@ typedef class TypeMgr* TypeMgr_ptr;
 
 /* aggregate types */
 typedef std::vector<Type_ptr> TypeVector;
-typedef boost::unordered_map<Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeMap;
+typedef boost::unordered_map<expr::Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeMap;
 
 /* 1. scalars */
 typedef class ScalarType* ScalarType_ptr;

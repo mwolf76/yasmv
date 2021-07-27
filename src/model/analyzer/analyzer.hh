@@ -35,10 +35,10 @@
 #include <boost/unordered_map.hpp>
 
 /* guard -> identifier map (first pass) */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
+typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
 
 /* identifier -> framing condition clause */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;
+typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;
 
 class ModelMgr;
 typedef enum {
@@ -48,13 +48,13 @@ typedef enum {
     ANALYZE_DEFINE
 } analyze_section_t ;
 
-class Analyzer : public ExprWalker {
+class Analyzer : public expr::ExprWalker {
 public:
     Analyzer(ModelMgr& owner);
     ~Analyzer();
 
     // walker toplevel
-    void process(Expr_ptr expr, Expr_ptr ctx, analyze_section_t section);
+    void process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section);
 
     inline ModelMgr& owner()
     { return f_owner; }
@@ -66,17 +66,17 @@ protected:
     void pre_hook();
     void post_hook();
 
-    void pre_node_hook(Expr_ptr expr);
-    void post_node_hook(Expr_ptr expr);
+    void pre_node_hook(expr::Expr_ptr expr);
+    void post_node_hook(expr::Expr_ptr expr);
 
     LTL_HOOKS; OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+    void walk_instant(const expr::Expr_ptr expr);
+    void walk_leaf(const expr::Expr_ptr expr);
 
 private:
-    ExprVector f_expr_stack;
-    ExprVector f_ctx_stack;
+    expr::ExprVector f_expr_stack;
+    expr::ExprVector f_ctx_stack;
 
     // managers
     ModelMgr& f_owner;
@@ -87,7 +87,7 @@ private:
     DependencyTrackingMap f_dependency_tracking_map;
 
     // helpers
-    bool mutually_exclusive(Expr_ptr p, Expr_ptr q);
+    bool mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q);
 };
 
 #endif /* ANALYZER_H */

@@ -42,12 +42,12 @@ public:
 /** Raised when a constant could not fit into a native word */
 class ConstantTooLarge : public CompilerException {
 public:
-    ConstantTooLarge(Expr_ptr expr);
+    ConstantTooLarge(expr::Expr_ptr expr);
 };
 
 class UnexpectedExpression : public CompilerException {
 public:
-    UnexpectedExpression(Expr_ptr expr);
+    UnexpectedExpression(expr::Expr_ptr expr);
 };
 
 #endif /* COMPILER_EXCEPTIONS_H */

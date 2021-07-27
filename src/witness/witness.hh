@@ -54,10 +54,10 @@
 
 namespace witness {
 
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
 
-typedef boost::unordered_map<Expr_ptr, value_format_t, utils::PtrHash, utils::PtrEq> Expr2FormatMap;
+typedef boost::unordered_map<expr::Expr_ptr, value_format_t, utils::PtrHash, utils::PtrEq> Expr2FormatMap;
 typedef Expr2FormatMap::iterator Expr2FormatMapIterator;
 
 class Witness; // fwd decl
@@ -70,20 +70,20 @@ public:
     ~TimeFrame();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
-    Expr_ptr value( Expr_ptr expr );
+    expr::Expr_ptr value( expr::Expr_ptr expr );
 
     /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( Expr_ptr expr );
+    bool has_value( expr::Expr_ptr expr );
 
     /* Sets value (and optionally also format) for expr */
-    void set_value( Expr_ptr expr, Expr_ptr value,
+    void set_value( expr::Expr_ptr expr, expr::Expr_ptr value,
                     value_format_t format = FORMAT_DECIMAL);
 
     /* Retrieves format for expr, throws an exception if no value exists. */
-    // value_format_t format( Expr_ptr expr );
+    // value_format_t format( expr::Expr_ptr expr );
 
     /* Full list of assignments for this Time Frame */
-    ExprVector assignments();
+    expr::ExprVector assignments();
 
 private:
     Expr2ExprMap f_map;
@@ -103,8 +103,8 @@ typedef class Witness* Witness_ptr;
 class Witness {
 public:
     Witness(Engine_ptr pengine = NULL,
-            Atom id = "<Noname>",
-            Atom desc = "<No description>",
+            expr::Atom id = "<Noname>",
+            expr::Atom desc = "<No description>",
             step_t j = 0);
 
     /* data storage */
@@ -113,16 +113,16 @@ public:
 
     TimeFrame& operator[](step_t i);
 
-    inline const Atom& id() const
+    inline const expr::Atom& id() const
     { return f_id; }
 
-    inline void set_id(Atom id)
+    inline void set_id(expr::Atom id)
     { f_id = id; }
 
-    inline const Atom& desc() const
+    inline const expr::Atom& desc() const
     { return f_desc; }
 
-    inline void set_desc(Atom desc)
+    inline void set_desc(expr::Atom desc)
     { f_desc = desc; }
 
     inline step_t first_time()
@@ -140,7 +140,7 @@ public:
     inline step_t size()
     { return f_frames.size(); }
 
-    inline ExprVector& lang()
+    inline expr::ExprVector& lang()
     { return f_lang; }
 
     /* Extends trace by k appending the given one, yields last timeframe */
@@ -150,17 +150,17 @@ public:
     TimeFrame& extend();
 
     /* Retrieves value for expr, throws an exception if no value exists. */
-    Expr_ptr value( Expr_ptr expr, step_t time);
+    expr::Expr_ptr value( expr::Expr_ptr expr, step_t time);
 
     /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( Expr_ptr expr, step_t time);
+    bool has_value( expr::Expr_ptr expr, step_t time);
 
 protected:
     /* this witness' id */
-    Atom f_id;
+    expr::Atom f_id;
 
     /* this witness' description */
-    Atom f_desc;
+    expr::Atom f_desc;
 
     /* distance (i.e. number of transitions) from time 0 of the first frame */
     step_t f_j;
@@ -169,7 +169,7 @@ protected:
     TimeFrames f_frames;
 
     /* Language (i.e. full list of symbols) */
-    ExprVector f_lang;
+    expr::ExprVector f_lang;
 
     /* An engine that can be used to extend this witness. This is not
        necessarily the engine that created the trace. Ordinarily it

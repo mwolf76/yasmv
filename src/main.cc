@@ -65,10 +65,10 @@ static const std::string heading_msg =
 
 /* printing helpers: these functions are unused in the code, they're
    here just for debugging purposes withing gdb */
-void pe(Expr_ptr e)
+void pe(expr::Expr_ptr e)
 { std::cerr << e << std::endl; }
 
-void pf(TimedExpr e)
+void pf(expr::TimedExpr e)
 { std::cerr << e << std::endl; }
 
 void pu(enc::UCBI& ucbi)

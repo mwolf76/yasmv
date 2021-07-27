@@ -37,8 +37,8 @@
 
 #include <type/type_mgr.hh>
 
-typedef boost::unordered_map<Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
-typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
+typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
+typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr> ParamMap;
 
 typedef enum {
     MMGR_BUILD_CTX_MAP,
@@ -58,7 +58,7 @@ public:
     inline Model& model()
     { return f_model; }
 
-    inline Module& module(Expr_ptr module_name)
+    inline Module& module(expr::Expr_ptr module_name)
     { return f_model.module( module_name); }
 
     inline symb::Resolver_ptr resolver()
@@ -67,7 +67,7 @@ public:
     // this must be called before any type checking
     bool analyze();
 
-    inline ExprMgr& em() const
+    inline expr::ExprMgr& em() const
     { return f_em; }
 
     inline TypeMgr& tm() const
@@ -77,23 +77,23 @@ public:
     { return f_analyzer; }
 
     // delegated type inference method
-    inline Type_ptr type(Expr_ptr body,
-                         Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
+    inline Type_ptr type(expr::Expr_ptr body,
+                         expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
     {
         assert( f_analyzed );
         return f_type_checker.type(body, ctx);
     }
 
     // delegated param binding method
-    inline Expr_ptr preprocess(Expr_ptr body,
-                               Expr_ptr ctx = ExprMgr::INSTANCE().make_empty())
+    inline expr::Expr_ptr preprocess(expr::Expr_ptr body,
+                               expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
     {
         return f_preprocessor.process(body, ctx);
     }
 
-    Module_ptr scope(Expr_ptr ctx);
+    Module_ptr scope(expr::Expr_ptr ctx);
 
-    Expr_ptr rewrite_parameter( Expr_ptr expr );
+    expr::Expr_ptr rewrite_parameter(expr::Expr_ptr expr );
 
 protected:
     ModelMgr();
@@ -112,7 +112,7 @@ private:
     Model f_model;
 
     // ref to expr manager
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
 
     // ref to type manager
     TypeMgr& f_tm;

@@ -30,7 +30,7 @@
 
 static inline value_t pow2(unsigned exp);
 
-void Compiler::walk_instant(const Expr_ptr expr)
+void Compiler::walk_instant(const expr::Expr_ptr expr)
 {
     DRIVEL
         << expr
@@ -43,13 +43,13 @@ void Compiler::walk_instant(const Expr_ptr expr)
     f_time_stack.push_back(expr->value());
 }
 
-void Compiler::walk_leaf(const Expr_ptr expr)
+void Compiler::walk_leaf(const expr::Expr_ptr expr)
 {
     DRIVEL
         << expr
         << std::endl;
 
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
     TypeMgr& tm
         (f_owner.tm());
@@ -57,7 +57,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     if (! cache_miss(expr))
         return;
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     step_t time
@@ -88,7 +88,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     }
 
     /* Ctx-aware symbol resolution */
-    Expr_ptr full
+    expr::Expr_ptr full
         (em.make_dot(ctx, expr));
 
     symb::ResolverProxy resolver;
@@ -115,7 +115,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         // if encoding for variable is available reuse it,
         // otherwise create and cache it.
-        TimedExpr key
+        expr::TimedExpr key
             (full, time);
 
         enc::Encoding_ptr enc
@@ -148,7 +148,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 
         /* INPUT vars are in fact bodyless, typed DEFINEs */
         if (var.is_input()) {
-            Expr_ptr value
+            expr::Expr_ptr value
                 (env::Environment::INSTANCE().get(expr));
 
             (*this) (value);
@@ -160,7 +160,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         }
 
         else {
-            TimedExpr key
+            expr::TimedExpr key
                 (full, var.is_frozen() ? FROZEN : time);
 
             enc::Encoding_ptr enc
@@ -175,7 +175,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
     /* 5. parameters, must be resolved against the Param map which is
      *    maintained by the ModelMgr */
     else if (symb->is_parameter()) {
-        Expr_ptr rewrite
+        expr::Expr_ptr rewrite
             (f_owner.rewrite_parameter(full));
 
         f_ctx_stack.push_back( rewrite -> lhs());
@@ -189,7 +189,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
         symb::Define& define
             (symb -> as_define());
 
-        Expr_ptr body
+        expr::Expr_ptr body
             (define.body());
 
         (*this) (body);
@@ -260,7 +260,7 @@ static inline value_t pow2(unsigned exp)
 }
 
 /* encodes constant value into a DD vector */
-void Compiler::algebraic_constant(Expr_ptr konst, unsigned width)
+void Compiler::algebraic_constant(expr::Expr_ptr konst, unsigned width)
 {
     const unsigned base
         (2);

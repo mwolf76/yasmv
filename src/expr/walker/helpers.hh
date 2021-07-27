@@ -26,15 +26,17 @@
 #ifndef EXPR_WALKER_HELPERS_H
 #define EXPR_WALKER_HELPERS_H
 
-/* helper macros to declare walker hooks */
-#define UNARY_HOOK(op)                                       \
-    bool walk_## op ## _preorder(const Expr_ptr expr);       \
-    void walk_## op ## _postorder(const Expr_ptr expr)
+namespace expr {
 
-#define BINARY_HOOK(op)                                      \
-    bool walk_## op ## _preorder(const Expr_ptr expr);       \
-    bool walk_## op ## _inorder(const Expr_ptr expr);        \
-    void walk_## op ## _postorder(const Expr_ptr expr)
+/* helper macros to declare walker hooks */
+#define UNARY_HOOK(op)                                             \
+    bool walk_## op ## _preorder(const expr::Expr_ptr expr);       \
+    void walk_## op ## _postorder(const expr::Expr_ptr expr)
+
+#define BINARY_HOOK(op)                                            \
+    bool walk_## op ## _preorder(const expr::Expr_ptr expr);       \
+    bool walk_## op ## _inorder(const expr::Expr_ptr expr);        \
+    void walk_## op ## _postorder(const expr::Expr_ptr expr)
 
 #define OP_HOOKS                                   \
     BINARY_HOOK(at); UNARY_HOOK(next);             \
@@ -74,20 +76,22 @@
     UNARY_HOOK(F); UNARY_HOOK(G); UNARY_HOOK(X);        \
     BINARY_HOOK(R); BINARY_HOOK(U)
 
-#define UNARY_STUB(op)                                       \
-    bool walk_## op ## _preorder(const Expr_ptr expr)        \
-    { assert(false); return false; }                         \
-    void walk_## op ## _postorder(const Expr_ptr expr) {}
+#define UNARY_STUB(op)                                             \
+    bool walk_## op ## _preorder(const expr::Expr_ptr expr)        \
+    { assert(false); return false; }                               \
+    void walk_## op ## _postorder(const expr::Expr_ptr expr) {}
 
-#define BINARY_STUB(op)                                      \
-    bool walk_## op ## _preorder(const Expr_ptr expr)        \
-    { assert(false); return false; }                         \
-    bool walk_## op ## _inorder(const Expr_ptr expr)         \
-    { assert(false); return false; }                         \
-    void walk_## op ## _postorder(const Expr_ptr expr) {}
+#define BINARY_STUB(op)                                            \
+    bool walk_## op ## _preorder(const expr::Expr_ptr expr)        \
+    { assert(false); return false; }                               \
+    bool walk_## op ## _inorder(const expr::Expr_ptr expr)         \
+    { assert(false); return false; }                               \
+    void walk_## op ## _postorder(const expr::Expr_ptr expr) {}
 
 #define LTL_STUBS                                       \
     UNARY_STUB(F); UNARY_STUB(G); UNARY_STUB(X);        \
     BINARY_STUB(R); BINARY_STUB(U)
+
+};
 
 #endif /* EXPR_WALKER_HELPERS_H */

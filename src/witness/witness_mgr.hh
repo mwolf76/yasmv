@@ -41,7 +41,7 @@
 namespace witness {
 
 typedef class WitnessMgr *WitnessMgr_ptr;
-typedef std::map<Atom, Witness_ptr> WitnessMap;
+typedef std::map<expr::Atom, Witness_ptr> WitnessMap;
 typedef std::vector<Witness_ptr> WitnessList;
 
 class WitnessMgr  {
@@ -51,7 +51,7 @@ public:
         return (*f_instance);
     }
 
-    inline ExprMgr& em() const
+    inline expr::ExprMgr& em() const
     { return f_em; }
 
     inline TypeMgr& tm() const
@@ -67,7 +67,7 @@ public:
     Witness& current();
 
     // get a registered witness by id
-    Witness& witness( Atom id );
+    Witness& witness( expr::Atom id );
 
     // record a new witness
     void record( Witness& witness );
@@ -75,7 +75,7 @@ public:
     // get a unique autoincrement index
     unsigned autoincrement();
 
-    Expr_ptr eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k);
+    expr::Expr_ptr eval(Witness &w, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t k);
 
 protected:
     WitnessMgr();
@@ -89,13 +89,13 @@ private:
     WitnessList f_list;
 
     // ref to expr manager
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
 
     // ref to type manager
     TypeMgr& f_tm;
 
     // currently selected witness uid
-    Atom f_curr_uid;
+    expr::Atom f_curr_uid;
 
     Evaluator f_evaluator;
 

@@ -85,7 +85,7 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
     symb::Variables variables = module.vars();
     std::for_each(std::begin(variables),
                   std::end(variables),
-                  [&](std::pair<Expr_ptr, symb::Variable_ptr> pair) {
+                  [&](std::pair<expr::Expr_ptr, symb::Variable_ptr> pair) {
                       auto id = pair.first;
                       auto pvar = pair.second;
 
@@ -123,15 +123,15 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
 
 void DumpModel::dump_inits(std::ostream& os, Module& module)
 {
-    const ExprVector init  { module.init() };
+    const expr::ExprVector init  { module.init() };
     if (init.begin() != init.end())
         os
             << std::endl;
 
-    for (ExprVector::const_iterator init_eye = init.begin();
+    for (expr::ExprVector::const_iterator init_eye = init.begin();
          init_eye != init.end(); ++ init_eye) {
 
-        Expr_ptr body { *init_eye };
+        expr::Expr_ptr body { *init_eye };
         os
             << "INIT "
             << body
@@ -142,15 +142,15 @@ void DumpModel::dump_inits(std::ostream& os, Module& module)
 
 void DumpModel::dump_invars(std::ostream& os, Module& module)
 {
-    const ExprVector invar { module.invar() };
+    const expr::ExprVector invar { module.invar() };
     if (invar.begin() != invar.end())
         os
             << std::endl;
 
-    for (ExprVector::const_iterator invar_eye = invar.begin();
+    for (expr::ExprVector::const_iterator invar_eye = invar.begin();
          invar_eye != invar.end(); ++ invar_eye) {
 
-        Expr_ptr body { *invar_eye };
+        expr::Expr_ptr body { *invar_eye };
         os
             << "INVAR "
             << body
@@ -161,15 +161,15 @@ void DumpModel::dump_invars(std::ostream& os, Module& module)
 
 void DumpModel::dump_transes(std::ostream& os, Module& module)
 {
-    const ExprVector trans { module.trans() };
+    const expr::ExprVector trans { module.trans() };
     if (trans.begin() != trans.end())
         os
             << std::endl;
 
-    for (ExprVector::const_iterator trans_eye = trans.begin();
+    for (expr::ExprVector::const_iterator trans_eye = trans.begin();
          trans_eye != trans.end(); ++ trans_eye) {
 
-        Expr_ptr body (*trans_eye);
+        expr::Expr_ptr body (*trans_eye);
         os
             << "TRANS "
             << body << ";"
@@ -212,7 +212,7 @@ utils::Variant DumpModel::operator()()
     bool dump_all { ! f_state && ! f_init && ! f_trans };
 
     std::for_each(begin(modules), end(modules),
-                  [this, dump_all, &out] (std::pair<Expr_ptr,
+                  [this, dump_all, &out] (std::pair<expr::Expr_ptr,
                                           Module_ptr> descriptor) {
 
                       Module& module

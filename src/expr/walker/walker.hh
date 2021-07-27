@@ -36,6 +36,8 @@
 #include <expr/walker/exceptions.hh>
 #include <expr/walker/helpers.hh>
 
+namespace expr {
+
 class ExprWalker {
 public:
     ExprWalker()
@@ -241,6 +243,8 @@ protected:
     // leaves
     virtual void walk_instant(const Expr_ptr expr) =0;
     virtual void walk_leaf(const Expr_ptr expr) =0;
+};
+
 };
 
 #endif /* EXPR_WALKER_H */

@@ -36,7 +36,7 @@ public:
     virtual ~PickState();
 
     /** cmd params */
-    void add_constraint(Expr_ptr constraint);
+    void add_constraint(expr::Expr_ptr constraint);
 
     void set_allsat(bool value);
     inline bool allsat() const
@@ -52,7 +52,7 @@ private:
     std::ostream& f_out;
 
     /* (optional) additional constraints */
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     /* perform ALLSAT enumeration? */
     bool f_allsat;

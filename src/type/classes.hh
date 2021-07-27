@@ -111,7 +111,7 @@
 /** Basic Type class. */
 class Type {
 public:
-    Expr_ptr repr() const
+    expr::Expr_ptr repr() const
     { return f_repr; }
 
     /* This depends on the Monolithic vs. Algebraic nature of type.
@@ -166,7 +166,7 @@ protected:
     {}
 
     TypeMgr& f_owner;
-    Expr_ptr f_repr;
+    expr::Expr_ptr f_repr;
 };
 
 /** -- Scalars ------------------------------------------------------------ */
@@ -233,18 +233,18 @@ typedef class EnumType* EnumType_ptr;
 class EnumType : public MonolithicType {
 protected:
     friend class TypeMgr; // ctors not public
-    EnumType(TypeMgr& owner, ExprSet& literals);
+    EnumType(TypeMgr& owner, expr::ExprSet& literals);
 
 public:
     unsigned width() const;
 
-    inline const ExprSet& literals() const
+    inline const expr::ExprSet& literals() const
     { return f_literals; }
 
-    value_t value(Expr_ptr lit) const;
+    value_t value(expr::Expr_ptr lit) const;
 
 private:
-    ExprSet f_literals;
+    expr::ExprSet f_literals;
 };
 
 /** Instances */
@@ -252,17 +252,17 @@ typedef class InstanceType* InstanceType_ptr;
 class InstanceType : public ScalarType {
 public:
     unsigned width() const;
-    InstanceType(TypeMgr& owner, Expr_ptr name, Expr_ptr params);
+    InstanceType(TypeMgr& owner, expr::Expr_ptr name, expr::Expr_ptr params);
 
-    inline Expr_ptr name() const
+    inline expr::Expr_ptr name() const
     { return f_name; }
 
-    inline Expr_ptr params() const
+    inline expr::Expr_ptr params() const
     { return f_params; }
 
 private:
-    Expr_ptr f_name;
-    Expr_ptr f_params;
+    expr::Expr_ptr f_name;
+    expr::Expr_ptr f_params;
 };
 
 /** Numeric constants (both integers and fixed) */

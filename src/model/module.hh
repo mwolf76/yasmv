@@ -33,37 +33,37 @@
 
 class Module {
 public:
-    Module(Expr_ptr name);
+    Module(expr::Expr_ptr name);
     ~Module();
 
-    inline const Expr_ptr name() const
+    inline const expr::Expr_ptr name() const
     { return f_name; }
 
     inline const symb::Variables& vars() const
     { return f_localVars; }
-    void add_var(Expr_ptr expr, symb::Variable_ptr var);
+    void add_var(expr::Expr_ptr expr, symb::Variable_ptr var);
 
     inline const symb::Parameters& parameters() const
     { return f_localParams; }
-    void add_parameter(Expr_ptr expr, symb::Parameter_ptr param);
+    void add_parameter(expr::Expr_ptr expr, symb::Parameter_ptr param);
 
     const symb::Defines& defs() const
     { return f_localDefs; }
-    void add_def(Expr_ptr expr, symb::Define_ptr def);
-    void override(Expr_ptr expr, symb::Define_ptr def);
+    void add_def(expr::Expr_ptr expr, symb::Define_ptr def);
+    void override(expr::Expr_ptr expr, symb::Define_ptr def);
 
     /* Finite State Machine definition */
-    inline const ExprVector& init() const
+    inline const expr::ExprVector& init() const
     { return f_init; }
-    void add_init(Expr_ptr expr);
+    void add_init(expr::Expr_ptr expr);
 
-    const ExprVector& invar() const
+    const expr::ExprVector& invar() const
     { return f_invar; }
-    void add_invar(Expr_ptr expr);
+    void add_invar(expr::Expr_ptr expr);
 
-    inline const ExprVector& trans() const
+    inline const expr::ExprVector& trans() const
     { return f_trans; }
-    void add_trans(Expr_ptr expr);
+    void add_trans(expr::Expr_ptr expr);
 
 private:
     friend std::ostream& operator<<(std::ostream& os, Module& module);
@@ -82,20 +82,20 @@ private:
         f_owner = model_ptr;
     }
 
-    Expr_ptr f_name;
+    expr::Expr_ptr f_name;
 
     /* used to detect duplicates */
-    ExprSet f_locals;
-    void checkDuplicates(Expr_ptr expr);
+    expr::ExprSet f_locals;
+    void checkDuplicates(expr::Expr_ptr expr);
 
     symb::Variables f_localVars;
     symb::Parameters f_localParams;
     symb::Defines   f_localDefs;
 
     /* transition relation formulas */
-    ExprVector f_init;
-    ExprVector f_invar;
-    ExprVector f_trans;
+    expr::ExprVector f_init;
+    expr::ExprVector f_invar;
+    expr::ExprVector f_trans;
 };
 
 #endif /* MODEL_MODULE_H */

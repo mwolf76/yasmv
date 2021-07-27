@@ -31,20 +31,20 @@
 
 class Get : public Command {
 
-    Expr_ptr f_identifier;
+    expr::Expr_ptr f_identifier;
 
 public:
     Get(Interpreter& owner);
     virtual ~Get();
 
-    void set_identifier(Expr_ptr id);
+    void set_identifier(expr::Expr_ptr id);
     utils::Variant virtual operator()();
 
 private:
     void print_all_assignments(std::ostream& os);
-    utils::Variant print_one_assignment(std::ostream& os, Expr_ptr id);
+    utils::Variant print_one_assignment(std::ostream& os, expr::Expr_ptr id);
 
-    void print_assignment(std::ostream& os, Expr_ptr id);
+    void print_assignment(std::ostream& os, expr::Expr_ptr id);
 };
 
 typedef Get* Get_ptr;

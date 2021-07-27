@@ -28,6 +28,8 @@
 #include <stack>
 #include <vector>
 
+namespace expr {
+
 // singleton instance initialization
 ExprMgr_ptr ExprMgr::f_instance = NULL;
 
@@ -248,3 +250,5 @@ value_t ExprMgr::decimal_lookup(const char *decimal_repr)
     // unreachable
     assert(false);
 }
+
+};

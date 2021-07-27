@@ -32,13 +32,13 @@
 
 class Clear : public Command {
 
-    Expr_ptr f_identifier;
+    expr::Expr_ptr f_identifier;
 
 public:
     Clear(Interpreter& owner);
     virtual ~Clear();
 
-    void set_identifier(Expr_ptr id);
+    void set_identifier(expr::Expr_ptr id);
     utils::Variant virtual operator()();
 };
 

@@ -32,15 +32,15 @@
 
 class Set : public Command {
 
-    Expr_ptr f_identifier;
-    Expr_ptr f_value;
+    expr::Expr_ptr f_identifier;
+    expr::Expr_ptr f_value;
 
 public:
     Set(Interpreter& owner);
     virtual ~Set();
 
-    void set_identifier(Expr_ptr id);
-    void set_value(Expr_ptr value);
+    void set_identifier(expr::Expr_ptr id);
+    void set_value(expr::Expr_ptr value);
     utils::Variant virtual operator()();
 };
 typedef Set* Set_ptr;

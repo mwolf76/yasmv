@@ -48,15 +48,15 @@ public:
         : f_model(model)
     {}
 
-    bool operator() (Expr_ptr a, Expr_ptr b)
+    bool operator() (expr::Expr_ptr a, expr::Expr_ptr b)
     {
         assert(a);
         assert(b);
 
-        Expr_ptr lhs_a
+        expr::Expr_ptr lhs_a
             (a->lhs());
 
-        Expr_ptr lhs_b
+        expr::Expr_ptr lhs_b
             (b->lhs());
 
         return
@@ -102,34 +102,34 @@ private:
                     witness::Witness& w);
     void dump_plain_section(std::ostream&os,
                             const char* section,
-                            ExprVector& ev);
+                            expr::ExprVector& ev);
 
     void dump_json(std::ostream& os,
                    witness::Witness& w);
     void dump_json_section(std::ostream&os,
                            const char* section,
-                           ExprVector& ev);
+                           expr::ExprVector& ev);
 
     void dump_xml(std::ostream& os,
                   witness::Witness& w);
     void dump_xml_section(std::ostream&os,
                           const char* section,
-                          ExprVector& ev);
+                          expr::ExprVector& ev);
 
     void dump_yaml(std::ostream& os,
                    witness::Witness& w);
     void dump_yaml_section(YAML::Emitter& out,
                            const char* section,
-                           ExprVector& ev);
+                           expr::ExprVector& ev);
 
     /* these values actually come from the current environment */
     void process_input(witness::Witness& w,
-                       ExprVector& input_vars_assignments);
+                       expr::ExprVector& input_vars_assignments);
 
     /* these values actually belong to the trace */
     void process_time_frame(witness::Witness& w, step_t time,
-                            ExprVector& state_vars_assignments,
-                            ExprVector& defines_assignments);
+                            expr::ExprVector& state_vars_assignments,
+                            expr::ExprVector& defines_assignments);
 
 };
 

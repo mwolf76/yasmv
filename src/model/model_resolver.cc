@@ -36,31 +36,31 @@ ModelResolver::ModelResolver(ModelMgr& owner)
     const void* instance
         (this);
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     DRIVEL
         << "Initialized Model Resolver instance @"
         << instance
         << std::endl;
 
-    f_owner.symbols().insert( std::pair<Expr_ptr,
+    f_owner.symbols().insert( std::pair<expr::Expr_ptr,
                               symb::Constant_ptr>( em.make_false(),
-                                                   new symb::Constant(ExprMgr::INSTANCE().make_empty(),
-                                                                      ExprMgr::INSTANCE().make_false(),
+                                                   new symb::Constant(expr::ExprMgr::INSTANCE().make_empty(),
+                                                                      expr::ExprMgr::INSTANCE().make_false(),
                                                                       TypeMgr::INSTANCE().find_boolean(), 0)));
 
-    f_owner.symbols().insert( std::pair<Expr_ptr,
+    f_owner.symbols().insert( std::pair<expr::Expr_ptr,
                               symb::Constant_ptr>( em.make_true(),
-                                                   new symb::Constant(ExprMgr::INSTANCE().make_empty(),
-                                                                      ExprMgr::INSTANCE().make_true(),
+                                                   new symb::Constant(expr::ExprMgr::INSTANCE().make_empty(),
+                                                                      expr::ExprMgr::INSTANCE().make_true(),
                                                                       TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()
 {}
 
-void ModelResolver::add_symbol(const Expr_ptr key, symb::Symbol_ptr symb)
+void ModelResolver::add_symbol(const expr::Expr_ptr key, symb::Symbol_ptr symb)
 {
     // TODO: turn this into an exception
     assert( NULL == f_owner.symbols() [ key ]);
@@ -68,18 +68,18 @@ void ModelResolver::add_symbol(const Expr_ptr key, symb::Symbol_ptr symb)
     f_owner.symbols()[ key ] = symb;
 }
 
-symb::Symbol_ptr ModelResolver::symbol(const Expr_ptr key)
+symb::Symbol_ptr ModelResolver::symbol(const expr::Expr_ptr key)
 {
     // init lookup data
     ModelMgr& mm
         (ModelMgr::INSTANCE());
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     assert( em.is_dot(key));
     Module_ptr module
         (mm.scope(key -> lhs()));
-    Expr_ptr symb_name
+    expr::Expr_ptr symb_name
         (key -> rhs());
 
     { /* global constants and temporaries */

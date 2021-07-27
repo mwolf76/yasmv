@@ -46,7 +46,7 @@ public:
     bool has_next() const;
 
     /* yields next symbol, raises an exception if no such symbol exists. */
-    std::pair <Expr_ptr, Symbol_ptr> next();
+    std::pair <expr::Expr_ptr, Symbol_ptr> next();
 
 private:
     Model&  f_model;

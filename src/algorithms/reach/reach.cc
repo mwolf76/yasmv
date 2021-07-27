@@ -63,22 +63,22 @@ Reachability::~Reachability()
         << std::endl ;
 }
 
-void Reachability::process(Expr_ptr target,
-                           ExprVector forward_constraints,
-                           ExprVector backward_constraints,
-                           ExprVector global_constraints)
+void Reachability::process(expr::Expr_ptr target,
+                           expr::ExprVector forward_constraints,
+                           expr::ExprVector backward_constraints,
+                           expr::ExprVector global_constraints)
 {
     f_target = target;
     assert(f_target);
 
-    Expr_ptr ctx { em().make_empty() };
+    expr::Expr_ptr ctx { em().make_empty() };
 
     try {
         /* compile forward constraints */
         unsigned no_forward_constraints { 0 };
         std::for_each(
             begin(forward_constraints), end(forward_constraints),
-            [this, ctx, &no_forward_constraints](Expr_ptr expr) {
+            [this, ctx, &no_forward_constraints](expr::Expr_ptr expr) {
                 INFO
                     << "Compiling constraint `"
                     << expr
@@ -95,7 +95,7 @@ void Reachability::process(Expr_ptr target,
         unsigned no_backward_constraints { 0 };
         std::for_each(
             begin(backward_constraints), end(backward_constraints),
-            [this, ctx, &no_backward_constraints](Expr_ptr expr) {
+            [this, ctx, &no_backward_constraints](expr::Expr_ptr expr) {
                 INFO
                     << "Compiling constraint `"
                     << expr
@@ -112,7 +112,7 @@ void Reachability::process(Expr_ptr target,
         unsigned no_global_constraints { 0 };
         std::for_each(
             begin(global_constraints), end(global_constraints),
-            [this, ctx, &no_global_constraints](Expr_ptr expr) {
+            [this, ctx, &no_global_constraints](expr::Expr_ptr expr) {
                 INFO
                     << "Compiling constraint `"
                     << expr

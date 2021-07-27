@@ -23,6 +23,8 @@
 
 #include <expr/timed_expr.hh>
 
+namespace expr {
+
 TimedExpr::TimedExpr(Expr_ptr expr, step_t time)
     : f_expr(expr)
     , f_time(time)
@@ -78,3 +80,5 @@ bool TimedExprEq::operator()(const TimedExpr& x, const TimedExpr& y) const
         x.expr() == y.expr() &&
         x.time() == y.time();
 }
+
+};

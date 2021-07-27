@@ -26,6 +26,8 @@
 #include <expr.hh>
 #include <walker/walker.hh>
 
+namespace expr {
+
 ExprWalker& ExprWalker::operator() (const Expr_ptr expr)
 {
     // pre-walking hook
@@ -947,3 +949,5 @@ void ExprWalker::walk ()
 
     } // while (!empty)
 }
+
+};

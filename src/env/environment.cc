@@ -27,7 +27,7 @@
 
 namespace env {
 
-std::string build_no_such_identifier_error_message(Expr_ptr expr)
+std::string build_no_such_identifier_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -48,7 +48,7 @@ Environment& Environment::INSTANCE()
     return *f_instance;
 }
 
-Expr_ptr Environment::get(Expr_ptr id) const
+expr::Expr_ptr Environment::get(expr::Expr_ptr id) const
 {
     Expr2ExprMap::const_iterator eye
         (f_env.find(id));
@@ -63,7 +63,7 @@ Expr_ptr Environment::get(Expr_ptr id) const
     return eye -> second; /* non-NULL */
 }
 
-void Environment::set(Expr_ptr id, Expr_ptr value)
+void Environment::set(expr::Expr_ptr id, expr::Expr_ptr value)
 {
     if (value)
         f_identifiers.insert(id);
@@ -76,7 +76,7 @@ void Environment::set(Expr_ptr id, Expr_ptr value)
     if (eye != f_env.end())
         f_env.erase(eye);
 
-    f_env.insert(std::pair<Expr_ptr, Expr_ptr> (id, value));
+    f_env.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr> (id, value));
 }
 
 void Environment::clear()
@@ -85,19 +85,19 @@ void Environment::clear()
     f_env.clear();
 }
 
-void Environment::add_extra_init(Expr_ptr constraint)
+void Environment::add_extra_init(expr::Expr_ptr constraint)
 {
     assert(constraint);
     f_extra_inits.push_back(constraint);
 }
 
-void Environment::add_extra_invar(Expr_ptr constraint)
+void Environment::add_extra_invar(expr::Expr_ptr constraint)
 {
     assert(constraint);
     f_extra_invars.push_back(constraint);
 }
 
-void Environment::add_extra_trans(Expr_ptr constraint)
+void Environment::add_extra_trans(expr::Expr_ptr constraint)
 {
     assert(constraint);
     f_extra_transes.push_back(constraint);

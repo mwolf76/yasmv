@@ -29,6 +29,8 @@
 
 #include <iomanip>
 
+namespace expr {
+
 value_t Expr_TAG::value() const
 {
     ExprMgr& em
@@ -128,3 +130,5 @@ bool ExprEq::operator() (const Expr& x, const Expr& y) const
             (x.u.f_lhs == y.u.f_lhs &&
              x.u.f_rhs == y.u.f_rhs));
 }
+
+};

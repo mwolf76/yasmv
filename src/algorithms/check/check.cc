@@ -48,7 +48,7 @@ LTL::~LTL()
         << std::endl;
 }
 
-void LTL::process(const Expr_ptr phi)
+void LTL::process(const expr::Expr_ptr phi)
 {
     set_status( LTL_UNKNOWN );
     assert(false); // XXX: TODO

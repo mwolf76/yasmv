@@ -53,12 +53,12 @@ public:
 
 class Body {
 public:
-    virtual const Expr_ptr body() const =0;
+    virtual const expr::Expr_ptr body() const =0;
 };
 
 class Params {
 public:
-    virtual const ExprVector& formals() const =0;
+    virtual const expr::ExprVector& formals() const =0;
 };
 
 class Symbol {
@@ -68,8 +68,8 @@ public:
         , f_hidden(false)
     {}
 
-    virtual const Expr_ptr module()  const =0;
-    virtual const Expr_ptr name() const =0;
+    virtual const expr::Expr_ptr module()  const =0;
+    virtual const expr::Expr_ptr name() const =0;
 
     bool is_const() const;
     Constant& as_const() const;
@@ -107,23 +107,23 @@ class Constant
     , public Typed
     , public Value
 {
-    Expr_ptr f_module;
-    Expr_ptr f_name;
+    expr::Expr_ptr f_module;
+    expr::Expr_ptr f_name;
     Type_ptr f_type;
     value_t f_value;
 
 public:
-    Constant(const Expr_ptr module, const Expr_ptr name, Type_ptr type, value_t value)
+    Constant(const expr::Expr_ptr module, const expr::Expr_ptr name, Type_ptr type, value_t value)
         : f_module(module)
         , f_name(name)
         , f_type(type)
         , f_value(value)
     {}
 
-    const Expr_ptr module() const
+    const expr::Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr name() const
+    const expr::Expr_ptr name() const
     { return f_name; }
 
     const Type_ptr type() const
@@ -137,8 +137,8 @@ class Variable
     : public Symbol
     , public Typed
 {
-    Expr_ptr f_module;
-    Expr_ptr f_name;
+    expr::Expr_ptr f_module;
+    expr::Expr_ptr f_name;
     Type_ptr f_type;
     bool     f_input;
     bool     f_temp;
@@ -146,7 +146,7 @@ class Variable
     bool     f_inertial;
 
 public:
-    Variable(Expr_ptr module, Expr_ptr name, Type_ptr type)
+    Variable(expr::Expr_ptr module, expr::Expr_ptr name, Type_ptr type)
         : f_module(module)
         , f_name(name)
         , f_type(type)
@@ -156,10 +156,10 @@ public:
         , f_inertial(false)
     {}
 
-    const Expr_ptr module() const
+    const expr::Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr name() const
+    const expr::Expr_ptr name() const
     { return f_name; }
 
     const Type_ptr type() const
@@ -194,21 +194,21 @@ class Parameter
     : public Symbol
     , public Typed
 {
-    Expr_ptr f_module;
-    Expr_ptr f_name;
+    expr::Expr_ptr f_module;
+    expr::Expr_ptr f_name;
     Type_ptr f_type;
 
 public:
-    Parameter(Expr_ptr module, Expr_ptr name, Type_ptr type)
+    Parameter(expr::Expr_ptr module, expr::Expr_ptr name, Type_ptr type)
         : f_module(module)
         , f_name(name)
         , f_type(type)
     {}
 
-    const Expr_ptr module() const
+    const expr::Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr name() const
+    const expr::Expr_ptr name() const
     { return f_name; }
 
     const Type_ptr type() const
@@ -220,21 +220,21 @@ class Literal
     : public Symbol
     , public Typed
 {
-    const Expr_ptr f_name;
+    const expr::Expr_ptr f_name;
     const Type_ptr f_type;
     const value_t f_value;
 
 public:
-    Literal(const Expr_ptr name, const Type_ptr type, value_t value)
+    Literal(const expr::Expr_ptr name, const Type_ptr type, value_t value)
         : f_name(name)
         , f_type(type)
         , f_value(value)
     {}
 
-    virtual const Expr_ptr module() const
+    virtual const expr::Expr_ptr module() const
     { return NULL; }
 
-    virtual const Expr_ptr name() const
+    virtual const expr::Expr_ptr name() const
     { return f_name; }
 
     virtual const Type_ptr type() const
@@ -248,24 +248,24 @@ class Define
     : public Symbol
     , public Body
 {
-    const Expr_ptr f_module;
-    const Expr_ptr f_name;
-    const Expr_ptr f_body;
+    const expr::Expr_ptr f_module;
+    const expr::Expr_ptr f_name;
+    const expr::Expr_ptr f_body;
 
 public:
-    Define(const Expr_ptr module, const Expr_ptr name, const Expr_ptr body)
+    Define(const expr::Expr_ptr module, const expr::Expr_ptr name, const expr::Expr_ptr body)
         : f_module(module)
         , f_name(name)
         , f_body(body)
     {}
 
-    const Expr_ptr module() const
+    const expr::Expr_ptr module() const
     { return f_module; }
 
-    const Expr_ptr name() const
+    const expr::Expr_ptr name() const
     { return f_name; }
 
-    const Expr_ptr body() const
+    const expr::Expr_ptr body() const
     { return f_body; }
 };
 

@@ -55,27 +55,27 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
     assert( *signedness == 's' || *signedness == 'u');
 
     const char* op (fragments[1].c_str());
-    ExprType op_type;
-    if      (! strcmp( "neg", op)) op_type = NEG;
-    else if (! strcmp( "add", op)) op_type = PLUS;
-    else if (! strcmp( "sub", op)) op_type = SUB;
-    else if (! strcmp( "div", op)) op_type = DIV;
-    else if (! strcmp( "mod", op)) op_type = MOD;
-    else if (! strcmp( "mul", op)) op_type = MUL;
-    else if (! strcmp( "not", op)) op_type = BW_NOT;
-    else if (! strcmp( "or",  op)) op_type = BW_OR;
-    else if (! strcmp( "and", op)) op_type = BW_AND;
-    else if (! strcmp( "xor", op)) op_type = BW_XOR;
-    else if (! strcmp( "xnor",op)) op_type = BW_XNOR;
-    else if (! strcmp( "impl",op)) op_type = IMPLIES;
-    else if (! strcmp( "eq",  op)) op_type = EQ;
-    else if (! strcmp( "ne",  op)) op_type = NE;
-    else if (! strcmp( "gt",  op)) op_type = GT;
-    else if (! strcmp( "ge",  op)) op_type = GE;
-    else if (! strcmp( "lt",  op)) op_type = LT;
-    else if (! strcmp( "le",  op)) op_type = LE;
-    else if (! strcmp( "lsh", op)) op_type = LSHIFT;
-    else if (! strcmp( "rsh", op)) op_type = RSHIFT;
+    expr::ExprType op_type;
+    if      (! strcmp( "neg", op)) op_type = expr::ExprType::NEG;
+    else if (! strcmp( "add", op)) op_type = expr::ExprType::PLUS;
+    else if (! strcmp( "sub", op)) op_type = expr::ExprType::SUB;
+    else if (! strcmp( "div", op)) op_type = expr::ExprType::DIV;
+    else if (! strcmp( "mod", op)) op_type = expr::ExprType::MOD;
+    else if (! strcmp( "mul", op)) op_type = expr::ExprType::MUL;
+    else if (! strcmp( "not", op)) op_type = expr::ExprType::BW_NOT;
+    else if (! strcmp( "or",  op)) op_type = expr::ExprType::BW_OR;
+    else if (! strcmp( "and", op)) op_type = expr::ExprType::BW_AND;
+    else if (! strcmp( "xor", op)) op_type = expr::ExprType::BW_XOR;
+    else if (! strcmp( "xnor",op)) op_type = expr::ExprType::BW_XNOR;
+    else if (! strcmp( "impl",op)) op_type = expr::ExprType::IMPLIES;
+    else if (! strcmp( "eq",  op)) op_type = expr::ExprType::EQ;
+    else if (! strcmp( "ne",  op)) op_type = expr::ExprType::NE;
+    else if (! strcmp( "gt",  op)) op_type = expr::ExprType::GT;
+    else if (! strcmp( "ge",  op)) op_type = expr::ExprType::GE;
+    else if (! strcmp( "lt",  op)) op_type = expr::ExprType::LT;
+    else if (! strcmp( "le",  op)) op_type = expr::ExprType::LE;
+    else if (! strcmp( "lsh", op)) op_type = expr::ExprType::LSHIFT;
+    else if (! strcmp( "rsh", op)) op_type = expr::ExprType::RSHIFT;
     else {
       ERR
         << "Unsupported mnemonic: "

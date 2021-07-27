@@ -33,26 +33,26 @@
 #include <model/type_checker/type_checker.hh>
 
 // fun: any -> any
-void TypeChecker::walk_unary_fsm_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_fsm_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_any(expr->lhs()) ); }
 
-void TypeChecker::walk_unary_ltl_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_ltl_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_logical(expr->lhs())); }
 
 // fun: arithm -> arithm
-void TypeChecker::walk_unary_arithmetical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_arithmetical_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_arithmetical(expr->lhs())); }
 
 // fun: logical -> logical
-void TypeChecker::walk_unary_logical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_unary_logical_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_logical(expr->lhs())); }
 
 // fun: instant, (timed) any -> any
-void TypeChecker::walk_binary_timed_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_timed_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_timed(expr)); }
 
 // fun: arithm, arithm -> arithm
-void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_arithmetical_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs
         (check_arithmetical(expr->rhs()));
@@ -89,7 +89,7 @@ void TypeChecker::walk_binary_arithmetical_postorder(const Expr_ptr expr)
 }
 
 // fun: logical x logical -> logical
-void TypeChecker::walk_binary_fsm_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_fsm_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs_type
         (check_logical(expr->rhs()));
@@ -101,7 +101,7 @@ void TypeChecker::walk_binary_fsm_postorder(const Expr_ptr expr)
     PUSH_TYPE( lhs_type );
 }
 
-void TypeChecker::walk_binary_ltl_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_ltl_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs_type
         (check_logical(expr->rhs()));
@@ -114,7 +114,7 @@ void TypeChecker::walk_binary_ltl_postorder(const Expr_ptr expr)
 }
 
 // fun: logical x logical -> logical
-void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_logical_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs_type
         (check_logical( expr->rhs()));
@@ -126,7 +126,7 @@ void TypeChecker::walk_binary_logical_postorder(const Expr_ptr expr)
     PUSH_TYPE( lhs_type );
 }
 
-void TypeChecker::walk_binary_cast_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_cast_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs_type
         (check_arithmetical(expr->rhs()));
@@ -138,7 +138,7 @@ void TypeChecker::walk_binary_cast_postorder(const Expr_ptr expr)
     PUSH_TYPE( lhs_type );
 }
 
-void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_shift_postorder(const expr::Expr_ptr expr)
 {
     Type_ptr rhs_type
         (check_arithmetical(expr->rhs()));
@@ -151,7 +151,7 @@ void TypeChecker::walk_binary_shift_postorder(const Expr_ptr expr)
 }
 
 // fun: arithmetical x arithmetical -> boolean
-void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_relational_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -192,7 +192,7 @@ void TypeChecker::walk_binary_relational_postorder(const Expr_ptr expr)
 }
 
 // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
-void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
+void TypeChecker::walk_binary_equality_postorder(const expr::Expr_ptr expr)
 {
     TypeMgr& tm
         (f_owner.tm());
@@ -275,7 +275,7 @@ void TypeChecker::walk_binary_equality_postorder(const Expr_ptr expr)
     else assert(false);
 }
 
-void TypeChecker::walk_binary_ite_postorder(Expr_ptr expr)
+void TypeChecker::walk_binary_ite_postorder(expr::Expr_ptr expr)
 {
     POP_TYPE(rhs_type);
 
@@ -362,16 +362,16 @@ void TypeChecker::walk_binary_ite_postorder(Expr_ptr expr)
     else assert(false);
 }
 
-void TypeChecker::memoize_result (Expr_ptr expr)
+void TypeChecker::memoize_result (expr::Expr_ptr expr)
 {
-    Expr_ptr key
+    expr::Expr_ptr key
         (f_owner.em().make_dot( f_ctx_stack.back(), expr));
 
     Type_ptr type
         (f_type_stack.back());
 
 #if defined DEBUG_TYPE_CHECKER
-    Expr_ptr type_repr
+    expr::Expr_ptr type_repr
         (type->repr());
 
     DEBUG
@@ -385,12 +385,12 @@ void TypeChecker::memoize_result (Expr_ptr expr)
     f_map[ key ] = type;
 }
 
-Type_ptr TypeChecker::type(Expr_ptr expr, Expr_ptr ctx)
+Type_ptr TypeChecker::type(expr::Expr_ptr expr, expr::Expr_ptr ctx)
 {
     /* to avoid a number of cache misses due to compiler rewrites,
        we squeeze types in equivalence classes: Relationals -> lhs
        '<' rhs, Arithmetical -> lhs '+' rhs */
-    Expr_ptr key
+    expr::Expr_ptr key
         (f_owner.em().make_dot(ctx, expr));
 
     TypeReg::const_iterator eye
@@ -413,7 +413,7 @@ void TypeChecker::pre_hook()
 void TypeChecker::post_hook()
 {}
 
-void TypeChecker::pre_node_hook(Expr_ptr expr)
+void TypeChecker::pre_node_hook(expr::Expr_ptr expr)
 {
 #if defined DEBUG_TYPE_CHECKER
     DEBUG
@@ -423,7 +423,7 @@ void TypeChecker::pre_node_hook(Expr_ptr expr)
         << std::endl;
 #endif
 }
-void TypeChecker::post_node_hook(Expr_ptr expr)
+void TypeChecker::post_node_hook(expr::Expr_ptr expr)
 {
 #if defined DEBUG_TYPE_CHECKER
     DEBUG
@@ -436,7 +436,7 @@ void TypeChecker::post_node_hook(Expr_ptr expr)
     for (depth = 0, ti = f_type_stack.rbegin(); ti != f_type_stack.rend(); ++ depth, ++ ti ) {
         Type_ptr type
             (*ti);
-        Expr_ptr repr
+        expr::Expr_ptr repr
             (type->repr());
 
         DEBUG
@@ -454,7 +454,7 @@ void TypeChecker::post_node_hook(Expr_ptr expr)
     memoize_result(expr);
 }
 
-Type_ptr TypeChecker::check_timed(Expr_ptr expr)
+Type_ptr TypeChecker::check_timed(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -469,7 +469,7 @@ Type_ptr TypeChecker::check_timed(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr TypeChecker::check_logical(Expr_ptr expr)
+Type_ptr TypeChecker::check_logical(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -481,7 +481,7 @@ Type_ptr TypeChecker::check_logical(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr TypeChecker::check_arithmetical(Expr_ptr expr)
+Type_ptr TypeChecker::check_arithmetical(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -493,7 +493,7 @@ Type_ptr TypeChecker::check_arithmetical(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr TypeChecker::check_scalar(Expr_ptr expr)
+Type_ptr TypeChecker::check_scalar(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -505,7 +505,7 @@ Type_ptr TypeChecker::check_scalar(Expr_ptr expr)
     return NULL; /* unreachable */
 }
 
-Type_ptr TypeChecker::check_any(Expr_ptr expr)
+Type_ptr TypeChecker::check_any(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -513,7 +513,7 @@ Type_ptr TypeChecker::check_any(Expr_ptr expr)
     return res;
 }
 
-Type_ptr TypeChecker::check_array(Expr_ptr expr)
+Type_ptr TypeChecker::check_array(expr::Expr_ptr expr)
 {
     POP_TYPE(res);
     assert (NULL != res);
@@ -526,11 +526,11 @@ Type_ptr TypeChecker::check_array(Expr_ptr expr)
 }
 
 // services
-bool TypeChecker::cache_miss(const Expr_ptr expr)
+bool TypeChecker::cache_miss(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
-    Expr_ptr key
+    expr::Expr_ptr key
         (em.make_dot( f_ctx_stack.back(), expr));
 
     TypeReg::iterator eye
@@ -542,7 +542,7 @@ bool TypeChecker::cache_miss(const Expr_ptr expr)
         PUSH_TYPE(res);
 
 #if defined DEBUG_TYPE_CHECKER
-        Expr_ptr repr
+        expr::Expr_ptr repr
             (res->repr());
 
         DEBUG

@@ -75,7 +75,7 @@ Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
     return res;
 }
 
-Encoding_ptr EncodingMgr::find_encoding(const TimedExpr& key)
+Encoding_ptr EncodingMgr::find_encoding(const expr::TimedExpr& key)
 {
     const TimedExpr2EncMap::iterator eye
         (f_timed_expr2enc_map.find(key));
@@ -88,7 +88,7 @@ Encoding_ptr EncodingMgr::find_encoding(const TimedExpr& key)
 }
 
 
-void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
+void EncodingMgr::register_encoding(const expr::TimedExpr& key, Encoding_ptr enc)
 {
     std::ostringstream oss;
     f_timed_expr2enc_map [ key ] = enc;
@@ -124,7 +124,7 @@ void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
 
 EncodingMgr::EncodingMgr()
     : f_cudd(dd::CuddMgr::INSTANCE().dd()) // this is a fresh instance
-    , f_em(ExprMgr::INSTANCE())
+    , f_em(expr::ExprMgr::INSTANCE())
     , f_word_width ((opts::OptsMgr::INSTANCE().word_width()))
 {
     const void* instance

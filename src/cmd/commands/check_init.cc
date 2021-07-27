@@ -37,7 +37,7 @@ CheckInit::CheckInit(Interpreter& owner)
 CheckInit::~CheckInit()
 {}
 
-void CheckInit::add_constraint(Expr_ptr constraint)
+void CheckInit::add_constraint(expr::Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
 }

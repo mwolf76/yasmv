@@ -44,7 +44,7 @@ void PickState::set_limit(value_t limit)
     f_limit = limit;
 }
 
-void PickState::add_constraint(Expr_ptr constraint)
+void PickState::add_constraint(expr::Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
 }

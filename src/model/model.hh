@@ -39,13 +39,13 @@ public:
     { return f_modules; }
 
     Module& add_module(Module& module);
-    Module& module(Expr_ptr module_name);
+    Module& module(expr::Expr_ptr module_name);
 
     /* topmost module in the model */
     Module& main_module();
 
-    void autoIndexSymbol(Expr_ptr identifier);
-    unsigned symbol_index(Expr_ptr identifier);
+    void autoIndexSymbol(expr::Expr_ptr identifier);
+    unsigned symbol_index(expr::Expr_ptr identifier);
 
 private:
     Modules f_modules;

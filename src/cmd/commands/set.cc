@@ -42,7 +42,7 @@ Set::Set(Interpreter& owner)
 Set::~Set()
 {}
 
-void Set::set_identifier(Expr_ptr id)
+void Set::set_identifier(expr::Expr_ptr id)
 {
     DEBUG
         << "Id"
@@ -51,7 +51,7 @@ void Set::set_identifier(Expr_ptr id)
     f_identifier = id;
 }
 
-void Set::set_value(Expr_ptr value)
+void Set::set_value(expr::Expr_ptr value)
 {
     DEBUG
         << "Val"

@@ -32,15 +32,15 @@
 
 namespace witness {
 
-void Evaluator::push_value(const Expr_ptr expr)
+void Evaluator::push_value(const expr::Expr_ptr expr)
 {
     symb::ResolverProxy resolver;
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     if (em.is_identifier(expr)) {
-        Expr_ptr full_lit
+        expr::Expr_ptr full_lit
             (em.make_dot(em.make_empty(), expr));
 
         symb::Symbol_ptr symb_lit
@@ -74,7 +74,7 @@ void Evaluator::push_value(const Expr_ptr expr)
 
     if (em.is_array(expr)) {
         /* array value, push each element */
-        Expr_ptr eye
+        expr::Expr_ptr eye
             (expr->lhs());
 
         while (em.is_array_comma(eye)) {
@@ -97,7 +97,7 @@ void Evaluator::push_value(const Expr_ptr expr)
 
 
 /* the evaluator treats time relatively */
-void Evaluator::walk_instant(const Expr_ptr expr)
+void Evaluator::walk_instant(const expr::Expr_ptr expr)
 {
     step_t curr_time
         (f_time_stack.back());
@@ -105,9 +105,9 @@ void Evaluator::walk_instant(const Expr_ptr expr)
     f_time_stack.push_back(curr_time + expr->value());
 }
 
-void Evaluator::walk_leaf(const Expr_ptr expr)
+void Evaluator::walk_leaf(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     TypeMgr& tm
@@ -155,7 +155,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
     symb::ResolverProxy resolver;
 
-    Expr_ptr full
+    expr::Expr_ptr full
         (em.make_dot( ctx, expr));
 
     symb::Symbol_ptr symb
@@ -207,7 +207,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
 
         /* parameters must be resolved against the Param map
            maintained by the ModelMgr */
-        Expr_ptr rewrite
+        expr::Expr_ptr rewrite
             (mm.rewrite_parameter(full));
 
 #if 0
@@ -218,11 +218,11 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
             << std::endl;
 #endif
 
-        Expr_ptr rewritten_ctx
+        expr::Expr_ptr rewritten_ctx
             (rewrite->lhs());
         PUSH_CTX(rewritten_ctx);
 
-        Expr_ptr rewritten_expr
+        expr::Expr_ptr rewritten_expr
             (rewrite->rhs());
         (*this) (rewritten_expr);
 
@@ -231,7 +231,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     }
 
     if (symb->is_define()) {
-        Expr_ptr body
+        expr::Expr_ptr body
             (symb->as_define().body());
 
         DEBUG
@@ -248,20 +248,20 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     assert( false ); /* unexpected */
 }
 
-bool Evaluator::cache_miss(const Expr_ptr expr)
+bool Evaluator::cache_miss(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     assert(0 < f_ctx_stack.size());
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     assert(0 < f_time_stack.size());
     step_t step
         (f_time_stack.back());
 
-    TimedExpr key
+    expr::TimedExpr key
         ( em.make_dot( ctx , expr), step);
 
     TimedExprValueMap::iterator eye

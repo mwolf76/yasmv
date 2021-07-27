@@ -33,6 +33,8 @@
 
 #include <opts/opts_mgr.hh>
 
+namespace expr {
+
 typedef class ExprMgr* ExprMgr_ptr;
 class ExprMgr  {
 public:
@@ -819,6 +821,8 @@ private:
 
     boost::mutex f_atom_mutex;
     AtomPool f_atom_pool;
+};
+
 };
 
 #endif /* EXPR_MGR_H */

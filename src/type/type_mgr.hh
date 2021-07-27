@@ -57,8 +57,8 @@ public:
     const ArrayType_ptr find_boolean_array(unsigned size);
 
     /* Remark: following C scoping rules for enums, enums are *globals* */
-    const ScalarType_ptr find_enum(ExprSet& lits);
-    const ArrayType_ptr find_enum_array(ExprSet& lits, unsigned size);
+    const ScalarType_ptr find_enum(expr::ExprSet& lits);
+    const ArrayType_ptr find_enum_array(expr::ExprSet& lits, unsigned size);
 
     const ScalarType_ptr find_constant(unsigned width);
 
@@ -68,9 +68,9 @@ public:
     const ScalarType_ptr find_unsigned(unsigned width);
     const ArrayType_ptr find_unsigned_array(unsigned width, unsigned size);
 
-    const Type_ptr find_type_by_def(const Expr_ptr expr);
+    const Type_ptr find_type_by_def(const expr::Expr_ptr expr);
 
-    const ScalarType_ptr find_instance(Expr_ptr module, Expr_ptr params);
+    const ScalarType_ptr find_instance(expr::Expr_ptr module, expr::Expr_ptr params);
     const StringType_ptr find_string();
 
     const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
@@ -91,7 +91,7 @@ public:
     }
 
     /** A ref to the ExprMgr */
-    inline ExprMgr& em() const
+    inline expr::ExprMgr& em() const
     { return f_em; }
 
 protected:
@@ -104,16 +104,16 @@ private:
     /* --- low-level services ----------------------------------------------- */
 
     // lookup up a type from its repr, returns NULL if not found
-    inline Type_ptr lookup_type(const Expr_ptr expr)
+    inline Type_ptr lookup_type(const expr::Expr_ptr expr)
     { return f_register [ expr ]; }
 
-    void register_type(const Expr_ptr expr, Type_ptr vtype);
+    void register_type(const expr::Expr_ptr expr, Type_ptr vtype);
 
     /* local data */
     TypeMap f_register;
 
     // ref to expr manager
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
 
     // ref to internal resolver
     TypeResolver f_resolver;

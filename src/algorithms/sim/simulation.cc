@@ -51,13 +51,13 @@ Simulation::~Simulation()
 
 void Simulation::pick_state(bool allsat,
                             value_t limit,
-                            ExprVector constraints)
+                            expr::ExprVector constraints)
 {
     enc::EncodingMgr& bm
         (enc::EncodingMgr::INSTANCE());
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     witness::WitnessMgr& wm
         (witness::WitnessMgr::INSTANCE());
@@ -74,13 +74,13 @@ void Simulation::pick_state(bool allsat,
 
     Engine engine { "pick_state" };
 
-    Expr_ptr ctx { em.make_empty() };
+    expr::Expr_ptr ctx { em.make_empty() };
 
     CompilationUnits constraint_cus;
     unsigned nconstraints { 0 };
     std::for_each(begin(constraints),
                   end(constraints),
-                  [this, ctx, &nconstraints, &constraint_cus](Expr_ptr expr) {
+                  [this, ctx, &nconstraints, &constraint_cus](expr::Expr_ptr expr) {
                       INFO
                           << "Compiling constraint `"
                           << expr
@@ -129,19 +129,19 @@ void Simulation::pick_state(bool allsat,
                     (model());
 
                 while (symbols.has_next()) {
-                    std::pair <Expr_ptr, symb::Symbol_ptr> pair
+                    std::pair <expr::Expr_ptr, symb::Symbol_ptr> pair
                         (symbols.next());
 
-                    Expr_ptr ctx
+                    expr::Expr_ptr ctx
                         (pair.first);
 
                     symb::Symbol_ptr symb
                         (pair.second);
 
-                    Expr_ptr symb_name
+                    expr::Expr_ptr symb_name
                         (symb->name());
 
-                    Expr_ptr key
+                    expr::Expr_ptr key
                         (em.make_dot( ctx, symb_name));
 
                     if (symb->is_variable()) {
@@ -155,7 +155,7 @@ void Simulation::pick_state(bool allsat,
 
                         /* time it, and fetch encoding for enc mgr */
                         enc::Encoding_ptr enc
-                            (bm.find_encoding( TimedExpr(key, 0)));
+                            (bm.find_encoding( expr::TimedExpr(key, 0)));
 
                         if ( ! enc )
                             continue;
@@ -242,9 +242,9 @@ void Simulation::pick_state(bool allsat,
     } /* while ( -- k ) */
 }
 
-void Simulation::simulate(Expr_ptr invar_condition,
-                          Expr_ptr until_condition,
-                          ExprVector constraints,
+void Simulation::simulate(expr::Expr_ptr invar_condition,
+                          expr::Expr_ptr until_condition,
+                          expr::ExprVector constraints,
                           step_t steps,
                           pconst_char trace_name)
 {
@@ -256,14 +256,14 @@ void Simulation::simulate(Expr_ptr invar_condition,
     Engine engine
         ("simulation");
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     witness::WitnessMgr& wm
         (witness::WitnessMgr::INSTANCE());
 
-    Atom trace_uid
-        (trace_name ? Atom(trace_name) : wm.current().id());
+    expr::Atom trace_uid
+        (trace_name ? expr::Atom(trace_name) : wm.current().id());
 
     witness::Witness& trace
         (wm.witness(trace_uid));
@@ -296,7 +296,7 @@ void Simulation::simulate(Expr_ptr invar_condition,
         Compiler& cmpl
             (compiler()); // just a local ref
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (em.make_empty());
 
         try {

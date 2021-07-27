@@ -46,7 +46,7 @@ public:
 
 class ModuleNotFound : public ModelException {
 public:
-    ModuleNotFound(Expr_ptr expr);
+    ModuleNotFound(expr::Expr_ptr expr);
 };
 
 class MainModuleNotFound : public ModelException {
@@ -56,17 +56,17 @@ public:
 
 class DuplicateIdentifier : public ModelException {
 public:
-    DuplicateIdentifier(Expr_ptr expr);
+    DuplicateIdentifier(expr::Expr_ptr expr);
 };
 
 class UnknownIdentifier : public ModelException {
 public:
-    UnknownIdentifier(Expr_ptr expr);
+    UnknownIdentifier(expr::Expr_ptr expr);
 };
 
 class BadParamCount : public ModelException {
 public:
-    BadParamCount(Expr_ptr instance, unsigned expected, unsigned got);
+    BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got);
 };
 
 #endif /* MODEL_EXCEPTIONS_H */

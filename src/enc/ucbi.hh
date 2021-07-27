@@ -33,10 +33,10 @@ namespace enc {
 /* Untimed Canonical Bit Identifiers */
 class UCBI {
 public:
-    UCBI(Expr_ptr expr, step_t time_ofs, unsigned bitno);
+    UCBI(expr::Expr_ptr expr, step_t time_ofs, unsigned bitno);
     UCBI(const UCBI& ucbi);
 
-    inline Expr_ptr expr() const
+    inline expr::Expr_ptr expr() const
     { return f_expr; }
 
     inline step_t time() const
@@ -47,7 +47,7 @@ public:
 
 private:
     // expression body
-    Expr_ptr f_expr;
+    expr::Expr_ptr f_expr;
 
     // expression time (default is 0)
     step_t f_time;

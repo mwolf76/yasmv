@@ -63,7 +63,7 @@ public:
     { return f_bits; }
 
     /* vector of DD leaves (consts) -> expr */
-    virtual Expr_ptr expr(int* assignment) =0;
+    virtual expr::Expr_ptr expr(int* assignment) =0;
 
 protected:
     Encoding()
@@ -93,7 +93,7 @@ class BooleanEncoding : public Encoding {
 
 public:
     // here assignment *must* have size 1
-    Expr_ptr expr(int* assignment);
+    expr::Expr_ptr expr(int* assignment);
 
     ADD bit();
 
@@ -114,7 +114,7 @@ class AlgebraicEncoding : public Encoding {
 
 public:
     // here assignment *must* have size 1
-    virtual Expr_ptr expr(int* assignment);
+    virtual expr::Expr_ptr expr(int* assignment);
 
     inline bool is_signed() const
     { return f_signed; }
@@ -152,8 +152,8 @@ protected:
     unsigned range_repr_bits (value_t range);
 };
 
-typedef boost::unordered_map<value_t, Expr_ptr, utils::ValueHash, utils::ValueEq> ValueExprMap;
-typedef boost::unordered_map<Expr_ptr, value_t, utils::PtrHash, utils::PtrEq> ExprValueMap;
+typedef boost::unordered_map<value_t, expr::Expr_ptr, utils::ValueHash, utils::ValueEq> ValueExprMap;
+typedef boost::unordered_map<expr::Expr_ptr, value_t, utils::PtrHash, utils::PtrEq> ExprValueMap;
 
 typedef class EnumEncoding* EnumEncoding_ptr;
 
@@ -163,15 +163,15 @@ class EnumEncoding : public MonolithicEncoding {
 
 public:
     // here assignment *must* have size 1
-    virtual Expr_ptr expr(int* assignment);
+    virtual expr::Expr_ptr expr(int* assignment);
 
-    virtual value_t value(Expr_ptr literal);
+    virtual value_t value(expr::Expr_ptr literal);
 
 protected:
     virtual ~EnumEncoding()
     { assert(0); }
 
-    EnumEncoding(const ExprSet& lits);
+    EnumEncoding(const expr::ExprSet& lits);
 
     ValueExprMap f_v2e_map;
     ExprValueMap f_e2v_map;
@@ -185,7 +185,7 @@ class ArrayEncoding : public Encoding {
     friend class EncodingMgr; // expose ctors only to mgr
 
 public:
-    virtual Expr_ptr expr(int* assignment);
+    virtual expr::Expr_ptr expr(int* assignment);
 
 protected:
     ArrayEncoding(Encodings elements);

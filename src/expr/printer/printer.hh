@@ -29,6 +29,8 @@
 #include <string>
 #include <expr/walker/walker.hh>
 
+namespace expr {
+
 class Printer : public ExprWalker {
     std::ostream& f_os;
 
@@ -58,6 +60,8 @@ protected:
 
 private:
     void print_leaf(const Expr_ptr expr);
+};
+
 };
 
 #endif /* PRINTER_H */

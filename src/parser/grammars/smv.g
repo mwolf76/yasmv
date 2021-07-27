@@ -43,8 +43,8 @@ options {
 
 @members {
     /* singleton managers */
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     ModelMgr& mm
         (ModelMgr::INSTANCE());
@@ -169,14 +169,14 @@ fsm_param_decl_body
 
 fsm_var_decl_clause
 @init {
-    ExprVector ev;
+    expr::ExprVector ev;
 }
     : ids=identifiers[&ev] ':' tp=type
     {
-            ExprVector::iterator expr_iter;
+            expr::ExprVector::iterator expr_iter;
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr vid (*expr_iter);
+                expr::Expr_ptr vid (*expr_iter);
                 symb::Variable_ptr var
                     (new symb::Variable($smv::current_module->name(), vid, tp));
 
@@ -199,14 +199,14 @@ fsm_var_decl_clause
 
 fsm_param_decl_clause
 @init {
-    ExprVector ev;
+    expr::ExprVector ev;
 }
     : ids=identifiers[&ev] ':' tp=type
     {
-            ExprVector::iterator expr_iter;
+            expr::ExprVector::iterator expr_iter;
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
-                Expr_ptr pid (*expr_iter);
+                expr::Expr_ptr pid (*expr_iter);
                 $smv::current_module->add_parameter(pid,
                                                     new symb::Parameter($smv::current_module->name(),
                                                                         pid, tp));
@@ -297,12 +297,12 @@ fsm_trans_decl_clause
       { $smv::current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
-toplevel_expression returns [Expr_ptr res]
+toplevel_expression returns [expr::Expr_ptr res]
     : expr=timed_expression
       { $res = expr; }
     ;
 
-timed_expression returns [Expr_ptr res]
+timed_expression returns [expr::Expr_ptr res]
     : '@' when=instant '{' expr=temporal_expression '}'
       { $res = em.make_at(when, expr); }
 
@@ -314,12 +314,12 @@ timed_expression returns [Expr_ptr res]
 
     ;
 
-temporal_expression returns [Expr_ptr res]
+temporal_expression returns [expr::Expr_ptr res]
     : expr=binary_ltl_expression
       { $res = expr; }
     ;
 
-binary_ltl_expression returns [Expr_ptr res]
+binary_ltl_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=unary_ltl_expression
       { $res = lhs; } (
@@ -330,7 +330,7 @@ binary_ltl_expression returns [Expr_ptr res]
             { $res = em.make_R($res, rhs); }
       )* ;
 
-unary_ltl_expression returns [Expr_ptr res]
+unary_ltl_expression returns [expr::Expr_ptr res]
 @init { }
     : 'G' expr=unary_ltl_expression
         { $res = em.make_G(expr); }
@@ -364,14 +364,14 @@ unary_ltl_expression returns [Expr_ptr res]
       { $res = expr; }
     ;
 
-propositional_expression returns [Expr_ptr res]
+propositional_expression returns [expr::Expr_ptr res]
 @init { }
     : expr=ite_expression {
          $res = expr;
       }
     ;
 
-ite_expression returns [Expr_ptr res]
+ite_expression returns [expr::Expr_ptr res]
 @init { }
     : expr=logical_expression {
          $res = expr;
@@ -383,12 +383,12 @@ ite_expression returns [Expr_ptr res]
       )?
     ;
 
-logical_expression returns [Expr_ptr res]
+logical_expression returns [expr::Expr_ptr res]
     : expr=logical_implies_expression
       { $res = expr; }
     ;
 
-logical_implies_expression returns [Expr_ptr res]
+logical_implies_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=logical_or_expression
       { $res = lhs; }
@@ -398,7 +398,7 @@ logical_implies_expression returns [Expr_ptr res]
       { $res = em.make_implies($res, rhs); }
     )* ;
 
-logical_or_expression returns[Expr_ptr res]
+logical_or_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=logical_and_expression
       { $res = lhs; }
@@ -408,7 +408,7 @@ logical_or_expression returns[Expr_ptr res]
       { $res = em.make_or($res, rhs); }
     )* ;
 
-logical_and_expression returns[Expr_ptr res]
+logical_and_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=equality_expression
       { $res = lhs; }
@@ -418,7 +418,7 @@ logical_and_expression returns[Expr_ptr res]
       { $res = em.make_and($res, rhs); }
     )* ;
 
-equality_expression returns [Expr_ptr res]
+equality_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=relational_expression
       { $res = lhs; }
@@ -434,7 +434,7 @@ equality_expression returns [Expr_ptr res]
 
       )? /* predicates are binary */;
 
-relational_expression returns [Expr_ptr res]
+relational_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=algebraic_expression
       { $res = lhs; }
@@ -452,14 +452,14 @@ relational_expression returns [Expr_ptr res]
             { $res = em.make_gt($res, rhs); }
       )? /* predicates are binary */ ;
 
-algebraic_expression returns [Expr_ptr res]
+algebraic_expression returns [expr::Expr_ptr res]
 @init { }
     :
         expr=bw_or_expression
         { $res = expr; }
     ;
 
-bw_or_expression returns[Expr_ptr res]
+bw_or_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=bw_xor_expression
       { $res = lhs; }
@@ -469,7 +469,7 @@ bw_or_expression returns[Expr_ptr res]
        { $res = em.make_bw_or($res, rhs); }
     )* ;
 
-bw_xor_expression returns[Expr_ptr res]
+bw_xor_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=bw_xnor_expression
       { $res = lhs; }
@@ -479,7 +479,7 @@ bw_xor_expression returns[Expr_ptr res]
       { $res = em.make_bw_xor($res, rhs); }
     )* ;
 
-bw_xnor_expression returns[Expr_ptr res]
+bw_xnor_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=bw_and_expression
       { $res = lhs; }
@@ -489,7 +489,7 @@ bw_xnor_expression returns[Expr_ptr res]
       { $res = em.make_bw_xnor($res, rhs); }
     )* ;
 
-bw_and_expression returns[Expr_ptr res]
+bw_and_expression returns[expr::Expr_ptr res]
 @init { }
     : lhs=shift_expression
       { $res = lhs; }
@@ -499,7 +499,7 @@ bw_and_expression returns[Expr_ptr res]
       { $res = em.make_bw_and($res, rhs); }
     )* ;
 
-shift_expression returns [Expr_ptr res]
+shift_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=additive_expression
       { $res = lhs; }
@@ -512,7 +512,7 @@ shift_expression returns [Expr_ptr res]
        { $res = em.make_rshift($res, rhs); }
     )* ;
 
-additive_expression returns [Expr_ptr res]
+additive_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=multiplicative_expression
       { $res = lhs; }
@@ -525,7 +525,7 @@ additive_expression returns [Expr_ptr res]
         { $res = em.make_sub($res, rhs); }
     )* ;
 
-multiplicative_expression returns [Expr_ptr res]
+multiplicative_expression returns [expr::Expr_ptr res]
 @init { }
     : lhs=cast_expression
       { $res = lhs; }
@@ -541,9 +541,9 @@ multiplicative_expression returns [Expr_ptr res]
       { $res = em.make_mod($res, rhs); }
     )* ;
 
-cast_expression returns [Expr_ptr res]
+cast_expression returns [expr::Expr_ptr res]
 @init {
-    Expr_ptr cast = NULL;
+    expr::Expr_ptr cast = NULL;
 }
     : '(' tp = native_type ')' expr = cast_expression
         { $res = em.make_cast( tp->repr(), expr ); }
@@ -552,7 +552,7 @@ cast_expression returns [Expr_ptr res]
         { $res = expr; }
     ;
 
-unary_expression returns [Expr_ptr res]
+unary_expression returns [expr::Expr_ptr res]
 @init { }
     : expr=postfix_expression
       { $res = expr; }
@@ -576,16 +576,16 @@ unary_expression returns [Expr_ptr res]
       { $res = em.make_neg(expr); }
     ;
 
-nondeterministic_expression returns[Expr_ptr res]
+nondeterministic_expression returns[expr::Expr_ptr res]
 @init {
-    ExprVector clauses;
+    expr::ExprVector clauses;
 }
     : '{'
           c=toplevel_expression{ clauses.push_back(c); }
             (',' c=toplevel_expression { clauses.push_back(c); })*
       '}'
       {
-            ExprVector::reverse_iterator i
+            expr::ExprVector::reverse_iterator i
                 (clauses.rbegin());
 
             while (clauses.rend() != i) {
@@ -597,16 +597,16 @@ nondeterministic_expression returns[Expr_ptr res]
         }
     ;
 
-array_expression returns[Expr_ptr res]
+array_expression returns[expr::Expr_ptr res]
 @init {
-    ExprVector clauses;
+    expr::ExprVector clauses;
 }
     : '['
           c=toplevel_expression{ clauses.push_back(c); }
             (',' c=toplevel_expression { clauses.push_back(c); })*
       ']'
       {
-            ExprVector::reverse_iterator i
+            expr::ExprVector::reverse_iterator i
                 (clauses.rbegin());
 
             while (clauses.rend() != i) {
@@ -619,18 +619,18 @@ array_expression returns[Expr_ptr res]
     ;
 
 
-params returns [Expr_ptr res]
+params returns [expr::Expr_ptr res]
 @init {
-    ExprVector actuals;
+    expr::ExprVector actuals;
     res = NULL;
 }
     : ( expressions[&actuals]
     {
-            ExprVector::reverse_iterator expr_iter;
+            expr::ExprVector::reverse_iterator expr_iter;
             res = NULL;
 
             for (expr_iter = actuals.rbegin(); expr_iter != actuals.rend(); ++ expr_iter) {
-                Expr_ptr expr = (*expr_iter);
+                expr::Expr_ptr expr = (*expr_iter);
                 res = (!res) ? expr : em.make_params_comma( expr, res );
             }
     })?
@@ -641,7 +641,7 @@ params returns [Expr_ptr res]
     }
     ;
 
-postfix_expression returns [Expr_ptr res]
+postfix_expression returns [expr::Expr_ptr res]
 @init { }
     :   lhs=basic_expression
         { $res = lhs; }
@@ -657,7 +657,7 @@ postfix_expression returns [Expr_ptr res]
         { $res = em.make_dot($res, rhs); }
     )* ;
 
-basic_expression returns [Expr_ptr res]
+basic_expression returns [expr::Expr_ptr res]
 @init { }
     : id=identifier
       { $res = id; }
@@ -672,19 +672,19 @@ basic_expression returns [Expr_ptr res]
       { $res = expr; }
     ;
 
-case_expression returns [Expr_ptr res]
+case_expression returns [expr::Expr_ptr res]
 @init {
-    typedef std::pair<Expr_ptr, Expr_ptr> CaseClause;
+    typedef std::pair<expr::Expr_ptr, expr::Expr_ptr> CaseClause;
     typedef std::vector<CaseClause> CaseClauses;
 
     CaseClauses clauses;
 }  : 'case'
 
      (lhs=toplevel_expression ':' rhs=toplevel_expression ';'
-     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (lhs, rhs)); }) +
+     { clauses.push_back( std::pair< expr::Expr_ptr, expr::Expr_ptr > (lhs, rhs)); }) +
 
      'else' ':' last=toplevel_expression ';'
-     { clauses.push_back( std::pair< Expr_ptr, Expr_ptr > (NULL, last)); }
+     { clauses.push_back( std::pair< expr::Expr_ptr, expr::Expr_ptr > (NULL, last)); }
 
      'end'
      {
@@ -699,7 +699,7 @@ case_expression returns [Expr_ptr res]
      }
     ;
 
-identifiers [ExprVector* ids]
+identifiers [expr::ExprVector* ids]
     :
       ident=identifier
       { ids->push_back(ident); }
@@ -708,7 +708,7 @@ identifiers [ExprVector* ids]
             { ids->push_back(ident); }
       )* ;
 
-expressions [ExprVector* exprs]
+expressions [expr::ExprVector* exprs]
     :
       expr=toplevel_expression
       { exprs->push_back(expr); }
@@ -717,39 +717,39 @@ expressions [ExprVector* exprs]
             { exprs->push_back(expr); }
       )* ;
 
-identifier returns [Expr_ptr res]
+identifier returns [expr::Expr_ptr res]
 @init { }
     : IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
     ;
 
-instant returns [Expr_ptr res]
+instant returns [expr::Expr_ptr res]
 @init { }
     : DECIMAL_LITERAL {
-        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+        expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
       }
     ;
 
-constant returns [Expr_ptr res]
+constant returns [expr::Expr_ptr res]
 @init { }
     : HEX_LITERAL {
-        Atom tmp((const char*)($HEX_LITERAL.text->chars));
+        expr::Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
       }
 
     | BINARY_LITERAL {
-        Atom tmp((const char*)($BINARY_LITERAL.text->chars));
+        expr::Atom tmp((const char*)($BINARY_LITERAL.text->chars));
         $res = em.make_bin_const(tmp);
       }
 
     | OCTAL_LITERAL {
-        Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
+        expr::Atom tmp((const char*)($OCTAL_LITERAL.text->chars));
         $res = em.make_oct_const(tmp);
       }
 
     | DECIMAL_LITERAL {
-        Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+        expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_dec_const(tmp);
       }
 
@@ -764,13 +764,13 @@ constant returns [Expr_ptr res]
             assert (*q == '\'' || *q == '\"');
             *q = 0; /* cut rhs quote */
 
-            Atom atom { (const char *) p };
+            expr::Atom atom { (const char *) p };
             $res = em.make_qstring(atom);
       }
     ;
 
 /* pvalue is used in param passing (actuals) */
-pvalue returns [Expr_ptr res]
+pvalue returns [expr::Expr_ptr res]
 @init {}
     : 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
@@ -780,7 +780,7 @@ pvalue returns [Expr_ptr res]
     ;
 
 /* ordinary values used elsewhere */
-value returns [Expr_ptr res]
+value returns [expr::Expr_ptr res]
 @init { }
     : expr=postfix_expression
       { $res = expr; }
@@ -833,7 +833,7 @@ boolean_type returns [Type_ptr res]
 enum_type returns [Type_ptr res]
 @init {
     int array_size = 0;
-    ExprSet lits;
+    expr::ExprSet lits;
 }
     : '{'
           lit=literal { lits.insert(lit); }
@@ -916,7 +916,7 @@ instance_type returns [Type_ptr res]
       { $res = tm.find_instance( module, parameters ); }
     ;
 
-literal returns [Expr_ptr res]
+literal returns [expr::Expr_ptr res]
 @init { }
     :  expr=identifier
        { $res = expr; }
@@ -1098,7 +1098,7 @@ do_command_topic returns [CommandTopic_ptr res]
 
 echo_command returns [Command_ptr res]
 @init {
-    ExprVector ev;
+    expr::ExprVector ev;
 }
     : 'echo'?
       { $res = cm.make_echo(); }

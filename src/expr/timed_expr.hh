@@ -29,6 +29,8 @@
 
 #include <expr/expr.hh>
 
+namespace expr {
+
 class TimedExpr {
 public:
     TimedExpr(Expr_ptr expr, step_t time);
@@ -59,5 +61,7 @@ struct TimedExprEq {
 
 typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
+
+};
 
 #endif /* TIMED_EXPR_H */

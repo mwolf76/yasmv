@@ -41,14 +41,14 @@ TypeResolver::TypeResolver(TypeMgr& owner)
 TypeResolver::~TypeResolver()
 {}
 
-symb::Symbol_ptr TypeResolver::symbol(const Expr_ptr key)
+symb::Symbol_ptr TypeResolver::symbol(const expr::Expr_ptr key)
 {
-     ExprMgr& em
-        (ExprMgr::INSTANCE());
+     expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
      assert(em.is_dot(key));
 
      /* Types are globally scoped */
-     Expr_ptr key_
+     expr::Expr_ptr key_
          (em.make_dot( em.make_empty(), key -> rhs()));
 
      const symb::Literals& lits

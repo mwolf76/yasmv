@@ -28,6 +28,8 @@
 
 #include <expr/nnfizer/nnfizer.hh>
 
+namespace expr {
+
 Nnfizer::Nnfizer()
     : f_em(ExprMgr::INSTANCE())
      , f_polarity_stack()
@@ -613,3 +615,5 @@ bool Nnfizer::internal_error(const Expr_ptr expr)
     throw new InternalError("NNF conversion aborted");
     return false;
 }
+
+};

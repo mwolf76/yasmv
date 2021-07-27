@@ -35,8 +35,8 @@ public:
     virtual ~Check();
 
     /** cmd params */
-    void set_property(Expr_ptr property);
-    void add_constraint(Expr_ptr constraint);
+    void set_property(expr::Expr_ptr property);
+    void add_constraint(expr::Expr_ptr constraint);
 
     /* run() */
     utils::Variant virtual operator()();
@@ -45,10 +45,10 @@ private:
     std::ostream& f_out;
 
     /* the property to be verified */
-    Expr_ptr f_property;
+    expr::Expr_ptr f_property;
 
     /* (optional) additional constraints */
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();

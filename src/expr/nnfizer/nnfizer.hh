@@ -31,6 +31,8 @@
 
 #include <boost/unordered_map.hpp>
 
+namespace expr {
+
 /* true -> direct, false -> inverse */
 typedef std::vector<bool> BoolVector;
 
@@ -65,6 +67,8 @@ private:
 
     BoolVector f_polarity_stack;
     ExprVector f_expr_stack;
+};
+
 };
 
 #endif /* NNFIZER_H */

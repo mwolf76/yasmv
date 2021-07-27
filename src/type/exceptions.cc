@@ -29,7 +29,7 @@
 #include <string>
 #include <sstream>
 
-static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs)
+static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs)
 {
     std::ostringstream oss;
 
@@ -42,7 +42,7 @@ static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs)
 }
 
 /** Raised when the inferrer detects a wrong type */
-static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
 {
     std::ostringstream oss;
 
@@ -56,17 +56,17 @@ static std::string format_bad_type(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
     return oss.str();
 }
 
-BadType::BadType(Expr_ptr expr, Type_ptr lhs)
+BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs)
     : TypeException("BadType",
                     format_bad_type(expr, lhs))
 {}
 
-BadType::BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
     : TypeException("BadType",
                     format_bad_type(expr, lhs, rhs))
 {}
 
-std::string format_identifier_expected(Expr_ptr expr)
+std::string format_identifier_expected(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -78,12 +78,12 @@ std::string format_identifier_expected(Expr_ptr expr)
     return oss.str();
 }
 
-IdentifierExpected::IdentifierExpected(Expr_ptr expr)
+IdentifierExpected::IdentifierExpected(expr::Expr_ptr expr)
     : TypeException("IdentifierExpected",
                     format_identifier_expected(expr))
 {}
 
-std::string format_duplicate_literal(Expr_ptr expr)
+std::string format_duplicate_literal(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
 
@@ -95,13 +95,13 @@ std::string format_duplicate_literal(Expr_ptr expr)
     return oss.str();
 }
 
-DuplicateLiteral::DuplicateLiteral(Expr_ptr expr)
+DuplicateLiteral::DuplicateLiteral(expr::Expr_ptr expr)
     : TypeException("DuplicateLiteral",
                     format_duplicate_literal(expr))
 {}
 
 /** Raised when the inferrer detects two mismatching types */
-std::string format_type_mismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
+std::string format_type_mismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
 {
     std::ostringstream oss;
 
@@ -118,7 +118,7 @@ std::string format_type_mismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
     return oss.str();
 }
 
-TypeMismatch::TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b)
+TypeMismatch::TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
     : TypeException("TypeMismatch",
                     format_type_mismatch(expr, a, b))
 {}

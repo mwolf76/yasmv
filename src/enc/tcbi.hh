@@ -37,7 +37,7 @@ public:
     TCBI(const UCBI& ucbi, step_t timebase);
     TCBI(const TCBI& tcbi);
 
-    inline Expr_ptr expr() const
+    inline expr::Expr_ptr expr() const
     { return f_expr; }
 
     inline unsigned bitno() const
@@ -65,7 +65,7 @@ public:
 private:
 
     // expression body
-    Expr_ptr f_expr;
+    expr::Expr_ptr f_expr;
 
     // expression time (default is 0)
     step_t f_time;

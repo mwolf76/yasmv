@@ -35,7 +35,10 @@ public:
     Reachability(Command& command, Model& model);
     ~Reachability();
 
-    void process(Expr_ptr target, ExprVector forward_constraints, ExprVector backward_constraints, ExprVector global_constraints);
+    void process(expr::Expr_ptr target,
+                 expr::ExprVector forward_constraints,
+                 expr::ExprVector backward_constraints,
+                 expr::ExprVector global_constraints);
 
     inline reachability_status_t status()
     { return sync_status(); }
@@ -44,10 +47,10 @@ public:
     bool sync_set_status(reachability_status_t status);
 
 private:
-    Expr_ptr f_target;
+    expr::Expr_ptr f_target;
     CompilationUnit_ptr f_target_cu;
 
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     CompilationUnits f_forward_constraint_cus; /* requires forward strategy */
     CompilationUnits f_backward_constraint_cus; /* requires backward strategy */

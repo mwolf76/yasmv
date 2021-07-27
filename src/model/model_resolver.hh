@@ -35,8 +35,8 @@ public:
     ModelResolver(ModelMgr& owner);
     ~ModelResolver();
 
-    void add_symbol(const Expr_ptr key, symb::Symbol_ptr symb);
-    symb::Symbol_ptr symbol(const Expr_ptr key);
+    void add_symbol(const expr::Expr_ptr key, symb::Symbol_ptr symb);
+    symb::Symbol_ptr symbol(const expr::Expr_ptr key);
 
 private:
     ModelMgr& f_owner;

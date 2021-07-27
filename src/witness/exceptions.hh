@@ -43,7 +43,7 @@ public:
 /** Raised when a given ID is registered more than once */
 class DuplicateWitnessId : public WitnessException {
 public:
-    DuplicateWitnessId(Atom id);
+    DuplicateWitnessId(expr::Atom id);
 };
 
 /** Raised when a given ID is registered more than once */
@@ -55,7 +55,7 @@ public:
 /** Raised when a given ID is searched for and was not registered */
 class UnknownWitnessId : public WitnessException {
 public:
-    UnknownWitnessId(Atom id);
+    UnknownWitnessId(expr::Atom id);
 };
 
 /** Raised when TimeFrame for requested time does not exist. */
@@ -66,7 +66,7 @@ public:
 
 class NoValue : public WitnessException {
 public:
-    NoValue(Expr_ptr id);
+    NoValue(expr::Expr_ptr id);
 };
 
 };

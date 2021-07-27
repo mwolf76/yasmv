@@ -35,11 +35,11 @@ void Analyzer::pre_hook()
 void Analyzer::post_hook()
 {}
 
-void Analyzer::pre_node_hook(Expr_ptr expr)
+void Analyzer::pre_node_hook(expr::Expr_ptr expr)
 {
     f_expr_stack.push_back(expr);
 }
-void Analyzer::post_node_hook(Expr_ptr expr)
+void Analyzer::post_node_hook(expr::Expr_ptr expr)
 {
     f_expr_stack.pop_back();
 }

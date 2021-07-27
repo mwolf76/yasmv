@@ -41,7 +41,7 @@ Clear::Clear(Interpreter& owner)
 Clear::~Clear()
 {}
 
-void Clear::set_identifier(Expr_ptr id)
+void Clear::set_identifier(expr::Expr_ptr id)
 {
     f_identifier = id;
 }

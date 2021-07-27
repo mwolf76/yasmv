@@ -52,13 +52,13 @@ TimeFrame& Witness::operator[](step_t i)
 }
 
 /* Retrieves value for expr, throws an exception if no value exists. */
-Expr_ptr TimeFrame::value( Expr_ptr expr )
+expr::Expr_ptr TimeFrame::value(expr::Expr_ptr expr )
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     // symbol is defined in witness' language
-    ExprVector& lang
+    expr::ExprVector& lang
         (f_owner.lang());
 
     assert( find(lang.begin(), lang.end(), expr) != lang.end());
@@ -69,7 +69,7 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
     if (f_map.end() == eye)
         throw NoValue(expr);
 
-    Expr_ptr vexpr
+    expr::Expr_ptr vexpr
         ((*eye).second);
 
     Expr2FormatMap::iterator format_eye
@@ -111,10 +111,10 @@ Expr_ptr TimeFrame::value( Expr_ptr expr )
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
-bool TimeFrame::has_value( Expr_ptr expr )
+bool TimeFrame::has_value(expr::Expr_ptr expr )
 {
     // symbol is defined in witness' language
-    ExprVector& lang
+    expr::ExprVector& lang
         (f_owner.lang());
 
     // FIXME: proper exception
@@ -130,7 +130,7 @@ bool TimeFrame::has_value( Expr_ptr expr )
 }
 
 /* Sets value for expr */
-void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
+void TimeFrame::set_value(expr::Expr_ptr expr, expr::Expr_ptr value, value_format_t format)
 {
     assert(value);
 
@@ -141,35 +141,35 @@ void TimeFrame::set_value( Expr_ptr expr, Expr_ptr value, value_format_t format)
         << std::endl;
 
     // symbol is defined in witness' language
-    ExprVector& lang
+    expr::ExprVector& lang
         (f_owner.lang());
 
     assert( find( lang.begin(),
                   lang.end(), expr) != lang.end());
 
     /* populate both maps at the same time. This ensures consistency. */
-    f_map.insert( std::pair< Expr_ptr, Expr_ptr >
+    f_map.insert( std::pair< expr::Expr_ptr, expr::Expr_ptr >
                   (expr, value));
 
-    f_format_map.insert( std::pair< Expr_ptr, value_format_t >
+    f_format_map.insert( std::pair< expr::Expr_ptr, value_format_t >
                          (expr, format));
 }
 
-ExprVector TimeFrame::assignments()
+expr::ExprVector TimeFrame::assignments()
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    ExprVector& lang
+    expr::ExprVector& lang
         (f_owner.lang());
 
-    ExprVector res;
+    expr::ExprVector res;
 
-    ExprVector::const_iterator i
+    expr::ExprVector::const_iterator i
         (lang.begin());
 
     while (i != lang.end()) {
-        Expr_ptr symb
+        expr::Expr_ptr symb
             (*i);
 
         ++ i;
@@ -184,7 +184,7 @@ ExprVector TimeFrame::assignments()
     return res;
 }
 
-Witness::Witness(Engine_ptr pe, Atom id, Atom desc, step_t j)
+Witness::Witness(Engine_ptr pe, expr::Atom id, expr::Atom desc, step_t j)
     : f_id(id)
     , f_desc(desc)
     , f_j(j)
@@ -234,19 +234,19 @@ TimeFrame& Witness::extend()
 }
 
 /* Retrieves value for expr, throws an exception if no such value exists. */
-Expr_ptr Witness::value( Expr_ptr expr, step_t time)
+expr::Expr_ptr Witness::value( expr::Expr_ptr expr, step_t time)
 {
     if (time < first_time() || time > last_time())
         throw IllegalTime(time);
 
-    Expr_ptr vexpr
+    expr::Expr_ptr vexpr
         (f_frames[time]->value(expr));
 
     return vexpr;
 }
 
 /* Returns true iff expr has an assigned value within this time frame. */
-bool Witness::has_value( Expr_ptr expr, step_t time)
+bool Witness::has_value(expr::Expr_ptr expr, step_t time)
 {
     if (time < first_time() ||
         time > last_time())

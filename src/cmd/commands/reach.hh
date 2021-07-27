@@ -35,12 +35,12 @@ public:
     virtual ~Reach();
 
     /** cmd params */
-    void set_target(Expr_ptr target);
+    void set_target(expr::Expr_ptr target);
 
     /* guided reachability support: forward, backward and global guides */
-    void add_forward_constraint(Expr_ptr constraint);
-    void add_backward_constraint(Expr_ptr constraint);
-    void add_global_constraint(Expr_ptr constraint);
+    void add_forward_constraint(expr::Expr_ptr constraint);
+    void add_backward_constraint(expr::Expr_ptr constraint);
+    void add_global_constraint(expr::Expr_ptr constraint);
 
     /* run() */
     utils::Variant virtual operator()();
@@ -49,11 +49,11 @@ private:
     std::ostream& f_out;
 
     /* the negation of invariant property to be verified */
-    Expr_ptr f_target;
+    expr::Expr_ptr f_target;
 
-    ExprVector f_forward_constraints;
-    ExprVector f_backward_constraints;
-    ExprVector f_global_constraints;
+    expr::ExprVector f_forward_constraints;
+    expr::ExprVector f_backward_constraints;
+    expr::ExprVector f_global_constraints;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();

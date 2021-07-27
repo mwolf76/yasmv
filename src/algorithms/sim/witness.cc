@@ -42,8 +42,8 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     enc::EncodingMgr& bm
         (enc::EncodingMgr::INSTANCE());
 
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     int inputs[bm.nbits()];
 
@@ -51,16 +51,16 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     symb::SymbIter si { model };
     while (si.has_next()) {
 
-        std::pair <Expr_ptr, symb::Symbol_ptr> pair
+        std::pair <expr::Expr_ptr, symb::Symbol_ptr> pair
             (si.next());
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (pair.first);
 
         symb::Symbol_ptr symb
             (pair.second);
 
-        Expr_ptr full_name
+        expr::Expr_ptr full_name
             ( em.make_dot( ctx, symb->name()));
 
         f_lang.push_back( full_name );
@@ -75,19 +75,19 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
     while (symbols.has_next()) {
 
-        std::pair <Expr_ptr, symb::Symbol_ptr> pair
+        std::pair <expr::Expr_ptr, symb::Symbol_ptr> pair
             (symbols.next());
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (pair.first);
 
         symb::Symbol_ptr symb
             (pair.second);
 
-        Expr_ptr symb_name
+        expr::Expr_ptr symb_name
                 (symb->name());
 
-        Expr_ptr key
+        expr::Expr_ptr key
             (em.make_dot( ctx, symb_name));
 
         if (symb->is_variable()) {
@@ -97,7 +97,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
             /* INPUT vars are in fact bodyless, typed DEFINEs */
             if (var.is_input()) {
-                Expr_ptr value
+                expr::Expr_ptr value
                     (env::Environment::INSTANCE().get(symb_name));
 
                 if (value)
@@ -105,10 +105,9 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             }
 
             else {
-
                 /* time it, and fetch encoding for enc mgr */
                 enc::Encoding_ptr enc
-                    (bm.find_encoding( TimedExpr(key, 0)) );
+                    (bm.find_encoding( expr::TimedExpr(key, 0)) );
 
                 /* not in COI, skipping... */
                 if ( ! enc )
@@ -143,7 +142,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
                 /* 2. eval the encoding DDs with inputs and put
                    resulting value into time frame container. */
-                Expr_ptr value
+                expr::Expr_ptr value
                     (enc->expr(inputs));
 
                 if (value)
@@ -159,11 +158,11 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
             const symb::Define& define
                 (symb->as_define());
 
-            Expr_ptr body
+            expr::Expr_ptr body
                 (define.body());
 
             try {
-                Expr_ptr value
+                expr::Expr_ptr value
                     (wm.eval( *this, ctx, body, 0));
 
                 if (value)

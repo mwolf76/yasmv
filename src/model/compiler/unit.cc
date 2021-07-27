@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
 {
     bool is_signed
         (ios_issigned(ios));
-    ExprType optype
+    expr::ExprType optype
         (ios_optype(ios));
     unsigned width
         (ios_width(ios));
@@ -80,32 +80,32 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios)
         (is_signed ? "s" : "u");
 
     switch (optype) {
-    case NEG: os << "neg"; break;
-    case NOT: os << "not"; break;
+    case expr::ExprType::NEG: os << "neg"; break;
+    case expr::ExprType::NOT: os << "not"; break;
 
-    case PLUS: os << "add"; break; // see expr/expr.hh
-    case SUB:  os << "sub"; break;
-    case MUL:  os << "mul"; break;
-    case DIV:  os << "div"; break;
-    case MOD:  os << "mod"; break;
+    case expr::ExprType::PLUS: os << "add"; break; // see expr/expr.hh
+    case expr::ExprType::SUB:  os << "sub"; break;
+    case expr::ExprType::MUL:  os << "mul"; break;
+    case expr::ExprType::DIV:  os << "div"; break;
+    case expr::ExprType::MOD:  os << "mod"; break;
 
-    case BW_NOT: os << "not"; break;
-    case BW_AND: os << "and"; break;
-    case BW_OR:  os << "or";  break;
+    case expr::ExprType::BW_NOT: os << "not"; break;
+    case expr::ExprType::BW_AND: os << "and"; break;
+    case expr::ExprType::BW_OR:  os << "or";  break;
 
-    case BW_XOR: os << "xor"; break;
-    case BW_XNOR: os << "xnor"; break;
-    case IMPLIES: os << "implies"; break;
+    case expr::ExprType::BW_XOR: os << "xor"; break;
+    case expr::ExprType::BW_XNOR: os << "xnor"; break;
+    case expr::ExprType::IMPLIES: os << "implies"; break;
 
-    case LSHIFT: os << "lsh"; break;
-    case RSHIFT: os << "rsh"; break;
+    case expr::ExprType::LSHIFT: os << "lsh"; break;
+    case expr::ExprType::RSHIFT: os << "rsh"; break;
 
-    case EQ: os << "eq"; break;
-    case NE: os << "ne"; break;
-    case LT: os << "lt"; break;
-    case LE: os << "le"; break;
-    case GT: os << "gt"; break;
-    case GE: os << "ge"; break;
+    case expr::ExprType::EQ: os << "eq"; break;
+    case expr::ExprType::NE: os << "ne"; break;
+    case expr::ExprType::LT: os << "lt"; break;
+    case expr::ExprType::LE: os << "le"; break;
+    case expr::ExprType::GT: os << "gt"; break;
+    case expr::ExprType::GE: os << "ge"; break;
 
     default: assert(false);
     } /* switch() */

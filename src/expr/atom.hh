@@ -30,6 +30,8 @@
 #include <string>
 #include <boost/unordered_set.hpp>
 
+namespace expr {
+
 /* using STL string as basic atom class */
 typedef std::string Atom;
 typedef Atom* Atom_ptr;
@@ -44,5 +46,7 @@ struct AtomEq {
 
 typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;
 typedef std::pair<AtomPool::iterator, bool> AtomPoolHit;
+
+};
 
 #endif /* ATOM_POOL_H */

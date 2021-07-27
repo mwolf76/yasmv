@@ -155,7 +155,7 @@ CommandVector_ptr parseCommand(const char *command_line)
 /**
  * Runs the parser TOPLEVEL_EXPRESSION rule on a single string.
  */
-Expr_ptr parseExpression(const char *string)
+expr::Expr_ptr parseExpression(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
@@ -178,7 +178,7 @@ Expr_ptr parseExpression(const char *string)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
-    Expr_ptr res { psr -> toplevel_expression(psr) };
+    expr::Expr_ptr res { psr -> toplevel_expression(psr) };
 
     psr->free(psr);
     tstream->free(tstream);

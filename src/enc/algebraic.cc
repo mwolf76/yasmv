@@ -57,9 +57,9 @@ AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD *dds)
     }
 }
 
-Expr_ptr AlgebraicEncoding::expr(int *assignment)
+expr::Expr_ptr AlgebraicEncoding::expr(int *assignment)
 {
-    ExprMgr& em = f_mgr.em();
+    expr::ExprMgr& em = f_mgr.em();
     unsigned i, base = 2;
 
     value_t res = 0;

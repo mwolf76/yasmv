@@ -30,6 +30,8 @@
 
 #include <iomanip>
 
+namespace expr {
+
 static void print_dec_leaf(const Expr_ptr expr, std::ostream& os)
 {
     value_t value
@@ -162,3 +164,5 @@ void Printer::print_leaf(const Expr_ptr expr)
         throw UnsupportedLeaf();
     } /* switch() */
 }
+
+};

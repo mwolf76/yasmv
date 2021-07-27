@@ -147,7 +147,7 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
             (binary_selection_descriptors_map.begin());
 
         while (binary_selection_descriptors_map.end() != mmi) {
-            Expr_ptr toplevel
+            expr::Expr_ptr toplevel
                 (mmi -> first);
             BinarySelectionDescriptors descriptors
                 (mmi -> second);

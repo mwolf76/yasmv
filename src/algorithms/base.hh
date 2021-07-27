@@ -76,7 +76,7 @@ public:
     inline ModelMgr& mm()
     { return f_mm; }
 
-    inline ExprMgr& em()
+    inline expr::ExprMgr& em()
     { return f_em; }
 
     inline TypeMgr& tm()
@@ -109,9 +109,9 @@ public:
 
 private:
     /* internals */
-    void process_init (Expr_ptr ctx, const ExprVector& init);
-    void process_invar(Expr_ptr ctx, const ExprVector& invar);
-    void process_trans(Expr_ptr ctx, const ExprVector& trans);
+    void process_init (expr::Expr_ptr ctx, const expr::ExprVector& init);
+    void process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar);
+    void process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans);
 
     /* all good? */
     bool f_ok;
@@ -125,7 +125,7 @@ private:
     /* Managers */
     ModelMgr& f_mm;
     enc::EncodingMgr& f_bm;
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
     TypeMgr& f_tm;
 
     /* Model Compiler */

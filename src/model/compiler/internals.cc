@@ -24,9 +24,9 @@
 #include <compiler.hh>
 
 /* auto id generator */
-Expr_ptr Compiler::make_auto_id()
+expr::Expr_ptr Compiler::make_auto_id()
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     std::ostringstream oss;
@@ -38,7 +38,7 @@ Expr_ptr Compiler::make_auto_id()
 /* build an auto fresh ADD variable and register its encoding */
 ADD Compiler::make_auto_dd()
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
     TypeMgr& tm
         (f_owner.tm());
@@ -50,14 +50,14 @@ ADD Compiler::make_auto_dd()
          (f_enc.make_encoding( boolean )));
 
     // register encoding, a FQExpr is needed for UCBI booking
-    Expr_ptr aid
+    expr::Expr_ptr aid
         (make_auto_id());
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
     step_t time
         (f_time_stack.back());
 
-    TimedExpr key
+    expr::TimedExpr key
         (em.make_dot( ctx, aid), time);
     f_enc.register_encoding(key, be);
 
@@ -73,7 +73,7 @@ void Compiler::make_auto_ddvect(dd::DDVector& dv, unsigned width)
         dv.push_back(make_auto_dd());
 }
 
-void Compiler::pre_node_hook(Expr_ptr expr)
+void Compiler::pre_node_hook(expr::Expr_ptr expr)
 {
     DRIVEL
         << "compiler pre-node: "
@@ -82,14 +82,14 @@ void Compiler::pre_node_hook(Expr_ptr expr)
 
     /* assemble memoization key */
     assert( 0 < f_ctx_stack.size() );
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     assert(0 < f_time_stack.size());
     step_t time
         (f_time_stack.back());
 
-    TimedExpr key
+    expr::TimedExpr key
         (f_owner.em().make_dot(ctx, expr), time);
 
     if (f_status == ENCODING)
@@ -103,14 +103,14 @@ void Compiler::pre_node_hook(Expr_ptr expr)
     else assert(false); /* unreachable */
 }
 
-void Compiler::post_node_hook(Expr_ptr expr)
+void Compiler::post_node_hook(expr::Expr_ptr expr)
 {
     DRIVEL
         << "compiler post-node: "
         << expr
         << std::endl;
 
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     /* cache is disabled for SETs, COMMAs and CONDs. This allows for
@@ -130,14 +130,14 @@ void Compiler::post_node_hook(Expr_ptr expr)
 
     /* assemble memoization key */
     assert(0 < f_ctx_stack.size());
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     assert(0 < f_time_stack.size());
     step_t time
         (f_time_stack.back());
 
-    TimedExpr key
+    expr::TimedExpr key
         (em.make_dot( ctx, expr), time);
 
     assert(0 < f_type_stack.size());
@@ -176,11 +176,11 @@ void Compiler::post_node_hook(Expr_ptr expr)
         }
         assert (dv.size() == width);
 
-        Expr_ptr timedExpression
+        expr::Expr_ptr timedExpression
             (em.make_at(em.make_instant(time), em.make_dot(ctx, expr)));
 
         /* memoize result */
-        f_compilation_cache.insert( std::pair<TimedExpr, CompilationUnit>
+        f_compilation_cache.insert( std::pair<expr::TimedExpr, CompilationUnit>
             ( key, CompilationUnit( timedExpression, dv, f_inlined_operator_descriptors,
                                     f_expr2bsd_map, f_multiway_selection_descriptors)));
 
@@ -190,12 +190,12 @@ void Compiler::post_node_hook(Expr_ptr expr)
     assert(false);
 }
 
-bool Compiler::cache_miss(const Expr_ptr expr)
+bool Compiler::cache_miss(const expr::Expr_ptr expr)
 {
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
-    TimedExpr key
+    expr::TimedExpr key
         (f_owner.em().make_dot( f_ctx_stack.back(), expr), f_time_stack.back());
 
     CompilationMap::iterator eye
@@ -283,7 +283,7 @@ void Compiler::clear_internals()
     f_bsuf_map.clear();
 }
 
-void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
+void Compiler::build_encodings(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     const void *p { ctx };
     DEBUG
@@ -302,7 +302,7 @@ void Compiler::build_encodings(Expr_ptr ctx, Expr_ptr body)
     (*this)(body);
 }
 
-void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
+void Compiler::compile(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     const void *p { ctx };
     DEBUG
@@ -321,7 +321,7 @@ void Compiler::compile(Expr_ptr ctx, Expr_ptr body)
     (*this)(body);
 }
 
-void Compiler::check_internals(Expr_ptr ctx, Expr_ptr body)
+void Compiler::check_internals(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     const void *p { ctx };
     DEBUG
@@ -347,7 +347,7 @@ void Compiler::check_internals(Expr_ptr ctx, Expr_ptr body)
     assert(res.FindMax().Equals(f_enc.one()));
 }
 
-void Compiler::activate_ite_muxes(Expr_ptr ctx, Expr_ptr body)
+void Compiler::activate_ite_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     const void *p { ctx };
 
@@ -365,7 +365,7 @@ void Compiler::activate_ite_muxes(Expr_ptr ctx, Expr_ptr body)
     for (Expr2BinarySelectionDescriptorsMap::const_iterator i = f_expr2bsd_map.begin();
          f_expr2bsd_map.end() != i; ++ i) {
 
-        Expr_ptr toplevel { i -> first };
+        expr::Expr_ptr toplevel { i -> first };
         const BinarySelectionDescriptors& descriptors { i -> second };
 
         DRIVEL
@@ -385,7 +385,7 @@ void Compiler::activate_ite_muxes(Expr_ptr ctx, Expr_ptr body)
     }
 }
 
-void Compiler::activate_array_muxes(Expr_ptr ctx, Expr_ptr body)
+void Compiler::activate_array_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body)
 {
     const void *p { ctx };
     DEBUG
@@ -418,7 +418,7 @@ void Compiler::activate_array_muxes(Expr_ptr ctx, Expr_ptr body)
     }
 }
 
-enc::Encoding_ptr Compiler::find_encoding( const TimedExpr& key, const Type_ptr type )
+enc::Encoding_ptr Compiler::find_encoding( const expr::TimedExpr& key, const Type_ptr type )
 {
     enc::Encoding_ptr res;
 

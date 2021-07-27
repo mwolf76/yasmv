@@ -29,6 +29,8 @@
 #include <expr/expr.hh>
 #include <stack>
 
+namespace expr {
+
 // enums in C++ are non-extensible, thus we have to keep all possible
 // values together in one place.
 typedef enum {
@@ -113,5 +115,7 @@ struct activation_record {
 };
 
 typedef std::stack<struct activation_record> walker_stack;
+
+};
 
 #endif /* EXPR_WALKER_TYPEDEFS_H */

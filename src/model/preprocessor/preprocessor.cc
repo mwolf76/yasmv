@@ -26,12 +26,28 @@
 
 #include <model/preprocessor/preprocessor.hh>
 
+/* shortcuts to simplify manipulation of the internal expr stack */
+#define POP_EXPR(op)                                    \
+    const auto op { f_expr_stack.back() };              \
+    f_expr_stack.pop_back()
+
+#define PUSH_EXPR(tp)                           \
+    f_expr_stack.push_back(tp)
+
+/* shortcuts to simplify manipulation of the internal define stack */
+#define POP_DEFINE(op)                              \
+    const Define_ptr op = f_define_stack.back();    \
+    f_define_stack.pop_back()
+
+#define PUSH_DEFINE(tp)                             \
+    f_define_stack.push_back(tp)
+
 Preprocessor::Preprocessor(ModelMgr& owner)
     : f_ctx_stack()
     , f_expr_stack()
     , f_env()
     , f_owner(owner)
-    , f_em(ExprMgr::INSTANCE())
+    , f_em(expr::ExprMgr::INSTANCE())
 {
     const void *instance
         (this);
@@ -53,7 +69,7 @@ Preprocessor::~Preprocessor()
         << std::endl;
 }
 
-Expr_ptr Preprocessor::process(Expr_ptr expr, Expr_ptr ctx)
+expr::Expr_ptr Preprocessor::process(expr::Expr_ptr expr, expr::Expr_ptr ctx)
 {
     // remove previous results
     f_ctx_stack.clear();
@@ -81,273 +97,273 @@ void Preprocessor::pre_hook()
 void Preprocessor::post_hook()
 {}
 
-void Preprocessor::pre_node_hook(Expr_ptr expr)
+void Preprocessor::pre_node_hook(expr::Expr_ptr expr)
 {}
 
-void Preprocessor::post_node_hook(Expr_ptr expr)
+void Preprocessor::post_node_hook(expr::Expr_ptr expr)
 {}
 
-bool Preprocessor::walk_F_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_F_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_F_postorder(const Expr_ptr expr)
+void Preprocessor::walk_F_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR( f_em.make_F( lhs));
 }
 
-bool Preprocessor::walk_G_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_G_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_G_postorder(const Expr_ptr expr)
+void Preprocessor::walk_G_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR( f_em.make_G( lhs));
 }
 
-bool Preprocessor::walk_X_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_X_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_X_postorder(const Expr_ptr expr)
+void Preprocessor::walk_X_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR( f_em.make_X( lhs));
 }
 
-bool Preprocessor::walk_U_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_U_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_U_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_U_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_U_postorder(const Expr_ptr expr)
+void Preprocessor::walk_U_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_U( lhs, rhs ));
 }
 
-bool Preprocessor::walk_R_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_R_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_R_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_R_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_R_postorder(const Expr_ptr expr)
+void Preprocessor::walk_R_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_R( lhs, rhs ));
 }
 
-bool Preprocessor::walk_at_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_at_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_at_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_at_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_at_postorder(const Expr_ptr expr)
+void Preprocessor::walk_at_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_at( lhs, rhs ));
 }
 
-bool Preprocessor::walk_next_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_next_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_next_postorder(const Expr_ptr expr)
+void Preprocessor::walk_next_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR( f_em.make_next( lhs));
 }
 
-bool Preprocessor::walk_neg_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_neg_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_neg_postorder(const Expr_ptr expr)
+void Preprocessor::walk_neg_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_neg( lhs));
 }
 
-bool Preprocessor::walk_not_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_not_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_not_postorder(const Expr_ptr expr)
+void Preprocessor::walk_not_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_not( lhs));
 }
 
-bool Preprocessor::walk_bw_not_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_not_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_bw_not_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_not_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_bw_not( lhs));
 }
 
-bool Preprocessor::walk_add_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_add_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_add_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_add_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_add_postorder(const Expr_ptr expr)
+void Preprocessor::walk_add_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_add( lhs, rhs ));
 }
 
-bool Preprocessor::walk_sub_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_sub_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_sub_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_sub_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_sub_postorder(const Expr_ptr expr)
+void Preprocessor::walk_sub_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_sub( lhs, rhs ));
 }
 
-bool Preprocessor::walk_div_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_div_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_div_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_div_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_div_postorder(const Expr_ptr expr)
+void Preprocessor::walk_div_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_div( lhs, rhs ));
 }
 
-bool Preprocessor::walk_mul_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_mul_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_mul_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_mul_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_mul_postorder(const Expr_ptr expr)
+void Preprocessor::walk_mul_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_mul( lhs, rhs ));
 }
 
-bool Preprocessor::walk_mod_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_mod_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_mod_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_mod_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_mod_postorder(const Expr_ptr expr)
+void Preprocessor::walk_mod_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_mod( lhs, rhs ));
 }
 
-bool Preprocessor::walk_and_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_and_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_and_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_and_postorder(const Expr_ptr expr)
+void Preprocessor::walk_and_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_and( lhs, rhs ));
 }
 
-bool Preprocessor::walk_bw_and_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_and_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_bw_and_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_bw_and_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_and_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_bw_and( lhs, rhs ));
 }
 
-bool Preprocessor::walk_or_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_or_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_or_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_or_postorder(const Expr_ptr expr)
+void Preprocessor::walk_or_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_or( lhs, rhs ));
 }
 
-bool Preprocessor::walk_bw_or_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_or_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_bw_or_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_bw_or_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_or_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_bw_or( lhs, rhs ));
 }
 
-bool Preprocessor::walk_bw_xor_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xor_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_bw_xor_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_bw_xor_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_xor_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_bw_xor( lhs, rhs ));
 }
 
-bool Preprocessor::walk_bw_xnor_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xnor_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_bw_xnor_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_bw_xnor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_bw_xnor_postorder(const Expr_ptr expr)
+void Preprocessor::walk_bw_xnor_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_bw_xnor( lhs, rhs ));
 }
 
-bool Preprocessor::walk_guard_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_guard_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_guard_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_guard_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_guard_postorder(const Expr_ptr expr)
+void Preprocessor::walk_guard_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_implies( lhs, rhs )); /* rewrite guard into an implication */
 }
 
-bool Preprocessor::walk_implies_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_implies_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_implies_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_implies_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_implies_postorder(const Expr_ptr expr)
+void Preprocessor::walk_implies_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_implies( lhs, rhs ));
 }
 
-bool Preprocessor::walk_lshift_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_lshift_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_lshift_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_lshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_lshift_postorder(const Expr_ptr expr)
+void Preprocessor::walk_lshift_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_lshift( lhs, rhs ));
 }
 
-bool Preprocessor::walk_rshift_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_rshift_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_rshift_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_rshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_rshift_postorder(const Expr_ptr expr)
+void Preprocessor::walk_rshift_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_rshift( lhs, rhs ));
 }
 
-bool Preprocessor::walk_assignment_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_assignment_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_assignment_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_assignment_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_assignment_postorder(const Expr_ptr expr)
+void Preprocessor::walk_assignment_postorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_em);
 
     POP_EXPR(rhs);
@@ -357,77 +373,77 @@ void Preprocessor::walk_assignment_postorder(const Expr_ptr expr)
                                    rhs ));
 }
 
-bool Preprocessor::walk_eq_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_eq_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_eq_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_eq_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_eq_postorder(const Expr_ptr expr)
+void Preprocessor::walk_eq_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_eq( lhs, rhs ));
 }
 
-bool Preprocessor::walk_ne_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_ne_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_ne_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_ne_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_ne_postorder(const Expr_ptr expr)
+void Preprocessor::walk_ne_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_ne( lhs, rhs ));
 }
 
-bool Preprocessor::walk_gt_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_gt_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_gt_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_gt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_gt_postorder(const Expr_ptr expr)
+void Preprocessor::walk_gt_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_gt( lhs, rhs ));
 }
 
-bool Preprocessor::walk_ge_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_ge_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_ge_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_ge_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_ge_postorder(const Expr_ptr expr)
+void Preprocessor::walk_ge_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_ge( lhs, rhs ));
 }
 
-bool Preprocessor::walk_lt_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_lt_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_lt_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_lt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_lt_postorder(const Expr_ptr expr)
+void Preprocessor::walk_lt_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_lt( lhs, rhs ));
 }
 
-bool Preprocessor::walk_le_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_le_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_le_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_le_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_le_postorder(const Expr_ptr expr)
+void Preprocessor::walk_le_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_le( lhs, rhs ));
 }
 
-bool Preprocessor::walk_ite_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_ite_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_ite_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_ite_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_ite_postorder(const Expr_ptr expr)
+void Preprocessor::walk_ite_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
@@ -437,109 +453,109 @@ void Preprocessor::walk_ite_postorder(const Expr_ptr expr)
                              rhs ));
 }
 
-bool Preprocessor::walk_cond_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_cond_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_cond_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_cond_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_cond_postorder(const Expr_ptr expr)
+void Preprocessor::walk_cond_postorder(const expr::Expr_ptr expr)
 {}
 
-bool Preprocessor::walk_dot_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_dot_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_dot_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_dot_inorder(const expr::Expr_ptr expr)
 {
     assert( false ); // FIXME
     return false;
 }
-void Preprocessor::walk_dot_postorder(const Expr_ptr expr)
+void Preprocessor::walk_dot_postorder(const expr::Expr_ptr expr)
 {
     assert( false );
 }
 
 /* main entry-point */
-bool Preprocessor::walk_params_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_params_preorder(const expr::Expr_ptr expr)
 {
     assert(false); /* TODO: review this */
     // substitute_expression( expr );
     return false;
 }
-bool Preprocessor::walk_params_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_params_inorder(const expr::Expr_ptr expr)
 { assert( false ); return false; }
-void Preprocessor::walk_params_postorder(const Expr_ptr expr)
+void Preprocessor::walk_params_postorder(const expr::Expr_ptr expr)
 { assert(false); }
 
-bool Preprocessor::walk_params_comma_preorder(Expr_ptr expr)
+bool Preprocessor::walk_params_comma_preorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_params_comma_inorder(Expr_ptr expr)
+bool Preprocessor::walk_params_comma_inorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_params_comma_postorder(Expr_ptr expr)
+void Preprocessor::walk_params_comma_postorder(expr::Expr_ptr expr)
 { assert(false); }
 
-bool Preprocessor::walk_subscript_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_subscript_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Preprocessor::walk_subscript_inorder(const Expr_ptr expr)
+bool Preprocessor::walk_subscript_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_subscript_postorder(const Expr_ptr expr)
+void Preprocessor::walk_subscript_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(rhs);
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_subscript( lhs, rhs ));
 }
 
-bool Preprocessor::walk_array_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_array_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_array_postorder(const Expr_ptr expr)
+void Preprocessor::walk_array_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_array( lhs));
 }
 
-bool Preprocessor::walk_array_comma_preorder(Expr_ptr expr)
+bool Preprocessor::walk_array_comma_preorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_array_comma_inorder(Expr_ptr expr)
+bool Preprocessor::walk_array_comma_inorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_array_comma_postorder(Expr_ptr expr)
+void Preprocessor::walk_array_comma_postorder(expr::Expr_ptr expr)
 { assert(false); }
 
 
-bool Preprocessor::walk_set_preorder(const Expr_ptr expr)
+bool Preprocessor::walk_set_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Preprocessor::walk_set_postorder(const Expr_ptr expr)
+void Preprocessor::walk_set_postorder(const expr::Expr_ptr expr)
 {
     POP_EXPR(lhs);
     PUSH_EXPR(f_em.make_set( lhs));
 }
 
-bool Preprocessor::walk_set_comma_preorder(Expr_ptr expr)
+bool Preprocessor::walk_set_comma_preorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_set_comma_inorder(Expr_ptr expr)
+bool Preprocessor::walk_set_comma_inorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_set_comma_postorder(Expr_ptr expr)
+void Preprocessor::walk_set_comma_postorder(expr::Expr_ptr expr)
 { assert(false); }
 
-bool Preprocessor::walk_cast_preorder(Expr_ptr expr)
+bool Preprocessor::walk_cast_preorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_cast_inorder(Expr_ptr expr)
+bool Preprocessor::walk_cast_inorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_cast_postorder(Expr_ptr expr)
+void Preprocessor::walk_cast_postorder(expr::Expr_ptr expr)
 { assert(false); }
 
-bool Preprocessor::walk_type_preorder(Expr_ptr expr)
+bool Preprocessor::walk_type_preorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-bool Preprocessor::walk_type_inorder(Expr_ptr expr)
+bool Preprocessor::walk_type_inorder(expr::Expr_ptr expr)
 { assert(false); return false; }
-void Preprocessor::walk_type_postorder(Expr_ptr expr)
+void Preprocessor::walk_type_postorder(expr::Expr_ptr expr)
 { assert(false); }
 
-void Preprocessor::walk_instant(const Expr_ptr expr)
+void Preprocessor::walk_instant(const expr::Expr_ptr expr)
 {}
 
-void Preprocessor::walk_leaf(const Expr_ptr expr)
+void Preprocessor::walk_leaf(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr expr_
+    expr::Expr_ptr expr_
         (expr);
 
     // is an integer const ..
@@ -555,7 +571,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
         ExprPairStack::reverse_iterator env_iter;
         for (env_iter = f_env.rbegin(); env_iter != f_env.rend(); ++ env_iter) {
 
-            std::pair<Expr_ptr, Expr_ptr> entry
+            std::pair<expr::Expr_ptr, expr::Expr_ptr> entry
                 (*env_iter);
 
             if (entry.first == expr_) {
@@ -570,17 +586,17 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
             (proxy.symbol( em.make_dot( f_ctx_stack.back(), expr_)));
 
         if (symb->is_const()) {
-            Expr_ptr res = symb->as_const().name();
+            expr::Expr_ptr res = symb->as_const().name();
             PUSH_EXPR(res);
             return;
         }
         else if (symb->is_literal()) {
-            Expr_ptr res = symb->as_literal().name();
+            expr::Expr_ptr res = symb->as_literal().name();
             PUSH_EXPR(res);
             return;
         }
         else if (symb->is_variable()) {
-            Expr_ptr res = symb->as_variable().name();
+            expr::Expr_ptr res = symb->as_variable().name();
             PUSH_EXPR(res);
             return;
         }
@@ -592,7 +608,7 @@ void Preprocessor::walk_leaf(const Expr_ptr expr)
     assert(false); // unexpected
 }
 
-void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
+void Preprocessor::traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr)
 {
     if (f_em.is_params_comma( expr)) {
         traverse_param_list( params, expr->lhs());
@@ -603,7 +619,7 @@ void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
     }
 }
 
-// void Preprocessor::substitute_expression(const Expr_ptr expr)
+// void Preprocessor::substitute_expression(const expr::Expr_ptr expr)
 // {
 //     ResolverProxy proxy;
 
@@ -631,13 +647,13 @@ void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 //         /* actual may have been introduced by a nested define, so we
 //            chain-resolve it to the outermost, real model variable,
 //            actual using the nested environment stack. */
-//         Expr_ptr actual
+//         expr::Expr_ptr actual
 //             (*ai);
 
 //         ExprPairStack::reverse_iterator eps_riter;
 //         for ( eps_riter = f_env.rbegin(); eps_riter != f_env.rend(); ++ eps_riter ) {
 
-//             std::pair<Expr_ptr, Expr_ptr> tmp
+//             std::pair<expr::Expr_ptr, expr::Expr_ptr> tmp
 //                 (*eps_riter);
 
 //             if (tmp.first == actual) {
@@ -645,10 +661,10 @@ void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 //             }
 //         }
 
-//         Expr_ptr formal
+//         expr::Expr_ptr formal
 //             (*fi);
 
-//         f_env.push_back( std::pair <Expr_ptr, Expr_ptr>
+//         f_env.push_back( std::pair <expr::Expr_ptr, expr::Expr_ptr>
 //                          ( formal, actual ));
 //     }
 

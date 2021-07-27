@@ -37,12 +37,12 @@ public:
 
     utils::Variant virtual operator()();
 
-    void set_invar_condition(Expr_ptr invar_condition);
-    inline Expr_ptr invar_condition() const
+    void set_invar_condition(expr::Expr_ptr invar_condition);
+    inline expr::Expr_ptr invar_condition() const
     { return f_invar_condition; }
 
-    void set_until_condition(Expr_ptr until_condition);
-    inline Expr_ptr until_condition() const
+    void set_until_condition(expr::Expr_ptr until_condition);
+    inline expr::Expr_ptr until_condition() const
     { return f_until_condition; }
 
     void set_k(step_t k);
@@ -57,13 +57,13 @@ private:
     std::ostream& f_out;
 
     /* (optional) additional constraints */
-    ExprVector f_constraints;
+    expr::ExprVector f_constraints;
 
     /* An invariant condition (optional) */
-    Expr_ptr f_invar_condition;
+    expr::Expr_ptr f_invar_condition;
 
     /* HALT condition (optional) */
-    Expr_ptr f_until_condition;
+    expr::Expr_ptr f_until_condition;
 
     /* Number of simulation steps to be performed (optional) */
     step_t f_k;

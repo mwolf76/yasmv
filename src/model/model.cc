@@ -47,7 +47,7 @@ Model::~Model()
 
 Module& Model::add_module(Module& module)
 {
-    Expr_ptr name
+    expr::Expr_ptr name
         (module.name());
 
     DEBUG
@@ -55,14 +55,14 @@ Module& Model::add_module(Module& module)
         << name << "`"
         << std::endl;
 
-    f_modules.insert( std::pair<Expr_ptr, Module_ptr>
+    f_modules.insert( std::pair<expr::Expr_ptr, Module_ptr>
                       (name, &module));
 
     module.set_owner(this);
     return module;
 }
 
-Module& Model::module(Expr_ptr module_name)
+Module& Model::module(expr::Expr_ptr module_name)
 {
     Modules::const_iterator i
         (f_modules.find(module_name));
@@ -84,23 +84,23 @@ Module& Model::main_module()
     return *(i -> second);
 }
 
-void Model::autoIndexSymbol(Expr_ptr identifier)
+void Model::autoIndexSymbol(expr::Expr_ptr identifier)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     // TODO: this is not going to work for other modules
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (em.make_empty());
 
-    Expr_ptr full
+    expr::Expr_ptr full
         (em.make_dot(ctx, identifier));
 
-    f_symbol_index_map.insert(std::pair<Expr_ptr, unsigned>
+    f_symbol_index_map.insert(std::pair<expr::Expr_ptr, unsigned>
                               (full, ++ f_autoincrement));
 }
 
-unsigned Model::symbol_index(Expr_ptr identifier)
+unsigned Model::symbol_index(expr::Expr_ptr identifier)
 {
     SymbolIndexMap::const_iterator eye
         (f_symbol_index_map.find(identifier));

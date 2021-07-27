@@ -36,8 +36,8 @@
 symb::SymbIter::SymbIter(Model& model)
     : f_model(model)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     Module& main_
         (model.main_module());
@@ -48,17 +48,17 @@ symb::SymbIter::SymbIter(Model& model)
 #define SI_PASS_DEFS (1)
     for (int pass = 0; pass < 2; ++ pass) {
 
-        std::stack< std::pair<Expr_ptr, Module_ptr> > stack;
-        stack.push( std::pair< Expr_ptr, Module_ptr >
+        std::stack< std::pair<expr::Expr_ptr, Module_ptr> > stack;
+        stack.push( std::pair< expr::Expr_ptr, Module_ptr >
                     (em.make_empty(), &main_));
 
         /* walk of var decls, starting from main module */
         while (0 < stack.size()) {
 
-            const std::pair< Expr_ptr, Module_ptr > top
+            const std::pair< expr::Expr_ptr, Module_ptr > top
                 (stack.top()); stack.pop();
 
-            Expr_ptr full_name
+            expr::Expr_ptr full_name
                 (top.first);
 
             Module& module
@@ -69,24 +69,24 @@ symb::SymbIter::SymbIter(Model& model)
 
             for (Variables::const_iterator vi = vars.begin(); vars.end() != vi; ++ vi) {
 
-                Expr_ptr id
+                expr::Expr_ptr id
                     (vi -> first);
                 Variable& var
                     (* vi -> second);
                 Type_ptr vtype
                     (var.type());
-                Expr_ptr inner_name
+                expr::Expr_ptr inner_name
                     (em.make_dot( full_name, id));
 
                 if (vtype -> is_instance()) {
                     InstanceType_ptr instance = vtype -> as_instance();
                     Module&  module( model.module(instance -> name()));
 
-                    stack.push( std::pair< Expr_ptr, Module_ptr >
+                    stack.push( std::pair< expr::Expr_ptr, Module_ptr >
                                 (inner_name, &module));
                 }
                 else if (SI_PASS_VARS == pass)
-                    f_symbols.push_back(std::pair< Expr_ptr, Symbol_ptr >
+                    f_symbols.push_back(std::pair< expr::Expr_ptr, Symbol_ptr >
                                         (full_name, &var ));
             }
 
@@ -98,7 +98,7 @@ symb::SymbIter::SymbIter(Model& model)
                     Define& def
                         (* di -> second);
 
-                    f_symbols.push_back(std::pair< Expr_ptr, Symbol_ptr >
+                    f_symbols.push_back(std::pair< expr::Expr_ptr, Symbol_ptr >
                                         (full_name, &def));
                 }
             }

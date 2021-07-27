@@ -39,46 +39,30 @@
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
-typedef std::vector< std::pair< Expr_ptr, Expr_ptr> > ExprPairStack;
-typedef std::vector<Expr_ptr> ExprStack;
+typedef std::vector< std::pair<expr::Expr_ptr, expr::Expr_ptr> > ExprPairStack;
+typedef std::vector<expr::Expr_ptr> ExprStack;
 typedef std::vector<symb::Define_ptr> DefinesStack;
 
-/* shortcuts to simplify manipulation of the internal expr stack */
-#define POP_EXPR(op)                              \
-    const Expr_ptr op = f_expr_stack.back();      \
-    f_expr_stack.pop_back()
-
-#define PUSH_EXPR(tp)                             \
-    f_expr_stack.push_back(tp)
-
-/* shortcuts to simplify manipulation of the internal define stack */
-#define POP_DEFINE(op)                              \
-    const Define_ptr op = f_define_stack.back();    \
-    f_define_stack.pop_back()
-
-#define PUSH_DEFINE(tp)                             \
-    f_define_stack.push_back(tp)
-
 class ModelMgr;
-class Preprocessor : public ExprWalker {
+class Preprocessor : public expr::ExprWalker {
 public:
     Preprocessor(ModelMgr& owner);
     ~Preprocessor();
 
     // walker toplevel
-    Expr_ptr process(Expr_ptr expr, Expr_ptr ctx);
+    expr::Expr_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
 protected:
     void pre_hook();
     void post_hook();
 
-    void pre_node_hook(Expr_ptr expr);
-    void post_node_hook(Expr_ptr expr);
+    void pre_node_hook(expr::Expr_ptr expr);
+    void post_node_hook(expr::Expr_ptr expr);
 
     LTL_HOOKS; OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+    void walk_instant(const expr::Expr_ptr expr);
+    void walk_leaf(const expr::Expr_ptr expr);
 
 private:
     // probably not really necessary, we keep it for now
@@ -94,11 +78,11 @@ private:
     ModelMgr& f_owner;
 
     // Expr Mgr
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
 
     /* internals */
-    // void substitute_expression(const Expr_ptr expr);
-    void traverse_param_list(ExprVector& params, const Expr_ptr expr);
+    // void substitute_expression(const expr::Expr_ptr expr);
+    void traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr);
 };
 
 #endif /* PREPROCESSOR_H */

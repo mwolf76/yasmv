@@ -22,6 +22,8 @@
  **/
 #include <atom.hh>
 
+namespace expr {
+
 long AtomHash::operator() (const Atom& k) const
 {
     unsigned long hash = 0;
@@ -43,3 +45,5 @@ bool AtomEq::operator() (const Atom& x, const Atom& y) const
 {
     return x == y;
 }
+
+};

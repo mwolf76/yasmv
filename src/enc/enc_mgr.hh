@@ -64,7 +64,7 @@ struct ADDEq {
     { return phi == psi; }
 };
 
-typedef boost::unordered_map<TimedExpr, Encoding_ptr, TimedExprHash, TimedExprEq> TimedExpr2EncMap;
+typedef boost::unordered_map<expr::TimedExpr, Encoding_ptr, expr::TimedExprHash, expr::TimedExprEq> TimedExpr2EncMap;
 typedef boost::unordered_map<int, UCBI, utils::IntHash, utils::IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
@@ -107,7 +107,7 @@ public:
     Encoding_ptr make_encoding(Type_ptr type);
 
     // Registers an encoding. Used by the compiler
-    void register_encoding(const TimedExpr& key, Encoding_ptr enc);
+    void register_encoding(const expr::TimedExpr& key, Encoding_ptr enc);
 
     // Retrieves Untimed Canonical Bit Id for index
     inline const UCBI& find_ucbi(int index)
@@ -115,9 +115,9 @@ public:
 
     // Retrieves an encoding previously created using
     // make_encoding. User by the SAT model evaluator
-    Encoding_ptr find_encoding(const TimedExpr& key);
+    Encoding_ptr find_encoding(const expr::TimedExpr& key);
 
-    inline ExprMgr& em()
+    inline expr::ExprMgr& em()
     { return f_em; }
 
     static EncodingMgr& INSTANCE() {
@@ -138,7 +138,7 @@ private:
     static EncodingMgr_ptr f_instance;
 
     Cudd& f_cudd;
-    ExprMgr& f_em;
+    expr::ExprMgr& f_em;
 
     /* encodings register */
     TimedExpr2EncMap f_timed_expr2enc_map;

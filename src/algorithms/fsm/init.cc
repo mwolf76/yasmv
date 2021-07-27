@@ -51,15 +51,15 @@ CheckInitConsistency::~CheckInitConsistency()
         << std::endl;
 }
 
-void CheckInitConsistency::process(ExprVector constraints)
+void CheckInitConsistency::process(expr::ExprVector constraints)
 {
     Engine engine { "Initial" };
-    Expr_ptr ctx { em().make_empty() };
+    expr::Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
     std::for_each(begin(constraints),
                   end(constraints),
-                  [this, ctx, &nconstraints](Expr_ptr expr) {
+                  [this, ctx, &nconstraints](expr::Expr_ptr expr) {
                       INFO
                           << "Compiling constraint `"
                           << expr

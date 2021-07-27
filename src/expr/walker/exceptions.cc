@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+namespace expr {
+
 // raised when the walker has encountered an unsupported entry point
 static std::string format_unsupported_entry_point(entry_point ep)
 {
@@ -46,3 +48,5 @@ UnsupportedLeaf::UnsupportedLeaf()
 InternalError::InternalError(const std::string& message)
     : ExprException("InternalError", message)
 {}
+
+};

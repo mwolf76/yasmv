@@ -44,7 +44,7 @@ Echo::~Echo()
 {
 }
 
-void Echo::append_expression(Expr_ptr expr)
+void Echo::append_expression(expr::Expr_ptr expr)
 {
     f_expressions.push_back(expr);
 }
@@ -69,14 +69,14 @@ utils::Variant Echo::operator()()
     /* TODO: not really compatible with the grammar... restrict to 1 expr */
     std::for_each(f_expressions.begin(),
                   f_expressions.end(),
-                  [&](Expr_ptr expr)
+                  [&](expr::Expr_ptr expr)
                   {
                       witness::Witness& current
                           (wm.current());
 
                       out
                           << wm.eval(current,
-                                     ExprMgr::INSTANCE().make_empty(),
+                                     expr::ExprMgr::INSTANCE().make_empty(),
                                      expr, current.last_time())
                           << " " ;
                   });

@@ -37,12 +37,12 @@ Check::Check(Interpreter& owner)
 Check::~Check()
 {}
 
-void Check::set_property(Expr_ptr property)
+void Check::set_property(expr::Expr_ptr property)
 {
     f_property = property;
 }
 
-void Check::add_constraint(Expr_ptr constraint)
+void Check::add_constraint(expr::Expr_ptr constraint)
 {
     f_constraints.push_back(constraint);
 }

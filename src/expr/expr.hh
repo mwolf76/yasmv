@@ -33,6 +33,8 @@
 
 #include <expr/atom.hh>
 
+namespace expr {
+
 typedef enum {
 
     // -- linear temporal logic expressions ------------------------------------
@@ -208,7 +210,7 @@ typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
 /** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
 #define TOP_CTX(tp)                            \
-    const Expr_ptr (tp)(f_ctx_stack.back())
+    const expr::Expr_ptr (tp)(f_ctx_stack.back())
 
 #define DROP_CTX()                             \
     f_ctx_stack.pop_back()
@@ -231,5 +233,7 @@ typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
 #define PUSH_TIME(step)                         \
     f_time_stack.push_back(step)
+
+};
 
 #endif /* EXPR_H */

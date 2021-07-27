@@ -99,7 +99,7 @@ void DumpTrace::set_output(pconst_char output)
 
 void DumpTrace::dump_plain_section(std::ostream& os,
                                    const char* section,
-                                   ExprVector& ev)
+                                   expr::ExprVector& ev)
 {
     const char* TAB
         (SPACES(3));
@@ -112,10 +112,10 @@ void DumpTrace::dump_plain_section(std::ostream& os,
         << section
         << std::endl;
 
-    for (ExprVector::const_iterator ei = ev.begin();
+    for (expr::ExprVector::const_iterator ei = ev.begin();
          ei != ev.end(); ) {
 
-        Expr_ptr eq
+        expr::Expr_ptr eq
             (*ei);
 
         os
@@ -141,7 +141,7 @@ void DumpTrace::dump_plain(std::ostream& os, witness::Witness& w)
         << " [[ " << w.desc() << " ]]"
         << std::endl;
 
-    ExprVector input_assignments;
+    expr::ExprVector input_assignments;
     process_input(w, input_assignments);
 
     if (0 < input_assignments.size()) {
@@ -158,8 +158,8 @@ void DumpTrace::dump_plain(std::ostream& os, witness::Witness& w)
             << time
             << std::endl;
 
-        ExprVector state_vars_assignments;
-        ExprVector defines_assignments;
+        expr::ExprVector state_vars_assignments;
+        expr::ExprVector defines_assignments;
 
         process_time_frame(w, time,
                            state_vars_assignments,
@@ -172,7 +172,7 @@ void DumpTrace::dump_plain(std::ostream& os, witness::Witness& w)
 
 void DumpTrace::dump_json_section(std::ostream& os,
                                   const char* section,
-                                  ExprVector& ev)
+                                  expr::ExprVector& ev)
 {
     const char* SECOND_LVL
         (SPACES(18));
@@ -187,10 +187,10 @@ void DumpTrace::dump_json_section(std::ostream& os,
         << "\": {"
         << std::endl;
 
-    for (ExprVector::const_iterator ei = ev.begin();
+    for (expr::ExprVector::const_iterator ei = ev.begin();
          ei != ev.end(); ) {
 
-        Expr_ptr eq
+        expr::Expr_ptr eq
             (*ei);
 
         os
@@ -228,7 +228,7 @@ void DumpTrace::dump_json(std::ostream& os, witness::Witness& w)
         << std::endl << FIRST_LVL << "\"id\": " << "\"" << w.id() << "\"" << ","
         << std::endl << FIRST_LVL << "\"description\": " << "\"" << w.desc() << "\"" << "," ;
 
-    ExprVector input_vars_assignments;
+    expr::ExprVector input_vars_assignments;
     process_input(w, input_vars_assignments);
 
     if (0 < input_vars_assignments.size()) {
@@ -247,8 +247,8 @@ void DumpTrace::dump_json(std::ostream& os, witness::Witness& w)
 
     for (step_t time = w.first_time(); time <= w.last_time(); ++ time) {
 
-        ExprVector state_vars_assignments;
-        ExprVector defines_assignments;
+        expr::ExprVector state_vars_assignments;
+        expr::ExprVector defines_assignments;
 
         process_time_frame(w, time,
                            state_vars_assignments,
@@ -280,15 +280,15 @@ void DumpTrace::dump_json(std::ostream& os, witness::Witness& w)
 
 void DumpTrace::dump_yaml_section(YAML::Emitter& out,
                                   const char* section,
-                                  ExprVector& ev)
+                                  expr::ExprVector& ev)
 {
     out
         << YAML::BeginMap
         << YAML::Key << section
         << YAML::Value << YAML::BeginSeq;
 
-    for (ExprVector::const_iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
-        Expr_ptr eq { *ei };
+    for (expr::ExprVector::const_iterator ei = ev.begin(); ei != ev.end(); ++ ei) {
+        expr::Expr_ptr eq { *ei };
 
         std::stringstream key_stream;
         key_stream << eq->lhs();
@@ -324,7 +324,7 @@ void DumpTrace::dump_yaml(std::ostream& os, witness::Witness& w)
         << YAML::Value << w.desc()
         << YAML::EndMap;
 
-    ExprVector input_assignments;
+    expr::ExprVector input_assignments;
     process_input(w, input_assignments);
 
     if (0 < input_assignments.size()) {
@@ -345,8 +345,8 @@ void DumpTrace::dump_yaml(std::ostream& os, witness::Witness& w)
             << YAML::Key << "time"
             << YAML::Value << time;
 
-        ExprVector state_vars_assignments;
-        ExprVector defines_assignments;
+        expr::ExprVector state_vars_assignments;
+        expr::ExprVector defines_assignments;
 
         process_time_frame(w, time,
                            state_vars_assignments,
@@ -371,10 +371,10 @@ void DumpTrace::dump_yaml(std::ostream& os, witness::Witness& w)
 }
 
 void DumpTrace::process_input(witness::Witness& w,
-                              ExprVector& input_assignments)
+                              expr::ExprVector& input_assignments)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     Model& model
         (ModelMgr::INSTANCE().model());
@@ -383,7 +383,7 @@ void DumpTrace::process_input(witness::Witness& w,
         (model);
 
     while (symbs.has_next()) {
-        std::pair< Expr_ptr, symb::Symbol_ptr > pair
+        std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair
             (symbs.next());
 
         symb::Symbol_ptr symb
@@ -392,11 +392,11 @@ void DumpTrace::process_input(witness::Witness& w,
         if (symb->is_hidden())
             continue;
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (pair.first);
-        Expr_ptr name
+        expr::Expr_ptr name
             (symb->name());
-        Expr_ptr full
+        expr::Expr_ptr full
             (em.make_dot( ctx, name));
 
         if (symb->is_variable())  {
@@ -407,7 +407,7 @@ void DumpTrace::process_input(witness::Witness& w,
             if (! var.is_input())
                 continue;
 
-            Expr_ptr value
+            expr::Expr_ptr value
                 (env::Environment::INSTANCE().get(name));
 
             if (!value)
@@ -428,11 +428,11 @@ void DumpTrace::process_input(witness::Witness& w,
 /* here UNDEF is used to fill up symbols not showing up in the witness where
    they're expected to. (i. e. UNDEF is only a UI entity) */
 void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
-                                   ExprVector& state_vars_assignments,
-                                   ExprVector& defines_assignments)
+                                   expr::ExprVector& state_vars_assignments,
+                                   expr::ExprVector& defines_assignments)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     witness::WitnessMgr& wm
         (witness::WitnessMgr::INSTANCE());
@@ -447,7 +447,7 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
         (model);
 
     while (symbs.has_next()) {
-        std::pair< Expr_ptr, symb::Symbol_ptr > pair
+        std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair
             (symbs.next());
 
         symb::Symbol_ptr symb
@@ -456,11 +456,11 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
         if (symb->is_hidden())
             continue;
 
-        Expr_ptr ctx
+        expr::Expr_ptr ctx
             (pair.first);
-        Expr_ptr name
+        expr::Expr_ptr name
             (symb->name());
-        Expr_ptr full
+        expr::Expr_ptr full
             (em.make_dot(ctx, name));
 
         if (symb->is_variable())  {
@@ -471,7 +471,7 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
             if (var.is_input())
                 continue;
 
-            Expr_ptr value
+            expr::Expr_ptr value
                 (tf.has_value(full)
                  ? tf.value(full)
                  : em.make_undef());
@@ -483,10 +483,10 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
             symb::Define& define
                 (symb->as_define());
 
-            Expr_ptr body
+            expr::Expr_ptr body
                 (define.body());
 
-            Expr_ptr value
+            expr::Expr_ptr value
                 (wm.eval( w, ctx, body, time));
 
             if (! value)
@@ -506,7 +506,7 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
          defines_assignments.end(), fun);
 }
 
-void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVector& ev)
+void DumpTrace::dump_xml_section(std::ostream& os, const char* section, expr::ExprVector& ev)
 {
     const char *SECOND_LVL
         (SPACES(8));
@@ -528,10 +528,10 @@ void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVect
         << "<" << section << ">"
         << std::endl;
 
-    for (ExprVector::const_iterator ei = ev.begin();
+    for (expr::ExprVector::const_iterator ei = ev.begin();
          ei != ev.end(); ++ ei) {
 
-        Expr_ptr eq
+        expr::Expr_ptr eq
             (*ei);
 
         os
@@ -562,7 +562,7 @@ void DumpTrace::dump_xml(std::ostream& os, witness::Witness& w)
         << ">"
         << std::endl;
 
-    ExprVector input_assignments;
+    expr::ExprVector input_assignments;
     process_input(w, input_assignments);
 
     if (0 < input_assignments.size()) {
@@ -586,8 +586,8 @@ void DumpTrace::dump_xml(std::ostream& os, witness::Witness& w)
             << "<step time=\"" << time << "\">"
             << std::endl;
 
-        ExprVector state_vars_assignments;
-        ExprVector defines_assignments;
+        expr::ExprVector state_vars_assignments;
+        expr::ExprVector defines_assignments;
 
         process_time_frame(w, time,
                            state_vars_assignments,
@@ -635,8 +635,8 @@ utils::Variant DumpTrace::operator()()
     std::ostream& os
         (get_output_stream());
 
-    Atom wid
-        (f_trace_id ? Atom(f_trace_id) : wm.current().id());
+    expr::Atom wid
+        (f_trace_id ? expr::Atom(f_trace_id) : wm.current().id());
 
     witness::Witness& w
         (wm.witness(wid));

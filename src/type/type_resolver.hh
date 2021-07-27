@@ -35,7 +35,7 @@ public:
     TypeResolver(TypeMgr& owner);
     ~TypeResolver();
 
-    symb::Symbol_ptr symbol(const Expr_ptr key);
+    symb::Symbol_ptr symbol(const expr::Expr_ptr key);
 
 private:
     TypeMgr& f_owner;

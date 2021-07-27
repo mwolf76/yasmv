@@ -43,7 +43,7 @@ public:
 
 class UnresolvedSymbol : public SymbolException {
 public:
-    UnresolvedSymbol(Expr_ptr expr);
+    UnresolvedSymbol(expr::Expr_ptr expr);
 };
 
 };

@@ -32,7 +32,7 @@
 #include <utility>
 #include <string>
 
-Module::Module(const Expr_ptr name)
+Module::Module(const expr::Expr_ptr name)
     : f_owner(NULL)
     , f_name(name)
 {
@@ -45,7 +45,7 @@ Module::Module(const Expr_ptr name)
         << std::endl;
 }
 
-void Module::checkDuplicates(Expr_ptr identifier)
+void Module::checkDuplicates(expr::Expr_ptr identifier)
 {
     if (f_locals.end() != std::find( f_locals.begin(),
                                      f_locals.end(), identifier))
@@ -58,9 +58,9 @@ void Module::checkDuplicates(Expr_ptr identifier)
     owner().autoIndexSymbol(identifier);
 }
 
-void Module::add_var(Expr_ptr identifier, symb::Variable_ptr var)
+void Module::add_var(expr::Expr_ptr identifier, symb::Variable_ptr var)
 {
-    Expr_ptr type_repr
+    expr::Expr_ptr type_repr
         (var->type()->repr());
 
     std::ostringstream oss;
@@ -94,13 +94,13 @@ void Module::add_var(Expr_ptr identifier, symb::Variable_ptr var)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localVars.insert(std::pair<Expr_ptr, symb::Variable_ptr>
+    f_localVars.insert(std::pair<expr::Expr_ptr, symb::Variable_ptr>
                        (identifier, var));
 }
 
-void Module::add_parameter(Expr_ptr identifier, symb::Parameter_ptr param)
+void Module::add_parameter(expr::Expr_ptr identifier, symb::Parameter_ptr param)
 {
-    Expr_ptr type_repr
+    expr::Expr_ptr type_repr
         (param->type()->repr());
 
     DEBUG
@@ -110,11 +110,11 @@ void Module::add_parameter(Expr_ptr identifier, symb::Parameter_ptr param)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localParams.push_back( std::pair<Expr_ptr, symb::Parameter_ptr>
+    f_localParams.push_back( std::pair<expr::Expr_ptr, symb::Parameter_ptr>
                              (identifier, param));
 }
 
-void Module::add_def(Expr_ptr identifier, symb::Define_ptr def)
+void Module::add_def(expr::Expr_ptr identifier, symb::Define_ptr def)
 {
     std::ostringstream oss;
 
@@ -137,11 +137,11 @@ void Module::add_def(Expr_ptr identifier, symb::Define_ptr def)
         << std::endl;
 
     checkDuplicates(identifier);
-    f_localDefs.insert(std::pair<Expr_ptr, symb::Define_ptr>
+    f_localDefs.insert(std::pair<expr::Expr_ptr, symb::Define_ptr>
                        (identifier, def));
 }
 
-void Module::override(Expr_ptr symb_name, symb::Define_ptr def)
+void Module::override(expr::Expr_ptr symb_name, symb::Define_ptr def)
 {
     std::ostringstream oss;
 
@@ -156,7 +156,7 @@ void Module::override(Expr_ptr symb_name, symb::Define_ptr def)
                                      f_locals.end(), symb_name))
         throw UnknownIdentifier(symb_name);
 
-    Expr_ptr body
+    expr::Expr_ptr body
         (def->body());
 
     DEBUG
@@ -170,11 +170,11 @@ void Module::override(Expr_ptr symb_name, symb::Define_ptr def)
         << body
         << std::endl;
 
-    f_localDefs.insert(std::pair<Expr_ptr, symb::Define_ptr>
+    f_localDefs.insert(std::pair<expr::Expr_ptr, symb::Define_ptr>
                        (symb_name, def));
 }
 
-void Module::add_init(Expr_ptr expr)
+void Module::add_init(expr::Expr_ptr expr)
 {
     DEBUG
         << "Module `"
@@ -186,7 +186,7 @@ void Module::add_init(Expr_ptr expr)
     f_init.push_back(expr);
 }
 
-void Module::add_invar(Expr_ptr expr)
+void Module::add_invar(expr::Expr_ptr expr)
 {
     DEBUG
         << "Module `"
@@ -198,7 +198,7 @@ void Module::add_invar(Expr_ptr expr)
     f_invar.push_back(expr);
 }
 
-void Module::add_trans(Expr_ptr expr)
+void Module::add_trans(expr::Expr_ptr expr)
 {
     DEBUG
         << "Module `"

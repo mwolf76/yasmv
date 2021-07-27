@@ -30,6 +30,8 @@
 #include <expr/exceptions.hh>
 #include <expr/walker/typedefs.hh>
 
+namespace expr {
+
 // raised when the walker has encountered an unsupported entry point
 class UnsupportedEntryPoint : public ExprException {
 public:
@@ -50,6 +52,8 @@ public:
 class InternalError : public ExprException {
 public:
     InternalError(const std::string& message);
+};
+
 };
 
 #endif /* EXPR_WALKER_EXCEPTIONS_H */

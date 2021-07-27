@@ -43,22 +43,22 @@ Reach::~Reach()
     f_global_constraints.clear();
 }
 
-void Reach::set_target(Expr_ptr target)
+void Reach::set_target(expr::Expr_ptr target)
 {
     f_target = target;
 }
 
-void Reach::add_forward_constraint(Expr_ptr constraint)
+void Reach::add_forward_constraint(expr::Expr_ptr constraint)
 {
     f_forward_constraints.push_back(constraint);
 }
 
-void Reach::add_backward_constraint(Expr_ptr constraint)
+void Reach::add_backward_constraint(expr::Expr_ptr constraint)
 {
     f_backward_constraints.push_back(constraint);
 }
 
-void Reach::add_global_constraint(Expr_ptr constraint)
+void Reach::add_global_constraint(expr::Expr_ptr constraint)
 {
     f_global_constraints.push_back(constraint);
 }

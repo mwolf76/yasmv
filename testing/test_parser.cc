@@ -31,23 +31,23 @@
 #include <type.hh>
 
 /* from src/parse.cc */
-extern Expr_ptr parseExpression(const char *string);
+extern expr::Expr_ptr parseExpression(const char *string);
 extern Type_ptr parseTypedef(const char *string);
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(parsing_identifiers)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK (x != y);
@@ -62,17 +62,17 @@ BOOST_AUTO_TEST_CASE(parsing_identifiers)
 
 BOOST_AUTO_TEST_CASE(temporal_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK (em.make_F(x) == parseExpression("F x"));
@@ -101,13 +101,13 @@ BOOST_AUTO_TEST_CASE(temporal_expressions)
 
 BOOST_AUTO_TEST_CASE(unary_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
 
     BOOST_CHECK (em.make_next(x) == parseExpression("next(x)"));
@@ -119,17 +119,17 @@ BOOST_AUTO_TEST_CASE(unary_expressions)
 
 BOOST_AUTO_TEST_CASE(binary_arithmetic_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK(em.make_add(x, y) == parseExpression("x + y"));
@@ -148,21 +148,21 @@ BOOST_AUTO_TEST_CASE(binary_arithmetic_expressions)
 
 BOOST_AUTO_TEST_CASE(binary_boolean_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
-    Atom a_w
+    expr::Atom a_w
         ("w");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
-    Expr_ptr w
+    expr::Expr_ptr w
         (em.make_identifier(a_w));
 
     BOOST_CHECK(em.make_and(x, y) ==
@@ -186,17 +186,17 @@ BOOST_AUTO_TEST_CASE(binary_boolean_expressions)
 
 BOOST_AUTO_TEST_CASE(binary_arithmetic_predicates)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK(em.make_eq(x, y) == parseExpression("x = y"));
@@ -209,21 +209,21 @@ BOOST_AUTO_TEST_CASE(binary_arithmetic_predicates)
 
 BOOST_AUTO_TEST_CASE(ternary_operator)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
-    Atom a_w
+    expr::Atom a_w
         ("w");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
-    Expr_ptr w
+    expr::Expr_ptr w
         (em.make_identifier(a_w));
 
     BOOST_CHECK(em.make_ite(em.make_cond(x, y), w) ==
@@ -232,12 +232,12 @@ BOOST_AUTO_TEST_CASE(ternary_operator)
 
 BOOST_AUTO_TEST_CASE(subscript_operator)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
 
     BOOST_CHECK(em.make_subscript(x, em.make_const(42)) ==
@@ -246,21 +246,21 @@ BOOST_AUTO_TEST_CASE(subscript_operator)
 
 BOOST_AUTO_TEST_CASE(operators_precedence)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
-    Atom a_w
+    expr::Atom a_w
         ("w");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
-    Expr_ptr w
+    expr::Expr_ptr w
         (em.make_identifier(a_w));
 
     BOOST_CHECK (em.make_add(x, em.make_mul(y, em.make_const(42))) ==
@@ -331,17 +331,17 @@ BOOST_AUTO_TEST_CASE(operators_precedence)
 
 BOOST_AUTO_TEST_CASE(at_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK (em.make_at(em.make_instant(0), x) ==
@@ -365,17 +365,17 @@ BOOST_AUTO_TEST_CASE(at_expressions)
 
 BOOST_AUTO_TEST_CASE(complex_expressions)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
-    Atom a_x
+    expr::Atom a_x
         ("x");
-    Atom a_y
+    expr::Atom a_y
         ("y");
 
-    Expr_ptr x
+    expr::Expr_ptr x
         (em.make_identifier(a_x));
-    Expr_ptr y
+    expr::Expr_ptr y
         (em.make_identifier(a_y));
 
     BOOST_CHECK (em.make_implies( em.make_and( em.make_eq(x, em.make_const(0)),
@@ -389,8 +389,8 @@ BOOST_AUTO_TEST_CASE(complex_expressions)
 
 BOOST_AUTO_TEST_CASE(typedefs)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
     /* boolean */
     BOOST_CHECK ((em.make_boolean_type()) ==

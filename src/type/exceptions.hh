@@ -36,26 +36,26 @@ public:
 /** Raised when the inferrer detects a wrong type */
 class BadType : public TypeException {
 public:
-    BadType(Expr_ptr expr, Type_ptr lhs);
-    BadType(Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
+    BadType(expr::Expr_ptr expr, Type_ptr lhs);
+    BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
 };
 
 class IdentifierExpected : public TypeException {
 public:
-    IdentifierExpected(Expr_ptr expr);
+    IdentifierExpected(expr::Expr_ptr expr);
 };
 
 /** Raised when the inferrer detects a wrong type */
 class DuplicateLiteral : public TypeException {
 public:
-    DuplicateLiteral(Expr_ptr expr);
+    DuplicateLiteral(expr::Expr_ptr expr);
 };
 
 /** Raised when the inferrer detects two mismatching types */
 
 class TypeMismatch : public TypeException {
 public:
-    TypeMismatch(Expr_ptr expr, Type_ptr a, Type_ptr b);
+    TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b);
 };
 
 #endif /* TYPE_EXCEPTIONS_H */

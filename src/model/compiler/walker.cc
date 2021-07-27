@@ -37,22 +37,22 @@
  * 2. ! f_preprocess proper compilation is carried out.
  */
 
-bool Compiler::walk_at_preorder(const Expr_ptr expr)
+bool Compiler::walk_at_preorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
-    Expr_ptr lhs { expr->lhs() };
+    expr::Expr_ptr lhs { expr->lhs() };
     assert(em.is_instant(lhs));
 
-    Expr_ptr rhs { expr->rhs() };
+    expr::Expr_ptr rhs { expr->rhs() };
     assert(NULL != rhs);
 
     return true;
 }
-bool Compiler::walk_at_inorder(const Expr_ptr expr)
+bool Compiler::walk_at_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_at_postorder(const Expr_ptr expr)
+void Compiler::walk_at_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -71,7 +71,7 @@ void Compiler::walk_at_postorder(const Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
-bool Compiler::walk_next_preorder(const Expr_ptr expr)
+bool Compiler::walk_next_preorder(const expr::Expr_ptr expr)
 {
     step_t curr_time
         (f_time_stack.back());
@@ -79,7 +79,7 @@ bool Compiler::walk_next_preorder(const Expr_ptr expr)
     f_time_stack.push_back(curr_time + 1);
     return true;
 }
-void Compiler::walk_next_postorder(const Expr_ptr expr)
+void Compiler::walk_next_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -88,9 +88,9 @@ void Compiler::walk_next_postorder(const Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
-bool Compiler::walk_neg_preorder(const Expr_ptr expr)
+bool Compiler::walk_neg_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Compiler::walk_neg_postorder(const Expr_ptr expr)
+void Compiler::walk_neg_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -101,9 +101,9 @@ void Compiler::walk_neg_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_not_preorder(const Expr_ptr expr)
+bool Compiler::walk_not_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Compiler::walk_not_postorder(const Expr_ptr expr)
+void Compiler::walk_not_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -114,9 +114,9 @@ void Compiler::walk_not_postorder(const Expr_ptr expr)
     else assert(false); // unreachable
 }
 
-bool Compiler::walk_bw_not_preorder(const Expr_ptr expr)
+bool Compiler::walk_bw_not_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Compiler::walk_bw_not_postorder(const Expr_ptr expr)
+void Compiler::walk_bw_not_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -127,11 +127,11 @@ void Compiler::walk_bw_not_postorder(const Expr_ptr expr)
     else assert(false); // unreachable
 }
 
-bool Compiler::walk_add_preorder(const Expr_ptr expr)
+bool Compiler::walk_add_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_add_inorder(const Expr_ptr expr)
+bool Compiler::walk_add_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_add_postorder(const Expr_ptr expr)
+void Compiler::walk_add_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -142,11 +142,11 @@ void Compiler::walk_add_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_sub_preorder(const Expr_ptr expr)
+bool Compiler::walk_sub_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_sub_inorder(const Expr_ptr expr)
+bool Compiler::walk_sub_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_sub_postorder(const Expr_ptr expr)
+void Compiler::walk_sub_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -157,11 +157,11 @@ void Compiler::walk_sub_postorder(const Expr_ptr expr)
     else assert( false ); // unexpected
 }
 
-bool Compiler::walk_div_preorder(const Expr_ptr expr)
+bool Compiler::walk_div_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_div_inorder(const Expr_ptr expr)
+bool Compiler::walk_div_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_div_postorder(const Expr_ptr expr)
+void Compiler::walk_div_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -172,11 +172,11 @@ void Compiler::walk_div_postorder(const Expr_ptr expr)
     else assert( false ); // unexpected
 }
 
-bool Compiler::walk_mul_preorder(const Expr_ptr expr)
+bool Compiler::walk_mul_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_mul_inorder(const Expr_ptr expr)
+bool Compiler::walk_mul_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_mul_postorder(const Expr_ptr expr)
+void Compiler::walk_mul_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -187,11 +187,11 @@ void Compiler::walk_mul_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_mod_preorder(const Expr_ptr expr)
+bool Compiler::walk_mod_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_mod_inorder(const Expr_ptr expr)
+bool Compiler::walk_mod_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_mod_postorder(const Expr_ptr expr)
+void Compiler::walk_mod_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -202,11 +202,11 @@ void Compiler::walk_mod_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_and_preorder(const Expr_ptr expr)
+bool Compiler::walk_and_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_and_inorder(const Expr_ptr expr)
+bool Compiler::walk_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_and_postorder(const Expr_ptr expr)
+void Compiler::walk_and_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -217,11 +217,11 @@ void Compiler::walk_and_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_bw_and_preorder(const Expr_ptr expr)
+bool Compiler::walk_bw_and_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_bw_and_inorder(const Expr_ptr expr)
+bool Compiler::walk_bw_and_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_bw_and_postorder(const Expr_ptr expr)
+void Compiler::walk_bw_and_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -232,11 +232,11 @@ void Compiler::walk_bw_and_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_or_preorder(const Expr_ptr expr)
+bool Compiler::walk_or_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_or_inorder(const Expr_ptr expr)
+bool Compiler::walk_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_or_postorder(const Expr_ptr expr)
+void Compiler::walk_or_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -247,11 +247,11 @@ void Compiler::walk_or_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_bw_or_preorder(const Expr_ptr expr)
+bool Compiler::walk_bw_or_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_bw_or_inorder(const Expr_ptr expr)
+bool Compiler::walk_bw_or_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_bw_or_postorder(const Expr_ptr expr)
+void Compiler::walk_bw_or_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -262,11 +262,11 @@ void Compiler::walk_bw_or_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_bw_xor_preorder(const Expr_ptr expr)
+bool Compiler::walk_bw_xor_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_bw_xor_inorder(const Expr_ptr expr)
+bool Compiler::walk_bw_xor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_bw_xor_postorder(const Expr_ptr expr)
+void Compiler::walk_bw_xor_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -277,11 +277,11 @@ void Compiler::walk_bw_xor_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_bw_xnor_preorder(const Expr_ptr expr)
+bool Compiler::walk_bw_xnor_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_bw_xnor_inorder(const Expr_ptr expr)
+bool Compiler::walk_bw_xnor_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
+void Compiler::walk_bw_xnor_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -292,13 +292,13 @@ void Compiler::walk_bw_xnor_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_guard_preorder(const Expr_ptr expr)
+bool Compiler::walk_guard_preorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     /* rewrite GUARD into IMPLIES */
-    Expr_ptr rewrite
+    expr::Expr_ptr rewrite
         (em.make_implies( expr->lhs(), expr->rhs()));
 
     DEBUG
@@ -313,19 +313,19 @@ bool Compiler::walk_guard_preorder(const Expr_ptr expr)
 
     return false;
 }
-bool Compiler::walk_guard_inorder(const Expr_ptr expr)
+bool Compiler::walk_guard_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_guard_postorder(const Expr_ptr expr)
+void Compiler::walk_guard_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
 }
 
-bool Compiler::walk_implies_preorder(const Expr_ptr expr)
+bool Compiler::walk_implies_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_implies_inorder(const Expr_ptr expr)
+bool Compiler::walk_implies_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_implies_postorder(const Expr_ptr expr)
+void Compiler::walk_implies_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -336,7 +336,7 @@ void Compiler::walk_implies_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_type_preorder(const Expr_ptr expr)
+bool Compiler::walk_type_preorder(const expr::Expr_ptr expr)
 {
     Type_ptr tp
         (f_owner.tm().find_type_by_def(expr));
@@ -345,21 +345,21 @@ bool Compiler::walk_type_preorder(const Expr_ptr expr)
 
     return false;
 }
-bool Compiler::walk_type_inorder(const Expr_ptr expr)
+bool Compiler::walk_type_inorder(const expr::Expr_ptr expr)
 { return false; }
-void Compiler::walk_type_postorder(const Expr_ptr expr)
+void Compiler::walk_type_postorder(const expr::Expr_ptr expr)
 { assert(false); }
 
-bool Compiler::walk_cast_preorder(const Expr_ptr expr)
+bool Compiler::walk_cast_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_cast_inorder(const Expr_ptr expr)
+bool Compiler::walk_cast_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_cast_postorder(const Expr_ptr expr)
+void Compiler::walk_cast_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
     Type_ptr tgt_type
         (f_owner.type( expr->lhs(), ctx));
@@ -390,11 +390,11 @@ void Compiler::walk_cast_postorder(const Expr_ptr expr)
     else assert (false); // unreachable
 }
 
-bool Compiler::walk_lshift_preorder(const Expr_ptr expr)
+bool Compiler::walk_lshift_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_lshift_inorder(const Expr_ptr expr)
+bool Compiler::walk_lshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_lshift_postorder(const Expr_ptr expr)
+void Compiler::walk_lshift_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -405,11 +405,11 @@ void Compiler::walk_lshift_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_rshift_preorder(const Expr_ptr expr)
+bool Compiler::walk_rshift_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_rshift_inorder(const Expr_ptr expr)
+bool Compiler::walk_rshift_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_rshift_postorder(const Expr_ptr expr)
+void Compiler::walk_rshift_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -420,13 +420,13 @@ void Compiler::walk_rshift_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_assignment_preorder(const Expr_ptr expr)
+bool Compiler::walk_assignment_preorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     /* rewrite `x := <expr>` into `NEXT(x) = <expr>` */
-    Expr_ptr rewrite
+    expr::Expr_ptr rewrite
         (em.make_eq( em.make_next(expr->lhs()), expr->rhs()));
 
     DEBUG
@@ -442,19 +442,19 @@ bool Compiler::walk_assignment_preorder(const Expr_ptr expr)
 
     return false;
 }
-bool Compiler::walk_assignment_inorder(const Expr_ptr expr)
+bool Compiler::walk_assignment_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_assignment_postorder(const Expr_ptr expr)
+void Compiler::walk_assignment_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
 }
 
-bool Compiler::walk_eq_preorder(const Expr_ptr expr)
+bool Compiler::walk_eq_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_eq_inorder(const Expr_ptr expr)
+bool Compiler::walk_eq_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_eq_postorder(const Expr_ptr expr)
+void Compiler::walk_eq_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -474,11 +474,11 @@ void Compiler::walk_eq_postorder(const Expr_ptr expr)
     else throw UnexpectedExpression(expr);
 }
 
-bool Compiler::walk_ne_preorder(const Expr_ptr expr)
+bool Compiler::walk_ne_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_ne_inorder(const Expr_ptr expr)
+bool Compiler::walk_ne_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_ne_postorder(const Expr_ptr expr)
+void Compiler::walk_ne_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -495,11 +495,11 @@ void Compiler::walk_ne_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_gt_preorder(const Expr_ptr expr)
+bool Compiler::walk_gt_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_gt_inorder(const Expr_ptr expr)
+bool Compiler::walk_gt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_gt_postorder(const Expr_ptr expr)
+void Compiler::walk_gt_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -510,11 +510,11 @@ void Compiler::walk_gt_postorder(const Expr_ptr expr)
     else assert( false );
 }
 
-bool Compiler::walk_ge_preorder(const Expr_ptr expr)
+bool Compiler::walk_ge_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_ge_inorder(const Expr_ptr expr)
+bool Compiler::walk_ge_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_ge_postorder(const Expr_ptr expr)
+void Compiler::walk_ge_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -525,11 +525,11 @@ void Compiler::walk_ge_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_lt_preorder(const Expr_ptr expr)
+bool Compiler::walk_lt_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_lt_inorder(const Expr_ptr expr)
+bool Compiler::walk_lt_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_lt_postorder(const Expr_ptr expr)
+void Compiler::walk_lt_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -540,11 +540,11 @@ void Compiler::walk_lt_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_le_preorder(const Expr_ptr expr)
+bool Compiler::walk_le_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_le_inorder(const Expr_ptr expr)
+bool Compiler::walk_le_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_le_postorder(const Expr_ptr expr)
+void Compiler::walk_le_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -555,7 +555,7 @@ void Compiler::walk_le_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_ite_preorder(const Expr_ptr expr)
+bool Compiler::walk_ite_preorder(const expr::Expr_ptr expr)
 {
     if (!cache_miss(expr))
         return false;
@@ -567,19 +567,19 @@ bool Compiler::walk_ite_preorder(const Expr_ptr expr)
         BinarySelectionUnionFindMap::const_iterator eye
             (f_bsuf_map.find( expr ));
 
-        Expr_ptr parent = expr;
+        expr::Expr_ptr parent = expr;
         if (f_bsuf_map.end() != eye)
             parent = eye -> second;
 
-        f_bsuf_map.insert( std::pair< Expr_ptr, Expr_ptr >
+        f_bsuf_map.insert( std::pair< expr::Expr_ptr, expr::Expr_ptr >
                            ( expr->rhs(), parent ));
     }
 
     return true;
 }
-bool Compiler::walk_ite_inorder(const Expr_ptr expr)
+bool Compiler::walk_ite_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_ite_postorder(const Expr_ptr expr)
+void Compiler::walk_ite_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -599,58 +599,58 @@ void Compiler::walk_ite_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_cond_preorder(const Expr_ptr expr)
+bool Compiler::walk_cond_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Compiler::walk_cond_inorder(const Expr_ptr expr)
+bool Compiler::walk_cond_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_cond_postorder(const Expr_ptr expr)
+void Compiler::walk_cond_postorder(const expr::Expr_ptr expr)
 {}
 
-bool Compiler::walk_dot_preorder(const Expr_ptr expr)
+bool Compiler::walk_dot_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_dot_inorder(const Expr_ptr expr)
+bool Compiler::walk_dot_inorder(const expr::Expr_ptr expr)
 {
-    ExprMgr& em
+    expr::ExprMgr& em
         (f_owner.em());
 
     f_type_stack.pop_back();
 
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (em.make_dot( f_ctx_stack.back(), expr -> lhs()));
     f_ctx_stack.push_back(ctx);
 
     return true;
 }
-void Compiler::walk_dot_postorder(const Expr_ptr expr)
+void Compiler::walk_dot_postorder(const expr::Expr_ptr expr)
 { f_ctx_stack.pop_back(); }
 
 /* on-demand preprocessing to expand defines delegated to Preprocessor */
-bool Compiler::walk_params_preorder(const Expr_ptr expr)
+bool Compiler::walk_params_preorder(const expr::Expr_ptr expr)
 {
-    Expr_ptr ctx
+    expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
     (*this)(f_owner.preprocess( expr, ctx));
 
     return false;
 }
-bool Compiler::walk_params_inorder(const Expr_ptr expr)
+bool Compiler::walk_params_inorder(const expr::Expr_ptr expr)
 { assert( false ); return false; /* unreachable */ }
-void Compiler::walk_params_postorder(const Expr_ptr expr)
+void Compiler::walk_params_postorder(const expr::Expr_ptr expr)
 { assert( false ); return ; /* unreachable */ }
 
-bool Compiler::walk_params_comma_preorder(const Expr_ptr expr)
+bool Compiler::walk_params_comma_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Compiler::walk_params_comma_inorder(const Expr_ptr expr)
+bool Compiler::walk_params_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_params_comma_postorder(const Expr_ptr expr)
+void Compiler::walk_params_comma_postorder(const expr::Expr_ptr expr)
 { }
 
-bool Compiler::walk_subscript_preorder(const Expr_ptr expr)
+bool Compiler::walk_subscript_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-bool Compiler::walk_subscript_inorder(const Expr_ptr expr)
+bool Compiler::walk_subscript_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_subscript_postorder(const Expr_ptr expr)
+void Compiler::walk_subscript_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -667,9 +667,9 @@ void Compiler::walk_subscript_postorder(const Expr_ptr expr)
     else assert( false ); // unreachable
 }
 
-bool Compiler::walk_array_preorder(const Expr_ptr expr)
+bool Compiler::walk_array_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
-void Compiler::walk_array_postorder(const Expr_ptr expr)
+void Compiler::walk_array_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -710,11 +710,11 @@ void Compiler::walk_array_postorder(const Expr_ptr expr)
     else assert(false); // unreachable
 }
 
-bool Compiler::walk_array_comma_preorder(const Expr_ptr expr)
+bool Compiler::walk_array_comma_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Compiler::walk_array_comma_inorder(const Expr_ptr expr)
+bool Compiler::walk_array_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
+void Compiler::walk_array_comma_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
@@ -756,17 +756,17 @@ void Compiler::walk_array_comma_postorder(const Expr_ptr expr)
 }
 
 /* non-deterministic expressions are not cachable */
-bool Compiler::walk_set_preorder(const Expr_ptr expr)
+bool Compiler::walk_set_preorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_set_postorder(const Expr_ptr expr)
+void Compiler::walk_set_postorder(const expr::Expr_ptr expr)
 {}
 
 /* non-deterministic expression are not cachable */
-bool Compiler::walk_set_comma_preorder(const Expr_ptr expr)
+bool Compiler::walk_set_comma_preorder(const expr::Expr_ptr expr)
 { return true; }
-bool Compiler::walk_set_comma_inorder(const Expr_ptr expr)
+bool Compiler::walk_set_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
-void Compiler::walk_set_comma_postorder(const Expr_ptr expr)
+void Compiler::walk_set_comma_postorder(const expr::Expr_ptr expr)
 {
     if (ENCODING == f_status)
         return;
