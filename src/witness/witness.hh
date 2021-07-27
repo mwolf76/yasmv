@@ -52,10 +52,10 @@
 
 #include <witness/exceptions.hh>
 
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
 
-typedef boost::unordered_map<Expr_ptr, value_format_t, PtrHash, PtrEq> Expr2FormatMap;
+typedef boost::unordered_map<Expr_ptr, value_format_t, utils::PtrHash, utils::PtrEq> Expr2FormatMap;
 typedef Expr2FormatMap::iterator Expr2FormatMapIterator;
 
 class Witness; // fwd decl

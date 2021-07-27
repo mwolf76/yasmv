@@ -62,7 +62,7 @@ bool CheckInit::check_requirements()
     return true;
 }
 
-Variant CheckInit::operator()()
+utils::Variant CheckInit::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -108,7 +108,7 @@ Variant CheckInit::operator()()
         } /* switch */
     }
 
-    return Variant(res ? okMessage : errMessage);
+    return utils::Variant(res ? okMessage : errMessage);
 }
 
 CheckInitTopic::CheckInitTopic(Interpreter& owner)

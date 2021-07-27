@@ -45,7 +45,7 @@ public:
     void select_init();
     void select_trans();
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 
 private:
     std::ostream* f_outfile { NULL };

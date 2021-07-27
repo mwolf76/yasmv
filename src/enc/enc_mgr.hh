@@ -65,7 +65,7 @@ struct ADDEq {
 };
 
 typedef boost::unordered_map<TimedExpr, Encoding_ptr, TimedExprHash, TimedExprEq> TimedExpr2EncMap;
-typedef boost::unordered_map<int, UCBI, IntHash, IntEq> Index2UCBIMap;
+typedef boost::unordered_map<int, UCBI, utils::IntHash, utils::IntEq> Index2UCBIMap;
 
 typedef class EncodingMgr* EncodingMgr_ptr;
 

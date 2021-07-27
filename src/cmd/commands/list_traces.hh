@@ -34,7 +34,7 @@ public:
     ListTraces (Interpreter& owner);
     virtual ~ListTraces();
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 
 class ListTracesTopic : public CommandTopic {

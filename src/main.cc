@@ -89,7 +89,7 @@ void batch(Command_ptr cmd)
     bool color { opts_mgr.color() };
 
     /* In batch mode, we print res unless in quiet mode */
-    Variant& res = system(cmd);
+    utils::Variant& res = system(cmd);
     if (! quiet) {
         if (color) {
             std::cout

@@ -39,7 +39,7 @@ public:
     virtual ~Do();
     void add_command(Command_ptr command);
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef Do* Do_ptr;
 

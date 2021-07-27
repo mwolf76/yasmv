@@ -69,7 +69,7 @@ typedef enum {
 
 #include <enc/tcbi.hh>
 typedef boost::unordered_map<enc::TCBI, Var, enc::TCBIHash, enc::TCBIEq> TCBI2VarMap;
-typedef boost::unordered_map<Var, enc::TCBI, IntHash, IntEq> Var2TCBIMap;
+typedef boost::unordered_map<Var, enc::TCBI, utils::IntHash, utils::IntEq> Var2TCBIMap;
 
 struct TimedVar {
 public:
@@ -125,7 +125,7 @@ public:
 
 struct TimedDDHash {
   inline long operator() (const TimedDD& k) const
-  { PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
+  { utils::PtrHash hasher; return hasher( reinterpret_cast<void *> (k.node())); }
 };
 
 struct TimedDDEq {
@@ -153,7 +153,7 @@ typedef vec<group_t> Groups;
 #include <boost/unordered_map.hpp>
 #include <utils/pool.hh>
 
-typedef boost::unordered_map<int, Var, IntHash, IntEq> Index2VarMap;
+typedef boost::unordered_map<int, Var, utils::IntHash, utils::IntEq> Index2VarMap;
 
 struct VarHash {
     inline long operator() (Var v) const

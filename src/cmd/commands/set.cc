@@ -60,7 +60,7 @@ void Set::set_value(Expr_ptr value)
     f_value = value;
 }
 
-Variant Set::operator()()
+utils::Variant Set::operator()()
 {
     env::Environment& env
         (env::Environment::INSTANCE());
@@ -72,7 +72,7 @@ Variant Set::operator()()
     else
         env.set(f_identifier, f_value);
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 SetTopic::SetTopic(Interpreter& owner)

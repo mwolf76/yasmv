@@ -33,7 +33,7 @@ ListTraces::ListTraces(Interpreter& owner)
 ListTraces::~ListTraces()
 {}
 
-Variant ListTraces::operator()()
+utils::Variant ListTraces::operator()()
 {
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
@@ -70,13 +70,13 @@ Variant ListTraces::operator()()
       }
 
       os << std::endl;
-      return Variant(okMessage);
+      return utils::Variant(okMessage);
     } else {
       os
         << "No traces to list."
         << std::endl;
       os << std::endl;
-      return Variant(errMessage);
+      return utils::Variant(errMessage);
     }
 }
 

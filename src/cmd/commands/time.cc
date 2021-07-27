@@ -37,7 +37,7 @@ Time::Time(Interpreter& owner)
 Time::~Time()
 {}
 
-Variant Time::operator()()
+utils::Variant Time::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -60,20 +60,20 @@ Variant Time::operator()()
             << "Session time: ";
 
     out
-        << elapsed_repr(interpreter.epoch(), now)
+        << utils::elapsed_repr(interpreter.epoch(), now)
         << std::endl;
 
     if (! first)
         out
             << outPrefix
             << "Elapsed time: "
-            << elapsed_repr(old, now)
+            << utils::elapsed_repr(old, now)
             << std::endl;
 
     old = now;
     first = false;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 TimeTopic::TimeTopic(Interpreter& owner)

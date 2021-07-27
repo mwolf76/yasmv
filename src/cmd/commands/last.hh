@@ -9,7 +9,7 @@ public:
     Last(Interpreter& owner);
     virtual ~Last();
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef Last* Last_ptr;
 

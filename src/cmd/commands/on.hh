@@ -40,7 +40,7 @@ public:
 
     void set_then(Command_ptr c);
     void set_else(Command_ptr c);
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef On* On_ptr;
 

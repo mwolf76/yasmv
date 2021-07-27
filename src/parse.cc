@@ -257,7 +257,7 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
 
 static void reportParserStatus(bool parseErrors, timespec start, timespec stop)
 {
-    const std::string elapsed { elapsed_repr(start, stop) };
+    const std::string elapsed { utils::elapsed_repr(start, stop) };
     if (parseErrors)
         DEBUG
             << "Parser terminated with errors in "

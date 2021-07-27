@@ -46,7 +46,7 @@ void Clear::set_identifier(Expr_ptr id)
     f_identifier = id;
 }
 
-Variant Clear::operator()()
+utils::Variant Clear::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -63,7 +63,7 @@ Variant Clear::operator()()
         << "WARNING: this commands currently does nothing!"
         << std::endl;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 ClearTopic::ClearTopic(Interpreter& owner)

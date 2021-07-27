@@ -51,7 +51,7 @@ void ReadModel::set_input(pconst_char input)
 }
 
 extern bool parseFile(pconst_char input); // in utils.cc
-Variant ReadModel::operator()()
+utils::Variant ReadModel::operator()()
 {
     ModelMgr& mm
         (ModelMgr::INSTANCE());
@@ -99,7 +99,7 @@ Variant ReadModel::operator()()
         }
     }
 
-    return Variant(ok ? okMessage : errMessage);
+    return utils::Variant(ok ? okMessage : errMessage);
 }
 
 ReadModelTopic::ReadModelTopic(Interpreter& owner)

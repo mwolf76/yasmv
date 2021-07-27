@@ -37,7 +37,7 @@ Last::~Last()
 {
 }
 
-Variant Last::operator()()
+utils::Variant Last::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -48,7 +48,7 @@ Variant Last::operator()()
     std::ostream& out
         (std::cout);
 
-    Variant& last
+    utils::Variant& last
         (interpreter.last_result());
 
     if (last.is_string()) {
@@ -75,7 +75,7 @@ Variant Last::operator()()
             << "No status available"
             << std::endl;
 
-        return Variant(errMessage);
+        return utils::Variant(errMessage);
     }
 }
 

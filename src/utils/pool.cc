@@ -29,6 +29,8 @@
  * Directed Acyclic Graph (DAG) for data sharing.
  */
 
+namespace utils {
+
 long PtrHash::operator() (void *ptr) const
 {
     return (long)(ptr);
@@ -50,3 +52,5 @@ bool ValueEq::operator() (const value_t x,
 {
     return x == y;
 }
+
+};

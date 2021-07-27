@@ -38,7 +38,7 @@ public:
     virtual ~Help();
 
     void set_topic(CommandTopic_ptr topic);
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef Help* Help_ptr;
 

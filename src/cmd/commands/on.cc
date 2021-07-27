@@ -60,7 +60,7 @@ void On::set_else(Command_ptr c)
     f_else = c;
 }
 
-Variant On::operator()()
+utils::Variant On::operator()()
 {
     CommandMgr& cm
         (CommandMgr::INSTANCE());
@@ -68,7 +68,7 @@ Variant On::operator()()
     Interpreter& interpreter
         (Interpreter::INSTANCE());
 
-    Variant& res
+    utils::Variant& res
         (interpreter.last_result());
 
     if (cm.is_success(res)) {

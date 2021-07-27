@@ -23,6 +23,8 @@
 
 #include <variant.hh>
 
+namespace utils {
+
 Variant NilValue;
 
 // variant constructors
@@ -102,3 +104,5 @@ std::ostream& operator<<(std::ostream& os, const Variant& variant)
 
     else assert(0); /* you shouldn't see me ... */
 }
+
+};

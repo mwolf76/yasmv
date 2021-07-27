@@ -88,7 +88,7 @@ void Analyzer::generate_framing_conditions()
         << std::endl ;
 
     /* identifer -> list of guards */
-    typedef boost::unordered_map<Expr_ptr, ExprVector, PtrHash, PtrEq> ProcessingMap;
+    typedef boost::unordered_map<Expr_ptr, ExprVector, utils::PtrHash, utils::PtrEq> ProcessingMap;
 
     ExprMgr& em
         (owner().em());

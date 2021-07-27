@@ -38,7 +38,7 @@ public:
 
     void append_expression(Expr_ptr expression);
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef Echo* Echo_ptr;
 

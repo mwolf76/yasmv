@@ -38,11 +38,11 @@ public:
     virtual ~Get();
 
     void set_identifier(Expr_ptr id);
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 
 private:
     void print_all_assignments(std::ostream& os);
-    Variant print_one_assignment(std::ostream& os, Expr_ptr id);
+    utils::Variant print_one_assignment(std::ostream& os, Expr_ptr id);
 
     void print_assignment(std::ostream& os, Expr_ptr id);
 };

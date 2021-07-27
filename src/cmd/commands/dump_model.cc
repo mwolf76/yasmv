@@ -198,7 +198,7 @@ std::ostream& DumpModel::get_output_stream()
     return *res;
 }
 
-Variant DumpModel::operator()()
+utils::Variant DumpModel::operator()()
 {
     Model& model
         (ModelMgr::INSTANCE().model());
@@ -233,7 +233,7 @@ Variant DumpModel::operator()()
                       }
                   });
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 DumpModelTopic::DumpModelTopic(Interpreter& owner)

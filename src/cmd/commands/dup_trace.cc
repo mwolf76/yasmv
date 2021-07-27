@@ -60,7 +60,7 @@ void DupTrace::set_duplicate_id(pconst_char duplicate_id)
     f_duplicate_id = strdup(duplicate_id);
 }
 
-Variant DupTrace::operator()()
+utils::Variant DupTrace::operator()()
 {
     /* FIXME: implement stream redirection for std{out,err} */
     std::ostream& out
@@ -71,7 +71,7 @@ Variant DupTrace::operator()()
         << "WARNING: this commands currently does nothing!"
         << std::endl;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 DupTraceTopic::DupTraceTopic(Interpreter& owner)

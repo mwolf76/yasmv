@@ -39,7 +39,7 @@ public:
     virtual ~Clear();
 
     void set_identifier(Expr_ptr id);
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 
 typedef Clear* Clear_ptr;

@@ -38,10 +38,10 @@ void Quit::set_retcode(int retcode)
 }
 
 // sends a signal to the owner
-Variant Quit::operator()()
+utils::Variant Quit::operator()()
 {
     f_owner.quit(f_retcode);
-    return Variant(byeMessage);
+    return utils::Variant(byeMessage);
 }
 
 

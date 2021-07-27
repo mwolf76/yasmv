@@ -37,26 +37,26 @@ namespace symb {
 
 typedef class Symbol* Symbol_ptr;
 typedef boost::unordered_map<Expr_ptr, Symbol_ptr,
-                             PtrHash, PtrEq> Symbols;
+                             utils::PtrHash, utils::PtrEq> Symbols;
 
 typedef class Literal* Literal_ptr;
 typedef boost::unordered_map<Expr_ptr, Literal_ptr,
-                             PtrHash, PtrEq> Literals;
+                             utils::PtrHash, utils::PtrEq> Literals;
 
 typedef class Constant* Constant_ptr;
 typedef boost::unordered_map<Expr_ptr, Constant_ptr,
-                             PtrHash, PtrEq> Constants;
+                             utils::PtrHash, utils::PtrEq> Constants;
 
 typedef class Variable* Variable_ptr;
 typedef boost::unordered_map<Expr_ptr, Variable_ptr,
-                             PtrHash, PtrEq> Variables;
+                             utils::PtrHash, utils::PtrEq> Variables;
 
 typedef class Parameter* Parameter_ptr;
 typedef std::vector< std::pair< Expr_ptr, Parameter_ptr > > Parameters;
 
 typedef class Define* Define_ptr;
 typedef boost::unordered_map<Expr_ptr, Define_ptr,
-                             PtrHash, PtrEq> Defines;
+                             utils::PtrHash, utils::PtrEq> Defines;
 
 typedef class Resolver* Resolver_ptr;
 

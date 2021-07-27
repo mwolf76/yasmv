@@ -22,3 +22,7 @@
  **/
 
 #include <misc.hh>
+
+namespace utils {
+
+};

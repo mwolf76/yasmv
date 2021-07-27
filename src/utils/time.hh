@@ -29,6 +29,11 @@
 
 #include <common/common.hh>
 #include <vector>
+
+namespace utils {
+
 typedef std::vector<step_t> TimeVector;
+
+};
 
 #endif /* UTILS_TIME_H */

@@ -144,7 +144,7 @@ void Interpreter::quit(int retcode)
 }
 
 extern CommandVector_ptr parseCommand(const char *command_line);
-Variant& Interpreter::operator()(Command_ptr cmd)
+utils::Variant& Interpreter::operator()(Command_ptr cmd)
 {
     assert(NULL != cmd);
 
@@ -158,7 +158,7 @@ Variant& Interpreter::operator()(Command_ptr cmd)
             << e.what()
             << std::endl;
 
-        f_last_result = Variant(errMessage);
+        f_last_result = utils::Variant(errMessage);
     }
 
     delete cmd; /* claims ownership! */
@@ -176,7 +176,7 @@ void chomp(char *p)
         *p = 0;
 }
 
-Variant& Interpreter::operator()()
+utils::Variant& Interpreter::operator()()
 {
     char *cmdline { NULL };
     if (isatty(STDIN_FILENO))
@@ -203,19 +203,19 @@ Variant& Interpreter::operator()()
                         (*this)(cmd);
                     }
                 }
-                else f_last_result = Variant(errMessage);
+                else f_last_result = utils::Variant(errMessage);
             } catch (Exception& e) {
                 std::string what { e.what() };
                 ERR
                     << what
                     << std::endl;
 
-                f_last_result = Variant(errMessage);
+                f_last_result = utils::Variant(errMessage);
             }
         }
     }
     else {
-        f_last_result = Variant(okMessage);
+        f_last_result = utils::Variant(okMessage);
         f_leaving = true;
     }
 

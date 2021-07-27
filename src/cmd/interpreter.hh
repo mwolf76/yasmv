@@ -51,12 +51,12 @@ public:
     static Interpreter& INSTANCE();
 
     // external commands (will be consumed and destroyed)
-    Variant& operator()(Command_ptr cmd);
+    utils::Variant& operator()(Command_ptr cmd);
 
     // cmd loop
-    Variant& operator()();
+    utils::Variant& operator()();
 
-    inline Variant& last_result()
+    inline utils::Variant& last_result()
     { return f_last_result; }
 
     // true iff system is shutting down
@@ -95,7 +95,7 @@ protected:
     std::ostream *f_out;
     std::ostream *f_err;
 
-    Variant f_last_result;
+    utils::Variant f_last_result;
 
     static Interpreter_ptr f_instance;
     struct timespec f_epoch;

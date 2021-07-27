@@ -63,12 +63,12 @@ bool CheckTrans::check_requirements()
     return true;
 }
 
-Variant CheckTrans::operator()()
+utils::Variant CheckTrans::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
 
-    Variant res { false };
+    utils::Variant res { false };
 
     if (check_requirements()) {
         fsm::CheckTransConsistency check_trans

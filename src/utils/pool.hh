@@ -30,6 +30,8 @@
 
 #include <common/common.hh>
 
+namespace utils {
+
 struct PtrHash {
     long operator() (void *ptr) const;
 };
@@ -58,6 +60,8 @@ struct IntEq {
     inline bool operator() (const int phi,
                             const int psi) const
     { return phi == psi; }
+};
+
 };
 
 #endif /* POOL_H */

@@ -627,7 +627,7 @@ std::ostream& DumpTrace::get_output_stream()
     return *res;
 }
 
-Variant DumpTrace::operator()()
+utils::Variant DumpTrace::operator()()
 {
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());
@@ -655,7 +655,7 @@ Variant DumpTrace::operator()()
 
     else assert(false); /* unsupported */
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 DumpTraceTopic::DumpTraceTopic(Interpreter& owner)

@@ -69,7 +69,7 @@ void Simulate::set_k(step_t k)
     f_k = k;
 }
 
-Variant Simulate::operator()()
+utils::Variant Simulate::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -147,7 +147,7 @@ Variant Simulate::operator()()
             << std::endl;
     }
 
-    return Variant(res ? okMessage : errMessage);
+    return utils::Variant(res ? okMessage : errMessage);
 }
 
 SimulateTopic::SimulateTopic(Interpreter& owner)

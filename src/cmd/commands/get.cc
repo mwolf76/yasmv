@@ -76,13 +76,13 @@ void Get::print_all_assignments(std::ostream& os)
     }
 }
 
-Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
+utils::Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
 {
-    Variant res { errMessage };
+    utils::Variant res { errMessage };
 
     try {
         print_assignment(os, id);
-        res = Variant(okMessage);
+        res = utils::Variant(okMessage);
     }
     catch (env::NoSuchIdentifier& nsi) {
         const char *what { nsi.what() };
@@ -96,7 +96,7 @@ Variant Get::print_one_assignment(std::ostream& os, Expr_ptr id)
     return res;
 }
 
-Variant Get::operator()()
+utils::Variant Get::operator()()
 {
     /* FIXME: implement stream redirection for std{out,err} */
     std::ostream& out
@@ -104,7 +104,7 @@ Variant Get::operator()()
 
     if (NULL == f_identifier) {
         print_all_assignments(out);
-        return Variant(okMessage);
+        return utils::Variant(okMessage);
     }
     else {
         return print_one_assignment(out, f_identifier);

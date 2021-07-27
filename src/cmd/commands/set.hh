@@ -41,7 +41,7 @@ public:
 
     void set_identifier(Expr_ptr id);
     void set_value(Expr_ptr value);
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef Set* Set_ptr;
 

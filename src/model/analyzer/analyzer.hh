@@ -35,10 +35,10 @@
 #include <boost/unordered_map.hpp>
 
 /* guard -> identifier map (first pass) */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> DependencyTrackingMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
 
 /* identifier -> framing condition clause */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> FramingConditionMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;
 
 class ModelMgr;
 typedef enum {

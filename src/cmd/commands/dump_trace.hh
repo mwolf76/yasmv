@@ -92,7 +92,7 @@ public:
     DumpTrace (Interpreter& owner);
     virtual ~DumpTrace();
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 
 private:
     std::ostream* f_outfile { NULL } ;

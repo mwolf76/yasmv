@@ -38,7 +38,7 @@
 namespace env {
 
 /* key -> value map for env */
-typedef boost::unordered_map<Expr_ptr, Expr_ptr, PtrHash, PtrEq> Expr2ExprMap;
+typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
 
 typedef class Environment* Environment_ptr;
 

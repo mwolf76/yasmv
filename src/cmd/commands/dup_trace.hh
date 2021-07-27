@@ -35,7 +35,7 @@ public:
     void set_trace_id(pconst_char trace_id);
     void set_duplicate_id(pconst_char duplicate_id);
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef DupTrace* DupTrace_ptr;
 

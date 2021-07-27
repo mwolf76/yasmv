@@ -69,7 +69,7 @@ bool PickState::check_requirements()
     return true;
 }
 
-Variant PickState::operator()()
+utils::Variant PickState::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -136,7 +136,7 @@ Variant PickState::operator()()
         } /* switch */
     }
 
-    return Variant(res ? okMessage : errMessage);
+    return utils::Variant(res ? okMessage : errMessage);
 }
 
 PickStateTopic::PickStateTopic(Interpreter& owner)

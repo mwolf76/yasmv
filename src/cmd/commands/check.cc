@@ -67,7 +67,7 @@ bool Check::check_requirements()
     return true;
 }
 
-Variant Check::operator()()
+utils::Variant Check::operator()()
 {
     bool res { false };
 
@@ -77,7 +77,7 @@ Variant Check::operator()()
         << "`."
         << std::endl;
 
-    return Variant(res ? okMessage : errMessage);
+    return utils::Variant(res ? okMessage : errMessage);
 }
 
 CheckTopic::CheckTopic(Interpreter& owner)

@@ -71,7 +71,7 @@ typedef boost::unordered_map<TimedExpr, CompilationUnit,
                              TimedExprHash, TimedExprEq> CompilationMap;
 
 typedef boost::unordered_map<Expr_ptr, Expr_ptr,
-                             PtrHash, PtrEq> BinarySelectionUnionFindMap;
+                             utils::PtrHash, utils::PtrEq> BinarySelectionUnionFindMap;
 
 #include <boost/thread/mutex.hpp>
 
@@ -243,7 +243,7 @@ private:
     ExprVector f_ctx_stack;
 
     /* current time frame stack */
-    TimeVector f_time_stack;
+    utils::TimeVector f_time_stack;
 
     /* managers */
     ModelMgr& f_owner;

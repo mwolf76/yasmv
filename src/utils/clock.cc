@@ -26,6 +26,8 @@
 #include <sstream>
 #include <clock.hh>
 
+namespace utils {
+
 struct stopclock_t {
     time_t tv_sec;
     double tv_msecs;
@@ -93,3 +95,5 @@ std::string elapsed_repr(struct timespec from, struct timespec to)
 
     return ss.str();
 }
+
+};

@@ -30,6 +30,8 @@
 #include <common/common.hh>
 #include <ctime>
 
+namespace utils {
+
 typedef enum {
     BOTTOM,
     BOOLEAN,
@@ -76,5 +78,7 @@ private:
 };
 
 extern Variant NilValue;
+
+};
 
 #endif /* VARIANT_H */

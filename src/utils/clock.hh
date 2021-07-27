@@ -27,6 +27,10 @@
 #include <string>
 #include <ctime>
 
+namespace utils {
+
 std::string elapsed_repr(struct timespec from, struct timespec to);
+
+};
 
 #endif /* CLOCK_H */

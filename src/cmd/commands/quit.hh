@@ -39,7 +39,7 @@ public:
 
     void set_retcode(int retcode);
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 
 class QuitTopic : public CommandTopic {

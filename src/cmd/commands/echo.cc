@@ -49,7 +49,7 @@ void Echo::append_expression(Expr_ptr expr)
     f_expressions.push_back(expr);
 }
 
-Variant Echo::operator()()
+utils::Variant Echo::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -84,7 +84,7 @@ Variant Echo::operator()()
     out
         << std::endl;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
 }
 
 EchoTopic::EchoTopic(Interpreter& owner)

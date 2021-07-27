@@ -39,12 +39,12 @@ Do::~Do()
     f_commands.clear();
 }
 
-Variant Do::operator()()
+utils::Variant Do::operator()()
 {
     CommandMgr& cm
         (CommandMgr::INSTANCE());
 
-    Variant res;
+    utils::Variant res;
     Commands::iterator i = f_commands.begin();
     while (i != f_commands.end()) {
         Command_ptr c { *i };

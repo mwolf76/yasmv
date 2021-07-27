@@ -34,7 +34,7 @@ public:
     Time(Interpreter& owner);
     virtual ~Time();
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 
 

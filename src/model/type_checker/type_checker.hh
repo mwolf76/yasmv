@@ -33,7 +33,7 @@
 #include <type/type_mgr.hh>
 
 #include <boost/unordered_map.hpp>
-typedef boost::unordered_map<Expr_ptr, Type_ptr, PtrHash, PtrEq> TypeReg;
+typedef boost::unordered_map<Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
 
 /* enable the following macro to debug the TypeChecker */
 // #define DEBUG_TYPE_CHECKER

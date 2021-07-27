@@ -28,6 +28,9 @@
 #define UTILS_VALUES_H
 
 #include <vector>
+
+namespace utils {
+
 typedef std::vector<value_t> ValueVector;
 
 /* shortcuts to to simplify manipulation of the internal values stack */
@@ -44,5 +47,7 @@ typedef std::vector<value_t> ValueVector;
 
 #define TOP_VALUE()                                \
     f_values_stack.back()
+
+}
 
 #endif /* UTILS_VALUES_H */

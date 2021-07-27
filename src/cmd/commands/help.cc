@@ -55,7 +55,7 @@ void Help::set_topic(CommandTopic_ptr topic)
     f_topic = topic;
 }
 
-Variant Help::operator()()
+utils::Variant Help::operator()()
 {
   if (f_topic) {
 
@@ -127,7 +127,7 @@ Variant Help::operator()()
       << "[fork-exec-test] end"
       << std::endl;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
   } else {
     std::cout
       << "Available topics: " << std::endl
@@ -154,7 +154,7 @@ Variant Help::operator()()
       << "- time" << std::endl
       << std::endl;
 
-    return Variant(okMessage);
+    return utils::Variant(okMessage);
   }
 }
 

@@ -46,7 +46,7 @@ public:
     inline value_t limit() const
     { return f_limit; }
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 
 private:
     std::ostream& f_out;

@@ -37,7 +37,7 @@
 
 #include <type/type_mgr.hh>
 
-typedef boost::unordered_map<Expr_ptr, Module_ptr, PtrHash, PtrEq> ContextMap;
+typedef boost::unordered_map<Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
 typedef boost::unordered_map<Expr_ptr, Expr_ptr> ParamMap;
 
 typedef enum {

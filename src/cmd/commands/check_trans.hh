@@ -40,7 +40,7 @@ public:
     void add_constraint(Expr_ptr constraint);
 
     /* run() */
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 
 private:
     std::ostream& f_out;

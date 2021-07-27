@@ -152,8 +152,8 @@ protected:
     unsigned range_repr_bits (value_t range);
 };
 
-typedef boost::unordered_map<value_t, Expr_ptr, ValueHash, ValueEq> ValueExprMap;
-typedef boost::unordered_map<Expr_ptr, value_t, PtrHash, PtrEq> ExprValueMap;
+typedef boost::unordered_map<value_t, Expr_ptr, utils::ValueHash, utils::ValueEq> ValueExprMap;
+typedef boost::unordered_map<Expr_ptr, value_t, utils::PtrHash, utils::PtrEq> ExprValueMap;
 
 typedef class EnumEncoding* EnumEncoding_ptr;
 

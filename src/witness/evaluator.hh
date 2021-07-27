@@ -44,8 +44,8 @@ class Evaluator : public ExprWalker {
 
     TypeVector f_type_stack;
     ExprVector f_ctx_stack;
-    TimeVector f_time_stack;
-    ValueVector f_values_stack;
+    utils::TimeVector f_time_stack;
+    utils::ValueVector f_values_stack;
 
     // environment for evaluation
     Witness_ptr f_witness;

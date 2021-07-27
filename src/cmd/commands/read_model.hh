@@ -42,7 +42,7 @@ public:
     inline pconst_char input() const
     { return f_input; }
 
-    Variant virtual operator()();
+    utils::Variant virtual operator()();
 };
 typedef ReadModel* ReadModel_ptr;
 

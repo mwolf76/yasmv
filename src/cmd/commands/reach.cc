@@ -92,7 +92,7 @@ bool Reach::check_requirements()
     return true;
 }
 
-Variant Reach::operator()()
+utils::Variant Reach::operator()()
 {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -100,7 +100,7 @@ Variant Reach::operator()()
     bool res { false };
 
     if (! check_requirements())
-        return Variant(errMessage);
+        return utils::Variant(errMessage);
 
     reach::Reachability bmc { *this, ModelMgr::INSTANCE().model() };
     bmc.process(f_target, f_forward_constraints, f_backward_constraints, f_global_constraints);
@@ -153,7 +153,7 @@ Variant Reach::operator()()
     default: assert(false); /* unexpected */
     } /* switch */
 
-    return Variant(res ? okMessage : errMessage);
+    return utils::Variant(res ? okMessage : errMessage);
 }
 
 ReachTopic::ReachTopic(Interpreter& owner)
