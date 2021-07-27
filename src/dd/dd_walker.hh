@@ -29,6 +29,8 @@
 #include <dd/dd.hh>
 #include <cuddInt.h>
 
+namespace dd {
+
 typedef enum {
     DD_WALK_LHS,
     DD_WALK_RHS,
@@ -71,6 +73,8 @@ protected:
 
     /* explicit recursion stack */
     add_walker_stack f_recursion_stack;
+};
+
 };
 
 #endif

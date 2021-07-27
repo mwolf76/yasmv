@@ -54,12 +54,12 @@ class Encoding {
 public:
     /* Full-Digit DDs (roots), used in manipulation of algebraics
        (e.g.. compiler) */
-    inline DDVector& dv()
+    inline dd::DDVector& dv()
     { return f_dv; }
 
     /* Bit-level DDs (leaves), used in bitlevel operations (e.g. SAT
        solver) */
-    inline DDVector& bits()
+    inline dd::DDVector& bits()
     { return f_bits; }
 
     /* vector of DD leaves (consts) -> expr */
@@ -74,8 +74,8 @@ protected:
 
     EncodingMgr& f_mgr;
 
-    DDVector f_dv;   // digit vector
-    DDVector f_bits; // all bits
+    dd::DDVector f_dv;   // digit vector
+    dd::DDVector f_bits; // all bits
 
     // low level services
     ADD make_bit();

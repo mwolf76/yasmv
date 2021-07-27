@@ -164,7 +164,7 @@ void Simulation::pick_state(bool allsat,
                            time it into TCBI at time 0, fetch its
                            value in MiniSAT model and append its
                            negation to exclusion clause.. */
-                        DDVector::const_iterator di;
+                        dd::DDVector::const_iterator di;
                         unsigned ndx;
                         for (ndx = 0, di = enc->bits().begin();
                              enc->bits().end() != di; ++ ndx, ++ di) {

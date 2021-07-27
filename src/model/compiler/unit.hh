@@ -92,75 +92,75 @@ struct InlinedOperatorSignatureEq {
 
 class BinarySelectionDescriptor {
 public:
-    BinarySelectionDescriptor(unsigned width, DDVector& z, ADD cnd,
-                              ADD aux, DDVector& x, DDVector& y);
+    BinarySelectionDescriptor(unsigned width, dd::DDVector& z, ADD cnd,
+                              ADD aux, dd::DDVector& x, dd::DDVector& y);
 
     inline unsigned width() const
     { return f_width; }
-    inline const DDVector& z() const
+    inline const dd::DDVector& z() const
     { return f_z; }
     inline ADD cnd() const
     { return f_cnd; }
     inline ADD aux() const
     { return f_aux; }
-    inline const DDVector& x() const
+    inline const dd::DDVector& x() const
     { return f_x; }
-    inline const DDVector& y() const
+    inline const dd::DDVector& y() const
     { return f_y; }
 
 private:
     unsigned f_width;
-    DDVector f_z;
+    dd::DDVector f_z;
     ADD f_cnd;
     ADD f_aux;
-    DDVector f_x;
-    DDVector f_y;
+    dd::DDVector f_x;
+    dd::DDVector f_y;
 };
 
 class MultiwaySelectionDescriptor {
 public:
     MultiwaySelectionDescriptor(unsigned elem_width, unsigned elem_count,
-                                DDVector& z, DDVector& cnds,
-                                DDVector& acts, DDVector& x);
+                                dd::DDVector& z, dd::DDVector& cnds,
+                                dd::DDVector& acts, dd::DDVector& x);
 
     inline unsigned elem_width() const
     { return f_elem_width; }
     inline unsigned elem_count() const
     { return f_elem_count; }
-    inline const DDVector& z() const
+    inline const dd::DDVector& z() const
     { return f_z; }
-    inline const DDVector& cnds() const
+    inline const dd::DDVector& cnds() const
     { return f_cnds; }
-    inline const DDVector& acts() const
+    inline const dd::DDVector& acts() const
     { return f_acts; }
-    inline const DDVector& x() const
+    inline const dd::DDVector& x() const
     { return f_x; }
 
 private:
     unsigned f_elem_width;
     unsigned f_elem_count;
-    DDVector f_z;
-    DDVector f_cnds;
-    DDVector f_acts;
-    DDVector f_x;
+    dd::DDVector f_z;
+    dd::DDVector f_cnds;
+    dd::DDVector f_acts;
+    dd::DDVector f_x;
 };
 
 class InlinedOperatorDescriptor {
 
 public:
     InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                              DDVector& z, DDVector &x);
+                              dd::DDVector& z, dd::DDVector &x);
     InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                              DDVector& z, DDVector &x, DDVector &y);
+                              dd::DDVector& z, dd::DDVector &x, dd::DDVector &y);
 
     inline const InlinedOperatorSignature& ios() const
     { return f_ios; }
 
-    inline const DDVector& z() const
+    inline const dd::DDVector& z() const
     { return f_z; }
-    inline const DDVector& x() const
+    inline const dd::DDVector& x() const
     { return f_x; }
-    inline const DDVector& y() const
+    inline const dd::DDVector& y() const
     { return f_y; }
 
     inline bool is_relational() const
@@ -178,9 +178,9 @@ public:
 private:
     InlinedOperatorSignature f_ios;
 
-    DDVector f_z;
-    DDVector f_x;
-    DDVector f_y;
+    dd::DDVector f_z;
+    dd::DDVector f_x;
+    dd::DDVector f_y;
 };
 
 typedef std::vector<InlinedOperatorDescriptor> InlinedOperatorDescriptors;
@@ -198,7 +198,7 @@ enum ECompilerTimePolarity {
 
 class CompilationUnit {
 public:
-    CompilationUnit( Expr_ptr expr, DDVector& dds,
+    CompilationUnit( Expr_ptr expr, dd::DDVector& dds,
                      InlinedOperatorDescriptors& inlined_operator_descriptors,
                      Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
                      MultiwaySelectionDescriptors& array_mux_descriptors)
@@ -212,7 +212,7 @@ public:
     const Expr_ptr expr() const
     { return f_expr; }
 
-    const DDVector& dds() const
+    const dd::DDVector& dds() const
     { return f_dds; }
 
     const InlinedOperatorDescriptors& inlined_operator_descriptors() const
@@ -226,7 +226,7 @@ public:
 
 private:
     Expr_ptr f_expr;
-    DDVector f_dds;
+    dd::DDVector f_dds;
     InlinedOperatorDescriptors f_inlined_operator_descriptors;
     Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
     MultiwaySelectionDescriptors f_array_mux_descriptors;

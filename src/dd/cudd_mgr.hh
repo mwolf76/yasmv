@@ -32,6 +32,8 @@
 #include <common/common.hh>
 #include <cuddObj.hh>
 
+namespace dd {
+
 typedef class CuddMgr* CuddMgr_ptr;
 typedef Cudd* Cudd_ptr;
 
@@ -57,6 +59,8 @@ protected:
 private:
     static CuddMgr_ptr f_instance;
     CuddVector f_cudd_instances;
+};
+
 };
 
 #endif

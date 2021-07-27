@@ -61,12 +61,12 @@ ADD Compiler::make_auto_dd()
         (em.make_dot( ctx, aid), time);
     f_enc.register_encoding(key, be);
 
-    DDVector& bits (be -> bits());
+    dd::DDVector& bits (be -> bits());
     return bits[0]; // just one
 }
 
 /* build an auto DD vector of fresh ADD variables. */
-void Compiler::make_auto_ddvect(DDVector& dv, unsigned width)
+void Compiler::make_auto_ddvect(dd::DDVector& dv, unsigned width)
 {
     assert(0 == dv.size());
     for (unsigned i = 0; i < width; ++ i )
@@ -153,7 +153,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
         return;
 
     if (type -> is_scalar()) {
-        DDVector dv;
+        dd::DDVector dv;
         unsigned i, width = type -> width();
 
         if (width > f_add_stack.size()) {
@@ -169,7 +169,7 @@ void Compiler::post_node_hook(Expr_ptr expr)
             assert(false);
         }
 
-        DDVector::reverse_iterator ri;
+        dd::DDVector::reverse_iterator ri;
         for (i = 0, ri = f_add_stack.rbegin();
              i < width; ++ i, ++ ri) {
             dv.push_back(*ri);
@@ -215,10 +215,10 @@ bool Compiler::cache_miss(const Expr_ptr expr)
 
         /* push cached DDs (reversed) */
         {
-            const DDVector& dds
+            const dd::DDVector& dds
                 (unit.dds());
 
-            DDVector::const_reverse_iterator i;
+            dd::DDVector::const_reverse_iterator i;
             for (i = dds.rbegin(); i != dds.rend(); ++ i )
                 f_add_stack.push_back(*i);
         }
@@ -403,11 +403,11 @@ void Compiler::activate_array_muxes(Expr_ptr ctx, Expr_ptr body)
     for (i = f_multiway_selection_descriptors.begin();
          f_multiway_selection_descriptors.end() != i; ++ i) {
 
-        const DDVector& cnds { i -> cnds() };
-        const DDVector& acts { i -> acts() };
+        const dd::DDVector& cnds { i -> cnds() };
+        const dd::DDVector& acts { i -> acts() };
 
-        DDVector::const_iterator ci { begin(cnds) };
-        DDVector::const_iterator ai { begin(acts) };
+        dd::DDVector::const_iterator ci { begin(cnds) };
+        dd::DDVector::const_iterator ai { begin(acts) };
 
         while (cnds.end() != ci) {
             PUSH_DD((*ci).Xnor(*ai));

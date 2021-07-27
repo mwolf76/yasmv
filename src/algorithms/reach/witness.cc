@@ -108,7 +108,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
                 /* 1. for each bit int the encoding, fetch UCBI, time
                    it into TCBI, fetch its value in MiniSAT model and
                    set the corresponding entry in input. */
-                DDVector::const_iterator di;
+                dd::DDVector::const_iterator di;
                 unsigned ndx;
                 for (ndx = 0, di = enc->bits().begin();
                      enc->bits().end() != di; ++ ndx, ++ di) {

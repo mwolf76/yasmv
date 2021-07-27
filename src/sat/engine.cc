@@ -108,10 +108,10 @@ void Engine::push(CompilationUnit cu, step_t time, group_t group)
      * 1. Pushing DDs
      */
     {
-        const DDVector& dv
+        const dd::DDVector& dv
             (cu.dds());
 
-        DDVector::const_iterator i;
+        dd::DDVector::const_iterator i;
         for (i = dv.begin(); dv.end() != i; ++ i) {
             cnf_push_single_cut( *i, time, group );
             // cnf_push_no_cut( *i, time, group );

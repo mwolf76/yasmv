@@ -204,7 +204,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
 void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
 {
     assert (NULL != enc);
-    DDVector& dds
+    dd::DDVector& dds
         (enc->dv());
     unsigned width
         (dds.size());
@@ -221,7 +221,7 @@ void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
     else if (type->is_algebraic()) {
         // type and enc width info has to match
         assert( type -> as_algebraic()-> width() == width );
-        for (DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
+        for (dd::DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
             f_add_stack.push_back(*ri);
     }
 
@@ -238,7 +238,7 @@ void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
             assert( type -> as_array() -> of() -> as_algebraic()-> width() ==
                     width / type -> as_array() -> nelems());
 
-        for (DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
+        for (dd::DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ ri)
             f_add_stack.push_back(*ri);
     }
 

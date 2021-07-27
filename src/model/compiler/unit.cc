@@ -25,22 +25,22 @@
 #include <type/type.hh>
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                                                     DDVector& z, DDVector &x)
+                                                     dd::DDVector& z, dd::DDVector &x)
     : f_ios(ios)
     , f_z(z)
     , f_x(x)
 {}
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                                                     DDVector& z, DDVector &x, DDVector &y)
+                                                     dd::DDVector& z, dd::DDVector &x, dd::DDVector &y)
     : f_ios(ios)
     , f_z(z)
     , f_x(x)
     , f_y(y)
 {}
 
-BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z,
-                                                     ADD cnd, ADD aux, DDVector &x, DDVector &y)
+BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, dd::DDVector& z,
+                                                     ADD cnd, ADD aux, dd::DDVector &x, dd::DDVector &y)
     : f_width(width)
     , f_z(z)
     , f_cnd(cnd)
@@ -51,8 +51,8 @@ BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, DDVector& z
 
 MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
                                                          unsigned elem_count,
-                                                         DDVector& z, DDVector& cnds,
-                                                         DDVector& acts, DDVector &x)
+                                                         dd::DDVector& z, dd::DDVector& cnds,
+                                                         dd::DDVector& acts, dd::DDVector &x)
     : f_elem_width(elem_width)
     , f_elem_count(elem_count)
     , f_z(z)
@@ -130,9 +130,9 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
         << md.ios()
         << "(z = [";
 
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
-    for (DDVector::const_iterator zi = z.begin();;) {
+    for (dd::DDVector::const_iterator zi = z.begin();;) {
         const DdNode* node
             (zi->getNode());
 
@@ -149,9 +149,9 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
 
     os << "], x = [";
 
-    const DDVector& x
+    const dd::DDVector& x
         (md.x());
-    for (DDVector::const_iterator xi = x.begin();;) {
+    for (dd::DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node
             (xi->getNode());
 
@@ -168,11 +168,11 @@ std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& md)
 
     os << "]";
 
-    const DDVector& y
+    const dd::DDVector& y
         (md.y());
     if (y.size()) {
         os << ", y = [";
-        for (DDVector::const_iterator yi = y.begin();;) {
+        for (dd::DDVector::const_iterator yi = y.begin();;) {
             const DdNode* node
                 (yi->getNode());
 
@@ -207,9 +207,9 @@ std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
        << md.width()
        << "(z = [";
 
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
-    for (DDVector::const_iterator zi = z.begin();;) {
+    for (dd::DDVector::const_iterator zi = z.begin();;) {
         const DdNode* node
             (zi->getNode());
 
@@ -237,9 +237,9 @@ std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
             << "), x = [";
     }
 
-    const DDVector& x
+    const dd::DDVector& x
         (md.x());
-    for (DDVector::const_iterator xi = x.begin();;) {
+    for (dd::DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node
             (xi->getNode());
 
@@ -256,9 +256,9 @@ std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md)
 
     os << "], y = [";
 
-    const DDVector& y
+    const dd::DDVector& y
         (md.y());
-    for (DDVector::const_iterator yi = y.begin();;) {
+    for (dd::DDVector::const_iterator yi = y.begin();;) {
         const DdNode* node
             (yi->getNode());
 
@@ -305,9 +305,9 @@ std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)
        << md.elem_width()
        << "(z = [";
 
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
-    for (DDVector::const_iterator zi = z.begin();;) {
+    for (dd::DDVector::const_iterator zi = z.begin();;) {
         const DdNode* node
             (zi->getNode());
 
@@ -322,10 +322,10 @@ std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)
             break;
     }
 
-    const DDVector& acts(md.acts());
+    const dd::DDVector& acts(md.acts());
     if (acts.size()) {
         os << ", acts = [";
-        for (DDVector::const_iterator actsi = acts.begin();;) {
+        for (dd::DDVector::const_iterator actsi = acts.begin();;) {
             const DdNode* node
                 (actsi->getNode());
 
@@ -342,8 +342,8 @@ std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md)
     }
 
     os << "], x = [";
-    const DDVector& x(md.x());
-    for (DDVector::const_iterator xi = x.begin();;) {
+    const dd::DDVector& x(md.x());
+    for (dd::DDVector::const_iterator xi = x.begin();;) {
         const DdNode* node
             (xi->getNode());
 

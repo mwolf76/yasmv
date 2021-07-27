@@ -55,10 +55,10 @@ void Compiler::array_equals(const Expr_ptr expr)
     for (unsigned j = 0; j < elems; ++ j) {
 
         /* extract fragments for LHS and RHS */
-        DDVector rhs_fragment;
+        dd::DDVector rhs_fragment;
         rhs_fragment.clear();
 
-        DDVector lhs_fragment;
+        dd::DDVector lhs_fragment;
         lhs_fragment.clear();
 
         for (unsigned k = 0; k < width; ++ k) {

@@ -36,6 +36,8 @@
 #include <common/common.hh>
 #include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
+namespace dd {
+
 typedef std::vector<ADD> DDVector;
 
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
@@ -55,7 +57,7 @@ typedef std::vector<ADD> DDVector;
 
 /** Fetch a DD vector of given width */
 #define POP_DV(vec, width)                      \
-    DDVector vec;                               \
+    dd::DDVector vec;                           \
     for (unsigned i = 0; i < width ; ++ i) {    \
         vec.push_back(f_add_stack.back());      \
         f_add_stack.pop_back();                 \
@@ -63,7 +65,7 @@ typedef std::vector<ADD> DDVector;
 
 /** Declare a DD vector of given width */
 #define FRESH_DV(vec, width)                    \
-    DDVector vec;                               \
+    dd::DDVector vec;                           \
     make_auto_ddvect(vec, width);
 
 /** Push a DD vector of given width */
@@ -71,5 +73,7 @@ typedef std::vector<ADD> DDVector;
     /* push DD vector in reversed order */      \
     for (unsigned i = 0; i < width; ++ i)       \
         PUSH_DD(vec[width - i - 1]);
+
+};
 
 #endif /* DECISION_DIAGRAMS_H */

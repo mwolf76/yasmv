@@ -23,6 +23,8 @@
 
 #include <cudd_mgr.hh>
 
+namespace dd {
+
 CuddMgr_ptr CuddMgr::f_instance = NULL;
 
 CuddMgr::CuddMgr()
@@ -62,3 +64,5 @@ Cudd& CuddMgr::dd()
 
     return *res;
 }
+
+};

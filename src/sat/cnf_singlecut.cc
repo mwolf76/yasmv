@@ -28,7 +28,7 @@
 
 // #define DEBUG_CNF_LITERALS
 
-class CNFBuilderSingleCut : public ADDWalker {
+class CNFBuilderSingleCut : public dd::ADDWalker {
 public:
     CNFBuilderSingleCut(Engine& sat, step_t time,
                         group_t group = MAINGROUP)
@@ -45,7 +45,7 @@ public:
     {
         assert(1 == f_recursion_stack.size());
 
-        add_activation_record curr = f_recursion_stack.top();
+        dd::add_activation_record curr = f_recursion_stack.top();
         f_toplevel = const_cast<DdNode *>(curr.node);
     }
 

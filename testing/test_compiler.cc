@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
             (f_compiler.process(em.make_empty(),
                                 test_expr));
 
-        DDVector dv
+        dd::DDVector dv
             (cu.dds());
 
         BOOST_CHECK(dv.size() == 1);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
-      DDVector dv
+      dd::DDVector dv
         (cu.dds());
 
       BOOST_CHECK(dv.size() == 1);

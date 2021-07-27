@@ -117,7 +117,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                 /* 1. for each bit int the encoding, fetch UCBI, time
                    it into TCBI, fetch its value in solver model and
                    set the corresponding entry in inputs array. */
-                DDVector::const_iterator di;
+                dd::DDVector::const_iterator di;
                 unsigned ndx;
                 for (ndx = 0, di = enc->bits().begin();
                      enc->bits().end() != di; ++ ndx, ++ di) {

@@ -147,8 +147,8 @@ void Compiler::boolean_subscript(const Expr_ptr expr)
     POP_DV(lhs, elem_width * elem_count);
 
     /* Build selection DDs */
-    DDVector cnd_dds;
-    DDVector act_dds;
+    dd::DDVector cnd_dds;
+    dd::DDVector act_dds;
     unsigned j_, j = 0; do {
 
         unsigned i;

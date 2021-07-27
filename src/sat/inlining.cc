@@ -273,13 +273,13 @@ void CNFOperatorInliner::inject(const InlinedOperatorDescriptor& md,
         (0);
 
     /* local refs */
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
 
-    const DDVector& x
+    const dd::DDVector& x
         (md.x());
 
-    const DDVector& y
+    const dd::DDVector& y
         (md.y());
 
     int width
@@ -422,13 +422,13 @@ void CNFBinarySelectionInliner::inject(const BinarySelectionDescriptor& md)
         (0);
 
     /* local refs */
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
     const ADD& aux
         (md.aux());
-    const DDVector& x
+    const dd::DDVector& x
         (md.x());
-    const DDVector& y
+    const dd::DDVector& y
         (md.y());
 
     /* allocate a fresh variable for ITE condition */
@@ -494,16 +494,16 @@ void CNFMultiwaySelectionInliner::inject(const MultiwaySelectionDescriptor& md)
         (0);
 
     /* local refs */
-    const DDVector& z
+    const dd::DDVector& z
         (md.z());
-    const DDVector& acts
+    const dd::DDVector& acts
         (md.acts());
-    const DDVector& x
+    const dd::DDVector& x
         (md.x());
 
     unsigned j
         (0);
-    DDVector::const_iterator ai
+    dd::DDVector::const_iterator ai
         (acts.begin());
     while (j < md.elem_count()) {
 

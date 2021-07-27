@@ -198,7 +198,7 @@ private:
 
     /* automatic inner variables (determinization, muxes, etc...) */
     Expr_ptr make_auto_id();
-    void make_auto_ddvect(DDVector& dv, unsigned width);
+    void make_auto_ddvect(dd::DDVector& dv, unsigned width);
     ADD  make_auto_dd();
 
     void pre_hook();
@@ -237,7 +237,7 @@ private:
     TypeVector f_type_stack;
 
     /* compilation results */
-    DDVector f_add_stack;
+    dd::DDVector f_add_stack;
 
     /* current ctx stack, for symbol resolution */
     ExprVector f_ctx_stack;

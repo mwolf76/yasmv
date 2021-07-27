@@ -312,7 +312,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
             if (!enc)
                 continue;
 
-            DDVector::const_iterator di;
+            dd::DDVector::const_iterator di;
             unsigned ndx;
             for (ndx = 0, di = enc->bits().begin();
                  enc->bits().end() != di; ++ ndx, ++ di) {

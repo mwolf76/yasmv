@@ -93,10 +93,10 @@ void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
     std::ostringstream oss;
     f_timed_expr2enc_map [ key ] = enc;
 
-    DDVector& bits = enc->bits();
+    dd::DDVector& bits = enc->bits();
 
     unsigned i;
-    DDVector::iterator di;
+    dd::DDVector::iterator di;
 
     oss << key << " := [" ;
     for (i = 0, di = bits.begin(); i < bits.size(); ) {
@@ -123,7 +123,7 @@ void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
 }
 
 EncodingMgr::EncodingMgr()
-    : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
+    : f_cudd(dd::CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
     , f_word_width ((opts::OptsMgr::INSTANCE().word_width()))
 {

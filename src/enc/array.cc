@@ -32,11 +32,11 @@ ArrayEncoding::ArrayEncoding(Encodings elements)
     for (Encodings::iterator i = elements.begin(); i != elements.end(); ++ i) {
 
         /* digits */
-        DDVector& dv = (*i)->dv();
+        dd::DDVector& dv = (*i)->dv();
         f_dv.insert( f_dv.end(), dv.begin(), dv.end() );
 
         /* bits */
-        DDVector& bits = (*i)->bits();
+        dd::DDVector& bits = (*i)->bits();
         f_bits.insert( f_bits.end(), bits.begin(), bits.end() );
     }
 }

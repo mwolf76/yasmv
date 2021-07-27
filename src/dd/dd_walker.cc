@@ -24,6 +24,8 @@
 #include <common/common.hh>
 #include <dd_walker.hh>
 
+namespace dd {
+
 /* --- ADD Walker ----------------------------------------------------------- */
 ADDWalker::ADDWalker()
 {}
@@ -90,3 +92,5 @@ void ADDWalker::walk ()
         } /* switch() */
     } // while
 }
+
+};
