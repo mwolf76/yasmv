@@ -125,7 +125,7 @@ void EncodingMgr::register_encoding(const TimedExpr& key, Encoding_ptr enc)
 EncodingMgr::EncodingMgr()
     : f_cudd(CuddMgr::INSTANCE().dd()) // this is a fresh instance
     , f_em(ExprMgr::INSTANCE())
-    , f_word_width ((OptsMgr::INSTANCE().word_width()))
+    , f_word_width ((opts::OptsMgr::INSTANCE().word_width()))
 {
     const void* instance
         (this);

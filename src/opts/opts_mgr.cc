@@ -25,6 +25,8 @@
 
 #include <opts_mgr.hh>
 
+namespace opts {
+
 // static initialization
 OptsMgr_ptr OptsMgr::f_instance = NULL;
 
@@ -63,19 +65,19 @@ OptsMgr::OptsMgr()
 
         (
          "word-width",
-         options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
+         boost::program_options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
          "native word size in bits"
         )
 
         (
          "verbosity",
-         options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
+         boost::program_options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
          "verbosity level"
         )
 
         (
          "model",
-         options::value<std::string>(),
+         boost::program_options::value<std::string>(),
          "input model"
         )
         ;
@@ -86,10 +88,10 @@ OptsMgr::OptsMgr()
 
 void OptsMgr::parse_command_line(int argc, const char **argv)
 {
-    options::store(options::command_line_parser(argc, const_cast<char **>(argv)).
+    boost::program_options::store(boost::program_options::command_line_parser(argc, const_cast<char **>(argv)).
                 options(f_desc).positional(f_pos).run(), f_vm);
 
-    options::notify(f_vm);
+    boost::program_options::notify(f_vm);
     if (f_vm.count("help")) {
         f_help = true;
     }
@@ -206,3 +208,5 @@ verbosity OptsMgr::get_verbosity_level_tolerance() {
     default: return log_very_rarely;
     }
 }
+
+};

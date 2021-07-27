@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(type_checking)
     TypeMgr& tm (TypeMgr::INSTANCE());
 
     /* set word width to 16 bits */
-    OptsMgr& om (OptsMgr::INSTANCE());
+    opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
     om.set_word_width(16);
 
     Model& model (mm.model());

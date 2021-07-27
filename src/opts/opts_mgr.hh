@@ -27,13 +27,13 @@
 #ifndef OPTS_H
 #define OPTS_H
 
-class OptsMgr;
-typedef OptsMgr* OptsMgr_ptr;
-
 #include <common/common.hh>
 #include <boost/program_options.hpp>
 
-namespace options = boost::program_options;
+namespace opts {
+
+class OptsMgr;
+typedef OptsMgr* OptsMgr_ptr;
 
 // -- system defaults
 const unsigned DEFAULT_WORD_WIDTH     = 16;
@@ -89,9 +89,9 @@ private:
     static OptsMgr_ptr f_instance;
 
     /* local data */
-    options::options_description f_desc;
-    options::positional_options_description f_pos;
-    options::variables_map f_vm;
+    boost::program_options::options_description f_desc;
+    boost::program_options::positional_options_description f_pos;
+    boost::program_options::variables_map f_vm;
 
     bool f_help;
     bool f_quiet;
@@ -101,6 +101,8 @@ private:
 
     unsigned f_word_width;
     unsigned f_precision;
+};
+
 };
 
 #endif

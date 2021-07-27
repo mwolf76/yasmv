@@ -71,8 +71,8 @@ void Simulate::set_k(step_t k)
 
 Variant Simulate::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     ModelMgr& mm
         (ModelMgr::INSTANCE());

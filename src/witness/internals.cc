@@ -137,7 +137,7 @@ void Evaluator::walk_leaf(const Expr_ptr expr)
     // explicit int consts (e.g. 42) ...
     if (em.is_int_const(expr)) {
         unsigned ww
-            (OptsMgr::INSTANCE().word_width());
+            (opts::OptsMgr::INSTANCE().word_width());
 
         PUSH_TYPE (tm.find_unsigned(ww));
         PUSH_VALUE(expr->value());

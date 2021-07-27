@@ -39,8 +39,8 @@ Last::~Last()
 
 Variant Last::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     Interpreter& interpreter
         (Interpreter::INSTANCE());

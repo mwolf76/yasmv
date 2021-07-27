@@ -80,7 +80,7 @@ void Compiler::walk_leaf(const Expr_ptr expr)
      * not be completed. */
     if (em.is_int_const(expr)) {
         unsigned ww
-            (OptsMgr::INSTANCE().word_width());
+            (opts::OptsMgr::INSTANCE().word_width());
 
         f_type_stack.push_back(tm.find_unsigned(ww));
         algebraic_constant(expr, ww);

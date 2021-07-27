@@ -48,8 +48,8 @@ void Clear::set_identifier(Expr_ptr id)
 
 Variant Clear::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     /* FIXME: implement stream redirection for std{out,err} */
     std::ostream& out

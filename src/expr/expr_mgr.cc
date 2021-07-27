@@ -212,7 +212,7 @@ value_t ExprMgr::decimal_lookup(const char *decimal_repr)
         (strtod(decimal_repr, NULL));
 
     unsigned precision
-        (OptsMgr::INSTANCE().precision());
+        (opts::OptsMgr::INSTANCE().precision());
 
     value_t j, m, k;
     double fm, dj, dm, dk, pp

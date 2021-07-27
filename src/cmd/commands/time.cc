@@ -39,8 +39,8 @@ Time::~Time()
 
 Variant Time::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     static struct timespec old;
     static bool first { true };

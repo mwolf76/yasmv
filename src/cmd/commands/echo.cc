@@ -51,8 +51,8 @@ void Echo::append_expression(Expr_ptr expr)
 
 Variant Echo::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     WitnessMgr& wm
         (WitnessMgr::INSTANCE());

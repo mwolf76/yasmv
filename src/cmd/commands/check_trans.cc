@@ -65,8 +65,8 @@ bool CheckTrans::check_requirements()
 
 Variant CheckTrans::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     Variant res { false };
 

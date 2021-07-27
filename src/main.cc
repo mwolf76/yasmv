@@ -83,7 +83,7 @@ void pd(InlinedOperatorDescriptor& md)
 void batch(Command_ptr cmd)
 {
     Interpreter& system = Interpreter::INSTANCE();
-    OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+    opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
 
     bool quiet { opts_mgr.quiet() };
     bool color { opts_mgr.color() };
@@ -150,12 +150,12 @@ int main(int argc, const char *argv[])
 
     try {
         /* parse command line options */
-        OptsMgr& opts_mgr = OptsMgr::INSTANCE();
+        opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
         opts_mgr.parse_command_line(argc, argv);
 
         if (opts_mgr.help()) {
             std::cout
-                << OptsMgr::INSTANCE().usage()
+                << opts_mgr.usage()
                 << std::endl ;
 
             exit(0);
@@ -230,6 +230,6 @@ namespace axter {
 
     /* delegated to OptsMgr */
     verbosity get_verbosity_level_tolerance() {
-        return OptsMgr::INSTANCE().get_verbosity_level_tolerance();
+        return opts::OptsMgr::INSTANCE().get_verbosity_level_tolerance();
     }
 };

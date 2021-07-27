@@ -64,8 +64,8 @@ bool CheckInit::check_requirements()
 
 Variant CheckInit::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     bool res { false };
 

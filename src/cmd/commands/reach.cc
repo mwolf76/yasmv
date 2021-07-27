@@ -94,8 +94,8 @@ bool Reach::check_requirements()
 
 Variant Reach::operator()()
 {
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     bool res { false };
 

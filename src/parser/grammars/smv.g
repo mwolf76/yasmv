@@ -52,8 +52,8 @@ options {
     TypeMgr& tm
         (TypeMgr::INSTANCE());
 
-    OptsMgr& om
-        (OptsMgr::INSTANCE());
+    opts::OptsMgr& om
+        (opts::OptsMgr::INSTANCE());
 
     CommandMgr& cm
         (CommandMgr::INSTANCE());
@@ -873,9 +873,9 @@ unsigned_int_type returns [Type_ptr res]
     {
         $res = array_size ?
             (Type_ptr) tm.find_unsigned_array(*p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), array_size) :
+                : om.word_width(), array_size) :
             (Type_ptr) tm.find_unsigned( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width());
+                : om.word_width());
     }
     ;
 
@@ -901,9 +901,9 @@ signed_int_type returns [Type_ptr res]
     {
         $res = array_size ?
             (Type_ptr) tm.find_signed_array(*p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width(), array_size) :
+                : om.word_width(), array_size) :
             (Type_ptr) tm.find_signed( *p ? atoi(p)
-                : OptsMgr::INSTANCE().word_width());
+                : om.word_width());
     }
     ;
 
