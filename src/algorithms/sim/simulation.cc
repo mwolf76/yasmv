@@ -59,8 +59,8 @@ void Simulation::pick_state(bool allsat,
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
     int k = ! allsat
         ? 1
@@ -194,7 +194,7 @@ void Simulation::pick_state(bool allsat,
             }
         } /* if (allsat) */
 
-        Witness_ptr w;
+        witness::Witness_ptr w;
         if (STATUS_SAT == engine.solve()) {
             t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
@@ -259,13 +259,13 @@ void Simulation::simulate(Expr_ptr invar_condition,
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
     Atom trace_uid
         (trace_name ? Atom(trace_name) : wm.current().id());
 
-    Witness& trace
+    witness::Witness& trace
         (wm.witness(trace_uid));
 
     set_witness(trace);
@@ -279,7 +279,7 @@ void Simulation::simulate(Expr_ptr invar_condition,
     step_t k
         (init_time);
 
-    TimeFrame& last
+    witness::TimeFrame& last
         (trace.last());
 
     assert_time_frame(engine, k, last);
@@ -338,7 +338,7 @@ void Simulation::simulate(Expr_ptr invar_condition,
 
         t0 = t1; // resetting clock
 
-        Witness& w
+        witness::Witness& w
             (*new SimulationWitness( model(), engine, k));
         witness().extend(w);
 

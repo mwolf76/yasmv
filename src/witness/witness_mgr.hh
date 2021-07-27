@@ -38,6 +38,8 @@
 #include <witness/witness.hh>
 #include <witness/evaluator.hh>
 
+namespace witness {
+
 typedef class WitnessMgr *WitnessMgr_ptr;
 typedef std::map<Atom, Witness_ptr> WitnessMap;
 typedef std::vector<Witness_ptr> WitnessList;
@@ -101,6 +103,8 @@ private:
     unsigned f_autoincrement;
 
     Witness f_empty_witness;
+};
+
 };
 
 #endif

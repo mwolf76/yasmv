@@ -29,6 +29,8 @@
 
 #include <common/common.hh>
 
+namespace witness {
+
 class WitnessException : public Exception
 {
 public:
@@ -65,6 +67,8 @@ public:
 class NoValue : public WitnessException {
 public:
     NoValue(Expr_ptr id);
+};
+
 };
 
 #endif /* WITNESS_EXCEPTIONS_H */

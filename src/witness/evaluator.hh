@@ -36,6 +36,9 @@
 #include <utils/values.hh>
 
 #include <boost/unordered_map.hpp>
+
+namespace witness {
+
 typedef boost::unordered_map<TimedExpr, value_t,
                              TimedExprHash, TimedExprEq> TimedExprValueMap;
 
@@ -75,6 +78,8 @@ private:
     void clear_internals();
 
     void push_value(const Expr_ptr expr);
+};
+
 };
 
 #endif /* EVALUATOR_H */

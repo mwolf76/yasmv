@@ -30,9 +30,13 @@
 #include <witness.hh>
 #include <witness_mgr.hh>
 
+namespace witness {
+
 class DefaultWitnessPrinter : public WitnessPrinter {
 public:
 void operator() (const Witness& w, step_t j = 0, step_t k = -1);
+
+};
 
 };
 

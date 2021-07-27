@@ -36,7 +36,7 @@
 namespace reach {
 
 /* Specialized for Reachability CEX */
-class ReachabilityCounterExample : public Witness {
+class ReachabilityCounterExample : public witness::Witness {
 public:
     ReachabilityCounterExample(Expr_ptr property, Model& model, Engine& engine,
                       unsigned k, bool reversed = false);

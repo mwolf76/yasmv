@@ -99,10 +99,10 @@ void Reachability::fast_forward_strategy()
             if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                 /* Extract reachability witness */
-                WitnessMgr& wm
-                    (WitnessMgr::INSTANCE());
+                witness::WitnessMgr& wm
+                    (witness::WitnessMgr::INSTANCE());
 
-                Witness& w
+                witness::Witness& w
                     (* new ReachabilityCounterExample(f_target, model(), engine, k));
 
                 /* witness identifier */

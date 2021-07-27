@@ -73,7 +73,7 @@ private:
     simulation_status_t f_status;
 };
 
-class SimulationWitness : public Witness {
+class SimulationWitness : public witness::Witness {
 
 public:
     SimulationWitness(Model& model, Engine& engine, step_t k);

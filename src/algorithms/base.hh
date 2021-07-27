@@ -64,10 +64,10 @@ public:
     inline bool has_witness() const
     { return NULL != f_witness; }
 
-    inline void set_witness(Witness &witness)
+    inline void set_witness(witness::Witness &witness)
     { f_witness = &witness; }
 
-    inline Witness& witness() const
+    inline witness::Witness& witness() const
     { assert (NULL != f_witness); return *f_witness; }
 
     inline Model& model()
@@ -104,7 +104,7 @@ public:
                         group_t group = MAINGROUP);
 
     /* TimeFrame from a witness */
-    void assert_time_frame(Engine& engine, step_t time, TimeFrame& tf,
+    void assert_time_frame(Engine& engine, step_t time, witness::TimeFrame& tf,
                            group_t group = MAINGROUP);
 
 private:
@@ -137,7 +137,7 @@ private:
     CompilationUnits f_trans;
 
     /* Witness */
-    Witness_ptr f_witness;
+    witness::Witness_ptr f_witness;
 };
 
 #endif /* BASE_ALGORITHM_H */

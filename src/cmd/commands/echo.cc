@@ -54,8 +54,8 @@ utils::Variant Echo::operator()()
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
     /* FIXME: implement stream redirection for std{out,err} */
     std::ostream& out
@@ -71,7 +71,7 @@ utils::Variant Echo::operator()()
                   f_expressions.end(),
                   [&](Expr_ptr expr)
                   {
-                      Witness& current
+                      witness::Witness& current
                           (wm.current());
 
                       out

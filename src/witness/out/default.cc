@@ -24,6 +24,8 @@
 #include <iostream>
 #include <default.hh>
 
+namespace witness {
+
 void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
 {
     step_t i = j;
@@ -34,3 +36,5 @@ void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
     }
 
 }
+
+};

@@ -30,6 +30,8 @@
 #include <utils/time.hh>
 #include <utils/values.hh>
 
+namespace witness {
+
 void Evaluator::push_value(const Expr_ptr expr)
 {
     symb::ResolverProxy resolver;
@@ -275,3 +277,5 @@ bool Evaluator::cache_miss(const Expr_ptr expr)
 
     return true;
 }
+
+};

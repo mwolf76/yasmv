@@ -28,6 +28,8 @@
 #include <sstream>
 #include <cstring>
 
+namespace witness {
+
 TimeFrame::TimeFrame(Witness& owner)
     : f_owner(owner)
 {}
@@ -259,3 +261,5 @@ void Witness::register_engine(Engine& e)
     assert( ! p_engine );
     p_engine = &e;
 }
+
+};

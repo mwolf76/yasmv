@@ -69,7 +69,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
 
     do {
 
-        TimeFrame& tf
+        witness::TimeFrame& tf
             (extend());
 
         symb::SymbIter symbols
@@ -144,8 +144,8 @@ ReachabilityCounterExample::ReachabilityCounterExample(Expr_ptr property, Model&
             }
 
             else if (symb->is_define()) {
-                WitnessMgr& wm
-                    (WitnessMgr::INSTANCE());
+                witness::WitnessMgr& wm
+                    (witness::WitnessMgr::INSTANCE());
 
                 const symb::Define& define
                     (symb->as_define());

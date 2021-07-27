@@ -60,7 +60,7 @@ private:
 };
 
 /* Specialized for LTL CEX */
-class LTLCounterExample : public Witness {
+class LTLCounterExample : public witness::Witness {
 public:
     LTLCounterExample(Expr_ptr property, Model& model,
                       Engine& engine, unsigned k);

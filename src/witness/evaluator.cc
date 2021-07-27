@@ -28,6 +28,8 @@
 #include <witness/evaluator.hh>
 #include <witness/witness_mgr.hh>
 
+namespace witness {
+
 Evaluator::Evaluator(WitnessMgr& owner)
     : f_owner(owner)
 {
@@ -719,3 +721,5 @@ bool Evaluator::walk_cast_inorder(const Expr_ptr expr)
 { return true; }
 void Evaluator::walk_cast_postorder(const Expr_ptr expr)
 { /* nop */ }
+
+};

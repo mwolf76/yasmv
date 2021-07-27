@@ -133,7 +133,7 @@ void DumpTrace::dump_plain_section(std::ostream& os,
 }
 
 
-void DumpTrace::dump_plain(std::ostream& os, Witness& w)
+void DumpTrace::dump_plain(std::ostream& os, witness::Witness& w)
 {
     os
         << "Witness: "
@@ -215,7 +215,7 @@ void DumpTrace::dump_json_section(std::ostream& os,
         << "}" ;
 }
 
-void DumpTrace::dump_json(std::ostream& os, Witness& w)
+void DumpTrace::dump_json(std::ostream& os, witness::Witness& w)
 {
     const char* FIRST_LVL
         (SPACES(4));
@@ -308,7 +308,7 @@ void DumpTrace::dump_yaml_section(YAML::Emitter& out,
         << YAML::EndMap;
 }
 
-void DumpTrace::dump_yaml(std::ostream& os, Witness& w)
+void DumpTrace::dump_yaml(std::ostream& os, witness::Witness& w)
 {
     YAML::Emitter out;
 
@@ -370,7 +370,7 @@ void DumpTrace::dump_yaml(std::ostream& os, Witness& w)
         << std::endl;
 }
 
-void DumpTrace::process_input(Witness& w,
+void DumpTrace::process_input(witness::Witness& w,
                               ExprVector& input_assignments)
 {
     ExprMgr& em
@@ -427,17 +427,17 @@ void DumpTrace::process_input(Witness& w,
 
 /* here UNDEF is used to fill up symbols not showing up in the witness where
    they're expected to. (i. e. UNDEF is only a UI entity) */
-void DumpTrace::process_time_frame(Witness& w, step_t time,
+void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
                                    ExprVector& state_vars_assignments,
                                    ExprVector& defines_assignments)
 {
     ExprMgr& em
         (ExprMgr::INSTANCE());
 
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
-    TimeFrame& tf
+    witness::TimeFrame& tf
         (w[time]);
 
     Model& model
@@ -548,7 +548,7 @@ void DumpTrace::dump_xml_section(std::ostream& os, const char* section, ExprVect
 }
 
 
-void DumpTrace::dump_xml(std::ostream& os, Witness& w)
+void DumpTrace::dump_xml(std::ostream& os, witness::Witness& w)
 {
     const char* FIRST_LVL
         (SPACES(4));
@@ -629,16 +629,16 @@ std::ostream& DumpTrace::get_output_stream()
 
 utils::Variant DumpTrace::operator()()
 {
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
     std::ostream& os
         (get_output_stream());
 
-    Atom wid = { f_trace_id
-                 ? Atom(f_trace_id)
-                 : wm.current().id() };
-    Witness& w
+    Atom wid
+        (f_trace_id ? Atom(f_trace_id) : wm.current().id());
+
+    witness::Witness& w
         (wm.witness(wid));
 
     if (! strcmp( f_format, TRACE_FMT_PLAIN))

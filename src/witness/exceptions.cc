@@ -29,6 +29,8 @@
 #include <string>
 #include <sstream>
 
+namespace witness {
+
 static std::string build_duplicate_witness_id_error_message(Atom id)
 {
     std::ostringstream oss;
@@ -102,3 +104,5 @@ NoValue::NoValue(Expr_ptr id)
     : WitnessException("NoValue",
                        build_no_value_error_message(id))
 {}
+
+};

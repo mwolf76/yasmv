@@ -35,30 +35,31 @@ ListTraces::~ListTraces()
 
 utils::Variant ListTraces::operator()()
 {
-    WitnessMgr& wm
-        (WitnessMgr::INSTANCE());
+    witness::WitnessMgr& wm
+        (witness::WitnessMgr::INSTANCE());
 
-    Witness& current
+    witness::Witness& current
         (wm.current());
 
-    WitnessList::const_iterator eye;
+    witness::WitnessList::const_iterator eye;
 
     std::ostream &os
         (std::cout);
 
-    const WitnessList& witnesses
+    const witness::WitnessList& witnesses
         (wm.witnesses());
 
     if (! witnesses.empty()) {
       for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
 
-        Witness& w
+        witness::Witness& w
           (**eye);
 
         const char* tmp
           (w.id() == current.id()
            ? "[*] "
            : "    ");
+
         os
           << tmp
           << w.id()

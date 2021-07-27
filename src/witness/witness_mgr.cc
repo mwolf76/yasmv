@@ -24,6 +24,8 @@
 #include <utility>
 #include <witness_mgr.hh>
 
+namespace witness {
+
 // static initialization
 WitnessMgr_ptr WitnessMgr::f_instance = NULL;
 
@@ -105,3 +107,5 @@ Expr_ptr WitnessMgr::eval(Witness &w, Expr_ptr ctx, Expr_ptr body, step_t k)
 
     return res;
 }
+
+};

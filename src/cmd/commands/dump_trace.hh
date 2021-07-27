@@ -98,32 +98,36 @@ private:
     std::ostream* f_outfile { NULL } ;
     std::ostream& get_output_stream() ;
 
-    void dump_plain(std::ostream& os, Witness& w);
+    void dump_plain(std::ostream& os,
+                    witness::Witness& w);
     void dump_plain_section(std::ostream&os,
                             const char* section,
                             ExprVector& ev);
 
-    void dump_json(std::ostream& os, Witness& w);
+    void dump_json(std::ostream& os,
+                   witness::Witness& w);
     void dump_json_section(std::ostream&os,
                            const char* section,
                            ExprVector& ev);
 
-    void dump_xml(std::ostream& os, Witness& w);
+    void dump_xml(std::ostream& os,
+                  witness::Witness& w);
     void dump_xml_section(std::ostream&os,
                           const char* section,
                           ExprVector& ev);
 
-    void dump_yaml(std::ostream& os, Witness& w);
+    void dump_yaml(std::ostream& os,
+                   witness::Witness& w);
     void dump_yaml_section(YAML::Emitter& out,
                            const char* section,
                            ExprVector& ev);
 
     /* these values actually come from the current environment */
-    void process_input(Witness& w,
+    void process_input(witness::Witness& w,
                        ExprVector& input_vars_assignments);
 
     /* these values actually belong to the trace */
-    void process_time_frame(Witness& w, step_t time,
+    void process_time_frame(witness::Witness& w, step_t time,
                             ExprVector& state_vars_assignments,
                             ExprVector& defines_assignments);
 

@@ -67,7 +67,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
     }
 
     /* just step `k` */
-    TimeFrame& tf
+    witness::TimeFrame& tf
         (extend());
 
     symb::SymbIter symbols
@@ -153,8 +153,8 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
 
         else if (symb->is_define()) {
 
-            WitnessMgr& wm
-                (WitnessMgr::INSTANCE());
+            witness::WitnessMgr& wm
+                (witness::WitnessMgr::INSTANCE());
 
             const symb::Define& define
                 (symb->as_define());
@@ -170,7 +170,7 @@ SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
                     tf.set_value( key, value);
             }
 
-            catch (NoValue& nv) {
+            catch (witness::NoValue& nv) {
                 WARN
                     << "Cannot evaluate define `"
                     << key

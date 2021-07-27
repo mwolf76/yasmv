@@ -388,7 +388,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
 
 void Algorithm::assert_time_frame(Engine& engine,
                                   step_t time,
-                                  TimeFrame& tf,
+                                  witness::TimeFrame& tf,
                                   group_t group)
 {
     ExprMgr& em

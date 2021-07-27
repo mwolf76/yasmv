@@ -114,7 +114,7 @@ utils::Variant Reach::operator()()
             << "Target is reachable";
 
         if (bmc.has_witness()) {
-            Witness& w
+            witness::Witness& w
                 (bmc.witness());
 
             f_out

@@ -52,6 +52,8 @@
 
 #include <witness/exceptions.hh>
 
+namespace witness {
+
 typedef boost::unordered_map<Expr_ptr, Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
 typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
 
@@ -189,6 +191,8 @@ protected:
 class WitnessPrinter {
 public:
     virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
+};
+
 };
 
 #endif /* WITNESS_H */
