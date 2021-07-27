@@ -24,6 +24,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/pick_state.hh>
 
+namespace cmd {
+
 PickState::PickState(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
@@ -152,3 +154,5 @@ PickStateTopic::~PickStateTopic()
 
 void PickStateTopic::usage()
 { display_manpage("pick-state"); }
+
+};

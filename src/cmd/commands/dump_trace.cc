@@ -41,6 +41,8 @@
 
 #include <utils/misc.hh>
 
+namespace cmd {
+
 /* a boost hack to generate indentation consts :-) */
 #define _SPACE(z, n, str)  " "
 #define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
@@ -671,3 +673,5 @@ DumpTraceTopic::~DumpTraceTopic()
 
 void DumpTraceTopic::usage()
 { display_manpage("dump-trace"); }
+
+};

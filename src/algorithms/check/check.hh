@@ -27,6 +27,8 @@
 #ifndef LTL_ALGORITHM_H
 #define LTL_ALGORITHM_H
 
+#include <cmd/command.hh>
+
 #include <expr/expr.hh>
 
 #include <algorithms/base.hh>
@@ -44,7 +46,7 @@ typedef enum {
 class LTL : public Algorithm {
 
 public:
-    LTL(Command& command, Model& model);
+    LTL(cmd::Command& command, Model& model);
     ~LTL();
 
     void process(const expr::Expr_ptr phi);

@@ -80,9 +80,9 @@ void pt(enc::TCBI& tcbi)
 void pd(InlinedOperatorDescriptor& md)
 { std::cerr << md << std::endl; }
 
-void batch(Command_ptr cmd)
+void batch(cmd::Command_ptr cmd)
 {
-    Interpreter& system = Interpreter::INSTANCE();
+    cmd::Interpreter& system = cmd::Interpreter::INSTANCE();
     opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
 
     bool quiet { opts_mgr.quiet() };
@@ -142,8 +142,8 @@ void sighandler(int signum)
 
 int main(int argc, const char *argv[])
 {
-    Interpreter& interpreter
-        (Interpreter::INSTANCE());
+    cmd::Interpreter& interpreter
+        (cmd::Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGTSTP, sighandler);
@@ -183,9 +183,9 @@ int main(int argc, const char *argv[])
         /* run options-generated commands (if any) */
         const std::string model_filename = opts_mgr.model();
         if (! model_filename.empty()) {
-            ReadModel* cmd
-                (reinterpret_cast<ReadModel*>
-                 (CommandMgr::INSTANCE().make_read_model()));
+            cmd::ReadModel_ptr cmd
+                (reinterpret_cast<cmd::ReadModel_ptr>
+                 (cmd::CommandMgr::INSTANCE().make_read_model()));
 
             cmd->set_input( model_filename.c_str());
             batch(cmd);

@@ -47,7 +47,7 @@ typedef enum {
 class Simulation : public Algorithm {
 
 public:
-    Simulation(Command& command, Model& model);
+    Simulation(cmd::Command& command, Model& model);
     ~Simulation();
 
     void pick_state(bool allsat,

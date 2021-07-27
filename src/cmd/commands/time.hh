@@ -29,6 +29,8 @@
 
 #include <cmd/command.hh>
 
+namespace cmd {
+
 class Time : public Command {
 public:
     Time(Interpreter& owner);
@@ -46,4 +48,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* TIME_CMD_H */

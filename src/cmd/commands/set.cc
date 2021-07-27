@@ -33,6 +33,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace cmd {
+
 Set::Set(Interpreter& owner)
     : Command(owner)
     , f_identifier(NULL)
@@ -88,3 +90,5 @@ SetTopic::~SetTopic()
 
 void SetTopic::usage()
 { display_manpage("set"); }
+
+};

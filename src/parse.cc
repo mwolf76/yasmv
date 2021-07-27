@@ -39,6 +39,8 @@
 #include <utils/misc.hh>
 #include <utils/clock.hh>
 
+namespace parse {
+
 static bool parseErrors;
 static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
                                           pANTLR3_UINT8 * tokenNames);
@@ -103,7 +105,7 @@ bool parseFile(const char* fName)
  * Runs the parser COMMAND_LINE rule on an input line string.
  */
 // FIXME: proper error handling
-CommandVector_ptr parseCommand(const char *command_line)
+cmd::CommandVector_ptr parseCommand(const char *command_line)
 {
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
@@ -135,7 +137,7 @@ CommandVector_ptr parseCommand(const char *command_line)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
-    CommandVector_ptr res
+    cmd::CommandVector_ptr res
         (psr -> command_line(psr));
 
     // cleanup
@@ -271,3 +273,5 @@ static void reportParserStatus(bool parseErrors, timespec start, timespec stop)
             << "."
             << std::endl;
 }
+
+};

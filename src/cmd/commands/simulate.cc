@@ -27,6 +27,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/simulate.hh>
 
+namespace cmd {
+
 Simulate::Simulate(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
@@ -164,19 +166,4 @@ SimulateTopic::~SimulateTopic()
 void SimulateTopic::usage()
 { display_manpage("simulate"); }
 
-
-// void SimulateTopic::usage()
-// {
-//     std::cout
-//         << "simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ] - Performs BMC simulation.\n"
-//         << "[ Requires model ]\n\n"
-//         << "options:\n"
-//         << "  -c <expr>, specifies an additional state constraint.\n"
-//         << "  -u <expr>, specifies an until condition.\n"
-//         << "  -k <steps>, the number of steps to simulate.\n"
-//         << "  -t <trace-uid>, the simulation trace UID.\n\n"
-//         << "Extends an existing trace with simulated steps. The simulation will follow\n"
-//         << "any additional constraint and will terminate due to (a) having reached\n"
-//         << "the until condition; or (b) having reached the specified number of steps.\n"
-//         << "If neither -k nor -u is used, -k 1 is assumed.\n" ;
-// }
+};

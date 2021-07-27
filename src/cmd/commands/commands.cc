@@ -30,17 +30,20 @@
 #include <ctime>
 
 #include <commands.hh>
+
+/* algorithms */
+#include <check/check.hh>
+#include <reach/reach.hh>
+#include <sim/simulation.hh>
+
+namespace cmd {
+
 const std::string outPrefix ("-- ");
 const std::string wrnPrefix ("!! ");
 
 const std::string okMessage ("Ok");
 const std::string errMessage ("ERROR");
 const std::string byeMessage ("Bye");
-
-/* algorithms */
-#include <check/check.hh>
-#include <reach/reach.hh>
-#include <sim/simulation.hh>
 
 Command::Command(Interpreter& owner)
     : f_owner(owner)
@@ -86,6 +89,7 @@ CommandTopic::~CommandTopic()
            << std::endl;
 }
 
+};
 
 #if 0
 ModelDumpCommand::ModelDumpCommand(Interpreter& owner)

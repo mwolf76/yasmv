@@ -36,13 +36,14 @@
 
 #include <iomanip>
 
+namespace cmd {
+
 Echo::Echo(Interpreter& owner)
     : Command(owner)
 {}
 
 Echo::~Echo()
-{
-}
+{}
 
 void Echo::append_expression(expr::Expr_ptr expr)
 {
@@ -100,3 +101,5 @@ EchoTopic::~EchoTopic()
 
 void EchoTopic::usage()
 { display_manpage("echo"); }
+
+};

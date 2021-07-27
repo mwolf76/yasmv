@@ -52,6 +52,8 @@
 #include <cmd/commands/set.hh>
 #include <cmd/commands/clear.hh>
 
+namespace cmd {
+
 class CommandMgr;
 typedef CommandMgr* CommandMgr_ptr;
 
@@ -200,6 +202,8 @@ protected:
 private:
     static CommandMgr_ptr f_instance;
     Interpreter& f_interpreter;
+};
+
 };
 
 #endif

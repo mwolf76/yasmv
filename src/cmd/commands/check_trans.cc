@@ -29,6 +29,7 @@
 
 #include <algorithms/fsm/fsm.hh>
 
+namespace cmd {
 
 CheckTrans::CheckTrans(Interpreter& owner)
     : Command(owner)
@@ -125,3 +126,5 @@ CheckTransTopic::~CheckTransTopic()
 
 void CheckTransTopic::usage()
 { display_manpage("check-trans"); }
+
+};

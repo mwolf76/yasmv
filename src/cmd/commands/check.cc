@@ -29,6 +29,8 @@
 
 #include <algorithms/check/check.hh>
 
+namespace cmd {
+
 Check::Check(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
@@ -93,3 +95,5 @@ CheckTopic::~CheckTopic()
 
 void CheckTopic::usage()
 { display_manpage("check"); }
+
+};

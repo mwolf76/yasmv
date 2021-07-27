@@ -29,6 +29,9 @@
 
 #include <algorithms/fsm/fsm.hh>
 
+
+namespace cmd {
+
 CheckInit::CheckInit(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
@@ -124,3 +127,5 @@ CheckInitTopic::~CheckInitTopic()
 
 void CheckInitTopic::usage()
 { display_manpage("check-init"); }
+
+};

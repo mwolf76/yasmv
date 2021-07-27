@@ -29,6 +29,8 @@
 #include <cmd/command.hh>
 #include <cmd/commands/commands.hh>
 
+namespace cmd {
+
 class Quit : public Command {
 
     int f_retcode;
@@ -50,4 +52,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif // QUIT_CMD_H

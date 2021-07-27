@@ -27,6 +27,8 @@
 #include <common/common.hh>
 #include <utils/variant.hh>
 
+namespace cmd {
+
 extern const std::string outPrefix;
 extern const std::string wrnPrefix;
 
@@ -39,5 +41,7 @@ inline bool is_success(utils::Variant& v)
 
 inline bool is_failure(utils::Variant& v)
 { return v.is_string() && v.as_string() == errMessage; }
+
+};
 
 #endif /* COMMANDS_H */

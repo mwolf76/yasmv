@@ -29,6 +29,8 @@
 
 #include <cmd/commands/cmd.hh>
 
+namespace cmd {
+
 // -- command definitions --------------------------------------------------
 class ReadModel : public Command {
 public:
@@ -49,4 +51,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* LOAD_MODEL_H */

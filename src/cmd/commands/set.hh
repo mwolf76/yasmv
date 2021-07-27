@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <env/environment.hh>
 
+namespace cmd {
+
 class Set : public Command {
 
     expr::Expr_ptr f_identifier;
@@ -53,4 +55,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* SET_CMD_H */

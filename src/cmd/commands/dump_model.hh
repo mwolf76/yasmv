@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <model/module.hh>
 
+namespace cmd {
+
 class DumpModel : public Command {
     pchar f_output;
 
@@ -69,6 +71,8 @@ public:
     virtual ~DumpModelTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* DUMP_MODEL_CMD_H */

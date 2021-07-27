@@ -26,6 +26,8 @@
 
 #include <witness/witness_mgr.hh>
 
+namespace cmd {
+
 ListTraces::ListTraces(Interpreter& owner)
     : Command(owner)
 {}
@@ -94,3 +96,5 @@ ListTracesTopic::~ListTracesTopic()
 
 void ListTracesTopic::usage()
 { display_manpage("list-traces"); }
+
+};

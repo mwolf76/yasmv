@@ -24,6 +24,8 @@
 #include <cmd/commands/quit.hh>
 #include <cmd/interpreter.hh>
 
+namespace cmd {
+
 Quit::Quit(Interpreter& owner)
     : Command(owner)
     , f_retcode(0)
@@ -58,3 +60,5 @@ QuitTopic::~QuitTopic()
 
 void QuitTopic::usage()
 { display_manpage("quit"); }
+
+};

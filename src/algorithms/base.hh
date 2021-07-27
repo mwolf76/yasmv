@@ -30,6 +30,8 @@
 
 #include <boost/unordered_map.hpp>
 
+#include <cmd/command.hh>
+
 #include <sat/sat.hh>
 
 #include <model/model.hh>
@@ -45,14 +47,12 @@
 #include <utils/variant.hh>
 #include <algorithms/exceptions.hh>
 
-class Command;
-
 /* Engine-less algorithm base class. Engine instances are provided by
    strategies. */
 class Algorithm {
 
 public:
-    Algorithm(Command& command, Model& model);
+    Algorithm(cmd::Command& command, Model& model);
     virtual ~Algorithm();
 
     /* Build encodings to perform model compilation */
@@ -117,7 +117,7 @@ private:
     bool f_ok;
 
     /* Command */
-    Command& f_command;
+    cmd::Command& f_command;
 
     /* Model */
     Model& f_model;

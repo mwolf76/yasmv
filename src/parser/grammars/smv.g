@@ -55,8 +55,8 @@ options {
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
 
-    CommandMgr& cm
-        (CommandMgr::INSTANCE());
+    cmd::CommandMgr& cm
+        (cmd::CommandMgr::INSTANCE());
 
     /* the model instance */
     Model& model
@@ -923,14 +923,14 @@ literal returns [expr::Expr_ptr res]
     ;
 
 // -- Scripting sub-system Toplevel ---------------------------------------------
-command_line returns [CommandVector_ptr res]
+command_line returns [cmd::CommandVector_ptr res]
 @init {
-    res = new CommandVector();
+    res = new cmd::CommandVector();
 }
     : commands[res]
     ;
 
-commands [CommandVector_ptr cmds]
+commands [cmd::CommandVector_ptr cmds]
     :
         c=command
         { cmds->push_back(c); }
@@ -940,7 +940,7 @@ commands [CommandVector_ptr cmds]
             { cmds->push_back(c); }
         )* ;
 
-command_topic returns [CommandTopic_ptr res]
+command_topic returns [cmd::CommandTopic_ptr res]
     :  c=check_command_topic
        { $res = c; }
 
@@ -1005,7 +1005,7 @@ command_topic returns [CommandTopic_ptr res]
        { $res = c; }
     ;
 
-command returns [Command_ptr res]
+command returns [cmd::Command_ptr res]
     :  c = check_command
        { $res = c; }
 
@@ -1070,33 +1070,33 @@ command returns [Command_ptr res]
        { $res = c; }
     ;
 
-help_command returns [Command_ptr res]
+help_command returns [cmd::Command_ptr res]
     : 'help'
       { $res = cm.make_help(); }
       (
           topic = command_topic
-          { ((Help_ptr) $res)->set_topic(topic); }
+          { ((cmd::Help_ptr) $res)->set_topic(topic); }
       )? ;
 
-help_command_topic returns [CommandTopic_ptr res]
+help_command_topic returns [cmd::CommandTopic_ptr res]
     : 'help'
       { $res = cm.topic_help(); }
     ;
 
-do_command returns [Command_ptr res]
+do_command returns [cmd::Command_ptr res]
     : 'do'
       { $res = cm.make_do(); }
       (
             subcommand = command ';'
-            { ((Do_ptr) res)->add_command(subcommand); }
+            { ((cmd::Do_ptr) res)->add_command(subcommand); }
       )+ ;
 
-do_command_topic returns [CommandTopic_ptr res]
+do_command_topic returns [cmd::CommandTopic_ptr res]
     : 'do'
        { $res = cm.topic_do(); }
     ;
 
-echo_command returns [Command_ptr res]
+echo_command returns [cmd::Command_ptr res]
 @init {
     expr::ExprVector ev;
 }
@@ -1105,293 +1105,293 @@ echo_command returns [Command_ptr res]
       (
             expr = toplevel_expression
             {
-                ((Echo_ptr) $res) -> append_expression(expr);
+                ((cmd::Echo_ptr) $res) -> append_expression(expr);
             }
       )
       ;
 
-echo_command_topic returns [CommandTopic_ptr res]
+echo_command_topic returns [cmd::CommandTopic_ptr res]
     : 'echo'
        { $res = cm.topic_echo(); }
     ;
 
-last_command returns [Command_ptr res]
+last_command returns [cmd::Command_ptr res]
     : 'last'
       { $res = cm.make_last(); }
     ;
 
-last_command_topic returns [CommandTopic_ptr res]
+last_command_topic returns [cmd::CommandTopic_ptr res]
     : 'last'
        { $res = cm.topic_last(); }
     ;
 
-on_command returns [Command_ptr res]
+on_command returns [cmd::Command_ptr res]
     :
       'on'
         ('success' { $res = cm.make_on(); }
-            tc=command { ((On_ptr) $res)->set_then(tc); } |
+            tc=command { ((cmd::On_ptr) $res)->set_then(tc); } |
 
           'failure' { $res = cm.make_on(); }
-            ec=command { ((On_ptr) $res)->set_else(ec); } )
+            ec=command { ((cmd::On_ptr) $res)->set_else(ec); } )
     ;
 
-on_command_topic returns [CommandTopic_ptr res]
+on_command_topic returns [cmd::CommandTopic_ptr res]
     : 'on'
         { $res = cm.topic_on(); }
     ;
 
-time_command returns [Command_ptr res]
+time_command returns [cmd::Command_ptr res]
     : 'time'
       { $res = cm.make_time(); }
     ;
 
-time_command_topic returns [CommandTopic_ptr res]
+time_command_topic returns [cmd::CommandTopic_ptr res]
     : 'time'
       { $res = cm.topic_time(); }
     ;
 
-read_model_command returns [Command_ptr res]
+read_model_command returns [cmd::Command_ptr res]
     :  'read-model'
         { $res = cm.make_read_model(); }
 
         ( input=pcchar_quoted_string {
-            ((ReadModel_ptr) $res)->set_input(input);
+            ((cmd::ReadModel_ptr) $res)->set_input(input);
         }) ?
     ;
 
-read_model_command_topic returns [CommandTopic_ptr res]
+read_model_command_topic returns [cmd::CommandTopic_ptr res]
     :  'read-model'
         { $res = cm.topic_read_model(); }
     ;
 
-dump_model_command returns [Command_ptr res]
+dump_model_command returns [cmd::Command_ptr res]
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
         ( '-o' output=pcchar_quoted_string {
-            ((DumpModel_ptr) $res)->set_output(output);
+            ((cmd::DumpModel_ptr) $res)->set_output(output);
         }
 
-        | '-s' ('state' { ((DumpModel_ptr) $res)->select_state(); }
-        |       'init'  { ((DumpModel_ptr) $res)->select_init();  }
-        |       'trans' { ((DumpModel_ptr) $res)->select_trans(); })
+        | '-s' ('state' { ((cmd::DumpModel_ptr) $res)->select_state(); }
+        |       'init'  { ((cmd::DumpModel_ptr) $res)->select_init();  }
+        |       'trans' { ((cmd::DumpModel_ptr) $res)->select_trans(); })
         ) *
     ;
 
-dump_model_command_topic returns [CommandTopic_ptr res]
+dump_model_command_topic returns [cmd::CommandTopic_ptr res]
     :  'dump-model'
         { $res = cm.topic_dump_model(); }
     ;
 
-check_command returns[Command_ptr res]
+check_command returns[cmd::Command_ptr res]
     : 'check'
       { $res = cm.make_check(); }
 
       property=temporal_expression
-      { ((Check_ptr) $res)->set_property(property); }
+      { ((cmd::Check_ptr) $res)->set_property(property); }
 
       ( '-c' constraint=temporal_expression
-      { ((Check_ptr) $res)->add_constraint(constraint); })*
+      { ((cmd::Check_ptr) $res)->add_constraint(constraint); })*
     ;
 
-check_command_topic returns[CommandTopic_ptr res]
+check_command_topic returns[cmd::CommandTopic_ptr res]
     : 'check'
        { $res = cm.topic_check(); }
     ;
 
-check_init_command returns[Command_ptr res]
+check_init_command returns[cmd::Command_ptr res]
     : 'check-init'
       { $res = cm.make_check_init(); }
 
       ( '-c' constraint=toplevel_expression
-      { ((CheckInit_ptr) $res)->add_constraint(constraint); })*
+      { ((cmd::CheckInit_ptr) $res)->add_constraint(constraint); })*
     ;
 
-check_init_command_topic returns [CommandTopic_ptr res]
+check_init_command_topic returns [cmd::CommandTopic_ptr res]
     :  'check-init'
         { $res = cm.topic_check_init(); }
     ;
 
-reach_command returns[Command_ptr res]
+reach_command returns[cmd::Command_ptr res]
     :   'reach'
         { $res = cm.make_reach(); }
 
         target=toplevel_expression
-        { ((Reach_ptr) $res)->set_target(target); }
+        { ((cmd::Reach_ptr) $res)->set_target(target); }
 
         /* forward guide */
         ( '-f' constraint=toplevel_expression
-          { ((Reach_ptr) $res)->add_forward_constraint(constraint); }
+          { ((cmd::Reach_ptr) $res)->add_forward_constraint(constraint); }
 
         /* backward guide */
         | '-b' constraint=toplevel_expression
-          { ((Reach_ptr) $res)->add_backward_constraint(constraint); }
+          { ((cmd::Reach_ptr) $res)->add_backward_constraint(constraint); }
 
         /* global guide */
         | '-g' constraint=toplevel_expression
-          { ((Reach_ptr) $res)->add_global_constraint(constraint); }
+          { ((cmd::Reach_ptr) $res)->add_global_constraint(constraint); }
 
         )*
     ;
 
-reach_command_topic returns [CommandTopic_ptr res]
+reach_command_topic returns [cmd::CommandTopic_ptr res]
     :  'reach'
         { $res = cm.topic_reach(); }
     ;
 
-check_trans_command returns[Command_ptr res]
+check_trans_command returns[cmd::Command_ptr res]
     : 'check-trans'
       { $res = cm.make_check_trans(); }
 
       ( '-c' constraint=toplevel_expression
-      { ((CheckTrans_ptr) $res)->add_constraint(constraint); })*
+      { ((cmd::CheckTrans_ptr) $res)->add_constraint(constraint); })*
     ;
 
-check_trans_command_topic returns [CommandTopic_ptr res]
+check_trans_command_topic returns [cmd::CommandTopic_ptr res]
     :  'check-trans'
         { $res = cm.topic_check_trans(); }
     ;
 
-list_traces_command returns [Command_ptr res]
+list_traces_command returns [cmd::Command_ptr res]
     : 'list-traces'
       { $res = cm.make_list_traces(); }
     ;
 
-list_traces_command_topic returns [CommandTopic_ptr res]
+list_traces_command_topic returns [cmd::CommandTopic_ptr res]
     :  'list-traces'
         { $res = cm.topic_list_traces(); }
     ;
 
-dump_trace_command returns [Command_ptr res]
+dump_trace_command returns [cmd::Command_ptr res]
     : 'dump-trace'
       { $res = cm.make_dump_trace(); }
 
     (
       '-f' format=pcchar_identifier
-      { ((DumpTrace_ptr) $res)->set_format(format); }
+      { ((cmd::DumpTrace_ptr) $res)->set_format(format); }
 
     | '-o' output=pcchar_quoted_string
       {
-            ((DumpTrace_ptr) $res)->set_output(output);
+            ((cmd::DumpTrace_ptr) $res)->set_output(output);
       }
 
     )*
 
     ( trace_id=pcchar_identifier
-    { ((DumpTrace_ptr) $res)->set_trace_id(trace_id); } )?
+    { ((cmd::DumpTrace_ptr) $res)->set_trace_id(trace_id); } )?
     ;
 
-dump_trace_command_topic returns [CommandTopic_ptr res]
+dump_trace_command_topic returns [cmd::CommandTopic_ptr res]
     :  'dump-trace'
         { $res = cm.topic_dump_trace(); }
     ;
 
 
-dup_trace_command returns [Command_ptr res]
+dup_trace_command returns [cmd::Command_ptr res]
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
       trace_id=pcchar_identifier
-      { ((DupTrace_ptr) $res)->set_trace_id(trace_id); }
+      { ((cmd::DupTrace_ptr) $res)->set_trace_id(trace_id); }
 
       ( duplicate_uid=pcchar_identifier
-        { ((DupTrace_ptr) $res)->set_duplicate_id(duplicate_uid); } )?
+        { ((cmd::DupTrace_ptr) $res)->set_duplicate_id(duplicate_uid); } )?
     ;
 
-dup_trace_command_topic returns [CommandTopic_ptr res]
+dup_trace_command_topic returns [cmd::CommandTopic_ptr res]
     :  'dup-trace'
         { $res = cm.topic_dup_trace(); }
     ;
 
-pick_state_command returns [Command_ptr res]
+pick_state_command returns [cmd::Command_ptr res]
     :   'pick-state'
         { $res = cm.make_pick_state(); }
     (
          '-a'
-         { ((PickState_ptr) $res)->set_allsat(true); }
+         { ((cmd::PickState_ptr) $res)->set_allsat(true); }
 
     |    '-l' limit=constant
-         { ((PickState_ptr) $res)->set_limit(limit->value()); }
+         { ((cmd::PickState_ptr) $res)->set_limit(limit->value()); }
 
     |    '-c' constraint=toplevel_expression
-         { ((PickState_ptr) $res)->add_constraint(constraint); }
+         { ((cmd::PickState_ptr) $res)->add_constraint(constraint); }
     )* ;
 
-pick_state_command_topic returns [CommandTopic_ptr res]
+pick_state_command_topic returns [cmd::CommandTopic_ptr res]
     :  'pick-state'
         { $res = cm.topic_pick_state(); }
     ;
 
-simulate_command returns [Command_ptr res]
+simulate_command returns [cmd::Command_ptr res]
     : 'simulate'
       { $res = cm.make_simulate(); }
     (
        '-i' invar_condition=toplevel_expression
-        { ((Simulate_ptr) $res)->set_invar_condition(invar_condition); }
+        { ((cmd::Simulate_ptr) $res)->set_invar_condition(invar_condition); }
 
     |  '-u' until_condition=toplevel_expression
-        { ((Simulate_ptr) $res)->set_until_condition(until_condition); }
+        { ((cmd::Simulate_ptr) $res)->set_until_condition(until_condition); }
 
     |   '-k' konst=constant
-        { ((Simulate_ptr) $res)->set_k(konst->value()); }
+        { ((cmd::Simulate_ptr) $res)->set_k(konst->value()); }
 
     |   '-t' trace_id=pcchar_identifier
-        { ((Simulate_ptr) $res)->set_trace_uid(trace_id); }
+        { ((cmd::Simulate_ptr) $res)->set_trace_uid(trace_id); }
     )* ;
 
-simulate_command_topic returns [CommandTopic_ptr res]
+simulate_command_topic returns [cmd::CommandTopic_ptr res]
     :  'simulate'
         { $res = cm.topic_simulate(); }
     ;
 
-get_command returns [Command_ptr res]
+get_command returns [cmd::Command_ptr res]
     : 'get'
       { $res = cm.make_get(); }
 
       ( id=identifier
-      { ((Get_ptr) $res)->set_identifier(id); })?
+      { ((cmd::Get_ptr) $res)->set_identifier(id); })?
     ;
 
-get_command_topic returns [CommandTopic_ptr res]
+get_command_topic returns [cmd::CommandTopic_ptr res]
     :  'get'
         { $res = cm.topic_get(); }
     ;
 
-set_command returns [Command_ptr res]
+set_command returns [cmd::Command_ptr res]
     : 'set'
       { $res = cm.make_set(); }
 
       id=identifier
-      { ((Set_ptr) $res)->set_identifier(id); }
+      { ((cmd::Set_ptr) $res)->set_identifier(id); }
 
       val=toplevel_expression
-      { ((Set_ptr) $res)->set_value(val); }
+      { ((cmd::Set_ptr) $res)->set_value(val); }
     ;
 
-set_command_topic returns [CommandTopic_ptr res]
+set_command_topic returns [cmd::CommandTopic_ptr res]
     :  'set'
         { $res = cm.topic_set(); }
     ;
 
-clear_command returns [Command_ptr res]
+clear_command returns [cmd::Command_ptr res]
     : 'clear'
       { $res = cm.make_clear(); }
 
       ( id=identifier
-      { ((Clear_ptr) $res)->set_identifier(id); })?
+      { ((cmd::Clear_ptr) $res)->set_identifier(id); })?
     ;
 
-clear_command_topic returns [CommandTopic_ptr res]
+clear_command_topic returns [cmd::CommandTopic_ptr res]
     :  'clear'
         { $res = cm.topic_clear(); }
     ;
 
-quit_command returns [Command_ptr res]
+quit_command returns [cmd::Command_ptr res]
     :  'quit'
        { $res = cm.make_quit(); }
     ;
 
-quit_command_topic returns [CommandTopic_ptr res]
+quit_command_topic returns [cmd::CommandTopic_ptr res]
     :  'quit'
         { $res = cm.topic_quit(); }
     ;

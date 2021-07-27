@@ -27,6 +27,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>
 
+namespace cmd {
+
 Reach::Reach(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
@@ -169,3 +171,5 @@ ReachTopic::~ReachTopic()
 
 void ReachTopic::usage()
 { display_manpage("reach"); }
+
+};

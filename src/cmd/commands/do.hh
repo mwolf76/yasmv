@@ -28,6 +28,9 @@
 #define DO_H
 
 #include <cmd/command.hh>
+
+namespace cmd {
+
 typedef CommandTopic* CommandTopic_ptr;
 
 using Commands = std::vector<Command_ptr>;
@@ -49,5 +52,7 @@ public:
     virtual ~DoTopic();
 
     void virtual usage();
+};
+
 };
 #endif /* DO_H */

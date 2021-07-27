@@ -29,8 +29,12 @@
 
 #include <common/common.hh>
 
+namespace cmd {
+
 typedef class Command* Command_ptr;
 typedef std::vector<Command_ptr> CommandVector;
 typedef CommandVector* CommandVector_ptr;
+
+};
 
 #endif /* COMMAND_TYPEDEFS_H */

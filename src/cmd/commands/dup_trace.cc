@@ -33,6 +33,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace cmd {
+
 DupTrace::DupTrace(Interpreter& owner)
     : Command(owner)
     , f_trace_id(NULL)
@@ -87,3 +89,5 @@ DupTraceTopic::~DupTraceTopic()
 
 void DupTraceTopic::usage()
 { display_manpage("dup-trace"); }
+
+};

@@ -28,6 +28,8 @@
 
 #include <iomanip>
 
+namespace cmd {
+
 Last::Last(Interpreter& owner)
     : Command(owner)
     , f_message(NULL)
@@ -92,3 +94,5 @@ LastTopic::~LastTopic()
 
 void LastTopic::usage()
 { display_manpage("last"); }
+
+};

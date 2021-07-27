@@ -30,6 +30,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/time.hh>
 
+namespace cmd {
+
 Time::Time(Interpreter& owner)
     : Command(owner)
 {}
@@ -89,3 +91,5 @@ TimeTopic::~TimeTopic()
 
 void TimeTopic::usage()
 { display_manpage("time"); }
+
+};

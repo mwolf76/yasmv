@@ -27,12 +27,14 @@
 #include <algorithms/base.hh>
 #include <algorithms/reach/typedefs.hh>
 
+#include <cmd/command.hh>
+
 namespace reach {
 
 class Reachability : public Algorithm {
 
 public:
-    Reachability(Command& command, Model& model);
+    Reachability(cmd::Command& command, Model& model);
     ~Reachability();
 
     void process(expr::Expr_ptr target,

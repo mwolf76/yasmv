@@ -27,6 +27,8 @@
 #include <boost/filesystem.hpp>
 #include "command.hh"
 
+namespace cmd {
+
 void CommandTopic::display_manpage(const char *topic)
 {
     std::stringstream oss;
@@ -57,3 +59,5 @@ void CommandTopic::display_manpage(const char *topic)
 
     execlp( "bash", "bash", "-c", tmp, NULL );
 }
+
+};

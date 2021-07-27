@@ -2,6 +2,9 @@
 #define __LAST_H_DEFINED__
 
 #include <cmd/command.hh>
+
+namespace cmd {
+
 class Last : public Command {
     pchar f_message;
 
@@ -21,4 +24,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif

@@ -27,6 +27,8 @@
 #ifndef FSM_ALGORITHM_H
 #define FSM_ALGORITHM_H
 
+#include <cmd/command.hh>
+
 #include <expr/expr.hh>
 
 #include <algorithms/base.hh>
@@ -43,7 +45,7 @@ typedef enum {
 class CheckInitConsistency : public Algorithm {
 
 public:
-    CheckInitConsistency(Command& command, Model& model);
+    CheckInitConsistency(cmd::Command& command, Model& model);
     ~CheckInitConsistency();
 
     void process(expr::ExprVector constraints);
@@ -65,7 +67,7 @@ private:
 class CheckTransConsistency : public Algorithm {
 
 public:
-    CheckTransConsistency(Command& command, Model& model);
+    CheckTransConsistency(cmd::Command& command, Model& model);
     ~CheckTransConsistency();
 
     void process(expr::ExprVector constraints);

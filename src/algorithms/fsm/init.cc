@@ -28,7 +28,7 @@
 
 namespace fsm {
 
-CheckInitConsistency::CheckInitConsistency(Command& command, Model& model)
+CheckInitConsistency::CheckInitConsistency(cmd::Command& command, Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);

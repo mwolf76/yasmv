@@ -29,6 +29,8 @@
 
 #include <cmd/command.hh>
 
+namespace cmd {
+
 class CheckInit : public Command {
 public:
     CheckInit(Interpreter& owner);
@@ -58,6 +60,8 @@ public:
     virtual ~CheckInitTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* CHECK_INIT_CMD_H */

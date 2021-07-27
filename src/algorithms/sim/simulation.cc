@@ -37,7 +37,7 @@ namespace sim {
 static unsigned progressive = 0;
 static const char *simulation_trace_prfx = "sim_";
 
-Simulation::Simulation(Command& command, Model& model)
+Simulation::Simulation(cmd::Command& command, Model& model)
     : Algorithm(command, model)
 {
     setup();

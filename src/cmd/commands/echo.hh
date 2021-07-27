@@ -28,6 +28,9 @@
 #define ECHO_H
 
 #include <cmd/command.hh>
+
+namespace cmd {
+
 class Echo : public Command {
     using expressions = std::vector<expr::Expr_ptr>;
     expressions f_expressions;
@@ -48,5 +51,7 @@ public:
     virtual ~EchoTopic();
 
     void virtual usage();
+};
+
 };
 #endif /* ECHO_H */

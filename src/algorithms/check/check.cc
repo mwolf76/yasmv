@@ -28,7 +28,7 @@
 
 namespace check {
 
-LTL::LTL(Command& command, Model& model)
+LTL::LTL(cmd::Command& command, Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);

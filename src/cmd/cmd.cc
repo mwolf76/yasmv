@@ -23,6 +23,8 @@
 
 #include <cmd.hh>
 
+namespace cmd {
+
 // static initialization
 CommandMgr_ptr CommandMgr::f_instance = NULL;
 
@@ -51,3 +53,5 @@ CommandMgr::~CommandMgr()
         << "Destroyed CommandMgr"
         << std::endl;
 }
+
+};

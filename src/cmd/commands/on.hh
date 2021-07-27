@@ -28,6 +28,9 @@
 #define ON_H
 
 #include <cmd/command.hh>
+
+namespace cmd {
+
 typedef CommandTopic* CommandTopic_ptr;
 
 class On : public Command {
@@ -50,5 +53,7 @@ public:
     virtual ~OnTopic();
 
     void virtual usage();
+};
+
 };
 #endif /* ON_H */

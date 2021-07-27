@@ -33,6 +33,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace cmd {
+
 Get::Get(Interpreter& owner)
     : Command(owner)
     , f_identifier(NULL)
@@ -124,3 +126,5 @@ GetTopic::~GetTopic()
 
 void GetTopic::usage()
 { display_manpage("get"); }
+
+};

@@ -29,6 +29,8 @@
 
 #include <cmd/command.hh>
 
+namespace cmd {
+
 class ListTraces : public Command {
 public:
     ListTraces (Interpreter& owner);
@@ -45,4 +47,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* LIST_TRACES_CMD_H */

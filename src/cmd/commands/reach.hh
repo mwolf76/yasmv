@@ -29,6 +29,8 @@
 #include <cmd/command.hh>
 #include <algorithms/reach/reach.hh>
 
+namespace cmd {
+
 class Reach : public Command {
 public:
     Reach(Interpreter& owner);
@@ -69,4 +71,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* REACH_CMD_H */

@@ -34,6 +34,8 @@
 
 #include <type/type.hh>
 
+namespace cmd {
+
 DumpModel::DumpModel(Interpreter& owner)
     : Command(owner)
     , f_output(NULL)
@@ -249,3 +251,5 @@ DumpModelTopic::~DumpModelTopic()
 
 void DumpModelTopic::usage()
 { display_manpage("dump-model"); }
+
+};

@@ -27,6 +27,8 @@
 #ifndef COMMAND_EXCEPTIONS_H
 #define COMMAND_EXCEPTIONS_H
 
+namespace cmd {
+
 /** Exception classes */
 class CommandException : public Exception {
 public:
@@ -34,6 +36,8 @@ public:
                      const std::string& message="")
         : Exception("CommandException", subtype, message)
     {}
+};
+
 };
 
 #endif /* COMMAND_EXCEPTIONS_H */

@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <algorithms/sim/simulation.hh>
 
+namespace cmd {
+
 class Simulate : public Command {
 public:
     Simulate(Interpreter& owner);
@@ -82,4 +84,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* SIMULATE_H_CMD */

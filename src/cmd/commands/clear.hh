@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <env/environment.hh>
 
+namespace cmd {
+
 class Clear : public Command {
 
     expr::Expr_ptr f_identifier;
@@ -50,6 +52,8 @@ public:
     virtual ~ClearTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* CLEAR_CMD_H */

@@ -29,6 +29,8 @@
 #include <cmd/command.hh>
 #include <env/environment.hh>
 
+namespace cmd {
+
 class Get : public Command {
 
     expr::Expr_ptr f_identifier;
@@ -55,6 +57,8 @@ public:
     virtual ~GetTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif // GET_CMD_H

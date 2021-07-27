@@ -33,7 +33,7 @@ namespace reach {
 typedef boost::thread* thread_ptr;
 typedef std::vector<thread_ptr> thread_ptrs;
 
-Reachability::Reachability(Command& command, Model& model)
+Reachability::Reachability(cmd::Command& command, Model& model)
     : Algorithm(command, model)
     , f_target(NULL)
     , f_target_cu(NULL)

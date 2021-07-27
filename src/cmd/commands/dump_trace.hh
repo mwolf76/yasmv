@@ -32,6 +32,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+namespace cmd {
 
 /** Raised when the type checker detects a wrong type */
 class UnsupportedFormat : public CommandException {
@@ -141,6 +142,8 @@ public:
     virtual ~DumpTraceTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* DUMP_TRACE_CMD_H */

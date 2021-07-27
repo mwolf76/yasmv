@@ -35,6 +35,8 @@
 
 #include <string>
 
+namespace cmd {
+
 class Interpreter;
 
 class Command {
@@ -51,7 +53,6 @@ public:
     // representation
     friend std::ostream& operator<<(std::ostream& os, Command& cmd);
 };
-typedef class Command* Command_ptr;
 
 class CommandTopic {
 protected:
@@ -68,5 +69,7 @@ public:
 
 typedef std::vector<Command_ptr> CommandVector;
 typedef CommandVector* CommandVector_ptr;
+
+};
 
 #endif /* COMMAND_H */

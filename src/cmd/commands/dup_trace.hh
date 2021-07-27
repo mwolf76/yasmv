@@ -23,6 +23,8 @@
 
 #include <cmd/command.hh>
 
+namespace cmd {
+
 class DupTrace : public Command {
 
     pchar f_trace_id;
@@ -45,6 +47,8 @@ public:
     virtual ~DupTraceTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif // DUP_TRACE_CMD_H

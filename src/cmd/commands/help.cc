@@ -37,6 +37,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/help.hh>
 
+namespace cmd {
+
 Help::Help(Interpreter& owner)
     : Command(owner)
     , f_topic(NULL)
@@ -171,3 +173,5 @@ HelpTopic::~HelpTopic()
 
 void HelpTopic::usage()
 { display_manpage("help"); }
+
+};

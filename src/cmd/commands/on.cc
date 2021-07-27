@@ -29,6 +29,8 @@
 
 #include <cmd/cmd.hh>
 
+namespace cmd {
+
 On::On(Interpreter& owner)
     : Command(owner)
     , f_then(NULL)
@@ -102,3 +104,5 @@ OnTopic::~OnTopic()
 
 void OnTopic::usage()
 { display_manpage("on"); }
+
+};

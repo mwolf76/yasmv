@@ -29,6 +29,8 @@
 
 #include <cmd/cmd.hh>
 
+namespace cmd {
+
 Do::Do(Interpreter& owner)
     : Command(owner)
     , f_commands()
@@ -78,3 +80,5 @@ DoTopic::~DoTopic()
 
 void DoTopic::usage()
 { display_manpage("do"); }
+
+};

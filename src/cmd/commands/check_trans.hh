@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <algorithms/fsm/fsm.hh>
 
+namespace cmd {
+
 class CheckTrans : public Command {
 
 public:
@@ -60,6 +62,8 @@ public:
     virtual ~CheckTransTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* CHECK_TRANS_CMD_H */

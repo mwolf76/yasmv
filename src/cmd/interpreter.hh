@@ -37,6 +37,8 @@
 
 #include <env/environment.hh>
 
+namespace cmd {
+
 typedef class Interpreter* Interpreter_ptr;
 
 class Command;
@@ -99,6 +101,8 @@ protected:
 
     static Interpreter_ptr f_instance;
     struct timespec f_epoch;
+};
+
 };
 
 #endif /* INTERPRETER_H */

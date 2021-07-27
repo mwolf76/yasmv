@@ -33,6 +33,8 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
+namespace cmd {
+
 Clear::Clear(Interpreter& owner)
     : Command(owner)
     , f_identifier(NULL)
@@ -79,3 +81,5 @@ ClearTopic::~ClearTopic()
 
 void ClearTopic::usage()
 { display_manpage("clear"); }
+
+};

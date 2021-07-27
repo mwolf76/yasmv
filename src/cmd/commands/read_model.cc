@@ -31,6 +31,10 @@
 
 #include <model/model_mgr.hh>
 
+#include <parse.hh>
+
+namespace cmd {
+
 ReadModel::ReadModel(Interpreter& owner)
     : Command(owner)
     , f_input(NULL)
@@ -50,7 +54,7 @@ void ReadModel::set_input(pconst_char input)
     }
 }
 
-extern bool parseFile(pconst_char input); // in utils.cc
+// extern bool parseFile(pconst_char input); // in utils.cc
 utils::Variant ReadModel::operator()()
 {
     ModelMgr& mm
@@ -84,7 +88,7 @@ utils::Variant ReadModel::operator()()
                 << std::endl;
 
             ok = false;
-        } else if (! parseFile(f_input)) {
+        } else if (! parse::parseFile(f_input)) {
             WARN
                 << "Syntax error"
                 << std::endl;
@@ -115,3 +119,5 @@ ReadModelTopic::~ReadModelTopic()
 
 void ReadModelTopic::usage()
 { display_manpage("read-model"); }
+
+};

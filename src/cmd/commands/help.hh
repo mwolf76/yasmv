@@ -28,6 +28,9 @@
 #define HELP_H
 
 #include <cmd/command.hh>
+
+namespace cmd {
+
 typedef CommandTopic* CommandTopic_ptr;
 
 class Help : public Command {
@@ -48,5 +51,7 @@ public:
     virtual ~HelpTopic();
 
     void virtual usage();
+};
+
 };
 #endif /* HELP_H */

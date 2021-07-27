@@ -29,6 +29,8 @@
 
 #include <cmd/command.hh>
 
+namespace cmd {
+
 class Check : public Command {
 public:
     Check(Interpreter& owner);
@@ -62,6 +64,8 @@ public:
     virtual ~CheckTopic();
 
     void virtual usage();
+};
+
 };
 
 #endif /* CHECK_CMD_H */

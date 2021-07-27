@@ -30,6 +30,8 @@
 #include <cmd/command.hh>
 #include <algorithms/sim/simulation.hh>
 
+namespace cmd {
+
 class PickState : public Command {
 public:
     PickState(Interpreter& owner);
@@ -74,4 +76,5 @@ public:
     void virtual usage();
 };
 
+};
 #endif /* PICK_STATE_CMD_H */
