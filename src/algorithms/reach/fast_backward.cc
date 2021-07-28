@@ -46,7 +46,7 @@ void Reachability::fast_backward_strategy()
     std::for_each(
         begin(f_backward_constraint_cus),
         end(f_backward_constraint_cus),
-        [this, &engine, k](CompilationUnit& cu) {
+        [this, &engine, k](model::CompilationUnit& cu) {
             this->assert_formula(engine, FINAL_STATE - k, cu);
         });
 

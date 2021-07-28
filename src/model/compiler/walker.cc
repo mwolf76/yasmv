@@ -26,6 +26,8 @@
 
 #include <proxy.hh>
 
+namespace model {
+
 /**
  * Compilation engine is implemented using a simple expression walker
  * pattern: (a) on preorder, return true if the node has not yet been
@@ -825,3 +827,5 @@ void Compiler::walk_set_comma_postorder(const expr::Expr_ptr expr)
 
     else assert(false);
 }
+
+};

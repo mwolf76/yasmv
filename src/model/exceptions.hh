@@ -29,6 +29,8 @@
 #include <common/common.hh>
 #include <expr/expr.hh>
 
+namespace model {
+
 class ModelException : public Exception {
 public:
     ModelException(const std::string& subtype,
@@ -67,6 +69,8 @@ public:
 class BadParamCount : public ModelException {
 public:
     BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got);
+};
+
 };
 
 #endif /* MODEL_EXCEPTIONS_H */

@@ -29,6 +29,8 @@
 
 #include <symb/resolver.hh>
 
+namespace model {
+
 class ModelMgr; // fwd
 class ModelResolver : public symb::Resolver {
 public:
@@ -41,6 +43,8 @@ public:
 private:
     ModelMgr& f_owner;
     symb::Constants f_constants; // global consts
+};
+
 };
 
 #endif /* MODEL_RESOLVER_H */

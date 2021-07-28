@@ -67,10 +67,10 @@ void Reach::add_global_constraint(expr::Expr_ptr constraint)
 
 bool Reach::check_requirements()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
-    Model& model
+    model::Model& model
         (mm.model());
 
     if (! f_target) {
@@ -104,7 +104,7 @@ utils::Variant Reach::operator()()
     if (! check_requirements())
         return utils::Variant(errMessage);
 
-    reach::Reachability bmc { *this, ModelMgr::INSTANCE().model() };
+    reach::Reachability bmc { *this, model::ModelMgr::INSTANCE().model() };
     bmc.process(f_target, f_forward_constraints, f_backward_constraints, f_global_constraints);
 
     switch (bmc.status()) {

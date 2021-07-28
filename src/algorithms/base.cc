@@ -32,10 +32,10 @@
 
 #include <utils/misc.hh>
 
-Algorithm::Algorithm(cmd::Command& command, Model& model)
+Algorithm::Algorithm(cmd::Command& command, model::Model& model)
     : f_command(command)
     , f_model(model)
-    , f_mm(ModelMgr::INSTANCE())
+    , f_mm(model::ModelMgr::INSTANCE())
     , f_bm(enc::EncodingMgr::INSTANCE())
     , f_em(expr::ExprMgr::INSTANCE())
     , f_tm(TypeMgr::INSTANCE())
@@ -62,27 +62,26 @@ void Algorithm::setup()
     env::Environment& env
         (env::Environment::INSTANCE());
 
-    Model& model
+    model::Model& model
         (f_model);
 
-    Module& main_module
+    model::Module& main_module
         (model.main_module());
 
-    std::stack< std::pair<expr::Expr_ptr, Module_ptr> > stack;
-    stack.push( std::pair<expr::Expr_ptr, Module_ptr >
+    std::stack< std::pair<expr::Expr_ptr, model::Module_ptr> > stack;
+    stack.push( std::pair<expr::Expr_ptr, model::Module_ptr >
                 (em.make_empty(), &main_module));
 
     /* walk of var decls, starting from main module */
     while (0 < stack.size()) {
-
-        const std::pair<expr::Expr_ptr, Module_ptr > top
+        const std::pair<expr::Expr_ptr, model::Module_ptr > top
             (stack.top());
         stack.pop();
 
         expr::Expr_ptr ctx
             (top.first);
 
-        Module& module
+        model::Module& module
             (* top.second);
 
         /* module INITs */
@@ -121,10 +120,10 @@ void Algorithm::setup()
                 InstanceType_ptr instance
                     (vtype->as_instance());
 
-                Module&  module
+                model::Module&  module
                     (model.module(instance->name()));
 
-                stack.push( std::pair< expr::Expr_ptr, Module_ptr >
+                stack.push( std::pair< expr::Expr_ptr, model::Module_ptr >
                             (local_ctx, &module));
             }
         }
@@ -148,7 +147,7 @@ void Algorithm::setup()
 
 void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    Compiler& cmpl
+    model::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
@@ -184,7 +183,7 @@ void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    Compiler& cmpl
+    model::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
@@ -219,7 +218,7 @@ void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    Compiler& cmpl
+    model::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ti = exprs.begin(); ti != exprs.end(); ++ ti ) {
@@ -255,19 +254,19 @@ void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
+    for (model::CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
 void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
+    for (model::CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
 void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
+    for (model::CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
@@ -394,7 +393,7 @@ void Algorithm::assert_time_frame(sat::Engine& engine,
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
-    Compiler& cmpl
+    model::Compiler& cmpl
         (compiler()); // just a local ref
 
     expr::ExprVector assignments
@@ -451,7 +450,7 @@ void Algorithm::assert_time_frame(sat::Engine& engine,
 
 void Algorithm::assert_formula(sat::Engine& engine,
                                step_t time,
-                               CompilationUnit& term,
+                               model::CompilationUnit& term,
                                sat::group_t group)
 {
     INFO

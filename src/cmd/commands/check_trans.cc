@@ -46,10 +46,10 @@ void CheckTrans::add_constraint(expr::Expr_ptr constraint)
 
 bool CheckTrans::check_requirements()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
-    Model& model
+    model::Model& model
         (mm.model());
 
     if (0 == model.modules().size()) {
@@ -73,7 +73,7 @@ utils::Variant CheckTrans::operator()()
 
     if (check_requirements()) {
         fsm::CheckTransConsistency check_trans
-            { *this, ModelMgr::INSTANCE().model() } ;
+            { *this, model::ModelMgr::INSTANCE().model() } ;
         check_trans.process(f_constraints);
 
         switch (check_trans.status()) {

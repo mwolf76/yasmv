@@ -29,6 +29,8 @@
 #include <model/exceptions.hh>
 #include <model/typedefs.hh>
 
+namespace model {
+
 /* main container class */
 class Model {
 public:
@@ -52,6 +54,8 @@ private:
 
     unsigned f_autoincrement;
     SymbolIndexMap f_symbol_index_map;
+};
+
 };
 
 #endif /* MODEL_H */

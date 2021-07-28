@@ -30,6 +30,8 @@
 #include <common/common.hh>
 #include <model/exceptions.hh>
 
+namespace model {
+
 /** Exception classes */
 class CompilerException : public Exception {
 public:
@@ -48,6 +50,8 @@ public:
 class UnexpectedExpression : public CompilerException {
 public:
     UnexpectedExpression(expr::Expr_ptr expr);
+};
+
 };
 
 #endif /* COMPILER_EXCEPTIONS_H */

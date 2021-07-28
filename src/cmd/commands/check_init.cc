@@ -47,10 +47,10 @@ void CheckInit::add_constraint(expr::Expr_ptr constraint)
 
 bool CheckInit::check_requirements()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
-    Model& model
+    model::Model& model
          (mm.model());
 
     if (0 == model.modules().size()) {
@@ -74,7 +74,7 @@ utils::Variant CheckInit::operator()()
 
     if (check_requirements()) {
         fsm::CheckInitConsistency check_init
-            { *this, ModelMgr::INSTANCE().model() };
+            { *this, model::ModelMgr::INSTANCE().model() };
         check_init.process(f_constraints);
 
         switch (check_init.status()) {

@@ -67,13 +67,16 @@
 #include <utils/time.hh>
 
 #include <boost/unordered_map.hpp>
+#include <boost/thread/mutex.hpp>
+
+namespace model {
+
 typedef boost::unordered_map<expr::TimedExpr, CompilationUnit,
                              expr::TimedExprHash, expr::TimedExprEq> CompilationMap;
 
 typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr,
                              utils::PtrHash, utils::PtrEq> BinarySelectionUnionFindMap;
 
-#include <boost/thread/mutex.hpp>
 
 enum ECompilerStatus {
     READY,
@@ -262,6 +265,8 @@ private:
 
     /* synchronization */
     boost::mutex f_process_mutex;
+};
+
 };
 
 #endif

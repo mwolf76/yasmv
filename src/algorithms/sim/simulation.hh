@@ -47,7 +47,7 @@ typedef enum {
 class Simulation : public Algorithm {
 
 public:
-    Simulation(cmd::Command& command, Model& model);
+    Simulation(cmd::Command& command, model::Model& model);
     ~Simulation();
 
     void pick_state(bool allsat,
@@ -76,7 +76,7 @@ private:
 class SimulationWitness : public witness::Witness {
 
 public:
-    SimulationWitness(Model& model, sat::Engine& engine, step_t k);
+    SimulationWitness(model::Model& model, sat::Engine& engine, step_t k);
 };
 
 };

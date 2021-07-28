@@ -30,6 +30,10 @@
 #include <common.hh>
 #include <model/classes.hh>
 
+namespace model {
+
 std::ostream& operator<<(std::ostream& os, Module& module);
+
+};
 
 #endif /* MODEL_PRINTERS_H */

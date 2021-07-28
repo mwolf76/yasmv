@@ -23,6 +23,8 @@
 
 #include <compiler.hh>
 
+namespace model {
+
 /* auto id generator */
 expr::Expr_ptr Compiler::make_auto_id()
 {
@@ -437,3 +439,5 @@ enc::Encoding_ptr Compiler::find_encoding( const expr::TimedExpr& key, const Typ
     assert( NULL != res );
     return res;
 }
+
+};

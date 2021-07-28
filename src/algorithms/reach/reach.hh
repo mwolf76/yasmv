@@ -34,7 +34,7 @@ namespace reach {
 class Reachability : public Algorithm {
 
 public:
-    Reachability(cmd::Command& command, Model& model);
+    Reachability(cmd::Command& command, model::Model& model);
     ~Reachability();
 
     void process(expr::Expr_ptr target,
@@ -50,13 +50,12 @@ public:
 
 private:
     expr::Expr_ptr f_target;
-    CompilationUnit_ptr f_target_cu;
+    model::CompilationUnit_ptr f_target_cu;
 
     expr::ExprVector f_constraints;
-
-    CompilationUnits f_forward_constraint_cus; /* requires forward strategy */
-    CompilationUnits f_backward_constraint_cus; /* requires backward strategy */
-    CompilationUnits f_global_constraint_cus;
+    model::CompilationUnits f_forward_constraint_cus; /* requires forward strategy */
+    model::CompilationUnits f_backward_constraint_cus; /* requires backward strategy */
+    model::CompilationUnits f_global_constraint_cus;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;

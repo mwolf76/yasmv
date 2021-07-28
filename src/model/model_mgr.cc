@@ -32,6 +32,8 @@
 #include <model/module.hh>
 #include <model/model_mgr.hh>
 
+namespace model {
+
 ModelMgr& ModelMgr::INSTANCE()
 {
     if (! f_instance)
@@ -491,3 +493,5 @@ bool ModelMgr::analyze()
 
     return true;
 }
+
+};

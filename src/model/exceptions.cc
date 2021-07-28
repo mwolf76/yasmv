@@ -29,6 +29,8 @@
 #include <sstream>
 #include <string>
 
+namespace model {
+
 static std::string build_module_not_found_error_message(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
@@ -116,3 +118,5 @@ BadParamCount::BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigne
     : ModelException("BadParamCount",
                      build_bad_param_count_error_message(instance, expected, got))
 {}
+
+};

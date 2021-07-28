@@ -378,15 +378,15 @@ void DumpTrace::process_input(witness::Witness& w,
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
-    Model& model
-        (ModelMgr::INSTANCE().model());
+    model::Model& model
+        (model::ModelMgr::INSTANCE().model());
 
-    symb::SymbIter symbs
+    symb::SymbIter symbols
         (model);
 
-    while (symbs.has_next()) {
+    while (symbols.has_next()) {
         std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair
-            (symbs.next());
+            (symbols.next());
 
         symb::Symbol_ptr symb
             (pair.second);
@@ -417,7 +417,7 @@ void DumpTrace::process_input(witness::Witness& w,
 
             input_assignments.push_back(em.make_eq(full, value));
         }
-    } /* while (symbs.has_next()) */
+    } /* while (symbols.has_next()) */
 
     OrderingPreservingComparisonFunctor fun
         (model);
@@ -442,8 +442,8 @@ void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
     witness::TimeFrame& tf
         (w[time]);
 
-    Model& model
-        (ModelMgr::INSTANCE().model());
+    model::Model& model
+        (model::ModelMgr::INSTANCE().model());
 
     symb::SymbIter symbs
         (model);

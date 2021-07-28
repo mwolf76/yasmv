@@ -42,10 +42,10 @@ public:
 
 /* Model ordering-preserving comparison helper */
 class OrderingPreservingComparisonFunctor {
-    Model& f_model;
+    model::Model& f_model;
 
 public:
-    OrderingPreservingComparisonFunctor(Model& model)
+    OrderingPreservingComparisonFunctor(model::Model& model)
         : f_model(model)
     {}
 

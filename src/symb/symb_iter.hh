@@ -39,7 +39,7 @@ namespace symb {
 
 class SymbIter {
 public:
-    SymbIter(Model& model);
+    SymbIter(model::Model& model);
     ~SymbIter();
 
     /* true iff there are more symbols to be processed */
@@ -49,7 +49,7 @@ public:
     std::pair <expr::Expr_ptr, Symbol_ptr> next();
 
 private:
-    Model&  f_model;
+    model::Model&  f_model;
 
     SymbIterable f_symbols;
     SymbIterable::const_iterator f_iter;

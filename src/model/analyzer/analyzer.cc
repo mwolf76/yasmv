@@ -35,6 +35,8 @@
 
 #include <utils/misc.hh>
 
+namespace model {
+
 Analyzer::Analyzer(ModelMgr& owner)
     : f_ctx_stack()
     , f_owner(owner)
@@ -265,3 +267,5 @@ bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
 
     return status == sat::status_t::STATUS_UNSAT;
 }
+
+};

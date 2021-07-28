@@ -35,6 +35,8 @@
 
 #include <utils/misc.hh>
 
+namespace model {
+
 bool Analyzer::walk_F_preorder(const expr::Expr_ptr expr)
 { return true; }
 void Analyzer::walk_F_postorder(const expr::Expr_ptr expr)
@@ -488,3 +490,5 @@ void Analyzer::walk_leaf(const expr::Expr_ptr expr)
         }
     }
 }
+
+};

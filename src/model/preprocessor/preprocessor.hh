@@ -37,6 +37,8 @@
 #include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
 
+namespace model {
+
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
 typedef std::vector< std::pair<expr::Expr_ptr, expr::Expr_ptr> > ExprPairStack;
@@ -83,6 +85,8 @@ private:
     /* internals */
     // void substitute_expression(const expr::Expr_ptr expr);
     void traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr);
+};
+
 };
 
 #endif /* PREPROCESSOR_H */

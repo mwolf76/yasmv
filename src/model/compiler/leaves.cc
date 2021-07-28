@@ -28,6 +28,8 @@
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
+namespace model {
+
 static inline value_t pow2(unsigned exp);
 
 void Compiler::walk_instant(const expr::Expr_ptr expr)
@@ -282,3 +284,5 @@ void Compiler::algebraic_constant(expr::Expr_ptr konst, unsigned width)
     if (value)
         throw ConstantTooLarge(konst);
 }
+
+};

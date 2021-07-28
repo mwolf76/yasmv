@@ -51,10 +51,10 @@ void Check::add_constraint(expr::Expr_ptr constraint)
 
 bool Check::check_requirements()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
-    Model& model
+    model::Model& model
          (mm.model());
 
     if (0 == model.modules().size()) {

@@ -23,6 +23,8 @@
 
 #include <compiler.hh>
 
+namespace model {
+
 bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
 {
     expr::ExprMgr& em
@@ -312,3 +314,5 @@ bool Compiler::is_ite_array(const expr::Expr_ptr expr)
 
     return false;
 }
+
+};

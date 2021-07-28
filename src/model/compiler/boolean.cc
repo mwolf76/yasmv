@@ -25,6 +25,8 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+namespace model {
+
 void Compiler::boolean_not(const expr::Expr_ptr expr)
 {
     POP_DD(lhs);
@@ -185,3 +187,5 @@ void Compiler::boolean_subscript(const expr::Expr_ptr expr)
         << "Registered " << msd
         << std::endl;
 }
+
+};

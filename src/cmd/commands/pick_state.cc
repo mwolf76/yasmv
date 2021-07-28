@@ -53,10 +53,10 @@ void PickState::add_constraint(expr::Expr_ptr constraint)
 
 bool PickState::check_requirements()
 {
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
-    Model& model
+    model::Model& model
         (mm.model());
 
     if (0 == model.modules().size()) {
@@ -80,7 +80,7 @@ utils::Variant PickState::operator()()
 
     if (check_requirements()) {
 
-        sim::Simulation simulation { *this, ModelMgr::INSTANCE().model() };
+        sim::Simulation simulation { *this, model::ModelMgr::INSTANCE().model() };
         simulation.pick_state(f_allsat, f_limit, f_constraints);
 
         switch (simulation.status()) {

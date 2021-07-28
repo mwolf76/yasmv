@@ -32,6 +32,8 @@
 #include <boost/unordered_map.hpp>
 #include <utils/pool.hh>
 
+namespace model {
+
 typedef class Model* Model_ptr;
 typedef class Module* Module_ptr;
 typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> Modules;
@@ -40,5 +42,7 @@ typedef boost::unordered_map<expr::Expr_ptr, unsigned, utils::PtrHash, utils::Pt
 
 /* streaming helper */
 std::ostream& operator<<(std::ostream& os, Module& module);
+
+};
 
 #endif /* MODEL_TYPEDEFS_H */

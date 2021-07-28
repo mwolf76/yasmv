@@ -46,7 +46,7 @@ typedef enum {
 class LTL : public Algorithm {
 
 public:
-    LTL(cmd::Command& command, Model& model);
+    LTL(cmd::Command& command, model::Model& model);
     ~LTL();
 
     void process(const expr::Expr_ptr phi);
@@ -64,7 +64,7 @@ private:
 /* Specialized for LTL CEX */
 class LTLCounterExample : public witness::Witness {
 public:
-    LTLCounterExample(expr::Expr_ptr property, Model& model,
+    LTLCounterExample(expr::Expr_ptr property, model::Model& model,
                       sat::Engine& engine, unsigned k);
 };
 

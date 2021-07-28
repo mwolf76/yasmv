@@ -25,6 +25,8 @@
 
 #include <model/preprocessor/preprocessor.hh>
 
+namespace model {
+
 // void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 // {
 //     if (f_em.is_params_comma( expr)) {
@@ -92,3 +94,5 @@
 //         f_env.pop_back();
 //     }
 // }
+
+};

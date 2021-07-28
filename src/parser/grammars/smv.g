@@ -46,8 +46,8 @@ options {
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
     TypeMgr& tm
         (TypeMgr::INSTANCE());
@@ -59,14 +59,14 @@ options {
         (cmd::CommandMgr::INSTANCE());
 
     /* the model instance */
-    Model& model
+    model::Model& smv_model
         (mm.model());
 }
 
 // --- Model Description Language  ---------------------------------------------
 smv
 scope {
-    Module_ptr current_module;
+    model::Module_ptr current_module;
 }
     : model_directives modules
     ;
@@ -90,7 +90,7 @@ modules
 
 module_def
     : 'MODULE' module_id=identifier
-      { model.add_module(* ($smv::current_module = new Module(module_id))); }
+      { smv_model.add_module(* ($smv::current_module = new model::Module(module_id))); }
 
       fsm_param_decl? module_body ';'
     ;

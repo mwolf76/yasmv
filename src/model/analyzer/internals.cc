@@ -30,6 +30,8 @@
 #include <model/model_mgr.hh>
 #include <model/analyzer/analyzer.hh>
 
+namespace model {
+
 void Analyzer::pre_hook()
 {}
 void Analyzer::post_hook()
@@ -43,3 +45,5 @@ void Analyzer::post_node_hook(expr::Expr_ptr expr)
 {
     f_expr_stack.pop_back();
 }
+
+};

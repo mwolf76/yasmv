@@ -33,6 +33,9 @@
 #include <type/type_mgr.hh>
 
 #include <boost/unordered_map.hpp>
+
+namespace model {
+
 typedef boost::unordered_map<expr::Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
 
 /* enable the following macro to debug the TypeChecker */
@@ -113,6 +116,8 @@ private:
     void walk_binary_ite_postorder(const expr::Expr_ptr expr);
     void walk_binary_boolean_or_relational_postorder(const expr::Expr_ptr expr);
     void walk_binary_cast_postorder(const expr::Expr_ptr expr);
+};
+
 };
 
 #endif /* TYPE_CHECKER_H */

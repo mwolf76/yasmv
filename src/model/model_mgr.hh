@@ -37,6 +37,8 @@
 
 #include <type/type_mgr.hh>
 
+namespace model {
+
 typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
 typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr> ParamMap;
 
@@ -135,6 +137,8 @@ private:
     /* internals */
     bool analyze_aux( analyzer_pass_t pass );
     bool f_analyzed;
+};
+
 };
 
 #endif /* MODEL_MGR_H */

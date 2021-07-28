@@ -42,6 +42,8 @@
 #define PUSH_DEFINE(tp)                             \
     f_define_stack.push_back(tp)
 
+namespace model {
+
 Preprocessor::Preprocessor(ModelMgr& owner)
     : f_ctx_stack()
     , f_expr_stack()
@@ -677,3 +679,5 @@ void Preprocessor::traverse_param_list(expr::ExprVector& params, const expr::Exp
 //         f_env.pop_back();
 //     }
 // }
+
+};

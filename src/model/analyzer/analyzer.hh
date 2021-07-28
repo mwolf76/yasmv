@@ -34,6 +34,8 @@
 
 #include <boost/unordered_map.hpp>
 
+namespace model {
+
 /* guard -> identifier map (first pass) */
 typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
 
@@ -88,6 +90,8 @@ private:
 
     // helpers
     bool mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q);
+};
+
 };
 
 #endif /* ANALYZER_H */

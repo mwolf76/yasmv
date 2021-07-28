@@ -202,8 +202,8 @@ void Evaluator::walk_leaf(const expr::Expr_ptr expr)
     } /* is_variable() */
 
     if (symb->is_parameter()) {
-        ModelMgr& mm
-            (ModelMgr::INSTANCE());
+        model::ModelMgr& mm
+            (model::ModelMgr::INSTANCE());
 
         /* parameters must be resolved against the Param map
            maintained by the ModelMgr */

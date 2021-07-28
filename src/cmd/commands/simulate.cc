@@ -76,8 +76,8 @@ utils::Variant Simulate::operator()()
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
 
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
 
     sim::Simulation simulation
         (*this, mm.model());

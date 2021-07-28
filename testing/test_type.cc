@@ -230,8 +230,8 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
 BOOST_AUTO_TEST_CASE(type_checking)
 {
     /* a rather rough setup... */
-    ModelMgr& mm
-        (ModelMgr::INSTANCE());
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
     TypeMgr& tm
@@ -241,9 +241,9 @@ BOOST_AUTO_TEST_CASE(type_checking)
     opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
     om.set_word_width(16);
 
-    Model& model (mm.model());
+    model::Model& model (mm.model());
     expr::Atom a_main("main");
-    Module& main (* new Module(em.make_identifier(a_main)));
+    model::Module& main (* new model::Module(em.make_identifier(a_main)));
     model.add_module(main);
 
     /* A few types */
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(type_checking)
     // add the main module to the model
     model.add_module(main);
 
-    BOOST_CHECK(ModelMgr::INSTANCE().analyze());
+    BOOST_CHECK(model::ModelMgr::INSTANCE().analyze());
 
     BOOST_CHECK(boolean ==
                 mm.type(x));

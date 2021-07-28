@@ -32,6 +32,8 @@
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
 
+namespace model {
+
 // fun: any -> any
 void TypeChecker::walk_unary_fsm_postorder(const expr::Expr_ptr expr)
 { PUSH_TYPE( check_any(expr->lhs()) ); }
@@ -558,3 +560,5 @@ bool TypeChecker::cache_miss(const expr::Expr_ptr expr)
 
     return true;
 }
+
+};

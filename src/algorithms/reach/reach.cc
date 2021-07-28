@@ -33,7 +33,7 @@ namespace reach {
 typedef boost::thread* thread_ptr;
 typedef std::vector<thread_ptr> thread_ptrs;
 
-Reachability::Reachability(cmd::Command& command, Model& model)
+Reachability::Reachability(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
     , f_target(NULL)
     , f_target_cu(NULL)
@@ -85,7 +85,7 @@ void Reachability::process(expr::Expr_ptr target,
                     << "` ..."
                     << std::endl;
 
-                CompilationUnit unit
+                model::CompilationUnit unit
                     (compiler().process(ctx, expr));
                 f_forward_constraint_cus.push_back(unit);
                 ++ no_forward_constraints;
@@ -102,7 +102,7 @@ void Reachability::process(expr::Expr_ptr target,
                     << "` ..."
                     << std::endl;
 
-                CompilationUnit unit
+                model::CompilationUnit unit
                     (compiler().process(ctx, expr));
                 f_backward_constraint_cus.push_back(unit);
                 ++ no_backward_constraints;
@@ -119,7 +119,7 @@ void Reachability::process(expr::Expr_ptr target,
                     << "` ..."
                     << std::endl;
 
-                CompilationUnit unit
+                model::CompilationUnit unit
                     (compiler().process(ctx, expr));
                 f_global_constraint_cus.push_back(unit);
                 ++ no_global_constraints;
@@ -155,7 +155,7 @@ void Reachability::process(expr::Expr_ptr target,
             << "` ..."
             << std::endl;
 
-        CompilationUnit unit
+        model::CompilationUnit unit
             (compiler().process(ctx, f_target));
 
         f_target_cu = &unit;

@@ -41,12 +41,12 @@ namespace symb {
 
 class ResolverProxy : public Resolver {
     TypeMgr& f_tm;
-    ModelMgr& f_mm;
+    model::ModelMgr& f_mm;
 
 public:
     ResolverProxy()
         : f_tm(TypeMgr::INSTANCE())
-        , f_mm(ModelMgr::INSTANCE())
+        , f_mm(model::ModelMgr::INSTANCE())
     {}
 
     /** @brief register a symbol in the underlying storage */

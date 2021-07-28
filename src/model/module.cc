@@ -32,6 +32,8 @@
 #include <utility>
 #include <string>
 
+namespace model {
+
 Module::Module(const expr::Expr_ptr name)
     : f_owner(NULL)
     , f_name(name)
@@ -209,3 +211,5 @@ void Module::add_trans(expr::Expr_ptr expr)
 
     f_trans.push_back(expr);
 }
+
+};

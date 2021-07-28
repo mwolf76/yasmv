@@ -52,13 +52,13 @@
 class Algorithm {
 
 public:
-    Algorithm(cmd::Command& command, Model& model);
+    Algorithm(cmd::Command& command, model::Model& model);
     virtual ~Algorithm();
 
     /* Build encodings to perform model compilation */
     virtual void setup();
 
-    inline Compiler& compiler()
+    inline model::Compiler& compiler()
     { return f_compiler; }
 
     inline bool has_witness() const
@@ -70,10 +70,10 @@ public:
     inline witness::Witness& witness() const
     { assert (NULL != f_witness); return *f_witness; }
 
-    inline Model& model()
+    inline model::Model& model()
     { return f_model; }
 
-    inline ModelMgr& mm()
+    inline model::ModelMgr& mm()
     { return f_mm; }
 
     inline expr::ExprMgr& em()
@@ -100,7 +100,7 @@ public:
                                sat::group_t group = sat::MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(sat::Engine& engine, step_t time, CompilationUnit& term,
+    void assert_formula(sat::Engine& engine, step_t time, model::CompilationUnit& term,
                         sat::group_t group = sat::MAINGROUP);
 
     /* TimeFrame from a witness */
@@ -120,21 +120,21 @@ private:
     cmd::Command& f_command;
 
     /* Model */
-    Model& f_model;
+    model::Model& f_model;
 
     /* Managers */
-    ModelMgr& f_mm;
+    model::ModelMgr& f_mm;
     enc::EncodingMgr& f_bm;
     expr::ExprMgr& f_em;
     TypeMgr& f_tm;
 
     /* Model Compiler */
-    Compiler f_compiler;
+    model::Compiler f_compiler;
 
     /* Formulas */
-    CompilationUnits f_init;
-    CompilationUnits f_invar;
-    CompilationUnits f_trans;
+    model::CompilationUnits f_init;
+    model::CompilationUnits f_invar;
+    model::CompilationUnits f_trans;
 
     /* Witness */
     witness::Witness_ptr f_witness;

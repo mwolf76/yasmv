@@ -26,6 +26,8 @@
 #include <string>
 #include <sstream>
 
+namespace model {
+
 static std::string format_constant_too_large(expr::Expr_ptr expr)
 {
     std::ostringstream oss;
@@ -54,3 +56,5 @@ UnexpectedExpression::UnexpectedExpression(expr::Expr_ptr expr)
     : CompilerException("UnexpectedExpression",
                         format_unexpected_expression(expr))
 {}
+
+};

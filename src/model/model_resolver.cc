@@ -30,6 +30,8 @@
 
 #include <algorithm>
 
+namespace model {
+
 ModelResolver::ModelResolver(ModelMgr& owner)
     : f_owner(owner)
 {
@@ -131,3 +133,5 @@ symb::Symbol_ptr ModelResolver::symbol(const expr::Expr_ptr key)
 
     return NULL; // unresolved;
 }
+
+};

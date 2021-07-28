@@ -31,6 +31,8 @@
 
 #include <model/typedefs.hh>
 
+namespace model {
+
 class Module {
 public:
     Module(expr::Expr_ptr name);
@@ -96,6 +98,8 @@ private:
     expr::ExprVector f_init;
     expr::ExprVector f_invar;
     expr::ExprVector f_trans;
+};
+
 };
 
 #endif /* MODEL_MODULE_H */

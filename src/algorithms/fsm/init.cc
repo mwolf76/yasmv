@@ -28,7 +28,7 @@
 
 namespace fsm {
 
-CheckInitConsistency::CheckInitConsistency(cmd::Command& command, Model& model)
+CheckInitConsistency::CheckInitConsistency(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
@@ -66,7 +66,7 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
                           << "` ..."
                           << std::endl;
 
-                      CompilationUnit unit
+                      model::CompilationUnit unit
                           (compiler().process(ctx, expr));
 
                       f_constraint_cus.push_back(unit);
@@ -85,7 +85,7 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
     /* Additional constraints */
     std::for_each(begin(f_constraint_cus),
                   end(f_constraint_cus),
-                  [this, &engine](CompilationUnit& cu) {
+                  [this, &engine](model::CompilationUnit& cu) {
                       this->assert_formula(engine, 0, cu);
                   });
 

@@ -45,7 +45,7 @@ typedef enum {
 class CheckInitConsistency : public Algorithm {
 
 public:
-    CheckInitConsistency(cmd::Command& command, Model& model);
+    CheckInitConsistency(cmd::Command& command, model::Model& model);
     ~CheckInitConsistency();
 
     void process(expr::ExprVector constraints);
@@ -58,7 +58,7 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    CompilationUnits f_constraint_cus;
+    model::CompilationUnits f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
@@ -67,7 +67,7 @@ private:
 class CheckTransConsistency : public Algorithm {
 
 public:
-    CheckTransConsistency(cmd::Command& command, Model& model);
+    CheckTransConsistency(cmd::Command& command, model::Model& model);
     ~CheckTransConsistency();
 
     void process(expr::ExprVector constraints);
@@ -80,7 +80,7 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    CompilationUnits f_constraint_cus;
+    model::CompilationUnits f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;

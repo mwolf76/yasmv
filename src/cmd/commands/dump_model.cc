@@ -73,7 +73,7 @@ void DumpModel::select_trans()
     f_trans = true;
 }
 
-void DumpModel::dump_heading(std::ostream& os, Module& module)
+void DumpModel::dump_heading(std::ostream& os, model::Module& module)
 {
     os
         << "MODULE "
@@ -81,7 +81,7 @@ void DumpModel::dump_heading(std::ostream& os, Module& module)
         << std::endl;
 }
 
-void DumpModel::dump_variables(std::ostream& os, Module& module)
+void DumpModel::dump_variables(std::ostream& os, model::Module& module)
 {
     /* Variables */
     symb::Variables variables = module.vars();
@@ -123,7 +123,7 @@ void DumpModel::dump_variables(std::ostream& os, Module& module)
                   });
 }
 
-void DumpModel::dump_inits(std::ostream& os, Module& module)
+void DumpModel::dump_inits(std::ostream& os, model::Module& module)
 {
     const expr::ExprVector init  { module.init() };
     if (init.begin() != init.end())
@@ -142,7 +142,7 @@ void DumpModel::dump_inits(std::ostream& os, Module& module)
     }
 }
 
-void DumpModel::dump_invars(std::ostream& os, Module& module)
+void DumpModel::dump_invars(std::ostream& os, model::Module& module)
 {
     const expr::ExprVector invar { module.invar() };
     if (invar.begin() != invar.end())
@@ -161,7 +161,7 @@ void DumpModel::dump_invars(std::ostream& os, Module& module)
     }
 }
 
-void DumpModel::dump_transes(std::ostream& os, Module& module)
+void DumpModel::dump_transes(std::ostream& os, model::Module& module)
 {
     const expr::ExprVector trans { module.trans() };
     if (trans.begin() != trans.end())
@@ -202,10 +202,10 @@ std::ostream& DumpModel::get_output_stream()
 
 utils::Variant DumpModel::operator()()
 {
-    Model& model
-        (ModelMgr::INSTANCE().model());
+    model::Model& model
+        (model::ModelMgr::INSTANCE().model());
 
-    const Modules& modules
+    const model::Modules& modules
         (model.modules());
 
     std::ostream& out
@@ -215,9 +215,9 @@ utils::Variant DumpModel::operator()()
 
     std::for_each(begin(modules), end(modules),
                   [this, dump_all, &out] (std::pair<expr::Expr_ptr,
-                                          Module_ptr> descriptor) {
+                                          model::Module_ptr> descriptor) {
 
-                      Module& module
+                      model::Module& module
                           (*descriptor.second);
 
                       if (dump_all)

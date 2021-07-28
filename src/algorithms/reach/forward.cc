@@ -47,7 +47,7 @@ void Reachability::forward_strategy()
     std::for_each(
         begin(f_forward_constraint_cus),
         end(f_forward_constraint_cus),
-        [this, &engine, k](CompilationUnit& cu) {
+        [this, &engine, k](model::CompilationUnit& cu) {
             this->assert_formula(engine, k, cu);
         });
 

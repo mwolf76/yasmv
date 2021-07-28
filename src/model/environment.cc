@@ -25,6 +25,8 @@
 #include <utility>
 #include <model.hh>
 
+namespace model {
+
 std::ostream& operator<<(std::ostream& os, Environment& env)
 {
   os
@@ -83,3 +85,5 @@ const Expr_ptr Environment::value(Expr_ptr key) const
 
     return i -> second;
 }
+
+};

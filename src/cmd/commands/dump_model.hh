@@ -57,11 +57,11 @@ private:
     bool f_init;
     bool f_trans;
 
-    void dump_heading(std::ostream& os, Module& module);
-    void dump_variables(std::ostream& os, Module& module);
-    void dump_inits(std::ostream &os, Module& module);
-    void dump_invars(std::ostream& os, Module& module);
-    void dump_transes(std::ostream&os, Module& module);
+    void dump_heading(std::ostream& os, model::Module& module);
+    void dump_variables(std::ostream& os, model::Module& module);
+    void dump_inits(std::ostream &os, model::Module& module);
+    void dump_invars(std::ostream& os, model::Module& module);
+    void dump_transes(std::ostream&os, model::Module& module);
 };
 typedef DumpModel* DumpModel_ptr;
 

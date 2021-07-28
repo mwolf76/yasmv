@@ -36,7 +36,7 @@
 
 namespace reach {
 
-ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, Model& model,
+ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, model::Model& model,
                                                        sat::Engine& engine, unsigned k, bool reversed)
     : Witness()
 {

@@ -26,6 +26,8 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+namespace model {
+
 /**
  * REMARK: operand arguments (which are DD vectors) are fetched from
  * the internal DD stack in a big-endian fashion, that is MSB
@@ -424,3 +426,5 @@ void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
         }
     }
 }
+
+};

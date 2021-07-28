@@ -26,6 +26,8 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+namespace model {
+
 void Compiler::array_equals(const expr::Expr_ptr expr)
 {
     const Type_ptr rhs_type
@@ -171,3 +173,5 @@ void Compiler::array_ite(const expr::Expr_ptr expr)
         << md
         << std::endl;
 }
+
+};

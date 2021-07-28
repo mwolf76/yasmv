@@ -31,6 +31,8 @@
 
 #include <model/type_checker/type_checker.hh>
 
+namespace model {
+
 TypeChecker::TypeChecker(ModelMgr& owner)
     : f_map()
     , f_type_stack()
@@ -571,3 +573,5 @@ void TypeChecker::walk_leaf(const expr::Expr_ptr expr)
 
     assert(false); // unexpected
 }
+
+};

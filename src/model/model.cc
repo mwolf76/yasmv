@@ -27,6 +27,8 @@
 #include <model/model.hh>
 #include <model/module.hh>
 
+namespace model {
+
 Model::Model()
     : f_modules()
 {
@@ -112,3 +114,5 @@ unsigned Model::symbol_index(expr::Expr_ptr identifier)
 
     return res;
 }
+
+};

@@ -24,6 +24,8 @@
 #include <expr.hh>
 #include <compiler.hh>
 
+namespace model {
+
 void Compiler::enumerative_equals(const expr::Expr_ptr expr)
 {
     POP_DD(rhs);
@@ -148,3 +150,5 @@ void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
         << msd
         << std::endl;
 }
+
+};

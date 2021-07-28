@@ -38,6 +38,8 @@
 
 #include <dd/dd.hh>
 
+namespace model {
+
 /** Exception classes */
 class UnitException : public Exception {
 public:
@@ -50,9 +52,7 @@ private:
 
 /* <symb, is_signed?, width> */
 typedef boost::tuple<bool, expr::ExprType, unsigned> InlinedOperatorSignature;
-inline const InlinedOperatorSignature make_ios (bool is_signed,
-                                                expr::ExprType exprType,
-                                                unsigned width)
+inline const InlinedOperatorSignature make_ios (bool is_signed, expr::ExprType exprType, unsigned width)
 {
     return boost::make_tuple <bool, expr::ExprType, unsigned>
         (is_signed, exprType, width);
@@ -234,19 +234,21 @@ private:
 typedef CompilationUnit* CompilationUnit_ptr;
 typedef std::vector<CompilationUnit> CompilationUnits;
 
+};
+
 /* helpers */
-std::ostream& operator<<(std::ostream& os, CompilationUnit& cu);
+std::ostream& operator<<(std::ostream& os, const model::CompilationUnit& cu);
 
-std::ostream& operator<<(std::ostream& os, InlinedOperatorSignature ios);
-std::string ios2string(InlinedOperatorSignature ios);
+std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorSignature& ios);
+std::string ios2string(const model::InlinedOperatorSignature ios);
 
-std::ostream& operator<<(std::ostream& os, InlinedOperatorDescriptor& iod);
-std::string iod2string(InlinedOperatorSignature& ios);
+std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorDescriptor& iod);
+std::string iod2string(const model::InlinedOperatorDescriptor& ios);
 
-std::ostream& operator<<(std::ostream& os, BinarySelectionDescriptor& md);
-std::string bsd2string(InlinedOperatorSignature& ios);
+std::ostream& operator<<(std::ostream& os, const model::BinarySelectionDescriptor& md);
+std::string bsd2string(const model::InlinedOperatorSignature& ios);
 
-std::ostream& operator<<(std::ostream& os, MultiwaySelectionDescriptor& md);
-std::string msd2string(InlinedOperatorSignature& ios);
+std::ostream& operator<<(std::ostream& os, const model::MultiwaySelectionDescriptor& md);
+std::string msd2string(const model::InlinedOperatorSignature& ios);
 
 #endif /* COMPILATION_UNIT_H */

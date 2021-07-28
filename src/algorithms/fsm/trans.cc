@@ -30,7 +30,7 @@
 
 namespace fsm {
 
-CheckTransConsistency::CheckTransConsistency(cmd::Command& command, Model& model)
+CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
@@ -68,7 +68,7 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
                           << "` ..."
                           << std::endl;
 
-                      CompilationUnit unit
+                      model::CompilationUnit unit
                           (compiler().process(ctx, expr));
 
                       f_constraint_cus.push_back(unit);
@@ -88,7 +88,7 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
     for (step_t time = 0; time < 2; ++ time) {
         std::for_each(begin(f_constraint_cus),
                       end(f_constraint_cus),
-                      [this, &engine, time](CompilationUnit& cu) {
+                      [this, &engine, time](model::CompilationUnit& cu) {
                           this->assert_formula(engine, time, cu);
                       });
     }

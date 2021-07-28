@@ -21,6 +21,8 @@
  *
  **/
 
+#include <model/compiler/unit.hh>
+
 #include <sat/exceptions.hh>
 #include <sat/inlining.hh>
 
@@ -29,19 +31,19 @@
 
 namespace sat {
 
-std::string format_loader_exception(const InlinedOperatorSignature& ios)
+std::string format_loader_exception(const model::InlinedOperatorSignature& ios)
 {
     std::ostringstream oss;
 
     oss
         << "can not instantiate loader for operator `"
-        << ios
+        << const_cast<model::InlinedOperatorSignature&>(ios)
         << "`" ;
 
     return oss.str();
 }
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOperatorSignature& ios)
+InlinedOperatorLoaderException::InlinedOperatorLoaderException(const model::InlinedOperatorSignature& ios)
     : EngineException("InlinedOperatorLoaderException",
                       format_loader_exception(ios))
 {}
