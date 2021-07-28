@@ -110,7 +110,7 @@ void Evaluator::walk_leaf(const expr::Expr_ptr expr)
     expr::ExprMgr& em
         (f_owner.em());
 
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     /* cached? */
@@ -166,7 +166,7 @@ void Evaluator::walk_leaf(const expr::Expr_ptr expr)
         symb::Literal& lit
             (symb->as_literal());
 
-        Type_ptr type
+        type::Type_ptr type
             (lit.type());
         PUSH_TYPE(type);
 
@@ -181,7 +181,7 @@ void Evaluator::walk_leaf(const expr::Expr_ptr expr)
             (symb->as_variable());
 
         // push into type stack
-        Type_ptr type
+        type::Type_ptr type
             (var.type());
 
         PUSH_TYPE(type);

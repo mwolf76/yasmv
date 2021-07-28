@@ -24,6 +24,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 unsigned InstanceType::width() const
 { assert(false); }
 
@@ -33,4 +35,6 @@ InstanceType::InstanceType(TypeMgr& owner, expr::Expr_ptr name, expr::Expr_ptr p
     , f_params(params)
 {
     f_repr = expr::ExprMgr::INSTANCE().make_params( name, params );
+}
+
 }

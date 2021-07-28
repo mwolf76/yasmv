@@ -29,34 +29,34 @@ namespace enc {
 
 EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
-Encoding_ptr EncodingMgr::make_encoding(Type_ptr tp)
+Encoding_ptr EncodingMgr::make_encoding(type::Type_ptr tp)
 {
     assert(NULL != tp);
 
     Encoding_ptr res = NULL;
 
-    BooleanType_ptr btype;
-    UnsignedAlgebraicType_ptr ua_type;
-    SignedAlgebraicType_ptr sa_type;
-    EnumType_ptr etype;
-    ArrayType_ptr vtype;
+    type::BooleanType_ptr btype;
+    type::UnsignedAlgebraicType_ptr ua_type;
+    type::SignedAlgebraicType_ptr sa_type;
+    type::EnumType_ptr etype;
+    type::ArrayType_ptr vtype;
 
     /* disable DD reordering */
     f_cudd.AutodynDisable();
 
-    if ((btype = dynamic_cast<BooleanType_ptr>(tp)))
+    if ((btype = dynamic_cast<type::BooleanType_ptr>(tp)))
         res = new BooleanEncoding();
 
-    else if ((sa_type = dynamic_cast<SignedAlgebraicType_ptr>(tp)))
+    else if ((sa_type = dynamic_cast<type::SignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(sa_type->width(), true, sa_type->dds());
 
-    else if ((ua_type = dynamic_cast<UnsignedAlgebraicType_ptr>(tp)))
+    else if ((ua_type = dynamic_cast<type::UnsignedAlgebraicType_ptr>(tp)))
         res = new AlgebraicEncoding(ua_type->width(), false, ua_type->dds());
 
-    else if ((etype = dynamic_cast<EnumType_ptr>(tp)))
+    else if ((etype = dynamic_cast<type::EnumType_ptr>(tp)))
         res = new EnumEncoding(etype->literals());
 
-    else if ((vtype = dynamic_cast<ArrayType_ptr>(tp))) {
+    else if ((vtype = dynamic_cast<type::ArrayType_ptr>(tp))) {
         Encodings encodings;
 
         assert( 0 == ( vtype->width() % vtype->of()->width()));

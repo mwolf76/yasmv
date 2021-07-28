@@ -31,7 +31,7 @@ WitnessMgr_ptr WitnessMgr::f_instance = NULL;
 
 WitnessMgr::WitnessMgr()
     : f_em(expr::ExprMgr::INSTANCE())
-    , f_tm(TypeMgr::INSTANCE())
+    , f_tm(type::TypeMgr::INSTANCE())
     , f_evaluator(*this)
     , f_autoincrement(0)
 {}

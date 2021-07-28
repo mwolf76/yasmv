@@ -59,10 +59,10 @@ void Compiler::walk_at_postorder(const expr::Expr_ptr expr)
     if (ENCODING == f_status)
         return;
 
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back()); f_type_stack.pop_back();
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back()); f_type_stack.pop_back();
 
     assert(lhs_type -> is_time());
@@ -340,7 +340,7 @@ void Compiler::walk_implies_postorder(const expr::Expr_ptr expr)
 
 bool Compiler::walk_type_preorder(const expr::Expr_ptr expr)
 {
-    Type_ptr tp
+    type::Type_ptr tp
         (f_owner.tm().find_type_by_def(expr));
 
     f_type_stack.push_back(tp);
@@ -363,11 +363,11 @@ void Compiler::walk_cast_postorder(const expr::Expr_ptr expr)
 
     expr::Expr_ptr ctx
         (f_ctx_stack.back());
-    Type_ptr tgt_type
+    type::Type_ptr tgt_type
         (f_owner.type( expr->lhs(), ctx));
-    Type_ptr src_type
+    type::Type_ptr src_type
         (f_owner.type( expr->rhs(), ctx));
-    Type_ptr cur_type
+    type::Type_ptr cur_type
         (f_type_stack.back());
 
     assert  (cur_type -> width() ==
@@ -676,15 +676,15 @@ void Compiler::walk_array_postorder(const expr::Expr_ptr expr)
     if (ENCODING == f_status)
         return;
 
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     unsigned elems, width;
 
     POP_TYPE(type);
 
     if (type -> is_array()) {
-        ArrayType_ptr array_type
+        type::ArrayType_ptr array_type
             (type -> as_array());
 
         elems = array_type -> nelems();
@@ -702,9 +702,9 @@ void Compiler::walk_array_postorder(const expr::Expr_ptr expr)
         }
     }
     else if (type -> is_scalar()) {
-        ScalarType_ptr scalar_type
+        type::ScalarType_ptr scalar_type
             (type -> as_scalar());
-        ArrayType_ptr array_type
+        type::ArrayType_ptr array_type
             (tm.find_array_type(scalar_type, 1));
         PUSH_TYPE(array_type);
         return; /* no need to do anything */
@@ -721,24 +721,24 @@ void Compiler::walk_array_comma_postorder(const expr::Expr_ptr expr)
     if (ENCODING == f_status)
         return;
 
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);
 
-    ArrayType_ptr array_type
+    type::ArrayType_ptr array_type
         (NULL);
 
     if (rhs_type -> is_array()) {
         array_type = rhs_type -> as_array();
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (array_type -> of());
 
         // not necessarily the same type, but compatible
         assert( lhs_type -> width() == of_type -> width());
 
-        ArrayType_ptr new_array_type
+        type::ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
 
         PUSH_TYPE(new_array_type);
@@ -746,7 +746,7 @@ void Compiler::walk_array_comma_postorder(const expr::Expr_ptr expr)
     }
 
     if (rhs_type -> is_scalar()) {
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
         // not necessarily the same type, but compatible
@@ -773,8 +773,8 @@ void Compiler::walk_set_comma_postorder(const expr::Expr_ptr expr)
     if (ENCODING == f_status)
         return;
 
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);

@@ -32,7 +32,7 @@ void Compiler::enumerative_equals(const expr::Expr_ptr expr)
     POP_DD(lhs);
     PUSH_DD(lhs.Equals(rhs));
 
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     f_type_stack.pop_back();
@@ -46,7 +46,7 @@ void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
     POP_DD(lhs);
     PUSH_DD(lhs.Equals(rhs).Cmpl());
 
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     f_type_stack.pop_back();
@@ -62,7 +62,7 @@ void Compiler::enumerative_ite(const expr::Expr_ptr expr)
     PUSH_DD(cnd.Ite(lhs, rhs));
 
     // consume all, push rhs type
-    Type_ptr type
+    type::Type_ptr type
         (f_type_stack.back());
 
     f_type_stack.pop_back();
@@ -78,12 +78,12 @@ void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
         (f_enc);
 
     // index
-    Type_ptr t0
+    type::Type_ptr t0
         (f_type_stack.back());
     f_type_stack.pop_back(); // consume index
     assert(t0 -> is_algebraic());
 
-    Type_ptr itype
+    type::Type_ptr itype
         (t0 -> as_algebraic());
     unsigned iwidth
         (itype -> width());
@@ -92,14 +92,14 @@ void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
     assert(iwidth == bm.word_width()); // needed?
 
     // array
-    Type_ptr t1
+    type::Type_ptr t1
         (f_type_stack.back());
     f_type_stack.pop_back(); // consume array
     assert(t1 -> is_array());
 
-    ArrayType_ptr atype
+    type::ArrayType_ptr atype
         (t1 -> as_array());
-    ScalarType_ptr type
+    type::ScalarType_ptr type
         (atype -> of());
     assert(type -> is_enum());
 

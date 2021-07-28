@@ -43,7 +43,7 @@ namespace symb {
 
 class Typed {
 public:
-    virtual const Type_ptr type() const =0;
+    virtual const type::Type_ptr type() const =0;
 };
 
 class Value {
@@ -109,11 +109,11 @@ class Constant
 {
     expr::Expr_ptr f_module;
     expr::Expr_ptr f_name;
-    Type_ptr f_type;
+    type::Type_ptr f_type;
     value_t f_value;
 
 public:
-    Constant(const expr::Expr_ptr module, const expr::Expr_ptr name, Type_ptr type, value_t value)
+    Constant(const expr::Expr_ptr module, const expr::Expr_ptr name, type::Type_ptr type, value_t value)
         : f_module(module)
         , f_name(name)
         , f_type(type)
@@ -126,7 +126,7 @@ public:
     const expr::Expr_ptr name() const
     { return f_name; }
 
-    const Type_ptr type() const
+    const type::Type_ptr type() const
     { return f_type; }
 
     value_t value() const
@@ -139,14 +139,14 @@ class Variable
 {
     expr::Expr_ptr f_module;
     expr::Expr_ptr f_name;
-    Type_ptr f_type;
+    type::Type_ptr f_type;
     bool     f_input;
     bool     f_temp;
     bool     f_frozen;
     bool     f_inertial;
 
 public:
-    Variable(expr::Expr_ptr module, expr::Expr_ptr name, Type_ptr type)
+    Variable(expr::Expr_ptr module, expr::Expr_ptr name, type::Type_ptr type)
         : f_module(module)
         , f_name(name)
         , f_type(type)
@@ -162,7 +162,7 @@ public:
     const expr::Expr_ptr name() const
     { return f_name; }
 
-    const Type_ptr type() const
+    const type::Type_ptr type() const
     { return f_type; }
 
     void set_input(bool value)
@@ -196,10 +196,10 @@ class Parameter
 {
     expr::Expr_ptr f_module;
     expr::Expr_ptr f_name;
-    Type_ptr f_type;
+    type::Type_ptr f_type;
 
 public:
-    Parameter(expr::Expr_ptr module, expr::Expr_ptr name, Type_ptr type)
+    Parameter(expr::Expr_ptr module, expr::Expr_ptr name, type::Type_ptr type)
         : f_module(module)
         , f_name(name)
         , f_type(type)
@@ -211,7 +211,7 @@ public:
     const expr::Expr_ptr name() const
     { return f_name; }
 
-    const Type_ptr type() const
+    const type::Type_ptr type() const
     { return f_type; }
 
 };
@@ -221,11 +221,11 @@ class Literal
     , public Typed
 {
     const expr::Expr_ptr f_name;
-    const Type_ptr f_type;
+    const type::Type_ptr f_type;
     const value_t f_value;
 
 public:
-    Literal(const expr::Expr_ptr name, const Type_ptr type, value_t value)
+    Literal(const expr::Expr_ptr name, const type::Type_ptr type, value_t value)
         : f_name(name)
         , f_type(type)
         , f_value(value)
@@ -237,7 +237,7 @@ public:
     virtual const expr::Expr_ptr name() const
     { return f_name; }
 
-    virtual const Type_ptr type() const
+    virtual const type::Type_ptr type() const
     { return f_type; }
 
     virtual const value_t value() const

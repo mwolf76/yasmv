@@ -32,7 +32,7 @@ namespace parse {
     bool parseFile(const char* fName);
     cmd::CommandVector_ptr parseCommand(const char *command_line);
     expr::Expr_ptr parseExpression(const char *string);
-    Type_ptr parseTypedef(const char *string);
+    type::Type_ptr parseTypedef(const char *string);
 }
 
 #endif

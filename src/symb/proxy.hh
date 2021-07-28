@@ -40,12 +40,12 @@
 namespace symb {
 
 class ResolverProxy : public Resolver {
-    TypeMgr& f_tm;
+    type::TypeMgr& f_tm;
     model::ModelMgr& f_mm;
 
 public:
     ResolverProxy()
-        : f_tm(TypeMgr::INSTANCE())
+        : f_tm(type::TypeMgr::INSTANCE())
         , f_mm(model::ModelMgr::INSTANCE())
     {}
 

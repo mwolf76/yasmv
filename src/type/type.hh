@@ -37,4 +37,6 @@
 #include <type/classes.hh>
 #include <type/helpers.hh>
 
+namespace type { };
+
 #endif /* TYPE_H */

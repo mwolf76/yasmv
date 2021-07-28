@@ -104,7 +104,7 @@ public:
     { return f_cudd.ReadSize(); }
 
     // Makes a new encoding. Used by the compiler
-    Encoding_ptr make_encoding(Type_ptr type);
+    Encoding_ptr make_encoding(type::Type_ptr type);
 
     // Registers an encoding. Used by the compiler
     void register_encoding(const expr::TimedExpr& key, Encoding_ptr enc);

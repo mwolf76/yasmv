@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_SUITE(tests)
 
 BOOST_AUTO_TEST_CASE(boolean_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_boolean();
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_boolean();
 
     BOOST_CHECK(  type->is_boolean());
     BOOST_CHECK(! type->is_algebraic());
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(boolean_type)
 
 BOOST_AUTO_TEST_CASE(boolean_array_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_boolean_array(10);
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_boolean_array(10);
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(! type->is_algebraic());
@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(boolean_array_type)
 
 BOOST_AUTO_TEST_CASE(unsigned_int_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_unsigned(8);
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_unsigned(8);
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(  type->is_algebraic());
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(unsigned_int_type)
 
 BOOST_AUTO_TEST_CASE(unsigned_int_array_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_unsigned_array(8, 10);
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_unsigned_array(8, 10);
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(! type->is_algebraic());
@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE(unsigned_int_array_type)
 
 BOOST_AUTO_TEST_CASE(signed_int_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_signed(8);
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_signed(8);
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(  type->is_algebraic());
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(signed_int_type)
 
 BOOST_AUTO_TEST_CASE(signed_int_array_type)
 {
-    TypeMgr& tm = TypeMgr::INSTANCE();
-    Type_ptr type = tm.find_signed_array(8, 10);
+    type::TypeMgr& tm = type::TypeMgr::INSTANCE();
+    type::Type_ptr type = tm.find_signed_array(8, 10);
 
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(! type->is_algebraic());
@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE(signed_int_array_type)
 
 BOOST_AUTO_TEST_CASE(enum_type)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(enum_type)
     ev.insert(l);
     ev.insert(d);
 
-    Type_ptr type = tm.find_enum(ev);
+    type::Type_ptr type = tm.find_enum(ev);
     BOOST_CHECK(! type->is_boolean());
     BOOST_CHECK(! type->is_constant());
     BOOST_CHECK(! type->is_algebraic());
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(enum_type)
     BOOST_CHECK(! type->is_instance());
 
     // additional checks
-    EnumType_ptr et = dynamic_cast<EnumType_ptr>(type);
+    type::EnumType_ptr et = dynamic_cast<type::EnumType_ptr>(type);
     BOOST_REQUIRE( NULL != et );
 
     BOOST_CHECK( 3 == et->literals().size() );
@@ -197,8 +197,8 @@ BOOST_AUTO_TEST_CASE(enum_type)
 
 BOOST_AUTO_TEST_CASE(enum_array_type)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
     ev.insert(l);
     ev.insert(d);
 
-    Type_ptr type
+    type::Type_ptr type
         (tm.find_enum_array(ev, 10));
 
     BOOST_CHECK(! type->is_boolean());
@@ -234,8 +234,8 @@ BOOST_AUTO_TEST_CASE(type_checking)
         (model::ModelMgr::INSTANCE());
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     /* set word width to 16 bits */
     opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
@@ -247,9 +247,9 @@ BOOST_AUTO_TEST_CASE(type_checking)
     model.add_module(main);
 
     /* A few types */
-    Type_ptr boolean = tm.find_boolean();
-    Type_ptr uint16 = tm.find_unsigned(16);
-    Type_ptr int16 = tm.find_signed(16);
+    type::Type_ptr boolean = tm.find_boolean();
+    type::Type_ptr uint16 = tm.find_unsigned(16);
+    type::Type_ptr int16 = tm.find_signed(16);
 
     /*
        A pair of variables for each type:
@@ -307,25 +307,25 @@ BOOST_AUTO_TEST_CASE(type_checking)
 
     // type system violations
     BOOST_CHECK_THROW(mm.type( em.make_neg( x )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_ge( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_gt( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_le( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_lt( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_lshift( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_rshift( x, y )),
-                      TypeException);
+                      type::TypeException);
 
     // relationals (unsigned)
     BOOST_CHECK( boolean ==
@@ -348,52 +348,52 @@ BOOST_AUTO_TEST_CASE(type_checking)
 
     // type system violations
     BOOST_CHECK_THROW(mm.type( em.make_not( s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_and( s, t )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_or( s, t )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_implies( s, t )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_eq( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_eq( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_ne( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_ne( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_ge( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_ge( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_gt( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_gt( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_le( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_le( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_lt( x, s )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_lt( x, u )),
-                      TypeException);
+                      type::TypeException);
 
     // relationals (signed)
     BOOST_CHECK( boolean ==
@@ -416,16 +416,16 @@ BOOST_AUTO_TEST_CASE(type_checking)
 
     // type system violations
     BOOST_CHECK_THROW(mm.type( em.make_not( u )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_and( u, v )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_or( u, v )),
-                      TypeException);
+                      type::TypeException);
 
     BOOST_CHECK_THROW(mm.type( em.make_implies( u, v )),
-                      TypeException);
+                      type::TypeException);
 
     // arithmetics
     BOOST_CHECK( uint16 ==

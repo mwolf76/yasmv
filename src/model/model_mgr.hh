@@ -72,15 +72,15 @@ public:
     inline expr::ExprMgr& em() const
     { return f_em; }
 
-    inline TypeMgr& tm() const
+    inline type::TypeMgr& tm() const
     { return f_tm; }
 
     inline Analyzer& analyzer() const
     { return f_analyzer; }
 
     // delegated type inference method
-    inline Type_ptr type(expr::Expr_ptr body,
-                         expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
+    inline type::Type_ptr type(expr::Expr_ptr body,
+                               expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
     {
         assert( f_analyzed );
         return f_type_checker.type(body, ctx);
@@ -117,7 +117,7 @@ private:
     expr::ExprMgr& f_em;
 
     // ref to type manager
-    TypeMgr& f_tm;
+    type::TypeMgr& f_tm;
 
     // symb resolver
     ModelResolver f_resolver;

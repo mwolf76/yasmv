@@ -45,7 +45,7 @@ typedef boost::unordered_map<expr::TimedExpr, value_t,
 class WitnessMgr;
 class Evaluator : public expr::ExprWalker {
 
-    TypeVector f_type_stack;
+    type::TypeVector f_type_stack;
     expr::ExprVector f_ctx_stack;
     utils::TimeVector f_time_stack;
     utils::ValueVector f_values_stack;

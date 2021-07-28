@@ -42,9 +42,9 @@ ADD Compiler::make_auto_dd()
 {
     expr::ExprMgr& em
         (f_owner.em());
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
-    Type_ptr boolean
+    type::Type_ptr boolean
         (tm.find_boolean());
 
     enc::BooleanEncoding_ptr be
@@ -143,7 +143,7 @@ void Compiler::post_node_hook(expr::Expr_ptr expr)
         (em.make_dot( ctx, expr), time);
 
     assert(0 < f_type_stack.size());
-    Type_ptr type = f_type_stack.back();
+    type::Type_ptr type = f_type_stack.back();
 
     if (type -> is_time())
         return;
@@ -204,7 +204,7 @@ bool Compiler::cache_miss(const expr::Expr_ptr expr)
         (f_compilation_cache.find(key));
 
     if (eye != f_compilation_cache.end()) {
-        const Type_ptr type
+        const type::Type_ptr type
             (f_owner.type(expr, ctx));
 
         DRIVEL
@@ -420,7 +420,7 @@ void Compiler::activate_array_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body)
     }
 }
 
-enc::Encoding_ptr Compiler::find_encoding( const expr::TimedExpr& key, const Type_ptr type )
+enc::Encoding_ptr Compiler::find_encoding( const expr::TimedExpr& key, const type::Type_ptr type )
 {
     enc::Encoding_ptr res;
 

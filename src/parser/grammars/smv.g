@@ -49,8 +49,8 @@ options {
     model::ModelMgr& mm
         (model::ModelMgr::INSTANCE());
 
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
@@ -171,7 +171,7 @@ fsm_var_decl_clause
 @init {
     expr::ExprVector ev;
 }
-    : ids=identifiers[&ev] ':' tp=type
+    : ids=identifiers[&ev] ':' tp=smv_type
     {
             expr::ExprVector::iterator expr_iter;
             assert(NULL != tp);
@@ -201,7 +201,7 @@ fsm_param_decl_clause
 @init {
     expr::ExprVector ev;
 }
-    : ids=identifiers[&ev] ':' tp=type
+    : ids=identifiers[&ev] ':' tp=smv_type
     {
             expr::ExprVector::iterator expr_iter;
             assert(NULL != tp);
@@ -787,7 +787,7 @@ value returns [expr::Expr_ptr res]
     ;
 
 /* typedecls */
-type returns [Type_ptr res]
+smv_type returns [type::Type_ptr res]
 @init {}
     : tp = native_type
       { $res = tp; }
@@ -799,7 +799,7 @@ type returns [Type_ptr res]
       { $res = tp; }
     ;
 
-native_type returns [Type_ptr res]
+native_type returns [type::Type_ptr res]
 @init {}
     : tp = boolean_type
       { $res = tp; }
@@ -811,7 +811,7 @@ native_type returns [Type_ptr res]
       { $res = tp; }
     ;
 
-boolean_type returns [Type_ptr res]
+boolean_type returns [type::Type_ptr res]
 @init {
     int array_size = 0;
 }
@@ -825,12 +825,12 @@ boolean_type returns [Type_ptr res]
     ) ?
     {
         $res = array_size ?
-            (Type_ptr) tm.find_boolean_array(array_size) :
-            (Type_ptr) tm.find_boolean();
+            (type::Type_ptr) tm.find_boolean_array(array_size) :
+            (type::Type_ptr) tm.find_boolean();
     }
     ;
 
-enum_type returns [Type_ptr res]
+enum_type returns [type::Type_ptr res]
 @init {
     int array_size = 0;
     expr::ExprSet lits;
@@ -847,12 +847,12 @@ enum_type returns [Type_ptr res]
     ) ?
     {
         $res = array_size ?
-            (Type_ptr) tm.find_enum_array(lits, array_size) :
-            (Type_ptr) tm.find_enum(lits);
+            (type::Type_ptr) tm.find_enum_array(lits, array_size) :
+            (type::Type_ptr) tm.find_enum(lits);
     }
     ;
 
-unsigned_int_type returns [Type_ptr res]
+unsigned_int_type returns [type::Type_ptr res]
 @init {
     int array_size = 0;
     char *p;
@@ -873,14 +873,14 @@ unsigned_int_type returns [Type_ptr res]
     ) ?
     {
         $res = array_size ?
-            (Type_ptr) tm.find_unsigned_array(*p ? atoi(p)
+            (type::Type_ptr) tm.find_unsigned_array(*p ? atoi(p)
                 : om.word_width(), array_size) :
-            (Type_ptr) tm.find_unsigned( *p ? atoi(p)
+            (type::Type_ptr) tm.find_unsigned( *p ? atoi(p)
                 : om.word_width());
     }
     ;
 
-signed_int_type returns [Type_ptr res]
+signed_int_type returns [type::Type_ptr res]
 @init {
     int array_size = 0;
     char *p;
@@ -901,15 +901,15 @@ signed_int_type returns [Type_ptr res]
         )?
     {
         $res = array_size ?
-            (Type_ptr) tm.find_signed_array(*p ? atoi(p)
+            (type::Type_ptr) tm.find_signed_array(*p ? atoi(p)
                 : om.word_width(), array_size) :
-            (Type_ptr) tm.find_signed( *p ? atoi(p)
+            (type::Type_ptr) tm.find_signed( *p ? atoi(p)
                 : om.word_width());
     }
     ;
 
 
-instance_type returns [Type_ptr res]
+instance_type returns [type::Type_ptr res]
 @init {
 }
     : module=identifier '(' parameters=params ')'

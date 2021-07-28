@@ -24,6 +24,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 bool Type::is_scalar()
 { return NULL != dynamic_cast<ScalarType_ptr>( this ); }
 
@@ -83,3 +85,5 @@ Type::~Type() {}
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 std::ostream& operator<<(std::ostream& os, Type_ptr type)
 { return os << type->repr(); }
+
+};

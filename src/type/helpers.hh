@@ -26,7 +26,7 @@
 
 /** -- shortcurts to simplify the manipulation of the internal Type stack -- */
 #define TOP_TYPE(tp)                            \
-    const Type_ptr (tp)(f_type_stack.back())
+    const auto (tp)(f_type_stack.back())
 
 #define DROP_TYPE()                             \
     f_type_stack.pop_back()
@@ -37,6 +37,10 @@
 #define PUSH_TYPE(tp)                           \
     f_type_stack.push_back(tp)
 
+namespace type {
+
 typedef std::vector<Type_ptr> TypeVector;
+
+};
 
 #endif /* TYPE_HELPERS_H */

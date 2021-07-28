@@ -30,6 +30,8 @@
 #include <symb/typedefs.hh>
 #include <symb/classes.hh>
 
+namespace type {
+
 // static initialization
 TypeMgr_ptr TypeMgr::f_instance = NULL;
 
@@ -327,3 +329,5 @@ void TypeMgr::register_type(const expr::Expr_ptr expr, Type_ptr vtype) {
     assert ((NULL != expr) && (NULL != vtype) && (! lookup_type(expr)));
     f_register [ expr ] = vtype;
 }
+
+};

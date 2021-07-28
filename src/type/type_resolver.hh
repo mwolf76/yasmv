@@ -29,6 +29,8 @@
 #include <common/common.hh>
 #include <symb/resolver.hh>
 
+namespace type {
+
 class TypeMgr;
 class TypeResolver : public symb::Resolver {
 public:
@@ -39,6 +41,8 @@ public:
 
 private:
     TypeMgr& f_owner;
+};
+
 };
 
 #endif /* TYPE_RESOLVER_H */

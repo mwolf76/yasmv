@@ -40,12 +40,12 @@ void Compiler::algebraic_unary(const expr::Expr_ptr expr)
 {
     assert(is_unary_algebraic(expr));
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
 
     // operands is algebraic
     assert(lhs_type -> is_algebraic());
-    const AlgebraicType_ptr algebraic_type
+    const type::AlgebraicType_ptr algebraic_type
         (lhs_type -> as_algebraic());
 
     unsigned width
@@ -79,9 +79,9 @@ void Compiler::algebraic_binary(const expr::Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
 
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back()); f_type_stack.pop_back();
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
 
     // both operands are algebraic, same width
@@ -151,14 +151,14 @@ void Compiler::algebraic_relational(const expr::Expr_ptr expr)
 {
     assert(is_binary_algebraic(expr));
 
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
@@ -213,15 +213,15 @@ void Compiler::algebraic_le(const expr::Expr_ptr expr)
 
 void Compiler::algebraic_ite(const expr::Expr_ptr expr)
 {
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr cnd_type
+    const type::Type_ptr cnd_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
@@ -290,12 +290,12 @@ void Compiler::algebraic_subscript(const expr::Expr_ptr expr)
         (f_enc);
 
     // index
-    Type_ptr t0
+    type::Type_ptr t0
         (f_type_stack.back());
     f_type_stack.pop_back(); // consume index
     assert(t0 -> is_algebraic());
 
-    Type_ptr itype
+    type::Type_ptr itype
         (t0 -> as_algebraic());
     unsigned iwidth
         (itype -> width());
@@ -304,14 +304,14 @@ void Compiler::algebraic_subscript(const expr::Expr_ptr expr)
     assert(iwidth == bm.word_width()); // needed?
 
     // array
-    Type_ptr t1
+    type::Type_ptr t1
         (f_type_stack.back());
     f_type_stack.pop_back(); // consume array
     assert(t1 -> is_array());
 
-    ArrayType_ptr atype
+    type::ArrayType_ptr atype
         (t1 -> as_array());
-    ScalarType_ptr type
+    type::ScalarType_ptr type
         (atype -> of());
 
     unsigned elem_width
@@ -363,7 +363,7 @@ void Compiler::algebraic_subscript(const expr::Expr_ptr expr)
 /* add n-1 non significant zero, LSB is original bit */
 void Compiler::algebraic_cast_from_boolean(const expr::Expr_ptr expr)
 {
-    Type_ptr tp = f_owner.type( expr->lhs(),
+    type::Type_ptr tp = f_owner.type( expr->lhs(),
                                 f_ctx_stack.back());
 
     for (unsigned i = 0; i < tp->width() -1; ++ i) {
@@ -374,7 +374,7 @@ void Compiler::algebraic_cast_from_boolean(const expr::Expr_ptr expr)
 /* squeeze all bits in a big Or */
 void Compiler::boolean_cast_from_algebraic(const expr::Expr_ptr expr)
 {
-    Type_ptr tp
+    type::Type_ptr tp
         (f_owner.type( expr->rhs(),
                        f_ctx_stack.back()));
 
@@ -393,9 +393,9 @@ void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
 {
     expr::Expr_ptr ctx
         (f_ctx_stack.back());
-    Type_ptr src_type
+    type::Type_ptr src_type
         (f_owner.type( expr->rhs(), ctx));
-    Type_ptr tgt_type
+    type::Type_ptr tgt_type
         (f_owner.type( expr->lhs(), ctx));
 
     if (src_type -> width() == tgt_type -> width())

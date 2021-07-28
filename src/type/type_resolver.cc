@@ -28,6 +28,8 @@
 #include <symb/typedefs.hh>
 #include <symb/classes.hh>
 
+namespace type {
+
 TypeResolver::TypeResolver(TypeMgr& owner)
     : f_owner(owner)
 {
@@ -62,3 +64,5 @@ symb::Symbol_ptr TypeResolver::symbol(const expr::Expr_ptr key)
 
      return NULL; /* unresolved */
 }
+
+};

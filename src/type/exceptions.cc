@@ -29,6 +29,8 @@
 #include <string>
 #include <sstream>
 
+namespace type {
+
 static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs)
 {
     std::ostringstream oss;
@@ -122,3 +124,5 @@ TypeMismatch::TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
     : TypeException("TypeMismatch",
                     format_type_mismatch(expr, a, b))
 {}
+
+}

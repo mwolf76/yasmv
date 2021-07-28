@@ -93,14 +93,16 @@ SymbIter::SymbIter(model::Model& model)
                     (vi -> first);
                 Variable& var
                     (* vi -> second);
-                Type_ptr vtype
+                type::Type_ptr vtype
                     (var.type());
                 expr::Expr_ptr inner_name
                     (em.make_dot( full_name, id));
 
                 if (vtype -> is_instance()) {
-                    InstanceType_ptr instance = vtype -> as_instance();
-                    model::Module&  module( model.module(instance -> name()));
+                    type::InstanceType_ptr instance
+                        (vtype -> as_instance());
+                    model::Module&  module
+                        (model.module(instance -> name()));
 
                     stack.push( std::pair< expr::Expr_ptr, model::Module_ptr >
                                 (inner_name, &module));

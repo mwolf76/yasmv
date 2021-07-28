@@ -50,13 +50,13 @@ ModelResolver::ModelResolver(ModelMgr& owner)
                               symb::Constant_ptr>( em.make_false(),
                                                    new symb::Constant(expr::ExprMgr::INSTANCE().make_empty(),
                                                                       expr::ExprMgr::INSTANCE().make_false(),
-                                                                      TypeMgr::INSTANCE().find_boolean(), 0)));
+                                                                      type::TypeMgr::INSTANCE().find_boolean(), 0)));
 
     f_owner.symbols().insert( std::pair<expr::Expr_ptr,
                               symb::Constant_ptr>( em.make_true(),
                                                    new symb::Constant(expr::ExprMgr::INSTANCE().make_empty(),
                                                                       expr::ExprMgr::INSTANCE().make_true(),
-                                                                      TypeMgr::INSTANCE().find_boolean(), 1)));
+                                                                      type::TypeMgr::INSTANCE().find_boolean(), 1)));
 }
 
 ModelResolver::~ModelResolver()

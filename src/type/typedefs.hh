@@ -31,6 +31,8 @@
 #include <vector>
 #include <boost/unordered_map.hpp>
 
+namespace type {
+
 /* base classes pointer types */
 typedef class Type* Type_ptr;
 typedef class TypeMgr* TypeMgr_ptr;
@@ -62,5 +64,7 @@ typedef class TimeType* TimeType_ptr;
 
 /* 2. arrays */
 typedef class ArrayType* ArrayType_ptr;
+
+};
 
 #endif /* TYPE_TYPEDEFS_H */

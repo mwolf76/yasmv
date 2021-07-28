@@ -79,7 +79,7 @@ public:
     inline expr::ExprMgr& em()
     { return f_em; }
 
-    inline TypeMgr& tm()
+    inline type::TypeMgr& tm()
     { return f_tm; }
 
     inline bool ok() const
@@ -126,7 +126,7 @@ private:
     model::ModelMgr& f_mm;
     enc::EncodingMgr& f_bm;
     expr::ExprMgr& f_em;
-    TypeMgr& f_tm;
+    type::TypeMgr& f_tm;
 
     /* Model Compiler */
     model::Compiler f_compiler;

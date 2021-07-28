@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     model::Compiler f_compiler;
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     model::Module_ptr main_module = new model::Module(main_expr);
     model.add_module(*main_module);
 
-    Type_ptr u2 = tm.find_unsigned(2);
+    type::Type_ptr u2 = tm.find_unsigned(2);
 
     expr::Atom a_x("x"); expr::Expr_ptr x = em.make_identifier(a_x);
     main_module->add_var(x, new symb::Variable(main_expr, x, u2));

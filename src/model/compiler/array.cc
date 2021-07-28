@@ -30,17 +30,17 @@ namespace model {
 
 void Compiler::array_equals(const expr::Expr_ptr expr)
 {
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
 
     assert( lhs_type -> is_array() &&
             rhs_type -> is_array());
 
-    const ArrayType_ptr atype
+    const type::ArrayType_ptr atype
         (rhs_type -> as_array());
 
     unsigned width
@@ -88,26 +88,26 @@ void Compiler::array_equals(const expr::Expr_ptr expr)
 
 void Compiler::array_ite(const expr::Expr_ptr expr)
 {
-    const Type_ptr rhs_type
+    const type::Type_ptr rhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr lhs_type
+    const type::Type_ptr lhs_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const Type_ptr cnd_type
+    const type::Type_ptr cnd_type
         (f_type_stack.back());
     f_type_stack.pop_back();
 
-    const ArrayType_ptr rhs_atype
+    const type::ArrayType_ptr rhs_atype
         (rhs_type -> as_array());
     unsigned rhs_width
         (rhs_atype -> of() -> width());
     unsigned rhs_nelems
         (rhs_atype -> nelems());
 
-    const ArrayType_ptr lhs_atype
+    const type::ArrayType_ptr lhs_atype
         (lhs_type -> as_array());
     unsigned lhs_width
         (lhs_atype -> of() -> width());

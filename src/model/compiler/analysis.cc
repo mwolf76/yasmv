@@ -122,20 +122,20 @@ bool Compiler::is_subscript_boolean(const expr::Expr_ptr expr)
     if (! em.is_subscript(expr))
         return false;
 
-    Type_ptr lhs_type
+    type::Type_ptr lhs_type
         (f_owner.type(expr->lhs(), ctx));
 
     if (lhs_type -> is_array()) {
-        ArrayType_ptr array_type
+        type::ArrayType_ptr array_type
             (lhs_type -> as_array());
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (array_type -> of());
 
         if (! of_type -> is_boolean())
             return false;
     }
 
-    Type_ptr rhs_type
+    type::Type_ptr rhs_type
         (f_owner.type(expr->rhs(), ctx));
 
     if (! rhs_type -> is_algebraic())
@@ -156,22 +156,22 @@ bool Compiler::is_subscript_enumerative(const expr::Expr_ptr expr)
     if (! em.is_subscript(expr))
         return false;
 
-    Type_ptr lhs_type
+    type::Type_ptr lhs_type
         (f_owner.type(expr->lhs(), ctx));
 
     if (lhs_type -> is_array()) {
 
-        ArrayType_ptr array_type
+        type::ArrayType_ptr array_type
             (lhs_type -> as_array());
 
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (array_type -> of());
 
         if (! of_type -> is_enum())
             return false;
     }
 
-    Type_ptr rhs_type
+    type::Type_ptr rhs_type
         (f_owner.type(expr->rhs(), ctx));
 
     if (! rhs_type -> is_algebraic())
@@ -192,22 +192,22 @@ bool Compiler::is_subscript_algebraic(const expr::Expr_ptr expr)
     if (! em.is_subscript(expr))
         return false;
 
-    Type_ptr lhs_type
+    type::Type_ptr lhs_type
         (f_owner.type(expr->lhs(), ctx));
 
     if (lhs_type -> is_array()) {
 
-        ArrayType_ptr array_type
+        type::ArrayType_ptr array_type
             (lhs_type -> as_array());
 
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (array_type -> of());
 
         if (! of_type -> is_algebraic())
             return false;
     }
 
-    Type_ptr rhs_type
+    type::Type_ptr rhs_type
         (f_owner.type(expr->rhs(), ctx));
 
     if (! rhs_type -> is_algebraic())

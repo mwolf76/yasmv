@@ -35,6 +35,8 @@
 #include <type/typedefs.hh>
 #include <type/type_resolver.hh>
 
+namespace type {
+
 /*
    The TypeMgr has two well-defined responsibilites:
 
@@ -117,6 +119,8 @@ private:
 
     // ref to internal resolver
     TypeResolver f_resolver;
+};
+
 };
 
 #endif

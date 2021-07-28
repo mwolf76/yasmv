@@ -31,8 +31,11 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
-#include <type/typedefs.hh>
 #include <type/classes.hh>
+#include <type/typedefs.hh>
+#include <type/type_mgr.hh>
+
+namespace type {
 
 /*
  * yasmv data types can be classified as (a) Monolithic types (i.e. that can be
@@ -104,9 +107,6 @@
  * operands.
  *
  **/
-
-#include <type/typedefs.hh>
-#include <type/type_mgr.hh>
 
 /** Basic Type class. */
 class Type {
@@ -343,6 +343,7 @@ protected:
 };
 
 /** -- shortcurts to simplify the manipulation of the internal Type stack -- */
+/*
 #define TOP_TYPE(tp)                            \
     const Type_ptr (tp)(f_type_stack.back())
 
@@ -356,5 +357,7 @@ protected:
     f_type_stack.push_back(tp)
 
 typedef std::vector<Type_ptr> TypeVector;
+*/
+};
 
 #endif /* TYPE_CLASSES_H */

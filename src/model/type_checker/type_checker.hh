@@ -36,7 +36,7 @@
 
 namespace model {
 
-typedef boost::unordered_map<expr::Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
+typedef boost::unordered_map<expr::Expr_ptr, type::Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
 
 /* enable the following macro to debug the TypeChecker */
 // #define DEBUG_TYPE_CHECKER
@@ -48,10 +48,10 @@ public:
     ~TypeChecker();
 
     /** @brief Returns Type object for given FQExpr (memoized). */
-    Type_ptr type(expr::Expr_ptr expr, expr::Expr_ptr ctx);
+    type::Type_ptr type(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
     // walker toplevel
-    Type_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
+    type::Type_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
     inline ModelMgr& owner()
     { return f_owner; }
@@ -71,7 +71,7 @@ protected:
 private:
     TypeReg f_map; // cache
 
-    TypeVector f_type_stack;
+    type::TypeVector f_type_stack;
     expr::ExprVector f_ctx_stack;
 
     // managers
@@ -80,18 +80,18 @@ private:
     bool cache_miss(const expr::Expr_ptr expr);
     void memoize_result(expr::Expr_ptr expr);
 
-    Type_ptr arithmetical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr relational_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr logical_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr ite_result_type(Type_ptr lhs, Type_ptr rhs);
-    Type_ptr cast_result_type(Type_ptr lhs, Type_ptr rhs);
+    type::Type_ptr arithmetical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+    type::Type_ptr relational_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+    type::Type_ptr logical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+    type::Type_ptr ite_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+    type::Type_ptr cast_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
 
-    Type_ptr check_any(expr::Expr_ptr expr);
-    Type_ptr check_timed(expr::Expr_ptr expr);
-    Type_ptr check_logical(expr::Expr_ptr expr);
-    Type_ptr check_arithmetical(expr::Expr_ptr expr);
-    Type_ptr check_scalar(expr::Expr_ptr expr);
-    Type_ptr check_array(expr::Expr_ptr expr);
+    type::Type_ptr check_any(expr::Expr_ptr expr);
+    type::Type_ptr check_timed(expr::Expr_ptr expr);
+    type::Type_ptr check_logical(expr::Expr_ptr expr);
+    type::Type_ptr check_arithmetical(expr::Expr_ptr expr);
+    type::Type_ptr check_scalar(expr::Expr_ptr expr);
+    type::Type_ptr check_array(expr::Expr_ptr expr);
 
     // post-orders only
     void walk_unary_fsm_postorder(const expr::Expr_ptr expr);

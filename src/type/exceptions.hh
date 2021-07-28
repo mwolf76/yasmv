@@ -24,6 +24,8 @@
 #ifndef TYPE_EXCEPTIONS_H
 #define TYPE_EXCEPTIONS_H
 
+namespace type {
+
 /** Exception classes */
 class TypeException : public Exception {
 public:
@@ -56,6 +58,8 @@ public:
 class TypeMismatch : public TypeException {
 public:
     TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b);
+};
+
 };
 
 #endif /* TYPE_EXCEPTIONS_H */

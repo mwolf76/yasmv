@@ -38,7 +38,7 @@ void Compiler::walk_instant(const expr::Expr_ptr expr)
         << expr
         << std::endl;
 
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     f_type_stack.push_back(tm.find_time());
@@ -53,7 +53,7 @@ void Compiler::walk_leaf(const expr::Expr_ptr expr)
 
     expr::ExprMgr& em
         (f_owner.em());
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     if (! cache_miss(expr))
@@ -112,7 +112,7 @@ void Compiler::walk_leaf(const expr::Expr_ptr expr)
         symb::Literal& lit (symb->as_literal());
 
         // push into type stack
-        Type_ptr type
+        type::Type_ptr type
             (lit.type());
 
         // if encoding for variable is available reuse it,
@@ -145,7 +145,7 @@ void Compiler::walk_leaf(const expr::Expr_ptr expr)
         const symb::Variable& var
             (symb -> as_variable());
 
-        Type_ptr type
+        type::Type_ptr type
             (var.type());
 
         /* INPUT vars are in fact bodyless, typed DEFINEs */
@@ -203,7 +203,7 @@ void Compiler::walk_leaf(const expr::Expr_ptr expr)
 }
 
 /* private service of walk_leaf */
-void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
+void Compiler::push_dds(enc::Encoding_ptr enc, type::Type_ptr type)
 {
     assert (NULL != enc);
     dd::DDVector& dds
@@ -230,7 +230,7 @@ void Compiler::push_dds(enc::Encoding_ptr enc, Type_ptr type)
     /* array of algebraics, same as above, times nelems */
     else if (type->is_array()) {
 
-        ScalarType_ptr scalar_type
+        type::ScalarType_ptr scalar_type
             (type->as_array()->of());
 
         if (scalar_type->is_monolithic())

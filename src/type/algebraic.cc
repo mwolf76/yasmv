@@ -26,6 +26,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 unsigned ConstantType::width() const
 {
     assert( 0 != f_width );
@@ -95,3 +97,5 @@ unsigned ArrayType::width() const
     assert( 0 != f_nelems );
     return f_nelems * f_of -> width();
 }
+
+};

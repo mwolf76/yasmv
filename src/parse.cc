@@ -195,7 +195,7 @@ expr::Expr_ptr parseExpression(const char *string)
 /**
  * Runs the parser TYPE rule on a single string.
  */
-Type_ptr parseTypedef(const char *string)
+type::Type_ptr parseTypedef(const char *string)
 {
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
@@ -218,8 +218,8 @@ Type_ptr parseTypedef(const char *string)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
-    Type_ptr res
-        (psr -> type(psr));
+    type::Type_ptr res
+        (psr -> smv_type(psr));
 
     if (!res)
         WARN

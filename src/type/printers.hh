@@ -26,10 +26,14 @@
 
 #include <common/common.hh>
 
+namespace type {
+
 // ostream helper, uses FQExpr printer (see expr/expr.cc)
 std::ostream& operator<<(std::ostream& os, Type_ptr type);
 
 // std::ostream helper, uses FQExpr printer (see expr/expr.cc)
 std::ostream& operator<<(std::ostream& os, const Type_ptr type);
+
+};
 
 #endif /* TYPE_PRINTERS_H */

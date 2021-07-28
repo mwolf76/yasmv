@@ -26,6 +26,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
     : Type(owner)
     , f_of(of)
@@ -48,4 +50,6 @@ unsigned ArrayType::width() const
 {
     assert( 0 != f_nelems );
     return f_nelems * f_of -> width();
+}
+
 }

@@ -111,7 +111,7 @@ private:
     void walk_leaf(const expr::Expr_ptr expr);
 
     /* push DDs and type information for variables (used by walk_leaf) */
-    void push_dds(enc::Encoding_ptr enc, Type_ptr type);
+    void push_dds(enc::Encoding_ptr enc, type::Type_ptr type);
 
     /* -- expr inspectors ---------------------------------------------------- */
     bool is_binary_boolean(const expr::Expr_ptr expr);
@@ -197,7 +197,7 @@ private:
     void memoize_result(const expr::Expr_ptr expr);
 
     /* encoding management */
-    enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr, const Type_ptr type);
+    enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr, const type::Type_ptr type);
 
     /* automatic inner variables (determinization, muxes, etc...) */
     expr::Expr_ptr make_auto_id();
@@ -237,7 +237,7 @@ private:
     MultiwaySelectionDescriptors f_multiway_selection_descriptors;
 
     /* type checking */
-    TypeVector f_type_stack;
+    type::TypeVector f_type_stack;
 
     /* compilation results */
     dd::DDVector f_add_stack;

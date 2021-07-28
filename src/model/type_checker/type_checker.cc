@@ -60,7 +60,7 @@ TypeChecker::~TypeChecker()
 }
 
 /* this function is not memoized by design, for a memoized wrapper use type() */
-Type_ptr TypeChecker::process(expr::Expr_ptr expr, expr::Expr_ptr ctx)
+type::Type_ptr TypeChecker::process(expr::Expr_ptr expr, expr::Expr_ptr ctx)
 {
     // remove previous results
     f_type_stack.clear();
@@ -237,10 +237,10 @@ void TypeChecker::walk_cast_postorder(const expr::Expr_ptr expr)
 
 bool TypeChecker::walk_type_preorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
-    Type_ptr tp
+    type::Type_ptr tp
         (tm.find_type_by_def(expr));
 
     f_type_stack.push_back(tp);
@@ -332,7 +332,7 @@ void TypeChecker::walk_cond_postorder(const expr::Expr_ptr expr)
     POP_TYPE(lhs_type);
     POP_TYPE(cnd);
     if (! cnd -> is_boolean())
-        throw BadType( expr -> lhs() -> lhs(), cnd );
+        throw type::BadType( expr -> lhs() -> lhs(), cnd );
 
     PUSH_TYPE(lhs_type);
 }
@@ -385,7 +385,7 @@ void TypeChecker::walk_subscript_postorder(const expr::Expr_ptr expr)
 {
     POP_TYPE(index);
     if (! index -> is_algebraic())
-        throw BadType(expr->rhs(), index);
+        throw type::BadType(expr->rhs(), index);
 
     /* return wrapped type */
     PUSH_TYPE(check_array(expr->lhs())
@@ -399,8 +399,8 @@ void TypeChecker::walk_array_postorder(const expr::Expr_ptr expr)
     /* Here we need to handle the singleton corner case
        (e.g. [42]). We can do it here because nested arrays are not
        supported. */
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     /* inspect head... */
     POP_TYPE(type);
@@ -411,11 +411,11 @@ void TypeChecker::walk_array_postorder(const expr::Expr_ptr expr)
         return;
     }
 
-    ScalarType_ptr scalar_type
+    type::ScalarType_ptr scalar_type
         (type -> as_scalar());
 
     /* build a singleton array type */
-    ArrayType_ptr new_array_type
+    type::ArrayType_ptr new_array_type
         (tm.find_array_type(scalar_type, 1));
 
     PUSH_TYPE(new_array_type);
@@ -430,24 +430,24 @@ bool TypeChecker::walk_array_comma_inorder(expr::Expr_ptr expr)
 
 void TypeChecker::walk_array_comma_postorder(expr::Expr_ptr expr)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
     POP_TYPE(lhs_type);
 
-    ArrayType_ptr array_type
+    type::ArrayType_ptr array_type
         (NULL);
 
     if (rhs_type -> is_array()) {
         array_type = rhs_type -> as_array();
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (array_type -> of());
 
         assert( lhs_type -> is_scalar() &&
                 lhs_type -> width() == of_type -> width());
 
-        ArrayType_ptr new_array_type
+        type::ArrayType_ptr new_array_type
             (tm.find_array_type( of_type, 1 + array_type -> nelems()));
 
         PUSH_TYPE(new_array_type);
@@ -455,7 +455,7 @@ void TypeChecker::walk_array_comma_postorder(expr::Expr_ptr expr)
     }
 
     if (rhs_type -> is_scalar()) {
-        ScalarType_ptr of_type
+        type::ScalarType_ptr of_type
             (rhs_type -> as_scalar());
 
         assert( lhs_type -> is_scalar() &&
@@ -483,14 +483,14 @@ void TypeChecker::walk_set_comma_postorder(expr::Expr_ptr expr)
     POP_TYPE(lhs);
 
     if (lhs != rhs)
-        throw TypeMismatch(expr, lhs, rhs);
+        throw type::TypeMismatch(expr, lhs, rhs);
 
     PUSH_TYPE(lhs);
 }
 
 void TypeChecker::walk_instant(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     PUSH_TYPE(tm.find_time());
@@ -499,7 +499,7 @@ void TypeChecker::walk_instant(const expr::Expr_ptr expr)
 
 void TypeChecker::walk_leaf(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     expr::ExprMgr& em
@@ -528,25 +528,25 @@ void TypeChecker::walk_leaf(const expr::Expr_ptr expr)
             (proxy.symbol(em.make_dot( ctx, expr)));
 
         if (symb->is_const()) {
-            Type_ptr res
+            type::Type_ptr res
                 (symb->as_const().type());
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_literal()) {
-            Type_ptr res
+            type::Type_ptr res
                 (symb->as_literal().type());
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_variable()) {
-            Type_ptr res
+            type::Type_ptr res
                 (symb->as_variable().type());
             PUSH_TYPE(res);
             return;
         }
         else if (symb->is_parameter()) {
-            Type_ptr res
+            type::Type_ptr res
                 (symb->as_parameter().type());
             PUSH_TYPE(res);
             return;

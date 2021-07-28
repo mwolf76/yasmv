@@ -24,9 +24,13 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 TimeType::TimeType(TypeMgr& owner)
     : Type(owner)
 { f_repr = f_owner.em().make_time_type(); }
 
 unsigned TimeType::width() const
 { return 0; }
+
+};

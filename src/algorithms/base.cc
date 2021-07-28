@@ -38,7 +38,7 @@ Algorithm::Algorithm(cmd::Command& command, model::Model& model)
     , f_mm(model::ModelMgr::INSTANCE())
     , f_bm(enc::EncodingMgr::INSTANCE())
     , f_em(expr::ExprMgr::INSTANCE())
-    , f_tm(TypeMgr::INSTANCE())
+    , f_tm(type::TypeMgr::INSTANCE())
     , f_witness(NULL)
 {}
 
@@ -109,15 +109,14 @@ void Algorithm::setup()
             symb::Variable& var
                 (* vi->second);
 
-            Type_ptr vtype
+            type::Type_ptr vtype
                 (var.type());
 
             expr::Expr_ptr local_ctx
                 (em.make_dot( ctx, id));
 
             if (vtype->is_instance()) {
-
-                InstanceType_ptr instance
+                type::InstanceType_ptr instance
                     (vtype->as_instance());
 
                 model::Module&  module

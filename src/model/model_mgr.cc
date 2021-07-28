@@ -48,7 +48,7 @@ ModelMgr_ptr ModelMgr::f_instance = NULL;
 ModelMgr::ModelMgr()
     : f_model()
     , f_em(expr::ExprMgr::INSTANCE())
-    , f_tm(TypeMgr::INSTANCE())
+    , f_tm(type::TypeMgr::INSTANCE())
     , f_resolver(* new ModelResolver(* this))
     , f_preprocessor(* new Preprocessor(* this))
     , f_analyzer(* new Analyzer(* this))
@@ -381,11 +381,11 @@ bool ModelMgr::analyze_aux(analyzer_pass_t pass)
             expr::Expr_ptr var_name
                (vi->first);
 
-            Type_ptr var_tp
+            type::Type_ptr var_tp
                 ((* vi->second).type());
 
             if (var_tp->is_instance()) {
-                InstanceType_ptr instance
+                type::InstanceType_ptr instance
                     (var_tp->as_instance());
                 expr::Expr_ptr inner_ctx
                     (em.make_dot( curr_ctx, var_name));

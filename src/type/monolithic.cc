@@ -24,6 +24,8 @@
 #include <type.hh>
 #include <type_mgr.hh>
 
+namespace type {
+
 BooleanType::BooleanType(TypeMgr& owner)
     : MonolithicType(owner)
 { f_repr = f_owner.em().make_boolean_type(); }
@@ -66,3 +68,5 @@ value_t EnumType::value(expr::Expr_ptr lit) const
 
     assert(false); // not found
 }
+
+};

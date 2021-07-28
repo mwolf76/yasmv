@@ -54,7 +54,7 @@ public:
     inline expr::ExprMgr& em() const
     { return f_em; }
 
-    inline TypeMgr& tm() const
+    inline type::TypeMgr& tm() const
     { return f_tm; }
 
     inline const WitnessList& witnesses() const
@@ -92,7 +92,7 @@ private:
     expr::ExprMgr& f_em;
 
     // ref to type manager
-    TypeMgr& f_tm;
+    type::TypeMgr& f_tm;
 
     // currently selected witness uid
     expr::Atom f_curr_uid;

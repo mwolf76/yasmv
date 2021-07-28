@@ -23,6 +23,8 @@
 
 #include <type/classes.hh>
 
+namespace type {
+
 Type::~Type()
 {}
 
@@ -91,3 +93,5 @@ bool Type::is_string()
 
 StringType_ptr Type::as_string()
 { return dynamic_cast<const StringType_ptr> (this); }
+
+};

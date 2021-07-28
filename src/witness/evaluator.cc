@@ -108,7 +108,7 @@ expr::Expr_ptr Evaluator::process(Witness &witness,
         assert(1 == f_values_stack.size());
         value_t res_value
             (f_values_stack.back());
-        EnumType_ptr enum_type
+        type::EnumType_ptr enum_type
             (res_type->as_enum());
 
         const expr::ExprSet& literals
@@ -131,7 +131,7 @@ expr::Expr_ptr Evaluator::process(Witness &witness,
         return em.make_const(res_value);
     }
     else if (res_type->is_array()) {
-        ArrayType_ptr atype
+        type::ArrayType_ptr atype
             (res_type->as_array());
 
         assert(atype->nelems() ==
@@ -422,7 +422,7 @@ bool Evaluator::walk_eq_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_eq_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     POP_TYPE(rhs_type);
@@ -440,9 +440,9 @@ void Evaluator::walk_eq_postorder(const expr::Expr_ptr expr)
     else if (rhs_type->is_array() &&
              lhs_type->is_array()) {
 
-        ArrayType_ptr arhs_type
+        type::ArrayType_ptr arhs_type
             (rhs_type->as_array());
-        ArrayType_ptr alhs_type
+        type::ArrayType_ptr alhs_type
             (lhs_type->as_array());
 
         assert (arhs_type->width() ==
@@ -487,7 +487,7 @@ bool Evaluator::walk_ne_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_ne_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     DROP_TYPE();
@@ -505,7 +505,7 @@ bool Evaluator::walk_gt_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_gt_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     DROP_TYPE();
@@ -523,7 +523,7 @@ bool Evaluator::walk_ge_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_ge_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     DROP_TYPE();
@@ -541,7 +541,7 @@ bool Evaluator::walk_lt_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_lt_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     DROP_TYPE();
@@ -559,7 +559,7 @@ bool Evaluator::walk_le_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_le_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
+    type::TypeMgr& tm
         (f_owner.tm());
 
     DROP_TYPE();
@@ -645,7 +645,7 @@ void Evaluator::walk_subscript_postorder(const expr::Expr_ptr expr)
     POP_TYPE(lhs_type);
     assert(lhs_type->is_array());
 
-    ArrayType_ptr alhs_type
+    type::ArrayType_ptr alhs_type
         (lhs_type->as_array());
 
     /* fetch the index */
@@ -675,8 +675,8 @@ bool Evaluator::walk_array_comma_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Evaluator::walk_array_comma_postorder(const expr::Expr_ptr expr)
 {
-    TypeMgr& tm
-        (TypeMgr::INSTANCE());
+    type::TypeMgr& tm
+        (type::TypeMgr::INSTANCE());
 
     POP_TYPE(rhs_type);
 
@@ -688,7 +688,7 @@ void Evaluator::walk_array_comma_postorder(const expr::Expr_ptr expr)
     POP_TYPE(lhs_type);
     assert(lhs_type->is_scalar());
 
-    ArrayType_ptr atmp_type
+    type::ArrayType_ptr atmp_type
         (tm.find_array_type(lhs_type->as_scalar(), nelems));
 
     PUSH_TYPE(atmp_type);
