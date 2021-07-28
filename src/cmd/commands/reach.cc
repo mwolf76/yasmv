@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <expr/analyzer/analyzer.hh>
+
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>
 
@@ -33,9 +35,6 @@ Reach::Reach(Interpreter& owner)
     : Command(owner)
     , f_out(std::cout)
     , f_target(NULL)
-    , f_forward_constraints()
-    , f_backward_constraints()
-    , f_global_constraints()
 {}
 
 Reach::~Reach()
@@ -50,19 +49,33 @@ void Reach::set_target(expr::Expr_ptr target)
     f_target = target;
 }
 
-void Reach::add_forward_constraint(expr::Expr_ptr constraint)
+void Reach::add_constraint(expr::Expr_ptr constraint)
 {
-    f_forward_constraints.push_back(constraint);
-}
+    expr::Analyzer ea;
 
-void Reach::add_backward_constraint(expr::Expr_ptr constraint)
-{
-    f_backward_constraints.push_back(constraint);
-}
+    ea.process(constraint);
+    if (ea.has_forward_time()) {
+        DEBUG
+            << "Adding FORWARD constraint to reachability problem: "
+            << constraint
+            << std::endl;
 
-void Reach::add_global_constraint(expr::Expr_ptr constraint)
-{
-    f_global_constraints.push_back(constraint);
+        f_forward_constraints.push_back(constraint);
+    } else if (ea.has_backward_time()) {
+        DEBUG
+            << "Adding BACKWARD constraint to reachability problem: "
+            << constraint
+            << std::endl;
+
+        f_backward_constraints.push_back(constraint);
+    } else {
+        DEBUG
+            << "Adding GLOBAL constraint to reachability problem: "
+            << constraint
+            << std::endl;
+
+       f_global_constraints.push_back(constraint);
+    }
 }
 
 bool Reach::check_requirements()

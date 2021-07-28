@@ -40,9 +40,7 @@ public:
     void set_target(expr::Expr_ptr target);
 
     /* guided reachability support: forward, backward and global guides */
-    void add_forward_constraint(expr::Expr_ptr constraint);
-    void add_backward_constraint(expr::Expr_ptr constraint);
-    void add_global_constraint(expr::Expr_ptr constraint);
+    void add_constraint(expr::Expr_ptr constraint);
 
     /* run() */
     utils::Variant virtual operator()();

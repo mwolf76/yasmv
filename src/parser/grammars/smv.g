@@ -1220,17 +1220,8 @@ reach_command returns[cmd::Command_ptr res]
         { ((cmd::Reach_ptr) $res)->set_target(target); }
 
         /* forward guide */
-        ( '-f' constraint=toplevel_expression
-          { ((cmd::Reach_ptr) $res)->add_forward_constraint(constraint); }
-
-        /* backward guide */
-        | '-b' constraint=toplevel_expression
-          { ((cmd::Reach_ptr) $res)->add_backward_constraint(constraint); }
-
-        /* global guide */
-        | '-g' constraint=toplevel_expression
-          { ((cmd::Reach_ptr) $res)->add_global_constraint(constraint); }
-
+        ( '-c' constraint=toplevel_expression
+          { ((cmd::Reach_ptr) $res)->add_constraint(constraint); }
         )*
     ;
 
