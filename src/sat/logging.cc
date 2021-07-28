@@ -30,6 +30,8 @@
 
 #include <iostream>
 
+namespace sat {
+
 std::ostream &operator<<(std::ostream &out, const Lit &lit)
 {
     out << (sign(lit) ? "-" : "") << var(lit);
@@ -133,3 +135,5 @@ std::ostream& operator<<(std::ostream& os, const Engine& engine)
 
     return os;
 }
+
+};

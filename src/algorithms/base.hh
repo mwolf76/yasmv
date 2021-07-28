@@ -86,26 +86,26 @@ public:
     { return f_ok; }
 
     /* FSM */
-    void assert_fsm_init(Engine& engine, step_t time,
-                         group_t group = MAINGROUP);
+    void assert_fsm_init(sat::Engine& engine, step_t time,
+                         sat::group_t group = sat::MAINGROUP);
 
-    void assert_fsm_invar(Engine& engine, step_t time,
-                          group_t group = MAINGROUP);
+    void assert_fsm_invar(sat::Engine& engine, step_t time,
+                          sat::group_t group = sat::MAINGROUP);
 
-    void assert_fsm_trans(Engine& engine, step_t time,
-                          group_t group = MAINGROUP);
+    void assert_fsm_trans(sat::Engine& engine, step_t time,
+                          sat::group_t group = sat::MAINGROUP);
 
     /* Generate uniqueness constraints between j-th and k-th state */
-    void assert_fsm_uniqueness(Engine& engine, step_t j, step_t k,
-                               group_t group = MAINGROUP);
+    void assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k,
+                               sat::group_t group = sat::MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(Engine& engine, step_t time, CompilationUnit& term,
-                        group_t group = MAINGROUP);
+    void assert_formula(sat::Engine& engine, step_t time, CompilationUnit& term,
+                        sat::group_t group = sat::MAINGROUP);
 
     /* TimeFrame from a witness */
-    void assert_time_frame(Engine& engine, step_t time, witness::TimeFrame& tf,
-                           group_t group = MAINGROUP);
+    void assert_time_frame(sat::Engine& engine, step_t time, witness::TimeFrame& tf,
+                           sat::group_t group = sat::MAINGROUP);
 
 private:
     /* internals */

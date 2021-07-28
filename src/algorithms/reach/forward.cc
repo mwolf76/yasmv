@@ -37,7 +37,7 @@ void Reachability::forward_strategy()
 {
     assert(! f_backward_constraint_cus.size());
 
-    Engine engine { "forward" };
+    sat::Engine engine { "forward" };
     step_t k  { 0 };
 
     /* initial constraints */
@@ -51,13 +51,13 @@ void Reachability::forward_strategy()
             this->assert_formula(engine, k, cu);
         });
 
-    status_t status
+    sat::status_t status
         (engine.solve());
 
-    if (STATUS_UNKNOWN == status)
+    if (sat::status_t::STATUS_UNKNOWN == status)
         goto cleanup;
 
-    else if (STATUS_UNSAT == status) {
+    else if (sat::status_t::STATUS_UNSAT == status) {
         INFO
             << "Forward: Empty initial states. Target is trivially UNREACHABLE."
             << std::endl;
@@ -66,7 +66,7 @@ void Reachability::forward_strategy()
         goto cleanup;
     }
 
-    else if (STATUS_SAT == status)
+    else if (sat::status_t::STATUS_SAT == status)
         INFO
             << "Forward: INIT consistency check ok."
             << std::endl;
@@ -81,13 +81,13 @@ void Reachability::forward_strategy()
             << "Forward: now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
-        status_t status
+        sat::status_t status
             (engine.solve());
 
-        if (STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (STATUS_SAT == status) {
+        else if (sat::status_t::STATUS_SAT == status) {
             INFO
                 << "Forward: Reachability witness exists (k = " << k << "), target `"
                 << f_target
@@ -128,7 +128,7 @@ void Reachability::forward_strategy()
             }
         }
 
-        else if (STATUS_UNSAT == status) {
+        else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
                 << "Forward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
@@ -153,13 +153,13 @@ void Reachability::forward_strategy()
                 << "Forward: now looking for unreachability proof (k = " << k << ")..."
                 << std::endl ;
 
-            status_t status
+            sat::status_t status
                 (engine.solve());
 
-            if (STATUS_UNKNOWN == status)
+            if (sat::status_t::STATUS_UNKNOWN == status)
                 goto cleanup;
 
-            else if (STATUS_UNSAT == status) {
+            else if (sat::status_t::STATUS_UNSAT == status) {
                 INFO
                     << "Forward: found unreachability proof (k = " << k << ")"
                     << std::endl;
@@ -168,7 +168,7 @@ void Reachability::forward_strategy()
                 goto cleanup;
             }
 
-            else if (STATUS_SAT == status)
+            else if (sat::status_t::STATUS_SAT == status)
                 INFO
                     << "Forward: no unreachability proof found (k = " << k << ")"
                     << std::endl;
@@ -184,8 +184,7 @@ void Reachability::forward_strategy()
 
  cleanup:
     /* signal other threads it's time to go home */
-    EngineMgr::INSTANCE()
-        .interrupt();
+    sat::EngineMgr::INSTANCE().interrupt();
 
     INFO
         << engine

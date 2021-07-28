@@ -53,7 +53,7 @@ CheckInitConsistency::~CheckInitConsistency()
 
 void CheckInitConsistency::process(expr::ExprVector constraints)
 {
-    Engine engine { "Initial" };
+    sat::Engine engine { "Initial" };
     expr::Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
@@ -89,16 +89,16 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
                       this->assert_formula(engine, 0, cu);
                   });
 
-    status_t status
+    sat::status_t status
         (engine.solve());
 
-    if (STATUS_UNKNOWN == status) {
+    if (sat::status_t::STATUS_UNKNOWN == status) {
         f_status = FSM_CONSISTENCY_UNDECIDED;
     }
-    else if (STATUS_UNSAT == status) {
+    else if (sat::status_t::STATUS_UNSAT == status) {
         f_status = FSM_CONSISTENCY_KO;
     }
-    else if (STATUS_SAT == status) {
+    else if (sat::status_t::STATUS_SAT == status) {
         f_status = FSM_CONSISTENCY_OK;
     }
 }

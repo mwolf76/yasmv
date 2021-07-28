@@ -34,6 +34,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/mutex.hpp>
 
+namespace sat {
+
 class Engine;
 
 typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
@@ -164,6 +166,8 @@ private:
     Engine& f_sat;
     step_t f_time;
     group_t f_group;
+};
+
 };
 
 #endif /* SAT_HELPERS */

@@ -34,6 +34,8 @@
 
 #include <sat/typedefs.hh>
 
+namespace sat {
+
 class Engine {
 public:
     /**
@@ -245,5 +247,7 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const Engine& engine);
+
+};
 
 #endif /* SAT_ENGINE_H */

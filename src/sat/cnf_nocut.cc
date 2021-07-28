@@ -21,10 +21,12 @@
  * 02110-1301 USA
  *
  **/
-#define  DEBUG_CNF_LITERALS
-
 #include <sat/sat.hh>
 #include <dd/dd_walker.hh>
+
+// #define  DEBUG_CNF_LITERALS
+
+namespace sat {
 
 class CNFBuilderNoCut : public dd::ADDWalker {
 public:
@@ -131,3 +133,5 @@ void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)
 
     worker(add);
 }
+
+};

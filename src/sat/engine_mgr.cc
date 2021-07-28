@@ -26,6 +26,8 @@
 
 #include <csignal>
 
+namespace sat {
+
 EngineMgr_ptr EngineMgr::f_instance = NULL;
 
 EngineMgr::EngineMgr()
@@ -110,3 +112,5 @@ void EngineMgr::dump_stats(std::ostream& os)
             << std::endl ;
     }
 }
+
+};

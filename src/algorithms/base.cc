@@ -50,8 +50,8 @@ void Algorithm::setup()
     f_ok = true;
 
     /* Force mgr to exist */
-    EngineMgr& mgr
-        (EngineMgr::INSTANCE());
+    sat::EngineMgr& mgr
+        (sat::EngineMgr::INSTANCE());
 
     /* suppress warning */
     (void) mgr;
@@ -253,32 +253,32 @@ void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
     }
 } /* process_trans() */
 
-void Algorithm::assert_fsm_init(Engine& engine, step_t time, group_t group)
+void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
 {
     for (CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
-void Algorithm::assert_fsm_invar(Engine& engine, step_t time, group_t group)
+void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
 {
     for (CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
-void Algorithm::assert_fsm_trans(Engine& engine, step_t time, group_t group)
+void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
 {
     for (CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
-void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_t group)
+void Algorithm::assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k, sat::group_t group)
 {
     symb::SymbIter symbs
         (model());
 
     /* this will hold the activation vars for the uniqueness clauses
        defined below */
-    VarVector uniqueness_vars;
+    sat::VarVector uniqueness_vars;
 
     while (symbs.has_next()) {
 
@@ -377,7 +377,7 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
         vec<Lit> ps;
         ps.push( mkLit( group, true));
 
-        for (VarVector::const_iterator eye = uniqueness_vars.begin();
+        for (sat::VarVector::const_iterator eye = uniqueness_vars.begin();
              eye != uniqueness_vars.end(); ++ eye) {
             ps.push( mkLit( *eye, false));
         }
@@ -386,10 +386,10 @@ void Algorithm::assert_fsm_uniqueness(Engine& engine, step_t j, step_t k, group_
     }
 }
 
-void Algorithm::assert_time_frame(Engine& engine,
+void Algorithm::assert_time_frame(sat::Engine& engine,
                                   step_t time,
                                   witness::TimeFrame& tf,
-                                  group_t group)
+                                  sat::group_t group)
 {
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
@@ -449,10 +449,10 @@ void Algorithm::assert_time_frame(Engine& engine,
         << std::endl;
 }
 
-void Algorithm::assert_formula(Engine& engine,
+void Algorithm::assert_formula(sat::Engine& engine,
                                step_t time,
                                CompilationUnit& term,
-                               group_t group)
+                               sat::group_t group)
 {
     INFO
         << "asserting formula at time "

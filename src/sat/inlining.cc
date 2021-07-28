@@ -37,6 +37,8 @@
 #include <utils/pool.hh>
 #include <utils/misc.hh>
 
+namespace sat {
+
 static const char* JSON_GENERATED = "generated";
 static const char* JSON_CNF       = "cnf";
 
@@ -537,3 +539,5 @@ void CNFMultiwaySelectionInliner::inject(const MultiwaySelectionDescriptor& md)
         ++ ai;
     }
 }
+
+};

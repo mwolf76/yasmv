@@ -27,6 +27,8 @@
 #include <sat/typedefs.hh>
 #include <boost/thread/mutex.hpp>
 
+namespace sat {
+
 class EngineMgr {
 
 public:
@@ -68,6 +70,8 @@ private: /* private interface, reserved to Engine instances. */
     EngineSet f_engines;
 
     boost::mutex f_mutex;
+};
+
 };
 
 #endif /* SAT_ENGINE_MGR_H */

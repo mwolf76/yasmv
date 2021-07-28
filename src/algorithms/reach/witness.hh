@@ -38,7 +38,7 @@ namespace reach {
 /* Specialized for Reachability CEX */
 class ReachabilityCounterExample : public witness::Witness {
 public:
-    ReachabilityCounterExample(expr::Expr_ptr property, Model& model, Engine& engine,
+    ReachabilityCounterExample(expr::Expr_ptr property, Model& model, sat::Engine& engine,
                                unsigned k, bool reversed = false);
 };
 

@@ -28,6 +28,8 @@
 
 #include <dd/dd.hh>
 
+#include <enc/tcbi.hh>
+
 /* decls from the Minisat SAT solver */
 #include <minisat/core/Solver.h>
 #include <minisat/simp/SimpSolver.h>
@@ -41,14 +43,17 @@ using Minisat::Var;
 using Minisat::lbool;
 using Minisat::vec;
 
-#include <vector>
-typedef std::vector<Var> VarVector;
+using Minisat::Solver;
+using Minisat::SimpSolver;
 
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
-using Minisat::Solver;
-using Minisat::SimpSolver;
+#include <vector>
+
+namespace sat {
+
+typedef std::vector<Var> VarVector;
 
 // Engine mgmt
 typedef class Engine* Engine_ptr;
@@ -67,7 +72,6 @@ typedef enum {
     STATUS_UNKNOWN,
 } status_t;
 
-#include <enc/tcbi.hh>
 typedef boost::unordered_map<enc::TCBI, Var, enc::TCBIHash, enc::TCBIEq> TCBI2VarMap;
 typedef boost::unordered_map<Var, enc::TCBI, utils::IntHash, utils::IntEq> Var2TCBIMap;
 
@@ -180,5 +184,7 @@ struct GroupEq {
 };
 
 typedef boost::unordered_map<group_t, Var, GroupHash, GroupEq> Group2VarMap;
+
+};
 
 #endif /* SAT_TYPDEFS_H */

@@ -36,7 +36,7 @@ void Reachability::fast_backward_strategy()
 {
     assert(! f_forward_constraint_cus.size());
 
-    Engine engine { "fast_backward" };
+    sat::Engine engine { "fast_backward" };
     step_t k { 0 };
 
     /* goal state constraints */
@@ -50,13 +50,13 @@ void Reachability::fast_backward_strategy()
             this->assert_formula(engine, FINAL_STATE - k, cu);
         });
 
-    status_t status
+    sat::status_t status
         (engine.solve());
 
-    if (STATUS_UNKNOWN == status)
+    if (sat::status_t::STATUS_UNKNOWN == status)
         goto cleanup;
 
-    else if (STATUS_UNSAT == status) {
+    else if (sat::status_t::STATUS_UNSAT == status) {
         INFO
             << "Fast_Backward: empty final states. Target is trivially UNREACHABLE."
             << std::endl;
@@ -65,7 +65,7 @@ void Reachability::fast_backward_strategy()
         goto cleanup;
     }
 
-    else if (STATUS_SAT == status)
+    else if (sat::status_t::STATUS_SAT == status)
         INFO
             << "Fast_Backward: GOAL consistency check ok."
             << std::endl;
@@ -80,13 +80,13 @@ void Reachability::fast_backward_strategy()
             << "Fast_Backward: now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
-        status_t status
+        sat::status_t status
             (engine.solve());
 
-        if (STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (STATUS_SAT == status) {
+        else if (sat::status_t::STATUS_SAT == status) {
 
             if (sync_set_status(REACHABILITY_REACHABLE)) {
 
@@ -122,7 +122,7 @@ void Reachability::fast_backward_strategy()
             }
         }
 
-        else if (STATUS_UNSAT == status) {
+        else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
                 << "Fast_Backward: no reachability witness found (k = " << k << ")..."
                 << std::endl ;
@@ -143,8 +143,7 @@ void Reachability::fast_backward_strategy()
 
  cleanup:
     /* signal other threads it's time to go home */
-    EngineMgr::INSTANCE()
-        .interrupt();
+    sat::EngineMgr::INSTANCE().interrupt();
 
     INFO
         << engine

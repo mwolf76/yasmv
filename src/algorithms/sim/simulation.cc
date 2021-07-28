@@ -72,7 +72,7 @@ void Simulation::pick_state(bool allsat,
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine { "pick_state" };
+    sat::Engine engine { "pick_state" };
 
     expr::Expr_ptr ctx { em.make_empty() };
 
@@ -195,7 +195,7 @@ void Simulation::pick_state(bool allsat,
         } /* if (allsat) */
 
         witness::Witness_ptr w;
-        if (STATUS_SAT == engine.solve()) {
+        if (sat::status_t::STATUS_SAT == engine.solve()) {
             t1 = clock(); secs = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
 
             TRACE
@@ -248,12 +248,12 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
                           step_t steps,
                           pconst_char trace_name)
 {
-    status_t last_sat;
+    sat::status_t last_sat;
 
     clock_t t0 = clock(), t1;
     double secs;
 
-    Engine engine
+    sat::Engine engine
         ("simulation");
 
     expr::ExprMgr& em
@@ -325,7 +325,7 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
         << "Resuming simulation..."
         << std::endl;
 
-    while (STATUS_SAT == (last_sat = engine.solve())) {
+    while (sat::status_t::STATUS_SAT == (last_sat = engine.solve())) {
 
         ++ k;
 
@@ -362,10 +362,10 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
         assert_fsm_invar(engine, k);
     }
 
-    if (last_sat == STATUS_UNKNOWN)
+    if (last_sat == sat::status_t::STATUS_UNKNOWN)
         f_status = SIMULATION_INTERRUPTED;
 
-    else if (last_sat == STATUS_UNSAT) {
+    else if (last_sat == sat::status_t::STATUS_UNSAT) {
         WARN
             << "Inconsistency detected in transition relation at step " << k
             << std::endl;

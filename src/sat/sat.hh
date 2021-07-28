@@ -43,4 +43,6 @@
 /* Engine Mgr class */
 #include <sat/engine_mgr.hh>
 
+namespace sat {};
+
 #endif /* SAT_H */

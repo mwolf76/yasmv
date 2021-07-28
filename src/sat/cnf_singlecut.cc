@@ -23,10 +23,11 @@
  **/
 
 #include <sat/sat.hh>
-
 #include <dd/dd_walker.hh>
 
 // #define DEBUG_CNF_LITERALS
+
+namespace sat {
 
 class CNFBuilderSingleCut : public dd::ADDWalker {
 public:
@@ -294,3 +295,5 @@ void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
         << std::endl;
 #endif
 }
+
+};

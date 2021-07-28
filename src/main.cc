@@ -114,8 +114,8 @@ void sighandler(int signum)
        Control-Z (within 1 sec) requires interruption */
     if (signum == SIGTSTP) {
 
-        EngineMgr& mgr
-            (EngineMgr::INSTANCE());
+        sat::EngineMgr& mgr
+            (sat::EngineMgr::INSTANCE());
 
         std::cerr
             << std::endl;
@@ -168,8 +168,8 @@ int main(int argc, const char *argv[])
         }
 
         /* load microcode */
-        InlinedOperatorMgr& mm
-            (InlinedOperatorMgr::INSTANCE());
+        sat::InlinedOperatorMgr& mm
+            (sat::InlinedOperatorMgr::INSTANCE());
 
         size_t nloaders { mm.loaders().size() };
 

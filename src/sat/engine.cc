@@ -24,6 +24,8 @@
 #include <sat.hh>
 #include <cstdlib>
 
+namespace sat {
+
 /**
  * @brief SAT instancte ctor
  */
@@ -305,3 +307,5 @@ enc::TCBI& Engine::var_to_tcbi(Var var)
 
     return eye->second;
 }
+
+};

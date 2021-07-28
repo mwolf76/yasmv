@@ -27,6 +27,8 @@
 #include <sstream>
 #include <string>
 
+namespace sat {
+
 std::string format_loader_exception(const InlinedOperatorSignature& ios)
 {
     std::ostringstream oss;
@@ -43,3 +45,5 @@ InlinedOperatorLoaderException::InlinedOperatorLoaderException(const InlinedOper
     : EngineException("InlinedOperatorLoaderException",
                       format_loader_exception(ios))
 {}
+
+};

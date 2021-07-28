@@ -29,6 +29,8 @@
 #include <sat/typedefs.hh>
 #include <sat/inlining.hh>
 
+namespace sat {
+
 class EngineException : public Exception
 {
 public:
@@ -41,6 +43,8 @@ public:
 class InlinedOperatorLoaderException : public EngineException {
 public:
     InlinedOperatorLoaderException(const InlinedOperatorSignature& ios);
+};
+
 };
 
 #endif /* SAT_EXCEPTIONS_H */

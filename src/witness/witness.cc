@@ -184,7 +184,7 @@ expr::ExprVector TimeFrame::assignments()
     return res;
 }
 
-Witness::Witness(Engine_ptr pe, expr::Atom id, expr::Atom desc, step_t j)
+Witness::Witness(sat::Engine_ptr pe, expr::Atom id, expr::Atom desc, step_t j)
     : f_id(id)
     , f_desc(desc)
     , f_j(j)
@@ -256,7 +256,7 @@ bool Witness::has_value(expr::Expr_ptr expr, step_t time)
 }
 
 /* Engine registration can be done only once */
-void Witness::register_engine(Engine& e)
+void Witness::register_engine(sat::Engine& e)
 {
     assert( ! p_engine );
     p_engine = &e;

@@ -231,7 +231,7 @@ bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
     expr::ExprMgr& em
         (owner().em());
 
-    Engine engine
+    sat::Engine engine
         ("Analyzer");
 
     Compiler compiler;
@@ -260,8 +260,8 @@ bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
     engine.push(compiler.process(ctx, p), 0);
     engine.push(compiler.process(ctx, q), 0);
 
-    status_t status
+    sat::status_t status
         (engine.solve());
 
-    return status == STATUS_UNSAT;
+    return status == sat::status_t::STATUS_UNSAT;
 }

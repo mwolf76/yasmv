@@ -36,7 +36,7 @@
 
 namespace sim {
 
-SimulationWitness::SimulationWitness(Model& model, Engine& engine, step_t k)
+SimulationWitness::SimulationWitness(Model& model, sat::Engine& engine, step_t k)
     : Witness(&engine)
 {
     enc::EncodingMgr& bm

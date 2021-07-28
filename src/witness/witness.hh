@@ -102,7 +102,7 @@ typedef std::vector<TimeFrame_ptr> TimeFrames;
 typedef class Witness* Witness_ptr;
 class Witness {
 public:
-    Witness(Engine_ptr pengine = NULL,
+    Witness(sat::Engine_ptr pengine = NULL,
             expr::Atom id = "<Noname>",
             expr::Atom desc = "<No description>",
             step_t j = 0);
@@ -174,18 +174,18 @@ protected:
     /* An engine that can be used to extend this witness. This is not
        necessarily the engine that created the trace. Ordinarily it
        should be a simulation engine. */
-    Engine_ptr p_engine;
+    sat::Engine_ptr p_engine;
 
     inline bool has_engine() const
     { return NULL != p_engine; }
 
-    inline Engine& engine()
+    inline sat::Engine& engine()
     {
         assert (NULL != p_engine);
         return * p_engine;
     }
 
-    void register_engine(Engine& e);
+    void register_engine(sat::Engine& e);
 };
 
 class WitnessPrinter {

@@ -55,7 +55,7 @@ CheckTransConsistency::~CheckTransConsistency()
 
 void CheckTransConsistency::process(expr::ExprVector constraints)
 {
-    Engine engine { "Transitional" };
+    sat::Engine engine { "Transitional" };
     expr::Expr_ptr ctx { em().make_empty() };
 
     unsigned nconstraints { 0 };
@@ -93,16 +93,16 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
                       });
     }
 
-    status_t status
+    sat::status_t status
         (engine.solve());
 
-    if (STATUS_UNKNOWN == status) {
+    if (sat::status_t::STATUS_UNKNOWN == status) {
         f_status = FSM_CONSISTENCY_UNDECIDED;
     }
-    else if (STATUS_UNSAT == status) {
+    else if (sat::status_t::STATUS_UNSAT == status) {
         f_status = FSM_CONSISTENCY_KO;
     }
-    else if (STATUS_SAT == status) {
+    else if (sat::status_t::STATUS_SAT == status) {
         f_status = FSM_CONSISTENCY_OK;
     }
 }

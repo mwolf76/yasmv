@@ -65,7 +65,7 @@ private:
 class LTLCounterExample : public witness::Witness {
 public:
     LTLCounterExample(expr::Expr_ptr property, Model& model,
-                      Engine& engine, unsigned k);
+                      sat::Engine& engine, unsigned k);
 };
 
 };

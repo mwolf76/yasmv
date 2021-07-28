@@ -76,7 +76,7 @@ private:
 class SimulationWitness : public witness::Witness {
 
 public:
-    SimulationWitness(Model& model, Engine& engine, step_t k);
+    SimulationWitness(Model& model, sat::Engine& engine, step_t k);
 };
 
 };
