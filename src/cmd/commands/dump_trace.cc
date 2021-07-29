@@ -157,6 +157,7 @@ void DumpTrace::dump_plain(std::ostream& os, witness::Witness& w)
 
         os
             << ":: @"
+            << std::dec
             << time
             << std::endl;
 
