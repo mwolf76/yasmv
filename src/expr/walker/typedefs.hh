@@ -47,6 +47,8 @@ typedef enum {
     // -- Simple walkers
     AT_1, AT_2, NEXT_1, PREV_1, NEG_1, NOT_1, BW_NOT_1,
 
+    INTERVAL_1, INTERVAL_2,
+
     PLUS_1, PLUS_2,
     SUB_1, SUB_2,
     MUL_1, MUL_2,

@@ -117,6 +117,13 @@ bool TypeChecker::walk_at_inorder(const expr::Expr_ptr expr)
 void TypeChecker::walk_at_postorder(const expr::Expr_ptr expr)
 { walk_binary_timed_postorder(expr); }
 
+bool TypeChecker::walk_interval_preorder(const expr::Expr_ptr expr)
+{ return cache_miss(expr); }
+bool TypeChecker::walk_interval_inorder(const expr::Expr_ptr expr)
+{ return true; }
+void TypeChecker::walk_interval_postorder(const expr::Expr_ptr expr)
+{ walk_binary_timed_postorder(expr); }
+
 bool TypeChecker::walk_next_preorder(const expr::Expr_ptr expr)
 { return cache_miss(expr); }
 void TypeChecker::walk_next_postorder(const expr::Expr_ptr expr)

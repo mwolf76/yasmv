@@ -180,6 +180,14 @@ void Evaluator::walk_at_postorder(const expr::Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
+/* unexpected */
+bool Evaluator::walk_interval_preorder(const expr::Expr_ptr expr)
+{ assert(false); return false; }
+bool Evaluator::walk_interval_inorder(const expr::Expr_ptr expr)
+{ return false; }
+void Evaluator::walk_interval_postorder(const expr::Expr_ptr expr)
+{}
+
 bool Evaluator::walk_next_preorder(const expr::Expr_ptr expr)
 {
     step_t curr_time = f_time_stack.back();

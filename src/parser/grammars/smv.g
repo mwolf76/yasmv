@@ -303,15 +303,18 @@ toplevel_expression returns [expr::Expr_ptr res]
     ;
 
 timed_expression returns [expr::Expr_ptr res]
-    : '@' when=instant '{' expr=temporal_expression '}'
-      { $res = em.make_at(when, expr); }
+@init {
+    expr::Expr_ptr a { NULL };
+    expr::Expr_ptr b { NULL };
+}
+    : '@' time=forward_instant { a = time; } ('..' time=forward_instant { b = time; })? '{' body=temporal_expression '}'
+      { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
-    | '$' when=instant '{' expr=temporal_expression '}'
-      { $res = em.make_at(em.make_instant(UINT_MAX - when->value()), expr); }
+    | '$' time=backward_instant { a = time; } ('..' time=backward_instant { b = time; })? '{' body=temporal_expression '}'
+      { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
-    | expr=temporal_expression
-      { $res = expr; }
-
+    | body=temporal_expression
+      { $res = body; }
     ;
 
 temporal_expression returns [expr::Expr_ptr res]
@@ -723,12 +726,28 @@ identifier returns [expr::Expr_ptr res]
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
     ;
 
-instant returns [expr::Expr_ptr res]
+forward_instant returns [expr::Expr_ptr res]
 @init { }
     : DECIMAL_LITERAL {
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
       }
+
+     | '*' {
+        $res = em.make_instant(UINT_MAX);
+     }
+    ;
+
+backward_instant returns [expr::Expr_ptr res]
+@init { }
+    : DECIMAL_LITERAL {
+        expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
+        $res = em.make_instant(UINT_MAX - strtoll(tmp.c_str(), NULL, 10));
+      }
+
+     | '*' {
+        $res = em.make_instant(0);
+     }
     ;
 
 constant returns [expr::Expr_ptr res]

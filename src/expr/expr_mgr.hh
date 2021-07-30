@@ -109,10 +109,10 @@ public:
     }
 
     /* -- Temporal operators ---------------------------------------------- */
-    inline Expr_ptr make_at(Expr_ptr instant, Expr_ptr expr)
+    inline Expr_ptr make_at(Expr_ptr time, Expr_ptr expr)
     {
-        assert(is_instant(instant));
-        return make_expr(AT, instant, expr);
+        assert(is_instant(time) || is_interval(time));
+        return make_expr(AT, time, expr);
     }
 
     inline bool is_at(const Expr_ptr expr) const {
@@ -376,6 +376,9 @@ public:
         return __make_expr(&tmp);
     }
 
+    inline Expr_ptr make_interval(Expr_ptr begin, Expr_ptr end)
+    { return make_expr(INTERVAL, begin, end); }
+
     inline Expr_ptr make_hconst(value_t value) // hexadecimal
     {
         Expr tmp(HCONST, value); // we need a temp store
@@ -602,7 +605,7 @@ public:
     /* -- broad is-a predicates -------------------------------------------- */
     inline bool is_temporal(const Expr_ptr expr) const {
         assert(expr);
-        return expr->f_symb == NEXT;
+        return is_next(expr) || is_at(expr);
     }
 
     inline bool is_lvalue(const Expr_ptr expr) const {
@@ -640,6 +643,11 @@ public:
     inline bool is_instant(const Expr_ptr expr) const {
         assert(expr);
         return (expr->f_symb == INSTANT);
+    }
+
+    inline bool is_interval(const Expr_ptr expr) const {
+        assert(expr);
+        return (expr->f_symb == INTERVAL);
     }
 
     inline bool is_params(const Expr_ptr expr) const {

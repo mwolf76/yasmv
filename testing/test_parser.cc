@@ -358,6 +358,18 @@ BOOST_AUTO_TEST_CASE(at_expressions)
 
     BOOST_CHECK (em.make_at(em.make_instant(0), em.make_at(em.make_instant(2), x)) ==
                  parse::parseExpression("@0{(@2{x})}"));
+
+    BOOST_CHECK (em.make_at(em.make_interval(em.make_instant(0), em.make_instant(5)), x) ==
+                 parse::parseExpression("@0..5{x}"));
+
+    BOOST_CHECK (em.make_at(em.make_interval(em.make_instant(UINT_MAX), em.make_instant(UINT_MAX - 5)), x) ==
+                 parse::parseExpression("$0..5{x}"));
+
+    BOOST_CHECK (em.make_at(em.make_interval(em.make_instant(0), em.make_instant(UINT_MAX)), x) ==
+                 parse::parseExpression("@0..*{x}"));
+
+    BOOST_CHECK (em.make_at(em.make_interval(em.make_instant(UINT_MAX), em.make_instant(0)), x) ==
+                 parse::parseExpression("$0..*{x}"));
 }
 
 BOOST_AUTO_TEST_CASE(complex_expressions)

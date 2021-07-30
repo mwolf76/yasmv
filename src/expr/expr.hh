@@ -98,7 +98,7 @@ typedef enum {
     BCONST, // binary constants
 
     // -- Time constants
-    INSTANT,
+    INSTANT, INTERVAL,
 
     // undefined
     UNDEF,

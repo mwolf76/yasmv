@@ -84,6 +84,12 @@ BOOST_AUTO_TEST_CASE(expressions)
     BOOST_CHECK (em.is_next(next_x));
     BOOST_CHECK (em.is_temporal(next_x));
 
+    expr::Expr_ptr at_42_x = em.make_at(em.make_instant(42), x);
+    BOOST_CHECK (at_42_x->f_symb == expr::AT && at_42_x->lhs()->f_symb == expr::INSTANT &&
+                 at_42_x->lhs()->value() == 42 && at_42_x->rhs() == x);
+    BOOST_CHECK (em.is_at(at_42_x));
+    BOOST_CHECK (em.is_temporal(at_42_x));
+
     expr::Expr_ptr neg_x = em.make_neg(x);
     BOOST_CHECK (neg_x->f_symb == expr::NEG && neg_x->lhs() == x && neg_x->rhs() == NULL);
     BOOST_CHECK (em.is_neg(neg_x));
@@ -274,6 +280,7 @@ BOOST_AUTO_TEST_CASE(printer)
         expr::Printer printer(oss);
         printer << y; BOOST_CHECK (oss.str() == std::string("y"));
     }
+
 
     // primary printers
     {

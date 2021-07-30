@@ -73,6 +73,14 @@ void Compiler::walk_at_postorder(const expr::Expr_ptr expr)
     f_time_stack.pop_back(); // reset time stack
 }
 
+/* INTERVAL needs rewriting: not supposed to reach the compiler */
+bool Compiler::walk_interval_preorder(const expr::Expr_ptr expr)
+{ assert(false); return false; }
+bool Compiler::walk_interval_inorder(const expr::Expr_ptr expr)
+{ assert(false); return false; }
+void Compiler::walk_interval_postorder(const expr::Expr_ptr expr)
+{}
+
 bool Compiler::walk_next_preorder(const expr::Expr_ptr expr)
 {
     step_t curr_time

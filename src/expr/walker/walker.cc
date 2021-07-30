@@ -87,6 +87,9 @@ void ExprWalker::walk ()
 
             case NEXT_1: goto entry_NEXT_1;
 
+            case INTERVAL_1: goto entry_INTERVAL_1;
+            case INTERVAL_2: goto entry_INTERVAL_2;
+
             case NEG_1: goto entry_NEG_1;
             case NOT_1: goto entry_NOT_1;
             case BW_NOT_1: goto entry_BW_NOT_1;
@@ -299,6 +302,25 @@ void ExprWalker::walk ()
                 walk_next_postorder(curr.expr);
             }
             break;
+
+        case INTERVAL:
+            if (walk_interval_preorder(curr.expr) && ! f_rewritten) {
+                f_recursion_stack.top().pc = INTERVAL_1;
+                f_recursion_stack.push(activation_record(curr.expr->u.f_lhs));
+                goto loop;
+
+            entry_INTERVAL_1:
+                if (walk_interval_inorder(curr.expr)) {
+                    f_recursion_stack.top().pc = INTERVAL_2;
+                    f_recursion_stack.push(activation_record(curr.expr->u.f_rhs));
+                    goto loop;
+                }
+
+            entry_INTERVAL_2:
+                walk_interval_postorder(curr.expr);
+            }
+            break;
+
 
         // unary
         case NEG:

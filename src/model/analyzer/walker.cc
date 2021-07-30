@@ -73,6 +73,14 @@ bool Analyzer::walk_at_inorder(const expr::Expr_ptr expr)
 void Analyzer::walk_at_postorder(const expr::Expr_ptr expr)
 {}
 
+/* INTERVAL needs rewriting */
+bool Analyzer::walk_interval_preorder(const expr::Expr_ptr expr)
+{ assert(false); return false; }
+bool Analyzer::walk_interval_inorder(const expr::Expr_ptr expr)
+{ assert(false); return false; }
+void Analyzer::walk_interval_postorder(const expr::Expr_ptr expr)
+{}
+
 bool Analyzer::walk_next_preorder(const expr::Expr_ptr expr)
 { return true; }
 void Analyzer::walk_next_postorder(const expr::Expr_ptr expr)

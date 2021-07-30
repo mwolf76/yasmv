@@ -114,6 +114,24 @@ bool Analyzer::walk_at_inorder(const Expr_ptr expr)
 void Analyzer::walk_at_postorder(const Expr_ptr expr)
 {}
 
+bool Analyzer::walk_interval_preorder(const Expr_ptr expr)
+{
+    ExprMgr& em
+        (ExprMgr::INSTANCE());
+
+    Expr_ptr lhs { expr->lhs() };
+    assert(em.is_instant(lhs));
+
+    Expr_ptr rhs { expr->rhs() };
+    assert(em.is_instant(rhs));
+
+    return true;
+}
+bool Analyzer::walk_interval_inorder(const Expr_ptr expr)
+{ return true; }
+void Analyzer::walk_interval_postorder(const Expr_ptr expr)
+{}
+
 bool Analyzer::walk_next_preorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_next_postorder(const Expr_ptr expr)

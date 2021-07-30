@@ -201,6 +201,13 @@ bool Nnfizer::walk_at_inorder(const Expr_ptr expr)
 void Nnfizer::walk_at_postorder(const Expr_ptr expr)
 {}
 
+bool Nnfizer::walk_interval_preorder(const Expr_ptr expr)
+{ return internal_error(expr); }
+bool Nnfizer::walk_interval_inorder(const Expr_ptr expr)
+{ return true; }
+void Nnfizer::walk_interval_postorder(const Expr_ptr expr)
+{}
+
 bool Nnfizer::walk_next_preorder(const Expr_ptr expr)
 { return internal_error(expr); }
 void Nnfizer::walk_next_postorder(const Expr_ptr expr)

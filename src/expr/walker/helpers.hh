@@ -39,7 +39,8 @@ namespace expr {
     void walk_## op ## _postorder(const expr::Expr_ptr expr)
 
 #define OP_HOOKS                                   \
-    BINARY_HOOK(at); UNARY_HOOK(next);             \
+    BINARY_HOOK(at); BINARY_HOOK(interval);        \
+    UNARY_HOOK(next);                              \
     UNARY_HOOK(neg); UNARY_HOOK(not);              \
     UNARY_HOOK(bw_not);                            \
                                                    \

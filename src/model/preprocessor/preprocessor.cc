@@ -162,6 +162,17 @@ void Preprocessor::walk_at_postorder(const expr::Expr_ptr expr)
     PUSH_EXPR(f_em.make_at( lhs, rhs ));
 }
 
+bool Preprocessor::walk_interval_preorder(const expr::Expr_ptr expr)
+{ return true; }
+bool Preprocessor::walk_interval_inorder(const expr::Expr_ptr expr)
+{ return true; }
+void Preprocessor::walk_interval_postorder(const expr::Expr_ptr expr)
+{
+    POP_EXPR(rhs);
+    POP_EXPR(lhs);
+    PUSH_EXPR(f_em.make_interval( lhs, rhs ));
+}
+
 bool Preprocessor::walk_next_preorder(const expr::Expr_ptr expr)
 { return true; }
 void Preprocessor::walk_next_postorder(const expr::Expr_ptr expr)
