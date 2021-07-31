@@ -30,7 +30,7 @@ nobase_dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
 unit-test: yasmv yasmv_tests
-	YASMV_HOME=`pwd` ./yasmv_tests --log_level=all
+	@YASMV_HOME=`pwd` ./yasmv_tests --log_level=all
 
 functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh

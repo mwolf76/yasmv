@@ -24,3 +24,5 @@ test cannibals cannibals-backward
 test vending vending
 test herschel herschel
 test koenisberg koenisberg
+
+echo ""  # one blank line
