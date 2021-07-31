@@ -33,7 +33,6 @@
 #include <nnfizer.hh>
 #include <printer.hh>
 
-
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(expressions)
 {
@@ -621,7 +620,38 @@ BOOST_AUTO_TEST_CASE(nnfizer)
                 nnfizer.process(em.make_not(em.make_implies(em.make_not(em.make_G(em.make_F(x))), em.make_not(y)))));
 }
 
+BOOST_AUTO_TEST_CASE(resolver)
+{
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
 
+    expr::Atom a_x
+        ("x");
+    expr::Expr_ptr x
+        (em.make_identifier(a_x));
+    expr::Expr_ptr _0
+        (em.make_instant(0));
+    expr::Expr_ptr _3
+        (em.make_instant(3));
+
+    expr::time::Resolver etr(em);
+
+    BOOST_CHECK(x == etr.process(x));
+    BOOST_CHECK(em.make_at(_0, x) == etr.process(em.make_at(_0, x) ));
+    BOOST_CHECK(em.make_at(_3, x) == etr.process(em.make_at(_3, x) ));
+
+    BOOST_CHECK(em.make_and(em.make_and(em.make_and(em.make_at(em.make_instant(0), x),
+                                                    em.make_at(em.make_instant(1), x)),
+                                        em.make_at(em.make_instant(2), x)),
+                            em.make_at(em.make_instant(3), x)) ==
+                etr.process(em.make_at(em.make_interval(_0, _3), x)));
+
+    BOOST_CHECK(em.make_and(em.make_and(em.make_and(em.make_at(em.make_instant(0), x),
+                                                    em.make_at(em.make_instant(1), x)),
+                                        em.make_at(em.make_instant(2), x)),
+                            em.make_at(em.make_instant(3), x)) ==
+                etr.process(em.make_at(em.make_interval(_3, _0), x)));
+}
 
 // BOOST_AUTO_TEST_CASE(fqexpr)
 // {

@@ -26,7 +26,7 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
-#include <expr/resolver/resolver.hh>
+#include <expr/analyzer/analyzer.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -40,15 +40,25 @@ static const char *reach_trace_prfx ("reach_");
 
 void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
 {
-    expr::time::Resolver time_resolver(em());
-
     sat::Engine engine { "fast_forward" };
-    boost::unordered_set<expr::Expr_ptr> seen;
     step_t k  { 0 };
 
     /* initial constraints */
     assert_fsm_init(engine, k);
     assert_fsm_invar(engine, k);
+
+    /* Timed constraints can be asserted immediately, global
+     * constraints must be assert at time zero, therefore we don't
+     * need any filtering here. */
+    std::for_each(
+        begin(f_constraints), end(f_constraints),
+        [this, &engine, k](expr::Expr_ptr constraint) {
+            auto i { f_constraint_cus.find(constraint) };
+            assert ( f_constraint_cus.end() != i );
+
+            model::CompilationUnit cu { i->second };
+            this->assert_formula(engine, k, cu);
+        });
 
     sat::status_t status
         (engine.solve());
@@ -58,40 +68,27 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
 
     else if (sat::status_t::STATUS_UNSAT == status) {
         INFO
-            << "Fast_Forward: Empty initial states. Target is trivially UNREACHABLE."
+            << "Empty initial states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(REACHABILITY_UNREACHABLE);
         goto cleanup;
     }
 
-    else if (sat::status_t::STATUS_SAT == status)
+    else if (sat::status_t::STATUS_SAT == status) {
         INFO
-            << "Fast_Forward: INIT consistency check ok."
+            << "INIT consistency check ok."
             << std::endl;
+    }
 
     else assert(false); /* unreachable */
 
     do {
-        std::for_each(
-            begin(f_constraints), end(f_constraints),
-            [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
-                expr::Expr_ptr formula = time_resolver.process(constraint, k);
-
-                /* prevent re-asserting the same formula more than once */
-                if (NULL != formula && seen.end() == seen.find(formula)) {
-                    model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
-
-                    this->assert_formula(engine, k, cu);
-                    seen.insert(formula);
-                }
-            });
-
         /* looking for witness : Reachability(k-1) ^ ! P(k) */
         assert_formula(engine, k, target_cu, engine.new_group());
 
         INFO
-            << "Fast_Forward: now looking for reachability witness (k = " << k << ")..."
+            << "Now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
         sat::status_t status
@@ -102,7 +99,7 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
 
         else if (sat::status_t::STATUS_SAT == status) {
             INFO
-                << "Fast_Forward: Reachability witness exists (k = " << k << "), target `"
+                << "Reachability witness exists (k = " << k << "), target `"
                 << f_target
                 << "` is REACHABLE."
                 << std::endl;
@@ -143,7 +140,7 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
-                << "Fast_Forward: no reachability witness found (k = " << k << ")..."
+                << "No reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
             engine.invert_last_group();
@@ -153,25 +150,29 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
             ++ k;
             assert_fsm_invar(engine, k);
 
+            /* Only global (i.e. untimed) constraints need be asserted here */
             std::for_each(
                 begin(f_constraints), end(f_constraints),
-                [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
-                    expr::Expr_ptr formula = time_resolver.process(constraint, k);
+                [this, &engine, k](expr::Expr_ptr constraint) {
+                    expr::time::Analyzer eta(em());
+                    eta.process(constraint);
 
-                    /* prevent re-asserting the same formula more than once */
-                    if (NULL != formula && seen.end() == seen.find(formula)) {
-                        model::CompilationUnit cu { compiler().process( em().make_empty(), formula) };
+                    /* if backward time made it up to this point, something went wrong */
+                    assert (! eta.has_backward_time());
 
+                    if (! eta.has_forward_time()) {
+                        auto i { f_constraint_cus.find(constraint) };
+                        assert ( f_constraint_cus.end() != i );
+
+                        model::CompilationUnit cu { i->second };
                         this->assert_formula(engine, k, cu);
-                        seen.insert(formula);
                     }
                 });
         }
 
         TRACE
-            << "Fast_Forward: done with k = " << k << "..."
+            << "Done with k = " << k << "..."
             << std::endl ;
-
     } while (sync_status() == REACHABILITY_UNKNOWN);
 
  cleanup:

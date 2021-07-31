@@ -34,10 +34,10 @@
 
 typedef unsigned step_t;
 
-const step_t FIRST_STATE { 0 };
-const step_t FINAL_STATE { UINT_MAX };
-
 const step_t FROZEN { UINT_MAX >> 1 };
+
+const step_t LAST_POSITIVE_TIME { FROZEN -1 };
+const step_t LAST_NEGATIVE_TIME { FROZEN +1 };
 
 inline bool is_positive(step_t instant)
 { return instant < FROZEN; }

@@ -121,8 +121,8 @@ ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, 
 
                     const enc::TCBI tcbi
                         (enc::TCBI(ucbi, reversed
-                              ? FINAL_STATE - step
-                              : FIRST_STATE + step));
+                              ? UINT_MAX - step
+                              : step));
 
                     Var var
                         (engine.tcbi_to_var(tcbi));
@@ -160,7 +160,7 @@ ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, 
         }
 
         step += reversed ? -1 :  1 ;
-        if ((reversed && step == FINAL_STATE) ||
+        if ((reversed && step == UINT_MAX) ||
             (! reversed && step > k))
             break;
     } while (1);

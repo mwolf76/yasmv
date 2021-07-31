@@ -24,7 +24,7 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
-#include <expr/resolver/resolver.hh>
+#include <expr/analyzer/analyzer.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -36,29 +36,24 @@ static const char *reach_trace_prfx ("reach_");
 
 void Reachability::backward_strategy(model::CompilationUnit& target_cu)
 {
-    expr::time::Resolver time_resolver(em());
-    boost::unordered_set<expr::Expr_ptr> seen;
-
     sat::Engine engine { "backward" };
-
     step_t k { 0 };
 
     /* goal state constraints */
     assert_formula(engine, UINT_MAX - k, target_cu);
     assert_fsm_invar(engine, UINT_MAX - k);
 
+    /* Timed constraints can be asserted immediately, global
+     * constraints must be assert at time zero, therefore we don't
+     * need any filtering here. */
     std::for_each(
         begin(f_constraints), end(f_constraints),
-        [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
-            expr::Expr_ptr formula = time_resolver.process(constraint, k);
+        [this, &engine, k](expr::Expr_ptr constraint) {
+            auto i { f_constraint_cus.find(constraint) };
+            assert ( f_constraint_cus.end() != i );
 
-            /* prevent re-asserting the same formula more than once */
-            if (NULL != formula && seen.end() == seen.find(formula)) {
-                model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
-
-                this->assert_formula(engine, UINT_MAX - k, cu);
-                seen.insert(formula);
-            }
+            model::CompilationUnit cu { i->second };
+            this->assert_formula(engine, UINT_MAX - k, cu);
         });
 
     sat::status_t status
@@ -69,7 +64,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
 
     else if (sat::status_t::STATUS_UNSAT == status) {
         INFO
-            << "Backward: empty final states. Target is trivially UNREACHABLE."
+            << "Empty final states. Target is trivially UNREACHABLE."
             << std::endl;
 
         sync_set_status(REACHABILITY_UNREACHABLE);
@@ -78,7 +73,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
 
     else if (sat::status_t::STATUS_SAT == status)
         INFO
-            << "Backward: GOAL consistency check ok."
+            << "GOAL consistency check ok."
             << std::endl;
 
     else assert(false); /* unreachable */
@@ -87,7 +82,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
         /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
         assert_fsm_init(engine, UINT_MAX - k, engine.new_group());
         INFO
-            << "Backward: now looking for reachability witness (k = " << k << ")..."
+            << "Now looking for reachability witness (k = " << k << ")..."
             << std::endl ;
 
         sat::status_t status
@@ -134,7 +129,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
-                << "Backward: no reachability witness found (k = " << k << ")..."
+                << "No reachability witness found (k = " << k << ")..."
                 << std::endl ;
 
             engine.invert_last_group();
@@ -144,17 +139,22 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
             assert_fsm_trans(engine, UINT_MAX - k);
             assert_fsm_invar(engine, UINT_MAX - k);
 
+            /* Only global (i.e. untimed) constraints need be asserted here */
             std::for_each(
                 begin(f_constraints), end(f_constraints),
-                [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
-                    expr::Expr_ptr formula = time_resolver.process(constraint, k);
+                [this, &engine, k](expr::Expr_ptr constraint) {
+                    expr::time::Analyzer eta(em());
+                    eta.process(constraint);
 
-                    /* prevent re-asserting the same formula more than once */
-                    if (NULL != formula && seen.end() == seen.find(formula)) {
-                        model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
+                    /* if forward time made it up to this point, something went wrong */
+                    assert (! eta.has_forward_time());
 
-                        this->assert_formula(engine, k, cu);
-                        seen.insert(formula);
+                    if (! eta.has_backward_time()) {
+                        auto i { f_constraint_cus.find(constraint) };
+                        assert ( f_constraint_cus.end() != i );
+
+                        model::CompilationUnit cu { i->second };
+                        this->assert_formula(engine, UINT_MAX - k, cu);
                     }
                 });
 
@@ -168,7 +168,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
                 goto cleanup;
 
             INFO
-                << "Backward: now looking for unreachability proof (k = " << k << ")..."
+                << "Now looking for unreachability proof (k = " << k << ")..."
                 << std::endl ;
 
             sat::status_t status
@@ -179,12 +179,12 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
 
             else if (sat::status_t::STATUS_SAT == status)
                 INFO
-                    << "Backward: no unreachability proof found (k = " << k << ")"
+                    << "No unreachability proof found (k = " << k << ")"
                     << std::endl;
 
             else if (sat::status_t::STATUS_UNSAT == status) {
                 INFO
-                    << "Backward: found unreachability proof (k = " << k << ")"
+                    << "Found unreachability proof (k = " << k << ")"
                     << std::endl;
 
                 sync_set_status(REACHABILITY_UNREACHABLE);
@@ -194,7 +194,7 @@ void Reachability::backward_strategy(model::CompilationUnit& target_cu)
         }
 
         TRACE
-            << "Backward: done with k = " << k << "..."
+            << "Done with k = " << k << "..."
             << std::endl ;
 
     } while (sync_status() == REACHABILITY_UNKNOWN);

@@ -33,6 +33,9 @@
 
 namespace reach {
 
+typedef boost::unordered_map<expr::Expr_ptr, model::CompilationUnit,
+                             utils::PtrHash, utils::PtrEq> ConstraintCompilationMap;
+
 class Reachability : public Algorithm {
 
 public:
@@ -49,12 +52,14 @@ public:
 
 private:
     expr::Expr_ptr f_target;
+
     expr::ExprVector f_constraints;
+    ConstraintCompilationMap f_constraint_cus;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
 
-    /* strategies */
+    /* checking strategies */
     void forward_strategy(model::CompilationUnit& target_cu);
     void backward_strategy(model::CompilationUnit& target_cu);
 
@@ -62,6 +67,6 @@ private:
     void fast_backward_strategy(model::CompilationUnit& target_cu);
 };
 
-};
+} // namespace reach
 
-#endif /* Reachability_ALGORITHM_CLASSES_H */
+#endif /* REACHABILITY_ALGORITHM_H */

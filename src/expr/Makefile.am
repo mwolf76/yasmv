@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = analyzer nnfizer resolver printer walker
+SUBDIRS = analyzer resolver nnfizer printer walker
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\

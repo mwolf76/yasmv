@@ -732,10 +732,6 @@ forward_instant returns [expr::Expr_ptr res]
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
       }
-
-     | '*' {
-        $res = em.make_instant(UINT_MAX);
-     }
     ;
 
 backward_instant returns [expr::Expr_ptr res]
@@ -744,10 +740,6 @@ backward_instant returns [expr::Expr_ptr res]
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(UINT_MAX - strtoll(tmp.c_str(), NULL, 10));
       }
-
-     | '*' {
-        $res = em.make_instant(0);
-     }
     ;
 
 constant returns [expr::Expr_ptr res]

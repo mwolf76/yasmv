@@ -26,6 +26,7 @@
 #include <algorithms/reach/witness.hh>
 
 #include <expr/analyzer/analyzer.hh>
+#include <expr/resolver/resolver.hh>
 
 #include <model/compiler/compiler.hh>
 
@@ -67,7 +68,6 @@ Reachability::~Reachability()
 
 void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
 {
-    expr::Expr_ptr ctx { em().make_empty() };
     expr::time::Analyzer eta(em());
 
     /* the target formula */
@@ -102,7 +102,7 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
     }
 
     unsigned no_constraints { no_forward_constraints + no_backward_constraints + no_global_constraints };
-    INFO
+    TRACE
         << no_constraints
         << " additional constraints were provided: "
         << no_forward_constraints
@@ -126,13 +126,34 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
         return ;
     }
 
+    expr::Expr_ptr ctx { em().make_empty() };
+
     TRACE
         << "Compiling target `"
         << f_target
         << "` ..."
         << std::endl;
 
-    model::CompilationUnit target_cu { compiler().process(ctx, f_target) };
+    /* strategy threads will access this value in the main thread's stack */
+    model::CompilationUnit target_cu
+        { compiler().process(ctx, f_target) };
+
+    expr::time::Resolver etr(em());
+
+    for (auto i = f_constraints.begin(); i != f_constraints.end(); ++ i) {
+        auto constraint { *i };
+
+        TRACE
+            << "Compiling constraint `"
+            << constraint
+            << "` ..."
+            << std::endl;
+
+        model::CompilationUnit cu
+            { compiler().process(ctx, etr.process(constraint)) };
+
+        f_constraint_cus.insert( std::pair<expr::Expr_ptr, model::CompilationUnit> (constraint, cu));
+    }
 
     /* fire up strategies */
     f_status = REACHABILITY_UNKNOWN;
@@ -155,6 +176,8 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
         tasks.push_back(new boost::thread (&Reachability::fast_backward_strategy, this, target_cu));
         tasks.push_back(new boost::thread (&Reachability::backward_strategy, this, target_cu));
     }
+
+    assert(0 < tasks.size());
 
     /* join and destroy all active threads */
     std::for_each(
@@ -193,4 +216,4 @@ bool Reachability::sync_set_status(reachability_status_t status)
     return res;
 }
 
-};
+} // namespace reach
