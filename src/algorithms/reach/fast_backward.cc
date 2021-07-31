@@ -24,6 +24,8 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
+#include <expr/resolver/resolver.hh>
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -32,22 +34,30 @@ namespace reach {
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void Reachability::fast_backward_strategy()
+void Reachability::fast_backward_strategy(model::CompilationUnit& target_cu)
 {
-    assert(! f_forward_constraint_cus.size());
+    expr::time::Resolver time_resolver(em());
+    boost::unordered_set<expr::Expr_ptr> seen;
 
     sat::Engine engine { "fast_backward" };
     step_t k { 0 };
 
     /* goal state constraints */
-    assert_formula(engine, FINAL_STATE - k, *f_target_cu);
-    assert_fsm_invar(engine, FINAL_STATE -k);
+    assert_formula(engine, UINT_MAX - k, target_cu);
+    assert_fsm_invar(engine, UINT_MAX -k);
 
     std::for_each(
-        begin(f_backward_constraint_cus),
-        end(f_backward_constraint_cus),
-        [this, &engine, k](model::CompilationUnit& cu) {
-            this->assert_formula(engine, FINAL_STATE - k, cu);
+        begin(f_constraints), end(f_constraints),
+        [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
+            expr::Expr_ptr formula = time_resolver.process(constraint, k);
+
+            /* prevent re-asserting the same formula more than once */
+            if (NULL != formula && seen.end() == seen.find(formula)) {
+                model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
+
+                this->assert_formula(engine, UINT_MAX - k, cu);
+                seen.insert(formula);
+            }
         });
 
     sat::status_t status
@@ -74,7 +84,7 @@ void Reachability::fast_backward_strategy()
 
     do {
         /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
-        assert_fsm_init(engine, FINAL_STATE - k, engine.new_group());
+        assert_fsm_init(engine, UINT_MAX - k, engine.new_group());
 
         INFO
             << "Fast_Backward: now looking for reachability witness (k = " << k << ")..."
@@ -131,8 +141,22 @@ void Reachability::fast_backward_strategy()
 
             /* unrolling next */
             ++ k;
-            assert_fsm_trans(engine, FINAL_STATE - k);
-            assert_fsm_invar(engine, FINAL_STATE - k);
+            assert_fsm_trans(engine, UINT_MAX - k);
+            assert_fsm_invar(engine, UINT_MAX - k);
+
+            std::for_each(
+                begin(f_constraints), end(f_constraints),
+                [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
+                    expr::Expr_ptr formula = time_resolver.process(constraint, k);
+
+                    /* prevent re-asserting the same formula more than once */
+                    if (NULL != formula && seen.end() == seen.find(formula)) {
+                        model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
+
+                        this->assert_formula(engine, k, cu);
+                        seen.insert(formula);
+                    }
+                });
         }
 
         TRACE

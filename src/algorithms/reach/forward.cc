@@ -25,6 +25,8 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
+#include <expr/resolver/resolver.hh>
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -33,11 +35,13 @@ namespace reach {
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void Reachability::forward_strategy()
+void Reachability::forward_strategy(model::CompilationUnit& target_cu)
 {
-    assert(! f_backward_constraint_cus.size());
+    expr::time::Resolver time_resolver(em());
 
     sat::Engine engine { "forward" };
+    boost::unordered_set<expr::Expr_ptr> seen;
+
     step_t k  { 0 };
 
     /* initial constraints */
@@ -45,11 +49,18 @@ void Reachability::forward_strategy()
     assert_fsm_invar(engine, k);
 
     std::for_each(
-        begin(f_forward_constraint_cus),
-        end(f_forward_constraint_cus),
-        [this, &engine, k](model::CompilationUnit& cu) {
-            this->assert_formula(engine, k, cu);
-        });
+            begin(f_constraints), end(f_constraints),
+            [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
+                expr::Expr_ptr formula = time_resolver.process(constraint, k);
+
+                /* prevent re-asserting the same formula more than once */
+                if (NULL != formula && seen.end() == seen.find(formula)) {
+                    model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
+
+                    this->assert_formula(engine, k, cu);
+                    seen.insert(formula);
+                }
+            });
 
     sat::status_t status
         (engine.solve());
@@ -75,7 +86,7 @@ void Reachability::forward_strategy()
 
     do {
         /* looking for witness : Reachability(k-1) ^ ! P(k) */
-        assert_formula(engine, k, *f_target_cu, engine.new_group());
+        assert_formula(engine, k, target_cu, engine.new_group());
 
         INFO
             << "Forward: now looking for reachability witness (k = " << k << ")..."
@@ -139,6 +150,20 @@ void Reachability::forward_strategy()
             assert_fsm_trans(engine, k);
             ++ k;
             assert_fsm_invar(engine, k);
+
+            std::for_each(
+                begin(f_constraints), end(f_constraints),
+                [this, &time_resolver, &engine, &seen, k](expr::Expr_ptr constraint) {
+                    expr::Expr_ptr formula = time_resolver.process(constraint, k);
+
+                    /* prevent re-asserting the same formula more than once */
+                    if (NULL != formula && seen.end() == seen.find(formula)) {
+                        model::CompilationUnit cu { compiler().process(em().make_empty(), formula) };
+
+                        this->assert_formula(engine, k, cu);
+                        seen.insert(formula);
+                    }
+                });
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */

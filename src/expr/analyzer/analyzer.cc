@@ -29,9 +29,10 @@
 
 #include <expr/analyzer/analyzer.hh>
 
-namespace expr {
+namespace expr::time {
 
-Analyzer::Analyzer()
+Analyzer::Analyzer(ExprMgr& em)
+    : f_em(em)
 {
     const void* instance { this };
     DRIVEL
@@ -60,6 +61,7 @@ void Analyzer::process(Expr_ptr expr)
     /* reset analyzer state */
     f_has_forward_time = false;
     f_has_backward_time = false;
+    f_has_intervals = false;
 
     this->operator()(expr);
 }
@@ -98,11 +100,8 @@ void Analyzer::walk_R_postorder(const Expr_ptr expr)
 
 bool Analyzer::walk_at_preorder(const Expr_ptr expr)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     Expr_ptr lhs { expr->lhs() };
-    assert(em.is_instant(lhs) || em.is_interval(lhs));
+    assert(em().is_instant(lhs) || em().is_interval(lhs));
 
     Expr_ptr rhs { expr->rhs() };
     assert(NULL != rhs);
@@ -116,21 +115,18 @@ void Analyzer::walk_at_postorder(const Expr_ptr expr)
 
 bool Analyzer::walk_interval_preorder(const Expr_ptr expr)
 {
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
     Expr_ptr lhs { expr->lhs() };
-    assert(em.is_instant(lhs));
+    assert(em().is_instant(lhs));
 
     Expr_ptr rhs { expr->rhs() };
-    assert(em.is_instant(rhs));
+    assert(em().is_instant(rhs));
 
     return true;
 }
 bool Analyzer::walk_interval_inorder(const Expr_ptr expr)
 { return true; }
 void Analyzer::walk_interval_postorder(const Expr_ptr expr)
-{}
+{ f_has_intervals = true; }
 
 bool Analyzer::walk_next_preorder(const Expr_ptr expr)
 { return true; }
@@ -401,4 +397,4 @@ void Analyzer::walk_instant(const Expr_ptr expr)
 void Analyzer::walk_leaf(const Expr_ptr expr)
 {}
 
-};
+} // namespace expr::time

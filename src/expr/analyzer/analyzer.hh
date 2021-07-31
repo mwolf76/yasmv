@@ -1,6 +1,6 @@
 /**
  * @file analyzer.hh
- * @brief Expr analyzer
+ * @brief Expr time analyzer
  *
  * This header file contains the declarations required by the
  * Expression analyzer class.
@@ -23,20 +23,24 @@
  *
  **/
 
-#ifndef EXPR_ANALYZER_H
-#define EXPR_ANALYZER_H
+#ifndef EXPR_TIME_ANALYZER_H
+#define EXPR_TIME_ANALYZER_H
 
 #include <string>
+#include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
 
 #include <boost/unordered_map.hpp>
 
-namespace expr {
+namespace expr::time {
 
 class Analyzer : public ExprWalker {
 public:
-    Analyzer();
+    Analyzer(ExprMgr& em);
     ~Analyzer();
+
+    inline ExprMgr& em()
+    { return f_em; }
 
     void process(Expr_ptr expr);
 
@@ -45,6 +49,9 @@ public:
 
     inline bool has_backward_time() const
     { return f_has_backward_time; }
+
+    inline bool has_intervals() const
+    { return f_has_intervals; }
 
 protected:
     void pre_hook();
@@ -60,10 +67,14 @@ protected:
     void walk_leaf(const Expr_ptr expr);
 
 private:
+    ExprMgr& f_em;
+
     bool f_has_forward_time;
     bool f_has_backward_time;
+
+    bool f_has_intervals;
 };
 
-};
+} // namespace expr::time
 
-#endif /* EXPR_ANALYZER_H */
+#endif /* EXPR_TIME_ANALYZER_H */

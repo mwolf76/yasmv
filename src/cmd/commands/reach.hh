@@ -51,9 +51,8 @@ private:
     /* the negation of invariant property to be verified */
     expr::Expr_ptr f_target;
 
-    expr::ExprVector f_forward_constraints;
-    expr::ExprVector f_backward_constraints;
-    expr::ExprVector f_global_constraints;
+    /* constraints for guided reachability */
+    expr::ExprVector f_constraints;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();

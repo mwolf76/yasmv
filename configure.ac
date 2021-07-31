@@ -161,6 +161,7 @@ AC_CONFIG_FILES([Makefile
                  src/expr/analyzer/Makefile
                  src/expr/nnfizer/Makefile
                  src/expr/printer/Makefile
+                 src/expr/resolver/Makefile
                  src/expr/walker/Makefile
                  src/algorithms/Makefile
                  src/algorithms/reach/Makefile

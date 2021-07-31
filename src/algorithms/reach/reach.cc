@@ -25,6 +25,10 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
+#include <expr/analyzer/analyzer.hh>
+
+#include <model/compiler/compiler.hh>
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -35,8 +39,6 @@ typedef std::vector<thread_ptr> thread_ptrs;
 
 Reachability::Reachability(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
-    , f_target(NULL)
-    , f_target_cu(NULL)
 {
     const void* instance
         (this);
@@ -63,142 +65,104 @@ Reachability::~Reachability()
         << std::endl ;
 }
 
-void Reachability::process(expr::Expr_ptr target,
-                           expr::ExprVector forward_constraints,
-                           expr::ExprVector backward_constraints,
-                           expr::ExprVector global_constraints)
+void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
 {
+    expr::Expr_ptr ctx { em().make_empty() };
+    expr::time::Analyzer eta(em());
+
+    /* the target formula */
     f_target = target;
     assert(f_target);
 
-    expr::Expr_ptr ctx { em().make_empty() };
+    /* store and inspect constraints: currently mixed-time (i.e. backward + forward) constraints are *not* supported */
+    f_constraints = constraints;
+    unsigned no_forward_constraints { 0 };
+    unsigned no_backward_constraints { 0 };
+    unsigned no_global_constraints { 0 };
+    for (auto i = f_constraints.begin(); i != f_constraints.end(); ++ i) {
+        auto constraint { *i };
 
-    try {
-        /* compile forward constraints */
-        unsigned no_forward_constraints { 0 };
-        std::for_each(
-            begin(forward_constraints), end(forward_constraints),
-            [this, ctx, &no_forward_constraints](expr::Expr_ptr expr) {
-                INFO
-                    << "Compiling constraint `"
-                    << expr
-                    << "` ..."
-                    << std::endl;
-
-                model::CompilationUnit unit
-                    (compiler().process(ctx, expr));
-                f_forward_constraint_cus.push_back(unit);
-                ++ no_forward_constraints;
-            });
-
-        /* compile backward constraints */
-        unsigned no_backward_constraints { 0 };
-        std::for_each(
-            begin(backward_constraints), end(backward_constraints),
-            [this, ctx, &no_backward_constraints](expr::Expr_ptr expr) {
-                INFO
-                    << "Compiling constraint `"
-                    << expr
-                    << "` ..."
-                    << std::endl;
-
-                model::CompilationUnit unit
-                    (compiler().process(ctx, expr));
-                f_backward_constraint_cus.push_back(unit);
-                ++ no_backward_constraints;
-            });
-
-        /* compile global constraints */
-        unsigned no_global_constraints { 0 };
-        std::for_each(
-            begin(global_constraints), end(global_constraints),
-            [this, ctx, &no_global_constraints](expr::Expr_ptr expr) {
-                INFO
-                    << "Compiling constraint `"
-                    << expr
-                    << "` ..."
-                    << std::endl;
-
-                model::CompilationUnit unit
-                    (compiler().process(ctx, expr));
-                f_global_constraint_cus.push_back(unit);
-                ++ no_global_constraints;
-            });
-
-        unsigned no_constraints { no_forward_constraints + no_backward_constraints + no_global_constraints };
-        INFO
-            << no_constraints
-            << " additional constraints were provided: "
-            << no_forward_constraints
-            << " forward, "
-            << no_backward_constraints
-            << " backward, "
-            << no_global_constraints
-            << " global."
-            << std::endl;
-
-        bool use_forward { ! no_backward_constraints };
-        bool use_backward{ ! no_forward_constraints };
-        if (!use_forward && !use_backward) {
-            /* TODO: consider introducing support for this: a bit trickier, but doable */
+        eta.process(constraint);
+        if (eta.has_forward_time() && eta.has_backward_time()) {
             ERR
-                << "Mixing forward and backward guided reachability constraints currently not supported."
+                << "Mixed-time constraints currently not supported!"
                 << std::endl;
 
             f_status = REACHABILITY_ERROR;
             return ;
         }
 
-        INFO
-            << "Compiling target `"
-            << f_target
-            << "` ..."
-            << std::endl;
-
-        model::CompilationUnit unit
-            (compiler().process(ctx, f_target));
-
-        f_target_cu = &unit;
-
-        /* fire up strategies */
-        f_status = REACHABILITY_UNKNOWN;
-
-        thread_ptrs tasks;
-
-        if (use_forward) {
-            INFO
-                << "Forward strategies enabled"
-                << std::endl;
-
-            tasks.push_back(new boost::thread (&Reachability::fast_forward_strategy, this));
-            tasks.push_back(new boost::thread (&Reachability::forward_strategy, this));
+        if (eta.has_forward_time()) {
+            ++ no_forward_constraints ;
+        } else if (eta.has_backward_time()) {
+            ++ no_backward_constraints ;
+        } else {
+            ++ no_global_constraints ;
         }
-
-        if (use_backward) {
-            INFO
-                << "Backward strategies enabled"
-                << std::endl;
-
-            tasks.push_back(new boost::thread (&Reachability::fast_backward_strategy, this));
-            tasks.push_back(new boost::thread (&Reachability::backward_strategy, this));
-        }
-
-        /* join and destroy all active threads */
-        std::for_each(
-            begin(tasks), end(tasks),
-            [](thread_ptr task) {
-                task->join();
-                delete task;
-            });
     }
 
-    catch (Exception& e) {
-        std::cerr
-            << e.what()
+    unsigned no_constraints { no_forward_constraints + no_backward_constraints + no_global_constraints };
+    INFO
+        << no_constraints
+        << " additional constraints were provided: "
+        << no_forward_constraints
+        << " forward, "
+        << no_backward_constraints
+        << " backward, "
+        << no_global_constraints
+        << " global."
+        << std::endl;
+
+    bool use_forward { ! no_backward_constraints };
+    bool use_backward{ ! no_forward_constraints };
+
+    /* TODO: consider introducing support for this: a bit trickier, but doable */
+    if (!use_forward && !use_backward) {
+        ERR
+            << "Mixing forward and backward guided reachability constraints currently not supported."
             << std::endl;
 
         f_status = REACHABILITY_ERROR;
+        return ;
     }
+
+    TRACE
+        << "Compiling target `"
+        << f_target
+        << "` ..."
+        << std::endl;
+
+    model::CompilationUnit target_cu { compiler().process(ctx, f_target) };
+
+    /* fire up strategies */
+    f_status = REACHABILITY_UNKNOWN;
+
+    thread_ptrs tasks;
+    if (use_forward) {
+        TRACE
+            << "Forward strategies enabled"
+            << std::endl;
+
+        tasks.push_back(new boost::thread (&Reachability::fast_forward_strategy, this, target_cu));
+        tasks.push_back(new boost::thread (&Reachability::forward_strategy, this, target_cu));
+    }
+
+    if (use_backward) {
+        TRACE
+            << "Backward strategies enabled"
+            << std::endl;
+
+        tasks.push_back(new boost::thread (&Reachability::fast_backward_strategy, this, target_cu));
+        tasks.push_back(new boost::thread (&Reachability::backward_strategy, this, target_cu));
+    }
+
+    /* join and destroy all active threads */
+    std::for_each(
+        begin(tasks), end(tasks),
+        [](thread_ptr task) {
+            task->join();
+            delete task;
+        });
 }
 
 /* synchronized */

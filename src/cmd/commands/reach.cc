@@ -38,44 +38,34 @@ Reach::Reach(Interpreter& owner)
 {}
 
 Reach::~Reach()
-{
-    f_forward_constraints.clear();
-    f_backward_constraints.clear();
-    f_global_constraints.clear();
-}
+{ f_constraints.clear(); }
 
 void Reach::set_target(expr::Expr_ptr target)
-{
-    f_target = target;
-}
+{ f_target = target; }
 
 void Reach::add_constraint(expr::Expr_ptr constraint)
 {
-    expr::Analyzer ea;
+    expr::time::Analyzer eta(expr::ExprMgr::INSTANCE());
 
-    ea.process(constraint);
-    if (ea.has_forward_time()) {
-        DEBUG
+    eta.process(constraint);
+    if (eta.has_forward_time()) {
+        TRACE
             << "Adding FORWARD constraint to reachability problem: "
             << constraint
             << std::endl;
-
-        f_forward_constraints.push_back(constraint);
-    } else if (ea.has_backward_time()) {
-        DEBUG
+    } else if (eta.has_backward_time()) {
+        TRACE
             << "Adding BACKWARD constraint to reachability problem: "
             << constraint
             << std::endl;
-
-        f_backward_constraints.push_back(constraint);
     } else {
-        DEBUG
+        TRACE
             << "Adding GLOBAL constraint to reachability problem: "
             << constraint
             << std::endl;
-
-       f_global_constraints.push_back(constraint);
     }
+
+    f_constraints.push_back(constraint);
 }
 
 bool Reach::check_requirements()
@@ -112,13 +102,16 @@ utils::Variant Reach::operator()()
     opts::OptsMgr& om
         (opts::OptsMgr::INSTANCE());
 
+    model::ModelMgr& mm
+        (model::ModelMgr::INSTANCE());
+
     bool res { false };
 
     if (! check_requirements())
         return utils::Variant(errMessage);
 
-    reach::Reachability bmc { *this, model::ModelMgr::INSTANCE().model() };
-    bmc.process(f_target, f_forward_constraints, f_backward_constraints, f_global_constraints);
+    reach::Reachability bmc { *this, mm.model() };
+    bmc.process(f_target, f_constraints);
 
     switch (bmc.status()) {
     case reach::reachability_status_t::REACHABILITY_REACHABLE:

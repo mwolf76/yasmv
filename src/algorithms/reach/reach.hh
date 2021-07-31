@@ -29,6 +29,8 @@
 
 #include <cmd/command.hh>
 
+#include <model/compiler/unit.hh>
+
 namespace reach {
 
 class Reachability : public Algorithm {
@@ -37,10 +39,7 @@ public:
     Reachability(cmd::Command& command, model::Model& model);
     ~Reachability();
 
-    void process(expr::Expr_ptr target,
-                 expr::ExprVector forward_constraints,
-                 expr::ExprVector backward_constraints,
-                 expr::ExprVector global_constraints);
+    void process(expr::Expr_ptr target, expr::ExprVector constraints);
 
     inline reachability_status_t status()
     { return sync_status(); }
@@ -50,22 +49,17 @@ public:
 
 private:
     expr::Expr_ptr f_target;
-    model::CompilationUnit_ptr f_target_cu;
-
     expr::ExprVector f_constraints;
-    model::CompilationUnits f_forward_constraint_cus; /* requires forward strategy */
-    model::CompilationUnits f_backward_constraint_cus; /* requires backward strategy */
-    model::CompilationUnits f_global_constraint_cus;
 
     boost::mutex f_status_mutex;
     reachability_status_t f_status;
 
     /* strategies */
-    void forward_strategy();
-    void backward_strategy();
+    void forward_strategy(model::CompilationUnit& target_cu);
+    void backward_strategy(model::CompilationUnit& target_cu);
 
-    void fast_forward_strategy();
-    void fast_backward_strategy();
+    void fast_forward_strategy(model::CompilationUnit& target_cu);
+    void fast_backward_strategy(model::CompilationUnit& target_cu);
 };
 
 };

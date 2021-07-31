@@ -75,7 +75,6 @@ Compiler::Compiler()
     , f_enc(enc::EncodingMgr::INSTANCE())
     , f_temp_auto_index(0)
     , f_status(READY)
-    , f_empty(f_owner.em().make_empty())
 {
     const void* instance { this };
     DRIVEL
@@ -93,4 +92,4 @@ Compiler::~Compiler()
         << std::endl;
 }
 
-};
+} // namespace model

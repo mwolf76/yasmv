@@ -258,12 +258,10 @@ private:
     /* Compiler status (see above) */
     ECompilerStatus f_status;
 
-    const expr::Expr_ptr f_empty; /* debug only */
-
     /* synchronization */
     boost::mutex f_process_mutex;
 };
 
-};
+} // namespace model
 
 #endif
