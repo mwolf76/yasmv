@@ -36,7 +36,7 @@ functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh
 
 test: unit-test functional-test
-	@echo "*** All tests passed Ok"
+	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
 microcode:
