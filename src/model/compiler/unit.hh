@@ -190,12 +190,6 @@ typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
 typedef boost::unordered_map<expr::Expr_ptr,
                              BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
 
-enum ECompilerTimePolarity {
-    UNDECIDED,
-    POSITIVE,
-    NEGATIVE
-};
-
 class CompilationUnit {
 public:
     CompilationUnit( expr::Expr_ptr expr, dd::DDVector& dds,

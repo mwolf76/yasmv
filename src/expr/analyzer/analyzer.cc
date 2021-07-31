@@ -102,7 +102,7 @@ bool Analyzer::walk_at_preorder(const Expr_ptr expr)
         (ExprMgr::INSTANCE());
 
     Expr_ptr lhs { expr->lhs() };
-    assert(em.is_instant(lhs));
+    assert(em.is_instant(lhs) || em.is_interval(lhs));
 
     Expr_ptr rhs { expr->rhs() };
     assert(NULL != rhs);

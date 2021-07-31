@@ -258,9 +258,6 @@ private:
     /* Compiler status (see above) */
     ECompilerStatus f_status;
 
-    /* Time polarity (see above) */
-    ECompilerTimePolarity f_time_polarity;
-
     const expr::Expr_ptr f_empty; /* debug only */
 
     /* synchronization */

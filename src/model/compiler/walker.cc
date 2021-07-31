@@ -45,7 +45,11 @@ bool Compiler::walk_at_preorder(const expr::Expr_ptr expr)
         (f_owner.em());
 
     expr::Expr_ptr lhs { expr->lhs() };
-    assert(em.is_instant(lhs));
+    assert(em.is_instant(lhs) || em.is_interval(lhs));
+
+    if (em.is_interval(lhs)) {
+        throw UnexpectedExpression(expr);
+    }
 
     expr::Expr_ptr rhs { expr->rhs() };
     assert(NULL != rhs);

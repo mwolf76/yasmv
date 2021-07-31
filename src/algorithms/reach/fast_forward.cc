@@ -158,4 +158,4 @@ void Reachability::fast_forward_strategy()
         << std::endl;
 } /* Reachability::fast_forward_strategy() */
 
-};
+}
