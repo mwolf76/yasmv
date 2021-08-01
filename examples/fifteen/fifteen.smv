@@ -8,9 +8,9 @@ VAR
   grid : uint[16];
 
 INIT
-  grid = [ 1, 2,  4,   0,
-           5, 6,  3,   8,
-           9, 10, 7,  11,
+  grid = [ 1,  2,  4,  0,
+           5,  6,  3,  8,
+           9, 10,  7, 11,
           13, 14, 15, 12 ];
 
 #hidden
@@ -19,7 +19,7 @@ DEFINE
       grid = [ 1,  2,  3,  4,
                5,  6,  7,  8,
                9, 10, 11, 12,
-              13, 14, 15, 0 ];
+              13, 14, 15,  0 ];
 
 -- This needs to be hidden, because move is unconstrained in the final
 -- state, so the resulting trace would not be perfectly reproducible
