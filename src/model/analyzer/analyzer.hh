@@ -37,7 +37,7 @@
 namespace model {
 
 /* guard -> identifier map (first pass) */
-typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
+typedef boost::unordered_multimap<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
 
 /* identifier -> framing condition clause */
 typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;

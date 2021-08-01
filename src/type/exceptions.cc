@@ -23,6 +23,7 @@
 
 #include <expr/expr.hh>
 
+#include <type/classes.hh>
 #include <type/typedefs.hh>
 #include <type/exceptions.hh>
 
@@ -37,8 +38,12 @@ static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs)
 
     oss
         << "operand `"
-        << expr << "` has invalid type `"
-        << lhs << "`";
+        << expr
+        << "` has invalid type `"
+        << lhs->repr()
+        << "` (@"
+        << lhs /* raw pointer */
+        << ")" ;
 
     return oss.str();
 }
@@ -52,8 +57,12 @@ static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr r
         << "operands `"
         << expr->lhs() << "` and `"
         << expr->rhs() << "` have invalid types `"
-        << lhs << "`, `"
-        << rhs << "`";
+        << lhs->repr() << "` (@"
+        << lhs /* raw pointer */
+        << ", `"
+        << rhs->repr() << "` (@"
+        << rhs << "`" /* raw pointer */
+        ;
 
     return oss.str();
 }

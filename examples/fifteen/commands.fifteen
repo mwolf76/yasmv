@@ -1,0 +1,3 @@
+reach GOAL
+on success dump-trace
+quit

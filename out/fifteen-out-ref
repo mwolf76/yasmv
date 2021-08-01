@@ -1,0 +1,37 @@
+Target is reachable, registered witness `reach_1`, 6 steps.
+Witness: reach_1 [[ Reachability witness for target `GOAL` in module `fifteen` ]]
+:: @0
+-- state
+   grid = [1, 2, 4, 0, 5, 6, 3, 8, 9, 10, 7, 11, 13, 14, 15, 12]
+   row = 0
+   col = 3
+
+:: @1
+-- state
+   grid = [1, 2, 0, 4, 5, 6, 3, 8, 9, 10, 7, 11, 13, 14, 15, 12]
+   row = 0
+   col = 2
+
+:: @2
+-- state
+   grid = [1, 2, 3, 4, 5, 6, 0, 8, 9, 10, 7, 11, 13, 14, 15, 12]
+   row = 1
+   col = 2
+
+:: @3
+-- state
+   grid = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 11, 13, 14, 15, 12]
+   row = 2
+   col = 2
+
+:: @4
+-- state
+   grid = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 13, 14, 15, 12]
+   row = 2
+   col = 3
+
+:: @5
+-- state
+   grid = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0]
+   row = 3
+   col = 3
