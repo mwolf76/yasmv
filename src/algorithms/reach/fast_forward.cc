@@ -38,7 +38,7 @@ namespace reach {
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
+void Reachability::fast_forward_strategy(model::compiler::CompilationUnit& target_cu)
 {
     sat::Engine engine { "fast_forward" };
     step_t k  { 0 };
@@ -56,7 +56,7 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
             auto i { f_constraint_cus.find(constraint) };
             assert ( f_constraint_cus.end() != i );
 
-            model::CompilationUnit cu { i->second };
+            model::compiler::CompilationUnit cu { i->second };
             this->assert_formula(engine, k, cu);
         });
 
@@ -164,7 +164,7 @@ void Reachability::fast_forward_strategy(model::CompilationUnit& target_cu)
                         auto i { f_constraint_cus.find(constraint) };
                         assert ( f_constraint_cus.end() != i );
 
-                        model::CompilationUnit cu { i->second };
+                        model::compiler::CompilationUnit cu { i->second };
                         this->assert_formula(engine, k, cu);
                     }
                 });

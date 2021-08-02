@@ -28,7 +28,7 @@
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
-namespace model {
+namespace model::compiler {
 
 static inline value_t pow2(unsigned exp);
 
@@ -285,4 +285,4 @@ void Compiler::algebraic_constant(expr::Expr_ptr konst, unsigned width)
         throw ConstantTooLarge(konst);
 }
 
-};
+} // namespace model::compiler

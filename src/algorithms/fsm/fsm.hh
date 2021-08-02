@@ -58,7 +58,7 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    model::CompilationUnits f_constraint_cus;
+    model::compiler::CompilationUnits f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
@@ -80,7 +80,7 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    model::CompilationUnits f_constraint_cus;
+    model::compiler::CompilationUnits f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;

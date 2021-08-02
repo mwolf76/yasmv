@@ -135,7 +135,7 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
         << std::endl;
 
     /* strategy threads will access this value in the main thread's stack */
-    model::CompilationUnit target_cu
+    model::compiler::CompilationUnit target_cu
         { compiler().process(ctx, f_target) };
 
     expr::time::Expander expander(em());
@@ -149,10 +149,10 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
             << "` ..."
             << std::endl;
 
-        model::CompilationUnit cu
+        model::compiler::CompilationUnit cu
             { compiler().process(ctx, expander.process(constraint)) };
 
-        f_constraint_cus.insert( std::pair<expr::Expr_ptr, model::CompilationUnit> (constraint, cu));
+        f_constraint_cus.insert( std::pair<expr::Expr_ptr, model::compiler::CompilationUnit> (constraint, cu));
     }
 
     /* fire up strategies */

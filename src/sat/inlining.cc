@@ -95,7 +95,7 @@ InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& file
     char* width
         (buf);
 
-    f_ios = model::make_ios( 's' == *signedness, op_type, atoi(width));
+    f_ios = model::compiler::make_ios( 's' == *signedness, op_type, atoi(width));
 }
 
 InlinedOperatorLoader::~InlinedOperatorLoader()
@@ -199,7 +199,7 @@ InlinedOperatorMgr::InlinedOperatorMgr()
                     assert(NULL != loader);
 
                     f_loaders.insert( std::pair
-                                      < model::InlinedOperatorSignature, InlinedOperatorLoader_ptr >
+                                      < model::compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr >
                                       (loader->ios(), loader));
                 }
                 catch (InlinedOperatorLoaderException& iole) {
@@ -240,7 +240,7 @@ InlinedOperatorMgr::~InlinedOperatorMgr()
 {
 }
 
-InlinedOperatorLoader& InlinedOperatorMgr::require(const model::InlinedOperatorSignature& ios)
+InlinedOperatorLoader& InlinedOperatorMgr::require(const model::compiler::InlinedOperatorSignature& ios)
 {
     InlinedOperatorLoaderMap::const_iterator i
         (f_loaders.find( ios ));
@@ -252,8 +252,8 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const model::InlinedOperatorS
             << " not found, falling back..."
             << std::endl;
 
-        model::InlinedOperatorSignature fallback
-            (model::make_ios(model::ios_issigned(ios), model::ios_optype(ios), model::ios_width(ios)));
+        model::compiler::InlinedOperatorSignature fallback
+            (model::compiler::make_ios(model::compiler::ios_issigned(ios), model::compiler::ios_optype(ios), model::compiler::ios_width(ios)));
 
         i = f_loaders.find( fallback );
     }
@@ -264,11 +264,11 @@ InlinedOperatorLoader& InlinedOperatorMgr::require(const model::InlinedOperatorS
     return * i->second;
 }
 
-void CNFOperatorInliner::inject(const model::InlinedOperatorDescriptor& md,
+void CNFOperatorInliner::inject(const model::compiler::InlinedOperatorDescriptor& md,
                                 const LitsVector& clauses)
 {
     DRIVEL
-        << const_cast<model::InlinedOperatorDescriptor&> (md)
+        << const_cast<model::compiler::InlinedOperatorDescriptor&> (md)
         << std::endl;
 
     /* true */
@@ -286,7 +286,7 @@ void CNFOperatorInliner::inject(const model::InlinedOperatorDescriptor& md,
         (md.y());
 
     int width
-        (model::ios_width(md.ios()));
+        (model::compiler::ios_width(md.ios()));
 
     /* keep each injection in a separate cnf space */
     f_sat.clear_cnf_map();
@@ -414,10 +414,10 @@ void CNFOperatorInliner::inject(const model::InlinedOperatorDescriptor& md,
 
 } /* CNFOperatorInliner::inject */
 
-void CNFBinarySelectionInliner::inject(const model::BinarySelectionDescriptor& md)
+void CNFBinarySelectionInliner::inject(const model::compiler::BinarySelectionDescriptor& md)
 {
     DRIVEL
-        << const_cast<model::BinarySelectionDescriptor&> (md)
+        << const_cast<model::compiler::BinarySelectionDescriptor&> (md)
         << std::endl;
 
     /* true */
@@ -486,10 +486,10 @@ void CNFBinarySelectionInliner::inject(const model::BinarySelectionDescriptor& m
     }
 }
 
-void CNFMultiwaySelectionInliner::inject(const model::MultiwaySelectionDescriptor& md)
+void CNFMultiwaySelectionInliner::inject(const model::compiler::MultiwaySelectionDescriptor& md)
 {
     DEBUG
-        << const_cast<model::MultiwaySelectionDescriptor&> (md)
+        << const_cast<model::compiler::MultiwaySelectionDescriptor&> (md)
         << std::endl;
 
     /* true */

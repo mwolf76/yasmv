@@ -76,7 +76,7 @@ void Simulation::pick_state(bool allsat,
 
     expr::Expr_ptr ctx { em.make_empty() };
 
-    model::CompilationUnits constraint_cus;
+    model::compiler::CompilationUnits constraint_cus;
     unsigned nconstraints { 0 };
     std::for_each(begin(constraints),
                   end(constraints),
@@ -87,7 +87,7 @@ void Simulation::pick_state(bool allsat,
                           << "` ..."
                           << std::endl;
 
-                      model::CompilationUnit unit
+                      model::compiler::CompilationUnit unit
                           (compiler().process(ctx, expr));
 
                       constraint_cus.push_back(unit);
@@ -106,7 +106,7 @@ void Simulation::pick_state(bool allsat,
     /* Additional constraints */
     std::for_each(begin(constraint_cus),
                   end(constraint_cus),
-                  [this, &engine](model::CompilationUnit& cu) {
+                  [this, &engine](model::compiler::CompilationUnit& cu) {
                       this->assert_formula(engine, 0, cu);
                   });
 
@@ -293,14 +293,14 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
     /* assert additional constraints */
     if (invar_condition) {
 
-        model::Compiler& cmpl
+        model::compiler::Compiler& cmpl
             (compiler()); // just a local ref
 
         expr::Expr_ptr ctx
             (em.make_empty());
 
         try {
-            model::CompilationUnit term
+            model::compiler::CompilationUnit term
                 (cmpl.process(ctx, invar_condition));
 
             assert_formula( engine, 1 + k, term, 0);

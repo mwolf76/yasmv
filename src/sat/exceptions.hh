@@ -42,7 +42,7 @@ public:
 
 class InlinedOperatorLoaderException : public EngineException {
 public:
-    InlinedOperatorLoaderException(const model::InlinedOperatorSignature& ios);
+    InlinedOperatorLoaderException(const model::compiler::InlinedOperatorSignature& ios);
 };
 
 };

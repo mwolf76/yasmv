@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     type::TypeMgr& tm
         (type::TypeMgr::INSTANCE());
 
-    model::Compiler f_compiler;
+    model::compiler::Compiler f_compiler;
 
     model::Model& model
         (mm.model());
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F}
       } ;
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {T}
       } ;
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
           {F, T}, {T, F}
         };
 
-        model::CompilationUnit cu
+        model::compiler::CompilationUnit cu
             (f_compiler.process(em.make_empty(),
                                 test_expr));
 
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, F}, {T, T}
       };
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       };
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {T, T}
       };
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, T}, {T, X}
       };
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, X}, {T, T}
       };
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      model::CompilationUnit cu
+      model::compiler::CompilationUnit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 

@@ -53,7 +53,7 @@ private:
     expr::ExprVector f_constraints;
 
     using ConstraintCompilationMap =
-        boost::unordered_map<expr::Expr_ptr, model::CompilationUnit,
+        boost::unordered_map<expr::Expr_ptr, model::compiler::CompilationUnit,
                              utils::PtrHash, utils::PtrEq> ;
     ConstraintCompilationMap f_constraint_cus;
 
@@ -61,11 +61,11 @@ private:
     reachability_status_t f_status;
 
     /* checking strategies */
-    void forward_strategy(model::CompilationUnit& target_cu);
-    void backward_strategy(model::CompilationUnit& target_cu);
+    void forward_strategy(model::compiler::CompilationUnit& target_cu);
+    void backward_strategy(model::compiler::CompilationUnit& target_cu);
 
-    void fast_forward_strategy(model::CompilationUnit& target_cu);
-    void fast_backward_strategy(model::CompilationUnit& target_cu);
+    void fast_forward_strategy(model::compiler::CompilationUnit& target_cu);
+    void fast_backward_strategy(model::compiler::CompilationUnit& target_cu);
 };
 
 } // namespace reach

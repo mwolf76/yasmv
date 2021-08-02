@@ -236,7 +236,7 @@ bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
     sat::Engine engine
         ("Analyzer");
 
-    Compiler compiler;
+    compiler::Compiler compiler;
 
     expr::Expr_ptr ctx
         (em.make_empty());

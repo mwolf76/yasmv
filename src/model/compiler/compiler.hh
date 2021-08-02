@@ -24,8 +24,8 @@
  *
  **/
 
-#ifndef COMPILER_H
-#define COMPILER_H
+#ifndef MODEL_COMPILER_H
+#define MODEL_COMPILER_H
 
 /**
  * Current implementation uses DDs to perform expression
@@ -57,7 +57,6 @@
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
-// #include <sat/helpers.hh>
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
@@ -70,7 +69,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/thread/mutex.hpp>
 
-namespace model {
+namespace model::compiler {
 
 class Compiler : public expr::ExprWalker {
 public:
@@ -247,6 +246,6 @@ private:
     boost::mutex f_process_mutex;
 };
 
-} // namespace model
+} // namespace model::compiler
 
-#endif
+#endif /* MODEL_COMPILER_H */

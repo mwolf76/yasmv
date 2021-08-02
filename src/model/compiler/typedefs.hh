@@ -36,7 +36,7 @@
 
 #include <utils/pool.hh>
 
-namespace model {
+namespace model::compiler {
 
 using BinarySelectionUnionFindMap =
     boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr,
@@ -238,6 +238,6 @@ using CompilationUnit_ptr =
 using CompilationUnits =
     std::vector<CompilationUnit> ;
 
-} // namespace model
+} // namespace model::compiler
 
 #endif /* COMPILER_TYPEDEFS_H */

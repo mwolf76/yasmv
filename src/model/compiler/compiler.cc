@@ -25,7 +25,7 @@
 #include <utility>
 #include <compiler.hh>
 
-namespace model {
+namespace model::compiler {
 
 ECompilerStatus& operator++(ECompilerStatus& status) {
     return status = static_cast<ECompilerStatus> (1 + static_cast <int> (status));
@@ -92,4 +92,4 @@ Compiler::~Compiler()
         << std::endl;
 }
 
-} // namespace model
+} // namespace model::compiler

@@ -58,7 +58,7 @@ public:
     /* Build encodings to perform model compilation */
     virtual void setup();
 
-    inline model::Compiler& compiler()
+    inline model::compiler::Compiler& compiler()
     { return f_compiler; }
 
     inline bool has_witness() const
@@ -100,7 +100,7 @@ public:
                                sat::group_t group = sat::MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(sat::Engine& engine, step_t time, model::CompilationUnit& term,
+    void assert_formula(sat::Engine& engine, step_t time, model::compiler::CompilationUnit& term,
                         sat::group_t group = sat::MAINGROUP);
 
     /* TimeFrame from a witness */
@@ -129,12 +129,12 @@ private:
     type::TypeMgr& f_tm;
 
     /* Model Compiler */
-    model::Compiler f_compiler;
+    model::compiler::Compiler f_compiler;
 
     /* Formulas */
-    model::CompilationUnits f_init;
-    model::CompilationUnits f_invar;
-    model::CompilationUnits f_trans;
+    model::compiler::CompilationUnits f_init;
+    model::compiler::CompilationUnits f_invar;
+    model::compiler::CompilationUnits f_trans;
 
     /* Witness */
     witness::Witness_ptr f_witness;

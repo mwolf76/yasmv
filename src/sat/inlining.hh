@@ -39,9 +39,9 @@ namespace sat {
 class Engine;
 
 typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
-typedef boost::unordered_map<model::InlinedOperatorSignature, InlinedOperatorLoader_ptr,
-                             model::InlinedOperatorSignatureHash,
-                             model::InlinedOperatorSignatureEq> InlinedOperatorLoaderMap;
+typedef boost::unordered_map<model::compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr,
+                             model::compiler::InlinedOperatorSignatureHash,
+                             model::compiler::InlinedOperatorSignatureEq> InlinedOperatorLoaderMap;
 
 
 class InlinedOperatorLoader {
@@ -49,7 +49,7 @@ public:
     InlinedOperatorLoader(const boost::filesystem::path& filepath);
     ~InlinedOperatorLoader();
 
-    inline const model::InlinedOperatorSignature& ios() const
+    inline const model::compiler::InlinedOperatorSignature& ios() const
     { return f_ios; }
 
     // synchronized
@@ -60,7 +60,7 @@ private:
     LitsVector f_clauses;
 
     boost::filesystem::path f_fullpath;
-    model::InlinedOperatorSignature f_ios;
+    model::compiler::InlinedOperatorSignature f_ios;
 };
 
 typedef class InlinedOperatorMgr *InlinedOperatorMgr_ptr;
@@ -74,7 +74,7 @@ public:
         return (*f_instance);
     }
 
-    InlinedOperatorLoader& require(const model::InlinedOperatorSignature& ios);
+    InlinedOperatorLoader& require(const model::compiler::InlinedOperatorSignature& ios);
 
     inline const InlinedOperatorLoaderMap& loaders() const
     { return f_loaders; }
@@ -102,12 +102,12 @@ public:
     ~CNFOperatorInliner()
     {}
 
-    inline void operator() (const model::InlinedOperatorDescriptor& md)
+    inline void operator() (const model::compiler::InlinedOperatorDescriptor& md)
     {
         InlinedOperatorMgr& mm
             (InlinedOperatorMgr::INSTANCE());
 
-        model::InlinedOperatorSignature ios
+        model::compiler::InlinedOperatorSignature ios
             (md.ios());
         InlinedOperatorLoader& loader
             (mm.require(ios));
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    void inject(const model::InlinedOperatorDescriptor& md,
+    void inject(const model::compiler::InlinedOperatorDescriptor& md,
                 const LitsVector& clauses);
 
     Engine& f_sat;
@@ -135,11 +135,11 @@ public:
     ~CNFBinarySelectionInliner()
     {}
 
-    inline void operator() (const model::BinarySelectionDescriptor& md)
+    inline void operator() (const model::compiler::BinarySelectionDescriptor& md)
     { inject(md); }
 
 private:
-    void inject(const model::BinarySelectionDescriptor& md);
+    void inject(const model::compiler::BinarySelectionDescriptor& md);
 
     Engine& f_sat;
     step_t f_time;
@@ -157,11 +157,11 @@ public:
     ~CNFMultiwaySelectionInliner()
     {}
 
-    inline void operator() (const model::MultiwaySelectionDescriptor& md)
+    inline void operator() (const model::compiler::MultiwaySelectionDescriptor& md)
     { inject(md); }
 
 private:
-    void inject(const model::MultiwaySelectionDescriptor& md);
+    void inject(const model::compiler::MultiwaySelectionDescriptor& md);
 
     Engine& f_sat;
     step_t f_time;

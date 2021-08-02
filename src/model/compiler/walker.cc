@@ -26,7 +26,7 @@
 
 #include <proxy.hh>
 
-namespace model {
+namespace model::compiler {
 
 /**
  * Compilation engine is implemented using a simple expression walker
@@ -840,4 +840,4 @@ void Compiler::walk_set_comma_postorder(const expr::Expr_ptr expr)
     else assert(false);
 }
 
-};
+} // namespace model::compiler

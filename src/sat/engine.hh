@@ -74,7 +74,7 @@ public:
     /**
      * @brief add a formula to the SAT problem instance.
      */
-    void push(model::CompilationUnit cu, step_t time, group_t group = MAINGROUP);
+    void push(model::compiler::CompilationUnit cu, step_t time, group_t group = MAINGROUP);
 
     /**
      * @brief Invoke Minisat

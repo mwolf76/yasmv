@@ -24,13 +24,13 @@
  *
  **/
 
-#ifndef COMPILER_EXCEPTIONS_H
-#define COMPILER_EXCEPTIONS_H
+#ifndef MODEL_COMPILER_EXCEPTIONS_H
+#define MODEL_COMPILER_EXCEPTIONS_H
 
 #include <common/common.hh>
 #include <model/exceptions.hh>
 
-namespace model {
+namespace model::compiler {
 
 /** Exception classes */
 class CompilerException : public Exception {
@@ -52,6 +52,6 @@ public:
     UnexpectedExpression(expr::Expr_ptr expr);
 };
 
-};
+} // namespace model::compiler
 
 #endif /* COMPILER_EXCEPTIONS_H */

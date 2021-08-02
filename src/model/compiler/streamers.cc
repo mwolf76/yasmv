@@ -26,20 +26,20 @@
 
 #include <type/type.hh>
 
-std::ostream& operator<<(std::ostream& os, const model::CompilationUnit& cu)
+std::ostream& operator<<(std::ostream& os, const model::compiler::CompilationUnit& cu)
 {
     return os
         << cu.expr();
 }
 
-std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorSignature& ios)
+std::ostream& operator<<(std::ostream& os, const model::compiler::InlinedOperatorSignature& ios)
 {
     bool is_signed
-        (model::ios_issigned(ios));
+        (model::compiler::ios_issigned(ios));
     expr::ExprType optype
-        (model::ios_optype(ios));
+        (model::compiler::ios_optype(ios));
     unsigned width
-        (model::ios_width(ios));
+        (model::compiler::ios_width(ios));
 
     os << (is_signed ? "s" : "u");
 
@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorSignature
     return os;
 }
 
-std::string ios2string(const model::InlinedOperatorSignature& ios)
+std::string ios2string(const model::compiler::InlinedOperatorSignature& ios)
 {
     std::ostringstream oss;
     oss
@@ -88,7 +88,7 @@ std::string ios2string(const model::InlinedOperatorSignature& ios)
     return oss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorDescriptor& md)
+std::ostream& operator<<(std::ostream& os, const model::compiler::InlinedOperatorDescriptor& md)
 {
     auto ios { md.ios() };
 
@@ -158,7 +158,7 @@ std::ostream& operator<<(std::ostream& os, const model::InlinedOperatorDescripto
     return os;
 }
 
-std::string ios2string(const model::InlinedOperatorDescriptor& iod)
+std::string ios2string(const model::compiler::InlinedOperatorDescriptor& iod)
 {
     std::ostringstream oss;
     oss
@@ -167,7 +167,7 @@ std::string ios2string(const model::InlinedOperatorDescriptor& iod)
     return oss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const model::BinarySelectionDescriptor& md)
+std::ostream& operator<<(std::ostream& os, const model::compiler::BinarySelectionDescriptor& md)
 {
     os << "ITE mux"
        << md.width()
@@ -243,7 +243,7 @@ std::ostream& operator<<(std::ostream& os, const model::BinarySelectionDescripto
     return os;
 }
 
-std::string bsd2string(const model::BinarySelectionDescriptor& bsd)
+std::string bsd2string(const model::compiler::BinarySelectionDescriptor& bsd)
 {
     std::ostringstream oss;
 
@@ -253,7 +253,7 @@ std::string bsd2string(const model::BinarySelectionDescriptor& bsd)
     return oss.str();
 }
 
-std::string msd2string(const model::MultiwaySelectionDescriptor& msd)
+std::string msd2string(const model::compiler::MultiwaySelectionDescriptor& msd)
 {
     std::ostringstream oss;
 
@@ -263,7 +263,7 @@ std::string msd2string(const model::MultiwaySelectionDescriptor& msd)
     return oss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const model::MultiwaySelectionDescriptor& md)
+std::ostream& operator<<(std::ostream& os, const model::compiler::MultiwaySelectionDescriptor& md)
 {
     os << "Array mux"
        << md.elem_count()

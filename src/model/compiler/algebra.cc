@@ -26,7 +26,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-namespace model {
+namespace model::compiler {
 
 /**
  * REMARK: operand arguments (which are DD vectors) are fetched from
@@ -427,4 +427,4 @@ void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
     }
 }
 
-};
+} // namespace model::compiler

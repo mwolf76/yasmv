@@ -32,19 +32,19 @@
 
 namespace sat {
 
-std::string format_loader_exception(const model::InlinedOperatorSignature& ios)
+std::string format_loader_exception(const model::compiler::InlinedOperatorSignature& ios)
 {
     std::ostringstream oss;
 
     oss
         << "can not instantiate loader for operator `"
-        << const_cast<model::InlinedOperatorSignature&>(ios)
+        << const_cast<model::compiler::InlinedOperatorSignature&>(ios)
         << "`" ;
 
     return oss.str();
 }
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const model::InlinedOperatorSignature& ios)
+InlinedOperatorLoaderException::InlinedOperatorLoaderException(const model::compiler::InlinedOperatorSignature& ios)
     : EngineException("InlinedOperatorLoaderException",
                       format_loader_exception(ios))
 {}

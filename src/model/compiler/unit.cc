@@ -26,7 +26,7 @@
 
 #include <type/type.hh>
 
-namespace model {
+namespace model::compiler {
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      dd::DDVector& z, dd::DDVector &x)
@@ -86,4 +86,4 @@ bool InlinedOperatorSignatureEq::operator() (const InlinedOperatorSignature& x,
         x.get<2>() == y.get<2>() ;
 }
 
-} // namespace model
+} // namespace model::compiler

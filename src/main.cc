@@ -77,7 +77,7 @@ void pu(enc::UCBI& ucbi)
 void pt(enc::TCBI& tcbi)
 { std::cerr << tcbi << std::endl; }
 
-void pd(model::InlinedOperatorDescriptor& md)
+void pd(model::compiler::InlinedOperatorDescriptor& md)
 { std::cerr << md << std::endl; }
 
 void batch(cmd::Command_ptr cmd)
