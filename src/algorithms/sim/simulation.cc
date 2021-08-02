@@ -21,15 +21,15 @@
  *
  **/
 
-#include <model/compiler/unit.hh>
+#include <sstream>
+
+#include <model/compiler/typedefs.hh>
 
 #include <sim/simulation.hh>
 
 #include <symb/typedefs.hh>
 #include <symb/classes.hh>
 #include <symb/symb_iter.hh>
-
-#include <sstream>
 
 namespace sim {
 
@@ -374,4 +374,4 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
     }
 }
 
-};
+} // namespace sim

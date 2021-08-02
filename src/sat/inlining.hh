@@ -29,7 +29,7 @@
 #include <sat/typedefs.hh>
 #include <dd/dd_walker.hh>
 
-#include <model/compiler/unit.hh>
+#include <model/compiler/typedefs.hh>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread/mutex.hpp>

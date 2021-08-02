@@ -27,6 +27,9 @@
 #include <jsoncpp/json/json.h>
 #include <boost/algorithm/string.hpp>
 
+#include <model/compiler/typedefs.hh>
+#include <model/compiler/streamers.hh>
+
 #include <sat/typedefs.hh>
 #include <sat/inlining.hh>
 #include <sat/exceptions.hh>

@@ -21,7 +21,8 @@
  *
  **/
 
-#include <model/compiler/unit.hh>
+#include <model/compiler/typedefs.hh>
+#include <model/compiler/streamers.hh>
 
 #include <sat/exceptions.hh>
 #include <sat/inlining.hh>

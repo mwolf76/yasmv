@@ -29,12 +29,9 @@
 
 #include <cmd/command.hh>
 
-#include <model/compiler/unit.hh>
+#include <model/compiler/typedefs.hh>
 
 namespace reach {
-
-typedef boost::unordered_map<expr::Expr_ptr, model::CompilationUnit,
-                             utils::PtrHash, utils::PtrEq> ConstraintCompilationMap;
 
 class Reachability : public Algorithm {
 
@@ -54,6 +51,10 @@ private:
     expr::Expr_ptr f_target;
 
     expr::ExprVector f_constraints;
+
+    using ConstraintCompilationMap =
+        boost::unordered_map<expr::Expr_ptr, model::CompilationUnit,
+                             utils::PtrHash, utils::PtrEq> ;
     ConstraintCompilationMap f_constraint_cus;
 
     boost::mutex f_status_mutex;

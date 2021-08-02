@@ -12,10 +12,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/src/dd	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/util				\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
-PKG_HH = compiler.hh exceptions.hh unit.hh
+PKG_HH = compiler.hh exceptions.hh streamers.hh typedefs.hh
 
 PKG_CC = compiler.cc algebra.cc boolean.cc enumerative.cc array.cc	\
-internals.cc leaves.cc analysis.cc exceptions.cc walker.cc unit.cc
+internals.cc leaves.cc analysis.cc exceptions.cc streamers.cc walker.cc unit.cc
 
 # -------------------------------------------------------
 

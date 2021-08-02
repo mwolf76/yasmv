@@ -30,7 +30,7 @@
 
 #include <enc/enc_mgr.hh>
 
-#include <model/compiler/unit.hh>
+#include <model/compiler/typedefs.hh>
 
 #include <sat/typedefs.hh>
 

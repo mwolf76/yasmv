@@ -62,7 +62,8 @@
 #include <model/model_mgr.hh>
 
 #include <model/compiler/exceptions.hh>
-#include <model/compiler/unit.hh>
+#include <model/compiler/typedefs.hh>
+#include <model/compiler/streamers.hh>
 
 #include <utils/time.hh>
 
@@ -70,25 +71,6 @@
 #include <boost/thread/mutex.hpp>
 
 namespace model {
-
-typedef boost::unordered_map<expr::TimedExpr, CompilationUnit,
-                             expr::TimedExprHash, expr::TimedExprEq> CompilationMap;
-
-typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr,
-                             utils::PtrHash, utils::PtrEq> BinarySelectionUnionFindMap;
-
-
-enum ECompilerStatus {
-    READY,
-    ENCODING,
-    COMPILING,
-    CHECKING,
-    ACTIVATING_ITE_MUXES,
-    ACTIVATING_ARRAY_MUXES
-};
-
-/* decl only */
-ECompilerStatus& operator++(ECompilerStatus& status);
 
 class Compiler : public expr::ExprWalker {
 public:
