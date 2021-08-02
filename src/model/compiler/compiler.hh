@@ -203,7 +203,10 @@ private:
 
     /* -- data -------------------------------------------------------------- */
 
-   /* TimedExpr -> Compilation Unit cache */
+    /* TimedExpr -> Compilation Unit cache */
+    using CompilationMap =
+        boost::unordered_map<expr::TimedExpr, CompilationUnit,
+                             expr::TimedExprHash, expr::TimedExprEq> ;
     CompilationMap f_compilation_cache;
 
     /* microcode descriptors */

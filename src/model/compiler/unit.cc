@@ -65,4 +65,25 @@ MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
     , f_x(x)
 {}
 
+long InlinedOperatorSignatureHash::operator() (const InlinedOperatorSignature& k) const
+{
+    const long prime = 31;
+
+    long res = 1;
+    res = prime * res + (k.get<0>() ? 1231 : 1237);
+    res = prime * res + k.get<1>();
+    res = prime * res + k.get<2>();
+
+    return res;
+}
+
+bool InlinedOperatorSignatureEq::operator() (const InlinedOperatorSignature& x,
+                                             const InlinedOperatorSignature& y) const
+{
+    return
+        x.get<0>() == y.get<0>() &&
+        x.get<1>() == y.get<1>() &&
+        x.get<2>() == y.get<2>() ;
+}
+
 } // namespace model

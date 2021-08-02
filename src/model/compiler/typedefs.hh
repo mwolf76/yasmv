@@ -55,7 +55,9 @@ enum ECompilerStatus {
 ECompilerStatus& operator++(ECompilerStatus& status);
 
 /* <symb, is_signed?, width> */
-typedef boost::tuple<bool, expr::ExprType, unsigned> InlinedOperatorSignature;
+using InlinedOperatorSignature =
+    boost::tuple<bool, expr::ExprType, unsigned>;
+
 inline const InlinedOperatorSignature make_ios (bool is_signed, expr::ExprType exprType, unsigned width)
 {
     return boost::make_tuple <bool, expr::ExprType, unsigned>
@@ -71,27 +73,12 @@ inline unsigned ios_width( const InlinedOperatorSignature& ios )
 { return ios.get<2>(); }
 
 struct InlinedOperatorSignatureHash {
-    long operator() (const InlinedOperatorSignature& k) const
-    {
-        const long prime = 31;
-
-        long res = 1;
-        res = prime * res + (k.get<0>() ? 1231 : 1237);
-        res = prime * res + k.get<1>();
-        res = prime * res + k.get<2>();
-        return res;
-    }
+    long operator() (const InlinedOperatorSignature& k) const ;
 };
 
 struct InlinedOperatorSignatureEq {
     bool operator() (const InlinedOperatorSignature& x,
-                     const InlinedOperatorSignature& y) const
-    {
-        return
-            x.get<0>() == y.get<0>() &&
-            x.get<1>() == y.get<1>() &&
-            x.get<2>() == y.get<2>() ;
-    }
+                     const InlinedOperatorSignature& y) const ;
 };
 
 class BinarySelectionDescriptor {
@@ -101,14 +88,19 @@ public:
 
     inline unsigned width() const
     { return f_width; }
+
     inline const dd::DDVector& z() const
     { return f_z; }
+
     inline ADD cnd() const
     { return f_cnd; }
+
     inline ADD aux() const
     { return f_aux; }
+
     inline const dd::DDVector& x() const
     { return f_x; }
+
     inline const dd::DDVector& y() const
     { return f_y; }
 
@@ -129,14 +121,19 @@ public:
 
     inline unsigned elem_width() const
     { return f_elem_width; }
+
     inline unsigned elem_count() const
     { return f_elem_count; }
+
     inline const dd::DDVector& z() const
     { return f_z; }
+
     inline const dd::DDVector& cnds() const
     { return f_cnds; }
+
     inline const dd::DDVector& acts() const
     { return f_acts; }
+
     inline const dd::DDVector& x() const
     { return f_x; }
 
@@ -162,19 +159,19 @@ public:
 
     inline const dd::DDVector& z() const
     { return f_z; }
+
     inline const dd::DDVector& x() const
     { return f_x; }
+
     inline const dd::DDVector& y() const
     { return f_y; }
+
 
     inline bool is_relational() const
     { return f_z.size() == 1; }
 
     inline bool is_binary() const
-    {
-        return f_z.size() == f_x.size() &&
-            f_z.size() == f_y.size();
-    }
+    { return f_z.size() == f_x.size() && f_z.size() == f_y.size(); }
 
     inline bool is_unary() const
     { return f_y.size() == 0; }
@@ -187,12 +184,17 @@ private:
     dd::DDVector f_y;
 };
 
-typedef std::vector<InlinedOperatorDescriptor> InlinedOperatorDescriptors;
-typedef std::vector<BinarySelectionDescriptor> BinarySelectionDescriptors;
-typedef std::vector<MultiwaySelectionDescriptor> MultiwaySelectionDescriptors;
+using InlinedOperatorDescriptors =
+    std::vector<InlinedOperatorDescriptor> ;
 
-typedef boost::unordered_map<expr::Expr_ptr,
-                             BinarySelectionDescriptors> Expr2BinarySelectionDescriptorsMap;
+using BinarySelectionDescriptors =
+    std::vector<BinarySelectionDescriptor> ;
+
+using MultiwaySelectionDescriptors =
+    std::vector<MultiwaySelectionDescriptor> ;
+
+using Expr2BinarySelectionDescriptorsMap =
+    boost::unordered_map<expr::Expr_ptr, BinarySelectionDescriptors> ;
 
 class CompilationUnit {
 public:
@@ -207,19 +209,19 @@ public:
         , f_array_mux_descriptors( array_mux_descriptors )
     {}
 
-    const expr::Expr_ptr expr() const
+    inline const expr::Expr_ptr expr() const
     { return f_expr; }
 
-    const dd::DDVector& dds() const
+    inline const dd::DDVector& dds() const
     { return f_dds; }
 
-    const InlinedOperatorDescriptors& inlined_operator_descriptors() const
+    inline const InlinedOperatorDescriptors& inlined_operator_descriptors() const
     { return f_inlined_operator_descriptors; }
 
-    const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map() const
+    inline const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map() const
     { return f_binary_selection_descriptors_map; }
 
-    const MultiwaySelectionDescriptors& array_mux_descriptors() const
+    inline const MultiwaySelectionDescriptors& array_mux_descriptors() const
     { return f_array_mux_descriptors; }
 
 private:
@@ -235,9 +237,6 @@ using CompilationUnit_ptr =
 
 using CompilationUnits =
     std::vector<CompilationUnit> ;
-
-using CompilationMap =
-    boost::unordered_map<expr::TimedExpr, CompilationUnit, expr::TimedExprHash, expr::TimedExprEq> ;
 
 } // namespace model
 
