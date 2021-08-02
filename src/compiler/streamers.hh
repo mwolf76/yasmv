@@ -32,18 +32,18 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 
-std::ostream& operator<<(std::ostream& os, const model::compiler::CompilationUnit& cu);
+std::ostream& operator<<(std::ostream& os, const compiler::CompilationUnit& cu);
 
-std::ostream& operator<<(std::ostream& os, const model::compiler::InlinedOperatorSignature& ios);
-std::string ios2string(const model::compiler::InlinedOperatorSignature ios);
+std::ostream& operator<<(std::ostream& os, const compiler::InlinedOperatorSignature& ios);
+std::string ios2string(const compiler::InlinedOperatorSignature ios);
 
-std::ostream& operator<<(std::ostream& os, const model::compiler::InlinedOperatorDescriptor& iod);
-std::string iod2string(const model::compiler::InlinedOperatorDescriptor& ios);
+std::ostream& operator<<(std::ostream& os, const compiler::InlinedOperatorDescriptor& iod);
+std::string iod2string(const compiler::InlinedOperatorDescriptor& ios);
 
-std::ostream& operator<<(std::ostream& os, const model::compiler::BinarySelectionDescriptor& md);
-std::string bsd2string(const model::compiler::InlinedOperatorSignature& ios);
+std::ostream& operator<<(std::ostream& os, const compiler::BinarySelectionDescriptor& md);
+std::string bsd2string(const compiler::InlinedOperatorSignature& ios);
 
-std::ostream& operator<<(std::ostream& os, const model::compiler::MultiwaySelectionDescriptor& md);
-std::string msd2string(const model::compiler::InlinedOperatorSignature& ios);
+std::ostream& operator<<(std::ostream& os, const compiler::MultiwaySelectionDescriptor& md);
+std::string msd2string(const compiler::InlinedOperatorSignature& ios);
 
 #endif /* COMPILATION_STREAMERS_H */

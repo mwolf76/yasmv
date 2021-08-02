@@ -368,7 +368,10 @@ bool TypeChecker::walk_params_preorder(const expr::Expr_ptr expr)
     expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
-    (*this)(f_owner.preprocess(expr, ctx));
+    expr::Expr_ptr preprocessed
+        { f_preprocessor.process(expr, ctx) };
+
+    (*this)(preprocessed);
 
     return false;
 }

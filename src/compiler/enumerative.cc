@@ -24,7 +24,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 void Compiler::enumerative_equals(const expr::Expr_ptr expr)
 {
@@ -151,4 +151,4 @@ void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
         << std::endl;
 }
 
-} // namespace model::compiler
+} // namespace compiler

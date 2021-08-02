@@ -27,6 +27,7 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
+#include <expr/preprocessor/preprocessor.hh>
 #include <expr/walker/walker.hh>
 
 #include <type/type.hh>
@@ -76,6 +77,9 @@ private:
 
     // managers
     ModelMgr& f_owner;
+
+    // owned
+    expr::preprocessor::Preprocessor f_preprocessor;
 
     bool cache_miss(const expr::Expr_ptr expr);
     void memoize_result(expr::Expr_ptr expr);

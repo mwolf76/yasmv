@@ -30,7 +30,7 @@
 #include <model/model.hh>
 #include <model/model_resolver.hh>
 
-#include <model/preprocessor/preprocessor.hh>
+#include <expr/preprocessor/preprocessor.hh>
 
 #include <model/analyzer/analyzer.hh>
 #include <model/type_checker/type_checker.hh>
@@ -75,7 +75,7 @@ public:
     inline type::TypeMgr& tm() const
     { return f_tm; }
 
-    inline Analyzer& analyzer() const
+    inline Analyzer& analyzer()
     { return f_analyzer; }
 
     // delegated type inference method
@@ -87,11 +87,11 @@ public:
     }
 
     // delegated param binding method
-    inline expr::Expr_ptr preprocess(expr::Expr_ptr body,
-                               expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
-    {
-        return f_preprocessor.process(body, ctx);
-    }
+    // inline expr::Expr_ptr preprocess(expr::Expr_ptr body,
+    //                            expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
+    // {
+    //     return f_preprocessor.process(body, ctx);
+    // }
 
     Module_ptr scope(expr::Expr_ptr ctx);
 
@@ -119,17 +119,10 @@ private:
     // ref to type manager
     type::TypeMgr& f_tm;
 
-    // symb resolver
+    // owned
     ModelResolver f_resolver;
-
-    // ref to preprocessor (used for defines expr substitution)
-    Preprocessor& f_preprocessor;
-
-    // ref to analyzer (used for model analysis)
-    Analyzer& f_analyzer;
-
-    // ref to type_checker (used for model analysis)
-    TypeChecker& f_type_checker;
+    Analyzer f_analyzer;
+    TypeChecker f_type_checker;
 
     ContextMap f_context_map;
     ParamMap f_param_map;

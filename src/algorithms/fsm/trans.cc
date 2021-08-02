@@ -68,7 +68,7 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
                           << "` ..."
                           << std::endl;
 
-                      model::compiler::CompilationUnit unit
+                      compiler::CompilationUnit unit
                           (compiler().process(ctx, expr));
 
                       f_constraint_cus.push_back(unit);
@@ -88,7 +88,7 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
     for (step_t time = 0; time < 2; ++ time) {
         std::for_each(begin(f_constraint_cus),
                       end(f_constraint_cus),
-                      [this, &engine, time](model::compiler::CompilationUnit& cu) {
+                      [this, &engine, time](compiler::CompilationUnit& cu) {
                           this->assert_formula(engine, time, cu);
                       });
     }

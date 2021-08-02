@@ -30,7 +30,7 @@
 
 #include <enc/enc_mgr.hh>
 
-#include <model/compiler/typedefs.hh>
+#include <compiler/typedefs.hh>
 
 #include <sat/typedefs.hh>
 
@@ -74,7 +74,7 @@ public:
     /**
      * @brief add a formula to the SAT problem instance.
      */
-    void push(model::compiler::CompilationUnit cu, step_t time, group_t group = MAINGROUP);
+    void push(compiler::CompilationUnit cu, step_t time, group_t group = MAINGROUP);
 
     /**
      * @brief Invoke Minisat

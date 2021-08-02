@@ -31,14 +31,14 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <model/compiler/compiler.hh>
+#include <compiler/compiler.hh>
 
 namespace reach {
 
 // reserved for witnesses
 static const char *reach_trace_prfx ("reach_");
 
-void Reachability::fast_forward_strategy(model::compiler::CompilationUnit& target_cu)
+void Reachability::fast_forward_strategy(compiler::CompilationUnit& target_cu)
 {
     sat::Engine engine { "fast_forward" };
     step_t k  { 0 };
@@ -56,7 +56,7 @@ void Reachability::fast_forward_strategy(model::compiler::CompilationUnit& targe
             auto i { f_constraint_cus.find(constraint) };
             assert ( f_constraint_cus.end() != i );
 
-            model::compiler::CompilationUnit cu { i->second };
+            compiler::CompilationUnit cu { i->second };
             this->assert_formula(engine, k, cu);
         });
 
@@ -164,7 +164,7 @@ void Reachability::fast_forward_strategy(model::compiler::CompilationUnit& targe
                         auto i { f_constraint_cus.find(constraint) };
                         assert ( f_constraint_cus.end() != i );
 
-                        model::compiler::CompilationUnit cu { i->second };
+                        compiler::CompilationUnit cu { i->second };
                         this->assert_formula(engine, k, cu);
                     }
                 });

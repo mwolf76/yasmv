@@ -104,7 +104,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     return f_status;
 }
 
-void Engine::push(model::compiler::CompilationUnit cu, step_t time, group_t group)
+void Engine::push(compiler::CompilationUnit cu, step_t time, group_t group)
 {
     /**
      * 1. Pushing DDs
@@ -124,10 +124,10 @@ void Engine::push(model::compiler::CompilationUnit cu, step_t time, group_t grou
      * 2. Pushing CNF for inlined operators
      */
     {
-        const model::compiler::InlinedOperatorDescriptors& inlined_operator_descriptors
+        const compiler::InlinedOperatorDescriptors& inlined_operator_descriptors
             (cu.inlined_operator_descriptors());
 
-        model::compiler::InlinedOperatorDescriptors::const_iterator i;
+        compiler::InlinedOperatorDescriptors::const_iterator i;
         for (i = inlined_operator_descriptors.begin();
              inlined_operator_descriptors.end() != i; ++ i) {
 
@@ -142,20 +142,20 @@ void Engine::push(model::compiler::CompilationUnit cu, step_t time, group_t grou
      * 3. Pushing ITE MUXes
      */
     {
-        const model::compiler::Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map
+        const compiler::Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map
             (cu.binary_selection_descriptors_map());
 
-        model::compiler::Expr2BinarySelectionDescriptorsMap::const_iterator mmi
+        compiler::Expr2BinarySelectionDescriptorsMap::const_iterator mmi
             (binary_selection_descriptors_map.begin());
 
         while (binary_selection_descriptors_map.end() != mmi) {
             expr::Expr_ptr toplevel
                 (mmi -> first);
 
-            model::compiler::BinarySelectionDescriptors descriptors
+            compiler::BinarySelectionDescriptors descriptors
                 (mmi -> second);
 
-            model::compiler::BinarySelectionDescriptors::const_iterator i;
+            compiler::BinarySelectionDescriptors::const_iterator i;
             for (i = descriptors.begin(); descriptors.end() != i; ++ i) {
 
                 CNFBinarySelectionInliner worker
@@ -172,9 +172,9 @@ void Engine::push(model::compiler::CompilationUnit cu, step_t time, group_t grou
      * 4. Pushing ARRAY MUXes
      */
     {
-        const model::compiler::MultiwaySelectionDescriptors& muxes
+        const compiler::MultiwaySelectionDescriptors& muxes
             (cu.array_mux_descriptors());
-        model::compiler::MultiwaySelectionDescriptors::const_iterator i;
+        compiler::MultiwaySelectionDescriptors::const_iterator i;
         for (i = muxes.begin(); muxes.end() != i; ++ i) {
 
             CNFMultiwaySelectionInliner worker

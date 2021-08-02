@@ -21,12 +21,12 @@
  *
  **/
 
-#include <model/compiler/typedefs.hh>
-#include <model/compiler/streamers.hh>
+#include <compiler/typedefs.hh>
+#include <compiler/streamers.hh>
 
 #include <type/type.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
                                                      dd::DDVector& z, dd::DDVector &x)
@@ -86,4 +86,4 @@ bool InlinedOperatorSignatureEq::operator() (const InlinedOperatorSignature& x,
         x.get<2>() == y.get<2>() ;
 }
 
-} // namespace model::compiler
+} // namespace compiler

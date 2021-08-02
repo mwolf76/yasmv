@@ -25,7 +25,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 void Compiler::boolean_not(const expr::Expr_ptr expr)
 {
@@ -188,4 +188,4 @@ void Compiler::boolean_subscript(const expr::Expr_ptr expr)
         << std::endl;
 }
 
-} // namespace model::compiler
+} // namespace compiler

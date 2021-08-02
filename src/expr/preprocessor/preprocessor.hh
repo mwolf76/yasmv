@@ -37,7 +37,7 @@
 #include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
 
-namespace model {
+namespace expr::preprocessor {
 
 // NOTE: here we're using a vector in order to bypass STL stack
 // interface limitations. (i.e. absence of clear())
@@ -45,10 +45,9 @@ typedef std::vector< std::pair<expr::Expr_ptr, expr::Expr_ptr> > ExprPairStack;
 typedef std::vector<expr::Expr_ptr> ExprStack;
 typedef std::vector<symb::Define_ptr> DefinesStack;
 
-class ModelMgr;
 class Preprocessor : public expr::ExprWalker {
 public:
-    Preprocessor(ModelMgr& owner);
+    Preprocessor();
     ~Preprocessor();
 
     // walker toplevel
@@ -67,6 +66,8 @@ protected:
     void walk_leaf(const expr::Expr_ptr expr);
 
 private:
+    ExprMgr& f_em;
+
     // probably not really necessary, we keep it for now
     ExprStack f_ctx_stack;
 
@@ -76,17 +77,11 @@ private:
     // Not terribly efficient but easier to implement nested envs with
     ExprPairStack f_env;
 
-    // managers
-    ModelMgr& f_owner;
-
-    // Expr Mgr
-    expr::ExprMgr& f_em;
-
     /* internals */
     // void substitute_expression(const expr::Expr_ptr expr);
     void traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr);
 };
 
-};
+} // namespace compiler
 
 #endif /* PREPROCESSOR_H */

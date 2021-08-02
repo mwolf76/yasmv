@@ -49,10 +49,8 @@ ModelMgr::ModelMgr()
     : f_model()
     , f_em(expr::ExprMgr::INSTANCE())
     , f_tm(type::TypeMgr::INSTANCE())
-    , f_resolver(* new ModelResolver(* this))
-    , f_preprocessor(* new Preprocessor(* this))
-    , f_analyzer(* new Analyzer(* this))
-    , f_type_checker(* new TypeChecker(* this))
+    , f_resolver(*this)
+    , f_type_checker(*this)
     , f_analyzed(false)
 {
 }

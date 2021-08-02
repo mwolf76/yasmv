@@ -21,14 +21,14 @@
  *
  **/
 
-#include <model/compiler/compiler.hh>
+#include <compiler/compiler.hh>
 
 #include <env/environment.hh>
 
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 static inline value_t pow2(unsigned exp);
 
@@ -285,4 +285,4 @@ void Compiler::algebraic_constant(expr::Expr_ptr konst, unsigned width)
         throw ConstantTooLarge(konst);
 }
 
-} // namespace model::compiler
+} // namespace compiler

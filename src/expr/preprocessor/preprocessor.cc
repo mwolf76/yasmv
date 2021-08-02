@@ -21,10 +21,12 @@
  *
  **/
 
+#include <expr/expr_mgr.hh>
+
 #include <symb/proxy.hh>
 #include <symb/classes.hh>
 
-#include <model/preprocessor/preprocessor.hh>
+#include <expr/preprocessor/preprocessor.hh>
 
 /* shortcuts to simplify manipulation of the internal expr stack */
 #define POP_EXPR(op)                                    \
@@ -42,14 +44,13 @@
 #define PUSH_DEFINE(tp)                             \
     f_define_stack.push_back(tp)
 
-namespace model {
+namespace expr::preprocessor {
 
-Preprocessor::Preprocessor(ModelMgr& owner)
-    : f_ctx_stack()
+Preprocessor::Preprocessor()
+    : f_em(ExprMgr::INSTANCE())
+    , f_ctx_stack()
     , f_expr_stack()
     , f_env()
-    , f_owner(owner)
-    , f_em(expr::ExprMgr::INSTANCE())
 {
     const void *instance
         (this);
@@ -565,20 +566,17 @@ void Preprocessor::walk_instant(const expr::Expr_ptr expr)
 
 void Preprocessor::walk_leaf(const expr::Expr_ptr expr)
 {
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr expr_
+   expr::Expr_ptr expr_
         (expr);
 
     // is an integer const ..
-    if (em.is_int_const(expr_)) {
+    if (f_em.is_int_const(expr_)) {
         PUSH_EXPR(expr_);
         return;
     }
 
     // .. or a symbol
-    if (em.is_identifier(expr_)) {
+    if (f_em.is_identifier(expr_)) {
 
         /* traverse the env stack, subst with the first occurence, if any */
         ExprPairStack::reverse_iterator env_iter;
@@ -596,7 +594,7 @@ void Preprocessor::walk_leaf(const expr::Expr_ptr expr)
         /* Symb resolution */
         symb::ResolverProxy proxy;
         symb::Symbol_ptr symb
-            (proxy.symbol( em.make_dot( f_ctx_stack.back(), expr_)));
+            (proxy.symbol( f_em.make_dot( f_ctx_stack.back(), expr_)));
 
         if (symb->is_const()) {
             expr::Expr_ptr res = symb->as_const().name();
@@ -637,7 +635,7 @@ void Preprocessor::traverse_param_list(expr::ExprVector& params, const expr::Exp
 //     ResolverProxy proxy;
 
 //     /* LHS -> define name, extract formals for definition */
-//     assert ( f_em.is_identifier( expr->lhs()));
+//     assert ( f_f_em.is_identifier( expr->lhs()));
 //     Define& define
 //         (proxy.symbol( f_owner.em().
 //                        make_dot( f_ctx_stack.back(), expr -> lhs())) -> as_define());
@@ -691,4 +689,4 @@ void Preprocessor::traverse_param_list(expr::ExprVector& params, const expr::Exp
 //     }
 // }
 
-};
+} // namespace expr::preprocessor

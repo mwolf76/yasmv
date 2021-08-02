@@ -23,7 +23,7 @@
 
 #include <compiler.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
 {
@@ -315,4 +315,4 @@ bool Compiler::is_ite_array(const expr::Expr_ptr expr)
     return false;
 }
 
-} // namespace model::compiler
+} // namespace compiler

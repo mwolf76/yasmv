@@ -146,7 +146,7 @@ void Algorithm::setup()
 
 void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    model::compiler::Compiler& cmpl
+    compiler::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
@@ -182,7 +182,7 @@ void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    model::compiler::Compiler& cmpl
+    compiler::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ii = exprs.begin(); ii != exprs.end(); ++ ii ) {
@@ -217,7 +217,7 @@ void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 {
-    model::compiler::Compiler& cmpl
+    compiler::Compiler& cmpl
         (compiler()); // just a local ref
 
     for (expr::ExprVector::const_iterator ti = exprs.begin(); ti != exprs.end(); ++ ti ) {
@@ -253,19 +253,19 @@ void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
 
 void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (model::compiler::CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
+    for (compiler::CompilationUnits::const_iterator i = f_init.begin(); f_init.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
 void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (model::compiler::CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
+    for (compiler::CompilationUnits::const_iterator i = f_invar.begin(); f_invar.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
 void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
 {
-    for (model::compiler::CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
+    for (compiler::CompilationUnits::const_iterator i = f_trans.begin(); f_trans.end() != i; ++ i)
         engine.push( *i, time, group);
 }
 
@@ -392,7 +392,7 @@ void Algorithm::assert_time_frame(sat::Engine& engine,
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
 
-    model::compiler::Compiler& cmpl
+    compiler::Compiler& cmpl
         (compiler()); // just a local ref
 
     expr::ExprVector assignments
@@ -449,7 +449,7 @@ void Algorithm::assert_time_frame(sat::Engine& engine,
 
 void Algorithm::assert_formula(sat::Engine& engine,
                                step_t time,
-                               model::compiler::CompilationUnit& term,
+                               compiler::CompilationUnit& term,
                                sat::group_t group)
 {
     INFO

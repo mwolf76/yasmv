@@ -32,12 +32,13 @@
 
 #include <cmd/command.hh>
 
+#include <compiler/compiler.hh>
+
 #include <sat/sat.hh>
 
 #include <model/model.hh>
 #include <model/module.hh>
 #include <model/model_mgr.hh>
-#include <model/compiler/compiler.hh>
 
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
@@ -58,7 +59,7 @@ public:
     /* Build encodings to perform model compilation */
     virtual void setup();
 
-    inline model::compiler::Compiler& compiler()
+    inline compiler::Compiler& compiler()
     { return f_compiler; }
 
     inline bool has_witness() const
@@ -100,7 +101,7 @@ public:
                                sat::group_t group = sat::MAINGROUP);
 
     /* Generic formulas */
-    void assert_formula(sat::Engine& engine, step_t time, model::compiler::CompilationUnit& term,
+    void assert_formula(sat::Engine& engine, step_t time, compiler::CompilationUnit& term,
                         sat::group_t group = sat::MAINGROUP);
 
     /* TimeFrame from a witness */
@@ -129,12 +130,12 @@ private:
     type::TypeMgr& f_tm;
 
     /* Model Compiler */
-    model::compiler::Compiler f_compiler;
+    compiler::Compiler f_compiler;
 
     /* Formulas */
-    model::compiler::CompilationUnits f_init;
-    model::compiler::CompilationUnits f_invar;
-    model::compiler::CompilationUnits f_trans;
+    compiler::CompilationUnits f_init;
+    compiler::CompilationUnits f_invar;
+    compiler::CompilationUnits f_trans;
 
     /* Witness */
     witness::Witness_ptr f_witness;

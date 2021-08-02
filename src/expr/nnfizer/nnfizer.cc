@@ -32,7 +32,7 @@ namespace expr {
 
 Nnfizer::Nnfizer()
     : f_em(ExprMgr::INSTANCE())
-     , f_polarity_stack()
+    , f_polarity_stack()
 {
     const void* instance { this };
     DRIVEL

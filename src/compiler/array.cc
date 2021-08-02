@@ -26,7 +26,7 @@
 #include <expr.hh>
 #include <compiler.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 void Compiler::array_equals(const expr::Expr_ptr expr)
 {
@@ -174,4 +174,4 @@ void Compiler::array_ite(const expr::Expr_ptr expr)
         << std::endl;
 }
 
-} // namespace model::compiler
+} // namespace compiler

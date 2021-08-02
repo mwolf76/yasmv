@@ -25,7 +25,7 @@
 #include <utility>
 #include <compiler.hh>
 
-namespace model::compiler {
+namespace compiler {
 
 ECompilerStatus& operator++(ECompilerStatus& status) {
     return status = static_cast<ECompilerStatus> (1 + static_cast <int> (status));
@@ -71,8 +71,9 @@ Compiler::Compiler()
     , f_add_stack()
     , f_ctx_stack()
     , f_time_stack()
-    , f_owner(ModelMgr::INSTANCE())
+    , f_owner(model::ModelMgr::INSTANCE())
     , f_enc(enc::EncodingMgr::INSTANCE())
+    , f_preprocessor()
     , f_temp_auto_index(0)
     , f_status(READY)
 {
@@ -92,4 +93,4 @@ Compiler::~Compiler()
         << std::endl;
 }
 
-} // namespace model::compiler
+} // namespace compiler

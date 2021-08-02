@@ -26,7 +26,7 @@
 #include <string>
 #include <sstream>
 
-namespace model::compiler {
+namespace compiler {
 
 static std::string format_constant_too_large(expr::Expr_ptr expr)
 {
@@ -57,4 +57,4 @@ UnexpectedExpression::UnexpectedExpression(expr::Expr_ptr expr)
                         format_unexpected_expression(expr))
 {}
 
-} // namespace model::compiler
+} // namespace compiler

@@ -23,6 +23,10 @@
 
 #include <common/common.hh>
 
+#include <compiler/compiler.hh>
+
+#include <expr/expr_mgr.hh>
+
 #include <expr/expr.hh>
 #include <type/type.hh>
 #include <symb/proxy.hh>
@@ -31,15 +35,14 @@
 
 #include <model/module.hh>
 #include <model/analyzer/analyzer.hh>
-#include <model/compiler/compiler.hh>
 
 #include <utils/misc.hh>
 
 namespace model {
 
-Analyzer::Analyzer(ModelMgr& owner)
-    : f_ctx_stack()
-    , f_owner(owner)
+Analyzer::Analyzer()
+    : f_em(expr::ExprMgr::INSTANCE())
+    , f_ctx_stack()
 {
     const void *instance
         (this);
@@ -91,9 +94,6 @@ void Analyzer::generate_framing_conditions()
 
     /* identifer -> list of guards */
     typedef boost::unordered_map<expr::Expr_ptr, expr::ExprVector, utils::PtrHash, utils::PtrEq> ProcessingMap;
-
-    expr::ExprMgr& em
-        (owner().em());
 
     ProcessingMap map;
 
@@ -179,7 +179,7 @@ void Analyzer::generate_framing_conditions()
        The resulting expr will be used as guard for a newly generated TRANS of
        the form: <guard> -> <var> := var. */
     Module& main
-        (owner().model().main_module());
+        (ModelMgr::INSTANCE().model().main_module());
 
     for (ProcessingMap::iterator i = map.begin();
          i != map.end(); ++ i) {
@@ -200,15 +200,15 @@ void Analyzer::generate_framing_conditions()
                 (*j);
 
             guard = (guard)
-                ? em.make_and(guard, em.make_not(expr))
-                : em.make_not(expr)
+                ? f_em.make_and(guard, f_em.make_not(expr))
+                : f_em.make_not(expr)
                 ;
         }
 
         /* synthetic TRANS will be added to the module. */
         expr::Expr_ptr synth_trans
-            (em.make_implies(guard,
-                             em.make_eq(em.make_next(ident),
+            (f_em.make_implies(guard,
+                             f_em.make_eq(f_em.make_next(ident),
                                         ident)));
         INFO
             << "Adding inertial INVAR: "
@@ -230,16 +230,13 @@ bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
         << "` for unsatisfiability ..."
         << std::endl ;
 
-    expr::ExprMgr& em
-        (owner().em());
-
     sat::Engine engine
         ("Analyzer");
 
     compiler::Compiler compiler;
 
     expr::Expr_ptr ctx
-        (em.make_empty());
+        (f_em.make_empty());
 
     /* adding INVARs @0 and @1 from main module */
     const expr::ExprVector& invar

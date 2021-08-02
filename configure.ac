@@ -154,10 +154,12 @@ AC_CONFIG_FILES([Makefile
                  src/cmd/Makefile
                  src/cmd/commands/Makefile
                  src/common/Makefile
+                 src/compiler/Makefile
                  src/dd/Makefile
                  src/enc/Makefile
                  src/env/Makefile
                  src/expr/Makefile
+                 src/expr/preprocessor/Makefile
                  src/expr/time/Makefile
                  src/expr/time/analyzer/Makefile
                  src/expr/time/expander/Makefile
@@ -172,9 +174,7 @@ AC_CONFIG_FILES([Makefile
                  src/symb/Makefile
                  src/model/Makefile
                  src/model/analyzer/Makefile
-                 src/model/compiler/Makefile
                  src/model/type_checker/Makefile
-                 src/model/preprocessor/Makefile
                  src/opts/Makefile
                  src/parser/Makefile
                  src/parser/grammars/Makefile

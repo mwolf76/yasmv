@@ -24,8 +24,8 @@
  *
  **/
 
-#ifndef MODEL_COMPILER_H
-#define MODEL_COMPILER_H
+#ifndef COMPILER_H
+#define COMPILER_H
 
 /**
  * Current implementation uses DDs to perform expression
@@ -60,16 +60,16 @@
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 
-#include <model/compiler/exceptions.hh>
-#include <model/compiler/typedefs.hh>
-#include <model/compiler/streamers.hh>
+#include <compiler/exceptions.hh>
+#include <compiler/typedefs.hh>
+#include <compiler/streamers.hh>
 
 #include <utils/time.hh>
 
 #include <boost/unordered_map.hpp>
 #include <boost/thread/mutex.hpp>
 
-namespace model::compiler {
+namespace compiler {
 
 class Compiler : public expr::ExprWalker {
 public:
@@ -233,8 +233,11 @@ private:
     utils::TimeVector f_time_stack;
 
     /* managers */
-    ModelMgr& f_owner;
+    model::ModelMgr& f_owner;
     enc::EncodingMgr& f_enc;
+
+    /* owned */
+    expr::preprocessor::Preprocessor f_preprocessor;
 
     /* Auto expressions and DDs */
     unsigned f_temp_auto_index;
@@ -246,6 +249,6 @@ private:
     boost::mutex f_process_mutex;
 };
 
-} // namespace model::compiler
+} // namespace compiler
 
-#endif /* MODEL_COMPILER_H */
+#endif /* COMPILER_H */

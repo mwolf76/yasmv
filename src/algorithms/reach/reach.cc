@@ -28,7 +28,7 @@
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
 
-#include <model/compiler/compiler.hh>
+#include <compiler/compiler.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -135,7 +135,7 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
         << std::endl;
 
     /* strategy threads will access this value in the main thread's stack */
-    model::compiler::CompilationUnit target_cu
+    compiler::CompilationUnit target_cu
         { compiler().process(ctx, f_target) };
 
     expr::time::Expander expander(em());
@@ -149,10 +149,10 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
             << "` ..."
             << std::endl;
 
-        model::compiler::CompilationUnit cu
+        compiler::CompilationUnit cu
             { compiler().process(ctx, expander.process(constraint)) };
 
-        f_constraint_cus.insert( std::pair<expr::Expr_ptr, model::compiler::CompilationUnit> (constraint, cu));
+        f_constraint_cus.insert( std::pair<expr::Expr_ptr, compiler::CompilationUnit> (constraint, cu));
     }
 
     /* fire up strategies */

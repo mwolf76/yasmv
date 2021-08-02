@@ -23,9 +23,9 @@
 
 #include <symb/proxy.hh>
 
-#include <model/preprocessor/preprocessor.hh>
+#include <expr/preprocessor/preprocessor.hh>
 
-namespace model {
+namespace expr::preprocessor {
 
 // void Preprocessor::traverse_param_list(ExprVector& params, const Expr_ptr expr)
 // {
@@ -95,4 +95,4 @@ namespace model {
 //     }
 // }
 
-};
+} // namespace expr::preprocessor

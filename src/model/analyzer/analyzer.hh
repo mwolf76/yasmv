@@ -27,6 +27,9 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
+#include <expr/expr_mgr.hh>
+
+#include <expr/preprocessor/preprocessor.hh>
 #include <expr/walker/walker.hh>
 
 #include <type/type.hh>
@@ -52,14 +55,14 @@ typedef enum {
 
 class Analyzer : public expr::ExprWalker {
 public:
-    Analyzer(ModelMgr& owner);
+    Analyzer();
     ~Analyzer();
 
     // walker toplevel
     void process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section);
 
-    inline ModelMgr& owner()
-    { return f_owner; }
+    inline expr::ExprMgr& em()
+    { return f_em; }
 
     // generates framing conditions, adds them in the module
     void generate_framing_conditions();
@@ -77,11 +80,12 @@ protected:
     void walk_leaf(const expr::Expr_ptr expr);
 
 private:
+    expr::ExprMgr& f_em;
+
     expr::ExprVector f_expr_stack;
     expr::ExprVector f_ctx_stack;
 
-    // managers
-    ModelMgr& f_owner;
+    expr::preprocessor::Preprocessor f_preprocessor;
 
     // the type of expr we're analyzing
     analyze_section_t f_section;

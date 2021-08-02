@@ -23,6 +23,8 @@
 
 #include <common/common.hh>
 
+#include <compiler/compiler.hh>
+
 #include <expr/expr.hh>
 #include <type/type.hh>
 
@@ -31,7 +33,7 @@
 
 #include <sat/sat.hh>
 #include <model/analyzer/analyzer.hh>
-#include <model/compiler/compiler.hh>
+
 
 #include <utils/misc.hh>
 
@@ -180,9 +182,6 @@ void Analyzer::walk_bw_xnor_postorder(const expr::Expr_ptr expr)
 
 bool Analyzer::walk_guard_preorder(const expr::Expr_ptr expr)
 {
-    expr::ExprMgr& em
-        (owner().em());
-
     if (f_section == ANALYZE_INIT)
         throw SemanticError("Guards not allowed in INITs");
 
@@ -202,7 +201,7 @@ bool Analyzer::walk_guard_preorder(const expr::Expr_ptr expr)
     expr::Expr_ptr action
         (expr->rhs());
 
-    if (! em.is_assignment(action)) {
+    if (! f_em.is_assignment(action)) {
         throw SemanticError("Guarded actions must be assignments");
     }
 
@@ -276,24 +275,21 @@ void Analyzer::walk_assignment_postorder(const expr::Expr_ptr expr)
     if (f_section == ANALYZE_DEFINE)
         throw SemanticError("Assignments not allowed in DEFINEs");
 
-    expr::ExprMgr& em
-        (owner().em());
-
     expr::Expr_ptr lhs
         (expr->lhs());
 
-    if (! em.is_lvalue(lhs))
+    if (! f_em.is_lvalue(lhs))
         throw SemanticError("Assignments require an lvalue for lhs");
 
     /* strip [] */
-    if (em.is_subscript(lhs))
+    if (f_em.is_subscript(lhs))
         lhs = lhs->lhs();
 
     /* assignment lhs *must* be an ordinary state variable */
     expr::Expr_ptr ctx
         (f_ctx_stack.back());
     expr::Expr_ptr full
-        (em.make_dot(ctx, lhs));
+        (f_em.make_dot(ctx, lhs));
 
     symb::ResolverProxy resolver;
 
@@ -400,7 +396,10 @@ bool Analyzer::walk_params_preorder(const expr::Expr_ptr expr)
     expr::Expr_ptr ctx
         (f_ctx_stack.back());
 
-    (*this)(f_owner.preprocess(expr, ctx));
+    expr::Expr_ptr preprocessed
+        { f_preprocessor.process(expr, ctx) };
+
+    (*this)(preprocessed);
 
     return false;
 }
@@ -456,15 +455,12 @@ void Analyzer::walk_instant(const expr::Expr_ptr expr)
 
 void Analyzer::walk_leaf(const expr::Expr_ptr expr)
 {
-    expr::ExprMgr& em
-        (owner().em());
-
-    if (em.is_identifier(expr)) {
+    if (f_em.is_identifier(expr)) {
 
         expr::Expr_ptr ctx
             (f_ctx_stack.back());
         expr::Expr_ptr full
-            (em.make_dot(ctx, expr));
+            (f_em.make_dot(ctx, expr));
 
         symb::ResolverProxy resolver;
 
