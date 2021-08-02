@@ -67,8 +67,9 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
 		$(top_builddir)/src/expr/printer/libprinter.la			\
 		$(top_builddir)/src/expr/nnfizer/libnnfizer.la			\
-		$(top_builddir)/src/expr/analyzer/libanalyzer.la			\
-		$(top_builddir)/src/expr/resolver/libresolver.la			\
+		$(top_builddir)/src/expr/time/libexpr_time.la			\
+		$(top_builddir)/src/expr/time/analyzer/libanalyzer.la			\
+		$(top_builddir)/src/expr/time/expander/libexpander.la			\
 		$(top_builddir)/src/type/libtype.la				\
 		$(top_builddir)/src/symb/libsymb.la				\
 		$(top_builddir)/src/utils/libutils.la				\
@@ -109,8 +110,9 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
 		$(top_builddir)/src/expr/printer/libprinter.la			\
 		$(top_builddir)/src/expr/nnfizer/libnnfizer.la			\
-		$(top_builddir)/src/expr/analyzer/libanalyzer.la			\
-		$(top_builddir)/src/expr/resolver/libresolver.la			\
+		$(top_builddir)/src/expr/time/libexpr_time.la			\
+		$(top_builddir)/src/expr/time/analyzer/libanalyzer.la			\
+		$(top_builddir)/src/expr/time/expander/libexpander.la			\
 		$(top_builddir)/src/type/libtype.la				\
 		$(top_builddir)/src/symb/libsymb.la				\
 		$(top_builddir)/src/utils/libutils.la				\

@@ -25,8 +25,8 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
-#include <expr/analyzer/analyzer.hh>
-#include <expr/resolver/resolver.hh>
+#include <expr/time/analyzer/analyzer.hh>
+#include <expr/time/expander/expander.hh>
 
 #include <model/compiler/compiler.hh>
 
@@ -138,7 +138,7 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
     model::CompilationUnit target_cu
         { compiler().process(ctx, f_target) };
 
-    expr::time::Resolver etr(em());
+    expr::time::Expander expander(em());
 
     for (auto i = f_constraints.begin(); i != f_constraints.end(); ++ i) {
         auto constraint { *i };
@@ -150,7 +150,7 @@ void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
             << std::endl;
 
         model::CompilationUnit cu
-            { compiler().process(ctx, etr.process(constraint)) };
+            { compiler().process(ctx, expander.process(constraint)) };
 
         f_constraint_cus.insert( std::pair<expr::Expr_ptr, model::CompilationUnit> (constraint, cu));
     }

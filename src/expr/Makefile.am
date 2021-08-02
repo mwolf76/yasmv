@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = analyzer resolver nnfizer printer walker
+SUBDIRS = time nnfizer printer walker
 
 AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\
@@ -10,8 +10,8 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
-PKG_HH = atom.hh exceptions.hh expr.hh expr_mgr.hh timed_expr.hh
-PKG_CC = atom.cc expr.cc timed_expr.cc expr_mgr.cc
+PKG_HH = atom.hh exceptions.hh expr.hh expr_mgr.hh
+PKG_CC = atom.cc expr.cc expr_mgr.cc
 
 # -------------------------------------------------------
 

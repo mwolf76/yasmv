@@ -24,7 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <expr/analyzer/analyzer.hh>
+#include <expr/time/analyzer/analyzer.hh>
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>

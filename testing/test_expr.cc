@@ -27,8 +27,8 @@
 #include <expr.hh>
 #include <expr_mgr.hh>
 
-#include <analyzer/analyzer.hh>
-#include <resolver/resolver.hh>
+#include <expr/time/analyzer/analyzer.hh>
+#include <expr/time/expander/expander.hh>
 
 #include <nnfizer.hh>
 #include <printer.hh>
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE(nnfizer)
                 nnfizer.process(em.make_not(em.make_implies(em.make_not(em.make_G(em.make_F(x))), em.make_not(y)))));
 }
 
-BOOST_AUTO_TEST_CASE(resolver)
+BOOST_AUTO_TEST_CASE(expander)
 {
     expr::ExprMgr& em
         (expr::ExprMgr::INSTANCE());
@@ -634,23 +634,23 @@ BOOST_AUTO_TEST_CASE(resolver)
     expr::Expr_ptr _3
         (em.make_instant(3));
 
-    expr::time::Resolver etr(em);
+    expr::time::Expander expander(em);
 
-    BOOST_CHECK(x == etr.process(x));
-    BOOST_CHECK(em.make_at(_0, x) == etr.process(em.make_at(_0, x) ));
-    BOOST_CHECK(em.make_at(_3, x) == etr.process(em.make_at(_3, x) ));
-
-    BOOST_CHECK(em.make_and(em.make_and(em.make_and(em.make_at(em.make_instant(0), x),
-                                                    em.make_at(em.make_instant(1), x)),
-                                        em.make_at(em.make_instant(2), x)),
-                            em.make_at(em.make_instant(3), x)) ==
-                etr.process(em.make_at(em.make_interval(_0, _3), x)));
+    BOOST_CHECK(x == expander.process(x));
+    BOOST_CHECK(em.make_at(_0, x) == expander.process(em.make_at(_0, x) ));
+    BOOST_CHECK(em.make_at(_3, x) == expander.process(em.make_at(_3, x) ));
 
     BOOST_CHECK(em.make_and(em.make_and(em.make_and(em.make_at(em.make_instant(0), x),
                                                     em.make_at(em.make_instant(1), x)),
                                         em.make_at(em.make_instant(2), x)),
                             em.make_at(em.make_instant(3), x)) ==
-                etr.process(em.make_at(em.make_interval(_3, _0), x)));
+                expander.process(em.make_at(em.make_interval(_0, _3), x)));
+
+    BOOST_CHECK(em.make_and(em.make_and(em.make_and(em.make_at(em.make_instant(0), x),
+                                                    em.make_at(em.make_instant(1), x)),
+                                        em.make_at(em.make_instant(2), x)),
+                            em.make_at(em.make_instant(3), x)) ==
+                expander.process(em.make_at(em.make_interval(_3, _0), x)));
 }
 
 // BOOST_AUTO_TEST_CASE(fqexpr)

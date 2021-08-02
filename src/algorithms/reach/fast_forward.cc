@@ -26,7 +26,7 @@
 #include <algorithms/reach/reach.hh>
 #include <algorithms/reach/witness.hh>
 
-#include <expr/analyzer/analyzer.hh>
+#include <expr/time/analyzer/analyzer.hh>
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>

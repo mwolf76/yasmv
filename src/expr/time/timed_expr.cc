@@ -21,7 +21,7 @@
  *
  **/
 
-#include <expr/timed_expr.hh>
+#include <expr/time/timed_expr.hh>
 
 namespace expr {
 

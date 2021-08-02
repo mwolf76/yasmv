@@ -1,9 +1,9 @@
 /**
- * @file analyzer.hh
- * @brief Expr time analyzer
+ * @file expander.hh
+ * @brief Expr time expander
  *
  * This header file contains the declarations required by the
- * Expression analyzer class.
+ * Expression expander class.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,8 +23,8 @@
  *
  **/
 
-#ifndef EXPR_TIME_ANALYZER_H
-#define EXPR_TIME_ANALYZER_H
+#ifndef EXPR_TIME_EXPANDER_H
+#define EXPR_TIME_EXPANDER_H
 
 #include <string>
 #include <expr/expr_mgr.hh>
@@ -34,24 +34,23 @@
 
 namespace expr::time {
 
-class Analyzer : public ExprWalker {
+class DoesNotApply : public ExprException {
 public:
-    Analyzer(ExprMgr& em);
-    ~Analyzer();
+    DoesNotApply(Expr_ptr expr, step_t time);
+};
+
+/* TODO: rename this to Expander. This class rewrites @a..b{phi} into
+ * @a{phi} ^ @a+1{phi} ^ ... ^ @b{phi} */
+
+class Expander : public ExprWalker {
+public:
+    Expander(ExprMgr& em);
+    ~Expander();
 
     inline ExprMgr& em()
     { return f_em; }
 
-    void process(Expr_ptr expr);
-
-    inline bool has_forward_time() const
-    { return f_has_forward_time; }
-
-    inline bool has_backward_time() const
-    { return f_has_backward_time; }
-
-    inline bool has_intervals() const
-    { return f_has_intervals; }
+    Expr_ptr process(Expr_ptr expr);
 
 protected:
     void pre_hook();
@@ -69,12 +68,10 @@ protected:
 private:
     ExprMgr& f_em;
 
-    bool f_has_forward_time;
-    bool f_has_backward_time;
-
-    bool f_has_intervals;
+    ExprVector f_expr_stack;
+    bool internal_error(const Expr_ptr expr);
 };
 
 } // namespace expr::time
 
-#endif /* EXPR_TIME_ANALYZER_H */
+#endif /* EXPR_TIME_EXPANDER_H */

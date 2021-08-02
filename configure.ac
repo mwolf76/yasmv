@@ -158,8 +158,9 @@ AC_CONFIG_FILES([Makefile
                  src/enc/Makefile
                  src/env/Makefile
                  src/expr/Makefile
-                 src/expr/analyzer/Makefile
-                 src/expr/resolver/Makefile
+                 src/expr/time/Makefile
+                 src/expr/time/analyzer/Makefile
+                 src/expr/time/expander/Makefile
                  src/expr/nnfizer/Makefile
                  src/expr/printer/Makefile
                  src/expr/walker/Makefile
