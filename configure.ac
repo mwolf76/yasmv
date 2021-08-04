@@ -183,6 +183,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/Makefile
                  src/witness/Makefile
                  src/witness/out/Makefile
+                 src/test/Makefile
                  doc/Makefile
                  yasmv.pc])
 

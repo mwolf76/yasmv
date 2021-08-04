@@ -24,14 +24,14 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
 
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
 
-#include <nnfizer.hh>
-#include <printer.hh>
+#include <expr/nnfizer/nnfizer.hh>
+#include <expr/printer/printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(expressions)

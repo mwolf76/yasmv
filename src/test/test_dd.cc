@@ -24,12 +24,12 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
-#include <type.hh>
-#include <type_mgr.hh>
+#include <type/type.hh>
+#include <type/type_mgr.hh>
 
 #include <cuddObj.hh>
 

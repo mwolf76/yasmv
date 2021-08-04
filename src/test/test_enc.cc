@@ -24,9 +24,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include <expr.hh>
-#include <expr_mgr.hh>
-#include <printer.hh>
+#include <expr/expr.hh>
+#include <expr/expr_mgr.hh>
+#include <expr/printer/printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(enc)
