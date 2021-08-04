@@ -182,9 +182,9 @@ void Compiler::post_node_hook(expr::Expr_ptr expr)
             (em.make_at(em.make_instant(time), em.make_dot(ctx, expr)));
 
         /* memoize result */
-        f_compilation_cache.insert( std::pair<expr::TimedExpr, CompilationUnit>
-            ( key, CompilationUnit( timedExpression, dv, f_inlined_operator_descriptors,
-                                    f_expr2bsd_map, f_multiway_selection_descriptors)));
+        f_compilation_cache.insert( std::pair<expr::TimedExpr, Unit>
+            (key, Unit(timedExpression, dv, f_inlined_operator_descriptors,
+                       f_expr2bsd_map, f_multiway_selection_descriptors)));
 
         return;
     }
@@ -212,7 +212,7 @@ bool Compiler::cache_miss(const expr::Expr_ptr expr)
             << ", type is " << type
             << std::endl;
 
-        CompilationUnit& unit
+        Unit& unit
             ((*eye).second);
 
         /* push cached DDs (reversed) */

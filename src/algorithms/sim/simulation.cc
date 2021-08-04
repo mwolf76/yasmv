@@ -87,7 +87,7 @@ void Simulation::pick_state(bool allsat,
                           << "` ..."
                           << std::endl;
 
-                      compiler::CompilationUnit unit
+                      compiler::Unit unit
                           (compiler().process(ctx, expr));
 
                       constraint_cus.push_back(unit);
@@ -106,7 +106,7 @@ void Simulation::pick_state(bool allsat,
     /* Additional constraints */
     std::for_each(begin(constraint_cus),
                   end(constraint_cus),
-                  [this, &engine](compiler::CompilationUnit& cu) {
+                  [this, &engine](compiler::Unit& cu) {
                       this->assert_formula(engine, 0, cu);
                   });
 
@@ -300,7 +300,7 @@ void Simulation::simulate(expr::Expr_ptr invar_condition,
             (em.make_empty());
 
         try {
-            compiler::CompilationUnit term
+            compiler::Unit term
                 (cmpl.process(ctx, invar_condition));
 
             assert_formula( engine, 1 + k, term, 0);

@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F}
       } ;
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {T}
       } ;
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
           {F, T}, {T, F}
         };
 
-        compiler::CompilationUnit cu
+        compiler::Unit cu
             (f_compiler.process(em.make_empty(),
                                 test_expr));
 
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, F}, {T, T}
       };
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       };
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {T, T}
       };
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, T}, {T, X}
       };
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {F, X}, {T, T}
       };
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         {X, X}
       } ;
 
-      compiler::CompilationUnit cu
+      compiler::Unit cu
         (f_compiler.process(em.make_empty(),
                             test_expr));
 

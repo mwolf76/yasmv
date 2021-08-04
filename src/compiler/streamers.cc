@@ -26,7 +26,7 @@
 
 #include <type/type.hh>
 
-std::ostream& operator<<(std::ostream& os, const compiler::CompilationUnit& cu)
+std::ostream& operator<<(std::ostream& os, const compiler::Unit& cu)
 {
     return os
         << cu.expr();

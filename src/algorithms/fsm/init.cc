@@ -66,7 +66,7 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
                           << "` ..."
                           << std::endl;
 
-                      compiler::CompilationUnit unit
+                      compiler::Unit unit
                           (compiler().process(ctx, expr));
 
                       f_constraint_cus.push_back(unit);
@@ -85,7 +85,7 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
     /* Additional constraints */
     std::for_each(begin(f_constraint_cus),
                   end(f_constraint_cus),
-                  [this, &engine](compiler::CompilationUnit& cu) {
+                  [this, &engine](compiler::Unit& cu) {
                       this->assert_formula(engine, 0, cu);
                   });
 

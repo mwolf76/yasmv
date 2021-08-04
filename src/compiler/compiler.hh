@@ -76,7 +76,7 @@ public:
     Compiler();
     virtual ~Compiler();
 
-    CompilationUnit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
+    Unit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
 private:
     /* Remark: the compiler does NOT support LTL ops. To enable
@@ -204,7 +204,7 @@ private:
 
     /* TimedExpr -> Compilation Unit cache */
     using CompilationMap =
-        boost::unordered_map<expr::TimedExpr, CompilationUnit,
+        boost::unordered_map<expr::TimedExpr, Unit,
                              expr::TimedExprHash, expr::TimedExprEq> ;
     CompilationMap f_compilation_cache;
 

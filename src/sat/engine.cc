@@ -104,7 +104,7 @@ status_t Engine::sat_solve_groups(const Groups& groups)
     return f_status;
 }
 
-void Engine::push(compiler::CompilationUnit cu, step_t time, group_t group)
+void Engine::push(compiler::Unit cu, step_t time, group_t group)
 {
     /**
      * 1. Pushing DDs

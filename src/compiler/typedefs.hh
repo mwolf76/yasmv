@@ -196,12 +196,12 @@ using MultiwaySelectionDescriptors =
 using Expr2BinarySelectionDescriptorsMap =
     boost::unordered_map<expr::Expr_ptr, BinarySelectionDescriptors> ;
 
-class CompilationUnit {
+class Unit {
 public:
-    CompilationUnit( expr::Expr_ptr expr, dd::DDVector& dds,
-                     InlinedOperatorDescriptors& inlined_operator_descriptors,
-                     Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
-                     MultiwaySelectionDescriptors& array_mux_descriptors)
+    Unit(expr::Expr_ptr expr, dd::DDVector& dds,
+         InlinedOperatorDescriptors& inlined_operator_descriptors,
+         Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
+         MultiwaySelectionDescriptors& array_mux_descriptors)
         : f_expr(expr)
         , f_dds(dds)
         , f_inlined_operator_descriptors( inlined_operator_descriptors )
@@ -233,10 +233,10 @@ private:
 };
 
 using CompilationUnit_ptr =
-    CompilationUnit* ;
+    Unit* ;
 
 using CompilationUnits =
-    std::vector<CompilationUnit> ;
+    std::vector<Unit> ;
 
 } // namespace compiler
 

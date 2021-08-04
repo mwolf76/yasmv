@@ -449,7 +449,7 @@ void Algorithm::assert_time_frame(sat::Engine& engine,
 
 void Algorithm::assert_formula(sat::Engine& engine,
                                step_t time,
-                               compiler::CompilationUnit& term,
+                               compiler::Unit& term,
                                sat::group_t group)
 {
     INFO
