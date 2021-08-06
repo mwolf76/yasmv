@@ -166,4 +166,4 @@ ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, 
     } while (1);
 } /* ReachabilityCounterExample::ReachabilityCounterExample() */
 
-};
+} // namespace reach

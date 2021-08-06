@@ -86,13 +86,6 @@ public:
         return f_type_checker.type(body, ctx);
     }
 
-    // delegated param binding method
-    // inline expr::Expr_ptr preprocess(expr::Expr_ptr body,
-    //                            expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
-    // {
-    //     return f_preprocessor.process(body, ctx);
-    // }
-
     Module_ptr scope(expr::Expr_ptr ctx);
 
     expr::Expr_ptr rewrite_parameter(expr::Expr_ptr expr );
@@ -132,6 +125,6 @@ private:
     bool f_analyzed;
 };
 
-};
+} // namespace model
 
 #endif /* MODEL_MGR_H */

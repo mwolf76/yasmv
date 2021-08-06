@@ -31,7 +31,7 @@
 namespace fsm {
 
 CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
-    : Algorithm(command, model)
+    : algorithm::Algorithm(command, model)
 {
     const void* instance(this);
 
@@ -107,4 +107,4 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
     }
 }
 
-};
+} // namespace fsm

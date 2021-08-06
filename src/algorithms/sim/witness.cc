@@ -180,4 +180,4 @@ SimulationWitness::SimulationWitness(model::Model& model, sat::Engine& engine, s
     }
 }
 
-};
+} // namespace sim

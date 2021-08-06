@@ -184,4 +184,4 @@ void Reachability::fast_forward_strategy(compiler::Unit& target_cu)
         << std::endl;
 } /* Reachability::fast_forward_strategy() */
 
-}
+} // namespace reach

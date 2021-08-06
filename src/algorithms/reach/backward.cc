@@ -208,4 +208,4 @@ void Reachability::backward_strategy(compiler::Unit& target_cu)
         << std::endl;
 } /* Reachability::backward_strategy() */
 
-};
+} // namespace reach

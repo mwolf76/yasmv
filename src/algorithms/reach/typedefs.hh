@@ -32,6 +32,6 @@ typedef enum {
     REACHABILITY_ERROR,
 } reachability_status_t;
 
-};
+} // namespace reach
 
 #endif /* REACHABILITY_ALGORITHM_TYPEDEFS_H */

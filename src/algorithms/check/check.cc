@@ -56,4 +56,4 @@ void LTL::process(const expr::Expr_ptr phi)
     TRACE << "Done." << std::endl;
 }
 
-};
+} // namespace check

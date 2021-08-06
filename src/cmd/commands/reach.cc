@@ -21,7 +21,6 @@
  *
  **/
 
-#include <cstdlib>
 #include <cstring>
 
 #include <expr/time/analyzer/analyzer.hh>

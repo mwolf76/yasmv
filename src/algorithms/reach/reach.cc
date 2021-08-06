@@ -46,8 +46,9 @@ Reachability::Reachability(cmd::Command& command, model::Model& model)
 
     setup();
 
-    if (! ok())
-        throw FailedSetup();
+    if (! ok()) {
+        throw algorithm::FailedSetup();
+    }
 
     DRIVEL
         << "Created Reachability @"

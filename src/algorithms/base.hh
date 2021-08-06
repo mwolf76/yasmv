@@ -48,97 +48,98 @@
 #include <utils/variant.hh>
 #include <algorithms/exceptions.hh>
 
+namespace algorithm {
+
 /* Engine-less algorithm base class. Engine instances are provided by
    strategies. */
-class Algorithm {
+    class Algorithm {
 
-public:
-    Algorithm(cmd::Command& command, model::Model& model);
-    virtual ~Algorithm();
+    public:
+        Algorithm(cmd::Command &command, model::Model &model);
 
-    /* Build encodings to perform model compilation */
-    virtual void setup();
+        virtual ~Algorithm();
 
-    inline compiler::Compiler& compiler()
-    { return f_compiler; }
+        /* Build encodings to perform model compilation */
+        virtual void setup();
 
-    inline bool has_witness() const
-    { return NULL != f_witness; }
+        inline compiler::Compiler &compiler() { return f_compiler; }
 
-    inline void set_witness(witness::Witness &witness)
-    { f_witness = &witness; }
+        inline bool has_witness() const { return NULL != f_witness; }
 
-    inline witness::Witness& witness() const
-    { assert (NULL != f_witness); return *f_witness; }
+        inline void set_witness(witness::Witness &witness) { f_witness = &witness; }
 
-    inline model::Model& model()
-    { return f_model; }
+        inline witness::Witness &witness() const {
+            assert (NULL != f_witness);
+            return *f_witness;
+        }
 
-    inline model::ModelMgr& mm()
-    { return f_mm; }
+        inline model::Model &model() { return f_model; }
 
-    inline expr::ExprMgr& em()
-    { return f_em; }
+        inline model::ModelMgr &mm() { return f_mm; }
 
-    inline type::TypeMgr& tm()
-    { return f_tm; }
+        inline expr::ExprMgr &em() { return f_em; }
 
-    inline bool ok() const
-    { return f_ok; }
+        inline type::TypeMgr &tm() { return f_tm; }
 
-    /* FSM */
-    void assert_fsm_init(sat::Engine& engine, step_t time,
-                         sat::group_t group = sat::MAINGROUP);
+        inline bool ok() const { return f_ok; }
 
-    void assert_fsm_invar(sat::Engine& engine, step_t time,
-                          sat::group_t group = sat::MAINGROUP);
+        /* FSM */
+        void assert_fsm_init(sat::Engine &engine, step_t time,
+                             sat::group_t group = sat::MAINGROUP);
 
-    void assert_fsm_trans(sat::Engine& engine, step_t time,
-                          sat::group_t group = sat::MAINGROUP);
+        void assert_fsm_invar(sat::Engine &engine, step_t time,
+                              sat::group_t group = sat::MAINGROUP);
 
-    /* Generate uniqueness constraints between j-th and k-th state */
-    void assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k,
+        void assert_fsm_trans(sat::Engine &engine, step_t time,
+                              sat::group_t group = sat::MAINGROUP);
+
+        /* Generate uniqueness constraints between j-th and k-th state */
+        void assert_fsm_uniqueness(sat::Engine &engine, step_t j, step_t k,
+                                   sat::group_t group = sat::MAINGROUP);
+
+        /* Generic formulas */
+        void assert_formula(sat::Engine &engine, step_t time, compiler::Unit &term,
+                            sat::group_t group = sat::MAINGROUP);
+
+        /* TimeFrame from a witness */
+        void assert_time_frame(sat::Engine &engine, step_t time, witness::TimeFrame &tf,
                                sat::group_t group = sat::MAINGROUP);
 
-    /* Generic formulas */
-    void assert_formula(sat::Engine& engine, step_t time, compiler::Unit& term,
-                        sat::group_t group = sat::MAINGROUP);
+    private:
+        /* internals */
+        void process_init(expr::Expr_ptr ctx, const expr::ExprVector &init);
 
-    /* TimeFrame from a witness */
-    void assert_time_frame(sat::Engine& engine, step_t time, witness::TimeFrame& tf,
-                           sat::group_t group = sat::MAINGROUP);
+        void process_invar(expr::Expr_ptr ctx, const expr::ExprVector &invar);
 
-private:
-    /* internals */
-    void process_init (expr::Expr_ptr ctx, const expr::ExprVector& init);
-    void process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar);
-    void process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans);
+        void process_trans(expr::Expr_ptr ctx, const expr::ExprVector &trans);
 
-    /* all good? */
-    bool f_ok;
+        /* all good? */
+        bool f_ok;
 
-    /* Command */
-    cmd::Command& f_command;
+        /* Command */
+        cmd::Command &f_command;
 
-    /* Model */
-    model::Model& f_model;
+        /* Model */
+        model::Model &f_model;
 
-    /* Managers */
-    model::ModelMgr& f_mm;
-    enc::EncodingMgr& f_bm;
-    expr::ExprMgr& f_em;
-    type::TypeMgr& f_tm;
+        /* Managers */
+        model::ModelMgr &f_mm;
+        enc::EncodingMgr &f_bm;
+        expr::ExprMgr &f_em;
+        type::TypeMgr &f_tm;
 
-    /* Model Compiler */
-    compiler::Compiler f_compiler;
+        /* Model Compiler */
+        compiler::Compiler f_compiler;
 
-    /* Formulas */
-    compiler::CompilationUnits f_init;
-    compiler::CompilationUnits f_invar;
-    compiler::CompilationUnits f_trans;
+        /* Formulas */
+        compiler::CompilationUnits f_init;
+        compiler::CompilationUnits f_invar;
+        compiler::CompilationUnits f_trans;
 
-    /* Witness */
-    witness::Witness_ptr f_witness;
-};
+        /* Witness */
+        witness::Witness_ptr f_witness;
+    };
+
+} // namespace algorithm
 
 #endif /* BASE_ALGORITHM_H */

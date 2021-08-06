@@ -43,7 +43,7 @@ Simulation::Simulation(cmd::Command& command, model::Model& model)
     setup();
 
     if (!ok())
-        throw FailedSetup();
+        throw algorithm::FailedSetup();
 }
 
 Simulation::~Simulation()

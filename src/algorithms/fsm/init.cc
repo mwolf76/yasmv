@@ -29,7 +29,7 @@
 namespace fsm {
 
 CheckInitConsistency::CheckInitConsistency(cmd::Command& command, model::Model& model)
-    : Algorithm(command, model)
+    : algorithm::Algorithm(command, model)
 {
     const void* instance(this);
 
@@ -103,4 +103,4 @@ void CheckInitConsistency::process(expr::ExprVector constraints)
     }
 }
 
-};
+} // namespace fsm

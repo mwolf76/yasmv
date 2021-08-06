@@ -21,9 +21,6 @@
  *
  **/
 
-#include <cstdlib>
-#include <cstring>
-
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/check.hh>
 

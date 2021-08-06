@@ -42,7 +42,7 @@ typedef enum {
     FSM_CONSISTENCY_UNDECIDED
 } fsm_consistency_t;
 
-class CheckInitConsistency : public Algorithm {
+class CheckInitConsistency : public algorithm::Algorithm {
 
 public:
     CheckInitConsistency(cmd::Command& command, model::Model& model);
@@ -64,7 +64,7 @@ private:
     fsm_consistency_t f_status;
 };
 
-class CheckTransConsistency : public Algorithm {
+class CheckTransConsistency : public algorithm::Algorithm {
 
 public:
     CheckTransConsistency(cmd::Command& command, model::Model& model);
@@ -86,6 +86,6 @@ private:
     fsm_consistency_t f_status;
 };
 
-};
+} // namespace fsm
 
 #endif /* FSM_ALGORITHM_H */

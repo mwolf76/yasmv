@@ -43,7 +43,7 @@ typedef enum {
     LTL_ERROR,
 } ltl_status_t;
 
-class LTL : public Algorithm {
+class LTL : public algorithm::Algorithm {
 
 public:
     LTL(cmd::Command& command, model::Model& model);
@@ -68,6 +68,6 @@ public:
                       sat::Engine& engine, unsigned k);
 };
 
-};
+} // namespace check
 
 #endif /* LTL_ALGORITHM_H */

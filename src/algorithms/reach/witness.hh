@@ -42,6 +42,6 @@ public:
                                unsigned k, bool reversed = false);
 };
 
-};
+} // namespace reach
 
 #endif /* REACHABILITY_ALGORITHM_WITNESS_H */

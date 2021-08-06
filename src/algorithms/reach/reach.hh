@@ -33,7 +33,7 @@
 
 namespace reach {
 
-class Reachability : public Algorithm {
+class Reachability : public algorithm::Algorithm {
 
 public:
     Reachability(cmd::Command& command, model::Model& model);
