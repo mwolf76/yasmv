@@ -42,7 +42,7 @@ typedef enum {
     FSM_CONSISTENCY_UNDECIDED
 } fsm_consistency_t;
 
-class CheckInitConsistency : public algorithm::Algorithm {
+class CheckInitConsistency : public algorithms::Algorithm {
 
 public:
     CheckInitConsistency(cmd::Command& command, model::Model& model);
@@ -64,7 +64,7 @@ private:
     fsm_consistency_t f_status;
 };
 
-class CheckTransConsistency : public algorithm::Algorithm {
+class CheckTransConsistency : public algorithms::Algorithm {
 
 public:
     CheckTransConsistency(cmd::Command& command, model::Model& model);

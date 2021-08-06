@@ -44,7 +44,7 @@ typedef enum {
     SIMULATION_HALTED,
 } simulation_status_t;
 
-class Simulation : public algorithm::Algorithm {
+class Simulation : public algorithms::Algorithm {
 
 public:
     Simulation(cmd::Command& command, model::Model& model);

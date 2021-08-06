@@ -31,7 +31,7 @@
 namespace fsm {
 
 CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
-    : algorithm::Algorithm(command, model)
+    : algorithms::Algorithm(command, model)
 {
     const void* instance(this);
 

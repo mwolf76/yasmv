@@ -32,7 +32,7 @@
 
 #include <utils/misc.hh>
 
-namespace algorithm {
+namespace algorithms {
 
     Algorithm::Algorithm(cmd::Command &command, model::Model &model)
             : f_command(command), f_model(model), f_mm(model::ModelMgr::INSTANCE()), f_bm(enc::EncodingMgr::INSTANCE()),

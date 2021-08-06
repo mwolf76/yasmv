@@ -48,7 +48,7 @@
 #include <utils/variant.hh>
 #include <algorithms/exceptions.hh>
 
-namespace algorithm {
+namespace algorithms {
 
 /* Engine-less algorithm base class. Engine instances are provided by
    strategies. */

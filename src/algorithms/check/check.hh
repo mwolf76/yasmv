@@ -43,7 +43,7 @@ typedef enum {
     LTL_ERROR,
 } ltl_status_t;
 
-class LTL : public algorithm::Algorithm {
+class LTL : public algorithms::Algorithm {
 
 public:
     LTL(cmd::Command& command, model::Model& model);

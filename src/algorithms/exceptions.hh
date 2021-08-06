@@ -28,7 +28,7 @@
 #ifndef BASE_ALGORITHM_EXCEPTIONS_H
 #define BASE_ALGORITHM_EXCEPTIONS_H
 
-namespace algorithm {
+namespace algorithms {
 
 /** Exception classes */
     class AlgorithmException : public Exception {
