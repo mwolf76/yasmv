@@ -32,8 +32,7 @@ Check::Check(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
-    setup();
-    DRIVEL
+    TRACE
         << "Created Check @"
         << instance
         << std::endl;
@@ -42,7 +41,7 @@ Check::Check(cmd::Command& command, model::Model& model)
 Check::~Check()
 {
     const void* instance(this);
-    DRIVEL
+    TRACE
         << "Destroyed Check @"
         << instance
         << std::endl;

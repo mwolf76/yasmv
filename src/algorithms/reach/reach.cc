@@ -41,16 +41,8 @@ typedef std::vector<thread_ptr> thread_ptrs;
 Reachability::Reachability(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
-    const void* instance
-        (this);
-
-    setup();
-
-    if (! ok()) {
-        throw algorithms::FailedSetup();
-    }
-
-    DRIVEL
+    const void* instance(this);
+    TRACE
         << "Created Reachability @"
         << instance
         << std::endl ;
@@ -58,10 +50,8 @@ Reachability::Reachability(cmd::Command& command, model::Model& model)
 
 Reachability::~Reachability()
 {
-    const void *instance
-        (this);
-
-    DRIVEL
+    const void* instance(this);
+    TRACE
         << "Destroyed Reachability @"
         << instance
         << std::endl ;

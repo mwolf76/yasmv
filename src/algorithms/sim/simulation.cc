@@ -40,16 +40,23 @@ static const char *simulation_trace_prfx = "sim_";
 Simulation::Simulation(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
-    setup();
-
-    if (!ok())
-        throw algorithms::FailedSetup();
+    const void* instance(this);
+    TRACE
+        << "Created Simulation @"
+        << instance
+        << std::endl;
 }
 
 Simulation::~Simulation()
-{}
+{
+    const void* instance(this);
+    TRACE
+        << "Destroyed Simulation @"
+        << instance
+        << std::endl;
+}
 
-void Simulation::pick_state(bool allsat,
+void Simulation::pick_state(bool all_sat,
                             value_t limit,
                             expr::ExprVector constraints)
 {
@@ -62,7 +69,7 @@ void Simulation::pick_state(bool allsat,
     witness::WitnessMgr& wm
         (witness::WitnessMgr::INSTANCE());
 
-    int k = ! allsat
+    int k = ! all_sat
         ? 1
         : limit;
 
@@ -77,10 +84,10 @@ void Simulation::pick_state(bool allsat,
     expr::Expr_ptr ctx { em.make_empty() };
 
     compiler::CompilationUnits constraint_cus;
-    unsigned nconstraints { 0 };
+    unsigned no_constraints {0 };
     std::for_each(begin(constraints),
                   end(constraints),
-                  [this, ctx, &nconstraints, &constraint_cus](expr::Expr_ptr expr) {
+                  [this, ctx, &no_constraints, &constraint_cus](expr::Expr_ptr expr) {
                       INFO
                           << "Compiling constraint `"
                           << expr
@@ -91,11 +98,11 @@ void Simulation::pick_state(bool allsat,
                           (compiler().process(ctx, expr));
 
                       constraint_cus.push_back(unit);
-                      ++ nconstraints;
+                      ++ no_constraints;
                   });
 
     INFO
-        << nconstraints
+        << no_constraints
         << " constraints found."
         << std::endl;
 
@@ -112,7 +119,7 @@ void Simulation::pick_state(bool allsat,
 
     while ( k -- ) {
 
-        if (allsat) {
+        if (all_sat) {
 
             /* skip first cycle */
             if (first) {
@@ -192,7 +199,7 @@ void Simulation::pick_state(bool allsat,
                 /* add exclusion clause to SAT instance */
                 engine.add_clause(exclusion);
             }
-        } /* if (allsat) */
+        } /* if (all_sat) */
 
         witness::Witness_ptr w;
         if (sat::status_t::STATUS_SAT == engine.solve()) {

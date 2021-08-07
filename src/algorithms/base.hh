@@ -59,9 +59,6 @@ namespace algorithms {
 
         virtual ~Algorithm();
 
-        /* Build encodings to perform model compilation */
-        void setup();
-
         inline compiler::Compiler &compiler() { return f_compiler; }
 
         inline bool has_witness() const { return NULL != f_witness; }

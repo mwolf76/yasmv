@@ -50,7 +50,7 @@ public:
     Simulation(cmd::Command& command, model::Model& model);
     ~Simulation();
 
-    void pick_state(bool allsat,
+    void pick_state(bool all_sat,
                     value_t limit,
                     expr::ExprVector constraints);
 
@@ -66,7 +66,7 @@ public:
 private:
     /* None of 'em, one of 'em, not both. */
     expr::Expr_ptr f_halt_cond;
-    expr::Expr_ptr f_nsteps;
+    expr::Expr_ptr f_no_steps;
 
     expr::ExprVector f_constraints;
 

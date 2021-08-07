@@ -32,9 +32,7 @@ CheckInitConsistency::CheckInitConsistency(cmd::Command& command, model::Model& 
     : algorithms::Algorithm(command, model)
 {
     const void* instance(this);
-
-    setup();
-    DRIVEL
+    TRACE
         << "Created CheckInitConsistency @"
         << instance
         << std::endl;
@@ -45,7 +43,7 @@ CheckInitConsistency::CheckInitConsistency(cmd::Command& command, model::Model& 
 CheckInitConsistency::~CheckInitConsistency()
 {
     const void* instance(this);
-    DRIVEL
+    TRACE
         << "Destroyed CheckInitConsistency @"
         << instance
         << std::endl;

@@ -43,12 +43,7 @@ namespace algorithms {
         , f_em(expr::ExprMgr::INSTANCE())
         , f_tm(type::TypeMgr::INSTANCE())
         , f_witness(NULL)
-    {}
-
-    Algorithm::~Algorithm()
-    {}
-
-    void Algorithm::setup() {
+    {
         f_ok = true;
 
         /* Force mgr to exist */
@@ -63,9 +58,6 @@ namespace algorithms {
 
         env::Environment &env
             (env::Environment::INSTANCE());
-
-        model::Model &model
-            (f_model);
 
         model::Module &main_module
             (model.main_module());
@@ -145,10 +137,16 @@ namespace algorithms {
             (env.extra_trans());
         process_trans(NULL, extra_trans);
 
+        if (!ok())
+            throw FailedSetup();
+
         TRACE
             << "Base setup completed"
             << std::endl;
     }
+
+    Algorithm::~Algorithm()
+    {}
 
     void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector &exprs) {
         compiler::Compiler &cmpl

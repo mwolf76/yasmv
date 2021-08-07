@@ -34,9 +34,7 @@ CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model
     : algorithms::Algorithm(command, model)
 {
     const void* instance(this);
-
-    setup();
-    DRIVEL
+    TRACE
         << "Created CheckTransConsistency @"
         << instance
         << std::endl;
@@ -47,7 +45,7 @@ CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model
 CheckTransConsistency::~CheckTransConsistency()
 {
     const void* instance(this);
-    DRIVEL
+    TRACE
         << "Destroyed CheckTransConsistency @"
         << instance
         << std::endl;
@@ -76,7 +74,7 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
                   });
 
     INFO
-            << no_constraints
+        << no_constraints
         << " additional constraints found."
         << std::endl;
 
