@@ -295,8 +295,8 @@ void Compiler::build_encodings(expr::Expr_ptr ctx, expr::Expr_ptr body)
         << body
         << std::endl;
 
-    assert (READY == f_status);
     ++ f_status;
+    assert (EStatus::ENCODING == f_status);
 
     clear_internals();
     f_ctx_stack.push_back(ctx);
@@ -314,8 +314,8 @@ void Compiler::compile(expr::Expr_ptr ctx, expr::Expr_ptr body)
         << body
         << std::endl;
 
-    assert (ENCODING == f_status);
     ++ f_status;
+    assert (EStatus::COMPILING == f_status);
 
     clear_internals();
     f_ctx_stack.push_back(ctx);
@@ -333,8 +333,8 @@ void Compiler::check_internals(expr::Expr_ptr ctx, expr::Expr_ptr body)
         << body
         << std::endl;
 
-    assert (COMPILING == f_status);
     ++ f_status;
+    assert (EStatus::CHECKING == f_status);
 
     /* Exactly one 0-1 ADD expected here */
     ADD res { f_add_stack.back() };
@@ -360,8 +360,8 @@ void Compiler::activate_ite_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body)
         << body
         << std::endl;
 
-   assert (CHECKING == f_status);
     ++ f_status;
+    assert (EStatus::ACTIVATING_ITE_MUXES == f_status);
 
     /* ITE MUXes */
     for (Expr2BinarySelectionDescriptorsMap::const_iterator i = f_expr2bsd_map.begin();
@@ -397,8 +397,8 @@ void Compiler::activate_array_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body)
         << body
         << std::endl;
 
-    assert (ACTIVATING_ITE_MUXES == f_status);
     ++ f_status;
+    assert (EStatus::ACTIVATING_ARRAY_MUXES == f_status);
 
     /* Array MUXes */
     MultiwaySelectionDescriptors::const_iterator i;

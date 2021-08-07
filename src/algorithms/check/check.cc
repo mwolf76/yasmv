@@ -28,29 +28,29 @@
 
 namespace check {
 
-LTL::LTL(cmd::Command& command, model::Model& model)
+Check::Check(cmd::Command& command, model::Model& model)
     : Algorithm(command, model)
 {
     const void* instance(this);
     setup();
     DRIVEL
-        << "Created LTL @"
+        << "Created Check @"
         << instance
         << std::endl;
 }
 
-LTL::~LTL()
+Check::~Check()
 {
     const void* instance(this);
     DRIVEL
-        << "Destroyed LTL @"
+        << "Destroyed Check @"
         << instance
         << std::endl;
 }
 
-void LTL::process(const expr::Expr_ptr phi)
+void Check::process(const expr::Expr_ptr phi)
 {
-    set_status( LTL_UNKNOWN );
+    set_status(CHECK_UNKNOWN );
     assert(false); // XXX: TODO
 
     TRACE << "Done." << std::endl;

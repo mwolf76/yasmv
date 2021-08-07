@@ -1,6 +1,6 @@
 /**
  * @file bmc.hh
- * @brief SAT-based SBMC Algorithm for LTL properties checking
+ * @brief SAT-based SBMC algorithm for LTL properties checking
  *
  * This header file contains the declarations required to implement
  * the LTL SAT-based SBMC model checking algorithm.
@@ -24,8 +24,8 @@
  *
  **/
 
-#ifndef LTL_ALGORITHM_H
-#define LTL_ALGORITHM_H
+#ifndef CHECK_ALGORITHM_H
+#define CHECK_ALGORITHM_H
 
 #include <cmd/command.hh>
 
@@ -37,17 +37,17 @@
 namespace check {
 
 typedef enum {
-    LTL_FALSE,
-    LTL_TRUE,
-    LTL_UNKNOWN,
-    LTL_ERROR,
+    CHECK_FALSE,
+    CHECK_TRUE,
+    CHECK_UNKNOWN,
+    CHECK_ERROR,
 } ltl_status_t;
 
-class LTL : public algorithms::Algorithm {
+class Check : public algorithms::Algorithm {
 
 public:
-    LTL(cmd::Command& command, model::Model& model);
-    ~LTL();
+    Check(cmd::Command& command, model::Model& model);
+    ~Check();
 
     void process(const expr::Expr_ptr phi);
 
@@ -62,12 +62,12 @@ private:
 };
 
 /* Specialized for LTL CEX */
-class LTLCounterExample : public witness::Witness {
+class CheckCounterExample : public witness::Witness {
 public:
-    LTLCounterExample(expr::Expr_ptr property, model::Model& model,
-                      sat::Engine& engine, unsigned k);
+    CheckCounterExample(expr::Expr_ptr property, model::Model& model,
+                        sat::Engine& engine, unsigned k);
 };
 
 } // namespace check
 
-#endif /* LTL_ALGORITHM_H */
+#endif /* CHECK_ALGORITHM_H */

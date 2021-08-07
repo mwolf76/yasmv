@@ -22,13 +22,12 @@
  *
  **/
 
-#include <utility>
 #include <compiler.hh>
 
 namespace compiler {
 
-ECompilerStatus& operator++(ECompilerStatus& status) {
-    return status = static_cast<ECompilerStatus> (1 + static_cast <int> (status));
+EStatus& operator++(EStatus& status) {
+    return status = static_cast<EStatus> (1 + static_cast <int> (status));
 }
 
 Unit Compiler::process(expr::Expr_ptr ctx, expr::Expr_ptr body)

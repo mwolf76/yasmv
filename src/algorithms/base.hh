@@ -60,7 +60,7 @@ namespace algorithms {
         virtual ~Algorithm();
 
         /* Build encodings to perform model compilation */
-        virtual void setup();
+        void setup();
 
         inline compiler::Compiler &compiler() { return f_compiler; }
 

@@ -42,7 +42,7 @@ using BinarySelectionUnionFindMap =
     boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr,
                          utils::PtrHash, utils::PtrEq> ;
 
-enum ECompilerStatus {
+enum EStatus {
     READY,
     ENCODING,
     COMPILING,
@@ -52,7 +52,7 @@ enum ECompilerStatus {
 };
 
 /* decl only */
-ECompilerStatus& operator++(ECompilerStatus& status);
+EStatus& operator++(EStatus& status);
 
 /* <symb, is_signed?, width> */
 using InlinedOperatorSignature =
@@ -198,7 +198,7 @@ using Expr2BinarySelectionDescriptorsMap =
 
 class Unit {
 public:
-    Unit(expr::Expr_ptr expr, dd::DDVector& dds,
+     Unit(expr::Expr_ptr expr, dd::DDVector& dds,
          InlinedOperatorDescriptors& inlined_operator_descriptors,
          Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
          MultiwaySelectionDescriptors& array_mux_descriptors)

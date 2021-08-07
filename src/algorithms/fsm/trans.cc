@@ -58,10 +58,10 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
     sat::Engine engine { "Transitional" };
     expr::Expr_ptr ctx { em().make_empty() };
 
-    unsigned nconstraints { 0 };
+    unsigned no_constraints { 0 };
     std::for_each(begin(constraints),
                   end(constraints),
-                  [this, ctx, &nconstraints](expr::Expr_ptr expr) {
+                  [this, ctx, &no_constraints](expr::Expr_ptr expr) {
                       INFO
                           << "Compiling constraint `"
                           << expr
@@ -72,11 +72,11 @@ void CheckTransConsistency::process(expr::ExprVector constraints)
                           (compiler().process(ctx, expr));
 
                       f_constraint_cus.push_back(unit);
-                      ++ nconstraints;
+                      ++ no_constraints;
                   });
 
     INFO
-        << nconstraints
+            << no_constraints
         << " additional constraints found."
         << std::endl;
 

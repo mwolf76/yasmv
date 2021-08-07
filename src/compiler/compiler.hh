@@ -243,7 +243,7 @@ private:
     unsigned f_temp_auto_index;
 
     /* Compiler status (see above) */
-    ECompilerStatus f_status;
+    EStatus f_status;
 
     /* synchronization */
     boost::mutex f_process_mutex;
