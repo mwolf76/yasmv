@@ -25,294 +25,242 @@
 
 namespace compiler {
 
-bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+    bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        /* AND, OR, XOR, XNOR, IFF, IMPLIES */
+        if (em.is_binary_logical(expr)) {
+            return (f_owner.type(expr->lhs(), ctx)->is_boolean() &&
+                    f_owner.type(expr->rhs(), ctx)->is_boolean());
+        }
 
-    /* AND, OR, XOR, XNOR, IFF, IMPLIES */
-    if (em.is_binary_logical(expr))
-
-        return (f_owner.type(expr->lhs(), ctx) -> is_boolean() &&
-                f_owner.type(expr->rhs(), ctx) -> is_boolean());
-
-    return false;
-}
-
-bool Compiler::is_binary_enumerative(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
-       IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
-    if ((em.is_binary_arithmetical(expr)) ||
-        (em.is_binary_relational(expr)))
-
-        return (f_owner.type(expr->lhs(), ctx) -> is_enum() &&
-                f_owner.type(expr->rhs(), ctx) -> is_enum() );
-
-    return false;
-}
-
-bool Compiler::is_binary_algebraic(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    if ((em.is_binary_logical(expr)) ||
-        (em.is_binary_arithmetical(expr)) ||
-        (em.is_binary_relational(expr)))
-
-        return
-            f_owner.type(expr->rhs(), ctx) -> is_algebraic() &&
-            f_owner.type(expr->lhs(), ctx) -> is_algebraic();
-
-    return false;
-}
-
-bool Compiler::is_unary_boolean(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    /*  NOT, () ? */
-    if (em.is_unary_logical(expr))
-        return f_owner.type(expr->lhs(), ctx) -> is_boolean();
-
-    return false;
-}
-
-bool Compiler::is_unary_enumerative(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    /* unary : ? (), : (), NEG, NOT(bw) */
-    if (em.is_unary_arithmetical(expr))
-        return (f_owner.type(expr->lhs(), ctx) -> is_enum());
-
-    return false;
-}
-
-/* checks lhs is array of boolean, and rhs is algebraic */
-bool Compiler::is_subscript_boolean(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    if (! em.is_subscript(expr))
         return false;
-
-    type::Type_ptr lhs_type
-        (f_owner.type(expr->lhs(), ctx));
-
-    if (lhs_type -> is_array()) {
-        type::ArrayType_ptr array_type
-            (lhs_type -> as_array());
-        type::ScalarType_ptr of_type
-            (array_type -> of());
-
-        if (! of_type -> is_boolean())
-            return false;
     }
 
-    type::Type_ptr rhs_type
-        (f_owner.type(expr->rhs(), ctx));
+    bool Compiler::is_binary_enumerative(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    if (! rhs_type -> is_algebraic())
+        /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
+         *  IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
+        if (em.is_binary_arithmetical(expr) ||
+            em.is_binary_relational(expr)) {
+            return (f_owner.type(expr->lhs(), ctx)->is_enum() &&
+                    f_owner.type(expr->rhs(), ctx)->is_enum());
+        }
+
         return false;
-
-    return true;
-}
-
-/* checks lhs is array of boolean, and rhs is algebraic */
-bool Compiler::is_subscript_enumerative(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    if (! em.is_subscript(expr))
-        return false;
-
-    type::Type_ptr lhs_type
-        (f_owner.type(expr->lhs(), ctx));
-
-    if (lhs_type -> is_array()) {
-
-        type::ArrayType_ptr array_type
-            (lhs_type -> as_array());
-
-        type::ScalarType_ptr of_type
-            (array_type -> of());
-
-        if (! of_type -> is_enum())
-            return false;
     }
 
-    type::Type_ptr rhs_type
-        (f_owner.type(expr->rhs(), ctx));
+    bool Compiler::is_binary_algebraic(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    if (! rhs_type -> is_algebraic())
+        if (em.is_binary_logical(expr) ||
+            em.is_binary_arithmetical(expr) ||
+            em.is_binary_relational(expr)) {
+            return f_owner.type(expr->rhs(), ctx)->is_algebraic() &&
+                   f_owner.type(expr->lhs(), ctx)->is_algebraic();
+        }
+
         return false;
-
-    return true;
-}
-
-/* checks lhs is array of algebraics, and rhs is algebraic */
-bool Compiler::is_subscript_algebraic(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    if (! em.is_subscript(expr))
-        return false;
-
-    type::Type_ptr lhs_type
-        (f_owner.type(expr->lhs(), ctx));
-
-    if (lhs_type -> is_array()) {
-
-        type::ArrayType_ptr array_type
-            (lhs_type -> as_array());
-
-        type::ScalarType_ptr of_type
-            (array_type -> of());
-
-        if (! of_type -> is_algebraic())
-            return false;
     }
 
-    type::Type_ptr rhs_type
-        (f_owner.type(expr->rhs(), ctx));
+    bool Compiler::is_unary_boolean(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    if (! rhs_type -> is_algebraic())
+        /*  NOT, () ? */
+        if (em.is_unary_logical(expr)) {
+            return f_owner.type(expr->lhs(), ctx)->is_boolean();
+        }
+
         return false;
+    }
 
-    return true;
-}
+    bool Compiler::is_unary_enumerative(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-bool Compiler::is_unary_algebraic(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+        /* unary : ? (), : (), NEG, NOT(bw) */
+        if (em.is_unary_arithmetical(expr)) {
+            return (f_owner.type(expr->lhs(), ctx)->is_enum());
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        return false;
+    }
 
-    if ((em.is_unary_logical(expr)) ||
-        (em.is_unary_arithmetical(expr)))
+    /* checks lhs is array of boolean, and rhs is algebraic */
+    bool Compiler::is_subscript_boolean(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        return f_owner.type(expr->lhs(), ctx) -> is_algebraic();
+        if (!em.is_subscript(expr)) {
+            return false;
+        }
 
-    return false;
-}
+        type::Type_ptr lhs_type { f_owner.type(expr->lhs(), ctx) };
+        if (lhs_type->is_array()) {
+            type::ArrayType_ptr array_type { lhs_type->as_array() };
+            type::ScalarType_ptr of_type { array_type->of() };
 
-/* same as is_binary_boolean, checks only lhs and rhs */
-bool Compiler::is_ite_boolean(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+            if (!of_type->is_boolean()) {
+                return false;
+            }
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        type::Type_ptr rhs_type { f_owner.type(expr->rhs(), ctx) };
+        if (!rhs_type->is_algebraic()) {
+            return false;
+        }
 
-    /* ITE */
-    if (em.is_ite(expr))
-        return (f_owner.type(expr->lhs(), ctx) -> is_boolean() &&
-                f_owner.type(expr->rhs(), ctx) -> is_boolean()) ;
+        return true;
+    }
 
-    return false;
-}
+    /* checks lhs is array of boolean, and rhs is algebraic */
+    bool Compiler::is_subscript_enumerative(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-/* same as  is_binary_enumerative, checks only lhs and rhs */
-bool Compiler::is_ite_enumerative(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+        if (!em.is_subscript(expr)) {
+            return false;
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        type::Type_ptr lhs_type { f_owner.type(expr->lhs(), ctx) };
+        if (lhs_type->is_array()) {
 
-    /* ITE (bw) */
-    if (em.is_ite(expr))
-        return (f_owner.type(expr->lhs(), ctx) -> is_enum() &&
-                f_owner.type(expr->rhs(), ctx) -> is_enum()) ;
+            type::ArrayType_ptr array_type { lhs_type->as_array() };
+            type::ScalarType_ptr of_type { array_type->of() };
 
-    return false;
-}
+            if (!of_type->is_enum()) {
+                return false;
+            }
+        }
 
-/* similar to is_binary_algebraic, checks only lhs and rhs */
-bool Compiler::is_ite_algebraic(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+        type::Type_ptr rhs_type { f_owner.type(expr->rhs(), ctx) };
+        if (!rhs_type->is_algebraic()) {
+            return false;
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        return true;
+    }
 
-    if (em.is_ite(expr))
-        return
-            f_owner.type(expr-> rhs(), ctx) -> is_algebraic() &&
-            f_owner.type(expr-> lhs(), ctx) -> is_algebraic();
+    /* checks lhs is array of algebraics, and rhs is algebraic */
+    bool Compiler::is_subscript_algebraic(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    return false;
-}
+        if (!em.is_subscript(expr)) {
+            return false;
+        }
 
-bool Compiler::is_binary_array(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+        type::Type_ptr lhs_type { f_owner.type(expr->lhs(), ctx) };
+        if (lhs_type->is_array()) {
+            type::ArrayType_ptr array_type { lhs_type->as_array() };
+            type::ScalarType_ptr of_type { array_type->of() };
+            if (!of_type->is_algebraic()) {
+                return false;
+            }
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        type::Type_ptr rhs_type { f_owner.type(expr->rhs(), ctx) };
+        if (!rhs_type->is_algebraic()) {
+            return false;
+        }
 
-    if (em.is_binary_equality(expr))
-        return
-            f_owner.type(expr->rhs(), ctx) -> is_array() &&
-            f_owner.type(expr->lhs(), ctx) -> is_array();
+        return true;
+    }
 
-    return false;
-}
+    bool Compiler::is_unary_algebraic(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-bool Compiler::is_ite_array(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
+        if ((em.is_unary_logical(expr)) ||
+            (em.is_unary_arithmetical(expr))) {
+            return f_owner.type(expr->lhs(), ctx)->is_algebraic();
+        }
 
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
+        return false;
+    }
 
-    if (em.is_ite(expr))
-        return
-            f_owner.type(expr->rhs(), ctx) -> is_array() &&
-            f_owner.type(expr->lhs(), ctx) -> is_array();
+    /* same as is_binary_boolean, checks only lhs and rhs */
+    bool Compiler::is_ite_boolean(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-    return false;
-}
+        /* ITE */
+        if (em.is_ite(expr)) {
+            return (f_owner.type(expr->lhs(), ctx)->is_boolean() &&
+                    f_owner.type(expr->rhs(), ctx)->is_boolean());
+        }
+
+        return false;
+    }
+
+    /* same as  is_binary_enumerative, checks only lhs and rhs */
+    bool Compiler::is_ite_enumerative(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+
+        /* ITE (bw) */
+        if (em.is_ite(expr)) {
+            return (f_owner.type(expr->lhs(), ctx)->is_enum() &&
+                    f_owner.type(expr->rhs(), ctx)->is_enum());
+        }
+
+        return false;
+    }
+
+    /* similar to is_binary_algebraic, checks only lhs and rhs */
+    bool Compiler::is_ite_algebraic(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+
+        if (em.is_ite(expr)) {
+            return f_owner.type(expr->rhs(), ctx)->is_algebraic() &&
+                   f_owner.type(expr->lhs(), ctx)->is_algebraic();
+        }
+
+        return false;
+    }
+
+    bool Compiler::is_binary_array(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+
+        if (em.is_binary_equality(expr)) {
+            return f_owner.type(expr->rhs(), ctx)->is_array() &&
+                   f_owner.type(expr->lhs(), ctx)->is_array();
+        }
+
+        return false;
+    }
+
+    bool Compiler::is_ite_array(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+
+        if (em.is_ite(expr)) {
+            return f_owner.type(expr->rhs(), ctx)->is_array() &&
+                   f_owner.type(expr->lhs(), ctx)->is_array();
+        }
+
+        return false;
+    }
 
 } // namespace compiler
