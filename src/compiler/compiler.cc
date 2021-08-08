@@ -35,6 +35,7 @@ namespace compiler {
     {
         /* the compiler can be shared among multiple strategies running on multiple threads */
         boost::mutex::scoped_lock lock { f_process_mutex };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         f_status = READY;
 
@@ -48,14 +49,12 @@ namespace compiler {
         check_internals(ctx, body);
 
         /* Pass 4: ITE MUXes, for each descriptor, we need to conjunct `! AND (
-       prev_conditions ) AND cnd <-> aux` to the original formula. */
+           prev_conditions ) AND cnd <-> aux` to the original formula. */
         activate_ite_muxes(ctx, body);
 
         /* Pass 5: Array MUXes, for each descriptor, push a conjunct `cnd_i <-> act_i, i in
-       [0..n_elems[` to the original formula. */
+           [0..n_elems[` to the original formula. */
         activate_array_muxes(ctx, body);
-
-        expr::ExprMgr& em(expr::ExprMgr::INSTANCE());
 
         return Unit(em.make_dot(ctx, body), f_add_stack, f_inlined_operator_descriptors,
                     f_expr2bsd_map, f_multiway_selection_descriptors);

@@ -79,10 +79,11 @@ namespace compiler {
         Unit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
     private:
-        /* Remark: the compiler does NOT support LTL ops. To enable
-       verification of temporal properties, the LTL operators needs to
-       be rewritten by the checking algorithm before feeding the
-       formula into the compiler. */
+        /**
+          The compiler does NOT support LTL ops. To enable
+          verification of temporal properties, the LTL operators needs to
+          be rewritten by the checking algorithm before feeding the
+          formula into the compiler. */
         LTL_STUBS;
 
         /* basic expr operators support */
@@ -203,8 +204,8 @@ namespace compiler {
         /* -- data -------------------------------------------------------------- */
 
         /* TimedExpr -> Compilation Unit cache */
-        using CompilationMap =
-            boost::unordered_map<expr::TimedExpr, Unit, expr::TimedExprHash, expr::TimedExprEq>;
+        using CompilationMap = boost::unordered_map<expr::TimedExpr, Unit,
+                                                    expr::TimedExprHash, expr::TimedExprEq>;
         CompilationMap f_compilation_cache;
 
         /* microcode descriptors */
