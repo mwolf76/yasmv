@@ -38,205 +38,259 @@
 
 namespace compiler {
 
-using BinarySelectionUnionFindMap =
-    boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr,
-                         utils::PtrHash, utils::PtrEq> ;
+    using BinarySelectionUnionFindMap =
+        boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq>;
 
-enum EStatus {
-    READY,
-    ENCODING,
-    COMPILING,
-    CHECKING,
-    ACTIVATING_ITE_MUXES,
-    ACTIVATING_ARRAY_MUXES
-};
+    enum EStatus {
+        READY,
+        ENCODING,
+        COMPILING,
+        CHECKING,
+        ACTIVATING_ITE_MUXES,
+        ACTIVATING_ARRAY_MUXES
+    };
 
-/* decl only */
-EStatus& operator++(EStatus& status);
+    /* decl only */
+    EStatus& operator++(EStatus& status);
 
-/* <symb, is_signed?, width> */
-using InlinedOperatorSignature =
-    boost::tuple<bool, expr::ExprType, unsigned>;
+    /* <symbol, is_signed?, width> */
+    using InlinedOperatorSignature =
+        boost::tuple<bool, expr::ExprType, unsigned>;
 
-inline const InlinedOperatorSignature make_ios (bool is_signed, expr::ExprType exprType, unsigned width)
-{
-    return boost::make_tuple <bool, expr::ExprType, unsigned>
-        (is_signed, exprType, width);
-}
+    inline const InlinedOperatorSignature make_ios(bool is_signed, expr::ExprType exprType, unsigned width)
+    {
+        return boost::make_tuple<bool, expr::ExprType, unsigned>(is_signed, exprType, width);
+    }
 
-/* ios helper getters */
-inline bool ios_issigned( const InlinedOperatorSignature& ios )
-{ return ios.get<0>(); }
-inline expr::ExprType ios_optype( const InlinedOperatorSignature& ios )
-{ return ios.get<1>(); }
-inline unsigned ios_width( const InlinedOperatorSignature& ios )
-{ return ios.get<2>(); }
+    /* ios helper getters */
+    inline bool ios_issigned(const InlinedOperatorSignature& ios)
+    {
+        return ios.get<0>();
+    }
 
-struct InlinedOperatorSignatureHash {
-    long operator() (const InlinedOperatorSignature& k) const ;
-};
+    inline expr::ExprType ios_optype(const InlinedOperatorSignature& ios)
+    {
+        return ios.get<1>();
+    }
 
-struct InlinedOperatorSignatureEq {
-    bool operator() (const InlinedOperatorSignature& x,
-                     const InlinedOperatorSignature& y) const ;
-};
+    inline unsigned ios_width(const InlinedOperatorSignature& ios)
+    {
+        return ios.get<2>();
+    }
 
-class BinarySelectionDescriptor {
-public:
-    BinarySelectionDescriptor(unsigned width, dd::DDVector& z, ADD cnd,
-                              ADD aux, dd::DDVector& x, dd::DDVector& y);
+    struct InlinedOperatorSignatureHash {
+        long operator()(const InlinedOperatorSignature& k) const;
+    };
 
-    inline unsigned width() const
-    { return f_width; }
+    struct InlinedOperatorSignatureEq {
+        bool operator()(const InlinedOperatorSignature& x,
+                        const InlinedOperatorSignature& y) const;
+    };
 
-    inline const dd::DDVector& z() const
-    { return f_z; }
+    class BinarySelectionDescriptor {
+    public:
+        BinarySelectionDescriptor(unsigned width, dd::DDVector& z, ADD cnd,
+                                  ADD aux, dd::DDVector& x, dd::DDVector& y);
 
-    inline ADD cnd() const
-    { return f_cnd; }
+        inline unsigned width() const
+        {
+            return f_width;
+        }
 
-    inline ADD aux() const
-    { return f_aux; }
+        inline const dd::DDVector& z() const
+        {
+            return f_z;
+        }
 
-    inline const dd::DDVector& x() const
-    { return f_x; }
+        inline ADD cnd() const
+        {
+            return f_cnd;
+        }
 
-    inline const dd::DDVector& y() const
-    { return f_y; }
+        inline ADD aux() const
+        {
+            return f_aux;
+        }
 
-private:
-    unsigned f_width;
-    dd::DDVector f_z;
-    ADD f_cnd;
-    ADD f_aux;
-    dd::DDVector f_x;
-    dd::DDVector f_y;
-};
+        inline const dd::DDVector& x() const
+        {
+            return f_x;
+        }
 
-class MultiwaySelectionDescriptor {
-public:
-    MultiwaySelectionDescriptor(unsigned elem_width, unsigned elem_count,
-                                dd::DDVector& z, dd::DDVector& cnds,
-                                dd::DDVector& acts, dd::DDVector& x);
+        inline const dd::DDVector& y() const
+        {
+            return f_y;
+        }
 
-    inline unsigned elem_width() const
-    { return f_elem_width; }
+    private:
+        unsigned f_width;
+        dd::DDVector f_z;
+        ADD f_cnd;
+        ADD f_aux;
+        dd::DDVector f_x;
+        dd::DDVector f_y;
+    };
 
-    inline unsigned elem_count() const
-    { return f_elem_count; }
+    class MultiwaySelectionDescriptor {
+    public:
+        MultiwaySelectionDescriptor(unsigned elem_width, unsigned elem_count,
+                                    dd::DDVector& z, dd::DDVector& cnds,
+                                    dd::DDVector& acts, dd::DDVector& x);
 
-    inline const dd::DDVector& z() const
-    { return f_z; }
+        inline unsigned elem_width() const
+        {
+            return f_elem_width;
+        }
 
-    inline const dd::DDVector& cnds() const
-    { return f_cnds; }
+        inline unsigned elem_count() const
+        {
+            return f_elem_count;
+        }
 
-    inline const dd::DDVector& acts() const
-    { return f_acts; }
+        inline const dd::DDVector& z() const
+        {
+            return f_z;
+        }
 
-    inline const dd::DDVector& x() const
-    { return f_x; }
+        inline const dd::DDVector& cnds() const
+        {
+            return f_cnds;
+        }
 
-private:
-    unsigned f_elem_width;
-    unsigned f_elem_count;
-    dd::DDVector f_z;
-    dd::DDVector f_cnds;
-    dd::DDVector f_acts;
-    dd::DDVector f_x;
-};
+        inline const dd::DDVector& acts() const
+        {
+            return f_acts;
+        }
 
-class InlinedOperatorDescriptor {
+        inline const dd::DDVector& x() const
+        {
+            return f_x;
+        }
 
-public:
-    InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                              dd::DDVector& z, dd::DDVector &x);
-    InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                              dd::DDVector& z, dd::DDVector &x, dd::DDVector &y);
+    private:
+        unsigned f_elem_width;
+        unsigned f_elem_count;
+        dd::DDVector f_z;
+        dd::DDVector f_cnds;
+        dd::DDVector f_acts;
+        dd::DDVector f_x;
+    };
 
-    inline const InlinedOperatorSignature& ios() const
-    { return f_ios; }
+    class InlinedOperatorDescriptor {
 
-    inline const dd::DDVector& z() const
-    { return f_z; }
+    public:
+        InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                                  dd::DDVector& z, dd::DDVector& x);
+        InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                                  dd::DDVector& z, dd::DDVector& x, dd::DDVector& y);
 
-    inline const dd::DDVector& x() const
-    { return f_x; }
+        inline const InlinedOperatorSignature& ios() const
+        {
+            return f_ios;
+        }
 
-    inline const dd::DDVector& y() const
-    { return f_y; }
+        inline const dd::DDVector& z() const
+        {
+            return f_z;
+        }
+
+        inline const dd::DDVector& x() const
+        {
+            return f_x;
+        }
+
+        inline const dd::DDVector& y() const
+        {
+            return f_y;
+        }
 
 
-    inline bool is_relational() const
-    { return f_z.size() == 1; }
+        inline bool is_relational() const
+        {
+            return f_z.size() == 1;
+        }
 
-    inline bool is_binary() const
-    { return f_z.size() == f_x.size() && f_z.size() == f_y.size(); }
+        inline bool is_binary() const
+        {
+            return f_z.size() == f_x.size() && f_z.size() == f_y.size();
+        }
 
-    inline bool is_unary() const
-    { return f_y.size() == 0; }
+        inline bool is_unary() const
+        {
+            return f_y.size() == 0;
+        }
 
-private:
-    InlinedOperatorSignature f_ios;
+    private:
+        InlinedOperatorSignature f_ios;
 
-    dd::DDVector f_z;
-    dd::DDVector f_x;
-    dd::DDVector f_y;
-};
+        dd::DDVector f_z;
+        dd::DDVector f_x;
+        dd::DDVector f_y;
+    };
 
-using InlinedOperatorDescriptors =
-    std::vector<InlinedOperatorDescriptor> ;
+    using InlinedOperatorDescriptors =
+        std::vector<InlinedOperatorDescriptor>;
 
-using BinarySelectionDescriptors =
-    std::vector<BinarySelectionDescriptor> ;
+    using BinarySelectionDescriptors =
+        std::vector<BinarySelectionDescriptor>;
 
-using MultiwaySelectionDescriptors =
-    std::vector<MultiwaySelectionDescriptor> ;
+    using MultiwaySelectionDescriptors =
+        std::vector<MultiwaySelectionDescriptor>;
 
-using Expr2BinarySelectionDescriptorsMap =
-    boost::unordered_map<expr::Expr_ptr, BinarySelectionDescriptors> ;
+    using Expr2BinarySelectionDescriptorsMap =
+        boost::unordered_map<expr::Expr_ptr, BinarySelectionDescriptors>;
 
-class Unit {
-public:
-     Unit(expr::Expr_ptr expr, dd::DDVector& dds,
-         InlinedOperatorDescriptors& inlined_operator_descriptors,
-         Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
-         MultiwaySelectionDescriptors& array_mux_descriptors)
-        : f_expr(expr)
-        , f_dds(dds)
-        , f_inlined_operator_descriptors( inlined_operator_descriptors )
-        , f_binary_selection_descriptors_map( binary_selection_descriptors_map )
-        , f_array_mux_descriptors( array_mux_descriptors )
-    {}
+    class Unit {
+    public:
+        Unit(expr::Expr_ptr expr, dd::DDVector& dds,
+             InlinedOperatorDescriptors& inlined_operator_descriptors,
+             Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
+             MultiwaySelectionDescriptors& array_mux_descriptors)
+            : f_expr(expr)
+            , f_dds(dds)
+            , f_inlined_operator_descriptors(inlined_operator_descriptors)
+            , f_binary_selection_descriptors_map(binary_selection_descriptors_map)
+            , f_array_mux_descriptors(array_mux_descriptors)
+        {}
 
-    inline const expr::Expr_ptr expr() const
-    { return f_expr; }
+        inline const expr::Expr_ptr expr() const
+        {
+            return f_expr;
+        }
 
-    inline const dd::DDVector& dds() const
-    { return f_dds; }
+        inline const dd::DDVector& dds() const
+        {
+            return f_dds;
+        }
 
-    inline const InlinedOperatorDescriptors& inlined_operator_descriptors() const
-    { return f_inlined_operator_descriptors; }
+        inline const InlinedOperatorDescriptors& inlined_operator_descriptors() const
+        {
+            return f_inlined_operator_descriptors;
+        }
 
-    inline const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map() const
-    { return f_binary_selection_descriptors_map; }
+        inline const Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map() const
+        {
+            return f_binary_selection_descriptors_map;
+        }
 
-    inline const MultiwaySelectionDescriptors& array_mux_descriptors() const
-    { return f_array_mux_descriptors; }
+        inline const MultiwaySelectionDescriptors& array_mux_descriptors() const
+        {
+            return f_array_mux_descriptors;
+        }
 
-private:
-    expr::Expr_ptr f_expr;
-    dd::DDVector f_dds;
-    InlinedOperatorDescriptors f_inlined_operator_descriptors;
-    Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
-    MultiwaySelectionDescriptors f_array_mux_descriptors;
-};
+    private:
+        expr::Expr_ptr f_expr;
+        dd::DDVector f_dds;
+        InlinedOperatorDescriptors f_inlined_operator_descriptors;
+        Expr2BinarySelectionDescriptorsMap f_binary_selection_descriptors_map;
+        MultiwaySelectionDescriptors f_array_mux_descriptors;
+    };
 
-using CompilationUnit_ptr =
-    Unit* ;
+    using CompilationUnit_ptr =
+        Unit*;
 
-using Units =
-    std::vector<Unit> ;
+    using Units =
+        std::vector<Unit>;
 
 } // namespace compiler
 

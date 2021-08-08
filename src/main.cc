@@ -129,11 +129,10 @@ void sighandler(int signum)
         std::cerr
             << std::endl;
 
-        boost::chrono::system_clock::time_point now(boost::chrono::system_clock::now());
+        boost::chrono::system_clock::time_point now { boost::chrono::system_clock::now() };
+        boost::chrono::duration<double> duration { boost::chrono::system_clock::now() - last };
 
-        boost::chrono::duration<double> sec(boost::chrono::system_clock::now() - last);
-
-        if (sec.count() < 1.00) {
+        if (duration.count() < 1.00) {
             std::cerr
                 << "Interrupting all active threads (this may take a while)..."
                 << std::endl;
