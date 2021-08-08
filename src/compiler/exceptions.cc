@@ -23,38 +23,34 @@
 
 #include <compiler.hh>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace compiler {
 
-static std::string format_constant_too_large(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    static std::string format_constant_too_large(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
+        oss << expr;
 
-    oss
-        << expr;
+        return oss.str();
+    }
 
-    return oss.str();
-}
+    ConstantTooLarge::ConstantTooLarge(expr::Expr_ptr expr)
+        : CompilerException("ConstantTooLarge",
+                            format_constant_too_large(expr))
+    {}
 
-ConstantTooLarge::ConstantTooLarge(expr::Expr_ptr expr)
-    : CompilerException("ConstantTooLarge",
-                        format_constant_too_large(expr))
-{}
+    static std::string format_unexpected_expression(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
+        oss << expr;
 
-static std::string format_unexpected_expression(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
-
-    oss
-        << expr;
-
-    return oss.str();
-}
-UnexpectedExpression::UnexpectedExpression(expr::Expr_ptr expr)
-    : CompilerException("UnexpectedExpression",
-                        format_unexpected_expression(expr))
-{}
+        return oss.str();
+    }
+    UnexpectedExpression::UnexpectedExpression(expr::Expr_ptr expr)
+        : CompilerException("UnexpectedExpression",
+                            format_unexpected_expression(expr))
+    {}
 
 } // namespace compiler
