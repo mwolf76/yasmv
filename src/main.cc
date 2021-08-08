@@ -92,7 +92,7 @@ void pd(compiler::InlinedOperatorDescriptor& md)
 
 void batch(cmd::Command_ptr cmd)
 {
-    cmd::Interpreter& system = cmd::Interpreter::INSTANCE();
+    cmd::Interpreter& system { cmd::Interpreter::INSTANCE() };
     opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
 
     bool quiet { opts_mgr.quiet() };
