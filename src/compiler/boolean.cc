@@ -22,170 +22,160 @@
  **/
 #include <common/common.hh>
 
-#include <expr.hh>
 #include <compiler.hh>
+#include <expr.hh>
 
 namespace compiler {
 
-void Compiler::boolean_not(const expr::Expr_ptr expr)
-{
-    POP_DD(lhs);
-    f_add_stack.push_back(lhs.Cmpl());
-}
+    void Compiler::boolean_not(const expr::Expr_ptr expr)
+    {
+        POP_DD(lhs);
+        f_add_stack.push_back(lhs.Cmpl());
+    }
 
-void Compiler::boolean_and(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
+    void Compiler::boolean_and(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-void Compiler::boolean_or(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Or(rhs));
+    void Compiler::boolean_or(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Or(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-void Compiler::boolean_xor(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Xor(rhs));
+    void Compiler::boolean_xor(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Xor(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-void Compiler::boolean_implies(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Cmpl().Or(rhs));
+    void Compiler::boolean_implies(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Cmpl().Or(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-void Compiler::boolean_iff(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Xnor(rhs));
+    void Compiler::boolean_iff(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Xnor(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-// implemented as xnor (logical equivalence)
-void Compiler::boolean_equals(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Xnor(rhs));
+    // implemented as xnor (logical equivalence)
+    void Compiler::boolean_equals(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Xnor(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-// implemented as negation of the former (i.e xor)
-void Compiler::boolean_not_equals(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Xor(rhs));
+    // implemented as negation of the former (i.e xor)
+    void Compiler::boolean_not_equals(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Xor(rhs));
 
-    f_type_stack.pop_back(); // consume one, leave the other
-}
+        f_type_stack.pop_back(); // consume one, leave the other
+    }
 
-void Compiler::boolean_ite(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    POP_DD(cnd);
-    PUSH_DD(cnd.Ite(lhs, rhs));
+    void Compiler::boolean_ite(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        POP_DD(cnd);
+        PUSH_DD(cnd.Ite(lhs, rhs));
 
-    // consume two operand types, leave the third
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-}
+        // consume two operand types, leave the third
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+    }
 
-void Compiler::boolean_subscript(const expr::Expr_ptr expr)
-{
-    enc::EncodingMgr& bm
-        (f_enc);
+    void Compiler::boolean_subscript(const expr::Expr_ptr expr)
+    {
+        enc::EncodingMgr& bm { f_enc };
 
-    // index
-    type::Type_ptr t0
-        (f_type_stack.back());
-    f_type_stack.pop_back(); // consume index
-    assert(t0 -> is_algebraic());
+        // index
+        type::Type_ptr t0 { f_type_stack.back() };
+        f_type_stack.pop_back(); // consume index
+        assert(t0->is_algebraic());
 
-    type::Type_ptr itype
-        (t0 -> as_algebraic());
-    unsigned iwidth
-        (itype -> width());
+        type::Type_ptr itype { t0->as_algebraic() };
+        unsigned iwidth { itype->width() };
 
-    POP_DV(index, iwidth);
-    assert(iwidth == bm.word_width()); // needed?
+        POP_DV(index, iwidth);
+        assert(iwidth == bm.word_width()); // needed?
 
-    // array
-    type::Type_ptr t1
-        (f_type_stack.back());
-    f_type_stack.pop_back(); // consume array
-    assert(t1 -> is_array());
+        // array
+        type::Type_ptr t1 { f_type_stack.back() };
+        f_type_stack.pop_back(); // consume array
+        assert(t1->is_array());
 
-    type::ArrayType_ptr atype
-        (t1 -> as_array());
-    type::ScalarType_ptr type
-        (atype -> of());
-    assert(type -> is_boolean());
+        type::ArrayType_ptr atype { t1->as_array() };
+        type::ScalarType_ptr type { atype->of() };
+        assert(type->is_boolean());
 
-    unsigned elem_width
-        (type -> width());
-    assert(elem_width == 1);
-    unsigned elem_count
-        (atype -> nelems());
-    POP_DV(lhs, elem_width * elem_count);
+        unsigned elem_width { type->width() };
+        assert(elem_width == 1);
+        unsigned elem_count { atype->nelems() };
+        POP_DV(lhs, elem_width * elem_count);
 
-    /* Build selection DDs */
-    dd::DDVector cnd_dds;
-    dd::DDVector act_dds;
-    unsigned j_, j = 0; do {
+        /* Build selection DDs */
+        dd::DDVector cnd_dds;
+        dd::DDVector act_dds;
+        unsigned j_, j { 0 };
+        do {
 
-        unsigned i;
-        ADD cnd
-            (bm.one());
+            unsigned i;
+            ADD cnd(bm.one());
 
-        i = 0; j_ = j; while (i < iwidth) {
-            ADD bit
-                ((j_ & 1) ? bm.one() : bm.zero());
-            unsigned ndx
-                (iwidth - i - 1);
-            j_ >>= 1;
+            i = 0;
+            j_ = j;
+            while (i < iwidth) {
+                ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
+                unsigned ndx { iwidth - i - 1 };
+                j_ >>= 1;
 
-            cnd *= index[ ndx ].Xnor(bit);
-            ++ i;
-        }
+                cnd *= index[ndx].Xnor(bit);
+                ++i;
+            }
 
-        cnd_dds.push_back(cnd);
-        act_dds.push_back(make_auto_dd());
-    } while (++ j < elem_count);
+            cnd_dds.push_back(cnd);
+            act_dds.push_back(make_auto_dd());
+        } while (++j < elem_count);
 
-    /* Push MUX output DD vector */
-    FRESH_DV(dv, elem_width);
-    PUSH_DV(dv, elem_width);
+        /* Push MUX output DD vector */
+        FRESH_DV(dv, elem_width);
+        PUSH_DV(dv, elem_width);
 
-    PUSH_TYPE(type);
+        PUSH_TYPE(type);
 
-    MultiwaySelectionDescriptor msd
-        (elem_width, elem_count, dv, cnd_dds, act_dds, lhs);
+        MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+        f_multiway_selection_descriptors.push_back(msd);
 
-    f_multiway_selection_descriptors.push_back(msd);
-
-    DEBUG
-        << "Registered " << msd
-        << std::endl;
-}
+        DEBUG
+            << "Registered "
+            << msd
+            << std::endl;
+    }
 
 } // namespace compiler
