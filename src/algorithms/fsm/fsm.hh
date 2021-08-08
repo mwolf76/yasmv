@@ -58,7 +58,7 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    compiler::CompilationUnits f_constraint_cus;
+    compiler::Units f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
@@ -80,10 +80,32 @@ public:
 
 private:
     expr::ExprVector f_constraints;
-    compiler::CompilationUnits f_constraint_cus;
+    compiler::Units f_constraint_cus;
 
     boost::mutex f_status_mutex;
     fsm_consistency_t f_status;
+};
+
+class ComputeDiameter : public algorithms::Algorithm {
+
+public:
+    ComputeDiameter(cmd::Command& command, model::Model& model);
+    ~ComputeDiameter();
+
+    void process();
+
+    inline step_t diameter()
+    { return sync_diameter(); }
+
+    step_t sync_diameter();
+    bool sync_set_diameter(step_t diameter);
+
+private:
+    boost::mutex f_diameter_mutex;
+    step_t f_diameter;
+
+    /* strategies */
+    void forward_strategy();
 };
 
 } // namespace fsm

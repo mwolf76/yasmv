@@ -48,9 +48,14 @@
 #include <utils/variant.hh>
 #include <algorithms/exceptions.hh>
 
+#include <boost/thread.hpp>
+
 namespace algorithms {
 
-/* Engine-less algorithm base class. Engine instances are provided by
+    using thread_ptr = boost::thread *;
+    using thread_ptrs = std::vector<thread_ptr>;
+
+    /* Engine-less algorithm base class. Engine instances are provided by
    strategies. */
     class Algorithm {
 
@@ -129,9 +134,9 @@ namespace algorithms {
         compiler::Compiler f_compiler;
 
         /* Formulas */
-        compiler::CompilationUnits f_init;
-        compiler::CompilationUnits f_invar;
-        compiler::CompilationUnits f_trans;
+        compiler::Units f_init;
+        compiler::Units f_invar;
+        compiler::Units f_trans;
 
         /* Witness */
         witness::Witness_ptr f_witness;

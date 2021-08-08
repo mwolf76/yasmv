@@ -83,7 +83,7 @@ void Simulation::pick_state(bool all_sat,
 
     expr::Expr_ptr ctx { em.make_empty() };
 
-    compiler::CompilationUnits constraint_cus;
+    compiler::Units constraint_cus;
     unsigned no_constraints {0 };
     std::for_each(begin(constraints),
                   end(constraints),

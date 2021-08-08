@@ -235,7 +235,7 @@ private:
 using CompilationUnit_ptr =
     Unit* ;
 
-using CompilationUnits =
+using Units =
     std::vector<Unit> ;
 
 } // namespace compiler

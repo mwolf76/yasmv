@@ -131,30 +131,32 @@ utils::Variant Help::operator()()
 
     return utils::Variant(okMessage);
   } else {
-    std::cout
-      << "Available topics: " << std::endl
-      << "- bmc" << std::endl
-      << "- check-init" << std::endl
-      << "- check-trans" << std::endl
-      << "- clear" << std::endl
-      << "- do" << std::endl
-      << "- dump-model" << std::endl
-      << "- dump-trace" << std::endl
-      << "- dup-trace" << std::endl
-      << "- echo" << std::endl
-      << "- get" << std::endl
-      << "- help" << std::endl
-      << "- last" << std::endl
-      << "- list-traces" << std::endl
-      << "- on" << std::endl
-      << "- pick-state" << std::endl
-      << "- quit" << std::endl
-      << "- reach" << std::endl
-      << "- read-model" << std::endl
-      << "- set" << std::endl
-      << "- simulate" << std::endl
-      << "- time" << std::endl
-      << std::endl;
+      /* TODO: this list should be generated dynamically */
+      std::cout
+          << "Available topics: " << std::endl
+          << "- bmc" << std::endl
+          << "- check-init" << std::endl
+          << "- check-trans" << std::endl
+          << "- clear" << std::endl
+          << "- diameter" << std::endl
+          << "- do" << std::endl
+          << "- dump-model" << std::endl
+          << "- dump-trace" << std::endl
+          << "- dup-trace" << std::endl
+          << "- echo" << std::endl
+          << "- get" << std::endl
+          << "- help" << std::endl
+          << "- last" << std::endl
+          << "- list-traces" << std::endl
+          << "- on" << std::endl
+          << "- pick-state" << std::endl
+          << "- quit" << std::endl
+          << "- reach" << std::endl
+          << "- read-model" << std::endl
+          << "- set" << std::endl
+          << "- simulate" << std::endl
+          << "- time" << std::endl
+          << std::endl;
 
     return utils::Variant(okMessage);
   }

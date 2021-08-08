@@ -961,6 +961,9 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=check_trans_command_topic
        { $res = c; }
 
+    |  c=diameter_command_topic
+       { $res = c; }
+
     |  c=clear_command_topic
        { $res = c; }
 
@@ -1028,6 +1031,9 @@ command returns [cmd::Command_ptr res]
 
     |  c=clear_command
        { $res = c; }
+
+    |  c=diameter_command
+        { $res = c; }
 
     |  c=do_command
        { $res = c; }
@@ -1221,6 +1227,16 @@ check_init_command returns[cmd::Command_ptr res]
 check_init_command_topic returns [cmd::CommandTopic_ptr res]
     :  'check-init'
         { $res = cm.topic_check_init(); }
+    ;
+
+diameter_command returns[cmd::Command_ptr res]
+    : 'diameter'
+      { $res = cm.make_diameter(); }
+    ;
+
+diameter_command_topic returns [cmd::CommandTopic_ptr res]
+    :  'diameter'
+        { $res = cm.topic_diameter(); }
     ;
 
 reach_command returns[cmd::Command_ptr res]

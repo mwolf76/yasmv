@@ -55,7 +55,8 @@ void Reachability::forward_strategy(compiler::Unit& target_cu)
 
             compiler::Unit cu(i->second);
             this->assert_formula(engine, k, cu);
-        });
+        }
+    );
 
     sat::status_t status
         (engine.solve());
@@ -164,16 +165,19 @@ void Reachability::forward_strategy(compiler::Unit& target_cu)
                         compiler::Unit cu {i->second };
                         this->assert_formula(engine, k, cu);
                     }
-                });
+                }
+            );
 
             /* build state uniqueness constraint for each pair of states
                (j, k), where j < k */
-            for (step_t j = 0; j < k; ++ j)
+            for (step_t j = 0; j < k; ++ j) {
                 assert_fsm_uniqueness(engine, j, k);
+            }
 
             /* is this still relevant? */
-            if (sync_status() != REACHABILITY_UNKNOWN)
+            if (sync_status() != REACHABILITY_UNKNOWN) {
                 goto cleanup;
+            }
 
             INFO
                 << "Now looking for unreachability proof (k = " << k << ")..."
