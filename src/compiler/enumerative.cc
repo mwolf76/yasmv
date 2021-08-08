@@ -21,134 +21,115 @@
  **/
 #include <common/common.hh>
 
-#include <expr.hh>
 #include <compiler.hh>
+#include <expr.hh>
 
 namespace compiler {
 
-void Compiler::enumerative_equals(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Equals(rhs));
+    void Compiler::enumerative_equals(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Equals(rhs));
 
-    type::TypeMgr& tm
-        (f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.push_back(tm.find_boolean());
+    }
 
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-    f_type_stack.push_back( tm.find_boolean());
-}
+    void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        PUSH_DD(lhs.Equals(rhs).Cmpl());
 
-void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    PUSH_DD(lhs.Equals(rhs).Cmpl());
+        type::TypeMgr& tm { f_owner.tm() };
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.push_back(tm.find_boolean());
+    }
 
-    type::TypeMgr& tm
-        (f_owner.tm());
+    void Compiler::enumerative_ite(const expr::Expr_ptr expr)
+    {
+        POP_DD(rhs);
+        POP_DD(lhs);
+        POP_DD(cnd);
+        PUSH_DD(cnd.Ite(lhs, rhs));
 
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-    f_type_stack.push_back( tm.find_boolean());
-}
+        // consume all, push rhs type
+        type::Type_ptr type { f_type_stack.back() };
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.pop_back();
+        f_type_stack.push_back(type);
+    }
 
-void Compiler::enumerative_ite(const expr::Expr_ptr expr)
-{
-    POP_DD(rhs);
-    POP_DD(lhs);
-    POP_DD(cnd);
-    PUSH_DD(cnd.Ite(lhs, rhs));
+    void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
+    {
+        enc::EncodingMgr& bm(f_enc);
 
-    // consume all, push rhs type
-    type::Type_ptr type
-        (f_type_stack.back());
+        // index
+        type::Type_ptr t0 { f_type_stack.back() };
+        f_type_stack.pop_back(); // consume index
+        assert(t0->is_algebraic());
 
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
-    f_type_stack.pop_back();
+        type::Type_ptr itype { t0->as_algebraic() };
+        unsigned iwidth { itype->width() };
 
-    f_type_stack.push_back(type);
-}
+        POP_DV(index, iwidth);
+        assert(iwidth == bm.word_width()); // needed?
 
-void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
-{
-    enc::EncodingMgr& bm
-        (f_enc);
+        // array
+        type::Type_ptr t1 { f_type_stack.back() };
+        f_type_stack.pop_back(); // consume array
+        assert(t1->is_array());
 
-    // index
-    type::Type_ptr t0
-        (f_type_stack.back());
-    f_type_stack.pop_back(); // consume index
-    assert(t0 -> is_algebraic());
+        type::ArrayType_ptr atype { t1->as_array() };
+        type::ScalarType_ptr type { atype->of() };
+        assert(type->is_enum());
 
-    type::Type_ptr itype
-        (t0 -> as_algebraic());
-    unsigned iwidth
-        (itype -> width());
+        unsigned elem_width { type->width() };
+        assert(elem_width == 1);
+        unsigned elem_count { atype->nelems() };
+        POP_DV(lhs, elem_width * elem_count);
 
-    POP_DV(index, iwidth);
-    assert(iwidth == bm.word_width()); // needed?
+        /* Build selection DDs */
+        dd::DDVector cnd_dds;
+        dd::DDVector act_dds;
+        unsigned j_, j { 0 };
+        do {
+            unsigned i;
+            ADD cnd { bm.one() };
 
-    // array
-    type::Type_ptr t1
-        (f_type_stack.back());
-    f_type_stack.pop_back(); // consume array
-    assert(t1 -> is_array());
+            i = 0;
+            j_ = j;
+            while (i < iwidth) {
+                ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
+                unsigned ndx { iwidth - i - 1 };
+                j_ >>= 1;
 
-    type::ArrayType_ptr atype
-        (t1 -> as_array());
-    type::ScalarType_ptr type
-        (atype -> of());
-    assert(type -> is_enum());
+                cnd *= index[ndx].Xnor(bit);
+                ++i;
+            }
 
-    unsigned elem_width
-        (type -> width());
-    assert(elem_width == 1);
-    unsigned elem_count
-        (atype -> nelems());
-    POP_DV(lhs, elem_width * elem_count);
+            cnd_dds.push_back(cnd);
+            act_dds.push_back(make_auto_dd());
+        } while (++j < elem_count);
 
-    /* Build selection DDs */
-    dd::DDVector cnd_dds;
-    dd::DDVector act_dds;
-    unsigned j_, j = 0; do {
+        /* Push MUX output DD vector */
+        FRESH_DV(dv, elem_width);
+        PUSH_DV(dv, elem_width);
 
-        unsigned i;
-        ADD cnd
-            (bm.one());
+        PUSH_TYPE(type);
 
-        i = 0; j_ = j; while (i < iwidth) {
-            ADD bit
-                ((j_ & 1) ? bm.one() : bm.zero());
-            unsigned ndx
-                (iwidth - i - 1);
-            j_ >>= 1;
+        MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+        f_multiway_selection_descriptors.push_back(msd);
 
-            cnd *= index[ ndx ].Xnor(bit);
-            ++ i;
-        }
-
-        cnd_dds.push_back(cnd);
-        act_dds.push_back(make_auto_dd());
-    } while (++ j < elem_count);
-
-    /* Push MUX output DD vector */
-    FRESH_DV(dv, elem_width);
-    PUSH_DV(dv, elem_width);
-
-    PUSH_TYPE(type);
-
-    MultiwaySelectionDescriptor msd
-        (elem_width, elem_count, dv, cnd_dds, act_dds, lhs);
-
-    f_multiway_selection_descriptors.push_back(msd);
-
-    DEBUG
-        << "Registered "
-        << msd
-        << std::endl;
-}
+        DEBUG
+            << "Registered "
+            << msd
+            << std::endl;
+    }
 
 } // namespace compiler
