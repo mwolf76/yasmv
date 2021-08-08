@@ -124,8 +124,7 @@ void sighandler(int signum)
     /* A single Control-Z requires current solving stats. Double
        Control-Z (within 1 sec) requires interruption */
     if (signum == SIGTSTP) {
-
-        sat::EngineMgr& mgr(sat::EngineMgr::INSTANCE());
+        sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
 
         std::cerr
             << std::endl;
@@ -213,7 +212,7 @@ int main(int argc, const char* argv[])
     }
 
     return interpreter.retcode();
-};
+}
 
 /* logging subsystem settings */
 namespace axter {
@@ -237,4 +236,4 @@ namespace axter {
     {
         return opts::OptsMgr::INSTANCE().get_verbosity_level_tolerance();
     }
-}; // namespace axter
+} // namespace axter
