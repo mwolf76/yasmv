@@ -9,6 +9,12 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
 
+- repo: https://github.com/pocc/pre-commit-hooks
+  rev: python
+  hooks:
+      - id: clang-format
+        args: [-i]
+
 -   repo: local
     hooks:
     -   id: yasmv-compile

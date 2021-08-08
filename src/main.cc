@@ -66,19 +66,29 @@ static const std::string heading_msg =
 /* printing helpers: these functions are unused in the code, they're
    here just for debugging purposes withing gdb */
 void pe(expr::Expr_ptr e)
-{ std::cerr << e << std::endl; }
+{
+    std::cerr << e << std::endl;
+}
 
 void pf(expr::TimedExpr e)
-{ std::cerr << e << std::endl; }
+{
+    std::cerr << e << std::endl;
+}
 
 void pu(enc::UCBI& ucbi)
-{ std::cerr << ucbi << std::endl; }
+{
+    std::cerr << ucbi << std::endl;
+}
 
 void pt(enc::TCBI& tcbi)
-{ std::cerr << tcbi << std::endl; }
+{
+    std::cerr << tcbi << std::endl;
+}
 
 void pd(compiler::InlinedOperatorDescriptor& md)
-{ std::cerr << md << std::endl; }
+{
+    std::cerr << md << std::endl;
+}
 
 void batch(cmd::Command_ptr cmd)
 {
@@ -90,7 +100,7 @@ void batch(cmd::Command_ptr cmd)
 
     /* In batch mode, we print res unless in quiet mode */
     utils::Variant& res = system(cmd);
-    if (! quiet) {
+    if (!quiet) {
         if (color) {
             std::cout
                 << std::endl
@@ -98,13 +108,14 @@ void batch(cmd::Command_ptr cmd)
                 << "<< "
                 << res
                 << normal << std::endl;
-        }
-        else {
-            std::cout << std::endl << "<< " << res
+        } else {
+            std::cout << std::endl
+                      << "<< " << res
                       << std::endl;
         }
     }
 }
+
 
 void sighandler(int signum)
 {
@@ -114,17 +125,14 @@ void sighandler(int signum)
        Control-Z (within 1 sec) requires interruption */
     if (signum == SIGTSTP) {
 
-        sat::EngineMgr& mgr
-            (sat::EngineMgr::INSTANCE());
+        sat::EngineMgr& mgr(sat::EngineMgr::INSTANCE());
 
         std::cerr
             << std::endl;
 
-        boost::chrono::system_clock::time_point now
-            (boost::chrono::system_clock::now());
+        boost::chrono::system_clock::time_point now(boost::chrono::system_clock::now());
 
-        boost::chrono::duration<double> sec
-            (boost::chrono::system_clock::now() - last);
+        boost::chrono::duration<double> sec(boost::chrono::system_clock::now() - last);
 
         if (sec.count() < 1.00) {
             std::cerr
@@ -132,18 +140,16 @@ void sighandler(int signum)
                 << std::endl;
 
             mgr.interrupt();
-        }
-        else {
+        } else {
             mgr.dump_stats(std::cerr);
             last = now;
         }
     }
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
-    cmd::Interpreter& interpreter
-        (cmd::Interpreter::INSTANCE());
+    cmd::Interpreter& interpreter(cmd::Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
     signal(SIGTSTP, sighandler);
@@ -156,24 +162,23 @@ int main(int argc, const char *argv[])
         if (opts_mgr.help()) {
             std::cout
                 << opts_mgr.usage()
-                << std::endl ;
+                << std::endl;
 
             exit(0);
         }
 
-        if (! opts_mgr.quiet()) {
+        if (!opts_mgr.quiet()) {
             std::cout
                 << heading_msg
                 << std::endl;
         }
 
         /* load microcode */
-        sat::InlinedOperatorMgr& mm
-            (sat::InlinedOperatorMgr::INSTANCE());
+        sat::InlinedOperatorMgr& mm(sat::InlinedOperatorMgr::INSTANCE());
 
         size_t nloaders { mm.loaders().size() };
 
-        if (! opts_mgr.quiet()) {
+        if (!opts_mgr.quiet()) {
             TRACE
                 << nloaders
                 << " microcode fragments registered."
@@ -182,25 +187,23 @@ int main(int argc, const char *argv[])
 
         /* run options-generated commands (if any) */
         const std::string model_filename = opts_mgr.model();
-        if (! model_filename.empty()) {
-            cmd::ReadModel_ptr cmd
-                (reinterpret_cast<cmd::ReadModel_ptr>
-                 (cmd::CommandMgr::INSTANCE().make_read_model()));
+        if (!model_filename.empty()) {
+            cmd::ReadModel_ptr cmd(reinterpret_cast<cmd::ReadModel_ptr>(cmd::CommandMgr::INSTANCE().make_read_model()));
 
-            cmd->set_input( model_filename.c_str());
+            cmd->set_input(model_filename.c_str());
             batch(cmd);
         }
 
         /* run interactive commands */
         do {
             interpreter();
-        } while (! interpreter.is_leaving());
+        } while (!interpreter.is_leaving());
 
         if (isatty(STDIN_FILENO))
             std::cout << std::endl;
     }
 
-    catch (Exception &e) {
+    catch (Exception& e) {
         std::cerr
             << red
             << "Uncaught exception!! "
@@ -210,26 +213,28 @@ int main(int argc, const char *argv[])
     }
 
     return interpreter.retcode();
-
 };
 
 /* logging subsystem settings */
 namespace axter {
-    std::string get_log_prefix_format(const char*FileName,
-                                      int LineNo, const char*FunctionName,
-                                      ext_data levels_format_usage_data) {
+    std::string get_log_prefix_format(const char* FileName,
+                                      int LineNo, const char* FunctionName,
+                                      ext_data levels_format_usage_data)
+    {
 
         return ezlogger_format_policy::
             get_log_prefix_format(FileName, LineNo, FunctionName,
                                   levels_format_usage_data);
     }
 
-    std::ostream& get_log_stream() {
+    std::ostream& get_log_stream()
+    {
         return ezlogger_output_policy::get_log_stream();
     }
 
     /* delegated to OptsMgr */
-    verbosity get_verbosity_level_tolerance() {
+    verbosity get_verbosity_level_tolerance()
+    {
         return opts::OptsMgr::INSTANCE().get_verbosity_level_tolerance();
     }
-};
+}; // namespace axter
