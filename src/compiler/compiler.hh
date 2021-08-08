@@ -61,193 +61,192 @@
 #include <model/model_mgr.hh>
 
 #include <compiler/exceptions.hh>
-#include <compiler/typedefs.hh>
 #include <compiler/streamers.hh>
+#include <compiler/typedefs.hh>
 
 #include <utils/time.hh>
 
-#include <boost/unordered_map.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace compiler {
 
-class Compiler : public expr::ExprWalker {
-public:
-    Compiler();
-    virtual ~Compiler();
+    class Compiler: public expr::ExprWalker {
+    public:
+        Compiler();
+        virtual ~Compiler();
 
-    Unit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        Unit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
-private:
-    /* Remark: the compiler does NOT support LTL ops. To enable
+    private:
+        /* Remark: the compiler does NOT support LTL ops. To enable
        verification of temporal properties, the LTL operators needs to
        be rewritten by the checking algorithm before feeding the
        formula into the compiler. */
-    LTL_STUBS;
+        LTL_STUBS;
 
-    /* basic expr operators support */
-    OP_HOOKS;
+        /* basic expr operators support */
+        OP_HOOKS;
 
-    void walk_instant(const expr::Expr_ptr expr);
-    void walk_leaf(const expr::Expr_ptr expr);
+        void walk_instant(const expr::Expr_ptr expr);
+        void walk_leaf(const expr::Expr_ptr expr);
 
-    /* push DDs and type information for variables (used by walk_leaf) */
-    void push_dds(enc::Encoding_ptr enc, type::Type_ptr type);
+        /* push DDs and type information for variables (used by walk_leaf) */
+        void push_dds(enc::Encoding_ptr enc, type::Type_ptr type);
 
-    /* -- expr inspectors ---------------------------------------------------- */
-    bool is_binary_boolean(const expr::Expr_ptr expr);
-    bool is_unary_boolean(const expr::Expr_ptr expr);
-    bool is_ite_boolean(const expr::Expr_ptr expr);
+        /* -- expr inspectors ---------------------------------------------------- */
+        bool is_binary_boolean(const expr::Expr_ptr expr);
+        bool is_unary_boolean(const expr::Expr_ptr expr);
+        bool is_ite_boolean(const expr::Expr_ptr expr);
 
-    bool is_binary_enumerative(const expr::Expr_ptr expr);
-    bool is_unary_enumerative(const expr::Expr_ptr expr);
-    bool is_ite_enumerative(const expr::Expr_ptr expr);
+        bool is_binary_enumerative(const expr::Expr_ptr expr);
+        bool is_unary_enumerative(const expr::Expr_ptr expr);
+        bool is_ite_enumerative(const expr::Expr_ptr expr);
 
-    bool is_binary_algebraic(const expr::Expr_ptr expr);
-    bool is_unary_algebraic(const expr::Expr_ptr expr);
-    bool is_ite_algebraic(const expr::Expr_ptr expr);
+        bool is_binary_algebraic(const expr::Expr_ptr expr);
+        bool is_unary_algebraic(const expr::Expr_ptr expr);
+        bool is_ite_algebraic(const expr::Expr_ptr expr);
 
-    bool is_binary_array(const expr::Expr_ptr expr);
-    bool is_ite_array(const expr::Expr_ptr expr);
+        bool is_binary_array(const expr::Expr_ptr expr);
+        bool is_ite_array(const expr::Expr_ptr expr);
 
-    bool is_subscript_boolean(const expr::Expr_ptr expr);
-    bool is_subscript_enumerative(const expr::Expr_ptr expr);
-    bool is_subscript_algebraic(const expr::Expr_ptr expr);
+        bool is_subscript_boolean(const expr::Expr_ptr expr);
+        bool is_subscript_enumerative(const expr::Expr_ptr expr);
+        bool is_subscript_algebraic(const expr::Expr_ptr expr);
 
-    /* -- boolean exprs ----------------------------------------------------- */
-    void boolean_not(const expr::Expr_ptr expr);
-    void boolean_and(const expr::Expr_ptr expr);
-    void boolean_or(const expr::Expr_ptr expr);
-    void boolean_xor(const expr::Expr_ptr expr);
-    void boolean_implies(const expr::Expr_ptr expr);
-    void boolean_iff(const expr::Expr_ptr expr);
-    void boolean_equals(const expr::Expr_ptr expr);
-    void boolean_not_equals(const expr::Expr_ptr expr);
-    void boolean_ite(const expr::Expr_ptr expr);
-    void boolean_subscript(const expr::Expr_ptr expr);
+        /* -- boolean exprs ----------------------------------------------------- */
+        void boolean_not(const expr::Expr_ptr expr);
+        void boolean_and(const expr::Expr_ptr expr);
+        void boolean_or(const expr::Expr_ptr expr);
+        void boolean_xor(const expr::Expr_ptr expr);
+        void boolean_implies(const expr::Expr_ptr expr);
+        void boolean_iff(const expr::Expr_ptr expr);
+        void boolean_equals(const expr::Expr_ptr expr);
+        void boolean_not_equals(const expr::Expr_ptr expr);
+        void boolean_ite(const expr::Expr_ptr expr);
+        void boolean_subscript(const expr::Expr_ptr expr);
 
-    /* -- algebraic exprs --------------------------------------------------- */
-    void algebraic_neg(const expr::Expr_ptr expr);
-    void algebraic_bw_not(const expr::Expr_ptr expr);
-    void algebraic_plus(const expr::Expr_ptr expr);
-    void algebraic_mul(const expr::Expr_ptr expr);
-    void algebraic_sub(const expr::Expr_ptr expr);
-    void algebraic_div(const expr::Expr_ptr expr);
-    void algebraic_mod(const expr::Expr_ptr expr);
-    void algebraic_bw_and(const expr::Expr_ptr expr);
-    void algebraic_bw_or(const expr::Expr_ptr expr);
-    void algebraic_bw_xor(const expr::Expr_ptr expr);
-    void algebraic_bw_xnor(const expr::Expr_ptr expr);
-    void algebraic_lshift(const expr::Expr_ptr expr);
-    void algebraic_rshift(const expr::Expr_ptr expr);
-    void algebraic_equals(const expr::Expr_ptr expr);
-    void algebraic_not_equals(const expr::Expr_ptr expr);
-    void algebraic_gt(const expr::Expr_ptr expr);
-    void algebraic_ge(const expr::Expr_ptr expr);
-    void algebraic_lt(const expr::Expr_ptr expr);
-    void algebraic_le(const expr::Expr_ptr expr);
-    void algebraic_ite(const expr::Expr_ptr expr);
-    void algebraic_subscript(const expr::Expr_ptr expr);
+        /* -- algebraic exprs --------------------------------------------------- */
+        void algebraic_neg(const expr::Expr_ptr expr);
+        void algebraic_bw_not(const expr::Expr_ptr expr);
+        void algebraic_plus(const expr::Expr_ptr expr);
+        void algebraic_mul(const expr::Expr_ptr expr);
+        void algebraic_sub(const expr::Expr_ptr expr);
+        void algebraic_div(const expr::Expr_ptr expr);
+        void algebraic_mod(const expr::Expr_ptr expr);
+        void algebraic_bw_and(const expr::Expr_ptr expr);
+        void algebraic_bw_or(const expr::Expr_ptr expr);
+        void algebraic_bw_xor(const expr::Expr_ptr expr);
+        void algebraic_bw_xnor(const expr::Expr_ptr expr);
+        void algebraic_lshift(const expr::Expr_ptr expr);
+        void algebraic_rshift(const expr::Expr_ptr expr);
+        void algebraic_equals(const expr::Expr_ptr expr);
+        void algebraic_not_equals(const expr::Expr_ptr expr);
+        void algebraic_gt(const expr::Expr_ptr expr);
+        void algebraic_ge(const expr::Expr_ptr expr);
+        void algebraic_lt(const expr::Expr_ptr expr);
+        void algebraic_le(const expr::Expr_ptr expr);
+        void algebraic_ite(const expr::Expr_ptr expr);
+        void algebraic_subscript(const expr::Expr_ptr expr);
 
-    /* -- enumeratives ------------------------------------------------------ */
-    void enumerative_equals(const expr::Expr_ptr expr);
-    void enumerative_not_equals(const expr::Expr_ptr expr);
-    void enumerative_ite(const expr::Expr_ptr expr);
-    void enumerative_subscript(const expr::Expr_ptr expr);
+        /* -- enumeratives ------------------------------------------------------ */
+        void enumerative_equals(const expr::Expr_ptr expr);
+        void enumerative_not_equals(const expr::Expr_ptr expr);
+        void enumerative_ite(const expr::Expr_ptr expr);
+        void enumerative_subscript(const expr::Expr_ptr expr);
 
-    /* -- arrays ------------------------------------------------------------ */
-    void array_equals(const expr::Expr_ptr expr);
-    void array_ite(const expr::Expr_ptr expr);
+        /* -- arrays ------------------------------------------------------------ */
+        void array_equals(const expr::Expr_ptr expr);
+        void array_ite(const expr::Expr_ptr expr);
 
-    /* -- casts ------------------------------------------------------------- */
-    void algebraic_cast_from_boolean(const expr::Expr_ptr expr);
-    void boolean_cast_from_algebraic(const expr::Expr_ptr expr);
-    void algebraic_cast_from_algebraic(const expr::Expr_ptr expr);
+        /* -- casts ------------------------------------------------------------- */
+        void algebraic_cast_from_boolean(const expr::Expr_ptr expr);
+        void boolean_cast_from_algebraic(const expr::Expr_ptr expr);
+        void algebraic_cast_from_algebraic(const expr::Expr_ptr expr);
 
-    /* -- internals --------------------------------------------------------- */
+        /* -- internals --------------------------------------------------------- */
 
-    /* algebraic manipulations */
-    void algebraic_unary(const expr::Expr_ptr expr);
-    void algebraic_binary(const expr::Expr_ptr expr);
-    void algebraic_relational(const expr::Expr_ptr expr);
-    void algebraic_constant(expr::Expr_ptr expr, unsigned width);
+        /* algebraic manipulations */
+        void algebraic_unary(const expr::Expr_ptr expr);
+        void algebraic_binary(const expr::Expr_ptr expr);
+        void algebraic_relational(const expr::Expr_ptr expr);
+        void algebraic_constant(expr::Expr_ptr expr, unsigned width);
 
-    /* cache management */
-    void clear_internals();
-    bool cache_miss(const expr::Expr_ptr expr);
-    void memoize_result(const expr::Expr_ptr expr);
+        /* cache management */
+        void clear_internals();
+        bool cache_miss(const expr::Expr_ptr expr);
+        void memoize_result(const expr::Expr_ptr expr);
 
-    /* encoding management */
-    enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr, const type::Type_ptr type);
+        /* encoding management */
+        enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr, const type::Type_ptr type);
 
-    /* automatic inner variables (determinization, muxes, etc...) */
-    expr::Expr_ptr make_auto_id();
-    void make_auto_ddvect(dd::DDVector& dv, unsigned width);
-    ADD  make_auto_dd();
+        /* automatic inner variables (determinization, muxes, etc...) */
+        expr::Expr_ptr make_auto_id();
+        void make_auto_ddvect(dd::DDVector& dv, unsigned width);
+        ADD make_auto_dd();
 
-    void pre_hook();
-    void post_hook();
+        void pre_hook();
+        void post_hook();
 
-    void pre_node_hook(expr::Expr_ptr expr);
-    void post_node_hook(expr::Expr_ptr expr);
+        void pre_node_hook(expr::Expr_ptr expr);
+        void post_node_hook(expr::Expr_ptr expr);
 
-    /* compilation passes: building encodings, compilation */
-    void build_encodings(expr::Expr_ptr ctx, expr::Expr_ptr body);
-    void compile(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        /* compilation passes: building encodings, compilation */
+        void build_encodings(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        void compile(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
-    /* post-processing stages */
-    void check_internals(expr::Expr_ptr ctx, expr::Expr_ptr body);
-    void activate_ite_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body);
-    void activate_array_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        /* post-processing stages */
+        void check_internals(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        void activate_ite_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body);
+        void activate_array_muxes(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
-    /* -- data -------------------------------------------------------------- */
+        /* -- data -------------------------------------------------------------- */
 
-    /* TimedExpr -> Compilation Unit cache */
-    using CompilationMap =
-        boost::unordered_map<expr::TimedExpr, Unit,
-                             expr::TimedExprHash, expr::TimedExprEq> ;
-    CompilationMap f_compilation_cache;
+        /* TimedExpr -> Compilation Unit cache */
+        using CompilationMap =
+            boost::unordered_map<expr::TimedExpr, Unit, expr::TimedExprHash, expr::TimedExprEq>;
+        CompilationMap f_compilation_cache;
 
-    /* microcode descriptors */
-    InlinedOperatorDescriptors f_inlined_operator_descriptors;
+        /* microcode descriptors */
+        InlinedOperatorDescriptors f_inlined_operator_descriptors;
 
-    /* Binary selection descriptors */
-    Expr2BinarySelectionDescriptorsMap f_expr2bsd_map;
+        /* Binary selection descriptors */
+        Expr2BinarySelectionDescriptorsMap f_expr2bsd_map;
 
-    /* Binary selection (ITEs) toplevels */
-    BinarySelectionUnionFindMap f_bsuf_map;
+        /* Binary selection (ITEs) toplevels */
+        BinarySelectionUnionFindMap f_bsuf_map;
 
-    /* Multiway selection (Arrays) descriptors */
-    MultiwaySelectionDescriptors f_multiway_selection_descriptors;
+        /* Multiway selection (Arrays) descriptors */
+        MultiwaySelectionDescriptors f_multiway_selection_descriptors;
 
-    /* type checking */
-    type::TypeVector f_type_stack;
+        /* type checking */
+        type::TypeVector f_type_stack;
 
-    /* compilation results */
-    dd::DDVector f_add_stack;
+        /* compilation results */
+        dd::DDVector f_add_stack;
 
-    /* current ctx stack, for symbol resolution */
-    expr::ExprVector f_ctx_stack;
+        /* current ctx stack, for symbol resolution */
+        expr::ExprVector f_ctx_stack;
 
-    /* current time frame stack */
-    utils::TimeVector f_time_stack;
+        /* current time frame stack */
+        utils::TimeVector f_time_stack;
 
-    /* managers */
-    model::ModelMgr& f_owner;
-    enc::EncodingMgr& f_enc;
+        /* managers */
+        model::ModelMgr& f_owner;
+        enc::EncodingMgr& f_enc;
 
-    /* owned */
-    expr::preprocessor::Preprocessor f_preprocessor;
+        /* owned */
+        expr::preprocessor::Preprocessor f_preprocessor;
 
-    /* Auto expressions and DDs */
-    unsigned f_temp_auto_index;
+        /* Auto expressions and DDs */
+        unsigned f_temp_auto_index;
 
-    /* Compiler status (see above) */
-    EStatus f_status;
+        /* Compiler status (see above) */
+        EStatus f_status;
 
-    /* synchronization */
-    boost::mutex f_process_mutex;
-};
+        /* synchronization */
+        boost::mutex f_process_mutex;
+    };
 
 } // namespace compiler
 

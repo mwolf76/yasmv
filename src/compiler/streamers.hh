@@ -29,6 +29,8 @@
 
 #include <vector>
 
+#include <compiler/typedefs.hh>
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 
