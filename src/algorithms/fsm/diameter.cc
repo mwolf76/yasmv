@@ -88,8 +88,9 @@ namespace fsm {
             INFO
                 << "INIT consistency check ok."
                 << std::endl;
-        } else
+        } else {
             assert(false); /* unreachable */
+        }
 
         do {
             /* unrolling next */
