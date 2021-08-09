@@ -148,7 +148,6 @@ namespace algorithms {
     void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
     {
         for (auto body : exprs) {
-
             DEBUG
                 << "processing INVAR "
                 << ctx << "::" << body
@@ -226,15 +225,13 @@ namespace algorithms {
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { symbols.next() };
 
             expr::Expr_ptr ctx { pair.first };
-            symb::Symbol_ptr symb { pair.second };
+            symb::Symbol_ptr symbol { pair.second };
 
-            if (symb->is_variable()) {
-                symb::Variable& var { symb->as_variable() };
-
-                if (var.is_input() ||
-                    var.is_frozen() ||
-                    var.is_temp())
+            if (symbol->is_variable()) {
+                symb::Variable& var { symbol->as_variable() };
+                if (var.is_input() || var.is_frozen() || var.is_temp()) {
                     continue;
+                }
 
                 expr::Expr_ptr expr { var.name() };
                 expr::TimedExpr key { em().make_dot(ctx, expr), 0 };
@@ -246,10 +243,8 @@ namespace algorithms {
 
                 dd::DDVector::const_iterator di;
                 unsigned ndx;
-                for (ndx = 0, di = enc->bits().begin();
-                     enc->bits().end() != di; ++ndx, ++di) {
-
-                    unsigned bit { (*di).getNode()->index };
+                for (ndx = 0, di = enc->bits().begin(); enc->bits().end() != di; ++ndx, ++di) {
+                    unsigned bit { di->getNode()->index };
                     const enc::UCBI& ucbi { f_bm.find_ucbi(bit) };
                     const enc::TCBI jtcbi { enc::TCBI(ucbi, j) };
                     const enc::TCBI ktcbi { enc::TCBI(ucbi, k) };
