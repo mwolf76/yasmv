@@ -55,30 +55,26 @@ namespace algorithms {
     using thread_ptr = boost::thread *;
     using thread_ptrs = std::vector<thread_ptr>;
 
-    /* Engine-less algorithm base class. Engine instances are provided by
-       strategies. */
+    /* Engine-less algorithm base class. Engine instances are provided
+     * by strategies. */
     class Algorithm {
 
     public:
         Algorithm(cmd::Command &command, model::Model &model);
         virtual ~Algorithm();
 
-        inline model::Model &model() { return f_model; }
-
-        inline compiler::Compiler &compiler() { return f_compiler; }
-
-        inline model::ModelMgr &mm() { return f_mm; }
-
+        /* top-level components */
         inline expr::ExprMgr &em() { return f_em; }
-
         inline type::TypeMgr &tm() { return f_tm; }
+        inline model::ModelMgr &mm() { return f_mm; }
+        inline model::Model &model() { return f_model; }
+        inline compiler::Compiler &compiler() { return f_compiler; }
 
         inline bool ok() const { return f_ok; }
 
+        /* witness management */
         inline bool has_witness() const { return NULL != f_witness; }
-
         inline void set_witness(witness::Witness &witness) { f_witness = &witness; }
-
         inline witness::Witness &witness() const {
             assert (NULL != f_witness);
             return *f_witness;
