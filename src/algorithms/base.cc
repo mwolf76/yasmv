@@ -44,22 +44,15 @@ namespace algorithms {
         , f_tm(type::TypeMgr::INSTANCE())
         , f_witness(NULL)
     {
-        f_ok = true;
-
         /* Force mgr to exist */
         sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
-
-        /* suppress warning */
-        (void) mgr;
-
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        (void) mgr; /* suppress warning */
 
         env::Environment& env { env::Environment::INSTANCE() };
 
-        model::Module& main_module { model.main_module() };
-
         std::stack<std::pair<expr::Expr_ptr, model::Module_ptr>> stack;
-        stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(em.make_empty(), &main_module));
+        model::Module& main_module { model.main_module() };
+        stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(em().make_empty(), &main_module));
 
         /* walk of var decls, starting from main module */
         while (0 < stack.size()) {
@@ -85,7 +78,7 @@ namespace algorithms {
             symb::Variables::const_iterator vi;
             for (vi = attrs.begin(); attrs.end() != vi; ++vi) {
                 expr::Expr_ptr id { vi->first };
-                expr::Expr_ptr local_ctx { em.make_dot(ctx, id) };
+                expr::Expr_ptr local_ctx { em().make_dot(ctx, id) };
 
                 symb::Variable& var { *vi->second };
                 type::Type_ptr vtype { var.type() };

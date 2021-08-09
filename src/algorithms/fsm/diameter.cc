@@ -28,27 +28,29 @@
 
 namespace fsm {
 
-    ComputeDiameter::ComputeDiameter(cmd::Command &command, model::Model &model)
-        : algorithms::Algorithm(command, model)
-        , f_diameter(UINT_MAX)
+    ComputeDiameter::ComputeDiameter(cmd::Command& command, model::Model& model)
+        : algorithms::Algorithm { command, model }
+        , f_diameter { UINT_MAX }
     {
-        const void *instance(this);
+        const void* instance { this };
         TRACE
             << "Created ComputeDiameter @"
             << instance
             << std::endl;
     }
 
-    ComputeDiameter::~ComputeDiameter() {
-        const void *instance(this);
+    ComputeDiameter::~ComputeDiameter()
+    {
+        const void* instance { this };
         TRACE
             << "Destroyed ComputeDiameter @"
             << instance
             << std::endl;
     }
 
-    void ComputeDiameter::process() {
-        sat::Engine engine{ "ComputeDiameter" };
+    void ComputeDiameter::process()
+    {
+        sat::Engine engine { "ComputeDiameter" };
 
         /* fire up strategies */
         algorithms::thread_ptrs tasks;
@@ -61,25 +63,22 @@ namespace fsm {
             [](algorithms::thread_ptr task) {
                 task->join();
                 delete task;
-            }
-        );
+            });
     }
 
-    void ComputeDiameter::forward_strategy() {
-        sat::Engine engine{"forward"};
-        step_t k(0);
+    void ComputeDiameter::forward_strategy()
+    {
+        sat::Engine engine { "forward" };
+        step_t k { 0 };
 
         /* initial constraints */
         assert_fsm_init(engine, k);
         assert_fsm_invar(engine, k);
 
-        sat::status_t status
-            (engine.solve());
-
-        if (sat::status_t::STATUS_UNKNOWN == status)
+        sat::status_t status { engine.solve() };
+        if (sat::status_t::STATUS_UNKNOWN == status) {
             goto cleanup;
-
-        else if (sat::status_t::STATUS_UNSAT == status) {
+        } else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
                 << "Empty initial states."
                 << std::endl;
@@ -94,8 +93,7 @@ namespace fsm {
 
         do {
             /* unrolling next */
-            assert_fsm_trans(engine, k);
-            ++k;
+            assert_fsm_trans(engine, k++);
             assert_fsm_invar(engine, k);
 
             /* build state uniqueness constraint for each pair of states
@@ -108,31 +106,26 @@ namespace fsm {
                 << "Now looking for unreachability proof (k = " << k << ")..."
                 << std::endl;
 
-            sat::status_t status
-                (engine.solve());
-
-            if (sat::status_t::STATUS_UNKNOWN == status)
+            sat::status_t status { engine.solve() };
+            if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
-
-            else if (sat::status_t::STATUS_UNSAT == status) {
+            } else if (sat::status_t::STATUS_UNSAT == status) {
                 INFO
                     << "Found unreachability proof (k = " << k << ")"
                     << std::endl;
 
                 sync_set_diameter(k);
                 goto cleanup;
-            } else if (sat::status_t::STATUS_SAT == status)
+            } else if (sat::status_t::STATUS_SAT == status) {
                 INFO
                     << "No unreachability proof found (k = " << k << ")"
                     << std::endl;
-            else {
+            } else
                 assert(false); /* unreachable */
-            }
 
             TRACE
                 << "Done with k = " << k << "..."
-                <<
-                std::endl;
+                << std::endl;
         } while (sync_diameter() == UINT_MAX);
 
     cleanup:
@@ -145,24 +138,21 @@ namespace fsm {
     } /* ComputeDiameter::forward_strategy */
 
     /* synchronized */
-    step_t ComputeDiameter::sync_diameter() {
-        boost::mutex::scoped_lock lock
-            (f_diameter_mutex);
-
+    step_t ComputeDiameter::sync_diameter()
+    {
+        boost::mutex::scoped_lock lock { f_diameter_mutex };
         return f_diameter;
     }
 
     /* synchronized */
-    bool ComputeDiameter::sync_set_diameter(step_t diameter) {
-        boost::mutex::scoped_lock lock
-            (f_diameter_mutex);
+    bool ComputeDiameter::sync_set_diameter(step_t diameter)
+    {
+        boost::mutex::scoped_lock lock { f_diameter_mutex };
 
         /* consistency check */
         assert(f_diameter == diameter || f_diameter == UINT_MAX);
 
-        bool res
-            (f_diameter != UINT_MAX);
-
+        bool res { f_diameter != UINT_MAX };
         f_diameter = diameter;
 
         return res;
