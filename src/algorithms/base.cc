@@ -310,29 +310,20 @@ namespace algorithms {
                                       witness::TimeFrame& tf,
                                       sat::group_t group)
     {
-        expr::ExprMgr& em(expr::ExprMgr::INSTANCE());
-
-        expr::ExprVector assignments(tf.assignments());
-
-        expr::ExprVector::const_iterator i(assignments.begin());
-
         symb::ResolverProxy resolver;
 
-        unsigned count(0);
+        expr::ExprVector assignments { tf.assignments() };
+        unsigned count { 0 };
+
+        expr::ExprVector::const_iterator i { assignments.begin() };
         while (i != assignments.end()) {
+            expr::Expr_ptr assignment { *i++ };
+            expr::Expr_ptr full { assignment->lhs() };
+            symb::Symbol_ptr symbol { resolver.symbol(full) };
 
-            expr::Expr_ptr assignment(*i);
-            ++i;
-
-            expr::Expr_ptr full(assignment->lhs());
-
-            symb::Symbol_ptr symb(resolver.symbol(full));
-
-            if (symb->is_variable()) {
-                expr::Expr_ptr scope(full->lhs());
-
-                expr::Expr_ptr expr(em.make_eq(full->rhs(),
-                                               assignment->rhs()));
+            if (symbol->is_variable()) {
+                expr::Expr_ptr scope { full->lhs() };
+                expr::Expr_ptr expr { em().make_eq(full->rhs(), assignment->rhs()) };
 
                 DEBUG
                     << expr
