@@ -121,8 +121,9 @@ namespace fsm {
                 INFO
                     << "No unreachability proof found (k = " << k << ")"
                     << std::endl;
-            } else
+            } else {
                 assert(false); /* unreachable */
+            }
 
             TRACE
                 << "Done with k = " << k << "..."
