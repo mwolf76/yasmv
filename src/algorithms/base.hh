@@ -56,15 +56,24 @@ namespace algorithms {
     using thread_ptrs = std::vector<thread_ptr>;
 
     /* Engine-less algorithm base class. Engine instances are provided by
-   strategies. */
+       strategies. */
     class Algorithm {
 
     public:
         Algorithm(cmd::Command &command, model::Model &model);
-
         virtual ~Algorithm();
 
+        inline model::Model &model() { return f_model; }
+
         inline compiler::Compiler &compiler() { return f_compiler; }
+
+        inline model::ModelMgr &mm() { return f_mm; }
+
+        inline expr::ExprMgr &em() { return f_em; }
+
+        inline type::TypeMgr &tm() { return f_tm; }
+
+        inline bool ok() const { return f_ok; }
 
         inline bool has_witness() const { return NULL != f_witness; }
 
@@ -74,16 +83,6 @@ namespace algorithms {
             assert (NULL != f_witness);
             return *f_witness;
         }
-
-        inline model::Model &model() { return f_model; }
-
-        inline model::ModelMgr &mm() { return f_mm; }
-
-        inline expr::ExprMgr &em() { return f_em; }
-
-        inline type::TypeMgr &tm() { return f_tm; }
-
-        inline bool ok() const { return f_ok; }
 
         /* FSM */
         void assert_fsm_init(sat::Engine &engine, step_t time,
@@ -110,9 +109,7 @@ namespace algorithms {
     private:
         /* internals */
         void process_init(expr::Expr_ptr ctx, const expr::ExprVector &init);
-
         void process_invar(expr::Expr_ptr ctx, const expr::ExprVector &invar);
-
         void process_trans(expr::Expr_ptr ctx, const expr::ExprVector &trans);
 
         /* all good? */
