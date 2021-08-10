@@ -25,33 +25,33 @@
 
 namespace cmd {
 
-// static initialization
-CommandMgr_ptr CommandMgr::f_instance = NULL;
+    // static initialization
+    CommandMgr_ptr CommandMgr::f_instance = NULL;
 
-CommandMgr& CommandMgr::INSTANCE()
-{
-    if (! f_instance)
-        f_instance = new CommandMgr();
+    CommandMgr& CommandMgr::INSTANCE()
+    {
+        if (!f_instance)
+            f_instance = new CommandMgr();
 
-    return (*f_instance);
-}
+        return (*f_instance);
+    }
 
-CommandMgr::CommandMgr()
-    : f_interpreter (Interpreter::INSTANCE())
-{
-    const void* instance { this };
+    CommandMgr::CommandMgr()
+        : f_interpreter(Interpreter::INSTANCE())
+    {
+        const void* instance { this };
 
-    DEBUG
-        << "Initialized CommandMgr @"
-        << instance
-        << std::endl;
-}
+        DEBUG
+            << "Initialized CommandMgr @"
+            << instance
+            << std::endl;
+    }
 
-CommandMgr::~CommandMgr()
-{
-    DEBUG
-        << "Destroyed CommandMgr"
-        << std::endl;
-}
+    CommandMgr::~CommandMgr()
+    {
+        DEBUG
+            << "Destroyed CommandMgr"
+            << std::endl;
+    }
 
-};
+} // namespace cmd
