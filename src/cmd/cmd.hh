@@ -173,7 +173,7 @@ namespace cmd {
             return new Clear(f_interpreter);
         }
 
-        // -- topicrs ----------------------------------------------------------------
+        // -- topics ----------------------------------------------------------------
         inline CommandTopic_ptr topic_help()
         {
             return new HelpTopic(f_interpreter);
