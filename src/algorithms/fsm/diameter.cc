@@ -55,6 +55,7 @@ namespace fsm {
         /* fire up strategies */
         algorithms::thread_ptrs tasks;
         tasks.push_back(new boost::thread(&ComputeDiameter::forward_strategy, this));
+        tasks.push_back(new boost::thread(&ComputeDiameter::backward_strategy, this));
 
         /* join and destroy all active threads */
         assert(0 < tasks.size());
@@ -72,7 +73,6 @@ namespace fsm {
         step_t k { 0 };
 
         /* initial constraints */
-        assert_fsm_init(engine, k);
         assert_fsm_invar(engine, k);
 
         sat::status_t status { engine.solve() };
@@ -80,13 +80,13 @@ namespace fsm {
             goto cleanup;
         } else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
-                << "Empty initial states."
+                << "Invariant deadlock detected. FSM has no valid states."
                 << std::endl;
 
             goto cleanup;
         } else if (sat::status_t::STATUS_SAT == status) {
             INFO
-                << "INIT consistency check ok."
+                << "INVAR consistency check ok."
                 << std::endl;
         } else {
             assert(false); /* unreachable */
@@ -104,7 +104,7 @@ namespace fsm {
             }
 
             INFO
-                << "Now looking for unreachability proof (k = " << k << ")..."
+                << "Now looking for infeasibility proof (k = " << k << ") ..."
                 << std::endl;
 
             sat::status_t status { engine.solve() };
@@ -112,14 +112,14 @@ namespace fsm {
                 goto cleanup;
             } else if (sat::status_t::STATUS_UNSAT == status) {
                 INFO
-                    << "Found unreachability proof (k = " << k << ")"
+                    << "Found infeasibility proof (k = " << k << ")"
                     << std::endl;
 
-                sync_set_diameter(k);
+                sync_set_diameter(k - 1);
                 goto cleanup;
             } else if (sat::status_t::STATUS_SAT == status) {
                 INFO
-                    << "No unreachability proof found (k = " << k << ")"
+                    << "No infeasibility proof found (k = " << k << ")"
                     << std::endl;
             } else {
                 assert(false); /* unreachable */
@@ -138,6 +138,80 @@ namespace fsm {
             << engine
             << std::endl;
     } /* ComputeDiameter::forward_strategy */
+
+    void ComputeDiameter::backward_strategy()
+    {
+        sat::Engine engine { "backward" };
+        step_t k { 0 };
+
+        assert_fsm_invar(engine, UINT_MAX - k);
+
+        sat::status_t status { engine.solve() };
+        if (sat::status_t::STATUS_UNKNOWN == status) {
+            goto cleanup;
+        } else if (sat::status_t::STATUS_UNSAT == status) {
+            INFO
+                << "Invariant deadlock detected. FSM has no valid states."
+                << std::endl;
+
+            goto cleanup;
+        } else if (sat::status_t::STATUS_SAT == status) {
+            INFO
+                << "INVAR consistency check ok."
+                << std::endl;
+        } else {
+            assert(false); /* unreachable */
+        }
+
+        do {
+            /* unrolling next */
+            ++k;
+            assert_fsm_trans(engine, UINT_MAX - k);
+            assert_fsm_invar(engine, UINT_MAX - k);
+
+            /* build state uniqueness constraint for each pair of states
+               (j, k), where j < k */
+            for (step_t j = 0; j < k; ++j) {
+                assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
+            }
+
+            INFO
+                << "Now looking for infeasibility proof (k = " << k << ")..."
+                << std::endl;
+
+            sat::status_t status { engine.solve() };
+
+            if (sat::status_t::STATUS_UNKNOWN == status) {
+                goto cleanup;
+            } else if (sat::status_t::STATUS_SAT == status) {
+                INFO
+                    << "No infeasibility proof found (k = " << k << ")"
+                    << std::endl;
+            } else if (sat::status_t::STATUS_UNSAT == status) {
+                INFO
+                    << "Found infeasibility proof (k = " << k << ")"
+                    << std::endl;
+
+                sync_set_diameter(k - 1);
+                goto cleanup;
+            } else {
+                assert(false); /* unreachable */
+            }
+
+            TRACE
+                << "Done with k = " << k << "..."
+                << std::endl;
+
+        } while (sync_diameter() == UINT_MAX);
+
+    cleanup:
+        /* signal other threads it's time to go home */
+        sat::EngineMgr::INSTANCE().interrupt();
+
+        INFO
+            << engine
+            << std::endl;
+    } /* Reachability::backward_strategy() */
 
     /* synchronized */
     step_t ComputeDiameter::sync_diameter()

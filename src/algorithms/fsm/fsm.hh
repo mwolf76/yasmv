@@ -106,6 +106,7 @@ private:
 
     /* strategies */
     void forward_strategy();
+    void backward_strategy();
 };
 
 } // namespace fsm
