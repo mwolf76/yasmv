@@ -55,6 +55,8 @@
 
 namespace cmd {
 
+    using CommandTopics = std::set<std::string>;
+
     class CommandMgr;
     typedef CommandMgr* CommandMgr_ptr;
 
@@ -174,6 +176,8 @@ namespace cmd {
         }
 
         // -- topics ----------------------------------------------------------------
+        CommandTopics topics() const;
+
         inline CommandTopic_ptr topic_help()
         {
             return new HelpTopic(f_interpreter);

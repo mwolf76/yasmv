@@ -23,11 +23,10 @@
 
 #include <cmd.hh>
 
+#include <boost/filesystem.hpp>
+
 namespace cmd {
-
-    // static initialization
-    CommandMgr_ptr CommandMgr::f_instance = NULL;
-
+    CommandMgr_ptr CommandMgr::f_instance { NULL };
     CommandMgr& CommandMgr::INSTANCE()
     {
         if (!f_instance)
@@ -52,6 +51,61 @@ namespace cmd {
         DEBUG
             << "Destroyed CommandMgr"
             << std::endl;
+    }
+
+    CommandTopics CommandMgr::topics() const
+    {
+        CommandTopics res;
+
+        char* yasmv_home_path { getenv(YASMV_HOME_PATH) };
+        if (NULL == yasmv_home_path) {
+            ERR
+                << "YASMV_HOME must be set to a valid directory."
+                << std::endl;
+            exit(1);
+        }
+
+        boost::filesystem::path help_path { yasmv_home_path };
+        help_path += "/help/";
+
+        TRACE
+            << help_path
+            << std::endl;
+
+        try {
+            if (exists(help_path) && is_directory(help_path)) {
+                for (boost::filesystem::directory_iterator di = boost::filesystem::directory_iterator(help_path);
+                     di != boost::filesystem::directory_iterator(); ++di) {
+
+                    boost::filesystem::path entry { di->path() };
+                    if (strcmp(entry.extension().c_str(), ".nroff")) {
+                        continue;
+                    }
+
+                    res.insert(basename(entry));
+                }
+            } else {
+                ERR
+                    << "Path "
+                    << help_path
+                    << " does not exist or is not a readable directory."
+                    << std::endl;
+
+                /* leave immediately */
+                exit(1);
+            }
+        } catch (const boost::filesystem::filesystem_error& fse) {
+            pconst_char what { fse.what() };
+
+            ERR
+                << what
+                << std::endl;
+
+            /* leave immediately */
+            exit(1);
+        }
+
+        return res;
     }
 
 } // namespace cmd
