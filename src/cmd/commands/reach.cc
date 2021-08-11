@@ -30,151 +30,154 @@
 
 namespace cmd {
 
-Reach::Reach(Interpreter& owner)
-    : Command(owner)
-    , f_out(std::cout)
-    , f_target(NULL)
-{}
+    Reach::Reach(Interpreter& owner)
+        : Command(owner)
+        , f_out(std::cout)
+        , f_target(NULL)
+    {}
 
-Reach::~Reach()
-{ f_constraints.clear(); }
-
-void Reach::set_target(expr::Expr_ptr target)
-{ f_target = target; }
-
-void Reach::add_constraint(expr::Expr_ptr constraint)
-{
-    expr::time::Analyzer eta(expr::ExprMgr::INSTANCE());
-
-    eta.process(constraint);
-    if (eta.has_forward_time()) {
-        TRACE
-            << "Adding FORWARD constraint to reachability problem: "
-            << constraint
-            << std::endl;
-    } else if (eta.has_backward_time()) {
-        TRACE
-            << "Adding BACKWARD constraint to reachability problem: "
-            << constraint
-            << std::endl;
-    } else {
-        TRACE
-            << "Adding GLOBAL constraint to reachability problem: "
-            << constraint
-            << std::endl;
+    Reach::~Reach()
+    {
+        f_constraints.clear();
     }
 
-    f_constraints.push_back(constraint);
-}
-
-bool Reach::check_requirements()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
-
-    model::Model& model
-        (mm.model());
-
-    if (! f_target) {
-        f_out
-            << wrnPrefix
-            << "No target given. Aborting..."
-            << std::endl;
-
-        return false;
+    void Reach::set_target(expr::Expr_ptr target)
+    {
+        f_target = target;
     }
 
-    if (0 == model.modules().size()) {
-        f_out
-            << wrnPrefix
-            << "Model not loaded."
-            << std::endl;
+    void Reach::add_constraint(expr::Expr_ptr constraint)
+    {
+        expr::time::Analyzer eta(expr::ExprMgr::INSTANCE());
 
-        return false;
-    }
-
-    return true;
-}
-
-utils::Variant Reach::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
-
-    bool res { false };
-
-    if (! check_requirements())
-        return utils::Variant(errMessage);
-
-    reach::Reachability bmc { *this, mm.model() };
-    bmc.process(f_target, f_constraints);
-
-    switch (bmc.status()) {
-    case reach::reachability_status_t::REACHABILITY_REACHABLE:
-        if (! om.quiet())
-            f_out
-                << outPrefix;
-        f_out
-            << "Target is reachable";
-
-        if (bmc.has_witness()) {
-            witness::Witness& w
-                (bmc.witness());
-
-            f_out
-                << ", registered witness `"
-                << w.id()
-                << "`, "
-                << w.size()
-                << " steps."
+        eta.process(constraint);
+        if (eta.has_forward_time()) {
+            TRACE
+                << "Adding FORWARD constraint to reachability problem: "
+                << constraint
+                << std::endl;
+        } else if (eta.has_backward_time()) {
+            TRACE
+                << "Adding BACKWARD constraint to reachability problem: "
+                << constraint
+                << std::endl;
+        } else {
+            TRACE
+                << "Adding GLOBAL constraint to reachability problem: "
+                << constraint
                 << std::endl;
         }
-        res = true;
-        break;
 
-    case reach::reachability_status_t::REACHABILITY_UNREACHABLE:
-        if (! om.quiet())
+        f_constraints.push_back(constraint);
+    }
+
+    bool Reach::check_requirements()
+    {
+        model::ModelMgr& mm(model::ModelMgr::INSTANCE());
+
+        model::Model& model(mm.model());
+
+        if (!f_target) {
             f_out
-                << wrnPrefix;
-        f_out
-            << "Target is unreachable."
+                << wrnPrefix
+                << "No target given. Aborting..."
+                << std::endl;
+
+            return false;
+        }
+
+        if (0 == model.modules().size()) {
+            f_out
+                << wrnPrefix
+                << "Model not loaded."
+                << std::endl;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    utils::Variant Reach::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        bool res { false };
+
+        if (!check_requirements()) {
+            return utils::Variant(errMessage);
+        }
+
+        reach::Reachability bmc { *this, mm.model() };
+        bmc.process(f_target, f_constraints);
+
+        switch (bmc.status()) {
+            case reach::reachability_status_t::REACHABILITY_REACHABLE:
+                if (!om.quiet()) {
+                    f_out
+                        << outPrefix;
+                }
+                f_out
+                    << "Target is reachable";
+
+                if (bmc.has_witness()) {
+                    witness::Witness& w { bmc.witness() };
+
+                    f_out
+                        << ", registered witness `"
+                        << w.id()
+                        << "`, "
+                        << w.size()
+                        << " steps."
+                        << std::endl;
+                }
+                res = true;
+                break;
+
+            case reach::reachability_status_t::REACHABILITY_UNREACHABLE:
+                if (!om.quiet()) {
+                    f_out
+                        << wrnPrefix;
+                }
+                f_out
+                    << "Target is unreachable."
+                    << std::endl;
+                break;
+
+            case reach::reachability_status_t::REACHABILITY_UNKNOWN:
+                f_out
+                    << "Reachability could not be decided."
+                    << std::endl;
+                break;
+
+            case reach::reachability_status_t::REACHABILITY_ERROR:
+                f_out
+                    << "Unexpected error."
+                    << std::endl;
+
+                break;
+
+            default:
+                assert(false); /* unexpected */
+        }
+
+        return utils::Variant { res ? okMessage : errMessage };
+    }
+
+    ReachTopic::ReachTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    ReachTopic::~ReachTopic()
+    {
+        TRACE
+            << "Destroyed check-target topic"
             << std::endl;
-        break;
+    }
 
-    case reach::reachability_status_t::REACHABILITY_UNKNOWN:
-        f_out
-            << "Reachability could not be decided."
-            << std::endl;
-        break;
+    void ReachTopic::usage()
+    {
+        display_manpage("reach");
+    }
 
-    case reach::reachability_status_t::REACHABILITY_ERROR:
-        f_out
-            << "Unexpected error."
-            << std::endl;
-
-        break;
-
-    default: assert(false); /* unexpected */
-    } /* switch */
-
-    return utils::Variant(res ? okMessage : errMessage);
-}
-
-ReachTopic::ReachTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
-
-ReachTopic::~ReachTopic()
-{
-    TRACE
-        << "Destroyed check-target topic"
-        << std::endl;
-}
-
-void ReachTopic::usage()
-{ display_manpage("reach"); }
-
-};
+} // namespace cmd

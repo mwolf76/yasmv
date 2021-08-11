@@ -2,7 +2,7 @@
  * @file reach.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `reach`
+ * This header file contains the handler interface for the `reach`
  * command.
  *
  * Copyright (C) 2012-2018 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -26,47 +26,47 @@
 #ifndef REACH_CMD_H
 #define REACH_CMD_H
 
-#include <cmd/command.hh>
 #include <algorithms/reach/reach.hh>
+#include <cmd/command.hh>
 
 namespace cmd {
 
-class Reach : public Command {
-public:
-    Reach(Interpreter& owner);
-    virtual ~Reach();
+    class Reach: public Command {
+    public:
+        Reach(Interpreter& owner);
+        virtual ~Reach();
 
-    /** cmd params */
-    void set_target(expr::Expr_ptr target);
+        /** cmd params */
+        void set_target(expr::Expr_ptr target);
 
-    /* guided reachability support: forward, backward and global guides */
-    void add_constraint(expr::Expr_ptr constraint);
+        /* guided reachability support: forward, backward and global guides */
+        void add_constraint(expr::Expr_ptr constraint);
 
-    /* run() */
-    utils::Variant virtual operator()();
+        /* run() */
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* the negation of invariant property to be verified */
-    expr::Expr_ptr f_target;
+        /* the negation of invariant property to be verified */
+        expr::Expr_ptr f_target;
 
-    /* constraints for guided reachability */
-    expr::ExprVector f_constraints;
+        /* constraints for guided reachability */
+        expr::ExprVector f_constraints;
 
-    // -- helpers -------------------------------------------------------------
-    bool check_requirements();
-};
+        // -- helpers -------------------------------------------------------------
+        bool check_requirements();
+    };
+    using Reach_ptr =  Reach*;
 
-typedef Reach* Reach_ptr;
+    class ReachTopic: public CommandTopic {
+    public:
+        ReachTopic(Interpreter& owner);
+        virtual ~ReachTopic();
 
-class ReachTopic : public CommandTopic {
-public:
-    ReachTopic(Interpreter& owner);
-    virtual ~ReachTopic();
+        void virtual usage();
+    };
 
-    void virtual usage();
-};
+} // namespace cmd
 
-};
 #endif /* REACH_CMD_H */

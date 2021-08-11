@@ -63,7 +63,6 @@ namespace cmd {
     utils::Variant Help::operator()()
     {
         if (f_topic) {
-
             int status;
             pid_t parent_pid;
             pid_t child_pid;
