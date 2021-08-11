@@ -141,15 +141,15 @@ namespace cmd {
             auto topics { CommandMgr::INSTANCE().topics() };
             std::cout
                 << "Available help topics:"
-                << std::endl
                 << std::endl;
 
             for (auto& topic : topics) {
                 std::cout
-                    << "  - "
+                    << "- "
                     << topic
                     << std::endl;
             }
+            std::cout << std::endl;
 
             return utils::Variant(okMessage);
         }
