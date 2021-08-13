@@ -16,7 +16,9 @@ DESCRIPTION
 .in 3
 Computes the diameter for the FSM.
 
-The diameter is defined as the longest simple path that satisfies the transition relation.
+The diameter is defined as the longest simple path that satisfies the
+transition relation. Initial states are not taken into account when
+computing the diameter.
 
 .ti 0
 EXAMPLES

@@ -15,9 +15,9 @@ DESCRIPTION
 .in 3
 Builds a sequence of commands.
 
-This command can be used to build sequences of other commands that are all
-evaluated as one single task. It's particularly useful when used in combination
-with the `on` command.
+This command can be used to build sequences of other commands that are
+all evaluated as one single task. It's particularly useful when used
+in combination with the `on` command.
 
 .ti 0
 EXAMPLES
@@ -30,5 +30,5 @@ Copyright (c) M. Pensallorto 2011-2018.
 
 .fi
 .in 3
-This document is part of the YASMV distribution, and as such is covered by the
-GPLv3 license that covers the whole project.
+This document is part of the YASMV distribution, and as such is
+covered by the GPLv3 license that covers the whole project.

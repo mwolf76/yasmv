@@ -5,8 +5,7 @@ YASMV manual                                                 reach
 SYNOPSIS
 
 .in 3
-reach <formula>
-
+reach [ -c <timed-constraint> | -t  <trace-witness-id> ]* <formula>
 
 .ti 0
 DESCRIPTION
@@ -15,9 +14,50 @@ DESCRIPTION
 .in 3
 Checks reachability of given formula.
 
-Runs BMC reachability analysis algorithm on the given formula. If the formula is
-found to be reachable, a witness trace is produced. On ther hand, if the formula
-can be proved to be not reachable the algorithm will mark it as UNREACHABLE.
+.ti 0
+BASIC REACHABILITY
+
+In its most basic form, this command uses a BMC reachability analysis
+algorithm on the given formula. If the formula is found to be
+reachable, a witness trace is produced. Additionally, if the formula
+can be proved to be not reachable with a finite witness, the algorithm
+will mark it as UNREACHABLE.
+
+.ti 0
+GUIDED REACHABILITY
+
+The command can also be used to perform guided reachability both by
+adding additional timed constraints on the command line, or by
+providing a trace to be followed. To this end, the -c and -t options
+can be specified arbitrarily many times and can also be used in
+conjunction. However, please note that when used in guided
+reachability mode, the unreachability proof analysis cannot be carried
+out, as a positive result would in general only be indicative of an
+incompatibility with the additional constraints that were provided.
+For this reason, in the guided reachability scenario, the
+unreachability analysis is implicitly disabled.
+
+.ti 1
+TIMED CONSTRAINTS
+
+Two forms of timed constraints are supported:
+
+@<time-index>{ expr }, is a FORWARD time expression and indicates time
+from the initial state. Therefore '@0' denotes the initial state
+itself, '@1' denotes the state reached after the first transition and
+so forth.
+
+$<time-index>{ expr }, is a BACKWARD time expression and indicates
+time from the final state, in a reversed fashion. Therefore '$0'
+denotes the final state itself, '$1' denotes the state from which the
+last transaction initiated, and so forth.
+
+Please note that mixing FORWARD and BACKWARD constraints on the
+command line is currently not supported.
+
+If one or more traces are specified using the -t option, they will all
+be implicitly appropriately converted into timed constraints and
+applied.
 
 .ti 0
 EXAMPLES
@@ -28,7 +68,7 @@ EXAMPLES
 -- Target is reachable, registered witness `reach_1`, 25 steps.
 
 .ti 0
-Copyright (c) M. Pensallorto 2011-2018.
+Copyright (c) M. Pensallorto 2011-2021.
 
 .fi
 .in 3
