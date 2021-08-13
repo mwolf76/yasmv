@@ -35,44 +35,50 @@
 
 namespace cmd {
 
-ReadModel::ReadModel(Interpreter& owner)
-    : Command(owner)
-    , f_input(NULL)
-{}
+    ReadModel::ReadModel(Interpreter& owner)
+        : Command(owner)
+        , f_input(NULL)
+    {}
 
-ReadModel::~ReadModel()
-{
-    free(f_input);
-    f_input = NULL;
-}
-
-void ReadModel::set_input(pconst_char input)
-{
-    if (input) {
+    ReadModel::~ReadModel()
+    {
         free(f_input);
-        f_input = strdup(input);
+        f_input = NULL;
     }
-}
 
-// extern bool parseFile(pconst_char input); // in utils.cc
-utils::Variant ReadModel::operator()()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
+    void ReadModel::set_input(pconst_char input)
+    {
+        if (input) {
+            free(f_input);
+            f_input = strdup(input);
+        }
+    }
 
-    bool ok
-        (true);
+    bool ReadModel::check_requirements()
+    {
+        if (!f_input) {
+            WARN
+                << "No input filename provided. (missing quotes?)"
+                << std::endl;
 
-    if (! f_input) {
-        WARN
-            << "No input filename provided. (missing quotes?)"
-            << std::endl;
-        ok = false;
-    } else {
-        boost::filesystem::path modelpath
-            (f_input);
+            return false;
+        }
 
-        if (! exists(modelpath)) {
+        return true;
+    }
+
+    // extern bool parseFile(pconst_char input); // in utils.cc
+    utils::Variant ReadModel::operator()()
+    {
+        if (!check_requirements()) {
+            return utils::Variant { errMessage };
+        }
+
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        bool ok { true };
+
+        boost::filesystem::path modelpath { f_input };
+        if (!exists(modelpath)) {
             WARN
                 << "File `"
                 << f_input
@@ -80,7 +86,7 @@ utils::Variant ReadModel::operator()()
                 << std::endl;
 
             ok = false;
-        } else if (! is_regular_file(modelpath)) {
+        } else if (!is_regular_file(modelpath)) {
             WARN
                 << "File `"
                 << f_input
@@ -88,36 +94,37 @@ utils::Variant ReadModel::operator()()
                 << std::endl;
 
             ok = false;
-        } else if (! parse::parseFile(f_input)) {
+        } else if (!parse::parseFile(f_input)) {
             WARN
                 << "Syntax error"
                 << std::endl;
 
             ok = false;
-        } else if (! mm.analyze()) {
+        } else if (!mm.analyze()) {
             WARN
                 << "Semantic error"
                 << std::endl;
 
             ok = false;
         }
+
+        return utils::Variant { ok ? okMessage : errMessage };
     }
 
-    return utils::Variant(ok ? okMessage : errMessage);
-}
+    ReadModelTopic::ReadModelTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-ReadModelTopic::ReadModelTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    ReadModelTopic::~ReadModelTopic()
+    {
+        TRACE
+            << "Destroyed read-model topic"
+            << std::endl;
+    }
 
-ReadModelTopic::~ReadModelTopic()
-{
-    TRACE
-        << "Destroyed read-model topic"
-        << std::endl;
-}
+    void ReadModelTopic::usage()
+    {
+        display_manpage("read-model");
+    }
 
-void ReadModelTopic::usage()
-{ display_manpage("read-model"); }
-
-};
+} // namespace cmd

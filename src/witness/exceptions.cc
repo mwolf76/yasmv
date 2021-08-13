@@ -26,83 +26,100 @@
 
 #include <witness/exceptions.hh>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace witness {
 
-static std::string build_duplicate_witness_id_error_message(expr::Atom id)
-{
-    std::ostringstream oss;
+    static std::string build_duplicate_witness_id_error_message(expr::Atom id)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "`"
-        << id
-        << "` is already registered." ;
+        oss
+            << "`"
+            << id
+            << "` is already registered.";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-DuplicateWitnessId::DuplicateWitnessId(expr::Atom id)
-    : WitnessException("DuplicateWitnessId",
-                       build_duplicate_witness_id_error_message(id))
-{}
+    DuplicateWitnessId::DuplicateWitnessId(expr::Atom id)
+        : WitnessException("DuplicateWitnessId",
+                           build_duplicate_witness_id_error_message(id))
+    {}
 
-/** Raised when a given ID is registered more than once */
-NoCurrentlySelectedWitness::NoCurrentlySelectedWitness()
-    : WitnessException("NoCurrentlySelectedWitness")
-{}
+    /** Raised when a given ID is registered more than once */
+    NoCurrentlySelectedWitness::NoCurrentlySelectedWitness()
+        : WitnessException("NoCurrentlySelectedWitness")
+    {}
 
-static std::string build_unknown_witness_error_message(expr::Atom id)
-{
-    std::ostringstream oss;
+    static std::string build_unknown_witness_error_message(expr::Atom id)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "`"
-        << id
-        << "` is not registered." ;
+        oss
+            << "`"
+            << id
+            << "` is not registered.";
 
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-/** Raised when a given ID is searched for and was not registered */
-UnknownWitnessId::UnknownWitnessId(expr::Atom id)
-    : WitnessException("UnknownWitnessId",
-                       build_unknown_witness_error_message(id))
-{}
+    /** Raised when a given ID is searched for and was not registered */
+    UnknownWitnessId::UnknownWitnessId(expr::Atom id)
+        : WitnessException("UnknownWitnessId",
+                           build_unknown_witness_error_message(id))
+    {}
 
-static std::string build_illegal_time_error_message(step_t time)
-{
-    std::ostringstream oss;
+    static std::string build_illegal_time_error_message(step_t time)
+    {
+        std::ostringstream oss;
 
-    oss
-        << time ;
+        oss
+            << time;
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-/** Raised when TimeFrame for requested time does not exist. */
-IllegalTime::IllegalTime(step_t time)
-    : WitnessException("IllegalTime",
-                       build_illegal_time_error_message(time))
-{}
+    /** Raised when TimeFrame for requested time does not exist. */
+    IllegalTime::IllegalTime(step_t time)
+        : WitnessException("IllegalTime",
+                           build_illegal_time_error_message(time))
+    {}
 
-static std::string build_no_value_error_message(expr::Expr_ptr id)
-{
-    std::ostringstream oss;
+    static std::string build_no_value_error_message(expr::Expr_ptr id)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "No value for `"
-        << id
-        << "`";
+        oss
+            << "No value for `"
+            << id
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-NoValue::NoValue(expr::Expr_ptr id)
-    : WitnessException("NoValue",
-                       build_no_value_error_message(id))
-{}
+    NoValue::NoValue(expr::Expr_ptr id)
+        : WitnessException("NoValue",
+                           build_no_value_error_message(id))
+    {}
 
-};
+    static std::string build_unknown_identifier_error_message(expr::Expr_ptr id)
+    {
+        std::ostringstream oss;
+
+        oss
+            << "Unknown identifier `"
+            << id
+            << "`";
+
+        return oss.str();
+    }
+
+    UnknownIdentifier::UnknownIdentifier(expr::Expr_ptr id)
+        : WitnessException("UnknownIdentifier",
+                           build_unknown_identifier_error_message(id))
+    {}
+
+} // namespace witness

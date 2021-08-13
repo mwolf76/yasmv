@@ -1000,6 +1000,9 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=read_model_command_topic
        { $res = c; }
 
+    |  c=read_trace_command_topic
+       { $res = c; }
+
     |  c=pick_state_command_topic
        { $res = c; }
 
@@ -1066,6 +1069,9 @@ command returns [cmd::Command_ptr res]
        {$res = c; }
 
     |  c=read_model_command
+       { $res = c; }
+
+    |  c=read_trace_command
        { $res = c; }
 
     |  c=pick_state_command
@@ -1179,6 +1185,20 @@ read_model_command returns [cmd::Command_ptr res]
 read_model_command_topic returns [cmd::CommandTopic_ptr res]
     :  'read-model'
         { $res = cm.topic_read_model(); }
+    ;
+
+read_trace_command returns [cmd::Command_ptr res]
+    :  'read-trace'
+        { $res = cm.make_read_trace(); }
+
+        ( input=pcchar_quoted_string {
+            ((cmd::ReadTrace_ptr) $res)->set_input(input);
+        }) ?
+    ;
+
+read_trace_command_topic returns [cmd::CommandTopic_ptr res]
+    :  'read-trace'
+        { $res = cm.topic_read_trace(); }
     ;
 
 dump_model_command returns [cmd::Command_ptr res]

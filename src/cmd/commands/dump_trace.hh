@@ -103,7 +103,7 @@ private:
                     witness::Witness& w);
     void dump_plain_section(std::ostream&os,
                             const char* section,
-                            expr::ExprVector& ev);
+                            expr::ExprVector& assignments);
 
     void dump_json(std::ostream& os,
                    witness::Witness& w);
@@ -115,13 +115,13 @@ private:
                   witness::Witness& w);
     void dump_xml_section(std::ostream&os,
                           const char* section,
-                          expr::ExprVector& ev);
+                          expr::ExprVector& assignments);
 
     void dump_yaml(std::ostream& os,
                    witness::Witness& w);
     void dump_yaml_section(YAML::Emitter& out,
                            const char* section,
-                           expr::ExprVector& ev);
+                           expr::ExprVector& assignments);
 
     /* these values actually come from the current environment */
     void process_input(witness::Witness& w,

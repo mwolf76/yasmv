@@ -24,40 +24,36 @@
  *
  **/
 
-#include <boost/filesystem.hpp>
 #include "command.hh"
+#include <boost/filesystem.hpp>
 
 namespace cmd {
 
-void CommandTopic::display_manpage(const char *topic)
-{
-    std::stringstream oss;
+    void CommandTopic::display_manpage(const char* topic)
+    {
+        boost::filesystem::path fullpath { getenv(YASMV_HOME_PATH) };
 
-    boost::filesystem::path fullpath
-        (getenv( YASMV_HOME_PATH ));
+        fullpath += "/help/";
+        fullpath += topic;
+        fullpath += ".nroff";
 
-    fullpath += "/help/";
-    fullpath += topic;
-    fullpath += ".nroff";
+        std::stringstream oss;
+        oss
+            << "nroff "
+            << fullpath.native()
+            << " | less"
+            << std::endl;
 
-    oss
-        << "nroff "
-        << fullpath.native()
-        << " | less"
-        << std::endl;
+        const std::string& s { oss.str() };
 
-    const std::string& s
-        (oss.str());
+        const char* tmp { s.c_str() };
 
-    const char *tmp
-        (s.c_str());
+        DEBUG
+            << "##"
+            << tmp
+            << std::endl;
 
-    DEBUG
-        << "##"
-        << tmp
-        << std::endl;
+        execlp("bash", "bash", "-c", tmp, NULL);
+    }
 
-    execlp( "bash", "bash", "-c", tmp, NULL );
-}
-
-};
+} // namespace cmd

@@ -5,7 +5,6 @@ YASMV manual                                           read-model
 SYNOPSIS
 
 .in 3
-read-model '<filepath>'
 read-model "<filepath>"
 
 
@@ -21,9 +20,9 @@ Reads a model from file with specified name. This is equivalent to passing a
 model on the command line. In fact, passing the name as argument is internally
 converted in a `read-model` command.
 
-NOTICE: due to a limitation of the parser, filepaths must ALWAYS be specified
-enclosed in either single or double quotes. Paths not enclosed in quotes, will
-not be correctly parsed.
+NOTICE: due to a limitation of the parser, file paths must ALWAYS be specified
+enclosed in either single or double quotes. Paths not enclosed in quotes will
+*not* be correctly parsed.
 
 
 .ti 0

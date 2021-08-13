@@ -31,31 +31,37 @@
 
 namespace model {
 
-/* main container class */
-class Model {
-public:
-    Model();
-    ~Model();
+    class Model {
+    public:
+        Model();
+        ~Model();
 
-    inline const Modules& modules() const
-    { return f_modules; }
+        inline bool empty() const
+        {
+            return 0 == f_modules.size();
+        }
 
-    Module& add_module(Module& module);
-    Module& module(expr::Expr_ptr module_name);
+        inline const Modules& modules() const
+        {
+            return f_modules;
+        }
 
-    /* topmost module in the model */
-    Module& main_module();
+        Module& add_module(Module& module);
+        Module& module(expr::Expr_ptr module_name);
 
-    void autoIndexSymbol(expr::Expr_ptr identifier);
-    unsigned symbol_index(expr::Expr_ptr identifier);
+        /* topmost module in the model */
+        Module& main_module();
 
-private:
-    Modules f_modules;
+        void autoIndexSymbol(expr::Expr_ptr identifier);
+        unsigned symbol_index(expr::Expr_ptr identifier);
 
-    unsigned f_autoincrement;
-    SymbolIndexMap f_symbol_index_map;
-};
+    private:
+        Modules f_modules;
 
-};
+        unsigned f_autoincrement;
+        SymbolIndexMap f_symbol_index_map;
+    };
+
+} // namespace model
 
 #endif /* MODEL_H */

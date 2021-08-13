@@ -44,9 +44,9 @@
 
 #include <sat/sat.hh>
 
-#include <symb/typedefs.hh>
 #include <symb/classes.hh>
 #include <symb/symb_iter.hh>
+#include <symb/typedefs.hh>
 
 #include <utils/variant.hh>
 
@@ -54,145 +54,169 @@
 
 namespace witness {
 
-typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> Expr2ExprMap;
-typedef Expr2ExprMap::iterator Expr2ExprMapIterator;
+    using Expr2ExprMap = boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq>;
+    // using Expr2ExprMapIterator = Expr2ExprMap::iterator;
 
-typedef boost::unordered_map<expr::Expr_ptr, value_format_t, utils::PtrHash, utils::PtrEq> Expr2FormatMap;
-typedef Expr2FormatMap::iterator Expr2FormatMapIterator;
+    using Expr2FormatMap = boost::unordered_map<expr::Expr_ptr, value_format_t, utils::PtrHash, utils::PtrEq>;
+    // using Expr2FormatMapIterator = Expr2FormatMap::iterator;
 
-class Witness; // fwd decl
+    using TimeFrame_ptr = class TimeFrame*;
+    using TimeFrames = std::vector<TimeFrame_ptr>;
 
-typedef class TimeFrame* TimeFrame_ptr;
-class TimeFrame {
+    class Witness;
+    class TimeFrame {
+    public:
+        TimeFrame(Witness& owner);
+        ~TimeFrame();
 
-public:
-    TimeFrame(Witness& owner);
-    ~TimeFrame();
+        /* Retrieves value for expr, throws an exception if no value exists. */
+        expr::Expr_ptr value(expr::Expr_ptr expr);
 
-    /* Retrieves value for expr, throws an exception if no value exists. */
-    expr::Expr_ptr value( expr::Expr_ptr expr );
+        /* Returns true iff expr has an assigned value within this time frame. */
+        bool has_value(expr::Expr_ptr expr);
 
-    /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( expr::Expr_ptr expr );
+        /* Sets value (and optionally also format) for expr */
+        void set_value(expr::Expr_ptr expr, expr::Expr_ptr value,
+                       value_format_t format = FORMAT_DECIMAL);
 
-    /* Sets value (and optionally also format) for expr */
-    void set_value( expr::Expr_ptr expr, expr::Expr_ptr value,
-                    value_format_t format = FORMAT_DECIMAL);
+        /* Retrieves format for expr, throws an exception if no value exists. */
+        // value_format_t format( expr::Expr_ptr expr );
 
-    /* Retrieves format for expr, throws an exception if no value exists. */
-    // value_format_t format( expr::Expr_ptr expr );
+        /* Full list of assignments for this Time Frame */
+        expr::ExprVector assignments();
 
-    /* Full list of assignments for this Time Frame */
-    expr::ExprVector assignments();
+    private:
+        Expr2ExprMap f_map;
+        Expr2FormatMap f_format_map;
 
-private:
-    Expr2ExprMap f_map;
-    Expr2FormatMap f_format_map;
+        // forbid copy
+        TimeFrame(const TimeFrame& other)
+            : f_owner(other.f_owner)
+        {
+            assert(false);
+        }
 
-    // forbid copy
-    TimeFrame(const TimeFrame &other)
-        : f_owner( other.f_owner)
-    { assert (false); }
+        Witness& f_owner;
+    };
 
-    Witness& f_owner;
-};
+    using  Witness_ptr = class Witness*;
+    class Witness {
+    public:
+        Witness(sat::Engine_ptr pengine = NULL,
+                expr::Atom id = "<Noname>",
+                expr::Atom desc = "<No description>",
+                step_t j = 0);
 
-typedef std::vector<TimeFrame_ptr> TimeFrames;
+        /* data storage */
+        inline TimeFrames& frames()
+        {
+            return f_frames;
+        }
 
-typedef class Witness* Witness_ptr;
-class Witness {
-public:
-    Witness(sat::Engine_ptr pengine = NULL,
-            expr::Atom id = "<Noname>",
-            expr::Atom desc = "<No description>",
-            step_t j = 0);
+        TimeFrame& operator[](step_t i);
 
-    /* data storage */
-    inline TimeFrames& frames()
-    { return f_frames; }
+        inline const expr::Atom& id() const
+        {
+            return f_id;
+        }
 
-    TimeFrame& operator[](step_t i);
+        inline void set_id(expr::Atom id)
+        {
+            f_id = id;
+        }
 
-    inline const expr::Atom& id() const
-    { return f_id; }
+        inline const expr::Atom& desc() const
+        {
+            return f_desc;
+        }
 
-    inline void set_id(expr::Atom id)
-    { f_id = id; }
+        inline void set_desc(expr::Atom desc)
+        {
+            f_desc = desc;
+        }
 
-    inline const expr::Atom& desc() const
-    { return f_desc; }
+        inline step_t first_time()
+        {
+            return f_j;
+        }
 
-    inline void set_desc(expr::Atom desc)
-    { f_desc = desc; }
+        inline TimeFrame& first()
+        {
+            return operator[](first_time());
+        }
 
-    inline step_t first_time()
-    { return f_j; }
+        inline step_t last_time()
+        {
+            return f_j + f_frames.size() - 1;
+        }
 
-    inline TimeFrame& first()
-    { return operator[](first_time()); }
+        inline TimeFrame& last()
+        {
+            return operator[](last_time());
+        }
 
-    inline step_t last_time()
-    { return f_j + f_frames.size() -1; }
+        inline step_t size()
+        {
+            return f_frames.size();
+        }
 
-    inline TimeFrame& last()
-    { return operator[](last_time()); }
+        inline expr::ExprVector& lang()
+        {
+            return f_lang;
+        }
 
-    inline step_t size()
-    { return f_frames.size(); }
+        /* Extends trace by k appending the given one, yields last timeframe */
+        TimeFrame& extend(Witness& w);
 
-    inline expr::ExprVector& lang()
-    { return f_lang; }
+        /* Extends trace by 1 steps, yields new step */
+        TimeFrame& extend();
 
-    /* Extends trace by k appending the given one, yields last timeframe */
-    TimeFrame& extend(Witness& w);
+        /* Retrieves value for expr, throws an exception if no value exists. */
+        expr::Expr_ptr value(expr::Expr_ptr expr, step_t time);
 
-    /* Extends trace by 1 steps, yields new step */
-    TimeFrame& extend();
+        /* Returns true iff expr has an assigned value within this time frame. */
+        bool has_value(expr::Expr_ptr expr, step_t time);
 
-    /* Retrieves value for expr, throws an exception if no value exists. */
-    expr::Expr_ptr value( expr::Expr_ptr expr, step_t time);
+    protected:
+        /* this witness' id */
+        expr::Atom f_id;
 
-    /* Returns true iff expr has an assigned value within this time frame. */
-    bool has_value( expr::Expr_ptr expr, step_t time);
+        /* this witness' description */
+        expr::Atom f_desc;
 
-protected:
-    /* this witness' id */
-    expr::Atom f_id;
+        /* distance (i.e. number of transitions) from time 0 of the first frame */
+        step_t f_j;
 
-    /* this witness' description */
-    expr::Atom f_desc;
+        /* Timeframes (list) */
+        TimeFrames f_frames;
 
-    /* distance (i.e. number of transitions) from time 0 of the first frame */
-    step_t f_j;
+        /* Language (i.e. full list of symbols) */
+        expr::ExprVector f_lang;
 
-    /* Timeframes (list) */
-    TimeFrames f_frames;
+        /* An engine that can be used to extend this witness. This is not
+           necessarily the engine that created the trace. Ordinarily it
+           should be a simulation engine. */
+        sat::Engine_ptr p_engine;
 
-    /* Language (i.e. full list of symbols) */
-    expr::ExprVector f_lang;
+        inline bool has_engine() const
+        {
+            return NULL != p_engine;
+        }
 
-    /* An engine that can be used to extend this witness. This is not
-       necessarily the engine that created the trace. Ordinarily it
-       should be a simulation engine. */
-    sat::Engine_ptr p_engine;
+        inline sat::Engine& engine()
+        {
+            assert(NULL != p_engine);
+            return *p_engine;
+        }
 
-    inline bool has_engine() const
-    { return NULL != p_engine; }
+        void register_engine(sat::Engine& e);
+    };
 
-    inline sat::Engine& engine()
-    {
-        assert (NULL != p_engine);
-        return * p_engine;
-    }
+    class WitnessPrinter {
+    public:
+        virtual void operator()(const Witness& w, step_t j = 0, step_t k = -1) = 0;
+    };
 
-    void register_engine(sat::Engine& e);
-};
-
-class WitnessPrinter {
-public:
-    virtual void operator() (const Witness& w, step_t j = 0, step_t k = -1) =0;
-};
-
-};
+} // namespace witness
 
 #endif /* WITNESS_H */

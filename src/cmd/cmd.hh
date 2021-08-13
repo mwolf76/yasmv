@@ -46,6 +46,7 @@
 #include <cmd/commands/simulate.hh>
 
 #include <cmd/commands/list_traces.hh>
+#include <cmd/commands/read_trace.hh>
 #include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/dup_trace.hh>
 
@@ -148,6 +149,11 @@ namespace cmd {
         inline Command_ptr make_list_traces()
         {
             return new ListTraces(f_interpreter);
+        }
+
+        inline Command_ptr make_read_trace()
+        {
+            return new ReadTrace(f_interpreter);
         }
 
         inline Command_ptr make_dump_trace()
@@ -261,6 +267,11 @@ namespace cmd {
         inline CommandTopic_ptr topic_list_traces()
         {
             return new ListTracesTopic(f_interpreter);
+        }
+
+        inline CommandTopic_ptr topic_read_trace()
+        {
+            return new ReadTraceTopic(f_interpreter);
         }
 
         inline CommandTopic_ptr topic_dump_trace()

@@ -37,39 +37,39 @@
 
 namespace cmd {
 
-class Interpreter;
+    class Interpreter;
 
-class Command {
-protected:
-    Interpreter& f_owner;
+    class Command {
+    protected:
+        Interpreter& f_owner;
 
-public:
-    Command(Interpreter& owner);
-    virtual ~Command();
+    public:
+        Command(Interpreter& owner);
+        virtual ~Command();
 
-    // functor-pattern
-    utils::Variant virtual operator()() =0;
+        // functor-pattern
+        utils::Variant virtual operator()() = 0;
 
-    // representation
-    friend std::ostream& operator<<(std::ostream& os, Command& cmd);
-};
+        // representation
+        friend std::ostream& operator<<(std::ostream& os, Command& cmd);
+    };
 
-class CommandTopic {
-protected:
-    Interpreter& f_owner;
-    void display_manpage(const char *topic);
+    class CommandTopic {
+    protected:
+        Interpreter& f_owner;
+        void display_manpage(const char* topic);
 
-public:
-    CommandTopic(Interpreter& owner);
-    virtual ~CommandTopic();
+    public:
+        CommandTopic(Interpreter& owner);
+        virtual ~CommandTopic();
 
-    // inline help system
-    void virtual usage() =0;
-};
+        // inline help system
+        void virtual usage() = 0;
+    };
 
-typedef std::vector<Command_ptr> CommandVector;
-typedef CommandVector* CommandVector_ptr;
+    using CommandVector = std::vector<Command_ptr>;
+    using CommandVector_ptr = CommandVector*;
 
-};
+} // namespace cmd
 
 #endif /* COMMAND_H */

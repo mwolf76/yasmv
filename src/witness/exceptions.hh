@@ -31,44 +31,48 @@
 
 namespace witness {
 
-class WitnessException : public Exception
-{
-public:
-    WitnessException(const std::string& subtype,
-                     const std::string& message="")
-        : Exception("WitnessException", subtype, message)
-    {}
-};
+    class WitnessException: public Exception {
+    public:
+        WitnessException(const std::string& subtype,
+                         const std::string& message = "")
+            : Exception("WitnessException", subtype, message)
+        {}
+    };
 
-/** Raised when a given ID is registered more than once */
-class DuplicateWitnessId : public WitnessException {
-public:
-    DuplicateWitnessId(expr::Atom id);
-};
+    /** Raised when a given ID is registered more than once */
+    class DuplicateWitnessId: public WitnessException {
+    public:
+        DuplicateWitnessId(expr::Atom id);
+    };
 
-/** Raised when a given ID is registered more than once */
-class NoCurrentlySelectedWitness : public WitnessException {
-public:
-    NoCurrentlySelectedWitness();
-};
+    /** Raised when a given ID is registered more than once */
+    class NoCurrentlySelectedWitness: public WitnessException {
+    public:
+        NoCurrentlySelectedWitness();
+    };
 
-/** Raised when a given ID is searched for and was not registered */
-class UnknownWitnessId : public WitnessException {
-public:
-    UnknownWitnessId(expr::Atom id);
-};
+    /** Raised when a given ID is searched for and was not registered */
+    class UnknownWitnessId: public WitnessException {
+    public:
+        UnknownWitnessId(expr::Atom id);
+    };
 
-/** Raised when TimeFrame for requested time does not exist. */
-class IllegalTime : public WitnessException {
-public:
-    IllegalTime(step_t time);
-};
+    /** Raised when TimeFrame for requested time does not exist. */
+    class IllegalTime: public WitnessException {
+    public:
+        IllegalTime(step_t time);
+    };
 
-class NoValue : public WitnessException {
-public:
-    NoValue(expr::Expr_ptr id);
-};
+    class NoValue: public WitnessException {
+    public:
+        NoValue(expr::Expr_ptr id);
+    };
 
-};
+    class UnknownIdentifier : public WitnessException {
+    public:
+        UnknownIdentifier(expr::Expr_ptr id);
+    };
+
+} // namespace witness
 
 #endif /* WITNESS_EXCEPTIONS_H */

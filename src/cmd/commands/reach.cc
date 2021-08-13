@@ -73,10 +73,6 @@ namespace cmd {
 
     bool Reach::check_requirements()
     {
-        model::ModelMgr& mm(model::ModelMgr::INSTANCE());
-
-        model::Model& model(mm.model());
-
         if (!f_target) {
             f_out
                 << wrnPrefix
@@ -86,7 +82,8 @@ namespace cmd {
             return false;
         }
 
-        if (0 == model.modules().size()) {
+        model::Model& model { model::ModelMgr::INSTANCE().model() };
+        if (model.empty()) {
             f_out
                 << wrnPrefix
                 << "Model not loaded."

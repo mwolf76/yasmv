@@ -1,5 +1,7 @@
 Target is reachable, registered witness `reach_1`, 12 steps.
-Witness: reach_1 [[ Reachability witness for target `GOAL` in module `cannibals` ]]
+-- Reachability witness for target `GOAL` in module `cannibals`
+Witness: reach_1
+
 :: @0
 -- state
    west-cannibals = 3

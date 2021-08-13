@@ -1,5 +1,7 @@
 Target is reachable, registered witness `reach_1`, 6 steps.
-Witness: reach_1 [[ Reachability witness for target `GOAL` in module `fifteen` ]]
+-- Reachability witness for target `GOAL` in module `fifteen`
+Witness: reach_1
+
 :: @0
 -- state
    grid = [1, 2, 4, 0, 5, 6, 3, 8, 9, 10, 7, 11, 13, 14, 15, 12]

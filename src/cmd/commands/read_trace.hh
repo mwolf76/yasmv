@@ -1,8 +1,8 @@
 /**
- * @file read_model.hh
+ * @file read_trace.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `read-model`
+ * This header file contains the handler inteface for the `read-trace`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -24,20 +24,22 @@
  *
  **/
 
-#ifndef READ_MODEL_H
-#define READ_MODEL_H
+#ifndef READ_TRACE_H
+#define READ_TRACE_H
 
 #include <cmd/command.hh>
+
+#include <expr/atom.hh>
+
+#include <witness/witness.hh>
 
 namespace cmd {
 
     // -- command definitions --------------------------------------------------
-    class ReadModel: public Command {
-        pchar f_input;
-
+    class ReadTrace: public Command {
     public:
-        ReadModel(Interpreter& owner);
-        virtual ~ReadModel();
+        ReadTrace(Interpreter& owner);
+        virtual ~ReadTrace();
 
         void set_input(pconst_char input);
         inline pconst_char input() const
@@ -48,19 +50,38 @@ namespace cmd {
         utils::Variant virtual operator()();
 
     private:
+        std::ostream& f_out;
+        pchar f_input;
+
         bool check_requirements();
+        bool parseJsonTrace(boost::filesystem::path& tracepath);
+        bool parseYamlTrace(boost::filesystem::path& tracepath);
+        bool parsePlainTrace(boost::filesystem::path& tracepath);
 
     };
-    typedef ReadModel* ReadModel_ptr;
+    typedef ReadTrace* ReadTrace_ptr;
 
-    class ReadModelTopic: public CommandTopic {
+    class ReadTraceTopic: public CommandTopic {
     public:
-        ReadModelTopic(Interpreter& owner);
-        virtual ~ReadModelTopic();
+        ReadTraceTopic(Interpreter& owner);
+        virtual ~ReadTraceTopic();
 
         void virtual usage();
     };
 
-}  // namespace cmd
+    class ReadTraceWitness: public witness::Witness {
+    public:
+        ReadTraceWitness(expr::Atom id, expr::Atom desc);
+    };
 
-#endif /* READ_MODEL_H */
+    class ReadTraceException: public Exception {
+    public:
+        ReadTraceException(const std::string& subtype,
+                           const std::string& message = "")
+            : Exception("ReadTraceException", subtype, message)
+        {}
+    };
+
+} // namespace cmd
+
+#endif /* READ_TRACE_H */
