@@ -84,7 +84,7 @@ void Compiler::walk_leaf(const expr::Expr_ptr expr)
         unsigned ww
             (opts::OptsMgr::INSTANCE().word_width());
 
-        f_type_stack.push_back(tm.find_unsigned(ww));
+        f_type_stack.push_back(tm.find_constant(ww));
         algebraic_constant(expr, ww);
         return;
     }

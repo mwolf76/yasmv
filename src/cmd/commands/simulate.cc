@@ -85,12 +85,9 @@ utils::Variant Simulate::operator()()
     bool res { false };
 
     expr::ExprVector f_constraints;
-    simulation.simulate(f_invar_condition,
-                 f_until_condition,
-                 f_constraints,
-                 f_k, f_trace_uid);
+    sim::simulation_status_t rc  { simulation.simulate(f_constraints, f_trace_uid) };
 
-    switch (simulation.status()) {
+    switch (rc) {
     case sim::simulation_status_t::SIMULATION_DONE:
         res = true;
         if (! om.quiet())
@@ -98,15 +95,6 @@ utils::Variant Simulate::operator()()
                 << outPrefix;
         f_out
             << "Simulation done";
-        break;
-
-    case sim::simulation_status_t::SIMULATION_INITIALIZED:
-        if (! om.quiet())
-            f_out
-                << outPrefix;
-        f_out
-            << "Simulation initialized"
-            << std::endl;
         break;
 
     case sim::simulation_status_t::SIMULATION_DEADLOCKED:

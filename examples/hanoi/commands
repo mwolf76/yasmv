@@ -1,4 +1,4 @@
 reach GOAL
-on success dump-trace
+on success dump-traces
 time
 quit

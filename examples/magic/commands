@@ -1,4 +1,0 @@
-pick-state
-on success do dump-trace ;
-time
-quit

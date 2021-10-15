@@ -24,26 +24,26 @@
 
 namespace expr {
 
-long AtomHash::operator() (const Atom& k) const
-{
-    unsigned long hash = 0;
-    unsigned long x    = 0;
+    long AtomHash::operator() (const Atom& k) const
+    {
+        unsigned long hash = 0;
+        unsigned long x    = 0;
 
-    for (std::size_t i = 0; i < k.length(); i++) {
+        for (std::size_t i = 0; i < k.length(); i++) {
 
-        hash = (hash << 4) + k[i];
-        if((x = hash & 0xF0000000L) != 0) {
-            hash ^= (x >> 24);
+            hash = (hash << 4) + k[i];
+            if((x = hash & 0xF0000000L) != 0) {
+                hash ^= (x >> 24);
+            }
+            hash &= ~x;
         }
-        hash &= ~x;
+
+        return hash;
     }
 
-    return hash;
-}
+    bool AtomEq::operator() (const Atom& x, const Atom& y) const
+    {
+        return x == y;
+    }
 
-bool AtomEq::operator() (const Atom& x, const Atom& y) const
-{
-    return x == y;
-}
-
-};
+} // namespace expr

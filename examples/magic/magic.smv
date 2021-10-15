@@ -6,7 +6,7 @@
 -- >> dump-trace
 
 #word-width 8
-MODULE main
+MODULE magic3
 
 VAR
         A : uint[9];

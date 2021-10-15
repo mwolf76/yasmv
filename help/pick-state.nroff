@@ -17,15 +17,20 @@ Initializes a new simulation. (Requires model).
 
 OPTIONS:
 
-  -a, requires an ALLSAT enumeration of all feasible initial states.
+  -a, executes an ALLSAT enumeration of all feasible initial states. Each feasible initial state is recorded
+in a separate witness.
 
-  -l <limit>, limits the number of enumerated solutions. Default is infinity.
+  -n, counts feasible initial states. Similarly to -a, performs an ALLSAT enumeration. However,
+only the number of states is calculated and no traces are recorded.
 
-  -c <expr>, allows the user to further constrain the initial states.
+  -l <limit>, limits the number of enumerated solutions. Default is infinity. Affects both -a and -n.
 
-Creates a new trace and selects it as current. If -a is used a number of traces
-will be created, according to the number of distinct feasible initial states for
-for the simulation.
+  -c <expr>, affects the set of feasible initial states, by allowing the user to pose additional constraints.
+
+If a single feasible state is selected, the command instantiates a new witness consisting of a single state
+and selects it as current. If -a is used, a number of traces will be created, one per each distinct feasible
+initial state. If -n is used, a similar enumeration is performed, but only the number of feasible initial states
+will be computed.
 
 
 .ti 0

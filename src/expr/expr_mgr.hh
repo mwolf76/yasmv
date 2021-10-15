@@ -356,11 +356,6 @@ public:
     /* -- constants -------------------------------------------------------- */
     inline value_t const_value(Expr_ptr expr)
     {
-        assert( expr->f_symb == ICONST ||
-                expr->f_symb == BCONST ||
-                expr->f_symb == HCONST ||
-                expr->f_symb == OCONST );
-
         return expr -> value();
     }
 
@@ -602,6 +597,8 @@ public:
 
     Expr_ptr make_qstring(Atom atom);
 
+    const Atom& internalize(Atom atom);
+
     /* -- broad is-a predicates -------------------------------------------- */
     inline bool is_temporal(const Expr_ptr expr) const {
         assert(expr);
@@ -673,6 +670,8 @@ public:
         assert(expr);
         return expr->f_symb == ARRAY_COMMA;
     }
+
+    ExprVector array_literals(const Expr_ptr expr) const;
 
     inline bool is_set(const Expr_ptr expr) const {
         assert(expr);

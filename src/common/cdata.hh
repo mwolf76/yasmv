@@ -35,6 +35,5 @@ extern const char *YASMV_HOME_PATH;
 extern const char *TRACE_FMT_DEFAULT;
 extern const char *TRACE_FMT_PLAIN;
 extern const char *TRACE_FMT_JSON;
-extern const char *TRACE_FMT_XML;
-extern const char *TRACE_FMT_YAML;
+
 #endif /* COMMON_CDATA_H  */

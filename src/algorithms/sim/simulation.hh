@@ -36,48 +36,39 @@
 
 namespace sim {
 
-typedef enum {
-    SIMULATION_DONE,
-    SIMULATION_INITIALIZED,
-    SIMULATION_DEADLOCKED,
-    SIMULATION_INTERRUPTED,
-    SIMULATION_HALTED,
-} simulation_status_t;
+    typedef enum {
+        SIMULATION_DONE,
+        SIMULATION_DEADLOCKED,
+        SIMULATION_INTERRUPTED,
+        SIMULATION_UNKNOWN,
+    } simulation_status_t;
 
-class Simulation : public algorithms::Algorithm {
+    class Simulation : public algorithms::Algorithm {
 
-public:
-    Simulation(cmd::Command& command, model::Model& model);
-    ~Simulation();
+    public:
+        Simulation(cmd::Command &command, model::Model &model);
 
-    void pick_state(bool all_sat,
-                    value_t limit,
-                    expr::ExprVector constraints);
+        ~Simulation();
 
-    void simulate(expr::Expr_ptr invar_condition,
-                  expr::Expr_ptr until_condition,
-                  expr::ExprVector constraints,
-                  step_t k,
-                  pconst_char trace_uid);
+        // returns the number of enumerated states
+        value_t pick_state(expr::ExprVector constraints, bool all_sat, bool count, value_t limit);
 
-    inline simulation_status_t status() const
-    { return f_status; }
+        // returns the status of the simulation
+        simulation_status_t simulate(expr::ExprVector constraints, pconst_char trace_uid);
 
-private:
-    /* None of 'em, one of 'em, not both. */
-    expr::Expr_ptr f_halt_cond;
-    expr::Expr_ptr f_no_steps;
+    private:
+        expr::ExprVector f_constraints;
 
-    expr::ExprVector f_constraints;
+        void extract_witness(sat::Engine& engine, bool select_current_witness);
+        void exclude_state(sat::Engine& engine);
 
-    simulation_status_t f_status;
-};
+    };
 
-class SimulationWitness : public witness::Witness {
+    class SimulationWitness : public witness::Witness {
 
-public:
-    SimulationWitness(model::Model& model, sat::Engine& engine, step_t k);
-};
+    public:
+        SimulationWitness(model::Model &model, sat::Engine &engine, step_t k);
+    };
 
 } // namespace sim
 

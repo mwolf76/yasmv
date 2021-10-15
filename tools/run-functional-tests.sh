@@ -25,5 +25,6 @@ test vending vending
 test herschel herschel
 test koenisberg koenisberg
 test fifteen fifteen
+test magic magic
 
 echo ""  # one blank line

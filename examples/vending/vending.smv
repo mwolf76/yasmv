@@ -40,7 +40,6 @@ VAR
 INIT
     change = credit - due-amount ;
 
-#hidden
 DEFINE
     GOAL := change = 0;
 

@@ -18,15 +18,16 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/					\
 AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = check.hh check_init.hh check_trans.hh clear.hh commands.hh	\
-diameter.hh do.hh dump_model.hh dump_trace.hh dup_trace.hh echo.hh	\
-get.hh help.hh last.hh list_traces.hh load_model.hh on.hh			\
-pick_state.hh quit.hh reach.hh read_model.hh read_trace.hh set.hh   \
-show_traces.hh simulate.hh time.hh
+diameter.hh do.hh dump_model.hh dump_traces.hh dup_trace.hh echo.hh	\
+get.hh help.hh last.hh list_traces.hh load_model.hh on.hh		    \
+pick_state.hh quit.hh reach.hh read_model.hh select_trace.hh		\
+read_trace.hh set.hh show_traces.hh simulate.hh time.hh
 
 PKG_CC = check.cc check_init.cc check_trans.cc clear.cc commands.cc	\
-diameter.cc do.cc dump_model.cc dump_trace.cc dup_trace.cc echo.cc	\
+diameter.cc do.cc dump_model.cc dump_traces.cc dup_trace.cc echo.cc	\
 get.cc help.cc last.cc list_traces.cc on.cc pick_state.cc quit.cc	\
-reach.cc read_model.cc read_trace.cc set.cc simulate.cc time.cc
+reach.cc read_model.cc read_trace.cc set.cc select_trace.cc		    \
+simulate.cc time.cc
 
 # -------------------------------------------------------
 

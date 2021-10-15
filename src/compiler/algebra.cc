@@ -322,43 +322,57 @@ namespace compiler {
         unsigned elem_count { atype->nelems() };
         POP_DV(lhs, elem_width * elem_count);
 
-        /* Build selection DDs */
-        dd::DDVector cnd_dds;
-        dd::DDVector act_dds;
-        unsigned j_, j { 0 };
-        do {
-
-            unsigned i;
-            ADD cnd { bm.one() };
-
-            i = 0;
-            j_ = j;
-            while (i < iwidth) {
-                ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
-                unsigned ndx { iwidth - i - 1 };
-                j_ >>= 1;
-
-                cnd *= index[ndx].Xnor(bit);
-                ++i;
-            }
-
-            cnd_dds.push_back(cnd);
-            act_dds.push_back(make_auto_dd());
-        } while (++j < elem_count);
-
-        /* Push MUX output DD vector */
-        FRESH_DV(dv, elem_width);
-        PUSH_DV(dv, elem_width);
-
         PUSH_TYPE(type);
 
-        MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
-        f_multiway_selection_descriptors.push_back(msd);
+        if (t0->is_constant()) {
+            unsigned subscript { 0 };
+            for (unsigned i = 0; i < iwidth; ++ i) {
+                ADD bit { index[i] };
+                subscript *= 2;
+                if (bit.IsOne()) {
+                    subscript ++;
+                }
+            }
 
-        DEBUG
+            for (unsigned i = 0; i < elem_width; ++ i) {
+                PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
+            }
+        } else {
+            /* Build selection DDs */
+            dd::DDVector cnd_dds;
+            dd::DDVector act_dds;
+            unsigned j_, j { 0 };
+            do {
+                unsigned i;
+                ADD cnd { bm.one() };
+
+                i = 0;
+                j_ = j;
+                while (i < iwidth) {
+                    ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
+                    unsigned ndx { iwidth - i - 1 };
+                    j_ >>= 1;
+
+                    cnd *= index[ndx].Xnor(bit);
+                    ++i;
+                }
+
+                cnd_dds.push_back(cnd);
+                act_dds.push_back(make_auto_dd());
+            } while (++j < elem_count);
+
+            /* Push MUX output DD vector */
+            FRESH_DV(dv, elem_width);
+            PUSH_DV(dv, elem_width);
+
+            MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+            f_multiway_selection_descriptors.push_back(msd);
+
+            DEBUG
             << "Registered "
             << msd
             << std::endl;
+        }
     }
 
     /* add n-1 non significant zero, LSB is original bit */

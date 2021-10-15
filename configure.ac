@@ -103,9 +103,6 @@ BOOST_CHRONO
 # libjsoncpp
 AC_LIBJSONCPP
 
-# Yaml support
-AC_LIBYAMLCPP
-
 # ANTLR3 checks
 AC_ANTLR3
 

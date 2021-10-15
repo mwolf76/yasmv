@@ -107,6 +107,24 @@ Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
     return make_set(res);
 }
 
+const Atom& ExprMgr::internalize(Atom atom)
+{
+    boost::mutex::scoped_lock lock(f_atom_mutex);
+
+    AtomPoolHit ah = f_atom_pool.insert(atom);
+    const Atom& pooled_atom =  (* ah.first);
+
+#if 0
+    if (ah.second) {
+        DEBUG
+        << "Added new atom to pool: `"
+        << pooled_atom << "`"
+        << std::endl;
+    }
+#endif
+
+    return pooled_atom;
+}
 
 Expr_ptr ExprMgr::make_identifier(Atom atom)
 {
@@ -249,6 +267,19 @@ value_t ExprMgr::decimal_lookup(const char *decimal_repr)
 
     // unreachable
     assert(false);
+}
+
+ExprVector ExprMgr::array_literals(const Expr_ptr expr) const
+{
+    assert(is_array(expr));
+    ExprVector res;
+    Expr_ptr eye;
+    for (eye = expr->lhs(); is_array_comma(eye); eye = eye->rhs()) {
+        res.push_back(eye->lhs());
+    }
+    res.push_back(eye);
+
+    return res;
 }
 
 };

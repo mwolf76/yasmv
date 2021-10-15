@@ -132,12 +132,7 @@ typedef struct Expr_TAG {
     inline ExprType symb() const
     { return f_symb; }
 
-    inline Atom& atom() const
-    {
-        assert (IDENT == f_symb || QSTRING == f_symb);
-        return *u.f_atom;
-    }
-
+    Atom& atom() const;
     value_t value() const;
 
     inline Expr_ptr lhs()

@@ -62,6 +62,7 @@ public:
 
     // selects current witness
     void set_current( Witness& witness );
+    void set_current( expr::Atom witness_id );
 
     // get currently selected witness
     Witness& current();

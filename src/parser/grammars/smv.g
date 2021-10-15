@@ -581,24 +581,51 @@ unary_expression returns [expr::Expr_ptr res]
 
 nondeterministic_expression returns[expr::Expr_ptr res]
 @init {
+    bool is_range { false };
     expr::ExprVector clauses;
 }
     : '{'
           c=toplevel_expression{ clauses.push_back(c); }
-            (',' c=toplevel_expression { clauses.push_back(c); })*
+        (  ','  c=toplevel_expression { clauses.push_back(c); }
+        | '..' c=toplevel_expression  { assert(!is_range); is_range = true; clauses.push_back(c); } )+
       '}'
       {
-            expr::ExprVector::reverse_iterator i
-                (clauses.rbegin());
+            if (!is_range) {
+                expr::ExprVector::reverse_iterator i { clauses.rbegin() };
+                while (clauses.rend() != i) {
+                    $res = $res ? em.make_set_comma( *i, $res) : *i;
+                    ++ i;
+                }
+            } else {
+               expr::ExprVector::iterator lhs { clauses.begin() };
+               expr::Expr_ptr lhs_expr { *lhs };
+               assert (em.is_constant(lhs_expr));
+               value_t start { lhs_expr->value() };
 
-            while (clauses.rend() != i) {
-                $res = $res ? em.make_set_comma( *i, $res) : *i;
-                ++ i;
+               expr::ExprVector::reverse_iterator rhs { clauses.rbegin() };
+               expr::Expr_ptr rhs_expr { *rhs };
+               assert (em.is_constant(rhs_expr));
+               value_t stop { rhs_expr->value() };
+
+               // ensure lhs <= rhs
+               if (start > stop) {
+                   value_t tmp { start };
+                   start = stop;
+                   stop  = tmp;
+               }
+
+               // create set interval
+               for (value_t i = stop; i >= start; i -- ) {
+                   $res = $res
+                       ? em.make_set_comma(em.make_const(i), $res)
+                       : em.make_const(i)
+                       ;
+               }
             }
 
             $res = em.make_set( $res );
-        }
-    ;
+      }
+      ;
 
 array_expression returns[expr::Expr_ptr res]
 @init {
@@ -973,7 +1000,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=dump_model_command_topic
         { $res = c; }
 
-    |  c=dump_trace_command_topic
+    |  c=dump_traces_command_topic
         { $res = c; }
 
     |  c=dup_trace_command_topic
@@ -1012,6 +1039,9 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=reach_command_topic
        { $res = c; }
 
+    | c=select_trace_topic
+      { $res = c; }
+
     |  c=set_command_topic
        { $res = c; }
 
@@ -1044,7 +1074,7 @@ command returns [cmd::Command_ptr res]
     |  c=dump_model_command
         { $res = c; }
 
-    |  c=dump_trace_command
+    |  c=dump_traces_command
         { $res = c; }
 
     |  c=dup_trace_command
@@ -1081,6 +1111,9 @@ command returns [cmd::Command_ptr res]
        { $res = c; }
 
     |  c=reach_command
+       { $res = c; }
+
+    |  c=select_trace_command
        { $res = c; }
 
     |  c=set_command
@@ -1277,6 +1310,19 @@ reach_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_reach(); }
     ;
 
+select_trace_command returns[cmd::Command_ptr res]
+    :   'select-trace'
+        { $res = cm.make_select_trace(); }
+
+        trace_id=pcchar_identifier
+        { ((cmd::SelectTrace_ptr) $res)->set_trace_id(trace_id); }
+    ;
+
+select_trace_topic returns [cmd::CommandTopic_ptr res]
+    :  'select-trace'
+       { $res = cm.topic_select_trace(); }
+    ;
+
 check_trans_command returns[cmd::Command_ptr res]
     : 'check-trans'
       { $res = cm.make_check_trans(); }
@@ -1300,28 +1346,30 @@ list_traces_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_list_traces(); }
     ;
 
-dump_trace_command returns [cmd::Command_ptr res]
-    : 'dump-trace'
-      { $res = cm.make_dump_trace(); }
+dump_traces_command returns [cmd::Command_ptr res]
+    : 'dump-traces'
+      { $res = cm.make_dump_traces(); }
 
     (
+      '-a'
+      { ((cmd::DumpTraces_ptr) $res)->set_all(true); }
+    |
       '-f' format=pcchar_identifier
-      { ((cmd::DumpTrace_ptr) $res)->set_format(format); }
+      { ((cmd::DumpTraces_ptr) $res)->set_format(format); }
 
     | '-o' output=pcchar_quoted_string
       {
-            ((cmd::DumpTrace_ptr) $res)->set_output(output);
+            ((cmd::DumpTraces_ptr) $res)->set_output(output);
       }
-
     )*
 
     ( trace_id=pcchar_identifier
-    { ((cmd::DumpTrace_ptr) $res)->set_trace_id(trace_id); } )?
+    { ((cmd::DumpTraces_ptr) $res)->add_trace_id(trace_id); } )*
     ;
 
-dump_trace_command_topic returns [cmd::CommandTopic_ptr res]
-    :  'dump-trace'
-        { $res = cm.topic_dump_trace(); }
+dump_traces_command_topic returns [cmd::CommandTopic_ptr res]
+    :  'dump-traces'
+        { $res = cm.topic_dump_traces(); }
     ;
 
 
@@ -1347,6 +1395,9 @@ pick_state_command returns [cmd::Command_ptr res]
     (
          '-a'
          { ((cmd::PickState_ptr) $res)->set_allsat(true); }
+
+    |    '-n'
+        { ((cmd::PickState_ptr) $res)->set_count(true); }
 
     |    '-l' limit=constant
          { ((cmd::PickState_ptr) $res)->set_limit(limit->value()); }

@@ -28,25 +28,28 @@
 #define ATOM_POOL_H
 
 #include <string>
+#include <vector>
+
 #include <boost/unordered_set.hpp>
 
 namespace expr {
 
-/* using STL string as basic atom class */
-typedef std::string Atom;
-typedef Atom* Atom_ptr;
+    /* using STL string as basic atom class */
+    typedef std::string Atom;
+    typedef Atom* Atom_ptr;
 
-struct AtomHash {
-    long operator() (const Atom& k) const;
-};
+    struct AtomHash {
+        long operator() (const Atom& k) const;
+    };
 
-struct AtomEq {
-    bool operator() (const Atom& x, const Atom& y) const;
-};
+    struct AtomEq {
+        bool operator() (const Atom& x, const Atom& y) const;
+    };
 
-typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;
-typedef std::pair<AtomPool::iterator, bool> AtomPoolHit;
+    typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;
+    typedef std::pair<AtomPool::iterator, bool> AtomPoolHit;
 
-};
+    typedef std::vector<Atom> AtomVector;
+} // namespace expr
 
 #endif /* ATOM_POOL_H */

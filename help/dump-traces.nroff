@@ -1,12 +1,12 @@
 .nf
-YASMV manual                                            dump-trace
+YASMV manual                                            dump-traces
 
 .ti 0
 SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-dump-trace [ -f <format> ] [ -o "<filename>" ] [ <trace-uid> ]
+dump-traces [ -f <format> ] [ -o "<filename>" ] [ -a | <trace-uid>+ ]
 
 
 .ti 0
@@ -14,14 +14,17 @@ DESCRIPTION
 
 .fi
 .in 3
-Dumps a trace.
+Dumps witness traces.
 
--f <format>, selects a format for trace printout. Format can be either `plain`, `xml`, `json` or `yaml`.
+-a, Dumps all available witnesses.
+
+-f <format>, selects a format for trace printout. Format can be either `plain`, or  `json`. If no format is
+specified, the `plain` format will be used for dumping.
 
 -o "<filename>", filename must be a valid writable file path. Existing files will be overwritten.
 
-`trace-uid` is the index of the trace to be dumped. If omitted, current trace
-will be dumped.
+`trace-uid` is the index of the trace to be dumped. Multiple `trace-uid`s can be required at once, in which case
+the traces will be printed in the specified order. If omitted, currently selected trace will be dumped.
 
 
 .ti 0
@@ -31,7 +34,7 @@ EXAMPLES
 >> read-model 'examples/ferryman/ferryman.smv'
 >> reach GOAL
 -- Target is reachable, registered witness `reach_1`, 8 steps.
->> dump-trace -f yaml
+>> dump-traces -f yaml
 witness:
   id: reach_1
   description: Reachability witness for target `GOAL` in module `ferryman`

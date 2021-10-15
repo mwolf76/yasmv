@@ -31,104 +31,130 @@
 
 namespace expr {
 
-value_t Expr_TAG::value() const
-{
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
+    class BadSymbol : public ExprException {
+    public:
+        BadSymbol(Expr_ptr expr);
+    };
 
-    if (em.is_false(const_cast<Expr_ptr> (this)))
-        return 0;
+    static std::string format_bad_symbol_exception(Expr_ptr expr) {
+        std::stringstream oss;
+        oss
+                << "Bad symbol in expr: "
+                << expr;
 
-    if (em.is_true(const_cast<Expr_ptr> (this)))
-        return 1;
+        return oss.str();
+    }
 
-    assert (ICONST == f_symb ||
+    BadSymbol::BadSymbol(Expr_ptr expr)
+            : ExprException(format_bad_symbol_exception(expr)) {}
+
+    value_t Expr_TAG::value() const {
+        ExprMgr &em{ExprMgr::INSTANCE()};
+        Expr_ptr expr { const_cast<Expr_ptr> (this) };
+
+        if (em.is_false(expr)) {
+            return 0;
+        }
+
+        if (em.is_true(expr)) {
+            return 1;
+        }
+
+        if (ICONST == f_symb ||
             HCONST == f_symb ||
             OCONST == f_symb ||
             BCONST == f_symb ||
             QSTRING == f_symb ||
-            INSTANT == f_symb );
+            INSTANT == f_symb) {
+            return u.f_value;
+        }
 
-    return u.f_value;
-}
-
-std::ostream& operator<<(std::ostream& os, const Expr_ptr expr)
-{
-    Printer (os)
-        << expr;
-
-    return os;
-}
-
-int LexicographicOrdering::operator() (const Expr_ptr x,
-                                       const Expr_ptr y) const
-{
-    ExprMgr& em
-        (ExprMgr::INSTANCE());
-
-    if (em.is_constant(x) && em.is_identifier(y))
-        return 1;
-
-    if (em.is_constant(x) && em.is_constant(y))
-        return x -> value() < y -> value();
-
-    if (em.is_identifier(x) && em.is_identifier(y))
-        return x -> atom() < y -> atom();
-
-    assert(false);
-}
-
-long ExprHash::operator() (const Expr& k) const
-{
-    if (k.f_symb == IDENT)
-        return (long)(k.u.f_atom);
-
-    long v0, v1, x, res = (long)(k.f_symb);
-
-    if (k.f_symb == ICONST
-        || k.f_symb == HCONST
-        || k.f_symb == BCONST
-        || k.f_symb == OCONST
-        || k.f_symb == INSTANT) {
-        v0 = (long)(k.u.f_value);
-        v1 = (long)(k.u.f_value >> sizeof(long));
-    }
-    else {
-        v0 = (long)(k.u.f_lhs);
-        v1 = (long)(k.u.f_rhs);
+        throw BadSymbol(expr);
     }
 
-    res = (res << 4) + v0;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
+    Atom& Expr_TAG::atom() const
+    {
+        Expr_ptr expr { const_cast<Expr_ptr> (this) };
+
+        if  (IDENT == f_symb || QSTRING == f_symb) {
+            return *u.f_atom;
+        }
+
+        throw BadSymbol(expr);
     }
-    res &= ~x;
 
-    res = (res << 4) + v1;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
+    std::ostream &operator<<(std::ostream &os, const Expr_ptr expr) {
+        Printer(os)
+                << expr;
+
+        return os;
     }
-    res &= ~x;
 
-    return res;
-}
+    int LexicographicOrdering::operator()(const Expr_ptr x,
+                                          const Expr_ptr y) const {
+        ExprMgr &em
+                (ExprMgr::INSTANCE());
 
-bool ExprEq::operator() (const Expr& x, const Expr& y) const
-{
-    return
-        // both exprs must be the same type and...
-        x.f_symb == y.f_symb
-        && (
-            /* ...either have the same identifier */
-            (x.f_symb == IDENT  && *x.u.f_atom == *y.u.f_atom) ||
+        if (em.is_constant(x) && em.is_identifier(y))
+            return 1;
 
-            /* ...or have the same constant value */
-            (x.f_symb >= ICONST && x.f_symb <= INSTANT
-             && x.u.f_value == y.u.f_value) ||
+        if (em.is_constant(x) && em.is_constant(y))
+            return x->value() < y->value();
 
-            /* ...or share the same subtrees */
-            (x.u.f_lhs == y.u.f_lhs &&
-             x.u.f_rhs == y.u.f_rhs));
-}
+        if (em.is_identifier(x) && em.is_identifier(y))
+            return x->atom() < y->atom();
 
-};
+        assert(false);
+    }
+
+    long ExprHash::operator()(const Expr &k) const {
+        if (k.f_symb == IDENT)
+            return (long) (k.u.f_atom);
+
+        long v0, v1, x, res = (long) (k.f_symb);
+
+        if (k.f_symb == ICONST
+            || k.f_symb == HCONST
+            || k.f_symb == BCONST
+            || k.f_symb == OCONST
+            || k.f_symb == INSTANT) {
+            v0 = (long) (k.u.f_value);
+            v1 = (long) (k.u.f_value >> sizeof(long));
+        } else {
+            v0 = (long) (k.u.f_lhs);
+            v1 = (long) (k.u.f_rhs);
+        }
+
+        res = (res << 4) + v0;
+        if ((x = res & 0xF0000000L) != 0) {
+            res ^= (x >> 24);
+        }
+        res &= ~x;
+
+        res = (res << 4) + v1;
+        if ((x = res & 0xF0000000L) != 0) {
+            res ^= (x >> 24);
+        }
+        res &= ~x;
+
+        return res;
+    }
+
+    bool ExprEq::operator()(const Expr &x, const Expr &y) const {
+        return
+            // both exprs must be the same type and...
+                x.f_symb == y.f_symb
+                && (
+                        /* ...either have the same identifier */
+                        (x.f_symb == IDENT && *x.u.f_atom == *y.u.f_atom) ||
+
+                        /* ...or have the same constant value */
+                        (x.f_symb >= ICONST && x.f_symb <= INSTANT
+                         && x.u.f_value == y.u.f_value) ||
+
+                        /* ...or share the same subtrees */
+                        (x.u.f_lhs == y.u.f_lhs &&
+                         x.u.f_rhs == y.u.f_rhs));
+    }
+
+} // namespace expr

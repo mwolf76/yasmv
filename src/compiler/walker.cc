@@ -669,17 +669,21 @@ bool Compiler::walk_subscript_inorder(const expr::Expr_ptr expr)
 { return true; }
 void Compiler::walk_subscript_postorder(const expr::Expr_ptr expr)
 {
-    if (ENCODING == f_status)
+    if (ENCODING == f_status) {
         return;
+    }
 
-    if (is_subscript_boolean(expr))
+    if (is_subscript_boolean(expr)) {
         boolean_subscript(expr);
+    }
 
-    else if (is_subscript_enumerative(expr))
+    else if (is_subscript_enumerative(expr)) {
         enumerative_subscript(expr);
+    }
 
-    else if (is_subscript_algebraic(expr))
+    else if (is_subscript_algebraic(expr)) {
         algebraic_subscript(expr);
+    }
 
     else assert( false ); // unreachable
 }

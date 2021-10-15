@@ -44,6 +44,10 @@ public:
     inline bool allsat() const
     { return f_allsat; }
 
+    void set_count(bool value);
+    inline bool count() const
+    { return f_count; }
+
     void set_limit(value_t limit);
     inline value_t limit() const
     { return f_limit; }
@@ -59,11 +63,17 @@ private:
     /* perform ALLSAT enumeration? */
     bool f_allsat;
 
-    /* ALLSAT enumeration limit (optional) */
+    /* perform ALLSAT counting */
+    bool f_count;
+
+    /* ALLSAT enumeration/counting limit (optional) */
     unsigned f_limit;
 
     // -- helpers -------------------------------------------------------------
     bool check_requirements();
+
+    void wrn_prefix();
+    void out_prefix();
 };
 
 typedef PickState* PickState_ptr;

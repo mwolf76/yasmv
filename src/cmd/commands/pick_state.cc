@@ -26,133 +26,109 @@
 
 namespace cmd {
 
-PickState::PickState(Interpreter& owner)
-    : Command(owner)
-    , f_out(std::cout)
-    , f_allsat(false)
-    , f_limit(-1)
-{}
+    PickState::PickState(Interpreter &owner)
+            : Command(owner), f_out(std::cout), f_allsat(false), f_count(false), f_limit(-1)
+    {}
 
-PickState::~PickState()
-{}
+    PickState::~PickState() {}
 
-void PickState::set_allsat(bool allsat)
-{
-    f_allsat = allsat;
-}
-
-void PickState::set_limit(value_t limit)
-{
-    f_limit = limit;
-}
-
-void PickState::add_constraint(expr::Expr_ptr constraint)
-{
-    f_constraints.push_back(constraint);
-}
-
-bool PickState::check_requirements()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
-
-    model::Model& model
-        (mm.model());
-
-    if (0 == model.modules().size()) {
-        f_out
-            << wrnPrefix
-            << "Model not loaded."
-            << std::endl;
-
-        return false;
+    void PickState::set_allsat(bool allsat) {
+        f_allsat = allsat;
     }
 
-    return true;
-}
-
-utils::Variant PickState::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    bool res { false };
-
-    if (check_requirements()) {
-
-        sim::Simulation simulation { *this, model::ModelMgr::INSTANCE().model() };
-        simulation.pick_state(f_allsat, f_limit, f_constraints);
-
-        switch (simulation.status()) {
-        case sim::simulation_status_t::SIMULATION_DONE:
-            res = true;
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Simulation done";
-
-            assert (simulation.has_witness());
-            f_out
-                << ", registered witness `"
-                << simulation.witness().id()
-                << "`"
-                << std::endl;
-            break;
-
-        case sim::simulation_status_t::SIMULATION_INITIALIZED:
-            res = true;
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Simulation initialized" ;
-
-            assert (simulation.has_witness());
-            f_out
-                << ", registered witness `"
-                << simulation.witness().id()
-                << "`"
-                << std::endl;
-            break;
-
-        case sim::simulation_status_t::SIMULATION_DEADLOCKED:
-            if (! om.quiet())
-                f_out
-                    << wrnPrefix;
-            f_out
-                << "Simulation deadlocked"
-                << std::endl;
-            break;
-
-        case sim::simulation_status_t::SIMULATION_INTERRUPTED:
-            if (! om.quiet())
-                f_out
-                    << wrnPrefix;
-            f_out
-                << "Simulation interrupted"
-                << std::endl;
-            break;
-
-        default: assert( false ); /* unreachable */
-        } /* switch */
+    void PickState::set_count(bool count) {
+        f_count = count;
     }
 
-    return utils::Variant(res ? okMessage : errMessage);
-}
+    void PickState::set_limit(value_t limit) {
+        f_limit = limit;
+    }
 
-PickStateTopic::PickStateTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    void PickState::add_constraint(expr::Expr_ptr constraint) {
+        f_constraints.push_back(constraint);
+    }
 
-PickStateTopic::~PickStateTopic()
-{
-    TRACE
-        << "Destroyed pick-state topic"
-        << std::endl;
-}
+    bool PickState::check_requirements() {
+        model::ModelMgr &mm
+                (model::ModelMgr::INSTANCE());
 
-void PickStateTopic::usage()
-{ display_manpage("pick-state"); }
+        model::Model &model
+                (mm.model());
 
+        if (0 == model.modules().size()) {
+            f_out
+                    << wrnPrefix
+                    << "Model not loaded."
+                    << std::endl;
+
+            return false;
+        }
+
+        if (f_allsat && f_count) {
+            f_out
+                    << wrnPrefix
+                    << "ALLSAT counting and enumeration are mutually exclusive."
+                    << std::endl;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    void PickState::wrn_prefix() {
+        opts::OptsMgr &om{opts::OptsMgr::INSTANCE()};
+        if (!om.quiet()) {
+            f_out << wrnPrefix;
+        }
+    }
+
+    void PickState::out_prefix() {
+        opts::OptsMgr &om{opts::OptsMgr::INSTANCE()};
+        if (!om.quiet()) {
+            f_out << outPrefix;
+        }
+    }
+
+    utils::Variant PickState::operator()() {
+        bool res{false};
+        if (check_requirements()) {
+            sim::Simulation simulation{*this, model::ModelMgr::INSTANCE().model()};
+            value_t states{ simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
+
+            if (0 == states) {
+                wrn_prefix();
+                f_out
+                        << "No feasible initial states found"
+                        << std::endl;
+            } else if (1 == states) {
+                res = true;
+                out_prefix();
+                f_out
+                        << "One feasible initial state found"
+                        << std::endl;
+            } else {
+                res = true;
+                out_prefix();
+                f_out
+                        << states
+                        << " feasible initial states"
+                        << std::endl;
+            }
+        }
+
+        return utils::Variant(res ? okMessage : errMessage);
+    }
+
+    PickStateTopic::PickStateTopic(Interpreter & owner)
+            : CommandTopic(owner) {}
+
+    PickStateTopic::~PickStateTopic()
+    {
+        TRACE
+                << "Destroyed pick-state topic"
+                << std::endl;
+    }
+
+    void PickStateTopic::usage() { display_manpage("pick-state"); }
 };

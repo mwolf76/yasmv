@@ -26,7 +26,5 @@ const char* YASMV_HOME_PATH { "YASMV_HOME" };
 
 const char* TRACE_FMT_PLAIN { "plain" };
 const char* TRACE_FMT_JSON  { "json" };
-const char* TRACE_FMT_XML   { "xml" };
-const char* TRACE_FMT_YAML  { "yaml" };
 
 const char* TRACE_FMT_DEFAULT { TRACE_FMT_PLAIN };

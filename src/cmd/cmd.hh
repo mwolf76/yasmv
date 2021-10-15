@@ -45,10 +45,11 @@
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
 
-#include <cmd/commands/list_traces.hh>
-#include <cmd/commands/read_trace.hh>
-#include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/dup_trace.hh>
+#include <cmd/commands/dump_traces.hh>
+#include <cmd/commands/read_trace.hh>
+#include <cmd/commands/list_traces.hh>
+#include <cmd/commands/select_trace.hh>
 
 #include <cmd/commands/get.hh>
 #include <cmd/commands/set.hh>
@@ -156,14 +157,19 @@ namespace cmd {
             return new ReadTrace(f_interpreter);
         }
 
-        inline Command_ptr make_dump_trace()
+        inline Command_ptr make_dump_traces()
         {
-            return new DumpTrace(f_interpreter);
+            return new DumpTraces(f_interpreter);
         }
 
         inline Command_ptr make_dup_trace()
         {
             return new DupTrace(f_interpreter);
+        }
+
+        inline Command_ptr make_select_trace()
+        {
+            return new SelectTrace(f_interpreter);
         }
 
         inline Command_ptr make_get()
@@ -274,14 +280,19 @@ namespace cmd {
             return new ReadTraceTopic(f_interpreter);
         }
 
-        inline CommandTopic_ptr topic_dump_trace()
+        inline CommandTopic_ptr topic_dump_traces()
         {
-            return new DumpTraceTopic(f_interpreter);
+            return new DumpTracesTopic(f_interpreter);
         }
 
         inline CommandTopic_ptr topic_dup_trace()
         {
             return new DupTraceTopic(f_interpreter);
+        }
+
+        inline CommandTopic_ptr topic_select_trace()
+        {
+            return new SelectTraceTopic(f_interpreter);
         }
 
         inline CommandTopic_ptr topic_get()

@@ -19,16 +19,12 @@ Performs BMC simulation.
 
 OPTIONS:
   -c <expr>, specifies an additional state constraint.
-  -u <expr>, specifies an until condition.
-  -k <steps>, the number of steps to simulate.
   -t <trace-uid>, the simulation trace UID.
 
 
-Extends an existing trace with simulated steps. The simulation will follow any
-additional constraint and will terminate due to (a) having reached the until
-condition; or (b) having reached the specified number of steps. If neither -k
-nor -u is used, -k 1 is assumed.
-
+Extends an existing trace by one step. The simulated transition will satisfy
+the transition relation of the FSM along with any additional constraint specified
+by the user via -c clauses.
 
 .ti 0
 EXAMPLES
@@ -37,7 +33,7 @@ EXAMPLES
 >> read-model 'examples/ferryman/ferryman.smv'
 >> pick-state
 -- Simulation initialized, registered witness `sim_1`
->> simulate -k 10
+>> simulate
 !! Simulation interrupted
 -- Registered witness `sim_1`
 >> dump-trace

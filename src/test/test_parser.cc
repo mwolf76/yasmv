@@ -114,6 +114,22 @@ BOOST_AUTO_TEST_CASE(unary_expressions)
     BOOST_CHECK (em.make_bw_not(x) == parse::parseExpression("~ x"));
 }
 
+BOOST_AUTO_TEST_CASE(nondeterministic_expressions)
+{
+    expr::ExprMgr& em
+        (expr::ExprMgr::INSTANCE());
+
+    BOOST_CHECK(em.make_set(em.make_set_comma(em.make_const(1), em.make_set_comma(em.make_const(2), em.make_const(3)))) \
+      == parse::parseExpression("{1, 2, 3}"));
+    BOOST_CHECK(em.make_set(em.make_set_comma(em.make_const(4), em.make_set_comma(em.make_const(6), em.make_const(8)))) \
+      == parse::parseExpression("{4,6,8}"));
+
+    BOOST_CHECK(em.make_set(em.make_set_comma(em.make_const(1), em.make_set_comma(em.make_const(2), em.make_const(3)))) \
+      == parse::parseExpression("{1..3}"));
+    BOOST_CHECK(em.make_set(em.make_set_comma(em.make_const(1), em.make_set_comma(em.make_const(2), em.make_const(3)))) \
+      == parse::parseExpression("{1 .. 3}"));
+}
+
 
 BOOST_AUTO_TEST_CASE(binary_arithmetic_expressions)
 {

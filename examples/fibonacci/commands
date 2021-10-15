@@ -1,5 +1,5 @@
 set n 50
 reach GOAL
-on success dump-trace -f yaml
+on success dump-traces -f json
 time
 quit

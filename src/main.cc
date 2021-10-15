@@ -60,7 +60,7 @@
 
 static const std::string heading_msg =
     "yasmv - Yet Another Symbolic Model Verifier\n"
-    "(c) 2011-2018, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
+    "(c) 2011-2021, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
     "https://github.com/mwolf76/yasmv\n";
 
 /* printing helpers: these functions are unused in the code, they're
