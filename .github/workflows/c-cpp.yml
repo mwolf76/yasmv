@@ -12,8 +12,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: install deps
+      run: apt-get install libboost-all-dev
+
     - name: configure
-      run: apt-install libboost-dev && ./setup.sh
+      run: ./setup.sh
+
     - name: make
       run: make
 
