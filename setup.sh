@@ -52,7 +52,7 @@ fi
 if [ $USE_STRICT -eq 1 ];
 then
     # compilation options for debugging, all + extra warnings enabled. Any warning is fatal.
-    FLAGS="-Wall -Werror"
+    FLAGS="-Wall -Wno-deprecated-declarations -Werror"
 else
     # compilation options for debugging, all + extra warnings enabled. Any warning is fatal.
     FLAGS=""
