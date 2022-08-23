@@ -34,9 +34,9 @@ AC_DEFUN([AC_ANTLR3], [
          AC_MSG_ERROR([antlr3 requires java to run])
       fi
 
-      AC_CHECK_PROG(ANTLR, antlr3, antlr, [])
+      AC_CHECK_PROG(ANTLR, antlr3.2, antlr3.2, [])
       if test x$ANTLR = "x"; then
-         AC_MSG_ERROR([antlr3 required to compile grammars])
+         AC_MSG_ERROR([antlr3.2 required to compile grammars])
 
       else
          save_CPPFLAGS=$CPPFLAGS
