@@ -11,6 +11,7 @@ function test() {
     diff -wB "$REFERENCE/$2-out-ref" "$2-out" &> /dev/null
     if [[ $? == 0 ]]; then
 	    echo "OK"
+            rm -f "$2-out"
     else
         echo "FAILED!"
         echo "####### Showing EXPECTED and ACTUAL output for $1/$2"

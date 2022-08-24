@@ -1,69 +1,85 @@
 Target is reachable, registered witness `reach_1`, 6 steps.
 {
-   "traces" : [
-      {
-         "description" : "Reachability witness for target `GOAL` in module `vending`",
-         "id" : "reach_1",
-         "input" : {
-            "credit" : 2000,
-            "due-amount" : 1255
-         },
-         "steps" : [
-            {
-               "defines" : {
-                  "GOAL" : "FALSE"
-               },
-               "state" : {
-                  "change" : 745,
-                  "choice" : "CHOICE_500CENT"
-               }
-            },
-            {
-               "defines" : {
-                  "GOAL" : "FALSE"
-               },
-               "state" : {
-                  "change" : 245,
-                  "choice" : "CHOICE_200CENT"
-               }
-            },
-            {
-               "defines" : {
-                  "GOAL" : "FALSE"
-               },
-               "state" : {
-                  "change" : 45,
-                  "choice" : "CHOICE_20CENT"
-               }
-            },
-            {
-               "defines" : {
-                  "GOAL" : "FALSE"
-               },
-               "state" : {
-                  "change" : 25,
-                  "choice" : "CHOICE_20CENT"
-               }
-            },
-            {
-               "defines" : {
-                  "GOAL" : "FALSE"
-               },
-               "state" : {
-                  "change" : 5,
-                  "choice" : "CHOICE_5CENT"
-               }
-            },
-            {
-               "defines" : {
-                  "GOAL" : "TRUE"
-               },
-               "state" : {
-                  "change" : 0,
-                  "choice" : "CHOICE_IDLE"
-               }
-            }
-         ]
-      }
-   ]
+	"traces" : 
+	[
+		{
+			"description" : "Reachability witness for target `GOAL` in module `vending`",
+			"id" : "reach_1",
+			"input" : 
+			{
+				"credit" : 2000,
+				"due-amount" : 1255
+			},
+			"steps" : 
+			[
+				{
+					"defines" : 
+					{
+						"GOAL" : "FALSE"
+					},
+					"state" : 
+					{
+						"change" : 745,
+						"choice" : "CHOICE_500CENT"
+					}
+				},
+				{
+					"defines" : 
+					{
+						"GOAL" : "FALSE"
+					},
+					"state" : 
+					{
+						"change" : 245,
+						"choice" : "CHOICE_200CENT"
+					}
+				},
+				{
+					"defines" : 
+					{
+						"GOAL" : "FALSE"
+					},
+					"state" : 
+					{
+						"change" : 45,
+						"choice" : "CHOICE_20CENT"
+					}
+				},
+				{
+					"defines" : 
+					{
+						"GOAL" : "FALSE"
+					},
+					"state" : 
+					{
+						"change" : 25,
+						"choice" : "CHOICE_20CENT"
+					}
+				},
+				{
+					"defines" : 
+					{
+						"GOAL" : "FALSE"
+					},
+					"state" : 
+					{
+						"change" : 5,
+						"choice" : "CHOICE_5CENT"
+					}
+				},
+				{
+					"defines" : 
+					{
+						"GOAL" : "TRUE"
+					},
+					"state" : 
+					{
+						"change" : 0,
+						"choice" : "CHOICE_IDLE"
+					}
+				}
+			]
+		}
+	]
 }
+
