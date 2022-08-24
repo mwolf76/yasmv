@@ -3,6 +3,7 @@ name: C/C++ CI
 on:
   push:
     branches: [ "master" ]
+
   pull_request:
     branches: [ "master" ]
 
@@ -19,6 +20,10 @@ jobs:
     - name: configure
       run: ./setup.sh
 
-    - name: make
+    - name: compiler
       run: make
+
+   - name: test
+     run: make test
+
 
