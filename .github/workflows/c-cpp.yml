@@ -23,4 +23,4 @@ jobs:
       run: make
 
     - name: functional tests
-      run: make test
+      run: YASMV_HOME=$(pwd) make test
