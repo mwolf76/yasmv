@@ -1,0 +1,68 @@
+Target is reachable, registered witness `reach_1`, 8 steps.
+-- Reachability witness for target `GOAL` in module `ferryman`
+Witness: reach_1
+
+:: @0
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = WEST
+   wolf = WEST
+   carry = NIL
+
+:: @1
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = WEST
+   wolf = WEST
+   carry = GOAT
+
+:: @2
+-- state
+   ferryman = WEST
+   goat = EAST
+   cabbage = WEST
+   wolf = WEST
+   carry = NIL
+
+:: @3
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = EAST
+   wolf = WEST
+   carry = CABBAGE
+
+:: @4
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = EAST
+   wolf = WEST
+   carry = GOAT
+
+:: @5
+-- state
+   ferryman = EAST
+   goat = WEST
+   cabbage = EAST
+   wolf = EAST
+   carry = WOLF
+
+:: @6
+-- state
+   ferryman = WEST
+   goat = WEST
+   cabbage = EAST
+   wolf = EAST
+   carry = NIL
+
+:: @7
+-- state
+   ferryman = EAST
+   goat = EAST
+   cabbage = EAST
+   wolf = EAST
+   carry = GOAT
+

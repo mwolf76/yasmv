@@ -1,199 +1,57 @@
 8 feasible initial states
-{
-	"traces" : 
-	[
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-1",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							6,
-							1,
-							8,
-							7,
-							5,
-							3,
-							2,
-							9,
-							4
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-2",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							2,
-							9,
-							4,
-							7,
-							5,
-							3,
-							6,
-							1,
-							8
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-3",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							4,
-							3,
-							8,
-							9,
-							5,
-							1,
-							2,
-							7,
-							6
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-4",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							8,
-							3,
-							4,
-							1,
-							5,
-							9,
-							6,
-							7,
-							2
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-5",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							8,
-							1,
-							6,
-							3,
-							5,
-							7,
-							4,
-							9,
-							2
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-6",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							4,
-							9,
-							2,
-							3,
-							5,
-							7,
-							8,
-							1,
-							6
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-7",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							6,
-							7,
-							2,
-							1,
-							5,
-							9,
-							8,
-							3,
-							4
-						]
-					}
-				}
-			]
-		},
-		{
-			"description" : "Simulation trace for module `magic3`",
-			"id" : "sim-8",
-			"steps" : 
-			[
-				{
-					"state" : 
-					{
-						"A" : 
-						[
-							2,
-							7,
-							6,
-							9,
-							5,
-							1,
-							4,
-							3,
-							8
-						]
-					}
-				}
-			]
-		}
-	]
-}
+-- Simulation trace for module `magic3`
+Witness: sim-1
+
+:: @0
+-- state
+   A = [6, 1, 8, 7, 5, 3, 2, 9, 4]
+
+-- Simulation trace for module `magic3`
+Witness: sim-2
+
+:: @0
+-- state
+   A = [2, 9, 4, 7, 5, 3, 6, 1, 8]
+
+-- Simulation trace for module `magic3`
+Witness: sim-3
+
+:: @0
+-- state
+   A = [4, 3, 8, 9, 5, 1, 2, 7, 6]
+
+-- Simulation trace for module `magic3`
+Witness: sim-4
+
+:: @0
+-- state
+   A = [8, 3, 4, 1, 5, 9, 6, 7, 2]
+
+-- Simulation trace for module `magic3`
+Witness: sim-5
+
+:: @0
+-- state
+   A = [8, 1, 6, 3, 5, 7, 4, 9, 2]
+
+-- Simulation trace for module `magic3`
+Witness: sim-6
+
+:: @0
+-- state
+   A = [4, 9, 2, 3, 5, 7, 8, 1, 6]
+
+-- Simulation trace for module `magic3`
+Witness: sim-7
+
+:: @0
+-- state
+   A = [6, 7, 2, 1, 5, 9, 8, 3, 4]
+
+-- Simulation trace for module `magic3`
+Witness: sim-8
+
+:: @0
+-- state
+   A = [2, 7, 6, 9, 5, 1, 4, 3, 8]
 

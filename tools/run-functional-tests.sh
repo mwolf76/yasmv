@@ -25,6 +25,7 @@ test cannibals cannibals-backward
 test vending vending
 test herschel herschel
 test koenisberg koenisberg
+test ferryman ferryman
 test fifteen fifteen
 test magic magic
 
