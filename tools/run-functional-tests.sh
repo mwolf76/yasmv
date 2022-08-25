@@ -15,7 +15,7 @@ function test() {
     else
         echo "FAILED!"
         echo "####### Showing EXPECTED and ACTUAL output for $1/$2"
-        diff -W $(( $(tput cols) - 2 )) -y "$REFERENCE/$2-out-ref" "$2-out"
+        diff -W $(( $(tput -T xterm cols) - 2 )) -y "$REFERENCE/$2-out-ref" "$2-out"
     	exit 1
     fi
 }
