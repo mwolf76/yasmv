@@ -20,7 +20,7 @@ jobs:
       run: ./setup.sh
 
     - name: compile
-      run: make
+      run: make -j $(nproc)
 
     - name: functional tests
       run: YASMV_HOME=$(pwd) make test
