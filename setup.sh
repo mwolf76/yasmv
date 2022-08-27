@@ -60,8 +60,8 @@ fi
 
 SETTINGS="$DEFINES $COMMON_OPTIONS $OPTIONS $FLAGS"
 
-# extract microcode
-if ! [ -d microcode ]; then
+# extract microcode (do it only once)
+if ! [ -f microcode/u-ge-26.json ]; then
    echo -n "Extracting microcode ... " && tar xfj microcode.tar.bz2 && echo "done."
 fi
 
