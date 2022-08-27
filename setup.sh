@@ -61,7 +61,9 @@ fi
 SETTINGS="$DEFINES $COMMON_OPTIONS $OPTIONS $FLAGS"
 
 # extract microcode
-echo -n "Extracting microcode ... " && tar xfj microcode.tar.bz2 && echo "done."
+if ! [ -d microcode ]; then
+   echo -n "Extracting microcode ... " && tar xfj microcode.tar.bz2 && echo "done."
+fi
 
 # generate configure script
 autoreconf -vif
