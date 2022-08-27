@@ -38,68 +38,64 @@
 
 namespace cmd {
 
-Echo::Echo(Interpreter& owner)
-    : Command(owner)
-{}
+    Echo::Echo(Interpreter& owner)
+        : Command(owner)
+    {}
 
-Echo::~Echo()
-{}
+    Echo::~Echo()
+    {}
 
-void Echo::append_expression(expr::Expr_ptr expr)
-{
-    f_expressions.push_back(expr);
-}
-
-utils::Variant Echo::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    witness::WitnessMgr& wm
-        (witness::WitnessMgr::INSTANCE());
-
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out
-        (std::cout);
-
-    if (! om.quiet()) {
-        out
-            << outPrefix;
+    void Echo::append_expression(expr::Expr_ptr expr)
+    {
+        f_expressions.push_back(expr);
     }
 
-    /* TODO: not really compatible with the grammar... restrict to 1 expr */
-    std::for_each(f_expressions.begin(),
-                  f_expressions.end(),
-                  [&](expr::Expr_ptr expr)
-                  {
-                      witness::Witness& current
-                          (wm.current());
+    utils::Variant Echo::operator()()
+    {
+        opts::OptsMgr& om(opts::OptsMgr::INSTANCE());
 
-                      out
-                          << wm.eval(current,
-                                     expr::ExprMgr::INSTANCE().make_empty(),
-                                     expr, current.last_time())
-                          << " " ;
-                  });
+        witness::WitnessMgr& wm(witness::WitnessMgr::INSTANCE());
 
-    out
-        << std::endl;
+        /* FIXME: implement stream redirection for std{out,err} */
+        std::ostream& out { std::cout };
 
-    return utils::Variant(okMessage);
-}
+        if (!om.quiet()) {
+            out
+                << outPrefix;
+        }
 
-EchoTopic::EchoTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+        /* TODO: not really compatible with the grammar... restrict to 1 expr */
+        std::for_each(
+	    f_expressions.begin(), f_expressions.end(),
+	    [&](expr::Expr_ptr expr) {
+		witness::Witness& current(wm.current());
+       		out
+		    << wm.eval(current,
+			       expr::ExprMgr::INSTANCE().make_empty(),
+			       expr, current.last_time())
+		    << " ";
+	    });
+	
+        out
+            << std::endl;
 
-EchoTopic::~EchoTopic()
-{
-    TRACE
-        << "Destroyed echo topic"
-        << std::endl;
-}
+        return utils::Variant(okMessage);
+    }
 
-void EchoTopic::usage()
-{ display_manpage("echo"); }
+    EchoTopic::EchoTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-};
+    EchoTopic::~EchoTopic()
+    {
+        TRACE
+            << "Destroyed echo topic"
+            << std::endl;
+    }
+
+    void EchoTopic::usage()
+    {
+        display_manpage("echo");
+    }
+
+}; // namespace cmd

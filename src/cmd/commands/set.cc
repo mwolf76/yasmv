@@ -35,60 +35,61 @@
 
 namespace cmd {
 
-Set::Set(Interpreter& owner)
-    : Command(owner)
-    , f_identifier(NULL)
-    , f_value(NULL)
-{}
+    Set::Set(Interpreter& owner)
+        : Command(owner)
+        , f_identifier(NULL)
+        , f_value(NULL)
+    {}
 
-Set::~Set()
-{}
+    Set::~Set()
+    {}
 
-void Set::set_identifier(expr::Expr_ptr id)
-{
-    DEBUG
-        << "Id"
-        << std::endl;
+    void Set::set_identifier(expr::Expr_ptr id)
+    {
+        DEBUG
+            << "Id"
+            << std::endl;
 
-    f_identifier = id;
-}
-
-void Set::set_value(expr::Expr_ptr value)
-{
-    DEBUG
-        << "Val"
-        << std::endl;
-
-    f_value = value;
-}
-
-utils::Variant Set::operator()()
-{
-    env::Environment& env
-        (env::Environment::INSTANCE());
-
-    if (NULL == f_identifier || NULL == f_value) {
-        SetTopic(f_owner)
-            .usage();
+        f_identifier = id;
     }
-    else
-        env.set(f_identifier, f_value);
 
-    return utils::Variant(okMessage);
-}
+    void Set::set_value(expr::Expr_ptr value)
+    {
+        DEBUG
+            << "Val"
+            << std::endl;
 
-SetTopic::SetTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+        f_value = value;
+    }
 
-SetTopic::~SetTopic()
-{
-    TRACE
-        << "Destroyed set topic"
-        << std::endl;
-}
+    utils::Variant Set::operator()()
+    {
+        env::Environment& env(env::Environment::INSTANCE());
 
-void SetTopic::usage()
-{ display_manpage("set"); }
+        if (NULL == f_identifier || NULL == f_value) {
+            SetTopic(f_owner)
+                .usage();
+        } else {
+            env.set(f_identifier, f_value);
+	}
 
-};
+        return utils::Variant(okMessage);
+    }
+
+    SetTopic::SetTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    SetTopic::~SetTopic()
+    {
+        TRACE
+            << "Destroyed set topic"
+            << std::endl;
+    }
+
+    void SetTopic::usage()
+    {
+        display_manpage("set");
+    }
+
+}; // namespace cmd

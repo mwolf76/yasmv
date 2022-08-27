@@ -21,76 +21,75 @@
  *
  **/
 
-#include <cmd/commands/commands.hh>
 #include <cmd/commands/check.hh>
+#include <cmd/commands/commands.hh>
 
 #include <algorithms/check/check.hh>
 
 namespace cmd {
 
-Check::Check(Interpreter& owner)
-    : Command(owner)
-    , f_out(std::cout)
-{}
+    Check::Check(Interpreter& owner)
+        : Command(owner)
+        , f_out(std::cout)
+    {}
 
-Check::~Check()
-{}
+    Check::~Check()
+    {}
 
-void Check::set_property(expr::Expr_ptr property)
-{
-    f_property = property;
-}
-
-void Check::add_constraint(expr::Expr_ptr constraint)
-{
-    f_constraints.push_back(constraint);
-}
-
-bool Check::check_requirements()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
-
-    model::Model& model
-         (mm.model());
-
-    if (0 == model.modules().size()) {
-        f_out
-            << wrnPrefix
-            << "Model not loaded."
-            << std::endl;
-
-        return false;
+    void Check::set_property(expr::Expr_ptr property)
+    {
+        f_property = property;
     }
 
-    return true;
-}
+    void Check::add_constraint(expr::Expr_ptr constraint)
+    {
+        f_constraints.push_back(constraint);
+    }
 
-utils::Variant Check::operator()()
-{
-    bool res { false };
+    bool Check::check_requirements()
+    {
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
 
-    DEBUG
-        << "Property to check is `"
-        << f_property
-        << "`."
-        << std::endl;
+        if (0 == model.modules().size()) {
+            f_out
+                << wrnPrefix
+                << "Model not loaded."
+                << std::endl;
 
-    return utils::Variant(res ? okMessage : errMessage);
-}
+            return false;
+        }
 
-CheckTopic::CheckTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+        return true;
+    }
 
-CheckTopic::~CheckTopic()
-{
-    TRACE
-        << "Destroyed check topic"
-        << std::endl;
-}
+    utils::Variant Check::operator()()
+    {
+        bool res { false };
 
-void CheckTopic::usage()
-{ display_manpage("check"); }
+        DEBUG
+            << "Property to check is `"
+            << f_property
+            << "`."
+            << std::endl;
 
-};
+        return utils::Variant(res ? okMessage : errMessage);
+    }
+
+    CheckTopic::CheckTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    CheckTopic::~CheckTopic()
+    {
+        TRACE
+            << "Destroyed check topic"
+            << std::endl;
+    }
+
+    void CheckTopic::usage()
+    {
+        display_manpage("check");
+    }
+
+}; // namespace cmd

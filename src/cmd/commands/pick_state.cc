@@ -26,49 +26,56 @@
 
 namespace cmd {
 
-    PickState::PickState(Interpreter &owner)
-            : Command(owner), f_out(std::cout), f_allsat(false), f_count(false), f_limit(-1)
+    PickState::PickState(Interpreter& owner)
+        : Command(owner)
+        , f_out(std::cout)
+        , f_allsat(false)
+        , f_count(false)
+        , f_limit(-1)
     {}
 
-    PickState::~PickState() {}
+    PickState::~PickState()
+    {}
 
-    void PickState::set_allsat(bool allsat) {
+    void PickState::set_allsat(bool allsat)
+    {
         f_allsat = allsat;
     }
 
-    void PickState::set_count(bool count) {
+    void PickState::set_count(bool count)
+    {
         f_count = count;
     }
 
-    void PickState::set_limit(value_t limit) {
+    void PickState::set_limit(value_t limit)
+    {
         f_limit = limit;
     }
 
-    void PickState::add_constraint(expr::Expr_ptr constraint) {
+    void PickState::add_constraint(expr::Expr_ptr constraint)
+    {
         f_constraints.push_back(constraint);
     }
 
-    bool PickState::check_requirements() {
-        model::ModelMgr &mm
-                (model::ModelMgr::INSTANCE());
-
-        model::Model &model
-                (mm.model());
+    bool PickState::check_requirements()
+    {
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
             f_out
-                    << wrnPrefix
-                    << "Model not loaded."
-                    << std::endl;
+                << wrnPrefix
+                << "Model not loaded."
+                << std::endl;
 
             return false;
         }
 
         if (f_allsat && f_count) {
             f_out
-                    << wrnPrefix
-                    << "ALLSAT counting and enumeration are mutually exclusive."
-                    << std::endl;
+                << wrnPrefix
+                << "ALLSAT counting and enumeration are mutually exclusive."
+                << std::endl;
 
             return false;
         }
@@ -76,59 +83,66 @@ namespace cmd {
         return true;
     }
 
-    void PickState::wrn_prefix() {
-        opts::OptsMgr &om{opts::OptsMgr::INSTANCE()};
+    void PickState::wrn_prefix()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         if (!om.quiet()) {
             f_out << wrnPrefix;
         }
     }
 
-    void PickState::out_prefix() {
-        opts::OptsMgr &om{opts::OptsMgr::INSTANCE()};
+    void PickState::out_prefix()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         if (!om.quiet()) {
             f_out << outPrefix;
         }
     }
 
-    utils::Variant PickState::operator()() {
-        bool res{false};
+    utils::Variant PickState::operator()()
+    {
+        bool res { false };
         if (check_requirements()) {
-            sim::Simulation simulation{*this, model::ModelMgr::INSTANCE().model()};
-            value_t states{ simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
+            sim::Simulation simulation { *this, model::ModelMgr::INSTANCE().model() };
+            value_t states { simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
 
             if (0 == states) {
                 wrn_prefix();
                 f_out
-                        << "No feasible initial states found"
-                        << std::endl;
+                    << "No feasible initial states found"
+                    << std::endl;
             } else if (1 == states) {
                 res = true;
                 out_prefix();
                 f_out
-                        << "One feasible initial state found"
-                        << std::endl;
+                    << "One feasible initial state found"
+                    << std::endl;
             } else {
                 res = true;
                 out_prefix();
                 f_out
-                        << states
-                        << " feasible initial states"
-                        << std::endl;
+                    << states
+                    << " feasible initial states"
+                    << std::endl;
             }
         }
 
         return utils::Variant(res ? okMessage : errMessage);
     }
 
-    PickStateTopic::PickStateTopic(Interpreter & owner)
-            : CommandTopic(owner) {}
+    PickStateTopic::PickStateTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
     PickStateTopic::~PickStateTopic()
     {
         TRACE
-                << "Destroyed pick-state topic"
-                << std::endl;
+            << "Destroyed pick-state topic"
+            << std::endl;
     }
 
-    void PickStateTopic::usage() { display_manpage("pick-state"); }
-};
+    void PickStateTopic::usage()
+    {
+        display_manpage("pick-state");
+    }
+}; // namespace cmd

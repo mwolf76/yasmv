@@ -1,3 +1,3 @@
-reach GOAL
+reach GOAL -c @3{carry = CABBAGE}
 on success dump-traces
 quit

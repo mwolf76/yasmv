@@ -27,64 +27,70 @@
 #ifndef PICK_STATE_CMD_H
 #define PICK_STATE_CMD_H
 
-#include <cmd/command.hh>
 #include <algorithms/sim/simulation.hh>
+#include <cmd/command.hh>
 
 namespace cmd {
 
-class PickState : public Command {
-public:
-    PickState(Interpreter& owner);
-    virtual ~PickState();
+    class PickState: public Command {
+    public:
+        PickState(Interpreter& owner);
+        virtual ~PickState();
 
-    /** cmd params */
-    void add_constraint(expr::Expr_ptr constraint);
+        /** cmd params */
+        void add_constraint(expr::Expr_ptr constraint);
 
-    void set_allsat(bool value);
-    inline bool allsat() const
-    { return f_allsat; }
+        void set_allsat(bool value);
+        inline bool allsat() const
+        {
+            return f_allsat;
+        }
 
-    void set_count(bool value);
-    inline bool count() const
-    { return f_count; }
+        void set_count(bool value);
+        inline bool count() const
+        {
+            return f_count;
+        }
 
-    void set_limit(value_t limit);
-    inline value_t limit() const
-    { return f_limit; }
+        void set_limit(value_t limit);
+        inline value_t limit() const
+        {
+            return f_limit;
+        }
 
-    utils::Variant virtual operator()();
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* (optional) additional constraints */
-    expr::ExprVector f_constraints;
+        /* (optional) additional constraints */
+        expr::ExprVector f_constraints;
 
-    /* perform ALLSAT enumeration? */
-    bool f_allsat;
+        /* perform ALLSAT enumeration? */
+        bool f_allsat;
 
-    /* perform ALLSAT counting */
-    bool f_count;
+        /* perform ALLSAT counting */
+        bool f_count;
 
-    /* ALLSAT enumeration/counting limit (optional) */
-    unsigned f_limit;
+        /* ALLSAT enumeration/counting limit (optional) */
+        unsigned f_limit;
 
-    // -- helpers -------------------------------------------------------------
-    bool check_requirements();
+        // -- helpers -------------------------------------------------------------
+        bool check_requirements();
 
-    void wrn_prefix();
-    void out_prefix();
-};
+        void wrn_prefix();
+        void out_prefix();
+    };
 
-typedef PickState* PickState_ptr;
+    typedef PickState* PickState_ptr;
 
-class PickStateTopic : public CommandTopic {
-public:
-    PickStateTopic(Interpreter& owner);
-    virtual ~PickStateTopic();
+    class PickStateTopic: public CommandTopic {
+    public:
+        PickStateTopic(Interpreter& owner);
+        virtual ~PickStateTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* PICK_STATE_CMD_H */

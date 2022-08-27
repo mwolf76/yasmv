@@ -27,15 +27,15 @@
 /* -- commands */
 #include <cmd/commands/diameter.hh>
 #include <cmd/commands/do.hh>
-#include <cmd/commands/help.hh>
 #include <cmd/commands/echo.hh>
+#include <cmd/commands/help.hh>
 #include <cmd/commands/last.hh>
 #include <cmd/commands/on.hh>
-#include <cmd/commands/time.hh>
 #include <cmd/commands/quit.hh>
+#include <cmd/commands/time.hh>
 
-#include <cmd/commands/read_model.hh>
 #include <cmd/commands/dump_model.hh>
+#include <cmd/commands/read_model.hh>
 
 #include <cmd/commands/check.hh>
 #include <cmd/commands/check_init.hh>
@@ -45,15 +45,15 @@
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
 
-#include <cmd/commands/dup_trace.hh>
 #include <cmd/commands/dump_traces.hh>
-#include <cmd/commands/read_trace.hh>
+#include <cmd/commands/dup_trace.hh>
 #include <cmd/commands/list_traces.hh>
+#include <cmd/commands/read_trace.hh>
 #include <cmd/commands/select_trace.hh>
 
+#include <cmd/commands/clear.hh>
 #include <cmd/commands/get.hh>
 #include <cmd/commands/set.hh>
-#include <cmd/commands/clear.hh>
 
 namespace cmd {
 

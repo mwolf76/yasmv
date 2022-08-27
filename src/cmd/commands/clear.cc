@@ -24,8 +24,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/commands.hh>
 #include <cmd/commands/clear.hh>
+#include <cmd/commands/commands.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -35,51 +35,52 @@
 
 namespace cmd {
 
-Clear::Clear(Interpreter& owner)
-    : Command(owner)
-    , f_identifier(NULL)
-{}
+    Clear::Clear(Interpreter& owner)
+        : Command(owner)
+        , f_identifier(NULL)
+    {}
 
-Clear::~Clear()
-{}
+    Clear::~Clear()
+    {}
 
-void Clear::set_identifier(expr::Expr_ptr id)
-{
-    f_identifier = id;
-}
+    void Clear::set_identifier(expr::Expr_ptr id)
+    {
+        f_identifier = id;
+    }
 
-utils::Variant Clear::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
+    utils::Variant Clear::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+	
+	/* FIXME: implement stream redirection for std{out,err} */
+	std::ostream& out { std::cout };
 
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out
-        (std::cout);
+        if (!om.quiet()) {
+            out
+                << outPrefix;
+	}
 
-    if (! om.quiet())
         out
-            << outPrefix;
+            << "WARNING: this commands currently does nothing!"
+            << std::endl;
 
-    out
-        << "WARNING: this commands currently does nothing!"
-        << std::endl;
+        return utils::Variant(okMessage);
+    }
 
-    return utils::Variant(okMessage);
-}
+    ClearTopic::ClearTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-ClearTopic::ClearTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    ClearTopic::~ClearTopic()
+    {
+        TRACE
+            << "Destroyed clear topic"
+            << std::endl;
+    }
 
-ClearTopic::~ClearTopic()
-{
-    TRACE
-        << "Destroyed clear topic"
-        << std::endl;
-}
+    void ClearTopic::usage()
+    {
+        display_manpage("clear");
+    }
 
-void ClearTopic::usage()
-{ display_manpage("clear"); }
-
-};
+}; // namespace cmd

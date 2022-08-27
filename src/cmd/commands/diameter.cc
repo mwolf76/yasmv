@@ -41,11 +41,8 @@ namespace cmd {
 
     bool Diameter::check_requirements()
     {
-        model::ModelMgr& mm
-            (model::ModelMgr::INSTANCE());
-
-        model::Model& model
-            (mm.model());
+        model::ModelMgr& mm{ model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
             f_out
@@ -64,8 +61,9 @@ namespace cmd {
         bool res { false };
 
         if (check_requirements()) {
-            fsm::ComputeDiameter computeDiameter
-                { *this, model::ModelMgr::INSTANCE().model() };
+            fsm::ComputeDiameter computeDiameter {
+		*this, model::ModelMgr::INSTANCE().model()
+	    };
 
             computeDiameter.process();
             step_t value = computeDiameter.diameter();
@@ -79,7 +77,7 @@ namespace cmd {
             res = (value != UINT_MAX);
         }
 
-        return utils::Variant(res ? okMessage : errMessage);
+        return utils::Variant { res ? okMessage : errMessage };
     }
 
     DiameterTopic::DiameterTopic(Interpreter& owner)
@@ -90,6 +88,8 @@ namespace cmd {
     {}
 
     void DiameterTopic::usage()
-    { display_manpage("diameter"); }
+    {
+        display_manpage("diameter");
+    }
 
-};
+}; // namespace cmd

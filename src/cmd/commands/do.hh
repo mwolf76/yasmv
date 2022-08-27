@@ -31,28 +31,28 @@
 
 namespace cmd {
 
-typedef CommandTopic* CommandTopic_ptr;
+    typedef CommandTopic* CommandTopic_ptr;
 
-using Commands = std::vector<Command_ptr>;
-class Do : public Command {
-    Commands f_commands;
+    using Commands = std::vector<Command_ptr>;
+    class Do: public Command {
+        Commands f_commands;
 
-public:
-    Do(Interpreter& owner);
-    virtual ~Do();
-    void add_command(Command_ptr command);
+    public:
+        Do(Interpreter& owner);
+        virtual ~Do();
+        void add_command(Command_ptr command);
 
-    utils::Variant virtual operator()();
-};
-typedef Do* Do_ptr;
+        utils::Variant virtual operator()();
+    };
+    typedef Do* Do_ptr;
 
-class DoTopic : public CommandTopic {
-public:
-    DoTopic(Interpreter& owner);
-    virtual ~DoTopic();
+    class DoTopic: public CommandTopic {
+    public:
+        DoTopic(Interpreter& owner);
+        virtual ~DoTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* DO_H */

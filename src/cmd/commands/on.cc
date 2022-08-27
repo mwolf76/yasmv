@@ -31,78 +31,85 @@
 
 namespace cmd {
 
-On::On(Interpreter& owner)
-    : Command(owner)
-    , f_then(NULL)
-    , f_else(NULL)
-{}
+    On::On(Interpreter& owner)
+        : Command(owner)
+        , f_then(NULL)
+        , f_else(NULL)
+    {}
 
-On::~On()
-{
-    if (f_then)
-        delete f_then;
-
-    if (f_else)
-        delete f_else;
-}
-
-void On::set_then(Command_ptr c)
-{
-    if (! c)
-        throw CommandException("Empty THEN branch");
-
-    f_then = c;
-}
-
-void On::set_else(Command_ptr c)
-{
-    if (! c)
-        throw CommandException("Empty ELSE branch");
-
-    f_else = c;
-}
-
-utils::Variant On::operator()()
-{
-    CommandMgr& cm
-        (CommandMgr::INSTANCE());
-
-    Interpreter& interpreter
-        (Interpreter::INSTANCE());
-
-    utils::Variant& res
-        (interpreter.last_result());
-
-    if (cm.is_success(res)) {
-        if (f_then)
-            res = f_then->operator()();
-    } else if (cm.is_failure(res)) {
-        if (f_else)
-            res = f_else->operator()();
-    } else {
-        std::cout
-            << "###"
-            << res
-            << std::endl;
-
-        assert(false);
+    On::~On()
+    {
+	delete f_then;
+	delete f_else;
     }
 
-    return res;
-}
+    void On::set_then(Command_ptr c)
+    {
+        if (!c) {
+            throw CommandException("Empty THEN branch");
+	}
 
-OnTopic::OnTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+        f_then = c;
+    }
 
-OnTopic::~OnTopic()
-{
-    TRACE
-        << "Destroyed on topic"
-        << std::endl;
-}
+    void On::set_else(Command_ptr c)
+    {
+        if (!c) {
+            throw CommandException("Empty ELSE branch");
+	}
 
-void OnTopic::usage()
-{ display_manpage("on"); }
+        f_else = c;
+    }
 
-};
+    utils::Variant On::operator()()
+    {
+        CommandMgr& cm { CommandMgr::INSTANCE() };
+        Interpreter& interpreter { Interpreter::INSTANCE() };
+
+        utils::Variant& res { interpreter.last_result() };
+
+        if (cm.is_success(res)) {
+            if (f_then) {
+		TRACE
+		    << "condition holds, triggering `then` action."
+		    << std::endl;
+		
+                res = f_then->operator()();
+	    }
+        } else if (cm.is_failure(res)) {
+            if (f_else) {
+		TRACE
+		    << "condition does not hold, triggering `else` action."
+		    << std::endl;
+		
+                res = f_else->operator()();
+	    }
+        } else {
+	    ERR
+		<< "unexpected: condition was neither in `SUCCESS` or `FAILURE` state."
+                << res
+                << std::endl;
+
+            assert(false);
+        }
+
+        return res;
+    }
+
+    OnTopic::OnTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    OnTopic::~OnTopic()
+    {
+        TRACE
+            << "Destroyed on topic"
+            << std::endl;
+    }
+
+    void OnTopic::usage()
+    {
+        display_manpage("on");
+    }
+
+}; // namespace cmd

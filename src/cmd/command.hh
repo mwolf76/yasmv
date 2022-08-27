@@ -27,10 +27,10 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <cmd/exceptions.hh>
+#include <cmd/typedefs.hh>
 #include <common/common.hh>
 #include <expr/expr.hh>
-#include <cmd/typedefs.hh>
-#include <cmd/exceptions.hh>
 #include <utils/variant.hh>
 
 #include <string>

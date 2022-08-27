@@ -31,54 +31,55 @@
 
 namespace cmd {
 
-Do::Do(Interpreter& owner)
-    : Command(owner)
-    , f_commands()
-{}
+    Do::Do(Interpreter& owner)
+        : Command(owner)
+        , f_commands()
+    {}
 
-Do::~Do()
-{
-    f_commands.clear();
-}
-
-utils::Variant Do::operator()()
-{
-    CommandMgr& cm
-        (CommandMgr::INSTANCE());
-
-    utils::Variant res;
-    Commands::iterator i = f_commands.begin();
-    while (i != f_commands.end()) {
-        Command_ptr c { *i };
-        assert(NULL != c);
-
-        res = (*c)();
-        if (cm.is_failure(res))
-            break;
-
-        ++ i;
+    Do::~Do()
+    {
+        f_commands.clear();
     }
 
-    return res;
-}
+    utils::Variant Do::operator()()
+    {
+        CommandMgr& cm { CommandMgr::INSTANCE() };
 
-void Do::add_command(Command_ptr c)
-{
-    f_commands.push_back(c);
-}
+        utils::Variant res;
+        Commands::iterator i = f_commands.begin();
+        while (i != f_commands.end()) {
+            Command_ptr c { *i };
+            assert(NULL != c);
 
-DoTopic::DoTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+            res = (*c)();
+            if (cm.is_failure(res))
+                break;
 
-DoTopic::~DoTopic()
-{
-    TRACE
-        << "Destroyed do topic"
-        << std::endl;
-}
+            ++i;
+        }
 
-void DoTopic::usage()
-{ display_manpage("do"); }
+        return res;
+    }
 
-};
+    void Do::add_command(Command_ptr c)
+    {
+        f_commands.push_back(c);
+    }
+
+    DoTopic::DoTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    DoTopic::~DoTopic()
+    {
+        TRACE
+            << "Destroyed do topic"
+            << std::endl;
+    }
+
+    void DoTopic::usage()
+    {
+        display_manpage("do");
+    }
+
+}; // namespace cmd

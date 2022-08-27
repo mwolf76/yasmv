@@ -32,47 +32,49 @@
 
 namespace cmd {
 
-class DumpModel : public Command {
-    pchar f_output;
+    class DumpModel: public Command {
+        pchar f_output;
 
-public:
-    DumpModel(Interpreter& owner);
-    virtual ~DumpModel();
+    public:
+        DumpModel(Interpreter& owner);
+        virtual ~DumpModel();
 
-    void set_output(pconst_char output);
-    inline pconst_char output() const
-    { return f_output; }
+        void set_output(pconst_char output);
+        inline pconst_char output() const
+        {
+            return f_output;
+        }
 
-    void select_state();
-    void select_init();
-    void select_trans();
+        void select_state();
+        void select_init();
+        void select_trans();
 
-    utils::Variant virtual operator()();
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream* f_outfile { NULL };
-    std::ostream& get_output_stream();
+    private:
+        std::ostream* f_outfile { NULL };
+        std::ostream& get_output_stream();
 
-    bool f_state;
-    bool f_init;
-    bool f_trans;
+        bool f_state;
+        bool f_init;
+        bool f_trans;
 
-    void dump_heading(std::ostream& os, model::Module& module);
-    void dump_variables(std::ostream& os, model::Module& module);
-    void dump_inits(std::ostream &os, model::Module& module);
-    void dump_invars(std::ostream& os, model::Module& module);
-    void dump_transes(std::ostream&os, model::Module& module);
-};
-typedef DumpModel* DumpModel_ptr;
+        void dump_heading(std::ostream& os, model::Module& module);
+        void dump_variables(std::ostream& os, model::Module& module);
+        void dump_inits(std::ostream& os, model::Module& module);
+        void dump_invars(std::ostream& os, model::Module& module);
+        void dump_transes(std::ostream& os, model::Module& module);
+    };
+    typedef DumpModel* DumpModel_ptr;
 
-class DumpModelTopic : public CommandTopic {
-public:
-    DumpModelTopic(Interpreter& owner);
-    virtual ~DumpModelTopic();
+    class DumpModelTopic: public CommandTopic {
+    public:
+        DumpModelTopic(Interpreter& owner);
+        virtual ~DumpModelTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif /* DUMP_MODEL_CMD_H */

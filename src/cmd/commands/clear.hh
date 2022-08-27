@@ -32,28 +32,28 @@
 
 namespace cmd {
 
-class Clear : public Command {
+    class Clear: public Command {
 
-    expr::Expr_ptr f_identifier;
+        expr::Expr_ptr f_identifier;
 
-public:
-    Clear(Interpreter& owner);
-    virtual ~Clear();
+    public:
+        Clear(Interpreter& owner);
+        virtual ~Clear();
 
-    void set_identifier(expr::Expr_ptr id);
-    utils::Variant virtual operator()();
-};
+        void set_identifier(expr::Expr_ptr id);
+        utils::Variant virtual operator()();
+    };
 
-typedef Clear* Clear_ptr;
+    typedef Clear* Clear_ptr;
 
-class ClearTopic : public CommandTopic {
-public:
-    ClearTopic(Interpreter& owner);
-    virtual ~ClearTopic();
+    class ClearTopic: public CommandTopic {
+    public:
+        ClearTopic(Interpreter& owner);
+        virtual ~ClearTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif /* CLEAR_CMD_H */

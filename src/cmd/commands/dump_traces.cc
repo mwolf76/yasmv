@@ -123,46 +123,49 @@ namespace cmd {
 
     void DumpTraces::dump_plain(std::ostream& os, const witness::WitnessList& witness_list)
     {
-        std::for_each(begin(witness_list), end(witness_list), [this, &os](witness::Witness_ptr wp) {
-            witness::Witness& w { *wp };
+        std::for_each(
+	    begin(witness_list), end(witness_list),
+	    [this, &os](witness::Witness_ptr wp) {
 
-            os
-                << "-- "
-                << w.desc()
-                << std::endl
-                << "Witness: "
-                << w.id()
-                << std::endl
-                << std::endl;
+		witness::Witness& w { *wp };
 
-            expr::ExprVector input_assignments;
-            process_input(w, input_assignments);
+		os
+		    << "-- "
+		    << w.desc()
+		    << std::endl
+		    << "Witness: "
+		    << w.id()
+		    << std::endl
+		    << std::endl;
 
-            if (0 < input_assignments.size()) {
-                os
-                    << ":: ENV"
-                    << std::endl;
-                dump_plain_section(os, "input", input_assignments);
-            }
+		expr::ExprVector input_assignments;
+		process_input(w, input_assignments);
 
-            for (step_t time = w.first_time(); time <= w.last_time(); ++time) {
-                os
-                    << ":: @"
-                    << std::dec
-                    << time
-                    << std::endl;
+		if (0 < input_assignments.size()) {
+		    os
+			<< ":: ENV"
+			<< std::endl;
+		    dump_plain_section(os, "input", input_assignments);
+		}
 
-                expr::ExprVector state_vars_assignments;
-                expr::ExprVector defines_assignments;
+		for (step_t time = w.first_time(); time <= w.last_time(); ++time) {
+		    os
+			<< ":: @"
+			<< std::dec
+			<< time
+			<< std::endl;
+		    
+		    expr::ExprVector state_vars_assignments;
+		    expr::ExprVector defines_assignments;
 
-                process_time_frame(w, time,
-                                   state_vars_assignments,
-                                   defines_assignments);
+		    process_time_frame(w, time,
+				       state_vars_assignments,
+				       defines_assignments);
 
-                dump_plain_section(os, "state", state_vars_assignments);
-                dump_plain_section(os, "defines", defines_assignments);
-            }
-        });
+		    dump_plain_section(os, "state", state_vars_assignments);
+		    dump_plain_section(os, "defines", defines_assignments);
+		}
+	    });
     }
 
     void DumpTraces::dump_plain_section(std::ostream& os,
@@ -170,7 +173,7 @@ namespace cmd {
                                         expr::ExprVector& assignments)
     {
 
-        /* a boost hack to generate indentation consts :-) */
+        /* a boost hack to generate indentation consts */
 #define _SPACE(z, n, str) " "
 #define SPACES(n) BOOST_PP_REPEAT(n, _SPACE, NULL)
         const char* TAB { SPACES(3) };
@@ -255,45 +258,46 @@ namespace cmd {
 
     Json::Value DumpTraces::section_to_json(expr::ExprVector& assignments)
     {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         Json::Value res;
 
-        std::for_each(begin(assignments), end(assignments), [&res](expr::Expr_ptr assignment) {
-            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        std::for_each(begin(assignments), end(assignments),
+		      [&res, &em](expr::Expr_ptr assignment) {
 
-            expr::Atom lhs { assignment->lhs()->rhs()->atom() };
-            expr::Expr_ptr rhs { assignment->rhs() };
+			  expr::Atom lhs { assignment->lhs()->rhs()->atom() };
+			  expr::Expr_ptr rhs { assignment->rhs() };
 
-            if (em.is_identifier(rhs)) {
-                res[lhs] = rhs->atom();
-            } else if (em.is_bool_const(rhs)) {
-                res[lhs] = em.is_true(rhs);
-            } else if (em.is_array(rhs)) {
-                Json::Value array_value { Json::arrayValue };
-                expr::ExprVector values { em.array_literals(rhs) };
+			  if (em.is_identifier(rhs)) {
+			      res[lhs] = rhs->atom();
+			  } else if (em.is_bool_const(rhs)) {
+			      res[lhs] = em.is_true(rhs);
+			  } else if (em.is_array(rhs)) {
+			      Json::Value array_value { Json::arrayValue };
+			      expr::ExprVector values { em.array_literals(rhs) };
 
-                std::for_each(begin(values), end(values), [&array_value](expr::Expr_ptr lit) {
-                    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+			      std::for_each(begin(values), end(values),
+					    [&array_value, &em](expr::Expr_ptr lit) {
 
-                    Json::Value scalar;
-                    if (em.is_identifier(lit)) {
-                        scalar = lit->atom();
-                    } else if (em.is_bool_const(lit)) {
-                        scalar = em.is_true(lit);
-                    } else if (em.is_array(lit)) {
-                        assert(false); // nested arrays are not supported
-                    } else if (em.is_constant(lit)) {
-                        scalar = (Json::Value::UInt64) em.const_value(lit);
-                    }
-                    array_value.append(scalar);
-                });
-                res[lhs] = array_value;
-            } else if (em.is_constant(rhs)) {
-                res[lhs] = (Json::Value::UInt64) em.const_value(rhs);
-            } else {
-                assert(false);
-            }
-        });
-
+						Json::Value scalar;
+						if (em.is_identifier(lit)) {
+						    scalar = lit->atom();
+						} else if (em.is_bool_const(lit)) {
+						    scalar = em.is_true(lit);
+						} else if (em.is_array(lit)) {
+						    assert(false); // nested arrays are not supported
+						} else if (em.is_constant(lit)) {
+						    scalar = (Json::Value::UInt64) em.const_value(lit);
+						}
+						array_value.append(scalar);
+					    });
+			      res[lhs] = array_value;
+			  } else if (em.is_constant(rhs)) {
+			      res[lhs] = (Json::Value::UInt64) em.const_value(rhs);
+			  } else {
+			      assert(false);
+			  }
+		      });
+	
         return res;
     }
 
@@ -301,9 +305,11 @@ namespace cmd {
                                    expr::ExprVector& input_assignments)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        model::Model& model { model::ModelMgr::INSTANCE().model() };
-        symb::SymbIter symbols { model };
+	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
 
+	model::Model& model { mm.model() };
+
+        symb::SymbIter symbols { model };
         while (symbols.has_next()) {
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { symbols.next() };
             symb::Symbol_ptr symb { pair.second };
@@ -340,17 +346,19 @@ namespace cmd {
     }
 
     /* here UNDEF is used to fill up symbols not showing up in the witness where
-   they're expected to. (i. e. UNDEF is only a UI entity) */
+       they're expected to. (i. e. UNDEF is only a UI entity) */
     void DumpTraces::process_time_frame(witness::Witness& w, step_t time,
                                         expr::ExprVector& state_vars_assignments,
                                         expr::ExprVector& defines_assignments)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };	
         witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
+	
         witness::TimeFrame& tf { w[time] };
-        model::Model& model { model::ModelMgr::INSTANCE().model() };
-        symb::SymbIter symbs { model };
+        model::Model& model { mm.model() };
 
+        symb::SymbIter symbs { model };
         while (symbs.has_next()) {
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { symbs.next() };
 
@@ -429,11 +437,12 @@ namespace cmd {
             }
 
             // built list of witnesses to dump
-            std::for_each(begin(f_trace_ids), end(f_trace_ids),
-                          [&wm, &witness_list](expr::Atom trace_id) {
-                              witness::Witness& w { wm.witness(trace_id) };
-                              witness_list.push_back(&w);
-                          });
+            std::for_each(
+		begin(f_trace_ids), end(f_trace_ids),
+		[&wm, &witness_list](expr::Atom trace_id) {
+		    witness::Witness& w { wm.witness(trace_id) };
+		    witness_list.push_back(&w);
+		});
         }
 
         if (!strcmp(f_format, TRACE_FMT_PLAIN)) {

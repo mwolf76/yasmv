@@ -31,22 +31,22 @@
 
 namespace cmd {
 
-class Time : public Command {
-public:
-    Time(Interpreter& owner);
-    virtual ~Time();
+    class Time: public Command {
+    public:
+        Time(Interpreter& owner);
+        virtual ~Time();
 
-    utils::Variant virtual operator()();
-};
+        utils::Variant virtual operator()();
+    };
 
 
-class TimeTopic : public CommandTopic {
-public:
-    TimeTopic(Interpreter& owner);
-    virtual ~TimeTopic();
+    class TimeTopic: public CommandTopic {
+    public:
+        TimeTopic(Interpreter& owner);
+        virtual ~TimeTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* TIME_CMD_H */

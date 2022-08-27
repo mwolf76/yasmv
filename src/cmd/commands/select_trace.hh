@@ -32,7 +32,7 @@
 
 namespace cmd {
 
-    class SelectTrace : public Command {
+    class SelectTrace: public Command {
 
         /* the trace id */
         pchar f_trace_id;
@@ -40,9 +40,11 @@ namespace cmd {
     public:
         void set_trace_id(pconst_char trace_id);
         inline pconst_char trace_id() const
-        { return f_trace_id; }
+        {
+            return f_trace_id;
+        }
 
-        SelectTrace (Interpreter& owner);
+        SelectTrace(Interpreter& owner);
         virtual ~SelectTrace();
 
         utils::Variant virtual operator()();
@@ -50,7 +52,7 @@ namespace cmd {
 
     typedef SelectTrace* SelectTrace_ptr;
 
-    class SelectTraceTopic : public CommandTopic {
+    class SelectTraceTopic: public CommandTopic {
     public:
         SelectTraceTopic(Interpreter& owner);
         virtual ~SelectTraceTopic();

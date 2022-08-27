@@ -27,62 +27,70 @@
 #ifndef SIMULATE_H_CMD
 #define SIMULATE_H_CMD
 
-#include <cmd/command.hh>
 #include <algorithms/sim/simulation.hh>
+#include <cmd/command.hh>
 
 namespace cmd {
 
-class Simulate : public Command {
-public:
-    Simulate(Interpreter& owner);
-    virtual ~Simulate();
+    class Simulate: public Command {
+    public:
+        Simulate(Interpreter& owner);
+        virtual ~Simulate();
 
-    utils::Variant virtual operator()();
+        utils::Variant virtual operator()();
 
-    void set_invar_condition(expr::Expr_ptr invar_condition);
-    inline expr::Expr_ptr invar_condition() const
-    { return f_invar_condition; }
+        void set_invar_condition(expr::Expr_ptr invar_condition);
+        inline expr::Expr_ptr invar_condition() const
+        {
+            return f_invar_condition;
+        }
 
-    void set_until_condition(expr::Expr_ptr until_condition);
-    inline expr::Expr_ptr until_condition() const
-    { return f_until_condition; }
+        void set_until_condition(expr::Expr_ptr until_condition);
+        inline expr::Expr_ptr until_condition() const
+        {
+            return f_until_condition;
+        }
 
-    void set_k(step_t k);
-    inline step_t k() const
-    { return f_k; }
+        void set_k(step_t k);
+        inline step_t k() const
+        {
+            return f_k;
+        }
 
-    void set_trace_uid(pconst_char trace_uid);
-    inline pconst_char trace_uid() const
-    { return f_trace_uid; }
+        void set_trace_uid(pconst_char trace_uid);
+        inline pconst_char trace_uid() const
+        {
+            return f_trace_uid;
+        }
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* (optional) additional constraints */
-    expr::ExprVector f_constraints;
+        /* (optional) additional constraints */
+        expr::ExprVector f_constraints;
 
-    /* An invariant condition (optional) */
-    expr::Expr_ptr f_invar_condition;
+        /* An invariant condition (optional) */
+        expr::Expr_ptr f_invar_condition;
 
-    /* HALT condition (optional) */
-    expr::Expr_ptr f_until_condition;
+        /* HALT condition (optional) */
+        expr::Expr_ptr f_until_condition;
 
-    /* Number of simulation steps to be performed (optional) */
-    step_t f_k;
+        /* Number of simulation steps to be performed (optional) */
+        step_t f_k;
 
-    /* Simulation trace uid (optional) */
-    pchar f_trace_uid;
-};
+        /* Simulation trace uid (optional) */
+        pchar f_trace_uid;
+    };
 
-typedef Simulate* Simulate_ptr;
+    typedef Simulate* Simulate_ptr;
 
-class SimulateTopic : public CommandTopic {
-public:
-    SimulateTopic(Interpreter& owner);
-    virtual ~SimulateTopic();
+    class SimulateTopic: public CommandTopic {
+    public:
+        SimulateTopic(Interpreter& owner);
+        virtual ~SimulateTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* SIMULATE_H_CMD */

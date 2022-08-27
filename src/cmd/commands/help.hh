@@ -31,27 +31,27 @@
 
 namespace cmd {
 
-typedef CommandTopic* CommandTopic_ptr;
+    typedef CommandTopic* CommandTopic_ptr;
 
-class Help : public Command {
-    CommandTopic_ptr f_topic;
+    class Help: public Command {
+        CommandTopic_ptr f_topic;
 
-public:
-    Help(Interpreter& owner);
-    virtual ~Help();
+    public:
+        Help(Interpreter& owner);
+        virtual ~Help();
 
-    void set_topic(CommandTopic_ptr topic);
-    utils::Variant virtual operator()();
-};
-typedef Help* Help_ptr;
+        void set_topic(CommandTopic_ptr topic);
+        utils::Variant virtual operator()();
+    };
+    typedef Help* Help_ptr;
 
-class HelpTopic : public CommandTopic {
-public:
-    HelpTopic(Interpreter& owner);
-    virtual ~HelpTopic();
+    class HelpTopic: public CommandTopic {
+    public:
+        HelpTopic(Interpreter& owner);
+        virtual ~HelpTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* HELP_H */

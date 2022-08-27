@@ -31,26 +31,26 @@
 
 namespace cmd {
 
-class Quit : public Command {
+    class Quit: public Command {
 
-    int f_retcode;
+        int f_retcode;
 
-public:
-    Quit(Interpreter& owner);
-    virtual ~Quit();
+    public:
+        Quit(Interpreter& owner);
+        virtual ~Quit();
 
-    void set_retcode(int retcode);
+        void set_retcode(int retcode);
 
-    utils::Variant virtual operator()();
-};
+        utils::Variant virtual operator()();
+    };
 
-class QuitTopic : public CommandTopic {
-public:
-    QuitTopic(Interpreter& owner);
-    virtual ~QuitTopic();
+    class QuitTopic: public CommandTopic {
+    public:
+        QuitTopic(Interpreter& owner);
+        virtual ~QuitTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif // QUIT_CMD_H

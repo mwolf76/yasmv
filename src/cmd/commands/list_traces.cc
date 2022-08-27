@@ -28,73 +28,68 @@
 
 namespace cmd {
 
-ListTraces::ListTraces(Interpreter& owner)
-    : Command(owner)
-{}
+    ListTraces::ListTraces(Interpreter& owner)
+        : Command(owner)
+    {}
 
-ListTraces::~ListTraces()
-{}
+    ListTraces::~ListTraces()
+    {}
 
-utils::Variant ListTraces::operator()()
-{
-    witness::WitnessMgr& wm
-        (witness::WitnessMgr::INSTANCE());
+    utils::Variant ListTraces::operator()()
+    {
+        witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
+        witness::Witness& current(wm.current());
 
-    witness::Witness& current
-        (wm.current());
+        witness::WitnessList::const_iterator eye;
+        std::ostream& os { std::cout };
 
-    witness::WitnessList::const_iterator eye;
+        const witness::WitnessList& witnesses { wm.witnesses() };
+        if (!witnesses.empty()) {
+            for (eye = witnesses.begin(); eye != witnesses.end(); ++eye) {
+                witness::Witness& w { **eye };
 
-    std::ostream &os
-        (std::cout);
+                const char* tmp(w.id() == current.id()
+                                    ? "[*] "
+                                    : "    ");
 
-    const witness::WitnessList& witnesses
-        (wm.witnesses());
+                os
+                    << tmp
+                    << w.id()
+                    << "\t\t"
+                    << w.desc()
+                    << "\t\t"
+                    << w.size()
+                    << std::endl;
+            }
 
-    if (! witnesses.empty()) {
-      for (eye = witnesses.begin(); eye != witnesses.end(); ++ eye) {
+            os << std::endl;
+            return utils::Variant(okMessage);
+        } else {
+            os
+                << "No traces to list."
+                << std::endl;
 
-        witness::Witness& w
-          (**eye);
+            os
+		<< std::endl;
 
-        const char* tmp
-          (w.id() == current.id()
-           ? "[*] "
-           : "    ");
-
-        os
-          << tmp
-          << w.id()
-          << "\t\t"
-          << w.desc()
-          << "\t\t"
-          << w.size()
-          << std::endl;
-      }
-
-      os << std::endl;
-      return utils::Variant(okMessage);
-    } else {
-      os
-        << "No traces to list."
-        << std::endl;
-      os << std::endl;
-      return utils::Variant(errMessage);
+            return utils::Variant(errMessage);
+        }
     }
-}
 
-ListTracesTopic::ListTracesTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    ListTracesTopic::ListTracesTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-ListTracesTopic::~ListTracesTopic()
-{
-    TRACE
-        << "Destroyed list-traces topic"
-        << std::endl;
-}
+    ListTracesTopic::~ListTracesTopic()
+    {
+        TRACE
+            << "Destroyed list-traces topic"
+            << std::endl;
+    }
 
-void ListTracesTopic::usage()
-{ display_manpage("list-traces"); }
+    void ListTracesTopic::usage()
+    {
+        display_manpage("list-traces");
+    }
 
-};
+}; // namespace cmd

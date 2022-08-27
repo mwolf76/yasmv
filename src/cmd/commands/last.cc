@@ -23,76 +23,76 @@
 
 #include <cmd/interpreter.hh>
 
-#include <cmd/commands/last.hh>
 #include <cmd/commands/commands.hh>
+#include <cmd/commands/last.hh>
 
 #include <iomanip>
 
 namespace cmd {
 
-Last::Last(Interpreter& owner)
-    : Command(owner)
-    , f_message(NULL)
-{}
+    Last::Last(Interpreter& owner)
+        : Command(owner)
+        , f_message(NULL)
+    {}
 
-Last::~Last()
-{
-}
-
-utils::Variant Last::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    Interpreter& interpreter
-        (Interpreter::INSTANCE());
-
-    std::ostream& out
-        (std::cout);
-
-    utils::Variant& last
-        (interpreter.last_result());
-
-    if (last.is_string()) {
-        if (! om.quiet())
-            out << outPrefix;
-
-        std::string value { last.as_string() };
-        if (value == okMessage) {
-            out
-                << "Last command was SUCCESSFUL"
-                << std::endl;
-        } else if (value == errMessage) {
-            out
-                << "Last command was UNSUCCESSFUL"
-                << std::endl;
-        } else assert(false); /* unexpected */
-
-        return last;
-    } else {
-        if (! om.quiet())
-            out << outPrefix;
-
-        out
-            << "No status available"
-            << std::endl;
-
-        return utils::Variant(errMessage);
+    Last::~Last()
+    {
     }
-}
 
-LastTopic::LastTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    utils::Variant Last::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        Interpreter& interpreter { Interpreter::INSTANCE() };
 
-LastTopic::~LastTopic()
-{
-    TRACE
-        << "Destroyed last topic"
-        << std::endl;
-}
+        std::ostream& out { std::cout };
 
-void LastTopic::usage()
-{ display_manpage("last"); }
+        utils::Variant& last { interpreter.last_result() };
 
-};
+        if (last.is_string()) {
+            if (!om.quiet()) {
+                out << outPrefix;
+	    }
+
+            std::string value { last.as_string() };
+            if (value == okMessage) {
+                out
+                    << "Last command was SUCCESSFUL"
+                    << std::endl;
+            } else if (value == errMessage) {
+                out
+                    << "Last command was UNSUCCESSFUL"
+                    << std::endl;
+            } else
+                assert(false); /* unexpected */
+
+            return last;
+        } else {
+            if (!om.quiet()) {
+                out << outPrefix;
+	    }
+
+            out
+                << "No status available"
+                << std::endl;
+
+            return utils::Variant(errMessage);
+        }
+    }
+
+    LastTopic::LastTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    LastTopic::~LastTopic()
+    {
+        TRACE
+            << "Destroyed last topic"
+            << std::endl;
+    }
+
+    void LastTopic::usage()
+    {
+        display_manpage("last");
+    }
+
+}; // namespace cmd

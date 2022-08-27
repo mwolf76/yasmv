@@ -31,37 +31,37 @@
 
 namespace cmd {
 
-class CheckInit : public Command {
-public:
-    CheckInit(Interpreter& owner);
-    virtual ~CheckInit();
+    class CheckInit: public Command {
+    public:
+        CheckInit(Interpreter& owner);
+        virtual ~CheckInit();
 
-    /** cmd params */
-    void add_constraint(expr::Expr_ptr constraint);
+        /** cmd params */
+        void add_constraint(expr::Expr_ptr constraint);
 
-    /* run() */
-    utils::Variant virtual operator()();
+        /* run() */
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* (optional) additional constraints */
-    expr::ExprVector f_constraints;
+        /* (optional) additional constraints */
+        expr::ExprVector f_constraints;
 
-    // -- helpers -------------------------------------------------------------
-    bool check_requirements();
-};
+        // -- helpers -------------------------------------------------------------
+        bool check_requirements();
+    };
 
-typedef CheckInit* CheckInit_ptr;
+    typedef CheckInit* CheckInit_ptr;
 
-class CheckInitTopic : public CommandTopic {
-public:
-    CheckInitTopic(Interpreter& owner);
-    virtual ~CheckInitTopic();
+    class CheckInitTopic: public CommandTopic {
+    public:
+        CheckInitTopic(Interpreter& owner);
+        virtual ~CheckInitTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif /* CHECK_INIT_CMD_H */

@@ -5,24 +5,24 @@
 
 namespace cmd {
 
-class Last : public Command {
-    pchar f_message;
+    class Last: public Command {
+        pchar f_message;
 
-public:
-    Last(Interpreter& owner);
-    virtual ~Last();
+    public:
+        Last(Interpreter& owner);
+        virtual ~Last();
 
-    utils::Variant virtual operator()();
-};
-typedef Last* Last_ptr;
+        utils::Variant virtual operator()();
+    };
+    typedef Last* Last_ptr;
 
-class LastTopic : public CommandTopic {
-public:
-    LastTopic(Interpreter& owner);
-    virtual ~LastTopic();
+    class LastTopic: public CommandTopic {
+    public:
+        LastTopic(Interpreter& owner);
+        virtual ~LastTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 #endif

@@ -31,29 +31,29 @@
 
 namespace cmd {
 
-typedef CommandTopic* CommandTopic_ptr;
+    typedef CommandTopic* CommandTopic_ptr;
 
-class On : public Command {
-    Command_ptr f_then;
-    Command_ptr f_else;
+    class On: public Command {
+        Command_ptr f_then;
+        Command_ptr f_else;
 
-public:
-    On(Interpreter& owner);
-    virtual ~On();
+    public:
+        On(Interpreter& owner);
+        virtual ~On();
 
-    void set_then(Command_ptr c);
-    void set_else(Command_ptr c);
-    utils::Variant virtual operator()();
-};
-typedef On* On_ptr;
+        void set_then(Command_ptr c);
+        void set_else(Command_ptr c);
+        utils::Variant virtual operator()();
+    };
+    typedef On* On_ptr;
 
-class OnTopic : public CommandTopic {
-public:
-    OnTopic(Interpreter& owner);
-    virtual ~OnTopic();
+    class OnTopic: public CommandTopic {
+    public:
+        OnTopic(Interpreter& owner);
+        virtual ~OnTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* ON_H */
