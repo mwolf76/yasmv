@@ -33,40 +33,42 @@
 
 namespace reach {
 
-class Reachability : public algorithms::Algorithm {
+    class Reachability: public algorithms::Algorithm {
 
-public:
-    Reachability(cmd::Command& command, model::Model& model);
-    ~Reachability();
+    public:
+        Reachability(cmd::Command& command, model::Model& model);
+        ~Reachability();
 
-    void process(expr::Expr_ptr target, expr::ExprVector constraints);
+        void process(expr::Expr_ptr target, expr::ExprVector constraints);
 
-    inline reachability_status_t status()
-    { return sync_status(); }
+        inline reachability_status_t status()
+        {
+            return sync_status();
+        }
 
-    reachability_status_t sync_status();
-    bool sync_set_status(reachability_status_t status);
+        reachability_status_t sync_status();
+        bool sync_set_status(reachability_status_t status);
 
-private:
-    expr::Expr_ptr f_target;
+    private:
+        expr::Expr_ptr f_target;
 
-    expr::ExprVector f_constraints;
+        expr::ExprVector f_constraints;
 
-    using ConstraintCompilationMap =
-        boost::unordered_map<expr::Expr_ptr, compiler::Unit,
-                             utils::PtrHash, utils::PtrEq> ;
-    ConstraintCompilationMap f_constraint_cus;
+        using ConstraintCompilationMap =
+            boost::unordered_map<expr::Expr_ptr, compiler::Unit,
+                                 utils::PtrHash, utils::PtrEq>;
+        ConstraintCompilationMap f_constraint_cus;
 
-    boost::mutex f_status_mutex;
-    reachability_status_t f_status;
+        boost::mutex f_status_mutex;
+        reachability_status_t f_status;
 
-    /* checking strategies */
-    void forward_strategy(compiler::Unit& target_cu);
-    void backward_strategy(compiler::Unit& target_cu);
+        /* checking strategies */
+        void forward_strategy(compiler::Unit& target_cu);
+        void backward_strategy(compiler::Unit& target_cu);
 
-    void fast_forward_strategy(compiler::Unit& target_cu);
-    void fast_backward_strategy(compiler::Unit& target_cu);
-};
+        void fast_forward_strategy(compiler::Unit& target_cu);
+        void fast_backward_strategy(compiler::Unit& target_cu);
+    };
 
 } // namespace reach
 

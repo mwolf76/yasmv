@@ -30,20 +30,22 @@
 
 namespace algorithms {
 
-/** Exception classes */
-    class AlgorithmException : public Exception {
+    /** Exception classes */
+    class AlgorithmException: public Exception {
     public:
-        AlgorithmException(const std::string &subtype,
-                           const std::string &message = "")
-                : Exception("AlgorithmException", subtype, message) {}
+        AlgorithmException(const std::string& subtype,
+                           const std::string& message = "")
+            : Exception("AlgorithmException", subtype, message)
+        {}
     };
 
-    class FailedSetup : public AlgorithmException {
+    class FailedSetup: public AlgorithmException {
     public:
         FailedSetup()
-                : AlgorithmException("FailedSetup") {}
+            : AlgorithmException("FailedSetup")
+        {}
     };
 
-} // namespace algorithm
+} // namespace algorithms
 
 #endif /* BASE_ALGORITHM_EXCEPTIONS_H */

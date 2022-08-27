@@ -25,12 +25,12 @@
 
 namespace reach {
 
-typedef enum {
-    REACHABILITY_REACHABLE,
-    REACHABILITY_UNREACHABLE,
-    REACHABILITY_UNKNOWN,
-    REACHABILITY_ERROR,
-} reachability_status_t;
+    typedef enum {
+        REACHABILITY_REACHABLE,
+        REACHABILITY_UNREACHABLE,
+        REACHABILITY_UNKNOWN,
+        REACHABILITY_ERROR,
+    } reachability_status_t;
 
 } // namespace reach
 

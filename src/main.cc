@@ -171,10 +171,14 @@ int main(int argc, const char* argv[])
                 << std::endl;
         }
 
+	/* initialize global managers now to prevent initialization race-conditions later on */
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() }; (void) em;
+	model::ModelMgr& mm { model::ModelMgr::INSTANCE() }; (void) mm;
+	witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() }; (void) wm;
+	
         /* load microcode */
-        sat::InlinedOperatorMgr& mm(sat::InlinedOperatorMgr::INSTANCE());
-
-        size_t nloaders { mm.loaders().size() };
+        sat::InlinedOperatorMgr& iom { sat::InlinedOperatorMgr::INSTANCE() };
+        size_t nloaders { iom.loaders().size() };
 
         if (!opts_mgr.quiet()) {
             TRACE
@@ -184,9 +188,11 @@ int main(int argc, const char* argv[])
         }
 
         /* run options-generated commands (if any) */
-        const std::string model_filename = opts_mgr.model();
+        const std::string model_filename { opts_mgr.model() };
         if (!model_filename.empty()) {
-            cmd::ReadModel_ptr cmd(reinterpret_cast<cmd::ReadModel_ptr>(cmd::CommandMgr::INSTANCE().make_read_model()));
+            cmd::ReadModel_ptr cmd {
+		reinterpret_cast<cmd::ReadModel_ptr>(cmd::CommandMgr::INSTANCE().make_read_model())
+	    };
 
             cmd->set_input(model_filename.c_str());
             batch(cmd);

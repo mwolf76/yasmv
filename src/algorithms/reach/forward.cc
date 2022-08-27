@@ -30,195 +30,188 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
+static const char* reach_trace_prfx { "reach_" };
+
 namespace reach {
+    void Reachability::forward_strategy(compiler::Unit& target_cu)
+    {
+        sat::Engine engine { "forward" };
+        step_t k { 0 };
 
-// reserved for witnesses
-static const char *reach_trace_prfx ("reach_");
+        /* initial constraints */
+        assert_fsm_init(engine, k);
+        assert_fsm_invar(engine, k);
 
-void Reachability::forward_strategy(compiler::Unit& target_cu)
-{
-    sat::Engine engine { "forward" };
-    step_t k { 0 };
+        /* Timed constraints can be asserted immediately, global
+	 * constraints must be assert at time zero, therefore we don't
+	 * need any filtering here. */
+        std::for_each(
+            begin(f_constraints), end(f_constraints),
+            [this, &engine, k](expr::Expr_ptr constraint) {
+                auto i { f_constraint_cus.find(constraint) };
+                assert(f_constraint_cus.end() != i);
 
-    /* initial constraints */
-    assert_fsm_init(engine, k);
-    assert_fsm_invar(engine, k);
+                compiler::Unit cu(i->second);
+                this->assert_formula(engine, k, cu);
+            });
 
-    /* Timed constraints can be asserted immediately, global
-     * constraints must be assert at time zero, therefore we don't
-     * need any filtering here. */
-    std::for_each(
-        begin(f_constraints), end(f_constraints),
-        [this, &engine, k](expr::Expr_ptr constraint) {
-            auto i { f_constraint_cus.find(constraint) };
-            assert (f_constraint_cus.end() != i );
-
-            compiler::Unit cu(i->second);
-            this->assert_formula(engine, k, cu);
-        }
-    );
-
-    sat::status_t status
-        (engine.solve());
-
-    if (sat::status_t::STATUS_UNKNOWN == status)
-        goto cleanup;
-
-    else if (sat::status_t::STATUS_UNSAT == status) {
-        INFO
-            << "Empty initial states. Target is trivially UNREACHABLE."
-            << std::endl;
-
-        sync_set_status(REACHABILITY_UNREACHABLE);
-        goto cleanup;
-    }
-
-    else if (sat::status_t::STATUS_SAT == status) {
-        INFO
-            << "INIT consistency check ok."
-            << std::endl;
-    }
-
-    else assert(false); /* unreachable */
-
-    do {
-        /* looking for witness : Reachability(k-1) ^ ! P(k) */
-        assert_formula(engine, k, target_cu, engine.new_group());
-
-        INFO
-            << "Now looking for reachability witness (k = " << k << ")..."
-            << std::endl ;
-
-        sat::status_t status
-            (engine.solve());
+        sat::status_t status(engine.solve());
 
         if (sat::status_t::STATUS_UNKNOWN == status)
             goto cleanup;
 
-        else if (sat::status_t::STATUS_SAT == status) {
-            INFO
-                << "Reachability witness exists (k = " << k << "), target `"
-                << f_target
-                << "` is REACHABLE."
-                << std::endl;
-
-            if (sync_set_status(REACHABILITY_REACHABLE)) {
-
-                /* Extract reachability witness */
-                witness::WitnessMgr& wm
-                    (witness::WitnessMgr::INSTANCE());
-
-                witness::Witness& w
-                    (* new ReachabilityCounterExample(f_target, model(), engine, k));
-
-                /* witness identifier */
-                std::ostringstream oss_id;
-                oss_id
-                    << reach_trace_prfx
-                    << wm.autoincrement();
-                w.set_id(oss_id.str());
-
-                /* witness description */
-                std::ostringstream oss_desc;
-                oss_desc
-                    << "Reachability witness for target `"
-                    << f_target
-                    << "` in module `"
-                    << model().main_module().name()
-                    << "`" ;
-                w.set_desc(oss_desc.str());
-
-                wm.record(w);
-                wm.set_current(w);
-                set_witness(w);
-
-                goto cleanup;
-            }
-        }
-
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
-                << "No reachability witness found (k = " << k << ")..."
-                << std::endl ;
+                << "Empty initial states. Target is trivially UNREACHABLE."
+                << std::endl;
 
-            engine.invert_last_group();
+            sync_set_status(REACHABILITY_UNREACHABLE);
+            goto cleanup;
+        }
 
-            /* unrolling next */
-            assert_fsm_trans(engine, k);
-            ++ k;
-            assert_fsm_invar(engine, k);
+        else if (sat::status_t::STATUS_SAT == status) {
+            INFO
+                << "INIT consistency check ok."
+                << std::endl;
+        }
 
-            /* Only global (i.e. untimed) constraints need be asserted here */
-            std::for_each(
-                begin(f_constraints), end(f_constraints),
-                [this, &engine, k](expr::Expr_ptr constraint) {
-                    expr::time::Analyzer eta(em());
-                    eta.process(constraint);
+        else
+            assert(false); /* unreachable */
 
-                    /* if backward time made it up to this point, something went wrong */
-                    assert (! eta.has_backward_time());
-
-                    if (! eta.has_forward_time()) {
-                        auto i { f_constraint_cus.find(constraint) };
-                        assert ( f_constraint_cus.end() != i );
-
-                        compiler::Unit cu {i->second };
-                        this->assert_formula(engine, k, cu);
-                    }
-                }
-            );
-
-            /* build state uniqueness constraint for each pair of states
-               (j, k), where j < k */
-            for (step_t j = 0; j < k; ++ j) {
-                assert_fsm_uniqueness(engine, j, k);
-            }
-
-            /* is this still relevant? */
-            if (sync_status() != REACHABILITY_UNKNOWN) {
-                goto cleanup;
-            }
+        do {
+            /* looking for witness : Reachability(k-1) ^ ! P(k) */
+            assert_formula(engine, k, target_cu, engine.new_group());
 
             INFO
-                << "Now looking for unreachability proof (k = " << k << ")..."
-                << std::endl ;
+                << "Now looking for reachability witness (k = " << k << ")..."
+                << std::endl;
 
-            sat::status_t status
-                (engine.solve());
+            sat::status_t status(engine.solve());
 
             if (sat::status_t::STATUS_UNKNOWN == status)
                 goto cleanup;
 
-            else if (sat::status_t::STATUS_UNSAT == status) {
+            else if (sat::status_t::STATUS_SAT == status) {
                 INFO
-                    << "Found unreachability proof (k = " << k << ")"
+                    << "Reachability witness exists (k = " << k << "), target `"
+                    << f_target
+                    << "` is REACHABLE."
                     << std::endl;
 
-                sync_set_status(REACHABILITY_UNREACHABLE);
-                goto cleanup;
+                if (sync_set_status(REACHABILITY_REACHABLE)) {
+
+                    /* Extract reachability witness */
+                    witness::WitnessMgr& wm(witness::WitnessMgr::INSTANCE());
+
+                    witness::Witness& w(*new ReachabilityCounterExample(f_target, model(), engine, k));
+
+                    /* witness identifier */
+                    std::ostringstream oss_id;
+                    oss_id
+                        << reach_trace_prfx
+                        << wm.autoincrement();
+                    w.set_id(oss_id.str());
+
+                    /* witness description */
+                    std::ostringstream oss_desc;
+                    oss_desc
+                        << "Reachability witness for target `"
+                        << f_target
+                        << "` in module `"
+                        << model().main_module().name()
+                        << "`";
+                    w.set_desc(oss_desc.str());
+
+                    wm.record(w);
+                    wm.set_current(w);
+                    set_witness(w);
+
+                    goto cleanup;
+                }
             }
 
-            else if (sat::status_t::STATUS_SAT == status)
+            else if (sat::status_t::STATUS_UNSAT == status) {
                 INFO
-                    << "No unreachability proof found (k = " << k << ")"
+                    << "No reachability witness found (k = " << k << ")..."
                     << std::endl;
 
-            else assert(false); /* unreachable */
-        }
+                engine.invert_last_group();
 
-        TRACE
-            << "Done with k = " << k << "..."
-            << std::endl ;
+                /* unrolling next */
+                assert_fsm_trans(engine, k);
+                ++k;
+                assert_fsm_invar(engine, k);
 
-    } while (sync_status() == REACHABILITY_UNKNOWN);
+                /* Only global (i.e. untimed) constraints need be asserted here */
+                std::for_each(
+                    begin(f_constraints), end(f_constraints),
+                    [this, &engine, k](expr::Expr_ptr constraint) {
+                        expr::time::Analyzer eta { em() };
+                        eta.process(constraint);
 
- cleanup:
-    /* signal other threads it's time to go home */
-    sat::EngineMgr::INSTANCE().interrupt();
+                        /* if backward time made it up to this point, something went wrong */
+                        assert(!eta.has_backward_time());
 
-    INFO
-        << engine
-        << std::endl;
-} /* Reachability::forward_strategy() */
+                        if (!eta.has_forward_time()) {
+                            auto i { f_constraint_cus.find(constraint) };
+                            assert(f_constraint_cus.end() != i);
+
+                            compiler::Unit cu { i->second };
+                            this->assert_formula(engine, k, cu);
+                        }
+                    });
+
+                /* build state uniqueness constraint for each pair of states
+               (j, k), where j < k */
+                for (step_t j = 0; j < k; ++j) {
+                    assert_fsm_uniqueness(engine, j, k);
+                }
+
+                /* is this still relevant? */
+                if (sync_status() != REACHABILITY_UNKNOWN) {
+                    goto cleanup;
+                }
+
+                INFO
+                    << "Now looking for unreachability proof (k = " << k << ")..."
+                    << std::endl;
+
+                sat::status_t status { engine.solve() };
+
+                if (sat::status_t::STATUS_UNKNOWN == status)
+                    goto cleanup;
+
+                else if (sat::status_t::STATUS_UNSAT == status) {
+                    INFO
+                        << "Found unreachability proof (k = " << k << ")"
+                        << std::endl;
+
+                    sync_set_status(REACHABILITY_UNREACHABLE);
+                    goto cleanup;
+                }
+
+                else if (sat::status_t::STATUS_SAT == status)
+                    INFO
+                        << "No unreachability proof found (k = " << k << ")"
+                        << std::endl;
+
+                else
+                    assert(false); /* unreachable */
+            }
+
+            TRACE
+                << "Done with k = " << k << "..."
+                << std::endl;
+
+        } while (sync_status() == REACHABILITY_UNKNOWN);
+
+    cleanup:
+        /* signal other threads it's time to go home */
+        sat::EngineMgr::INSTANCE().interrupt();
+
+        INFO
+            << engine
+            << std::endl;
+    } /* Reachability::forward_strategy() */
 
 } // namespace reach

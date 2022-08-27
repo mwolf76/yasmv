@@ -47,7 +47,9 @@ typedef std::vector<Witness_ptr> WitnessList;
 class WitnessMgr  {
 public:
     static WitnessMgr& INSTANCE() {
-        if (! f_instance) f_instance = new WitnessMgr();
+        if (! f_instance) {
+	    f_instance = new WitnessMgr();
+	}
         return (*f_instance);
     }
 

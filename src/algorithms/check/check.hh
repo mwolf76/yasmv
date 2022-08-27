@@ -36,37 +36,41 @@
 
 namespace check {
 
-typedef enum {
-    CHECK_FALSE,
-    CHECK_TRUE,
-    CHECK_UNKNOWN,
-    CHECK_ERROR,
-} ltl_status_t;
+    typedef enum {
+        CHECK_FALSE,
+        CHECK_TRUE,
+        CHECK_UNKNOWN,
+        CHECK_ERROR,
+    } ltl_status_t;
 
-class Check : public algorithms::Algorithm {
+    class Check: public algorithms::Algorithm {
 
-public:
-    Check(cmd::Command& command, model::Model& model);
-    ~Check();
+    public:
+        Check(cmd::Command& command, model::Model& model);
+        ~Check();
 
-    void process(const expr::Expr_ptr phi);
+        void process(const expr::Expr_ptr phi);
 
-    inline ltl_status_t status() const
-    { return f_status; }
+        inline ltl_status_t status() const
+        {
+            return f_status;
+        }
 
-    inline void set_status(ltl_status_t status)
-    { f_status = status; }
+        inline void set_status(ltl_status_t status)
+        {
+            f_status = status;
+        }
 
-private:
-    ltl_status_t f_status;
-};
+    private:
+        ltl_status_t f_status;
+    };
 
-/* Specialized for LTL CEX */
-class CheckCounterExample : public witness::Witness {
-public:
-    CheckCounterExample(expr::Expr_ptr property, model::Model& model,
-                        sat::Engine& engine, unsigned k);
-};
+    /* Specialized for LTL CEX */
+    class CheckCounterExample: public witness::Witness {
+    public:
+        CheckCounterExample(expr::Expr_ptr property, model::Model& model,
+                            sat::Engine& engine, unsigned k);
+    };
 
 } // namespace check
 
