@@ -36,15 +36,11 @@
 #include <common/common.hh>
 #include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
-namespace dd {
-
-typedef std::vector<ADD> DDVector;
-
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
 
 /** Fetch a single DD */
-#define POP_DD(op)                              \
-    const ADD op (f_add_stack.back());          \
+#define POP_DD(op)				  \
+    const ADD op  { f_add_stack.back()};	  \
     f_add_stack.pop_back()
 
 /** Declare a fresh DD */
@@ -73,6 +69,10 @@ typedef std::vector<ADD> DDVector;
     /* push DD vector in reversed order */      \
     for (unsigned i = 0; i < width; ++ i)       \
         PUSH_DD(vec[width - i - 1]);
+
+namespace dd {
+
+    typedef std::vector<ADD> DDVector;
 
 };
 

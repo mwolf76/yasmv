@@ -30,10 +30,13 @@ namespace compiler {
 
     void Compiler::array_equals(const expr::Expr_ptr expr)
     {
+        type::TypeMgr& tm { f_owner.tm() };
+
         const type::Type_ptr rhs_type { f_type_stack.back() };
         f_type_stack.pop_back();
 
         const type::Type_ptr lhs_type { f_type_stack.back() };
+        f_type_stack.pop_back();
 
         assert(lhs_type->is_array() &&
                rhs_type->is_array());
@@ -43,13 +46,15 @@ namespace compiler {
         unsigned width { atype->of()->width() };
         unsigned elems { atype->nelems() };
 
+        const type::Type_ptr res_type { tm.find_boolean() };
+        f_type_stack.push_back(res_type);
+
         POP_DV(rhs, width * elems);
         POP_DV(lhs, width * elems);
 
+        /* res := AND(lhs[i] == rhs[i]) */
         ADD res(f_enc.one());
         for (unsigned j = 0; j < elems; ++j) {
-
-            /* extract fragments for LHS and RHS */
             dd::DDVector rhs_fragment;
             rhs_fragment.clear();
 
@@ -62,13 +67,10 @@ namespace compiler {
             }
 
             FRESH_DV(act, 1);
-            InlinedOperatorDescriptor md { make_ios(false, expr::EQ, width), act, lhs_fragment, rhs_fragment };
+            InlinedOperatorDescriptor md {
+                make_ios(false, expr::EQ, width), act, lhs_fragment, rhs_fragment
+            };
             f_inlined_operator_descriptors.push_back(md);
-
-            DEBUG
-                << "Registered "
-                << md
-                << std::endl;
 
             res *= act[0];
         }

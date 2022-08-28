@@ -27,6 +27,7 @@
 #include <witness/witness_mgr.hh>
 #include <witness/evaluator.hh>
 
+#include <utils/ctx.hh>
 #include <utils/time.hh>
 #include <utils/values.hh>
 

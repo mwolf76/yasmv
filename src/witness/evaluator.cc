@@ -25,6 +25,8 @@
 
 #include <expr/expr.hh>
 
+#include <utils/ctx.hh>
+
 #include <witness/evaluator.hh>
 #include <witness/witness_mgr.hh>
 

@@ -28,85 +28,78 @@ namespace compiler {
 
     void Compiler::enumerative_equals(const expr::Expr_ptr expr)
     {
+        type::TypeMgr& tm { f_owner.tm() };
+        DROP_TYPE();
+        DROP_TYPE();
+        PUSH_TYPE(tm.find_boolean());
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Equals(rhs));
-
-        type::TypeMgr& tm { f_owner.tm() };
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.push_back(tm.find_boolean());
     }
 
     void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
     {
+        type::TypeMgr& tm { f_owner.tm() };
+        DROP_TYPE();
+        DROP_TYPE();
+        PUSH_TYPE(tm.find_boolean());
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Equals(rhs).Cmpl());
-
-        type::TypeMgr& tm { f_owner.tm() };
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.push_back(tm.find_boolean());
     }
 
     void Compiler::enumerative_ite(const expr::Expr_ptr expr)
     {
+        POP_TYPE(rhs_type);
+        DROP_TYPE();
+        DROP_TYPE();
+        PUSH_TYPE(rhs_type);
+
         POP_DD(rhs);
         POP_DD(lhs);
         POP_DD(cnd);
         PUSH_DD(cnd.Ite(lhs, rhs));
-
-        // consume all, push rhs type
-        type::Type_ptr type { f_type_stack.back() };
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
-        f_type_stack.push_back(type);
     }
 
     void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
     {
         enc::EncodingMgr& bm(f_enc);
 
-        // index
-        type::Type_ptr t0 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume index
+        POP_TYPE(t0);
         assert(t0->is_algebraic());
-
         type::Type_ptr itype { t0->as_algebraic() };
         unsigned iwidth { itype->width() };
 
-        POP_DV(index, iwidth);
-        assert(iwidth == bm.word_width()); // needed?
-
-        // array
-        type::Type_ptr t1 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume array
+        POP_TYPE(t1);
         assert(t1->is_array());
-
         type::ArrayType_ptr atype { t1->as_array() };
         type::ScalarType_ptr type { atype->of() };
         assert(type->is_enum());
 
+        PUSH_TYPE(type);
+
+        POP_DV(index, iwidth);
+        assert(iwidth == bm.word_width());
+
         unsigned elem_width { type->width() };
         assert(elem_width == 1);
+
         unsigned elem_count { atype->nelems() };
         POP_DV(lhs, elem_width * elem_count);
 
-        PUSH_TYPE(type);
-
         if (t0->is_constant()) {
             unsigned subscript { 0 };
-            for (unsigned i = 0; i < iwidth; ++ i) {
+            for (unsigned i = 0; i < iwidth; ++i) {
                 ADD bit { index[i] };
                 subscript *= 2;
                 if (bit.IsOne()) {
-                    subscript ++;
+                    subscript++;
                 }
             }
 
-            for (unsigned i = 0; i < elem_width; ++ i) {
+            for (unsigned i = 0; i < elem_width; ++i) {
                 PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
             }
         } else {
@@ -139,11 +132,6 @@ namespace compiler {
 
             MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
             f_multiway_selection_descriptors.push_back(msd);
-
-            DEBUG
-            << "Registered "
-            << msd
-            << std::endl;
         }
     }
 

@@ -24,9 +24,9 @@
 #ifndef TYPE_HELPERS_H
 #define TYPE_HELPERS_H
 
-/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
+/** -- shortcurts to simplify the manipulation of the internal type stack -- */
 #define TOP_TYPE(tp)                            \
-    const auto (tp)(f_type_stack.back())
+    const auto tp { f_type_stack.back() }
 
 #define DROP_TYPE()                             \
     f_type_stack.pop_back()

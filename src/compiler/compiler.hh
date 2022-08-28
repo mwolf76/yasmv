@@ -64,6 +64,7 @@
 #include <compiler/streamers.hh>
 #include <compiler/typedefs.hh>
 
+#include <utils/ctx.hh>
 #include <utils/time.hh>
 
 #include <boost/thread/mutex.hpp>

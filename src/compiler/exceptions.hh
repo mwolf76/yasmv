@@ -32,25 +32,25 @@
 
 namespace compiler {
 
-/** Exception classes */
-class CompilerException : public Exception {
-public:
-    CompilerException(const std::string& subtype,
-                      const std::string& message="")
-        : Exception("CompilerException", subtype, message)
-    {}
-};
+    /** Exception classes */
+    class CompilerException: public Exception {
+    public:
+        CompilerException(const std::string& subtype,
+                          const std::string& message = "")
+            : Exception("CompilerException", subtype, message)
+        {}
+    };
 
-/** Raised when a constant could not fit into a native word */
-class ConstantTooLarge : public CompilerException {
-public:
-    ConstantTooLarge(expr::Expr_ptr expr);
-};
+    /** Raised when a constant could not fit into a native word */
+    class ConstantTooLarge: public CompilerException {
+    public:
+        ConstantTooLarge(expr::Expr_ptr expr);
+    };
 
-class UnexpectedExpression : public CompilerException {
-public:
-    UnexpectedExpression(expr::Expr_ptr expr);
-};
+    class UnexpectedExpression: public CompilerException {
+    public:
+        UnexpectedExpression(expr::Expr_ptr expr);
+    };
 
 } // namespace compiler
 

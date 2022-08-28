@@ -201,34 +201,5 @@ struct ExprEq {
 typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
 typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
-/* FIXME: how does this stuff belong here?!? */
-
-/** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
-#define TOP_CTX(tp)                            \
-    const expr::Expr_ptr (tp)(f_ctx_stack.back())
-
-#define DROP_CTX()                             \
-    f_ctx_stack.pop_back()
-
-#define POP_CTX(tp)                            \
-    TOP_CTX(tp); DROP_CTX()
-
-#define PUSH_CTX(tp)                           \
-    f_ctx_stack.push_back(tp)
-
-/** -- shortcurts to simplify the manipulation of the internal time stack -- */
-#define TOP_TIME(step)                          \
-    const step_t (step)(f_time_stack.back())
-
-#define DROP_TIME()                             \
-    f_time_stack.pop_back()
-
-#define POP_TIME(step)                          \
-    TOP_TIME(step); DROP_TIME()
-
-#define PUSH_TIME(step)                         \
-    f_time_stack.push_back(step)
-
 };
-
 #endif /* EXPR_H */
