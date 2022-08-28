@@ -31,12 +31,13 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
-#include <type/typedefs.hh>
-#include <type/printers.hh>
-#include <type/exceptions.hh>
 #include <type/classes.hh>
+#include <type/exceptions.hh>
 #include <type/helpers.hh>
+#include <type/printers.hh>
+#include <type/typedefs.hh>
 
-namespace type { };
+namespace type {
+};
 
 #endif /* TYPE_H */

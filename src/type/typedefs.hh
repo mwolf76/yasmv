@@ -28,43 +28,43 @@
 #include <expr/expr.hh>
 #include <utils/pool.hh>
 
-#include <vector>
 #include <boost/unordered_map.hpp>
+#include <vector>
 
 namespace type {
 
-/* base classes pointer types */
-typedef class Type* Type_ptr;
-typedef class TypeMgr* TypeMgr_ptr;
+    /* base classes pointer types */
+    typedef class Type* Type_ptr;
+    typedef class TypeMgr* TypeMgr_ptr;
 
-/* aggregate types */
-typedef std::vector<Type_ptr> TypeVector;
-typedef boost::unordered_map<expr::Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeMap;
+    /* aggregate types */
+    typedef std::vector<Type_ptr> TypeVector;
+    typedef boost::unordered_map<expr::Expr_ptr, Type_ptr, utils::PtrHash, utils::PtrEq> TypeMap;
 
-/* 1. scalars */
-typedef class ScalarType* ScalarType_ptr;
-typedef class StringType* StringType_ptr;
+    /* 1. scalars */
+    typedef class ScalarType* ScalarType_ptr;
+    typedef class StringType* StringType_ptr;
 
-/* 1.1. monoliths */
-typedef class MonolithicType* MonolithicType_ptr;
-typedef class BooleanType* BooleanType_ptr;
-typedef class EnumType* EnumType_ptr;
+    /* 1.1. monoliths */
+    typedef class MonolithicType* MonolithicType_ptr;
+    typedef class BooleanType* BooleanType_ptr;
+    typedef class EnumType* EnumType_ptr;
 
-/* 1.2. algebraics */
-typedef class ConstantType* ConstantType_ptr;
-typedef class AlgebraicType* AlgebraicType_ptr;
-typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
-typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
+    /* 1.2. algebraics */
+    typedef class ConstantType* ConstantType_ptr;
+    typedef class AlgebraicType* AlgebraicType_ptr;
+    typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
+    typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
 
-/* 1.3. module instances */
-typedef class InstanceType* InstanceType_ptr;
+    /* 1.3. module instances */
+    typedef class InstanceType* InstanceType_ptr;
 
-/* 1.4. time constants */
-typedef class TimeType* TimeType_ptr;
+    /* 1.4. time constants */
+    typedef class TimeType* TimeType_ptr;
 
-/* 2. arrays */
-typedef class ArrayType* ArrayType_ptr;
+    /* 2. arrays */
+    typedef class ArrayType* ArrayType_ptr;
 
-};
+}; // namespace type
 
 #endif /* TYPE_TYPEDEFS_H */

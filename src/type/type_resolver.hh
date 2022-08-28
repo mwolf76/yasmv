@@ -31,18 +31,18 @@
 
 namespace type {
 
-class TypeMgr;
-class TypeResolver : public symb::Resolver {
-public:
-    TypeResolver(TypeMgr& owner);
-    ~TypeResolver();
+    class TypeMgr;
+    class TypeResolver: public symb::Resolver {
+    public:
+        TypeResolver(TypeMgr& owner);
+        ~TypeResolver();
 
-    symb::Symbol_ptr symbol(const expr::Expr_ptr key);
+        symb::Symbol_ptr symbol(const expr::Expr_ptr key);
 
-private:
-    TypeMgr& f_owner;
-};
+    private:
+        TypeMgr& f_owner;
+    };
 
-};
+}; // namespace type
 
 #endif /* TYPE_RESOLVER_H */

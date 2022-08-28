@@ -25,73 +25,117 @@
 
 namespace type {
 
-Type::~Type()
-{}
+    Type::~Type()
+    {}
 
-bool Type::is_scalar()
-{ return NULL != dynamic_cast<ScalarType_ptr>( this ); }
+    bool Type::is_scalar()
+    {
+        return NULL != dynamic_cast<ScalarType_ptr>(this);
+    }
 
-ScalarType_ptr Type::as_scalar()
-{ return dynamic_cast <const ScalarType_ptr> (this); }
+    ScalarType_ptr Type::as_scalar()
+    {
+        return dynamic_cast<const ScalarType_ptr>(this);
+    }
 
-bool Type::is_monolithic()
-{ return NULL != dynamic_cast<MonolithicType_ptr>( this ); }
+    bool Type::is_monolithic()
+    {
+        return NULL != dynamic_cast<MonolithicType_ptr>(this);
+    }
 
-bool Type::is_boolean()
-{ return NULL != dynamic_cast<BooleanType_ptr>( this ); }
+    bool Type::is_boolean()
+    {
+        return NULL != dynamic_cast<BooleanType_ptr>(this);
+    }
 
-BooleanType_ptr Type::as_boolean()
-{ return dynamic_cast <const BooleanType_ptr> (this); }
+    BooleanType_ptr Type::as_boolean()
+    {
+        return dynamic_cast<const BooleanType_ptr>(this);
+    }
 
-bool Type::is_enum()
-{ return NULL != dynamic_cast<EnumType_ptr>( this ); }
+    bool Type::is_enum()
+    {
+        return NULL != dynamic_cast<EnumType_ptr>(this);
+    }
 
-EnumType_ptr Type::as_enum()
-{ return dynamic_cast<EnumType_ptr> (this); }
+    EnumType_ptr Type::as_enum()
+    {
+        return dynamic_cast<EnumType_ptr>(this);
+    }
 
-bool Type::is_instance()
-{ return NULL != dynamic_cast<InstanceType_ptr> (this); }
+    bool Type::is_instance()
+    {
+        return NULL != dynamic_cast<InstanceType_ptr>(this);
+    }
 
-InstanceType_ptr Type::as_instance()
-{ return dynamic_cast<InstanceType_ptr> (this); }
+    InstanceType_ptr Type::as_instance()
+    {
+        return dynamic_cast<InstanceType_ptr>(this);
+    }
 
-bool Type::is_time()
-{ return NULL != dynamic_cast<TimeType_ptr> (this); }
+    bool Type::is_time()
+    {
+        return NULL != dynamic_cast<TimeType_ptr>(this);
+    }
 
-TimeType_ptr Type::as_time()
-{ return dynamic_cast<TimeType_ptr> (this); }
+    TimeType_ptr Type::as_time()
+    {
+        return dynamic_cast<TimeType_ptr>(this);
+    }
 
-bool Type::is_algebraic()
-{ return NULL != dynamic_cast<AlgebraicType_ptr> (this); }
+    bool Type::is_algebraic()
+    {
+        return NULL != dynamic_cast<AlgebraicType_ptr>(this);
+    }
 
-bool Type::is_constant()
-{ return NULL != dynamic_cast<ConstantType_ptr> (this); }
+    bool Type::is_constant()
+    {
+        return NULL != dynamic_cast<ConstantType_ptr>(this);
+    }
 
-AlgebraicType_ptr Type::as_algebraic()
-{ return dynamic_cast <const AlgebraicType_ptr> (this); }
+    AlgebraicType_ptr Type::as_algebraic()
+    {
+        return dynamic_cast<const AlgebraicType_ptr>(this);
+    }
 
-bool Type::is_signed_algebraic()
-{ return NULL != dynamic_cast<SignedAlgebraicType_ptr> (this); }
+    bool Type::is_signed_algebraic()
+    {
+        return NULL != dynamic_cast<SignedAlgebraicType_ptr>(this);
+    }
 
-SignedAlgebraicType_ptr Type::as_signed_algebraic()
-{ return dynamic_cast <const SignedAlgebraicType_ptr> (this); }
+    SignedAlgebraicType_ptr Type::as_signed_algebraic()
+    {
+        return dynamic_cast<const SignedAlgebraicType_ptr>(this);
+    }
 
-bool Type::is_unsigned_algebraic()
-{ return NULL != dynamic_cast<UnsignedAlgebraicType_ptr> (this); }
+    bool Type::is_unsigned_algebraic()
+    {
+        return NULL != dynamic_cast<UnsignedAlgebraicType_ptr>(this);
+    }
 
-UnsignedAlgebraicType_ptr Type::as_unsigned_algebraic()
-{ return dynamic_cast <const UnsignedAlgebraicType_ptr> (this); }
+    UnsignedAlgebraicType_ptr Type::as_unsigned_algebraic()
+    {
+        return dynamic_cast<const UnsignedAlgebraicType_ptr>(this);
+    }
 
-bool Type::is_array()
-{ return NULL != dynamic_cast<ArrayType_ptr> (this); }
+    bool Type::is_array()
+    {
+        return NULL != dynamic_cast<ArrayType_ptr>(this);
+    }
 
-ArrayType_ptr Type::as_array()
-{ return dynamic_cast<ArrayType_ptr> (this); }
+    ArrayType_ptr Type::as_array()
+    {
+        return dynamic_cast<ArrayType_ptr>(this);
+    }
 
-bool Type::is_string()
-{ return NULL != dynamic_cast<StringType_ptr> (this); }
+    bool Type::is_string()
+    {
+        return NULL != dynamic_cast<StringType_ptr>(this);
+    }
 
-StringType_ptr Type::as_string()
-{ return dynamic_cast<const StringType_ptr> (this); }
+    StringType_ptr Type::as_string()
+    {
+        return dynamic_cast<const StringType_ptr>(this);
+    }
 
-};
+}; // namespace type

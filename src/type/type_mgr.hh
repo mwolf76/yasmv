@@ -32,95 +32,104 @@
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 
-#include <type/typedefs.hh>
 #include <type/type_resolver.hh>
+#include <type/typedefs.hh>
 
 namespace type {
 
-/*
+    /*
    The TypeMgr has two well-defined responsibilites:
 
    1. It keeps track of types that has been defined;
    2. It instantiates (and owns) type descriptors (Type objects).
 */
 
-class TypeMgr {
+    class TypeMgr {
 
-    // reserved
-    Type_ptr f_ctx_type;
+        // reserved
+        Type_ptr f_ctx_type;
 
-    /* Shared enums and literals */
-    symb::Literals f_lits;
+        /* Shared enums and literals */
+        symb::Literals f_lits;
 
-public:
-    const TimeType_ptr find_time();
+    public:
+        const TimeType_ptr find_time();
 
-    const ScalarType_ptr find_boolean();
-    const ArrayType_ptr find_boolean_array(unsigned size);
+        const ScalarType_ptr find_boolean();
+        const ArrayType_ptr find_boolean_array(unsigned size);
 
-    /* Remark: following C scoping rules for enums, enums are *globals* */
-    const ScalarType_ptr find_enum(expr::ExprSet& lits);
-    const ArrayType_ptr find_enum_array(expr::ExprSet& lits, unsigned size);
+        /* Remark: following C scoping rules for enums, enums are *globals* */
+        const ScalarType_ptr find_enum(expr::ExprSet& lits);
+        const ArrayType_ptr find_enum_array(expr::ExprSet& lits, unsigned size);
 
-    const ScalarType_ptr find_constant(unsigned width);
+        const ScalarType_ptr find_constant(unsigned width);
 
-    const ScalarType_ptr find_signed(unsigned width);
-    const ArrayType_ptr  find_signed_array(unsigned width, unsigned size);
+        const ScalarType_ptr find_signed(unsigned width);
+        const ArrayType_ptr find_signed_array(unsigned width, unsigned size);
 
-    const ScalarType_ptr find_unsigned(unsigned width);
-    const ArrayType_ptr find_unsigned_array(unsigned width, unsigned size);
+        const ScalarType_ptr find_unsigned(unsigned width);
+        const ArrayType_ptr find_unsigned_array(unsigned width, unsigned size);
 
-    const Type_ptr find_type_by_def(const expr::Expr_ptr expr);
+        const Type_ptr find_type_by_def(const expr::Expr_ptr expr);
 
-    const ScalarType_ptr find_instance(expr::Expr_ptr module, expr::Expr_ptr params);
-    const StringType_ptr find_string();
+        const ScalarType_ptr find_instance(expr::Expr_ptr module, expr::Expr_ptr params);
+        const StringType_ptr find_string();
 
-    const ArrayType_ptr find_array_type( ScalarType_ptr of, unsigned nelems);
+        const ArrayType_ptr find_array_type(ScalarType_ptr of, unsigned nelems);
 
-    const symb::Literals& literals() const
-    { return f_lits; }
-
-    inline symb::Resolver_ptr resolver()
-    { return &f_resolver; }
-
-    /** Singleton instance accessor */
-    static inline TypeMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new TypeMgr();
+        const symb::Literals& literals() const
+        {
+            return f_lits;
         }
 
-        return (*f_instance);
-    }
+        inline symb::Resolver_ptr resolver()
+        {
+            return &f_resolver;
+        }
 
-    /** A ref to the ExprMgr */
-    inline expr::ExprMgr& em() const
-    { return f_em; }
+        /** Singleton instance accessor */
+        static inline TypeMgr& INSTANCE()
+        {
+            if (!f_instance) {
+                f_instance = new TypeMgr();
+            }
 
-protected:
-    TypeMgr();
-    ~TypeMgr();
+            return (*f_instance);
+        }
 
-private:
-    static TypeMgr_ptr f_instance;
+        /** A ref to the ExprMgr */
+        inline expr::ExprMgr& em() const
+        {
+            return f_em;
+        }
 
-    /* --- low-level services ----------------------------------------------- */
+    protected:
+        TypeMgr();
+        ~TypeMgr();
 
-    // lookup up a type from its repr, returns NULL if not found
-    inline Type_ptr lookup_type(const expr::Expr_ptr expr)
-    { return f_register [ expr ]; }
+    private:
+        static TypeMgr_ptr f_instance;
 
-    void register_type(const expr::Expr_ptr expr, Type_ptr vtype);
+        /* --- low-level services ----------------------------------------------- */
 
-    /* local data */
-    TypeMap f_register;
+        // lookup up a type from its repr, returns NULL if not found
+        inline Type_ptr lookup_type(const expr::Expr_ptr expr)
+        {
+            return f_register[expr];
+        }
 
-    // ref to expr manager
-    expr::ExprMgr& f_em;
+        void register_type(const expr::Expr_ptr expr, Type_ptr vtype);
 
-    // ref to internal resolver
-    TypeResolver f_resolver;
-};
+        /* local data */
+        TypeMap f_register;
 
-};
+        // ref to expr manager
+        expr::ExprMgr& f_em;
+
+        // ref to internal resolver
+        TypeResolver f_resolver;
+    };
+
+}; // namespace type
 
 #endif
