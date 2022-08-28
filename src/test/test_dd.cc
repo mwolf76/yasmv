@@ -39,14 +39,10 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
 {
     Cudd dd;
 
-    ADD lhs
-        (dd.addVar());
-    ADD rhs
-        (dd.addVar());
-    ADD zero
-        (dd.addZero());
-    ADD one
-        (dd.addOne());
+    ADD lhs(dd.addVar());
+    ADD rhs(dd.addVar());
+    ADD zero(dd.addZero());
+    ADD one(dd.addOne());
 
     /* ! 0 == 1 */
     BOOST_CHECK(zero.Cmpl() == one);
@@ -116,7 +112,7 @@ ADD make_integer_encoding(Cudd& mgr, unsigned nbits, bool is_signed)
         // add it to the encoding
         res += add_var;
 
-        ++ i;
+        ++i;
     }
 
     return res;
@@ -127,10 +123,8 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
 {
     Cudd dd;
 
-    ADD lhs
-        (make_integer_encoding(dd, 4, false));
-    ADD rhs
-        (make_integer_encoding(dd, 4, false));
+    ADD lhs(make_integer_encoding(dd, 4, false));
+    ADD rhs(make_integer_encoding(dd, 4, false));
 
     BOOST_CHECK(lhs == lhs.Negate().Negate());
 
@@ -205,7 +199,6 @@ BOOST_AUTO_TEST_CASE(dd_bitwise)
         ADD y_xnor_x = rhs.BWXnor(lhs);
         BOOST_CHECK(x_xnor_y == y_xnor_x);
     }
-
 }
 
 BOOST_AUTO_TEST_CASE(dd_relational)
@@ -223,7 +216,7 @@ BOOST_AUTO_TEST_CASE(dd_relational)
     ADD y_lt_x = rhs.LT(lhs);
     BOOST_CHECK(x_lt_y != y_lt_x);
 
-    BOOST_CHECK( x_equals_y.Or(x_lt_y) == lhs.LEQ(rhs) );
+    BOOST_CHECK(x_equals_y.Or(x_lt_y) == lhs.LEQ(rhs));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
