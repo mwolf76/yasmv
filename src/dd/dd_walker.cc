@@ -36,7 +36,7 @@ namespace dd {
     ADDWalker& ADDWalker::operator()(ADD dd)
     {
         /* setup toplevel act. record and perform walk. */
-        add_activation_record call(dd.getNode());
+        add_activation_record call { dd.getNode() };
         f_recursion_stack.push(call);
 
         /* actions before the walk */
@@ -55,10 +55,10 @@ namespace dd {
     {
         while (0 != f_recursion_stack.size()) {
         loop:
-            add_activation_record curr(f_recursion_stack.top());
+            add_activation_record curr { f_recursion_stack.top() };
             assert(!Cudd_IsComplement(curr.node));
 
-            register const DdNode* node(curr.node);
+            register const DdNode* node { curr.node };
 
             /* leaves have no children */
             if (cuddIsConstant(node))
@@ -80,15 +80,16 @@ namespace dd {
 
                 case DD_WALK_NODE:
                     /* process node in post-order. */
-                    if (condition(node))
+                    if (condition(node)) {
                         action(node);
+		    }
                     f_recursion_stack.pop();
                     break;
 
                 default:
                     assert(false); // unexpected
-            }                      /* switch() */
-        }                          // while
+            }
+        }
     }
 
 }; // namespace dd

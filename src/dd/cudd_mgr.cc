@@ -29,7 +29,7 @@ namespace dd {
 
     CuddMgr::CuddMgr()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DRIVEL
             << "Initialized CuddMgr @ "
@@ -39,7 +39,7 @@ namespace dd {
 
     CuddMgr::~CuddMgr()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         CuddVector::iterator i;
         for (i = f_cudd_instances.begin(); i != f_cudd_instances.end(); ++i)
@@ -53,7 +53,7 @@ namespace dd {
 
     Cudd& CuddMgr::dd()
     {
-        Cudd* res = new Cudd();
+        Cudd* res { new Cudd() };
         assert(NULL != res);
 
         /* Common setup for all dd instances */
