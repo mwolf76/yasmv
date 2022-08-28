@@ -30,42 +30,48 @@
 
 namespace enc {
 
-/* Untimed Canonical Bit Identifiers */
-class UCBI {
-public:
-    UCBI(expr::Expr_ptr expr, step_t time_ofs, unsigned bitno);
-    UCBI(const UCBI& ucbi);
+    /* Untimed Canonical Bit Identifiers */
+    class UCBI {
+    public:
+        UCBI(expr::Expr_ptr expr, step_t time_ofs, unsigned bitno);
+        UCBI(const UCBI& ucbi);
 
-    inline expr::Expr_ptr expr() const
-    { return f_expr; }
+        inline expr::Expr_ptr expr() const
+        {
+            return f_expr;
+        }
 
-    inline step_t time() const
-    { return f_time; }
+        inline step_t time() const
+        {
+            return f_time;
+        }
 
-    inline unsigned bitno() const
-    { return f_bitno; }
+        inline unsigned bitno() const
+        {
+            return f_bitno;
+        }
 
-private:
-    // expression body
-    expr::Expr_ptr f_expr;
+    private:
+        // expression body
+        expr::Expr_ptr f_expr;
 
-    // expression time (default is 0)
-    step_t f_time;
+        // expression time (default is 0)
+        step_t f_time;
 
-    // bit number
-    unsigned f_bitno;
-};
+        // bit number
+        unsigned f_bitno;
+    };
 
-std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
+    std::ostream& operator<<(std::ostream& os, const UCBI& ucbi);
 
-struct UCBIHash {
-    long operator() (const UCBI& k) const;
-};
+    struct UCBIHash {
+        long operator()(const UCBI& k) const;
+    };
 
-struct UCBIEq {
-    bool operator() (const UCBI& x, const UCBI& y) const;
-};
+    struct UCBIEq {
+        bool operator()(const UCBI& x, const UCBI& y) const;
+    };
 
-};
+}; // namespace enc
 
 #endif

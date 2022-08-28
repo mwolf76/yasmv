@@ -31,63 +31,69 @@
 
 namespace enc {
 
-/* Timed Canonical Bit Identifiers */
-class TCBI {
-public:
-    TCBI(const UCBI& ucbi, step_t timebase);
-    TCBI(const TCBI& tcbi);
+    /* Timed Canonical Bit Identifiers */
+    class TCBI {
+    public:
+        TCBI(const UCBI& ucbi, step_t timebase);
+        TCBI(const TCBI& tcbi);
 
-    inline expr::Expr_ptr expr() const
-    { return f_expr; }
+        inline expr::Expr_ptr expr() const
+        {
+            return f_expr;
+        }
 
-    inline unsigned bitno() const
-    { return f_bitno; }
+        inline unsigned bitno() const
+        {
+            return f_bitno;
+        }
 
-    inline step_t absolute_time() const
-    {
-        /* reserved for frozen variables */
-        if (f_time == FROZEN)
-            return 0;
+        inline step_t absolute_time() const
+        {
+            /* reserved for frozen variables */
+            if (f_time == FROZEN)
+                return 0;
 
-        /* always treat negative time as absolute */
-        if (is_negative(f_time))
+            /* always treat negative time as absolute */
+            if (is_negative(f_time))
+                return f_time;
+
+            return f_time + f_base;
+        }
+
+        inline step_t time() const
+        {
             return f_time;
+        }
 
-        return f_time + f_base;
-    }
+        inline step_t base() const
+        {
+            return f_base;
+        }
 
-    inline step_t time() const
-    { return f_time; }
+    private:
+        // expression body
+        expr::Expr_ptr f_expr;
 
-    inline step_t base() const
-    { return f_base; }
+        // expression time (default is 0)
+        step_t f_time;
 
-private:
+        // bit number
+        unsigned f_bitno;
 
-    // expression body
-    expr::Expr_ptr f_expr;
+        // time base (default is 0)
+        step_t f_base;
+    };
 
-    // expression time (default is 0)
-    step_t f_time;
+    std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
 
-    // bit number
-    unsigned f_bitno;
+    struct TCBIHash {
+        long operator()(const TCBI& k) const;
+    };
 
-    // time base (default is 0)
-    step_t f_base;
+    struct TCBIEq {
+        bool operator()(const TCBI& x, const TCBI& y) const;
+    };
 
-};
-
-std::ostream& operator<<(std::ostream& os, const TCBI& tcbi);
-
-struct TCBIHash {
-    long operator() (const TCBI& k) const;
-};
-
-struct TCBIEq {
-    bool operator() (const TCBI& x, const TCBI& y) const;
-};
-
-};
+}; // namespace enc
 
 #endif

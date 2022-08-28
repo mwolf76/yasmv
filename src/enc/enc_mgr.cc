@@ -27,123 +27,125 @@
 
 namespace enc {
 
-EncodingMgr_ptr EncodingMgr::f_instance = NULL;
+    EncodingMgr_ptr EncodingMgr::f_instance = NULL;
 
-Encoding_ptr EncodingMgr::make_encoding(type::Type_ptr tp)
-{
-    assert(NULL != tp);
+    Encoding_ptr EncodingMgr::make_encoding(type::Type_ptr tp)
+    {
+        assert(NULL != tp);
 
-    Encoding_ptr res = NULL;
+        Encoding_ptr res { NULL };
 
-    type::BooleanType_ptr btype;
-    type::UnsignedAlgebraicType_ptr ua_type;
-    type::SignedAlgebraicType_ptr sa_type;
-    type::EnumType_ptr etype;
-    type::ArrayType_ptr vtype;
+        type::BooleanType_ptr btype;
+        type::UnsignedAlgebraicType_ptr ua_type;
+        type::SignedAlgebraicType_ptr sa_type;
+        type::EnumType_ptr etype;
+        type::ArrayType_ptr vtype;
 
-    /* disable DD reordering */
-    f_cudd.AutodynDisable();
+        /* disable DD reordering */
+        f_cudd.AutodynDisable();
 
-    if ((btype = dynamic_cast<type::BooleanType_ptr>(tp)))
-        res = new BooleanEncoding();
-
-    else if ((sa_type = dynamic_cast<type::SignedAlgebraicType_ptr>(tp)))
-        res = new AlgebraicEncoding(sa_type->width(), true, sa_type->dds());
-
-    else if ((ua_type = dynamic_cast<type::UnsignedAlgebraicType_ptr>(tp)))
-        res = new AlgebraicEncoding(ua_type->width(), false, ua_type->dds());
-
-    else if ((etype = dynamic_cast<type::EnumType_ptr>(tp)))
-        res = new EnumEncoding(etype->literals());
-
-    else if ((vtype = dynamic_cast<type::ArrayType_ptr>(tp))) {
-        Encodings encodings;
-
-        assert( 0 == ( vtype->width() % vtype->of()->width()));
-        for (unsigned i = 0; i < vtype->width() / vtype->of()->width(); ++ i) {
-            encodings.push_back( make_encoding(vtype->of()));
+        if ((btype = dynamic_cast<type::BooleanType_ptr>(tp))) {
+            res = new BooleanEncoding();
         }
-        res = new ArrayEncoding(encodings);
+
+        else if ((sa_type = dynamic_cast<type::SignedAlgebraicType_ptr>(tp))) {
+            res = new AlgebraicEncoding(sa_type->width(), true, sa_type->dds());
+        }
+
+        else if ((ua_type = dynamic_cast<type::UnsignedAlgebraicType_ptr>(tp))) {
+            res = new AlgebraicEncoding(ua_type->width(), false, ua_type->dds());
+        }
+
+        else if ((etype = dynamic_cast<type::EnumType_ptr>(tp))) {
+            res = new EnumEncoding(etype->literals());
+        }
+
+        else if ((vtype = dynamic_cast<type::ArrayType_ptr>(tp))) {
+            Encodings encodings;
+
+            assert(0 == (vtype->width() % vtype->of()->width()));
+            for (unsigned i = 0; i < vtype->width() / vtype->of()->width(); ++i) {
+                encodings.push_back(make_encoding(vtype->of()));
+            }
+            res = new ArrayEncoding(encodings);
+        }
+
+        else
+            assert(false); /* unexpected or unsupported */
+
+        /* enable DD reordering */
+        f_cudd.AutodynEnable(CUDD_REORDER_SAME);
+
+        assert(NULL != res);
+        return res;
     }
 
-    else assert(false); /* unexpected or unsupported */
+    Encoding_ptr EncodingMgr::find_encoding(const expr::TimedExpr& key)
+    {
+        const TimedExpr2EncMap::iterator eye { f_timed_expr2enc_map.find(key) };
 
-    /* enable DD reordering */
-    f_cudd.AutodynEnable(CUDD_REORDER_SAME);
+        if (eye != f_timed_expr2enc_map.end()) {
+            return (*eye).second;
+        }
 
-    assert (NULL != res);
-    return res;
-}
-
-Encoding_ptr EncodingMgr::find_encoding(const expr::TimedExpr& key)
-{
-    const TimedExpr2EncMap::iterator eye
-        (f_timed_expr2enc_map.find(key));
-
-    if (eye != f_timed_expr2enc_map.end()) {
-        return (*eye).second;
+        return NULL;
     }
 
-    return NULL;
-}
 
+    void EncodingMgr::register_encoding(const expr::TimedExpr& key, Encoding_ptr enc)
+    {
+        std::ostringstream oss;
+        f_timed_expr2enc_map[key] = enc;
 
-void EncodingMgr::register_encoding(const expr::TimedExpr& key, Encoding_ptr enc)
-{
-    std::ostringstream oss;
-    f_timed_expr2enc_map [ key ] = enc;
+        dd::DDVector& bits { enc->bits() };
 
-    dd::DDVector& bits = enc->bits();
+        unsigned i;
+        dd::DDVector::iterator di;
 
-    unsigned i;
-    dd::DDVector::iterator di;
+        oss << key << " := [";
+        for (i = 0, di = bits.begin(); i < bits.size();) {
+            int index((*di).getNode()->index);
+            oss << index;
 
-    oss << key << " := [" ;
-    for (i = 0, di = bits.begin(); i < bits.size(); ) {
-        int index ((*di).getNode()->index);
-        oss << index;
+            f_index2ucbi_map.insert(
+                std::pair<int, UCBI>(index, UCBI(key.expr(), key.time(), i)));
 
-        f_index2ucbi_map.
-            insert( std::pair<int, UCBI>
-                    (index, UCBI(key.expr(), key.time(), i)));
+            if (++i < bits.size()) {
+                oss << ", ";
+            }
 
-        if ( ++ i < bits.size())
-            oss << ", ";
+            ++di;
+        }
+        assert(di == bits.end());
+        oss << "]";
 
-        ++ di;
+        std::string tmp(oss.str());
+        DRIVEL
+            << "Registered encoding: "
+            << tmp
+            << std::endl;
     }
-    assert (di == bits.end());
-    oss << "]";
 
-    std::string tmp (oss.str());
-    DRIVEL
-        << "Registered encoding: "
-        << tmp
-        << std::endl;
-}
+    EncodingMgr::EncodingMgr()
+        : f_cudd(dd::CuddMgr::INSTANCE().dd()) // this is a fresh instance
+        , f_em(expr::ExprMgr::INSTANCE())
+        , f_word_width((opts::OptsMgr::INSTANCE().word_width()))
+    {
+        const void* instance(this);
 
-EncodingMgr::EncodingMgr()
-    : f_cudd(dd::CuddMgr::INSTANCE().dd()) // this is a fresh instance
-    , f_em(expr::ExprMgr::INSTANCE())
-    , f_word_width ((opts::OptsMgr::INSTANCE().word_width()))
-{
-    const void* instance
-        (this);
+        DRIVEL
+            << "Initialized EncodingMgr @ " << instance
+            << ", native word size is " << f_word_width
+            << std::endl;
+    }
 
-    DRIVEL
-        << "Initialized EncodingMgr @ " << instance
-        << ", native word size is " << f_word_width
-        << std::endl;
-}
+    EncodingMgr::~EncodingMgr()
+    {
+        const void* instance(this);
 
-EncodingMgr::~EncodingMgr()
-{
-    const void* instance
-        (this);
+        DRIVEL
+            << "Destroyed EncodingMgr @ " << instance
+            << std::endl;
+    }
 
-    DRIVEL
-        << "Destroyed EncodingMgr @ " << instance
-        << std::endl;
-}
-
-};
+}; // namespace enc

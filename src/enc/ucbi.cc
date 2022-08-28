@@ -26,75 +26,72 @@
 
 namespace enc {
 
-UCBI::UCBI(expr::Expr_ptr expr, step_t time, unsigned bitno)
-    : f_expr(expr)
-    , f_time(time)
-    , f_bitno(bitno)
-{}
+    UCBI::UCBI(expr::Expr_ptr expr, step_t time, unsigned bitno)
+        : f_expr(expr)
+        , f_time(time)
+        , f_bitno(bitno)
+    {}
 
-UCBI::UCBI(const UCBI& ucbi)
-    : f_expr(ucbi.expr())
-    , f_time(ucbi.time())
-    , f_bitno(ucbi.bitno())
-{}
+    UCBI::UCBI(const UCBI& ucbi)
+        : f_expr(ucbi.expr())
+        , f_time(ucbi.time())
+        , f_bitno(ucbi.bitno())
+    {}
 
-std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
-{
-    expr::Expr_ptr expr
-        (ucbi.expr());
-    step_t step
-        (ucbi.time());
-    unsigned bitno
-        (ucbi.bitno());
+    std::ostream& operator<<(std::ostream& os, const UCBI& ucbi)
+    {
+        expr::Expr_ptr expr { ucbi.expr() };
+        step_t step { ucbi.time() };
+        unsigned bitno { ucbi.bitno() };
 
-    os << "+" << step
-       << "{" ;
+        os << "+" << step
+           << "{";
 
-    expr::Printer (os)
-        << "::"
-        << expr ;
+        expr::Printer(os)
+            << "::"
+            << expr;
 
-    os << "}."
-       << bitno ;
+        os << "}."
+           << bitno;
 
-    return os;
-}
-
-long UCBIHash::operator() (const UCBI& k) const
-{
-    long x, res = 0;
-    expr::ExprHash eh;
-
-    long v0 = eh(*k.expr());
-    long v1 = k.time();
-    long v2 = k.bitno();
-
-    res = (res << 4) + v0;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
+        return os;
     }
-    res &= ~x;
 
-    res = (res << 4) + v1;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
+    long UCBIHash::operator()(const UCBI& k) const
+    {
+        long x, res { 0 };
+        expr::ExprHash eh;
+
+        long v0 { eh(*k.expr()) };
+        long v1 { k.time() };
+        long v2 { k.bitno() };
+
+        res = (res << 4) + v0;
+        if ((x = res & 0xF0000000L) != 0) {
+            res ^= (x >> 24);
+        }
+        res &= ~x;
+
+        res = (res << 4) + v1;
+        if ((x = res & 0xF0000000L) != 0) {
+            res ^= (x >> 24);
+        }
+        res &= ~x;
+
+        res = (res << 4) + v2;
+        if ((x = res & 0xF0000000L) != 0) {
+            res ^= (x >> 24);
+        }
+        res &= ~x;
+
+        return res;
     }
-    res &= ~x;
 
-    res = (res << 4) + v2;
-    if ((x = res & 0xF0000000L) != 0) {
-        res ^= (x >> 24);
+    bool UCBIEq::operator()(const UCBI& x, const UCBI& y) const
+    {
+        return x.expr() == y.expr() &&
+               x.time() == y.time() &&
+               x.bitno() == y.bitno();
     }
-    res &= ~x;
 
-    return res;
-}
-
-bool UCBIEq::operator() (const UCBI& x, const UCBI& y) const
-{
-    return x.expr() == y.expr() &&
-        x.time() == y.time() &&
-        x.bitno() == y.bitno() ;
-}
-
-};
+}; // namespace enc

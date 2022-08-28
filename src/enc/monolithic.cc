@@ -25,75 +25,75 @@
 
 namespace enc {
 
-// boolean 1(1 bit) var
-BooleanEncoding::BooleanEncoding()
-    : Encoding()
-{
-    f_dv.push_back(make_bit());
-}
-
-expr::Expr_ptr BooleanEncoding::expr(int *assignment)
-{
-    expr::ExprMgr& em = f_mgr.em();
-    ADD eval = f_dv[0].Eval( assignment );
-    assert (cuddIsConstant(eval.getRegularNode()));
-
-    value_t res = Cudd_V(eval.getNode());
-    return res == 0 ? em.make_false() : em.make_true();
-}
-
-ADD BooleanEncoding::bit()
-{
-    assert( 1 == f_dv.size() );
-    return f_dv[0];
-}
-
-MonolithicEncoding::MonolithicEncoding()
-    : Encoding()
-{}
-
-unsigned MonolithicEncoding::range_repr_bits (value_t range)
-{
-    unsigned res = 0;
-    assert(0 < range);
-    while (range) {
-        ++ res;
-        range /= 2;
+    // boolean 1(1 bit) var
+    BooleanEncoding::BooleanEncoding()
+        : Encoding()
+    {
+        f_dv.push_back(make_bit());
     }
 
-    return res;
-}
+    expr::Expr_ptr BooleanEncoding::expr(int* assignment)
+    {
+        expr::ExprMgr& em = { f_mgr.em() };
+        ADD eval { f_dv[0].Eval(assignment) };
+        assert(cuddIsConstant(eval.getRegularNode()));
 
-EnumEncoding::EnumEncoding(const expr::ExprSet& lits)
-{
-    unsigned nbits = range_repr_bits(lits.size());
-    f_dv.push_back( make_monolithic_encoding(nbits));
-
-    value_t v;
-    expr::ExprSet::iterator eye;
-    for (v = 0, eye = lits.begin(); eye != lits.end(); ++ eye, ++ v) {
-
-        f_v2e_map[v] = *eye;
-        f_e2v_map[*eye] = v;
+        value_t res { Cudd_V(eval.getNode()) };
+        return res == 0 ? em.make_false() : em.make_true();
     }
-}
 
-value_t EnumEncoding::value(expr::Expr_ptr lit)
-{
-    ExprValueMap::iterator eye = f_e2v_map.find( lit );
-    assert( eye != f_e2v_map.end());
+    ADD BooleanEncoding::bit()
+    {
+        assert(1 == f_dv.size());
+        return f_dv[0];
+    }
 
-    return (*eye).second;
-}
+    MonolithicEncoding::MonolithicEncoding()
+        : Encoding()
+    {}
 
-expr::Expr_ptr EnumEncoding::expr(int *assignment)
-{
-    ADD eval = f_dv[0].Eval(assignment);
-    assert (cuddIsConstant(eval.getNode()));
+    unsigned MonolithicEncoding::range_repr_bits(value_t range)
+    {
+        unsigned res { 0 };
+        assert(0 < range);
+        while (range) {
+            ++res;
+            range /= 2;
+        }
 
-    value_t lindex = Cudd_V(eval.getNode());
+        return res;
+    }
 
-    return f_v2e_map [lindex];
-}
+    EnumEncoding::EnumEncoding(const expr::ExprSet& lits)
+    {
+        unsigned nbits { range_repr_bits(lits.size()) };
+        f_dv.push_back(make_monolithic_encoding(nbits));
 
-};
+        value_t v;
+        expr::ExprSet::iterator eye;
+        for (v = 0, eye = lits.begin(); eye != lits.end(); ++eye, ++v) {
+
+            f_v2e_map[v] = *eye;
+            f_e2v_map[*eye] = v;
+        }
+    }
+
+    value_t EnumEncoding::value(expr::Expr_ptr lit)
+    {
+        ExprValueMap::iterator eye { f_e2v_map.find(lit) };
+        assert(eye != f_e2v_map.end());
+
+        return (*eye).second;
+    }
+
+    expr::Expr_ptr EnumEncoding::expr(int* assignment)
+    {
+        ADD eval { f_dv[0].Eval(assignment) };
+        assert(cuddIsConstant(eval.getNode()));
+
+        value_t lindex { Cudd_V(eval.getNode()) };
+
+        return f_v2e_map[lindex];
+    }
+
+}; // namespace enc
