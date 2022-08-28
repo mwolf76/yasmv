@@ -62,8 +62,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -96,10 +96,10 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAnneal.c,v 1.15 2012/02/05 01:07:18 fa
 #endif
 
 #ifdef DD_STATS
-extern	int	ddTotalNumberSwapping;
-extern	int	ddTotalNISwaps;
-static	int	tosses;
-static	int	acceptances;
+extern int ddTotalNumberSwapping;
+extern int ddTotalNISwaps;
+static int tosses;
+static int acceptances;
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -113,15 +113,15 @@ static	int	acceptances;
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static int stopping_criterion (int c1, int c2, int c3, int c4, double temp);
-static double random_generator (void);
-static int ddExchange (DdManager *table, int x, int y, double temp);
-static int ddJumpingAux (DdManager *table, int x, int x_low, int x_high, double temp);
-static Move * ddJumpingUp (DdManager *table, int x, int x_low, int initial_size);
-static Move * ddJumpingDown (DdManager *table, int x, int x_high, int initial_size);
-static int siftBackwardProb (DdManager *table, Move *moves, int size, double temp);
-static void copyOrder (DdManager *table, int *array, int lower, int upper);
-static int restoreOrder (DdManager *table, int *array, int lower, int upper);
+static int stopping_criterion(int c1, int c2, int c3, int c4, double temp);
+static double random_generator(void);
+static int ddExchange(DdManager* table, int x, int y, double temp);
+static int ddJumpingAux(DdManager* table, int x, int x_low, int x_high, double temp);
+static Move* ddJumpingUp(DdManager* table, int x, int x_low, int initial_size);
+static Move* ddJumpingDown(DdManager* table, int x, int x_high, int initial_size);
+static int siftBackwardProb(DdManager* table, Move* moves, int size, double temp);
+static void copyOrder(DdManager* table, int* array, int lower, int upper);
+static int restoreOrder(DdManager* table, int* array, int lower, int upper);
 
 /**AutomaticEnd***************************************************************/
 
@@ -150,42 +150,41 @@ static int restoreOrder (DdManager *table, int *array, int lower, int upper);
   SeeAlso     []
 
 ******************************************************************************/
-int
-cuddAnnealing(
-  DdManager * table,
-  int  lower,
-  int  upper)
+int cuddAnnealing(
+    DdManager* table,
+    int lower,
+    int upper)
 {
-    int         nvars;
-    int         size;
-    int         x,y;
-    int         result;
-    int		c1, c2, c3, c4;
-    int		BestCost;
-    int		*BestOrder;
-    double	NewTemp, temp;
-    double	rand1;
-    int         innerloop, maxGen;
-    int         ecount, ucount, dcount;
+    int nvars;
+    int size;
+    int x, y;
+    int result;
+    int c1, c2, c3, c4;
+    int BestCost;
+    int* BestOrder;
+    double NewTemp, temp;
+    double rand1;
+    int innerloop, maxGen;
+    int ecount, ucount, dcount;
 
     nvars = upper - lower + 1;
 
-    result = cuddSifting(table,lower,upper);
+    result = cuddSifting(table, lower, upper);
 #ifdef DD_STATS
-    (void) fprintf(table->out,"\n");
+    (void) fprintf(table->out, "\n");
 #endif
-    if (result == 0) return(0);
+    if (result == 0) return (0);
 
     size = table->keys - table->isolated;
 
     /* Keep track of the best order. */
     BestCost = size;
-    BestOrder = ALLOC(int,nvars);
+    BestOrder = ALLOC(int, nvars);
     if (BestOrder == NULL) {
-	table->errorCode = CUDD_MEMORY_OUT;
-	return(0);
+        table->errorCode = CUDD_MEMORY_OUT;
+        return (0);
     }
-    copyOrder(table,BestOrder,lower,upper);
+    copyOrder(table, BestOrder, lower, upper);
 
     temp = BETA * size;
     maxGen = (int) (MAXGEN_RATIO * nvars);
@@ -198,88 +197,88 @@ cuddAnnealing(
 
     while (!stopping_criterion(c1, c2, c3, c4, temp)) {
 #ifdef DD_STATS
-	(void) fprintf(table->out,"temp=%f\tsize=%d\tgen=%d\t",
-		       temp,size,maxGen);
-	tosses = acceptances = 0;
+        (void) fprintf(table->out, "temp=%f\tsize=%d\tgen=%d\t",
+                       temp, size, maxGen);
+        tosses = acceptances = 0;
 #endif
-	for (innerloop = 0; innerloop < maxGen; innerloop++) {
-	    /* Choose x, y  randomly. */
-	    x = (int) Cudd_Random() % nvars;
-	    do {
-		y = (int) Cudd_Random() % nvars;
-	    } while (x == y);
-	    x += lower;
-	    y += lower;
-	    if (x > y) {
-		int tmp = x;
-		x = y;
-		y = tmp;
-	    }
+        for (innerloop = 0; innerloop < maxGen; innerloop++) {
+            /* Choose x, y  randomly. */
+            x = (int) Cudd_Random() % nvars;
+            do {
+                y = (int) Cudd_Random() % nvars;
+            } while (x == y);
+            x += lower;
+            y += lower;
+            if (x > y) {
+                int tmp = x;
+                x = y;
+                y = tmp;
+            }
 
-	    /* Choose move with roulette wheel. */
-	    rand1 = random_generator();
-	    if (rand1 < EXC_PROB) {
-		result = ddExchange(table,x,y,temp);       /* exchange */
-		ecount++;
+            /* Choose move with roulette wheel. */
+            rand1 = random_generator();
+            if (rand1 < EXC_PROB) {
+                result = ddExchange(table, x, y, temp); /* exchange */
+                ecount++;
 #if 0
 		(void) fprintf(table->out,
 			       "Exchange of %d and %d: size = %d\n",
 			       x,y,table->keys - table->isolated);
 #endif
-	    } else if (rand1 < EXC_PROB + JUMP_UP_PROB) {
-		result = ddJumpingAux(table,y,x,y,temp); /* jumping_up */
-		ucount++;
+            } else if (rand1 < EXC_PROB + JUMP_UP_PROB) {
+                result = ddJumpingAux(table, y, x, y, temp); /* jumping_up */
+                ucount++;
 #if 0
 		(void) fprintf(table->out,
 			       "Jump up of %d to %d: size = %d\n",
 			       y,x,table->keys - table->isolated);
 #endif
-	    } else {
-		result = ddJumpingAux(table,x,x,y,temp); /* jumping_down */
-		dcount++;
+            } else {
+                result = ddJumpingAux(table, x, x, y, temp); /* jumping_down */
+                dcount++;
 #if 0
 		(void) fprintf(table->out,
 			       "Jump down of %d to %d: size = %d\n",
 			       x,y,table->keys - table->isolated);
 #endif
-	    }
+            }
 
-	    if (!result) {
-		FREE(BestOrder);
-		return(0);
-	    }
+            if (!result) {
+                FREE(BestOrder);
+                return (0);
+            }
 
-	    size = table->keys - table->isolated;	/* keep current size */
-	    if (size < BestCost) {			/* update best order */
-		BestCost = size;
-		copyOrder(table,BestOrder,lower,upper);
-	    }
-	}
-	c1 = c2;
-	c2 = c3;
-	c3 = c4;
-	c4 = size;
-	NewTemp = ALPHA * temp;
-	if (NewTemp >= 1.0) {
-	    maxGen = (int)(log(NewTemp) / log(temp) * maxGen);
-	}
-	temp = NewTemp;	                /* control variable */
+            size = table->keys - table->isolated; /* keep current size */
+            if (size < BestCost) {                /* update best order */
+                BestCost = size;
+                copyOrder(table, BestOrder, lower, upper);
+            }
+        }
+        c1 = c2;
+        c2 = c3;
+        c3 = c4;
+        c4 = size;
+        NewTemp = ALPHA * temp;
+        if (NewTemp >= 1.0) {
+            maxGen = (int) (log(NewTemp) / log(temp) * maxGen);
+        }
+        temp = NewTemp; /* control variable */
 #ifdef DD_STATS
-	(void) fprintf(table->out,"uphill = %d\taccepted = %d\n",
-		       tosses,acceptances);
-	fflush(table->out);
+        (void) fprintf(table->out, "uphill = %d\taccepted = %d\n",
+                       tosses, acceptances);
+        fflush(table->out);
 #endif
     }
 
-    result = restoreOrder(table,BestOrder,lower,upper);
+    result = restoreOrder(table, BestOrder, lower, upper);
     FREE(BestOrder);
-    if (!result) return(0);
+    if (!result) return (0);
 #ifdef DD_STATS
-    fprintf(table->out,"#:N_EXCHANGE %8d : total exchanges\n",ecount);
-    fprintf(table->out,"#:N_JUMPUP   %8d : total jumps up\n",ucount);
-    fprintf(table->out,"#:N_JUMPDOWN %8d : total jumps down",dcount);
+    fprintf(table->out, "#:N_EXCHANGE %8d : total exchanges\n", ecount);
+    fprintf(table->out, "#:N_JUMPUP   %8d : total jumps up\n", ucount);
+    fprintf(table->out, "#:N_JUMPDOWN %8d : total jumps down", dcount);
 #endif
-    return(1);
+    return (1);
 
 } /* end of cuddAnnealing */
 
@@ -303,18 +302,18 @@ cuddAnnealing(
 ******************************************************************************/
 static int
 stopping_criterion(
-  int  c1,
-  int  c2,
-  int  c3,
-  int  c4,
-  double  temp)
+    int c1,
+    int c2,
+    int c3,
+    int c4,
+    double temp)
 {
     if (STOP_TEMP < temp) {
-	return(0);
+        return (0);
     } else if ((c1 == c2) && (c1 == c3) && (c1 == c4)) {
-	return(1);
+        return (1);
     } else {
-	return(0);
+        return (0);
     }
 
 } /* end of stopping_criterion */
@@ -334,7 +333,7 @@ stopping_criterion(
 static double
 random_generator(void)
 {
-    return((double)(Cudd_Random() / 2147483561.0));
+    return ((double) (Cudd_Random() / 2147483561.0));
 
 } /* end of random_generator */
 
@@ -353,110 +352,110 @@ random_generator(void)
 ******************************************************************************/
 static int
 ddExchange(
-  DdManager * table,
-  int  x,
-  int  y,
-  double  temp)
+    DdManager* table,
+    int x,
+    int y,
+    double temp)
 {
-    Move       *move,*moves;
-    int        tmp;
-    int        x_ref,y_ref;
-    int        x_next,y_next;
-    int        size, result;
-    int        initial_size, limit_size;
+    Move *move, *moves;
+    int tmp;
+    int x_ref, y_ref;
+    int x_next, y_next;
+    int size, result;
+    int initial_size, limit_size;
 
     x_ref = x;
     y_ref = y;
 
-    x_next = cuddNextHigh(table,x);
-    y_next = cuddNextLow(table,y);
+    x_next = cuddNextHigh(table, x);
+    y_next = cuddNextLow(table, y);
     moves = NULL;
     initial_size = limit_size = table->keys - table->isolated;
 
     for (;;) {
-	if (x_next == y_next) {
-	    size = cuddSwapInPlace(table,x,x_next);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = x;
-	    move->y = x_next;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
-	    size = cuddSwapInPlace(table,y_next,y);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = y_next;
-	    move->y = y;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
-	    size = cuddSwapInPlace(table,x,x_next);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = x;
-	    move->y = x_next;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
+        if (x_next == y_next) {
+            size = cuddSwapInPlace(table, x, x_next);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = x;
+            move->y = x_next;
+            move->size = size;
+            move->next = moves;
+            moves = move;
+            size = cuddSwapInPlace(table, y_next, y);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = y_next;
+            move->y = y;
+            move->size = size;
+            move->next = moves;
+            moves = move;
+            size = cuddSwapInPlace(table, x, x_next);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = x;
+            move->y = x_next;
+            move->size = size;
+            move->next = moves;
+            moves = move;
 
-	    tmp = x;
-	    x = y;
-	    y = tmp;
-	} else if (x == y_next) {
-	    size = cuddSwapInPlace(table,x,x_next);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = x;
-	    move->y = x_next;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
-	    tmp = x;
-	    x = y;
-	    y = tmp;
-	} else {
-	    size = cuddSwapInPlace(table,x,x_next);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = x;
-	    move->y = x_next;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
-	    size = cuddSwapInPlace(table,y_next,y);
-	    if (size == 0) goto ddExchangeOutOfMem;
-	    move = (Move *)cuddDynamicAllocNode(table);
-	    if (move == NULL) goto ddExchangeOutOfMem;
-	    move->x = y_next;
-	    move->y = y;
-	    move->size = size;
-	    move->next = moves;
-	    moves = move;
-	    x = x_next;
-	    y = y_next;
-	}
+            tmp = x;
+            x = y;
+            y = tmp;
+        } else if (x == y_next) {
+            size = cuddSwapInPlace(table, x, x_next);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = x;
+            move->y = x_next;
+            move->size = size;
+            move->next = moves;
+            moves = move;
+            tmp = x;
+            x = y;
+            y = tmp;
+        } else {
+            size = cuddSwapInPlace(table, x, x_next);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = x;
+            move->y = x_next;
+            move->size = size;
+            move->next = moves;
+            moves = move;
+            size = cuddSwapInPlace(table, y_next, y);
+            if (size == 0) goto ddExchangeOutOfMem;
+            move = (Move*) cuddDynamicAllocNode(table);
+            if (move == NULL) goto ddExchangeOutOfMem;
+            move->x = y_next;
+            move->y = y;
+            move->size = size;
+            move->next = moves;
+            moves = move;
+            x = x_next;
+            y = y_next;
+        }
 
-	x_next = cuddNextHigh(table,x);
-	y_next = cuddNextLow(table,y);
-	if (x_next > y_ref) break;
+        x_next = cuddNextHigh(table, x);
+        y_next = cuddNextLow(table, y);
+        if (x_next > y_ref) break;
 
-	if ((double) size > DD_MAX_REORDER_GROWTH * (double) limit_size) {
-	    break;
-	} else if (size < limit_size) {
-	    limit_size = size;
-	}
+        if ((double) size > DD_MAX_REORDER_GROWTH * (double) limit_size) {
+            break;
+        } else if (size < limit_size) {
+            limit_size = size;
+        }
     }
 
-    if (y_next>=x_ref) {
-        size = cuddSwapInPlace(table,y_next,y);
+    if (y_next >= x_ref) {
+        size = cuddSwapInPlace(table, y_next, y);
         if (size == 0) goto ddExchangeOutOfMem;
-        move = (Move *)cuddDynamicAllocNode(table);
+        move = (Move*) cuddDynamicAllocNode(table);
         if (move == NULL) goto ddExchangeOutOfMem;
         move->x = y_next;
         move->y = y;
@@ -466,15 +465,15 @@ ddExchange(
     }
 
     /* move backward and stop at best position or accept uphill move */
-    result = siftBackwardProb(table,moves,initial_size,temp);
+    result = siftBackwardProb(table, moves, initial_size, temp);
     if (!result) goto ddExchangeOutOfMem;
 
     while (moves != NULL) {
-	move = moves->next;
-	cuddDeallocMove(table, moves);
-	moves = move;
+        move = moves->next;
+        cuddDeallocMove(table, moves);
+        moves = move;
     }
-    return(1);
+    return (1);
 
 ddExchangeOutOfMem:
     while (moves != NULL) {
@@ -482,7 +481,7 @@ ddExchangeOutOfMem:
         cuddDeallocMove(table, moves);
         moves = move;
     }
-    return(0);
+    return (0);
 
 } /* end of ddExchange */
 
@@ -502,16 +501,16 @@ ddExchangeOutOfMem:
 ******************************************************************************/
 static int
 ddJumpingAux(
-  DdManager * table,
-  int  x,
-  int  x_low,
-  int  x_high,
-  double  temp)
+    DdManager* table,
+    int x,
+    int x_low,
+    int x_high,
+    double temp)
 {
-    Move       *move;
-    Move       *moves;        /* list of moves */
-    int        initial_size;
-    int        result;
+    Move* move;
+    Move* moves; /* list of moves */
+    int initial_size;
+    int result;
 
     initial_size = table->keys - table->isolated;
 
@@ -521,39 +520,39 @@ ddJumpingAux(
 
     moves = NULL;
 
-    if (cuddNextLow(table,x) < x_low) {
-	if (cuddNextHigh(table,x) > x_high) return(1);
-	moves = ddJumpingDown(table,x,x_high,initial_size);
-	/* after that point x --> x_high unless early termination */
-	if (moves == NULL) goto ddJumpingAuxOutOfMem;
-	/* move backward and stop at best position or accept uphill move */
-	result = siftBackwardProb(table,moves,initial_size,temp);
-	if (!result) goto ddJumpingAuxOutOfMem;
-    } else if (cuddNextHigh(table,x) > x_high) {
-	moves = ddJumpingUp(table,x,x_low,initial_size);
-	/* after that point x --> x_low unless early termination */
-	if (moves == NULL) goto ddJumpingAuxOutOfMem;
-	/* move backward and stop at best position or accept uphill move */
-	result = siftBackwardProb(table,moves,initial_size,temp);
-	if (!result) goto ddJumpingAuxOutOfMem;
+    if (cuddNextLow(table, x) < x_low) {
+        if (cuddNextHigh(table, x) > x_high) return (1);
+        moves = ddJumpingDown(table, x, x_high, initial_size);
+        /* after that point x --> x_high unless early termination */
+        if (moves == NULL) goto ddJumpingAuxOutOfMem;
+        /* move backward and stop at best position or accept uphill move */
+        result = siftBackwardProb(table, moves, initial_size, temp);
+        if (!result) goto ddJumpingAuxOutOfMem;
+    } else if (cuddNextHigh(table, x) > x_high) {
+        moves = ddJumpingUp(table, x, x_low, initial_size);
+        /* after that point x --> x_low unless early termination */
+        if (moves == NULL) goto ddJumpingAuxOutOfMem;
+        /* move backward and stop at best position or accept uphill move */
+        result = siftBackwardProb(table, moves, initial_size, temp);
+        if (!result) goto ddJumpingAuxOutOfMem;
     } else {
-	(void) fprintf(table->err,"Unexpected condition in ddJumping\n");
-	goto ddJumpingAuxOutOfMem;
+        (void) fprintf(table->err, "Unexpected condition in ddJumping\n");
+        goto ddJumpingAuxOutOfMem;
     }
     while (moves != NULL) {
-	move = moves->next;
-	cuddDeallocMove(table, moves);
-	moves = move;
+        move = moves->next;
+        cuddDeallocMove(table, moves);
+        moves = move;
     }
-    return(1);
+    return (1);
 
 ddJumpingAuxOutOfMem:
     while (moves != NULL) {
-	move = moves->next;
-	cuddDeallocMove(table, moves);
-	moves = move;
+        move = moves->next;
+        cuddDeallocMove(table, moves);
+        moves = move;
     }
-    return(0);
+    return (0);
 
 } /* end of ddJumpingAux */
 
@@ -571,48 +570,48 @@ ddJumpingAuxOutOfMem:
   SeeAlso     []
 
 ******************************************************************************/
-static Move *
+static Move*
 ddJumpingUp(
-  DdManager * table,
-  int  x,
-  int  x_low,
-  int  initial_size)
+    DdManager* table,
+    int x,
+    int x_low,
+    int initial_size)
 {
-    Move       *moves;
-    Move       *move;
-    int        y;
-    int        size;
-    int        limit_size = initial_size;
+    Move* moves;
+    Move* move;
+    int y;
+    int size;
+    int limit_size = initial_size;
 
     moves = NULL;
-    y = cuddNextLow(table,x);
+    y = cuddNextLow(table, x);
     while (y >= x_low) {
-	size = cuddSwapInPlace(table,y,x);
-	if (size == 0) goto ddJumpingUpOutOfMem;
-	move = (Move *)cuddDynamicAllocNode(table);
-	if (move == NULL) goto ddJumpingUpOutOfMem;
-	move->x = y;
-	move->y = x;
-	move->size = size;
-	move->next = moves;
-	moves = move;
-	if ((double) size > table->maxGrowth * (double) limit_size) {
-	    break;
-	} else if (size < limit_size) {
-	    limit_size = size;
-	}
-	x = y;
-	y = cuddNextLow(table,x);
+        size = cuddSwapInPlace(table, y, x);
+        if (size == 0) goto ddJumpingUpOutOfMem;
+        move = (Move*) cuddDynamicAllocNode(table);
+        if (move == NULL) goto ddJumpingUpOutOfMem;
+        move->x = y;
+        move->y = x;
+        move->size = size;
+        move->next = moves;
+        moves = move;
+        if ((double) size > table->maxGrowth * (double) limit_size) {
+            break;
+        } else if (size < limit_size) {
+            limit_size = size;
+        }
+        x = y;
+        y = cuddNextLow(table, x);
     }
-    return(moves);
+    return (moves);
 
 ddJumpingUpOutOfMem:
     while (moves != NULL) {
-	move = moves->next;
-	cuddDeallocMove(table, moves);
-	moves = move;
+        move = moves->next;
+        cuddDeallocMove(table, moves);
+        moves = move;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of ddJumpingUp */
 
@@ -630,48 +629,48 @@ ddJumpingUpOutOfMem:
   SeeAlso     []
 
 ******************************************************************************/
-static Move *
+static Move*
 ddJumpingDown(
-  DdManager * table,
-  int  x,
-  int  x_high,
-  int  initial_size)
+    DdManager* table,
+    int x,
+    int x_high,
+    int initial_size)
 {
-    Move       *moves;
-    Move       *move;
-    int        y;
-    int        size;
-    int        limit_size = initial_size;
+    Move* moves;
+    Move* move;
+    int y;
+    int size;
+    int limit_size = initial_size;
 
     moves = NULL;
-    y = cuddNextHigh(table,x);
+    y = cuddNextHigh(table, x);
     while (y <= x_high) {
-	size = cuddSwapInPlace(table,x,y);
-	if (size == 0) goto ddJumpingDownOutOfMem;
-	move = (Move *)cuddDynamicAllocNode(table);
-	if (move == NULL) goto ddJumpingDownOutOfMem;
-	move->x = x;
-	move->y = y;
-	move->size = size;
-	move->next = moves;
-	moves = move;
-	if ((double) size > table->maxGrowth * (double) limit_size) {
-	    break;
-	} else if (size < limit_size) {
-	    limit_size = size;
-	}
-	x = y;
-	y = cuddNextHigh(table,x);
+        size = cuddSwapInPlace(table, x, y);
+        if (size == 0) goto ddJumpingDownOutOfMem;
+        move = (Move*) cuddDynamicAllocNode(table);
+        if (move == NULL) goto ddJumpingDownOutOfMem;
+        move->x = x;
+        move->y = y;
+        move->size = size;
+        move->next = moves;
+        moves = move;
+        if ((double) size > table->maxGrowth * (double) limit_size) {
+            break;
+        } else if (size < limit_size) {
+            limit_size = size;
+        }
+        x = y;
+        y = cuddNextHigh(table, x);
     }
-    return(moves);
+    return (moves);
 
 ddJumpingDownOutOfMem:
     while (moves != NULL) {
-	move = moves->next;
-	cuddDeallocMove(table, moves);
-	moves = move;
+        move = moves->next;
+        cuddDeallocMove(table, moves);
+        moves = move;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of ddJumpingDown */
 
@@ -692,21 +691,21 @@ ddJumpingDownOutOfMem:
 ******************************************************************************/
 static int
 siftBackwardProb(
-  DdManager * table,
-  Move * moves,
-  int  size,
-  double  temp)
+    DdManager* table,
+    Move* moves,
+    int size,
+    double temp)
 {
-    Move   *move;
-    int    res;
-    int    best_size = size;
+    Move* move;
+    int res;
+    int best_size = size;
     double coin, threshold;
 
     /* Look for best size during the last sifting */
     for (move = moves; move != NULL; move = move->next) {
-	if (move->size < best_size) {
-	    best_size = move->size;
-	}
+        if (move->size < best_size) {
+            best_size = move->size;
+        }
     }
 
     /* If best_size equals size, the last sifting did not produce any
@@ -714,17 +713,17 @@ siftBackwardProb(
     ** this change or not.
     */
     if (best_size == size) {
-	coin = random_generator();
+        coin = random_generator();
 #ifdef DD_STATS
-	tosses++;
+        tosses++;
 #endif
-	threshold = exp(-((double)(table->keys - table->isolated - size))/temp);
-	if (coin < threshold) {
+        threshold = exp(-((double) (table->keys - table->isolated - size)) / temp);
+        if (coin < threshold) {
 #ifdef DD_STATS
-	    acceptances++;
+            acceptances++;
 #endif
-	    return(1);
-	}
+            return (1);
+        }
     }
 
     /* Either there was improvement, or we have decided not to
@@ -732,12 +731,12 @@ siftBackwardProb(
     */
     res = table->keys - table->isolated;
     for (move = moves; move != NULL; move = move->next) {
-	if (res == best_size) return(1);
-	res = cuddSwapInPlace(table,(int)move->x,(int)move->y);
-	if (!res) return(0);
+        if (res == best_size) return (1);
+        res = cuddSwapInPlace(table, (int) move->x, (int) move->y);
+        if (!res) return (0);
     }
 
-    return(1);
+    return (1);
 
 } /* end of sift_backward_prob */
 
@@ -756,17 +755,17 @@ siftBackwardProb(
 ******************************************************************************/
 static void
 copyOrder(
-  DdManager * table,
-  int * array,
-  int  lower,
-  int  upper)
+    DdManager* table,
+    int* array,
+    int lower,
+    int upper)
 {
     int i;
     int nvars;
 
     nvars = upper - lower + 1;
     for (i = 0; i < nvars; i++) {
-	array[i] = table->invperm[i+lower];
+        array[i] = table->invperm[i + lower];
     }
 
 } /* end of copyOrder */
@@ -786,28 +785,28 @@ copyOrder(
 ******************************************************************************/
 static int
 restoreOrder(
-  DdManager * table,
-  int * array,
-  int  lower,
-  int  upper)
+    DdManager* table,
+    int* array,
+    int lower,
+    int upper)
 {
     int i, x, y, size;
     int nvars = upper - lower + 1;
 
     for (i = 0; i < nvars; i++) {
-	x = table->perm[array[i]];
+        x = table->perm[array[i]];
 #ifdef DD_DEBUG
-    assert(x >= lower && x <= upper);
+        assert(x >= lower && x <= upper);
 #endif
-	y = cuddNextLow(table,x);
-	while (y >= i + lower) {
-	    size = cuddSwapInPlace(table,y,x);
-	    if (size == 0) return(0);
-	    x = y;
-	    y = cuddNextLow(table,x);
-	}
+        y = cuddNextLow(table, x);
+        while (y >= i + lower) {
+            size = cuddSwapInPlace(table, y, x);
+            if (size == 0) return (0);
+            x = y;
+            y = cuddNextLow(table, x);
+        }
     }
 
-    return(1);
+    return (1);
 
 } /* end of restoreOrder */

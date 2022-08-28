@@ -26,55 +26,54 @@
 #include <common/common.hh>
 #include <stack>
 
-#include <dd/dd.hh>
 #include <cuddInt.h>
+#include <dd/dd.hh>
 
 namespace dd {
 
-typedef enum {
-    DD_WALK_LHS,
-    DD_WALK_RHS,
-    DD_WALK_NODE,
-} dd_entry_point;
+    typedef enum {
+        DD_WALK_LHS,
+        DD_WALK_RHS,
+        DD_WALK_NODE,
+    } dd_entry_point;
 
-// reserved for ADD walkers
-struct add_activation_record {
-    dd_entry_point pc;
-    const DdNode *node;
+    // reserved for ADD walkers
+    struct add_activation_record {
+        dd_entry_point pc;
+        const DdNode* node;
 
-    add_activation_record(const DdNode *dd)
-        : pc(DD_WALK_LHS)
-        , node(dd)
-    {}
-};
-typedef std::stack<struct add_activation_record> add_walker_stack;
+        add_activation_record(const DdNode* dd)
+            : pc(DD_WALK_LHS)
+            , node(dd)
+        {}
+    };
+    typedef std::stack<struct add_activation_record> add_walker_stack;
 
-class DDWalkerException : public Exception
-{
-public:
-    virtual const char* what() const throw() =0;
-};
+    class DDWalkerException: public Exception {
+    public:
+        virtual const char* what() const throw() = 0;
+    };
 
-class ADDWalker {
-public:
-    ADDWalker();
-    virtual ~ADDWalker();
+    class ADDWalker {
+    public:
+        ADDWalker();
+        virtual ~ADDWalker();
 
-    virtual ADDWalker& operator() (ADD dd);
+        virtual ADDWalker& operator()(ADD dd);
 
-protected:
-    virtual void walk();
+    protected:
+        virtual void walk();
 
-    virtual bool condition(const DdNode *node) =0;
-    virtual void action   (const DdNode *node) =0;
+        virtual bool condition(const DdNode* node) = 0;
+        virtual void action(const DdNode* node) = 0;
 
-    virtual void pre_hook() =0;
-    virtual void post_hook() =0;
+        virtual void pre_hook() = 0;
+        virtual void post_hook() = 0;
 
-    /* explicit recursion stack */
-    add_walker_stack f_recursion_stack;
-};
+        /* explicit recursion stack */
+        add_walker_stack f_recursion_stack;
+    };
 
-};
+}; // namespace dd
 
 #endif

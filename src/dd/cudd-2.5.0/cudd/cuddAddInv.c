@@ -51,8 +51,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 
 /*---------------------------------------------------------------------------*/
@@ -112,23 +112,23 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddInv.c,v 1.10 2012/02/05 01:07:18 fa
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addScalarInverse(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * epsilon)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* epsilon)
 {
-    DdNode *res;
+    DdNode* res;
 
     if (!cuddIsConstant(epsilon)) {
-	(void) fprintf(dd->err,"Invalid epsilon\n");
-	return(NULL);
+        (void) fprintf(dd->err, "Invalid epsilon\n");
+        return (NULL);
     }
     do {
-	dd->reordered = 0;
-	res  = cuddAddScalarInverseRecur(dd,f,epsilon);
+        dd->reordered = 0;
+        res = cuddAddScalarInverseRecur(dd, f, epsilon);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addScalarInverse */
 
@@ -148,49 +148,49 @@ Cudd_addScalarInverse(
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddScalarInverseRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * epsilon)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* epsilon)
 {
     DdNode *t, *e, *res;
     CUDD_VALUE_TYPE value;
 
     statLine(dd);
     if (cuddIsConstant(f)) {
-	if (ddAbs(cuddV(f)) < cuddV(epsilon)) return(NULL);
-	value = 1.0 / cuddV(f);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        if (ddAbs(cuddV(f)) < cuddV(epsilon)) return (NULL);
+        value = 1.0 / cuddV(f);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
 
-    res = cuddCacheLookup2(dd,Cudd_addScalarInverse,f,epsilon);
-    if (res != NULL) return(res);
+    res = cuddCacheLookup2(dd, Cudd_addScalarInverse, f, epsilon);
+    if (res != NULL) return (res);
 
-    t = cuddAddScalarInverseRecur(dd,cuddT(f),epsilon);
-    if (t == NULL) return(NULL);
+    t = cuddAddScalarInverseRecur(dd, cuddT(f), epsilon);
+    if (t == NULL) return (NULL);
     cuddRef(t);
 
-    e = cuddAddScalarInverseRecur(dd,cuddE(f),epsilon);
+    e = cuddAddScalarInverseRecur(dd, cuddE(f), epsilon);
     if (e == NULL) {
-	Cudd_RecursiveDeref(dd, t);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        return (NULL);
     }
     cuddRef(e);
 
-    res = (t == e) ? t : cuddUniqueInter(dd,(int)f->index,t,e);
+    res = (t == e) ? t : cuddUniqueInter(dd, (int) f->index, t, e);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, t);
-	Cudd_RecursiveDeref(dd, e);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        Cudd_RecursiveDeref(dd, e);
+        return (NULL);
     }
     cuddDeref(t);
     cuddDeref(e);
 
-    cuddCacheInsert2(dd,Cudd_addScalarInverse,f,epsilon,res);
+    cuddCacheInsert2(dd, Cudd_addScalarInverse, f, epsilon, res);
 
-    return(res);
+    return (res);
 
 } /* end of cuddAddScalarInverseRecur */
 

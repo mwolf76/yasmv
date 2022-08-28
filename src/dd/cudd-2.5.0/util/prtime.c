@@ -1,7 +1,7 @@
 /* LINTLIBRARY */
 
-#include <stdio.h>
 #include "util.h"
+#include <stdio.h>
 
 
 /*
@@ -11,11 +11,10 @@
  *  Hack for IBM/PC -- avoids using floating point
  */
 
-char *
-util_print_time(unsigned long t)
+char* util_print_time(unsigned long t)
 {
     static char s[40];
 
-    (void) sprintf(s, "%lu.%02lu sec", t/1000, (t%1000)/10);
+    (void) sprintf(s, "%lu.%02lu sec", t / 1000, (t % 1000) / 10);
     return s;
 }

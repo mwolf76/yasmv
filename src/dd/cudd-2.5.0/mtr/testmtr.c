@@ -46,8 +46,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "mtr.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Variable declarations                                                     */
@@ -61,7 +61,7 @@ static char rcsid[] MTR_UNUSED = "$Id: testmtr.c,v 1.5 2012/02/05 06:10:35 fabio
 /* Constant declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
-#define TESTMTR_VERSION\
+#define TESTMTR_VERSION \
     "TestMtr Version #0.6, Release date 2/6/12"
 
 /**AutomaticStart*************************************************************/
@@ -70,8 +70,8 @@ static char rcsid[] MTR_UNUSED = "$Id: testmtr.c,v 1.5 2012/02/05 06:10:35 fabio
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static void usage (char *prog);
-static FILE * open_file (const char *filename, const char *mode);
+static void usage(char* prog);
+static FILE* open_file(const char* filename, const char* mode);
 
 /**AutomaticEnd***************************************************************/
 
@@ -92,51 +92,50 @@ static FILE * open_file (const char *filename, const char *mode);
   SeeAlso     []
 
 ******************************************************************************/
-int
-main(
-  int  argc,
-  char ** argv)
+int main(
+    int argc,
+    char** argv)
 {
     MtrNode *root,
-	    *node;
-    int	    i,
-	    c,
-	    pr = 0;
-    FILE    *fp;
-    const char *file = NULL;
+        *node;
+    int i,
+        c,
+        pr = 0;
+    FILE* fp;
+    const char* file = NULL;
 
     (void) printf("# %s\n", TESTMTR_VERSION);
     /* Echo command line and arguments. */
     (void) printf("#");
-    for(i = 0; i < argc; i++) {
-	(void) printf(" %s", argv[i]);
+    for (i = 0; i < argc; i++) {
+        (void) printf(" %s", argv[i]);
     }
     (void) printf("\n");
     (void) fflush(stdout);
 
     while ((c = getopt(argc, argv, "Mhp:")) != EOF) {
-	switch(c) {
-	case 'M':
+        switch (c) {
+            case 'M':
 #ifdef MNEMOSYNE
-	    (void) mnem_setrecording(0);
+                (void) mnem_setrecording(0);
 #endif
-	    break;
-	case 'p':
-	    pr = atoi(optarg);
-	    break;
-	case 'h':
-	default:
-	    usage(argv[0]);
-	    break;
-	}
+                break;
+            case 'p':
+                pr = atoi(optarg);
+                break;
+            case 'h':
+            default:
+                usage(argv[0]);
+                break;
+        }
     }
 
     if (argc - optind == 0) {
-	file = "-";
+        file = "-";
     } else if (argc - optind == 1) {
-	file = argv[optind];
+        file = argv[optind];
     } else {
-	usage(argv[0]);
+        usage(argv[0]);
     }
 
     /* Create and print a simple tree. */
@@ -150,58 +149,74 @@ main(
     node->flags = 3;
     node = Mtr_AllocNode();
     node->flags = 4;
-    Mtr_MakeNextSibling(root->child,node);
+    Mtr_MakeNextSibling(root->child, node);
     Mtr_PrintTree(root);
     Mtr_FreeTree(root);
     (void) printf("#------------------------\n");
 
     /* Create an initial tree in which all variables belong to one group. */
-    root = Mtr_InitGroupTree(0,12);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
-    node = Mtr_MakeGroup(root,0,6,MTR_DEFAULT);
-    node = Mtr_MakeGroup(root,6,6,MTR_DEFAULT);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
-    for (i = 0; i < 6; i+=2) {
-	node = Mtr_MakeGroup(root,(unsigned) i,(unsigned) 2,MTR_DEFAULT);
+    root = Mtr_InitGroupTree(0, 12);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
+    node = Mtr_MakeGroup(root, 0, 6, MTR_DEFAULT);
+    node = Mtr_MakeGroup(root, 6, 6, MTR_DEFAULT);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
+    for (i = 0; i < 6; i += 2) {
+        node = Mtr_MakeGroup(root, (unsigned) i, (unsigned) 2, MTR_DEFAULT);
     }
-    node = Mtr_MakeGroup(root,0,12,MTR_FIXED);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
+    node = Mtr_MakeGroup(root, 0, 12, MTR_FIXED);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
     /* Print a partial tree. */
     (void) printf("#  ");
-    Mtr_PrintGroups(root->child,pr == 0); (void) printf("\n");
-    node = Mtr_FindGroup(root,0,6);
+    Mtr_PrintGroups(root->child, pr == 0);
+    (void) printf("\n");
+    node = Mtr_FindGroup(root, 0, 6);
     node = Mtr_DissolveGroup(node);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
-    node = Mtr_FindGroup(root,4,2);
-    if (!Mtr_SwapGroups(node,node->younger)) {
-	(void) printf("error in Mtr_SwapGroups\n");
-	exit(3);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
+    node = Mtr_FindGroup(root, 4, 2);
+    if (!Mtr_SwapGroups(node, node->younger)) {
+        (void) printf("error in Mtr_SwapGroups\n");
+        exit(3);
     }
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
     Mtr_FreeTree(root);
     (void) printf("#------------------------\n");
 
     /* Create a group tree with fixed subgroups. */
-    root = Mtr_InitGroupTree(0,4);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
-    node = Mtr_MakeGroup(root,0,2,MTR_FIXED);
-    node = Mtr_MakeGroup(root,2,2,MTR_FIXED);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
+    root = Mtr_InitGroupTree(0, 4);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
+    node = Mtr_MakeGroup(root, 0, 2, MTR_FIXED);
+    node = Mtr_MakeGroup(root, 2, 2, MTR_FIXED);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
     Mtr_FreeTree(root);
     (void) printf("#------------------------\n");
 
     /* Open input file. */
     fp = open_file(file, "r");
-    root = Mtr_ReadGroups(fp,12);
-    Mtr_PrintTree(root); (void) printf("#  ");
-    Mtr_PrintGroups(root,pr == 0); (void) printf("\n");
+    root = Mtr_ReadGroups(fp, 12);
+    Mtr_PrintTree(root);
+    (void) printf("#  ");
+    Mtr_PrintGroups(root, pr == 0);
+    (void) printf("\n");
 
     Mtr_FreeTree(root);
 
@@ -228,7 +243,7 @@ main(
 ******************************************************************************/
 static void
 usage(
-  char * prog)
+    char* prog)
 {
     (void) fprintf(stderr, "usage: %s [options] [file]\n", prog);
     (void) fprintf(stderr, "   -M\t\tturns off memory allocation recording\n");
@@ -251,12 +266,12 @@ usage(
   SeeAlso     []
 
 ******************************************************************************/
-static FILE *
+static FILE*
 open_file(
-  const char * filename,
-  const char * mode)
+    const char* filename,
+    const char* mode)
 {
-    FILE *fp;
+    FILE* fp;
 
     if (strcmp(filename, "-") == 0) {
         return mode[0] == 'r' ? stdin : stdout;
@@ -264,6 +279,6 @@ open_file(
         perror(filename);
         exit(1);
     }
-    return(fp);
+    return (fp);
 
 } /* end of open_file */

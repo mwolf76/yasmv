@@ -22,12 +22,11 @@
  */
 
 /* ARGSUSED */
-int
-util_pipefork(
-  char * const *argv,		/* normal argv argument list */
-  FILE **toCommand,	/* pointer to the sending stream */
-  FILE **fromCommand,	/* pointer to the reading stream */
-  int *pid)
+int util_pipefork(
+    char* const* argv,  /* normal argv argument list */
+    FILE** toCommand,   /* pointer to the sending stream */
+    FILE** fromCommand, /* pointer to the reading stream */
+    int* pid)
 {
 #ifdef UNIX
     int forkpid, waitPid;
@@ -39,27 +38,27 @@ util_pipefork(
      * fildes[0] for reading from command
      * fildes[1] for writing to command
      */
-    if (pipe(topipe)) return(0);
-    if (pipe(frompipe)) return(0);
+    if (pipe(topipe)) return (0);
+    if (pipe(frompipe)) return (0);
 
 #ifdef __CYGWIN32__
     if ((forkpid = fork()) == 0) {
 #else
     if ((forkpid = vfork()) == 0) {
 #endif
-	/* child here, connect the pipes */
-	(void) dup2(topipe[0], fileno(stdin));
-	(void) dup2(frompipe[1], fileno(stdout));
+        /* child here, connect the pipes */
+        (void) dup2(topipe[0], fileno(stdin));
+        (void) dup2(frompipe[1], fileno(stdout));
 
-	(void) close(topipe[0]);
-	(void) close(topipe[1]);
-	(void) close(frompipe[0]);
-	(void) close(frompipe[1]);
+        (void) close(topipe[0]);
+        (void) close(topipe[1]);
+        (void) close(frompipe[0]);
+        (void) close(frompipe[1]);
 
-	(void) execvp(argv[0], argv);
-	(void) sprintf(buffer, "util_pipefork: can not exec %s", argv[0]);
-	perror(buffer);
-	(void) _exit(1);
+        (void) execvp(argv[0], argv);
+        (void) sprintf(buffer, "util_pipefork: can not exec %s", argv[0]);
+        perror(buffer);
+        (void) _exit(1);
     }
 
     if (pid) {
@@ -74,20 +73,20 @@ util_pipefork(
 
     /* parent here, use slimey vfork() semantics to get return status */
     if (waitPid == forkpid && WIFEXITED(status)) {
-	return 0;
+        return 0;
     }
     if ((*toCommand = fdopen(topipe[1], "w")) == NULL) {
-	return 0;
+        return 0;
     }
     if ((*fromCommand = fdopen(frompipe[0], "r")) == NULL) {
-	return 0;
+        return 0;
     }
     (void) close(topipe[0]);
     (void) close(frompipe[1]);
     return 1;
 #else
     (void) fprintf(stderr,
-	"util_pipefork: not implemented on your operating system\n");
+                   "util_pipefork: not implemented on your operating system\n");
     return 0;
 #endif
 }

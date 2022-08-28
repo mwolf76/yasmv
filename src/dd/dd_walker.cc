@@ -26,71 +26,69 @@
 
 namespace dd {
 
-/* --- ADD Walker ----------------------------------------------------------- */
-ADDWalker::ADDWalker()
-{}
+    /* --- ADD Walker ----------------------------------------------------------- */
+    ADDWalker::ADDWalker()
+    {}
 
-ADDWalker::~ADDWalker()
-{}
+    ADDWalker::~ADDWalker()
+    {}
 
-ADDWalker& ADDWalker::operator() (ADD dd)
-{
-    /* setup toplevel act. record and perform walk. */
-    add_activation_record call
-        (dd.getNode());
-    f_recursion_stack.push(call);
+    ADDWalker& ADDWalker::operator()(ADD dd)
+    {
+        /* setup toplevel act. record and perform walk. */
+        add_activation_record call(dd.getNode());
+        f_recursion_stack.push(call);
 
-    /* actions before the walk */
-    pre_hook();
+        /* actions before the walk */
+        pre_hook();
 
-    walk();
+        walk();
 
-    /* actions after the walk */
-    post_hook();
+        /* actions after the walk */
+        post_hook();
 
-    return *this;
-}
+        return *this;
+    }
 
-/* post-order visit strategy */
-void ADDWalker::walk ()
-{
-    while(0 != f_recursion_stack.size()) {
-    loop:
-        add_activation_record curr
-            (f_recursion_stack.top());
-        assert (!Cudd_IsComplement(curr.node));
+    /* post-order visit strategy */
+    void ADDWalker::walk()
+    {
+        while (0 != f_recursion_stack.size()) {
+        loop:
+            add_activation_record curr(f_recursion_stack.top());
+            assert(!Cudd_IsComplement(curr.node));
 
-        register const DdNode *node
-            (curr.node);
+            register const DdNode* node(curr.node);
 
-        /* leaves have no children */
-        if (cuddIsConstant(node))
-            curr.pc = DD_WALK_NODE;
+            /* leaves have no children */
+            if (cuddIsConstant(node))
+                curr.pc = DD_WALK_NODE;
 
-        // restore caller location (simulate call return behavior)
-        switch(curr.pc) {
-        case DD_WALK_LHS:
-            /* recur in THEN */
-            f_recursion_stack.top().pc = DD_WALK_RHS;
-            f_recursion_stack.push( add_activation_record( cuddT(node)));
-            goto loop;
+            // restore caller location (simulate call return behavior)
+            switch (curr.pc) {
+                case DD_WALK_LHS:
+                    /* recur in THEN */
+                    f_recursion_stack.top().pc = DD_WALK_RHS;
+                    f_recursion_stack.push(add_activation_record(cuddT(node)));
+                    goto loop;
 
-        case DD_WALK_RHS:
-            /* recur in ELSE */
-            f_recursion_stack.top().pc = DD_WALK_NODE;
-            f_recursion_stack.push( add_activation_record( cuddE(node)));
-            goto loop;
+                case DD_WALK_RHS:
+                    /* recur in ELSE */
+                    f_recursion_stack.top().pc = DD_WALK_NODE;
+                    f_recursion_stack.push(add_activation_record(cuddE(node)));
+                    goto loop;
 
-        case DD_WALK_NODE:
-            /* process node in post-order. */
-            if (condition(node))
-                action(node);
-            f_recursion_stack.pop();
-            break;
+                case DD_WALK_NODE:
+                    /* process node in post-order. */
+                    if (condition(node))
+                        action(node);
+                    f_recursion_stack.pop();
+                    break;
 
-        default: assert( false ); // unexpected
-        } /* switch() */
-    } // while
-}
+                default:
+                    assert(false); // unexpected
+            }                      /* switch() */
+        }                          // while
+    }
 
-};
+}; // namespace dd

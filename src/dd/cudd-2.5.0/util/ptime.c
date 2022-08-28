@@ -2,8 +2,7 @@
 #include "util.h"
 
 /* backwards compatibility */
-long
-ptime()
+long ptime()
 {
     return util_cpu_time();
 }

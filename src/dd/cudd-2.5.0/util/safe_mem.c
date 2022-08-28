@@ -1,7 +1,7 @@
 /* LINTLIBRARY */
 
-#include <stdio.h>
 #include "util.h"
+#include <stdio.h>
 
 /*
  *  These are interface routines to be placed between a program and the
@@ -25,9 +25,9 @@
 extern "C" {
 #endif
 
-extern char *MMalloc(long);
+extern char* MMalloc(long);
 extern void MMout_of_memory(long);
-extern char *MMrealloc(char *, long);
+extern char* MMrealloc(char*, long);
 
 void (*MMoutOfMemory)(long) = MMout_of_memory;
 
@@ -37,61 +37,57 @@ void (*MMoutOfMemory)(long) = MMout_of_memory;
 
 
 /* MMout_of_memory -- out of memory for lazy people, flush and exit */
-void
-MMout_of_memory(long size)
+void MMout_of_memory(long size)
 {
     (void) fflush(stdout);
     (void) fprintf(stderr, "\nout of memory allocating %lu bytes\n",
-		   (unsigned long) size);
+                   (unsigned long) size);
     exit(1);
 }
 
 
-char *
-MMalloc(long size)
+char* MMalloc(long size)
 {
-    char *p;
+    char* p;
 
 #ifdef IBMPC
     if (size > 65000L) {
-	if (MMoutOfMemory != (void (*)(long)) 0 ) (*MMoutOfMemory)(size);
-	return NIL(char);
+        if (MMoutOfMemory != (void (*)(long)) 0) (*MMoutOfMemory)(size);
+        return NIL(char);
     }
 #endif
     if (size == 0) size = sizeof(long);
-    if ((p = (char *) malloc((unsigned long) size)) == NIL(char)) {
-	if (MMoutOfMemory != 0 ) (*MMoutOfMemory)(size);
-	return NIL(char);
+    if ((p = (char*) malloc((unsigned long) size)) == NIL(char)) {
+        if (MMoutOfMemory != 0) (*MMoutOfMemory)(size);
+        return NIL(char);
     }
     return p;
 }
 
 
-char *
-MMrealloc(char *obj, long size)
+char* MMrealloc(char* obj, long size)
 {
-    char *p;
+    char* p;
 
 #ifdef IBMPC
     if (size > 65000L) {
-	if (MMoutOfMemory != 0 ) (*MMoutOfMemory)(size);
-	return NIL(char);
+        if (MMoutOfMemory != 0) (*MMoutOfMemory)(size);
+        return NIL(char);
     }
 #endif
     if (obj == NIL(char)) return MMalloc(size);
     if (size <= 0) size = sizeof(long);
-    if ((p = (char *) realloc(obj, (unsigned long) size)) == NIL(char)) {
-	if (MMoutOfMemory != 0 ) (*MMoutOfMemory)(size);
-	return NIL(char);
+    if ((p = (char*) realloc(obj, (unsigned long) size)) == NIL(char)) {
+        if (MMoutOfMemory != 0) (*MMoutOfMemory)(size);
+        return NIL(char);
     }
     return p;
 }
 
 
-void
-MMfree(char *obj)
+void MMfree(char* obj)
 {
     if (obj != 0) {
-	free(obj);
+        free(obj);
     }
 }

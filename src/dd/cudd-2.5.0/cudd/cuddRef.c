@@ -65,8 +65,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -121,9 +121,8 @@ static char rcsid[] DD_UNUSED = "$Id: cuddRef.c,v 1.29 2012/02/05 01:07:19 fabio
   SeeAlso     [Cudd_RecursiveDeref Cudd_Deref]
 
 ******************************************************************************/
-void
-Cudd_Ref(
-  DdNode * n)
+void Cudd_Ref(
+    DdNode* n)
 {
 
     n = Cudd_Regular(n);
@@ -146,47 +145,46 @@ Cudd_Ref(
   SeeAlso     [Cudd_Deref Cudd_Ref Cudd_RecursiveDerefZdd]
 
 ******************************************************************************/
-void
-Cudd_RecursiveDeref(
-  DdManager * table,
-  DdNode * n)
+void Cudd_RecursiveDeref(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack = table->stack;
+    DdNodePtr* stack = table->stack;
     int SP = 1;
 
     unsigned int live = table->keys - table->dead;
     if (live > table->peakLiveNodes) {
-	table->peakLiveNodes = live;
+        table->peakLiveNodes = live;
     }
 
     N = Cudd_Regular(n);
 
     do {
 #ifdef DD_DEBUG
-	assert(N->ref != 0);
+        assert(N->ref != 0);
 #endif
 
-	if (N->ref == 1) {
-	    N->ref = 0;
-	    table->dead++;
+        if (N->ref == 1) {
+            N->ref = 0;
+            table->dead++;
 #ifdef DD_STATS
-	    table->nodesDropped++;
+            table->nodesDropped++;
 #endif
-	    if (cuddIsConstant(N)) {
-		table->constants.dead++;
-		N = stack[--SP];
-	    } else {
-		ord = table->perm[N->index];
-		stack[SP++] = Cudd_Regular(cuddE(N));
-		table->subtables[ord].dead++;
-		N = cuddT(N);
-	    }
-	} else {
-	    cuddSatDec(N->ref);
-	    N = stack[--SP];
-	}
+            if (cuddIsConstant(N)) {
+                table->constants.dead++;
+                N = stack[--SP];
+            } else {
+                ord = table->perm[N->index];
+                stack[SP++] = Cudd_Regular(cuddE(N));
+                table->subtables[ord].dead++;
+                N = cuddT(N);
+            }
+        } else {
+            cuddSatDec(N->ref);
+            N = stack[--SP];
+        }
     } while (SP != 0);
 
 } /* end of Cudd_RecursiveDeref */
@@ -209,42 +207,41 @@ Cudd_RecursiveDeref(
   SeeAlso     [Cudd_RecursiveDeref Cudd_DelayedDerefBdd]
 
 ******************************************************************************/
-void
-Cudd_IterDerefBdd(
-  DdManager * table,
-  DdNode * n)
+void Cudd_IterDerefBdd(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack = table->stack;
+    DdNodePtr* stack = table->stack;
     int SP = 1;
 
     unsigned int live = table->keys - table->dead;
     if (live > table->peakLiveNodes) {
-	table->peakLiveNodes = live;
+        table->peakLiveNodes = live;
     }
 
     N = Cudd_Regular(n);
 
     do {
 #ifdef DD_DEBUG
-	assert(N->ref != 0);
+        assert(N->ref != 0);
 #endif
 
-	if (N->ref == 1) {
-	    N->ref = 0;
-	    table->dead++;
+        if (N->ref == 1) {
+            N->ref = 0;
+            table->dead++;
 #ifdef DD_STATS
-	    table->nodesDropped++;
+            table->nodesDropped++;
 #endif
-	    ord = table->perm[N->index];
-	    stack[SP++] = Cudd_Regular(cuddE(N));
-	    table->subtables[ord].dead++;
-	    N = cuddT(N);
-	} else {
-	    cuddSatDec(N->ref);
-	    N = stack[--SP];
-	}
+            ord = table->perm[N->index];
+            stack[SP++] = Cudd_Regular(cuddE(N));
+            table->subtables[ord].dead++;
+            N = cuddT(N);
+        } else {
+            cuddSatDec(N->ref);
+            N = stack[--SP];
+        }
     } while (SP != 0);
 
 } /* end of Cudd_IterDerefBdd */
@@ -266,19 +263,18 @@ Cudd_IterDerefBdd(
   SeeAlso     [Cudd_RecursiveDeref Cudd_IterDerefBdd]
 
 ******************************************************************************/
-void
-Cudd_DelayedDerefBdd(
-  DdManager * table,
-  DdNode * n)
+void Cudd_DelayedDerefBdd(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack;
+    DdNodePtr* stack;
     int SP;
 
     unsigned int live = table->keys - table->dead;
     if (live > table->peakLiveNodes) {
-	table->peakLiveNodes = live;
+        table->peakLiveNodes = live;
     }
 
     n = Cudd_Regular(n);
@@ -291,10 +287,10 @@ Cudd_DelayedDerefBdd(
 #else
     if (cuddIsConstant(n) || n->ref > 1) {
 #ifdef DD_DEBUG
-	assert(n->ref != 1 && (!cuddIsConstant(n) || n == DD_ONE(table)));
+        assert(n->ref != 1 && (!cuddIsConstant(n) || n == DD_ONE(table)));
 #endif
-	cuddSatDec(n->ref);
-	return;
+        cuddSatDec(n->ref);
+        return;
     }
 
     N = table->deathRow[table->nextDead];
@@ -302,36 +298,36 @@ Cudd_DelayedDerefBdd(
     if (N != NULL) {
 #endif
 #ifdef DD_DEBUG
-	assert(!Cudd_IsComplement(N));
+    assert(!Cudd_IsComplement(N));
 #endif
-	stack = table->stack;
-	SP = 1;
-	do {
+    stack = table->stack;
+    SP = 1;
+    do {
 #ifdef DD_DEBUG
-	    assert(N->ref != 0);
+        assert(N->ref != 0);
 #endif
-	    if (N->ref == 1) {
-		N->ref = 0;
-		table->dead++;
+        if (N->ref == 1) {
+            N->ref = 0;
+            table->dead++;
 #ifdef DD_STATS
-		table->nodesDropped++;
+            table->nodesDropped++;
 #endif
-		ord = table->perm[N->index];
-		stack[SP++] = Cudd_Regular(cuddE(N));
-		table->subtables[ord].dead++;
-		N = cuddT(N);
-	    } else {
-		cuddSatDec(N->ref);
-		N = stack[--SP];
-	    }
-	} while (SP != 0);
+            ord = table->perm[N->index];
+            stack[SP++] = Cudd_Regular(cuddE(N));
+            table->subtables[ord].dead++;
+            N = cuddT(N);
+        } else {
+            cuddSatDec(N->ref);
+            N = stack[--SP];
+        }
+    } while (SP != 0);
 #ifndef DD_NO_DEATH_ROW
-    }
-    table->deathRow[table->nextDead] = n;
+}
+table->deathRow[table->nextDead] = n;
 
-    /* Udate insertion point. */
-    table->nextDead++;
-    table->nextDead &= table->deadMask;
+/* Udate insertion point. */
+table->nextDead++;
+table->nextDead &= table->deadMask;
 #if 0
     if (table->nextDead == table->deathRowDepth) {
 	if (table->deathRowDepth < table->looseUpTo / 2) {
@@ -377,40 +373,39 @@ Cudd_DelayedDerefBdd(
   SeeAlso     [Cudd_Deref Cudd_Ref Cudd_RecursiveDeref]
 
 ******************************************************************************/
-void
-Cudd_RecursiveDerefZdd(
-  DdManager * table,
-  DdNode * n)
+void Cudd_RecursiveDerefZdd(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack = table->stack;
+    DdNodePtr* stack = table->stack;
     int SP = 1;
 
     N = n;
 
     do {
 #ifdef DD_DEBUG
-	assert(N->ref != 0);
+        assert(N->ref != 0);
 #endif
 
-	cuddSatDec(N->ref);
+        cuddSatDec(N->ref);
 
-	if (N->ref == 0) {
-	    table->deadZ++;
+        if (N->ref == 0) {
+            table->deadZ++;
 #ifdef DD_STATS
-	    table->nodesDropped++;
+            table->nodesDropped++;
 #endif
 #ifdef DD_DEBUG
-	    assert(!cuddIsConstant(N));
+            assert(!cuddIsConstant(N));
 #endif
-	    ord = table->permZ[N->index];
-	    stack[SP++] = cuddE(N);
-	    table->subtableZ[ord].dead++;
-	    N = cuddT(N);
-	} else {
-	    N = stack[--SP];
-	}
+            ord = table->permZ[N->index];
+            stack[SP++] = cuddE(N);
+            table->subtableZ[ord].dead++;
+            N = cuddT(N);
+        } else {
+            N = stack[--SP];
+        }
     } while (SP != 0);
 
 } /* end of Cudd_RecursiveDerefZdd */
@@ -430,9 +425,8 @@ Cudd_RecursiveDerefZdd(
   SeeAlso     [Cudd_RecursiveDeref Cudd_RecursiveDerefZdd Cudd_Ref]
 
 ******************************************************************************/
-void
-Cudd_Deref(
-  DdNode * node)
+void Cudd_Deref(
+    DdNode* node)
 {
     node = Cudd_Regular(node);
     cuddSatDec(node->ref);
@@ -458,17 +452,16 @@ Cudd_Deref(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_CheckZeroRef(
-  DdManager * manager)
+int Cudd_CheckZeroRef(
+    DdManager* manager)
 {
     int size;
     int i, j;
-    int remain;	/* the expected number of remaining references to one */
-    DdNodePtr *nodelist;
-    DdNode *node;
-    DdNode *sentinel = &(manager->sentinel);
-    DdSubtable *subtable;
+    int remain; /* the expected number of remaining references to one */
+    DdNodePtr* nodelist;
+    DdNode* node;
+    DdNode* sentinel = &(manager->sentinel);
+    DdSubtable* subtable;
     int count = 0;
     int index;
 
@@ -479,53 +472,53 @@ Cudd_CheckZeroRef(
     /* First look at the BDD/ADD subtables. */
     remain = 1; /* reference from the manager */
     size = manager->size;
-    remain += 2 * size;	/* reference from the BDD projection functions */
+    remain += 2 * size; /* reference from the BDD projection functions */
 
     for (i = 0; i < size; i++) {
-	subtable = &(manager->subtables[i]);
-	nodelist = subtable->nodelist;
-	for (j = 0; (unsigned) j < subtable->slots; j++) {
-	    node = nodelist[j];
-	    while (node != sentinel) {
-		if (node->ref != 0 && node->ref != DD_MAXREF) {
-		    index = (int) node->index;
-		    if (node != manager->vars[index]) {
-			count++;
-		    } else {
-			if (node->ref != 1) {
-			    count++;
-			}
-		    }
-		}
-		node = node->next;
-	    }
-	}
+        subtable = &(manager->subtables[i]);
+        nodelist = subtable->nodelist;
+        for (j = 0; (unsigned) j < subtable->slots; j++) {
+            node = nodelist[j];
+            while (node != sentinel) {
+                if (node->ref != 0 && node->ref != DD_MAXREF) {
+                    index = (int) node->index;
+                    if (node != manager->vars[index]) {
+                        count++;
+                    } else {
+                        if (node->ref != 1) {
+                            count++;
+                        }
+                    }
+                }
+                node = node->next;
+            }
+        }
     }
 
     /* Then look at the ZDD subtables. */
     size = manager->sizeZ;
     if (size) /* references from ZDD universe */
-	remain += 2;
+        remain += 2;
 
     for (i = 0; i < size; i++) {
-	subtable = &(manager->subtableZ[i]);
-	nodelist = subtable->nodelist;
-	for (j = 0; (unsigned) j < subtable->slots; j++) {
-	    node = nodelist[j];
-	    while (node != NULL) {
-		if (node->ref != 0 && node->ref != DD_MAXREF) {
-		    index = (int) node->index;
-		    if (node == manager->univ[manager->permZ[index]]) {
-			if (node->ref > 2) {
-			    count++;
-			}
-		    } else {
-			count++;
-		    }
-		}
-		node = node->next;
-	    }
-	}
+        subtable = &(manager->subtableZ[i]);
+        nodelist = subtable->nodelist;
+        for (j = 0; (unsigned) j < subtable->slots; j++) {
+            node = nodelist[j];
+            while (node != NULL) {
+                if (node->ref != 0 && node->ref != DD_MAXREF) {
+                    index = (int) node->index;
+                    if (node == manager->univ[manager->permZ[index]]) {
+                        if (node->ref > 2) {
+                            count++;
+                        }
+                    } else {
+                        count++;
+                    }
+                }
+                node = node->next;
+            }
+        }
     }
 
     /* Now examine the constant table. Plusinfinity, minusinfinity, and
@@ -535,25 +528,25 @@ Cudd_CheckZeroRef(
     */
     nodelist = manager->constants.nodelist;
     for (j = 0; (unsigned) j < manager->constants.slots; j++) {
-	node = nodelist[j];
-	while (node != NULL) {
-	    if (node->ref != 0 && node->ref != DD_MAXREF) {
-		if (node == manager->one) {
-		    if ((int) node->ref != remain) {
-			count++;
-		    }
-		} else if (node == manager->zero) {
-		    if (node->ref != 1) {
-			count++;
-		    }
-		} else {
-		    count++;
-		}
-	    }
-	    node = node->next;
-	}
+        node = nodelist[j];
+        while (node != NULL) {
+            if (node->ref != 0 && node->ref != DD_MAXREF) {
+                if (node == manager->one) {
+                    if ((int) node->ref != remain) {
+                        count++;
+                    }
+                } else if (node == manager->zero) {
+                    if (node->ref != 1) {
+                        count++;
+                    }
+                } else {
+                    count++;
+                }
+            }
+            node = node->next;
+        }
     }
-    return(count);
+    return (count);
 
 } /* end of Cudd_CheckZeroRef */
 
@@ -574,14 +567,13 @@ Cudd_CheckZeroRef(
   SeeAlso     [cuddReclaimZdd]
 
 ******************************************************************************/
-void
-cuddReclaim(
-  DdManager * table,
-  DdNode * n)
+void cuddReclaim(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack = table->stack;
+    DdNodePtr* stack = table->stack;
     int SP = 1;
     double initialDead = table->dead;
 
@@ -592,22 +584,22 @@ cuddReclaim(
 #endif
 
     do {
-	if (N->ref == 0) {
-	    N->ref = 1;
-	    table->dead--;
-	    if (cuddIsConstant(N)) {
-		table->constants.dead--;
-		N = stack[--SP];
-	    } else {
-		ord = table->perm[N->index];
-		stack[SP++] = Cudd_Regular(cuddE(N));
-		table->subtables[ord].dead--;
-		N = cuddT(N);
-	    }
-	} else {
-	    cuddSatInc(N->ref);
-	    N = stack[--SP];
-	}
+        if (N->ref == 0) {
+            N->ref = 1;
+            table->dead--;
+            if (cuddIsConstant(N)) {
+                table->constants.dead--;
+                N = stack[--SP];
+            } else {
+                ord = table->perm[N->index];
+                stack[SP++] = Cudd_Regular(cuddE(N));
+                table->subtables[ord].dead--;
+                N = cuddT(N);
+            }
+        } else {
+            cuddSatInc(N->ref);
+            N = stack[--SP];
+        }
     } while (SP != 0);
 
     N = Cudd_Regular(n);
@@ -628,14 +620,13 @@ cuddReclaim(
   SeeAlso     [cuddReclaim]
 
 ******************************************************************************/
-void
-cuddReclaimZdd(
-  DdManager * table,
-  DdNode * n)
+void cuddReclaimZdd(
+    DdManager* table,
+    DdNode* n)
 {
-    DdNode *N;
+    DdNode* N;
     int ord;
-    DdNodePtr *stack = table->stack;
+    DdNodePtr* stack = table->stack;
     int SP = 1;
 
     N = n;
@@ -645,21 +636,21 @@ cuddReclaimZdd(
 #endif
 
     do {
-	cuddSatInc(N->ref);
+        cuddSatInc(N->ref);
 
-	if (N->ref == 1) {
-	    table->deadZ--;
-	    table->reclaimed++;
+        if (N->ref == 1) {
+            table->deadZ--;
+            table->reclaimed++;
 #ifdef DD_DEBUG
-	    assert(!cuddIsConstant(N));
+            assert(!cuddIsConstant(N));
 #endif
-	    ord = table->permZ[N->index];
-	    stack[SP++] = cuddE(N);
-	    table->subtableZ[ord].dead--;
-	    N = cuddT(N);
-	} else {
-	    N = stack[--SP];
-	}
+            ord = table->permZ[N->index];
+            stack[SP++] = cuddE(N);
+            table->subtableZ[ord].dead--;
+            N = cuddT(N);
+        } else {
+            N = stack[--SP];
+        }
     } while (SP != 0);
 
     cuddSatDec(n->ref);
@@ -678,26 +669,25 @@ cuddReclaimZdd(
   SeeAlso     [cuddClearDeathRow]
 
 ******************************************************************************/
-void
-cuddShrinkDeathRow(
-  DdManager *table)
+void cuddShrinkDeathRow(
+    DdManager* table)
 {
 #ifndef DD_NO_DEATH_ROW
     int i;
 
     if (table->deathRowDepth > 3) {
-	for (i = table->deathRowDepth/4; i < table->deathRowDepth; i++) {
-	    if (table->deathRow[i] == NULL) break;
-	    Cudd_IterDerefBdd(table,table->deathRow[i]);
-	    table->deathRow[i] = NULL;
-	}
-	table->deathRowDepth /= 4;
-	table->deadMask = table->deathRowDepth - 1;
-	if ((unsigned) table->nextDead > table->deadMask) {
-	    table->nextDead = 0;
-	}
-	table->deathRow = REALLOC(DdNodePtr, table->deathRow,
-				   table->deathRowDepth);
+        for (i = table->deathRowDepth / 4; i < table->deathRowDepth; i++) {
+            if (table->deathRow[i] == NULL) break;
+            Cudd_IterDerefBdd(table, table->deathRow[i]);
+            table->deathRow[i] = NULL;
+        }
+        table->deathRowDepth /= 4;
+        table->deadMask = table->deathRowDepth - 1;
+        if ((unsigned) table->nextDead > table->deadMask) {
+            table->nextDead = 0;
+        }
+        table->deathRow = REALLOC(DdNodePtr, table->deathRow,
+                                  table->deathRowDepth);
     }
 #endif
 
@@ -716,21 +706,20 @@ cuddShrinkDeathRow(
   cuddGarbageCollect]
 
 ******************************************************************************/
-void
-cuddClearDeathRow(
-  DdManager *table)
+void cuddClearDeathRow(
+    DdManager* table)
 {
 #ifndef DD_NO_DEATH_ROW
     int i;
 
     for (i = 0; i < table->deathRowDepth; i++) {
-	if (table->deathRow[i] == NULL) break;
-	Cudd_IterDerefBdd(table,table->deathRow[i]);
-	table->deathRow[i] = NULL;
+        if (table->deathRow[i] == NULL) break;
+        Cudd_IterDerefBdd(table, table->deathRow[i]);
+        table->deathRow[i] = NULL;
     }
 #ifdef DD_DEBUG
     for (; i < table->deathRowDepth; i++) {
-	assert(table->deathRow[i] == NULL);
+        assert(table->deathRow[i] == NULL);
     }
 #endif
     table->nextDead = 0;
@@ -752,22 +741,21 @@ cuddClearDeathRow(
   SeeAlso     [Cudd_DelayedDerefBdd cuddClearDeathRow]
 
 ******************************************************************************/
-int
-cuddIsInDeathRow(
-  DdManager *dd,
-  DdNode *f)
+int cuddIsInDeathRow(
+    DdManager* dd,
+    DdNode* f)
 {
 #ifndef DD_NO_DEATH_ROW
     int i;
 
     for (i = 0; i < dd->deathRowDepth; i++) {
-	if (f == dd->deathRow[i]) {
-	    return(i);
-	}
+        if (f == dd->deathRow[i]) {
+            return (i);
+        }
     }
 #endif
 
-    return(-1);
+    return (-1);
 
 } /* end of cuddIsInDeathRow */
 
@@ -783,21 +771,20 @@ cuddIsInDeathRow(
   SeeAlso     [Cudd_DelayedDerefBdd cuddClearDeathRow cuddIsInDeathRow]
 
 ******************************************************************************/
-int
-cuddTimesInDeathRow(
-  DdManager *dd,
-  DdNode *f)
+int cuddTimesInDeathRow(
+    DdManager* dd,
+    DdNode* f)
 {
     int count = 0;
 #ifndef DD_NO_DEATH_ROW
     int i;
 
     for (i = 0; i < dd->deathRowDepth; i++) {
-	count += f == dd->deathRow[i];
+        count += f == dd->deathRow[i];
     }
 #endif
 
-    return(count);
+    return (count);
 
 } /* end of cuddTimesInDeathRow */
 

@@ -53,8 +53,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 
 /*---------------------------------------------------------------------------*/
@@ -112,18 +112,18 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddNeg.c,v 1.14 2012/02/05 01:07:18 fa
   SeeAlso     [Cudd_addCmpl]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addNegate(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
-    DdNode *res;
+    DdNode* res;
 
     do {
-	dd->reordered = 0;
-	res = cuddAddNegateRecur(dd,f);
+        dd->reordered = 0;
+        res = cuddAddNegateRecur(dd, f);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addNegate */
 
@@ -141,20 +141,20 @@ Cudd_addNegate(
   SeeAlso     []
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addRoundOff(
-  DdManager * dd,
-  DdNode * f,
-  int  N)
+    DdManager* dd,
+    DdNode* f,
+    int N)
 {
-    DdNode *res;
-    double trunc = pow(10.0,(double)N);
+    DdNode* res;
+    double trunc = pow(10.0, (double) N);
 
     do {
-	dd->reordered = 0;
-	res = cuddAddRoundOffRecur(dd,f,trunc);
+        dd->reordered = 0;
+        res = cuddAddRoundOffRecur(dd, f, trunc);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addRoundOff */
 
@@ -174,52 +174,52 @@ Cudd_addRoundOff(
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddNegateRecur(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     DdNode *res,
-	    *fv, *fvn,
-	    *T, *E;
+        *fv, *fvn,
+        *T, *E;
 
     statLine(dd);
     /* Check terminal cases. */
     if (cuddIsConstant(f)) {
-	res = cuddUniqueConst(dd,-cuddV(f));
-	return(res);
+        res = cuddUniqueConst(dd, -cuddV(f));
+        return (res);
     }
 
     /* Check cache */
-    res = cuddCacheLookup1(dd,Cudd_addNegate,f);
-    if (res != NULL) return(res);
+    res = cuddCacheLookup1(dd, Cudd_addNegate, f);
+    if (res != NULL) return (res);
 
     /* Recursive Step */
     fv = cuddT(f);
     fvn = cuddE(f);
-    T = cuddAddNegateRecur(dd,fv);
-    if (T == NULL) return(NULL);
+    T = cuddAddNegateRecur(dd, fv);
+    if (T == NULL) return (NULL);
     cuddRef(T);
 
-    E = cuddAddNegateRecur(dd,fvn);
+    E = cuddAddNegateRecur(dd, fvn);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
-    res = (T == E) ? T : cuddUniqueInter(dd,(int)f->index,T,E);
+    res = (T == E) ? T : cuddUniqueInter(dd, (int) f->index, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	Cudd_RecursiveDeref(dd, E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddDeref(T);
     cuddDeref(E);
 
     /* Store result. */
-    cuddCacheInsert1(dd,Cudd_addNegate,f,res);
+    cuddCacheInsert1(dd, Cudd_addNegate, f, res);
 
-    return(res);
+    return (res);
 
 } /* end of cuddAddNegateRecur */
 
@@ -234,11 +234,11 @@ cuddAddNegateRecur(
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddRoundOffRecur(
-  DdManager * dd,
-  DdNode * f,
-  double  trunc)
+    DdManager* dd,
+    DdNode* f,
+    double trunc)
 {
 
     DdNode *res, *fv, *fvn, *T, *E;
@@ -247,41 +247,41 @@ cuddAddRoundOffRecur(
 
     statLine(dd);
     if (cuddIsConstant(f)) {
-	n = ceil(cuddV(f)*trunc)/trunc;
-	res = cuddUniqueConst(dd,n);
-	return(res);
+        n = ceil(cuddV(f) * trunc) / trunc;
+        res = cuddUniqueConst(dd, n);
+        return (res);
     }
     cacheOp = (DD_CTFP1) Cudd_addRoundOff;
-    res = cuddCacheLookup1(dd,cacheOp,f);
+    res = cuddCacheLookup1(dd, cacheOp, f);
     if (res != NULL) {
-	return(res);
+        return (res);
     }
     /* Recursive Step */
     fv = cuddT(f);
     fvn = cuddE(f);
-    T = cuddAddRoundOffRecur(dd,fv,trunc);
+    T = cuddAddRoundOffRecur(dd, fv, trunc);
     if (T == NULL) {
-       return(NULL);
+        return (NULL);
     }
     cuddRef(T);
-    E = cuddAddRoundOffRecur(dd,fvn,trunc);
+    E = cuddAddRoundOffRecur(dd, fvn, trunc);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
-    res = (T == E) ? T : cuddUniqueInter(dd,(int)f->index,T,E);
+    res = (T == E) ? T : cuddUniqueInter(dd, (int) f->index, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	Cudd_RecursiveDeref(dd,E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddDeref(T);
     cuddDeref(E);
 
     /* Store result. */
-    cuddCacheInsert1(dd,cacheOp,f,res);
-    return(res);
+    cuddCacheInsert1(dd, cacheOp, f, res);
+    return (res);
 
 } /* end of cuddAddRoundOffRecur */
 

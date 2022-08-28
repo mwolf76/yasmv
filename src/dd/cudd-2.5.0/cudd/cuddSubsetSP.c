@@ -68,20 +68,20 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
-#define DEFAULT_PAGE_SIZE 2048 /* page size to store the BFS queue element type */
+#define DEFAULT_PAGE_SIZE 2048           /* page size to store the BFS queue element type */
 #define DEFAULT_NODE_DIST_PAGE_SIZE 2048 /*  page size to store NodeDist_t type */
-#define MAXSHORTINT	((DdHalfWord) ~0) /* constant defined to store
+#define MAXSHORTINT ((DdHalfWord) ~0)    /* constant defined to store
 					   * maximum distance of a node
 					   * from the root or the constant
 					   */
-#define INITIAL_PAGES 128 /* number of initial pages for the
+#define INITIAL_PAGES 128                /* number of initial pages for the
 			   * queue/NodeDist_t type */
 
 /*---------------------------------------------------------------------------*/
@@ -97,8 +97,8 @@ struct NodeDist {
     DdHalfWord evenTopDist;
     DdHalfWord oddBotDist;
     DdHalfWord evenBotDist;
-    DdNode *regResult;
-    DdNode *compResult;
+    DdNode* regResult;
+    DdNode* compResult;
 };
 
 /* assorted information needed by the BuildSubsetBdd procedure. */
@@ -106,27 +106,27 @@ struct AssortedInfo {
     unsigned int maxpath;
     int findShortestPath;
     int thresholdReached;
-    st_table *maxpathTable;
+    st_table* maxpathTable;
     int threshold;
 };
 
 struct GlobalInfo {
-    struct NodeDist **nodeDistPages; /* pointers to the pages */
-    int		nodeDistPageIndex; /* index to next element */
-    int		nodeDistPage; /* index to current page */
-    int		nodeDistPageSize; /* page size */
-    int		maxNodeDistPages; /* number of page pointers */
-    struct NodeDist *currentNodeDistPage; /* current page */
-    DdNode      ***queuePages; /* pointers to the pages */
-    int		queuePageIndex;	/* index to next element */
-    int		queuePage; /* index to current page */
-    int		queuePageSize; /* page size */
-    int		maxQueuePages; /* number of page pointers */
-    DdNode      **currentQueuePage; /* current page */
+    struct NodeDist** nodeDistPages;      /* pointers to the pages */
+    int nodeDistPageIndex;                /* index to next element */
+    int nodeDistPage;                     /* index to current page */
+    int nodeDistPageSize;                 /* page size */
+    int maxNodeDistPages;                 /* number of page pointers */
+    struct NodeDist* currentNodeDistPage; /* current page */
+    DdNode*** queuePages;                 /* pointers to the pages */
+    int queuePageIndex;                   /* index to next element */
+    int queuePage;                        /* index to current page */
+    int queuePageSize;                    /* page size */
+    int maxQueuePages;                    /* number of page pointers */
+    DdNode** currentQueuePage;            /* current page */
 #ifdef DD_DEBUG
-    int         numCalls;
-    int         hits;
-    int         thishit;
+    int numCalls;
+    int hits;
+    int thishit;
 #endif
 };
 
@@ -160,14 +160,14 @@ extern "C" {
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static void ResizeNodeDistPages (DdManager *dd, GlobalInfo_t *gInfo);
-static void ResizeQueuePages (DdManager *dd, GlobalInfo_t *gInfo);
-static void CreateTopDist (DdManager *dd, GlobalInfo_t *gInfo, st_table *pathTable, int parentPage, int parentQueueIndex, int topLen, DdNode **childPage, int childQueueIndex, int numParents, FILE *fp);
-static int CreateBotDist (DdNode *node, st_table *pathTable, unsigned int *pathLengthArray, FILE *fp);
-static st_table * CreatePathTable (DdManager *dd, GlobalInfo_t *gInfo, DdNode *node, unsigned int *pathLengthArray, FILE *fp);
-static unsigned int AssessPathLength (unsigned int *pathLengthArray, int threshold, int numVars, unsigned int *excess, FILE *fp);
-static DdNode * BuildSubsetBdd (DdManager *dd, GlobalInfo_t *gInfo, st_table *pathTable, DdNode *node, struct AssortedInfo *info, st_table *subsetNodeTable);
-static enum st_retval stPathTableDdFree (char *key, char *value, char *arg);
+static void ResizeNodeDistPages(DdManager* dd, GlobalInfo_t* gInfo);
+static void ResizeQueuePages(DdManager* dd, GlobalInfo_t* gInfo);
+static void CreateTopDist(DdManager* dd, GlobalInfo_t* gInfo, st_table* pathTable, int parentPage, int parentQueueIndex, int topLen, DdNode** childPage, int childQueueIndex, int numParents, FILE* fp);
+static int CreateBotDist(DdNode* node, st_table* pathTable, unsigned int* pathLengthArray, FILE* fp);
+static st_table* CreatePathTable(DdManager* dd, GlobalInfo_t* gInfo, DdNode* node, unsigned int* pathLengthArray, FILE* fp);
+static unsigned int AssessPathLength(unsigned int* pathLengthArray, int threshold, int numVars, unsigned int* excess, FILE* fp);
+static DdNode* BuildSubsetBdd(DdManager* dd, GlobalInfo_t* gInfo, st_table* pathTable, DdNode* node, struct AssortedInfo* info, st_table* subsetNodeTable);
+static enum st_retval stPathTableDdFree(char* key, char* value, char* arg);
 
 /**AutomaticEnd***************************************************************/
 
@@ -208,22 +208,22 @@ static enum st_retval stPathTableDdFree (char *key, char *value, char *arg);
   SeeAlso     [Cudd_SupersetShortPaths Cudd_SubsetHeavyBranch Cudd_ReadSize]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_SubsetShortPaths(
-  DdManager * dd /* manager */,
-  DdNode * f /* function to be subset */,
-  int  numVars /* number of variables in the support of f */,
-  int  threshold /* maximum number of nodes in the subset */,
-  int  hardlimit /* flag: 1 if threshold is a hard limit */)
+    DdManager* dd /* manager */,
+    DdNode* f /* function to be subset */,
+    int numVars /* number of variables in the support of f */,
+    int threshold /* maximum number of nodes in the subset */,
+    int hardlimit /* flag: 1 if threshold is a hard limit */)
 {
-    DdNode *subset;
+    DdNode* subset;
 
     do {
-	dd->reordered = 0;
-	subset = cuddSubsetShortPaths(dd, f, numVars, threshold, hardlimit);
-    } while(dd->reordered == 1);
+        dd->reordered = 0;
+        subset = cuddSubsetShortPaths(dd, f, numVars, threshold, hardlimit);
+    } while (dd->reordered == 1);
 
-    return(subset);
+    return (subset);
 
 } /* end of Cudd_SubsetShortPaths */
 
@@ -259,23 +259,23 @@ Cudd_SubsetShortPaths(
   SeeAlso     [Cudd_SubsetShortPaths Cudd_SupersetHeavyBranch Cudd_ReadSize]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_SupersetShortPaths(
-  DdManager * dd /* manager */,
-  DdNode * f /* function to be superset */,
-  int  numVars /* number of variables in the support of f */,
-  int  threshold /* maximum number of nodes in the subset */,
-  int  hardlimit /* flag: 1 if threshold is a hard limit */)
+    DdManager* dd /* manager */,
+    DdNode* f /* function to be superset */,
+    int numVars /* number of variables in the support of f */,
+    int threshold /* maximum number of nodes in the subset */,
+    int hardlimit /* flag: 1 if threshold is a hard limit */)
 {
     DdNode *subset, *g;
 
     g = Cudd_Not(f);
     do {
-	dd->reordered = 0;
-	subset = cuddSubsetShortPaths(dd, g, numVars, threshold, hardlimit);
-    } while(dd->reordered == 1);
+        dd->reordered = 0;
+        subset = cuddSubsetShortPaths(dd, g, numVars, threshold, hardlimit);
+    } while (dd->reordered == 1);
 
-    return(Cudd_NotCond(subset, (subset != NULL)));
+    return (Cudd_NotCond(subset, (subset != NULL)));
 
 } /* end of Cudd_SupersetShortPaths */
 
@@ -302,46 +302,47 @@ Cudd_SupersetShortPaths(
   SeeAlso     [Cudd_SubsetShortPaths]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddSubsetShortPaths(
-  DdManager * dd /* DD manager */,
-  DdNode * f /* function to be subset */,
-  int  numVars /* total number of variables in consideration */,
-  int  threshold /* maximum number of nodes allowed in the subset */,
-  int  hardlimit /* flag determining whether threshold should be respected strictly */)
+    DdManager* dd /* DD manager */,
+    DdNode* f /* function to be subset */,
+    int numVars /* total number of variables in consideration */,
+    int threshold /* maximum number of nodes allowed in the subset */,
+    int hardlimit /* flag determining whether threshold should be respected strictly */)
 {
     GlobalInfo_t gInfo;
-    st_table *pathTable;
+    st_table* pathTable;
     DdNode *N, *subset;
 
-    unsigned int  *pathLengthArray;
+    unsigned int* pathLengthArray;
     unsigned int maxpath, oddLen, evenLen, pathLength, *excess;
     int i;
-    NodeDist_t	*nodeStat;
-    struct AssortedInfo *info;
-    st_table *subsetNodeTable;
+    NodeDist_t* nodeStat;
+    struct AssortedInfo* info;
+    st_table* subsetNodeTable;
 
     gInfo.nodeDistPageSize = DEFAULT_NODE_DIST_PAGE_SIZE;
     gInfo.queuePageSize = DEFAULT_PAGE_SIZE;
 
     if (numVars == 0) {
-      /* set default value */
-      numVars = Cudd_ReadSize(dd);
+        /* set default value */
+        numVars = Cudd_ReadSize(dd);
     }
 
     if (threshold > numVars) {
-	threshold = threshold - numVars;
+        threshold = threshold - numVars;
     }
     if (f == NULL) {
-	fprintf(dd->err, "Cannot partition, nil object\n");
-	dd->errorCode = CUDD_INVALID_ARG;
-	return(NULL);
+        fprintf(dd->err, "Cannot partition, nil object\n");
+        dd->errorCode = CUDD_INVALID_ARG;
+        return (NULL);
     }
     if (Cudd_IsConstant(f))
-	return (f);
+        return (f);
 
-    pathLengthArray = ALLOC(unsigned int, numVars+1);
-    for (i = 0; i < numVars+1; i++) pathLengthArray[i] = 0;
+    pathLengthArray = ALLOC(unsigned int, numVars + 1);
+    for (i = 0; i < numVars + 1; i++)
+        pathLengthArray[i] = 0;
 
 
 #ifdef DD_DEBUG
@@ -351,126 +352,127 @@ cuddSubsetShortPaths(
     pathTable = CreatePathTable(dd, &gInfo, f, pathLengthArray, dd->err);
 
     if ((pathTable == NULL) || (dd->errorCode == CUDD_MEMORY_OUT)) {
-	if (pathTable != NULL)
-	    st_free_table(pathTable);
-	FREE(pathLengthArray);
-	return (NIL(DdNode));
+        if (pathTable != NULL)
+            st_free_table(pathTable);
+        FREE(pathLengthArray);
+        return (NIL(DdNode));
     }
 
     excess = ALLOC(unsigned int, 1);
     *excess = 0;
     maxpath = AssessPathLength(pathLengthArray, threshold, numVars, excess,
-			       dd->err);
+                               dd->err);
 
     if (maxpath != (unsigned) (numVars + 1)) {
 
-	info = ALLOC(struct AssortedInfo, 1);
-	info->maxpath = maxpath;
-	info->findShortestPath = 0;
-	info->thresholdReached = *excess;
-	info->maxpathTable = st_init_table(st_ptrcmp, st_ptrhash);
-	info->threshold = threshold;
+        info = ALLOC(struct AssortedInfo, 1);
+        info->maxpath = maxpath;
+        info->findShortestPath = 0;
+        info->thresholdReached = *excess;
+        info->maxpathTable = st_init_table(st_ptrcmp, st_ptrhash);
+        info->threshold = threshold;
 
 #ifdef DD_DEBUG
-	(void) fprintf(dd->out, "Path length array\n");
-	for (i = 0; i < (numVars+1); i++) {
-	    if (pathLengthArray[i])
-		(void) fprintf(dd->out, "%d ",i);
-	}
-	(void) fprintf(dd->out, "\n");
-	for (i = 0; i < (numVars+1); i++) {
-	    if (pathLengthArray[i])
-		(void) fprintf(dd->out, "%d ",pathLengthArray[i]);
-	}
-	(void) fprintf(dd->out, "\n");
-	(void) fprintf(dd->out, "Maxpath  = %d, Thresholdreached = %d\n",
-		       maxpath, info->thresholdReached);
+        (void) fprintf(dd->out, "Path length array\n");
+        for (i = 0; i < (numVars + 1); i++) {
+            if (pathLengthArray[i])
+                (void) fprintf(dd->out, "%d ", i);
+        }
+        (void) fprintf(dd->out, "\n");
+        for (i = 0; i < (numVars + 1); i++) {
+            if (pathLengthArray[i])
+                (void) fprintf(dd->out, "%d ", pathLengthArray[i]);
+        }
+        (void) fprintf(dd->out, "\n");
+        (void) fprintf(dd->out, "Maxpath  = %d, Thresholdreached = %d\n",
+                       maxpath, info->thresholdReached);
 #endif
 
-	N = Cudd_Regular(f);
-	if (!st_lookup(pathTable, N, &nodeStat)) {
-	    fprintf(dd->err, "Something wrong, root node must be in table\n");
-	    dd->errorCode = CUDD_INTERNAL_ERROR;
-	    FREE(excess);
-	    FREE(info);
-	    return(NULL);
-	} else {
-	    if ((nodeStat->oddTopDist != MAXSHORTINT) &&
-		(nodeStat->oddBotDist != MAXSHORTINT))
-		oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
-	    else
-		oddLen = MAXSHORTINT;
+        N = Cudd_Regular(f);
+        if (!st_lookup(pathTable, N, &nodeStat)) {
+            fprintf(dd->err, "Something wrong, root node must be in table\n");
+            dd->errorCode = CUDD_INTERNAL_ERROR;
+            FREE(excess);
+            FREE(info);
+            return (NULL);
+        } else {
+            if ((nodeStat->oddTopDist != MAXSHORTINT) &&
+                (nodeStat->oddBotDist != MAXSHORTINT))
+                oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
+            else
+                oddLen = MAXSHORTINT;
 
-	    if ((nodeStat->evenTopDist != MAXSHORTINT) &&
-		(nodeStat->evenBotDist != MAXSHORTINT))
-		evenLen = (nodeStat->evenTopDist +nodeStat->evenBotDist);
-	    else
-		evenLen = MAXSHORTINT;
+            if ((nodeStat->evenTopDist != MAXSHORTINT) &&
+                (nodeStat->evenBotDist != MAXSHORTINT))
+                evenLen = (nodeStat->evenTopDist + nodeStat->evenBotDist);
+            else
+                evenLen = MAXSHORTINT;
 
-	    pathLength = (oddLen <= evenLen) ? oddLen : evenLen;
-	    if (pathLength > maxpath) {
-		(void) fprintf(dd->err, "All computations are bogus, since root has path length greater than max path length within threshold %u, %u\n", maxpath, pathLength);
-		dd->errorCode = CUDD_INTERNAL_ERROR;
-		return(NULL);
-	    }
-	}
+            pathLength = (oddLen <= evenLen) ? oddLen : evenLen;
+            if (pathLength > maxpath) {
+                (void) fprintf(dd->err, "All computations are bogus, since root has path length greater than max path length within threshold %u, %u\n", maxpath, pathLength);
+                dd->errorCode = CUDD_INTERNAL_ERROR;
+                return (NULL);
+            }
+        }
 
 #ifdef DD_DEBUG
-	gInfo.numCalls = 0;
-	gInfo.hits = 0;
-	gInfo.thishit = 0;
+        gInfo.numCalls = 0;
+        gInfo.hits = 0;
+        gInfo.thishit = 0;
 #endif
-	/* initialize a table to store computed nodes */
-	if (hardlimit) {
-	    subsetNodeTable = st_init_table(st_ptrcmp, st_ptrhash);
-	} else {
-	    subsetNodeTable = NIL(st_table);
-	}
-	subset = BuildSubsetBdd(dd, &gInfo, pathTable, f, info, subsetNodeTable);
-	if (subset != NULL) {
-	    cuddRef(subset);
-	}
-	/* record the number of times a computed result for a node is hit */
+        /* initialize a table to store computed nodes */
+        if (hardlimit) {
+            subsetNodeTable = st_init_table(st_ptrcmp, st_ptrhash);
+        } else {
+            subsetNodeTable = NIL(st_table);
+        }
+        subset = BuildSubsetBdd(dd, &gInfo, pathTable, f, info, subsetNodeTable);
+        if (subset != NULL) {
+            cuddRef(subset);
+        }
+        /* record the number of times a computed result for a node is hit */
 
 #ifdef DD_DEBUG
-	(void) fprintf(dd->out, "Hits = %d, New==Node = %d, NumCalls = %d\n",
-		gInfo.hits, gInfo.thishit, gInfo.numCalls);
+        (void) fprintf(dd->out, "Hits = %d, New==Node = %d, NumCalls = %d\n",
+                       gInfo.hits, gInfo.thishit, gInfo.numCalls);
 #endif
 
-	if (subsetNodeTable != NIL(st_table)) {
-	    st_free_table(subsetNodeTable);
-	}
-	st_free_table(info->maxpathTable);
-	st_foreach(pathTable, stPathTableDdFree, (char *)dd);
+        if (subsetNodeTable != NIL(st_table)) {
+            st_free_table(subsetNodeTable);
+        }
+        st_free_table(info->maxpathTable);
+        st_foreach(pathTable, stPathTableDdFree, (char*) dd);
 
-	FREE(info);
+        FREE(info);
 
-    } else {/* if threshold larger than size of dd */
-	subset = f;
-	cuddRef(subset);
+    } else { /* if threshold larger than size of dd */
+        subset = f;
+        cuddRef(subset);
     }
     FREE(excess);
     st_free_table(pathTable);
     FREE(pathLengthArray);
-    for (i = 0; i <= gInfo.nodeDistPage; i++) FREE(gInfo.nodeDistPages[i]);
+    for (i = 0; i <= gInfo.nodeDistPage; i++)
+        FREE(gInfo.nodeDistPages[i]);
     FREE(gInfo.nodeDistPages);
 
 #ifdef DD_DEBUG
     /* check containment of subset in f */
     if (subset != NULL) {
-	if (!Cudd_bddLeq(dd, subset, f)) {
-	    (void) fprintf(dd->err, "Wrong partition\n");
-	    dd->errorCode = CUDD_INTERNAL_ERROR;
-	    return(NULL);
-	}
+        if (!Cudd_bddLeq(dd, subset, f)) {
+            (void) fprintf(dd->err, "Wrong partition\n");
+            dd->errorCode = CUDD_INTERNAL_ERROR;
+            return (NULL);
+        }
     }
 #endif
 
     if (subset != NULL) {
-	cuddDeref(subset);
-	return(subset);
+        cuddDeref(subset);
+        return (subset);
     } else {
-	return(NULL);
+        return (NULL);
     }
 
 } /* end of cuddSubsetShortPaths */
@@ -499,11 +501,11 @@ cuddSubsetShortPaths(
 ******************************************************************************/
 static void
 ResizeNodeDistPages(
-  DdManager *dd /* DD manager */,
-  GlobalInfo_t *gInfo /* global information */)
+    DdManager* dd /* DD manager */,
+    GlobalInfo_t* gInfo /* global information */)
 {
     int i;
-    NodeDist_t **newNodeDistPages;
+    NodeDist_t** newNodeDistPages;
 
     /* move to next page */
     gInfo->nodeDistPage++;
@@ -513,30 +515,32 @@ ResizeNodeDistPages(
      * INITIAL_PAGES
      */
     if (gInfo->nodeDistPage == gInfo->maxNodeDistPages) {
-	newNodeDistPages = ALLOC(NodeDist_t *,gInfo->maxNodeDistPages + INITIAL_PAGES);
-	if (newNodeDistPages == NULL) {
-	    for (i = 0; i < gInfo->nodeDistPage; i++) FREE(gInfo->nodeDistPages[i]);
-	    FREE(gInfo->nodeDistPages);
-	    dd->errorCode = CUDD_MEMORY_OUT;
-	    return;
-	} else {
-	    for (i = 0; i < gInfo->maxNodeDistPages; i++) {
-		newNodeDistPages[i] = gInfo->nodeDistPages[i];
-	    }
-	    /* Increase total page count */
-	    gInfo->maxNodeDistPages += INITIAL_PAGES;
-	    FREE(gInfo->nodeDistPages);
-	    gInfo->nodeDistPages = newNodeDistPages;
-	}
+        newNodeDistPages = ALLOC(NodeDist_t*, gInfo->maxNodeDistPages + INITIAL_PAGES);
+        if (newNodeDistPages == NULL) {
+            for (i = 0; i < gInfo->nodeDistPage; i++)
+                FREE(gInfo->nodeDistPages[i]);
+            FREE(gInfo->nodeDistPages);
+            dd->errorCode = CUDD_MEMORY_OUT;
+            return;
+        } else {
+            for (i = 0; i < gInfo->maxNodeDistPages; i++) {
+                newNodeDistPages[i] = gInfo->nodeDistPages[i];
+            }
+            /* Increase total page count */
+            gInfo->maxNodeDistPages += INITIAL_PAGES;
+            FREE(gInfo->nodeDistPages);
+            gInfo->nodeDistPages = newNodeDistPages;
+        }
     }
     /* Allocate a new page */
     gInfo->currentNodeDistPage = gInfo->nodeDistPages[gInfo->nodeDistPage] =
         ALLOC(NodeDist_t, gInfo->nodeDistPageSize);
     if (gInfo->currentNodeDistPage == NULL) {
-	for (i = 0; i < gInfo->nodeDistPage; i++) FREE(gInfo->nodeDistPages[i]);
-	FREE(gInfo->nodeDistPages);
-	dd->errorCode = CUDD_MEMORY_OUT;
-	return;
+        for (i = 0; i < gInfo->nodeDistPage; i++)
+            FREE(gInfo->nodeDistPages[i]);
+        FREE(gInfo->nodeDistPages);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        return;
     }
     /* reset page index */
     gInfo->nodeDistPageIndex = 0;
@@ -563,11 +567,11 @@ ResizeNodeDistPages(
 ******************************************************************************/
 static void
 ResizeQueuePages(
-  DdManager *dd /* DD manager */,
-  GlobalInfo_t *gInfo /* global information */)
+    DdManager* dd /* DD manager */,
+    GlobalInfo_t* gInfo /* global information */)
 {
     int i;
-    DdNode ***newQueuePages;
+    DdNode*** newQueuePages;
 
     gInfo->queuePage++;
     /* If the current page index is larger than the number of pages
@@ -575,30 +579,32 @@ ResizeQueuePages(
      * INITIAL_PAGES
      */
     if (gInfo->queuePage == gInfo->maxQueuePages) {
-	newQueuePages = ALLOC(DdNode **,gInfo->maxQueuePages + INITIAL_PAGES);
-	if (newQueuePages == NULL) {
-	    for (i = 0; i < gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-	    FREE(gInfo->queuePages);
-	    dd->errorCode = CUDD_MEMORY_OUT;
-	    return;
-	} else {
-	    for (i = 0; i < gInfo->maxQueuePages; i++) {
-		newQueuePages[i] = gInfo->queuePages[i];
-	    }
-	    /* Increase total page count */
-	    gInfo->maxQueuePages += INITIAL_PAGES;
-	    FREE(gInfo->queuePages);
-	    gInfo->queuePages = newQueuePages;
-	}
+        newQueuePages = ALLOC(DdNode**, gInfo->maxQueuePages + INITIAL_PAGES);
+        if (newQueuePages == NULL) {
+            for (i = 0; i < gInfo->queuePage; i++)
+                FREE(gInfo->queuePages[i]);
+            FREE(gInfo->queuePages);
+            dd->errorCode = CUDD_MEMORY_OUT;
+            return;
+        } else {
+            for (i = 0; i < gInfo->maxQueuePages; i++) {
+                newQueuePages[i] = gInfo->queuePages[i];
+            }
+            /* Increase total page count */
+            gInfo->maxQueuePages += INITIAL_PAGES;
+            FREE(gInfo->queuePages);
+            gInfo->queuePages = newQueuePages;
+        }
     }
     /* Allocate a new page */
     gInfo->currentQueuePage = gInfo->queuePages[gInfo->queuePage] =
-        ALLOC(DdNode *,gInfo->queuePageSize);
+        ALLOC(DdNode*, gInfo->queuePageSize);
     if (gInfo->currentQueuePage == NULL) {
-	for (i = 0; i < gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-	FREE(gInfo->queuePages);
-	dd->errorCode = CUDD_MEMORY_OUT;
-	return;
+        for (i = 0; i < gInfo->queuePage; i++)
+            FREE(gInfo->queuePages[i]);
+        FREE(gInfo->queuePages);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        return;
     }
     /* reset page index */
     gInfo->queuePageIndex = 0;
@@ -627,20 +633,20 @@ ResizeQueuePages(
 ******************************************************************************/
 static void
 CreateTopDist(
-  DdManager *dd /* DD manager */,
-  GlobalInfo_t *gInfo /* global information */,
-  st_table * pathTable /* hast table to store path lengths */,
-  int  parentPage /* the pointer to the page on which the first parent in the queue is to be found. */,
-  int  parentQueueIndex /* pointer to the first parent on the page */,
-  int  topLen /* current distance from the root */,
-  DdNode ** childPage /* pointer to the page on which the first child is to be added. */,
-  int  childQueueIndex /* pointer to the first child */,
-  int  numParents /* number of parents to process in this recursive call */,
-  FILE *fp /* where to write messages */)
+    DdManager* dd /* DD manager */,
+    GlobalInfo_t* gInfo /* global information */,
+    st_table* pathTable /* hast table to store path lengths */,
+    int parentPage /* the pointer to the page on which the first parent in the queue is to be found. */,
+    int parentQueueIndex /* pointer to the first parent on the page */,
+    int topLen /* current distance from the root */,
+    DdNode** childPage /* pointer to the page on which the first child is to be added. */,
+    int childQueueIndex /* pointer to the first child */,
+    int numParents /* number of parents to process in this recursive call */,
+    FILE* fp /* where to write messages */)
 {
-    NodeDist_t *nodeStat;
+    NodeDist_t* nodeStat;
     DdNode *N, *Nv, *Nnv, *node, *child, *regChild;
-    int  i;
+    int i;
     int processingDone, childrenCount;
 
 #ifdef DD_DEBUG
@@ -650,8 +656,8 @@ CreateTopDist(
     /* set queue index to the next available entry for addition */
     /* set queue page to page of addition */
     if ((gInfo->queuePages[parentPage] == childPage) && (parentQueueIndex ==
-						  childQueueIndex)) {
-	fprintf(fp, "Should not happen that they are equal\n");
+                                                         childQueueIndex)) {
+        fprintf(fp, "Should not happen that they are equal\n");
     }
     assert(gInfo->queuePageIndex == childQueueIndex);
     assert(gInfo->currentQueuePage == childPage);
@@ -662,134 +668,136 @@ CreateTopDist(
     childrenCount = 0;
     /* process all the nodes in this level */
     while (numParents) {
-	numParents--;
-	if (parentQueueIndex == gInfo->queuePageSize) {
-	    parentPage++;
-	    parentQueueIndex = 0;
-	}
-	/* a parent to process */
-	node = *(gInfo->queuePages[parentPage] + parentQueueIndex);
-	parentQueueIndex++;
-	/* get its children */
-	N = Cudd_Regular(node);
-	Nv = Cudd_T(N);
-	Nnv = Cudd_E(N);
+        numParents--;
+        if (parentQueueIndex == gInfo->queuePageSize) {
+            parentPage++;
+            parentQueueIndex = 0;
+        }
+        /* a parent to process */
+        node = *(gInfo->queuePages[parentPage] + parentQueueIndex);
+        parentQueueIndex++;
+        /* get its children */
+        N = Cudd_Regular(node);
+        Nv = Cudd_T(N);
+        Nnv = Cudd_E(N);
 
-	Nv = Cudd_NotCond(Nv, Cudd_IsComplement(node));
-	Nnv = Cudd_NotCond(Nnv, Cudd_IsComplement(node));
+        Nv = Cudd_NotCond(Nv, Cudd_IsComplement(node));
+        Nnv = Cudd_NotCond(Nnv, Cudd_IsComplement(node));
 
-	processingDone = 2;
-	while (processingDone) {
-	    /* processing the THEN and the ELSE children, the THEN
+        processingDone = 2;
+        while (processingDone) {
+            /* processing the THEN and the ELSE children, the THEN
 	     * child first
 	     */
-	    if (processingDone == 2) {
-		child = Nv;
-	    } else {
-		child = Nnv;
-	    }
+            if (processingDone == 2) {
+                child = Nv;
+            } else {
+                child = Nnv;
+            }
 
-	    regChild = Cudd_Regular(child);
-	    /* dont process if the child is a constant */
-	    if (!Cudd_IsConstant(child)) {
-		/* check is already visited, if not add a new entry in
+            regChild = Cudd_Regular(child);
+            /* dont process if the child is a constant */
+            if (!Cudd_IsConstant(child)) {
+                /* check is already visited, if not add a new entry in
 		 * the path Table
 		 */
-		if (!st_lookup(pathTable, regChild, &nodeStat)) {
-		    /* if not in table, has never been visited */
-		    /* create entry for table */
-		    if (gInfo->nodeDistPageIndex == gInfo->nodeDistPageSize)
-			ResizeNodeDistPages(dd, gInfo);
-		    if (dd->errorCode == CUDD_MEMORY_OUT) {
-			for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-			FREE(gInfo->queuePages);
-			st_free_table(pathTable);
-			return;
-		    }
-		    /* New entry for child in path Table is created here */
-		    nodeStat = gInfo->currentNodeDistPage + gInfo->nodeDistPageIndex;
-		    gInfo->nodeDistPageIndex++;
+                if (!st_lookup(pathTable, regChild, &nodeStat)) {
+                    /* if not in table, has never been visited */
+                    /* create entry for table */
+                    if (gInfo->nodeDistPageIndex == gInfo->nodeDistPageSize)
+                        ResizeNodeDistPages(dd, gInfo);
+                    if (dd->errorCode == CUDD_MEMORY_OUT) {
+                        for (i = 0; i <= gInfo->queuePage; i++)
+                            FREE(gInfo->queuePages[i]);
+                        FREE(gInfo->queuePages);
+                        st_free_table(pathTable);
+                        return;
+                    }
+                    /* New entry for child in path Table is created here */
+                    nodeStat = gInfo->currentNodeDistPage + gInfo->nodeDistPageIndex;
+                    gInfo->nodeDistPageIndex++;
 
-		    /* Initialize fields of the node data */
-		    nodeStat->oddTopDist = MAXSHORTINT;
-		    nodeStat->evenTopDist = MAXSHORTINT;
-		    nodeStat->evenBotDist = MAXSHORTINT;
-		    nodeStat->oddBotDist = MAXSHORTINT;
-		    nodeStat->regResult = NULL;
-		    nodeStat->compResult = NULL;
-		    /* update the table entry element, the distance keeps
+                    /* Initialize fields of the node data */
+                    nodeStat->oddTopDist = MAXSHORTINT;
+                    nodeStat->evenTopDist = MAXSHORTINT;
+                    nodeStat->evenBotDist = MAXSHORTINT;
+                    nodeStat->oddBotDist = MAXSHORTINT;
+                    nodeStat->regResult = NULL;
+                    nodeStat->compResult = NULL;
+                    /* update the table entry element, the distance keeps
 		     * track of the parity of the path from the root
 		     */
-		    if (Cudd_IsComplement(child)) {
-			nodeStat->oddTopDist = (DdHalfWord) topLen + 1;
-		    } else {
-			nodeStat->evenTopDist = (DdHalfWord) topLen + 1;
-		    }
+                    if (Cudd_IsComplement(child)) {
+                        nodeStat->oddTopDist = (DdHalfWord) topLen + 1;
+                    } else {
+                        nodeStat->evenTopDist = (DdHalfWord) topLen + 1;
+                    }
 
-		    /* insert entry element for child in the table */
-		    if (st_insert(pathTable, regChild,
-				  nodeStat) == ST_OUT_OF_MEM) {
-			dd->errorCode = CUDD_MEMORY_OUT;
-			for (i = 0; i <= gInfo->nodeDistPage; i++)
-			    FREE(gInfo->nodeDistPages[i]);
-			FREE(gInfo->nodeDistPages);
-			for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-			FREE(gInfo->queuePages);
-			st_free_table(pathTable);
-			return;
-		    }
+                    /* insert entry element for child in the table */
+                    if (st_insert(pathTable, regChild,
+                                  nodeStat) == ST_OUT_OF_MEM) {
+                        dd->errorCode = CUDD_MEMORY_OUT;
+                        for (i = 0; i <= gInfo->nodeDistPage; i++)
+                            FREE(gInfo->nodeDistPages[i]);
+                        FREE(gInfo->nodeDistPages);
+                        for (i = 0; i <= gInfo->queuePage; i++)
+                            FREE(gInfo->queuePages[i]);
+                        FREE(gInfo->queuePages);
+                        st_free_table(pathTable);
+                        return;
+                    }
 
-		    /* Create list element for this child to process its children.
+                    /* Create list element for this child to process its children.
 		     * If this node has been processed already, then it appears
 		     * in the path table and hence is never added to the list
 		     * again.
 		     */
 
-		    if (gInfo->queuePageIndex == gInfo->queuePageSize) ResizeQueuePages(dd, gInfo);
-		    if (dd->errorCode == CUDD_MEMORY_OUT) {
-			for (i = 0; i <= gInfo->nodeDistPage; i++)
-			    FREE(gInfo->nodeDistPages[i]);
-			FREE(gInfo->nodeDistPages);
-			st_free_table(pathTable);
-			return;
-		    }
-		    *(gInfo->currentQueuePage + gInfo->queuePageIndex) = child;
-		    gInfo->queuePageIndex++;
+                    if (gInfo->queuePageIndex == gInfo->queuePageSize) ResizeQueuePages(dd, gInfo);
+                    if (dd->errorCode == CUDD_MEMORY_OUT) {
+                        for (i = 0; i <= gInfo->nodeDistPage; i++)
+                            FREE(gInfo->nodeDistPages[i]);
+                        FREE(gInfo->nodeDistPages);
+                        st_free_table(pathTable);
+                        return;
+                    }
+                    *(gInfo->currentQueuePage + gInfo->queuePageIndex) = child;
+                    gInfo->queuePageIndex++;
 
-		    childrenCount++;
-		} else {
-		    /* if not been met in a path with this parity before */
-		    /* put in list */
-		    if (((Cudd_IsComplement(child)) && (nodeStat->oddTopDist ==
-			  MAXSHORTINT)) || ((!Cudd_IsComplement(child)) &&
-				  (nodeStat->evenTopDist == MAXSHORTINT))) {
+                    childrenCount++;
+                } else {
+                    /* if not been met in a path with this parity before */
+                    /* put in list */
+                    if (((Cudd_IsComplement(child)) && (nodeStat->oddTopDist ==
+                                                        MAXSHORTINT)) ||
+                        ((!Cudd_IsComplement(child)) &&
+                         (nodeStat->evenTopDist == MAXSHORTINT))) {
 
-			if (gInfo->queuePageIndex == gInfo->queuePageSize) ResizeQueuePages(dd, gInfo);
-			if (dd->errorCode == CUDD_MEMORY_OUT) {
-			    for (i = 0; i <= gInfo->nodeDistPage; i++)
-				FREE(gInfo->nodeDistPages[i]);
-			    FREE(gInfo->nodeDistPages);
-			    st_free_table(pathTable);
-			    return;
+                        if (gInfo->queuePageIndex == gInfo->queuePageSize) ResizeQueuePages(dd, gInfo);
+                        if (dd->errorCode == CUDD_MEMORY_OUT) {
+                            for (i = 0; i <= gInfo->nodeDistPage; i++)
+                                FREE(gInfo->nodeDistPages[i]);
+                            FREE(gInfo->nodeDistPages);
+                            st_free_table(pathTable);
+                            return;
+                        }
+                        *(gInfo->currentQueuePage + gInfo->queuePageIndex) = child;
+                        gInfo->queuePageIndex++;
 
-			}
-			*(gInfo->currentQueuePage + gInfo->queuePageIndex) = child;
-			gInfo->queuePageIndex++;
+                        /* update the distance with the appropriate parity */
+                        if (Cudd_IsComplement(child)) {
+                            nodeStat->oddTopDist = (DdHalfWord) topLen + 1;
+                        } else {
+                            nodeStat->evenTopDist = (DdHalfWord) topLen + 1;
+                        }
+                        childrenCount++;
+                    }
 
-			/* update the distance with the appropriate parity */
-			if (Cudd_IsComplement(child)) {
-			    nodeStat->oddTopDist = (DdHalfWord) topLen + 1;
-			} else {
-			    nodeStat->evenTopDist = (DdHalfWord) topLen + 1;
-			}
-			childrenCount++;
-		    }
-
-		} /* end of else (not found in st_table) */
-	    } /*end of if Not constant child */
-	    processingDone--;
-	} /*end of while processing Nv, Nnv */
-    }  /*end of while numParents */
+                } /* end of else (not found in st_table) */
+            }     /*end of if Not constant child */
+            processingDone--;
+        } /*end of while processing Nv, Nnv */
+    }     /*end of while numParents */
 
 #ifdef DD_DEBUG
     assert(gInfo->queuePages[parentPage] == childPage);
@@ -797,11 +805,11 @@ CreateTopDist(
 #endif
 
     if (childrenCount != 0) {
-	topLen++;
-	childPage = gInfo->currentQueuePage;
-	childQueueIndex = gInfo->queuePageIndex;
-	CreateTopDist(dd, gInfo, pathTable, parentPage, parentQueueIndex, topLen,
-		      childPage, childQueueIndex, childrenCount, fp);
+        topLen++;
+        childPage = gInfo->currentQueuePage;
+        childQueueIndex = gInfo->queuePageIndex;
+        CreateTopDist(dd, gInfo, pathTable, parentPage, parentQueueIndex, topLen,
+                      childPage, childQueueIndex, childrenCount, fp);
     }
 
     return;
@@ -830,43 +838,43 @@ CreateTopDist(
 ******************************************************************************/
 static int
 CreateBotDist(
-  DdNode * node /* current node */,
-  st_table * pathTable /* path table with path lengths */,
-  unsigned int * pathLengthArray /* array that stores number of nodes belonging to a particular path length. */,
-  FILE *fp /* where to write messages */)
+    DdNode* node /* current node */,
+    st_table* pathTable /* path table with path lengths */,
+    unsigned int* pathLengthArray /* array that stores number of nodes belonging to a particular path length. */,
+    FILE* fp /* where to write messages */)
 {
     DdNode *N, *Nv, *Nnv;
-    DdNode *realChild;
+    DdNode* realChild;
     DdNode *child, *regChild;
     NodeDist_t *nodeStat, *nodeStatChild;
-    unsigned int  oddLen, evenLen, pathLength;
+    unsigned int oddLen, evenLen, pathLength;
     DdHalfWord botDist;
     int processingDone;
 
     if (Cudd_IsConstant(node))
-	return(1);
+        return (1);
     N = Cudd_Regular(node);
     /* each node has one table entry */
     /* update as you go down the min dist of each node from
        the root in each (odd and even) parity */
     if (!st_lookup(pathTable, N, &nodeStat)) {
-	fprintf(fp, "Something wrong, the entry doesn't exist\n");
-	return(0);
+        fprintf(fp, "Something wrong, the entry doesn't exist\n");
+        return (0);
     }
 
     /* compute length of odd parity distances */
     if ((nodeStat->oddTopDist != MAXSHORTINT) &&
-	(nodeStat->oddBotDist != MAXSHORTINT))
-	oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
+        (nodeStat->oddBotDist != MAXSHORTINT))
+        oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
     else
-	oddLen = MAXSHORTINT;
+        oddLen = MAXSHORTINT;
 
     /* compute length of even parity distances */
     if (!((nodeStat->evenTopDist == MAXSHORTINT) ||
-	  (nodeStat->evenBotDist == MAXSHORTINT)))
-	evenLen = (nodeStat->evenTopDist +nodeStat->evenBotDist);
+          (nodeStat->evenBotDist == MAXSHORTINT)))
+        evenLen = (nodeStat->evenTopDist + nodeStat->evenBotDist);
     else
-	evenLen = MAXSHORTINT;
+        evenLen = MAXSHORTINT;
 
     /* assign pathlength to minimum of the two */
     pathLength = (oddLen <= evenLen) ? oddLen : evenLen;
@@ -877,118 +885,118 @@ CreateBotDist(
     /* process each child */
     processingDone = 0;
     while (processingDone != 2) {
-	if (!processingDone) {
-	    child = Nv;
-	} else {
-	    child = Nnv;
-	}
+        if (!processingDone) {
+            child = Nv;
+        } else {
+            child = Nnv;
+        }
 
-	realChild = Cudd_NotCond(child, Cudd_IsComplement(node));
-	regChild = Cudd_Regular(child);
-	if (Cudd_IsConstant(realChild)) {
-	    /* Found a minterm; count parity and shortest distance
+        realChild = Cudd_NotCond(child, Cudd_IsComplement(node));
+        regChild = Cudd_Regular(child);
+        if (Cudd_IsConstant(realChild)) {
+            /* Found a minterm; count parity and shortest distance
 	    ** from the constant.
 	    */
-	    if (Cudd_IsComplement(child))
-		nodeStat->oddBotDist = 1;
-	    else
-		nodeStat->evenBotDist = 1;
-	} else {
-	    /* If node not in table, recur. */
-	    if (!st_lookup(pathTable, regChild, &nodeStatChild)) {
-		fprintf(fp, "Something wrong, node in table should have been created in top dist proc.\n");
-		return(0);
-	    }
+            if (Cudd_IsComplement(child))
+                nodeStat->oddBotDist = 1;
+            else
+                nodeStat->evenBotDist = 1;
+        } else {
+            /* If node not in table, recur. */
+            if (!st_lookup(pathTable, regChild, &nodeStatChild)) {
+                fprintf(fp, "Something wrong, node in table should have been created in top dist proc.\n");
+                return (0);
+            }
 
-	    if (nodeStatChild->oddBotDist == MAXSHORTINT) {
-		if (nodeStatChild->evenBotDist == MAXSHORTINT) {
-		    if (!CreateBotDist(realChild, pathTable, pathLengthArray, fp))
-			return(0);
-		} else {
-		    fprintf(fp, "Something wrong, both bot nodeStats should be there\n");
-		    return(0);
-		}
-	    }
+            if (nodeStatChild->oddBotDist == MAXSHORTINT) {
+                if (nodeStatChild->evenBotDist == MAXSHORTINT) {
+                    if (!CreateBotDist(realChild, pathTable, pathLengthArray, fp))
+                        return (0);
+                } else {
+                    fprintf(fp, "Something wrong, both bot nodeStats should be there\n");
+                    return (0);
+                }
+            }
 
-	    /* Update shortest distance from the constant depending on
+            /* Update shortest distance from the constant depending on
 	    **  parity. */
 
-	    if (Cudd_IsComplement(child)) {
-		/* If parity on the edge then add 1 to even distance
+            if (Cudd_IsComplement(child)) {
+                /* If parity on the edge then add 1 to even distance
 		** of child to get odd parity distance and add 1 to
 		** odd distance of child to get even parity
 		** distance. Change distance of current node only if
 		** the calculated distance is less than existing
 		** distance. */
-		if (nodeStatChild->oddBotDist != MAXSHORTINT)
-		    botDist = nodeStatChild->oddBotDist + 1;
-		else
-		    botDist = MAXSHORTINT;
-		if (nodeStat->evenBotDist > botDist )
-		    nodeStat->evenBotDist = botDist;
+                if (nodeStatChild->oddBotDist != MAXSHORTINT)
+                    botDist = nodeStatChild->oddBotDist + 1;
+                else
+                    botDist = MAXSHORTINT;
+                if (nodeStat->evenBotDist > botDist)
+                    nodeStat->evenBotDist = botDist;
 
-		if (nodeStatChild->evenBotDist != MAXSHORTINT)
-		    botDist = nodeStatChild->evenBotDist + 1;
-		else
-		    botDist = MAXSHORTINT;
-		if (nodeStat->oddBotDist > botDist)
-		    nodeStat->oddBotDist = botDist;
+                if (nodeStatChild->evenBotDist != MAXSHORTINT)
+                    botDist = nodeStatChild->evenBotDist + 1;
+                else
+                    botDist = MAXSHORTINT;
+                if (nodeStat->oddBotDist > botDist)
+                    nodeStat->oddBotDist = botDist;
 
-	    } else {
-		/* If parity on the edge then add 1 to even distance
+            } else {
+                /* If parity on the edge then add 1 to even distance
 		** of child to get even parity distance and add 1 to
 		** odd distance of child to get odd parity distance.
 		** Change distance of current node only if the
 		** calculated distance is lesser than existing
 		** distance. */
-		if (nodeStatChild->evenBotDist != MAXSHORTINT)
-		    botDist = nodeStatChild->evenBotDist + 1;
-		else
-		    botDist = MAXSHORTINT;
-		if (nodeStat->evenBotDist > botDist)
-		    nodeStat->evenBotDist = botDist;
+                if (nodeStatChild->evenBotDist != MAXSHORTINT)
+                    botDist = nodeStatChild->evenBotDist + 1;
+                else
+                    botDist = MAXSHORTINT;
+                if (nodeStat->evenBotDist > botDist)
+                    nodeStat->evenBotDist = botDist;
 
-		if (nodeStatChild->oddBotDist != MAXSHORTINT)
-		    botDist = nodeStatChild->oddBotDist + 1;
-		else
-		    botDist = MAXSHORTINT;
-		if (nodeStat->oddBotDist > botDist)
-		    nodeStat->oddBotDist = botDist;
-	    }
-	} /* end of else (if not constant child ) */
-	processingDone++;
+                if (nodeStatChild->oddBotDist != MAXSHORTINT)
+                    botDist = nodeStatChild->oddBotDist + 1;
+                else
+                    botDist = MAXSHORTINT;
+                if (nodeStat->oddBotDist > botDist)
+                    nodeStat->oddBotDist = botDist;
+            }
+        } /* end of else (if not constant child ) */
+        processingDone++;
     } /* end of while processing Nv, Nnv */
 
     /* Compute shortest path length on the fly. */
     if ((nodeStat->oddTopDist != MAXSHORTINT) &&
-	(nodeStat->oddBotDist != MAXSHORTINT))
-	oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
+        (nodeStat->oddBotDist != MAXSHORTINT))
+        oddLen = (nodeStat->oddTopDist + nodeStat->oddBotDist);
     else
-	oddLen = MAXSHORTINT;
+        oddLen = MAXSHORTINT;
 
     if ((nodeStat->evenTopDist != MAXSHORTINT) &&
-	(nodeStat->evenBotDist != MAXSHORTINT))
-	evenLen = (nodeStat->evenTopDist +nodeStat->evenBotDist);
+        (nodeStat->evenBotDist != MAXSHORTINT))
+        evenLen = (nodeStat->evenTopDist + nodeStat->evenBotDist);
     else
-	evenLen = MAXSHORTINT;
+        evenLen = MAXSHORTINT;
 
     /* Update path length array that has number of nodes of a particular
     ** path length. */
-    if (oddLen < pathLength ) {
-	if (pathLength != MAXSHORTINT)
-	    pathLengthArray[pathLength]--;
-	if (oddLen != MAXSHORTINT)
-	    pathLengthArray[oddLen]++;
-	pathLength = oddLen;
+    if (oddLen < pathLength) {
+        if (pathLength != MAXSHORTINT)
+            pathLengthArray[pathLength]--;
+        if (oddLen != MAXSHORTINT)
+            pathLengthArray[oddLen]++;
+        pathLength = oddLen;
     }
-    if (evenLen < pathLength ) {
-	if (pathLength != MAXSHORTINT)
-	    pathLengthArray[pathLength]--;
-	if (evenLen != MAXSHORTINT)
-	    pathLengthArray[evenLen]++;
+    if (evenLen < pathLength) {
+        if (pathLength != MAXSHORTINT)
+            pathLengthArray[pathLength]--;
+        if (evenLen != MAXSHORTINT)
+            pathLengthArray[evenLen]++;
     }
 
-    return(1);
+    return (1);
 
 } /*end of CreateBotDist */
 
@@ -1011,57 +1019,59 @@ CreateBotDist(
   SeeAlso     [CreateTopDist CreateBotDist]
 
 ******************************************************************************/
-static st_table *
+static st_table*
 CreatePathTable(
-  DdManager *dd /* DD manager */,
-  GlobalInfo_t *gInfo /* global information */,
-  DdNode * node /* root of function */,
-  unsigned int * pathLengthArray /* array of path lengths to store nodes labeled with the various path lengths */,
-  FILE *fp /* where to write messages */)
+    DdManager* dd /* DD manager */,
+    GlobalInfo_t* gInfo /* global information */,
+    DdNode* node /* root of function */,
+    unsigned int* pathLengthArray /* array of path lengths to store nodes labeled with the various path lengths */,
+    FILE* fp /* where to write messages */)
 {
 
-    st_table *pathTable;
-    NodeDist_t *nodeStat;
+    st_table* pathTable;
+    NodeDist_t* nodeStat;
     DdHalfWord topLen;
-    DdNode *N;
+    DdNode* N;
     int i, numParents;
     int insertValue;
-    DdNode **childPage;
+    DdNode** childPage;
     int parentPage;
     int childQueueIndex, parentQueueIndex;
 
     /* Creating path Table for storing data about nodes */
-    pathTable = st_init_table(st_ptrcmp,st_ptrhash);
+    pathTable = st_init_table(st_ptrcmp, st_ptrhash);
 
     /* initializing pages for info about each node */
     gInfo->maxNodeDistPages = INITIAL_PAGES;
-    gInfo->nodeDistPages = ALLOC(NodeDist_t *, gInfo->maxNodeDistPages);
+    gInfo->nodeDistPages = ALLOC(NodeDist_t*, gInfo->maxNodeDistPages);
     if (gInfo->nodeDistPages == NULL) {
-	goto OUT_OF_MEM;
+        goto OUT_OF_MEM;
     }
     gInfo->nodeDistPage = 0;
     gInfo->currentNodeDistPage = gInfo->nodeDistPages[gInfo->nodeDistPage] =
-	ALLOC(NodeDist_t, gInfo->nodeDistPageSize);
+        ALLOC(NodeDist_t, gInfo->nodeDistPageSize);
     if (gInfo->currentNodeDistPage == NULL) {
-	for (i = 0; i <= gInfo->nodeDistPage; i++) FREE(gInfo->nodeDistPages[i]);
-	FREE(gInfo->nodeDistPages);
-	goto OUT_OF_MEM;
+        for (i = 0; i <= gInfo->nodeDistPage; i++)
+            FREE(gInfo->nodeDistPages[i]);
+        FREE(gInfo->nodeDistPages);
+        goto OUT_OF_MEM;
     }
     gInfo->nodeDistPageIndex = 0;
 
     /* Initializing pages for the BFS search queue, implemented as an array. */
     gInfo->maxQueuePages = INITIAL_PAGES;
-    gInfo->queuePages = ALLOC(DdNode **, gInfo->maxQueuePages);
+    gInfo->queuePages = ALLOC(DdNode**, gInfo->maxQueuePages);
     if (gInfo->queuePages == NULL) {
-	goto OUT_OF_MEM;
+        goto OUT_OF_MEM;
     }
     gInfo->queuePage = 0;
-    gInfo->currentQueuePage  = gInfo->queuePages[gInfo->queuePage] =
-        ALLOC(DdNode *, gInfo->queuePageSize);
+    gInfo->currentQueuePage = gInfo->queuePages[gInfo->queuePage] =
+        ALLOC(DdNode*, gInfo->queuePageSize);
     if (gInfo->currentQueuePage == NULL) {
-	for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-	FREE(gInfo->queuePages);
-	goto OUT_OF_MEM;
+        for (i = 0; i <= gInfo->queuePage; i++)
+            FREE(gInfo->queuePages[i]);
+        FREE(gInfo->queuePages);
+        goto OUT_OF_MEM;
     }
     gInfo->queuePageIndex = 0;
 
@@ -1078,12 +1088,14 @@ CreatePathTable(
 
     if (gInfo->nodeDistPageIndex == gInfo->nodeDistPageSize) ResizeNodeDistPages(dd, gInfo);
     if (dd->errorCode == CUDD_MEMORY_OUT) {
-	for (i = 0; i <= gInfo->nodeDistPage; i++) FREE(gInfo->nodeDistPages[i]);
-	FREE(gInfo->nodeDistPages);
-	for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-	FREE(gInfo->queuePages);
-	st_free_table(pathTable);
-	goto OUT_OF_MEM;
+        for (i = 0; i <= gInfo->nodeDistPage; i++)
+            FREE(gInfo->nodeDistPages[i]);
+        FREE(gInfo->nodeDistPages);
+        for (i = 0; i <= gInfo->queuePage; i++)
+            FREE(gInfo->queuePages[i]);
+        FREE(gInfo->queuePages);
+        st_free_table(pathTable);
+        goto OUT_OF_MEM;
     }
 
     nodeStat = gInfo->currentNodeDistPage + gInfo->nodeDistPageIndex;
@@ -1098,22 +1110,24 @@ CreatePathTable(
 
     insertValue = st_insert(pathTable, N, nodeStat);
     if (insertValue == ST_OUT_OF_MEM) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	for (i = 0; i <= gInfo->nodeDistPage; i++) FREE(gInfo->nodeDistPages[i]);
-	FREE(gInfo->nodeDistPages);
-	for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
-	FREE(gInfo->queuePages);
-	st_free_table(pathTable);
-	goto OUT_OF_MEM;
+        dd->errorCode = CUDD_MEMORY_OUT;
+        for (i = 0; i <= gInfo->nodeDistPage; i++)
+            FREE(gInfo->nodeDistPages[i]);
+        FREE(gInfo->nodeDistPages);
+        for (i = 0; i <= gInfo->queuePage; i++)
+            FREE(gInfo->queuePages[i]);
+        FREE(gInfo->queuePages);
+        st_free_table(pathTable);
+        goto OUT_OF_MEM;
     } else if (insertValue == 1) {
-	fprintf(fp, "Something wrong, the entry exists but didnt show up in st_lookup\n");
-	return(NULL);
+        fprintf(fp, "Something wrong, the entry exists but didnt show up in st_lookup\n");
+        return (NULL);
     }
 
     if (Cudd_IsComplement(node)) {
-	nodeStat->oddTopDist = 0;
+        nodeStat->oddTopDist = 0;
     } else {
-	nodeStat->evenTopDist = 0;
+        nodeStat->evenTopDist = 0;
     }
     numParents = 1;
     /* call the function that counts the distance of each node from the
@@ -1123,10 +1137,10 @@ CreatePathTable(
     gInfo->numCalls = 0;
 #endif
     CreateTopDist(dd, gInfo, pathTable, parentPage, parentQueueIndex, (int) topLen,
-		  childPage, childQueueIndex, numParents, fp);
+                  childPage, childQueueIndex, numParents, fp);
     if (dd->errorCode == CUDD_MEMORY_OUT) {
-	fprintf(fp, "Out of Memory and cant count path lengths\n");
-	goto OUT_OF_MEM;
+        fprintf(fp, "Out of Memory and cant count path lengths\n");
+        goto OUT_OF_MEM;
     }
 
 #ifdef DD_DEBUG
@@ -1135,17 +1149,18 @@ CreatePathTable(
     /* call the function that counts the distance of each node from the
      * constant
      */
-    if (!CreateBotDist(node, pathTable, pathLengthArray, fp)) return(NULL);
+    if (!CreateBotDist(node, pathTable, pathLengthArray, fp)) return (NULL);
 
     /* free BFS queue pages as no longer required */
-    for (i = 0; i <= gInfo->queuePage; i++) FREE(gInfo->queuePages[i]);
+    for (i = 0; i <= gInfo->queuePage; i++)
+        FREE(gInfo->queuePages[i]);
     FREE(gInfo->queuePages);
-    return(pathTable);
+    return (pathTable);
 
 OUT_OF_MEM:
     (void) fprintf(fp, "Out of Memory, cannot allocate pages\n");
     dd->errorCode = CUDD_MEMORY_OUT;
-    return(NULL);
+    return (NULL);
 
 } /*end of CreatePathTable */
 
@@ -1168,11 +1183,11 @@ OUT_OF_MEM:
 ******************************************************************************/
 static unsigned int
 AssessPathLength(
-  unsigned int * pathLengthArray /* array determining number of nodes belonging to the different path lengths */,
-  int  threshold /* threshold to determine maximum allowable nodes in the subset */,
-  int  numVars /* maximum number of variables */,
-  unsigned int * excess /* number of nodes labeled maxpath required in the subset */,
-  FILE *fp /* where to write messages */)
+    unsigned int* pathLengthArray /* array determining number of nodes belonging to the different path lengths */,
+    int threshold /* threshold to determine maximum allowable nodes in the subset */,
+    int numVars /* maximum number of variables */,
+    unsigned int* excess /* number of nodes labeled maxpath required in the subset */,
+    FILE* fp /* where to write messages */)
 {
     unsigned int i, maxpath;
     int temp;
@@ -1183,27 +1198,27 @@ AssessPathLength(
     /* quit loop if i reaches max number of variables or if temp reaches
      * below zero
      */
-    while ((i < (unsigned) numVars+1) && (temp > 0)) {
-	if (pathLengthArray[i] > 0) {
-	    maxpath = i;
-	    temp = temp - pathLengthArray[i];
-	}
-	i++;
+    while ((i < (unsigned) numVars + 1) && (temp > 0)) {
+        if (pathLengthArray[i] > 0) {
+            maxpath = i;
+            temp = temp - pathLengthArray[i];
+        }
+        i++;
     }
     /* if all nodes of max path are needed */
     if (temp >= 0) {
-	maxpath++; /* now maxpath  becomes the next maxppath or max number
+        maxpath++; /* now maxpath  becomes the next maxppath or max number
 		      of variables */
-	*excess = 0;
+        *excess = 0;
     } else { /* normal case when subset required is less than size of
 		original BDD */
-	*excess = temp + pathLengthArray[maxpath];
+        *excess = temp + pathLengthArray[maxpath];
     }
 
     if (maxpath == 0) {
-	fprintf(fp, "Path Length array seems to be all zeroes, check\n");
+        fprintf(fp, "Path Length array seems to be all zeroes, check\n");
     }
-    return(maxpath);
+    return (maxpath);
 
 } /* end of AssessPathLength */
 
@@ -1250,40 +1265,40 @@ AssessPathLength(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 BuildSubsetBdd(
-  DdManager * dd /* DD manager */,
-  GlobalInfo_t *gInfo /* global information */,
-  st_table * pathTable /* path table with path lengths and computed results */,
-  DdNode * node /* current node */,
-  struct AssortedInfo * info /* assorted information structure */,
-  st_table * subsetNodeTable /* table storing computed results */)
+    DdManager* dd /* DD manager */,
+    GlobalInfo_t* gInfo /* global information */,
+    st_table* pathTable /* path table with path lengths and computed results */,
+    DdNode* node /* current node */,
+    struct AssortedInfo* info /* assorted information structure */,
+    st_table* subsetNodeTable /* table storing computed results */)
 {
     DdNode *N, *Nv, *Nnv;
     DdNode *ThenBranch, *ElseBranch, *childBranch;
     DdNode *child, *regChild, *regNnv = NULL, *regNv = NULL;
     NodeDist_t *nodeStatNv, *nodeStat, *nodeStatNnv;
     DdNode *neW, *topv, *regNew;
-    char *entry;
+    char* entry;
     unsigned int topid;
     unsigned int childPathLength, oddLen, evenLen, NnvPathLength = -1, NvPathLength = -1;
     unsigned int NvBotDist, NnvBotDist;
     int tiebreakChild;
-    int  processingDone, thenDone, elseDone;
+    int processingDone, thenDone, elseDone;
 
-    DdNode *zero = Cudd_Not(DD_ONE(dd));
+    DdNode* zero = Cudd_Not(DD_ONE(dd));
 #ifdef DD_DEBUG
     gInfo->numCalls++;
 #endif
     if (Cudd_IsConstant(node))
-	return(node);
+        return (node);
 
     N = Cudd_Regular(node);
     /* Find node in table. */
     if (!st_lookup(pathTable, N, &nodeStat)) {
-	(void) fprintf(dd->err, "Something wrong, node must be in table \n");
-	dd->errorCode = CUDD_INTERNAL_ERROR;
-	return(NULL);
+        (void) fprintf(dd->err, "Something wrong, node must be in table \n");
+        dd->errorCode = CUDD_INTERNAL_ERROR;
+        return (NULL);
     }
     /* If the node in the table has been visited, then return the corresponding
     ** Dd. Since a node can become a subset of itself, its
@@ -1295,22 +1310,22 @@ BuildSubsetBdd(
 
     /* If this node is reached with an odd parity, get odd parity results. */
     if (Cudd_IsComplement(node)) {
-	if  (nodeStat->compResult != NULL) {
+        if (nodeStat->compResult != NULL) {
 #ifdef DD_DEBUG
-	    gInfo->hits++;
+            gInfo->hits++;
 #endif
-	    return(nodeStat->compResult);
-	}
+            return (nodeStat->compResult);
+        }
     } else {
-	/* if this node is reached with an even parity, get even parity
+        /* if this node is reached with an even parity, get even parity
 	 * results
 	 */
-	if (nodeStat->regResult != NULL) {
+        if (nodeStat->regResult != NULL) {
 #ifdef DD_DEBUG
-	    gInfo->hits++;
+            gInfo->hits++;
 #endif
-	    return(nodeStat->regResult);
-	}
+            return (nodeStat->regResult);
+        }
     }
 
 
@@ -1331,217 +1346,215 @@ BuildSubsetBdd(
     ElseBranch = NULL;
     /* if then child constant, branch is the child */
     if (Cudd_IsConstant(Nv)) {
-	/*shortest path found */
-	if ((Nv == DD_ONE(dd)) && (info->findShortestPath)) {
-	    info->findShortestPath = 0;
-	}
+        /*shortest path found */
+        if ((Nv == DD_ONE(dd)) && (info->findShortestPath)) {
+            info->findShortestPath = 0;
+        }
 
-	ThenBranch = Nv;
-	cuddRef(ThenBranch);
-	if (ThenBranch == NULL) {
-	    return(NULL);
-	}
+        ThenBranch = Nv;
+        cuddRef(ThenBranch);
+        if (ThenBranch == NULL) {
+            return (NULL);
+        }
 
-	thenDone++;
-	processingDone++;
-	NvBotDist = MAXSHORTINT;
+        thenDone++;
+        processingDone++;
+        NvBotDist = MAXSHORTINT;
     } else {
-	/* Derive regular child for table lookup. */
-	regNv = Cudd_Regular(Nv);
-	/* Get node data for shortest path length. */
-	if (!st_lookup(pathTable, regNv, &nodeStatNv) ) {
-	    (void) fprintf(dd->err, "Something wrong, node must be in table\n");
-	    dd->errorCode = CUDD_INTERNAL_ERROR;
-	    return(NULL);
-	}
-	/* Derive shortest path length for child. */
-	if ((nodeStatNv->oddTopDist != MAXSHORTINT) &&
-	    (nodeStatNv->oddBotDist != MAXSHORTINT)) {
-	    oddLen = (nodeStatNv->oddTopDist + nodeStatNv->oddBotDist);
-	} else {
-	    oddLen = MAXSHORTINT;
-	}
+        /* Derive regular child for table lookup. */
+        regNv = Cudd_Regular(Nv);
+        /* Get node data for shortest path length. */
+        if (!st_lookup(pathTable, regNv, &nodeStatNv)) {
+            (void) fprintf(dd->err, "Something wrong, node must be in table\n");
+            dd->errorCode = CUDD_INTERNAL_ERROR;
+            return (NULL);
+        }
+        /* Derive shortest path length for child. */
+        if ((nodeStatNv->oddTopDist != MAXSHORTINT) &&
+            (nodeStatNv->oddBotDist != MAXSHORTINT)) {
+            oddLen = (nodeStatNv->oddTopDist + nodeStatNv->oddBotDist);
+        } else {
+            oddLen = MAXSHORTINT;
+        }
 
-	if ((nodeStatNv->evenTopDist != MAXSHORTINT) &&
-	    (nodeStatNv->evenBotDist != MAXSHORTINT)) {
-	    evenLen = (nodeStatNv->evenTopDist +nodeStatNv->evenBotDist);
-	} else {
-	    evenLen = MAXSHORTINT;
-	}
+        if ((nodeStatNv->evenTopDist != MAXSHORTINT) &&
+            (nodeStatNv->evenBotDist != MAXSHORTINT)) {
+            evenLen = (nodeStatNv->evenTopDist + nodeStatNv->evenBotDist);
+        } else {
+            evenLen = MAXSHORTINT;
+        }
 
-	NvPathLength = (oddLen <= evenLen) ? oddLen : evenLen;
-	NvBotDist = (oddLen <= evenLen) ? nodeStatNv->oddBotDist:
-						   nodeStatNv->evenBotDist;
+        NvPathLength = (oddLen <= evenLen) ? oddLen : evenLen;
+        NvBotDist = (oddLen <= evenLen) ? nodeStatNv->oddBotDist : nodeStatNv->evenBotDist;
     }
     /* if else child constant, branch is the child */
     if (Cudd_IsConstant(Nnv)) {
-	/*shortest path found */
-	if ((Nnv == DD_ONE(dd)) && (info->findShortestPath)) {
-	    info->findShortestPath = 0;
-	}
+        /*shortest path found */
+        if ((Nnv == DD_ONE(dd)) && (info->findShortestPath)) {
+            info->findShortestPath = 0;
+        }
 
-	ElseBranch = Nnv;
-	cuddRef(ElseBranch);
-	if (ElseBranch == NULL) {
-	    return(NULL);
-	}
+        ElseBranch = Nnv;
+        cuddRef(ElseBranch);
+        if (ElseBranch == NULL) {
+            return (NULL);
+        }
 
-	elseDone++;
-	processingDone++;
-	NnvBotDist = MAXSHORTINT;
+        elseDone++;
+        processingDone++;
+        NnvBotDist = MAXSHORTINT;
     } else {
-	/* Derive regular child for table lookup. */
-	regNnv = Cudd_Regular(Nnv);
-	/* Get node data for shortest path length. */
-	if (!st_lookup(pathTable, regNnv, &nodeStatNnv) ) {
-	    (void) fprintf(dd->err, "Something wrong, node must be in table\n");
-	    dd->errorCode = CUDD_INTERNAL_ERROR;
-	    return(NULL);
-	}
-	/* Derive shortest path length for child. */
-	if ((nodeStatNnv->oddTopDist != MAXSHORTINT) &&
-	    (nodeStatNnv->oddBotDist != MAXSHORTINT)) {
-	    oddLen = (nodeStatNnv->oddTopDist + nodeStatNnv->oddBotDist);
-	} else {
-	    oddLen = MAXSHORTINT;
-	}
+        /* Derive regular child for table lookup. */
+        regNnv = Cudd_Regular(Nnv);
+        /* Get node data for shortest path length. */
+        if (!st_lookup(pathTable, regNnv, &nodeStatNnv)) {
+            (void) fprintf(dd->err, "Something wrong, node must be in table\n");
+            dd->errorCode = CUDD_INTERNAL_ERROR;
+            return (NULL);
+        }
+        /* Derive shortest path length for child. */
+        if ((nodeStatNnv->oddTopDist != MAXSHORTINT) &&
+            (nodeStatNnv->oddBotDist != MAXSHORTINT)) {
+            oddLen = (nodeStatNnv->oddTopDist + nodeStatNnv->oddBotDist);
+        } else {
+            oddLen = MAXSHORTINT;
+        }
 
-	if ((nodeStatNnv->evenTopDist != MAXSHORTINT) &&
-	    (nodeStatNnv->evenBotDist != MAXSHORTINT)) {
-	    evenLen = (nodeStatNnv->evenTopDist +nodeStatNnv->evenBotDist);
-	} else {
-	    evenLen = MAXSHORTINT;
-	}
+        if ((nodeStatNnv->evenTopDist != MAXSHORTINT) &&
+            (nodeStatNnv->evenBotDist != MAXSHORTINT)) {
+            evenLen = (nodeStatNnv->evenTopDist + nodeStatNnv->evenBotDist);
+        } else {
+            evenLen = MAXSHORTINT;
+        }
 
-	NnvPathLength = (oddLen <= evenLen) ? oddLen : evenLen;
-	NnvBotDist = (oddLen <= evenLen) ? nodeStatNnv->oddBotDist :
-						   nodeStatNnv->evenBotDist;
+        NnvPathLength = (oddLen <= evenLen) ? oddLen : evenLen;
+        NnvBotDist = (oddLen <= evenLen) ? nodeStatNnv->oddBotDist : nodeStatNnv->evenBotDist;
     }
 
     tiebreakChild = (NvBotDist <= NnvBotDist) ? 1 : 0;
     /* while both children not processed */
     while (processingDone != 2) {
-	if (!processingDone) {
-	    /* if no child processed */
-	    /* pick the child with shortest path length and record which one
+        if (!processingDone) {
+            /* if no child processed */
+            /* pick the child with shortest path length and record which one
 	     * picked
 	     */
-	    if ((NvPathLength < NnvPathLength) ||
-		((NvPathLength == NnvPathLength) && (tiebreakChild == 1))) {
-		child = Nv;
-		regChild = regNv;
-		thenDone = 1;
-		childPathLength = NvPathLength;
-	    } else {
-		child = Nnv;
-		regChild = regNnv;
-		elseDone = 1;
-		childPathLength = NnvPathLength;
-	    } /* then path length less than else path length */
-	} else {
-	    /* if one child processed, process the other */
-	    if (thenDone) {
-		child = Nnv;
-		regChild = regNnv;
-		elseDone = 1;
-		childPathLength = NnvPathLength;
-	    } else {
-		child = Nv;
-		regChild = regNv;
-		thenDone = 1;
-		childPathLength = NvPathLength;
-	    } /* end of else pick the Then child if ELSE child processed */
-	} /* end of else one child has been processed */
+            if ((NvPathLength < NnvPathLength) ||
+                ((NvPathLength == NnvPathLength) && (tiebreakChild == 1))) {
+                child = Nv;
+                regChild = regNv;
+                thenDone = 1;
+                childPathLength = NvPathLength;
+            } else {
+                child = Nnv;
+                regChild = regNnv;
+                elseDone = 1;
+                childPathLength = NnvPathLength;
+            } /* then path length less than else path length */
+        } else {
+            /* if one child processed, process the other */
+            if (thenDone) {
+                child = Nnv;
+                regChild = regNnv;
+                elseDone = 1;
+                childPathLength = NnvPathLength;
+            } else {
+                child = Nv;
+                regChild = regNv;
+                thenDone = 1;
+                childPathLength = NvPathLength;
+            } /* end of else pick the Then child if ELSE child processed */
+        }     /* end of else one child has been processed */
 
-	/* ignore (replace with constant 0) all nodes which lie on paths larger
+        /* ignore (replace with constant 0) all nodes which lie on paths larger
 	 * than the maximum length of the path required
 	 */
-	if (childPathLength > info->maxpath) {
-	    /* record nodes visited */
-	    childBranch = zero;
-	} else {
-	    if (childPathLength < info->maxpath) {
-		if (info->findShortestPath) {
-		    info->findShortestPath = 0;
-		}
-		childBranch = BuildSubsetBdd(dd, gInfo, pathTable, child, info,
-					     subsetNodeTable);
+        if (childPathLength > info->maxpath) {
+            /* record nodes visited */
+            childBranch = zero;
+        } else {
+            if (childPathLength < info->maxpath) {
+                if (info->findShortestPath) {
+                    info->findShortestPath = 0;
+                }
+                childBranch = BuildSubsetBdd(dd, gInfo, pathTable, child, info,
+                                             subsetNodeTable);
 
-	    } else { /* Case: path length of node = maxpath */
-		/* If the node labeled with maxpath is found in the
+            } else { /* Case: path length of node = maxpath */
+                /* If the node labeled with maxpath is found in the
 		** maxpathTable, use it to build the subset BDD.  */
-		if (st_lookup(info->maxpathTable, regChild, &entry)) {
-		    /* When a node that is already been chosen is hit,
+                if (st_lookup(info->maxpathTable, regChild, &entry)) {
+                    /* When a node that is already been chosen is hit,
 		    ** the quest for a complete path is over.  */
-		    if (info->findShortestPath) {
-			info->findShortestPath = 0;
-		    }
-		    childBranch = BuildSubsetBdd(dd, gInfo, pathTable, child, info,
-						 subsetNodeTable);
-		} else {
-		    /* If node is not found in the maxpathTable and
+                    if (info->findShortestPath) {
+                        info->findShortestPath = 0;
+                    }
+                    childBranch = BuildSubsetBdd(dd, gInfo, pathTable, child, info,
+                                                 subsetNodeTable);
+                } else {
+                    /* If node is not found in the maxpathTable and
 		    ** the threshold has been reached, then if the
 		    ** path needs to be completed, continue. Else
 		    ** replace the node with a zero.  */
-		    if (info->thresholdReached <= 0) {
-			if (info->findShortestPath) {
-			    if (st_insert(info->maxpathTable, regChild,
-					  NULL) == ST_OUT_OF_MEM) {
-				dd->errorCode = CUDD_MEMORY_OUT;
-				(void) fprintf(dd->err, "OUT of memory\n");
-				info->thresholdReached = 0;
-				childBranch = zero;
-			    } else {
-				info->thresholdReached--;
-				childBranch = BuildSubsetBdd(dd, gInfo, pathTable,
-						    child, info,subsetNodeTable);
-			    }
-			} else { /* not find shortest path, we dont need this
+                    if (info->thresholdReached <= 0) {
+                        if (info->findShortestPath) {
+                            if (st_insert(info->maxpathTable, regChild,
+                                          NULL) == ST_OUT_OF_MEM) {
+                                dd->errorCode = CUDD_MEMORY_OUT;
+                                (void) fprintf(dd->err, "OUT of memory\n");
+                                info->thresholdReached = 0;
+                                childBranch = zero;
+                            } else {
+                                info->thresholdReached--;
+                                childBranch = BuildSubsetBdd(dd, gInfo, pathTable,
+                                                             child, info, subsetNodeTable);
+                            }
+                        } else { /* not find shortest path, we dont need this
 				    node */
-			    childBranch = zero;
-			}
-		    } else { /* Threshold hasn't been reached,
+                            childBranch = zero;
+                        }
+                    } else { /* Threshold hasn't been reached,
 			     ** need the node. */
-			if (st_insert(info->maxpathTable, regChild,
-				      NULL) == ST_OUT_OF_MEM) {
-			    dd->errorCode = CUDD_MEMORY_OUT;
-			    (void) fprintf(dd->err, "OUT of memory\n");
-			    info->thresholdReached = 0;
-			    childBranch = zero;
-			} else {
-			    info->thresholdReached--;
-			    if (info->thresholdReached <= 0) {
-				info->findShortestPath = 1;
-			    }
-			    childBranch = BuildSubsetBdd(dd, gInfo, pathTable,
-						 child, info, subsetNodeTable);
+                        if (st_insert(info->maxpathTable, regChild,
+                                      NULL) == ST_OUT_OF_MEM) {
+                            dd->errorCode = CUDD_MEMORY_OUT;
+                            (void) fprintf(dd->err, "OUT of memory\n");
+                            info->thresholdReached = 0;
+                            childBranch = zero;
+                        } else {
+                            info->thresholdReached--;
+                            if (info->thresholdReached <= 0) {
+                                info->findShortestPath = 1;
+                            }
+                            childBranch = BuildSubsetBdd(dd, gInfo, pathTable,
+                                                         child, info, subsetNodeTable);
 
-			} /* end of st_insert successful */
-		    } /* end of threshold hasnt been reached yet */
-		} /* end of else node not found in maxpath table */
-	    } /* end of if (path length of node = maxpath) */
-	} /* end if !(childPathLength > maxpath) */
-	if (childBranch == NULL) {
-	    /* deref other stuff incase reordering has taken place */
-	    if (ThenBranch != NULL) {
-		Cudd_RecursiveDeref(dd, ThenBranch);
-		ThenBranch = NULL;
-	    }
-	    if (ElseBranch != NULL) {
-		Cudd_RecursiveDeref(dd, ElseBranch);
-		ElseBranch = NULL;
-	    }
-	    return(NULL);
-	}
+                        } /* end of st_insert successful */
+                    }     /* end of threshold hasnt been reached yet */
+                }         /* end of else node not found in maxpath table */
+            }             /* end of if (path length of node = maxpath) */
+        }                 /* end if !(childPathLength > maxpath) */
+        if (childBranch == NULL) {
+            /* deref other stuff incase reordering has taken place */
+            if (ThenBranch != NULL) {
+                Cudd_RecursiveDeref(dd, ThenBranch);
+                ThenBranch = NULL;
+            }
+            if (ElseBranch != NULL) {
+                Cudd_RecursiveDeref(dd, ElseBranch);
+                ElseBranch = NULL;
+            }
+            return (NULL);
+        }
 
-	cuddRef(childBranch);
+        cuddRef(childBranch);
 
-	if (child == Nv) {
-	    ThenBranch = childBranch;
-	} else {
-	    ElseBranch = childBranch;
-	}
-	processingDone++;
+        if (child == Nv) {
+            ThenBranch = childBranch;
+        } else {
+            ElseBranch = childBranch;
+        }
+        processingDone++;
 
     } /*end of while processing Nv, Nnv */
 
@@ -1551,7 +1564,7 @@ BuildSubsetBdd(
     cuddRef(topv);
     neW = cuddBddIteRecur(dd, topv, ThenBranch, ElseBranch);
     if (neW != NULL) {
-	cuddRef(neW);
+        cuddRef(neW);
     }
     Cudd_RecursiveDeref(dd, topv);
     Cudd_RecursiveDeref(dd, ThenBranch);
@@ -1560,69 +1573,69 @@ BuildSubsetBdd(
 
     /* Hard Limit of threshold has been imposed */
     if (subsetNodeTable != NIL(st_table)) {
-	/* check if a new node is created */
-	regNew = Cudd_Regular(neW);
-	/* subset node table keeps all new nodes that have been created to keep
+        /* check if a new node is created */
+        regNew = Cudd_Regular(neW);
+        /* subset node table keeps all new nodes that have been created to keep
 	 * a running count of how many nodes have been built in the subset.
 	 */
-	if (!st_lookup(subsetNodeTable, regNew, &entry)) {
-	    if (!Cudd_IsConstant(regNew)) {
-		if (st_insert(subsetNodeTable, regNew,
-			      NULL) == ST_OUT_OF_MEM) {
-		    (void) fprintf(dd->err, "Out of memory\n");
-		    return (NULL);
-		}
-		if (st_count(subsetNodeTable) > info->threshold) {
-		    info->thresholdReached = 0;
-		}
-	    }
-	}
+        if (!st_lookup(subsetNodeTable, regNew, &entry)) {
+            if (!Cudd_IsConstant(regNew)) {
+                if (st_insert(subsetNodeTable, regNew,
+                              NULL) == ST_OUT_OF_MEM) {
+                    (void) fprintf(dd->err, "Out of memory\n");
+                    return (NULL);
+                }
+                if (st_count(subsetNodeTable) > info->threshold) {
+                    info->thresholdReached = 0;
+                }
+            }
+        }
     }
 
 
     if (neW == NULL) {
-	return(NULL);
+        return (NULL);
     } else {
-	/*store computed result in regular form*/
-	if (Cudd_IsComplement(node)) {
-	    nodeStat->compResult = neW;
-	    cuddRef(nodeStat->compResult);
-	    /* if the new node is the same as the corresponding node in the
+        /*store computed result in regular form*/
+        if (Cudd_IsComplement(node)) {
+            nodeStat->compResult = neW;
+            cuddRef(nodeStat->compResult);
+            /* if the new node is the same as the corresponding node in the
 	     * original bdd then its complement need not be computed as it
 	     * cannot be larger than the node itself
 	     */
-	    if (neW == node) {
+            if (neW == node) {
 #ifdef DD_DEBUG
-		gInfo->thishit++;
+                gInfo->thishit++;
 #endif
-		/* if a result for the node has already been computed, then
+                /* if a result for the node has already been computed, then
 		 * it can only be smaller than teh node itself. hence store
 		 * the node result in order not to break recombination
 		 */
-		if (nodeStat->regResult != NULL) {
-		    Cudd_RecursiveDeref(dd, nodeStat->regResult);
-		}
-		nodeStat->regResult = Cudd_Not(neW);
-		cuddRef(nodeStat->regResult);
-	    }
+                if (nodeStat->regResult != NULL) {
+                    Cudd_RecursiveDeref(dd, nodeStat->regResult);
+                }
+                nodeStat->regResult = Cudd_Not(neW);
+                cuddRef(nodeStat->regResult);
+            }
 
-	} else {
-	    nodeStat->regResult = neW;
-	    cuddRef(nodeStat->regResult);
-	    if (neW == node) {
+        } else {
+            nodeStat->regResult = neW;
+            cuddRef(nodeStat->regResult);
+            if (neW == node) {
 #ifdef DD_DEBUG
-		gInfo->thishit++;
+                gInfo->thishit++;
 #endif
-		if (nodeStat->compResult != NULL) {
-		    Cudd_RecursiveDeref(dd, nodeStat->compResult);
-		}
-		nodeStat->compResult = Cudd_Not(neW);
-		cuddRef(nodeStat->compResult);
-	    }
-	}
+                if (nodeStat->compResult != NULL) {
+                    Cudd_RecursiveDeref(dd, nodeStat->compResult);
+                }
+                nodeStat->compResult = Cudd_Not(neW);
+                cuddRef(nodeStat->compResult);
+            }
+        }
 
-	cuddDeref(neW);
-	return(neW);
+        cuddDeref(neW);
+        return (neW);
     } /* end of else i.e. Subset != NULL */
 } /* end of BuildSubsetBdd */
 
@@ -1640,21 +1653,21 @@ BuildSubsetBdd(
 ******************************************************************************/
 static enum st_retval
 stPathTableDdFree(
-  char * key,
-  char * value,
-  char * arg)
+    char* key,
+    char* value,
+    char* arg)
 {
-    NodeDist_t *nodeStat;
-    DdManager *dd;
+    NodeDist_t* nodeStat;
+    DdManager* dd;
 
-    nodeStat = (NodeDist_t *)value;
-    dd = (DdManager *)arg;
+    nodeStat = (NodeDist_t*) value;
+    dd = (DdManager*) arg;
     if (nodeStat->regResult != NULL) {
-	Cudd_RecursiveDeref(dd, nodeStat->regResult);
+        Cudd_RecursiveDeref(dd, nodeStat->regResult);
     }
     if (nodeStat->compResult != NULL) {
-	Cudd_RecursiveDeref(dd, nodeStat->compResult);
+        Cudd_RecursiveDeref(dd, nodeStat->compResult);
     }
-    return(ST_CONTINUE);
+    return (ST_CONTINUE);
 
 } /* end of stPathTableFree */

@@ -70,8 +70,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -93,7 +93,7 @@
 static char rcsid[] DD_UNUSED = "$Id: cuddApa.c,v 1.20 2012/02/05 01:07:18 fabio Exp $";
 #endif
 
-static	DdNode	*background, *zero;
+static DdNode *background, *zero;
 
 /*---------------------------------------------------------------------------*/
 /* Macro declarations                                                        */
@@ -109,8 +109,8 @@ extern "C" {
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static DdApaNumber cuddApaCountMintermAux (DdNode * node, int digits, DdApaNumber max, DdApaNumber min, st_table * table);
-static enum st_retval cuddApaStCountfree (char * key, char * value, char * arg);
+static DdApaNumber cuddApaCountMintermAux(DdNode* node, int digits, DdApaNumber max, DdApaNumber min, st_table* table);
+static enum st_retval cuddApaStCountfree(char* key, char* value, char* arg);
 
 /**AutomaticEnd***************************************************************/
 
@@ -139,16 +139,15 @@ static enum st_retval cuddApaStCountfree (char * key, char * value, char * arg);
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_ApaNumberOfDigits(
-  int  binaryDigits)
+int Cudd_ApaNumberOfDigits(
+    int binaryDigits)
 {
     int digits;
 
     digits = binaryDigits / DD_APA_BITS;
     if ((digits * DD_APA_BITS) != binaryDigits)
-	digits++;
-    return(digits);
+        digits++;
+    return (digits);
 
 } /* end of Cudd_ApaNumberOfDigits */
 
@@ -168,9 +167,9 @@ Cudd_ApaNumberOfDigits(
 ******************************************************************************/
 DdApaNumber
 Cudd_NewApaNumber(
-  int  digits)
+    int digits)
 {
-    return(ALLOC(DdApaDigit, digits));
+    return (ALLOC(DdApaDigit, digits));
 
 } /* end of Cudd_NewApaNumber */
 
@@ -186,16 +185,15 @@ Cudd_NewApaNumber(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Cudd_ApaCopy(
-  int  digits,
-  DdApaNumber  source,
-  DdApaNumber  dest)
+void Cudd_ApaCopy(
+    int digits,
+    DdApaNumber source,
+    DdApaNumber dest)
 {
     int i;
 
     for (i = 0; i < digits; i++) {
-	dest[i] = source[i];
+        dest[i] = source[i];
     }
 
 } /* end of Cudd_ApaCopy */
@@ -215,19 +213,19 @@ Cudd_ApaCopy(
 ******************************************************************************/
 DdApaDigit
 Cudd_ApaAdd(
-  int  digits,
-  DdApaNumber  a,
-  DdApaNumber  b,
-  DdApaNumber  sum)
+    int digits,
+    DdApaNumber a,
+    DdApaNumber b,
+    DdApaNumber sum)
 {
     int i;
     DdApaDoubleDigit partial = 0;
 
     for (i = digits - 1; i >= 0; i--) {
-	partial = a[i] + b[i] + DD_MSDIGIT(partial);
-	sum[i] = (DdApaDigit) DD_LSDIGIT(partial);
+        partial = a[i] + b[i] + DD_MSDIGIT(partial);
+        sum[i] = (DdApaDigit) DD_LSDIGIT(partial);
     }
-    return((DdApaDigit) DD_MSDIGIT(partial));
+    return ((DdApaDigit) DD_MSDIGIT(partial));
 
 } /* end of Cudd_ApaAdd */
 
@@ -247,19 +245,19 @@ Cudd_ApaAdd(
 ******************************************************************************/
 DdApaDigit
 Cudd_ApaSubtract(
-  int  digits,
-  DdApaNumber  a,
-  DdApaNumber  b,
-  DdApaNumber  diff)
+    int digits,
+    DdApaNumber a,
+    DdApaNumber b,
+    DdApaNumber diff)
 {
     int i;
     DdApaDoubleDigit partial = DD_APA_BASE;
 
     for (i = digits - 1; i >= 0; i--) {
-	partial = DD_MSDIGIT(partial) + DD_APA_MASK + a[i] - b[i];
-	diff[i] = (DdApaDigit) DD_LSDIGIT(partial);
+        partial = DD_MSDIGIT(partial) + DD_APA_MASK + a[i] - b[i];
+        diff[i] = (DdApaDigit) DD_LSDIGIT(partial);
     }
-    return((DdApaDigit) DD_MSDIGIT(partial) - 1);
+    return ((DdApaDigit) DD_MSDIGIT(partial) - 1);
 
 } /* end of Cudd_ApaSubtract */
 
@@ -277,10 +275,10 @@ Cudd_ApaSubtract(
 ******************************************************************************/
 DdApaDigit
 Cudd_ApaShortDivision(
-  int  digits,
-  DdApaNumber  dividend,
-  DdApaDigit  divisor,
-  DdApaNumber  quotient)
+    int digits,
+    DdApaNumber dividend,
+    DdApaDigit divisor,
+    DdApaNumber quotient)
 {
     int i;
     DdApaDigit remainder;
@@ -288,12 +286,12 @@ Cudd_ApaShortDivision(
 
     remainder = 0;
     for (i = 0; i < digits; i++) {
-	partial = remainder * DD_APA_BASE + dividend[i];
-	quotient[i] = (DdApaDigit) (partial/(DdApaDoubleDigit)divisor);
-	remainder = (DdApaDigit) (partial % divisor);
+        partial = remainder * DD_APA_BASE + dividend[i];
+        quotient[i] = (DdApaDigit)(partial / (DdApaDoubleDigit) divisor);
+        remainder = (DdApaDigit)(partial % divisor);
     }
 
-    return(remainder);
+    return (remainder);
 
 } /* end of Cudd_ApaShortDivision */
 
@@ -318,10 +316,10 @@ Cudd_ApaShortDivision(
 ******************************************************************************/
 unsigned int
 Cudd_ApaIntDivision(
-  int  digits,
-  DdApaNumber dividend,
-  unsigned int divisor,
-  DdApaNumber quotient)
+    int digits,
+    DdApaNumber dividend,
+    unsigned int divisor,
+    DdApaNumber quotient)
 {
     int i;
     double partial;
@@ -329,12 +327,12 @@ Cudd_ApaIntDivision(
     double ddiv = (double) divisor;
 
     for (i = 0; i < digits; i++) {
-	partial = (double) remainder * DD_APA_BASE + dividend[i];
-	quotient[i] = (DdApaDigit) (partial / ddiv);
-	remainder = (unsigned int) (partial - ((double)quotient[i] * ddiv));
+        partial = (double) remainder * DD_APA_BASE + dividend[i];
+        quotient[i] = (DdApaDigit)(partial / ddiv);
+        remainder = (unsigned int) (partial - ((double) quotient[i] * ddiv));
     }
 
-    return(remainder);
+    return (remainder);
 
 } /* end of Cudd_ApaIntDivision */
 
@@ -353,17 +351,16 @@ Cudd_ApaIntDivision(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Cudd_ApaShiftRight(
-  int  digits,
-  DdApaDigit  in,
-  DdApaNumber  a,
-  DdApaNumber  b)
+void Cudd_ApaShiftRight(
+    int digits,
+    DdApaDigit in,
+    DdApaNumber a,
+    DdApaNumber b)
 {
     int i;
 
     for (i = digits - 1; i > 0; i--) {
-	b[i] = (a[i] >> 1) | ((a[i-1] & 1) << (DD_APA_BITS - 1));
+        b[i] = (a[i] >> 1) | ((a[i - 1] & 1) << (DD_APA_BITS - 1));
     }
     b[0] = (a[0] >> 1) | (in << (DD_APA_BITS - 1));
 
@@ -381,16 +378,15 @@ Cudd_ApaShiftRight(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Cudd_ApaSetToLiteral(
-  int  digits,
-  DdApaNumber  number,
-  DdApaDigit  literal)
+void Cudd_ApaSetToLiteral(
+    int digits,
+    DdApaNumber number,
+    DdApaDigit literal)
 {
     int i;
 
     for (i = 0; i < digits - 1; i++)
-	number[i] = 0;
+        number[i] = 0;
     number[digits - 1] = literal;
 
 } /* end of Cudd_ApaSetToLiteral */
@@ -409,17 +405,16 @@ Cudd_ApaSetToLiteral(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Cudd_ApaPowerOfTwo(
-  int  digits,
-  DdApaNumber  number,
-  int  power)
+void Cudd_ApaPowerOfTwo(
+    int digits,
+    DdApaNumber number,
+    int power)
 {
     int i;
     int index;
 
     for (i = 0; i < digits; i++)
-	number[i] = 0;
+        number[i] = 0;
     i = digits - 1 - power / DD_APA_BITS;
     if (i < 0) return;
     index = power & (DD_APA_BITS - 1);
@@ -441,28 +436,31 @@ Cudd_ApaPowerOfTwo(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_ApaCompare(
-  int digitsFirst,
-  DdApaNumber  first,
-  int digitsSecond,
-  DdApaNumber  second)
+int Cudd_ApaCompare(
+    int digitsFirst,
+    DdApaNumber first,
+    int digitsSecond,
+    DdApaNumber second)
 {
     int i;
     int firstNZ, secondNZ;
 
     /* Find first non-zero in both numbers. */
     for (firstNZ = 0; firstNZ < digitsFirst; firstNZ++)
-	if (first[firstNZ] != 0) break;
+        if (first[firstNZ] != 0) break;
     for (secondNZ = 0; secondNZ < digitsSecond; secondNZ++)
-	if (second[secondNZ] != 0) break;
-    if (digitsFirst - firstNZ > digitsSecond - secondNZ) return(1);
-    else if (digitsFirst - firstNZ < digitsSecond - secondNZ) return(-1);
+        if (second[secondNZ] != 0) break;
+    if (digitsFirst - firstNZ > digitsSecond - secondNZ)
+        return (1);
+    else if (digitsFirst - firstNZ < digitsSecond - secondNZ)
+        return (-1);
     for (i = 0; i < digitsFirst - firstNZ; i++) {
-	if (first[firstNZ + i] > second[secondNZ + i]) return(1);
-	else if (first[firstNZ + i] < second[secondNZ + i]) return(-1);
+        if (first[firstNZ + i] > second[secondNZ + i])
+            return (1);
+        else if (first[firstNZ + i] < second[secondNZ + i])
+            return (-1);
     }
-    return(0);
+    return (0);
 
 } /* end of Cudd_ApaCompare */
 
@@ -481,33 +479,32 @@ Cudd_ApaCompare(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_ApaCompareRatios(
-  int digitsFirst,
-  DdApaNumber firstNum,
-  unsigned int firstDen,
-  int digitsSecond,
-  DdApaNumber secondNum,
-  unsigned int secondDen)
+int Cudd_ApaCompareRatios(
+    int digitsFirst,
+    DdApaNumber firstNum,
+    unsigned int firstDen,
+    int digitsSecond,
+    DdApaNumber secondNum,
+    unsigned int secondDen)
 {
     int result;
     DdApaNumber first, second;
     unsigned int firstRem, secondRem;
 
     first = Cudd_NewApaNumber(digitsFirst);
-    firstRem = Cudd_ApaIntDivision(digitsFirst,firstNum,firstDen,first);
+    firstRem = Cudd_ApaIntDivision(digitsFirst, firstNum, firstDen, first);
     second = Cudd_NewApaNumber(digitsSecond);
-    secondRem = Cudd_ApaIntDivision(digitsSecond,secondNum,secondDen,second);
-    result = Cudd_ApaCompare(digitsFirst,first,digitsSecond,second);
+    secondRem = Cudd_ApaIntDivision(digitsSecond, secondNum, secondDen, second);
+    result = Cudd_ApaCompare(digitsFirst, first, digitsSecond, second);
     FREE(first);
     FREE(second);
     if (result == 0) {
-	if ((double)firstRem/firstDen > (double)secondRem/secondDen)
-	    return(1);
-	else if ((double)firstRem/firstDen < (double)secondRem/secondDen)
-	    return(-1);
+        if ((double) firstRem / firstDen > (double) secondRem / secondDen)
+            return (1);
+        else if ((double) firstRem / firstDen < (double) secondRem / secondDen)
+            return (-1);
     }
-    return(result);
+    return (result);
 
 } /* end of Cudd_ApaCompareRatios */
 
@@ -524,20 +521,19 @@ Cudd_ApaCompareRatios(
   SeeAlso     [Cudd_ApaPrintDecimal Cudd_ApaPrintExponential]
 
 ******************************************************************************/
-int
-Cudd_ApaPrintHex(
-  FILE * fp,
-  int  digits,
-  DdApaNumber  number)
+int Cudd_ApaPrintHex(
+    FILE* fp,
+    int digits,
+    DdApaNumber number)
 {
     int i, result;
 
     for (i = 0; i < digits; i++) {
-	result = fprintf(fp,DD_APA_HEXPRINT,number[i]);
-	if (result == EOF)
-	    return(0);
+        result = fprintf(fp, DD_APA_HEXPRINT, number[i]);
+        if (result == EOF)
+            return (0);
     }
-    return(1);
+    return (1);
 
 } /* end of Cudd_ApaPrintHex */
 
@@ -554,47 +550,46 @@ Cudd_ApaPrintHex(
   SeeAlso     [Cudd_ApaPrintHex Cudd_ApaPrintExponential]
 
 ******************************************************************************/
-int
-Cudd_ApaPrintDecimal(
-  FILE * fp,
-  int  digits,
-  DdApaNumber  number)
+int Cudd_ApaPrintDecimal(
+    FILE* fp,
+    int digits,
+    DdApaNumber number)
 {
     int i, result;
     DdApaDigit remainder;
     DdApaNumber work;
-    unsigned char *decimal;
+    unsigned char* decimal;
     int leadingzero;
     int decimalDigits = (int) (digits * log10((double) DD_APA_BASE)) + 1;
 
     work = Cudd_NewApaNumber(digits);
     if (work == NULL)
-	return(0);
+        return (0);
     decimal = ALLOC(unsigned char, decimalDigits);
     if (decimal == NULL) {
-	FREE(work);
-	return(0);
+        FREE(work);
+        return (0);
     }
-    Cudd_ApaCopy(digits,number,work);
+    Cudd_ApaCopy(digits, number, work);
     for (i = decimalDigits - 1; i >= 0; i--) {
-	remainder = Cudd_ApaShortDivision(digits,work,(DdApaDigit) 10,work);
-	decimal[i] = (unsigned char) remainder;
+        remainder = Cudd_ApaShortDivision(digits, work, (DdApaDigit) 10, work);
+        decimal[i] = (unsigned char) remainder;
     }
     FREE(work);
 
     leadingzero = 1;
     for (i = 0; i < decimalDigits; i++) {
-	leadingzero = leadingzero && (decimal[i] == 0);
-	if ((!leadingzero) || (i == (decimalDigits - 1))) {
-	    result = fprintf(fp,"%1d",decimal[i]);
-	    if (result == EOF) {
-		FREE(decimal);
-		return(0);
-	    }
-	}
+        leadingzero = leadingzero && (decimal[i] == 0);
+        if ((!leadingzero) || (i == (decimalDigits - 1))) {
+            result = fprintf(fp, "%1d", decimal[i]);
+            if (result == EOF) {
+                FREE(decimal);
+                return (0);
+            }
+        }
     }
     FREE(decimal);
-    return(1);
+    return (1);
 
 } /* end of Cudd_ApaPrintDecimal */
 
@@ -611,50 +606,49 @@ Cudd_ApaPrintDecimal(
   SeeAlso     [Cudd_ApaPrintHex Cudd_ApaPrintDecimal]
 
 ******************************************************************************/
-int
-Cudd_ApaPrintExponential(
-  FILE * fp,
-  int  digits,
-  DdApaNumber  number,
-  int precision)
+int Cudd_ApaPrintExponential(
+    FILE* fp,
+    int digits,
+    DdApaNumber number,
+    int precision)
 {
     int i, first, last, result;
     DdApaDigit remainder;
     DdApaNumber work;
-    unsigned char *decimal;
+    unsigned char* decimal;
     int decimalDigits = (int) (digits * log10((double) DD_APA_BASE)) + 1;
 
     work = Cudd_NewApaNumber(digits);
     if (work == NULL)
-	return(0);
+        return (0);
     decimal = ALLOC(unsigned char, decimalDigits);
     if (decimal == NULL) {
-	FREE(work);
-	return(0);
+        FREE(work);
+        return (0);
     }
-    Cudd_ApaCopy(digits,number,work);
+    Cudd_ApaCopy(digits, number, work);
     first = decimalDigits - 1;
     for (i = decimalDigits - 1; i >= 0; i--) {
-	remainder = Cudd_ApaShortDivision(digits,work,(DdApaDigit) 10,work);
-	decimal[i] = (unsigned char) remainder;
-	if (remainder != 0) first = i; /* keep track of MS non-zero */
+        remainder = Cudd_ApaShortDivision(digits, work, (DdApaDigit) 10, work);
+        decimal[i] = (unsigned char) remainder;
+        if (remainder != 0) first = i; /* keep track of MS non-zero */
     }
     FREE(work);
     last = ddMin(first + precision, decimalDigits);
 
     for (i = first; i < last; i++) {
-	result = fprintf(fp,"%s%1d",i == first+1 ? "." : "", decimal[i]);
-	if (result == EOF) {
-	    FREE(decimal);
-	    return(0);
-	}
+        result = fprintf(fp, "%s%1d", i == first + 1 ? "." : "", decimal[i]);
+        if (result == EOF) {
+            FREE(decimal);
+            return (0);
+        }
     }
     FREE(decimal);
-    result = fprintf(fp,"e+%d",decimalDigits - first - 1);
+    result = fprintf(fp, "e+%d", decimalDigits - first - 1);
     if (result == EOF) {
-	return(0);
+        return (0);
     }
-    return(1);
+    return (1);
 
 } /* end of Cudd_ApaPrintExponential */
 
@@ -678,64 +672,64 @@ Cudd_ApaPrintExponential(
 ******************************************************************************/
 DdApaNumber
 Cudd_ApaCountMinterm(
-  DdManager * manager,
-  DdNode * node,
-  int  nvars,
-  int * digits)
+    DdManager* manager,
+    DdNode* node,
+    int nvars,
+    int* digits)
 {
-    DdApaNumber	max, min;
-    st_table	*table;
-    DdApaNumber	i,count;
+    DdApaNumber max, min;
+    st_table* table;
+    DdApaNumber i, count;
 
     background = manager->zero; /* [MP: it was manager->background] */
     zero = Cudd_Not(manager->one);
 
-    *digits = Cudd_ApaNumberOfDigits(nvars+1);
+    *digits = Cudd_ApaNumberOfDigits(nvars + 1);
     max = Cudd_NewApaNumber(*digits);
     if (max == NULL) {
-	return(NULL);
+        return (NULL);
     }
-    Cudd_ApaPowerOfTwo(*digits,max,nvars);
+    Cudd_ApaPowerOfTwo(*digits, max, nvars);
     min = Cudd_NewApaNumber(*digits);
     if (min == NULL) {
-	FREE(max);
-	return(NULL);
+        FREE(max);
+        return (NULL);
     }
-    Cudd_ApaSetToLiteral(*digits,min,0);
-    table = st_init_table(st_ptrcmp,st_ptrhash);
+    Cudd_ApaSetToLiteral(*digits, min, 0);
+    table = st_init_table(st_ptrcmp, st_ptrhash);
     if (table == NULL) {
-	FREE(max);
-	FREE(min);
-	return(NULL);
+        FREE(max);
+        FREE(min);
+        return (NULL);
     }
-    i = cuddApaCountMintermAux(Cudd_Regular(node),*digits,max,min,table);
+    i = cuddApaCountMintermAux(Cudd_Regular(node), *digits, max, min, table);
     if (i == NULL) {
-	FREE(max);
-	FREE(min);
-	st_foreach(table, cuddApaStCountfree, NULL);
-	st_free_table(table);
-	return(NULL);
+        FREE(max);
+        FREE(min);
+        st_foreach(table, cuddApaStCountfree, NULL);
+        st_free_table(table);
+        return (NULL);
     }
     count = Cudd_NewApaNumber(*digits);
     if (count == NULL) {
-	FREE(max);
-	FREE(min);
-	st_foreach(table, cuddApaStCountfree, NULL);
-	st_free_table(table);
-	if (Cudd_Regular(node)->ref == 1) FREE(i);
-	return(NULL);
+        FREE(max);
+        FREE(min);
+        st_foreach(table, cuddApaStCountfree, NULL);
+        st_free_table(table);
+        if (Cudd_Regular(node)->ref == 1) FREE(i);
+        return (NULL);
     }
     if (Cudd_IsComplement(node)) {
-	(void) Cudd_ApaSubtract(*digits,max,i,count);
+        (void) Cudd_ApaSubtract(*digits, max, i, count);
     } else {
-	Cudd_ApaCopy(*digits,i,count);
+        Cudd_ApaCopy(*digits, i, count);
     }
     FREE(max);
     FREE(min);
     st_foreach(table, cuddApaStCountfree, NULL);
     st_free_table(table);
     if (Cudd_Regular(node)->ref == 1) FREE(i);
-    return(count);
+    return (count);
 
 } /* end of Cudd_ApaCountMinterm */
 
@@ -753,26 +747,25 @@ Cudd_ApaCountMinterm(
   SeeAlso     [Cudd_ApaPrintMintermExp]
 
 ******************************************************************************/
-int
-Cudd_ApaPrintMinterm(
-  FILE * fp,
-  DdManager * dd,
-  DdNode * node,
-  int  nvars)
+int Cudd_ApaPrintMinterm(
+    FILE* fp,
+    DdManager* dd,
+    DdNode* node,
+    int nvars)
 {
     int digits;
     int result;
     DdApaNumber count;
 
-    count = Cudd_ApaCountMinterm(dd,node,nvars,&digits);
+    count = Cudd_ApaCountMinterm(dd, node, nvars, &digits);
     if (count == NULL)
-	return(0);
-    result = Cudd_ApaPrintDecimal(fp,digits,count);
+        return (0);
+    result = Cudd_ApaPrintDecimal(fp, digits, count);
     FREE(count);
-    if (fprintf(fp,"\n") == EOF) {
-	return(0);
+    if (fprintf(fp, "\n") == EOF) {
+        return (0);
     }
-    return(result);
+    return (result);
 
 } /* end of Cudd_ApaPrintMinterm */
 
@@ -792,27 +785,26 @@ Cudd_ApaPrintMinterm(
   SeeAlso     [Cudd_ApaPrintMinterm]
 
 ******************************************************************************/
-int
-Cudd_ApaPrintMintermExp(
-  FILE * fp,
-  DdManager * dd,
-  DdNode * node,
-  int  nvars,
-  int precision)
+int Cudd_ApaPrintMintermExp(
+    FILE* fp,
+    DdManager* dd,
+    DdNode* node,
+    int nvars,
+    int precision)
 {
     int digits;
     int result;
     DdApaNumber count;
 
-    count = Cudd_ApaCountMinterm(dd,node,nvars,&digits);
+    count = Cudd_ApaCountMinterm(dd, node, nvars, &digits);
     if (count == NULL)
-	return(0);
-    result = Cudd_ApaPrintExponential(fp,digits,count,precision);
+        return (0);
+    result = Cudd_ApaPrintExponential(fp, digits, count, precision);
     FREE(count);
-    if (fprintf(fp,"\n") == EOF) {
-	return(0);
+    if (fprintf(fp, "\n") == EOF) {
+        return (0);
     }
-    return(result);
+    return (result);
 
 } /* end of Cudd_ApaPrintMintermExp */
 
@@ -830,32 +822,31 @@ Cudd_ApaPrintMintermExp(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_ApaPrintDensity(
-  FILE * fp,
-  DdManager * dd,
-  DdNode * node,
-  int  nvars)
+int Cudd_ApaPrintDensity(
+    FILE* fp,
+    DdManager* dd,
+    DdNode* node,
+    int nvars)
 {
     int digits;
     int result;
-    DdApaNumber count,density;
+    DdApaNumber count, density;
     unsigned int size, remainder, fractional;
 
-    count = Cudd_ApaCountMinterm(dd,node,nvars,&digits);
+    count = Cudd_ApaCountMinterm(dd, node, nvars, &digits);
     if (count == NULL)
-	return(0);
+        return (0);
     size = Cudd_DagSize(node);
     density = Cudd_NewApaNumber(digits);
-    remainder = Cudd_ApaIntDivision(digits,count,size,density);
-    result = Cudd_ApaPrintDecimal(fp,digits,density);
+    remainder = Cudd_ApaIntDivision(digits, count, size, density);
+    result = Cudd_ApaPrintDecimal(fp, digits, density);
     FREE(count);
     FREE(density);
-    fractional = (unsigned int)((double)remainder / size * 1000000);
-    if (fprintf(fp,".%u\n", fractional) == EOF) {
-	return(0);
+    fractional = (unsigned int) ((double) remainder / size * 1000000);
+    if (fprintf(fp, ".%u\n", fractional) == EOF) {
+        return (0);
     }
-    return(result);
+    return (result);
 
 } /* end of Cudd_ApaPrintDensity */
 
@@ -893,49 +884,50 @@ Cudd_ApaPrintDensity(
 ******************************************************************************/
 static DdApaNumber
 cuddApaCountMintermAux(
-  DdNode * node,
-  int  digits,
-  DdApaNumber  max,
-  DdApaNumber  min,
-  st_table * table)
+    DdNode* node,
+    int digits,
+    DdApaNumber max,
+    DdApaNumber min,
+    st_table* table)
 {
-    DdNode      *Nt, *Ne;
-    DdApaNumber	mint, mint1, mint2;
-    DdApaDigit	carryout;
+    DdNode *Nt, *Ne;
+    DdApaNumber mint, mint1, mint2;
+    DdApaDigit carryout;
 
     if (cuddIsConstant(node)) {
-	if (node == background || node == zero) {
-	    return(min);
-	} else {
-	    return(max);
-	}
+        if (node == background || node == zero) {
+            return (min);
+        } else {
+            return (max);
+        }
     }
     if (node->ref > 1 && st_lookup(table, node, &mint)) {
-	return(mint);
+        return (mint);
     }
 
-    Nt = cuddT(node); Ne = cuddE(node);
+    Nt = cuddT(node);
+    Ne = cuddE(node);
 
-    mint1 = cuddApaCountMintermAux(Nt,  digits, max, min, table);
-    if (mint1 == NULL) return(NULL);
+    mint1 = cuddApaCountMintermAux(Nt, digits, max, min, table);
+    if (mint1 == NULL) return (NULL);
     mint2 = cuddApaCountMintermAux(Cudd_Regular(Ne), digits, max, min, table);
     if (mint2 == NULL) {
-	if (Nt->ref == 1) FREE(mint1);
-	return(NULL);
+        if (Nt->ref == 1) FREE(mint1);
+        return (NULL);
     }
     mint = Cudd_NewApaNumber(digits);
     if (mint == NULL) {
-	if (Nt->ref == 1) FREE(mint1);
-	if (Cudd_Regular(Ne)->ref == 1) FREE(mint2);
-	return(NULL);
+        if (Nt->ref == 1) FREE(mint1);
+        if (Cudd_Regular(Ne)->ref == 1) FREE(mint2);
+        return (NULL);
     }
     if (Cudd_IsComplement(Ne)) {
-	(void) Cudd_ApaSubtract(digits,max,mint2,mint);
-	carryout = Cudd_ApaAdd(digits,mint1,mint,mint);
+        (void) Cudd_ApaSubtract(digits, max, mint2, mint);
+        carryout = Cudd_ApaAdd(digits, mint1, mint, mint);
     } else {
-	carryout = Cudd_ApaAdd(digits,mint1,mint2,mint);
+        carryout = Cudd_ApaAdd(digits, mint1, mint2, mint);
     }
-    Cudd_ApaShiftRight(digits,carryout,mint,mint);
+    Cudd_ApaShiftRight(digits, carryout, mint, mint);
     /* If the refernce count of a child is 1, its minterm count
     ** hasn't been stored in table.  Therefore, it must be explicitly
     ** freed here. */
@@ -943,12 +935,12 @@ cuddApaCountMintermAux(
     if (Cudd_Regular(Ne)->ref == 1) FREE(mint2);
 
     if (node->ref > 1) {
-	if (st_insert(table, (char *)node, (char *)mint) == ST_OUT_OF_MEM) {
-	    FREE(mint);
-	    return(NULL);
-	}
+        if (st_insert(table, (char*) node, (char*) mint) == ST_OUT_OF_MEM) {
+            FREE(mint);
+            return (NULL);
+        }
     }
-    return(mint);
+    return (mint);
 
 } /* end of cuddApaCountMintermAux */
 
@@ -966,14 +958,14 @@ cuddApaCountMintermAux(
 ******************************************************************************/
 static enum st_retval
 cuddApaStCountfree(
-  char * key,
-  char * value,
-  char * arg)
+    char* key,
+    char* value,
+    char* arg)
 {
-    DdApaNumber	d;
+    DdApaNumber d;
 
     d = (DdApaNumber) value;
     FREE(d);
-    return(ST_CONTINUE);
+    return (ST_CONTINUE);
 
 } /* end of cuddApaStCountfree */

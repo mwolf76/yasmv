@@ -34,33 +34,34 @@
 
 namespace dd {
 
-typedef class CuddMgr* CuddMgr_ptr;
-typedef Cudd* Cudd_ptr;
+    typedef class CuddMgr* CuddMgr_ptr;
+    typedef Cudd* Cudd_ptr;
 
-typedef std::vector<Cudd_ptr> CuddVector;
+    typedef std::vector<Cudd_ptr> CuddVector;
 
-class CuddMgr  {
+    class CuddMgr {
 
-public:
-    /* Generate a *new* Cudd instance */
-    Cudd& dd();
+    public:
+        /* Generate a *new* Cudd instance */
+        Cudd& dd();
 
-    static CuddMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new CuddMgr();
+        static CuddMgr& INSTANCE()
+        {
+            if (!f_instance) {
+                f_instance = new CuddMgr();
+            }
+            return (*f_instance);
         }
-        return (*f_instance);
-    }
 
-protected:
-    CuddMgr();
-    ~CuddMgr();
+    protected:
+        CuddMgr();
+        ~CuddMgr();
 
-private:
-    static CuddMgr_ptr f_instance;
-    CuddVector f_cudd_instances;
-};
+    private:
+        static CuddMgr_ptr f_instance;
+        CuddVector f_cudd_instances;
+    };
 
-};
+}; // namespace dd
 
 #endif
