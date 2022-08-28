@@ -39,63 +39,66 @@
 
 namespace model {
 
-/* guard -> identifier map (first pass) */
-typedef boost::unordered_multimap<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
+    /* guard -> identifier map (first pass) */
+    typedef boost::unordered_multimap<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
 
-/* identifier -> framing condition clause */
-typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;
+    /* identifier -> framing condition clause */
+    typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;
 
-class ModelMgr;
-typedef enum {
-    ANALYZE_INIT,
-    ANALYZE_INVAR,
-    ANALYZE_TRANS,
-    ANALYZE_DEFINE
-} analyze_section_t ;
+    class ModelMgr;
+    typedef enum {
+        ANALYZE_INIT,
+        ANALYZE_INVAR,
+        ANALYZE_TRANS,
+        ANALYZE_DEFINE
+    } analyze_section_t;
 
-class Analyzer : public expr::ExprWalker {
-public:
-    Analyzer();
-    ~Analyzer();
+    class Analyzer: public expr::ExprWalker {
+    public:
+        Analyzer();
+        ~Analyzer();
 
-    // walker toplevel
-    void process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section);
+        // walker toplevel
+        void process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section);
 
-    inline expr::ExprMgr& em()
-    { return f_em; }
+        inline expr::ExprMgr& em()
+        {
+            return f_em;
+        }
 
-    // generates framing conditions, adds them in the module
-    void generate_framing_conditions();
+        // generates framing conditions, adds them in the module
+        void generate_framing_conditions();
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    void pre_node_hook(expr::Expr_ptr expr);
-    void post_node_hook(expr::Expr_ptr expr);
+        void pre_node_hook(expr::Expr_ptr expr);
+        void post_node_hook(expr::Expr_ptr expr);
 
-    LTL_HOOKS; OP_HOOKS;
+        LTL_HOOKS;
+        OP_HOOKS;
 
-    void walk_instant(const expr::Expr_ptr expr);
-    void walk_leaf(const expr::Expr_ptr expr);
+        void walk_instant(const expr::Expr_ptr expr);
+        void walk_leaf(const expr::Expr_ptr expr);
 
-private:
-    expr::ExprMgr& f_em;
+    private:
+        expr::ExprMgr& f_em;
 
-    expr::ExprVector f_expr_stack;
-    expr::ExprVector f_ctx_stack;
+        expr::ExprVector f_expr_stack;
+        expr::ExprVector f_ctx_stack;
 
-    expr::preprocessor::Preprocessor f_preprocessor;
+        expr::preprocessor::Preprocessor f_preprocessor;
 
-    // the type of expr we're analyzing
-    analyze_section_t f_section;
+        // the type of expr we're analyzing
+        analyze_section_t f_section;
 
-    DependencyTrackingMap f_dependency_tracking_map;
+        DependencyTrackingMap f_dependency_tracking_map;
 
-    // helpers
-    bool mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q);
-};
+        // helpers
+        bool mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q);
+    };
 
-};
+}; // namespace model
 
 #endif /* ANALYZER_H */

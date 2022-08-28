@@ -1,4 +1,4 @@
- /**
+/**
  * @file internals.cc
  * @brief Semantic analyzer, internals implementation.
  *
@@ -24,26 +24,26 @@
 #include <common/common.hh>
 
 #include <expr/expr.hh>
-#include <type/type.hh>
 #include <symb/proxy.hh>
+#include <type/type.hh>
 
-#include <model/model_mgr.hh>
 #include <model/analyzer/analyzer.hh>
+#include <model/model_mgr.hh>
 
 namespace model {
 
-void Analyzer::pre_hook()
-{}
-void Analyzer::post_hook()
-{}
+    void Analyzer::pre_hook()
+    {}
+    void Analyzer::post_hook()
+    {}
 
-void Analyzer::pre_node_hook(expr::Expr_ptr expr)
-{
-    f_expr_stack.push_back(expr);
-}
-void Analyzer::post_node_hook(expr::Expr_ptr expr)
-{
-    f_expr_stack.pop_back();
-}
+    void Analyzer::pre_node_hook(expr::Expr_ptr expr)
+    {
+        f_expr_stack.push_back(expr);
+    }
+    void Analyzer::post_node_hook(expr::Expr_ptr expr)
+    {
+        f_expr_stack.pop_back();
+    }
 
-};
+}; // namespace model

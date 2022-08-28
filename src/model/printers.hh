@@ -32,7 +32,7 @@
 
 namespace model {
 
-std::ostream& operator<<(std::ostream& os, Module& module);
+    std::ostream& operator<<(std::ostream& os, Module& module);
 
 };
 

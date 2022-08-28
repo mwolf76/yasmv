@@ -27,11 +27,12 @@
 namespace expr {
 
     /** Exception classes */
-    class ExprException : public Exception {
+    class ExprException: public Exception {
     public:
-        ExprException(const std::string &subexpr,
-                      const std::string &message = "")
-                : Exception("ExprException", subexpr, message) {}
+        ExprException(const std::string& subexpr,
+                      const std::string& message = "")
+            : Exception("ExprException", subexpr, message)
+        {}
     };
 
 } // namespace expr

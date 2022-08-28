@@ -26,42 +26,42 @@
 #ifndef PRINTER_H
 #define PRINTER_H
 
-#include <string>
 #include <expr/walker/walker.hh>
+#include <string>
 
 namespace expr {
 
-class Printer : public ExprWalker {
-    std::ostream& f_os;
+    class Printer: public ExprWalker {
+        std::ostream& f_os;
 
-public:
-    Printer(); // defaults to std::cout
-    Printer(std::ostream& os);
+    public:
+        Printer(); // defaults to std::cout
+        Printer(std::ostream& os);
 
-    ~Printer();
+        ~Printer();
 
-    Printer& operator<<(const std::string& str);
+        Printer& operator<<(const std::string& str);
 
-    Printer& operator<<(Expr& expr);
-    Printer& operator<<(Expr_ptr expr);
+        Printer& operator<<(Expr& expr);
+        Printer& operator<<(Expr_ptr expr);
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    // support for LTL ops
-    LTL_HOOKS;
+        // support for LTL ops
+        LTL_HOOKS;
 
-    // support for basic ops
-    OP_HOOKS;
+        // support for basic ops
+        OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+        void walk_instant(const Expr_ptr expr);
+        void walk_leaf(const Expr_ptr expr);
 
-private:
-    void print_leaf(const Expr_ptr expr);
-};
+    private:
+        void print_leaf(const Expr_ptr expr);
+    };
 
-};
+}; // namespace expr
 
 #endif /* PRINTER_H */

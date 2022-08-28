@@ -39,49 +39,50 @@
 
 namespace expr::preprocessor {
 
-// NOTE: here we're using a vector in order to bypass STL stack
-// interface limitations. (i.e. absence of clear())
-typedef std::vector< std::pair<expr::Expr_ptr, expr::Expr_ptr> > ExprPairStack;
-typedef std::vector<expr::Expr_ptr> ExprStack;
-typedef std::vector<symb::Define_ptr> DefinesStack;
+    // NOTE: here we're using a vector in order to bypass STL stack
+    // interface limitations. (i.e. absence of clear())
+    typedef std::vector<std::pair<expr::Expr_ptr, expr::Expr_ptr>> ExprPairStack;
+    typedef std::vector<expr::Expr_ptr> ExprStack;
+    typedef std::vector<symb::Define_ptr> DefinesStack;
 
-class Preprocessor : public expr::ExprWalker {
-public:
-    Preprocessor();
-    ~Preprocessor();
+    class Preprocessor: public expr::ExprWalker {
+    public:
+        Preprocessor();
+        ~Preprocessor();
 
-    // walker toplevel
-    expr::Expr_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
+        // walker toplevel
+        expr::Expr_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    void pre_node_hook(expr::Expr_ptr expr);
-    void post_node_hook(expr::Expr_ptr expr);
+        void pre_node_hook(expr::Expr_ptr expr);
+        void post_node_hook(expr::Expr_ptr expr);
 
-    LTL_HOOKS; OP_HOOKS;
+        LTL_HOOKS;
+        OP_HOOKS;
 
-    void walk_instant(const expr::Expr_ptr expr);
-    void walk_leaf(const expr::Expr_ptr expr);
+        void walk_instant(const expr::Expr_ptr expr);
+        void walk_leaf(const expr::Expr_ptr expr);
 
-private:
-    ExprMgr& f_em;
+    private:
+        ExprMgr& f_em;
 
-    // probably not really necessary, we keep it for now
-    ExprStack f_ctx_stack;
+        // probably not really necessary, we keep it for now
+        ExprStack f_ctx_stack;
 
-    // Results stack
-    ExprStack f_expr_stack;
+        // Results stack
+        ExprStack f_expr_stack;
 
-    // Not terribly efficient but easier to implement nested envs with
-    ExprPairStack f_env;
+        // Not terribly efficient but easier to implement nested envs with
+        ExprPairStack f_env;
 
-    /* internals */
-    // void substitute_expression(const expr::Expr_ptr expr);
-    void traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr);
-};
+        /* internals */
+        // void substitute_expression(const expr::Expr_ptr expr);
+        void traverse_param_list(expr::ExprVector& params, const expr::Expr_ptr expr);
+    };
 
-} // namespace compiler
+} // namespace expr::preprocessor
 
 #endif /* PREPROCESSOR_H */

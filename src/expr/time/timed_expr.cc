@@ -25,60 +25,55 @@
 
 namespace expr {
 
-TimedExpr::TimedExpr(Expr_ptr expr, step_t time)
-    : f_expr(expr)
-    , f_time(time)
-{}
+    TimedExpr::TimedExpr(Expr_ptr expr, step_t time)
+        : f_expr(expr)
+        , f_time(time)
+    {}
 
-std::ostream& operator<<(std::ostream& os, const TimedExpr& timed_expr)
-{
-    Expr_ptr expr
-        (timed_expr.expr());
+    std::ostream& operator<<(std::ostream& os, const TimedExpr& timed_expr)
+    {
+        Expr_ptr expr(timed_expr.expr());
 
-    step_t time
-        (timed_expr.time());
+        step_t time(timed_expr.time());
 
-    os
-        << "time: "
-        << time
-        << ", "
-        << "expr: "
-        << expr;
+        os
+            << "time: "
+            << time
+            << ", "
+            << "expr: "
+            << expr;
 
-    return os;
-}
+        return os;
+    }
 
-long TimedExprHash::operator() (const TimedExpr& k) const
-{
-    long x, res(0);
-    ExprHash eh;
+    long TimedExprHash::operator()(const TimedExpr& k) const
+    {
+        long x, res(0);
+        ExprHash eh;
 
-    long v0
-        (eh(*k.expr()));
+        long v0(eh(*k.expr()));
 
-    long v1
-        (k.time());
+        long v1(k.time());
 
-    res = (res << 4) + v0;
-    if ((x = res & 0xF0000000L) != 0)
-        res ^= (x >> 24);
+        res = (res << 4) + v0;
+        if ((x = res & 0xF0000000L) != 0)
+            res ^= (x >> 24);
 
-    res &= ~x;
+        res &= ~x;
 
-    res = (res << 4) + v1;
-    if ((x = res & 0xF0000000L) != 0)
-        res ^= (x >> 24);
+        res = (res << 4) + v1;
+        if ((x = res & 0xF0000000L) != 0)
+            res ^= (x >> 24);
 
-    res &= ~x;
+        res &= ~x;
 
-    return res;
-}
+        return res;
+    }
 
-bool TimedExprEq::operator()(const TimedExpr& x, const TimedExpr& y) const
-{
-    return
-        x.expr() == y.expr() &&
-        x.time() == y.time();
-}
+    bool TimedExprEq::operator()(const TimedExpr& x, const TimedExpr& y) const
+    {
+        return x.expr() == y.expr() &&
+               x.time() == y.time();
+    }
 
-};
+}; // namespace expr

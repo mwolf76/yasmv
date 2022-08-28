@@ -30,38 +30,43 @@
 
 #include <utils/pool.hh>
 
-#include <vector>
 #include <boost/unordered_map.hpp>
+#include <vector>
 
 namespace symb {
 
-typedef class Symbol* Symbol_ptr;
-typedef boost::unordered_map<expr::Expr_ptr, Symbol_ptr,
-                             utils::PtrHash, utils::PtrEq> Symbols;
+    typedef class Symbol* Symbol_ptr;
+    typedef boost::unordered_map<expr::Expr_ptr, Symbol_ptr,
+                                 utils::PtrHash, utils::PtrEq>
+        Symbols;
 
-typedef class Literal* Literal_ptr;
-typedef boost::unordered_map<expr::Expr_ptr, Literal_ptr,
-                             utils::PtrHash, utils::PtrEq> Literals;
+    typedef class Literal* Literal_ptr;
+    typedef boost::unordered_map<expr::Expr_ptr, Literal_ptr,
+                                 utils::PtrHash, utils::PtrEq>
+        Literals;
 
-typedef class Constant* Constant_ptr;
-typedef boost::unordered_map<expr::Expr_ptr, Constant_ptr,
-                             utils::PtrHash, utils::PtrEq> Constants;
+    typedef class Constant* Constant_ptr;
+    typedef boost::unordered_map<expr::Expr_ptr, Constant_ptr,
+                                 utils::PtrHash, utils::PtrEq>
+        Constants;
 
-typedef class Variable* Variable_ptr;
-typedef boost::unordered_map<expr::Expr_ptr, Variable_ptr,
-                             utils::PtrHash, utils::PtrEq> Variables;
+    typedef class Variable* Variable_ptr;
+    typedef boost::unordered_map<expr::Expr_ptr, Variable_ptr,
+                                 utils::PtrHash, utils::PtrEq>
+        Variables;
 
-typedef class Parameter* Parameter_ptr;
-typedef std::vector< std::pair< expr::Expr_ptr, Parameter_ptr > > Parameters;
+    typedef class Parameter* Parameter_ptr;
+    typedef std::vector<std::pair<expr::Expr_ptr, Parameter_ptr>> Parameters;
 
-typedef class Define* Define_ptr;
-typedef boost::unordered_map<expr::Expr_ptr, Define_ptr,
-                             utils::PtrHash, utils::PtrEq> Defines;
+    typedef class Define* Define_ptr;
+    typedef boost::unordered_map<expr::Expr_ptr, Define_ptr,
+                                 utils::PtrHash, utils::PtrEq>
+        Defines;
 
-typedef class Resolver* Resolver_ptr;
+    typedef class Resolver* Resolver_ptr;
 
-typedef std::vector< std::pair<expr::Expr_ptr, Symbol_ptr > > SymbIterable;
+    typedef std::vector<std::pair<expr::Expr_ptr, Symbol_ptr>> SymbIterable;
 
-};
+}; // namespace symb
 
 #endif /* SYMBOL_TYPEDEFS_H */

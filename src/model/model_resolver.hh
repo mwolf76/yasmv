@@ -31,20 +31,20 @@
 
 namespace model {
 
-class ModelMgr; // fwd
-class ModelResolver : public symb::Resolver {
-public:
-    ModelResolver(ModelMgr& owner);
-    ~ModelResolver();
+    class ModelMgr; // fwd
+    class ModelResolver: public symb::Resolver {
+    public:
+        ModelResolver(ModelMgr& owner);
+        ~ModelResolver();
 
-    void add_symbol(const expr::Expr_ptr key, symb::Symbol_ptr symb);
-    symb::Symbol_ptr symbol(const expr::Expr_ptr key);
+        void add_symbol(const expr::Expr_ptr key, symb::Symbol_ptr symb);
+        symb::Symbol_ptr symbol(const expr::Expr_ptr key);
 
-private:
-    ModelMgr& f_owner;
-    symb::Constants f_constants; // global consts
-};
+    private:
+        ModelMgr& f_owner;
+        symb::Constants f_constants; // global consts
+    };
 
-};
+}; // namespace model
 
 #endif /* MODEL_RESOLVER_H */

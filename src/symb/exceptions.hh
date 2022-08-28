@@ -32,20 +32,19 @@
 
 namespace symb {
 
-class SymbolException : public Exception
-{
-public:
-    SymbolException(const std::string& subtype,
-                    const std::string& message="")
-        : Exception("SymbolException", subtype, message)
-    {}
-};
+    class SymbolException: public Exception {
+    public:
+        SymbolException(const std::string& subtype,
+                        const std::string& message = "")
+            : Exception("SymbolException", subtype, message)
+        {}
+    };
 
-class UnresolvedSymbol : public SymbolException {
-public:
-    UnresolvedSymbol(expr::Expr_ptr expr);
-};
+    class UnresolvedSymbol: public SymbolException {
+    public:
+        UnresolvedSymbol(expr::Expr_ptr expr);
+    };
 
-};
+}; // namespace symb
 
 #endif /* SYMBOL_EXCEPTIONS_H */

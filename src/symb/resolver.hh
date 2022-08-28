@@ -31,12 +31,12 @@
 
 namespace symb {
 
-class Resolver {
-public:
-    /** @brief fetch a symbol */
-    virtual Symbol_ptr symbol(const expr::Expr_ptr key) =0;
-};
+    class Resolver {
+    public:
+        /** @brief fetch a symbol */
+        virtual Symbol_ptr symbol(const expr::Expr_ptr key) = 0;
+    };
 
-};
+}; // namespace symb
 
 #endif /* SYMB_RESOLVER_H */

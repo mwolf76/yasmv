@@ -22,68 +22,63 @@
  **/
 
 #include <algorithm>
-#include <utility>
 #include <model.hh>
+#include <utility>
 
 namespace model {
 
-std::ostream& operator<<(std::ostream& os, Environment& env)
-{
-  os
-    << "Bindings"
-    << std::endl;
+    std::ostream& operator<<(std::ostream& os, Environment& env)
+    {
+        os
+            << "Bindings"
+            << std::endl;
 
-  const Values& values
-    (env.values());
+        const Values& values { env.values() };
 
-  for (Values::const_iterator i = values.begin(); values.end() != i; ++ i) {
+        for (Values::const_iterator i = values.begin(); values.end() != i; ++i) {
+            std::pair<Expr_ptr, Expr_ptr> p { *i };
 
-    std::pair<Expr_ptr, Expr_ptr> p
-      (*i);
+            os
+                << "  "
+                << p.first
+                << " := "
+                << p.second
+                << std::endl;
+        }
 
-    os
-      << "  "
-      << p.first
-      << " := "
-      << p.second
-      << std::endl
-      ;
-  }
+        return os;
+    }
 
-  return os;
-}
+    Environment::Environment()
+        : f_localValues()
+    {
+        DEBUG
+            << "Created environment"
+            << std::endl;
+    }
 
-Environment::Environment()
-  : f_localValues()
-{
-  DEBUG
-        << "Created environment"
-        << std::endl;
+    Environment::~Environment()
+    {
+        DEBUG
+            << "Destroyed environment"
+            << std::endl;
+    }
 
-}
+    void Environment::add_value(Expr_ptr symbol, Expr_ptr value)
+    {
+        f_localValues.insert(
+            std::pair<Expr_ptr, Expr_ptr>(symbol, value));
+    }
 
-Environment::~Environment()
-{
-  DEBUG
-    << "Destroyed environment"
-    << std::endl;
-}
+    const Expr_ptr Environment::value(Expr_ptr key) const
+    {
+        Values::const_iterator i { f_localValues.find(key) };
 
-void Environment::add_value(Expr_ptr symbol, Expr_ptr value)
-{
-  f_localValues.insert(std::pair<Expr_ptr, Expr_ptr>
-                       (symbol, value));
-}
+        if (i == f_localValues.end()) {
+            throw UnknownIdentifier(key);
+        }
 
-const Expr_ptr Environment::value(Expr_ptr key) const
-{
-    Values::const_iterator i
-      (f_localValues.find(key));
+        return i->second;
+    }
 
-    if (i == f_localValues.end())
-        throw UnknownIdentifier(key);
-
-    return i -> second;
-}
-
-};
+}; // namespace model
