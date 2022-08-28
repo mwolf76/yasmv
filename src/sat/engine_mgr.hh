@@ -24,54 +24,55 @@
 #ifndef SAT_ENGINE_MGR_H
 #define SAT_ENGINE_MGR_H
 
-#include <sat/typedefs.hh>
 #include <boost/thread/mutex.hpp>
+#include <sat/typedefs.hh>
 
 namespace sat {
 
-class EngineMgr {
+    class EngineMgr {
 
-public:
-    /**
+    public:
+        /**
      * @brief Signals an interrupt to all running instances
      */
-    void interrupt();
+        void interrupt();
 
-    /**
+        /**
      * @brief Requires a stats printout from all existing instances
      */
-    void dump_stats(std::ostream& os);
+        void dump_stats(std::ostream& os);
 
-    static EngineMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new EngineMgr();
+        static EngineMgr& INSTANCE()
+        {
+            if (!f_instance) {
+                f_instance = new EngineMgr();
+            }
+            return (*f_instance);
         }
-        return (*f_instance);
-    }
 
-protected:
-    EngineMgr();
-    ~EngineMgr();
+    protected:
+        EngineMgr();
+        ~EngineMgr();
 
-private: /* private interface, reserved to Engine instances. */
-    friend class Engine;
+    private: /* private interface, reserved to Engine instances. */
+        friend class Engine;
 
-    /**
+        /**
      * @brief Registers a new engine instance. Used by Engine ctor
      */
-    void register_instance(Engine_ptr engine);
+        void register_instance(Engine_ptr engine);
 
-    /**
+        /**
      * @brief Unregisters an existing engine instance. Used by Engine dctor.
      */
-    void unregister_instance(Engine_ptr engine);
+        void unregister_instance(Engine_ptr engine);
 
-    static EngineMgr_ptr f_instance;
-    EngineSet f_engines;
+        static EngineMgr_ptr f_instance;
+        EngineSet f_engines;
 
-    boost::mutex f_mutex;
-};
+        boost::mutex f_mutex;
+    };
 
-};
+}; // namespace sat
 
 #endif /* SAT_ENGINE_MGR_H */

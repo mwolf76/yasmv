@@ -26,25 +26,24 @@
 
 #include <common/common.hh>
 
-#include <sat/typedefs.hh>
 #include <sat/inlining.hh>
+#include <sat/typedefs.hh>
 
 namespace sat {
 
-class EngineException : public Exception
-{
-public:
-    EngineException(const std::string& subtype,
-                    const std::string& message="")
-        : Exception("EngineException", subtype, message)
-    {}
-};
+    class EngineException: public Exception {
+    public:
+        EngineException(const std::string& subtype,
+                        const std::string& message = "")
+            : Exception("EngineException", subtype, message)
+        {}
+    };
 
-class InlinedOperatorLoaderException : public EngineException {
-public:
-    InlinedOperatorLoaderException(const compiler::InlinedOperatorSignature& ios);
-};
+    class InlinedOperatorLoaderException: public EngineException {
+    public:
+        InlinedOperatorLoaderException(const compiler::InlinedOperatorSignature& ios);
+    };
 
-};
+}; // namespace sat
 
 #endif /* SAT_EXCEPTIONS_H */

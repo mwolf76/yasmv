@@ -42,8 +42,8 @@
 
 namespace sat {
 
-    static const char* JSON_GENERATED = "generated";
-    static const char* JSON_CNF = "cnf";
+    static const char* JSON_GENERATED { "generated" };
+    static const char* JSON_CNF { "cnf" };
 
     InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
         : f_fullpath(filepath)
@@ -55,10 +55,10 @@ namespace sat {
 
         assert(3 == fragments.size());
 
-        const char* signedness(fragments[0].c_str());
+        const char* signedness { fragments[0].c_str() };
         assert(*signedness == 's' || *signedness == 'u');
 
-        const char* op(fragments[1].c_str());
+        const char* op { fragments[1].c_str() };
         expr::ExprType op_type;
         if (!strcmp("neg", op)) {
             op_type = expr::ExprType::NEG;
@@ -111,7 +111,7 @@ namespace sat {
         char buf[20];
         strncpy(buf, fragments[2].c_str(), 20);
 
-        char* width(buf);
+        char* width { buf };
         f_ios = compiler::make_ios('s' == *signedness, op_type, atoi(width));
     }
 
@@ -142,7 +142,7 @@ namespace sat {
                 << ", generated "
                 << generated;
 
-            const Json::Value cnf(obj[JSON_CNF]);
+            const Json::Value cnf { obj[JSON_CNF] };
             assert(cnf.type() == Json::arrayValue);
 
             for (auto clause : cnf) {
@@ -209,7 +209,8 @@ namespace sat {
                         InlinedOperatorLoader* loader { new InlinedOperatorLoader(entry) };
                         assert(NULL != loader);
 
-                        f_loaders.insert(std::pair<compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr>(loader->ios(), loader));
+                        f_loaders.insert(
+                            std::pair<compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr>(loader->ios(), loader));
                     } catch (InlinedOperatorLoaderException& iole) {
                         pconst_char what { iole.what() };
                         WARN
@@ -253,7 +254,9 @@ namespace sat {
                 << " not found, falling back..."
                 << std::endl;
 
-            compiler::InlinedOperatorSignature fallback { compiler::make_ios(compiler::ios_issigned(ios), compiler::ios_optype(ios), compiler::ios_width(ios)) };
+            compiler::InlinedOperatorSignature fallback {
+                compiler::make_ios(compiler::ios_issigned(ios), compiler::ios_optype(ios), compiler::ios_width(ios))
+            };
             i = f_loaders.find(fallback);
         }
 
@@ -289,11 +292,12 @@ namespace sat {
                 ps.push(mkLit(f_group, true));
             }
 
-            /* for each literal in clause, determine whether associated var belongs
-               to z, x, y or is a cnf var. For each group in (z, x, y) fetch
-               appropriate DD var from the registry; cnf vars gets rewritten into
-               new sat vars. Remark: rewritten cnf vars must be kept distinct among
-               distinct injections. */
+            /* for each literal in clause, determine whether
+               associated var belongs to z, x, y or is a cnf var. For
+               each group in (z, x, y) fetch appropriate DD var from
+               the registry; cnf vars gets rewritten into new sat
+               vars. Remark: rewritten cnf vars must be kept distinct
+               among distinct injections. */
             for (auto lit : clause) {
                 Var lit_var { Minisat::var(lit) };
                 int lit_sign { Minisat::sign(lit) };
@@ -309,8 +313,9 @@ namespace sat {
                     if (md.is_relational()) {
                         assert(!ndx);
                         node = z[0].getNode();
-                    } else
+                    } else {
                         node = z[width - ndx - 1].getNode();
+                    }
 
                     if (!Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
@@ -328,7 +333,7 @@ namespace sat {
                     int ndx { lit_var - width };
 
                     assert(0 <= ndx && ndx < width);
-                    const DdNode* node(x[width - ndx - 1].getNode());
+                    const DdNode* node { x[width - ndx - 1].getNode() };
 
                     if (!Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
@@ -346,7 +351,7 @@ namespace sat {
                     int ndx { lit_var - 2 * width };
 
                     assert(0 <= ndx && ndx < width);
-                    const DdNode* node(y[width - ndx - 1].getNode());
+                    const DdNode* node { y[width - ndx - 1].getNode() };
 
                     if (!Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
@@ -355,9 +360,7 @@ namespace sat {
                         value_t value { cuddV(node) };
 
                         assert(value < 2); // 0 or 1
-                        ps.push(mkLit(alpha, value
-                                                 ? lit_sign
-                                                 : !lit_sign));
+                        ps.push(mkLit(alpha, value ? lit_sign : !lit_sign));
                     }
                 }
 
@@ -408,9 +411,10 @@ namespace sat {
                 ps.push(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
                 DdNode* xnode { x[i].getNode() };
 
-                ps.push(Cudd_IsConstant(xnode)
-                            ? mkLit(alpha, Cudd_V(xnode) ? pol : !pol)
-                            : mkLit(f_sat.find_dd_var(x[i].getNode(), f_time), pol));
+                ps.push(
+                    Cudd_IsConstant(xnode)
+                        ? mkLit(alpha, Cudd_V(xnode) ? pol : !pol)
+                        : mkLit(f_sat.find_dd_var(x[i].getNode(), f_time), pol));
 
                 f_sat.add_clause(ps);
             }
@@ -429,9 +433,10 @@ namespace sat {
                 ps.push(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
                 DdNode* ynode { y[i].getNode() };
 
-                ps.push(Cudd_IsConstant(ynode)
-                            ? mkLit(alpha, Cudd_V(ynode) ? pol : !pol)
-                            : mkLit(f_sat.find_dd_var(y[i].getNode(), f_time), pol));
+                ps.push(
+                    Cudd_IsConstant(ynode)
+                        ? mkLit(alpha, Cudd_V(ynode) ? pol : !pol)
+                        : mkLit(f_sat.find_dd_var(y[i].getNode(), f_time), pol));
 
                 f_sat.add_clause(ps);
             }
@@ -462,7 +467,7 @@ namespace sat {
             /* ! a, Zi <-> Xi for all i */
             for (unsigned pol = 0; pol < 2; ++pol) {
                 for (unsigned i = 0; i < md.elem_width(); ++i) {
-                    unsigned ndx(i + j * md.elem_width());
+                    unsigned ndx { i + j * md.elem_width() };
 
                     Minisat::vec<Lit> ps;
 

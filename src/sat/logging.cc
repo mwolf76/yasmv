@@ -25,115 +25,120 @@
  *
  **/
 
-#include <sat/logging.hh>
 #include <sat/engine.hh>
+#include <sat/logging.hh>
 
 #include <iostream>
 
 namespace sat {
 
-std::ostream &operator<<(std::ostream &out, const Lit &lit)
-{
-    out << (sign(lit) ? "-" : "") << var(lit);
-    return out;
-}
-
-std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits)
-{
-    for (int i = 0; i < lits.size()-1; ++i) {
-        out << lits[i] << " ";
+    std::ostream& operator<<(std::ostream& out, const Lit& lit)
+    {
+        out << (sign(lit) ? "-" : "") << var(lit);
+        return out;
     }
 
-    if (0 != lits.size()) {
-        out << lits[lits.size()-1];
+    std::ostream& operator<<(std::ostream& out, const vec<Lit>& lits)
+    {
+        for (int i = 0; i < lits.size() - 1; ++i) {
+            out << lits[i] << " ";
+        }
+
+        if (0 != lits.size()) {
+            out << lits[lits.size() - 1];
+        }
+
+        return out;
     }
 
-    return out;
-}
+    std::ostream& operator<<(std::ostream& os, const lbool& lb)
+    {
+        switch (toInt(lb)) {
+            case 0:
+                os << "T";
+                break;
 
-std::ostream &operator<<(std::ostream &os, const lbool &lb)
-{
-    switch(toInt(lb)) {
-    case 0:
-        os << "T";
-        break;
-    case 1:
-        os << "F";
-        break;
-    case 2:
-        os << "X";
-        break;
-    default:
-        assert(0);
+            case 1:
+                os << "F";
+                break;
+
+            case 2:
+                os << "X";
+                break;
+
+            default:
+                assert(0);
+        }
+
+        return os;
     }
 
-    return os;
-}
+    std::ostream& operator<<(std::ostream& os, const status_t& status)
+    {
+        switch (status) {
+            case STATUS_SAT:
+                os << "SAT";
+                break;
 
-std::ostream &operator<<(std::ostream &os, const status_t &status)
-{
-    switch (status) {
-    case STATUS_SAT:
-        os << "SAT";
-        break;
-    case STATUS_UNSAT:
-        os << "UNSAT";
-        break;
-    case STATUS_UNKNOWN:
-        os << "??";
-        break;
-    default:
-        assert(0);
+            case STATUS_UNSAT:
+                os << "UNSAT";
+                break;
+
+            case STATUS_UNKNOWN:
+                os << "??";
+                break;
+
+            default:
+                assert(0);
+        }
+
+        return os;
     }
 
-    return os;
-}
+    std::ostream& operator<<(std::ostream& os, const Engine& engine)
+    {
+        const Solver& solver { engine.f_solver };
 
-std::ostream& operator<<(std::ostream& os, const Engine& engine)
-{
-    const Solver& solver
-        (engine.f_solver);
+        os
+            << "Solver: `"
+            << engine.f_instance_name
 
-    os
-        << "Solver: `"
-        << engine.f_instance_name
+            << "`, solves: "
+            << solver.solves
 
-        << "`, solves: "
-        << solver.solves
+            << ", starts: "
+            << solver.starts
 
-        << ", starts: "
-        << solver.starts
+            << ", decs: "
+            << solver.decisions
 
-        << ", decs: "
-        << solver.decisions
+            << ", rnd decs: "
+            << solver.rnd_decisions
 
-        << ", rnd decs: "
-        << solver.rnd_decisions
+            << ", props: "
+            << solver.propagations
 
-        << ", props: "
-        << solver.propagations
+            << ", conflicts: "
+            << solver.conflicts
 
-        << ", conflicts: "
-        << solver.conflicts
+            << ", dec vars: "
+            << solver.dec_vars
 
-        << ", dec vars: "
-        << solver.dec_vars
+            << ", clause lits: "
+            << solver.clauses_literals
 
-        << ", clause lits: "
-        << solver.clauses_literals
+            << ", learnt lits: "
+            << solver.learnts_literals
 
-        << ", learnt lits: "
-        << solver.learnts_literals
+            << ", max lits: "
+            << solver.max_literals
 
-        << ", max lits: "
-        << solver.max_literals
+            << ", tot lits: "
+            << solver.tot_literals
 
-        << ", tot lits: "
-        << solver.tot_literals
+            ;
 
-        ;
+        return os;
+    }
 
-    return os;
-}
-
-};
+}; // namespace sat

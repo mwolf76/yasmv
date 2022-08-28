@@ -32,15 +32,15 @@
 
 namespace sat {
 
-// streaming for various SAT related types
-std::ostream &operator<<(std::ostream &os, const Minisat::Lit &lit);
-std::ostream &operator<<(std::ostream &os, const vec<Lit> &lits);
-std::ostream &operator<<(std::ostream &os, const status_t &status);
-std::ostream &operator<<(std::ostream &os, const lbool &value);
+    // streaming for various SAT related types
+    std::ostream& operator<<(std::ostream& os, const Minisat::Lit& lit);
+    std::ostream& operator<<(std::ostream& os, const vec<Lit>& lits);
+    std::ostream& operator<<(std::ostream& os, const status_t& status);
+    std::ostream& operator<<(std::ostream& os, const lbool& value);
 
-std::ostream &operator<<(std::ostream &out, const Lit &lit);
-std::ostream &operator<<(std::ostream &out, const vec<Lit> &lits);
+    std::ostream& operator<<(std::ostream& out, const Lit& lit);
+    std::ostream& operator<<(std::ostream& out, const vec<Lit>& lits);
 
-};
+}; // namespace sat
 
 #endif /* SAT_LOGGING_H */

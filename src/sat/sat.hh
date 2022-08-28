@@ -28,8 +28,8 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include <sat/typedefs.hh>
 #include <sat/exceptions.hh>
+#include <sat/typedefs.hh>
 
 /* inlining helpers */
 #include <sat/inlining.hh>
@@ -43,6 +43,7 @@
 /* Engine Mgr class */
 #include <sat/engine_mgr.hh>
 
-namespace sat {};
+namespace sat {
+};
 
 #endif /* SAT_H */

@@ -28,89 +28,89 @@
 
 namespace sat {
 
-EngineMgr_ptr EngineMgr::f_instance = NULL;
+    EngineMgr_ptr EngineMgr::f_instance { NULL };
 
-EngineMgr::EngineMgr()
-{
-    const void* instance
-        (this);
+    EngineMgr::EngineMgr()
+    {
+        const void* instance { this };
 
-    DRIVEL
-        << "Initialized EngineMgr @ " << instance
-        << std::endl;
-}
-
-EngineMgr::~EngineMgr()
-{
-    const void* instance { this } ;
-
-    DRIVEL
-        << "Destroyed EngineMgr @ "
-        << instance
-        << std::endl;
-}
-
-void EngineMgr::register_instance(Engine_ptr engine)
-{
-    boost::mutex::scoped_lock lock { f_mutex };
-
-    /* this engine is not yet registered */
-    assert (f_engines.find(engine) == f_engines.end());
-
-    DEBUG
-        << "Registered engine instance"
-        << "@"
-        << engine
-        << std::endl;
-
-    f_engines.insert(engine);
-}
-
-void EngineMgr::unregister_instance(Engine_ptr engine)
-{
-    boost::mutex::scoped_lock lock { f_mutex };
-
-    /* this engine is registered */
-    assert (f_engines.find(engine) != f_engines.end());
-
-    DEBUG
-        << "Unregistered engine instance"
-        << "@"
-        << engine
-        << std::endl;
-
-    f_engines.erase(engine);
-}
-
-void EngineMgr::interrupt()
-{
-    boost::mutex::scoped_lock lock { f_mutex };
-
-    EngineSet::iterator esi;
-    for (esi = begin(f_engines); end(f_engines) != esi; ++ esi) {
-        Engine_ptr pe { *esi };
-        pe -> interrupt();
+        DRIVEL
+            << "Initialized EngineMgr @ " << instance
+            << std::endl;
     }
-}
 
-void EngineMgr::dump_stats(std::ostream& os)
-{
-    boost::mutex::scoped_lock lock { f_mutex };
+    EngineMgr::~EngineMgr()
+    {
+        const void* instance { this };
 
-    if (f_engines.empty()) {}
-    else {
+        DRIVEL
+            << "Destroyed EngineMgr @ "
+            << instance
+            << std::endl;
+    }
+
+    void EngineMgr::register_instance(Engine_ptr engine)
+    {
+        boost::mutex::scoped_lock lock { f_mutex };
+
+        /* this engine is not yet registered */
+        assert(f_engines.find(engine) == f_engines.end());
+
+        DEBUG
+            << "Registered engine instance"
+            << "@"
+            << engine
+            << std::endl;
+
+        f_engines.insert(engine);
+    }
+
+    void EngineMgr::unregister_instance(Engine_ptr engine)
+    {
+        boost::mutex::scoped_lock lock { f_mutex };
+
+        /* this engine is registered */
+        assert(f_engines.find(engine) != f_engines.end());
+
+        DEBUG
+            << "Unregistered engine instance"
+            << "@"
+            << engine
+            << std::endl;
+
+        f_engines.erase(engine);
+    }
+
+    void EngineMgr::interrupt()
+    {
+        boost::mutex::scoped_lock lock { f_mutex };
+
         EngineSet::iterator esi;
-        for (esi = f_engines.begin(); f_engines.end() != esi; ++ esi) {
+        for (esi = begin(f_engines); end(f_engines) != esi; ++esi) {
             Engine_ptr pe { *esi };
+            pe->interrupt();
+        }
+    }
+
+    void EngineMgr::dump_stats(std::ostream& os)
+    {
+        boost::mutex::scoped_lock lock { f_mutex };
+
+        if (f_engines.empty()) {
+            /* nop */
+        } else {
+            EngineSet::iterator esi;
+            for (esi = f_engines.begin(); f_engines.end() != esi; ++esi) {
+                Engine_ptr pe { *esi };
+
+                os
+                    << (*pe)
+                    << std::endl;
+            }
 
             os
-                << (*pe)
-                << std::endl ;
+                << std::endl;
         }
-
-        os
-            << std::endl ;
     }
-}
 
-};
+}; // namespace sat
