@@ -66,7 +66,7 @@ namespace fsm {
                     << "` ..."
                     << std::endl;
 
-                compiler::Unit unit(compiler().process(ctx, expr));
+                compiler::Unit unit { compiler().process(ctx, expr) };
 
                 f_constraint_cus.push_back(unit);
                 ++no_constraints;
@@ -83,11 +83,11 @@ namespace fsm {
 
         /* Additional constraints, times 0 and 1 */
         for (step_t time = 0; time < 2; ++time) {
-            std::for_each(begin(f_constraint_cus),
-                          end(f_constraint_cus),
-                          [this, &engine, time](compiler::Unit& cu) {
-                              this->assert_formula(engine, time, cu);
-                          });
+            std::for_each(
+                begin(f_constraint_cus), end(f_constraint_cus),
+                [this, &engine, time](compiler::Unit& cu) {
+                    this->assert_formula(engine, time, cu);
+                });
         }
 
         sat::status_t status { engine.solve() };

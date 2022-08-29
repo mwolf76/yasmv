@@ -55,20 +55,20 @@ namespace fsm {
         expr::Expr_ptr ctx { em().make_empty() };
 
         unsigned nconstraints { 0 };
-        std::for_each(begin(constraints),
-                      end(constraints),
-                      [this, ctx, &nconstraints](expr::Expr_ptr expr) {
-                          INFO
-                              << "Compiling constraint `"
-                              << expr
-                              << "` ..."
-                              << std::endl;
+        std::for_each(
+            begin(constraints), end(constraints),
+            [this, ctx, &nconstraints](expr::Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
 
-                          compiler::Unit unit(compiler().process(ctx, expr));
+                compiler::Unit unit { compiler().process(ctx, expr) };
 
-                          f_constraint_cus.push_back(unit);
-                          ++nconstraints;
-                      });
+                f_constraint_cus.push_back(unit);
+                ++nconstraints;
+            });
 
         INFO
             << nconstraints
@@ -80,11 +80,11 @@ namespace fsm {
         assert_fsm_invar(engine, 0);
 
         /* Additional constraints */
-        std::for_each(begin(f_constraint_cus),
-                      end(f_constraint_cus),
-                      [this, &engine](compiler::Unit& cu) {
-                          this->assert_formula(engine, 0, cu);
-                      });
+        std::for_each(
+            begin(f_constraint_cus), end(f_constraint_cus),
+            [this, &engine](compiler::Unit& cu) {
+                this->assert_formula(engine, 0, cu);
+            });
 
         sat::status_t status { engine.solve() };
 
