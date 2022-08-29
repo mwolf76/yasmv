@@ -388,8 +388,7 @@ namespace compiler {
             return; /* nop */
         }
 
-        else if (src_type->width() < tgt_type->width()) {
-            /* grow */
+        else if (src_type->width() < tgt_type->width()) { /* grow */
             if (tgt_type->is_signed_algebraic()) {
                 /* signed, needs sign bit extension (src MSB) */
                 ADD msb = f_add_stack.back(); /* just inspect */
@@ -398,13 +397,15 @@ namespace compiler {
                 }
             } else {
                 assert(tgt_type->is_unsigned_algebraic());
+
                 /* unsigned, pad with zeroes */
                 for (unsigned i = src_type->width(); i < tgt_type->width(); ++i) {
                     PUSH_DD(f_enc.zero());
                 }
             }
-        } else {
-            /* shrink */
+        }
+
+        else { /* shrink */
             assert(tgt_type->width() < src_type->width());
             for (unsigned i = src_type->width(); i > tgt_type->width(); --i) {
                 f_add_stack.pop_back(); /* discard ADDs */
