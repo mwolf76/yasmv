@@ -58,8 +58,9 @@ namespace reach {
 
         sat::status_t status { engine.solve() };
 
-        if (sat::status_t::STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status) {
             goto cleanup;
+        }
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
@@ -70,10 +71,11 @@ namespace reach {
             goto cleanup;
         }
 
-        else if (sat::status_t::STATUS_SAT == status)
+        else if (sat::status_t::STATUS_SAT == status) {
             INFO
                 << "GOAL consistency check ok."
                 << std::endl;
+        }
 
         else
             assert(false); /* unreachable */
@@ -95,7 +97,9 @@ namespace reach {
                 if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                     /* Extract reachability witness */
-                    witness::Witness& w { *new ReachabilityCounterExample(f_target, model(), engine, k, true) }; /* reversed */
+                    witness::Witness& w {
+                        *new ReachabilityCounterExample(f_target, model(), engine, k, true)
+                    }; /* reversed */
 
                     /* witness identifier */
                     std::ostringstream oss_id;

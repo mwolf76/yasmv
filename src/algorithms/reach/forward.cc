@@ -51,14 +51,15 @@ namespace reach {
                 auto i { f_constraint_cus.find(constraint) };
                 assert(f_constraint_cus.end() != i);
 
-                compiler::Unit cu(i->second);
+                compiler::Unit cu { i->second };
                 this->assert_formula(engine, k, cu);
             });
 
-        sat::status_t status(engine.solve());
+        sat::status_t status { engine.solve() };
 
-        if (sat::status_t::STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status) {
             goto cleanup;
+        }
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
@@ -75,8 +76,9 @@ namespace reach {
                 << std::endl;
         }
 
-        else
+        else {
             assert(false); /* unreachable */
+        }
 
         do {
             /* looking for witness : Reachability(k-1) ^ ! P(k) */
@@ -86,10 +88,11 @@ namespace reach {
                 << "Now looking for reachability witness (k = " << k << ")..."
                 << std::endl;
 
-            sat::status_t status(engine.solve());
+            sat::status_t status { engine.solve() };
 
-            if (sat::status_t::STATUS_UNKNOWN == status)
+            if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
+            }
 
             else if (sat::status_t::STATUS_SAT == status) {
                 INFO
@@ -101,9 +104,11 @@ namespace reach {
                 if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                     /* Extract reachability witness */
-                    witness::WitnessMgr& wm(witness::WitnessMgr::INSTANCE());
+                    witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
 
-                    witness::Witness& w(*new ReachabilityCounterExample(f_target, model(), engine, k));
+                    witness::Witness& w {
+                        *new ReachabilityCounterExample(f_target, model(), engine, k)
+                    };
 
                     /* witness identifier */
                     std::ostringstream oss_id;
@@ -178,8 +183,9 @@ namespace reach {
 
                 sat::status_t status { engine.solve() };
 
-                if (sat::status_t::STATUS_UNKNOWN == status)
+                if (sat::status_t::STATUS_UNKNOWN == status) {
                     goto cleanup;
+                }
 
                 else if (sat::status_t::STATUS_UNSAT == status) {
                     INFO
@@ -195,8 +201,9 @@ namespace reach {
                         << "No unreachability proof found (k = " << k << ")"
                         << std::endl;
 
-                else
+                else {
                     assert(false); /* unreachable */
+                }
             }
 
             TRACE

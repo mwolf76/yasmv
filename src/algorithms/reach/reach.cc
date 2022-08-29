@@ -62,7 +62,9 @@ namespace reach {
         f_target = target;
         assert(f_target);
 
-        /* store and inspect constraints: currently mixed-time (i.e. backward + forward) constraints are *not* supported */
+        /* store and inspect constraints: currently mixed-time
+	 * (i.e. backward + forward) constraints are *not*
+	 * supported */
         f_constraints = constraints;
         unsigned no_forward_constraints { 0 };
         unsigned no_backward_constraints { 0 };
@@ -90,7 +92,11 @@ namespace reach {
             }
         }
 
-        unsigned no_constraints { no_forward_constraints + no_backward_constraints + no_global_constraints };
+        unsigned no_constraints {
+            no_forward_constraints +
+            no_backward_constraints +
+            no_global_constraints
+        };
         TRACE
             << no_constraints
             << " additional constraints were provided: "
@@ -108,7 +114,8 @@ namespace reach {
         /* TODO: consider introducing support for this: a bit trickier, but doable */
         if (!use_forward && !use_backward) {
             ERR
-                << "Mixing forward and backward guided reachability constraints currently not supported."
+                << "Mixing forward and backward guided reachability "
+                << "constraints currently not supported."
                 << std::endl;
 
             f_status = REACHABILITY_ERROR;
@@ -136,8 +143,11 @@ namespace reach {
                 << "` ..."
                 << std::endl;
 
-            compiler::Unit cu { compiler().process(ctx, expander.process(constraint)) };
-            f_constraint_cus.insert(std::pair<expr::Expr_ptr, compiler::Unit>(constraint, cu));
+            compiler::Unit cu {
+                compiler().process(ctx, expander.process(constraint))
+            };
+            f_constraint_cus.insert(
+                std::pair<expr::Expr_ptr, compiler::Unit>(constraint, cu));
         }
 
         /* fire up strategies */
@@ -149,8 +159,10 @@ namespace reach {
                 << "Forward strategies enabled"
                 << std::endl;
 
-            tasks.push_back(new boost::thread(&Reachability::fast_forward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(&Reachability::forward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::fast_forward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::forward_strategy, this, target_cu));
         }
 
         if (use_backward) {
@@ -158,8 +170,10 @@ namespace reach {
                 << "Backward strategies enabled"
                 << std::endl;
 
-            tasks.push_back(new boost::thread(&Reachability::fast_backward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(&Reachability::backward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::fast_backward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::backward_strategy, this, target_cu));
         }
 
         /* join and destroy all active threads */
@@ -188,7 +202,7 @@ namespace reach {
         assert(f_status == status ||
                (status != REACHABILITY_UNKNOWN && f_status == REACHABILITY_UNKNOWN));
 
-        bool res(f_status != status);
+        bool res { f_status != status };
 
         /* set status, extract witness if reachable */
         f_status = status;

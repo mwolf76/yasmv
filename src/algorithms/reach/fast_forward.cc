@@ -62,8 +62,9 @@ namespace reach {
 
         sat::status_t status { engine.solve() };
 
-        if (sat::status_t::STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status) {
             goto cleanup;
+        }
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
@@ -80,8 +81,9 @@ namespace reach {
                 << std::endl;
         }
 
-        else
+        else {
             assert(false); /* unreachable */
+        }
 
         do {
             /* looking for witness : Reachability(k-1) ^ ! P(k) */
@@ -93,8 +95,9 @@ namespace reach {
 
             sat::status_t status { engine.solve() };
 
-            if (sat::status_t::STATUS_UNKNOWN == status)
+            if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
+            }
 
             else if (sat::status_t::STATUS_SAT == status) {
                 INFO
@@ -105,7 +108,9 @@ namespace reach {
 
                 if (sync_set_status(REACHABILITY_REACHABLE)) {
                     /* Extract reachability witness */
-                    witness::Witness& w { *new ReachabilityCounterExample(f_target, model(), engine, k) };
+                    witness::Witness& w {
+                        *new ReachabilityCounterExample(f_target, model(), engine, k)
+                    };
 
                     /* witness identifier */
                     std::ostringstream oss_id;

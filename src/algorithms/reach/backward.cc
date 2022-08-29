@@ -58,8 +58,9 @@ namespace reach {
 
         sat::status_t status { engine.solve() };
 
-        if (sat::status_t::STATUS_UNKNOWN == status)
+        if (sat::status_t::STATUS_UNKNOWN == status) {
             goto cleanup;
+        }
 
         else if (sat::status_t::STATUS_UNSAT == status) {
             INFO
@@ -76,8 +77,9 @@ namespace reach {
                 << std::endl;
         }
 
-        else
+        else {
             assert(false); /* unreachable */
+        }
 
         do {
             /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
@@ -88,14 +90,17 @@ namespace reach {
 
             sat::status_t status { engine.solve() };
 
-            if (sat::status_t::STATUS_UNKNOWN == status)
+            if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
+            }
 
             else if (sat::status_t::STATUS_SAT == status) {
                 if (sync_set_status(REACHABILITY_REACHABLE)) {
 
                     /* Extract reachability witness */
-                    witness::Witness& w { *new ReachabilityCounterExample(f_target, model(), engine, k, true) }; /* reversed */
+                    witness::Witness& w {
+                        *new ReachabilityCounterExample(f_target, model(), engine, k, true)
+                    }; /* reversed */
 
                     /* witness identifier */
                     std::ostringstream oss_id;
@@ -155,12 +160,14 @@ namespace reach {
 
                 /* build state uniqueness constraint for each pair of states
 		   (j, k), where j < k */
-                for (step_t j = 0; j < k; ++j)
+                for (step_t j = 0; j < k; ++j) {
                     assert_fsm_uniqueness(engine, UINT_MAX - j, UINT_MAX - k);
+                }
 
                 /* is this still relevant? */
-                if (sync_status() != REACHABILITY_UNKNOWN)
+                if (sync_status() != REACHABILITY_UNKNOWN) {
                     goto cleanup;
+                }
 
                 INFO
                     << "Now looking for unreachability proof (k = " << k << ")..."
@@ -168,13 +175,15 @@ namespace reach {
 
                 sat::status_t status { engine.solve() };
 
-                if (sat::status_t::STATUS_UNKNOWN == status)
+                if (sat::status_t::STATUS_UNKNOWN == status) {
                     goto cleanup;
+                }
 
-                else if (sat::status_t::STATUS_SAT == status)
+                else if (sat::status_t::STATUS_SAT == status) {
                     INFO
                         << "No unreachability proof found (k = " << k << ")"
                         << std::endl;
+                }
 
                 else if (sat::status_t::STATUS_UNSAT == status) {
                     INFO
@@ -183,8 +192,10 @@ namespace reach {
 
                     sync_set_status(REACHABILITY_UNREACHABLE);
                     goto cleanup;
-                } else
+
+                } else {
                     assert(false); /* unreachable */
+                }
             }
 
             TRACE

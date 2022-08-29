@@ -36,14 +36,15 @@
 
 namespace reach {
 
-    ReachabilityCounterExample::ReachabilityCounterExample(expr::Expr_ptr property, model::Model& model,
-                                                           sat::Engine& engine, unsigned k, bool reversed)
+    ReachabilityCounterExample::ReachabilityCounterExample(
+        expr::Expr_ptr property, model::Model& model,
+        sat::Engine& engine, unsigned k, bool reversed)
         : Witness()
     {
         enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-	witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
-	
+        witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
+
         /* Collecting symbols for the witness' language */
         symb::SymbIter si { model };
         while (si.has_next()) {
@@ -55,9 +56,9 @@ namespace reach {
             f_lang.push_back(full_name);
         }
 
-        step_t step{ reversed ? k : 0 };
+        step_t step { reversed ? k : 0 };
         do {
-            witness::TimeFrame& tf{ extend() };
+            witness::TimeFrame& tf { extend() };
             symb::SymbIter symbols { model };
 
             while (symbols.has_next()) {
@@ -71,10 +72,16 @@ namespace reach {
                     symb::Variable& var { symb->as_variable() };
 
                     /* time it, and fetch encoding for enc mgr */
-                    enc::Encoding_ptr enc { bm.find_encoding(expr::TimedExpr(key, var.is_frozen() ? FROZEN : 0)) };
+                    enc::Encoding_ptr enc {
+                        bm.find_encoding(
+                            expr::TimedExpr(key, var.is_frozen()
+                                                     ? FROZEN
+                                                     : 0))
+                    };
 
-                    if (!enc)
+                    if (!enc) {
                         continue;
+                    }
 
                     int inputs[bm.nbits()];
                     memset(inputs, 0, sizeof(inputs));
@@ -88,11 +95,13 @@ namespace reach {
                     for (ndx = 0, di = enc->bits().begin();
                          enc->bits().end() != di; ++ndx, ++di) {
 
-			unsigned bit((*di).getNode()->index);
-                        const enc::UCBI& ucbi{ bm.find_ucbi(bit) };
-			const enc::TCBI tcbi { enc::TCBI(ucbi, reversed ? UINT_MAX - step : step) };
+                        unsigned bit((*di).getNode()->index);
+                        const enc::UCBI& ucbi { bm.find_ucbi(bit) };
+                        const enc::TCBI tcbi {
+                            enc::TCBI(ucbi, reversed ? UINT_MAX - step : step)
+                        };
 
-                        Var var{ engine.tcbi_to_var(tcbi) };
+                        Var var { engine.tcbi_to_var(tcbi) };
                         int value { engine.value(var) }; /* XXX: don't cares assigned to 0 */
 
                         inputs[bit] = value;
@@ -105,23 +114,24 @@ namespace reach {
                     /* NULL values here indicate UNDEFs */
                     if (value) {
                         tf.set_value(key, value, symb->format());
-		    }
+                    }
                 }
 
                 else if (symb->is_define()) {
                     const symb::Define& define { symb->as_define() };
-		    expr::Expr_ptr value { wm.eval(*this, ctx, define.body(), 0) };
+                    expr::Expr_ptr value { wm.eval(*this, ctx, define.body(), 0) };
 
                     /* NULL values here indicate UNDEFs */
                     if (value) {
                         tf.set_value(key, value, symb->format());
-		    }
+                    }
                 }
             }
 
             step += reversed ? -1 : 1;
-            if ((reversed && step == UINT_MAX) || (!reversed && step > k))
-		break;
+            if ((reversed && step == UINT_MAX) || (!reversed && step > k)) {
+                break;
+            }
         } while (1);
     } /* ReachabilityCounterExample::ReachabilityCounterExample() */
 
