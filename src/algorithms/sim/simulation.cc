@@ -113,7 +113,9 @@ namespace sim {
                 }
 
                 /* time it, and fetch encoding for enc mgr */
-                enc::Encoding_ptr enc { bm.find_encoding(expr::TimedExpr(key, 0)) };
+                enc::Encoding_ptr enc {
+                    bm.find_encoding(expr::TimedExpr(key, 0))
+                };
 
                 if (!enc) {
                     continue;
@@ -128,7 +130,7 @@ namespace sim {
                 for (ndx = 0, di = enc->bits().begin();
                      enc->bits().end() != di; ++ndx, ++di) {
 
-		    unsigned bit { (*di).getNode()->index };
+                    unsigned bit { (*di).getNode()->index };
                     const enc::UCBI& ucbi { bm.find_ucbi(bit) };
                     const enc::TCBI tcbi { enc::TCBI(ucbi, 0) };
 
@@ -157,8 +159,7 @@ namespace sim {
         unsigned no_constraints { 0 };
 
         std::for_each(
-            begin(constraints),
-            end(constraints),
+            begin(constraints), end(constraints),
             [this, ctx, &no_constraints, &constraint_cus](expr::Expr_ptr expr) {
                 INFO
                     << "Compiling constraint `"
@@ -182,8 +183,7 @@ namespace sim {
 
         /* Additional constraints */
         std::for_each(
-            begin(constraint_cus),
-            end(constraint_cus),
+            begin(constraint_cus), end(constraint_cus),
             [this, &engine](compiler::Unit& cu) {
                 this->assert_formula(engine, 0, cu);
             });
@@ -235,14 +235,16 @@ namespace sim {
                                              pconst_char trace_name)
     {
         witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
-	sat::status_t last_sat;
+        sat::status_t last_sat;
 
         clock_t t0 { clock() }, t1;
         double secs;
 
         sat::Engine engine { "simulation" };
 
-        expr::Atom trace_uid { trace_name ? expr::Atom(trace_name) : wm.current().id() };
+        expr::Atom trace_uid {
+            trace_name ? expr::Atom(trace_name) : wm.current().id()
+        };
         witness::Witness& trace { wm.witness(trace_uid) };
 
         set_witness(trace);
