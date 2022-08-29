@@ -70,7 +70,7 @@ namespace cmd {
                 << std::endl;
 
             os
-		<< std::endl;
+                << std::endl;
 
             return utils::Variant(errMessage);
         }

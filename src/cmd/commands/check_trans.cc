@@ -68,8 +68,8 @@ namespace cmd {
 
         if (check_requirements()) {
             fsm::CheckTransConsistency check_trans {
-		*this, model::ModelMgr::INSTANCE().model()
-	    };
+                *this, model::ModelMgr::INSTANCE().model()
+            };
             check_trans.process(f_constraints);
 
             switch (check_trans.status()) {
@@ -77,7 +77,7 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
                     f_out
                         << "Transition relation consistency check ok."
@@ -90,7 +90,7 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
                     f_out
                         << "Transition relation consistency check failed."
@@ -101,7 +101,7 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
                     f_out
                         << "Could not decide transition relation consistency check."
@@ -113,7 +113,7 @@ namespace cmd {
             }
         }
 
-	return utils::Variant { res ? okMessage : errMessage };
+        return utils::Variant { res ? okMessage : errMessage };
     }
 
     CheckTransTopic::CheckTransTopic(Interpreter& owner)

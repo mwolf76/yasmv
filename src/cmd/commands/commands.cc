@@ -37,8 +37,8 @@
 #include <sim/simulation.hh>
 
 namespace cmd {
-    const std::string outPrefix { "-- "};
-    const std::string wrnPrefix {"!! "};
+    const std::string outPrefix { "-- " };
+    const std::string wrnPrefix { "!! " };
 
     const std::string okMessage { "Ok" };
     const std::string errMessage { "ERROR" };

@@ -261,8 +261,8 @@ namespace compiler {
         }
 
         /* verify if entry for toplevel already exists. If it doesn't,
-	 * create it. This ensures the next assertion will certainly
-	 * hold. */
+         * create it. This ensures the next assertion will certainly
+         * hold. */
         Expr2BinarySelectionDescriptorsMap::const_iterator toplevel_mi {
             f_expr2bsd_map.find(parent)
         };

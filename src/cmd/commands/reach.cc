@@ -82,7 +82,7 @@ namespace cmd {
             return false;
         }
 
-	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         model::Model& model { mm.model() };
         if (model.empty()) {
             f_out

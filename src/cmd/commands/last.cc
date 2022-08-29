@@ -51,7 +51,7 @@ namespace cmd {
         if (last.is_string()) {
             if (!om.quiet()) {
                 out << outPrefix;
-	    }
+            }
 
             std::string value { last.as_string() };
             if (value == okMessage) {
@@ -69,7 +69,7 @@ namespace cmd {
         } else {
             if (!om.quiet()) {
                 out << outPrefix;
-	    }
+            }
 
             out
                 << "No status available"

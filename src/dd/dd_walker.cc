@@ -82,7 +82,7 @@ namespace dd {
                     /* process node in post-order. */
                     if (condition(node)) {
                         action(node);
-		    }
+                    }
                     f_recursion_stack.pop();
                     break;
 

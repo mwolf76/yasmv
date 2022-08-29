@@ -69,8 +69,8 @@ namespace cmd {
 
         if (check_requirements()) {
             fsm::CheckInitConsistency check_init {
-		*this, model::ModelMgr::INSTANCE().model()
-	    };
+                *this, model::ModelMgr::INSTANCE().model()
+            };
             check_init.process(f_constraints);
 
             switch (check_init.status()) {
@@ -78,7 +78,7 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
                     f_out
                         << "Initial states consistency check ok."
@@ -91,7 +91,7 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
                     f_out
                         << "Initial states consistency check failed."
@@ -102,9 +102,9 @@ namespace cmd {
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
-		    }
+                    }
 
-		    f_out
+                    f_out
                         << "Could not decide initial states consistency check."
                         << std::endl;
                     break;

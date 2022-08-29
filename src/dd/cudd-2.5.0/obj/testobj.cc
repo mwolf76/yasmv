@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     }
 
     Cudd mgr(0, 2);
-    // mgr.makeVerbose();		// trace constructors and destructors
+    // mgr.makeVerbose();               // trace constructors and destructors
     testBdd(mgr, verbosity);
     testAdd(mgr, verbosity);
     testAdd2(mgr, verbosity);

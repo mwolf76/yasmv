@@ -356,8 +356,8 @@ namespace model {
     type::Type_ptr TypeChecker::type(expr::Expr_ptr expr, expr::Expr_ptr ctx)
     {
         /* to avoid a number of cache misses due to compiler rewrites,
-	 * we squeeze types in equivalence classes: Relationals -> lhs
-	 * '<' rhs, Arithmetical -> lhs '+' rhs */
+         * we squeeze types in equivalence classes: Relationals -> lhs
+         * '<' rhs, Arithmetical -> lhs '+' rhs */
         expr::Expr_ptr key(f_owner.em().make_dot(ctx, expr));
 
         TypeReg::const_iterator eye(f_map.find(key));

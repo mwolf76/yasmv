@@ -41,7 +41,7 @@ namespace cmd {
 
     bool Diameter::check_requirements()
     {
-        model::ModelMgr& mm{ model::ModelMgr::INSTANCE() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
@@ -62,8 +62,8 @@ namespace cmd {
 
         if (check_requirements()) {
             fsm::ComputeDiameter computeDiameter {
-		*this, model::ModelMgr::INSTANCE().model()
-	    };
+                *this, model::ModelMgr::INSTANCE().model()
+            };
 
             computeDiameter.process();
             step_t value = computeDiameter.diameter();

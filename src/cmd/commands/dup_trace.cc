@@ -45,11 +45,11 @@ namespace cmd {
     {
         if (f_trace_id) {
             free(f_trace_id);
-	}
+        }
 
         if (f_duplicate_id) {
             free(f_duplicate_id);
-	}
+        }
     }
 
     void DupTrace::set_trace_id(pconst_char trace_id)

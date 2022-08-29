@@ -63,8 +63,8 @@ namespace reach {
         assert(f_target);
 
         /* store and inspect constraints: currently mixed-time
-	 * (i.e. backward + forward) constraints are *not*
-	 * supported */
+         * (i.e. backward + forward) constraints are *not*
+         * supported */
         f_constraints = constraints;
         unsigned no_forward_constraints { 0 };
         unsigned no_backward_constraints { 0 };

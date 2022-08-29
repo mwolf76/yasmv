@@ -46,42 +46,42 @@ namespace opts {
             (
                 "help",
                 "produce help message"
-	    )
+            )
 
-	    (
-		"version",
-		"produce version number"
-	    )
+            (
+                "version",
+                "produce version number"
+            )
 
-	    (
-		"quiet",
-		"avoid any extra output"
-	    )
+            (
+                "quiet",
+                "avoid any extra output"
+            )
 
-	    (
-		"color",
-		"enables colorized output in interactive shell"
-	    )
+            (
+                "color",
+                "enables colorized output in interactive shell"
+            )
 
-	    (
-		"word-width",
-		boost::program_options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
-		"native word size in bits"
-	    )
+            (
+                "word-width",
+                boost::program_options::value<unsigned>()->default_value(DEFAULT_WORD_WIDTH),
+                "native word size in bits"
+            )
 
-	    (
-		"verbosity",
-		boost::program_options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
-		"verbosity level"
-	    )
-	    
-	    (
-		"model",
-		boost::program_options::value<std::string>(),
-		"input model"
-	    )
-	    ;
-	// clang-format on	
+            (
+                "verbosity",
+                boost::program_options::value<unsigned>()->default_value(DEFAULT_VERBOSITY),
+                "verbosity level"
+            )
+
+            (
+                "model",
+                boost::program_options::value<std::string>(),
+                "input model"
+            )
+            ;
+        // clang-format on
 
         // positional arguments are models
         f_pos.add("model", -1);
@@ -90,11 +90,12 @@ namespace opts {
     void OptsMgr::parse_command_line(int argc, const char** argv)
     {
         boost::program_options::store(
-	    boost::program_options::command_line_parser(
-		argc, const_cast<char**>(argv))
-	    .options(f_desc)
-	    .positional(f_pos)
-	    .run(), f_vm);
+            boost::program_options::command_line_parser(
+                argc, const_cast<char**>(argv))
+                .options(f_desc)
+                .positional(f_pos)
+                .run(),
+            f_vm);
 
         boost::program_options::notify(f_vm);
         if (f_vm.count("help")) {
@@ -170,8 +171,8 @@ namespace opts {
     unsigned OptsMgr::precision() const
     {
         return (UINT_MAX != f_precision)
-	    ? f_precision
-	    : f_vm["precision"].as<unsigned>();
+                   ? f_precision
+                   : f_vm["precision"].as<unsigned>();
     }
 
 
@@ -203,23 +204,23 @@ namespace opts {
     {
         if (!f_started) {
             return log_often;
-	}
+        }
 
         switch (verbosity()) {
-	case 0:
-	    return log_always;
+            case 0:
+                return log_always;
 
-	case 1:
-	    return log_often;
+            case 1:
+                return log_often;
 
-	case 2:
-	    return log_regularly;
+            case 2:
+                return log_regularly;
 
-	case 3:
-	    return log_rarely;
+            case 3:
+                return log_rarely;
 
-	default:
-	    return log_very_rarely;
+            default:
+                return log_very_rarely;
         }
     }
 

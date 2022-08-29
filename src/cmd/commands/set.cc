@@ -71,7 +71,7 @@ namespace cmd {
                 .usage();
         } else {
             env.set(f_identifier, f_value);
-	}
+        }
 
         return utils::Variant(okMessage);
     }

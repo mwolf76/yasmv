@@ -69,8 +69,8 @@ namespace compiler {
         }
 
         /* 1. Explicit int constants, perform booleanization
-	 * immediately. An exception will be thrown if conversion could
-	 * not be completed. */
+         * immediately. An exception will be thrown if conversion could
+         * not be completed. */
         if (em.is_int_const(expr)) {
             unsigned ww { opts::OptsMgr::INSTANCE().word_width() };
 
@@ -123,7 +123,7 @@ namespace compiler {
         }
 
         /* 4. variables, encodings will be created on-the-fly, if
-	 *    necessary */
+         *    necessary */
         else if (symb->is_variable()) {
 
             const symb::Variable& var { symb->as_variable() };
@@ -150,7 +150,7 @@ namespace compiler {
         }
 
         /* 5. parameters, must be resolved against the Param map which is
-	 *    maintained by the ModelMgr */
+         *    maintained by the ModelMgr */
         else if (symb->is_parameter()) {
             expr::Expr_ptr rewrite { f_owner.rewrite_parameter(full) };
 

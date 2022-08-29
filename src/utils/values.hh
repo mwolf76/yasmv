@@ -31,23 +31,23 @@
 
 namespace utils {
 
-typedef std::vector<value_t> ValueVector;
+    typedef std::vector<value_t> ValueVector;
 
 /* shortcuts to to simplify manipulation of the internal values stack */
-#define POP_VALUE(op)                              \
-    assert(0 < f_values_stack.size());             \
-    const value_t op = f_values_stack.back();      \
+#define POP_VALUE(op)                         \
+    assert(0 < f_values_stack.size());        \
+    const value_t op = f_values_stack.back(); \
     f_values_stack.pop_back()
 
-#define PUSH_VALUE(op)                             \
+#define PUSH_VALUE(op) \
     f_values_stack.push_back(op)
 
-#define DROP_VALUE()                               \
+#define DROP_VALUE() \
     f_values_stack.pop_back()
 
-#define TOP_VALUE()                                \
+#define TOP_VALUE() \
     f_values_stack.back()
 
-}
+} // namespace utils
 
 #endif /* UTILS_VALUES_H */

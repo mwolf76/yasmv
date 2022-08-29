@@ -87,9 +87,9 @@ namespace reach {
                     memset(inputs, 0, sizeof(inputs));
 
                     /* 1. for each bit int the encoding, fetch UCBI,
-		     * time it into TCBI, fetch its value in MiniSAT
-		     * model and set the corresponding entry in
-		     * input. */
+                     * time it into TCBI, fetch its value in MiniSAT
+                     * model and set the corresponding entry in
+                     * input. */
                     dd::DDVector::const_iterator di;
                     unsigned ndx;
                     for (ndx = 0, di = enc->bits().begin();
@@ -108,7 +108,7 @@ namespace reach {
                     }
 
                     /* 2. eval the encoding DDs with inputs and put
-		     * resulting value into time frame container. */
+                     * resulting value into time frame container. */
                     expr::Expr_ptr value { enc->expr(inputs) };
 
                     /* NULL values here indicate UNDEFs */

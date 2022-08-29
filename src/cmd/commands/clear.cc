@@ -51,14 +51,14 @@ namespace cmd {
     utils::Variant Clear::operator()()
     {
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-	
-	/* FIXME: implement stream redirection for std{out,err} */
-	std::ostream& out { std::cout };
+
+        /* FIXME: implement stream redirection for std{out,err} */
+        std::ostream& out { std::cout };
 
         if (!om.quiet()) {
             out
                 << outPrefix;
-	}
+        }
 
         out
             << "WARNING: this commands currently does nothing!"

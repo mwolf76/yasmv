@@ -128,7 +128,7 @@ namespace cmd {
         if (init.begin() != init.end()) {
             os
                 << std::endl;
-	}
+        }
 
         for (expr::ExprVector::const_iterator init_eye = init.begin();
              init_eye != init.end(); ++init_eye) {
@@ -148,7 +148,7 @@ namespace cmd {
         if (invar.begin() != invar.end()) {
             os
                 << std::endl;
-	}
+        }
 
         for (expr::ExprVector::const_iterator invar_eye = invar.begin();
              invar_eye != invar.end(); ++invar_eye) {
@@ -168,7 +168,7 @@ namespace cmd {
         if (trans.begin() != trans.end()) {
             os
                 << std::endl;
-	}
+        }
 
         for (expr::ExprVector::const_iterator trans_eye = trans.begin();
              trans_eye != trans.end(); ++trans_eye) {
@@ -203,31 +203,30 @@ namespace cmd {
 
     utils::Variant DumpModel::operator()()
     {
-	model::ModelMgr& mm { model::ModelMgr::INSTANCE() }; 
-        model::Model& model{ mm.model() };
-	const model::Modules& modules { model.modules() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
+        const model::Modules& modules { model.modules() };
 
         std::ostream& out(get_output_stream());
         bool dump_all { !f_state && !f_init && !f_trans };
 
         std::for_each(begin(modules), end(modules),
                       [this, dump_all, &out](std::pair<expr::Expr_ptr,
-					     model::Module_ptr>
-					     descriptor) {
+                                                       model::Module_ptr>
+                                                 descriptor) {
+                          model::Module& module { *descriptor.second };
 
-			  model::Module& module { *descriptor.second };
-			  
                           if (dump_all) {
                               dump_heading(out, module);
-			  }
+                          }
 
                           if (dump_all || f_state) {
                               dump_variables(out, module);
-			  }
+                          }
 
                           if (dump_all || f_init) {
                               dump_inits(out, module);
-			  }
+                          }
 
                           if (dump_all || f_trans) {
                               dump_invars(out, module);

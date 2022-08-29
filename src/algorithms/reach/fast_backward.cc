@@ -44,8 +44,8 @@ namespace reach {
         assert_fsm_invar(engine, UINT_MAX - k);
 
         /* Timed constraints can be asserted immediately, global
-	 * constraints must be asserted at time zero, therefore we
-	 * don't need any filtering here. */
+         * constraints must be asserted at time zero, therefore we
+         * don't need any filtering here. */
         std::for_each(
             begin(f_constraints), end(f_constraints),
             [this, &engine, k](expr::Expr_ptr constraint) {

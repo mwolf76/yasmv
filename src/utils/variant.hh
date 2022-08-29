@@ -32,53 +32,53 @@
 
 namespace utils {
 
-typedef enum {
-    BOTTOM,
-    BOOLEAN,
-    INTEGER,
-    STRING,
-} VariantType;
+    typedef enum {
+        BOTTOM,
+        BOOLEAN,
+        INTEGER,
+        STRING,
+    } VariantType;
 
-class Variant {
-    friend std::ostream& operator<<(std::ostream& os, const Variant& variant);
+    class Variant {
+        friend std::ostream& operator<<(std::ostream& os, const Variant& variant);
 
-public:
-    // variant ctors
-    Variant();
+    public:
+        // variant ctors
+        Variant();
 
-    Variant(const std::string& value);
+        Variant(const std::string& value);
 
-    Variant(bool value);
-    Variant(int value);
+        Variant(bool value);
+        Variant(int value);
 
-    Variant(const Variant& v);
+        Variant(const Variant& v);
 
-    // variant predicates & getters
-    bool is_nil() const;
+        // variant predicates & getters
+        bool is_nil() const;
 
-    bool is_boolean() const;
-    bool as_boolean() const;
+        bool is_boolean() const;
+        bool as_boolean() const;
 
-    bool is_integer() const;
-    int as_integer() const;
+        bool is_integer() const;
+        int as_integer() const;
 
-    bool is_clock() const;
-    clock_t as_clock() const;
+        bool is_clock() const;
+        clock_t as_clock() const;
 
-    bool is_string() const;
-    std::string as_string() const;
+        bool is_string() const;
+        std::string as_string() const;
 
-private:
-    VariantType f_type;
+    private:
+        VariantType f_type;
 
-    bool f_bool;
-    int f_int;
-    std::string f_str;
-    clock_t f_clock;
-};
+        bool f_bool;
+        int f_int;
+        std::string f_str;
+        clock_t f_clock;
+    };
 
-extern Variant NilValue;
+    extern Variant NilValue;
 
-};
+}; // namespace utils
 
 #endif /* VARIANT_H */

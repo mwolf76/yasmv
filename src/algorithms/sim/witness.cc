@@ -89,9 +89,9 @@ namespace sim {
                     }
 
                     /* 1. for each bit int the encoding, fetch UCBI,
-		     * time it into TCBI, fetch its value in solver
-		     * model and set the corresponding entry in inputs
-		     * array. */
+                     * time it into TCBI, fetch its value in solver
+                     * model and set the corresponding entry in inputs
+                     * array. */
                     dd::DDVector::const_iterator di;
                     unsigned ndx;
                     for (ndx = 0, di = enc->bits().begin();
@@ -108,7 +108,7 @@ namespace sim {
                     }
 
                     /* 2. eval the encoding DDs with inputs and put
-		     * resulting value into time frame container. */
+                     * resulting value into time frame container. */
                     expr::Expr_ptr value { enc->expr(inputs) };
                     if (value) {
                         tf.set_value(key, value, symb->format());

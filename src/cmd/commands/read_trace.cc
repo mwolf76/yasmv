@@ -44,9 +44,9 @@ namespace cmd {
     ReadTraceWitness::ReadTraceWitness(expr::Atom id, expr::Atom desc)
         : witness::Witness(NULL, id, desc)
     {
-	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-	
+
         symb::SymbIter si { mm.model() };
         while (si.has_next()) {
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { si.next() };
@@ -94,8 +94,8 @@ namespace cmd {
 
     bool ReadTrace::check_requirements()
     {
-	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
-	
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+
         if (!f_input) {
             WARN
                 << "No input filename provided. (missing quotes?)"
@@ -176,7 +176,7 @@ namespace cmd {
     bool ReadTrace::parsePlainTrace(boost::filesystem::path& tracepath)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-	witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
+        witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
 
         witness::Witness_ptr witness = NULL;
         witness::TimeFrame_ptr current = NULL;
@@ -202,10 +202,10 @@ namespace cmd {
                 const char* id_prefix { "Witness:" };
                 if (boost::starts_with(trimmed, id_prefix)) {
                     std::string witness_id {
-			boost::algorithm::trim_copy(
-			    boost::algorithm::erase_head_copy(
-				trimmed, strlen(id_prefix)))
-		    };
+                        boost::algorithm::trim_copy(
+                            boost::algorithm::erase_head_copy(
+                                trimmed, strlen(id_prefix)))
+                    };
 
                     std::ostringstream oss;
                     oss
@@ -240,13 +240,13 @@ namespace cmd {
 
                     expr::Expr_ptr ctx { em.make_empty() };
                     expr::Expr_ptr lhs {
-			parse::parseExpression(
-			    boost::algorithm::trim_copy(split[0]).c_str())
-		    };
+                        parse::parseExpression(
+                            boost::algorithm::trim_copy(split[0]).c_str())
+                    };
                     expr::Expr_ptr rhs {
-			parse::parseExpression(
-			    boost::algorithm::trim_copy(split[1]).c_str())
-		    };
+                        parse::parseExpression(
+                            boost::algorithm::trim_copy(split[1]).c_str())
+                    };
 
                     DRIVEL
                         << lhs

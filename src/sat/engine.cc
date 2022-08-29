@@ -69,10 +69,10 @@ namespace sat {
             Var grp { groups[i] };
 
             /* Assumptions work like "a -> phi". Here we use both
-	     * polarities of the implication, that is a positive group
-	     * var asserts the formulas in the group whereas a
-	     * negative group var asserts the negation of those
-	     * formulas. */
+             * polarities of the implication, that is a positive group
+             * var asserts the formulas in the group whereas a
+             * negative group var asserts the negation of those
+             * formulas. */
             assumptions.push(mkLit(abs(grp), grp < 0));
         }
 
@@ -107,8 +107,8 @@ namespace sat {
     void Engine::push(compiler::Unit cu, step_t time, group_t group)
     {
         /**
-	 * 1. Pushing DDs
-	 */
+         * 1. Pushing DDs
+         */
         {
             const dd::DDVector& dv { cu.dds() };
             dd::DDVector::const_iterator i;
@@ -119,8 +119,8 @@ namespace sat {
         }
 
         /**
-	 * 2. Pushing CNF for inlined operators
-	 */
+         * 2. Pushing CNF for inlined operators
+         */
         {
             const compiler::InlinedOperatorDescriptors& inlined_operator_descriptors {
                 cu.inlined_operator_descriptors()
@@ -136,8 +136,8 @@ namespace sat {
         }
 
         /**
-	 * 3. Pushing ITE MUXes
-	 */
+         * 3. Pushing ITE MUXes
+         */
         {
             const compiler::Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map {
                 cu.binary_selection_descriptors_map()
@@ -163,8 +163,8 @@ namespace sat {
         }
 
         /**
-	 * 4. Pushing ARRAY MUXes
-	 */
+         * 4. Pushing ARRAY MUXes
+         */
         {
             const compiler::MultiwaySelectionDescriptors& muxes {
                 cu.array_mux_descriptors()

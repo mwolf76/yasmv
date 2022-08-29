@@ -23,8 +23,8 @@
 
 #include <parser/exceptions.hh>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 SyntaxError::SyntaxError(const std::string& message)
     : ParserException("SyntaxError", message)

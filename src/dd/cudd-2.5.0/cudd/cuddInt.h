@@ -124,13 +124,13 @@ extern "C" {
 #define DD_GC_FRAC_HI DD_MAX_SUBTABLE_DENSITY * 1.0
 #define DD_GC_FRAC_MIN 0.2
 #define DD_MIN_HIT 30                 /* resize cache when hit ratio
-					   above this percentage (default) */
+                                           above this percentage (default) */
 #define DD_MAX_LOOSE_FRACTION 5       /* 1 / (max fraction of memory used for
-				     unique table in fast growth mode) */
+                                     unique table in fast growth mode) */
 #define DD_MAX_CACHE_FRACTION 3       /* 1 / (max fraction of memory used for
-				     computed table if resizing enabled) */
+                                     computed table if resizing enabled) */
 #define DD_STASH_FRACTION 64          /* 1 / (fraction of memory set
-				      aside for emergencies) */
+                                      aside for emergencies) */
 #define DD_MAX_CACHE_TO_SLOTS_RATIO 4 /* used to limit the cache size */
 
 /* Variable ordering default parameter values. */

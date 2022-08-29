@@ -623,8 +623,8 @@ namespace model {
     void TypeChecker::walk_array_postorder(const expr::Expr_ptr expr)
     {
         /* Here we need to handle the singleton corner case
-	 * (e.g. [42]). We can do it here because nested arrays are
-	 * not supported. */
+         * (e.g. [42]). We can do it here because nested arrays are
+         * not supported. */
         type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         /* inspect head... */

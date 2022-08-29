@@ -30,17 +30,21 @@
 #include <vector>
 
 /* -- shortcurts to simplify the manipulation of the internal ctx stack -- */
-#define TOP_CTX(ctx)					\
-    assert (0 < f_ctx_stack.size());			\
-    const expr::Expr_ptr ctx { f_ctx_stack.back() }
+#define TOP_CTX(ctx)                \
+    assert(0 < f_ctx_stack.size()); \
+    const expr::Expr_ptr ctx        \
+    {                               \
+        f_ctx_stack.back()          \
+    }
 
-#define DROP_CTX()                             \
+#define DROP_CTX() \
     f_ctx_stack.pop_back()
 
-#define POP_CTX(ctx)                            \
-    TOP_CTX(ctx); DROP_CTX()
+#define POP_CTX(ctx) \
+    TOP_CTX(ctx);    \
+    DROP_CTX()
 
-#define PUSH_CTX(ctx)                           \
+#define PUSH_CTX(ctx) \
     f_ctx_stack.push_back(ctx)
 
 namespace utils {

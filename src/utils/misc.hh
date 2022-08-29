@@ -28,15 +28,19 @@
 
 namespace utils {
 
-static inline bool _iff(bool a, bool b)
-{ return (!(a) || (b)) && ((!b) || (a)); }
+    static inline bool _iff(bool a, bool b)
+    {
+        return (!(a) || (b)) && ((!b) || (a));
+    }
 
-static inline bool _xor(bool a, bool b)
-{ return (!(a) && (b)) || ((!b) && (a)); }
+    static inline bool _xor(bool a, bool b)
+    {
+        return (!(a) && (b)) || ((!b) && (a));
+    }
 
 #define INLINE(str) #str
 #define STRING(str) INLINE(str)
 
-};
+}; // namespace utils
 
 #endif /* MISC_H */

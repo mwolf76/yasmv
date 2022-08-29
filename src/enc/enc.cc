@@ -35,7 +35,7 @@ namespace enc {
         ADD res { f_mgr.bit() };
 
         /* keep track of every bit in the encoding, this is used later,
-	   when evaluating the scalar value of a bit combination. */
+           when evaluating the scalar value of a bit combination. */
         f_bits.push_back(res);
 
         return res;

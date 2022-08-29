@@ -32,36 +32,40 @@
 
 namespace utils {
 
-struct PtrHash {
-    long operator() (void *ptr) const;
-};
+    struct PtrHash {
+        long operator()(void* ptr) const;
+    };
 
-struct PtrEq {
-    bool operator() (const void* x,
-                     const void* y) const;
-};
+    struct PtrEq {
+        bool operator()(const void* x,
+                        const void* y) const;
+    };
 
-/* -- integer key definitions (here to collect them all together) ------------ */
-struct ValueHash {
-    long operator() (value_t) const;
-};
+    /* -- integer key definitions (here to collect them all together) ------------ */
+    struct ValueHash {
+        long operator()(value_t) const;
+    };
 
-struct ValueEq {
-    bool operator() (const value_t x,
-                     const value_t y) const;
-};
+    struct ValueEq {
+        bool operator()(const value_t x,
+                        const value_t y) const;
+    };
 
-struct IntHash {
-    inline long operator() (int term) const
-    { return (long) (term); }
-};
+    struct IntHash {
+        inline long operator()(int term) const
+        {
+            return (long) (term);
+        }
+    };
 
-struct IntEq {
-    inline bool operator() (const int phi,
-                            const int psi) const
-    { return phi == psi; }
-};
+    struct IntEq {
+        inline bool operator()(const int phi,
+                               const int psi) const
+        {
+            return phi == psi;
+        }
+    };
 
-};
+}; // namespace utils
 
 #endif /* POOL_H */

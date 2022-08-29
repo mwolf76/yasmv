@@ -57,7 +57,7 @@ namespace cmd {
             out
                 << outPrefix
                 << "Session time: ";
-	}
+        }
 
         out
             << utils::elapsed_repr(interpreter.epoch(), now)
@@ -69,7 +69,7 @@ namespace cmd {
                 << "Elapsed time: "
                 << utils::elapsed_repr(old, now)
                 << std::endl;
-	}
+        }
 
         old = now;
         first = false;

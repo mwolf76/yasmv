@@ -66,16 +66,16 @@ namespace cmd {
 
         /* TODO: not really compatible with the grammar... restrict to 1 expr */
         std::for_each(
-	    f_expressions.begin(), f_expressions.end(),
-	    [&](expr::Expr_ptr expr) {
-		witness::Witness& current(wm.current());
-       		out
-		    << wm.eval(current,
-			       expr::ExprMgr::INSTANCE().make_empty(),
-			       expr, current.last_time())
-		    << " ";
-	    });
-	
+            f_expressions.begin(), f_expressions.end(),
+            [&](expr::Expr_ptr expr) {
+                witness::Witness& current(wm.current());
+                out
+                    << wm.eval(current,
+                               expr::ExprMgr::INSTANCE().make_empty(),
+                               expr, current.last_time())
+                    << " ";
+            });
+
         out
             << std::endl;
 

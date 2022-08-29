@@ -50,18 +50,18 @@ namespace type {
 
         /* Types are globally scoped */
         expr::Expr_ptr key_ {
-	    em.make_dot(em.make_empty(), key->rhs())
-	};
+            em.make_dot(em.make_empty(), key->rhs())
+        };
 
         const symb::Literals& lits {
-	    TypeMgr::INSTANCE().literals()
-	};
+            TypeMgr::INSTANCE().literals()
+        };
 
         symb::Literals::const_iterator iter { lits.find(key_) };
 
         if (iter != lits.end()) {
             return dynamic_cast<symb::Symbol_ptr>((*iter).second);
-	}
+        }
 
         return NULL; /* unresolved */
     }

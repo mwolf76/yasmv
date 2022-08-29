@@ -2674,8 +2674,8 @@ ADD ADD::Negate() const
 //     DdNode **X = new DdNode *[n];
 //     DdNode **Y = new DdNode *[n];
 //     for (int i = 0; i < n; i++) {
-// 	X[i] = x[i].getNode();
-// 	Y[i] = y[i].getNode();
+//      X[i] = x[i].getNode();
+//      Y[i] = y[i].getNode();
 //     }
 //     DdNode *result = Cudd_addWalsh(p->manager, X, Y, n);
 //     delete [] X;

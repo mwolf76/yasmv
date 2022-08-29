@@ -39,15 +39,15 @@ namespace cmd {
 
     On::~On()
     {
-	delete f_then;
-	delete f_else;
+        delete f_then;
+        delete f_else;
     }
 
     void On::set_then(Command_ptr c)
     {
         if (!c) {
             throw CommandException("Empty THEN branch");
-	}
+        }
 
         f_then = c;
     }
@@ -56,7 +56,7 @@ namespace cmd {
     {
         if (!c) {
             throw CommandException("Empty ELSE branch");
-	}
+        }
 
         f_else = c;
     }
@@ -70,23 +70,23 @@ namespace cmd {
 
         if (cm.is_success(res)) {
             if (f_then) {
-		TRACE
-		    << "condition holds, triggering `then` action."
-		    << std::endl;
-		
+                TRACE
+                    << "condition holds, triggering `then` action."
+                    << std::endl;
+
                 res = f_then->operator()();
-	    }
+            }
         } else if (cm.is_failure(res)) {
             if (f_else) {
-		TRACE
-		    << "condition does not hold, triggering `else` action."
-		    << std::endl;
-		
+                TRACE
+                    << "condition does not hold, triggering `else` action."
+                    << std::endl;
+
                 res = f_else->operator()();
-	    }
+            }
         } else {
-	    ERR
-		<< "unexpected: condition was neither in `SUCCESS` or `FAILURE` state."
+            ERR
+                << "unexpected: condition was neither in `SUCCESS` or `FAILURE` state."
                 << res
                 << std::endl;
 

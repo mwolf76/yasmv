@@ -132,20 +132,20 @@ typedef int (*ST_PFICPI)(char*, int); /* type for hash function */
   associated value (if it is not nil). `gen' is a generator variable
   used internally. Sample usage:
   <pre>
-     	char *key, *value;
+        char *key, *value;
   </pre>
   <pre>
-	st_generator *gen;
+        st_generator *gen;
   </pre>
   <pre>
 
-	st_foreach_item(table, gen, &key, &value) {
+        st_foreach_item(table, gen, &key, &value) {
   </pre>
   <pre>
-	    process_item(value);
+            process_item(value);
   </pre>
   <pre>
-	}
+        }
   </pre>
   ]
 
@@ -168,23 +168,23 @@ typedef int (*ST_PFICPI)(char*, int); /* type for hash function */
   pointer to an integer.  `gen' is a generator variable used
   internally. Sample usage:
   <pre>
-     	char *key;
+        char *key;
   </pre>
   <pre>
-	int value;
+        int value;
   </pre>
   <pre>
-	st_generator *gen;
+        st_generator *gen;
   </pre>
   <pre>
 
-	st_foreach_item_int(table, gen, &key, &value) {
+        st_foreach_item_int(table, gen, &key, &value) {
   </pre>
   <pre>
-	    process_item(value);
+            process_item(value);
   </pre>
   <pre>
-	}
+        }
   </pre>
   ]
 

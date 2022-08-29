@@ -49,11 +49,11 @@ namespace type {
 
             if (!expr::ExprMgr::INSTANCE().is_identifier(lit)) {
                 throw IdentifierExpected(lit);
-	    }
+            }
 
             if (lits.end() != lits.find(lit)) {
                 throw DuplicateLiteral(lit);
-	    }
+            }
         }
 
         f_repr = f_owner.em().make_enum_type(f_literals);
@@ -72,7 +72,7 @@ namespace type {
 
             if (*eye == lit) {
                 return res;
-	    }
+            }
         }
 
         assert(false); // not found

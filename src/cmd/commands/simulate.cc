@@ -89,7 +89,7 @@ namespace cmd {
                 if (!om.quiet()) {
                     f_out
                         << outPrefix;
-		}
+                }
 
                 f_out
                     << "Simulation done";
@@ -99,7 +99,7 @@ namespace cmd {
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
-		}
+                }
 
                 f_out
                     << "Simulation deadlocked"
@@ -110,7 +110,7 @@ namespace cmd {
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
-		}
+                }
 
                 f_out
                     << "Simulation interrupted"
@@ -125,7 +125,7 @@ namespace cmd {
             if (!om.quiet()) {
                 f_out
                     << outPrefix;
-	    }
+            }
 
             f_out
                 << "Registered witness `"
@@ -136,7 +136,7 @@ namespace cmd {
             if (!om.quiet()) {
                 f_out
                     << wrnPrefix;
-	    }
+            }
 
             f_out
                 << "(no witness available)"

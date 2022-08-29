@@ -46,13 +46,13 @@ typedef int util_ptrint;
 #if defined(USE_MM) || defined(MNEMOSYNE)
 /*
  *  assumes the memory manager is either libmm.a or libmnem.a
- *	libmm.a:
- *	- allows malloc(0) or realloc(obj, 0)
- *	- catches out of memory (and calls MMout_of_memory())
- *	- catch free(0) and realloc(0, size) in the macros
- *	libmnem.a:
- *	- reports memory leaks
- *	- is used in conjunction with the mnemalyse postprocessor
+ *      libmm.a:
+ *      - allows malloc(0) or realloc(obj, 0)
+ *      - catches out of memory (and calls MMout_of_memory())
+ *      - catch free(0) and realloc(0, size) in the macros
+ *      libmnem.a:
+ *      - reports memory leaks
+ *      - is used in conjunction with the mnemalyse postprocessor
  */
 #ifdef MNEMOSYNE
 #include "mnemosyne.h"
@@ -69,7 +69,7 @@ typedef int util_ptrint;
 #else
 /*
  *  enforce strict semantics on the memory allocator
- *	- when in doubt, delete the '#define USE_MM' above
+ *      - when in doubt, delete the '#define USE_MM' above
  */
 #define ALLOC(type, num) \
     ((type*) MMalloc((long) sizeof(type) * (long) (num)))
