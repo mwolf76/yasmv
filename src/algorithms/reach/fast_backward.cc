@@ -77,8 +77,9 @@ namespace reach {
                 << std::endl;
         }
 
-        else
+        else {
             assert(false); /* unreachable */
+        }
 
         do {
             /* looking for witness : I(k-1) ^ Reachability(k-1) ^ ... ^! P(0) */
@@ -90,8 +91,9 @@ namespace reach {
 
             sat::status_t status { engine.solve() };
 
-            if (sat::status_t::STATUS_UNKNOWN == status)
+            if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
+            }
 
             else if (sat::status_t::STATUS_SAT == status) {
                 if (sync_set_status(REACHABILITY_REACHABLE)) {

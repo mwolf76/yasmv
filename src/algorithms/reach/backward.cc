@@ -192,8 +192,9 @@ namespace reach {
 
                     sync_set_status(REACHABILITY_UNREACHABLE);
                     goto cleanup;
+                }
 
-                } else {
+                else {
                     assert(false); /* unreachable */
                 }
             }
