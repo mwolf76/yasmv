@@ -61,7 +61,6 @@ namespace sim {
         symb::SymbIter symbols { model };
 
         while (symbols.has_next()) {
-
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { symbols.next() };
             expr::Expr_ptr ctx { pair.first };
             symb::Symbol_ptr symb { pair.second };
@@ -102,17 +101,15 @@ namespace sim {
                         const enc::UCBI& ucbi { bm.find_ucbi(bit) };
                         const enc::TCBI tcbi { enc::TCBI(ucbi, k) };
                         Var var { engine.tcbi_to_var(tcbi) };
-                        int value { engine.value(var) }; /* Don't care is
-							   assigned to
-							   0 */
 
+                        /* Don't care is assigned to 0 */
+                        int value { engine.value(var) };
                         inputs[bit] = value;
                     }
 
                     /* 2. eval the encoding DDs with inputs and put
 		     * resulting value into time frame container. */
                     expr::Expr_ptr value { enc->expr(inputs) };
-
                     if (value) {
                         tf.set_value(key, value, symb->format());
                     }
