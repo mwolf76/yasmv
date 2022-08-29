@@ -50,8 +50,10 @@ namespace cmd {
 
     void Get::print_assignment(std::ostream& os, expr::Expr_ptr id)
     {
-        env::Environment& env(env::Environment::INSTANCE());
-        expr::Expr_ptr value { env.get(id) }; /* raises an exception on failures */
+        env::Environment& env { env::Environment::INSTANCE() };
+
+        /* raises an exception on failures */
+        expr::Expr_ptr value { env.get(id) };
 
         os
             << outPrefix
@@ -63,7 +65,7 @@ namespace cmd {
 
     void Get::print_all_assignments(std::ostream& os)
     {
-        env::Environment& env(env::Environment::INSTANCE());
+        env::Environment& env { env::Environment::INSTANCE() };
         const expr::ExprSet& identifiers { env.identifiers() };
 
         for (expr::ExprSet::const_iterator i = identifiers.begin();

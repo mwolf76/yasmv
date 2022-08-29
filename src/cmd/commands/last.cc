@@ -58,15 +58,22 @@ namespace cmd {
                 out
                     << "Last command was SUCCESSFUL"
                     << std::endl;
-            } else if (value == errMessage) {
+            }
+
+            else if (value == errMessage) {
                 out
                     << "Last command was UNSUCCESSFUL"
                     << std::endl;
-            } else
+            }
+
+            else {
                 assert(false); /* unexpected */
+            }
 
             return last;
-        } else {
+        }
+
+        else {
             if (!om.quiet()) {
                 out << outPrefix;
             }

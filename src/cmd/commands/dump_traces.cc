@@ -260,40 +260,41 @@ namespace cmd {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         Json::Value res;
 
-        std::for_each(begin(assignments), end(assignments),
-                      [&res, &em](expr::Expr_ptr assignment) {
-                          expr::Atom lhs { assignment->lhs()->rhs()->atom() };
-                          expr::Expr_ptr rhs { assignment->rhs() };
+        std::for_each(
+            begin(assignments), end(assignments),
+            [&res, &em](expr::Expr_ptr assignment) {
+                expr::Atom lhs { assignment->lhs()->rhs()->atom() };
+                expr::Expr_ptr rhs { assignment->rhs() };
 
-                          if (em.is_identifier(rhs)) {
-                              res[lhs] = rhs->atom();
-                          } else if (em.is_bool_const(rhs)) {
-                              res[lhs] = em.is_true(rhs);
-                          } else if (em.is_array(rhs)) {
-                              Json::Value array_value { Json::arrayValue };
-                              expr::ExprVector values { em.array_literals(rhs) };
+                if (em.is_identifier(rhs)) {
+                    res[lhs] = rhs->atom();
+                } else if (em.is_bool_const(rhs)) {
+                    res[lhs] = em.is_true(rhs);
+                } else if (em.is_array(rhs)) {
+                    Json::Value array_value { Json::arrayValue };
+                    expr::ExprVector values { em.array_literals(rhs) };
 
-                              std::for_each(begin(values), end(values),
-                                            [&array_value, &em](expr::Expr_ptr lit) {
-                                                Json::Value scalar;
-                                                if (em.is_identifier(lit)) {
-                                                    scalar = lit->atom();
-                                                } else if (em.is_bool_const(lit)) {
-                                                    scalar = em.is_true(lit);
-                                                } else if (em.is_array(lit)) {
-                                                    assert(false); // nested arrays are not supported
-                                                } else if (em.is_constant(lit)) {
-                                                    scalar = (Json::Value::UInt64) em.const_value(lit);
-                                                }
-                                                array_value.append(scalar);
-                                            });
-                              res[lhs] = array_value;
-                          } else if (em.is_constant(rhs)) {
-                              res[lhs] = (Json::Value::UInt64) em.const_value(rhs);
-                          } else {
-                              assert(false);
-                          }
-                      });
+                    std::for_each(begin(values), end(values),
+                                  [&array_value, &em](expr::Expr_ptr lit) {
+                                      Json::Value scalar;
+                                      if (em.is_identifier(lit)) {
+                                          scalar = lit->atom();
+                                      } else if (em.is_bool_const(lit)) {
+                                          scalar = em.is_true(lit);
+                                      } else if (em.is_array(lit)) {
+                                          assert(false); // nested arrays are not supported
+                                      } else if (em.is_constant(lit)) {
+                                          scalar = (Json::Value::UInt64) em.const_value(lit);
+                                      }
+                                      array_value.append(scalar);
+                                  });
+                    res[lhs] = array_value;
+                } else if (em.is_constant(rhs)) {
+                    res[lhs] = (Json::Value::UInt64) em.const_value(rhs);
+                } else {
+                    assert(false);
+                }
+            });
 
         return res;
     }
@@ -303,9 +304,9 @@ namespace cmd {
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        env::Environment& env { env::Environment::INSTANCE() };
 
         model::Model& model { mm.model() };
-
         symb::SymbIter symbols { model };
         while (symbols.has_next()) {
             std::pair<expr::Expr_ptr, symb::Symbol_ptr> pair { symbols.next() };
@@ -322,12 +323,12 @@ namespace cmd {
             if (symb->is_variable()) {
                 symb::Variable& var { symb->as_variable() };
 
-                /* we're interested onlyl in INPUT vars here ... */
+                /* we're interested only in INPUT vars here ... */
                 if (!var.is_input()) {
                     continue;
                 }
 
-                expr::Expr_ptr value { env::Environment::INSTANCE().get(name) };
+                expr::Expr_ptr value { env.get(name) };
                 if (!value) {
                     value = em.make_undef();
                 }
@@ -375,15 +376,21 @@ namespace cmd {
                     continue;
                 }
 
-                expr::Expr_ptr value { tf.has_value(full)
-                                           ? tf.value(full)
-                                           : em.make_undef() };
+                expr::Expr_ptr value {
+                    tf.has_value(full)
+                        ? tf.value(full)
+                        : em.make_undef()
+                };
                 state_vars_assignments.push_back(em.make_eq(full, value));
-            } else if (symb->is_define()) {
+            }
+
+            else if (symb->is_define()) {
                 symb::Define& define { symb->as_define() };
                 expr::Expr_ptr body { define.body() };
 
-                expr::Expr_ptr value { wm.eval(w, ctx, body, time) };
+                expr::Expr_ptr value {
+                    wm.eval(w, ctx, body, time)
+                };
                 if (!value) {
                     value = em.make_undef();
                 }

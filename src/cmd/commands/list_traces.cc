@@ -48,9 +48,11 @@ namespace cmd {
             for (eye = witnesses.begin(); eye != witnesses.end(); ++eye) {
                 witness::Witness& w { **eye };
 
-                const char* tmp(w.id() == current.id()
-                                    ? "[*] "
-                                    : "    ");
+                const char* tmp {
+                    w.id() == current.id()
+                        ? "[*] "
+                        : "    "
+                };
 
                 os
                     << tmp
@@ -64,12 +66,12 @@ namespace cmd {
 
             os << std::endl;
             return utils::Variant(okMessage);
-        } else {
+        }
+
+        else {
             os
                 << "No traces to list."
-                << std::endl;
-
-            os
+                << std::endl
                 << std::endl;
 
             return utils::Variant(errMessage);

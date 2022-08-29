@@ -85,41 +85,41 @@ namespace cmd {
     {
         /* Variables */
         symb::Variables variables { module.vars() };
-        std::for_each(std::begin(variables),
-                      std::end(variables),
-                      [&](std::pair<expr::Expr_ptr, symb::Variable_ptr> pair) {
-                          auto id { pair.first };
-                          auto pvar { pair.second };
+        std::for_each(
+            std::begin(variables), std::end(variables),
+            [&](std::pair<expr::Expr_ptr, symb::Variable_ptr> pair) {
+                auto id { pair.first };
+                auto pvar { pair.second };
 
-                          if (pvar->is_frozen()) {
-                              os
-                                  << "@frozen"
-                                  << std::endl;
-                          }
-                          if (pvar->is_hidden()) {
-                              os
-                                  << "@hidden"
-                                  << std::endl;
-                          }
-                          if (pvar->is_inertial()) {
-                              os
-                                  << "@inertial"
-                                  << std::endl;
-                          }
-                          if (pvar->is_input()) {
-                              os
-                                  << "@input"
-                                  << std::endl;
-                          }
+                if (pvar->is_frozen()) {
+                    os
+                        << "@frozen"
+                        << std::endl;
+                }
+                if (pvar->is_hidden()) {
+                    os
+                        << "@hidden"
+                        << std::endl;
+                }
+                if (pvar->is_inertial()) {
+                    os
+                        << "@inertial"
+                        << std::endl;
+                }
+                if (pvar->is_input()) {
+                    os
+                        << "@input"
+                        << std::endl;
+                }
 
-                          os
-                              << "VAR "
-                              << id
-                              << ": "
-                              << pvar->type()
-                              << ";"
-                              << std::endl;
-                      });
+                os
+                    << "VAR "
+                    << id
+                    << ": "
+                    << pvar->type()
+                    << ";"
+                    << std::endl;
+            });
     }
 
     void DumpModel::dump_inits(std::ostream& os, model::Module& module)
@@ -210,29 +210,30 @@ namespace cmd {
         std::ostream& out(get_output_stream());
         bool dump_all { !f_state && !f_init && !f_trans };
 
-        std::for_each(begin(modules), end(modules),
-                      [this, dump_all, &out](std::pair<expr::Expr_ptr,
-                                                       model::Module_ptr>
-                                                 descriptor) {
-                          model::Module& module { *descriptor.second };
+        std::for_each(
+            begin(modules), end(modules),
+            [this, dump_all, &out](std::pair<expr::Expr_ptr,
+                                             model::Module_ptr>
+                                       descriptor) {
+                model::Module& module { *descriptor.second };
 
-                          if (dump_all) {
-                              dump_heading(out, module);
-                          }
+                if (dump_all) {
+                    dump_heading(out, module);
+                }
 
-                          if (dump_all || f_state) {
-                              dump_variables(out, module);
-                          }
+                if (dump_all || f_state) {
+                    dump_variables(out, module);
+                }
 
-                          if (dump_all || f_init) {
-                              dump_inits(out, module);
-                          }
+                if (dump_all || f_init) {
+                    dump_inits(out, module);
+                }
 
-                          if (dump_all || f_trans) {
-                              dump_invars(out, module);
-                              dump_transes(out, module);
-                          }
-                      });
+                if (dump_all || f_trans) {
+                    dump_invars(out, module);
+                    dump_transes(out, module);
+                }
+            });
 
         return utils::Variant(okMessage);
     }
