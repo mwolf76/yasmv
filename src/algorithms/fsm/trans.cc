@@ -57,20 +57,20 @@ namespace fsm {
         expr::Expr_ptr ctx { em().make_empty() };
 
         unsigned no_constraints { 0 };
-        std::for_each(begin(constraints),
-                      end(constraints),
-                      [this, ctx, &no_constraints](expr::Expr_ptr expr) {
-                          INFO
-                              << "Compiling constraint `"
-                              << expr
-                              << "` ..."
-                              << std::endl;
+        std::for_each(
+            begin(constraints), end(constraints),
+            [this, ctx, &no_constraints](expr::Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
 
-                          compiler::Unit unit(compiler().process(ctx, expr));
+                compiler::Unit unit(compiler().process(ctx, expr));
 
-                          f_constraint_cus.push_back(unit);
-                          ++no_constraints;
-                      });
+                f_constraint_cus.push_back(unit);
+                ++no_constraints;
+            });
 
         INFO
             << no_constraints
