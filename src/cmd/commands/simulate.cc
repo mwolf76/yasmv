@@ -73,15 +73,17 @@ namespace cmd {
 
     utils::Variant Simulate::operator()()
     {
-        opts::OptsMgr& om(opts::OptsMgr::INSTANCE());
-        model::ModelMgr& mm(model::ModelMgr::INSTANCE());
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
 
         sim::Simulation simulation(*this, mm.model());
 
         bool res { false };
 
         expr::ExprVector f_constraints;
-        sim::simulation_status_t rc { simulation.simulate(f_constraints, f_trace_uid) };
+        sim::simulation_status_t rc {
+            simulation.simulate(f_constraints, f_trace_uid)
+        };
 
         switch (rc) {
             case sim::simulation_status_t::SIMULATION_DONE:

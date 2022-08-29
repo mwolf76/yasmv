@@ -40,14 +40,14 @@ namespace cmd {
     /* A static variable for holding the line. */
     static char* line_buf = NULL;
 
-    /* Read a string, and return a pointer to it.
-   Returns NULL on EOF. */
+    /* Read a string, and return a pointer to it.  Returns NULL on
+       EOF. */
     static char* rl_gets()
     {
         opts::OptsMgr& om(opts::OptsMgr::INSTANCE());
 
-        /* If the buffer has already been allocated, return the memory to
-       the free pool. */
+        /* If the buffer has already been allocated, return the memory
+	   to the free pool. */
         if (NULL != line_buf) {
             free(line_buf);
             line_buf = NULL;
@@ -57,8 +57,9 @@ namespace cmd {
         line_buf = readline(om.quiet() ? NULL : ">> ");
 
         /* If the line has any text in it, save it on the history. */
-        if (line_buf && *line_buf)
+        if (line_buf && *line_buf) {
             add_history(line_buf);
+        }
 
         return line_buf;
     }
@@ -66,8 +67,9 @@ namespace cmd {
     Interpreter_ptr Interpreter::f_instance = NULL;
     Interpreter& Interpreter::INSTANCE()
     {
-        if (!f_instance)
+        if (!f_instance) {
             f_instance = new Interpreter();
+        }
 
         return *f_instance;
     }
@@ -81,7 +83,7 @@ namespace cmd {
         , f_out(&std::cout)
         , f_err(&std::cerr)
     {
-        const void* instance(this);
+        const void* instance { this };
 
         clock_gettime(CLOCK_MONOTONIC, &f_epoch);
 
@@ -93,7 +95,7 @@ namespace cmd {
 
     Interpreter::~Interpreter()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DEBUG
             << "Destroyed Interpreter @"
@@ -132,20 +134,22 @@ namespace cmd {
     void chomp(char* p)
     {
         assert(p != NULL);
-        while (*p)
+        while (*p) {
             ++p;
+        }
 
         --p;
-        if (isspace(*p))
+        if (isspace(*p)) {
             *p = 0;
+        }
     }
 
     utils::Variant& Interpreter::operator()()
     {
         char* cmdline { NULL };
-        if (isatty(STDIN_FILENO))
+        if (isatty(STDIN_FILENO)) {
             cmdline = rl_gets();
-        else {
+        } else {
             /* FIXME: memleaks */
             static char* buf = NULL;
             const int LINE_BUFSIZE(0x200);
@@ -166,8 +170,9 @@ namespace cmd {
                             Command_ptr cmd { *i };
                             (*this)(cmd);
                         }
-                    } else
+                    } else {
                         f_last_result = utils::Variant(errMessage);
+                    }
                 } catch (Exception& e) {
                     std::string what { e.what() };
                     ERR
