@@ -42,37 +42,42 @@ namespace env {
     Environment_ptr Environment::f_instance = NULL;
     Environment& Environment::INSTANCE()
     {
-        if (!f_instance)
+        if (!f_instance) {
             f_instance = new Environment();
+        }
 
         return *f_instance;
     }
 
     expr::Expr_ptr Environment::get(expr::Expr_ptr id) const
     {
-        Expr2ExprMap::const_iterator eye(f_env.find(id));
+        Expr2ExprMap::const_iterator eye { f_env.find(id) };
 
-        if (eye == f_env.end())
+        if (eye == f_env.end()) {
             throw NoSuchIdentifier(id);
+        }
 
         /* NULL value means deleted entry */
-        if (!eye->second)
+        if (!eye->second) {
             throw NoSuchIdentifier(id);
+        }
 
         return eye->second; /* non-NULL */
     }
 
     void Environment::set(expr::Expr_ptr id, expr::Expr_ptr value)
     {
-        if (value)
+        if (value) {
             f_identifiers.insert(id);
-        else
+        } else {
             f_identifiers.erase(id);
+        }
 
-        Expr2ExprMap::const_iterator eye(f_env.find(id));
+        Expr2ExprMap::const_iterator eye { f_env.find(id) };
 
-        if (eye != f_env.end())
+        if (eye != f_env.end()) {
             f_env.erase(eye);
+        }
 
         f_env.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>(id, value));
     }

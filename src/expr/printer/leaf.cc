@@ -34,7 +34,7 @@ namespace expr {
 
     static void print_dec_leaf(const Expr_ptr expr, std::ostream& os)
     {
-        value_t value(expr->value());
+        value_t value { expr->value() };
 
         os
             << std::dec
@@ -43,7 +43,7 @@ namespace expr {
 
     static void print_hex_leaf(const Expr_ptr expr, std::ostream& os)
     {
-        value_t value(expr->value());
+        value_t value { expr->value() };
 
         os
             << std::hex
@@ -54,37 +54,39 @@ namespace expr {
     // duplicated
     static inline value_t pow2(unsigned exp)
     {
-        value_t res = 1;
+        value_t res { 1 };
 
-        if (!exp)
+        if (!exp) {
             return res;
+        }
 
         ++res;
 
-        while (--exp)
+        while (--exp) {
             res <<= 1;
+        }
 
         return res;
     }
 
     static void print_bin_leaf(const Expr_ptr expr, std::ostream& os)
     {
-        enc::EncodingMgr& bm(enc::EncodingMgr::INSTANCE());
+        enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
 
         std::vector<bool> booleanization;
+        const unsigned base { 2 };
+        const unsigned width { bm.word_width() };
 
-        const unsigned base(2);
+        value_t value { expr->value() };
 
-        const unsigned width(bm.word_width());
-
-        value_t value(expr->value());
-
-        if (value < 0)
+        if (value < 0) {
             value += pow2(width); // 2's complement
+        }
 
         for (unsigned i = 0; i < width; ++i) {
-            bool digit(value % base);
-
+            bool digit {
+                0 != (value % base)
+            };
             booleanization.push_back(digit);
 
             value /= base;
@@ -95,7 +97,7 @@ namespace expr {
         for (std::vector<bool>::reverse_iterator ri = booleanization.rbegin();
              ri != booleanization.rend(); ++ri) {
 
-            bool d(*ri);
+            bool d { *ri };
 
             os
                 << (d ? "1" : "0");
@@ -104,7 +106,7 @@ namespace expr {
 
     static void print_oct_leaf(const Expr_ptr expr, std::ostream& os)
     {
-        value_t value(expr->value());
+        value_t value { expr->value() };
 
         os
             << std::oct
@@ -114,7 +116,7 @@ namespace expr {
 
     static void print_atom_leaf(const Expr_ptr expr, std::ostream& os)
     {
-        Atom& atom(expr->atom());
+        Atom& atom { expr->atom() };
 
         os
             << atom;

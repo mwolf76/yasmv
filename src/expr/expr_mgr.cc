@@ -94,7 +94,6 @@ namespace expr {
     {
         Expr_ptr res { NULL };
 
-        /* reverse iteration */
         for (ExprSet::reverse_iterator eye = literals.rbegin();
              eye != literals.rend(); eye++) {
 
@@ -157,7 +156,7 @@ namespace expr {
         stack.push(expr);
 
         while (0 < stack.size()) {
-            Expr_ptr top(stack.top());
+            Expr_ptr top { stack.top() };
             stack.pop();
 
             if (is_dot(top)) {

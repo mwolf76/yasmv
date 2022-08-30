@@ -70,8 +70,9 @@ namespace enc {
             res = new ArrayEncoding(encodings);
         }
 
-        else
-            assert(false); /* unexpected or unsupported */
+        else {
+            assert(false);
+        }
 
         /* enable DD reordering */
         f_cudd.AutodynEnable(CUDD_REORDER_SAME);
@@ -104,8 +105,9 @@ namespace enc {
 
         oss << key << " := [";
         for (i = 0, di = bits.begin(); i < bits.size();) {
-            int index((*di).getNode()->index);
-            oss << index;
+            auto index { (*di).getNode()->index };
+            oss
+                << index;
 
             f_index2ucbi_map.insert(
                 std::pair<int, UCBI>(index, UCBI(key.expr(), key.time(), i)));
@@ -127,11 +129,11 @@ namespace enc {
     }
 
     EncodingMgr::EncodingMgr()
-        : f_cudd(dd::CuddMgr::INSTANCE().dd()) // this is a fresh instance
-        , f_em(expr::ExprMgr::INSTANCE())
-        , f_word_width((opts::OptsMgr::INSTANCE().word_width()))
+        : f_cudd { dd::CuddMgr::INSTANCE().dd() }
+        , f_em { expr::ExprMgr::INSTANCE() }
+        , f_word_width { opts::OptsMgr::INSTANCE().word_width() }
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DRIVEL
             << "Initialized EncodingMgr @ " << instance
@@ -141,7 +143,7 @@ namespace enc {
 
     EncodingMgr::~EncodingMgr()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DRIVEL
             << "Destroyed EncodingMgr @ " << instance

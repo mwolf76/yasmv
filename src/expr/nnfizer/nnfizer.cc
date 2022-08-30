@@ -59,16 +59,14 @@ namespace expr {
     Expr_ptr Nnfizer::process(Expr_ptr expr)
     {
         assert(0 == f_polarity_stack.size());
-        f_polarity_stack.push_back(true);
+        PUSH_POLARITY(true);
 
         this->operator()(expr);
 
         assert(1 == f_expr_stack.size());
         assert(0 == f_polarity_stack.size());
 
-
-        Expr_ptr res(f_expr_stack.back());
-        f_expr_stack.pop_back();
+        POP_EXPR(res);
         return res;
     }
 

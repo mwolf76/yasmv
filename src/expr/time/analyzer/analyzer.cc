@@ -548,10 +548,15 @@ namespace expr::time {
 
         if (is_positive(time)) {
             f_has_forward_time = true;
-        } else if (is_negative(time)) {
+        }
+
+        else if (is_negative(time)) {
             f_has_backward_time = true;
-        } else
-            assert(false); /* unexpected */
+        }
+
+        else {
+            assert(false);
+        }
     }
 
     void Analyzer::walk_leaf(const Expr_ptr expr)

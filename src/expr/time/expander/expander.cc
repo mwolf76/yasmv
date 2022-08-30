@@ -58,11 +58,10 @@ namespace expr::time {
 
     Expr_ptr Expander::process(Expr_ptr expr)
     {
-        Expr_ptr res;
         f_expr_stack.clear();
-
         this->operator()(expr);
-        res = f_expr_stack.back();
+
+        TOP_EXPR(res);
         return res;
     }
 
@@ -113,7 +112,8 @@ namespace expr::time {
     bool Expander::walk_at_preorder(const Expr_ptr expr)
     {
         Expr_ptr lhs { expr->lhs() };
-        assert(em().is_instant(lhs) || em().is_interval(lhs));
+        assert(f_em.is_instant(lhs) ||
+               f_em.is_interval(lhs));
 
         Expr_ptr rhs { expr->rhs() };
         assert(NULL != rhs);
@@ -129,16 +129,17 @@ namespace expr::time {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
 
-        if (em().is_instant(lhs)) {
-            PUSH_EXPR(em().make_at(lhs, rhs));
+        if (f_em.is_instant(lhs)) {
+            Expr_ptr at_expr { f_em.make_at(lhs, rhs) };
+            PUSH_EXPR(at_expr);
         } else {
-            assert(em().is_interval(lhs));
+            assert(f_em.is_interval(lhs));
 
             Expr_ptr a { lhs->lhs() };
-            assert(em().is_instant(a));
+            assert(f_em.is_instant(a));
 
             Expr_ptr b { lhs->rhs() };
-            assert(em().is_instant(b));
+            assert(f_em.is_instant(b));
 
             step_t va { (step_t) a->value() };
             step_t vb { (step_t) b->value() };
@@ -148,11 +149,10 @@ namespace expr::time {
 
             Expr_ptr res { NULL };
             for (step_t k = begin; k <= end; ++k) {
-                Expr_ptr fragment = em().make_at(em().make_instant(k), rhs);
-
+                Expr_ptr fragment = f_em.make_at(f_em.make_instant(k), rhs);
                 res = (NULL == res)
                           ? fragment
-                          : em().make_and(res, fragment);
+                          : f_em.make_and(res, fragment);
             }
 
             PUSH_EXPR(res);
@@ -163,10 +163,10 @@ namespace expr::time {
     bool Expander::walk_interval_preorder(const Expr_ptr expr)
     {
         Expr_ptr lhs { expr->lhs() };
-        assert(em().is_instant(lhs));
+        assert(f_em.is_instant(lhs));
 
         Expr_ptr rhs { expr->rhs() };
-        assert(em().is_instant(rhs));
+        assert(f_em.is_instant(rhs));
 
         return true;
     }
@@ -178,7 +178,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(em().make_interval(lhs, rhs));
+
+        Expr_ptr interval { f_em.make_interval(lhs, rhs) };
+        PUSH_EXPR(interval);
     }
 
     bool Expander::walk_next_preorder(const Expr_ptr expr)
@@ -188,7 +190,9 @@ namespace expr::time {
     void Expander::walk_next_postorder(const Expr_ptr expr)
     {
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_next(lhs));
+
+        Expr_ptr next { f_em.make_next(lhs) };
+        PUSH_EXPR(next);
     }
 
     bool Expander::walk_neg_preorder(const Expr_ptr expr)
@@ -198,7 +202,8 @@ namespace expr::time {
     void Expander::walk_neg_postorder(const Expr_ptr expr)
     {
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_neg(lhs));
+        Expr_ptr neg { f_em.make_neg(lhs) };
+        PUSH_EXPR(neg);
     }
 
     bool Expander::walk_not_preorder(const Expr_ptr expr)
@@ -208,7 +213,9 @@ namespace expr::time {
     void Expander::walk_not_postorder(const Expr_ptr expr)
     {
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_not(lhs));
+
+        Expr_ptr not_expr { f_em.make_not(lhs) };
+        PUSH_EXPR(not_expr);
     }
 
     bool Expander::walk_bw_not_preorder(const Expr_ptr expr)
@@ -218,7 +225,9 @@ namespace expr::time {
     void Expander::walk_bw_not_postorder(const Expr_ptr expr)
     {
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_bw_not(lhs));
+
+        Expr_ptr res { f_em.make_bw_not(lhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_add_preorder(const Expr_ptr expr)
@@ -233,7 +242,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_add(lhs, rhs));
+
+        Expr_ptr res { f_em.make_add(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_sub_preorder(const Expr_ptr expr)
@@ -248,7 +259,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_sub(lhs, rhs));
+
+        Expr_ptr res { f_em.make_sub(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_div_preorder(const Expr_ptr expr)
@@ -263,7 +276,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_div(lhs, rhs));
+
+        Expr_ptr res { f_em.make_div(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_mul_preorder(const Expr_ptr expr)
@@ -278,7 +293,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_mul(lhs, rhs));
+
+        Expr_ptr res { f_em.make_mul(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_mod_preorder(const Expr_ptr expr)
@@ -293,7 +310,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_mod(lhs, rhs));
+
+        Expr_ptr res { f_em.make_mod(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_and_preorder(const Expr_ptr expr)
@@ -308,7 +327,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_and(lhs, rhs));
+
+        Expr_ptr res { f_em.make_and(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_bw_and_preorder(const Expr_ptr expr)
@@ -323,7 +344,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_bw_and(lhs, rhs));
+
+        Expr_ptr res { f_em.make_bw_and(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_or_preorder(const Expr_ptr expr)
@@ -338,7 +361,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_or(lhs, rhs));
+
+        Expr_ptr res { f_em.make_or(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_bw_or_preorder(const Expr_ptr expr)
@@ -353,7 +378,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_bw_or(lhs, rhs));
+
+        Expr_ptr res { f_em.make_bw_or(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_bw_xor_preorder(const Expr_ptr expr)
@@ -368,7 +395,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_bw_xor(lhs, rhs));
+
+        Expr_ptr res { f_em.make_bw_xor(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_bw_xnor_preorder(const Expr_ptr expr)
@@ -383,7 +412,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_bw_xnor(lhs, rhs));
+
+        Expr_ptr res { f_em.make_bw_xnor(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_guard_preorder(const Expr_ptr expr)
@@ -409,7 +440,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_implies(lhs, rhs));
+
+        Expr_ptr res { f_em.make_implies(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_cast_preorder(const Expr_ptr expr)
@@ -446,7 +479,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_lshift(lhs, rhs));
+
+        Expr_ptr res { f_em.make_lshift(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_rshift_preorder(const Expr_ptr expr)
@@ -461,7 +496,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_rshift(lhs, rhs));
+
+        Expr_ptr res { f_em.make_rshift(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_assignment_preorder(const Expr_ptr expr)
@@ -487,7 +524,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_eq(lhs, rhs));
+
+        Expr_ptr res { f_em.make_eq(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_ne_preorder(const Expr_ptr expr)
@@ -502,7 +541,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_ne(lhs, rhs));
+
+        Expr_ptr res { f_em.make_ne(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_gt_preorder(const Expr_ptr expr)
@@ -517,7 +558,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_gt(lhs, rhs));
+
+        Expr_ptr res { f_em.make_gt(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_ge_preorder(const Expr_ptr expr)
@@ -532,7 +575,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_ge(lhs, rhs));
+
+        Expr_ptr res { f_em.make_ge(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_lt_preorder(const Expr_ptr expr)
@@ -547,7 +592,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_lt(lhs, rhs));
+
+        Expr_ptr res { f_em.make_lt(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_le_preorder(const Expr_ptr expr)
@@ -562,7 +609,9 @@ namespace expr::time {
     {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
-        PUSH_EXPR(f_em.make_le(lhs, rhs));
+
+        Expr_ptr res { f_em.make_le(lhs, rhs) };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_ite_preorder(const Expr_ptr expr)
@@ -578,8 +627,13 @@ namespace expr::time {
         POP_EXPR(rhs);
         POP_EXPR(lhs);
         POP_EXPR(cond);
-        PUSH_EXPR(f_em.make_ite(f_em.make_cond(cond, lhs),
-                                rhs));
+
+        Expr_ptr res {
+            f_em.make_ite(
+                f_em.make_cond(cond, lhs),
+                rhs)
+        };
+        PUSH_EXPR(res);
     }
 
     bool Expander::walk_cond_preorder(const Expr_ptr expr)

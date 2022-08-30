@@ -34,7 +34,7 @@ namespace enc {
 
     expr::Expr_ptr BooleanEncoding::expr(int* assignment)
     {
-        expr::ExprMgr& em = { f_mgr.em() };
+        expr::ExprMgr& em { f_mgr.em() };
         ADD eval { f_dv[0].Eval(assignment) };
         assert(cuddIsConstant(eval.getRegularNode()));
 
