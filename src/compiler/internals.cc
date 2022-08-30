@@ -62,8 +62,9 @@ namespace compiler {
     void Compiler::make_auto_ddvect(dd::DDVector& dv, unsigned width)
     {
         assert(0 == dv.size());
-        for (unsigned i = 0; i < width; ++i)
+        for (unsigned i = 0; i < width; ++i) {
             dv.push_back(make_auto_dd());
+        }
     }
 
     void Compiler::pre_node_hook(expr::Expr_ptr expr)
@@ -135,10 +136,9 @@ namespace compiler {
         if (type->is_scalar()) {
             dd::DDVector dv;
             unsigned i, width { type->width() };
+            auto add_stack_size { f_add_stack.size() };
 
-            if (width > f_add_stack.size()) {
-                auto add_stack_size { f_add_stack.size() };
-
+            if (width > add_stack_size) {
                 ERR
                     << "width: "
                     << width
@@ -178,11 +178,13 @@ namespace compiler {
         TOP_CTX(ctx);
         TOP_TIME(time);
         expr::TimedExpr key {
-            f_owner.em().make_dot(f_ctx_stack.back(), expr), time
+            f_owner.em().make_dot(ctx, expr), time
         };
 
 
-        CompilationMap::iterator eye { f_compilation_cache.find(key) };
+        CompilationMap::iterator eye {
+            f_compilation_cache.find(key)
+        };
 
         if (eye != f_compilation_cache.end()) {
             const type::Type_ptr type { f_owner.type(expr, ctx) };
@@ -283,6 +285,7 @@ namespace compiler {
         assert(EStatus::ENCODING == f_status);
 
         clear_internals();
+
         PUSH_CTX(ctx);
         PUSH_TIME(0);
         (*this)(body);
@@ -302,6 +305,7 @@ namespace compiler {
         assert(EStatus::COMPILING == f_status);
 
         clear_internals();
+
         PUSH_CTX(ctx);
         PUSH_TIME(0);
         (*this)(body);
@@ -395,10 +399,13 @@ namespace compiler {
             dd::DDVector::const_iterator ai { begin(acts) };
 
             while (cnds.end() != ci) {
-                PUSH_DD((*ci).Xnor(*ai));
+                ADD eq { (*ci).Xnor(*ai) };
+                PUSH_DD(eq);
+
                 ++ci;
                 ++ai;
             }
+
             assert(acts.end() == ai);
         }
     }

@@ -49,28 +49,26 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         type::TypeMgr& tm { f_owner.tm() };
 
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        TOP_CTX(ctx);
 
-        if (!cache_miss(expr))
+        if (!cache_miss(expr)) {
             return;
+        }
 
         step_t time { f_time_stack.back() };
 
         /* 0. Explicit boolean consts (TRUE, FALSE) */
-        if (em.is_false(expr)) {
+        if (em.is_true(expr) || em.is_false(expr)) {
             PUSH_TYPE(tm.find_boolean());
-            PUSH_DD(f_enc.zero());
-            return;
-        }
-        if (em.is_true(expr)) {
-            PUSH_TYPE(tm.find_boolean());
-            PUSH_DD(f_enc.one());
+            PUSH_DD(em.is_true(expr)
+                        ? f_enc.one()
+                        : f_enc.zero());
             return;
         }
 
         /* 1. Explicit int constants, perform booleanization
-         * immediately. An exception will be thrown if conversion could
-         * not be completed. */
+         * immediately. An exception will be thrown if conversion
+         * could not be completed. */
         if (em.is_int_const(expr)) {
             unsigned ww { opts::OptsMgr::INSTANCE().word_width() };
 
@@ -79,7 +77,7 @@ namespace compiler {
             return;
         }
 
-        /* Ctx-aware symbol resolution */
+        /* ctx-aware symbol resolution */
         expr::Expr_ptr full { em.make_dot(ctx, expr) };
 
         symb::ResolverProxy resolver;
@@ -105,7 +103,6 @@ namespace compiler {
             // if encoding for variable is available reuse it,
             // otherwise create and cache it.
             expr::TimedExpr key { full, time };
-
             enc::Encoding_ptr enc { f_enc.find_encoding(key) };
 
             /* build a new encoding for this symbol if none is available. */
@@ -114,7 +111,9 @@ namespace compiler {
                 f_enc.register_encoding(key, enc);
             }
 
-            enc::EnumEncoding_ptr eenc { dynamic_cast<enc::EnumEncoding_ptr>(enc) };
+            enc::EnumEncoding_ptr eenc {
+                dynamic_cast<enc::EnumEncoding_ptr>(enc)
+            };
             assert(NULL != eenc);
 
             PUSH_TYPE(type);
@@ -125,39 +124,47 @@ namespace compiler {
         /* 4. variables, encodings will be created on-the-fly, if
          *    necessary */
         else if (symb->is_variable()) {
-
             const symb::Variable& var { symb->as_variable() };
             type::Type_ptr type { var.type() };
 
             /* INPUT vars are in fact bodyless, typed DEFINEs */
             if (var.is_input()) {
-                expr::Expr_ptr value { env::Environment::INSTANCE().get(expr) };
+                expr::Expr_ptr value {
+                    env::Environment::INSTANCE().get(expr)
+                };
                 (*this)(value);
             }
 
             /* REVIEW THIS */
             else if (type->is_instance()) {
+                assert(false);
                 PUSH_TYPE(type);
             }
 
             else {
-                expr::TimedExpr key { full, var.is_frozen() ? FROZEN : time };
-                enc::Encoding_ptr enc { find_encoding(key, type) };
+                expr::TimedExpr key {
+                    full, var.is_frozen() ? FROZEN : time
+                };
+                enc::Encoding_ptr enc {
+                    find_encoding(key, type)
+                };
+
+                PUSH_TYPE(type);
                 push_dds(enc, type);
             }
 
             return;
         }
 
-        /* 5. parameters, must be resolved against the Param map which is
-         *    maintained by the ModelMgr */
+        /* 5. parameters, must be resolved against the Param map which
+         *    is maintained by the ModelMgr */
         else if (symb->is_parameter()) {
             expr::Expr_ptr rewrite { f_owner.rewrite_parameter(full) };
 
-            f_ctx_stack.push_back(rewrite->lhs());
+            PUSH_CTX(rewrite->lhs());
             (*this)(rewrite->rhs());
 
-            f_ctx_stack.pop_back();
+            DROP_CTX();
             return;
         }
 
@@ -178,11 +185,10 @@ namespace compiler {
     void Compiler::push_dds(enc::Encoding_ptr enc, type::Type_ptr type)
     {
         assert(NULL != enc);
+
         dd::DDVector& dds { enc->dv() };
         auto width { dds.size() };
         assert(0 < width);
-
-        PUSH_TYPE(type);
 
         /* booleans, monoliths are just one DD */
         if (type->is_monolithic()) {
@@ -193,13 +199,11 @@ namespace compiler {
         else if (type->is_algebraic()) {
             // type and enc width info has to match
             assert(type->as_algebraic()->width() == width);
-            for (dd::DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ri)
-                f_add_stack.push_back(*ri);
+            PUSH_DV(dds, width);
         }
 
         /* array of algebraics, same as above, times nelems */
         else if (type->is_array()) {
-
             type::ScalarType_ptr scalar_type { type->as_array()->of() };
 
             if (scalar_type->is_monolithic()) {
@@ -211,9 +215,7 @@ namespace compiler {
                        width / type->as_array()->nelems());
             }
 
-            for (dd::DDVector::reverse_iterator ri = dds.rbegin(); ri != dds.rend(); ++ri) {
-                f_add_stack.push_back(*ri);
-            }
+            PUSH_DV(dds, width);
         }
 
         else {

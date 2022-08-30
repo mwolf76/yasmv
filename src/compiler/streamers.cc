@@ -128,7 +128,8 @@ std::string ios2string(const compiler::InlinedOperatorSignature& ios)
     return oss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const compiler::InlinedOperatorDescriptor& md)
+std::ostream& operator<<(std::ostream& os,
+                         const compiler::InlinedOperatorDescriptor& md)
 {
     auto ios { md.ios() };
 
@@ -136,54 +137,61 @@ std::ostream& operator<<(std::ostream& os, const compiler::InlinedOperatorDescri
         << ios
         << "(z = [";
 
-    const dd::DDVector& z(md.z());
+    const dd::DDVector& z { md.z() };
     for (dd::DDVector::const_iterator zi = z.begin();;) {
-        const DdNode* node(zi->getNode());
+        const DdNode* node { zi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++zi != z.end())
+        if (++zi != z.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
 
     os << "], x = [";
 
-    const dd::DDVector& x(md.x());
+    const dd::DDVector& x { md.x() };
     for (dd::DDVector::const_iterator xi = x.begin();;) {
-        const DdNode* node(xi->getNode());
+        const DdNode* node { xi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++xi != x.end())
+        if (++xi != x.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
 
     os << "]";
 
-    const dd::DDVector& y(md.y());
+    const dd::DDVector& y { md.y() };
     if (y.size()) {
         os << ", y = [";
         for (dd::DDVector::const_iterator yi = y.begin();;) {
-            const DdNode* node(yi->getNode());
+            const DdNode* node { yi->getNode() };
 
-            if (!Cudd_IsConstant(node))
+            if (!Cudd_IsConstant(node)) {
                 os << node->index;
-            else
+            } else {
                 os << ((Cudd_V(node) == 0) ? 'F' : 'T');
-            if (++yi != y.end())
+            }
+
+            if (++yi != y.end()) {
                 os << ", ";
-            else
+            } else {
                 break;
+            }
         }
         os << "]";
     }
@@ -207,25 +215,27 @@ std::ostream& operator<<(std::ostream& os, const compiler::BinarySelectionDescri
        << md.width()
        << "(z = [";
 
-    const dd::DDVector& z(md.z());
+    const dd::DDVector& z { md.z() };
     for (dd::DDVector::const_iterator zi = z.begin();;) {
-        const DdNode* node(zi->getNode());
+        const DdNode* node { zi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++zi != z.end())
+        if (++zi != z.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
 
     os << "], (aux = ";
     {
-        const ADD aux(md.aux());
-        const DdNode* node(aux.getNode());
+        const ADD aux { md.aux() };
+        const DdNode* node { aux.getNode() };
 
         assert(!Cudd_IsConstant(node));
 
@@ -234,36 +244,40 @@ std::ostream& operator<<(std::ostream& os, const compiler::BinarySelectionDescri
             << "), x = [";
     }
 
-    const dd::DDVector& x(md.x());
+    const dd::DDVector& x { md.x() };
     for (dd::DDVector::const_iterator xi = x.begin();;) {
-        const DdNode* node(xi->getNode());
+        const DdNode* node { xi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++xi != x.end())
+        if (++xi != x.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
 
     os << "], y = [";
 
     const dd::DDVector& y(md.y());
     for (dd::DDVector::const_iterator yi = y.begin();;) {
-        const DdNode* node(yi->getNode());
+        const DdNode* node { yi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++yi != y.end())
+        if (++yi != y.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
     os << "])";
 
@@ -298,53 +312,60 @@ std::ostream& operator<<(std::ostream& os, const compiler::MultiwaySelectionDesc
        << md.elem_width()
        << "(z = [";
 
-    const dd::DDVector& z(md.z());
+    const dd::DDVector& z { md.z() };
     for (dd::DDVector::const_iterator zi = z.begin();;) {
-        const DdNode* node(zi->getNode());
+        const DdNode* node { zi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++zi != z.end())
+        if (++zi != z.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
 
-    const dd::DDVector& acts(md.acts());
+    const dd::DDVector& acts { md.acts() };
     if (acts.size()) {
         os << ", acts = [";
         for (dd::DDVector::const_iterator actsi = acts.begin();;) {
-            const DdNode* node(actsi->getNode());
+            const DdNode* node { actsi->getNode() };
 
-            if (!Cudd_IsConstant(node))
+            if (!Cudd_IsConstant(node)) {
                 os << node->index;
-            else
+            } else {
                 os << ((Cudd_V(node) == 0) ? 'F' : 'T');
-            if (++actsi != acts.end())
+            }
+
+            if (++actsi != acts.end()) {
                 os << ", ";
-            else
+            } else {
                 break;
+            }
         }
         os << "]";
     }
 
     os << "], x = [";
-    const dd::DDVector& x(md.x());
+    const dd::DDVector& x { md.x() };
     for (dd::DDVector::const_iterator xi = x.begin();;) {
-        const DdNode* node(xi->getNode());
+        const DdNode* node { xi->getNode() };
 
-        if (!Cudd_IsConstant(node))
+        if (!Cudd_IsConstant(node)) {
             os << node->index;
-        else
+        } else {
             os << ((Cudd_V(node) == 0) ? 'F' : 'T');
+        }
 
-        if (++xi != x.end())
+        if (++xi != x.end()) {
             os << ", ";
-        else
+        } else {
             break;
+        }
     }
     os << "])";
 

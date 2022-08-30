@@ -57,9 +57,12 @@ namespace compiler {
     using InlinedOperatorSignature =
         boost::tuple<bool, expr::ExprType, unsigned>;
 
-    inline const InlinedOperatorSignature make_ios(bool is_signed, expr::ExprType exprType, unsigned width)
+    inline const InlinedOperatorSignature
+    make_ios(bool is_signed, expr::ExprType exprType, unsigned width)
     {
-        return boost::make_tuple<bool, expr::ExprType, unsigned>(is_signed, exprType, width);
+        return
+	    boost::make_tuple<bool, expr::ExprType, unsigned>
+	    (is_signed, exprType, width);
     }
 
     /* ios helper getters */

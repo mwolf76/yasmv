@@ -32,11 +32,8 @@ namespace compiler {
     {
         type::TypeMgr& tm { f_owner.tm() };
 
-        const type::Type_ptr rhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
-
-        const type::Type_ptr lhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
+        POP_TYPE(rhs_type);
+        POP_TYPE(lhs_type);
 
         assert(lhs_type->is_array() &&
                rhs_type->is_array());
@@ -47,7 +44,7 @@ namespace compiler {
         unsigned elems { atype->nelems() };
 
         const type::Type_ptr res_type { tm.find_boolean() };
-        f_type_stack.push_back(res_type);
+        PUSH_TYPE(res_type);
 
         POP_DV(rhs, width * elems);
         POP_DV(lhs, width * elems);
@@ -80,14 +77,9 @@ namespace compiler {
 
     void Compiler::array_ite(const expr::Expr_ptr expr)
     {
-        const type::Type_ptr rhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
-
-        const type::Type_ptr lhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
-
-        const type::Type_ptr cnd_type { f_type_stack.back() };
-        f_type_stack.pop_back();
+        POP_TYPE(rhs_type);
+        POP_TYPE(lhs_type);
+        POP_TYPE(cnd_type);
 
         const type::ArrayType_ptr rhs_atype { rhs_type->as_array() };
         unsigned rhs_width { rhs_atype->of()->width() };
@@ -97,56 +89,54 @@ namespace compiler {
         unsigned lhs_width { lhs_atype->of()->width() };
         unsigned lhs_nelems { lhs_atype->nelems() };
 
-        // both operands are algebraic, same width & nelems
         assert(rhs_type->is_array() &&
                lhs_type->is_array() &&
-               cnd_type->is_boolean() &&
                lhs_width == rhs_width &&
-               lhs_nelems == rhs_nelems);
+               lhs_nelems == rhs_nelems &&
+               cnd_type->is_boolean());
 
-        f_type_stack.push_back(rhs_type);
+        PUSH_TYPE(rhs_type);
 
         unsigned width(lhs_width * lhs_nelems);
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
-
-        /* Fetch cnd DD */
         POP_DD(cnd);
 
-        /* Push MUX output DD vector */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
 
         /* Register ITE MUX */
-        expr::Expr_ptr parent(expr);
-
+        expr::Expr_ptr parent { expr };
         BinarySelectionUnionFindMap::const_iterator eye { f_bsuf_map.find(expr) };
 
-        if (f_bsuf_map.end() != eye)
+        if (f_bsuf_map.end() != eye) {
             parent = eye->second;
+        }
 
         /* verify if entry for toplevel already exists. If it doesn't, create it */
         {
-            Expr2BinarySelectionDescriptorsMap::const_iterator mi { f_expr2bsd_map.find(parent) };
-            if (f_expr2bsd_map.end() == mi)
-                f_expr2bsd_map.insert(std::pair<expr::Expr_ptr, BinarySelectionDescriptors>(parent, BinarySelectionDescriptors()));
+            Expr2BinarySelectionDescriptorsMap::const_iterator mi {
+                f_expr2bsd_map.find(parent)
+            };
+
+            if (f_expr2bsd_map.end() == mi) {
+                f_expr2bsd_map.insert(
+                    std::pair<expr::Expr_ptr, BinarySelectionDescriptors>(parent, BinarySelectionDescriptors()));
+            }
         }
 
-        BinarySelectionDescriptor md { width, res, cnd, make_auto_dd(), lhs, rhs };
+        BinarySelectionDescriptor md {
+            width, res, cnd, make_auto_dd(), lhs, rhs
+        };
 
-        /* Entry for toplevel does exist for sure */
         {
-            Expr2BinarySelectionDescriptorsMap::iterator mi { f_expr2bsd_map.find(parent) };
-            assert(f_expr2bsd_map.end() != mi);
+            Expr2BinarySelectionDescriptorsMap::iterator mi {
+                f_expr2bsd_map.find(parent)
+            };
 
+            assert(f_expr2bsd_map.end() != mi);
             mi->second.push_back(md);
         }
-
-        DEBUG
-            << "Registered "
-            << md
-            << std::endl;
     }
-
 } // namespace compiler
