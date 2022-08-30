@@ -39,9 +39,11 @@
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
 
 /** Fetch a single DD */
-#define POP_DD(op)                       \
-    const ADD op { f_add_stack.back() }; \
-    f_add_stack.pop_back()
+#define TOP_DD(op)				\
+    const ADD op { f_add_stack.back() }
+
+#define POP_DD(op)				\
+    TOP_DD(op); f_add_stack.pop_back()
 
 /** Declare a fresh DD */
 #define FRESH_DD(var) \

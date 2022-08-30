@@ -292,8 +292,7 @@ namespace compiler {
         unsigned iwidth(itype->width());
         assert(iwidth == bm.word_width());
 
-        type::Type_ptr t1 { f_type_stack.back() };
-        f_type_stack.pop_back();
+        POP_TYPE(t1);
         assert(t1->is_array());
 
         type::ArrayType_ptr atype { t1->as_array() };
@@ -357,7 +356,7 @@ namespace compiler {
     /* add n-1 non significant zero, LSB is original bit */
     void Compiler::algebraic_cast_from_boolean(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        TOP_CTX(ctx);
         type::Type_ptr tp { f_owner.type(expr->lhs(), ctx) };
         for (unsigned i = 0; i < tp->width() - 1; ++i) {
             PUSH_DD(f_enc.zero());
@@ -367,7 +366,7 @@ namespace compiler {
     /* squeeze all bits in a big Or */
     void Compiler::boolean_cast_from_algebraic(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        TOP_CTX(ctx);
         type::Type_ptr tp { f_owner.type(expr->rhs(), ctx) };
         POP_DV(rhs, tp->width());
 
@@ -380,7 +379,7 @@ namespace compiler {
 
     void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        TOP_CTX(ctx);
         type::Type_ptr src_type { f_owner.type(expr->rhs(), ctx) };
         type::Type_ptr tgt_type { f_owner.type(expr->lhs(), ctx) };
 
@@ -388,10 +387,12 @@ namespace compiler {
             return; /* nop */
         }
 
-        else if (src_type->width() < tgt_type->width()) { /* grow */
+        /* growing cast? */
+        else if (src_type->width() < tgt_type->width()) {
             if (tgt_type->is_signed_algebraic()) {
                 /* signed, needs sign bit extension (src MSB) */
-                ADD msb = f_add_stack.back(); /* just inspect */
+                TOP_DD(msb);
+
                 for (unsigned i = src_type->width(); i < tgt_type->width(); ++i) {
                     PUSH_DD(msb);
                 }
@@ -405,7 +406,8 @@ namespace compiler {
             }
         }
 
-        else { /* shrink */
+        /* shrinking cast */
+        else {
             assert(tgt_type->width() < src_type->width());
             for (unsigned i = src_type->width(); i > tgt_type->width(); --i) {
                 f_add_stack.pop_back(); /* discard ADDs */
