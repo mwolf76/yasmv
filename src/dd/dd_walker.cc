@@ -61,8 +61,9 @@ namespace dd {
             register const DdNode* node { curr.node };
 
             /* leaves have no children */
-            if (cuddIsConstant(node))
+            if (cuddIsConstant(node)) {
                 curr.pc = DD_WALK_NODE;
+            }
 
             // restore caller location (simulate call return behavior)
             switch (curr.pc) {

@@ -47,7 +47,7 @@
 
 /** Declare a fresh DD */
 #define FRESH_DD(var) \
-    ADD var(make_auto_dd())
+    ADD var{make_auto_dd()}
 
 /** Push a single DD */
 #define PUSH_DD(add) \
@@ -68,9 +68,8 @@
 
 /** Push a DD vector of given width */
 #define PUSH_DV(vec, width)                \
-    /* push DD vector in reversed order */ \
     for (unsigned i = 0; i < width; ++i)   \
-        PUSH_DD(vec[width - i - 1]);
+        PUSH_DD(vec[width - i - 1])
 
 namespace dd {
 
