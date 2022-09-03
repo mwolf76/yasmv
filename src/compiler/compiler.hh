@@ -64,6 +64,7 @@
 #include <compiler/streamers.hh>
 #include <compiler/typedefs.hh>
 
+#include <utils/ctx.hh>
 #include <utils/time.hh>
 
 #include <boost/thread/mutex.hpp>
@@ -179,7 +180,8 @@ namespace compiler {
         void memoize_result(const expr::Expr_ptr expr);
 
         /* encoding management */
-        enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr, const type::Type_ptr type);
+        enc::Encoding_ptr find_encoding(const expr::TimedExpr& timed_expr,
+                                        const type::Type_ptr type);
 
         /* automatic inner variables (determinization, muxes, etc...) */
         expr::Expr_ptr make_auto_id();

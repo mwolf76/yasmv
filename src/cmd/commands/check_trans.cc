@@ -24,107 +24,112 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/commands.hh>
 #include <cmd/commands/check_trans.hh>
+#include <cmd/commands/commands.hh>
 
 #include <algorithms/fsm/fsm.hh>
 
 namespace cmd {
 
-CheckTrans::CheckTrans(Interpreter& owner)
-    : Command(owner)
-    , f_out(std::cout)
-{}
+    CheckTrans::CheckTrans(Interpreter& owner)
+        : Command(owner)
+        , f_out(std::cout)
+    {}
 
-CheckTrans::~CheckTrans()
-{}
+    CheckTrans::~CheckTrans()
+    {}
 
-void CheckTrans::add_constraint(expr::Expr_ptr constraint)
-{
-    f_constraints.push_back(constraint);
-}
+    void CheckTrans::add_constraint(expr::Expr_ptr constraint)
+    {
+        f_constraints.push_back(constraint);
+    }
 
-bool CheckTrans::check_requirements()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
+    bool CheckTrans::check_requirements()
+    {
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
 
-    model::Model& model
-        (mm.model());
+        if (0 == model.modules().size()) {
+            f_out
+                << wrnPrefix
+                << "Model not loaded."
+                << std::endl;
 
-    if (0 == model.modules().size()) {
-        f_out
-            << wrnPrefix
-            << "Model not loaded."
+            return false;
+        }
+
+        return true;
+    }
+
+    utils::Variant CheckTrans::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        bool res { false };
+
+        if (check_requirements()) {
+            fsm::CheckTransConsistency check_trans {
+                *this, model::ModelMgr::INSTANCE().model()
+            };
+            check_trans.process(f_constraints);
+
+            switch (check_trans.status()) {
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Transition relation consistency check ok."
+                        << std::endl;
+
+                    res = true;
+                    break;
+
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Transition relation consistency check failed."
+                        << std::endl;
+                    break;
+
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Could not decide transition relation consistency check."
+                        << std::endl;
+                    break;
+
+                default:
+                    assert(false); /* unreachable */
+            }
+        }
+
+        return utils::Variant { res ? okMessage : errMessage };
+    }
+
+    CheckTransTopic::CheckTransTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    CheckTransTopic::~CheckTransTopic()
+    {
+        TRACE
+            << "Destroyed check-trans topic"
             << std::endl;
-
-        return false;
     }
 
-    return true;
-}
-
-utils::Variant CheckTrans::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    utils::Variant res { false };
-
-    if (check_requirements()) {
-        fsm::CheckTransConsistency check_trans
-            { *this, model::ModelMgr::INSTANCE().model() } ;
-        check_trans.process(f_constraints);
-
-        switch (check_trans.status()) {
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Transition relation consistency check ok."
-                << std::endl;
-
-            res = true;
-            break;
-
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Transition relation consistency check failed."
-                << std::endl;
-            break;
-
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Could not decide transition relation consistency check."
-                << std::endl;
-            break;
-
-        default: assert( false ); /* unreachable */
-        } /* switch */
+    void CheckTransTopic::usage()
+    {
+        display_manpage("check-trans");
     }
 
-    return res;
-}
-
-CheckTransTopic::CheckTransTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
-
-CheckTransTopic::~CheckTransTopic()
-{
-    TRACE
-        << "Destroyed check-trans topic"
-        << std::endl;
-}
-
-void CheckTransTopic::usage()
-{ display_manpage("check-trans"); }
-
-};
+}; // namespace cmd

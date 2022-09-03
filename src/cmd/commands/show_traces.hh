@@ -31,21 +31,21 @@
 
 namespace cmd {
 
-class ListTraces : public Command {
-public:
-    ListTraces (Interpreter& owner);
-    virtual ~ListTraces();
+    class ListTraces: public Command {
+    public:
+        ListTraces(Interpreter& owner);
+        virtual ~ListTraces();
 
-    Variant virtual operator()();
-};
+        Variant virtual operator()();
+    };
 
-class ShowTracesTopic : public CommandTopic {
-public:
-    ShowTracesTopic(Interpreter& owner);
-    virtual ~ShowTracesTopic();
+    class ShowTracesTopic: public CommandTopic {
+    public:
+        ShowTracesTopic(Interpreter& owner);
+        virtual ~ShowTracesTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* LIST_TRACES_CMD_H */

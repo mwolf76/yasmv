@@ -57,7 +57,7 @@ namespace cmd {
         // -- helpers -------------------------------------------------------------
         bool check_requirements();
     };
-    using Reach_ptr =  Reach*;
+    using Reach_ptr = Reach*;
 
     class ReachTopic: public CommandTopic {
     public:

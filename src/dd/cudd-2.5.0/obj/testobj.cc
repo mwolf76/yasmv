@@ -47,9 +47,9 @@
 ******************************************************************************/
 
 #include "cuddObj.hh"
-#include <math.h>
-#include <iostream>
 #include <cassert>
+#include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -91,8 +91,7 @@ static void testBdd5(Cudd& mgr, int verbosity);
   SeeAlso     []
 
 ******************************************************************************/
-int
-main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     int verbosity = 0;
 
@@ -104,17 +103,17 @@ main(int argc, char **argv)
         return 1;
     }
 
-    Cudd mgr(0,2);
-    // mgr.makeVerbose();		// trace constructors and destructors
-    testBdd(mgr,verbosity);
-    testAdd(mgr,verbosity);
-    testAdd2(mgr,verbosity);
-    testZdd(mgr,verbosity);
-    testBdd2(mgr,verbosity);
-    testBdd3(mgr,verbosity);
-    testZdd2(mgr,verbosity);
-    testBdd4(mgr,verbosity);
-    testBdd5(mgr,verbosity);
+    Cudd mgr(0, 2);
+    // mgr.makeVerbose();               // trace constructors and destructors
+    testBdd(mgr, verbosity);
+    testAdd(mgr, verbosity);
+    testAdd2(mgr, verbosity);
+    testZdd(mgr, verbosity);
+    testBdd2(mgr, verbosity);
+    testBdd3(mgr, verbosity);
+    testZdd2(mgr, verbosity);
+    testBdd4(mgr, verbosity);
+    testBdd5(mgr, verbosity);
     if (verbosity) mgr.info();
     return 0;
 
@@ -136,8 +135,8 @@ main(int argc, char **argv)
 ******************************************************************************/
 static void
 testBdd(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testBdd\n";
     // Create two new variables in the manager. If testBdd is called before
@@ -146,10 +145,12 @@ testBdd(
     BDD y = mgr.bddVar();
 
     BDD f = x * y;
-    if (verbosity) cout << "f"; f.print(2,verbosity);
+    if (verbosity) cout << "f";
+    f.print(2, verbosity);
 
     BDD g = y + !x;
-    if (verbosity) cout << "g"; g.print(2,verbosity);
+    if (verbosity) cout << "g";
+    g.print(2, verbosity);
 
     if (verbosity)
         cout << "f and g are" << (f == !g ? "" : " not") << " complementary\n";
@@ -157,15 +158,18 @@ testBdd(
         cout << "f is" << (f <= g ? "" : " not") << " less than or equal to g\n";
 
     g = f | ~g;
-    if (verbosity) cout << "g"; g.print(2,verbosity);
+    if (verbosity) cout << "g";
+    g.print(2, verbosity);
 
     BDD h = f = y;
-    if (verbosity) cout << "h"; h.print(2,verbosity);
+    if (verbosity) cout << "h";
+    h.print(2, verbosity);
 
-    if (verbosity) cout << "x + h has " << (x+h).nodeCount() << " nodes\n";
+    if (verbosity) cout << "x + h has " << (x + h).nodeCount() << " nodes\n";
 
     h += x;
-    if (verbosity) cout << "h"; h.print(2,verbosity);
+    if (verbosity) cout << "h";
+    h.print(2, verbosity);
 
 } // testBdd
 
@@ -185,8 +189,8 @@ testBdd(
 ******************************************************************************/
 static void
 testAdd(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testAdd\n";
     // Create two ADD variables. If we called method addVar without an
@@ -199,15 +203,18 @@ testAdd(
 
     // Test arithmetic operators.
     ADD r = p + q;
-    if (verbosity) cout << "r"; r.print(2,verbosity);
+    if (verbosity) cout << "r";
+    r.print(2, verbosity);
 
     // CUDD_VALUE_TYPE is double.
     ADD s = mgr.constant(3.0);
     s *= p * q;
-    if (verbosity) cout << "s"; s.print(2,verbosity);
+    if (verbosity) cout << "s";
+    s.print(2, verbosity);
 
     s += mgr.plusInfinity();
-    if (verbosity) cout << "s"; s.print(2,verbosity);
+    if (verbosity) cout << "s";
+    s.print(2, verbosity);
 
     // Test relational operators.
     if (verbosity)
@@ -215,7 +222,8 @@ testAdd(
 
     // Test logical operators.
     r = p | q;
-    if (verbosity) cout << "r"; r.print(2,verbosity);
+    if (verbosity) cout << "r";
+    r.print(2, verbosity);
 
 } // testAdd
 
@@ -235,8 +243,8 @@ testAdd(
 ******************************************************************************/
 static void
 testAdd2(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testAdd2\n";
     // Create two ADD variables. If we called method addVar without an
@@ -244,23 +252,27 @@ testAdd2(
     int i;
     vector<ADD> x(2);
     for (i = 0; i < 2; i++) {
-	x[i] = mgr.addVar(i);
+        x[i] = mgr.addVar(i);
     }
 
     // Build a probability density function: [0.1, 0.2, 0.3, 0.4].
     ADD f0 = x[1].Ite(mgr.constant(0.2), mgr.constant(0.1));
     ADD f1 = x[1].Ite(mgr.constant(0.4), mgr.constant(0.3));
-    ADD f  = x[0].Ite(f1, f0);
-    if (verbosity) cout << "f"; f.print(2,verbosity);
+    ADD f = x[0].Ite(f1, f0);
+    if (verbosity) cout << "f";
+    f.print(2, verbosity);
 
     // Compute the entropy.
     ADD l = f.Log();
-    if (verbosity) cout << "l"; l.print(2,verbosity);
+    if (verbosity) cout << "l";
+    l.print(2, verbosity);
     ADD r = f * l;
-    if (verbosity) cout << "r"; r.print(2,verbosity);
+    if (verbosity) cout << "r";
+    r.print(2, verbosity);
 
-    ADD e = r.MatrixMultiply(mgr.constant(-1.0/log(2.0)),x);
-    if (verbosity) cout << "e"; e.print(2,verbosity);
+    ADD e = r.MatrixMultiply(mgr.constant(-1.0 / log(2.0)), x);
+    if (verbosity) cout << "e";
+    e.print(2, verbosity);
 
 } // testAdd2
 
@@ -280,20 +292,22 @@ testAdd2(
 ******************************************************************************/
 static void
 testZdd(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testZdd\n";
     ZDD v = mgr.zddVar(0);
     ZDD w = mgr.zddVar(1);
 
     ZDD s = v + w;
-    if (verbosity) cout << "s"; s.print(2,verbosity);
+    if (verbosity) cout << "s";
+    s.print(2, verbosity);
 
     if (verbosity) cout << "v is" << (v < s ? "" : " not") << " less than s\n";
 
     s -= v;
-    if (verbosity) cout << "s"; s.print(2,verbosity);
+    if (verbosity) cout << "s";
+    s.print(2, verbosity);
 
 } // testZdd
 
@@ -313,40 +327,46 @@ testZdd(
 ******************************************************************************/
 static void
 testBdd2(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testBdd2\n";
     vector<BDD> x(4);
     for (int i = 0; i < 4; i++) {
-	x[i] = mgr.bddVar(i);
+        x[i] = mgr.bddVar(i);
     }
 
     // Create the BDD for the Achilles' Heel function.
     BDD p1 = x[0] * x[2];
     BDD p2 = x[1] * x[3];
     BDD f = p1 + p2;
-    const char* inames[] = {"x0", "x1", "x2", "x3"};
+    const char* inames[] = { "x0", "x1", "x2", "x3" };
     if (verbosity) {
-        cout << "f"; f.print(4,verbosity);
-        cout << "Irredundant cover of f:" << endl; f.PrintCover();
-        cout << "Number of minterms (arbitrary precision): "; f.ApaPrintMinterm(4);
-        cout << "Number of minterms (extended precision):  "; f.EpdPrintMinterm(4);
+        cout << "f";
+        f.print(4, verbosity);
+        cout << "Irredundant cover of f:" << endl;
+        f.PrintCover();
+        cout << "Number of minterms (arbitrary precision): ";
+        f.ApaPrintMinterm(4);
+        cout << "Number of minterms (extended precision):  ";
+        f.EpdPrintMinterm(4);
         cout << "Two-literal clauses of f:" << endl;
-        f.PrintTwoLiteralClauses((char **)inames); cout << endl;
+        f.PrintTwoLiteralClauses((char**) inames);
+        cout << endl;
     }
 
     vector<BDD> vect = f.CharToVect();
     if (verbosity) {
         for (size_t i = 0; i < vect.size(); i++) {
-            cout << "vect[" << i << "]" << endl; vect[i].PrintCover();
+            cout << "vect[" << i << "]" << endl;
+            vect[i].PrintCover();
         }
     }
 
     // v0,...,v3 suffice if testBdd2 is called before testBdd3.
     if (verbosity) {
-        const char* onames[] = {"v0", "v1", "v2", "v3", "v4", "v5"};
-        mgr.DumpDot(vect, (char **)inames,(char **)onames);
+        const char* onames[] = { "v0", "v1", "v2", "v3", "v4", "v5" };
+        mgr.DumpDot(vect, (char**) inames, (char**) onames);
     }
 
 } // testBdd2
@@ -367,37 +387,41 @@ testBdd2(
 ******************************************************************************/
 static void
 testBdd3(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testBdd3\n";
     vector<BDD> x(6);
     for (int i = 0; i < 6; i++) {
-	x[i] = mgr.bddVar(i);
+        x[i] = mgr.bddVar(i);
     }
 
     BDD G = x[4] + !x[5];
     BDD H = x[4] * x[5];
-    BDD E = x[3].Ite(G,!x[5]);
+    BDD E = x[3].Ite(G, !x[5]);
     BDD F = x[3] + !H;
-    BDD D = x[2].Ite(F,!H);
-    BDD C = x[2].Ite(E,!F);
-    BDD B = x[1].Ite(C,!F);
-    BDD A = x[0].Ite(B,!D);
+    BDD D = x[2].Ite(F, !H);
+    BDD C = x[2].Ite(E, !F);
+    BDD B = x[1].Ite(C, !F);
+    BDD A = x[0].Ite(B, !D);
     BDD f = !A;
-    if (verbosity) cout << "f"; f.print(6,verbosity);
+    if (verbosity) cout << "f";
+    f.print(6, verbosity);
 
     BDD f1 = f.RemapUnderApprox(6);
-    if (verbosity) cout << "f1"; f1.print(6,verbosity);
+    if (verbosity) cout << "f1";
+    f1.print(6, verbosity);
     if (verbosity)
         cout << "f1 is" << (f1 <= f ? "" : " not") << " less than or equal to f\n";
 
     BDD g;
     BDD h;
-    f.GenConjDecomp(&g,&h);
+    f.GenConjDecomp(&g, &h);
     if (verbosity) {
-        cout << "g"; g.print(6,verbosity);
-        cout << "h"; h.print(6,verbosity);
+        cout << "g";
+        g.print(6, verbosity);
+        cout << "h";
+        h.print(6, verbosity);
         cout << "g * h " << (g * h == f ? "==" : "!=") << " f\n";
     }
 
@@ -422,64 +446,67 @@ testBdd3(
 ******************************************************************************/
 static void
 testZdd2(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testZdd2\n";
-    int N = 3;			// number of bits
+    int N = 3; // number of bits
     // Create variables.
     vector<BDD> a(N);
     vector<BDD> b(N);
-    vector<BDD> c(N+1);
+    vector<BDD> c(N + 1);
     for (int i = 0; i < N; i++) {
-	a[N-1-i] = mgr.bddVar(2*i);
-	b[N-1-i] = mgr.bddVar(2*i+1);
+        a[N - 1 - i] = mgr.bddVar(2 * i);
+        b[N - 1 - i] = mgr.bddVar(2 * i + 1);
     }
-    c[0] = mgr.bddVar(2*N);
+    c[0] = mgr.bddVar(2 * N);
     // Build functions.
     vector<BDD> s(N);
     for (int i = 0; i < N; i++) {
-	s[i] = a[i].Xnor(c[i]);
-	c[i+1] = a[i].Ite(b[i],c[i]);
+        s[i] = a[i].Xnor(c[i]);
+        c[i + 1] = a[i].Ite(b[i], c[i]);
     }
 
     // Create array of outputs and print it.
-    vector<BDD> p(N+1);
+    vector<BDD> p(N + 1);
     for (int i = 0; i < N; i++) {
-	p[i] = s[i];
+        p[i] = s[i];
     }
     p[N] = c[N];
     if (verbosity) {
         for (size_t i = 0; i < p.size(); i++) {
-            cout << "p[" << i << "]"; p[i].print(2*N+1,verbosity);
+            cout << "p[" << i << "]";
+            p[i].print(2 * N + 1, verbosity);
         }
     }
-    const char* onames[] = {"s0", "s1", "s2", "c3"};
+    const char* onames[] = { "s0", "s1", "s2", "c3" };
     if (verbosity) {
-        const char* inames[] = {"a2", "b2", "a1", "b1", "a0", "b0", "c0"};
-        mgr.DumpDot(p, (char **)inames,(char **)onames);
+        const char* inames[] = { "a2", "b2", "a1", "b1", "a0", "b0", "c0" };
+        mgr.DumpDot(p, (char**) inames, (char**) onames);
     }
 
     // Create ZDD variables and build ZDD covers from BDDs.
     mgr.zddVarsFromBddVars(2);
-    vector<ZDD> z(N+1);
-    for (int i = 0; i < N+1; i++) {
-	ZDD temp;
-	BDD dummy = p[i].zddIsop(p[i],&temp);
-	z[i] = temp;
+    vector<ZDD> z(N + 1);
+    for (int i = 0; i < N + 1; i++) {
+        ZDD temp;
+        BDD dummy = p[i].zddIsop(p[i], &temp);
+        z[i] = temp;
     }
 
     // Print out covers.
     if (verbosity) {
         for (size_t i = 0; i < z.size(); i++) {
-            cout << "z[" << i << "]"; z[i].print(4*N+2,verbosity);
+            cout << "z[" << i << "]";
+            z[i].print(4 * N + 2, verbosity);
         }
         for (size_t i = 0; i < z.size(); i++) {
-            cout << "z[" << i << "]\n"; z[i].PrintCover();
+            cout << "z[" << i << "]\n";
+            z[i].PrintCover();
         }
-        const char* znames[] = {"a2+", "a2-", "b2+", "b2-", "a1+", "a1-", "b1+",
-                                "b1-", "a0+", "a0-", "b0+", "b0-", "c0+", "c0-"};
-        mgr.DumpDot(z, (char **)znames,(char **)onames);
+        const char* znames[] = { "a2+", "a2-", "b2+", "b2-", "a1+", "a1-", "b1+",
+                                 "b1-", "a0+", "a0-", "b0+", "b0-", "c0+", "c0-" };
+        mgr.DumpDot(z, (char**) znames, (char**) onames);
     }
 
 } // testZdd2
@@ -501,8 +528,8 @@ testZdd2(
 ******************************************************************************/
 static void
 testBdd4(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testBdd4\n";
     BDD x = mgr.bddVar(0);
@@ -510,18 +537,19 @@ testBdd4(
     BDD z = mgr.bddVar(2);
 
     BDD f = !x * !y * !z + x * y;
-    if (verbosity) cout << "f"; f.print(3,verbosity);
+    if (verbosity) cout << "f";
+    f.print(3, verbosity);
 
-    Cudd otherMgr(0,0);
+    Cudd otherMgr(0, 0);
     BDD g = f.Transfer(otherMgr);
-    if (verbosity) cout << "g"; g.print(3,verbosity);
+    if (verbosity) cout << "g";
+    g.print(3, verbosity);
 
     BDD h = g.Transfer(mgr);
     if (verbosity)
         cout << "f and h are" << (f == h ? "" : " not") << " identical\n";
 
 } // testBdd4
-
 
 
 /**Function********************************************************************
@@ -539,25 +567,25 @@ testBdd4(
 ******************************************************************************/
 static void
 testBdd5(
-  Cudd& mgr,
-  int verbosity)
+    Cudd& mgr,
+    int verbosity)
 {
     if (verbosity) cout << "Entering testBdd5\n";
     vector<BDD> x;
     x.reserve(4);
     for (int i = 0; i < 4; i++) {
-	x.push_back(mgr.bddVar(i));
+        x.push_back(mgr.bddVar(i));
     }
-    const char* inames[] = {"a", "b", "c", "d"};
+    const char* inames[] = { "a", "b", "c", "d" };
     BDD f = (x[1] & x[3]) | (x[0] & !x[2] & x[3]) | (!x[0] & x[1] & !x[2]);
     BDD lb = x[1] & !x[2] & x[3];
     BDD ub = x[3];
-    BDD primes = lb.MaximallyExpand(ub,f);
+    BDD primes = lb.MaximallyExpand(ub, f);
     assert(primes == (x[1] & x[3]));
     BDD lprime = primes.LargestPrimeUnate(lb);
     assert(lprime == primes);
     if (verbosity) {
-      const char * onames[] = {"lb", "ub", "f", "primes", "lprime"};
+        const char* onames[] = { "lb", "ub", "f", "primes", "lprime" };
         vector<BDD> z;
         z.reserve(5);
         z.push_back(lb);
@@ -565,43 +593,49 @@ testBdd5(
         z.push_back(f);
         z.push_back(primes);
         z.push_back(lprime);
-        mgr.DumpDot(z, (char **)inames, (char **)onames);
-        cout << "primes(1)"; primes.print(4,verbosity);
+        mgr.DumpDot(z, (char**) inames, (char**) onames);
+        cout << "primes(1)";
+        primes.print(4, verbosity);
     }
 
     lb = !x[0] & x[2] & x[3];
-    primes = lb.MaximallyExpand(ub,f);
+    primes = lb.MaximallyExpand(ub, f);
     assert(primes == mgr.bddZero());
     if (verbosity) {
-        cout << "primes(2)"; primes.print(4,verbosity);
+        cout << "primes(2)";
+        primes.print(4, verbosity);
     }
 
     lb = x[0] & !x[2] & x[3];
-    primes = lb.MaximallyExpand(ub,f);
+    primes = lb.MaximallyExpand(ub, f);
     assert(primes == lb);
     lprime = primes.LargestPrimeUnate(lb);
     assert(lprime == primes);
     if (verbosity) {
-        cout << "primes(3)"; primes.print(4,verbosity);
+        cout << "primes(3)";
+        primes.print(4, verbosity);
     }
 
     lb = !x[0] & x[1] & !x[2] & x[3];
     ub = mgr.bddOne();
-    primes = lb.MaximallyExpand(ub,f);
+    primes = lb.MaximallyExpand(ub, f);
     assert(primes == ((x[1] & x[3]) | (!x[0] & x[1] & !x[2])));
     lprime = primes.LargestPrimeUnate(lb);
     assert(lprime == (x[1] & x[3]));
     if (verbosity) {
-        cout << "primes(4)"; primes.print(4,1); primes.PrintCover();
+        cout << "primes(4)";
+        primes.print(4, 1);
+        primes.PrintCover();
     }
 
     ub = !x[0] & x[3];
-    primes = lb.MaximallyExpand(ub,f);
+    primes = lb.MaximallyExpand(ub, f);
     assert(primes == (!x[0] & x[1] & x[3]));
     lprime = primes.LargestPrimeUnate(lb);
     assert(lprime == primes);
     if (verbosity) {
-        cout << "primes(5)"; primes.print(4,verbosity);
+        cout << "primes(5)";
+        primes.print(4, verbosity);
     }
 
 } // testBdd5

@@ -21,20 +21,19 @@
  *
  **/
 
-#include <iostream>
 #include <default.hh>
+#include <iostream>
 
 namespace witness {
 
-void DefaultWitnessPrinter::operator() (const Witness& w, step_t j, step_t k)
-{
-    step_t i = j;
+    void DefaultWitnessPrinter::operator()(const Witness& w, step_t j, step_t k)
+    {
+        step_t i { j };
 
-    while (i < k) {
-        std::cout << "-- @ " << i
-                  << " --"  << std::endl;
+        while (i < k) {
+            std::cout << "-- @ " << i
+                      << " --" << std::endl;
+        }
     }
 
-}
-
-};
+}; // namespace witness

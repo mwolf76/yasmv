@@ -30,79 +30,75 @@
 
 namespace fsm {
 
-CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
-    : algorithms::Algorithm(command, model)
-{
-    const void* instance(this);
-    TRACE
-        << "Created CheckTransConsistency @"
-        << instance
-        << std::endl;
+    CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
+        : algorithms::Algorithm(command, model)
+    {
+        const void* instance { this };
+        TRACE
+            << "Created CheckTransConsistency @"
+            << instance
+            << std::endl;
 
-    f_status = FSM_CONSISTENCY_UNDECIDED;
-}
-
-CheckTransConsistency::~CheckTransConsistency()
-{
-    const void* instance(this);
-    TRACE
-        << "Destroyed CheckTransConsistency @"
-        << instance
-        << std::endl;
-}
-
-void CheckTransConsistency::process(expr::ExprVector constraints)
-{
-    sat::Engine engine { "Transitional" };
-    expr::Expr_ptr ctx { em().make_empty() };
-
-    unsigned no_constraints { 0 };
-    std::for_each(begin(constraints),
-                  end(constraints),
-                  [this, ctx, &no_constraints](expr::Expr_ptr expr) {
-                      INFO
-                          << "Compiling constraint `"
-                          << expr
-                          << "` ..."
-                          << std::endl;
-
-                      compiler::Unit unit
-                          (compiler().process(ctx, expr));
-
-                      f_constraint_cus.push_back(unit);
-                      ++ no_constraints;
-                  });
-
-    INFO
-        << no_constraints
-        << " additional constraints found."
-        << std::endl;
-
-    /* FSM constraints */
-    assert_fsm_trans(engine, 0);
-    assert_fsm_invar(engine, 0);
-
-    /* Additional constraints, times 0 and 1 */
-    for (step_t time = 0; time < 2; ++ time) {
-        std::for_each(begin(f_constraint_cus),
-                      end(f_constraint_cus),
-                      [this, &engine, time](compiler::Unit& cu) {
-                          this->assert_formula(engine, time, cu);
-                      });
-    }
-
-    sat::status_t status
-        (engine.solve());
-
-    if (sat::status_t::STATUS_UNKNOWN == status) {
         f_status = FSM_CONSISTENCY_UNDECIDED;
     }
-    else if (sat::status_t::STATUS_UNSAT == status) {
-        f_status = FSM_CONSISTENCY_KO;
+
+    CheckTransConsistency::~CheckTransConsistency()
+    {
+        const void* instance { this };
+        TRACE
+            << "Destroyed CheckTransConsistency @"
+            << instance
+            << std::endl;
     }
-    else if (sat::status_t::STATUS_SAT == status) {
-        f_status = FSM_CONSISTENCY_OK;
+
+    void CheckTransConsistency::process(expr::ExprVector constraints)
+    {
+        sat::Engine engine { "Transitional" };
+        expr::Expr_ptr ctx { em().make_empty() };
+
+        unsigned no_constraints { 0 };
+        std::for_each(
+            begin(constraints), end(constraints),
+            [this, ctx, &no_constraints](expr::Expr_ptr expr) {
+                INFO
+                    << "Compiling constraint `"
+                    << expr
+                    << "` ..."
+                    << std::endl;
+
+                compiler::Unit unit { compiler().process(ctx, expr) };
+
+                f_constraint_cus.push_back(unit);
+                ++no_constraints;
+            });
+
+        INFO
+            << no_constraints
+            << " additional constraints found."
+            << std::endl;
+
+        /* FSM constraints */
+        assert_fsm_trans(engine, 0);
+        assert_fsm_invar(engine, 0);
+
+        /* Additional constraints, times 0 and 1 */
+        for (step_t time = 0; time < 2; ++time) {
+            std::for_each(
+                begin(f_constraint_cus), end(f_constraint_cus),
+                [this, &engine, time](compiler::Unit& cu) {
+                    this->assert_formula(engine, time, cu);
+                });
+        }
+
+        sat::status_t status { engine.solve() };
+
+        if (sat::status_t::STATUS_UNKNOWN == status) {
+            f_status = FSM_CONSISTENCY_UNDECIDED;
+        } else if (sat::status_t::STATUS_UNSAT == status) {
+            f_status = FSM_CONSISTENCY_KO;
+        } else if (sat::status_t::STATUS_SAT == status) {
+            f_status = FSM_CONSISTENCY_OK;
+        }
     }
-}
 
 } // namespace fsm

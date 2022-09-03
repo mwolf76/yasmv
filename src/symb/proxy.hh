@@ -30,8 +30,8 @@
 #include <expr/expr.hh>
 
 #include <symb/exceptions.hh>
-#include <symb/typedefs.hh>
 #include <symb/resolver.hh>
+#include <symb/typedefs.hh>
 
 #include <type/type_mgr.hh>
 
@@ -39,37 +39,39 @@
 
 namespace symb {
 
-class ResolverProxy : public Resolver {
-    type::TypeMgr& f_tm;
-    model::ModelMgr& f_mm;
+    class ResolverProxy: public Resolver {
+        type::TypeMgr& f_tm;
+        model::ModelMgr& f_mm;
 
-public:
-    ResolverProxy()
-        : f_tm(type::TypeMgr::INSTANCE())
-        , f_mm(model::ModelMgr::INSTANCE())
-    {}
+    public:
+        ResolverProxy()
+            : f_tm(type::TypeMgr::INSTANCE())
+            , f_mm(model::ModelMgr::INSTANCE())
+        {}
 
-    /** @brief register a symbol in the underlying storage */
-    void add_symbol(const expr::Expr_ptr ctx, const expr::Expr_ptr expr, Symbol_ptr symb)
-    { assert(false); } // proxy is used read-only
+        /** @brief register a symbol in the underlying storage */
+        void add_symbol(const expr::Expr_ptr ctx, const expr::Expr_ptr expr, Symbol_ptr symb)
+        {
+            assert(false);
+        } // proxy is used read-only
 
-    /** @brief fetch a symbol */
-    Symbol_ptr symbol(const expr::Expr_ptr key)
-    {
-        Symbol_ptr res = NULL;
+        /** @brief fetch a symbol */
+        Symbol_ptr symbol(const expr::Expr_ptr key)
+        {
+            Symbol_ptr res = NULL;
 
-        res = f_tm.resolver()->symbol(key);
-        if (NULL != res)
-            return res;
+            res = f_tm.resolver()->symbol(key);
+            if (NULL != res)
+                return res;
 
-        res = f_mm.resolver()->symbol(key);
-        if (NULL != res)
-            return res;
+            res = f_mm.resolver()->symbol(key);
+            if (NULL != res)
+                return res;
 
-        throw UnresolvedSymbol(key);
-    }
-};
+            throw UnresolvedSymbol(key);
+        }
+    };
 
-};
+}; // namespace symb
 
 #endif /* RESOLVER_PROXY_H */

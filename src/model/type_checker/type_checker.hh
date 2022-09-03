@@ -37,91 +37,94 @@
 
 namespace model {
 
-typedef boost::unordered_map<expr::Expr_ptr, type::Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
+    typedef boost::unordered_map<expr::Expr_ptr, type::Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
 
-/* enable the following macro to debug the TypeChecker */
-// #define DEBUG_TYPE_CHECKER
+    /* enable the following macro to debug the TypeChecker */
+    // #define DEBUG_TYPE_CHECKER
 
-class ModelMgr;
-class TypeChecker : public expr::ExprWalker {
-public:
-    TypeChecker(ModelMgr& owner);
-    ~TypeChecker();
+    class ModelMgr;
+    class TypeChecker: public expr::ExprWalker {
+    public:
+        TypeChecker(ModelMgr& owner);
+        ~TypeChecker();
 
-    /** @brief Returns Type object for given FQExpr (memoized). */
-    type::Type_ptr type(expr::Expr_ptr expr, expr::Expr_ptr ctx);
+        /** @brief Returns Type object for given FQExpr (memoized). */
+        type::Type_ptr type(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
-    // walker toplevel
-    type::Type_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
+        // walker toplevel
+        type::Type_ptr process(expr::Expr_ptr expr, expr::Expr_ptr ctx);
 
-    inline ModelMgr& owner()
-    { return f_owner; }
+        inline ModelMgr& owner()
+        {
+            return f_owner;
+        }
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    void pre_node_hook(expr::Expr_ptr expr);
-    void post_node_hook(expr::Expr_ptr expr);
+        void pre_node_hook(expr::Expr_ptr expr);
+        void post_node_hook(expr::Expr_ptr expr);
 
-    LTL_HOOKS; OP_HOOKS;
+        LTL_HOOKS;
+        OP_HOOKS;
 
-    void walk_instant(const expr::Expr_ptr expr);
-    void walk_leaf(const expr::Expr_ptr expr);
+        void walk_instant(const expr::Expr_ptr expr);
+        void walk_leaf(const expr::Expr_ptr expr);
 
-private:
-    TypeReg f_map; // cache
+    private:
+        TypeReg f_map; // cache
 
-    type::TypeVector f_type_stack;
-    expr::ExprVector f_ctx_stack;
+        type::TypeVector f_type_stack;
+        expr::ExprVector f_ctx_stack;
 
-    // managers
-    ModelMgr& f_owner;
+        // managers
+        ModelMgr& f_owner;
 
-    // owned
-    expr::preprocessor::Preprocessor f_preprocessor;
+        // owned
+        expr::preprocessor::Preprocessor f_preprocessor;
 
-    bool cache_miss(const expr::Expr_ptr expr);
-    void memoize_result(expr::Expr_ptr expr);
+        bool cache_miss(const expr::Expr_ptr expr);
+        void memoize_result(expr::Expr_ptr expr);
 
-    type::Type_ptr arithmetical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
-    type::Type_ptr relational_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
-    type::Type_ptr logical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
-    type::Type_ptr ite_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
-    type::Type_ptr cast_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+        type::Type_ptr arithmetical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+        type::Type_ptr relational_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+        type::Type_ptr logical_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+        type::Type_ptr ite_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
+        type::Type_ptr cast_result_type(type::Type_ptr lhs, type::Type_ptr rhs);
 
-    type::Type_ptr check_any(expr::Expr_ptr expr);
-    type::Type_ptr check_timed(expr::Expr_ptr expr);
-    type::Type_ptr check_logical(expr::Expr_ptr expr);
-    type::Type_ptr check_arithmetical(expr::Expr_ptr expr);
-    type::Type_ptr check_scalar(expr::Expr_ptr expr);
-    type::Type_ptr check_array(expr::Expr_ptr expr);
+        type::Type_ptr check_any(expr::Expr_ptr expr);
+        type::Type_ptr check_timed(expr::Expr_ptr expr);
+        type::Type_ptr check_logical(expr::Expr_ptr expr);
+        type::Type_ptr check_arithmetical(expr::Expr_ptr expr);
+        type::Type_ptr check_scalar(expr::Expr_ptr expr);
+        type::Type_ptr check_array(expr::Expr_ptr expr);
 
-    // post-orders only
-    void walk_unary_fsm_postorder(const expr::Expr_ptr expr);
-    void walk_unary_ltl_postorder(const expr::Expr_ptr expr);
+        // post-orders only
+        void walk_unary_fsm_postorder(const expr::Expr_ptr expr);
+        void walk_unary_ltl_postorder(const expr::Expr_ptr expr);
 
-    void walk_binary_fsm_postorder(const expr::Expr_ptr expr);
-    void walk_binary_ltl_postorder(const expr::Expr_ptr expr);
+        void walk_binary_fsm_postorder(const expr::Expr_ptr expr);
+        void walk_binary_ltl_postorder(const expr::Expr_ptr expr);
 
-    void walk_unary_arithmetical_postorder(const expr::Expr_ptr expr);
-    void walk_binary_arithmetical_postorder(const expr::Expr_ptr expr);
-    void walk_binary_timed_postorder(const expr::Expr_ptr expr);
+        void walk_unary_arithmetical_postorder(const expr::Expr_ptr expr);
+        void walk_binary_arithmetical_postorder(const expr::Expr_ptr expr);
+        void walk_binary_timed_postorder(const expr::Expr_ptr expr);
 
-    void walk_unary_logical_postorder(const expr::Expr_ptr expr);
-    void walk_unary_bitwise_postorder(const expr::Expr_ptr expr);
+        void walk_unary_logical_postorder(const expr::Expr_ptr expr);
+        void walk_unary_bitwise_postorder(const expr::Expr_ptr expr);
 
-    void walk_binary_logical_postorder(const expr::Expr_ptr expr);
-    void walk_binary_bitwise_postorder(const expr::Expr_ptr expr);
+        void walk_binary_logical_postorder(const expr::Expr_ptr expr);
+        void walk_binary_bitwise_postorder(const expr::Expr_ptr expr);
 
-    void walk_binary_shift_postorder(const expr::Expr_ptr expr);
-    void walk_binary_relational_postorder(const expr::Expr_ptr expr);
-    void walk_binary_equality_postorder(const expr::Expr_ptr expr);
-    void walk_binary_ite_postorder(const expr::Expr_ptr expr);
-    void walk_binary_boolean_or_relational_postorder(const expr::Expr_ptr expr);
-    void walk_binary_cast_postorder(const expr::Expr_ptr expr);
-};
+        void walk_binary_shift_postorder(const expr::Expr_ptr expr);
+        void walk_binary_relational_postorder(const expr::Expr_ptr expr);
+        void walk_binary_equality_postorder(const expr::Expr_ptr expr);
+        void walk_binary_ite_postorder(const expr::Expr_ptr expr);
+        void walk_binary_boolean_or_relational_postorder(const expr::Expr_ptr expr);
+        void walk_binary_cast_postorder(const expr::Expr_ptr expr);
+    };
 
-};
+}; // namespace model
 
 #endif /* TYPE_CHECKER_H */

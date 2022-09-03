@@ -39,91 +39,105 @@
 
 namespace model {
 
-typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
-typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr> ParamMap;
+    typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
+    typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr> ParamMap;
 
-typedef enum {
-    MMGR_BUILD_CTX_MAP,
-    MMGR_BUILD_PARAM_MAP,
-    MMGR_ANALYZE,
-    MMGR_TYPE_CHECK,
-    MMGR_DONE
-} analyzer_pass_t;
+    typedef enum {
+        MMGR_BUILD_CTX_MAP,
+        MMGR_BUILD_PARAM_MAP,
+        MMGR_ANALYZE,
+        MMGR_TYPE_CHECK,
+        MMGR_DONE
+    } analyzer_pass_t;
 
-typedef class ModelMgr *ModelMgr_ptr;
-class ModelMgr  {
+    typedef class ModelMgr* ModelMgr_ptr;
+    class ModelMgr {
 
-public:
-    /* singleton */
-    static ModelMgr& INSTANCE();
+    public:
+        /* singleton */
+        static ModelMgr& INSTANCE();
 
-    inline Model& model()
-    { return f_model; }
+        inline Model& model()
+        {
+            return f_model;
+        }
 
-    inline Module& module(expr::Expr_ptr module_name)
-    { return f_model.module( module_name); }
+        inline Module& module(expr::Expr_ptr module_name)
+        {
+            return f_model.module(module_name);
+        }
 
-    inline symb::Resolver_ptr resolver()
-    { return &f_resolver; }
+        inline symb::Resolver_ptr resolver()
+        {
+            return &f_resolver;
+        }
 
-    // this must be called before any type checking
-    bool analyze();
+        // this must be called before any type checking
+        bool analyze();
 
-    inline expr::ExprMgr& em() const
-    { return f_em; }
+        inline expr::ExprMgr& em() const
+        {
+            return f_em;
+        }
 
-    inline type::TypeMgr& tm() const
-    { return f_tm; }
+        inline type::TypeMgr& tm() const
+        {
+            return f_tm;
+        }
 
-    inline Analyzer& analyzer()
-    { return f_analyzer; }
+        inline Analyzer& analyzer()
+        {
+            return f_analyzer;
+        }
 
-    // delegated type inference method
-    inline type::Type_ptr type(expr::Expr_ptr body,
-                               expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
-    {
-        assert( f_analyzed );
-        return f_type_checker.type(body, ctx);
-    }
+        // delegated type inference method
+        inline type::Type_ptr type(expr::Expr_ptr body,
+                                   expr::Expr_ptr ctx = expr::ExprMgr::INSTANCE().make_empty())
+        {
+            assert(f_analyzed);
+            return f_type_checker.type(body, ctx);
+        }
 
-    Module_ptr scope(expr::Expr_ptr ctx);
+        Module_ptr scope(expr::Expr_ptr ctx);
 
-    expr::Expr_ptr rewrite_parameter(expr::Expr_ptr expr );
+        expr::Expr_ptr rewrite_parameter(expr::Expr_ptr expr);
 
-protected:
-    ModelMgr();
-    ~ModelMgr();
+    protected:
+        ModelMgr();
+        ~ModelMgr();
 
-    friend class ModelResolver;
+        friend class ModelResolver;
 
-    symb::Symbols f_symbols;
-    inline symb::Symbols& symbols()
-    { return f_symbols; }
+        symb::Symbols f_symbols;
+        inline symb::Symbols& symbols()
+        {
+            return f_symbols;
+        }
 
-private:
-    static ModelMgr_ptr f_instance;
+    private:
+        static ModelMgr_ptr f_instance;
 
-    /* local data */
-    Model f_model;
+        /* local data */
+        Model f_model;
 
-    // ref to expr manager
-    expr::ExprMgr& f_em;
+        // ref to expr manager
+        expr::ExprMgr& f_em;
 
-    // ref to type manager
-    type::TypeMgr& f_tm;
+        // ref to type manager
+        type::TypeMgr& f_tm;
 
-    // owned
-    ModelResolver f_resolver;
-    Analyzer f_analyzer;
-    TypeChecker f_type_checker;
+        // owned
+        ModelResolver f_resolver;
+        Analyzer f_analyzer;
+        TypeChecker f_type_checker;
 
-    ContextMap f_context_map;
-    ParamMap f_param_map;
+        ContextMap f_context_map;
+        ParamMap f_param_map;
 
-    /* internals */
-    bool analyze_aux( analyzer_pass_t pass );
-    bool f_analyzed;
-};
+        /* internals */
+        bool analyze_aux(analyzer_pass_t pass);
+        bool f_analyzed;
+    };
 
 } // namespace model
 

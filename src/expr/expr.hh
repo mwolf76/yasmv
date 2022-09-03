@@ -33,202 +33,226 @@
 
 #include <expr/atom.hh>
 
+/** -- shortcurts to simplify the manipulation of the internal expr stack -- */
+#define TOP_EXPR(expr)      \
+    const auto expr         \
+    {                       \
+        f_expr_stack.back() \
+    }
+
+#define DROP_EXPR() \
+    f_expr_stack.pop_back()
+
+#define POP_EXPR(expr) \
+    TOP_EXPR(expr);    \
+    DROP_EXPR()
+
+#define PUSH_EXPR(expr) \
+    f_expr_stack.push_back(expr)
+
 namespace expr {
 
-typedef enum {
+    typedef enum {
 
-    // -- linear temporal logic expressions ------------------------------------
-    F, G, X, U, R,
+        // -- linear temporal logic expressions ------------------------------------
+        F,
+        G,
+        X,
+        U,
+        R,
 
-    // -- primary expressions --------------------------------------------------
+        // -- primary expressions --------------------------------------------------
 
-    /* time shift operators (nesting supported) */
-    AT, NEXT,
+        /* time shift operators (nesting supported) */
+        AT,
+        NEXT,
 
-    /* arithmetical operators */
-    NEG, PLUS, SUB, DIV, MUL, MOD, /* not using the more familiar word 'ADD' for addition to prevent confusion with ADDs. */
+        /* arithmetical operators */
+        NEG,
+        PLUS,
+        SUB,
+        DIV,
+        MUL,
+        MOD, /* not using the more familiar word 'ADD' for addition to prevent confusion with ADDs. */
 
-    /* bitwise operators */
-    BW_NOT, BW_AND, BW_OR, BW_XOR, BW_XNOR,
+        /* bitwise operators */
+        BW_NOT,
+        BW_AND,
+        BW_OR,
+        BW_XOR,
+        BW_XNOR,
 
-    /* logical operators */
-    NOT, AND, OR, IMPLIES,
+        /* logical operators */
+        NOT,
+        AND,
+        OR,
+        IMPLIES,
 
-    /* reserved for TRANSes */
-    GUARD,
+        /* reserved for TRANSes */
+        GUARD,
 
-    /* shift operators */
-    LSHIFT, RSHIFT,
+        /* shift operators */
+        LSHIFT,
+        RSHIFT,
 
-    /* type operators */
-    TYPE, CAST,
+        /* type operators */
+        TYPE,
+        CAST,
 
-    /* assignment operator */
-    ASSIGNMENT,
+        /* assignment operator */
+        ASSIGNMENT,
 
-    /* relational operators */
-    EQ, NE, GE, GT, LE, LT,
+        /* relational operators */
+        EQ,
+        NE,
+        GE,
+        GT,
+        LE,
+        LT,
 
-    /* conditionals */
-    ITE, COND,
+        /* conditionals */
+        ITE,
+        COND,
 
-    /* identifiers */
-    QSTRING, IDENT, DOT,
+        /* identifiers */
+        QSTRING,
+        IDENT,
+        DOT,
 
-    /* declarations */
-    BOOL, SIGNED, UNSIGNED,
+        /* declarations */
+        BOOL,
+        SIGNED,
+        UNSIGNED,
 
-    /* defines */
-    PARAMS, // (), binary
-    PARAMS_COMMA,
+        /* defines */
+        PARAMS, // (), binary
+        PARAMS_COMMA,
 
-    /* arrays */
-    ARRAY, // [] unary
-    ARRAY_COMMA,
+        /* arrays */
+        ARRAY, // [] unary
+        ARRAY_COMMA,
 
-    SUBSCRIPT, // [], binary
+        SUBSCRIPT, // [], binary
 
-    SET, // {}, unary
-    SET_COMMA,
+        SET, // {}, unary
+        SET_COMMA,
 
-    // -- Nullary
-    ICONST, // decimal constants
-    HCONST, // hex constants
-    OCONST, // octal constants
-    BCONST, // binary constants
+        // -- Nullary
+        ICONST, // decimal constants
+        HCONST, // hex constants
+        OCONST, // octal constants
+        BCONST, // binary constants
 
-    // -- Time constants
-    INSTANT, INTERVAL,
+        // -- Time constants
+        INSTANT,
+        INTERVAL,
 
-    // undefined
-    UNDEF,
+        // undefined
+        UNDEF,
 
-} ExprType;
+    } ExprType;
 
-// An Expression consists of an AST symbol, which is the expression
-// main operator, operands which depend on the type of operator and a
-// context, in which the expression has to evaluated.
-typedef struct Expr_TAG *Expr_ptr;
-typedef struct Expr_TAG {
+    // An Expression consists of an AST symbol, which is the expression
+    // main operator, operands which depend on the type of operator and a
+    // context, in which the expression has to evaluated.
+    typedef struct Expr_TAG* Expr_ptr;
+    typedef struct Expr_TAG {
 
-    // AST symb type
-    ExprType f_symb;
+        // AST symb type
+        ExprType f_symb;
 
-    union {
-        // identifiers
-        Atom_ptr f_atom;
+        union {
+            // identifiers
+            Atom_ptr f_atom;
 
-        // numeric constants
-        value_t f_value;
+            // numeric constants
+            value_t f_value;
 
-        // operators
-        struct  {
-            Expr_ptr f_lhs;
-            Expr_ptr f_rhs; // NULL for unary ops
-        };
-    } u;
+            // operators
+            struct {
+                Expr_ptr f_lhs;
+                Expr_ptr f_rhs; // NULL for unary ops
+            };
+        } u;
 
-    // accessors
-    inline ExprType symb() const
-    { return f_symb; }
+        // accessors
+        inline ExprType symb() const
+        {
+            return f_symb;
+        }
 
-    Atom& atom() const;
-    value_t value() const;
+        Atom& atom() const;
+        value_t value() const;
 
-    inline Expr_ptr lhs()
-    { return u.f_lhs; }
-    inline Expr_ptr rhs()
-    { return u.f_rhs; }
+        inline Expr_ptr lhs()
+        {
+            return u.f_lhs;
+        }
+        inline Expr_ptr rhs()
+        {
+            return u.f_rhs;
+        }
 
-    // identifiers and strings
-    inline Expr_TAG(ExprType symb, const Atom& atom)
-    {
-        assert(IDENT == symb || QSTRING == symb);
-        f_symb = symb;
-        u.f_atom = const_cast<Atom *>(& atom);
-    }
+        // identifiers and strings
+        inline Expr_TAG(ExprType symb, const Atom& atom)
+        {
+            assert(IDENT == symb || QSTRING == symb);
+            f_symb = symb;
+            u.f_atom = const_cast<Atom*>(&atom);
+        }
 
-    // binary expr (rhs is NULL for unary ops)
-    inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
-        : f_symb(symb)
-    {
-        u.f_lhs = lhs;
-        u.f_rhs = rhs;
-    }
+        // binary expr (rhs is NULL for unary ops)
+        inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
+            : f_symb(symb)
+        {
+            u.f_lhs = lhs;
+            u.f_rhs = rhs;
+        }
 
-    // numeric constants, are treated as machine size consts.
-    inline Expr_TAG(ExprType symb, value_t value)
-        : f_symb(symb)
-    {
-        assert (symb == ICONST ||
-                symb == HCONST ||
-                symb == OCONST ||
-                symb == BCONST ||
-                symb == INSTANT);
+        // numeric constants, are treated as machine size consts.
+        inline Expr_TAG(ExprType symb, value_t value)
+            : f_symb(symb)
+        {
+            assert(symb == ICONST ||
+                   symb == HCONST ||
+                   symb == OCONST ||
+                   symb == BCONST ||
+                   symb == INSTANT);
 
-        u.f_value = value;
-    }
+            u.f_value = value;
+        }
 
-    // nullary nodes (errors, undefined)
-    inline Expr_TAG(ExprType symb)
-        : f_symb(symb)
-    {
-        assert( symb == UNDEF );
-    }
+        // nullary nodes (errors, undefined)
+        inline Expr_TAG(ExprType symb)
+            : f_symb(symb)
+        {
+            assert(symb == UNDEF);
+        }
 
-} Expr;
+    } Expr;
 
-typedef std::vector<Expr_ptr> ExprVector;
-typedef ExprVector* ExprVector_ptr;
+    typedef std::vector<Expr_ptr> ExprVector;
+    typedef ExprVector* ExprVector_ptr;
 
-struct LexicographicOrdering {
-    int operator() (const Expr_ptr x, const Expr_ptr y) const;
-};
+    struct LexicographicOrdering {
+        int operator()(const Expr_ptr x, const Expr_ptr y) const;
+    };
 
-typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;
-typedef ExprSet* ExprSet_ptr;
+    typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;
+    typedef ExprSet* ExprSet_ptr;
 
-std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
+    std::ostream& operator<<(std::ostream& os, const Expr_ptr expr);
 
-struct ExprHash {
-    long operator() (const Expr& k) const;
-};
+    struct ExprHash {
+        long operator()(const Expr& k) const;
+    };
 
-struct ExprEq {
-    bool operator() (const Expr& x, const Expr& y) const;
-};
+    struct ExprEq {
+        bool operator()(const Expr& x, const Expr& y) const;
+    };
 
-typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
-typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
+    typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+    typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
-/* FIXME: how does this stuff belong here?!? */
-
-/** -- shortcurts to simplify the manipulation of the internal ctx stack -- */
-#define TOP_CTX(tp)                            \
-    const expr::Expr_ptr (tp)(f_ctx_stack.back())
-
-#define DROP_CTX()                             \
-    f_ctx_stack.pop_back()
-
-#define POP_CTX(tp)                            \
-    TOP_CTX(tp); DROP_CTX()
-
-#define PUSH_CTX(tp)                           \
-    f_ctx_stack.push_back(tp)
-
-/** -- shortcurts to simplify the manipulation of the internal time stack -- */
-#define TOP_TIME(step)                          \
-    const step_t (step)(f_time_stack.back())
-
-#define DROP_TIME()                             \
-    f_time_stack.pop_back()
-
-#define POP_TIME(step)                          \
-    TOP_TIME(step); DROP_TIME()
-
-#define PUSH_TIME(step)                         \
-    f_time_stack.push_back(step)
-
-};
-
+};     // namespace expr
 #endif /* EXPR_H */

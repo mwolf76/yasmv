@@ -26,54 +26,62 @@
 #ifndef EXPR_TIME_ANALYZER_H
 #define EXPR_TIME_ANALYZER_H
 
-#include <string>
 #include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
+#include <string>
 
 #include <boost/unordered_map.hpp>
 
 namespace expr::time {
 
-class Analyzer : public ExprWalker {
-public:
-    Analyzer(ExprMgr& em);
-    ~Analyzer();
+    class Analyzer: public ExprWalker {
+    public:
+        Analyzer(ExprMgr& em);
+        ~Analyzer();
 
-    inline ExprMgr& em()
-    { return f_em; }
+        inline ExprMgr& em()
+        {
+            return f_em;
+        }
 
-    void process(Expr_ptr expr);
+        void process(Expr_ptr expr);
 
-    inline bool has_forward_time() const
-    { return f_has_forward_time; }
+        inline bool has_forward_time() const
+        {
+            return f_has_forward_time;
+        }
 
-    inline bool has_backward_time() const
-    { return f_has_backward_time; }
+        inline bool has_backward_time() const
+        {
+            return f_has_backward_time;
+        }
 
-    inline bool has_intervals() const
-    { return f_has_intervals; }
+        inline bool has_intervals() const
+        {
+            return f_has_intervals;
+        }
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    // support for LTL ops
-    LTL_HOOKS;
+        // support for LTL ops
+        LTL_HOOKS;
 
-    // support for basic ops
-    OP_HOOKS;
+        // support for basic ops
+        OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+        void walk_instant(const Expr_ptr expr);
+        void walk_leaf(const Expr_ptr expr);
 
-private:
-    ExprMgr& f_em;
+    private:
+        ExprMgr& f_em;
 
-    bool f_has_forward_time;
-    bool f_has_backward_time;
+        bool f_has_forward_time;
+        bool f_has_backward_time;
 
-    bool f_has_intervals;
-};
+        bool f_has_intervals;
+    };
 
 } // namespace expr::time
 

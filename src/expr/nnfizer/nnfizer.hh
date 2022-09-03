@@ -26,49 +26,66 @@
 #ifndef NNFIZER_H
 #define NNFIZER_H
 
-#include <string>
 #include <expr/walker/walker.hh>
+#include <string>
 
 #include <boost/unordered_map.hpp>
 
+/** -- shortcurts to simplify the manipulation of the internal polarity stack -- */
+#define TOP_POLARITY(polarity)  \
+    const auto polarity         \
+    {                           \
+        f_polarity_stack.back() \
+    }
+
+#define DROP_POLARITY() \
+    f_polarity_stack.pop_back()
+
+#define POP_POLARITY(polarity) \
+    TOP_POLARITY(polarity);    \
+    DROP_POLARITY()
+
+#define PUSH_POLARITY(polarity) \
+    f_polarity_stack.push_back(polarity)
+
 namespace expr {
 
-/* true -> direct, false -> inverse */
-typedef std::vector<bool> BoolVector;
+    /* true -> direct, false -> inverse */
+    typedef std::vector<bool> BoolVector;
 
-class Nnfizer : public ExprWalker {
-public:
-    Nnfizer();
-    ~Nnfizer();
+    class Nnfizer: public ExprWalker {
+    public:
+        Nnfizer();
+        ~Nnfizer();
 
-    Expr_ptr process(Expr_ptr expr);
+        Expr_ptr process(Expr_ptr expr);
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    // support for LTL ops
-    LTL_HOOKS;
+        // support for LTL ops
+        LTL_HOOKS;
 
-    // support for basic ops
-    OP_HOOKS;
+        // support for basic ops
+        OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+        void walk_instant(const Expr_ptr expr);
+        void walk_leaf(const Expr_ptr expr);
 
-private:
-    bool walk_unary_preorder(const Expr_ptr expr);
-    bool walk_binary_preorder(const Expr_ptr expr);
+    private:
+        bool walk_unary_preorder(const Expr_ptr expr);
+        bool walk_binary_preorder(const Expr_ptr expr);
 
-    bool internal_error(const Expr_ptr expr);
+        bool internal_error(const Expr_ptr expr);
 
-    /* -- data -------------------------------------------------------------- */
-    ExprMgr& f_em;
+        /* -- data -------------------------------------------------------------- */
+        ExprMgr& f_em;
 
-    BoolVector f_polarity_stack;
-    ExprVector f_expr_stack;
-};
+        BoolVector f_polarity_stack;
+        ExprVector f_expr_stack;
+    };
 
-};
+}; // namespace expr
 
 #endif /* NNFIZER_H */

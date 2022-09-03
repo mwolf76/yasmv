@@ -31,41 +31,41 @@
 
 namespace cmd {
 
-class Check : public Command {
-public:
-    Check(Interpreter& owner);
-    virtual ~Check();
+    class Check: public Command {
+    public:
+        Check(Interpreter& owner);
+        virtual ~Check();
 
-    /** cmd params */
-    void set_property(expr::Expr_ptr property);
-    void add_constraint(expr::Expr_ptr constraint);
+        /** cmd params */
+        void set_property(expr::Expr_ptr property);
+        void add_constraint(expr::Expr_ptr constraint);
 
-    /* run() */
-    utils::Variant virtual operator()();
+        /* run() */
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* the property to be verified */
-    expr::Expr_ptr f_property;
+        /* the property to be verified */
+        expr::Expr_ptr f_property;
 
-    /* (optional) additional constraints */
-    expr::ExprVector f_constraints;
+        /* (optional) additional constraints */
+        expr::ExprVector f_constraints;
 
-    // -- helpers -------------------------------------------------------------
-    bool check_requirements();
-};
+        // -- helpers -------------------------------------------------------------
+        bool check_requirements();
+    };
 
-typedef Check* Check_ptr;
+    typedef Check* Check_ptr;
 
-class CheckTopic : public CommandTopic {
-public:
-    CheckTopic(Interpreter& owner);
-    virtual ~CheckTopic();
+    class CheckTopic: public CommandTopic {
+    public:
+        CheckTopic(Interpreter& owner);
+        virtual ~CheckTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif /* CHECK_CMD_H */

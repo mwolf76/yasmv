@@ -38,111 +38,107 @@
 
 using LList = std::initializer_list<std::initializer_list<int>>;
 class DDChecker {
-  std::list<std::list<int>> f_expected;
-  std::list<std::list<int>> f_actual;
+    std::list<std::list<int>> f_expected;
+    std::list<std::list<int>> f_actual;
 
 public:
-  DDChecker(LList list_of_ints)
-  {
-    std::list<int> tmp;
-    for (auto literals : list_of_ints) {
-      tmp.clear();
-      for (auto value : literals) {
-        tmp.push_back(value);
-      }
-      f_expected.push_back(tmp);
-    }
-  }
-
-  void add(std::list<int> lst) {
-    f_actual.push_back(lst);
-  }
-
-  bool check() const
-  {
-    bool res { f_expected == f_actual };
-
-    if (! res) {
-      std::cerr
-        << "Expected"
-        << std::endl ;
-
-      std::for_each(begin(f_expected), end(f_expected),
-                    [](std::list<int> lst) {
-                      std::for_each(begin(lst), end(lst),
-                                    [](int elem) {
-                                      std::cerr
-                                        << elem
-                                        << " ";
-                                    });
-                      std::cerr
-                        << std::endl;
-                    });
-
-      std::cerr
-        << "Actual"
-        << std::endl;
-
-      std::for_each(begin(f_actual), end(f_actual),
-                    [](std::list<int> lst) {
-                      std::for_each(begin(lst), end(lst),
-                                    [](int elem) {
-                                      std::cerr
-                                        << elem
-                                        << " ";
-                                    });
-                      std::cerr
-                        << std::endl;
-                    });
+    DDChecker(LList list_of_ints)
+    {
+        std::list<int> tmp;
+        for (auto literals : list_of_ints) {
+            tmp.clear();
+            for (auto value : literals) {
+                tmp.push_back(value);
+            }
+            f_expected.push_back(tmp);
+        }
     }
 
-    return res;
-  }
+    void add(std::list<int> lst)
+    {
+        f_actual.push_back(lst);
+    }
+
+    bool check() const
+    {
+        bool res { f_expected == f_actual };
+        if (!res) {
+            std::cerr
+                << "Expected"
+                << std::endl;
+
+            std::for_each(begin(f_expected), end(f_expected),
+                          [](std::list<int> lst) {
+                              std::for_each(begin(lst), end(lst),
+                                            [](int elem) {
+                                                std::cerr
+                                                    << elem
+                                                    << " ";
+                                            });
+                              std::cerr
+                                  << std::endl;
+                          });
+
+            std::cerr
+                << "Actual"
+                << std::endl;
+
+            std::for_each(begin(f_actual), end(f_actual),
+                          [](std::list<int> lst) {
+                              std::for_each(begin(lst), end(lst),
+                                            [](int elem) {
+                                                std::cerr
+                                                    << elem
+                                                    << " ";
+                                            });
+                              std::cerr
+                                  << std::endl;
+                          });
+        }
+
+        return res;
+    }
 };
 
-static void callback(void *obj, int* list, int size)
+static void callback(void* obj, int* list, int size)
 {
-  assert (NULL != obj);
-  DDChecker* pchecker = (DDChecker *) obj;
+    assert(NULL != obj);
+    DDChecker* pchecker = (DDChecker*) obj;
 
-  std::list<int> tmp;
-  for (int i = 0; i < size; ++ i) {
-    int c { *(list+i) };
-    tmp.push_back(c);
-  }
+    std::list<int> tmp;
+    for (int i = 0; i < size; ++i) {
+        int c { *(list + i) };
+        tmp.push_back(c);
+    }
 
-  pchecker->add(tmp);
+    pchecker->add(tmp);
 }
 
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_CASE(compiler_boolean)
 {
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
-
-    expr::ExprMgr& em
-        (expr::ExprMgr::INSTANCE());
-
-    type::TypeMgr& tm
-        (type::TypeMgr::INSTANCE());
+    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+    model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+    type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
     compiler::Compiler f_compiler;
 
-    model::Model& model
-        (mm.model());
+    model::Model& model { mm.model() };
 
-    expr::Atom a_main("main");
-    expr::Expr_ptr main_expr(em.make_identifier(a_main));
+    expr::Atom a_main { "main" };
+    expr::Expr_ptr main_expr { em.make_identifier(a_main) };
 
-    model::Module_ptr main_module = new model::Module(main_expr);
+    model::Module_ptr main_module { new model::Module(main_expr) };
     model.add_module(*main_module);
 
-    type::Type_ptr u2 = tm.find_unsigned(2);
+    type::Type_ptr u2 { tm.find_unsigned(2) };
 
-    expr::Atom a_x("x"); expr::Expr_ptr x = em.make_identifier(a_x);
+    expr::Atom a_x { "x" };
+    expr::Expr_ptr x { em.make_identifier(a_x) };
     main_module->add_var(x, new symb::Variable(main_expr, x, u2));
 
-    expr::Atom a_y("y"); expr::Expr_ptr y = em.make_identifier(a_y);
+    expr::Atom a_y { "y" };
+    expr::Expr_ptr y = em.make_identifier(a_y);
     main_module->add_var(y, new symb::Variable(main_expr, y, u2));
 
     // mm.analyze();
@@ -153,71 +149,68 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* NOT x */
     {
-      expr::Expr_ptr test_expr
-        (em.make_not(x));
+        expr::Expr_ptr test_expr {
+            em.make_not(x)
+        };
 
-      DDChecker checker {
-        {F}
-      } ;
+        DDChecker checker {
+            { F }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd(dv.at(0));
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* NOT NOT x */
     {
-      expr::Expr_ptr test_expr
-        (em.make_not(em.make_not(x)));
+        expr::Expr_ptr test_expr {
+            em.make_not(em.make_not(x))
+        };
 
-      DDChecker checker {
-        {T}
-      } ;
+        DDChecker checker {
+            { T }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* x NE y */
     {
-        expr::Expr_ptr test_expr
-          (em.make_ne(x, y));
-
-        DDChecker checker {
-          {F, T}, {T, F}
+        expr::Expr_ptr test_expr {
+            em.make_ne(x, y)
         };
 
-        compiler::Unit cu
-            (f_compiler.process(em.make_empty(),
-                                test_expr));
+        DDChecker checker {
+            { F, T }, { T, F }
+        };
 
-        dd::DDVector dv
-            (cu.dds());
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
+
+        dd::DDVector dv { cu.dds() };
 
         BOOST_CHECK(dv.size() == 1);
-        ADD dd
-            (dv.at(0));
+        ADD dd { dv.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -225,201 +218,185 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
 
     /* x EQ y */
     {
-      expr::Expr_ptr test_expr
-        (em.make_eq(x, y));
+        expr::Expr_ptr test_expr { em.make_eq(x, y) };
 
-      DDChecker checker {
-        {F, F}, {T, T}
-      };
+        DDChecker checker {
+            { F, F }, { T, T }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      // dd.PrintMinterm();
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        // dd.PrintMinterm();
+        BOOST_CHECK(checker.check());
     }
 
     /* (NOT x NE y) <-> x EQ y */
     {
-      expr::Expr_ptr test_expr
-        (em.make_eq(em.make_not(em.make_ne(x, y)),
-                    em.make_eq(x, y)));
+        expr::Expr_ptr test_expr(em.make_eq(em.make_not(em.make_ne(x, y)),
+                                            em.make_eq(x, y)));
 
-      DDChecker checker {
-        {X, X}
-      };
+        DDChecker checker {
+            { X, X }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      // dd.PrintMinterm();
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        // dd.PrintMinterm();
+        BOOST_CHECK(checker.check());
     }
 
     /* x AND y */
     {
-      expr::Expr_ptr test_expr
-        (em.make_and(x, y));
+        expr::Expr_ptr test_expr { em.make_and(x, y) };
 
-      DDChecker checker {
-        {T, T}
-      };
+        DDChecker checker {
+            { T, T }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* x OR y */
     {
-      expr::Expr_ptr test_expr
-        (em.make_or(x, y));
+        expr::Expr_ptr test_expr { em.make_or(x, y) };
 
-      DDChecker checker {
-        {F, T}, {T, X}
-      };
+        DDChecker checker {
+            { F, T }, { T, X }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* (NOT (X AND Y)) == (NOT X) OR (NOT Y) */
     {
-      expr::Expr_ptr test_expr
-        (em.make_eq(em.make_not(em.make_and(x, y)),
-                    em.make_or(em.make_not(x), em.make_not(y))));
+        expr::Expr_ptr test_expr {
+            em.make_eq(em.make_not(em.make_and(x, y)),
+                       em.make_or(em.make_not(x), em.make_not(y)))
+        };
 
-      DDChecker checker {
-        {X, X}
-      } ;
+        DDChecker checker {
+            { X, X }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
     {
-      expr::Expr_ptr test_expr
-        (em.make_eq(em.make_not(em.make_or(x, y)),
-                    em.make_and(em.make_not(x), em.make_not(y))));
+        expr::Expr_ptr test_expr {
+            em.make_eq(em.make_not(em.make_or(x, y)),
+                       em.make_and(em.make_not(x), em.make_not(y)))
+        };
 
-      DDChecker checker {
-        {X, X}
-      } ;
+        DDChecker checker {
+            { X, X }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* x IMPL y */
     {
-      expr::Expr_ptr test_expr
-        (em.make_implies(x, y));
+        expr::Expr_ptr test_expr {
+            em.make_implies(x, y)
+        };
 
-      DDChecker checker {
-        {F, X}, {T, T}
-      };
+        DDChecker checker {
+            { F, X }, { T, T }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 
     /* (x IMPL y) AND (y IMPL X) == (x == y) */
     {
-      expr::Expr_ptr test_expr
-        (em.make_eq(em.make_and(em.make_implies(x, y),
-                                em.make_implies(y, x)),
-                    em.make_eq(x, y)));
+        expr::Expr_ptr test_expr {
+            em.make_eq(em.make_and(em.make_implies(x, y),
+                                   em.make_implies(y, x)),
+                       em.make_eq(x, y))
+        };
 
-      DDChecker checker {
-        {X, X}
-      } ;
+        DDChecker checker {
+            { X, X }
+        };
 
-      compiler::Unit cu
-        (f_compiler.process(em.make_empty(),
-                            test_expr));
+        compiler::Unit cu {
+            f_compiler.process(em.make_empty(), test_expr)
+        };
 
-      dd::DDVector dv
-        (cu.dds());
+        dd::DDVector dv { cu.dds() };
 
-      BOOST_CHECK(dv.size() == 1);
-      ADD dd
-        (dv.at(0));
+        BOOST_CHECK(dv.size() == 1);
+        ADD dd { dv.at(0) };
 
-      dd.Callback(callback, &checker, 1);
-      BOOST_CHECK(checker.check());
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
     }
 }
 

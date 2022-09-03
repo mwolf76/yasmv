@@ -31,7 +31,7 @@
 
 namespace cmd {
 
-    class Diameter : public Command {
+    class Diameter: public Command {
     public:
         Diameter(Interpreter& owner);
         virtual ~Diameter();
@@ -48,7 +48,7 @@ namespace cmd {
 
     typedef Diameter* Diameter_ptr;
 
-    class DiameterTopic : public CommandTopic {
+    class DiameterTopic: public CommandTopic {
     public:
         DiameterTopic(Interpreter& owner);
         virtual ~DiameterTopic();
@@ -56,6 +56,6 @@ namespace cmd {
         void virtual usage();
     };
 
-};
+}; // namespace cmd
 
 #endif /* DIAMETER_CMD_H */

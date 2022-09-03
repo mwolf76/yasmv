@@ -35,37 +35,43 @@
 
 namespace reach {
 
-    Reachability::Reachability(cmd::Command &command, model::Model &model)
-        : Algorithm(command, model) {
-        const void *instance(this);
+    Reachability::Reachability(cmd::Command& command, model::Model& model)
+        : Algorithm(command, model)
+    {
+        const void* instance { this };
         TRACE
             << "Created Reachability @"
             << instance
             << std::endl;
     }
 
-    Reachability::~Reachability() {
-        const void *instance(this);
+    Reachability::~Reachability()
+    {
+        const void* instance { this };
         TRACE
             << "Destroyed Reachability @"
             << instance
             << std::endl;
     }
 
-    void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints) {
-        expr::time::Analyzer eta(em());
+    void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
+    {
+        expr::time::Analyzer eta { em() };
 
         /* the target formula */
         f_target = target;
         assert(f_target);
 
-        /* store and inspect constraints: currently mixed-time (i.e. backward + forward) constraints are *not* supported */
+        /* store and inspect constraints: currently mixed-time
+         * (i.e. backward + forward) constraints are *not*
+         * supported */
         f_constraints = constraints;
-        unsigned no_forward_constraints{0};
-        unsigned no_backward_constraints{0};
-        unsigned no_global_constraints{0};
+        unsigned no_forward_constraints { 0 };
+        unsigned no_backward_constraints { 0 };
+        unsigned no_global_constraints { 0 };
+
         for (auto i = f_constraints.begin(); i != f_constraints.end(); ++i) {
-            auto constraint{*i};
+            auto constraint { *i };
 
             eta.process(constraint);
             if (eta.has_forward_time() && eta.has_backward_time()) {
@@ -86,7 +92,11 @@ namespace reach {
             }
         }
 
-        unsigned no_constraints{no_forward_constraints + no_backward_constraints + no_global_constraints};
+        unsigned no_constraints {
+            no_forward_constraints +
+            no_backward_constraints +
+            no_global_constraints
+        };
         TRACE
             << no_constraints
             << " additional constraints were provided: "
@@ -98,20 +108,21 @@ namespace reach {
             << " global."
             << std::endl;
 
-        bool use_forward{!no_backward_constraints};
-        bool use_backward{!no_forward_constraints};
+        bool use_forward { !no_backward_constraints };
+        bool use_backward { !no_forward_constraints };
 
         /* TODO: consider introducing support for this: a bit trickier, but doable */
         if (!use_forward && !use_backward) {
             ERR
-                << "Mixing forward and backward guided reachability constraints currently not supported."
+                << "Mixing forward and backward guided reachability "
+                << "constraints currently not supported."
                 << std::endl;
 
             f_status = REACHABILITY_ERROR;
             return;
         }
 
-        expr::Expr_ptr ctx{em().make_empty()};
+        expr::Expr_ptr ctx { em().make_empty() };
 
         TRACE
             << "Compiling target `"
@@ -120,13 +131,11 @@ namespace reach {
             << std::endl;
 
         /* strategy threads will access this value in the main thread's stack */
-        compiler::Unit target_cu
-            {compiler().process(ctx, f_target)};
-
-        expr::time::Expander expander(em());
+        compiler::Unit target_cu { compiler().process(ctx, f_target) };
+        expr::time::Expander expander { em() };
 
         for (auto i = f_constraints.begin(); i != f_constraints.end(); ++i) {
-            auto constraint{*i};
+            auto constraint { *i };
 
             TRACE
                 << "Compiling constraint `"
@@ -134,10 +143,11 @@ namespace reach {
                 << "` ..."
                 << std::endl;
 
-            compiler::Unit cu
-                {compiler().process(ctx, expander.process(constraint))};
-
-            f_constraint_cus.insert(std::pair<expr::Expr_ptr, compiler::Unit>(constraint, cu));
+            compiler::Unit cu {
+                compiler().process(ctx, expander.process(constraint))
+            };
+            f_constraint_cus.insert(
+                std::pair<expr::Expr_ptr, compiler::Unit>(constraint, cu));
         }
 
         /* fire up strategies */
@@ -149,8 +159,10 @@ namespace reach {
                 << "Forward strategies enabled"
                 << std::endl;
 
-            tasks.push_back(new boost::thread(&Reachability::fast_forward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(&Reachability::forward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::fast_forward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::forward_strategy, this, target_cu));
         }
 
         if (use_backward) {
@@ -158,8 +170,10 @@ namespace reach {
                 << "Backward strategies enabled"
                 << std::endl;
 
-            tasks.push_back(new boost::thread(&Reachability::fast_backward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(&Reachability::backward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::fast_backward_strategy, this, target_cu));
+            tasks.push_back(new boost::thread(
+                &Reachability::backward_strategy, this, target_cu));
         }
 
         /* join and destroy all active threads */
@@ -173,24 +187,22 @@ namespace reach {
     }
 
     /* synchronized */
-    reachability_status_t Reachability::sync_status() {
-        boost::mutex::scoped_lock lock
-            (f_status_mutex);
-
+    reachability_status_t Reachability::sync_status()
+    {
+        boost::mutex::scoped_lock lock { f_status_mutex };
         return f_status;
     }
 
     /* synchronized */
-    bool Reachability::sync_set_status(reachability_status_t status) {
-        boost::mutex::scoped_lock lock
-            (f_status_mutex);
+    bool Reachability::sync_set_status(reachability_status_t status)
+    {
+        boost::mutex::scoped_lock lock { f_status_mutex };
 
         /* consistency check */
         assert(f_status == status ||
                (status != REACHABILITY_UNKNOWN && f_status == REACHABILITY_UNKNOWN));
 
-        bool res
-            (f_status != status);
+        bool res { f_status != status };
 
         /* set status, extract witness if reachable */
         f_status = status;

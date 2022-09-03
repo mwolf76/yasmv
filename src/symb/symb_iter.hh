@@ -37,24 +37,24 @@
 
 namespace symb {
 
-class SymbIter {
-public:
-    SymbIter(model::Model& model);
-    ~SymbIter();
+    class SymbIter {
+    public:
+        SymbIter(model::Model& model);
+        ~SymbIter();
 
-    /* true iff there are more symbols to be processed */
-    bool has_next() const;
+        /* true iff there are more symbols to be processed */
+        bool has_next() const;
 
-    /* yields next symbol, raises an exception if no such symbol exists. */
-    std::pair <expr::Expr_ptr, Symbol_ptr> next();
+        /* yields next symbol, raises an exception if no such symbol exists. */
+        std::pair<expr::Expr_ptr, Symbol_ptr> next();
 
-private:
-    model::Model&  f_model;
+    private:
+        model::Model& f_model;
 
-    SymbIterable f_symbols;
-    SymbIterable::const_iterator f_iter;
-};
+        SymbIterable f_symbols;
+        SymbIterable::const_iterator f_iter;
+    };
 
-};
+}; // namespace symb
 
 #endif /* SYMBOL_ITER_H */

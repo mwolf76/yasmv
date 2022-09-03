@@ -52,8 +52,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 
 /*---------------------------------------------------------------------------*/
@@ -116,20 +116,20 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAndAbs.c,v 1.20 2012/02/05 01:07:18 fa
   SeeAlso     [Cudd_addMatrixMultiply Cudd_addTriangle Cudd_bddAnd]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddAndAbstract(
-  DdManager * manager,
-  DdNode * f,
-  DdNode * g,
-  DdNode * cube)
+    DdManager* manager,
+    DdNode* f,
+    DdNode* g,
+    DdNode* cube)
 {
-    DdNode *res;
+    DdNode* res;
 
     do {
-	manager->reordered = 0;
-	res = cuddBddAndAbstractRecur(manager, f, g, cube);
+        manager->reordered = 0;
+        res = cuddBddAndAbstractRecur(manager, f, g, cube);
     } while (manager->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddAndAbstract */
 
@@ -150,25 +150,25 @@ Cudd_bddAndAbstract(
   SeeAlso     [Cudd_bddAndAbstract]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddAndAbstractLimit(
-  DdManager * manager,
-  DdNode * f,
-  DdNode * g,
-  DdNode * cube,
-  unsigned int limit)
+    DdManager* manager,
+    DdNode* f,
+    DdNode* g,
+    DdNode* cube,
+    unsigned int limit)
 {
-    DdNode *res;
+    DdNode* res;
     unsigned int saveLimit = manager->maxLive;
 
     manager->maxLive = (manager->keys - manager->dead) +
-      (manager->keysZ - manager->deadZ) + limit;
+                       (manager->keysZ - manager->deadZ) + limit;
     do {
-	manager->reordered = 0;
-	res = cuddBddAndAbstractRecur(manager, f, g, cube);
+        manager->reordered = 0;
+        res = cuddBddAndAbstractRecur(manager, f, g, cube);
     } while (manager->reordered == 1);
     manager->maxLive = saveLimit;
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddAndAbstractLimit */
 
@@ -192,12 +192,12 @@ Cudd_bddAndAbstractLimit(
   SeeAlso     [Cudd_bddAndAbstract]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddBddAndAbstractRecur(
-  DdManager * manager,
-  DdNode * f,
-  DdNode * g,
-  DdNode * cube)
+    DdManager* manager,
+    DdNode* f,
+    DdNode* g,
+    DdNode* cube)
 {
     DdNode *F, *ft, *fe, *G, *gt, *ge;
     DdNode *one, *zero, *r, *t, *e;
@@ -208,24 +208,24 @@ cuddBddAndAbstractRecur(
     zero = Cudd_Not(one);
 
     /* Terminal cases. */
-    if (f == zero || g == zero || f == Cudd_Not(g)) return(zero);
-    if (f == one && g == one)	return(one);
+    if (f == zero || g == zero || f == Cudd_Not(g)) return (zero);
+    if (f == one && g == one) return (one);
 
     if (cube == one) {
-	return(cuddBddAndRecur(manager, f, g));
+        return (cuddBddAndRecur(manager, f, g));
     }
     if (f == one || f == g) {
-	return(cuddBddExistAbstractRecur(manager, g, cube));
+        return (cuddBddExistAbstractRecur(manager, g, cube));
     }
     if (g == one) {
-	return(cuddBddExistAbstractRecur(manager, f, cube));
+        return (cuddBddExistAbstractRecur(manager, f, cube));
     }
     /* At this point f, g, and cube are not constant. */
 
     if (f > g) { /* Try to increase cache efficiency. */
-	DdNode *tmp = f;
-	f = g;
-	g = tmp;
+        DdNode* tmp = f;
+        f = g;
+        g = tmp;
     }
 
     /* Here we can skip the use of cuddI, because the operands are known
@@ -239,129 +239,129 @@ cuddBddAndAbstractRecur(
     topcube = manager->perm[cube->index];
 
     while (topcube < top) {
-	cube = cuddT(cube);
-	if (cube == one) {
-	    return(cuddBddAndRecur(manager, f, g));
-	}
-	topcube = manager->perm[cube->index];
+        cube = cuddT(cube);
+        if (cube == one) {
+            return (cuddBddAndRecur(manager, f, g));
+        }
+        topcube = manager->perm[cube->index];
     }
     /* Now, topcube >= top. */
 
     /* Check cache. */
     if (F->ref != 1 || G->ref != 1) {
-	r = cuddCacheLookup(manager, DD_BDD_AND_ABSTRACT_TAG, f, g, cube);
-	if (r != NULL) {
-	    return(r);
-	}
+        r = cuddCacheLookup(manager, DD_BDD_AND_ABSTRACT_TAG, f, g, cube);
+        if (r != NULL) {
+            return (r);
+        }
     }
 
     if (topf == top) {
-	index = F->index;
-	ft = cuddT(F);
-	fe = cuddE(F);
-	if (Cudd_IsComplement(f)) {
-	    ft = Cudd_Not(ft);
-	    fe = Cudd_Not(fe);
-	}
+        index = F->index;
+        ft = cuddT(F);
+        fe = cuddE(F);
+        if (Cudd_IsComplement(f)) {
+            ft = Cudd_Not(ft);
+            fe = Cudd_Not(fe);
+        }
     } else {
-	index = G->index;
-	ft = fe = f;
+        index = G->index;
+        ft = fe = f;
     }
 
     if (topg == top) {
-	gt = cuddT(G);
-	ge = cuddE(G);
-	if (Cudd_IsComplement(g)) {
-	    gt = Cudd_Not(gt);
-	    ge = Cudd_Not(ge);
-	}
+        gt = cuddT(G);
+        ge = cuddE(G);
+        if (Cudd_IsComplement(g)) {
+            gt = Cudd_Not(gt);
+            ge = Cudd_Not(ge);
+        }
     } else {
-	gt = ge = g;
+        gt = ge = g;
     }
 
-    if (topcube == top) {	/* quantify */
-	DdNode *Cube = cuddT(cube);
-	t = cuddBddAndAbstractRecur(manager, ft, gt, Cube);
-	if (t == NULL) return(NULL);
-	/* Special case: 1 OR anything = 1. Hence, no need to compute
+    if (topcube == top) { /* quantify */
+        DdNode* Cube = cuddT(cube);
+        t = cuddBddAndAbstractRecur(manager, ft, gt, Cube);
+        if (t == NULL) return (NULL);
+        /* Special case: 1 OR anything = 1. Hence, no need to compute
 	** the else branch if t is 1. Likewise t + t * anything == t.
 	** Notice that t == fe implies that fe does not depend on the
 	** variables in Cube. Likewise for t == ge.
 	*/
-	if (t == one || t == fe || t == ge) {
-	    if (F->ref != 1 || G->ref != 1)
-		cuddCacheInsert(manager, DD_BDD_AND_ABSTRACT_TAG,
-				f, g, cube, t);
-	    return(t);
-	}
-	cuddRef(t);
-	/* Special case: t + !t * anything == t + anything. */
-	if (t == Cudd_Not(fe)) {
-	    e = cuddBddExistAbstractRecur(manager, ge, Cube);
-	} else if (t == Cudd_Not(ge)) {
-	    e = cuddBddExistAbstractRecur(manager, fe, Cube);
-	} else {
-	    e = cuddBddAndAbstractRecur(manager, fe, ge, Cube);
-	}
-	if (e == NULL) {
-	    Cudd_IterDerefBdd(manager, t);
-	    return(NULL);
-	}
-	if (t == e) {
-	    r = t;
-	    cuddDeref(t);
-	} else {
-	    cuddRef(e);
-	    r = cuddBddAndRecur(manager, Cudd_Not(t), Cudd_Not(e));
-	    if (r == NULL) {
-		Cudd_IterDerefBdd(manager, t);
-		Cudd_IterDerefBdd(manager, e);
-		return(NULL);
-	    }
-	    r = Cudd_Not(r);
-	    cuddRef(r);
-	    Cudd_DelayedDerefBdd(manager, t);
-	    Cudd_DelayedDerefBdd(manager, e);
-	    cuddDeref(r);
-	}
+        if (t == one || t == fe || t == ge) {
+            if (F->ref != 1 || G->ref != 1)
+                cuddCacheInsert(manager, DD_BDD_AND_ABSTRACT_TAG,
+                                f, g, cube, t);
+            return (t);
+        }
+        cuddRef(t);
+        /* Special case: t + !t * anything == t + anything. */
+        if (t == Cudd_Not(fe)) {
+            e = cuddBddExistAbstractRecur(manager, ge, Cube);
+        } else if (t == Cudd_Not(ge)) {
+            e = cuddBddExistAbstractRecur(manager, fe, Cube);
+        } else {
+            e = cuddBddAndAbstractRecur(manager, fe, ge, Cube);
+        }
+        if (e == NULL) {
+            Cudd_IterDerefBdd(manager, t);
+            return (NULL);
+        }
+        if (t == e) {
+            r = t;
+            cuddDeref(t);
+        } else {
+            cuddRef(e);
+            r = cuddBddAndRecur(manager, Cudd_Not(t), Cudd_Not(e));
+            if (r == NULL) {
+                Cudd_IterDerefBdd(manager, t);
+                Cudd_IterDerefBdd(manager, e);
+                return (NULL);
+            }
+            r = Cudd_Not(r);
+            cuddRef(r);
+            Cudd_DelayedDerefBdd(manager, t);
+            Cudd_DelayedDerefBdd(manager, e);
+            cuddDeref(r);
+        }
     } else {
-	t = cuddBddAndAbstractRecur(manager, ft, gt, cube);
-	if (t == NULL) return(NULL);
-	cuddRef(t);
-	e = cuddBddAndAbstractRecur(manager, fe, ge, cube);
-	if (e == NULL) {
-	    Cudd_IterDerefBdd(manager, t);
-	    return(NULL);
-	}
-	if (t == e) {
-	    r = t;
-	    cuddDeref(t);
-	} else {
-	    cuddRef(e);
-	    if (Cudd_IsComplement(t)) {
-		r = cuddUniqueInter(manager, (int) index,
-				    Cudd_Not(t), Cudd_Not(e));
-		if (r == NULL) {
-		    Cudd_IterDerefBdd(manager, t);
-		    Cudd_IterDerefBdd(manager, e);
-		    return(NULL);
-		}
-		r = Cudd_Not(r);
-	    } else {
-		r = cuddUniqueInter(manager,(int)index,t,e);
-		if (r == NULL) {
-		    Cudd_IterDerefBdd(manager, t);
-		    Cudd_IterDerefBdd(manager, e);
-		    return(NULL);
-		}
-	    }
-	    cuddDeref(e);
-	    cuddDeref(t);
-	}
+        t = cuddBddAndAbstractRecur(manager, ft, gt, cube);
+        if (t == NULL) return (NULL);
+        cuddRef(t);
+        e = cuddBddAndAbstractRecur(manager, fe, ge, cube);
+        if (e == NULL) {
+            Cudd_IterDerefBdd(manager, t);
+            return (NULL);
+        }
+        if (t == e) {
+            r = t;
+            cuddDeref(t);
+        } else {
+            cuddRef(e);
+            if (Cudd_IsComplement(t)) {
+                r = cuddUniqueInter(manager, (int) index,
+                                    Cudd_Not(t), Cudd_Not(e));
+                if (r == NULL) {
+                    Cudd_IterDerefBdd(manager, t);
+                    Cudd_IterDerefBdd(manager, e);
+                    return (NULL);
+                }
+                r = Cudd_Not(r);
+            } else {
+                r = cuddUniqueInter(manager, (int) index, t, e);
+                if (r == NULL) {
+                    Cudd_IterDerefBdd(manager, t);
+                    Cudd_IterDerefBdd(manager, e);
+                    return (NULL);
+                }
+            }
+            cuddDeref(e);
+            cuddDeref(t);
+        }
     }
 
     if (F->ref != 1 || G->ref != 1)
-	cuddCacheInsert(manager, DD_BDD_AND_ABSTRACT_TAG, f, g, cube, r);
+        cuddCacheInsert(manager, DD_BDD_AND_ABSTRACT_TAG, f, g, cube, r);
     return (r);
 
 } /* end of cuddBddAndAbstractRecur */

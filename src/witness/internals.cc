@@ -23,259 +23,240 @@
 
 #include <env/environment.hh>
 #include <symb/proxy.hh>
+#include <witness/evaluator.hh>
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
-#include <witness/evaluator.hh>
 
+#include <utils/ctx.hh>
 #include <utils/time.hh>
 #include <utils/values.hh>
 
 namespace witness {
 
-void Evaluator::push_value(const expr::Expr_ptr expr)
-{
-    symb::ResolverProxy resolver;
+    void Evaluator::push_value(const expr::Expr_ptr expr)
+    {
+        symb::ResolverProxy resolver;
 
-    expr::ExprMgr& em
-        (expr::ExprMgr::INSTANCE());
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
-    if (em.is_identifier(expr)) {
-        expr::Expr_ptr full_lit
-            (em.make_dot(em.make_empty(), expr));
+        if (em.is_identifier(expr)) {
+            expr::Expr_ptr full_lit {
+                em.make_dot(em.make_empty(), expr)
+            };
 
-        symb::Symbol_ptr symb_lit
-            (resolver.symbol(full_lit));
+            symb::Symbol_ptr symb_lit {
+                resolver.symbol(full_lit)
+            };
 
-        assert(symb_lit->is_literal());
+            assert(symb_lit->is_literal());
 
-        symb::Literal& lit
-            (symb_lit->as_literal());
+            symb::Literal& lit {
+                symb_lit->as_literal()
+            };
 
-        value_t value
-            (lit.value());
+            value_t value {
+                lit.value()
+            };
 
-        PUSH_VALUE(value);
-        return;
-    }
-
-    if (em.is_constant(expr)) {
-        /* scalar value, easy case */
-        PUSH_VALUE(expr->value());
-        return;
-    }
-
-    if (em.is_neg(expr) &&
-        em.is_constant(expr->lhs())) {
-
-        /* negative scalar value, easy case */
-        PUSH_VALUE(- expr->lhs()->value());
-        return;
-    }
-
-    if (em.is_array(expr)) {
-        /* array value, push each element */
-        expr::Expr_ptr eye
-            (expr->lhs());
-
-        while (em.is_array_comma(eye)) {
-            PUSH_VALUE(eye->lhs()->value());
-            eye = eye->rhs();
-        }
-
-        PUSH_VALUE(eye->value()); /* last */
-        return;
-    }
-
-    ERR
-        << "Cannot evaluate `"
-        << expr
-        << "`"
-        << std::endl;
-
-    assert(false);
-}
-
-
-/* the evaluator treats time relatively */
-void Evaluator::walk_instant(const expr::Expr_ptr expr)
-{
-    step_t curr_time
-        (f_time_stack.back());
-
-    f_time_stack.push_back(curr_time + expr->value());
-}
-
-void Evaluator::walk_leaf(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (f_owner.em());
-
-    type::TypeMgr& tm
-        (f_owner.tm());
-
-    /* cached? */
-    if (! cache_miss(expr))
-        return;
-
-    TOP_CTX(ctx);
-    TOP_TIME(time);
-
-    // explicit boolean consts
-    if (em.is_bool_const(expr)) {
-
-        PUSH_TYPE(tm.find_boolean());
-
-        if (em.is_false(expr))
-            PUSH_VALUE(0);
-
-        else if (em.is_true(expr))
-            PUSH_VALUE(1);
-
-        else assert(false);
-
-        return;
-    }
-
-    // explicit int consts (e.g. 42) ...
-    if (em.is_int_const(expr)) {
-        unsigned ww
-            (opts::OptsMgr::INSTANCE().word_width());
-
-        PUSH_TYPE (tm.find_unsigned(ww));
-        PUSH_VALUE(expr->value());
-        return;
-    }
-
-    // explicit string consts (e.g. "hello") ...
-    if (em.is_qstring(expr)) {
-        PUSH_TYPE (tm.find_string());
-        PUSH_VALUE((value_t) expr->atom().c_str());
-        return;
-    }
-
-    symb::ResolverProxy resolver;
-
-    expr::Expr_ptr full
-        (em.make_dot( ctx, expr));
-
-    symb::Symbol_ptr symb
-        (resolver.symbol(full));
-
-    // 2. enum literals
-    if (symb->is_literal()) {
-        symb::Literal& lit
-            (symb->as_literal());
-
-        type::Type_ptr type
-            (lit.type());
-        PUSH_TYPE(type);
-
-        value_t value
-            (lit.value());
-        PUSH_VALUE(value);
-        return;
-    }
-
-    if (symb->is_variable()) {
-        symb::Variable& var
-            (symb->as_variable());
-
-        // push into type stack
-        type::Type_ptr type
-            (var.type());
-
-        PUSH_TYPE(type);
-        if (type->is_instance())
+            PUSH_VALUE(value);
             return;
-
-        else if (var.is_input()) {
-            push_value(env::Environment::INSTANCE().get(expr));
         }
 
-        else if (f_witness->has_value( full, time)) {
-            push_value(f_witness->value( full, time));
+        if (em.is_constant(expr)) {
+            /* scalar value, easy case */
+            PUSH_VALUE(expr->value());
+            return;
         }
 
-        else throw NoValue(full);
+        if (em.is_neg(expr) &&
+            em.is_constant(expr->lhs())) {
+            /* negative scalar value, easy case */
+            PUSH_VALUE(-expr->lhs()->value());
+            return;
+        }
 
-        return;
-    } /* is_variable() */
+        if (em.is_array(expr)) {
+            /* array value, push each element */
+            expr::Expr_ptr eye { expr->lhs() };
 
-    if (symb->is_parameter()) {
-        model::ModelMgr& mm
-            (model::ModelMgr::INSTANCE());
+            while (em.is_array_comma(eye)) {
+                PUSH_VALUE(eye->lhs()->value());
+                eye = eye->rhs();
+            }
 
-        /* parameters must be resolved against the Param map
-           maintained by the ModelMgr */
-        expr::Expr_ptr rewrite
-            (mm.rewrite_parameter(full));
+            PUSH_VALUE(eye->value()); /* last */
+            return;
+        }
+
+        ERR
+            << "Cannot evaluate `"
+            << expr
+            << "`"
+            << std::endl;
+
+        assert(false);
+    }
+
+
+    /* the evaluator treats time relatively */
+    void Evaluator::walk_instant(const expr::Expr_ptr expr)
+    {
+        step_t curr_time { f_time_stack.back() };
+        f_time_stack.push_back(curr_time + expr->value());
+    }
+
+    void Evaluator::walk_leaf(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { f_owner.em() };
+        model::ModelMgr& mm(model::ModelMgr::INSTANCE());
+        type::TypeMgr& tm { f_owner.tm() };
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+
+        /* cached? */
+        if (!cache_miss(expr)) {
+            return;
+        }
+
+        TOP_CTX(ctx);
+        TOP_TIME(time);
+
+        // explicit boolean consts
+        if (em.is_bool_const(expr)) {
+            PUSH_TYPE(tm.find_boolean());
+
+            if (em.is_false(expr)) {
+                PUSH_VALUE(0);
+            }
+
+            else if (em.is_true(expr)) {
+                PUSH_VALUE(1);
+            }
+
+            else {
+                assert(false);
+            }
+
+            return;
+        }
+
+        // explicit int consts (e.g. 42) ...
+        if (em.is_int_const(expr)) {
+            unsigned ww { om.word_width() };
+            PUSH_TYPE(tm.find_unsigned(ww));
+            PUSH_VALUE(expr->value());
+            return;
+        }
+
+        // explicit string consts (e.g. "hello") ...
+        if (em.is_qstring(expr)) {
+            PUSH_TYPE(tm.find_string());
+            PUSH_VALUE((value_t) expr->atom().c_str());
+            return;
+        }
+
+        symb::ResolverProxy resolver;
+
+        expr::Expr_ptr full { em.make_dot(ctx, expr) };
+        symb::Symbol_ptr symb { resolver.symbol(full) };
+
+        // 2. enum literals
+        if (symb->is_literal()) {
+            symb::Literal& lit { symb->as_literal() };
+            type::Type_ptr type { lit.type() };
+            PUSH_TYPE(type);
+
+            value_t value { lit.value() };
+            PUSH_VALUE(value);
+            return;
+        }
+
+        if (symb->is_variable()) {
+            symb::Variable& var { symb->as_variable() };
+
+            // push into type stack
+            type::Type_ptr type { var.type() };
+
+            PUSH_TYPE(type);
+            if (type->is_instance()) {
+                return;
+            }
+
+            else if (var.is_input()) {
+                push_value(env::Environment::INSTANCE().get(expr));
+            }
+
+            else if (f_witness->has_value(full, time)) {
+                push_value(f_witness->value(full, time));
+            }
+
+            else {
+                throw NoValue(full);
+            }
+
+            return;
+        } /* is_variable() */
+
+        if (symb->is_parameter()) {
+            /* parameters must be resolved against the Param map
+               maintained by the ModelMgr */
+            expr::Expr_ptr rewrite { mm.rewrite_parameter(full) };
 
 #if 0
-        DRIVEL
-            << "Rewritten `"
-            << full << "` to "
-            << rewrite
-            << std::endl;
+            DRIVEL
+                << "Rewritten `"
+                << full << "` to "
+                << rewrite
+                << std::endl;
 #endif
 
-        expr::Expr_ptr rewritten_ctx
-            (rewrite->lhs());
-        PUSH_CTX(rewritten_ctx);
+            expr::Expr_ptr rewritten_ctx { rewrite->lhs() };
+            PUSH_CTX(rewritten_ctx);
 
-        expr::Expr_ptr rewritten_expr
-            (rewrite->rhs());
-        (*this) (rewritten_expr);
+            expr::Expr_ptr rewritten_expr { rewrite->rhs() };
+            (*this)(rewritten_expr);
 
-        DROP_CTX();
-        return;
+            DROP_CTX();
+            return;
+        }
+
+        if (symb->is_define()) {
+            expr::Expr_ptr body { symb->as_define().body() };
+
+            DEBUG
+                << "Inlining `"
+                << expr
+                << "` := "
+                << body
+                << std::endl;
+
+            (*this)(body);
+            return;
+        }
+
+        assert(false); /* unexpected */
     }
 
-    if (symb->is_define()) {
-        expr::Expr_ptr body
-            (symb->as_define().body());
+    bool Evaluator::cache_miss(const expr::Expr_ptr expr)
+    {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
-        DEBUG
-            << "Inlining `"
-            << expr
-            << "` := "
-            << body
-            << std::endl;
+        assert(0 < f_ctx_stack.size());
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        (*this) (body);
-        return;
+        assert(0 < f_time_stack.size());
+        step_t step { f_time_stack.back() };
+
+        expr::TimedExpr key { em.make_dot(ctx, expr), step };
+        TimedExprValueMap::iterator eye { f_te2v_map.find(key) };
+
+        if (eye != f_te2v_map.end()) {
+            value_t res { (*eye).second };
+
+            PUSH_VALUE(res);
+            return false;
+        }
+
+        return true;
     }
 
-    assert( false ); /* unexpected */
-}
-
-bool Evaluator::cache_miss(const expr::Expr_ptr expr)
-{
-    expr::ExprMgr& em
-        (expr::ExprMgr::INSTANCE());
-
-    assert(0 < f_ctx_stack.size());
-    expr::Expr_ptr ctx
-        (f_ctx_stack.back());
-
-    assert(0 < f_time_stack.size());
-    step_t step
-        (f_time_stack.back());
-
-    expr::TimedExpr key
-        ( em.make_dot( ctx , expr), step);
-
-    TimedExprValueMap::iterator eye
-        (f_te2v_map.find(key));
-
-    if (eye != f_te2v_map.end()) {
-        value_t res
-            ((*eye).second);
-
-        PUSH_VALUE(res);
-        return false;
-    }
-
-    return true;
-}
-
-};
+}; // namespace witness

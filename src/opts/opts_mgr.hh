@@ -27,82 +27,83 @@
 #ifndef OPTS_H
 #define OPTS_H
 
-#include <common/common.hh>
 #include <boost/program_options.hpp>
+#include <common/common.hh>
 
 namespace opts {
 
-class OptsMgr;
-typedef OptsMgr* OptsMgr_ptr;
+    class OptsMgr;
+    typedef OptsMgr* OptsMgr_ptr;
 
-// -- system defaults
-const unsigned DEFAULT_WORD_WIDTH     = 16;
-const unsigned DEFAULT_PRECISION      = 0;
-const unsigned DEFAULT_VERBOSITY      = 0;
+    // -- system defaults
+    const unsigned DEFAULT_WORD_WIDTH = 16;
+    const unsigned DEFAULT_PRECISION = 0;
+    const unsigned DEFAULT_VERBOSITY = 0;
 
-class OptsMgr {
+    class OptsMgr {
 
-public:
-    static OptsMgr& INSTANCE() {
-        if (! f_instance)
-            f_instance = new OptsMgr();
+    public:
+        static OptsMgr& INSTANCE()
+        {
+            if (!f_instance)
+                f_instance = new OptsMgr();
 
-        return (*f_instance);
-    }
+            return (*f_instance);
+        }
 
-    // the usage message
-    std::string usage() const;
+        // the usage message
+        std::string usage() const;
 
-    // true iff help has been required
-    bool help() const;
+        // true iff help has been required
+        bool help() const;
 
-    // level of verbosity
-    unsigned verbosity() const;
+        // level of verbosity
+        unsigned verbosity() const;
 
-    // quiet
-    bool quiet() const;
+        // quiet
+        bool quiet() const;
 
-    // colorized
-    bool color() const;
+        // colorized
+        bool color() const;
 
-    // native word size in bits, used for algebrization of constant ITEs and arrays
-    unsigned word_width() const;
-    void set_word_width(unsigned);
+        // native word size in bits, used for algebrization of constant ITEs and arrays
+        unsigned word_width() const;
+        void set_word_width(unsigned);
 
-    // precision in bits, used for algebrization of constant ITEs and arrays
-    unsigned precision() const;
-    void set_precision(unsigned);
+        // precision in bits, used for algebrization of constant ITEs and arrays
+        unsigned precision() const;
+        void set_precision(unsigned);
 
-    // model filename
-    std::string model() const;
+        // model filename
+        std::string model() const;
 
-    // to be invoked by main
-    void parse_command_line(int argc, const char **argv);
+        // to be invoked by main
+        void parse_command_line(int argc, const char** argv);
 
-    // delegate
-    axter::verbosity get_verbosity_level_tolerance();
+        // delegate
+        axter::verbosity get_verbosity_level_tolerance();
 
-protected:
-    OptsMgr();
+    protected:
+        OptsMgr();
 
-private:
-    static OptsMgr_ptr f_instance;
+    private:
+        static OptsMgr_ptr f_instance;
 
-    /* local data */
-    boost::program_options::options_description f_desc;
-    boost::program_options::positional_options_description f_pos;
-    boost::program_options::variables_map f_vm;
+        /* local data */
+        boost::program_options::options_description f_desc;
+        boost::program_options::positional_options_description f_pos;
+        boost::program_options::variables_map f_vm;
 
-    bool f_help;
-    bool f_quiet;
-    bool f_color;
-    bool f_started;
-    bool f_version;
+        bool f_help;
+        bool f_quiet;
+        bool f_color;
+        bool f_started;
+        bool f_version;
 
-    unsigned f_word_width;
-    unsigned f_precision;
-};
+        unsigned f_word_width;
+        unsigned f_precision;
+    };
 
-};
+}; // namespace opts
 
 #endif

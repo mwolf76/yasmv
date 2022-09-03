@@ -1,9 +1,9 @@
 /**
- * @file default.hh
- * @brief Witness printer (default implementation)
+ * @file utils/ctx.hh
+ * @brief System-wide definitions.
  *
- * This header file contains the declarations required by the default
- * witness printer class.
+ * This header file contains common definitions used throughout the
+ * whole program.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -24,19 +24,31 @@
  *
  **/
 
-#ifndef DEFAULT_WITNESS_OUT_H
-#define DEFAULT_WITNESS_OUT_H
+#ifndef UTILS_CTX_H
+#define UTILS_CTX_H
 
-#include <witness.hh>
-#include <witness_mgr.hh>
+#include <vector>
 
-namespace witness {
+/* -- shortcurts to simplify the manipulation of the internal ctx stack -- */
+#define TOP_CTX(ctx)                \
+    assert(0 < f_ctx_stack.size()); \
+    const expr::Expr_ptr ctx        \
+    {                               \
+        f_ctx_stack.back()          \
+    }
 
-    class DefaultWitnessPrinter: public WitnessPrinter {
-    public:
-        void operator()(const Witness& w, step_t j = 0, step_t k = -1);
-    };
+#define DROP_CTX() \
+    f_ctx_stack.pop_back()
 
-}; // namespace witness
+#define POP_CTX(ctx) \
+    TOP_CTX(ctx);    \
+    DROP_CTX()
 
-#endif /* DEFAULT_WITNESS_OUT_H */
+#define PUSH_CTX(ctx) \
+    f_ctx_stack.push_back(ctx)
+
+namespace utils {
+
+};
+
+#endif /* UTILS_CTX_H */

@@ -31,34 +31,34 @@
 
 namespace cmd {
 
-class Get : public Command {
+    class Get: public Command {
 
-    expr::Expr_ptr f_identifier;
+        expr::Expr_ptr f_identifier;
 
-public:
-    Get(Interpreter& owner);
-    virtual ~Get();
+    public:
+        Get(Interpreter& owner);
+        virtual ~Get();
 
-    void set_identifier(expr::Expr_ptr id);
-    utils::Variant virtual operator()();
+        void set_identifier(expr::Expr_ptr id);
+        utils::Variant virtual operator()();
 
-private:
-    void print_all_assignments(std::ostream& os);
-    utils::Variant print_one_assignment(std::ostream& os, expr::Expr_ptr id);
+    private:
+        void print_all_assignments(std::ostream& os);
+        utils::Variant print_one_assignment(std::ostream& os, expr::Expr_ptr id);
 
-    void print_assignment(std::ostream& os, expr::Expr_ptr id);
-};
+        void print_assignment(std::ostream& os, expr::Expr_ptr id);
+    };
 
-typedef Get* Get_ptr;
+    typedef Get* Get_ptr;
 
-class GetTopic : public CommandTopic {
-public:
-    GetTopic(Interpreter& owner);
-    virtual ~GetTopic();
+    class GetTopic: public CommandTopic {
+    public:
+        GetTopic(Interpreter& owner);
+        virtual ~GetTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif // GET_CMD_H

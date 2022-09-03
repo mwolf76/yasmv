@@ -27,43 +27,43 @@
 #ifndef CHECK_TRANS_CMD_H
 #define CHECK_TRANS_CMD_H
 
-#include <cmd/command.hh>
 #include <algorithms/fsm/fsm.hh>
+#include <cmd/command.hh>
 
 namespace cmd {
 
-class CheckTrans : public Command {
+    class CheckTrans: public Command {
 
-public:
-    CheckTrans(Interpreter& owner);
-    virtual ~CheckTrans();
+    public:
+        CheckTrans(Interpreter& owner);
+        virtual ~CheckTrans();
 
-    /** cmd params */
-    void add_constraint(expr::Expr_ptr constraint);
+        /** cmd params */
+        void add_constraint(expr::Expr_ptr constraint);
 
-    /* run() */
-    utils::Variant virtual operator()();
+        /* run() */
+        utils::Variant virtual operator()();
 
-private:
-    std::ostream& f_out;
+    private:
+        std::ostream& f_out;
 
-    /* (optional) additional constraints */
-    expr::ExprVector f_constraints;
+        /* (optional) additional constraints */
+        expr::ExprVector f_constraints;
 
-    // -- helpers -------------------------------------------------------------
-    bool check_requirements();
-};
+        // -- helpers -------------------------------------------------------------
+        bool check_requirements();
+    };
 
-typedef CheckTrans* CheckTrans_ptr;
+    typedef CheckTrans* CheckTrans_ptr;
 
-class CheckTransTopic : public CommandTopic {
-public:
-    CheckTransTopic(Interpreter& owner);
-    virtual ~CheckTransTopic();
+    class CheckTransTopic: public CommandTopic {
+    public:
+        CheckTransTopic(Interpreter& owner);
+        virtual ~CheckTransTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif /* CHECK_TRANS_CMD_H */

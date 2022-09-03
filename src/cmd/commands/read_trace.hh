@@ -57,7 +57,6 @@ namespace cmd {
         bool parseJsonTrace(boost::filesystem::path& tracepath);
         bool parseYamlTrace(boost::filesystem::path& tracepath);
         bool parsePlainTrace(boost::filesystem::path& tracepath);
-
     };
     typedef ReadTrace* ReadTrace_ptr;
 

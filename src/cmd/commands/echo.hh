@@ -31,27 +31,27 @@
 
 namespace cmd {
 
-class Echo : public Command {
-    using expressions = std::vector<expr::Expr_ptr>;
-    expressions f_expressions;
+    class Echo: public Command {
+        using expressions = std::vector<expr::Expr_ptr>;
+        expressions f_expressions;
 
-public:
-    Echo(Interpreter& owner);
-    virtual ~Echo();
+    public:
+        Echo(Interpreter& owner);
+        virtual ~Echo();
 
-    void append_expression(expr::Expr_ptr expression);
+        void append_expression(expr::Expr_ptr expression);
 
-    utils::Variant virtual operator()();
-};
-typedef Echo* Echo_ptr;
+        utils::Variant virtual operator()();
+    };
+    typedef Echo* Echo_ptr;
 
-class EchoTopic : public CommandTopic {
-public:
-    EchoTopic(Interpreter& owner);
-    virtual ~EchoTopic();
+    class EchoTopic: public CommandTopic {
+    public:
+        EchoTopic(Interpreter& owner);
+        virtual ~EchoTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* ECHO_H */

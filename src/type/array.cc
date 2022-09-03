@@ -28,28 +28,28 @@
 
 namespace type {
 
-ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
-    : Type(owner)
-    , f_of(of)
-    , f_nelems(nelems)
-{
-    // 0 is reserved for abstract arrays
-    assert (0 < nelems);
+    ArrayType::ArrayType(TypeMgr& owner, ScalarType_ptr of, unsigned nelems)
+        : Type(owner)
+        , f_of(of)
+        , f_nelems(nelems)
+    {
+        // 0 is reserved for abstract arrays
+        assert(0 < nelems);
 
-    // valid type
-    assert( NULL != of);
+        // valid type
+        assert(NULL != of);
 
-    // scalar types only allowed here. Make sure we know how to calculate size()
-    assert (f_of -> is_scalar());
+        // scalar types only allowed here. Make sure we know how to calculate size()
+        assert(f_of->is_scalar());
 
-    f_repr = f_owner.em().make_subscript( of->repr(),
-                                          f_owner.em().make_const(nelems));
-}
+        f_repr = f_owner.em().make_subscript(of->repr(),
+                                             f_owner.em().make_const(nelems));
+    }
 
-unsigned ArrayType::width() const
-{
-    assert( 0 != f_nelems );
-    return f_nelems * f_of -> width();
-}
+    unsigned ArrayType::width() const
+    {
+        assert(0 != f_nelems);
+        return f_nelems * f_of->width();
+    }
 
-}
+} // namespace type

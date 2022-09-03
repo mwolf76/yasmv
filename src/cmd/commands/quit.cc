@@ -26,39 +26,41 @@
 
 namespace cmd {
 
-Quit::Quit(Interpreter& owner)
-    : Command(owner)
-    , f_retcode(0)
-{}
+    Quit::Quit(Interpreter& owner)
+        : Command(owner)
+        , f_retcode(0)
+    {}
 
-Quit::~Quit()
-{}
+    Quit::~Quit()
+    {}
 
-void Quit::set_retcode(int retcode)
-{
-    f_retcode = retcode;
-}
+    void Quit::set_retcode(int retcode)
+    {
+        f_retcode = retcode;
+    }
 
-// sends a signal to the owner
-utils::Variant Quit::operator()()
-{
-    f_owner.quit(f_retcode);
-    return utils::Variant(byeMessage);
-}
+    // sends a signal to the owner
+    utils::Variant Quit::operator()()
+    {
+        f_owner.quit(f_retcode);
+        return utils::Variant(byeMessage);
+    }
 
 
-QuitTopic::QuitTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    QuitTopic::QuitTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-QuitTopic::~QuitTopic()
-{
-    TRACE
-        << "Destroyed quit topic"
-        << std::endl;
-}
+    QuitTopic::~QuitTopic()
+    {
+        TRACE
+            << "Destroyed quit topic"
+            << std::endl;
+    }
 
-void QuitTopic::usage()
-{ display_manpage("quit"); }
+    void QuitTopic::usage()
+    {
+        display_manpage("quit");
+    }
 
-};
+}; // namespace cmd

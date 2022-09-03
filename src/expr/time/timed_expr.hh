@@ -31,37 +31,43 @@
 
 namespace expr {
 
-class TimedExpr {
-public:
-    TimedExpr(Expr_ptr expr, step_t time);
+    class TimedExpr {
+    public:
+        TimedExpr(Expr_ptr expr, step_t time);
 
-    inline Expr_ptr expr() const
-    { return f_expr; }
+        inline Expr_ptr expr() const
+        {
+            return f_expr;
+        }
 
-    inline step_t time() const
-    { return f_time; }
+        inline step_t time() const
+        {
+            return f_time;
+        }
 
-    inline bool operator==(const TimedExpr& other)
-    { return f_expr == other.f_expr && f_time == other.f_time; }
+        inline bool operator==(const TimedExpr& other)
+        {
+            return f_expr == other.f_expr && f_time == other.f_time;
+        }
 
-private:
-    Expr_ptr f_expr;
-    step_t f_time;
-};
+    private:
+        Expr_ptr f_expr;
+        step_t f_time;
+    };
 
-std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
+    std::ostream& operator<<(std::ostream& os, const TimedExpr& expr);
 
-struct TimedExprHash {
-    long operator() (const TimedExpr& k) const;
-};
+    struct TimedExprHash {
+        long operator()(const TimedExpr& k) const;
+    };
 
-struct TimedExprEq {
-    bool operator() (const TimedExpr& x, const TimedExpr& y) const;
-};
+    struct TimedExprEq {
+        bool operator()(const TimedExpr& x, const TimedExpr& y) const;
+    };
 
-typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
-typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
+    typedef boost::unordered_set<Expr, ExprHash, ExprEq> ExprPool;
+    typedef std::pair<ExprPool::iterator, bool> ExprPoolHit;
 
-};
+}; // namespace expr
 
 #endif /* TIMED_EXPR_H */

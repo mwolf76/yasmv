@@ -21,8 +21,8 @@
  *
  **/
 
-#include <compiler/typedefs.hh>
 #include <compiler/streamers.hh>
+#include <compiler/typedefs.hh>
 
 #include <sat/exceptions.hh>
 #include <sat/inlining.hh>
@@ -32,21 +32,21 @@
 
 namespace sat {
 
-std::string format_loader_exception(const compiler::InlinedOperatorSignature& ios)
-{
-    std::ostringstream oss;
+    std::string format_loader_exception(const compiler::InlinedOperatorSignature& ios)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "can not instantiate loader for operator `"
-        << const_cast<compiler::InlinedOperatorSignature&>(ios)
-        << "`" ;
+        oss
+            << "can not instantiate loader for operator `"
+            << const_cast<compiler::InlinedOperatorSignature&>(ios)
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-InlinedOperatorLoaderException::InlinedOperatorLoaderException(const compiler::InlinedOperatorSignature& ios)
-    : EngineException("InlinedOperatorLoaderException",
-                      format_loader_exception(ios))
-{}
+    InlinedOperatorLoaderException::InlinedOperatorLoaderException(const compiler::InlinedOperatorSignature& ios)
+        : EngineException("InlinedOperatorLoaderException",
+                          format_loader_exception(ios))
+    {}
 
-};
+}; // namespace sat

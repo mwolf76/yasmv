@@ -68,7 +68,7 @@ namespace witness {
         NoValue(expr::Expr_ptr id);
     };
 
-    class UnknownIdentifier : public WitnessException {
+    class UnknownIdentifier: public WitnessException {
     public:
         UnknownIdentifier(expr::Expr_ptr id);
     };

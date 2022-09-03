@@ -21,14 +21,14 @@
  *
  **/
 
-#include <string>
 #include <model/module.hh>
+#include <string>
 
 namespace model {
 
-std::ostream& operator<<(std::ostream& os, Module& module)
-{
-    return os << module.name();
-}
+    std::ostream& operator<<(std::ostream& os, Module& module)
+    {
+        return os << module.name();
+    }
 
 } // namespace model

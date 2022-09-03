@@ -26,8 +26,8 @@
 #ifndef SAT_HELPERS
 #define SAT_HELPERS
 
-#include <sat/typedefs.hh>
 #include <dd/dd_walker.hh>
+#include <sat/typedefs.hh>
 
 #include <compiler/typedefs.hh>
 
@@ -36,138 +36,145 @@
 
 namespace sat {
 
-class Engine;
+    class Engine;
 
-typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
-typedef boost::unordered_map<compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr,
-                             compiler::InlinedOperatorSignatureHash,
-                             compiler::InlinedOperatorSignatureEq> InlinedOperatorLoaderMap;
-
-
-class InlinedOperatorLoader {
-public:
-    InlinedOperatorLoader(const boost::filesystem::path& filepath);
-    ~InlinedOperatorLoader();
-
-    inline const compiler::InlinedOperatorSignature& ios() const
-    { return f_ios; }
-
-    // synchronized
-    const LitsVector& clauses();
-
-private:
-    boost::mutex f_loading_mutex;
-    LitsVector f_clauses;
-
-    boost::filesystem::path f_fullpath;
-    compiler::InlinedOperatorSignature f_ios;
-};
-
-typedef class InlinedOperatorMgr *InlinedOperatorMgr_ptr;
-class InlinedOperatorMgr  {
-
-public:
-    static InlinedOperatorMgr& INSTANCE() {
-        if (! f_instance)
-            f_instance = new InlinedOperatorMgr();
-
-        return (*f_instance);
-    }
-
-    InlinedOperatorLoader& require(const compiler::InlinedOperatorSignature& ios);
-
-    inline const InlinedOperatorLoaderMap& loaders() const
-    { return f_loaders; }
-
-protected:
-    InlinedOperatorMgr();
-    ~InlinedOperatorMgr();
-
-private:
-    static InlinedOperatorMgr_ptr f_instance;
-    std::string f_builtin_microcode_path;
-
-    InlinedOperatorLoaderMap f_loaders;
-};
+    typedef class InlinedOperatorLoader* InlinedOperatorLoader_ptr;
+    typedef boost::unordered_map<compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr,
+                                 compiler::InlinedOperatorSignatureHash,
+                                 compiler::InlinedOperatorSignatureEq>
+        InlinedOperatorLoaderMap;
 
 
-class CNFOperatorInliner {
-public:
-    CNFOperatorInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
+    class InlinedOperatorLoader {
+    public:
+        InlinedOperatorLoader(const boost::filesystem::path& filepath);
+        ~InlinedOperatorLoader();
 
-    ~CNFOperatorInliner()
-    {}
+        inline const compiler::InlinedOperatorSignature& ios() const
+        {
+            return f_ios;
+        }
 
-    inline void operator() (const compiler::InlinedOperatorDescriptor& md)
-    {
-        InlinedOperatorMgr& mm
-            (InlinedOperatorMgr::INSTANCE());
+        // synchronized
+        const LitsVector& clauses();
 
-        compiler::InlinedOperatorSignature ios
-            (md.ios());
-        InlinedOperatorLoader& loader
-            (mm.require(ios));
+    private:
+        boost::mutex f_loading_mutex;
+        LitsVector f_clauses;
 
-        inject(md, loader.clauses());
-    }
+        boost::filesystem::path f_fullpath;
+        compiler::InlinedOperatorSignature f_ios;
+    };
 
-private:
-    void inject(const compiler::InlinedOperatorDescriptor& md,
-                const LitsVector& clauses);
+    typedef class InlinedOperatorMgr* InlinedOperatorMgr_ptr;
+    class InlinedOperatorMgr {
 
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
+    public:
+        static InlinedOperatorMgr& INSTANCE()
+        {
+            if (!f_instance)
+                f_instance = new InlinedOperatorMgr();
 
-class CNFBinarySelectionInliner {
-public:
-    CNFBinarySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
+            return (*f_instance);
+        }
 
-    ~CNFBinarySelectionInliner()
-    {}
+        InlinedOperatorLoader& require(const compiler::InlinedOperatorSignature& ios);
 
-    inline void operator() (const compiler::BinarySelectionDescriptor& md)
-    { inject(md); }
+        inline const InlinedOperatorLoaderMap& loaders() const
+        {
+            return f_loaders;
+        }
 
-private:
-    void inject(const compiler::BinarySelectionDescriptor& md);
+    protected:
+        InlinedOperatorMgr();
+        ~InlinedOperatorMgr();
 
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
+    private:
+        static InlinedOperatorMgr_ptr f_instance;
+        std::string f_builtin_microcode_path;
 
-class CNFMultiwaySelectionInliner {
-public:
-    CNFMultiwaySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
-        : f_sat(sat)
-        , f_time(time)
-        , f_group(group)
-    {}
+        InlinedOperatorLoaderMap f_loaders;
+    };
 
-    ~CNFMultiwaySelectionInliner()
-    {}
 
-    inline void operator() (const compiler::MultiwaySelectionDescriptor& md)
-    { inject(md); }
+    class CNFOperatorInliner {
+    public:
+        CNFOperatorInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
+            : f_sat(sat)
+            , f_time(time)
+            , f_group(group)
+        {}
 
-private:
-    void inject(const compiler::MultiwaySelectionDescriptor& md);
+        ~CNFOperatorInliner()
+        {}
 
-    Engine& f_sat;
-    step_t f_time;
-    group_t f_group;
-};
+        inline void operator()(const compiler::InlinedOperatorDescriptor& md)
+        {
+            InlinedOperatorMgr& mm(InlinedOperatorMgr::INSTANCE());
 
-};
+            compiler::InlinedOperatorSignature ios(md.ios());
+            InlinedOperatorLoader& loader(mm.require(ios));
+
+            inject(md, loader.clauses());
+        }
+
+    private:
+        void inject(const compiler::InlinedOperatorDescriptor& md,
+                    const LitsVector& clauses);
+
+        Engine& f_sat;
+        step_t f_time;
+        group_t f_group;
+    };
+
+    class CNFBinarySelectionInliner {
+    public:
+        CNFBinarySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
+            : f_sat(sat)
+            , f_time(time)
+            , f_group(group)
+        {}
+
+        ~CNFBinarySelectionInliner()
+        {}
+
+        inline void operator()(const compiler::BinarySelectionDescriptor& md)
+        {
+            inject(md);
+        }
+
+    private:
+        void inject(const compiler::BinarySelectionDescriptor& md);
+
+        Engine& f_sat;
+        step_t f_time;
+        group_t f_group;
+    };
+
+    class CNFMultiwaySelectionInliner {
+    public:
+        CNFMultiwaySelectionInliner(Engine& sat, step_t time, group_t group = MAINGROUP)
+            : f_sat(sat)
+            , f_time(time)
+            , f_group(group)
+        {}
+
+        ~CNFMultiwaySelectionInliner()
+        {}
+
+        inline void operator()(const compiler::MultiwaySelectionDescriptor& md)
+        {
+            inject(md);
+        }
+
+    private:
+        void inject(const compiler::MultiwaySelectionDescriptor& md);
+
+        Engine& f_sat;
+        step_t f_time;
+        group_t f_group;
+    };
+
+}; // namespace sat
 
 #endif /* SAT_HELPERS */

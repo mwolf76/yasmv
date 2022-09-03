@@ -37,56 +37,47 @@
 #include <sim/simulation.hh>
 
 namespace cmd {
+    const std::string outPrefix { "-- " };
+    const std::string wrnPrefix { "!! " };
 
-    const std::string outPrefix ("-- ");
-    const std::string wrnPrefix ("!! ");
-
-    const std::string okMessage ("Ok");
-    const std::string errMessage ("ERROR");
-    const std::string byeMessage ("Bye");
+    const std::string okMessage { "Ok" };
+    const std::string errMessage { "ERROR" };
+    const std::string byeMessage { "Bye" };
 
     Command::Command(Interpreter& owner)
-    : f_owner(owner)
+        : f_owner(owner)
     {
-        const void *instance
-        (this);
-
+        const void* instance { this };
         DRIVEL
-        << "Initialized command @"
-        << instance
-        << std::endl;
+            << "Initialized command @"
+            << instance
+            << std::endl;
     }
 
     Command::~Command()
     {
-        const void *instance
-        (this);
-
+        const void* instance { this };
         DRIVEL << "Destroyed command @"
-        << instance
-        << std::endl;
+               << instance
+               << std::endl;
     }
 
     CommandTopic::CommandTopic(Interpreter& owner)
-    : f_owner(owner)
+        : f_owner(owner)
     {
-        const void *instance
-        (this);
-
+        const void* instance { this };
         DRIVEL
-        << "Initialized command topic @"
-        << instance
-        << std::endl;
+            << "Initialized command topic @"
+            << instance
+            << std::endl;
     }
 
     CommandTopic::~CommandTopic()
     {
-        const void *instance
-        (this);
-
+        const void* instance { this };
         DRIVEL << "Destroyed command topic @"
-        << instance
-        << std::endl;
+               << instance
+               << std::endl;
     }
 
 } // namespace cmd

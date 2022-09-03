@@ -27,17 +27,20 @@
 #ifndef COMMAND_EXCEPTIONS_H
 #define COMMAND_EXCEPTIONS_H
 
+#include <common/exceptions.hh>
+
+
 namespace cmd {
 
-/** Exception classes */
-class CommandException : public Exception {
-public:
-    CommandException(const std::string& subtype,
-                     const std::string& message="")
-        : Exception("CommandException", subtype, message)
-    {}
-};
+    /** Exception classes */
+    class CommandException: public Exception {
+    public:
+        CommandException(const std::string& subtype,
+                         const std::string& message = "")
+            : Exception("CommandException", subtype, message)
+        {}
+    };
 
-};
+}; // namespace cmd
 
 #endif /* COMMAND_EXCEPTIONS_H */

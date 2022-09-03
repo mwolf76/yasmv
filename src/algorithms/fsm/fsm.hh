@@ -36,78 +36,88 @@
 
 namespace fsm {
 
-typedef enum {
-    FSM_CONSISTENCY_OK,
-    FSM_CONSISTENCY_KO,
-    FSM_CONSISTENCY_UNDECIDED
-} fsm_consistency_t;
+    typedef enum {
+        FSM_CONSISTENCY_OK,
+        FSM_CONSISTENCY_KO,
+        FSM_CONSISTENCY_UNDECIDED
+    } fsm_consistency_t;
 
-class CheckInitConsistency : public algorithms::Algorithm {
+    class CheckInitConsistency: public algorithms::Algorithm {
 
-public:
-    CheckInitConsistency(cmd::Command& command, model::Model& model);
-    ~CheckInitConsistency();
+    public:
+        CheckInitConsistency(cmd::Command& command, model::Model& model);
+        ~CheckInitConsistency();
 
-    void process(expr::ExprVector constraints);
+        void process(expr::ExprVector constraints);
 
-    inline fsm_consistency_t status() const
-    { return f_status; }
+        inline fsm_consistency_t status() const
+        {
+            return f_status;
+        }
 
-    inline void set_status(fsm_consistency_t status)
-    { f_status = status; }
+        inline void set_status(fsm_consistency_t status)
+        {
+            f_status = status;
+        }
 
-private:
-    expr::ExprVector f_constraints;
-    compiler::Units f_constraint_cus;
+    private:
+        expr::ExprVector f_constraints;
+        compiler::Units f_constraint_cus;
 
-    boost::mutex f_status_mutex;
-    fsm_consistency_t f_status;
-};
+        boost::mutex f_status_mutex;
+        fsm_consistency_t f_status;
+    };
 
-class CheckTransConsistency : public algorithms::Algorithm {
+    class CheckTransConsistency: public algorithms::Algorithm {
 
-public:
-    CheckTransConsistency(cmd::Command& command, model::Model& model);
-    ~CheckTransConsistency();
+    public:
+        CheckTransConsistency(cmd::Command& command, model::Model& model);
+        ~CheckTransConsistency();
 
-    void process(expr::ExprVector constraints);
+        void process(expr::ExprVector constraints);
 
-    inline fsm_consistency_t status() const
-    { return f_status; }
+        inline fsm_consistency_t status() const
+        {
+            return f_status;
+        }
 
-    inline void set_status(fsm_consistency_t status)
-    { f_status = status; }
+        inline void set_status(fsm_consistency_t status)
+        {
+            f_status = status;
+        }
 
-private:
-    expr::ExprVector f_constraints;
-    compiler::Units f_constraint_cus;
+    private:
+        expr::ExprVector f_constraints;
+        compiler::Units f_constraint_cus;
 
-    boost::mutex f_status_mutex;
-    fsm_consistency_t f_status;
-};
+        boost::mutex f_status_mutex;
+        fsm_consistency_t f_status;
+    };
 
-class ComputeDiameter : public algorithms::Algorithm {
+    class ComputeDiameter: public algorithms::Algorithm {
 
-public:
-    ComputeDiameter(cmd::Command& command, model::Model& model);
-    ~ComputeDiameter();
+    public:
+        ComputeDiameter(cmd::Command& command, model::Model& model);
+        ~ComputeDiameter();
 
-    void process();
+        void process();
 
-    inline step_t diameter()
-    { return sync_diameter(); }
+        inline step_t diameter()
+        {
+            return sync_diameter();
+        }
 
-    step_t sync_diameter();
-    bool sync_set_diameter(step_t diameter);
+        step_t sync_diameter();
+        bool sync_set_diameter(step_t diameter);
 
-private:
-    boost::mutex f_diameter_mutex;
-    step_t f_diameter;
+    private:
+        boost::mutex f_diameter_mutex;
+        step_t f_diameter;
 
-    /* strategies */
-    void forward_strategy();
-    void backward_strategy();
-};
+        /* strategies */
+        void forward_strategy();
+        void backward_strategy();
+    };
 
 } // namespace fsm
 

@@ -39,115 +39,145 @@
 
 #include <type/type.hh>
 
+#include <dd/cudd-2.5.0/cudd/cuddInt.h> /* for cudd_isconstant */
 #include <dd/cudd_mgr.hh>
-#include <dd/cudd-2.5.0/cudd/cuddInt.h>  /* for cudd_isconstant */
 
 #include <enc/ucbi.hh>
 #include <utils/pool.hh>
 
 namespace enc {
 
-typedef class Encoding *Encoding_ptr; // fwd decl
+    typedef class Encoding* Encoding_ptr; // fwd decl
 
-typedef std::vector<int> IndexVector;
+    typedef std::vector<int> IndexVector;
 
-struct ADDHash {
-    inline long operator() (ADD term) const
-    {
-        DdNode *tmp = term.getRegularNode();
-        return (long) (tmp);
-    }
-};
-struct ADDEq {
-    inline bool operator() (const ADD phi,
-                            const ADD psi) const
-    { return phi == psi; }
-};
-
-typedef boost::unordered_map<expr::TimedExpr, Encoding_ptr, expr::TimedExprHash, expr::TimedExprEq> TimedExpr2EncMap;
-typedef boost::unordered_map<int, UCBI, utils::IntHash, utils::IntEq> Index2UCBIMap;
-
-typedef class EncodingMgr* EncodingMgr_ptr;
-
-class EncodingMgr  {
-    friend class Encoding;
-
-public:
-    inline Cudd& dd() const
-    { return f_cudd; }
-
-    inline ADD one()
-    { return f_cudd.addOne(); }
-
-    inline ADD zero()
-    { return f_cudd.addZero(); }
-
-    inline ADD error()
-    { return f_cudd.addError(); }
-
-    inline ADD constant(value_t value)
-    { assert (error_value != value); return f_cudd.constant(value); }
-
-    inline bool is_constant(ADD x) const
-    { return cuddIsConstant(x.getNode()); }
-
-    inline bool is_error(ADD x) const
-    { return cuddIsConstant(x.getNode()) && (error_value == Cudd_V(x.getNode())); }
-
-    inline value_t const_value(ADD x) const
-    { return Cudd_V(x.getNode()); }
-
-    inline ADD bit()
-    { return f_cudd.addVar(); }
-
-    inline unsigned nbits()
-    { return f_cudd.ReadSize(); }
-
-    // Makes a new encoding. Used by the compiler
-    Encoding_ptr make_encoding(type::Type_ptr type);
-
-    // Registers an encoding. Used by the compiler
-    void register_encoding(const expr::TimedExpr& key, Encoding_ptr enc);
-
-    // Retrieves Untimed Canonical Bit Id for index
-    inline const UCBI& find_ucbi(int index)
-    { return f_index2ucbi_map.at(index); }
-
-    // Retrieves an encoding previously created using
-    // make_encoding. User by the SAT model evaluator
-    Encoding_ptr find_encoding(const expr::TimedExpr& key);
-
-    inline expr::ExprMgr& em()
-    { return f_em; }
-
-    static EncodingMgr& INSTANCE() {
-        if (! f_instance) {
-            f_instance = new EncodingMgr();
+    struct ADDHash {
+        inline long operator()(ADD term) const
+        {
+            DdNode* tmp = term.getRegularNode();
+            return (long) (tmp);
         }
-        return (*f_instance);
-    }
+    };
+    struct ADDEq {
+        inline bool operator()(const ADD phi,
+                               const ADD psi) const
+        {
+            return phi == psi;
+        }
+    };
 
-    inline unsigned word_width() const
-    { return f_word_width; }
+    typedef boost::unordered_map<expr::TimedExpr, Encoding_ptr, expr::TimedExprHash, expr::TimedExprEq> TimedExpr2EncMap;
+    typedef boost::unordered_map<int, UCBI, utils::IntHash, utils::IntEq> Index2UCBIMap;
 
-protected:
-    EncodingMgr();
-    ~EncodingMgr();
+    typedef class EncodingMgr* EncodingMgr_ptr;
 
-private:
-    static EncodingMgr_ptr f_instance;
+    class EncodingMgr {
+        friend class Encoding;
 
-    Cudd& f_cudd;
-    expr::ExprMgr& f_em;
+    public:
+        inline Cudd& dd() const
+        {
+            return f_cudd;
+        }
 
-    /* encodings register */
-    TimedExpr2EncMap f_timed_expr2enc_map;
+        inline ADD one()
+        {
+            return f_cudd.addOne();
+        }
 
-    /* Untimed Canonical Bit Identifiers register */
-    Index2UCBIMap f_index2ucbi_map;
+        inline ADD zero()
+        {
+            return f_cudd.addZero();
+        }
 
-    unsigned f_word_width;
-};
+        inline ADD error()
+        {
+            return f_cudd.addError();
+        }
 
-};
+        inline ADD constant(value_t value)
+        {
+            assert(error_value != value);
+            return f_cudd.constant(value);
+        }
+
+        inline bool is_constant(ADD x) const
+        {
+            return cuddIsConstant(x.getNode());
+        }
+
+        inline bool is_error(ADD x) const
+        {
+            return cuddIsConstant(x.getNode()) && (error_value == Cudd_V(x.getNode()));
+        }
+
+        inline value_t const_value(ADD x) const
+        {
+            return Cudd_V(x.getNode());
+        }
+
+        inline ADD bit()
+        {
+            return f_cudd.addVar();
+        }
+
+        inline unsigned nbits()
+        {
+            return f_cudd.ReadSize();
+        }
+
+        // Makes a new encoding. Used by the compiler
+        Encoding_ptr make_encoding(type::Type_ptr type);
+
+        // Registers an encoding. Used by the compiler
+        void register_encoding(const expr::TimedExpr& key, Encoding_ptr enc);
+
+        // Retrieves Untimed Canonical Bit Id for index
+        inline const UCBI& find_ucbi(int index)
+        {
+            return f_index2ucbi_map.at(index);
+        }
+
+        // Retrieves an encoding previously created using
+        // make_encoding. User by the SAT model evaluator
+        Encoding_ptr find_encoding(const expr::TimedExpr& key);
+
+        inline expr::ExprMgr& em()
+        {
+            return f_em;
+        }
+
+        static EncodingMgr& INSTANCE()
+        {
+            if (!f_instance) {
+                f_instance = new EncodingMgr();
+            }
+            return (*f_instance);
+        }
+
+        inline unsigned word_width() const
+        {
+            return f_word_width;
+        }
+
+    protected:
+        EncodingMgr();
+        ~EncodingMgr();
+
+    private:
+        static EncodingMgr_ptr f_instance;
+
+        Cudd& f_cudd;
+        expr::ExprMgr& f_em;
+
+        /* encodings register */
+        TimedExpr2EncMap f_timed_expr2enc_map;
+
+        /* Untimed Canonical Bit Identifiers register */
+        Index2UCBIMap f_index2ucbi_map;
+
+        unsigned f_word_width;
+    };
+
+};     // namespace enc
 #endif /* ENCODING_MGR_H */

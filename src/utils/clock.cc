@@ -21,79 +21,76 @@
  *
  **/
 
+#include <clock.hh>
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
-#include <clock.hh>
 
 namespace utils {
 
-struct stopclock_t {
-    time_t tv_sec;
-    double tv_msecs;
-};
+    struct stopclock_t {
+        time_t tv_sec;
+        double tv_msecs;
+    };
 
-const uint64_t ONE_BILLION { 1000000000L };
-struct stopclock_t timespec_diff(struct timespec from, struct timespec to)
-{
-    uint64_t t_from {from.tv_sec * ONE_BILLION + from.tv_nsec};
-    uint64_t t_to {to.tv_sec * ONE_BILLION + to.tv_nsec};
-    uint64_t t_diff {t_to - t_from};
+    const uint64_t ONE_BILLION { 1000000000L };
+    struct stopclock_t timespec_diff(struct timespec from, struct timespec to)
+    {
+        uint64_t t_from { from.tv_sec * ONE_BILLION + from.tv_nsec };
+        uint64_t t_to { to.tv_sec * ONE_BILLION + to.tv_nsec };
+        uint64_t t_diff { t_to - t_from };
 
-    uint64_t tv_sec { t_diff / ONE_BILLION };
-    uint64_t tv_nsec { t_diff % ONE_BILLION };
+        uint64_t tv_sec { t_diff / ONE_BILLION };
+        uint64_t tv_nsec { t_diff % ONE_BILLION };
 
-    return { (time_t) tv_sec, (double) tv_nsec / ONE_BILLION };
-}
-
-std::string elapsed_repr(struct timespec from, struct timespec to)
-{
-    struct stopclock_t diff
-        (timespec_diff(from, to));
-
-    time_t uptime { diff.tv_sec };
-    unsigned secs = uptime % 60;
-    unsigned mins = uptime / 60;
-    unsigned hrs = 0;
-
-    if (60 < mins) {
-        mins = mins % 60;
-        hrs  = mins / 60;
+        return { (time_t) tv_sec, (double) tv_nsec / ONE_BILLION };
     }
 
-    std::ostringstream ss;
+    std::string elapsed_repr(struct timespec from, struct timespec to)
+    {
+        struct stopclock_t diff(timespec_diff(from, to));
 
-    bool a
-        (false);
-    if (0 < hrs) {
-        ss
-            << hrs
-            << "h";
-        a = true;
-    }
+        time_t uptime { diff.tv_sec };
+        unsigned secs = uptime % 60;
+        unsigned mins = uptime / 60;
+        unsigned hrs = 0;
 
-    bool b
-        (a);
-    if (0 < mins) {
-        if (a)
+        if (60 < mins) {
+            mins = mins % 60;
+            hrs = mins / 60;
+        }
+
+        std::ostringstream ss;
+
+        bool a(false);
+        if (0 < hrs) {
+            ss
+                << hrs
+                << "h";
+            a = true;
+        }
+
+        bool b(a);
+        if (0 < mins) {
+            if (a)
+                ss
+                    << " ";
+            ss
+                << mins
+                << "m";
+            b = true;
+        }
+
+        if (b)
             ss
                 << " ";
+
         ss
-            << mins
-            << "m";
-        b = true;
+            << std::setprecision(3)
+            << secs + diff.tv_msecs
+            << "s";
+
+        return ss.str();
     }
 
-    if (b)
-        ss
-            << " ";
-
-    ss
-        << std::setprecision(3)
-        << secs + diff.tv_msecs
-        << "s" ;
-
-    return ss.str();
-}
-
-};
+}; // namespace utils

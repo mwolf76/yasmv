@@ -26,80 +26,94 @@
 
 #include <expr/expr.hh>
 
-#include <symb/typedefs.hh>
 #include <symb/classes.hh>
+#include <symb/typedefs.hh>
 
 #include <model/typedefs.hh>
 
 namespace model {
 
-class Module {
-public:
-    Module(expr::Expr_ptr name);
-    ~Module();
+    class Module {
+    public:
+        Module(expr::Expr_ptr name);
+        ~Module();
 
-    inline const expr::Expr_ptr name() const
-    { return f_name; }
+        inline const expr::Expr_ptr name() const
+        {
+            return f_name;
+        }
 
-    inline const symb::Variables& vars() const
-    { return f_localVars; }
-    void add_var(expr::Expr_ptr expr, symb::Variable_ptr var);
+        inline const symb::Variables& vars() const
+        {
+            return f_localVars;
+        }
+        void add_var(expr::Expr_ptr expr, symb::Variable_ptr var);
 
-    inline const symb::Parameters& parameters() const
-    { return f_localParams; }
-    void add_parameter(expr::Expr_ptr expr, symb::Parameter_ptr param);
+        inline const symb::Parameters& parameters() const
+        {
+            return f_localParams;
+        }
+        void add_parameter(expr::Expr_ptr expr, symb::Parameter_ptr param);
 
-    const symb::Defines& defs() const
-    { return f_localDefs; }
-    void add_def(expr::Expr_ptr expr, symb::Define_ptr def);
-    void override(expr::Expr_ptr expr, symb::Define_ptr def);
+        const symb::Defines& defs() const
+        {
+            return f_localDefs;
+        }
+        void add_def(expr::Expr_ptr expr, symb::Define_ptr def);
+        void override(expr::Expr_ptr expr, symb::Define_ptr def);
 
-    /* Finite State Machine definition */
-    inline const expr::ExprVector& init() const
-    { return f_init; }
-    void add_init(expr::Expr_ptr expr);
+        /* Finite State Machine definition */
+        inline const expr::ExprVector& init() const
+        {
+            return f_init;
+        }
+        void add_init(expr::Expr_ptr expr);
 
-    const expr::ExprVector& invar() const
-    { return f_invar; }
-    void add_invar(expr::Expr_ptr expr);
+        const expr::ExprVector& invar() const
+        {
+            return f_invar;
+        }
+        void add_invar(expr::Expr_ptr expr);
 
-    inline const expr::ExprVector& trans() const
-    { return f_trans; }
-    void add_trans(expr::Expr_ptr expr);
+        inline const expr::ExprVector& trans() const
+        {
+            return f_trans;
+        }
+        void add_trans(expr::Expr_ptr expr);
 
-private:
-    friend std::ostream& operator<<(std::ostream& os, Module& module);
+    private:
+        friend std::ostream& operator<<(std::ostream& os, Module& module);
 
-    friend class Model;
-    Model* f_owner;
-    inline Model& owner() const
-    {
-        assert(f_owner);
-        return *f_owner;
-    }
+        friend class Model;
+        Model* f_owner;
+        inline Model& owner() const
+        {
+            assert(f_owner);
+            return *f_owner;
+        }
 
-    void set_owner(Model_ptr model_ptr)
-    {
-        // assert(! f_owner);
-        f_owner = model_ptr;
-    }
+        void set_owner(Model_ptr model_ptr)
+        {
+            // assert(! f_owner);
+            f_owner = model_ptr;
+        }
 
-    expr::Expr_ptr f_name;
+        expr::Expr_ptr f_name;
 
-    /* used to detect duplicates */
-    expr::ExprSet f_locals;
-    void checkDuplicates(expr::Expr_ptr expr);
+        /* used to detect duplicates */
+        expr::ExprSet f_locals;
+        void checkDuplicates(expr::Expr_ptr expr);
 
-    symb::Variables f_localVars;
-    symb::Parameters f_localParams;
-    symb::Defines   f_localDefs;
+        symb::Variables f_localVars;
+        symb::Parameters f_localParams;
+        symb::Defines f_localDefs;
 
-    /* transition relation formulas */
-    expr::ExprVector f_init;
-    expr::ExprVector f_invar;
-    expr::ExprVector f_trans;
-};
+        /* transition relation formulas */
+        expr::ExprVector f_init;
+        expr::ExprVector f_invar;
+        expr::ExprVector f_trans;
+    };
 
-};
+}; // namespace model
 
 #endif /* MODEL_MODULE_H */

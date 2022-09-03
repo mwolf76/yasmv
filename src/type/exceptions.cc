@@ -24,114 +24,114 @@
 #include <expr/expr.hh>
 
 #include <type/classes.hh>
-#include <type/typedefs.hh>
 #include <type/exceptions.hh>
+#include <type/typedefs.hh>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace type {
 
-static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs)
-{
-    std::ostringstream oss;
+    static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "operand `"
-        << expr
-        << "` has invalid type `"
-        << lhs->repr()
-        << "` (@"
-        << lhs /* raw pointer */
-        << ")" ;
+        oss
+            << "operand `"
+            << expr
+            << "` has invalid type `"
+            << lhs->repr()
+            << "` (@"
+            << lhs /* raw pointer */
+            << ")";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-/** Raised when the inferrer detects a wrong type */
-static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
-{
-    std::ostringstream oss;
+    /** Raised when the inferrer detects a wrong type */
+    static std::string format_bad_type(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "operands `"
-        << expr->lhs() << "` and `"
-        << expr->rhs() << "` have invalid types `"
-        << lhs->repr() << "` (@"
-        << lhs /* raw pointer */
-        << ", `"
-        << rhs->repr() << "` (@"
-        << rhs << "`" /* raw pointer */
-        ;
+        oss
+            << "operands `"
+            << expr->lhs() << "` and `"
+            << expr->rhs() << "` have invalid types `"
+            << lhs->repr() << "` (@"
+            << lhs /* raw pointer */
+            << ", `"
+            << rhs->repr() << "` (@"
+            << rhs << "`" /* raw pointer */
+            ;
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs)
-    : TypeException("BadType",
-                    format_bad_type(expr, lhs))
-{}
+    BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs)
+        : TypeException("BadType",
+                        format_bad_type(expr, lhs))
+    {}
 
-BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
-    : TypeException("BadType",
-                    format_bad_type(expr, lhs, rhs))
-{}
+    BadType::BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs)
+        : TypeException("BadType",
+                        format_bad_type(expr, lhs, rhs))
+    {}
 
-std::string format_identifier_expected(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    std::string format_identifier_expected(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "identifier expected while defining ENUM, got `"
-        << expr
-        << "` instead";
+        oss
+            << "identifier expected while defining ENUM, got `"
+            << expr
+            << "` instead";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-IdentifierExpected::IdentifierExpected(expr::Expr_ptr expr)
-    : TypeException("IdentifierExpected",
-                    format_identifier_expected(expr))
-{}
+    IdentifierExpected::IdentifierExpected(expr::Expr_ptr expr)
+        : TypeException("IdentifierExpected",
+                        format_identifier_expected(expr))
+    {}
 
-std::string format_duplicate_literal(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    std::string format_duplicate_literal(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "duplicate literal `"
-        << expr
-        << "` detected";
+        oss
+            << "duplicate literal `"
+            << expr
+            << "` detected";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-DuplicateLiteral::DuplicateLiteral(expr::Expr_ptr expr)
-    : TypeException("DuplicateLiteral",
-                    format_duplicate_literal(expr))
-{}
+    DuplicateLiteral::DuplicateLiteral(expr::Expr_ptr expr)
+        : TypeException("DuplicateLiteral",
+                        format_duplicate_literal(expr))
+    {}
 
-/** Raised when the inferrer detects two mismatching types */
-std::string format_type_mismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
-{
-    std::ostringstream oss;
+    /** Raised when the inferrer detects two mismatching types */
+    std::string format_type_mismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "`"
-        << a
-        << "` and `"
-        << b
-        << "` do not match in expression `"
-        << expr
-        << "`"
-        << std::endl;
+        oss
+            << "`"
+            << a
+            << "` and `"
+            << b
+            << "` do not match in expression `"
+            << expr
+            << "`"
+            << std::endl;
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-TypeMismatch::TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
-    : TypeException("TypeMismatch",
-                    format_type_mismatch(expr, a, b))
-{}
+    TypeMismatch::TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b)
+        : TypeException("TypeMismatch",
+                        format_type_mismatch(expr, a, b))
+    {}
 
-}
+} // namespace type

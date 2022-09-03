@@ -54,8 +54,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -95,7 +95,7 @@ extern "C" {
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static DdNode * addDoIthBit (DdManager *dd, DdNode *f, DdNode *index);
+static DdNode* addDoIthBit(DdManager* dd, DdNode* f, DdNode* index);
 
 /**AutomaticEnd***************************************************************/
 
@@ -116,31 +116,31 @@ static DdNode * addDoIthBit (DdManager *dd, DdNode *f, DdNode *index);
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addFindMax(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     DdNode *t, *e, *res;
 
     statLine(dd);
     if (cuddIsConstant(f)) {
-	return(f);
+        return (f);
     }
 
-    res = cuddCacheLookup1(dd,Cudd_addFindMax,f);
+    res = cuddCacheLookup1(dd, Cudd_addFindMax, f);
     if (res != NULL) {
-	return(res);
+        return (res);
     }
 
-    t  = Cudd_addFindMax(dd,cuddT(f));
-    e  = Cudd_addFindMax(dd,cuddE(f));
+    t = Cudd_addFindMax(dd, cuddT(f));
+    e = Cudd_addFindMax(dd, cuddE(f));
 
     res = (cuddV(t) >= cuddV(e)) ? t : e;
 
-    cuddCacheInsert1(dd,Cudd_addFindMax,f,res);
+    cuddCacheInsert1(dd, Cudd_addFindMax, f, res);
 
-    return(res);
+    return (res);
 
 } /* end of Cudd_addFindMax */
 
@@ -154,31 +154,31 @@ Cudd_addFindMax(
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addFindMin(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     DdNode *t, *e, *res;
 
     statLine(dd);
     if (cuddIsConstant(f)) {
-	return(f);
+        return (f);
     }
 
-    res = cuddCacheLookup1(dd,Cudd_addFindMin,f);
+    res = cuddCacheLookup1(dd, Cudd_addFindMin, f);
     if (res != NULL) {
-	return(res);
+        return (res);
     }
 
-    t  = Cudd_addFindMin(dd,cuddT(f));
-    e  = Cudd_addFindMin(dd,cuddE(f));
+    t = Cudd_addFindMin(dd, cuddT(f));
+    e = Cudd_addFindMin(dd, cuddE(f));
 
     res = (cuddV(t) <= cuddV(e)) ? t : e;
 
-    cuddCacheInsert1(dd,Cudd_addFindMin,f,res);
+    cuddCacheInsert1(dd, Cudd_addFindMin, f, res);
 
-    return(res);
+    return (res);
 
 } /* end of Cudd_addFindMin */
 
@@ -201,35 +201,35 @@ Cudd_addFindMin(
   SeeAlso     [Cudd_addBddIthBit]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addIthBit(
-  DdManager * dd,
-  DdNode * f,
-  int  bit)
+    DdManager* dd,
+    DdNode* f,
+    int bit)
 {
-    DdNode *res;
-    DdNode *index;
+    DdNode* res;
+    DdNode* index;
 
     /* Use a constant node to remember the bit, so that we can use the
     ** global cache.
     */
-    index = cuddUniqueConst(dd,(CUDD_VALUE_TYPE) bit);
-    if (index == NULL) return(NULL);
+    index = cuddUniqueConst(dd, (CUDD_VALUE_TYPE) bit);
+    if (index == NULL) return (NULL);
     cuddRef(index);
 
     do {
-	dd->reordered = 0;
-	res = addDoIthBit(dd, f, index);
+        dd->reordered = 0;
+        res = addDoIthBit(dd, f, index);
     } while (dd->reordered == 1);
 
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, index);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, index);
+        return (NULL);
     }
     cuddRef(res);
     Cudd_RecursiveDeref(dd, index);
     cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addIthBit */
 
@@ -256,11 +256,11 @@ Cudd_addIthBit(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 addDoIthBit(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * index)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* index)
 {
     DdNode *res, *T, *E;
     DdNode *fv, *fvn;
@@ -270,42 +270,43 @@ addDoIthBit(
     statLine(dd);
     /* Check terminal case. */
     if (cuddIsConstant(f)) {
-	mask = 1 << ((int) cuddV(index));
-	value = (int) cuddV(f);
-	return((value & mask) == 0 ? DD_ZERO(dd) : DD_ONE(dd));
+        mask = 1 << ((int) cuddV(index));
+        value = (int) cuddV(f);
+        return ((value & mask) == 0 ? DD_ZERO(dd) : DD_ONE(dd));
     }
 
     /* Check cache. */
-    res = cuddCacheLookup2(dd,addDoIthBit,f,index);
-    if (res != NULL) return(res);
+    res = cuddCacheLookup2(dd, addDoIthBit, f, index);
+    if (res != NULL) return (res);
 
     /* Recursive step. */
     v = f->index;
-    fv = cuddT(f); fvn = cuddE(f);
+    fv = cuddT(f);
+    fvn = cuddE(f);
 
-    T = addDoIthBit(dd,fv,index);
-    if (T == NULL) return(NULL);
+    T = addDoIthBit(dd, fv, index);
+    if (T == NULL) return (NULL);
     cuddRef(T);
 
-    E = addDoIthBit(dd,fvn,index);
+    E = addDoIthBit(dd, fvn, index);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
-    res = (T == E) ? T : cuddUniqueInter(dd,v,T,E);
+    res = (T == E) ? T : cuddUniqueInter(dd, v, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	Cudd_RecursiveDeref(dd, E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddDeref(T);
     cuddDeref(E);
 
     /* Store result. */
-    cuddCacheInsert2(dd,addDoIthBit,f,index,res);
+    cuddCacheInsert2(dd, addDoIthBit, f, index, res);
 
-    return(res);
+    return (res);
 
 } /* end of addDoIthBit */

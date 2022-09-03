@@ -29,90 +29,80 @@
 
 namespace model {
 
-Model::Model()
-    : f_modules()
-{
-    const void *instance
-        (this);
+    Model::Model()
+        : f_modules()
+    {
+        const void* instance(this);
 
-    DEBUG
-        << "Initialized Model instance @"
-        << instance
-        << std::endl;
-}
+        DEBUG
+            << "Initialized Model instance @"
+            << instance
+            << std::endl;
+    }
 
-Model::~Model()
-{
-    // TODO: free memory for symbols... (they've been allocated using new)
-    assert(false); // XXX
-}
+    Model::~Model()
+    {
+        // TODO: free memory for symbols... (they've been allocated using new)
+        assert(false); // XXX
+    }
 
-Module& Model::add_module(Module& module)
-{
-    expr::Expr_ptr name
-        (module.name());
+    Module& Model::add_module(Module& module)
+    {
+        expr::Expr_ptr name { module.name() };
 
-    DEBUG
-        << "Added module: `"
-        << name << "`"
-        << std::endl;
+        DEBUG
+            << "Added module: `"
+            << name << "`"
+            << std::endl;
 
-    f_modules.insert( std::pair<expr::Expr_ptr, Module_ptr>
-                      (name, &module));
+        f_modules.insert(
+            std::pair<expr::Expr_ptr, Module_ptr>(name, &module));
 
-    module.set_owner(this);
-    return module;
-}
+        module.set_owner(this);
+        return module;
+    }
 
-Module& Model::module(expr::Expr_ptr module_name)
-{
-    Modules::const_iterator i
-        (f_modules.find(module_name));
+    Module& Model::module(expr::Expr_ptr module_name)
+    {
+        Modules::const_iterator i { f_modules.find(module_name) };
 
-    if (i == f_modules.end())
-        throw MainModuleNotFound();
+        if (i == f_modules.end()) {
+            throw MainModuleNotFound();
+        }
 
-    return *(i -> second);
-}
+        return *(i->second);
+    }
 
-Module& Model::main_module()
-{
-    if (! f_modules.size())
-        throw MainModuleNotFound();
+    Module& Model::main_module()
+    {
+        if (!f_modules.size()) {
+            throw MainModuleNotFound();
+        }
 
-    Modules::const_iterator i
-        (f_modules.begin());
+        Modules::const_iterator i { f_modules.begin() };
 
-    return *(i -> second);
-}
+        return *(i->second);
+    }
 
-void Model::autoIndexSymbol(expr::Expr_ptr identifier)
-{
-    expr::ExprMgr& em
-        (expr::ExprMgr::INSTANCE());
+    void Model::autoIndexSymbol(expr::Expr_ptr identifier)
+    {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
-    // TODO: this is not going to work for other modules
-    expr::Expr_ptr ctx
-        (em.make_empty());
+        // TODO: this is not going to work for other modules
+        expr::Expr_ptr ctx { em.make_empty() };
+        expr::Expr_ptr full { em.make_dot(ctx, identifier) };
 
-    expr::Expr_ptr full
-        (em.make_dot(ctx, identifier));
+        f_symbol_index_map.insert(
+            std::pair<expr::Expr_ptr, unsigned>(full, ++f_autoincrement));
+    }
 
-    f_symbol_index_map.insert(std::pair<expr::Expr_ptr, unsigned>
-                              (full, ++ f_autoincrement));
-}
+    unsigned Model::symbol_index(expr::Expr_ptr identifier)
+    {
+        SymbolIndexMap::const_iterator eye { f_symbol_index_map.find(identifier) };
+        assert(f_symbol_index_map.end() != eye);
 
-unsigned Model::symbol_index(expr::Expr_ptr identifier)
-{
-    SymbolIndexMap::const_iterator eye
-        (f_symbol_index_map.find(identifier));
+        unsigned res { eye->second };
+        return res;
+    }
 
-    assert(f_symbol_index_map.end() != eye);
-
-    unsigned res
-        (eye->second);
-
-    return res;
-}
-
-};
+}; // namespace model

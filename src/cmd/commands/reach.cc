@@ -48,9 +48,9 @@ namespace cmd {
 
     void Reach::add_constraint(expr::Expr_ptr constraint)
     {
-        expr::time::Analyzer eta(expr::ExprMgr::INSTANCE());
-
+        expr::time::Analyzer eta { expr::ExprMgr::INSTANCE() };
         eta.process(constraint);
+
         if (eta.has_forward_time()) {
             TRACE
                 << "Adding FORWARD constraint to reachability problem: "
@@ -82,7 +82,8 @@ namespace cmd {
             return false;
         }
 
-        model::Model& model { model::ModelMgr::INSTANCE().model() };
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
         if (model.empty()) {
             f_out
                 << wrnPrefix

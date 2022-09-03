@@ -31,25 +31,25 @@
 
 namespace cmd {
 
-// -- command definitions --------------------------------------------------
-class ReadModel : public Command {
-public:
-    ReadModel(Interpreter& owner, const std::string& filename);
-    virtual ~ReadModel();
+    // -- command definitions --------------------------------------------------
+    class ReadModel: public Command {
+    public:
+        ReadModel(Interpreter& owner, const std::string& filename);
+        virtual ~ReadModel();
 
-    Variant virtual operator()();
+        Variant virtual operator()();
 
-private:
-    std::string f_filename;
-};
+    private:
+        std::string f_filename;
+    };
 
-class ReadModelTopic : public CommandTopic {
-public:
-    ReadModelTopic(Interpreter& owner);
-    virtual ~ReadModelTopic();
+    class ReadModelTopic: public CommandTopic {
+    public:
+        ReadModelTopic(Interpreter& owner);
+        virtual ~ReadModelTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+};     // namespace cmd
 #endif /* LOAD_MODEL_H */

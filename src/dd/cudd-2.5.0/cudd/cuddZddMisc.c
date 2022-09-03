@@ -59,9 +59,9 @@
 
 ******************************************************************************/
 
-#include <math.h>
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
+#include <math.h>
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -97,7 +97,7 @@ static char rcsid[] DD_UNUSED = "$Id: cuddZddMisc.c,v 1.18 2012/02/05 01:07:19 f
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static int cuddZddDagInt (DdNode *n, st_table *tab);
+static int cuddZddDagInt(DdNode* n, st_table* tab);
 
 /**AutomaticEnd***************************************************************/
 
@@ -119,18 +119,17 @@ static int cuddZddDagInt (DdNode *n, st_table *tab);
   SeeAlso     [Cudd_DagSize]
 
 ******************************************************************************/
-int
-Cudd_zddDagSize(
-  DdNode * p_node)
+int Cudd_zddDagSize(
+    DdNode* p_node)
 {
 
-    int		i;
-    st_table	*table;
+    int i;
+    st_table* table;
 
     table = st_init_table(st_ptrcmp, st_ptrhash);
     i = cuddZddDagInt(p_node, table);
     st_free_table(table);
-    return(i);
+    return (i);
 
 } /* end of Cudd_zddDagSize */
 
@@ -152,15 +151,15 @@ Cudd_zddDagSize(
 ******************************************************************************/
 double
 Cudd_zddCountMinterm(
-  DdManager * zdd,
-  DdNode * node,
-  int  path)
+    DdManager* zdd,
+    DdNode* node,
+    int path)
 {
-    double	dc_var, minterms;
+    double dc_var, minterms;
 
-    dc_var = (double)((double)(zdd->sizeZ) - (double)path);
+    dc_var = (double) ((double) (zdd->sizeZ) - (double) path);
     minterms = Cudd_zddCountDouble(zdd, node) / pow(2.0, dc_var);
-    return(minterms);
+    return (minterms);
 
 } /* end of Cudd_zddCountMinterm */
 
@@ -176,64 +175,61 @@ Cudd_zddCountMinterm(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Cudd_zddPrintSubtable(
-  DdManager * table)
+void Cudd_zddPrintSubtable(
+    DdManager* table)
 {
-    int		i, j;
-    DdNode	*z1, *z1_next, *base;
-    DdSubtable	*ZSubTable;
+    int i, j;
+    DdNode *z1, *z1_next, *base;
+    DdSubtable* ZSubTable;
 
     base = table->one;
     for (i = table->sizeZ - 1; i >= 0; i--) {
-	ZSubTable = &(table->subtableZ[i]);
-	printf("subtable[%d]:\n", i);
-	for (j = ZSubTable->slots - 1; j >= 0; j--) {
-	    z1 = ZSubTable->nodelist[j];
-	    while (z1 != NIL(DdNode)) {
-		(void) fprintf(table->out,
+        ZSubTable = &(table->subtableZ[i]);
+        printf("subtable[%d]:\n", i);
+        for (j = ZSubTable->slots - 1; j >= 0; j--) {
+            z1 = ZSubTable->nodelist[j];
+            while (z1 != NIL(DdNode)) {
+                (void) fprintf(table->out,
 #if SIZEOF_VOID_P == 8
-		    "ID = 0x%lx\tindex = %u\tr = %u\t",
-		    (ptruint) z1 / (ptruint) sizeof(DdNode),
-		    z1->index, z1->ref);
+                               "ID = 0x%lx\tindex = %u\tr = %u\t",
+                               (ptruint) z1 / (ptruint) sizeof(DdNode),
+                               z1->index, z1->ref);
 #else
-		    "ID = 0x%x\tindex = %hu\tr = %hu\t",
-		    (ptruint) z1 / (ptruint) sizeof(DdNode),
-		    z1->index, z1->ref);
+                               "ID = 0x%x\tindex = %hu\tr = %hu\t",
+                               (ptruint) z1 / (ptruint) sizeof(DdNode),
+                               z1->index, z1->ref);
 #endif
-		z1_next = cuddT(z1);
-		if (Cudd_IsConstant(z1_next)) {
-		    (void) fprintf(table->out, "T = %d\t\t",
-			(z1_next == base));
-		}
-		else {
+                z1_next = cuddT(z1);
+                if (Cudd_IsConstant(z1_next)) {
+                    (void) fprintf(table->out, "T = %d\t\t",
+                                   (z1_next == base));
+                } else {
 #if SIZEOF_VOID_P == 8
-		    (void) fprintf(table->out, "T = 0x%lx\t",
-			(ptruint) z1_next / (ptruint) sizeof(DdNode));
+                    (void) fprintf(table->out, "T = 0x%lx\t",
+                                   (ptruint) z1_next / (ptruint) sizeof(DdNode));
 #else
-		    (void) fprintf(table->out, "T = 0x%x\t",
-			(ptruint) z1_next / (ptruint) sizeof(DdNode));
+                    (void) fprintf(table->out, "T = 0x%x\t",
+                                   (ptruint) z1_next / (ptruint) sizeof(DdNode));
 #endif
-		}
-		z1_next = cuddE(z1);
-		if (Cudd_IsConstant(z1_next)) {
-		    (void) fprintf(table->out, "E = %d\n",
-			(z1_next == base));
-		}
-		else {
+                }
+                z1_next = cuddE(z1);
+                if (Cudd_IsConstant(z1_next)) {
+                    (void) fprintf(table->out, "E = %d\n",
+                                   (z1_next == base));
+                } else {
 #if SIZEOF_VOID_P == 8
-		    (void) fprintf(table->out, "E = 0x%lx\n",
-			(ptruint) z1_next / (ptruint) sizeof(DdNode));
+                    (void) fprintf(table->out, "E = 0x%lx\n",
+                                   (ptruint) z1_next / (ptruint) sizeof(DdNode));
 #else
-		    (void) fprintf(table->out, "E = 0x%x\n",
-			(ptruint) z1_next / (ptruint) sizeof(DdNode));
+                    (void) fprintf(table->out, "E = 0x%x\n",
+                                   (ptruint) z1_next / (ptruint) sizeof(DdNode));
 #endif
-		}
+                }
 
-		z1_next = z1->next;
-		z1 = z1_next;
-	    }
-	}
+                z1_next = z1->next;
+                z1 = z1_next;
+            }
+        }
     }
     putchar('\n');
 
@@ -259,20 +255,20 @@ Cudd_zddPrintSubtable(
 ******************************************************************************/
 static int
 cuddZddDagInt(
-  DdNode * n,
-  st_table * tab)
+    DdNode* n,
+    st_table* tab)
 {
     if (n == NIL(DdNode))
-	return(0);
+        return (0);
 
-    if (st_is_member(tab, (char *)n) == 1)
-	return(0);
+    if (st_is_member(tab, (char*) n) == 1)
+        return (0);
 
     if (Cudd_IsConstant(n))
-	return(0);
+        return (0);
 
-    (void)st_insert(tab, (char *)n, NIL(char));
-    return(1 + cuddZddDagInt(cuddT(n), tab) +
-	cuddZddDagInt(cuddE(n), tab));
+    (void) st_insert(tab, (char*) n, NIL(char));
+    return (1 + cuddZddDagInt(cuddT(n), tab) +
+            cuddZddDagInt(cuddE(n), tab));
 
 } /* cuddZddDagInt */

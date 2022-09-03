@@ -25,39 +25,39 @@
 
 namespace enc {
 
-// shared dctor
-Encoding::~Encoding()
-{}
+    // shared dctor
+    Encoding::~Encoding()
+    {}
 
-// low-level service for bits allocation
-ADD Encoding::make_bit()
-{
-    ADD res = f_mgr.bit();
+    // low-level service for bits allocation
+    ADD Encoding::make_bit()
+    {
+        ADD res { f_mgr.bit() };
 
-    /* keep track of every bit in the encoding, this is used later,
-       when evaluating the scalar value of a bit combination. */
-    f_bits.push_back(res);
+        /* keep track of every bit in the encoding, this is used later,
+           when evaluating the scalar value of a bit combination. */
+        f_bits.push_back(res);
 
-    return res;
-}
-
-// base service, has to be in superclass for visibility
-ADD Encoding::make_monolithic_encoding(unsigned nbits)
-{
-    ADD res = make_bit();
-    ADD two = f_mgr.constant(2);
-
-    assert(0 < nbits);
-    unsigned i = 1;
-
-    while (i < nbits) {
-        res *= two;
-        res += make_bit();
-
-        ++ i;
+        return res;
     }
 
-    return res;
-}
+    // base service, has to be in superclass for visibility
+    ADD Encoding::make_monolithic_encoding(unsigned nbits)
+    {
+        ADD res { make_bit() };
+        ADD two { f_mgr.constant(2) };
 
-};
+        assert(0 < nbits);
+        unsigned i { 1 };
+
+        while (i < nbits) {
+            res *= two;
+            res += make_bit();
+
+            ++i;
+        }
+
+        return res;
+    }
+
+}; // namespace enc

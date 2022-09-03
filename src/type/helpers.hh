@@ -24,22 +24,26 @@
 #ifndef TYPE_HELPERS_H
 #define TYPE_HELPERS_H
 
-/** -- shortcurts to simplify the manipulation of the internal Type stack -- */
-#define TOP_TYPE(tp)                            \
-    const auto (tp)(f_type_stack.back())
+/** -- shortcurts to simplify the manipulation of the internal type stack -- */
+#define TOP_TYPE(tp)        \
+    const auto tp           \
+    {                       \
+        f_type_stack.back() \
+    }
 
-#define DROP_TYPE()                             \
+#define DROP_TYPE() \
     f_type_stack.pop_back()
 
-#define POP_TYPE(tp)                            \
-    TOP_TYPE(tp); DROP_TYPE()
+#define POP_TYPE(tp) \
+    TOP_TYPE(tp);    \
+    DROP_TYPE()
 
-#define PUSH_TYPE(tp)                           \
+#define PUSH_TYPE(tp) \
     f_type_stack.push_back(tp)
 
 namespace type {
 
-typedef std::vector<Type_ptr> TypeVector;
+    typedef std::vector<Type_ptr> TypeVector;
 
 };
 

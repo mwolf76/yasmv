@@ -49,7 +49,6 @@ namespace cmd {
 
     private:
         bool check_requirements();
-
     };
     typedef ReadModel* ReadModel_ptr;
 
@@ -61,6 +60,6 @@ namespace cmd {
         void virtual usage();
     };
 
-}  // namespace cmd
+} // namespace cmd
 
 #endif /* READ_MODEL_H */

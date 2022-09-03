@@ -26,51 +26,53 @@
 #ifndef EXPR_TIME_EXPANDER_H
 #define EXPR_TIME_EXPANDER_H
 
-#include <string>
 #include <expr/expr_mgr.hh>
 #include <expr/walker/walker.hh>
+#include <string>
 
 #include <boost/unordered_map.hpp>
 
 namespace expr::time {
 
-class DoesNotApply : public ExprException {
-public:
-    DoesNotApply(Expr_ptr expr, step_t time);
-};
+    class DoesNotApply: public ExprException {
+    public:
+        DoesNotApply(Expr_ptr expr, step_t time);
+    };
 
-/* TODO: rename this to Expander. This class rewrites @a..b{phi} into
+    /* TODO: rename this to Expander. This class rewrites @a..b{phi} into
  * @a{phi} ^ @a+1{phi} ^ ... ^ @b{phi} */
 
-class Expander : public ExprWalker {
-public:
-    Expander(ExprMgr& em);
-    ~Expander();
+    class Expander: public ExprWalker {
+    public:
+        Expander(ExprMgr& em);
+        ~Expander();
 
-    inline ExprMgr& em()
-    { return f_em; }
+        inline ExprMgr& em()
+        {
+            return f_em;
+        }
 
-    Expr_ptr process(Expr_ptr expr);
+        Expr_ptr process(Expr_ptr expr);
 
-protected:
-    void pre_hook();
-    void post_hook();
+    protected:
+        void pre_hook();
+        void post_hook();
 
-    // support for LTL ops
-    LTL_HOOKS;
+        // support for LTL ops
+        LTL_HOOKS;
 
-    // support for basic ops
-    OP_HOOKS;
+        // support for basic ops
+        OP_HOOKS;
 
-    void walk_instant(const Expr_ptr expr);
-    void walk_leaf(const Expr_ptr expr);
+        void walk_instant(const Expr_ptr expr);
+        void walk_leaf(const Expr_ptr expr);
 
-private:
-    ExprMgr& f_em;
+    private:
+        ExprMgr& f_em;
 
-    ExprVector f_expr_stack;
-    bool internal_error(const Expr_ptr expr);
-};
+        ExprVector f_expr_stack;
+        bool internal_error(const Expr_ptr expr);
+    };
 
 } // namespace expr::time
 

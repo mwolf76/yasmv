@@ -26,8 +26,8 @@
 
 #include <common/common.hh>
 
-#include <iostream>
 #include <boost/unordered_map.hpp>
+#include <iostream>
 
 #include <utils/pool.hh>
 
@@ -39,70 +39,84 @@
 
 namespace cmd {
 
-typedef class Interpreter* Interpreter_ptr;
+    typedef class Interpreter* Interpreter_ptr;
 
-class Command;
-typedef Command* Command_ptr;
+    class Command;
+    typedef Command* Command_ptr;
 
-class CommandTopic;
-typedef CommandTopic* CommandTopic_ptr;
+    class CommandTopic;
+    typedef CommandTopic* CommandTopic_ptr;
 
-class Interpreter {
-public:
-    // singleton
-    static Interpreter& INSTANCE();
+    class Interpreter {
+    public:
+        // singleton
+        static Interpreter& INSTANCE();
 
-    // external commands (will be consumed and destroyed)
-    utils::Variant& operator()(Command_ptr cmd);
+        // external commands (will be consumed and destroyed)
+        utils::Variant& operator()(Command_ptr cmd);
 
-    // cmd loop
-    utils::Variant& operator()();
+        // cmd loop
+        utils::Variant& operator()();
 
-    inline utils::Variant& last_result()
-    { return f_last_result; }
+        inline utils::Variant& last_result()
+        {
+            return f_last_result;
+        }
 
-    // true iff system is shutting down
-    inline bool is_leaving() const
-    { return f_leaving; }
+        // true iff system is shutting down
+        inline bool is_leaving() const
+        {
+            return f_leaving;
+        }
 
-    // process retcode
-    inline int retcode() const
-    { return f_retcode; }
+        // process retcode
+        inline int retcode() const
+        {
+            return f_retcode;
+        }
 
-    void quit(int retcode);
+        void quit(int retcode);
 
-    inline struct timespec epoch() const
-    { return f_epoch; }
+        inline struct timespec epoch() const
+        {
+            return f_epoch;
+        }
 
-protected:
-    friend class Command;
+    protected:
+        friend class Command;
 
-    Interpreter();
-    virtual ~Interpreter();
+        Interpreter();
+        virtual ~Interpreter();
 
-    // for streams redirection
-    inline std::istream& in() const
-    { return *f_in; }
+        // for streams redirection
+        inline std::istream& in() const
+        {
+            return *f_in;
+        }
 
-    inline std::ostream& out() const
-    { return *f_out; }
+        inline std::ostream& out() const
+        {
+            return *f_out;
+        }
 
-    inline std::ostream& err() const
-    { return *f_err; }
+        inline std::ostream& err() const
+        {
+            return *f_err;
+        }
 
-    int f_retcode;
-    bool f_leaving;
+        int f_retcode;
+        bool f_leaving;
 
-    std::istream *f_in;
-    std::ostream *f_out;
-    std::ostream *f_err;
+        std::istream* f_in;
+        std::ostream* f_out;
+        std::ostream* f_err;
 
-    utils::Variant f_last_result;
+        utils::Variant f_last_result;
 
-    static Interpreter_ptr f_instance;
-    struct timespec f_epoch;
-};
+        static Interpreter_ptr f_instance;
+        struct timespec f_epoch;
+    };
 
-};
+}; // namespace cmd
 
 #endif /* INTERPRETER_H */

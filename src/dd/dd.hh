@@ -36,43 +36,51 @@
 #include <common/common.hh>
 #include <dd/cudd-2.5.0/obj/cuddObj.hh>
 
-namespace dd {
-
-typedef std::vector<ADD> DDVector;
-
 /* -- shortcuts to simplify the manipulation of the internal DD stack ------- */
 
 /** Fetch a single DD */
-#define POP_DD(op)                              \
-    const ADD op (f_add_stack.back());          \
+#define TOP_DD(op)         \
+    const ADD op           \
+    {                      \
+        f_add_stack.back() \
+    }
+
+#define POP_DD(op) \
+    TOP_DD(op);    \
     f_add_stack.pop_back()
 
 /** Declare a fresh DD */
-#define FRESH_DD(var)                           \
-    ADD var (make_auto_dd())
+#define FRESH_DD(var)  \
+    ADD var            \
+    {                  \
+        make_auto_dd() \
+    }
 
 /** Push a single DD */
-#define PUSH_DD(add)                            \
+#define PUSH_DD(add) \
     f_add_stack.push_back(add)
 
 /** Fetch a DD vector of given width */
-#define POP_DV(vec, width)                      \
-    dd::DDVector vec;                           \
-    for (unsigned i = 0; i < width ; ++ i) {    \
-        vec.push_back(f_add_stack.back());      \
-        f_add_stack.pop_back();                 \
+#define POP_DV(vec, width)                 \
+    dd::DDVector vec;                      \
+    for (unsigned i = 0; i < width; ++i) { \
+        vec.push_back(f_add_stack.back()); \
+        f_add_stack.pop_back();            \
     }
 
 /** Declare a DD vector of given width */
-#define FRESH_DV(vec, width)                    \
-    dd::DDVector vec;                           \
+#define FRESH_DV(vec, width) \
+    dd::DDVector vec;        \
     make_auto_ddvect(vec, width);
 
 /** Push a DD vector of given width */
-#define PUSH_DV(vec, width)                     \
-    /* push DD vector in reversed order */      \
-    for (unsigned i = 0; i < width; ++ i)       \
-        PUSH_DD(vec[width - i - 1]);
+#define PUSH_DV(vec, width)              \
+    for (unsigned i = 0; i < width; ++i) \
+    PUSH_DD(vec[width - i - 1])
+
+namespace dd {
+
+    typedef std::vector<ADD> DDVector;
 
 };
 

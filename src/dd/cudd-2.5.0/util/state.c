@@ -56,7 +56,7 @@ util_restart_restore_state()
 #endif
 
 
-#if defined(sun) && ! defined(sparc)
+#if defined(sun) && !defined(sparc)
 int util_restart_state[32];
 
 util_restart_save_state()

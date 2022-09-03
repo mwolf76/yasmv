@@ -31,26 +31,26 @@
 
 namespace utils {
 
-long PtrHash::operator() (void *ptr) const
-{
-    return (long)(ptr);
-}
+    long PtrHash::operator()(void* ptr) const
+    {
+        return (long) (ptr);
+    }
 
-bool PtrEq::operator() (const void* x,
-                        const void* y) const
-{
-    return x == y;
-}
+    bool PtrEq::operator()(const void* x,
+                           const void* y) const
+    {
+        return x == y;
+    }
 
-long ValueHash::operator() (value_t k) const
-{
-    return (long)(k);
-}
+    long ValueHash::operator()(value_t k) const
+    {
+        return (long) (k);
+    }
 
-bool ValueEq::operator() (const value_t x,
-                          const value_t y) const
-{
-    return x == y;
-}
+    bool ValueEq::operator()(const value_t x,
+                             const value_t y) const
+    {
+        return x == y;
+    }
 
-};
+}; // namespace utils

@@ -24,108 +24,113 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <cmd/commands/commands.hh>
 #include <cmd/commands/check_init.hh>
+#include <cmd/commands/commands.hh>
 
 #include <algorithms/fsm/fsm.hh>
 
 
 namespace cmd {
 
-CheckInit::CheckInit(Interpreter& owner)
-    : Command(owner)
-    , f_out(std::cout)
-{}
+    CheckInit::CheckInit(Interpreter& owner)
+        : Command(owner)
+        , f_out(std::cout)
+    {}
 
-CheckInit::~CheckInit()
-{}
+    CheckInit::~CheckInit()
+    {}
 
-void CheckInit::add_constraint(expr::Expr_ptr constraint)
-{
-    f_constraints.push_back(constraint);
-}
+    void CheckInit::add_constraint(expr::Expr_ptr constraint)
+    {
+        f_constraints.push_back(constraint);
+    }
 
-bool CheckInit::check_requirements()
-{
-    model::ModelMgr& mm
-        (model::ModelMgr::INSTANCE());
+    bool CheckInit::check_requirements()
+    {
+        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        model::Model& model { mm.model() };
 
-    model::Model& model
-         (mm.model());
+        if (0 == model.modules().size()) {
+            f_out
+                << wrnPrefix
+                << "Model not loaded."
+                << std::endl;
 
-    if (0 == model.modules().size()) {
-        f_out
-            << wrnPrefix
-            << "Model not loaded."
+            return false;
+        }
+
+        return true;
+    }
+
+    utils::Variant CheckInit::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        bool res { false };
+
+        if (check_requirements()) {
+            fsm::CheckInitConsistency check_init {
+                *this, model::ModelMgr::INSTANCE().model()
+            };
+            check_init.process(f_constraints);
+
+            switch (check_init.status()) {
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Initial states consistency check ok."
+                        << std::endl;
+
+                    res = true;
+                    break;
+
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Initial states consistency check failed."
+                        << std::endl;
+                    break;
+
+                case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
+                    if (!om.quiet()) {
+                        f_out
+                            << outPrefix;
+                    }
+
+                    f_out
+                        << "Could not decide initial states consistency check."
+                        << std::endl;
+                    break;
+
+                default:
+                    assert(false); /* unreachable */
+            }                      /* switch */
+        }
+
+        return utils::Variant { res ? okMessage : errMessage };
+    }
+
+    CheckInitTopic::CheckInitTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
+
+    CheckInitTopic::~CheckInitTopic()
+    {
+        TRACE
+            << "Destroyed check-init topic"
             << std::endl;
-
-        return false;
     }
 
-    return true;
-}
-
-utils::Variant CheckInit::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
-
-    bool res { false };
-
-    if (check_requirements()) {
-        fsm::CheckInitConsistency check_init
-            { *this, model::ModelMgr::INSTANCE().model() };
-        check_init.process(f_constraints);
-
-        switch (check_init.status()) {
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Initial states consistency check ok."
-                << std::endl;
-
-            res = true;
-            break;
-
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Initial states consistency check failed."
-                << std::endl;
-            break;
-
-        case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
-            if (! om.quiet())
-                f_out
-                    << outPrefix;
-            f_out
-                << "Could not decide initial states consistency check."
-                << std::endl;
-            break;
-
-        default: assert(false); /* unreachable */
-        } /* switch */
+    void CheckInitTopic::usage()
+    {
+        display_manpage("check-init");
     }
 
-    return utils::Variant(res ? okMessage : errMessage);
-}
-
-CheckInitTopic::CheckInitTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
-
-CheckInitTopic::~CheckInitTopic()
-{
-    TRACE
-        << "Destroyed check-init topic"
-        << std::endl;
-}
-
-void CheckInitTopic::usage()
-{ display_manpage("check-init"); }
-
-};
+}; // namespace cmd

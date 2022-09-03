@@ -39,14 +39,10 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
 {
     Cudd dd;
 
-    ADD lhs
-        (dd.addVar());
-    ADD rhs
-        (dd.addVar());
-    ADD zero
-        (dd.addZero());
-    ADD one
-        (dd.addOne());
+    ADD lhs { dd.addVar() };
+    ADD rhs { dd.addVar() };
+    ADD zero { dd.addZero() };
+    ADD one { dd.addOne() };
 
     /* ! 0 == 1 */
     BOOST_CHECK(zero.Cmpl() == one);
@@ -95,15 +91,15 @@ BOOST_AUTO_TEST_CASE(dd_boolean)
 // duplicate code... :-/
 ADD make_integer_encoding(Cudd& mgr, unsigned nbits, bool is_signed)
 {
-    bool msb = true;
-
-    ADD res = mgr.addOne();
+    bool msb { true };
+    ADD res { mgr.addOne() };
 
     assert(0 < nbits);
-    unsigned i = 0;
+    unsigned i;
 
+    i = 0;
     while (i < nbits) {
-        ADD two = mgr.constant(2);
+        ADD two { mgr.constant(2) };
         if (msb && is_signed) {
             msb = false;
             two = two.Negate(); // MSB is -2^N in 2's complement
@@ -116,7 +112,7 @@ ADD make_integer_encoding(Cudd& mgr, unsigned nbits, bool is_signed)
         // add it to the encoding
         res += add_var;
 
-        ++ i;
+        ++i;
     }
 
     return res;
@@ -127,10 +123,8 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
 {
     Cudd dd;
 
-    ADD lhs
-        (make_integer_encoding(dd, 4, false));
-    ADD rhs
-        (make_integer_encoding(dd, 4, false));
+    ADD lhs { make_integer_encoding(dd, 4, false) };
+    ADD rhs { make_integer_encoding(dd, 4, false) };
 
     BOOST_CHECK(lhs == lhs.Negate().Negate());
 
@@ -168,8 +162,8 @@ BOOST_AUTO_TEST_CASE(dd_arithmetic)
 BOOST_AUTO_TEST_CASE(dd_bitwise)
 {
     Cudd dd;
-    ADD lhs = dd.addVar();
-    ADD rhs = dd.addVar();
+    ADD lhs { dd.addVar() };
+    ADD rhs { dd.addVar() };
 
     {
         ADD neg_neg = lhs.Cmpl().Cmpl();
@@ -205,25 +199,24 @@ BOOST_AUTO_TEST_CASE(dd_bitwise)
         ADD y_xnor_x = rhs.BWXnor(lhs);
         BOOST_CHECK(x_xnor_y == y_xnor_x);
     }
-
 }
 
 BOOST_AUTO_TEST_CASE(dd_relational)
 {
     Cudd dd;
 
-    ADD lhs = make_integer_encoding(dd, 4, false);
-    ADD rhs = make_integer_encoding(dd, 4, false);
+    ADD lhs { make_integer_encoding(dd, 4, false) };
+    ADD rhs { make_integer_encoding(dd, 4, false) };
 
-    ADD x_equals_y = lhs.Equals(rhs);
-    ADD y_equals_x = rhs.Equals(lhs);
+    ADD x_equals_y { lhs.Equals(rhs) };
+    ADD y_equals_x { rhs.Equals(lhs) };
     BOOST_CHECK(x_equals_y == y_equals_x);
 
-    ADD x_lt_y = lhs.LT(rhs);
-    ADD y_lt_x = rhs.LT(lhs);
+    ADD x_lt_y { lhs.LT(rhs) };
+    ADD y_lt_x { rhs.LT(lhs) };
     BOOST_CHECK(x_lt_y != y_lt_x);
 
-    BOOST_CHECK( x_equals_y.Or(x_lt_y) == lhs.LEQ(rhs) );
+    BOOST_CHECK(x_equals_y.Or(x_lt_y) == lhs.LEQ(rhs));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

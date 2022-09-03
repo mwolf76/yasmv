@@ -31,46 +31,46 @@
 
 namespace model {
 
-class ModelException : public Exception {
-public:
-    ModelException(const std::string& subtype,
-                   const std::string& message="")
-        : Exception("ModelException", subtype, message)
-    {}
-};
+    class ModelException: public Exception {
+    public:
+        ModelException(const std::string& subtype,
+                       const std::string& message = "")
+            : Exception("ModelException", subtype, message)
+        {}
+    };
 
-class SemanticError : public ModelException {
-public:
-    SemanticError(const std::string &message)
-        : ModelException("SemanticError", message)
-    {}
-};
+    class SemanticError: public ModelException {
+    public:
+        SemanticError(const std::string& message)
+            : ModelException("SemanticError", message)
+        {}
+    };
 
-class ModuleNotFound : public ModelException {
-public:
-    ModuleNotFound(expr::Expr_ptr expr);
-};
+    class ModuleNotFound: public ModelException {
+    public:
+        ModuleNotFound(expr::Expr_ptr expr);
+    };
 
-class MainModuleNotFound : public ModelException {
-public:
-    MainModuleNotFound();
-};
+    class MainModuleNotFound: public ModelException {
+    public:
+        MainModuleNotFound();
+    };
 
-class DuplicateIdentifier : public ModelException {
-public:
-    DuplicateIdentifier(expr::Expr_ptr expr);
-};
+    class DuplicateIdentifier: public ModelException {
+    public:
+        DuplicateIdentifier(expr::Expr_ptr expr);
+    };
 
-class UnknownIdentifier : public ModelException {
-public:
-    UnknownIdentifier(expr::Expr_ptr expr);
-};
+    class UnknownIdentifier: public ModelException {
+    public:
+        UnknownIdentifier(expr::Expr_ptr expr);
+    };
 
-class BadParamCount : public ModelException {
-public:
-    BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got);
-};
+    class BadParamCount: public ModelException {
+    public:
+        BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got);
+    };
 
-};
+}; // namespace model
 
 #endif /* MODEL_EXCEPTIONS_H */

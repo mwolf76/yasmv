@@ -18,15 +18,15 @@
 #endif
 
 #ifndef RLIMIT_DATA_DEFAULT
-#define RLIMIT_DATA_DEFAULT 67108864	/* assume 64MB by default */
+#define RLIMIT_DATA_DEFAULT 67108864 /* assume 64MB by default */
 #endif
 
 #ifndef EXTERN
-#   ifdef __cplusplus
-#	define EXTERN extern "C"
-#   else
-#	define EXTERN extern
-#   endif
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN extern
+#endif
 #endif
 
 EXTERN unsigned long getSoftDataLimit(void);
@@ -40,11 +40,11 @@ getSoftDataLimit(void)
 
     result = getrlimit(RLIMIT_DATA, &rl);
     if (result != 0 || rl.rlim_cur == RLIM_INFINITY)
-	return((unsigned long) RLIMIT_DATA_DEFAULT);
+        return ((unsigned long) RLIMIT_DATA_DEFAULT);
     else
-	return((unsigned long) rl.rlim_cur);
+        return ((unsigned long) rl.rlim_cur);
 #else
-    return((unsigned long) RLIMIT_DATA_DEFAULT);
+    return ((unsigned long) RLIMIT_DATA_DEFAULT);
 #endif
 
 } /* end of getSoftDataLimit */

@@ -37,22 +37,22 @@
 #include <sat/sat.hh>
 
 #include <model/model.hh>
-#include <model/module.hh>
 #include <model/model_mgr.hh>
+#include <model/module.hh>
 
 #include <enc/enc.hh>
 #include <enc/enc_mgr.hh>
 
 #include <witness/witness.hh>
 
-#include <utils/variant.hh>
 #include <algorithms/exceptions.hh>
+#include <utils/variant.hh>
 
 #include <boost/thread.hpp>
 
 namespace algorithms {
 
-    using thread_ptr = boost::thread *;
+    using thread_ptr = boost::thread*;
     using thread_ptrs = std::vector<thread_ptr>;
 
     /* Engine-less algorithm base class. Engine instances are provided
@@ -60,68 +60,93 @@ namespace algorithms {
     class Algorithm {
 
     public:
-        Algorithm(cmd::Command &command, model::Model &model);
+        Algorithm(cmd::Command& command, model::Model& model);
         virtual ~Algorithm();
 
         /* top-level components */
-        inline expr::ExprMgr &em() { return f_em; }
-        inline type::TypeMgr &tm() { return f_tm; }
-        inline model::ModelMgr &mm() { return f_mm; }
-        inline model::Model &model() { return f_model; }
-        inline compiler::Compiler &compiler() { return f_compiler; }
+        inline expr::ExprMgr& em()
+        {
+            return f_em;
+        }
+        inline type::TypeMgr& tm()
+        {
+            return f_tm;
+        }
+        inline model::ModelMgr& mm()
+        {
+            return f_mm;
+        }
+        inline model::Model& model()
+        {
+            return f_model;
+        }
+        inline compiler::Compiler& compiler()
+        {
+            return f_compiler;
+        }
 
-        inline bool ok() const { return f_ok; }
+        inline bool ok() const
+        {
+            return f_ok;
+        }
 
         /* witness management */
-        inline bool has_witness() const { return NULL != f_witness; }
-        inline void set_witness(witness::Witness &witness) { f_witness = &witness; }
-        inline witness::Witness &witness() const {
-            assert (NULL != f_witness);
+        inline bool has_witness() const
+        {
+            return NULL != f_witness;
+        }
+        inline void set_witness(witness::Witness& witness)
+        {
+            f_witness = &witness;
+        }
+        inline witness::Witness& witness() const
+        {
+            assert(NULL != f_witness);
             return *f_witness;
         }
 
         /* FSM */
-        void assert_fsm_init(sat::Engine &engine, step_t time,
+        void assert_fsm_init(sat::Engine& engine, step_t time,
                              sat::group_t group = sat::MAINGROUP);
 
-        void assert_fsm_invar(sat::Engine &engine, step_t time,
+        void assert_fsm_invar(sat::Engine& engine, step_t time,
                               sat::group_t group = sat::MAINGROUP);
 
-        void assert_fsm_trans(sat::Engine &engine, step_t time,
+        void assert_fsm_trans(sat::Engine& engine, step_t time,
                               sat::group_t group = sat::MAINGROUP);
 
         /* Generate uniqueness constraints between j-th and k-th state */
-        void assert_fsm_uniqueness(sat::Engine &engine, step_t j, step_t k,
+        void assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k,
                                    sat::group_t group = sat::MAINGROUP);
 
         /* Generic formulas */
-        void assert_formula(sat::Engine &engine, step_t time, compiler::Unit &term,
+        void assert_formula(sat::Engine& engine, step_t time, compiler::Unit& term,
                             sat::group_t group = sat::MAINGROUP);
 
         /* TimeFrame from a witness */
-        void assert_time_frame(sat::Engine &engine, step_t time, witness::TimeFrame &tf,
+        void assert_time_frame(sat::Engine& engine, step_t time, witness::TimeFrame& tf,
                                sat::group_t group = sat::MAINGROUP);
 
     private:
         /* internals */
-        void process_init(expr::Expr_ptr ctx, const expr::ExprVector &init);
-        void process_invar(expr::Expr_ptr ctx, const expr::ExprVector &invar);
-        void process_trans(expr::Expr_ptr ctx, const expr::ExprVector &trans);
+        void process_init(expr::Expr_ptr ctx, const expr::ExprVector& init);
+        void process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar);
+        void process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans);
 
         /* all good? */
         bool f_ok;
 
         /* Command */
-        cmd::Command &f_command;
+        cmd::Command& f_command;
 
         /* Model */
-        model::Model &f_model;
+        model::Model& f_model;
 
         /* Managers */
-        model::ModelMgr &f_mm;
-        enc::EncodingMgr &f_bm;
-        expr::ExprMgr &f_em;
-        type::TypeMgr &f_tm;
+        model::ModelMgr& f_mm;
+        enc::EncodingMgr& f_bm;
+        expr::ExprMgr& f_em;
+        type::TypeMgr& f_tm;
 
         /* Model Compiler */
         compiler::Compiler f_compiler;
@@ -135,6 +160,6 @@ namespace algorithms {
         witness::Witness_ptr f_witness;
     };
 
-} // namespace algorithm
+} // namespace algorithms
 
 #endif /* BASE_ALGORITHM_H */

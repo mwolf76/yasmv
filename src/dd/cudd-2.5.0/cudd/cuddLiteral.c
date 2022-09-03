@@ -52,8 +52,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 
 /*---------------------------------------------------------------------------*/
@@ -110,19 +110,19 @@ static char rcsid[] DD_UNUSED = "$Id: cuddLiteral.c,v 1.9 2012/02/05 01:07:19 fa
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddLiteralSetIntersection(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g)
 {
-    DdNode *res;
+    DdNode* res;
 
     do {
-	dd->reordered = 0;
-	res = cuddBddLiteralSetIntersectionRecur(dd,f,g);
+        dd->reordered = 0;
+        res = cuddBddLiteralSetIntersectionRecur(dd, f, g);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddLiteralSetIntersection */
 
@@ -145,22 +145,22 @@ Cudd_bddLiteralSetIntersection(
   SideEffects [None]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddBddLiteralSetIntersectionRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g)
 {
     DdNode *res, *tmp;
     DdNode *F, *G;
     DdNode *fc, *gc;
-    DdNode *one;
-    DdNode *zero;
+    DdNode* one;
+    DdNode* zero;
     unsigned int topf, topg, comple;
     int phasef, phaseg;
 
     statLine(dd);
-    if (f == g) return(f);
+    if (f == g) return (f);
 
     F = Cudd_Regular(f);
     G = Cudd_Regular(g);
@@ -170,44 +170,44 @@ cuddBddLiteralSetIntersectionRecur(
     ** Since they are two cubes, this case only occurs when f == v,
     ** g == v', and v is a variable or its complement.
     */
-    if (F == G) return(one);
+    if (F == G) return (one);
 
     zero = Cudd_Not(one);
-    topf = cuddI(dd,F->index);
-    topg = cuddI(dd,G->index);
+    topf = cuddI(dd, F->index);
+    topg = cuddI(dd, G->index);
     /* Look for a variable common to both cubes. If there are none, this
     ** loop will stop when the constant node is reached in both cubes.
     */
     while (topf != topg) {
-	if (topf < topg) {	/* move down on f */
-	    comple = f != F;
-	    f = cuddT(F);
-	    if (comple) f = Cudd_Not(f);
-	    if (f == zero) {
-		f = cuddE(F);
-		if (comple) f = Cudd_Not(f);
-	    }
-	    F = Cudd_Regular(f);
-	    topf = cuddI(dd,F->index);
-	} else if (topg < topf) {
-	    comple = g != G;
-	    g = cuddT(G);
-	    if (comple) g = Cudd_Not(g);
-	    if (g == zero) {
-		g = cuddE(G);
-		if (comple) g = Cudd_Not(g);
-	    }
-	    G = Cudd_Regular(g);
-	    topg = cuddI(dd,G->index);
-	}
+        if (topf < topg) { /* move down on f */
+            comple = f != F;
+            f = cuddT(F);
+            if (comple) f = Cudd_Not(f);
+            if (f == zero) {
+                f = cuddE(F);
+                if (comple) f = Cudd_Not(f);
+            }
+            F = Cudd_Regular(f);
+            topf = cuddI(dd, F->index);
+        } else if (topg < topf) {
+            comple = g != G;
+            g = cuddT(G);
+            if (comple) g = Cudd_Not(g);
+            if (g == zero) {
+                g = cuddE(G);
+                if (comple) g = Cudd_Not(g);
+            }
+            G = Cudd_Regular(g);
+            topg = cuddI(dd, G->index);
+        }
     }
 
     /* At this point, f == one <=> g == 1. It suffices to test one of them. */
-    if (f == one) return(one);
+    if (f == one) return (one);
 
-    res = cuddCacheLookup2(dd,Cudd_bddLiteralSetIntersection,f,g);
+    res = cuddCacheLookup2(dd, Cudd_bddLiteralSetIntersection, f, g);
     if (res != NULL) {
-	return(res);
+        return (res);
     }
 
     /* Here f and g are both non constant and have the same top variable. */
@@ -216,44 +216,44 @@ cuddBddLiteralSetIntersectionRecur(
     phasef = 1;
     if (comple) fc = Cudd_Not(fc);
     if (fc == zero) {
-	fc = cuddE(F);
-	phasef = 0;
-	if (comple) fc = Cudd_Not(fc);
+        fc = cuddE(F);
+        phasef = 0;
+        if (comple) fc = Cudd_Not(fc);
     }
     comple = g != G;
     gc = cuddT(G);
     phaseg = 1;
     if (comple) gc = Cudd_Not(gc);
     if (gc == zero) {
-	gc = cuddE(G);
-	phaseg = 0;
-	if (comple) gc = Cudd_Not(gc);
+        gc = cuddE(G);
+        phaseg = 0;
+        if (comple) gc = Cudd_Not(gc);
     }
 
-    tmp = cuddBddLiteralSetIntersectionRecur(dd,fc,gc);
+    tmp = cuddBddLiteralSetIntersectionRecur(dd, fc, gc);
     if (tmp == NULL) {
-	return(NULL);
+        return (NULL);
     }
 
     if (phasef != phaseg) {
-	res = tmp;
+        res = tmp;
     } else {
-	cuddRef(tmp);
-	if (phasef == 0) {
-	    res = cuddBddAndRecur(dd,Cudd_Not(dd->vars[F->index]),tmp);
-	} else {
-	    res = cuddBddAndRecur(dd,dd->vars[F->index],tmp);
-	}
-	if (res == NULL) {
-	    Cudd_RecursiveDeref(dd,tmp);
-	    return(NULL);
-	}
-	cuddDeref(tmp); /* Just cuddDeref, because it is included in result */
+        cuddRef(tmp);
+        if (phasef == 0) {
+            res = cuddBddAndRecur(dd, Cudd_Not(dd->vars[F->index]), tmp);
+        } else {
+            res = cuddBddAndRecur(dd, dd->vars[F->index], tmp);
+        }
+        if (res == NULL) {
+            Cudd_RecursiveDeref(dd, tmp);
+            return (NULL);
+        }
+        cuddDeref(tmp); /* Just cuddDeref, because it is included in result */
     }
 
-    cuddCacheInsert2(dd,Cudd_bddLiteralSetIntersection,f,g,res);
+    cuddCacheInsert2(dd, Cudd_bddLiteralSetIntersection, f, g, res);
 
-    return(res);
+    return (res);
 
 } /* end of cuddBddLiteralSetIntersectionRecur */
 

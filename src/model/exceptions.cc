@@ -31,92 +31,92 @@
 
 namespace model {
 
-static std::string build_module_not_found_error_message(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    static std::string build_module_not_found_error_message(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "Module not found: `"
-        << expr
-        << "`";
+        oss
+            << "Module not found: `"
+            << expr
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-ModuleNotFound::ModuleNotFound(expr::Expr_ptr module_name)
-    : ModelException("ModuleNotFound",
-                     build_module_not_found_error_message(module_name))
-{}
+    ModuleNotFound::ModuleNotFound(expr::Expr_ptr module_name)
+        : ModelException("ModuleNotFound",
+                         build_module_not_found_error_message(module_name))
+    {}
 
-static std::string build_main_module_not_found_error_message()
-{
-    std::ostringstream oss;
+    static std::string build_main_module_not_found_error_message()
+    {
+        std::ostringstream oss;
 
-    oss
-        << "Main module not found";
+        oss
+            << "Main module not found";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-MainModuleNotFound::MainModuleNotFound()
-    : ModelException("MainModuleNotFound",
-                     build_main_module_not_found_error_message())
-{}
+    MainModuleNotFound::MainModuleNotFound()
+        : ModelException("MainModuleNotFound",
+                         build_main_module_not_found_error_message())
+    {}
 
-static std::string build_duplicate_identifier_error_message(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
-    oss
-        << "identifier: `"
-        << expr
-        << "`";
+    static std::string build_duplicate_identifier_error_message(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
+        oss
+            << "identifier: `"
+            << expr
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-DuplicateIdentifier::DuplicateIdentifier(expr::Expr_ptr duplicate)
-    : ModelException("DuplicateIdentifier",
-                     build_duplicate_identifier_error_message(duplicate))
-{}
+    DuplicateIdentifier::DuplicateIdentifier(expr::Expr_ptr duplicate)
+        : ModelException("DuplicateIdentifier",
+                         build_duplicate_identifier_error_message(duplicate))
+    {}
 
-static std::string build_unknown_identifier_error_message(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    static std::string build_unknown_identifier_error_message(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "Unknown identifier: `"
-        << expr
-        << "`";
+        oss
+            << "Unknown identifier: `"
+            << expr
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-UnknownIdentifier::UnknownIdentifier(expr::Expr_ptr unknown)
-    : ModelException("UnknownIdentifier",
-                     build_unknown_identifier_error_message(unknown))
-{}
+    UnknownIdentifier::UnknownIdentifier(expr::Expr_ptr unknown)
+        : ModelException("UnknownIdentifier",
+                         build_unknown_identifier_error_message(unknown))
+    {}
 
-static std::string build_bad_param_count_error_message(expr::Expr_ptr instance,
-                                                       unsigned expected,
-                                                       unsigned got)
-{
-    std::ostringstream oss;
+    static std::string build_bad_param_count_error_message(expr::Expr_ptr instance,
+                                                           unsigned expected,
+                                                           unsigned got)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "Wrong parameters count in `"
-        << instance
-        << "`, "
-        << expected
-        << " expected, "
-        << " got "
-        << got;
+        oss
+            << "Wrong parameters count in `"
+            << instance
+            << "`, "
+            << expected
+            << " expected, "
+            << " got "
+            << got;
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-BadParamCount::BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got)
-    : ModelException("BadParamCount",
-                     build_bad_param_count_error_message(instance, expected, got))
-{}
+    BadParamCount::BadParamCount(expr::Expr_ptr instance, unsigned expected, unsigned got)
+        : ModelException("BadParamCount",
+                         build_bad_param_count_error_message(instance, expected, got))
+    {}
 
-};
+}; // namespace model

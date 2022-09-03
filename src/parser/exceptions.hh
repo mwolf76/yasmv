@@ -27,22 +27,22 @@
 #include <common/common.hh>
 #include <string>
 
-class ParserException : public Exception {
+class ParserException: public Exception {
 public:
     ParserException(const std::string& subtype,
-                    const std::string& message="")
+                    const std::string& message = "")
         : Exception("ParserException", subtype, message)
     {}
 };
 
-class SyntaxError : public ParserException {
+class SyntaxError: public ParserException {
 public:
     SyntaxError(const std::string& message);
 };
 
-class FileInputException : public ParserException {
+class FileInputException: public ParserException {
 public:
-    FileInputException(const std::string &filename);
+    FileInputException(const std::string& filename);
 };
 
 #endif /* PARSER_EXCEPTIONS_H */

@@ -25,30 +25,30 @@
 
 namespace cmd {
 
-class DupTrace : public Command {
+    class DupTrace: public Command {
 
-    pchar f_trace_id;
-    pchar f_duplicate_id;
+        pchar f_trace_id;
+        pchar f_duplicate_id;
 
-public:
-    DupTrace (Interpreter& owner);
-    virtual ~DupTrace();
+    public:
+        DupTrace(Interpreter& owner);
+        virtual ~DupTrace();
 
-    void set_trace_id(pconst_char trace_id);
-    void set_duplicate_id(pconst_char duplicate_id);
+        void set_trace_id(pconst_char trace_id);
+        void set_duplicate_id(pconst_char duplicate_id);
 
-    utils::Variant virtual operator()();
-};
-typedef DupTrace* DupTrace_ptr;
+        utils::Variant virtual operator()();
+    };
+    typedef DupTrace* DupTrace_ptr;
 
-class DupTraceTopic : public CommandTopic {
-public:
-    DupTraceTopic(Interpreter& owner);
-    virtual ~DupTraceTopic();
+    class DupTraceTopic: public CommandTopic {
+    public:
+        DupTraceTopic(Interpreter& owner);
+        virtual ~DupTraceTopic();
 
-    void virtual usage();
-};
+        void virtual usage();
+    };
 
-};
+}; // namespace cmd
 
 #endif // DUP_TRACE_CMD_H

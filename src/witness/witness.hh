@@ -99,7 +99,7 @@ namespace witness {
         Witness& f_owner;
     };
 
-    using  Witness_ptr = class Witness*;
+    using Witness_ptr = class Witness*;
     class Witness {
     public:
         Witness(sat::Engine_ptr pengine = NULL,

@@ -35,96 +35,93 @@
 
 namespace cmd {
 
-Get::Get(Interpreter& owner)
-    : Command(owner)
-    , f_identifier(NULL)
-{}
+    Get::Get(Interpreter& owner)
+        : Command(owner)
+        , f_identifier(NULL)
+    {}
 
-Get::~Get()
-{}
+    Get::~Get()
+    {}
 
-void Get::set_identifier(expr::Expr_ptr id)
-{
-    f_identifier = id;
-}
-
-void Get::print_assignment(std::ostream& os, expr::Expr_ptr id)
-{
-    env::Environment& env
-        (env::Environment::INSTANCE());
-
-    expr::Expr_ptr value { env.get(id) }; /* raises an exception on failures */
-
-    os
-        << outPrefix
-        << id
-        << " := "
-        << value
-        << std::endl;
-}
-
-void Get::print_all_assignments(std::ostream& os)
-{
-    env::Environment& env
-        (env::Environment::INSTANCE());
-
-    const expr::ExprSet& identifiers { env.identifiers() };
-
-    for (expr::ExprSet::const_iterator i = identifiers.begin();
-         i != identifiers.end(); ++ i) {
-
-        expr::Expr_ptr id { *i };
-        print_assignment(os, id);
+    void Get::set_identifier(expr::Expr_ptr id)
+    {
+        f_identifier = id;
     }
-}
 
-utils::Variant Get::print_one_assignment(std::ostream& os, expr::Expr_ptr id)
-{
-    utils::Variant res { errMessage };
+    void Get::print_assignment(std::ostream& os, expr::Expr_ptr id)
+    {
+        env::Environment& env { env::Environment::INSTANCE() };
 
-    try {
-        print_assignment(os, id);
-        res = utils::Variant(okMessage);
-    }
-    catch (env::NoSuchIdentifier& nsi) {
-        const char *what { nsi.what() };
+        /* raises an exception on failures */
+        expr::Expr_ptr value { env.get(id) };
 
         os
-            << wrnPrefix
-            << what
+            << outPrefix
+            << id
+            << " := "
+            << value
             << std::endl;
     }
 
-    return res;
-}
+    void Get::print_all_assignments(std::ostream& os)
+    {
+        env::Environment& env { env::Environment::INSTANCE() };
+        const expr::ExprSet& identifiers { env.identifiers() };
 
-utils::Variant Get::operator()()
-{
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out
-        (std::cout);
+        for (expr::ExprSet::const_iterator i = identifiers.begin();
+             i != identifiers.end(); ++i) {
 
-    if (NULL == f_identifier) {
-        print_all_assignments(out);
-        return utils::Variant(okMessage);
+            expr::Expr_ptr id { *i };
+            print_assignment(os, id);
+        }
     }
-    else {
-        return print_one_assignment(out, f_identifier);
+
+    utils::Variant Get::print_one_assignment(std::ostream& os, expr::Expr_ptr id)
+    {
+        utils::Variant res { errMessage };
+
+        try {
+            print_assignment(os, id);
+            res = utils::Variant(okMessage);
+        } catch (env::NoSuchIdentifier& nsi) {
+            const char* what { nsi.what() };
+
+            os
+                << wrnPrefix
+                << what
+                << std::endl;
+        }
+
+        return res;
     }
-}
 
-GetTopic::GetTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    utils::Variant Get::operator()()
+    {
+        /* FIXME: implement stream redirection for std{out,err} */
+        std::ostream& out { std::cout };
 
-GetTopic::~GetTopic()
-{
-    TRACE
-        << "Destroyed get topic"
-        << std::endl;
-}
+        if (NULL == f_identifier) {
+            print_all_assignments(out);
+            return utils::Variant(okMessage);
+        } else {
+            return print_one_assignment(out, f_identifier);
+        }
+    }
 
-void GetTopic::usage()
-{ display_manpage("get"); }
+    GetTopic::GetTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-};
+    GetTopic::~GetTopic()
+    {
+        TRACE
+            << "Destroyed get topic"
+            << std::endl;
+    }
+
+    void GetTopic::usage()
+    {
+        display_manpage("get");
+    }
+
+}; // namespace cmd

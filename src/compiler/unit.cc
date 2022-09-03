@@ -21,69 +21,68 @@
  *
  **/
 
-#include <compiler/typedefs.hh>
 #include <compiler/streamers.hh>
+#include <compiler/typedefs.hh>
 
 #include <type/type.hh>
 
 namespace compiler {
 
-InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                                                     dd::DDVector& z, dd::DDVector &x)
-    : f_ios(ios)
-    , f_z(z)
-    , f_x(x)
-{}
+    InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                                                         dd::DDVector& z, dd::DDVector& x)
+        : f_ios(ios)
+        , f_z(z)
+        , f_x(x)
+    {}
 
-InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
-                                                     dd::DDVector& z, dd::DDVector &x, dd::DDVector &y)
-    : f_ios(ios)
-    , f_z(z)
-    , f_x(x)
-    , f_y(y)
-{}
+    InlinedOperatorDescriptor::InlinedOperatorDescriptor(InlinedOperatorSignature ios,
+                                                         dd::DDVector& z, dd::DDVector& x, dd::DDVector& y)
+        : f_ios(ios)
+        , f_z(z)
+        , f_x(x)
+        , f_y(y)
+    {}
 
-BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, dd::DDVector& z,
-                                                     ADD cnd, ADD aux, dd::DDVector &x, dd::DDVector &y)
-    : f_width(width)
-    , f_z(z)
-    , f_cnd(cnd)
-    , f_aux(aux)
-    , f_x(x)
-    , f_y(y)
-{}
+    BinarySelectionDescriptor::BinarySelectionDescriptor(unsigned width, dd::DDVector& z,
+                                                         ADD cnd, ADD aux, dd::DDVector& x, dd::DDVector& y)
+        : f_width(width)
+        , f_z(z)
+        , f_cnd(cnd)
+        , f_aux(aux)
+        , f_x(x)
+        , f_y(y)
+    {}
 
-MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
-                                                         unsigned elem_count,
-                                                         dd::DDVector& z, dd::DDVector& cnds,
-                                                         dd::DDVector& acts, dd::DDVector &x)
-    : f_elem_width(elem_width)
-    , f_elem_count(elem_count)
-    , f_z(z)
-    , f_cnds(cnds)
-    , f_acts(acts)
-    , f_x(x)
-{}
+    MultiwaySelectionDescriptor::MultiwaySelectionDescriptor(unsigned elem_width,
+                                                             unsigned elem_count,
+                                                             dd::DDVector& z, dd::DDVector& cnds,
+                                                             dd::DDVector& acts, dd::DDVector& x)
+        : f_elem_width(elem_width)
+        , f_elem_count(elem_count)
+        , f_z(z)
+        , f_cnds(cnds)
+        , f_acts(acts)
+        , f_x(x)
+    {}
 
-long InlinedOperatorSignatureHash::operator() (const InlinedOperatorSignature& k) const
-{
-    const long prime = 31;
+    long InlinedOperatorSignatureHash::operator()(const InlinedOperatorSignature& k) const
+    {
+        const long prime = 31;
 
-    long res = 1;
-    res = prime * res + (k.get<0>() ? 1231 : 1237);
-    res = prime * res + k.get<1>();
-    res = prime * res + k.get<2>();
+        long res = 1;
+        res = prime * res + (k.get<0>() ? 1231 : 1237);
+        res = prime * res + k.get<1>();
+        res = prime * res + k.get<2>();
 
-    return res;
-}
+        return res;
+    }
 
-bool InlinedOperatorSignatureEq::operator() (const InlinedOperatorSignature& x,
-                                             const InlinedOperatorSignature& y) const
-{
-    return
-        x.get<0>() == y.get<0>() &&
-        x.get<1>() == y.get<1>() &&
-        x.get<2>() == y.get<2>() ;
-}
+    bool InlinedOperatorSignatureEq::operator()(const InlinedOperatorSignature& x,
+                                                const InlinedOperatorSignature& y) const
+    {
+        return x.get<0>() == y.get<0>() &&
+               x.get<1>() == y.get<1>() &&
+               x.get<2>() == y.get<2>();
+    }
 
 } // namespace compiler

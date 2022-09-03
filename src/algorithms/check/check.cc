@@ -28,31 +28,31 @@
 
 namespace check {
 
-Check::Check(cmd::Command& command, model::Model& model)
-    : Algorithm(command, model)
-{
-    const void* instance(this);
-    TRACE
-        << "Created Check @"
-        << instance
-        << std::endl;
-}
+    Check::Check(cmd::Command& command, model::Model& model)
+        : Algorithm(command, model)
+    {
+        const void* instance { this };
+        TRACE
+            << "Created Check @"
+            << instance
+            << std::endl;
+    }
 
-Check::~Check()
-{
-    const void* instance(this);
-    TRACE
-        << "Destroyed Check @"
-        << instance
-        << std::endl;
-}
+    Check::~Check()
+    {
+        const void* instance { this };
+        TRACE
+            << "Destroyed Check @"
+            << instance
+            << std::endl;
+    }
 
-void Check::process(const expr::Expr_ptr phi)
-{
-    set_status(CHECK_UNKNOWN );
-    assert(false); // XXX: TODO
+    void Check::process(const expr::Expr_ptr phi)
+    {
+        set_status(CHECK_UNKNOWN);
+        assert(false); // XXX: TODO
 
-    TRACE << "Done." << std::endl;
-}
+        TRACE << "Done." << std::endl;
+    }
 
 } // namespace check

@@ -27,12 +27,29 @@
 #ifndef UTILS_TIME_H
 #define UTILS_TIME_H
 
-#include <common/common.hh>
 #include <vector>
+
+/** -- shortcurts to simplify the manipulation of the internal time stack -- */
+#define TOP_TIME(step)               \
+    assert(0 < f_time_stack.size()); \
+    const step_t step                \
+    {                                \
+        f_time_stack.back()          \
+    }
+
+#define DROP_TIME() \
+    f_time_stack.pop_back()
+
+#define POP_TIME(step) \
+    TOP_TIME(step);    \
+    DROP_TIME()
+
+#define PUSH_TIME(step) \
+    f_time_stack.push_back(step)
 
 namespace utils {
 
-typedef std::vector<step_t> TimeVector;
+    typedef std::vector<step_t> TimeVector;
 
 };
 

@@ -25,84 +25,105 @@
 
 namespace utils {
 
-Variant NilValue;
+    Variant NilValue;
 
-// variant constructors
-Variant::Variant()
-    : f_type(BOTTOM)
-{}
+    // variant constructors
+    Variant::Variant()
+        : f_type(BOTTOM)
+    {}
 
-Variant::Variant(bool value)
-    : f_type(BOOLEAN)
-    , f_bool(value)
-{}
+    Variant::Variant(bool value)
+        : f_type(BOOLEAN)
+        , f_bool(value)
+    {}
 
-Variant::Variant(int value)
-    : f_type(INTEGER)
-    , f_int(value)
-{}
+    Variant::Variant(int value)
+        : f_type(INTEGER)
+        , f_int(value)
+    {}
 
-Variant::Variant(const std::string& value)
-    : f_type(STRING)
-    , f_str(value)
-{}
+    Variant::Variant(const std::string& value)
+        : f_type(STRING)
+        , f_str(value)
+    {}
 
-Variant::Variant(const Variant& v)
-    : f_type(v.f_type)
-{
-    switch (f_type) {
-    case BOTTOM:
-        return;
+    Variant::Variant(const Variant& v)
+        : f_type(v.f_type)
+    {
+        switch (f_type) {
+            case BOTTOM:
+                return;
 
-    case BOOLEAN:
-        f_bool = v.f_bool;
-        return;
+            case BOOLEAN:
+                f_bool = v.f_bool;
+                return;
 
-    case INTEGER:
-        f_int = v.f_int;
-        return;
+            case INTEGER:
+                f_int = v.f_int;
+                return;
 
-    case STRING:
-        f_str = v.f_str;
-        return;
+            case STRING:
+                f_str = v.f_str;
+                return;
 
-    default: assert(false);
+            default:
+                assert(false);
+        }
     }
-}
 
-bool Variant::is_nil() const
-{ return f_type == BOTTOM; }
+    bool Variant::is_nil() const
+    {
+        return f_type == BOTTOM;
+    }
 
-bool Variant::is_boolean() const
-{ return f_type == BOOLEAN; }
-bool Variant::as_boolean() const
-{ return f_bool; }
+    bool Variant::is_boolean() const
+    {
+        return f_type == BOOLEAN;
+    }
+    bool Variant::as_boolean() const
+    {
+        return f_bool;
+    }
 
-bool Variant::is_integer() const
-{ return f_type == INTEGER; }
-int Variant::as_integer() const
-{ return f_int; }
+    bool Variant::is_integer() const
+    {
+        return f_type == INTEGER;
+    }
+    int Variant::as_integer() const
+    {
+        return f_int;
+    }
 
-bool Variant::is_string() const
-{ return f_type == STRING; }
-std::string Variant::as_string() const
-{ return f_str; }
+    bool Variant::is_string() const
+    {
+        return f_type == STRING;
+    }
+    std::string Variant::as_string() const
+    {
+        return f_str;
+    }
 
-std::ostream& operator<<(std::ostream& os, const Variant& variant)
-{
-    if (variant.is_nil())
-        return os << "(null)";
+    std::ostream& operator<<(std::ostream& os, const Variant& variant)
+    {
+        if (variant.is_nil()) {
+            return os << "(null)";
+        }
 
-    else if (variant.is_boolean())
-        return os << variant.as_boolean();
+        else if (variant.is_boolean()) {
+            return os << variant.as_boolean();
+        }
 
-    else if (variant.is_integer())
-        return os << variant.as_integer();
+        else if (variant.is_integer()) {
+            return os << variant.as_integer();
+        }
 
-    else if (variant.is_string())
-        return os << variant.as_string();
+        else if (variant.is_string()) {
+            return os << variant.as_string();
+        }
 
-    else assert(0); /* you shouldn't see me ... */
-}
+        else {
+            assert(0); /* you shouldn't see me ... */
+        }
+    }
 
-};
+}; // namespace utils

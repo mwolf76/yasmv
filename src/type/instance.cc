@@ -26,15 +26,17 @@
 
 namespace type {
 
-unsigned InstanceType::width() const
-{ assert(false); }
+    unsigned InstanceType::width() const
+    {
+        assert(false);
+    }
 
-InstanceType::InstanceType(TypeMgr& owner, expr::Expr_ptr name, expr::Expr_ptr params)
-    : ScalarType(owner)
-    , f_name(name)
-    , f_params(params)
-{
-    f_repr = expr::ExprMgr::INSTANCE().make_params( name, params );
-}
+    InstanceType::InstanceType(TypeMgr& owner, expr::Expr_ptr name, expr::Expr_ptr params)
+        : ScalarType(owner)
+        , f_name(name)
+        , f_params(params)
+    {
+        f_repr = expr::ExprMgr::INSTANCE().make_params(name, params);
+    }
 
-}
+} // namespace type

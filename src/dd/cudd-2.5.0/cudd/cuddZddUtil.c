@@ -69,8 +69,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -106,11 +106,11 @@ static char rcsid[] DD_UNUSED = "$Id: cuddZddUtil.c,v 1.29 2012/02/05 01:07:19 f
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static int zp2 (DdManager *zdd, DdNode *f, st_table *t);
-static void zdd_print_minterm_aux (DdManager *zdd, DdNode *node, int level, int *list);
-static void zddPrintCoverAux (DdManager *zdd, DdNode *node, int level, int *list);
-static void zddSupportStep(DdNode * f, int * support);
-static void zddClearFlag(DdNode * f);
+static int zp2(DdManager* zdd, DdNode* f, st_table* t);
+static void zdd_print_minterm_aux(DdManager* zdd, DdNode* node, int level, int* list);
+static void zddPrintCoverAux(DdManager* zdd, DdNode* node, int level, int* list);
+static void zddSupportStep(DdNode* f, int* support);
+static void zddClearFlag(DdNode* f);
 
 /**AutomaticEnd***************************************************************/
 
@@ -132,24 +132,24 @@ static void zddClearFlag(DdNode * f);
   SeeAlso     [Cudd_zddPrintDebug Cudd_zddPrintCover]
 
 ******************************************************************************/
-int
-Cudd_zddPrintMinterm(
-  DdManager * zdd,
-  DdNode * node)
+int Cudd_zddPrintMinterm(
+    DdManager* zdd,
+    DdNode* node)
 {
-    int		i, size;
-    int		*list;
+    int i, size;
+    int* list;
 
-    size = (int)zdd->sizeZ;
+    size = (int) zdd->sizeZ;
     list = ALLOC(int, size);
     if (list == NULL) {
-	zdd->errorCode = CUDD_MEMORY_OUT;
-	return(0);
+        zdd->errorCode = CUDD_MEMORY_OUT;
+        return (0);
     }
-    for (i = 0; i < size; i++) list[i] = 3; /* bogus value should disappear */
+    for (i = 0; i < size; i++)
+        list[i] = 3; /* bogus value should disappear */
     zdd_print_minterm_aux(zdd, node, 0, list);
     FREE(list);
-    return(1);
+    return (1);
 
 } /* end of Cudd_zddPrintMinterm */
 
@@ -166,25 +166,25 @@ Cudd_zddPrintMinterm(
   SeeAlso     [Cudd_zddPrintMinterm]
 
 ******************************************************************************/
-int
-Cudd_zddPrintCover(
-  DdManager * zdd,
-  DdNode * node)
+int Cudd_zddPrintCover(
+    DdManager* zdd,
+    DdNode* node)
 {
-    int		i, size;
-    int		*list;
+    int i, size;
+    int* list;
 
-    size = (int)zdd->sizeZ;
-    if (size % 2 != 0) return(0); /* number of variables should be even */
+    size = (int) zdd->sizeZ;
+    if (size % 2 != 0) return (0); /* number of variables should be even */
     list = ALLOC(int, size);
     if (list == NULL) {
-	zdd->errorCode = CUDD_MEMORY_OUT;
-	return(0);
+        zdd->errorCode = CUDD_MEMORY_OUT;
+        return (0);
     }
-    for (i = 0; i < size; i++) list[i] = 3; /* bogus value should disappear */
+    for (i = 0; i < size; i++)
+        list[i] = 3; /* bogus value should disappear */
     zddPrintCoverAux(zdd, node, 0, list);
     FREE(list);
-    return(1);
+    return (1);
 
 } /* end of Cudd_zddPrintCover */
 
@@ -212,43 +212,41 @@ Cudd_zddPrintCover(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Cudd_zddPrintDebug(
-  DdManager * zdd,
-  DdNode * f,
-  int  n,
-  int  pr)
+int Cudd_zddPrintDebug(
+    DdManager* zdd,
+    DdNode* f,
+    int n,
+    int pr)
 {
-    DdNode	*empty = DD_ZERO(zdd);
-    int		nodes;
-    double	minterms;
-    int		retval = 1;
+    DdNode* empty = DD_ZERO(zdd);
+    int nodes;
+    double minterms;
+    int retval = 1;
 
     if (f == empty && pr > 0) {
-	(void) fprintf(zdd->out,": is the empty ZDD\n");
-	(void) fflush(zdd->out);
-	return(1);
+        (void) fprintf(zdd->out, ": is the empty ZDD\n");
+        (void) fflush(zdd->out);
+        return (1);
     }
 
     if (pr > 0) {
-	nodes = Cudd_zddDagSize(f);
-	if (nodes == CUDD_OUT_OF_MEM) retval = 0;
-	minterms = Cudd_zddCountMinterm(zdd, f, n);
-	if (minterms == (double)CUDD_OUT_OF_MEM) retval = 0;
-	(void) fprintf(zdd->out,": %d nodes %g minterms\n",
-		       nodes, minterms);
-	if (pr > 2)
-	    if (!cuddZddP(zdd, f)) retval = 0;
-	if (pr == 2 || pr > 3) {
-	    if (!Cudd_zddPrintMinterm(zdd, f)) retval = 0;
-	    (void) fprintf(zdd->out,"\n");
-	}
-	(void) fflush(zdd->out);
+        nodes = Cudd_zddDagSize(f);
+        if (nodes == CUDD_OUT_OF_MEM) retval = 0;
+        minterms = Cudd_zddCountMinterm(zdd, f, n);
+        if (minterms == (double) CUDD_OUT_OF_MEM) retval = 0;
+        (void) fprintf(zdd->out, ": %d nodes %g minterms\n",
+                       nodes, minterms);
+        if (pr > 2)
+            if (!cuddZddP(zdd, f)) retval = 0;
+        if (pr == 2 || pr > 3) {
+            if (!Cudd_zddPrintMinterm(zdd, f)) retval = 0;
+            (void) fprintf(zdd->out, "\n");
+        }
+        (void) fflush(zdd->out);
     }
-    return(retval);
+    return (retval);
 
 } /* end of Cudd_zddPrintDebug */
-
 
 
 /**Function********************************************************************
@@ -272,25 +270,25 @@ Cudd_zddPrintDebug(
   Cudd_IsGenEmpty]
 
 ******************************************************************************/
-DdGen *
+DdGen*
 Cudd_zddFirstPath(
-  DdManager * zdd,
-  DdNode * f,
-  int ** path)
+    DdManager* zdd,
+    DdNode* f,
+    int** path)
 {
-    DdGen *gen;
+    DdGen* gen;
     DdNode *top, *next, *prev;
     int i;
     int nvars;
 
     /* Sanity Check. */
-    if (zdd == NULL || f == NULL) return(NULL);
+    if (zdd == NULL || f == NULL) return (NULL);
 
     /* Allocate generator an initialize it. */
-    gen = ALLOC(DdGen,1);
+    gen = ALLOC(DdGen, 1);
     if (gen == NULL) {
-	zdd->errorCode = CUDD_MEMORY_OUT;
-	return(NULL);
+        zdd->errorCode = CUDD_MEMORY_OUT;
+        return (NULL);
     }
 
     gen->manager = zdd;
@@ -303,68 +301,72 @@ Cudd_zddFirstPath(
     gen->node = NULL;
 
     nvars = zdd->sizeZ;
-    gen->gen.cubes.cube = ALLOC(int,nvars);
+    gen->gen.cubes.cube = ALLOC(int, nvars);
     if (gen->gen.cubes.cube == NULL) {
-	zdd->errorCode = CUDD_MEMORY_OUT;
-	FREE(gen);
-	return(NULL);
+        zdd->errorCode = CUDD_MEMORY_OUT;
+        FREE(gen);
+        return (NULL);
     }
-    for (i = 0; i < nvars; i++) gen->gen.cubes.cube[i] = 2;
+    for (i = 0; i < nvars; i++)
+        gen->gen.cubes.cube[i] = 2;
 
     /* The maximum stack depth is one plus the number of variables.
     ** because a path may have nodes at all levels, including the
     ** constant level.
     */
-    gen->stack.stack = ALLOC(DdNodePtr, nvars+1);
+    gen->stack.stack = ALLOC(DdNodePtr, nvars + 1);
     if (gen->stack.stack == NULL) {
-	zdd->errorCode = CUDD_MEMORY_OUT;
-	FREE(gen->gen.cubes.cube);
-	FREE(gen);
-	return(NULL);
+        zdd->errorCode = CUDD_MEMORY_OUT;
+        FREE(gen->gen.cubes.cube);
+        FREE(gen);
+        return (NULL);
     }
-    for (i = 0; i <= nvars; i++) gen->stack.stack[i] = NULL;
+    for (i = 0; i <= nvars; i++)
+        gen->stack.stack[i] = NULL;
 
     /* Find the first path of the ZDD. */
-    gen->stack.stack[gen->stack.sp] = f; gen->stack.sp++;
+    gen->stack.stack[gen->stack.sp] = f;
+    gen->stack.sp++;
 
     while (1) {
-	top = gen->stack.stack[gen->stack.sp-1];
-	if (!cuddIsConstant(Cudd_Regular(top))) {
-	    /* Take the else branch first. */
-	    gen->gen.cubes.cube[Cudd_Regular(top)->index] = 0;
-	    next = cuddE(Cudd_Regular(top));
-	    gen->stack.stack[gen->stack.sp] = Cudd_Not(next); gen->stack.sp++;
-	} else if (Cudd_Regular(top) == DD_ZERO(zdd)) {
-	    /* Backtrack. */
-	    while (1) {
-		if (gen->stack.sp == 1) {
-		    /* The current node has no predecessor. */
-		    gen->status = CUDD_GEN_EMPTY;
-		    gen->stack.sp--;
-		    goto done;
-		}
-		prev = Cudd_Regular(gen->stack.stack[gen->stack.sp-2]);
-		next = cuddT(prev);
-		if (next != top) { /* follow the then branch next */
-		    gen->gen.cubes.cube[prev->index] = 1;
-		    gen->stack.stack[gen->stack.sp-1] = next;
-		    break;
-		}
-		/* Pop the stack and try again. */
-		gen->gen.cubes.cube[prev->index] = 2;
-		gen->stack.sp--;
-		top = gen->stack.stack[gen->stack.sp-1];
-	    }
-	} else {
-	    gen->status = CUDD_GEN_NONEMPTY;
-	    gen->gen.cubes.value = cuddV(Cudd_Regular(top));
-	    goto done;
-	}
+        top = gen->stack.stack[gen->stack.sp - 1];
+        if (!cuddIsConstant(Cudd_Regular(top))) {
+            /* Take the else branch first. */
+            gen->gen.cubes.cube[Cudd_Regular(top)->index] = 0;
+            next = cuddE(Cudd_Regular(top));
+            gen->stack.stack[gen->stack.sp] = Cudd_Not(next);
+            gen->stack.sp++;
+        } else if (Cudd_Regular(top) == DD_ZERO(zdd)) {
+            /* Backtrack. */
+            while (1) {
+                if (gen->stack.sp == 1) {
+                    /* The current node has no predecessor. */
+                    gen->status = CUDD_GEN_EMPTY;
+                    gen->stack.sp--;
+                    goto done;
+                }
+                prev = Cudd_Regular(gen->stack.stack[gen->stack.sp - 2]);
+                next = cuddT(prev);
+                if (next != top) { /* follow the then branch next */
+                    gen->gen.cubes.cube[prev->index] = 1;
+                    gen->stack.stack[gen->stack.sp - 1] = next;
+                    break;
+                }
+                /* Pop the stack and try again. */
+                gen->gen.cubes.cube[prev->index] = 2;
+                gen->stack.sp--;
+                top = gen->stack.stack[gen->stack.sp - 1];
+            }
+        } else {
+            gen->status = CUDD_GEN_NONEMPTY;
+            gen->gen.cubes.value = cuddV(Cudd_Regular(top));
+            goto done;
+        }
     }
 
 done:
     *path = gen->gen.cubes.cube;
-    return(gen);
+    return (gen);
 
 } /* end of Cudd_zddFirstPath */
 
@@ -384,74 +386,74 @@ done:
   Cudd_IsGenEmpty]
 
 ******************************************************************************/
-int
-Cudd_zddNextPath(
-  DdGen * gen,
-  int ** path)
+int Cudd_zddNextPath(
+    DdGen* gen,
+    int** path)
 {
     DdNode *top, *next, *prev;
-    DdManager *zdd = gen->manager;
+    DdManager* zdd = gen->manager;
 
     /* Backtrack from previously reached terminal node. */
     while (1) {
-	if (gen->stack.sp == 1) {
-	    /* The current node has no predecessor. */
-	    gen->status = CUDD_GEN_EMPTY;
-	    gen->stack.sp--;
-	    goto done;
-	}
-	top = gen->stack.stack[gen->stack.sp-1];
-	prev = Cudd_Regular(gen->stack.stack[gen->stack.sp-2]);
-	next = cuddT(prev);
-	if (next != top) { /* follow the then branch next */
-	    gen->gen.cubes.cube[prev->index] = 1;
-	    gen->stack.stack[gen->stack.sp-1] = next;
-	    break;
-	}
-	/* Pop the stack and try again. */
-	gen->gen.cubes.cube[prev->index] = 2;
-	gen->stack.sp--;
+        if (gen->stack.sp == 1) {
+            /* The current node has no predecessor. */
+            gen->status = CUDD_GEN_EMPTY;
+            gen->stack.sp--;
+            goto done;
+        }
+        top = gen->stack.stack[gen->stack.sp - 1];
+        prev = Cudd_Regular(gen->stack.stack[gen->stack.sp - 2]);
+        next = cuddT(prev);
+        if (next != top) { /* follow the then branch next */
+            gen->gen.cubes.cube[prev->index] = 1;
+            gen->stack.stack[gen->stack.sp - 1] = next;
+            break;
+        }
+        /* Pop the stack and try again. */
+        gen->gen.cubes.cube[prev->index] = 2;
+        gen->stack.sp--;
     }
 
     while (1) {
-	top = gen->stack.stack[gen->stack.sp-1];
-	if (!cuddIsConstant(Cudd_Regular(top))) {
-	    /* Take the else branch first. */
-	    gen->gen.cubes.cube[Cudd_Regular(top)->index] = 0;
-	    next = cuddE(Cudd_Regular(top));
-	    gen->stack.stack[gen->stack.sp] = Cudd_Not(next); gen->stack.sp++;
-	} else if (Cudd_Regular(top) == DD_ZERO(zdd)) {
-	    /* Backtrack. */
-	    while (1) {
-		if (gen->stack.sp == 1) {
-		    /* The current node has no predecessor. */
-		    gen->status = CUDD_GEN_EMPTY;
-		    gen->stack.sp--;
-		    goto done;
-		}
-		prev = Cudd_Regular(gen->stack.stack[gen->stack.sp-2]);
-		next = cuddT(prev);
-		if (next != top) { /* follow the then branch next */
-		    gen->gen.cubes.cube[prev->index] = 1;
-		    gen->stack.stack[gen->stack.sp-1] = next;
-		    break;
-		}
-		/* Pop the stack and try again. */
-		gen->gen.cubes.cube[prev->index] = 2;
-		gen->stack.sp--;
-		top = gen->stack.stack[gen->stack.sp-1];
-	    }
-	} else {
-	    gen->status = CUDD_GEN_NONEMPTY;
-	    gen->gen.cubes.value = cuddV(Cudd_Regular(top));
-	    goto done;
-	}
+        top = gen->stack.stack[gen->stack.sp - 1];
+        if (!cuddIsConstant(Cudd_Regular(top))) {
+            /* Take the else branch first. */
+            gen->gen.cubes.cube[Cudd_Regular(top)->index] = 0;
+            next = cuddE(Cudd_Regular(top));
+            gen->stack.stack[gen->stack.sp] = Cudd_Not(next);
+            gen->stack.sp++;
+        } else if (Cudd_Regular(top) == DD_ZERO(zdd)) {
+            /* Backtrack. */
+            while (1) {
+                if (gen->stack.sp == 1) {
+                    /* The current node has no predecessor. */
+                    gen->status = CUDD_GEN_EMPTY;
+                    gen->stack.sp--;
+                    goto done;
+                }
+                prev = Cudd_Regular(gen->stack.stack[gen->stack.sp - 2]);
+                next = cuddT(prev);
+                if (next != top) { /* follow the then branch next */
+                    gen->gen.cubes.cube[prev->index] = 1;
+                    gen->stack.stack[gen->stack.sp - 1] = next;
+                    break;
+                }
+                /* Pop the stack and try again. */
+                gen->gen.cubes.cube[prev->index] = 2;
+                gen->stack.sp--;
+                top = gen->stack.stack[gen->stack.sp - 1];
+            }
+        } else {
+            gen->status = CUDD_GEN_NONEMPTY;
+            gen->gen.cubes.value = cuddV(Cudd_Regular(top));
+            goto done;
+        }
     }
 
 done:
-    if (gen->status == CUDD_GEN_EMPTY) return(0);
+    if (gen->status == CUDD_GEN_EMPTY) return (0);
     *path = gen->gen.cubes.cube;
-    return(1);
+    return (1);
 
 } /* end of Cudd_zddNextPath */
 
@@ -472,49 +474,48 @@ done:
   SeeAlso     [Cudd_zddForeachPath]
 
 ******************************************************************************/
-char *
-Cudd_zddCoverPathToString(
-  DdManager *zdd		/* DD manager */,
-  int *path			/* path of ZDD representing a cover */,
-  char *str			/* pointer to string to use if != NULL */
-  )
+char* Cudd_zddCoverPathToString(
+    DdManager* zdd /* DD manager */,
+    int* path /* path of ZDD representing a cover */,
+    char* str /* pointer to string to use if != NULL */
+)
 {
     int nvars = zdd->sizeZ;
     int i;
-    char *res;
+    char* res;
 
-    if (nvars & 1) return(NULL);
+    if (nvars & 1) return (NULL);
     nvars >>= 1;
     if (str == NULL) {
-	res = ALLOC(char, nvars+1);
-	if (res == NULL) return(NULL);
+        res = ALLOC(char, nvars + 1);
+        if (res == NULL) return (NULL);
     } else {
-	res = str;
+        res = str;
     }
     for (i = 0; i < nvars; i++) {
-	int v = (path[2*i] << 2) | path[2*i+1];
-	switch (v) {
-	case 0:
-	case 2:
-	case 8:
-	case 10:
-	    res[i] = '-';
-	    break;
-	case 1:
-	case 9:
-	    res[i] = '0';
-	    break;
-	case 4:
-	case 6:
-	    res[i] = '1';
-	    break;
-	default:
-	    res[i] = '?';
-	}
+        int v = (path[2 * i] << 2) | path[2 * i + 1];
+        switch (v) {
+            case 0:
+            case 2:
+            case 8:
+            case 10:
+                res[i] = '-';
+                break;
+            case 1:
+            case 9:
+                res[i] = '0';
+                break;
+            case 4:
+            case 6:
+                res[i] = '1';
+                break;
+            default:
+                res[i] = '?';
+        }
     }
     res[nvars] = 0;
 
-    return(res);
+    return (res);
 
 } /* end of Cudd_zddCoverPathToString */
 
@@ -532,29 +533,29 @@ Cudd_zddCoverPathToString(
   SeeAlso     [Cudd_Support]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_zddSupport(
-  DdManager * dd /* manager */,
-  DdNode * f /* ZDD whose support is sought */)
+    DdManager* dd /* manager */,
+    DdNode* f /* ZDD whose support is sought */)
 {
-    int *support;
+    int* support;
     DdNode *res, *tmp, *var;
-    int i,j;
+    int i, j;
     int size;
 
     /* Allocate and initialize support array for ddSupportStep. */
     size = ddMax(dd->size, dd->sizeZ);
-    support = ALLOC(int,size);
+    support = ALLOC(int, size);
     if (support == NULL) {
         dd->errorCode = CUDD_MEMORY_OUT;
-        return(NULL);
+        return (NULL);
     }
     for (i = 0; i < size; i++) {
         support[i] = 0;
     }
 
     /* Compute support and clean up markers. */
-    zddSupportStep(Cudd_Regular(f),support);
+    zddSupportStep(Cudd_Regular(f), support);
     zddClearFlag(Cudd_Regular(f));
 
     /* Transform support from array to cube. */
@@ -568,18 +569,18 @@ Cudd_zddSupport(
                 /* The following call to cuddUniqueInter is guaranteed
                 ** not to trigger reordering because the node we look up
                 ** already exists. */
-                var = cuddUniqueInter(dd,i,dd->one,Cudd_Not(dd->one));
+                var = cuddUniqueInter(dd, i, dd->one, Cudd_Not(dd->one));
                 cuddRef(var);
-                tmp = cuddBddAndRecur(dd,res,var);
+                tmp = cuddBddAndRecur(dd, res, var);
                 if (tmp == NULL) {
-                    Cudd_RecursiveDeref(dd,res);
-                    Cudd_RecursiveDeref(dd,var);
+                    Cudd_RecursiveDeref(dd, res);
+                    Cudd_RecursiveDeref(dd, var);
                     res = NULL;
                     break;
                 }
                 cuddRef(tmp);
-                Cudd_RecursiveDeref(dd,res);
-                Cudd_RecursiveDeref(dd,var);
+                Cudd_RecursiveDeref(dd, res);
+                Cudd_RecursiveDeref(dd, var);
                 res = tmp;
             }
         }
@@ -587,7 +588,7 @@ Cudd_zddSupport(
 
     FREE(support);
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_zddSupport */
 
@@ -619,46 +620,46 @@ Cudd_zddSupport(
   SeeAlso     [Cudd_DumpDot Cudd_zddPrintDebug]
 
 ******************************************************************************/
-int
-Cudd_zddDumpDot(
-  DdManager * dd /* manager */,
-  int  n /* number of output nodes to be dumped */,
-  DdNode ** f /* array of output nodes to be dumped */,
-  char ** inames /* array of input names (or NULL) */,
-  char ** onames /* array of output names (or NULL) */,
-  FILE * fp /* pointer to the dump file */)
+int Cudd_zddDumpDot(
+    DdManager* dd /* manager */,
+    int n /* number of output nodes to be dumped */,
+    DdNode** f /* array of output nodes to be dumped */,
+    char** inames /* array of input names (or NULL) */,
+    char** onames /* array of output names (or NULL) */,
+    FILE* fp /* pointer to the dump file */)
 {
-    DdNode	*support = NULL;
-    DdNode	*scan;
-    int		*sorted = NULL;
-    int		nvars = dd->sizeZ;
-    st_table	*visited = NULL;
-    st_generator *gen;
-    int		retval;
-    int		i, j;
-    int		slots;
-    DdNodePtr	*nodelist;
-    long	refAddr, diff, mask;
+    DdNode* support = NULL;
+    DdNode* scan;
+    int* sorted = NULL;
+    int nvars = dd->sizeZ;
+    st_table* visited = NULL;
+    st_generator* gen;
+    int retval;
+    int i, j;
+    int slots;
+    DdNodePtr* nodelist;
+    long refAddr, diff, mask;
 
     /* Build a bit array with the support of f. */
-    sorted = ALLOC(int,nvars);
+    sorted = ALLOC(int, nvars);
     if (sorted == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	goto failure;
+        dd->errorCode = CUDD_MEMORY_OUT;
+        goto failure;
     }
-    for (i = 0; i < nvars; i++) sorted[i] = 0;
+    for (i = 0; i < nvars; i++)
+        sorted[i] = 0;
 
     /* Take the union of the supports of each output function. */
     for (i = 0; i < n; i++) {
-	support = Cudd_zddSupport(dd,f[i]);
-	if (support == NULL) goto failure;
-	cuddRef(support);
-	scan = support;
-	while (!cuddIsConstant(scan)) {
-	    sorted[scan->index] = 1;
-	    scan = cuddT(scan);
-	}
-	Cudd_RecursiveDeref(dd,support);
+        support = Cudd_zddSupport(dd, f[i]);
+        if (support == NULL) goto failure;
+        cuddRef(support);
+        scan = support;
+        while (!cuddIsConstant(scan)) {
+            sorted[scan->index] = 1;
+            scan = cuddT(scan);
+        }
+        Cudd_RecursiveDeref(dd, support);
     }
     support = NULL; /* so that we do not try to free it in case of failure */
 
@@ -668,8 +669,8 @@ Cudd_zddDumpDot(
 
     /* Collect all the nodes of this DD in the symbol table. */
     for (i = 0; i < n; i++) {
-	retval = cuddCollectNodes(f[i],visited);
-	if (retval == 0) goto failure;
+        retval = cuddCollectNodes(f[i], visited);
+        if (retval == 0) goto failure;
     }
 
     /* Find how many most significant hex digits are identical
@@ -688,188 +689,184 @@ Cudd_zddDumpDot(
     diff = 0;
     gen = st_init_gen(visited);
     while (st_gen(gen, &scan, NULL)) {
-	diff |= refAddr ^ (long) scan;
+        diff |= refAddr ^ (long) scan;
     }
     st_free_gen(gen);
 
     /* Choose the mask. */
     for (i = 0; (unsigned) i < 8 * sizeof(long); i += 4) {
-	mask = (1 << i) - 1;
-	if (diff <= mask) break;
+        mask = (1 << i) - 1;
+        if (diff <= mask) break;
     }
 
     /* Write the header and the global attributes. */
-    retval = fprintf(fp,"digraph \"ZDD\" {\n");
-    if (retval == EOF) return(0);
+    retval = fprintf(fp, "digraph \"ZDD\" {\n");
+    if (retval == EOF) return (0);
     retval = fprintf(fp,
-	"size = \"7.5,10\"\ncenter = true;\nedge [dir = none];\n");
-    if (retval == EOF) return(0);
+                     "size = \"7.5,10\"\ncenter = true;\nedge [dir = none];\n");
+    if (retval == EOF) return (0);
 
     /* Write the input name subgraph by scanning the support array. */
-    retval = fprintf(fp,"{ node [shape = plaintext];\n");
+    retval = fprintf(fp, "{ node [shape = plaintext];\n");
     if (retval == EOF) goto failure;
-    retval = fprintf(fp,"  edge [style = invis];\n");
+    retval = fprintf(fp, "  edge [style = invis];\n");
     if (retval == EOF) goto failure;
     /* We use a name ("CONST NODES") with an embedded blank, because
     ** it is unlikely to appear as an input name.
     */
-    retval = fprintf(fp,"  \"CONST NODES\" [style = invis];\n");
+    retval = fprintf(fp, "  \"CONST NODES\" [style = invis];\n");
     if (retval == EOF) goto failure;
     for (i = 0; i < nvars; i++) {
-	if (sorted[dd->invpermZ[i]]) {
-	    if (inames == NULL) {
-		retval = fprintf(fp,"\" %d \" -> ", dd->invpermZ[i]);
-	    } else {
-		retval = fprintf(fp,"\" %s \" -> ", inames[dd->invpermZ[i]]);
-	    }
-	    if (retval == EOF) goto failure;
-	}
+        if (sorted[dd->invpermZ[i]]) {
+            if (inames == NULL) {
+                retval = fprintf(fp, "\" %d \" -> ", dd->invpermZ[i]);
+            } else {
+                retval = fprintf(fp, "\" %s \" -> ", inames[dd->invpermZ[i]]);
+            }
+            if (retval == EOF) goto failure;
+        }
     }
-    retval = fprintf(fp,"\"CONST NODES\"; \n}\n");
+    retval = fprintf(fp, "\"CONST NODES\"; \n}\n");
     if (retval == EOF) goto failure;
 
     /* Write the output node subgraph. */
-    retval = fprintf(fp,"{ rank = same; node [shape = box]; edge [style = invis];\n");
+    retval = fprintf(fp, "{ rank = same; node [shape = box]; edge [style = invis];\n");
     if (retval == EOF) goto failure;
     for (i = 0; i < n; i++) {
-	if (onames == NULL) {
-	    retval = fprintf(fp,"\"F%d\"", i);
-	} else {
-	    retval = fprintf(fp,"\"  %s  \"", onames[i]);
-	}
-	if (retval == EOF) goto failure;
-	if (i == n - 1) {
-	    retval = fprintf(fp,"; }\n");
-	} else {
-	    retval = fprintf(fp," -> ");
-	}
-	if (retval == EOF) goto failure;
+        if (onames == NULL) {
+            retval = fprintf(fp, "\"F%d\"", i);
+        } else {
+            retval = fprintf(fp, "\"  %s  \"", onames[i]);
+        }
+        if (retval == EOF) goto failure;
+        if (i == n - 1) {
+            retval = fprintf(fp, "; }\n");
+        } else {
+            retval = fprintf(fp, " -> ");
+        }
+        if (retval == EOF) goto failure;
     }
 
     /* Write rank info: All nodes with the same index have the same rank. */
     for (i = 0; i < nvars; i++) {
-	if (sorted[dd->invpermZ[i]]) {
-	    retval = fprintf(fp,"{ rank = same; ");
-	    if (retval == EOF) goto failure;
-	    if (inames == NULL) {
-		retval = fprintf(fp,"\" %d \";\n", dd->invpermZ[i]);
-	    } else {
-		retval = fprintf(fp,"\" %s \";\n", inames[dd->invpermZ[i]]);
-	    }
-	    if (retval == EOF) goto failure;
-	    nodelist = dd->subtableZ[i].nodelist;
-	    slots = dd->subtableZ[i].slots;
-	    for (j = 0; j < slots; j++) {
-		scan = nodelist[j];
-		while (scan != NULL) {
-		    if (st_is_member(visited,(char *) scan)) {
-			retval = fprintf(fp,"\"%p\";\n", (void *)
-					 ((mask & (ptrint) scan) /
-					  sizeof(DdNode)));
-			if (retval == EOF) goto failure;
-		    }
-		    scan = scan->next;
-		}
-	    }
-	    retval = fprintf(fp,"}\n");
-	    if (retval == EOF) goto failure;
-	}
+        if (sorted[dd->invpermZ[i]]) {
+            retval = fprintf(fp, "{ rank = same; ");
+            if (retval == EOF) goto failure;
+            if (inames == NULL) {
+                retval = fprintf(fp, "\" %d \";\n", dd->invpermZ[i]);
+            } else {
+                retval = fprintf(fp, "\" %s \";\n", inames[dd->invpermZ[i]]);
+            }
+            if (retval == EOF) goto failure;
+            nodelist = dd->subtableZ[i].nodelist;
+            slots = dd->subtableZ[i].slots;
+            for (j = 0; j < slots; j++) {
+                scan = nodelist[j];
+                while (scan != NULL) {
+                    if (st_is_member(visited, (char*) scan)) {
+                        retval = fprintf(fp, "\"%p\";\n", (void*) ((mask & (ptrint) scan) / sizeof(DdNode)));
+                        if (retval == EOF) goto failure;
+                    }
+                    scan = scan->next;
+                }
+            }
+            retval = fprintf(fp, "}\n");
+            if (retval == EOF) goto failure;
+        }
     }
 
     /* All constants have the same rank. */
     retval = fprintf(fp,
-	"{ rank = same; \"CONST NODES\";\n{ node [shape = box]; ");
+                     "{ rank = same; \"CONST NODES\";\n{ node [shape = box]; ");
     if (retval == EOF) goto failure;
     nodelist = dd->constants.nodelist;
     slots = dd->constants.slots;
     for (j = 0; j < slots; j++) {
-	scan = nodelist[j];
-	while (scan != NULL) {
-	    if (st_is_member(visited,(char *) scan)) {
-		retval = fprintf(fp,"\"%p\";\n", (void *)
-				 ((mask & (ptrint) scan) / sizeof(DdNode)));
-		if (retval == EOF) goto failure;
-	    }
-	    scan = scan->next;
-	}
+        scan = nodelist[j];
+        while (scan != NULL) {
+            if (st_is_member(visited, (char*) scan)) {
+                retval = fprintf(fp, "\"%p\";\n", (void*) ((mask & (ptrint) scan) / sizeof(DdNode)));
+                if (retval == EOF) goto failure;
+            }
+            scan = scan->next;
+        }
     }
-    retval = fprintf(fp,"}\n}\n");
+    retval = fprintf(fp, "}\n}\n");
     if (retval == EOF) goto failure;
 
     /* Write edge info. */
     /* Edges from the output nodes. */
     for (i = 0; i < n; i++) {
-	if (onames == NULL) {
-	    retval = fprintf(fp,"\"F%d\"", i);
-	} else {
-	    retval = fprintf(fp,"\"  %s  \"", onames[i]);
-	}
-	if (retval == EOF) goto failure;
-	retval = fprintf(fp," -> \"%p\" [style = solid];\n",
-			 (void *) ((mask & (ptrint) f[i]) /
-					  sizeof(DdNode)));
-	if (retval == EOF) goto failure;
+        if (onames == NULL) {
+            retval = fprintf(fp, "\"F%d\"", i);
+        } else {
+            retval = fprintf(fp, "\"  %s  \"", onames[i]);
+        }
+        if (retval == EOF) goto failure;
+        retval = fprintf(fp, " -> \"%p\" [style = solid];\n",
+                         (void*) ((mask & (ptrint) f[i]) /
+                                  sizeof(DdNode)));
+        if (retval == EOF) goto failure;
     }
 
     /* Edges from internal nodes. */
     for (i = 0; i < nvars; i++) {
-	if (sorted[dd->invpermZ[i]]) {
-	    nodelist = dd->subtableZ[i].nodelist;
-	    slots = dd->subtableZ[i].slots;
-	    for (j = 0; j < slots; j++) {
-		scan = nodelist[j];
-		while (scan != NULL) {
-		    if (st_is_member(visited,(char *) scan)) {
-			retval = fprintf(fp,
-			    "\"%p\" -> \"%p\";\n",
-			    (void *) ((mask & (ptrint) scan) / sizeof(DdNode)),
-			    (void *) ((mask & (ptrint) cuddT(scan)) /
-				      sizeof(DdNode)));
-			if (retval == EOF) goto failure;
-			retval = fprintf(fp,
-					 "\"%p\" -> \"%p\" [style = dashed];\n",
-					 (void *) ((mask & (ptrint) scan)
-						   / sizeof(DdNode)),
-					 (void *) ((mask & (ptrint)
-						    cuddE(scan)) /
-						   sizeof(DdNode)));
-			if (retval == EOF) goto failure;
-		    }
-		    scan = scan->next;
-		}
-	    }
-	}
+        if (sorted[dd->invpermZ[i]]) {
+            nodelist = dd->subtableZ[i].nodelist;
+            slots = dd->subtableZ[i].slots;
+            for (j = 0; j < slots; j++) {
+                scan = nodelist[j];
+                while (scan != NULL) {
+                    if (st_is_member(visited, (char*) scan)) {
+                        retval = fprintf(fp,
+                                         "\"%p\" -> \"%p\";\n",
+                                         (void*) ((mask & (ptrint) scan) / sizeof(DdNode)),
+                                         (void*) ((mask & (ptrint) cuddT(scan)) /
+                                                  sizeof(DdNode)));
+                        if (retval == EOF) goto failure;
+                        retval = fprintf(fp,
+                                         "\"%p\" -> \"%p\" [style = dashed];\n",
+                                         (void*) ((mask & (ptrint) scan) / sizeof(DdNode)),
+                                         (void*) ((mask & (ptrint)
+                                                              cuddE(scan)) /
+                                                  sizeof(DdNode)));
+                        if (retval == EOF) goto failure;
+                    }
+                    scan = scan->next;
+                }
+            }
+        }
     }
 
     /* Write constant labels. */
     nodelist = dd->constants.nodelist;
     slots = dd->constants.slots;
     for (j = 0; j < slots; j++) {
-	scan = nodelist[j];
-	while (scan != NULL) {
-	    if (st_is_member(visited,(char *) scan)) {
-		retval = fprintf(fp,"\"%p\" [label = \"%lx\"];\n",
-				 (void *) ((mask & (ptrint) scan) /
-					   sizeof(DdNode)),
-				 cuddV(scan));
-		if (retval == EOF) goto failure;
-	    }
-	    scan = scan->next;
-	}
+        scan = nodelist[j];
+        while (scan != NULL) {
+            if (st_is_member(visited, (char*) scan)) {
+                retval = fprintf(fp, "\"%p\" [label = \"%lx\"];\n",
+                                 (void*) ((mask & (ptrint) scan) /
+                                          sizeof(DdNode)),
+                                 cuddV(scan));
+                if (retval == EOF) goto failure;
+            }
+            scan = scan->next;
+        }
     }
 
     /* Write trailer and return. */
-    retval = fprintf(fp,"}\n");
+    retval = fprintf(fp, "}\n");
     if (retval == EOF) goto failure;
 
     st_free_table(visited);
     FREE(sorted);
-    return(1);
+    return (1);
 
 failure:
     if (sorted != NULL) FREE(sorted);
     if (visited != NULL) st_free_table(visited);
-    return(0);
+    return (0);
 
 } /* end of Cudd_zddDumpBlif */
 
@@ -892,20 +889,19 @@ failure:
   SeeAlso     [Cudd_zddPrintDebug]
 
 ******************************************************************************/
-int
-cuddZddP(
-  DdManager * zdd,
-  DdNode * f)
+int cuddZddP(
+    DdManager* zdd,
+    DdNode* f)
 {
     int retval;
-    st_table *table = st_init_table(st_ptrcmp, st_ptrhash);
+    st_table* table = st_init_table(st_ptrcmp, st_ptrhash);
 
-    if (table == NULL) return(0);
+    if (table == NULL) return (0);
 
     retval = zp2(zdd, f, table);
     st_free_table(table);
     (void) fputc('\n', zdd->out);
-    return(retval);
+    return (retval);
 
 } /* end of cuddZddP */
 
@@ -929,70 +925,66 @@ cuddZddP(
 ******************************************************************************/
 static int
 zp2(
-  DdManager * zdd,
-  DdNode * f,
-  st_table * t)
+    DdManager* zdd,
+    DdNode* f,
+    st_table* t)
 {
-    DdNode	*n;
-    int		T, E;
-    DdNode	*base = DD_ONE(zdd);
+    DdNode* n;
+    int T, E;
+    DdNode* base = DD_ONE(zdd);
 
     if (f == NULL)
-	return(0);
+        return (0);
 
     if (Cudd_IsConstant(f)) {
-	(void)fprintf(zdd->out, "ID = %d\n", (f == base));
-	return(1);
+        (void) fprintf(zdd->out, "ID = %d\n", (f == base));
+        return (1);
     }
-    if (st_is_member(t, (char *)f) == 1)
-	return(1);
+    if (st_is_member(t, (char*) f) == 1)
+        return (1);
 
-    if (st_insert(t, (char *) f, NULL) == ST_OUT_OF_MEM)
-	return(0);
+    if (st_insert(t, (char*) f, NULL) == ST_OUT_OF_MEM)
+        return (0);
 
 #if SIZEOF_VOID_P == 8
     (void) fprintf(zdd->out, "ID = 0x%lx\tindex = %u\tr = %u\t",
-	(ptruint)f / (ptruint) sizeof(DdNode), f->index, f->ref);
+                   (ptruint) f / (ptruint) sizeof(DdNode), f->index, f->ref);
 #else
     (void) fprintf(zdd->out, "ID = 0x%x\tindex = %hu\tr = %hu\t",
-	(ptruint)f / (ptruint) sizeof(DdNode), f->index, f->ref);
+                   (ptruint) f / (ptruint) sizeof(DdNode), f->index, f->ref);
 #endif
 
     n = cuddT(f);
     if (Cudd_IsConstant(n)) {
-	(void) fprintf(zdd->out, "T = %d\t\t", (n == base));
-	T = 1;
+        (void) fprintf(zdd->out, "T = %d\t\t", (n == base));
+        T = 1;
     } else {
 #if SIZEOF_VOID_P == 8
-	(void) fprintf(zdd->out, "T = 0x%lx\t", (ptruint) n /
-		       (ptruint) sizeof(DdNode));
+        (void) fprintf(zdd->out, "T = 0x%lx\t", (ptruint) n / (ptruint) sizeof(DdNode));
 #else
-	(void) fprintf(zdd->out, "T = 0x%x\t", (ptruint) n /
-		       (ptruint) sizeof(DdNode));
+        (void) fprintf(zdd->out, "T = 0x%x\t", (ptruint) n / (ptruint) sizeof(DdNode));
 #endif
-	T = 0;
+        T = 0;
     }
 
     n = cuddE(f);
     if (Cudd_IsConstant(n)) {
-	(void) fprintf(zdd->out, "E = %d\n", (n == base));
-	E = 1;
+        (void) fprintf(zdd->out, "E = %d\n", (n == base));
+        E = 1;
     } else {
 #if SIZEOF_VOID_P == 8
-	(void) fprintf(zdd->out, "E = 0x%lx\n", (ptruint) n /
-		      (ptruint) sizeof(DdNode));
+        (void) fprintf(zdd->out, "E = 0x%lx\n", (ptruint) n / (ptruint) sizeof(DdNode));
 #else
-	(void) fprintf(zdd->out, "E = 0x%x\n", (ptruint) n /
-		       (ptruint) sizeof(DdNode));
+        (void) fprintf(zdd->out, "E = 0x%x\n", (ptruint) n / (ptruint) sizeof(DdNode));
 #endif
-	E = 0;
+        E = 0;
     }
 
     if (E == 0)
-	if (zp2(zdd, cuddE(f), t) == 0) return(0);
+        if (zp2(zdd, cuddE(f), t) == 0) return (0);
     if (T == 0)
-	if (zp2(zdd, cuddT(f), t) == 0) return(0);
-    return(1);
+        if (zp2(zdd, cuddT(f), t) == 0) return (0);
+    return (1);
 
 } /* end of zp2 */
 
@@ -1010,59 +1002,59 @@ zp2(
 ******************************************************************************/
 static void
 zdd_print_minterm_aux(
-  DdManager * zdd /* manager */,
-  DdNode * node /* current node */,
-  int  level /* depth in the recursion */,
-  int * list /* current recursion path */)
+    DdManager* zdd /* manager */,
+    DdNode* node /* current node */,
+    int level /* depth in the recursion */,
+    int* list /* current recursion path */)
 {
-    DdNode	*Nv, *Nnv;
-    int		i, v;
-    DdNode	*base = DD_ONE(zdd);
+    DdNode *Nv, *Nnv;
+    int i, v;
+    DdNode* base = DD_ONE(zdd);
 
     if (Cudd_IsConstant(node)) {
-	if (node == base) {
-	    /* Check for missing variable. */
-	    if (level != zdd->sizeZ) {
-		list[zdd->invpermZ[level]] = 0;
-		zdd_print_minterm_aux(zdd, node, level + 1, list);
-		return;
-	    }
-	    /* Terminal case: Print one cube based on the current recursion
+        if (node == base) {
+            /* Check for missing variable. */
+            if (level != zdd->sizeZ) {
+                list[zdd->invpermZ[level]] = 0;
+                zdd_print_minterm_aux(zdd, node, level + 1, list);
+                return;
+            }
+            /* Terminal case: Print one cube based on the current recursion
 	    ** path.
 	    */
-	    for (i = 0; i < zdd->sizeZ; i++) {
-		v = list[i];
-		if (v == 0)
-		    (void) fprintf(zdd->out,"0");
-		else if (v == 1)
-		    (void) fprintf(zdd->out,"1");
-		else if (v == 3)
-		    (void) fprintf(zdd->out,"@");	/* should never happen */
-		else
-		    (void) fprintf(zdd->out,"-");
-	    }
-	    (void) fprintf(zdd->out," 1\n");
-	}
+            for (i = 0; i < zdd->sizeZ; i++) {
+                v = list[i];
+                if (v == 0)
+                    (void) fprintf(zdd->out, "0");
+                else if (v == 1)
+                    (void) fprintf(zdd->out, "1");
+                else if (v == 3)
+                    (void) fprintf(zdd->out, "@"); /* should never happen */
+                else
+                    (void) fprintf(zdd->out, "-");
+            }
+            (void) fprintf(zdd->out, " 1\n");
+        }
     } else {
-	/* Check for missing variable. */
-	if (level != cuddIZ(zdd,node->index)) {
-	    list[zdd->invpermZ[level]] = 0;
-	    zdd_print_minterm_aux(zdd, node, level + 1, list);
-	    return;
-	}
+        /* Check for missing variable. */
+        if (level != cuddIZ(zdd, node->index)) {
+            list[zdd->invpermZ[level]] = 0;
+            zdd_print_minterm_aux(zdd, node, level + 1, list);
+            return;
+        }
 
-	Nnv = cuddE(node);
-	Nv = cuddT(node);
-	if (Nv == Nnv) {
-	    list[node->index] = 2;
-	    zdd_print_minterm_aux(zdd, Nnv, level + 1, list);
-	    return;
-	}
+        Nnv = cuddE(node);
+        Nv = cuddT(node);
+        if (Nv == Nnv) {
+            list[node->index] = 2;
+            zdd_print_minterm_aux(zdd, Nnv, level + 1, list);
+            return;
+        }
 
-	list[node->index] = 1;
-	zdd_print_minterm_aux(zdd, Nv, level + 1, list);
-	list[node->index] = 0;
-	zdd_print_minterm_aux(zdd, Nnv, level + 1, list);
+        list[node->index] = 1;
+        zdd_print_minterm_aux(zdd, Nv, level + 1, list);
+        list[node->index] = 0;
+        zdd_print_minterm_aux(zdd, Nnv, level + 1, list);
     }
     return;
 
@@ -1082,59 +1074,59 @@ zdd_print_minterm_aux(
 ******************************************************************************/
 static void
 zddPrintCoverAux(
-  DdManager * zdd /* manager */,
-  DdNode * node /* current node */,
-  int  level /* depth in the recursion */,
-  int * list /* current recursion path */)
+    DdManager* zdd /* manager */,
+    DdNode* node /* current node */,
+    int level /* depth in the recursion */,
+    int* list /* current recursion path */)
 {
-    DdNode	*Nv, *Nnv;
-    int		i, v;
-    DdNode	*base = DD_ONE(zdd);
+    DdNode *Nv, *Nnv;
+    int i, v;
+    DdNode* base = DD_ONE(zdd);
 
     if (Cudd_IsConstant(node)) {
-	if (node == base) {
-	    /* Check for missing variable. */
-	    if (level != zdd->sizeZ) {
-		list[zdd->invpermZ[level]] = 0;
-		zddPrintCoverAux(zdd, node, level + 1, list);
-		return;
-	    }
-	    /* Terminal case: Print one cube based on the current recursion
+        if (node == base) {
+            /* Check for missing variable. */
+            if (level != zdd->sizeZ) {
+                list[zdd->invpermZ[level]] = 0;
+                zddPrintCoverAux(zdd, node, level + 1, list);
+                return;
+            }
+            /* Terminal case: Print one cube based on the current recursion
 	    ** path.
 	    */
-	    for (i = 0; i < zdd->sizeZ; i += 2) {
-		v = list[i] * 4 + list[i+1];
-		if (v == 0)
-		    (void) putc('-',zdd->out);
-		else if (v == 4)
-		    (void) putc('1',zdd->out);
-		else if (v == 1)
-		    (void) putc('0',zdd->out);
-		else
-		    (void) putc('@',zdd->out); /* should never happen */
-	    }
-	    (void) fprintf(zdd->out," 1\n");
-	}
+            for (i = 0; i < zdd->sizeZ; i += 2) {
+                v = list[i] * 4 + list[i + 1];
+                if (v == 0)
+                    (void) putc('-', zdd->out);
+                else if (v == 4)
+                    (void) putc('1', zdd->out);
+                else if (v == 1)
+                    (void) putc('0', zdd->out);
+                else
+                    (void) putc('@', zdd->out); /* should never happen */
+            }
+            (void) fprintf(zdd->out, " 1\n");
+        }
     } else {
-	/* Check for missing variable. */
-	if (level != cuddIZ(zdd,node->index)) {
-	    list[zdd->invpermZ[level]] = 0;
-	    zddPrintCoverAux(zdd, node, level + 1, list);
-	    return;
-	}
+        /* Check for missing variable. */
+        if (level != cuddIZ(zdd, node->index)) {
+            list[zdd->invpermZ[level]] = 0;
+            zddPrintCoverAux(zdd, node, level + 1, list);
+            return;
+        }
 
-	Nnv = cuddE(node);
-	Nv = cuddT(node);
-	if (Nv == Nnv) {
-	    list[node->index] = 2;
-	    zddPrintCoverAux(zdd, Nnv, level + 1, list);
-	    return;
-	}
+        Nnv = cuddE(node);
+        Nv = cuddT(node);
+        if (Nv == Nnv) {
+            list[node->index] = 2;
+            zddPrintCoverAux(zdd, Nnv, level + 1, list);
+            return;
+        }
 
-	list[node->index] = 1;
-	zddPrintCoverAux(zdd, Nv, level + 1, list);
-	list[node->index] = 0;
-	zddPrintCoverAux(zdd, Nnv, level + 1, list);
+        list[node->index] = 1;
+        zddPrintCoverAux(zdd, Nv, level + 1, list);
+        list[node->index] = 0;
+        zddPrintCoverAux(zdd, Nnv, level + 1, list);
     }
     return;
 
@@ -1156,16 +1148,16 @@ zddPrintCoverAux(
 ******************************************************************************/
 static void
 zddSupportStep(
-  DdNode * f,
-  int * support)
+    DdNode* f,
+    int* support)
 {
     if (cuddIsConstant(f) || Cudd_IsComplement(f->next)) {
         return;
     }
 
     support[f->index] = 1;
-    zddSupportStep(cuddT(f),support);
-    zddSupportStep(Cudd_Regular(cuddE(f)),support);
+    zddSupportStep(cuddT(f), support);
+    zddSupportStep(Cudd_Regular(cuddE(f)), support);
     /* Mark as visited. */
     f->next = Cudd_Not(f->next);
     return;
@@ -1187,7 +1179,7 @@ zddSupportStep(
 ******************************************************************************/
 static void
 zddClearFlag(
-  DdNode * f)
+    DdNode* f)
 {
     if (!Cudd_IsComplement(f->next)) {
         return;

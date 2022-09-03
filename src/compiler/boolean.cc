@@ -30,84 +30,84 @@ namespace compiler {
     void Compiler::boolean_not(const expr::Expr_ptr expr)
     {
         POP_DD(lhs);
-        f_add_stack.push_back(lhs.Cmpl());
+        PUSH_DD(lhs.Cmpl());
     }
 
     void Compiler::boolean_and(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Times(rhs)); /* 0, 1 logic uses arithmetic product for AND */
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     void Compiler::boolean_or(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Or(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     void Compiler::boolean_xor(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Xor(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     void Compiler::boolean_implies(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Cmpl().Or(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     void Compiler::boolean_iff(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Xnor(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     // implemented as xnor (logical equivalence)
     void Compiler::boolean_equals(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Xnor(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     // implemented as negation of the former (i.e xor)
     void Compiler::boolean_not_equals(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         PUSH_DD(lhs.Xor(rhs));
-
-        f_type_stack.pop_back(); // consume one, leave the other
     }
 
     void Compiler::boolean_ite(const expr::Expr_ptr expr)
     {
+        DROP_TYPE();
+        DROP_TYPE();
+
         POP_DD(rhs);
         POP_DD(lhs);
         POP_DD(cnd);
-        PUSH_DD(cnd.Ite(lhs, rhs));
 
-        // consume two operand types, leave the third
-        f_type_stack.pop_back();
-        f_type_stack.pop_back();
+        PUSH_DD(cnd.Ite(lhs, rhs));
     }
 
     void Compiler::boolean_subscript(const expr::Expr_ptr expr)
@@ -115,8 +115,7 @@ namespace compiler {
         enc::EncodingMgr& bm { f_enc };
 
         // index
-        type::Type_ptr t0 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume index
+        POP_TYPE(t0);
         assert(t0->is_algebraic());
 
         type::Type_ptr itype { t0->as_algebraic() };
@@ -126,8 +125,7 @@ namespace compiler {
         assert(iwidth == bm.word_width()); // needed?
 
         // array
-        type::Type_ptr t1 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume array
+        POP_TYPE(t1);
         assert(t1->is_array());
 
         type::ArrayType_ptr atype { t1->as_array() };
@@ -136,6 +134,7 @@ namespace compiler {
 
         unsigned elem_width { type->width() };
         assert(elem_width == 1);
+
         unsigned elem_count { atype->nelems() };
         POP_DV(lhs, elem_width * elem_count);
 
@@ -143,11 +142,11 @@ namespace compiler {
 
         if (t0->is_constant()) {
             unsigned subscript { 0 };
-            for (unsigned i = 0; i < iwidth; ++ i) {
+            for (unsigned i = 0; i < iwidth; ++i) {
                 ADD bit { index[i] };
                 subscript *= 2;
                 if (bit.IsOne()) {
-                    subscript ++;
+                    subscript++;
                 }
             }
 
@@ -181,13 +180,10 @@ namespace compiler {
             FRESH_DV(dv, elem_width);
             PUSH_DV(dv, elem_width);
 
-            MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+            MultiwaySelectionDescriptor msd {
+                elem_width, elem_count, dv, cnd_dds, act_dds, lhs
+            };
             f_multiway_selection_descriptors.push_back(msd);
-
-            DEBUG
-                    << "Registered "
-                    << msd
-                    << std::endl;
         }
     }
 

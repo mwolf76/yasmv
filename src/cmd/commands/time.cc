@@ -32,64 +32,65 @@
 
 namespace cmd {
 
-Time::Time(Interpreter& owner)
-    : Command(owner)
-{}
+    Time::Time(Interpreter& owner)
+        : Command(owner)
+    {}
 
-Time::~Time()
-{}
+    Time::~Time()
+    {}
 
-utils::Variant Time::operator()()
-{
-    opts::OptsMgr& om
-        (opts::OptsMgr::INSTANCE());
+    utils::Variant Time::operator()()
+    {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
 
-    static struct timespec old;
-    static bool first { true };
+        static struct timespec old;
+        static bool first { true };
 
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out
-        (std::cout);
+        /* FIXME: implement stream redirection for std{out,err} */
+        std::ostream& out { std::cout };
 
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    Interpreter& interpreter
-        (Interpreter::INSTANCE());
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        Interpreter& interpreter { Interpreter::INSTANCE() };
 
-    if (! om.quiet())
+        if (!om.quiet()) {
+            out
+                << outPrefix
+                << "Session time: ";
+        }
+
         out
-            << outPrefix
-            << "Session time: ";
-
-    out
-        << utils::elapsed_repr(interpreter.epoch(), now)
-        << std::endl;
-
-    if (! first)
-        out
-            << outPrefix
-            << "Elapsed time: "
-            << utils::elapsed_repr(old, now)
+            << utils::elapsed_repr(interpreter.epoch(), now)
             << std::endl;
 
-    old = now;
-    first = false;
+        if (!first) {
+            out
+                << outPrefix
+                << "Elapsed time: "
+                << utils::elapsed_repr(old, now)
+                << std::endl;
+        }
 
-    return utils::Variant(okMessage);
-}
+        old = now;
+        first = false;
 
-TimeTopic::TimeTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+        return utils::Variant(okMessage);
+    }
 
-TimeTopic::~TimeTopic()
-{
-    TRACE
-        << "Destroyed time topic"
-        << std::endl;
-}
+    TimeTopic::TimeTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-void TimeTopic::usage()
-{ display_manpage("time"); }
+    TimeTopic::~TimeTopic()
+    {
+        TRACE
+            << "Destroyed time topic"
+            << std::endl;
+    }
 
-};
+    void TimeTopic::usage()
+    {
+        display_manpage("time");
+    }
+
+}; // namespace cmd

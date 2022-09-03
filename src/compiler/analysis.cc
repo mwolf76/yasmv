@@ -30,7 +30,6 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /* AND, OR, XOR, XNOR, IFF, IMPLIES */
         if (em.is_binary_logical(expr)) {
             return (f_owner.type(expr->lhs(), ctx)->is_boolean() &&
                     f_owner.type(expr->rhs(), ctx)->is_boolean());
@@ -44,8 +43,6 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /* AND (bw), OR(bw), XOR(bw), XNOR(bw), IFF(bw),
-         *  IMPLIES(bw), LT, LE, GT, GE, EQ, NE, PLUS, SUB, DIV, MUL, MOD */
         if (em.is_binary_arithmetical(expr) ||
             em.is_binary_relational(expr)) {
             return (f_owner.type(expr->lhs(), ctx)->is_enum() &&
@@ -75,7 +72,6 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /*  NOT, () ? */
         if (em.is_unary_logical(expr)) {
             return f_owner.type(expr->lhs(), ctx)->is_boolean();
         }
@@ -88,9 +84,8 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /* unary : ? (), : (), NEG, NOT(bw) */
         if (em.is_unary_arithmetical(expr)) {
-            return (f_owner.type(expr->lhs(), ctx)->is_enum());
+            return f_owner.type(expr->lhs(), ctx)->is_enum();
         }
 
         return false;
@@ -199,7 +194,6 @@ namespace compiler {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /* ITE */
         if (em.is_ite(expr)) {
             return (f_owner.type(expr->lhs(), ctx)->is_boolean() &&
                     f_owner.type(expr->rhs(), ctx)->is_boolean());
@@ -208,13 +202,12 @@ namespace compiler {
         return false;
     }
 
-    /* same as  is_binary_enumerative, checks only lhs and rhs */
+    /* same as is_binary_enumerative, checks only lhs and rhs */
     bool Compiler::is_ite_enumerative(const expr::Expr_ptr expr)
     {
         expr::ExprMgr& em { f_owner.em() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
-        /* ITE (bw) */
         if (em.is_ite(expr)) {
             return (f_owner.type(expr->lhs(), ctx)->is_enum() &&
                     f_owner.type(expr->rhs(), ctx)->is_enum());

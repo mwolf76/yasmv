@@ -69,8 +69,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 #include <limits.h>
 
 /*---------------------------------------------------------------------------*/
@@ -132,20 +132,20 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddApply.c,v 1.19 2012/02/05 01:07:18 
   Cudd_addXor Cudd_addXnor]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addApply(
-  DdManager * dd,
-  DD_AOP op,
-  DdNode * f,
-  DdNode * g)
+    DdManager* dd,
+    DD_AOP op,
+    DdNode* f,
+    DdNode* g)
 {
-    DdNode *res;
+    DdNode* res;
 
     do {
-	dd->reordered = 0;
-	res = cuddAddApplyRecur(dd,op,f,g);
+        dd->reordered = 0;
+        res = cuddAddApplyRecur(dd, op, f, g);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addApply */
 
@@ -162,29 +162,30 @@ Cudd_addApply(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addPlus(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
-    if (F == DD_ZERO(dd)) return(G);
-    if (G == DD_ZERO(dd)) return(F);
+    F = *f;
+    G = *g;
+    if (F == DD_ZERO(dd)) return (G);
+    if (G == DD_ZERO(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) + cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) + cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addPlus */
 
@@ -202,30 +203,31 @@ Cudd_addPlus(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addTimes(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
-    if (F == DD_ZERO(dd) || G == DD_ZERO(dd)) return(DD_ZERO(dd));
-    if (F == DD_ONE(dd)) return(G);
-    if (G == DD_ONE(dd)) return(F);
+    F = *f;
+    G = *g;
+    if (F == DD_ZERO(dd) || G == DD_ZERO(dd)) return (DD_ZERO(dd));
+    if (F == DD_ONE(dd)) return (G);
+    if (G == DD_ONE(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) * cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) * cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addTimes */
 
@@ -241,27 +243,28 @@ Cudd_addTimes(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWTimes(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) & cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) & cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWTimes */
 
@@ -308,30 +311,31 @@ Cudd_addBWTimes(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addDivide(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     /* We would like to use F == G -> F/G == 1, but F and G may
     ** contain zeroes. */
-    if (F == DD_ZERO(dd)) return(DD_ZERO(dd));
-    if (G == DD_ONE(dd)) return(F);
+    if (F == DD_ZERO(dd)) return (DD_ZERO(dd));
+    if (G == DD_ONE(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = (G == DD_ZERO(dd)
-                 ? INT_MAX /* division by zero! */
-                 : (cuddV(F) / cuddV(G)));
+        value = (G == DD_ZERO(dd)
+                     ? INT_MAX /* division by zero! */
+                     : (cuddV(F) / cuddV(G)));
 
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addDivide */
 
@@ -348,27 +352,28 @@ Cudd_addDivide(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addModulus(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     /* We would like to use F == G -> F/G == 1, but F and G may
     ** contain zeroes. */
-    if (F == DD_ZERO(dd)) return(DD_ZERO(dd));
-    if (G == DD_ONE(dd)) return(F);
+    if (F == DD_ZERO(dd)) return (DD_ZERO(dd));
+    if (G == DD_ONE(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) % cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) % cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addModulus */
 
@@ -385,26 +390,27 @@ Cudd_addModulus(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addMinus(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
-    if (F == G) return(DD_ZERO(dd));
-    if (F == DD_ZERO(dd)) return(cuddAddNegateRecur(dd,G));
-    if (G == DD_ZERO(dd)) return(F);
+    F = *f;
+    G = *g;
+    if (F == G) return (DD_ZERO(dd));
+    if (F == DD_ZERO(dd)) return (cuddAddNegateRecur(dd, G));
+    if (G == DD_ZERO(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) - cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) - cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addMinus */
 
@@ -421,29 +427,30 @@ Cudd_addMinus(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addMinimum(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == G) return(F);
+    F = *f;
+    G = *g;
+    if (F == G) return (F);
 
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	if (cuddV(F) <= cuddV(G)) {
-	    return(F);
-	} else {
-	    return(G);
-	}
+        if (cuddV(F) <= cuddV(G)) {
+            return (F);
+        } else {
+            return (G);
+        }
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addMinimum */
 
@@ -460,29 +467,30 @@ Cudd_addMinimum(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addMaximum(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == G) return(F);
+    F = *f;
+    G = *g;
+    if (F == G) return (F);
 
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	if (cuddV(F) >= cuddV(G)) {
-	    return(F);
-	} else {
-	    return(G);
-	}
+        if (cuddV(F) >= cuddV(G)) {
+            return (F);
+        } else {
+            return (G);
+        }
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addMaximum */
 
@@ -500,23 +508,23 @@ Cudd_addMaximum(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addOneZeroMaximum(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
 
-    if (*f == *g) return(DD_ZERO(dd));
+    if (*f == *g) return (DD_ZERO(dd));
     if (cuddIsConstant(*f) && cuddIsConstant(*g)) {
-	if (cuddV(*f) > cuddV(*g)) {
-	    return(DD_ONE(dd));
-	} else {
-	    return(DD_ZERO(dd));
-	}
+        if (cuddV(*f) > cuddV(*g)) {
+            return (DD_ONE(dd));
+        } else {
+            return (DD_ZERO(dd));
+        }
     }
 
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addOneZeroMaximum */
 
@@ -533,26 +541,27 @@ Cudd_addOneZeroMaximum(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addLShift(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (F == DD_ZERO(dd)) return DD_ZERO(dd);
-    if (G == DD_ZERO(dd)) return(F);
+    if (G == DD_ZERO(dd)) return (F);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) << cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) << cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
 
-    return(NULL);
+    return (NULL);
 } /* end of Cudd_addLShift */
 
 
@@ -568,25 +577,26 @@ Cudd_addLShift(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addRShift(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (F == DD_ZERO(dd)) return DD_ZERO(dd); /* unsigned arithmetic */
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) >> cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) >> cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
 
-    return(NULL);
+    return (NULL);
 } /* end of Cudd_addRShift */
 
 
@@ -602,24 +612,25 @@ Cudd_addRShift(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addOr(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == DD_ONE(dd) || G == DD_ONE(dd)) return(DD_ONE(dd));
-    if (cuddIsConstant(F)) return(G);
-    if (cuddIsConstant(G)) return(F);
-    if (F == G) return(F);
+    F = *f;
+    G = *g;
+    if (F == DD_ONE(dd) || G == DD_ONE(dd)) return (DD_ONE(dd));
+    if (cuddIsConstant(F)) return (G);
+    if (cuddIsConstant(G)) return (F);
+    if (F == G) return (F);
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addOr */
 
@@ -635,28 +646,29 @@ Cudd_addOr(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWOr(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) | cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) | cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
 
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWOr */
 
@@ -673,22 +685,23 @@ Cudd_addBWOr(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addNand(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == DD_ZERO(dd) || G == DD_ZERO(dd)) return(DD_ONE(dd));
-    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    F = *f;
+    G = *g;
+    if (F == DD_ZERO(dd) || G == DD_ZERO(dd)) return (DD_ONE(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return (DD_ZERO(dd));
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addNand */
 
@@ -705,22 +718,23 @@ Cudd_addNand(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addNor(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == DD_ONE(dd) || G == DD_ONE(dd)) return(DD_ZERO(dd));
-    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ONE(dd));
+    F = *f;
+    G = *g;
+    if (F == DD_ONE(dd) || G == DD_ONE(dd)) return (DD_ZERO(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return (DD_ONE(dd));
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addNor */
 
@@ -737,24 +751,25 @@ Cudd_addNor(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addXor(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == G) return(DD_ZERO(dd));
-    if (F == DD_ONE(dd) && G == DD_ZERO(dd)) return(DD_ONE(dd));
-    if (G == DD_ONE(dd) && F == DD_ZERO(dd)) return(DD_ONE(dd));
-    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    F = *f;
+    G = *g;
+    if (F == G) return (DD_ZERO(dd));
+    if (F == DD_ONE(dd) && G == DD_ZERO(dd)) return (DD_ONE(dd));
+    if (G == DD_ONE(dd) && F == DD_ZERO(dd)) return (DD_ONE(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return (DD_ZERO(dd));
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addXor */
 
@@ -771,27 +786,28 @@ Cudd_addXor(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWXor(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = cuddV(F) ^ cuddV(G);
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = cuddV(F) ^ cuddV(G);
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWXor */
 
@@ -808,24 +824,25 @@ Cudd_addBWXor(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addXnor(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == G) return(DD_ONE(dd));
-    if (F == DD_ONE(dd) && G == DD_ONE(dd)) return(DD_ONE(dd));
-    if (G == DD_ZERO(dd) && F == DD_ZERO(dd)) return(DD_ONE(dd));
-    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    F = *f;
+    G = *g;
+    if (F == G) return (DD_ONE(dd));
+    if (F == DD_ONE(dd) && G == DD_ONE(dd)) return (DD_ONE(dd));
+    if (G == DD_ZERO(dd) && F == DD_ZERO(dd)) return (DD_ONE(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return (DD_ZERO(dd));
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addXnor */
 
@@ -841,28 +858,29 @@ Cudd_addXnor(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWXnor(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
-    DdNode *res;
+    DdNode* res;
     DdNode *F, *G;
     CUDD_VALUE_TYPE value;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	value = ! (cuddV(F) ^ cuddV(G));
-	res = cuddUniqueConst(dd,value);
-	return(res);
+        value = !(cuddV(F) ^ cuddV(G));
+        res = cuddUniqueConst(dd, value);
+        return (res);
     }
 
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addXnor */
 
@@ -879,22 +897,23 @@ Cudd_addBWXnor(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addEquals(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
-    if (F == G) return(DD_ONE(dd));
-    if (cuddIsConstant(F) && cuddIsConstant(G)) return(DD_ZERO(dd));
+    F = *f;
+    G = *g;
+    if (F == G) return (DD_ONE(dd));
+    if (cuddIsConstant(F) && cuddIsConstant(G)) return (DD_ZERO(dd));
     if (F > G) { /* swap f and g */
-	*f = G;
-	*g = F;
+        *f = G;
+        *g = F;
     }
-    return(NULL);
+    return (NULL);
 } /* end of Cudd_addEquals */
 
 
@@ -910,23 +929,24 @@ Cudd_addEquals(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addNotEquals(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	if (cuddV(F) != cuddV(G)) {
-	    return DD_ONE(dd);
-	} else {
-	    return DD_ZERO(dd);
-	}
+        if (cuddV(F) != cuddV(G)) {
+            return DD_ONE(dd);
+        } else {
+            return DD_ZERO(dd);
+        }
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addLT */
 
@@ -942,23 +962,24 @@ Cudd_addNotEquals(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addLT(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	if (cuddV(F) < cuddV(G)) {
-	    return DD_ONE(dd);
-	} else {
-	    return DD_ZERO(dd);
-	}
+        if (cuddV(F) < cuddV(G)) {
+            return DD_ONE(dd);
+        } else {
+            return DD_ZERO(dd);
+        }
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addLT */
 
@@ -974,24 +995,25 @@ Cudd_addLT(
   SeeAlso     [Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addLEQ(
-  DdManager * dd,
-  DdNode ** f,
-  DdNode ** g)
+    DdManager* dd,
+    DdNode** f,
+    DdNode** g)
 {
     DdNode *F, *G;
 
-    F = *f; G = *g;
+    F = *f;
+    G = *g;
     if (F == G) return DD_ONE(dd);
     if (cuddIsConstant(F) && cuddIsConstant(G)) {
-	if (cuddV(F) < cuddV(G)) {
-	    return DD_ONE(dd);
-	} else {
-	    return DD_ZERO(dd);
-	}
+        if (cuddV(F) < cuddV(G)) {
+            return DD_ONE(dd);
+        } else {
+            return DD_ZERO(dd);
+        }
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addLEq */
 
@@ -1008,19 +1030,19 @@ Cudd_addLEQ(
   SeeAlso     [Cudd_addApply Cudd_addLog]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addMonadicApply(
-  DdManager * dd,
-  DD_MAOP op,
-  DdNode * f)
+    DdManager* dd,
+    DD_MAOP op,
+    DdNode* f)
 {
-    DdNode *res;
+    DdNode* res;
 
     do {
-	dd->reordered = 0;
-	res = cuddAddMonadicApplyRecur(dd,op,f);
+        dd->reordered = 0;
+        res = cuddAddMonadicApplyRecur(dd, op, f);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addMonadicApply */
 
@@ -1063,17 +1085,17 @@ Cudd_addMonadicApply(
   SeeAlso     [Cudd_addMonadicApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWCmpl(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     if (cuddIsConstant(f)) {
-	CUDD_VALUE_TYPE value = 0xF - cuddV(f);
-	DdNode *res = cuddUniqueConst(dd,value);
-	return(res);
+        CUDD_VALUE_TYPE value = 0xF - cuddV(f);
+        DdNode* res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWCmpl */
 
@@ -1089,17 +1111,17 @@ Cudd_addBWCmpl(
   SeeAlso     [Cudd_addMonadicApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWLShift(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     if (cuddIsConstant(f)) {
-	CUDD_VALUE_TYPE value = (cuddV(f) << 1) & 0xf;
-	DdNode *res = cuddUniqueConst(dd,value);
-	return(res);
+        CUDD_VALUE_TYPE value = (cuddV(f) << 1) & 0xf;
+        DdNode* res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWLShift */
 
@@ -1115,17 +1137,17 @@ Cudd_addBWLShift(
   SeeAlso     [Cudd_addMonadicApply]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addBWRShift(
-  DdManager * dd,
-  DdNode * f)
+    DdManager* dd,
+    DdNode* f)
 {
     if (cuddIsConstant(f)) {
-	CUDD_VALUE_TYPE value = (cuddV(f) >> 1) & 0xf;
-	DdNode *res = cuddUniqueConst(dd,value);
-	return(res);
+        CUDD_VALUE_TYPE value = (cuddV(f) >> 1) & 0xf;
+        DdNode* res = cuddUniqueConst(dd, value);
+        return (res);
     }
-    return(NULL);
+    return (NULL);
 
 } /* end of Cudd_addBWRShift */
 
@@ -1146,16 +1168,16 @@ Cudd_addBWRShift(
   SeeAlso     [cuddAddMonadicApplyRecur]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddApplyRecur(
-  DdManager * dd,
-  DD_AOP op,
-  DdNode * f,
-  DdNode * g)
+    DdManager* dd,
+    DD_AOP op,
+    DdNode* f,
+    DdNode* g)
 {
     DdNode *res,
-	   *fv, *fvn, *gv, *gvn,
-	   *T, *E;
+        *fv, *fvn, *gv, *gvn,
+        *T, *E;
     unsigned int ford, gord;
     unsigned int index;
     DD_CTFP cacheOp;
@@ -1164,56 +1186,56 @@ cuddAddApplyRecur(
      * cache hit rate.
      */
     statLine(dd);
-    res = (*op)(dd,&f,&g);
-    if (res != NULL) return(res);
+    res = (*op)(dd, &f, &g);
+    if (res != NULL) return (res);
 
     /* Check cache. */
     cacheOp = (DD_CTFP) op;
-    res = cuddCacheLookup2(dd,cacheOp,f,g);
-    if (res != NULL) return(res);
+    res = cuddCacheLookup2(dd, cacheOp, f, g);
+    if (res != NULL) return (res);
 
     /* Recursive step. */
-    ford = cuddI(dd,f->index);
-    gord = cuddI(dd,g->index);
+    ford = cuddI(dd, f->index);
+    gord = cuddI(dd, g->index);
     if (ford <= gord) {
-	index = f->index;
-	fv = cuddT(f);
-	fvn = cuddE(f);
+        index = f->index;
+        fv = cuddT(f);
+        fvn = cuddE(f);
     } else {
-	index = g->index;
-	fv = fvn = f;
+        index = g->index;
+        fv = fvn = f;
     }
     if (gord <= ford) {
-	gv = cuddT(g);
-	gvn = cuddE(g);
+        gv = cuddT(g);
+        gvn = cuddE(g);
     } else {
-	gv = gvn = g;
+        gv = gvn = g;
     }
 
-    T = cuddAddApplyRecur(dd,op,fv,gv);
-    if (T == NULL) return(NULL);
+    T = cuddAddApplyRecur(dd, op, fv, gv);
+    if (T == NULL) return (NULL);
     cuddRef(T);
 
-    E = cuddAddApplyRecur(dd,op,fvn,gvn);
+    E = cuddAddApplyRecur(dd, op, fvn, gvn);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
-    res = (T == E) ? T : cuddUniqueInter(dd,(int)index,T,E);
+    res = (T == E) ? T : cuddUniqueInter(dd, (int) index, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	Cudd_RecursiveDeref(dd, E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddDeref(T);
     cuddDeref(E);
 
     /* Store result. */
-    cuddCacheInsert2(dd,cacheOp,f,g,res);
+    cuddCacheInsert2(dd, cacheOp, f, g, res);
 
-    return(res);
+    return (res);
 
 } /* end of cuddAddApplyRecur */
 
@@ -1230,53 +1252,53 @@ cuddAddApplyRecur(
   SeeAlso     [cuddAddApplyRecur]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddMonadicApplyRecur(
-  DdManager * dd,
-  DD_MAOP op,
-  DdNode * f)
+    DdManager* dd,
+    DD_MAOP op,
+    DdNode* f)
 {
     DdNode *res, *ft, *fe, *T, *E;
     unsigned int index;
 
     /* Check terminal cases. */
     statLine(dd);
-    res = (*op)(dd,f);
-    if (res != NULL) return(res);
+    res = (*op)(dd, f);
+    if (res != NULL) return (res);
 
     /* Check cache. */
-    res = cuddCacheLookup1(dd,op,f);
-    if (res != NULL) return(res);
+    res = cuddCacheLookup1(dd, op, f);
+    if (res != NULL) return (res);
 
     /* Recursive step. */
     index = f->index;
     ft = cuddT(f);
     fe = cuddE(f);
 
-    T = cuddAddMonadicApplyRecur(dd,op,ft);
-    if (T == NULL) return(NULL);
+    T = cuddAddMonadicApplyRecur(dd, op, ft);
+    if (T == NULL) return (NULL);
     cuddRef(T);
 
-    E = cuddAddMonadicApplyRecur(dd,op,fe);
+    E = cuddAddMonadicApplyRecur(dd, op, fe);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
-    res = (T == E) ? T : cuddUniqueInter(dd,(int)index,T,E);
+    res = (T == E) ? T : cuddUniqueInter(dd, (int) index, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	Cudd_RecursiveDeref(dd, E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddDeref(T);
     cuddDeref(E);
 
     /* Store result. */
-    cuddCacheInsert1(dd,op,f,res);
+    cuddCacheInsert1(dd, op, f, res);
 
-    return(res);
+    return (res);
 
 } /* end of cuddAddMonadicApplyRecur */
 

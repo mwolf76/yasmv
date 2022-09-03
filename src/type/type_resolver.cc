@@ -25,44 +25,51 @@
 #include <type/type_mgr.hh>
 #include <type/type_resolver.hh>
 
-#include <symb/typedefs.hh>
 #include <symb/classes.hh>
+#include <symb/typedefs.hh>
 
 namespace type {
 
-TypeResolver::TypeResolver(TypeMgr& owner)
-    : f_owner(owner)
-{
-    const void* instance(this);
-    DEBUG
-        << "Initialized Type Resolver instance @"
-        << instance
-        << std::endl;
-}
+    TypeResolver::TypeResolver(TypeMgr& owner)
+        : f_owner(owner)
+    {
+        const void* instance { this };
+        DEBUG
+            << "Initialized Type Resolver instance @"
+            << instance
+            << std::endl;
+    }
 
-TypeResolver::~TypeResolver()
-{}
+    TypeResolver::~TypeResolver()
+    {
+        const void* instance { this };
+        DEBUG
+            << "Destroyed Type Resolver instance @"
+            << instance
+            << std::endl;
+    }
 
-symb::Symbol_ptr TypeResolver::symbol(const expr::Expr_ptr key)
-{
-     expr::ExprMgr& em
-        (expr::ExprMgr::INSTANCE());
-     assert(em.is_dot(key));
+    symb::Symbol_ptr TypeResolver::symbol(const expr::Expr_ptr key)
+    {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        assert(em.is_dot(key));
 
-     /* Types are globally scoped */
-     expr::Expr_ptr key_
-         (em.make_dot( em.make_empty(), key -> rhs()));
+        /* Types are globally scoped */
+        expr::Expr_ptr key_ {
+            em.make_dot(em.make_empty(), key->rhs())
+        };
 
-     const symb::Literals& lits
-         (TypeMgr::INSTANCE().literals());
+        const symb::Literals& lits {
+            TypeMgr::INSTANCE().literals()
+        };
 
-     symb::Literals::const_iterator iter
-         (lits.find(key_));
+        symb::Literals::const_iterator iter { lits.find(key_) };
 
-     if (iter != lits.end())
-         return dynamic_cast<symb::Symbol_ptr>((*iter).second);
+        if (iter != lits.end()) {
+            return dynamic_cast<symb::Symbol_ptr>((*iter).second);
+        }
 
-     return NULL; /* unresolved */
-}
+        return NULL; /* unresolved */
+    }
 
-};
+}; // namespace type

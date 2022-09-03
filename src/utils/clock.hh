@@ -24,12 +24,12 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include <string>
 #include <ctime>
+#include <string>
 
 namespace utils {
 
-std::string elapsed_repr(struct timespec from, struct timespec to);
+    std::string elapsed_repr(struct timespec from, struct timespec to);
 
 };
 

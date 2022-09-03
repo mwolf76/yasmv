@@ -23,26 +23,26 @@
 
 #include <symb/exceptions.hh>
 
-#include <sstream>
 #include <cstring>
+#include <sstream>
 
 namespace symb {
 
-static std::string build_unresolved_symbol_error_message(expr::Expr_ptr expr)
-{
-    std::ostringstream oss;
+    static std::string build_unresolved_symbol_error_message(expr::Expr_ptr expr)
+    {
+        std::ostringstream oss;
 
-    oss
-        << "Unresolved symbol: `"
-        << expr
-        << "`";
+        oss
+            << "Unresolved symbol: `"
+            << expr
+            << "`";
 
-    return oss.str();
-}
+        return oss.str();
+    }
 
-UnresolvedSymbol::UnresolvedSymbol(expr::Expr_ptr expr)
-    : SymbolException("UnresolvedSymbol",
-                      build_unresolved_symbol_error_message(expr))
-{}
+    UnresolvedSymbol::UnresolvedSymbol(expr::Expr_ptr expr)
+        : SymbolException("UnresolvedSymbol",
+                          build_unresolved_symbol_error_message(expr))
+    {}
 
-};
+}; // namespace symb

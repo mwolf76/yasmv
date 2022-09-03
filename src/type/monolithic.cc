@@ -26,47 +26,56 @@
 
 namespace type {
 
-BooleanType::BooleanType(TypeMgr& owner)
-    : MonolithicType(owner)
-{ f_repr = f_owner.em().make_boolean_type(); }
-
-unsigned BooleanType::width() const
-{ return 1; }
-
-EnumType::EnumType(TypeMgr& owner, expr::ExprSet& literals)
-    : MonolithicType(owner)
-    , f_literals(literals)
-{
-    TypeMgr& tm (TypeMgr::INSTANCE());
-    const symb::Literals& lits (tm.literals());
-
-    for (expr::ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++ i) {
-        const expr::Expr_ptr& lit(*i);
-
-        if (! expr::ExprMgr::INSTANCE().is_identifier(lit))
-            throw IdentifierExpected(lit);
-
-        if (lits.end() != lits.find(lit))
-            throw DuplicateLiteral(lit);
+    BooleanType::BooleanType(TypeMgr& owner)
+        : MonolithicType(owner)
+    {
+        f_repr = f_owner.em().make_boolean_type();
     }
 
-    f_repr = f_owner.em().make_enum_type(f_literals);
-}
-
-unsigned EnumType::width() const
-{ return 1; }
-
-value_t EnumType::value(expr::Expr_ptr lit) const
-{
-    value_t res = 0;
-    for (expr::ExprSet::iterator eye = f_literals.begin();
-         eye != f_literals.end(); ++ eye, ++ res) {
-
-        if (*eye == lit)
-            return res;
+    unsigned BooleanType::width() const
+    {
+        return 1;
     }
 
-    assert(false); // not found
-}
+    EnumType::EnumType(TypeMgr& owner, expr::ExprSet& literals)
+        : MonolithicType(owner)
+        , f_literals(literals)
+    {
+        TypeMgr& tm { TypeMgr::INSTANCE() };
+        const symb::Literals& lits { tm.literals() };
 
-};
+        for (expr::ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++i) {
+            const expr::Expr_ptr& lit { *i };
+
+            if (!expr::ExprMgr::INSTANCE().is_identifier(lit)) {
+                throw IdentifierExpected(lit);
+            }
+
+            if (lits.end() != lits.find(lit)) {
+                throw DuplicateLiteral(lit);
+            }
+        }
+
+        f_repr = f_owner.em().make_enum_type(f_literals);
+    }
+
+    unsigned EnumType::width() const
+    {
+        return 1;
+    }
+
+    value_t EnumType::value(expr::Expr_ptr lit) const
+    {
+        value_t res { 0 };
+        for (expr::ExprSet::iterator eye = f_literals.begin();
+             eye != f_literals.end(); ++eye, ++res) {
+
+            if (*eye == lit) {
+                return res;
+            }
+        }
+
+        assert(false); // not found
+    }
+
+}; // namespace type

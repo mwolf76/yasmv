@@ -29,10 +29,16 @@
 namespace compiler {
 
     /**
-     * Operand arguments (which are DD vectors) are fetched from the internal
-     * DD stack in a big-endian fashion, that is MSB first. On the other hand,
-     * to ensure proper behavior the result of any such operation has to be
-     * pushed in reversed order.
+     * Operand arguments (which are DD vectors) are fetched from the
+     * internal DD stack MSB first. On the other hand, to ensure
+     * proper behavior the result of any such operation has to be
+     * pushed in reversed order. This is taken care of by the POP_DV
+     * and PUSH_DV macros. The main methods of this class
+     * (algebraic_unary, algebraic_binary, algebraic_relational,
+     * algebraic_ternary) all follow a similar structure: (1) verify
+     * type information and populate the type stack with the result
+     * type, (2) pull the operands DVs and push the result DV (3)
+     * populate and register an operator descriptor.
      */
 
     // unary ops -------------------------------------------------------------------
@@ -40,27 +46,24 @@ namespace compiler {
     {
         assert(is_unary_algebraic(expr));
 
-        const type::Type_ptr lhs_type { f_type_stack.back() };
-
-        // operands is algebraic
+        TOP_TYPE(lhs_type);
         assert(lhs_type->is_algebraic());
         const type::AlgebraicType_ptr algebraic_type { lhs_type->as_algebraic() };
 
         unsigned width { algebraic_type->width() };
         bool signedness { algebraic_type->is_signed_algebraic() };
 
+        /* no op on the type stack required */
+
         POP_DV(lhs, width);
 
         FRESH_DV(res, width);
         PUSH_DV(res, width);
 
-        InlinedOperatorDescriptor iod { make_ios(signedness, expr->symb(), width), res, lhs };
+        InlinedOperatorDescriptor iod {
+            make_ios(signedness, expr->symb(), width), res, lhs
+        };
         f_inlined_operator_descriptors.push_back(iod);
-
-        DEBUG
-            << "Registered "
-            << iod
-            << std::endl;
     }
 
     void Compiler::algebraic_neg(const expr::Expr_ptr expr)
@@ -78,33 +81,31 @@ namespace compiler {
     {
         assert(is_binary_algebraic(expr));
 
-        const type::Type_ptr rhs_type(f_type_stack.back());
-        f_type_stack.pop_back();
-        const type::Type_ptr lhs_type(f_type_stack.back());
+        POP_TYPE(rhs_type);
+        TOP_TYPE(lhs_type);
 
-        // both operands are algebraic, same width
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
                lhs_type->width() == rhs_type->width());
 
-        unsigned width(rhs_type->width());
+        unsigned width { rhs_type->width() };
+        bool signedness {
+            lhs_type->is_signed_algebraic() ||
+            rhs_type->is_signed_algebraic()
+        };
 
-        bool signedness(lhs_type->is_signed_algebraic() ||
-                        rhs_type->is_signed_algebraic());
+        /* no op on the type stack required */
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
 
-        FRESH_DV(res, width); // algebraic, same width
+        FRESH_DV(res, width);
         PUSH_DV(res, width);
 
-        InlinedOperatorDescriptor md { make_ios(signedness, expr->symb(), width), res, lhs, rhs };
+        InlinedOperatorDescriptor md {
+            make_ios(signedness, expr->symb(), width), res, lhs, rhs
+        };
         f_inlined_operator_descriptors.push_back(md);
-
-        DEBUG
-            << "Registered "
-            << md
-            << std::endl;
     }
 
     void Compiler::algebraic_plus(const expr::Expr_ptr expr)
@@ -165,41 +166,37 @@ namespace compiler {
     // relationals -----------------------------------------------------------------
     void Compiler::algebraic_relational(const expr::Expr_ptr expr)
     {
-        assert(is_binary_algebraic(expr));
-
         type::TypeMgr& tm { f_owner.tm() };
 
-        const type::Type_ptr rhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
+        assert(is_binary_algebraic(expr));
 
-        const type::Type_ptr lhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
+        POP_TYPE(rhs_type);
+        POP_TYPE(lhs_type);
 
-        f_type_stack.push_back(tm.find_boolean());
-
-        // both operands are algebraic, same width
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
                lhs_type->width() == rhs_type->width());
 
-        unsigned width(rhs_type->width());
+        unsigned width { rhs_type->width() };
+        bool signedness {
+            lhs_type->is_signed_algebraic() ||
+            rhs_type->is_signed_algebraic()
+        };
 
-        bool signedness(lhs_type->is_signed_algebraic() ||
-                        rhs_type->is_signed_algebraic());
+        const type::Type_ptr res_type { tm.find_boolean() };
+        PUSH_TYPE(res_type);
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
 
-        FRESH_DV(res, 1); // boolean
+        FRESH_DV(res, 1);
         PUSH_DV(res, 1);
 
-        InlinedOperatorDescriptor md { make_ios(signedness, expr->symb(), width), res, lhs, rhs };
-        f_inlined_operator_descriptors.push_back(md);
+        InlinedOperatorDescriptor md {
+            make_ios(signedness, expr->symb(), width), res, lhs, rhs
+        };
 
-        DEBUG
-            << "Registered "
-            << md
-            << std::endl;
+        f_inlined_operator_descriptors.push_back(md);
     }
 
     void Compiler::algebraic_equals(const expr::Expr_ptr expr)
@@ -234,85 +231,68 @@ namespace compiler {
 
     void Compiler::algebraic_ite(const expr::Expr_ptr expr)
     {
-        const type::Type_ptr rhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
+        POP_TYPE(rhs_type);
+        POP_TYPE(lhs_type);
+        POP_TYPE(cnd_type);
 
-        const type::Type_ptr lhs_type { f_type_stack.back() };
-        f_type_stack.pop_back();
-
-        const type::Type_ptr cnd_type { f_type_stack.back() };
-        f_type_stack.pop_back();
-
-        // both operands are algebraic, same width
+        // condition is boolean, ite operands are algebraic, same width
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
-               cnd_type->is_boolean() &&
-               lhs_type->width() == rhs_type->width());
-
-        f_type_stack.push_back(rhs_type);
+               lhs_type->width() == rhs_type->width() &&
+               cnd_type->is_boolean());
 
         unsigned width { rhs_type->width() };
 
+        /* as both lhs and rhs are the same type either works here */
+        PUSH_TYPE(rhs_type);
+
         POP_DV(rhs, width);
         POP_DV(lhs, width);
-
-        /* Fetch cnd DD */
         POP_DD(cnd);
 
-        /* Push MUX output DD vector */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
 
-        /* Register ITE MUX */
         expr::Expr_ptr parent { expr };
 
         BinarySelectionUnionFindMap::const_iterator eye { f_bsuf_map.find(expr) };
-        if (f_bsuf_map.end() != eye)
+        if (f_bsuf_map.end() != eye) {
             parent = eye->second;
-
-        /* verify if entry for toplevel already exists. If it doesn't, create it */
-        {
-            Expr2BinarySelectionDescriptorsMap::const_iterator mi { f_expr2bsd_map.find(parent) };
-
-            if (f_expr2bsd_map.end() == mi)
-                f_expr2bsd_map.insert(
-                    std::pair<expr::Expr_ptr,
-                              BinarySelectionDescriptors>(parent, BinarySelectionDescriptors()));
         }
 
-        /* Entry for toplevel does exist for sure */
-        BinarySelectionDescriptor md { width, res, cnd, make_auto_dd(), lhs, rhs };
-        {
-            Expr2BinarySelectionDescriptorsMap::iterator mi(f_expr2bsd_map.find(parent));
-            assert(f_expr2bsd_map.end() != mi);
-
-            mi->second.push_back(md);
+        /* verify if entry for toplevel already exists. If it doesn't,
+         * create it. This ensures the next assertion will certainly
+         * hold. */
+        Expr2BinarySelectionDescriptorsMap::const_iterator toplevel_mi {
+            f_expr2bsd_map.find(parent)
+        };
+        if (f_expr2bsd_map.end() == toplevel_mi) {
+            f_expr2bsd_map.insert(
+                std::pair<expr::Expr_ptr, BinarySelectionDescriptors>(parent, BinarySelectionDescriptors()));
         }
 
-        DEBUG
-            << "Registered "
-            << md
-            << std::endl;
+        BinarySelectionDescriptor md {
+            width, res, cnd, make_auto_dd(), lhs, rhs
+        };
+        Expr2BinarySelectionDescriptorsMap::iterator mi {
+            f_expr2bsd_map.find(parent)
+        };
+        assert(f_expr2bsd_map.end() != mi);
+        mi->second.push_back(md);
     }
 
     void Compiler::algebraic_subscript(const expr::Expr_ptr expr)
     {
-        enc::EncodingMgr& bm(f_enc);
+        enc::EncodingMgr& bm { f_enc };
 
-        // index
-        type::Type_ptr t0 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume index
+        POP_TYPE(t0);
         assert(t0->is_algebraic());
 
         type::Type_ptr itype { t0->as_algebraic() };
         unsigned iwidth(itype->width());
+        assert(iwidth == bm.word_width());
 
-        POP_DV(index, iwidth);
-        assert(iwidth == bm.word_width()); // needed?
-
-        // array
-        type::Type_ptr t1 { f_type_stack.back() };
-        f_type_stack.pop_back(); // consume array
+        POP_TYPE(t1);
         assert(t1->is_array());
 
         type::ArrayType_ptr atype { t1->as_array() };
@@ -320,28 +300,30 @@ namespace compiler {
 
         unsigned elem_width { type->width() };
         unsigned elem_count { atype->nelems() };
-        POP_DV(lhs, elem_width * elem_count);
 
         PUSH_TYPE(type);
 
+        POP_DV(index, iwidth);
+        POP_DV(lhs, elem_width * elem_count);
+
         if (t0->is_constant()) {
             unsigned subscript { 0 };
-            for (unsigned i = 0; i < iwidth; ++ i) {
+            for (unsigned i = 0; i < iwidth; ++i) {
                 ADD bit { index[i] };
                 subscript *= 2;
                 if (bit.IsOne()) {
-                    subscript ++;
+                    subscript++;
                 }
             }
 
-            for (unsigned i = 0; i < elem_width; ++ i) {
+            for (unsigned i = 0; i < elem_width; ++i) {
                 PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
             }
         } else {
-            /* Build selection DDs */
             dd::DDVector cnd_dds;
             dd::DDVector act_dds;
             unsigned j_, j { 0 };
+
             do {
                 unsigned i;
                 ADD cnd { bm.one() };
@@ -361,24 +343,21 @@ namespace compiler {
                 act_dds.push_back(make_auto_dd());
             } while (++j < elem_count);
 
-            /* Push MUX output DD vector */
             FRESH_DV(dv, elem_width);
             PUSH_DV(dv, elem_width);
 
-            MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+            MultiwaySelectionDescriptor msd {
+                elem_width, elem_count, dv, cnd_dds, act_dds, lhs
+            };
             f_multiway_selection_descriptors.push_back(msd);
-
-            DEBUG
-            << "Registered "
-            << msd
-            << std::endl;
         }
     }
 
     /* add n-1 non significant zero, LSB is original bit */
     void Compiler::algebraic_cast_from_boolean(const expr::Expr_ptr expr)
     {
-        type::Type_ptr tp { f_owner.type(expr->lhs(), f_ctx_stack.back()) };
+        TOP_CTX(ctx);
+        type::Type_ptr tp { f_owner.type(expr->lhs(), ctx) };
         for (unsigned i = 0; i < tp->width() - 1; ++i) {
             PUSH_DD(f_enc.zero());
         }
@@ -387,7 +366,8 @@ namespace compiler {
     /* squeeze all bits in a big Or */
     void Compiler::boolean_cast_from_algebraic(const expr::Expr_ptr expr)
     {
-        type::Type_ptr tp { f_owner.type(expr->rhs(), f_ctx_stack.back()) };
+        TOP_CTX(ctx);
+        type::Type_ptr tp { f_owner.type(expr->rhs(), ctx) };
         POP_DV(rhs, tp->width());
 
         ADD res { f_enc.zero() };
@@ -399,30 +379,35 @@ namespace compiler {
 
     void Compiler::algebraic_cast_from_algebraic(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        TOP_CTX(ctx);
         type::Type_ptr src_type { f_owner.type(expr->rhs(), ctx) };
         type::Type_ptr tgt_type { f_owner.type(expr->lhs(), ctx) };
 
-        if (src_type->width() == tgt_type->width())
+        if (src_type->width() == tgt_type->width()) {
             return; /* nop */
+        }
 
+        /* growing cast? */
         else if (src_type->width() < tgt_type->width()) {
-            /* grow */
             if (tgt_type->is_signed_algebraic()) {
                 /* signed, needs sign bit extension (src MSB) */
-                ADD msb = f_add_stack.back(); /* just inspect */
+                TOP_DD(msb);
+
                 for (unsigned i = src_type->width(); i < tgt_type->width(); ++i) {
                     PUSH_DD(msb);
                 }
             } else {
                 assert(tgt_type->is_unsigned_algebraic());
+
                 /* unsigned, pad with zeroes */
                 for (unsigned i = src_type->width(); i < tgt_type->width(); ++i) {
                     PUSH_DD(f_enc.zero());
                 }
             }
-        } else {
-            /* shrink */
+        }
+
+        /* shrinking cast */
+        else {
             assert(tgt_type->width() < src_type->width());
             for (unsigned i = src_type->width(); i > tgt_type->width(); --i) {
                 f_add_stack.pop_back(); /* discard ADDs */

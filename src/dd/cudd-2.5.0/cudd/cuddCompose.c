@@ -82,8 +82,8 @@
 
 ******************************************************************************/
 
-#include "util.h"
 #include "cuddInt.h"
+#include "util.h"
 
 
 /*---------------------------------------------------------------------------*/
@@ -126,16 +126,16 @@ static int addGeneralVectorComposeHits;
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static DdNode * cuddAddPermuteRecur (DdManager *manager, DdHashTable *table, DdNode *node, int *permut);
-static DdNode * cuddBddPermuteRecur (DdManager *manager, DdHashTable *table, DdNode *node, int *permut);
-static DdNode * cuddBddVarMapRecur (DdManager *manager, DdNode *f);
-static DdNode * cuddAddVectorComposeRecur (DdManager *dd, DdHashTable *table, DdNode *f, DdNode **vector, int deepest);
-static DdNode * cuddAddNonSimComposeRecur (DdManager *dd, DdNode *f, DdNode **vector, DdNode *key, DdNode *cube, int lastsub);
-static DdNode * cuddBddVectorComposeRecur (DdManager *dd, DdHashTable *table, DdNode *f, DdNode **vector, int deepest);
-DD_INLINE static int ddIsIthAddVar (DdManager *dd, DdNode *f, unsigned int i);
+static DdNode* cuddAddPermuteRecur(DdManager* manager, DdHashTable* table, DdNode* node, int* permut);
+static DdNode* cuddBddPermuteRecur(DdManager* manager, DdHashTable* table, DdNode* node, int* permut);
+static DdNode* cuddBddVarMapRecur(DdManager* manager, DdNode* f);
+static DdNode* cuddAddVectorComposeRecur(DdManager* dd, DdHashTable* table, DdNode* f, DdNode** vector, int deepest);
+static DdNode* cuddAddNonSimComposeRecur(DdManager* dd, DdNode* f, DdNode** vector, DdNode* key, DdNode* cube, int lastsub);
+static DdNode* cuddBddVectorComposeRecur(DdManager* dd, DdHashTable* table, DdNode* f, DdNode** vector, int deepest);
+DD_INLINE static int ddIsIthAddVar(DdManager* dd, DdNode* f, unsigned int i);
 
-static DdNode * cuddAddGeneralVectorComposeRecur (DdManager *dd, DdHashTable *table, DdNode *f, DdNode **vectorOn, DdNode **vectorOff, int deepest);
-DD_INLINE static int ddIsIthAddVarPair (DdManager *dd, DdNode *f, DdNode *g, unsigned int i);
+static DdNode* cuddAddGeneralVectorComposeRecur(DdManager* dd, DdHashTable* table, DdNode* f, DdNode** vectorOn, DdNode** vectorOff, int deepest);
+DD_INLINE static int ddIsIthAddVarPair(DdManager* dd, DdNode* f, DdNode* g, unsigned int i);
 
 /**AutomaticEnd***************************************************************/
 
@@ -159,24 +159,24 @@ DD_INLINE static int ddIsIthAddVarPair (DdManager *dd, DdNode *f, DdNode *g, uns
   SeeAlso     [Cudd_addCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  int  v)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g,
+    int v)
 {
     DdNode *proj, *res;
 
     /* Sanity check. */
-    if (v < 0 || v >= dd->size) return(NULL);
+    if (v < 0 || v >= dd->size) return (NULL);
 
-    proj =  dd->vars[v];
+    proj = dd->vars[v];
     do {
-	dd->reordered = 0;
-	res = cuddBddComposeRecur(dd,f,g,proj);
+        dd->reordered = 0;
+        res = cuddBddComposeRecur(dd, f, g, proj);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddCompose */
 
@@ -196,24 +196,24 @@ Cudd_bddCompose(
   SeeAlso     [Cudd_bddCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  int  v)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g,
+    int v)
 {
     DdNode *proj, *res;
 
     /* Sanity check. */
-    if (v < 0 || v >= dd->size) return(NULL);
+    if (v < 0 || v >= dd->size) return (NULL);
 
-    proj =  dd->vars[v];
+    proj = dd->vars[v];
     do {
-	dd->reordered = 0;
-	res = cuddAddComposeRecur(dd,f,g,proj);
+        dd->reordered = 0;
+        res = cuddAddComposeRecur(dd, f, g, proj);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addCompose */
 
@@ -234,28 +234,28 @@ Cudd_addCompose(
   SeeAlso     [Cudd_bddPermute Cudd_addSwapVariables]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addPermute(
-  DdManager * manager,
-  DdNode * node,
-  int * permut)
+    DdManager* manager,
+    DdNode* node,
+    int* permut)
 {
-    DdHashTable		*table;
-    DdNode		*res;
+    DdHashTable* table;
+    DdNode* res;
 
     do {
-	manager->reordered = 0;
-	table = cuddHashTableInit(manager,1,2);
-	if (table == NULL) return(NULL);
-	/* Recursively solve the problem. */
-	res = cuddAddPermuteRecur(manager,table,node,permut);
-	if (res != NULL) cuddRef(res);
-	/* Dispose of local cache. */
-	cuddHashTableQuit(table);
+        manager->reordered = 0;
+        table = cuddHashTableInit(manager, 1, 2);
+        if (table == NULL) return (NULL);
+        /* Recursively solve the problem. */
+        res = cuddAddPermuteRecur(manager, table, node, permut);
+        if (res != NULL) cuddRef(res);
+        /* Dispose of local cache. */
+        cuddHashTableQuit(table);
     } while (manager->reordered == 1);
 
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addPermute */
 
@@ -275,35 +275,36 @@ Cudd_addPermute(
   SeeAlso     [Cudd_addPermute Cudd_bddSwapVariables]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addSwapVariables(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** x,
-  DdNode ** y,
-  int  n)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** x,
+    DdNode** y,
+    int n)
 {
-    DdNode *swapped;
-    int	 i, j, k;
-    int	 *permut;
+    DdNode* swapped;
+    int i, j, k;
+    int* permut;
 
-    permut = ALLOC(int,dd->size);
+    permut = ALLOC(int, dd->size);
     if (permut == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	return(NULL);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        return (NULL);
     }
-    for (i = 0; i < dd->size; i++) permut[i] = i;
+    for (i = 0; i < dd->size; i++)
+        permut[i] = i;
     for (i = 0; i < n; i++) {
-	j = x[i]->index;
-	k = y[i]->index;
-	permut[j] = k;
-	permut[k] = j;
+        j = x[i]->index;
+        k = y[i]->index;
+        permut[j] = k;
+        permut[k] = j;
     }
 
-    swapped = Cudd_addPermute(dd,f,permut);
+    swapped = Cudd_addPermute(dd, f, permut);
     FREE(permut);
 
-    return(swapped);
+    return (swapped);
 
 } /* end of Cudd_addSwapVariables */
 
@@ -324,28 +325,28 @@ Cudd_addSwapVariables(
   SeeAlso     [Cudd_addPermute Cudd_bddSwapVariables]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddPermute(
-  DdManager * manager,
-  DdNode * node,
-  int * permut)
+    DdManager* manager,
+    DdNode* node,
+    int* permut)
 {
-    DdHashTable		*table;
-    DdNode		*res;
+    DdHashTable* table;
+    DdNode* res;
 
     do {
-	manager->reordered = 0;
-	table = cuddHashTableInit(manager,1,2);
-	if (table == NULL) return(NULL);
-	res = cuddBddPermuteRecur(manager,table,node,permut);
-	if (res != NULL) cuddRef(res);
-	/* Dispose of local cache. */
-	cuddHashTableQuit(table);
+        manager->reordered = 0;
+        table = cuddHashTableInit(manager, 1, 2);
+        if (table == NULL) return (NULL);
+        res = cuddBddPermuteRecur(manager, table, node, permut);
+        if (res != NULL) cuddRef(res);
+        /* Dispose of local cache. */
+        cuddHashTableQuit(table);
 
     } while (manager->reordered == 1);
 
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddPermute */
 
@@ -365,20 +366,20 @@ Cudd_bddPermute(
   SeeAlso     [Cudd_bddPermute Cudd_bddSwapVariables Cudd_SetVarMap]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddVarMap(
-  DdManager * manager /* DD manager */,
-  DdNode * f /* function in which to remap variables */)
+    DdManager* manager /* DD manager */,
+    DdNode* f /* function in which to remap variables */)
 {
-    DdNode *res;
+    DdNode* res;
 
-    if (manager->map == NULL) return(NULL);
+    if (manager->map == NULL) return (NULL);
     do {
-	manager->reordered = 0;
-	res = cuddBddVarMapRecur(manager, f);
+        manager->reordered = 0;
+        res = cuddBddVarMapRecur(manager, f);
     } while (manager->reordered == 1);
 
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddVarMap */
 
@@ -408,35 +409,34 @@ Cudd_bddVarMap(
   SeeAlso     [Cudd_bddVarMap Cudd_bddPermute Cudd_bddSwapVariables]
 
 ******************************************************************************/
-int
-Cudd_SetVarMap (
-  DdManager *manager /* DD manager */,
-  DdNode **x /* first array of variables */,
-  DdNode **y /* second array of variables */,
-  int n /* length of both arrays */)
+int Cudd_SetVarMap(
+    DdManager* manager /* DD manager */,
+    DdNode** x /* first array of variables */,
+    DdNode** y /* second array of variables */,
+    int n /* length of both arrays */)
 {
     int i;
 
     if (manager->map != NULL) {
-	cuddCacheFlush(manager);
+        cuddCacheFlush(manager);
     } else {
-	manager->map = ALLOC(int,manager->maxSize);
-	if (manager->map == NULL) {
-	    manager->errorCode = CUDD_MEMORY_OUT;
-	    return(0);
-	}
-	manager->memused += sizeof(int) * manager->maxSize;
+        manager->map = ALLOC(int, manager->maxSize);
+        if (manager->map == NULL) {
+            manager->errorCode = CUDD_MEMORY_OUT;
+            return (0);
+        }
+        manager->memused += sizeof(int) * manager->maxSize;
     }
     /* Initialize the map to the identity. */
     for (i = 0; i < manager->size; i++) {
-	manager->map[i] = i;
+        manager->map[i] = i;
     }
     /* Create the map. */
     for (i = 0; i < n; i++) {
-	manager->map[x[i]->index] = y[i]->index;
-	manager->map[y[i]->index] = x[i]->index;
+        manager->map[x[i]->index] = y[i]->index;
+        manager->map[y[i]->index] = x[i]->index;
     }
-    return(1);
+    return (1);
 
 } /* end of Cudd_SetVarMap */
 
@@ -456,35 +456,36 @@ Cudd_SetVarMap (
   SeeAlso     [Cudd_bddPermute Cudd_addSwapVariables]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddSwapVariables(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** x,
-  DdNode ** y,
-  int  n)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** x,
+    DdNode** y,
+    int n)
 {
-    DdNode *swapped;
-    int	 i, j, k;
-    int	 *permut;
+    DdNode* swapped;
+    int i, j, k;
+    int* permut;
 
-    permut = ALLOC(int,dd->size);
+    permut = ALLOC(int, dd->size);
     if (permut == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	return(NULL);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        return (NULL);
     }
-    for (i = 0; i < dd->size; i++) permut[i] = i;
+    for (i = 0; i < dd->size; i++)
+        permut[i] = i;
     for (i = 0; i < n; i++) {
-	j = x[i]->index;
-	k = y[i]->index;
-	permut[j] = k;
-	permut[k] = j;
+        j = x[i]->index;
+        k = y[i]->index;
+        permut[j] = k;
+        permut[k] = j;
     }
 
-    swapped = Cudd_bddPermute(dd,f,permut);
+    swapped = Cudd_bddPermute(dd, f, permut);
     FREE(permut);
 
-    return(swapped);
+    return (swapped);
 
 } /* end of Cudd_bddSwapVariables */
 
@@ -504,34 +505,35 @@ Cudd_bddSwapVariables(
   Cudd_Dxygtdxz Cudd_Dxygtdyz Cudd_PrioritySelect]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddAdjPermuteX(
-  DdManager * dd,
-  DdNode * B,
-  DdNode ** x,
-  int  n)
+    DdManager* dd,
+    DdNode* B,
+    DdNode** x,
+    int n)
 {
-    DdNode *swapped;
-    int	 i, j, k;
-    int	 *permut;
+    DdNode* swapped;
+    int i, j, k;
+    int* permut;
 
-    permut = ALLOC(int,dd->size);
+    permut = ALLOC(int, dd->size);
     if (permut == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	return(NULL);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        return (NULL);
     }
-    for (i = 0; i < dd->size; i++) permut[i] = i;
-    for (i = 0; i < n-2; i += 3) {
-	j = x[i]->index;
-	k = x[i+1]->index;
-	permut[j] = k;
-	permut[k] = j;
+    for (i = 0; i < dd->size; i++)
+        permut[i] = i;
+    for (i = 0; i < n - 2; i += 3) {
+        j = x[i]->index;
+        k = x[i + 1]->index;
+        permut[j] = k;
+        permut[k] = j;
     }
 
-    swapped = Cudd_bddPermute(dd,B,permut);
+    swapped = Cudd_bddPermute(dd, B, permut);
     FREE(permut);
 
-    return(swapped);
+    return (swapped);
 
 } /* end of Cudd_bddAdjPermuteX */
 
@@ -555,41 +557,41 @@ Cudd_bddAdjPermuteX(
   Cudd_bddVectorCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addVectorCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** vector)
 {
-    DdHashTable		*table;
-    DdNode		*res;
-    int			deepest;
-    int                 i;
+    DdHashTable* table;
+    DdNode* res;
+    int deepest;
+    int i;
 
     do {
-	dd->reordered = 0;
-	/* Initialize local cache. */
-	table = cuddHashTableInit(dd,1,2);
-	if (table == NULL) return(NULL);
+        dd->reordered = 0;
+        /* Initialize local cache. */
+        table = cuddHashTableInit(dd, 1, 2);
+        if (table == NULL) return (NULL);
 
-	/* Find deepest real substitution. */
-	for (deepest = dd->size - 1; deepest >= 0; deepest--) {
-	    i = dd->invperm[deepest];
-	    if (!ddIsIthAddVar(dd,vector[i],i)) {
-		break;
-	    }
-	}
+        /* Find deepest real substitution. */
+        for (deepest = dd->size - 1; deepest >= 0; deepest--) {
+            i = dd->invperm[deepest];
+            if (!ddIsIthAddVar(dd, vector[i], i)) {
+                break;
+            }
+        }
 
-	/* Recursively solve the problem. */
-	res = cuddAddVectorComposeRecur(dd,table,f,vector,deepest);
-	if (res != NULL) cuddRef(res);
+        /* Recursively solve the problem. */
+        res = cuddAddVectorComposeRecur(dd, table, f, vector, deepest);
+        if (res != NULL) cuddRef(res);
 
-	/* Dispose of local cache. */
-	cuddHashTableQuit(table);
+        /* Dispose of local cache. */
+        cuddHashTableQuit(table);
     } while (dd->reordered == 1);
 
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addVectorCompose */
 
@@ -613,43 +615,43 @@ Cudd_addVectorCompose(
   Cudd_addCompose Cudd_bddVectorCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addGeneralVectorCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vectorOn,
-  DdNode ** vectorOff)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** vectorOn,
+    DdNode** vectorOff)
 {
-    DdHashTable		*table;
-    DdNode		*res;
-    int			deepest;
-    int                 i;
+    DdHashTable* table;
+    DdNode* res;
+    int deepest;
+    int i;
 
     do {
-	dd->reordered = 0;
-	/* Initialize local cache. */
-	table = cuddHashTableInit(dd,1,2);
-	if (table == NULL) return(NULL);
+        dd->reordered = 0;
+        /* Initialize local cache. */
+        table = cuddHashTableInit(dd, 1, 2);
+        if (table == NULL) return (NULL);
 
-	/* Find deepest real substitution. */
-	for (deepest = dd->size - 1; deepest >= 0; deepest--) {
-	    i = dd->invperm[deepest];
-	    if (!ddIsIthAddVarPair(dd,vectorOn[i],vectorOff[i],i)) {
-		break;
-	    }
-	}
+        /* Find deepest real substitution. */
+        for (deepest = dd->size - 1; deepest >= 0; deepest--) {
+            i = dd->invperm[deepest];
+            if (!ddIsIthAddVarPair(dd, vectorOn[i], vectorOff[i], i)) {
+                break;
+            }
+        }
 
-	/* Recursively solve the problem. */
-	res = cuddAddGeneralVectorComposeRecur(dd,table,f,vectorOn,
-					       vectorOff,deepest);
-	if (res != NULL) cuddRef(res);
+        /* Recursively solve the problem. */
+        res = cuddAddGeneralVectorComposeRecur(dd, table, f, vectorOn,
+                                               vectorOff, deepest);
+        if (res != NULL) cuddRef(res);
 
-	/* Dispose of local cache. */
-	cuddHashTableQuit(table);
+        /* Dispose of local cache. */
+        cuddHashTableQuit(table);
     } while (dd->reordered == 1);
 
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addGeneralVectorCompose */
 
@@ -674,15 +676,15 @@ Cudd_addGeneralVectorCompose(
   SeeAlso     [Cudd_addVectorCompose Cudd_addPermute Cudd_addCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_addNonSimCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** vector)
 {
-    DdNode		*cube, *key, *var, *tmp, *piece;
-    DdNode		*res;
-    int			i, lastsub;
+    DdNode *cube, *key, *var, *tmp, *piece;
+    DdNode* res;
+    int i, lastsub;
 
     /* The cache entry for this function is composed of three parts:
     ** f itself, the replacement relation, and the cube of the
@@ -699,68 +701,68 @@ Cudd_addNonSimCompose(
     cube = DD_ONE(dd);
     cuddRef(cube);
     for (i = (int) dd->size - 1; i >= 0; i--) {
-	if (ddIsIthAddVar(dd,vector[i],(unsigned int)i)) {
-	    continue;
-	}
-	var = Cudd_addIthVar(dd,i);
-	if (var == NULL) {
-	    Cudd_RecursiveDeref(dd,key);
-	    Cudd_RecursiveDeref(dd,cube);
-	    return(NULL);
-	}
-	cuddRef(var);
-	/* Update cube. */
-	tmp = Cudd_addApply(dd,Cudd_addTimes,var,cube);
-	if (tmp == NULL) {
-	    Cudd_RecursiveDeref(dd,key);
-	    Cudd_RecursiveDeref(dd,cube);
-	    Cudd_RecursiveDeref(dd,var);
-	    return(NULL);
-	}
-	cuddRef(tmp);
-	Cudd_RecursiveDeref(dd,cube);
-	cube = tmp;
-	/* Update replacement relation. */
-	piece = Cudd_addApply(dd,Cudd_addXnor,var,vector[i]);
-	if (piece == NULL) {
-	    Cudd_RecursiveDeref(dd,key);
-	    Cudd_RecursiveDeref(dd,var);
-	    return(NULL);
-	}
-	cuddRef(piece);
-	Cudd_RecursiveDeref(dd,var);
-	tmp = Cudd_addApply(dd,Cudd_addTimes,key,piece);
-	if (tmp == NULL) {
-	    Cudd_RecursiveDeref(dd,key);
-	    Cudd_RecursiveDeref(dd,piece);
-	    return(NULL);
-	}
-	cuddRef(tmp);
-	Cudd_RecursiveDeref(dd,key);
-	Cudd_RecursiveDeref(dd,piece);
-	key = tmp;
+        if (ddIsIthAddVar(dd, vector[i], (unsigned int) i)) {
+            continue;
+        }
+        var = Cudd_addIthVar(dd, i);
+        if (var == NULL) {
+            Cudd_RecursiveDeref(dd, key);
+            Cudd_RecursiveDeref(dd, cube);
+            return (NULL);
+        }
+        cuddRef(var);
+        /* Update cube. */
+        tmp = Cudd_addApply(dd, Cudd_addTimes, var, cube);
+        if (tmp == NULL) {
+            Cudd_RecursiveDeref(dd, key);
+            Cudd_RecursiveDeref(dd, cube);
+            Cudd_RecursiveDeref(dd, var);
+            return (NULL);
+        }
+        cuddRef(tmp);
+        Cudd_RecursiveDeref(dd, cube);
+        cube = tmp;
+        /* Update replacement relation. */
+        piece = Cudd_addApply(dd, Cudd_addXnor, var, vector[i]);
+        if (piece == NULL) {
+            Cudd_RecursiveDeref(dd, key);
+            Cudd_RecursiveDeref(dd, var);
+            return (NULL);
+        }
+        cuddRef(piece);
+        Cudd_RecursiveDeref(dd, var);
+        tmp = Cudd_addApply(dd, Cudd_addTimes, key, piece);
+        if (tmp == NULL) {
+            Cudd_RecursiveDeref(dd, key);
+            Cudd_RecursiveDeref(dd, piece);
+            return (NULL);
+        }
+        cuddRef(tmp);
+        Cudd_RecursiveDeref(dd, key);
+        Cudd_RecursiveDeref(dd, piece);
+        key = tmp;
     }
 
     /* Now try composition, until no reordering occurs. */
     do {
-	/* Find real substitution with largest index. */
-	for (lastsub = dd->size - 1; lastsub >= 0; lastsub--) {
-	    if (!ddIsIthAddVar(dd,vector[lastsub],(unsigned int)lastsub)) {
-		break;
-	    }
-	}
+        /* Find real substitution with largest index. */
+        for (lastsub = dd->size - 1; lastsub >= 0; lastsub--) {
+            if (!ddIsIthAddVar(dd, vector[lastsub], (unsigned int) lastsub)) {
+                break;
+            }
+        }
 
-	/* Recursively solve the problem. */
-	dd->reordered = 0;
-	res = cuddAddNonSimComposeRecur(dd,f,vector,key,cube,lastsub+1);
-	if (res != NULL) cuddRef(res);
+        /* Recursively solve the problem. */
+        dd->reordered = 0;
+        res = cuddAddNonSimComposeRecur(dd, f, vector, key, cube, lastsub + 1);
+        if (res != NULL) cuddRef(res);
 
     } while (dd->reordered == 1);
 
-    Cudd_RecursiveDeref(dd,key);
-    Cudd_RecursiveDeref(dd,cube);
+    Cudd_RecursiveDeref(dd, key);
+    Cudd_RecursiveDeref(dd, cube);
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addNonSimCompose */
 
@@ -783,41 +785,41 @@ Cudd_addNonSimCompose(
   SeeAlso     [Cudd_bddPermute Cudd_bddCompose Cudd_addVectorCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 Cudd_bddVectorCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** vector)
 {
-    DdHashTable		*table;
-    DdNode		*res;
-    int			deepest;
-    int                 i;
+    DdHashTable* table;
+    DdNode* res;
+    int deepest;
+    int i;
 
     do {
-	dd->reordered = 0;
-	/* Initialize local cache. */
-	table = cuddHashTableInit(dd,1,2);
-	if (table == NULL) return(NULL);
+        dd->reordered = 0;
+        /* Initialize local cache. */
+        table = cuddHashTableInit(dd, 1, 2);
+        if (table == NULL) return (NULL);
 
-	/* Find deepest real substitution. */
-	for (deepest = dd->size - 1; deepest >= 0; deepest--) {
-	    i = dd->invperm[deepest];
-	    if (vector[i] != dd->vars[i]) {
-		break;
-	    }
-	}
+        /* Find deepest real substitution. */
+        for (deepest = dd->size - 1; deepest >= 0; deepest--) {
+            i = dd->invperm[deepest];
+            if (vector[i] != dd->vars[i]) {
+                break;
+            }
+        }
 
-	/* Recursively solve the problem. */
-	res = cuddBddVectorComposeRecur(dd,table,f,vector, deepest);
-	if (res != NULL) cuddRef(res);
+        /* Recursively solve the problem. */
+        res = cuddBddVectorComposeRecur(dd, table, f, vector, deepest);
+        if (res != NULL) cuddRef(res);
 
-	/* Dispose of local cache. */
-	cuddHashTableQuit(table);
+        /* Dispose of local cache. */
+        cuddHashTableQuit(table);
     } while (dd->reordered == 1);
 
     if (res != NULL) cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of Cudd_bddVectorCompose */
 
@@ -842,24 +844,24 @@ Cudd_bddVectorCompose(
   SeeAlso     [Cudd_bddCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddBddComposeRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  DdNode * proj)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g,
+    DdNode* proj)
 {
-    DdNode	*F, *G, *f1, *f0, *g1, *g0, *r, *t, *e;
+    DdNode *F, *G, *f1, *f0, *g1, *g0, *r, *t, *e;
     unsigned int v, topf, topg, topindex;
-    int		comple;
+    int comple;
 
     statLine(dd);
     v = dd->perm[proj->index];
     F = Cudd_Regular(f);
-    topf = cuddI(dd,F->index);
+    topf = cuddI(dd, F->index);
 
     /* Terminal case. Subsumes the test for constant f. */
-    if (topf > v) return(f);
+    if (topf > v) return (f);
 
     /* We solve the problem for a regular pointer, and then complement
     ** the result if the pointer was originally complemented.
@@ -867,67 +869,67 @@ cuddBddComposeRecur(
     comple = Cudd_IsComplement(f);
 
     /* Check cache. */
-    r = cuddCacheLookup(dd,DD_BDD_COMPOSE_RECUR_TAG,F,g,proj);
+    r = cuddCacheLookup(dd, DD_BDD_COMPOSE_RECUR_TAG, F, g, proj);
     if (r != NULL) {
-	return(Cudd_NotCond(r,comple));
+        return (Cudd_NotCond(r, comple));
     }
 
     if (topf == v) {
-	/* Compose. */
-	f1 = cuddT(F);
-	f0 = cuddE(F);
-	r = cuddBddIteRecur(dd, g, f1, f0);
-	if (r == NULL) return(NULL);
+        /* Compose. */
+        f1 = cuddT(F);
+        f0 = cuddE(F);
+        r = cuddBddIteRecur(dd, g, f1, f0);
+        if (r == NULL) return (NULL);
     } else {
-	/* Compute cofactors of f and g. Remember the index of the top
+        /* Compute cofactors of f and g. Remember the index of the top
 	** variable.
 	*/
-	G = Cudd_Regular(g);
-	topg = cuddI(dd,G->index);
-	if (topf > topg) {
-	    topindex = G->index;
-	    f1 = f0 = F;
-	} else {
-	    topindex = F->index;
-	    f1 = cuddT(F);
-	    f0 = cuddE(F);
-	}
-	if (topg > topf) {
-	    g1 = g0 = g;
-	} else {
-	    g1 = cuddT(G);
-	    g0 = cuddE(G);
-	    if (g != G) {
-		g1 = Cudd_Not(g1);
-		g0 = Cudd_Not(g0);
-	    }
-	}
-	/* Recursive step. */
-	t = cuddBddComposeRecur(dd, f1, g1, proj);
-	if (t == NULL) return(NULL);
-	cuddRef(t);
-	e = cuddBddComposeRecur(dd, f0, g0, proj);
-	if (e == NULL) {
-	    Cudd_IterDerefBdd(dd, t);
-	    return(NULL);
-	}
-	cuddRef(e);
+        G = Cudd_Regular(g);
+        topg = cuddI(dd, G->index);
+        if (topf > topg) {
+            topindex = G->index;
+            f1 = f0 = F;
+        } else {
+            topindex = F->index;
+            f1 = cuddT(F);
+            f0 = cuddE(F);
+        }
+        if (topg > topf) {
+            g1 = g0 = g;
+        } else {
+            g1 = cuddT(G);
+            g0 = cuddE(G);
+            if (g != G) {
+                g1 = Cudd_Not(g1);
+                g0 = Cudd_Not(g0);
+            }
+        }
+        /* Recursive step. */
+        t = cuddBddComposeRecur(dd, f1, g1, proj);
+        if (t == NULL) return (NULL);
+        cuddRef(t);
+        e = cuddBddComposeRecur(dd, f0, g0, proj);
+        if (e == NULL) {
+            Cudd_IterDerefBdd(dd, t);
+            return (NULL);
+        }
+        cuddRef(e);
 
-	r = cuddBddIteRecur(dd, dd->vars[topindex], t, e);
-	if (r == NULL) {
-	    Cudd_IterDerefBdd(dd, t);
-	    Cudd_IterDerefBdd(dd, e);
-	    return(NULL);
-	}
-	cuddRef(r);
-	Cudd_IterDerefBdd(dd, t); /* t & e not necessarily part of r */
-	Cudd_IterDerefBdd(dd, e);
-	cuddDeref(r);
+        r = cuddBddIteRecur(dd, dd->vars[topindex], t, e);
+        if (r == NULL) {
+            Cudd_IterDerefBdd(dd, t);
+            Cudd_IterDerefBdd(dd, e);
+            return (NULL);
+        }
+        cuddRef(r);
+        Cudd_IterDerefBdd(dd, t); /* t & e not necessarily part of r */
+        Cudd_IterDerefBdd(dd, e);
+        cuddDeref(r);
     }
 
-    cuddCacheInsert(dd,DD_BDD_COMPOSE_RECUR_TAG,F,g,proj,r);
+    cuddCacheInsert(dd, DD_BDD_COMPOSE_RECUR_TAG, F, g, proj, r);
 
-    return(Cudd_NotCond(r,comple));
+    return (Cudd_NotCond(r, comple));
 
 } /* end of cuddBddComposeRecur */
 
@@ -944,82 +946,82 @@ cuddBddComposeRecur(
   SeeAlso     [Cudd_addCompose]
 
 ******************************************************************************/
-DdNode *
+DdNode*
 cuddAddComposeRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  DdNode * proj)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g,
+    DdNode* proj)
 {
     DdNode *f1, *f0, *g1, *g0, *r, *t, *e;
     unsigned int v, topf, topg, topindex;
 
     statLine(dd);
     v = dd->perm[proj->index];
-    topf = cuddI(dd,f->index);
+    topf = cuddI(dd, f->index);
 
     /* Terminal case. Subsumes the test for constant f. */
-    if (topf > v) return(f);
+    if (topf > v) return (f);
 
     /* Check cache. */
-    r = cuddCacheLookup(dd,DD_ADD_COMPOSE_RECUR_TAG,f,g,proj);
+    r = cuddCacheLookup(dd, DD_ADD_COMPOSE_RECUR_TAG, f, g, proj);
     if (r != NULL) {
-	return(r);
+        return (r);
     }
 
     if (topf == v) {
-	/* Compose. */
-	f1 = cuddT(f);
-	f0 = cuddE(f);
-	r = cuddAddIteRecur(dd, g, f1, f0);
-	if (r == NULL) return(NULL);
+        /* Compose. */
+        f1 = cuddT(f);
+        f0 = cuddE(f);
+        r = cuddAddIteRecur(dd, g, f1, f0);
+        if (r == NULL) return (NULL);
     } else {
-	/* Compute cofactors of f and g. Remember the index of the top
+        /* Compute cofactors of f and g. Remember the index of the top
 	** variable.
 	*/
-	topg = cuddI(dd,g->index);
-	if (topf > topg) {
-	    topindex = g->index;
-	    f1 = f0 = f;
-	} else {
-	    topindex = f->index;
-	    f1 = cuddT(f);
-	    f0 = cuddE(f);
-	}
-	if (topg > topf) {
-	    g1 = g0 = g;
-	} else {
-	    g1 = cuddT(g);
-	    g0 = cuddE(g);
-	}
-	/* Recursive step. */
-	t = cuddAddComposeRecur(dd, f1, g1, proj);
-	if (t == NULL) return(NULL);
-	cuddRef(t);
-	e = cuddAddComposeRecur(dd, f0, g0, proj);
-	if (e == NULL) {
-	    Cudd_RecursiveDeref(dd, t);
-	    return(NULL);
-	}
-	cuddRef(e);
+        topg = cuddI(dd, g->index);
+        if (topf > topg) {
+            topindex = g->index;
+            f1 = f0 = f;
+        } else {
+            topindex = f->index;
+            f1 = cuddT(f);
+            f0 = cuddE(f);
+        }
+        if (topg > topf) {
+            g1 = g0 = g;
+        } else {
+            g1 = cuddT(g);
+            g0 = cuddE(g);
+        }
+        /* Recursive step. */
+        t = cuddAddComposeRecur(dd, f1, g1, proj);
+        if (t == NULL) return (NULL);
+        cuddRef(t);
+        e = cuddAddComposeRecur(dd, f0, g0, proj);
+        if (e == NULL) {
+            Cudd_RecursiveDeref(dd, t);
+            return (NULL);
+        }
+        cuddRef(e);
 
-	if (t == e) {
-	    r = t;
-	} else {
-	    r = cuddUniqueInter(dd, (int) topindex, t, e);
-	    if (r == NULL) {
-		Cudd_RecursiveDeref(dd, t);
-		Cudd_RecursiveDeref(dd, e);
-		return(NULL);
-	    }
-	}
-	cuddDeref(t);
-	cuddDeref(e);
+        if (t == e) {
+            r = t;
+        } else {
+            r = cuddUniqueInter(dd, (int) topindex, t, e);
+            if (r == NULL) {
+                Cudd_RecursiveDeref(dd, t);
+                Cudd_RecursiveDeref(dd, e);
+                return (NULL);
+            }
+        }
+        cuddDeref(t);
+        cuddDeref(e);
     }
 
-    cuddCacheInsert(dd,DD_ADD_COMPOSE_RECUR_TAG,f,g,proj,r);
+    cuddCacheInsert(dd, DD_ADD_COMPOSE_RECUR_TAG, f, g, proj, r);
 
-    return(r);
+    return (r);
 
 } /* end of cuddAddComposeRecur */
 
@@ -1049,39 +1051,39 @@ cuddAddComposeRecur(
   SeeAlso     [Cudd_addPermute cuddBddPermuteRecur]
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddAddPermuteRecur(
-  DdManager * manager /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * node /* ADD to be reordered */,
-  int * permut /* permutation array */)
+    DdManager* manager /* DD manager */,
+    DdHashTable* table /* computed table */,
+    DdNode* node /* ADD to be reordered */,
+    int* permut /* permutation array */)
 {
-    DdNode	*T,*E;
-    DdNode	*res,*var;
-    int		index;
+    DdNode *T, *E;
+    DdNode *res, *var;
+    int index;
 
     statLine(manager);
     /* Check for terminal case of constant node. */
     if (cuddIsConstant(node)) {
-	return(node);
+        return (node);
     }
 
     /* If problem already solved, look up answer and return. */
-    if (node->ref != 1 && (res = cuddHashTableLookup1(table,node)) != NULL) {
+    if (node->ref != 1 && (res = cuddHashTableLookup1(table, node)) != NULL) {
 #ifdef DD_DEBUG
-	addPermuteRecurHits++;
+        addPermuteRecurHits++;
 #endif
-	return(res);
+        return (res);
     }
 
     /* Split and recur on children of this node. */
-    T = cuddAddPermuteRecur(manager,table,cuddT(node),permut);
-    if (T == NULL) return(NULL);
+    T = cuddAddPermuteRecur(manager, table, cuddT(node), permut);
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddAddPermuteRecur(manager,table,cuddE(node),permut);
+    E = cuddAddPermuteRecur(manager, table, cuddE(node), permut);
     if (E == NULL) {
-	Cudd_RecursiveDeref(manager, T);
-	return(NULL);
+        Cudd_RecursiveDeref(manager, T);
+        return (NULL);
     }
     cuddRef(E);
 
@@ -1090,18 +1092,18 @@ cuddAddPermuteRecur(
     ** cuddAddIteRecur with the T and E we just created.
     */
     index = permut[node->index];
-    var = cuddUniqueInter(manager,index,DD_ONE(manager),DD_ZERO(manager));
-    if (var == NULL) return(NULL);
+    var = cuddUniqueInter(manager, index, DD_ONE(manager), DD_ZERO(manager));
+    if (var == NULL) return (NULL);
     cuddRef(var);
-    res = cuddAddIteRecur(manager,var,T,E);
+    res = cuddAddIteRecur(manager, var, T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(manager,var);
-	Cudd_RecursiveDeref(manager, T);
-	Cudd_RecursiveDeref(manager, E);
-	return(NULL);
+        Cudd_RecursiveDeref(manager, var);
+        Cudd_RecursiveDeref(manager, T);
+        Cudd_RecursiveDeref(manager, E);
+        return (NULL);
     }
     cuddRef(res);
-    Cudd_RecursiveDeref(manager,var);
+    Cudd_RecursiveDeref(manager, var);
     Cudd_RecursiveDeref(manager, T);
     Cudd_RecursiveDeref(manager, E);
 
@@ -1109,15 +1111,15 @@ cuddAddPermuteRecur(
     ** it will not be visited again.
     */
     if (node->ref != 1) {
-	ptrint fanout = (ptrint) node->ref;
-	cuddSatDec(fanout);
-	if (!cuddHashTableInsert1(table,node,res,fanout)) {
-	    Cudd_RecursiveDeref(manager, res);
-	    return(NULL);
-	}
+        ptrint fanout = (ptrint) node->ref;
+        cuddSatDec(fanout);
+        if (!cuddHashTableInsert1(table, node, res, fanout)) {
+            Cudd_RecursiveDeref(manager, res);
+            return (NULL);
+        }
     }
     cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of cuddAddPermuteRecur */
 
@@ -1142,41 +1144,41 @@ cuddAddPermuteRecur(
   SeeAlso     [Cudd_bddPermute cuddAddPermuteRecur]
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddBddPermuteRecur(
-  DdManager * manager /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * node /* BDD to be reordered */,
-  int * permut /* permutation array */)
+    DdManager* manager /* DD manager */,
+    DdHashTable* table /* computed table */,
+    DdNode* node /* BDD to be reordered */,
+    int* permut /* permutation array */)
 {
-    DdNode	*N,*T,*E;
-    DdNode	*res;
-    int		index;
+    DdNode *N, *T, *E;
+    DdNode* res;
+    int index;
 
     statLine(manager);
     N = Cudd_Regular(node);
 
     /* Check for terminal case of constant node. */
     if (cuddIsConstant(N)) {
-	return(node);
+        return (node);
     }
 
     /* If problem already solved, look up answer and return. */
-    if (N->ref != 1 && (res = cuddHashTableLookup1(table,N)) != NULL) {
+    if (N->ref != 1 && (res = cuddHashTableLookup1(table, N)) != NULL) {
 #ifdef DD_DEBUG
-	bddPermuteRecurHits++;
+        bddPermuteRecurHits++;
 #endif
-	return(Cudd_NotCond(res,N != node));
+        return (Cudd_NotCond(res, N != node));
     }
 
     /* Split and recur on children of this node. */
-    T = cuddBddPermuteRecur(manager,table,cuddT(N),permut);
-    if (T == NULL) return(NULL);
+    T = cuddBddPermuteRecur(manager, table, cuddT(N), permut);
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddBddPermuteRecur(manager,table,cuddE(N),permut);
+    E = cuddBddPermuteRecur(manager, table, cuddE(N), permut);
     if (E == NULL) {
-	Cudd_IterDerefBdd(manager, T);
-	return(NULL);
+        Cudd_IterDerefBdd(manager, T);
+        return (NULL);
     }
     cuddRef(E);
 
@@ -1185,11 +1187,11 @@ cuddBddPermuteRecur(
     ** cuddBddIteRecur with the T and E we just created.
     */
     index = permut[N->index];
-    res = cuddBddIteRecur(manager,manager->vars[index],T,E);
+    res = cuddBddIteRecur(manager, manager->vars[index], T, E);
     if (res == NULL) {
-	Cudd_IterDerefBdd(manager, T);
-	Cudd_IterDerefBdd(manager, E);
-	return(NULL);
+        Cudd_IterDerefBdd(manager, T);
+        Cudd_IterDerefBdd(manager, E);
+        return (NULL);
     }
     cuddRef(res);
     Cudd_IterDerefBdd(manager, T);
@@ -1199,15 +1201,15 @@ cuddBddPermuteRecur(
     ** it will not be visited again.
     */
     if (N->ref != 1) {
-	ptrint fanout = (ptrint) N->ref;
-	cuddSatDec(fanout);
-	if (!cuddHashTableInsert1(table,N,res,fanout)) {
-	    Cudd_IterDerefBdd(manager, res);
-	    return(NULL);
-	}
+        ptrint fanout = (ptrint) N->ref;
+        cuddSatDec(fanout);
+        if (!cuddHashTableInsert1(table, N, res, fanout)) {
+            Cudd_IterDerefBdd(manager, res);
+            return (NULL);
+        }
     }
     cuddDeref(res);
-    return(Cudd_NotCond(res,N != node));
+    return (Cudd_NotCond(res, N != node));
 
 } /* end of cuddBddPermuteRecur */
 
@@ -1224,37 +1226,37 @@ cuddBddPermuteRecur(
   SeeAlso     [Cudd_bddVarMap]
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddBddVarMapRecur(
-  DdManager *manager /* DD manager */,
-  DdNode *f /* BDD to be remapped */)
+    DdManager* manager /* DD manager */,
+    DdNode* f /* BDD to be remapped */)
 {
-    DdNode	*F, *T, *E;
-    DdNode	*res;
-    int		index;
+    DdNode *F, *T, *E;
+    DdNode* res;
+    int index;
 
     statLine(manager);
     F = Cudd_Regular(f);
 
     /* Check for terminal case of constant node. */
     if (cuddIsConstant(F)) {
-	return(f);
+        return (f);
     }
 
     /* If problem already solved, look up answer and return. */
     if (F->ref != 1 &&
-	(res = cuddCacheLookup1(manager,Cudd_bddVarMap,F)) != NULL) {
-	return(Cudd_NotCond(res,F != f));
+        (res = cuddCacheLookup1(manager, Cudd_bddVarMap, F)) != NULL) {
+        return (Cudd_NotCond(res, F != f));
     }
 
     /* Split and recur on children of this node. */
-    T = cuddBddVarMapRecur(manager,cuddT(F));
-    if (T == NULL) return(NULL);
+    T = cuddBddVarMapRecur(manager, cuddT(F));
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddBddVarMapRecur(manager,cuddE(F));
+    E = cuddBddVarMapRecur(manager, cuddE(F));
     if (E == NULL) {
-	Cudd_IterDerefBdd(manager, T);
-	return(NULL);
+        Cudd_IterDerefBdd(manager, T);
+        return (NULL);
     }
     cuddRef(E);
 
@@ -1263,11 +1265,11 @@ cuddBddVarMapRecur(
     ** cuddBddIteRecur with the T and E we just created.
     */
     index = manager->map[F->index];
-    res = cuddBddIteRecur(manager,manager->vars[index],T,E);
+    res = cuddBddIteRecur(manager, manager->vars[index], T, E);
     if (res == NULL) {
-	Cudd_IterDerefBdd(manager, T);
-	Cudd_IterDerefBdd(manager, E);
-	return(NULL);
+        Cudd_IterDerefBdd(manager, T);
+        Cudd_IterDerefBdd(manager, E);
+        return (NULL);
     }
     cuddRef(res);
     Cudd_IterDerefBdd(manager, T);
@@ -1277,10 +1279,10 @@ cuddBddVarMapRecur(
     ** it will not be visited again.
     */
     if (F->ref != 1) {
-	cuddCacheInsert1(manager,Cudd_bddVarMap,F,res);
+        cuddCacheInsert1(manager, Cudd_bddVarMap, F, res);
     }
     cuddDeref(res);
-    return(Cudd_NotCond(res,F != f));
+    return (Cudd_NotCond(res, F != f));
 
 } /* end of cuddBddVarMapRecur */
 
@@ -1296,49 +1298,49 @@ cuddBddVarMapRecur(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddAddVectorComposeRecur(
-  DdManager * dd /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * f /* ADD in which to compose */,
-  DdNode ** vector /* functions to substitute */,
-  int  deepest /* depth of deepest substitution */)
+    DdManager* dd /* DD manager */,
+    DdHashTable* table /* computed table */,
+    DdNode* f /* ADD in which to compose */,
+    DdNode** vector /* functions to substitute */,
+    int deepest /* depth of deepest substitution */)
 {
-    DdNode	*T,*E;
-    DdNode	*res;
+    DdNode *T, *E;
+    DdNode* res;
 
     statLine(dd);
     /* If we are past the deepest substitution, return f. */
-    if (cuddI(dd,f->index) > deepest) {
-	return(f);
+    if (cuddI(dd, f->index) > deepest) {
+        return (f);
     }
 
-    if ((res = cuddHashTableLookup1(table,f)) != NULL) {
+    if ((res = cuddHashTableLookup1(table, f)) != NULL) {
 #ifdef DD_DEBUG
-	addVectorComposeHits++;
+        addVectorComposeHits++;
 #endif
-	return(res);
+        return (res);
     }
 
     /* Split and recur on children of this node. */
-    T = cuddAddVectorComposeRecur(dd,table,cuddT(f),vector,deepest);
-    if (T == NULL)  return(NULL);
+    T = cuddAddVectorComposeRecur(dd, table, cuddT(f), vector, deepest);
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddAddVectorComposeRecur(dd,table,cuddE(f),vector,deepest);
+    E = cuddAddVectorComposeRecur(dd, table, cuddE(f), vector, deepest);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
     /* Retrieve the 0-1 ADD for the current top variable and call
     ** cuddAddIteRecur with the T and E we just created.
     */
-    res = cuddAddIteRecur(dd,vector[f->index],T,E);
+    res = cuddAddIteRecur(dd, vector[f->index], T, E);
     if (res == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	Cudd_RecursiveDeref(dd, E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddRef(res);
     Cudd_RecursiveDeref(dd, T);
@@ -1348,15 +1350,15 @@ cuddAddVectorComposeRecur(
     ** it will not be visited again
     */
     if (f->ref != 1) {
-	ptrint fanout = (ptrint) f->ref;
-	cuddSatDec(fanout);
-	if (!cuddHashTableInsert1(table,f,res,fanout)) {
-	    Cudd_RecursiveDeref(dd, res);
-	    return(NULL);
-	}
+        ptrint fanout = (ptrint) f->ref;
+        cuddSatDec(fanout);
+        if (!cuddHashTableInsert1(table, f, res, fanout)) {
+            Cudd_RecursiveDeref(dd, res);
+            return (NULL);
+        }
     }
     cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of cuddAddVectorComposeRecur */
 
@@ -1372,88 +1374,88 @@ cuddAddVectorComposeRecur(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddAddGeneralVectorComposeRecur(
-  DdManager * dd /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * f /* ADD in which to compose */,
-  DdNode ** vectorOn /* functions to substitute for x_i */,
-  DdNode ** vectorOff /* functions to substitute for x_i' */,
-  int  deepest /* depth of deepest substitution */)
+    DdManager* dd /* DD manager */,
+    DdHashTable* table /* computed table */,
+    DdNode* f /* ADD in which to compose */,
+    DdNode** vectorOn /* functions to substitute for x_i */,
+    DdNode** vectorOff /* functions to substitute for x_i' */,
+    int deepest /* depth of deepest substitution */)
 {
-    DdNode	*T,*E,*t,*e;
-    DdNode	*res;
+    DdNode *T, *E, *t, *e;
+    DdNode* res;
 
     /* If we are past the deepest substitution, return f. */
-    if (cuddI(dd,f->index) > deepest) {
-	return(f);
+    if (cuddI(dd, f->index) > deepest) {
+        return (f);
     }
 
-    if ((res = cuddHashTableLookup1(table,f)) != NULL) {
+    if ((res = cuddHashTableLookup1(table, f)) != NULL) {
 #ifdef DD_DEBUG
-	addGeneralVectorComposeHits++;
+        addGeneralVectorComposeHits++;
 #endif
-	return(res);
+        return (res);
     }
 
     /* Split and recur on children of this node. */
-    T = cuddAddGeneralVectorComposeRecur(dd,table,cuddT(f),
-					 vectorOn,vectorOff,deepest);
-    if (T == NULL)  return(NULL);
+    T = cuddAddGeneralVectorComposeRecur(dd, table, cuddT(f),
+                                         vectorOn, vectorOff, deepest);
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddAddGeneralVectorComposeRecur(dd,table,cuddE(f),
-					 vectorOn,vectorOff,deepest);
+    E = cuddAddGeneralVectorComposeRecur(dd, table, cuddE(f),
+                                         vectorOn, vectorOff, deepest);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd, T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
     /* Retrieve the compose ADDs for the current top variable and call
     ** cuddAddApplyRecur with the T and E we just created.
     */
-    t = cuddAddApplyRecur(dd,Cudd_addTimes,vectorOn[f->index],T);
+    t = cuddAddApplyRecur(dd, Cudd_addTimes, vectorOn[f->index], T);
     if (t == NULL) {
-      Cudd_RecursiveDeref(dd,T);
-      Cudd_RecursiveDeref(dd,E);
-      return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddRef(t);
-    e = cuddAddApplyRecur(dd,Cudd_addTimes,vectorOff[f->index],E);
+    e = cuddAddApplyRecur(dd, Cudd_addTimes, vectorOff[f->index], E);
     if (e == NULL) {
-      Cudd_RecursiveDeref(dd,T);
-      Cudd_RecursiveDeref(dd,E);
-      Cudd_RecursiveDeref(dd,t);
-      return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        Cudd_RecursiveDeref(dd, t);
+        return (NULL);
     }
     cuddRef(e);
-    res = cuddAddApplyRecur(dd,Cudd_addPlus,t,e);
+    res = cuddAddApplyRecur(dd, Cudd_addPlus, t, e);
     if (res == NULL) {
-      Cudd_RecursiveDeref(dd,T);
-      Cudd_RecursiveDeref(dd,E);
-      Cudd_RecursiveDeref(dd,t);
-      Cudd_RecursiveDeref(dd,e);
-      return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        Cudd_RecursiveDeref(dd, t);
+        Cudd_RecursiveDeref(dd, e);
+        return (NULL);
     }
     cuddRef(res);
-    Cudd_RecursiveDeref(dd,T);
-    Cudd_RecursiveDeref(dd,E);
-    Cudd_RecursiveDeref(dd,t);
-    Cudd_RecursiveDeref(dd,e);
+    Cudd_RecursiveDeref(dd, T);
+    Cudd_RecursiveDeref(dd, E);
+    Cudd_RecursiveDeref(dd, t);
+    Cudd_RecursiveDeref(dd, e);
 
     /* Do not keep the result if the reference count is only 1, since
     ** it will not be visited again
     */
     if (f->ref != 1) {
-	ptrint fanout = (ptrint) f->ref;
-	cuddSatDec(fanout);
-	if (!cuddHashTableInsert1(table,f,res,fanout)) {
-	    Cudd_RecursiveDeref(dd, res);
-	    return(NULL);
-	}
+        ptrint fanout = (ptrint) f->ref;
+        cuddSatDec(fanout);
+        if (!cuddHashTableInsert1(table, f, res, fanout)) {
+            Cudd_RecursiveDeref(dd, res);
+            return (NULL);
+        }
     }
     cuddDeref(res);
-    return(res);
+    return (res);
 
 } /* end of cuddAddGeneralVectorComposeRecur */
 
@@ -1469,151 +1471,151 @@ cuddAddGeneralVectorComposeRecur(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddAddNonSimComposeRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector,
-  DdNode * key,
-  DdNode * cube,
-  int  lastsub)
+    DdManager* dd,
+    DdNode* f,
+    DdNode** vector,
+    DdNode* key,
+    DdNode* cube,
+    int lastsub)
 {
     DdNode *f1, *f0, *key1, *key0, *cube1, *var;
-    DdNode *T,*E;
-    DdNode *r;
+    DdNode *T, *E;
+    DdNode* r;
     unsigned int top, topf, topk, topc;
     unsigned int index;
     int i;
-    DdNode **vect1;
-    DdNode **vect0;
+    DdNode** vect1;
+    DdNode** vect0;
 
     statLine(dd);
     /* If we are past the deepest substitution, return f. */
     if (cube == DD_ONE(dd) || cuddIsConstant(f)) {
-	return(f);
+        return (f);
     }
 
     /* If problem already solved, look up answer and return. */
-    r = cuddCacheLookup(dd,DD_ADD_NON_SIM_COMPOSE_TAG,f,key,cube);
+    r = cuddCacheLookup(dd, DD_ADD_NON_SIM_COMPOSE_TAG, f, key, cube);
     if (r != NULL) {
-	return(r);
+        return (r);
     }
 
     /* Find top variable. we just need to look at f, key, and cube,
     ** because all the varibles in the gi are in key.
     */
-    topf = cuddI(dd,f->index);
-    topk = cuddI(dd,key->index);
-    top = ddMin(topf,topk);
-    topc = cuddI(dd,cube->index);
-    top = ddMin(top,topc);
+    topf = cuddI(dd, f->index);
+    topk = cuddI(dd, key->index);
+    top = ddMin(topf, topk);
+    topc = cuddI(dd, cube->index);
+    top = ddMin(top, topc);
     index = dd->invperm[top];
 
     /* Compute the cofactors. */
     if (topf == top) {
-	f1 = cuddT(f);
-	f0 = cuddE(f);
+        f1 = cuddT(f);
+        f0 = cuddE(f);
     } else {
-	f1 = f0 = f;
+        f1 = f0 = f;
     }
     if (topc == top) {
-	cube1 = cuddT(cube);
-	/* We want to eliminate vector[index] from key. Otherwise
+        cube1 = cuddT(cube);
+        /* We want to eliminate vector[index] from key. Otherwise
 	** cache performance is severely affected. Hence we
 	** existentially quantify the variable with index "index" from key.
 	*/
-	var = Cudd_addIthVar(dd, (int) index);
-	if (var == NULL) {
-	    return(NULL);
-	}
-	cuddRef(var);
-	key1 = cuddAddExistAbstractRecur(dd, key, var);
-	if (key1 == NULL) {
-	    Cudd_RecursiveDeref(dd,var);
-	    return(NULL);
-	}
-	cuddRef(key1);
-	Cudd_RecursiveDeref(dd,var);
-	key0 = key1;
+        var = Cudd_addIthVar(dd, (int) index);
+        if (var == NULL) {
+            return (NULL);
+        }
+        cuddRef(var);
+        key1 = cuddAddExistAbstractRecur(dd, key, var);
+        if (key1 == NULL) {
+            Cudd_RecursiveDeref(dd, var);
+            return (NULL);
+        }
+        cuddRef(key1);
+        Cudd_RecursiveDeref(dd, var);
+        key0 = key1;
     } else {
-	cube1 = cube;
-	if (topk == top) {
-	    key1 = cuddT(key);
-	    key0 = cuddE(key);
-	} else {
-	    key1 = key0 = key;
-	}
-	cuddRef(key1);
+        cube1 = cube;
+        if (topk == top) {
+            key1 = cuddT(key);
+            key0 = cuddE(key);
+        } else {
+            key1 = key0 = key;
+        }
+        cuddRef(key1);
     }
 
     /* Allocate two new vectors for the cofactors of vector. */
-    vect1 = ALLOC(DdNode *,lastsub);
+    vect1 = ALLOC(DdNode*, lastsub);
     if (vect1 == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	Cudd_RecursiveDeref(dd,key1);
-	return(NULL);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        Cudd_RecursiveDeref(dd, key1);
+        return (NULL);
     }
-    vect0 = ALLOC(DdNode *,lastsub);
+    vect0 = ALLOC(DdNode*, lastsub);
     if (vect0 == NULL) {
-	dd->errorCode = CUDD_MEMORY_OUT;
-	Cudd_RecursiveDeref(dd,key1);
-	FREE(vect1);
-	return(NULL);
+        dd->errorCode = CUDD_MEMORY_OUT;
+        Cudd_RecursiveDeref(dd, key1);
+        FREE(vect1);
+        return (NULL);
     }
 
     /* Cofactor the gi. Eliminate vect1[index] and vect0[index], because
     ** we do not need them.
     */
     for (i = 0; i < lastsub; i++) {
-	DdNode *gi = vector[i];
-	if (gi == NULL) {
-	    vect1[i] = vect0[i] = NULL;
-	} else if (gi->index == index) {
-	    vect1[i] = cuddT(gi);
-	    vect0[i] = cuddE(gi);
-	} else {
-	    vect1[i] = vect0[i] = gi;
-	}
+        DdNode* gi = vector[i];
+        if (gi == NULL) {
+            vect1[i] = vect0[i] = NULL;
+        } else if (gi->index == index) {
+            vect1[i] = cuddT(gi);
+            vect0[i] = cuddE(gi);
+        } else {
+            vect1[i] = vect0[i] = gi;
+        }
     }
     vect1[index] = vect0[index] = NULL;
 
     /* Recur on children. */
-    T = cuddAddNonSimComposeRecur(dd,f1,vect1,key1,cube1,lastsub);
+    T = cuddAddNonSimComposeRecur(dd, f1, vect1, key1, cube1, lastsub);
     FREE(vect1);
     if (T == NULL) {
-	Cudd_RecursiveDeref(dd,key1);
-	FREE(vect0);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, key1);
+        FREE(vect0);
+        return (NULL);
     }
     cuddRef(T);
-    E = cuddAddNonSimComposeRecur(dd,f0,vect0,key0,cube1,lastsub);
+    E = cuddAddNonSimComposeRecur(dd, f0, vect0, key0, cube1, lastsub);
     FREE(vect0);
     if (E == NULL) {
-	Cudd_RecursiveDeref(dd,key1);
-	Cudd_RecursiveDeref(dd,T);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, key1);
+        Cudd_RecursiveDeref(dd, T);
+        return (NULL);
     }
     cuddRef(E);
-    Cudd_RecursiveDeref(dd,key1);
+    Cudd_RecursiveDeref(dd, key1);
 
     /* Retrieve the 0-1 ADD for the current top variable from vector,
     ** and call cuddAddIteRecur with the T and E we just created.
     */
-    r = cuddAddIteRecur(dd,vector[index],T,E);
+    r = cuddAddIteRecur(dd, vector[index], T, E);
     if (r == NULL) {
-	Cudd_RecursiveDeref(dd,T);
-	Cudd_RecursiveDeref(dd,E);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, T);
+        Cudd_RecursiveDeref(dd, E);
+        return (NULL);
     }
     cuddRef(r);
-    Cudd_RecursiveDeref(dd,T);
-    Cudd_RecursiveDeref(dd,E);
+    Cudd_RecursiveDeref(dd, T);
+    Cudd_RecursiveDeref(dd, E);
     cuddDeref(r);
 
     /* Store answer to trim recursion. */
-    cuddCacheInsert(dd,DD_ADD_NON_SIM_COMPOSE_TAG,f,key,cube,r);
+    cuddCacheInsert(dd, DD_ADD_NON_SIM_COMPOSE_TAG, f, key, cube, r);
 
-    return(r);
+    return (r);
 
 } /* end of cuddAddNonSimComposeRecur */
 
@@ -1629,52 +1631,52 @@ cuddAddNonSimComposeRecur(
   SeeAlso     []
 
 ******************************************************************************/
-static DdNode *
+static DdNode*
 cuddBddVectorComposeRecur(
-  DdManager * dd /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * f /* BDD in which to compose */,
-  DdNode ** vector /* functions to be composed */,
-  int deepest /* depth of the deepest substitution */)
+    DdManager* dd /* DD manager */,
+    DdHashTable* table /* computed table */,
+    DdNode* f /* BDD in which to compose */,
+    DdNode** vector /* functions to be composed */,
+    int deepest /* depth of the deepest substitution */)
 {
-    DdNode	*F,*T,*E;
-    DdNode	*res;
+    DdNode *F, *T, *E;
+    DdNode* res;
 
     statLine(dd);
     F = Cudd_Regular(f);
 
     /* If we are past the deepest substitution, return f. */
-    if (cuddI(dd,F->index) > deepest) {
-	return(f);
+    if (cuddI(dd, F->index) > deepest) {
+        return (f);
     }
 
     /* If problem already solved, look up answer and return. */
-    if ((res = cuddHashTableLookup1(table,F)) != NULL) {
+    if ((res = cuddHashTableLookup1(table, F)) != NULL) {
 #ifdef DD_DEBUG
-	bddVectorComposeHits++;
+        bddVectorComposeHits++;
 #endif
-	return(Cudd_NotCond(res,F != f));
+        return (Cudd_NotCond(res, F != f));
     }
 
     /* Split and recur on children of this node. */
-    T = cuddBddVectorComposeRecur(dd,table,cuddT(F),vector, deepest);
-    if (T == NULL) return(NULL);
+    T = cuddBddVectorComposeRecur(dd, table, cuddT(F), vector, deepest);
+    if (T == NULL) return (NULL);
     cuddRef(T);
-    E = cuddBddVectorComposeRecur(dd,table,cuddE(F),vector, deepest);
+    E = cuddBddVectorComposeRecur(dd, table, cuddE(F), vector, deepest);
     if (E == NULL) {
-	Cudd_IterDerefBdd(dd, T);
-	return(NULL);
+        Cudd_IterDerefBdd(dd, T);
+        return (NULL);
     }
     cuddRef(E);
 
     /* Call cuddBddIteRecur with the BDD that replaces the current top
     ** variable and the T and E we just created.
     */
-    res = cuddBddIteRecur(dd,vector[F->index],T,E);
+    res = cuddBddIteRecur(dd, vector[F->index], T, E);
     if (res == NULL) {
-	Cudd_IterDerefBdd(dd, T);
-	Cudd_IterDerefBdd(dd, E);
-	return(NULL);
+        Cudd_IterDerefBdd(dd, T);
+        Cudd_IterDerefBdd(dd, E);
+        return (NULL);
     }
     cuddRef(res);
     Cudd_IterDerefBdd(dd, T);
@@ -1684,15 +1686,15 @@ cuddBddVectorComposeRecur(
     ** it will not be visited again.
     */
     if (F->ref != 1) {
-	ptrint fanout = (ptrint) F->ref;
-	cuddSatDec(fanout);
-	if (!cuddHashTableInsert1(table,F,res,fanout)) {
-	    Cudd_IterDerefBdd(dd, res);
-	    return(NULL);
-	}
+        ptrint fanout = (ptrint) F->ref;
+        cuddSatDec(fanout);
+        if (!cuddHashTableInsert1(table, F, res, fanout)) {
+            Cudd_IterDerefBdd(dd, res);
+            return (NULL);
+        }
     }
     cuddDeref(res);
-    return(Cudd_NotCond(res,F != f));
+    return (Cudd_NotCond(res, F != f));
 
 } /* end of cuddBddVectorComposeRecur */
 
@@ -1712,11 +1714,11 @@ cuddBddVectorComposeRecur(
 DD_INLINE
 static int
 ddIsIthAddVar(
-  DdManager * dd,
-  DdNode * f,
-  unsigned int  i)
+    DdManager* dd,
+    DdNode* f,
+    unsigned int i)
 {
-    return(f->index == i && cuddT(f) == DD_ONE(dd) && cuddE(f) == DD_ZERO(dd));
+    return (f->index == i && cuddT(f) == DD_ONE(dd) && cuddE(f) == DD_ZERO(dd));
 
 } /* end of ddIsIthAddVar */
 
@@ -1737,13 +1739,13 @@ ddIsIthAddVar(
 DD_INLINE
 static int
 ddIsIthAddVarPair(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  unsigned int  i)
+    DdManager* dd,
+    DdNode* f,
+    DdNode* g,
+    unsigned int i)
 {
-    return(f->index == i && g->index == i &&
-	   cuddT(f) == DD_ONE(dd) && cuddE(f) == DD_ZERO(dd) &&
-	   cuddT(g) == DD_ZERO(dd) && cuddE(g) == DD_ONE(dd));
+    return (f->index == i && g->index == i &&
+            cuddT(f) == DD_ONE(dd) && cuddE(f) == DD_ZERO(dd) &&
+            cuddT(g) == DD_ZERO(dd) && cuddE(g) == DD_ONE(dd));
 
 } /* end of ddIsIthAddVarPair */

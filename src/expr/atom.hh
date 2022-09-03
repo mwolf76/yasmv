@@ -39,11 +39,11 @@ namespace expr {
     typedef Atom* Atom_ptr;
 
     struct AtomHash {
-        long operator() (const Atom& k) const;
+        long operator()(const Atom& k) const;
     };
 
     struct AtomEq {
-        bool operator() (const Atom& x, const Atom& y) const;
+        bool operator()(const Atom& x, const Atom& y) const;
     };
 
     typedef boost::unordered_set<Atom, AtomHash, AtomEq> AtomPool;

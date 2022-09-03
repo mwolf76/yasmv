@@ -26,40 +26,40 @@
 
 namespace type {
 
-/** Exception classes */
-class TypeException : public Exception {
-public:
-    TypeException(const std::string& subtype,
-                  const std::string& message="")
-        : Exception("TypeException", subtype, message)
-    {}
-};
+    /** Exception classes */
+    class TypeException: public Exception {
+    public:
+        TypeException(const std::string& subtype,
+                      const std::string& message = "")
+            : Exception("TypeException", subtype, message)
+        {}
+    };
 
-/** Raised when the inferrer detects a wrong type */
-class BadType : public TypeException {
-public:
-    BadType(expr::Expr_ptr expr, Type_ptr lhs);
-    BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
-};
+    /** Raised when the inferrer detects a wrong type */
+    class BadType: public TypeException {
+    public:
+        BadType(expr::Expr_ptr expr, Type_ptr lhs);
+        BadType(expr::Expr_ptr expr, Type_ptr lhs, Type_ptr rhs);
+    };
 
-class IdentifierExpected : public TypeException {
-public:
-    IdentifierExpected(expr::Expr_ptr expr);
-};
+    class IdentifierExpected: public TypeException {
+    public:
+        IdentifierExpected(expr::Expr_ptr expr);
+    };
 
-/** Raised when the inferrer detects a wrong type */
-class DuplicateLiteral : public TypeException {
-public:
-    DuplicateLiteral(expr::Expr_ptr expr);
-};
+    /** Raised when the inferrer detects a wrong type */
+    class DuplicateLiteral: public TypeException {
+    public:
+        DuplicateLiteral(expr::Expr_ptr expr);
+    };
 
-/** Raised when the inferrer detects two mismatching types */
+    /** Raised when the inferrer detects two mismatching types */
 
-class TypeMismatch : public TypeException {
-public:
-    TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b);
-};
+    class TypeMismatch: public TypeException {
+    public:
+        TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b);
+    };
 
-};
+}; // namespace type
 
 #endif /* TYPE_EXCEPTIONS_H */

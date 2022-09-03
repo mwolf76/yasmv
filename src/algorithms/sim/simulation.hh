@@ -43,11 +43,10 @@ namespace sim {
         SIMULATION_UNKNOWN,
     } simulation_status_t;
 
-    class Simulation : public algorithms::Algorithm {
+    class Simulation: public algorithms::Algorithm {
 
     public:
-        Simulation(cmd::Command &command, model::Model &model);
-
+        Simulation(cmd::Command& command, model::Model& model);
         ~Simulation();
 
         // returns the number of enumerated states
@@ -61,13 +60,12 @@ namespace sim {
 
         void extract_witness(sat::Engine& engine, bool select_current_witness);
         void exclude_state(sat::Engine& engine);
-
     };
 
-    class SimulationWitness : public witness::Witness {
+    class SimulationWitness: public witness::Witness {
 
     public:
-        SimulationWitness(model::Model &model, sat::Engine &engine, step_t k);
+        SimulationWitness(model::Model& model, sat::Engine& engine, step_t k);
     };
 
 } // namespace sim

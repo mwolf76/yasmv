@@ -35,59 +35,62 @@
 
 namespace cmd {
 
-DupTrace::DupTrace(Interpreter& owner)
-    : Command(owner)
-    , f_trace_id(NULL)
-    , f_duplicate_id(NULL)
-{}
+    DupTrace::DupTrace(Interpreter& owner)
+        : Command(owner)
+        , f_trace_id(NULL)
+        , f_duplicate_id(NULL)
+    {}
 
-DupTrace::~DupTrace()
-{
-    if (f_trace_id)
-        free (f_trace_id);
+    DupTrace::~DupTrace()
+    {
+        if (f_trace_id) {
+            free(f_trace_id);
+        }
 
-    if (f_duplicate_id)
-        free (f_duplicate_id);
-}
+        if (f_duplicate_id) {
+            free(f_duplicate_id);
+        }
+    }
 
-void DupTrace::set_trace_id(pconst_char trace_id)
-{
-    free(f_trace_id);
-    f_trace_id = strdup(trace_id);
-}
+    void DupTrace::set_trace_id(pconst_char trace_id)
+    {
+        free(f_trace_id);
+        f_trace_id = strdup(trace_id);
+    }
 
-void DupTrace::set_duplicate_id(pconst_char duplicate_id)
-{
-    free(f_duplicate_id);
-    f_duplicate_id = strdup(duplicate_id);
-}
+    void DupTrace::set_duplicate_id(pconst_char duplicate_id)
+    {
+        free(f_duplicate_id);
+        f_duplicate_id = strdup(duplicate_id);
+    }
 
-utils::Variant DupTrace::operator()()
-{
-    /* FIXME: implement stream redirection for std{out,err} */
-    std::ostream& out
-        (std::cout);
+    utils::Variant DupTrace::operator()()
+    {
+        /* FIXME: implement stream redirection for std{out,err} */
+        std::ostream& out(std::cout);
 
-    out
-        << outPrefix
-        << "WARNING: this commands currently does nothing!"
-        << std::endl;
+        out
+            << outPrefix
+            << "WARNING: this commands currently does nothing!"
+            << std::endl;
 
-    return utils::Variant(okMessage);
-}
+        return utils::Variant(okMessage);
+    }
 
-DupTraceTopic::DupTraceTopic(Interpreter& owner)
-    : CommandTopic(owner)
-{}
+    DupTraceTopic::DupTraceTopic(Interpreter& owner)
+        : CommandTopic(owner)
+    {}
 
-DupTraceTopic::~DupTraceTopic()
-{
-    TRACE
-        << "Destroyed dup-trace topic"
-        << std::endl;
-}
+    DupTraceTopic::~DupTraceTopic()
+    {
+        TRACE
+            << "Destroyed dup-trace topic"
+            << std::endl;
+    }
 
-void DupTraceTopic::usage()
-{ display_manpage("dup-trace"); }
+    void DupTraceTopic::usage()
+    {
+        display_manpage("dup-trace");
+    }
 
-};
+}; // namespace cmd

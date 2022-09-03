@@ -39,47 +39,50 @@
 
 namespace witness {
 
-typedef boost::unordered_map<expr::TimedExpr, value_t,
-                             expr::TimedExprHash, expr::TimedExprEq> TimedExprValueMap;
+    typedef boost::unordered_map<expr::TimedExpr, value_t,
+                                 expr::TimedExprHash, expr::TimedExprEq>
+        TimedExprValueMap;
 
-class WitnessMgr;
-class Evaluator : public expr::ExprWalker {
+    class WitnessMgr;
+    class Evaluator: public expr::ExprWalker {
 
-    type::TypeVector f_type_stack;
-    expr::ExprVector f_ctx_stack;
-    utils::TimeVector f_time_stack;
-    utils::ValueVector f_values_stack;
+        type::TypeVector f_type_stack;
+        expr::ExprVector f_ctx_stack;
+        utils::TimeVector f_time_stack;
+        utils::ValueVector f_values_stack;
 
-    // environment for evaluation
-    Witness_ptr f_witness;
+        // environment for evaluation
+        Witness_ptr f_witness;
 
-    TimedExprValueMap f_te2v_map;
+        TimedExprValueMap f_te2v_map;
 
-public:
-    Evaluator(WitnessMgr& owner);
-    virtual ~Evaluator();
+    public:
+        Evaluator(WitnessMgr& owner);
+        virtual ~Evaluator();
 
-    expr::Expr_ptr process(Witness& witness, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t time);
+        expr::Expr_ptr process(Witness& witness, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t time);
 
-protected:
-    inline WitnessMgr& owner() const
-    { return f_owner; }
+    protected:
+        inline WitnessMgr& owner() const
+        {
+            return f_owner;
+        }
 
-    OP_HOOKS;
-    LTL_STUBS;
+        OP_HOOKS;
+        LTL_STUBS;
 
-    void walk_instant(const expr::Expr_ptr expr);
-    void walk_leaf(const expr::Expr_ptr expr);
+        void walk_instant(const expr::Expr_ptr expr);
+        void walk_leaf(const expr::Expr_ptr expr);
 
-private:
-    WitnessMgr &f_owner;
+    private:
+        WitnessMgr& f_owner;
 
-    bool cache_miss(const expr::Expr_ptr expr);
-    void clear_internals();
+        bool cache_miss(const expr::Expr_ptr expr);
+        void clear_internals();
 
-    void push_value(const expr::Expr_ptr expr);
-};
+        void push_value(const expr::Expr_ptr expr);
+    };
 
-};
+}; // namespace witness
 
 #endif /* EVALUATOR_H */
