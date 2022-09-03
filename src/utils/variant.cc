@@ -105,20 +105,25 @@ namespace utils {
 
     std::ostream& operator<<(std::ostream& os, const Variant& variant)
     {
-        if (variant.is_nil())
+        if (variant.is_nil()) {
             return os << "(null)";
+        }
 
-        else if (variant.is_boolean())
+        else if (variant.is_boolean()) {
             return os << variant.as_boolean();
+        }
 
-        else if (variant.is_integer())
+        else if (variant.is_integer()) {
             return os << variant.as_integer();
+        }
 
-        else if (variant.is_string())
+        else if (variant.is_string()) {
             return os << variant.as_string();
+        }
 
-        else
+        else {
             assert(0); /* you shouldn't see me ... */
+        }
     }
 
 }; // namespace utils

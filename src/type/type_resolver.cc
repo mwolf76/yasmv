@@ -33,7 +33,7 @@ namespace type {
     TypeResolver::TypeResolver(TypeMgr& owner)
         : f_owner(owner)
     {
-        const void* instance(this);
+        const void* instance { this };
         DEBUG
             << "Initialized Type Resolver instance @"
             << instance
@@ -41,7 +41,13 @@ namespace type {
     }
 
     TypeResolver::~TypeResolver()
-    {}
+    {
+        const void* instance { this };
+        DEBUG
+            << "Destroyed Type Resolver instance @"
+            << instance
+            << std::endl;
+    }
 
     symb::Symbol_ptr TypeResolver::symbol(const expr::Expr_ptr key)
     {

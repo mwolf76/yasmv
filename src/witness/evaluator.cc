@@ -35,7 +35,7 @@ namespace witness {
     Evaluator::Evaluator(WitnessMgr& owner)
         : f_owner(owner)
     {
-        const void* instance(this);
+        const void* instance { this };
         DRIVEL
             << "Created Evaluator @"
             << instance
@@ -44,7 +44,7 @@ namespace witness {
 
     Evaluator::~Evaluator()
     {
-        const void* instance(this);
+        const void* instance { this };
         DRIVEL
             << "Destroying Evaluator @"
             << instance
@@ -65,7 +65,7 @@ namespace witness {
                                       expr::Expr_ptr body,
                                       step_t time)
     {
-        expr::ExprMgr& em(expr::ExprMgr::INSTANCE());
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         clear_internals();
 
@@ -92,24 +92,28 @@ namespace witness {
 
         if (res_type->is_boolean()) {
             assert(1 == f_values_stack.size());
-            value_t res_value(f_values_stack.back());
+            value_t res_value { f_values_stack.back() };
 
             return res_value
                        ? em.make_true()
                        : em.make_false();
-        } else if (res_type->is_string()) {
+        }
+
+        else if (res_type->is_string()) {
             assert(1 == f_values_stack.size());
             value_t cp { f_values_stack.at(0) };
             expr::Atom atom { (const char*) cp };
+
             return em.make_qstring(atom);
-        } else if (res_type->is_enum()) {
+        }
+
+        else if (res_type->is_enum()) {
             assert(1 == f_values_stack.size());
-            value_t res_value(f_values_stack.back());
-            type::EnumType_ptr enum_type(res_type->as_enum());
+            value_t res_value { f_values_stack.back() };
+            type::EnumType_ptr enum_type { res_type->as_enum() };
 
-            const expr::ExprSet& literals(enum_type->literals());
-
-            expr::ExprSet::const_iterator i(literals.begin());
+            const expr::ExprSet& literals { enum_type->literals() };
+            expr::ExprSet::const_iterator i { literals.begin() };
 
             while (0 < res_value) {
                 --res_value;
@@ -117,12 +121,17 @@ namespace witness {
             }
 
             return *i;
-        } else if (res_type->is_algebraic()) {
+        }
+
+        else if (res_type->is_algebraic()) {
             assert(1 == f_values_stack.size());
-            value_t res_value(f_values_stack.back());
+            value_t res_value { f_values_stack.back() };
+
             return em.make_const(res_value);
-        } else if (res_type->is_array()) {
-            type::ArrayType_ptr atype(res_type->as_array());
+        }
+
+        else if (res_type->is_array()) {
+            type::ArrayType_ptr atype { res_type->as_array() };
 
             assert(atype->nelems() ==
                    f_values_stack.size());
@@ -131,7 +140,7 @@ namespace witness {
 
             /* assemble array values list */
             for (unsigned i = 0; i < atype->nelems(); ++i) {
-                value_t lst_value(f_values_stack.back());
+                value_t lst_value { f_values_stack.back() };
                 f_values_stack.pop_back();
 
                 lst = lst
@@ -141,8 +150,11 @@ namespace witness {
 
             /* wrap list in ARRAY node and return */
             return em.make_array(lst);
-        } else
+        }
+
+        else {
             assert(false);
+        }
     }
 
     /*  Evaluation engine is implemented using a simple expression walker
@@ -186,8 +198,9 @@ namespace witness {
 
     bool Evaluator::walk_next_preorder(const expr::Expr_ptr expr)
     {
-        step_t curr_time = f_time_stack.back();
+        step_t curr_time { f_time_stack.back() };
         f_time_stack.push_back(curr_time + 1);
+
         return true;
     }
     void Evaluator::walk_next_postorder(const expr::Expr_ptr expr)
@@ -504,7 +517,7 @@ namespace witness {
     }
     void Evaluator::walk_eq_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
@@ -521,15 +534,15 @@ namespace witness {
         else if (rhs_type->is_array() &&
                  lhs_type->is_array()) {
 
-            type::ArrayType_ptr arhs_type(rhs_type->as_array());
-            type::ArrayType_ptr alhs_type(lhs_type->as_array());
+            type::ArrayType_ptr arhs_type { rhs_type->as_array() };
+            type::ArrayType_ptr alhs_type { lhs_type->as_array() };
 
             assert(arhs_type->width() ==
                        alhs_type->width() &&
                    arhs_type->nelems() ==
                        alhs_type->nelems());
 
-            unsigned nelems(arhs_type->nelems());
+            unsigned nelems { arhs_type->nelems() };
 
             value_t rhs[nelems];
             for (unsigned i = 0; i < nelems; ++i) {
@@ -543,8 +556,7 @@ namespace witness {
                 DROP_VALUE();
             }
 
-            bool res(true);
-
+            bool res { true };
             for (unsigned i = 0; res && i < nelems; ++i) {
                 if (rhs[i] != lhs[i])
                     res = false;
@@ -553,8 +565,9 @@ namespace witness {
             PUSH_VALUE((value_t) res);
         }
 
-        else
+        else {
             assert(false);
+        }
 
         PUSH_TYPE(tm.find_boolean());
     }
@@ -569,7 +582,7 @@ namespace witness {
     }
     void Evaluator::walk_ne_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         DROP_TYPE();
         DROP_TYPE();
@@ -590,7 +603,7 @@ namespace witness {
     }
     void Evaluator::walk_gt_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         DROP_TYPE();
         DROP_TYPE();
@@ -611,7 +624,7 @@ namespace witness {
     }
     void Evaluator::walk_ge_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         DROP_TYPE();
         DROP_TYPE();
@@ -632,7 +645,7 @@ namespace witness {
     }
     void Evaluator::walk_lt_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         DROP_TYPE();
         DROP_TYPE();
@@ -653,7 +666,7 @@ namespace witness {
     }
     void Evaluator::walk_le_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(f_owner.tm());
+        type::TypeMgr& tm { f_owner.tm() };
 
         DROP_TYPE();
         DROP_TYPE();
@@ -703,13 +716,13 @@ namespace witness {
     }
     bool Evaluator::walk_dot_inorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em(f_owner.em());
+        expr::ExprMgr& em { f_owner.em() };
 
         DROP_TYPE();
 
         TOP_CTX(parent_ctx);
 
-        expr::Expr_ptr ctx(em.make_dot(parent_ctx, expr->lhs()));
+        expr::Expr_ptr ctx { em.make_dot(parent_ctx, expr->lhs()) };
         PUSH_CTX(ctx);
 
         return true;
@@ -765,7 +778,7 @@ namespace witness {
         POP_TYPE(lhs_type);
         assert(lhs_type->is_array());
 
-        type::ArrayType_ptr alhs_type(lhs_type->as_array());
+        type::ArrayType_ptr alhs_type { lhs_type->as_array() };
 
         /* fetch the index */
         POP_VALUE(index);
@@ -800,7 +813,7 @@ namespace witness {
     }
     void Evaluator::walk_array_comma_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm(type::TypeMgr::INSTANCE());
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
 
@@ -811,7 +824,9 @@ namespace witness {
         POP_TYPE(lhs_type);
         assert(lhs_type->is_scalar());
 
-        type::ArrayType_ptr atmp_type(tm.find_array_type(lhs_type->as_scalar(), nelems));
+        type::ArrayType_ptr atmp_type {
+            tm.find_array_type(lhs_type->as_scalar(), nelems)
+        };
 
         PUSH_TYPE(atmp_type);
     }
