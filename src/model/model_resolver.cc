@@ -102,8 +102,9 @@ namespace model {
             symb::Parameters::const_iterator iter { params.begin() };
 
             while (params.end() != iter) {
-                if (iter->first == symb_name)
+                if (iter->first == symb_name) {
                     return iter->second;
+                }
 
                 ++iter;
             }

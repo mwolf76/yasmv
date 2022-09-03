@@ -32,9 +32,8 @@ namespace expr {
 
     std::ostream& operator<<(std::ostream& os, const TimedExpr& timed_expr)
     {
-        Expr_ptr expr(timed_expr.expr());
-
-        step_t time(timed_expr.time());
+        Expr_ptr expr { timed_expr.expr() };
+        step_t time { timed_expr.time() };
 
         os
             << "time: "
@@ -48,22 +47,23 @@ namespace expr {
 
     long TimedExprHash::operator()(const TimedExpr& k) const
     {
-        long x, res(0);
+        long x, res { 0 };
         ExprHash eh;
 
-        long v0(eh(*k.expr()));
-
-        long v1(k.time());
+        long v0 { eh(*k.expr()) };
+        long v1 { k.time() };
 
         res = (res << 4) + v0;
-        if ((x = res & 0xF0000000L) != 0)
+        if ((x = res & 0xF0000000L) != 0) {
             res ^= (x >> 24);
+        }
 
         res &= ~x;
 
         res = (res << 4) + v1;
-        if ((x = res & 0xF0000000L) != 0)
+        if ((x = res & 0xF0000000L) != 0) {
             res ^= (x >> 24);
+        }
 
         res &= ~x;
 

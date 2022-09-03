@@ -258,28 +258,31 @@ namespace model {
 
     bool Analyzer::walk_guard_preorder(const expr::Expr_ptr expr)
     {
-        if (f_section == ANALYZE_INIT)
+        if (f_section == ANALYZE_INIT) {
             throw SemanticError("Guards not allowed in INITs");
+        }
 
-        if (f_section == ANALYZE_INVAR)
+        if (f_section == ANALYZE_INVAR) {
             throw SemanticError("Guards not allowed in INVARs");
+        }
 
-        if (f_section == ANALYZE_DEFINE)
+        if (f_section == ANALYZE_DEFINE) {
             throw SemanticError("Guards not allowed in DEFINEs");
+        }
 
         /* now we know it's a TRANS */
-        if (1 != f_expr_stack.size())
+        if (1 != f_expr_stack.size()) {
             throw SemanticError("Guards are only allowed toplevel in TRANSes");
+        }
 
-        expr::Expr_ptr guard(expr->lhs());
-
-        expr::Expr_ptr action(expr->rhs());
+        expr::Expr_ptr guard { expr->lhs() };
+        expr::Expr_ptr action { expr->rhs() };
 
         if (!f_em.is_assignment(action)) {
             throw SemanticError("Guarded actions must be assignments");
         }
 
-        expr::Expr_ptr lhs(action->lhs());
+        expr::Expr_ptr lhs { action->lhs() };
 
         INFO
             << "Tracking dependency: "
@@ -288,7 +291,8 @@ namespace model {
             << guard
             << std::endl;
 
-        f_dependency_tracking_map.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>(guard, lhs));
+        f_dependency_tracking_map.insert(
+            std::pair<expr::Expr_ptr, expr::Expr_ptr>(guard, lhs));
 
         return true;
     }
@@ -368,54 +372,59 @@ namespace model {
     }
     void Analyzer::walk_assignment_postorder(const expr::Expr_ptr expr)
     {
-        if (f_section == ANALYZE_INIT)
+        if (f_section == ANALYZE_INIT) {
             throw SemanticError("Assignments not allowed in INITs");
+        }
 
-        if (f_section == ANALYZE_INVAR)
+        if (f_section == ANALYZE_INVAR) {
             throw SemanticError("Assignments not allowed in INVARs");
+        }
 
-        if (f_section == ANALYZE_DEFINE)
+        if (f_section == ANALYZE_DEFINE) {
             throw SemanticError("Assignments not allowed in DEFINEs");
+        }
 
-        expr::Expr_ptr lhs(expr->lhs());
+        expr::Expr_ptr lhs { expr->lhs() };
 
-        if (!f_em.is_lvalue(lhs))
+        if (!f_em.is_lvalue(lhs)) {
             throw SemanticError("Assignments require an lvalue for lhs");
+        }
 
         /* strip [] */
-        if (f_em.is_subscript(lhs))
+        if (f_em.is_subscript(lhs)) {
             lhs = lhs->lhs();
+        }
 
         /* assignment lhs *must* be an ordinary state variable */
-        expr::Expr_ptr ctx(f_ctx_stack.back());
-        expr::Expr_ptr full(f_em.make_dot(ctx, lhs));
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        expr::Expr_ptr full { f_em.make_dot(ctx, lhs) };
 
         symb::ResolverProxy resolver;
 
-        symb::Symbol_ptr symb(resolver.symbol(full));
+        symb::Symbol_ptr symb { resolver.symbol(full) };
 
         if (symb->is_variable()) {
-
-            const symb::Variable& var(symb->as_variable());
+            const symb::Variable& var { symb->as_variable() };
 
             /* INPUT vars are in fact bodyless, typed DEFINEs */
-            if (var.is_input())
+            if (var.is_input()) {
                 throw SemanticError("Assignments not allowed on input vars.");
+            }
 
             /* FROZEN vars can not be assigned */
-            if (var.is_frozen())
+            if (var.is_frozen()) {
                 throw SemanticError("Assignments can not be used on frozen vars.");
+            }
 
             /* assignments can only be used on INERTIAL vars */
-            if (!var.is_inertial())
+            if (!var.is_inertial()) {
                 throw SemanticError("Assignments can only be used on inertial vars.");
+            }
         }
 
         else if (symb->is_define()) {
-
-            symb::Define& define(symb->as_define());
-
-            expr::Expr_ptr body(define.body());
+            symb::Define& define { symb->as_define() };
+            expr::Expr_ptr body { define.body() };
 
             /* recur in body */
             (*this)(body);
@@ -524,9 +533,10 @@ namespace model {
     /* on-demand preprocessing to expand defines delegated to Preprocessor */
     bool Analyzer::walk_params_preorder(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx(f_ctx_stack.back());
-
-        expr::Expr_ptr preprocessed { f_preprocessor.process(expr, ctx) };
+        expr::Expr_ptr ctx { f_ctx_stack.back() };
+        expr::Expr_ptr preprocessed {
+            f_preprocessor.process(expr, ctx)
+        };
 
         (*this)(preprocessed);
 
@@ -611,31 +621,33 @@ namespace model {
     void Analyzer::walk_leaf(const expr::Expr_ptr expr)
     {
         if (f_em.is_identifier(expr)) {
-
-            expr::Expr_ptr ctx(f_ctx_stack.back());
-            expr::Expr_ptr full(f_em.make_dot(ctx, expr));
+            expr::Expr_ptr ctx { f_ctx_stack.back() };
+            expr::Expr_ptr full { f_em.make_dot(ctx, expr) };
 
             symb::ResolverProxy resolver;
-
-            symb::Symbol_ptr symb(resolver.symbol(full));
+            symb::Symbol_ptr symb { resolver.symbol(full) };
 
             if (symb->is_variable()) {
-                const symb::Variable& var(symb->as_variable());
+                const symb::Variable& var { symb->as_variable() };
 
                 /* Sanity checks on var modifiers */
-                if (var.is_input() && var.is_inertial())
-                    throw SemanticError("@input and @inertial not simultaneously allowed on the same var.");
+                if (var.is_input() && var.is_inertial()) {
+                    throw SemanticError(
+                        "@input and @inertial not simultaneously allowed on the same var.");
+                }
 
-                if (var.is_input() && var.is_frozen())
-                    throw SemanticError("@input and @frozen not simultaneously allowed on the same var.");
+                if (var.is_input() && var.is_frozen()) {
+                    throw SemanticError(
+                        "@input and @frozen not simultaneously allowed on the same var.");
+                }
 
-                if (var.is_inertial() && var.is_frozen())
-                    throw SemanticError("@inertial and @frozen not simultaneously allowed on the same var.");
+                if (var.is_inertial() && var.is_frozen()) {
+                    throw SemanticError(
+                        "@inertial and @frozen not simultaneously allowed on the same var.");
+                }
             } else if (symb->is_define()) {
-
-                symb::Define& define(symb->as_define());
-
-                expr::Expr_ptr body(define.body());
+                symb::Define& define { symb->as_define() };
+                expr::Expr_ptr body { define.body() };
 
                 /* recur in body */
                 (*this)(body);

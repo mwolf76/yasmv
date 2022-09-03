@@ -44,7 +44,7 @@ namespace model {
         : f_em(expr::ExprMgr::INSTANCE())
         , f_ctx_stack()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DRIVEL
             << "Created Analyzer @"
@@ -54,7 +54,7 @@ namespace model {
 
     Analyzer::~Analyzer()
     {
-        const void* instance(this);
+        const void* instance { this };
 
         DRIVEL
             << "Destroying Analyzer @"
@@ -86,12 +86,16 @@ namespace model {
 
     void Analyzer::generate_framing_conditions()
     {
+        ModelMgr& mm { ModelMgr::INSTANCE() };
+
         DEBUG
             << "Generating framing conditions ..."
             << std::endl;
 
         /* identifer -> list of guards */
-        typedef boost::unordered_map<expr::Expr_ptr, expr::ExprVector, utils::PtrHash, utils::PtrEq> ProcessingMap;
+        using ProcessingMap =
+            boost::unordered_map<expr::Expr_ptr, expr::ExprVector,
+                                 utils::PtrHash, utils::PtrEq>;
 
         ProcessingMap map;
 
@@ -99,54 +103,53 @@ namespace model {
         for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
              i != f_dependency_tracking_map.end(); ++i) {
 
-            expr::Expr_ptr ident(i->second);
+            expr::Expr_ptr ident { i->second };
+            ProcessingMap::const_iterator pmi { map.find(ident) };
 
-            ProcessingMap::const_iterator pmi(map.find(ident));
-
-            if (map.end() == pmi)
+            if (map.end() == pmi) {
                 map.insert(
                     std::pair<expr::Expr_ptr, expr::ExprVector>(ident, expr::ExprVector()));
+            }
         }
 
-        /* pass 2: group together all guards associated with each var identifier */
+        /* pass 2: group together all guards associated with each var
+	 * identifier */
         for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
              i != f_dependency_tracking_map.end(); ++i) {
 
-            expr::Expr_ptr guard(i->first);
+            expr::Expr_ptr guard { i->first };
+            expr::Expr_ptr ident { i->second };
 
-            expr::Expr_ptr ident(i->second);
-
-            ProcessingMap::iterator pmi(map.find(ident));
+            ProcessingMap::iterator pmi { map.find(ident) };
 
             /* right? */
             assert(map.end() != pmi);
 
-            expr::ExprVector& ev(pmi->second);
-
+            expr::ExprVector& ev { pmi->second };
             ev.push_back(guard);
         }
 
-        /* pass 3: for each group of clauses, for each pair <p, q>, p and q must be
-       mutually exclusive (i.e. `p ^ q` must be UNSAT). */
+        /* pass 3: for each group of clauses, for each pair <p, q>, p
+	   and q must be mutually exclusive (i.e. `p ^ q` must be
+	   UNSAT). */
         for (ProcessingMap::iterator i = map.begin();
              i != map.end(); ++i) {
 
-            expr::Expr_ptr ident(i->first);
+            expr::Expr_ptr ident { i->first };
+            const expr::ExprVector& ev { i->second };
 
-            const expr::ExprVector& ev(i->second);
-
-            unsigned input_length(ev.size());
-
+            auto input_length { ev.size() };
             if (2 <= input_length) {
                 for (unsigned i = 0; i < input_length - 1; ++i) {
-                    expr::Expr_ptr p(ev[i]);
+                    expr::Expr_ptr p { ev[i] };
 
                     for (unsigned j = i + 1; j < input_length; ++j) {
-                        expr::Expr_ptr q(ev[j]);
+                        expr::Expr_ptr q { ev[j] };
 
                         if (!mutually_exclusive(p, q)) {
                             INFO
-                                << "Found two guards that could be NOT mutually exclusive for identifier `"
+                                << "Found two guards that could be NOT mutually "
+                                << "exclusive for identifier `"
                                 << ident
                                 << "`: `"
                                 << p
@@ -160,25 +163,24 @@ namespace model {
             }
         }
 
-        /* pass 4: for each expr vector, build the conjunction of all (mutually
-       exclusive) negated guards and associate it to the variable identifier.
-       The resulting expr will be used as guard for a newly generated TRANS of
-       the form: <guard> -> <var> := var. */
-        Module& main(ModelMgr::INSTANCE().model().main_module());
+        /* pass 4: for each expr vector, build the conjunction of all
+	   (mutually exclusive) negated guards and associate it to the
+	   variable identifier.  The resulting expr will be used as
+	   guard for a newly generated TRANS of the form: <guard> ->
+	   <var> := var. */
+        Module& main { mm.model().main_module() };
 
         for (ProcessingMap::iterator i = map.begin();
              i != map.end(); ++i) {
 
-            expr::Expr_ptr ident(i->first);
+            expr::Expr_ptr ident { i->first };
+            expr::ExprVector& ev { i->second };
 
-            expr::ExprVector& ev(i->second);
-
-            expr::Expr_ptr guard(NULL);
-
+            expr::Expr_ptr guard { NULL };
             for (expr::ExprVector::const_iterator j = ev.begin();
                  j != ev.end(); ++j) {
 
-                expr::Expr_ptr expr(*j);
+                expr::Expr_ptr expr { *j };
 
                 guard = (guard)
                             ? f_em.make_and(guard, f_em.make_not(expr))
@@ -186,9 +188,12 @@ namespace model {
             }
 
             /* synthetic TRANS will be added to the module. */
-            expr::Expr_ptr synth_trans(f_em.make_implies(guard,
-                                                         f_em.make_eq(f_em.make_next(ident),
-                                                                      ident)));
+            expr::Expr_ptr synth_trans {
+                f_em.make_implies(guard,
+                                  f_em.make_eq(f_em.make_next(ident),
+                                               ident))
+            };
+
             INFO
                 << "Adding inertial INVAR: "
                 << synth_trans
@@ -201,6 +206,7 @@ namespace model {
     // under model invariants
     bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
     {
+        ModelMgr& mm { ModelMgr::INSTANCE() };
         DEBUG
             << "Testing `"
             << p
@@ -209,18 +215,17 @@ namespace model {
             << "` for unsatisfiability ..."
             << std::endl;
 
-        sat::Engine engine("Analyzer");
-
+        sat::Engine engine { "Analyzer" };
         compiler::Compiler compiler;
 
-        expr::Expr_ptr ctx(f_em.make_empty());
+        expr::Expr_ptr ctx { f_em.make_empty() };
 
         /* adding INVARs @0 and @1 from main module */
-        const expr::ExprVector& invar(ModelMgr::INSTANCE().model().main_module().invar());
+        const expr::ExprVector& invar { mm.model().main_module().invar() };
         for (expr::ExprVector::const_iterator ii = invar.begin();
              ii != invar.end(); ++ii) {
 
-            expr::Expr_ptr body(*ii);
+            expr::Expr_ptr body { *ii };
 
             DEBUG
                 << "Pushing INVAR "
@@ -234,8 +239,7 @@ namespace model {
         engine.push(compiler.process(ctx, p), 0);
         engine.push(compiler.process(ctx, q), 0);
 
-        sat::status_t status(engine.solve());
-
+        sat::status_t status { engine.solve() };
         return status == sat::status_t::STATUS_UNSAT;
     }
 

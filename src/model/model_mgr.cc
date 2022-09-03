@@ -132,7 +132,7 @@ namespace model {
                     }
                 } // for init
 
-                const expr::ExprVector& invar = curr_module.invar();
+                const expr::ExprVector& invar { curr_module.invar() };
                 for (expr::ExprVector::const_iterator ii = invar.begin();
                      ii != invar.end(); ++ii) {
 

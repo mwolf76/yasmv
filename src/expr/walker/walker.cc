@@ -47,7 +47,7 @@ namespace expr {
 
     void ExprWalker::rewrite(const Expr_ptr expr)
     {
-        activation_record curr = f_recursion_stack.top();
+        activation_record curr { f_recursion_stack.top() };
 
         // rewrites can only be performed in pre-order
         assert(curr.pc == DEFAULT);
@@ -62,14 +62,14 @@ namespace expr {
     {
         f_rewritten = false;
 
-        size_t rec_level = f_recursion_stack.size();
+        size_t rec_level { f_recursion_stack.size() };
         assert(0 != rec_level);
 
-        size_t rec_goal = rec_level - 1; // support re-entrant invocation
+        size_t rec_goal { rec_level - 1 }; // support re-entrant invocation
         while (f_recursion_stack.size() != rec_goal) {
 
         loop:
-            activation_record curr = f_recursion_stack.top();
+            activation_record curr { f_recursion_stack.top() };
             if (curr.pc != DEFAULT) {
 
                 // restore caller location (simulate call return behavior)
@@ -276,8 +276,10 @@ namespace expr {
             }
 
             /* pre-node hooks */
-            if (!curr.expr)
-                throw InternalError("NULL expression encountered (walker pre-node() hook)");
+            if (!curr.expr) {
+                throw InternalError(
+                    "NULL expression encountered (walker pre-node() hook)");
+            }
             pre_node_hook(curr.expr);
 
             switch (curr.expr->f_symb) {
@@ -1047,8 +1049,9 @@ namespace expr {
             if (!f_rewritten) {
                 post_node_hook(curr.expr);
                 f_recursion_stack.pop();
-            } else
+            } else {
                 f_rewritten = false;
+            }
 
         } // while (!empty)
     }
