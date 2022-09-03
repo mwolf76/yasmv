@@ -113,7 +113,7 @@ namespace model {
         }
 
         /* pass 2: group together all guards associated with each var
-	 * identifier */
+         * identifier */
         for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
              i != f_dependency_tracking_map.end(); ++i) {
 
@@ -130,8 +130,8 @@ namespace model {
         }
 
         /* pass 3: for each group of clauses, for each pair <p, q>, p
-	   and q must be mutually exclusive (i.e. `p ^ q` must be
-	   UNSAT). */
+           and q must be mutually exclusive (i.e. `p ^ q` must be
+           UNSAT). */
         for (ProcessingMap::iterator i = map.begin();
              i != map.end(); ++i) {
 
@@ -164,10 +164,10 @@ namespace model {
         }
 
         /* pass 4: for each expr vector, build the conjunction of all
-	   (mutually exclusive) negated guards and associate it to the
-	   variable identifier.  The resulting expr will be used as
-	   guard for a newly generated TRANS of the form: <guard> ->
-	   <var> := var. */
+           (mutually exclusive) negated guards and associate it to the
+           variable identifier.  The resulting expr will be used as
+           guard for a newly generated TRANS of the form: <guard> ->
+           <var> := var. */
         Module& main { mm.model().main_module() };
 
         for (ProcessingMap::iterator i = map.begin();

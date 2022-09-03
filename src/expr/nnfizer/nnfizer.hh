@@ -32,13 +32,13 @@
 #include <boost/unordered_map.hpp>
 
 /** -- shortcurts to simplify the manipulation of the internal polarity stack -- */
-#define TOP_POLARITY(polarity)	\
+#define TOP_POLARITY(polarity)  \
     const auto polarity         \
-    {				\
+    {                           \
         f_polarity_stack.back() \
     }
 
-#define DROP_POLARITY()		\
+#define DROP_POLARITY() \
     f_polarity_stack.pop_back()
 
 #define POP_POLARITY(polarity) \

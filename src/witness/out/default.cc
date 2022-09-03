@@ -28,7 +28,7 @@ namespace witness {
 
     void DefaultWitnessPrinter::operator()(const Witness& w, step_t j, step_t k)
     {
-        step_t i = j;
+        step_t i { j };
 
         while (i < k) {
             std::cout << "-- @ " << i

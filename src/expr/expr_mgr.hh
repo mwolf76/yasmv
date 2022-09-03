@@ -852,11 +852,10 @@ namespace expr {
         inline bool is_int_const(const Expr_ptr expr) const
         {
             assert(expr);
-            return
-		(expr->f_symb == ICONST) ||
-		(expr->f_symb == BCONST) ||
-		(expr->f_symb == HCONST) ||
-		(expr->f_symb == OCONST);
+            return (expr->f_symb == ICONST) ||
+                   (expr->f_symb == BCONST) ||
+                   (expr->f_symb == HCONST) ||
+                   (expr->f_symb == OCONST);
         }
 
         /* -- expr inspectors -------------------------------------------------- */

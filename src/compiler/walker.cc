@@ -944,7 +944,7 @@ namespace compiler {
             PUSH_TYPE(array_type);
 
             /* Here we fiddle a bit with the ordering of DDs to
-	       keep consistency with the array equals op. */
+               keep consistency with the array equals op. */
             POP_DV(dvs, width * elems);
             for (unsigned i = 0; i < elems; ++i) {
                 for (unsigned j = 0; j < width; ++j) {

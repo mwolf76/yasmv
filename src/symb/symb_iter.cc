@@ -58,8 +58,8 @@ namespace symb {
         model::Module& main_ { model.main_module() };
 
         /* two iterations, putting DEFINEs after VARs. This ensures
-	   defines can be calculated on-the fly using a single
-	   pass. */
+           defines can be calculated on-the fly using a single
+           pass. */
 #define SI_PASS_VARS (0)
 #define SI_PASS_DEFS (1)
         for (int pass = 0; pass < 2; ++pass) {

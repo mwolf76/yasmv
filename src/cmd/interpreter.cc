@@ -47,7 +47,7 @@ namespace cmd {
         opts::OptsMgr& om(opts::OptsMgr::INSTANCE());
 
         /* If the buffer has already been allocated, return the memory
-	   to the free pool. */
+           to the free pool. */
         if (NULL != line_buf) {
             free(line_buf);
             line_buf = NULL;

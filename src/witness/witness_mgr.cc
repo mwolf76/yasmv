@@ -38,8 +38,9 @@ namespace witness {
 
     Witness& WitnessMgr::current()
     {
-        if (!f_curr_uid.size())
+        if (!f_curr_uid.size()) {
             return f_empty_witness;
+        }
 
         return witness(f_curr_uid);
     }
@@ -62,27 +63,26 @@ namespace witness {
 
     Witness& WitnessMgr::witness(expr::Atom id)
     {
-        WitnessMap::iterator eye(f_map.find(id));
+        WitnessMap::iterator eye { f_map.find(id) };
 
-        if (f_map.end() == eye)
+        if (f_map.end() == eye) {
             throw UnknownWitnessId(id);
+        }
 
-        Witness_ptr wp((*eye).second);
-
+        Witness_ptr wp { (*eye).second };
         return *wp;
     }
 
     void WitnessMgr::record(Witness& witness)
     {
-        expr::Atom uid(witness.id());
+        expr::Atom uid { witness.id() };
 
-        WitnessMap::iterator eye(f_map.find(uid));
-
-        if (f_map.end() != eye)
+        WitnessMap::iterator eye { f_map.find(uid) };
+        if (f_map.end() != eye) {
             throw DuplicateWitnessId(uid);
+        }
 
         f_map.insert(std::pair<expr::Atom, Witness_ptr>(uid, &witness));
-
         f_list.push_back(&witness);
     }
 
@@ -91,7 +91,8 @@ namespace witness {
         return ++f_autoincrement;
     }
 
-    expr::Expr_ptr WitnessMgr::eval(Witness& w, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t k)
+    expr::Expr_ptr WitnessMgr::eval(Witness& w, expr::Expr_ptr ctx,
+                                    expr::Expr_ptr body, step_t k)
     {
         expr::Expr_ptr res;
 
