@@ -39,9 +39,11 @@ namespace symb {
 
     Variable& Symbol::as_variable(void) const
     {
-        Variable_ptr res = dynamic_cast<const Variable_ptr>(const_cast<const Symbol_ptr>(this));
-        assert(res);
+        Variable_ptr res {
+            dynamic_cast<const Variable_ptr>(const_cast<const Symbol_ptr>(this))
+        };
 
+        assert(res);
         return (*res);
     }
 
@@ -52,7 +54,10 @@ namespace symb {
 
     Parameter& Symbol::as_parameter(void) const
     {
-        Parameter_ptr res = dynamic_cast<const Parameter_ptr>(const_cast<const Symbol_ptr>(this));
+        Parameter_ptr res {
+            dynamic_cast<const Parameter_ptr>(const_cast<const Symbol_ptr>(this))
+        };
+
         assert(res);
         return (*res);
     }
@@ -64,7 +69,10 @@ namespace symb {
 
     Define& Symbol::as_define(void) const
     {
-        Define_ptr res = dynamic_cast<const Define_ptr>(const_cast<const Symbol_ptr>(this));
+        Define_ptr res {
+            dynamic_cast<const Define_ptr>(const_cast<const Symbol_ptr>(this))
+        };
+
         assert(res);
         return (*res);
     }
@@ -76,7 +84,10 @@ namespace symb {
 
     Constant& Symbol::as_const(void) const
     {
-        Constant_ptr res = dynamic_cast<const Constant_ptr>(const_cast<const Symbol_ptr>(this));
+        Constant_ptr res {
+            dynamic_cast<const Constant_ptr>(const_cast<const Symbol_ptr>(this))
+        };
+
         assert(res);
         return (*res);
     }
@@ -88,7 +99,10 @@ namespace symb {
 
     Literal& Symbol::as_literal(void) const
     {
-        Literal_ptr res = dynamic_cast<const Literal_ptr>(const_cast<const Symbol_ptr>(this));
+        Literal_ptr res {
+            dynamic_cast<const Literal_ptr>(const_cast<const Symbol_ptr>(this))
+        };
+
         assert(res);
         return (*res);
     }
