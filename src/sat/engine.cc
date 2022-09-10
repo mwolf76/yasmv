@@ -22,6 +22,8 @@
  **/
 
 #include <cstdlib>
+
+#include <opts/opts_mgr.hh>
 #include <sat.hh>
 
 namespace sat {
@@ -106,6 +108,8 @@ namespace sat {
 
     void Engine::push(compiler::Unit cu, step_t time, group_t group)
     {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+
         /**
          * 1. Pushing DDs
          */
@@ -113,8 +117,23 @@ namespace sat {
             const dd::DDVector& dv { cu.dds() };
             dd::DDVector::const_iterator i;
             for (i = dv.begin(); dv.end() != i; ++i) {
-                cnf_push_single_cut(*i, time, group);
-                // cnf_push_no_cut( *i, time, group );
+                if (om.cnf() == opts::CNF::SINGLE_CUT) {
+                    cnf_push_single_cut(*i, time, group);
+                }
+
+                else if (om.cnf() == opts::CNF::NO_CUT) {
+                    cnf_push_no_cut(*i, time, group);
+                }
+
+                else if (om.cnf() == opts::CNF::AUX_CUT) {
+                    cnf_push_aux_cut(*i, time, group);
+                }
+
+                else {
+                    ERR
+                        << "Unsupported CNF algorithm";
+                    abort();
+                }
             }
         }
 

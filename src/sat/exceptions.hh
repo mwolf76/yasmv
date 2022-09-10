@@ -44,6 +44,11 @@ namespace sat {
         InlinedOperatorLoaderException(const compiler::InlinedOperatorSignature& ios);
     };
 
+    class InternalError: public EngineException {
+    public:
+        InternalError(const std::string& message);
+    };
+
 }; // namespace sat
 
 #endif /* SAT_EXCEPTIONS_H */

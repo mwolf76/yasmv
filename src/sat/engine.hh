@@ -254,6 +254,7 @@ namespace sat {
         /* CNFization algorithms */
         void cnf_push_no_cut(ADD add, step_t time, const group_t group);
         void cnf_push_single_cut(ADD add, step_t time, const group_t group);
+	void cnf_push_aux_cut(ADD add, step_t time, const group_t group);
 
         friend std::ostream& operator<<(std::ostream& os, const Engine& engine);
     };

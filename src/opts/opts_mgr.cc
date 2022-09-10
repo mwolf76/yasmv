@@ -21,6 +21,7 @@
  *
  **/
 
+#include <boost/algorithm/string.hpp>
 #include <sstream>
 
 #include <opts_mgr.hh>
@@ -62,6 +63,12 @@ namespace opts {
                 "color",
                 "enables colorized output in interactive shell"
             )
+
+	    (
+		"cnf",
+		boost::program_options::value<CNF>()->default_value(CNF::SINGLE_CUT),
+		"CNF algorithm"
+	    )
 
             (
                 "word-width",
@@ -137,6 +144,11 @@ namespace opts {
         return f_quiet;
     }
 
+    CNF OptsMgr::cnf() const
+    {
+        return f_vm["cnf"].as<CNF>();
+    }
+
     void OptsMgr::set_word_width(unsigned value)
     {
         TRACE
@@ -149,8 +161,9 @@ namespace opts {
 
     unsigned OptsMgr::word_width() const
     {
-        return (UINT_MAX != f_word_width) ? f_word_width
-                                          : f_vm["word-width"].as<unsigned>();
+        return (UINT_MAX != f_word_width)
+                   ? f_word_width
+                   : f_vm["word-width"].as<unsigned>();
     }
 
     void OptsMgr::set_precision(unsigned value)
@@ -162,10 +175,11 @@ namespace opts {
 
         f_precision = value;
 
-        if (f_precision < 4)
+        if (f_precision < 4) {
             WARN
                 << "Warning! No decimal digits will be shown in fixed-point values"
                 << std::endl;
+        }
     }
 
     unsigned OptsMgr::precision() const
@@ -223,5 +237,33 @@ namespace opts {
                 return log_very_rarely;
         }
     }
+
+    std::istream& operator>>(std::istream& in, CNF& cnf)
+    {
+        std::string token;
+        in >> token;
+
+        boost::to_upper(token);
+
+        if (token == "SINGLE-CUT") {
+            cnf = CNF::SINGLE_CUT;
+        }
+
+        else if (token == "NO-CUT") {
+            cnf = CNF::NO_CUT;
+        }
+
+        else if (token == "AUX-CUT") {
+            cnf = CNF::AUX_CUT;
+        }
+
+        else {
+            throw boost::program_options::validation_error(
+                boost::program_options::validation_error::invalid_option_value);
+        }
+
+        return in;
+    }
+
 
 }; // namespace opts

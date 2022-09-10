@@ -49,4 +49,8 @@ namespace sat {
                           format_loader_exception(ios))
     {}
 
+    InternalError::InternalError(const std::string& message)
+        : EngineException("InternalError", message)
+    {}
+
 }; // namespace sat

@@ -37,17 +37,24 @@ namespace dd {
         DD_WALK_NODE,
     } dd_entry_point;
 
+    typedef enum {
+	DD_POSITIVE,
+	DD_NEGATIVE,
+    } dd_polarity;
+
     // reserved for ADD walkers
     struct add_activation_record {
         dd_entry_point pc;
+	dd_polarity polarity;
         const DdNode* node;
 
-        add_activation_record(const DdNode* dd)
+        add_activation_record(const DdNode* dd, const dd_polarity pol)
             : pc(DD_WALK_LHS)
+	    , polarity(pol)
             , node(dd)
         {}
     };
-    typedef std::stack<struct add_activation_record> add_walker_stack;
+    typedef std::vector<struct add_activation_record> add_walker_stack;
 
     class DDWalkerException: public Exception {
     public:

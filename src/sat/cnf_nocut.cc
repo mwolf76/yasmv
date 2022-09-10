@@ -21,10 +21,9 @@
  * 02110-1301 USA
  *
  **/
+
 #include <dd/dd_walker.hh>
 #include <sat/sat.hh>
-
-// #define  DEBUG_CNF_LITERALS
 
 namespace sat {
 
@@ -44,7 +43,7 @@ namespace sat {
         {
             assert(1 == f_recursion_stack.size());
 
-            dd::add_activation_record curr { f_recursion_stack.top() };
+            dd::add_activation_record curr { f_recursion_stack.back() };
             f_toplevel = const_cast<DdNode*>(curr.node);
         }
 
@@ -55,9 +54,6 @@ namespace sat {
             ps.push(mkLit(f_group, true));
 
             assert(NULL != f_toplevel);
-
-            /* assert toplevel fun */
-            push1(f_sat.find_cnf_var(f_toplevel, f_time), false);
         }
 
         inline bool is_unseen(const DdNode* node) const
@@ -83,21 +79,29 @@ namespace sat {
             assert(!value);
 
             vec<Lit> ps;
+            ps.clear();
             if (MAINGROUP != f_group) {
                 ps.push(mkLit(f_group, true));
             }
 
-            int i, size { dd_mgr->size };
-            for (i = 0; i < size; ++i) {
+            for (auto i { f_recursion_stack.rbegin() }; f_recursion_stack.rend() != i; ++i) {
+                const auto& eye { *i };
+
+                if (cuddIsConstant(eye.node)) {
+                    continue;
+                }
+
                 Lit lit {
-                    mkLit(f_sat.find_dd_var(i, f_time), true)
+                    mkLit(f_sat.find_dd_var(eye.node, f_time),
+                          eye.polarity == dd::DD_NEGATIVE)
                 };
                 ps.push(lit);
             }
 
             f_sat.add_clause(ps);
 
-            DEBUG
+            std::cerr
+                << "no-cut push: "
                 << ps
                 << std::endl;
         }
@@ -110,22 +114,6 @@ namespace sat {
 
         step_t f_time;
         group_t f_group;
-
-        /* push 1 var clause */
-        inline void push1(Var x, bool px)
-        {
-            vec<Lit> ps;
-            ps.push(mkLit(f_group, true));
-            ps.push(mkLit(x, px));
-
-#ifdef DEBUG_CNF_LITERALS
-            DRIVEL
-                << ps
-                << std::endl;
-#endif
-
-            f_sat.add_clause(ps);
-        }
     };
 
     void Engine::cnf_push_no_cut(ADD add, step_t time, const group_t group)

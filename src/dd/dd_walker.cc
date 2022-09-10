@@ -36,8 +36,8 @@ namespace dd {
     ADDWalker& ADDWalker::operator()(ADD dd)
     {
         /* setup toplevel act. record and perform walk. */
-        add_activation_record call { dd.getNode() };
-        f_recursion_stack.push(call);
+        add_activation_record call { dd.getNode(), DD_POSITIVE };
+        f_recursion_stack.push_back(call);
 
         /* actions before the walk */
         pre_hook();
@@ -55,7 +55,7 @@ namespace dd {
     {
         while (0 != f_recursion_stack.size()) {
         loop:
-            add_activation_record curr { f_recursion_stack.top() };
+            add_activation_record curr { f_recursion_stack.back() };
             assert(!Cudd_IsComplement(curr.node));
 
             register const DdNode* node { curr.node };
@@ -69,14 +69,14 @@ namespace dd {
             switch (curr.pc) {
                 case DD_WALK_LHS:
                     /* recur in THEN */
-                    f_recursion_stack.top().pc = DD_WALK_RHS;
-                    f_recursion_stack.push(add_activation_record(cuddT(node)));
+                    f_recursion_stack.back().pc = DD_WALK_RHS;
+                    f_recursion_stack.push_back(add_activation_record(cuddT(node), DD_POSITIVE));
                     goto loop;
 
                 case DD_WALK_RHS:
                     /* recur in ELSE */
-                    f_recursion_stack.top().pc = DD_WALK_NODE;
-                    f_recursion_stack.push(add_activation_record(cuddE(node)));
+                    f_recursion_stack.back().pc = DD_WALK_NODE;
+                    f_recursion_stack.push_back(add_activation_record(cuddE(node), DD_NEGATIVE));
                     goto loop;
 
                 case DD_WALK_NODE:
@@ -84,7 +84,8 @@ namespace dd {
                     if (condition(node)) {
                         action(node);
                     }
-                    f_recursion_stack.pop();
+
+                    f_recursion_stack.pop_back();
                     break;
 
                 default:

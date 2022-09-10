@@ -35,6 +35,14 @@ namespace opts {
     class OptsMgr;
     typedef OptsMgr* OptsMgr_ptr;
 
+    enum CNF {
+	SINGLE_CUT,
+	NO_CUT,
+	AUX_CUT,
+    };
+
+    std::istream& operator>> (std::istream& in, CNF& cnf);
+
     // -- system defaults
     const unsigned DEFAULT_WORD_WIDTH = 16;
     const unsigned DEFAULT_PRECISION = 0;
@@ -65,6 +73,8 @@ namespace opts {
 
         // colorized
         bool color() const;
+
+	CNF cnf() const;
 
         // native word size in bits, used for algebrization of constant ITEs and arrays
         unsigned word_width() const;
