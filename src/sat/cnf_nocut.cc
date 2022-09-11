@@ -22,6 +22,7 @@
  *
  **/
 
+#include <dd/cudd_mgr.hh>
 #include <dd/dd_walker.hh>
 #include <sat/sat.hh>
 
@@ -31,7 +32,8 @@ namespace sat {
     public:
         CNFBuilderNoCut(Engine& sat, step_t time,
                         group_t group = MAINGROUP)
-            : f_sat(sat)
+            : dd::ADDWalker(sat.enc().dd())
+            , f_sat(sat)
             , f_time(time)
             , f_group(group)
         {}
@@ -66,44 +68,48 @@ namespace sat {
             f_seen.insert(const_cast<DdNode*>(node));
         }
 
-        bool condition(const DdNode* node)
-        {
-            return cuddIsConstant(node) && !cuddV(node);
-        }
-
         void action(const DdNode* node)
         {
-            DdManager* dd_mgr { f_sat.enc().dd().getManager() };
+            DdManager* dd_mgr {
+                f_dd.getManager()
+            };
+
+            bool condition {
+                cuddIsConstant(node) && !cuddV(node)
+            };
+
+            if (!condition) {
+                return;
+            }
 
             value_t value { Cudd_V(node) };
             assert(!value);
 
             vec<Lit> ps;
-            ps.clear();
             if (MAINGROUP != f_group) {
                 ps.push(mkLit(f_group, true));
             }
 
-            for (auto i { f_recursion_stack.rbegin() }; f_recursion_stack.rend() != i; ++i) {
-                const auto& eye { *i };
-
-                if (cuddIsConstant(eye.node)) {
-                    continue;
-                }
-
+            for (int i = 0; i < dd_mgr->size; ++i) {
+                auto val { variable(i) };
                 Lit lit {
-                    mkLit(f_sat.find_dd_var(eye.node, f_time),
-                          eye.polarity == dd::DD_NEGATIVE)
+                    mkLit(f_sat.find_dd_var(i, f_time), 2 == val) // F
                 };
-                ps.push(lit);
+
+                if (0 < val) {
+                    ps.push(lit);
+                }
             }
 
             f_sat.add_clause(ps);
 
+#if 0
             std::cerr
                 << "no-cut push: "
+		<< std::dec
                 << ps
                 << std::endl;
+#endif
         }
 
     private:

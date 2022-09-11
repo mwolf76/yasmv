@@ -31,7 +31,8 @@ namespace sat {
     public:
         CNFBuilderSingleCut(Engine& sat, step_t time,
                             group_t group = MAINGROUP)
-            : f_sat(sat)
+            : dd::ADDWalker(sat.enc().dd())
+            , f_sat(sat)
             , f_toplevel(NULL)
             , f_time(time)
             , f_group(group)
@@ -72,144 +73,151 @@ namespace sat {
             f_seen.insert(const_cast<DdNode*>(node));
         }
 
-        bool condition(const DdNode* node)
-        {
-            assert(NULL != node);
-            return cuddIsConstant(node)
-
-                       /* toplevel leaf or ... */
-                       ? is_toplevel()
-
-                       /* is a non-constant, yet unseen node. */
-                       : is_unseen(node);
-        }
-
         void action(const DdNode* node)
         {
+            assert(NULL != node);
+
+            bool condition {
+                cuddIsConstant(node)
+
+                    /* toplevel leaf or ... */
+                    ? is_toplevel()
+
+                    /* is a non-constant, yet unseen node. */
+                    : is_unseen(node)
+            };
+
+            if (!condition) {
+                return;
+            }
+
             if (cuddIsConstant(node)) {
                 assert(is_toplevel());
 
                 if (!Cudd_V(node)) {
                     push1(0, true); /* make formula unsatisfiable */
                 }
-            } else {
-                mark(node);
 
-                Var f { f_sat.find_cnf_var(node, f_time) };
-                Var v { f_sat.find_dd_var(node, f_time) };
+                return;
+            }
 
-                /* both T, E are consts */
-                if (cuddIsConstant(cuddT(node)) &&
-                    cuddIsConstant(cuddE(node))) {
+            mark(node);
 
-                    /* positive polarity (T ^ !E) */
-                    if (0 != cuddV(cuddT(node)) &&
-                        0 == cuddV(cuddE(node))) {
+            Var f { f_sat.find_cnf_var(node, f_time) };
+            Var v { f_sat.find_dd_var(node, f_time) };
 
-                        /* v <-> f */
-                        push2(f, false, v, true);
-                        push2(f, true, v, false);
-                    }
+            /* both T, E are consts */
+            if (cuddIsConstant(cuddT(node)) &&
+                cuddIsConstant(cuddE(node))) {
 
-                    /* negative polarity (!T ^ E) */
-                    else if (0 == cuddV(cuddT(node)) &&
-                             0 != cuddV(cuddE(node))) {
+                /* positive polarity (T ^ !E) */
+                if (0 != cuddV(cuddT(node)) &&
+                    0 == cuddV(cuddE(node))) {
 
-                        /* !( v <-> f ) */
-                        push2(f, false, v, false);
-                        push2(f, true, v, true);
-                    }
-
-                    else {
-                        assert(false); /* unreachable */
-                    }
+                    /* v <-> f */
+                    push2(f, false, v, true);
+                    push2(f, true, v, false);
                 }
 
-                /* T is const, E is not */
-                else if (cuddIsConstant(cuddT(node)) &&
-                         !cuddIsConstant(cuddE(node))) {
+                /* negative polarity (!T ^ E) */
+                else if (0 == cuddV(cuddT(node)) &&
+                         0 != cuddV(cuddE(node))) {
 
-                    Var e { f_sat.find_cnf_var(cuddE(node), f_time) };
-
-                    /* Positive polarity (T) */
-                    if (0 != cuddV(cuddT(node))) {
-
-                        /* ( f | !v ) */
-                        push2(f, false, v, true);
-
-                        /* ( f | !e ) */
-                        push2(f, false, e, true);
-
-                        /* (!f |  v |  e) */
-                        push3(f, true, v, false, e, false);
-                    }
-
-                    /* Negative polarity (!T) */
-                    else {
-                        /* ( !f | !v ) ; */
-                        push2(f, true, v, true);
-
-                        /* ( !f | e ) */
-                        push2(f, true, e, false);
-
-                        /* (f |  v |  !e) */
-                        push3(f, false, v, false, e, true);
-                    }
+                    /* !( v <-> f ) */
+                    push2(f, false, v, false);
+                    push2(f, true, v, true);
                 }
 
-                /* E is const, T is not */
-                else if (cuddIsConstant(cuddE(node)) &&
-                         !cuddIsConstant(cuddT(node))) {
-
-                    Var t { f_sat.find_cnf_var(cuddT(node), f_time) };
-
-                    /* Positive polarity (E) */
-                    if (0 != cuddV(cuddE(node))) {
-
-                        /* ( f | v ) */
-                        push2(f, false, v, false);
-
-                        /* ( f | !t ) */
-                        push2(f, false, t, true);
-
-                        /* (!f |  !v |  t) */
-                        push3(f, true, v, true, t, false);
-                    }
-
-                    /* Negative polarity */
-                    else {
-                        /* ( !f | v ) */
-                        push2(f, true, v, false);
-
-                        /* ( !f | t ) */
-                        push2(f, true, t, false);
-
-                        /* (f |  !v |  !t) */
-                        push3(f, false, v, true, t, true);
-                    }
-                }
-
-                /* General case: both T, E non const */
                 else {
-                    assert(!cuddIsConstant(cuddT(node)));
-                    Var t { f_sat.find_cnf_var(cuddT(node), f_time) };
+                    assert(false); /* unreachable */
+                }
+            }
 
-                    assert(!cuddIsConstant(cuddE(node)));
-                    Var e { f_sat.find_cnf_var(cuddE(node), f_time) };
+            /* T is const, E is not */
+            else if (cuddIsConstant(cuddT(node)) &&
+                     !cuddIsConstant(cuddE(node))) {
 
-                    /* !f, v, e */
+                Var e { f_sat.find_cnf_var(cuddE(node), f_time) };
+
+                /* Positive polarity (T) */
+                if (0 != cuddV(cuddT(node))) {
+
+                    /* ( f | !v ) */
+                    push2(f, false, v, true);
+
+                    /* ( f | !e ) */
+                    push2(f, false, e, true);
+
+                    /* (!f |  v |  e) */
                     push3(f, true, v, false, e, false);
+                }
 
-                    /* !f, !v, t  */
-                    push3(f, true, v, true, t, false);
+                /* Negative polarity (!T) */
+                else {
+                    /* ( !f | !v ) ; */
+                    push2(f, true, v, true);
 
-                    /* f, v, !e */
+                    /* ( !f | e ) */
+                    push2(f, true, e, false);
+
+                    /* (f |  v |  !e) */
                     push3(f, false, v, false, e, true);
+                }
+            }
 
-                    /* f, !v, !t */
+            /* E is const, T is not */
+            else if (cuddIsConstant(cuddE(node)) &&
+                     !cuddIsConstant(cuddT(node))) {
+
+                Var t { f_sat.find_cnf_var(cuddT(node), f_time) };
+
+                /* Positive polarity (E) */
+                if (0 != cuddV(cuddE(node))) {
+
+                    /* ( f | v ) */
+                    push2(f, false, v, false);
+
+                    /* ( f | !t ) */
+                    push2(f, false, t, true);
+
+                    /* (!f |  !v |  t) */
+                    push3(f, true, v, true, t, false);
+                }
+
+                /* Negative polarity */
+                else {
+                    /* ( !f | v ) */
+                    push2(f, true, v, false);
+
+                    /* ( !f | t ) */
+                    push2(f, true, t, false);
+
+                    /* (f |  !v |  !t) */
                     push3(f, false, v, true, t, true);
                 }
             }
+
+            /* General case: both T, E non const */
+            else {
+                assert(!cuddIsConstant(cuddT(node)));
+                Var t { f_sat.find_cnf_var(cuddT(node), f_time) };
+
+                assert(!cuddIsConstant(cuddE(node)));
+                Var e { f_sat.find_cnf_var(cuddE(node), f_time) };
+
+                /* !f, v, e */
+                push3(f, true, v, false, e, false);
+
+                /* !f, !v, t  */
+                push3(f, true, v, true, t, false);
+
+                /* f, v, !e */
+                push3(f, false, v, false, e, true);
+
+                /* f, !v, !t */
+                push3(f, false, v, true, t, true);
+            }
+
         } /* action() */
 
     private:
@@ -232,11 +240,13 @@ namespace sat {
 
             ps.push(mkLit(x, px));
 
+#if 0
             std::cerr
                 << std::dec
                 << "single-cut push1: "
                 << ps
                 << std::endl;
+#endif
 
             f_sat.add_clause(ps);
         }
@@ -255,11 +265,13 @@ namespace sat {
 
             f_sat.add_clause(ps);
 
+#if 0
             std::cerr
                 << std::dec
                 << "single-cut push2: "
                 << ps
                 << std::endl;
+#endif
         }
 
         /* push 3 vars clause */
@@ -275,11 +287,13 @@ namespace sat {
             ps.push(mkLit(y, py));
             ps.push(mkLit(w, pw));
 
+#if 0
             std::cerr
                 << std::dec
                 << "single-cut push3: "
                 << ps
                 << std::endl;
+#endif
 
             f_sat.add_clause(ps);
         }

@@ -31,7 +31,8 @@ namespace sat {
     public:
         CNFBuilderAuxCut(Engine& sat, step_t time,
                          group_t group = MAINGROUP)
-            : f_sat(sat)
+            : dd::ADDWalker(sat.enc().dd())
+            , f_sat(sat)
             , f_toplevel(NULL)
             , f_time(time)
             , f_group(group)

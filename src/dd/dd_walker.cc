@@ -22,21 +22,41 @@
  **/
 
 #include <common/common.hh>
+
+#include <dd/cudd_mgr.hh>
 #include <dd_walker.hh>
 
 namespace dd {
 
     /* --- ADD Walker ----------------------------------------------------------- */
-    ADDWalker::ADDWalker()
-    {}
+    ADDWalker::ADDWalker(Cudd& dd)
+        : f_dd(dd)
+    {
+        const void* instance { this };
+        const void* dd_ptr { &dd };
+
+        DEBUG
+            << "Created DD walker instance @"
+            << instance
+            << " (cudd = @"
+            << dd_ptr
+            << ")"
+            << std::endl;
+    }
 
     ADDWalker::~ADDWalker()
-    {}
+    {
+        const void* instance { this };
+        DEBUG
+            << "Destroyed DD walker instance @"
+            << instance
+            << std::endl;
+    }
 
     ADDWalker& ADDWalker::operator()(ADD dd)
     {
         /* setup toplevel act. record and perform walk. */
-        add_activation_record call { dd.getNode(), DD_POSITIVE };
+        add_activation_record call { dd.getNode() };
         f_recursion_stack.push_back(call);
 
         /* actions before the walk */
@@ -53,6 +73,10 @@ namespace dd {
     /* post-order visit strategy */
     void ADDWalker::walk()
     {
+        DdManager* dd_mgr { f_dd.getManager() };
+        f_variables = (short int*)
+            calloc(dd_mgr->size, sizeof(short));
+
         while (0 != f_recursion_stack.size()) {
         loop:
             add_activation_record curr { f_recursion_stack.back() };
@@ -68,21 +92,28 @@ namespace dd {
             // restore caller location (simulate call return behavior)
             switch (curr.pc) {
                 case DD_WALK_LHS:
-                    /* recur in THEN */
+                    /* recur in THEN (i.e. assume TRUE) */
+                    f_variables[node->index] = 1;
+
                     f_recursion_stack.back().pc = DD_WALK_RHS;
-                    f_recursion_stack.push_back(add_activation_record(cuddT(node), DD_POSITIVE));
+                    f_recursion_stack.push_back(add_activation_record(cuddT(node)));
                     goto loop;
 
                 case DD_WALK_RHS:
-                    /* recur in ELSE */
+                    /* recur in ELSE (i.e. assume FALSE) */
+                    f_variables[node->index] = 2;
+
                     f_recursion_stack.back().pc = DD_WALK_NODE;
-                    f_recursion_stack.push_back(add_activation_record(cuddE(node), DD_NEGATIVE));
+                    f_recursion_stack.push_back(add_activation_record(cuddE(node)));
                     goto loop;
 
                 case DD_WALK_NODE:
                     /* process node in post-order. */
-                    if (condition(node)) {
-                        action(node);
+                    action(node);
+
+                    /* restore DON'T CARE state */
+                    if (!cuddIsConstant(node)) {
+                        f_variables[node->index] = 0;
                     }
 
                     f_recursion_stack.pop_back();
@@ -92,6 +123,15 @@ namespace dd {
                     assert(false); // unexpected
             }
         }
+
+        free(f_variables);
+        f_variables = NULL;
+    }
+
+    short ADDWalker::variable(int index)
+    {
+        assert(f_variables);
+        return f_variables[index];
     }
 
 }; // namespace dd

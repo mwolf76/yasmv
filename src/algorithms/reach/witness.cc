@@ -95,8 +95,12 @@ namespace reach {
                     for (ndx = 0, di = enc->bits().begin();
                          enc->bits().end() != di; ++ndx, ++di) {
 
-                        unsigned bit((*di).getNode()->index);
-                        const enc::UCBI& ucbi { bm.find_ucbi(bit) };
+                        auto node { (*di).getNode() };
+                        unsigned bit { node->index };
+
+                        const enc::UCBI& ucbi {
+                            bm.find_ucbi(bit)
+                        };
                         const enc::TCBI tcbi {
                             enc::TCBI(ucbi, reversed ? UINT_MAX - step : step)
                         };

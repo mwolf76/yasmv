@@ -26,8 +26,9 @@
 #include <common/common.hh>
 #include <stack>
 
-#include <cuddInt.h>
 #include <dd/dd.hh>
+#include <dd/cudd_mgr.hh>
+#include <cuddInt.h>
 
 namespace dd {
 
@@ -37,24 +38,17 @@ namespace dd {
         DD_WALK_NODE,
     } dd_entry_point;
 
-    typedef enum {
-	DD_POSITIVE,
-	DD_NEGATIVE,
-    } dd_polarity;
-
-    // reserved for ADD walkers
     struct add_activation_record {
         dd_entry_point pc;
-	dd_polarity polarity;
         const DdNode* node;
 
-        add_activation_record(const DdNode* dd, const dd_polarity pol)
+        add_activation_record(const DdNode* dd)
             : pc(DD_WALK_LHS)
-	    , polarity(pol)
             , node(dd)
         {}
     };
-    typedef std::vector<struct add_activation_record> add_walker_stack;
+
+    using add_walker_stack = std::vector<struct add_activation_record>;
 
     class DDWalkerException: public Exception {
     public:
@@ -63,22 +57,25 @@ namespace dd {
 
     class ADDWalker {
     public:
-        ADDWalker();
+        ADDWalker(Cudd& dd);
         virtual ~ADDWalker();
 
         virtual ADDWalker& operator()(ADD dd);
 
     protected:
         virtual void walk();
+	short variable(int inex);
+	virtual void action(const DdNode* node) = 0;
 
-        virtual bool condition(const DdNode* node) = 0;
-        virtual void action(const DdNode* node) = 0;
-
-        virtual void pre_hook() = 0;
+	virtual void pre_hook() = 0;
         virtual void post_hook() = 0;
 
-        /* explicit recursion stack */
         add_walker_stack f_recursion_stack;
+	Cudd& f_dd;
+
+    private:
+	short* f_variables;
+
     };
 
 }; // namespace dd
