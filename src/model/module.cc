@@ -62,8 +62,6 @@ namespace model {
 
     void Module::add_var(expr::Expr_ptr identifier, symb::Variable_ptr var)
     {
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
         type::Type_ptr type { var->type() };
         expr::Expr_ptr type_repr { type->repr() };
 
@@ -106,6 +104,8 @@ namespace model {
 
         /* for enum vars, we need to add an INVAR x in { <lits > } */
         if (type->is_enum()) {
+	    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
             type::EnumType_ptr enum_type {
                 type->as_enum()
             };
