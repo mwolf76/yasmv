@@ -34,7 +34,7 @@ namespace compiler {
 
     void Compiler::walk_instant(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         DRIVEL
             << expr
@@ -46,8 +46,8 @@ namespace compiler {
 
     void Compiler::walk_leaf(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
-        type::TypeMgr& tm { f_owner.tm() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         TOP_CTX(ctx);
 

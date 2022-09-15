@@ -28,7 +28,8 @@ namespace compiler {
 
     void Compiler::enumerative_equals(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         DROP_TYPE();
         DROP_TYPE();
         PUSH_TYPE(tm.find_boolean());
@@ -40,7 +41,8 @@ namespace compiler {
 
     void Compiler::enumerative_not_equals(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         DROP_TYPE();
         DROP_TYPE();
         PUSH_TYPE(tm.find_boolean());
@@ -130,7 +132,9 @@ namespace compiler {
             FRESH_DV(dv, elem_width);
             PUSH_DV(dv, elem_width);
 
-            MultiwaySelectionDescriptor msd { elem_width, elem_count, dv, cnd_dds, act_dds, lhs };
+            MultiwaySelectionDescriptor msd {
+                elem_width, elem_count, dv, cnd_dds, act_dds, lhs
+            };
             f_multiway_selection_descriptors.push_back(msd);
         }
     }

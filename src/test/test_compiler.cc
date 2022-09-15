@@ -62,38 +62,45 @@ public:
     bool check() const
     {
         bool res { f_expected == f_actual };
+
         if (!res) {
             std::cerr
                 << "Expected"
                 << std::endl;
 
-            std::for_each(begin(f_expected), end(f_expected),
-                          [](std::list<int> lst) {
-                              std::for_each(begin(lst), end(lst),
-                                            [](int elem) {
-                                                std::cerr
-                                                    << elem
-                                                    << " ";
-                                            });
-                              std::cerr
-                                  << std::endl;
-                          });
+            std::for_each(
+                begin(f_expected), end(f_expected),
+                [](std::list<int> lst) {
+                    std::for_each(
+                        begin(lst), end(lst),
+                        [](int elem) {
+                            std::cerr
+                                << elem
+                                << " ";
+                        });
+
+                    std::cerr
+                        << std::endl;
+                });
 
             std::cerr
                 << "Actual"
                 << std::endl;
 
-            std::for_each(begin(f_actual), end(f_actual),
-                          [](std::list<int> lst) {
-                              std::for_each(begin(lst), end(lst),
-                                            [](int elem) {
-                                                std::cerr
-                                                    << elem
-                                                    << " ";
-                                            });
-                              std::cerr
-                                  << std::endl;
-                          });
+            std::for_each(
+                begin(f_actual), end(f_actual),
+                [](std::list<int> lst) {
+                    std::for_each(
+                        begin(lst), end(lst),
+                        [](int elem) {
+                            std::cerr
+                                << elem
+                                << " ";
+                        });
+
+                    std::cerr
+                        << std::endl;
+                });
         }
 
         return res;
@@ -131,17 +138,17 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
     model::Module_ptr main_module { new model::Module(main_expr) };
     model.add_module(*main_module);
 
-    type::Type_ptr u2 { tm.find_unsigned(2) };
+    type::Type_ptr boolean { tm.find_boolean() };
 
     expr::Atom a_x { "x" };
     expr::Expr_ptr x { em.make_identifier(a_x) };
-    main_module->add_var(x, new symb::Variable(main_expr, x, u2));
+    main_module->add_var(x, new symb::Variable(main_expr, x, boolean));
 
     expr::Atom a_y { "y" };
     expr::Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_var(y, new symb::Variable(main_expr, y, u2));
+    main_module->add_var(y, new symb::Variable(main_expr, y, boolean));
 
-    // mm.analyze();
+    expr::Expr_ptr ctx { em.make_empty() };
 
     const int F = 0;
     const int T = 1;
@@ -158,13 +165,13 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd(dv.at(0));
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd(dds.at(0));
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -181,13 +188,13 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -204,13 +211,13 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -225,16 +232,15 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
-        // dd.PrintMinterm();
         BOOST_CHECK(checker.check());
     }
 
@@ -248,16 +254,15 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
-        // dd.PrintMinterm();
         BOOST_CHECK(checker.check());
     }
 
@@ -270,13 +275,13 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -291,13 +296,36 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
+
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
+    }
+
+    /* x IMPL y */
+    {
+        expr::Expr_ptr test_expr {
+            em.make_implies(x, y)
+        };
+
+        DDChecker checker {
+            { F, X }, { T, T }
+        };
+
+        compiler::Unit cu {
+            f_compiler.process(ctx, test_expr)
+        };
+
+        dd::DDVector dds { cu.dds() };
+
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -315,17 +343,19 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
     }
+
+    // -- tautologies ----------------------------------------------------------
 
     /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
     {
@@ -339,36 +369,13 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
-
-        dd.Callback(callback, &checker, 1);
-        BOOST_CHECK(checker.check());
-    }
-
-    /* x IMPL y */
-    {
-        expr::Expr_ptr test_expr {
-            em.make_implies(x, y)
-        };
-
-        DDChecker checker {
-            { F, X }, { T, T }
-        };
-
-        compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
-        };
-
-        dd::DDVector dv { cu.dds() };
-
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
@@ -387,15 +394,111 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         };
 
         compiler::Unit cu {
-            f_compiler.process(em.make_empty(), test_expr)
+            f_compiler.process(ctx, test_expr)
         };
 
-        dd::DDVector dv { cu.dds() };
+        dd::DDVector dds { cu.dds() };
 
-        BOOST_CHECK(dv.size() == 1);
-        ADD dd { dv.at(0) };
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
 
         dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
+    }
+
+    /* x OR (NOT x) */
+    {
+        expr::Expr_ptr test_expr {
+            em.make_or(x, em.make_not(x))
+        };
+
+        DDChecker checker {
+            { X, X }
+        };
+
+        compiler::Unit cu {
+            f_compiler.process(ctx, test_expr)
+        };
+
+        dd::DDVector dds { cu.dds() };
+
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
+
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
+    }
+
+    /* x OR y OR ((NOT X) AND (NOT y)) */
+    {
+        expr::Expr_ptr test_expr {
+            em.make_or(em.make_or(x, y),
+                       em.make_and(em.make_not(x), em.make_not(y)))
+        };
+
+        DDChecker checker {
+            { X, X }
+        };
+
+        compiler::Unit cu {
+            f_compiler.process(ctx, test_expr)
+        };
+
+        dd::DDVector dds { cu.dds() };
+
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
+
+        dd.Callback(callback, &checker, 1);
+        BOOST_CHECK(checker.check());
+    }
+
+    // -- contradictions -------------------------------------------------------
+
+    /* X AND (NOT X) */
+    {
+        expr::Expr_ptr test_expr {
+            em.make_and(x, em.make_not(x))
+        };
+
+        DDChecker checker {
+            { X, X }
+        };
+
+        compiler::Unit cu {
+            f_compiler.process(ctx, test_expr)
+        };
+
+        dd::DDVector dds { cu.dds() };
+
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
+
+        dd.Callback(callback, &checker, 0);
+        BOOST_CHECK(checker.check());
+    }
+
+    /* (X OR Y) AND ((NOT X) AND (NOT Y)) */
+    {
+        expr::Expr_ptr test_expr {
+            em.make_and(em.make_or(x, y),
+                        em.make_and(em.make_not(x), em.make_not(y)))
+        };
+
+        DDChecker checker {
+            { X, X }
+        };
+
+        compiler::Unit cu {
+            f_compiler.process(ctx, test_expr)
+        };
+
+        dd::DDVector dds { cu.dds() };
+
+        BOOST_CHECK(dds.size() == 1);
+        ADD dd { dds.at(0) };
+
+        dd.Callback(callback, &checker, 0);
         BOOST_CHECK(checker.check());
     }
 }

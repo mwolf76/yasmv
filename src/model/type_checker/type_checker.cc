@@ -379,7 +379,7 @@ namespace model {
 
     bool TypeChecker::walk_type_preorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
         type::Type_ptr tp { tm.find_type_by_def(expr) };
         f_type_stack.push_back(tp);
 
@@ -551,7 +551,7 @@ namespace model {
     }
     bool TypeChecker::walk_dot_inorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { em.make_dot(f_ctx_stack.back(), expr->lhs()) };
 
         f_ctx_stack.push_back(ctx);
@@ -723,15 +723,15 @@ namespace model {
 
     void TypeChecker::walk_instant(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
         PUSH_TYPE(tm.find_time());
     }
 
 
     void TypeChecker::walk_leaf(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
-        expr::ExprMgr& em { f_owner.em() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         // cache miss took care of the stack already
         if (!cache_miss(expr)) {

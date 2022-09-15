@@ -30,7 +30,7 @@ namespace compiler {
 
     void Compiler::array_equals(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);

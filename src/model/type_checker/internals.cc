@@ -149,7 +149,7 @@ namespace model {
     // fun: arithmetical x arithmetical -> boolean
     void TypeChecker::walk_binary_relational_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
         type::Type_ptr boolean { tm.find_boolean() };
 
         type::Type_ptr rhs { check_arithmetical(expr->rhs()) };
@@ -182,7 +182,7 @@ namespace model {
     // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
     void TypeChecker::walk_binary_equality_postorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
         enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
@@ -334,8 +334,10 @@ namespace model {
 
     void TypeChecker::memoize_result(expr::Expr_ptr expr)
     {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
         expr::Expr_ptr key {
-            f_owner.em().make_dot(f_ctx_stack.back(), expr)
+            em.make_dot(f_ctx_stack.back(), expr)
         };
         type::Type_ptr type { f_type_stack.back() };
 
@@ -355,13 +357,15 @@ namespace model {
 
     type::Type_ptr TypeChecker::type(expr::Expr_ptr expr, expr::Expr_ptr ctx)
     {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
         /* to avoid a number of cache misses due to compiler rewrites,
          * we squeeze types in equivalence classes: Relationals -> lhs
          * '<' rhs, Arithmetical -> lhs '+' rhs */
-        expr::Expr_ptr key(f_owner.em().make_dot(ctx, expr));
+        expr::Expr_ptr key { em.make_dot(ctx, expr) };
 
-        TypeReg::const_iterator eye(f_map.find(key));
-        type::Type_ptr res(NULL);
+        TypeReg::const_iterator eye { f_map.find(key) };
+        type::Type_ptr res { NULL };
 
         // cache miss, fallback to walker
         if (eye == f_map.end()) {
@@ -496,7 +500,7 @@ namespace model {
     // services
     bool TypeChecker::cache_miss(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr key {
             em.make_dot(f_ctx_stack.back(), expr)
         };

@@ -166,7 +166,7 @@ namespace compiler {
     // relationals -----------------------------------------------------------------
     void Compiler::algebraic_relational(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         assert(is_binary_algebraic(expr));
 

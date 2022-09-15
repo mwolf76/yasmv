@@ -98,9 +98,8 @@ namespace expr {
              eye != literals.rend(); eye++) {
 
             res = (!res)
-                      ? make_dot(make_empty(), (*eye))
-                      : make_expr(SET_COMMA,
-                                  make_dot(make_empty(), (*eye)), res);
+                      ? *eye
+                      : make_expr(SET_COMMA, *eye, res);
         }
 
         return make_set(res);

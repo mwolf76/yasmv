@@ -48,8 +48,6 @@ namespace model {
 
     ModelMgr::ModelMgr()
         : f_model()
-        , f_em(expr::ExprMgr::INSTANCE())
-        , f_tm(type::TypeMgr::INSTANCE())
         , f_resolver(*this)
         , f_type_checker(*this)
         , f_analyzed(false)
@@ -355,13 +353,13 @@ namespace model {
                     expr::Expr_ptr top { comma_stack.top() };
                     comma_stack.pop();
 
-                    if (f_em.is_params_comma(top)) {
+                    if (em.is_params_comma(top)) {
                         comma_stack.push(top->rhs());
                         comma_stack.push(top->lhs());
                         continue;
                     }
 
-                    if (!f_em.is_empty(top)) {
+                    if (!em.is_empty(top)) {
                         actuals.push_back(em.make_dot(em.make_empty(), top));
                     }
                 }
