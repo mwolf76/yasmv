@@ -60,6 +60,11 @@ namespace type {
         TypeMismatch(expr::Expr_ptr expr, Type_ptr a, Type_ptr b);
     };
 
+    class InternalError: public TypeException {
+    public:
+        InternalError(const std::string& message);
+    };
+
 }; // namespace type
 
 #endif /* TYPE_EXCEPTIONS_H */

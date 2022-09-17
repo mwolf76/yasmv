@@ -38,7 +38,10 @@ namespace type {
         : AlgebraicType(owner)
         , f_width(width)
     {
-        f_repr = f_owner.em().make_const_int_type(width);
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
+        f_repr = em.make_const_int_type(width);
     }
 
     SignedAlgebraicType::SignedAlgebraicType(TypeMgr& owner,
@@ -48,7 +51,11 @@ namespace type {
         , f_width(width)
         , f_dds(dds)
     {
-        f_repr = f_owner.em().make_signed_int_type(width);
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
+
+        f_repr = em.make_signed_int_type(width);
     }
 
     unsigned SignedAlgebraicType::width() const
@@ -64,7 +71,11 @@ namespace type {
         , f_width(width)
         , f_dds(dds)
     {
-        f_repr = f_owner.em().make_unsigned_int_type(width);
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
+
+        f_repr = em.make_unsigned_int_type(width);
     }
 
     unsigned UnsignedAlgebraicType::width() const
@@ -79,6 +90,9 @@ namespace type {
         , f_of(of)
         , f_nelems(nelems)
     {
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
         // 0 is reserved for abstract arrays
         assert(0 < nelems);
 
@@ -88,8 +102,8 @@ namespace type {
         // scalar type, only. Make sure we know how to calculate size()
         assert(f_of->is_scalar());
 
-        f_repr = f_owner.em().make_subscript(of->repr(),
-                                             f_owner.em().make_const(nelems));
+        f_repr = em.make_subscript(of->repr(),
+				   em.make_const(nelems));
     }
 
     unsigned ArrayType::width() const

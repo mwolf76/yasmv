@@ -4,7 +4,7 @@ REFERENCE="out"
 YASMV="./yasmv"
 
 function test() {
-    echo -n "Running integration test $1/$2 ... "
+    echo -n "Running short-test $1/$2 ... "
     rm -f "$2-out"
 
     RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1" < "$DIRECTORY/$2" | tail -n1)
@@ -16,5 +16,12 @@ function test() {
     fi
 }
 
-test enum00.smv enum00-pick-state.cmd
+# enums
+test enums/enum00.smv unfeasible-pick-state.cmd
+
+# casts
+test casts/cast00.smv unfeasible-pick-state.cmd
+test casts/cast01.smv unfeasible-pick-state.cmd
+test casts/cast02.smv unfeasible-pick-state.cmd
+
 echo ""  # one blank line

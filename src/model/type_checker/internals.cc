@@ -129,12 +129,19 @@ namespace model {
 
     void TypeChecker::walk_binary_cast_postorder(const expr::Expr_ptr expr)
     {
-        type::Type_ptr rhs_type { check_arithmetical(expr->rhs()) };
-        (void) rhs_type;
+	TOP_TYPE(rhs_type);
 
-        type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
+	if (rhs_type->is_boolean()) {
+            type::Type_ptr lhs_type { check_logical(expr->lhs()) };
+            (void) lhs_type;
+        }
 
-        PUSH_TYPE(lhs_type);
+	else if (rhs_type->is_algebraic()) {
+            type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
+	    (void) lhs_type;
+	}
+
+	else throw type::BadType(expr->rhs(), rhs_type);
     }
 
     void TypeChecker::walk_binary_shift_postorder(const expr::Expr_ptr expr)

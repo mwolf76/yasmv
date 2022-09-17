@@ -72,11 +72,14 @@ namespace model {
     bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        Model& model { f_model };
+
+	Model& model { f_model };
         Module& main_module { model.main_module() };
 
         std::stack<boost::tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>> stack;
-        stack.push(boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>(em.make_empty(), &main_module, em.make_empty()));
+        stack.push(
+	    boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>
+	    (em.make_empty(), &main_module, em.make_empty()));
 
         /* walk of var decls, starting from main module */
         while (0 < stack.size()) {
@@ -337,7 +340,9 @@ namespace model {
                     expr::Expr_ptr inner_params { instance->params() };
                     Module& module_ { module(instance->name()) };
 
-                    stack.push(boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>(inner_ctx, &module_, inner_params));
+                    stack.push(
+			boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>
+			(inner_ctx, &module_, inner_params));
                 }
             }
 
@@ -385,7 +390,8 @@ namespace model {
                         << actual << "`"
                         << std::endl;
 
-                    f_param_map.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>(formal, actual));
+                    f_param_map.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>
+				       (formal, actual));
 
                     ++fi;
                     ++ai;

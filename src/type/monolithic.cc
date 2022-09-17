@@ -29,7 +29,10 @@ namespace type {
     BooleanType::BooleanType(TypeMgr& owner)
         : MonolithicType(owner)
     {
-        f_repr = f_owner.em().make_boolean_type();
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
+        f_repr = em.make_boolean_type();
     }
 
     unsigned BooleanType::width() const
@@ -41,13 +44,15 @@ namespace type {
         : MonolithicType(owner)
         , f_literals(literals)
     {
-        TypeMgr& tm { TypeMgr::INSTANCE() };
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
         const symb::Literals& lits { tm.literals() };
 
         for (expr::ExprSet::const_iterator i = literals.begin(); i != literals.end(); ++i) {
             const expr::Expr_ptr& lit { *i };
 
-            if (!expr::ExprMgr::INSTANCE().is_identifier(lit)) {
+            if (!em.is_identifier(lit)) {
                 throw IdentifierExpected(lit);
             }
 
@@ -56,7 +61,7 @@ namespace type {
             }
         }
 
-        f_repr = f_owner.em().make_enum_type(f_literals);
+        f_repr = em.make_enum_type(f_literals);
     }
 
     unsigned EnumType::width() const

@@ -469,11 +469,15 @@ namespace compiler {
 
     bool Compiler::walk_type_preorder(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        type::TypeMgr& tm {
+	    type::TypeMgr::INSTANCE()
+	};
 
-        type::Type_ptr tp { tm.find_type_by_def(expr) };
-        PUSH_TYPE(tp);
+        type::Type_ptr tp {
+	    tm.find_type_by_def(expr)
+	};
 
+	PUSH_TYPE(tp);
         return false;
     }
     bool Compiler::walk_type_inorder(const expr::Expr_ptr expr)

@@ -399,7 +399,7 @@ namespace expr {
     }
     bool Printer::walk_type_inorder(const Expr_ptr expr)
     {
-        return true;
+        return NULL != expr->rhs();
     }
     void Printer::walk_type_postorder(const Expr_ptr expr)
     {}

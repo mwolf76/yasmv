@@ -258,6 +258,8 @@ namespace model {
 
     bool Analyzer::walk_guard_preorder(const expr::Expr_ptr expr)
     {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
         if (f_section == ANALYZE_INIT) {
             throw SemanticError("Guards not allowed in INITs");
         }
@@ -278,7 +280,7 @@ namespace model {
         expr::Expr_ptr guard { expr->lhs() };
         expr::Expr_ptr action { expr->rhs() };
 
-        if (!f_em.is_assignment(action)) {
+        if (! em.is_assignment(action)) {
             throw SemanticError("Guarded actions must be assignments");
         }
 
@@ -292,7 +294,8 @@ namespace model {
             << std::endl;
 
         f_dependency_tracking_map.insert(
-            std::pair<expr::Expr_ptr, expr::Expr_ptr>(guard, lhs));
+            std::pair<expr::Expr_ptr, expr::Expr_ptr>
+	    (guard, lhs));
 
         return true;
     }
@@ -317,18 +320,21 @@ namespace model {
 
     bool Analyzer::walk_cast_preorder(const expr::Expr_ptr expr)
     {
-        return true;
+	return false;
     }
     bool Analyzer::walk_cast_inorder(const expr::Expr_ptr expr)
     {
-        return true;
+	assert(false); /* unreachable */
+        return false;
     }
     void Analyzer::walk_cast_postorder(const expr::Expr_ptr expr)
-    {}
+    {
+	assert(false); /* unreachable */
+    }
 
     bool Analyzer::walk_type_preorder(const expr::Expr_ptr expr)
     {
-        return true;
+        return false;
     }
     bool Analyzer::walk_type_inorder(const expr::Expr_ptr expr)
     {
@@ -372,6 +378,8 @@ namespace model {
     }
     void Analyzer::walk_assignment_postorder(const expr::Expr_ptr expr)
     {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
         if (f_section == ANALYZE_INIT) {
             throw SemanticError("Assignments not allowed in INITs");
         }
@@ -386,18 +394,18 @@ namespace model {
 
         expr::Expr_ptr lhs { expr->lhs() };
 
-        if (!f_em.is_lvalue(lhs)) {
+        if (!em.is_lvalue(lhs)) {
             throw SemanticError("Assignments require an lvalue for lhs");
         }
 
         /* strip [] */
-        if (f_em.is_subscript(lhs)) {
+        if (em.is_subscript(lhs)) {
             lhs = lhs->lhs();
         }
 
         /* assignment lhs *must* be an ordinary state variable */
         expr::Expr_ptr ctx { f_ctx_stack.back() };
-        expr::Expr_ptr full { f_em.make_dot(ctx, lhs) };
+        expr::Expr_ptr full { em.make_dot(ctx, lhs) };
 
         symb::ResolverProxy resolver;
 
@@ -620,9 +628,11 @@ namespace model {
 
     void Analyzer::walk_leaf(const expr::Expr_ptr expr)
     {
-        if (f_em.is_identifier(expr)) {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+	if (em.is_identifier(expr)) {
             expr::Expr_ptr ctx { f_ctx_stack.back() };
-            expr::Expr_ptr full { f_em.make_dot(ctx, expr) };
+            expr::Expr_ptr full { em.make_dot(ctx, expr) };
 
             symb::ResolverProxy resolver;
             symb::Symbol_ptr symb { resolver.symbol(full) };
@@ -645,7 +655,9 @@ namespace model {
                     throw SemanticError(
                         "@inertial and @frozen not simultaneously allowed on the same var.");
                 }
-            } else if (symb->is_define()) {
+            }
+
+	    else if (symb->is_define()) {
                 symb::Define& define { symb->as_define() };
                 expr::Expr_ptr body { define.body() };
 
