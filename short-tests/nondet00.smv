@@ -1,0 +1,7 @@
+MODULE nondet;
+
+VAR
+	x: { HUEWEY, LOUIE, DEWEY }
+
+INIT
+	x != { HUEWEY, LOUIE };

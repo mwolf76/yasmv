@@ -1,0 +1,16 @@
+MODULE casts;
+
+VAR
+	u : uint;
+
+VAR
+	b : boolean;
+
+INVAR
+	b = (boolean) u;
+
+INIT
+	u = 0;
+
+INIT
+	b;

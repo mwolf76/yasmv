@@ -3,11 +3,11 @@ DIRECTORY="short-tests"
 REFERENCE="out"
 YASMV="./yasmv"
 
-function test() {
-    echo -n "Running short-test $1/$2 ... "
-    rm -f "$2-out"
+function test-unfeasible-state() {
+    echo -n "Running short-test $1 ... "
+    rm -f "$1.out"
 
-    RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1" < "$DIRECTORY/$2" | tail -n1)
+    RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1.smv" < "$DIRECTORY/unfeasible-pick-state.cmd" | tail -n1)
     if [[ $RES -eq "OK" ]]; then
 	    echo "OK"
     else
@@ -17,11 +17,19 @@ function test() {
 }
 
 # enums
-test enums/enum00.smv unfeasible-pick-state.cmd
+test-unfeasible-state enums/enum00
 
 # casts
-test casts/cast00.smv unfeasible-pick-state.cmd
-test casts/cast01.smv unfeasible-pick-state.cmd
-test casts/cast02.smv unfeasible-pick-state.cmd
+test-unfeasible-state casts/cast00
+test-unfeasible-state casts/cast01
+test-unfeasible-state casts/cast02
+test-unfeasible-state casts/cast03
+
+# ite
+test-unfeasible-state ite/ite00
+
+# nondet
+test-unfeasible-state nondet/nondet00
+test-unfeasible-state nondet/nondet01
 
 echo ""  # one blank line

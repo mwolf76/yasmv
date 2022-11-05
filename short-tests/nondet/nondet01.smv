@@ -1,0 +1,28 @@
+#word-width 4
+MODULE nondet;
+
+VAR
+	x : uint;
+
+INVAR
+	x > 5;
+
+INVAR
+	x != 6 ;
+
+INVAR
+	x != 7;
+
+INVAR
+	x != 8;
+
+INVAR
+	x != 9;
+
+INVAR
+	x != 10;
+
+INIT
+	x = { 0 .. 10 };
+
+-- pick-state is unfeasible as the only admissable values are all excluded.

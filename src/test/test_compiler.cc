@@ -331,6 +331,8 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         BOOST_CHECK(checker.check());
     }
 
+    // -- tautologies ----------------------------------------------------------
+
     /* (NOT (X AND Y)) == (NOT X) OR (NOT Y) */
     {
         expr::Expr_ptr test_expr {
@@ -354,8 +356,6 @@ BOOST_AUTO_TEST_CASE(compiler_boolean)
         dd.Callback(callback, &checker, 1);
         BOOST_CHECK(checker.check());
     }
-
-    // -- tautologies ----------------------------------------------------------
 
     /* (NOT (X OR Y)) == (NOT X) AND (NOT Y) */
     {
