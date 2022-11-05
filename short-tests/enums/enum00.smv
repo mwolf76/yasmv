@@ -1,7 +1,7 @@
-MODULE enumerations;
+MODULE enums;
 
 VAR
-	x: { HUEWEY, LOUIE, DEWEY }
+	x: { HUEWEY, LOUIE, DEWEY };
 
 INIT
 	x != HUEWEY;
@@ -12,6 +12,6 @@ INIT
 INIT
 	x != DEWEY;
 
--- pick-state should fail here as x cannot be none of the available
+-- pick-state should fail here as x cannot be any of the available
 -- values; this is ensured by a synthetic INVAR which is automatically
 -- created when processing the variable definition for x.

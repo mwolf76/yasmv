@@ -1,0 +1,13 @@
+MODULE logical;
+
+VAR
+	x, y: boolean;
+
+INVAR
+	x ;
+
+INVAR
+	! y ;
+
+INVAR
+	x = y ;

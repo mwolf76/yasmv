@@ -1,0 +1,138 @@
+Target is reachable, registered witness `reach_1`, 27 steps.
+-- Reachability witness for target `GOAL` in module `maze`
+Witness: reach_1
+
+:: @0
+-- state
+   x = 00
+   y = 00
+
+:: @1
+-- state
+   x = 01
+   y = 00
+
+:: @2
+-- state
+   x = 01
+   y = 01
+
+:: @3
+-- state
+   x = 01
+   y = 02
+
+:: @4
+-- state
+   x = 01
+   y = 03
+
+:: @5
+-- state
+   x = 01
+   y = 04
+
+:: @6
+-- state
+   x = 02
+   y = 04
+
+:: @7
+-- state
+   x = 02
+   y = 05
+
+:: @8
+-- state
+   x = 03
+   y = 05
+
+:: @9
+-- state
+   x = 03
+   y = 06
+
+:: @10
+-- state
+   x = 04
+   y = 06
+
+:: @11
+-- state
+   x = 05
+   y = 06
+
+:: @12
+-- state
+   x = 05
+   y = 05
+
+:: @13
+-- state
+   x = 05
+   y = 04
+
+:: @14
+-- state
+   x = 05
+   y = 03
+
+:: @15
+-- state
+   x = 04
+   y = 03
+
+:: @16
+-- state
+   x = 04
+   y = 02
+
+:: @17
+-- state
+   x = 04
+   y = 01
+
+:: @18
+-- state
+   x = 05
+   y = 01
+
+:: @19
+-- state
+   x = 06
+   y = 01
+
+:: @20
+-- state
+   x = 07
+   y = 01
+
+:: @21
+-- state
+   x = 07
+   y = 02
+
+:: @22
+-- state
+   x = 07
+   y = 03
+
+:: @23
+-- state
+   x = 07
+   y = 04
+
+:: @24
+-- state
+   x = 07
+   y = 05
+
+:: @25
+-- state
+   x = 07
+   y = 06
+
+:: @26
+-- state
+   x = 07
+   y = 07

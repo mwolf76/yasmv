@@ -16,6 +16,9 @@ function test-unfeasible-state() {
     fi
 }
 
+# arrays
+test-unfeasible-state array/array00
+
 # enums
 test-unfeasible-state enums/enum00
 
@@ -27,9 +30,15 @@ test-unfeasible-state casts/cast03
 
 # ite
 test-unfeasible-state ite/ite00
+test-unfeasible-state ite/ite01
 
 # nondet
 test-unfeasible-state nondet/nondet00
 test-unfeasible-state nondet/nondet01
+
+# logical
+test-unfeasible-state logical/logical00
+test-unfeasible-state logical/logical01
+test-unfeasible-state logical/logical02
 
 echo ""  # one blank line

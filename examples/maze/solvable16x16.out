@@ -1,0 +1,158 @@
+Target is reachable, registered witness `reach_1`, 31 steps.
+-- Reachability witness for target `GOAL` in module `maze`
+Witness: reach_1
+
+:: @0
+-- state
+   x = 0
+   y = 0
+
+:: @1
+-- state
+   x = 1
+   y = 0
+
+:: @2
+-- state
+   x = 2
+   y = 0
+
+:: @3
+-- state
+   x = 2
+   y = 1
+
+:: @4
+-- state
+   x = 2
+   y = 2
+
+:: @5
+-- state
+   x = 2
+   y = 3
+
+:: @6
+-- state
+   x = 2
+   y = 4
+
+:: @7
+-- state
+   x = 2
+   y = 5
+
+:: @8
+-- state
+   x = 2
+   y = 6
+
+:: @9
+-- state
+   x = 2
+   y = 7
+
+:: @10
+-- state
+   x = 3
+   y = 7
+
+:: @11
+-- state
+   x = 3
+   y = 8
+
+:: @12
+-- state
+   x = 4
+   y = 8
+
+:: @13
+-- state
+   x = 5
+   y = 8
+
+:: @14
+-- state
+   x = 5
+   y = 9
+
+:: @15
+-- state
+   x = 5
+   y = 10
+
+:: @16
+-- state
+   x = 6
+   y = 10
+
+:: @17
+-- state
+   x = 6
+   y = 11
+
+:: @18
+-- state
+   x = 7
+   y = 11
+
+:: @19
+-- state
+   x = 7
+   y = 12
+
+:: @20
+-- state
+   x = 7
+   y = 13
+
+:: @21
+-- state
+   x = 8
+   y = 13
+
+:: @22
+-- state
+   x = 9
+   y = 13
+
+:: @23
+-- state
+   x = 10
+   y = 13
+
+:: @24
+-- state
+   x = 11
+   y = 13
+
+:: @25
+-- state
+   x = 12
+   y = 13
+
+:: @26
+-- state
+   x = 12
+   y = 14
+
+:: @27
+-- state
+   x = 13
+   y = 14
+
+:: @28
+-- state
+   x = 14
+   y = 14
+
+:: @29
+-- state
+   x = 14
+   y = 15
+
+:: @30
+-- state
+   x = 15
+   y = 15

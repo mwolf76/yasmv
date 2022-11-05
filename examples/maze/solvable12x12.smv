@@ -46,7 +46,7 @@ INIT
 -- he can not occupy a cell which holds an obstacle...
 #hidden
 DEFINE
-  position := 12 * y + x;
+  position := y * 12 + x;
 
 INVAR
   !  SPACE [position];

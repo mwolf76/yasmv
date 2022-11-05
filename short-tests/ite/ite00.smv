@@ -9,12 +9,8 @@ INVAR
 INVAR
 	! y;
 
--- z is FALSE
 INIT
 	z = (x ? y : x);
 
--- z is TRUE
 INIT
 	z = (y ? y : x);
-
--- pick-state should fail here as the above INITs are mutually inconsistent

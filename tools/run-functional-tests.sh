@@ -1,32 +1,42 @@
 #!/bin/bash
 EXAMPLES="examples"
-REFERENCE="out"
 YASMV="./yasmv"
 
 function test() {
-    echo -n "Running functional test $1/$2 ... "
-    rm -f "$2-out"
+    local DIRECTORY="$1"
+    local MODEL="$2"
+    local COMMANDS="$3"
+    local EXPECTED="$4"
 
-    YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$1/$1.smv" < "$EXAMPLES/$1/commands.$2" > "$2-out"
-    diff -wB "$REFERENCE/$2-out-ref" "$2-out" &> /dev/null
+    echo -n "Running functional test $DIRECTORY/$MODEL::$COMMANDS ... "
+    rm -f "out"
+
+    YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$DIRECTORY/$MODEL" <"$EXAMPLES/$DIRECTORY/$COMMANDS" >out
+    diff -wB "$EXAMPLES/$DIRECTORY/$EXPECTED" out &> /dev/null
     if [[ $? == 0 ]]; then
 	    echo "OK"
-            rm -f "$2-out"
+            rm -f out
     else
         echo "FAILED!"
-        echo "####### Showing EXPECTED and ACTUAL output for $1/$2"
-        diff -W $(( $(tput -T xterm cols) - 2 )) -y "$REFERENCE/$2-out-ref" "$2-out"
+        echo "####### Showing EXPECTED and ACTUAL output for $DIRECTORY/$MODEL::$COMMANDS"
+        diff -W $(( $(tput -T xterm cols) - 2 )) "$EXAMPLES/$DIRECTORY/$EXPECTED" out
     	exit 1
     fi
 }
 
-test cannibals cannibals-forward
-test cannibals cannibals-backward
-test vending vending
-test herschel herschel
-test koenisberg koenisberg
-test ferryman ferryman
-test fifteen fifteen
-test magic magic
+test cannibals cannibals.smv forward forward.out
+test cannibals cannibals.smv backward backward.out
+
+test maze solvable8x8.smv commands solvable8x8.out
+test maze unsolvable8x8.smv commands unsolvable8x8.out
+test maze solvable12x12.smv commands solvable12x12.out
+test maze solvable16x16.smv commands solvable16x16.out
+
+test vending vending.smv commands commands.out
+test herschel herschel.smv commands commands.out
+test koenisberg koenisberg.smv commands commands.out
+test ferryman ferryman.smv commands commands.out
+test fifteen fifteen.smv commands commands.out
+test magic magic.smv commands commands.out
 
 echo ""  # one blank line
