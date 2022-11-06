@@ -49,7 +49,7 @@ DEFINE
   position := y * 12 + x;
 
 INVAR
-  !  SPACE [position];
+  ! SPACE [position];
 
 -- can move one step at the time on the X axis
 INVAR

@@ -1,0 +1,25 @@
+#word-width 8
+MODULE array;
+
+VAR
+    space: boolean[4];
+    r, c : int;
+
+#hidden
+DEFINE _ := FALSE;
+
+#hidden
+DEFINE O := TRUE;
+
+INVAR
+    space = [ O, O,
+    	      O, _ ];
+
+INVAR
+    r = 1 && c = 1;
+
+DEFINE
+    addr := r * 2 + c;
+
+INIT
+    space[addr];

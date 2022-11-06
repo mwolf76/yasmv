@@ -7,7 +7,7 @@ function test-unfeasible-state() {
     echo -n "Running short-test $1 ... "
     rm -f "$1.out"
 
-    RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1.smv" < "$DIRECTORY/unfeasible-pick-state.cmd" | tail -n1)
+    RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1" < "$DIRECTORY/unfeasible-pick-state.cmd" | tail -n1)
     if [[ $RES -eq "OK" ]]; then
 	    echo "OK"
     else
@@ -17,28 +17,28 @@ function test-unfeasible-state() {
 }
 
 # arrays
-test-unfeasible-state array/array00
+test-unfeasible-state arrays/array00.smv
 
 # enums
-test-unfeasible-state enums/enum00
+test-unfeasible-state enums/enum00.smv
 
 # casts
-test-unfeasible-state casts/cast00
-test-unfeasible-state casts/cast01
-test-unfeasible-state casts/cast02
-test-unfeasible-state casts/cast03
+test-unfeasible-state casts/cast00.smv
+test-unfeasible-state casts/cast01.smv
+test-unfeasible-state casts/cast02.smv
+test-unfeasible-state casts/cast03.smv
 
 # ite
-test-unfeasible-state ite/ite00
-test-unfeasible-state ite/ite01
+test-unfeasible-state ite/ite00.smv
+test-unfeasible-state ite/ite01.smv
 
 # nondet
-test-unfeasible-state nondet/nondet00
-test-unfeasible-state nondet/nondet01
+test-unfeasible-state nondet/nondet00.smv
+test-unfeasible-state nondet/nondet01.smv
 
 # logical
-test-unfeasible-state logical/logical00
-test-unfeasible-state logical/logical01
-test-unfeasible-state logical/logical02
+test-unfeasible-state logical/logical00.smv
+test-unfeasible-state logical/logical01.smv
+test-unfeasible-state logical/logical02.smv
 
 echo ""  # one blank line
