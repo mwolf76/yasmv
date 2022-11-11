@@ -97,7 +97,7 @@ namespace witness {
         expr::Expr_ptr res;
 
         try {
-            res = f_evaluator.process(w, ctx, body, k);
+            res = f_evaluator.process(&w, ctx, body, k);
         } catch (NoValue& nv) {
             res = NULL;
         }

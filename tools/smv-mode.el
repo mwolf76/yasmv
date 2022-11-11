@@ -15,33 +15,15 @@
   ;; keywords
   '(
     "DEFINE"
-    "define"
-
     "MODULE"
-    "module"
-
     "VAR"
-    "var"
-
     "INIT"
-    "init"
-
-    "NEXT"
-    "next"
-
     "INVAR"
-    "invar"
-
     "TRANS"
-    "trans"
 
-    "CASE"
+    "next"
     "case"
-
-    "ELSE"
     "else"
-
-    "END"
     "end")
 
   ;; custom faces

@@ -60,7 +60,7 @@ namespace witness {
         f_te2v_map.clear();
     }
 
-    expr::Expr_ptr Evaluator::process(Witness& witness,
+    expr::Expr_ptr Evaluator::process(Witness_ptr witness,
                                       expr::Expr_ptr ctx,
                                       expr::Expr_ptr body,
                                       step_t time)
@@ -69,8 +69,8 @@ namespace witness {
 
         clear_internals();
 
-        // setting the environment
-        f_witness = &witness;
+        // setting the environment(if applicable)
+        f_witness = witness;
 
         // walk body in given ctx
         f_ctx_stack.push_back(ctx);
@@ -158,9 +158,9 @@ namespace witness {
     }
 
     /*  Evaluation engine is implemented using a simple expression walker
- *  pattern: (a) on preorder, return true if the node has not yet been
- *  visited; (b) always do in-order (for binary nodes); (c) perform
- *  proper compilation in post-order hooks. */
+     *  pattern: (a) on preorder, return true if the node has not yet been
+     *  visited; (b) always do in-order (for binary nodes); (c) perform
+     *  proper compilation in post-order hooks. */
     bool Evaluator::walk_at_preorder(const expr::Expr_ptr expr)
     {
         return cache_miss(expr);

@@ -26,6 +26,9 @@
 #include <compiler.hh>
 #include <expr.hh>
 
+#include <witness/evaluator.hh>
+#include <witness/witness_mgr.hh>
+
 namespace compiler {
 
     /**
@@ -53,7 +56,20 @@ namespace compiler {
         unsigned width { algebraic_type->width() };
         bool signedness { algebraic_type->is_signed_algebraic() };
 
-        /* no op on the type stack required */
+        /* const optimization */
+        if (lhs_type->is_constant()) {
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, lhs_type->width());
+            return;
+        }
 
         POP_DV(lhs, width);
 
@@ -82,22 +98,45 @@ namespace compiler {
         assert(is_binary_algebraic(expr));
 
         POP_TYPE(rhs_type);
-        TOP_TYPE(lhs_type);
+        POP_TYPE(lhs_type);
 
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
                lhs_type->width() == rhs_type->width());
 
         unsigned width { rhs_type->width() };
+
+        POP_DV(rhs, width);
+        POP_DV(lhs, width);
+
+        /* const optimization */
+        if (rhs_type->is_constant() &&
+            lhs_type->is_constant()) {
+
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            PUSH_TYPE(rhs_type);
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, rhs_type->width());
+            return;
+        }
+
+        /* one is constant, the other is not. Push the non-const one */
+        PUSH_TYPE(rhs_type->is_constant()
+                      ? lhs_type
+                      : rhs_type);
+
         bool signedness {
             lhs_type->is_signed_algebraic() ||
             rhs_type->is_signed_algebraic()
         };
-
-        /* no op on the type stack required */
-
-        POP_DV(rhs, width);
-        POP_DV(lhs, width);
 
         FRESH_DV(res, width);
         PUSH_DV(res, width);
@@ -183,11 +222,29 @@ namespace compiler {
             rhs_type->is_signed_algebraic()
         };
 
-        const type::Type_ptr res_type { tm.find_boolean() };
-        PUSH_TYPE(res_type);
+        /* relationals are predicates */
+        PUSH_TYPE(tm.find_boolean());
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
+
+
+        /* const optimization */
+        if (rhs_type->is_constant() &&
+            lhs_type->is_constant()) {
+
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, 1); // boolean
+            return;
+        }
 
         FRESH_DV(res, 1);
         PUSH_DV(res, 1);
@@ -231,6 +288,8 @@ namespace compiler {
 
     void Compiler::algebraic_ite(const expr::Expr_ptr expr)
     {
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
         POP_TYPE(cnd_type);
@@ -243,8 +302,15 @@ namespace compiler {
 
         unsigned width { rhs_type->width() };
 
-        /* as both lhs and rhs are the same type either works here */
-        PUSH_TYPE(rhs_type);
+
+        bool is_signed {
+            rhs_type->is_signed_algebraic() ||
+            lhs_type->as_signed_algebraic()
+        };
+
+        PUSH_TYPE(is_signed
+                      ? tm.find_signed(width)
+                      : tm.find_unsigned(width));
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
@@ -306,6 +372,7 @@ namespace compiler {
         POP_DV(index, iwidth);
         POP_DV(lhs, elem_width * elem_count);
 
+        /* const optimization */
         if (t0->is_constant()) {
             unsigned subscript { 0 };
             for (unsigned i = 0; i < iwidth; ++i) {
@@ -319,38 +386,40 @@ namespace compiler {
             for (unsigned i = 0; i < elem_width; ++i) {
                 PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
             }
-        } else {
-            dd::DDVector cnd_dds;
-            dd::DDVector act_dds;
-            unsigned j_, j { 0 };
 
-            do {
-                unsigned i;
-                ADD cnd { bm.one() };
-
-                i = 0;
-                j_ = j;
-                while (i < iwidth) {
-                    ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
-                    unsigned ndx { iwidth - i - 1 };
-                    j_ >>= 1;
-
-                    cnd *= index[ndx].Xnor(bit);
-                    ++i;
-                }
-
-                cnd_dds.push_back(cnd);
-                act_dds.push_back(make_auto_dd());
-            } while (++j < elem_count);
-
-            FRESH_DV(dv, elem_width);
-            PUSH_DV(dv, elem_width);
-
-            MultiwaySelectionDescriptor msd {
-                elem_width, elem_count, dv, cnd_dds, act_dds, lhs
-            };
-            f_multiway_selection_descriptors.push_back(msd);
+            return;
         }
+
+        dd::DDVector cnd_dds;
+        dd::DDVector act_dds;
+        unsigned j_, j { 0 };
+
+        do {
+            unsigned i;
+            ADD cnd { bm.one() };
+
+            i = 0;
+            j_ = j;
+            while (i < iwidth) {
+                ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
+                unsigned ndx { iwidth - i - 1 };
+                j_ >>= 1;
+
+                cnd *= index[ndx].Xnor(bit);
+                ++i;
+            }
+
+            cnd_dds.push_back(cnd);
+            act_dds.push_back(make_auto_dd());
+        } while (++j < elem_count);
+
+        FRESH_DV(dv, elem_width);
+        PUSH_DV(dv, elem_width);
+
+        MultiwaySelectionDescriptor msd {
+            elem_width, elem_count, dv, cnd_dds, act_dds, lhs
+        };
+        f_multiway_selection_descriptors.push_back(msd);
     }
 
     /* add n-1 non significant zero, LSB is original bit */
