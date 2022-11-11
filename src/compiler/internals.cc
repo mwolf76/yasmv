@@ -123,12 +123,6 @@ namespace compiler {
 
         TOP_TYPE(type);
 
-        DRIVEL
-            << key
-            << " := "
-            << type
-            << std::endl;
-
         if (type->is_time()) {
             return;
         }
