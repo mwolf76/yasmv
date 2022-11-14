@@ -33,15 +33,15 @@ namespace compiler {
 
     /**
      * Operand arguments (which are DD vectors) are fetched from the
-     * internal DD stack MSB first. On the other hand, to ensure
-     * proper behavior the result of any such operation has to be
-     * pushed in reversed order. This is taken care of by the POP_DV
-     * and PUSH_DV macros. The main methods of this class
-     * (algebraic_unary, algebraic_binary, algebraic_relational,
-     * algebraic_ternary) all follow a similar structure: (1) verify
-     * type information and populate the type stack with the result
-     * type, (2) pull the operands DVs and push the result DV (3)
-     * populate and register an operator descriptor.
+     * internal DD stack MSB-first. Naturally, the result of any such
+     * operation has to be pushed in reversed order. This is taken
+     * care of by the TOP/POP_DV and PUSH_DV macros. The main methods
+     * of this class (algebraic_unary, algebraic_binary,
+     * algebraic_relational, algebraic_ternary) all follow a similar
+     * structure: (1) verify type information and populate the type
+     * stack with the result type, (2) pull the operands DVs and push
+     * the result DV (3) populate and register an operator descriptor,
+     * where applicable.
      */
 
     // unary ops -------------------------------------------------------------------
@@ -50,14 +50,16 @@ namespace compiler {
         assert(is_unary_algebraic(expr));
 
         TOP_TYPE(lhs_type);
-        assert(lhs_type->is_algebraic());
-        const type::AlgebraicType_ptr algebraic_type { lhs_type->as_algebraic() };
+	assert(lhs_type->is_algebraic());
+        const type::AlgebraicType_ptr t { lhs_type->as_algebraic() };
 
-        unsigned width { algebraic_type->width() };
-        bool signedness { algebraic_type->is_signed_algebraic() };
+        unsigned width { t->width() };
+        bool signedness { t->is_signed_algebraic() };
+
+        POP_DV(lhs, width);
 
         /* const optimization */
-        if (lhs_type->is_constant()) {
+        if (t->is_constant()) {
             expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
             witness::Evaluator evaluator {
@@ -67,15 +69,13 @@ namespace compiler {
                 evaluator.process(NULL, em.make_empty(), expr, 0)
             };
 
-            algebraic_constant(konst, lhs_type->width());
+            algebraic_constant(konst, t->width());
             return;
         }
 
-        POP_DV(lhs, width);
-
+	/* ordinary unary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
-
         InlinedOperatorDescriptor iod {
             make_ios(signedness, expr->symb(), width), res, lhs
         };
@@ -105,6 +105,10 @@ namespace compiler {
                lhs_type->width() == rhs_type->width());
 
         unsigned width { rhs_type->width() };
+        bool signedness {
+            lhs_type->is_signed_algebraic() ||
+            rhs_type->is_signed_algebraic()
+        };
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
@@ -133,14 +137,9 @@ namespace compiler {
                       ? lhs_type
                       : rhs_type);
 
-        bool signedness {
-            lhs_type->is_signed_algebraic() ||
-            rhs_type->is_signed_algebraic()
-        };
-
+	/* ordinary binary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
-
         InlinedOperatorDescriptor md {
             make_ios(signedness, expr->symb(), width), res, lhs, rhs
         };
@@ -222,12 +221,10 @@ namespace compiler {
             rhs_type->is_signed_algebraic()
         };
 
-        /* relationals are predicates */
-        PUSH_TYPE(tm.find_boolean());
-
         POP_DV(rhs, width);
         POP_DV(lhs, width);
 
+        PUSH_TYPE(tm.find_boolean());
 
         /* const optimization */
         if (rhs_type->is_constant() &&
@@ -242,13 +239,14 @@ namespace compiler {
                 evaluator.process(NULL, em.make_empty(), expr, 0)
             };
 
-            algebraic_constant(konst, 1); // boolean
+            algebraic_constant(konst, 1);
             return;
         }
 
+
+	/* ordinary relational */
         FRESH_DV(res, 1);
         PUSH_DV(res, 1);
-
         InlinedOperatorDescriptor md {
             make_ios(signedness, expr->symb(), width), res, lhs, rhs
         };
@@ -301,16 +299,15 @@ namespace compiler {
                cnd_type->is_boolean());
 
         unsigned width { rhs_type->width() };
-
-
-        bool is_signed {
+        bool signedness {
             rhs_type->is_signed_algebraic() ||
             lhs_type->as_signed_algebraic()
         };
 
-        PUSH_TYPE(is_signed
-                      ? tm.find_signed(width)
-                      : tm.find_unsigned(width));
+	// in any case, const qualifier of the branches are lost here
+        PUSH_TYPE(signedness
+		  ? tm.find_signed(width)
+		  : tm.find_unsigned(width));
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
@@ -326,9 +323,6 @@ namespace compiler {
             parent = eye->second;
         }
 
-        /* verify if entry for toplevel already exists. If it doesn't,
-         * create it. This ensures the next assertion will certainly
-         * hold. */
         Expr2BinarySelectionDescriptorsMap::const_iterator toplevel_mi {
             f_expr2bsd_map.find(parent)
         };
