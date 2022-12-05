@@ -41,8 +41,6 @@
 namespace model {
 
     Analyzer::Analyzer()
-        : f_em(expr::ExprMgr::INSTANCE())
-        , f_ctx_stack()
     {
         const void* instance { this };
 
@@ -86,6 +84,7 @@ namespace model {
 
     void Analyzer::generate_framing_conditions()
     {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         ModelMgr& mm { ModelMgr::INSTANCE() };
 
         DEBUG
@@ -183,14 +182,14 @@ namespace model {
                 expr::Expr_ptr expr { *j };
 
                 guard = (guard)
-                            ? f_em.make_and(guard, f_em.make_not(expr))
-                            : f_em.make_not(expr);
+                            ? em.make_and(guard, em.make_not(expr))
+                            : em.make_not(expr);
             }
 
             /* synthetic TRANS will be added to the module. */
             expr::Expr_ptr synth_trans {
-                f_em.make_implies(guard,
-                                  f_em.make_eq(f_em.make_next(ident),
+                em.make_implies(guard,
+                                  em.make_eq(em.make_next(ident),
                                                ident))
             };
 
@@ -206,7 +205,9 @@ namespace model {
     // under model invariants
     bool Analyzer::mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q)
     {
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         ModelMgr& mm { ModelMgr::INSTANCE() };
+
         DEBUG
             << "Testing `"
             << p
@@ -218,7 +219,7 @@ namespace model {
         sat::Engine engine { "Analyzer" };
         compiler::Compiler compiler;
 
-        expr::Expr_ptr ctx { f_em.make_empty() };
+        expr::Expr_ptr ctx { em.make_empty() };
 
         /* adding INVARs @0 and @1 from main module */
         const expr::ExprVector& invar { mm.model().main_module().invar() };

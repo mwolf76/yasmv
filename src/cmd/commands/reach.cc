@@ -27,6 +27,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>
+#include <cmd/commands/dump_traces.hh>
 
 namespace cmd {
 
@@ -34,6 +35,7 @@ namespace cmd {
         : Command(owner)
         , f_out(std::cout)
         , f_target(NULL)
+	, f_quiet(false)
     {}
 
     Reach::~Reach()
@@ -70,6 +72,12 @@ namespace cmd {
 
         f_constraints.push_back(constraint);
     }
+
+    void Reach::go_quiet()
+    {
+	f_quiet = true;
+    }
+
 
     bool Reach::check_requirements()
     {
@@ -115,19 +123,26 @@ namespace cmd {
                     f_out
                         << outPrefix;
                 }
-                f_out
-                    << "Target is reachable";
+		if (! f_quiet) {
+		    f_out
+			<< "Target is reachable";
 
-                if (bmc.has_witness()) {
+		}
+
+		if (bmc.has_witness()) {
                     witness::Witness& w { bmc.witness() };
 
-                    f_out
-                        << ", registered witness `"
-                        << w.id()
-                        << "`, "
-                        << w.size()
-                        << " steps."
-                        << std::endl;
+                    if (! f_quiet) {
+			f_out
+			    << ", registered witness `"
+			    << w.id()
+			    << "`, "
+			    << w.size()
+			    << " steps."
+			    << std::endl;
+
+			DumpTraces { this->f_owner }();
+		    }
                 }
                 res = true;
                 break;
@@ -137,22 +152,36 @@ namespace cmd {
                     f_out
                         << wrnPrefix;
                 }
-                f_out
-                    << "Target is unreachable."
-                    << std::endl;
+		if (! f_quiet) {
+		    f_out
+			<< "Target is unreachable."
+			<< std::endl;
+
+		}
                 break;
 
             case reach::reachability_status_t::REACHABILITY_UNKNOWN:
-                f_out
-                    << "Reachability could not be decided."
-                    << std::endl;
+		if (!om.quiet()) {
+                    f_out
+                        << outPrefix;
+                }
+
+		// cannot be quiet about undecidability
+		f_out
+		    << "Reachability could not be decided."
+		    << std::endl;
                 break;
 
             case reach::reachability_status_t::REACHABILITY_ERROR:
-                f_out
-                    << "Unexpected error."
-                    << std::endl;
+		if (!om.quiet()) {
+                    f_out
+                        << outPrefix;
+                }
 
+		// cannot be quiet about errors
+		f_out
+		    << "Unexpected error."
+		    << std::endl;
                 break;
 
             default:

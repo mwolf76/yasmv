@@ -27,7 +27,7 @@ namespace compiler {
 
     bool Compiler::is_binary_boolean(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_binary_logical(expr)) {
@@ -40,7 +40,7 @@ namespace compiler {
 
     bool Compiler::is_binary_enumerative(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_binary_arithmetical(expr) ||
@@ -54,7 +54,7 @@ namespace compiler {
 
     bool Compiler::is_binary_algebraic(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_binary_logical(expr) ||
@@ -69,7 +69,7 @@ namespace compiler {
 
     bool Compiler::is_unary_boolean(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_unary_logical(expr)) {
@@ -81,7 +81,7 @@ namespace compiler {
 
     bool Compiler::is_unary_enumerative(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_unary_arithmetical(expr)) {
@@ -94,7 +94,7 @@ namespace compiler {
     /* checks lhs is array of boolean, and rhs is algebraic */
     bool Compiler::is_subscript_boolean(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (!em.is_subscript(expr)) {
@@ -122,7 +122,7 @@ namespace compiler {
     /* checks lhs is array of boolean, and rhs is algebraic */
     bool Compiler::is_subscript_enumerative(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (!em.is_subscript(expr)) {
@@ -151,7 +151,7 @@ namespace compiler {
     /* checks lhs is array of algebraics, and rhs is algebraic */
     bool Compiler::is_subscript_algebraic(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (!em.is_subscript(expr)) {
@@ -177,7 +177,7 @@ namespace compiler {
 
     bool Compiler::is_unary_algebraic(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if ((em.is_unary_logical(expr)) ||
@@ -191,7 +191,7 @@ namespace compiler {
     /* same as is_binary_boolean, checks only lhs and rhs */
     bool Compiler::is_ite_boolean(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_ite(expr)) {
@@ -205,7 +205,7 @@ namespace compiler {
     /* same as is_binary_enumerative, checks only lhs and rhs */
     bool Compiler::is_ite_enumerative(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_ite(expr)) {
@@ -219,7 +219,7 @@ namespace compiler {
     /* similar to is_binary_algebraic, checks only lhs and rhs */
     bool Compiler::is_ite_algebraic(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_ite(expr)) {
@@ -232,7 +232,7 @@ namespace compiler {
 
     bool Compiler::is_binary_array(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_binary_equality(expr)) {
@@ -245,7 +245,7 @@ namespace compiler {
 
     bool Compiler::is_ite_array(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         expr::Expr_ptr ctx { f_ctx_stack.back() };
 
         if (em.is_ite(expr)) {

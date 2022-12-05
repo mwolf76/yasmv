@@ -60,7 +60,10 @@ namespace witness {
         Evaluator(WitnessMgr& owner);
         virtual ~Evaluator();
 
-        expr::Expr_ptr process(Witness& witness, expr::Expr_ptr ctx, expr::Expr_ptr body, step_t time);
+        expr::Expr_ptr process(Witness_ptr witness,
+			       expr::Expr_ptr ctx,
+			       expr::Expr_ptr body,
+			       step_t time);
 
     protected:
         inline WitnessMgr& owner() const

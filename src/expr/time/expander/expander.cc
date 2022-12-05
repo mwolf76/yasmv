@@ -745,7 +745,7 @@ namespace expr::time {
             << "` was not supposed to be reached."
             << std::endl;
 
-        throw new InternalError("Time resolution aborted");
+        throw InternalError("Time resolution aborted");
         return false;
     }
 

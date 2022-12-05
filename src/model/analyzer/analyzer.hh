@@ -61,11 +61,6 @@ namespace model {
         // walker toplevel
         void process(expr::Expr_ptr expr, expr::Expr_ptr ctx, analyze_section_t section);
 
-        inline expr::ExprMgr& em()
-        {
-            return f_em;
-        }
-
         // generates framing conditions, adds them in the module
         void generate_framing_conditions();
 
@@ -83,8 +78,6 @@ namespace model {
         void walk_leaf(const expr::Expr_ptr expr);
 
     private:
-        expr::ExprMgr& f_em;
-
         expr::ExprVector f_expr_stack;
         expr::ExprVector f_ctx_stack;
 

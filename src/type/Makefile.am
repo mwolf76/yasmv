@@ -14,7 +14,7 @@ PKG_HH = classes.hh exceptions.hh helpers.hh printers.hh typedefs.hh	\
 type.hh type_mgr.hh type_resolver.hh
 
 PKG_CC = algebraic.cc array.cc classes.cc exceptions.cc instance.cc	\
-monolithic.cc printers.cc time.cc type.cc type_mgr.cc type_resolver.cc
+monolithic.cc printers.cc time.cc type_mgr.cc type_resolver.cc
 
 # -------------------------------------------------------
 

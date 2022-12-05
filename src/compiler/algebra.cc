@@ -26,19 +26,22 @@
 #include <compiler.hh>
 #include <expr.hh>
 
+#include <witness/evaluator.hh>
+#include <witness/witness_mgr.hh>
+
 namespace compiler {
 
     /**
      * Operand arguments (which are DD vectors) are fetched from the
-     * internal DD stack MSB first. On the other hand, to ensure
-     * proper behavior the result of any such operation has to be
-     * pushed in reversed order. This is taken care of by the POP_DV
-     * and PUSH_DV macros. The main methods of this class
-     * (algebraic_unary, algebraic_binary, algebraic_relational,
-     * algebraic_ternary) all follow a similar structure: (1) verify
-     * type information and populate the type stack with the result
-     * type, (2) pull the operands DVs and push the result DV (3)
-     * populate and register an operator descriptor.
+     * internal DD stack MSB-first. Naturally, the result of any such
+     * operation has to be pushed in reversed order. This is taken
+     * care of by the TOP/POP_DV and PUSH_DV macros. The main methods
+     * of this class (algebraic_unary, algebraic_binary,
+     * algebraic_relational, algebraic_ternary) all follow a similar
+     * structure: (1) verify type information and populate the type
+     * stack with the result type, (2) pull the operands DVs and push
+     * the result DV (3) populate and register an operator descriptor,
+     * where applicable.
      */
 
     // unary ops -------------------------------------------------------------------
@@ -47,19 +50,32 @@ namespace compiler {
         assert(is_unary_algebraic(expr));
 
         TOP_TYPE(lhs_type);
-        assert(lhs_type->is_algebraic());
-        const type::AlgebraicType_ptr algebraic_type { lhs_type->as_algebraic() };
+	assert(lhs_type->is_algebraic());
+        const type::AlgebraicType_ptr t { lhs_type->as_algebraic() };
 
-        unsigned width { algebraic_type->width() };
-        bool signedness { algebraic_type->is_signed_algebraic() };
-
-        /* no op on the type stack required */
+        unsigned width { t->width() };
+        bool signedness { t->is_signed_algebraic() };
 
         POP_DV(lhs, width);
 
+        /* const optimization */
+        if (t->is_constant()) {
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, t->width());
+            return;
+        }
+
+	/* ordinary unary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
-
         InlinedOperatorDescriptor iod {
             make_ios(signedness, expr->symb(), width), res, lhs
         };
@@ -82,7 +98,7 @@ namespace compiler {
         assert(is_binary_algebraic(expr));
 
         POP_TYPE(rhs_type);
-        TOP_TYPE(lhs_type);
+        POP_TYPE(lhs_type);
 
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
@@ -94,14 +110,36 @@ namespace compiler {
             rhs_type->is_signed_algebraic()
         };
 
-        /* no op on the type stack required */
-
         POP_DV(rhs, width);
         POP_DV(lhs, width);
 
+        /* const optimization */
+        if (rhs_type->is_constant() &&
+            lhs_type->is_constant()) {
+
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            PUSH_TYPE(rhs_type);
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, rhs_type->width());
+            return;
+        }
+
+        /* one is constant, the other is not. Push the non-const one */
+        PUSH_TYPE(rhs_type->is_constant()
+                      ? lhs_type
+                      : rhs_type);
+
+	/* ordinary binary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
-
         InlinedOperatorDescriptor md {
             make_ios(signedness, expr->symb(), width), res, lhs, rhs
         };
@@ -166,7 +204,7 @@ namespace compiler {
     // relationals -----------------------------------------------------------------
     void Compiler::algebraic_relational(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { f_owner.tm() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         assert(is_binary_algebraic(expr));
 
@@ -183,15 +221,32 @@ namespace compiler {
             rhs_type->is_signed_algebraic()
         };
 
-        const type::Type_ptr res_type { tm.find_boolean() };
-        PUSH_TYPE(res_type);
-
         POP_DV(rhs, width);
         POP_DV(lhs, width);
 
+        PUSH_TYPE(tm.find_boolean());
+
+        /* const optimization */
+        if (rhs_type->is_constant() &&
+            lhs_type->is_constant()) {
+
+            expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            witness::Evaluator evaluator {
+                witness::WitnessMgr::INSTANCE()
+            };
+            expr::Expr_ptr konst {
+                evaluator.process(NULL, em.make_empty(), expr, 0)
+            };
+
+            algebraic_constant(konst, 1);
+            return;
+        }
+
+
+	/* ordinary relational */
         FRESH_DV(res, 1);
         PUSH_DV(res, 1);
-
         InlinedOperatorDescriptor md {
             make_ios(signedness, expr->symb(), width), res, lhs, rhs
         };
@@ -231,6 +286,8 @@ namespace compiler {
 
     void Compiler::algebraic_ite(const expr::Expr_ptr expr)
     {
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
         POP_TYPE(cnd_type);
@@ -242,9 +299,15 @@ namespace compiler {
                cnd_type->is_boolean());
 
         unsigned width { rhs_type->width() };
+        bool signedness {
+            rhs_type->is_signed_algebraic() ||
+            lhs_type->as_signed_algebraic()
+        };
 
-        /* as both lhs and rhs are the same type either works here */
-        PUSH_TYPE(rhs_type);
+	// in any case, const qualifier of the branches are lost here
+        PUSH_TYPE(signedness
+		  ? tm.find_signed(width)
+		  : tm.find_unsigned(width));
 
         POP_DV(rhs, width);
         POP_DV(lhs, width);
@@ -260,9 +323,6 @@ namespace compiler {
             parent = eye->second;
         }
 
-        /* verify if entry for toplevel already exists. If it doesn't,
-         * create it. This ensures the next assertion will certainly
-         * hold. */
         Expr2BinarySelectionDescriptorsMap::const_iterator toplevel_mi {
             f_expr2bsd_map.find(parent)
         };
@@ -298,6 +358,11 @@ namespace compiler {
         type::ArrayType_ptr atype { t1->as_array() };
         type::ScalarType_ptr type { atype->of() };
 
+	DRIVEL
+	    << "%% "
+	    << type
+	    << std::endl;
+
         unsigned elem_width { type->width() };
         unsigned elem_count { atype->nelems() };
 
@@ -306,6 +371,7 @@ namespace compiler {
         POP_DV(index, iwidth);
         POP_DV(lhs, elem_width * elem_count);
 
+        /* const optimization */
         if (t0->is_constant()) {
             unsigned subscript { 0 };
             for (unsigned i = 0; i < iwidth; ++i) {
@@ -319,38 +385,40 @@ namespace compiler {
             for (unsigned i = 0; i < elem_width; ++i) {
                 PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
             }
-        } else {
-            dd::DDVector cnd_dds;
-            dd::DDVector act_dds;
-            unsigned j_, j { 0 };
 
-            do {
-                unsigned i;
-                ADD cnd { bm.one() };
-
-                i = 0;
-                j_ = j;
-                while (i < iwidth) {
-                    ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
-                    unsigned ndx { iwidth - i - 1 };
-                    j_ >>= 1;
-
-                    cnd *= index[ndx].Xnor(bit);
-                    ++i;
-                }
-
-                cnd_dds.push_back(cnd);
-                act_dds.push_back(make_auto_dd());
-            } while (++j < elem_count);
-
-            FRESH_DV(dv, elem_width);
-            PUSH_DV(dv, elem_width);
-
-            MultiwaySelectionDescriptor msd {
-                elem_width, elem_count, dv, cnd_dds, act_dds, lhs
-            };
-            f_multiway_selection_descriptors.push_back(msd);
+            return;
         }
+
+        dd::DDVector cnd_dds;
+        dd::DDVector act_dds;
+        unsigned j_, j { 0 };
+
+        do {
+            unsigned i;
+            ADD cnd { bm.one() };
+
+            i = 0;
+            j_ = j;
+            while (i < iwidth) {
+                ADD bit { (j_ & 1) ? bm.one() : bm.zero() };
+                unsigned ndx { iwidth - i - 1 };
+                j_ >>= 1;
+
+                cnd *= index[ndx].Xnor(bit);
+                ++i;
+            }
+
+            cnd_dds.push_back(cnd);
+            act_dds.push_back(make_auto_dd());
+        } while (++j < elem_count);
+
+        FRESH_DV(dv, elem_width);
+        PUSH_DV(dv, elem_width);
+
+        MultiwaySelectionDescriptor msd {
+            elem_width, elem_count, dv, cnd_dds, act_dds, lhs
+        };
+        f_multiway_selection_descriptors.push_back(msd);
     }
 
     /* add n-1 non significant zero, LSB is original bit */

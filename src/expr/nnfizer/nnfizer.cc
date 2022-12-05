@@ -750,7 +750,7 @@ namespace expr {
             << "` was not supposed to be reached."
             << std::endl;
 
-        throw new InternalError("NNF conversion aborted");
+        throw InternalError("NNF conversion aborted");
         return false;
     }
 

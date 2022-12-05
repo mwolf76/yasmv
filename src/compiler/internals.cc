@@ -28,7 +28,7 @@ namespace compiler {
     /* auto id generator */
     expr::Expr_ptr Compiler::make_auto_id()
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         std::ostringstream oss;
         oss << "__tmp" << f_temp_auto_index++;
@@ -39,8 +39,9 @@ namespace compiler {
     /* build an auto fresh ADD variable and register its encoding */
     ADD Compiler::make_auto_dd()
     {
-        expr::ExprMgr& em { f_owner.em() };
-        type::TypeMgr& tm { f_owner.tm() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         type::Type_ptr boolean { tm.find_boolean() };
 
         enc::BooleanEncoding_ptr be {
@@ -69,7 +70,7 @@ namespace compiler {
 
     void Compiler::pre_node_hook(expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* assemble memoization key */
         TOP_CTX(ctx);
@@ -95,7 +96,7 @@ namespace compiler {
 
     void Compiler::post_node_hook(expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* cache is disabled for SETs, COMMAs and CONDs. This allows for
        anonymous determinization variables on the fly. */
@@ -121,6 +122,7 @@ namespace compiler {
         expr::TimedExpr key { em.make_dot(ctx, expr), time };
 
         TOP_TYPE(type);
+
         if (type->is_time()) {
             return;
         }
@@ -175,10 +177,13 @@ namespace compiler {
 
     bool Compiler::cache_miss(const expr::Expr_ptr expr)
     {
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
         TOP_CTX(ctx);
         TOP_TIME(time);
+
         expr::TimedExpr key {
-            f_owner.em().make_dot(ctx, expr), time
+            em.make_dot(ctx, expr), time
         };
 
 

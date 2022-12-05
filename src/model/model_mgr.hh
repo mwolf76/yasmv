@@ -39,8 +39,11 @@
 
 namespace model {
 
-    typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> ContextMap;
-    typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr> ParamMap;
+    using ContextMap =
+	boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq>;
+
+    using ParamMap =
+	boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr>;
 
     typedef enum {
         MMGR_BUILD_CTX_MAP,
@@ -74,16 +77,6 @@ namespace model {
 
         // this must be called before any type checking
         bool analyze();
-
-        inline expr::ExprMgr& em() const
-        {
-            return f_em;
-        }
-
-        inline type::TypeMgr& tm() const
-        {
-            return f_tm;
-        }
 
         inline Analyzer& analyzer()
         {
@@ -119,12 +112,6 @@ namespace model {
 
         /* local data */
         Model f_model;
-
-        // ref to expr manager
-        expr::ExprMgr& f_em;
-
-        // ref to type manager
-        type::TypeMgr& f_tm;
 
         // owned
         ModelResolver f_resolver;

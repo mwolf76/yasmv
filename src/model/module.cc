@@ -62,7 +62,8 @@ namespace model {
 
     void Module::add_var(expr::Expr_ptr identifier, symb::Variable_ptr var)
     {
-        expr::Expr_ptr type_repr { var->type()->repr() };
+        type::Type_ptr type { var->type() };
+        expr::Expr_ptr type_repr { type->repr() };
 
         std::ostringstream oss;
 
@@ -100,6 +101,19 @@ namespace model {
         checkDuplicates(identifier);
         f_localVars.insert(
             std::pair<expr::Expr_ptr, symb::Variable_ptr>(identifier, var));
+
+        /* for enum vars, we need to add an INVAR x in { <lits > } */
+        if (type->is_enum()) {
+	    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+            type::EnumType_ptr enum_type {
+                type->as_enum()
+            };
+
+            add_invar(
+                em.make_eq(identifier,
+                           enum_type->repr()));
+        }
     }
 
     void Module::add_parameter(expr::Expr_ptr identifier, symb::Parameter_ptr param)

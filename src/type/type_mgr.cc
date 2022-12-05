@@ -310,6 +310,10 @@ namespace type {
     {
         assert(f_em.is_type(expr));
 
+	if (f_em.is_boolean_type(expr)) {
+	    return find_boolean();
+	}
+
         if (f_em.is_unsigned_int(expr->lhs())) {
             return find_unsigned(expr->rhs()->value());
         }

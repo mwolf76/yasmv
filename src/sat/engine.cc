@@ -206,12 +206,14 @@ namespace sat {
             /* Insert into tdd2var map */
             f_tdd2var_map.insert(std::pair<TimedDD, Var>(timed_node, res));
 
+#if 0
             DRIVEL
                 << "Created cnf var "
                 << res
                 << " for DD node "
                 << node
                 << std::endl;
+#endif
         } else {
             res = (*eye).second;
         }
@@ -238,12 +240,14 @@ namespace sat {
             /* Insert into tvv2var map */
             f_rewrite_map.insert(std::pair<TimedVar, Var>(timed_var, res));
 
+#if 0
             DRIVEL
                 << "Rewrote microcode cnf var "
                 << v << "@" << time
                 << " as "
                 << res
                 << std::endl;
+#endif
         } else {
             res = (*eye).second;
         }

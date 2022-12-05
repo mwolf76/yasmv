@@ -1,0 +1,16 @@
+MODULE ite;
+
+VAR
+	x, y, z : boolean;
+
+INVAR
+	x;
+
+INVAR
+	! y;
+
+INIT
+	z = (x ? y : x);
+
+INIT
+	z = (y ? y : x);

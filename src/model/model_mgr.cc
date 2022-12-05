@@ -48,8 +48,6 @@ namespace model {
 
     ModelMgr::ModelMgr()
         : f_model()
-        , f_em(expr::ExprMgr::INSTANCE())
-        , f_tm(type::TypeMgr::INSTANCE())
         , f_resolver(*this)
         , f_type_checker(*this)
         , f_analyzed(false)
@@ -74,11 +72,14 @@ namespace model {
     bool ModelMgr::analyze_aux(analyzer_pass_t pass)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        Model& model { f_model };
+
+	Model& model { f_model };
         Module& main_module { model.main_module() };
 
         std::stack<boost::tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>> stack;
-        stack.push(boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>(em.make_empty(), &main_module, em.make_empty()));
+        stack.push(
+	    boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>
+	    (em.make_empty(), &main_module, em.make_empty()));
 
         /* walk of var decls, starting from main module */
         while (0 < stack.size()) {
@@ -339,7 +340,9 @@ namespace model {
                     expr::Expr_ptr inner_params { instance->params() };
                     Module& module_ { module(instance->name()) };
 
-                    stack.push(boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>(inner_ctx, &module_, inner_params));
+                    stack.push(
+			boost::make_tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>
+			(inner_ctx, &module_, inner_params));
                 }
             }
 
@@ -355,13 +358,13 @@ namespace model {
                     expr::Expr_ptr top { comma_stack.top() };
                     comma_stack.pop();
 
-                    if (f_em.is_params_comma(top)) {
+                    if (em.is_params_comma(top)) {
                         comma_stack.push(top->rhs());
                         comma_stack.push(top->lhs());
                         continue;
                     }
 
-                    if (!f_em.is_empty(top)) {
+                    if (!em.is_empty(top)) {
                         actuals.push_back(em.make_dot(em.make_empty(), top));
                     }
                 }
@@ -387,7 +390,8 @@ namespace model {
                         << actual << "`"
                         << std::endl;
 
-                    f_param_map.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>(formal, actual));
+                    f_param_map.insert(std::pair<expr::Expr_ptr, expr::Expr_ptr>
+				       (formal, actual));
 
                     ++fi;
                     ++ai;

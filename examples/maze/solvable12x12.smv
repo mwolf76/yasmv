@@ -46,10 +46,10 @@ INIT
 -- he can not occupy a cell which holds an obstacle...
 #hidden
 DEFINE
-  position := 12 * y + x;
+  position := y * 12 + x;
 
 INVAR
-  !  SPACE [position];
+  ! SPACE [position];
 
 -- can move one step at the time on the X axis
 INVAR

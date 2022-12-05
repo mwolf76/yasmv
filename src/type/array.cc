@@ -33,6 +33,9 @@ namespace type {
         , f_of(of)
         , f_nelems(nelems)
     {
+	TypeMgr& tm { f_owner };
+	expr::ExprMgr& em { tm.em() };
+
         // 0 is reserved for abstract arrays
         assert(0 < nelems);
 
@@ -42,8 +45,8 @@ namespace type {
         // scalar types only allowed here. Make sure we know how to calculate size()
         assert(f_of->is_scalar());
 
-        f_repr = f_owner.em().make_subscript(of->repr(),
-                                             f_owner.em().make_const(nelems));
+        f_repr = em.make_subscript(of->repr(),
+				   em.make_const(nelems));
     }
 
     unsigned ArrayType::width() const

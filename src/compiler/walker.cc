@@ -41,7 +41,7 @@ namespace compiler {
 
     bool Compiler::walk_at_preorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         expr::Expr_ptr lhs { expr->lhs() };
         assert(em.is_instant(lhs) || em.is_interval(lhs));
@@ -414,7 +414,7 @@ namespace compiler {
 
     bool Compiler::walk_guard_preorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* rewrite GUARD into IMPLIES */
         expr::Expr_ptr rewrite {
@@ -469,9 +469,15 @@ namespace compiler {
 
     bool Compiler::walk_type_preorder(const expr::Expr_ptr expr)
     {
-        type::Type_ptr tp { f_owner.tm().find_type_by_def(expr) };
-        PUSH_TYPE(tp);
+        type::TypeMgr& tm {
+	    type::TypeMgr::INSTANCE()
+	};
 
+        type::Type_ptr tp {
+	    tm.find_type_by_def(expr)
+	};
+
+	PUSH_TYPE(tp);
         return false;
     }
     bool Compiler::walk_type_inorder(const expr::Expr_ptr expr)
@@ -577,7 +583,7 @@ namespace compiler {
 
     bool Compiler::walk_assignment_preorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* rewrite `x := <expr>` into `NEXT(x) = <expr>` */
         expr::Expr_ptr rewrite {
@@ -839,7 +845,7 @@ namespace compiler {
     }
     bool Compiler::walk_dot_inorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { f_owner.em() };
+        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         DROP_TYPE();
 

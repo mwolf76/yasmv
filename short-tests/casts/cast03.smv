@@ -1,0 +1,16 @@
+MODULE casts;
+
+VAR
+	i : int;
+
+VAR
+	b : boolean;
+
+INVAR
+	b = (boolean) i;
+
+INIT
+	i = 42 ;
+
+INIT
+	! b;

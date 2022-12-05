@@ -1,0 +1,23 @@
+MODULE logical;
+
+VAR
+	x, y, u, w: boolean;
+
+INVAR
+	x -> u ;
+
+INVAR
+	u = w ;
+
+INVAR
+	w -> y ;
+
+INVAR
+	x ;
+
+INVAR
+	! y ;
+
+-- pick-state should fail here as x cannot be none of the available
+-- values; this is ensured by a synthetic INVAR which is automatically
+-- created when processing the variable definition for x.

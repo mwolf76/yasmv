@@ -1,0 +1,11 @@
+#word-width 8
+MODULE enumerations;
+
+VAR
+	x : { 1, 2, 3, 4, 5 };
+
+DEFINE
+	n := (uint4)(x);
+
+INIT
+	(n < 1) || (n > 5);

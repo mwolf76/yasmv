@@ -43,10 +43,10 @@ INIT
 
 #hidden
 DEFINE
-  addr := 8 * y + x;
+  addr := y * 8 + x;
 
 INVAR
-  !  space [addr];
+  ! space [addr];
 
 -- he can move one step at the time on the X axis...
 INVAR

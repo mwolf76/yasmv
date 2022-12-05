@@ -134,4 +134,8 @@ namespace type {
                         format_type_mismatch(expr, a, b))
     {}
 
+    InternalError::InternalError(const std::string& message)
+        : TypeException("InternalError", message)
+    {}
+
 } // namespace type

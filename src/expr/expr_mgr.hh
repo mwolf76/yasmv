@@ -602,15 +602,15 @@ namespace expr {
             return time_expr;
         }
 
-        inline Expr_ptr make_boolean_type() const
+        inline Expr_ptr make_boolean_type()
         {
-            return bool_expr;
+            return make_expr(TYPE, bool_expr, NULL);
         }
 
         inline bool is_boolean_type(const Expr_ptr expr) const
         {
             assert(expr);
-            return expr == bool_expr;
+            return is_type(expr) && expr->lhs() == bool_expr;
         }
 
         inline Expr_ptr make_string_type() const
