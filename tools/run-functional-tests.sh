@@ -37,6 +37,7 @@ test herschel herschel.smv commands commands.out
 test koenisberg koenisberg.smv commands commands.out
 test ferryman ferryman.smv commands commands.out
 test fifteen fifteen.smv commands commands.out
+test hanoi hanoi3.smv commands hanoi3.out
 test magic magic.smv commands commands.out
 
 echo ""  # one blank line

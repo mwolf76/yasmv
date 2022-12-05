@@ -358,6 +358,11 @@ namespace compiler {
         type::ArrayType_ptr atype { t1->as_array() };
         type::ScalarType_ptr type { atype->of() };
 
+	DRIVEL
+	    << "%% "
+	    << type
+	    << std::endl;
+
         unsigned elem_width { type->width() };
         unsigned elem_count { atype->nelems() };
 

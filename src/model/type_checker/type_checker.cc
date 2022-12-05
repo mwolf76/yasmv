@@ -380,8 +380,7 @@ namespace model {
     bool TypeChecker::walk_type_preorder(const expr::Expr_ptr expr)
     {
         type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
-        type::Type_ptr tp { tm.find_type_by_def(expr) };
-        f_type_stack.push_back(tp);
+        PUSH_TYPE(tm.find_type_by_def(expr));
 
         /* no need to process further */
         return false;

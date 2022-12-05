@@ -1299,7 +1299,10 @@ reach_command returns[cmd::Command_ptr res]
         target=toplevel_expression
         { ((cmd::Reach_ptr) $res)->set_target(target); }
 
-        /* forward guide */
+        ( '-q'
+            { ((cmd::Reach_ptr) $res)->go_quiet(); }
+        )*
+
         ( '-c' constraint=toplevel_expression
           { ((cmd::Reach_ptr) $res)->add_constraint(constraint); }
         )*

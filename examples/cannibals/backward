@@ -1,3 +1,2 @@
 reach GOAL -c $10{carry = M_} -c $1{carry = CC}
-on success dump-traces -f plain
 quit

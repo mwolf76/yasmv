@@ -32,6 +32,8 @@
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
 
+#define DEBUG_TYPE_CHECKER
+
 namespace model {
 
     // fun: any -> any
@@ -66,10 +68,12 @@ namespace model {
     // fun: arithm, arithm -> arithm
     void TypeChecker::walk_binary_arithmetical_postorder(const expr::Expr_ptr expr)
     {
-        type::Type_ptr rhs { check_arithmetical(expr->rhs()) };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
+	type::Type_ptr rhs { check_arithmetical(expr->rhs()) };
         type::Type_ptr lhs { check_arithmetical(expr->lhs()) };
 
-        // matching types are most definitely ok
+        // identical types most definitely match
         if (rhs == lhs) {
             PUSH_TYPE(rhs);
             return;
@@ -82,17 +86,18 @@ namespace model {
             throw type::TypeMismatch(expr, alhs, arhs);
         }
 
-        if (arhs->is_constant() && !alhs->is_constant()) {
-            PUSH_TYPE(alhs);
-            return;
-        }
+	bool signedness {
+	    arhs->is_signed_algebraic() ||
+	    alhs->is_signed_algebraic()
+	};
 
-        if (alhs->is_constant() && !arhs->is_constant()) {
-            PUSH_TYPE(arhs);
-            return;
-        }
+	unsigned width {
+	    arhs->width()
+	};
 
-        assert(false);
+	PUSH_TYPE(signedness
+		  ? tm.find_signed(width)
+		  : tm.find_unsigned(width));
     }
 
     // fun: logical x logical -> logical
@@ -264,79 +269,84 @@ namespace model {
 
     void TypeChecker::walk_binary_ite_postorder(expr::Expr_ptr expr)
     {
+	type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
         POP_TYPE(rhs_type);
 
         if (rhs_type->is_boolean()) {
             type::Type_ptr lhs_type { check_logical(expr->lhs()) };
             (void) lhs_type;
 
-            PUSH_TYPE(type::TypeMgr::INSTANCE().find_boolean());
-        } else if (rhs_type->is_algebraic()) {
-            type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
+            PUSH_TYPE(tm.find_boolean());
+	    return;
+        }
 
-            if (rhs_type == lhs_type) {
-                PUSH_TYPE(rhs_type);
-                return;
-            }
+	if (rhs_type->is_algebraic()) {
+            type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
 
             if (lhs_type->width() !=
                 rhs_type->width())
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
 
-            if (rhs_type->is_constant() &&
-                !lhs_type->is_constant()) {
-                PUSH_TYPE(rhs_type);
-                return;
-            }
+	    bool signedness {
+		rhs_type->is_signed_algebraic() ||
+		lhs_type->is_signed_algebraic()
+	    };
 
-            if (lhs_type->is_constant() &&
-                !rhs_type->is_constant()) {
-                PUSH_TYPE(lhs_type);
-                return;
-            }
+	    unsigned width {
+		rhs_type->width()
+	    };
 
-            assert(false);
-        } else if (rhs_type->is_array()) {
+	    PUSH_TYPE(signedness
+		      ? tm.find_signed(width)
+		      : tm.find_unsigned(width));
+
+	    return;
+        }
+
+	if (rhs_type->is_array()) {
             type::Type_ptr lhs_type { check_array(expr->lhs()) };
 
-            if (rhs_type == lhs_type) {
-                PUSH_TYPE(rhs_type);
-                return;
-            }
-
             type::ArrayType_ptr alhs_type { lhs_type->as_array() };
+	    type::ScalarType_ptr alhs_of_type { alhs_type->of() };
+	    unsigned lhs_width { alhs_of_type->width() };
+	    unsigned lhs_elems { alhs_type->nelems() };
+
             type::ArrayType_ptr arhs_type { rhs_type->as_array() };
+	    type::ScalarType_ptr arhs_of_type { arhs_type->of() };
+	    unsigned rhs_width { arhs_of_type->width() };
+	    unsigned rhs_elems { arhs_type->nelems() };
 
-            /* probably a bit too relaxed */
-            if (alhs_type->width() !=
-                arhs_type->width()) {
+            if (lhs_width != rhs_width ||
+		lhs_elems != rhs_elems) {
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
             }
 
-            type::ScalarType_ptr alhs_of_type { alhs_type->of() };
-            type::ScalarType_ptr arhs_of_type { arhs_type->of() };
+	    bool signedness {
+		alhs_type->is_signed_algebraic() ||
+		arhs_type->is_signed_algebraic()
+	    };
 
-            if (arhs_of_type->is_constant() &&
-                !alhs_of_type->is_constant()) {
-                PUSH_TYPE(rhs_type);
-                return;
-            }
+	    PUSH_TYPE(
+		signedness
+		? tm.find_signed_array(rhs_width, rhs_elems)
+		: tm.find_unsigned_array(rhs_width, rhs_elems)
+	    );
 
-            if (alhs_of_type->is_constant() &&
-                !arhs_of_type->is_constant()) {
-                PUSH_TYPE(lhs_type);
-                return;
-            }
+	    return;
+        }
 
-            assert(false);
-        } else if (rhs_type->is_enum()) {
+	if (rhs_type->is_enum()) {
             POP_TYPE(lhs_type);
-            if (lhs_type != rhs_type)
+            if (lhs_type != rhs_type) {
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
+	    }
 
             PUSH_TYPE(rhs_type);
-        } else
-            assert(false);
+	    return;
+        }
+
+	assert(false);
     }
 
     void TypeChecker::memoize_result(expr::Expr_ptr expr)
@@ -407,10 +417,10 @@ namespace model {
             << expr
             << std::endl;
 
-        int depth;
-        TypeVector::const_reverse_iterator ti;
+	int depth = 0;
+        for (auto ti = f_type_stack.rbegin();
+	     ti != f_type_stack.rend(); ++depth, ++ti) {
 
-        for (depth = 0, ti = f_type_stack.rbegin(); ti != f_type_stack.rend(); ++depth, ++ti) {
             type::Type_ptr type { *ti };
             expr::Expr_ptr repr { type->repr() };
 

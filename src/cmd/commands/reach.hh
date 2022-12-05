@@ -42,6 +42,9 @@ namespace cmd {
         /* guided reachability support: forward, backward and global guides */
         void add_constraint(expr::Expr_ptr constraint);
 
+	/* quiet mode */
+	void go_quiet();
+
         /* run() */
         utils::Variant virtual operator()();
 
@@ -50,6 +53,9 @@ namespace cmd {
 
         /* the negation of invariant property to be verified */
         expr::Expr_ptr f_target;
+
+	/* if true and a witness is found, it is immediately displayed */
+	bool f_quiet;
 
         /* constraints for guided reachability */
         expr::ExprVector f_constraints;
