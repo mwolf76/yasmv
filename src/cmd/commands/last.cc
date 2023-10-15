@@ -21,12 +21,14 @@
  *
  **/
 
+#include <iomanip>
+
 #include <cmd/interpreter.hh>
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/last.hh>
 
-#include <iomanip>
+#include <common/logging.hh>
 
 namespace cmd {
 

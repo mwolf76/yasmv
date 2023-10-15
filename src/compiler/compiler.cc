@@ -23,6 +23,7 @@
  **/
 
 #include <compiler.hh>
+#include <common/logging.hh>
 
 namespace compiler {
 

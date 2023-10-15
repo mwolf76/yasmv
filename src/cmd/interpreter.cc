@@ -21,19 +21,21 @@
  *
  **/
 
-#include <interpreter.hh>
-
 #include <config.h>
+
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
+
+#include <interpreter.hh>
 
 #include <cmd/readline.h.inc>
 #include <commands/commands.hh>
 
 #include <parse.hh>
 
-#include <cstdio>
-#include <cstdlib>
+#include <common/logging.hh>
 
 namespace cmd {
 

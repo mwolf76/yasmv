@@ -28,6 +28,8 @@
 
 #include <expr/nnfizer/nnfizer.hh>
 
+#include <common/logging.hh>
+
 namespace expr {
 
     Nnfizer::Nnfizer()

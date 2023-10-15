@@ -20,10 +20,12 @@
  * 02110-1301 USA
  *
  **/
-
+#include <iostream>
 #include <sstream>
 
 #include <opts_mgr.hh>
+
+#include <common/logging.hh>
 
 namespace opts {
 
@@ -38,7 +40,7 @@ namespace opts {
         , f_quiet(false)
         , f_color(false)
         , f_started(false)
-        , f_version { PACKAGE_VERSION }
+        , f_version(false)
         , f_word_width(UINT_MAX)
     {
         // clang-format off

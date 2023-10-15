@@ -29,6 +29,8 @@
 
 #include <expr/time/analyzer/analyzer.hh>
 
+#include <common/logging.hh>
+
 namespace expr::time {
 
     Analyzer::Analyzer(ExprMgr& em)

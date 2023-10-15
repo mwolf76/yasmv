@@ -22,6 +22,7 @@
  **/
 
 #include <cudd_mgr.hh>
+#include <common/logging.hh>
 
 namespace dd {
 

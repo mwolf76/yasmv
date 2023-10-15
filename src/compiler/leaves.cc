@@ -28,6 +28,8 @@
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
+#include <common/logging.hh>
+
 namespace compiler {
 
     static inline value_t pow2(unsigned exp);

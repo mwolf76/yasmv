@@ -28,6 +28,8 @@
 #include <stack>
 #include <vector>
 
+#include<common/logging.hh>
+
 namespace expr {
 
     // singleton instance initialization

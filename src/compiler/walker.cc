@@ -26,6 +26,8 @@
 
 #include <proxy.hh>
 
+#include <common/logging.hh>
+
 namespace compiler {
 
     /**

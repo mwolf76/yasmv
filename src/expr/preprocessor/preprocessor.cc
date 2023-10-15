@@ -28,6 +28,8 @@
 
 #include <expr/preprocessor/preprocessor.hh>
 
+#include <common/logging.hh>
+
 /* shortcuts to simplify manipulation of the internal define stack */
 #define POP_DEFINE(op)                           \
     const Define_ptr op = f_define_stack.back(); \

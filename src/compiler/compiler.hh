@@ -61,8 +61,8 @@
 #include <model/model_mgr.hh>
 
 #include <compiler/exceptions.hh>
-#include <compiler/streamers.hh>
 #include <compiler/typedefs.hh>
+#include <compiler/streamers.hh>
 
 #include <utils/ctx.hh>
 #include <utils/time.hh>

@@ -31,6 +31,8 @@
 
 #include <model/type_checker/type_checker.hh>
 
+#include <common/logging.hh>
+
 namespace model {
 
     TypeChecker::TypeChecker(ModelMgr& owner)

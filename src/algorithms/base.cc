@@ -32,6 +32,9 @@
 
 #include <utils/misc.hh>
 
+#include <compiler/typedefs.hh>
+#include <compiler/streamers.hh>
+
 namespace algorithms {
 
     Algorithm::Algorithm(cmd::Command& command, model::Model& model)

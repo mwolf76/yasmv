@@ -25,6 +25,8 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
+#include <common/logging.hh>
+
 namespace enc {
 
     EncodingMgr_ptr EncodingMgr::f_instance = NULL;

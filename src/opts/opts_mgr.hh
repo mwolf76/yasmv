@@ -28,7 +28,9 @@
 #define OPTS_H
 
 #include <boost/program_options.hpp>
+
 #include <common/common.hh>
+#include <3rdparty/ezlogger/ezlogger_verbosity_level_policy.hpp>
 
 namespace opts {
 

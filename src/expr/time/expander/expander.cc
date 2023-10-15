@@ -29,6 +29,8 @@
 
 #include <expr/time/expander/expander.hh>
 
+#include <common/logging.hh>
+
 namespace expr::time {
 
     Expander::Expander(ExprMgr& em)

@@ -28,6 +28,7 @@
 #include <symb/classes.hh>
 #include <symb/typedefs.hh>
 
+#include <common/logging.hh>
 namespace type {
 
     TypeResolver::TypeResolver(TypeMgr& owner)

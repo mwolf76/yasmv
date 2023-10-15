@@ -30,6 +30,8 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/time.hh>
 
+#include <common/logging.hh>
+
 namespace cmd {
 
     Time::Time(Interpreter& owner)
