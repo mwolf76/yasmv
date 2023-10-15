@@ -22,7 +22,8 @@
  **/
 
 #include <compiler.hh>
-#include <common/logging.hh>
+
+#include <utils/logging.hh>
 
 namespace compiler {
 

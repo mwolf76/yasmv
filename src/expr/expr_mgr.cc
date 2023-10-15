@@ -28,7 +28,7 @@
 #include <stack>
 #include <vector>
 
-#include<common/logging.hh>
+#include <utils/logging.hh>
 
 namespace expr {
 

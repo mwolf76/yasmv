@@ -27,7 +27,7 @@
 #include <model/model.hh>
 #include <model/module.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace model {
 

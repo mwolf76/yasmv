@@ -30,7 +30,7 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/time.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace cmd {
 

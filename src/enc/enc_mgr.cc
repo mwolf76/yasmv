@@ -25,7 +25,7 @@
 #include <enc.hh>
 #include <enc_mgr.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace enc {
 

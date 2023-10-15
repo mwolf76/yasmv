@@ -28,7 +28,7 @@
 
 #include <expr/preprocessor/preprocessor.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 /* shortcuts to simplify manipulation of the internal define stack */
 #define POP_DEFINE(op)                           \

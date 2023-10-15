@@ -27,7 +27,7 @@
 #include "command.hh"
 #include <boost/filesystem.hpp>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace cmd {
 

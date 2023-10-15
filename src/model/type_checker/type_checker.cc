@@ -31,7 +31,7 @@
 
 #include <model/type_checker/type_checker.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace model {
 

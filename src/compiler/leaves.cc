@@ -28,7 +28,7 @@
 #include <symb/classes.hh>
 #include <symb/proxy.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace compiler {
 

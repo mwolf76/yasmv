@@ -24,7 +24,7 @@
 #include <cmd/commands/quit.hh>
 #include <cmd/interpreter.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace cmd {
 

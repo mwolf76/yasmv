@@ -29,7 +29,7 @@
 
 #include <expr/time/analyzer/analyzer.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace expr::time {
 

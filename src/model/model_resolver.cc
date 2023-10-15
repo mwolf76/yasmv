@@ -30,7 +30,7 @@
 
 #include <type/type.hh>
 
-#include <common/logging.hh>
+#include <utils/logging.hh>
 
 namespace model {
 
