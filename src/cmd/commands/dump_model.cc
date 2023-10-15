@@ -34,6 +34,8 @@
 
 #include <type/type.hh>
 
+#include <utils/logging.hh>
+
 namespace cmd {
 
     DumpModel::DumpModel(Interpreter& owner)

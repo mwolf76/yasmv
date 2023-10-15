@@ -33,6 +33,8 @@
 
 #include <parse.hh>
 
+#include <utils/logging.hh>
+
 namespace cmd {
 
     ReadModel::ReadModel(Interpreter& owner)

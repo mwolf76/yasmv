@@ -32,6 +32,8 @@
 #include <model/model_mgr.hh>
 #include <model/type_checker/type_checker.hh>
 
+#include <utils/logging.hh>
+
 #define DEBUG_TYPE_CHECKER
 
 namespace model {

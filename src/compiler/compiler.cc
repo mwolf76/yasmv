@@ -24,6 +24,8 @@
 
 #include <compiler.hh>
 
+#include <utils/logging.hh>
+
 namespace compiler {
 
     EStatus& operator++(EStatus& status)

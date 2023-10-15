@@ -30,8 +30,11 @@
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_AUTO_TEST_SUITE_END()
 
-#include <common/common.hh>
 #include <expr/expr.hh>
+
+#include <common/common.hh>
+
+#include <utils/logging.hh>
 
 // just for debugging purposes within gdb
 void pe(expr::Expr_ptr e)

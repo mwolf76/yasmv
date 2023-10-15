@@ -27,6 +27,8 @@
 #include "command.hh"
 #include <boost/filesystem.hpp>
 
+#include <utils/logging.hh>
+
 namespace cmd {
 
     void CommandTopic::display_manpage(const char* topic)

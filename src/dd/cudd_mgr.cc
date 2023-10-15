@@ -23,6 +23,8 @@
 
 #include <cudd_mgr.hh>
 
+#include <utils/logging.hh>
+
 namespace dd {
 
     CuddMgr_ptr CuddMgr::f_instance = NULL;

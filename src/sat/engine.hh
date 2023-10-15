@@ -34,6 +34,8 @@
 
 #include <sat/typedefs.hh>
 
+#include <utils/logging.hh>
+
 namespace sat {
 
     class Engine {

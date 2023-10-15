@@ -24,6 +24,8 @@
 #include <cmd/commands/quit.hh>
 #include <cmd/interpreter.hh>
 
+#include <utils/logging.hh>
+
 namespace cmd {
 
     Quit::Quit(Interpreter& owner)

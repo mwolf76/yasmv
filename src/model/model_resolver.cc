@@ -21,6 +21,8 @@
  *
  **/
 
+#include <algorithm>
+
 #include <model/model.hh>
 #include <model/model_mgr.hh>
 #include <model/model_resolver.hh>
@@ -28,7 +30,7 @@
 
 #include <type/type.hh>
 
-#include <algorithm>
+#include <utils/logging.hh>
 
 namespace model {
 

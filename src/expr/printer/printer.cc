@@ -29,6 +29,8 @@
 #include <expr/expr_mgr.hh>
 #include <expr/printer/printer.hh>
 
+#include <utils/logging.hh>
+
 namespace expr {
 
     Printer::Printer()

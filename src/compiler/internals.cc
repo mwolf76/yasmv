@@ -23,6 +23,8 @@
 
 #include <compiler.hh>
 
+#include <utils/logging.hh>
+
 namespace compiler {
 
     /* auto id generator */

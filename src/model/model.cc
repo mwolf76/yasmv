@@ -27,6 +27,8 @@
 #include <model/model.hh>
 #include <model/module.hh>
 
+#include <utils/logging.hh>
+
 namespace model {
 
     Model::Model()

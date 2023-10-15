@@ -27,7 +27,7 @@
 #ifndef COMMAND_TYPEDEFS_H
 #define COMMAND_TYPEDEFS_H
 
-#include <common/common.hh>
+#include <vector>
 
 namespace cmd {
 

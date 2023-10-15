@@ -21,6 +21,10 @@
  *
  **/
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
 #include <model/exceptions.hh>
 #include <model/model.hh>
 #include <model/module.hh>
@@ -28,9 +32,7 @@
 #include <type/classes.hh>
 #include <type/typedefs.hh>
 
-#include <algorithm>
-#include <string>
-#include <utility>
+#include <utils/logging.hh>
 
 namespace model {
 

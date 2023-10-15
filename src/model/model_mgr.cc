@@ -32,6 +32,8 @@
 #include <model/model_mgr.hh>
 #include <model/module.hh>
 
+#include <utils/logging.hh>
+
 namespace model {
 
     ModelMgr& ModelMgr::INSTANCE()
