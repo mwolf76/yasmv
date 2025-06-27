@@ -17,7 +17,7 @@ DESCRIPTION
 Checks initial states for consistency.
 
 Initial states (i.e. INIT formulas) are checked for propositional
-satisfiability. Thie command returns SUCCESS if initial states are
+satisfiability. This command returns SUCCESS if initial states are
 found to be consistent, FAILURE if initial states are found to be
 inconsistent. If no decision could be made (e.g. due to user
 interruption), the command returns `??`.
