@@ -289,7 +289,7 @@ namespace cmd {
     bool ReadTrace::parseYamlTrace(boost::filesystem::path& tracepath)
     {
         TRACE
-            << "Reading JSON trace from file "
+            << "Reading YAML trace from file "
             << tracepath
             << " ..."
             << std::endl;

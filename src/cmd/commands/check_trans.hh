@@ -1,8 +1,8 @@
 /**
  * @file check_trans.hh
- * @brief Command-interpreter subsystem related classes and deffsmions.
+ * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `check-trans`
+ * This header file contains the handler interface for the `check-trans`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
