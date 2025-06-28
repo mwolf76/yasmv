@@ -61,13 +61,20 @@ options {
     /* the model instance */
     model::Model& smv_model
         (mm.model());
+
+    /* global variables to replace scopes */
+    model::Module_ptr current_module;
+
+    /* declaration modifier flags */
+    int hidden;
+    int input;
+    int frozen;
+    int inertial;
+    value_format_t format;
 }
 
 // --- Model Description Language  ---------------------------------------------
 smv
-scope {
-    model::Module_ptr current_module;
-}
     : model_directives modules
     ;
 
@@ -90,7 +97,7 @@ modules
 
 module_def
     : 'MODULE' module_id=identifier
-      { smv_model.add_module(* ($smv::current_module = new model::Module(module_id))); }
+      { smv_model.add_module(* (current_module = new model::Module(module_id))); }
 
       fsm_param_decl? module_body ';'
     ;
@@ -100,21 +107,13 @@ module_body
     ;
 
 module_decl
-scope {
-    int hidden;
-    int input;
-    int frozen;
-    int inertial;
-
-    value_format_t format;
-}
 @init {
-    $module_decl::hidden = 0;
-    $module_decl::input = 0;
-    $module_decl::frozen = 0;
-    $module_decl::inertial = 0;
+    hidden = 0;
+    input = 0;
+    frozen = 0;
+    inertial = 0;
 
-    $module_decl::format = FORMAT_DEFAULT;
+    format = FORMAT_DEFAULT;
 }
 
     :   /* variables and defines */
@@ -136,15 +135,15 @@ fsm_formula_decl
 fsm_decl_modifiers
     : ( '#'
             (
-              'hidden'   { $module_decl::hidden   = 1; }
-            | 'frozen'   { $module_decl::frozen   = 1; }
-            | 'inertial' { $module_decl::inertial = 1; }
-            | 'input'    { $module_decl::input    = 1; }
+              'hidden'   { hidden   = 1; }
+            | 'frozen'   { frozen   = 1; }
+            | 'inertial' { inertial = 1; }
+            | 'input'    { input    = 1; }
 
-            | 'bin' { $module_decl::format = FORMAT_BINARY;      }
-            | 'oct' { $module_decl::format = FORMAT_OCTAL;       }
-            | 'dec' { $module_decl::format = FORMAT_DECIMAL;     }
-            | 'hex' { $module_decl::format = FORMAT_HEXADECIMAL; }
+            | 'bin' { format = FORMAT_BINARY;      }
+            | 'oct' { format = FORMAT_OCTAL;       }
+            | 'dec' { format = FORMAT_DECIMAL;     }
+            | 'hex' { format = FORMAT_HEXADECIMAL; }
             )) *
     ;
 
@@ -178,21 +177,21 @@ fsm_var_decl_clause
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 expr::Expr_ptr vid (*expr_iter);
                 symb::Variable_ptr var
-                    (new symb::Variable($smv::current_module->name(), vid, tp));
+                    (new symb::Variable(current_module->name(), vid, tp));
 
-                if ($module_decl::hidden)
+                if (hidden)
                     var->set_hidden(true);
-                if ($module_decl::input)
+                if (input)
                     var->set_input(true);
-                if ($module_decl::inertial)
+                if (inertial)
                     var->set_inertial(true);
-                if ($module_decl::frozen)
+                if (frozen)
                     var->set_frozen(true);
 
-                if ($module_decl::format != FORMAT_DEFAULT)
-                    var->set_format($module_decl::format);
+                if (format != FORMAT_DEFAULT)
+                    var->set_format(format);
 
-                $smv::current_module->add_var(vid, var);
+                current_module->add_var(vid, var);
             }
     }
     ;
@@ -207,8 +206,8 @@ fsm_param_decl_clause
             assert(NULL != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 expr::Expr_ptr pid (*expr_iter);
-                $smv::current_module->add_parameter(pid,
-                                                    new symb::Parameter($smv::current_module->name(),
+                current_module->add_parameter(pid,
+                                                    new symb::Parameter(current_module->name(),
                                                                         pid, tp));
             }
     }
@@ -229,25 +228,25 @@ fsm_define_decl_clause
     : id=identifier ':=' body=toplevel_expression
     {
       symb::Define_ptr def =
-          new symb::Define($smv::current_module->name(), id, body);
+          new symb::Define(current_module->name(), id, body);
 
-      if ($module_decl::input)
+      if (input)
           throw SyntaxError("#input modifier not supported in DEFINE decls");
 
-      if ($module_decl::frozen)
+      if (frozen)
           throw SyntaxError("#frozen modifier not supported in DEFINE decls");
 
-      if ($module_decl::inertial)
+      if (inertial)
           throw SyntaxError("#inertial modifier not supported in DEFINE decls");
 
-      if ($module_decl::hidden)
+      if (hidden)
           def->set_hidden(true);
 
       /* these are mutually exclusive, default is hexadecimal */
-      if ($module_decl::format != FORMAT_DEFAULT)
-          def->set_format($module_decl::format);
+      if (format != FORMAT_DEFAULT)
+          def->set_format(format);
 
-      $smv::current_module->add_def(id, def);
+      current_module->add_def(id, def);
     }
     ;
 
@@ -262,7 +261,7 @@ fsm_init_decl_body
 
 fsm_init_decl_clause
     : expr=toplevel_expression
-      { $smv::current_module->add_init(expr); }
+      { current_module->add_init(expr); }
     ;
 
 fsm_invar_decl
@@ -276,7 +275,7 @@ fsm_invar_decl_body
 
 fsm_invar_decl_clause
     : expr=toplevel_expression
-      { $smv::current_module->add_invar(expr); }
+      { current_module->add_invar(expr); }
     ;
 
 fsm_trans_decl
@@ -291,19 +290,21 @@ fsm_trans_decl_body
 fsm_trans_decl_clause
     : (toplevel_expression '?:' toplevel_expression) =>
         lhs=toplevel_expression '?:' rhs=toplevel_expression
-      { $smv::current_module->add_trans(em.make_guard(lhs, rhs)); }
+      { current_module->add_trans(em.make_guard(lhs, rhs)); }
 
     | rhs=toplevel_expression
-      { $smv::current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
+      { current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
 toplevel_expression returns [expr::Expr_ptr res]
+@init { $res = NULL; }
     : expr=timed_expression
       { $res = expr; }
     ;
 
 timed_expression returns [expr::Expr_ptr res]
 @init {
+    $res = NULL;
     expr::Expr_ptr a { NULL };
     expr::Expr_ptr b { NULL };
 }
@@ -318,12 +319,13 @@ timed_expression returns [expr::Expr_ptr res]
     ;
 
 temporal_expression returns [expr::Expr_ptr res]
+@init { $res = NULL; }
     : expr=binary_ltl_expression
       { $res = expr; }
     ;
 
 binary_ltl_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=unary_ltl_expression
       { $res = lhs; } (
             'U' rhs=unary_ltl_expression
@@ -334,7 +336,7 @@ binary_ltl_expression returns [expr::Expr_ptr res]
       )* ;
 
 unary_ltl_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : 'G' expr=unary_ltl_expression
         { $res = em.make_G(expr); }
 
@@ -368,14 +370,14 @@ unary_ltl_expression returns [expr::Expr_ptr res]
     ;
 
 propositional_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : expr=ite_expression {
          $res = expr;
       }
     ;
 
 ite_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : expr=logical_expression {
          $res = expr;
       }
@@ -387,12 +389,13 @@ ite_expression returns [expr::Expr_ptr res]
     ;
 
 logical_expression returns [expr::Expr_ptr res]
+@init { $res = NULL; }
     : expr=logical_implies_expression
       { $res = expr; }
     ;
 
 logical_implies_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=logical_or_expression
       { $res = lhs; }
 
@@ -402,7 +405,7 @@ logical_implies_expression returns [expr::Expr_ptr res]
     )* ;
 
 logical_or_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=logical_and_expression
       { $res = lhs; }
 
@@ -412,7 +415,7 @@ logical_or_expression returns[expr::Expr_ptr res]
     )* ;
 
 logical_and_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=equality_expression
       { $res = lhs; }
 
@@ -422,7 +425,7 @@ logical_and_expression returns[expr::Expr_ptr res]
     )* ;
 
 equality_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=relational_expression
       { $res = lhs; }
 
@@ -438,7 +441,7 @@ equality_expression returns [expr::Expr_ptr res]
       )? /* predicates are binary */;
 
 relational_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=algebraic_expression
       { $res = lhs; }
 
@@ -456,14 +459,14 @@ relational_expression returns [expr::Expr_ptr res]
       )? /* predicates are binary */ ;
 
 algebraic_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     :
         expr=bw_or_expression
         { $res = expr; }
     ;
 
 bw_or_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=bw_xor_expression
       { $res = lhs; }
 
@@ -473,7 +476,7 @@ bw_or_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_xor_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=bw_xnor_expression
       { $res = lhs; }
 
@@ -483,7 +486,7 @@ bw_xor_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_xnor_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=bw_and_expression
       { $res = lhs; }
 
@@ -493,7 +496,7 @@ bw_xnor_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_and_expression returns[expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=shift_expression
       { $res = lhs; }
 
@@ -503,7 +506,7 @@ bw_and_expression returns[expr::Expr_ptr res]
     )* ;
 
 shift_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=additive_expression
       { $res = lhs; }
 
@@ -516,7 +519,7 @@ shift_expression returns [expr::Expr_ptr res]
     )* ;
 
 additive_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=multiplicative_expression
       { $res = lhs; }
 
@@ -529,7 +532,7 @@ additive_expression returns [expr::Expr_ptr res]
     )* ;
 
 multiplicative_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : lhs=cast_expression
       { $res = lhs; }
 
@@ -546,6 +549,7 @@ multiplicative_expression returns [expr::Expr_ptr res]
 
 cast_expression returns [expr::Expr_ptr res]
 @init {
+    $res = NULL;
     expr::Expr_ptr cast = NULL;
 }
     : '(' tp = native_type ')' expr = cast_expression
@@ -556,7 +560,7 @@ cast_expression returns [expr::Expr_ptr res]
     ;
 
 unary_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : expr=postfix_expression
       { $res = expr; }
 
@@ -581,6 +585,7 @@ unary_expression returns [expr::Expr_ptr res]
 
 nondeterministic_expression returns[expr::Expr_ptr res]
 @init {
+    $res = NULL;
     bool is_range { false };
     expr::ExprVector clauses;
 }
@@ -629,6 +634,7 @@ nondeterministic_expression returns[expr::Expr_ptr res]
 
 array_expression returns[expr::Expr_ptr res]
 @init {
+    $res = NULL;
     expr::ExprVector clauses;
 }
     : '['
@@ -651,6 +657,7 @@ array_expression returns[expr::Expr_ptr res]
 
 params returns [expr::Expr_ptr res]
 @init {
+    $res = NULL;
     expr::ExprVector actuals;
     res = NULL;
 }
@@ -672,7 +679,7 @@ params returns [expr::Expr_ptr res]
     ;
 
 postfix_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     :   lhs=basic_expression
         { $res = lhs; }
 
@@ -688,7 +695,7 @@ postfix_expression returns [expr::Expr_ptr res]
     )* ;
 
 basic_expression returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : id=identifier
       { $res = id; }
 
@@ -704,6 +711,7 @@ basic_expression returns [expr::Expr_ptr res]
 
 case_expression returns [expr::Expr_ptr res]
 @init {
+    $res = NULL;
     typedef std::pair<expr::Expr_ptr, expr::Expr_ptr> CaseClause;
     typedef std::vector<CaseClause> CaseClauses;
 
@@ -748,13 +756,13 @@ expressions [expr::ExprVector* exprs]
       )* ;
 
 identifier returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
     ;
 
 forward_instant returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : DECIMAL_LITERAL {
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
@@ -762,7 +770,7 @@ forward_instant returns [expr::Expr_ptr res]
     ;
 
 backward_instant returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : DECIMAL_LITERAL {
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
         $res = em.make_instant(UINT_MAX - strtoll(tmp.c_str(), NULL, 10));
@@ -770,7 +778,7 @@ backward_instant returns [expr::Expr_ptr res]
     ;
 
 constant returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : HEX_LITERAL {
         expr::Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
@@ -809,7 +817,7 @@ constant returns [expr::Expr_ptr res]
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [expr::Expr_ptr res]
-@init {}
+@init { $res = NULL; }
     : 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
@@ -819,14 +827,14 @@ pvalue returns [expr::Expr_ptr res]
 
 /* ordinary values used elsewhere */
 value returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     : expr=postfix_expression
       { $res = expr; }
     ;
 
 /* typedecls */
 smv_type returns [type::Type_ptr res]
-@init {}
+@init { $res = NULL; }
     : tp = native_type
       { $res = tp; }
 
@@ -838,7 +846,7 @@ smv_type returns [type::Type_ptr res]
     ;
 
 native_type returns [type::Type_ptr res]
-@init {}
+@init { $res = NULL; }
     : tp = boolean_type
       { $res = tp; }
 
@@ -851,6 +859,7 @@ native_type returns [type::Type_ptr res]
 
 boolean_type returns [type::Type_ptr res]
 @init {
+    $res = NULL;
     int array_size = 0;
 }
     : 'boolean' (
@@ -870,6 +879,7 @@ boolean_type returns [type::Type_ptr res]
 
 enum_type returns [type::Type_ptr res]
 @init {
+    $res = NULL;
     int array_size = 0;
     expr::ExprSet lits;
 }
@@ -892,6 +902,7 @@ enum_type returns [type::Type_ptr res]
 
 unsigned_int_type returns [type::Type_ptr res]
 @init {
+    $res = NULL;
     int array_size = 0;
     char *p;
 }
@@ -920,6 +931,7 @@ unsigned_int_type returns [type::Type_ptr res]
 
 signed_int_type returns [type::Type_ptr res]
 @init {
+    $res = NULL;
     int array_size = 0;
     char *p;
 }
@@ -948,14 +960,13 @@ signed_int_type returns [type::Type_ptr res]
 
 
 instance_type returns [type::Type_ptr res]
-@init {
-}
+@init { $res = NULL; }
     : module=identifier '(' parameters=params ')'
       { $res = tm.find_instance( module, parameters ); }
     ;
 
 literal returns [expr::Expr_ptr res]
-@init { }
+@init { $res = NULL; }
     :  expr=identifier
        { $res = expr; }
     ;
@@ -963,6 +974,7 @@ literal returns [expr::Expr_ptr res]
 // -- Scripting sub-system Toplevel ---------------------------------------------
 command_line returns [cmd::CommandVector_ptr res]
 @init {
+    $res = NULL;
     res = new cmd::CommandVector();
 }
     : commands[res]
@@ -979,6 +991,7 @@ commands [cmd::CommandVector_ptr cmds]
         )* ;
 
 command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  c=check_command_topic
        { $res = c; }
 
@@ -1053,6 +1066,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
     ;
 
 command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :  c = check_command
        { $res = c; }
 
@@ -1127,6 +1141,7 @@ command returns [cmd::Command_ptr res]
     ;
 
 help_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'help'
       { $res = cm.make_help(); }
       (
@@ -1135,11 +1150,13 @@ help_command returns [cmd::Command_ptr res]
       )? ;
 
 help_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'help'
       { $res = cm.topic_help(); }
     ;
 
 do_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'do'
       { $res = cm.make_do(); }
       (
@@ -1148,12 +1165,14 @@ do_command returns [cmd::Command_ptr res]
       )+ ;
 
 do_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'do'
        { $res = cm.topic_do(); }
     ;
 
 echo_command returns [cmd::Command_ptr res]
 @init {
+    $res = NULL;
     expr::ExprVector ev;
 }
     : 'echo'?
@@ -1167,21 +1186,25 @@ echo_command returns [cmd::Command_ptr res]
       ;
 
 echo_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'echo'
        { $res = cm.topic_echo(); }
     ;
 
 last_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'last'
       { $res = cm.make_last(); }
     ;
 
 last_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'last'
        { $res = cm.topic_last(); }
     ;
 
 on_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :
       'on'
         ('success' { $res = cm.make_on(); }
@@ -1192,21 +1215,25 @@ on_command returns [cmd::Command_ptr res]
     ;
 
 on_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'on'
         { $res = cm.topic_on(); }
     ;
 
 time_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'time'
       { $res = cm.make_time(); }
     ;
 
 time_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'time'
       { $res = cm.topic_time(); }
     ;
 
 read_model_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :  'read-model'
         { $res = cm.make_read_model(); }
 
@@ -1216,11 +1243,13 @@ read_model_command returns [cmd::Command_ptr res]
     ;
 
 read_model_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'read-model'
         { $res = cm.topic_read_model(); }
     ;
 
 read_trace_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :  'read-trace'
         { $res = cm.make_read_trace(); }
 
@@ -1230,11 +1259,13 @@ read_trace_command returns [cmd::Command_ptr res]
     ;
 
 read_trace_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'read-trace'
         { $res = cm.topic_read_trace(); }
     ;
 
 dump_model_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
@@ -1249,11 +1280,13 @@ dump_model_command returns [cmd::Command_ptr res]
     ;
 
 dump_model_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'dump-model'
         { $res = cm.topic_dump_model(); }
     ;
 
 check_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'check'
       { $res = cm.make_check(); }
 
@@ -1265,11 +1298,13 @@ check_command returns[cmd::Command_ptr res]
     ;
 
 check_command_topic returns[cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     : 'check'
        { $res = cm.topic_check(); }
     ;
 
 check_init_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'check-init'
       { $res = cm.make_check_init(); }
 
@@ -1278,21 +1313,25 @@ check_init_command returns[cmd::Command_ptr res]
     ;
 
 check_init_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'check-init'
         { $res = cm.topic_check_init(); }
     ;
 
 diameter_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'diameter'
       { $res = cm.make_diameter(); }
     ;
 
 diameter_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'diameter'
         { $res = cm.topic_diameter(); }
     ;
 
 reach_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     :   'reach'
         { $res = cm.make_reach(); }
 
@@ -1309,11 +1348,13 @@ reach_command returns[cmd::Command_ptr res]
     ;
 
 reach_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'reach'
         { $res = cm.topic_reach(); }
     ;
 
 select_trace_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     :   'select-trace'
         { $res = cm.make_select_trace(); }
 
@@ -1322,11 +1363,13 @@ select_trace_command returns[cmd::Command_ptr res]
     ;
 
 select_trace_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'select-trace'
        { $res = cm.topic_select_trace(); }
     ;
 
 check_trans_command returns[cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'check-trans'
       { $res = cm.make_check_trans(); }
 
@@ -1335,21 +1378,25 @@ check_trans_command returns[cmd::Command_ptr res]
     ;
 
 check_trans_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'check-trans'
         { $res = cm.topic_check_trans(); }
     ;
 
 list_traces_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'list-traces'
       { $res = cm.make_list_traces(); }
     ;
 
 list_traces_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'list-traces'
         { $res = cm.topic_list_traces(); }
     ;
 
 dump_traces_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'dump-traces'
       { $res = cm.make_dump_traces(); }
 
@@ -1371,12 +1418,14 @@ dump_traces_command returns [cmd::Command_ptr res]
     ;
 
 dump_traces_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'dump-traces'
         { $res = cm.topic_dump_traces(); }
     ;
 
 
 dup_trace_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
@@ -1388,11 +1437,13 @@ dup_trace_command returns [cmd::Command_ptr res]
     ;
 
 dup_trace_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'dup-trace'
         { $res = cm.topic_dup_trace(); }
     ;
 
 pick_state_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :   'pick-state'
         { $res = cm.make_pick_state(); }
     (
@@ -1410,11 +1461,13 @@ pick_state_command returns [cmd::Command_ptr res]
     )* ;
 
 pick_state_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'pick-state'
         { $res = cm.topic_pick_state(); }
     ;
 
 simulate_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'simulate'
       { $res = cm.make_simulate(); }
     (
@@ -1432,11 +1485,13 @@ simulate_command returns [cmd::Command_ptr res]
     )* ;
 
 simulate_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'simulate'
         { $res = cm.topic_simulate(); }
     ;
 
 get_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'get'
       { $res = cm.make_get(); }
 
@@ -1445,11 +1500,13 @@ get_command returns [cmd::Command_ptr res]
     ;
 
 get_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'get'
         { $res = cm.topic_get(); }
     ;
 
 set_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'set'
       { $res = cm.make_set(); }
 
@@ -1461,11 +1518,13 @@ set_command returns [cmd::Command_ptr res]
     ;
 
 set_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'set'
         { $res = cm.topic_set(); }
     ;
 
 clear_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     : 'clear'
       { $res = cm.make_clear(); }
 
@@ -1474,27 +1533,31 @@ clear_command returns [cmd::Command_ptr res]
     ;
 
 clear_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'clear'
         { $res = cm.topic_clear(); }
     ;
 
 quit_command returns [cmd::Command_ptr res]
+@init { $res = NULL; }
     :  'quit'
        { $res = cm.make_quit(); }
     ;
 
 quit_command_topic returns [cmd::CommandTopic_ptr res]
+@init { $res = NULL; }
     :  'quit'
         { $res = cm.topic_quit(); }
     ;
 
 pcchar_identifier returns [pconst_char res]
-@init {}
+@init { $res = NULL; }
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
 
 pcchar_quoted_string returns [pconst_char res]
+@init { $res = NULL; }
     : QUOTED_STRING
         {
             pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
