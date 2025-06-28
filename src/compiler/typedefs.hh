@@ -28,6 +28,7 @@
 #define COMPILER_TYPEDEFS_H
 
 #include <boost/unordered_map.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <dd/dd.hh>
 

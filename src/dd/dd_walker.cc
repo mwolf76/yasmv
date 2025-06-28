@@ -58,7 +58,7 @@ namespace dd {
             add_activation_record curr { f_recursion_stack.top() };
             assert(!Cudd_IsComplement(curr.node));
 
-            register const DdNode* node { curr.node };
+            const DdNode* node { curr.node };
 
             /* leaves have no children */
             if (cuddIsConstant(node)) {

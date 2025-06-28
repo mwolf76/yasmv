@@ -82,7 +82,7 @@ namespace cmd {
                         continue;
                     }
 
-                    res.insert(basename(entry));
+                    res.insert(entry.filename().string());
                 }
             } else {
                 ERR
