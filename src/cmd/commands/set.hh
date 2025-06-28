@@ -2,7 +2,7 @@
  * @file set.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `set`
+ * This header file contains the handler interface for the `set`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >

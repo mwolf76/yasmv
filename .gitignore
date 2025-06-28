@@ -25,3 +25,6 @@ yasmv.pc
 yasmv
 yasmv_tests
 playground/
+
+# Local git configuration
+.gitconfig

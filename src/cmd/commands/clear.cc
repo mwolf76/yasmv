@@ -61,7 +61,7 @@ namespace cmd {
         }
 
         out
-            << "WARNING: this commands currently does nothing!"
+            << "WARNING: this command currently does nothing!"
             << std::endl;
 
         return utils::Variant(okMessage);

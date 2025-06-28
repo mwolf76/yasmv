@@ -5,7 +5,7 @@ YASMV manual                                           pick-state
 SYNOPSIS
 
 .in 3
-pick-state pick-state [ -a | -l <limit> ] [ -c <expr> ]
+pick-state [ -a | -l <limit> ] [ -c <expr> ]
 
 
 .ti 0

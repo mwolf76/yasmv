@@ -34,11 +34,16 @@ AC_DEFUN([AC_ANTLR3], [
          AC_MSG_ERROR([antlr3 requires java to run])
       fi
 
-      AC_CHECK_PROG(ANTLR, antlr3.2, antlr3.2, [])
+      AC_CHECK_PROG(ANTLR, antlr3, antlr3, [])
       if test x$ANTLR = "x"; then
-         AC_MSG_ERROR([antlr3.2 required to compile grammars])
+         # Fall back to antlr3.2 for older systems
+         AC_CHECK_PROG(ANTLR, antlr3.2, antlr3.2, [])
+         if test x$ANTLR = "x"; then
+            AC_MSG_ERROR([antlr3 or antlr3.2 required to compile grammars])
+         fi
+      fi
 
-      else
+      if test x$ANTLR != "x"; then
          save_CPPFLAGS=$CPPFLAGS
          save_LIBS=$LIBS
 

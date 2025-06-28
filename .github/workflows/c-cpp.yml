@@ -8,13 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: install deps
-      run: sudo apt-get install -y libboost-all-dev libjsoncpp-dev antlr3.2 libantlr3c-dev minisat
+      run: sudo apt-get install -y libboost-all-dev libjsoncpp-dev antlr3 libantlr3c-dev minisat
 
     - name: configure
       run: ./setup.sh

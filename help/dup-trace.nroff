@@ -13,7 +13,9 @@ DESCRIPTION
 
 .fi
 .in 3
-Duplicates a trace.
+WARNING: This command is currently not implemented and does nothing.
+It was intended to duplicate an existing trace but the functionality
+has not been completed.
 
 
 .ti 0

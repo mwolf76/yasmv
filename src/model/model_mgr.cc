@@ -21,6 +21,7 @@
  *
  **/
 
+#include <boost/tuple/tuple.hpp>
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
 

@@ -38,7 +38,7 @@ else
     CXX="g++"
 fi
 
-COMMON_OPTIONS="-fPIC -std=c++11"
+COMMON_OPTIONS="-fPIC -std=c++20"
 
 if [ $USE_DEBUGGER -eq 1 ];
 then

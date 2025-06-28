@@ -13,10 +13,9 @@ DESCRIPTION
 
 .fi
 .in 3
-Clears current assignments to environment variables. Argument must be
-a valid environment identifier or nothing. If no argument is given all
-assignments in the current environment are cleared if no argument is
-given.
+WARNING: This command is currently not implemented and does nothing.
+It was intended to clear current assignments to environment variables
+but the functionality has not been completed.
 
 .ti 0
 EXAMPLES

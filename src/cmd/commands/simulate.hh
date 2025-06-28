@@ -2,7 +2,7 @@
  * @file simulate.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `simulate`
+ * This header file contains the handler interface for the `simulate`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >

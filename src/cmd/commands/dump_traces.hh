@@ -2,7 +2,7 @@
  * @file dump_traces.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `dump-trace`
+ * This header file contains the handler interface for the `dump-trace`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -149,4 +149,4 @@ namespace cmd {
 
 } // namespace cmd
 
-#endif /* DUMP_TRACE_CMDS_H */
+#endif /* DUMP_TRACES_CMD_H */

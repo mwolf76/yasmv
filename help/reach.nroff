@@ -50,7 +50,7 @@ so forth.
 $<time-index>{ expr }, is a BACKWARD time expression and indicates
 time from the final state, in a reversed fashion. Therefore '$0'
 denotes the final state itself, '$1' denotes the state from which the
-last transaction initiated, and so forth.
+last transition initiated, and so forth.
 
 Please note that mixing FORWARD and BACKWARD constraints on the
 command line is currently not supported.
