@@ -67,6 +67,89 @@ to solve planning problems.
   the grammar source files you will no longer need the JRE to make the build. No
   JRE is needed when running the final executable either.
 
+## DEBIAN PACKAGE BUILD
+
+  The project includes Debian packaging files in the `debian/` directory, allowing
+  you to build .deb packages for easy installation and distribution.
+
+### Prerequisites
+
+  In addition to the standard build dependencies, you'll need the Debian packaging
+  tools:
+
+  ```
+  $ sudo apt-get install debhelper devscripts build-essential
+  ```
+
+### Building the Package
+
+  To build the Debian package:
+
+  ```
+  $ dpkg-buildpackage -us -uc -b
+  ```
+
+  Options explained:
+  - `-us`: Do not sign the source package
+  - `-uc`: Do not sign the .changes file
+  - `-b`: Build binary-only package
+
+  The build process will:
+  1. Clean the source tree
+  2. Configure and compile the project
+  3. Install files to a temporary directory
+  4. Create the .deb package
+
+  **Note**: The package build can take considerable time (10-30 minutes depending
+  on your system) as it performs a full clean build with optimization flags.
+
+### Output
+
+  Upon successful completion, you'll find the following files in the parent directory:
+  - `yasmv_1.0-1_amd64.deb` - The main package containing the yasmv binary
+  - `yasmv-dbgsym_1.0-1_amd64.deb` - Debug symbols package (optional)
+
+### Installation
+
+  To install the package:
+
+  ```
+  $ sudo dpkg -i ../yasmv_1.0-1_amd64.deb
+  ```
+
+  Or using apt to handle dependencies:
+
+  ```
+  $ sudo apt install ../yasmv_1.0-1_amd64.deb
+  ```
+
+### Package Details
+
+  The Debian package:
+  - Installs yasmv to `/usr/bin/`
+  - Sets `YASMV_HOME` to `/usr/share/yasmv`
+  - Includes man pages in `/usr/share/man/`
+  - Handles dependencies automatically
+
+### Troubleshooting
+
+  If the build fails:
+  1. Ensure all build dependencies are installed
+  2. Run `./setup.sh` first to configure the build system
+  3. Try a regular build with `make` to verify the code compiles
+  4. Check for sufficient disk space (the build requires ~2GB)
+
+### Automated Builds
+
+  The project includes GitHub Actions workflows for automated Debian package builds:
+  
+  - **Release builds**: When a new release is created on GitHub, the workflow
+    automatically builds .deb packages and attaches them to the release
+  - **Test builds**: Pull requests and pushes to master/develop branches trigger
+    test builds to ensure packaging remains functional
+  
+  You can download pre-built packages from the [Releases](https://github.com/mwolf76/yasmv/releases) page.
+
 ## RUN
 
   If you didn't run the setup.sh script, when done with the build there is one

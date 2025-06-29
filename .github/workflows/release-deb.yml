@@ -1,0 +1,66 @@
+name: Build Debian Package on Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          debhelper \
+          devscripts \
+          libboost-all-dev \
+          libjsoncpp-dev \
+          antlr3 \
+          libantlr3c-dev \
+          minisat \
+          zlib1g-dev \
+          libyaml-cpp-dev \
+          openjdk-11-jdk \
+          autoconf \
+          libtool
+    
+    - name: Setup build environment
+      run: ./setup.sh
+      
+    - name: Build Debian package
+      run: |
+        # Update changelog with release version
+        RELEASE_VERSION="${{ github.event.release.tag_name }}"
+        RELEASE_VERSION="${RELEASE_VERSION#v}"  # Remove 'v' prefix if present
+        
+        # Create a new changelog entry
+        dch --newversion "${RELEASE_VERSION}-1" --distribution stable "Release ${RELEASE_VERSION}"
+        dch --release ""
+        
+        # Build the package
+        dpkg-buildpackage -us -uc -b
+        
+    - name: Prepare artifacts
+      run: |
+        mkdir -p debian-packages
+        mv ../*.deb debian-packages/
+        ls -la debian-packages/
+        
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-packages
+        path: debian-packages/*.deb
+        
+    - name: Upload packages to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: debian-packages/*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
