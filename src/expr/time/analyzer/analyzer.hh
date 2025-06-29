@@ -66,7 +66,6 @@ namespace expr::time {
         void post_hook();
 
         // support for LTL ops
-        LTL_HOOKS;
 
         // support for basic ops
         OP_HOOKS;

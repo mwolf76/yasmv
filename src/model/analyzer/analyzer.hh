@@ -71,7 +71,6 @@ namespace model {
         void pre_node_hook(expr::Expr_ptr expr);
         void post_node_hook(expr::Expr_ptr expr);
 
-        LTL_HOOKS;
         OP_HOOKS;
 
         void walk_instant(const expr::Expr_ptr expr);

@@ -44,20 +44,6 @@ namespace expr {
         }
 
 
-        inline bool is_unary_ltl(const Expr_ptr expr) const
-        {
-            assert(expr);
-            return expr->f_symb == F ||
-                   expr->f_symb == G ||
-                   expr->f_symb == X;
-        }
-
-        inline bool is_binary_ltl(const Expr_ptr expr) const
-        {
-            assert(expr);
-            return expr->f_symb == U ||
-                   expr->f_symb == R;
-        }
 
         /* -- Temporal operators ---------------------------------------------- */
         inline Expr_ptr make_at(Expr_ptr time, Expr_ptr expr)

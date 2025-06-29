@@ -68,51 +68,6 @@ namespace expr::time {
         this->operator()(expr);
     }
 
-    bool Analyzer::walk_F_preorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-
-    void Analyzer::walk_F_postorder(const Expr_ptr expr)
-    {}
-
-    bool Analyzer::walk_G_preorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-
-    void Analyzer::walk_G_postorder(const Expr_ptr expr)
-    {}
-
-    bool Analyzer::walk_X_preorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-
-    void Analyzer::walk_X_postorder(const Expr_ptr expr)
-    {}
-
-    bool Analyzer::walk_U_preorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-    bool Analyzer::walk_U_inorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-    void Analyzer::walk_U_postorder(const Expr_ptr expr)
-    {}
-
-    bool Analyzer::walk_R_preorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-    bool Analyzer::walk_R_inorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-    void Analyzer::walk_R_postorder(const Expr_ptr expr)
-    {}
 
     bool Analyzer::walk_at_preorder(const Expr_ptr expr)
     {
