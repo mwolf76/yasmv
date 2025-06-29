@@ -47,38 +47,6 @@ BOOST_AUTO_TEST_CASE(expressions)
     expr::Expr_ptr y { em.make_identifier(a_y) };
     BOOST_CHECK(y == em.make_identifier(a_y));
 
-    // LTL makers and is-a predicates
-    expr::Expr_ptr Fx { em.make_F(x) };
-    BOOST_CHECK(Fx->f_symb == expr::F && Fx->lhs() == x && Fx->rhs() == NULL);
-    BOOST_CHECK(em.is_F(Fx));
-    BOOST_CHECK(em.is_LTL(Fx));
-
-
-    expr::Expr_ptr Gx { em.make_G(x) };
-    BOOST_CHECK(Gx->f_symb == expr::G && Gx->lhs() == x && Gx->rhs() == NULL);
-    BOOST_CHECK(em.is_G(Gx));
-    BOOST_CHECK(em.is_LTL(Gx));
-
-    expr::Expr_ptr Xx { em.make_X(x) };
-    BOOST_CHECK(Xx->f_symb == expr::X && Xx->lhs() == x && Xx->rhs() == NULL);
-    BOOST_CHECK(em.is_X(Xx));
-    BOOST_CHECK(em.is_LTL(Xx));
-
-    expr::Expr_ptr xUy { em.make_U(x, y) };
-    BOOST_CHECK(xUy->f_symb == expr::U && xUy->lhs() == x && xUy->rhs() == y);
-    BOOST_CHECK(em.is_U(xUy));
-    BOOST_CHECK(em.is_LTL(xUy));
-
-    expr::Expr_ptr xRy { em.make_R(x, y) };
-    BOOST_CHECK(xRy->f_symb == expr::R && xRy->lhs() == x && xRy->rhs() == y);
-    BOOST_CHECK(em.is_R(xRy));
-    BOOST_CHECK(em.is_LTL(xRy));
-
-    BOOST_CHECK(em.make_F(x) == Fx);
-    BOOST_CHECK(em.make_G(x) == Gx);
-    BOOST_CHECK(em.make_X(x) == Xx);
-    BOOST_CHECK(em.make_U(x, y) == xUy);
-    BOOST_CHECK(em.make_R(x, y) == xRy);
 
     // primary makers and is-a predicates
     expr::Expr_ptr next_x { em.make_next(x) };
@@ -517,46 +485,6 @@ BOOST_AUTO_TEST_CASE(printer)
         BOOST_CHECK(oss.str() == std::string("x(y)"));
     }
 
-    // LTL
-    {
-        expr::Expr_ptr Fx { em.make_F(x) };
-        std::ostringstream oss;
-        expr::Printer printer(oss);
-        printer << Fx;
-        BOOST_CHECK(oss.str() == std::string("F (x)"));
-    }
-
-    {
-        expr::Expr_ptr Gx { em.make_G(x) };
-        std::ostringstream oss;
-        expr::Printer printer(oss);
-        printer << Gx;
-        BOOST_CHECK(oss.str() == std::string("G (x)"));
-    }
-
-    {
-        expr::Expr_ptr Xx { em.make_X(x) };
-        std::ostringstream oss;
-        expr::Printer printer(oss);
-        printer << Xx;
-        BOOST_CHECK(oss.str() == std::string("X (x)"));
-    }
-
-    {
-        expr::Expr_ptr xUy { em.make_U(x, y) };
-        std::ostringstream oss;
-        expr::Printer printer(oss);
-        printer << xUy;
-        BOOST_CHECK(oss.str() == std::string("(x U y)"));
-    }
-
-    {
-        expr::Expr_ptr xRy { em.make_R(x, y) };
-        std::ostringstream oss;
-        expr::Printer printer(oss);
-        printer << xRy;
-        BOOST_CHECK(oss.str() == std::string("(x R y)"));
-    }
 
     {
         expr::Expr_ptr false_ { em.make_false() };
@@ -591,23 +519,10 @@ BOOST_AUTO_TEST_CASE(analyzer)
     BOOST_CHECK(x == nnfizer.process(x));
     BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
 
-    BOOST_CHECK(em.make_F(em.make_not(x)) ==
-                nnfizer.process(em.make_not(em.make_G(x))));
-
-    BOOST_CHECK(em.make_G(em.make_not(x)) ==
-                nnfizer.process(em.make_not(em.make_F(x))));
-
-    BOOST_CHECK(em.make_U(em.make_not(x), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_R(x, y))));
-
-    BOOST_CHECK(em.make_R(em.make_not(x), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_U(x, y))));
 
     BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
                 nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
 
-    BOOST_CHECK(em.make_and(em.make_G(em.make_F(x)), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_implies(em.make_not(em.make_G(em.make_F(x))), em.make_not(y)))));
 }
 
 BOOST_AUTO_TEST_CASE(nnfizer)
@@ -625,23 +540,10 @@ BOOST_AUTO_TEST_CASE(nnfizer)
     BOOST_CHECK(x == nnfizer.process(x));
     BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
 
-    BOOST_CHECK(em.make_F(em.make_not(x)) ==
-                nnfizer.process(em.make_not(em.make_G(x))));
-
-    BOOST_CHECK(em.make_G(em.make_not(x)) ==
-                nnfizer.process(em.make_not(em.make_F(x))));
-
-    BOOST_CHECK(em.make_U(em.make_not(x), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_R(x, y))));
-
-    BOOST_CHECK(em.make_R(em.make_not(x), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_U(x, y))));
 
     BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
                 nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
 
-    BOOST_CHECK(em.make_and(em.make_G(em.make_F(x)), em.make_not(y)) ==
-                nnfizer.process(em.make_not(em.make_implies(em.make_not(em.make_G(em.make_F(x))), em.make_not(y)))));
 }
 
 BOOST_AUTO_TEST_CASE(expander)
