@@ -44,10 +44,6 @@ namespace model {
         PUSH_TYPE(check_any(expr->lhs()));
     }
 
-    void TypeChecker::walk_unary_ltl_postorder(const expr::Expr_ptr expr)
-    {
-        PUSH_TYPE(check_logical(expr->lhs()));
-    }
 
     // fun: arithm -> arithm
     void TypeChecker::walk_unary_arithmetical_postorder(const expr::Expr_ptr expr)
@@ -113,15 +109,6 @@ namespace model {
         PUSH_TYPE(lhs_type);
     }
 
-    void TypeChecker::walk_binary_ltl_postorder(const expr::Expr_ptr expr)
-    {
-        type::Type_ptr rhs_type { check_logical(expr->rhs()) };
-        (void) rhs_type;
-
-        type::Type_ptr lhs_type { check_logical(expr->lhs()) };
-
-        PUSH_TYPE(lhs_type);
-    }
 
     // fun: logical x logical -> logical
     void TypeChecker::walk_binary_logical_postorder(const expr::Expr_ptr expr)

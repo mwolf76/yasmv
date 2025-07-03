@@ -161,9 +161,6 @@ Add a constraint to TRANS
 * CNFization algorithm
 - Support for multiple CNF algorithms (no-cut, single-cut, mix-cut)
 
-* Unified checking algorithm
-- full LTL properties (not yet suported)
-
 * SAT optimizations
 
 * Interpolation based-algorithms

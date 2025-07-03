@@ -37,14 +37,6 @@ namespace expr {
         DEFAULT,
         RETURN,
 
-        // -- LTL ops
-        F_1,
-        G_1,
-        X_1,
-        U_1,
-        U_2,
-        R_1,
-        R_2,
 
         // -- Simple walkers
         AT_1,
