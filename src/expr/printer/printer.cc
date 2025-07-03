@@ -70,65 +70,6 @@ namespace expr {
         return *this;
     }
 
-    bool Printer::walk_F_preorder(const Expr_ptr expr)
-    {
-        f_os << "F (";
-        return true;
-    }
-    void Printer::walk_F_postorder(const Expr_ptr expr)
-    {
-        f_os << ")";
-    }
-
-    bool Printer::walk_G_preorder(const Expr_ptr expr)
-    {
-        f_os << "G (";
-        return true;
-    }
-    void Printer::walk_G_postorder(const Expr_ptr expr)
-    {
-        f_os << ")";
-    }
-
-    bool Printer::walk_X_preorder(const Expr_ptr expr)
-    {
-        f_os << "X (";
-        return true;
-    }
-    void Printer::walk_X_postorder(const Expr_ptr expr)
-    {
-        f_os << ")";
-    }
-
-    bool Printer::walk_U_preorder(const Expr_ptr expr)
-    {
-        f_os << "(";
-        return true;
-    }
-    bool Printer::walk_U_inorder(const Expr_ptr expr)
-    {
-        f_os << " U ";
-        return true;
-    }
-    void Printer::walk_U_postorder(const Expr_ptr expr)
-    {
-        f_os << ")";
-    }
-
-    bool Printer::walk_R_preorder(const Expr_ptr expr)
-    {
-        f_os << "(";
-        return true;
-    }
-    bool Printer::walk_R_inorder(const Expr_ptr expr)
-    {
-        f_os << " R ";
-        return true;
-    }
-    void Printer::walk_R_postorder(const Expr_ptr expr)
-    {
-        f_os << ")";
-    }
 
     bool Printer::walk_at_preorder(const Expr_ptr expr)
     {

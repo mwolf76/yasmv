@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = check fsm reach sim
+SUBDIRS = fsm reach sim
 
 AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd		\

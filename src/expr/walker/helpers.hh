@@ -86,12 +86,6 @@ namespace expr {
     UNARY_HOOK(array);         \
     BINARY_HOOK(array_comma)
 
-#define LTL_HOOKS   \
-    UNARY_HOOK(F);  \
-    UNARY_HOOK(G);  \
-    UNARY_HOOK(X);  \
-    BINARY_HOOK(R); \
-    BINARY_HOOK(U)
 
 #define UNARY_STUB(op)                                    \
     bool walk_##op##_preorder(const expr::Expr_ptr expr)  \
@@ -116,12 +110,6 @@ namespace expr {
     void walk_##op##_postorder(const expr::Expr_ptr expr) \
     {}
 
-#define LTL_STUBS   \
-    UNARY_STUB(F);  \
-    UNARY_STUB(G);  \
-    UNARY_STUB(X);  \
-    BINARY_STUB(R); \
-    BINARY_STUB(U)
 
 }; // namespace expr
 
