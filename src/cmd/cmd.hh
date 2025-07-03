@@ -37,7 +37,6 @@
 #include <cmd/commands/dump_model.hh>
 #include <cmd/commands/read_model.hh>
 
-#include <cmd/commands/check.hh>
 #include <cmd/commands/check_init.hh>
 #include <cmd/commands/check_trans.hh>
 #include <cmd/commands/reach.hh>
@@ -115,11 +114,6 @@ namespace cmd {
         inline Command_ptr make_dump_model()
         {
             return new DumpModel(f_interpreter);
-        }
-
-        inline Command_ptr make_check()
-        {
-            return new Check(f_interpreter);
         }
 
         inline Command_ptr make_reach()
@@ -238,11 +232,6 @@ namespace cmd {
         inline CommandTopic_ptr topic_dump_model()
         {
             return new DumpModelTopic(f_interpreter);
-        }
-
-        inline CommandTopic_ptr topic_check()
-        {
-            return new CheckTopic(f_interpreter);
         }
 
         inline CommandTopic_ptr topic_reach()

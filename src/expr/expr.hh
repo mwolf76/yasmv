@@ -54,13 +54,6 @@ namespace expr {
 
     typedef enum {
 
-        // -- linear temporal logic expressions ------------------------------------
-        F,
-        G,
-        X,
-        U,
-        R,
-
         // -- primary expressions --------------------------------------------------
 
         /* time shift operators (nesting supported) */

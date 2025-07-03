@@ -53,39 +53,6 @@ BOOST_AUTO_TEST_CASE(parsing_identifiers)
     BOOST_CHECK(y == em.make_identifier("y"));
 }
 
-BOOST_AUTO_TEST_CASE(temporal_expressions)
-{
-    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
-    expr::Atom a_x { "x" };
-    expr::Atom a_y { "y" };
-
-    expr::Expr_ptr x { em.make_identifier(a_x) };
-    expr::Expr_ptr y { em.make_identifier(a_y) };
-
-    BOOST_CHECK(em.make_F(x) == parse::parseExpression("F x"));
-    BOOST_CHECK(em.make_F(x) == parse::parseExpression("F(x)"));
-
-    BOOST_CHECK(em.make_G(x) == parse::parseExpression("G x"));
-    BOOST_CHECK(em.make_G(x) == parse::parseExpression("G(x)"));
-
-    BOOST_CHECK(em.make_X(x) == parse::parseExpression("X x"));
-    BOOST_CHECK(em.make_X(x) == parse::parseExpression("X(x)"));
-
-    BOOST_CHECK(em.make_G(em.make_F(x)) == parse::parseExpression("G F x"));
-    BOOST_CHECK(em.make_G(em.make_F(x)) == parse::parseExpression("G(F x)"));
-    BOOST_CHECK(em.make_G(em.make_F(x)) == parse::parseExpression("G(F(x))"));
-
-    BOOST_CHECK(em.make_F(em.make_G(x)) == parse::parseExpression("F G x"));
-    BOOST_CHECK(em.make_F(em.make_G(x)) == parse::parseExpression("F(G x)"));
-    BOOST_CHECK(em.make_F(em.make_G(x)) == parse::parseExpression("F(G(x))"));
-
-    BOOST_CHECK(em.make_U(x, y) == parse::parseExpression("x U y"));
-    BOOST_CHECK(em.make_U(x, y) == parse::parseExpression("(x) U (y)"));
-
-    BOOST_CHECK(em.make_R(x, y) == parse::parseExpression("x R y"));
-    BOOST_CHECK(em.make_R(x, y) == parse::parseExpression("(x) R (y)"));
-}
 
 BOOST_AUTO_TEST_CASE(unary_expressions)
 {
