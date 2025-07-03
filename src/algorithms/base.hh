@@ -4,7 +4,7 @@
  *
  * This header file contains definitions and services that provide the
  * foundations for all the SAT-based algorithms (i.e. reachability,
- * simulation, ltl property checking).
+ * simulation).
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *

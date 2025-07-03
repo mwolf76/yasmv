@@ -72,7 +72,6 @@ namespace witness {
         }
 
         OP_HOOKS;
-        LTL_STUBS;
 
         void walk_instant(const expr::Expr_ptr expr);
         void walk_leaf(const expr::Expr_ptr expr);

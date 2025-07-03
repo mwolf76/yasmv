@@ -66,7 +66,6 @@ namespace model {
         void pre_node_hook(expr::Expr_ptr expr);
         void post_node_hook(expr::Expr_ptr expr);
 
-        LTL_HOOKS;
         OP_HOOKS;
 
         void walk_instant(const expr::Expr_ptr expr);
@@ -102,10 +101,8 @@ namespace model {
 
         // post-orders only
         void walk_unary_fsm_postorder(const expr::Expr_ptr expr);
-        void walk_unary_ltl_postorder(const expr::Expr_ptr expr);
 
         void walk_binary_fsm_postorder(const expr::Expr_ptr expr);
-        void walk_binary_ltl_postorder(const expr::Expr_ptr expr);
 
         void walk_unary_arithmetical_postorder(const expr::Expr_ptr expr);
         void walk_binary_arithmetical_postorder(const expr::Expr_ptr expr);

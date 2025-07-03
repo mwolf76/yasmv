@@ -69,23 +69,6 @@ namespace expr {
 
         // -- hooks ----------------------------------------------------------------
 
-        // LTL temporal ops
-        virtual bool walk_F_preorder(const Expr_ptr expr) = 0;
-        virtual void walk_F_postorder(const Expr_ptr expr) = 0;
-
-        virtual bool walk_G_preorder(const Expr_ptr expr) = 0;
-        virtual void walk_G_postorder(const Expr_ptr expr) = 0;
-
-        virtual bool walk_X_preorder(const Expr_ptr expr) = 0;
-        virtual void walk_X_postorder(const Expr_ptr expr) = 0;
-
-        virtual bool walk_U_preorder(const Expr_ptr expr) = 0;
-        virtual bool walk_U_inorder(const Expr_ptr expr) = 0;
-        virtual void walk_U_postorder(const Expr_ptr expr) = 0;
-
-        virtual bool walk_R_preorder(const Expr_ptr expr) = 0;
-        virtual bool walk_R_inorder(const Expr_ptr expr) = 0;
-        virtual void walk_R_postorder(const Expr_ptr expr) = 0;
 
         // temporal ops
         virtual bool walk_at_preorder(const Expr_ptr expr) = 0;
