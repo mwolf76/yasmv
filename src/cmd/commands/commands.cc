@@ -32,7 +32,6 @@
 #include <commands.hh>
 
 /* algorithms */
-#include <check/check.hh>
 #include <reach/reach.hh>
 #include <sim/simulation.hh>
 

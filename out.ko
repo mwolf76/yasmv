@@ -1,0 +1,489 @@
+yasmv - Yet Another Symbolic Model Verifier
+(c) 2011-2021, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
+https://github.com/mwolf76/yasmv
+
+V :: Created Evaluator @0x561727b643b8
+D :: Created new witness: <Noname>, starting at time 0
+T :: 2432 microcode fragments registered.
+V :: Initialized command @0x561727b64760
+D :: Parsing smv file short-tests/arrays/array01-ko.smv ...
+T :: Setting word width to 8
+D :: Initialized Module instance @0x561727b6d850
+D :: Added module: `array`
+D :: Registering type `boolean[9]` at 0x561727b67fc0
+D :: Module `array`, added var `space`, of type `boolean[9]`
+D :: Registering type `uint8` at 0x561727b68730
+D :: Module `array`, added var `r`, of type `uint8`
+D :: Module `array`, added var `c`, of type `uint8`
+D :: Module array, added hidden DEFINE `_`
+D :: Module array, added hidden DEFINE `O`
+D :: Module `array`, added INVAR (space = [O, O, O, O, O, O, O, O, _])
+D :: Module array, added DEFINE `addr`
+D :: Module `array`, added INVAR ((0 <= r) && (r < 3))
+D :: Module `array`, added INVAR ((0 <= c) && (c < 3))
+D :: Module `array`, added INIT ! space[addr]
+D :: Parser terminated successfully in 0.000808s.
+V :: Model analysis (pass 0)
+V :: Registering scope `` instance of `array`
+V :: Model analysis (pass 1)
+V :: Model analysis (pass 2)
+D :: Analyzing INIT ::! space[addr]
+D :: Analyzing INVAR ::(space = [O, O, O, O, O, O, O, O, _])
+D :: Analyzing INVAR ::((0 <= r) && (r < 3))
+D :: Analyzing INVAR ::((0 <= c) && (c < 3))
+D :: Analyzing ::((3 * r) + c)
+D :: Analyzing ::TRUE
+D :: Analyzing ::FALSE
+V :: Model analysis (pass 3)
+D :: Type checking INIT ::! space[addr]
+D :: Recurring in `((3 * r) + c)`
+D :: Registering type `const int8` at 0x561727b65350
+D :: Type checking INVAR ::(space = [O, O, O, O, O, O, O, O, _])
+D :: Recurring in `TRUE`
+D :: Recurring in `FALSE`
+D :: Registering type `boolean[2]` at 0x561727b69680
+D :: Registering type `boolean[3]` at 0x561727b69790
+D :: Registering type `boolean[4]` at 0x561727b69ab0
+D :: Registering type `boolean[5]` at 0x561727b69bd0
+D :: Registering type `boolean[6]` at 0x561727b69cf0
+D :: Registering type `boolean[7]` at 0x561727b6a490
+D :: Registering type `boolean[8]` at 0x561727b6a5f0
+V :: Initialized CuddMgr @ 0x561727b67c30
+V :: Initialized EncodingMgr @ 0x561727b65ba0, native word size is 8
+D :: Type checking INVAR ::((0 <= r) && (r < 3))
+D :: Type checking INVAR ::((0 <= c) && (c < 3))
+D :: Type checking ::((3 * r) + c)
+D :: Type checking ::TRUE
+D :: Type checking ::FALSE
+D :: Generating framing conditions ...
+T :: Model analysis complete
+V :: Destroyed command @0x561727b64760
+
+<< Ok
+D :: Parsing command ...
+V :: Initialized command @0x561727b66a30
+V :: Initialized command @0x561727c037b0
+V :: Initialized command @0x561727b67c50
+D :: Parser terminated successfully in 9.8e-05s.
+D :: Created Preprocessor @0x7ffed8c92c60
+V :: Initialized Compiler @0x7ffed8c92ad0
+V :: Initialized EngineMgr @ 0x561727b64ec0
+D :: processing INIT ::! space[addr]
+D :: (pass 1/5) building encodings for `` (@0x561727b5fd30) :: ! space[addr]
+V :: (encoding) time: 0, expr: ! space[addr]...
+V :: (encoding) time: 0, expr: space[addr]...
+V :: (encoding) time: 0, expr: space...
+D :: Registering new encoding of type boolean[9] for time: 0, expr: space
+V :: Registered encoding: time: 0, expr: space := [0, 1, 2, 3, 4, 5, 6, 7, 8]
+V :: (encoding) time: 0, expr: addr...
+V :: (encoding) time: 0, expr: ((3 * r) + c)...
+V :: (encoding) time: 0, expr: (3 * r)...
+V :: (encoding) time: 0, expr: 3...
+V :: (encoding) time: 0, expr: r...
+D :: Registering new encoding of type uint8 for time: 0, expr: r
+V :: Registered encoding: time: 0, expr: r := [9, 10, 11, 12, 13, 14, 15, 16]
+V :: (encoding) time: 0, expr: c...
+D :: Registering new encoding of type uint8 for time: 0, expr: c
+V :: Registered encoding: time: 0, expr: c := [17, 18, 19, 20, 21, 22, 23, 24]
+D :: (pass 2/5) compiling for `` (@0x561727b5fd30) :: ! space[addr]
+V :: (compiling) time: 0, expr: ! space[addr]...
+V :: (compiling) time: 0, expr: space[addr]...
+V :: (compiling) time: 0, expr: space...
+V :: (compiling) time: 0, expr: addr...
+V :: (compiling) time: 0, expr: ((3 * r) + c)...
+V :: (compiling) time: 0, expr: (3 * r)...
+V :: (compiling) time: 0, expr: 3...
+V :: (compiling) time: 0, expr: r...
+V :: (3 * r)
+V :: Registered encoding: time: 0, expr: __tmp0 := [25]
+V :: Registered encoding: time: 0, expr: __tmp1 := [26]
+V :: Registered encoding: time: 0, expr: __tmp2 := [27]
+V :: Registered encoding: time: 0, expr: __tmp3 := [28]
+V :: Registered encoding: time: 0, expr: __tmp4 := [29]
+V :: Registered encoding: time: 0, expr: __tmp5 := [30]
+V :: Registered encoding: time: 0, expr: __tmp6 := [31]
+V :: Registered encoding: time: 0, expr: __tmp7 := [32]
+V :: (compiling) time: 0, expr: c...
+V :: ((3 * r) + c)
+V :: Registered encoding: time: 0, expr: __tmp8 := [33]
+V :: Registered encoding: time: 0, expr: __tmp9 := [34]
+V :: Registered encoding: time: 0, expr: __tmp10 := [35]
+V :: Registered encoding: time: 0, expr: __tmp11 := [36]
+V :: Registered encoding: time: 0, expr: __tmp12 := [37]
+V :: Registered encoding: time: 0, expr: __tmp13 := [38]
+V :: Registered encoding: time: 0, expr: __tmp14 := [39]
+V :: Registered encoding: time: 0, expr: __tmp15 := [40]
+V :: space[addr]
+V :: Registered encoding: time: 0, expr: __tmp16 := [41]
+V :: Registered encoding: time: 0, expr: __tmp17 := [42]
+V :: Registered encoding: time: 0, expr: __tmp18 := [43]
+V :: Registered encoding: time: 0, expr: __tmp19 := [44]
+V :: Registered encoding: time: 0, expr: __tmp20 := [45]
+V :: Registered encoding: time: 0, expr: __tmp21 := [46]
+V :: Registered encoding: time: 0, expr: __tmp22 := [47]
+V :: Registered encoding: time: 0, expr: __tmp23 := [48]
+V :: Registered encoding: time: 0, expr: __tmp24 := [49]
+V :: Registered encoding: time: 0, expr: __tmp25 := [50]
+D :: (pass 3/5) checking internals for `` (@0x561727b5fd30) :: ! space[addr]
+D :: (pass 4/5) activating ITE MUXes for `` (@0x561727b5fd30) :: ! space[addr]
+D :: (pass 4/5) activating array MUXes for  `` (@0x561727b5fd30) :: ! space[addr]
+D :: processing INVAR ::(space = [O, O, O, O, O, O, O, O, _])
+D :: (pass 1/5) building encodings for `` (@0x561727b5fd30) :: (space = [O, O, O, O, O, O, O, O, _])
+V :: (encoding) time: 0, expr: (space = [O, O, O, O, O, O, O, O, _])...
+V :: (encoding) time: 0, expr: space...
+V :: (encoding) time: 0, expr: [O, O, O, O, O, O, O, O, _]...
+V :: (encoding) time: 0, expr: O, O, O, O, O, O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, O, O, O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, O, O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: O, _...
+V :: (encoding) time: 0, expr: O...
+V :: (encoding) time: 0, expr: TRUE...
+V :: (encoding) time: 0, expr: _...
+V :: (encoding) time: 0, expr: FALSE...
+D :: (pass 2/5) compiling for `` (@0x561727b5fd30) :: (space = [O, O, O, O, O, O, O, O, _])
+V :: (compiling) time: 0, expr: (space = [O, O, O, O, O, O, O, O, _])...
+V :: (compiling) time: 0, expr: space...
+V :: (compiling) time: 0, expr: [O, O, O, O, O, O, O, O, _]...
+V :: (compiling) time: 0, expr: O, O, O, O, O, O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: (compiling) time: 0, expr: TRUE...
+V :: (compiling) time: 0, expr: O, O, O, O, O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, O, O, O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, O, O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: O, _...
+V :: (compiling) time: 0, expr: O...
+V :: Cache hit for O, type is boolean
+V :: (compiling) time: 0, expr: _...
+V :: (compiling) time: 0, expr: FALSE...
+V :: Registered encoding: time: 0, expr: __tmp26 := [51]
+V :: Registered encoding: time: 0, expr: __tmp27 := [52]
+V :: Registered encoding: time: 0, expr: __tmp28 := [53]
+V :: Registered encoding: time: 0, expr: __tmp29 := [54]
+V :: Registered encoding: time: 0, expr: __tmp30 := [55]
+V :: Registered encoding: time: 0, expr: __tmp31 := [56]
+V :: Registered encoding: time: 0, expr: __tmp32 := [57]
+V :: Registered encoding: time: 0, expr: __tmp33 := [58]
+V :: Registered encoding: time: 0, expr: __tmp34 := [59]
+D :: (pass 3/5) checking internals for `` (@0x561727b5fd30) :: (space = [O, O, O, O, O, O, O, O, _])
+D :: (pass 4/5) activating ITE MUXes for `` (@0x561727b5fd30) :: (space = [O, O, O, O, O, O, O, O, _])
+D :: (pass 4/5) activating array MUXes for  `` (@0x561727b5fd30) :: (space = [O, O, O, O, O, O, O, O, _])
+D :: processing INVAR ::((0 <= r) && (r < 3))
+D :: (pass 1/5) building encodings for `` (@0x561727b5fd30) :: ((0 <= r) && (r < 3))
+V :: (encoding) time: 0, expr: ((0 <= r) && (r < 3))...
+V :: (encoding) time: 0, expr: (0 <= r)...
+V :: (encoding) time: 0, expr: 0...
+V :: (encoding) time: 0, expr: r...
+V :: Cache hit for r, type is uint8
+V :: (encoding) time: 0, expr: (r < 3)...
+V :: (encoding) time: 0, expr: r...
+V :: Cache hit for r, type is uint8
+V :: (encoding) time: 0, expr: 3...
+V :: Cache hit for 3, type is const int8
+D :: (pass 2/5) compiling for `` (@0x561727b5fd30) :: ((0 <= r) && (r < 3))
+V :: (compiling) time: 0, expr: ((0 <= r) && (r < 3))...
+V :: (compiling) time: 0, expr: (0 <= r)...
+V :: (compiling) time: 0, expr: 0...
+V :: (compiling) time: 0, expr: r...
+V :: Cache hit for r, type is uint8
+V :: Registered encoding: time: 0, expr: __tmp35 := [60]
+V :: (compiling) time: 0, expr: (r < 3)...
+V :: (compiling) time: 0, expr: r...
+V :: Cache hit for r, type is uint8
+V :: (compiling) time: 0, expr: 3...
+V :: Cache hit for 3, type is const int8
+V :: Registered encoding: time: 0, expr: __tmp36 := [61]
+D :: (pass 3/5) checking internals for `` (@0x561727b5fd30) :: ((0 <= r) && (r < 3))
+D :: (pass 4/5) activating ITE MUXes for `` (@0x561727b5fd30) :: ((0 <= r) && (r < 3))
+D :: (pass 4/5) activating array MUXes for  `` (@0x561727b5fd30) :: ((0 <= r) && (r < 3))
+D :: processing INVAR ::((0 <= c) && (c < 3))
+D :: (pass 1/5) building encodings for `` (@0x561727b5fd30) :: ((0 <= c) && (c < 3))
+V :: (encoding) time: 0, expr: ((0 <= c) && (c < 3))...
+V :: (encoding) time: 0, expr: (0 <= c)...
+V :: (encoding) time: 0, expr: 0...
+V :: Cache hit for 0, type is const int8
+V :: (encoding) time: 0, expr: c...
+V :: Cache hit for c, type is uint8
+V :: (encoding) time: 0, expr: (c < 3)...
+V :: (encoding) time: 0, expr: c...
+V :: Cache hit for c, type is uint8
+V :: (encoding) time: 0, expr: 3...
+V :: Cache hit for 3, type is const int8
+D :: (pass 2/5) compiling for `` (@0x561727b5fd30) :: ((0 <= c) && (c < 3))
+V :: (compiling) time: 0, expr: ((0 <= c) && (c < 3))...
+V :: (compiling) time: 0, expr: (0 <= c)...
+V :: (compiling) time: 0, expr: 0...
+V :: Cache hit for 0, type is const int8
+V :: (compiling) time: 0, expr: c...
+V :: Cache hit for c, type is uint8
+V :: Registered encoding: time: 0, expr: __tmp37 := [62]
+V :: (compiling) time: 0, expr: (c < 3)...
+V :: (compiling) time: 0, expr: c...
+V :: Cache hit for c, type is uint8
+V :: (compiling) time: 0, expr: 3...
+V :: Cache hit for 3, type is const int8
+V :: Registered encoding: time: 0, expr: __tmp38 := [63]
+D :: (pass 3/5) checking internals for `` (@0x561727b5fd30) :: ((0 <= c) && (c < 3))
+D :: (pass 4/5) activating ITE MUXes for `` (@0x561727b5fd30) :: ((0 <= c) && (c < 3))
+D :: (pass 4/5) activating array MUXes for  `` (@0x561727b5fd30) :: ((0 <= c) && (c < 3))
+T :: Base setup completed
+T :: Created Simulation @0x7ffed8c92a90
+D :: Registered engine instance@0x7ffed8c92360
+D :: Initialized Engine instance @0x7ffed8c92360
+I :: 0 constraints found.
+V :: Created cnf var 1 for DD node 0x561727c04d40
+V :: Adding model var 2 for @0+0::__tmp25.0
+V :: Created cnf var 3 for DD node 0x561727c04d60
+V :: Adding model var 4 for @0+0::__tmp16.0
+V :: Created cnf var 5 for DD node 0x561727c044a0
+V :: Created cnf var 6 for DD node 0x561727c04d80
+V :: Adding model var 7 for @0+0::__tmp15.0
+V :: Created cnf var 8 for DD node 0x561727c04da0
+V :: Adding model var 9 for @0+0::__tmp14.0
+V :: Created cnf var 10 for DD node 0x561727c04dc0
+V :: Adding model var 11 for @0+0::__tmp13.0
+V :: Created cnf var 12 for DD node 0x561727c04de0
+V :: Adding model var 13 for @0+0::__tmp12.0
+V :: Created cnf var 14 for DD node 0x561727c04e00
+V :: Adding model var 15 for @0+0::__tmp11.0
+V :: Created cnf var 16 for DD node 0x561727c04e20
+V :: Adding model var 17 for @0+0::__tmp10.0
+V :: Created cnf var 18 for DD node 0x561727c04e40
+V :: Adding model var 19 for @0+0::__tmp9.0
+V :: Created cnf var 20 for DD node 0x561727c04e60
+V :: Adding model var 21 for @0+0::__tmp8.0
+V :: Created cnf var 22 for DD node 0x561727c04e80
+V :: Adding model var 23 for @0+0::__tmp17.0
+V :: Created cnf var 24 for DD node 0x561727c045c0
+V :: Created cnf var 25 for DD node 0x561727c04ea0
+V :: Created cnf var 26 for DD node 0x561727c04ec0
+V :: Created cnf var 27 for DD node 0x561727c04ee0
+V :: Created cnf var 28 for DD node 0x561727c04f00
+V :: Created cnf var 29 for DD node 0x561727c04f20
+V :: Created cnf var 30 for DD node 0x561727c04f40
+V :: Created cnf var 31 for DD node 0x561727c04f60
+V :: Created cnf var 32 for DD node 0x561727c04f80
+V :: Created cnf var 33 for DD node 0x561727c04fa0
+V :: Adding model var 34 for @0+0::__tmp18.0
+V :: Created cnf var 35 for DD node 0x561727c046e0
+V :: Created cnf var 36 for DD node 0x561727c04fc0
+V :: Created cnf var 37 for DD node 0x561727c04fe0
+V :: Created cnf var 38 for DD node 0x561727c05000
+V :: Created cnf var 39 for DD node 0x561727c05020
+V :: Created cnf var 40 for DD node 0x561727c05040
+V :: Created cnf var 41 for DD node 0x561727c05060
+V :: Created cnf var 42 for DD node 0x561727c05080
+V :: Created cnf var 43 for DD node 0x561727c050a0
+V :: Created cnf var 44 for DD node 0x561727c050c0
+V :: Adding model var 45 for @0+0::__tmp19.0
+V :: Created cnf var 46 for DD node 0x561727c04800
+V :: Created cnf var 47 for DD node 0x561727c050e0
+V :: Created cnf var 48 for DD node 0x561727c05100
+V :: Created cnf var 49 for DD node 0x561727c05120
+V :: Created cnf var 50 for DD node 0x561727c05140
+V :: Created cnf var 51 for DD node 0x561727c05160
+V :: Created cnf var 52 for DD node 0x561727c05180
+V :: Created cnf var 53 for DD node 0x561727c051a0
+V :: Created cnf var 54 for DD node 0x561727c051c0
+V :: Created cnf var 55 for DD node 0x561727c051e0
+V :: Adding model var 56 for @0+0::__tmp20.0
+V :: Created cnf var 57 for DD node 0x561727c04900
+V :: Created cnf var 58 for DD node 0x561727c05200
+V :: Created cnf var 59 for DD node 0x561727c05220
+V :: Created cnf var 60 for DD node 0x561727c05240
+V :: Created cnf var 61 for DD node 0x561727c05260
+V :: Created cnf var 62 for DD node 0x561727c05280
+V :: Created cnf var 63 for DD node 0x561727c052a0
+V :: Created cnf var 64 for DD node 0x561727c052c0
+V :: Created cnf var 65 for DD node 0x561727c052e0
+V :: Created cnf var 66 for DD node 0x561727c05300
+V :: Adding model var 67 for @0+0::__tmp21.0
+V :: Created cnf var 68 for DD node 0x561727c04a00
+V :: Created cnf var 69 for DD node 0x561727c05320
+V :: Created cnf var 70 for DD node 0x561727c05340
+V :: Created cnf var 71 for DD node 0x561727c05360
+V :: Created cnf var 72 for DD node 0x561727c05380
+V :: Created cnf var 73 for DD node 0x561727c053a0
+V :: Created cnf var 74 for DD node 0x561727c053c0
+V :: Created cnf var 75 for DD node 0x561727c053e0
+V :: Created cnf var 76 for DD node 0x561727c05400
+V :: Created cnf var 77 for DD node 0x561727c05420
+V :: Adding model var 78 for @0+0::__tmp22.0
+V :: Created cnf var 79 for DD node 0x561727c04b00
+V :: Created cnf var 80 for DD node 0x561727c05440
+V :: Created cnf var 81 for DD node 0x561727c05460
+V :: Created cnf var 82 for DD node 0x561727c05480
+V :: Created cnf var 83 for DD node 0x561727c054a0
+V :: Created cnf var 84 for DD node 0x561727c054c0
+V :: Created cnf var 85 for DD node 0x561727c054e0
+V :: Created cnf var 86 for DD node 0x561727c05500
+V :: Created cnf var 87 for DD node 0x561727c05520
+V :: Created cnf var 88 for DD node 0x561727c05540
+V :: Adding model var 89 for @0+0::__tmp23.0
+V :: Created cnf var 90 for DD node 0x561727c04c00
+V :: Created cnf var 91 for DD node 0x561727c05560
+V :: Created cnf var 92 for DD node 0x561727c05580
+V :: Created cnf var 93 for DD node 0x561727c055a0
+V :: Created cnf var 94 for DD node 0x561727c055c0
+V :: Created cnf var 95 for DD node 0x561727c055e0
+V :: Created cnf var 96 for DD node 0x561727c05600
+V :: Created cnf var 97 for DD node 0x561727c05620
+V :: Created cnf var 98 for DD node 0x561727c05640
+V :: Created cnf var 99 for DD node 0x561727c05660
+V :: Adding model var 100 for @0+0::__tmp24.0
+V :: Created cnf var 101 for DD node 0x561727c04ce0
+V :: Created cnf var 102 for DD node 0x561727c05680
+V :: Created cnf var 103 for DD node 0x561727c056a0
+V :: Created cnf var 104 for DD node 0x561727c056c0
+V :: Created cnf var 105 for DD node 0x561727c056e0
+V :: Created cnf var 106 for DD node 0x561727c05700
+V :: Created cnf var 107 for DD node 0x561727c05720
+V :: Created cnf var 108 for DD node 0x561727c05740
+V :: Created cnf var 109 for DD node 0x561727c05760
+D :: Loading clauses for umul8, generated "2021-07-16T08:44:03.369306+00:00"V :: 413 clauses fetched, took 1.222 ms
+V :: umul8(z = [25, 26, 27, 28, 29, 30, 31, 32], x = [F, F, F, F, F, F, T, T], y = [9, 10, 11, 12, 13, 14, 15, 16])
+V :: Adding model var 111 for @0+0::__tmp7.0
+V :: Adding model var 112 for @0+0::r.7
+V :: Adding model var 115 for @0+0::__tmp6.0
+V :: Adding model var 118 for @0+0::__tmp5.0
+V :: Adding model var 121 for @0+0::__tmp4.0
+V :: Adding model var 124 for @0+0::__tmp3.0
+V :: Adding model var 127 for @0+0::__tmp2.0
+V :: Adding model var 130 for @0+0::__tmp1.0
+V :: Adding model var 133 for @0+0::__tmp0.0
+V :: Adding model var 158 for @0+0::r.0
+V :: Adding model var 159 for @0+0::r.1
+V :: Adding model var 164 for @0+0::r.2
+V :: Adding model var 169 for @0+0::r.3
+V :: Adding model var 174 for @0+0::r.4
+V :: Adding model var 179 for @0+0::r.5
+V :: Adding model var 184 for @0+0::r.6
+D :: Loading clauses for uadd8, generated "2021-07-16T08:44:03.312496+00:00"V :: 100 clauses fetched, took 0.292 ms
+V :: uadd8(z = [33, 34, 35, 36, 37, 38, 39, 40], x = [25, 26, 27, 28, 29, 30, 31, 32], y = [17, 18, 19, 20, 21, 22, 23, 24])
+V :: Adding model var 226 for @0+0::c.7
+V :: Adding model var 241 for @0+0::c.0
+V :: Adding model var 242 for @0+0::c.1
+V :: Adding model var 243 for @0+0::c.2
+V :: Adding model var 244 for @0+0::c.3
+V :: Adding model var 245 for @0+0::c.4
+V :: Adding model var 246 for @0+0::c.5
+V :: Adding model var 247 for @0+0::c.6
+D :: Array mux9 x 1(z = [50, acts = [41, 42, 43, 44, 45, 46, 47, 48, 49]], x = [0, 1, 2, 3, 4, 5, 6, 7, 8])
+V :: Adding model var 248 for @0+0::space.0
+V :: Adding model var 249 for @0+0::space.1
+V :: Adding model var 250 for @0+0::space.2
+V :: Adding model var 251 for @0+0::space.3
+V :: Adding model var 252 for @0+0::space.4
+V :: Adding model var 253 for @0+0::space.5
+V :: Adding model var 254 for @0+0::space.6
+V :: Adding model var 255 for @0+0::space.7
+V :: Adding model var 256 for @0+0::space.8
+V :: Created cnf var 257 for DD node 0x561727c05d20
+V :: Adding model var 258 for @0+0::__tmp34.0
+V :: Created cnf var 259 for DD node 0x561727c05d40
+V :: Adding model var 260 for @0+0::__tmp33.0
+V :: Created cnf var 261 for DD node 0x561727c05d60
+V :: Adding model var 262 for @0+0::__tmp32.0
+V :: Created cnf var 263 for DD node 0x561727c05d80
+V :: Adding model var 264 for @0+0::__tmp31.0
+V :: Created cnf var 265 for DD node 0x561727c05da0
+V :: Adding model var 266 for @0+0::__tmp30.0
+V :: Created cnf var 267 for DD node 0x561727c05dc0
+V :: Adding model var 268 for @0+0::__tmp29.0
+V :: Created cnf var 269 for DD node 0x561727c05de0
+V :: Adding model var 270 for @0+0::__tmp28.0
+V :: Created cnf var 271 for DD node 0x561727c05e00
+V :: Adding model var 272 for @0+0::__tmp27.0
+V :: Created cnf var 273 for DD node 0x561727c05e20
+V :: Adding model var 274 for @0+0::__tmp26.0
+D :: Loading clauses for ueq1, generated "2021-07-16T08:44:00.049228+00:00"V :: 5 clauses fetched, took 0.082 ms
+V :: ueq1(z = [51], x = [0], y = [T])
+V :: ueq1(z = [52], x = [1], y = [T])
+V :: ueq1(z = [53], x = [2], y = [T])
+V :: ueq1(z = [54], x = [3], y = [T])
+V :: ueq1(z = [55], x = [4], y = [T])
+V :: ueq1(z = [56], x = [5], y = [T])
+V :: ueq1(z = [57], x = [6], y = [T])
+V :: ueq1(z = [58], x = [7], y = [T])
+V :: ueq1(z = [59], x = [8], y = [F])
+V :: Created cnf var 284 for DD node 0x561727c05ea0
+V :: Adding model var 285 for @0+0::__tmp36.0
+V :: Created cnf var 286 for DD node 0x561727c05ec0
+V :: Adding model var 287 for @0+0::__tmp35.0
+D :: Loading clauses for ule8, generated "2021-07-16T08:44:03.693938+00:00"V :: 55 clauses fetched, took 0.188 ms
+V :: ule8(z = [60], x = [F, F, F, F, F, F, F, F], y = [9, 10, 11, 12, 13, 14, 15, 16])
+D :: Loading clauses for ult8, generated "2021-07-16T08:44:03.668521+00:00"V :: 52 clauses fetched, took 0.178 ms
+V :: ult8(z = [61], x = [9, 10, 11, 12, 13, 14, 15, 16], y = [F, F, F, F, F, F, T, T])
+V :: Created cnf var 317 for DD node 0x561727c05f40
+V :: Adding model var 318 for @0+0::__tmp38.0
+V :: Created cnf var 319 for DD node 0x561727c05f60
+V :: Adding model var 320 for @0+0::__tmp37.0
+V :: umul8(z = [25, 26, 27, 28, 29, 30, 31, 32], x = [F, F, F, F, F, F, T, T], y = [9, 10, 11, 12, 13, 14, 15, 16])
+V :: ule8(z = [62], x = [F, F, F, F, F, F, F, F], y = [17, 18, 19, 20, 21, 22, 23, 24])
+V :: umul8(z = [25, 26, 27, 28, 29, 30, 31, 32], x = [F, F, F, F, F, F, T, T], y = [9, 10, 11, 12, 13, 14, 15, 16])
+V :: ult8(z = [63], x = [17, 18, 19, 20, 21, 22, 23, 24], y = [F, F, F, F, F, F, T, T])
+D :: Solving ...
+D :: Took 0.001469 seconds. Status is SAT.
+T :: found feasible initial state, took 0.01366 seconds
+D :: Created new witness: <Noname>, starting at time 0
+D :: Added empty TimeFrame 1 to witness <Noname> @0x561727c2f920
+D :: space := [TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE]
+D :: r := 2
+D :: c := 2
+D :: _ := FALSE
+D :: O := TRUE
+D :: addr := 8
+T :: Found 1 feasible states
+D :: Unregistered engine instance@0x7ffed8c92360
+-- One feasible initial state found
+T :: Destroyed Simulation @0x7ffed8c92a90
+V :: Destroyed Compiler @0x7ffed8c92ad0
+D :: Destroying Preprocessor @0x7ffed8c92c60
+V :: Destroyed command @0x561727b66a30
+T :: condition holds, triggering `then` action.
+-- Simulation trace for module `array`
+Witness: sim-1
+
+:: @0
+-- state
+   space = [TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE]
+   r = 2
+   c = 2
+
+-- defines
+   addr = 8
+
+V :: Destroyed command @0x561727b67c50
+V :: Destroyed command @0x561727c037b0

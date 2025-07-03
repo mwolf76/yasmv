@@ -80,13 +80,6 @@ namespace compiler {
         Unit process(expr::Expr_ptr ctx, expr::Expr_ptr body);
 
     private:
-        /**
-          The compiler does NOT support LTL ops. To enable
-          verification of temporal properties, the LTL operators needs to
-          be rewritten by the checking algorithm before feeding the
-          formula into the compiler. */
-        LTL_STUBS;
-
         /* basic expr operators support */
         OP_HOOKS;
 

@@ -166,7 +166,6 @@ AC_CONFIG_FILES([Makefile
                  src/algorithms/Makefile
                  src/algorithms/reach/Makefile
                  src/algorithms/fsm/Makefile
-                 src/algorithms/check/Makefile
                  src/algorithms/sim/Makefile
                  src/symb/Makefile
                  src/model/Makefile

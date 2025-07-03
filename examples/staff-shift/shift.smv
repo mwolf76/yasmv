@@ -1,0 +1,317 @@
+-- This file is part of the yasmv distribution
+-- (c) 2011-2016 M. Pensallorto < marco DOT pensallorto AT gmail DOT com >
+--
+-- This example proves the Herschel graph has no hamiltonian cycles.
+-- The GOAL defined in this model is expected to be UNREACHABLE.
+--
+-- a shift planning problem defined as follows:
+-- - 4 workers, each of which is required to work for 40 hours a week;
+-- - 5 days of eight hours, for which two workers are required to be on duty;
+#word-width 6
+MODULE shift;
+
+VAR
+	w1: boolean[40];
+	w2: boolean[40];
+	w3: boolean[40];
+	w4: boolean[40];
+
+INVAR
+	(uint)(w1[0]) +
+	(uint)(w1[1]) +
+	(uint)(w1[2]) +
+	(uint)(w1[3]) +
+	(uint)(w1[4]) +
+	(uint)(w1[5]) +
+	(uint)(w1[6]) +
+	(uint)(w1[7]) +
+	(uint)(w1[8]) +
+	(uint)(w1[9]) +
+
+	(uint)(w1[10]) +
+	(uint)(w1[11]) +
+	(uint)(w1[12]) +
+	(uint)(w1[13]) +
+	(uint)(w1[14]) +
+	(uint)(w1[15]) +
+	(uint)(w1[16]) +
+	(uint)(w1[17]) +
+	(uint)(w1[18]) +
+	(uint)(w1[19]) +
+
+	(uint)(w1[20]) +
+	(uint)(w1[21]) +
+	(uint)(w1[22]) +
+	(uint)(w1[23]) +
+	(uint)(w1[24]) +
+	(uint)(w1[25]) +
+	(uint)(w1[26]) +
+	(uint)(w1[27]) +
+	(uint)(w1[28]) +
+	(uint)(w1[29]) +
+
+	(uint)(w1[30]) +
+	(uint)(w1[31]) +
+	(uint)(w1[32]) +
+	(uint)(w1[33]) +
+	(uint)(w1[34]) +
+	(uint)(w1[35]) +
+	(uint)(w1[36]) +
+	(uint)(w1[37]) +
+	(uint)(w1[38]) +
+	(uint)(w1[39]) = 40;
+
+INVAR
+	(uint)(w2[0]) +
+	(uint)(w2[1]) +
+	(uint)(w2[2]) +
+	(uint)(w2[3]) +
+	(uint)(w2[4]) +
+	(uint)(w2[5]) +
+	(uint)(w2[6]) +
+	(uint)(w2[7]) +
+	(uint)(w2[8]) +
+	(uint)(w2[9]) +
+
+	(uint)(w2[10]) +
+	(uint)(w2[11]) +
+	(uint)(w2[12]) +
+	(uint)(w2[13]) +
+	(uint)(w2[14]) +
+	(uint)(w2[15]) +
+	(uint)(w2[16]) +
+	(uint)(w2[17]) +
+	(uint)(w2[18]) +
+	(uint)(w2[19]) +
+
+	(uint)(w2[20]) +
+	(uint)(w2[21]) +
+	(uint)(w2[22]) +
+	(uint)(w2[23]) +
+	(uint)(w2[24]) +
+	(uint)(w2[25]) +
+	(uint)(w2[26]) +
+	(uint)(w2[27]) +
+	(uint)(w2[28]) +
+	(uint)(w2[29]) +
+
+	(uint)(w2[30]) +
+	(uint)(w2[31]) +
+	(uint)(w2[32]) +
+	(uint)(w2[33]) +
+	(uint)(w2[34]) +
+	(uint)(w2[35]) +
+	(uint)(w2[36]) +
+	(uint)(w2[37]) +
+	(uint)(w2[38]) +
+	(uint)(w2[39]) = 40;
+
+INVAR
+	(uint)(w3[0]) +
+	(uint)(w3[1]) +
+	(uint)(w3[2]) +
+	(uint)(w3[3]) +
+	(uint)(w3[4]) +
+	(uint)(w3[5]) +
+	(uint)(w3[6]) +
+	(uint)(w3[7]) +
+	(uint)(w3[8]) +
+	(uint)(w3[9]) +
+
+	(uint)(w3[10]) +
+	(uint)(w3[11]) +
+	(uint)(w3[12]) +
+	(uint)(w3[13]) +
+	(uint)(w3[14]) +
+	(uint)(w3[15]) +
+	(uint)(w3[16]) +
+	(uint)(w3[17]) +
+	(uint)(w3[18]) +
+	(uint)(w3[19]) +
+
+	(uint)(w3[20]) +
+	(uint)(w3[21]) +
+	(uint)(w3[22]) +
+	(uint)(w3[23]) +
+	(uint)(w3[24]) +
+	(uint)(w3[25]) +
+	(uint)(w3[26]) +
+	(uint)(w3[27]) +
+	(uint)(w3[28]) +
+	(uint)(w3[29]) +
+
+	(uint)(w3[30]) +
+	(uint)(w3[31]) +
+	(uint)(w3[32]) +
+	(uint)(w3[33]) +
+	(uint)(w3[34]) +
+	(uint)(w3[35]) +
+	(uint)(w3[36]) +
+	(uint)(w3[37]) +
+	(uint)(w3[38]) +
+	(uint)(w3[39]) = 40;
+
+INVAR
+	(uint)(w4[0]) +
+	(uint)(w4[1]) +
+	(uint)(w4[2]) +
+	(uint)(w4[3]) +
+	(uint)(w4[4]) +
+	(uint)(w4[5]) +
+	(uint)(w4[6]) +
+	(uint)(w4[7]) +
+	(uint)(w4[8]) +
+	(uint)(w4[9]) +
+
+	(uint)(w4[10]) +
+	(uint)(w4[11]) +
+	(uint)(w4[12]) +
+	(uint)(w4[13]) +
+	(uint)(w4[14]) +
+	(uint)(w4[15]) +
+	(uint)(w4[16]) +
+	(uint)(w4[17]) +
+	(uint)(w4[18]) +
+	(uint)(w4[19]) +
+
+	(uint)(w4[20]) +
+	(uint)(w4[21]) +
+	(uint)(w4[22]) +
+	(uint)(w4[23]) +
+	(uint)(w4[24]) +
+	(uint)(w4[25]) +
+	(uint)(w4[26]) +
+	(uint)(w4[27]) +
+	(uint)(w4[28]) +
+	(uint)(w4[29]) +
+
+	(uint)(w4[30]) +
+	(uint)(w4[31]) +
+	(uint)(w4[32]) +
+	(uint)(w4[33]) +
+	(uint)(w4[34]) +
+	(uint)(w4[35]) +
+	(uint)(w4[36]) +
+	(uint)(w4[37]) +
+	(uint)(w4[38]) +
+	(uint)(w4[39]) = 40;
+
+INVAR
+	(uint)(w1[0]) + (uint)(w2[0]) + (uint)(w3[0]) + (uint)(w4[0]) = 2;
+
+INVAR
+	(uint)(w1[1]) + (uint)(w2[1]) + (uint)(w3[1]) + (uint)(w4[1]) = 2;
+
+INVAR
+	(uint)(w1[2]) + (uint)(w2[2]) + (uint)(w3[2]) + (uint)(w4[2]) = 2;
+
+INVAR
+	(uint)(w1[3]) + (uint)(w2[3]) + (uint)(w3[3]) + (uint)(w4[3]) = 2;
+
+INVAR
+	(uint)(w1[4]) + (uint)(w2[4]) + (uint)(w3[4]) + (uint)(w4[4]) = 2;
+
+INVAR
+	(uint)(w1[5]) + (uint)(w2[5]) + (uint)(w3[5]) + (uint)(w4[5]) = 2;
+
+INVAR
+	(uint)(w1[6]) + (uint)(w2[6]) + (uint)(w3[6]) + (uint)(w4[6]) = 2;
+
+INVAR
+	(uint)(w1[7]) + (uint)(w2[7]) + (uint)(w3[7]) + (uint)(w4[7]) = 2;
+
+INVAR
+	(uint)(w1[8]) + (uint)(w2[8]) + (uint)(w3[8]) + (uint)(w4[8]) = 2;
+
+INVAR
+	(uint)(w1[9]) + (uint)(w2[9]) + (uint)(w3[9]) + (uint)(w4[9]) = 2;
+
+INVAR
+	(uint)(w1[10]) + (uint)(w2[10]) + (uint)(w3[10]) + (uint)(w4[10]) = 2;
+
+INVAR
+	(uint)(w1[11]) + (uint)(w2[11]) + (uint)(w3[11]) + (uint)(w4[11]) = 2;
+
+INVAR
+	(uint)(w1[12]) + (uint)(w2[12]) + (uint)(w3[12]) + (uint)(w4[12]) = 2;
+
+INVAR
+	(uint)(w1[13]) + (uint)(w2[13]) + (uint)(w3[13]) + (uint)(w4[13]) = 2;
+
+INVAR
+	(uint)(w1[14]) + (uint)(w2[14]) + (uint)(w3[14]) + (uint)(w4[14]) = 2;
+
+INVAR
+	(uint)(w1[15]) + (uint)(w2[15]) + (uint)(w3[15]) + (uint)(w4[15]) = 2;
+
+INVAR
+	(uint)(w1[16]) + (uint)(w2[16]) + (uint)(w3[16]) + (uint)(w4[16]) = 2;
+
+INVAR
+	(uint)(w1[17]) + (uint)(w2[17]) + (uint)(w3[17]) + (uint)(w4[17]) = 2;
+
+INVAR
+	(uint)(w1[18]) + (uint)(w2[18]) + (uint)(w3[18]) + (uint)(w4[18]) = 2;
+
+INVAR
+	(uint)(w1[19]) + (uint)(w2[19]) + (uint)(w3[19]) + (uint)(w4[19]) = 2;
+
+INVAR
+	(uint)(w1[20]) + (uint)(w2[20]) + (uint)(w3[20]) + (uint)(w4[20]) = 2;
+
+INVAR
+	(uint)(w1[21]) + (uint)(w2[21]) + (uint)(w3[21]) + (uint)(w4[21]) = 2;
+
+INVAR
+	(uint)(w1[22]) + (uint)(w2[22]) + (uint)(w3[22]) + (uint)(w4[22]) = 2;
+
+INVAR
+	(uint)(w1[23]) + (uint)(w2[23]) + (uint)(w3[23]) + (uint)(w4[23]) = 2;
+
+INVAR
+	(uint)(w1[24]) + (uint)(w2[24]) + (uint)(w3[24]) + (uint)(w4[24]) = 2;
+
+INVAR
+	(uint)(w1[25]) + (uint)(w2[25]) + (uint)(w3[25]) + (uint)(w4[25]) = 2;
+
+INVAR
+	(uint)(w1[26]) + (uint)(w2[26]) + (uint)(w3[26]) + (uint)(w4[26]) = 2;
+
+INVAR
+	(uint)(w1[27]) + (uint)(w2[27]) + (uint)(w3[27]) + (uint)(w4[27]) = 2;
+
+INVAR
+	(uint)(w1[28]) + (uint)(w2[28]) + (uint)(w3[28]) + (uint)(w4[28]) = 2;
+
+INVAR
+	(uint)(w1[29]) + (uint)(w2[29]) + (uint)(w3[29]) + (uint)(w4[29]) = 2;
+
+INVAR
+	(uint)(w1[30]) + (uint)(w2[30]) + (uint)(w3[30]) + (uint)(w4[30]) = 2;
+
+INVAR
+	(uint)(w1[31]) + (uint)(w2[31]) + (uint)(w3[31]) + (uint)(w4[31]) = 2;
+
+INVAR
+	(uint)(w1[32]) + (uint)(w2[32]) + (uint)(w3[32]) + (uint)(w4[32]) = 2;
+
+INVAR
+	(uint)(w1[33]) + (uint)(w2[33]) + (uint)(w3[33]) + (uint)(w4[33]) = 2;
+
+INVAR
+	(uint)(w1[34]) + (uint)(w2[34]) + (uint)(w3[34]) + (uint)(w4[34]) = 2;
+
+INVAR
+	(uint)(w1[35]) + (uint)(w2[35]) + (uint)(w3[35]) + (uint)(w4[35]) = 2;
+
+INVAR
+	(uint)(w1[36]) + (uint)(w2[36]) + (uint)(w3[36]) + (uint)(w4[36]) = 2;
+
+INVAR
+	(uint)(w1[37]) + (uint)(w2[37]) + (uint)(w3[37]) + (uint)(w4[37]) = 2;
+
+INVAR
+	(uint)(w1[38]) + (uint)(w2[38]) + (uint)(w3[38]) + (uint)(w4[38]) = 2;
+
+INVAR
+	(uint)(w1[39]) + (uint)(w2[39]) + (uint)(w3[39]) + (uint)(w4[39]) = 2;

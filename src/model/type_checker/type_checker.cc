@@ -82,58 +82,6 @@ namespace model {
         return res;
     }
 
-    bool TypeChecker::walk_F_preorder(const expr::Expr_ptr expr)
-    {
-        return cache_miss(expr);
-    }
-    void TypeChecker::walk_F_postorder(const expr::Expr_ptr expr)
-    {
-        walk_unary_ltl_postorder(expr);
-    }
-
-    bool TypeChecker::walk_G_preorder(const expr::Expr_ptr expr)
-    {
-        return cache_miss(expr);
-    }
-    void TypeChecker::walk_G_postorder(const expr::Expr_ptr expr)
-    {
-        walk_unary_ltl_postorder(expr);
-    }
-
-    bool TypeChecker::walk_X_preorder(const expr::Expr_ptr expr)
-    {
-        return cache_miss(expr);
-    }
-    void TypeChecker::walk_X_postorder(const expr::Expr_ptr expr)
-    {
-        walk_unary_ltl_postorder(expr);
-    }
-
-    bool TypeChecker::walk_U_preorder(const expr::Expr_ptr expr)
-    {
-        return cache_miss(expr);
-    }
-    bool TypeChecker::walk_U_inorder(const expr::Expr_ptr expr)
-    {
-        return true;
-    }
-    void TypeChecker::walk_U_postorder(const expr::Expr_ptr expr)
-    {
-        walk_binary_ltl_postorder(expr);
-    }
-
-    bool TypeChecker::walk_R_preorder(const expr::Expr_ptr expr)
-    {
-        return cache_miss(expr);
-    }
-    bool TypeChecker::walk_R_inorder(const expr::Expr_ptr expr)
-    {
-        return true;
-    }
-    void TypeChecker::walk_R_postorder(const expr::Expr_ptr expr)
-    {
-        walk_binary_ltl_postorder(expr);
-    }
 
     bool TypeChecker::walk_at_preorder(const expr::Expr_ptr expr)
     {

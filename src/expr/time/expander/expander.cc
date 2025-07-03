@@ -67,49 +67,6 @@ namespace expr::time {
         return res;
     }
 
-    // TODO: a lot of internal_errors could actually be normally supported
-    bool Expander::walk_F_preorder(const Expr_ptr expr)
-    {
-        return internal_error(expr);
-    }
-    void Expander::walk_F_postorder(const Expr_ptr expr)
-    {}
-
-    bool Expander::walk_G_preorder(const Expr_ptr expr)
-    {
-        return internal_error(expr);
-    }
-    void Expander::walk_G_postorder(const Expr_ptr expr)
-    {}
-
-    bool Expander::walk_X_preorder(const Expr_ptr expr)
-    {
-        return internal_error(expr);
-    }
-    void Expander::walk_X_postorder(const Expr_ptr expr)
-    {}
-
-    bool Expander::walk_U_preorder(const Expr_ptr expr)
-    {
-        return internal_error(expr);
-    }
-    bool Expander::walk_U_inorder(const Expr_ptr expr)
-    {
-        return false;
-    }
-    void Expander::walk_U_postorder(const Expr_ptr expr)
-    {}
-
-    bool Expander::walk_R_preorder(const Expr_ptr expr)
-    {
-        return internal_error(expr);
-    }
-    bool Expander::walk_R_inorder(const Expr_ptr expr)
-    {
-        return true;
-    }
-    void Expander::walk_R_postorder(const Expr_ptr expr)
-    {}
 
     bool Expander::walk_at_preorder(const Expr_ptr expr)
     {
