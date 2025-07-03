@@ -308,64 +308,19 @@ timed_expression returns [expr::Expr_ptr res]
     expr::Expr_ptr a { NULL };
     expr::Expr_ptr b { NULL };
 }
-    : '@' time=forward_instant { a = time; } ('..' time=forward_instant { b = time; })? '{' body=temporal_expression '}'
+    : '@' time=forward_instant { a = time; } ('..' time=forward_instant { b = time; })? '{' body=propositional_expression '}'
       { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
-    | '$' time=backward_instant { a = time; } ('..' time=backward_instant { b = time; })? '{' body=temporal_expression '}'
+    | '$' time=backward_instant { a = time; } ('..' time=backward_instant { b = time; })? '{' body=propositional_expression '}'
       { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
-    | body=temporal_expression
+    | body=propositional_expression
       { $res = body; }
     ;
 
 temporal_expression returns [expr::Expr_ptr res]
 @init { $res = NULL; }
-    : expr=binary_ltl_expression
-      { $res = expr; }
-    ;
-
-binary_ltl_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
-    : lhs=unary_ltl_expression
-      { $res = lhs; } (
-            'U' rhs=unary_ltl_expression
-            { $res = em.make_U($res, rhs); }
-
-        |   'R' rhs=unary_ltl_expression
-            { $res = em.make_R($res, rhs); }
-      )* ;
-
-unary_ltl_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
-    : 'G' expr=unary_ltl_expression
-        { $res = em.make_G(expr); }
-
-    | 'F' expr=unary_ltl_expression
-        { $res = em.make_F(expr); }
-
-    | 'X' expr=unary_ltl_expression
-        { $res = em.make_X(expr); }
-
-    /* common shortcuts */
-    | 'GF' expr=unary_ltl_expression
-        { $res = em.make_G(em.make_F(expr)); }
-
-    | 'GX' expr=unary_ltl_expression
-        { $res = em.make_G(em.make_X(expr)); }
-
-    | 'FG' expr=unary_ltl_expression
-        { $res = em.make_F(em.make_G(expr)); }
-
-    | 'FX' expr=unary_ltl_expression
-        { $res = em.make_F(em.make_X(expr)); }
-
-    | 'XG' expr=unary_ltl_expression
-        { $res = em.make_X(em.make_G(expr)); }
-
-    | 'XF' expr=unary_ltl_expression
-        { $res = em.make_X(em.make_F(expr)); }
-
-    | expr=propositional_expression
+    : expr=propositional_expression
       { $res = expr; }
     ;
 
@@ -992,10 +947,7 @@ commands [cmd::CommandVector_ptr cmds]
 
 command_topic returns [cmd::CommandTopic_ptr res]
 @init { $res = NULL; }
-    :  c=check_command_topic
-       { $res = c; }
-
-    |  c=check_init_command_topic
+    :  c=check_init_command_topic
        { $res = c; }
 
     |  c=check_trans_command_topic
@@ -1067,10 +1019,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
 
 command returns [cmd::Command_ptr res]
 @init { $res = NULL; }
-    :  c = check_command
-       { $res = c; }
-
-    |  c=check_init_command
+    :  c=check_init_command
        { $res = c; }
 
     |  c=check_trans_command
@@ -1285,23 +1234,6 @@ dump_model_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_dump_model(); }
     ;
 
-check_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
-    : 'check'
-      { $res = cm.make_check(); }
-
-      property=temporal_expression
-      { ((cmd::Check_ptr) $res)->set_property(property); }
-
-      ( '-c' constraint=temporal_expression
-      { ((cmd::Check_ptr) $res)->add_constraint(constraint); })*
-    ;
-
-check_command_topic returns[cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
-    : 'check'
-       { $res = cm.topic_check(); }
-    ;
 
 check_init_command returns[cmd::Command_ptr res]
 @init { $res = NULL; }

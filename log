@@ -1,0 +1,972 @@
+yasmv - Yet Another Symbolic Model Verifier
+(c) 2011-2021, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
+https://github.com/mwolf76/yasmv
+
+[Sun Sep 11 18:44:51 2022 +639 ms] witness.cc:182 (Witness) D :: Created new witness: <Noname>, starting at time 0
+[Sun Sep 11 18:44:51 2022 +660 ms] src/main.cc:184 (main) T :: 2432 microcode fragments registered.
+[Sun Sep 11 18:44:51 2022 +660 ms] src/parse.cc:63 (parseFile) D :: Parsing smv file examples/maze/unsolvable8x8.smv ...
+[Sun Sep 11 18:44:51 2022 +660 ms] opts_mgr.cc:142 (set_word_width) T :: Setting word width to 6
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:43 (Module) D :: Initialized Module instance @0x556a3f852350
+[Sun Sep 11 18:44:51 2022 +661 ms] model.cc:53 (add_module) D :: Added module: `maze`
+[Sun Sep 11 18:44:51 2022 +661 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[64]` at 0x556a3f850a90
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:91 (add_var) D :: Module `maze`, added hidden frozen var `space`, of type `boolean[64]`
+[Sun Sep 11 18:44:51 2022 +661 ms] type_mgr.cc:354 (register_type) D :: Registering type `uint6` at 0x556a3f851200
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:91 (add_var) D :: Module `maze`, added var `x`, of type `uint6`
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:91 (add_var) D :: Module `maze`, added var `y`, of type `uint6`
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:134 (add_def) D :: Module maze, added hidden DEFINE `_`
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:134 (add_def) D :: Module maze, added hidden DEFINE `O`
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +661 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:182 (add_init) D :: Module `maze`, added INIT ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:134 (add_def) D :: Module maze, added DEFINE `addr`
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:134 (add_def) D :: Module maze, added DEFINE `eye`
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +662 ms] module.cc:194 (add_invar) D :: Module `maze`, added INVAR (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +663 ms] module.cc:134 (add_def) D :: Module maze, added hidden DEFINE `GOAL`
+[Sun Sep 11 18:44:51 2022 +663 ms] src/parse.cc:270 (reportParserStatus) D :: Parser terminated successfully in 0.00248s.
+[Sun Sep 11 18:44:51 2022 +663 ms] model_mgr.cc:114 (analyze_aux) D :: Analyzing INIT ::((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +663 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +663 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +663 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::(eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:141 (analyze_aux) D :: Analyzing INVAR ::(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +664 ms] model_mgr.cc:195 (analyze_aux) D :: Analyzing ::((x = 7) && (y = 7))
+[Sun Sep 11 18:44:51 2022 +665 ms] model_mgr.cc:195 (analyze_aux) D :: Analyzing ::space[addr]
+[Sun Sep 11 18:44:51 2022 +665 ms] model_mgr.cc:195 (analyze_aux) D :: Analyzing ::((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +665 ms] model_mgr.cc:195 (analyze_aux) D :: Analyzing ::TRUE
+[Sun Sep 11 18:44:51 2022 +665 ms] model_mgr.cc:195 (analyze_aux) D :: Analyzing ::FALSE
+[Sun Sep 11 18:44:51 2022 +665 ms] model_mgr.cc:224 (analyze_aux) D :: Type checking INIT ::((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +665 ms] type_mgr.cc:354 (register_type) D :: Registering type `const int6` at 0x556a3f8ec250
+[Sun Sep 11 18:44:51 2022 +667 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +667 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +667 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +668 ms] type_checker.cc:778 (walk_leaf) D :: Recurring in `FALSE`
+[Sun Sep 11 18:44:51 2022 +668 ms] type_checker.cc:778 (walk_leaf) D :: Recurring in `TRUE`
+[Sun Sep 11 18:44:51 2022 +668 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[2]` at 0x556a3f8ee2d0
+[Sun Sep 11 18:44:51 2022 +668 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[3]` at 0x556a3f8ee3c0
+[Sun Sep 11 18:44:51 2022 +668 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[4]` at 0x556a3f8ebc30
+[Sun Sep 11 18:44:51 2022 +668 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[5]` at 0x556a3f8ebd20
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[6]` at 0x556a3f8f2050
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[7]` at 0x556a3f8f2110
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[8]` at 0x556a3f8f21d0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[9]` at 0x556a3f8f1ed0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[10]` at 0x556a3f8f1fc0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[11]` at 0x556a3f8f0190
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[12]` at 0x556a3f8f0280
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[13]` at 0x556a3f8eff80
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[14]` at 0x556a3f8f0070
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[15]` at 0x556a3f8ef630
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[16]` at 0x556a3f8ef720
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[17]` at 0x556a3f8ef420
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[18]` at 0x556a3f8ef510
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[19]` at 0x556a3f8ee550
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[20]` at 0x556a3f8ee640
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[21]` at 0x556a3f8e8ec0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[22]` at 0x556a3f8e8fb0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[23]` at 0x556a3f8e8700
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[24]` at 0x556a3f8e87f0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[25]` at 0x556a3f8e8260
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[26]` at 0x556a3f8e8350
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[27]` at 0x556a3f8e84d0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[28]` at 0x556a3f8e85c0
+[Sun Sep 11 18:44:51 2022 +669 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[29]` at 0x556a3f84a470
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[30]` at 0x556a3f84a560
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[31]` at 0x556a3f8e96f0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[32]` at 0x556a3f8e97e0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[33]` at 0x556a3f8e98d0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[34]` at 0x556a3f8ed320
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[35]` at 0x556a3f8ed410
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[36]` at 0x556a3f8ed500
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[37]` at 0x556a3f8ed5f0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[38]` at 0x556a3f8f04f0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[39]` at 0x556a3f8f05e0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[40]` at 0x556a3f8f06d0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[41]` at 0x556a3f8f07c0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[42]` at 0x556a3f8f1a80
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[43]` at 0x556a3f8f1b70
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[44]` at 0x556a3f8f1c60
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[45]` at 0x556a3f8f1d50
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[46]` at 0x556a3f8e92e0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[47]` at 0x556a3f8e93d0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[48]` at 0x556a3f8e94c0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[49]` at 0x556a3f8e95b0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[50]` at 0x556a3f8ef9c0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[51]` at 0x556a3f8efab0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[52]` at 0x556a3f8efba0
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[53]` at 0x556a3f8efc90
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[54]` at 0x556a3f8efd80
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[55]` at 0x556a3f84a920
+[Sun Sep 11 18:44:51 2022 +670 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[56]` at 0x556a3f84aa10
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[57]` at 0x556a3f84ab00
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[58]` at 0x556a3f84abf0
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[59]` at 0x556a3f84ace0
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[60]` at 0x556a3f84add0
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[61]` at 0x556a3f8f0a30
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[62]` at 0x556a3f8f0f30
+[Sun Sep 11 18:44:51 2022 +671 ms] type_mgr.cc:354 (register_type) D :: Registering type `boolean[63]` at 0x556a3f8f1020
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::(eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +671 ms] type_checker.cc:778 (walk_leaf) D :: Recurring in `space[addr]`
+[Sun Sep 11 18:44:51 2022 +671 ms] type_checker.cc:778 (walk_leaf) D :: Recurring in `((8 * y) + x)`
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +671 ms] model_mgr.cc:251 (analyze_aux) D :: Type checking INVAR ::(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:306 (analyze_aux) D :: Type checking ::((x = 7) && (y = 7))
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:306 (analyze_aux) D :: Type checking ::space[addr]
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:306 (analyze_aux) D :: Type checking ::((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:306 (analyze_aux) D :: Type checking ::TRUE
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:306 (analyze_aux) D :: Type checking ::FALSE
+[Sun Sep 11 18:44:51 2022 +672 ms] analyzer.cc:91 (generate_framing_conditions) D :: Generating framing conditions ...
+[Sun Sep 11 18:44:51 2022 +672 ms] model_mgr.cc:425 (analyze) T :: Model analysis complete
+
+<< Ok
+[Sun Sep 11 18:44:51 2022 +672 ms] src/parse.cc:116 (parseCommand) D :: Parsing command ...
+[Sun Sep 11 18:44:51 2022 +672 ms] src/parse.cc:270 (reportParserStatus) D :: Parser terminated successfully in 0.000112s.
+[Sun Sep 11 18:44:51 2022 +672 ms] preprocessor.cc:49 (Preprocessor) D :: Created Preprocessor @0x7ffe64d35ea0
+[Sun Sep 11 18:44:51 2022 +672 ms] base.cc:120 (process_init) D :: processing INIT ::((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +672 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +672 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 0, expr: x
+[Sun Sep 11 18:44:51 2022 +672 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 0, expr: y
+[Sun Sep 11 18:44:51 2022 +672 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((x = 0) && (y = 0))
+[Sun Sep 11 18:44:51 2022 +673 ms] base.cc:144 (process_invar) D :: processing INVAR ::((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((0 <= x) && (0 <= y))
+[Sun Sep 11 18:44:51 2022 +673 ms] base.cc:144 (process_invar) D :: processing INVAR ::((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((x <= 7) && (y <= 7))
+[Sun Sep 11 18:44:51 2022 +674 ms] base.cc:144 (process_invar) D :: processing INVAR ::(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +674 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +675 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type boolean[64] for time: 2147483647, expr: space
+[Sun Sep 11 18:44:51 2022 +676 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +679 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +680 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +680 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: (space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])
+[Sun Sep 11 18:44:51 2022 +680 ms] base.cc:144 (process_invar) D :: processing INVAR ::(eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +680 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +680 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: (eye = FALSE)
+[Sun Sep 11 18:44:51 2022 +681 ms] base.cc:144 (process_invar) D :: processing INVAR ::((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 1, expr: x
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 2, expr: x
+[Sun Sep 11 18:44:51 2022 +681 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((x < next(x)) -> ((next(x) - x) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] base.cc:144 (process_invar) D :: processing INVAR ::((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +682 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((next(x) < x) -> ((x - next(x)) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] base.cc:144 (process_invar) D :: processing INVAR ::((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 1, expr: y
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 2, expr: y
+[Sun Sep 11 18:44:51 2022 +683 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((y < next(y)) -> ((next(y) - y) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] base.cc:144 (process_invar) D :: processing INVAR ::((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +684 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +685 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +685 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +685 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: ((next(y) < y) -> ((y - next(y)) = 1))
+[Sun Sep 11 18:44:51 2022 +685 ms] base.cc:144 (process_invar) D :: processing INVAR ::(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +685 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +685 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 3, expr: x
+[Sun Sep 11 18:44:51 2022 +686 ms] internals.cc:419 (find_encoding) D :: Registering new encoding of type uint6 for time: 4, expr: y
+[Sun Sep 11 18:44:51 2022 +686 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +686 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +686 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +686 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: (((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))
+[Sun Sep 11 18:44:51 2022 +687 ms] base.cc:109 (Algorithm) T :: Base setup completed
+[Sun Sep 11 18:44:51 2022 +687 ms] reach.cc:42 (Reachability) T :: Created Reachability @0x7ffe64d35cd0
+[Sun Sep 11 18:44:51 2022 +687 ms] reach.cc:100 (process) T :: 0 additional constraints were provided: 0 forward, 0 backward, 0 global.
+[Sun Sep 11 18:44:51 2022 +687 ms] reach.cc:127 (process) T :: Compiling target `GOAL` ...
+[Sun Sep 11 18:44:51 2022 +687 ms] internals.cc:277 (build_encodings) D :: (pass 1/5) building encodings for `` (@0x556a3f843d30) :: GOAL
+[Sun Sep 11 18:44:51 2022 +687 ms] internals.cc:297 (compile) D :: (pass 2/5) compiling for `` (@0x556a3f843d30) :: GOAL
+[Sun Sep 11 18:44:51 2022 +687 ms] internals.cc:317 (check_internals) D :: (pass 3/5) checking internals for `` (@0x556a3f843d30) :: GOAL
+[Sun Sep 11 18:44:51 2022 +687 ms] internals.cc:343 (activate_ite_muxes) D :: (pass 4/5) activating ITE MUXes for `` (@0x556a3f843d30) :: GOAL
+[Sun Sep 11 18:44:51 2022 +687 ms] internals.cc:380 (activate_array_muxes) D :: (pass 4/5) activating array MUXes for  `` (@0x556a3f843d30) :: GOAL
+[Sun Sep 11 18:44:51 2022 +687 ms] reach.cc:158 (process) T :: Forward strategies enabled
+[Sun Sep 11 18:44:51 2022 +687 ms] reach.cc:169 (process) T :: Backward strategies enabled
+[Sun Sep 11 18:44:51 2022 +687 ms] engine_mgr.cc:59 (register_instance) D :: Registered engine instance@0x7fd71592d590
+[Sun Sep 11 18:44:51 2022 +687 ms] engine.cc:51 (Engine) D :: Initialized Engine instance @0x7fd71592d590
+[Sun Sep 11 18:44:51 2022 +687 ms] base.cc:192 (assert_fsm_init) T :: asserting  1 INIT constraints @0(group = 0)
+[Sun Sep 11 18:44:51 2022 +687 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((x = 0) && (y = 0))}
+[Sun Sep 11 18:44:51 2022 +688 ms] engine.cc:141 (push) D :: pushing 2 inlined ops for @0{((x = 0) && (y = 0))}
+[Sun Sep 11 18:44:51 2022 +688 ms] inlining.cc:139 (clauses) D :: Loading clauses for ueq6, generated "2021-07-16T08:44:02.632339+00:00"[Sun Sep 11 18:44:51 2022 +688 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @0(group = 0)
+[Sun Sep 11 18:44:51 2022 +688 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +688 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @0{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +688 ms] inlining.cc:139 (clauses) D :: Loading clauses for ule6, generated "2021-07-16T08:44:02.555544+00:00"[Sun Sep 11 18:44:51 2022 +689 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +689 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @0{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +689 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +690 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @0{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +690 ms] inlining.cc:139 (clauses) D :: Loading clauses for ueq1, generated "2021-07-16T08:44:00.049228+00:00"[Sun Sep 11 18:44:51 2022 +691 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +691 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @0{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +692 ms] inlining.cc:139 (clauses) D :: Loading clauses for umul6, generated "2021-07-16T08:44:02.249414+00:00"[Sun Sep 11 18:44:51 2022 +693 ms] inlining.cc:139 (clauses) D :: Loading clauses for uadd6, generated "2021-07-16T08:44:02.194823+00:00"[Sun Sep 11 18:44:51 2022 +693 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +693 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @0{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +693 ms] inlining.cc:139 (clauses) D :: Loading clauses for ult6, generated "2021-07-16T08:44:02.529676+00:00"[Sun Sep 11 18:44:51 2022 +694 ms] inlining.cc:139 (clauses) D :: Loading clauses for usub6, generated "2021-07-16T08:44:02.221130+00:00"[Sun Sep 11 18:44:51 2022 +694 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +694 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @0{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +695 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +695 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @0{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +696 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +696 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @0{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +696 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +697 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @0{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +697 ms] inlining.cc:139 (clauses) D :: Loading clauses for une6, generated "2021-07-16T08:44:02.658268+00:00"[Sun Sep 11 18:44:51 2022 +697 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +698 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.000791 seconds. Status is SAT.
+[Sun Sep 11 18:44:51 2022 +698 ms] fast_forward.cc:79 (fast_forward_strategy) I :: INIT consistency check ok.
+[Sun Sep 11 18:44:51 2022 +698 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 686
+[Sun Sep 11 18:44:51 2022 +698 ms] base.cc:370 (assert_formula) I :: asserting formula at time 0: GOAL
+[Sun Sep 11 18:44:51 2022 +698 ms] engine.cc:119 (push) D :: pushing 1 DDs for @0{GOAL}
+[Sun Sep 11 18:44:51 2022 +698 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @0{GOAL}
+[Sun Sep 11 18:44:51 2022 +698 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 0)...
+[Sun Sep 11 18:44:51 2022 +698 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +698 ms] engine.cc:97 (sat_solve_groups) D :: Took 2.8e-05 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +698 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 0)...
+[Sun Sep 11 18:44:51 2022 +698 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @0(group = 0)
+[Sun Sep 11 18:44:51 2022 +699 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @1(group = 0)
+[Sun Sep 11 18:44:51 2022 +699 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +699 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @1{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +699 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +699 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @1{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +699 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +700 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @1{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +701 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +701 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @1{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +702 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +702 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @1{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +702 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +702 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @1{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +703 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +703 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @1{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +704 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +704 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @1{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +705 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +705 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @1{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +705 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 1...
+[Sun Sep 11 18:44:51 2022 +705 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 1300
+[Sun Sep 11 18:44:51 2022 +705 ms] base.cc:370 (assert_formula) I :: asserting formula at time 1: GOAL
+[Sun Sep 11 18:44:51 2022 +705 ms] engine.cc:119 (push) D :: pushing 1 DDs for @1{GOAL}
+[Sun Sep 11 18:44:51 2022 +706 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @1{GOAL}
+[Sun Sep 11 18:44:51 2022 +706 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 1)...
+[Sun Sep 11 18:44:51 2022 +706 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.000902 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +707 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 1)...
+[Sun Sep 11 18:44:51 2022 +707 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @1(group = 0)
+[Sun Sep 11 18:44:51 2022 +707 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @2(group = 0)
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @2{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @2{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +707 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +708 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @2{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +709 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +709 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @2{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +710 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +710 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @2{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +711 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +711 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @2{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +711 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +711 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @2{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +712 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +712 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @2{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +713 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +713 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @2{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +714 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 2...
+[Sun Sep 11 18:44:51 2022 +714 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 1914
+[Sun Sep 11 18:44:51 2022 +714 ms] base.cc:370 (assert_formula) I :: asserting formula at time 2: GOAL
+[Sun Sep 11 18:44:51 2022 +714 ms] engine.cc:119 (push) D :: pushing 1 DDs for @2{GOAL}
+[Sun Sep 11 18:44:51 2022 +714 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @2{GOAL}
+[Sun Sep 11 18:44:51 2022 +714 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 2)...
+[Sun Sep 11 18:44:51 2022 +714 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +715 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001129 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +715 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 2)...
+[Sun Sep 11 18:44:51 2022 +715 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @2(group = 0)
+[Sun Sep 11 18:44:51 2022 +715 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @3(group = 0)
+[Sun Sep 11 18:44:51 2022 +715 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +715 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @3{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +716 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +716 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @3{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +716 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +717 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @3{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +718 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +718 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @3{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +719 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +719 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @3{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +719 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +719 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @3{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +720 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +720 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @3{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +721 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +721 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @3{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +721 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +722 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @3{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +722 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 3...
+[Sun Sep 11 18:44:51 2022 +722 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 2528
+[Sun Sep 11 18:44:51 2022 +722 ms] base.cc:370 (assert_formula) I :: asserting formula at time 3: GOAL
+[Sun Sep 11 18:44:51 2022 +722 ms] engine.cc:119 (push) D :: pushing 1 DDs for @3{GOAL}
+[Sun Sep 11 18:44:51 2022 +722 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @3{GOAL}
+[Sun Sep 11 18:44:51 2022 +722 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 3)...
+[Sun Sep 11 18:44:51 2022 +722 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +723 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001103 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +724 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 3)...
+[Sun Sep 11 18:44:51 2022 +724 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @3(group = 0)
+[Sun Sep 11 18:44:51 2022 +724 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @4(group = 0)
+[Sun Sep 11 18:44:51 2022 +724 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +724 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @4{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +724 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +724 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @4{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +724 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +725 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @4{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +726 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +726 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @4{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +727 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +727 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @4{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +727 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +727 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @4{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +728 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +728 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @4{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +729 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +729 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @4{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +729 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +730 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @4{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +730 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 4...
+[Sun Sep 11 18:44:51 2022 +730 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 3142
+[Sun Sep 11 18:44:51 2022 +730 ms] base.cc:370 (assert_formula) I :: asserting formula at time 4: GOAL
+[Sun Sep 11 18:44:51 2022 +730 ms] engine.cc:119 (push) D :: pushing 1 DDs for @4{GOAL}
+[Sun Sep 11 18:44:51 2022 +730 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @4{GOAL}
+[Sun Sep 11 18:44:51 2022 +730 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 4)...
+[Sun Sep 11 18:44:51 2022 +730 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001141 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +732 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 4)...
+[Sun Sep 11 18:44:51 2022 +732 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @4(group = 0)
+[Sun Sep 11 18:44:51 2022 +732 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @5(group = 0)
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @5{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @5{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +732 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +733 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @5{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +734 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +734 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @5{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +735 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +735 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @5{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +735 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +735 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @5{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +736 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +736 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @5{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +737 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +737 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @5{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +738 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +738 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @5{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +738 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 5...
+[Sun Sep 11 18:44:51 2022 +738 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 3756
+[Sun Sep 11 18:44:51 2022 +738 ms] base.cc:370 (assert_formula) I :: asserting formula at time 5: GOAL
+[Sun Sep 11 18:44:51 2022 +738 ms] engine.cc:119 (push) D :: pushing 1 DDs for @5{GOAL}
+[Sun Sep 11 18:44:51 2022 +738 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @5{GOAL}
+[Sun Sep 11 18:44:51 2022 +739 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 5)...
+[Sun Sep 11 18:44:51 2022 +739 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +740 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001403 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +740 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 5)...
+[Sun Sep 11 18:44:51 2022 +740 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @5(group = 0)
+[Sun Sep 11 18:44:51 2022 +740 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @6(group = 0)
+[Sun Sep 11 18:44:51 2022 +740 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +740 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @6{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +740 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +740 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @6{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +741 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +742 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @6{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +742 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +742 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @6{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +743 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +743 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @6{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +744 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +744 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @6{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +744 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +744 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @6{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +745 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +745 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @6{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +746 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +746 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @6{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +747 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 6...
+[Sun Sep 11 18:44:51 2022 +747 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 4370
+[Sun Sep 11 18:44:51 2022 +747 ms] base.cc:370 (assert_formula) I :: asserting formula at time 6: GOAL
+[Sun Sep 11 18:44:51 2022 +747 ms] engine.cc:119 (push) D :: pushing 1 DDs for @6{GOAL}
+[Sun Sep 11 18:44:51 2022 +747 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @6{GOAL}
+[Sun Sep 11 18:44:51 2022 +747 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 6)...
+[Sun Sep 11 18:44:51 2022 +747 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001554 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +749 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 6)...
+[Sun Sep 11 18:44:51 2022 +749 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @6(group = 0)
+[Sun Sep 11 18:44:51 2022 +749 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @7(group = 0)
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @7{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @7{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +749 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +750 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @7{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +751 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +751 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @7{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +752 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +752 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @7{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +752 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +752 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @7{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +753 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +753 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @7{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +754 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +754 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @7{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +755 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +755 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @7{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +755 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 7...
+[Sun Sep 11 18:44:51 2022 +755 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 4984
+[Sun Sep 11 18:44:51 2022 +755 ms] base.cc:370 (assert_formula) I :: asserting formula at time 7: GOAL
+[Sun Sep 11 18:44:51 2022 +755 ms] engine.cc:119 (push) D :: pushing 1 DDs for @7{GOAL}
+[Sun Sep 11 18:44:51 2022 +756 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @7{GOAL}
+[Sun Sep 11 18:44:51 2022 +756 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 7)...
+[Sun Sep 11 18:44:51 2022 +756 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +757 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001336 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +757 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 7)...
+[Sun Sep 11 18:44:51 2022 +757 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @7(group = 0)
+[Sun Sep 11 18:44:51 2022 +757 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @8(group = 0)
+[Sun Sep 11 18:44:51 2022 +757 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +757 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @8{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +757 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +758 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @8{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +758 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +759 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @8{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +760 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +760 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @8{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +760 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +760 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @8{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +761 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +761 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @8{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +762 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +762 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @8{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +763 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +763 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @8{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +763 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +764 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @8{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +764 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 8...
+[Sun Sep 11 18:44:51 2022 +764 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 5598
+[Sun Sep 11 18:44:51 2022 +764 ms] base.cc:370 (assert_formula) I :: asserting formula at time 8: GOAL
+[Sun Sep 11 18:44:51 2022 +764 ms] engine.cc:119 (push) D :: pushing 1 DDs for @8{GOAL}
+[Sun Sep 11 18:44:51 2022 +764 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @8{GOAL}
+[Sun Sep 11 18:44:51 2022 +764 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 8)...
+[Sun Sep 11 18:44:51 2022 +764 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +766 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.00157 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +766 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 8)...
+[Sun Sep 11 18:44:51 2022 +766 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @8(group = 0)
+[Sun Sep 11 18:44:51 2022 +766 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @9(group = 0)
+[Sun Sep 11 18:44:51 2022 +766 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +766 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @9{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +766 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +766 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @9{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +767 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +767 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @9{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +768 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +768 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @9{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +769 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +769 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @9{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +770 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +770 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @9{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +770 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +770 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @9{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +771 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +771 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @9{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +772 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +772 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @9{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +772 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 9...
+[Sun Sep 11 18:44:51 2022 +773 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 6212
+[Sun Sep 11 18:44:51 2022 +773 ms] base.cc:370 (assert_formula) I :: asserting formula at time 9: GOAL
+[Sun Sep 11 18:44:51 2022 +773 ms] engine.cc:119 (push) D :: pushing 1 DDs for @9{GOAL}
+[Sun Sep 11 18:44:51 2022 +773 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @9{GOAL}
+[Sun Sep 11 18:44:51 2022 +773 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 9)...
+[Sun Sep 11 18:44:51 2022 +773 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +776 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.00288 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +776 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 9)...
+[Sun Sep 11 18:44:51 2022 +776 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @9(group = 0)
+[Sun Sep 11 18:44:51 2022 +776 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @10(group = 0)
+[Sun Sep 11 18:44:51 2022 +776 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +776 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @10{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +776 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +776 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @10{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +777 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +777 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @10{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +778 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +778 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @10{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +779 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +779 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @10{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +779 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +780 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @10{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +780 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +780 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @10{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +781 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +781 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @10{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +782 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +782 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @10{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +782 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 10...
+[Sun Sep 11 18:44:51 2022 +782 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 6826
+[Sun Sep 11 18:44:51 2022 +782 ms] base.cc:370 (assert_formula) I :: asserting formula at time 10: GOAL
+[Sun Sep 11 18:44:51 2022 +782 ms] engine.cc:119 (push) D :: pushing 1 DDs for @10{GOAL}
+[Sun Sep 11 18:44:51 2022 +782 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @10{GOAL}
+[Sun Sep 11 18:44:51 2022 +783 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 10)...
+[Sun Sep 11 18:44:51 2022 +783 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.003967 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +787 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 10)...
+[Sun Sep 11 18:44:51 2022 +787 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @10(group = 0)
+[Sun Sep 11 18:44:51 2022 +787 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @11(group = 0)
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @11{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @11{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +787 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +788 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @11{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +789 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +789 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @11{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +790 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +790 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @11{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +791 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +791 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @11{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +791 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +791 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @11{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +792 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +792 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @11{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +793 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +793 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @11{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +794 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 11...
+[Sun Sep 11 18:44:51 2022 +794 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 7440
+[Sun Sep 11 18:44:51 2022 +794 ms] base.cc:370 (assert_formula) I :: asserting formula at time 11: GOAL
+[Sun Sep 11 18:44:51 2022 +794 ms] engine.cc:119 (push) D :: pushing 1 DDs for @11{GOAL}
+[Sun Sep 11 18:44:51 2022 +794 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @11{GOAL}
+[Sun Sep 11 18:44:51 2022 +794 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 11)...
+[Sun Sep 11 18:44:51 2022 +794 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.007703 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +802 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 11)...
+[Sun Sep 11 18:44:51 2022 +802 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @11(group = 0)
+[Sun Sep 11 18:44:51 2022 +802 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @12(group = 0)
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @12{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @12{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +802 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +803 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @12{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +804 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +804 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @12{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +805 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +805 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @12{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +805 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +805 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @12{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +806 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +806 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @12{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +807 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +807 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @12{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +808 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +808 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @12{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +808 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 12...
+[Sun Sep 11 18:44:51 2022 +808 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 8054
+[Sun Sep 11 18:44:51 2022 +808 ms] base.cc:370 (assert_formula) I :: asserting formula at time 12: GOAL
+[Sun Sep 11 18:44:51 2022 +808 ms] engine.cc:119 (push) D :: pushing 1 DDs for @12{GOAL}
+[Sun Sep 11 18:44:51 2022 +809 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @12{GOAL}
+[Sun Sep 11 18:44:51 2022 +809 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 12)...
+[Sun Sep 11 18:44:51 2022 +809 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +816 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.007477 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +816 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 12)...
+[Sun Sep 11 18:44:51 2022 +816 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @12(group = 0)
+[Sun Sep 11 18:44:51 2022 +816 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @13(group = 0)
+[Sun Sep 11 18:44:51 2022 +816 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +816 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @13{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +817 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +817 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @13{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +817 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +818 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @13{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +819 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +819 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @13{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +819 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +820 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @13{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +820 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +820 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @13{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +821 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +821 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @13{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +821 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +821 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @13{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +822 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +822 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @13{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +823 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 13...
+[Sun Sep 11 18:44:51 2022 +823 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 8668
+[Sun Sep 11 18:44:51 2022 +823 ms] base.cc:370 (assert_formula) I :: asserting formula at time 13: GOAL
+[Sun Sep 11 18:44:51 2022 +823 ms] engine.cc:119 (push) D :: pushing 1 DDs for @13{GOAL}
+[Sun Sep 11 18:44:51 2022 +823 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @13{GOAL}
+[Sun Sep 11 18:44:51 2022 +823 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 13)...
+[Sun Sep 11 18:44:51 2022 +823 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +833 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.010191 seconds. Status is UNSAT.
+[Sun Sep 11 18:44:51 2022 +833 ms] fast_forward.cc:141 (fast_forward_strategy) I :: No reachability witness found (k = 13)...
+[Sun Sep 11 18:44:51 2022 +833 ms] base.cc:222 (assert_fsm_trans) T :: asserting  0 TRANS constraints @13(group = 0)
+[Sun Sep 11 18:44:51 2022 +833 ms] base.cc:207 (assert_fsm_invar) T :: asserting  9 INVAR constraints @14(group = 0)
+[Sun Sep 11 18:44:51 2022 +833 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +833 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @14{((0 <= x) && (0 <= y))}
+[Sun Sep 11 18:44:51 2022 +834 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +834 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @14{((x <= 7) && (y <= 7))}
+[Sun Sep 11 18:44:51 2022 +834 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +835 ms] engine.cc:141 (push) D :: pushing 64 inlined ops for @14{(space = [_, _, O, O, _, O, O, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, O, _, O, _, _, _, O, _, _, _, _, O, O, _, O, O, _, _, _, _, O, _, O, _, _, O, O, _, _, _, O, _, _, _, _, _, O, O, O, _])}
+[Sun Sep 11 18:44:51 2022 +836 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +836 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @14{(eye = FALSE)}
+[Sun Sep 11 18:44:51 2022 +837 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +837 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @14{((x < next(x)) -> ((next(x) - x) = 1))}
+[Sun Sep 11 18:44:51 2022 +837 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +837 ms] engine.cc:141 (push) D :: pushing 5 inlined ops for @14{((next(x) < x) -> ((x - next(x)) = 1))}
+[Sun Sep 11 18:44:51 2022 +838 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +838 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @14{((y < next(y)) -> ((next(y) - y) = 1))}
+[Sun Sep 11 18:44:51 2022 +839 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +839 ms] engine.cc:141 (push) D :: pushing 9 inlined ops for @14{((next(y) < y) -> ((y - next(y)) = 1))}
+[Sun Sep 11 18:44:51 2022 +839 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +840 ms] engine.cc:141 (push) D :: pushing 8 inlined ops for @14{(((next(x) != x) && (next(y) = y)) || ((next(x) = x) && (next(y) != y)))}
+[Sun Sep 11 18:44:51 2022 +840 ms] fast_forward.cc:172 (fast_forward_strategy) T :: Done with k = 14...
+[Sun Sep 11 18:44:51 2022 +840 ms] ../../../src/sat/engine.hh:50 (new_group) D :: Created new group var 9282
+[Sun Sep 11 18:44:51 2022 +840 ms] base.cc:370 (assert_formula) I :: asserting formula at time 14: GOAL
+[Sun Sep 11 18:44:51 2022 +840 ms] engine.cc:119 (push) D :: pushing 1 DDs for @14{GOAL}
+[Sun Sep 11 18:44:51 2022 +840 ms] engine.cc:141 (push) D :: pushing 3 inlined ops for @14{GOAL}
+[Sun Sep 11 18:44:51 2022 +840 ms] fast_forward.cc:92 (fast_forward_strategy) I :: Now looking for reachability witness (k = 14)...
+[Sun Sep 11 18:44:51 2022 +840 ms] engine.cc:79 (sat_solve_groups) D :: Solving ...
+[Sun Sep 11 18:44:51 2022 +842 ms] engine.cc:97 (sat_solve_groups) D :: Took 0.001989 seconds. Status is SAT.
+[Sun Sep 11 18:44:51 2022 +842 ms] fast_forward.cc:103 (fast_forward_strategy) I :: Reachability witness exists (k = 14), target `GOAL` is REACHABLE.
+[Sun Sep 11 18:44:51 2022 +842 ms] witness.cc:182 (Witness) D :: Created new witness: <Noname>, starting at time 0
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 1 to witness <Noname> @0x7fd7100370c0
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: x := 0
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: y := 0
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +843 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 2 to witness <Noname> @0x7fd710025a40
+[Sun Sep 11 18:44:51 2022 +843 ms] witness.cc:135 (set_value) D :: x := 1
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: y := 0
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +844 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 3 to witness <Noname> @0x7fd71002e870
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: x := 2
+[Sun Sep 11 18:44:51 2022 +844 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: y := 0
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +845 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 4 to witness <Noname> @0x7fd710011880
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: x := 3
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: y := 0
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +845 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +846 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 5 to witness <Noname> @0x7fd71001a4a0
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: x := 4
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: y := 0
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +846 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +846 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 6 to witness <Noname> @0x7fd7100128e0
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: x := 4
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: y := 1
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +847 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 7 to witness <Noname> @0x7fd71000cc10
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: x := 5
+[Sun Sep 11 18:44:51 2022 +847 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: y := 1
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +848 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 8 to witness <Noname> @0x7fd7101088b0
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: x := 6
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +848 ms] witness.cc:135 (set_value) D :: y := 1
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +849 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 9 to witness <Noname> @0x7fd710108d40
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: y := 1
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +849 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +849 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 10 to witness <Noname> @0x7fd710109260
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: y := 2
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +850 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 11 to witness <Noname> @0x7fd7101096f0
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +850 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: y := 3
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +851 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 12 to witness <Noname> @0x7fd710109b80
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +851 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: y := 4
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +852 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 13 to witness <Noname> @0x7fd71010a010
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: y := 5
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +852 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +853 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 14 to witness <Noname> @0x7fd71010a4a0
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: y := 6
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +853 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:211 (extend) D :: Added empty TimeFrame 15 to witness <Noname> @0x7fd71010a930
+[Sun Sep 11 18:44:51 2022 +853 ms] witness.cc:135 (set_value) D :: x := 7
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: space := [FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE]
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: y := 7
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: _ := FALSE
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: O := TRUE
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: addr := 0
+[Sun Sep 11 18:44:51 2022 +854 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: eye := FALSE
+[Sun Sep 11 18:44:51 2022 +854 ms] witness.cc:135 (set_value) D :: GOAL := FALSE
+[Sun Sep 11 18:44:51 2022 +854 ms] fast_forward.cc:181 (fast_forward_strategy) I :: Solver: `fast_forward`, solves: 16, starts: 24, decs: 1983, rnd decs: 110, props: 311483, conflicts: 1356, dec vars: 7119, clause lits: 21762, learnt lits: 10808, max lits: 13158, tot lits: 10836
+[Sun Sep 11 18:44:51 2022 +854 ms] engine_mgr.cc:75 (unregister_instance) D :: Unregistered engine instance@0x7fd71592d590
+-- Target is reachable, registered witness `reach_1`, 15 steps.
+[Sun Sep 11 18:44:51 2022 +856 ms] reach.cc:51 (~Reachability) T :: Destroyed Reachability @0x7ffe64d35cd0
+[Sun Sep 11 18:44:51 2022 +856 ms] preprocessor.cc:59 (~Preprocessor) D :: Destroying Preprocessor @0x7ffe64d35ea0
+[Sun Sep 11 18:44:51 2022 +856 ms] src/parse.cc:116 (parseCommand) D :: Parsing command ...
+[Sun Sep 11 18:44:51 2022 +856 ms] src/parse.cc:270 (reportParserStatus) D :: Parser terminated successfully in 0.000121s.
+[Sun Sep 11 18:44:51 2022 +856 ms] on.cc:73 (operator()) T :: condition holds, triggering `then` action.
+-- Reachability witness for target `GOAL` in module `maze`
+Witness: reach_1
+
+:: @0
+[Sun Sep 11 18:44:51 2022 +856 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 0
+   y = 0
+
+-- defines
+   addr = 0
+   eye = FALSE
+
+:: @1
+[Sun Sep 11 18:44:51 2022 +856 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 1
+   y = 0
+
+-- defines
+   addr = 1
+   eye = FALSE
+
+:: @2
+[Sun Sep 11 18:44:51 2022 +857 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 2
+   y = 0
+
+-- defines
+   addr = 2
+   eye = TRUE
+
+:: @3
+[Sun Sep 11 18:44:51 2022 +857 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 3
+   y = 0
+
+-- defines
+   addr = 3
+   eye = TRUE
+
+:: @4
+[Sun Sep 11 18:44:51 2022 +857 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 4
+   y = 0
+
+-- defines
+   addr = 4
+   eye = FALSE
+
+:: @5
+[Sun Sep 11 18:44:51 2022 +857 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 4
+   y = 1
+
+-- defines
+   addr = 12
+   eye = FALSE
+
+:: @6
+[Sun Sep 11 18:44:51 2022 +857 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 5
+   y = 1
+
+-- defines
+   addr = 13
+   eye = FALSE
+
+:: @7
+[Sun Sep 11 18:44:51 2022 +858 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 6
+   y = 1
+
+-- defines
+   addr = 14
+   eye = FALSE
+
+:: @8
+[Sun Sep 11 18:44:51 2022 +858 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 1
+
+-- defines
+   addr = 15
+   eye = FALSE
+
+:: @9
+[Sun Sep 11 18:44:51 2022 +858 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 2
+
+-- defines
+   addr = 23
+   eye = FALSE
+
+:: @10
+[Sun Sep 11 18:44:51 2022 +858 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 3
+
+-- defines
+   addr = 31
+   eye = FALSE
+
+:: @11
+[Sun Sep 11 18:44:51 2022 +858 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 4
+
+-- defines
+   addr = 39
+   eye = TRUE
+
+:: @12
+[Sun Sep 11 18:44:51 2022 +859 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 5
+
+-- defines
+   addr = 47
+   eye = FALSE
+
+:: @13
+[Sun Sep 11 18:44:51 2022 +859 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 6
+
+-- defines
+   addr = 55
+   eye = FALSE
+
+:: @14
+[Sun Sep 11 18:44:51 2022 +859 ms] internals.cc:225 (walk_leaf) D :: Inlining `addr` := ((8 * y) + x)
+-- state
+   x = 7
+   y = 7
+
+-- defines
+   addr = 63
+   eye = FALSE
+
+[Sun Sep 11 18:44:51 2022 +859 ms] src/parse.cc:116 (parseCommand) D :: Parsing command ...
+[Sun Sep 11 18:44:51 2022 +859 ms] src/parse.cc:270 (reportParserStatus) D :: Parser terminated successfully in 0.000108s.
+[Sun Sep 11 18:44:51 2022 +859 ms] src/parse.cc:116 (parseCommand) D :: Parsing command ...
+[Sun Sep 11 18:44:51 2022 +859 ms] src/parse.cc:270 (reportParserStatus) D :: Parser terminated successfully in 1.64e-05s.
