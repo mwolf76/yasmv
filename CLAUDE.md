@@ -58,7 +58,7 @@ diff -wB examples/maze/solvable8x8.out out
 4. **Encoding** (`src/enc/`) - Manages encoding schemes (algebraic, monolithic, TCBI/UCBI)
 5. **SAT Engine** (`src/sat/`) - MiniSat-based SAT solving with CNF encoding
 6. **Algorithms** (`src/algorithms/`) - Core verification algorithms:
-   - `check/` - Model checking (init, trans, ltl)
+   - `check/` - Consistency checking for INITial states, TRANSition relations, and constraints.
    - `reach/` - Forward/backward reachability
    - `sim/` - Simulation
 7. **Decision Diagrams** (`src/dd/`) - CUDD 2.5.0 for BDD/ADD manipulation

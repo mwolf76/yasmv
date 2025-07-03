@@ -947,10 +947,7 @@ commands [cmd::CommandVector_ptr cmds]
 
 command_topic returns [cmd::CommandTopic_ptr res]
 @init { $res = NULL; }
-    :  c=check_command_topic
-       { $res = c; }
-
-    |  c=check_init_command_topic
+    :  c=check_init_command_topic
        { $res = c; }
 
     |  c=check_trans_command_topic
@@ -1237,12 +1234,6 @@ dump_model_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_dump_model(); }
     ;
 
-
-check_command_topic returns[cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
-    : 'check'
-       { $res = cm.topic_check(); }
-    ;
 
 check_init_command returns[cmd::Command_ptr res]
 @init { $res = NULL; }
