@@ -1,0 +1,23 @@
+# Build artifacts
+*.c
+*.o
+
+# LLVM IR files
+*.ll
+
+# SMV output files
+*.smv
+
+# Editor files
+*~
+.*.swp
+.*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.pro.user
+
+# OS files
+.DS_Store
+Thumbs.db
