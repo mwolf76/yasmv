@@ -1,0 +1,96 @@
+name: Test Debian Package Build
+
+on:
+  push:
+    branches: [ master, develop ]
+    paths:
+      - 'debian/**'
+      - 'src/**'
+      - '**.cc'
+      - '**.hh'
+      - '**.h'
+      - '**.c'
+      - 'configure.ac'
+      - 'Makefile.am'
+      - '.github/workflows/test-deb-build.yml'
+  pull_request:
+    branches: [ master, develop ]
+    paths:
+      - 'debian/**'
+      - 'src/**'
+      - '**.cc'
+      - '**.hh'
+      - '**.h'
+      - '**.c'
+      - 'configure.ac'
+      - 'Makefile.am'
+      - '.github/workflows/test-deb-build.yml'
+
+jobs:
+  test-deb-build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          debhelper \
+          devscripts \
+          libboost-all-dev \
+          libjsoncpp-dev \
+          antlr3 \
+          libantlr3c-dev \
+          minisat \
+          zlib1g-dev \
+          libyaml-cpp-dev \
+          openjdk-11-jdk \
+          autoconf \
+          libtool
+    
+    - name: Setup build environment
+      run: ./setup.sh
+      
+    - name: Build Debian package
+      run: |
+        # Build the package without updating version
+        dpkg-buildpackage -us -uc -b
+        # Move generated packages to a safe location
+        mkdir -p debian-packages
+        mv ../*.deb debian-packages/ || true
+        
+    - name: List generated packages
+      run: |
+        echo "Generated packages:"
+        ls -la debian-packages/*.deb || echo "No packages found"
+        
+    - name: Test package installation
+      run: |
+        sudo dpkg -i debian-packages/yasmv_*.deb || true
+        sudo apt-get install -f -y  # Fix any dependency issues
+        
+    - name: Test installed binary
+      run: |
+        # Extract and set up microcode for testing
+        tar xfj microcode.tar.bz2
+        export YASMV_HOME=$(pwd)
+        
+        # Test that yasmv runs
+        which yasmv
+        yasmv --version || true
+        
+    - name: Upload test packages
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-debian-packages-${{ matrix.os }}
+        path: debian-packages/*.deb
+        retention-days: 7
