@@ -7,21 +7,25 @@ This tool translates C programs (via LLVM IR) to SMV models for formal verificat
 ### Prerequisites
 
 - LLVM development libraries (version 10+ recommended)
-- CMake 3.10+
-- C++14 compiler
+- Make
+- C++20 compiler (g++ 10+ or clang++ 10+)
 
 On Ubuntu/Debian:
 ```bash
-sudo apt-get install llvm-dev libllvm10 clang cmake build-essential
+sudo apt-get install llvm-dev clang build-essential
 ```
+
+On other systems, install the LLVM development packages for your distribution.
 
 ### Compilation
 
 ```bash
-mkdir build
-cd build
-cmake ..
 make
+```
+
+Check dependencies:
+```bash
+make deps
 ```
 
 ## Usage

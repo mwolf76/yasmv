@@ -4,11 +4,10 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include "SMVWriter.h"
 #include <memory>
 
 namespace llvm2smv {
-
-    class SMVModule;
 
     /// Main LLVM pass that converts LLVM IR to SMV
     class LLVM2SMVPass: public llvm::ModulePass {

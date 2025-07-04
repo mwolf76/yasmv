@@ -174,10 +174,10 @@ std::unique_ptr<SMVExpr> ExprTranslator::translateConstant(Constant* C)
     }
 
     if (isa<ConstantPointerNull>(C)) {
-        return makeConstant(0);
+        return makeConstant(int64_t(0));
     }
 
     // Default
     errs() << "Warning: Unknown constant type\n";
-    return makeConstant(0);
+    return makeConstant(int64_t(0));
 }

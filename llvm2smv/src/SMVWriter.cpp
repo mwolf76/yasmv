@@ -91,27 +91,27 @@ void SMVModule::write(raw_ostream& OS) const
             GroupedVars[ModifierKey].push_back(Var.get());
         }
 
-        // Write each group
-        for (const auto& Group : GroupedVars) {
-            if (!Group.first.empty()) {
-                OS << Group.first << "\n";
+        // Write each group (C++20 structured bindings)
+        for (const auto& [modifier, vars] : GroupedVars) {
+            if (!modifier.empty()) {
+                OS << modifier << "\n";
             }
             OS << "VAR\n";
-            for (const auto* Var : Group.second) {
-                OS << "    " << Var->Name << " : ";
-                Var->Type->print(OS);
+            for (const auto* var : vars) {
+                OS << "    " << var->Name << " : ";
+                var->Type->print(OS);
                 OS << ";\n";
             }
             OS << "\n";
         }
     }
 
-    // Write defines
+    // Write defines (C++20 structured bindings)
     if (!Defines.empty()) {
         OS << "DEFINE\n";
-        for (const auto& Def : Defines) {
-            OS << "    " << Def.first << " := ";
-            Def.second->print(OS);
+        for (const auto& [name, expr] : Defines) {
+            OS << "    " << name << " := ";
+            expr->print(OS);
             OS << ";\n";
         }
         OS << "\n";

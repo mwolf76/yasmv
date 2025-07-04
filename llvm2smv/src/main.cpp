@@ -1,3 +1,5 @@
+#include <string>
+
 #include "llvm2smv/LLVM2SMVPass.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -74,7 +76,7 @@ int main(int argc, char** argv)
 
     if (Verbose) {
         errs() << "Translation complete. Output written to "
-               << (OutputFilename == "-" ? "stdout" : OutputFilename) << "\n";
+               << (OutputFilename.getValue() == "-" ? "stdout" : OutputFilename.getValue()) << "\n";
     }
 
     return 0;

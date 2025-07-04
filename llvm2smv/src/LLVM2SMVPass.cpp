@@ -28,8 +28,11 @@ bool LLVM2SMVPass::runOnModule(Module& M)
     if (!MainFunc) {
         errs() << "Warning: No main function found\n";
         // Try to find any function
-        if (!M.empty()) {
-            MainFunc = &M.front();
+        for (Function& F : M) {
+            if (!F.isDeclaration()) {
+                MainFunc = &F;
+                break;
+            }
         }
     }
 
@@ -68,7 +71,7 @@ void LLVM2SMVPass::translateGlobalVariables(Module& M)
             if (Init->isNullValue()) {
                 CurrentModule->addInit(makeBinary("=",
                                                   makeVariable(Name),
-                                                  makeConstant(0)));
+                                                  makeConstant(int64_t(0))));
             }
         }
     }
