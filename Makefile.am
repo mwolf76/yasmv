@@ -41,6 +41,10 @@ unit-test: yasmv yasmv_tests
 
 functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh
+if ENABLE_LLVM2SMV
+	@echo "Running llvm2smv tests..."
+	@$(MAKE) -C llvm2smv test
+endif
 
 test: short-test unit-test functional-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
