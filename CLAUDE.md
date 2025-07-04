@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 yasmv (Yet Another Symbolic Model Verifier) is a symbolic model checker that performs reachability analysis and step-by-step simulation. It uses a dialect of the SMV language and is built in C++ with modern development practices.
 
+The project now includes **llvm2smv**, a C-to-SMV translator that enables formal verification of C programs by compiling them to LLVM IR and then translating to SMV models for verification with yasmv.
+
 ## Common Development Commands
 
 ### Building the Project
@@ -18,7 +20,15 @@ make -j $(nproc)
 # Manual build
 autoreconf -vif
 tar xfj microcode.tar.bz2
-./configure CXXFLAGS="-std=c++11"
+./configure
+make -j $(nproc)
+
+# Build with llvm2smv (requires LLVM and clang)
+./configure --enable-llvm2smv
+make -j $(nproc)
+
+# Build without llvm2smv
+./configure --disable-llvm2smv
 make -j $(nproc)
 ```
 
@@ -39,6 +49,9 @@ YASMV_HOME=`pwd` ./yasmv_tests --run_test=tests/expressions
 # Run a specific functional test
 YASMV_HOME=`pwd` ./yasmv --quiet examples/maze/solvable8x8.smv < examples/maze/commands > out
 diff -wB examples/maze/solvable8x8.out out
+
+# Test llvm2smv (if enabled)
+make -C llvm2smv test
 ```
 
 ### Code Quality
@@ -63,6 +76,12 @@ diff -wB examples/maze/solvable8x8.out out
    - `sim/` - Simulation
 7. **Decision Diagrams** (`src/dd/`) - CUDD 2.5.0 for BDD/ADD manipulation
 8. **Commands** (`src/cmd/`) - Interactive shell commands
+9. **LLVM2SMV** (`llvm2smv/`) - C-to-SMV translator using LLVM backend:
+   - `src/main.cc` - Command-line tool entry point with timestamp headers
+   - `src/llvm2smv_pass.cc` - Main LLVM IR to SMV translation pass
+   - `src/expr_translator.cc` - LLVM expression to SMV expression translation
+   - `src/type_translator.cc` - LLVM type to SMV type mapping
+   - `src/smv_writer.cc` - SMV output generation with C++20 features
 
 ### Design Patterns
 
@@ -77,7 +96,8 @@ diff -wB examples/maze/solvable8x8.out out
 ## Development Notes
 
 - Always set `YASMV_HOME` environment variable to the project root when running tests
-- The project uses C++11 standard
+- The main project uses modern C++ features (compiler default standard)
+- llvm2smv sub-project uses C++20 standard and requires LLVM development libraries
 - Debug builds use `-O0` by default for easier debugging
 - Microcode must be extracted before building (`tar xfj microcode.tar.bz2`)
 - The project supports distcc for distributed compilation
