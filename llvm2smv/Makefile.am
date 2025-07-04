@@ -39,7 +39,7 @@ EXTRA_DIST = \
 	design.md
 
 # Test target
-check-local:
+test-local:
 	@echo "Testing llvm2smv..."
 	@if test "x$(CLANG)" != "xno"; then \
 		cd $(srcdir)/examples/simple && ./compile.sh counter.c && \
@@ -52,4 +52,7 @@ check-local:
 clean-local:
 	-rm -f examples/simple/*.ll examples/simple/*.smv
 
-.PHONY: check-local clean-local
+# Make test target available
+test: test-local
+
+.PHONY: test test-local clean-local

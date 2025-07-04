@@ -41,21 +41,21 @@ void ExprTranslator::translateInstruction(Instruction* I)
 {
     if (auto* BO = dyn_cast<BinaryOperator>(I)) {
         auto Expr = translateBinaryOp(BO);
-        // Add assignment for this instruction
-        Module.addTrans(makeBinary("=",
-                                   makeNext(makeVariable(getValueName(I))),
+        // Add assignment for this instruction using yasmv syntax
+        Module.addTrans(makeBinary(":=",
+                                   makeVariable(getValueName(I)),
                                    std::move(Expr)));
     } else if (auto* ICmp = dyn_cast<ICmpInst>(I)) {
         auto Expr = translateICmp(ICmp);
-        Module.addTrans(makeBinary("=",
-                                   makeNext(makeVariable(getValueName(I))),
+        Module.addTrans(makeBinary(":=",
+                                   makeVariable(getValueName(I)),
                                    std::move(Expr)));
     } else if (auto* SI = dyn_cast<StoreInst>(I)) {
         translateStore(SI);
     } else if (auto* LI = dyn_cast<LoadInst>(I)) {
         auto Expr = translateLoad(LI);
-        Module.addTrans(makeBinary("=",
-                                   makeNext(makeVariable(getValueName(I))),
+        Module.addTrans(makeBinary(":=",
+                                   makeVariable(getValueName(I)),
                                    std::move(Expr)));
     }
     // TODO: Add more instruction types
@@ -159,8 +159,8 @@ void ExprTranslator::translateStore(StoreInst* SI)
     auto Ptr = SI->getPointerOperand();
 
     // For now, treat store as assignment to the pointed variable
-    Module.addTrans(makeBinary("=",
-                               makeNext(makeVariable(getValueName(Ptr))),
+    Module.addTrans(makeBinary(":=",
+                               makeVariable(getValueName(Ptr)),
                                std::move(Value)));
 }
 

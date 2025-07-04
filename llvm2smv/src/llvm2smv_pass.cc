@@ -5,6 +5,8 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/Support/raw_ostream.h"
+#include <algorithm>
+#include <cctype>
 
 using namespace llvm;
 using namespace llvm2smv;
@@ -18,7 +20,14 @@ bool LLVM2SMVPass::runOnModule(Module& M)
     }
 
     // For now, we'll translate the module as a single SMV module
-    CurrentModule = std::make_unique<SMVModule>(M.getName());
+    // Clean the module name to be a valid SMV identifier
+    std::string CleanName = M.getName().str();
+    if (CleanName.empty()) {
+        CleanName = "main_module";
+    }
+    // Replace invalid characters with underscores
+    std::replace_if(CleanName.begin(), CleanName.end(), [](char c) { return !std::isalnum(c); }, '_');
+    CurrentModule = std::make_unique<SMVModule>(CleanName);
 
     // First, translate global variables
     translateGlobalVariables(M);
@@ -61,7 +70,9 @@ void LLVM2SMVPass::translateGlobalVariables(Module& M)
         Type* Ty = GV.getValueType();
 
         auto SMVTy = TT.translateType(Ty);
-        CurrentModule->addVariable(Name, std::move(SMVTy));
+        auto Var = std::make_unique<SMVVariable>(Name, std::move(SMVTy));
+        Var->Modifiers.push_back("#inertial");
+        CurrentModule->addVariable(std::move(Var));
 
         // Handle initialization
         if (GV.hasInitializer()) {
@@ -83,14 +94,21 @@ void LLVM2SMVPass::translateFunction(Function& F)
     std::vector<std::string> PCStates;
     PCStates.push_back("ENTRY_" + F.getName().str());
 
-    // Collect all basic blocks
+    // Collect all basic blocks, giving them names if they don't have any
+    int bbCounter = 0;
     for (BasicBlock& BB : F) {
-        PCStates.push_back(BB.getName().str());
+        std::string bbName = BB.getName().str();
+        if (bbName.empty()) {
+            bbName = "BB" + std::to_string(bbCounter++);
+        }
+        PCStates.push_back(bbName);
     }
     PCStates.push_back("EXIT_" + F.getName().str());
 
     auto PCType = std::make_unique<SMVEnumType>(PCStates);
-    CurrentModule->addVariable("pc_" + F.getName().str(), std::move(PCType));
+    auto PCVar = std::make_unique<SMVVariable>("pc_" + F.getName().str(), std::move(PCType));
+    PCVar->Modifiers.push_back("#inertial");
+    CurrentModule->addVariable(std::move(PCVar));
 
     // Initialize PC to entry
     CurrentModule->addInit(makeBinary("=",
@@ -109,7 +127,9 @@ void LLVM2SMVPass::translateFunction(Function& F)
         }
 
         auto ArgType = TT.translateType(Arg.getType());
-        CurrentModule->addVariable(ArgName, std::move(ArgType));
+        auto ArgVar = std::make_unique<SMVVariable>(ArgName, std::move(ArgType));
+        ArgVar->Modifiers.push_back("#inertial");
+        CurrentModule->addVariable(std::move(ArgVar));
         ET.mapValue(&Arg, ArgName);
     }
 
@@ -123,13 +143,16 @@ void LLVM2SMVPass::translateFunction(Function& F)
             if (!I.getType()->isVoidTy()) {
                 std::string InstName = I.getName().str();
                 if (InstName.empty()) {
-                    InstName = "tmp_" + std::to_string(reinterpret_cast<uintptr_t>(&I));
+                    static int tmpCounter = 0;
+                    InstName = "tmp_" + std::to_string(tmpCounter++);
                 }
                 ET.mapValue(&I, InstName);
 
                 // Add variable for this instruction
                 auto InstType = TT.translateType(I.getType());
-                CurrentModule->addVariable(InstName, std::move(InstType));
+                auto InstVar = std::make_unique<SMVVariable>(InstName, std::move(InstType));
+                InstVar->Modifiers.push_back("#inertial");
+                CurrentModule->addVariable(std::move(InstVar));
             }
 
             // Translate the instruction
