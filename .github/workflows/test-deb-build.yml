@@ -63,15 +63,18 @@ jobs:
       run: |
         # Build the package without updating version
         dpkg-buildpackage -us -uc -b
+        # Move generated packages to a safe location
+        mkdir -p debian-packages
+        mv ../*.deb debian-packages/ || true
         
     - name: List generated packages
       run: |
         echo "Generated packages:"
-        ls -la ../*.deb
+        ls -la debian-packages/*.deb || echo "No packages found"
         
     - name: Test package installation
       run: |
-        sudo dpkg -i ../yasmv_*.deb || true
+        sudo dpkg -i debian-packages/yasmv_*.deb || true
         sudo apt-get install -f -y  # Fix any dependency issues
         
     - name: Test installed binary
@@ -89,5 +92,5 @@ jobs:
       if: always()
       with:
         name: test-debian-packages-${{ matrix.os }}
-        path: ../*.deb
+        path: debian-packages/*.deb
         retention-days: 7
