@@ -71,6 +71,7 @@ jobs:
         EOF
         
     - name: Build Debian package
+      timeout-minutes: 10
       run: |
         dpkg-buildpackage -us -uc -b
         # Move generated packages to a safe location
