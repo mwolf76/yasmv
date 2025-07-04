@@ -1,4 +1,4 @@
-#include "llvm2smv/SMVWriter.h"
+#include "llvm2smv/smv_writer.hh"
 #include <algorithm>
 
 using namespace llvm;

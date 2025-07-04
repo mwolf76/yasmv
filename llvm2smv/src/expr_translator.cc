@@ -1,5 +1,5 @@
-#include "llvm2smv/ExprTranslator.h"
-#include "llvm2smv/SMVWriter.h"
+#include "llvm2smv/expr_translator.hh"
+#include "llvm2smv/smv_writer.hh"
 #include "llvm/IR/Constants.h"
 #include "llvm/Support/raw_ostream.h"
 

@@ -1,5 +1,5 @@
-#include "llvm2smv/TypeTranslator.h"
-#include "llvm2smv/SMVWriter.h"
+#include "llvm2smv/type_translator.hh"
+#include "llvm2smv/smv_writer.hh"
 #include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;

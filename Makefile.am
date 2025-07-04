@@ -1,4 +1,8 @@
+if ENABLE_LLVM2SMV
+SUBDIRS = src doc llvm2smv
+else
 SUBDIRS = src doc
+endif
 AUTOMAKE_OPTIONS = subdir-objects
 
 ACLOCAL_AMFLAGS = -I m4

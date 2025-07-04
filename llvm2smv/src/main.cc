@@ -1,6 +1,6 @@
 #include <string>
 
-#include "llvm2smv/LLVM2SMVPass.h"
+#include "llvm2smv/llvm2smv_pass.hh"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
