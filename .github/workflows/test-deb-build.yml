@@ -54,7 +54,10 @@ jobs:
           libyaml-cpp-dev \
           openjdk-11-jdk \
           autoconf \
-          libtool
+          libtool \
+          llvm-dev \
+          libclang-dev \
+          clang
     
     - name: Setup build environment
       run: ./setup.sh
