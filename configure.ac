@@ -109,6 +109,9 @@ AC_ANTLR3
 # minisat checks
 AC_MINISAT
 
+# LLVM checks (for llvm2smv)
+AC_LLVM
+
 # libpthread
 AX_PTHREAD
 
@@ -182,5 +185,9 @@ AC_CONFIG_FILES([Makefile
                  src/test/Makefile
                  doc/Makefile
                  yasmv.pc])
+
+if test "$enable_llvm2smv" = "yes"; then
+  AC_CONFIG_FILES([llvm2smv/Makefile])
+fi
 
 AC_OUTPUT
