@@ -1,0 +1,139 @@
+name: Build and Release Debian Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-deb:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "push" ]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+    
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          debhelper \
+          devscripts \
+          libboost-all-dev \
+          libjsoncpp-dev \
+          antlr3 \
+          libantlr3c-dev \
+          minisat \
+          zlib1g-dev \
+          libyaml-cpp-dev \
+          openjdk-11-jdk \
+          autoconf \
+          libtool
+    
+    - name: Setup build environment
+      run: ./setup.sh
+      
+    - name: Update changelog
+      run: |
+        # Update debian changelog with the version
+        cat > debian/changelog << EOF
+        yasmv (${{ steps.version.outputs.VERSION }}-1) stable; urgency=medium
+        
+          * Release version ${{ steps.version.outputs.VERSION }}
+        
+         -- Marco Pensallorto <marco.pensallorto@gmail.com>  $(date -R)
+        EOF
+        
+    - name: Build Debian package
+      run: |
+        dpkg-buildpackage -us -uc -b
+        # Move generated packages to a safe location
+        mkdir -p debian-packages
+        mv ../*.deb debian-packages/
+        
+    - name: List generated packages
+      run: |
+        echo "Generated packages:"
+        ls -la debian-packages/
+        
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-packages-${{ matrix.os }}
+        path: debian-packages/*.deb
+        retention-days: 30
+
+  create-release:
+    needs: build-deb
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          Debian packages for yasmv ${{ github.ref_name }}
+          
+          Available for:
+          - Ubuntu 22.04 LTS (Jammy)
+          - Ubuntu 24.04 LTS (Noble)
+          
+          ## Installation
+          
+          Download the appropriate .deb file for your Ubuntu version and install with:
+          ```bash
+          sudo dpkg -i yasmv_*.deb
+          sudo apt-get install -f  # Install any missing dependencies
+          ```
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Assets
+      run: |
+        for file in artifacts/*/*.deb; do
+          asset_name=$(basename "$file")
+          os_version=$(echo "$file" | grep -oP 'ubuntu-\d+\.\d+')
+          asset_label="yasmv for ${os_version}"
+          
+          gh release upload "${{ github.ref_name }}" "$file" \
+            --clobber \
+            --repo "${{ github.repository }}"
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
