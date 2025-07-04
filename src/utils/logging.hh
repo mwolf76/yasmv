@@ -32,7 +32,7 @@
 #include <sstream>
 
 #include <3rdparty/ezlogger/ezlogger_misc.hpp>
-#include <sys/timeb.h>
+#include <time.h>
 
 #include <common/strings.hh>
 
@@ -46,15 +46,15 @@ namespace axter {
                                           int LineNo, const char*FunctionName,
                                           ext_data levels_format_usage_data)
         {
-            struct timeb now;
-            ftime(&now);
+            struct timespec now;
+            clock_gettime(CLOCK_REALTIME, &now);
 
-            std::string time_str { ctime(&now.time) };
+            std::string time_str { ctime(&now.tv_sec) };
             rtrim(time_str);
 
             std::ostringstream oss;
             oss
-                << "[" << time_str << " +" << now.millitm << " ms] "
+                << "[" << time_str << " +" << (now.tv_nsec / 1000000) << " ms] "
                 << FileName << ":" << LineNo
                 << " (" << FunctionName << ") ";
 
