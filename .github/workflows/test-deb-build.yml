@@ -64,6 +64,7 @@ jobs:
       run: ./setup.sh
       
     - name: Build Debian package
+      timeout-minutes: 10
       run: |
         # Build the package without updating version
         dpkg-buildpackage -us -uc -b
