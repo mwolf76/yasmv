@@ -48,6 +48,7 @@ jobs:
           minisat \
           zlib1g-dev \
           libyaml-cpp-dev \
+          libreadline-dev \
           openjdk-11-jdk \
           autoconf \
           libtool \
