@@ -1,7 +1,6 @@
 # Build artifacts
 *.c
 *.o
-llvm2smv
 
 # LLVM IR files
 *.ll
