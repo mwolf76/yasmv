@@ -12,7 +12,6 @@ INVAR
 INVAR
 	4 * r + c != 10 ;
 
-
 -- pick-state should fail here as x cannot be any of the available
 -- values; this is ensured by a synthetic INVAR which is automatically
 -- created when processing the variable definition for x.

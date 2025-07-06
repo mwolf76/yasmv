@@ -1,0 +1,18 @@
+-- Test identifier literals
+MODULE identifier_literals;
+
+VAR
+    flag1, flag2: boolean;
+
+INIT
+    flag1 && !flag2;
+
+INVAR
+    flag1;
+
+INVAR
+    !flag2;
+
+-- This should be unfeasible - flag2 cannot be both false and true
+INVAR
+    flag2;

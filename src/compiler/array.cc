@@ -39,37 +39,53 @@ namespace compiler {
                rhs_type->is_array());
 
         const type::ArrayType_ptr atype { rhs_type->as_array() };
-
-        unsigned width { atype->of()->width() };
         unsigned elems { atype->nelems() };
 
-        const type::Type_ptr res_type { tm.find_boolean() };
-        PUSH_TYPE(res_type);
-
-        POP_DV(rhs, width * elems);
-        POP_DV(lhs, width * elems);
+        const type::ScalarType_ptr stype { atype->of() };
+        unsigned width { stype->width() };
 
         /* res := AND(lhs[i] == rhs[i]) */
-        ADD res(f_enc.one());
-        for (unsigned j = 0; j < elems; ++j) {
-            dd::DDVector rhs_fragment;
-            rhs_fragment.clear();
+        const type::Type_ptr res_type { tm.find_boolean() };
+        PUSH_TYPE(res_type);
+        ADD res { f_enc.one() };
 
-            dd::DDVector lhs_fragment;
-            lhs_fragment.clear();
+        if (stype->is_monolithic()) {
+            POP_DV(rhs, elems);
+            POP_DV(lhs, elems);
 
-            for (unsigned k = 0; k < width; ++k) {
-                lhs_fragment.push_back(lhs[j * width + k]);
-                rhs_fragment.push_back(rhs[j * width + k]);
+            for (unsigned j = 0; j < elems; ++j) {
+                res *= lhs[j].Equals(rhs[j]);
             }
+        }
 
-            FRESH_DV(act, 1);
-            InlinedOperatorDescriptor md {
-                make_ios(false, expr::EQ, width), act, lhs_fragment, rhs_fragment
-            };
-            f_inlined_operator_descriptors.push_back(md);
+        else if (stype->is_algebraic()) {
+            POP_DV(rhs, width * elems);
+            POP_DV(lhs, width * elems);
 
-            res *= act[0];
+            for (unsigned j = 0; j < elems; ++j) {
+                dd::DDVector rhs_fragment;
+                rhs_fragment.clear();
+
+                dd::DDVector lhs_fragment;
+                lhs_fragment.clear();
+
+                for (unsigned k = 0; k < width; ++k) {
+                    lhs_fragment.push_back(lhs[j * width + k]);
+                    rhs_fragment.push_back(rhs[j * width + k]);
+                }
+
+                FRESH_DV(act, 1);
+                InlinedOperatorDescriptor md {
+                    make_ios(false, expr::EQ, width), act, lhs_fragment, rhs_fragment
+                };
+                f_inlined_operator_descriptors.push_back(md);
+
+                res *= act[0];
+            }
+        }
+
+        else {
+            assert(false);
         }
 
         PUSH_DD(res);

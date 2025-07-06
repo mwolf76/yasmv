@@ -1,0 +1,16 @@
+-- Test bitwise operators
+#word-width 8
+MODULE bitwise_ops;
+
+VAR
+    a, b: uint;
+    result: uint;
+
+INIT
+    a = 0b10101010 && b = 0x55;
+
+DEFINE
+    bit_xnor := a <-> b;
+
+INVAR
+    bit_xnor != 0;

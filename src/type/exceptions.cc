@@ -118,9 +118,9 @@ namespace type {
 
         oss
             << "`"
-            << a
+            << a->repr()
             << "` and `"
-            << b
+            << b->repr()
             << "` do not match in expression `"
             << expr
             << "`"
