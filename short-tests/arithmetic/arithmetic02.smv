@@ -1,0 +1,23 @@
+-- Test multiplication and modulo
+#word-width 8
+MODULE arith_mul_mod;
+
+VAR
+    x, y: int8;
+    
+INIT
+    x = 7 && y = 3;
+
+DEFINE
+    product := x * y;
+    remainder := x % y;
+    
+INVAR
+    product = 21;
+
+INVAR
+    remainder = 1;
+
+-- This should be unfeasible
+INVAR
+    remainder = 0;

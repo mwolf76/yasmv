@@ -1,0 +1,29 @@
+-- Test TRUE and FALSE constants
+MODULE constants_test;
+
+VAR
+    t: boolean;
+    f: boolean;
+    
+INIT
+    t = TRUE && f = FALSE;
+
+DEFINE
+    tautology := TRUE || FALSE;
+    contradiction := TRUE && FALSE;
+    
+INVAR
+    t = TRUE;
+
+INVAR
+    f = FALSE;
+
+INVAR
+    tautology = TRUE;
+
+INVAR
+    contradiction = FALSE;
+
+-- This should be unfeasible
+INVAR
+    t = f;

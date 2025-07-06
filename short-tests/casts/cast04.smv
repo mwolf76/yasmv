@@ -1,0 +1,25 @@
+-- Test simple type casting
+MODULE simple_casts;
+
+VAR
+    small_val: uint8;
+    bool_val: boolean;
+
+INIT
+    small_val = (uint8) 5;
+
+INIT
+    bool_val;
+
+DEFINE
+    is_nonzero := (small_val != (uint8) 0);
+
+INVAR
+    is_nonzero;
+
+INVAR
+    bool_val;
+
+-- This should be unfeasible
+INVAR
+    small_val = (uint8) 0;

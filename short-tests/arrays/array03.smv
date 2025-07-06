@@ -1,0 +1,28 @@
+-- Test array with dynamic index
+#word-width 8
+MODULE array_dynamic;
+
+VAR
+    data: int8[8];
+    idx: uint8;
+    value: int8;
+    
+INIT
+    data = [10, 20, 30, 40, 50, 60, 70, 80];
+
+INIT
+    idx = {0, 2, 4, 6};
+
+DEFINE
+    selected := data[idx];
+    valid_idx := idx < 8;
+    
+INVAR
+    valid_idx;
+
+INVAR
+    selected = {10, 30, 50, 70};
+
+-- This should be unfeasible
+INVAR
+    selected = 25;

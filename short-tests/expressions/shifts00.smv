@@ -1,0 +1,17 @@
+-- Test shift operators
+#word-width 8
+MODULE shift_ops;
+
+VAR
+    value: uint8;
+    shift_count: uint8;
+
+INIT
+    value = 0b00001111 && shift_count = 2;
+
+DEFINE
+    shifted := value << shift_count;
+
+INVAR
+    shifted != 0b00111100;
+

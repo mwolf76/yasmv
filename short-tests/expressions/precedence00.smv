@@ -1,0 +1,38 @@
+-- Test operator precedence and associativity
+#word-width 8
+MODULE precedence_test;
+
+VAR
+    a, b, c: int8;
+
+INIT
+    a = 2 && b = 3 && c = 4;
+
+DEFINE
+    -- Test arithmetic precedence: 2 + 3 * 4 = 2 + 12 = 14
+    arith_prec := a + b * c;
+    
+    -- Test with parentheses: (2 + 3) * 4 = 5 * 4 = 20  
+    arith_paren := (a + b) * c;
+    
+    -- Test logical precedence: TRUE && FALSE || TRUE = FALSE || TRUE = TRUE
+    logic_prec := (a > 0) && (b < 0) || (c > 0);
+    
+    -- Test mixed precedence: 2 + 3 > 4 = 5 > 4 = TRUE
+    mixed_prec := a + b > c;
+
+INVAR
+    arith_prec = 14;
+
+INVAR
+    arith_paren = 20;
+
+INVAR
+    logic_prec;
+
+INVAR
+    mixed_prec;
+
+-- This should be unfeasible
+INVAR
+    arith_prec = arith_paren;

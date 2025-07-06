@@ -1,0 +1,22 @@
+-- Test relational operators with different types
+#word-width 16
+MODULE relational_mixed;
+
+VAR
+    a: uint8;
+    b: int8;
+    c: uint16;
+    
+INIT
+    a = (uint8) 200 && b = (uint8) -50 && c = 1000;
+
+DEFINE
+    cmp1 := (int16) a > (int16) b;    -- 200 > -50 = true
+    cmp2 := c > (uint16) a;            -- 1000 > 200 = true
+    
+INVAR
+    cmp1 && cmp2;
+
+-- This should be unfeasible
+INVAR
+    b > (uint8) 0;

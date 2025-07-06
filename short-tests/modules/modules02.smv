@@ -1,0 +1,31 @@
+-- Test multiple INIT and TRANS clauses
+MODULE multi_clauses;
+
+VAR
+    x, y: boolean;
+    counter: uint8;
+    
+INIT
+    x;
+
+INIT
+    !y;
+
+INIT
+    counter = 0;
+
+TRANS
+    x -> next(x) = !x;
+
+TRANS
+    !x -> next(y) = TRUE;
+
+TRANS
+    next(counter) = counter + 1;
+
+INVAR
+    counter < 10;
+
+-- This should be unfeasible
+INVAR
+    x && y;

@@ -1,0 +1,21 @@
+-- Test division by zero
+#word-width 8
+MODULE div_by_zero;
+
+VAR
+    numerator: int8;
+    denominator: int8;
+    
+INIT
+    numerator = 10 && denominator = 0;
+
+DEFINE
+    -- This should trigger an error
+    result := numerator / denominator;
+    
+INVAR
+    result = 0;
+
+-- This should be unfeasible (or error)
+INVAR
+    TRUE;

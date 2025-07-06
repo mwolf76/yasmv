@@ -1,0 +1,28 @@
+-- Test word-width directive and operations
+#word-width 32
+MODULE word_ops;
+
+VAR
+    a, b: uint;
+    signed_val: int;
+    
+INIT
+    a = 0xDEADBEEF && b = 0xCAFEBABE;
+
+INIT
+    signed_val = -1;
+
+DEFINE
+    and_result := a & b;
+    or_result := a | b;
+    xor_result := a ^ b;
+    
+INVAR
+    and_result = 0x8AADBAAE;
+
+INVAR
+    signed_val = 0xFFFFFFFF;  -- -1 in 32-bit two's complement
+
+-- This should be unfeasible
+INVAR
+    signed_val > 0;

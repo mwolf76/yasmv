@@ -123,19 +123,30 @@ namespace model {
 
     void TypeChecker::walk_binary_cast_postorder(const expr::Expr_ptr expr)
     {
-	TOP_TYPE(rhs_type);
+        TOP_TYPE(rhs_type);
 
-	if (rhs_type->is_boolean()) {
+        if (rhs_type->is_boolean()) {
             type::Type_ptr lhs_type { check_logical(expr->lhs()) };
             (void) lhs_type;
         }
 
-	else if (rhs_type->is_algebraic()) {
+        else if (rhs_type->is_algebraic()) {
             type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
-	    (void) lhs_type;
-	}
+            (void) lhs_type;
 
-	else throw type::BadType(expr->rhs(), rhs_type);
+            expr::Expr_ptr lhs_repr { lhs_type->repr() };
+            expr::Expr_ptr rhs_repr { rhs_type->repr() };
+
+            DEBUG
+                << "Casting from "
+                << lhs_repr
+                << " to "
+                << rhs_repr
+                << std::endl;
+            ;
+        }
+
+        else throw type::BadType(expr->rhs(), rhs_type);
     }
 
     void TypeChecker::walk_binary_shift_postorder(const expr::Expr_ptr expr)

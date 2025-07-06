@@ -1,0 +1,22 @@
+-- Test mixed temporal operators
+MODULE temporal_mixed;
+
+VAR
+    state: {init, run, stop};
+    value: int8;
+    
+INIT
+    state = init && value = 0;
+
+TRANS
+    state = init -> next(state) = run;
+
+TRANS
+    state = run -> next(value) = value + 1;
+
+INVAR
+    @0..2{state != stop};
+
+-- This should be unfeasible
+INVAR
+    $1{state = stop} && @1{state = init};

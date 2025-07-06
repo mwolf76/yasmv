@@ -1,0 +1,30 @@
+-- Test basic module constructs
+MODULE basic_fsm;
+
+VAR
+    state: {idle, working, done};
+    #hidden counter: uint8;
+    #input enable: boolean;
+
+DEFINE
+    is_active := (state != idle);
+    #hidden progress := counter / 2;
+
+INIT
+    state = idle && counter = 0;
+
+INVAR
+    enable -> (state != idle);
+
+TRANS
+    state = idle && enable -> next(state) = working;
+
+TRANS  
+    state = working -> next(state) = done;
+
+TRANS
+    state = done -> next(state) = idle;
+
+-- This should be unfeasible
+INVAR
+    state = idle && !enable && is_active;

@@ -70,10 +70,25 @@ void pe(expr::Expr_ptr e)
     std::cerr << e << std::endl;
 }
 
+std::string se(expr::Expr_ptr e)
+{
+    std::ostringstream oss;
+    oss << e;
+    return oss.str();
+}
+
 void pf(expr::TimedExpr e)
 {
     std::cerr << e << std::endl;
 }
+
+std::string sf(expr::TimedExpr e)
+{
+    std::ostringstream oss;
+    oss << e;
+    return oss.str();
+}
+
 
 void pu(enc::UCBI& ucbi)
 {

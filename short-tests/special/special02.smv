@@ -1,0 +1,19 @@
+-- Test empty arrays and edge cases
+MODULE empty_edge_cases;
+
+VAR
+    empty_bool_array: boolean[0];  -- Empty array
+    single_elem: uint8[1];
+    
+INIT
+    single_elem = [42];
+
+DEFINE
+    first := single_elem[0];
+    
+INVAR
+    first = 42;
+
+-- This should be unfeasible
+INVAR
+    first = 0;
