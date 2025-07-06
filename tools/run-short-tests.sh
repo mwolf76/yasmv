@@ -59,6 +59,4 @@ test-unfeasible-state expressions/shifts01.smv
 test-unfeasible-state literals/numbers00.smv
 test-unfeasible-state literals/strings00.smv
 
-
-
 echo ""  # one blank line
