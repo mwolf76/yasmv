@@ -1,0 +1,26 @@
+-- Test guarded transitions
+MODULE guarded_trans;
+
+VAR
+    mode: {idle, active, error};
+    value: int8;
+    
+INIT
+    mode = idle && value = 0;
+
+-- Guarded transitions
+TRANS
+    mode = idle && value > 5 ?: next(mode) = active;
+
+TRANS
+    mode = active && value < 0 ?: next(mode) = error;
+
+TRANS
+    mode != error ?: next(value) = value + 1;
+
+INVAR
+    mode != error;
+
+-- This should be unfeasible
+INVAR
+    value < 0;

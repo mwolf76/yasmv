@@ -1,0 +1,26 @@
+-- Test assignment operator
+MODULE assignment_op;
+
+VAR
+    x, y: uint8;
+    flag: boolean;
+    
+INIT
+    x = 10;
+
+DEFINE
+    -- Assignment within expression
+    temp := (y := x + 5);
+    
+INIT
+    flag = (y = 15);
+
+INVAR
+    y = 15;
+
+INVAR
+    temp = 15;
+
+-- This should be unfeasible
+INVAR
+    y != temp;

@@ -14,7 +14,7 @@ DEFINE O := TRUE;
 INVAR
     space = [ O, O, O,
     	      O, O, O,
-	      O, O, _ ];
+	          O, O, O ];
 
 DEFINE
     addr := 3 * r + c;

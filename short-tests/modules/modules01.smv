@@ -1,0 +1,31 @@
+-- Test variable declaration modifiers
+MODULE declaration_modifiers;
+
+VAR
+    #input cmd: {start, stop, reset};
+    #frozen config: uint8;
+    #inertial sensor_data: int16;
+    #hidden internal_state: boolean;
+
+#bin
+VAR
+    binary_flags: uint8;
+
+#hex  
+VAR
+    hex_addr: uint16;
+
+#dec
+DEFINE
+    decimal_value := config * 10;
+
+#hidden
+DEFINE
+    secret := internal_state && (config > 0);
+
+INIT
+    config = 42 && !internal_state;
+
+-- This should be unfeasible
+INVAR
+    config = 42 && secret && (config = 0);

@@ -1,0 +1,24 @@
+-- Test array bounds violation
+#word-width 8
+MODULE array_bounds;
+
+VAR
+    arr: uint8[5];
+    idx: uint8;
+    
+INIT
+    arr = [1, 2, 3, 4, 5];
+
+INIT
+    idx = 10;  -- Out of bounds!
+
+DEFINE
+    -- This should trigger bounds error
+    value := arr[idx];
+    
+INVAR
+    value = 0;
+
+-- This should be unfeasible (or error)
+INVAR
+    TRUE;

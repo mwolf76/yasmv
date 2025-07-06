@@ -1,0 +1,23 @@
+-- Test implication operator
+MODULE logical_implies;
+
+VAR
+    p, q, r: boolean;
+    
+INIT
+    p && !q && r;
+
+DEFINE
+    impl1 := p -> q;      -- true -> false = false
+    impl2 := q -> r;      -- false -> true = true
+    impl3 := !p -> !q;    -- false -> true = true
+    
+INVAR
+    !impl1;
+
+INVAR
+    impl2;
+
+-- This should be unfeasible
+INVAR
+    impl1;

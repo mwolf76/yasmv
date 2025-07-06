@@ -1,0 +1,29 @@
+-- Test type conversions and edge cases
+#word-width 16
+MODULE type_conversions;
+
+VAR
+    small: uint8;
+    big: uint16;
+    signed_val: int8;
+    
+INIT
+    small = (uint8) 250 && signed_val = (int8) -10;
+
+DEFINE
+    extended := (uint16) small;
+    sign_extended := (int16) signed_val;
+    truncated := (uint8) big;
+    
+INIT
+    big = extended + 100;  -- 350
+
+INVAR
+    extended = 250;
+
+INVAR
+    sign_extended = -10;
+
+-- This should be unfeasible
+INVAR
+    truncated = (uint8) 350;  -- truncation loses data

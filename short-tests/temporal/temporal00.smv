@@ -1,0 +1,23 @@
+-- Test forward time operators
+MODULE temporal_forward;
+
+VAR
+    x, y: boolean;
+    counter: uint8;
+
+INIT
+    x && counter = 0;
+
+TRANS
+    next(counter) = counter + 1;
+
+-- Test @time{} forward temporal operators
+INVAR
+    @0{x};
+
+INVAR
+    @1{counter} = 1;
+
+-- This should be unfeasible as x cannot be both true and false
+INVAR
+    @0{x} && @1{!x};

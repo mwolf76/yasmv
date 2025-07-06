@@ -235,8 +235,6 @@ namespace witness {
     }
     void Evaluator::walk_bw_not_postorder(const expr::Expr_ptr expr)
     {
-        DROP_TYPE();
-
         POP_VALUE(lhs);
         PUSH_VALUE(~lhs);
     }

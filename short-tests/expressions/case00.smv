@@ -1,0 +1,37 @@
+-- Test case expressions
+#word-width 8
+MODULE case_expressions;
+
+VAR
+    selector: uint8;
+    input_val: int8;
+
+INIT
+    selector = 2 && input_val = 10;
+
+DEFINE
+    case_result := case
+        selector = 0: input_val * 2;
+        selector = 1: input_val + 5;
+        selector = 2: input_val - 3;
+        selector = 3: - input_val;
+        else: 0;
+    end;
+
+    nested_case := case
+        input_val > 0: case
+            selector < 2: 1;
+            else: 2;
+        end;
+        else: 0;
+    end;
+
+INVAR
+    case_result = 7;
+
+INVAR
+    nested_case = 2;
+
+-- This should be unfeasible
+INVAR
+    case_result = 0;

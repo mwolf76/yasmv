@@ -1,0 +1,23 @@
+-- Test complex logical expressions
+MODULE logical_complex;
+
+VAR
+    a, b, c, d: boolean;
+    
+INIT
+    a && b && !c && d;
+
+DEFINE
+    expr1 := (a && b) || (c && d);
+    expr2 := (a -> b) && (b -> c);
+    expr3 := !(a && b) || !(c || d);
+    
+INVAR
+    expr1;    -- true
+
+INVAR
+    !expr2;   -- false
+
+-- This should be unfeasible
+INVAR
+    expr3;    -- should be false

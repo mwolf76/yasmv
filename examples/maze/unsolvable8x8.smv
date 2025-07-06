@@ -23,7 +23,7 @@ INVAR
    0 <= x && 0 <= y;
 
 INVAR
-  x <= 7 && y <= 7;
+  x < 8 && y < 8;
 
 INVAR
     space = [_,_,O,O,_,O,O,O,

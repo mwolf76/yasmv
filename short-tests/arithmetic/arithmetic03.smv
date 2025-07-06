@@ -1,0 +1,23 @@
+-- Test division and negative numbers
+#word-width 8
+MODULE arith_div_neg;
+
+VAR
+    a, b: int8;
+    
+INIT
+    a = -20 && b = 4;
+
+DEFINE
+    quotient := a / b;
+    negation := - a; -- known issue with the grammar, a space is needed before the operand
+    
+INVAR
+    quotient = -5;
+
+INVAR
+    negation = 20;
+
+-- This should be unfeasible
+INVAR
+    quotient > 0;

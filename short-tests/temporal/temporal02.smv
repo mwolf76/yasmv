@@ -1,0 +1,24 @@
+-- Test time intervals
+MODULE temporal_intervals;
+
+VAR
+    clock: uint4;
+    active: boolean;
+
+INIT
+    clock = 0 && active;
+
+TRANS
+    next(clock) = (clock + 1) % 16;
+
+-- Test forward time intervals
+INVAR
+    @0..2{active};
+
+-- Test backward time intervals  
+INVAR
+    $0..1{clock < 8};
+
+-- This creates unfeasible condition
+INVAR
+    @0..2{active} && @1{!active};

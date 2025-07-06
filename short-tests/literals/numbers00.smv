@@ -1,0 +1,35 @@
+-- Test numeric literal formats
+#word-width 8
+MODULE numeric_literals;
+
+VAR
+    decimal_val: uint8;
+    hex_val: uint8;
+    octal_val: uint8;
+    binary_val: uint8;
+
+INIT
+    decimal_val = 42;
+
+INIT  
+    hex_val = 0x2A;
+
+INIT
+    octal_val = 052;
+
+INIT
+    binary_val = 0b00101010;
+
+-- All should be equal (42 in different bases)
+INVAR
+    decimal_val = hex_val;
+
+INVAR
+    hex_val = octal_val;
+
+INVAR
+    octal_val = binary_val;
+
+-- This should be unfeasible
+INVAR
+    decimal_val != binary_val;
