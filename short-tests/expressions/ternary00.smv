@@ -1,0 +1,28 @@
+-- Test ternary conditional operator
+#word-width 8
+MODULE ternary_ops;
+
+VAR
+    condition: boolean;
+    x, y: uint;
+    
+INIT
+    condition = TRUE && x = 10 && y = 20;
+
+DEFINE
+    result1 := condition ? x : y;
+    result2 := !condition ? x : y;
+    nested := condition ? (x > 5 ? x : 0) : y;
+    
+INVAR
+    result1 = 10;
+
+INVAR
+    result2 = 20;
+
+INVAR
+    nested = 10;
+
+-- This should be unfeasible
+INVAR
+    result1 = result2;

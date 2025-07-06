@@ -1,0 +1,27 @@
+-- Test array of enums
+MODULE array_enum;
+
+VAR
+    colors: {red, green, blue}[4];
+    flags: boolean[8];
+    
+INIT
+    colors = [red, green, blue, red];
+
+INIT
+    flags = [TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE];
+
+DEFINE
+    all_red := (colors[0] = red) && (colors[1] = red) && 
+               (colors[2] = red) && (colors[3] = red);
+    alternating := flags[0] && !flags[1] && flags[2] && !flags[3];
+    
+INVAR
+    !all_red;
+
+INVAR
+    alternating;
+
+-- This should be unfeasible
+INVAR
+    all_red;

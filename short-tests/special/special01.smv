@@ -1,0 +1,25 @@
+-- Test dot notation for module access
+MODULE sub_module;
+VAR
+    value: uint8;
+    
+INIT
+    value = 42;
+
+MODULE special_dot;
+VAR
+    sub: sub_module;
+    local: uint8;
+    
+INIT
+    local = sub.value + 8;
+
+INVAR
+    sub.value = 42;
+
+INVAR
+    local = 50;
+
+-- This should be unfeasible
+INVAR
+    sub.value != 42;

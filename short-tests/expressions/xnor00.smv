@@ -1,0 +1,23 @@
+-- Test XNOR operator
+#word-width 12
+MODULE xnor_test;
+
+VAR
+    a, b, c: uint12;
+    
+INIT
+    a = 0b10101010 && b = 0b10101010 && c = 0b01010101;
+
+DEFINE
+    same := a <-> b;       -- All bits match = 0xFF
+    opposite := a <-> c;   -- All bits opposite = 0x00
+    
+INVAR
+    same = 0xFF;
+
+INVAR
+    opposite = 0x00;
+
+-- This should be unfeasible
+INVAR
+    same = opposite;

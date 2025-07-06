@@ -1,0 +1,29 @@
+-- Test all integer types
+#word-width 64
+MODULE integer_types;
+
+VAR
+    i8: int8;
+    u8: uint8;
+    i16: int16;
+    u16: uint16;
+    i32: int32;
+    u32: uint32;
+    i64: int64;
+    u64: uint64;
+    
+INIT
+    i8 = (int8) -128 && u8 = (uint8) 255;
+
+INIT
+    i16 = (int16) -32768 && u16 = (uint16) 65535;
+
+INIT
+    i32 = (int32) -2147483648 && u32 = (uint32) 4294967295;
+
+INIT
+    i64 = -9223372036854775808 && u64 = 18446744073709551615;
+
+-- This should be unfeasible - signed overflow
+INVAR
+    i8 > (int8) 127;
