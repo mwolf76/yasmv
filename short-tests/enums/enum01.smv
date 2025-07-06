@@ -1,0 +1,30 @@
+-- Test complex enumerated types
+MODULE complex_enums;
+
+VAR
+    color: {red, green, blue, yellow, orange};
+    priority: {low, medium, high, critical};
+    status_array: {ok, error, warning}[4];
+
+ INIT
+    color = red && priority = high;
+
+INIT status_array = [ok, ok, warning, error];
+
+DEFINE
+  is_primary := (color = red) || (color = green) || (color = blue);
+  high_prio := (priority = high) || (priority = critical);
+  any_errors := (status_array[0] = error) || (status_array[1] = error) || (status_array[2] = error) || (status_array[3] = error);
+
+INVAR
+    is_primary;
+
+INVAR
+    high_prio;
+
+INVAR
+    any_errors;
+
+-- This should be unfeasible
+INVAR
+    color = yellow;

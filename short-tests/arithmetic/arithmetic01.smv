@@ -1,0 +1,20 @@
+-- Test addition and subtraction with overflow
+#word-width 8
+MODULE arith_add_sub;
+
+VAR
+    a, b, c: uint8;
+
+INIT
+    a = 250 && b = 10 && c = 5;
+
+DEFINE
+    sum := a + b;         -- should overflow
+    diff := c - b;        -- should underflow
+    
+INVAR
+    sum = 4;              -- 250 + 10 = 260 % 256 = 4
+
+-- This should be unfeasible
+INVAR
+    sum > 255;

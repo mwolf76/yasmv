@@ -1,0 +1,31 @@
+-- Test different word widths
+#word-width 16
+MODULE word_sizes;
+
+VAR
+    default_uint: uint;    -- should be 16-bit
+    default_int: int;      -- should be 16-bit
+    explicit8: uint8;
+    explicit64: uint64;
+    
+INIT
+    default_uint = 65535;
+
+INIT
+    default_int = -32768;
+
+INIT
+    explicit8 = (uint8) 255;
+
+INIT
+    explicit64 = (uint64) 4294967295;
+
+DEFINE
+    overflow := default_uint + 1;  -- should wrap to 0
+    
+INVAR
+    overflow = 0;
+
+-- This should be unfeasible
+INVAR
+    default_uint > 65535;

@@ -1,0 +1,24 @@
+-- Test all relational operators
+#word-width 8
+MODULE relational_ops;
+
+VAR
+    x, y, z: int8;
+    
+INIT
+    x = 5 && y = 5 && z = 10;
+
+DEFINE
+    eq := x = y;
+    neq := x != z;
+    lt := x < z;
+    lte := x <= y;
+    gt := z > x;
+    gte := y >= x;
+    
+INVAR
+    eq && neq && lt && lte && gt && gte;
+
+-- This should be unfeasible
+INVAR
+    x > y;

@@ -13,5 +13,5 @@ INVAR
 INIT
 	x = { 0, 2, 5, 8, 12 };
 
--- pick-state is unfeasible as the only admissable value between 3 and
+-- pick-state is unfeasible as the only admissible value between 3 and
 -- 7 is 5 which is explicitly excluded.

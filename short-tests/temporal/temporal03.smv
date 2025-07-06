@@ -1,0 +1,25 @@
+-- Test next operator
+MODULE temporal_next;
+
+VAR
+    counter: uint8;
+    flag: boolean;
+    
+INIT
+    counter = 0 && flag;
+
+TRANS
+    next(counter) = counter + 1;
+
+TRANS
+    counter = 3 -> next(flag) = FALSE;
+
+INVAR
+    @0{counter} = 0;
+
+INVAR
+    @3{counter} = 3;
+
+-- This should be unfeasible
+INVAR
+    @3{flag};
