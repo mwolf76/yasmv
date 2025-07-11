@@ -29,6 +29,8 @@
 #include <witness/evaluator.hh>
 #include <witness/witness_mgr.hh>
 
+#include <algorithm>
+
 namespace compiler {
 
     /**
@@ -101,17 +103,30 @@ namespace compiler {
         POP_TYPE(lhs_type);
 
         assert(rhs_type->is_algebraic() &&
-               lhs_type->is_algebraic() &&
-               lhs_type->width() == rhs_type->width());
+               lhs_type->is_algebraic());
 
-        unsigned width { rhs_type->width() };
         bool signedness {
             lhs_type->is_signed_algebraic() ||
             rhs_type->is_signed_algebraic()
         };
 
-        POP_DV(rhs, width);
-        POP_DV(lhs, width);
+	unsigned width {
+	    std::min(
+		rhs_type->width(),
+		lhs_type->width())
+	};
+
+	// a different width is only admissible for constants (rhs)
+	unsigned rhs_extra_width { rhs_type->width() - width };
+	assert(0 == rhs_type || rhs_type->is_constant());
+	DISCARD_DV(rhs_extra_width);
+	POP_DV(rhs, width);
+
+	// a different width is only admissible for constants (lhs)
+	unsigned lhs_extra_width { lhs_type->width() - width };
+	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        DISCARD_DV(lhs_extra_width);
+	POP_DV(lhs, width);
 
         /* const optimization */
         if (rhs_type->is_constant() &&
@@ -133,9 +148,11 @@ namespace compiler {
         }
 
         /* one is constant, the other is not. Push the non-const one */
-        PUSH_TYPE(rhs_type->is_constant()
-                      ? lhs_type
-                      : rhs_type);
+        PUSH_TYPE(
+	    rhs_type->is_constant()
+	    ? lhs_type
+	    : rhs_type
+	);
 
 	/* ordinary binary operation */
         FRESH_DV(res, width);
@@ -211,18 +228,31 @@ namespace compiler {
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
 
-        assert(rhs_type->is_algebraic() &&
-               lhs_type->is_algebraic() &&
-               lhs_type->width() == rhs_type->width());
+	assert(rhs_type->is_algebraic() &&
+               lhs_type->is_algebraic());
 
-        unsigned width { rhs_type->width() };
         bool signedness {
             lhs_type->is_signed_algebraic() ||
             rhs_type->is_signed_algebraic()
         };
 
-        POP_DV(rhs, width);
-        POP_DV(lhs, width);
+        unsigned width {
+	    std::min(lhs_type->width(),
+		     rhs_type->width())
+	};
+
+	// a different width is admitted for constants only (rhs)
+	unsigned rhs_extra_width { rhs_type->width() - width };
+	assert(0 == rhs_type || rhs_type->is_constant());
+	DISCARD_DV(rhs_extra_width);
+	POP_DV(rhs, width);
+
+	// a different width is admitted for constants only (lhs)
+	unsigned lhs_extra_width { lhs_type->width() - width };
+	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        DISCARD_DV(lhs_extra_width);
+	POP_DV(lhs, width);
+	
 
         PUSH_TYPE(tm.find_boolean());
 
@@ -292,29 +322,44 @@ namespace compiler {
         POP_TYPE(lhs_type);
         POP_TYPE(cnd_type);
 
-        // condition is boolean, ite operands are algebraic, same width
+        // condition is boolean, ite operands are algebraic
         assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic() &&
-               lhs_type->width() == rhs_type->width() &&
                cnd_type->is_boolean());
 
-        unsigned width { rhs_type->width() };
         bool signedness {
             rhs_type->is_signed_algebraic() ||
             lhs_type->as_signed_algebraic()
         };
 
-	// in any case, const qualifier of the branches are lost here
-        PUSH_TYPE(signedness
-		  ? tm.find_signed(width)
-		  : tm.find_unsigned(width));
+	unsigned width {
+	    std::min(
+		rhs_type->width(),
+		lhs_type->width())
+	};
+        
 
-        POP_DV(rhs, width);
-        POP_DV(lhs, width);
+	// a different width is only admissible for constants (rhs)
+	unsigned rhs_extra_width { rhs_type->width() - width };
+	assert(0 == rhs_type || rhs_type->is_constant());
+	DISCARD_DV(rhs_extra_width);
+	POP_DV(rhs, width);
+
+	// a different width is only admissible for constants (lhs)
+	unsigned lhs_extra_width { lhs_type->width() - width };
+	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        DISCARD_DV(lhs_extra_width);
+	POP_DV(lhs, width);
+
         POP_DD(cnd);
 
         FRESH_DV(res, width);
         PUSH_DV(res, width);
+
+        // in any case, const qualifier of the branches are lost here
+        PUSH_TYPE(signedness
+		  ? tm.find_signed(width)
+		  : tm.find_unsigned(width));
 
         expr::Expr_ptr parent { expr };
 
