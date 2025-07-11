@@ -70,7 +70,7 @@ namespace model {
     {
         type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
-	type::Type_ptr rhs { check_arithmetical(expr->rhs()) };
+        type::Type_ptr rhs { check_arithmetical(expr->rhs()) };
         type::Type_ptr lhs { check_arithmetical(expr->lhs()) };
 
         // identical types most definitely match
@@ -82,27 +82,27 @@ namespace model {
         type::AlgebraicType_ptr arhs { dynamic_cast<type::AlgebraicType_ptr>(rhs) };
         type::AlgebraicType_ptr alhs { dynamic_cast<type::AlgebraicType_ptr>(lhs) };
 
-	// width mismatch is only admissible if either operant is a constant
-	if (arhs->width() != alhs->width() &&
-	    ! arhs->is_constant() &&
-	    ! alhs->is_constant()) {
+        // width mismatch is only admissible if either operant is a constant
+        if (arhs->width() != alhs->width() &&
+            !arhs->is_constant() &&
+            !alhs->is_constant()) {
             throw type::TypeMismatch(expr, alhs, arhs);
         }
 
-	bool signedness {
-	    arhs->is_signed_algebraic() ||
-	    alhs->is_signed_algebraic()
-	};
+        bool signedness {
+            arhs->is_signed_algebraic() ||
+            alhs->is_signed_algebraic()
+        };
 
-	unsigned width {
-	    std::min(
-		arhs->width(),
-		alhs->width())
-	};
+        unsigned width {
+            std::min(
+                arhs->width(),
+                alhs->width())
+        };
 
-	PUSH_TYPE(signedness
-		  ? tm.find_signed(width)
-		  : tm.find_unsigned(width));
+        PUSH_TYPE(signedness
+                      ? tm.find_signed(width)
+                      : tm.find_unsigned(width));
     }
 
     // fun: logical x logical -> logical
@@ -142,8 +142,8 @@ namespace model {
             (void) lhs_type;
 
             expr::Expr_ptr rhs_repr { rhs_type->repr() };
-	    expr::Expr_ptr lhs_repr { lhs_type->repr() };
-            
+            expr::Expr_ptr lhs_repr { lhs_type->repr() };
+
 
             DEBUG
                 << "Casting from "
@@ -154,7 +154,8 @@ namespace model {
             ;
         }
 
-        else throw type::BadType(expr->rhs(), rhs_type);
+        else
+            throw type::BadType(expr->rhs(), rhs_type);
     }
 
     void TypeChecker::walk_binary_shift_postorder(const expr::Expr_ptr expr)
@@ -184,14 +185,14 @@ namespace model {
         type::AlgebraicType_ptr arhs { dynamic_cast<type::AlgebraicType_ptr>(rhs) };
         type::AlgebraicType_ptr alhs { dynamic_cast<type::AlgebraicType_ptr>(lhs) };
 
-	// width mismatch admissible only if either operand is a constant
+        // width mismatch admissible only if either operand is a constant
         if (arhs->width() != alhs->width() &&
-	    ! arhs->is_constant() &&
-	    ! alhs->is_constant()) {
+            !arhs->is_constant() &&
+            !alhs->is_constant()) {
             throw type::TypeMismatch(expr, alhs, arhs);
         }
 
-	PUSH_TYPE(boolean);
+        PUSH_TYPE(boolean);
     }
 
     // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
@@ -216,12 +217,12 @@ namespace model {
                 return;
             }
 
-	    /* either operand is a constant */
-	    if (lhs_type->is_constant() ||
-		rhs_type->is_constant()) {
-		PUSH_TYPE(tm.find_boolean());
+            /* either operand is a constant */
+            if (lhs_type->is_constant() ||
+                rhs_type->is_constant()) {
+                PUSH_TYPE(tm.find_boolean());
                 return;
-	    }
+            }
 
             throw type::TypeMismatch(expr, lhs_type, rhs_type);
         }
@@ -264,7 +265,7 @@ namespace model {
 
     void TypeChecker::walk_binary_ite_postorder(expr::Expr_ptr expr)
     {
-	type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
 
@@ -273,79 +274,78 @@ namespace model {
             (void) lhs_type;
 
             PUSH_TYPE(tm.find_boolean());
-	    return;
+            return;
         }
 
-	if (rhs_type->is_algebraic()) {
+        if (rhs_type->is_algebraic()) {
             type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
 
-	    // width mismatch is only admissible if either operand is a constant
+            // width mismatch is only admissible if either operand is a constant
             if (rhs_type->width() != lhs_type->width() &&
-		! rhs_type->is_constant() &&
-		! lhs_typs->is_constant())
+                !rhs_type->is_constant() &&
+                !lhs_typs->is_constant())
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
 
-	    bool signedness {
-		rhs_type->is_signed_algebraic() ||
-		lhs_type->is_signed_algebraic()
-	    };
+            bool signedness {
+                rhs_type->is_signed_algebraic() ||
+                lhs_type->is_signed_algebraic()
+            };
 
-	    unsigned width {
-		std::min(
-		    rhs_type->width(),
-		    lhs_type->width())
-	    };
+            unsigned width {
+                std::min(
+                    rhs_type->width(),
+                    lhs_type->width())
+            };
 
-	    PUSH_TYPE(signedness
-		      ? tm.find_signed(width)
-		      : tm.find_unsigned(width));
+            PUSH_TYPE(signedness
+                          ? tm.find_signed(width)
+                          : tm.find_unsigned(width));
 
-	    return;
+            return;
         }
 
-	if (rhs_type->is_array()) {
+        if (rhs_type->is_array()) {
             type::Type_ptr lhs_type { check_array(expr->lhs()) };
 
             type::ArrayType_ptr alhs_type { lhs_type->as_array() };
-	    type::ScalarType_ptr alhs_of_type { alhs_type->of() };
-	    unsigned lhs_width { alhs_of_type->width() };
-	    unsigned lhs_elems { alhs_type->nelems() };
+            type::ScalarType_ptr alhs_of_type { alhs_type->of() };
+            unsigned lhs_width { alhs_of_type->width() };
+            unsigned lhs_elems { alhs_type->nelems() };
 
             type::ArrayType_ptr arhs_type { rhs_type->as_array() };
-	    type::ScalarType_ptr arhs_of_type { arhs_type->of() };
-	    unsigned rhs_width { arhs_of_type->width() };
-	    unsigned rhs_elems { arhs_type->nelems() };
+            type::ScalarType_ptr arhs_of_type { arhs_type->of() };
+            unsigned rhs_width { arhs_of_type->width() };
+            unsigned rhs_elems { arhs_type->nelems() };
 
             if (lhs_width != rhs_width ||
-		lhs_elems != rhs_elems) {
+                lhs_elems != rhs_elems) {
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
             }
 
-	    bool signedness {
-		alhs_type->is_signed_algebraic() ||
-		arhs_type->is_signed_algebraic()
-	    };
+            bool signedness {
+                alhs_type->is_signed_algebraic() ||
+                arhs_type->is_signed_algebraic()
+            };
 
-	    PUSH_TYPE(
-		signedness
-		? tm.find_signed_array(rhs_width, rhs_elems)
-		: tm.find_unsigned_array(rhs_width, rhs_elems)
-	    );
+            PUSH_TYPE(
+                signedness
+                    ? tm.find_signed_array(rhs_width, rhs_elems)
+                    : tm.find_unsigned_array(rhs_width, rhs_elems));
 
-	    return;
+            return;
         }
 
-	if (rhs_type->is_enum()) {
+        if (rhs_type->is_enum()) {
             POP_TYPE(lhs_type);
             if (lhs_type != rhs_type) {
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
-	    }
+            }
 
             PUSH_TYPE(rhs_type);
-	    return;
+            return;
         }
 
-	assert(false);
+        assert(false);
     }
 
     void TypeChecker::memoize_result(expr::Expr_ptr expr)
@@ -416,9 +416,9 @@ namespace model {
             << expr
             << std::endl;
 
-	int depth = 0;
+        int depth = 0;
         for (auto ti = f_type_stack.rbegin();
-	     ti != f_type_stack.rend(); ++depth, ++ti) {
+             ti != f_type_stack.rend(); ++depth, ++ti) {
 
             type::Type_ptr type { *ti };
             expr::Expr_ptr repr { type->repr() };
