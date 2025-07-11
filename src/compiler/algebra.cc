@@ -52,7 +52,7 @@ namespace compiler {
         assert(is_unary_algebraic(expr));
 
         TOP_TYPE(lhs_type);
-	assert(lhs_type->is_algebraic());
+        assert(lhs_type->is_algebraic());
         const type::AlgebraicType_ptr t { lhs_type->as_algebraic() };
 
         unsigned width { t->width() };
@@ -75,7 +75,7 @@ namespace compiler {
             return;
         }
 
-	/* ordinary unary operation */
+        /* ordinary unary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
         InlinedOperatorDescriptor iod {
@@ -110,23 +110,23 @@ namespace compiler {
             rhs_type->is_signed_algebraic()
         };
 
-	unsigned width {
-	    std::min(
-		rhs_type->width(),
-		lhs_type->width())
-	};
+        unsigned width {
+            std::min(
+                rhs_type->width(),
+                lhs_type->width())
+        };
 
-	// a different width is only admissible for constants (rhs)
-	unsigned rhs_extra_width { rhs_type->width() - width };
-	assert(0 == rhs_type || rhs_type->is_constant());
-	DISCARD_DV(rhs_extra_width);
-	POP_DV(rhs, width);
+        // a different width is only admissible for constants (rhs)
+        unsigned rhs_extra_width { rhs_type->width() - width };
+        assert(0 == rhs_type || rhs_type->is_constant());
+        DISCARD_DV(rhs_extra_width);
+        POP_DV(rhs, width);
 
-	// a different width is only admissible for constants (lhs)
-	unsigned lhs_extra_width { lhs_type->width() - width };
-	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        // a different width is only admissible for constants (lhs)
+        unsigned lhs_extra_width { lhs_type->width() - width };
+        assert(0 == lhs_extra_width || lhs_type->is_constant());
         DISCARD_DV(lhs_extra_width);
-	POP_DV(lhs, width);
+        POP_DV(lhs, width);
 
         /* const optimization */
         if (rhs_type->is_constant() &&
@@ -149,12 +149,11 @@ namespace compiler {
 
         /* one is constant, the other is not. Push the non-const one */
         PUSH_TYPE(
-	    rhs_type->is_constant()
-	    ? lhs_type
-	    : rhs_type
-	);
+            rhs_type->is_constant()
+                ? lhs_type
+                : rhs_type);
 
-	/* ordinary binary operation */
+        /* ordinary binary operation */
         FRESH_DV(res, width);
         PUSH_DV(res, width);
         InlinedOperatorDescriptor md {
@@ -228,7 +227,7 @@ namespace compiler {
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
 
-	assert(rhs_type->is_algebraic() &&
+        assert(rhs_type->is_algebraic() &&
                lhs_type->is_algebraic());
 
         bool signedness {
@@ -237,22 +236,22 @@ namespace compiler {
         };
 
         unsigned width {
-	    std::min(lhs_type->width(),
-		     rhs_type->width())
-	};
+            std::min(lhs_type->width(),
+                     rhs_type->width())
+        };
 
-	// a different width is admitted for constants only (rhs)
-	unsigned rhs_extra_width { rhs_type->width() - width };
-	assert(0 == rhs_type || rhs_type->is_constant());
-	DISCARD_DV(rhs_extra_width);
-	POP_DV(rhs, width);
+        // a different width is admitted for constants only (rhs)
+        unsigned rhs_extra_width { rhs_type->width() - width };
+        assert(0 == rhs_type || rhs_type->is_constant());
+        DISCARD_DV(rhs_extra_width);
+        POP_DV(rhs, width);
 
-	// a different width is admitted for constants only (lhs)
-	unsigned lhs_extra_width { lhs_type->width() - width };
-	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        // a different width is admitted for constants only (lhs)
+        unsigned lhs_extra_width { lhs_type->width() - width };
+        assert(0 == lhs_extra_width || lhs_type->is_constant());
         DISCARD_DV(lhs_extra_width);
-	POP_DV(lhs, width);
-	
+        POP_DV(lhs, width);
+
 
         PUSH_TYPE(tm.find_boolean());
 
@@ -274,7 +273,7 @@ namespace compiler {
         }
 
 
-	/* ordinary relational */
+        /* ordinary relational */
         FRESH_DV(res, 1);
         PUSH_DV(res, 1);
         InlinedOperatorDescriptor md {
@@ -332,24 +331,24 @@ namespace compiler {
             lhs_type->as_signed_algebraic()
         };
 
-	unsigned width {
-	    std::min(
-		rhs_type->width(),
-		lhs_type->width())
-	};
-        
+        unsigned width {
+            std::min(
+                rhs_type->width(),
+                lhs_type->width())
+        };
 
-	// a different width is only admissible for constants (rhs)
-	unsigned rhs_extra_width { rhs_type->width() - width };
-	assert(0 == rhs_type || rhs_type->is_constant());
-	DISCARD_DV(rhs_extra_width);
-	POP_DV(rhs, width);
 
-	// a different width is only admissible for constants (lhs)
-	unsigned lhs_extra_width { lhs_type->width() - width };
-	assert(0 == lhs_extra_width || lhs_type->is_constant());
+        // a different width is only admissible for constants (rhs)
+        unsigned rhs_extra_width { rhs_type->width() - width };
+        assert(0 == rhs_type || rhs_type->is_constant());
+        DISCARD_DV(rhs_extra_width);
+        POP_DV(rhs, width);
+
+        // a different width is only admissible for constants (lhs)
+        unsigned lhs_extra_width { lhs_type->width() - width };
+        assert(0 == lhs_extra_width || lhs_type->is_constant());
         DISCARD_DV(lhs_extra_width);
-	POP_DV(lhs, width);
+        POP_DV(lhs, width);
 
         POP_DD(cnd);
 
@@ -358,8 +357,8 @@ namespace compiler {
 
         // in any case, const qualifier of the branches are lost here
         PUSH_TYPE(signedness
-		  ? tm.find_signed(width)
-		  : tm.find_unsigned(width));
+                      ? tm.find_signed(width)
+                      : tm.find_unsigned(width));
 
         expr::Expr_ptr parent { expr };
 
@@ -403,10 +402,10 @@ namespace compiler {
         type::ArrayType_ptr atype { t1->as_array() };
         type::ScalarType_ptr type { atype->of() };
 
-	DRIVEL
-	    << "%% "
-	    << type
-	    << std::endl;
+        DRIVEL
+            << "%% "
+            << type
+            << std::endl;
 
         unsigned elem_width { type->width() };
         unsigned elem_count { atype->nelems() };
