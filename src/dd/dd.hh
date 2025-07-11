@@ -68,6 +68,12 @@
         f_add_stack.pop_back();            \
     }
 
+/** Discard a DD vector of given width */
+#define DISCARD_DV(width)		   \
+    for (unsigned i = 0; i < width; ++i) { \
+        f_add_stack.pop_back();            \
+    }
+
 /** Declare a DD vector of given width */
 #define FRESH_DV(vec, width) \
     dd::DDVector vec;        \

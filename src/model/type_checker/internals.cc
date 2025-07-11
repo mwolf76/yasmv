@@ -34,6 +34,8 @@
 
 #include <utils/logging.hh>
 
+#include <algorithm>
+
 #define DEBUG_TYPE_CHECKER
 
 namespace model {
@@ -80,7 +82,10 @@ namespace model {
         type::AlgebraicType_ptr arhs { dynamic_cast<type::AlgebraicType_ptr>(rhs) };
         type::AlgebraicType_ptr alhs { dynamic_cast<type::AlgebraicType_ptr>(lhs) };
 
-        if (alhs->width() != arhs->width()) {
+	// width mismatch is only admissible if either operant is a constant
+	if (arhs->width() != alhs->width() &&
+	    ! arhs->is_constant() &&
+	    ! alhs->is_constant()) {
             throw type::TypeMismatch(expr, alhs, arhs);
         }
 
@@ -90,7 +95,9 @@ namespace model {
 	};
 
 	unsigned width {
-	    arhs->width()
+	    std::min(
+		arhs->width(),
+		alhs->width())
 	};
 
 	PUSH_TYPE(signedness
@@ -134,8 +141,9 @@ namespace model {
             type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
             (void) lhs_type;
 
-            expr::Expr_ptr lhs_repr { lhs_type->repr() };
             expr::Expr_ptr rhs_repr { rhs_type->repr() };
+	    expr::Expr_ptr lhs_repr { lhs_type->repr() };
+            
 
             DEBUG
                 << "Casting from "
@@ -176,26 +184,20 @@ namespace model {
         type::AlgebraicType_ptr arhs { dynamic_cast<type::AlgebraicType_ptr>(rhs) };
         type::AlgebraicType_ptr alhs { dynamic_cast<type::AlgebraicType_ptr>(lhs) };
 
-        if (alhs->width() != arhs->width()) {
+	// width mismatch admissible only if either operand is a constant
+        if (arhs->width() != alhs->width() &&
+	    ! arhs->is_constant() &&
+	    ! alhs->is_constant()) {
             throw type::TypeMismatch(expr, alhs, arhs);
         }
 
-        if (arhs->is_constant() && !alhs->is_constant()) {
-            PUSH_TYPE(boolean);
-            return;
-        }
-
-        if (alhs->is_constant() && !arhs->is_constant()) {
-            PUSH_TYPE(boolean);
-            return;
-        }
+	PUSH_TYPE(boolean);
     }
 
     // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean
     void TypeChecker::walk_binary_equality_postorder(const expr::Expr_ptr expr)
     {
         type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
-        enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
 
@@ -214,19 +216,12 @@ namespace model {
                 return;
             }
 
-            /* constant on the right, word-width matches lhs width */
-            if (!lhs_type->is_constant() && lhs_type->width() == bm.word_width() &&
-                rhs_type->is_constant()) {
-                PUSH_TYPE(tm.find_boolean());
+	    /* either operand is a constant */
+	    if (lhs_type->is_constant() ||
+		rhs_type->is_constant()) {
+		PUSH_TYPE(tm.find_boolean());
                 return;
-            }
-
-            /* constant on the left */
-            if (!rhs_type->is_constant() && rhs_type->width() == bm.word_width() &&
-                lhs_type->is_constant()) {
-                PUSH_TYPE(tm.find_boolean());
-                return;
-            }
+	    }
 
             throw type::TypeMismatch(expr, lhs_type, rhs_type);
         }
@@ -284,8 +279,10 @@ namespace model {
 	if (rhs_type->is_algebraic()) {
             type::Type_ptr lhs_type { check_arithmetical(expr->lhs()) };
 
-            if (lhs_type->width() !=
-                rhs_type->width())
+	    // width mismatch is only admissible if either operand is a constant
+            if (rhs_type->width() != lhs_type->width() &&
+		! rhs_type->is_constant() &&
+		! lhs_typs->is_constant())
                 throw type::TypeMismatch(expr, lhs_type, rhs_type);
 
 	    bool signedness {
@@ -294,7 +291,9 @@ namespace model {
 	    };
 
 	    unsigned width {
-		rhs_type->width()
+		std::min(
+		    rhs_type->width(),
+		    lhs_type->width())
 	    };
 
 	    PUSH_TYPE(signedness

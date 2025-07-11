@@ -37,10 +37,12 @@
 
 namespace model {
 
-    typedef boost::unordered_map<expr::Expr_ptr, type::Type_ptr, utils::PtrHash, utils::PtrEq> TypeReg;
+    using TypeReg =
+	boost::unordered_map<expr::Expr_ptr, type::Type_ptr,
+			     utils::PtrHash, utils::PtrEq>;
 
     /* enable the following macro to debug the TypeChecker */
-    // #define DEBUG_TYPE_CHECKER
+    #define DEBUG_TYPE_CHECKER
 
     class ModelMgr;
     class TypeChecker: public expr::ExprWalker {

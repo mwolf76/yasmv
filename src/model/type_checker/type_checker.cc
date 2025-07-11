@@ -689,7 +689,7 @@ namespace model {
 
         // is an integer const ..
         if (em.is_int_const(expr)) {
-            unsigned ww { opts::OptsMgr::INSTANCE().word_width() };
+            unsigned ww { 64 };
             PUSH_TYPE(tm.find_constant(ww));
             return;
         }
