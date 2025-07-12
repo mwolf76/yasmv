@@ -162,7 +162,6 @@ AC_CONFIG_FILES([Makefile
                  src/expr/time/Makefile
                  src/expr/time/analyzer/Makefile
                  src/expr/time/expander/Makefile
-                 src/expr/nnfizer/Makefile
                  src/expr/printer/Makefile
                  src/expr/walker/Makefile
                  src/algorithms/Makefile
