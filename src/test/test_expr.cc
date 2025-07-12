@@ -30,7 +30,6 @@
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
 
-#include <expr/nnfizer/nnfizer.hh>
 #include <expr/printer/printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
@@ -514,37 +513,8 @@ BOOST_AUTO_TEST_CASE(analyzer)
     expr::Atom a_y { "y" };
     expr::Expr_ptr y { em.make_identifier(a_y) };
 
-    expr::Nnfizer nnfizer;
-
-    BOOST_CHECK(x == nnfizer.process(x));
-    BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
-
-
-    BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
-                nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
-
 }
 
-BOOST_AUTO_TEST_CASE(nnfizer)
-{
-    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
-    expr::Atom a_x { "x" };
-    expr::Expr_ptr x { em.make_identifier(a_x) };
-
-    expr::Atom a_y { "y" };
-    expr::Expr_ptr y { em.make_identifier(a_y) };
-
-    expr::Nnfizer nnfizer;
-
-    BOOST_CHECK(x == nnfizer.process(x));
-    BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
-
-
-    BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
-                nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
-
-}
 
 BOOST_AUTO_TEST_CASE(expander)
 {
