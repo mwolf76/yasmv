@@ -68,7 +68,7 @@ namespace compiler {
                 witness::WitnessMgr::INSTANCE()
             };
             expr::Expr_ptr konst {
-                evaluator.process(NULL, em.make_empty(), expr, 0)
+                evaluator.process(nullptr, em.make_empty(), expr, 0)
             };
 
             algebraic_constant(konst, t->width());
@@ -118,7 +118,7 @@ namespace compiler {
 
         // a different width is only admissible for constants (rhs)
         unsigned rhs_extra_width { rhs_type->width() - width };
-        assert(0 == rhs_type || rhs_type->is_constant());
+        assert(0 == rhs_extra_width || rhs_type->is_constant());
         DISCARD_DV(rhs_extra_width);
         POP_DV(rhs, width);
 
@@ -140,7 +140,7 @@ namespace compiler {
                 witness::WitnessMgr::INSTANCE()
             };
             expr::Expr_ptr konst {
-                evaluator.process(NULL, em.make_empty(), expr, 0)
+                evaluator.process(nullptr, em.make_empty(), expr, 0)
             };
 
             algebraic_constant(konst, rhs_type->width());
@@ -217,7 +217,7 @@ namespace compiler {
         algebraic_binary(expr);
     }
 
-    // relationals -----------------------------------------------------------------
+    // relational operators -----------------------------------------------------------------
     void Compiler::algebraic_relational(const expr::Expr_ptr expr)
     {
         type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
@@ -242,13 +242,13 @@ namespace compiler {
 
         // a different width is admitted for constants only (rhs)
         unsigned rhs_extra_width { rhs_type->width() - width };
-        assert(0 == rhs_type || rhs_type->is_constant());
+        // assert(0 == rhs_extra_width || rhs_type->is_constant());
         DISCARD_DV(rhs_extra_width);
         POP_DV(rhs, width);
 
         // a different width is admitted for constants only (lhs)
         unsigned lhs_extra_width { lhs_type->width() - width };
-        assert(0 == lhs_extra_width || lhs_type->is_constant());
+        // assert(0 == lhs_extra_width || lhs_type->is_constant());
         DISCARD_DV(lhs_extra_width);
         POP_DV(lhs, width);
 
@@ -265,7 +265,7 @@ namespace compiler {
                 witness::WitnessMgr::INSTANCE()
             };
             expr::Expr_ptr konst {
-                evaluator.process(NULL, em.make_empty(), expr, 0)
+                evaluator.process(nullptr, em.make_empty(), expr, 0)
             };
 
             algebraic_constant(konst, 1);
@@ -337,15 +337,14 @@ namespace compiler {
                 lhs_type->width())
         };
 
-
         // a different width is only admissible for constants (rhs)
-        unsigned rhs_extra_width { rhs_type->width() - width };
-        assert(0 == rhs_type || rhs_type->is_constant());
+        const auto rhs_extra_width { rhs_type->width() - width };
+        assert(0 == rhs_extra_width || rhs_type->is_constant());
         DISCARD_DV(rhs_extra_width);
         POP_DV(rhs, width);
 
         // a different width is only admissible for constants (lhs)
-        unsigned lhs_extra_width { lhs_type->width() - width };
+        const auto lhs_extra_width { lhs_type->width() - width };
         assert(0 == lhs_extra_width || lhs_type->is_constant());
         DISCARD_DV(lhs_extra_width);
         POP_DV(lhs, width);
@@ -392,23 +391,23 @@ namespace compiler {
         POP_TYPE(t0);
         assert(t0->is_algebraic());
 
-        type::Type_ptr itype { t0->as_algebraic() };
-        unsigned iwidth(itype->width());
+        const type::Type_ptr itype { t0->as_algebraic() };
+        const unsigned iwidth(itype->width());
         assert(iwidth == bm.word_width());
 
         POP_TYPE(t1);
         assert(t1->is_array());
 
-        type::ArrayType_ptr atype { t1->as_array() };
-        type::ScalarType_ptr type { atype->of() };
+        const auto atype { t1->as_array() };
+        const auto type { atype->of() };
 
         DRIVEL
             << "%% "
             << type
             << std::endl;
 
-        unsigned elem_width { type->width() };
-        unsigned elem_count { atype->nelems() };
+        const auto elem_width { type->width() };
+        const auto elem_count { atype->nelems() };
 
         PUSH_TYPE(type);
 

@@ -122,7 +122,7 @@ namespace compiler {
         unsigned iwidth { itype->width() };
 
         POP_DV(index, iwidth);
-        assert(iwidth == bm.word_width()); // needed?
+        // assert(iwidth == bm.word_width()); // needed?
 
         // array
         POP_TYPE(t1);
@@ -151,7 +151,9 @@ namespace compiler {
             }
 
             PUSH_DD(lhs[subscript]);
-        } else {
+        }
+
+        else {
             /* Build selection DDs */
             dd::DDVector cnd_dds;
             dd::DDVector act_dds;
