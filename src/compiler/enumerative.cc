@@ -67,28 +67,30 @@ namespace compiler {
 
     void Compiler::enumerative_subscript(const expr::Expr_ptr expr)
     {
-        enc::EncodingMgr& bm(f_enc);
+        auto& bm(f_enc);
 
         POP_TYPE(t0);
         assert(t0->is_algebraic());
-        type::Type_ptr itype { t0->as_algebraic() };
-        unsigned iwidth { itype->width() };
+
+        const auto itype { t0->as_algebraic() };
+        const auto iwidth { itype->width() };
 
         POP_TYPE(t1);
         assert(t1->is_array());
-        type::ArrayType_ptr atype { t1->as_array() };
-        type::ScalarType_ptr type { atype->of() };
+
+        const auto atype { t1->as_array() };
+        const auto type { atype->of() };
         assert(type->is_enum());
 
         PUSH_TYPE(type);
 
         POP_DV(index, iwidth);
-        assert(iwidth == bm.word_width());
+        // assert(iwidth == bm.word_width());
 
-        unsigned elem_width { type->width() };
+        const auto elem_width { type->width() };
         assert(elem_width == 1);
 
-        unsigned elem_count { atype->nelems() };
+        const auto elem_count { atype->nelems() };
         POP_DV(lhs, elem_width * elem_count);
 
         if (t0->is_constant()) {
@@ -104,7 +106,9 @@ namespace compiler {
             for (unsigned i = 0; i < elem_width; ++i) {
                 PUSH_DD(lhs[elem_width * subscript + elem_width - i - 1]);
             }
-        } else {
+        }
+
+        else {
             /* Build selection DDs */
             dd::DDVector cnd_dds;
             dd::DDVector act_dds;
