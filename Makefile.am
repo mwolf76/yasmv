@@ -16,7 +16,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb                   \
 -I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/expr/printer    \
--I$(top_srcdir)/src/expr/nnfizer -I$(top_srcdir)/src/model          \
+-I$(top_srcdir)/src/model          \
 -I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/utils                   \
 -I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger   \
 -I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/algorithms  \
@@ -75,7 +75,6 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/expr/preprocessor/libpreprocessor.la	\
 		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
 		$(top_builddir)/src/expr/printer/libprinter.la			\
-		$(top_builddir)/src/expr/nnfizer/libnnfizer.la			\
 		$(top_builddir)/src/expr/time/libexpr_time.la			\
 		$(top_builddir)/src/expr/time/analyzer/libanalyzer.la			\
 		$(top_builddir)/src/expr/time/expander/libexpander.la			\
@@ -117,7 +116,6 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/expr/preprocessor/libpreprocessor.la	\
 		$(top_builddir)/src/expr/walker/libexpr_walker.la		\
 		$(top_builddir)/src/expr/printer/libprinter.la			\
-		$(top_builddir)/src/expr/nnfizer/libnnfizer.la			\
 		$(top_builddir)/src/expr/time/libexpr_time.la			\
 		$(top_builddir)/src/expr/time/analyzer/libanalyzer.la			\
 		$(top_builddir)/src/expr/time/expander/libexpander.la			\
