@@ -33,7 +33,6 @@ AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
 # Program informations
 AC_DEFINE_UNQUOTED(PROGRAM_NAME, "yasmv", Program Name)
-AC_DEFINE_UNQUOTED(PROGRAM_VERSION, "0.0.7", Program Version)
 AC_DEFINE_UNQUOTED(PROGRAM_BUILD_DATE, "`date -u`", Program build date)
 AC_DEFINE_UNQUOTED(PROGRAM_WEBSITE, "https://github.com/mwolf76", Program Website)
 AC_DEFINE_UNQUOTED(PROGRAM_EMAIL, "marco.pensallorto@gmail.com", Program Email)
