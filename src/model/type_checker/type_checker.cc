@@ -77,7 +77,7 @@ namespace model {
         }
 
         POP_TYPE(res);
-        assert(NULL != res);
+        assert(nullptr != res);
 
         return res;
     }
@@ -338,7 +338,6 @@ namespace model {
     bool TypeChecker::walk_type_inorder(const expr::Expr_ptr expr)
     {
         assert(false); /* unreachable */
-        return false;
     }
     void TypeChecker::walk_type_postorder(const expr::Expr_ptr expr)
     {
@@ -500,8 +499,8 @@ namespace model {
     }
     bool TypeChecker::walk_dot_inorder(const expr::Expr_ptr expr)
     {
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        expr::Expr_ptr ctx { em.make_dot(f_ctx_stack.back(), expr->lhs()) };
+        auto& em { expr::ExprMgr::INSTANCE() };
+        const auto ctx { em.make_dot(f_ctx_stack.back(), expr->lhs()) };
 
         f_ctx_stack.push_back(ctx);
         f_type_stack.pop_back();
@@ -516,8 +515,8 @@ namespace model {
     /* on-demand preprocessing to expand defines delegated to Preprocessor */
     bool TypeChecker::walk_params_preorder(const expr::Expr_ptr expr)
     {
-        expr::Expr_ptr ctx { f_ctx_stack.back() };
-        expr::Expr_ptr preprocessed { f_preprocessor.process(expr, ctx) };
+        const auto ctx { f_ctx_stack.back() };
+        const auto preprocessed { f_preprocessor.process(expr, ctx) };
 
         (*this)(preprocessed);
         return false;
@@ -525,12 +524,10 @@ namespace model {
     bool TypeChecker::walk_params_inorder(const expr::Expr_ptr expr)
     {
         assert(false);
-        return false; /* unreachable */
     }
     void TypeChecker::walk_params_postorder(const expr::Expr_ptr expr)
     {
         assert(false);
-        return; /* unreachable */
     }
 
     bool TypeChecker::walk_params_comma_preorder(const expr::Expr_ptr expr)
@@ -574,7 +571,7 @@ namespace model {
         /* Here we need to handle the singleton corner case
          * (e.g. [42]). We can do it here because nested arrays are
          * not supported. */
-        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        auto& tm { type::TypeMgr::INSTANCE() };
 
         /* inspect head... */
         POP_TYPE(type);
@@ -585,15 +582,14 @@ namespace model {
             return;
         }
 
-        type::ScalarType_ptr scalar_type { type->as_scalar() };
+        const auto scalar_type { type->as_scalar() };
 
         /* build a singleton array type */
-        type::ArrayType_ptr new_array_type {
+        const auto new_array_type {
             tm.find_array_type(scalar_type, 1)
         };
 
         PUSH_TYPE(new_array_type);
-        return;
     }
 
     bool TypeChecker::walk_array_comma_preorder(expr::Expr_ptr expr)
@@ -608,21 +604,21 @@ namespace model {
 
     void TypeChecker::walk_array_comma_postorder(expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        auto& tm { type::TypeMgr::INSTANCE() };
 
         POP_TYPE(rhs_type);
         POP_TYPE(lhs_type);
 
-        type::ArrayType_ptr array_type { NULL };
+        type::ArrayType_ptr array_type { nullptr };
 
         if (rhs_type->is_array()) {
             array_type = rhs_type->as_array();
-            type::ScalarType_ptr of_type { array_type->of() };
+            const auto of_type { array_type->of() };
 
             assert(lhs_type->is_scalar() &&
                    lhs_type->width() == of_type->width());
 
-            type::ArrayType_ptr new_array_type {
+            const auto new_array_type {
                 tm.find_array_type(of_type, 1 + array_type->nelems())
             };
 
@@ -631,7 +627,7 @@ namespace model {
         }
 
         if (rhs_type->is_scalar()) {
-            type::ScalarType_ptr of_type { rhs_type->as_scalar() };
+            const auto of_type { rhs_type->as_scalar() };
 
             assert(lhs_type->is_scalar() &&
                    lhs_type->width() == of_type->width());
@@ -672,15 +668,15 @@ namespace model {
 
     void TypeChecker::walk_instant(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+        auto& tm { type::TypeMgr::INSTANCE() };
         PUSH_TYPE(tm.find_time());
     }
 
 
     void TypeChecker::walk_leaf(const expr::Expr_ptr expr)
     {
-        type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+        auto& tm { type::TypeMgr::INSTANCE() };
+        auto& em { expr::ExprMgr::INSTANCE() };
 
         // cache miss took care of the stack already
         if (!cache_miss(expr)) {
@@ -689,40 +685,45 @@ namespace model {
 
         // is an integer const ..
         if (em.is_int_const(expr)) {
-            unsigned ww { 64 };
-            PUSH_TYPE(tm.find_constant(ww));
+            PUSH_TYPE(tm.find_constant(64));
             return;
         }
 
         // .. or a symbol
         if (em.is_identifier(expr)) {
-            expr::Expr_ptr ctx { f_ctx_stack.back() };
+            const auto ctx { f_ctx_stack.back() };
 
             symb::ResolverProxy proxy;
-            symb::Symbol_ptr symb { proxy.symbol(em.make_dot(ctx, expr)) };
+            const auto symb { proxy.symbol(em.make_dot(ctx, expr)) };
 
             if (symb->is_const()) {
-                type::Type_ptr res { symb->as_const().type() };
+                const auto res { symb->as_const().type() };
                 PUSH_TYPE(res);
                 return;
-            } else if (symb->is_literal()) {
-                type::Type_ptr res { symb->as_literal().type() };
+            }
+
+            if (symb->is_literal()) {
+                const auto res { symb->as_literal().type() };
                 PUSH_TYPE(res);
                 return;
-            } else if (symb->is_variable()) {
-                type::Type_ptr res { symb->as_variable().type() };
+            }
+
+            if (symb->is_variable()) {
+                const auto res { symb->as_variable().type() };
                 PUSH_TYPE(res);
                 return;
-            } else if (symb->is_parameter()) {
-                type::Type_ptr res { symb->as_parameter().type() };
+            }
+
+            if (symb->is_parameter()) {
+                const auto res { symb->as_parameter().type() };
                 PUSH_TYPE(res);
                 return;
             }
 
             /* DEFINE, we can safely recur into its body. */
-            else if (symb->is_define()) {
-                symb::Define& define { symb->as_define() };
-                expr::Expr_ptr body { define.body() };
+            if (symb->is_define()) {
+                const auto& define { symb->as_define() };
+                const auto body { define.body() };
 
                 DEBUG
                     << "Recurring in `"

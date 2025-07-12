@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(type_checking)
     type::Type_ptr boolean { tm.find_boolean() };
     type::Type_ptr uint16 { tm.find_unsigned(16) };
     type::Type_ptr int16 { tm.find_signed(16) };
-    type::Type_ptr const16 { tm.find_constant(16) };
+    type::Type_ptr const64 { tm.find_constant(64) };
 
     /*
        A pair of variables for each type:
@@ -512,19 +512,19 @@ BOOST_AUTO_TEST_CASE(type_checking)
     // const-only arithmetics
     expr::Expr_ptr j = em.make_const(0);
 
-    BOOST_CHECK(const16 ==
+    BOOST_CHECK(const64 ==
 		mm.type(em.make_add(j, k)));
 
-    BOOST_CHECK(const16 ==
+    BOOST_CHECK(const64 ==
 		mm.type(em.make_sub(j, k)));
 
-    BOOST_CHECK(const16 ==
+    BOOST_CHECK(const64 ==
 		mm.type(em.make_mul(j, k)));
 
-    BOOST_CHECK(const16 ==
+    BOOST_CHECK(const64 ==
 		mm.type(em.make_div(j, k)));
 
-    BOOST_CHECK(const16 ==
+    BOOST_CHECK(const64 ==
 		mm.type(em.make_mod(j, k)));
 }
 

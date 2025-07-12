@@ -72,7 +72,7 @@ namespace compiler {
          * immediately. An exception will be thrown if conversion
          * could not be completed. */
         if (em.is_int_const(expr)) {
-            unsigned ww { opts::OptsMgr::INSTANCE().word_width() };
+            unsigned ww { 64 };
 
             PUSH_TYPE(tm.find_constant(ww));
             algebraic_constant(expr, ww);
