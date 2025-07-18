@@ -30,7 +30,6 @@
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
 
-#include <expr/nnfizer/nnfizer.hh>
 #include <expr/printer/printer.hh>
 
 BOOST_AUTO_TEST_SUITE(tests)
@@ -511,40 +510,52 @@ BOOST_AUTO_TEST_CASE(analyzer)
     expr::Atom a_x { "x" };
     expr::Expr_ptr x { em.make_identifier(a_x) };
 
-    expr::Atom a_y { "y" };
-    expr::Expr_ptr y { em.make_identifier(a_y) };
+    expr::Expr_ptr pos_instant { em.make_instant(5) };
+    expr::Expr_ptr neg_instant { em.make_instant(-3) };
 
-    expr::Nnfizer nnfizer;
+    // Test basic expression without time references
+    eta.process(x);
+    BOOST_CHECK(!eta.has_forward_time());
+    BOOST_CHECK(!eta.has_backward_time());
+    BOOST_CHECK(!eta.has_intervals());
 
-    BOOST_CHECK(x == nnfizer.process(x));
-    BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
+    // Test forward time reference
+    expr::Expr_ptr forward_at { em.make_at(pos_instant, x) };
+    eta.process(forward_at);
+    BOOST_CHECK(eta.has_forward_time());
+    BOOST_CHECK(!eta.has_backward_time());
+    BOOST_CHECK(!eta.has_intervals());
 
+    // Test backward time reference
+    expr::Expr_ptr backward_at { em.make_at(neg_instant, x) };
+    eta.process(backward_at);
+    BOOST_CHECK(!eta.has_forward_time());
+    BOOST_CHECK(eta.has_backward_time());
+    BOOST_CHECK(!eta.has_intervals());
 
-    BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
-                nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
+    // Test interval (contains both forward and backward time since it spans from -3 to 5)
+    expr::Expr_ptr interval { em.make_interval(neg_instant, pos_instant) };
+    expr::Expr_ptr interval_at { em.make_at(interval, x) };
+    eta.process(interval_at);
+    BOOST_CHECK(eta.has_forward_time());
+    BOOST_CHECK(eta.has_backward_time());
+    BOOST_CHECK(eta.has_intervals());
 
+    // Test complex expression with multiple time features
+    expr::Expr_ptr complex_expr { em.make_and(forward_at, backward_at) };
+    eta.process(complex_expr);
+    BOOST_CHECK(eta.has_forward_time());
+    BOOST_CHECK(eta.has_backward_time());
+    BOOST_CHECK(!eta.has_intervals());
+
+    // Test expression with all time features
+    expr::Expr_ptr all_features { em.make_and(complex_expr, interval_at) };
+    eta.process(all_features);
+    BOOST_CHECK(eta.has_forward_time());
+    BOOST_CHECK(eta.has_backward_time());
+    BOOST_CHECK(eta.has_intervals());
 }
 
-BOOST_AUTO_TEST_CASE(nnfizer)
-{
-    expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
-    expr::Atom a_x { "x" };
-    expr::Expr_ptr x { em.make_identifier(a_x) };
-
-    expr::Atom a_y { "y" };
-    expr::Expr_ptr y { em.make_identifier(a_y) };
-
-    expr::Nnfizer nnfizer;
-
-    BOOST_CHECK(x == nnfizer.process(x));
-    BOOST_CHECK(x == nnfizer.process(em.make_not(em.make_not(x))));
-
-
-    BOOST_CHECK(em.make_and(em.make_not(x), em.make_and(x, y)) ==
-                nnfizer.process(em.make_not(em.make_implies(x, em.make_and(x, y)))));
-
-}
 
 BOOST_AUTO_TEST_CASE(expander)
 {
@@ -573,30 +584,5 @@ BOOST_AUTO_TEST_CASE(expander)
                             em.make_at(em.make_instant(3), x)) ==
                 expander.process(em.make_at(em.make_interval(_3, _0), x)));
 }
-
-// BOOST_AUTO_TEST_CASE(fqexpr)
-// {
-//     ExprMgr& em = ExprMgr::INSTANCE();
-//     expr::Atom a_x("x");
-
-//     expr::Expr_ptr x = em.make_identifier(a_x);
-//     expr::Expr_ptr main_ = em.make_main();
-
-//     {
-
-//         const FQExpr& fqexpr = FQExpr(main_, x, 7);
-
-//         std::ostringstream oss;
-//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@7{main::x}"));
-//     }
-
-//     {
-
-//         const FQExpr& fqexpr = FQExpr(main_, x, 0);
-
-//         std::ostringstream oss;
-//         oss << fqexpr; BOOST_CHECK (oss.str() == std::string("@0{main::x}"));
-//     }
-// }
 
 BOOST_AUTO_TEST_SUITE_END()

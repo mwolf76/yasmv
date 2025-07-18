@@ -21,7 +21,7 @@ PKG_HH = check_init.hh check_trans.hh clear.hh commands.hh	\
 diameter.hh do.hh dump_model.hh dump_traces.hh dup_trace.hh echo.hh	\
 get.hh help.hh last.hh list_traces.hh load_model.hh on.hh		    \
 pick_state.hh quit.hh reach.hh read_model.hh select_trace.hh		\
-read_trace.hh set.hh show_traces.hh simulate.hh time.hh
+read_trace.hh set.hh simulate.hh time.hh
 
 PKG_CC = check_init.cc check_trans.cc clear.cc commands.cc	\
 diameter.cc do.cc dump_model.cc dump_traces.cc dup_trace.cc echo.cc	\
