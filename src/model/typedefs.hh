@@ -34,11 +34,15 @@
 
 namespace model {
 
-    typedef class Model* Model_ptr;
-    typedef class Module* Module_ptr;
-    typedef boost::unordered_map<expr::Expr_ptr, Module_ptr, utils::PtrHash, utils::PtrEq> Modules;
+    using Model_ptr = class Model*;
+    using Module_ptr = class Module*;
 
-    typedef boost::unordered_map<expr::Expr_ptr, unsigned, utils::PtrHash, utils::PtrEq> SymbolIndexMap;
+
+    using Modules = boost::unordered_map<expr::Expr_ptr, Module_ptr,
+					 utils::PtrHash, utils::PtrEq>;
+
+    using SymbolIndexMap = boost::unordered_map<expr::Expr_ptr, unsigned,
+						utils::PtrHash, utils::PtrEq>;
 
     /* streaming helper */
     std::ostream& operator<<(std::ostream& os, Module& module);

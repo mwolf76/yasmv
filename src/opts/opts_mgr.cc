@@ -41,6 +41,7 @@ namespace opts {
         , f_color(false)
         , f_started(false)
         , f_version(false)
+        , f_skip_inertial_fsm_checks(false)
         , f_word_width(UINT_MAX)
     {
         // clang-format off
@@ -82,6 +83,11 @@ namespace opts {
                 boost::program_options::value<std::string>(),
                 "input model"
             )
+            
+            (
+                "skip-inertial-fsm-checks",
+                "skip mutual exclusiveness checks for inertial FSM conditions (faster but potentially unsafe)"
+            )
             ;
         // clang-format on
 
@@ -118,6 +124,10 @@ namespace opts {
 
         if (f_vm.count("color")) {
             f_color = true;
+        }
+        
+        if (f_vm.count("skip-inertial-fsm-checks")) {
+            f_skip_inertial_fsm_checks = true;
         }
 
         f_started = true;
@@ -191,6 +201,11 @@ namespace opts {
     bool OptsMgr::help() const
     {
         return f_help;
+    }
+    
+    bool OptsMgr::skip_inertial_fsm_checks() const
+    {
+        return f_skip_inertial_fsm_checks;
     }
 
     std::string OptsMgr::usage() const

@@ -64,7 +64,10 @@ namespace cmd {
             assert(b);
 
             expr::Expr_ptr lhs_a { a->lhs() };
+	    assert(lhs_a != nullptr);
+	    
             expr::Expr_ptr lhs_b { b->lhs() };
+	    assert(lhs_b != nullptr);
 
             return f_model.symbol_index(lhs_a) <
                    f_model.symbol_index(lhs_b);

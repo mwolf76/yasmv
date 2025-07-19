@@ -47,14 +47,16 @@ namespace model {
     }
 
     // static initialization
-    ModelMgr_ptr ModelMgr::f_instance { NULL };
+    ModelMgr_ptr ModelMgr::f_instance { nullptr };
 
     ModelMgr::ModelMgr()
-        : f_model()
+        : f_model(nullptr)
         , f_resolver(*this)
         , f_type_checker(*this)
         , f_analyzed(false)
-    {}
+    {
+	f_model = new Model();
+    }
 
     Module_ptr ModelMgr::scope(expr::Expr_ptr key)
     {
@@ -76,7 +78,7 @@ namespace model {
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
-	Model& model { f_model };
+	Model& model { * f_model };
         Module& main_module { model.main_module() };
 
         std::stack<boost::tuple<expr::Expr_ptr, Module_ptr, expr::Expr_ptr>> stack;

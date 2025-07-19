@@ -22,6 +22,7 @@
  **/
 
 #include <cstdlib>
+#include <set>
 #include <sat.hh>
 
 namespace sat {
@@ -32,6 +33,8 @@ namespace sat {
     Engine::Engine(const char* instance_name)
         : f_instance_name(instance_name)
         , f_enc_mgr(enc::EncodingMgr::INSTANCE())
+        , f_cnf_optimization_enabled(true)  // Enable by default
+        , f_optimization_in_progress(false)
     {
         const void* instance { this };
 
@@ -62,6 +65,9 @@ namespace sat {
 
     status_t Engine::sat_solve_groups(const Groups& groups)
     {
+        // Optimize pending clauses before solving
+        optimize_and_commit();
+        
         vec<Lit> assumptions;
 
         clock_t t0 { clock() };
@@ -289,6 +295,215 @@ namespace sat {
         assert(f_var2tcbi_map.end() != eye);
 
         return eye->second;
+    }
+    
+    // -- CNF Optimization Implementation -------------------------------------
+    
+    void Engine::enable_cnf_optimization(bool enable)
+    {
+        f_cnf_optimization_enabled = enable;
+        
+        const char* status_str = enable ? "enabled" : "disabled";
+        DEBUG
+            << "CNF optimization "
+            << status_str
+            << std::endl;
+    }
+    
+    void Engine::optimize_and_commit()
+    {
+        if (!f_cnf_optimization_enabled || f_pending_clauses.empty()) {
+            return;
+        }
+        
+        f_optimization_in_progress = true;
+        f_opt_stats.reset();
+        f_opt_stats.original_clauses = f_pending_clauses.size();
+        
+        TRACE
+            << "Starting CNF optimization with "
+            << f_opt_stats.original_clauses
+            << " clauses"
+            << std::endl;
+        
+        // Run optimization pipeline
+        optimize_cnf();
+        
+        // Commit optimized clauses to solver
+        for (auto& clause : f_pending_clauses) {
+            vec<Lit> ps;
+            for (auto lit : clause) {
+                ps.push(lit);
+            }
+            f_solver.addClause_(ps);
+        }
+        
+        f_opt_stats.final_clauses = f_pending_clauses.size();
+        
+        size_t removed = f_opt_stats.original_clauses - f_opt_stats.final_clauses;
+        double reduction = (100.0 * removed) / f_opt_stats.original_clauses;
+        
+        INFO
+            << "CNF optimization complete: "
+            << f_opt_stats.original_clauses << " -> "
+            << f_opt_stats.final_clauses << " clauses "
+            << "(" << removed
+            << " removed, "
+            << reduction
+            << "% reduction)"
+            << std::endl;
+        
+        DEBUG
+            << "  Tautologies removed: " << f_opt_stats.removed_tautologies
+            << ", Duplicates removed: " << f_opt_stats.removed_duplicates
+            << ", Subsumed removed: " << f_opt_stats.removed_subsumed
+            << std::endl;
+        
+        // Clear pending clauses
+        f_pending_clauses.clear();
+        f_optimization_in_progress = false;
+    }
+    
+    void Engine::optimize_cnf()
+    {
+        // Run optimization passes in sequence
+        remove_tautologies();
+        remove_duplicates();
+        // subsumption_elimination(); // Disabled - too heavy for now
+    }
+    
+    bool Engine::has_tautology(const std::vector<Lit>& clause)
+    {
+        // Use set instead of unordered_set to avoid hash issues with Lit
+        std::set<int> seen;
+        for (auto lit : clause) {
+            int lit_int = toInt(lit);
+            int neg_lit_int = toInt(~lit);
+            if (seen.count(neg_lit_int) > 0) {
+                return true;
+            }
+            seen.insert(lit_int);
+        }
+        return false;
+    }
+    
+    void Engine::remove_tautologies()
+    {
+        std::vector<std::vector<Lit>> result;
+        result.reserve(f_pending_clauses.size());
+        
+        for (auto& clause : f_pending_clauses) {
+            if (!has_tautology(clause)) {
+                result.push_back(std::move(clause));
+            } else {
+                f_opt_stats.removed_tautologies++;
+            }
+        }
+        
+        f_pending_clauses = std::move(result);
+    }
+    
+    void Engine::remove_duplicates()
+    {
+        // First sort literals within each clause
+        for (auto& clause : f_pending_clauses) {
+            std::sort(clause.begin(), clause.end(),
+                [](Lit a, Lit b) { return toInt(a) < toInt(b); });
+        }
+        
+        // Sort clauses for efficient duplicate detection
+        std::sort(f_pending_clauses.begin(), f_pending_clauses.end(),
+            [](const std::vector<Lit>& a, const std::vector<Lit>& b) {
+                if (a.size() != b.size()) return a.size() < b.size();
+                for (size_t i = 0; i < a.size(); ++i) {
+                    if (toInt(a[i]) != toInt(b[i])) {
+                        return toInt(a[i]) < toInt(b[i]);
+                    }
+                }
+                return false;
+            });
+        
+        // Remove duplicates
+        std::vector<std::vector<Lit>> result;
+        result.reserve(f_pending_clauses.size());
+        
+        for (size_t i = 0; i < f_pending_clauses.size(); ++i) {
+            bool is_duplicate = false;
+            
+            // Check if this clause is a duplicate of the previous one
+            if (i > 0) {
+                const auto& prev = f_pending_clauses[i-1];
+                const auto& curr = f_pending_clauses[i];
+                
+                if (prev.size() == curr.size()) {
+                    is_duplicate = true;
+                    for (size_t j = 0; j < prev.size(); ++j) {
+                        if (toInt(prev[j]) != toInt(curr[j])) {
+                            is_duplicate = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (!is_duplicate) {
+                result.push_back(std::move(f_pending_clauses[i]));
+            } else {
+                f_opt_stats.removed_duplicates++;
+            }
+        }
+        
+        f_pending_clauses = std::move(result);
+    }
+    
+    bool Engine::is_subsumed(const std::vector<Lit>& smaller, const std::vector<Lit>& larger)
+    {
+        if (smaller.size() > larger.size()) return false;
+        
+        size_t j = 0;
+        for (size_t i = 0; i < smaller.size(); ++i) {
+            while (j < larger.size() && toInt(larger[j]) < toInt(smaller[i])) {
+                j++;
+            }
+            if (j >= larger.size() || toInt(larger[j]) != toInt(smaller[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    void Engine::subsumption_elimination()
+    {
+        // Clauses are already sorted by size from remove_duplicates
+        std::vector<bool> subsumed(f_pending_clauses.size(), false);
+        
+        // For each clause, check if it's subsumed by any smaller clause
+        for (size_t i = 0; i < f_pending_clauses.size(); ++i) {
+            if (subsumed[i]) continue;
+            
+            for (size_t j = 0; j < i; ++j) {
+                if (subsumed[j]) continue;
+                if (f_pending_clauses[j].size() > f_pending_clauses[i].size()) break;
+                
+                if (is_subsumed(f_pending_clauses[j], f_pending_clauses[i])) {
+                    subsumed[i] = true;
+                    f_opt_stats.removed_subsumed++;
+                    break;
+                }
+            }
+        }
+        
+        // Collect non-subsumed clauses
+        std::vector<std::vector<Lit>> result;
+        result.reserve(f_pending_clauses.size());
+        
+        for (size_t i = 0; i < f_pending_clauses.size(); ++i) {
+            if (!subsumed[i]) {
+                result.push_back(std::move(f_pending_clauses[i]));
+            }
+        }
+        
+        f_pending_clauses = std::move(result);
     }
 
 }; // namespace sat

@@ -57,7 +57,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-yasmv_SOURCES = src/main.cc src/parse.cc
+yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
