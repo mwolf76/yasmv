@@ -78,6 +78,9 @@ namespace opts {
 
         // model filename
         std::string model() const;
+        
+        // skip inertial FSM checks
+        bool skip_inertial_fsm_checks() const;
 
         // to be invoked by main
         void parse_command_line(int argc, const char** argv);
@@ -101,6 +104,7 @@ namespace opts {
         bool f_color;
         bool f_started;
         bool f_version;
+        bool f_skip_inertial_fsm_checks;
 
         unsigned f_word_width;
         unsigned f_precision;

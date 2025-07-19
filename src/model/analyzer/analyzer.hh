@@ -86,9 +86,6 @@ namespace model {
         analyze_section_t f_section;
 
         DependencyTrackingMap f_dependency_tracking_map;
-
-        // helpers
-        bool mutually_exclusive(expr::Expr_ptr p, expr::Expr_ptr q);
     };
 
 }; // namespace model
