@@ -1,5 +1,5 @@
 /**
- * @file dump_traces.hh
+ * @file dump_trace.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * This header file contains the handler interface for the `dump-trace`
@@ -24,8 +24,8 @@
  *
  **/
 
-#ifndef DUMP_TRACES_CMD_H
-#define DUMP_TRACES_CMD_H
+#ifndef DUMP_TRACE_CMD_H
+#define DUMP_TRACE_CMD_H
 
 #include <cmd/command.hh>
 #include <expr/atom.hh>
@@ -74,7 +74,7 @@ namespace cmd {
         }
     };
 
-    class DumpTraces: public Command {
+    class DumpTrace: public Command {
 
         /* the trace ids selected for dumping */
         expr::AtomVector f_trace_ids;
@@ -113,8 +113,8 @@ namespace cmd {
             return f_all;
         }
 
-        DumpTraces(Interpreter& owner);
-        virtual ~DumpTraces();
+        DumpTrace(Interpreter& owner);
+        virtual ~DumpTrace();
 
         utils::Variant virtual operator()();
 
@@ -140,16 +140,16 @@ namespace cmd {
                                 expr::ExprVector& defines_assignments);
     };
 
-    typedef DumpTraces* DumpTraces_ptr;
+    typedef DumpTrace* DumpTrace_ptr;
 
-    class DumpTracesTopic: public CommandTopic {
+    class DumpTraceTopic: public CommandTopic {
     public:
-        DumpTracesTopic(Interpreter& owner);
-        virtual ~DumpTracesTopic();
+        DumpTraceTopic(Interpreter& owner);
+        virtual ~DumpTraceTopic();
 
         void virtual usage();
     };
 
 } // namespace cmd
 
-#endif /* DUMP_TRACES_CMD_H */
+#endif /* DUMP_TRACE_CMD_H */

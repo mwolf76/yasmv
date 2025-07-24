@@ -965,7 +965,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=dump_model_command_topic
         { $res = c; }
 
-    |  c=dump_traces_command_topic
+    |  c=dump_trace_command_topic
         { $res = c; }
 
     |  c=dup_trace_command_topic
@@ -1037,7 +1037,7 @@ command returns [cmd::Command_ptr res]
     |  c=dump_model_command
         { $res = c; }
 
-    |  c=dump_traces_command
+    |  c=dump_trace_command
         { $res = c; }
 
     |  c=dup_trace_command
@@ -1327,32 +1327,32 @@ list_traces_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_list_traces(); }
     ;
 
-dump_traces_command returns [cmd::Command_ptr res]
+dump_trace_command returns [cmd::Command_ptr res]
 @init { $res = NULL; }
-    : 'dump-traces'
-      { $res = cm.make_dump_traces(); }
+    : 'dump-trace'
+      { $res = cm.make_dump_trace(); }
 
     (
       '-a'
-      { ((cmd::DumpTraces_ptr) $res)->set_all(true); }
+      { ((cmd::DumpTrace_ptr) $res)->set_all(true); }
     |
       '-f' format=pcchar_identifier
-      { ((cmd::DumpTraces_ptr) $res)->set_format(format); }
+      { ((cmd::DumpTrace_ptr) $res)->set_format(format); }
 
     | '-o' output=pcchar_quoted_string
       {
-            ((cmd::DumpTraces_ptr) $res)->set_output(output);
+            ((cmd::DumpTrace_ptr) $res)->set_output(output);
       }
     )*
 
     ( trace_id=pcchar_identifier
-    { ((cmd::DumpTraces_ptr) $res)->add_trace_id(trace_id); } )*
+    { ((cmd::DumpTrace_ptr) $res)->add_trace_id(trace_id); } )*
     ;
 
-dump_traces_command_topic returns [cmd::CommandTopic_ptr res]
+dump_trace_command_topic returns [cmd::CommandTopic_ptr res]
 @init { $res = NULL; }
-    :  'dump-traces'
-        { $res = cm.topic_dump_traces(); }
+    :  'dump-trace'
+        { $res = cm.topic_dump_trace(); }
     ;
 
 

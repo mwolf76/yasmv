@@ -119,8 +119,7 @@ namespace sat {
             const dd::DDVector& dv { cu.dds() };
             dd::DDVector::const_iterator i;
             for (i = dv.begin(); dv.end() != i; ++i) {
-                cnf_push_single_cut(*i, time, group);
-                // cnf_push_no_cut( *i, time, group );
+                cnf_push(*i, time, group);
             }
         }
 

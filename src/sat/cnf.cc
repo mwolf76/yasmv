@@ -1,6 +1,6 @@
 /**
- * @file sat/cnf_singlecut.cc
- * @brief Engine interface implementation, CNFization algorithm #2 (Single cut)
+ * @file sat/cnf.cc
+ * @brief Engine interface implementation, CNFization algorithm
  * implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -29,17 +29,17 @@
 
 namespace sat {
 
-    class CNFBuilderSingleCut: public dd::ADDWalker {
+    class CNFBuilder: public dd::ADDWalker {
     public:
-        CNFBuilderSingleCut(Engine& sat, step_t time,
-                            group_t group = MAINGROUP)
+        CNFBuilder(Engine& sat, step_t time,
+                   group_t group = MAINGROUP)
             : f_sat(sat)
             , f_toplevel(NULL)
             , f_time(time)
             , f_group(group)
         {}
 
-        ~CNFBuilderSingleCut()
+        ~CNFBuilder()
         {}
 
         void pre_hook()
@@ -287,9 +287,9 @@ namespace sat {
         }
     };
 
-    void Engine::cnf_push_single_cut(ADD add, step_t time, const group_t group)
+    void Engine::cnf_push(ADD add, step_t time, const group_t group)
     {
-        CNFBuilderSingleCut worker { *this, time, group };
+        CNFBuilder worker { *this, time, group };
 
         worker(add);
 

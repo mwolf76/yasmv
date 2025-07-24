@@ -1,6 +1,6 @@
 /*
- * @file dump_traces.cc
- * @brief Command `dump-traces` class implementation.
+ * @file dump_trace.cc
+ * @brief Command `dump-trace` class implementation.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -26,7 +26,7 @@
 #include <cstring>
 
 #include <cmd/commands/commands.hh>
-#include <cmd/commands/dump_traces.hh>
+#include <cmd/commands/dump_trace.hh>
 
 #include <env/environment.hh>
 
@@ -72,20 +72,20 @@ namespace cmd {
         : CommandException(build_bad_request_error_message())
     {}
 
-    DumpTraces::DumpTraces(Interpreter& owner)
+    DumpTrace::DumpTrace(Interpreter& owner)
         : Command(owner)
         , f_format(strdup(TRACE_FMT_DEFAULT))
         , f_output(NULL)
         , f_all(false)
     {}
 
-    DumpTraces::~DumpTraces()
+    DumpTrace::~DumpTrace()
     {
         free((pchar) f_format);
         free(f_output);
     }
 
-    void DumpTraces::set_format(pconst_char format)
+    void DumpTrace::set_format(pconst_char format)
     {
         f_format = strdup(format);
         if (strcmp(f_format, TRACE_FMT_PLAIN) &&
@@ -94,7 +94,7 @@ namespace cmd {
         }
     }
 
-    void DumpTraces::add_trace_id(pconst_char trace_id)
+    void DumpTrace::add_trace_id(pconst_char trace_id)
     {
         if (f_all) {
             throw BadRequest();
@@ -104,13 +104,13 @@ namespace cmd {
         f_trace_ids.push_back(atom);
     }
 
-    void DumpTraces::set_output(pconst_char output)
+    void DumpTrace::set_output(pconst_char output)
     {
         free(f_output);
         f_output = strdup(output);
     }
 
-    void DumpTraces::set_all(bool value)
+    void DumpTrace::set_all(bool value)
     {
         assert(value); // clearing is not supported
 
@@ -121,7 +121,7 @@ namespace cmd {
         f_all = true;
     }
 
-    void DumpTraces::dump_plain(std::ostream& os, const witness::WitnessList& witness_list)
+    void DumpTrace::dump_plain(std::ostream& os, const witness::WitnessList& witness_list)
     {
         std::for_each(
             begin(witness_list), end(witness_list),
@@ -167,7 +167,7 @@ namespace cmd {
             });
     }
 
-    void DumpTraces::dump_plain_section(std::ostream& os,
+    void DumpTrace::dump_plain_section(std::ostream& os,
                                         const char* section,
                                         expr::ExprVector& assignments)
     {
@@ -199,7 +199,7 @@ namespace cmd {
             << std::endl;
     }
 
-    void DumpTraces::dump_json(std::ostream& os, const witness::WitnessList& witness_list)
+    void DumpTrace::dump_json(std::ostream& os, const witness::WitnessList& witness_list)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
@@ -255,7 +255,7 @@ namespace cmd {
             << std::endl;
     }
 
-    Json::Value DumpTraces::section_to_json(expr::ExprVector& assignments)
+    Json::Value DumpTrace::section_to_json(expr::ExprVector& assignments)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
         Json::Value res;
@@ -299,7 +299,7 @@ namespace cmd {
         return res;
     }
 
-    void DumpTraces::process_input(witness::Witness& w,
+    void DumpTrace::process_input(witness::Witness& w,
                                    expr::ExprVector& input_assignments)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
@@ -345,7 +345,7 @@ namespace cmd {
 
     /* here UNDEF is used to fill up symbols not showing up in the witness where
        they're expected to. (i. e. UNDEF is only a UI entity) */
-    void DumpTraces::process_time_frame(witness::Witness& w, step_t time,
+    void DumpTrace::process_time_frame(witness::Witness& w, step_t time,
                                         expr::ExprVector& state_vars_assignments,
                                         expr::ExprVector& defines_assignments)
     {
@@ -407,7 +407,7 @@ namespace cmd {
              defines_assignments.end(), fun);
     }
 
-    std::ostream& DumpTraces::get_output_stream()
+    std::ostream& DumpTrace::get_output_stream()
     {
         std::ostream* res { &std::cout };
         if (f_output) {
@@ -426,7 +426,7 @@ namespace cmd {
         return *res;
     }
 
-    utils::Variant DumpTraces::operator()()
+    utils::Variant DumpTrace::operator()()
     {
         std::ostream& os { get_output_stream() };
         witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
@@ -460,20 +460,20 @@ namespace cmd {
         return utils::Variant(okMessage);
     }
 
-    DumpTracesTopic::DumpTracesTopic(Interpreter& owner)
+    DumpTraceTopic::DumpTraceTopic(Interpreter& owner)
         : CommandTopic(owner)
     {}
 
-    DumpTracesTopic::~DumpTracesTopic()
+    DumpTraceTopic::~DumpTraceTopic()
     {
         TRACE
-            << "Destroyed dump-traces topic"
+            << "Destroyed dump-trace topic"
             << std::endl;
     }
 
-    void DumpTracesTopic::usage()
+    void DumpTraceTopic::usage()
     {
-        display_manpage("dump-traces");
+        display_manpage("dump-trace");
     }
 
 } // namespace cmd
