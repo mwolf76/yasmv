@@ -9,7 +9,7 @@ AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-function
 PKG_HH = engine.hh engine_mgr.hh exceptions.hh inlining.hh logging.hh sat.hh	\
 typedefs.hh
 
-PKG_CC = cnf_nocut.cc cnf_singlecut.cc engine.cc engine_mgr.cc exceptions.cc	\
+PKG_CC = cnf.cc engine.cc engine_mgr.cc exceptions.cc	\
 inlining.cc logging.cc
 
 # -------------------------------------------------------

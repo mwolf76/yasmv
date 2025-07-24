@@ -1,5 +1,5 @@
 set n 1231124341
 pick-state
-dump-traces
+dump-trace
 time
 quit
