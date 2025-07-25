@@ -88,6 +88,15 @@ namespace opts {
         int sat_ccmin_mode() const;
         int sat_phase_saving() const;
         double sat_garbage_frac() const;
+        
+        // CNF optimization configuration
+        bool cnf_optimization() const;
+        bool cnf_no_tautology_removal() const;
+        bool cnf_no_duplicate_removal() const;
+        bool cnf_no_subsumption() const;
+        bool cnf_no_variable_elimination() const;
+        bool cnf_no_self_subsumption() const;
+        bool cnf_no_blocked_clause() const;
 
         // to be invoked by main
         void parse_command_line(int argc, const char** argv);

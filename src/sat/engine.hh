@@ -285,14 +285,36 @@ namespace sat {
             size_t removed_tautologies;
             size_t removed_duplicates;
             size_t removed_subsumed;
+            size_t removed_by_var_elim;
+            size_t removed_by_self_subsumption;
+            size_t removed_blocked;
             size_t final_clauses;
+            
+            // Timing information (in milliseconds)
+            double total_time_ms;
+            double tautology_time_ms;
+            double duplicate_time_ms;
+            double subsumption_time_ms;
+            double var_elim_time_ms;
+            double self_subsumption_time_ms;
+            double blocked_clause_time_ms;
             
             void reset() {
                 original_clauses = 0;
                 removed_tautologies = 0;
                 removed_duplicates = 0;
                 removed_subsumed = 0;
+                removed_by_var_elim = 0;
+                removed_by_self_subsumption = 0;
+                removed_blocked = 0;
                 final_clauses = 0;
+                total_time_ms = 0.0;
+                tautology_time_ms = 0.0;
+                duplicate_time_ms = 0.0;
+                subsumption_time_ms = 0.0;
+                var_elim_time_ms = 0.0;
+                self_subsumption_time_ms = 0.0;
+                blocked_clause_time_ms = 0.0;
             }
         } f_opt_stats;
         
@@ -300,6 +322,9 @@ namespace sat {
         void remove_tautologies();
         void remove_duplicates();
         void subsumption_elimination();
+        void variable_elimination();
+        void self_subsuming_resolution();
+        void blocked_clause_elimination();
         void optimize_cnf();
         
         // Helper methods for optimization

@@ -117,6 +117,41 @@ namespace opts {
                 boost::program_options::value<double>()->default_value(DEFAULT_SAT_GARBAGE_FRAC),
                 "SAT solver garbage collection fraction (0.0-1.0)"
             )
+            
+            (
+                "cnf-optimization",
+                "enable CNF optimization (may improve or worsen performance)"
+            )
+            
+            (
+                "cnf-no-tautology-removal",
+                "disable tautology removal in CNF optimization"
+            )
+            
+            (
+                "cnf-no-duplicate-removal",
+                "disable duplicate clause removal in CNF optimization"
+            )
+            
+            (
+                "cnf-no-subsumption",
+                "disable subsumption elimination in CNF optimization"
+            )
+            
+            (
+                "cnf-no-variable-elimination",
+                "disable variable elimination in CNF optimization"
+            )
+            
+            (
+                "cnf-no-self-subsumption",
+                "disable self-subsuming resolution in CNF optimization"
+            )
+            
+            (
+                "cnf-no-blocked-clause",
+                "disable blocked clause elimination in CNF optimization"
+            )
             ;
         // clang-format on
 
@@ -239,6 +274,41 @@ namespace opts {
     double OptsMgr::sat_garbage_frac() const
     {
         return f_vm["sat-garbage-frac"].as<double>();
+    }
+    
+    bool OptsMgr::cnf_optimization() const
+    {
+        return f_vm.count("cnf-optimization") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_tautology_removal() const
+    {
+        return f_vm.count("cnf-no-tautology-removal") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_duplicate_removal() const
+    {
+        return f_vm.count("cnf-no-duplicate-removal") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_subsumption() const
+    {
+        return f_vm.count("cnf-no-subsumption") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_variable_elimination() const
+    {
+        return f_vm.count("cnf-no-variable-elimination") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_self_subsumption() const
+    {
+        return f_vm.count("cnf-no-self-subsumption") > 0;
+    }
+    
+    bool OptsMgr::cnf_no_blocked_clause() const
+    {
+        return f_vm.count("cnf-no-blocked-clause") > 0;
     }
 
     std::string OptsMgr::usage() const
