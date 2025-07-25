@@ -24,11 +24,12 @@
 #include <cstdlib>
 #include <set>
 #include <sat.hh>
+#include <opts/opts_mgr.hh>
 
 namespace sat {
 
     /**
- * @brief SAT instancte ctor
+ * @brief SAT instance ctor
  */
     Engine::Engine(const char* instance_name)
         : f_instance_name(instance_name)
@@ -39,11 +40,12 @@ namespace sat {
         const void* instance { this };
 
         /* Default configuration */
-        f_solver.random_var_freq = .1;
-        // f_solver.ccmin_mode = 0;
-        // f_solver.phase_saving = 0;
-        f_solver.rnd_init_act = true;
-        f_solver.garbage_frac = 0.50;
+        opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
+        f_solver.random_var_freq = opts_mgr.sat_random_var_freq();
+        f_solver.ccmin_mode = opts_mgr.sat_ccmin_mode();
+        f_solver.phase_saving = opts_mgr.sat_phase_saving();
+        f_solver.rnd_init_act = opts_mgr.sat_random_init_act();
+        f_solver.garbage_frac = opts_mgr.sat_garbage_frac();
 
         /* MAINGROUP (=0) is already there. */
         f_groups.push(new_sat_var());

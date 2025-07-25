@@ -88,6 +88,35 @@ namespace opts {
                 "skip-inertial-fsm-checks",
                 "skip mutual exclusiveness checks for inertial FSM conditions (faster but potentially unsafe)"
             )
+            
+            (
+                "sat-random-var-freq",
+                boost::program_options::value<double>()->default_value(DEFAULT_SAT_RANDOM_VAR_FREQ),
+                "SAT solver random variable frequency (0.0 = deterministic, higher = more random)"
+            )
+            
+            (
+                "sat-random-init-act",
+                "enable SAT solver random initial activity (non-deterministic)"
+            )
+            
+            (
+                "sat-ccmin-mode",
+                boost::program_options::value<int>()->default_value(DEFAULT_SAT_CCMIN_MODE),
+                "SAT solver conflict clause minimization mode (0=none, 1=basic, 2=deep)"
+            )
+            
+            (
+                "sat-phase-saving",
+                boost::program_options::value<int>()->default_value(DEFAULT_SAT_PHASE_SAVING),
+                "SAT solver phase saving mode (0=none, 1=limited, 2=full)"
+            )
+            
+            (
+                "sat-garbage-frac",
+                boost::program_options::value<double>()->default_value(DEFAULT_SAT_GARBAGE_FRAC),
+                "SAT solver garbage collection fraction (0.0-1.0)"
+            )
             ;
         // clang-format on
 
@@ -165,27 +194,6 @@ namespace opts {
                                           : f_vm["word-width"].as<unsigned>();
     }
 
-    void OptsMgr::set_precision(unsigned value)
-    {
-        TRACE
-            << "Setting precision to "
-            << value
-            << std::endl;
-
-        f_precision = value;
-
-        if (f_precision < 4)
-            WARN
-                << "Warning! No decimal digits will be shown in fixed-point values"
-                << std::endl;
-    }
-
-    unsigned OptsMgr::precision() const
-    {
-        return (UINT_MAX != f_precision)
-                   ? f_precision
-                   : f_vm["precision"].as<unsigned>();
-    }
 
 
     std::string OptsMgr::model() const
@@ -206,6 +214,31 @@ namespace opts {
     bool OptsMgr::skip_inertial_fsm_checks() const
     {
         return f_skip_inertial_fsm_checks;
+    }
+    
+    double OptsMgr::sat_random_var_freq() const
+    {
+        return f_vm["sat-random-var-freq"].as<double>();
+    }
+    
+    bool OptsMgr::sat_random_init_act() const
+    {
+        return f_vm.count("sat-random-init-act") > 0;
+    }
+    
+    int OptsMgr::sat_ccmin_mode() const
+    {
+        return f_vm["sat-ccmin-mode"].as<int>();
+    }
+    
+    int OptsMgr::sat_phase_saving() const
+    {
+        return f_vm["sat-phase-saving"].as<int>();
+    }
+    
+    double OptsMgr::sat_garbage_frac() const
+    {
+        return f_vm["sat-garbage-frac"].as<double>();
     }
 
     std::string OptsMgr::usage() const

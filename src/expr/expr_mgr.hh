@@ -895,8 +895,6 @@ namespace expr {
         /* aux service of make_dot */
         Expr_ptr left_associate_dot(const Expr_ptr);
 
-        value_t decimal_lookup(const char* decimal_repr);
-
         /* -- data ------------------------------------------------------------- */
         Expr_ptr time_expr;
         Expr_ptr bool_expr;
