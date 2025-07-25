@@ -5,9 +5,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ -I$(top_srcdir)/src/					\
 -I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/micro					\
 -I$(top_srcdir)/src/model -I$(top_srcdir)/src/sat					\
 -I$(top_srcdir)/src/algorithms -I$(top_srcdir)/src/witness			\
--I$(top_srcdir)/src/utils -I$(top_srcdir)/src/sat/core				\
--I$(top_srcdir)/src/sat/mtl -I$(top_srcdir)/src/sat/proof			\
--I$(top_srcdir)/src/sat/utils -I$(top_srcdir)/src/parser/grammars	\
+-I$(top_srcdir)/src/utils -I$(top_srcdir)/src/parser/grammars	    \
 -I$(top_srcdir)/src/3rdparty/ezlogger								\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd								\
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr								\
