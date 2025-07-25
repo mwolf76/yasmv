@@ -27,7 +27,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/reach.hh>
-#include <cmd/commands/dump_traces.hh>
+#include <cmd/commands/dump_trace.hh>
 
 namespace cmd {
 
@@ -141,7 +141,7 @@ namespace cmd {
 			    << " steps."
 			    << std::endl;
 
-			DumpTraces { this->f_owner }();
+			DumpTrace { this->f_owner }();
 		    }
                 }
                 res = true;

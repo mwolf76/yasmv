@@ -62,12 +62,13 @@ namespace model {
 
         inline Model& model()
         {
-            return f_model;
+            return * f_model;
         }
 
         inline Module& module(expr::Expr_ptr module_name)
         {
-            return f_model.module(module_name);
+	    assert(f_model != nullptr);
+            return f_model->module(module_name);
         }
 
         inline symb::Resolver_ptr resolver()
@@ -111,7 +112,7 @@ namespace model {
         static ModelMgr_ptr f_instance;
 
         /* local data */
-        Model f_model;
+        Model_ptr f_model;
 
         // owned
         ModelResolver f_resolver;

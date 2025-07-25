@@ -109,13 +109,11 @@ to solve planning problems.
   $ make test
   ```
 
-  Remark: The default build for C++ code uses a low level of optimization (-O0)
-  to make life a whole lot easier for debugging. If you want to, feel free to
-  enable higher level of optimization for the C++ code (C code already uses
-  '-O2' by default). Do not expect major performance gains though, as core
-  services `CUDD` (used in the expression compiler) and `Minisat` (which powers the
-  solving engine) are compiled/installed separately and already use a higher
-  level of optimization.
+  Remark: The default build for C++ code now uses -O2 optimization for optimal
+  performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the
+  setup.sh script to use -O0 instead. Core services `CUDD` (used in the expression
+  compiler) and `Minisat` (which powers the solving engine) are compiled/installed
+  separately and already use a higher level of optimization.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 

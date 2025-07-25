@@ -220,6 +220,7 @@ namespace expr {
             : f_symb(symb)
         {
             assert(symb == UNDEF);
+	    u.f_value = 0;
         }
 
     } Expr;

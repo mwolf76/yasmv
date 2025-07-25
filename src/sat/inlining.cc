@@ -109,7 +109,8 @@ namespace sat {
         }
 
         char buf[20];
-        strncpy(buf, fragments[2].c_str(), 20);
+        strncpy(buf, fragments[2].c_str(), 19);
+        buf[19] = '\0';
 
         char* width { buf };
         f_ios = compiler::make_ios('s' == *signedness, op_type, atoi(width));

@@ -45,7 +45,10 @@ namespace sat {
         static EngineMgr& INSTANCE()
         {
             if (!f_instance) {
-                f_instance = new EngineMgr();
+                boost::mutex::scoped_lock lock(f_singleton_mutex);
+                if (!f_instance) {
+                    f_instance = new EngineMgr();
+                }
             }
             return (*f_instance);
         }
@@ -68,6 +71,7 @@ namespace sat {
         void unregister_instance(Engine_ptr engine);
 
         static EngineMgr_ptr f_instance;
+        static boost::mutex f_singleton_mutex;
         EngineSet f_engines;
 
         boost::mutex f_mutex;

@@ -29,6 +29,7 @@
 namespace sat {
 
     EngineMgr_ptr EngineMgr::f_instance { NULL };
+    boost::mutex EngineMgr::f_singleton_mutex;
 
     EngineMgr::EngineMgr()
     {

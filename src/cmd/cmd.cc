@@ -74,15 +74,15 @@ namespace cmd {
 
         try {
             if (exists(help_path) && is_directory(help_path)) {
-                for (boost::filesystem::directory_iterator di = boost::filesystem::directory_iterator(help_path);
+                for (auto di = boost::filesystem::directory_iterator(help_path);
                      di != boost::filesystem::directory_iterator(); ++di) {
 
-                    boost::filesystem::path entry { di->path() };
-                    if (strcmp(entry.extension().c_str(), ".nroff")) {
+                    auto entry { di->path() };
+                    if (entry.extension() != ".nroff") {
                         continue;
                     }
 
-                    res.insert(entry.filename().string());
+                    res.insert(entry.filename().stem().string());
                 }
             } else {
                 ERR

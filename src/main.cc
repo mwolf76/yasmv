@@ -57,53 +57,10 @@
 #include <sat/sat.hh>
 
 #include <boost/chrono.hpp>
-
 static const std::string heading_msg =
     "yasmv - Yet Another Symbolic Model Verifier\n"
     "(c) 2011-2021, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
-    "https://github.com/mwolf76/yasmv\n";
-
-/* printing helpers: these functions are unused in the code, they're
-   here just for debugging purposes withing gdb */
-void pe(expr::Expr_ptr e)
-{
-    std::cerr << e << std::endl;
-}
-
-std::string se(expr::Expr_ptr e)
-{
-    std::ostringstream oss;
-    oss << e;
-    return oss.str();
-}
-
-void pf(expr::TimedExpr e)
-{
-    std::cerr << e << std::endl;
-}
-
-std::string sf(expr::TimedExpr e)
-{
-    std::ostringstream oss;
-    oss << e;
-    return oss.str();
-}
-
-
-void pu(enc::UCBI& ucbi)
-{
-    std::cerr << ucbi << std::endl;
-}
-
-void pt(enc::TCBI& tcbi)
-{
-    std::cerr << tcbi << std::endl;
-}
-
-void pd(compiler::InlinedOperatorDescriptor& md)
-{
-    std::cerr << md << std::endl;
-}
+    "https://github.com/mwolf76/yasmv\n\n";
 
 void batch(cmd::Command_ptr cmd)
 {
@@ -168,48 +125,51 @@ int main(int argc, const char* argv[])
     signal(SIGTSTP, sighandler);
 
     try {
-        /* parse command line options */
-        opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
-        opts_mgr.parse_command_line(argc, argv);
+	/* -- init managers --------------------------------------- */
+	opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+	(void) om;
+	
+	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+	(void) em;
 
-        if (opts_mgr.help()) {
+	model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+	(void) mm;
+
+	witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
+	(void) wm;
+
+	sat::InlinedOperatorMgr& iom { sat::InlinedOperatorMgr::INSTANCE() };
+	(void) iom;
+
+        
+        /* -- parse command line options ---------------------------*/
+        om.parse_command_line(argc, argv);
+        if (om.help()) {
             std::cout
-                << opts_mgr.usage()
+                << om.usage()
                 << std::endl;
 
             exit(0);
         }
 
-        if (!opts_mgr.quiet()) {
+        if (!om.quiet()) {
             std::cout
                 << heading_msg
-                << std::endl;
-        }
-
-        /* initialize global managers now to prevent initialization race-conditions later on */
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        (void) em;
-        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
-        (void) mm;
-        witness::WitnessMgr& wm { witness::WitnessMgr::INSTANCE() };
-        (void) wm;
-
-        /* load microcode */
-        sat::InlinedOperatorMgr& iom { sat::InlinedOperatorMgr::INSTANCE() };
-        size_t nloaders { iom.loaders().size() };
-
-        if (!opts_mgr.quiet()) {
-            TRACE
-                << nloaders
-                << " microcode fragments registered."
+		<< "YASMV_HOME="
+		<< getenv(YASMV_HOME_PATH)
+		<< ", "
+                << iom.loaders().size()
+                << " microcode fragments found."
                 << std::endl;
         }
 
         /* run options-generated commands (if any) */
-        const std::string model_filename { opts_mgr.model() };
+        const std::string model_filename { om.model() };
         if (!model_filename.empty()) {
             cmd::ReadModel_ptr cmd {
-                reinterpret_cast<cmd::ReadModel_ptr>(cmd::CommandMgr::INSTANCE().make_read_model())
+                reinterpret_cast<cmd::ReadModel_ptr>(
+		    cmd::CommandMgr::INSTANCE().make_read_model()
+		)
             };
 
             cmd->set_input(model_filename.c_str());

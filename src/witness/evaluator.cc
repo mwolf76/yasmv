@@ -28,6 +28,7 @@
 #include <utils/ctx.hh>
 
 #include <witness/evaluator.hh>
+#include <witness/exceptions.hh>
 #include <witness/witness_mgr.hh>
 
 namespace witness {
@@ -768,7 +769,8 @@ namespace witness {
 
     void Evaluator::walk_subscript_postorder(const expr::Expr_ptr expr)
     {
-        value_t res;
+        bool found { false };
+        value_t res { 0 };
 
         POP_TYPE(rhs_type);
         assert(rhs_type->is_algebraic());
@@ -776,7 +778,7 @@ namespace witness {
         POP_TYPE(lhs_type);
         assert(lhs_type->is_array());
 
-        type::ArrayType_ptr alhs_type { lhs_type->as_array() };
+        const type::ArrayType_ptr alhs_type { lhs_type->as_array() };
 
         /* fetch the index */
         POP_VALUE(index);
@@ -785,8 +787,14 @@ namespace witness {
         for (unsigned i = 0; i < alhs_type->nelems(); ++i) {
             POP_VALUE(elem);
 
-            if (i == alhs_type->nelems() - index - 1)
+            if (i == alhs_type->nelems() - index - 1) {
+                found = true;
                 res = elem;
+            }
+        }
+
+        if (!found) {
+            throw NoValue(expr);
         }
 
         /* return the value and scalar type*/

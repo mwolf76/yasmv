@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
- * This header file contains the handler inteface for the `dump-model`
+ * This header file contains the handler interface for the `dump-model`
  * command.
  *
  * This library is free software; you can redistribute it and/or
@@ -32,15 +32,15 @@
 
 namespace cmd {
 
-    class DumpModel: public Command {
+    class DumpModel final : public Command {
         pchar f_output;
 
     public:
-        DumpModel(Interpreter& owner);
-        virtual ~DumpModel();
+        explicit DumpModel(Interpreter& owner);
+        ~DumpModel() override;
 
         void set_output(pconst_char output);
-        inline pconst_char output() const
+        pconst_char output() const
         {
             return f_output;
         }
@@ -49,30 +49,31 @@ namespace cmd {
         void select_init();
         void select_trans();
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
-        std::ostream* f_outfile { NULL };
+        std::ostream* f_outfile { nullptr };
         std::ostream& get_output_stream();
 
         bool f_state;
         bool f_init;
         bool f_trans;
 
-        void dump_heading(std::ostream& os, model::Module& module);
-        void dump_variables(std::ostream& os, model::Module& module);
-        void dump_inits(std::ostream& os, model::Module& module);
-        void dump_invars(std::ostream& os, model::Module& module);
-        void dump_transes(std::ostream& os, model::Module& module);
+        // dump helpers
+        static void dump_heading(std::ostream& os, const model::Module& module);
+        static void dump_variables(std::ostream& os, const model::Module& module);
+        static void dump_init(std::ostream& os, const model::Module& module);
+        static void dump_invar(std::ostream& os, const model::Module& module);
+        static void dump_trans(std::ostream& os, const model::Module& module);
     };
     typedef DumpModel* DumpModel_ptr;
 
-    class DumpModelTopic: public CommandTopic {
+    class DumpModelTopic final : public CommandTopic {
     public:
-        DumpModelTopic(Interpreter& owner);
-        virtual ~DumpModelTopic();
+        explicit DumpModelTopic(Interpreter& owner);
+        ~DumpModelTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd
