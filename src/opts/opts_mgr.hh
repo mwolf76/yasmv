@@ -44,7 +44,7 @@ namespace opts {
     const bool DEFAULT_SAT_RANDOM_INIT_ACT = true;  // Randomized initial activities for performance
     const int DEFAULT_SAT_CCMIN_MODE = 2;  // Deep conflict clause minimization for performance
     const int DEFAULT_SAT_PHASE_SAVING = 2;  // Full phase saving for performance
-    const double DEFAULT_SAT_GARBAGE_FRAC = 0.20;  // Standard GC threshold for optimal memory management
+    const double DEFAULT_SAT_GARBAGE_FRAC = 0.30;  // Higher threshold for better performance in model checking
 
     class OptsMgr {
 
@@ -90,13 +90,12 @@ namespace opts {
         double sat_garbage_frac() const;
         
         // CNF optimization configuration
-        bool cnf_optimization() const;
-        bool cnf_no_tautology_removal() const;
-        bool cnf_no_duplicate_removal() const;
-        bool cnf_no_subsumption() const;
-        bool cnf_no_variable_elimination() const;
-        bool cnf_no_self_subsumption() const;
-        bool cnf_no_blocked_clause() const;
+        bool cnf_tautology_removal() const;
+        bool cnf_duplicate_removal() const;
+        bool cnf_subsumption() const;
+        bool cnf_variable_elimination() const;
+        bool cnf_self_subsumption() const;
+        bool cnf_blocked_clause() const;
 
         // to be invoked by main
         void parse_command_line(int argc, const char** argv);
