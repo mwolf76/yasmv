@@ -275,7 +275,7 @@ namespace type {
         expr::Expr_ptr f_params;
     };
 
-    /** Numeric constants (both integers and fixed) */
+    /** Numeric constants */
     typedef class ConstantType* ConstantType_ptr;
     class ConstantType: public AlgebraicType {
     public:
@@ -293,7 +293,7 @@ namespace type {
         unsigned f_width;
     };
 
-    /** Signed algebraics (both integers and fixed) */
+    /** Signed algebraics */
     typedef class SignedAlgebraicType* SignedAlgebraicType_ptr;
     class SignedAlgebraicType: public AlgebraicType {
     public:
@@ -314,7 +314,7 @@ namespace type {
         ADD* f_dds;
     };
 
-    /** Unsigned algebraics (both integers and fixed) */
+    /** Unsigned algebraics */
     typedef class UnsignedAlgebraicType* UnsignedAlgebraicType_ptr;
     class UnsignedAlgebraicType: public AlgebraicType {
     public:

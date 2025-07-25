@@ -201,7 +201,7 @@ namespace type {
         return res;
     }
 
-    /** Unsigned algebraics (both integer and fixed-point) */
+    /** Unsigned algebraics */
     const ScalarType_ptr TypeMgr::find_unsigned(unsigned width)
     {
         expr::Expr_ptr descr {
@@ -244,7 +244,7 @@ namespace type {
         return res;
     }
 
-    /** Signed algebraics (both integer and fixed-point) */
+    /** Signed algebraics */
     const ScalarType_ptr TypeMgr::find_signed(unsigned width)
     {
         expr::Expr_ptr descr {

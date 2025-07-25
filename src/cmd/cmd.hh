@@ -44,7 +44,7 @@
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
 
-#include <cmd/commands/dump_traces.hh>
+#include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/dup_trace.hh>
 #include <cmd/commands/list_traces.hh>
 #include <cmd/commands/read_trace.hh>
@@ -151,9 +151,9 @@ namespace cmd {
             return new ReadTrace(f_interpreter);
         }
 
-        inline Command_ptr make_dump_traces()
+        inline Command_ptr make_dump_trace()
         {
-            return new DumpTraces(f_interpreter);
+            return new DumpTrace(f_interpreter);
         }
 
         inline Command_ptr make_dup_trace()
@@ -269,9 +269,9 @@ namespace cmd {
             return new ReadTraceTopic(f_interpreter);
         }
 
-        inline CommandTopic_ptr topic_dump_traces()
+        inline CommandTopic_ptr topic_dump_trace()
         {
-            return new DumpTracesTopic(f_interpreter);
+            return new DumpTraceTopic(f_interpreter);
         }
 
         inline CommandTopic_ptr topic_dup_trace()

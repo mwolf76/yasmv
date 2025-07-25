@@ -1,5 +1,5 @@
 set n 50
 reach GOAL
-on success dump-traces -f json
+on success dump-trace -f json
 time
 quit

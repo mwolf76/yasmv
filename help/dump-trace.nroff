@@ -1,12 +1,12 @@
 .nf
-YASMV manual                                            dump-traces
+YASMV manual                                            dump-trace
 
 .ti 0
 SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-dump-traces [ -f <format> ] [ -o "<filename>" ] [ -a | <trace-uid>+ ]
+dump-trace [ -f <format> ] [ -o "<filename>" ] [ -a | <trace-uid>+ ]
 
 
 .ti 0
@@ -34,7 +34,7 @@ EXAMPLES
 >> read-model 'examples/ferryman/ferryman.smv'
 >> reach GOAL
 -- Target is reachable, registered witness `reach_1`, 8 steps.
->> dump-traces -f json
+>> dump-trace -f json
 {
   "witness": {
     "id": "reach_1",

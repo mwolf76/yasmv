@@ -39,8 +39,12 @@ namespace opts {
 
     // -- system defaults
     const unsigned DEFAULT_WORD_WIDTH = 16;
-    const unsigned DEFAULT_PRECISION = 0;
     const unsigned DEFAULT_VERBOSITY = 0;
+    const double DEFAULT_SAT_RANDOM_VAR_FREQ = 0.02;  // 2% randomization for performance
+    const bool DEFAULT_SAT_RANDOM_INIT_ACT = true;  // Randomized initial activities for performance
+    const int DEFAULT_SAT_CCMIN_MODE = 2;  // Deep conflict clause minimization for performance
+    const int DEFAULT_SAT_PHASE_SAVING = 2;  // Full phase saving for performance
+    const double DEFAULT_SAT_GARBAGE_FRAC = 0.30;  // Higher threshold for better performance in model checking
 
     class OptsMgr {
 
@@ -72,12 +76,26 @@ namespace opts {
         unsigned word_width() const;
         void set_word_width(unsigned);
 
-        // precision in bits, used for algebrization of constant ITEs and arrays
-        unsigned precision() const;
-        void set_precision(unsigned);
-
         // model filename
         std::string model() const;
+        
+        // skip inertial FSM checks
+        bool skip_inertial_fsm_checks() const;
+        
+        // SAT solver configuration
+        double sat_random_var_freq() const;
+        bool sat_random_init_act() const;
+        int sat_ccmin_mode() const;
+        int sat_phase_saving() const;
+        double sat_garbage_frac() const;
+        
+        // CNF optimization configuration
+        bool cnf_tautology_removal() const;
+        bool cnf_duplicate_removal() const;
+        bool cnf_subsumption() const;
+        bool cnf_variable_elimination() const;
+        bool cnf_self_subsumption() const;
+        bool cnf_blocked_clause() const;
 
         // to be invoked by main
         void parse_command_line(int argc, const char** argv);
@@ -101,9 +119,9 @@ namespace opts {
         bool f_color;
         bool f_started;
         bool f_version;
+        bool f_skip_inertial_fsm_checks;
 
         unsigned f_word_width;
-        unsigned f_precision;
     };
 
 }; // namespace opts
