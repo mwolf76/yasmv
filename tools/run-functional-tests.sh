@@ -11,7 +11,7 @@ function test() {
     echo -n "Running functional test $DIRECTORY/$MODEL::$COMMANDS ... "
     rm -f "out"
 
-    YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$DIRECTORY/$MODEL" <"$EXAMPLES/$DIRECTORY/$COMMANDS" >out
+    YASMV_HOME=`pwd` $YASMV --quiet --sat-random-var-freq=0.0 --sat-random-init-act=no "$EXAMPLES/$DIRECTORY/$MODEL" <"$EXAMPLES/$DIRECTORY/$COMMANDS" >out
     diff -wB "$EXAMPLES/$DIRECTORY/$EXPECTED" out &> /dev/null
     if [[ $? == 0 ]]; then
 	    echo "OK"
