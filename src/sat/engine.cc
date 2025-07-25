@@ -47,8 +47,13 @@ namespace sat {
         f_solver.rnd_init_act = opts_mgr.sat_random_init_act();
         f_solver.garbage_frac = opts_mgr.sat_garbage_frac();
         
-        /* Enable CNF optimization if requested via CLI */
-        if (opts_mgr.cnf_optimization()) {
+        /* Enable CNF optimization if any individual optimization is enabled */
+        if (opts_mgr.cnf_tautology_removal() || 
+            opts_mgr.cnf_duplicate_removal() ||
+            opts_mgr.cnf_subsumption() ||
+            opts_mgr.cnf_variable_elimination() ||
+            opts_mgr.cnf_self_subsumption() ||
+            opts_mgr.cnf_blocked_clause()) {
             enable_cnf_optimization(true);
         }
 
@@ -412,37 +417,37 @@ namespace sat {
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
         clock_t start;
         
-        if (!opts_mgr.cnf_no_tautology_removal()) {
+        if (opts_mgr.cnf_tautology_removal()) {
             start = clock();
             remove_tautologies();
             f_opt_stats.tautology_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;
         }
         
-        if (!opts_mgr.cnf_no_duplicate_removal()) {
+        if (opts_mgr.cnf_duplicate_removal()) {
             start = clock();
             remove_duplicates();
             f_opt_stats.duplicate_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;
         }
         
-        if (!opts_mgr.cnf_no_subsumption()) {
+        if (opts_mgr.cnf_subsumption()) {
             start = clock();
             subsumption_elimination();
             f_opt_stats.subsumption_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;
         }
         
-        if (!opts_mgr.cnf_no_variable_elimination()) {
+        if (opts_mgr.cnf_variable_elimination()) {
             start = clock();
             variable_elimination();
             f_opt_stats.var_elim_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;
         }
         
-        if (!opts_mgr.cnf_no_self_subsumption()) {
+        if (opts_mgr.cnf_self_subsumption()) {
             start = clock();
             self_subsuming_resolution();
             f_opt_stats.self_subsumption_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;
         }
         
-        if (!opts_mgr.cnf_no_blocked_clause()) {
+        if (opts_mgr.cnf_blocked_clause()) {
             start = clock();
             blocked_clause_elimination();
             f_opt_stats.blocked_clause_time_ms = ((double)(clock() - start) / CLOCKS_PER_SEC) * 1000;

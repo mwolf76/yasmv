@@ -38,16 +38,16 @@ Controls how often the solver chooses variables randomly instead of using its no
 
 ### 2. Random Initial Activity (`--sat-random-init-act`)
 
-**Type:** `boolean` (flag)  
-**Default:** `true` (enabled for optimal performance)  
+**Type:** `string` (yes/no)  
+**Default:** `yes` (enabled for optimal performance)  
 **MiniSat Default:** `false`
 
 #### Purpose
 Controls whether variable activities are initialized with small random values instead of starting at zero. Variable activity determines the priority of variables in the decision heuristic.
 
 #### Behavior
-- **false**: All variables start with zero activity, purely deterministic
-- **true**: Variables get small random initial activities, breaking initial symmetries
+- **no**: All variables start with zero activity, purely deterministic
+- **yes**: Variables get small random initial activities, breaking initial symmetries
 
 #### When to Adjust
 - **Disable** for completely reproducible results and testing
@@ -160,13 +160,13 @@ Set to `0.20` (MiniSat standard) for optimal memory management. This provides th
 # These are the optimized defaults - no flags needed!
 yasmv model.smv
 # Equivalent to: --sat-random-var-freq=0.02 --sat-ccmin-mode=2 --sat-phase-saving=2 \
-#                --sat-garbage-frac=0.20 --sat-random-init-act
+#                --sat-garbage-frac=0.20 --sat-random-init-act=yes
 ```
 
 ### For Testing and Reproducibility
 ```bash
 yasmv --sat-random-var-freq=0.0 --sat-ccmin-mode=0 --sat-phase-saving=0 \
-      --no-sat-random-init-act model.smv
+      --sat-random-init-act=no model.smv
 ```
 
 ### For Memory-Constrained Environments
