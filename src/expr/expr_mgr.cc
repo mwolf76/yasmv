@@ -180,66 +180,7 @@ namespace expr {
         return res;
     }
 
-    static inline value_t pow2(unsigned exp)
-    {
-        value_t res = 1;
-        if (!exp) {
-            return res;
-        }
-        ++res;
 
-        while (--exp) {
-            res <<= 1;
-        }
-
-        return res;
-    }
-
-    value_t ExprMgr::decimal_lookup(const char* decimal_repr)
-    {
-        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-
-        double val { strtod(decimal_repr, NULL) };
-        unsigned precision { om.precision() };
-
-        value_t j, m, k;
-        double fm, dj, dm, dk, pp { pow(2.0, precision) };
-
-        j = 0;
-        k = pow2(precision) - 1;
-
-        while (k - j > 1) {
-            m = j + (k - j) / 2;
-            fm = (double) m / pp;
-
-            if (fm <= val) {
-                j = m;
-            }
-
-            else if (val <= fm) {
-                k = m;
-            }
-        }
-
-        dj = fabs(val - ((double) j / pp));
-        dm = fabs(val - ((double) m / pp));
-        dk = fabs(val - ((double) k / pp));
-
-        if (dj <= dm && dj <= dk) {
-            return j;
-        }
-
-        else if (dk <= dj && dk <= dm) {
-            return k;
-        }
-
-        else if (dm <= dj && dm <= dk) {
-            return m;
-        }
-
-        // unreachable
-        assert(false);
-    }
 
     ExprVector ExprMgr::array_literals(const Expr_ptr expr) const
     {

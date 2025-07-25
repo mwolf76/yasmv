@@ -858,8 +858,8 @@ enum_type returns [type::Type_ptr res]
 unsigned_int_type returns [type::Type_ptr res]
 @init {
     $res = NULL;
+    char *p = NULL;
     int array_size = 0;
-    char *p;
 }
     :
         UNSIGNED_INT_TYPE
@@ -887,8 +887,8 @@ unsigned_int_type returns [type::Type_ptr res]
 signed_int_type returns [type::Type_ptr res]
 @init {
     $res = NULL;
+    char *p = NULL;
     int array_size = 0;
-    char *p;
 }
     :
         SIGNED_INT_TYPE
