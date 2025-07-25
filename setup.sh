@@ -21,7 +21,7 @@
 USE_DISTCC=0
 
 # set to 1 to make a debugger-friendly build
-USE_DEBUGGER=1
+USE_DEBUGGER=0
 
 # set to 1 to enable strict compilation settings
 USE_STRICT=1

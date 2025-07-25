@@ -33,6 +33,7 @@ namespace model {
 
     Model::Model()
         : f_modules()
+	, f_autoincrement(0)
     {
         const void* instance(this);
 
