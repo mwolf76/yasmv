@@ -16,19 +16,19 @@ DESCRIPTION
 .in 3
 Checks initial states for consistency.
 
-Initial states (i.e. INIT formulas) are checked for propositional
-satisfiability. This command returns SUCCESS if initial states are
-found to be consistent, FAILURE if initial states are found to be
-inconsistent. If no decision could be made (e.g. due to user
-interruption), the command returns `??`.
+FSM Initial states (i.e. INIT ^ INVAR) are checked for propositional
+satisfiability. This command returns SUCCESS if the initial states
+formula is found to be satisfiable, FAILURE otherwise. If no decision
+could be made (e.g. due to user interruption), the command returns `??`.
 
 Further constraints can be specified using the -c option. These
-constraints will be applied on top of the INIT constraints defined in
-the model FSM. Please note, that in this latter case a FAILURE outcome
-only points to at an incompatibility between the FSM initial states
-and the additional constraints, or even at a set of mutually
-incompatible additional constraints. The -c option can be used
-arbitrarily many times.
+constraints will be applied on top of the constraints defined in
+the model FSM. Please note, that in this latter case, a FAILURE
+outcome indicates an incompatibility between the FSM initial states
+and the additional constraints, or even a set of mutually incompatible
+additional constraints.
+
+The -c option can be used arbitrarily many times.
 
 .ti 0
 EXAMPLES

@@ -76,14 +76,24 @@ namespace fsm {
 
         void process(expr::ExprVector constraints);
 
-        inline fsm_consistency_t status() const
+        fsm_consistency_t status() const
         {
             return f_status;
         }
 
-        inline void set_status(fsm_consistency_t status)
+        void set_status(fsm_consistency_t status)
         {
             f_status = status;
+        }
+
+        size_t limit() const
+        {
+            return f_limit;
+        }
+
+        void set_limit(size_t limit)
+        {
+            f_limit = limit;
         }
 
     private:
@@ -92,6 +102,7 @@ namespace fsm {
 
         boost::mutex f_status_mutex;
         fsm_consistency_t f_status;
+        size_t f_limit;
     };
 
     class ComputeDiameter: public algorithms::Algorithm {

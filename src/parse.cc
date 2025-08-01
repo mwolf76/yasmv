@@ -22,6 +22,7 @@
  **/
 
 #include <sstream>
+#include <string>
 #include <common/common.hh>
 
 #include <cmd/cmd.hh>
@@ -120,8 +121,55 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
     struct timespec start_clock;
     clock_gettime(CLOCK_MONOTONIC, &start_clock);
 
-    input = antlr3StringStreamNew((pANTLR3_UINT8) command_line,
-                                  ANTLR3_ENC_8BIT, strlen(command_line), (pANTLR3_UINT8) "command");
+    // Preprocess command line to handle shell-style comments
+    std::string processed_command;
+    const char* p = command_line;
+    bool in_string = false;
+    char string_delimiter = '\0';
+    
+    // Process the command line, removing comments but preserving # inside strings
+    while (*p) {
+        if (!in_string) {
+            // Check for string delimiters
+            if (*p == '"' || *p == '\'') {
+                in_string = true;
+                string_delimiter = *p;
+                processed_command += *p;
+            }
+            // Check for comment start
+            else if (*p == '#') {
+                // Skip the rest of the line
+                break;
+            }
+            else {
+                processed_command += *p;
+            }
+        }
+        else {
+            // Inside a string, copy everything
+            processed_command += *p;
+            // Check for end of string
+            if (*p == string_delimiter) {
+                in_string = false;
+                string_delimiter = '\0';
+            }
+        }
+        p++;
+    }
+    
+    // Trim trailing whitespace
+    while (!processed_command.empty() && 
+           (processed_command.back() == ' ' || processed_command.back() == '\t')) {
+        processed_command.pop_back();
+    }
+    
+    // If the processed command is empty, return empty CommandVector
+    if (processed_command.empty()) {
+        return new cmd::CommandVector();
+    }
+
+    input = antlr3StringStreamNew((pANTLR3_UINT8) processed_command.c_str(),
+                                  ANTLR3_ENC_8BIT, processed_command.length(), (pANTLR3_UINT8) "command");
 
     assert(input);
 

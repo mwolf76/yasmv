@@ -40,6 +40,7 @@ namespace cmd {
 
         /** cmd params */
         void add_constraint(expr::Expr_ptr constraint);
+        void set_limit(value_t value);
 
         /* run() */
         utils::Variant virtual operator()();
@@ -49,6 +50,9 @@ namespace cmd {
 
         /* (optional) additional constraints */
         expr::ExprVector f_constraints;
+
+        /* max depth of FSM consistency check */
+        value_t f_limit;
 
         // -- helpers -------------------------------------------------------------
         bool check_requirements();
