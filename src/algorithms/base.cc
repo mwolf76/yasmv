@@ -140,7 +140,6 @@ namespace algorithms {
 
     void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
     {
-#if 1
         for (auto body : exprs) {
             DEBUG
                 << "processing INVAR "
@@ -160,37 +159,6 @@ namespace algorithms {
                     << std::endl;
             }
         }
-
-#else
-        expr::ExprMgr& em { this->em() };
-
-        expr::Expr_ptr formula { nullptr };
-        for (auto body : exprs) {
-            formula = (! formula)
-                ? body
-                : em.make_and(formula, body)
-            ;
-        }
-
-        DEBUG
-            << "processing INVAR "
-            << ctx << "::" << formula
-            << std::endl;
-
-        try {
-            f_invar.push_back(compiler().process(ctx, formula));
-        } catch (Exception& ae) {
-            f_ok = false;
-
-            pconst_char what { ae.what() };
-            ERR
-                << what
-                << std::endl
-                << "  in INVAR "
-                << ctx << "::" << formula
-                << std::endl;
-        }
-#endif
     } /* process_invar() */
 
     void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
