@@ -186,7 +186,7 @@ namespace algorithms {
         }
     } /* process_trans() */
 
-    void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, const sat::group_t group)
     {
         const clock_t t0 { clock() };
         const auto count { f_init.size() };
@@ -212,7 +212,7 @@ namespace algorithms {
             << std::endl;
     }
 
-    void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, const sat::group_t group)
     {
         const clock_t t0 { clock() };
         const auto count { f_invar.size() };
@@ -238,10 +238,10 @@ namespace algorithms {
             << std::endl;
     }
 
-    void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, const sat::group_t group)
     {
         const clock_t t0 { clock() };
-        const auto count { f_init.size() };
+        const auto count { f_trans.size() };
 
         TRACE
             << "Pushing "
