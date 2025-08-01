@@ -1,6 +1,6 @@
 /**
- * @file helpers.cc
- * @brief SAT implementation, misc helpers implementation.
+ * @file inlining.cc
+ * @brief SAT implementation, CNF inlining subsystem.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
  *
@@ -23,6 +23,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <unordered_map>
 
 #include <boost/algorithm/string.hpp>
 #include <jsoncpp/json/json.h>
@@ -38,12 +39,11 @@
 #include <dd/dd_walker.hh>
 
 #include <utils/misc.hh>
-#include <utils/pool.hh>
 
 namespace sat {
 
-    static const char* JSON_GENERATED { "generated" };
-    static const char* JSON_CNF { "cnf" };
+    static auto JSON_GENERATED { "generated" };
+    static auto JSON_CNF { "cnf" };
 
     InlinedOperatorLoader::InlinedOperatorLoader(const boost::filesystem::path& filepath)
         : f_fullpath(filepath)
@@ -55,75 +55,56 @@ namespace sat {
 
         assert(3 == fragments.size());
 
-        const char* signedness { fragments[0].c_str() };
-        assert(*signedness == 's' || *signedness == 'u');
+        const bool is_signed = (fragments[0] == "s");
+        assert(fragments[0] == "s" || fragments[0] == "u");
 
-        const char* op { fragments[1].c_str() };
-        expr::ExprType op_type;
-        if (!strcmp("neg", op)) {
-            op_type = expr::ExprType::NEG;
-        } else if (!strcmp("add", op)) {
-            op_type = expr::ExprType::PLUS;
-        } else if (!strcmp("sub", op)) {
-            op_type = expr::ExprType::SUB;
-        } else if (!strcmp("div", op)) {
-            op_type = expr::ExprType::DIV;
-        } else if (!strcmp("mod", op)) {
-            op_type = expr::ExprType::MOD;
-        } else if (!strcmp("mul", op)) {
-            op_type = expr::ExprType::MUL;
-        } else if (!strcmp("not", op)) {
-            op_type = expr::ExprType::BW_NOT;
-        } else if (!strcmp("or", op)) {
-            op_type = expr::ExprType::BW_OR;
-        } else if (!strcmp("and", op)) {
-            op_type = expr::ExprType::BW_AND;
-        } else if (!strcmp("xor", op)) {
-            op_type = expr::ExprType::BW_XOR;
-        } else if (!strcmp("xnor", op)) {
-            op_type = expr::ExprType::BW_XNOR;
-        } else if (!strcmp("impl", op)) {
-            op_type = expr::ExprType::IMPLIES;
-        } else if (!strcmp("eq", op)) {
-            op_type = expr::ExprType::EQ;
-        } else if (!strcmp("ne", op)) {
-            op_type = expr::ExprType::NE;
-        } else if (!strcmp("gt", op)) {
-            op_type = expr::ExprType::GT;
-        } else if (!strcmp("ge", op)) {
-            op_type = expr::ExprType::GE;
-        } else if (!strcmp("lt", op)) {
-            op_type = expr::ExprType::LT;
-        } else if (!strcmp("le", op)) {
-            op_type = expr::ExprType::LE;
-        } else if (!strcmp("lsh", op)) {
-            op_type = expr::ExprType::LSHIFT;
-        } else if (!strcmp("rsh", op)) {
-            op_type = expr::ExprType::RSHIFT;
-        } else {
+        // Modern C++ operator type mapping
+        static const std::unordered_map<std::string_view, expr::ExprType> op_map {
+            {"neg", expr::ExprType::NEG},
+            {"add", expr::ExprType::PLUS},
+            {"sub", expr::ExprType::SUB},
+            {"div", expr::ExprType::DIV},
+            {"mod", expr::ExprType::MOD},
+            {"mul", expr::ExprType::MUL},
+            {"not", expr::ExprType::BW_NOT},
+            {"or", expr::ExprType::BW_OR},
+            {"and", expr::ExprType::BW_AND},
+            {"xor", expr::ExprType::BW_XOR},
+            {"xnor", expr::ExprType::BW_XNOR},
+            {"impl", expr::ExprType::IMPLIES},
+            {"eq", expr::ExprType::EQ},
+            {"ne", expr::ExprType::NE},
+            {"gt", expr::ExprType::GT},
+            {"ge", expr::ExprType::GE},
+            {"lt", expr::ExprType::LT},
+            {"le", expr::ExprType::LE},
+            {"lsh", expr::ExprType::LSHIFT},
+            {"rsh", expr::ExprType::RSHIFT}
+        };
+
+        auto op_iter = op_map.find(fragments[1]);
+        if (op_iter == op_map.end()) {
             ERR
                 << "Unsupported mnemonic: "
-                << op
+                << fragments[1]
                 << std::endl;
             assert(false);
         }
 
-        char buf[20];
-        strncpy(buf, fragments[2].c_str(), 19);
-        buf[19] = '\0';
+        const expr::ExprType op_type = op_iter->second;
+        const int width = std::stoi(fragments[2]);
 
-        char* width { buf };
-        f_ios = compiler::make_ios('s' == *signedness, op_type, atoi(width));
+        f_ios = compiler::make_ios(is_signed, op_type, width);
     }
 
     InlinedOperatorLoader::~InlinedOperatorLoader()
-    {}
+    = default;
 
     const LitsVector& InlinedOperatorLoader::clauses()
     {
         boost::mutex::scoped_lock lock { f_loading_mutex };
 
-        if (0 == f_clauses.size()) {
+        if (f_clauses.empty()) {
             unsigned count { 0 };
             clock_t t0 { clock() };
             double secs;
@@ -146,11 +127,11 @@ namespace sat {
             const Json::Value cnf { obj[JSON_CNF] };
             assert(cnf.type() == Json::arrayValue);
 
-            for (auto clause : cnf) {
+            for (const auto& clause : cnf) {
                 assert(clause.type() == Json::arrayValue);
 
                 newClause.clear();
-                for (auto literal : clause) {
+                for (const auto& literal : clause) {
                     assert(literal.type() == Json::intValue);
                     newClause.push_back(Minisat::toLit(literal.asInt()));
                 }
@@ -160,7 +141,7 @@ namespace sat {
             }
 
             clock_t t1 { clock() };
-            secs = 1000 * (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
+            secs = 1000 * static_cast<double>(t1 - t0) / static_cast<double>(CLOCKS_PER_SEC);
 
             DRIVEL
                 << count
@@ -173,7 +154,7 @@ namespace sat {
     }
 
     // static initialization
-    InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance { NULL };
+    InlinedOperatorMgr_ptr InlinedOperatorMgr::f_instance { nullptr };
 
     InlinedOperatorMgr::InlinedOperatorMgr()
         : f_builtin_microcode_path(STRING(YASMV_HOME))
@@ -183,32 +164,31 @@ namespace sat {
         using boost::filesystem::path;
 
         char* env_microcode_path { getenv(YASMV_HOME_PATH) };
-        if (NULL == env_microcode_path) {
+        if (nullptr == env_microcode_path) {
             ERR
                 << "YASMV_HOME must be set to a valid directory."
                 << std::endl;
             exit(1);
         }
 
-        path micropath { env_microcode_path
-                             ? env_microcode_path
-                             : f_builtin_microcode_path.c_str() };
+        // microcode directory is now configurable to experiment with multiple versions
+        path micropath { env_microcode_path };
+        micropath += opts::OptsMgr::INSTANCE().cnf_microcode_directory();
 
-        micropath += "/microcode/";
         try {
             if (exists(micropath) && is_directory(micropath)) {
                 for (directory_iterator di = directory_iterator(micropath);
                      di != directory_iterator(); ++di) {
 
                     path entry { di->path() };
-                    if (strcmp(entry.extension().c_str(), ".json")) {
+                    if (strcmp(entry.extension().c_str(), ".json") != 0) {
                         continue;
                     }
 
                     // lazy clauses-loaders registration
                     try {
                         InlinedOperatorLoader* loader { new InlinedOperatorLoader(entry) };
-                        assert(NULL != loader);
+                        assert(nullptr != loader);
 
                         f_loaders.insert(
                             std::pair<compiler::InlinedOperatorSignature, InlinedOperatorLoader_ptr>(loader->ios(), loader));
@@ -242,8 +222,7 @@ namespace sat {
     }
 
     InlinedOperatorMgr::~InlinedOperatorMgr()
-    {
-    }
+    = default;
 
     InlinedOperatorLoader& InlinedOperatorMgr::require(const compiler::InlinedOperatorSignature& ios)
     {
@@ -269,26 +248,22 @@ namespace sat {
     }
 
     void CNFOperatorInliner::inject(const compiler::InlinedOperatorDescriptor& md,
-                                    const LitsVector& clauses)
+                                    const LitsVector& clauses) const
     {
-        DRIVEL
-            << const_cast<compiler::InlinedOperatorDescriptor&>(md)
-            << std::endl;
-
-        /* true */
-        const Var alpha { 0 };
-
         /* local refs */
         const dd::DDVector& z { md.z() };
         const dd::DDVector& x { md.x() };
         const dd::DDVector& y { md.y() };
-        int width { static_cast<int>(compiler::ios_width(md.ios())) };
+
+        const int width { static_cast<int>(compiler::ios_width(md.ios())) };
+        const int width2 { width * 2 };
+        const int width3 { width * 3 };
 
         /* keep each injection in a separate cnf space */
         f_sat.clear_cnf_map();
 
         for (const auto& clause : clauses) {
-            Minisat::vec<Lit> ps;
+            vec<Lit> ps;
             if (MAINGROUP != f_group) {
                 ps.push(mkLit(f_group, true));
             }
@@ -299,9 +274,11 @@ namespace sat {
                the registry; cnf vars gets rewritten into new sat
                vars. Remark: rewritten cnf vars must be kept distinct
                among distinct injections. */
-            for (auto lit : clause) {
-                Var lit_var { Minisat::var(lit) };
-                int lit_sign { Minisat::sign(lit) };
+            for (const auto lit : clause) {
+                constexpr Var alpha { 0 }; // true
+
+                const Var lit_var { Minisat::var(lit) };
+                const int lit_sign { Minisat::sign(lit) };
 
                 Var tgt_var;
 
@@ -310,7 +287,7 @@ namespace sat {
                     int ndx { lit_var };
                     assert(0 <= ndx && ndx < width);
 
-                    const DdNode* node { NULL };
+                    const DdNode* node { nullptr };
                     if (md.is_relational()) {
                         assert(!ndx);
                         node = z[0].getNode();
@@ -330,13 +307,11 @@ namespace sat {
                 }
 
                 /* x? */
-                else if (width <= lit_var && lit_var < 2 * width) {
-                    int ndx { lit_var - width };
-
+                else if (width <= lit_var && lit_var < width2) {
+                    const int ndx { lit_var - width };
                     assert(0 <= ndx && ndx < width);
-                    const DdNode* node { x[width - ndx - 1].getNode() };
 
-                    if (!Cudd_IsConstant(node)) {
+                    if (const DdNode * node { x[width - ndx - 1].getNode() }; !Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
                         ps.push(mkLit(tgt_var, lit_sign));
                     } else {
@@ -348,13 +323,11 @@ namespace sat {
                 }
 
                 /* y? */
-                else if (2 * width <= lit_var && lit_var < 3 * width) {
-                    int ndx { lit_var - 2 * width };
-
+                else if (width2 <= lit_var && lit_var < width3) {
+                    const int ndx { lit_var - width2 };
                     assert(0 <= ndx && ndx < width);
-                    const DdNode* node { y[width - ndx - 1].getNode() };
 
-                    if (!Cudd_IsConstant(node)) {
+                    if (const DdNode * node { y[width - ndx - 1].getNode() }; !Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
                         ps.push(mkLit(tgt_var, lit_sign));
                     } else {
@@ -367,9 +340,9 @@ namespace sat {
 
                 /* none of the above, it's a cnf var. */
                 else {
-                    int ndx { lit_var - 3 * width };
-
+                    const int ndx { lit_var - width3 };
                     assert(0 <= ndx /* && ndx < width */);
+
                     tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
                     ps.push(mkLit(tgt_var, lit_sign));
                 }
@@ -381,14 +354,10 @@ namespace sat {
 
     } /* CNFOperatorInliner::inject */
 
-    void CNFBinarySelectionInliner::inject(const compiler::BinarySelectionDescriptor& md)
+    void CNFBinarySelectionInliner::inject(const compiler::BinarySelectionDescriptor& md) const
     {
-        DRIVEL
-            << const_cast<compiler::BinarySelectionDescriptor&>(md)
-            << std::endl;
-
         /* true */
-        const Var alpha { 0 };
+        constexpr Var alpha { 0 };
 
         /* local refs */
         const dd::DDVector& z { md.z() };
@@ -397,7 +366,7 @@ namespace sat {
         const dd::DDVector& y { md.y() };
 
         /* allocate a fresh variable for ITE condition */
-        Var act { f_sat.find_dd_var(aux.getNode(), f_time) };
+        const Var act { f_sat.find_dd_var(aux.getNode(), f_time) };
 
         /* ! a, Zi <-> Xi for all i */
         for (unsigned pol = 0; pol < 2; ++pol) {
@@ -444,26 +413,20 @@ namespace sat {
         }
     }
 
-    void CNFMultiwaySelectionInliner::inject(const compiler::MultiwaySelectionDescriptor& md)
+    void CNFMultiwaySelectionInliner::inject(const compiler::MultiwaySelectionDescriptor& md) const
     {
-        DEBUG
-            << const_cast<compiler::MultiwaySelectionDescriptor&>(md)
-            << std::endl;
-
-        /* true */
-        const Var alpha(0);
-
         /* local refs */
         const dd::DDVector& z { md.z() };
         const dd::DDVector& acts { md.acts() };
         const dd::DDVector& x { md.x() };
 
         unsigned j { 0 };
-        dd::DDVector::const_iterator ai { acts.begin() };
+
+        auto ai { acts.begin() };
         while (j < md.elem_count()) {
 
             /* allocate a fresh variable for ITE condition */
-            Var act { f_sat.find_dd_var((*ai).getNode(), f_time) };
+            const Var act { f_sat.find_dd_var(ai->getNode(), f_time) };
 
             /* ! a, Zi <-> Xi for all i */
             for (unsigned pol = 0; pol < 2; ++pol) {

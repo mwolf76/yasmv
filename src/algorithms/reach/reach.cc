@@ -56,6 +56,8 @@ namespace reach {
 
     void Reachability::process(expr::Expr_ptr target, expr::ExprVector constraints)
     {
+        auto& om { opts::OptsMgr::INSTANCE() };
+
         expr::time::Analyzer eta { em() };
 
         /* the target formula */
@@ -155,25 +157,51 @@ namespace reach {
 
         algorithms::thread_ptrs tasks;
         if (use_forward) {
-            TRACE
-                << "Forward strategies enabled"
-                << std::endl;
+            if (om.reach_fast_forward_strategy()) {
+                TRACE
+                    << "Fast-Forward strategy enabled"
+                    << std::endl;
 
-            tasks.push_back(new boost::thread(
-                &Reachability::fast_forward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(
-                &Reachability::forward_strategy, this, target_cu));
+                tasks.push_back(new boost::thread(
+                    &Reachability::fast_forward_strategy, this, target_cu));
+            }
+
+            if (om.reach_forward_strategy()) {
+                TRACE
+                    << "Forward strategy enabled"
+                    << std::endl;
+
+                tasks.push_back(new boost::thread(
+                    &Reachability::forward_strategy, this, target_cu));
+            }
+        } else {
+            TRACE
+                << "Forward strategies unavailable"
+                << std::endl;
         }
 
         if (use_backward) {
-            TRACE
-                << "Backward strategies enabled"
-                << std::endl;
+            if (om.reach_fast_backward_strategy()) {
+                TRACE
+                    << "Fast-Backward strategy enabled"
+                    << std::endl;
 
-            tasks.push_back(new boost::thread(
-                &Reachability::fast_backward_strategy, this, target_cu));
-            tasks.push_back(new boost::thread(
+                tasks.push_back(new boost::thread(
+                    &Reachability::fast_backward_strategy, this, target_cu));
+            }
+
+            if (om.reach_backward_strategy()) {
+                TRACE
+                    << "Backward strategy enabled"
+                    << std::endl;
+
+                tasks.push_back(new boost::thread(
                 &Reachability::backward_strategy, this, target_cu));
+            }
+        } else {
+            TRACE
+                << "Backward strategies unavailable"
+                << std::endl;
         }
 
         /* join and destroy all active threads */

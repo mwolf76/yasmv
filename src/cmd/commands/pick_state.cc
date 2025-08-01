@@ -103,27 +103,43 @@ namespace cmd {
     {
         bool res { false };
         if (check_requirements()) {
-            sim::Simulation simulation { *this, model::ModelMgr::INSTANCE().model() };
+            model::Model& model { model::ModelMgr::INSTANCE().model() };
+            sim::Simulation simulation { *this, model };
             value_t states { simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
+
+            expr::Expr_ptr model_name { model.main_module().name() };
+            size_t num_constraints { f_constraints.size() };
 
             if (0 == states) {
                 wrn_prefix();
                 f_out
-                    << "No feasible initial states found"
-                    << std::endl;
+                    << "Model `" << model_name << "` has no feasible initial states";
+                if (num_constraints > 0) {
+                    f_out << " (with " << num_constraints << " additional constraint" 
+                          << (num_constraints > 1 ? "s" : "") << ")";
+                }
+                f_out << std::endl;
             } else if (1 == states) {
                 res = true;
                 out_prefix();
                 f_out
-                    << "One feasible initial state found"
-                    << std::endl;
+                    << "Model `" << model_name << "` has only one feasible initial state";
+                if (num_constraints > 0) {
+                    f_out << " (with " << num_constraints << " additional constraint" 
+                          << (num_constraints > 1 ? "s" : "") << ")";
+                }
+                f_out << std::endl;
             } else {
                 res = true;
                 out_prefix();
                 f_out
-                    << states
-                    << " feasible initial states"
-                    << std::endl;
+                    << "Model `" << model_name << "` has " << states
+                    << " feasible initial states";
+                if (num_constraints > 0) {
+                    f_out << " (with " << num_constraints << " additional constraint" 
+                          << (num_constraints > 1 ? "s" : "") << ")";
+                }
+                f_out << std::endl;
             }
         }
 

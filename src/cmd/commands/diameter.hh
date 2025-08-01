@@ -43,7 +43,7 @@ namespace cmd {
         std::ostream& f_out;
 
         // -- helpers -------------------------------------------------------------
-        bool check_requirements();
+        bool check_requirements() const;
     };
 
     typedef Diameter* Diameter_ptr;

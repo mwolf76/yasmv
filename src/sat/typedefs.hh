@@ -76,18 +76,17 @@ namespace sat {
     typedef boost::unordered_map<Var, enc::TCBI, utils::IntHash, utils::IntEq> Var2TCBIMap;
 
     struct TimedVar {
-    public:
-        TimedVar(Var var, step_t time)
+        TimedVar(const Var var, const step_t time)
             : f_var(var)
             , f_time(time)
         {}
 
-        inline Var var() const
+        Var var() const
         {
             return f_var;
         }
 
-        inline step_t time() const
+        step_t time() const
         {
             return f_time;
         }
@@ -100,16 +99,24 @@ namespace sat {
     };
 
     struct TimedVarHash {
-        inline long operator()(const TimedVar& k) const
+        long operator()(const TimedVar& k) const
         {
-            return 0L;
+            auto res { k.f_var };
+
+            // Mix two 64-bit integers using Murmur-inspired finalizer
+            res ^= k.f_time + 0x9e3779b97f4a7c15;
+            res ^= (res >> 30); res *= 0xbf58476d1ce4e5b9;
+            res ^= (res >> 27); res *= 0x94d049bb133111eb;
+            res ^= (res >> 31);
+
+            return res;
         }
     };
 
     struct TimedVarEq {
-        inline bool operator()(const TimedVar& x, const TimedVar& y) const
+        bool operator()(const TimedVar& x, const TimedVar& y) const
         {
-            return (x.var() == y.var() && x.time() == y.time());
+            return (x.f_var == y.f_var && x.f_time == y.f_time);
         }
     };
 

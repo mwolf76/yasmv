@@ -86,9 +86,7 @@ namespace fsm {
                 this->assert_formula(engine, 0, cu);
             });
 
-        sat::status_t status { engine.solve() };
-
-        if (sat::status_t::STATUS_UNKNOWN == status) {
+        if (const auto status { engine.solve() }; sat::status_t::STATUS_UNKNOWN == status) {
             f_status = FSM_CONSISTENCY_UNDECIDED;
         } else if (sat::status_t::STATUS_UNSAT == status) {
             f_status = FSM_CONSISTENCY_KO;

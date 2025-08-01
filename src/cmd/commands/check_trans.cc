@@ -34,6 +34,7 @@ namespace cmd {
     CheckTrans::CheckTrans(Interpreter& owner)
         : Command(owner)
         , f_out(std::cout)
+        , f_limit(1)
     {}
 
     CheckTrans::~CheckTrans()
@@ -42,6 +43,11 @@ namespace cmd {
     void CheckTrans::add_constraint(expr::Expr_ptr constraint)
     {
         f_constraints.push_back(constraint);
+    }
+
+    void CheckTrans::set_limit(const value_t value)
+    {
+        f_limit = value;
     }
 
     bool CheckTrans::check_requirements()
@@ -70,6 +76,7 @@ namespace cmd {
             fsm::CheckTransConsistency check_trans {
                 *this, model::ModelMgr::INSTANCE().model()
             };
+            check_trans.set_limit(f_limit);
             check_trans.process(f_constraints);
 
             switch (check_trans.status()) {
@@ -80,7 +87,7 @@ namespace cmd {
                     }
 
                     f_out
-                        << "Transition relation consistency check ok."
+                        << "Transition relation consistency check ok (limit = " << f_limit << ")"
                         << std::endl;
 
                     res = true;

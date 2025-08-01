@@ -21,6 +21,8 @@
  *
  **/
 
+// ReSharper disable CppMemberFunctionMayBeConst
+// ReSharper disable CppMemberFunctionMayBeStatic
 #include <vector>
 
 #include <base.hh>
@@ -42,7 +44,7 @@ namespace algorithms {
         , f_bm(enc::EncodingMgr::INSTANCE())
         , f_em(expr::ExprMgr::INSTANCE())
         , f_tm(type::TypeMgr::INSTANCE())
-        , f_witness(NULL)
+        , f_witness(nullptr)
     {
         /* Force mgr to exist */
         sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
@@ -81,26 +83,25 @@ namespace algorithms {
                 expr::Expr_ptr local_ctx { em().make_dot(ctx, id) };
 
                 symb::Variable& var { *vi->second };
-                type::Type_ptr vtype { var.type() };
-                if (vtype->is_instance()) {
-                    type::InstanceType_ptr instance { vtype->as_instance() };
-                    model::Module& module { model.module(instance->name()) };
-                    stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(local_ctx, &module));
+                if (const type::Type_ptr var_type { var.type() }; var_type->is_instance()) {
+                    type::InstanceType_ptr instance { var_type->as_instance() };
+                    model::Module& instance_module { model.module(instance->name()) };
+                    stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(local_ctx, &instance_module));
                 }
             }
         } /* while() */
 
         /* processing environment extra constraints */
         const expr::ExprVector& extra_init { env.extra_init() };
-        process_init(NULL, extra_init);
+        process_init(nullptr, extra_init);
 
         /* environment INVARs */
         const expr::ExprVector& extra_invar { env.extra_invar() };
-        process_invar(NULL, extra_invar);
+        process_invar(nullptr, extra_invar);
 
         /* environment TRANSes */
         const expr::ExprVector& extra_trans { env.extra_trans() };
-        process_trans(NULL, extra_trans);
+        process_trans(nullptr, extra_trans);
 
         if (!ok()) {
             throw FailedSetup();
@@ -114,9 +115,9 @@ namespace algorithms {
     Algorithm::~Algorithm()
     {}
 
-    void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& init)
     {
-        for (auto body : exprs) {
+        for (auto body : init) {
             DEBUG
                 << "processing INIT "
                 << ctx << "::" << body
@@ -138,9 +139,9 @@ namespace algorithms {
         }
     } /* process_init() */
 
-    void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar)
     {
-        for (auto body : exprs) {
+        for (auto body : invar) {
             DEBUG
                 << "processing INVAR "
                 << ctx << "::" << body
@@ -161,9 +162,9 @@ namespace algorithms {
         }
     } /* process_invar() */
 
-    void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans)
     {
-        for (auto body : exprs) {
+        for (auto body : trans) {
             DEBUG
                 << "processing TRANS "
                 << ctx << "::" << body
@@ -185,25 +186,82 @@ namespace algorithms {
         }
     } /* process_trans() */
 
-    void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, const sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_init.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " INIT units"
+            << "(time = " << time << ")"
+            << std::endl;
+
         for (const auto& i : f_init) {
             engine.push(i, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
-    void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, const sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_invar.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " INVAR units "
+            << "(time = " << time << ") ..."
+            << std::endl;
+
         for (const auto& i : f_invar) {
             engine.push(i, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
-    void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
+    void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, const sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_trans.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " TRANS units"
+            << "(time = " << time << ") ..."
+            << std::endl;
+
         for (const auto& f_tran : f_trans) {
             engine.push(f_tran, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
     void Algorithm::assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k, sat::group_t group)
@@ -245,8 +303,8 @@ namespace algorithms {
                     Var jkne { engine.new_sat_var() };
                     uniqueness_vars.push_back(jkne);
 
-                    Var jvar { engine.tcbi_to_var(jtcbi) };
-                    Var kvar { engine.tcbi_to_var(ktcbi) };
+                    const Var jvar { engine.tcbi_to_var(jtcbi) };
+                    const Var kvar { engine.tcbi_to_var(ktcbi) };
 
                     /* for each pair (j, k) we assert two clauses, both
                        activated by jkne. The first clause is satisfied if

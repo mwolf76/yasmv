@@ -37,6 +37,8 @@ incompatibility with the additional constraints that were provided.
 For this reason, in the guided reachability scenario, the
 unreachability analysis is implicitly disabled.
 
+NOTE: the -t option is not currently supported.
+
 .ti 1
 TIMED CONSTRAINTS
 

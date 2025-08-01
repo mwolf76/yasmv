@@ -21,21 +21,19 @@
  *
  **/
 
-#include <cstring>
-
 #include <expr/time/analyzer/analyzer.hh>
 
 #include <cmd/commands/commands.hh>
-#include <cmd/commands/reach.hh>
 #include <cmd/commands/dump_trace.hh>
+#include <cmd/commands/reach.hh>
 
 namespace cmd {
 
     Reach::Reach(Interpreter& owner)
         : Command(owner)
         , f_out(std::cout)
-        , f_target(NULL)
-	, f_quiet(false)
+        , f_target(nullptr)
+        , f_quiet(false)
     {}
 
     Reach::~Reach()
@@ -75,11 +73,10 @@ namespace cmd {
 
     void Reach::go_quiet()
     {
-	f_quiet = true;
+        f_quiet = true;
     }
 
-
-    bool Reach::check_requirements()
+    bool Reach::check_requirements() const
     {
         if (!f_target) {
             f_out
@@ -111,7 +108,7 @@ namespace cmd {
         bool res { false };
 
         if (!check_requirements()) {
-            return utils::Variant(errMessage);
+            return utils::Variant { errMessage };
         }
 
         reach::Reachability bmc { *this, mm.model() };
@@ -123,26 +120,25 @@ namespace cmd {
                     f_out
                         << outPrefix;
                 }
-		if (! f_quiet) {
-		    f_out
-			<< "Target is reachable";
+                if (!f_quiet) {
+                    f_out
+                        << "Target is reachable";
+                }
 
-		}
-
-		if (bmc.has_witness()) {
+                if (bmc.has_witness()) {
                     witness::Witness& w { bmc.witness() };
 
-                    if (! f_quiet) {
-			f_out
-			    << ", registered witness `"
-			    << w.id()
-			    << "`, "
-			    << w.size()
-			    << " steps."
-			    << std::endl;
+                    if (!f_quiet) {
+                        f_out
+                            << ", registered witness `"
+                            << w.id()
+                            << "`, "
+                            << w.size()
+                            << " steps."
+                            << std::endl;
 
-			DumpTrace { this->f_owner }();
-		    }
+                        DumpTrace { this->f_owner }();
+                    }
                 }
                 res = true;
                 break;
@@ -152,36 +148,35 @@ namespace cmd {
                     f_out
                         << wrnPrefix;
                 }
-		if (! f_quiet) {
-		    f_out
-			<< "Target is unreachable."
-			<< std::endl;
-
-		}
+                if (!f_quiet) {
+                    f_out
+                        << "Target is unreachable."
+                        << std::endl;
+                }
                 break;
 
             case reach::reachability_status_t::REACHABILITY_UNKNOWN:
-		if (!om.quiet()) {
+                if (!om.quiet()) {
                     f_out
                         << outPrefix;
                 }
 
-		// cannot be quiet about undecidability
-		f_out
-		    << "Reachability could not be decided."
-		    << std::endl;
+                // cannot be quiet about undecidability
+                f_out
+                    << "Reachability could not be decided."
+                    << std::endl;
                 break;
 
             case reach::reachability_status_t::REACHABILITY_ERROR:
-		if (!om.quiet()) {
+                if (!om.quiet()) {
                     f_out
                         << outPrefix;
                 }
 
-		// cannot be quiet about errors
-		f_out
-		    << "Unexpected error."
-		    << std::endl;
+                // cannot be quiet about errors
+                f_out
+                    << "Unexpected error."
+                    << std::endl;
                 break;
 
             default:

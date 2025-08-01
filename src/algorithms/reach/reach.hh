@@ -33,15 +33,15 @@
 
 namespace reach {
 
-    class Reachability: public algorithms::Algorithm {
+    class Reachability : public algorithms::Algorithm {
 
     public:
         Reachability(cmd::Command& command, model::Model& model);
-        ~Reachability();
+        ~Reachability() override;
 
         void process(expr::Expr_ptr target, expr::ExprVector constraints);
 
-        inline reachability_status_t status()
+        reachability_status_t status()
         {
             return sync_status();
         }

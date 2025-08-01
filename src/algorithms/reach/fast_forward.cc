@@ -138,16 +138,27 @@ namespace reach {
             }
 
             else if (sat::status_t::STATUS_UNSAT == status) {
-                INFO
-                    << "No reachability witness found (k = " << k << ")..."
+                TRACE
+                    << "No reachability witness found (k = " << k << ")"
                     << std::endl;
 
-                engine.invert_last_group();
+                TRACE
+                    << "Unrolling next INVAR ..."
+                    << std::endl;
 
                 /* unrolling next */
+                assert_fsm_invar(engine, k+1);
+
+                TRACE
+                    << "Unrolling next TRANS ..."
+                    << std::endl;
+
                 assert_fsm_trans(engine, k);
                 ++k;
-                assert_fsm_invar(engine, k);
+
+                TRACE
+                    << "Adding untimed constraints ..."
+                    << std::endl;
 
                 /* Only global (i.e. untimed) constraints need be asserted here */
                 std::for_each(
@@ -166,7 +177,13 @@ namespace reach {
                             compiler::Unit cu { i->second };
                             this->assert_formula(engine, k, cu);
                         }
-                    });
+                });
+
+                TRACE
+                    << "Inverting last group ..."
+                    << std::endl;
+
+                engine.invert_last_group();
             }
 
             TRACE
