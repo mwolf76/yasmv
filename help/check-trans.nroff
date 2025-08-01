@@ -22,7 +22,7 @@ Returns `OK` if transition relation is found consistent, `KO` if transition rela
 If no decision could be made (e.g. user interruption), returns `??`.
 
 The user can specify the limit for the check depth using -l option. If no depth limit is explicitly given, the check
-is performed only for k = 0 (i. e. first TRANS).
+is performed only for k = 1 (i. e. the first TRANS).
 
 Further constraints can be specified using the -c option. These
 constraints will be applied on top of the INVAR and TRANS constraints
