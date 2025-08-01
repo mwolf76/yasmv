@@ -32,6 +32,7 @@ namespace fsm {
 
     CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
         : algorithms::Algorithm(command, model)
+        , f_limit(1)
     {
         const void* instance { this };
         TRACE
@@ -58,7 +59,8 @@ namespace fsm {
 
         unsigned no_constraints { 0 };
         std::for_each(
-            begin(constraints), end(constraints),
+            begin(constraints),
+            end(constraints),
             [this, ctx, &no_constraints](expr::Expr_ptr expr) {
                 INFO
                     << "Compiling constraint `"
@@ -66,7 +68,7 @@ namespace fsm {
                     << "` ..."
                     << std::endl;
 
-                compiler::Unit unit { compiler().process(ctx, expr) };
+                const compiler::Unit unit { this->compiler().process(ctx, expr) };
 
                 f_constraint_cus.push_back(unit);
                 ++no_constraints;
@@ -77,28 +79,42 @@ namespace fsm {
             << " additional constraints found."
             << std::endl;
 
-        /* FSM constraints */
-        assert_fsm_trans(engine, 0);
+        // assert the invars and constraints at time zero separately
         assert_fsm_invar(engine, 0);
+        std::for_each(
+            begin(f_constraint_cus),
+            end(f_constraint_cus),
+            [this, &engine](compiler::Unit& cu) {
+                this->assert_formula(engine, 0, cu);
+            });
 
-        /* Additional constraints, times 0 and 1 */
-        for (step_t time = 0; time < 2; ++time) {
+        for (size_t k = 0; k < f_limit; ++ k) {
+            INFO
+                << "Checking FSM transition relation consistency"
+                << "@" << k << std::endl;
+
+            assert_fsm_trans(engine, k);
+
+            // assert the invars and constraints at time k + 1
+            assert_fsm_invar(engine, k + 1);
             std::for_each(
-                begin(f_constraint_cus), end(f_constraint_cus),
-                [this, &engine, time](compiler::Unit& cu) {
-                    this->assert_formula(engine, time, cu);
-                });
+            begin(f_constraint_cus),
+            end(f_constraint_cus),
+            [this, &engine, k](compiler::Unit& cu) {
+                    this->assert_formula(engine, k+1, cu);
+            });
+
+            sat::status_t status { engine.solve() };
+
+            if (sat::status_t::STATUS_UNSAT == status) {
+                f_status = FSM_CONSISTENCY_KO;
+                break;
+            }
         }
 
-        sat::status_t status { engine.solve() };
-
-        if (sat::status_t::STATUS_UNKNOWN == status) {
-            f_status = FSM_CONSISTENCY_UNDECIDED;
-        } else if (sat::status_t::STATUS_UNSAT == status) {
-            f_status = FSM_CONSISTENCY_KO;
-        } else if (sat::status_t::STATUS_SAT == status) {
+        // if no failures were detected up to this point, result is SAT
+        if (f_status == FSM_CONSISTENCY_UNDECIDED) {
             f_status = FSM_CONSISTENCY_OK;
         }
     }
-
 } // namespace fsm

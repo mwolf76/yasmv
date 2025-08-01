@@ -120,7 +120,7 @@ namespace sat {
 
     private:
         void inject(const compiler::InlinedOperatorDescriptor& md,
-                    const LitsVector& clauses);
+                    const LitsVector& clauses) const;
 
         Engine& f_sat;
         step_t f_time;
@@ -144,7 +144,7 @@ namespace sat {
         }
 
     private:
-        void inject(const compiler::BinarySelectionDescriptor& md);
+        void inject(const compiler::BinarySelectionDescriptor& md) const;
 
         Engine& f_sat;
         step_t f_time;
@@ -168,7 +168,7 @@ namespace sat {
         }
 
     private:
-        void inject(const compiler::MultiwaySelectionDescriptor& md);
+        void inject(const compiler::MultiwaySelectionDescriptor& md) const;
 
         Engine& f_sat;
         step_t f_time;
