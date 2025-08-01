@@ -22,7 +22,6 @@
  **/
 
 #include <cstdlib>
-#include <cstring>
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/diameter.hh>
@@ -39,7 +38,7 @@ namespace cmd {
     Diameter::~Diameter()
     {}
 
-    bool Diameter::check_requirements()
+    bool Diameter::check_requirements() const
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         model::Model& model { mm.model() };
@@ -58,6 +57,7 @@ namespace cmd {
 
     utils::Variant Diameter::operator()()
     {
+        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         bool res { false };
 
         if (check_requirements()) {
@@ -66,7 +66,12 @@ namespace cmd {
             };
 
             computeDiameter.process();
-            step_t value = computeDiameter.diameter();
+            const step_t value = computeDiameter.diameter();
+
+            if (!om.quiet()) {
+                f_out
+                    << outPrefix;
+            }
 
             f_out
                 << "FSM diameter is "

@@ -87,9 +87,7 @@ namespace cmd {
                     }
 
                     f_out
-                        << "Transition relation consistency check ok."
-                        << std::endl
-                        << "Limit: " << f_limit
+                        << "Transition relation consistency check ok (limit = " << f_limit << ")"
                         << std::endl;
 
                     res = true;

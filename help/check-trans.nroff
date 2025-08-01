@@ -6,7 +6,7 @@ SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-check-trans [ -c <expr> ]+
+check-trans [ -l <limit> ] | [ -c <expr> ]+
 
 
 .ti 0
@@ -22,15 +22,16 @@ Returns `OK` if transition relation is found consistent, `KO` if transition rela
 If no decision could be made (e.g. user interruption), returns `??`.
 
 The user can specify the limit for the check depth using -l option. If no depth limit is explicitly given, the check
-is performed only for k = 0;
+is performed only for k = 0 (i. e. first TRANS).
 
 Further constraints can be specified using the -c option. These
 constraints will be applied on top of the INVAR and TRANS constraints
 defined in the model FSM. Please note, that in this latter case a
 FAILURE outcome only points to at an incompatibility between the FSM
 transition relation and the additional constraints, or even at a set
-of mutually incompatible additional constraints. The -c option can be
-used arbitrarily many times.
+of mutually incompatible additional constraints.
+
+The -c option can be used arbitrarily many times.
 
 .ti 0
 EXAMPLES
