@@ -38,13 +38,26 @@ namespace opts {
     typedef OptsMgr* OptsMgr_ptr;
 
     // -- system defaults
-    const unsigned DEFAULT_WORD_WIDTH = 16;
-    const unsigned DEFAULT_VERBOSITY = 0;
-    const double DEFAULT_SAT_RANDOM_VAR_FREQ = 0.02;  // 2% randomization for performance
-    const bool DEFAULT_SAT_RANDOM_INIT_ACT = true;  // Randomized initial activities for performance
-    const int DEFAULT_SAT_CCMIN_MODE = 2;  // Deep conflict clause minimization for performance
-    const int DEFAULT_SAT_PHASE_SAVING = 2;  // Full phase saving for performance
-    const double DEFAULT_SAT_GARBAGE_FRAC = 0.30;  // Higher threshold for better performance in model checking
+    const unsigned DEFAULT_WORD_WIDTH { 16 };
+    const unsigned DEFAULT_VERBOSITY { 0 };
+
+    // -- CNF defaults
+    const bool DEFAULT_CNF_DUPLICATE_REMOVAL { true };
+    const bool DEFAULT_CNF_TAUTOLOGY_REMOVAL { true };
+    const std::string DEFAULT_MICROCODE_DIRECTORY { "/microcode" };
+
+    // -- SAT defaults
+    const double DEFAULT_SAT_RANDOM_VAR_FREQ { 0.02 };  // 2% randomization for performance
+    const bool DEFAULT_SAT_RANDOM_INIT_ACT { true };  // Randomized initial activities for performance
+    const int DEFAULT_SAT_CCMIN_MODE { 2 };  // Deep conflict clause minimization for performance
+    const int DEFAULT_SAT_PHASE_SAVING { 2 };  // Full phase saving for performance
+    const double DEFAULT_SAT_GARBAGE_FRAC { 0.30 };  // Higher threshold for better performance in model checking
+
+    // -- REACH defaults
+    const bool DEFAULT_REACH_FAST_FORWARD_STRATEGY { true };
+    const bool DEFAULT_REACH_FORWARD_STRATEGY { true };
+    const bool DEFAULT_REACH_FAST_BACKWARD_STRATEGY { true };
+    const bool DEFAULT_REACH_BACKWARD_STRATEGY { true };
 
     class OptsMgr {
 
@@ -81,9 +94,16 @@ namespace opts {
         
         // skip inertial FSM checks
         bool skip_inertial_fsm_checks() const;
-        
+
+        // REACH strategies
+        bool reach_fast_forward_strategy() const;
+        bool reach_fast_backward_strategy() const;
+        bool reach_forward_strategy() const;
+        bool reach_backward_strategy() const;
+
         // SAT solver configuration
         double sat_random_var_freq() const;
+        static bool is_true(const std::string& value) ;
         bool sat_random_init_act() const;
         int sat_ccmin_mode() const;
         int sat_phase_saving() const;
@@ -97,11 +117,14 @@ namespace opts {
         bool cnf_self_subsumption() const;
         bool cnf_blocked_clause() const;
 
+        // CNF microcode configuration
+        std::string cnf_microcode_directory() const;
+
         // to be invoked by main
         void parse_command_line(int argc, const char** argv);
 
         // delegate
-        axter::verbosity get_verbosity_level_tolerance();
+        axter::verbosity get_verbosity_level_tolerance() const;
 
     protected:
         OptsMgr();

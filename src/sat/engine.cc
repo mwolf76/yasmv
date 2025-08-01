@@ -82,9 +82,9 @@ namespace sat {
         
         vec<Lit> assumptions;
 
-        clock_t t0 { clock() };
+        const clock_t t0 { clock() };
         for (int i = 0; i < groups.size(); ++i) {
-            Var grp { groups[i] };
+            const Var grp { groups[i] };
 
             /* Assumptions work like "a -> phi". Here we use both
              * polarities of the implication, that is a positive group
@@ -94,12 +94,11 @@ namespace sat {
             assumptions.push(mkLit(abs(grp), grp < 0));
         }
 
-        DEBUG
+        TRACE
             << "Solving ..."
             << std::endl;
 
-        Minisat::lbool status { f_solver.solveLimited(assumptions) };
-        if (status == l_True) {
+        if (const lbool status { f_solver.solveLimited(assumptions) }; status == l_True) {
             f_status = STATUS_SAT;
         } else if (status == l_False) {
             f_status = STATUS_UNSAT;
@@ -109,10 +108,10 @@ namespace sat {
             assert(false); /* unreachable */
         }
 
-        clock_t elapsed { clock() - t0 };
-        double secs { (double) elapsed / (double) CLOCKS_PER_SEC };
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
 
-        DEBUG
+        TRACE
             << "Took "
             << secs
             << " seconds. Status is "
@@ -283,11 +282,6 @@ namespace sat {
         } else {
             /* generate a new var and book it. Newly created var is not eliminable. */
             var = new_sat_var(true);
-
-            DRIVEL
-                << "Adding model var " << var
-                << " for " << tcbi
-                << std::endl;
 
             f_tcbi2var_map.insert(std::pair<enc::TCBI, Var>(tcbi, var));
             f_var2tcbi_map.insert(std::pair<Var, enc::TCBI>(var, tcbi));

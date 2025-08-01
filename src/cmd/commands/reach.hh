@@ -61,7 +61,7 @@ namespace cmd {
         expr::ExprVector f_constraints;
 
         // -- helpers -------------------------------------------------------------
-        bool check_requirements();
+        bool check_requirements() const;
     };
     using Reach_ptr = Reach*;
 

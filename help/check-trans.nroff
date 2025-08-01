@@ -15,12 +15,14 @@ DESCRIPTION
 .fi
 .in 3
 
-Checks compatibility with the transition relation.
+Checks the transition relation for consistency
 
-Checks transition relation's consistency. Returns `OK` if transition
-relation is found consistent, `KO` if transition relation is found to
-be inconsistent. If no decision could be made (e.g. user
-interruption), returns `??`.
+FSM Transition relation (i.e. INVAR(i) ^ TRANS(i) ^ INVAR(i+1), for i in 0..k) is checker for satisfiability.
+Returns `OK` if transition relation is found consistent, `KO` if transition relation is found to be inconsistent.
+If no decision could be made (e.g. user interruption), returns `??`.
+
+The user can specify the limit for the check depth using -l option. If no depth limit is explicitly given, the check
+is performed only for k = 0;
 
 Further constraints can be specified using the -c option. These
 constraints will be applied on top of the INVAR and TRANS constraints

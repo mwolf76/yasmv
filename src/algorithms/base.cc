@@ -42,7 +42,7 @@ namespace algorithms {
         , f_bm(enc::EncodingMgr::INSTANCE())
         , f_em(expr::ExprMgr::INSTANCE())
         , f_tm(type::TypeMgr::INSTANCE())
-        , f_witness(NULL)
+        , f_witness(nullptr)
     {
         /* Force mgr to exist */
         sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
@@ -92,15 +92,15 @@ namespace algorithms {
 
         /* processing environment extra constraints */
         const expr::ExprVector& extra_init { env.extra_init() };
-        process_init(NULL, extra_init);
+        process_init(nullptr, extra_init);
 
         /* environment INVARs */
         const expr::ExprVector& extra_invar { env.extra_invar() };
-        process_invar(NULL, extra_invar);
+        process_invar(nullptr, extra_invar);
 
         /* environment TRANSes */
         const expr::ExprVector& extra_trans { env.extra_trans() };
-        process_trans(NULL, extra_trans);
+        process_trans(nullptr, extra_trans);
 
         if (!ok()) {
             throw FailedSetup();
@@ -140,6 +140,7 @@ namespace algorithms {
 
     void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
     {
+#if 1
         for (auto body : exprs) {
             DEBUG
                 << "processing INVAR "
@@ -159,6 +160,37 @@ namespace algorithms {
                     << std::endl;
             }
         }
+
+#else
+        expr::ExprMgr& em { this->em() };
+
+        expr::Expr_ptr formula { nullptr };
+        for (auto body : exprs) {
+            formula = (! formula)
+                ? body
+                : em.make_and(formula, body)
+            ;
+        }
+
+        DEBUG
+            << "processing INVAR "
+            << ctx << "::" << formula
+            << std::endl;
+
+        try {
+            f_invar.push_back(compiler().process(ctx, formula));
+        } catch (Exception& ae) {
+            f_ok = false;
+
+            pconst_char what { ae.what() };
+            ERR
+                << what
+                << std::endl
+                << "  in INVAR "
+                << ctx << "::" << formula
+                << std::endl;
+        }
+#endif
     } /* process_invar() */
 
     void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
@@ -187,23 +219,80 @@ namespace algorithms {
 
     void Algorithm::assert_fsm_init(sat::Engine& engine, step_t time, sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_init.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " INIT units"
+            << "(time = " << time << ")"
+            << std::endl;
+
         for (const auto& i : f_init) {
             engine.push(i, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
     void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_init.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " INVAR units "
+            << "(time = " << time << ") ..."
+            << std::endl;
+
         for (const auto& i : f_invar) {
             engine.push(i, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
     void Algorithm::assert_fsm_trans(sat::Engine& engine, step_t time, sat::group_t group)
     {
+        const clock_t t0 { clock() };
+        const auto count { f_init.size() };
+
+        TRACE
+            << "Pushing "
+            << count
+            << " TRANS units"
+            << "(time = " << time << ") ..."
+            << std::endl;
+
         for (const auto& f_tran : f_trans) {
             engine.push(f_tran, time, group);
         }
+
+        const clock_t elapsed { clock() - t0 };
+        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
+
+        TRACE
+            << "Took "
+            << secs
+            << " seconds."
+            << std::endl;
     }
 
     void Algorithm::assert_fsm_uniqueness(sat::Engine& engine, step_t j, step_t k, sat::group_t group)

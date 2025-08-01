@@ -1305,6 +1305,9 @@ check_trans_command returns[cmd::Command_ptr res]
     : 'check-trans'
       { $res = cm.make_check_trans(); }
 
+      ( '-l' limit=constant
+      { ((cmd::CheckTrans_ptr) $res)->set_limit(limit->value()); })*
+
       ( '-c' constraint=toplevel_expression
       { ((cmd::CheckTrans_ptr) $res)->add_constraint(constraint); })*
     ;
