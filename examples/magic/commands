@@ -7,5 +7,11 @@ pick-state -c A = [4, 9, 2, 3, 5, 7, 8, 1, 6]
 pick-state -c A = [8, 1, 6, 3, 5, 7, 4, 9, 2]
 pick-state -c A = [8, 3, 4, 1, 5, 9, 6, 7, 2]
 pick-state -c A = [4, 3, 8, 9, 5, 1, 2, 7, 6]
-dump-trace -a
+dump-trace -a  # the  witnesses will be printed in the same order in which they were created
+
+# Last but not least, we count the number of possible solutions
+pick-state -n
+
 quit
+
+
