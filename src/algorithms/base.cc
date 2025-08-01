@@ -21,6 +21,8 @@
  *
  **/
 
+// ReSharper disable CppMemberFunctionMayBeConst
+// ReSharper disable CppMemberFunctionMayBeStatic
 #include <vector>
 
 #include <base.hh>
@@ -81,11 +83,10 @@ namespace algorithms {
                 expr::Expr_ptr local_ctx { em().make_dot(ctx, id) };
 
                 symb::Variable& var { *vi->second };
-                type::Type_ptr vtype { var.type() };
-                if (vtype->is_instance()) {
-                    type::InstanceType_ptr instance { vtype->as_instance() };
-                    model::Module& module { model.module(instance->name()) };
-                    stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(local_ctx, &module));
+                if (const type::Type_ptr var_type { var.type() }; var_type->is_instance()) {
+                    type::InstanceType_ptr instance { var_type->as_instance() };
+                    model::Module& instance_module { model.module(instance->name()) };
+                    stack.push(std::pair<expr::Expr_ptr, model::Module_ptr>(local_ctx, &instance_module));
                 }
             }
         } /* while() */
@@ -114,9 +115,9 @@ namespace algorithms {
     Algorithm::~Algorithm()
     {}
 
-    void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& init)
     {
-        for (auto body : exprs) {
+        for (auto body : init) {
             DEBUG
                 << "processing INIT "
                 << ctx << "::" << body
@@ -138,9 +139,9 @@ namespace algorithms {
         }
     } /* process_init() */
 
-    void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar)
     {
-        for (auto body : exprs) {
+        for (auto body : invar) {
             DEBUG
                 << "processing INVAR "
                 << ctx << "::" << body
@@ -161,9 +162,9 @@ namespace algorithms {
         }
     } /* process_invar() */
 
-    void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& exprs)
+    void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans)
     {
-        for (auto body : exprs) {
+        for (auto body : trans) {
             DEBUG
                 << "processing TRANS "
                 << ctx << "::" << body
@@ -214,7 +215,7 @@ namespace algorithms {
     void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, sat::group_t group)
     {
         const clock_t t0 { clock() };
-        const auto count { f_init.size() };
+        const auto count { f_invar.size() };
 
         TRACE
             << "Pushing "
@@ -302,8 +303,8 @@ namespace algorithms {
                     Var jkne { engine.new_sat_var() };
                     uniqueness_vars.push_back(jkne);
 
-                    Var jvar { engine.tcbi_to_var(jtcbi) };
-                    Var kvar { engine.tcbi_to_var(ktcbi) };
+                    const Var jvar { engine.tcbi_to_var(jtcbi) };
+                    const Var kvar { engine.tcbi_to_var(ktcbi) };
 
                     /* for each pair (j, k) we assert two clauses, both
                        activated by jkne. The first clause is satisfied if
