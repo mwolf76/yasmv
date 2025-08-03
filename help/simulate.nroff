@@ -6,7 +6,7 @@ SYNOPSIS
 
 .in 3
 [[ REQUIRES MODEL ]]
-simulate [ -c <expr> ] [ -u <expr> | -k <#steps> ]
+simulate [ -c <expr> ] [ -u <expr> ] [ -k <#steps> ] [ -t <trace-uid> ]
 
 
 .ti 0
@@ -18,13 +18,18 @@ Performs BMC simulation.
 
 
 OPTIONS:
-  -c <expr>, specifies an additional state constraint.
+  -c <expr>, specifies an additional state constraint (can be repeated).
+  -u <expr>, specifies an until condition (stop when satisfied).
+  -k <#steps>, number of simulation steps to perform (default: 1).
   -t <trace-uid>, the simulation trace UID.
 
 
-Extends an existing trace by one step. The simulated transition will satisfy
-the transition relation of the FSM along with any additional constraint specified
-by the user via -c clauses.
+Extends an existing trace by one or more steps. Each simulated transition will satisfy
+the transition relation of the FSM along with any additional constraints specified
+by the user via -c clauses. Simulation continues until one of the following occurs:
+  - The specified number of steps (-k) is completed
+  - The until condition (-u) is satisfied
+  - A deadlock is encountered (no valid next state exists)
 
 .ti 0
 EXAMPLES

@@ -39,11 +39,7 @@ namespace cmd {
 
         utils::Variant virtual operator()();
 
-        void set_invar_condition(expr::Expr_ptr invar_condition);
-        inline expr::Expr_ptr invar_condition() const
-        {
-            return f_invar_condition;
-        }
+        void add_constraint(expr::Expr_ptr constraint);
 
         void set_until_condition(expr::Expr_ptr until_condition);
         inline expr::Expr_ptr until_condition() const
@@ -68,9 +64,6 @@ namespace cmd {
 
         /* (optional) additional constraints */
         expr::ExprVector f_constraints;
-
-        /* An invariant condition (optional) */
-        expr::Expr_ptr f_invar_condition;
 
         /* HALT condition (optional) */
         expr::Expr_ptr f_until_condition;
