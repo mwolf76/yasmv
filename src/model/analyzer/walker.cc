@@ -216,8 +216,6 @@ namespace model {
 
     bool Analyzer::walk_guard_preorder(const expr::Expr_ptr expr)
     {
-	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
         if (f_section == ANALYZE_INIT) {
             throw SemanticError("Guards not allowed in INITs");
         }
@@ -235,26 +233,12 @@ namespace model {
             throw SemanticError("Guards are only allowed toplevel in TRANSes");
         }
 
-        expr::Expr_ptr guard { expr->lhs() };
-        expr::Expr_ptr action { expr->rhs() };
-
-        if (! em.is_assignment(action)) {
+        // Since 0.0.10 we also allow a set expression, with the semantic of a conjunction of assignments
+        if (! is_valid_guarded_action(expr)) {
             throw SemanticError("Guarded actions must be assignments");
         }
 
-        expr::Expr_ptr lhs { action->lhs() };
-
-        INFO
-            << "Tracking dependency: "
-            << lhs
-            << " -> "
-            << guard
-            << std::endl;
-
-        f_dependency_tracking_map.insert(
-            std::pair<expr::Expr_ptr, expr::Expr_ptr>
-	    (guard, lhs));
-
+        track_dependency(expr);
         return true;
     }
 

@@ -22,7 +22,6 @@
  **/
 
 #include <cstdlib>
-#include <cstring>
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/simulate.hh>
@@ -32,35 +31,29 @@ namespace cmd {
     Simulate::Simulate(Interpreter& owner)
         : Command(owner)
         , f_out(std::cout)
-        , f_invar_condition(NULL)
-        , f_until_condition(NULL)
+        , f_until_condition(nullptr)
         , f_k(1)
-        , f_trace_uid(NULL)
+        , f_trace_uid(nullptr)
     {}
 
 
     Simulate::~Simulate()
     {
         free(f_trace_uid);
-        f_trace_uid = NULL;
+        f_trace_uid = nullptr;
     }
 
-    void Simulate::set_invar_condition(expr::Expr_ptr invar_condition)
+    void Simulate::add_constraint(const expr::Expr_ptr constraint)
     {
-        f_invar_condition = invar_condition;
-
-        ERR
-            << "Additional constraint: "
-            << invar_condition
-            << std::endl;
+        f_constraints.push_back(constraint);
     }
 
-    void Simulate::set_until_condition(expr::Expr_ptr until_condition)
+    void Simulate::set_until_condition(const expr::Expr_ptr until_condition)
     {
         f_until_condition = until_condition;
     }
 
-    void Simulate::set_trace_uid(pconst_char trace_uid)
+    void Simulate::set_trace_uid(const pconst_char trace_uid)
     {
         free(f_trace_uid);
         f_trace_uid = strdup(trace_uid);
@@ -73,16 +66,15 @@ namespace cmd {
 
     utils::Variant Simulate::operator()()
     {
-        opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        const opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
 
         sim::Simulation simulation(*this, mm.model());
 
         bool res { false };
 
-        expr::ExprVector f_constraints;
-        sim::simulation_status_t rc {
-            simulation.simulate(f_constraints, f_trace_uid)
+        const sim::simulation_status_t rc {
+            simulation.simulate(f_constraints, f_trace_uid, f_until_condition, f_k)
         };
 
         switch (rc) {
@@ -94,7 +86,8 @@ namespace cmd {
                 }
 
                 f_out
-                    << "Simulation done";
+                    << "Simulation done"
+                    << std::endl;
                 break;
 
             case sim::simulation_status_t::SIMULATION_DEADLOCKED:
@@ -121,28 +114,6 @@ namespace cmd {
 
             default:
                 assert(false); /* unreachable */
-        }
-
-        if (simulation.has_witness()) {
-            if (!om.quiet()) {
-                f_out
-                    << outPrefix;
-            }
-
-            f_out
-                << "Registered witness `"
-                << simulation.witness().id()
-                << "`"
-                << std::endl;
-        } else {
-            if (!om.quiet()) {
-                f_out
-                    << wrnPrefix;
-            }
-
-            f_out
-                << "(no witness available)"
-                << std::endl;
         }
 
         return utils::Variant(res ? okMessage : errMessage);

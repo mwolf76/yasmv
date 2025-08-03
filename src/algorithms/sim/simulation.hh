@@ -53,7 +53,8 @@ namespace sim {
         value_t pick_state(expr::ExprVector constraints, bool all_sat, bool count, value_t limit);
 
         // returns the status of the simulation
-        simulation_status_t simulate(expr::ExprVector constraints, pconst_char trace_uid);
+        simulation_status_t simulate(expr::ExprVector constraints, pconst_char trace_uid,
+                                   expr::Expr_ptr until_condition = nullptr, step_t k_steps = 1);
 
     private:
         expr::ExprVector f_constraints;

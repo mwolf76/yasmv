@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# antlr3 wrapper script with quiet mode support
+
+# Default values
+QUIET=0
+ANTLR3_ARGS=()
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -q|--quiet)
+            QUIET=1
+            shift
+            ;;
+        *)
+            ANTLR3_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Run antlr3 with appropriate output handling
+if [ $QUIET -eq 1 ]; then
+    # Suppress all diagnostic output (stdout and stderr)
+    antlr3 "${ANTLR3_ARGS[@]}" >/dev/null 2>&1
+else
+    # Normal execution
+    antlr3 "${ANTLR3_ARGS[@]}"
+fi
+
+# Preserve exit code
+exit $?

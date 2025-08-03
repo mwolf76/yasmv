@@ -37,27 +37,27 @@ namespace cmd {
     PickState::~PickState()
     {}
 
-    void PickState::set_allsat(bool allsat)
+    void PickState::set_allsat(const bool value)
     {
-        f_allsat = allsat;
+        f_allsat = value;
     }
 
-    void PickState::set_count(bool count)
+    void PickState::set_count(const bool value)
     {
-        f_count = count;
+        f_count = value;
     }
 
-    void PickState::set_limit(value_t limit)
+    void PickState::set_limit(const value_t value)
     {
-        f_limit = limit;
+        f_limit = value;
     }
 
-    void PickState::add_constraint(expr::Expr_ptr constraint)
+    void PickState::add_constraint(const expr::Expr_ptr constraint)
     {
         f_constraints.push_back(constraint);
     }
 
-    bool PickState::check_requirements()
+    bool PickState::check_requirements() const
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         model::Model& model { mm.model() };
@@ -83,7 +83,7 @@ namespace cmd {
         return true;
     }
 
-    void PickState::wrn_prefix()
+    void PickState::wrn_prefix() const
     {
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         if (!om.quiet()) {
@@ -91,7 +91,7 @@ namespace cmd {
         }
     }
 
-    void PickState::out_prefix()
+    void PickState::out_prefix() const
     {
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
         if (!om.quiet()) {
@@ -107,8 +107,8 @@ namespace cmd {
             sim::Simulation simulation { *this, model };
             value_t states { simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
 
-            expr::Expr_ptr model_name { model.main_module().name() };
-            size_t num_constraints { f_constraints.size() };
+            const expr::Expr_ptr model_name { model.main_module().name() };
+            const size_t num_constraints { f_constraints.size() };
 
             if (0 == states) {
                 wrn_prefix();
