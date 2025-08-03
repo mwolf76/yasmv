@@ -173,7 +173,7 @@ fsm_var_decl_clause
     : ids=identifiers[&ev] ':' tp=smv_type
     {
             expr::ExprVector::iterator expr_iter;
-            assert(NULL != tp);
+            assert(nullptr != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 expr::Expr_ptr vid (*expr_iter);
                 symb::Variable_ptr var
@@ -203,7 +203,7 @@ fsm_param_decl_clause
     : ids=identifiers[&ev] ':' tp=smv_type
     {
             expr::ExprVector::iterator expr_iter;
-            assert(NULL != tp);
+            assert(nullptr != tp);
             for (expr_iter = ev.begin(); expr_iter != ev.end(); ++ expr_iter) {
                 expr::Expr_ptr pid (*expr_iter);
                 current_module->add_parameter(pid,
@@ -288,51 +288,68 @@ fsm_trans_decl_body
     ;
 
 fsm_trans_decl_clause
-    : (toplevel_expression '?:' toplevel_expression) =>
-        lhs=toplevel_expression '?:' rhs=toplevel_expression
+    : (toplevel_expression '?:' fsm_trans_decl_clause_assignments) =>
+        lhs=toplevel_expression '?:' rhs=fsm_trans_decl_clause_assignments
       { current_module->add_trans(em.make_guard(lhs, rhs)); }
 
-    | rhs=toplevel_expression
+    | rhs=fsm_trans_decl_clause_assignments
       { current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
     ;
 
+fsm_trans_decl_clause_assignments returns [expr::Expr_ptr res]
+@init {
+    $res = nullptr;
+    expr::ExprVector clauses;
+}
+    : c=toplevel_expression{ clauses.push_back(c); }
+      (  ','  c=toplevel_expression { clauses.push_back(c); })*
+
+    {
+      expr::ExprVector::reverse_iterator i { clauses.rbegin() };
+      while (clauses.rend() != i) {
+          $res = ($res != nullptr) ? em.make_and( *i, $res) : *i;
+          ++ i;
+      }
+    }
+    ;
+
 toplevel_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=timed_expression
       { $res = expr; }
     ;
 
 timed_expression returns [expr::Expr_ptr res]
 @init {
-    $res = NULL;
-    expr::Expr_ptr a { NULL };
-    expr::Expr_ptr b { NULL };
+    $res = nullptr;
+    expr::Expr_ptr a { nullptr };
+    expr::Expr_ptr b { nullptr };
 }
     : '@' time=forward_instant { a = time; } ('..' time=forward_instant { b = time; })? '{' body=propositional_expression '}'
-      { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
+      { $res = (nullptr != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
     | '$' time=backward_instant { a = time; } ('..' time=backward_instant { b = time; })? '{' body=propositional_expression '}'
-      { $res = (NULL != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
+      { $res = (nullptr != b) ? em.make_at( em.make_interval(a, b),  body) : em.make_at(a, body); }
 
     | body=propositional_expression
       { $res = body; }
     ;
 
 temporal_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=propositional_expression
       { $res = expr; }
     ;
 
 propositional_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=ite_expression {
          $res = expr;
       }
     ;
 
 ite_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=logical_expression {
          $res = expr;
       }
@@ -344,13 +361,13 @@ ite_expression returns [expr::Expr_ptr res]
     ;
 
 logical_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=logical_implies_expression
       { $res = expr; }
     ;
 
 logical_implies_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=logical_or_expression
       { $res = lhs; }
 
@@ -360,7 +377,7 @@ logical_implies_expression returns [expr::Expr_ptr res]
     )* ;
 
 logical_or_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=logical_and_expression
       { $res = lhs; }
 
@@ -370,7 +387,7 @@ logical_or_expression returns[expr::Expr_ptr res]
     )* ;
 
 logical_and_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=equality_expression
       { $res = lhs; }
 
@@ -380,7 +397,7 @@ logical_and_expression returns[expr::Expr_ptr res]
     )* ;
 
 equality_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=relational_expression
       { $res = lhs; }
 
@@ -396,7 +413,7 @@ equality_expression returns [expr::Expr_ptr res]
       )? /* predicates are binary */;
 
 relational_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=algebraic_expression
       { $res = lhs; }
 
@@ -414,14 +431,14 @@ relational_expression returns [expr::Expr_ptr res]
       )? /* predicates are binary */ ;
 
 algebraic_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :
         expr=bw_or_expression
         { $res = expr; }
     ;
 
 bw_or_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=bw_xor_expression
       { $res = lhs; }
 
@@ -431,7 +448,7 @@ bw_or_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_xor_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=bw_xnor_expression
       { $res = lhs; }
 
@@ -441,7 +458,7 @@ bw_xor_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_xnor_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=bw_and_expression
       { $res = lhs; }
 
@@ -451,7 +468,7 @@ bw_xnor_expression returns[expr::Expr_ptr res]
     )* ;
 
 bw_and_expression returns[expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=shift_expression
       { $res = lhs; }
 
@@ -461,7 +478,7 @@ bw_and_expression returns[expr::Expr_ptr res]
     )* ;
 
 shift_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=additive_expression
       { $res = lhs; }
 
@@ -474,7 +491,7 @@ shift_expression returns [expr::Expr_ptr res]
     )* ;
 
 additive_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=multiplicative_expression
       { $res = lhs; }
 
@@ -487,7 +504,7 @@ additive_expression returns [expr::Expr_ptr res]
     )* ;
 
 multiplicative_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : lhs=cast_expression
       { $res = lhs; }
 
@@ -504,8 +521,8 @@ multiplicative_expression returns [expr::Expr_ptr res]
 
 cast_expression returns [expr::Expr_ptr res]
 @init {
-    $res = NULL;
-    expr::Expr_ptr cast = NULL;
+    $res = nullptr;
+    expr::Expr_ptr cast = nullptr;
 }
     : '(' tp = native_type ')' expr = cast_expression
         { $res = em.make_cast( tp->repr(), expr ); }
@@ -515,7 +532,7 @@ cast_expression returns [expr::Expr_ptr res]
     ;
 
 unary_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=postfix_expression
       { $res = expr; }
 
@@ -540,7 +557,7 @@ unary_expression returns [expr::Expr_ptr res]
 
 nondeterministic_expression returns[expr::Expr_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     bool is_range { false };
     expr::ExprVector clauses;
 }
@@ -589,7 +606,7 @@ nondeterministic_expression returns[expr::Expr_ptr res]
 
 array_expression returns[expr::Expr_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     expr::ExprVector clauses;
 }
     : '['
@@ -612,14 +629,14 @@ array_expression returns[expr::Expr_ptr res]
 
 params returns [expr::Expr_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     expr::ExprVector actuals;
-    res = NULL;
+    res = nullptr;
 }
     : ( expressions[&actuals]
     {
             expr::ExprVector::reverse_iterator expr_iter;
-            res = NULL;
+            res = nullptr;
 
             for (expr_iter = actuals.rbegin(); expr_iter != actuals.rend(); ++ expr_iter) {
                 expr::Expr_ptr expr = (*expr_iter);
@@ -634,7 +651,7 @@ params returns [expr::Expr_ptr res]
     ;
 
 postfix_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :   lhs=basic_expression
         { $res = lhs; }
 
@@ -650,7 +667,7 @@ postfix_expression returns [expr::Expr_ptr res]
     )* ;
 
 basic_expression returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : id=identifier
       { $res = id; }
 
@@ -666,7 +683,7 @@ basic_expression returns [expr::Expr_ptr res]
 
 case_expression returns [expr::Expr_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     typedef std::pair<expr::Expr_ptr, expr::Expr_ptr> CaseClause;
     typedef std::vector<CaseClause> CaseClauses;
 
@@ -677,7 +694,7 @@ case_expression returns [expr::Expr_ptr res]
      { clauses.push_back( std::pair< expr::Expr_ptr, expr::Expr_ptr > (lhs, rhs)); }) +
 
      'else' ':' last=toplevel_expression ';'
-     { clauses.push_back( std::pair< expr::Expr_ptr, expr::Expr_ptr > (NULL, last)); }
+     { clauses.push_back( std::pair< expr::Expr_ptr, expr::Expr_ptr > (nullptr, last)); }
 
      'end'
      {
@@ -711,29 +728,29 @@ expressions [expr::ExprVector* exprs]
       )* ;
 
 identifier returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : IDENTIFIER
       { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
     ;
 
 forward_instant returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : DECIMAL_LITERAL {
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
-        $res = em.make_instant(strtoll(tmp.c_str(), NULL, 10));
+        $res = em.make_instant(strtoll(tmp.c_str(), nullptr, 10));
       }
     ;
 
 backward_instant returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : DECIMAL_LITERAL {
         expr::Atom tmp((const char*)($DECIMAL_LITERAL.text->chars));
-        $res = em.make_instant(UINT_MAX - strtoll(tmp.c_str(), NULL, 10));
+        $res = em.make_instant(UINT_MAX - strtoll(tmp.c_str(), nullptr, 10));
       }
     ;
 
 constant returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : HEX_LITERAL {
         expr::Atom tmp((const char*)($HEX_LITERAL.text->chars));
         $res = em.make_hex_const(tmp);
@@ -772,7 +789,7 @@ constant returns [expr::Expr_ptr res]
 
 /* pvalue is used in param passing (actuals) */
 pvalue returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'next' '(' expr=postfix_expression ')'
       { $res = em.make_next(expr); }
 
@@ -782,14 +799,14 @@ pvalue returns [expr::Expr_ptr res]
 
 /* ordinary values used elsewhere */
 value returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : expr=postfix_expression
       { $res = expr; }
     ;
 
 /* typedecls */
 smv_type returns [type::Type_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : tp = native_type
       { $res = tp; }
 
@@ -801,7 +818,7 @@ smv_type returns [type::Type_ptr res]
     ;
 
 native_type returns [type::Type_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : tp = boolean_type
       { $res = tp; }
 
@@ -814,7 +831,7 @@ native_type returns [type::Type_ptr res]
 
 boolean_type returns [type::Type_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     int array_size = 0;
 }
     : 'boolean' (
@@ -834,7 +851,7 @@ boolean_type returns [type::Type_ptr res]
 
 enum_type returns [type::Type_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     int array_size = 0;
     expr::ExprSet lits;
 }
@@ -857,8 +874,8 @@ enum_type returns [type::Type_ptr res]
 
 unsigned_int_type returns [type::Type_ptr res]
 @init {
-    $res = NULL;
-    char *p = NULL;
+    $res = nullptr;
+    char *p = nullptr;
     int array_size = 0;
 }
     :
@@ -886,8 +903,8 @@ unsigned_int_type returns [type::Type_ptr res]
 
 signed_int_type returns [type::Type_ptr res]
 @init {
-    $res = NULL;
-    char *p = NULL;
+    $res = nullptr;
+    char *p = nullptr;
     int array_size = 0;
 }
     :
@@ -915,13 +932,13 @@ signed_int_type returns [type::Type_ptr res]
 
 
 instance_type returns [type::Type_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : module=identifier '(' parameters=params ')'
       { $res = tm.find_instance( module, parameters ); }
     ;
 
 literal returns [expr::Expr_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  expr=identifier
        { $res = expr; }
     ;
@@ -929,7 +946,7 @@ literal returns [expr::Expr_ptr res]
 // -- Scripting sub-system Toplevel ---------------------------------------------
 command_line returns [cmd::CommandVector_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     res = new cmd::CommandVector();
 }
     : commands[res]
@@ -946,7 +963,7 @@ commands [cmd::CommandVector_ptr cmds]
         )* ;
 
 command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  c=check_init_command_topic
        { $res = c; }
 
@@ -1018,7 +1035,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
     ;
 
 command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  c=check_init_command
        { $res = c; }
 
@@ -1090,7 +1107,7 @@ command returns [cmd::Command_ptr res]
     ;
 
 help_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'help'
       { $res = cm.make_help(); }
       (
@@ -1099,13 +1116,13 @@ help_command returns [cmd::Command_ptr res]
       )? ;
 
 help_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'help'
       { $res = cm.topic_help(); }
     ;
 
 do_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'do'
       { $res = cm.make_do(); }
       (
@@ -1114,14 +1131,14 @@ do_command returns [cmd::Command_ptr res]
       )+ ;
 
 do_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'do'
        { $res = cm.topic_do(); }
     ;
 
 echo_command returns [cmd::Command_ptr res]
 @init {
-    $res = NULL;
+    $res = nullptr;
     expr::ExprVector ev;
 }
     : 'echo'?
@@ -1135,25 +1152,25 @@ echo_command returns [cmd::Command_ptr res]
       ;
 
 echo_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'echo'
        { $res = cm.topic_echo(); }
     ;
 
 last_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'last'
       { $res = cm.make_last(); }
     ;
 
 last_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'last'
        { $res = cm.topic_last(); }
     ;
 
 on_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :
       'on'
         ('success' { $res = cm.make_on(); }
@@ -1164,25 +1181,25 @@ on_command returns [cmd::Command_ptr res]
     ;
 
 on_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'on'
         { $res = cm.topic_on(); }
     ;
 
 time_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'time'
       { $res = cm.make_time(); }
     ;
 
 time_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'time'
       { $res = cm.topic_time(); }
     ;
 
 read_model_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'read-model'
         { $res = cm.make_read_model(); }
 
@@ -1192,13 +1209,13 @@ read_model_command returns [cmd::Command_ptr res]
     ;
 
 read_model_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'read-model'
         { $res = cm.topic_read_model(); }
     ;
 
 read_trace_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'read-trace'
         { $res = cm.make_read_trace(); }
 
@@ -1208,13 +1225,13 @@ read_trace_command returns [cmd::Command_ptr res]
     ;
 
 read_trace_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'read-trace'
         { $res = cm.topic_read_trace(); }
     ;
 
 dump_model_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'dump-model'
         { $res = cm.make_dump_model(); }
 
@@ -1229,14 +1246,14 @@ dump_model_command returns [cmd::Command_ptr res]
     ;
 
 dump_model_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'dump-model'
         { $res = cm.topic_dump_model(); }
     ;
 
 
 check_init_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'check-init'
       { $res = cm.make_check_init(); }
 
@@ -1245,25 +1262,25 @@ check_init_command returns[cmd::Command_ptr res]
     ;
 
 check_init_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'check-init'
         { $res = cm.topic_check_init(); }
     ;
 
 diameter_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'diameter'
       { $res = cm.make_diameter(); }
     ;
 
 diameter_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'diameter'
         { $res = cm.topic_diameter(); }
     ;
 
 reach_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :   'reach'
         { $res = cm.make_reach(); }
 
@@ -1280,13 +1297,13 @@ reach_command returns[cmd::Command_ptr res]
     ;
 
 reach_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'reach'
         { $res = cm.topic_reach(); }
     ;
 
 select_trace_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :   'select-trace'
         { $res = cm.make_select_trace(); }
 
@@ -1295,13 +1312,13 @@ select_trace_command returns[cmd::Command_ptr res]
     ;
 
 select_trace_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'select-trace'
        { $res = cm.topic_select_trace(); }
     ;
 
 check_trans_command returns[cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'check-trans'
       { $res = cm.make_check_trans(); }
 
@@ -1313,25 +1330,25 @@ check_trans_command returns[cmd::Command_ptr res]
     ;
 
 check_trans_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'check-trans'
         { $res = cm.topic_check_trans(); }
     ;
 
 list_traces_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'list-traces'
       { $res = cm.make_list_traces(); }
     ;
 
 list_traces_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'list-traces'
         { $res = cm.topic_list_traces(); }
     ;
 
 dump_trace_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'dump-trace'
       { $res = cm.make_dump_trace(); }
 
@@ -1353,14 +1370,14 @@ dump_trace_command returns [cmd::Command_ptr res]
     ;
 
 dump_trace_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'dump-trace'
         { $res = cm.topic_dump_trace(); }
     ;
 
 
 dup_trace_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'dup-trace'
       { $res = cm.make_dup_trace(); }
 
@@ -1372,13 +1389,13 @@ dup_trace_command returns [cmd::Command_ptr res]
     ;
 
 dup_trace_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'dup-trace'
         { $res = cm.topic_dup_trace(); }
     ;
 
 pick_state_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :   'pick-state'
         { $res = cm.make_pick_state(); }
     (
@@ -1396,18 +1413,18 @@ pick_state_command returns [cmd::Command_ptr res]
     )* ;
 
 pick_state_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'pick-state'
         { $res = cm.topic_pick_state(); }
     ;
 
 simulate_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'simulate'
       { $res = cm.make_simulate(); }
     (
-       '-i' invar_condition=toplevel_expression
-        { ((cmd::Simulate_ptr) $res)->set_invar_condition(invar_condition); }
+       '-c' constraint=toplevel_expression
+        { ((cmd::Simulate_ptr) $res)->add_constraint(constraint); }
 
     |  '-u' until_condition=toplevel_expression
         { ((cmd::Simulate_ptr) $res)->set_until_condition(until_condition); }
@@ -1420,13 +1437,13 @@ simulate_command returns [cmd::Command_ptr res]
     )* ;
 
 simulate_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'simulate'
         { $res = cm.topic_simulate(); }
     ;
 
 get_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'get'
       { $res = cm.make_get(); }
 
@@ -1435,13 +1452,13 @@ get_command returns [cmd::Command_ptr res]
     ;
 
 get_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'get'
         { $res = cm.topic_get(); }
     ;
 
 set_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'set'
       { $res = cm.make_set(); }
 
@@ -1453,13 +1470,13 @@ set_command returns [cmd::Command_ptr res]
     ;
 
 set_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'set'
         { $res = cm.topic_set(); }
     ;
 
 clear_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : 'clear'
       { $res = cm.make_clear(); }
 
@@ -1468,31 +1485,31 @@ clear_command returns [cmd::Command_ptr res]
     ;
 
 clear_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'clear'
         { $res = cm.topic_clear(); }
     ;
 
 quit_command returns [cmd::Command_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'quit'
        { $res = cm.make_quit(); }
     ;
 
 quit_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     :  'quit'
         { $res = cm.topic_quit(); }
     ;
 
 pcchar_identifier returns [pconst_char res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
     ;
 
 pcchar_quoted_string returns [pconst_char res]
-@init { $res = NULL; }
+@init { $res = nullptr; }
     : QUOTED_STRING
         {
             pANTLR3_UINT8 p = $QUOTED_STRING.text->chars;
