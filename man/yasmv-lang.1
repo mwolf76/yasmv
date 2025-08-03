@@ -8,8 +8,7 @@ Verifier) language for describing finite state systems.
 The SMV language in yasmv allows specification of finite state machines using
 variables, initial conditions, invariants, and transition relations.
 .SH MODULE STRUCTURE
-Each SMV file contains one or more modules. The main module (usually named 'main')
-is the entry point:
+Each SMV file contains exactly one module, which can have an arbitrary name:
 .PP
 .nf
     MODULE module_name [ (param1, param2, ...) ]
