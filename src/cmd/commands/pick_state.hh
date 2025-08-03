@@ -76,10 +76,10 @@ namespace cmd {
         unsigned f_limit;
 
         // -- helpers -------------------------------------------------------------
-        bool check_requirements();
+        bool check_requirements() const;
 
-        void wrn_prefix();
-        void out_prefix();
+        void wrn_prefix() const;
+        void out_prefix() const;
     };
 
     typedef PickState* PickState_ptr;

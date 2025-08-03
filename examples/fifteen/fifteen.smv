@@ -66,241 +66,145 @@ INVAR
     end;
 
 TRANS
-	row = 0 && col = 0 && move = DOWN ?: grid[4] := 0;
-TRANS
-	row = 0 && col = 0 && move = DOWN ?: grid[0] := grid[4];
+	row = 0 && col = 0 && move = DOWN ?: grid[4] := 0, grid[0] := grid[4];
 
 TRANS
-	row = 0 && col = 0 && move = RIGHT ?: grid[1] := 0;
-TRANS
-	row = 0 && col = 0 && move = RIGHT ?: grid[0] := grid[1];
+	row = 0 && col = 0 && move = RIGHT ?: grid[1] := 0, grid[0] := grid[1];
 
 TRANS
-	row = 0 && col = 1 && move = DOWN ?: grid[5] := 0;
-TRANS
-	row = 0 && col = 1 && move = DOWN ?: grid[1] := grid[5];
+	row = 0 && col = 1 && move = DOWN ?: grid[5] := 0, grid[1] := grid[5];
 
 TRANS
-	row = 0 && col = 1 && move = RIGHT ?: grid[2] := 0;
-TRANS
-	row = 0 && col = 1 && move = RIGHT ?: grid[1] := grid[2];
+	row = 0 && col = 1 && move = RIGHT ?: grid[2] := 0, grid[1] := grid[2];
 
 TRANS
-	row = 0 && col = 1 && move = LEFT ?: grid[0] := 0;
-TRANS
-	row = 0 && col = 1 && move = LEFT ?: grid[1] := grid[0];
+	row = 0 && col = 1 && move = LEFT ?: grid[0] := 0, grid[1] := grid[0];
 
 TRANS
-	row = 0 && col = 2 && move = DOWN ?: grid[6] := 0;
-TRANS
-	row = 0 && col = 2 && move = DOWN ?: grid[2] := grid[6];
+	row = 0 && col = 2 && move = DOWN ?: grid[6] := 0, grid[2] := grid[6];
 
 TRANS
-	row = 0 && col = 2 && move = RIGHT ?: grid[3] := 0;
-TRANS
-	row = 0 && col = 2 && move = RIGHT ?: grid[2] := grid[3];
+	row = 0 && col = 2 && move = RIGHT ?: grid[3] := 0, grid[2] := grid[3];
 
 TRANS
-	row = 0 && col = 2 && move = LEFT ?: grid[1] := 0;
-TRANS
-	row = 0 && col = 2 && move = LEFT ?: grid[2] := grid[1];
+	row = 0 && col = 2 && move = LEFT ?: grid[1] := 0, grid[2] := grid[1];
 
 TRANS
-	row = 0 && col = 3 && move = DOWN ?: grid[7] := 0;
-TRANS
-	row = 0 && col = 3 && move = DOWN ?: grid[3] := grid[7];
+	row = 0 && col = 3 && move = DOWN ?: grid[7] := 0, grid[3] := grid[7];
 
 TRANS
-	row = 0 && col = 3 && move = LEFT ?: grid[2] := 0;
-TRANS
-	row = 0 && col = 3 && move = LEFT ?: grid[3] := grid[2];
+	row = 0 && col = 3 && move = LEFT ?: grid[2] := 0, grid[3] := grid[2];
 
 TRANS
-	row = 1 && col = 0 && move = UP ?: grid[0] := 0;
-TRANS
-	row = 1 && col = 0 && move = UP ?: grid[4] := grid[0];
+	row = 1 && col = 0 && move = UP ?: grid[0] := 0, grid[4] := grid[0];
 
 TRANS
-	row = 1 && col = 0 && move = DOWN ?: grid[8] := 0;
-TRANS
-	row = 1 && col = 0 && move = DOWN ?: grid[4] := grid[8];
+	row = 1 && col = 0 && move = DOWN ?: grid[8] := 0, grid[4] := grid[8];
 
 TRANS
-	row = 1 && col = 0 && move = RIGHT ?: grid[5] := 0;
-TRANS
-	row = 1 && col = 0 && move = RIGHT ?: grid[4] := grid[5];
+	row = 1 && col = 0 && move = RIGHT ?: grid[5] := 0, grid[4] := grid[5];
 
 TRANS
-	row = 1 && col = 1 && move = UP ?: grid[1] := 0;
-TRANS
-	row = 1 && col = 1 && move = UP ?: grid[5] := grid[1];
+	row = 1 && col = 1 && move = UP ?: grid[1] := 0, grid[5] := grid[1];
 
 TRANS
-	row = 1 && col = 1 && move = DOWN ?: grid[9] := 0;
-TRANS
-	row = 1 && col = 1 && move = DOWN ?: grid[5] := grid[9];
+	row = 1 && col = 1 && move = DOWN ?: grid[9] := 0, grid[5] := grid[9];
 
 TRANS
-	row = 1 && col = 1 && move = RIGHT ?: grid[6] := 0;
-TRANS
-	row = 1 && col = 1 && move = RIGHT ?: grid[5] := grid[6];
+	row = 1 && col = 1 && move = RIGHT ?: grid[6] := 0, grid[5] := grid[6];
 
 TRANS
-	row = 1 && col = 1 && move = LEFT ?: grid[4] := 0;
-TRANS
-	row = 1 && col = 1 && move = LEFT ?: grid[5] := grid[4];
+	row = 1 && col = 1 && move = LEFT ?: grid[4] := 0, grid[5] := grid[4];
 
 TRANS
-	row = 1 && col = 2 && move = UP ?: grid[2] := 0;
-TRANS
-	row = 1 && col = 2 && move = UP ?: grid[6] := grid[2];
+	row = 1 && col = 2 && move = UP ?: grid[2] := 0, grid[6] := grid[2];
 
 TRANS
-	row = 1 && col = 2 && move = DOWN ?: grid[10] := 0;
-TRANS
-	row = 1 && col = 2 && move = DOWN ?: grid[6] := grid[10];
+	row = 1 && col = 2 && move = DOWN ?: grid[10] := 0, grid[6] := grid[10];
 
 TRANS
-	row = 1 && col = 2 && move = RIGHT ?: grid[7] := 0;
-TRANS
-	row = 1 && col = 2 && move = RIGHT ?: grid[6] := grid[7];
+	row = 1 && col = 2 && move = RIGHT ?: grid[7] := 0, grid[6] := grid[7];
 
 TRANS
-	row = 1 && col = 2 && move = LEFT ?: grid[5] := 0;
-TRANS
-	row = 1 && col = 2 && move = LEFT ?: grid[6] := grid[5];
+	row = 1 && col = 2 && move = LEFT ?: grid[5] := 0, grid[6] := grid[5];
 
 TRANS
-	row = 1 && col = 3 && move = UP ?: grid[3] := 0;
-TRANS
-	row = 1 && col = 3 && move = UP ?: grid[7] := grid[3];
+	row = 1 && col = 3 && move = UP ?: grid[3] := 0, grid[7] := grid[3];
 
 TRANS
-	row = 1 && col = 3 && move = DOWN ?: grid[11] := 0;
-TRANS
-	row = 1 && col = 3 && move = DOWN ?: grid[7] := grid[11];
+	row = 1 && col = 3 && move = DOWN ?: grid[11] := 0, grid[7] := grid[11];
 
 TRANS
-	row = 1 && col = 3 && move = LEFT ?: grid[6] := 0;
-TRANS
-	row = 1 && col = 3 && move = LEFT ?: grid[7] := grid[6];
+	row = 1 && col = 3 && move = LEFT ?: grid[6] := 0, grid[7] := grid[6];
 
 TRANS
-	row = 2 && col = 0 && move = UP ?: grid[4] := 0;
-TRANS
-	row = 2 && col = 0 && move = UP ?: grid[8] := grid[4];
+	row = 2 && col = 0 && move = UP ?: grid[4] := 0, grid[8] := grid[4];
 
 TRANS
-	row = 2 && col = 0 && move = DOWN ?: grid[12] := 0;
-TRANS
-	row = 2 && col = 0 && move = DOWN ?: grid[8] := grid[12];
+	row = 2 && col = 0 && move = DOWN ?: grid[12] := 0, grid[8] := grid[12];
 
 TRANS
-	row = 2 && col = 0 && move = RIGHT ?: grid[9] := 0;
-TRANS
-	row = 2 && col = 0 && move = RIGHT ?: grid[8] := grid[9];
+	row = 2 && col = 0 && move = RIGHT ?: grid[9] := 0, grid[8] := grid[9];
 
 TRANS
-	row = 2 && col = 1 && move = UP ?: grid[5] := 0;
-TRANS
-	row = 2 && col = 1 && move = UP ?: grid[9] := grid[5];
+	row = 2 && col = 1 && move = UP ?: grid[5] := 0, grid[9] := grid[5];
 
 TRANS
-	row = 2 && col = 1 && move = DOWN ?: grid[13] := 0;
-TRANS
-	row = 2 && col = 1 && move = DOWN ?: grid[9] := grid[13];
+	row = 2 && col = 1 && move = DOWN ?: grid[13] := 0, grid[9] := grid[13];
 
 TRANS
-	row = 2 && col = 1 && move = RIGHT ?: grid[10] := 0;
-TRANS
-	row = 2 && col = 1 && move = RIGHT ?: grid[9] := grid[10];
+	row = 2 && col = 1 && move = RIGHT ?: grid[10] := 0, grid[9] := grid[10];
 
 TRANS
-	row = 2 && col = 1 && move = LEFT ?: grid[8] := 0;
-TRANS
-	row = 2 && col = 1 && move = LEFT ?: grid[9] := grid[8];
+	row = 2 && col = 1 && move = LEFT ?: grid[8] := 0, grid[9] := grid[8];
 
 TRANS
-	row = 2 && col = 2 && move = UP ?: grid[6] := 0;
-TRANS
-	row = 2 && col = 2 && move = UP ?: grid[10] := grid[6];
+	row = 2 && col = 2 && move = UP ?: grid[6] := 0, grid[10] := grid[6];
 
 TRANS
-	row = 2 && col = 2 && move = DOWN ?: grid[14] := 0;
-TRANS
-	row = 2 && col = 2 && move = DOWN ?: grid[10] := grid[14];
+	row = 2 && col = 2 && move = DOWN ?: grid[14] := 0, grid[10] := grid[14];
 
 TRANS
-	row = 2 && col = 2 && move = RIGHT ?: grid[11] := 0;
-TRANS
-	row = 2 && col = 2 && move = RIGHT ?: grid[10] := grid[11];
+	row = 2 && col = 2 && move = RIGHT ?: grid[11] := 0, grid[10] := grid[11];
 
 TRANS
-	row = 2 && col = 2 && move = LEFT ?: grid[9] := 0;
-TRANS
-	row = 2 && col = 2 && move = LEFT ?: grid[10] := grid[9];
+	row = 2 && col = 2 && move = LEFT ?: grid[9] := 0, grid[10] := grid[9];
 
 TRANS
-	row = 2 && col = 3 && move = UP ?: grid[7] := 0;
-TRANS
-	row = 2 && col = 3 && move = UP ?: grid[11] := grid[7];
+	row = 2 && col = 3 && move = UP ?: grid[7] := 0, grid[11] := grid[7];
 
 TRANS
-	row = 2 && col = 3 && move = DOWN ?: grid[15] := 0;
-TRANS
-	row = 2 && col = 3 && move = DOWN ?: grid[11] := grid[15];
+	row = 2 && col = 3 && move = DOWN ?: grid[15] := 0, grid[11] := grid[15];
 
 TRANS
-	row = 2 && col = 3 && move = LEFT ?: grid[10] := 0;
-TRANS
-	row = 2 && col = 3 && move = LEFT ?: grid[11] := grid[10];
+	row = 2 && col = 3 && move = LEFT ?: grid[10] := 0, grid[11] := grid[10];
 
 TRANS
-	row = 3 && col = 0 && move = UP ?: grid[8] := 0;
-TRANS
-	row = 3 && col = 0 && move = UP ?: grid[12] := grid[8];
+	row = 3 && col = 0 && move = UP ?: grid[8] := 0, grid[12] := grid[8];
 
 TRANS
-	row = 3 && col = 0 && move = RIGHT ?: grid[13] := 0;
-TRANS
-	row = 3 && col = 0 && move = RIGHT ?: grid[12] := grid[13];
+	row = 3 && col = 0 && move = RIGHT ?: grid[13] := 0, grid[12] := grid[13];
 
 TRANS
-	row = 3 && col = 1 && move = UP ?: grid[9] := 0;
-TRANS
-	row = 3 && col = 1 && move = UP ?: grid[13] := grid[9];
+	row = 3 && col = 1 && move = UP ?: grid[9] := 0, grid[13] := grid[9];
 
 TRANS
-	row = 3 && col = 1 && move = RIGHT ?: grid[14] := 0;
-TRANS
-	row = 3 && col = 1 && move = RIGHT ?: grid[13] := grid[14];
+	row = 3 && col = 1 && move = RIGHT ?: grid[14] := 0, grid[13] := grid[14];
 
 TRANS
-	row = 3 && col = 1 && move = LEFT ?: grid[12] := 0;
-TRANS
-	row = 3 && col = 1 && move = LEFT ?: grid[13] := grid[12];
+	row = 3 && col = 1 && move = LEFT ?: grid[12] := 0, grid[13] := grid[12];
 
 TRANS
-	row = 3 && col = 2 && move = UP ?: grid[10] := 0;
-TRANS
-	row = 3 && col = 2 && move = UP ?: grid[14] := grid[10];
+	row = 3 && col = 2 && move = UP ?: grid[10] := 0, grid[14] := grid[10];
 
 TRANS
-	row = 3 && col = 2 && move = RIGHT ?: grid[15] := 0;
-TRANS
-	row = 3 && col = 2 && move = RIGHT ?: grid[14] := grid[15];
+	row = 3 && col = 2 && move = RIGHT ?: grid[15] := 0, grid[14] := grid[15];
 
 TRANS
-	row = 3 && col = 2 && move = LEFT ?: grid[13] := 0;
-TRANS
-	row = 3 && col = 2 && move = LEFT ?: grid[14] := grid[13];
+	row = 3 && col = 2 && move = LEFT ?: grid[13] := 0, grid[14] := grid[13];
 
 TRANS
-	row = 3 && col = 3 && move = UP ?: grid[11] := 0;
-TRANS
-	row = 3 && col = 3 && move = UP ?: grid[15] := grid[11];
+	row = 3 && col = 3 && move = UP ?: grid[11] := 0, grid[15] := grid[11];
 
 TRANS
-	row = 3 && col = 3 && move = LEFT ?: grid[14] := 0;
-TRANS
-	row = 3 && col = 3 && move = LEFT ?: grid[15] := grid[14];
+	row = 3 && col = 3 && move = LEFT ?: grid[14] := 0, grid[15] := grid[14];

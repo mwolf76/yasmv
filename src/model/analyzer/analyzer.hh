@@ -86,6 +86,9 @@ namespace model {
         analyze_section_t f_section;
 
         DependencyTrackingMap f_dependency_tracking_map;
+
+        bool is_valid_guarded_action(expr::Expr_ptr expr) const;
+        void track_dependency(expr::Expr_ptr expr);
     };
 
 }; // namespace model
