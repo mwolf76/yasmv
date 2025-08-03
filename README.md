@@ -1,6 +1,4 @@
-develop [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=develop)](https://travis-ci.org/mwolf76/yasmv)
-&nbsp;
-master [![Build Status](https://travis-ci.org/mwolf76/yasmv.svg?branch=master)](https://travis-ci.org/mwolf76/yasmv)
+![master](https://github.com/mwolf76/yasmv/actions/workflows/ci.yml/badge.svg)
 
 ## ABOUT
 

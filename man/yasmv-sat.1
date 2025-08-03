@@ -1,0 +1,250 @@
+.TH YASMV-SAT 1 "August 3, 2025"
+.SH NAME
+yasmv-sat \- SAT solver configuration options for yasmv
+.SH SYNOPSIS
+.B yasmv
+[\fISAT-OPTIONS\fR] \fImodel.smv\fR
+.PP
+All SAT solver options follow the pattern \fB--sat-OPTION=VALUE\fR.
+.SH DESCRIPTION
+.B yasmv
+uses the MiniSat SAT solver as its core decision engine. This manual
+describes all available SAT solver configuration options that control the
+behavior, performance characteristics, and search strategy of the underlying
+solver.
+.PP
+The default values have been optimized for maximum performance based on
+MiniSat best practices and extensive SAT solving research.
+.SH CORE SOLVER OPTIONS
+.TP
+.BI --sat-ccmin-mode= MODE
+Conflict clause minimization mode (default: 2)
+.br
+0 = none (no minimization)
+.br
+1 = basic (simple redundancy removal)
+.br
+2 = deep (recursive minimization, recommended)
+.TP
+.BI --sat-phase-saving= MODE
+Phase saving mode (default: 2)
+.br
+0 = none (always use default polarity)
+.br
+1 = limited (save some polarity information)
+.br
+2 = full (remember all variable polarities, recommended)
+.TP
+.BI --sat-random-var-freq= FREQ
+Random variable selection frequency (default: 0.02)
+.br
+0.0 = completely deterministic decisions
+.br
+0.02 = 2% random selections (optimal balance)
+.br
+Higher values increase randomization but may reduce performance
+.TP
+.BI --sat-random-init-act= BOOL
+Random initial variable activities (default: yes)
+.br
+yes = variables start with random activities (recommended)
+.br
+no = all variables start with zero activity
+.TP
+.BI --sat-garbage-frac= FRAC
+Garbage collection trigger fraction (default: 0.30)
+.br
+Controls when memory cleanup occurs based on wasted space
+.br
+Lower values = more frequent cleanup, less memory usage
+.br
+Higher values = less frequent cleanup, more memory usage
+.SH BRANCHING HEURISTICS
+.TP
+.BI --sat-var-decay= FACTOR
+Variable activity decay factor (default: 0.95)
+.br
+Range: 0.0-1.0
+.br
+Controls how quickly solver "forgets" variable importance
+.br
+Lower values = more reactive to recent conflicts
+.br
+Higher values = more stable variable rankings
+.TP
+.BI --sat-clause-decay= FACTOR
+Clause activity decay factor (default: 0.999)
+.br
+Range: 0.0-1.0
+.br
+Controls learned clause database management
+.br
+Lower values = more aggressive deletion of older clauses
+.TP
+.BI --sat-random-seed= SEED
+Random number generator seed (default: 91648253)
+.br
+Affects random decisions and initial activities
+.br
+Use different seeds for reproducible randomized solving
+.SH RESTART STRATEGIES
+.TP
+.BI --sat-luby-restart= BOOL
+Use Luby restart sequence (default: no)
+.br
+yes = Luby sequence (1,1,2,1,1,2,4,...)
+.br
+no = geometric restart sequence
+.br
+Luby often better for hard combinatorial instances
+.TP
+.BI --sat-restart-first= CONFLICTS
+Base restart interval in conflicts (default: 100)
+.br
+Lower values = more frequent restarts
+.br
+Higher values = longer initial search phases
+.TP
+.BI --sat-restart-inc= MULTIPLIER
+Restart interval multiplier for geometric restarts (default: 2.0)
+.br
+Only used when --sat-luby-restart=no
+.br
+Controls growth rate of restart intervals
+.SH PREPROCESSING OPTIONS
+.TP
+.BI --sat-elim= BOOL
+Enable variable elimination preprocessing (default: yes)
+.br
+yes = remove variables through resolution (recommended)
+.br
+no = preserve original problem structure
+.TP
+.BI --sat-grow= CLAUSES
+Allow formula growth during elimination (default: 0)
+.br
+0 = only eliminate if formula shrinks
+.br
+Positive values = allow growth by this many clauses
+.TP
+.BI --sat-clause-lim= LENGTH
+Skip elimination producing long clauses (default: 20)
+.br
+-1 = no length limit
+.br
+Prevents creation of very long resolvents
+.TP
+.BI --sat-subsumption-lim= SIZE
+Skip subsumption check for large clauses (default: 1000)
+.br
+-1 = check all clauses
+.br
+Controls expensive subsumption checking
+.TP
+.BI --sat-simp-garbage-frac= FRAC
+Garbage collection fraction during simplification (default: 0.5)
+.br
+Separate from main solver GC settings
+.br
+Higher threshold since preprocessing is one-time
+.TP
+.BI --sat-rcheck= BOOL
+Check if clauses are already implied (default: no)
+.br
+yes = expensive redundancy checking
+.br
+Usually not worth the computational cost
+.TP
+.BI --sat-asymm= BOOL
+Shrink clauses by asymmetric branching (default: no)
+.br
+yes = attempt to strengthen clauses
+.br
+Computational overhead usually not justified
+.SH CONFIGURATION EXAMPLES
+.SS Maximum Performance (Default):
+.nf
+yasmv model.smv
+# Uses optimized defaults for best performance
+.fi
+.SS For Reproducible Testing:
+.nf
+yasmv --sat-random-var-freq=0.0 --sat-random-init-act=no \\
+      --sat-random-seed=12345 model.smv
+.fi
+.SS For Memory-Constrained Environments:
+.nf
+yasmv --sat-garbage-frac=0.15 --sat-simp-garbage-frac=0.2 \\
+      --sat-subsumption-lim=100 model.smv
+.fi
+.SS For Hard Combinatorial Problems:
+.nf
+yasmv --sat-luby-restart=yes --sat-restart-first=32 \\
+      --sat-ccmin-mode=2 --sat-asymm=yes model.smv
+.fi
+.SS For Satisfiable Problems:
+.nf
+yasmv --sat-phase-saving=2 --sat-restart-first=1000 \\
+      --sat-random-var-freq=0.01 model.smv
+.fi
+.SS For Highly Structured Problems:
+.nf
+yasmv --sat-random-var-freq=0.03 --sat-elim=yes \\
+      --sat-phase-saving=2 model.smv
+.fi
+.SH PERFORMANCE TUNING GUIDELINES
+.PP
+1. Start with default settings - they are optimized for most problems
+.PP
+2. For deterministic results, disable randomization:
+.br
+   --sat-random-var-freq=0.0 --sat-random-init-act=no
+.PP
+3. For memory issues, reduce garbage collection thresholds:
+.br
+   --sat-garbage-frac=0.15 --sat-simp-garbage-frac=0.2
+.PP
+4. For very hard problems, try Luby restarts:
+.br
+   --sat-luby-restart=yes --sat-restart-first=32
+.PP
+5. For satisfiable instances, allow longer searches:
+.br
+   --sat-restart-first=1000
+.PP
+6. Preprocessing is usually beneficial but can be disabled for debugging:
+.br
+   --sat-elim=no
+.SH OPTION INTERACTIONS
+.PP
+- Random frequency and initial activities both affect determinism
+.PP
+- Restart strategy (Luby vs geometric) changes restart interval behavior
+.PP
+- Garbage collection frequency affects both memory usage and performance
+.PP
+- Preprocessing options interact with each other and formula structure
+.PP
+- Phase saving effectiveness depends on problem structure
+.SH NOTES
+.PP
+- All SAT options can be combined freely
+.PP
+- Non-zero random-var-freq or enabled random-init-act introduces non-determinism
+.PP
+- Performance impact varies significantly based on problem characteristics
+.PP
+- Preprocessing is generally beneficial but changes solution space
+.PP
+- Default values prioritize performance over determinism
+.SH SEE ALSO
+.BR yasmv (1),
+.BR yasmv-lang (1),
+.BR yasmv-usage (1)
+.PP
+For detailed MiniSat documentation, see the MiniSat paper by Eén & Sörensson.
+.SH COPYRIGHT
+Copyright (c) M. Pensallorto 2011-2025.
+.PP
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
