@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH YASMV 1 "December 26, 2016"
+.TH YASMV 1 "August 3, 2025"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -23,10 +23,10 @@ yasmv \- Yet Another Symbolic Model Verifier
 .PP
 .B yasmv
 takes as input an FSM representational model written in a dialect of
-the SMV language. Refer to section
-.B LANGUAGE
-below for more information about the the SMV language understood by
-.B yasmv
+the SMV language. For detailed language reference, see
+.BR yasmv-lang (1).
+For command usage guide, see
+.BR yasmv-usage (1).
 .PP
 .SH DESCRIPTION
 This manual page documents briefly the
@@ -52,19 +52,29 @@ Set the native word width for bitvector types (can be overridden by the
 .B word-width
 directive, defaults to 16).
 .PP
-.SH LANGUAGE
+.SH INTERACTIVE COMMANDS
 .TP
 .B yasmv
-understands a dialect of the smv language.  Programs in the smv
-language consist of one or more modules, each one consisting of a
-number of variable declarations (see section
-.B TYPES
-below)
-
-.SH SCRIPTING
+provides an interactive command-line interface for model checking tasks.
+Common commands include:
 .TP
-.B yasmv
-includes a basic scripting language that can be used to implement simple control flow [...]
+.B read-model
+Load an SMV model file
+.TP
+.B pick-state
+Select initial state(s) for analysis
+.TP
+.B simulate
+Perform step-by-step simulation
+.TP
+.B reach
+Find path to target condition
+.TP
+.B dump-trace
+Display execution traces
+.PP
+For a complete command reference and usage patterns, see
+.BR yasmv-usage (1).
 .SH EXAMPLES
 .TP
 $ yasmv /usr/share/yasmv/doc/examples/ferryman/ferryman.smv < /usr/share/yasmv/doc/examples/ferryman/commands
@@ -156,6 +166,11 @@ Witness: reach_1 [[ Reachability witness for target `GOAL` in module `ferryman` 
 << Bye
 .fi
 .PP
+.SH SEE ALSO
+.BR yasmv-lang (1),
+.BR yasmv-usage (1)
+.PP
+Complete documentation and examples are available in the yasmv distribution.
 .SH AUTHOR
 .B yasmv
 was written by Marco Pensallorto
