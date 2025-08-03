@@ -182,6 +182,7 @@ AC_CONFIG_FILES([Makefile
                  src/witness/out/Makefile
                  src/test/Makefile
                  doc/Makefile
+                 man/Makefile
                  yasmv.pc])
 
 if test "$enable_llvm2smv" = "yes"; then

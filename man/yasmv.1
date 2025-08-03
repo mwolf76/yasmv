@@ -51,6 +51,11 @@ Set the verbosity of informational and debugging output (set to 0 for silent, de
 Set the native word width for bitvector types (can be overridden by the
 .B word-width
 directive, defaults to 16).
+.TP
+.B \-\-sat-*
+SAT solver configuration options. For complete documentation of all
+SAT solver parameters, see
+.BR yasmv-sat (1).
 .PP
 .SH INTERACTIVE COMMANDS
 .TP
@@ -168,7 +173,8 @@ Witness: reach_1 [[ Reachability witness for target `GOAL` in module `ferryman` 
 .PP
 .SH SEE ALSO
 .BR yasmv-lang (1),
-.BR yasmv-usage (1)
+.BR yasmv-usage (1),
+.BR yasmv-sat (1)
 .PP
 Complete documentation and examples are available in the yasmv distribution.
 .SH AUTHOR

@@ -1,7 +1,7 @@
 if ENABLE_LLVM2SMV
-SUBDIRS = src doc llvm2smv
+SUBDIRS = src doc man llvm2smv
 else
-SUBDIRS = src doc
+SUBDIRS = src doc man
 endif
 AUTOMAKE_OPTIONS = subdir-objects
 
