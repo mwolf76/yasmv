@@ -1,0 +1,212 @@
+.TH YASMV-USAGE 1 "August 3, 2025"
+.SH NAME
+yasmv-usage \- Command usage guide for yasmv model checker
+.SH SYNOPSIS
+This guide describes the interactive commands available in yasmv and common
+usage patterns for model checking tasks.
+.SH DESCRIPTION
+yasmv provides an interactive command-line interface for model checking. Commands
+can be entered interactively, piped via stdin, or loaded from files.
+.SH BASIC WORKFLOW
+1. Load a model:
+.nf
+   >> read-model 'model.smv'
+.fi
+.PP
+2. Initialize simulation:
+.nf
+   >> pick-state
+.fi
+.PP
+3. Perform verification:
+.nf
+   >> reach GOAL
+   >> simulate -k 10
+.fi
+.PP
+4. Examine results:
+.nf
+   >> dump-trace
+   >> list-traces
+.fi
+.SH COMMAND CATEGORIES
+.SS Model Management
+.TP
+.B read-model
+Load an SMV model file
+.TP
+.B dump-model
+Output the loaded model
+.SS State Space Exploration
+.TP
+.B pick-state
+Select initial state(s)
+.TP
+.B simulate
+Perform simulation steps
+.TP
+.B reach
+Find path to target condition
+.SS Verification
+.TP
+.B check-init
+Verify initial state consistency
+.TP
+.B check-trans
+Verify transition relation consistency
+.TP
+.B diameter
+Compute state space diameter
+.SS Trace Management
+.TP
+.B dump-trace
+Display witness trace(s)
+.TP
+.B list-traces
+List available traces
+.TP
+.B select-trace
+Select current trace
+.TP
+.B dup-trace
+Duplicate a trace
+.TP
+.B read-trace
+Load trace from file
+.SS Environment
+.TP
+.B set
+Set variable value
+.TP
+.B get
+Get variable value
+.TP
+.B clear
+Clear variable
+.TP
+.B echo
+Display expression value
+.SS Control
+.TP
+.B help
+Show command help
+.TP
+.B time
+Show elapsed time
+.TP
+.B last
+Show last command result
+.TP
+.B quit
+Exit yasmv
+.SH COMMON USAGE PATTERNS
+.SS Planning Problems
+.nf
+    # Set input parameters
+    >> set start_pos HOME
+    >> set goal_pos OFFICE
+    
+    # Find solution
+    >> reach pos = goal_pos
+    >> dump-trace
+.fi
+.SS Bounded Verification
+.nf
+    # Check if error state is reachable
+    >> reach ERROR_STATE
+    
+    # If unreachable within bounds:
+    !! Reachability failed
+.fi
+.SS Simulation with Constraints
+.nf
+    # Simulate avoiding certain states
+    >> pick-state -c "safe_mode = TRUE"
+    >> simulate -c "temperature < 100" -k 20
+.fi
+.SS Multi-Step Simulation
+.nf
+    # Run until condition met
+    >> simulate -u "goal_reached = TRUE" -k 100
+    
+    # Fixed number of steps
+    >> simulate -k 50
+.fi
+.SS Exhaustive Initial State Analysis
+.nf
+    # Count all possible initial states
+    >> pick-state -n
+    
+    # Enumerate all initial states
+    >> pick-state -a -l 100
+.fi
+.SH INPUT VARIABLES
+Variables marked with #input in the model can be set before verification:
+.PP
+.nf
+    >> set input_var value
+    >> reach GOAL
+.fi
+.PP
+Input variables act as parameters to the verification problem.
+.SH TEMPORAL CONSTRAINTS
+Constraints can reference specific time points:
+.PP
+.nf
+    # Require condition at step 3
+    >> reach GOAL -c "@3{x = 5}"
+    
+    # Require condition from step 2 to 5
+    >> reach GOAL -c "@2..5{safe = TRUE}"
+.fi
+.SH ADVANCED FEATURES
+.SS Command Composition
+.nf
+    # Execute multiple commands
+    >> do read-model 'test.smv'; pick-state; reach GOAL; quit;
+    
+    # Conditional execution
+    >> reach GOAL
+    >> on success dump-trace
+    >> on failure echo "No solution found"
+.fi
+.SS Trace Analysis
+.nf
+    # Compare multiple solutions
+    >> pick-state -c "strategy = FAST"
+    >> reach GOAL
+    >> dup-trace sim_1 fast_solution
+    
+    >> clear
+    >> pick-state -c "strategy = SAFE"  
+    >> reach GOAL
+    >> dup-trace sim_2 safe_solution
+.fi
+.SH TIPS AND BEST PRACTICES
+1. Use meaningful DEFINE macros for complex conditions
+.PP
+2. Set #hidden on internal variables to reduce trace clutter
+.PP
+3. Use #inertial for variables that maintain state
+.PP
+4. Add constraints incrementally to debug unreachability
+.PP
+5. Use -c with pick-state to focus on specific scenarios
+.PP
+6. Export important traces with dump-trace -o for analysis
+.SH EXIT STATUS
+Commands return success/failure status that can be used with 'on':
+.TP
+Verification commands fail if property is violated
+.TP
+Reachability fails if target is unreachable
+.TP
+Simulation fails if deadlock occurs
+.SH SEE ALSO
+.BR yasmv (1),
+.BR yasmv-lang (1)
+.SH COPYRIGHT
+Copyright (c) M. Pensallorto 2011-2025.
+
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
