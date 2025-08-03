@@ -184,6 +184,71 @@ namespace opts {
                 boost::program_options::value<double>(),
                 "random variable frequency (0.0 = deterministic, higher = more random, default: 0.02)"
             )
+            (
+                "sat-var-decay",
+                boost::program_options::value<double>(),
+                "variable activity decay factor (0.0-1.0, default: 0.95)"
+            )
+            (
+                "sat-clause-decay",
+                boost::program_options::value<double>(),
+                "clause activity decay factor (0.0-1.0, default: 0.999)"
+            )
+            (
+                "sat-random-seed",
+                boost::program_options::value<double>(),
+                "random seed for SAT solver (default: 91648253)"
+            )
+            (
+                "sat-luby-restart",
+                boost::program_options::value<std::string>(),
+                "use Luby restart sequence (yes/no, default: no)"
+            )
+            (
+                "sat-restart-first",
+                boost::program_options::value<int>(),
+                "base restart interval in conflicts (default: 100)"
+            )
+            (
+                "sat-restart-inc",
+                boost::program_options::value<double>(),
+                "restart interval multiplier for geometric restarts (default: 2.0)"
+            )
+            (
+                "sat-elim",
+                boost::program_options::value<std::string>(),
+                "enable variable elimination preprocessing (yes/no, default: yes)"
+            )
+            (
+                "sat-rcheck",
+                boost::program_options::value<std::string>(),
+                "check if clauses are already implied (yes/no, default: no)"
+            )
+            (
+                "sat-asymm",
+                boost::program_options::value<std::string>(),
+                "shrink clauses by asymmetric branching (yes/no, default: no)"
+            )
+            (
+                "sat-grow",
+                boost::program_options::value<int>(),
+                "allow formula growth during elimination (default: 0)"
+            )
+            (
+                "sat-clause-lim",
+                boost::program_options::value<int>(),
+                "skip elimination producing long clauses (default: 20)"
+            )
+            (
+                "sat-subsumption-lim",
+                boost::program_options::value<int>(),
+                "skip subsumption check for large clauses (default: 1000)"
+            )
+            (
+                "sat-simp-garbage-frac",
+                boost::program_options::value<double>(),
+                "garbage collection fraction during simplification (default: 0.5)"
+            )
             ;
 
         // Combine all option groups
@@ -377,6 +442,114 @@ namespace opts {
             return f_vm["sat-garbage-frac"].as<double>();
         }
         return DEFAULT_SAT_GARBAGE_FRAC;
+    }
+    
+    double OptsMgr::sat_var_decay() const
+    {
+        if (f_vm.contains("sat-var-decay")) {
+            return f_vm["sat-var-decay"].as<double>();
+        }
+        return DEFAULT_SAT_VAR_DECAY;
+    }
+    
+    double OptsMgr::sat_clause_decay() const
+    {
+        if (f_vm.contains("sat-clause-decay")) {
+            return f_vm["sat-clause-decay"].as<double>();
+        }
+        return DEFAULT_SAT_CLAUSE_DECAY;
+    }
+    
+    double OptsMgr::sat_random_seed() const
+    {
+        if (f_vm.contains("sat-random-seed")) {
+            return f_vm["sat-random-seed"].as<double>();
+        }
+        return DEFAULT_SAT_RANDOM_SEED;
+    }
+    
+    bool OptsMgr::sat_luby_restart() const
+    {
+        if (f_vm.contains("sat-luby-restart")) {
+            const auto value = f_vm["sat-luby-restart"].as<std::string>();
+            return is_true(value);
+        }
+        return DEFAULT_SAT_LUBY_RESTART;
+    }
+    
+    int OptsMgr::sat_restart_first() const
+    {
+        if (f_vm.contains("sat-restart-first")) {
+            return f_vm["sat-restart-first"].as<int>();
+        }
+        return DEFAULT_SAT_RESTART_FIRST;
+    }
+    
+    double OptsMgr::sat_restart_inc() const
+    {
+        if (f_vm.contains("sat-restart-inc")) {
+            return f_vm["sat-restart-inc"].as<double>();
+        }
+        return DEFAULT_SAT_RESTART_INC;
+    }
+    
+    bool OptsMgr::sat_elim() const
+    {
+        if (f_vm.contains("sat-elim")) {
+            const auto value = f_vm["sat-elim"].as<std::string>();
+            return is_true(value);
+        }
+        return DEFAULT_SAT_ELIM;
+    }
+    
+    bool OptsMgr::sat_rcheck() const
+    {
+        if (f_vm.contains("sat-rcheck")) {
+            const auto value = f_vm["sat-rcheck"].as<std::string>();
+            return is_true(value);
+        }
+        return DEFAULT_SAT_RCHECK;
+    }
+    
+    bool OptsMgr::sat_asymm() const
+    {
+        if (f_vm.contains("sat-asymm")) {
+            const auto value = f_vm["sat-asymm"].as<std::string>();
+            return is_true(value);
+        }
+        return DEFAULT_SAT_ASYMM;
+    }
+    
+    int OptsMgr::sat_grow() const
+    {
+        if (f_vm.contains("sat-grow")) {
+            return f_vm["sat-grow"].as<int>();
+        }
+        return DEFAULT_SAT_GROW;
+    }
+    
+    int OptsMgr::sat_clause_lim() const
+    {
+        if (f_vm.contains("sat-clause-lim")) {
+            return f_vm["sat-clause-lim"].as<int>();
+        }
+        return DEFAULT_SAT_CLAUSE_LIM;
+    }
+    
+    int OptsMgr::sat_subsumption_lim() const
+    {
+        if (f_vm.contains("sat-subsumption-lim")) {
+            return f_vm["sat-subsumption-lim"].as<int>();
+        }
+        return DEFAULT_SAT_SUBSUMPTION_LIM;
+    }
+    
+    double OptsMgr::sat_simp_garbage_frac() const
+    {
+        if (f_vm.contains("sat-simp-garbage-frac")) {
+            return f_vm["sat-simp-garbage-frac"].as<double>();
+        }
+        return DEFAULT_SAT_SIMP_GARBAGE_FRAC;
     }
     
     

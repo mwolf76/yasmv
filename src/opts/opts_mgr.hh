@@ -52,6 +52,19 @@ namespace opts {
     const int DEFAULT_SAT_CCMIN_MODE { 2 };  // Deep conflict clause minimization for performance
     const int DEFAULT_SAT_PHASE_SAVING { 2 };  // Full phase saving for performance
     const double DEFAULT_SAT_GARBAGE_FRAC { 0.30 };  // Higher threshold for better performance in model checking
+    const double DEFAULT_SAT_VAR_DECAY { 0.95 };  // Variable activity decay factor
+    const double DEFAULT_SAT_CLAUSE_DECAY { 0.999 };  // Clause activity decay factor
+    const double DEFAULT_SAT_RANDOM_SEED { 91648253 };  // Random seed for reproducibility
+    const bool DEFAULT_SAT_LUBY_RESTART { false };  // Use Luby restart sequence
+    const int DEFAULT_SAT_RESTART_FIRST { 100 };  // Base restart interval (conflicts)
+    const double DEFAULT_SAT_RESTART_INC { 2.0 };  // Restart interval multiplier for geometric
+    const bool DEFAULT_SAT_ELIM { true };  // Enable variable elimination preprocessing
+    const bool DEFAULT_SAT_RCHECK { false };  // Check if clauses are already implied
+    const bool DEFAULT_SAT_ASYMM { false };  // Shrink clauses by asymmetric branching
+    const int DEFAULT_SAT_GROW { 0 };  // Allow formula growth during elimination
+    const int DEFAULT_SAT_CLAUSE_LIM { 20 };  // Skip elimination producing long clauses
+    const int DEFAULT_SAT_SUBSUMPTION_LIM { 1000 };  // Skip subsumption check for large clauses
+    const double DEFAULT_SAT_SIMP_GARBAGE_FRAC { 0.5 };  // GC trigger during simplification
 
     // -- REACH defaults
     const bool DEFAULT_REACH_FAST_FORWARD_STRATEGY { true };
@@ -108,6 +121,19 @@ namespace opts {
         int sat_ccmin_mode() const;
         int sat_phase_saving() const;
         double sat_garbage_frac() const;
+        double sat_var_decay() const;
+        double sat_clause_decay() const;
+        double sat_random_seed() const;
+        bool sat_luby_restart() const;
+        int sat_restart_first() const;
+        double sat_restart_inc() const;
+        bool sat_elim() const;
+        bool sat_rcheck() const;
+        bool sat_asymm() const;
+        int sat_grow() const;
+        int sat_clause_lim() const;
+        int sat_subsumption_lim() const;
+        double sat_simp_garbage_frac() const;
         
         // CNF optimization configuration
         bool cnf_tautology_removal() const;

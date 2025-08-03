@@ -46,6 +46,19 @@ namespace sat {
         f_solver.phase_saving = opts_mgr.sat_phase_saving();
         f_solver.rnd_init_act = opts_mgr.sat_random_init_act();
         f_solver.garbage_frac = opts_mgr.sat_garbage_frac();
+        f_solver.var_decay = opts_mgr.sat_var_decay();
+        f_solver.clause_decay = opts_mgr.sat_clause_decay();
+        f_solver.random_seed = opts_mgr.sat_random_seed();
+        f_solver.luby_restart = opts_mgr.sat_luby_restart();
+        f_solver.restart_first = opts_mgr.sat_restart_first();
+        f_solver.restart_inc = opts_mgr.sat_restart_inc();
+        f_solver.use_elim = opts_mgr.sat_elim();
+        f_solver.use_rcheck = opts_mgr.sat_rcheck();
+        f_solver.use_asymm = opts_mgr.sat_asymm();
+        f_solver.grow = opts_mgr.sat_grow();
+        f_solver.clause_lim = opts_mgr.sat_clause_lim();
+        f_solver.subsumption_lim = opts_mgr.sat_subsumption_lim();
+        f_solver.simp_garbage_frac = opts_mgr.sat_simp_garbage_frac();
         
         /* Enable CNF optimization if any individual optimization is enabled */
         if (opts_mgr.cnf_tautology_removal() || 
