@@ -278,9 +278,33 @@ Multiple actions per guard:
     TRANS
         x < 5 ?: x := x + 1, y := y + 1;
 .fi
+.SH CURATED EXAMPLES
+The yasmv distribution includes a curated set of example models that demonstrate
+complex language use cases and advanced features:
+.PP
+.nf
+examples/ferryman/      Classic river crossing puzzle
+examples/hanoi/         Tower of Hanoi puzzle (3, 4, 5 disks)
+examples/maze/          Maze solving with path finding
+examples/fifteen/       15-puzzle sliding tile game
+examples/fibonacci/     Fibonacci sequence generation
+examples/magic/         Magic square construction
+examples/tic-tac-toe/   Tic-tac-toe game strategy
+examples/vending/       Vending machine controller
+examples/automation/    Industrial automation system
+examples/cannibals/     Missionaries and cannibals puzzle
+examples/herschel/      Herschel graph traversal
+examples/koenisberg/    Königsberg bridge problem
+examples/primes/        Prime number generation
+examples/staff-shift/   Staff scheduling system
+.fi
+.PP
+Each example includes both the SMV model file and command scripts showing
+typical verification workflows.
 .SH SEE ALSO
 .BR yasmv (1),
-.BR yasmv-usage (1)
+.BR yasmv-usage (1),
+.BR yasmv-sat (1)
 .SH COPYRIGHT
 Copyright (c) M. Pensallorto 2011-2025.
 
