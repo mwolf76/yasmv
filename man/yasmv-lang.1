@@ -1,0 +1,312 @@
+.TH YASMV-LANG 1 "August 3, 2025"
+.SH NAME
+yasmv-lang \- SMV language reference for yasmv
+.SH SYNOPSIS
+The yasmv model checker uses an extended dialect of the SMV (Symbolic Model 
+Verifier) language for describing finite state systems.
+.SH DESCRIPTION
+The SMV language in yasmv allows specification of finite state machines using
+variables, initial conditions, invariants, and transition relations.
+.SH MODULE STRUCTURE
+Each SMV file contains exactly one module, which can have an arbitrary name:
+.PP
+.nf
+    MODULE module_name [ (param1, param2, ...) ]
+        <declarations>
+        <formulas>
+.fi
+.SH DIRECTIVES
+Global directives that affect model interpretation:
+.TP
+.B #word-width <n>
+Set the default bit width for integers (default: 16)
+.SH VARIABLE DECLARATIONS
+Variables are declared in VAR sections with optional modifiers:
+.PP
+.nf
+    [#modifiers]
+    VAR
+        var_name : type;
+        ...
+.fi
+.PP
+Modifiers:
+.TP
+.B #hidden
+Variable is not shown in traces
+.TP
+.B #frozen
+Variable value cannot change after initialization
+.TP
+.B #inertial
+Variable maintains its value unless explicitly changed
+.TP
+.B #input
+Variable is an external input
+.PP
+Formatting modifiers for display:
+.TP
+.B #bin
+Display in binary format
+.TP
+.B #oct
+Display in octal format
+.TP
+.B #dec
+Display in decimal format
+.TP
+.B #hex
+Display in hexadecimal format (default)
+.SH DATA TYPES
+Basic types:
+.TP
+.B boolean
+Boolean value (TRUE/FALSE)
+.TP
+.B boolean[n]
+Array of n booleans
+.TP
+.B { val1, val2, ... }
+Enumeration type
+.TP
+.B uint
+Unsigned integer (width from #word-width)
+.TP
+.B uint<n>
+Unsigned integer of n bits
+.TP
+.B int
+Signed integer
+.TP
+.B int<n>
+Signed integer of n bits
+.PP
+Array types:
+.TP
+.B type[n]
+Array of n elements of given type
+.PP
+Instance types:
+.TP
+.B module_name(params)
+Instance of another module
+.SH EXPRESSIONS
+Logical operators:
+.TP
+.B !
+Logical NOT
+.TP
+.B &&
+Logical AND
+.TP
+.B ||
+Logical OR
+.TP
+.B ->
+Logical implication
+.TP
+.B <->
+Logical equivalence
+.PP
+Relational operators:
+.TP
+.B =
+Equal
+.TP
+.B !=
+Not equal
+.TP
+.B <
+Less than
+.TP
+.B <=
+Less than or equal
+.TP
+.B >
+Greater than
+.TP
+.B >=
+Greater than or equal
+.PP
+Arithmetic operators:
+.TP
+.B +
+Addition
+.TP
+.B -
+Subtraction/Negation
+.TP
+.B *
+Multiplication
+.TP
+.B /
+Division
+.TP
+.B %
+Modulo
+.PP
+Bitwise operators:
+.TP
+.B &
+Bitwise AND
+.TP
+.B |
+Bitwise OR
+.TP
+.B ^
+Bitwise XOR
+.TP
+.B ~
+Bitwise NOT
+.TP
+.B <<
+Left shift
+.TP
+.B >>
+Right shift
+.PP
+Temporal operators:
+.TP
+.B next(expr)
+Value of expression in next state
+.TP
+.B @t{expr}
+Expression at absolute time t
+.TP
+.B @t..u{expr}
+Expression holds from time t to u
+.PP
+Conditional expressions:
+.TP
+.B condition ? then_expr : else_expr
+Ternary conditional
+.TP
+.B case ... end
+Multi-way conditional
+.PP
+Set expressions:
+.TP
+.B { elem1, elem2, ... }
+Set enumeration
+.TP
+.B { start .. stop }
+Set range
+.PP
+Array expressions:
+.TP
+.B [ elem1, elem2, ... ]
+Array literal
+.TP
+.B array[index]
+Array element access
+.SH DEFINE DECLARATIONS
+Defines create named expressions (macros):
+.PP
+.nf
+    DEFINE
+        name := expression;
+.fi
+.SH FSM FORMULAS
+.TP
+.B INIT
+Initial state constraints:
+.nf
+    INIT
+        expression;
+.fi
+.TP
+.B INVAR
+State invariants (must hold in every reachable state):
+.nf
+    INVAR
+        expression;
+.fi
+.TP
+.B TRANS
+Transition relation:
+.nf
+    TRANS
+        expression;
+    
+    TRANS
+        guard ?: action;
+    
+    TRANS
+        guard ?: action1, action2, ...;  // Multiple actions
+.fi
+.PP
+Assignment in TRANS:
+.TP
+.B var := expr
+Assign expr to var in next state
+.SH EXAMPLES
+Simple counter:
+.PP
+.nf
+    MODULE main
+    VAR
+        counter : { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    INIT
+        counter = 0
+    TRANS
+        counter < 10 ?: counter := counter + 1;
+.fi
+.PP
+Traffic light with enumeration:
+.PP
+.nf
+    MODULE main
+    VAR
+        light : { RED, YELLOW, GREEN };
+    INIT
+        light = RED
+    TRANS
+        light = RED    ?: light := GREEN;
+    TRANS
+        light = GREEN  ?: light := YELLOW;
+    TRANS
+        light = YELLOW ?: light := RED;
+.fi
+.PP
+Multiple actions per guard:
+.PP
+.nf
+    MODULE main
+    VAR
+        x : { 0, 1, 2, 3, 4, 5 };
+        y : { 0, 1, 2, 3, 4, 5 };
+    TRANS
+        x < 5 ?: x := x + 1, y := y + 1;
+.fi
+.SH CURATED EXAMPLES
+The yasmv distribution includes a curated set of example models that demonstrate
+complex language use cases and advanced features:
+.PP
+.nf
+examples/ferryman/      Classic river crossing puzzle
+examples/hanoi/         Tower of Hanoi puzzle (3, 4, 5 disks)
+examples/maze/          Maze solving with path finding
+examples/fifteen/       15-puzzle sliding tile game
+examples/fibonacci/     Fibonacci sequence generation
+examples/magic/         Magic square construction
+examples/tic-tac-toe/   Tic-tac-toe game strategy
+examples/vending/       Vending machine controller
+examples/automation/    Industrial automation system
+examples/cannibals/     Missionaries and cannibals puzzle
+examples/herschel/      Herschel graph traversal
+examples/koenisberg/    Königsberg bridge problem
+examples/primes/        Prime number generation
+examples/staff-shift/   Staff scheduling system
+.fi
+.PP
+Each example includes both the SMV model file and command scripts showing
+typical verification workflows.
+.SH SEE ALSO
+.BR yasmv (1),
+.BR yasmv-usage (1),
+.BR yasmv-sat (1)
+.SH COPYRIGHT
+Copyright (c) M. Pensallorto 2011-2025.
+
+This document is part of the YASMV distribution, and as such is covered by the
+GPLv3 license that covers the whole project.
