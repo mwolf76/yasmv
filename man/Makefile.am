@@ -1,0 +1,1 @@
+dist_man1_MANS = yasmv.1 yasmv-lang.1 yasmv-usage.1 yasmv-sat.1
