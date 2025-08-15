@@ -1479,9 +1479,6 @@ clear_command returns [cmd::Command_ptr res]
 @init { $res = nullptr; }
     : 'clear'
       { $res = cm.make_clear(); }
-
-      ( id=identifier
-      { ((cmd::Clear_ptr) $res)->set_identifier(id); })?
     ;
 
 clear_command_topic returns [cmd::CommandTopic_ptr res]

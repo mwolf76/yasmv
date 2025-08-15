@@ -34,13 +34,10 @@ namespace cmd {
 
     class Clear final: public Command {
 
-        expr::Expr_ptr f_identifier;
-
     public:
         explicit Clear(Interpreter& owner);
         ~Clear() override;
 
-        void set_identifier(expr::Expr_ptr id);
         utils::Variant operator()() override;
     };
 
