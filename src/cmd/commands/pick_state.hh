@@ -2,7 +2,7 @@
  * @file pick_state.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `pick-state`
+ * This header file contains the handler interface for the `pick-state`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -34,8 +34,8 @@ namespace cmd {
 
     class PickState: public Command {
     public:
-        PickState(Interpreter& owner);
-        virtual ~PickState();
+        explicit PickState(Interpreter& owner);
+        ~PickState() override;
 
         /** cmd params */
         void add_constraint(expr::Expr_ptr constraint);
@@ -58,7 +58,7 @@ namespace cmd {
             return f_limit;
         }
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -84,12 +84,12 @@ namespace cmd {
 
     typedef PickState* PickState_ptr;
 
-    class PickStateTopic: public CommandTopic {
+    class PickStateTopic final: public CommandTopic {
     public:
-        PickStateTopic(Interpreter& owner);
-        virtual ~PickStateTopic();
+        explicit PickStateTopic(Interpreter& owner);
+        ~PickStateTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

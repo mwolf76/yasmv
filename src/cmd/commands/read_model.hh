@@ -2,7 +2,7 @@
  * @file read_model.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `read-model`
+ * This header file contains the handler interface for the `read-model`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -32,32 +32,32 @@
 namespace cmd {
 
     // -- command definitions --------------------------------------------------
-    class ReadModel: public Command {
+    class ReadModel final: public Command {
         pchar f_input;
 
     public:
-        ReadModel(Interpreter& owner);
-        virtual ~ReadModel();
+        explicit ReadModel(Interpreter& owner);
+        ~ReadModel() override;
 
         void set_input(pconst_char input);
-        inline pconst_char input() const
+        pconst_char input() const
         {
             return f_input;
         }
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         bool check_requirements();
     };
     typedef ReadModel* ReadModel_ptr;
 
-    class ReadModelTopic: public CommandTopic {
+    class ReadModelTopic final: public CommandTopic {
     public:
-        ReadModelTopic(Interpreter& owner);
-        virtual ~ReadModelTopic();
+        explicit ReadModelTopic(Interpreter& owner);
+        ~ReadModelTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 } // namespace cmd

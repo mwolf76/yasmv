@@ -44,7 +44,7 @@ namespace cmd {
         Interpreter& f_owner;
 
     public:
-        Command(Interpreter& owner);
+        explicit Command(Interpreter& owner);
         virtual ~Command();
 
         // functor-pattern
@@ -60,7 +60,7 @@ namespace cmd {
         void display_manpage(const char* topic);
 
     public:
-        CommandTopic(Interpreter& owner);
+        explicit CommandTopic(Interpreter& owner);
         virtual ~CommandTopic();
 
         // inline help system

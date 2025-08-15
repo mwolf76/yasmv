@@ -21,10 +21,14 @@ TAGS
 .timestamp
 smv.tokens
 stamp-h1
+yasmv
+llvm2smv/llvm2smv
 yasmv.pc
 yasmv_tests
 playground/
 .idea/
+microcode/
+
 
 # Local git configuration
 .gitconfig

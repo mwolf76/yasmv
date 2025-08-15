@@ -25,28 +25,28 @@
 
 namespace cmd {
 
-    class DupTrace: public Command {
+    class DupTrace final: public Command {
 
         pchar f_trace_id;
         pchar f_duplicate_id;
 
     public:
-        DupTrace(Interpreter& owner);
-        virtual ~DupTrace();
+        explicit DupTrace(Interpreter& owner);
+        ~DupTrace() override;
 
         void set_trace_id(pconst_char trace_id);
         void set_duplicate_id(pconst_char duplicate_id);
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
     typedef DupTrace* DupTrace_ptr;
 
-    class DupTraceTopic: public CommandTopic {
+    class DupTraceTopic final: public CommandTopic {
     public:
-        DupTraceTopic(Interpreter& owner);
-        virtual ~DupTraceTopic();
+        explicit DupTraceTopic(Interpreter& owner);
+        ~DupTraceTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd

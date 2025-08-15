@@ -32,12 +32,12 @@
 
 namespace cmd {
 
-    class Simulate: public Command {
+    class Simulate final: public Command {
     public:
-        Simulate(Interpreter& owner);
-        virtual ~Simulate();
+        explicit Simulate(Interpreter& owner);
+        ~Simulate() override;
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
         void add_constraint(expr::Expr_ptr constraint);
 
@@ -77,12 +77,12 @@ namespace cmd {
 
     typedef Simulate* Simulate_ptr;
 
-    class SimulateTopic: public CommandTopic {
+    class SimulateTopic final: public CommandTopic {
     public:
-        SimulateTopic(Interpreter& owner);
-        virtual ~SimulateTopic();
+        explicit SimulateTopic(Interpreter& owner);
+        ~SimulateTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

@@ -31,10 +31,10 @@
 
 namespace cmd {
 
-    class Reach: public Command {
+    class Reach final: public Command {
     public:
-        Reach(Interpreter& owner);
-        virtual ~Reach();
+        explicit Reach(Interpreter& owner);
+        ~Reach() override;
 
         /** cmd params */
         void set_target(expr::Expr_ptr target);
@@ -46,7 +46,7 @@ namespace cmd {
 	void go_quiet();
 
         /* run() */
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -65,12 +65,12 @@ namespace cmd {
     };
     using Reach_ptr = Reach*;
 
-    class ReachTopic: public CommandTopic {
+    class ReachTopic final: public CommandTopic {
     public:
-        ReachTopic(Interpreter& owner);
-        virtual ~ReachTopic();
+        explicit ReachTopic(Interpreter& owner);
+        ~ReachTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 } // namespace cmd
