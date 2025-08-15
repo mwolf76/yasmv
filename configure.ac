@@ -137,7 +137,7 @@ AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
                 strrchr strstr strtol, random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
 
-AM_CPPFLAGS="$BOOST_CPPFLAGS $ANTLR_CPPFLAGS -DYASMV_HOME=$datadir/$PACKAGE"
+AM_CPPFLAGS="$BOOST_CPPFLAGS $ANTLR_CPPFLAGS"
 AC_SUBST(AM_CPPFLAGS)
 
 AM_CFLAGS="-Wall -Wstrict-prototypes"
