@@ -32,27 +32,27 @@
 
 namespace cmd {
 
-    class Set: public Command {
+    class Set final: public Command {
 
         expr::Expr_ptr f_identifier;
         expr::Expr_ptr f_value;
 
     public:
-        Set(Interpreter& owner);
-        virtual ~Set();
+        explicit Set(Interpreter& owner);
+        ~Set() override;
 
         void set_identifier(expr::Expr_ptr id);
         void set_value(expr::Expr_ptr value);
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
     typedef Set* Set_ptr;
 
-    class SetTopic: public CommandTopic {
+    class SetTopic final: public CommandTopic {
     public:
-        SetTopic(Interpreter& owner);
-        virtual ~SetTopic();
+        explicit SetTopic(Interpreter& owner);
+        ~SetTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

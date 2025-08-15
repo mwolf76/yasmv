@@ -37,32 +37,28 @@ namespace cmd {
 
     Clear::Clear(Interpreter& owner)
         : Command(owner)
-        , f_identifier(NULL)
     {}
 
     Clear::~Clear()
     {}
 
-    void Clear::set_identifier(expr::Expr_ptr id)
-    {
-        f_identifier = id;
-    }
-
     utils::Variant Clear::operator()()
     {
+        env::Environment& env { env::Environment::INSTANCE() };
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
 
         /* FIXME: implement stream redirection for std{out,err} */
         std::ostream& out { std::cout };
 
+        /* Clear the environment */
+        env.clear();
+
         if (!om.quiet()) {
             out
-                << outPrefix;
+                << outPrefix
+                << "Environment cleared."
+                << std::endl;
         }
-
-        out
-            << "WARNING: this command currently does nothing!"
-            << std::endl;
 
         return utils::Variant(okMessage);
     }

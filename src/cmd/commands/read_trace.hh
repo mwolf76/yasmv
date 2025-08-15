@@ -2,7 +2,7 @@
  * @file read_trace.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `read-trace`
+ * This header file contains the handler interface for the `read-trace`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -36,10 +36,10 @@
 namespace cmd {
 
     // -- command definitions --------------------------------------------------
-    class ReadTrace: public Command {
+    class ReadTrace final: public Command {
     public:
-        ReadTrace(Interpreter& owner);
-        virtual ~ReadTrace();
+        explicit ReadTrace(Interpreter& owner);
+        ~ReadTrace() override;
 
         void set_input(pconst_char input);
         inline pconst_char input() const
@@ -47,7 +47,7 @@ namespace cmd {
             return f_input;
         }
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -62,10 +62,10 @@ namespace cmd {
 
     class ReadTraceTopic: public CommandTopic {
     public:
-        ReadTraceTopic(Interpreter& owner);
-        virtual ~ReadTraceTopic();
+        explicit ReadTraceTopic(Interpreter& owner);
+        ~ReadTraceTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
     class ReadTraceWitness: public witness::Witness {

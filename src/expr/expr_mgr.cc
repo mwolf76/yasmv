@@ -32,8 +32,64 @@
 
 namespace expr {
 
-    // singleton instance initialization
-    ExprMgr_ptr ExprMgr::f_instance = NULL;
+    Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
+    {
+        Expr_ptr res { nullptr };
+
+        for (ExprSet::reverse_iterator eye = literals.rbegin();
+             eye != literals.rend(); ++eye) {
+
+            res = (!res)
+                      ? *eye
+                      : make_expr(SET_COMMA, *eye, res);
+        }
+
+        return make_set(res);
+    }
+
+    Expr_ptr ExprMgr::make_identifier(const Atom& atom)
+    {
+        boost::mutex::scoped_lock lock { f_atom_mutex };
+
+        auto [key, _] { f_atom_pool.emplace(atom) };
+        const Atom& pooled_atom { *key };
+
+        return make_expr(IDENT, pooled_atom);
+    }
+
+    Expr_ptr ExprMgr::make_qstring(const Atom& atom)
+    {
+        boost::mutex::scoped_lock lock { f_atom_mutex };
+
+        auto [key, _] { f_atom_pool.emplace(atom) };
+        const auto& pooled_atom { *key };
+
+        return make_expr(QSTRING, pooled_atom);
+    }
+
+    const Atom& ExprMgr::internalize(const Atom& atom)
+    {
+        boost::mutex::scoped_lock lock { f_atom_mutex };
+
+        auto [key, _] { f_atom_pool.emplace(atom) };
+        const auto& pooled_atom { *key };
+
+        return pooled_atom;
+    }
+
+    ExprVector ExprMgr::array_literals(const Expr_ptr expr)
+    {
+        assert(is_array(expr));
+
+        ExprVector res;
+        Expr_ptr eye;
+        for (eye = expr->lhs(); is_array_comma(eye); eye = eye->rhs()) {
+            res.push_back(eye->lhs());
+        }
+        res.push_back(eye);
+
+        return res;
+    }
 
     ExprMgr::ExprMgr()
     {
@@ -92,64 +148,20 @@ namespace expr {
             << std::endl;
     }
 
-    Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
-    {
-        Expr_ptr res { NULL };
+    // singleton instance initialization
+    ExprMgr_ptr ExprMgr::f_instance = nullptr;
 
-        for (ExprSet::reverse_iterator eye = literals.rbegin();
-             eye != literals.rend(); eye++) {
-
-            res = (!res)
-                      ? *eye
-                      : make_expr(SET_COMMA, *eye, res);
-        }
-
-        return make_set(res);
-    }
-
-    const Atom& ExprMgr::internalize(Atom atom)
-    {
-        boost::mutex::scoped_lock lock { f_atom_mutex };
-
-        AtomPoolHit ah { f_atom_pool.insert(atom) };
-        const Atom& pooled_atom { *ah.first };
-
-        return pooled_atom;
-    }
-
-    Expr_ptr ExprMgr::make_identifier(Atom atom)
-    {
-        boost::mutex::scoped_lock lock { f_atom_mutex };
-
-        AtomPoolHit ah { f_atom_pool.insert(atom) };
-        const Atom& pooled_atom { *ah.first };
-
-        return make_expr(IDENT, pooled_atom);
-    }
-
-    Expr_ptr ExprMgr::make_qstring(Atom atom)
-    {
-        boost::mutex::scoped_lock lock { f_atom_mutex };
-
-        AtomPoolHit ah { f_atom_pool.insert(atom) };
-        const Atom& pooled_atom { *ah.first };
-
-        return make_expr(QSTRING, pooled_atom);
-    }
-
-    Expr_ptr ExprMgr::__make_expr(Expr_ptr expr)
+    Expr_ptr ExprMgr::__make_expr(const Expr_ptr expr)
     {
         boost::mutex::scoped_lock lock { f_expr_mutex };
 
-        ExprPoolHit eh { f_expr_pool.insert(*expr) };
-        Expr_ptr pooled_expr { const_cast<Expr_ptr>(&(*eh.first)) };
-
-        return pooled_expr;
+        auto [key, _] { f_expr_pool.emplace(*expr) };
+        return const_cast<Expr_ptr>(&*key);
     }
 
     Expr_ptr ExprMgr::left_associate_dot(const Expr_ptr expr)
     {
-        Expr_ptr res { NULL };
+        Expr_ptr res { nullptr };
         std::vector<Expr_ptr> fragments;
 
         // 1. in-order visit, build fwd expr stack
@@ -176,22 +188,6 @@ namespace expr {
             res = res
                       ? make_expr(DOT, res, *i)
                       : *i;
-
-        return res;
-    }
-
-
-
-    ExprVector ExprMgr::array_literals(const Expr_ptr expr) const
-    {
-        assert(is_array(expr));
-
-        ExprVector res;
-        Expr_ptr eye;
-        for (eye = expr->lhs(); is_array_comma(eye); eye = eye->rhs()) {
-            res.push_back(eye->lhs());
-        }
-        res.push_back(eye);
 
         return res;
     }

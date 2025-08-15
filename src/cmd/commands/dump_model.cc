@@ -78,9 +78,9 @@ namespace cmd {
     void DumpModel::dump_heading(std::ostream& os, const model::Module& module)
     {
         os
-                << "#word-width"
-                << opts::OptsMgr::INSTANCE().word_width()
-                << std::endl;
+            << "#word-width "
+            << opts::OptsMgr::INSTANCE().word_width()
+            << std::endl;
 
         os
             << "MODULE "
@@ -93,53 +93,52 @@ namespace cmd {
         /* Variables */
         symb::Variables variables { module.vars() };
         std::for_each(variables.begin(), variables.end(),
-                      [&](const std::pair<expr::Expr_ptr, symb::Variable_ptr> &pair) {
-                                  const auto id { pair.first };
-                                  const auto var_ptr { pair.second };
+                      [&](const std::pair<expr::Expr_ptr, symb::Variable_ptr>& pair) {
+                          const auto id { pair.first };
+                          const auto var_ptr { pair.second };
 
-                                  if (var_ptr->is_frozen()) {
-                                      os
-                                              << "#frozen"
-                                              << std::endl;
-                                  }
-                                  if (var_ptr->is_hidden()) {
-                                      os
-                                              << "#hidden"
-                                              << std::endl;
-                                  }
-                                  if (var_ptr->is_inertial()) {
-                                      os
-                                              << "#inertial"
-                                              << std::endl;
-                                  }
-                                  if (var_ptr->is_input()) {
-                                      os
-                                              << "#input"
-                                              << std::endl;
-                                  }
+                          if (var_ptr->is_frozen()) {
+                              os
+                                  << "#frozen"
+                                  << std::endl;
+                          }
+                          if (var_ptr->is_hidden()) {
+                              os
+                                  << "#hidden"
+                                  << std::endl;
+                          }
+                          if (var_ptr->is_inertial()) {
+                              os
+                                  << "#inertial"
+                                  << std::endl;
+                          }
+                          if (var_ptr->is_input()) {
+                              os
+                                  << "#input"
+                                  << std::endl;
+                          }
 
-                                  os
-                                          << "VAR "
-                                          << id
-                                          << ": "
-                                          << var_ptr->type()
-                                          << ";"
-                                          << std::endl;
-                              });
+                          os
+                              << "VAR "
+                              << id
+                              << ": "
+                              << var_ptr->type()
+                              << ";"
+                              << std::endl;
+                      });
     }
 
     void DumpModel::dump_init(std::ostream& os, const model::Module& module)
     {
-        const expr::ExprVector init { module.init() };
+        const expr::ExprVector& init { module.init() };
         if (init.begin() != init.end()) {
             os
                 << std::endl;
         }
 
-        for (expr::ExprVector::const_iterator init_eye = init.begin();
-             init_eye != init.end(); ++init_eye) {
+        for (const auto init_eye : init) {
 
-            expr::Expr_ptr body { *init_eye };
+            expr::Expr_ptr body { init_eye };
             os
                 << "INIT "
                 << body
@@ -150,16 +149,14 @@ namespace cmd {
 
     void DumpModel::dump_invar(std::ostream& os, const model::Module& module)
     {
-        const expr::ExprVector invar { module.invar() };
+        const expr::ExprVector& invar { module.invar() };
         if (invar.begin() != invar.end()) {
             os
                 << std::endl;
         }
 
-        for (expr::ExprVector::const_iterator invar_eye = invar.begin();
-             invar_eye != invar.end(); ++invar_eye) {
-
-            expr::Expr_ptr body { *invar_eye };
+        for (const auto invar_eye : invar) {
+            const expr::Expr_ptr body { invar_eye };
             os
                 << "INVAR "
                 << body
@@ -170,16 +167,14 @@ namespace cmd {
 
     void DumpModel::dump_trans(std::ostream& os, const model::Module& module)
     {
-        const expr::ExprVector trans { module.trans() };
+        const expr::ExprVector& trans { module.trans() };
         if (trans.begin() != trans.end()) {
             os
                 << std::endl;
         }
 
-        for (expr::ExprVector::const_iterator trans_eye = trans.begin();
-             trans_eye != trans.end(); ++trans_eye) {
-
-            expr::Expr_ptr body { *trans_eye };
+        for (const auto trans_eye : trans) {
+            const expr::Expr_ptr body { trans_eye };
             os
                 << "TRANS "
                 << body << ";"
@@ -218,29 +213,28 @@ namespace cmd {
 
         std::for_each(modules.begin(), modules.end(),
                       [this, dump_all, &out](const std::pair<expr::Expr_ptr,
-                                                              model::Module_ptr>
-                                             &descriptor) {
-                                  model::Module& module { *descriptor.second };
+                                                             model::Module_ptr>& descriptor) {
+                          model::Module& module { *descriptor.second };
 
-                                  if (dump_all) {
-                                      dump_heading(out, module);
-                                  }
+                          if (dump_all) {
+                              dump_heading(out, module);
+                          }
 
-                                  if (dump_all || f_state) {
-                                      dump_variables(out, module);
-                                  }
+                          if (dump_all || f_state) {
+                              dump_variables(out, module);
+                          }
 
-                                  if (dump_all || f_init) {
-                                      dump_init(out, module);
-                                  }
+                          if (dump_all || f_init) {
+                              dump_init(out, module);
+                          }
 
-                                  if (dump_all || f_trans) {
-                                      dump_invar(out, module);
-                                      dump_trans(out, module);
-                                  }
-                              });
+                          if (dump_all || f_trans) {
+                              dump_invar(out, module);
+                              dump_trans(out, module);
+                          }
+                      });
 
-        return utils::Variant(okMessage);
+        return {okMessage};
     }
 
     DumpModelTopic::DumpModelTopic(Interpreter& owner)

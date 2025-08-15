@@ -2,7 +2,7 @@
  * @file list_traces.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `list-traces`
+ * This header file contains the handler interface for the `list-traces`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -31,20 +31,20 @@
 
 namespace cmd {
 
-    class ListTraces: public Command {
+    class ListTraces final: public Command {
     public:
-        ListTraces(Interpreter& owner);
-        virtual ~ListTraces();
+        explicit ListTraces(Interpreter& owner);
+        ~ListTraces() override;
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
 
-    class ListTracesTopic: public CommandTopic {
+    class ListTracesTopic final: public CommandTopic {
     public:
-        ListTracesTopic(Interpreter& owner);
-        virtual ~ListTracesTopic();
+        explicit ListTracesTopic(Interpreter& owner);
+        ~ListTracesTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

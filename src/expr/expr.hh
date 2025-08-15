@@ -33,7 +33,7 @@
 
 #include <expr/atom.hh>
 
-/** -- shortcurts to simplify the manipulation of the internal expr stack -- */
+/** -- shortcuts to simplify the manipulation of the internal expr stack -- */
 #define TOP_EXPR(expr)      \
     const auto expr         \
     {                       \
@@ -147,7 +147,7 @@ namespace expr {
 
     // An Expression consists of an AST symbol, which is the expression
     // main operator, operands which depend on the type of operator and a
-    // context, in which the expression has to evaluated.
+    // context, in which the expression has to be evaluated.
     typedef struct Expr_TAG* Expr_ptr;
     typedef struct Expr_TAG {
 
@@ -169,7 +169,7 @@ namespace expr {
         } u;
 
         // accessors
-        inline ExprType symb() const
+        ExprType symb() const
         {
             return f_symb;
         }
@@ -177,25 +177,26 @@ namespace expr {
         Atom& atom() const;
         value_t value() const;
 
-        inline Expr_ptr lhs()
+        Expr_ptr lhs() const
         {
             return u.f_lhs;
         }
-        inline Expr_ptr rhs()
+        Expr_ptr rhs() const
         {
             return u.f_rhs;
         }
 
         // identifiers and strings
-        inline Expr_TAG(ExprType symb, const Atom& atom)
+        explicit Expr_TAG(const ExprType symb, const Atom& atom)
+            : f_symb { symb }
         {
             assert(IDENT == symb || QSTRING == symb);
-            f_symb = symb;
+            u.f_rhs = nullptr; // suppress valgrind warning
             u.f_atom = const_cast<Atom*>(&atom);
         }
 
         // binary expr (rhs is NULL for unary ops)
-        inline Expr_TAG(ExprType symb, Expr_ptr lhs, Expr_ptr rhs)
+        explicit  Expr_TAG(const ExprType symb, const Expr_ptr lhs, const Expr_ptr rhs)
             : f_symb(symb)
         {
             u.f_lhs = lhs;
@@ -203,7 +204,7 @@ namespace expr {
         }
 
         // numeric constants, are treated as machine size consts.
-        inline Expr_TAG(ExprType symb, value_t value)
+        explicit Expr_TAG(const ExprType symb, const value_t value)
             : f_symb(symb)
         {
             assert(symb == ICONST ||
@@ -216,11 +217,11 @@ namespace expr {
         }
 
         // nullary nodes (errors, undefined)
-        inline Expr_TAG(ExprType symb)
+        explicit Expr_TAG(const ExprType symb)
             : f_symb(symb)
         {
             assert(symb == UNDEF);
-	    u.f_value = 0;
+            u.f_value = 0;
         }
 
     } Expr;
@@ -229,7 +230,7 @@ namespace expr {
     typedef ExprVector* ExprVector_ptr;
 
     struct LexicographicOrdering {
-        int operator()(const Expr_ptr x, const Expr_ptr y) const;
+        int operator()(Expr_ptr x, Expr_ptr y) const;
     };
 
     typedef std::set<Expr_ptr, LexicographicOrdering> ExprSet;

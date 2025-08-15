@@ -31,13 +31,13 @@
 
 namespace cmd {
 
-    class Diameter: public Command {
+    class Diameter final: public Command {
     public:
-        Diameter(Interpreter& owner);
-        virtual ~Diameter();
+        explicit Diameter(Interpreter& owner);
+        ~Diameter() override;
 
         /* run() */
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -48,12 +48,12 @@ namespace cmd {
 
     typedef Diameter* Diameter_ptr;
 
-    class DiameterTopic: public CommandTopic {
+    class DiameterTopic final: public CommandTopic {
     public:
-        DiameterTopic(Interpreter& owner);
-        virtual ~DiameterTopic();
+        explicit DiameterTopic(Interpreter& owner);
+        ~DiameterTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd

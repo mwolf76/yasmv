@@ -31,26 +31,26 @@
 
 namespace cmd {
 
-    class Echo: public Command {
+    class Echo final: public Command {
         using expressions = std::vector<expr::Expr_ptr>;
         expressions f_expressions;
 
     public:
-        Echo(Interpreter& owner);
-        virtual ~Echo();
+        explicit Echo(Interpreter& owner);
+        ~Echo() override;
 
         void append_expression(expr::Expr_ptr expression);
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
     typedef Echo* Echo_ptr;
 
-    class EchoTopic: public CommandTopic {
+    class EchoTopic final: public CommandTopic {
     public:
-        EchoTopic(Interpreter& owner);
-        virtual ~EchoTopic();
+        explicit EchoTopic(Interpreter& owner);
+        ~EchoTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

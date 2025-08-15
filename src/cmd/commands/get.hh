@@ -2,7 +2,7 @@
  * @file get.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `get`
+ * This header file contains the handler interface for the `get`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -31,16 +31,16 @@
 
 namespace cmd {
 
-    class Get: public Command {
+    class Get final: public Command {
 
         expr::Expr_ptr f_identifier;
 
     public:
-        Get(Interpreter& owner);
-        virtual ~Get();
+        explicit Get(Interpreter& owner);
+        ~Get() override;
 
         void set_identifier(expr::Expr_ptr id);
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         void print_all_assignments(std::ostream& os);
@@ -51,12 +51,12 @@ namespace cmd {
 
     typedef Get* Get_ptr;
 
-    class GetTopic: public CommandTopic {
+    class GetTopic final: public CommandTopic {
     public:
-        GetTopic(Interpreter& owner);
-        virtual ~GetTopic();
+        explicit GetTopic(Interpreter& owner);
+        ~GetTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd

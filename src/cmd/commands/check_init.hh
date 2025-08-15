@@ -2,7 +2,7 @@
  * @file check_init.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `check-init`
+ * This header file contains the handler interface for the `check-init`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -31,16 +31,16 @@
 
 namespace cmd {
 
-    class CheckInit: public Command {
+    class CheckInit final: public Command {
     public:
-        CheckInit(Interpreter& owner);
-        virtual ~CheckInit();
+        explicit CheckInit(Interpreter& owner);
+        ~CheckInit() override;
 
         /** cmd params */
         void add_constraint(expr::Expr_ptr constraint);
 
         /* run() */
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -56,10 +56,10 @@ namespace cmd {
 
     class CheckInitTopic: public CommandTopic {
     public:
-        CheckInitTopic(Interpreter& owner);
-        virtual ~CheckInitTopic();
+        explicit CheckInitTopic(Interpreter& owner);
+        ~CheckInitTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd
