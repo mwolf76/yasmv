@@ -31,21 +31,21 @@
 
 namespace cmd {
 
-    class Time: public Command {
+    class Time final: public Command {
     public:
-        Time(Interpreter& owner);
-        virtual ~Time();
+        explicit Time(Interpreter& owner);
+        ~Time() override;
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
 
 
-    class TimeTopic: public CommandTopic {
+    class TimeTopic final: public CommandTopic {
     public:
-        TimeTopic(Interpreter& owner);
-        virtual ~TimeTopic();
+        explicit TimeTopic(Interpreter& owner);
+        ~TimeTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

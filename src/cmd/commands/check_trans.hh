@@ -32,18 +32,18 @@
 
 namespace cmd {
 
-    class CheckTrans: public Command {
+    class CheckTrans final: public Command {
 
     public:
         CheckTrans(Interpreter& owner);
-        virtual ~CheckTrans();
+        ~CheckTrans() override;
 
         /** cmd params */
         void add_constraint(expr::Expr_ptr constraint);
         void set_limit(value_t value);
 
         /* run() */
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
         std::ostream& f_out;
@@ -60,12 +60,12 @@ namespace cmd {
 
     typedef CheckTrans* CheckTrans_ptr;
 
-    class CheckTransTopic: public CommandTopic {
+    class CheckTransTopic final: public CommandTopic {
     public:
-        CheckTransTopic(Interpreter& owner);
-        virtual ~CheckTransTopic();
+        explicit CheckTransTopic(Interpreter& owner);
+        ~CheckTransTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 }; // namespace cmd

@@ -40,13 +40,13 @@ namespace cmd {
     /** Raised when the type checker detects a wrong type */
     class UnsupportedFormat: public CommandException {
     public:
-        UnsupportedFormat(pconst_char format);
+        explicit UnsupportedFormat(pconst_char format);
     };
 
     /** Raised when both -a and a trace id are specified */
     class BadRequest: public CommandException {
     public:
-        BadRequest();
+        explicit BadRequest();
     };
 
     /* Model ordering-preserving comparison helper */
@@ -54,27 +54,27 @@ namespace cmd {
         model::Model& f_model;
 
     public:
-        OrderingPreservingComparisonFunctor(model::Model& model)
+        explicit OrderingPreservingComparisonFunctor(model::Model& model)
             : f_model(model)
         {}
 
-        bool operator()(expr::Expr_ptr a, expr::Expr_ptr b)
+        bool operator()(const expr::Expr_ptr a, const expr::Expr_ptr b) const
         {
             assert(a);
             assert(b);
 
-            expr::Expr_ptr lhs_a { a->lhs() };
-	    assert(lhs_a != nullptr);
-	    
-            expr::Expr_ptr lhs_b { b->lhs() };
-	    assert(lhs_b != nullptr);
+            const expr::Expr_ptr lhs_a { a->lhs() };
+            assert(lhs_a != nullptr);
+
+            const expr::Expr_ptr lhs_b { b->lhs() };
+            assert(lhs_b != nullptr);
 
             return f_model.symbol_index(lhs_a) <
                    f_model.symbol_index(lhs_b);
         }
     };
 
-    class DumpTrace: public Command {
+    class DumpTrace final: public Command {
 
         /* the trace ids selected for dumping */
         expr::AtomVector f_trace_ids;
@@ -90,36 +90,36 @@ namespace cmd {
 
     public:
         void add_trace_id(pconst_char trace_id);
-        inline const expr::AtomVector& trace_ids() const
+        const expr::AtomVector& trace_ids() const
         {
             return f_trace_ids;
         }
 
         void set_format(pconst_char format);
-        inline pconst_char format() const
+        pconst_char format() const
         {
             return f_format;
         }
 
         void set_output(pconst_char filepath);
-        inline pconst_char output() const
+        pconst_char output() const
         {
             return f_output;
         }
 
         void set_all(bool value);
-        inline bool all() const
+        bool all() const
         {
             return f_all;
         }
 
-        DumpTrace(Interpreter& owner);
-        virtual ~DumpTrace();
+        explicit DumpTrace(Interpreter& owner);
+        ~DumpTrace() override;
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
 
     private:
-        std::ostream* f_outfile { NULL };
+        std::ostream* f_outfile { nullptr };
         std::ostream& get_output_stream();
 
         /* PLAIN format helpers */
@@ -142,12 +142,12 @@ namespace cmd {
 
     typedef DumpTrace* DumpTrace_ptr;
 
-    class DumpTraceTopic: public CommandTopic {
+    class DumpTraceTopic final: public CommandTopic {
     public:
-        DumpTraceTopic(Interpreter& owner);
-        virtual ~DumpTraceTopic();
+        explicit DumpTraceTopic(Interpreter& owner);
+        ~DumpTraceTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 } // namespace cmd

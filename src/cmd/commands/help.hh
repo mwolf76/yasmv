@@ -2,7 +2,7 @@
  * @file help.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `help`
+ * This header file contains the handler interface for the `help`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -33,24 +33,24 @@ namespace cmd {
 
     typedef CommandTopic* CommandTopic_ptr;
 
-    class Help: public Command {
+    class Help final: public Command {
         CommandTopic_ptr f_topic;
 
     public:
-        Help(Interpreter& owner);
-        virtual ~Help();
+        explicit Help(Interpreter& owner);
+        ~Help() override;
 
         void set_topic(CommandTopic_ptr topic);
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
     typedef Help* Help_ptr;
 
     class HelpTopic: public CommandTopic {
     public:
-        HelpTopic(Interpreter& owner);
-        virtual ~HelpTopic();
+        explicit HelpTopic(Interpreter& owner);
+        ~HelpTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

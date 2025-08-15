@@ -2,7 +2,7 @@
  * @file quit.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
- * This header file contains the handler inteface for the `quit`
+ * This header file contains the handler interface for the `quit`
  * command.
  *
  * Copyright (C) 2012 Marco Pensallorto < marco AT pensallorto DOT gmail DOT com >
@@ -31,25 +31,25 @@
 
 namespace cmd {
 
-    class Quit: public Command {
+    class Quit final: public Command {
 
         int f_retcode;
 
     public:
-        Quit(Interpreter& owner);
-        virtual ~Quit();
+        explicit Quit(Interpreter& owner);
+        ~Quit() override;
 
         void set_retcode(int retcode);
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
 
-    class QuitTopic: public CommandTopic {
+    class QuitTopic final: public CommandTopic {
     public:
-        QuitTopic(Interpreter& owner);
-        virtual ~QuitTopic();
+        explicit QuitTopic(Interpreter& owner);
+        ~QuitTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 };     // namespace cmd

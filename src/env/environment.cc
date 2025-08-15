@@ -91,19 +91,19 @@ namespace env {
     void Environment::add_extra_init(expr::Expr_ptr constraint)
     {
         assert(constraint);
-        f_extra_inits.push_back(constraint);
+        f_extra_init.push_back(constraint);
     }
 
     void Environment::add_extra_invar(expr::Expr_ptr constraint)
     {
         assert(constraint);
-        f_extra_invars.push_back(constraint);
+        f_extra_invar.push_back(constraint);
     }
 
     void Environment::add_extra_trans(expr::Expr_ptr constraint)
     {
         assert(constraint);
-        f_extra_transes.push_back(constraint);
+        f_extra_trans.push_back(constraint);
     }
 
 }; // namespace env

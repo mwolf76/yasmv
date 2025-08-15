@@ -13,9 +13,9 @@ DESCRIPTION
 
 .fi
 .in 3
-WARNING: This command is currently not implemented and does nothing.
-It was intended to clear current assignments to environment variables
-but the functionality has not been completed.
+Clears all current assignments to environment variables. This command
+removes all user-defined variable assignments from the environment,
+resetting it to an empty state.
 
 .ti 0
 EXAMPLES

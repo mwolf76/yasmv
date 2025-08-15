@@ -276,11 +276,11 @@ namespace opts {
             f_vm);
 
         boost::program_options::notify(f_vm);
-        if (f_vm.contains("help")) {
+        if (0 < f_vm.count("help")) {
             f_help = true;
         }
 
-        if (f_vm.contains("version")) {
+        if (0 < f_vm.count("version")) {
             std::cout
                 << PACKAGE_VERSION
                 << std::endl;
@@ -288,15 +288,15 @@ namespace opts {
             exit(0);
         }
 
-        if (f_vm.contains("quiet")) {
+        if (0 < f_vm.count("quiet")) {
             f_quiet = true;
         }
 
-        if (f_vm.contains("color")) {
+        if (0 < f_vm.count("color")) {
             f_color = true;
         }
         
-        if (f_vm.contains("fsm-inertial-checks")) {
+        if (0 < f_vm.count("fsm-inertial-checks")) {
             const auto inertial_value = f_vm["fsm-inertial-checks"].as<std::string>();
             f_skip_inertial_fsm_checks = ! is_true(inertial_value);
         } else {
@@ -308,7 +308,7 @@ namespace opts {
 
     unsigned OptsMgr::verbosity() const
     {
-        if (f_vm.contains("verbosity")) {
+        if (0 < f_vm.count("verbosity")) {
             return f_vm["verbosity"].as<unsigned>();
         }
         return DEFAULT_VERBOSITY;
@@ -339,7 +339,7 @@ namespace opts {
         if (UINT_MAX != f_word_width) {
             return f_word_width;
         }
-        if (f_vm.contains("word-width")) {
+        if (0 < f_vm.count("word-width")) {
             return f_vm["word-width"].as<unsigned>();
         }
         return DEFAULT_WORD_WIDTH;
@@ -350,7 +350,7 @@ namespace opts {
     std::string OptsMgr::model() const
     {
         std::string res;
-        if (f_vm.contains("model")) {
+        if (0 < f_vm.count("model")) {
             res = f_vm["model"].as<std::string>();
         }
 
@@ -369,7 +369,7 @@ namespace opts {
 
     bool OptsMgr::reach_fast_forward_strategy() const
     {
-        if (f_vm.contains("reach-fast-forward-strategy")) {
+        if (0 < f_vm.count("reach-fast-forward-strategy")) {
             const auto value = f_vm["reach-fast-forward-strategy"].as<std::string>();
             return is_true(value);
         }
@@ -378,7 +378,7 @@ namespace opts {
 
     bool OptsMgr::reach_forward_strategy() const
     {
-        if (f_vm.contains("reach-forward-strategy")) {
+        if (0 < f_vm.count("reach-forward-strategy")) {
             const auto value = f_vm["reach-forward-strategy"].as<std::string>();
             return is_true(value);
         }
@@ -387,7 +387,7 @@ namespace opts {
 
     bool OptsMgr::reach_fast_backward_strategy() const
     {
-        if (f_vm.contains("reach-fast-backward-strategy")) {
+        if (0 < f_vm.count("reach-fast-backward-strategy")) {
             const auto value = f_vm["reach-fast-backward-strategy"].as<std::string>();
             return is_true(value);
         }
@@ -396,7 +396,7 @@ namespace opts {
 
     bool OptsMgr::reach_backward_strategy() const
     {
-        if (f_vm.contains("reach-backward-strategy")) {
+        if (0 < f_vm.count("reach-backward-strategy")) {
             const auto value = f_vm["reach-backward-strategy"].as<std::string>();
             return is_true(value);
         }
@@ -405,7 +405,7 @@ namespace opts {
 
     double OptsMgr::sat_random_var_freq() const
     {
-        if (f_vm.contains("sat-random-var-freq")) {
+        if (0 < f_vm.count("sat-random-var-freq")) {
             return f_vm["sat-random-var-freq"].as<double>();
         }
         return DEFAULT_SAT_RANDOM_VAR_FREQ;
@@ -413,7 +413,7 @@ namespace opts {
 
     bool OptsMgr::sat_random_init_act() const
     {
-        if (f_vm.contains("sat-random-init-act")) {
+        if (0 < f_vm.count("sat-random-init-act")) {
             const auto value = f_vm["sat-random-init-act"].as<std::string>();
             return is_true(value);
         }
@@ -422,7 +422,7 @@ namespace opts {
     
     int OptsMgr::sat_ccmin_mode() const
     {
-        if (f_vm.contains("sat-ccmin-mode")) {
+        if (0 < f_vm.count("sat-ccmin-mode")) {
             return f_vm["sat-ccmin-mode"].as<int>();
         }
         return DEFAULT_SAT_CCMIN_MODE;
@@ -430,7 +430,7 @@ namespace opts {
     
     int OptsMgr::sat_phase_saving() const
     {
-        if (f_vm.contains("sat-phase-saving")) {
+        if (0 < f_vm.count("sat-phase-saving")) {
             return f_vm["sat-phase-saving"].as<int>();
         }
         return DEFAULT_SAT_PHASE_SAVING;
@@ -438,7 +438,7 @@ namespace opts {
     
     double OptsMgr::sat_garbage_frac() const
     {
-        if (f_vm.contains("sat-garbage-frac")) {
+        if (0 < f_vm.count("sat-garbage-frac")) {
             return f_vm["sat-garbage-frac"].as<double>();
         }
         return DEFAULT_SAT_GARBAGE_FRAC;
@@ -446,7 +446,7 @@ namespace opts {
     
     double OptsMgr::sat_var_decay() const
     {
-        if (f_vm.contains("sat-var-decay")) {
+        if (0 < f_vm.count("sat-var-decay")) {
             return f_vm["sat-var-decay"].as<double>();
         }
         return DEFAULT_SAT_VAR_DECAY;
@@ -454,7 +454,7 @@ namespace opts {
     
     double OptsMgr::sat_clause_decay() const
     {
-        if (f_vm.contains("sat-clause-decay")) {
+        if (0 < f_vm.count("sat-clause-decay")) {
             return f_vm["sat-clause-decay"].as<double>();
         }
         return DEFAULT_SAT_CLAUSE_DECAY;
@@ -462,7 +462,7 @@ namespace opts {
     
     double OptsMgr::sat_random_seed() const
     {
-        if (f_vm.contains("sat-random-seed")) {
+        if (0 < f_vm.count("sat-random-seed")) {
             return f_vm["sat-random-seed"].as<double>();
         }
         return DEFAULT_SAT_RANDOM_SEED;
@@ -470,7 +470,7 @@ namespace opts {
     
     bool OptsMgr::sat_luby_restart() const
     {
-        if (f_vm.contains("sat-luby-restart")) {
+        if (0 < f_vm.count("sat-luby-restart")) {
             const auto value = f_vm["sat-luby-restart"].as<std::string>();
             return is_true(value);
         }
@@ -479,7 +479,7 @@ namespace opts {
     
     int OptsMgr::sat_restart_first() const
     {
-        if (f_vm.contains("sat-restart-first")) {
+        if (0 < f_vm.count("sat-restart-first")) {
             return f_vm["sat-restart-first"].as<int>();
         }
         return DEFAULT_SAT_RESTART_FIRST;
@@ -487,7 +487,7 @@ namespace opts {
     
     double OptsMgr::sat_restart_inc() const
     {
-        if (f_vm.contains("sat-restart-inc")) {
+        if (0 < f_vm.count("sat-restart-inc")) {
             return f_vm["sat-restart-inc"].as<double>();
         }
         return DEFAULT_SAT_RESTART_INC;
@@ -495,7 +495,7 @@ namespace opts {
     
     bool OptsMgr::sat_elim() const
     {
-        if (f_vm.contains("sat-elim")) {
+        if (0 < f_vm.count("sat-elim")) {
             const auto value = f_vm["sat-elim"].as<std::string>();
             return is_true(value);
         }
@@ -504,7 +504,7 @@ namespace opts {
     
     bool OptsMgr::sat_rcheck() const
     {
-        if (f_vm.contains("sat-rcheck")) {
+        if (0 < f_vm.count("sat-rcheck")) {
             const auto value = f_vm["sat-rcheck"].as<std::string>();
             return is_true(value);
         }
@@ -513,7 +513,7 @@ namespace opts {
     
     bool OptsMgr::sat_asymm() const
     {
-        if (f_vm.contains("sat-asymm")) {
+        if (0 < f_vm.count("sat-asymm")) {
             const auto value = f_vm["sat-asymm"].as<std::string>();
             return is_true(value);
         }
@@ -522,7 +522,7 @@ namespace opts {
     
     int OptsMgr::sat_grow() const
     {
-        if (f_vm.contains("sat-grow")) {
+        if (0 < f_vm.count("sat-grow")) {
             return f_vm["sat-grow"].as<int>();
         }
         return DEFAULT_SAT_GROW;
@@ -530,7 +530,7 @@ namespace opts {
     
     int OptsMgr::sat_clause_lim() const
     {
-        if (f_vm.contains("sat-clause-lim")) {
+        if (0 < f_vm.count("sat-clause-lim")) {
             return f_vm["sat-clause-lim"].as<int>();
         }
         return DEFAULT_SAT_CLAUSE_LIM;
@@ -538,7 +538,7 @@ namespace opts {
     
     int OptsMgr::sat_subsumption_lim() const
     {
-        if (f_vm.contains("sat-subsumption-lim")) {
+        if (0 < f_vm.count("sat-subsumption-lim")) {
             return f_vm["sat-subsumption-lim"].as<int>();
         }
         return DEFAULT_SAT_SUBSUMPTION_LIM;
@@ -546,7 +546,7 @@ namespace opts {
     
     double OptsMgr::sat_simp_garbage_frac() const
     {
-        if (f_vm.contains("sat-simp-garbage-frac")) {
+        if (0 < f_vm.count("sat-simp-garbage-frac")) {
             return f_vm["sat-simp-garbage-frac"].as<double>();
         }
         return DEFAULT_SAT_SIMP_GARBAGE_FRAC;
@@ -555,7 +555,7 @@ namespace opts {
     
     bool OptsMgr::cnf_tautology_removal() const
     {
-        if (f_vm.contains("cnf-tautology-removal")) {
+        if (0 < f_vm.count("cnf-tautology-removal")) {
             const auto value = f_vm["cnf-tautology-removal"].as<std::string>();
             return is_true(value);
         }
@@ -564,7 +564,7 @@ namespace opts {
     
     bool OptsMgr::cnf_duplicate_removal() const
     {
-        if (f_vm.contains("cnf-duplicate-removal")) {
+        if (0 < f_vm.count("cnf-duplicate-removal")) {
             const auto value = f_vm["cnf-duplicate-removal"].as<std::string>();
             return is_true(value);
         }
@@ -573,7 +573,7 @@ namespace opts {
     
     bool OptsMgr::cnf_subsumption() const
     {
-        if (f_vm.contains("cnf-subsumption")) {
+        if (0 < f_vm.count("cnf-subsumption")) {
             const auto value = f_vm["cnf-subsumption"].as<std::string>();
             return is_true(value);
         }
@@ -582,7 +582,7 @@ namespace opts {
     
     bool OptsMgr::cnf_variable_elimination() const
     {
-        if (f_vm.contains("cnf-variable-elimination")) {
+        if (0 < f_vm.count("cnf-variable-elimination")) {
             const auto value = f_vm["cnf-variable-elimination"].as<std::string>();
             return is_true(value);
         }
@@ -591,7 +591,7 @@ namespace opts {
     
     bool OptsMgr::cnf_self_subsumption() const
     {
-        if (f_vm.contains("cnf-self-subsumption")) {
+        if (0 < f_vm.count("cnf-self-subsumption")) {
             const auto value = f_vm["cnf-self-subsumption"].as<std::string>();
             return is_true(value);
         }
@@ -600,7 +600,7 @@ namespace opts {
     
     bool OptsMgr::cnf_blocked_clause() const
     {
-        if (f_vm.contains("cnf-blocked-clause")) {
+        if (0 < f_vm.count("cnf-blocked-clause")) {
             const auto value = f_vm["cnf-blocked-clause"].as<std::string>();
             return is_true(value);
         }
@@ -609,7 +609,7 @@ namespace opts {
 
     std::string OptsMgr::cnf_microcode_directory() const
     {
-        if (f_vm.contains("cnf-microcode-directory")) {
+        if (0 < f_vm.count("cnf-microcode-directory")) {
             auto value = f_vm["cnf-microcode-directory"].as<std::string>();
             return value;
         }
