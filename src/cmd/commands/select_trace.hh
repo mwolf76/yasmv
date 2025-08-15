@@ -1,5 +1,5 @@
 /**
- * @file SELECT_TRACE.hh
+ * @file select_trace.hh
  * @brief Command-interpreter subsystem related classes and definitions.
  *
  * This header file contains the handler interface for the `select-trace`
@@ -32,7 +32,7 @@
 
 namespace cmd {
 
-    class SelectTrace: public Command {
+    class SelectTrace final: public Command {
 
         /* the trace id */
         pchar f_trace_id;
@@ -44,20 +44,20 @@ namespace cmd {
             return f_trace_id;
         }
 
-        SelectTrace(Interpreter& owner);
-        virtual ~SelectTrace();
+        explicit SelectTrace(Interpreter& owner);
+        ~SelectTrace() override;
 
-        utils::Variant virtual operator()();
+        utils::Variant operator()() override;
     };
 
     typedef SelectTrace* SelectTrace_ptr;
 
-    class SelectTraceTopic: public CommandTopic {
+    class SelectTraceTopic final: public CommandTopic {
     public:
-        SelectTraceTopic(Interpreter& owner);
-        virtual ~SelectTraceTopic();
+        explicit SelectTraceTopic(Interpreter& owner);
+        ~SelectTraceTopic() override;
 
-        void virtual usage();
+        void usage() override;
     };
 
 } // namespace cmd

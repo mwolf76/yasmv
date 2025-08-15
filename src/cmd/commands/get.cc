@@ -37,7 +37,7 @@ namespace cmd {
 
     Get::Get(Interpreter& owner)
         : Command(owner)
-        , f_identifier(NULL)
+        , f_identifier(nullptr)
     {}
 
     Get::~Get()
@@ -48,12 +48,12 @@ namespace cmd {
         f_identifier = id;
     }
 
-    void Get::print_assignment(std::ostream& os, expr::Expr_ptr id)
+    void Get::print_assignment(std::ostream& os, const expr::Expr_ptr id)
     {
-        env::Environment& env { env::Environment::INSTANCE() };
+        const env::Environment& env { env::Environment::INSTANCE() };
 
         /* raises an exception on failures */
-        expr::Expr_ptr value { env.get(id) };
+        const expr::Expr_ptr value { env.get(id) };
 
         os
             << outPrefix
@@ -65,13 +65,13 @@ namespace cmd {
 
     void Get::print_all_assignments(std::ostream& os)
     {
-        env::Environment& env { env::Environment::INSTANCE() };
+        const env::Environment& env { env::Environment::INSTANCE() };
         const expr::ExprSet& identifiers { env.identifiers() };
 
-        for (expr::ExprSet::const_iterator i = identifiers.begin();
+        for (auto i = identifiers.begin();
              i != identifiers.end(); ++i) {
 
-            expr::Expr_ptr id { *i };
+            const expr::Expr_ptr id { *i };
             print_assignment(os, id);
         }
     }
@@ -100,7 +100,7 @@ namespace cmd {
         /* FIXME: implement stream redirection for std{out,err} */
         std::ostream& out { std::cout };
 
-        if (NULL == f_identifier) {
+        if (nullptr == f_identifier) {
             print_all_assignments(out);
             return utils::Variant(okMessage);
         } else {
