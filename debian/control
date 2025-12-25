@@ -2,8 +2,28 @@ Source: yasmv
 Maintainer: Marco Pensallorto <marco.pensallorto@gmail.com>
 Section: misc
 Priority: optional
-Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9)
+Standards-Version: 4.6.2
+Build-Depends: debhelper (>= 9),
+               autoconf,
+               automake,
+               libtool,
+               libboost-filesystem-dev (>= 1.48),
+               libboost-program-options-dev (>= 1.48),
+               libboost-test-dev (>= 1.48),
+               libboost-thread-dev (>= 1.48),
+               libboost-chrono-dev (>= 1.48),
+               libboost-regex-dev (>= 1.48),
+               zlib1g-dev,
+               libantlr3c-dev,
+               libjsoncpp-dev,
+               libyaml-cpp-dev,
+               libreadline-dev,
+               antlr3,
+               minisat,
+               openjdk-11-jdk,
+               llvm-dev,
+               libclang-dev,
+               clang
 
 Package: yasmv
 Architecture: any
