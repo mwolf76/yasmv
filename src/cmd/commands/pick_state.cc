@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /**
  * @file pick_state.cc
  * @brief Command `pick-state` class implementation.
@@ -108,8 +109,11 @@ namespace cmd {
         bool res { false };
         if (check_requirements()) {
             model::Model& model { model::ModelMgr::INSTANCE().model() };
-            sim::Simulation simulation { *this, model };
-            const auto enumeration = simulation.pick_state(f_constraints, f_allsat, f_count, f_limit);
+            query::QuerySpec spec;
+            spec.operation = query::Operation::pick_state;
+            spec.assumptions = f_constraints; spec.enumerate = f_allsat; spec.count = f_count; spec.limits.states = f_limit;
+            const auto result = query::checked(spec);
+            sim::EnumerationResult enumeration { result.value, result.complete ? sim::EnumerationStop::exhausted : result.reason == query::StopReason::state_limit ? sim::EnumerationStop::limit : result.status == query::ExecutionStatus::unknown ? sim::EnumerationStop::unknown : sim::EnumerationStop::witness };
             const value_t states = enumeration.count;
 
             if (enumeration.stop == sim::EnumerationStop::unknown) {

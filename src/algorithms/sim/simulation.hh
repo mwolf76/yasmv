@@ -32,7 +32,6 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-#include <cmd/command.hh>
 
 namespace sim {
 
@@ -54,7 +53,7 @@ namespace sim {
     class Simulation: public algorithms::Algorithm {
 
     public:
-        Simulation(cmd::Command& command, model::Model& model);
+        Simulation(model::Model& model);
         ~Simulation();
 
         // returns the number of enumerated states

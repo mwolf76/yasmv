@@ -1,3 +1,4 @@
+#include <query/runtime.hh>
 /**
  * @file internals.cc
  * @brief Model compiler subsystem, internals implementation.
@@ -72,6 +73,7 @@ namespace compiler {
 
     void Compiler::pre_node_hook(expr::Expr_ptr expr)
     {
+        query::checkpoint(query::Phase::compilation);
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* assemble memoization key */

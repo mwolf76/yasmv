@@ -51,7 +51,7 @@ jobs:
       env:
         ASAN_OPTIONS: detect_leaks=0
         UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      run: YASMV_HOME=$(pwd) make reliability-test
+      run: YASMV_HOME=$(pwd) make reliability-test query-test
 
     - name: record toolchain and arithmetic fragment provenance
       if: always()

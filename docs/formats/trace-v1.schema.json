@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity": {
+      "type": "object"
+    },
+    "initial_time": {
+      "const": 0
+    },
+    "origin": {
+      "type": "object",
+      "properties": {
+        "initial_time": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "direction": {
+          "enum": [
+            "forward",
+            "backward"
+          ]
+        }
+      },
+      "required": [
+        "initial_time",
+        "direction"
+      ],
+      "additionalProperties": false
+    },
+    "symbols": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/$defs/type"
+          },
+          "input": {
+            "type": "boolean"
+          },
+          "frozen": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "input",
+          "frozen"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/$defs/value"
+            }
+          }
+        },
+        "required": [
+          "step",
+          "values"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "query": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "check-init",
+            "check-trans",
+            "pick-state",
+            "reach",
+            "simulate",
+            "diameter",
+            "validate-trace"
+          ]
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "auto",
+            "forward",
+            "backward"
+          ]
+        },
+        "target": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "depth": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "states": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "conflicts": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "propagations": {
+              "type": "integer",
+              "minimum": -1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "count": {
+          "type": "boolean"
+        },
+        "enumerate": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "trace": {
+          "type": "object"
+        },
+        "parent_trace": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "operation"
+      ],
+      "additionalProperties": false
+    },
+    "branch": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "parent_id": {
+              "type": "string"
+            },
+            "prefix_length": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "parent_digest": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "parent_id",
+            "prefix_length",
+            "parent_digest"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "version",
+    "id",
+    "identity",
+    "initial_time",
+    "origin",
+    "symbols",
+    "steps",
+    "query",
+    "branch"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "type": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "boolean"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "integer"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "signed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "width",
+            "signed"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "enum"
+            },
+            "literals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "kind",
+            "literals"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "array"
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "element": {
+              "$ref": "#/$defs/type"
+            }
+          },
+          "required": [
+            "kind",
+            "length",
+            "element"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "value": {
+      "oneOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "string"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        }
+      ]
+    }
+  }
+}
