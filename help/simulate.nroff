@@ -22,6 +22,11 @@ OPTIONS:
   -u <expr>, specifies an until condition (stop when satisfied).
   -k <#steps>, number of simulation steps to perform (default: 1).
   -t <trace-uid>, the simulation trace UID.
+  -at <index>, preserve states 0 through index, including its action.
+  -depth <N>, run N additional transitions in an isolated workspace job.
+
+The -at/-depth path uses the same native model and trace selection and registers
+its replayed result in the native trace manager. See help workspace and help job.
 
 
 Validates the selected parent and creates a new continuation trace, preserving

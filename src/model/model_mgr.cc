@@ -62,7 +62,10 @@ namespace model {
     Module_ptr ModelMgr::scope(expr::Expr_ptr key)
     {
         ContextMap::const_iterator mi { f_context_map.find(key) };
-        assert(f_context_map.end() != mi);
+        if (f_context_map.end() == mi) {
+            require_valid();
+            throw ModuleNotFound(key);
+        }
 
         return mi->second;
     }

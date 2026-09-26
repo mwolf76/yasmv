@@ -1,0 +1,45 @@
+.nf
+YASMV manual                                                 explain-step
+
+.ti 0
+SYNOPSIS
+
+.in 3
+explain-step [-at <index>] [-c <expression>] [-minimize] [options]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Explain why the selected native trace cannot continue by one transition
+under the supplied assumptions. Requires a loaded model and a current trace.
+
+-at K preserves states 0 through K, including the action at K. Indices start
+at zero. Omitting -at uses the complete current trace. The parent is replayed
+before analysis; the current native trace is preserved.
+
+-minimize requests minimization of the inconsistent constraint set. Evidence
+records whether minimization completed. Satisfiable requests have no
+inconsistency to explain.
+
+-c <expression> adds an assumption (repeatable). -wall-ms <N> limits computation
+time; -conflicts <N> and -propagations <N> limit solver work. -async submits a
+background job. Use job wait to retrieve its result or job cancel to cancel it.
+Ctrl-C cancels a waiting job. job show -full displays complete evidence.
+Shell options use one dash; -- starts an SMV comment.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> explain-step -at 0 -c action = ACK -minimize
+>> job show -full
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help job, help reach, help simulate, help workspace.

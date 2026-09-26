@@ -118,24 +118,27 @@ to solve planning problems.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
-## LOCAL MODEL WORKBENCH
+## MODEL WORKBENCH
 
-After building the checker and extracting microcode, run:
+Use the CLI workbench after building the checker and extracting microcode:
 
 ```sh
-python3 -m tools.workbench serve
+./yasmv
+# Structured agent requests over stdin/stdout:
+./yasmv --agent --store ./investigation
+# Discover operations and argument schemas:
+./yasmv --capabilities
 ```
 
-Open the printed loopback URL to validate models, search named goals within
-explicit bounds, inspect replay-validated traces, and branch from selected
-states. Explain impossible bounded queries, export action scenarios, and
-replay them against a toy implementation. The included retry protocol
-demonstrates duplicate execution and a
-receiver fix. Runtime requires only Python 3.10+ and a modern browser.
+The CLI supports model revisions, bounded and shortest searches, trace inspection
+and branching, explanations, safety proofs, and executable scenario replay.
+Use `help` to list commands and `help workspace` for artifact storage. Python
+3.10+ is required. See [the CLI and agent guide](docs/CLI_WORKBENCH.md).
 
-See [the workbench guide](docs/WORKBENCH.md),
-[the explanation and scenario guide](docs/EXPLANATIONS_AND_SCENARIOS.md),
-[the protocol example](examples/retry-protocol/README.md), and
+The optional browser and HTTP API remain available with
+`python3 -m tools.workbench serve`. See [the HTTP/browser guide](docs/WORKBENCH.md),
+[explanations and scenarios](docs/EXPLANATIONS_AND_SCENARIOS.md),
+[the retry example](examples/retry-protocol/README.md), and
 [the implementation plan](docs/IMPLEMENTATION_PLAN.md).
 
 ## DISCLAIMER

@@ -224,6 +224,17 @@ namespace query::trace {
         if (width < 64) require(x < (uint64_t(1) << width), "Unsigned integer out of range");
         return em.make_const(static_cast<int64_t>(x));
     }
+    Json::Value symbol_catalog()
+    {
+        Json::Value catalog(Json::objectValue);
+        for (const auto& s : symbols()) {
+            auto& d = catalog[s.name];
+            d["type"] = type_json(s.type);
+            d["frozen"] = s.frozen;
+            d["input"] = s.input;
+        }
+        return catalog;
+    }
     Json::Value export_trace(witness::Witness& w, const QuerySpec& spec, const Json::Value& id)
     {
         PhaseTimer timer(Phase::decoding);
@@ -234,13 +245,7 @@ namespace query::trace {
         v["initial_time"] = 0;
         v["origin"]["initial_time"] = spec.strategy == "backward" ? UINT_MAX - (w.size() - 1) : w.first_time();
         v["origin"]["direction"] = spec.strategy == "backward" ? "backward" : "forward";
-        v["symbols"] = Json::objectValue;
-        for (const auto& s : symbols()) {
-            auto& d = v["symbols"][s.name];
-            d["type"] = type_json(s.type);
-            d["frozen"] = s.frozen;
-            d["input"] = s.input;
-        }
+        v["symbols"] = symbol_catalog();
         v["steps"] = Json::arrayValue;
         unsigned k = 0;
         for (auto tf : w.frames()) {

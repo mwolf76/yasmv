@@ -51,6 +51,8 @@ class Engine:
         self.home = str(Path(home or ROOT).resolve())
         from .sessions import Pool
         self.sessions = Pool() if reuse_models else None
+        self.worker_options = []
+        self.expected_identities = {}
         self.guard = threading.RLock()
         self.active = {}
         self.closed = False
@@ -228,7 +230,7 @@ class Engine:
                        inputs=rev['inputs'], query=dict(query, request_id=identifier))
         path = directory / (stage + '-request.json')
         atomic(path, payload)
-        args = [self.binary, '--quiet', '--query-file', str(path)]
+        args = [self.binary, '--quiet', '--query-file', str(path), *self.worker_options]
         if rev['root']:
             args += ['--root', rev['root']]
         env = dict(os.environ, YASMV_HOME=self.home)
@@ -261,6 +263,9 @@ class Engine:
             expected = 0 if result['status'] == 'completed' else 3 if result['status'] == 'unknown' else 4 if result.get('stop_reason') == 'internal_error' else 2
             if proc.returncode != expected or result.get('request_id') != identifier:
                 raise ValueError('Worker exit status or request ID disagrees with result')
+            expected_identity = self.expected_identities.get(rev['id'])
+            if result['status'] == 'completed' and expected_identity is not None and result.get('identity') != expected_identity:
+                raise ValueError('Worker configuration differs from the native shell model')
             return result
         except (ValueError, UnicodeError) as error:
             return protocol.failure(identifier, 'worker_failed', f'{stage} worker exited {proc.returncode}: {error}. See {stage}-stderr.log')

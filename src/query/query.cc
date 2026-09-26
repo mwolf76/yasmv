@@ -64,6 +64,7 @@ namespace query {
         v["strategy"] = strategy;
         v["proof_method"] = proof_method;
         v["statistics"] = statistics;
+        if (!symbols.isNull()) v["symbols"] = symbols;
         v["watches"] = watches;
         v["explanation"] = explanation;
         v["optimality"] = optimality;
@@ -337,6 +338,7 @@ namespace query {
                 r.status = ExecutionStatus::completed;
                 r.outcome = Outcome::valid;
                 r.scope = "model";
+                r.symbols = trace::symbol_catalog();
                 r.complete = true;
             } else if (spec.operation == Operation::check_init) {
                 fsm::CheckInitConsistency a(mm.model());
