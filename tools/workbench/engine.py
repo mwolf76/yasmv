@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import threading
 import time
@@ -376,6 +377,30 @@ class Engine:
                 atomic(directory / 'result.json', result)
                 self.emit(identifier, 'result', result=result)
                 self.active.pop(identifier, None)
+
+    def clear(self):
+        """Remove owned artifacts while retaining the workspace ownership lock."""
+        with self.guard:
+            if self.closed:
+                raise ValueError('Runner is shutting down')
+            if self.active:
+                raise ValueError('Wait for active jobs to finish before clearing the workspace; cancel and wait if needed')
+            directories = [self.directory / kind for kind in ('revisions', 'jobs', 'traces', 'scenarios')]
+            for directory in directories:
+                if directory.is_symlink() or not directory.is_dir():
+                    raise ValueError('Workspace artifact directories must be real directories: ' + directory.name)
+            if self.sessions is not None:
+                from .sessions import Pool
+                capacity = self.sessions.capacity
+                self.sessions.close()
+                self.sessions = Pool(capacity)
+            self.expected_identities.clear()
+            for directory in directories:
+                for artifact in directory.iterdir():
+                    if artifact.is_dir() and not artifact.is_symlink():
+                        shutil.rmtree(artifact)
+                    else:
+                        artifact.unlink()
 
     def close(self):
         with self.guard:

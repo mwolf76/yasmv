@@ -78,7 +78,7 @@ help job
 
 | Commands | Purpose |
 | --- | --- |
-| `workspace open "PATH"`, `workspace show` | Choose an artifact store and inspect selections |
+| `workspace open "PATH"`, `workspace show`, `workspace clear` | Choose a store, inspect context, or delete saved artifacts |
 | `read-model`, `set`, `get` | Existing native model loading and input bindings |
 | `goal`, `property`, `watch` with `set NAME EXPR` / `list` | Save named expressions in an immutable revision |
 | `show-symbols` | Inspect resolved symbols, types, and frozen/input flags |
@@ -109,6 +109,11 @@ at K remains part of the preserved prefix. Use `-t NAME` for a different native
 trace. Inputs, root, word width, and solver configuration come from the native
 session. Extra environment constraints are currently rejected by workspace jobs.
 
+Progress queries do not take a depth bound. Native defaults are 10,000 non-goal
+states and 30,000 ms. Agent queries supply both limits explicitly. They report a
+verified unbounded result or UNKNOWN; they do not assume fairness. See
+[guaranteed progress](PROGRESS_CHECKING.md) for semantics and artifacts.
+
 Worker traces are replayed against the loaded native model before being
 registered and selected. They work with existing trace commands, `echo`, and
 native simulation. Conversely, traces from native commands are replayed and
@@ -127,10 +132,32 @@ A store has one owner at a time. Close the HTTP server before opening the same
 store from the CLI. Switch workspaces after active jobs finish. The default is
 `.yasmv-workbench` in the current directory.
 
-Progress queries do not take a depth bound. Native defaults are 10,000 non-goal
-states and 30,000 ms. Agent queries supply both limits explicitly. They report a
-verified unbounded result or UNKNOWN; they do not assume fairness. See
-[guaranteed progress](PROGRESS_CHECKING.md) for semantics and artifacts.
+### Clear a workspace
+
+```text
+workspace clear
+```
+
+This permanently deletes saved revisions and their metadata, jobs (including
+progress/proof evidence), traces, and scenarios. It resets saved selections
+and closes compiled sessions. There is no confirmation prompt. The directory
+and ownership lock stay in place; unrelated files at its root and exports
+outside the managed `revisions`, `jobs`, `traces`, and `scenarios` directories
+are preserved.
+
+The native model, input bindings, and native traces remain usable. Inspection
+with `workspace show`, `job list`, or `scenario list` keeps the store empty.
+The next model-dependent workspace command saves a fresh model revision;
+reusing a native trace replays and persists it again. Saved goals, properties,
+watches, and scenario mappings must be defined again.
+
+Clear refuses while jobs are active. Cancel and wait for each job, or let them
+finish, before clearing. Clearing an empty workspace is valid. Agents use the
+same operation with an empty argument object:
+
+```json
+{"version":1,"request_id":"clear-1","operation":"workspace.clear","arguments":{}}
+```
 
 ## Batch use and jobs
 
