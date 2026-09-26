@@ -138,6 +138,11 @@ namespace cmd {
             f_last_result = utils::Variant(errMessage);
             record_error();
         }
+        catch (const std::invalid_argument& e) {
+            err() << "Error: " << e.what() << std::endl;
+            f_last_result = utils::Variant(errMessage);
+            record_error(2);
+        }
         catch (const std::exception& e) {
             err() << "Error: " << e.what() << std::endl;
             f_last_result = utils::Variant(errMessage);
@@ -193,6 +198,10 @@ namespace cmd {
 
                     f_last_result = utils::Variant(errMessage);
                     record_error();
+                } catch (const std::invalid_argument& e) {
+                    err() << "Error: " << e.what() << std::endl;
+                    f_last_result = utils::Variant(errMessage);
+                    record_error(2);
                 } catch (const std::exception& e) {
                     err() << "Error: " << e.what() << std::endl;
                     f_last_result = utils::Variant(errMessage);

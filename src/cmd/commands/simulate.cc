@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /*
  * @file simulate.cc
  * @brief Command `simulate` class implementation.
@@ -67,18 +68,14 @@ namespace cmd {
     utils::Variant Simulate::operator()()
     {
         const opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
-
-        sim::Simulation simulation(*this, mm.model());
-
+        query::QuerySpec spec;
+        spec.operation = query::Operation::simulate; spec.assumptions = f_constraints;
+        spec.trace_id = f_trace_uid ? f_trace_uid : ""; spec.until = f_until_condition; spec.limits.depth = f_k;
+        const auto result = query::checked(spec);
         bool res { false };
 
-        const sim::simulation_status_t rc {
-            simulation.simulate(f_constraints, f_trace_uid, f_until_condition, f_k)
-        };
-
-        switch (rc) {
-            case sim::simulation_status_t::SIMULATION_DONE:
+        switch (result.outcome) {
+            case query::Outcome::simulated:
                 res = true;
                 if (!om.quiet()) {
                     f_out
@@ -90,7 +87,7 @@ namespace cmd {
                     << std::endl;
                 break;
 
-            case sim::simulation_status_t::SIMULATION_DEADLOCKED:
+            case query::Outcome::deadlocked:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -101,8 +98,7 @@ namespace cmd {
                     << std::endl;
                 break;
 
-            case sim::simulation_status_t::SIMULATION_INTERRUPTED:
-            case sim::simulation_status_t::SIMULATION_UNKNOWN:
+            case query::Outcome::none:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;

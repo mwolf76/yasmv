@@ -34,3 +34,6 @@ microcode/
 
 # Local git configuration
 .gitconfig
+
+yasmv_query_tests
+!docs/formats/*.json

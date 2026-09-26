@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "model": {
+      "type": "string"
+    },
+    "query": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "check-init",
+            "check-trans",
+            "pick-state",
+            "reach",
+            "simulate",
+            "diameter",
+            "validate-trace"
+          ]
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "auto",
+            "forward",
+            "backward"
+          ]
+        },
+        "target": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "depth": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "states": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "conflicts": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "propagations": {
+              "type": "integer",
+              "minimum": -1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "count": {
+          "type": "boolean"
+        },
+        "enumerate": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "trace": {
+          "type": "object"
+        },
+        "parent_trace": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "operation"
+      ],
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "version",
+    "model",
+    "query"
+  ],
+  "additionalProperties": false
+}

@@ -89,6 +89,7 @@ namespace reach {
                 << std::endl;
 
             sat::status_t status { engine.solve() };
+            if (auto context = query::current(); context && status != sat::STATUS_UNKNOWN) context->checked_depths.push_back(k);
 
             if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;

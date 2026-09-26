@@ -1,3 +1,6 @@
+#include <compiler/streamers.hh>
+#include <query/source.hh>
+#include <query/trace.hh>
 /**
  * @file base.cc
  * @brief foundations for all the SAT-based algorithms.
@@ -36,9 +39,8 @@
 
 namespace algorithms {
 
-    Algorithm::Algorithm(cmd::Command& command, model::Model& model)
+    Algorithm::Algorithm(model::Model& model)
         : f_ok(true)
-        , f_command(command)
         , f_model(model)
         , f_mm(model::ModelMgr::INSTANCE())
         , f_bm(enc::EncodingMgr::INSTANCE())
@@ -65,6 +67,7 @@ namespace algorithms {
             expr::Expr_ptr ctx { top.first };
             model::Module& module { *top.second };
 
+            f_source_module = module.name();
             /* module INITs */
             const expr::ExprVector& init { module.init() };
             process_init(ctx, init);
@@ -92,6 +95,7 @@ namespace algorithms {
             }
         } /* while() */
 
+        f_source_module = nullptr;
         /* processing environment extra constraints */
         const expr::ExprVector& extra_init { env.extra_init() };
         process_init(nullptr, extra_init);
@@ -118,6 +122,7 @@ namespace algorithms {
 
     void Algorithm::process_init(expr::Expr_ptr ctx, const expr::ExprVector& init)
     {
+        size_t occurrence_index = 0;
         for (auto body : init) {
             DEBUG
                 << "processing INIT "
@@ -125,7 +130,9 @@ namespace algorithms {
                 << std::endl;
 
             try {
-                f_init.push_back(compiler().process(ctx, body));
+                auto unit = compiler().process(ctx, body);
+                unit.source_ids = {source::occurrence(f_source_module, "init", occurrence_index++, ctx)};
+                f_init.push_back(unit);
             } catch (Exception& ae) {
                 f_ok = false;
 
@@ -142,13 +149,16 @@ namespace algorithms {
 
     void Algorithm::process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar)
     {
+        size_t occurrence_index = 0;
         for (auto body : invar) {
             DEBUG
                 << "processing INVAR "
                 << ctx << "::" << body
                 << std::endl;
             try {
-                f_invar.push_back(compiler().process(ctx, body));
+                auto unit = compiler().process(ctx, body);
+                unit.source_ids = {source::occurrence(f_source_module, "invar", occurrence_index++, ctx)};
+                f_invar.push_back(unit);
             } catch (Exception& ae) {
                 f_ok = false;
 
@@ -165,6 +175,7 @@ namespace algorithms {
 
     void Algorithm::process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans)
     {
+        size_t occurrence_index = 0;
         for (auto body : trans) {
             DEBUG
                 << "processing TRANS "
@@ -172,7 +183,9 @@ namespace algorithms {
                 << std::endl;
 
             try {
-                f_trans.push_back(compiler().process(ctx, body));
+                auto unit = compiler().process(ctx, body);
+                unit.source_ids = {source::occurrence(f_source_module, "trans", occurrence_index++, ctx)};
+                f_trans.push_back(unit);
             } catch (Exception& ae) {
                 f_ok = false;
 
@@ -215,6 +228,7 @@ namespace algorithms {
 
     void Algorithm::assert_fsm_invar(sat::Engine& engine, step_t time, const sat::group_t group)
     {
+        query::trace::allocate_state(engine, time);
         const clock_t t0 { clock() };
         const auto count { f_invar.size() };
 
@@ -383,10 +397,7 @@ namespace algorithms {
 
                 catch (Exception& e) {
                     f_ok = false;
-
-                    std::cerr
-                        << e.what()
-                        << std::endl;
+                    throw;
                 }
             }
         }

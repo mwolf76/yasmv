@@ -1,3 +1,4 @@
+#include <query/source.hh>
 /**
  * @file parse.cc
  * @brief Parsing services implementation.
@@ -43,6 +44,7 @@
 namespace parse {
 
 static bool parseErrors;
+static std::string diagnosticFile;
 static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
                                           pANTLR3_UINT8 * tokenNames);
 static void reportParserStatus(bool parseErrors, timespec start,
@@ -55,6 +57,8 @@ static void reportParserStatus(bool parseErrors, timespec start,
  */
 bool parseFile(const char* fName)
 {
+    diagnosticFile = fName;
+    source::begin(fName);
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -113,6 +117,7 @@ bool parseFile(const char* fName)
 // FIXME: proper error handling
 cmd::CommandVector_ptr parseCommand(const char *command_line)
 {
+    diagnosticFile = "<command>";
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -224,6 +229,7 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
  */
 expr::Expr_ptr parseExpression(const char *string)
 {
+    diagnosticFile = "<expression>";
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -244,8 +250,10 @@ expr::Expr_ptr parseExpression(const char *string)
 
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
     expr::Expr_ptr res { psr -> toplevel_expression(psr) };
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) parseErrors = true;
 
     psr->free(psr);
     tstream->free(tstream);
@@ -305,6 +313,12 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
                                           pANTLR3_UINT8 * tokenNames)
 {
     if (! parseErrors) {
+        source::Diagnostic diagnostic;
+        diagnostic.code = "syntax-error";
+        diagnostic.message = "Unexpected token";
+        const auto ex = recognizer->state->exception;
+        diagnostic.primary = {diagnosticFile, ex->line, static_cast<unsigned>(std::max(0, ex->charPositionInLine) + 1), ex->line, static_cast<unsigned>(std::max(0, ex->charPositionInLine) + 1)};
+        source::diagnostics().push_back(diagnostic);
         std::cerr
             << "Syntax error";
 

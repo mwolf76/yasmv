@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /**
  * @file check_trans.cc
  * @brief Command `check-trans` class implementation.
@@ -77,14 +78,14 @@ namespace cmd {
         bool res { false };
 
         if (check_requirements()) {
-            fsm::CheckTransConsistency check_trans {
-                *this, model::ModelMgr::INSTANCE().model()
-            };
-            check_trans.set_limit(f_limit);
-            check_trans.process(f_constraints);
+            query::QuerySpec spec;
+            spec.operation = query::Operation::check_trans;
+            spec.assumptions = f_constraints;
+            spec.limits.depth = f_limit;
+            const auto result = query::checked(spec);
 
-            switch (check_trans.status()) {
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
+            switch (result.outcome) {
+                case query::Outcome::satisfiable:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
@@ -97,7 +98,7 @@ namespace cmd {
                     res = true;
                     break;
 
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
+                case query::Outcome::unsatisfiable:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
@@ -108,7 +109,7 @@ namespace cmd {
                         << std::endl;
                     break;
 
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
+                case query::Outcome::none:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;

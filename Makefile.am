@@ -12,7 +12,11 @@ VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
 EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
-    tools/build-provenance.py tests/test_regressions.py docs/CORRECTNESS_BASELINE.md
+    tools/build-provenance.py tests/test_regressions.py docs/CORRECTNESS_BASELINE.md \
+    src/query/query.hh src/query/runtime.hh src/query/source.hh src/query/trace.hh src/query/expressions.hh \
+    tools/run-query.py tests/test_query.py tests/models/query.smv \
+    docs/QUERY_AND_TRACE_CONTRACTS.md \
+    docs/formats/query-v1.schema.json docs/formats/trace-v1.schema.json
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
@@ -31,7 +35,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests
 nobase_dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
@@ -54,7 +58,11 @@ reliability-test: yasmv yasmv_reliability_tests
 	    YASMV_HOME=`pwd` YASMV_TEST_CNF=$$settings ./yasmv_reliability_tests --log_level=error || exit 1; \
 	done
 
-test: short-test unit-test functional-test reliability-test
+query-test: yasmv yasmv_query_tests
+	@YASMV_HOME=`pwd` ./yasmv_query_tests --log_level=error
+	@YASMV_HOME=`pwd` python3 tests/test_query.py
+
+test: short-test unit-test functional-test reliability-test query-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -65,7 +73,8 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc
+query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc
+yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
@@ -103,7 +112,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 
 yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
-yasmv_tests_SOURCES = src/parse.cc src/test/main.cc		\
+yasmv_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc		\
 		src/test/test_expr.cc src/test/test_parser.cc	\
 		src/test/test_type.cc src/test/test_dd.cc		\
 		src/test/test_enc.cc src/test/test_compiler.cc
@@ -145,9 +154,13 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 
 yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 
-yasmv_reliability_tests_SOURCES = src/parse.cc src/test/main.cc src/test/test_reliability.cc
+yasmv_reliability_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_reliability.cc
 yasmv_reliability_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_reliability_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 
 pkgconfdir = $(libdir)/pkgconfig
 pkgconf_DATA = yasmv.pc
+
+yasmv_query_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_query.cc
+yasmv_query_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_query_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)

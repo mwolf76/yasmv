@@ -22,6 +22,8 @@
  **/
 
 #include <cmath>
+#include <charconv>
+#include <stdexcept>
 #include <common/common.hh>
 #include <expr_mgr.hh>
 
@@ -31,6 +33,20 @@
 #include <utils/logging.hh>
 
 namespace expr {
+    static value_t parse_unsigned_literal(const std::string& text, unsigned skip, int base)
+    {
+        if (skip == text.size()) return 0;
+        uint64_t bits = 0;
+        auto p = std::from_chars(text.data() + skip, text.data() + text.size(), bits, base);
+        if (p.ec != std::errc() || p.ptr != text.data() + text.size())
+            throw std::invalid_argument("Integer literal exceeds the supported 64-bit range: " + text);
+        return static_cast<value_t>(bits);
+    }
+    Expr_ptr ExprMgr::make_dec_const(const Atom& text) { return make_const(parse_unsigned_literal(text, 0, 10)); }
+    Expr_ptr ExprMgr::make_hex_const(const Atom& text) { return make_hconst(parse_unsigned_literal(text, 2, 16)); }
+    Expr_ptr ExprMgr::make_oct_const(const Atom& text) { return make_oconst(parse_unsigned_literal(text, 1, 8)); }
+    Expr_ptr ExprMgr::make_bin_const(const Atom& text) { return make_bconst(parse_unsigned_literal(text, 2, 2)); }
+
 
     Expr_ptr ExprMgr::make_enum_type(ExprSet& literals)
     {

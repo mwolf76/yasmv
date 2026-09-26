@@ -24,7 +24,8 @@ OPTIONS:
   -t <trace-uid>, the simulation trace UID.
 
 
-Extends an existing trace by one or more steps. Each simulated transition will satisfy
+Validates the selected parent and creates a new continuation trace, preserving
+the parent and its complete prefix. The new trace becomes current. Each simulated transition will satisfy
 the transition relation of the FSM along with any additional constraints specified
 by the user via -c clauses. Simulation continues until one of the following occurs:
   - The specified number of steps (-k) is completed
@@ -35,102 +36,16 @@ by the user via -c clauses. Simulation continues until one of the following occu
 EXAMPLES
 
 .nf
->> read-model 'examples/ferryman/ferryman.smv'
+>> read-model 'tests/models/query.smv'
 >> pick-state
--- Simulation initialized, registered witness `sim_1`
->> simulate
-!! Simulation interrupted
--- Registered witness `sim_1`
->> dump-trace
-Witness: sim_1 [[ Simulation trace for module `ferryman` ]]
-:: @0
--- state
-   ferryman = WEST
-   goat = WEST
-   cabbage = WEST
-   wolf = WEST
-   carry = NIL
+>> simulate -k 2
+>> dump-trace -f json
 
-:: @1
--- state
-   ferryman = EAST
-   goat = EAST
-   cabbage = WEST
-   wolf = WEST
-   carry = GOAT
-
-:: @2
--- state
-   ferryman = WEST
-   goat = EAST
-   cabbage = WEST
-   wolf = WEST
-   carry = NIL
-
-:: @3
--- state
-   ferryman = EAST
-   goat = EAST
-   cabbage = EAST
-   wolf = WEST
-   carry = CABBAGE
-
-:: @4
--- state
-   ferryman = WEST
-   goat = WEST
-   cabbage = EAST
-   wolf = WEST
-   carry = GOAT
-
-:: @5
--- state
-   ferryman = EAST
-   goat = EAST
-   cabbage = EAST
-   wolf = WEST
-   carry = GOAT
-
-:: @6
--- state
-   ferryman = WEST
-   goat = EAST
-   cabbage = WEST
-   wolf = WEST
-   carry = CABBAGE
-
-:: @7
--- state
-   ferryman = EAST
-   goat = WEST
-   cabbage = WEST
-   wolf = EAST
-   carry = NIL
-
-:: @8
--- state
-   ferryman = WEST
-   goat = WEST
-   cabbage = EAST
-   wolf = WEST
-   carry = WOLF
-
-:: @9
--- state
-   ferryman = EAST
-   goat = EAST
-   cabbage = EAST
-   wolf = WEST
-   carry = GOAT
-
-:: @10
--- state
-   ferryman = WEST
-   goat = EAST
-   cabbage = EAST
-   wolf = WEST
-   carry = NIL
-
+.fi
+The additional state constraints apply to source states of new transitions.
+The JSON artifact embeds the parent and can be replayed in a fresh process.
+The step count must be positive. Imported parents require trace v1 query
+metadata. See docs/QUERY_AND_TRACE_CONTRACTS.md.
 
 .ti 0
 Copyright (c) M. Pensallorto 2011-2018.

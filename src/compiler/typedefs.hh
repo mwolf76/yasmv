@@ -244,6 +244,7 @@ namespace compiler {
 
     class Unit {
     public:
+        std::vector<std::string> source_ids;
         Unit(expr::Expr_ptr expr, dd::DDVector& dds,
              InlinedOperatorDescriptors& inlined_operator_descriptors,
              Expr2BinarySelectionDescriptorsMap& binary_selection_descriptors_map,
