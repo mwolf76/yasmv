@@ -1,0 +1,10 @@
+MODULE main
+#inertial
+VAR phase : {READY, WORKING, DONE, BLOCKED};
+INIT phase = READY;
+INVAR phase != BLOCKED;
+TRANS phase = READY ?: phase := WORKING;
+-- WORKING's only proposed successor is forbidden: no legal continuation.
+TRANS phase = WORKING ?: phase := BLOCKED;
+TRANS phase = DONE ?: phase := DONE;
+DEFINE FINISHED := phase = DONE;

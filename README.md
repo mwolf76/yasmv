@@ -135,7 +135,7 @@ Use the CLI workbench after building the checker and extracting microcode:
 ```
 
 The CLI supports model revisions, bounded and shortest searches, trace inspection
-and branching, explanations, safety proofs, and executable scenario replay.
+and branching, explanations, safety proofs, guaranteed progress checks, and executable scenario replay.
 Use `help` to list commands and `help workspace` for artifact storage. Python
 3.10+ is required. See [the CLI and agent guide](docs/CLI_WORKBENCH.md).
 
@@ -160,3 +160,11 @@ Find certified shortest witnesses and check named safety properties with
 bounded search or verified k-induction. Optional `--reuse-models` workbench
 sessions retain compiled models while keeping queries in isolated processes.
 See [shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md).
+
+### Guaranteed progress
+
+Use `check-progress GOAL` to ask whether every execution eventually reaches a
+goal. Inspect repeating or dead-end failures, export portable evidence, and
+revalidate graph proofs. Resource limits return UNKNOWN; fairness is not assumed.
+See [the progress guide](docs/PROGRESS_CHECKING.md) and
+[the example models](examples/progress/README.md).

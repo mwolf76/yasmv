@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 namespace cmd {
+    Json::Value read_progress_file(const std::string& path);
     int workbench(const std::vector<std::string>& arguments, bool replace_process);
     void close_workspace();
     class WorkspaceCommand final: public Command {

@@ -270,3 +270,10 @@ the report preserves individual samples and exact inputs for comparison.
 The [benchmark report](benchmarks/m4-sessions.json) records matching fresh and
 cached results and the measured benefit. The implementation plan records the
 process ownership refinement and the remaining in-process migration separately.
+
+## Guaranteed progress (M6)
+
+Universal eventuality is available through `check-progress`. Its graph proofs,
+loop/dead-end evidence, and resource semantics are documented separately in
+[the progress guide](PROGRESS_CHECKING.md). It complements safety induction and
+does not add general LTL/CTL or fairness.

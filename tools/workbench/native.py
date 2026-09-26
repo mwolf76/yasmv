@@ -31,12 +31,14 @@ class Native:
         self.client = candidate
         self.trace_ids.clear()
 
-    def bind(self, context):
+    def bind(self, context, save_model=True):
         self.context = context
         if not self.client: self.open(self.options.store)
         c = self.client
         if not context:
             c.select(revision=None, trace_id=None, scenario_id=None)
+            return
+        if not save_model:
             return
         identity = context['identity']
         if any(identity.get('environment_constraints', [])):
@@ -95,7 +97,13 @@ class Native:
     def execute(self, request):
         op, args = request['operation'], deepcopy(request['arguments'])
         if op == 'workspace.open': self.open(args['directory'])
-        self.bind(request['context'])
+        if op == 'workspace.clear':
+            if not self.client: self.open(self.options.store)
+            result = self.client.dispatch(op, args)
+            self.trace_ids.clear()
+            return result, None
+        needs_revision = op in ('metadata.set', 'metadata.list', 'model.symbols', 'query.run', 'scenario.configure', 'scenario.export', 'scenario.replay')
+        self.bind(request['context'], save_model=needs_revision or op in ('workspace.open', 'trace.compare'))
         c = self.client
         if op in ('workspace.open', 'workspace.show'):
             result = deepcopy(c.dispatch('workspace.show', {}))
@@ -104,7 +112,6 @@ class Native:
             selections['model'] = self.context.get('document', {}).get('name')
             selections['trace'] = self.context.get('trace_name')
             return result, None
-        needs_revision = op in ('metadata.set', 'metadata.list', 'model.symbols', 'query.run', 'scenario.configure', 'scenario.export', 'scenario.replay')
         if needs_revision: args['revision'] = self.current_revision()
         background = args.pop('background', False)
         if op == 'query.run':
@@ -120,6 +127,7 @@ class Native:
         if op == 'scenario.export': args['trace_id'] = self.trace()
         if op in ('scenario.replay', 'scenario.show'):
             args['scenario_id'] = c.resolve('scenario', args.get('scenario_id'))
+        if op == 'progress.export': args['job_id'] = c.resolve('job')
         if op.startswith('job.') and op not in ('job.list', 'job.submit'):
             args['job_id'] = c.resolve('job', args.get('job_id'))
         result = c.dispatch(op, args)

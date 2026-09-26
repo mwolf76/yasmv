@@ -19,6 +19,7 @@
 #include <workbench.hh>
 
 namespace cmd {
+    Json::Value read_progress_file(const std::string& path) { return query::trace::read_file(path); }
     int workbench(const std::vector<std::string>& arguments, bool replace_process)
     {
         namespace fs = std::filesystem;
@@ -231,6 +232,6 @@ namespace cmd {
             return utils::Variant(errMessage);
         }
         const auto outcome = result.get("outcome", "").asString();
-        return utils::Variant(outcome == "unreachable" || outcome == "unsatisfiable" || outcome == "violated" || outcome == "deadlocked" || outcome == "diverged" ? errMessage : okMessage);
+        return utils::Variant(outcome == "unreachable" || outcome == "unsatisfiable" || outcome == "violated" || outcome == "invalid" || outcome == "deadlocked" || outcome == "diverged" ? errMessage : okMessage);
     }
 } // namespace cmd
