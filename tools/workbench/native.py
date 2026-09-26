@@ -120,6 +120,7 @@ class Native:
         if op == 'scenario.export': args['trace_id'] = self.trace()
         if op in ('scenario.replay', 'scenario.show'):
             args['scenario_id'] = c.resolve('scenario', args.get('scenario_id'))
+        if op == 'progress.export': args['job_id'] = c.resolve('job')
         if op.startswith('job.') and op not in ('job.list', 'job.submit'):
             args['job_id'] = c.resolve('job', args.get('job_id'))
         result = c.dispatch(op, args)

@@ -275,6 +275,8 @@ class Engine:
         identifier = request['request_id']
         directory = self.path('jobs', identifier)
         if query['operation'] == 'export-scenario':
+            if request['query'].get('trace_id') and self.trace(request['query']['trace_id']).get('progress_kind'):
+                raise ValueError('Progress evidence is not a finite scenario; explicitly export and import its finite trace prefix first')
             trace = query['trace']
             validation = self.worker(request, rev, dict(operation='validate-trace', trace=trace), cancel, deadline, 'replay')
             if validation['status'] != 'completed':
@@ -328,7 +330,7 @@ class Engine:
                 query['property'] = dict(name=name, expression=rev['properties'][name])
             if 'trace_id' in query:
                 query['trace'] = self.trace(query.pop('trace_id'))['trace']
-            query.setdefault('watches', {} if query['operation'].startswith('explain-') else rev['watches'])
+            query.setdefault('watches', {} if query['operation'].startswith('explain-') or query['operation'] == 'validate-progress' else rev['watches'])
             deadline = time.monotonic() + request.get('hard_timeout', 60)
             if query['operation'] in ('export-scenario', 'replay-scenario'):
                 result = self.scenario_job(request, rev, query, cancel, deadline)
@@ -349,7 +351,11 @@ class Engine:
                 else:
                     artifact = dict(revision=rev['id'], trace=trace, validated=True,
                                     watches=replay.get('watches') or {}, watch_expressions=query['watches'], job=identifier)
-                    trace_id = hashlib.sha256(encoded(dict(revision=rev['id'], trace=trace, watches=artifact['watches'], watch_expressions=query['watches']))).hexdigest()
+                    if result.get('progress'):
+                        artifact['progress_kind'] = result['progress']['kind']
+                    identity = dict(revision=rev['id'], trace=trace, watches=artifact['watches'], watch_expressions=query['watches'])
+                    if 'progress_kind' in artifact: identity['progress_kind'] = artifact['progress_kind']
+                    trace_id = hashlib.sha256(encoded(identity)).hexdigest()
                     artifact['id'] = trace_id
                     with self.guard:
                         if not cancel.is_set():

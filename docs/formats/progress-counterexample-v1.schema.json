@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "loop",
+        "deadlock"
+      ]
+    },
+    "identity": {
+      "type": "object"
+    },
+    "query": {
+      "$ref": "query-v1.schema.json#/properties/query"
+    },
+    "trace": {
+      "$ref": "trace-v1.schema.json"
+    },
+    "loop_start": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "title": "Guaranteed progress counterexample v1",
+  "required": [
+    "version",
+    "kind",
+    "identity",
+    "query",
+    "trace"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "loop"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "loop_start"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "loop_start"
+          ]
+        }
+      }
+    }
+  ]
+}

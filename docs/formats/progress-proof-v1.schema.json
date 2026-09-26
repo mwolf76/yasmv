@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "proof"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "query": {
+      "$ref": "query-v1.schema.json#/properties/query"
+    },
+    "initial_satisfiable": {
+      "type": "boolean"
+    },
+    "vacuous": {
+      "type": "boolean"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "values",
+          "edges",
+          "goal_exit",
+          "rank"
+        ],
+        "properties": {
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "trace-v1.schema.json#/$defs/value"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "goal_exit": {
+            "type": "boolean"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "title": "Guaranteed progress proof v1",
+  "required": [
+    "version",
+    "kind",
+    "identity",
+    "query",
+    "initial_satisfiable",
+    "vacuous",
+    "nodes"
+  ]
+}

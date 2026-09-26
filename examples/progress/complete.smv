@@ -1,0 +1,8 @@
+MODULE main
+#inertial
+VAR phase : {READY, WORKING, DONE};
+INIT phase = READY;
+TRANS phase = READY ?: phase := WORKING;
+TRANS phase = WORKING ?: phase := DONE;
+TRANS phase = DONE ?: phase := DONE;
+DEFINE FINISHED := phase = DONE;

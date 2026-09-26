@@ -85,6 +85,8 @@ help job
 | `capabilities` | Discover agent operations; use `yasmv --capabilities` for machine-readable schemas |
 | `reach EXPR -depth N`, optionally `-shortest` | Bounded or shortest search, accepting saved goal names |
 | `check-property NAME -depth N`, `prove-property NAME -depth N` | Bounded safety checking and verified induction |
+| `check-progress EXPR -states N -wall-ms N` | Check universal eventual completion; detect loops and dead ends |
+| `export-progress "FILE"`, `validate-progress "FILE"` | Save and recheck a portable progress proof or failure |
 | `explain-init`, `explain-step`, `explain-reach EXPR -depth N` | Explain inconsistent assumptions and bounded impossibility |
 | `simulate -at K -depth N` | Continue the current trace after preserving states 0 through K |
 | `list-traces`, `select-trace`, `dump-trace`, `read-trace` | Existing native trace inspection and exchange |
@@ -124,6 +126,11 @@ root, and inputs. The shell still explicitly loads its model and selects traces.
 A store has one owner at a time. Close the HTTP server before opening the same
 store from the CLI. Switch workspaces after active jobs finish. The default is
 `.yasmv-workbench` in the current directory.
+
+Progress queries do not take a depth bound. Native defaults are 10,000 non-goal
+states and 30,000 ms. Agent queries supply both limits explicitly. They report a
+verified unbounded result or UNKNOWN; they do not assume fairness. See
+[guaranteed progress](PROGRESS_CHECKING.md) for semantics and artifacts.
 
 ## Batch use and jobs
 
