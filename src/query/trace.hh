@@ -3,6 +3,8 @@
 #include <query/query.hh>
 namespace query::trace {
     Json::Value symbol_catalog();
+    Json::Value state_values(sat::Engine&, unsigned);
+    expr::Expr_ptr valuation(const Json::Value&);
     Json::Value evaluate_watches(witness::Witness&, const std::map<std::string, expr::Expr_ptr>&);
     void allocate_state(sat::Engine&, unsigned);
     witness::Witness_ptr decode(sat::Engine&, unsigned);

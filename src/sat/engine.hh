@@ -129,6 +129,8 @@ namespace sat {
         /**
 	 * @brief Fetch variable value from Minisat model
 	 */
+        inline bool assigned(Var var) { return Minisat::toInt(f_solver.modelValue(var)) != 2; }
+
         inline int value(Var var)
         {
             assert(STATUS_SAT == f_status);

@@ -69,6 +69,7 @@ namespace query {
         v["explanation"] = explanation;
         v["optimality"] = optimality;
         v["proof"] = proof;
+        if (!progress.isNull()) v["progress"] = progress;
         v["trace"] = trace;
         v["checked_depths"] = Json::arrayValue;
         for (auto d : checked_depths)
@@ -303,6 +304,8 @@ namespace query {
             const auto& l = context.limits;
             if (l.depth != spec.limits.depth || l.states != spec.limits.states || l.wall_ms != spec.limits.wall_ms || l.conflicts != spec.limits.conflicts || l.propagations != spec.limits.propagations)
                 throw std::invalid_argument("QueryContext limits must match QuerySpec limits");
+            const bool progress = spec.operation == Operation::check_progress || spec.operation == Operation::validate_progress;
+            if (!progress && !spec.progress.isNull()) throw std::invalid_argument("Progress artifact requires validate-progress");
             const bool reaching = spec.operation == Operation::reach || spec.operation == Operation::shortest_reach;
             const bool property = spec.operation == Operation::check_property || spec.operation == Operation::prove_property;
             if (property != !spec.property.isNull()) throw std::invalid_argument("Named property requires check-property or prove-property");
@@ -313,13 +316,13 @@ namespace query {
             for (const auto& [name, e] : spec.watches)
                 if (name.empty() || !state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Watches require named Boolean state expressions");
             if (!reaching && spec.strategy != "auto") throw std::invalid_argument("Strategy selection applies only to reachability");
-            if (spec.target && ((!reaching && spec.operation != Operation::explain_reach) || !state_expression(spec.target))) throw std::invalid_argument("Reachability target must be a state expression");
+            if (spec.target && ((!reaching && spec.operation != Operation::check_progress && spec.operation != Operation::explain_reach) || !state_expression(spec.target))) throw std::invalid_argument("Reachability target must be a state expression");
             if (spec.until && spec.operation != Operation::simulate) throw std::invalid_argument("Until condition applies only to simulation");
             if (spec.operation != Operation::pick_state && (spec.enumerate || spec.count)) throw std::invalid_argument("Enumeration/counting applies only to pick-state");
             if (spec.operation == Operation::check_init || spec.operation == Operation::pick_state || spec.operation == Operation::check_trans)
                 for (auto e : spec.assumptions)
                     if (!state_expression(e)) throw std::invalid_argument("This operation requires state assumptions");
-            if (spec.limits.states >= 0 && spec.operation != Operation::pick_state) throw std::invalid_argument("State limit applies only to pick-state");
+            if (spec.limits.states >= 0 && spec.operation != Operation::pick_state && !progress) throw std::invalid_argument("State limit applies only to pick-state and progress");
             if (spec.limits.depth >= 0 && (spec.operation == Operation::check_init || spec.operation == Operation::pick_state || spec.operation == Operation::validate_trace || spec.operation == Operation::validate_model)) throw std::invalid_argument("Depth limit is unsupported for this operation");
             if (reaching)
                 for (auto e : spec.assumptions)
@@ -329,7 +332,9 @@ namespace query {
             r.identity = identity();
             if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward") throw std::invalid_argument("Unknown or empty strategy configuration");
             if (reaching && !spec.target) throw std::invalid_argument("Reachability requires a target");
-            if (property) {
+            if (progress) {
+                analyze_progress(spec, r, context);
+            } else if (property) {
                 analyze_property(spec, r, context);
             } else if (explaining) {
                 explain(spec, r, context);
@@ -439,6 +444,7 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.progress = Json::Value();
             r.witness = nullptr;
         } catch (const Exception& e) {
             r.status = ExecutionStatus::error;
@@ -469,6 +475,7 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.progress = Json::Value();
             r.witness = nullptr;
         }
         r.statistics["compile_ms"] = context.compile_ms;

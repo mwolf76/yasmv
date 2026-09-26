@@ -55,6 +55,17 @@ def render(result):
               'proven': 'Safety property proven by verified induction', 'simulated': 'Simulation done', 'deadlocked': 'Simulation deadlocked',
               'exported': 'Scenario exported', 'matched': 'Implementation matches the scenario', 'diverged': 'Implementation diverges from the scenario',
               'unsatisfiable': 'Constraints are inconsistent', 'satisfiable': 'Constraints are satisfiable'}
+    progress = result.get('progress_summary') or result.get('progress')
+    if progress:
+        labels.update(proven='Every execution eventually reaches the goal', violated='Guaranteed progress violated', valid='Progress artifact validated')
+        if progress['kind'] == 'loop':
+            print('-- Repeating execution: last state returns to state ' + str(progress['loop_start']))
+        elif progress['kind'] == 'deadlock':
+            print('-- Execution gets stuck before reaching the goal')
+        if progress.get('vacuous'):
+            print('-- VACUOUS: no legal initial states; this does not establish a runnable system')
+        assumptions = progress.get('assumptions', progress.get('query', {}).get('assumptions', []))
+        if assumptions: print('   Under assumptions: ' + ', '.join(assumptions))
     print('-- ' + labels.get(result.get('outcome'), result.get('outcome') or 'Completed'))
     if result.get('optimality'): print('   Shortest witness: ' + str(result['optimality']['depth']) + ' transitions')
     if result.get('job_id'): print('   Job: ' + result['job_id'])

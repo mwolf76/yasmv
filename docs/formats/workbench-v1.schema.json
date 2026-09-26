@@ -47,7 +47,9 @@
             "replay-scenario",
             "shortest-reach",
             "check-property",
-            "prove-property"
+            "prove-property",
+            "check-progress",
+            "validate-progress"
           ]
         },
         "target": {
@@ -92,6 +94,10 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
+            },
+            "states": {
+              "type": "integer",
+              "minimum": 1
             }
           }
         },
@@ -162,6 +168,16 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 120
+        },
+        "progress": {
+          "oneOf": [
+            {
+              "$ref": "progress-proof-v1.schema.json"
+            },
+            {
+              "$ref": "progress-counterexample-v1.schema.json"
+            }
+          ]
         }
       },
       "allOf": [
@@ -172,7 +188,8 @@
                 "enum": [
                   "reach",
                   "explain-reach",
-                  "shortest-reach"
+                  "shortest-reach",
+                  "check-progress"
                 ]
               }
             }
@@ -181,14 +198,7 @@
             "required": [
               "target",
               "limits"
-            ],
-            "properties": {
-              "limits": {
-                "required": [
-                  "depth"
-                ]
-              }
-            }
+            ]
           },
           "else": {
             "not": {
@@ -529,6 +539,106 @@
                     "minimum": 1
                   }
                 }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check-progress",
+                  "validate-progress"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "states",
+                  "wall_ms"
+                ],
+                "properties": {
+                  "states": {
+                    "minimum": 1
+                  },
+                  "wall_ms": {
+                    "minimum": 0
+                  }
+                },
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "check-progress"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-progress"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "progress"
+            ],
+            "not": {
+              "required": [
+                "target"
+              ]
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "progress"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "reach",
+                  "shortest-reach",
+                  "explain-reach"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ]
               }
             }
           }

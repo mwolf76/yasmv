@@ -1,0 +1,8 @@
+.nf
+YASMV manual                                           export-progress
+
+export-progress "FILE"
+
+Exports the last job's verified progress artifact, including model identity,
+generating query, and loop/deadlock or proof evidence. Use validate-progress
+to recheck it. The file is replaced atomically.

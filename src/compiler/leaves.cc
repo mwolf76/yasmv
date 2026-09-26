@@ -136,9 +136,10 @@ namespace compiler {
                 (*this)(value);
             }
 
-            /* REVIEW THIS */
             else if (type->is_instance()) {
-                assert(false);
+                // A dotted expression visits its instance prefix before entering
+                // that scope. It contributes a type, not an encoded value. This
+                // also applies to a fresh query compiler in a reused snapshot.
                 PUSH_TYPE(type);
             }
 
