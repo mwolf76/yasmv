@@ -1,5 +1,10 @@
 # SAT Solver Configuration Parameters
 
+For the supported custom CNF transformations and quarantined options, see the
+[correctness baseline](CORRECTNESS_BASELINE.md). Those passes are separate from
+the MiniSat parameters documented here. Performance guidance below is historical;
+measure the relevant workload before adopting tuning settings.
+
 This document provides detailed documentation for all configurable SAT solver parameters in yasmv, based on the underlying MiniSat SAT solver. These parameters control various aspects of the solver's behavior, performance characteristics, and search strategy.
 
 ## Overview

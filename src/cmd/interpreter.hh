@@ -76,6 +76,9 @@ namespace cmd {
         }
 
         void quit(int retcode);
+        // Execution failures are sticky in batch mode; negative SAT outcomes
+        // remain ordinary command results.
+        void record_error(int code = 2);
 
         inline struct timespec epoch() const
         {

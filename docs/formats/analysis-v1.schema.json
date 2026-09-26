@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "M4 analysis result evidence v1",
+  "type": "object",
+  "required": [
+    "version",
+    "status",
+    "outcome",
+    "scope",
+    "optimality",
+    "proof"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "unknown",
+        "error"
+      ]
+    },
+    "outcome": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scope": {
+      "type": "string"
+    },
+    "optimality": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "criterion",
+        "certified",
+        "depth",
+        "unsat_depths",
+        "method"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "criterion": {
+          "const": "transitions"
+        },
+        "certified": {
+          "const": true
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsat_depths": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        },
+        "method": {
+          "const": "increasing-depth-exhaustion"
+        }
+      }
+    },
+    "proof": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "property": {
+          "type": "object",
+          "required": [
+            "name",
+            "expression"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expression": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "base_unsat_depths": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        },
+        "induction_depth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "step_status": {
+          "enum": [
+            "satisfiable",
+            "unsatisfiable"
+          ]
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "verified_base_depths": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        },
+        "verification": {
+          "const": "fresh-solvers"
+        },
+        "induction_counterexample": {
+          "type": "object",
+          "required": [
+            "trace",
+            "reachable",
+            "meaning"
+          ],
+          "properties": {
+            "trace": {
+              "type": "object"
+            },
+            "reachable": {
+              "const": "not_established"
+            },
+            "meaning": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "proven"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          },
+          "scope": {
+            "const": "unbounded"
+          },
+          "trace": {
+            "type": "null"
+          },
+          "proof": {
+            "type": "object",
+            "required": [
+              "property",
+              "assumptions",
+              "base_unsat_depths",
+              "induction_depth",
+              "verified_base_depths",
+              "step_status",
+              "verified",
+              "verification"
+            ],
+            "properties": {
+              "verified": {
+                "const": true
+              },
+              "step_status": {
+                "const": "unsatisfiable"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "unknown",
+              "error"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "optimality": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

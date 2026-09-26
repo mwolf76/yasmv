@@ -1,11 +1,11 @@
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
-Model `magic3` has only one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
+Model `magic3` has at least one feasible initial state (with 1 additional constraint)
 -- Simulation trace for module `magic3`
 Witness: sim-1
 

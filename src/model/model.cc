@@ -78,13 +78,29 @@ namespace model {
 
     Module& Model::main_module()
     {
-        if (!f_modules.size()) {
+        if (!f_root) {
+            select_root("");
+        }
+        return *f_root;
+    }
+
+    void Model::select_root(const std::string& name)
+    {
+        if (f_modules.empty()) {
             throw MainModuleNotFound();
         }
-
-        Modules::const_iterator i { f_modules.begin() };
-
-        return *(i->second);
+        if (!name.empty()) {
+            auto id = expr::ExprMgr::INSTANCE().make_identifier(name);
+            auto found = f_modules.find(id);
+            if (found == f_modules.end()) {
+                throw SemanticError("Unknown root module `" + name + "`.");
+            }
+            f_root = found->second;
+        } else if (f_modules.size() == 1) {
+            f_root = f_modules.begin()->second;
+        } else {
+            throw SemanticError("Multiple modules require an explicit --root <module>.");
+        }
     }
 
     void Model::autoIndexSymbol(expr::Expr_ptr identifier)

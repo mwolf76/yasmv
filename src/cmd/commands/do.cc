@@ -52,7 +52,7 @@ namespace cmd {
             assert(NULL != c);
 
             res = (*c)();
-            if (cm.is_failure(res)) {
+            if (cm.is_failure(res) || is_unknown(res)) {
                 break;
             }
 
