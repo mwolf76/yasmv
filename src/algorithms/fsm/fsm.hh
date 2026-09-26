@@ -27,7 +27,6 @@
 #ifndef FSM_ALGORITHM_H
 #define FSM_ALGORITHM_H
 
-#include <cmd/command.hh>
 
 #include <expr/expr.hh>
 
@@ -45,7 +44,7 @@ namespace fsm {
     class CheckInitConsistency: public algorithms::Algorithm {
 
     public:
-        CheckInitConsistency(cmd::Command& command, model::Model& model);
+        CheckInitConsistency(model::Model& model);
         ~CheckInitConsistency();
 
         void process(expr::ExprVector constraints);
@@ -71,10 +70,10 @@ namespace fsm {
     class CheckTransConsistency: public algorithms::Algorithm {
 
     public:
-        CheckTransConsistency(cmd::Command& command, model::Model& model);
+        CheckTransConsistency(model::Model& model);
         ~CheckTransConsistency();
 
-        void process(expr::ExprVector constraints);
+        void process(expr::ExprVector constraints, const sat::SolveCallback& solve = {});
 
         fsm_consistency_t status() const
         {
@@ -108,7 +107,7 @@ namespace fsm {
     class ComputeDiameter: public algorithms::Algorithm {
 
     public:
-        ComputeDiameter(cmd::Command& command, model::Model& model);
+        ComputeDiameter(model::Model& model);
         ~ComputeDiameter();
 
         void process();

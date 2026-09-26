@@ -1,3 +1,4 @@
+#include <query/source.hh>
 /**
  * @file parse.cc
  * @brief Parsing services implementation.
@@ -43,6 +44,7 @@
 namespace parse {
 
 static bool parseErrors;
+static std::string diagnosticFile;
 static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
                                           pANTLR3_UINT8 * tokenNames);
 static void reportParserStatus(bool parseErrors, timespec start,
@@ -55,6 +57,8 @@ static void reportParserStatus(bool parseErrors, timespec start,
  */
 bool parseFile(const char* fName)
 {
+    diagnosticFile = fName;
+    source::begin(fName);
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -86,8 +90,13 @@ bool parseFile(const char* fName)
 
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
     psr->smv(psr);
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) {
+        std::cerr << "Syntax error: unexpected trailing model input." << std::endl;
+        parseErrors = true;
+    }
 
     // cleanup
     psr->free(psr);
@@ -108,6 +117,7 @@ bool parseFile(const char* fName)
 // FIXME: proper error handling
 cmd::CommandVector_ptr parseCommand(const char *command_line)
 {
+    diagnosticFile = "<command>";
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -185,8 +195,15 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+
     cmd::CommandVector_ptr res
         (psr -> command_line(psr));
+
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) {
+        std::cerr << "Syntax error: unexpected trailing command input." << std::endl;
+        parseErrors = true;
+    }
 
     // cleanup
     psr->free(psr);
@@ -198,6 +215,11 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
     clock_gettime(CLOCK_MONOTONIC, &stop_clock);
 
     reportParserStatus(parseErrors, start_clock, stop_clock);
+    if (parseErrors && res) {
+        for (auto command : *res) delete command;
+        delete res;
+        res = nullptr;
+    }
     return ! parseErrors
         ? res : NULL;
 }
@@ -207,6 +229,7 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
  */
 expr::Expr_ptr parseExpression(const char *string)
 {
+    diagnosticFile = "<expression>";
     pANTLR3_INPUT_STREAM input;
     pANTLR3_COMMON_TOKEN_STREAM tstream;
 
@@ -227,8 +250,10 @@ expr::Expr_ptr parseExpression(const char *string)
 
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
     expr::Expr_ptr res { psr -> toplevel_expression(psr) };
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) parseErrors = true;
 
     psr->free(psr);
     tstream->free(tstream);
@@ -288,6 +313,12 @@ static void yasmvdisplayRecognitionError (pANTLR3_BASE_RECOGNIZER recognizer,
                                           pANTLR3_UINT8 * tokenNames)
 {
     if (! parseErrors) {
+        source::Diagnostic diagnostic;
+        diagnostic.code = "syntax-error";
+        diagnostic.message = "Unexpected token";
+        const auto ex = recognizer->state->exception;
+        diagnostic.primary = {diagnosticFile, ex->line, static_cast<unsigned>(std::max(0, ex->charPositionInLine) + 1), ex->line, static_cast<unsigned>(std::max(0, ex->charPositionInLine) + 1)};
+        source::diagnostics().push_back(diagnostic);
         std::cerr
             << "Syntax error";
 

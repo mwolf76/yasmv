@@ -40,7 +40,7 @@ EXTRA_DIST = \
 
 # Test target
 test-local:
-	@echo "Testing llvm2smv..."
+	@echo "LLVM translation smoke test (does not establish semantic equivalence)..."
 	@if test "x$(CLANG)" != "xno"; then \
 		cd $(srcdir)/examples/simple && ./compile.sh counter.c && \
 		$(abs_builddir)/llvm2smv counter.ll -o counter.smv && \

@@ -5,20 +5,20 @@ YASMV manual                                           read-trace
 SYNOPSIS
 
 .in 3
-read-trace [-f <format>] '<filepath>'
+read-trace '<filepath>'
 
 .ti 0
 DESCRIPTION
 
 .fi
 .in 3
-Reads a trace from given filename.
+Reads a trace from the given filename. A .json file must contain one trace v1
+object. Its model identity, types, values, initialization, invariants,
+transitions, and generating query are validated before it is registered and
+selected. The matching model and input bindings must already be loaded.
 
-
-Reads a trace from file with specified name. If no format is specified, the extension of the input file is used
-to determine which format to apply. If an extension '*.json' is encountered, the parser tries to read the input
-file as a json; if '*.yaml' is encountered, the parser tries to read the input file as a yaml file. In no other
-format could be determined, the parser attempts to read a plain-text trace from the input file.
+Other extensions use the legacy plain-text reader; YAML is unsupported.
+See docs/QUERY_AND_TRACE_CONTRACTS.md for the JSON format and migration notes.
 
 NOTICE: due to a limitation of the parser, file paths must ALWAYS be specified
 enclosed in either single or double quotes. Paths not enclosed in quotes will

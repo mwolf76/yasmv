@@ -1,3 +1,5 @@
+#include <query/source.hh>
+#include <query/runtime.hh>
 /**
  * @file analyzer.cc
  * @brief Semantic analyzer module
@@ -220,6 +222,7 @@ namespace model {
             // For small check counts, don't overdo parallelism
             num_threads = std::min(num_threads, static_cast<unsigned int>(compiled_checks.size()));
             
+            if (query::current()) num_threads = 1;
             size_t num_checks = compiled_checks.size();
             DEBUG
                 << "Performing " << num_checks << " mutual exclusivity SAT checks "
@@ -281,6 +284,7 @@ namespace model {
                             << "` and `"
                             << check.q
                             << "`";
+                        source::guard_conflict(check.p, check.q);
                         errors.push_back(oss.str());
                     }
                 }
@@ -304,12 +308,15 @@ namespace model {
             
             // Wait for all tasks to complete
             for (auto& future : futures) {
-                future.wait();
+                future.get();
             }
             
             // Report all errors
             for (const auto& error : errors) {
                 ERR << error << std::endl;
+            }
+            if (!errors.empty()) {
+                throw SemanticError("Inertial assignment guards must be mutually exclusive.");
             }
         }
         } // end of else block for skip_inertial_fsm_checks
@@ -351,6 +358,7 @@ namespace model {
                 << std::endl;
 
             main.add_trans(synth_trans);
+            source::generated(synth_trans, ident, ev);
         }
     }
 

@@ -30,8 +30,8 @@
 
 namespace fsm {
 
-    CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
-        : algorithms::Algorithm(command, model)
+    CheckTransConsistency::CheckTransConsistency(model::Model& model)
+        : algorithms::Algorithm(model)
         , f_limit(1)
     {
         const void* instance { this };
@@ -52,8 +52,13 @@ namespace fsm {
             << std::endl;
     }
 
-    void CheckTransConsistency::process(expr::ExprVector constraints)
+    void CheckTransConsistency::process(expr::ExprVector constraints, const sat::SolveCallback& solve)
     {
+        f_status = FSM_CONSISTENCY_UNDECIDED;
+        f_constraint_cus.clear();
+        if (f_limit == 0) {
+            throw model::SemanticError("Transition check limit must be positive.");
+        }
         sat::Engine engine { "Transitional" };
         expr::Expr_ptr ctx { em().make_empty() };
 
@@ -104,17 +109,19 @@ namespace fsm {
                     this->assert_formula(engine, k+1, cu);
             });
 
-            sat::status_t status { engine.solve() };
+            sat::status_t status { solve ? solve(engine) : engine.solve() };
+
+            if (status == sat::STATUS_UNKNOWN) {
+                return;
+            }
 
             if (sat::status_t::STATUS_UNSAT == status) {
                 f_status = FSM_CONSISTENCY_KO;
-                break;
+                return;
             }
         }
 
         // if no failures were detected up to this point, result is SAT
-        if (f_status == FSM_CONSISTENCY_UNDECIDED) {
-            f_status = FSM_CONSISTENCY_OK;
-        }
+        f_status = FSM_CONSISTENCY_OK;
     }
 } // namespace fsm

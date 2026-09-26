@@ -35,8 +35,8 @@ static unsigned progressive = 0;
 static auto simulation_trace_prefix = "sim-";
 
 namespace sim {
-    Simulation::Simulation(cmd::Command& command, model::Model& model)
-        : Algorithm(command, model)
+    Simulation::Simulation(model::Model& model)
+        : Algorithm(model)
     {
         const void* instance { this };
         TRACE
@@ -107,13 +107,14 @@ namespace sim {
             if (symb->is_variable()) {
 
                 /* INPUT vars are not really vars ... */
-                if (symb::Variable & var { symb->as_variable() }; var.is_input()) {
+                const auto& var = symb->as_variable();
+                if (var.is_input() || var.type()->is_instance()) {
                     continue;
                 }
 
                 /* time it, and fetch encoding for enc mgr */
                 const enc::Encoding_ptr enc {
-                    bm.find_encoding(expr::TimedExpr(key, 0))
+                    bm.find_encoding(expr::TimedExpr(key, var.is_frozen() ? FROZEN : 0))
                 };
 
                 if (!enc) {
@@ -138,22 +139,47 @@ namespace sim {
                 }
             }
 
-            /* add exclusion clause to SAT instance */
-            engine.add_clause(exclusion);
         }
+        // Exclude exactly one complete valuation, not each successive prefix.
+        engine.add_clause(exclusion);
     }
 
-    value_t Simulation::pick_state(expr::ExprVector constraints,
+    EnumerationResult Simulation::pick_state(expr::ExprVector constraints,
                                    const bool all_sat,
                                    const bool count,
-                                   const value_t limit)
+                                   const value_t limit,
+                                   const sat::SolveCallback& solve)
     {
+        if (limit == 0 || limit < -1) {
+            throw model::SemanticError("State limit must be positive, or -1 for no limit.");
+        }
         value_t feasible { 0 };
+        EnumerationStop stop { EnumerationStop::unknown };
 
         const clock_t t0 { clock() };
 
         sat::Engine engine { "pick_state" };
         expr::Expr_ptr ctx { em().make_empty() };
+
+        // Unconstrained state variables are still part of the state space.
+        // Allocate their SAT bits before solving, including frozen variables.
+        auto& enc_mgr = enc::EncodingMgr::INSTANCE();
+        symb::SymbIter symbols { model() };
+        while (symbols.has_next()) {
+            const auto [scope, symbol] = symbols.next();
+            if (!symbol->is_variable()) continue;
+            const auto& var = symbol->as_variable();
+            if (var.is_input() || var.type()->is_instance()) continue;
+            expr::TimedExpr key(em().make_dot(scope, var.name()), var.is_frozen() ? FROZEN : 0);
+            auto encoding = enc_mgr.find_encoding(key);
+            if (!encoding) {
+                encoding = enc_mgr.make_encoding(var.type());
+                enc_mgr.register_encoding(key, encoding);
+            }
+            for (const auto& bit : encoding->bits()) {
+                engine.tcbi_to_var(enc::TCBI(enc_mgr.find_ucbi(bit.getNode()->index), 0));
+            }
+        }
 
         compiler::Units constraint_cus;
         unsigned no_constraints { 0 };
@@ -189,7 +215,10 @@ namespace sim {
             });
 
         while (true) {
-            if (sat::status_t::STATUS_SAT != engine.solve()) {
+            const auto status = solve ? solve(engine) : engine.solve();
+            if (status != sat::STATUS_SAT) {
+                stop = status == sat::STATUS_UNSAT ? EnumerationStop::exhausted
+                                                  : EnumerationStop::unknown;
                 break;
             }
 
@@ -201,14 +230,7 @@ namespace sim {
                 << secs << " seconds"
                 << std::endl;
 
-            if (++feasible >= limit) {
-                TRACE
-                    << "Reached limit: "
-                    << limit
-                    << ", leaving."
-                    << std::endl;
-                break;
-            }
+            ++feasible;
 
             if (!count) {
                 extract_witness(engine, !all_sat);
@@ -216,6 +238,12 @@ namespace sim {
 
             if (!all_sat && !count) {
                 /* no further work needed here ... */
+                stop = EnumerationStop::witness;
+                break;
+            }
+
+            if (limit > 0 && feasible >= limit) {
+                stop = EnumerationStop::limit;
                 break;
             }
 
@@ -228,7 +256,7 @@ namespace sim {
             << " feasible states"
             << std::endl;
 
-        return feasible;
+        return { feasible, stop };
     }
 
     simulation_status_t Simulation::simulate(expr::ExprVector constraints,

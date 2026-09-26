@@ -27,7 +27,6 @@
 #include <algorithms/base.hh>
 #include <algorithms/reach/typedefs.hh>
 
-#include <cmd/command.hh>
 
 #include <compiler/typedefs.hh>
 
@@ -36,7 +35,7 @@ namespace reach {
     class Reachability : public algorithms::Algorithm {
 
     public:
-        Reachability(cmd::Command& command, model::Model& model);
+        Reachability(model::Model& model);
         ~Reachability() override;
 
         void process(expr::Expr_ptr target, expr::ExprVector constraints);

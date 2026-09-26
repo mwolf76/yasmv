@@ -84,13 +84,11 @@ namespace cmd {
 
                 res = f_else->operator()();
             }
+        } else if (is_unknown(res)) {
+            // Neither success nor failure has been established.
+            return res;
         } else {
-            ERR
-                << "unexpected: condition was neither in `SUCCESS` or `FAILURE` state."
-                << res
-                << std::endl;
-
-            assert(false);
+            throw CommandException("No previous command status is available.");
         }
 
         return res;

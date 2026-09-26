@@ -30,6 +30,7 @@
 #include <common/common.hh>
 
 #include <vector>
+#include <jsoncpp/json/json.h>
 
 #include <boost/unordered_map.hpp>
 
@@ -102,6 +103,7 @@ namespace witness {
     using Witness_ptr = class Witness*;
     class Witness {
     public:
+        Json::Value artifact;
         Witness(sat::Engine_ptr pengine = NULL,
                 expr::Atom id = "<Noname>",
                 expr::Atom desc = "<No description>",

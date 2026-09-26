@@ -25,6 +25,8 @@ yasmv
 llvm2smv/llvm2smv
 yasmv.pc
 yasmv_tests
+yasmv_reliability_tests
+__pycache__/
 playground/
 .idea/
 microcode/
@@ -32,3 +34,11 @@ microcode/
 
 # Local git configuration
 .gitconfig
+
+yasmv_query_tests
+!docs/formats/*.json
+
+.yasmv-workbench/
+!examples/retry-protocol/scenario.json
+
+!docs/benchmarks/m4-sessions.json

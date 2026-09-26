@@ -30,7 +30,6 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <cmd/command.hh>
 
 #include <compiler/compiler.hh>
 
@@ -60,7 +59,9 @@ namespace algorithms {
     class Algorithm {
 
     public:
-        Algorithm(cmd::Command& command, model::Model& model);
+        Algorithm(model::Model& model);
+        // Only an immutable, single-model snapshot process may install this cache.
+        static void reuse(const Algorithm* compiled);
         virtual ~Algorithm();
 
         /* top-level components */
@@ -105,6 +106,10 @@ namespace algorithms {
             return *f_witness;
         }
 
+        const compiler::Units& init_units() const { return f_init; }
+        const compiler::Units& invar_units() const { return f_invar; }
+        const compiler::Units& trans_units() const { return f_trans; }
+
         /* FSM */
         void assert_fsm_init(sat::Engine& engine, step_t time,
                              sat::group_t group = sat::MAINGROUP);
@@ -133,11 +138,9 @@ namespace algorithms {
         void process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar);
         void process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans);
 
+        expr::Expr_ptr f_source_module = nullptr;
         /* all good? */
         bool f_ok;
-
-        /* Command */
-        cmd::Command& f_command;
 
         /* Model */
         model::Model& f_model;

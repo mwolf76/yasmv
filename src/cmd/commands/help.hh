@@ -46,8 +46,10 @@ namespace cmd {
     typedef Help* Help_ptr;
 
     class HelpTopic: public CommandTopic {
+        std::string f_name;
+
     public:
-        explicit HelpTopic(Interpreter& owner);
+        explicit HelpTopic(Interpreter& owner, const std::string& name = "help");
         ~HelpTopic() override;
 
         void usage() override;

@@ -24,6 +24,7 @@
 #include <cmd.hh>
 
 #include <boost/filesystem.hpp>
+#include <stdexcept>
 
 namespace cmd {
     CommandMgr_ptr CommandMgr::f_instance { NULL };
@@ -51,6 +52,14 @@ namespace cmd {
         DEBUG
             << "Destroyed CommandMgr"
             << std::endl;
+    }
+
+    CommandTopic_ptr CommandMgr::topic_named(const std::string& name)
+    {
+        if (!topics().count(name)) {
+            throw std::invalid_argument("Unknown help topic: " + name);
+        }
+        return new HelpTopic(f_interpreter, name);
     }
 
     CommandTopics CommandMgr::topics() const

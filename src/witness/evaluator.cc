@@ -217,7 +217,7 @@ namespace witness {
     void Evaluator::walk_neg_postorder(const expr::Expr_ptr expr)
     {
         POP_VALUE(lhs);
-        PUSH_VALUE(-lhs);
+        PUSH_VALUE(static_cast<value_t>(uint64_t(0) - static_cast<uint64_t>(lhs)));
     }
 
     bool Evaluator::walk_not_preorder(const expr::Expr_ptr expr)

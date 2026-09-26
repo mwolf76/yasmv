@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /**
  * @file pick_state.cc
  * @brief Command `pick-state` class implementation.
@@ -49,6 +50,9 @@ namespace cmd {
 
     void PickState::set_limit(const value_t value)
     {
+        if (value <= 0) {
+            throw CommandException("State limit must be positive.");
+        }
         f_limit = value;
     }
 
@@ -60,6 +64,7 @@ namespace cmd {
     bool PickState::check_requirements() const
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
@@ -77,7 +82,7 @@ namespace cmd {
                 << "ALLSAT counting and enumeration are mutually exclusive."
                 << std::endl;
 
-            return false;
+            throw CommandException("ALLSAT counting and enumeration are mutually exclusive.");
         }
 
         return true;
@@ -104,8 +109,18 @@ namespace cmd {
         bool res { false };
         if (check_requirements()) {
             model::Model& model { model::ModelMgr::INSTANCE().model() };
-            sim::Simulation simulation { *this, model };
-            value_t states { simulation.pick_state(f_constraints, f_allsat, f_count, f_limit) };
+            query::QuerySpec spec;
+            spec.operation = query::Operation::pick_state;
+            spec.assumptions = f_constraints; spec.enumerate = f_allsat; spec.count = f_count; spec.limits.states = f_limit;
+            const auto result = query::checked(spec);
+            sim::EnumerationResult enumeration { result.value, result.complete ? sim::EnumerationStop::exhausted : result.reason == query::StopReason::state_limit ? sim::EnumerationStop::limit : result.status == query::ExecutionStatus::unknown ? sim::EnumerationStop::unknown : sim::EnumerationStop::witness };
+            const value_t states = enumeration.count;
+
+            if (enumeration.stop == sim::EnumerationStop::unknown) {
+                f_out << "Initial-state enumeration interrupted; found " << states
+                      << " states (incomplete)." << std::endl;
+                return utils::Variant(unknownMessage);
+            }
 
             const expr::Expr_ptr model_name { model.main_module().name() };
             const size_t num_constraints { f_constraints.size() };
@@ -123,7 +138,9 @@ namespace cmd {
                 res = true;
                 out_prefix();
                 f_out
-                    << "Model `" << model_name << "` has only one feasible initial state";
+                    << "Model `" << model_name << "` has "
+                    << (enumeration.complete() ? "only one" : "at least one")
+                    << " feasible initial state";
                 if (num_constraints > 0) {
                     f_out << " (with " << num_constraints << " additional constraint" 
                           << (num_constraints > 1 ? "s" : "") << ")";
@@ -133,13 +150,18 @@ namespace cmd {
                 res = true;
                 out_prefix();
                 f_out
-                    << "Model `" << model_name << "` has " << states
+                    << "Model `" << model_name << "` has "
+                    << (enumeration.complete() ? "" : "at least ") << states
                     << " feasible initial states";
                 if (num_constraints > 0) {
                     f_out << " (with " << num_constraints << " additional constraint" 
                           << (num_constraints > 1 ? "s" : "") << ")";
                 }
                 f_out << std::endl;
+            }
+            if (enumeration.stop == sim::EnumerationStop::limit) {
+                f_out << "State limit reached; enumeration is incomplete." << std::endl;
+                return utils::Variant(unknownMessage);
             }
         }
 

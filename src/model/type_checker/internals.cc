@@ -189,6 +189,10 @@ namespace model {
             PUSH_TYPE(boolean);
             return;
         }
+
+        // Mixed signed/unsigned operands of the same width still produce a
+        // Boolean. Omitting this result underflows the type stack at the parent.
+        PUSH_TYPE(boolean);
     }
 
     // fun: logical/arithmetical/enum x logical/arithmetical/enum -> boolean

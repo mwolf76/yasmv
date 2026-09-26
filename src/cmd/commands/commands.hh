@@ -34,6 +34,7 @@ namespace cmd {
 
     extern const std::string okMessage;
     extern const std::string errMessage;
+    extern const std::string unknownMessage;
     extern const std::string byeMessage;
 
     inline bool is_success(utils::Variant& v)
@@ -44,6 +45,11 @@ namespace cmd {
     inline bool is_failure(utils::Variant& v)
     {
         return v.is_string() && v.as_string() == errMessage;
+    }
+
+    inline bool is_unknown(utils::Variant& v)
+    {
+        return v.is_string() && v.as_string() == unknownMessage;
     }
 
 }; // namespace cmd

@@ -1,0 +1,36 @@
+#word-width 4
+MODULE main
+VAR action : {SEND, DELIVER, DROP_REQUEST, ACK, DROP_ACK, RETRY, GIVE_UP, IDLE};
+#inertial
+VAR phase : {READY, WAITING, REPLY, RETRYING, DONE, FAILED};
+#inertial
+VAR retries : uint4;
+#inertial
+VAR executions : uint4;
+#inertial
+VAR seen : boolean;
+INIT phase = READY;
+INIT retries = 0;
+INIT executions = 0;
+INIT !seen;
+INVAR retries <= 2;
+INVAR executions <= 3;
+INVAR (phase = READY && action = SEND) ||
+      (phase = WAITING && (action = DELIVER || action = DROP_REQUEST)) ||
+      (phase = REPLY && (action = ACK || action = DROP_ACK)) ||
+      (phase = RETRYING && retries < 2 && action = RETRY) ||
+      (phase = RETRYING && retries = 2 && action = GIVE_UP) ||
+      ((phase = DONE || phase = FAILED) && action = IDLE);
+DEFINE DUPLICATE := executions > 1;
+DEFINE SUCCEEDED := phase = DONE;
+DEFINE EXHAUSTED := phase = FAILED;
+TRANS action = SEND ?: phase := WAITING;
+TRANS action = DELIVER ?: phase := REPLY;
+TRANS action = DELIVER && !seen ?: executions := executions + 1;
+TRANS action = DELIVER ?: seen := TRUE;
+TRANS action = DROP_REQUEST ?: phase := RETRYING;
+TRANS action = DROP_ACK ?: phase := RETRYING;
+TRANS action = ACK ?: phase := DONE;
+TRANS action = RETRY ?: phase := WAITING;
+TRANS action = RETRY ?: retries := retries + 1;
+TRANS action = GIVE_UP ?: phase := FAILED;

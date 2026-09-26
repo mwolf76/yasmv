@@ -28,8 +28,8 @@
 
 namespace fsm {
 
-    ComputeDiameter::ComputeDiameter(cmd::Command& command, model::Model& model)
-        : algorithms::Algorithm { command, model }
+    ComputeDiameter::ComputeDiameter(model::Model& model)
+        : algorithms::Algorithm { model }
         , f_diameter { UINT_MAX }
     {
         const void* instance { this };
@@ -52,6 +52,7 @@ namespace fsm {
     {
         sat::Engine engine { "ComputeDiameter" };
 
+        if (query::current()) { forward_strategy(); return; }
         /* fire up strategies */
         algorithms::thread_ptrs tasks;
         tasks.push_back(new boost::thread(&ComputeDiameter::forward_strategy, this));
@@ -93,6 +94,12 @@ namespace fsm {
         }
 
         do {
+            if (auto c = query::current()) {
+                if (c->limits.depth >= 0 && k >= static_cast<unsigned>(c->limits.depth)) {
+                    c->cancel(query::StopReason::depth_limit);
+                    c->check(query::Phase::encoding);
+                }
+            }
             /* unrolling next */
             assert_fsm_trans(engine, k++);
             assert_fsm_invar(engine, k);
@@ -108,6 +115,7 @@ namespace fsm {
                 << std::endl;
 
             sat::status_t status { engine.solve() };
+            if (auto c = query::current(); c && status != sat::STATUS_UNKNOWN) c->checked_depths.push_back(k);
             if (sat::status_t::STATUS_UNKNOWN == status) {
                 goto cleanup;
             } else if (sat::status_t::STATUS_UNSAT == status) {

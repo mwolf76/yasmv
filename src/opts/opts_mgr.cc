@@ -48,6 +48,8 @@ namespace opts {
         // General options
         boost::program_options::options_description general_opts("General options");
         general_opts.add_options()
+            ("session-file", boost::program_options::value<std::string>(), "load an immutable model snapshot and serve isolated JSON Lines queries")
+            ("query-file", boost::program_options::value<std::string>(), "execute a typed query request and emit one JSON result")
             (
                 "help",
                 "produce help message"
@@ -79,6 +81,11 @@ namespace opts {
                 boost::program_options::value<std::string>(),
                 "input model"
             )
+            (
+                "root",
+                boost::program_options::value<std::string>(),
+                "root module (required for models containing multiple modules)"
+            )
             ;
 
         // CNF optimization options
@@ -87,7 +94,7 @@ namespace opts {
             (
                 "cnf-blocked-clause",
                 boost::program_options::value<std::string>(),
-                "enable blocked clause elimination (yes/no, default: no)"
+                "blocked clause elimination is quarantined (only no is supported)"
             )
             (
                 "cnf-duplicate-removal",
@@ -102,7 +109,7 @@ namespace opts {
             (
                 "cnf-self-subsumption",
                 boost::program_options::value<std::string>(),
-                "enable self-subsuming resolution (yes/no, default: no)"
+                "self-subsuming resolution is quarantined (only no is supported)"
             )
             (
                 "cnf-subsumption",
@@ -112,7 +119,7 @@ namespace opts {
             (
                 "cnf-variable-elimination",
                 boost::program_options::value<std::string>(),
-                "enable variable elimination (yes/no, default: no)"
+                "variable elimination is quarantined (only no is supported)"
             )
             (
                 "cnf-microcode-directory",
@@ -127,7 +134,7 @@ namespace opts {
             (
                 "fsm-inertial-checks",
                 boost::program_options::value<std::string>(),
-                "enable mutual exclusiveness checks for inertial conditions (yes/no, default: yes)"
+                "required mutual exclusiveness checks for inertial conditions (only yes is supported)"
             )
             ;
 
@@ -276,6 +283,26 @@ namespace opts {
             f_vm);
 
         boost::program_options::notify(f_vm);
+        for (const char* option : {"cnf-blocked-clause", "cnf-variable-elimination",
+                                   "cnf-self-subsumption", "cnf-subsumption",
+                                   "cnf-tautology-removal", "cnf-duplicate-removal",
+                                   "fsm-inertial-checks"}) {
+            if (!f_vm.count(option)) continue;
+            const auto value = f_vm[option].as<std::string>();
+            if (!is_true(value) && value != "no" && value != "false" &&
+                value != "0" && value != "off") {
+                throw std::invalid_argument(std::string("Expected yes/no for --") + option);
+            }
+        }
+        // These custom passes do not preserve the incremental solver contract.
+        // Keep the options recognizable so existing scripts fail explicitly.
+        for (const char* option : {"cnf-blocked-clause", "cnf-variable-elimination",
+                                   "cnf-self-subsumption"}) {
+            if (f_vm.count(option) && is_true(f_vm[option].as<std::string>())) {
+                throw std::invalid_argument(std::string("Unsupported option --") + option +
+                    " yes: this CNF pass is quarantined pending incremental correctness validation.");
+            }
+        }
         if (0 < f_vm.count("help")) {
             f_help = true;
         }
@@ -298,6 +325,9 @@ namespace opts {
         
         if (0 < f_vm.count("fsm-inertial-checks")) {
             const auto inertial_value = f_vm["fsm-inertial-checks"].as<std::string>();
+            if (!is_true(inertial_value)) {
+                throw std::invalid_argument("Unsupported option --fsm-inertial-checks no: guard validation is required.");
+            }
             f_skip_inertial_fsm_checks = ! is_true(inertial_value);
         } else {
             f_skip_inertial_fsm_checks = false; // Default: enabled (so skip = false)
@@ -355,6 +385,11 @@ namespace opts {
         }
 
         return res;
+    }
+
+    std::string OptsMgr::root() const
+    {
+        return f_vm.count("root") ? f_vm["root"].as<std::string>() : "";
     }
 
     bool OptsMgr::help() const
@@ -657,3 +692,7 @@ namespace opts {
     }
 
 }; // namespace opts
+
+std::string opts::OptsMgr::query_file() const { return f_vm.count("query-file") ? f_vm["query-file"].as<std::string>() : ""; }
+
+std::string opts::OptsMgr::session_file() const { return f_vm.count("session-file") ? f_vm["session-file"].as<std::string>() : ""; }

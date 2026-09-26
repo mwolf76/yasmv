@@ -79,6 +79,11 @@ namespace model {
         // this must be called before any type checking
         bool analyze();
 
+        bool valid() const { return f_valid; }
+        void require_valid() const;
+        // A process owns one model until session teardown is implemented.
+        void begin_load();
+
         inline Analyzer& analyzer()
         {
             return f_analyzer;
@@ -125,6 +130,8 @@ namespace model {
         /* internals */
         bool analyze_aux(analyzer_pass_t pass);
         bool f_analyzed;
+        bool f_valid { false };
+        bool f_load_started { false };
     };
 
 } // namespace model

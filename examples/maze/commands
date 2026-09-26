@@ -1,3 +1,5 @@
-reach GOAL -f @32{!GOAL}
+# Plain reachability. The retired -f option was previously ignored by the parser.
+# Timed constraints, when desired, use: reach GOAL -c @32{!GOAL}
+reach GOAL
 on failure echo "Help, I'm trapped into a maze!"
 quit

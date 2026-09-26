@@ -30,25 +30,38 @@ namespace utils {
     // variant constructors
     Variant::Variant()
         : f_type(BOTTOM)
+        , f_bool(false)
+        , f_int(0)
+        , f_clock(0)
     {}
 
     Variant::Variant(bool value)
         : f_type(BOOLEAN)
         , f_bool(value)
+        , f_int(0)
+        , f_clock(0)
     {}
 
     Variant::Variant(int value)
         : f_type(INTEGER)
+        , f_bool(false)
         , f_int(value)
+        , f_clock(0)
     {}
 
     Variant::Variant(const std::string& value)
         : f_type(STRING)
+        , f_bool(false)
+        , f_int(0)
         , f_str(value)
+        , f_clock(0)
     {}
 
     Variant::Variant(const Variant& v)
         : f_type(v.f_type)
+        , f_bool(false)
+        , f_int(0)
+        , f_clock(0)
     {
         switch (f_type) {
             case BOTTOM:

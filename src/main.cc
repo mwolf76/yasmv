@@ -43,6 +43,7 @@
  **/
 
 #include <cmd/cmd.hh>
+#include <workbench.hh>
 
 #include <expr/expr.hh>
 #include <expr/printer/printer.hh>
@@ -55,6 +56,8 @@
 #include <parser/grammars/smvParser.h>
 
 #include <sat/sat.hh>
+#include <query/runtime.hh>
+#include <query/query.hh>
 
 #include <boost/chrono.hpp>
 static const std::string heading_msg =
@@ -89,46 +92,35 @@ void batch(cmd::Command_ptr cmd)
 }
 
 
-void sighandler(int signum)
-{
-    static boost::chrono::system_clock::time_point last;
-
-    /* A single Control-Z requires current solving stats. Double
-       Control-Z (within 1 sec) requires interruption */
-    if (signum == SIGTSTP) {
-        sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
-
-        std::cerr
-            << std::endl;
-
-        boost::chrono::system_clock::time_point now { boost::chrono::system_clock::now() };
-        boost::chrono::duration<double> duration { boost::chrono::system_clock::now() - last };
-
-        if (duration.count() < 1.00) {
-            std::cerr
-                << "Interrupting all active threads (this may take a while)..."
-                << std::endl;
-
-            mgr.interrupt();
-        } else {
-            mgr.dump_stats(std::cerr);
-            last = now;
-        }
-    }
-}
 
 int main(int argc, const char* argv[])
 {
+    if (argc > 1 && (std::string(argv[1]) == "--agent" || std::string(argv[1]) == "--capabilities")) {
+        std::vector<std::string> arguments(argv + 2, argv + argc);
+        arguments.push_back(std::string(argv[1]) == "--agent" ? "agent" : "capabilities");
+        return cmd::workbench(arguments, true);
+    }
     cmd::Interpreter& interpreter(cmd::Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
-    signal(SIGTSTP, sighandler);
+    signal(SIGTSTP, query::signal_handler);
+    signal(SIGINT, query::signal_handler);
+    signal(SIGTERM, query::signal_handler);
 
     try {
 	/* -- init managers --------------------------------------- */
 	opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
 	(void) om;
+
+        // Options must precede managers that use widths and resource paths.
+        om.parse_command_line(argc, argv);
+        if (om.help()) {
+            std::cout << om.usage() << std::endl;
+            return 0;
+        }
 	
+        if (!om.session_file().empty()) return query::run_session(om.session_file());
+        if (!om.query_file().empty()) return query::run_file(om.query_file());
 	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 	(void) em;
 
@@ -142,16 +134,6 @@ int main(int argc, const char* argv[])
 	(void) iom;
 
         
-        /* -- parse command line options ---------------------------*/
-        om.parse_command_line(argc, argv);
-        if (om.help()) {
-            std::cout
-                << om.usage()
-                << std::endl;
-
-            exit(0);
-        }
-
         if (!om.quiet()) {
             std::cout
                 << heading_msg
@@ -192,8 +174,15 @@ int main(int argc, const char* argv[])
             << e.what()
             << normal
             << std::endl;
+        return 2;
     }
 
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 2;
+    }
+
+    cmd::close_workspace();
     return interpreter.retcode();
 }
 

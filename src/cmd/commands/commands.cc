@@ -1,3 +1,4 @@
+#include <cmd/command.hh>
 /**
  * @file commands.cc
  * @brief Command interpreter subsystem implementation.
@@ -41,6 +42,7 @@ namespace cmd {
 
     const std::string okMessage { "Ok" };
     const std::string errMessage { "ERROR" };
+    const std::string unknownMessage { "UNKNOWN" };
     const std::string byeMessage { "Bye" };
 
     Command::Command(Interpreter& owner)

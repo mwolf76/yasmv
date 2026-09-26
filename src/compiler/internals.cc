@@ -1,3 +1,5 @@
+#include <query/runtime.hh>
+#include <atomic>
 /**
  * @file internals.cc
  * @brief Model compiler subsystem, internals implementation.
@@ -33,7 +35,10 @@ namespace compiler {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         std::ostringstream oss;
-        oss << "__tmp" << f_temp_auto_index++;
+        // Different Compiler instances can contribute units to one SAT engine.
+        // Use a process-wide counter and a spelling unavailable to source identifiers.
+        static std::atomic<uint64_t> next_temporary { 0 };
+        oss << "#temporary:" << next_temporary.fetch_add(1, std::memory_order_relaxed);
 
         return em.make_identifier(oss.str());
     }
@@ -72,6 +77,7 @@ namespace compiler {
 
     void Compiler::pre_node_hook(expr::Expr_ptr expr)
     {
+        query::checkpoint(query::Phase::compilation);
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
         /* assemble memoization key */

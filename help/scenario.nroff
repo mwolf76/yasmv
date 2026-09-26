@@ -1,0 +1,46 @@
+.nf
+YASMV manual                                                 scenario
+
+.ti 0
+SYNOPSIS
+
+.in 3
+scenario configure "<file>"
+scenario list
+scenario show [<id>]
+scenario export [-o "<file>"]
+scenario replay <implementation> [<id>]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Configure, export, inspect, and replay executable scenarios in the current
+workspace. Quote IDs that are not native identifiers. Omitting an ID uses the
+last selected scenario.
+
+configure saves adapter mappings from a JSON file in a new model revision.
+export replays the current native trace and saves a scenario using those
+mappings. -o also writes it to a file, replacing existing contents.
+
+list shows stored scenarios. show displays a complete scenario. replay runs
+it against an implementation and reports a match or the first divergence.
+The supported implementations are faulty and deduplicating for the retry
+protocol adapter. Configure, export, and replay require a loaded model.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> scenario configure "examples/retry-protocol/scenario.json"
+>> scenario export -o "/tmp/retry-scenario.json"
+>> scenario replay faulty
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help workspace, help reach, help select-trace, help dump-trace, help job.

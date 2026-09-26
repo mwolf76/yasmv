@@ -39,8 +39,14 @@
 #include <algorithm>
 #include <unordered_set>
 #include <vector>
+#include <functional>
+#include <query/runtime.hh>
 
 namespace sat {
+
+    class Engine;
+    // Optional algorithm seam for deterministic solver-status tests.
+    using SolveCallback = std::function<status_t(Engine&)>;
 
     class Engine {
     public:
@@ -88,6 +94,8 @@ namespace sat {
         /**
 	 * @brief Invoke Minisat
 	 */
+        std::vector<group_t> failed_groups() const;
+
         inline status_t solve()
         {
             return sat_solve_groups(f_groups);
@@ -175,6 +183,7 @@ namespace sat {
 	 */
         inline Var new_sat_var(bool frozen = false) // proxy
         {
+            query::checkpoint(query::Phase::encoding);
             Var var(f_solver.newVar());
 
             f_solver.setFrozen(var, frozen);
@@ -187,6 +196,7 @@ namespace sat {
 	 */
         inline void add_clause(vec<Lit>& ps) // proxy
         {
+            query::checkpoint(query::Phase::encoding);
             if (f_cnf_optimization_enabled && !f_optimization_in_progress) {
                 // Store clause for later optimization
                 std::vector<Lit> clause_copy;

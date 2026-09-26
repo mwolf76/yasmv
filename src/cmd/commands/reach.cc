@@ -1,3 +1,5 @@
+#include <query/query.hh>
+#include <workbench.hh>
 /*
  * @file reach.cc
  * @brief Command `reach` class implementation.
@@ -26,6 +28,7 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/reach.hh>
+#include <cmd/interpreter.hh>
 
 namespace cmd {
 
@@ -88,6 +91,7 @@ namespace cmd {
         }
 
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
         if (model.empty()) {
             f_out
@@ -104,18 +108,33 @@ namespace cmd {
     utils::Variant Reach::operator()()
     {
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         bool res { false };
 
         if (!check_requirements()) {
+            f_owner.record_error();
             return utils::Variant { errMessage };
         }
 
-        reach::Reachability bmc { *this, mm.model() };
-        bmc.process(f_target, f_constraints);
+        if (!extended_options.empty()) {
+            WorkspaceCommand command(f_owner, "query.run");
+            auto& q = command.arguments()["query"];
+            q = extended_options;
+            if (q.isMember("background")) {
+                command.arguments()["background"] = q["background"];
+                q.removeMember("background");
+            }
+            if (!q.isMember("operation")) q["operation"] = "reach";
+            q["target"] = source::print(f_target);
+            for (auto expression : f_constraints) q["assumptions"].append(source::print(expression));
+            return command();
+        }
 
-        switch (bmc.status()) {
-            case reach::reachability_status_t::REACHABILITY_REACHABLE:
+        query::QuerySpec spec;
+        spec.operation = query::Operation::reach; spec.target = f_target; spec.assumptions = f_constraints;
+        const auto result = query::checked(spec);
+
+        switch (result.outcome) {
+            case query::Outcome::reachable:
                 if (!om.quiet()) {
                     f_out
                         << outPrefix;
@@ -125,8 +144,8 @@ namespace cmd {
                         << "Target is reachable";
                 }
 
-                if (bmc.has_witness()) {
-                    witness::Witness& w { bmc.witness() };
+                if (result.witness != nullptr) {
+                    witness::Witness& w { *result.witness };
 
                     if (!f_quiet) {
                         f_out
@@ -143,7 +162,7 @@ namespace cmd {
                 res = true;
                 break;
 
-            case reach::reachability_status_t::REACHABILITY_UNREACHABLE:
+            case query::Outcome::unreachable:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -155,7 +174,7 @@ namespace cmd {
                 }
                 break;
 
-            case reach::reachability_status_t::REACHABILITY_UNKNOWN:
+            case query::Outcome::none:
                 if (!om.quiet()) {
                     f_out
                         << outPrefix;
@@ -165,19 +184,7 @@ namespace cmd {
                 f_out
                     << "Reachability could not be decided."
                     << std::endl;
-                break;
-
-            case reach::reachability_status_t::REACHABILITY_ERROR:
-                if (!om.quiet()) {
-                    f_out
-                        << outPrefix;
-                }
-
-                // cannot be quiet about errors
-                f_out
-                    << "Unexpected error."
-                    << std::endl;
-                break;
+                return utils::Variant(unknownMessage);
 
             default:
                 assert(false); /* unexpected */

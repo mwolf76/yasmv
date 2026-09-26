@@ -23,6 +23,7 @@
  **/
 
 #include <compiler.hh>
+#include <query/runtime.hh>
 
 #include <utils/logging.hh>
 
@@ -35,6 +36,7 @@ namespace compiler {
 
     Unit Compiler::process(expr::Expr_ptr ctx, expr::Expr_ptr body)
     {
+        query::PhaseTimer timer(query::Phase::compilation);
         /* the compiler can be shared among multiple strategies running on multiple threads */
         boost::mutex::scoped_lock lock { f_process_mutex };
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
@@ -74,7 +76,6 @@ namespace compiler {
         , f_owner(model::ModelMgr::INSTANCE())
         , f_enc(enc::EncodingMgr::INSTANCE())
         , f_preprocessor()
-        , f_temp_auto_index(0)
         , f_status(READY)
     {
         const void* instance { this };

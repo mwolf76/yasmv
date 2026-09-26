@@ -1,0 +1,36 @@
+.nf
+YASMV manual                                                 capabilities
+
+.ti 0
+SYNOPSIS
+
+.in 3
+capabilities
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+List the available agent operations and their descriptions.
+
+For machine-readable operation schemas and supported limits, run
+"yasmv --capabilities" from the operating-system shell. To submit versioned
+JSON Lines requests, run "yasmv --agent --store <directory>". Agent analysis
+requests use explicit revision and artifact IDs.
+
+See docs/CLI_WORKBENCH.md for the agent protocol and examples.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> capabilities
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help workspace, help job.

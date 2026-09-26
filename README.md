@@ -22,6 +22,9 @@ to solve planning problems.
 
 ## BUILD
 
+  For the current core-only build, correctness regression tests, and migration
+  notes, see [the correctness baseline](docs/CORRECTNESS_BASELINE.md).
+
   Here is the complete list of build dependencies. These package names are from
   Ubuntu 14.04 (Trusty), used in Travis CI.
 
@@ -102,10 +105,14 @@ to solve planning problems.
   For further information on microcode, please refer to the `README` file in the
   microcode bzip2'd tarball.
 
-  Unit and functional tests can be run using:
+  Run the full local regression gate before committing using:
   ```
   $ make test
   ```
+
+  CI runs one core build and two smoke checks. Full regression, LLVM,
+  sanitizer, and browser acceptance remain local pre-commit gates; see
+  [the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
 
   Remark: The default build for C++ code now uses -O2 optimization for optimal
   performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the
@@ -115,6 +122,29 @@ to solve planning problems.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
+## MODEL WORKBENCH
+
+Use the CLI workbench after building the checker and extracting microcode:
+
+```sh
+./yasmv
+# Structured agent requests over stdin/stdout:
+./yasmv --agent --store ./investigation
+# Discover operations and argument schemas:
+./yasmv --capabilities
+```
+
+The CLI supports model revisions, bounded and shortest searches, trace inspection
+and branching, explanations, safety proofs, and executable scenario replay.
+Use `help` to list commands and `help workspace` for artifact storage. Python
+3.10+ is required. See [the CLI and agent guide](docs/CLI_WORKBENCH.md).
+
+The optional browser and HTTP API remain available with
+`python3 -m tools.workbench serve`. See [the HTTP/browser guide](docs/WORKBENCH.md),
+[explanations and scenarios](docs/EXPLANATIONS_AND_SCENARIOS.md),
+[the retry example](examples/retry-protocol/README.md), and
+[the implementation plan](docs/IMPLEMENTATION_PLAN.md).
+
 ## DISCLAIMER
 
 This code is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -123,3 +153,10 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 yasmv is in no way related to, or endorsed by, the NuSMV development board
 and/or FBK. yasmv does not contain any code from NuSMV's code base.
+
+### Stronger analysis
+
+Find certified shortest witnesses and check named safety properties with
+bounded search or verified k-induction. Optional `--reuse-models` workbench
+sessions retain compiled models while keeping queries in isolated processes.
+See [shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md).
