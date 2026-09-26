@@ -25,22 +25,6 @@
 
 namespace enc {
 
-    static inline value_t pow2(unsigned exp)
-    {
-        value_t res { 1 };
-        if (!exp) {
-            return res;
-        }
-
-        ++res;
-
-        while (--exp) {
-            res <<= 1;
-        }
-
-        return res;
-    }
-
     AlgebraicEncoding::AlgebraicEncoding(unsigned width, bool is_signed, ADD* dds)
         : f_width(width)
         , f_signed(is_signed)
@@ -61,29 +45,15 @@ namespace enc {
     expr::Expr_ptr AlgebraicEncoding::expr(int* assignment)
     {
         expr::ExprMgr& em { f_mgr.em() };
-        unsigned i { 0 }, base { 2 };
-        value_t res { 0 };
-
-        do {
+        uint64_t bits = 0;
+        for (unsigned i = 0; i < f_width; ++i) {
             ADD eval { f_dv[i].Eval(assignment) };
             assert(cuddIsConstant(eval.getRegularNode()));
-
-            res += Cudd_V(eval.getNode());
-
-            if (++i < f_width) {
-                res *= base;
-            } else
-                break;
-        } while (true);
-
-        if (is_signed()) {
-            // REVIEW this for non-exact types
-            value_t msb { pow2(i - 1) };
-            if (res & msb) {
-                value_t cmpl { 1 + (~res & (pow2(i) - 1)) };
-                return em.make_neg(em.make_const(cmpl));
-            }
+            bits = (bits << 1) | (Cudd_V(eval.getNode()) != 0);
         }
+        if (is_signed() && f_width < 64 && (bits & (uint64_t(1) << (f_width - 1))))
+            bits |= ~((uint64_t(1) << f_width) - 1);
+        value_t res = static_cast<value_t>(bits);
 
         return em.make_const(res);
     }

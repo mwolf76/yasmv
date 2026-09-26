@@ -1,8 +1,10 @@
 # Implementation plan: model exploration and scenario generation
 
-Status: M0 (packages 01–05) implemented and locally verified on 2026-09-26.
-M1–M4 remain planned. Current behavior and migration notes are documented in
-[CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md).
+Status: M0 (packages 01–05) and M1 (packages 06–09) are implemented and locally
+verified on 2026-09-26. M2–M4 remain planned. Current behavior, API usage, migration
+notes, and acceptance evidence are documented in
+[CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md) and
+[QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md).
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 
@@ -111,6 +113,13 @@ Create CI configurations for core-only and LLVM-enabled builds, label LLVM check
 **Gate:** clean builds exercise the corrected harness; root selection is deterministic; module tests and known arithmetic edge cases have explicit expected outcomes. **Dependencies:** 02–04.
 
 ## 4. M1 — define query, diagnostic, and trace contracts
+
+**Completed.** The CLI now uses typed query services. Machine jobs expose bounded
+results, query-scoped cancellation, source provenance, exact trace v1 artifacts,
+and replay validation. The isolated deadline runner is the M1 primitive for
+package 07; the event protocol, artifact store, and browser workflow in M2 remain
+next. Normal and ASan/UBSan acceptance checks passed; see the contract guide for
+commands, counts, and the tested toolchain.
 
 ### 06. Extract typed query services — M
 

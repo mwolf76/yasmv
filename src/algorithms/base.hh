@@ -30,7 +30,6 @@
 
 #include <boost/unordered_map.hpp>
 
-#include <cmd/command.hh>
 
 #include <compiler/compiler.hh>
 
@@ -60,7 +59,7 @@ namespace algorithms {
     class Algorithm {
 
     public:
-        Algorithm(cmd::Command& command, model::Model& model);
+        Algorithm(model::Model& model);
         virtual ~Algorithm();
 
         /* top-level components */
@@ -133,11 +132,9 @@ namespace algorithms {
         void process_invar(expr::Expr_ptr ctx, const expr::ExprVector& invar);
         void process_trans(expr::Expr_ptr ctx, const expr::ExprVector& trans);
 
+        expr::Expr_ptr f_source_module = nullptr;
         /* all good? */
         bool f_ok;
-
-        /* Command */
-        cmd::Command& f_command;
 
         /* Model */
         model::Model& f_model;

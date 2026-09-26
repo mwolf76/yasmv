@@ -2,7 +2,9 @@
 
 This document describes the first implementation milestone from the
 [implementation plan](IMPLEMENTATION_PLAN.md). It changes result handling and
-validation before introducing the query protocol or workbench.
+validation before introducing the query protocol or workbench. The subsequent
+M1 API and trace migration are documented in
+[QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md).
 
 ## Build and test
 

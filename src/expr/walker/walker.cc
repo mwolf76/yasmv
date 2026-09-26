@@ -24,12 +24,15 @@
 #include <common/common.hh>
 
 #include <expr.hh>
+#include <query/runtime.hh>
 #include <walker/walker.hh>
 
 namespace expr {
 
     ExprWalker& ExprWalker::operator()(const Expr_ptr expr)
     {
+        const auto saved_depth = f_recursion_stack.size();
+        try {
         // pre-walking hook
         this->pre_hook();
 
@@ -43,6 +46,10 @@ namespace expr {
         this->post_hook();
 
         return *this;
+        } catch (...) {
+            while (f_recursion_stack.size() > saved_depth) f_recursion_stack.pop();
+            throw;
+        }
     }
 
     void ExprWalker::rewrite(const Expr_ptr expr)

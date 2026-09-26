@@ -81,7 +81,7 @@ namespace sim {
 
                 else {
                     /* time it, and fetch encoding for enc mgr */
-                    enc::Encoding_ptr enc { bm.find_encoding(expr::TimedExpr(key, 0)) };
+                    enc::Encoding_ptr enc { bm.find_encoding(expr::TimedExpr(key, var.is_frozen() ? FROZEN : 0)) };
 
                     /* not in COI, skipping... */
                     if (!enc) {

@@ -32,7 +32,6 @@
 
 namespace compiler {
 
-    static inline value_t pow2(unsigned exp);
 
     void Compiler::walk_instant(const expr::Expr_ptr expr)
     {
@@ -225,41 +224,22 @@ namespace compiler {
         }
     }
 
-    static inline value_t pow2(unsigned exp)
-    {
-        value_t res { 1 };
-
-        if (!exp) {
-            return res;
-        }
-        ++res;
-
-        while (--exp) {
-            res <<= 1;
-        }
-
-        return res;
-    }
-
     /* encodes constant value into a DD vector */
     void Compiler::algebraic_constant(expr::Expr_ptr konst, unsigned width)
     {
-        const unsigned base { 2 };
-        value_t value { konst->value() };
-
-        if (value < 0) {
-            value += pow2(width); // 2's complement
+        const int64_t raw = konst->value();
+        uint64_t value = static_cast<uint64_t>(raw);
+        if (width == 0 || width > 64) throw ConstantTooLarge(konst);
+        if (width < 64) {
+            const uint64_t modulus = uint64_t(1) << width;
+            if ((raw >= 0 && value >= modulus) ||
+                (raw < 0 && raw < -static_cast<int64_t>(modulus >> 1)))
+                throw ConstantTooLarge(konst);
+            value &= modulus - 1;
         }
-
         for (unsigned i = 0; i < width; ++i) {
-            ADD digit { f_enc.constant(value % base) };
-
-            f_add_stack.push_back(digit);
-            value /= base;
-        }
-
-        if (value) {
-            throw ConstantTooLarge(konst);
+            f_add_stack.push_back(f_enc.constant(value & 1));
+            value >>= 1;
         }
     }
 

@@ -30,8 +30,8 @@
 
 namespace fsm {
 
-    CheckTransConsistency::CheckTransConsistency(cmd::Command& command, model::Model& model)
-        : algorithms::Algorithm(command, model)
+    CheckTransConsistency::CheckTransConsistency(model::Model& model)
+        : algorithms::Algorithm(model)
         , f_limit(1)
     {
         const void* instance { this };

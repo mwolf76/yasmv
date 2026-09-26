@@ -1,3 +1,4 @@
+#include <cmd/command.hh>
 /**
  * @file commands.cc
  * @brief Command interpreter subsystem implementation.

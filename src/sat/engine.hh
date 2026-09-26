@@ -40,6 +40,7 @@
 #include <unordered_set>
 #include <vector>
 #include <functional>
+#include <query/runtime.hh>
 
 namespace sat {
 
@@ -180,6 +181,7 @@ namespace sat {
 	 */
         inline Var new_sat_var(bool frozen = false) // proxy
         {
+            query::checkpoint(query::Phase::encoding);
             Var var(f_solver.newVar());
 
             f_solver.setFrozen(var, frozen);
@@ -192,6 +194,7 @@ namespace sat {
 	 */
         inline void add_clause(vec<Lit>& ps) // proxy
         {
+            query::checkpoint(query::Phase::encoding);
             if (f_cnf_optimization_enabled && !f_optimization_in_progress) {
                 // Store clause for later optimization
                 std::vector<Lit> clause_copy;

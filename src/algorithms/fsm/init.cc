@@ -28,8 +28,8 @@
 
 namespace fsm {
 
-    CheckInitConsistency::CheckInitConsistency(cmd::Command& command, model::Model& model)
-        : algorithms::Algorithm(command, model)
+    CheckInitConsistency::CheckInitConsistency(model::Model& model)
+        : algorithms::Algorithm(model)
     {
         const void* instance { this };
         TRACE

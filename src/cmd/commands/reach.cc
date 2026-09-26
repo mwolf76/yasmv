@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /*
  * @file reach.cc
  * @brief Command `reach` class implementation.
@@ -106,7 +107,6 @@ namespace cmd {
     utils::Variant Reach::operator()()
     {
         opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
         bool res { false };
 
         if (!check_requirements()) {
@@ -114,11 +114,12 @@ namespace cmd {
             return utils::Variant { errMessage };
         }
 
-        reach::Reachability bmc { *this, mm.model() };
-        bmc.process(f_target, f_constraints);
+        query::QuerySpec spec;
+        spec.operation = query::Operation::reach; spec.target = f_target; spec.assumptions = f_constraints;
+        const auto result = query::checked(spec);
 
-        switch (bmc.status()) {
-            case reach::reachability_status_t::REACHABILITY_REACHABLE:
+        switch (result.outcome) {
+            case query::Outcome::reachable:
                 if (!om.quiet()) {
                     f_out
                         << outPrefix;
@@ -128,8 +129,8 @@ namespace cmd {
                         << "Target is reachable";
                 }
 
-                if (bmc.has_witness()) {
-                    witness::Witness& w { bmc.witness() };
+                if (result.witness != nullptr) {
+                    witness::Witness& w { *result.witness };
 
                     if (!f_quiet) {
                         f_out
@@ -146,7 +147,7 @@ namespace cmd {
                 res = true;
                 break;
 
-            case reach::reachability_status_t::REACHABILITY_UNREACHABLE:
+            case query::Outcome::unreachable:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -158,7 +159,7 @@ namespace cmd {
                 }
                 break;
 
-            case reach::reachability_status_t::REACHABILITY_UNKNOWN:
+            case query::Outcome::none:
                 if (!om.quiet()) {
                     f_out
                         << outPrefix;
@@ -169,19 +170,6 @@ namespace cmd {
                     << "Reachability could not be decided."
                     << std::endl;
                 return utils::Variant(unknownMessage);
-
-            case reach::reachability_status_t::REACHABILITY_ERROR:
-                if (!om.quiet()) {
-                    f_out
-                        << outPrefix;
-                }
-
-                // cannot be quiet about errors
-                f_out
-                    << "Unexpected error."
-                    << std::endl;
-                f_owner.record_error();
-                break;
 
             default:
                 assert(false); /* unexpected */

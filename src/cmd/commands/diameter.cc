@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /**
  * @file diameter.cc
  * @brief Command `diameter` class implementation.
@@ -62,12 +63,9 @@ namespace cmd {
         bool res { false };
 
         if (check_requirements()) {
-            fsm::ComputeDiameter computeDiameter {
-                *this, model::ModelMgr::INSTANCE().model()
-            };
-
-            computeDiameter.process();
-            const step_t value = computeDiameter.diameter();
+            query::QuerySpec spec; spec.operation = query::Operation::diameter;
+            const auto result = query::checked(spec);
+            const step_t value = result.status == query::ExecutionStatus::completed ? result.value : UINT_MAX;
             if (value == UINT_MAX) {
                 f_out << "FSM diameter could not be decided." << std::endl;
                 return utils::Variant(unknownMessage);

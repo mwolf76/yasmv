@@ -1,3 +1,4 @@
+#include <query/query.hh>
 /**
  * @file check_init.cc
  * @brief Command `check-init` class implementation.
@@ -69,13 +70,13 @@ namespace cmd {
         bool res { false };
 
         if (check_requirements()) {
-            fsm::CheckInitConsistency check_init {
-                *this, model::ModelMgr::INSTANCE().model()
-            };
-            check_init.process(f_constraints);
+            query::QuerySpec spec;
+            spec.operation = query::Operation::check_init;
+            spec.assumptions = f_constraints;
+            const auto result = query::checked(spec);
 
-            switch (check_init.status()) {
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_OK:
+            switch (result.outcome) {
+                case query::Outcome::satisfiable:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
@@ -88,7 +89,7 @@ namespace cmd {
                     res = true;
                     break;
 
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_KO:
+                case query::Outcome::unsatisfiable:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;
@@ -99,7 +100,7 @@ namespace cmd {
                         << std::endl;
                     break;
 
-                case fsm::fsm_consistency_t::FSM_CONSISTENCY_UNDECIDED:
+                case query::Outcome::none:
                     if (!om.quiet()) {
                         f_out
                             << outPrefix;

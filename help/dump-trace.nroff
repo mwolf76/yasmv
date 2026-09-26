@@ -27,6 +27,11 @@ specified, the `plain` format will be used for dumping.
 the traces will be printed in the specified order. If omitted, currently selected trace will be dumped.
 
 
+JSON output uses trace v1, including model/configuration identity, generating
+query, typed values, and chronological steps. Integer values are exact decimal
+strings. Multiple traces are exported as an array of v1 objects; read-trace
+imports one object at a time. See docs/QUERY_AND_TRACE_CONTRACTS.md.
+
 .ti 0
 EXAMPLES
 

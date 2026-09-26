@@ -35,8 +35,8 @@
 
 namespace reach {
 
-    Reachability::Reachability(cmd::Command& command, model::Model& model)
-        : Algorithm(command, model)
+    Reachability::Reachability(model::Model& model)
+        : Algorithm(model)
     {
         const void* instance { this };
         TRACE
@@ -112,6 +112,10 @@ namespace reach {
 
         bool use_forward { !no_backward_constraints };
         bool use_backward { !no_forward_constraints };
+        if (auto context = query::current()) {
+            use_forward = use_forward && context->requested_strategy != "backward";
+            use_backward = use_backward && context->requested_strategy != "forward";
+        }
 
         /* TODO: consider introducing support for this: a bit trickier, but doable */
         if (!use_forward && !use_backward) {
@@ -152,6 +156,13 @@ namespace reach {
                 std::pair<expr::Expr_ptr, compiler::Unit>(constraint, cu));
         }
 
+        if (query::current()) {
+            f_status = REACHABILITY_UNKNOWN;
+            if (use_forward && (om.reach_forward_strategy() || om.reach_fast_forward_strategy())) { query::current()->selected_strategy = "forward"; forward_strategy(target_cu); }
+            else if (use_backward && (om.reach_backward_strategy() || om.reach_fast_backward_strategy())) { query::current()->selected_strategy = "backward"; backward_strategy(target_cu); }
+            else f_status = REACHABILITY_ERROR;
+            return;
+        }
         /* fire up strategies */
         f_status = REACHABILITY_UNKNOWN;
 

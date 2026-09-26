@@ -28,6 +28,7 @@ options {
 
   /* cmd subsystem */
   #include <cmd/cmd.hh>
+  #include <query/source.hh>
 
   #include <expr/expr.hh>
   #include <expr/expr_mgr.hh>
@@ -169,6 +170,7 @@ fsm_param_decl_body
 fsm_var_decl_clause
 @init {
     expr::ExprVector ev;
+    pANTLR3_COMMON_TOKEN source_start = LT(1);
 }
     : ids=identifiers[&ev] ':' tp=smv_type
     {
@@ -191,6 +193,7 @@ fsm_var_decl_clause
                 if (format != FORMAT_DEFAULT)
                     var->set_format(format);
 
+                source::locate(current_module->name(), "declaration", vid, source_start->line, source_start->charPosition, LT(-1)->line, LT(-1)->charPosition + LT(-1)->getText(LT(-1))->len);
                 current_module->add_var(vid, var);
             }
     }
@@ -260,8 +263,9 @@ fsm_init_decl_body
     ;
 
 fsm_init_decl_clause
+@init { pANTLR3_COMMON_TOKEN source_start = LT(1); }
     : expr=toplevel_expression
-      { current_module->add_init(expr); }
+      { current_module->add_init(expr); source::locate(current_module->name(), "init", expr, source_start->line, source_start->charPosition, LT(-1)->line, LT(-1)->charPosition + LT(-1)->getText(LT(-1))->len); }
     ;
 
 fsm_invar_decl
@@ -274,8 +278,9 @@ fsm_invar_decl_body
     ;
 
 fsm_invar_decl_clause
+@init { pANTLR3_COMMON_TOKEN source_start = LT(1); }
     : expr=toplevel_expression
-      { current_module->add_invar(expr); }
+      { current_module->add_invar(expr); source::locate(current_module->name(), "invar", expr, source_start->line, source_start->charPosition, LT(-1)->line, LT(-1)->charPosition + LT(-1)->getText(LT(-1))->len); }
     ;
 
 fsm_trans_decl
@@ -288,12 +293,13 @@ fsm_trans_decl_body
     ;
 
 fsm_trans_decl_clause
+@init { pANTLR3_COMMON_TOKEN source_start = LT(1); }
     : (toplevel_expression '?:' fsm_trans_decl_clause_assignments) =>
         lhs=toplevel_expression '?:' rhs=fsm_trans_decl_clause_assignments
-      { current_module->add_trans(em.make_guard(lhs, rhs)); }
+      { current_module->add_trans(em.make_guard(lhs, rhs)); source::locate(current_module->name(), "trans", em.make_guard(lhs, rhs), source_start->line, source_start->charPosition, LT(-1)->line, LT(-1)->charPosition + LT(-1)->getText(LT(-1))->len); }
 
     | rhs=fsm_trans_decl_clause_assignments
-      { current_module->add_trans(em.make_guard(em.make_true(), rhs)); }
+      { current_module->add_trans(em.make_guard(em.make_true(), rhs)); source::locate(current_module->name(), "trans", em.make_guard(em.make_true(), rhs), source_start->line, source_start->charPosition, LT(-1)->line, LT(-1)->charPosition + LT(-1)->getText(LT(-1))->len); }
     ;
 
 fsm_trans_decl_clause_assignments returns [expr::Expr_ptr res]

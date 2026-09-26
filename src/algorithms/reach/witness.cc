@@ -1,3 +1,4 @@
+#include <env/environment.hh>
 /**
  * @file reach/witness.cc
  * @brief SAT-based BMC reachability analysis, BMC CEX witness class implementation.
@@ -71,6 +72,11 @@ namespace reach {
                 if (symb->is_variable()) {
                     symb::Variable& var { symb->as_variable() };
 
+                    if (var.is_input()) {
+                        auto value = env::Environment::INSTANCE().get(symb_name);
+                        if (value) tf.set_value(key, value, symb->format());
+                        continue;
+                    }
                     /* time it, and fetch encoding for enc mgr */
                     enc::Encoding_ptr enc {
                         bm.find_encoding(
@@ -119,7 +125,7 @@ namespace reach {
 
                 else if (symb->is_define()) {
                     const symb::Define& define { symb->as_define() };
-                    expr::Expr_ptr value { wm.eval(*this, ctx, define.body(), 0) };
+                    expr::Expr_ptr value { wm.eval(*this, ctx, define.body(), last_time()) };
 
                     /* NULL values here indicate UNDEFs */
                     if (value) {

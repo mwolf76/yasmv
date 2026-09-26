@@ -55,6 +55,8 @@
 #include <parser/grammars/smvParser.h>
 
 #include <sat/sat.hh>
+#include <query/runtime.hh>
+#include <query/query.hh>
 
 #include <boost/chrono.hpp>
 static const std::string heading_msg =
@@ -89,40 +91,15 @@ void batch(cmd::Command_ptr cmd)
 }
 
 
-void sighandler(int signum)
-{
-    static boost::chrono::system_clock::time_point last;
-
-    /* A single Control-Z requires current solving stats. Double
-       Control-Z (within 1 sec) requires interruption */
-    if (signum == SIGTSTP) {
-        sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
-
-        std::cerr
-            << std::endl;
-
-        boost::chrono::system_clock::time_point now { boost::chrono::system_clock::now() };
-        boost::chrono::duration<double> duration { boost::chrono::system_clock::now() - last };
-
-        if (duration.count() < 1.00) {
-            std::cerr
-                << "Interrupting all active threads (this may take a while)..."
-                << std::endl;
-
-            mgr.interrupt();
-        } else {
-            mgr.dump_stats(std::cerr);
-            last = now;
-        }
-    }
-}
 
 int main(int argc, const char* argv[])
 {
     cmd::Interpreter& interpreter(cmd::Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
-    signal(SIGTSTP, sighandler);
+    signal(SIGTSTP, query::signal_handler);
+    signal(SIGINT, query::signal_handler);
+    signal(SIGTERM, query::signal_handler);
 
     try {
 	/* -- init managers --------------------------------------- */
@@ -136,6 +113,7 @@ int main(int argc, const char* argv[])
             return 0;
         }
 	
+        if (!om.query_file().empty()) return query::run_file(om.query_file());
 	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 	(void) em;
 

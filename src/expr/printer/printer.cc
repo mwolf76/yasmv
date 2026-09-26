@@ -110,10 +110,15 @@ namespace expr {
     bool Printer::walk_neg_preorder(const Expr_ptr expr)
     {
         f_os << "-";
+        auto& em = ExprMgr::INSTANCE();
+        if (em.is_neg(expr->lhs()) || (em.is_int_const(expr->lhs()) && expr->lhs()->value() < 0)) f_os << "(";
         return true;
     }
     void Printer::walk_neg_postorder(const Expr_ptr expr)
-    {}
+    {
+        auto& em = ExprMgr::INSTANCE();
+        if (em.is_neg(expr->lhs()) || (em.is_int_const(expr->lhs()) && expr->lhs()->value() < 0)) f_os << ")";
+    }
 
     bool Printer::walk_not_preorder(const Expr_ptr expr)
     {

@@ -1,3 +1,4 @@
+#include <query/source.hh>
 /**
  * @file model/model_mgr.cc
  * @brief Model management subsystem, ModelMgr class implementation.
@@ -141,6 +142,7 @@ namespace model {
                     try {
                         f_analyzer.process(body, curr_ctx, ANALYZE_INIT);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -168,6 +170,7 @@ namespace model {
                     try {
                         f_analyzer.process(body, curr_ctx, ANALYZE_INVAR);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -195,6 +198,7 @@ namespace model {
                     try {
                         f_analyzer.process(body, curr_ctx, ANALYZE_TRANS);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -222,6 +226,7 @@ namespace model {
                     try {
                         f_analyzer.process(body, curr_ctx, ANALYZE_DEFINE);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -251,6 +256,7 @@ namespace model {
                     try {
                         f_type_checker.process(body, curr_ctx);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp(ae.what());
 
                         WARN
@@ -278,6 +284,7 @@ namespace model {
                     try {
                         f_type_checker.process(body, curr_ctx);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -305,6 +312,7 @@ namespace model {
                     try {
                         f_type_checker.process(body, curr_ctx);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN
@@ -333,6 +341,7 @@ namespace model {
                     try {
                         f_type_checker.process(body, curr_ctx);
                     } catch (Exception& ae) {
+                        source::error(body, "model-validation", ae.what());
                         std::string tmp { ae.what() };
 
                         WARN

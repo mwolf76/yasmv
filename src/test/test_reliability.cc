@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)
     TestCommand command;
     const sat::SolveCallback unknown = [](sat::Engine&) { return sat::STATUS_UNKNOWN; };
 
-    fsm::CheckTransConsistency check(command, mm.model());
+    fsm::CheckTransConsistency check(mm.model());
     check.process({}, unknown);
     BOOST_CHECK(check.status() == fsm::FSM_CONSISTENCY_UNDECIDED);
     check.set_limit(2);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)
     check.set_limit(0);
     BOOST_CHECK_THROW(check.process({}), model::SemanticError);
 
-    sim::Simulation simulation(command, mm.model());
+    sim::Simulation simulation(mm.model());
     auto result = simulation.pick_state({}, false, true, -1, unknown);
     BOOST_CHECK_EQUAL(result.count, 0);
     BOOST_CHECK(!result.complete());

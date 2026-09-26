@@ -35,8 +35,8 @@ static unsigned progressive = 0;
 static auto simulation_trace_prefix = "sim-";
 
 namespace sim {
-    Simulation::Simulation(cmd::Command& command, model::Model& model)
-        : Algorithm(command, model)
+    Simulation::Simulation(model::Model& model)
+        : Algorithm(model)
     {
         const void* instance { this };
         TRACE

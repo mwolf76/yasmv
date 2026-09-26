@@ -1,3 +1,4 @@
+#include <query/source.hh>
 /**
  * @file model/module.cc
  * @brief Model management subsystem, Module class implementation.
@@ -203,6 +204,7 @@ namespace model {
             << std::endl;
 
         f_init.push_back(expr);
+        source::record(name(), "init", expr);
     }
 
     void Module::add_invar(expr::Expr_ptr expr)
@@ -215,6 +217,7 @@ namespace model {
             << std::endl;
 
         f_invar.push_back(expr);
+        source::record(name(), "invar", expr);
     }
 
     void Module::add_trans(expr::Expr_ptr expr)
@@ -227,6 +230,7 @@ namespace model {
             << std::endl;
 
         f_trans.push_back(expr);
+        source::record(name(), "trans", expr);
     }
 
 }; // namespace model
