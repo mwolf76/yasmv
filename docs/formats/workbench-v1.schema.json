@@ -3,39 +3,475 @@
   "title": "Workbench job request v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "request_id", "revision", "query"],
+  "required": [
+    "version",
+    "request_id",
+    "revision",
+    "query"
+  ],
   "properties": {
-    "version": {"const": 1},
-    "request_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,80}$"},
-    "revision": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "hard_timeout": {"type": "number", "minimum": 0.05, "maximum": 300},
+    "version": {
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "hard_timeout": {
+      "type": "number",
+      "minimum": 0.05,
+      "maximum": 300
+    },
     "query": {
-      "type": "object", "additionalProperties": false, "required": ["operation"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation"
+      ],
       "properties": {
-        "operation": {"enum": ["validate-model", "pick-state", "reach", "validate-trace", "simulate"]},
-        "target": {"type": "string", "minLength": 1, "maxLength": 4096},
-        "until": {"type": "string", "minLength": 1, "maxLength": 4096},
-        "assumptions": {"type": "array", "maxItems": 32, "items": {"type": "string", "minLength": 1, "maxLength": 4096}},
-        "limits": {
-          "type": "object", "additionalProperties": false,
-          "properties": {
-            "depth": {"type": "integer", "minimum": 0, "maximum": 10000},
-            "wall_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
-            "conflicts": {"type": "integer", "minimum": 0, "maximum": 2147483647},
-            "propagations": {"type": "integer", "minimum": 0, "maximum": 2147483647}
+        "operation": {
+          "enum": [
+            "validate-model",
+            "pick-state",
+            "reach",
+            "validate-trace",
+            "simulate",
+            "explain-init",
+            "explain-step",
+            "explain-reach",
+            "export-scenario",
+            "replay-scenario"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "until": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "assumptions": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
           }
         },
-        "trace_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,80}$"},
-        "trace": {"type": "object"},
-        "prefix_length": {"type": "integer", "minimum": 1, "maximum": 10001},
-        "watches": {"type": "object", "maxProperties": 32, "propertyNames": {"minLength": 1, "maxLength": 120}, "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}}
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "depth": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "conflicts": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "propagations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          }
+        },
+        "trace_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,80}$"
+        },
+        "trace": {
+          "type": "object"
+        },
+        "prefix_length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10001
+        },
+        "watches": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "explanation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimize": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "exact_depth": {
+              "type": "boolean"
+            },
+            "active_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "implementation": {
+          "enum": [
+            "faulty",
+            "deduplicating"
+          ]
+        }
       },
       "allOf": [
-        {"if": {"properties": {"operation": {"const": "reach"}}}, "then": {"required": ["target", "limits"], "properties": {"limits": {"required": ["depth"]}}}, "else": {"not": {"required": ["target"]}}},
-        {"if": {"properties": {"operation": {"const": "simulate"}}}, "then": {"required": ["limits"], "properties": {"limits": {"required": ["depth"], "properties": {"depth": {"minimum": 1}}}}}, "else": {"not": {"anyOf": [{"required": ["prefix_length"]}, {"required": ["until"]}]}}},
-        {"if": {"properties": {"operation": {"enum": ["validate-trace", "simulate"]}}}, "then": {"oneOf": [{"required": ["trace"]}, {"required": ["trace_id"]}]}, "else": {"not": {"anyOf": [{"required": ["trace"]}, {"required": ["trace_id"]}]}}},
-        {"if": {"properties": {"operation": {"enum": ["validate-model", "pick-state", "validate-trace"]}}}, "then": {"properties": {"limits": {"not": {"required": ["depth"]}}}}},
-        {"if": {"properties": {"operation": {"const": "validate-model"}}}, "then": {"properties": {"assumptions": {"maxItems": 0}}}}
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "reach",
+                  "explain-reach"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target",
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ]
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "target"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "simulate"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ],
+                "properties": {
+                  "depth": {
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "until"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "simulate",
+                  "explain-step"
+                ]
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "prefix_length"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "validate-trace",
+                  "simulate",
+                  "explain-step",
+                  "export-scenario"
+                ]
+              }
+            }
+          },
+          "then": {
+            "oneOf": [
+              {
+                "required": [
+                  "trace"
+                ]
+              },
+              {
+                "required": [
+                  "trace_id"
+                ]
+              }
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "trace"
+                  ]
+                },
+                {
+                  "required": [
+                    "trace_id"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "explain-step"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "properties": {
+                  "depth": {
+                    "const": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "validate-model",
+                  "pick-state",
+                  "validate-trace",
+                  "explain-init"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-model"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "assumptions": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "explain-init",
+                  "explain-step",
+                  "explain-reach"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watches": {
+                "maxProperties": 0
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "explanation"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "replay-scenario"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "scenario_id",
+              "implementation"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "scenario_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "implementation"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "export-scenario",
+                  "replay-scenario"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "assumptions": {
+                "maxItems": 0
+              },
+              "limits": {
+                "maxProperties": 0
+              }
+            },
+            "not": {
+              "required": [
+                "watches"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "explain-reach"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "explanation": {
+                "if": {
+                  "required": [
+                    "active_ids"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "exact_depth"
+                  ],
+                  "properties": {
+                    "exact_depth": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "explanation": {
+                "properties": {
+                  "exact_depth": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

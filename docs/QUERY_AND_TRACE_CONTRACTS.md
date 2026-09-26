@@ -264,3 +264,13 @@ using SAT with each complete state pinned, preserving the checker's bit-vector
 semantics. Watches do not constrain the generating query. Trace-v1 continues to
 carry the generating specification; evaluated watch views live outside the
 trace in workbench artifacts. Interrupted watch evaluation remains inconclusive.
+
+## Additive native API extensions in M3
+
+`explain-init`, `explain-step`, and `explain-reach` return either a feasible
+result or a verified high-level conflicting subset. Query `explanation` options
+control per-depth subset minimization and explicit subset rechecks. Result
+`explanation` carries bound, fixed background, source references, and verified
+cores; interrupted decisions have no explanation. See
+[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md) for the complete
+contract and the separate executable scenario/implementation replay workflow.

@@ -4,11 +4,12 @@ import math
 import re
 
 VERSION = 1
-OPERATIONS = ('validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate')
+OPERATIONS = ('validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
 CAPABILITIES = {
     'version': VERSION, 'operations': list(OPERATIONS), 'events': ['started', 'progress', 'result'],
     'trace_version': 1, 'bounded_only': True, 'watch_types': ['boolean'],
-    'selected_prefix': True, 'process_isolation': True,
+    'explanations': ['initial', 'single_step_continuation', 'bounded_reach'],
+    'scenario_adapters': ['retry-protocol-v1'], 'selected_prefix': True, 'process_isolation': True,
     'limits': ['depth', 'wall_ms', 'conflicts', 'propagations'],
 }
 ID = re.compile(r'^[a-zA-Z0-9_-]{1,80}$')
@@ -62,7 +63,7 @@ def expressions(value):
 
 
 def revision(value):
-    fields(value, ('source', 'name', 'root', 'inputs', 'goals', 'watches'), ('source',))
+    fields(value, ('source', 'name', 'root', 'inputs', 'goals', 'watches', 'scenario'), ('source',))
     if not isinstance(value['source'], str) or not value['source'].strip() or len(value['source'].encode()) > 1024 * 1024:
         raise ValueError('Source must contain 1 byte to 1 MiB')
     for key in ('name', 'root'):
@@ -70,8 +71,14 @@ def revision(value):
             raise ValueError('Invalid ' + key)
     for key in ('inputs', 'goals', 'watches'):
         expressions(value.get(key, {}))
-    return dict(source=value['source'], name=value.get('name', 'Untitled model'), root=value.get('root', ''),
+    if value.get('scenario') is not None:
+        from tools.scenario.format import metadata
+        metadata(value['scenario'])
+    result = dict(source=value['source'], name=value.get('name', 'Untitled model'), root=value.get('root', ''),
                 inputs=value.get('inputs', {}), goals=value.get('goals', {}), watches=value.get('watches', {}))
+    if value.get('scenario') is not None:
+        result['scenario'] = value['scenario']
+    return result
 
 
 def request(value):
@@ -85,22 +92,22 @@ def request(value):
     if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0.05 <= timeout <= 300:
         raise ValueError('Hard timeout must be between 0.05 and 300 seconds')
     q = value['query']
-    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches'), ('operation',))
+    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation'), ('operation',))
     op = q['operation']
     if op not in OPERATIONS:
         raise ValueError('Unsupported operation')
     for key in ('target', 'until'):
         if key in q and (not isinstance(q[key], str) or not q[key].strip() or len(q[key]) > 4096):
             raise ValueError('Invalid ' + key)
-    if ('target' in q) != (op == 'reach') or ('until' in q and op != 'simulate'):
+    if ('target' in q) != (op in ('reach', 'explain-reach')) or ('until' in q and op != 'simulate'):
         raise ValueError('Target is required only for reach; until is supported only for simulate')
     limits = q.get('limits', {})
     fields(limits, CAPABILITIES['limits'])
     for key, val in limits.items():
         integer(val, 0, 10000 if key == 'depth' else 2147483647, key)
-    if op in ('reach', 'simulate'):
+    if op in ('reach', 'simulate', 'explain-reach'):
         integer(limits.get('depth'), 1 if op == 'simulate' else 0, 10000, 'depth')
-    elif 'depth' in limits:
+    elif 'depth' in limits and not (op == 'explain-step' and limits['depth'] == 1):
         raise ValueError('Depth applies only to reach and simulate')
     assumptions = q.get('assumptions', [])
     if not isinstance(assumptions, list) or len(assumptions) > 32 or any(not isinstance(a, str) or not a.strip() or len(a) > 4096 for a in assumptions):
@@ -109,7 +116,7 @@ def request(value):
         raise ValueError('Model validation does not accept assumptions')
     if 'watches' in q:
         expressions(q['watches'])
-    if op in ('validate-trace', 'simulate'):
+    if op in ('validate-trace', 'simulate', 'explain-step', 'export-scenario'):
         if ('trace' in q) == ('trace_id' in q):
             raise ValueError('Specify exactly one trace or trace_id')
         if 'trace' in q and not isinstance(q['trace'], dict):
@@ -119,9 +126,38 @@ def request(value):
     elif 'trace' in q or 'trace_id' in q:
         raise ValueError('This operation does not accept a trace')
     if 'prefix_length' in q:
-        if op != 'simulate':
-            raise ValueError('Prefix length applies only to simulate')
+        if op not in ('simulate', 'explain-step'):
+            raise ValueError('Prefix length applies only to continuation')
         integer(q['prefix_length'], 1, 10001, 'prefix_length')
+    explaining = op.startswith('explain-')
+    if 'explanation' in q:
+        if not explaining:
+            raise ValueError('Explanation options require an explanation operation')
+        options = q['explanation']
+        fields(options, ('minimize', 'checks', 'wall_ms', 'active_ids', 'exact_depth'))
+        for key in ('minimize', 'exact_depth'):
+            if key in options and type(options[key]) is not bool:
+                raise ValueError('Explanation flags must be Boolean')
+        for key in ('checks', 'wall_ms'):
+            if key in options:
+                integer(options[key], 0, 1000000, key)
+        if 'active_ids' in options and (not isinstance(options['active_ids'], list) or any(not isinstance(i, str) for i in options['active_ids'])):
+            raise ValueError('active_ids must be an array of strings')
+        if options.get('exact_depth') and op != 'explain-reach':
+            raise ValueError('exact_depth applies only to explain-reach')
+        if 'active_ids' in options and op == 'explain-reach' and not options.get('exact_depth'):
+            raise ValueError('Reach subset rechecks require exact_depth')
+    if explaining and q.get('watches'):
+        raise ValueError('Explanation queries do not evaluate watches')
+    if op == 'replay-scenario':
+        if not isinstance(q.get('scenario_id'), str) or not ID.fullmatch(q['scenario_id']):
+            raise ValueError('Scenario replay requires a saved scenario_id')
+        if q.get('implementation') not in ('faulty', 'deduplicating'):
+            raise ValueError('Select faulty or deduplicating implementation')
+    elif 'scenario_id' in q or 'implementation' in q:
+        raise ValueError('Scenario fields require replay-scenario')
+    if op in ('export-scenario', 'replay-scenario') and (assumptions or 'watches' in q or limits):
+        raise ValueError('Scenario jobs use saved query context and a hard timeout only')
     return value
 
 

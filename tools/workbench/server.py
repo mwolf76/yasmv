@@ -18,7 +18,7 @@ def examples():
     scenario = read(directory / 'scenario.json')
     return [dict(name=m['name'], source=(directory / m['file']).read_text(),
                  goals=scenario['goals'], watches=scenario['watches'], description=scenario['description'],
-                 default_depth=scenario['default_depth']) for m in scenario['models']]
+                 default_depth=scenario['default_depth'], scenario=scenario) for m in scenario['models']]
 
 
 def make_server(engine, port=8765):
@@ -81,6 +81,10 @@ def make_server(engine, port=8765):
                         self.reply(200, {'cancel_requested': engine.cancel(route[2])})
                     else:
                         self.reply(404, {'error': 'Unknown endpoint'})
+                elif not post and route == ['api', 'scenarios']:
+                    self.reply(200, engine.scenarios())
+                elif not post and len(route) == 3 and route[:2] == ['api', 'scenarios']:
+                    self.reply(200, engine.scenario(route[2]))
                 elif not post and route == ['api', 'traces']:
                     self.reply(200, engine.traces(parse_qs(url.query).get('revision', [None])[0]))
                 elif not post and len(route) == 3 and route[:2] == ['api', 'traces']:

@@ -23,7 +23,10 @@ EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional
     tools/workbench/static/style.css tools/workbench/static/app.js \
     examples/retry-protocol/README.md examples/retry-protocol/faulty.smv \
     examples/retry-protocol/deduplicating.smv examples/retry-protocol/scenario.json \
-    examples/retry-protocol/runner.py tests/test_workbench.py tests/workbench-browser.cjs
+    examples/retry-protocol/runner.py tests/test_workbench.py tests/workbench-browser.cjs \
+    tests/test_explanations.py tests/test_scenarios.py docs/EXPLANATIONS_AND_SCENARIOS.md \
+    docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
+    tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
@@ -72,7 +75,11 @@ query-test: yasmv yasmv_query_tests
 workbench-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_workbench.py
 
-test: short-test unit-test functional-test reliability-test query-test workbench-test
+developer-workflow-test: yasmv
+	@YASMV_HOME=`pwd` python3 tests/test_explanations.py
+	@YASMV_HOME=`pwd` python3 tests/test_scenarios.py
+
+test: short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -83,7 +90,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc
+query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\

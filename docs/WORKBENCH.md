@@ -1,9 +1,11 @@
-# M2: local model workbench
+# Local model workbench (M2 and M3)
 
-M2 implements work packages 10–12: an artifact runner, a browser workbench, and
+M2 implemented work packages 10–12: an artifact runner, a browser workbench, and
 a retry-protocol demonstration. The server and CLI use Python 3.10+ standard
 library modules; the browser uses ordinary HTML, CSS, and JavaScript. There are
-no runtime npm dependencies or external web assets.
+no runtime npm dependencies or external web assets. M3 adds bounded
+explanations and executable scenario export/replay; see
+[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md).
 
 ## Start
 
@@ -194,9 +196,8 @@ PLAYWRIGHT_MODULE=/tmp/yasmv-browser/node_modules/playwright node tests/workbenc
 ```
 
 See [the retry protocol guide](../examples/retry-protocol/README.md) for the exact
-state graph, expected witness, limits, and scenario sidecar. M3 adds bounded
-explanations and general executable scenario export/adapters; those are not
-claimed by this milestone.
+state graph, expected witness, limits, and scenario sidecar. The implemented M3 extension adds bounded explanations and executable scenario
+export with a retry-protocol adapter, as documented in the linked M3 guide.
 
 ### Local acceptance evidence — 2026-09-26
 
@@ -217,4 +218,4 @@ claimed by this milestone.
 The retry witness first reaches duplicate execution at depth 5 and passes both
 checker replay and the independent Python state machine. The deduplicating
 model has no duplicate witness through depth 12. These are the M2 exit gates;
-M3 is the next milestone.
+M3 acceptance evidence is recorded in the explanation and scenario guide.

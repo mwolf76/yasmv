@@ -1,6 +1,6 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {revision: null, dirty: true, examples: [], jobs: [], job: null, artifact: null, comparison: null, step: 0, importing: false};
+const state = {revision: null, dirty: true, examples: [], jobs: [], job: null, artifact: null, comparison: null, step: 0, importing: false, scenario: null};
 const node = (tag, text, className) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e; };
 const option = (label, value) => { const e = node('option', label); e.value = value; return e; };
 async function api(path, body) {
@@ -12,14 +12,15 @@ async function api(path, body) {
 function notice(error) { $('notice').hidden = !error; $('notice').textContent = error ? String(error.message || error) : ''; }
 function action(id, fn) { $(id).addEventListener('click', async () => { notice(null); try { await fn(); } catch (e) { notice(e); } }); }
 function remember() {
-  localStorage.setItem('yasmv-session', JSON.stringify({revision: state.revision?.id, trace: state.artifact?.id, comparison: state.comparison?.id, job: state.job, step: state.step}));
+  localStorage.setItem('yasmv-session', JSON.stringify({revision: state.revision?.id, trace: state.artifact?.id, comparison: state.comparison?.id, job: state.job, step: state.step, scenario: state.scenario?.id}));
 }
 function markDirty() { state.dirty = true; $('dirty').textContent = 'Unsaved changes'; }
-for (const id of ['source', 'model-name', 'root', 'inputs', 'goals', 'watches']) $(id).addEventListener('input', markDirty);
+for (const id of ['source', 'model-name', 'root', 'inputs', 'goals', 'watches', 'scenario-metadata']) $(id).addEventListener('input', markDirty);
 function fillEditor(revision) {
   $('model-name').value = revision.name;
   $('source').value = revision.source;
   $('root').value = revision.root || '';
+  $('scenario-metadata').value = JSON.stringify(revision.scenario || null, null, 2);
   for (const name of ['inputs', 'goals', 'watches']) $(name).value = JSON.stringify(revision[name] || {}, null, 2);
   $('goal').replaceChildren(option('Custom expression', ''));
   for (const [name, expression] of Object.entries(revision.goals || {})) $('goal').append(option(name, expression));
@@ -43,8 +44,8 @@ async function selectRevision(id) {
   $('result-title').textContent = 'Revision selected';
   $('result-detail').textContent = 'Validate or query this saved revision, or select a previous job.';
   $('result-panel').className = 'panel result-panel';
-  for (const id of ['cancel', 'progress', 'diagnostics']) $(id).hidden = true;
-  renderTrace(); await refreshTraces(); remember();
+  for (const id of ['cancel', 'progress', 'diagnostics', 'explanation', 'replay-difference']) $(id).hidden = true;
+  renderTrace(); await refreshTraces(); state.scenario = null; await refreshScenarios(); remember();
 }
 $('revision').addEventListener('change', async () => { try { if ($('revision').value) await selectRevision($('revision').value); } catch (e) { notice(e); } });
 $('example').addEventListener('change', () => {
@@ -62,7 +63,7 @@ async function submit(query) {
   ready();
   const timeout = number('timeout', 1, 300);
   const request = {version: 1, request_id: crypto.randomUUID(), revision: state.revision.id, hard_timeout: timeout,
-    query: {...query, limits: {...query.limits, wall_ms: timeout * 1000}}};
+    query: query.operation.endsWith('-scenario') ? query : {...query, limits: {...query.limits, wall_ms: timeout * 1000}}};
   const {id} = await api('jobs', request);
   state.job = id; remember();
   await refreshJobs();
@@ -71,6 +72,8 @@ async function submit(query) {
 action('save', async () => {
   const revision = {name: $('model-name').value, source: $('source').value, root: $('root').value};
   for (const name of ['inputs', 'goals', 'watches']) revision[name] = JSON.parse($(name).value);
+  const mapping = JSON.parse($('scenario-metadata').value);
+  if (mapping !== null) revision.scenario = mapping;
   const saved = await api('revisions', revision);
   await refreshRevisions(); await selectRevision(saved.id);
   await submit({operation: 'validate-model'});
@@ -85,6 +88,17 @@ action('cancel', () => api('jobs/' + state.job + '/cancel', {}));
 function describeResult(result, query) {
   if (result.status === 'error') return ['Query failed', 'Read the diagnostics below. The saved revision is unchanged.', 'error'];
   if (result.status === 'unknown') return ['Inconclusive · ' + result.stop_reason.replaceAll('_', ' '), 'No reachability or safety conclusion follows from this interrupted or incomplete computation.', 'unknown'];
+  if (query.operation.startsWith('explain-')) {
+    if (result.outcome === 'satisfiable') return ['Query is feasible', 'No impossibility explanation applies. Run a search to obtain a concrete trace.', 'success'];
+    return [query.operation === 'explain-step' ? 'No valid next transition' : query.operation === 'explain-init' ? 'Initial constraints are inconsistent' : 'Goal impossible through depth ' + query.limits.depth,
+      'Each reported subset reproduces UNSAT under the fixed background below. This is not an unbounded safety proof.', 'unknown'];
+  }
+  if (query.operation === 'export-scenario') return ['Executable scenario exported', 'The source trace passed model replay. Download the scenario or replay it against either receiver.', 'success'];
+  if (query.operation === 'replay-scenario') {
+    const replay = result.implementation_replay;
+    return result.outcome === 'matched' ? ['Implementation matched the scenario', replay.duplicate_execution ? 'Duplicate execution reproduced in the faulty receiver.' : 'All observations matched the exported expectations.', 'success'] :
+      ['Implementation diverged at step ' + replay.first_divergence.step, replay.duplicate_execution ? 'The first differing observation is shown below.' : 'Duplicate execution has not been reproduced. The first differing observation is shown below.', 'unknown'];
+  }
   if (result.outcome === 'unreachable') return [`No witness through depth ${query.limits.depth}`, 'Bounded negative result. Reachability beyond this bound is unknown; this is not a safety proof.', 'unknown'];
   if (result.outcome === 'reachable') return [`Goal reached at depth ${result.trace.steps.length - 1}`, 'A concrete witness was found and independently replayed in a fresh checker process.', 'success'];
   if (result.outcome === 'deadlocked') return ['Continuation blocked', 'No extension meets the constraint at the pinned source state. If the constraint conflicts with the prefix, start a fresh search. The child preserves the valid prefix.', 'unknown'];
@@ -109,24 +123,34 @@ async function refreshJobs() {
   $('cancel').hidden = !job.running;
   $('progress').hidden = !job.running;
   $('diagnostics').hidden = true;
+  $('explanation').hidden = true;
+  $('replay-difference').hidden = true;
   if (job.running) {
     $('result-panel').className = 'panel result-panel';
     $('result-title').textContent = 'Working · ' + job.request.query.operation;
     const response = await fetch(`/api/jobs/${state.job}/events`);
     const events = (await response.text()).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     const progress = events.filter(e => e.event === 'progress').at(-1);
-    $('result-detail').textContent = progress ? `${progress.phase === 'replay' ? 'Validating trace' : 'Checker running'} · ${(progress.elapsed_ms / 1000).toFixed(1)} s in this phase · isolated worker` : 'Starting an isolated worker…';
+    $('result-detail').textContent = progress ? `${({'analysis': 'Checker running', 'replay': 'Validating model trace', 'implementation-replay': 'Replaying implementation'}[progress.phase] || progress.phase)} · ${(progress.elapsed_ms / 1000).toFixed(1)} s in this phase · isolated worker` : 'Starting an isolated worker…';
   } else {
     const [title, detail, style] = describeResult(job.result, job.request.query);
     $('result-title').textContent = title;
     $('result-detail').textContent = detail + ' · Revision ' + job.request.revision.slice(0, 8);
     $('result-panel').className = 'panel result-panel ' + style;
+    renderExplanation(job);
+    if (job.result.implementation_replay?.first_divergence) {
+      $('replay-difference').hidden = false;
+      $('replay-difference').textContent = JSON.stringify(job.result.implementation_replay.first_divergence, null, 2);
+    }
     const diagnostics = job.result.diagnostics || [];
     if (diagnostics.length) { $('diagnostics').hidden = false; $('diagnostics').textContent = diagnostics.map(d => `${d.code}: ${d.message}${d.primary?.line ? ' (line ' + d.primary.line + ')' : ''}`).join('\n'); }
     if (lastPublished !== state.job) {
       lastPublished = state.job;
       if (state.revision?.id === job.request.revision && job.result.trace_id) {
         await refreshTraces(); await selectTrace(job.result.trace_id);
+      }
+      if (state.revision?.id === job.request.revision && job.result.scenario_id) {
+        await selectScenario(job.result.scenario_id); await refreshScenarios();
       }
       state.importing = false;
     }
@@ -172,6 +196,8 @@ function renderTrace() {
   $('trust').className = 'badge ' + (trace ? trusted ? 'valid' : 'untrusted' : '');
   $('export').disabled = !trusted;
   $('branch').disabled = !trusted || artifact.revision !== state.revision?.id;
+  $('explain-step').disabled = $('branch').disabled;
+  $('export-scenario').disabled = $('branch').disabled || !state.revision?.scenario;
   $('timeline').replaceChildren();
   if (!trace) {
     $('trace-description').textContent = 'Replay-validated traces will appear here. Select a step to inspect or branch.';
@@ -212,6 +238,70 @@ $('import').addEventListener('change', async () => {
     state.importing = true; await submit({operation: 'validate-trace', trace});
   } catch (e) { notice(e); } finally { $('import').value = ''; }
 });
+function explanationOptions() {
+  return {minimize: $('minimize').checked, checks: number('min-checks', 0, 1000000), wall_ms: number('min-ms', 0, 1000000)};
+}
+function assumptions() { return $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean); }
+action('explain-init', () => submit({operation: 'explain-init', assumptions: assumptions(), explanation: explanationOptions()}));
+action('explain-reach', () => submit({operation: 'explain-reach', target: $('target').value.trim(), limits: {depth: number('depth', 0, 10000)}, assumptions: assumptions(), explanation: explanationOptions()}));
+action('explain-step', () => submit({operation: 'explain-step', trace_id: state.artifact.id, prefix_length: state.step + 1,
+  assumptions: $('branch-constraint').value.trim() ? [$('branch-constraint').value.trim()] : [], explanation: explanationOptions()}));
+function renderExplanation(job) {
+  const explanation = job.result.explanation;
+  if (!explanation) return;
+  const container = $('explanation'); container.hidden = false; container.replaceChildren();
+  container.append(node('h3', `Bound: ${explanation.bound} · ${explanation.scope.replaceAll('_', ' ')}`), node('p', explanation.background, 'muted'));
+  const sources = new Map((job.result.constraints || []).map(c => [c.id, c]));
+  const sourceLines = (id, visited = new Set()) => {
+    if (visited.has(id)) return []; visited.add(id);
+    const source = sources.get(id); if (!source) return [];
+    return source.span?.line ? [source.span.line] : (source.parents || []).flatMap(p => sourceLines(p, visited));
+  };
+  for (const core of explanation.cases) {
+    const details = node('details'); details.open = explanation.cases.length < 4;
+    const label = core.subset_minimal ? 'subset-minimal' : 'nonminimal · ' + core.minimization.stop_reason;
+    details.append(node('summary', `Depth ${core.depth} · ${core.constraints.length} conflicting constraints · ${label}`));
+    const table = node('table'); const header = node('tr');
+    for (const label of ['Kind / state', 'Constraint', 'Source']) header.append(node('th', label)); table.append(header);
+    for (const constraint of core.constraints) {
+      const row = node('tr'); row.append(node('td', `${constraint.kind} / ${constraint.step}`), node('td', constraint.expression));
+      const location = node('td');
+      const lines = [...new Set(constraint.source_ids.flatMap(id => sourceLines(id)))];
+      for (const line of lines) {
+        const link = node('button', 'Line ' + line, 'source-link'); link.disabled = state.dirty || state.revision?.id !== job.request.revision;
+        link.addEventListener('click', () => {
+          $('editor').open = true; $('source').focus();
+          const text = $('source').value.split('\n'); const start = text.slice(0, line - 1).reduce((n, s) => n + s.length + 1, 0);
+          $('source').setSelectionRange(start, start + (text[line - 1] || '').length); $('source').scrollIntoView({block: 'center'});
+        }); location.append(link);
+      }
+      if (!lines.length) location.textContent = constraint.kind === 'pin' ? 'Pinned trace value' : constraint.kind === 'assumption' ? 'Query assumption' : constraint.kind === 'goal' ? 'Query goal' : 'Generated constraint';
+      row.append(location); table.append(row);
+    }
+    details.append(table); container.append(details);
+  }
+}
+async function refreshScenarios() {
+  const scenarios = await api('scenarios');
+  $('scenario').replaceChildren(option('Choose a scenario…', ''));
+  for (const scenario of scenarios.filter(s => s.revision === state.revision?.id)) $('scenario').append(option(`${scenario.actions} actions · ${scenario.id.slice(0, 12)}`, scenario.id));
+  $('scenario').value = state.scenario?.id || '';
+  $('replay-scenario').disabled = !state.scenario || state.scenario.revision !== state.revision?.id;
+  $('download-scenario').disabled = $('replay-scenario').disabled;
+}
+async function selectScenario(id) {
+  state.scenario = id ? await api('scenarios/' + id) : null;
+  $('scenario-detail').textContent = state.scenario ? `${state.scenario.actions.length} actions · Model trace validated at export · Adapter: ${state.scenario.adapter}. Implementation replay checks observations separately.` : 'Choose or export a scenario.';
+  remember();
+}
+$('scenario').addEventListener('change', async () => { try { await selectScenario($('scenario').value); await refreshScenarios(); } catch (e) { notice(e); } });
+action('export-scenario', () => submit({operation: 'export-scenario', trace_id: state.artifact.id}));
+action('replay-scenario', () => submit({operation: 'replay-scenario', scenario_id: state.scenario.id, implementation: $('implementation').value}));
+action('download-scenario', () => {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(state.scenario, null, 2) + '\n'], {type: 'application/json'}));
+  const link = node('a'); link.href = url; link.download = 'scenario-' + state.scenario.id.slice(0, 12) + '.json'; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
 async function init() {
   state.examples = await api('examples');
   state.examples.forEach((example, index) => $('example').append(option(example.name, String(index))));
@@ -224,7 +314,8 @@ async function init() {
   if (saved.comparison) { try { state.comparison = await api('traces/' + saved.comparison); } catch (_) { /* Missing artifact. */ } }
   state.step = Math.min(saved.step || 0, Math.max(0, (state.artifact?.trace.steps.length || 1) - 1));
   state.job = saved.job || null; lastPublished = state.job;
-  renderTrace(); await refreshTraces(); await refreshJobs();
+  if (saved.scenario) { try { await selectScenario(saved.scenario); } catch (_) {} }
+  renderTrace(); await refreshTraces(); await refreshScenarios(); await refreshJobs();
   async function poll() { try { await refreshJobs(); } catch (e) { notice(e); } finally { setTimeout(poll, 700); } }
   setTimeout(poll, 700);
 }

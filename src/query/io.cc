@@ -5,7 +5,7 @@
 #include <query/query.hh>
 #include <query/trace.hh>
 namespace query {
-    static const std::map<std::string, Operation> operations = { { "validate-model", Operation::validate_model }, { "check-init", Operation::check_init }, { "check-trans", Operation::check_trans }, { "pick-state", Operation::pick_state }, { "reach", Operation::reach }, { "simulate", Operation::simulate }, { "diameter", Operation::diameter }, { "validate-trace", Operation::validate_trace } };
+    static const std::map<std::string, Operation> operations = { { "explain-init", Operation::explain_init }, { "explain-step", Operation::explain_step }, { "explain-reach", Operation::explain_reach }, { "validate-model", Operation::validate_model }, { "check-init", Operation::check_init }, { "check-trans", Operation::check_trans }, { "pick-state", Operation::pick_state }, { "reach", Operation::reach }, { "simulate", Operation::simulate }, { "diameter", Operation::diameter }, { "validate-trace", Operation::validate_trace } };
     static void require(bool c, const std::string& message)
     {
         if (!c) throw std::invalid_argument(message);
@@ -41,6 +41,7 @@ namespace query {
         v["enumerate"] = s.enumerate;
         v["count"] = s.count;
         v["trace_id"] = s.trace_id;
+        if (!s.explanation.isNull()) v["explanation"] = s.explanation;
         if (s.prefix_length >= 0) v["prefix_length"] = Json::Int64(s.prefix_length);
         if (!s.watches.empty()) {
             v["watches"] = Json::objectValue;
@@ -57,7 +58,7 @@ namespace query {
     }
     QuerySpec spec_from_json(const Json::Value& v)
     {
-        allowed(v, { "operation", "request_id", "strategy", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches" });
+        allowed(v, { "operation", "request_id", "strategy", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches", "explanation" });
         require(v["operation"].isString() && operations.count(v["operation"].asString()), "Unsupported query operation");
         QuerySpec s;
         s.operation = operations.at(v["operation"].asString());
@@ -94,6 +95,20 @@ namespace query {
             require(v["watches"].isObject(), "Watches must be an object of Boolean expressions");
             for (const auto& name : v["watches"].getMemberNames())
                 s.watches[name] = expression(v["watches"][name]);
+        }
+        if (v.isMember("explanation")) {
+            const auto& options = v["explanation"];
+            allowed(options, { "minimize", "checks", "wall_ms", "active_ids", "exact_depth" });
+            for (auto key : { "minimize", "exact_depth" })
+                if (options.isMember(key)) require(options[key].isBool(), "Explanation flag must be Boolean");
+            for (auto key : { "checks", "wall_ms" })
+                if (options.isMember(key)) require(options[key].isInt64() && options[key].asInt64() >= 0 && options[key].asInt64() <= 1000000, "Invalid explanation budget");
+            if (options.isMember("active_ids")) {
+                require(options["active_ids"].isArray(), "active_ids must be an array");
+                for (const auto& id : options["active_ids"])
+                    require(id.isString(), "Constraint IDs must be strings");
+            }
+            s.explanation = options;
         }
         s.trace = v["trace"];
         s.parent_trace = v["parent_trace"];

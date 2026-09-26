@@ -56,8 +56,11 @@ BOOST_AUTO_TEST_CASE(incremental_solver)
     BOOST_CHECK_EQUAL(engine.value(x), 0);
     engine.invert_last_group();
     BOOST_CHECK(engine.solve() == sat::STATUS_UNSAT);
+    const auto failed = engine.failed_groups();
+    BOOST_CHECK(std::find(failed.begin(), failed.end(), group) != failed.end());
     engine.invert_last_group();
     BOOST_CHECK(engine.solve() == sat::STATUS_SAT);
+    BOOST_CHECK(engine.failed_groups().empty());
     clause(engine, {});
     BOOST_CHECK(engine.solve() == sat::STATUS_UNSAT);
 
@@ -66,6 +69,7 @@ BOOST_AUTO_TEST_CASE(incremental_solver)
     clause(interrupted, { Minisat::mkLit(z), Minisat::mkLit(z, true) });
     interrupted.interrupt();
     BOOST_CHECK(interrupted.solve() == sat::STATUS_UNKNOWN);
+    BOOST_CHECK(interrupted.failed_groups().empty());
 }
 
 BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)

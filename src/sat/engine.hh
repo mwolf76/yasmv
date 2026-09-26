@@ -94,6 +94,8 @@ namespace sat {
         /**
 	 * @brief Invoke Minisat
 	 */
+        std::vector<group_t> failed_groups() const;
+
         inline status_t solve()
         {
             return sat_solve_groups(f_groups);

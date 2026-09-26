@@ -20,7 +20,10 @@
             "reach",
             "simulate",
             "diameter",
-            "validate-trace"
+            "validate-trace",
+            "explain-init",
+            "explain-step",
+            "explain-reach"
           ]
         },
         "request_id": {
@@ -97,6 +100,34 @@
             "type": "string"
           },
           "description": "Named Boolean state expressions, evaluated on result trace frames."
+        },
+        "explanation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimize": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "exact_depth": {
+              "type": "boolean"
+            },
+            "active_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       },
       "required": [

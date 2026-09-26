@@ -43,6 +43,7 @@ const assert = require('node:assert/strict');
     await page.click('.step:nth-child(3)');
     await page.click('#branch-panel summary');
     await page.fill('#branch-depth', '3');
+    await page.fill('#branch-constraint', 'action = DROP_ACK || action = RETRY || action = DELIVER');
     await page.click('#branch'); await result('Child trace created');
     await page.waitForFunction(old => document.querySelector('#trace').value && document.querySelector('#trace').value !== old, original);
     const child = await page.locator('#trace').inputValue();
@@ -60,6 +61,29 @@ const assert = require('node:assert/strict');
     await page.fill('#branch-constraint', 'action = ACK');
     await page.click('#branch'); await result('Continuation blocked');
     await page.waitForFunction(() => document.querySelectorAll('.step').length === 1);
+    // Explain why the pinned SEND action cannot satisfy ACK.
+    await page.selectOption('#trace', original);
+    await page.waitForSelector('.step:nth-child(6)');
+    await page.click('.step:nth-child(1)');
+    await page.click('#explain-step'); await result('No valid next transition');
+    await page.waitForSelector('#explanation:not([hidden])');
+    assert.match(await page.locator('#explanation').innerText(), /subset-minimal/);
+    assert.match(await page.locator('#explanation').innerText(), /Fixed model declarations/);
+    assert.match(await page.locator('#explanation').innerText(), /action/);
+    // Export the original witness and replay both implementations.
+    await page.click('#export-scenario'); await result('Executable scenario exported');
+    await page.waitForFunction(() => document.querySelector('#scenario').value.length > 0);
+    const scenarioId = await page.locator('#scenario').inputValue();
+    const [scenarioDownload] = await Promise.all([page.waitForEvent('download'), page.click('#download-scenario')]);
+    const scenarioFile = path.join(store, 'scenario.json'); await scenarioDownload.saveAs(scenarioFile);
+    assert.equal(JSON.parse(fs.readFileSync(scenarioFile)).actions.length, 5);
+    await page.click('#replay-scenario'); await result('Implementation matched the scenario');
+    assert.match(await page.locator('#result-detail').innerText(), /Duplicate execution reproduced/);
+    await page.selectOption('#implementation', 'deduplicating');
+    await page.click('#replay-scenario'); await result('Implementation diverged at step 5');
+    assert.match(await page.locator('#replay-difference').innerText(), /executions/);
+    await page.reload(); await result('Implementation diverged at step 5');
+    await page.waitForFunction(expected => document.querySelector('#scenario').value === expected, scenarioId);
     // Import remains visibly untrusted until replay; a damaged valuation never becomes trusted.
     trace.steps[0].values.executions = '1';
     const damaged = path.join(store, 'damaged.json'); fs.writeFileSync(damaged, JSON.stringify(trace));
@@ -92,7 +116,7 @@ const assert = require('node:assert/strict');
     await page.setViewportSize({width: 390, height: 844});
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepEqual(errors, []);
-    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout.');
+    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout, explanations, scenario export and implementation replay.');
   } finally {
     if (browser) await browser.close();
     server.kill('SIGTERM');

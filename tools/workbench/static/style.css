@@ -599,3 +599,12 @@ footer span {
     width:100%;
   }
 }
+
+.explain-controls { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 20px; }
+.check-label { display: flex; align-items: center; gap: 8px; }
+.check-label input { width: auto; margin: 0; }
+.scenario-panel { padding: 22px; }
+#explanation { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 15px; }
+#explanation details { margin: 16px 0; overflow-x: auto; }
+#explanation td { font-family: ui-monospace, monospace; font-size: 11px; }
+.source-link { color: var(--accent); background: var(--soft); min-height: 24px; padding: 4px 7px; }
