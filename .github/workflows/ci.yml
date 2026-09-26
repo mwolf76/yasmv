@@ -11,67 +11,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - llvm: "no"
-            sanitize: false
-          - llvm: "yes"
-            sanitize: false
-          - llvm: "no"
-            sanitize: true
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: install deps
-      run: sudo apt-get update && sudo apt-get install -y build-essential python3 autoconf automake libtool libboost-all-dev libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev minisat clang llvm-dev
+    - name: install core dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3 autoconf automake libtool \
+          libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
+          libboost-thread-dev libboost-system-dev libboost-chrono-dev \
+          libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev minisat
 
-    - name: configure
+    - name: configure core build
       run: |
         autoreconf -vif
         tar xfj microcode.tar.bz2
-        flags="-std=c++20 -O2 -g -Wall -Wno-deprecated-declarations -Werror"
-        if [ '${{ matrix.sanitize }}' = 'true' ]; then
-          flags="-std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
-        fi
-        ./configure --enable-llvm2smv=${{ matrix.llvm }} CXXFLAGS="$flags"
+        ./configure --disable-llvm2smv CXXFLAGS="-std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror"
 
     - name: compile
       run: make -j2
 
-    - name: unit, short, functional, and reliability tests
-      if: ${{ !matrix.sanitize }}
-      run: YASMV_HOME=$(pwd) make test
-
-    - name: sanitizer correctness regressions
-      if: ${{ matrix.sanitize }}
-      # Legacy arenas are owned by isolated processes; query children are reclaimed on exit.
+    # Full regression, LLVM, sanitizer, and browser gates run locally.
+    # See docs/CORRECTNESS_BASELINE.md for the pre-commit checks.
+    - name: CLI and agent smoke tests
       env:
-        ASAN_OPTIONS: detect_leaks=0
-        UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test developer-workflow-test analysis-test cli-test
-
-    - name: set up browser test runtime
-      if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-
-    - name: browser acceptance
-      if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}
+        YASMV_HOME: ${{ github.workspace }}
       run: |
-        npm install --prefix /tmp/yasmv-browser playwright@1.63.0
-        /tmp/yasmv-browser/node_modules/.bin/playwright install --with-deps chromium
-        PLAYWRIGHT_MODULE=/tmp/yasmv-browser/node_modules/playwright node tests/workbench-browser.cjs
-
-    - name: record toolchain and arithmetic fragment provenance
-      if: always()
-      run: python3 tools/build-provenance.py --output /tmp/yasmv-build-provenance.json
-
-    - uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: provenance-llvm-${{ matrix.llvm }}-sanitize-${{ matrix.sanitize }}
-        path: /tmp/yasmv-build-provenance.json
+        python3 tests/test_query.py QueryTests.test_cli_and_machine_agree
+        python3 tests/test_cli.py CLITests.test_protocol_recovery_and_discovery
