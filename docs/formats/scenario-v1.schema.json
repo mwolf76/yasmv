@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scenario metadata v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["version", "name", "description", "models", "goals", "watches", "default_depth", "actions"],
+  "properties": {
+    "version": {"const": 1}, "name": {"type": "string"}, "description": {"type": "string"},
+    "models": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "file"], "additionalProperties": false, "properties": {"name": {"type": "string"}, "file": {"type": "string"}}}},
+    "goals": {"type": "object", "additionalProperties": {"type": "string"}},
+    "watches": {"type": "object", "additionalProperties": {"type": "string"}},
+    "default_depth": {"type": "integer", "minimum": 0},
+    "actions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["symbol", "controllable", "observed", "arguments", "timing"],
+      "properties": {
+        "symbol": {"type": "string"}, "timing": {"type": "string"},
+        "controllable": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "observed": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "arguments": {"type": "object", "additionalProperties": {"oneOf": [
+          {"type": "object", "required": ["constant"], "additionalProperties": false, "properties": {"constant": {"type": ["string", "number", "boolean"]}}},
+          {"type": "object", "required": ["symbol"], "additionalProperties": false, "properties": {"symbol": {"type": "string"}}}
+        ]}}
+      }
+    }
+  }
+}

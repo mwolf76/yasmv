@@ -80,6 +80,30 @@ namespace query::trace {
         }
         return w;
     }
+    Json::Value evaluate_watches(witness::Witness& w, const std::map<std::string, expr::Expr_ptr>& watches)
+    {
+        Json::Value result(Json::objectValue);
+        algorithms::Algorithm a(model::ModelMgr::INSTANCE().model());
+        auto empty = expr::ExprMgr::INSTANCE().make_empty();
+        for (const auto& [name, expression] : watches) {
+            auto unit = a.compiler().process(empty, expression);
+            result[name] = Json::arrayValue;
+            for (unsigned k = 0; k < w.size(); ++k) {
+                checkpoint(Phase::encoding);
+                sat::Engine engine("watch");
+                a.assert_time_frame(engine, 0, w[w.first_time() + k]);
+                a.assert_fsm_invar(engine, 0);
+                auto state_status = engine.solve();
+                if (state_status == sat::STATUS_UNKNOWN) throw Cancelled();
+                if (state_status != sat::STATUS_SAT) throw std::invalid_argument("Cannot evaluate watch on an invalid state");
+                a.assert_formula(engine, 0, unit);
+                auto status = engine.solve();
+                if (status == sat::STATUS_UNKNOWN) throw Cancelled();
+                result[name].append(status == sat::STATUS_SAT);
+            }
+        }
+        return result;
+    }
     static void require(bool condition, const std::string& message)
     {
         if (!condition) throw std::invalid_argument(message);

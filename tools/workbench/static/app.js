@@ -1,0 +1,231 @@
+'use strict';
+const $ = id => document.getElementById(id);
+const state = {revision: null, dirty: true, examples: [], jobs: [], job: null, artifact: null, comparison: null, step: 0, importing: false};
+const node = (tag, text, className) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (className) e.className = className; return e; };
+const option = (label, value) => { const e = node('option', label); e.value = value; return e; };
+async function api(path, body) {
+  const response = await fetch('/api/' + path, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Request failed');
+  return result;
+}
+function notice(error) { $('notice').hidden = !error; $('notice').textContent = error ? String(error.message || error) : ''; }
+function action(id, fn) { $(id).addEventListener('click', async () => { notice(null); try { await fn(); } catch (e) { notice(e); } }); }
+function remember() {
+  localStorage.setItem('yasmv-session', JSON.stringify({revision: state.revision?.id, trace: state.artifact?.id, comparison: state.comparison?.id, job: state.job, step: state.step}));
+}
+function markDirty() { state.dirty = true; $('dirty').textContent = 'Unsaved changes'; }
+for (const id of ['source', 'model-name', 'root', 'inputs', 'goals', 'watches']) $(id).addEventListener('input', markDirty);
+function fillEditor(revision) {
+  $('model-name').value = revision.name;
+  $('source').value = revision.source;
+  $('root').value = revision.root || '';
+  for (const name of ['inputs', 'goals', 'watches']) $(name).value = JSON.stringify(revision[name] || {}, null, 2);
+  $('goal').replaceChildren(option('Custom expression', ''));
+  for (const [name, expression] of Object.entries(revision.goals || {})) $('goal').append(option(name, expression));
+  if ($('goal').options.length > 1) { $('goal').selectedIndex = 1; $('target').value = $('goal').value; }
+  else $('target').value = '';
+}
+async function refreshRevisions() {
+  const revisions = await api('revisions');
+  $('revision').replaceChildren(option('Choose a revision…', ''));
+  for (const rev of revisions) $('revision').append(option(`${rev.name} · ${rev.id.slice(0, 8)}`, rev.id));
+  $('revision').value = state.revision?.id || '';
+}
+async function selectRevision(id) {
+  state.revision = await api('revisions/' + id);
+  state.dirty = false;
+  fillEditor(state.revision);
+  $('revision').value = id;
+  $('dirty').textContent = 'Saved · ' + id.slice(0, 8);
+  $('revision-id').textContent = id;
+  state.artifact = null; state.comparison = null; state.step = 0; state.job = null;
+  $('result-title').textContent = 'Revision selected';
+  $('result-detail').textContent = 'Validate or query this saved revision, or select a previous job.';
+  $('result-panel').className = 'panel result-panel';
+  for (const id of ['cancel', 'progress', 'diagnostics']) $(id).hidden = true;
+  renderTrace(); await refreshTraces(); remember();
+}
+$('revision').addEventListener('change', async () => { try { if ($('revision').value) await selectRevision($('revision').value); } catch (e) { notice(e); } });
+$('example').addEventListener('change', () => {
+  if ($('example').value === '') return;
+  const model = state.examples[Number($('example').value)];
+  fillEditor(model); $('depth').value = model.default_depth; markDirty(); $('editor').open = true;
+});
+$('goal').addEventListener('change', () => { if ($('goal').value) $('target').value = $('goal').value; });
+$('target').addEventListener('input', () => { if ($('goal').value !== $('target').value) $('goal').value = ''; });
+function ready() {
+  if (!state.revision || state.dirty) throw new Error('Save the current source and configuration as a revision before running a query.');
+}
+function number(id, min, max) { const value = Number($(id).value); if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${id} must be an integer from ${min} to ${max}.`); return value; }
+async function submit(query) {
+  ready();
+  const timeout = number('timeout', 1, 300);
+  const request = {version: 1, request_id: crypto.randomUUID(), revision: state.revision.id, hard_timeout: timeout,
+    query: {...query, limits: {...query.limits, wall_ms: timeout * 1000}}};
+  const {id} = await api('jobs', request);
+  state.job = id; remember();
+  await refreshJobs();
+  return id;
+}
+action('save', async () => {
+  const revision = {name: $('model-name').value, source: $('source').value, root: $('root').value};
+  for (const name of ['inputs', 'goals', 'watches']) revision[name] = JSON.parse($(name).value);
+  const saved = await api('revisions', revision);
+  await refreshRevisions(); await selectRevision(saved.id);
+  await submit({operation: 'validate-model'});
+});
+action('search', async () => {
+  const target = $('target').value.trim();
+  if (!target) throw new Error('Enter a target expression.');
+  await submit({operation: 'reach', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+});
+action('pick', () => submit({operation: 'pick-state', assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)}));
+action('cancel', () => api('jobs/' + state.job + '/cancel', {}));
+function describeResult(result, query) {
+  if (result.status === 'error') return ['Query failed', 'Read the diagnostics below. The saved revision is unchanged.', 'error'];
+  if (result.status === 'unknown') return ['Inconclusive · ' + result.stop_reason.replaceAll('_', ' '), 'No reachability or safety conclusion follows from this interrupted or incomplete computation.', 'unknown'];
+  if (result.outcome === 'unreachable') return [`No witness through depth ${query.limits.depth}`, 'Bounded negative result. Reachability beyond this bound is unknown; this is not a safety proof.', 'unknown'];
+  if (result.outcome === 'reachable') return [`Goal reached at depth ${result.trace.steps.length - 1}`, 'A concrete witness was found and independently replayed in a fresh checker process.', 'success'];
+  if (result.outcome === 'deadlocked') return ['Continuation blocked', 'No extension meets the constraint at the pinned source state. If the constraint conflicts with the prefix, start a fresh search. The child preserves the valid prefix.', 'unknown'];
+  if (result.outcome === 'simulated') return ['Child trace created', 'The selected prefix is unchanged. The child and its parent have passed replay validation.', 'success'];
+  if (query.operation === 'validate-model') return ['Model validated', 'Parsing, types, and model structure are valid. Use Pick initial state to check that an initial state exists.', 'success'];
+  if (query.operation === 'validate-trace') return result.outcome === 'valid' ? ['Trace passed replay', 'Identity, values, transitions, generating constraints, and parent prefix were checked.', 'success'] : ['Trace failed replay', 'This import remains untrusted and cannot be used as evidence.', 'error'];
+  return result.outcome === 'satisfiable' ? ['Initial state found', 'This initial state has passed replay validation.', 'success'] : ['No initial state', 'The model and current assumptions admit no initial state.', 'unknown'];
+}
+let lastPublished = null;
+async function refreshJobs() {
+  state.jobs = await api('jobs');
+  $('job-count').textContent = state.jobs.length;
+  $('jobs').replaceChildren();
+  for (const job of [...state.jobs].reverse()) {
+    const button = node('button', undefined, 'job' + (job.request.request_id === state.job ? ' selected' : ''));
+    button.append(node('strong', job.request.query.operation + ' · ' + job.request.revision.slice(0, 6)), node('small', job.result ? job.result.status + ' / ' + (job.result.outcome || job.result.stop_reason) : 'Running…'));
+    button.addEventListener('click', async () => { state.job = job.request.request_id; lastPublished = null; remember(); try { await refreshJobs(); } catch (e) { notice(e); } });
+    $('jobs').append(button);
+  }
+  const job = state.jobs.find(j => j.request.request_id === state.job);
+  if (!job) return;
+  $('cancel').hidden = !job.running;
+  $('progress').hidden = !job.running;
+  $('diagnostics').hidden = true;
+  if (job.running) {
+    $('result-panel').className = 'panel result-panel';
+    $('result-title').textContent = 'Working · ' + job.request.query.operation;
+    const response = await fetch(`/api/jobs/${state.job}/events`);
+    const events = (await response.text()).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
+    const progress = events.filter(e => e.event === 'progress').at(-1);
+    $('result-detail').textContent = progress ? `${progress.phase === 'replay' ? 'Validating trace' : 'Checker running'} · ${(progress.elapsed_ms / 1000).toFixed(1)} s in this phase · isolated worker` : 'Starting an isolated worker…';
+  } else {
+    const [title, detail, style] = describeResult(job.result, job.request.query);
+    $('result-title').textContent = title;
+    $('result-detail').textContent = detail + ' · Revision ' + job.request.revision.slice(0, 8);
+    $('result-panel').className = 'panel result-panel ' + style;
+    const diagnostics = job.result.diagnostics || [];
+    if (diagnostics.length) { $('diagnostics').hidden = false; $('diagnostics').textContent = diagnostics.map(d => `${d.code}: ${d.message}${d.primary?.line ? ' (line ' + d.primary.line + ')' : ''}`).join('\n'); }
+    if (lastPublished !== state.job) {
+      lastPublished = state.job;
+      if (state.revision?.id === job.request.revision && job.result.trace_id) {
+        await refreshTraces(); await selectTrace(job.result.trace_id);
+      }
+      state.importing = false;
+    }
+  }
+}
+async function refreshTraces() {
+  const values = await api('traces');
+  for (const id of ['trace', 'compare']) {
+    const selected = id === 'trace' ? state.artifact?.id : state.comparison?.id;
+    $(id).replaceChildren(option(id === 'trace' ? 'Choose a trace…' : 'No comparison', ''));
+    for (const trace of values) {
+      if (id === 'trace' && trace.revision !== state.revision?.id) continue;
+      $(id).append(option(`${trace.operation} · ${trace.steps} states · ${trace.id.slice(0, 8)} · rev ${trace.revision.slice(0, 6)}`, trace.id));
+    }
+    $(id).value = selected || '';
+  }
+}
+async function selectTrace(id) {
+  state.artifact = id ? await api('traces/' + id) : null;
+  state.step = 0; $('trace').value = id || ''; renderTrace(); remember();
+}
+$('trace').addEventListener('change', async () => { try { await selectTrace($('trace').value); } catch (e) { notice(e); } });
+$('compare').addEventListener('change', async () => { try { state.comparison = $('compare').value ? await api('traces/' + $('compare').value) : null; renderTrace(); remember(); } catch (e) { notice(e); } });
+function table(artifact, step, reference, comparing = false) {
+  const frame = artifact.trace?.steps?.[step];
+  if (!frame) return node('p', 'This trace has no state at the selected step.', 'muted');
+  const rows = Object.entries(frame.values);
+  const watches = Object.entries(artifact.watches || {});
+  const t = node('table'); const head = node('tr'); head.append(node('th', 'SYMBOL / WATCH'), node('th', comparing ? 'COMPARISON VALUE' : 'VALUE')); t.append(head);
+  for (const [name, value, watch] of [...rows.map(r => [...r, false]), ...watches.map(([name, values]) => [name, values[step], true])]) {
+    const ref = watch ? reference?.watches?.[name]?.[comparing ? step : step - 1] : reference?.trace?.steps?.[comparing ? step : step - 1]?.values?.[name];
+    const changed = ref !== undefined && JSON.stringify(ref) !== JSON.stringify(value);
+    const row = node('tr', undefined, (watch ? 'watch ' : '') + (changed ? comparing ? 'different' : 'changed' : ''));
+    row.append(node('td', (watch ? '◈ ' : '') + name), node('td', value === null || value === undefined ? 'unassigned' : typeof value === 'object' ? JSON.stringify(value) : String(value)));
+    t.append(row);
+  }
+  return t;
+}
+function renderTrace() {
+  const artifact = state.artifact; const trace = artifact?.trace;
+  const trusted = Boolean(artifact?.validated);
+  $('trust').textContent = trace ? trusted ? 'Replay validated' : 'Untrusted import' : 'No trace';
+  $('trust').className = 'badge ' + (trace ? trusted ? 'valid' : 'untrusted' : '');
+  $('export').disabled = !trusted;
+  $('branch').disabled = !trusted || artifact.revision !== state.revision?.id;
+  $('timeline').replaceChildren();
+  if (!trace) {
+    $('trace-description').textContent = 'Replay-validated traces will appear here. Select a step to inspect or branch.';
+    $('inspector').textContent = 'No state selected.'; $('comparison').textContent = 'Choose another trace to compare the same step.'; return;
+  }
+  $('trace-description').textContent = `${trace.steps.length} states · ${trace.steps.length - 1} transitions${trace.branch ? ' · Branch prefix: ' + trace.branch.prefix_length + ' states' : ''}. Actions label outgoing transitions; the final action has not executed. Amber values changed since the previous step; red values differ from the selected trace.`;
+  for (const [index, frame] of trace.steps.entries()) {
+    const button = node('button', undefined, 'step' + (index === state.step ? ' selected' : ''));
+    button.setAttribute('aria-pressed', String(index === state.step));
+    button.append(node('small', 'STEP ' + index + (index === trace.steps.length - 1 ? ' · FINAL' : '')), node('strong', frame.values.action || (index === trace.steps.length - 1 ? 'FINAL STATE' : 'STATE')));
+    button.addEventListener('click', () => { state.step = index; renderTrace(); remember(); });
+    $('timeline').append(button);
+  }
+  $('step-title').textContent = 'State ' + state.step;
+  $('inspector').replaceChildren(table(artifact, state.step, artifact));
+  $('comparison').replaceChildren(state.comparison ? table(state.comparison, state.step, artifact, true) : node('p', 'Choose another trace to compare the same step.', 'muted'));
+  $('compare-title').textContent = state.comparison ? 'Comparison · revision ' + state.comparison.revision.slice(0, 8) : 'Comparison';
+}
+action('branch', async () => {
+  if (!state.artifact?.validated) throw new Error('Replay validation is required before branching.');
+  const constraint = $('branch-constraint').value.trim();
+  await submit({operation: 'simulate', trace_id: state.artifact.id, prefix_length: state.step + 1,
+    limits: {depth: number('branch-depth', 1, 10000)}, assumptions: constraint ? [constraint] : []});
+});
+action('export', () => {
+  const blob = new Blob([JSON.stringify(state.artifact.trace, null, 2) + '\n'], {type: 'application/json'});
+  const url = URL.createObjectURL(blob); const a = node('a'); a.href = url; a.download = 'trace-' + state.artifact.id.slice(0, 12) + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+$('import').addEventListener('change', async () => {
+  notice(null);
+  try {
+    ready(); const file = $('import').files[0]; if (!file) return;
+    if (file.size > 16 * 1024 * 1024) throw new Error('Trace exceeds 16 MiB.');
+    const trace = JSON.parse(await file.text());
+    // Imported JSON is never rendered as HTML, and cannot enable export or branch.
+    if (!trace || !Array.isArray(trace.steps) || trace.steps.some(s => !s || !s.values || typeof s.values !== 'object')) throw new Error('Invalid trace structure.');
+    state.artifact = {trace, validated: false, revision: state.revision.id}; state.step = 0; renderTrace();
+    state.importing = true; await submit({operation: 'validate-trace', trace});
+  } catch (e) { notice(e); } finally { $('import').value = ''; }
+});
+async function init() {
+  state.examples = await api('examples');
+  state.examples.forEach((example, index) => $('example').append(option(example.name, String(index))));
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem('yasmv-session') || '{}'); } catch (_) { /* Ignore obsolete local preferences. */ }
+  await refreshRevisions();
+  if (saved.revision) {
+    try { await selectRevision(saved.revision); } catch (_) { /* A different store may be open. */ }
+  } else if (state.examples.length) { $('example').value = '0'; fillEditor(state.examples[0]); markDirty(); }
+  if (saved.trace) { try { await selectTrace(saved.trace); } catch (_) { /* Missing artifact. */ } }
+  if (saved.comparison) { try { state.comparison = await api('traces/' + saved.comparison); } catch (_) { /* Missing artifact. */ } }
+  state.step = Math.min(saved.step || 0, Math.max(0, (state.artifact?.trace.steps.length || 1) - 1));
+  state.job = saved.job || null; lastPublished = state.job;
+  renderTrace(); await refreshTraces(); await refreshJobs();
+  async function poll() { try { await refreshJobs(); } catch (e) { notice(e); } finally { setTimeout(poll, 700); } }
+  setTimeout(poll, 700);
+}
+init().catch(notice);

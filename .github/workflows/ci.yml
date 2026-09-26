@@ -51,7 +51,20 @@ jobs:
       env:
         ASAN_OPTIONS: detect_leaks=0
         UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      run: YASMV_HOME=$(pwd) make reliability-test query-test
+      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test
+
+    - name: set up browser test runtime
+      if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: browser acceptance
+      if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}
+      run: |
+        npm install --prefix /tmp/yasmv-browser playwright@1.63.0
+        /tmp/yasmv-browser/node_modules/.bin/playwright install --with-deps chromium
+        PLAYWRIGHT_MODULE=/tmp/yasmv-browser/node_modules/playwright node tests/workbench-browser.cjs
 
     - name: record toolchain and arithmetic fragment provenance
       if: always()

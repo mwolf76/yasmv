@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workbench job request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "request_id", "revision", "query"],
+  "properties": {
+    "version": {"const": 1},
+    "request_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,80}$"},
+    "revision": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "hard_timeout": {"type": "number", "minimum": 0.05, "maximum": 300},
+    "query": {
+      "type": "object", "additionalProperties": false, "required": ["operation"],
+      "properties": {
+        "operation": {"enum": ["validate-model", "pick-state", "reach", "validate-trace", "simulate"]},
+        "target": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "until": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "assumptions": {"type": "array", "maxItems": 32, "items": {"type": "string", "minLength": 1, "maxLength": 4096}},
+        "limits": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "depth": {"type": "integer", "minimum": 0, "maximum": 10000},
+            "wall_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+            "conflicts": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+            "propagations": {"type": "integer", "minimum": 0, "maximum": 2147483647}
+          }
+        },
+        "trace_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,80}$"},
+        "trace": {"type": "object"},
+        "prefix_length": {"type": "integer", "minimum": 1, "maximum": 10001},
+        "watches": {"type": "object", "maxProperties": 32, "propertyNames": {"minLength": 1, "maxLength": 120}, "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}}
+      },
+      "allOf": [
+        {"if": {"properties": {"operation": {"const": "reach"}}}, "then": {"required": ["target", "limits"], "properties": {"limits": {"required": ["depth"]}}}, "else": {"not": {"required": ["target"]}}},
+        {"if": {"properties": {"operation": {"const": "simulate"}}}, "then": {"required": ["limits"], "properties": {"limits": {"required": ["depth"], "properties": {"depth": {"minimum": 1}}}}}, "else": {"not": {"anyOf": [{"required": ["prefix_length"]}, {"required": ["until"]}]}}},
+        {"if": {"properties": {"operation": {"enum": ["validate-trace", "simulate"]}}}, "then": {"oneOf": [{"required": ["trace"]}, {"required": ["trace_id"]}]}, "else": {"not": {"anyOf": [{"required": ["trace"]}, {"required": ["trace_id"]}]}}},
+        {"if": {"properties": {"operation": {"enum": ["validate-model", "pick-state", "validate-trace"]}}}, "then": {"properties": {"limits": {"not": {"required": ["depth"]}}}}},
+        {"if": {"properties": {"operation": {"const": "validate-model"}}}, "then": {"properties": {"assumptions": {"maxItems": 0}}}}
+      ]
+    }
+  }
+}
