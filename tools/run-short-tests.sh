@@ -1,19 +1,10 @@
 #!/bin/bash
 DIRECTORY="short-tests"
-REFERENCE="out"
-YASMV="./yasmv"
+source "$(dirname "${BASH_SOURCE[0]}")/test-support.sh"
 
 function test-unfeasible-state() {
-    echo -n "Running short-test $1 ... "
-    rm -f "$1.out"
-
-    RES=$(YASMV_HOME=`pwd` $YASMV --quiet "$DIRECTORY/$1" < "$DIRECTORY/unfeasible-pick-state.cmd" | tail -n1)
-    if [[ $RES -eq "OK" ]]; then
-	    echo "OK"
-    else
-        echo "FAILED!"
-    	exit 1
-    fi
+    run_yasmv_case "short-test $1" "$DIRECTORY/$1" \
+        "$DIRECTORY/unfeasible-pick-state.cmd" last OK || exit 1
 }
 
 # arrays
@@ -96,8 +87,8 @@ test-unfeasible-state nondet/nondet03.smv
 test-unfeasible-state words/words00.smv
 # test-unfeasible-state words/words01.smv
 
-# errors (may fail differently)
-test-unfeasible-state errors/errors00.smv || echo " (expected error)"
+# This model is expected to be UNSAT, not to crash or fail parsing.
+test-unfeasible-state errors/errors00.smv
 # test-unfeasible-state errors/errors01.smv || echo " (expected error)"
 
 # special features

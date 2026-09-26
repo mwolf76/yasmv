@@ -34,6 +34,7 @@
 #include <commands/commands.hh>
 
 #include <parse.hh>
+#include <workbench.hh>
 
 #include <utils/logging.hh>
 
@@ -107,8 +108,17 @@ namespace cmd {
 
     void Interpreter::quit(int retcode)
     {
-        f_retcode = retcode;
+        if (f_retcode == 0 || retcode != 0) {
+            f_retcode = retcode;
+        }
         f_leaving = true;
+    }
+
+    void Interpreter::record_error(int code)
+    {
+        if (!isatty(STDIN_FILENO) && f_retcode == 0) {
+            f_retcode = code;
+        }
     }
 
     extern CommandVector_ptr parseCommand(const char* command_line);
@@ -127,41 +137,41 @@ namespace cmd {
                 << std::endl;
 
             f_last_result = utils::Variant(errMessage);
+            record_error();
+        }
+        catch (const std::invalid_argument& e) {
+            err() << "Error: " << e.what() << std::endl;
+            f_last_result = utils::Variant(errMessage);
+            record_error(2);
+        }
+        catch (const std::exception& e) {
+            err() << "Error: " << e.what() << std::endl;
+            f_last_result = utils::Variant(errMessage);
+            record_error(4);
+        }
+
+        if (is_unknown(f_last_result)) {
+            record_error(3);
         }
 
         delete cmd; /* claims ownership! */
         return f_last_result;
     }
 
-    void chomp(char* p)
-    {
-        assert(p != NULL);
-        while (*p) {
-            ++p;
-        }
-
-        --p;
-        if (isspace(*p)) {
-            *p = 0;
-        }
-    }
-
     utils::Variant& Interpreter::operator()()
     {
         char* cmdline { NULL };
+        std::string batch_line;
         if (isatty(STDIN_FILENO)) {
             cmdline = rl_gets();
         } else {
-            /* FIXME: memleaks */
-            static char* buf = NULL;
-            const int LINE_BUFSIZE(0x200);
-
-            buf = (char*) malloc(LINE_BUFSIZE);
-            cmdline = fgets(buf, LINE_BUFSIZE, stdin);
+            if (std::getline(*f_in, batch_line)) {
+                cmdline = batch_line.data();
+            }
         }
 
         if (cmdline != NULL) {
-            chomp(cmdline);
+            // getline/readline already remove the newline. Empty lines are valid.
             if (cmdline && 0 < strlen(cmdline)) {
                 try {
                     CommandVector_ptr cmds { parse::parseCommand(cmdline) };
@@ -170,10 +180,16 @@ namespace cmd {
                              cmds->end() != i; ++i) {
 
                             Command_ptr cmd { *i };
-                            (*this)(cmd);
+                            if (!is_leaving()) {
+                                (*this)(cmd);
+                            } else {
+                                delete cmd;
+                            }
                         }
+                        delete cmds;
                     } else {
                         f_last_result = utils::Variant(errMessage);
+                        record_error();
                     }
                 } catch (Exception& e) {
                     std::string what { e.what() };
@@ -182,10 +198,18 @@ namespace cmd {
                         << std::endl;
 
                     f_last_result = utils::Variant(errMessage);
+                    record_error();
+                } catch (const std::invalid_argument& e) {
+                    err() << "Error: " << e.what() << std::endl;
+                    f_last_result = utils::Variant(errMessage);
+                    record_error(2);
+                } catch (const std::exception& e) {
+                    err() << "Error: " << e.what() << std::endl;
+                    f_last_result = utils::Variant(errMessage);
+                    record_error(4);
                 }
             }
         } else {
-            f_last_result = utils::Variant(okMessage);
             f_leaving = true;
         }
 

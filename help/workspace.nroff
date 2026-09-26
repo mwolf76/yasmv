@@ -1,0 +1,44 @@
+.nf
+YASMV manual                                                 workspace
+
+.ti 0
+SYNOPSIS
+
+.in 3
+workspace open "<directory>"
+workspace show
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Choose the directory used to store model revisions, named expressions, jobs,
+traces, and scenarios. The default is .yasmv-workbench in the current directory.
+Python 3.10 or newer is required.
+
+open creates or opens the directory. Wait for active jobs to finish before
+switching directories. A directory can have only one owner: close any other
+CLI or HTTP service using it first.
+
+show reports the directory, loaded native model, selected native trace, and
+saved revision, job, and scenario selections.
+
+Opening a workspace preserves the native model and trace selection. Use
+read-model to load a model. The existing one-model-load-attempt rule applies;
+start a new yasmv process to load another model.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> workspace open "./investigation"
+>> workspace show
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help read-model, help goal, help property, help watch, help job, help scenario.

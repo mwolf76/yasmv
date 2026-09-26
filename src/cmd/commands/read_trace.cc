@@ -1,3 +1,4 @@
+#include <query/trace.hh>
 /**
  * @file read_trace.cc
  * @brief Command `read-trace` class implementation.
@@ -31,6 +32,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/read_trace.hh>
+#include <cmd/interpreter.hh>
 
 #include <model/model_mgr.hh>
 
@@ -95,6 +97,7 @@ namespace cmd {
     bool ReadTrace::check_requirements()
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
 
         if (!f_input) {
             WARN
@@ -120,6 +123,7 @@ namespace cmd {
     utils::Variant ReadTrace::operator()()
     {
         if (!check_requirements()) {
+            f_owner.record_error();
             return utils::Variant { errMessage };
         }
 
@@ -170,6 +174,7 @@ namespace cmd {
             ok = false;
         }
 
+        if (!ok) f_owner.record_error();
         return utils::Variant { ok ? okMessage : errMessage };
     }
 
@@ -276,14 +281,16 @@ namespace cmd {
 
     bool ReadTrace::parseJsonTrace(boost::filesystem::path& tracepath)
     {
-        TRACE
-            << "Reading JSON trace from file "
-            << tracepath
-            << " ..."
-            << std::endl;
-
-        // TODO: not implemented yet
-        return false;
+        query::QuerySpec spec; spec.operation = query::Operation::validate_trace;
+        spec.trace = query::trace::read_file(tracepath.string());
+        const auto result = query::checked(spec);
+        if (result.outcome != query::Outcome::valid) {
+            throw model::SemanticError(result.diagnostics.empty() ? "Trace replay is inconclusive" : result.diagnostics.front().message);
+        }
+        result.witness->artifact = spec.trace;
+        witness::WitnessMgr::INSTANCE().record(*result.witness);
+        witness::WitnessMgr::INSTANCE().set_current(*result.witness);
+        return true;
     }
 
     bool ReadTrace::parseYamlTrace(boost::filesystem::path& tracepath)

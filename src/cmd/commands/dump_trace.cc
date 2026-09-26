@@ -1,3 +1,4 @@
+#include <query/trace.hh>
 /*
  * @file dump_trace.cc
  * @brief Command `dump-trace` class implementation.
@@ -201,102 +202,14 @@ namespace cmd {
 
     void DumpTrace::dump_json(std::ostream& os, const witness::WitnessList& witness_list)
     {
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-
-        Json::StreamWriterBuilder builder;
-        const std::unique_ptr<Json::StreamWriter> writer { builder.newStreamWriter() };
-
-        Json::Value root, lst { Json::arrayValue };
-        std::for_each(
-            begin(witness_list), end(witness_list),
-            [this, &em, &lst](witness::Witness_ptr wp) {
-                Json::Value obj;
-
-                obj["id"] = wp->id();
-                obj["description"] = wp->desc();
-
-                /* dump input assignments */
-                expr::ExprVector input_vars_assignments;
-                process_input(*wp, input_vars_assignments);
-                Json::Value input { section_to_json(input_vars_assignments) };
-                if (!input.empty()) {
-                    obj["input"] = input;
-                }
-
-                Json::Value steps { Json::arrayValue };
-                for (step_t time = wp->first_time(); time <= wp->last_time(); ++time) {
-                    Json::Value step;
-
-                    expr::ExprVector state_vars_assignments;
-                    expr::ExprVector defines_assignments;
-                    process_time_frame(*wp, time,
-                                       state_vars_assignments,
-                                       defines_assignments);
-
-                    Json::Value vars { section_to_json(state_vars_assignments) };
-                    if (!vars.empty()) {
-                        step["state"] = vars;
-                    }
-
-                    Json::Value defs { section_to_json(defines_assignments) };
-                    if (!defs.empty()) {
-                        step["defines"] = defs;
-                    }
-
-                    steps.append(step);
-                }
-                obj["steps"] = steps;
-                lst.append(obj);
-            });
-
-        root["traces"] = lst;
-        os
-            << root.toStyledString()
-            << std::endl;
-    }
-
-    Json::Value DumpTrace::section_to_json(expr::ExprVector& assignments)
-    {
-        expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-        Json::Value res;
-
-        std::for_each(
-            begin(assignments), end(assignments),
-            [&res, &em](expr::Expr_ptr assignment) {
-                expr::Atom lhs { assignment->lhs()->rhs()->atom() };
-                expr::Expr_ptr rhs { assignment->rhs() };
-
-                if (em.is_identifier(rhs)) {
-                    res[lhs] = rhs->atom();
-                } else if (em.is_bool_const(rhs)) {
-                    res[lhs] = em.is_true(rhs);
-                } else if (em.is_array(rhs)) {
-                    Json::Value array_value { Json::arrayValue };
-                    expr::ExprVector values { em.array_literals(rhs) };
-
-                    std::for_each(begin(values), end(values),
-                                  [&array_value, &em](expr::Expr_ptr lit) {
-                                      Json::Value scalar;
-                                      if (em.is_identifier(lit)) {
-                                          scalar = lit->atom();
-                                      } else if (em.is_bool_const(lit)) {
-                                          scalar = em.is_true(lit);
-                                      } else if (em.is_array(lit)) {
-                                          assert(false); // nested arrays are not supported
-                                      } else if (em.is_constant(lit)) {
-                                          scalar = (Json::Value::UInt64) em.const_value(lit);
-                                      }
-                                      array_value.append(scalar);
-                                  });
-                    res[lhs] = array_value;
-                } else if (em.is_constant(rhs)) {
-                    res[lhs] = (Json::Value::UInt64) em.const_value(rhs);
-                } else {
-                    assert(false);
-                }
-            });
-
-        return res;
+        Json::Value output(Json::arrayValue);
+        for (auto w : witness_list) {
+            if (w->artifact.isNull()) {
+                throw model::SemanticError("Trace has no generating-query metadata; JSON export requires a completed query or validated trace v1 import.");
+            }
+            output.append(w->artifact);
+        }
+        os << (output.size() == 1 ? output[0] : output) << std::endl;
     }
 
     void DumpTrace::process_input(witness::Witness& w,

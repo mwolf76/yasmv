@@ -32,9 +32,16 @@
 #include <witness/witness.hh>
 #include <witness/witness_mgr.hh>
 
-#include <cmd/command.hh>
 
 namespace sim {
+
+    enum class EnumerationStop { exhausted, witness, limit, unknown };
+
+    struct EnumerationResult {
+        value_t count { 0 };
+        EnumerationStop stop { EnumerationStop::unknown };
+        bool complete() const { return stop == EnumerationStop::exhausted; }
+    };
 
     typedef enum {
         SIMULATION_DONE,
@@ -46,11 +53,13 @@ namespace sim {
     class Simulation: public algorithms::Algorithm {
 
     public:
-        Simulation(cmd::Command& command, model::Model& model);
+        Simulation(model::Model& model);
         ~Simulation();
 
         // returns the number of enumerated states
-        value_t pick_state(expr::ExprVector constraints, bool all_sat, bool count, value_t limit);
+        EnumerationResult pick_state(expr::ExprVector constraints, bool all_sat,
+                                     bool count, value_t limit,
+                                     const sat::SolveCallback& solve = {});
 
         // returns the status of the simulation
         simulation_status_t simulate(expr::ExprVector constraints, pconst_char trace_uid,

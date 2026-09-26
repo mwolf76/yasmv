@@ -1,0 +1,7 @@
+MODULE main
+#inertial
+VAR x : boolean;
+INIT !x;
+INVAR TRUE;
+INVAR TRUE;
+TRANS x := !x;

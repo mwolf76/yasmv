@@ -235,7 +235,6 @@ namespace compiler {
         expr::preprocessor::Preprocessor f_preprocessor;
 
         /* Auto expressions and DDs */
-        unsigned f_temp_auto_index;
 
         /* Compiler status (see above) */
         EStatus f_status;

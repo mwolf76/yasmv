@@ -1,3 +1,5 @@
+#include <query/query.hh>
+#include <workbench.hh>
 /*
  * @file simulate.cc
  * @brief Command `simulate` class implementation.
@@ -67,18 +69,25 @@ namespace cmd {
     utils::Variant Simulate::operator()()
     {
         const opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-        model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
-
-        sim::Simulation simulation(*this, mm.model());
-
+        if (!extended_options.empty()) {
+            WorkspaceCommand command(f_owner, "query.run");
+            auto& q = command.arguments()["query"];
+            q = extended_options;
+            q["operation"] = "simulate";
+            if (!q["limits"].isMember("depth")) q["limits"]["depth"] = f_k;
+            if (f_trace_uid) command.arguments()["native_trace"] = f_trace_uid;
+            if (f_until_condition) q["until"] = source::print(f_until_condition);
+            for (auto expression : f_constraints) q["assumptions"].append(source::print(expression));
+            return command();
+        }
+        query::QuerySpec spec;
+        spec.operation = query::Operation::simulate; spec.assumptions = f_constraints;
+        spec.trace_id = f_trace_uid ? f_trace_uid : ""; spec.until = f_until_condition; spec.limits.depth = f_k;
+        const auto result = query::checked(spec);
         bool res { false };
 
-        const sim::simulation_status_t rc {
-            simulation.simulate(f_constraints, f_trace_uid, f_until_condition, f_k)
-        };
-
-        switch (rc) {
-            case sim::simulation_status_t::SIMULATION_DONE:
+        switch (result.outcome) {
+            case query::Outcome::simulated:
                 res = true;
                 if (!om.quiet()) {
                     f_out
@@ -90,7 +99,7 @@ namespace cmd {
                     << std::endl;
                 break;
 
-            case sim::simulation_status_t::SIMULATION_DEADLOCKED:
+            case query::Outcome::deadlocked:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -101,7 +110,7 @@ namespace cmd {
                     << std::endl;
                 break;
 
-            case sim::simulation_status_t::SIMULATION_INTERRUPTED:
+            case query::Outcome::none:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -110,7 +119,7 @@ namespace cmd {
                 f_out
                     << "Simulation interrupted"
                     << std::endl;
-                break;
+                return utils::Variant(unknownMessage);
 
             default:
                 assert(false); /* unreachable */

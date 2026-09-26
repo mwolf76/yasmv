@@ -1,3 +1,4 @@
+#include <query/runtime.hh>
 /**
  * @file sat/engine.cc
  * @brief SAT interface subsystem, Engine class implementation.
@@ -72,6 +73,7 @@ namespace sat {
 
         /* MAINGROUP (=0) is already there. */
         f_groups.push(new_sat_var());
+        if (auto context = query::current()) context->attach(this);
 
         EngineMgr::INSTANCE()
             .register_instance(this);
@@ -84,12 +86,39 @@ namespace sat {
 
     Engine::~Engine()
     {
+        if (auto context = query::current()) context->detach(this);
         EngineMgr::INSTANCE()
             .unregister_instance(this);
     }
 
+    std::vector<group_t> Engine::failed_groups() const
+    {
+        std::vector<group_t> result;
+        if (f_status != STATUS_UNSAT) return result;
+        for (int i = 0; i < f_solver.conflict.size(); ++i) {
+            const auto assumption = ~f_solver.conflict[i];
+            result.push_back(Minisat::sign(assumption) ? -Minisat::var(assumption) : Minisat::var(assumption));
+        }
+        return result;
+    }
+
     status_t Engine::sat_solve_groups(const Groups& groups)
     {
+        query::PhaseTimer timer(query::Phase::solving);
+        auto context = query::current();
+        const auto initial_conflicts = f_solver.conflicts;
+        const auto initial_propagations = f_solver.propagations;
+        if (context) {
+            const auto& l = context->limits;
+            if (l.conflicts >= 0) {
+                if (context->conflicts_used >= static_cast<uint64_t>(l.conflicts)) { context->cancel(query::StopReason::conflict_budget); return f_status = STATUS_UNKNOWN; }
+                f_solver.setConfBudget(l.conflicts - context->conflicts_used);
+            }
+            if (l.propagations >= 0) {
+                if (context->propagations_used >= static_cast<uint64_t>(l.propagations)) { context->cancel(query::StopReason::propagation_budget); return f_status = STATUS_UNKNOWN; }
+                f_solver.setPropBudget(l.propagations - context->propagations_used);
+            }
+        }
         // Optimize pending clauses before solving
         optimize_and_commit();
         
@@ -102,8 +131,7 @@ namespace sat {
             /* Assumptions work like "a -> phi". Here we use both
              * polarities of the implication, that is a positive group
              * var asserts the formulas in the group whereas a
-             * negative group var asserts the negation of those
-             * formulas. */
+             * negative group var disables those formulas. */
             assumptions.push(mkLit(abs(grp), grp < 0));
         }
 
@@ -131,11 +159,22 @@ namespace sat {
             << f_status << "."
             << std::endl;
 
+        if (context) {
+            context->conflicts_used += f_solver.conflicts - initial_conflicts;
+            context->propagations_used += f_solver.propagations - initial_propagations;
+            context->variables = std::max(context->variables, static_cast<uint64_t>(f_solver.nVars()));
+            context->clauses = std::max(context->clauses, static_cast<uint64_t>(f_solver.nClauses()));
+            if (f_status == STATUS_UNKNOWN && context->stop == query::StopReason::none) {
+                context->cancel(context->limits.conflicts >= 0 && context->conflicts_used >= static_cast<uint64_t>(context->limits.conflicts) ? query::StopReason::conflict_budget : context->limits.propagations >= 0 && context->propagations_used >= static_cast<uint64_t>(context->limits.propagations) ? query::StopReason::propagation_budget : query::StopReason::solver_unknown);
+            }
+            if (context->stop != query::StopReason::none) f_status = STATUS_UNKNOWN;
+        }
         return f_status;
     }
 
     void Engine::push(compiler::Unit cu, step_t time, group_t group)
     {
+        query::PhaseTimer timer(query::Phase::encoding);
         /**
          * 1. Pushing DDs
          */
@@ -422,6 +461,10 @@ namespace sat {
     {
         // Run optimization passes in sequence with timing
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
+        if (opts_mgr.cnf_variable_elimination() || opts_mgr.cnf_blocked_clause() ||
+            opts_mgr.cnf_self_subsumption()) {
+            throw std::invalid_argument("Unsupported custom CNF transformation.");
+        }
         clock_t start;
         
         if (opts_mgr.cnf_tautology_removal()) {
@@ -520,8 +563,8 @@ namespace sat {
             bool is_duplicate = false;
             
             // Check if this clause is a duplicate of the previous one
-            if (i > 0) {
-                const auto& prev = f_pending_clauses[i-1];
+            if (!result.empty()) {
+                const auto& prev = result.back();
                 const auto& curr = f_pending_clauses[i];
                 
                 if (prev.size() == curr.size()) {
@@ -563,11 +606,19 @@ namespace sat {
     
     void Engine::subsumption_elimination()
     {
-        // Clauses are already sorted by size from remove_duplicates
+        // This pass also works when duplicate removal is disabled.
+        for (auto& clause : f_pending_clauses) {
+            std::sort(clause.begin(), clause.end(), [](Lit a, Lit b) {
+                return toInt(a) < toInt(b);
+            });
+        }
+        std::stable_sort(f_pending_clauses.begin(), f_pending_clauses.end(),
+                         [](const auto& a, const auto& b) { return a.size() < b.size(); });
         std::vector<bool> subsumed(f_pending_clauses.size(), false);
         
         // For each clause, check if it's subsumed by any smaller clause
         for (size_t i = 0; i < f_pending_clauses.size(); ++i) {
+            query::checkpoint(query::Phase::encoding);
             if (subsumed[i]) continue;
             
             for (size_t j = 0; j < i; ++j) {

@@ -612,31 +612,13 @@ namespace expr {
             return is_constant(expr) && (1 == expr->u.f_value);
         }
 
-        Expr_ptr make_dec_const(const Atom& atom)
-        {
-            return make_const(strtoll(atom.c_str(), nullptr, 10));
-        }
+        Expr_ptr make_dec_const(const Atom& atom);
 
-        Expr_ptr make_hex_const(const Atom& atom)
-        {
-            const char* p(atom.c_str() + 2);
+        Expr_ptr make_hex_const(const Atom& atom);
 
-            return make_hconst(strtoll(p, nullptr, 0x10));
-        }
+        Expr_ptr make_oct_const(const Atom& atom);
 
-        Expr_ptr make_oct_const(const Atom& atom)
-        {
-            const char* p(atom.c_str() + 1);
-
-            return make_oconst(strtoll(p, nullptr, 010));
-        }
-
-        Expr_ptr make_bin_const(const Atom& atom)
-        {
-            const char* p(atom.c_str() + 2);
-
-            return make_bconst(strtoll(p, nullptr, 2));
-        }
+        Expr_ptr make_bin_const(const Atom& atom);
 
         Expr_ptr make_undef()
         {

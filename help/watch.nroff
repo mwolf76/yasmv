@@ -1,0 +1,37 @@
+.nf
+YASMV manual                                                 watch
+
+.ti 0
+SYNOPSIS
+
+.in 3
+watch set <name> <expression>
+watch list
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Save an expression to evaluate on workspace worker traces. Watch values
+are included in job evidence, available through job show -full.
+
+Requires a loaded model. set saves a new immutable revision; reusing a name
+replaces its expression in that revision. list displays the saved expressions.
+Names containing spaces must be quoted. Expressions use native syntax and are
+validated when used. These commands preserve the native model and trace.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> watch set executions executions
+>> watch list
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help workspace, help job, help reach.

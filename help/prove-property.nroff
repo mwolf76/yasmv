@@ -1,0 +1,43 @@
+.nf
+YASMV manual                                                 prove-property
+
+.ti 0
+SYNOPSIS
+
+.in 3
+prove-property <name> -depth <N> [options]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Attempt to prove a saved safety property by k-induction, with N from 1 to
+10000. Requires a loaded model and a property saved with property set.
+A conclusive proof checks both the base and inductive-step obligations.
+
+A reachable counterexample is replayed into the native trace register.
+An inconclusive inductive step does not establish that the property is false;
+its evidence is available through job show -full.
+
+-c <expression> adds an assumption (repeatable). -wall-ms <N> limits computation
+time; -conflicts <N> and -propagations <N> limit solver work. -async submits a
+background job. Use job wait to retrieve its result or job cancel to cancel it.
+Ctrl-C cancels a waiting job. job show -full displays complete evidence.
+Shell options use one dash; -- starts an SMV comment.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> property set once !DUPLICATE
+>> prove-property once -depth 12
+>> job show -full
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help property, help check-property, help job.
