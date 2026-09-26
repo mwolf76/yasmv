@@ -148,9 +148,28 @@
             }
           },
           "additionalProperties": false
+        },
+        "initial_satisfiable": {
+          "type": "boolean"
+        },
+        "vacuous": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
+    },
+    "progress": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "progress-proof-v1.schema.json"
+        },
+        {
+          "$ref": "progress-counterexample-v1.schema.json"
+        }
+      ]
     }
   },
   "allOf": [
@@ -159,8 +178,14 @@
         "properties": {
           "outcome": {
             "const": "proven"
+          },
+          "proof_method": {
+            "const": "k-induction"
           }
-        }
+        },
+        "required": [
+          "proof_method"
+        ]
       },
       "then": {
         "properties": {
@@ -212,6 +237,48 @@
         "properties": {
           "optimality": {
             "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "proof_method": {
+            "const": "finite-graph-ranking"
+          },
+          "outcome": {
+            "const": "proven"
+          }
+        },
+        "required": [
+          "proof_method",
+          "outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "progress"
+        ],
+        "properties": {
+          "scope": {
+            "const": "unbounded"
+          },
+          "status": {
+            "const": "completed"
+          },
+          "proof": {
+            "required": [
+              "verified",
+              "verification",
+              "vacuous",
+              "initial_satisfiable"
+            ],
+            "properties": {
+              "verified": {
+                "const": true
+              }
+            }
           }
         }
       }

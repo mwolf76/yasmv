@@ -4,13 +4,13 @@ import math
 import re
 
 VERSION = 1
-OPERATIONS = ('shortest-reach', 'check-property', 'prove-property', 'validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
+OPERATIONS = ('check-progress', 'validate-progress', 'shortest-reach', 'check-property', 'prove-property', 'validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
 CAPABILITIES = {
     'version': VERSION, 'operations': list(OPERATIONS), 'events': ['started', 'progress', 'result'],
-    'trace_version': 1, 'bounded_only': False, 'proof_methods': ['k-induction'], 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
+    'trace_version': 1, 'bounded_only': False, 'progress': {'form': 'universal-eventuality', 'backend': 'explicit-sat-graph', 'fairness': 'none', 'artifact_version': 1}, 'proof_methods': ['k-induction', 'finite-graph-ranking'], 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
     'explanations': ['initial', 'single_step_continuation', 'bounded_reach'],
     'scenario_adapters': ['retry-protocol-v1'], 'selected_prefix': True, 'process_isolation': True,
-    'limits': ['depth', 'wall_ms', 'conflicts', 'propagations'],
+    'limits': ['states', 'depth', 'wall_ms', 'conflicts', 'propagations'],
 }
 ID = re.compile(r'^[a-zA-Z0-9_-]{1,80}$')
 
@@ -94,14 +94,14 @@ def request(value):
     if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0.05 <= timeout <= 300:
         raise ValueError('Hard timeout must be between 0.05 and 300 seconds')
     q = value['query']
-    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property'), ('operation',))
+    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property', 'progress'), ('operation',))
     op = q['operation']
     if op not in OPERATIONS:
         raise ValueError('Unsupported operation')
     for key in ('target', 'until'):
         if key in q and (not isinstance(q[key], str) or not q[key].strip() or len(q[key]) > 4096):
             raise ValueError('Invalid ' + key)
-    if ('target' in q) != (op in ('reach', 'shortest-reach', 'explain-reach')) or ('until' in q and op != 'simulate'):
+    if ('target' in q) != (op in ('reach', 'shortest-reach', 'explain-reach', 'check-progress')) or ('until' in q and op != 'simulate'):
         raise ValueError('Target is required only for reach; until is supported only for simulate')
     if op in ('check-property', 'prove-property'):
         if not isinstance(q.get('property'), str) or not q['property'].strip() or len(q['property']) > 120:
@@ -116,6 +116,18 @@ def request(value):
         integer(limits.get('depth'), 1 if op in ('simulate', 'prove-property') else 0, 10000, 'depth')
     elif 'depth' in limits and not (op == 'explain-step' and limits['depth'] == 1):
         raise ValueError('Depth applies only to reach and simulate')
+    if op in ('check-progress', 'validate-progress'):
+        integer(limits.get('states'), 1, 1000000, 'states')
+        integer(limits.get('wall_ms'), 0, 2147483647, 'wall_ms')
+    elif 'states' in limits and op != 'pick-state':
+        raise ValueError('State limit applies only to progress and pick-state')
+    if op == 'validate-progress':
+        if not isinstance(q.get('progress'), dict):
+            raise ValueError('Progress validation requires an artifact')
+        if q.get('assumptions') or q.get('watches'):
+            raise ValueError('Progress validation uses the artifact context')
+    elif 'progress' in q:
+        raise ValueError('Progress artifacts require validate-progress')
     assumptions = q.get('assumptions', [])
     if not isinstance(assumptions, list) or len(assumptions) > 32 or any(not isinstance(a, str) or not a.strip() or len(a) > 4096 for a in assumptions):
         raise ValueError('Invalid assumptions')

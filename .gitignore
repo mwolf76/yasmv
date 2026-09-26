@@ -42,3 +42,4 @@ yasmv_query_tests
 !examples/retry-protocol/scenario.json
 
 !docs/benchmarks/m4-sessions.json
+!docs/benchmarks/m6-progress.json

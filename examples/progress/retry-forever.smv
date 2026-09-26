@@ -1,0 +1,9 @@
+MODULE main
+#inertial
+VAR phase : {SEND, RETRY, DONE};
+INIT phase = SEND;
+-- Delivery may succeed or be lost. No fairness assumption forces delivery.
+TRANS phase = SEND ?: phase := {RETRY, DONE};
+TRANS phase = RETRY ?: phase := SEND;
+TRANS phase = DONE ?: phase := DONE;
+DEFINE FINISHED := phase = DONE;

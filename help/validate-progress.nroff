@@ -1,0 +1,9 @@
+.nf
+YASMV manual                                           validate-progress
+
+validate-progress "FILE" [ -states N ] [ -wall-ms N ] [ -async ]
+
+Rechecks a portable progress proof or counterexample against the loaded model.
+Defaults: 10000 states, 30000 ms. Also accepts -conflicts and -propagations.
+Target and assumptions come from the artifact. Finite trace replay alone does
+not establish a repeating execution or deadlock.

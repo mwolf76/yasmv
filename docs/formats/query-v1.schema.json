@@ -26,7 +26,9 @@
             "explain-reach",
             "shortest-reach",
             "check-property",
-            "prove-property"
+            "prove-property",
+            "check-progress",
+            "validate-progress"
           ]
         },
         "request_id": {
@@ -149,6 +151,16 @@
               "minLength": 1
             }
           }
+        },
+        "progress": {
+          "oneOf": [
+            {
+              "$ref": "progress-proof-v1.schema.json"
+            },
+            {
+              "$ref": "progress-counterexample-v1.schema.json"
+            }
+          ]
         }
       },
       "required": [
@@ -237,6 +249,82 @@
                   }
                 }
               }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check-progress",
+                  "validate-progress"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "states",
+                  "wall_ms"
+                ],
+                "properties": {
+                  "states": {
+                    "minimum": 1
+                  },
+                  "wall_ms": {
+                    "minimum": 0
+                  },
+                  "depth": {
+                    "const": -1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "check-progress"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-progress"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "progress"
+            ],
+            "not": {
+              "required": [
+                "target"
+              ]
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "progress"
+              ]
             }
           }
         }

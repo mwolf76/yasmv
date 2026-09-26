@@ -224,6 +224,48 @@ namespace query::trace {
         if (width < 64) require(x < (uint64_t(1) << width), "Unsigned integer out of range");
         return em.make_const(static_cast<int64_t>(x));
     }
+    // Exact semantic valuations shared by graph exploration and its verifier.
+    Json::Value state_values(sat::Engine& engine, unsigned step)
+    {
+        auto& bm = enc::EncodingMgr::INSTANCE();
+        Json::Value result(Json::objectValue);
+        for (const auto& s : symbols()) {
+            checkpoint(Phase::decoding);
+            expr::Expr_ptr value;
+            if (s.input) value = env::Environment::INSTANCE().get(s.key->rhs());
+            else {
+                auto encoding = bm.find_encoding(expr::TimedExpr(s.key, s.frozen ? FROZEN : 0));
+                require(encoding != nullptr, "State encoding is missing");
+                std::vector<int> bits(bm.nbits(), 0);
+                for (const auto& bit : encoding->bits()) {
+                    auto index = bit.getNode()->index;
+                    auto var = engine.tcbi_to_var(enc::TCBI(bm.find_ucbi(index), step));
+                    require(engine.assigned(var), "Unassigned semantic state bit");
+                    bits[index] = engine.value(var);
+                }
+                value = encoding->expr(bits.data());
+            }
+            require(value != nullptr, "Incomplete semantic state");
+            result[s.name] = value_json(s.type, value);
+        }
+        return result;
+    }
+    expr::Expr_ptr valuation(const Json::Value& values)
+    {
+        auto syms = symbols();
+        require(values.isObject() && values.size() == syms.size(), "Expected a complete semantic state");
+        auto& em = expr::ExprMgr::INSTANCE();
+        auto result = em.make_true();
+        for (const auto& s : syms) {
+            checkpoint(Phase::compilation);
+            require(values.isMember(s.name) && !values[s.name].isNull(), "Missing state value: " + s.name);
+            auto value = value_expr(s.type, values[s.name]);
+            if (s.input) {
+                require(values[s.name] == value_json(s.type, env::Environment::INSTANCE().get(s.key->rhs())), "Input value differs from model binding");
+            } else result = em.make_and(result, em.make_eq(parse::parseExpression(s.name.c_str()), value));
+        }
+        return result;
+    }
     Json::Value symbol_catalog()
     {
         Json::Value catalog(Json::objectValue);

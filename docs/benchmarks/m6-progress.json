@@ -1,0 +1,132 @@
+{
+  "machine": "Linux-6.8.0-142-generic-aarch64-with-glibc2.39",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cxxflags": "-D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC -std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror",
+  "binary_sha256": "d9fcb4b794586e527cb8c581c1433fd5876f88e7d9a58bb93c12816b3cf82cad",
+  "limits": {
+    "states": 10000,
+    "wall_ms": 30000
+  },
+  "notes": [
+    "One fresh-process sample per operation; wall and RSS include model loading.",
+    "Checker analysis includes enumeration and mandatory fresh-solver evidence validation; standalone validation is also timed.",
+    "Small examples are smoke baselines, not scalability claims."
+  ],
+  "cases": [
+    {
+      "model": "examples/progress/complete.smv",
+      "source_sha256": "0f662093ce768a7cee310bc876486629f06752f0841292bb25bc80f6a2629def",
+      "target": "FINISHED",
+      "outcome": "proven",
+      "kind": "proof",
+      "graph": {
+        "edges": 1,
+        "expanded": 2,
+        "pending": 0,
+        "states": 2
+      },
+      "check": {
+        "process_wall_ms": 1280.0,
+        "peak_rss_kib": 382044,
+        "analysis_ms": 1282.281335
+      },
+      "validate": {
+        "process_wall_ms": 1270.0,
+        "peak_rss_kib": 382068,
+        "analysis_ms": 1270.958661
+      }
+    },
+    {
+      "model": "examples/progress/stalled.smv",
+      "source_sha256": "bbfab96839551cb7d1310f7bcf21e48475d63e6df483bd4237314f1aae1c23fc",
+      "target": "FINISHED",
+      "outcome": "violated",
+      "kind": "deadlock",
+      "graph": {
+        "edges": 1,
+        "expanded": 2,
+        "pending": 0,
+        "states": 2
+      },
+      "check": {
+        "process_wall_ms": 1270.0,
+        "peak_rss_kib": 382060,
+        "analysis_ms": 1273.553489
+      },
+      "validate": {
+        "process_wall_ms": 1270.0,
+        "peak_rss_kib": 382096,
+        "analysis_ms": 1273.651443
+      }
+    },
+    {
+      "model": "examples/progress/retry-forever.smv",
+      "source_sha256": "a1b09464de5cd764b89608863715b064373df4068010c0f76ae35c8acdfa07dd",
+      "target": "FINISHED",
+      "outcome": "violated",
+      "kind": "loop",
+      "graph": {
+        "edges": 2,
+        "expanded": 2,
+        "pending": 0,
+        "states": 2
+      },
+      "check": {
+        "process_wall_ms": 1280.0,
+        "peak_rss_kib": 382048,
+        "analysis_ms": 1275.288262
+      },
+      "validate": {
+        "process_wall_ms": 1280.0,
+        "peak_rss_kib": 382088,
+        "analysis_ms": 1280.461033
+      }
+    },
+    {
+      "model": "examples/retry-protocol/faulty.smv",
+      "source_sha256": "075bb962e7426d69a4e348b81ecb54f68d1b6d4c25d0a882743c0ca5dc21d5ca",
+      "target": "SUCCEEDED || EXHAUSTED",
+      "outcome": "proven",
+      "kind": "proof",
+      "graph": {
+        "edges": 36,
+        "expanded": 34,
+        "pending": 0,
+        "states": 34
+      },
+      "check": {
+        "process_wall_ms": 1470.0,
+        "peak_rss_kib": 382140,
+        "analysis_ms": 1470.797975
+      },
+      "validate": {
+        "process_wall_ms": 1400.0,
+        "peak_rss_kib": 382268,
+        "analysis_ms": 1395.282801
+      }
+    },
+    {
+      "model": "examples/retry-protocol/deduplicating.smv",
+      "source_sha256": "2c82c26c3347fddc86481216d3a221981c3cfa3d901d55912823358c66b27d9b",
+      "target": "SUCCEEDED || EXHAUSTED",
+      "outcome": "proven",
+      "kind": "proof",
+      "graph": {
+        "edges": 28,
+        "expanded": 23,
+        "pending": 0,
+        "states": 23
+      },
+      "check": {
+        "process_wall_ms": 1400.0,
+        "peak_rss_kib": 382136,
+        "analysis_ms": 1400.777006
+      },
+      "validate": {
+        "process_wall_ms": 1370.0,
+        "peak_rss_kib": 382228,
+        "analysis_ms": 1365.802074
+      }
+    }
+  ]
+}

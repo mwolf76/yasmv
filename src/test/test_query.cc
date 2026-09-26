@@ -163,3 +163,48 @@ BOOST_AUTO_TEST_CASE(shortest_and_proof_cancellation_never_publish_claims)
     BOOST_CHECK(interrupted.optimality.isNull());
     BOOST_CHECK(query::execute(spec).optimality["certified"].asBool());
 }
+
+BOOST_AUTO_TEST_CASE(progress_discovery_and_verification_cancellation)
+{
+    load_model();
+    for (const char* target : { "x", "FALSE" }) {
+        query::QuerySpec spec;
+        spec.operation = query::Operation::check_progress;
+        spec.target = parse::parseExpression(target);
+        spec.limits.states = 100;
+        spec.limits.wall_ms = 30000;
+        auto completed = query::execute(spec);
+        BOOST_REQUIRE(completed.status == query::ExecutionStatus::completed);
+        BOOST_REQUIRE(!completed.progress.isNull());
+        for (bool validating : { false, true }) {
+            auto request = spec;
+            if (validating) {
+                request.operation = query::Operation::validate_progress;
+                request.target = nullptr;
+                request.progress = completed.progress;
+            }
+            std::map<query::Phase, unsigned> counts;
+            query::QueryContext measured(request.limits);
+            measured.checkpoint_hook = [&](query::Phase phase) { ++counts[phase]; };
+            BOOST_REQUIRE(query::execute(request, measured).status == query::ExecutionStatus::completed);
+            for (auto phase : { query::Phase::compilation, query::Phase::encoding, query::Phase::solving, query::Phase::decoding }) {
+                if (!counts[phase]) continue; // A proof validator need not decode a witness.
+                for (unsigned stop_at : { 1u, std::max(1u, counts[phase] / 2) }) {
+                    if (!stop_at) continue;
+                    query::QueryContext interrupted(request.limits);
+                    unsigned count = 0;
+                    interrupted.checkpoint_hook = [&](query::Phase p) {
+                        if (p == phase && ++count == stop_at) interrupted.cancel();
+                    };
+                    auto r = query::execute(request, interrupted);
+                    BOOST_CHECK(r.status == query::ExecutionStatus::unknown);
+                    BOOST_CHECK(r.outcome == query::Outcome::none);
+                    BOOST_CHECK(r.progress.isNull());
+                    BOOST_CHECK(r.proof.isNull());
+                    BOOST_CHECK(r.trace.isNull());
+                }
+            }
+            BOOST_CHECK(query::execute(request).status == query::ExecutionStatus::completed);
+        }
+    }
+}
