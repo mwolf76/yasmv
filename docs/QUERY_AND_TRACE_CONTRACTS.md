@@ -222,9 +222,11 @@ new continuation trace rather than changing the parent in place.
 ## Verification
 
 `make query-test` runs direct C++ contract/cancellation tests and process-level
-request/replay tests. `make test` includes those plus the M0 suites. CI runs
-`reliability-test query-test` under ASan/UBSan (process-lifetime manager leaks
-are excluded, matching M0). Fixtures cover bounded and unbounded results,
+request/replay tests. `make test` includes those plus the M0 suites. These
+checks and the ASan/UBSan gate run locally before committing; CI runs only
+the CLI trace/replay and agent protocol smoke checks. See the
+[local gate commands](CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
+Fixtures cover bounded and unbounded results,
 negative/unknown/error outcomes, exact numeric boundaries, backward replay,
 wrong/tampered artifacts, missing values, frozen/input values, source parentage,
 continuation chains, CLI agreement, and forced worker deadlines.

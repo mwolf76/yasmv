@@ -105,10 +105,14 @@ to solve planning problems.
   For further information on microcode, please refer to the `README` file in the
   microcode bzip2'd tarball.
 
-  Unit and functional tests can be run using:
+  Run the full local regression gate before committing using:
   ```
   $ make test
   ```
+
+  CI runs one core build and two smoke checks. Full regression, LLVM,
+  sanitizer, and browser acceptance remain local pre-commit gates; see
+  [the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
 
   Remark: The default build for C++ code now uses -O2 optimization for optimal
   performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the

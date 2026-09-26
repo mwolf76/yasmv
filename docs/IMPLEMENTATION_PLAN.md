@@ -14,6 +14,11 @@ API usage, migration notes, and acceptance evidence are documented in
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 
+CI now runs a single core build and two smoke checks. Full regression, LLVM,
+sanitizer, and browser gates run locally before committing; see
+[the testing guide](CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
+This supersedes the original CI matrix proposed in package 05 below.
+
 M5 is the CLI workbench and agent interface, prioritized after user feedback on
 the browser workflow. Arithmetic generator modernization remains separate.
 See [CLI_WORKBENCH.md](CLI_WORKBENCH.md) for the implementation contract.

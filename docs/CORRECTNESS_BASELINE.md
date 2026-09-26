@@ -30,18 +30,48 @@ of the supported CNF passes, and runs the Python process/harness regressions.
 Python 3 is required for this test target. The existing short, unit, and
 functional targets remain available.
 
-For a fresh sanitizer build, use
-`CXXFLAGS='-std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer'`
-when configuring. Run `make reliability-test` with
-`ASAN_OPTIONS=detect_leaks=0` and
-`UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1`.
-Leak detection is deferred because managers still own objects for the lifetime
-of the process; invalid accesses and undefined behavior remain enabled.
+## CI and local pre-commit gates
 
-Run `python3 tools/build-provenance.py --output /tmp/yasmv-provenance.json`
-to record the source revision, toolchain, linked libraries, configuration, and
-SHA256 inventory of the actual arithmetic fragments. CI archives this report
-for each build configuration.
+CI runs one optimized core build with LLVM disabled, followed by two smoke
+checks: native CLI trace generation/replay and agent protocol recovery/discovery.
+It does not run the full regression suite, sanitizer builds, LLVM translation,
+Chromium acceptance, or provenance collection.
+
+Before committing, run the full regression gate on the normal build:
+
+```bash
+YASMV_HOME="$PWD" make test
+```
+
+Keep the following checks local as well:
+
+- LLVM: configure a normal build with `--enable-llvm2smv`, build it, and run
+  `YASMV_HOME="$PWD" make test`. This includes the translation smoke test.
+- Sanitizers: use a fresh checkout containing the changes being tested, or a
+  clean rebuild, to avoid mixing normal and instrumented objects. Configure
+  and run the focused gate as follows:
+
+```bash
+./configure --disable-llvm2smv \
+  CXXFLAGS='-std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer'
+make -j4
+ASAN_OPTIONS=detect_leaks=0 \
+UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
+YASMV_HOME="$PWD" make reliability-test query-test workbench-test \
+  developer-workflow-test analysis-test cli-test
+```
+
+Leak detection is deferred because managers still own objects for the lifetime
+of the process; invalid accesses and undefined behavior remain enabled. Use
+an optimized normal build for the full functional suite, whose per-case time
+limits can be exceeded under sanitizers.
+
+- Browser: run the Chromium acceptance commands in
+  [WORKBENCH.md](WORKBENCH.md#verification) against a normal build.
+- Provenance: run
+  `python3 tools/build-provenance.py --output /tmp/yasmv-provenance.json`
+  to record the source revision, toolchain, linked libraries, configuration,
+  and SHA256 inventory of the actual arithmetic fragments.
 
 ## Supported CNF transformations
 
@@ -144,8 +174,9 @@ Hosted CI execution remains separate from these local results.
 ASan/UBSan runs also pass the unit tests, all active short cases, the initial
 23 process regressions, and the focused C++ configuration matrix. The full functional
 suite exceeded its 60-second per-case limit in the unoptimized sanitizer build;
-functional coverage above uses the clean optimized build. CI uses a focused
-sanitizer gate and the full suite for its normal configurations.
+functional coverage above uses the clean optimized build. These are local
+acceptance results; the current CI policy is the lightweight gate described
+above.
 
 The packaged arithmetic inventory contains 2,432 fragments. Its manifest
 SHA256 is
