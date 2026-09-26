@@ -23,7 +23,10 @@
             "validate-trace",
             "explain-init",
             "explain-step",
-            "explain-reach"
+            "explain-reach",
+            "shortest-reach",
+            "check-property",
+            "prove-property"
           ]
         },
         "request_id": {
@@ -128,12 +131,116 @@
               }
             }
           }
+        },
+        "property": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "expression"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expression": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       },
       "required": [
         "operation"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check-property",
+                  "prove-property"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "property",
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ],
+                "properties": {
+                  "depth": {
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "property"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "prove-property"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "properties": {
+                  "depth": {
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "shortest-reach"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target",
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ],
+                "properties": {
+                  "depth": {
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "inputs": {
       "type": "object",

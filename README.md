@@ -146,3 +146,10 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 yasmv is in no way related to, or endorsed by, the NuSMV development board
 and/or FBK. yasmv does not contain any code from NuSMV's code base.
+
+### Stronger analysis
+
+Find certified shortest witnesses and check named safety properties with
+bounded search or verified k-induction. Optional `--reuse-models` workbench
+sessions retain compiled models while keeping queries in isolated processes.
+See [shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md).

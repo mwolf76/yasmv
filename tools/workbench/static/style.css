@@ -608,3 +608,7 @@ footer span {
 #explanation details { margin: 16px 0; overflow-x: auto; }
 #explanation td { font-family: ui-monospace, monospace; font-size: 11px; }
 .source-link { color: var(--accent); background: var(--soft); min-height: 24px; padding: 4px 7px; }
+
+.safety-controls {border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px;}
+#proof-detail p {margin: 8px 0;}
+#proof-detail details {margin-top: 12px;}

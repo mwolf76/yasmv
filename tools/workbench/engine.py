@@ -38,7 +38,7 @@ def read(path):
 
 
 class Engine:
-    def __init__(self, directory, binary=None, home=None):
+    def __init__(self, directory, binary=None, home=None, reuse_models=False):
         self.directory = Path(directory).resolve()
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lockfile = (self.directory / 'owner.lock').open('a')
@@ -49,6 +49,8 @@ class Engine:
             raise ValueError('This artifact store is already open by another runner') from None
         self.binary = str(Path(binary or ROOT / 'yasmv').resolve())
         self.home = str(Path(home or ROOT).resolve())
+        from .sessions import Pool
+        self.sessions = Pool() if reuse_models else None
         self.guard = threading.RLock()
         self.active = {}
         self.closed = False
@@ -137,6 +139,8 @@ class Engine:
         value = deepcopy(protocol.request(value))
         rev = self.revision(value['revision'])
         q = value['query']
+        if q['operation'] in ('check-property', 'prove-property') and q['property'] not in rev.get('properties', {}):
+            raise ValueError('Unknown safety property in this revision')
         if 'trace_id' in q:
             artifact = self.trace(q['trace_id'])
             if artifact['revision'] != rev['id'] or not artifact['validated']:
@@ -199,6 +203,27 @@ class Engine:
     def worker(self, request, rev, query, cancel, deadline, stage):
         identifier = request['request_id']
         directory = self.path('jobs', identifier)
+        if self.sessions is not None:
+            from .sessions import Interrupted, LoadError
+            self.emit(identifier, 'progress', phase=stage, elapsed_ms=0)
+            finished = threading.Event()
+            started = time.monotonic()
+            def progress():
+                while not finished.wait(.5):
+                    self.emit(identifier, 'progress', phase=stage, elapsed_ms=round((time.monotonic() - started) * 1000))
+            monitor = threading.Thread(target=progress, name='session-progress-' + identifier)
+            monitor.start()
+            try:
+                return self.sessions.run(self.binary, self.home, rev, dict(query, request_id=identifier), cancel, deadline)
+            except LoadError as error:
+                result = error.result
+                result['request_id'] = identifier
+                return result
+            except Interrupted as error:
+                return protocol.failure(identifier, str(error), 'Compiled session interrupted', True)
+            finally:
+                finished.set()
+                monitor.join()
         payload = dict(version=1, model=str(self.path('revisions', rev['id']) / 'model.smv'),
                        inputs=rev['inputs'], query=dict(query, request_id=identifier))
         path = directory / (stage + '-request.json')
@@ -293,6 +318,9 @@ class Engine:
         result = None
         try:
             query = deepcopy(request['query'])
+            if query['operation'] in ('check-property', 'prove-property'):
+                name = query['property']
+                query['property'] = dict(name=name, expression=rev['properties'][name])
             if 'trace_id' in query:
                 query['trace'] = self.trace(query.pop('trace_id'))['trace']
             query.setdefault('watches', {} if query['operation'].startswith('explain-') else rev['watches'])
@@ -346,5 +374,7 @@ class Engine:
                 cancel.set()
         for thread, _ in threads:
             thread.join()
+        if self.sessions is not None:
+            self.sessions.close()
         fcntl.flock(self.lockfile, fcntl.LOCK_UN)
         self.lockfile.close()

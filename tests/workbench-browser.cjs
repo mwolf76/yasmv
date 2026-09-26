@@ -1,4 +1,4 @@
-/* M2 browser acceptance. Test-only dependency: Playwright with Chromium. */
+/* M2–M4 browser acceptance. Test-only dependency: Playwright with Chromium. */
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
@@ -29,7 +29,8 @@ const assert = require('node:assert/strict');
       await page.waitForFunction(value => document.querySelector('#result-title').textContent.includes(value), text, {timeout: 90000});
     };
     await page.click('#save'); await result('Model validated');
-    await page.click('#search'); await result('Goal reached at depth 5');
+    await page.click('#shortest'); await result('Shortest witness at depth 5');
+    assert.match(await page.locator('#proof-detail').innerText(), /UNSAT at smaller depths/);
     await page.waitForSelector('.step:nth-child(6)');
     assert.equal(await page.locator('#trust').innerText(), 'Replay validated');
     await page.click('.step:nth-child(6)');
@@ -51,6 +52,7 @@ const assert = require('node:assert/strict');
     await page.waitForFunction(() => document.querySelector('#comparison table') !== null);
     await page.reload();
     await page.waitForFunction(expected => document.querySelector('#trace').value === expected, child);
+    await page.waitForFunction(expected => document.querySelector('#compare').value === expected, original);
     assert.equal(await page.locator('#compare').inputValue(), original);
     assert.equal(await page.locator('#trust').innerText(), 'Replay validated');
     // Changing a pinned action blocks the continuation without changing its parent.
@@ -104,10 +106,17 @@ const assert = require('node:assert/strict');
     await page.click('#search'); await result('No witness through depth 12');
     assert.match(await page.locator('#result-detail').innerText(), /not a safety proof/);
     await page.reload(); await result('No witness through depth 12');
+    await page.click('.safety-controls summary');
+    await page.click('#check-property'); await result('Property holds through depth 12');
+    await page.click('#prove-property'); await result('Safety property proved');
+    assert.match(await page.locator('#proof-detail').innerText(), /fresh solvers/);
+    await page.reload(); await result('Safety property proved');
     // Reopen the original immutable model and evidence.
     const revisions = await (await page.request.get(base + '/api/revisions')).json();
     const faulty = revisions.find(r => r.name === 'Faulty receiver');
     await page.selectOption('#revision', faulty.id);
+    await page.click('.safety-controls summary');
+    await page.click('#prove-property'); await result('Safety property violated at depth 5');
     await page.selectOption('#trace', original);
     await page.waitForSelector('.step:nth-child(6)');
     await page.click('.step:nth-child(6)');
@@ -116,7 +125,7 @@ const assert = require('node:assert/strict');
     await page.setViewportSize({width: 390, height: 844});
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepEqual(errors, []);
-    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout, explanations, scenario export and implementation replay.');
+    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout, explanations, scenario export, implementation replay, shortest witnesses, safety refutation and induction proof.');
   } finally {
     if (browser) await browser.close();
     server.kill('SIGTERM');

@@ -427,7 +427,11 @@ namespace query::trace {
                 }
                 r.checked_depths.push_back(k);
             }
-            if (spec.operation == Operation::reach) {
+            if (spec.operation == Operation::reach || spec.operation == Operation::shortest_reach || spec.operation == Operation::check_property || spec.operation == Operation::prove_property) {
+                if (spec.operation == Operation::check_property || spec.operation == Operation::prove_property) {
+                    require(!spec.property.isNull(), "Missing safety property");
+                    spec.target = expr::ExprMgr::INSTANCE().make_not(parse::parseExpression(spec.property["expression"].asCString()));
+                }
                 require(spec.target != nullptr, "Reachability trace has no target");
                 auto goal = a.compiler().process(empty, spec.target);
                 a.assert_formula(engine, w->size() - 1, goal);
