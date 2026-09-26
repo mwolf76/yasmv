@@ -104,6 +104,10 @@ namespace algorithms {
             return *f_witness;
         }
 
+        const compiler::Units& init_units() const { return f_init; }
+        const compiler::Units& invar_units() const { return f_invar; }
+        const compiler::Units& trans_units() const { return f_trans; }
+
         /* FSM */
         void assert_fsm_init(sat::Engine& engine, step_t time,
                              sat::group_t group = sat::MAINGROUP);

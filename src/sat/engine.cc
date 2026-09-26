@@ -91,6 +91,17 @@ namespace sat {
             .unregister_instance(this);
     }
 
+    std::vector<group_t> Engine::failed_groups() const
+    {
+        std::vector<group_t> result;
+        if (f_status != STATUS_UNSAT) return result;
+        for (int i = 0; i < f_solver.conflict.size(); ++i) {
+            const auto assumption = ~f_solver.conflict[i];
+            result.push_back(Minisat::sign(assumption) ? -Minisat::var(assumption) : Minisat::var(assumption));
+        }
+        return result;
+    }
+
     status_t Engine::sat_solve_groups(const Groups& groups)
     {
         query::PhaseTimer timer(query::Phase::solving);
@@ -120,8 +131,7 @@ namespace sat {
             /* Assumptions work like "a -> phi". Here we use both
              * polarities of the implication, that is a positive group
              * var asserts the formulas in the group whereas a
-             * negative group var asserts the negation of those
-             * formulas. */
+             * negative group var disables those formulas. */
             assumptions.push(mkLit(abs(grp), grp < 0));
         }
 

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Executable scenario v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "kind",
+    "id",
+    "adapter",
+    "policy",
+    "model_identity",
+    "trace_identity",
+    "revision",
+    "query",
+    "model_trace_validation",
+    "observations",
+    "initial",
+    "actions"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "executable-scenario"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "adapter": {
+      "const": "retry-protocol-v1"
+    },
+    "policy": {
+      "const": {
+        "reset": true,
+        "mode": "deterministic",
+        "observe": "initial_and_after_each_action",
+        "final_action": "not_executed",
+        "comparison": "exact_typed"
+      }
+    },
+    "model_identity": {
+      "type": "object"
+    },
+    "trace_identity": {
+      "type": "object",
+      "required": [
+        "id",
+        "digest",
+        "artifact_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "revision": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "query": {
+      "type": "object"
+    },
+    "model_trace_validation": {
+      "const": {
+        "status": "valid",
+        "method": "checker-replay",
+        "recorded_at_export": true
+      }
+    },
+    "observations": {
+      "type": "object",
+      "required": [
+        "phase",
+        "retries",
+        "executions",
+        "seen"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "symbol",
+          "type"
+        ],
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "initial": {
+      "$ref": "#/$defs/observation"
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "label",
+          "action",
+          "arguments",
+          "expected"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "label": {
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "SEND",
+              "DELIVER",
+              "DROP_REQUEST",
+              "ACK",
+              "DROP_ACK",
+              "RETRY",
+              "GIVE_UP",
+              "IDLE"
+            ]
+          },
+          "arguments": {
+            "type": "object",
+            "required": [
+              "job_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "job_id": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "type": "object"
+                  },
+                  "value": {
+                    "const": "job-1"
+                  }
+                }
+              }
+            }
+          },
+          "expected": {
+            "$ref": "#/$defs/observation"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "observation": {
+      "type": "object",
+      "required": [
+        "phase",
+        "retries",
+        "executions",
+        "seen"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "type": "string"
+        },
+        "retries": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "executions": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "seen": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

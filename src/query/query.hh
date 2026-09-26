@@ -4,7 +4,10 @@
 #include <query/source.hh>
 #include <witness/witness.hh>
 namespace query {
-    enum class Operation { validate_model,
+    enum class Operation { explain_init,
+                           explain_step,
+                           explain_reach,
+                           validate_model,
                            check_init,
                            check_trans,
                            pick_state,
@@ -35,7 +38,7 @@ namespace query {
         QueryLimits limits;
         bool enumerate = false, count = false;
         std::string trace_id;
-        Json::Value trace, parent_trace;
+        Json::Value trace, parent_trace, explanation;
     };
     struct QueryResult {
         std::string request_id;
@@ -47,11 +50,12 @@ namespace query {
         int64_t value = 0;
         std::vector<unsigned> checked_depths;
         witness::Witness_ptr witness = nullptr;
-        Json::Value identity, trace, statistics, watches;
+        Json::Value identity, trace, statistics, watches, explanation;
         std::vector<source::Diagnostic> diagnostics;
         int exit_code() const;
         Json::Value json() const;
     };
+    void explain(const QuerySpec&, QueryResult&, QueryContext&);
     QueryResult execute(const QuerySpec&, QueryContext&);
     QueryResult execute(const QuerySpec&);
     QueryResult checked(const QuerySpec&);

@@ -52,7 +52,7 @@ class Engine:
         self.guard = threading.RLock()
         self.active = {}
         self.closed = False
-        for kind in ('revisions', 'jobs', 'traces'):
+        for kind in ('revisions', 'jobs', 'traces', 'scenarios'):
             (self.directory / kind).mkdir(exist_ok=True)
         for directory in (self.directory / 'jobs').iterdir():
             if not directory.is_dir() or not (directory / 'request.json').exists():
@@ -92,6 +92,13 @@ class Engine:
 
     def trace(self, identifier):
         return read(self.path('traces', identifier).with_suffix('.json'))
+
+    def scenario(self, identifier):
+        return read(self.path('scenarios', identifier).with_suffix('.json'))
+
+    def scenarios(self):
+        return [dict(id=v['id'], revision=v['revision'], trace_id=v['trace_identity']['artifact_id'], actions=len(v['actions']))
+                for p in (self.directory / 'scenarios').glob('*.json') for v in [read(p)]]
 
     def traces(self, revision=None):
         values = [read(p) for p in (self.directory / 'traces').glob('*.json')]
@@ -134,6 +141,10 @@ class Engine:
             artifact = self.trace(q['trace_id'])
             if artifact['revision'] != rev['id'] or not artifact['validated']:
                 raise ValueError('Trace belongs to a different revision or has not passed replay')
+        if q['operation'] == 'export-scenario' and not rev.get('scenario'):
+            raise ValueError('This revision has no scenario mappings; save mappings in a new revision first')
+        if q['operation'] == 'replay-scenario' and self.scenario(q['scenario_id'])['revision'] != rev['id']:
+            raise ValueError('Scenario belongs to a different revision')
         identifier = value['request_id']
         with self.guard:
             if self.closed:
@@ -229,6 +240,53 @@ class Engine:
         except (ValueError, UnicodeError) as error:
             return protocol.failure(identifier, 'worker_failed', f'{stage} worker exited {proc.returncode}: {error}. See {stage}-stderr.log')
 
+    def scenario_job(self, request, rev, query, cancel, deadline):
+        from tools.scenario.format import build
+        identifier = request['request_id']
+        directory = self.path('jobs', identifier)
+        if query['operation'] == 'export-scenario':
+            trace = query['trace']
+            validation = self.worker(request, rev, dict(operation='validate-trace', trace=trace), cancel, deadline, 'replay')
+            if validation['status'] != 'completed':
+                return validation
+            if validation.get('outcome') != 'valid':
+                return protocol.failure(identifier, 'trace_validation_failed', 'Scenario export requires a replay-valid trace')
+            scenario = build(trace, rev['scenario'], validation, rev['id'], request['query'].get('trace_id'))
+            with self.guard:
+                if cancel.is_set():
+                    return protocol.failure(identifier, 'cancelled', 'Job cancelled', True)
+                path = self.path('scenarios', scenario['id']).with_suffix('.json')
+                if not path.exists():
+                    atomic(path, scenario)
+            return dict(version=1, request_id=identifier, status='completed', outcome='exported', complete=True,
+                        trace=None, scenario_id=scenario['id'], model_trace_validated=True, diagnostics=[])
+        scenario = self.scenario(query['scenario_id'])
+        atomic(directory / 'scenario.json', scenario)
+        # Reuse the process-group/deadline machinery with a dedicated adapter subprocess.
+        import sys
+        args = [sys.executable, '-m', 'tools.scenario', 'replay', str(directory / 'scenario.json'),
+                '--implementation', query['implementation']]
+        environment = dict(os.environ, PYTHONPATH=str(ROOT))
+        self.emit(identifier, 'progress', phase='implementation-replay', elapsed_ms=0)
+        with (directory / 'adapter-stdout.json').open('wb') as out, (directory / 'adapter-stderr.log').open('wb') as err:
+            process = subprocess.Popen(args, cwd=directory, env=environment, stdout=out, stderr=err, start_new_session=True)
+            try:
+                while process.poll() is None:
+                    if cancel.is_set() or time.monotonic() >= deadline:
+                        self.terminate(process)
+                        return protocol.failure(identifier, 'cancelled' if cancel.is_set() else 'deadline', 'Implementation replay interrupted', True)
+                    cancel.wait(.04)
+            finally:
+                if process.poll() is None:
+                    self.terminate(process)
+        result = read(directory / 'adapter-stdout.json')
+        expected = 3 if result.get('outcome') == 'diverged' else 0 if result.get('status') == 'completed' else 2
+        if process.returncode != expected:
+            raise ValueError('Implementation adapter failed')
+        return dict(version=1, request_id=identifier, status=result['status'], outcome=result.get('outcome'),
+                    complete=result['status'] == 'completed', trace=None, diagnostics=result.get('diagnostics', []),
+                    scenario_id=scenario['id'], implementation_replay=result)
+
     def run(self, request, rev, cancel):
         identifier = request['request_id']
         directory = self.path('jobs', identifier)
@@ -237,8 +295,11 @@ class Engine:
             query = deepcopy(request['query'])
             if 'trace_id' in query:
                 query['trace'] = self.trace(query.pop('trace_id'))['trace']
-            query.setdefault('watches', rev['watches'])
+            query.setdefault('watches', {} if query['operation'].startswith('explain-') else rev['watches'])
             deadline = time.monotonic() + request.get('hard_timeout', 60)
+            if query['operation'] in ('export-scenario', 'replay-scenario'):
+                result = self.scenario_job(request, rev, query, cancel, deadline)
+                return
             result = self.worker(request, rev, query, cancel, deadline, 'analysis')
             trace = result.get('trace')
             if trace is not None and result['status'] == 'completed':
