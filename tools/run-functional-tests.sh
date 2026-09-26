@@ -1,6 +1,6 @@
 #!/bin/bash
 EXAMPLES="examples"
-YASMV="./yasmv"
+source "$(dirname "${BASH_SOURCE[0]}")/test-support.sh"
 
 function test() {
     local DIRECTORY="$1"
@@ -8,20 +8,9 @@ function test() {
     local COMMANDS="$3"
     local EXPECTED="$4"
 
-    echo -n "Running functional test $DIRECTORY/$MODEL::$COMMANDS ... "
-    rm -f "out"
-
-    YASMV_HOME=`pwd` $YASMV --quiet "$EXAMPLES/$DIRECTORY/$MODEL" <"$EXAMPLES/$DIRECTORY/$COMMANDS" >out
-    diff -wB "$EXAMPLES/$DIRECTORY/$EXPECTED" out &> /dev/null
-    if [[ $? == 0 ]]; then
-	    echo "OK"
-            rm -f out
-    else
-        echo "FAILED!"
-        echo "####### Showing EXPECTED and ACTUAL output for $DIRECTORY/$MODEL::$COMMANDS"
-        diff -W $(( $(tput -T xterm cols) - 2 )) "$EXAMPLES/$DIRECTORY/$EXPECTED" out
-    	exit 1
-    fi
+    run_yasmv_case "functional test $DIRECTORY/$MODEL::$COMMANDS" \
+        "$EXAMPLES/$DIRECTORY/$MODEL" "$EXAMPLES/$DIRECTORY/$COMMANDS" \
+        file "$EXAMPLES/$DIRECTORY/$EXPECTED" || exit 1
 }
 
 test cannibals cannibals.smv forward forward.out

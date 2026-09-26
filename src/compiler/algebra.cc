@@ -457,7 +457,7 @@ namespace compiler {
 
         /* growing cast? */
         else if (src_type->width() < tgt_type->width()) {
-            if (tgt_type->is_signed_algebraic()) {
+            if (src_type->is_signed_algebraic()) {
                 /* signed, needs sign bit extension (src MSB) */
                 TOP_DD(msb);
 
@@ -465,8 +465,6 @@ namespace compiler {
                     PUSH_DD(msb);
                 }
             } else {
-                assert(tgt_type->is_unsigned_algebraic());
-
                 /* unsigned, pad with zeroes */
                 for (unsigned i = src_type->width(); i < tgt_type->width(); ++i) {
                     PUSH_DD(f_enc.zero());

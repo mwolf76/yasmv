@@ -2,6 +2,10 @@
 
 Review baseline: commit `970f6484`, inspected on 2026-09-25.
 
+Implementation update (2026-09-26): the first correctness milestone addresses
+several findings below. See [current behavior and migration notes](docs/CORRECTNESS_BASELINE.md).
+The review findings below retain their original baseline context.
+
 The accepted development direction is broken down into work packages and completion gates in the [implementation plan](docs/IMPLEMENTATION_PLAN.md).
 
 This document describes the implementation in this checkout, distinguishes working capabilities from incomplete ones, and proposes an incremental development direction. Findings marked **observed** were exercised with the existing binaries; findings marked **inspection** come from source review. Proposed interfaces and features are designs, not existing commands.

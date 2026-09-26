@@ -104,6 +104,7 @@ namespace opts {
 
         // model filename
         std::string model() const;
+        std::string root() const;
         
         // skip inertial FSM checks
         bool skip_inertial_fsm_checks() const;

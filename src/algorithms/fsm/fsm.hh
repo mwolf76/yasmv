@@ -74,7 +74,7 @@ namespace fsm {
         CheckTransConsistency(cmd::Command& command, model::Model& model);
         ~CheckTransConsistency();
 
-        void process(expr::ExprVector constraints);
+        void process(expr::ExprVector constraints, const sat::SolveCallback& solve = {});
 
         fsm_consistency_t status() const
         {

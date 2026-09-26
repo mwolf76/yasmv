@@ -102,6 +102,7 @@ namespace cmd {
                 break;
 
             case sim::simulation_status_t::SIMULATION_INTERRUPTED:
+            case sim::simulation_status_t::SIMULATION_UNKNOWN:
                 if (!om.quiet()) {
                     f_out
                         << wrnPrefix;
@@ -110,7 +111,7 @@ namespace cmd {
                 f_out
                     << "Simulation interrupted"
                     << std::endl;
-                break;
+                return utils::Variant(unknownMessage);
 
             default:
                 assert(false); /* unreachable */

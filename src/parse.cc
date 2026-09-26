@@ -86,8 +86,13 @@ bool parseFile(const char* fName)
 
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
     psr->smv(psr);
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) {
+        std::cerr << "Syntax error: unexpected trailing model input." << std::endl;
+        parseErrors = true;
+    }
 
     // cleanup
     psr->free(psr);
@@ -185,8 +190,15 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
     parseErrors = false;
     psr->pParser->rec->displayRecognitionError = yasmvdisplayRecognitionError;
 
+    lxr->pLexer->rec->displayRecognitionError = yasmvdisplayRecognitionError;
+
     cmd::CommandVector_ptr res
         (psr -> command_line(psr));
+
+    if (tstream->tstream->istream->_LA(tstream->tstream->istream, 1) != ANTLR3_TOKEN_EOF) {
+        std::cerr << "Syntax error: unexpected trailing command input." << std::endl;
+        parseErrors = true;
+    }
 
     // cleanup
     psr->free(psr);
@@ -198,6 +210,11 @@ cmd::CommandVector_ptr parseCommand(const char *command_line)
     clock_gettime(CLOCK_MONOTONIC, &stop_clock);
 
     reportParserStatus(parseErrors, start_clock, stop_clock);
+    if (parseErrors && res) {
+        for (auto command : *res) delete command;
+        delete res;
+        res = nullptr;
+    }
     return ! parseErrors
         ? res : NULL;
 }

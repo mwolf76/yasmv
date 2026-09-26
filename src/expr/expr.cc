@@ -120,16 +120,17 @@ namespace expr {
             return (long) (k.u.f_atom);
         }
 
-        long v0, v1, x, res { (long) (k.f_symb) };
+        // Hash arithmetic intentionally wraps, so it must use unsigned values.
+        unsigned long v0, v1, x, res { (unsigned long) (k.f_symb) };
 
         if (k.f_symb == ICONST || k.f_symb == HCONST ||
             k.f_symb == BCONST || k.f_symb == OCONST ||
             k.f_symb == INSTANT) {
-            v0 = (long) (k.u.f_value);
-            v1 = (long) (k.u.f_value >> sizeof(long));
+            v0 = (unsigned long) (k.u.f_value);
+            v1 = v0 >> sizeof(long);
         } else {
-            v0 = (long) (k.u.f_lhs);
-            v1 = (long) (k.u.f_rhs);
+            v0 = (unsigned long) (k.u.f_lhs);
+            v1 = (unsigned long) (k.u.f_rhs);
         }
 
         res = (res << 4) + v0;
