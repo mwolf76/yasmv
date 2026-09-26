@@ -22,6 +22,9 @@ to solve planning problems.
 
 ## BUILD
 
+  For the current core-only build, correctness regression tests, and migration
+  notes, see [the correctness baseline](docs/CORRECTNESS_BASELINE.md).
+
   Here is the complete list of build dependencies. These package names are from
   Ubuntu 14.04 (Trusty), used in Travis CI.
 

@@ -39,8 +39,13 @@
 #include <algorithm>
 #include <unordered_set>
 #include <vector>
+#include <functional>
 
 namespace sat {
+
+    class Engine;
+    // Optional algorithm seam for deterministic solver-status tests.
+    using SolveCallback = std::function<status_t(Engine&)>;
 
     class Engine {
     public:

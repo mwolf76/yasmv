@@ -19,6 +19,7 @@ This command has two different modes of invocation:
 
 The `success` mode which executes what follows if last command was successful,
 and the `failure` mode which executes what follows if last command has failed.
+Neither branch executes when the previous result is INCONCLUSIVE.
 
 reach GOAL
 on success do dump-trace time

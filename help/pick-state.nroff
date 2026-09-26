@@ -25,6 +25,11 @@ only the number of states is calculated and no traces are recorded.
 
   -l <limit>, limits the number of enumerated solutions. Default is infinity. Affects both -a and -n.
 
+The limit must be positive. Reaching it records the final witness and reports an
+incomplete enumeration. Counts are complete only when the solver exhausts all
+states. A single picked state does not establish uniqueness. Interrupted solving
+is inconclusive, and does not establish that the model has no initial states.
+
   -c <expr>, affects the set of feasible initial states, by allowing the user to pose additional constraints.
 
 If a single feasible state is selected, the command instantiates a new witness consisting of a single state

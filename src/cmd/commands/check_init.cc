@@ -48,6 +48,7 @@ namespace cmd {
     bool CheckInit::check_requirements()
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
@@ -107,7 +108,7 @@ namespace cmd {
                     f_out
                         << "Could not decide initial states consistency check."
                         << std::endl;
-                    break;
+                    return utils::Variant(unknownMessage);
 
                 default:
                     assert(false); /* unreachable */

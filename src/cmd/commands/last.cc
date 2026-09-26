@@ -68,6 +68,9 @@ namespace cmd {
                     << std::endl;
             }
 
+            else if (value == unknownMessage) {
+                out << "Last command was INCONCLUSIVE" << std::endl;
+            }
             else {
                 assert(false); /* unexpected */
             }

@@ -304,12 +304,15 @@ namespace model {
             
             // Wait for all tasks to complete
             for (auto& future : futures) {
-                future.wait();
+                future.get();
             }
             
             // Report all errors
             for (const auto& error : errors) {
                 ERR << error << std::endl;
+            }
+            if (!errors.empty()) {
+                throw SemanticError("Inertial assignment guards must be mutually exclusive.");
             }
         }
         } // end of else block for skip_inertial_fsm_checks

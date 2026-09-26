@@ -28,6 +28,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/read_model.hh>
+#include <cmd/interpreter.hh>
 
 #include <model/model_mgr.hh>
 
@@ -73,10 +74,12 @@ namespace cmd {
     utils::Variant ReadModel::operator()()
     {
         if (!check_requirements()) {
+            f_owner.record_error();
             return utils::Variant { errMessage };
         }
 
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.begin_load();
         bool ok { true };
 
         boost::filesystem::path modelpath { f_input };
@@ -110,6 +113,9 @@ namespace cmd {
             ok = false;
         }
 
+        if (!ok) {
+            f_owner.record_error();
+        }
         return utils::Variant { ok ? okMessage : errMessage };
     }
 

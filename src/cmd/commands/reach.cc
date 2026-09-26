@@ -26,6 +26,7 @@
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/dump_trace.hh>
 #include <cmd/commands/reach.hh>
+#include <cmd/interpreter.hh>
 
 namespace cmd {
 
@@ -88,6 +89,7 @@ namespace cmd {
         }
 
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
         if (model.empty()) {
             f_out
@@ -108,6 +110,7 @@ namespace cmd {
         bool res { false };
 
         if (!check_requirements()) {
+            f_owner.record_error();
             return utils::Variant { errMessage };
         }
 
@@ -165,7 +168,7 @@ namespace cmd {
                 f_out
                     << "Reachability could not be decided."
                     << std::endl;
-                break;
+                return utils::Variant(unknownMessage);
 
             case reach::reachability_status_t::REACHABILITY_ERROR:
                 if (!om.quiet()) {
@@ -177,6 +180,7 @@ namespace cmd {
                 f_out
                     << "Unexpected error."
                     << std::endl;
+                f_owner.record_error();
                 break;
 
             default:

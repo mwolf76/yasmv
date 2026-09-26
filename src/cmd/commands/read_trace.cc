@@ -31,6 +31,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/read_trace.hh>
+#include <cmd/interpreter.hh>
 
 #include <model/model_mgr.hh>
 
@@ -95,6 +96,7 @@ namespace cmd {
     bool ReadTrace::check_requirements()
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
 
         if (!f_input) {
             WARN
@@ -120,6 +122,7 @@ namespace cmd {
     utils::Variant ReadTrace::operator()()
     {
         if (!check_requirements()) {
+            f_owner.record_error();
             return utils::Variant { errMessage };
         }
 
@@ -170,6 +173,7 @@ namespace cmd {
             ok = false;
         }
 
+        if (!ok) f_owner.record_error();
         return utils::Variant { ok ? okMessage : errMessage };
     }
 

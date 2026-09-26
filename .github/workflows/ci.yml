@@ -11,18 +11,54 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - llvm: "no"
+            sanitize: false
+          - llvm: "yes"
+            sanitize: false
+          - llvm: "no"
+            sanitize: true
 
     steps:
     - uses: actions/checkout@v4
 
     - name: install deps
-      run: sudo apt-get install -y libboost-all-dev libjsoncpp-dev antlr3 libantlr3c-dev minisat clang llvm
+      run: sudo apt-get update && sudo apt-get install -y build-essential python3 autoconf automake libtool libboost-all-dev libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev minisat clang llvm-dev
 
     - name: configure
-      run: ./setup.sh
+      run: |
+        autoreconf -vif
+        tar xfj microcode.tar.bz2
+        flags="-std=c++20 -O2 -g -Wall -Wno-deprecated-declarations -Werror"
+        if [ '${{ matrix.sanitize }}' = 'true' ]; then
+          flags="-std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+        fi
+        ./configure --enable-llvm2smv=${{ matrix.llvm }} CXXFLAGS="$flags"
 
     - name: compile
-      run: make -j $(nproc)
+      run: make -j2
 
-    - name: functional tests
+    - name: unit, short, functional, and reliability tests
+      if: ${{ !matrix.sanitize }}
       run: YASMV_HOME=$(pwd) make test
+
+    - name: sanitizer correctness regressions
+      if: ${{ matrix.sanitize }}
+      # Managers currently live until process exit; teardown is a later milestone.
+      env:
+        ASAN_OPTIONS: detect_leaks=0
+        UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      run: YASMV_HOME=$(pwd) make reliability-test
+
+    - name: record toolchain and arithmetic fragment provenance
+      if: always()
+      run: python3 tools/build-provenance.py --output /tmp/yasmv-build-provenance.json
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: provenance-llvm-${{ matrix.llvm }}-sanitize-${{ matrix.sanitize }}
+        path: /tmp/yasmv-build-provenance.json

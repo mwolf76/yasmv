@@ -422,6 +422,10 @@ namespace sat {
     {
         // Run optimization passes in sequence with timing
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
+        if (opts_mgr.cnf_variable_elimination() || opts_mgr.cnf_blocked_clause() ||
+            opts_mgr.cnf_self_subsumption()) {
+            throw std::invalid_argument("Unsupported custom CNF transformation.");
+        }
         clock_t start;
         
         if (opts_mgr.cnf_tautology_removal()) {
@@ -520,8 +524,8 @@ namespace sat {
             bool is_duplicate = false;
             
             // Check if this clause is a duplicate of the previous one
-            if (i > 0) {
-                const auto& prev = f_pending_clauses[i-1];
+            if (!result.empty()) {
+                const auto& prev = result.back();
                 const auto& curr = f_pending_clauses[i];
                 
                 if (prev.size() == curr.size()) {
@@ -563,7 +567,14 @@ namespace sat {
     
     void Engine::subsumption_elimination()
     {
-        // Clauses are already sorted by size from remove_duplicates
+        // This pass also works when duplicate removal is disabled.
+        for (auto& clause : f_pending_clauses) {
+            std::sort(clause.begin(), clause.end(), [](Lit a, Lit b) {
+                return toInt(a) < toInt(b);
+            });
+        }
+        std::stable_sort(f_pending_clauses.begin(), f_pending_clauses.end(),
+                         [](const auto& a, const auto& b) { return a.size() < b.size(); });
         std::vector<bool> subsumed(f_pending_clauses.size(), false);
         
         // For each clause, check if it's subsumed by any smaller clause

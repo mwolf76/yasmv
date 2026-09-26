@@ -36,6 +36,14 @@
 
 namespace sim {
 
+    enum class EnumerationStop { exhausted, witness, limit, unknown };
+
+    struct EnumerationResult {
+        value_t count { 0 };
+        EnumerationStop stop { EnumerationStop::unknown };
+        bool complete() const { return stop == EnumerationStop::exhausted; }
+    };
+
     typedef enum {
         SIMULATION_DONE,
         SIMULATION_DEADLOCKED,
@@ -50,7 +58,9 @@ namespace sim {
         ~Simulation();
 
         // returns the number of enumerated states
-        value_t pick_state(expr::ExprVector constraints, bool all_sat, bool count, value_t limit);
+        EnumerationResult pick_state(expr::ExprVector constraints, bool all_sat,
+                                     bool count, value_t limit,
+                                     const sat::SolveCallback& solve = {});
 
         // returns the status of the simulation
         simulation_status_t simulate(expr::ExprVector constraints, pconst_char trace_uid,

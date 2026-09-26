@@ -15,6 +15,10 @@ DESCRIPTION
 .in 3
 Reads a model from given filename.
 
+A process supports one model-load attempt. Start a new process to replace a
+model or retry a failed load. Queries require a successfully validated model.
+For a file with multiple modules, supply --root <module> on the command line.
+
 
 Reads a model from file with specified name. This is equivalent to passing a
 model on the command line. In fact, passing the name as argument is internally

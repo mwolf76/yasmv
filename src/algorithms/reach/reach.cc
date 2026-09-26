@@ -205,7 +205,11 @@ namespace reach {
         }
 
         /* join and destroy all active threads */
-        assert(0 < tasks.size());
+        if (tasks.empty()) {
+            ERR << "No compatible reachability strategy is enabled." << std::endl;
+            f_status = REACHABILITY_ERROR;
+            return;
+        }
         std::for_each(
             begin(tasks), end(tasks),
             [](algorithms::thread_ptr task) {

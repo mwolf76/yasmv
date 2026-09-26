@@ -11,6 +11,8 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
+EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
+    tools/build-provenance.py tests/test_regressions.py docs/CORRECTNESS_BASELINE.md
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
@@ -29,7 +31,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests
 nobase_dist_pkgdata_DATA = microcode/* help/*
 
 # test target helper
@@ -46,7 +48,13 @@ if ENABLE_LLVM2SMV
 	@$(MAKE) -C llvm2smv test
 endif
 
-test: short-test unit-test functional-test
+reliability-test: yasmv yasmv_reliability_tests
+	@YASMV_HOME=`pwd` python3 tests/test_regressions.py
+	@for settings in 000 001 010 011 100 101 110 111; do \
+	    YASMV_HOME=`pwd` YASMV_TEST_CNF=$$settings ./yasmv_reliability_tests --log_level=error || exit 1; \
+	done
+
+test: short-test unit-test functional-test reliability-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -136,6 +144,10 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		-lboost_unit_test_framework
 
 yasmv_tests_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
+
+yasmv_reliability_tests_SOURCES = src/parse.cc src/test/main.cc src/test/test_reliability.cc
+yasmv_reliability_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_reliability_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 
 pkgconfdir = $(libdir)/pkgconfig
 pkgconf_DATA = yasmv.pc

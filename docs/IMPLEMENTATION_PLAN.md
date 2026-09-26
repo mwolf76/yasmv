@@ -1,8 +1,10 @@
 # Implementation plan: model exploration and scenario generation
 
-Status: planned; implementation has not started.
+Status: M0 (packages 01–05) implemented and locally verified on 2026-09-26.
+M1–M4 remain planned. Current behavior and migration notes are documented in
+[CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md).
 
-Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The correctness findings still appear in the inspected source. Runtime observations below refer to the preceding architecture review; they were not rerun while preparing this plan.
+Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 
 ## 1. Intended outcome
 
@@ -283,4 +285,4 @@ Start with packages 01–05 as a reviewable correctness series. The first concre
 5. Make semantic validation fail loading and prevent queries against invalid state.
 6. Establish explicit root selection and the corrected CI baseline.
 
-M0 is complete only when those gates pass. M1 then defines the durable interfaces that the viewer, explanation engine, and scenario exporter share. No implementation changes are included in this planning document.
+M0 is complete only when those gates pass. M1 then defines the durable interfaces that the viewer, explanation engine, and scenario exporter share. Implementation status and acceptance evidence are recorded in the correctness baseline document linked above.

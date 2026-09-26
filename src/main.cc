@@ -128,6 +128,13 @@ int main(int argc, const char* argv[])
 	/* -- init managers --------------------------------------- */
 	opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
 	(void) om;
+
+        // Options must precede managers that use widths and resource paths.
+        om.parse_command_line(argc, argv);
+        if (om.help()) {
+            std::cout << om.usage() << std::endl;
+            return 0;
+        }
 	
 	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 	(void) em;
@@ -142,16 +149,6 @@ int main(int argc, const char* argv[])
 	(void) iom;
 
         
-        /* -- parse command line options ---------------------------*/
-        om.parse_command_line(argc, argv);
-        if (om.help()) {
-            std::cout
-                << om.usage()
-                << std::endl;
-
-            exit(0);
-        }
-
         if (!om.quiet()) {
             std::cout
                 << heading_msg
@@ -192,6 +189,12 @@ int main(int argc, const char* argv[])
             << e.what()
             << normal
             << std::endl;
+        return 2;
+    }
+
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 2;
     }
 
     return interpreter.retcode();
