@@ -1149,6 +1149,7 @@ workspace_command returns [cmd::Command_ptr res]
       ( 'open' path=pcchar_quoted_string
         { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.open"); w->arguments()["directory"] = path; $res = w; }
       | 'show' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.show"); }
+      | 'clear' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.clear"); }
       )
     | ('goal' {kind="goals";} | 'property' {kind="properties";} | 'watch' {kind="watches";})
       ( 'set' name=workspace_name expression=toplevel_expression
