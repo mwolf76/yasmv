@@ -1,0 +1,37 @@
+.nf
+YASMV manual                                                 goal
+
+.ti 0
+SYNOPSIS
+
+.in 3
+goal set <name> <expression>
+goal list
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Save a named Boolean target for bounded and shortest reachability searches.
+A matching saved name takes precedence when reach uses -depth.
+
+Requires a loaded model. set saves a new immutable revision; reusing a name
+replaces its expression in that revision. list displays the saved expressions.
+Names containing spaces must be quoted. Expressions use native syntax and are
+validated when used. These commands preserve the native model and trace.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> goal set duplicate DUPLICATE
+>> reach duplicate -shortest -depth 12
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help workspace, help reach.

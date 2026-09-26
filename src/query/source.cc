@@ -6,7 +6,7 @@
 #include <query/source.hh>
 #include <sstream>
 namespace source {
-    static std::string file, rev;
+    static std::string file, rev, content;
     std::vector<Constraint>& constraints()
     {
         static std::vector<Constraint> v;
@@ -44,13 +44,15 @@ namespace source {
         if (!in) throw std::invalid_argument("Cannot read model: " + path);
         std::ostringstream text;
         text << in.rdbuf();
-        rev = digest(text.str());
+        content = text.str();
+        rev = digest(content);
         query::checkpoint(query::Phase::loading);
     }
     const std::string& revision()
     {
         return rev;
     }
+    const std::string& contents() { return content; }
     const std::string& filename()
     {
         return file;

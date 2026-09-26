@@ -34,6 +34,7 @@
 #include <commands/commands.hh>
 
 #include <parse.hh>
+#include <workbench.hh>
 
 #include <utils/logging.hh>
 

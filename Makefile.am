@@ -28,9 +28,10 @@ EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional
     docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
     docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
-    docs/benchmarks/m4-sessions.json
+    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
+AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
+-I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
 -I$(top_srcdir)/src/type -I$(top_srcdir)/src/symb                   \
 -I$(top_srcdir)/src/expr/walker -I$(top_srcdir)/src/expr/printer    \
@@ -48,7 +49,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests
-nobase_dist_pkgdata_DATA = microcode/* help/*
+nobase_dist_pkgdata_DATA = microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
+    tools/workbench/static/* examples/retry-protocol/*.smv examples/retry-protocol/*.json \
+    examples/retry-protocol/runner.py examples/retry-protocol/README.md docs/formats/*.json
 
 # test target helper
 short-test: yasmv
@@ -85,7 +88,10 @@ analysis-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_analysis.py
 	@YASMV_HOME=`pwd` python3 tests/test_sessions.py
 
-test: short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
+cli-test: yasmv
+	@YASMV_HOME=`pwd` python3 tests/test_cli.py
+
+test: cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -96,7 +102,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/session.cc
+query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/session.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\

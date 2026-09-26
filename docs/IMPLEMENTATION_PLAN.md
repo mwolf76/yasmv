@@ -1,17 +1,22 @@
 # Implementation plan: model exploration and scenario generation
 
 Status: M0 (packages 01–05), M1 (packages 06–09), M2 (packages 10–12),
-M3 (packages 13–14), and M4 (packages 15–17) are implemented and locally
-verified on 2026-09-26. M4 compilation reuse uses process-owned snapshots; the
+M3 (packages 13–14), M4 (packages 15–17), and M5 (packages 18–20) are
+implemented and locally verified on 2026-09-26. M4 compilation reuse uses process-owned snapshots; the
 full in-process ownership migration remains follow-on work. Current behavior,
 API usage, migration notes, and acceptance evidence are documented in
 [CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md),
 [QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md),
 [WORKBENCH.md](WORKBENCH.md),
-[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md), and
-[STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md).
+[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md),
+[STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md), and
+[CLI_WORKBENCH.md](CLI_WORKBENCH.md).
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
+
+M5 is the CLI workbench and agent interface, prioritized after user feedback on
+the browser workflow. Arithmetic generator modernization remains separate.
+See [CLI_WORKBENCH.md](CLI_WORKBENCH.md) for the implementation contract.
 
 ## 1. Intended outcome
 
@@ -47,6 +52,7 @@ These choices let the first product use the core without making full singleton r
 | M2: first workbench | Artifact protocol, local runner, timeline, branching, protocol example | 10–12 | The complete load/search/inspect/branch workflow works without interpreting console output |
 | M3: useful developer workflow | Bounded explanations and executable scenario export | 13–14 | The protocol failure can be explained and replayed against an implementation |
 | M4: stronger analysis | Shortest witnesses, named properties, induction, process-owned compilation reuse | 15–17 | Optimality/proof claims are validated; reuse preserves results and isolates jobs |
+| M5: CLI workbench and agents | Interactive and batch commands, structured agent transport, workspace/evidence inspection | 18–20 | The retry investigation completes through the CLI; agents discover operations, use explicit revisions, retrieve evidence, and cancel isolated jobs |
 
 ```mermaid
 flowchart TD
@@ -273,6 +279,34 @@ Use measured job timings to determine the value of compilation reuse. Introduce 
 Cache keys include source/root identity, effective compilation-time environment values, relevant encoding options, generated constraints, and microcode identity. Implement transactional load in a temporary session and publish only after validation. Validate repeated load/query/destroy cycles and cross-session isolation before allowing a persistent worker to serve multiple revisions. Run targeted race checks before enabling concurrent queries in one process.
 
 **Dependencies:** stable contracts from M1, profiling from M2/M3. Process isolation remains the supported path until this gate passes.
+
+### M5 — CLI workbench and agent interface
+
+**Implemented.** The CLI guide records the native command integration and
+agent transport boundaries. Acceptance includes shared native model/trace state.
+
+**18. Shared command service and shell.** Expose the workbench through the yasmv
+grammar and interpreter, with one prompt and native ownership of model and trace
+selection. Reuse the Python artifact engine behind a private local process
+interface. Add metadata, bounded searches, continuations, explanations, proofs,
+and scenario export/replay. Replay worker traces into the native trace register.
+Preserve immutable revisions, validation gates, and ordinary native commands.
+
+**19. Agent transport and inspection.** Publish a versioned operation catalog
+with argument schemas; support JSON Lines requests, explicit revision/artifact
+IDs, compact results, paged evidence, asynchronous job submission and
+cancellation. Return resolved state symbol/type metadata from model validation.
+Keep HTTP optional and existing native interfaces available.
+
+**20. Acceptance and packaging.** Exercise the full retry investigation through
+the real executable, protocol errors and recovery, cancellation/isolation,
+failed loads, exact values, workspace persistence, native command composition, and
+installed client discovery. Package the client and scenario dependencies,
+document migration and limits, and include CLI tests in normal/sanitizer gates.
+
+**Dependencies:** M1 contracts, M2 artifact engine, M3 explanations/scenarios,
+and M4 proofs/process-owned compilation reuse. Full in-process ownership is not
+a prerequisite. M5 supersedes the proposed generator follow-up in priority.
 
 ### Follow-on work with separate gates
 

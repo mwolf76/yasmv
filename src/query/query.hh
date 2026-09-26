@@ -56,7 +56,7 @@ namespace query {
         int64_t value = 0;
         std::vector<unsigned> checked_depths;
         witness::Witness_ptr witness = nullptr;
-        Json::Value identity, trace, statistics, watches, explanation, optimality, proof;
+        Json::Value identity, trace, statistics, watches, explanation, optimality, proof, symbols;
         std::vector<source::Diagnostic> diagnostics;
         int exit_code() const;
         Json::Value json() const;
