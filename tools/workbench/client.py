@@ -29,6 +29,7 @@ def operation(name, description, properties=None, required=()):
 
 operation('capabilities', 'Discover operations, argument schemas, query contract, and exit codes.')
 operation('workspace.show', 'Show workspace path and interactive selections.')
+operation('workspace.clear', 'Delete saved workspace artifacts and selections; requires no active jobs.')
 operation('model.load', 'Save source from a local file as an immutable revision and validate it.',
           dict(file=STRING, name=STRING, root=STRING, metadata=STRING, inputs={'type': 'object'}, hard_timeout=TIMEOUT), ('file',))
 operation('model.save', 'Save a revision document and validate it.', {'document': {'type': 'object'}, 'hard_timeout': TIMEOUT}, ('document',))
@@ -58,6 +59,8 @@ operation('trace.show', 'Read a trace slice with exact values and optional chang
 operation('trace.compare', 'Compare corresponding states in two traces; revisions remain explicit.',
           dict(PAGE, trace_id=STRING, other=STRING), ('trace_id', 'other'))
 operation('trace.export', 'Write the complete native trace artifact to a local file.', {'trace_id': STRING, 'file': STRING}, ('trace_id', 'file'))
+operation('progress.show', 'Retrieve a saved progress certificate or counterexample.', {'job_id': STRING}, ('job_id',))
+operation('progress.export', 'Export a portable progress artifact from a completed job.', {'job_id': STRING, 'file': STRING}, ('job_id', 'file'))
 operation('trace.import', 'Replay a local native trace before saving it as trusted evidence.',
           dict(REV, file=STRING, hard_timeout=TIMEOUT), ('revision', 'file'))
 operation('scenario.list', 'List saved executable scenarios.', PAGE)
@@ -116,7 +119,12 @@ def exit_code(result):
 def compact(result):
     result = deepcopy(result)
     evidence = {}
-    for key in ('trace', 'explanation', 'proof', 'constraints', 'watches', 'symbols'):
+    if result.get('progress'):
+        artifact = result['progress']
+        result['progress_summary'] = {k: artifact[k] for k in ('kind', 'loop_start', 'vacuous', 'initial_satisfiable') if k in artifact}
+        result['progress_summary']['target'] = artifact['query']['target']
+        result['progress_summary']['assumptions'] = artifact['query'].get('assumptions', [])
+    for key in ('trace', 'explanation', 'proof', 'constraints', 'watches', 'symbols', 'progress'):
         value = result.pop(key, None)
         if value is not None:
             evidence[key] = True
@@ -204,6 +212,12 @@ class Client:
         e = self.engine
         if name == 'capabilities':
             return completed(capabilities())
+        if name == 'workspace.clear':
+            with e.guard:
+                e.clear()
+                self.state = {}
+                atomic(self.state_path, self.state)
+            return completed(dict(directory=str(e.directory), cleared=True, selections={}))
         if name == 'workspace.show':
             return completed(dict(directory=str(e.directory), selections=self.state))
         if name == 'model.list':
@@ -296,6 +310,15 @@ class Client:
             start, limit = args.get('offset', 0), args.get('limit', 20)
             result['watches'] = {key: values[start:start + limit] for key, values in artifact.get('watches', {}).items()}
             return completed(result)
+        if name in ('progress.show', 'progress.export'):
+            result = read(e.path('jobs', args['job_id']) / 'result.json')
+            artifact = result.get('progress')
+            if result['status'] != 'completed' or not artifact:
+                raise ValueError('This job has no verified progress artifact')
+            if name == 'progress.show':
+                return completed(artifact)
+            atomic(args['file'], artifact)
+            return completed(dict(file=str(Path(args['file']).resolve()), job_id=args['job_id']))
         if name == 'trace.import':
             return self.query(dict(revision=args['revision'], query=dict(operation='validate-trace', trace=read(args['file'])),
                                    hard_timeout=args.get('hard_timeout', 60)), emit=emit)

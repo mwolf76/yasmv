@@ -23,6 +23,13 @@ M5 is the CLI workbench and agent interface, prioritized after user feedback on
 the browser workflow. Arithmetic generator modernization remains separate.
 See [CLI_WORKBENCH.md](CLI_WORKBENCH.md) for the implementation contract.
 
+M6 adds guaranteed progress: checking whether every
+execution eventually reaches a goal, with dead-end and repeating counterexamples.
+See [the progress-checking plan](PROGRESS_CHECKING_PLAN.md) for semantics,
+implementation packages, evidence contracts, and the separate fairness follow-up.
+The core and CLI/agent workflow are implemented; browser presentation and
+fairness remain separate follow-ups. See [the user guide](PROGRESS_CHECKING.md).
+
 ## 1. Intended outcome
 
 Deliver a local workbench in which a developer can:
@@ -58,6 +65,7 @@ These choices let the first product use the core without making full singleton r
 | M3: useful developer workflow | Bounded explanations and executable scenario export | 13–14 | The protocol failure can be explained and replayed against an implementation |
 | M4: stronger analysis | Shortest witnesses, named properties, induction, process-owned compilation reuse | 15–17 | Optimality/proof claims are validated; reuse preserves results and isolates jobs |
 | M5: CLI workbench and agents | Interactive and batch commands, structured agent transport, workspace/evidence inspection | 18–20 | The retry investigation completes through the CLI; agents discover operations, use explicit revisions, retrieve evidence, and cancel isolated jobs |
+| M6: guaranteed progress | Universal eventuality, exact graph exploration, replayable loops/dead ends, verified ranking certificates, CLI/agent commands | 21–25 in the progress plan | Independent finite-graph oracle agreement, artifact replay/tampering, limits/cancellation, and CLI/agent persistence |
 
 ```mermaid
 flowchart TD

@@ -1,0 +1,10 @@
+.nf
+YASMV manual                                           check-progress
+
+check-progress EXPR [ -states N ] [ -wall-ms N ] [ -c EXPR ] [ -async ]
+
+Checks whether every execution eventually visits EXPR. Defaults: 10000 states,
+30000 ms. Also accepts -conflicts N and -propagations N. Named goals are accepted.
+No fairness is assumed. Dead ends and cycles before the goal violate progress.
+Resource exhaustion is UNKNOWN. Empty initialization is explicitly vacuous.
+Use dump-trace to inspect a failure and export-progress to save full evidence.

@@ -1039,7 +1039,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
 
     |  c=time_command_topic
        { $res = c; }
-    | keyword=('workspace' | 'goal' | 'property' | 'watch' | 'show-symbols' | 'capabilities' | 'job' | 'scenario' | 'explain-init' | 'explain-step' | 'explain-reach' | 'check-property' | 'prove-property' | 'compare-traces')
+    | keyword=('workspace' | 'goal' | 'property' | 'watch' | 'show-symbols' | 'capabilities' | 'job' | 'scenario' | 'explain-init' | 'explain-step' | 'explain-reach' | 'check-property' | 'prove-property' | 'compare-traces' | 'check-progress' | 'validate-progress' | 'export-progress')
        { $res = cm.topic_named((const char*)$keyword.text->chars); }
     |  name=pcchar_identifier
        { $res = cm.topic_named(name); }
@@ -1131,7 +1131,8 @@ workspace_count returns [Json::Int64 res]
     ;
 
 workspace_query_options[cmd::WorkspaceCommand* command]
-    : ( '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
+    : ( '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
+      | '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
       | '-wall-ms' ms=workspace_count { command->arguments()["query"]["limits"]["wall_ms"] = ms; }
       | '-conflicts' cf=workspace_count { command->arguments()["query"]["limits"]["conflicts"] = cf; }
       | '-propagations' pr=workspace_count { command->arguments()["query"]["limits"]["propagations"] = pr; }
@@ -1148,6 +1149,7 @@ workspace_command returns [cmd::Command_ptr res]
       ( 'open' path=pcchar_quoted_string
         { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.open"); w->arguments()["directory"] = path; $res = w; }
       | 'show' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.show"); }
+      | 'clear' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.clear"); }
       )
     | ('goal' {kind="goals";} | 'property' {kind="properties";} | 'watch' {kind="watches";})
       ( 'set' name=workspace_name expression=toplevel_expression
@@ -1159,6 +1161,14 @@ workspace_command returns [cmd::Command_ptr res]
     | ('check-property' {kind="check-property";} | 'prove-property' {kind="prove-property";}) name=workspace_name
       { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = kind; w->arguments()["query"]["property"] = name; $res = w; }
       workspace_query_options[w]
+    | 'check-progress' target=toplevel_expression
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "check-progress"; w->arguments()["query"]["target"] = source::print(target); w->arguments()["query"]["limits"]["states"] = 10000; w->arguments()["query"]["limits"]["wall_ms"] = 30000; $res = w; }
+      workspace_query_options[w]
+    | 'validate-progress' path=pcchar_quoted_string
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "validate-progress"; w->arguments()["query"]["progress"] = cmd::read_progress_file(path); w->arguments()["query"]["limits"]["states"] = 10000; w->arguments()["query"]["limits"]["wall_ms"] = 30000; $res = w; }
+      workspace_query_options[w]
+    | 'export-progress' path=pcchar_quoted_string
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "progress.export"); w->arguments()["file"] = path; $res = w; }
     | 'explain-init'
       { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "explain-init"; $res = w; }
       workspace_query_options[w]

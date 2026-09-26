@@ -22,6 +22,7 @@
       "enum": [
         "capabilities",
         "workspace.show",
+        "workspace.clear",
         "model.load",
         "model.save",
         "model.list",
@@ -42,6 +43,8 @@
         "trace.show",
         "trace.compare",
         "trace.export",
+        "progress.show",
+        "progress.export",
         "trace.import",
         "scenario.list",
         "scenario.show",
@@ -78,6 +81,25 @@
         "properties": {
           "operation": {
             "const": "workspace.show"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "workspace.clear"
           }
         }
       },
@@ -756,6 +778,63 @@
             },
             "required": [
               "trace_id",
+              "file"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "progress.show"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "properties": {
+              "job_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "job_id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "progress.export"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "properties": {
+              "job_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "job_id",
               "file"
             ],
             "additionalProperties": false

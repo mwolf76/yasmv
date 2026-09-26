@@ -11,7 +11,10 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
+EXTRA_DIST = tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
+    examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
+    docs/formats/progress-counterexample-v1.schema.json docs/formats/progress-proof-v1.schema.json \
+    tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
     tools/build-provenance.py tests/test_regressions.py docs/CORRECTNESS_BASELINE.md \
     src/query/query.hh src/query/runtime.hh src/query/source.hh src/query/trace.hh src/query/expressions.hh \
     tools/run-query.py tests/test_query.py tests/models/query.smv \
@@ -49,7 +52,7 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests
-nobase_dist_pkgdata_DATA = microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
+nobase_dist_pkgdata_DATA = docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json examples/progress/*.smv examples/progress/README.md microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
     tools/workbench/static/* examples/retry-protocol/*.smv examples/retry-protocol/*.json \
     examples/retry-protocol/runner.py examples/retry-protocol/README.md docs/formats/*.json
 
@@ -91,7 +94,10 @@ analysis-test: yasmv
 cli-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_cli.py
 
-test: cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
+progress-test: yasmv
+	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
+
+test: progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -102,7 +108,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/session.cc
+query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/progress.cc src/query/session.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
