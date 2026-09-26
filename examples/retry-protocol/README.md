@@ -74,4 +74,23 @@ with this oracle and retain the expected graph sizes and shortest failure path.
   senders, timers, and real network delivery are outside this tiny model. They
   are natural future variants, with explicit bounds and persistence assumptions.
 
-General trace-to-executable-scenario export and adapter execution remain M3.
+## Explain and replay the failure (M3)
+
+With the original trace selected, select step 0 and constrain the continuation
+with `action = ACK`. **Explain next step** reports a conflicting subset against
+the pinned SEND state. Return to the original trace, export an executable
+scenario, and replay it against both receivers. The faulty receiver matches all
+observations and executes twice; the deduplicating receiver first differs after
+the final DELIVER (state 5), with one execution instead of two.
+
+Download the scenario and run without the browser or server:
+
+```sh
+python3 -m tools.scenario replay scenario.json --implementation faulty
+python3 -m tools.scenario replay scenario.json --implementation deduplicating
+```
+
+Implementation replay is distinct from checker validation. The adapter drives
+the independent state machine described above; it does not reinterpret the SMV
+model. See [the M3 guide](../../docs/EXPLANATIONS_AND_SCENARIOS.md) for standalone
+export, explicit mappings, result semantics, and the full acceptance workflow.
