@@ -2,6 +2,7 @@
 #define YASMV_TRACE_V1_HH
 #include <query/query.hh>
 namespace query::trace {
+    Json::Value evaluate_watches(witness::Witness&, const std::map<std::string, expr::Expr_ptr>&);
     void allocate_state(sat::Engine&, unsigned);
     witness::Witness_ptr decode(sat::Engine&, unsigned);
     Json::Value export_trace(witness::Witness&, const QuerySpec&, const Json::Value&);

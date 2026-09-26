@@ -61,6 +61,7 @@ namespace query {
         v["strategy"] = strategy;
         v["proof_method"] = proof_method;
         v["statistics"] = statistics;
+        v["watches"] = watches;
         v["trace"] = trace;
         v["checked_depths"] = Json::arrayValue;
         for (auto d : checked_depths)
@@ -206,7 +207,8 @@ namespace query {
         for (auto e : spec.assumptions)
             if (!state_expression(e)) throw std::invalid_argument("Continuation requires state assumptions");
         if (spec.until && !state_expression(spec.until)) throw std::invalid_argument("Continuation requires a state until condition");
-        const unsigned prefix = checked.witness->size();
+        if (spec.prefix_length > int64_t(checked.witness->size())) throw std::invalid_argument("Prefix exceeds parent trace");
+        const unsigned prefix = spec.prefix_length < 0 ? checked.witness->size() : spec.prefix_length;
         const unsigned count = spec.limits.depth < 0 ? 1 : spec.limits.depth;
         if (count == 0 || uint64_t(prefix) + count >= UINT_MAX) throw std::invalid_argument("Invalid continuation depth");
         algorithms::Algorithm a(model::ModelMgr::INSTANCE().model());
@@ -226,6 +228,9 @@ namespace query {
         r.strategy = "forward";
         r.outcome = Outcome::simulated;
         Json::Value evidence = parent;
+        evidence["steps"].resize(prefix);
+        evidence["origin"]["direction"] = "forward";
+        evidence["origin"]["initial_time"] = 0;
         for (unsigned i = 0; i < count; ++i) {
             const unsigned group = engine.new_group();
             for (auto& u : assumptions)
@@ -285,6 +290,9 @@ namespace query {
             const auto& l = context.limits;
             if (l.depth != spec.limits.depth || l.states != spec.limits.states || l.wall_ms != spec.limits.wall_ms || l.conflicts != spec.limits.conflicts || l.propagations != spec.limits.propagations)
                 throw std::invalid_argument("QueryContext limits must match QuerySpec limits");
+            if (spec.prefix_length != -1 && (spec.operation != Operation::simulate || spec.prefix_length <= 0)) throw std::invalid_argument("Prefix length applies only to continuation");
+            for (const auto& [name, e] : spec.watches)
+                if (name.empty() || !state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Watches require named Boolean state expressions");
             if (spec.operation != Operation::reach && spec.strategy != "auto") throw std::invalid_argument("Strategy selection applies only to reachability");
             if (spec.target && (spec.operation != Operation::reach || !state_expression(spec.target))) throw std::invalid_argument("Reachability target must be a state expression");
             if (spec.until && spec.operation != Operation::simulate) throw std::invalid_argument("Until condition applies only to simulation");
@@ -293,7 +301,7 @@ namespace query {
                 for (auto e : spec.assumptions)
                     if (!state_expression(e)) throw std::invalid_argument("This operation requires state assumptions");
             if (spec.limits.states >= 0 && spec.operation != Operation::pick_state) throw std::invalid_argument("State limit applies only to pick-state");
-            if (spec.limits.depth >= 0 && (spec.operation == Operation::check_init || spec.operation == Operation::pick_state || spec.operation == Operation::validate_trace)) throw std::invalid_argument("Depth limit is unsupported for this operation");
+            if (spec.limits.depth >= 0 && (spec.operation == Operation::check_init || spec.operation == Operation::pick_state || spec.operation == Operation::validate_trace || spec.operation == Operation::validate_model)) throw std::invalid_argument("Depth limit is unsupported for this operation");
             if (spec.operation == Operation::reach)
                 for (auto e : spec.assumptions)
                     if (!state_expression(e, spec.limits.depth < 0)) throw std::invalid_argument("Incompatible timed assumption");
@@ -302,7 +310,13 @@ namespace query {
             r.identity = identity();
             if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward") throw std::invalid_argument("Unknown or empty strategy configuration");
             if (spec.operation == Operation::reach && !spec.target) throw std::invalid_argument("Reachability requires a target");
-            if (spec.operation == Operation::check_init) {
+            if (spec.operation == Operation::validate_model) {
+                if (!spec.assumptions.empty()) throw std::invalid_argument("Model validation does not accept assumptions");
+                r.status = ExecutionStatus::completed;
+                r.outcome = Outcome::valid;
+                r.scope = "model";
+                r.complete = true;
+            } else if (spec.operation == Operation::check_init) {
                 fsm::CheckInitConsistency a(mm.model());
                 a.process(spec.assumptions);
                 if (a.status() != fsm::FSM_CONSISTENCY_UNDECIDED) {
@@ -381,6 +395,8 @@ namespace query {
                 r.trace = trace::export_trace(*r.witness, evidence_spec, r.identity);
                 r.witness->artifact = r.trace;
             }
+            if (r.witness && r.status == ExecutionStatus::completed && !spec.watches.empty())
+                r.watches = trace::evaluate_watches(*r.witness, spec.watches);
             if (context.stop != StopReason::none) throw Cancelled();
             if (r.witness && r.status == ExecutionStatus::completed &&
                 (spec.operation == Operation::simulate || (spec.operation == Operation::reach && spec.limits.depth >= 0))) {

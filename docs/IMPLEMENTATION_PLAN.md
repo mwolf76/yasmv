@@ -1,10 +1,11 @@
 # Implementation plan: model exploration and scenario generation
 
-Status: M0 (packages 01–05) and M1 (packages 06–09) are implemented and locally
-verified on 2026-09-26. M2–M4 remain planned. Current behavior, API usage, migration
+Status: M0 (packages 01–05), M1 (packages 06–09), and M2 (packages 10–12)
+are implemented and locally verified on 2026-09-26. M3–M4 remain planned. Current behavior, API usage, migration
 notes, and acceptance evidence are documented in
-[CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md) and
-[QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md).
+[CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md),
+[QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md), and
+[WORKBENCH.md](WORKBENCH.md).
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 

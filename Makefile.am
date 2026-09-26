@@ -16,7 +16,14 @@ EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional
     src/query/query.hh src/query/runtime.hh src/query/source.hh src/query/trace.hh src/query/expressions.hh \
     tools/run-query.py tests/test_query.py tests/models/query.smv \
     docs/QUERY_AND_TRACE_CONTRACTS.md \
-    docs/formats/query-v1.schema.json docs/formats/trace-v1.schema.json
+    docs/formats/query-v1.schema.json docs/formats/trace-v1.schema.json \
+    docs/WORKBENCH.md docs/formats/workbench-v1.schema.json docs/formats/scenario-v1.schema.json \
+    tools/workbench/__init__.py tools/workbench/__main__.py tools/workbench/protocol.py \
+    tools/workbench/engine.py tools/workbench/server.py tools/workbench/static/index.html \
+    tools/workbench/static/style.css tools/workbench/static/app.js \
+    examples/retry-protocol/README.md examples/retry-protocol/faulty.smv \
+    examples/retry-protocol/deduplicating.smv examples/retry-protocol/scenario.json \
+    examples/retry-protocol/runner.py tests/test_workbench.py tests/workbench-browser.cjs
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
@@ -62,7 +69,10 @@ query-test: yasmv yasmv_query_tests
 	@YASMV_HOME=`pwd` ./yasmv_query_tests --log_level=error
 	@YASMV_HOME=`pwd` python3 tests/test_query.py
 
-test: short-test unit-test functional-test reliability-test query-test
+workbench-test: yasmv
+	@YASMV_HOME=`pwd` python3 tests/test_workbench.py
+
+test: short-test unit-test functional-test reliability-test query-test workbench-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode

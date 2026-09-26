@@ -118,6 +118,23 @@ to solve planning problems.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 
+## LOCAL MODEL WORKBENCH
+
+After building the checker and extracting microcode, run:
+
+```sh
+python3 -m tools.workbench serve
+```
+
+Open the printed loopback URL to validate models, search named goals within
+explicit bounds, inspect replay-validated traces, and branch from selected
+states. The included retry protocol demonstrates duplicate execution and a
+receiver fix. Runtime requires only Python 3.10+ and a modern browser.
+
+See [the workbench guide](docs/WORKBENCH.md),
+[the protocol example](examples/retry-protocol/README.md), and
+[the implementation plan](docs/IMPLEMENTATION_PLAN.md).
+
 ## DISCLAIMER
 
 This code is distributed in the hope that it will be useful, but WITHOUT ANY

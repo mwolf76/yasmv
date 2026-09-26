@@ -37,3 +37,6 @@ microcode/
 
 yasmv_query_tests
 !docs/formats/*.json
+
+.yasmv-workbench/
+!examples/retry-protocol/scenario.json
