@@ -28,6 +28,7 @@ namespace source {
     void begin(const std::string& path);
     const std::string& revision();
     const std::string& filename();
+    const std::string& contents();
     void record(expr::Expr_ptr module, const std::string& kind, expr::Expr_ptr expression);
     void locate(expr::Expr_ptr module, const std::string& kind, expr::Expr_ptr expression, unsigned line, unsigned column, unsigned end_line, unsigned end_column);
     void generated(expr::Expr_ptr expression, expr::Expr_ptr variable, const std::vector<expr::Expr_ptr>& guards);

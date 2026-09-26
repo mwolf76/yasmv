@@ -1,0 +1,50 @@
+.nf
+YASMV manual                                                 job
+
+.ti 0
+SYNOPSIS
+
+.in 3
+job list
+job show [<id>] [-full]
+job wait [<id>]
+job cancel [<id>]
+job events [<id>]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Inspect and control analysis jobs in the current workspace. Omitting the ID
+uses the last selected job. Quote IDs that are not native identifiers.
+
+list displays job summaries. show displays a job's request and summary;
+-full includes complete result evidence. events displays a page of recorded
+progress events. The agent protocol supports explicit event pagination.
+
+wait waits for completion and imports a returned trace into the native trace
+register after replay. show does not change the current native trace.
+cancel requests cancellation of an active job. Queries with -async return
+immediately so that these commands can be used while the job runs.
+
+Ctrl-C cancels a waiting job. Closing the shell cancels outstanding jobs and
+reaps workers. Isolated jobs have a default hard deadline of 60 seconds;
+agent requests can set hard_timeout explicitly.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> reach FALSE -depth 10000 -async
+>> job show
+>> job cancel
+>> job wait
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help workspace, help reach, help check-property, help prove-property.

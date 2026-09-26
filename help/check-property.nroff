@@ -1,0 +1,40 @@
+.nf
+YASMV manual                                                 check-property
+
+.ti 0
+SYNOPSIS
+
+.in 3
+check-property <name> -depth <N> [options]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Search for a counterexample to a saved safety property through depth N
+(0 to 10000 transitions). Requires a loaded model and a property saved with
+property set. A counterexample is replayed and selected in the native trace
+register. A property that holds through this bound is not an unbounded proof.
+
+-c <expression> adds an assumption (repeatable). -wall-ms <N> limits computation
+time; -conflicts <N> and -propagations <N> limit solver work. -async submits a
+background job. Use job wait to retrieve its result or job cancel to cancel it.
+Ctrl-C cancels a waiting job. job show -full displays complete evidence.
+Shell options use one dash; -- starts an SMV comment.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> property set once !DUPLICATE
+>> check-property once -depth 12
+>> dump-trace
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help property, help prove-property, help job, help dump-trace.

@@ -5,7 +5,8 @@ YASMV manual                                                 reach
 SYNOPSIS
 
 .in 3
-reach [ -c <timed-constraint> | -t  <trace-witness-id> ]* <formula>
+reach <formula> [ -c <timed-constraint> ]* [ -q ]
+reach <formula-or-goal> -depth <N> [ -shortest ] [ -async ] [ -wall-ms <N> ]
 
 .ti 0
 DESCRIPTION
@@ -60,6 +61,14 @@ command line is currently not supported.
 If one or more traces are specified using the -t option, they will all
 be implicitly appropriately converted into timed constraints and
 applied.
+
+.ti 0
+BOUNDED AND SHORTEST SEARCH
+
+-depth N runs a supervised bounded search. -shortest checks depths in order
+and returns a shortest witness. -async submits a job; job wait selects its
+result. The result is replayed into the native trace register. Saved goal names
+are supported on this path. -wall-ms limits worker computation. See help workspace and help job.
 
 .ti 0
 EXAMPLES

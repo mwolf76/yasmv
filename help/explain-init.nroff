@@ -1,0 +1,41 @@
+.nf
+YASMV manual                                                 explain-init
+
+.ti 0
+SYNOPSIS
+
+.in 3
+explain-init [-c <expression>] [-minimize] [options]
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Explain why the loaded model's initial-state constraints and supplied
+assumptions are inconsistent. No trace is required.
+
+-minimize requests minimization of the inconsistent constraint set. Evidence
+records whether minimization completed. Satisfiable requests have no
+inconsistency to explain.
+
+-c <expression> adds an assumption (repeatable). -wall-ms <N> limits computation
+time; -conflicts <N> and -propagations <N> limit solver work. -async submits a
+background job. Use job wait to retrieve its result or job cancel to cancel it.
+Ctrl-C cancels a waiting job. job show -full displays complete evidence.
+Shell options use one dash; -- starts an SMV comment.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> explain-init -c FALSE -minimize
+>> job show -full
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help job, help reach, help simulate, help workspace.

@@ -1,0 +1,32 @@
+.nf
+YASMV manual                                                 show-symbols
+
+.ti 0
+SYNOPSIS
+
+.in 3
+show-symbols
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Inspect the loaded model's resolved state symbols, exact types, and input and
+frozen flags. Validation does not require a feasible initial state, so this
+command also works for models with contradictory INIT constraints.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> read-model "tests/models/query.smv"
+>> show-symbols
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help read-model, help set, help check-init, help workspace.

@@ -45,6 +45,8 @@ namespace cmd {
 	/* quiet mode */
 	void go_quiet();
 
+        Json::Value extended_options { Json::objectValue };
+
         /* run() */
         utils::Variant operator()() override;
 

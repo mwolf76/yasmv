@@ -1,4 +1,5 @@
 #include <query/query.hh>
+#include <workbench.hh>
 /*
  * @file reach.cc
  * @brief Command `reach` class implementation.
@@ -112,6 +113,20 @@ namespace cmd {
         if (!check_requirements()) {
             f_owner.record_error();
             return utils::Variant { errMessage };
+        }
+
+        if (!extended_options.empty()) {
+            WorkspaceCommand command(f_owner, "query.run");
+            auto& q = command.arguments()["query"];
+            q = extended_options;
+            if (q.isMember("background")) {
+                command.arguments()["background"] = q["background"];
+                q.removeMember("background");
+            }
+            if (!q.isMember("operation")) q["operation"] = "reach";
+            q["target"] = source::print(f_target);
+            for (auto expression : f_constraints) q["assumptions"].append(source::print(expression));
+            return command();
         }
 
         query::QuerySpec spec;

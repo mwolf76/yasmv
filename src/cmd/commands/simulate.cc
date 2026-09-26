@@ -1,4 +1,5 @@
 #include <query/query.hh>
+#include <workbench.hh>
 /*
  * @file simulate.cc
  * @brief Command `simulate` class implementation.
@@ -68,6 +69,17 @@ namespace cmd {
     utils::Variant Simulate::operator()()
     {
         const opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
+        if (!extended_options.empty()) {
+            WorkspaceCommand command(f_owner, "query.run");
+            auto& q = command.arguments()["query"];
+            q = extended_options;
+            q["operation"] = "simulate";
+            if (!q["limits"].isMember("depth")) q["limits"]["depth"] = f_k;
+            if (f_trace_uid) command.arguments()["native_trace"] = f_trace_uid;
+            if (f_until_condition) q["until"] = source::print(f_until_condition);
+            for (auto expression : f_constraints) q["assumptions"].append(source::print(expression));
+            return command();
+        }
         query::QuerySpec spec;
         spec.operation = query::Operation::simulate; spec.assumptions = f_constraints;
         spec.trace_id = f_trace_uid ? f_trace_uid : ""; spec.until = f_until_condition; spec.limits.depth = f_k;

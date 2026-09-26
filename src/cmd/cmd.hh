@@ -183,6 +183,7 @@ namespace cmd {
 
         // -- topics ----------------------------------------------------------------
         CommandTopics topics() const;
+        CommandTopic_ptr topic_named(const std::string& name);
 
         inline CommandTopic_ptr topic_help()
         {

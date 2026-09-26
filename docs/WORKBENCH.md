@@ -1,4 +1,7 @@
-# Local model workbench (M2–M4)
+# Local model workbench (M2–M5)
+
+Exploration commands are integrated into the native `yasmv` shell, with a
+structured agent transport available through `yasmv --agent`. See [the CLI guide](CLI_WORKBENCH.md).
 
 M2 implemented work packages 10–12: an artifact runner, a browser workbench, and
 a retry-protocol demonstration. The server and CLI use Python 3.10+ standard

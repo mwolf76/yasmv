@@ -37,6 +37,7 @@ namespace cmd {
         explicit Simulate(Interpreter& owner);
         ~Simulate() override;
 
+        Json::Value extended_options { Json::objectValue };
         utils::Variant operator()() override;
 
         void add_constraint(expr::Expr_ptr constraint);

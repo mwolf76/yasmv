@@ -28,6 +28,7 @@ options {
 
   /* cmd subsystem */
   #include <cmd/cmd.hh>
+  #include <workbench.hh>
   #include <query/source.hh>
 
   #include <expr/expr.hh>
@@ -735,8 +736,8 @@ expressions [expr::ExprVector* exprs]
 
 identifier returns [expr::Expr_ptr res]
 @init { $res = nullptr; }
-    : IDENTIFIER
-      { $res = em.make_identifier((const char*)($IDENTIFIER.text->chars)); }
+    : n=pcchar_identifier
+      { $res = em.make_identifier(n); }
     ;
 
 forward_instant returns [expr::Expr_ptr res]
@@ -1038,11 +1039,18 @@ command_topic returns [cmd::CommandTopic_ptr res]
 
     |  c=time_command_topic
        { $res = c; }
+    | keyword=('workspace' | 'goal' | 'property' | 'watch' | 'show-symbols' | 'capabilities' | 'job' | 'scenario' | 'explain-init' | 'explain-step' | 'explain-reach' | 'check-property' | 'prove-property' | 'compare-traces')
+       { $res = cm.topic_named((const char*)$keyword.text->chars); }
+    |  name=pcchar_identifier
+       { $res = cm.topic_named(name); }
     ;
 
 command returns [cmd::Command_ptr res]
 @init { $res = nullptr; }
-    :  c=check_init_command
+    :  c=workspace_command
+       { $res = c; }
+
+    |  c=check_init_command
        { $res = c; }
 
     |  c=check_trans_command
@@ -1110,6 +1118,75 @@ command returns [cmd::Command_ptr res]
 
     |  c=time_command
        { $res = c; }
+    ;
+
+workspace_name returns [std::string res]
+    : n=pcchar_identifier { $res = n; }
+    | q=pcchar_quoted_string { $res = q; }
+    ;
+
+workspace_count returns [Json::Int64 res]
+@init { $res = 0; }
+    : n=DECIMAL_LITERAL { $res = std::stoll((const char*)$n.text->chars); }
+    ;
+
+workspace_query_options[cmd::WorkspaceCommand* command]
+    : ( '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
+      | '-wall-ms' ms=workspace_count { command->arguments()["query"]["limits"]["wall_ms"] = ms; }
+      | '-conflicts' cf=workspace_count { command->arguments()["query"]["limits"]["conflicts"] = cf; }
+      | '-propagations' pr=workspace_count { command->arguments()["query"]["limits"]["propagations"] = pr; }
+      | '-c' e=toplevel_expression { command->arguments()["query"]["assumptions"].append(source::print(e)); }
+      | '-at' at=workspace_count { if (at == INT64_MAX) { throw std::invalid_argument("Trace index is too large"); } command->arguments()["query"]["prefix_length"] = at + 1; }
+      | '-minimize' { command->arguments()["query"]["explanation"]["minimize"] = true; }
+      | '-async' { command->arguments()["background"] = true; }
+      )*
+    ;
+
+workspace_command returns [cmd::Command_ptr res]
+@init { $res = nullptr; cmd::WorkspaceCommand* w = nullptr; std::string kind; }
+    : 'workspace'
+      ( 'open' path=pcchar_quoted_string
+        { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.open"); w->arguments()["directory"] = path; $res = w; }
+      | 'show' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "workspace.show"); }
+      )
+    | ('goal' {kind="goals";} | 'property' {kind="properties";} | 'watch' {kind="watches";})
+      ( 'set' name=workspace_name expression=toplevel_expression
+        { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "metadata.set"); w->arguments()["kind"] = kind; w->arguments()["name"] = name; w->arguments()["expression"] = source::print(expression); $res = w; }
+      | 'list' { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "metadata.list"); w->arguments()["kind"] = kind; $res = w; }
+      )
+    | 'show-symbols' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "model.symbols"); }
+    | 'capabilities' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "capabilities"); }
+    | ('check-property' {kind="check-property";} | 'prove-property' {kind="prove-property";}) name=workspace_name
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = kind; w->arguments()["query"]["property"] = name; $res = w; }
+      workspace_query_options[w]
+    | 'explain-init'
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "explain-init"; $res = w; }
+      workspace_query_options[w]
+    | 'explain-step'
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "explain-step"; $res = w; }
+      workspace_query_options[w]
+    | 'explain-reach' target=toplevel_expression
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "explain-reach"; w->arguments()["query"]["target"] = source::print(target); $res = w; }
+      workspace_query_options[w]
+    | 'job'
+      ( 'list' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "job.list"); }
+      | ('show' {kind="job.show";} | 'wait' {kind="job.wait";} | 'cancel' {kind="job.cancel";} | 'events' {kind="job.events";})
+        { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), kind); $res = w; }
+        (id=workspace_name {w->arguments()["job_id"]=id;})?
+        ('-full' {w->arguments()["full"]=true;})?
+      )
+    | 'scenario'
+      ( 'configure' path=pcchar_quoted_string { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "scenario.configure"); w->arguments()["file"] = path; $res = w; }
+      | 'list' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "scenario.list"); }
+      | 'show' { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "scenario.show"); $res = w; }
+        (id=workspace_name {w->arguments()["scenario_id"]=id;})?
+      | 'export' { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "scenario.export"); $res = w; }
+        ('-o' path=pcchar_quoted_string {w->arguments()["file"]=path;})?
+      | 'replay' implementation=workspace_name { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "scenario.replay"); w->arguments()["implementation"] = implementation; $res = w; }
+        (id=workspace_name {w->arguments()["scenario_id"]=id;})?
+      )
+    | 'compare-traces' left=workspace_name right=workspace_name
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "trace.compare"); w->arguments()["trace_id"] = left; w->arguments()["other"] = right; $res = w; }
     ;
 
 help_command returns [cmd::Command_ptr res]
@@ -1293,12 +1370,12 @@ reach_command returns[cmd::Command_ptr res]
         target=toplevel_expression
         { ((cmd::Reach_ptr) $res)->set_target(target); }
 
-        ( '-q'
-            { ((cmd::Reach_ptr) $res)->go_quiet(); }
-        )*
-
-        ( '-c' constraint=toplevel_expression
-          { ((cmd::Reach_ptr) $res)->add_constraint(constraint); }
+        ( '-q' { ((cmd::Reach_ptr) $res)->go_quiet(); }
+        | '-c' constraint=toplevel_expression { ((cmd::Reach_ptr) $res)->add_constraint(constraint); }
+        | '-depth' depth=workspace_count { ((cmd::Reach_ptr) $res)->extended_options["limits"]["depth"] = depth; }
+        | '-shortest' { ((cmd::Reach_ptr) $res)->extended_options["operation"] = "shortest-reach"; }
+        | '-async' { ((cmd::Reach_ptr) $res)->extended_options["background"] = true; }
+        | '-wall-ms' wall=workspace_count { ((cmd::Reach_ptr) $res)->extended_options["limits"]["wall_ms"] = wall; }
         )*
     ;
 
@@ -1440,6 +1517,8 @@ simulate_command returns [cmd::Command_ptr res]
 
     |   '-t' trace_id=pcchar_identifier
         { ((cmd::Simulate_ptr) $res)->set_trace_uid(trace_id); }
+    | '-depth' depth=workspace_count { ((cmd::Simulate_ptr)$res)->extended_options["limits"]["depth"] = depth; }
+    | '-at' at=workspace_count { if (at == INT64_MAX) { throw std::invalid_argument("Trace index is too large"); } ((cmd::Simulate_ptr)$res)->extended_options["prefix_length"] = at + 1; }
     )* ;
 
 simulate_command_topic returns [cmd::CommandTopic_ptr res]
@@ -1509,6 +1588,22 @@ pcchar_identifier returns [pconst_char res]
 @init { $res = nullptr; }
     : IDENTIFIER
       { $res = (pconst_char) $IDENTIFIER.text->chars; }
+    | 'workspace' { $res = "workspace"; }
+    | 'open' { $res = "open"; }
+    | 'show' { $res = "show"; }
+    | 'goal' { $res = "goal"; }
+    | 'property' { $res = "property"; }
+    | 'watch' { $res = "watch"; }
+    | 'list' { $res = "list"; }
+    | 'capabilities' { $res = "capabilities"; }
+    | 'job' { $res = "job"; }
+    | 'wait' { $res = "wait"; }
+    | 'cancel' { $res = "cancel"; }
+    | 'events' { $res = "events"; }
+    | 'scenario' { $res = "scenario"; }
+    | 'configure' { $res = "configure"; }
+    | 'export' { $res = "export"; }
+    | 'replay' { $res = "replay"; }
     ;
 
 pcchar_quoted_string returns [pconst_char res]

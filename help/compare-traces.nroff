@@ -1,0 +1,35 @@
+.nf
+YASMV manual                                                 compare-traces
+
+.ti 0
+SYNOPSIS
+
+.in 3
+compare-traces <trace> <other-trace>
+
+.ti 0
+DESCRIPTION
+
+.fi
+.in 3
+Compare corresponding states of two traces. Arguments may be native trace
+names or quoted durable artifact IDs. Requires a loaded model; both artifacts
+are replayed in the current model before comparison.
+
+The result includes revision IDs and a page of differing states. Use the
+agent trace.compare operation for explicit pagination. Native trace selection
+is preserved.
+
+.ti 0
+EXAMPLES
+
+.nf
+.in 3
+>> compare-traces workspace_1 workspace_2
+
+.ti 0
+SEE ALSO
+
+.fi
+.in 3
+help list-traces, help select-trace, help dump-trace, help capabilities.

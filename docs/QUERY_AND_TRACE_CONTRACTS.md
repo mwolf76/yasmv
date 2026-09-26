@@ -284,3 +284,12 @@ evidence and named safety checks. Bounded reachable results now include an
 resolved safety properties and verifies the final violation. Existing version 1
 requests and traces remain valid. See [STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md)
 for result scope, assumption semantics, optional compiled sessions, and limits.
+
+## CLI model inspection (M5)
+
+Successful `validate-model` results additionally contain `symbols`, using the
+same name-to-type/frozen/input descriptors as trace v1. This catalog describes
+resolved state variables and is available even when INIT is contradictory;
+validation does not require an initial witness. The CLI and agent workflow is
+documented in [CLI_WORKBENCH.md](CLI_WORKBENCH.md). Existing native request
+formats and trace serialization are unchanged.

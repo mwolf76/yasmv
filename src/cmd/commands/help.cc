@@ -154,8 +154,9 @@ namespace cmd {
         }
     }
 
-    HelpTopic::HelpTopic(Interpreter& owner)
+    HelpTopic::HelpTopic(Interpreter& owner, const std::string& name)
         : CommandTopic(owner)
+        , f_name(name)
     {}
 
     HelpTopic::~HelpTopic()
@@ -167,7 +168,7 @@ namespace cmd {
 
     void HelpTopic::usage()
     {
-        display_manpage("help");
+        display_manpage(f_name.c_str());
     }
 
 } // namespace cmd

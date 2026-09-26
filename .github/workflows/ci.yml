@@ -51,7 +51,7 @@ jobs:
       env:
         ASAN_OPTIONS: detect_leaks=0
         UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test developer-workflow-test analysis-test
+      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test developer-workflow-test analysis-test cli-test
 
     - name: set up browser test runtime
       if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}

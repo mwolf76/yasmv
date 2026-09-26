@@ -43,6 +43,7 @@
  **/
 
 #include <cmd/cmd.hh>
+#include <workbench.hh>
 
 #include <expr/expr.hh>
 #include <expr/printer/printer.hh>
@@ -94,6 +95,11 @@ void batch(cmd::Command_ptr cmd)
 
 int main(int argc, const char* argv[])
 {
+    if (argc > 1 && (std::string(argv[1]) == "--agent" || std::string(argv[1]) == "--capabilities")) {
+        std::vector<std::string> arguments(argv + 2, argv + argc);
+        arguments.push_back(std::string(argv[1]) == "--agent" ? "agent" : "capabilities");
+        return cmd::workbench(arguments, true);
+    }
     cmd::Interpreter& interpreter(cmd::Interpreter::INSTANCE());
 
     /* you may also prefer sigaction() instead of signal() */
@@ -176,6 +182,7 @@ int main(int argc, const char* argv[])
         return 2;
     }
 
+    cmd::close_workspace();
     return interpreter.retcode();
 }
 
