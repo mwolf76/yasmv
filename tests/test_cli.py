@@ -18,7 +18,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.workbench.client import OPERATIONS, capabilities
+from tools.workbench.client import Client, OPERATIONS, capabilities
+from tools.workbench.engine import Engine
 
 
 class CLITests(unittest.TestCase):
@@ -156,6 +157,134 @@ list-traces
         self.assertIn('target = x', text)
         self.assertIn('Shortest witness: 1 transitions', text)
         self.assertIn('[*] workspace_1', text)
+
+    def test_workspace_clear_deletes_only_owned_artifacts_and_retains_lock(self):
+        outside = Path(self.temp.name) / 'outside'
+        outside.mkdir()
+        (outside / 'keep.txt').write_text('keep')
+        with self.subTest('clear artifacts and selections'):
+            client = Client(self.store)
+            try:
+                revision = client.engine.save_revision(dict(source='MODULE main\nVAR x:boolean;\n'))
+                client.select(revision=revision['id'], job_id='old-job', trace_id='old-trace', scenario_id='old-scenario')
+                for kind in ('jobs', 'traces', 'scenarios'):
+                    (self.store / kind / 'old-artifact').write_text('owned artifact')
+                (self.store / 'jobs' / 'external-link').symlink_to(outside, target_is_directory=True)
+                (self.store / 'notes.txt').write_text('personal notes')
+                client.engine.expected_identities[revision['id']] = {'old': True}
+                inode = (self.store / 'owner.lock').stat().st_ino
+                result = client.dispatch('workspace.clear', {})
+                self.assertTrue(result['data']['cleared'])
+                self.assertEqual(client.state, {})
+                self.assertEqual(client.engine.expected_identities, {})
+                self.assertEqual(json.loads((self.store / 'cli-state.json').read_text()), {})
+                for kind in ('revisions', 'jobs', 'traces', 'scenarios'):
+                    self.assertEqual(list((self.store / kind).iterdir()), [])
+                self.assertEqual((outside / 'keep.txt').read_text(), 'keep')
+                self.assertEqual((self.store / 'notes.txt').read_text(), 'personal notes')
+                self.assertEqual((self.store / 'owner.lock').stat().st_ino, inode)
+                with self.assertRaisesRegex(ValueError, 'already open'):
+                    Engine(self.store)
+                self.assertTrue(client.dispatch('workspace.clear', {})['data']['cleared'])
+            finally:
+                client.close()
+        reopened = Client(self.store)
+        try:
+            self.assertEqual(reopened.state, {})
+            self.assertEqual(reopened.engine.revisions(), [])
+        finally:
+            reopened.close()
+
+    def test_workspace_clear_rejects_redirected_artifact_directories(self):
+        client = Client(self.store)
+        try:
+            revision = client.engine.save_revision(dict(source='MODULE main\nVAR x:boolean;\n'))
+            client.select(revision=revision['id'])
+            outside = Path(self.temp.name) / 'outside'
+            outside.mkdir()
+            (outside / 'keep.txt').write_text('keep')
+            (self.store / 'traces').rmdir()
+            (self.store / 'traces').symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'real directories'):
+                client.dispatch('workspace.clear', {})
+            self.assertEqual(client.state['revision'], revision['id'])
+            self.assertEqual(client.engine.revision(revision['id'])['id'], revision['id'])
+            self.assertEqual((outside / 'keep.txt').read_text(), 'keep')
+        finally:
+            client.close()
+
+    def test_native_workspace_clear_preserves_trace_and_stays_empty_on_inspection(self):
+        source = ROOT / 'tests/models/query.smv'
+        before, after = (Path(self.temp.name) / name for name in ('before.json', 'after.json'))
+        output = self.native(f'''read-model "{source}"
+goal set target x
+reach target -shortest -depth 1
+dump-trace -f json -o "{before}"
+do workspace clear; workspace show;
+job list
+scenario list
+list-traces
+dump-trace -f json -o "{after}"
+''')
+        self.assertIn('Workspace cleared:', output)
+        self.assertIn('trace: workspace_1', output)
+        self.assertIn('[*] workspace_1', output)
+        self.assertEqual(json.loads(before.read_text()), json.loads(after.read_text()))
+        for kind in ('revisions', 'jobs', 'traces', 'scenarios'):
+            self.assertEqual(list((self.store / kind).iterdir()), [])
+        self.assertEqual(json.loads((self.store / 'cli-state.json').read_text()), {})
+
+    def test_native_workspace_clear_can_resume_from_native_trace(self):
+        source = ROOT / 'tests/models/query.smv'
+        export = Path(self.temp.name) / 'continued.json'
+        output = self.native(f'''workspace clear
+read-model "{source}"
+goal set target x
+reach target -shortest -depth 1
+workspace clear
+goal list
+simulate -depth 1
+dump-trace -f json -o "{export}"
+''')
+        self.assertIn('-- Goals\n   (none)', output)
+        self.assertIn('Simulation done', output)
+        self.assertEqual([v['values']['x'] for v in json.loads(export.read_text())['steps']], [False, True, False])
+        revisions = [json.loads(path.read_text()) for path in self.store.glob('revisions/*/revision.json')]
+        self.assertTrue(revisions)
+        self.assertTrue(all(not revision['goals'] for revision in revisions))
+
+    def test_agent_workspace_clear_rejects_active_jobs_and_reaps_sessions(self):
+        process, send = self.start_agent()
+        source = (ROOT / 'tests/models/query.smv').read_text()
+        revision = send('model.save', {'document': {'source': source}})['revision']
+        found = send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))
+        trace_id = found['trace_id']
+        started = send('job.submit', dict(revision=revision, query=dict(operation='reach', target='FALSE', limits={'depth': 10000})))
+        job_id = started['data']['job_id']
+        rejected = send('workspace.clear', {})
+        self.assertEqual(rejected['status'], 'error')
+        self.assertIn('active jobs', rejected['diagnostics'][0]['message'])
+        self.assertEqual(send('model.show', {'revision': revision})['status'], 'completed')
+        self.assertTrue((self.store / 'traces' / (trace_id + '.json')).exists())
+        send('job.cancel', {'job_id': job_id})
+        self.assertEqual(send('job.wait', {'job_id': job_id})['stop_reason'], 'cancelled')
+        # Cancellation may discard its snapshot; prime a live one before clearing.
+        self.assertEqual(send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))['outcome'], 'reachable')
+        children = Path(f'/proc/{process.pid}/task/{process.pid}/children')
+        snapshots = children.read_text().split()
+        self.assertTrue(snapshots)
+        cleared = send('workspace.clear', {})
+        self.assertEqual(cleared['status'], 'completed')
+        self.assertTrue(cleared['data']['cleared'])
+        self.assertTrue(all(not Path(f'/proc/{pid}').exists() for pid in snapshots))
+        self.assertEqual(send('workspace.show', {})['data']['selections'], {})
+        for operation in ('model.list', 'job.list', 'trace.list', 'scenario.list'):
+            self.assertEqual(send(operation, {})['data']['total'], 0)
+        self.assertEqual(send('model.show', {'revision': revision})['status'], 'error')
+        revision = send('model.save', {'document': {'source': source}})['revision']
+        found = send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))
+        self.assertEqual(found['outcome'], 'reachable')
+        self.assertEqual(send('workspace.clear', {})['status'], 'completed')
 
     def test_native_exit_cancels_outstanding_work(self):
         source = ROOT / 'tests/models/query.smv'

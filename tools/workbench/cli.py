@@ -19,7 +19,7 @@ def render(result):
     data = result.get('data')
     if isinstance(data, dict):
         if 'directory' in data:
-            print('-- Workspace: ' + data['directory'])
+            print(('-- Workspace cleared: ' if data.get('cleared') else '-- Workspace: ') + data['directory'])
             for key, value in data.get('selections', {}).items():
                 if value: print('   ' + key + ': ' + value)
         elif 'expressions' in data:

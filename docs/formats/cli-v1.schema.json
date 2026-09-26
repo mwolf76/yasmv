@@ -22,6 +22,7 @@
       "enum": [
         "capabilities",
         "workspace.show",
+        "workspace.clear",
         "model.load",
         "model.save",
         "model.list",
@@ -80,6 +81,25 @@
         "properties": {
           "operation": {
             "const": "workspace.show"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "workspace.clear"
           }
         }
       },

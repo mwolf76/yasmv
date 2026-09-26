@@ -7,6 +7,7 @@ SYNOPSIS
 .in 3
 workspace open "<directory>"
 workspace show
+workspace clear
 
 .ti 0
 DESCRIPTION
@@ -24,6 +25,19 @@ CLI or HTTP service using it first.
 show reports the directory, loaded native model, selected native trace, and
 saved revision, job, and scenario selections.
 
+clear permanently deletes the workspace's saved revisions (including goals,
+properties, watches, and scenario mappings), jobs and their evidence, traces,
+and scenarios. It also resets saved selections and closes compiled sessions.
+It keeps the workspace directory and ownership lock, unrelated files at its
+root, and the native loaded model, input bindings, and traces. Exported files
+outside the managed artifact directories are preserved.
+
+Clear requires no active jobs. Use job cancel followed by job wait, or let
+jobs finish, before clearing. Repeated clears of an empty workspace are valid.
+There is no confirmation prompt. workspace show and artifact listings do not
+recreate deleted artifacts. The next model-dependent workspace command saves
+a fresh revision of the loaded model; a native trace is replayed when reused.
+
 Opening a workspace preserves the native model and trace selection. Use
 read-model to load a model. The existing one-model-load-attempt rule applies;
 start a new yasmv process to load another model.
@@ -35,6 +49,7 @@ EXAMPLES
 .in 3
 >> workspace open "./investigation"
 >> workspace show
+>> workspace clear
 
 .ti 0
 SEE ALSO

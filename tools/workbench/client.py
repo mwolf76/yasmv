@@ -29,6 +29,7 @@ def operation(name, description, properties=None, required=()):
 
 operation('capabilities', 'Discover operations, argument schemas, query contract, and exit codes.')
 operation('workspace.show', 'Show workspace path and interactive selections.')
+operation('workspace.clear', 'Delete saved workspace artifacts and selections; requires no active jobs.')
 operation('model.load', 'Save source from a local file as an immutable revision and validate it.',
           dict(file=STRING, name=STRING, root=STRING, metadata=STRING, inputs={'type': 'object'}, hard_timeout=TIMEOUT), ('file',))
 operation('model.save', 'Save a revision document and validate it.', {'document': {'type': 'object'}, 'hard_timeout': TIMEOUT}, ('document',))
@@ -211,6 +212,12 @@ class Client:
         e = self.engine
         if name == 'capabilities':
             return completed(capabilities())
+        if name == 'workspace.clear':
+            with e.guard:
+                e.clear()
+                self.state = {}
+                atomic(self.state_path, self.state)
+            return completed(dict(directory=str(e.directory), cleared=True, selections={}))
         if name == 'workspace.show':
             return completed(dict(directory=str(e.directory), selections=self.state))
         if name == 'model.list':
